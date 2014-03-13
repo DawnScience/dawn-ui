@@ -4,8 +4,6 @@ import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Length;
 import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
-import javax.measure.unit.UnitFormat;
-
 import org.dawnsci.common.widgets.tree.AbstractNodeModel;
 import org.dawnsci.common.widgets.tree.AmountEvent;
 import org.dawnsci.common.widgets.tree.AmountListener;
@@ -48,7 +46,12 @@ public class GridTreeModel extends AbstractNodeModel {
 	private ObjectNode  roiName, gridDims;
 	private ColorNode   regionColor, spotColor, gridColor;
 	private BooleanNode midPoints,   gridLines;
-	private NumericNode<Dimensionless> x, y, width, height;
+	private NumericNode<Length> x, y, width, height;
+	private Unit<Length> xPosPixel = new Pixel();
+	private Unit<Length> xDimPixel = new Pixel();
+	private Unit<Length> yPosPixel = new Pixel();
+	private Unit<Length> yDimPixel = new Pixel();
+
 	/**
 	 * Same nodes to edit any 
 	 */
@@ -208,98 +211,83 @@ public class GridTreeModel extends AbstractNodeModel {
 		pos.setDefaultExpanded(true);
 		registerNode(pos);
 
-		this.x = new NumericNode<Dimensionless>("x", pos, Dimensionless.UNIT);
-		x.setDefault(Amount.valueOf(0, Dimensionless.UNIT));
-		x.setUnits(Dimensionless.UNIT);
+
+		this.x = new NumericNode<Length>("x", pos, xPosPixel);
+		x.setDefault(Amount.valueOf(0, SI.MILLI(SI.METRE)));
+		x.setUnits(xPosPixel, SI.MILLI(SI.METRE));
 		x.setEditable(true);
 		x.setFormat("#####0.##");
-		x.setLowerBound(Amount.valueOf(0, Dimensionless.UNIT));
-		x.setUpperBound(Amount.valueOf(10000, Dimensionless.UNIT));
+		x.setLowerBound(Amount.valueOf(-10000, xPosPixel));
+		x.setUpperBound(Amount.valueOf(10000, xPosPixel));
 		x.setIncrement(0.1);
-		x.addAmountListener(new AmountListener<Dimensionless>() {		
+		x.addAmountListener(new AmountListener<Length>() {		
 			@Override
-			public void amountChanged(AmountEvent<Dimensionless> evt) {
-				if (groi==null || region==null) return;
-				try {
-					adjustingValue = true;
-					final double xVal = evt.getAmount().doubleValue(Dimensionless.UNIT);
-					groi.setPoint(xVal, groi.getPoint()[1]);
-					region.setROI(groi);
-				} finally {
-					adjustingValue = false;
-				}
+			public void amountChanged(AmountEvent<Length> evt) {
+				adjustingValue = true;
+				double val = changeAmount(evt);
+				groi.setPoint(val, groi.getPoint()[1]);
+				region.setROI(groi);
+				adjustingValue = false;
 			}
 		});
 		registerNode(x);
 
-		this.y = new NumericNode<Dimensionless>("y", pos, Dimensionless.UNIT);
-		y.setDefault(Amount.valueOf(0, Dimensionless.UNIT));
-		y.setUnits(Dimensionless.UNIT);
+		this.y = new NumericNode<Length>("y", pos, yPosPixel);
+		y.setDefault(Amount.valueOf(0, SI.MILLI(SI.METRE)));
+		y.setUnits(yPosPixel, SI.MILLI(SI.METRE));
 		y.setFormat("#####0.##");
 		y.setEditable(true);
-		y.setLowerBound(Amount.valueOf(0, Dimensionless.UNIT));
-		y.setUpperBound(Amount.valueOf(10000, Dimensionless.UNIT));
+		y.setLowerBound(Amount.valueOf(-1000, yPosPixel));
+		y.setUpperBound(Amount.valueOf(10000, yPosPixel));
 		y.setIncrement(0.1);
-		y.addAmountListener(new AmountListener<Dimensionless>() {		
+		y.addAmountListener(new AmountListener<Length>() {		
 			@Override
-			public void amountChanged(AmountEvent<Dimensionless> evt) {
-				if (groi==null || region==null) return;
-				try {
-					adjustingValue = true;
-					final double yVal = evt.getAmount().doubleValue(Dimensionless.UNIT);
-					groi.setPoint(groi.getPoint()[0], yVal);
-					region.setROI(groi);
-				} finally {
-					adjustingValue = false;
-				}
+			public void amountChanged(AmountEvent<Length> evt) {
+				adjustingValue = true;
+				double val = changeAmount(evt);
+				groi.setPoint(groi.getPoint()[0], val);
+				region.setROI(groi);
+				adjustingValue = false;
 			}
 		});
 		registerNode(y);
 
-		this.width = new NumericNode<Dimensionless>("width", pos, Dimensionless.UNIT);
-		width.setDefault(Amount.valueOf(0, Dimensionless.UNIT));
-		width.setUnits(Dimensionless.UNIT);
+		this.width = new NumericNode<Length>("width", pos, xDimPixel);
+		width.setDefault(Amount.valueOf(0, SI.MILLI(SI.METRE)));
+		width.setUnits(xDimPixel, SI.MILLI(SI.METRE));
 		width.setFormat("#####0.##");
 		width.setEditable(true);
-		width.setLowerBound(Amount.valueOf(0, Dimensionless.UNIT));
-		width.setUpperBound(Amount.valueOf(10000, Dimensionless.UNIT));
+		width.setLowerBound(Amount.valueOf(0, xDimPixel));
+		width.setUpperBound(Amount.valueOf(10000, xDimPixel));
 		width.setIncrement(0.1);
-		width.addAmountListener(new AmountListener<Dimensionless>() {		
+		width.addAmountListener(new AmountListener<Length>() {		
 			@Override
-			public void amountChanged(AmountEvent<Dimensionless> evt) {
-				if (groi==null || region==null) return;
-				try {
-					adjustingValue = true;
-					final double val = evt.getAmount().doubleValue(Dimensionless.UNIT);
-					groi.setLengths(val, groi.getLengths()[1]);
-					region.setROI(groi);
-				} finally {
-					adjustingValue = false;
-				}
+			public void amountChanged(AmountEvent<Length> evt) {
+				adjustingValue = true;
+				double val = changeAmount(evt);
+				groi.setLengths(val, groi.getLengths()[1]);
+				region.setROI(groi);
+				adjustingValue = false;
 			}
 		});
 		registerNode(width);
 
-		this.height = new NumericNode<Dimensionless>("height", pos, Dimensionless.UNIT);
-		height.setDefault(Amount.valueOf(0, Dimensionless.UNIT));
-		height.setUnits(Dimensionless.UNIT);
+		this.height = new NumericNode<Length>("height", pos, yDimPixel);
+		height.setDefault(Amount.valueOf(0, SI.MILLI(SI.METRE)));
+		height.setUnits(yDimPixel, SI.MILLI(SI.METRE));
 		height.setFormat("#####0.##");
 		height.setEditable(true);
-		height.setLowerBound(Amount.valueOf(0, Dimensionless.UNIT));
-		height.setUpperBound(Amount.valueOf(10000, Dimensionless.UNIT));
+		height.setLowerBound(Amount.valueOf(0, yDimPixel));
+		height.setUpperBound(Amount.valueOf(10000, yDimPixel));
 		height.setIncrement(0.1);
-		height.addAmountListener(new AmountListener<Dimensionless>() {		
+		height.addAmountListener(new AmountListener<Length>() {		
 			@Override
-			public void amountChanged(AmountEvent<Dimensionless> evt) {
-				if (groi==null || region==null) return;
-				try {
-					adjustingValue = true;
-					final double val = evt.getAmount().doubleValue(Dimensionless.UNIT);
-					groi.setLengths(groi.getLengths()[0], val);
-					region.setROI(groi);
-				} finally {
-					adjustingValue = false;
-				}
+			public void amountChanged(AmountEvent<Length> evt) {
+				adjustingValue = true;
+				double val = changeAmount(evt);
+				groi.setLengths(groi.getLengths()[0], val);
+				region.setROI(groi);
+				adjustingValue = false;
 			}
 		});
 		registerNode(height);
@@ -319,8 +307,18 @@ public class GridTreeModel extends AbstractNodeModel {
 		viewer.update(gridDims,  new String[]{"Value"});
 	}
 
-	private void setGridROI(GridROI groi) {
+	public void newGridPreferences(GridPreferences gp) {
+		setGridROI(groi, gp);
+	}
 
+	private void setGridROI(GridROI groi) {
+ 		setGridROI(groi, null);
+ 	}
+
+	//This is a bit of a workaround to allow new gridpreferences to be used 
+	//before and Async thread has updated them
+	private void setGridROI(GridROI groi, GridPreferences gp) {
+	
 		if (!adjustingValue) viewer.cancelEditing();
 
 		if (this.groi != groi) { // Grid spacings may have changed.
@@ -343,19 +341,14 @@ public class GridTreeModel extends AbstractNodeModel {
 			updateGridDimensions(groi);
 		}
 		this.groi = groi;
-        
-		this.x.setValueQuietly(groi.getPointX(), Dimensionless.UNIT);
-		viewer.update(x, new String[]{"Value"});
-		
-		this.y.setValueQuietly(groi.getPointY(), Dimensionless.UNIT);
-		viewer.update(y, new String[]{"Value"});
-		
-		this.width.setValueQuietly(groi.getLengths()[0], Dimensionless.UNIT);
-		viewer.update(width, new String[]{"Value"});
-		
-		this.height.setValueQuietly(groi.getLengths()[1], Dimensionless.UNIT);
-		viewer.update(height, new String[]{"Value"});
 
+		if (gp == null) gp = groi.getGridPreferences();
+		
+		updateUnits(gp);
+		updateNode(x, groi.getPointX());
+		updateNode(y, groi.getPointY());
+		updateNode(width, groi.getLength(0));
+		updateNode(height, groi.getLength(1));
 	}
 	
 	private void createDetector() {
@@ -371,47 +364,13 @@ public class GridTreeModel extends AbstractNodeModel {
         registerNode(beamCen);
         beamCen.setDefaultExpanded(true);
 
-        Unit<Length> unknown = SI.MILLIMETRE;
-        UnitFormat.getInstance().label(unknown, "unit");
         NumericNode<Dimensionless> beamX = new NumericNode<Dimensionless>("X", beamCen, Dimensionless.UNIT);
         beamX.setUnits(Dimensionless.UNIT);
-        beamX.addAmountListener(new AmountListener<Dimensionless>() {		
-			@Override
-			public void amountChanged(AmountEvent<Dimensionless> evt) {
-				if (groi==null || region==null) return;
-				try {
-					adjustingValue = true;
-					final double val = evt.getAmount().doubleValue(Dimensionless.UNIT);
-					GridPreferences gp = groi.getGridPreferences();
-					gp.setBeamlinePosX(val);
-					groi.setGridPreferences(gp);
-					region.setROI(groi);
-				} finally {
-					adjustingValue = false;
-				}
-			}
-		});
         registerNode(beamX);
         beamX.setEditable(true);
 
         NumericNode<Dimensionless> beamY = new NumericNode<Dimensionless>("Y", beamCen, Dimensionless.UNIT);
         beamY.setUnits(Dimensionless.UNIT);
-        beamY.addAmountListener(new AmountListener<Dimensionless>() {		
-			@Override
-			public void amountChanged(AmountEvent<Dimensionless> evt) {
-				if (groi==null || region==null) return;
-				try {
-					adjustingValue = true;
-					final double val = evt.getAmount().doubleValue(Dimensionless.UNIT);
-					GridPreferences gp = groi.getGridPreferences();
-					gp.setBeamlinePosY(val);
-					groi.setGridPreferences(gp);
-					region.setROI(groi);
-				} finally {
-					adjustingValue = false;
-				}
-			}
-		});
         registerNode(beamY);
         beamY.setEditable(true);
 
@@ -440,4 +399,35 @@ public class GridTreeModel extends AbstractNodeModel {
 		this.region = region;
 		setGridROI(groi);
 	}
-}
+
+	private void updateNode(NumericNode<Length> node, double newValue) {
+		node.setValueQuietly(Amount.valueOf(newValue, node.getDefaultUnit()).to(node.getUnit()));
+		viewer.update(node, new String[]{"Value"});
+	}
+	
+	public void updateUnits(GridPreferences gp) {
+		double xPPMm = gp.getResolutionX(); //x pixels per mm
+		double yPPMm = gp.getResolutionY();
+		double xOffset = gp.getBeamlinePosX();
+		double yOffset = gp.getBeamlinePosY();
+		
+		((Pixel) xPosPixel).setPixelsPerMm(xPPMm);
+		((Pixel) xPosPixel).setOffset(xOffset);
+		
+		((Pixel) yPosPixel).setPixelsPerMm(yPPMm);
+		((Pixel) yPosPixel).setOffset(yOffset);
+		
+		((Pixel) xDimPixel).setPixelsPerMm(xPPMm);
+		((Pixel) yDimPixel).setPixelsPerMm(yPPMm);
+	}
+	
+	@SuppressWarnings("unchecked")
+	private double changeAmount(AmountEvent<Length> evt) {
+		if (groi==null || region==null) return 0;
+		try {
+			Amount<Length> amt = evt.getAmount();
+			return amt.doubleValue(((NumericNode<Length>) evt.getSource()).getDefaultUnit());
+		} finally {
+		}
+	}
+} 
