@@ -1,6 +1,7 @@
 package org.dawnsci.plotting.tools.grid;
 
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -21,6 +22,9 @@ import org.dawnsci.common.widgets.tree.NodeLabelProvider;
 import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.common.widgets.tree.UnitEditingSupport;
 import org.dawnsci.common.widgets.tree.ValueEditingSupport;
+import org.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.plotting.api.PlottingFactory;
+import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -150,8 +154,8 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 				}
 			}
 		};
-		
 	}
+
 
 
 	@Override
@@ -173,7 +177,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 
 	@Override
 	public void createControl(Composite parent) {
-		
+				
 		final Action reselect = new Action("Create new grid.", getImageDescriptor()) {
 			public void run() {
 				createNewRegion(true);
@@ -296,13 +300,14 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 			}			
 		});
 		gridPreferences = getGridPreferences();
+		
 		connectBeamCenterControls();
 		updateBeamCentre();
 	}
-	
-	private void updateGridPreferences() {
+		private void updateGridPreferences() {
 		gridPreferences = getGridPreferences();
 		updateBeamCentre();
+		setAxes(gridPreferences.getResolutionX(), gridPreferences.getResolutionY());
 		drawBeamCentre(beamCenterAction.isChecked());
 
 		if (model != null) model.newGridPreferences(gridPreferences);
@@ -640,7 +645,6 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 	}
 	
 	private GridPreferences getGridPreferences() {
-		
 		try {
 			IMetaData m = getImageTrace().getData().getMetadata();
 			if (m != null && m.getMetaNames().contains(GDA_GRID_METADATA)) {
@@ -652,7 +656,6 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		} catch (Exception e) {
 			logger.error("Exception on getting GDA grid preferences: " + e.getMessage());
 		}
-		
 		return getGridFromStore();
 		
 	}
@@ -667,4 +670,35 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		return new GridPreferences(xRes, yRes, xbeam, ybeam);
 	}
 
+	private void setAxes(double xRes, double yRes) {
+		try {
+			IPlottingSystem system = PlottingFactory.getPlottingSystem("Microscope View");
+			IAxis xAxis = system.getSelectedXAxis();
+			xAxis.setAutoFormat(false);
+			
+			int xdp;
+			if (xRes > 0) { xdp = (int)Math.ceil(Math.log10(xRes)); }
+			else { xdp = 1; }
+			char[] x = new char[xdp];
+			Arrays.fill(x, '0');
+			//bit of a workaround but needs the '#' to stop the '.' being displayed for integers
+			String xFormat = (xdp > 0) ? "######0.".concat(new String(x)) : "######0.#";
+			xAxis.setFormatPattern(xFormat);
+			
+			IAxis yAxis = system.getSelectedYAxis();
+			yAxis.setAutoFormat(false);
+
+			int ydp;
+			if (yRes > 0) { ydp = (int)Math.ceil(Math.log10(yRes)); }
+			else { ydp = 1; }
+			char[] y = new char[ydp];
+			Arrays.fill(y, '0');
+			//bit of a workaround but needs the '#' to stop the '.' being displayed for integers
+			String yFormat = (ydp > 0) ? "######0.".concat(new String(y)) : "######0.#";
+			yAxis.setFormatPattern(yFormat);
+		}
+		catch (Exception e) {
+			System.out.println(e);
+		}
+	}
 }
