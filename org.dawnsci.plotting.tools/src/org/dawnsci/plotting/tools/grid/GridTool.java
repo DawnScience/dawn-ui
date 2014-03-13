@@ -297,12 +297,15 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		});
 		gridPreferences = getGridPreferences();
 		connectBeamCenterControls();
+		updateBeamCentre();
 	}
 	
 	private void updateGridPreferences() {
 		gridPreferences = getGridPreferences();
 		updateBeamCentre();
 		drawBeamCentre(beamCenterAction.isChecked());
+
+		if (model != null) model.newGridPreferences(gridPreferences);
 	}
 	
 	private void updateBeamCentre() {
