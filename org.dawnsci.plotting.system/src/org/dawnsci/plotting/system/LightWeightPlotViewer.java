@@ -672,7 +672,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	}
 
 	public void setFocus() {
-		if (xyCanvas!=null) xyCanvas.setFocus();
+		if (xyCanvas!=null && !xyCanvas.isDisposed()) xyCanvas.setFocus();
 	}
 
 	public void setTitle(String name) {
