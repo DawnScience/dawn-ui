@@ -102,7 +102,8 @@
             icon="icons/plot-tool-derivative.png"
             id="org.dawb.workbench.plotting.tools.derivative"
             label="Derivative"
-            tooltip="A tool which shows the derivative next to what is currently plotted.">
+            tooltip="A tool which shows the derivative next to what is currently plotted."
+            visible="false">
       </plotting_tool_page>
       <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.measurement"
