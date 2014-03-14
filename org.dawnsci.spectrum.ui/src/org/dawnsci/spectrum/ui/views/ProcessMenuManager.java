@@ -17,6 +17,7 @@ import org.dawnsci.spectrum.ui.processing.DivisionProcess;
 import org.dawnsci.spectrum.ui.processing.MultiplicationProcess;
 import org.dawnsci.spectrum.ui.processing.PolySmoothProcess;
 import org.dawnsci.spectrum.ui.processing.SubtractionProcess;
+import org.dawnsci.spectrum.ui.utils.Contain1DDataImpl;
 import org.dawnsci.spectrum.ui.utils.SpectrumUtils;
 import org.dawnsci.spectrum.ui.wizard.SpectrumSubtractionWizardPage;
 import org.dawnsci.spectrum.ui.wizard.SpectrumWizard;
@@ -101,7 +102,9 @@ public class ProcessMenuManager {
 			public void run() {
 				ISelection selection = viewer.getSelection();
 				List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
-				manager.setCachedFile(list.get(0));
+				IContain1DData d = list.get(0);
+				IContain1DData cacheData = new Contain1DDataImpl(d.getxDataset(), d.getyDatasets(), d.getName(), d.getLongName());
+				manager.setCachedFile(cacheData);
 			}
 		};
 		

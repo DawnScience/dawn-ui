@@ -18,6 +18,7 @@ public class DivisionProcess extends AbstractCacheProcess {
 	protected AbstractDataset process(AbstractDataset x, AbstractDataset y) {
 		AbstractDataset y1 = DatasetUtils.convertToAbstractDataset(cachedData.getyDatasets().get(0));
 		AbstractDataset out = Maths.dividez(y, y1);
+		out.setName(y.getName()+ "_divided_"+y1.getName());
 		return out;
 	}
 
