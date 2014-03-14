@@ -92,7 +92,10 @@ public class PowderIntegrationJob extends Job {
 		integrator.setMask(mask);
 		integrator.setROI(roi);
 		integrator.setAxisType(xAxis);
-		system.setEnabled(false);
+		
+		//non splitting should be fast
+		if (mode != IntegrationMode.NONSPLITTING) system.setEnabled(false);
+		
 		final List<AbstractDataset> out = integrator.value(data);
 		system.setEnabled(true);
 		
