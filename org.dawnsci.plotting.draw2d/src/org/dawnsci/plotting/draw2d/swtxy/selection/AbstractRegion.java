@@ -120,6 +120,9 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 		// Required fix after someone thought it would be a laugh to send
 		// null ROIs over.
 		if (roi == null) throw new NullPointerException("Cannot have a null region position!");
+		if (this.roi == roi)
+			return; // do not fire event
+
 		this.roi = roi;
 		String name = roi.getName();
 		if (name == null || name.isEmpty() || name.trim().isEmpty()) {
