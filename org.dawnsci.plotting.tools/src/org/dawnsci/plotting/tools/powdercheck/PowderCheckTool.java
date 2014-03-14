@@ -278,6 +278,7 @@ public class PowderCheckTool extends AbstractToolPage {
 			}
 		};
 		fullImage.setToolTipText("Integrate the entire image, showing lines at calibrant positions");
+		fullImage.setImageDescriptor(Activator.getImageDescriptor("icons/pixel.png"));
 		
 		modeSelect.add(fullImage);
 		modeSelect.setSelectedAction(fullImage);
@@ -294,6 +295,7 @@ public class PowderCheckTool extends AbstractToolPage {
 		};
 		
 		quad.setToolTipText("Integrate the 4 quadrants, showing lines at calibrant positions");
+		quad.setImageDescriptor(Activator.getImageDescriptor("icons/CalibrationCheck.png"));
 		
 		modeSelect.add(quad);
 		
@@ -319,7 +321,9 @@ public class PowderCheckTool extends AbstractToolPage {
 				
 			}
 		};
+		
 		peakfit.setToolTipText("Integrate the entire image, peak fit, and compare with calibrant positions");
+		peakfit.setImageDescriptor(Activator.getImageDescriptor("icons/peakfit.png"));
 		modeSelect.add(peakfit);
 		
 		final MenuAction axisSelect= new MenuAction("Select Axis");
@@ -355,6 +359,8 @@ public class PowderCheckTool extends AbstractToolPage {
 				updatePlotJob.schedule();
 			}
 		};
+		
+		cake.setImageDescriptor(Activator.getImageDescriptor("icons/cake.png"));
 		
 		this.calPref = new Action("Configure Calibrants...") {
 			@Override
