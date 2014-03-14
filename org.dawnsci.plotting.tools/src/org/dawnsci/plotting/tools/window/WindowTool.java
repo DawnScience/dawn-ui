@@ -41,6 +41,7 @@ import org.dawnsci.common.richbeans.event.ValueAdapter;
 import org.dawnsci.common.richbeans.event.ValueEvent;
 import org.dawnsci.plotting.roi.SurfacePlotROI;
 import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.util.PlottingUtils;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlottingFactory;
 import org.dawnsci.plotting.api.region.IROIListener;
@@ -340,7 +341,7 @@ public class WindowTool extends AbstractToolPage {
 		    setActionsEnabled(false);
 		    updateSlicePlot((ILineStackTrace)trace);
 		} else {
-		    setActionsEnabled(false);
+			setActionsEnabled(false);
 			StackLayout stackLayout = (StackLayout)content.getLayout();
 			stackLayout.topControl  = blankComposite;
 			content.layout();
@@ -376,7 +377,7 @@ public class WindowTool extends AbstractToolPage {
 			xAspectRatio = regionControlWindow.getXAspectRatio();
 			yAspectRatio = regionControlWindow.getYAspectRatio();
 		}
-		binShape = RegionControlWindow.getBinShape(rroi.getLengths()[0], rroi.getLengths()[1], isDrag);
+		binShape = PlottingUtils.getBinShape(rroi.getLengths()[0], rroi.getLengths()[1], isDrag);
 
 		if (binShape != 1) {
 			// DownsampleMode.MEAN = 2
@@ -399,7 +400,8 @@ public class WindowTool extends AbstractToolPage {
 		List<IDataset> axes = trace.getAxes();
 		if (axes!=null) axes = Arrays.asList(axes.get(0), axes.get(1));
 		windowSystem.updatePlot2D(data, axes, null);
-		regionControlWindow.createSurfaceRegion(windowSystem, "Window");
+		if (regionControlWindow != null && regionControlWindow.isControlReady())
+			regionControlWindow.createSurfaceRegion("Window", true);
 		// manage layout
 		if (content != null && content.isDisposed()) return;
 		StackLayout stackLayout = (StackLayout)content.getLayout();
@@ -481,7 +483,7 @@ public class WindowTool extends AbstractToolPage {
 
 	@Override
 	public void setFocus() {
-		if (windowSystem!=null) windowSystem.setFocus();
+		if (windowSystem!=null && !windowSystem.isDisposed()) windowSystem.setFocus();
 	}
 
 	@Override
