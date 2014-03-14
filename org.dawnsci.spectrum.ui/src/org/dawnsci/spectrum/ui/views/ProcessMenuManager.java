@@ -2,6 +2,7 @@ package org.dawnsci.spectrum.ui.views;
 
 import java.util.List;
 
+import org.dawb.common.ui.menu.MenuAction;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.spectrum.ui.Activator;
 import org.dawnsci.spectrum.ui.file.IContain1DData;
@@ -9,17 +10,25 @@ import org.dawnsci.spectrum.ui.file.ISpectrumFile;
 import org.dawnsci.spectrum.ui.file.SpectrumFileManager;
 import org.dawnsci.spectrum.ui.file.SpectrumInMemory;
 import org.dawnsci.spectrum.ui.processing.AbstractProcess;
+import org.dawnsci.spectrum.ui.processing.AdditionProcess;
 import org.dawnsci.spectrum.ui.processing.AverageProcess;
 import org.dawnsci.spectrum.ui.processing.DerivativeProcess;
 import org.dawnsci.spectrum.ui.processing.DivisionProcess;
+import org.dawnsci.spectrum.ui.processing.MultiplicationProcess;
+import org.dawnsci.spectrum.ui.processing.PolySmoothProcess;
 import org.dawnsci.spectrum.ui.processing.SubtractionProcess;
 import org.dawnsci.spectrum.ui.utils.SpectrumUtils;
 import org.dawnsci.spectrum.ui.wizard.SpectrumSubtractionWizardPage;
 import org.dawnsci.spectrum.ui.wizard.SpectrumWizard;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -27,6 +36,8 @@ import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
+
+import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
 
 public class ProcessMenuManager {
 	
@@ -41,36 +52,49 @@ public class ProcessMenuManager {
 	}
 	
 	public void fillProcessMenu(IMenuManager menu) {
-		MenuManager menuProcess = new MenuManager("Process",
-				Activator.imageDescriptorFromPlugin("org.dawnsci.spectrum.ui","icons/function.png"),
-				"org.dawnsci.spectrum.ui.views.processingmenu");
+		MenuAction menuProcess = new MenuAction("Process");
+		menuProcess.setId("org.dawnsci.spectrum.ui.views.processingmenu");
+		menuProcess.setImageDescriptor(Activator.imageDescriptorFromPlugin("org.dawnsci.spectrum.ui","icons/function.png"));
 		
 		AbstractProcess process = new AverageProcess();
 		addProcessAction(process, menuProcess, "Average",((IStructuredSelection)viewer.getSelection()).size() > 1);
 
 		process = new DerivativeProcess();
 		addProcessAction(process, menuProcess, "Derivative",((IStructuredSelection)viewer.getSelection()).size() >= 1);
+		//process = new PolySmoothProcess();
+		//addProcessAction(process, menuProcess, "Polynomial smoothing",((IStructuredSelection)viewer.getSelection()).size() >= 1);
+		menuProcess.addSeparator();
 		addWizardActions(menuProcess);
+		menuProcess.addSeparator();
 		addCacheArithmeticMenu(menuProcess);
+		menuProcess.addSeparator();
 		addCacheActions(menuProcess);
 		
 		menu.add(menuProcess);
 	}
 	
-	private void addCacheActions(MenuManager menu) {
+	private void addCacheActions(MenuAction menu) {
 		
 		boolean enabled = ((IStructuredSelection)viewer.getSelection()).size() == 1;
 		
-		MenuManager cacheMenu = new MenuManager("Cache");
+		MenuAction cacheMenu = new MenuAction("Cache");
+		cacheMenu.setImageDescriptor(Activator.imageDescriptorFromPlugin("org.dawnsci.spectrum.ui","icons/spectrumCache.png"));
 		
-		if (manager.getCachedFile() != null) {
-			cacheMenu.add(new Action(manager.getCachedFile().getName()) {
-				@Override
-				public void run() {
-					//does nothing
-				}
-			});
+		IAction cacheName = null; 
+		
+		if (manager.getCachedFile() == null) {
+			cacheName = new Action("Empty") {
+				
+			};
+		} else {
+			cacheName = new Action(manager.getCachedFile().getName()) {
+			};
 		}
+		
+		cacheName.setEnabled(false);
+		cacheMenu.add(cacheName);
+		cacheMenu.addSeparator();
+		
 		
 		IAction setCache = new Action("Set as cached") {
 			@Override
@@ -97,40 +121,59 @@ public class ProcessMenuManager {
 		
 	}
 	
-	private void addCacheArithmeticMenu(MenuManager menuManager) {
+	private void addCacheArithmeticMenu(MenuAction menuManager) {
 		
 		boolean enabled = manager.getCachedFile() != null;
 		
-		MenuManager menu = new MenuManager("Arithmetic with cache");
+		MenuAction menu = new MenuAction("Arithmetic with cache");
+		menu.setImageDescriptor(Activator.imageDescriptorFromPlugin("org.dawnsci.spectrum.ui","icons/processCache.png"));
+		menu.setEnabled(enabled);
 		
 		AbstractProcess process = new SubtractionProcess(manager.getCachedFile());
 		addProcessAction(process, menu, "Subtract cached",enabled);
 		
 		process = new DivisionProcess(manager.getCachedFile());
-		addProcessAction(process, menu, "Divied by cached",enabled);
+		addProcessAction(process, menu, "Divide by cached",enabled);
+		
+		process = new AdditionProcess(manager.getCachedFile());
+		addProcessAction(process, menu, "Add to cached",enabled);
+		
+		process = new MultiplicationProcess(manager.getCachedFile());
+		addProcessAction(process, menu, "Multiply by cached",enabled);
 		
 		menuManager.add(menu);
 
 		
 	}
 	
-	private void addProcessAction(final AbstractProcess process, MenuManager manager, String name, boolean enabled) {
+	private void addProcessAction(final AbstractProcess process, MenuAction manager, String name, boolean enabled) {
 		//manager
 		Action action = new Action(name) {
 			public void run() {
 				ISelection selection = viewer.getSelection();
-				List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
-				List<IContain1DData> out = process.process(list);
+				final List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
 				
-				if (out == null) {
-					showMessage("Could not process dataset, operation not supported for this data!");
-					return;
-				}
+				Job processJob = new Job("process") {
+					
+					@Override
+					protected IStatus run(IProgressMonitor monitor) {
+						List<IContain1DData> out = process.process(list);
+						
+						if (out == null) {
+							showMessage("Could not process dataset, operation not supported for this data!");
+							return Status.CANCEL_STATUS;
+						}
+						
+						for(IContain1DData data : out) {
+							SpectrumInMemory mem = new SpectrumInMemory(data.getLongName(), data.getName(), data.getxDataset(), data.getyDatasets(), system);
+							ProcessMenuManager.this.manager.addFile(mem);
+						}
+						return Status.OK_STATUS;
+					}
+				};
 				
-				for(IContain1DData data : out) {
-					SpectrumInMemory mem = new SpectrumInMemory(data.getLongName(), data.getName(), data.getxDataset(), data.getyDatasets(), system);
-					ProcessMenuManager.this.manager.addFile(mem);
-				}
+				processJob.schedule();
+				
 			}
 		};
 		
@@ -139,12 +182,11 @@ public class ProcessMenuManager {
 		
 	}
 	
-	private void addWizardActions(MenuManager menuManager) {
+	private void addWizardActions(MenuAction menuManager) {
 
 		boolean enabled = ((IStructuredSelection)viewer.getSelection()).size() == 1 &&
 				manager.getCachedFile() != null;
-		MenuManager menu = new MenuManager("Wizards");
-
+		MenuAction menu = new MenuAction("Wizards");
 
 		IAction subtractionWizard = new Action("Subtraction wizard...") {
 			public void run() {

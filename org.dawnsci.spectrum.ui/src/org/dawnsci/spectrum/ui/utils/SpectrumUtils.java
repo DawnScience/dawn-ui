@@ -236,7 +236,7 @@ public class SpectrumUtils {
 				ynew.add(PolynomialInterpolator1D.interpolate(x, y, xnew));
 			}
 			
-			output.add(new Contain1DDataImpl(xnew, ynew,data.get(i).getName(),data.get(0).getLongName()));
+			output.add(new Contain1DDataImpl(xnew, ynew,data.get(i).getName(),data.get(i).getLongName()));
 		}
 		
 		return output;

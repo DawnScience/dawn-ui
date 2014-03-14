@@ -1,30 +1,29 @@
 package org.dawnsci.spectrum.ui.processing;
 
-
 import org.dawnsci.spectrum.ui.file.IContain1DData;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 
-public class DivisionProcess extends AbstractCacheProcess {
+public class AdditionProcess extends AbstractCacheProcess {
 
-	
-	public DivisionProcess(IContain1DData denominator) {
-		super(denominator);
+
+	public AdditionProcess(IContain1DData add) {
+		super(add);
 	}
 	
 	@Override
 	protected AbstractDataset process(AbstractDataset x, AbstractDataset y) {
 		AbstractDataset y1 = DatasetUtils.convertToAbstractDataset(cachedData.getyDatasets().get(0));
-		AbstractDataset out = Maths.dividez(y, y1);
+		AbstractDataset out = Maths.add(y, y1);
 		return out;
 	}
 
 	
 	@Override
 	protected String getAppendingName() {
-		return "_dividedBy_"+oCachedData.getName();
+		return "+"+oCachedData.getName();
 	}
 
 }
