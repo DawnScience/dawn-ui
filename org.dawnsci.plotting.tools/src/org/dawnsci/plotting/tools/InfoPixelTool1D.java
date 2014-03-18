@@ -25,6 +25,8 @@ import org.eclipse.swt.SWT;
 
 public class InfoPixelTool1D extends InfoPixelTool {
 
+	public final static String INFOPIXELTOOL1D_ID="org.dawb.workbench.plotting.tools.InfoPixel1D";
+
 	@Override
 	public ToolPageRole getToolPageRole() {
 		return ToolPageRole.ROLE_1D;
