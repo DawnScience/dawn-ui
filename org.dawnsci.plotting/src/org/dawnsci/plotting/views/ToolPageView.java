@@ -116,7 +116,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	 */
 	public static final String TOOLPAGE_1AND2D_VIEW_ID = "org.dawb.workbench.plotting.views.toolPageView.1D_and_2D";
 
-	private static final String FIXED_VIEW_ID = "org.dawb.workbench.plotting.views.toolPageView.fixed";
+	public static final String FIXED_VIEW_ID = "org.dawb.workbench.plotting.views.toolPageView.fixed";
 	/**
 	 * The pagebook control, or <code>null</code> if not initialized.
 	 */
