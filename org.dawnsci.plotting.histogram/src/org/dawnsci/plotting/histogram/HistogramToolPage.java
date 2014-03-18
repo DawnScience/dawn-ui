@@ -1136,6 +1136,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		G.setName("green");
 		B.setName("blue");
 		RGBX.setName("Axis");
+		if (histogramY == null) return;
 		double scale = ((histogramY.max(true).doubleValue())/256.0);
 		if(scale <= 0) scale = 1.0/256.0;
 

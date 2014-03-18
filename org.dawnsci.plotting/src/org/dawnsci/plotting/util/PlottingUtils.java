@@ -169,4 +169,45 @@ public class PlottingUtils {
 			return null;
 		}
 	}
+
+	/**
+	 * Returns the bin shape given a SurfaceROI width and height
+	 * 
+	 * @param width
+	 * @param height
+	 * @param isDrag
+	 * @return binShape
+	 */
+	public static int getBinShape(double width, double height, boolean isDrag) {
+		int binShape = 1;
+
+		if (isDrag && 
+				((width > 300 && width < 900 && height > 300 && width < 900)// size above 300x300 and below 900x900
+				|| (width < 300 && height > 300)					// if width below 300 but height above
+				|| (width > 300 && height < 300))) {				// if width above 300 but height below
+			return (int)(((width + height) / 2) / 100) - 1;
+		} else if (!isDrag && 
+				((width > 300 && width < 900 && height > 300 && width < 900)
+						|| (width < 300 && height > 300)
+						|| (width > 300 && height < 300))) {
+			return (int)(((width + height) / 2) / 100) - 2;
+		}
+		// if size is below 300x300
+		if (width < 300 && height < 300) {
+			return 1;
+		}
+		// if size is bigger than 900x900
+		if (isDrag && 
+				((width > 900 && height > 900)
+				||(width > 900 && height < 900)
+				||(width < 900 && height > 900))) {
+			return (int)(((width + height) / 2) / 100);
+		} else if (!isDrag && 
+				((width > 900 && height > 900)
+				||(width > 900 && height < 900)
+				||(width < 900 && height > 900))) {
+			return (int)(((width + height) / 2) / 100) - 1;
+		}
+		return binShape;
+	}
 }

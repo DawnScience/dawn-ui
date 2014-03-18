@@ -4,6 +4,7 @@ package org.dawnsci.plotting.tools.masking;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import org.dawb.common.ui.image.CursorUtils;
@@ -99,6 +100,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IViewPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -126,13 +128,17 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	private MaskMouseListener   clickListener;
 	private ColorSelector       colorSelector;	
 	
+	private Collection<Control> enableControls;
+	
 	public MaskingTool() {
 		
+		enableControls = new HashSet<Control>(7);
 		
 		this.traceListener = new ITraceListener.Stub() {
 			@Override
 			public void traceAdded(TraceEvent evt) {
 				try {
+					setEnabled(getImageTrace()!=null);
 					if (evt.getSource() instanceof IImageTrace) {
 	
 						((IImageTrace)evt.getSource()).setMask(maskObject.getMaskDataset());
@@ -320,8 +326,10 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		minEnabled.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1,1));
 		minEnabled.setText("Enable lower mask    ");
 		minEnabled.setToolTipText("Enable the lower bound mask, removing pixels with lower intensity.");
+		enableControls.add(minEnabled);
 		
 		this.minimum = new FloatSpinner(minMaxComp, SWT.NONE);
+		enableControls.add(minimum);
 		minimum.setIncrement(1d);
 		minimum.setEnabled(false);
 		minimum.setMinimum(Integer.MIN_VALUE);
@@ -348,7 +356,8 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		maxEnabled.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1,1));
 		maxEnabled.setText("Enable upper mask    ");
 		maxEnabled.setToolTipText("Enable the upper bound mask, removing pixels with higher intensity.");
-		
+		enableControls.add(maxEnabled);
+	
 		
 		minEnabled.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -376,6 +385,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		});
 		
 		this.maximum = new FloatSpinner(minMaxComp, SWT.NONE);
+		enableControls.add(maximum);
 		maximum.setIncrement(1d);
 		maximum.setEnabled(false);
 		maximum.setMinimum(Integer.MIN_VALUE);
@@ -398,6 +408,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		});
 		
 		final Button ignoreAlreadyMasked =  new Button(minMaxComp, SWT.CHECK);
+		enableControls.add(ignoreAlreadyMasked);
 		ignoreAlreadyMasked.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 2,1));
 		ignoreAlreadyMasked.setText("Keep pixels aleady masked");
 		ignoreAlreadyMasked.setToolTipText("When using bounds, pixels already masked can be ignored and not checked for range.\nThis setting is ignored when removing the bounds mask.");
@@ -414,8 +425,10 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		label = new Label(minMaxComp, SWT.NONE);
 		label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1,1));
 		label.setText("Mask Color");
+		enableControls.add(label);
 		
 		this.colorSelector = new ColorSelector(minMaxComp);
+		enableControls.add(colorSelector.getButton());
 		colorSelector.getButton().setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1,1));
 		if (image!=null) colorSelector.setColorValue(ColorUtility.getRGB(image.getNanBound().getColor()));
 		colorSelector.addListener(new IPropertyChangeListener() {			
@@ -435,14 +448,17 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		GridData data = new GridData(SWT.LEFT, SWT.FILL, false, false);
 		label.setLayoutData(data);
 		label.setText("Mask using:  ");
+		enableControls.add(label);
 	
 		final Button directDraw = new Button(drawGroup, SWT.RADIO);
 		directDraw.setText("Direct draw");
 		directDraw.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
+		enableControls.add(directDraw);
 		
 		final Button regionDraw = new Button(drawGroup, SWT.RADIO);
 		regionDraw.setText("Regions");
 		regionDraw.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false));
+		enableControls.add(regionDraw);
 		
 		label = new Label(drawGroup, SWT.HORIZONTAL|SWT.SEPARATOR);
 		GridData gdata = new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1);
@@ -461,7 +477,8 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		createDirectToolbarActions(directToolbar);
 		Control          tb         = directToolbar.createControl(directComp);
 		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
-		
+		enableControls.add(directToolbar.getControl());
+	
 		new Label(directComp, SWT.NONE);
 		final Label shiftLabel = new Label(directComp, SWT.WRAP);
 		shiftLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, true, false));
@@ -472,6 +489,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		final Button useThresh = new Button(directComp, SWT.CHECK);
 		useThresh.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
 		useThresh.setText("Use threshold on brush.");
+		enableControls.add(useThresh);
 		
 		final Composite threshComp = new Composite(directComp, SWT.NONE);
 		threshComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -480,6 +498,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		final Label minThreshLabel = new Label(threshComp, SWT.NONE);
 		threshComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		minThreshLabel.setText("Minimum Threshold");
+		enableControls.add(minThreshLabel);
 		
 		final FloatSpinner minThresh = new FloatSpinner(threshComp, SWT.NONE);
 		minThresh.setIncrement(1d);
@@ -488,10 +507,12 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		minThresh.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		if (image!=null) minThresh.setDouble(getValue(image.getMin(), image.getMinCut(), 0));
 		minThresh.setToolTipText("Press enter to set minimum threshold for brush.");
+		enableControls.add(minThresh);
 
 		final Label maxThreshLabel = new Label(threshComp, SWT.NONE);
 		maxThreshLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		maxThreshLabel.setText("Maximum Threshold");
+		enableControls.add(maxThreshLabel);
 
 		final FloatSpinner maxThresh = new FloatSpinner(threshComp, SWT.NONE);
 		maxThresh.setIncrement(1d);
@@ -500,6 +521,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		maxThresh.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		if (image!=null) maxThresh.setDouble(getValue(image.getMax(), image.getMaxCut(), Integer.MAX_VALUE));
 		maxThresh.setToolTipText("Press enter to set maximum threshold for brush.");
+		enableControls.add(maxThresh);
 		
 		
 		minThresh.addSelectionListener(new SelectionAdapter() {
@@ -548,6 +570,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		GridUtils.removeMargins(regionComp);
 
 		final ToolBarManager   regionToolbar = new ToolBarManager(SWT.FLAT|SWT.RIGHT);
+		enableControls.add(regionToolbar.getControl());
 		
 		createMaskingRegionActions(regionToolbar);
 		tb         = regionToolbar.createControl(regionComp);
@@ -581,12 +604,14 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			}
 		});
 		regionTable.setInput(new Object());
+		enableControls.add(regionTable.getControl());
 		
 		final Composite buttons = new Composite(drawGroup, SWT.BORDER);
 		buttons.setLayout(new GridLayout(2, false));
 		buttons.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false, 3, 1));
 		
 		this.autoApply     = new Button(buttons, SWT.CHECK);
+		enableControls.add(autoApply);
 		autoApply.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true, 2, 1));
 		autoApply.setText("Automatically apply mask when something changes.");
 		autoApply.setSelection(Activator.getPlottingPreferenceStore().getBoolean(PlottingConstants.MASK_AUTO_APPLY));
@@ -601,6 +626,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			}
 		});
 		apply.setEnabled(true);
+		enableControls.add(apply);
 		
 		autoApply.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -619,6 +645,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				resetMask();
 			}
 		});
+		enableControls.add(reset);
 		
 		createActions(getSite().getActionBars());
 		
@@ -678,6 +705,11 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			}
 		});
 
+		try {
+		    enableControls.add(((ToolBarManager)getViewPart().getViewSite().getActionBars().getToolBarManager()).getControl());
+		} catch (Throwable ignored) {
+			
+		}
 	}
 	
 	private boolean lastActionRange = false;
@@ -847,12 +879,16 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	
 	private void updateIcons(int[] ia) {
 		
-		RGB maskColor = ColorUtility.getRGB(ia);
-		((ActionContributionItem)directToolbar.find(ShapeType.SQUARE.getId())).getAction().setImageDescriptor(IconUtils.getBrushIcon(  12, ShapeType.SQUARE,   maskColor));
-		((ActionContributionItem)directToolbar.find(ShapeType.TRIANGLE.getId())).getAction().setImageDescriptor(IconUtils.getBrushIcon(12, ShapeType.TRIANGLE, maskColor));
-		((ActionContributionItem)directToolbar.find(ShapeType.CIRCLE.getId())).getAction().setImageDescriptor(IconUtils.getBrushIcon(  12, ShapeType.CIRCLE,   maskColor));
+		try {
+			RGB maskColor = ColorUtility.getRGB(ia);
+			((ActionContributionItem)directToolbar.find(ShapeType.SQUARE.getId())).getAction().setImageDescriptor(IconUtils.getBrushIcon(  12, ShapeType.SQUARE,   maskColor));
+			((ActionContributionItem)directToolbar.find(ShapeType.TRIANGLE.getId())).getAction().setImageDescriptor(IconUtils.getBrushIcon(12, ShapeType.TRIANGLE, maskColor));
+			((ActionContributionItem)directToolbar.find(ShapeType.CIRCLE.getId())).getAction().setImageDescriptor(IconUtils.getBrushIcon(  12, ShapeType.CIRCLE,   maskColor));
+	
+		} catch (Throwable ne) {
+			logger.error("Cannot set mask color!", ne);
+		}
 	}
-
 
 	private static BooleanDataset savedMask=null;
 	private static boolean        autoApplySavedMask=false;
@@ -886,7 +922,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	
 	private void createActions(IActionBars actionBars) {
 		
-		
+		createToolPageActions();
 		
 		final Action exportMask = new Action("Export mask to file", Activator.getImageDescriptor("icons/mask-export-wiz.png")) {
 			public void run() {
@@ -1035,7 +1071,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 
 	protected void saveMaskBuffer() {
 		savedMask = maskObject.getMaskDataset();
-		loadMask.setEnabled(savedMask!=null);
+		if (loadMask!=null) loadMask.setEnabled(savedMask!=null);
 	}
 
 	protected void mergeSavedMask() {
@@ -1181,7 +1217,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		maskingTypes.add(RegionType.POLYGON);
 		maskingTypes.add(RegionType.SECTOR);
 	}
-	private void createMaskingRegionActions(IToolBarManager man) {		
+	private void createMaskingRegionActions(ToolBarManager man) {		
 		
 		final Action multipleRegion  = new Action("Continuously add the same region", IAction.AS_CHECK_BOX) {
 			public void run() {
@@ -1249,6 +1285,9 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			menuAction = (MenuAction)menu.getAction();	
 			man.add(menuAction);
 		}
+		
+		enableControls.add(man.getControl());
+
 	}
 
 	private int getValue(Number bound, HistogramBound hb, int defaultInt) {
@@ -1315,6 +1354,8 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	@Override
 	public void activate() {
 		super.activate();
+		setEnabled(getImageTrace()!=null);
+		
 		currentMaskingTool = this;
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().addTraceListener(traceListener); // If it changes get reference to image.
@@ -1341,6 +1382,9 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 
 		if (loadMask!=null) loadMask.setEnabled(savedMask!=null);
 		
+		if (autoApplyMask!=null) {
+			autoApplyMask.setEnabled(!(getPlottingSystem().getPart() instanceof IViewPart));
+		}
 	}
 	
 	@Override
@@ -1373,6 +1417,8 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	@Override
 	public void dispose() {
 		super.dispose();
+		
+		enableControls.clear();
 		if (scrollComp!=null) scrollComp.dispose();
 		if (maskObject!=null) maskObject.dispose();
 		scrollComp     = null;
@@ -1381,6 +1427,12 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		regionBoundsListener = null;
 		if (this.regionTable!=null && !regionTable.getControl().isDisposed()) {
 			regionTable.getTable().removeMouseListener(this);
+		}
+	}
+	
+	private void setEnabled(boolean enabled) {
+		for (Control control : enableControls) {
+			if (control!=null) control.setEnabled(enabled);
 		}
 	}
 

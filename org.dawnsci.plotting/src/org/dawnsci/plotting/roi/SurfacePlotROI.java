@@ -16,13 +16,13 @@
 
 package org.dawnsci.plotting.roi;
 
-import uk.ac.diamond.scisoft.analysis.roi.ROIBase;
+import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 /**
  * This is a region of interest selection object for the 3D surface plotting 
  * 
  */
-public class SurfacePlotROI extends ROIBase {
+public class SurfacePlotROI extends RectangularROI {
 
 	/**
 	 * 

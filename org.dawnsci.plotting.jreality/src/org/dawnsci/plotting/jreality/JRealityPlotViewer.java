@@ -60,6 +60,7 @@ import org.dawnsci.plotting.jreality.tool.SceneDragTool;
 import org.dawnsci.plotting.jreality.util.JOGLChecker;
 import org.dawnsci.plotting.jreality.util.PlotColorUtility;
 import org.dawnsci.plotting.roi.SurfacePlotROI;
+import org.dawnsci.plotting.util.PlottingUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -395,12 +396,6 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 				final int[] start = rroi.getIntPoint();
 				final int[] lens  = rroi.getIntLengths();
 				surfRoi = new SurfacePlotROI(start[0], start[1], start[0]+lens[0], start[1]+lens[1], 0,0,0,0);
-			} else {
-				int y = currentTrace != null ? currentTrace.getData().getShape()[0] : 300;
-				int x = currentTrace != null ? currentTrace.getData().getShape()[1] : 300;
-				int width = x > 300 ? 300 : x;
-				int height = y > 300 ? 300 : y;
-				surfRoi = new SurfacePlotROI(0, 0, width, height, 0 , 0, 0, 0);
 			}
 			return surfRoi;
 		} else {
@@ -491,7 +486,18 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 
 		try {
 			if (window == null && mode == PlottingMode.SURF2D) {
-				window = new SurfacePlotROI(0, 0, 300, 300, 0, 0, 0, 0);
+				// Apply some downsampling to the surfacePlotROI
+				int width = data.get(0).getShape()[1];
+				int height = data.get(0).getShape()[0];
+				int binShape = 1, samplingMode = 0;
+				binShape = PlottingUtils.getBinShape(width, height, false);
+				if (binShape != 1) {
+					// DownsampleMode.MEAN = 2
+					samplingMode = 2; 
+				}
+				window = new SurfacePlotROI(0, 0, width, height, samplingMode, samplingMode, 0, 0);
+				((SurfacePlotROI)window).setXBinShape(binShape);
+				((SurfacePlotROI)window).setYBinShape(binShape);
 			}
 			if (mode == PlottingMode.SURF2D && window instanceof SurfacePlotROI && !window.equals(getDataWindow())) {
 				((DataSet3DPlot3D) plotter).setDataWindow(data, (SurfacePlotROI)window, null);
@@ -1352,13 +1358,9 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	}
 
 	public Image getImage(Rectangle size) {
-		
 		AbstractViewerApp app = getViewer();
-		
 		ViewerSwt viewer = (ViewerSwt)app.getCurrentViewer();
-		
 		BufferedImage img = viewer.renderOffscreen(size.width, size.height);
-		
 		BufferedImage img2 = new BufferedImage(size.width, 
 												size.height,
 												BufferedImage.TYPE_INT_RGB);

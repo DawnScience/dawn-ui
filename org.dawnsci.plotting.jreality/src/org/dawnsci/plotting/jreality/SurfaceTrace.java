@@ -18,7 +18,6 @@ import org.eclipse.ui.PlatformUI;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
-import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 /**
  * A class for holding surface trace data.
@@ -54,17 +53,6 @@ public class SurfaceTrace extends Image3DTrace implements ISurfaceTrace{
 			stYPt = stYPt < 0 ? 0 : stYPt;
 			((SurfacePlotROI)window).setPoint(stXPt, stYPt);
 		}
-		if (window instanceof RectangularROI && getData()!=null) {
-			RectangularROI rroi = (RectangularROI)window;
-			int[]       start = rroi.getIntPoint();
-			final int[] lens  = rroi.getIntLengths();
-			int[]       end   = new int[]{start[0]+lens[0], start[1]+lens[1]};
-
-			// Ensure shape not outside
-			start = normalize(start, getData().getShape()[1], getData().getShape()[0]);
-			end   = normalize(end,   getData().getShape()[1], getData().getShape()[0]);
-			window = new SurfacePlotROI(start[0], start[1], end[0], end[1], 0,0,0,0);
-		}
 		this.window = window;
 		if (plotter!=null && this.isActive())
 			return plotter.setSurfaceWindow(this.window, monitor);
@@ -80,15 +68,15 @@ public class SurfaceTrace extends Image3DTrace implements ISurfaceTrace{
 	public IROI getWindow() {
 		return window;
 	}
-
-	private int[] normalize(int[] point, int maxX, int maxY) {
-		if (point[0]<0) point[0]=0;
-		if (point[0]>=maxX) point[0]=maxX-1;
-		
-		if (point[1]<0) point[1]=0;
-		if (point[1]>=maxY) point[1]=maxY-1;
-		return point;
-	}
+//
+//	private int[] normalize(int[] point, int maxX, int maxY) {
+//		if (point[0]<0) point[0]=0;
+//		if (point[0]>=maxX) point[0]=maxX-1;
+//		
+//		if (point[1]<0) point[1]=0;
+//		if (point[1]>=maxY) point[1]=maxY-1;
+//		return point;
+//	}
 
 	@SuppressWarnings("unchecked")
 	@Override

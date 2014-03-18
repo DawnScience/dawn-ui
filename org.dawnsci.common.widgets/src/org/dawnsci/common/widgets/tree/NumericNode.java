@@ -326,6 +326,10 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 		}
 	}
 	
+	public Unit<E> getDefaultUnit() {
+		return defaultUnit;
+	}
+	
 	public Unit<E> getUnit() {
 		if (value!=null)        return value.getUnit();
 		if (defaultValue!=null) return defaultValue.getUnit();

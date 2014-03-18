@@ -31,6 +31,7 @@ import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
+import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.diffraction.DiffractionUtils;
 import org.dawnsci.plotting.tools.powderintegration.PowderIntegrationJob.IntegrationMode;
 import org.eclipse.core.runtime.Status;
@@ -171,6 +172,8 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			}
 		};
 		
+		nonAction.setImageDescriptor(Activator.getImageDescriptor("icons/pixel.png"));
+		
 		final Action splitAction = new Action("Pixel splitting") {
 			@Override
 			public void run() {
@@ -180,6 +183,9 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 				update(null);
 			}
 		};
+		
+		splitAction.setImageDescriptor(Activator.getImageDescriptor("icons/splitPixel.png"));
+		
 		final Action split2DAction = new Action("Pixel splitting 2D") {
 			@Override
 			public void run() {
@@ -189,7 +195,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 				update(null);
 			}
 		};
-		
+		split2DAction.setImageDescriptor(Activator.getImageDescriptor("icons/cake.png"));
 		
 		final MenuAction axisSelect= new MenuAction("Select Axis");
 
@@ -215,7 +221,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		};
 		
 		final MenuAction corrections= new MenuAction("Corrections");
-		final Action solidAngle = new Action("Solid Angle",IAction.AS_CHECK_BOX) {
+		final Action solidAngle = new Action("Solid Angle Correction",IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
 				correctSolidAngle = isChecked();
@@ -225,6 +231,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 
 		};
 		
+		corrections.setImageDescriptor(Activator.getImageDescriptor("icons/function.png"));
 		
 		modeSelect.add(nonAction);
 		modeSelect.add(splitAction);

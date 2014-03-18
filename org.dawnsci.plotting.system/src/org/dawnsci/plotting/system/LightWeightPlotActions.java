@@ -882,9 +882,13 @@ class LightWeightPlotActions {
 			autoHideRegions.setToolTipText("Automatically hide regions when the plot dimensionality changes.");
 			actionBarManager.registerAction(autoHideRegions, ActionType.ALL, ManagerType.MENUBAR);
 			
+			MenuAction filters = PlotFilterActions.getXYFilterActions(actionBarManager.getSystem());
+			
 			actionBarManager.addXYSeparator();
 			actionBarManager.addXYAction(plotX);
 			actionBarManager.addXYAction(plotIndex);
+			actionBarManager.addXYSeparator();
+			actionBarManager.addXYAction(filters);
 			actionBarManager.addXYSeparator();
 
 			

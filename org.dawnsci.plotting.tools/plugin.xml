@@ -102,7 +102,8 @@
             icon="icons/plot-tool-derivative.png"
             id="org.dawb.workbench.plotting.tools.derivative"
             label="Derivative"
-            tooltip="A tool which shows the derivative next to what is currently plotted.">
+            tooltip="A tool which shows the derivative next to what is currently plotted."
+            visible="false">
       </plotting_tool_page>
       <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.measurement"
@@ -351,6 +352,13 @@
             id="org.dawnsci.plotting.tools.plotting_tool_hyper2d"
             label="Hyper2d"
             visible="true">
+      </plotting_tool_page>
+      <plotting_tool_page
+            category="org.dawnsci.plotting.tools.plotting_tool_category.fitting"
+            class="org.dawnsci.plotting.tools.DerivativeToolExternalPlot"
+            icon="icons/plot-tool-derivative.png"
+            id="org.dawnsci.plotting.tools.DerivativeToolExternalPlot"
+            label="Derivative View">
       </plotting_tool_page>
    </extension>
 
