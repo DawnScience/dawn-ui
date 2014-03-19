@@ -1,5 +1,6 @@
 package org.dawnsci.plotting.tools.powderintegration;
 
+import java.io.File;
 import java.util.List;
 
 import javax.measure.unit.NonSI;
@@ -19,6 +20,7 @@ import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage.DataReductionInfo;
 import org.dawb.common.ui.util.EclipseUtils;
+import org.dawb.common.ui.wizard.persistence.PersistenceImportWizard;
 import org.dawb.hdf5.IHierarchicalDataFile;
 import org.dawb.hdf5.Nexus;
 import org.dawb.hdf5.nexus.NexusUtils;
@@ -37,9 +39,12 @@ import org.dawnsci.plotting.tools.powderintegration.PowderIntegrationJob.Integra
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
@@ -47,6 +52,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
@@ -63,6 +69,7 @@ import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.ILoaderService;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.io.NexusDiffractionMetaReader;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile.XAxis;
 
 public class PowderIntegrationTool extends AbstractToolPage implements IDataReductionToolPage {
@@ -78,6 +85,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	XAxis xAxis = XAxis.Q;
 	IntegrationMode mode = IntegrationMode.NONSPLITTING;
 	boolean correctSolidAngle = false;
+	IDiffractionMetadata importedMeta;
 	
 	public PowderIntegrationTool() {
 		try {
@@ -165,7 +173,6 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		final Action nonAction = new Action("Non pixel splitting") {
 			@Override
 			public void run() {
-				PowderIntegrationTool.this.fullImageJob.setIntegrationMode(IntegrationMode.NONSPLITTING);
 				mode = IntegrationMode.NONSPLITTING;
 				modeSelect.setSelectedAction(this);
 				update(null);
@@ -177,7 +184,6 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		final Action splitAction = new Action("Pixel splitting") {
 			@Override
 			public void run() {
-				PowderIntegrationTool.this.fullImageJob.setIntegrationMode(IntegrationMode.SPLITTING);
 				mode = IntegrationMode.SPLITTING;
 				modeSelect.setSelectedAction(this);
 				update(null);
@@ -189,7 +195,6 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		final Action split2DAction = new Action("Pixel splitting 2D") {
 			@Override
 			public void run() {
-				PowderIntegrationTool.this.fullImageJob.setIntegrationMode(IntegrationMode.SPLITTING2D);
 				mode = IntegrationMode.SPLITTING2D;
 				modeSelect.setSelectedAction(this);
 				update(null);
@@ -225,13 +230,74 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			@Override
 			public void run() {
 				correctSolidAngle = isChecked();
-				PowderIntegrationTool.this.fullImageJob.setCorrectSolidAngle(correctSolidAngle);
 				update(null);
 			}
 
 		};
 		
 		corrections.setImageDescriptor(Activator.getImageDescriptor("icons/function.png"));
+
+		final Action clearImported = new Action("Clear imported metadata") {
+			@Override
+			public void run() {
+				importedMeta = null;
+				fullImageJob = null;
+				this.setEnabled(false);
+				update(null);
+			}
+		};
+		
+		clearImported.setEnabled(false);
+		
+		final MenuAction loadMeta= new MenuAction("Experimental metadata");
+		loadMeta.setImageDescriptor(Activator.getImageDescriptor("icons/detectorlight.png"));
+		final Action loadMetaAction = new Action("Import metadata from NeXus file") {
+			@Override
+			public void run() {
+				try {
+
+					FileDialog dialog =  new FileDialog(getViewPart().getSite().getShell(), SWT.OPEN);
+					dialog.setText("Open metadata file");
+					dialog.setFilterExtensions(new String[]{"*.nxs"});
+					dialog.open();
+					String[] names =  dialog.getFileNames();
+					if (names.length == 0) return;
+
+					NexusDiffractionMetaReader nexusDiffReader = new NexusDiffractionMetaReader(dialog.getFilterPath() + File.separator + names[0]);
+
+					IDiffractionMetadata md = nexusDiffReader.getDiffractionMetadataFromNexus(null);
+
+					if (nexusDiffReader.isPartialRead()) {
+						importedMeta = md;
+						fullImageJob = null;
+						logger.debug("meta loaded from file");
+						clearImported.setEnabled(true);
+						update(null);
+					} else {
+						MessageDialog.openError(
+								getViewPart().getSite().getShell(),
+								"Error!",
+								"Metadata could not be read from file!");
+					}
+
+				} catch (Exception e) {
+					MessageDialog.openError(
+							getViewPart().getSite().getShell(),
+							"Error!",
+							"Metadata could not be read from file: " + e.getMessage());
+				}
+				return;
+			}
+
+		};
+		
+		//if (importedMeta == null) clearImported.setEnabled(false);
+		
+		loadMetaAction.setImageDescriptor(Activator.getImageDescriptor("icons/mask-import-wiz.png"));
+		clearImported.setImageDescriptor(Activator.getImageDescriptor("icons/delete.gif"));
+		
+		loadMeta.add(loadMetaAction);
+		loadMeta.add(clearImported);
 		
 		modeSelect.add(nonAction);
 		modeSelect.add(splitAction);
@@ -252,11 +318,12 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		
 		getSite().getActionBars().getToolBarManager().add(corrections);
 		getSite().getActionBars().getMenuManager().add(corrections);
+		
+		getSite().getActionBars().getToolBarManager().add(loadMeta);
 	}
 
 	@Override
 	public Control getControl() {
-		//if (system != null) return system.getPlotComposite();
 		return baseComposite;
 	}
 
@@ -276,6 +343,54 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		
 		logger.debug("Update");
 		
+		//Imported metadata first
+		if (importedMeta != null) {
+			DetectorProperties d = importedMeta.getDetector2DProperties();
+			if(d.getPx() != ds.getShape()[0] || d.getPy() != ds.getShape()[1])  {
+				statusMessage.setText("Data shape not compatible with current metadata!!!");
+				return;
+			} else {
+				statusMessage.setText("Using imported metadata");
+			}
+			if (fullImageJob == null) fullImageJob = new PowderIntegrationJob(metadata, system);
+		} else {
+			
+			IDiffractionMetadata m = getUpdatedMetadata(ds, statusString);
+			
+			if (m == null && metadata == null) return;
+
+			if (metadata == null) {
+				metadata = m;
+				fullImageJob = new PowderIntegrationJob(metadata, system);
+			} else {
+				if (m != null && (!metadata.getDetector2DProperties().equals(m.getDetector2DProperties()) ||
+						!metadata.getDiffractionCrystalEnvironment().equals(m.getDiffractionCrystalEnvironment()))) {
+					metadata = m;
+					fullImageJob = new PowderIntegrationJob(metadata, system);
+					statusMessage.setText("Meta data updated");
+				}
+			}
+			
+			if (fullImageJob == null) fullImageJob = new PowderIntegrationJob(metadata, system);
+		}
+		
+		AbstractDataset mask = null;
+		
+		if (im != null) mask = DatasetUtils.convertToAbstractDataset(im.getMask());
+		
+		fullImageJob.setData(DatasetUtils.convertToAbstractDataset(ds),
+				mask, null);
+		
+		fullImageJob.setAxisType(xAxis);
+		fullImageJob.setIntegrationMode(mode);
+		fullImageJob.setCorrectSolidAngle(correctSolidAngle);
+		
+		fullImageJob.schedule();
+	}
+	
+	private IDiffractionMetadata getUpdatedMetadata(IDataset ds, String[] statusString) {
+		
+		//check class metadata ok
 		if (metadata != null) {
 			DetectorProperties d = metadata.getDetector2DProperties();
 			if(d.getPx() != ds.getShape()[0] || d.getPy() != ds.getShape()[1])  {
@@ -286,8 +401,8 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			}
 		}
 		
+		//look in data set
 		IDiffractionMetadata m = null;
-		
 		if (ds.getMetadata() != null && ds.getMetadata() instanceof IDiffractionMetadata) {
 			m = (IDiffractionMetadata)ds.getMetadata();
 			statusMessage.setText("Metadata from data set");
@@ -303,35 +418,9 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			}
 		}
 		
-		if (m == null && metadata == null) return;
-		
-		if (metadata == null) {
-			metadata = m;
-			fullImageJob = new PowderIntegrationJob(metadata, system);
-		}
-		else {
-			if (m != null && (!metadata.getDetector2DProperties().equals(m.getDetector2DProperties()) ||
-					!metadata.getDiffractionCrystalEnvironment().equals(m.getDiffractionCrystalEnvironment()))) {
-				metadata = m;
-				fullImageJob = new PowderIntegrationJob(metadata, system);
-				statusMessage.setText("Meta data updated");
-			}
-		}
-		
-		if (fullImageJob == null) fullImageJob = new PowderIntegrationJob(metadata, system);
-		
-		AbstractDataset mask = null;
-		
-		if (im != null) mask = DatasetUtils.convertToAbstractDataset(im.getMask());
-		
-		fullImageJob.setData(DatasetUtils.convertToAbstractDataset(ds),
-				mask, null);
-		
-		fullImageJob.setAxisType(xAxis);
-		fullImageJob.setIntegrationMode(mode);
-		
-		fullImageJob.schedule();
+		return m;
 	}
+	
 	
 	private IDiffractionMetadata getDiffractionMetaData(IDataset image) {
 		IWorkbenchPart part = getPart();
@@ -356,6 +445,8 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	 */
 	@Override
 	public DataReductionInfo export(DataReductionSlice slice) throws Exception {
+		
+		if (fullImageJob == null) throw new IllegalArgumentException("Integration not correctly configured!");
 		
 		IHierarchicalDataFile file = slice.getFile();
 		Group dataGroup = slice.getParent();
