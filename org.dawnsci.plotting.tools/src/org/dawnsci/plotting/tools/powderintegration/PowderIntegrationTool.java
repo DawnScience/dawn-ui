@@ -159,8 +159,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		statusMessage = new Label(baseComposite, SWT.WRAP);
 		statusMessage.setText("Status...");
 		statusMessage.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
-		ColorRegistry colorRegistry = JFaceResources.getColorRegistry();
-		statusMessage.setForeground(new Color(statusMessage.getDisplay(), colorRegistry.getRGB(JFacePreferences.QUALIFIER_COLOR)));
+		statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
 		statusMessage.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		
 		update(null);
@@ -272,6 +271,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 						fullImageJob = null;
 						logger.debug("meta loaded from file");
 						clearImported.setEnabled(true);
+						system.clear();
 						update(null);
 					} else {
 						MessageDialog.openError(
@@ -348,9 +348,11 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			DetectorProperties d = importedMeta.getDetector2DProperties();
 			if(d.getPx() != ds.getShape()[0] || d.getPy() != ds.getShape()[1])  {
 				statusMessage.setText("Data shape not compatible with current metadata!!!");
+				statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
 				return;
 			} else {
 				statusMessage.setText("Using imported metadata");
+				statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
 			}
 			if (fullImageJob == null) fullImageJob = new PowderIntegrationJob(metadata, system);
 		} else {
@@ -368,6 +370,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 					metadata = m;
 					fullImageJob = new PowderIntegrationJob(metadata, system);
 					statusMessage.setText("Meta data updated");
+					statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
 				}
 			}
 			
@@ -396,8 +399,10 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			if(d.getPx() != ds.getShape()[0] || d.getPy() != ds.getShape()[1])  {
 				metadata = null;
 				statusMessage.setText("Data shape not compatible with current metadata");
+				statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
 			} else {
 				statusMessage.setText("Metadata OK");
+				statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
 			}
 		}
 		
@@ -406,6 +411,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		if (ds.getMetadata() != null && ds.getMetadata() instanceof IDiffractionMetadata) {
 			m = (IDiffractionMetadata)ds.getMetadata();
 			statusMessage.setText("Metadata from data set");
+			statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
 		}
 		
 		//read from preferences first time
