@@ -84,8 +84,7 @@ class BoxSelection extends AbstractSelectionRegion {
 	@Override
 	protected void updateBounds() {
 		if (box != null) {
-			box.updateFromHandles();
-			Rectangle b = box.getBounds();
+			Rectangle b = box.updateFromHandles();
 			if (b != null)
 				box.setBounds(b);
 		}
@@ -119,12 +118,6 @@ class BoxSelection extends AbstractSelectionRegion {
 
 	@Override
 	protected IROI createROI(boolean recordResult) {
-//		proi.setName(getName());
-//		if (roi != null) {
-//			proi.setPlot(roi.isPlot());
-//			// set the Region isActive flag
-//			this.setActive(roi.isPlot());
-//		}
 		if (recordResult) {
 			roi = box.croi;
 		}
