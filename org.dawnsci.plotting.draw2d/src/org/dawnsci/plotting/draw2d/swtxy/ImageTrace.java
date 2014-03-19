@@ -419,11 +419,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					yOffset = (yPixD - yPix)*yScale;
 					break;
 				}
-				if (yPix+fullHeight > ySize) {
+				if (xPix < 0 || yPix < 0 || xPix+fullWidth > xSize || yPix+fullHeight > ySize) {
 					return false; // prevent IAE in calling getPixel
-				}
-				if (xPix+fullWidth > xSize) {
-					return false;
 				}
 				// Slice the data.
 				// Pixel slice on downsampled data = fast!
