@@ -369,7 +369,10 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				logger.debug("Exception getting the image metadata", e);
 			}
 		}
-		return DiffractionUtils.getDiffractionMetadata(image, altPath, service, statusString);
+		//Add the meta data to the data set
+		IDiffractionMetadata md = DiffractionUtils.getDiffractionMetadata(image, altPath, service, statusString);
+		image.setMetadata(md);
+		return md;
 	}
 
 
