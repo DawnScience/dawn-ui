@@ -54,7 +54,6 @@ public class GridSelection extends BoxSelection implements IGridSelection{
 	}
 
 	protected void drawMidPoint(double x, double y, Graphics gc) {
-		
 		int[] pnt = coords.getValuePosition(x, y);
 		gc.pushState();
 		gc.setAlpha(255);
@@ -141,7 +140,6 @@ public class GridSelection extends BoxSelection implements IGridSelection{
 			}
 			
 			for (int i = 0; i < yGrids; i++) {
-
 				int[] pnt1 = coords.getValuePosition(spt[0], gridLines[1][i]);
 				int[] pnt2 = coords.getValuePosition(spt[0] + len[0], gridLines[1][i]);
 				gc.drawLine(pnt1[0], pnt1[1], pnt2[0], pnt2[1]);

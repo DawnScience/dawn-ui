@@ -27,15 +27,14 @@ import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
 import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
-import org.dawnsci.plotting.draw2d.swtxy.util.RotatableRectangle;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.MouseEvent;
+import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
-import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 
@@ -44,11 +43,11 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import uk.ac.diamond.scisoft.analysis.roi.handler.HandleStatus;
 import uk.ac.diamond.scisoft.analysis.roi.handler.RectangularROIHandler;
 
-public class BoxSelection extends AbstractSelectionRegion {
+class BoxSelection extends AbstractSelectionRegion {
 
-	DecoratedRectangle rect;
+	Box box;
 
-	public BoxSelection(String name, ICoordinateSystem coords) {
+	BoxSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
 		setRegionColor(RegionType.BOX.getDefaultColor());
 		setAlpha(80);
@@ -56,32 +55,26 @@ public class BoxSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public void setVisible(boolean visible) {
-		getBean().setVisible(visible);
-		if (rect != null)
-			rect.setVisible(visible);
-	}
-
-	@Override
-	public void setMobile(final boolean mobile) {
-		getBean().setMobile(mobile);
-		if (rect != null)
-			rect.setMobile(mobile);
+	public void setMobile(boolean mobile) {
+		super.setMobile(mobile);
+		if (box != null)
+			box.setMobile(mobile);
 	}
 
 	@Override
 	public void createContents(Figure parent) {
-		rect = new DecoratedRectangle(parent);
-		rect.setCursor(Draw2DUtils.getRoiMoveCursor());
+		box = new Box(parent);
+		box.setCoordinateSystem(coords);
+		box.setCursor(Draw2DUtils.getRoiMoveCursor());
 
-		parent.add(rect);
+		parent.add(box);
 		sync(getBean());
 		setOpaque(false);
 	}
 
 	@Override
 	public boolean containsPoint(int x, int y) {
-		return rect.containsPoint(x, y);
+		return box.containsPoint(x, y);
 	}
 
 	@Override
@@ -91,14 +84,19 @@ public class BoxSelection extends AbstractSelectionRegion {
 
 	@Override
 	protected void updateBounds() {
-		if (rect != null) {
-			Rectangle b = rect.updateFromHandles();
-			rect.setBounds(b);
+		if (box != null) {
+			box.updateFromHandles();
+			Rectangle b = box.getBounds();
+			if (b != null)
+				box.setBounds(b);
 		}
 	}
 
 	@Override
 	public void paintBeforeAdded(Graphics g, PointList clicks, Rectangle parentBounds) {
+		if (clicks.size() <= 1)
+			return;
+
 		g.setLineStyle(SWT.LINE_DOT);
 		final Rectangle bounds = new Rectangle(clicks.getFirstPoint(), clicks.getLastPoint());
 		g.drawRectangle(bounds);
@@ -109,8 +107,8 @@ public class BoxSelection extends AbstractSelectionRegion {
 
 	@Override
 	public void initialize(PointList clicks) {
-		if (rect != null) {
-			rect.setup(clicks);
+		if (box != null) {
+			box.setup(clicks);
 			fireROIChanged(getROI());
 		}
 	}
@@ -122,39 +120,22 @@ public class BoxSelection extends AbstractSelectionRegion {
 
 	@Override
 	protected IROI createROI(boolean recordResult) {
-		final PointList pl = rect.getPoints();
-		if (pl.size() < 2)
-			return super.getROI();
-
-		final RectangularROI rroi = new RectangularROI();
-		rroi.setName(getName());
-		rroi.setAngle(Math.toRadians(rect.getAngleDegrees()));
-		Point p;
-		p = pl.getPoint(0);
-		double[] pa = coords.getPositionValue(p.x(), p.y());
-		p = pl.getPoint(1);
-		double[] pb = coords.getPositionValue(p.x(), p.y());
-		p = pl.getPoint(2);
-		double[] pc = coords.getPositionValue(p.x(), p.y());
-		double la = Math.hypot(pa[0] - pb[0], pa[1] - pb[1]);
-		double lb = Math.hypot(pc[0] - pb[0], pc[1] - pb[1]);
-		rroi.setPoint(pa);
-		rroi.setLengths(la,  lb);
-		if (roi != null) {
-			rroi.setPlot(roi.isPlot());
-			// set the Region isActive flag
-			this.setActive(roi.isPlot());
+//		proi.setName(getName());
+//		if (roi != null) {
+//			proi.setPlot(roi.isPlot());
+//			// set the Region isActive flag
+//			this.setActive(roi.isPlot());
+//		}
+		if (recordResult) {
+			roi = box.croi;
 		}
-		if (recordResult)
-			roi = rroi;
-
-		return rroi;
+		return box.croi;
 	}
 
 	@Override
 	protected void updateRegion() {
-		if (rect != null && roi instanceof RectangularROI) {
-			rect.updateFromROI((RectangularROI) roi);
+		if (box != null && roi instanceof RectangularROI) {
+			box.updateFromROI((RectangularROI) roi);
 			sync(getBean());
 		}
 	}
@@ -167,20 +148,20 @@ public class BoxSelection extends AbstractSelectionRegion {
 	@Override
 	public void dispose() {
 		super.dispose();
-		if (rect != null) {
-			rect.dispose();
+		if (box != null) {
+			box.dispose();
 		}
 	}
 
 	protected void drawRectangle(Graphics g) {
-		rect.internalOutline(g);
+		box.internalOutline(g);
 	}
 
 	protected void fillRectangle(Graphics g) {
-		rect.internalFill(g);
+		box.internalFill(g);
 	}
 
-	class DecoratedRectangle extends RotatableRectangle implements IRegionContainer {
+	class Box extends Shape implements IRegionContainer {
 		List<IFigure> handles;
 		List<FigureTranslator> fTranslators;
 		private Figure parent;
@@ -189,8 +170,10 @@ public class BoxSelection extends AbstractSelectionRegion {
 		private TranslationListener handleListener;
 		private FigureListener moveListener;
 		private boolean isMobile;
+		private Rectangle bnds;
+		private boolean dirty = true;
 
-		public DecoratedRectangle(Figure parent) {
+		public Box(Figure parent) {
 			super();
 			handles = new ArrayList<IFigure>();
 			fTranslators = new ArrayList<FigureTranslator>();
@@ -200,9 +183,78 @@ public class BoxSelection extends AbstractSelectionRegion {
 			moveListener = new FigureListener() {
 				@Override
 				public void figureMoved(IFigure source) {
-					DecoratedRectangle.this.parent.repaint();
+					Box.this.parent.repaint();
 				}
 			};
+		}
+
+		private ICoordinateSystem cs;
+		private RectangularROI croi;
+
+		public void setCoordinateSystem(ICoordinateSystem system) {
+			cs = system;
+		}
+
+		public ICoordinateSystem getCoordinateSystem() {
+			return cs;
+		}
+
+		public Point getStart() {
+			if (croi == null) {
+				return null;
+			}
+			int[] pt = cs.getValuePosition(croi.getPointRef());
+			return new Point(pt[0], pt[1]);
+		}
+
+		public void setStart(int x, int y) {
+			if (croi == null) {
+				return;
+			}
+			double[] pt = cs.getPositionValue(x, y);
+			croi.setPoint(pt);
+			dirty = true;
+			calcBox(true);
+		}
+
+		public void setCentre(Point nc) {
+			double[] pt = cs.getPositionValue(nc.x(), nc.y());
+			double[] pc = croi.getMidPoint();
+			pt[0] -= pc[0];
+			pt[1] -= pc[1];
+			croi.addPoint(pt);
+			dirty = true;
+			calcBox(true);
+		}
+
+		public int getMajor() {
+			if (croi == null) {
+				return 0;
+			}
+			int[] pt = cs.getValuePosition(croi.getLengths());
+			return pt[0];
+		}
+
+		public int getMinor() {
+			if (croi == null) {
+				return 0;
+			}
+			int[] pt = cs.getValuePosition(croi.getLengths());
+			return pt[1];
+		}
+
+		public double getAngleDegrees() {
+			if (croi == null) {
+				return 0;
+			}
+			return croi.getAngleDegrees();
+		}
+
+		@Override
+		public boolean containsPoint(int x, int y) {
+			if (croi == null)
+				return super.containsPoint(x, y);
+			return croi.containsPoint(cs.getPositionValue(x, y));
 		}
 
 		public void dispose() {
@@ -215,12 +267,25 @@ public class BoxSelection extends AbstractSelectionRegion {
 			removeFigureListener(moveListener);
 		}
 
-		public void setup(PointList points) {
-			final Point pa = points.getFirstPoint();
-			final Point pc = points.getLastPoint();
+		public void setup(PointList corners) {
+			final Point pa = corners.getFirstPoint();
+			final Point pc = corners.getLastPoint();
 
-			setOrigin(Math.min(pa.x(), pc.x()), Math.min(pa.y(), pc.y()));
-			setLengths(Math.abs(pa.x() - pc.x()), Math.abs(pa.y() - pc.y()));
+			double[] a = cs.getPositionValue(pa.x(), pa.y());
+			double[] c = cs.getPositionValue(pc.x(), pc.y());
+			double ox = Math.min(a[0], c[0]);
+			double oy = Math.min(a[1], c[1]);
+			double lx = Math.abs(a[0] - c[0]);
+			double ly = Math.abs(a[1] - c[1]);
+			double angle = 0;
+			if (lx < ly) {
+				angle = 0.5*Math.PI;
+				ox += lx;
+				double t = lx;
+				lx = ly;
+				ly = t;
+			}
+			croi = new RectangularROI(ox, oy, lx, ly, angle);
 
 			roiHandler.setROI(createROI(true));
 			configureHandles();
@@ -290,7 +355,7 @@ public class BoxSelection extends AbstractSelectionRegion {
 
 		private TranslationListener createHandleNotifier() {
 			return new TranslationListener() {
-				private int[] spt;
+				private double[] spt;
 
 				@Override
 				public void onActivate(TranslationEvent evt) {
@@ -298,8 +363,7 @@ public class BoxSelection extends AbstractSelectionRegion {
 					if (src instanceof FigureTranslator) {
 						final FigureTranslator translator = (FigureTranslator) src;
 						Point start = translator.getStartLocation();
-						double[] c = coords.getPositionValue(start.x(), start.y());
-						spt = new int[]{(int)c[0], (int)c[1]};
+						spt = coords.getPositionValue(start.x(), start.y());
 						final IFigure handle = translator.getRedrawFigure();
 						final int h = handles.indexOf(handle);
 						HandleStatus status = h == 4 ? HandleStatus.RMOVE : HandleStatus.RESIZE;
@@ -320,9 +384,7 @@ public class BoxSelection extends AbstractSelectionRegion {
 						
 						if (end==null) return;
 						double[] c = coords.getPositionValue(end.x(), end.y());
-						int[] r = new int[] { (int) c[0], (int) c[1] };
-
-						RectangularROI croi = (RectangularROI) roiHandler.interpretMouseDragging(spt, r);
+						RectangularROI croi = (RectangularROI) roiHandler.interpretMouseDragging(spt, c);
 
 						intUpdateFromROI(croi);
 						fireROIDragged(croi, roiHandler.getStatus() == HandleStatus.RESIZE ?
@@ -338,9 +400,7 @@ public class BoxSelection extends AbstractSelectionRegion {
 						Point end = translator.getEndLocation();
 
 						double[] c = coords.getPositionValue(end.x(), end.y());
-						int[] r = new int[] { (int) c[0], (int) c[1] };
-
-						RectangularROI croi = (RectangularROI) roiHandler.interpretMouseDragging(spt, r);
+						RectangularROI croi = (RectangularROI) roiHandler.interpretMouseDragging(spt, c);
 
 						updateFromROI(croi);
 						roiHandler.unconfigureDragging();
@@ -362,6 +422,53 @@ public class BoxSelection extends AbstractSelectionRegion {
 				}
 			}
 			return getBounds();
+		}
+
+		protected PointList generatePointList() {
+			PointList pl = new PointList(4);
+			int[] pt;
+			pt = cs.getValuePosition(croi.getPointRef());
+			pl.addPoint(pt[0], pt[1]);
+			pt = cs.getValuePosition(croi.getPoint(1, 0));
+			pl.addPoint(pt[0], pt[1]);
+			pt = cs.getValuePosition(croi.getPoint(1, 1));
+			pl.addPoint(pt[0], pt[1]);
+			pt = cs.getValuePosition(croi.getPoint(0, 1));
+			pl.addPoint(pt[0], pt[1]);
+
+			return pl;
+		}
+
+		private void internalFill(Graphics graphics) {
+			graphics.pushState();
+			graphics.setAdvanced(true);
+			graphics.setAntialias(SWT.ON);
+			graphics.fillPolygon(generatePointList());
+			graphics.popState();
+		}
+
+		private void internalOutline(Graphics graphics) {
+			graphics.pushState();
+			graphics.setAdvanced(true);
+			graphics.setAntialias(SWT.ON);
+
+			Rectangle bnds = parent.getBounds();
+			Draw2DUtils.drawClippedPolyline(graphics, generatePointList(), bnds, true);
+			graphics.popState();
+		}
+
+		private void calcBox(boolean redraw) {
+			RectangularROI rroi = croi.getBounds();
+			int[] bp = cs.getValuePosition(rroi.getPointRef());
+			int[] ep = cs.getValuePosition(rroi.getEndPoint());
+			bnds = new Rectangle(new Point(bp[0], bp[1]), new Point(ep[0], ep[1]));
+			ep = cs.getValuePosition(rroi.getPoint(0, 1));
+			bnds.union(new Point(ep[0], ep[1]));
+			ep = cs.getValuePosition(rroi.getPoint(1, 0));
+			bnds.union(new Point(ep[0], ep[1]));
+			if (redraw) {
+				setBounds(bnds);
+			}
 		}
 
 		@Override
@@ -387,11 +494,53 @@ public class BoxSelection extends AbstractSelectionRegion {
 			}
 		}
 
+		@Override
+		public String toString() {
+			return "BoxSel: start=" + getStart() + ", major=" + getMajor() + ", minor=" + getMinor() + ", ang=" + getAngleDegrees();
+		}
+
+		/**
+		 * @return list of handle points (can be null)
+		 */
+		public PointList getPoints() {
+			int imax = handles.size() - 1;
+			if (imax < 0)
+				return null;
+
+			PointList pts = new PointList(imax);
+			for (int i = 0; i < imax; i++) {
+				IFigure f = handles.get(i);
+				if (f instanceof SelectionHandle) {
+					SelectionHandle h = (SelectionHandle) f;
+					pts.addPoint(h.getSelectionPoint());
+				}
+			}
+			return pts;
+		}
+
+		@Override
+		public Rectangle getBounds() {
+			if (croi != null && dirty)
+				calcBox(false);
+			dirty = false;
+			Rectangle b = bnds == null ? super.getBounds() : new Rectangle(bnds);
+			if (handles != null) {
+				for (IFigure f : handles) {
+					if (f instanceof SelectionHandle) {
+						SelectionHandle h = (SelectionHandle) f;
+						b.union(h.getBounds());
+					}
+				}
+			}
+			return b;
+		}
+
 		/**
 		 * Update according to ROI
 		 * @param rroi
 		 */
 		public void updateFromROI(RectangularROI rroi) {
+			croi = rroi;
 			roiHandler.setROI(rroi);
 			intUpdateFromROI(rroi);
 		}
@@ -401,18 +550,6 @@ public class BoxSelection extends AbstractSelectionRegion {
 		 * @param rroi
 		 */
 		private void intUpdateFromROI(RectangularROI rroi) {
-			int[] pta = coords.getValuePosition(0,0);
-			int[] ptb = coords.getValuePosition(rroi.getLengths());
-
-			double ratio = coords.getAspectRatio();
-			affine.setAspectRatio(ratio);
-			setLengths(Math.abs(pta[0] - ptb[0]), (int) Math.round(Math.abs(pta[1] - ptb[1])/ratio));
-
-			pta  = coords.getValuePosition(rroi.getPointRef());
-			setOrigin(pta[0], pta[1]);
-
-			setAngle(rroi.getAngleDegrees());
-
 			int imax = handles.size();
 			if (imax != roiHandler.size()) {
 				configureHandles();
@@ -421,10 +558,12 @@ public class BoxSelection extends AbstractSelectionRegion {
 				for (int i = 0; i < imax; i++) {
 					double[] hpt = handler.getAnchorPoint(i, SIDE);
 					SelectionHandle handle = (SelectionHandle) handles.get(i);
-					pta  = coords.getValuePosition(hpt);
-					handle.setSelectionPoint(new PrecisionPoint(pta[0], pta[1]));
+					int[] pta = coords.getValuePosition(hpt);
+					handle.setSelectionPoint(new Point(pta[0], pta[1]));
 				}
 			}
+			dirty = true;
+			calcBox(true);
 		}
 
 		@Override
@@ -434,14 +573,6 @@ public class BoxSelection extends AbstractSelectionRegion {
 
 		@Override
 		public void setRegion(IRegion region) {
-		}
-
-		private void internalOutline(Graphics g) {
-			super.outlineShape(g);
-		}
-
-		private void internalFill(Graphics g) {
-			super.fillShape(g);
 		}
 
 		@Override
