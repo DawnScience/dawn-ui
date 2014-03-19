@@ -433,7 +433,7 @@ class HyperbolaSelection extends AbstractSelectionRegion implements ILockableReg
 
 		@Override
 		public String toString() {
-			return "ParaSel: focus=" + getFocus() + ", semi-latus=" + getSemilatus() + ", ecc=" + getEccentricity() + ", ang=" + getAngleDegrees();
+			return "HyperSel: focus=" + getFocus() + ", semi-latus=" + getSemilatus() + ", ecc=" + getEccentricity() + ", ang=" + getAngleDegrees();
 		}
 
 		private TranslationListener createHandleNotifier() {

@@ -101,7 +101,7 @@ public class BasePlottingConstants {
 	public static final String REMOVE_REGION = "org.dawb.workbench.ui.editors.plotting.swtxy.removeRegions";
 
 	/**
-	 * Used to identify the autoscal action
+	 * Used to identify the autoscale action
 	 */
 	public static final String AUTO_SCALE = "org.csstudio.swt.xygraph.autoscale";
 

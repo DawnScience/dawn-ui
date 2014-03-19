@@ -24,7 +24,8 @@ Require-Bundle: org.eclipse.ui,
 Bundle-ActivationPolicy: lazy
 Export-Package: org.dawnsci.plotting,
  org.dawnsci.plotting.roi,
- org.dawnsci.plotting.util
+ org.dawnsci.plotting.util,
+ org.dawnsci.plotting.views
 Import-Package: com.thoughtworks.xstream.core.util,
  org.dawb.workbench.jmx,
  org.eclipse.core.resources,
