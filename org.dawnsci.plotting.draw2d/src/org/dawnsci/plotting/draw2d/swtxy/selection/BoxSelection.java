@@ -63,8 +63,7 @@ class BoxSelection extends AbstractSelectionRegion {
 
 	@Override
 	public void createContents(Figure parent) {
-		box = new Box(parent);
-		box.setCoordinateSystem(coords);
+		box = new Box(parent, coords);
 		box.setCursor(Draw2DUtils.getRoiMoveCursor());
 
 		parent.add(box);
@@ -172,12 +171,15 @@ class BoxSelection extends AbstractSelectionRegion {
 		private boolean isMobile;
 		private Rectangle bnds;
 		private boolean dirty = true;
+		private ICoordinateSystem cs;
+		private RectangularROI croi;
 
-		public Box(Figure parent) {
+		public Box(Figure parent, ICoordinateSystem system) {
 			super();
+			this.parent = parent;
+			cs = system;
 			handles = new ArrayList<IFigure>();
 			fTranslators = new ArrayList<FigureTranslator>();
-			this.parent = parent;
 			roiHandler = new RectangularROIHandler((RectangularROI) roi);
 			handleListener = createHandleNotifier();
 			moveListener = new FigureListener() {
@@ -188,35 +190,6 @@ class BoxSelection extends AbstractSelectionRegion {
 			};
 		}
 
-		private ICoordinateSystem cs;
-		private RectangularROI croi;
-
-		public void setCoordinateSystem(ICoordinateSystem system) {
-			cs = system;
-		}
-
-		public ICoordinateSystem getCoordinateSystem() {
-			return cs;
-		}
-
-		public Point getStart() {
-			if (croi == null) {
-				return null;
-			}
-			int[] pt = cs.getValuePosition(croi.getPointRef());
-			return new Point(pt[0], pt[1]);
-		}
-
-		public void setStart(int x, int y) {
-			if (croi == null) {
-				return;
-			}
-			double[] pt = cs.getPositionValue(x, y);
-			croi.setPoint(pt);
-			dirty = true;
-			calcBox(true);
-		}
-
 		public void setCentre(Point nc) {
 			double[] pt = cs.getPositionValue(nc.x(), nc.y());
 			double[] pc = croi.getMidPoint();
@@ -225,29 +198,6 @@ class BoxSelection extends AbstractSelectionRegion {
 			croi.addPoint(pt);
 			dirty = true;
 			calcBox(true);
-		}
-
-		public int getMajor() {
-			if (croi == null) {
-				return 0;
-			}
-			int[] pt = cs.getValuePosition(croi.getLengths());
-			return pt[0];
-		}
-
-		public int getMinor() {
-			if (croi == null) {
-				return 0;
-			}
-			int[] pt = cs.getValuePosition(croi.getLengths());
-			return pt[1];
-		}
-
-		public double getAngleDegrees() {
-			if (croi == null) {
-				return 0;
-			}
-			return croi.getAngleDegrees();
 		}
 
 		@Override
@@ -496,7 +446,15 @@ class BoxSelection extends AbstractSelectionRegion {
 
 		@Override
 		public String toString() {
-			return "BoxSel: start=" + getStart() + ", major=" + getMajor() + ", minor=" + getMinor() + ", ang=" + getAngleDegrees();
+			if (croi == null)
+				return "BoxSel: undefined";
+
+			int[] pt = cs.getValuePosition(croi.getPointRef());
+			Point start = new Point(pt[0], pt[1]);
+			int[] pta = cs.getValuePosition(0, 0);
+			int[] ptb = cs.getValuePosition(croi.getLengths());
+
+			return "BoxSel: start=" + start + ", major=" + (ptb[0] - pta[0]) + ", minor=" + (ptb[1] - pta[1]) + ", ang=" + croi.getAngleDegrees();
 		}
 
 		/**
