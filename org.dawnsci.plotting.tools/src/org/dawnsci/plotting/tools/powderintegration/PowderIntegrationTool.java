@@ -320,6 +320,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		getSite().getActionBars().getMenuManager().add(corrections);
 		
 		getSite().getActionBars().getToolBarManager().add(loadMeta);
+		getSite().getActionBars().getMenuManager().add(loadMeta);
 	}
 
 	@Override
