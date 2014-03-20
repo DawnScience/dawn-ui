@@ -118,6 +118,9 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	private boolean containerOverride = false;
 
+	private static Display getDisplay() {
+		return Display.getDefault();
+	}
 
 	public void createPlotPart(final Composite      container,
 							   final String         plotName,
@@ -140,7 +143,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			this.parent            = new Composite(container, SWT.NONE);
 			this.stackLayout       = new StackLayout();
 			this.parent.setLayout(stackLayout);
-			parent.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+			parent.setBackground(getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		}
 
 		// We ignore hint, we create a light weight plot as default because
@@ -212,23 +215,24 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		super.addTraceListener(l);
 		lightWeightViewer.addImageTraceListener(l);
 	}
+
 	public void removeTraceListener(final ITraceListener l) {
 		super.removeTraceListener(l);
 		lightWeightViewer.removeImageTraceListener(l);
 	}
-	
 
 	@Override
 	public void setEnabled(final boolean enabled) {
-		if (lightWeightViewer==null) return;
-		if (getDisplay().getThread()==Thread.currentThread()) {
+		if (lightWeightViewer == null)
+			return;
+		if (getDisplay().getThread() == Thread.currentThread()) {
 			lightWeightViewer.setEnabled(enabled);
 		} else {
-		    getDisplay().syncExec(new Runnable() {
-		    	public void run() {
-		    		lightWeightViewer.setEnabled(enabled);
-		    	}
-		    });
+			getDisplay().syncExec(new Runnable() {
+				public void run() {
+					lightWeightViewer.setEnabled(enabled);
+				}
+			});
 		}
 	}
 
@@ -264,18 +268,19 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			final ITrace trace = getTrace(y.getName());
 			if (trace!=null && trace instanceof ILineTrace) {
 				
-				if (x==null) x = IntegerDataset.arange(y.getSize(), IntegerDataset.INT32);
+				if (x == null)
+					x = IntegerDataset.arange(y.getSize(), IntegerDataset.INT32);
 				final IDataset finalX = x;
-				final ILineTrace lineTrace = (ILineTrace)trace;
+				final ILineTrace lineTrace = (ILineTrace) trace;
 				updatedAndCreated.add(lineTrace);
-				
-				if (!((IErrorDataset)y).hasErrors()) {
+
+				if (!((IErrorDataset) y).hasErrors()) {
 					lineTrace.setErrorBarEnabled(false);
-				} else if (((IErrorDataset)y).hasErrors()){
+				} else if (((IErrorDataset) y).hasErrors()) {
 					lineTrace.setErrorBarEnabled(true);
 				}
-				
-				if (getDisplay().getThread()==Thread.currentThread()) {
+
+				if (getDisplay().getThread() == Thread.currentThread()) {
 					lineTrace.setData(finalX, y);
 				} else {
 					getDisplay().syncExec(new Runnable() {
@@ -343,26 +348,23 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			x = xIn;
 		}
 
-		if (getDisplay().getThread()==Thread.currentThread()) {
+		if (getDisplay().getThread() == Thread.currentThread()) {
 			List<ITrace> ts = createPlot1DInternal(x, ysIn, dataNames, title, monitor);
-			if (ts!=null) traces.addAll(ts);
+			if (ts != null)
+				traces.addAll(ts);
 		} else {
 			getDisplay().syncExec(new Runnable() {
 				@Override
 				public void run() {
 					List<ITrace> ts = createPlot1DInternal(x, ysIn, dataNames, title, monitor);
-					if (ts!=null) traces.addAll(ts);
+					if (ts != null)
+						traces.addAll(ts);
 				}
 			});
 		}
 
 		if (monitor!=null) monitor.worked(1);
 		return traces;
-		
-	}
-
-	private Display getDisplay() {
-		return Display.getDefault();
 	}
 
 	@Override
@@ -371,10 +373,12 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 					    final Number           yValue,
 					    final IProgressMonitor monitor) throws Exception  {       
 		
-		if (!this.plottingMode.is1D()) throw new Exception("Can only add in 1D mode!");
-		if (name==null || "".equals(name)) throw new IllegalArgumentException("The dataset name must not be null or empty string!");
-		
-		if (getDisplay().getThread()==Thread.currentThread()) {
+		if (!this.plottingMode.is1D())
+			throw new Exception("Can only add in 1D mode!");
+		if (name == null || "".equals(name))
+			throw new IllegalArgumentException("The dataset name must not be null or empty string!");
+
+		if (getDisplay().getThread() == Thread.currentThread()) {
 			appendInternal(name, xValue, yValue, monitor);
 		} else {
 			getDisplay().syncExec(new Runnable() {
@@ -391,12 +395,12 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
      */
 	public void setPlotType(final PlotType mode) {
 		super.setPlotType(mode);
-		if (Thread.currentThread()==Display.getDefault().getThread()) {
-		    switchPlottingType(mode);
+		if (getDisplay().getThread() == Thread.currentThread()) {
+			switchPlottingType(mode);
 		} else {
-			Display.getDefault().syncExec(new Runnable() {
+			getDisplay().syncExec(new Runnable() {
 				public void run() {
-				    switchPlottingType(mode);
+					switchPlottingType(mode);
 				}
 			});
 		}
@@ -415,10 +419,10 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 				               final IProgressMonitor      monitor) {
 
 		if (plottingMode.is1D()) {
-			if (getDisplay().getThread()==Thread.currentThread()) {
+			if (getDisplay().getThread() == Thread.currentThread()) {
 				switchPlottingType(PlotType.IMAGE);
 			} else {
-				Display.getDefault().syncExec(new Runnable() {
+				getDisplay().syncExec(new Runnable() {
 					public void run() {
 						switchPlottingType(PlotType.IMAGE);
 					}
@@ -428,23 +432,27 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		final Collection<ITrace> traces = plottingMode.is3D() 
 				                        ? getTraces(ISurfaceTrace.class)
 				                        : getTraces(IImageTrace.class);
-				                        
-		if (monitor!=null&&monitor.isCanceled()) return null;
-		if (traces!=null && traces.size()>0) {
-			
+
+		if (monitor != null && monitor.isCanceled())
+			return null;
+
+		if (traces != null && traces.size() > 0) {
 			ITrace image = traces.iterator().next();
-			final int[]       shape = image.getData()!=null ? image.getData().getShape() : null;
-			if (shape!=null && Arrays.equals(shape, data.getShape())) {
-				if (getDisplay().getThread()==Thread.currentThread()) {
+			final int[] shape = image.getData() != null ? image.getData().getShape() : null;
+
+			if (shape != null && Arrays.equals(shape, data.getShape())) {
+				if (getDisplay().getThread() == Thread.currentThread()) {
 					image = updatePlot2DInternal(image, data, axes, dataName, monitor);
 				} else {
 					final List<ITrace> images = Arrays.asList(image);
-					Display.getDefault().syncExec(new Runnable() {
+					getDisplay().syncExec(new Runnable() {
 						public void run() {
-							// This will keep the previous zoom level if there was one
-							// and will be faster than createPlot2D(...) which autoscales.
-			                ITrace im = updatePlot2DInternal(images.get(0), data, axes, dataName, monitor);
-			                images.set(0, im);
+							// This will keep the previous zoom level if there
+							// was one
+							// and will be faster than createPlot2D(...) which
+							// autoscales.
+							ITrace im = updatePlot2DInternal(images.get(0), data, axes, dataName, monitor);
+							images.set(0, im);
 						}
 					});
 					image = images.get(0);
@@ -502,15 +510,17 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 		final List<ITrace> traces = new ArrayList<ITrace>(7);
 
-		if (getDisplay().getThread()==Thread.currentThread()) {
+		if (getDisplay().getThread() == Thread.currentThread()) {
 			ITrace ts = createPlot2DInternal(data, axes, dataName, monitor);
-			if (ts!=null) traces.add(ts);
+			if (ts != null)
+				traces.add(ts);
 		} else {
 			getDisplay().syncExec(new Runnable() {
 				@Override
 				public void run() {
 					ITrace ts = createPlot2DInternal(data, axes, dataName, monitor);
-					if (ts!=null) traces.add(ts);
+					if (ts != null)
+						traces.add(ts);
 				}
 			});
 		}
@@ -955,7 +965,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	@Override
 	public void reset() {
-		if (getDisplay().getThread()==Thread.currentThread()) {
+		if (getDisplay().getThread() == Thread.currentThread()) {
 			resetInternal();
 		} else {
 			getDisplay().syncExec(new Runnable() {
@@ -977,7 +987,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	@Override
 	public void clear() {
-		if (getDisplay().getThread()==Thread.currentThread()) {
+		if (getDisplay().getThread() == Thread.currentThread()) {
 			clearInternal();
 		} else {
 			getDisplay().syncExec(new Runnable() {
@@ -1127,7 +1137,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	@Override
 	public void resetAxes() {
-		if (getDisplay().getThread()==Thread.currentThread()) {
+		if (getDisplay().getThread() == Thread.currentThread()) {
 			lightWeightViewer.resetAxes();
 		} else {
 			getDisplay().syncExec(new Runnable() {
