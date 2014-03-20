@@ -125,12 +125,6 @@ class HyperbolaSelection extends AbstractSelectionRegion implements ILockableReg
 
 	@Override
 	protected IROI createROI(boolean recordResult) {
-//		proi.setName(getName());
-//		if (roi != null) {
-//			proi.setPlot(roi.isPlot());
-//			// set the Region isActive flag
-//			this.setActive(roi.isPlot());
-//		}
 		if (recordResult) {
 			roi = hyperbola.croi;
 		}
