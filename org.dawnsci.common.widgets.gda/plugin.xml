@@ -163,6 +163,11 @@
             id="uk.ac.diamond.scisoft.analysis.convolve"
             name="Convolve">
       </function>
+      <function
+            class="uk.ac.diamond.scisoft.analysis.fitting.functions.Quadratic"
+            id="uk.ac.diamond.scisoft.analysis.quadratic"
+            name="Quadratic">
+      </function>
    </extension>
 
 </plugin>
