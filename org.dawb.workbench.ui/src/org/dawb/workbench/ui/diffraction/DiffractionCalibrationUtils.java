@@ -432,26 +432,26 @@ public class DiffractionCalibrationUtils {
 		for (int i = 0; i < model.size(); i++) {
 			DetectorProperties dp = model.get(i).md.getDetector2DProperties();
 			double wavelength = model.get(i).md.getDiffractionCrystalEnvironment().getWavelength();
-			wavelength = DiffractionCalibrationUtils.setPrecision(wavelength, 5);
+			//wavelength = DiffractionCalibrationUtils.setPrecision(wavelength, 5);
 			double residual = model.get(i).residual;
 			// image
 			values[i][0] = model.get(i).name;
 			// distance
-			values[i][1] = String.format("%.2f",dp.getBeamCentreDistance());
+			values[i][1] = String.valueOf(dp.getBeamCentreDistance());
 			// X beam centre
-			values[i][2] = String.format("%.2f",dp.getBeamCentreCoords()[0]);
+			values[i][2] = String.valueOf(dp.getBeamCentreCoords()[0]);
 			// Y beam centre
-			values[i][3] = String.format("%.2f",dp.getBeamCentreCoords()[1]);
+			values[i][3] = String.valueOf(dp.getBeamCentreCoords()[1]);
 			// wavelength
 			values[i][4] = String.valueOf(wavelength);
 			// energy
 			values[i][5] = String.valueOf(DiffractionCalibrationUtils.getWavelengthEnergy(wavelength));
 			// Orientation Yaw
-			values[i][6] = String.format("%.2f",dp.getNormalAnglesInDegrees()[0]);
+			values[i][6] = String.valueOf(dp.getNormalAnglesInDegrees()[0]);
 			// Orientation Pitch
-			values[i][7] = String.format("%.2f",dp.getNormalAnglesInDegrees()[1]);
+			values[i][7] = String.valueOf(dp.getNormalAnglesInDegrees()[1]);
 			// Orientation Roll
-			values[i][8] = String.format("%.2f",dp.getNormalAnglesInDegrees()[2]);
+			values[i][8] = String.valueOf(dp.getNormalAnglesInDegrees()[2]);
 			// Orientation Roll
 			values[i][9] = String.valueOf(residual);
 		}
