@@ -12,7 +12,9 @@ import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.roi.ResolutionRing;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.ILockableRegion;
+import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
+import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.tools.Activator;
@@ -34,6 +36,7 @@ import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 import uk.ac.diamond.scisoft.analysis.diffraction.DSpacing;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorPropertyEvent;
+import uk.ac.diamond.scisoft.analysis.diffraction.DetectorPropertyEvent.EventType;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironmentEvent;
 import uk.ac.diamond.scisoft.analysis.diffraction.IDetectorPropertyListener;
@@ -110,6 +113,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	private DiffractionCrystalEnvironment diffenv;
 	private IRegion crosshairs;
 	private IRegion beamPosition;
+	private IROIListener roilistener;
 
     private enum RING_TYPE {
     	ICE, STANDARD, CALIBRANT, BEAM_CENTRE, BEAM_POSITION_HANDLE;
@@ -128,11 +132,39 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		plottingSystem = system;
 		if (activeAugmenter==null) activeAugmenter = this;
 		resROIs = new ArrayList<IROI>();
+		
+		roilistener = new IROIListener.Stub() {
+			
+			@Override
+			public void roiDragged(ROIEvent evt) {
+				updateBeamCentre(evt, false); 
+			}
+			
+			@Override
+			public void roiChanged(ROIEvent evt) {
+				updateBeamCentre(evt, true);
+			}
+			
+			private void updateBeamCentre(ROIEvent evt, boolean force) {
+				if (evt.getROI() != null && evt.getROI() instanceof PointROI) {
+					PointROI roi = (PointROI)evt.getROI();
+					if (evt.getSource() != null && evt.getSource() instanceof IRegion) {
+						IRegion region = (IRegion)evt.getSource();
+						if (region.getUserObject() == RING_TYPE.BEAM_POSITION_HANDLE) {
+							forceRedraw = force;
+							if (detprop != null)  detprop.setBeamCentreCoords(roi.getPoint());
+						}
+					}
+				}
+			}
+		};
 	}
 	
 	private boolean active = true;
 	private IDiffractionMetadata dmd;
 	private List<IROI> resROIs;
+	private boolean centreMoved = false;
+	private boolean forceRedraw = false;
 
 	/**
 	 * @return list of ROIs representing resolution rings
@@ -161,7 +193,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			for (RING_TYPE rt : RING_TYPE.values()) removeConics(rt);
 		}
 		registerListeners(false);
-		
+		if (beamPosition != null) beamPosition.removeROIListener(roilistener);
 		beamPosition = null;
 	}
 
@@ -321,12 +353,15 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	}
 
 	private void drawResolutionConics(List<ResolutionRing> conicList, String typeName, final RING_TYPE marker) {
-		Display.getDefault().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				removeConics(marker);
-			}
-		});
+		
+		if (!centreMoved || forceRedraw) {
+			Display.getDefault().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					removeConics(marker);
+				}
+			});
+		}
 		resROIs.clear();
 		if (!active) // We are likely to be off-screen
 			return;
@@ -345,13 +380,44 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		IROI[] rois = DSpacing.conicsFromAngles(detprop, alphas);
 		if (rois == null)
 			return;
-
-		for (int i = 0; i < nRings; i++) {
-			IROI conic = rois[i];
-			resROIs.add(conic);
-			if (conic != null)
-				drawResolutionConic(conicList.get(i), conic, typeName+i, marker, false);
+		
+		if (centreMoved && !forceRedraw) {
+			List<IRegion> regions = new ArrayList<IRegion>();
+			if (plottingSystem==null) return;
+			if (plottingSystem.getRegions()==null) return;
+			for (IRegion region : plottingSystem.getRegions()) {
+				try {
+					if (region.getUserObject()!=marker) continue;
+				    regions.add(region);
+				} catch (Throwable ne) {
+				}
+			}
+			
+			if (rois.length < regions.size()) return;
+			
+			for (int i = 0; i < regions.size(); i++) {
+				IROI conic = rois[i];
+				resROIs.add(conic);
+				if (conic != null)
+					updateResolutionConic(conic, regions.get(i));
+			}
+			
+		} else {
+			for (int i = 0; i < nRings; i++) {
+				IROI conic = rois[i];
+				resROIs.add(conic);
+				if (conic != null)
+					drawResolutionConic(conicList.get(i), conic, typeName+i, marker, false);
+			}
 		}
+	}
+	
+	private void updateResolutionConic(IROI roi, IRegion region) {
+		if (region.getROI().getClass() != roi.getClass()) {
+			region.setVisible(false);
+			return;
+		}
+		region.setROI(roi);
 	}
 
 	private void drawResolutionConic(ResolutionRing ring, IROI roi, String name, RING_TYPE marker, 
@@ -388,6 +454,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		region.setVisible(true);
 		region.setMobile(isMobile);
 		region.setUserObject(marker);
+		region.toBack();
 		if (isMobile) {
 			ILockableRegion lockable = region instanceof ILockableRegion ? (ILockableRegion) region : null;
 			if (lockable == null)
@@ -478,6 +545,8 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			beamPosition.setUserRegion(false);
 			beamPosition.setShowPosition(false);
 			beamPosition.setUserObject(RING_TYPE.BEAM_POSITION_HANDLE);
+			
+			beamPosition.addROIListener(roilistener);
 
 			plottingSystem.addRegion(beamPosition);
 			beamPosition.setMobile(true); // NOTE: Must be done **AFTER** calling the
@@ -486,6 +555,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			PointROI proi = (PointROI) beamPosition.getROI();
 			proi.setPoint(beamCentrePC);
 			beamPosition.setRegionColor(ColorConstants.red);
+
 		}
 	}
 	
@@ -496,7 +566,12 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 
 	@Override
 	public void detectorPropertiesChanged(DetectorPropertyEvent evt) {
+		
+		if (evt.getType()  == EventType.BEAM_CENTRE) {
+			centreMoved = true;
+		}
 		updateAll();
+		
 	}
 
 	private void updateAll() {
@@ -504,6 +579,11 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		standardRings.run();
 		iceRings.run();
 		calibrantRings.run();
+		
+		if ((!centreMoved || forceRedraw) && beamPosition!= null) beamPosition.toFront();
+		
+		centreMoved = false;
+		forceRedraw = false;
 	}
 
 	@Override

@@ -1203,24 +1203,24 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	public void roiSelected(ROIEvent evt) {}
 	
 	private void updateBeamCentre(ROIEvent evt) {
-		IROI roi = evt.getROI();
-		if(roi == null)return;
-		PointROI eroi = roi instanceof PointROI ? (PointROI)roi : null;		
-		if(eroi == null) return;
-		if (!(evt.getSource() instanceof IRegion)) return;
-		
-		IRegion point = (IRegion)evt.getSource();
-		Object ob = point.getUserObject();
-		if (ob == null) return;
-		
-		String ringType = ob.toString(); // TODO this is hacky!
-		if (!"CALIBRANT".equals(ringType) && !"BEAM_POSITION_HANDLE".equals(ringType)) return;
-		
-		double ptx = eroi.getPointX();
-		double pty = eroi.getPointY();
-		IDiffractionMetadata data = getDiffractionMetaData();
-		DetectorProperties detprop = data.getDetector2DProperties();
-		detprop.setBeamCentreCoords(new double[]{ptx, pty});
+//		IROI roi = evt.getROI();
+//		if(roi == null)return;
+//		PointROI eroi = roi instanceof PointROI ? (PointROI)roi : null;		
+//		if(eroi == null) return;
+//		if (!(evt.getSource() instanceof IRegion)) return;
+//		
+//		IRegion point = (IRegion)evt.getSource();
+//		Object ob = point.getUserObject();
+//		if (ob == null) return;
+//		
+//		String ringType = ob.toString(); // TODO this is hacky!
+//		if (!"CALIBRANT".equals(ringType) && !"BEAM_POSITION_HANDLE".equals(ringType)) return;
+//		
+//		double ptx = eroi.getPointX();
+//		double pty = eroi.getPointY();
+//		IDiffractionMetadata data = getDiffractionMetaData();
+//		DetectorProperties detprop = data.getDetector2DProperties();
+//		detprop.setBeamCentreCoords(new double[]{ptx, pty});
 	}
 
 }
