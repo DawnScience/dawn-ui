@@ -31,8 +31,10 @@ public class RectangularHandle extends SelectionHandle {
 		} else {
 			angle = 0;
 		}
-		location = new PrecisionPoint(params[0], params[1]);
-		int[] pt = coords.getValuePosition(params);
-		return new RotatableRectangle(pt[0], pt[1], side, side, angle);
+		int x = (int) params[0];
+		int y = (int) params[1];
+		double[] pt = coords.getPositionValue(x, y);
+		location = new PrecisionPoint(pt[0], pt[1]);
+		return new RotatableRectangle(x, y, side, side, angle);
 	}
 }
