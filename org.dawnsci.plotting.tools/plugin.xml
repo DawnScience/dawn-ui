@@ -347,6 +347,7 @@
             label="Powder Integration">
       </plotting_tool_page>
       <plotting_tool_page
+            category="org.dawnsci.plotting.tools.category.Profile"
             class="org.dawnsci.plotting.tools.hyper2d.Hyper2DTool"
             icon="icons/cutter_line.png"
             id="org.dawnsci.plotting.tools.plotting_tool_hyper2d"
