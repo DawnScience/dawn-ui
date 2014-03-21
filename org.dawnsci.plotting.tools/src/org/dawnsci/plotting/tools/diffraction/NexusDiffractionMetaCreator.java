@@ -6,7 +6,6 @@ import java.util.Collection;
 
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetectorHelper;
 
-import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.io.DiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.NexusDiffractionMetaReader;
@@ -31,11 +30,11 @@ public class NexusDiffractionMetaCreator {
 	 */
 	public IDiffractionMetadata getDiffractionMetadataFromNexus(int[] imageSize) {
 		final DetectorBean bean = DiffractionDefaultMetadata.getPersistedDetectorPropertiesBean(imageSize);
-		final DiffractionCrystalEnvironment diffcrys = DiffractionDefaultMetadata.getPersistedDiffractionCrystalEnvironment();
+		//final DiffractionCrystalEnvironment diffcrys = DiffractionDefaultMetadata.getPersistedDiffractionCrystalEnvironment();
 		
 		double[] xyPixelSize = DiffractionDetectorHelper.getXYPixelSizeMM(imageSize);
 		
-		IDiffractionMetadata md = nexusDiffraction.getDiffractionMetadataFromNexus(imageSize, bean.getDetectorProperties(), diffcrys, xyPixelSize);
+		IDiffractionMetadata md = nexusDiffraction.getDiffractionMetadataFromNexus(imageSize, null, null, xyPixelSize);
 		
 		if (!nexusDiffraction.isDetectorRead()) {
 			if (md instanceof DiffractionMetadata) {

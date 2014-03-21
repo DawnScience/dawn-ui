@@ -102,7 +102,8 @@ public class DiffractionUtils {
 			NexusDiffractionMetaCreator ndmc = new NexusDiffractionMetaCreator(filePath);
 			IDiffractionMetadata difMet = ndmc.getDiffractionMetadataFromNexus(shape);
 			if (difMet !=null) {
-				image.setMetadata(difMet);
+				//TODO comment out
+				//image.setMetadata(difMet);
 				if (statusText != null && statusText[0] == null) {
 					if (ndmc.isCompleteRead())
 						statusText[0] = "Metadata completely loaded from nexus tree";
