@@ -28,21 +28,24 @@ import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
 import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
-import org.dawnsci.plotting.draw2d.swtxy.util.Sector;
+import org.dawnsci.plotting.draw2d.swtxy.util.PointFunction;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.MouseEvent;
+import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
+import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 import uk.ac.diamond.scisoft.analysis.roi.handler.HandleStatus;
 import uk.ac.diamond.scisoft.analysis.roi.handler.SectorROIHandler;
@@ -53,7 +56,7 @@ import uk.ac.diamond.scisoft.analysis.roi.handler.SectorROIHandler;
  */
 class SectorSelection extends AbstractSelectionRegion implements ILockableRegion {
 
-	DecoratedSector sector;
+	Sector sector;
 
 	SectorSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
@@ -80,8 +83,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 
 	@Override
 	public void createContents(Figure parent) {
-		sector = new DecoratedSector(parent);
-		sector.setCoordinateSystem(coords);
+		sector = new Sector(parent, coords);
 		sector.setCursor(Draw2DUtils.getRoiMoveCursor());
 
 		parent.add(sector);
@@ -102,8 +104,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 	@Override
 	protected void updateBounds() { // called after a handle translation
 		if (sector != null) {
-			sector.updateFromHandles();
-			Rectangle b = sector.getBounds();
+			Rectangle b = sector.updateFromHandles();
 			if (b != null)
 				sector.setBounds(b);
 		}
@@ -130,17 +131,8 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 			g.drawOval((int) Math.round(cen.preciseX() - ri), (int) Math.round(cen.preciseY() - ri * ratio),
 					(int) Math.round(2*ri), (int) Math.round(2*ri*ratio));
 		} else {
-			double as = Math.toDegrees(Math.atan2(h, w));
-			Point out = clicks.getPoint(2);
-			rd = out.getDifference(cen);
-			h = -rd.preciseHeight() / ratio;
-			w = rd.preciseWidth();
-			final double ro = Math.hypot(w, h);
-			double ae = Math.toDegrees(Math.atan2(h, w));
-			double[] a = calcAngles(as, ae);
-//			System.err.printf("Temp: c = %d, %d; r = %.2f, %.2f; a = %.1f, %.1f\n", cen.x(), cen.y(), ri, ro, a[0], a[1]);
-			Sector s = new Sector(cen.preciseX(), cen.preciseY(), ri,  ro, a[0], a[1]);
-			s.setCoordinateSystem(coords);
+			Sector s = new Sector(null, coords);
+			s.setup(clicks);
  		    s.setLineStyle(Graphics.LINE_DOT);
 			s.setLineWidth(getLineWidth());
 			s.setForegroundColor(getRegionColor());
@@ -150,14 +142,16 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 	}
 
 	private Boolean clockwise = null;
+	private final static double ONE_PI = Math.PI;
+	private final static double TWO_PI = 2.0 * Math.PI;
 	private double[] calcAngles(double anglea, double angleb) {
 		if (anglea < 0)
-			anglea += 360;
+			anglea += TWO_PI;
 		if (angleb < 0)
-			angleb += 360;
+			angleb += TWO_PI;
 		if (clockwise == null) {
 			if (anglea == 0) {
-				clockwise = angleb > 180;
+				clockwise = angleb > ONE_PI;
 			} else {
 				clockwise = anglea > angleb;
 			}
@@ -165,37 +159,37 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 
 		double l;
 		if (clockwise) {
-			if (anglea < 180) {
-				if (angleb < 180) {
+			if (anglea < ONE_PI) {
+				if (angleb < ONE_PI) {
 					l = angleb - anglea;
 					if (l > 0)
-						l -= 360;
+						l -= TWO_PI;
 				} else
-					l = angleb - 360 - anglea;
+					l = angleb - TWO_PI - anglea;
 			} else {
-				if (angleb < 180) {
+				if (angleb < ONE_PI) {
 					l = angleb - anglea;
 				} else {
 					l = angleb - anglea;
 					if (l > 0)
-						l -= 360;
+						l -= TWO_PI;
 				}
 			}
 		} else {
-			if (anglea < 180) {
-				if (angleb < 180) {
+			if (anglea < ONE_PI) {
+				if (angleb < ONE_PI) {
 					l = angleb - anglea;
 					if (l < 0)
-						l += 360;
+						l += TWO_PI;
 				} else
 					l = angleb - anglea;
 			} else {
-				if (angleb < 180)
-					l = angleb - anglea + 360;
+				if (angleb < ONE_PI)
+					l = angleb - anglea + TWO_PI;
 				else {
 					l = angleb - anglea;
 					if (l < 0)
-						l += 360;
+						l += TWO_PI;
 				}
 			}
 		}
@@ -218,33 +212,10 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 
 	@Override
 	protected IROI createROI(boolean recordResult) {
-		final Point c = sector.getCentre();
-		final double[] a = sector.getAnglesDegrees();
-		double offset = coords.getXAxisRotationAngleDegrees();
-		final Point r0 = sector.getPoint(offset, 0);
-		final Point r1 = sector.getPoint(offset, 1);
-		final double[] pc = coords.getPositionValue(c.x(), c.y());
-		final double[] p0 = coords.getPositionValue(r0.x(), r0.y());
-		final double[] p1 = coords.getPositionValue(r1.x(), r1.y());
-
-		final int symmetry = roi != null ? ((SectorROI) roi).getSymmetry() : 0;
-		final boolean combine = roi != null ? ((SectorROI) roi).isCombineSymmetry() : false;
-		offset = 360 - offset;
-		final SectorROI sroi = new SectorROI(pc[0], pc[1], Math.abs(p0[0] - pc[0]), Math.abs(p1[0] - pc[0]),
-				Math.toRadians(offset - a[1]), Math.toRadians(offset - a[0]));
-		sroi.setName(getName());
-		sroi.setSymmetry(symmetry);
-		sroi.setCombineSymmetry(combine);
-		if (roi != null) {
-			sroi.setPlot(roi.isPlot());
-			// set the Region isActive flag
-			this.setActive(roi.isPlot());
-		}
 		if (recordResult) {
-			roi = sroi;
+			roi = sector.croi;
 		}
-
-		return sroi;
+		return sector.croi;
 	}
 
 	@Override
@@ -267,10 +238,10 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 			sector.dispose();
 		}
 	}
-	
+
 	private boolean isCentreMovable=true;
 
-	class DecoratedSector extends Sector implements IRegionContainer {
+	class Sector extends Shape implements IRegionContainer, PointFunction {
 		private List<IFigure> handles;
 		private List<FigureTranslator> fTranslators;
 		private Figure parent;
@@ -279,21 +250,57 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 		private TranslationListener handleListener;
 		private FigureListener moveListener;
 		private boolean isMobile;
+		private Rectangle bnds;
+		private boolean dirty = true;
+		private ICoordinateSystem cs;
+		private SectorROI croi;
+		private SectorROI troi = null; // temporary ROI used in dragging
+		private PointFunction innerFunction;
+		private PointFunction outerFunction;
 
-		public DecoratedSector(Figure parent) {
+		public Sector(Figure parent, ICoordinateSystem system) {
 			super();
+			this.parent = parent;
+			cs = system;
 			handles = new ArrayList<IFigure>();
 			fTranslators = new ArrayList<FigureTranslator>();
-			this.parent = parent;
 			roiHandler = new SectorROIHandler((SectorROI) roi);
 			handleListener = createHandleNotifier();
 			moveListener = new FigureListener() {
 				@Override
 				public void figureMoved(IFigure source) {
-					DecoratedSector.this.parent.repaint();
+					Sector.this.parent.repaint();
 				}
 			};
 			setBackgroundColor(getRegionColor());
+
+			innerFunction = new PointFunction.Stub() {
+				@Override
+				public Point calculatePoint(double... parameter) {
+					return Sector.this.getPoint(parameter[0], 0);
+				}
+			};
+
+			outerFunction = new PointFunction.Stub() {
+				@Override
+				public Point calculatePoint(double... parameter) {
+					return Sector.this.getPoint(parameter[0], 1);
+				}
+			};
+		}
+
+		public SectorROI getROI() {
+			return troi != null ? troi : croi;
+		}
+
+		public void setCentre(Point nc) {
+			double[] pt = cs.getPositionValue(nc.x(), nc.y());
+			double[] pc = croi.getPointRef();
+			pt[0] -= pc[0];
+			pt[1] -= pc[1];
+			croi.addPoint(pt);
+			dirty = true;
+			calcBox(croi, true);
 		}
 
 		public void dispose() {
@@ -312,35 +319,102 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 		 */
 		public void setup(PointList points) {
 			final Point cen = points.getFirstPoint();
+			double[] pc = cs.getPositionValue(cen.x(), cen.y());
+
 			Point inn = points.getPoint(1);
-			Dimension rd = inn.getDifference(cen);
-			double offset = coords.getXAxisRotationAngleDegrees();
-			double ratio = coords.getAspectRatio();
-			double h, w;
-			offset = 0;
-			h = -rd.preciseHeight() / ratio;
-			w = rd.preciseWidth();
-			double as = offset + Math.toDegrees(Math.atan2(h, w));
-			final double ri = Math.hypot(w, h);
+			double[] pa = cs.getPositionValue(inn.x(), inn.y());
+			pa[0] -= pc[0];
+			pa[1] -= pc[1];
+			double as = Math.atan2(pa[1], pa[0]);
+			final double ri = Math.hypot(pa[0], pa[1]);
 
 			Point out = points.getPoint(2);
-			rd = out.getDifference(cen);
-			h = -rd.preciseHeight() / ratio;
-			w = rd.preciseWidth();
+			double[] pb = cs.getPositionValue(out.x(), out.y());
+			pb[0] -= pc[0];
+			pb[1] -= pc[1];
 
-			final double ro = Math.hypot(w, h);
-			double ae = offset + Math.toDegrees(Math.atan2(h, w));
+			double ae = Math.atan2(pb[1], pb[0]);
+			final double ro = Math.hypot(pb[0], pb[1]);
 			double[] a = calcAngles(as, ae);
-//			System.err.printf("Perm: c = %d, %d; r = %.2f, %.2f; a = %.1f, %.1f\n", cen.x(), cen.y(), ri, ro, a[0], a[1]);
-			setCentre(cen.preciseX(), cen.preciseY());
-			if (ri < ro)
-				setRadii(ri,  ro);
-			else
-				setRadii(ro,  ri);
-			setAnglesDegrees(a[0], a[1]);
+			croi = new SectorROI(pc[0], pc[1], ri, ro, a[0], a[1]);
 
+			if (parent == null) { // for last click rendering
+				return;
+			}
 			roiHandler.setROI(createROI(true));
 			configureHandles();
+		}
+
+		/**
+		 * Get point on ellipse at given angle
+		 * @param angle (positive for anti-clockwise)
+		 * @return
+		 */
+		public Point getPoint(double angle, int i) {
+			SectorROI sroi = getROI();
+			if (sroi == null) {
+				return null;
+			}
+			double r = sroi.getRadius(i);
+			double[] c = sroi.getPointRef();
+			int[] pt = cs.getValuePosition(c[0] + r * Math.cos(angle), c[1] + r * Math.sin(angle));
+			return new Point(pt[0], pt[1]);
+		}
+
+		@Override
+		public Point calculatePoint(double... parameter) {
+			return null;
+		}
+
+		@Override
+		public double[] calculateXIntersectionParameters(int x) {
+			return null;
+		}
+
+		@Override
+		public double[] calculateYIntersectionParameters(int y) {
+			return null;
+		}
+
+		@Override
+		public void setCoordinateSystem(ICoordinateSystem system) {
+		}
+
+		@Override
+		public boolean containsPoint(int x, int y) {
+			if (croi == null)
+				return super.containsPoint(x, y);
+			return croi.containsPoint(cs.getPositionValue(x, y));
+		}
+
+		public void setMobile(boolean mobile) {
+			if (isMobile == mobile)
+				return;
+			isMobile = mobile;
+		
+			for (FigureTranslator f : fTranslators) {
+				f.setActive(mobile);
+			}
+			
+			if (mobile) {
+				setOpaque(true);
+				setCursor(Draw2DUtils.getRoiMoveCursor());
+				addFigureListener(moveListener);
+			} else {
+				setOpaque(false);
+				setCursor(null);
+				removeFigureListener(moveListener);
+			}
+			parent.revalidate();
+		}
+
+		@Override
+		public void setVisible(boolean visible) {
+			super.setVisible(visible);
+			for (IFigure h : handles) {
+				if (isMobile && visible && !h.isVisible())
+					h.setVisible(true);
+			}
 		}
 
 		private void configureHandles() {
@@ -381,25 +455,47 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 				setBounds(b);
 		}
 
-		public void setMobile(boolean mobile) {
-			if (isMobile == mobile)
-				return;
-			isMobile = mobile;
+		@Override
+		protected void fillShape(Graphics graphics) {
+			graphics.pushState();
+			graphics.setAdvanced(true);
+			graphics.setAntialias(SWT.ON);
 
-			for (FigureTranslator f : fTranslators) {
-				f.setActive(mobile);
-			}
-			
-			if (mobile) {
-				setOpaque(true);
-				setCursor(Draw2DUtils.getRoiMoveCursor());
-				addFigureListener(moveListener);
-			} else {
-				setOpaque(false);
-				setCursor(null);
-				removeFigureListener(moveListener);
-			}
-			parent.revalidate();
+			SectorROI sroi = getROI();
+			fillSector(graphics, sroi.getAngles());
+
+			if (sroi.getSymmetry() != SectorROI.NONE)
+				fillSector(graphics, sroi.getSymmetryAngles());
+
+			graphics.popState();
+		}
+
+		private static final double DELTA = Math.PI/180;
+
+		private void fillSector(Graphics graphics, double[] ang) {
+			PointList points = Draw2DUtils.generateCurve(innerFunction, ang[0], ang[1], DELTA);
+			PointList oPoints = Draw2DUtils.generateCurve(outerFunction, ang[0], ang[1], DELTA);
+			oPoints.reverse();
+			points.addAll(oPoints);
+			graphics.fillPolygon(points);
+		}
+
+		@Override
+		protected void outlineShape(Graphics graphics) {
+			graphics.pushState();
+			graphics.setAdvanced(true);
+			graphics.setAntialias(SWT.ON);
+
+			double[] ang = getROI().getAngles();
+			PointList points = Draw2DUtils.generateCurve(innerFunction, ang[0], ang[1], DELTA);
+			PointList oPoints = Draw2DUtils.generateCurve(outerFunction, ang[0], ang[1], DELTA);
+			oPoints.reverse();
+			points.addAll(oPoints);
+			Rectangle bnd = new Rectangle();
+			graphics.getClip(bnd);
+			Draw2DUtils.drawClippedPolyline(graphics, points, bnd, true);
+
+			graphics.popState();
 		}
 
 		private TranslationListener createRegionNotifier() {
@@ -429,7 +525,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 
 		private TranslationListener createHandleNotifier() {
 			return new TranslationListener() {
-				private int[] spt;
+				private double[] spt;
 
 				@Override
 				public void onActivate(TranslationEvent evt) {
@@ -437,8 +533,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 					if (src instanceof FigureTranslator) {
 						final FigureTranslator translator = (FigureTranslator) src;
 						Point start = translator.getStartLocation();
-						double[] c = coords.getPositionValue(start.x(), start.y());
-						spt = new int[]{(int)c[0], (int)c[1]};
+						spt = coords.getPositionValue(start.x(), start.y());
 						final IFigure handle = translator.getRedrawFigure();
 						final int h = handles.indexOf(handle);
 						HandleStatus status = HandleStatus.RESIZE;
@@ -464,12 +559,11 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 						
 						if (end==null) return;
 						double[] c = coords.getPositionValue(end.x(), end.y());
-						int[] r = new int[]{(int)c[0], (int)c[1]};
 
-						SectorROI croi = (SectorROI)roiHandler.interpretMouseDragging(spt,r);
+						troi = (SectorROI)roiHandler.interpretMouseDragging(spt, c);
 
-						intUpdateFromROI(croi);
-						fireROIDragged(croi, roiHandler.getStatus() == HandleStatus.RESIZE ?
+						intUpdateFromROI(troi);
+						fireROIDragged(troi, roiHandler.getStatus() == HandleStatus.RESIZE ?
 								ROIEvent.DRAG_TYPE.RESIZE : ROIEvent.DRAG_TYPE.TRANSLATE);
 					}
 				}
@@ -478,13 +572,13 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 				public void translationCompleted(TranslationEvent evt) {
 					Object src = evt.getSource();
 					if (src instanceof FigureTranslator) {
+						troi = null;
 						final FigureTranslator translator = (FigureTranslator) src;
 						Point end = translator.getEndLocation();
 
 						double[] c = coords.getPositionValue(end.x(), end.y());
-						int[] r = new int[]{(int)c[0], (int)c[1]};
 
-						SectorROI croi = (SectorROI)roiHandler.interpretMouseDragging(spt,r);
+						SectorROI croi = (SectorROI)roiHandler.interpretMouseDragging(spt, c);
 
 						updateFromROI(croi);
 						roiHandler.unconfigureDragging();
@@ -500,20 +594,23 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 		/**
 		 * Update selection according to centre handle
 		 */
-		private void updateFromHandles() {
+		private Rectangle updateFromHandles() {
 			if (handles.size() > 0) {
 				IFigure f = handles.get(roiHandler.size() - 1);
 				if (f instanceof SelectionHandle) {
 					SelectionHandle h = (SelectionHandle) f;
-					Point p = h.getSelectionPoint();
-					setCentre(p.preciseX(), p.preciseY());
+					setCentre(h.getSelectionPoint());
 				}
 			}
+			return getBounds();
 		}
 
 		@Override
 		public Rectangle getBounds() {
-			Rectangle b = super.getBounds();
+			if (croi != null && dirty)
+				calcBox(croi, false);
+			dirty = false;
+			Rectangle b = bnds == null ? super.getBounds() : new Rectangle(bnds);
 			if (handles != null)
 				for (IFigure f : handles) {
 					if (f instanceof SelectionHandle) {
@@ -524,11 +621,26 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 			return b;
 		}
 
+		private void calcBox(SectorROI proi, boolean redraw) {
+			RectangularROI rroi = proi.getBounds();
+			int[] bp = cs.getValuePosition(rroi.getPointRef());
+			int[] ep = cs.getValuePosition(rroi.getEndPoint());
+			bnds = new Rectangle(new Point(bp[0], bp[1]), new Point(ep[0], ep[1]));
+			ep = cs.getValuePosition(rroi.getPoint(0, 1));
+			bnds.union(new Point(ep[0], ep[1]));
+			ep = cs.getValuePosition(rroi.getPoint(1, 0));
+			bnds.union(new Point(ep[0], ep[1]));
+			if (redraw) {
+				setBounds(bnds);
+			}
+		}
+
 		/**
 		 * Update according to ROI
 		 * @param sroi
 		 */
 		public void updateFromROI(SectorROI sroi) {
+			croi = sroi;
 			roiHandler.setROI(sroi);
 			intUpdateFromROI(sroi);
 		}
@@ -538,34 +650,6 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 		 * @param sroi
 		 */
 		private void intUpdateFromROI(SectorROI sroi) {
-			final double x = sroi.getPointX();
-			final double y = sroi.getPointY();
-			final double[] r = sroi.getRadii();
-			final double[] a = sroi.getAnglesDegrees();
-
-			final int[] c  = coords.getValuePosition(x, y);
-			final int[] rd = coords.getValuePosition(x + r[0], y + r[1]);
-			setCentre(c[0], c[1]);
-			double ra = Math.abs(rd[0] - c[0]);
-			double rb = Math.abs(rd[1] - c[1]) / coords.getAspectRatio();
-			if (ra > rb)
-				setRadii(rb, ra);
-			else
-				setRadii(ra, rb);
-
-			double offset = 360 - coords.getXAxisRotationAngleDegrees();
-			a[0] = offset - a[0];
-			a[1] = offset - a[1];
-			setAnglesDegrees(a[1], a[0]);
-			
-			if (sroi.getSymmetry() == SectorROI.NONE) {
-				setDrawSymmetry(false);
-			} else {
-				setDrawSymmetry(true);
-				double[] nang = sroi.getSymmetryAngles();
-				setSymmetryAnglesDegrees(-Math.toDegrees(nang[1]), -Math.toDegrees(nang[0]));
-			}
-
 			int imax = handles.size();
 			if (imax != roiHandler.size()) {
 				configureHandles();
@@ -578,6 +662,8 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 					handle.setSelectionPoint(new PrecisionPoint(pnt[0], pnt[1]));
 				}
 			}
+			dirty = true;
+			calcBox(sroi, true);
 		}
 
 		@Override
