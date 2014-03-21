@@ -394,7 +394,6 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
      * Do not call before createPlotPart(...)
      */
 	public void setPlotType(final PlotType mode) {
-		super.setPlotType(mode);
 		if (getDisplay().getThread() == Thread.currentThread()) {
 			switchPlottingType(mode);
 		} else {
@@ -616,15 +615,16 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 				store.setValue(PlottingConstants.GLOBAL_SHOW_ERROR_BARS, true);
 			}
 		}
-		
+		PlotType newType = null;
 		if (plottingMode.is1Dor2D()) {
-		    this.plottingMode = PlotType.XY;
+		    newType = PlotType.XY;
 		} else if (plottingMode.isStacked3D()) {
-			this.plottingMode = PlotType.XY_STACKED_3D;
+			newType = PlotType.XY_STACKED_3D;
 		} else if (plottingMode.isScatter3D()) {
-			this.plottingMode = PlotType.XY_SCATTER_3D;
+			newType = PlotType.XY_SCATTER_3D;
 		}
-		switchPlottingType(plottingMode);
+		if (newType != null)
+			switchPlottingType(newType);
 
 		if (colorMap == null && getColorOption()!=ColorOption.NONE) {
 			if (getColorOption()==ColorOption.BY_NAME) {
@@ -762,12 +762,11 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		return jrealityViewer.createScatter3DTrace(traceName);
 	}
 
-	protected void switchPlottingType( PlotType type ) {
-		
+	protected void switchPlottingType(PlotType type) {
 		PlotType previous = plottingMode;
-		this.plottingMode=type;
-		this.actionBarManager.switchActions(plottingMode);
-		
+		plottingMode = type;
+		actionBarManager.switchActions(plottingMode);
+
 		Control top = null;
 		if (type.is3D()) { 
 			createJRealityUI();
@@ -788,7 +787,8 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			// We auto-hide regions that are different plot type.
 			final Collection<IRegion> regions = getRegions();
 			if (regions!=null) for (IRegion iRegion : regions) {
-				if (iRegion.isUserRegion()) iRegion.setVisible(iRegion.getPlotType()==null || iRegion.getPlotType()==type);
+				if (iRegion.isUserRegion())
+					iRegion.setVisible(iRegion.getPlotType()==null || iRegion.getPlotType()==type);
 			}
 		}
 	}
