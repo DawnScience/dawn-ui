@@ -31,6 +31,8 @@ import org.dawnsci.spectrum.ui.processing.AbstractProcess;
 import org.dawnsci.spectrum.ui.processing.AverageProcess;
 import org.dawnsci.spectrum.ui.processing.DerivativeProcess;
 import org.dawnsci.spectrum.ui.processing.DivisionProcess;
+import org.dawnsci.spectrum.ui.processing.SaveProcess;
+import org.dawnsci.spectrum.ui.processing.SaveTextProcess;
 import org.dawnsci.spectrum.ui.processing.SubtractionProcess;
 import org.dawnsci.spectrum.ui.utils.SpectrumUtils;
 import org.dawnsci.spectrum.ui.wizard.SaveFileWizardPage;
@@ -389,13 +391,25 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 			List<ISpectrumFile> file = SpectrumUtils.getSpectrumFilesList((IStructuredSelection)viewer.getSelection());
 
 			if (!file.isEmpty() && file.get(0) instanceof SpectrumInMemory) {
-				manager.add(new Action("Save...") {
+				manager.add(new Action("Save HDF5...") {
 					public void run() {
 						SpectrumWizard sw = new SpectrumWizard();
 						ISelection selection = viewer.getSelection();
 						List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
 						WizardDialog wd = new WizardDialog(Display.getDefault().getActiveShell(),sw);
-						sw.addPage(new SaveFileWizardPage());
+						sw.addPage(new SaveFileWizardPage(new SaveProcess()));
+						sw.setData(list);
+						wd.open();
+					}
+				});
+				
+				manager.add(new Action("Save text...") {
+					public void run() {
+						SpectrumWizard sw = new SpectrumWizard();
+						ISelection selection = viewer.getSelection();
+						List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
+						WizardDialog wd = new WizardDialog(Display.getDefault().getActiveShell(),sw);
+						sw.addPage(new SaveFileWizardPage(new SaveTextProcess()));
 						sw.setData(list);
 						wd.open();
 					}
@@ -404,9 +418,6 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 				manager.add(new Separator());
 			}
 		}
-		
-		
-		
 		
 		manager.add(removeAction);
 
