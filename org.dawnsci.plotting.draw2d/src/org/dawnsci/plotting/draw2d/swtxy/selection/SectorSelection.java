@@ -607,8 +607,8 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 
 		@Override
 		public Rectangle getBounds() {
-			if (croi != null && dirty)
-				calcBox(croi, false);
+			if (getROI() != null && dirty)
+				calcBox(getROI(), false);
 			dirty = false;
 			Rectangle b = bnds == null ? super.getBounds() : new Rectangle(bnds);
 			if (handles != null)
@@ -633,6 +633,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 			if (redraw) {
 				setBounds(bnds);
 			}
+			dirty = false;
 		}
 
 		/**
