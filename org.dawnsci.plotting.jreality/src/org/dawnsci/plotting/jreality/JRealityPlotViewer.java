@@ -227,9 +227,9 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 * @throws Exception 
 	 */
 	public void removeStackTrace(final ILineStackTrace trace) {
-		StackTrace surface = (StackTrace)trace;
+		StackTrace stack = (StackTrace)trace;
 		removeOldSceneNodes();
-		surface.setActive(false);
+		stack.setActive(false);
 	}
 
 	/**
@@ -435,31 +435,45 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	}
 
 	/**
-	 * 
-	 * @param data, its name is used for the title
-	 * @param axes Axes values for each axis required, there should be three.
+	 * @param axes Axes values for each axis required, there should be three or more.
 	 * @param window - may be null
 	 * @param mode
+	 * @param data, its name is used for the title
 	 * @return true if something plotted
 	 */
 	protected final boolean updatePlot(final List<AxisValues>    axes, 
 						               final IROI             window,
 						               final PlottingMode        mode,
 						               final AbstractDataset...  data) {
-		return plot(axes, window, mode, data);
+		return plot(axes, window, mode, true, data);
 	}
 
 	/**
-	 * 
-	 * @param data, its name is used for the title
-	 * @param axes Axes values for each axis required, there should be three.
+	 * @param axes Axes values for each axis required, there should be three or more.
 	 * @param window - may be null
 	 * @param mode
+	 * @param data, its name is used for the title
 	 * @return true if something plotted
 	 */
 	private final boolean plot(final List<AxisValues>    axes, 
 							   IROI                      window,
 							   final PlottingMode        mode,
+							   final IDataset...         data) {
+		return plot(axes, window, mode, false, data);
+	}
+
+	/**
+	 * @param axes Axes values for each axis required, there should be three or more.
+	 * @param window - may be null
+	 * @param mode
+	 * @param update
+	 * @param rawData, its name is used for the title
+	 * @return true if something plotted
+	 */
+	private final boolean plot(final List<AxisValues>    axes, 
+							   IROI                      window,
+							   final PlottingMode        mode,
+							   final boolean            update,
 							   final IDataset...         rawData) {
 
 		final boolean newMode = setMode(mode, rawData.length);
@@ -526,7 +540,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		 return ((DataSet3DPlot3D) plotter).getDataWindow();
 	}
 
-	private String getName(String name, String defaultName) {
+	private static String getName(String name, String defaultName) {
 		if (name!=null && !"".equals(name)) return name;
 		return defaultName;
 	}
