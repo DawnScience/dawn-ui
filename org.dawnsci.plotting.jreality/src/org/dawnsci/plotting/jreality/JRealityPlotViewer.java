@@ -315,7 +315,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		try {
 			surface.setPlottingSystem(system);
 			graph.setVisible(false);
-			plot(surface.createAxisValues(), getWindow(surface.getWindow()), PlottingMode.SURF2D, surface.getData());
+			plot(surface.createAxisValues(), getWindow(surface, surface.getWindow(), false), PlottingMode.SURF2D, surface.getData());
 			plotter.handleColourCast(surface.createImageData(), graph, surface.getMin().doubleValue(), surface.getMax().doubleValue());
 		} finally {
 			graph.setVisible(true);
@@ -387,7 +387,14 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	}
 
 	protected SurfacePlotROI getWindow(IROI roi) {
-		if (currentMode == PlottingMode.SURF2D && currentTrace instanceof SurfaceTrace) {
+        return getWindow(currentTrace, roi, true);
+	}
+	
+	protected SurfacePlotROI getWindow(ITrace trace, IROI roi, boolean checkMode) {
+		
+		boolean surfaceOk = trace instanceof SurfaceTrace;
+		if (checkMode) surfaceOk = surfaceOk && currentMode == PlottingMode.SURF2D;
+		if (surfaceOk) {
 			SurfacePlotROI surfRoi = null;
 			if (roi instanceof SurfacePlotROI) {
 				surfRoi = (SurfacePlotROI)roi;
