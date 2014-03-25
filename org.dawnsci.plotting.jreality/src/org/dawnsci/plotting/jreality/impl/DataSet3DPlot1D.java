@@ -275,6 +275,11 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 		return null;
 	}
 
+	@Override
+	public List<IDataset> getData() {
+		return sets;
+	}
+
 	protected void refresh() {
 		app.getCurrentViewer().render();
 	}
