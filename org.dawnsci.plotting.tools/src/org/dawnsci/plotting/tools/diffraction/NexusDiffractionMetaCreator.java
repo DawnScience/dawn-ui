@@ -37,7 +37,7 @@ public class NexusDiffractionMetaCreator {
 		
 		IDiffractionMetadata md = nexusDiffraction.getDiffractionMetadataFromNexus(imageSize, null, null, xyPixelSize);
 		
-		if (!nexusDiffraction.anyValuesRead()) {
+		if (md != null && !nexusDiffraction.anyValuesRead()) {
 			md = new DiffractionMetadata(nexusDiffraction.getFilePath(), bean.getDetectorProperties(), diffcrys);
 			Collection<Serializable> col = new ArrayList<Serializable>();
 			col.add(bean.getDiffractionDetector());
