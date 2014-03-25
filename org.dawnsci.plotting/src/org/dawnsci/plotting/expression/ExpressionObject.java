@@ -176,6 +176,17 @@ class ExpressionObject implements IExpressionObject {
 			return false;
 		}
 	}
+	
+	/**
+	 * Just gives a lazy the same size as one of the 
+	 */
+	@Override
+	public ILazyDataset getCachedLazyDataSet() {
+		
+		if (lazySet!=null&&lazySet.get()!=null) return lazySet.get();
+		if (dataSet!=null&&dataSet.get()!=null) return dataSet.get();
+        return null;
+	}
 	/**
 	 * Just gives a lazy the same size as one of the 
 	 */
