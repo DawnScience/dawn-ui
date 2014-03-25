@@ -116,8 +116,12 @@ class ExpressionObject implements IExpressionObject {
 		return expressionString!=null ? expressionString : "";
 	}
 	
+	private String validationReason;
+	
 	public boolean isValid(IMonitor monitor) {
 		try {
+			validationReason = null;
+			
 			if (dataSet!=null) return true;
 			if (lazySet!=null) return true;
 			
@@ -130,9 +134,15 @@ class ExpressionObject implements IExpressionObject {
 		    	if (!provider.isVariableName(key, monitor)) return false;
 			}
 			return true;
+			
 		} catch (Exception ne) {
+			validationReason = ne.getMessage();
 			return false;
 		}
+	}
+	
+	public String getInvalidReason() {
+		return validationReason;
 	}
 	
 	public List<String> getInvalidVariables(IMonitor monitor) {
