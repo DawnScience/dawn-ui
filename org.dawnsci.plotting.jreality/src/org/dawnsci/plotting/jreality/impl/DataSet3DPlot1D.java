@@ -2602,11 +2602,10 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 		if (numHistory == 0)
 			xAxes.clear();
 		else
-			for (int i = axes.size() - 1; i >= numHistory; i--)
+			for (int i = xAxes.size() - 1; i >= numHistory; i--)
 				xAxes.remove(i);
 
-		for (int i = 0, imax = axes.size(); i < imax; i++)
-			xAxes.add(axes.get(i));
+		xAxes.addAll(axes);
 	}
 
 	public void set2ndXAxisValues(AxisValues secondAxis) {
@@ -2619,14 +2618,10 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 	
 	@Override
 	public void setXAxisValues(AxisValues axis, int numOfDataSets) {
-		if (xAxes.size() > 0) {
-			for (int i = 0, imax = Math.min(numOfDataSets, xAxes.size()); i < imax; i++)
-				xAxes.set(i, axis);
-			for (int i = xAxes.size(); i < numOfDataSets; i++)
-				xAxes.add(i, axis);
-		} else
-			for (int i = 0; i < numOfDataSets; i++)
-				xAxes.add(i, axis);
+		for (int i = 0, imax = Math.min(numOfDataSets, xAxes.size()); i < imax; i++)
+			xAxes.set(i, axis);
+		for (int i = xAxes.size(); i < numOfDataSets; i++)
+			xAxes.add(axis);
 	}
 
 	/**
@@ -2877,6 +2872,9 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 			xTicks.removeChild(xLabels);
 		if (yTicks != null)
 			yTicks.removeChild(yLabels);
+
+		sets = null; // remove datasets and axes too
+		xAxes.clear();
 	}
 
 	@Override
