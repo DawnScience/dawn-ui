@@ -352,7 +352,7 @@
             icon="icons/cutter_line.png"
             id="org.dawnsci.plotting.tools.plotting_tool_hyper2d"
             label="Hyper2d"
-            visible="true">
+            visible="false">
       </plotting_tool_page>
       <plotting_tool_page
             category="org.dawnsci.plotting.tools.plotting_tool_category.fitting"
