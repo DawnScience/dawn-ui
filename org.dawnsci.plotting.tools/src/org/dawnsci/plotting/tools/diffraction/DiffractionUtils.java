@@ -138,7 +138,7 @@ public class DiffractionUtils {
 		
 		// if there is no meta or is not nexus or IDiff create default IDiff and put it in the dataset
 		mdImage = DiffractionDefaultMetadata.getDiffractionMetadata(filePath, shape);
-		image.setMetadata(mdImage);
+		//image.setMetadata(mdImage);
 		if (statusText != null && statusText[0] == null) {
 			statusText[0] = "No metadata found. Values loaded from preferences:";
 		}
