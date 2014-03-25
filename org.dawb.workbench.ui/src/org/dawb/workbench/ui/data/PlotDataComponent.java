@@ -78,6 +78,7 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -500,7 +501,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 
 	private void readExpressions() throws Exception {
 		
-		final String cachePath = DawbUtils.getDawbHome()+getFileName()+".properties";
+		final String cachePath = DawbUtils.getDawnHome()+getFileName()+".properties";
 		Properties props = PropUtils.loadProperties(cachePath);
 		if (props!=null) {
 			try {
@@ -532,7 +533,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				props.put(check.getMementoKey(), check.getMemento());
 			}
 			// Save properties to workspace.
-			final String cachePath = DawbUtils.getDawbHome()+getFileName()+".properties";
+			final String cachePath = DawbUtils.getDawnHome()+getFileName()+".properties";
 			PropUtils.storeProperties(props, cachePath);
 			
 		} catch (Exception e) {
@@ -1439,9 +1440,10 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 						                      "Expression '"+check.getName()+"' is not valid.\n\n"+
 						                       names+" cannot be resolved.");
 			} else {
-				MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Expression '"+check.getName()+"' is not valid.",
-	                      "Expression '"+check.getName()+"' is not valid.");
-			}
+				ErrorDialog.openError(Display.getDefault().getActiveShell(), "Expression '"+check.getName()+"' is not valid.", 
+						"Expression '"+check.getName()+"' is not valid.", 
+						new Status(IStatus.ERROR, "org.dawb.workbench.ui", check.getExpression().getInvalidReason()));
+				}
 			return true;
 		}
 		
