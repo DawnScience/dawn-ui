@@ -425,6 +425,7 @@ class BoxSelection extends AbstractSelectionRegion {
 			if (redraw) {
 				setBounds(bnds);
 			}
+			dirty = false;
 		}
 
 		@Override
@@ -484,8 +485,8 @@ class BoxSelection extends AbstractSelectionRegion {
 
 		@Override
 		public Rectangle getBounds() {
-			if (croi != null && dirty)
-				calcBox(croi, false);
+			if (getROI() != null && dirty)
+				calcBox(getROI(), false);
 			dirty = false;
 			Rectangle b = bnds == null ? super.getBounds() : new Rectangle(bnds);
 			if (handles != null) {

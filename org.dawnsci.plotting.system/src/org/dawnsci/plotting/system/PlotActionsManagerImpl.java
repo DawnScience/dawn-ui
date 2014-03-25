@@ -39,6 +39,8 @@ import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.nebula.visualization.xygraph.undo.ZoomType;
@@ -221,6 +223,19 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 		if (action!=null) man.add(((ActionContributionItem)action).getAction());
 	}
 
+	protected void selectedPaletteChanged(final String paletteName) {
+		final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
+		final PaletteData data = pservice.getDirectPaletteData(paletteName);
+		final Collection<ITrace> traces = system.getTraces();
+		if (traces!=null) for (final ITrace trace: traces) {
+			if (trace instanceof IPaletteTrace) {
+				final IPaletteTrace paletteTrace = (IPaletteTrace) trace;
+				paletteTrace.setPaletteData(data);
+				paletteTrace.setPaletteName(paletteName);
+			}
+		}
+	}
+
 	private IMenuListener paletteMenuListener;
 
 	protected void createPaletteActions() {
@@ -252,15 +267,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 						}
 						// set the main colour scheme preference used in the colour mapping tool
 						PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.COLOUR_SCHEME, paletteName);
-						final PaletteData data = pservice.getDirectPaletteData(paletteName);
-						final Collection<ITrace> traces = system.getTraces();
-						if (traces!=null) for (ITrace trace: traces) {
-							if (trace instanceof IPaletteTrace) {
-								IPaletteTrace paletteTrace = (IPaletteTrace) trace;
-								paletteTrace.setPaletteData(data);
-								paletteTrace.setPaletteName(paletteName);
-							}
-						}
+						selectedPaletteChanged(paletteName);
 					} catch (Exception ne) {
 						logger.error("Cannot create palette data!", ne);
 					}
@@ -295,6 +302,22 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 			}
 		};
 		getActionBars().getMenuManager().addMenuListener(paletteMenuListener);
+		PlottingSystemActivator.getPlottingPreferenceStore()
+				.addPropertyChangeListener(new IPropertyChangeListener() {
+					@Override
+					public void propertyChange(final PropertyChangeEvent event) {
+						if (isInterestedProperty(event)) {
+							final Object newValue = event.getNewValue();
+							if (newValue instanceof String)
+								selectedPaletteChanged((String) newValue);
+						}
+					}
+					private boolean isInterestedProperty(
+							final PropertyChangeEvent event) {
+						final String propName = event.getProperty();
+						return PlottingConstants.COLOUR_SCHEME.equals(propName);
+					}
+		});
 	}
 
 	public void dispose() {

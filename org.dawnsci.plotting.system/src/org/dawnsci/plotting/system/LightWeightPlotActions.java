@@ -561,7 +561,7 @@ class LightWeightPlotActions {
 	protected void createAspectHistoAction(final XYRegionGraph xyGraph) {
 
 		
-		final Action histo = new Action("Rehistogram on zoom in or zoom out (F5)", IAction.AS_PUSH_BUTTON) {
+		final Action histo = new Action("Rehistogram (F5)", IAction.AS_PUSH_BUTTON) {
 			
 		    public void run() {		    	
 		    	PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.HISTO, isChecked());
