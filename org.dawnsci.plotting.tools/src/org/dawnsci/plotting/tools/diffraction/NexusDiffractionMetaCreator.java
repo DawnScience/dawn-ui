@@ -35,7 +35,14 @@ public class NexusDiffractionMetaCreator {
 		
 		double[] xyPixelSize = DiffractionDetectorHelper.getXYPixelSizeMM(imageSize);
 		
-		IDiffractionMetadata md = nexusDiffraction.getDiffractionMetadataFromNexus(imageSize, bean.getDetectorProperties(), diffcrys, xyPixelSize);
+		IDiffractionMetadata md = nexusDiffraction.getDiffractionMetadataFromNexus(imageSize, null, null, xyPixelSize);
+		
+		if (md != null && !nexusDiffraction.anyValuesRead()) {
+			md = new DiffractionMetadata(nexusDiffraction.getFilePath(), bean.getDetectorProperties(), diffcrys);
+			Collection<Serializable> col = new ArrayList<Serializable>();
+			col.add(bean.getDiffractionDetector());
+			((DiffractionMetadata)md).setUserObjects(col);
+		}
 		
 		if (!nexusDiffraction.isDetectorRead()) {
 			if (md instanceof DiffractionMetadata) {

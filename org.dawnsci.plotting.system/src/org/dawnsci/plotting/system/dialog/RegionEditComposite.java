@@ -442,7 +442,8 @@ public class RegionEditComposite extends Composite {
 	public void applyChanges() {
 //		this.roiViewer.cancelEditing();
 		AbstractSelectionRegion region = getEditingRegion();
-		region.repaint();
+		if (region.isVisible())
+			region.repaint();
 	}
 	private static final Logger logger = LoggerFactory.getLogger(RegionEditComposite.class);
 	public void cancelChanges() {

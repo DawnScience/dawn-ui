@@ -9,22 +9,25 @@ import org.dawb.common.services.IPersistentFile;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.wizard.ResourceChoosePage;
 import org.dawnsci.spectrum.ui.file.IContain1DData;
+import org.dawnsci.spectrum.ui.processing.AbstractProcess;
+import org.dawnsci.spectrum.ui.processing.AbstractSaveProcess;
 import org.dawnsci.spectrum.ui.processing.SaveProcess;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 public class SaveFileWizardPage extends ResourceChoosePage implements ISpectrumWizardPage{
 	
-	SaveProcess process;
+	AbstractSaveProcess process;
 	
-	public SaveFileWizardPage() {
+	public SaveFileWizardPage(AbstractSaveProcess process) {
 		super("Save file wizard", "Save processed data to file", null);
 		setDirectory(false);
 		setOverwriteVisible(false);
 		setNewFile(true);
 		setPathEditable(true);
     	setFileLabel("Output file");
-    	process = new SaveProcess();
+    	this.process = process;
+    	setPath(System.getProperty("user.home") +File.separator+ process.getDefaultName());
 	}
 	
 	

@@ -97,7 +97,7 @@ public class GridSelection extends BoxSelection implements IGridSelection{
 
 		IROI croi = getROI();
 		if (croi != null && croi instanceof GridROI) {
-			GridROI groi = (GridROI)createROI(false);
+			GridROI groi = (GridROI) croi;
 
 			if (groi.isMidPointOn()) {
 				double[][] points = getGridPoints(groi);
@@ -120,7 +120,6 @@ public class GridSelection extends BoxSelection implements IGridSelection{
 	 * @return [xpoints][ypoints]
 	 */
 	protected void drawGridLines(GridROI groi, Graphics gc) {
-
 		gc.pushState();
 		gc.setAlpha(255);
 		gc.setForegroundColor(gridColor);

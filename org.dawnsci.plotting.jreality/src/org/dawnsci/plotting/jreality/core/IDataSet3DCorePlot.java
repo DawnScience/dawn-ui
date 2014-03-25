@@ -318,7 +318,11 @@ public interface IDataSet3DCorePlot {
 	 * @return list of AxisValues or null if non-existent
 	 */	
 	public List<AxisValues> getAxisValues();
-	
+
+	/**
+	 * @return list of plotted data
+	 */	
+	public List<IDataset> getData();
 	
 	public void toggleErrorBars(boolean xcoord, boolean ycoord, boolean zcoord);
 	

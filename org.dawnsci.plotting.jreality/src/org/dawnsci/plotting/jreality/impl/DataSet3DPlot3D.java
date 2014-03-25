@@ -181,6 +181,11 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 		tickFactory = new TickFactory(yLabelMode);
 	}
 	
+	@Override
+	public List<IDataset> getData() {
+		return null;
+	}
+
 	private IndexedLineSet createBBoxGeometry() {
 		IndexedLineSetFactory factory = new IndexedLineSetFactory();
 		

@@ -12,17 +12,7 @@ import org.dawnsci.spectrum.ui.file.IContain1DData;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
-public class SaveProcess extends AbstractProcess {
-	
-	String path;
-	
-	public void setPath(String path) {
-		this.path = path;
-	}
-	
-	public String getPath() {
-		return path;
-	}
+public class SaveProcess extends AbstractSaveProcess {
 
 	@Override
 	public List<IContain1DData> process(List<IContain1DData> list) {
@@ -57,6 +47,11 @@ public class SaveProcess extends AbstractProcess {
 	protected String getAppendingName() {
 		//Should never be called
 		return "_save";
+	}
+
+	@Override
+	public String getDefaultName() {
+		return "traceprocessed.hdf5";
 	}
 
 }

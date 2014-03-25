@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.List;
 
 import javax.measure.unit.NonSI;
-import javax.measure.unit.SI;
 import javax.measure.unit.UnitFormat;
 
 import ncsa.hdf.object.Dataset;
@@ -18,9 +17,7 @@ import org.dawb.common.services.IPersistentFile;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
-import org.dawb.common.ui.plot.tools.IDataReductionToolPage.DataReductionInfo;
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawb.common.ui.wizard.persistence.PersistenceImportWizard;
 import org.dawb.hdf5.IHierarchicalDataFile;
 import org.dawb.hdf5.Nexus;
 import org.dawb.hdf5.nexus.NexusUtils;
@@ -40,13 +37,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.preference.JFacePreferences;
-import org.eclipse.jface.resource.ColorRegistry;
-import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.wizard.IWizard;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -347,7 +338,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		//Imported metadata first
 		if (importedMeta != null) {
 			DetectorProperties d = importedMeta.getDetector2DProperties();
-			if(d.getPx() != ds.getShape()[0] || d.getPy() != ds.getShape()[1])  {
+			if(d.getPx() != ds.getShape()[1] || d.getPy() != ds.getShape()[0])  {
 				statusMessage.setText("Data shape not compatible with current metadata!!!");
 				statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
 				return;
@@ -355,7 +346,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 				statusMessage.setText("Using imported metadata");
 				statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
 			}
-			if (fullImageJob == null) fullImageJob = new PowderIntegrationJob(metadata, system);
+			if (fullImageJob == null) fullImageJob = new PowderIntegrationJob(importedMeta, system);
 		} else {
 			
 			IDiffractionMetadata m = getUpdatedMetadata(ds, statusString);
@@ -397,7 +388,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		//check class metadata ok
 		if (metadata != null) {
 			DetectorProperties d = metadata.getDetector2DProperties();
-			if(d.getPx() != ds.getShape()[0] || d.getPy() != ds.getShape()[1])  {
+			if(d.getPx() != ds.getShape()[1] || d.getPy() != ds.getShape()[0])  {
 				metadata = null;
 				statusMessage.setText("Data shape not compatible with current metadata");
 				statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));

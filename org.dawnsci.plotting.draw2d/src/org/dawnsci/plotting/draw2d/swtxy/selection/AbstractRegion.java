@@ -131,11 +131,13 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 		} else {
 			setName(name);
 		}
-		try {
-			regionEventsActive = false;
-			updateRegion();
-		} finally {
-			regionEventsActive = true;
+		if (isVisible()) {
+			try {
+				regionEventsActive = false;
+				updateRegion();
+			} finally {
+				regionEventsActive = true;
+			}
 		}
 		fireROIChanged(this.roi);
 	}
