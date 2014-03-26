@@ -164,6 +164,7 @@ public class DiffractionDataManager {
 			data.image = image;
 			String[] statusString = new String[1];
 			data.md = DiffractionUtils.getDiffractionMetadata(image, path, service, statusString);
+			data.image.setMetadata(data.md);
 			model.add(data);
 			
 			fireDiffractionDataListeners(new DiffractionDataChanged(data));

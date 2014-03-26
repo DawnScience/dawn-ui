@@ -1,5 +1,6 @@
 package org.dawnsci.plotting.jreality;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -56,19 +57,34 @@ public class StackTrace extends PlotterTrace implements ILineStackTrace {
 	
 	@Override
 	protected List<AxisValues> createAxisValues() {
+		ArrayList<AxisValues> values = new ArrayList<AxisValues>();
+
+		int a = 0;
+		int nAxes;
+		if (axes == null) {
+			nAxes = 0;
+			values.add(new AxisValues(getLabel(a++), null));
+		} else {
+			nAxes = axes.size();
+			String l = getLabel(a++);
+			for (int i = 0; i < (nAxes - 2); i++) {
+				values.add(new AxisValues(l, (AbstractDataset) axes.get(i)));
+			}
+			
+		}
+		values.add(new AxisValues(getLabel(a++), null));
 		
-		final AxisValues xAxis = new AxisValues(getLabel(0), axes!=null?(AbstractDataset)axes.get(0):null);
-		final AxisValues yAxis = new AxisValues(getLabel(1), axes!=null?(AbstractDataset)axes.get(1):null);
 		final AxisValues zAxis;
 		if (getWindow()==null || !(getWindow() instanceof LinearROI)) {
-		    zAxis = new AxisValues(getLabel(2), axes!=null?(AbstractDataset)axes.get(2):null);
+		    zAxis = new AxisValues(getLabel(a), axes!=null?(AbstractDataset)axes.get(nAxes-1):null);
 		} else {
 			final int x1 = window.getIntPoint()[0];
-			final int x2 = (int)Math.round(((LinearROI)window).getEndPoint()[0]);
+			final int x2 = (int)Math.ceil(((LinearROI)window).getEndPoint()[0]);
 			final int len = x2-x1;
-			zAxis = new AxisValues(getLabel(2), AbstractDataset.arange(len, AbstractDataset.INT32));
+			zAxis = new AxisValues(getLabel(a), AbstractDataset.arange(len, AbstractDataset.INT32));
 		}
-		return Arrays.asList(xAxis, yAxis, zAxis);
+		values.add(zAxis);
+		return values;
 	}
 
 	@Override
@@ -96,6 +112,7 @@ public class StackTrace extends PlotterTrace implements ILineStackTrace {
 			// It's disposed anyway
 		}
 	}
+
 	@Override
 	public int getRank() {
 		return 1;

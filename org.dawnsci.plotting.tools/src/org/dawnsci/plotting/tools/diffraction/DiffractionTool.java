@@ -355,13 +355,13 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	
 	private IDiffractionMetadata getDiffractionMetaData() {
 		IDataset image = getImageTrace() == null ? null : getImageTrace().getData();
+		if (image == null) return null;
 		IWorkbenchPart part = getPart();
 		String altPath = null;
 		if(part instanceof IEditorPart){
 			altPath = EclipseUtils.getFilePath(((IEditorPart) part).getEditorInput());
 		} else if (part instanceof IViewPart){
 			try {
-				if (image == null) return null;
 				IMetaData md = image.getMetadata();
 				if(md != null)
 					altPath = md.getFilePath();

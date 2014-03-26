@@ -227,9 +227,9 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	 * @throws Exception 
 	 */
 	public void removeStackTrace(final ILineStackTrace trace) {
-		StackTrace surface = (StackTrace)trace;
+		StackTrace stack = (StackTrace)trace;
 		removeOldSceneNodes();
-		surface.setActive(false);
+		stack.setActive(false);
 	}
 
 	/**
@@ -435,32 +435,52 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	}
 
 	/**
-	 * 
-	 * @param data, its name is used for the title
-	 * @param axes Axes values for each axis required, there should be three.
+	 * @param axes Axes values for each axis required, there should be three or more.
 	 * @param window - may be null
 	 * @param mode
+	 * @param data, its name is used for the title
 	 * @return true if something plotted
 	 */
 	protected final boolean updatePlot(final List<AxisValues>    axes, 
 						               final IROI             window,
 						               final PlottingMode        mode,
 						               final AbstractDataset...  data) {
-		return plot(axes, window, mode, data);
+		return plot(axes, window, mode, true, data);
 	}
 
 	/**
-	 * 
-	 * @param data, its name is used for the title
-	 * @param axes Axes values for each axis required, there should be three.
+	 * @param axes Axes values for each axis required, there should be three or more.
 	 * @param window - may be null
 	 * @param mode
+	 * @param data, its name is used for the title
 	 * @return true if something plotted
 	 */
 	private final boolean plot(final List<AxisValues>    axes, 
 							   IROI                      window,
 							   final PlottingMode        mode,
+							   final IDataset...         data) {
+		return plot(axes, window, mode, false, data);
+	}
+
+	/**
+	 * @param axes Axes values for each axis required, there should be three or more.
+	 * @param window - may be null
+	 * @param mode
+	 * @param update
+	 * @param rawData, its name is used for the title
+	 * @return true if something plotted
+	 */
+	private final boolean plot(final List<AxisValues>    axes, 
+							   IROI                      window,
+							   final PlottingMode        mode,
+							   final boolean            update,
 							   final IDataset...         rawData) {
+
+		int nAxes = axes.size();
+		if (nAxes < 3) {
+			logger.error("There should be at least three (possibly null) axes supplied");
+			throw new IllegalArgumentException("There should be at least three (possibly null) axes supplied");
+		}
 
 		final boolean newMode = setMode(mode, rawData.length);
 
@@ -468,7 +488,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 
 		if (window!=null && window instanceof LinearROI && data.size()>1) {
 			final int x1 = window.getIntPoint()[0];
-			final int x2 = (int)Math.round(((LinearROI)window).getEndPoint()[0]);
+			final int x2 = (int)Math.ceil(((LinearROI)window).getEndPoint()[0]);
 			try {
 				data = data.subList(x1, x2);
 			} catch (Throwable ignored) {
@@ -476,15 +496,52 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			}
 		}
 
-		final AxisValues xAxis = axes.get(0);
-		final AxisValues yAxis = axes.get(1);
-		final AxisValues zAxis = axes.get(2);
+		final List<AxisValues> xAxes;
+		final AxisValues yAxis;
+		final AxisValues zAxis;
+		int nData = data.size();
+		if (nAxes > 3) {
+			int excessAxes = nAxes - 2 - nData;
+			if (excessAxes < 0) {
+				logger.warn("Insufficient x axes supplied, ignoring all but last two");
+				xAxes = new ArrayList<AxisValues>();
+				xAxes.add(null);
+			} else {
+				if (excessAxes > 0) {
+					logger.warn("Excess x axes supplied, ignoring them");
+				}
+				xAxes = axes.subList(0, nData);
+			}
+			yAxis = axes.get(nAxes - 2);
+			zAxis = axes.get(nAxes - 1);
+		} else {
+			xAxes = new ArrayList<AxisValues>();
+			xAxes.add(axes.get(0));
+			yAxis = axes.get(1);
+			zAxis = axes.get(2);
+		}
 
-		setAxisModes((xAxis != null && xAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR),
-				     (yAxis != null && yAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR),
-				     (zAxis != null && zAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR));
+		boolean xModeIsCustom = false;
+		for (AxisValues a : xAxes) {
+			if (a != null && a.isData()) {
+				xModeIsCustom = true;
+				break;
+			}
+		}
+		setAxisModes(xModeIsCustom ? AxisMode.CUSTOM : AxisMode.LINEAR,
+				yAxis != null && yAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR,
+				zAxis != null && zAxis.isData() ? AxisMode.CUSTOM : AxisMode.LINEAR);
 
-		if (xAxis.isData()) plotter.setXAxisValues(xAxis, 1);
+		List<IDataset> old = plotter.getData();
+		int oSize = old == null ? 0 : old.size();
+		if (xModeIsCustom) {
+			if (plotter instanceof DataSet3DPlot1D) {
+				int keep = !newMode && !update ? oSize : 0;
+				((DataSet3DPlot1D) plotter).setXAxisValues(xAxes, keep);
+			} else {
+				plotter.setXAxisValues(xAxes.get(0), oSize);
+			}
+		}
 		if (yAxis.isData()) plotter.setYAxisValues(yAxis);
 		if (zAxis.isData()) plotter.setZAxisValues(zAxis);
 
@@ -509,8 +566,17 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			if (mode == PlottingMode.SURF2D && window instanceof SurfacePlotROI && !window.equals(getDataWindow())) {
 				((DataSet3DPlot3D) plotter).setDataWindow(data, (SurfacePlotROI)window, null);
 			}
+			if (!newMode && !update) {
+				if (oSize > 0) {
+					List<IDataset> datasets = new ArrayList<IDataset>();
+					datasets.addAll(old);
+					datasets.addAll(data);
+					data = datasets;
+				}
+			}
 			update(newMode, data);
-			plotter.setXAxisLabel(getName(xAxis.getName(), "X-Axis"));
+			String xName = xAxes.get(0) == null ? null : xAxes.get(0).getName();
+			plotter.setXAxisLabel(getName(xName, "X-Axis"));
 			plotter.setYAxisLabel(getName(yAxis.getName(), "Y-Axis"));
 			plotter.setZAxisLabel(getName(zAxis.getName(), "Z-Axis"));
 
@@ -526,7 +592,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		 return ((DataSet3DPlot3D) plotter).getDataWindow();
 	}
 
-	private String getName(String name, String defaultName) {
+	private static String getName(String name, String defaultName) {
 		if (name!=null && !"".equals(name)) return name;
 		return defaultName;
 	}
