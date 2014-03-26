@@ -63,7 +63,7 @@ public class DataSet3DPlot1DStack extends DataSet3DPlot1D {
 	private DefaultTextShader dtsZAxisLabel;
 	private DefaultTextShader dtsZTicks;
 	private String zAxisLabelStr = null;
-	private TickFormatting zLabelMode = TickFormatting.roundAndChopMode;
+	private TickFormatting zLabelMode = null;
 	private final static double TICKWIDTH = 0.25;
 	private final static double INITROTATION = -0.25 * Math.PI;
 	private double zOffset;
@@ -382,10 +382,27 @@ public class DataSet3DPlot1DStack extends DataSet3DPlot1D {
 		}
 		return null;
 	}
-	
+
+	private boolean isNotAnInteger(double x) {
+		double pos = Math.abs(x);
+		return pos > Math.floor(pos);
+	}
+
+	private TickFormatting getTickFormatting() {
+		if (zLabelMode != null) {
+			return zLabelMode;
+		}
+		if (zAxisValues.isData()) {
+			if (isNotAnInteger(zAxisValues.getValue(0)) && isNotAnInteger(zAxisValues.distBetween(0, 1))) {
+				return TickFormatting.plainMode;
+			}
+		}
+		return TickFormatting.roundAndChopMode;
+	}
+
 	private PointSet createZLabelsGeometry()
 	{
-		tickFactory.setTickMode(zLabelMode);
+		tickFactory.setTickMode(getTickFormatting());
 		
 		LinkedList<Tick> ticks = 
 			tickFactory.generateTicks(Math.min(15, zAxisValues.size()), zAxisValues.getMinValue(), zAxisValues.getMaxValue(), (short) 2, false);
@@ -419,7 +436,7 @@ public class DataSet3DPlot1DStack extends DataSet3DPlot1D {
 	
 	private IndexedLineSet createZTicksGeometry()
 	{
-		tickFactory.setTickMode(zLabelMode);
+		tickFactory.setTickMode(getTickFormatting());
 		LinkedList<Tick> ticks = 
 			tickFactory.generateTicks(Math.min(15, zAxisValues.size()), zAxisValues.getMinValue(), zAxisValues.getMaxValue(), (short) 2, false);
 
