@@ -33,7 +33,7 @@ class PlotterTrace {
 		window=null;
 	}
 	
-	protected AbstractDataset[] getStack(IDataset... s) {
+	protected static AbstractDataset[] getStack(IDataset... s) {
 		AbstractDataset[] stack = new AbstractDataset[s.length];
 		for (int i = 0; i < s.length; i++) stack[i] = DatasetUtils.convertToAbstractDataset(s[i]);
 		return stack;

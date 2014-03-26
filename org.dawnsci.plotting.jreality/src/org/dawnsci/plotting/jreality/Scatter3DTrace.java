@@ -29,6 +29,7 @@ public class Scatter3DTrace extends PlotterTrace implements IScatter3DTrace {
 		return scatter;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void setData(IDataset data, List<? extends IDataset> axes) {
 		if (axes!=null && axes.size()==2) {
@@ -51,13 +52,13 @@ public class Scatter3DTrace extends PlotterTrace implements IScatter3DTrace {
 		final AxisValues xAxis = new AxisValues(getLabel(0), axes!=null?(AbstractDataset)axes.get(0):null);
 		final AxisValues yAxis = new AxisValues(getLabel(1), axes!=null?(AbstractDataset)axes.get(1):null);
 		final AxisValues zAxis;
-		if (getWindow()==null || !(getWindow() instanceof LinearROI)) {
-			zAxis = new AxisValues(getLabel(2), axes!=null?(AbstractDataset)axes.get(2):null);
-		} else {
+		if (window instanceof LinearROI) {
 			final int x1 = window.getIntPoint()[0];
-			final int x2 = (int)Math.round(((LinearROI)window).getEndPoint()[0]);
+			final int x2 = (int)Math.round(((LinearROI) window).getEndPoint()[0]);
 			final int len = x2-x1;
 			zAxis = new AxisValues(getLabel(2), AbstractDataset.arange(len, AbstractDataset.INT32));
+		} else {
+			zAxis = new AxisValues(getLabel(2), axes!=null?(AbstractDataset)axes.get(2):null);
 		}
 		return Arrays.asList(xAxis, yAxis, zAxis);
 	}
