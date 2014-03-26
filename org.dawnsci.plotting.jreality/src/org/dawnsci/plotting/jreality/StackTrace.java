@@ -1,5 +1,6 @@
 package org.dawnsci.plotting.jreality;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import org.eclipse.core.runtime.Status;
 
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
@@ -56,19 +58,40 @@ public class StackTrace extends PlotterTrace implements ILineStackTrace {
 	
 	@Override
 	protected List<AxisValues> createAxisValues() {
-		
-		final AxisValues xAxis = new AxisValues(getLabel(0), axes!=null?(AbstractDataset)axes.get(0):null);
-		final AxisValues yAxis = new AxisValues(getLabel(1), axes!=null?(AbstractDataset)axes.get(1):null);
-		final AxisValues zAxis;
-		if (getWindow()==null || !(getWindow() instanceof LinearROI)) {
-		    zAxis = new AxisValues(getLabel(2), axes!=null?(AbstractDataset)axes.get(2):null);
+		ArrayList<AxisValues> values = new ArrayList<AxisValues>();
+
+		int a = 0;
+		int nAxes;
+		final IDataset y, z;
+		if (axes == null) {
+			nAxes = 0;
+			values.add(new AxisValues(getLabel(a++), null));
+			y = null;
+			z = null;
 		} else {
-			final int x1 = window.getIntPoint()[0];
-			final int x2 = (int)Math.round(((LinearROI)window).getEndPoint()[0]);
-			final int len = x2-x1;
-			zAxis = new AxisValues(getLabel(2), AbstractDataset.arange(len, AbstractDataset.INT32));
+			nAxes = axes.size();
+			String l = getLabel(a++);
+			for (int i = 0; i < (nAxes - 2); i++) {
+				values.add(new AxisValues(l, DatasetUtils.convertToAbstractDataset(axes.get(i))));
+			}
+			y = axes.get(nAxes - 2);
+			z = axes.get(nAxes - 1);
 		}
-		return Arrays.asList(xAxis, yAxis, zAxis);
+		values.add(new AxisValues(getLabel(a++), DatasetUtils.convertToAbstractDataset(y)));
+
+		final AxisValues zAxis;
+		if (z != null) {
+			zAxis = new AxisValues(getLabel(a), DatasetUtils.convertToAbstractDataset(z));
+		} else if (window instanceof LinearROI) {
+			final int x1 = window.getIntPoint()[0];
+			final int x2 = (int) Math.ceil(((LinearROI) window).getEndPoint()[0]);
+			final int len = x2 - x1;
+			zAxis = new AxisValues(getLabel(a), AbstractDataset.arange(len, AbstractDataset.INT32));
+		} else {
+			zAxis = new AxisValues(getLabel(a), null);
+		}
+		values.add(zAxis);
+		return values;
 	}
 
 	@Override
@@ -96,6 +119,7 @@ public class StackTrace extends PlotterTrace implements ILineStackTrace {
 			// It's disposed anyway
 		}
 	}
+
 	@Override
 	public int getRank() {
 		return 1;

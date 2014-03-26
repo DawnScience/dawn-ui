@@ -14,7 +14,6 @@ import org.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
 import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 /**
  * Interface used for the plotting system to plot images.

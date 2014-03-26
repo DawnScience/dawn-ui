@@ -8,6 +8,7 @@ import org.dawnsci.plotting.api.trace.TraceEvent;
 
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
@@ -32,9 +33,9 @@ class PlotterTrace {
 		window=null;
 	}
 	
-	protected AbstractDataset[] getStack(IDataset... s) {
+	protected static AbstractDataset[] getStack(IDataset... s) {
 		AbstractDataset[] stack = new AbstractDataset[s.length];
-		for (int i = 0; i < s.length; i++) stack[i] = (AbstractDataset)s[i];
+		for (int i = 0; i < s.length; i++) stack[i] = DatasetUtils.convertToAbstractDataset(s[i]);
 		return stack;
 	}
 

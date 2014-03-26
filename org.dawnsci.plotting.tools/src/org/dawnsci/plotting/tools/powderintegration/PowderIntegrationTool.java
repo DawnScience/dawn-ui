@@ -346,7 +346,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 				statusMessage.setText("Using imported metadata");
 				statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
 			}
-			if (fullImageJob == null) fullImageJob = new PowderIntegrationJob(metadata, system);
+			if (fullImageJob == null) fullImageJob = new PowderIntegrationJob(importedMeta, system);
 		} else {
 			
 			IDiffractionMetadata m = getUpdatedMetadata(ds, statusString);

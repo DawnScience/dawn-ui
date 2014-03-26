@@ -15,9 +15,11 @@ import org.eclipse.ui.PlatformUI;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
 
+
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
+import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 /**
  * A class for holding surface trace data.
@@ -35,6 +37,7 @@ public class SurfaceTrace extends Image3DTrace implements ISurfaceTrace{
 	public SurfaceTrace(JRealityPlotViewer plotter, String name) {
 		super(plotter, name);
 		plotType = PlottingMode.SURF2D;
+		this.window = new RectangularROI(100, 100, 400, 400, 0);
 	}
 
 	/**

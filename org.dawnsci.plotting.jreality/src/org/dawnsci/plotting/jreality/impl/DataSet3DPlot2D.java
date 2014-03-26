@@ -314,6 +314,11 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 		return null;
 	}
 
+	@Override
+	public List<IDataset> getData() {
+		return null;
+	}
+
 	private void refresh()
 	{
 		try {
