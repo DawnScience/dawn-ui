@@ -534,12 +534,20 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 
 		List<IDataset> old = plotter.getData();
 		int oSize = old == null ? 0 : old.size();
+		final boolean keepOldData = !newMode && !update;
+		if (keepOldData) {
+			if (oSize > 0) {
+				List<IDataset> datasets = new ArrayList<IDataset>();
+				datasets.addAll(old);
+				datasets.addAll(data);
+				data = datasets;
+			}
+		}
 		if (xModeIsCustom) {
 			if (plotter instanceof DataSet3DPlot1D) {
-				int keep = !newMode && !update ? oSize : 0;
-				((DataSet3DPlot1D) plotter).setXAxisValues(xAxes, keep);
+				((DataSet3DPlot1D) plotter).setXAxisValues(xAxes, keepOldData ? oSize : 0);
 			} else {
-				plotter.setXAxisValues(xAxes.get(0), oSize);
+				plotter.setXAxisValues(xAxes.get(0), oSize); // just use first set of values
 			}
 		}
 		if (yAxis.isData()) plotter.setYAxisValues(yAxis);
@@ -565,14 +573,6 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			}
 			if (mode == PlottingMode.SURF2D && window instanceof SurfacePlotROI && !window.equals(getDataWindow())) {
 				((DataSet3DPlot3D) plotter).setDataWindow(data, (SurfacePlotROI)window, null);
-			}
-			if (!newMode && !update) {
-				if (oSize > 0) {
-					List<IDataset> datasets = new ArrayList<IDataset>();
-					datasets.addAll(old);
-					datasets.addAll(data);
-					data = datasets;
-				}
 			}
 			update(newMode, data);
 			String xName = xAxes.get(0) == null ? null : xAxes.get(0).getName();
