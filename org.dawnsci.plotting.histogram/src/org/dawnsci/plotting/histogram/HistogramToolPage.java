@@ -437,6 +437,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				if (image!=null) {
 					image.getImageServiceBean().setLogColorScale(btnColourMapLog.getSelection());
 					updateImage(null, true);
+					imagerepaintJob.schedule();
 				}
 			}
 		};
@@ -491,7 +492,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			@Override
 			public IStatus runInUIThread(IProgressMonitor mon) {
-				if (!updatePalette(null, mon, false)) return Status.CANCEL_STATUS;
+				if (!updatePalette(null, mon, true)) return Status.CANCEL_STATUS;
 				return Status.OK_STATUS;
 			}
 		};
@@ -536,6 +537,11 @@ public class HistogramToolPage extends AbstractToolPage {
 			} else {
 				return false;
 			}
+			
+				
+		} catch (Exception e) {
+			logger.warn("Failed to update plot due to an exception", e);
+			return false;
 		}finally {
 			internalEvent--;			
 		}
