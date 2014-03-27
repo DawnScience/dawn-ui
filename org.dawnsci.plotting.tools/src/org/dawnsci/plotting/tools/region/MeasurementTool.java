@@ -186,7 +186,7 @@ public class MeasurementTool extends AbstractRegionTableTool {
 	@Override
 	public void deactivate() {
 		super.deactivate();
-		if (getPlottingSystem()!=null) try {
+		if (getPlottingSystem()!=null && axesTraceListener!=null) try {
 			getPlottingSystem().removeTraceListener(axesTraceListener);
 		} catch (Exception e) {
 			logger.error("Cannot remove trace listener!", e);
