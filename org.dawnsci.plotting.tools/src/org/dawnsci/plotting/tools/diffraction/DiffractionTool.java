@@ -190,19 +190,21 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		viewer.getTree().setHeaderVisible(true);
 		
 		Composite status = new Composite(control, SWT.NONE);
+		status.setLayoutData(new GridData(SWT.FILL, GridData.FILL, true, false));
 		status.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		status.setLayout(new GridLayout(2, true));
-		
-		statusMessage = new Label(status, SWT.NONE);
-		statusMessage.setLayoutData(new GridData(GridData.BEGINNING, GridData.CENTER, true, false));
+		GridUtils.removeMargins(status);
+	
+		statusMessage = new Label(status, SWT.LEFT);
+		statusMessage.setLayoutData(new GridData(SWT.FILL, GridData.CENTER, true, false));
 		ColorRegistry colorRegistry = JFaceResources.getColorRegistry();
 		statusMessage.setForeground(new Color(statusMessage.getDisplay(), colorRegistry.getRGB(JFacePreferences.QUALIFIER_COLOR)));
 		statusMessage.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		if (statusString != null && statusString[0] != null)
 			statusMessage.setText(statusString[0]);
 
-		final Label label = new Label(status, SWT.NONE);
-		label.setLayoutData(new GridData(GridData.END, GridData.CENTER, true, false));
+		final Label label = new Label(status, SWT.RIGHT);
+		label.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 		label.setForeground(new Color(label.getDisplay(), colorRegistry.getRGB(JFacePreferences.QUALIFIER_COLOR)));
 		label.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		label.setText("* Click to change value  ");
