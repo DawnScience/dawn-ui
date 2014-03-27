@@ -27,6 +27,7 @@ import java.util.List;
 import javax.vecmath.Vector3d;
 
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
+import org.dawb.workbench.ui.diffraction.table.DiffractionDataManager;
 import org.dawb.workbench.ui.diffraction.table.DiffractionTableData;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IRegion;
@@ -427,15 +428,16 @@ public class DiffractionCalibrationUtils {
 	 * @param model
 	 * @param filepath
 	 */
-	public static void saveModelToCSVFile(List<DiffractionTableData> model, String filepath) {
-		String[][] values = new String[model.size()][NAMES.length];
-		for (int i = 0; i < model.size(); i++) {
-			DetectorProperties dp = model.get(i).md.getDetector2DProperties();
-			double wavelength = model.get(i).md.getDiffractionCrystalEnvironment().getWavelength();
+	public static void saveModelToCSVFile(DiffractionDataManager manager, String filepath) {
+		String[][] values = new String[manager.getSize()][NAMES.length];
+		int i = 0;
+		for (DiffractionTableData model : manager.iterable()) {
+			DetectorProperties dp = model.md.getDetector2DProperties();
+			double wavelength = model.md.getDiffractionCrystalEnvironment().getWavelength();
 			//wavelength = DiffractionCalibrationUtils.setPrecision(wavelength, 5);
-			double residual = model.get(i).residual;
+			double residual = model.residual;
 			// image
-			values[i][0] = model.get(i).name;
+			values[i][0] = model.name;
 			// distance
 			values[i][1] = String.valueOf(dp.getBeamCentreDistance());
 			// X beam centre
@@ -454,6 +456,7 @@ public class DiffractionCalibrationUtils {
 			values[i][8] = String.valueOf(dp.getNormalAnglesInDegrees()[2]);
 			// Orientation Roll
 			values[i][9] = String.valueOf(residual);
+			++i;
 		}
 		saveToCsvFile(filepath, NAMES, values);
 	}

@@ -42,7 +42,7 @@ import uk.ac.diamond.scisoft.analysis.hdf5.HDF5NodeLink;
  * @author wqk87977
  *
  */
-public class DiffCalTableViewer extends TableViewer {
+public class DiffCalTableViewer extends TableViewer  {
 
 	private Action deleteAction;
 	//private List<DiffractionTableData> model = new ArrayList<DiffractionTableData>();
@@ -169,14 +169,14 @@ public class DiffCalTableViewer extends TableViewer {
 				Object[] selected = selection.toArray();
 				for (int i = 0; i < selected.length; i++) {
 					DiffractionTableData selectedData = (DiffractionTableData) selected[i];
-					if (manager.getModel().size() > 0) {
-						if (manager.getModel().remove(selectedData)) {
+					if (manager.getSize() > 0) {
+						if (manager.remove(selectedData)) {
 							if (selectedData.md != null)
 								selectedData.md.getDetector2DProperties().removeDetectorPropertyListener(detectorPropertyListener);
 						}
 					}
 				}
-				if (!manager.getModel().isEmpty()) {
+				if (manager.getSize() > 0) {
 					setSelection(new StructuredSelection((DiffractionTableData) getElementAt(0)));
 				} else {
 					setSelection(new StructuredSelection());
@@ -196,13 +196,6 @@ public class DiffCalTableViewer extends TableViewer {
 		data.md.getDetector2DProperties().addDetectorPropertyListener(detectorPropertyListener);
 	}
 
-	/**
-	 * Remove DetectorPropertyListener for the given DiffractionTableData
-	 * @param data
-	 */
-	public void removeDetectorPropertyListener (DiffractionTableData data) {
-		data.md.getDetector2DProperties().removeDetectorPropertyListener(detectorPropertyListener);
-	}
 
 	private void createColumns(TableViewer tv) {
 		TableViewerColumn tvc = new TableViewerColumn(tv, SWT.NONE);
@@ -238,13 +231,13 @@ public class DiffCalTableViewer extends TableViewer {
 			if (tabIndex == 0) {	// auto mode
 				int width = 0;
 				// if more than one image and distance column index
-				if (manager.getModel().size() > 1 && i == 2)
+				if (manager.getSize() > 1 && i == 2)
 					width = 80;
 				table.getColumns()[i].setWidth(width);
 			} else if (tabIndex == 1) {	// manual mode
 				int width = 80;
 				// if less than 2 images and column is distance
-				if (manager.getModel().size() <= 1 && i == 2)
+				if (manager.getSize() <= 1 && i == 2)
 					width = 0;
 				table.getColumns()[i].setWidth(width);
 			}
@@ -257,6 +250,10 @@ public class DiffCalTableViewer extends TableViewer {
 			scrollHolder.setMinSize(parent.computeSize(r.width, SWT.DEFAULT));
 			scrollHolder.layout();
 		}
+	}
+
+	public IDetectorPropertyListener getDetectorPropertyListener() {
+		return detectorPropertyListener;
 	}
 	
 }

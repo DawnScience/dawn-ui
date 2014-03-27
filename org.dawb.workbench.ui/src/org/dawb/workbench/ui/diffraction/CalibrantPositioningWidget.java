@@ -16,10 +16,10 @@
 package org.dawb.workbench.ui.diffraction;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 
 import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.diffraction.DiffractionCalibrationUtils.ManipulateMode;
+import org.dawb.workbench.ui.diffraction.table.DiffractionDataManager;
 import org.dawb.workbench.ui.diffraction.table.DiffractionTableData;
 import org.dawb.workbench.ui.views.RepeatingMouseAdapter;
 import org.dawb.workbench.ui.views.SlowFastRunnable;
@@ -39,7 +39,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
-import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 
 /**
@@ -49,7 +48,7 @@ import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
  */
 public class CalibrantPositioningWidget {
 
-	private List<DiffractionTableData> model;
+	private DiffractionDataManager manager;
 	private Control[] controls;
 	private DiffractionTableData currentData;
 	private TableViewer tableViewer;
@@ -63,8 +62,8 @@ public class CalibrantPositioningWidget {
 	 * @param model
 	 *         List of all diffraction data present in the TableViewer (used to update beam centre)
 	 */
-	public CalibrantPositioningWidget(Composite parent, final List<DiffractionTableData> model) {
-		this.model = model;
+	public CalibrantPositioningWidget(Composite parent, final DiffractionDataManager manager) {
+		this.manager = manager;
 		final Display display = Display.getDefault();
 
 		Group controllerHolder = new Group(parent, SWT.BORDER | SWT.FILL);
@@ -294,10 +293,9 @@ public class CalibrantPositioningWidget {
 					return;
 				DetectorProperties properties = currentData.md.getDetector2DProperties();
 				double[] coords = properties.getBeamCentreCoords();
-				if (model == null)
-					return;
-				for (int i = 0; i < model.size(); i++) {
-					model.get(i).md.getDetector2DProperties().setBeamCentreCoords(coords);
+				if (manager.isValidModel())	return;
+				for (DiffractionTableData dd : manager.iterable()) {
+					dd.md.getDetector2DProperties().setBeamCentreCoords(coords);
 				}
 			}
 		});
@@ -339,7 +337,7 @@ public class CalibrantPositioningWidget {
 	private void setCalibrateButtons() {
 
 			// enable calibrate button if all images have rings
-			for (DiffractionTableData d : model) {
+			for (DiffractionTableData d : manager.iterable()) {
 				if (d.nrois <= 0) {
 					setCalibrateOptionsEnabled(false);
 					return;
