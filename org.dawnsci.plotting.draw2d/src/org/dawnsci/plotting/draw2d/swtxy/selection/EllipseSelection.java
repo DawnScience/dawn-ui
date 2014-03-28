@@ -271,7 +271,6 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 				double offset = coords.getXAxisRotationAngleDegrees();
 				graphics.drawLine(getPoint(offset), getPoint(offset + 180));
 			}
-			graphics.popState();
 
 			if (label != null && isShowLabel()) {
 				graphics.setAlpha(192);
@@ -280,6 +279,7 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 				graphics.setFont(labelFont);
 				graphics.fillString(label, getPoint(135));
 			}
+			graphics.popState();
 		}
 
 		public void setMobile(boolean mobile) {
