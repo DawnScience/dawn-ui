@@ -208,16 +208,21 @@ public class DiffCalTableViewer extends TableViewer  {
 		tc = tvc.getColumn();
 		tc.setText("# of rings");
 		tc.setWidth(0);
+		tc.setMoveable(false);
 		tvc.setEditingSupport(new DiffCalEditingSupport(tv, 1));
 
 		tvc = new TableViewerColumn(tv, SWT.NONE);
 		tc = tvc.getColumn();
 		tc.setText("Distance");
 		tc.setToolTipText("in mm");
-		if (pathsList != null && pathsList.size() <= 1) // if more than one image then we show the column
+		if (pathsList != null && pathsList.size() <= 1) {// if more than one image then we show the column
 			tc.setWidth(0);
-		else
+		    tc.setMoveable(false);
+		} else {
 			tc.setWidth(80);
+			tc.setMoveable(true);
+		}
+		
 		tvc.setEditingSupport(new DiffCalEditingSupport(tv, 2));
 	}
 
@@ -234,12 +239,14 @@ public class DiffCalTableViewer extends TableViewer  {
 				if (manager.getSize() > 1 && i == 2)
 					width = 80;
 				table.getColumns()[i].setWidth(width);
+				table.getColumns()[i].setMoveable(width>0);
 			} else if (tabIndex == 1) {	// manual mode
 				int width = 80;
 				// if less than 2 images and column is distance
 				if (manager.getSize() <= 1 && i == 2)
 					width = 0;
 				table.getColumns()[i].setWidth(width);
+				table.getColumns()[i].setMoveable(width>0);
 			}
 		}
 		// update parent composite
