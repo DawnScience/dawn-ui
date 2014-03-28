@@ -100,21 +100,21 @@ public class DiffractionCalibrationUtils {
 				List<DetectorProperties> dps = new ArrayList<DetectorProperties>();
 				DiffractionCrystalEnvironment env = null;
 				for (DiffractionTableData data : model) {
-					IDiffractionMetadata md = data.md;
-					if (!data.use || data.nrois <= 0 || md == null) {
+					IDiffractionMetadata md = data.getMetaData();
+					if (!data.isUse() || data.getNrois() <= 0 || md == null) {
 						continue;
 					}
 					if (env == null) {
 						env = md.getDiffractionCrystalEnvironment();
 					}
-					data.q = null;
+					data.setQ(null);
 
 					DetectorProperties dp = md.getDetector2DProperties();
 					if (dp == null) {
 						continue;
 					}
 					dps.add(dp);
-					lROIs.add(data.rois);
+					lROIs.add(data.getRois());
 				}
 				List<QSpace> qs = null;
 				if (useFixedWavelength) {
@@ -134,8 +134,8 @@ public class DiffractionCalibrationUtils {
 
 				int i = 0;
 				for (DiffractionTableData data : model) {
-					IDiffractionMetadata md = data.md;
-					if (!data.use || data.nrois <= 0 || md == null) {
+					IDiffractionMetadata md = data.getMetaData();
+					if (!data.isUse() || data.getNrois() <= 0 || md == null) {
 						continue;
 					}
 
@@ -143,16 +143,16 @@ public class DiffractionCalibrationUtils {
 					if (dp == null) {
 						continue;
 					}
-					data.q = qs.get(i++);
-					logger.debug("Q-space = {}", data.q);
+					data.setQ(qs.get(i++));
+					logger.debug("Q-space = {}", data.getQ());
 				}
 
 				display.syncExec(new Runnable() {
 					@Override
 					public void run() {
 						for (DiffractionTableData data : model) {
-							IDiffractionMetadata md = data.md;
-							if (data.q == null || !data.use || data.nrois <= 0 || md == null) {
+							IDiffractionMetadata md = data.getMetaData();
+							if (data.getQ() == null || !data.isUse() || data.getNrois() <= 0 || md == null) {
 								continue;
 							}
 							DetectorProperties dp = md.getDetector2DProperties();
@@ -161,12 +161,12 @@ public class DiffractionCalibrationUtils {
 								continue;
 							}
 
-							DetectorProperties fp = data.q.getDetectorProperties();
+							DetectorProperties fp = data.getQ().getDetectorProperties();
 							dp.setGeometry(fp);
-							ce.setWavelength(data.q.getWavelength());
+							ce.setWavelength(data.getQ().getWavelength());
 						}
 
-						if (currentData == null || currentData.md == null || currentData.q == null)
+						if (currentData == null || currentData.getMetaData() == null || currentData.getQ() == null)
 							return;
 
 						hideFoundRings(plottingSystem);
@@ -243,10 +243,10 @@ public class DiffractionCalibrationUtils {
 	 * @param fast
 	 */
 	public static void changeRings(DiffractionTableData currentData, ManipulateMode mode, boolean fast) {
-		if (currentData == null || currentData.md == null)
+		if (currentData == null || currentData.getMetaData() == null)
 			return;
 
-		DetectorProperties detprop = currentData.md.getDetector2DProperties();
+		DetectorProperties detprop = currentData.getMetaData().getDetector2DProperties();
 		if (detprop == null)
 			return;
 
@@ -346,15 +346,15 @@ public class DiffractionCalibrationUtils {
 				List<Double> odist = new ArrayList<Double>();
 				List<Double> ndist = new ArrayList<Double>();
 				for (DiffractionTableData data : model) {
-					if (data.q == null || !data.use || data.nrois <= 0 || data.md == null) {
+					if (data.getQ() == null || !data.isUse() || data.getNrois() <= 0 || data.getMetaData() == null) {
 						continue;
 					}
 
-					if (Double.isNaN(data.od)) {
+					if (Double.isNaN(data.getOd())) {
 						continue;
 					}
-					odist.add(data.od);
-					ndist.add(data.q.getDetectorProperties().getDetectorDistance());
+					odist.add(data.getOd());
+					ndist.add(data.getQ().getDetectorProperties().getDetectorDistance());
 				}
 				if (odist.size() < 3) {
 					logger.warn("Need to use three or more images");
@@ -374,11 +374,11 @@ public class DiffractionCalibrationUtils {
 					@Override
 					public void run() {
 						for (final DiffractionTableData data : model) {
-							if (!data.use || data.nrois <= 0 || data.md == null) {
+							if (!data.isUse() || data.getNrois() <= 0 || data.getMetaData() == null) {
 								continue;
 							}
 
-							final DiffractionCrystalEnvironment ce = data.md.getDiffractionCrystalEnvironment();
+							final DiffractionCrystalEnvironment ce = data.getMetaData().getDiffractionCrystalEnvironment();
 							if (ce != null) {
 								double ow = ce.getWavelength();
 								ce.setWavelength(ow * f);
@@ -432,12 +432,12 @@ public class DiffractionCalibrationUtils {
 		String[][] values = new String[manager.getSize()][NAMES.length];
 		int i = 0;
 		for (DiffractionTableData model : manager.iterable()) {
-			DetectorProperties dp = model.md.getDetector2DProperties();
-			double wavelength = model.md.getDiffractionCrystalEnvironment().getWavelength();
+			DetectorProperties dp = model.getMetaData().getDetector2DProperties();
+			double wavelength = model.getMetaData().getDiffractionCrystalEnvironment().getWavelength();
 			//wavelength = DiffractionCalibrationUtils.setPrecision(wavelength, 5);
-			double residual = model.residual;
+			double residual = model.getResidual();
 			// image
-			values[i][0] = model.name;
+			values[i][0] = model.getName();
 			// distance
 			values[i][1] = String.valueOf(dp.getBeamCentreDistance());
 			// X beam centre

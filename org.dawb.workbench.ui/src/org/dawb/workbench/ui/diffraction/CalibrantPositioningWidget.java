@@ -289,13 +289,12 @@ public class CalibrantPositioningWidget {
 		setBeamCentreButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (currentData == null)
-					return;
-				DetectorProperties properties = currentData.md.getDetector2DProperties();
+				if (currentData == null) return;
+				DetectorProperties properties = currentData.getMetaData().getDetector2DProperties();
 				double[] coords = properties.getBeamCentreCoords();
 				if (manager.isValidModel())	return;
 				for (DiffractionTableData dd : manager.iterable()) {
-					dd.md.getDetector2DProperties().setBeamCentreCoords(coords);
+					dd.getMetaData().getDetector2DProperties().setBeamCentreCoords(coords);
 				}
 			}
 		});
@@ -338,7 +337,7 @@ public class CalibrantPositioningWidget {
 
 			// enable calibrate button if all images have rings
 			for (DiffractionTableData d : manager.iterable()) {
-				if (d.nrois <= 0) {
+				if (d.getNrois() <= 0) {
 					setCalibrateOptionsEnabled(false);
 					return;
 				}
@@ -377,7 +376,7 @@ public class CalibrantPositioningWidget {
 	}
 	
 	private void updateAfterRingFinding(){
-		if (currentData != null && currentData.nrois > 0) {
+		if (currentData != null && currentData.getNrois() > 0) {
 			setCalibrateButtons();
 		}
 		if (tableViewer != null)

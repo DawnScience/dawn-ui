@@ -71,7 +71,7 @@ public class DiffractionDataManager {
 	
 	public void setWavelength(double wavelength) {
 		for (DiffractionTableData data : model) {
-			data.md.getDiffractionCrystalEnvironment().setWavelength(wavelength);
+			data.getMetaData().getDiffractionCrystalEnvironment().setWavelength(wavelength);
 		}
 	}
 	
@@ -111,10 +111,10 @@ public class DiffractionDataManager {
 	public void reset() {
 		for (DiffractionTableData model : iterable()) {
 			// Restore original metadata
-			DetectorProperties originalProps = model.md.getOriginalDetector2DProperties();
-			DiffractionCrystalEnvironment originalEnvironment =model.md.getOriginalDiffractionCrystalEnvironment();
-			model.md.getDetector2DProperties().restore(originalProps);
-			model.md.getDiffractionCrystalEnvironment().restore(originalEnvironment);
+			DetectorProperties originalProps = model.getMetaData().getOriginalDetector2DProperties();
+			DiffractionCrystalEnvironment originalEnvironment =model.getMetaData().getOriginalDiffractionCrystalEnvironment();
+			model.getMetaData().getDetector2DProperties().restore(originalProps);
+			model.getMetaData().getDiffractionCrystalEnvironment().restore(originalEnvironment);
 		}		
 	}
 
@@ -122,7 +122,7 @@ public class DiffractionDataManager {
 		if (filePath == null) return;
 
 		for (DiffractionTableData d : model) {
-			if (filePath.equals(d.path)) {
+			if (filePath.equals(d.getPath())) {
 				return;
 			}
 		}
@@ -205,12 +205,12 @@ public class DiffractionDataManager {
 			image.setName(fileName + ":" + image.getName());
 
 			DiffractionTableData data = new DiffractionTableData();
-			data.path = path;
-			data.name = fileName;
-			data.image = image;
+			data.setPath(path);
+			data.setName(fileName);
+			data.setImage(image);
 			String[] statusString = new String[1];
-			data.md = DiffractionUtils.getDiffractionMetadata(image, path, service, statusString);
-			data.image.setMetadata(data.md);
+			data.setMetaData(DiffractionUtils.getDiffractionMetadata(image, path, service, statusString));
+			data.getImage().setMetadata(data.getMetaData());
 			model.add(data);
 			
 			fireDiffractionDataListeners(new DiffractionDataChanged(data));
@@ -242,7 +242,7 @@ public class DiffractionDataManager {
 		
 		double[] deltaDistance = new double[getSize()];
 		
-		for (int i = 0; i < model.size(); i++) deltaDistance[i] = model.get(i).distance;
+		for (int i = 0; i < model.size(); i++) deltaDistance[i] = model.get(i).getDistance();
 		
 		return new DoubleDataset(deltaDistance, new int[]{deltaDistance.length});
 	}
@@ -250,7 +250,7 @@ public class DiffractionDataManager {
 	public void clear(IDetectorPropertyListener listener) {
 		if (!isValidModel()) return;
 		if (listener!=null) for (DiffractionTableData d : iterable()) {
-			d.md.getDetector2DProperties().removeDetectorPropertyListener(listener);
+			d.getMetaData().getDetector2DProperties().removeDetectorPropertyListener(listener);
 		}
 		model.clear();
 	}

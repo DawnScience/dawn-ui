@@ -41,7 +41,7 @@ public class DiffCalEditingSupport extends EditingSupport {
 		protected Object getValue(Object element) {
 			DiffractionTableData data = (DiffractionTableData) element;
 			if (column == 2) {
-				return data.distance;
+				return data.getDistance();
 			}
 			return null;
 		}
@@ -51,7 +51,7 @@ public class DiffCalEditingSupport extends EditingSupport {
 			DiffractionTableData data = (DiffractionTableData) element;
 
 			if (column == 2) {
-				data.distance = (Double) value;
+				data.setDistance((Double) value);
 				tv.refresh();
 			}
 		}

@@ -94,7 +94,7 @@ public class DiffCalTableViewer extends TableViewer  {
 					if (selected.length == 1) {
 						deleteAction.setText("Delete "
 								+ ((DiffractionTableData) selection
-										.getFirstElement()).name);
+										.getFirstElement()).getName());
 						mgr.add(deleteAction);
 					} else {
 						deleteAction.setText("Delete " + selected.length
@@ -171,8 +171,8 @@ public class DiffCalTableViewer extends TableViewer  {
 					DiffractionTableData selectedData = (DiffractionTableData) selected[i];
 					if (manager.getSize() > 0) {
 						if (manager.remove(selectedData)) {
-							if (selectedData.md != null)
-								selectedData.md.getDetector2DProperties().removeDetectorPropertyListener(detectorPropertyListener);
+							if (selectedData.getMetaData() != null)
+								selectedData.getMetaData().getDetector2DProperties().removeDetectorPropertyListener(detectorPropertyListener);
 						}
 					}
 				}
@@ -193,7 +193,7 @@ public class DiffCalTableViewer extends TableViewer  {
 	 * @param data
 	 */
 	public void addDetectorPropertyListener(DiffractionTableData data) {
-		data.md.getDetector2DProperties().addDetectorPropertyListener(detectorPropertyListener);
+		data.getMetaData().getDetector2DProperties().addDetectorPropertyListener(detectorPropertyListener);
 	}
 
 

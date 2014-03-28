@@ -35,13 +35,13 @@ public class DiffCalLabelProvider implements ITableLabelProvider {
 
 		DiffractionTableData data = (DiffractionTableData) element;
 		if (columnIndex == 0) {
-			return data.name;
+			return data.getName();
 		} else if (columnIndex == 1) { // # of rings
-			if (data.rois == null)
+			if (data.getRois() == null)
 				return null;
-			return String.valueOf(data.nrois);
+			return String.valueOf(data.getNrois());
 		} else if (columnIndex == 2) { // distance
-			return String.format("%.2f", data.distance) + "*";
+			return String.format("%.2f", data.getDistance()) + "*";
 		}
 		return null;
 	}
