@@ -150,7 +150,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		fitOnceButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,
 				false, 1, 1));
 		fitOnceButton.setText("Fit Once");
-		fitOnceButton.setEnabled(false);
+		fitOnceButton.setEnabled(true);
 		fitOnceButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
