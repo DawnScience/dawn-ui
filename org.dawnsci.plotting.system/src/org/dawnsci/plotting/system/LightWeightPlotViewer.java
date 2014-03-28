@@ -1051,7 +1051,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	 */
 	public void addRegion(final IRegion region) {
 		final AbstractSelectionRegion r = (AbstractSelectionRegion) region;
-		xyGraph.addRegion(r);
+		if (xyGraph!=null) xyGraph.addRegion(r);
 	}
 
 	/**
@@ -1060,13 +1060,13 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	 */
 	public void removeRegion(final IRegion region) {
 		final AbstractSelectionRegion r = (AbstractSelectionRegion) region;
-		xyGraph.removeRegion(r);
+		if (xyGraph!=null) xyGraph.removeRegion(r);
 	}
 
 	@Override
 	public void renameRegion(final IRegion region, String name) {
 		if (xyGraph == null) return;
-		xyGraph.renameRegion((AbstractSelectionRegion) region, name);
+		if (xyGraph!=null) xyGraph.renameRegion((AbstractSelectionRegion) region, name);
 	}
 
 	/**
@@ -1075,8 +1075,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	 * @return
 	 */
 	public IRegion getRegion(final String name) {
-		if (xyGraph == null)
-			return null;
+		if (xyGraph == null) return null;
 		return xyGraph.getRegion(name);
 	}
 	
