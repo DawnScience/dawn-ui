@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.workbench.jmx.UserPlotBean;
 import org.dawnsci.common.widgets.gda.function.FunctionFittingWidget;
@@ -46,6 +47,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -421,10 +423,16 @@ public class FunctionFittingTool extends AbstractToolPage implements
 					switch (algorithm) {
 					default:
 					case APACHENELDERMEAD:
-						fitMethod = new ApacheNelderMead();
+						resultFunction = new CompositeFunction();
+						for (IFunction function : compFunction.getFunctions()) {
+							resultFunction.addFunction(function);
+						}
+						Fitter.ApacheNelderMeadFit(new AbstractDataset[] {x}, y, resultFunction, 1000);
 						break;
 					case GENETIC:
 						fitMethod = new GeneticAlg(accuracy);
+						resultFunction = Fitter.fit(x, y, fitMethod, compFunction
+								.copy().getFunctions());
 						break;
 					}
 				}
@@ -442,8 +450,18 @@ public class FunctionFittingTool extends AbstractToolPage implements
 				// org.dawnsci.plotting.tools.fitting.FunctionFittingTool$UpdateFitPlotJob"
 				// error is observed.
 
-				resultFunction = Fitter.fit(x, y, fitMethod, compFunction
-						.copy().getFunctions());
+			} catch (TooManyEvaluationsException me) {
+				UIJob uijob = new UIJob("Update chiSquared Label") {
+					
+					@Override
+					public IStatus runInUIThread(IProgressMonitor monitor) {
+						chiSquaredValueText.setText("Maximun Number of Itterations Exceeded");
+						return null;
+					}
+				};
+				uijob.schedule();
+				
+				
 			} catch (Exception e) {
 				return Status.CANCEL_STATUS;
 			}
