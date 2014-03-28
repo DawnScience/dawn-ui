@@ -321,7 +321,7 @@ class HyperbolaSelection extends AbstractSelectionRegion implements ILockableReg
 			graphics.setAntialias(SWT.ON);
 
 			double max = getMaxRadius();
-			double start = croi.getStartAngle(max);
+			double start = croi.getStartParameter(max);
 			Rectangle bnds = parent.getBounds();
 			if (!Draw2DUtils.drawCurve(graphics, bnds, false, this, start, 2*Math.PI - start, Math.PI/100)) {
 				graphics.popState();
