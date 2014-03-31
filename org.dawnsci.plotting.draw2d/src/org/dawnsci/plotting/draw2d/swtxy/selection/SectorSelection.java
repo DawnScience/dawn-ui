@@ -341,7 +341,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 			if (parent == null) { // for last click rendering
 				return;
 			}
-			roiHandler.setROI(createROI(true));
+			roiHandler.setROI((SectorROI)createROI(true));
 			configureHandles();
 		}
 
@@ -513,7 +513,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 				@Override
 				public void translationCompleted(TranslationEvent evt) {
 					fireROIChanged(createROI(true));
-					roiHandler.setROI(roi);
+					roiHandler.setROI((SectorROI)roi);
 					fireROISelection();
 				}
 
