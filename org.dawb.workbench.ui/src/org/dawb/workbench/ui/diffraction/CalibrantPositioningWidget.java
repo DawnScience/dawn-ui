@@ -17,16 +17,17 @@ package org.dawb.workbench.ui.diffraction;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.dawb.common.ui.util.GridUtils;
 import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.diffraction.DiffractionCalibrationUtils.ManipulateMode;
 import org.dawb.workbench.ui.diffraction.table.DiffractionDataManager;
 import org.dawb.workbench.ui.diffraction.table.DiffractionTableData;
+import org.dawb.workbench.ui.diffraction.table.IRefreshable;
 import org.dawb.workbench.ui.views.RepeatingMouseAdapter;
 import org.dawb.workbench.ui.views.SlowFastRunnable;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -51,7 +52,7 @@ public class CalibrantPositioningWidget {
 	private DiffractionDataManager manager;
 	private Control[] controls;
 	private DiffractionTableData currentData;
-	private TableViewer tableViewer;
+	private IRefreshable tableViewer;
 	private IRunnableWithProgress ringFinder;
 
 	/**
@@ -63,17 +64,19 @@ public class CalibrantPositioningWidget {
 	 *         List of all diffraction data present in the TableViewer (used to update beam centre)
 	 */
 	public CalibrantPositioningWidget(Composite parent, final DiffractionDataManager manager) {
+		
 		this.manager = manager;
 		final Display display = Display.getDefault();
 
-		Group controllerHolder = new Group(parent, SWT.BORDER | SWT.FILL);
-		controllerHolder.setText("Calibrant positioning");
+		Composite controllerHolder = new Composite(parent, SWT.FILL);
 		controllerHolder.setLayout(new GridLayout(2, false));
+		controllerHolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		GridUtils.removeMargins(controllerHolder);
 
 		// Pad composite
-		Composite padComp = new Composite(controllerHolder, SWT.BORDER);
+		Composite padComp = new Composite(controllerHolder, SWT.NONE);
 		padComp.setLayout(new GridLayout(5, false));
-		padComp.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
+		padComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		padComp.setToolTipText("Move calibrant");
 
 		Label l = new Label(padComp, SWT.NONE);
@@ -162,10 +165,11 @@ public class CalibrantPositioningWidget {
 		actionComp.setLayout(new GridLayout(3, false));
 		actionComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
 
-		Composite sizeComp = new Composite(actionComp, SWT.BORDER);
+		Composite sizeComp = new Composite(actionComp, SWT.NONE);
 		sizeComp.setLayout(new GridLayout(1, false));
 		sizeComp.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, true));
 		sizeComp.setToolTipText("Change size");
+		GridUtils.removeMargins(sizeComp);
 
 		Button plusButton = new Button(sizeComp, SWT.PUSH);
 		plusButton.setImage(Activator.getImage("icons/arrow_out.png"));
@@ -202,10 +206,11 @@ public class CalibrantPositioningWidget {
 				}));
 		minusButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 
-		Composite shapeComp = new Composite(actionComp, SWT.BORDER);
+		Composite shapeComp = new Composite(actionComp, SWT.NONE);
 		shapeComp.setLayout(new GridLayout(1, false));
 		shapeComp.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, true));
 		shapeComp.setToolTipText("Change shape");
+		GridUtils.removeMargins(shapeComp);
 
 		Button elongateButton = new Button(shapeComp, SWT.PUSH);
 		elongateButton.setText("Elongate");
@@ -242,10 +247,11 @@ public class CalibrantPositioningWidget {
 				}));
 		squashButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 
-		Composite rotateComp = new Composite(actionComp, SWT.BORDER);
+		Composite rotateComp = new Composite(actionComp, SWT.NONE);
 		rotateComp.setLayout(new GridLayout(1, false));
 		rotateComp.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, true));
 		rotateComp.setToolTipText("Change rotation");
+		GridUtils.removeMargins(rotateComp);
 
 		Button clockButton = new Button(rotateComp, SWT.PUSH);
 		clockButton.setImage(Activator.getImage("icons/arrow_rotate_clockwise.png"));
@@ -367,7 +373,7 @@ public class CalibrantPositioningWidget {
 	 * Set the Table viewer to update (refresh)
 	 * @param tableViewer
 	 */
-	public void setTableViewerToUpdate (TableViewer tableViewer) {
+	public void setRefreshable (IRefreshable tableViewer) {
 		this.tableViewer = tableViewer;
 	}
 	

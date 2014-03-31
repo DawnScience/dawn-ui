@@ -10,6 +10,8 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.util.LocalSelectionTransfer;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
@@ -42,8 +44,10 @@ import uk.ac.diamond.scisoft.analysis.hdf5.HDF5NodeLink;
  * @author wqk87977
  *
  */
-public class DiffCalTableViewer extends TableViewer  {
+public class DiffractionDelegate implements IRefreshable {
 
+	private TableViewer viewer;
+	
 	private Action deleteAction;
 	//private List<DiffractionTableData> model = new ArrayList<DiffractionTableData>();
 	private DiffractionDataManager manager;
@@ -63,32 +67,35 @@ public class DiffCalTableViewer extends TableViewer  {
 	 * @param service
 	 *           service loader, can be null
 	 */
-	public DiffCalTableViewer(Composite parent, List<String> pathsList, DiffractionDataManager manager) {
-		super(parent, SWT.FULL_SELECTION
-				| SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+	public DiffractionDelegate(Composite parent, List<String> pathsList, DiffractionDataManager manager) {
+		
+		viewer = new TableViewer(parent, SWT.FULL_SELECTION | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER );
 		this.parent = parent;
 		this.pathsList = pathsList;
-		this.table = getTable();
+		this.table = viewer.getTable();
 		this.manager = manager;
 		
 		initialize();
-		createColumns(this);
+		createColumns(viewer);
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
-		table.setToolTipText(
-				"Drag/drop file(s)/data to this table");
+		table.setToolTipText("How to use Diffraction Calibration View:\n" +
+				"1. Drag/drop or double click your calibration file to add it.\n"+
+				"2. Choose the calibrant\n" +
+				"3. Select the rings to use.\n" +
+				"4. Run the calibration.");
 		
-		setContentProvider(new DiffCalContentProvider());
-		setLabelProvider(new DiffCalLabelProvider());
-		setInput(manager);
-		getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		refresh();
+		viewer.setContentProvider(new DiffCalContentProvider());
+		viewer.setLabelProvider(new DiffCalLabelProvider());
+		viewer.setInput(manager);
+		viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+	
 		final MenuManager mgr = new MenuManager();
 		mgr.setRemoveAllWhenShown(true);
 		mgr.addMenuListener(new IMenuListener() {
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
-				IStructuredSelection selection = (IStructuredSelection)getSelection();
+				IStructuredSelection selection = (IStructuredSelection)viewer.getSelection();
 				Object[] selected = selection.toArray();
 				if (selected.length > 0) {
 					if (selected.length == 1) {
@@ -104,17 +111,17 @@ public class DiffCalTableViewer extends TableViewer  {
 				}
 			}
 		});
-		getControl().setMenu(mgr.createContextMenu(getControl()));
+		viewer.getControl().setMenu(mgr.createContextMenu(viewer.getControl()));
 		// add drop support
-		DropTarget dt = new DropTarget(getControl(), DND.DROP_MOVE
+		DropTarget dt = new DropTarget(viewer.getControl(), DND.DROP_MOVE
 				| DND.DROP_DEFAULT | DND.DROP_COPY);
 		dt.setTransfer(new Transfer[] { TextTransfer.getInstance(),
 				FileTransfer.getInstance(), ResourceTransfer.getInstance(),
 				LocalSelectionTransfer.getTransfer() });
 		dt.addDropListener(dropListener);
 
-		Label infoEditableLabel = new Label(parent, SWT.NONE);
-		infoEditableLabel.setText("* Click to change value");
+//		Label infoEditableLabel = new Label(parent, SWT.NONE);
+//		infoEditableLabel.setText("* Click to change value");
 	}
 
 	private void initialize(){
@@ -124,7 +131,7 @@ public class DiffCalTableViewer extends TableViewer  {
 				Display.getDefault().asyncExec(new Runnable() {
 					@Override
 					public void run() {
-						refresh();
+						viewer.refresh();
 					}
 				});
 			}
@@ -165,7 +172,7 @@ public class DiffCalTableViewer extends TableViewer  {
 		deleteAction = new Action("Delete item", Activator.getImageDescriptor("icons/delete_obj.png")) {
 			@Override
 			public void run() {
-				StructuredSelection selection = (StructuredSelection) getSelection();
+				StructuredSelection selection = (StructuredSelection) viewer.getSelection();
 				Object[] selected = selection.toArray();
 				for (int i = 0; i < selected.length; i++) {
 					DiffractionTableData selectedData = (DiffractionTableData) selected[i];
@@ -177,9 +184,9 @@ public class DiffCalTableViewer extends TableViewer  {
 					}
 				}
 				if (manager.getSize() > 0) {
-					setSelection(new StructuredSelection((DiffractionTableData) getElementAt(0)));
+					viewer.setSelection(new StructuredSelection((DiffractionTableData) viewer.getElementAt(0)));
 				} else {
-					setSelection(new StructuredSelection());
+					viewer.setSelection(new StructuredSelection());
 				}
 				updateTableColumnsAndLayout(tabIndex);
 			}
@@ -201,7 +208,7 @@ public class DiffCalTableViewer extends TableViewer  {
 		TableViewerColumn tvc = new TableViewerColumn(tv, SWT.NONE);
 		TableColumn tc = tvc.getColumn();
 		tc.setText("Image");
-		tc.setWidth(100);
+		tc.setWidth(200);
 		tvc.setEditingSupport(new DiffCalEditingSupport(tv, 0));
 
 		tvc = new TableViewerColumn(tv, SWT.NONE);
@@ -250,7 +257,7 @@ public class DiffCalTableViewer extends TableViewer  {
 			}
 		}
 		// update parent composite
-		refresh();
+		viewer.refresh();
 		Rectangle r = parent.getClientArea();
 		if (parent.getParent() instanceof ScrolledComposite) {
 			ScrolledComposite scrollHolder = (ScrolledComposite)parent.getParent();
@@ -261,6 +268,42 @@ public class DiffCalTableViewer extends TableViewer  {
 
 	public IDetectorPropertyListener getDetectorPropertyListener() {
 		return detectorPropertyListener;
+	}
+
+	public void addSelectionChangedListener(ISelectionChangedListener selectionChangeListener) {
+		viewer.addSelectionChangedListener(selectionChangeListener);
+	}
+
+	public void removeSelectionChangedListener(ISelectionChangedListener selectionChangeListener) {
+		viewer.removeSelectionChangedListener(selectionChangeListener);
+	}
+
+	public void setLayoutData(GridData data) {
+		viewer.getTable().setLayoutData(data);
+	}
+
+	public void refresh() {
+		viewer.refresh();
+	}
+
+	public void setSelection(StructuredSelection structuredSelection) {
+		viewer.setSelection(structuredSelection);
+	}
+
+	public void setSelection(ISelection structuredSelection, boolean reveal) {
+		viewer.setSelection(structuredSelection, reveal);
+	}
+
+	public ISelection getSelection() {
+		return viewer.getSelection();
+	}
+
+	public boolean isDisposed() {
+		return viewer.getTable().isDisposed();
+	}
+
+	public void setFocus() {
+		viewer.getTable().setFocus();
 	}
 	
 }
