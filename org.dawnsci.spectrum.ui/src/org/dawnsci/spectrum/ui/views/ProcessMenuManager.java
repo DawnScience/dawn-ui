@@ -16,9 +16,11 @@ import org.dawnsci.spectrum.ui.processing.DerivativeProcess;
 import org.dawnsci.spectrum.ui.processing.DivisionProcess;
 import org.dawnsci.spectrum.ui.processing.MultiplicationProcess;
 import org.dawnsci.spectrum.ui.processing.PolySmoothProcess;
+import org.dawnsci.spectrum.ui.processing.RollingBallBaselineProcess;
 import org.dawnsci.spectrum.ui.processing.SubtractionProcess;
 import org.dawnsci.spectrum.ui.utils.Contain1DDataImpl;
 import org.dawnsci.spectrum.ui.utils.SpectrumUtils;
+import org.dawnsci.spectrum.ui.wizard.IntegerInputDialog;
 import org.dawnsci.spectrum.ui.wizard.SpectrumSubtractionWizardPage;
 import org.dawnsci.spectrum.ui.wizard.SpectrumWizard;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,6 +32,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -210,8 +213,52 @@ public class ProcessMenuManager {
 			}
 		};
 		
+		IAction rollingBaseline = new Action("Rolling Ball Baseline Correction...") {
+			public void run() {
+				ISelection selection = viewer.getSelection();
+				final List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
+				
+				int size =  list.get(0).getyDatasets().get(0).getSize();
+				
+				IntegerInputDialog id = new IntegerInputDialog(Display.getDefault().getActiveShell(),
+						0, size,size/20, "Select ball radius (data points):");
+				
+				if (id.open() == Dialog.OK) {
+					int width = id.getValue();
+					
+					final RollingBallBaselineProcess process = new RollingBallBaselineProcess();
+					process.setWidth(width);
+					
+					Job processJob = new Job("process") {
+						
+						@Override
+						protected IStatus run(IProgressMonitor monitor) {
+							List<IContain1DData> out = process.process(list);
+							
+							if (out == null) {
+								showMessage("Could not process dataset, operation not supported for this data!");
+								return Status.CANCEL_STATUS;
+							}
+							
+							for(IContain1DData data : out) {
+								SpectrumInMemory mem = new SpectrumInMemory(data.getLongName(), data.getName(), data.getxDataset(), data.getyDatasets(), system);
+								ProcessMenuManager.this.manager.addFile(mem);
+							}
+							return Status.OK_STATUS;
+						}
+					};
+					
+					processJob.schedule();
+					
+				}
+			}
+		};
+		
 		subtractionWizard.setEnabled(enabled);
+		rollingBaseline.setEnabled(((IStructuredSelection)viewer.getSelection()).size() >= 1);
+
 		menu.add(subtractionWizard);
+		menu.add(rollingBaseline);
 		menuManager.add(menu);
 	}
 	

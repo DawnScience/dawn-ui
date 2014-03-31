@@ -1046,8 +1046,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		final ITransferableDataObject ob  = (ITransferableDataObject)sel;
 		if (ob==null) return false;
 		ILazyDataset lazy = ob.getLazyData(null);
-		if (lazy.getRank() >= 3)
-			return true;
+		if (lazy!=null && lazy.getRank() >= 3) return true;
 		return false;
 	}
 	

@@ -167,9 +167,10 @@ public class GridSelection extends BoxSelection implements IGridSelection{
 			// these in the RegionComposite...
 			groi.setxySpacing(oldRoi.getxSpacing(), oldRoi.getySpacing());
 			groi.setGridPreferences(oldRoi.getGridPreferences());
-		    groi.setGridLineOn(oldRoi.isGridLineOn());
-		    groi.setMidPointOn(oldRoi.isMidPointOn());
-		    
+			groi.setGridLineOn(oldRoi.isGridLineOn());
+			groi.setMidPointOn(oldRoi.isMidPointOn());
+		} else {
+			box.croi = groi;
 		}
 
 		groi.setName(getName());
