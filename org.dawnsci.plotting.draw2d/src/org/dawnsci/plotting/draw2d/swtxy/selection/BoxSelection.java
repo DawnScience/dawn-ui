@@ -145,7 +145,7 @@ class BoxSelection extends AbstractSelectionRegion {
 		return box != null ? box.getROI() : super.getROI();
 	}
 
-	class Box extends ROIShape {
+	class Box extends ROIShape<RectangularROI> {
 
 		public Box(Figure parent, AbstractSelectionRegion region) {
 			super(parent, region);
@@ -159,7 +159,7 @@ class BoxSelection extends AbstractSelectionRegion {
 		@Override
 		public void setCentre(Point nc) {
 			double[] pt = cs.getPositionValue(nc.x(), nc.y());
-			double[] pc = getROI().getMidPoint();
+			double[] pc = croi.getMidPoint();
 			pt[0] -= pc[0];
 			pt[1] -= pc[1];
 			croi.addPoint(pt);
@@ -167,11 +167,6 @@ class BoxSelection extends AbstractSelectionRegion {
 			calcBox(croi, true);
 		}
 
-		@Override
-		public RectangularROI getROI() {
-			return (RectangularROI) super.getROI();
-		}
-		
 		@Override
 		public void setup(PointList corners) {
 			final Point pa = corners.getFirstPoint();
@@ -202,12 +197,12 @@ class BoxSelection extends AbstractSelectionRegion {
 			if (croi == null)
 				return "BoxSel: undefined";
 
-			int[] pt = cs.getValuePosition(getROI().getPointRef());
+			int[] pt = cs.getValuePosition(croi.getPointRef());
 			Point start = new Point(pt[0], pt[1]);
 			int[] pta = cs.getValuePosition(0, 0);
-			int[] ptb = cs.getValuePosition(getROI().getLengths());
+			int[] ptb = cs.getValuePosition(croi.getLengths());
 
-			return "BoxSel: start=" + start + ", major=" + (ptb[0] - pta[0]) + ", minor=" + (ptb[1] - pta[1]) + ", ang=" + getROI().getAngleDegrees();
+			return "BoxSel: start=" + start + ", major=" + (ptb[0] - pta[0]) + ", minor=" + (ptb[1] - pta[1]) + ", ang=" + croi.getAngleDegrees();
 		}
 
 		protected PointList generatePointList() {

@@ -137,7 +137,7 @@ public class PolygonSelection extends AbstractSelectionRegion {
 		public boolean containsPoint(int x, int y) {
 			if (croi == null)
 				return super.containsPoint(x, y);
-			return getROI().containsPoint(cs.getPositionValue(x, y));
+			return croi.containsPoint(cs.getPositionValue(x, y));
 		}
 
 		@Override

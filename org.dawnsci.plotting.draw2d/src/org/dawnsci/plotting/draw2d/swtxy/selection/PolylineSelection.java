@@ -137,7 +137,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 		public boolean containsPoint(int x, int y) {
 			if (croi == null)
 				return super.containsPoint(x, y);
-			return getROI().isNearOutline(cs.getPositionValue(x, y), TOLERANCE);
+			return croi.isNearOutline(cs.getPositionValue(x, y), TOLERANCE);
 		}
 
 		@Override

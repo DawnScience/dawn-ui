@@ -43,7 +43,7 @@ import uk.ac.diamond.scisoft.analysis.roi.handler.ROIHandler;
 /**
  * Class for a shape based on a ROI and uses a ROIHandler
  */
-public abstract class ROIShape extends Shape implements IRegionContainer {
+public abstract class ROIShape<T extends IROI> extends Shape implements IRegionContainer {
 	protected Figure parent;
 	protected AbstractSelectionRegion region;
 	protected ICoordinateSystem cs;
@@ -55,8 +55,8 @@ public abstract class ROIShape extends Shape implements IRegionContainer {
 	private boolean isMobile;
 	protected Rectangle bnds;
 	protected boolean dirty = true;
-	protected IROI croi;
-	private IROI troi = null; // temporary ROI used in dragging
+	protected T croi;
+	private T troi = null; // temporary ROI used in dragging
 
 	protected static final int SIDE = 8;
 
@@ -78,7 +78,6 @@ public abstract class ROIShape extends Shape implements IRegionContainer {
 	}
 
 	abstract protected ROIHandler createROIHandler(IROI roi);
-
 
 	abstract public void setCentre(Point nc);
 
@@ -113,7 +112,7 @@ public abstract class ROIShape extends Shape implements IRegionContainer {
 		removeFigureListener(moveListener);
 	}
 
-	public IROI getROI() {
+	public T getROI() {
 		return troi != null ? troi : croi;
 	}
 
@@ -202,6 +201,7 @@ public abstract class ROIShape extends Shape implements IRegionContainer {
 			public void translateBefore(TranslationEvent evt) {
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public void translationAfter(TranslationEvent evt) {
 				Object src = evt.getSource();
@@ -211,7 +211,7 @@ public abstract class ROIShape extends Shape implements IRegionContainer {
 					
 					if (end==null) return;
 					double[] c = cs.getPositionValue(end.x(), end.y());
-					troi = (RectangularROI) roiHandler.interpretMouseDragging(spt, c);
+					troi = (T) roiHandler.interpretMouseDragging(spt, c);
 
 					intUpdateFromROI(troi);
 					region.fireROIDragged(troi, roiHandler.getStatus() == HandleStatus.RESIZE ?
@@ -228,7 +228,8 @@ public abstract class ROIShape extends Shape implements IRegionContainer {
 					Point end = translator.getEndLocation();
 
 					double[] c = cs.getPositionValue(end.x(), end.y());
-					RectangularROI croi = (RectangularROI) roiHandler.interpretMouseDragging(spt, c);
+					@SuppressWarnings("unchecked")
+					T croi = (T) roiHandler.interpretMouseDragging(spt, c);
 
 					updateFromROI(croi);
 					roiHandler.unconfigureDragging();
@@ -319,7 +320,7 @@ public abstract class ROIShape extends Shape implements IRegionContainer {
 	 * Update according to ROI
 	 * @param rroi
 	 */
-	public void updateFromROI(IROI rroi) {
+	public void updateFromROI(T rroi) {
 		croi = rroi;
 		roiHandler.setROI(rroi);
 		intUpdateFromROI(rroi);
