@@ -30,7 +30,7 @@ public class OpenSpectrumAction extends Action {
 	 *            The selection provider
 	 */
 	public OpenSpectrumAction(IWorkbenchPage p, ISelectionProvider selectionProvider) {
-		setText("Open Property"); //$NON-NLS-1$
+		setText("Open"); //$NON-NLS-1$
 		provider = selectionProvider;
 	}
 
