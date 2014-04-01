@@ -76,7 +76,7 @@ public class CalibrantPositioningWidget {
 		// Pad composite
 		Composite padComp = new Composite(controllerHolder, SWT.NONE);
 		padComp.setLayout(new GridLayout(5, false));
-		padComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		padComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		padComp.setToolTipText("Move calibrant");
 
 		Label l = new Label(padComp, SWT.NONE);
