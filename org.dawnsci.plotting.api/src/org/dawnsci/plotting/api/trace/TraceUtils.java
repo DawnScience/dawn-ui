@@ -104,11 +104,18 @@ public class TraceUtils {
 		return axis.getDouble(0) != 0 && axis.getDouble(length) != length;
 	}
 
-	public static void transform(IDataset label, int index, double[]... points) {
+	public final static void transform(IDataset label, int index, double[]... points) {
 		if (label!=null) {
 			for (double[] ds : points) {
-				int dataIndex = (int)ds[index];
-				ds[index] = label.getDouble(dataIndex);
+				double dataIndex = ds[index];
+				
+				double floor = Math.floor(dataIndex);
+				double lo    = label.getDouble((int)floor);
+				double hi    = label.getDouble((int)Math.ceil(dataIndex));
+
+				double frac = dataIndex-floor;
+				ds[index] = (1-frac)*lo + frac*hi;
+			
 			}
 		}		
 	}

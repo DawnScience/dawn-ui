@@ -377,8 +377,8 @@ public class SliceUtils {
 			});
 		} else if (type==PlotType.IMAGE || type==PlotType.SURFACE){
 			plottingSystem.setPlotType(type);
-			IDataset y = getAxis(currentSlice, sliceSource.getVariableManager(), slice.getShape()[0], currentSlice.getX()+1, true, monitor);
-			IDataset x = getAxis(currentSlice, sliceSource.getVariableManager(), slice.getShape()[1], currentSlice.getY()+1, true, monitor);		
+			IDataset y = getAxis(currentSlice, sliceSource.getVariableManager(), slice.getShape()[0], currentSlice.getX()+1, false, monitor);
+			IDataset x = getAxis(currentSlice, sliceSource.getVariableManager(), slice.getShape()[1], currentSlice.getY()+1, false, monitor);		
 
 			// Nullify user objects because the ImageHistoryTool uses
 			// user objects to know if the image came from it. Since we
@@ -388,7 +388,10 @@ public class SliceUtils {
 			if (trace!=null) {
 				trace.setUserObject(null);
 			}
-			plottingSystem.updatePlot2D(slice, Arrays.asList(x,y), sliceSource.getDataName(), monitor); 			
+			
+			// No point giving axes where non are required.
+			List<IDataset> axes = x==null&&y==null ? null : Arrays.asList(x,y);
+			plottingSystem.updatePlot2D(slice, axes, sliceSource.getDataName(), monitor); 			
 		}
 		plottingSystem.repaint(requireScale);
 	}
@@ -429,9 +432,13 @@ public class SliceUtils {
 		String axisName = currentSlice.getAxisName(iAxis);
 		final IDatasetMathsService service = (IDatasetMathsService)ServiceManager.getService(IDatasetMathsService.class);
 		if ("indices".equals(axisName) || axisName==null) {
-			IDataset indices = service.arange(length, IDatasetMathsService.INT); // Save time
-			indices.setName("");
-			return indices;
+			if (requireIndicesOnError) {
+				IDataset indices = service.arange(length, IDatasetMathsService.INT); // Save time
+				indices.setName("");
+				return indices;
+			} else {
+				return null;
+			}
 		}
 		
 		if (axisName.endsWith("[Expression]")) {
