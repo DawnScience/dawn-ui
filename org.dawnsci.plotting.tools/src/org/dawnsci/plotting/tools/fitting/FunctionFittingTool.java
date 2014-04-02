@@ -47,7 +47,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -283,8 +282,10 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		super.deactivate();
 	}
 
-	private void setChiSquaredValue(double value) {
-		chiSquaredValueText.setText(Double.toString(value));
+	private void setChiSquaredValue(double value, boolean notConverged) {
+		String text = Double.toString(value);
+		if (notConverged) text = text + " (Not converged)";
+		chiSquaredValueText.setText(text);
 	}
 
 	private void fillActionBar(IActionBars actionBars) {
@@ -410,6 +411,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 				}
 			});
 
+			boolean tooManyItterations = false;
 			try {
 				double accuracy = prefs.getDouble(FittingConstants.FIT_QUALITY);
 				logger.debug("Accuracy is set to {}", accuracy);
@@ -451,28 +453,21 @@ public class FunctionFittingTool extends AbstractToolPage implements
 				// error is observed.
 
 			} catch (TooManyEvaluationsException me) {
-				UIJob uijob = new UIJob("Update chiSquared Label") {
-					
-					@Override
-					public IStatus runInUIThread(IProgressMonitor monitor) {
-						chiSquaredValueText.setText("Maximun Number of Itterations Exceeded");
-						return null;
-					}
-				};
-				uijob.schedule();
-				
+				tooManyItterations = true;
 				
 			} catch (Exception e) {
 				return Status.CANCEL_STATUS;
 			}
 
+			final boolean notConverged = tooManyItterations;
+			
 			PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 
 				@Override
 				public void run() {
 					getPlottingSystem().removeTraceListener(traceListener);
 					setChiSquaredValue(resultFunction.residual(true, y, null,
-							new IDataset[] { x }) / x.count());
+							new IDataset[] { x }) / x.count(), notConverged);
 
 					fitTrace = (ILineTrace) getPlottingSystem().getTrace("Fit");
 					if (fitTrace == null) {
