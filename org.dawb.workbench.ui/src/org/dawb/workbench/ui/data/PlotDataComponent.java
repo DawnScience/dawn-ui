@@ -620,30 +620,35 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		};
 		bars.getToolBarManager().add(delete);
 		delete.setEnabled(false);
+
+		// Fix to http://jira.diamond.ac.uk/browse/SCI-1558
+		// remove feature.
+		final Action createFilter = null; 
+		final Action clearFilter  = null; 
 		
-		bars.getToolBarManager().add(new Separator());
-		final Action createFilter = new Action("Create Filter", Activator.getImageDescriptor("icons/filter.png")) {
-			public void run() {
-				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
-				final ITransferableDataObject ob  = (ITransferableDataObject)sel;
-				if (ob==null) return;
-				chooseFilterFile(ob);
-			}
-		};
-		bars.getToolBarManager().add(createFilter);
-		createFilter.setEnabled(false);
-		
-		final Action clearFilter = new Action("Clear filter", Activator.getImageDescriptor("icons/delete_filter.png")) {
-			public void run() {
-				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
-				final ITransferableDataObject ob  = (ITransferableDataObject)sel;
-				if (ob==null) return;
-				clearFilterFile(ob);
-			}
-		};
-		bars.getToolBarManager().add(clearFilter);
-		clearFilter.setEnabled(false);
-	
+// Used to have ability to choose a python script to filter datasets:
+//		bars.getToolBarManager().add(new Separator());
+//		final Action createFilter = new Action("Create Filter", Activator.getImageDescriptor("icons/filter.png")) {
+//			public void run() {
+//				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
+//				final ITransferableDataObject ob  = (ITransferableDataObject)sel;
+//				if (ob==null) return;
+//				chooseFilterFile(ob);
+//			}
+//		};
+//		bars.getToolBarManager().add(createFilter);
+//		createFilter.setEnabled(false);
+//		
+//		final Action clearFilter = new Action("Clear filter", Activator.getImageDescriptor("icons/delete_filter.png")) {
+//			public void run() {
+//				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
+//				final ITransferableDataObject ob  = (ITransferableDataObject)sel;
+//				if (ob==null) return;
+//				clearFilterFile(ob);
+//			}
+//		};
+//		bars.getToolBarManager().add(clearFilter);
+//		clearFilter.setEnabled(false);
 		
 		dataViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
@@ -694,8 +699,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				menuManager.add(paste);
 				menuManager.add(delete);
 				menuManager.add(new Separator(getClass().getName()+".filter"));
-				menuManager.add(createFilter);
-				menuManager.add(clearFilter);
+				if (createFilter!=null) menuManager.add(createFilter);
+				if (clearFilter!=null)  menuManager.add(clearFilter);
 				
 				updateActions(copy, paste, delete, createFilter, clearFilter, ob, null);
 
@@ -873,18 +878,22 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			delete.setEnabled(false);
 		}
 		
-		if (ob!=null) {
-			createFilter.setText("Filter plot of '"+ob.getName()+"' using python");
-			createFilter.setEnabled(true);
-		} else {
-			createFilter.setEnabled(false);
+		if (createFilter!=null) {
+			if (ob!=null) {
+				createFilter.setText("Filter plot of '"+ob.getName()+"' using python");
+				createFilter.setEnabled(true);
+			} else {
+				createFilter.setEnabled(false);
+			}
 		}
 		
-		if (ob!=null && ob.getFilterPath()!=null) {
-			deleteFilter.setText("Clear filter of '"+ob.getName()+"'");
-			deleteFilter.setEnabled(true);
-		} else {
-			deleteFilter.setEnabled(false);
+		if (deleteFilter!=null) {
+			if (ob!=null && ob.getFilterPath()!=null) {
+				deleteFilter.setText("Clear filter of '"+ob.getName()+"'");
+				deleteFilter.setEnabled(true);
+			} else {
+				deleteFilter.setEnabled(false);
+			}
 		}
 
 		if (bars!=null) {
