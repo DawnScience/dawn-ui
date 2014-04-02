@@ -28,6 +28,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -75,9 +76,22 @@ public class ROIEditTable  {
 		
 		createColumns(regionTable);
 		
-		final Label clickToEdit = new Label(parent, SWT.WRAP);
+		final Button round = new Button(parent, SWT.PUSH);
+		round.setText("Round");
+		round.setToolTipText("Round values of region to nearest integer");
+		round.setLayoutData(new GridData(SWT.LEFT, SWT.NONE, true, false));
+		round.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				for (RegionRow row : rows) row.round();
+				regionTable.refresh();
+	            roi = createRoi(rows, null, coords);
+				fireROIListeners();
+			}
+		});
+		
+		final Label clickToEdit = new Label(parent, SWT.RIGHT);
 		clickToEdit.setText("* Click to change");
-		clickToEdit.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false, 2, 1));
+		clickToEdit.setLayoutData(new GridData(SWT.RIGHT, SWT.NONE, true, false));
 		
 		return regionTable.getTable();
 	}
@@ -399,11 +413,18 @@ public class ROIEditTable  {
 		}
 	}
 
-	public IROI createRoi(List<RegionRow> rows, RegionRow changed, ICoordinateSystem coords) {
+	/**
+	 * Creates a roi from the current table data
+	 * @param rows
+	 * @param changed
+	 * @param coords
+	 * @return
+	 */
+	private IROI createRoi(List<RegionRow> rows, RegionRow changed, ICoordinateSystem coords) {
 				
 		IROI ret = null; 
 		if (roi instanceof LinearROI) {
-			if (changed==rows.get(2)) {
+			if (changed!=null && changed==rows.get(2)) {
 				LinearROI lr = new LinearROI(getPoint(coords, rows.get(0)), getPoint(coords, rows.get(1)));
 				lr.setAngle(Math.toRadians(rows.get(2).getxLikeVal()));
 				ret = lr;
@@ -566,6 +587,10 @@ public class ROIEditTable  {
 			this.unit     = unit;
 			this.xLikeVal = vals[0];
 			this.yLikeVal = vals[1];
+		}
+		public void round() {
+			xLikeVal = Math.round(xLikeVal);
+			yLikeVal = Math.round(yLikeVal);
 		}
 		public double[] getPoint() {
 			return new double[]{xLikeVal, yLikeVal};
