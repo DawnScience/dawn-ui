@@ -329,7 +329,6 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		enableControls.add(minEnabled);
 		
 		this.minimum = new FloatSpinner(minMaxComp, SWT.NONE);
-		enableControls.add(minimum);
 		minimum.setIncrement(1d);
 		minimum.setEnabled(false);
 		minimum.setMinimum(Integer.MIN_VALUE);
@@ -385,7 +384,6 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		});
 		
 		this.maximum = new FloatSpinner(minMaxComp, SWT.NONE);
-		enableControls.add(maximum);
 		maximum.setIncrement(1d);
 		maximum.setEnabled(false);
 		maximum.setMinimum(Integer.MIN_VALUE);
