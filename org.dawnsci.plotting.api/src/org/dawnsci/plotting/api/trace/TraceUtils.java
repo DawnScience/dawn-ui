@@ -93,7 +93,7 @@ public class TraceUtils {
 			return false;
 
 		final Class<?> clazz = axis.elementClass();
-		if (!clazz.isInstance(int.class)) {
+		if (clazz != Integer.class) {
 			return true;
 		}
 
