@@ -61,7 +61,7 @@ public class JRealityPlotActions {
 		// Print/export
 		createExportActions();
 		//axes actions
-		createAxesActions();
+		// createAxesActions(); // These actions don't make any sense.
 		// Others
 		createSurfaceModeActions();
 		createScatter3DModeActions();
@@ -81,7 +81,7 @@ public class JRealityPlotActions {
 		};
 		displayFilled.setText("Filled mode");
 		displayFilled.setDescription("Render the graph in filled mode");
-		displayFilled.setImageDescriptor(Activator.getImageDescriptor("icons/save.gif"));
+		//displayFilled.setImageDescriptor(Activator.getImageDescriptor("icons/save.gif"));
 		displayFilled.setChecked(true);
 		surfaceModeGroup.add(displayFilled);
 		actionMan.registerAction(surfaceActionsGroupName, displayFilled, ActionType.SURFACE, ManagerType.MENUBAR);
