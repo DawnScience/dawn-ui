@@ -20,6 +20,7 @@ import org.eclipse.draw2d.AbstractPointListShape;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
+import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
 
 /**
@@ -119,6 +120,13 @@ public class RotatablePolygonShape extends AbstractPointListShape {
 	public void setLocation(Point p) {
 		affine.setTranslation(p.preciseX(), p.preciseY());
 		refresh();
+	}
+
+	/**
+	 * @return precise location
+	 */
+	public Point getPreciseLocation() {
+		return new PrecisionPoint(affine.getTranslationX(), affine.getTranslationY());
 	}
 
 	protected void refresh() {

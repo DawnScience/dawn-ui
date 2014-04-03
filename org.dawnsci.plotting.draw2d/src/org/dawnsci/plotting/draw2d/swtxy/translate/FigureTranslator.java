@@ -105,12 +105,12 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 		} else if (trans instanceof SelectionHandle) {
 			SelectionHandle handle = (SelectionHandle)trans;
 			if (handle.isLocationAbsolute()) {
-				// Point handle (like beam center) are absolute
+				// Point handle (like beam centre) are absolute
 				handle.setLocation(location);
 			} else {
 				// Handles dispersed over the shape have to be relative
 				// and less accurate.
-				Point l = handle.getLocation();
+				Point l = handle.getPreciseLocation();
 				l.translate(width, height);
 				handle.setLocation(l);
 			}

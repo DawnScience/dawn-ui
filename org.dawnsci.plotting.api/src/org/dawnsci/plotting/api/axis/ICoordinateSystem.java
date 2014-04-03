@@ -42,6 +42,20 @@ public interface ICoordinateSystem {
 	public double[] getPositionValue(int... position);
 
 	/**
+	 * The value for a position in pixels.
+	 * @param position
+	 * @return value
+	 */
+	public double[] getValueFromPosition(double... position);
+
+	/**
+	 * The position in pixels of a given value.
+	 * @param value
+	 * @return position
+	 */
+	public double[] getPositionFromValue(double... value);
+	
+	/**
 	 * Listen to the coordinates changing, zoom in or image rotated usually.
 	 * @param l
 	 */

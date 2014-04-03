@@ -432,6 +432,16 @@ public class AspectAxis extends Axis implements IAxis {
 		return getPositionValue(position, false);
 	}
 
+	@Override
+	public double getValueFromPosition(double position) {
+		return getPositionValue(position, false);
+	}
+
+	@Override
+	public double getPositionFromValue(double value) {
+		return getValuePrecisePosition(value, false);
+	}
+
 	protected Collection<IAxisListener> axisListeners;
 
 	@Override
