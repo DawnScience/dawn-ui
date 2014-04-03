@@ -59,12 +59,12 @@ public interface ILineStackTrace extends IAxesTrace, IWindowTrace {
 	
 	/**
 	 * 
-	 * @return the region of the window, usually a LineROI
+	 * @return the region of the window, usually a LinearROI
 	 */
 	public IROI getWindow();
 	
 	/**
-	 * Set the window to be used as a LineROI. The first x value is
+	 * Set the window to be used as a LinearROI. The first x value is
 	 * the start of the window, the second x value is the end. the y
 	 * values are ignored.
 	 * 

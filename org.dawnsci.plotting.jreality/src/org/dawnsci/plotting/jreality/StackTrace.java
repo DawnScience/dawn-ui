@@ -14,6 +14,7 @@ import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Slice;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 
@@ -81,7 +82,13 @@ public class StackTrace extends PlotterTrace implements ILineStackTrace {
 
 		final AxisValues zAxis;
 		if (z != null) {
-			zAxis = new AxisValues(getLabel(a), DatasetUtils.convertToAbstractDataset(z));
+			AbstractDataset tz = DatasetUtils.convertToAbstractDataset(z);
+			if (window instanceof LinearROI && tz.getRank() == 1) {
+				final int x1 = window.getIntPoint()[0];
+				final int x2 = (int) Math.ceil(((LinearROI) window).getEndPoint()[0]);
+				tz = tz.getSliceView(new Slice(x1, x2));
+			}
+			zAxis = new AxisValues(getLabel(a), tz);
 		} else if (window instanceof LinearROI) {
 			final int x1 = window.getIntPoint()[0];
 			final int x2 = (int) Math.ceil(((LinearROI) window).getEndPoint()[0]);
@@ -102,6 +109,13 @@ public class StackTrace extends PlotterTrace implements ILineStackTrace {
 	@Override
 	public void setWindow(IROI window) {
 		setWindow(window, null);
+	}
+
+	@Override
+	protected void setActive(boolean active) {
+		super.setActive(active);
+		if (active && plotter!=null) // hack as the window is set in createStackTrace when trace is not active
+			plotter.setStackWindow(window);
 	}
 
 	@Override
