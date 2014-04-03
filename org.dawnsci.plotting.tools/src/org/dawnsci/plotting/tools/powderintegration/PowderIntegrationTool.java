@@ -215,6 +215,17 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 
 		};
 		
+		final Action dAction = new Action("d") {
+			@Override
+			public void run() {
+				PowderIntegrationTool.this.fullImageJob.setAxisType(XAxis.RESOLUTION);
+				xAxis = XAxis.RESOLUTION;
+				axisSelect.setSelectedAction(this);
+				update(null);
+			}
+
+		};
+		
 		final MenuAction corrections= new MenuAction("Corrections");
 		final Action solidAngle = new Action("Solid Angle Correction",IAction.AS_CHECK_BOX) {
 			@Override
@@ -297,6 +308,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		
 		axisSelect.add(qAction);
 		axisSelect.add(tthAction);
+		axisSelect.add(dAction);
 		axisSelect.setSelectedAction(qAction);
 		
 		corrections.add(solidAngle);
@@ -482,7 +494,10 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 				String degrees = unitFormat.format(NonSI.DEGREE_ANGLE);
 				file.setAttribute(s, "units", degrees);
 				break;
-
+			case RESOLUTION:
+				String ang = unitFormat.format(NonSI.ANGSTROM);
+				file.setAttribute(s, "units", ang);
+				break;
 			default:
 				break;
 			}
