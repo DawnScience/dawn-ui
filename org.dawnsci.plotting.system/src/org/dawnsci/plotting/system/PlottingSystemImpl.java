@@ -656,7 +656,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			ILineStackTrace trace = null;
 			// Limit the number of stack plots to 100
 			if (ysIn.size() > 100)
-				trace = jrealityViewer.createStackTrace(title, 25);
+				trace = jrealityViewer.createStackTrace(title, ILineStackTrace.MAXIMUM_STACK);
 			else
 				trace = jrealityViewer.createStackTrace(title, ysIn.size());
 			final IDataset x = xIn;
@@ -749,7 +749,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	@Override
 	public ILineStackTrace createLineStackTrace(String traceName) {
-		return jrealityViewer.createStackTrace(traceName, 25);
+		return jrealityViewer.createStackTrace(traceName, ILineStackTrace.MAXIMUM_STACK);
 	}
 
 	@Override
