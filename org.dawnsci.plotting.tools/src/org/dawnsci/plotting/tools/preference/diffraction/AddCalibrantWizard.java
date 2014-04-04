@@ -11,11 +11,14 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
@@ -128,7 +131,7 @@ public class AddCalibrantWizard extends Wizard implements IWorkbenchWizard{
 			Button hexButton = new Button(container, SWT.RADIO);
 			hexButton.setSelection(false);
 			hexButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-			hexButton.setText("New Hexagonal");
+			hexButton.setText("New Rhombohedral - R3\u0305c [hexagonal] (e.g. Al2O3, Cr2O3) a");
 			
 			final Group hexComposite = new Group(container, SWT.None);
 			hexComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
@@ -197,7 +200,7 @@ public class AddCalibrantWizard extends Wizard implements IWorkbenchWizard{
 			});
 			
 			Button simple = new Button(cubicComposite, SWT.RADIO);
-			simple.setText("Simple");
+			simple.setText("Pm3\u0305m (e.g. LaB6)");
 			simple.setSelection(true);
 			simple.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
@@ -205,21 +208,21 @@ public class AddCalibrantWizard extends Wizard implements IWorkbenchWizard{
 				}			
 			});
 			Button bcc = new Button(cubicComposite, SWT.RADIO);
-			bcc.setText("BCC");
+			bcc.setText("Im3\u0305m (e.g. Fe, V, W)");
 			bcc.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					model.cubicType = Cubic.BCC;
 				}			
 			});
 			Button fcc = new Button(cubicComposite, SWT.RADIO);
-			fcc.setText("FCC");
+			fcc.setText("Fm3\u0305m (e.g. CeO2, Ni)");
 			fcc.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					model.cubicType = Cubic.FCC;
 				}			
 			});
 			Button diamond = new Button(cubicComposite, SWT.RADIO);
-			diamond.setText("Diamond");
+			diamond.setText("Fd3\u0305m (e.g. Si, Ge)");
 			diamond.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					model.cubicType = Cubic.DIAMOND;
