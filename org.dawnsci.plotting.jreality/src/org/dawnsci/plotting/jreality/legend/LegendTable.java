@@ -49,7 +49,16 @@ public class LegendTable extends LegendComponent implements SelectionListener, K
 	private LinkedList<Button> buttons;
 	private Plot1DGraphTable plotTable;
 	private static final int DEL_KEY = 127;
+	private boolean requireActiveButton = false;
 	
+	public boolean isRequireActiveButton() {
+		return requireActiveButton;
+	}
+
+	public void setRequireActiveButton(boolean requireButton) {
+		this.requireActiveButton = requireButton;
+	}
+
 	/**
 	 * @param parent
 	 * @param style
@@ -126,22 +135,28 @@ public class LegendTable extends LegendComponent implements SelectionListener, K
 			editor.setEditor(canvas,newItem,0);
 			editor.grabHorizontal = true;
 			newItem.setText(1,plotApp.getName());
-			TableEditor editor2 = new TableEditor(tblLegend);
-			editor2.horizontalAlignment = SWT.CENTER;
-			editor2.grabHorizontal = true;
-			editor2.grabVertical = true;
-			Button checkButton = new Button(tblLegend,SWT.CHECK|SWT.DOUBLE_BUFFERED);
-			checkButton.setText("Active");
-			checkButton.pack();
-			checkButton.addSelectionListener(this);
-			checkButton.setBackground(this.getDisplay().getSystemColor(SWT.COLOR_WHITE));
-			buttons.add(checkButton);
-			if (plotApp.isVisible())
-				checkButton.setSelection(true);
-			else
-				checkButton.setSelection(false);
 			
-			editor2.setEditor(checkButton,newItem,2);
+			TableEditor editor2 = null;
+			if (requireActiveButton) {
+				
+				editor2 = new TableEditor(tblLegend);
+				editor2.horizontalAlignment = SWT.CENTER;
+				editor2.grabHorizontal = true;
+				editor2.grabVertical = true;
+
+				Button checkButton = new Button(tblLegend,SWT.CHECK|SWT.DOUBLE_BUFFERED);
+				checkButton.setText("Active");
+				checkButton.pack();
+				checkButton.addSelectionListener(this);
+				checkButton.setBackground(this.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+				buttons.add(checkButton);
+				if (plotApp.isVisible())
+					checkButton.setSelection(true);
+				else
+					checkButton.setSelection(false);
+				editor2.setEditor(checkButton,newItem,2);
+			}
+			
 			editors.add(editor2);
 		}
 	}
@@ -152,6 +167,7 @@ public class LegendTable extends LegendComponent implements SelectionListener, K
 		Iterator<TableEditor> iter = editors.iterator();
 		while (iter.hasNext()) {
 			TableEditor editor = iter.next();
+			if( editor == null) continue; // Not editable
 			editor.getEditor().dispose();
 			editor.dispose();
 		}
