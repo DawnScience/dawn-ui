@@ -48,7 +48,8 @@ public class StackTrace extends PlotterTrace implements ILineStackTrace {
 		this.axes  = (List<IDataset>) axes;
 		
 		if (isActive()) {
-			plotter.updatePlot(createAxisValues(), null, PlottingMode.ONED_THREED, stack);
+			IROI roi = new LinearROI(new double[]{0.0,0.0}, new double[]{stack.length,0.0});
+			plotter.updatePlot(createAxisValues(roi), roi, PlottingMode.ONED_THREED, stack);
 			
 			if (plottingSystem!=null) {
 				plottingSystem.fireTraceUpdated(new TraceEvent(this));
@@ -59,6 +60,15 @@ public class StackTrace extends PlotterTrace implements ILineStackTrace {
 	
 	@Override
 	protected List<AxisValues> createAxisValues() {
+		return createAxisValues(window);
+	}
+
+	/**
+	 * Creates the Axes values given a window
+	 * @param window
+	 * @return axes list
+	 */
+	protected List<AxisValues> createAxisValues(IROI window) {
 		ArrayList<AxisValues> values = new ArrayList<AxisValues>();
 
 		int a = 0;
