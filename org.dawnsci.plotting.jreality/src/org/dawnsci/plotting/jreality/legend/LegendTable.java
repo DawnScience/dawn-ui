@@ -87,13 +87,12 @@ public class LegendTable extends LegendComponent implements SelectionListener, K
 			tblclmnDescription.setResizable(true);
 			tblclmnDescription.setText("Description");
 		}
-		{
+		if (isRequireActiveButton()) {
 			TableColumn tblclmnVisible = new TableColumn(tblLegend, SWT.NONE);
 			tblclmnVisible.setWidth(80);
 			tblclmnVisible.setResizable(false);
 			tblclmnVisible.setText("Visible");
 		}
-		
 		// The headers have to be visible to resize the column. Sometimes people
 		// use long dataset names, therefore need to resize the legend to see
 		// what's plotted. We add a right click action to the table to show headers
