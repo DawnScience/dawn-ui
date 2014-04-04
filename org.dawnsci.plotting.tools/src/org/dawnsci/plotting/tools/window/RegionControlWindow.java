@@ -7,6 +7,7 @@ import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.dawnsci.plotting.api.trace.ILineStackTrace;
 import org.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.roi.SurfacePlotROI;
@@ -141,7 +142,7 @@ public class RegionControlWindow {
 		int yStartPt = 0;
 		final ITrace trace = getTrace();
 		int xSize = 0, ySize = 0;
-		if (trace != null && trace.getData() != null && trace.getData().getShape().length > 1) {
+		if (trace != null && !(trace instanceof ILineStackTrace) && trace.getData() != null && trace.getData().getShape().length > 1) {
 			xSize = trace.getData().getShape()[1];
 			ySize = trace.getData().getShape()[0];
 		} else {

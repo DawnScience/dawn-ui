@@ -55,7 +55,7 @@ class PlotterTrace {
 		return active;
 	}
 
-	protected final void setActive(boolean active) {
+	protected void setActive(boolean active) {
 		this.active = active;
 		if (active) {
 			if (plottingSystem!=null) plottingSystem.fireTraceAdded(new TraceEvent(this));

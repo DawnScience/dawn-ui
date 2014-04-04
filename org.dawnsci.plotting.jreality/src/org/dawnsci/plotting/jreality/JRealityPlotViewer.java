@@ -207,7 +207,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		try {
 			stack.setPlottingSystem(system);
 			graph.setVisible(false);
-			plot(stack.createAxisValues(), null, PlottingMode.ONED_THREED, stack.getStack());
+			plot(stack.createAxisValues(), stack.getWindow(), PlottingMode.ONED_THREED, stack.getStack());
 
 			// TODO Colour of lines?
 		} finally {
@@ -426,7 +426,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			final StackTrace stack = (StackTrace)currentTrace;
 			try {
 				graph.setVisible(false);
-				plot(stack.createAxisValues(), stack.getWindow(), PlottingMode.ONED_THREED, stack.getStack());
+				plot(stack.createAxisValues(), stack.getWindow(), PlottingMode.ONED_THREED, true, stack.getStack());
 			} finally {
 				graph.setVisible(true);
 				refresh(false);
