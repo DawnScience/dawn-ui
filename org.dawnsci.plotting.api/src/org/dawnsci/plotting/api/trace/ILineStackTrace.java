@@ -30,6 +30,11 @@ import uk.ac.diamond.scisoft.analysis.roi.IROI;
 public interface ILineStackTrace extends IAxesTrace, IWindowTrace {
 
 	/**
+	 * Maximum number of stack plots used for the stack window slicing tool
+	 */
+	public static final int MAXIMUM_STACK = 100;
+
+	/**
 	 * For IStackTrace, calling this method will throw a RuntimeException
 	 * all the time which ask you to use getStack() instead.
 	 */
