@@ -409,6 +409,8 @@ public class TransferableDataObject implements H5Path, ITransferableDataObject{
 
 	@Override
 	public String getFileName() {
+		if (holder==null) return null;
+		if (holder.getFilePath()==null) return null;
 		return (new File(holder.getFilePath())).getName();
 	}
 
