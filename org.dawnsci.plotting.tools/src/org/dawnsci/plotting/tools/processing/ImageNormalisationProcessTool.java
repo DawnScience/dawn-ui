@@ -44,7 +44,6 @@ import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Comparisons;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.optimize.ApachePolynomial;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
@@ -293,6 +292,7 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 				if(!selectionData.equals(originalData))
 					selectionPlottingSystem.updatePlot2D(originalData, originalAxes, monitor);
 			}
+			profile = AbstractDataset.ones(DatasetUtils.convertToAbstractDataset(originalAxes.get(1)));
 		} else if (type.equals(NormaliseType.ROI) || type.equals(NormaliseType.AUX)){
 			if(roi == null) return;
 	
@@ -307,44 +307,40 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 	@Override
 	protected void createReviewProfile(IProgressMonitor monitor) {
 		List<IDataset> data = new ArrayList<IDataset>();
-		if(type.equals(NormaliseType.NONE)){
-			data.add(new IntegerDataset(originalData.getShape()[0]));
-			data.get(0).setName("Norm");
-			reviewPlottingSystem.updatePlot1D(originalAxes.get(1), data, monitor);
-		} else if(type.equals(NormaliseType.ROI) || type.equals(NormaliseType.AUX)){
-			// smooth the review plot
-			AbstractDataset tmpProfile = profile.clone();
-			
-			if(smoothLevel > 1){
-				try {
-					tmpProfile = ApachePolynomial.getPolynomialSmoothed((AbstractDataset)originalAxes.get(1), profile, smoothLevel, 3);
-					BooleanDataset comp = Comparisons.lessThanOrEqualTo(tmpProfile, 1);
-					tmpProfile.setByBoolean(1, comp);
-				} catch (Exception e) {
-					logger.error("Could not smooth the plot:"+e);
-				}
+
+		// smooth the review plot
+		AbstractDataset tmpProfile = profile.clone();
+		
+		if(smoothLevel > 1){
+			try {
+				tmpProfile = ApachePolynomial.getPolynomialSmoothed((AbstractDataset)originalAxes.get(1), profile, smoothLevel, 3);
+				BooleanDataset comp = Comparisons.lessThanOrEqualTo(tmpProfile, 1);
+				tmpProfile.setByBoolean(1, comp);
+			} catch (Exception e) {
+				logger.error("Could not smooth the plot:"+e);
 			}
-			
-			data.add(profile);
-			data.get(0).setName("Norm");
-			data.add(tmpProfile);
-			data.get(1).setName("Smoothed");
-			reviewPlottingSystem.clear();
-			reviewPlottingSystem.updatePlot1D(originalAxes.get(1), data, monitor);
-
-			AbstractDataset tile = tmpProfile.reshape(tmpProfile.getShapeRef()[0],1);
-
-			AbstractDataset ds = (AbstractDataset) originalData.clone();
-
-			AbstractDataset correctionDataset = DatasetUtils.tile(tile, ds.getShapeRef()[1]);
-			ds.idivide(correctionDataset);
-
-			userPlotBean.addList("norm", ds.clone());
-			userPlotBean.addList("norm_profile", profile.clone());
-			userPlotBean.addList("norm_correction", correctionDataset.clone());
-			
-			getPlottingSystem().updatePlot2D(ds, originalAxes, monitor);
 		}
+		
+		data.add(profile);
+		data.get(0).setName("Norm");
+		data.add(tmpProfile);
+		data.get(1).setName("Smoothed");
+		reviewPlottingSystem.clear();
+		reviewPlottingSystem.updatePlot1D(originalAxes.get(1), data, monitor);
+
+		AbstractDataset tile = tmpProfile.reshape(tmpProfile.getShapeRef()[0],1);
+
+		AbstractDataset ds = (AbstractDataset) originalData.clone();
+
+		AbstractDataset correctionDataset = DatasetUtils.tile(tile, ds.getShapeRef()[1]);
+		ds.idivide(correctionDataset);
+
+		userPlotBean.addList("norm", ds.clone());
+		userPlotBean.addList("norm_profile", profile.clone());
+		userPlotBean.addList("norm_correction", correctionDataset.clone());
+		
+		getPlottingSystem().updatePlot2D(ds, originalAxes, monitor);
+
 	}
 
 	@Override
