@@ -279,7 +279,7 @@ public class CircleSelection extends AbstractSelectionRegion {
 		
 		@Override
 		protected void outlineShape(Graphics graphics) {
-			PointList points = Draw2DUtils.generateCurve(DecoratedCircle.this, 0, 360, 1);
+			PointList points = Draw2DUtils.generateCurve(DecoratedCircle.this, 0, 360);
 			Draw2DUtils.drawClippedPolyline(graphics, points, getParent().getBounds(), true);
 
 			if (label != null && isShowLabel()) {

@@ -470,11 +470,9 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 			graphics.popState();
 		}
 
-		private static final double DELTA = Math.PI/180;
-
 		private void fillSector(Graphics graphics, double[] ang) {
-			PointList points = Draw2DUtils.generateCurve(innerFunction, ang[0], ang[1], DELTA);
-			PointList oPoints = Draw2DUtils.generateCurve(outerFunction, ang[0], ang[1], DELTA);
+			PointList points = Draw2DUtils.generateCurve(innerFunction, ang[0], ang[1]);
+			PointList oPoints = Draw2DUtils.generateCurve(outerFunction, ang[0], ang[1]);
 			oPoints.reverse();
 			points.addAll(oPoints);
 			graphics.fillPolygon(points);
@@ -487,8 +485,8 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 			graphics.setAntialias(SWT.ON);
 
 			double[] ang = getROI().getAngles();
-			PointList points = Draw2DUtils.generateCurve(innerFunction, ang[0], ang[1], DELTA);
-			PointList oPoints = Draw2DUtils.generateCurve(outerFunction, ang[0], ang[1], DELTA);
+			PointList points = Draw2DUtils.generateCurve(innerFunction, ang[0], ang[1]);
+			PointList oPoints = Draw2DUtils.generateCurve(outerFunction, ang[0], ang[1]);
 			oPoints.reverse();
 			points.addAll(oPoints);
 			Rectangle bnd = new Rectangle();
