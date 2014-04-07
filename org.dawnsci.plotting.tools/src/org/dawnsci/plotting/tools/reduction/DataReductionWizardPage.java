@@ -63,7 +63,7 @@ public class DataReductionWizardPage extends AbstractSliceConversionPage {
         // normally acts on.
         int rank=0;
         final DimsDataList dl = sliceComponent.getDimsDataList();
-        for (DimsData dd : dl.getDimsData()) {
+        for (DimsData dd : dl.iterable()) {
 			if (dd.isTextRange()||dd.isSlice()) continue;
 			rank++;
 		}
@@ -95,7 +95,7 @@ public class DataReductionWizardPage extends AbstractSliceConversionPage {
 		final DimsDataList ddl = sliceComponent.getDimsDataList();
 		
 		IDataset x=null; IDataset y=null;
-		for (DimsData dd : ddl.getDimsData()) {
+		for (DimsData dd : ddl.iterable()) {
 			
 			if (dd.getPlotAxis()==AxisType.X) {
 				final String name = names.get(dd.getDimension()+1);

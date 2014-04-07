@@ -154,8 +154,8 @@ public class HyperSlicingTool extends AbstractSlicingTool {
 		final DimsDataList dims = getSlicingSystem().getDimsDataList();
 		final int[] ret = new int[3];
 		
-		for (int i = 0; i < dims.getDimsData().size(); i++) {
-			int axis = dims.getDimsData().get(i).getPlotAxis().getIndex();
+		for (int i = 0; i < dims.size(); i++) {
+			int axis = dims.getDimsData(i).getPlotAxis().getIndex();
 			
 			if (axis > -1 && axis < 3) {
 				ret[axis] = i;
@@ -199,8 +199,8 @@ public class HyperSlicingTool extends AbstractSlicingTool {
 		
 		AbstractDataset[] ret = new AbstractDataset[3];
 		ret.toString();
-		for (int i = 0; i < ddl.getDimsData().size(); i++) {
-			int axis = ddl.getDimsData().get(i).getPlotAxis().getIndex();
+		for (int i = 0; i < ddl.size(); i++) {
+			int axis = ddl.getDimsData(i).getPlotAxis().getIndex();
 			
 			if (axis > -1 && axis < 3) {
 				IDataset id = ia.get(i);

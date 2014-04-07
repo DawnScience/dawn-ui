@@ -70,12 +70,8 @@ public class DimsDataList implements Serializable {
 		}
 	}
 
-	public List<DimsData> getDimsData() {
+	public Iterable<DimsData> iterable() {
 		return dimsData;
-	}
-
-	public void setDimsData(List<DimsData> slices) {
-		this.dimsData = slices;
 	}
 	
 	public void add(DimsData dimension) {
@@ -161,7 +157,7 @@ public class DimsDataList implements Serializable {
 	}
 
 	public boolean isRangeDefined() {
-		for (DimsData data : getDimsData()) {
+		for (DimsData data : iterable()) {
 			if (data.getSliceRange()!=null) return true;
 		}
 		return false;
@@ -190,7 +186,7 @@ public class DimsDataList implements Serializable {
 	
 	public DimsDataList clone() {
 		final DimsDataList clone = new DimsDataList();
-		for (DimsData dd : getDimsData()) {
+		for (DimsData dd : iterable()) {
 			DimsData dnew = dd.clone();
 			clone.add(dnew);
 		}
@@ -202,7 +198,7 @@ public class DimsDataList implements Serializable {
 	 * Sets any axes there are to  the axis passed in
 	 */
 	public void normalise(AxisType axis) {
-		for (DimsData dd : getDimsData()) {
+		for (DimsData dd : iterable()) {
 			if (!dd.getPlotAxis().hasValue()) dd.setPlotAxis(axis);
 		}
 	}
@@ -216,7 +212,7 @@ public class DimsDataList implements Serializable {
 	 */
 	public void setSingleAxisOnly(AxisType iaxisToFind, AxisType iaxisValue) {
 		DimsData found = null;
-		for (DimsData dd : getDimsData()) {
+		for (DimsData dd : iterable()) {
 			if (dd.getPlotAxis()==iaxisToFind) {
 				dd.setPlotAxis(iaxisValue);
 				found=dd;
@@ -224,20 +220,20 @@ public class DimsDataList implements Serializable {
 		}
 		
 		if (found!=null) {
-			for (DimsData dd : getDimsData()) {
+			for (DimsData dd : iterable()) {
 				if (dd==found) continue;
 				dd.setPlotAxis(AxisType.SLICE);
 			}
 			return;
 		} else { // We have to decide which of the others is x
 			
-			for (DimsData dd : getDimsData()) {
+			for (DimsData dd : iterable()) {
 				if (!dd.getPlotAxis().hasValue()) {
 				    dd.setPlotAxis(iaxisValue);
 				    found=dd;
 				}
 			}
-			for (DimsData dd : getDimsData()) {
+			for (DimsData dd : iterable()) {
 				if (dd==found) continue;
 				dd.setPlotAxis(AxisType.SLICE);
 			}
@@ -254,13 +250,13 @@ public class DimsDataList implements Serializable {
 	 */
 	public void setTwoAxesOnly(AxisType firstAxis, AxisType secondAxis) {
 		boolean foundFirst = false, foundSecond = false;
-		for (DimsData dd : getDimsData()) {
+		for (DimsData dd : iterable()) {
 			if (dd.getPlotAxis()==firstAxis)  foundFirst  = true;
 			if (dd.getPlotAxis()==secondAxis) foundSecond = true;
 		}
 		
 		if (foundFirst&&foundSecond) {
-			for (DimsData dd : getDimsData()) {
+			for (DimsData dd : iterable()) {
 				if (dd.getPlotAxis()==firstAxis)  continue;
 				if (dd.getPlotAxis()==secondAxis) continue;
 				if (dd.getPlotAxis()==AxisType.RANGE) continue;
@@ -272,7 +268,7 @@ public class DimsDataList implements Serializable {
 			if (!foundFirst)  foundFirst  = processAxis(firstAxis, secondAxis);
 			if (!foundSecond) foundSecond = processAxis(secondAxis, firstAxis);
 			
-			for (DimsData dd : getDimsData()) {
+			for (DimsData dd : iterable()) {
 				if (dd.getPlotAxis()==firstAxis)  continue;
 				if (dd.getPlotAxis()==secondAxis) continue;
 				if (dd.getPlotAxis()==AxisType.RANGE) continue;
@@ -296,14 +292,14 @@ public class DimsDataList implements Serializable {
 	public void setThreeAxesOnly(AxisType firstAxis, AxisType secondAxis, AxisType thirdAxis) {
 
 		boolean foundFirst = false, foundSecond = false, foundThird = false;
-		for (DimsData dd : getDimsData()) {
+		for (DimsData dd : iterable()) {
 			if (dd.getPlotAxis()==firstAxis)  foundFirst  = true;
 			if (dd.getPlotAxis()==secondAxis) foundSecond = true;
 			if (dd.getPlotAxis()==thirdAxis)  foundThird  = true;
 		}
 		
 		if (foundFirst&&foundSecond&&foundThird) {
-			for (DimsData dd : getDimsData()) {
+			for (DimsData dd : iterable()) {
 				if (dd.getPlotAxis()==firstAxis)  continue;
 				if (dd.getPlotAxis()==secondAxis) continue;
 				if (dd.getPlotAxis()==thirdAxis)  continue;
@@ -317,7 +313,7 @@ public class DimsDataList implements Serializable {
 			if (!foundSecond) foundSecond = processAxis(secondAxis, firstAxis,  thirdAxis);
 			if (!foundThird)  foundThird  = processAxis(thirdAxis,  firstAxis,  secondAxis);
 			
-			for (DimsData dd : getDimsData()) {
+			for (DimsData dd : iterable()) {
 				if (dd.getPlotAxis()==firstAxis)  continue;
 				if (dd.getPlotAxis()==secondAxis) continue;
 				if (dd.getPlotAxis()==thirdAxis)  continue;
@@ -334,14 +330,14 @@ public class DimsDataList implements Serializable {
 	private final boolean processAxis(AxisType axis, AxisType... ignoredAxes) {
 		
 		final List ignored = asList(ignoredAxes);
-		for (DimsData dd : getDimsData()) {
+		for (DimsData dd : iterable()) {
 			if (!dd.getPlotAxis().hasValue() && !ignored.contains(dd.getPlotAxis())) {
 			    dd.setPlotAxis(axis);
 			    return true;
 			}
 		}	
 		
-		for (DimsData dd : getDimsData()) {
+		for (DimsData dd : iterable()) {
 			if (!ignored.contains(dd.getPlotAxis())) {
 				dd.setPlotAxis(axis);
 				return true;
@@ -374,7 +370,7 @@ public class DimsDataList implements Serializable {
     }
 
 	public boolean isXFirst() {
-		for (DimsData dd : getDimsData()) {
+		for (DimsData dd : iterable()) {
 			if (dd.getPlotAxis().hasValue()) continue;
 			return dd.getPlotAxis()==AxisType.X;
 		}
@@ -382,7 +378,7 @@ public class DimsDataList implements Serializable {
 	}
 
 	public void reverseImage() {
-		for (DimsData dd : getDimsData()) {
+		for (DimsData dd : iterable()) {
 			if (dd.getPlotAxis()==AxisType.X) {
 				dd.setPlotAxis(AxisType.Y);
 				continue;
@@ -408,7 +404,7 @@ public class DimsDataList implements Serializable {
 	}
 
 	public boolean isAdvanced() {
-		for (DimsData dd : getDimsData()) {
+		for (DimsData dd : iterable()) {
             if (dd.getPlotAxis().isAdvanced()) return true;
 		}
 		return false;

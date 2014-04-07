@@ -87,7 +87,7 @@ public abstract class AbstractSlicingTool implements ISlicingTool {
 		final int[]            dataShape = getSlicingSystem().getData().getLazySet().getShape();
 		
 		final List<IDataset>         ret = new ArrayList<IDataset>(3);
-		for (DimsData dd : ddl.getDimsData()) {
+		for (DimsData dd : ddl.iterable()) {
 			
 			IDataset axis = null;
 			try {

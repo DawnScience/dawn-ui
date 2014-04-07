@@ -156,7 +156,7 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 	public void setSlice(final ILazyDataset lazy, final DimsDataList dList) {
 		if (dList!=null) {
 			this.dimsList = dList.clone();
-			for (DimsData dd : dimsList.getDimsData()) {
+			for (DimsData dd : dimsList.iterable()) {
 				if (dd.isSlice()) {
 					context.addSliceDimension(dd.getDimension(), String.valueOf(dd.getSlice()));
 					if (dd.getSlice()>0) {
