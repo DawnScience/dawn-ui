@@ -97,7 +97,7 @@ public class SWTXYRegionsTest {
 		for (File file : fa) {
 			if (!file.isFile()) continue;
 			if (LoaderFactory.getSupportedExtensions().contains(FileUtils.getFileExtension(file))) {
-				final AbstractDataset set = LoaderFactory.getData(file.getAbsolutePath(), null).getDataset(0);
+				final IDataset set = LoaderFactory.getData(file.getAbsolutePath(), null).getDataset(0);
 				system.updatePlot2D(set, null, null);
 				
 				EclipseUtils.delay(1);

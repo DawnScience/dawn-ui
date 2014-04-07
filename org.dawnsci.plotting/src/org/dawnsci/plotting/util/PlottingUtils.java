@@ -34,7 +34,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Slice;
 import uk.ac.diamond.scisoft.analysis.hdf5.HDF5NodeLink;
-import uk.ac.diamond.scisoft.analysis.io.DataHolder;
+import uk.ac.diamond.scisoft.analysis.io.IDataHolder;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
@@ -150,7 +150,7 @@ public class PlottingUtils {
 	public static AbstractDataset loadData(final String fileName, final String dataPath){
 		AbstractDataset dataset = null;
 		try {
-			DataHolder data = LoaderFactory.getData(fileName, null);
+			IDataHolder data = LoaderFactory.getData(fileName, null);
 			IMetaData md = data.getMetadata();
 			Map<String, ILazyDataset> map = data.toLazyMap();
 			ILazyDataset tmpvalue = map.get(dataPath);

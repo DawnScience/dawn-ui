@@ -1,7 +1,5 @@
 package org.dawnsci.plotting.expression;
 
-import gda.analysis.io.ScanFileHolderException;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +13,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.io.ILazyLoader;
+import uk.ac.diamond.scisoft.analysis.io.ScanFileHolderException;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
 class ExpressionLazyLoader implements ILazyLoader {

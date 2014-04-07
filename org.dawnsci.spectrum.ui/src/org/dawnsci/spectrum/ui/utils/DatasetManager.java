@@ -9,6 +9,7 @@ import java.util.Map;
 
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.io.DataHolder;
+import uk.ac.diamond.scisoft.analysis.io.IDataHolder;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
@@ -30,7 +31,7 @@ public class DatasetManager {
 			
 			//should work, doesn't
 			//IMetaData meta = LoaderFactory.getMetaData(path, null);
-			DataHolder dh = LoaderFactory.getData(path);
+			IDataHolder dh = LoaderFactory.getData(path);
 			IMetaData meta =dh.getMetadata();
 
 			
@@ -44,7 +45,7 @@ public class DatasetManager {
 		}
 		
 		try {
-			DataHolder dh = LoaderFactory.getData(path);
+			IDataHolder dh = LoaderFactory.getData(path);
 			if (dh != null) {
 				return getDatasetManager(dh);
 			}
@@ -98,7 +99,7 @@ public class DatasetManager {
 			
 			if (shape == null) {
 				try {
-					DataHolder dh = LoaderFactory.getData(meta.getFilePath());
+					IDataHolder dh = LoaderFactory.getData(meta.getFilePath());
 					shape = dh.getLazyDataset(name).getShape();
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
@@ -121,7 +122,7 @@ public class DatasetManager {
 		return new DatasetManager(shapeMap.keySet(), axis, all);
 	}
 	
-	private static DatasetManager getDatasetManager(DataHolder dh) {
+	private static DatasetManager getDatasetManager(IDataHolder dh) {
 //		
 		String[] names = dh.getNames();
 		Map<Integer, List<String>> axis = new HashMap<Integer, List<String>>();
