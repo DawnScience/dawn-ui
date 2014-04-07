@@ -654,8 +654,8 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		} else if (plottingMode.isStacked3D()) {
 			traceMap.clear();
 			ILineStackTrace trace = null;
-			// Limit the number of stack plots to 100
-			if (ysIn.size() > 100)
+			// Limit the number of stack plots
+			if (ysIn.size() > ILineStackTrace.MAXIMUM_STACK)
 				trace = jrealityViewer.createStackTrace(title, ILineStackTrace.MAXIMUM_STACK);
 			else
 				trace = jrealityViewer.createStackTrace(title, ysIn.size());

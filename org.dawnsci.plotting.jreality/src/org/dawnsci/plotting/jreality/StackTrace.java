@@ -122,13 +122,6 @@ public class StackTrace extends PlotterTrace implements ILineStackTrace {
 	}
 
 	@Override
-	protected void setActive(boolean active) {
-		super.setActive(active);
-		if (active && plotter!=null) // hack as the window is set in createStackTrace when trace is not active
-			plotter.setStackWindow(window);
-	}
-
-	@Override
 	public IStatus setWindow(IROI roi, IProgressMonitor monitor) {
 		window=roi;
 		if (plotter!=null && this.isActive()) plotter.setStackWindow(window);
