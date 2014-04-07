@@ -110,54 +110,83 @@ public class Draw2DUtils {
 	 * @param fn
 	 * @param lower
 	 * @param upper
-	 * @param delta
 	 * @return a point list of curve
 	 */
-	public static PointList generateCurve(PointFunction fn, double lower, double upper, double delta) {
-		return generateCurve(fn, lower, upper, delta, 3, Math.toRadians(0.5));
+	public static PointList generateCurve(PointFunction fn, double lower, double upper) {
+		return generateCurve(fn, lower, upper, Math.toRadians(0.5));
 	}
+
+	private final static double MIN_DISTANCE = 2.0;
 
 	/**
 	 * Generate a curve from a parametrised point function
 	 * @param fn
 	 * @param lower
 	 * @param upper
-	 * @param delta
-	 * @param minDistance
 	 * @param maxAngle (in radians)
 	 * @return a point list of curve
 	 */
-	public static PointList generateCurve(PointFunction fn, double lower, double upper, double delta, double minDistance, double maxAngle) {
-		double vd = delta;
+	public static PointList generateCurve(PointFunction fn, double lower, double upper, double maxAngle) {
+		if (lower > upper) {
+			double t = lower;
+			lower = upper;
+			upper = t;
+		}
+
+		double vd = (upper - lower) / 128.;
 		PointList list = new PointList();
 		Point pp, pc;
 		pp = fn.calculatePoint(lower);
 		list.addPoint(pp);
+		double vc = lower + vd;
+		double dxc, dyc; // current deltas
+		double sc;
+		do { // find second point less than minimal distance
+			pc = fn.calculatePoint(vc);
+			dxc = pc.x() - pp.x();
+			dyc = pc.y() - pp.y();
+			sc = Math.hypot(dxc, dyc);
+			if (sc <= MIN_DISTANCE) {
+				break;
+			}
+			vd *= 0.5;
+			vc -= vd;
+		} while (vc < upper);
+		list.addPoint(pc);
+		pp = pc;
+		vc += vd;
+
+		double dxp = dxc;
+		double dyp = dyc;
 		double cos = Math.cos(maxAngle);
 		boolean force = false;
-		double vc = lower + vd;
-		double dxp = Double.NaN; // previous deltas
-		double dyp = 0;
-		double sp = 0;
+		double sp = sc;
 		while (vc < upper) {
 			pc = fn.calculatePoint(vc);
-			double dxc = pc.x() - pp.x(); // current deltas
-			double dyc = pc.y() - pp.y();
-			double sc = Math.hypot(dxc, dyc);
-			if (sc >= minDistance) {
-				if (Double.isNaN(dxp)) {
+			dxc = pc.x() - pp.x();
+			dyc = pc.y() - pp.y();
+			sc = Math.hypot(dxc, dyc);
+			if (sc >= MIN_DISTANCE) {
+				double cc = dxc * dxp + dyc * dyp;
+				if (cc * cc < sc * sp * cos) {
+					// angle too wide so halve step and backtrack
 					vd *= 0.5;
 					vc -= vd;
 					force = true; // prevent bouncing
 					continue;
 				} else {
-					double cc = dxc * dxp + dyc * dyp;
-					if (cc * cc < sc * sp * cos) {
-						// angle too wide so halve step and backtrack
+					// check if mid point is better i.e. has smaller angle (larger cos)
+					Point tp = fn.calculatePoint(vc - vd*0.5);
+					double tdx = tp.x() - pp.x();
+					double tdy = tp.y() - pp.y();
+					double tc = tdx * dxp + tdy * dyp;
+					if (tc > cc) {
 						vd *= 0.5;
 						vc -= vd;
-						force = true; // prevent bouncing
-						continue;
+						pc = tp;
+						dxc = tdx;
+						dyc = tdy;
+						sc = Math.hypot(dxp, dyc);
 					}
 				}
 			} else if (!force) {
@@ -186,11 +215,10 @@ public class Draw2DUtils {
 	 * @param fn
 	 * @param lower
 	 * @param upper
-	 * @param delta
 	 * @return true, if drawn
 	 */
-	public static boolean drawCurve(Graphics g, Rectangle bounds, boolean isPolygon, PointFunction fn, double lower, double upper, double delta) {
-		return drawCurve(g, bounds, isPolygon, fn, lower, upper, delta, 3, Math.toRadians(0.5));
+	public static boolean drawCurve(Graphics g, Rectangle bounds, boolean isPolygon, PointFunction fn, double lower, double upper) {
+		return drawCurve(g, bounds, isPolygon, fn, lower, upper, Math.toRadians(0.5));
 	}
 
 	/**
@@ -201,12 +229,10 @@ public class Draw2DUtils {
 	 * @param fn
 	 * @param lower
 	 * @param upper
-	 * @param delta
-	 * @param minDistance
 	 * @param maxAngle (in radians)
 	 * @return true, if drawn
 	 */
-	public static boolean drawCurve(Graphics g, Rectangle bounds, boolean isPolygon, PointFunction fn, double lower, double upper, double delta, double minDistance, double maxAngle) {
+	public static boolean drawCurve(Graphics g, Rectangle bounds, boolean isPolygon, PointFunction fn, double lower, double upper, double maxAngle) {
 		List<Double> parameters = new ArrayList<Double>();
 		double[] angles;
 
@@ -303,7 +329,7 @@ public class Draw2DUtils {
 		for (int i = 1; i < size; i++) {
 			double e = subset.get(i);
 			if (inside) {
-				PointList list = generateCurve(fn, b, e, delta, minDistance, maxAngle);
+				PointList list = generateCurve(fn, b, e, maxAngle);
 				g.drawPolyline(list);
 			}
 			inside = !inside;
