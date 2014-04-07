@@ -248,7 +248,8 @@ public class PowderCheckTool extends AbstractToolPage {
 									return (int) Math.signum(o1.getCalibrantQValue()-o2.getCalibrantQValue());
 								}
 							});
-							viewer.setInput(resultsList);
+							
+							if (viewer != null && !viewer.getTable().isDisposed()) viewer.setInput(resultsList);
 						}
 					});
 				}
