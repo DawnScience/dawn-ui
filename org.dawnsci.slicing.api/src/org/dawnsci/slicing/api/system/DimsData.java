@@ -247,4 +247,9 @@ public class DimsData implements Serializable {
 	public void setSliceSpan(int sliceSpan) {
 		this.sliceSpan = sliceSpan;
 	}
+
+	public String getShapeLabel() {
+		if (getPlotAxis().hasValue()) return getPlotAxis().getLabel();
+		return String.valueOf(slice);
+	}
 }

@@ -25,6 +25,7 @@ public class DimsDataList implements Serializable {
 	
 	
 	private List<DimsData> dimsData;
+
 	private boolean        expression;
 		
 	public DimsDataList() {
@@ -410,5 +411,20 @@ public class DimsDataList implements Serializable {
 		return false;
 	}
 
+	/**
+	 * DO NOT USE THIS IS FOR XML SERLIALIZATION
+	 * @return
+	 */
+	public List<DimsData> getDimsData() {
+		return dimsData;
+	}
+
+	/**
+	 * DO NOT USE THIS IS FOR XML SERLIALIZATION
+	 * @return
+	 */
+	public void setDimsData(List<DimsData> dimsData) {
+		this.dimsData = dimsData;
+	}
 
 }
