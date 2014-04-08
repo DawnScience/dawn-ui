@@ -1,5 +1,7 @@
 package org.dawnsci.product.plugin;
 
+import java.util.Locale;
+
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -13,6 +15,12 @@ public class Activator extends AbstractUIPlugin {
 
 	// The shared instance
 	private static Activator plugin;
+	
+	static {
+		final Locale local   = Locale.getDefault();
+		final Locale english = new Locale("en", local.getCountry());
+		Locale.setDefault(english);
+	}
 	
 	/**
 	 * The constructor
