@@ -1,5 +1,6 @@
 package org.dawnsci.spectrum.ui.wizard;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
@@ -8,6 +9,10 @@ import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.PlottingFactory;
 import org.dawnsci.spectrum.ui.file.IContain1DData;
 import org.dawnsci.spectrum.ui.processing.SubtractionProcess;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -22,6 +27,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 
+import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 
@@ -31,6 +38,7 @@ public class SpectrumSubtractionWizardPage extends WizardPage implements ISpectr
 	IDataset xdata, ydata1, ydata2;
 	IPlottingSystem system;
 	double scale = 1;
+	Job subtractionJob;
 	
 	SubtractionProcess process;
 
@@ -47,9 +55,10 @@ public class SpectrumSubtractionWizardPage extends WizardPage implements ISpectr
 		GridLayout layout = new GridLayout(2, false);
 		container.setLayout(layout);
 		setControl(container);
-		
+		setTitle("Subtraction wizard page");
+		setDescription("Adjust scale value for subtraction");
 		Label label = new Label(container,SWT.None); 
-		label.setText("Subtraction wizard page");
+		label.setText("");
 		label.setLayoutData(new GridData());
 		ActionBarWrapper actionBarWrapper = ActionBarWrapper.createActionBars(container, null);
 		Composite controlComposite = new Composite(container, SWT.None);
@@ -107,15 +116,37 @@ public class SpectrumSubtractionWizardPage extends WizardPage implements ISpectr
 	
 	private void update() {
 		
-		process.setScale(scale);
+		if (subtractionJob == null) {
+			subtractionJob = new Job("subtraction") {
+				
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					process.setScale(scale);
+					
+			        List<IContain1DData> out = process.process(dataList);
+			        
+			        List<IDataset> yds = out.get(0).getyDatasets();
+			        
+			        int i = 0;
+			        for (IDataset ds : yds) ds.setName("difference_"+ i++);
+			        
+			        IDataset y = dataList.get(0).getyDatasets().get(0).clone();
+			        y.setName("data");
+			        IDataset sub = process.getSubtrahend().getyDatasets().get(0).clone();
+			        AbstractDataset suba = DatasetUtils.convertToAbstractDataset(sub);
+			        suba.imultiply(scale);
+			        suba.setName("subtrahend");
+					//system.clear();
+					system.updatePlot1D(dataList.get(0).getxDataset(),Arrays.asList(new IDataset[]{y}) ,null);
+					system.updatePlot1D(process.getSubtrahend().getxDataset(), Arrays.asList(new IDataset[]{suba}) , null);
+					system.updatePlot1D(out.get(0).getxDataset(),out.get(0).getyDatasets() ,null);
+					system.repaint();
+					return Status.OK_STATUS;
+				}
+			};
+		}
 		
-        List<IContain1DData> out = process.process(dataList);
-        
-		system.clear();
-		system.createPlot1D(dataList.get(0).getxDataset(),dataList.get(0).getyDatasets() ,null);
-		system.createPlot1D(process.getSubtrahend().getxDataset(), process.getSubtrahend().getyDatasets(), null);
-		system.createPlot1D(out.get(0).getxDataset(),out.get(0).getyDatasets() ,null);
-		
+		subtractionJob.schedule();
 	}
 	
 	public void setVisible(boolean visible) {

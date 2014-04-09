@@ -228,7 +228,20 @@ public interface IAxis {
 	 */
 	public double getPositionValue(int position);
 
+	/**
+	 * The value for a position in pixels.
+	 * @param position
+	 * @return
+	 */
+	public double getValueFromPosition(double position);
 	
+	/**
+	 * The position in pixels of a given value.
+	 * @param value
+	 * @return
+	 */
+	public double getPositionFromValue(double value);
+
 	/**
 	 * Sets an alternative dataset to use for the labels and the title
 	 * @param labels

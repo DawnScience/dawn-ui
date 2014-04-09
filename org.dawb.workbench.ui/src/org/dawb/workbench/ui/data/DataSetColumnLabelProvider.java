@@ -97,8 +97,9 @@ class DataSetColumnLabelProvider extends ColumnLabelProvider implements IStyledL
 	public String getText(Object ob) {
 		
 		final ITransferableDataObject element = (ITransferableDataObject)ob;
-		final String          name    = element.toString();
-		IMetaData metaData = component.getMetaData();
+		
+		// Get shape (should be fast as does not evaluate expressions).
+		final int[] shape  = element.getShape(false);
 		
 		switch (columnIndex) {
 		case 0:
@@ -110,47 +111,24 @@ class DataSetColumnLabelProvider extends ColumnLabelProvider implements IStyledL
 			return element.getAxis(component.getSelections(), system.is2D(), ((AbstractPlottingSystem)system).isXFirst());
 
 		case 3:
-			if (!element.isExpression()) {
-				try {
-					if (metaData==null || metaData.getDataSizes()==null || !metaData.getDataSizes().containsKey(name)) {
-						final ILazyDataset set = element.getLazyData(new IMonitor.Stub());
-						if (set!=null) {
-							return set.getSize()+"";
-						}
-					    return "Unknown";
-						
-					}
-				} catch (IllegalArgumentException ne) {
-					return "large";
-				}
-				return metaData.getDataSizes().get(name)+"";
-			} else {
-				final ILazyDataset set = element.getLazyData(new IMonitor.Stub());
-				if (set!=null) {
-					return set.getSize()+"";
-				}
-			    return "Unknown";
+			if (shape!=null) {
+				int size = 1;
+				for (int i : shape) size*=i;
+				return size+"";
 			}
+		    return "";
+
 		case 4:
-			return element.getShape(false).length+"";
-		case 5:
-			if (!element.isExpression()) {
-				if (metaData==null ||metaData.getDataShapes()==null || metaData.getDataShapes().get(name)==null) {
-					final ILazyDataset set = element.getLazyData(new IMonitor.Stub());
-					if (set!=null) {
-						return Arrays.toString(set.getShape());
-					}
-				    return "Unknown";
-					
-				}
-				return Arrays.toString(metaData.getDataShapes().get(name));
-			}  else {
-				final ILazyDataset set = element.getExpression().getLazyDataSet(name, new IMonitor.Stub());
-				if (set!=null) {
-					return Arrays.toString(set.getShape());
-				}
-			    return "Unknown";
+			if (shape!=null) {
+				return shape.length+"";
 			}
+		    return "";
+		
+		case 5:
+			if (shape!=null) {
+				return Arrays.toString(shape);
+			}
+		    return "";
 
 		case 6:
 			return element.getVariable();

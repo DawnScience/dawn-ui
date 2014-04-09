@@ -30,6 +30,11 @@ import uk.ac.diamond.scisoft.analysis.roi.IROI;
 public interface ILineStackTrace extends IAxesTrace, IWindowTrace {
 
 	/**
+	 * Maximum number of stack plots used for the stack window slicing tool
+	 */
+	public static final int MAXIMUM_STACK = 100;
+
+	/**
 	 * For IStackTrace, calling this method will throw a RuntimeException
 	 * all the time which ask you to use getStack() instead.
 	 */
@@ -59,12 +64,12 @@ public interface ILineStackTrace extends IAxesTrace, IWindowTrace {
 	
 	/**
 	 * 
-	 * @return the region of the window, usually a LineROI
+	 * @return the region of the window, usually a LinearROI
 	 */
 	public IROI getWindow();
 	
 	/**
-	 * Set the window to be used as a LineROI. The first x value is
+	 * Set the window to be used as a LinearROI. The first x value is
 	 * the start of the window, the second x value is the end. the y
 	 * values are ignored.
 	 * 

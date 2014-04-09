@@ -18,11 +18,15 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ListDialog;
-import org.eclipse.ui.dialogs.ListSelectionDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
+import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
+import uk.ac.diamond.scisoft.analysis.diffraction.IDetectorPropertyListener;
 import uk.ac.diamond.scisoft.analysis.io.ILoaderService;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
@@ -41,9 +45,12 @@ public class DiffractionDataManager {
 	private HashSet<IDiffractionDataListener> listeners;
 	
 	public DiffractionDataManager() {
-		service = (ILoaderService) PlatformUI.getWorkbench().getService(ILoaderService.class);
-		model= new ArrayList<DiffractionTableData>();
-		listeners     = new HashSet<IDiffractionDataListener>();
+		this(new ArrayList<DiffractionTableData>(7));
+	}
+	public DiffractionDataManager(List<DiffractionTableData> model) {
+		this.model = model;
+		service    = (ILoaderService) PlatformUI.getWorkbench().getService(ILoaderService.class);
+		listeners  = new HashSet<IDiffractionDataListener>();
 	}
 	
 	public void setModel(List<DiffractionTableData> model) {
@@ -64,19 +71,58 @@ public class DiffractionDataManager {
 	
 	public void setWavelength(double wavelength) {
 		for (DiffractionTableData data : model) {
-			data.md.getDiffractionCrystalEnvironment().setWavelength(wavelength);
+			data.getMetaData().getDiffractionCrystalEnvironment().setWavelength(wavelength);
 		}
 	}
 	
-	public List<DiffractionTableData> getModel() {
-		return model;
+	// Encapsulation is goooood.
+	public DiffractionTableData[] toArray() {
+		return model.toArray(new DiffractionTableData[model.size()]);
+	}
+
+	// Encapsulation is goooood.
+	public Iterable<DiffractionTableData> iterable() {
+		return model; // Cannot get at data unless they cast. Could provide protection against this in future.
 	}
 	
+	// Encapsulation is goooood.
+	public int getSize() {
+		return model.size();
+	}
+	
+	// Encapsulation is goooood.
+	public boolean remove(DiffractionTableData selectedData) {
+		return model.remove(selectedData);
+	}
+
+	// Encapsulation is goooood.
+	public boolean isValidModel() {
+		return model!=null && getSize()>0;
+	}
+	
+	// Encapsulation is goooood.
+	public DiffractionTableData getLast() {
+		return isValidModel() ? model.get(model.size()-1) : null;
+	}
+    
+	/**
+	 * Resets the meta data
+	 */
+	public void reset() {
+		for (DiffractionTableData model : iterable()) {
+			// Restore original metadata
+			DetectorProperties originalProps = model.getMetaData().getOriginalDetector2DProperties();
+			DiffractionCrystalEnvironment originalEnvironment =model.getMetaData().getOriginalDiffractionCrystalEnvironment();
+			model.getMetaData().getDetector2DProperties().restore(originalProps);
+			model.getMetaData().getDiffractionCrystalEnvironment().restore(originalEnvironment);
+		}		
+	}
+
 	public void loadData(String filePath, String dataFullName) {
 		if (filePath == null) return;
 
 		for (DiffractionTableData d : model) {
-			if (filePath.equals(d.path)) {
+			if (filePath.equals(d.getPath())) {
 				return;
 			}
 		}
@@ -159,11 +205,12 @@ public class DiffractionDataManager {
 			image.setName(fileName + ":" + image.getName());
 
 			DiffractionTableData data = new DiffractionTableData();
-			data.path = path;
-			data.name = fileName;
-			data.image = image;
+			data.setPath(path);
+			data.setName(fileName);
+			data.setImage(image);
 			String[] statusString = new String[1];
-			data.md = DiffractionUtils.getDiffractionMetadata(image, path, service, statusString);
+			data.setMetaData(DiffractionUtils.getDiffractionMetadata(image, path, service, statusString));
+			data.getImage().setMetadata(data.getMetaData());
 			model.add(data);
 			
 			fireDiffractionDataListeners(new DiffractionDataChanged(data));
@@ -184,5 +231,29 @@ public class DiffractionDataManager {
 		}
 
 	}
+
+	public void dispose() {
+		if (model!=null) model.clear(); // Helps garbage collector.
+	}
+
+	public AbstractDataset getDistances() {
+		
+		if (!isValidModel()) return null; // Or raise exception?
+		
+		double[] deltaDistance = new double[getSize()];
+		
+		for (int i = 0; i < model.size(); i++) deltaDistance[i] = model.get(i).getDistance();
+		
+		return new DoubleDataset(deltaDistance, new int[]{deltaDistance.length});
+	}
+	
+	public void clear(IDetectorPropertyListener listener) {
+		if (!isValidModel()) return;
+		if (listener!=null) for (DiffractionTableData d : iterable()) {
+			d.getMetaData().getDetector2DProperties().removeDetectorPropertyListener(listener);
+		}
+		model.clear();
+	}
+
 
 }

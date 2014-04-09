@@ -44,11 +44,18 @@ public interface ITransferableDataObject {
 	 * The shape of the data. If the data is an image, will attempt to 
 	 * get the shape WITHOUT reading all the data as many image loaders do.
 	 * 
-	 * @param squeeze
+	 * If the data is an expression, will attempt to get the shape without
+	 * evaluating the expression if it has not already been evaluated (=faster)
+	 * 
+	 * @param force -  if forced expressions will be evaluated and datasets squeezed.
 	 * @return
 	 */
-	public int[] getShape(boolean squeeze);
+	public int[] getShape(boolean force);
 
+	/**
+	 * Name of transferable.
+	 * @return
+	 */
 	public String getName();
 
 	/**

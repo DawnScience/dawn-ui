@@ -54,7 +54,6 @@ public class GridSelection extends BoxSelection implements IGridSelection{
 	}
 
 	protected void drawMidPoint(double x, double y, Graphics gc) {
-		
 		int[] pnt = coords.getValuePosition(x, y);
 		gc.pushState();
 		gc.setAlpha(255);
@@ -98,7 +97,7 @@ public class GridSelection extends BoxSelection implements IGridSelection{
 
 		IROI croi = getROI();
 		if (croi != null && croi instanceof GridROI) {
-			GridROI groi = (GridROI)createROI(false);
+			GridROI groi = (GridROI) croi;
 
 			if (groi.isMidPointOn()) {
 				double[][] points = getGridPoints(groi);
@@ -121,7 +120,6 @@ public class GridSelection extends BoxSelection implements IGridSelection{
 	 * @return [xpoints][ypoints]
 	 */
 	protected void drawGridLines(GridROI groi, Graphics gc) {
-
 		gc.pushState();
 		gc.setAlpha(255);
 		gc.setForegroundColor(gridColor);
@@ -141,7 +139,6 @@ public class GridSelection extends BoxSelection implements IGridSelection{
 			}
 			
 			for (int i = 0; i < yGrids; i++) {
-
 				int[] pnt1 = coords.getValuePosition(spt[0], gridLines[1][i]);
 				int[] pnt2 = coords.getValuePosition(spt[0] + len[0], gridLines[1][i]);
 				gc.drawLine(pnt1[0], pnt1[1], pnt2[0], pnt2[1]);
@@ -170,9 +167,10 @@ public class GridSelection extends BoxSelection implements IGridSelection{
 			// these in the RegionComposite...
 			groi.setxySpacing(oldRoi.getxSpacing(), oldRoi.getySpacing());
 			groi.setGridPreferences(oldRoi.getGridPreferences());
-		    groi.setGridLineOn(oldRoi.isGridLineOn());
-		    groi.setMidPointOn(oldRoi.isMidPointOn());
-		    
+			groi.setGridLineOn(oldRoi.isGridLineOn());
+			groi.setMidPointOn(oldRoi.isMidPointOn());
+		} else {
+			box.croi = groi;
 		}
 
 		groi.setName(getName());

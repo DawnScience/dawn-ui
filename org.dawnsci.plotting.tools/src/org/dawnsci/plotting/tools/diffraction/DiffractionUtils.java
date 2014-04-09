@@ -28,7 +28,7 @@ public class DiffractionUtils {
 	private static final Logger logger = LoggerFactory.getLogger(DiffractionUtils.class);
 
 	/**
-	 * Fetch diffraction metadata
+	 * Fetch diffraction metadata, doesn't add it to the IDataset
 	 * @param image
 	 * @param altPath alternative for file path if metadata is null or does not hold it
 	 * @param service
@@ -62,14 +62,12 @@ public class DiffractionUtils {
 						if (statusText != null)
 							statusText[0] = "Locked metadata does not match image dimensions!";
 					}
-					image.setMetadata(mdImage);
 				}
 			} else {
 				//TODO what if the image is rotated?
 				
 				if (shape[0] == lockedMeta.getDetector2DProperties().getPx() &&
 					shape[1] == lockedMeta.getDetector2DProperties().getPy()) {
-					image.setMetadata(lockedMeta.clone());
 				} else {
 					IDiffractionMetadata clone = lockedMeta.clone();
 					clone.getDetector2DProperties().setPx(shape[0]);
@@ -104,7 +102,8 @@ public class DiffractionUtils {
 			NexusDiffractionMetaCreator ndmc = new NexusDiffractionMetaCreator(filePath);
 			IDiffractionMetadata difMet = ndmc.getDiffractionMetadataFromNexus(shape);
 			if (difMet !=null) {
-				image.setMetadata(difMet);
+				//TODO comment out
+				//image.setMetadata(difMet);
 				if (statusText != null && statusText[0] == null) {
 					if (ndmc.isCompleteRead())
 						statusText[0] = "Metadata completely loaded from nexus tree";
@@ -139,7 +138,7 @@ public class DiffractionUtils {
 		
 		// if there is no meta or is not nexus or IDiff create default IDiff and put it in the dataset
 		mdImage = DiffractionDefaultMetadata.getDiffractionMetadata(filePath, shape);
-		image.setMetadata(mdImage);
+		//image.setMetadata(mdImage);
 		if (statusText != null && statusText[0] == null) {
 			statusText[0] = "No metadata found. Values loaded from preferences:";
 		}

@@ -317,14 +317,14 @@ public class XYRegionGraph extends XYGraph {
 		
 		annotation.setLabelProvider(new IAnnotationLabelProvider() {		
 			@Override
-			public String getInfoText(double xValue, double yValue) {
+			public String getInfoText(double xValue, double yValue, boolean showName, boolean showSample, boolean showPosition) {
 				if (getRegionArea().getImageTrace()==null) return null;
 				if (annotation.getTrace()!=null) return null;
 				
 				final ImageTrace im = getRegionArea().getImageTrace();
 				final StringBuilder buf = new StringBuilder();
-				buf.append(annotation.getName());
-				try {
+				if (showName) buf.append(annotation.getName());
+				if (showSample) try {
 					if (annotation.getXAxis().getRange().inRange(xValue) &&
 						annotation.getYAxis().getRange().inRange(yValue)) {
 						
@@ -335,12 +335,14 @@ public class XYRegionGraph extends XYGraph {
 				} catch (Exception ignored) {
 					// We carry on if the pixel locations are invalid.
 				}
-				buf.append("\nLocation ");
-				buf.append("(");
-				buf.append(integerFormat.format(xValue));
-				buf.append(" : ");
-				buf.append(integerFormat.format(yValue));
-				buf.append(")");
+				if (showPosition) {
+					buf.append("\nLocation ");
+					buf.append("(");
+					buf.append(integerFormat.format(xValue));
+					buf.append(" : ");
+					buf.append(integerFormat.format(yValue));
+					buf.append(")");
+				}
 				return buf.toString();
 			}
 		});

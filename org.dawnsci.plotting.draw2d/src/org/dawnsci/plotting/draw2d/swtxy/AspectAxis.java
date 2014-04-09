@@ -24,6 +24,7 @@ import org.eclipse.nebula.visualization.xygraph.linearscale.Range;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 /**
@@ -362,14 +363,26 @@ public class AspectAxis extends Axis implements IAxis {
 		return new Range(lower, upper);
 	}
 
+	private static String getTitleFromLabelData(IDataset label) {
+		if (label == null) {
+			return null;
+		}
+		String title = label.getName();
+		if (title == null || title.length() == 0)
+			return null;
+		return title;
+	}
+
 	@Override
 	public void setLabelDataAndTitle(IDataset labels) {
 		if (labels!=null && labels.getRank()!=1) {
 			return;
 		}
-		this.labelData = (AbstractDataset)labels;
-		if (labels != null)
-			setTitle(labels.getName());
+		labelData = DatasetUtils.convertToAbstractDataset(labels);
+		String text = getTitleFromLabelData(labels);
+		if (text != null) {
+			setTitle(text);
+		}
 	}
 	
 	/**
@@ -417,6 +430,16 @@ public class AspectAxis extends Axis implements IAxis {
 	@Override
 	public double getPositionValue(int position) {
 		return getPositionValue(position, false);
+	}
+
+	@Override
+	public double getValueFromPosition(double position) {
+		return getPositionValue(position, false);
+	}
+
+	@Override
+	public double getPositionFromValue(double value) {
+		return getValuePrecisePosition(value, false);
 	}
 
 	protected Collection<IAxisListener> axisListeners;

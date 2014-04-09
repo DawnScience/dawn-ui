@@ -419,11 +419,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					yOffset = (yPixD - yPix)*yScale;
 					break;
 				}
-				if (yPix+fullHeight > ySize) {
+				if (xPix < 0 || yPix < 0 || xPix+fullWidth > xSize || yPix+fullHeight > ySize) {
 					return false; // prevent IAE in calling getPixel
-				}
-				if (xPix+fullWidth > xSize) {
-					return false;
 				}
 				// Slice the data.
 				// Pixel slice on downsampled data = fast!
@@ -1384,39 +1381,51 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	
 	@Override
 	public double[] getPointInAxisCoordinates(final double[] point) throws Exception {
-		if (!TraceUtils.isCustomAxes(this)) return point;
+		if (axes == null || axes.size() == 0 || image == null)
+			return point;
+
+		final double[] ret = point.clone();
+		final int[] shape = image.getShapeRef();
 		
 		final AbstractDataset xl = (AbstractDataset)axes.get(0); // May be null
-		final AbstractDataset yl = (AbstractDataset)axes.get(1); // May be null
-		
-		final double[] ret = point.clone();
-		if (xl!=null && xl.getDtype()==AbstractDataset.INT && xl.getSize()==image.getShape()[1] && xl.getInt(0)==0) {
-			// Axis is index.
-		} else {
-			TraceUtils.transform(xl,0,ret);
+		if (TraceUtils.isAxisCustom(xl, shape[1])) {
+			TraceUtils.transform(xl, 0, ret);
 		}
-		
-		if (yl!=null && yl.getDtype()==AbstractDataset.INT && yl.getSize()==image.getShape()[0] && yl.getInt(0)==0) {
-			// Axis is index.
-		} else {
-			TraceUtils.transform(yl,1,ret);
+
+		if (axes.size() < 2)
+			return ret;
+
+		final AbstractDataset yl = (AbstractDataset)axes.get(1); // May be null
+		if (TraceUtils.isAxisCustom(yl, shape[0])) {
+			TraceUtils.transform(yl, 1, ret);
 		}
         return ret;
 	}
-	
+
 	@Override
 	public double[] getPointInImageCoordinates(final double[] axisLocation) throws Exception {
-		if (!TraceUtils.isCustomAxes(this)) return axisLocation;
-		
-		final AbstractDataset xl = (AbstractDataset)axes.get(0); // May be null
-		final AbstractDataset yl = (AbstractDataset)axes.get(1); // May be null
-		final double xIndex = Double.isNaN(axisLocation[0])
-				            ? Double.NaN
-				            : DatasetUtils.crossings(xl, axisLocation[0]).get(0);
-		final double yIndex = Double.isNaN(axisLocation[1])
-	                        ? Double.NaN
-	            		    : DatasetUtils.crossings(yl, axisLocation[1]).get(0);
-        return new double[]{xIndex, yIndex};
+		if (axes == null || axes.size() == 0 || image == null)
+			return axisLocation;
+
+		final double[] ret = axisLocation.clone();
+		final int[] shape = image.getShapeRef();
+
+		final AbstractDataset xl = (AbstractDataset) axes.get(0); // May be null
+		if (TraceUtils.isAxisCustom(xl, shape[1])) {
+			double x = axisLocation[0];
+			ret[0] = Double.isNaN(x) ? Double.NaN : DatasetUtils.crossings(xl, x).get(0);
+		}
+
+		if (axes.size() < 2)
+			return ret;
+
+		final AbstractDataset yl = (AbstractDataset) axes.get(1); // May be null
+		if (TraceUtils.isAxisCustom(yl, shape[0])) {
+			double y = axisLocation[1];
+			ret[1] = Double.isNaN(y) ? Double.NaN : DatasetUtils.crossings(yl, y).get(0);
+		}
+
+		return ret;
 	}
 
 	public IPlottingSystem getPlottingSystem() {

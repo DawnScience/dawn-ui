@@ -9,6 +9,33 @@ import org.eclipse.draw2d.geometry.Point;
 public interface PointFunction {
 
 	/**
+	 * An empty implementation that does nothing and return nulls
+	 */
+	public class Stub implements PointFunction {
+		public Stub() {
+		}
+
+		@Override
+		public void setCoordinateSystem(ICoordinateSystem system) {
+		}
+
+		@Override
+		public Point calculatePoint(double... parameter) {
+			return null;
+		}
+
+		@Override
+		public double[] calculateXIntersectionParameters(int x) {
+			return null;
+		}
+
+		@Override
+		public double[] calculateYIntersectionParameters(int y) {
+			return null;
+		}
+	}
+
+	/**
 	 * 
 	 * @param system
 	 */

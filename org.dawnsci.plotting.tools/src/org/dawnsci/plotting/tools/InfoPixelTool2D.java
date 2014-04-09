@@ -25,6 +25,8 @@ import org.eclipse.swt.SWT;
 
 public class InfoPixelTool2D extends InfoPixelTool {
 
+	public final static String INFOPIXELTOOL2D_ID="org.dawb.workbench.plotting.tools.InfoPixel2D";
+
 	@Override
 	public ToolPageRole getToolPageRole() {
 		return ToolPageRole.ROLE_2D;

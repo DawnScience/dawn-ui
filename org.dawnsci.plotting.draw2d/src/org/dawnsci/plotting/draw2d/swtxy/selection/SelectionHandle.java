@@ -7,6 +7,7 @@ import java.util.Iterator;
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.draw2d.swtxy.IMobileFigure;
 import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
+import org.dawnsci.plotting.draw2d.swtxy.util.RotatablePolygonShape;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
@@ -14,6 +15,7 @@ import org.eclipse.draw2d.MouseListener;
 import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
@@ -88,8 +90,8 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 	public double[] getPosition() {
 		if (coords != null) {
 			final Point p = getSelectionPoint();
-			double[] point = coords.getPositionValue(p.x, p.y);
-			return point;
+			double[] value = coords.getValueFromPosition(p.preciseX(), p.preciseY());
+			return value;
 		}
 	    return new double[]{Double.NaN, Double.NaN};
 	}
@@ -101,8 +103,8 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 	 * @param point
 	 */
 	public void setPosition(final double[] point) {
-		final int[] val = coords.getValuePosition(point);
-		setSelectionPoint(new Point(val[0], val[1]));
+		final double[] pos = coords.getPositionFromValue(point);
+		setSelectionPoint(new PrecisionPoint(pos[0], pos[1]));
 	}
 
 	private NumberFormat format = new DecimalFormat("######0.00");
@@ -118,14 +120,21 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 	}
 
 	public Point getSelectionPoint() {
-		final Point loc = getLocation();
+		final Point loc = getPreciseLocation();
 		final Rectangle bnds = shape.getBounds();
-		return new Point(loc.x + bnds.width()/2, loc.y + bnds.height()/2);
+		return new PrecisionPoint(loc.preciseX() + bnds.width()/2, loc.preciseY() + bnds.height()/2);
+	}
+
+	public Point getPreciseLocation() {
+		if (shape instanceof RotatablePolygonShape)
+			return ((RotatablePolygonShape) shape).getPreciseLocation();
+
+		return shape.getLocation();
 	}
 
 	protected void setSelectionPoint(Point p) {
 		final Rectangle bnds = shape.getBounds();
-		final Point loc = new Point(p.x - bnds.width()/2, p.y - bnds.height()/2);
+		final Point loc = new PrecisionPoint(p.preciseX() - bnds.width()/2, p.preciseY() - bnds.height()/2);
 		setLocation(loc);
 	}
 

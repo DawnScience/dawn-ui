@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.workbench.jmx.UserPlotBean;
 import org.dawnsci.common.widgets.gda.function.FunctionFittingWidget;
@@ -150,7 +151,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		fitOnceButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,
 				false, 1, 1));
 		fitOnceButton.setText("Fit Once");
-		fitOnceButton.setEnabled(false);
+		fitOnceButton.setEnabled(true);
 		fitOnceButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -281,8 +282,10 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		super.deactivate();
 	}
 
-	private void setChiSquaredValue(double value) {
-		chiSquaredValueText.setText(Double.toString(value));
+	private void setChiSquaredValue(double value, boolean notConverged) {
+		String text = Double.toString(value);
+		if (notConverged) text = text + " (Not converged)";
+		chiSquaredValueText.setText(text);
 	}
 
 	private void fillActionBar(IActionBars actionBars) {
@@ -408,6 +411,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 				}
 			});
 
+			boolean tooManyItterations = false;
 			try {
 				double accuracy = prefs.getDouble(FittingConstants.FIT_QUALITY);
 				logger.debug("Accuracy is set to {}", accuracy);
@@ -421,10 +425,16 @@ public class FunctionFittingTool extends AbstractToolPage implements
 					switch (algorithm) {
 					default:
 					case APACHENELDERMEAD:
-						fitMethod = new ApacheNelderMead();
+						resultFunction = new CompositeFunction();
+						for (IFunction function : compFunction.getFunctions()) {
+							resultFunction.addFunction(function);
+						}
+						Fitter.ApacheNelderMeadFit(new AbstractDataset[] {x}, y, resultFunction, 1000);
 						break;
 					case GENETIC:
 						fitMethod = new GeneticAlg(accuracy);
+						resultFunction = Fitter.fit(x, y, fitMethod, compFunction
+								.copy().getFunctions());
 						break;
 					}
 				}
@@ -442,19 +452,22 @@ public class FunctionFittingTool extends AbstractToolPage implements
 				// org.dawnsci.plotting.tools.fitting.FunctionFittingTool$UpdateFitPlotJob"
 				// error is observed.
 
-				resultFunction = Fitter.fit(x, y, fitMethod, compFunction
-						.copy().getFunctions());
+			} catch (TooManyEvaluationsException me) {
+				tooManyItterations = true;
+				
 			} catch (Exception e) {
 				return Status.CANCEL_STATUS;
 			}
 
+			final boolean notConverged = tooManyItterations;
+			
 			PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 
 				@Override
 				public void run() {
 					getPlottingSystem().removeTraceListener(traceListener);
 					setChiSquaredValue(resultFunction.residual(true, y, null,
-							new IDataset[] { x }) / x.count());
+							new IDataset[] { x }) / x.count(), notConverged);
 
 					fitTrace = (ILineTrace) getPlottingSystem().getTrace("Fit");
 					if (fitTrace == null) {

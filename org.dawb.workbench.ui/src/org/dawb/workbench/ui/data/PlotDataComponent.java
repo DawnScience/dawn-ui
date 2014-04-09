@@ -78,6 +78,7 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -500,7 +501,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 
 	private void readExpressions() throws Exception {
 		
-		final String cachePath = DawbUtils.getDawbHome()+getFileName()+".properties";
+		final String cachePath = DawbUtils.getDawnHome()+getFileName()+".properties";
 		Properties props = PropUtils.loadProperties(cachePath);
 		if (props!=null) {
 			try {
@@ -532,7 +533,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				props.put(check.getMementoKey(), check.getMemento());
 			}
 			// Save properties to workspace.
-			final String cachePath = DawbUtils.getDawbHome()+getFileName()+".properties";
+			final String cachePath = DawbUtils.getDawnHome()+getFileName()+".properties";
 			PropUtils.storeProperties(props, cachePath);
 			
 		} catch (Exception e) {
@@ -619,30 +620,35 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		};
 		bars.getToolBarManager().add(delete);
 		delete.setEnabled(false);
+
+		// Fix to http://jira.diamond.ac.uk/browse/SCI-1558
+		// remove feature.
+		final Action createFilter = null; 
+		final Action clearFilter  = null; 
 		
-		bars.getToolBarManager().add(new Separator());
-		final Action createFilter = new Action("Create Filter", Activator.getImageDescriptor("icons/filter.png")) {
-			public void run() {
-				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
-				final ITransferableDataObject ob  = (ITransferableDataObject)sel;
-				if (ob==null) return;
-				chooseFilterFile(ob);
-			}
-		};
-		bars.getToolBarManager().add(createFilter);
-		createFilter.setEnabled(false);
-		
-		final Action clearFilter = new Action("Clear filter", Activator.getImageDescriptor("icons/delete_filter.png")) {
-			public void run() {
-				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
-				final ITransferableDataObject ob  = (ITransferableDataObject)sel;
-				if (ob==null) return;
-				clearFilterFile(ob);
-			}
-		};
-		bars.getToolBarManager().add(clearFilter);
-		clearFilter.setEnabled(false);
-	
+// Used to have ability to choose a python script to filter datasets:
+//		bars.getToolBarManager().add(new Separator());
+//		final Action createFilter = new Action("Create Filter", Activator.getImageDescriptor("icons/filter.png")) {
+//			public void run() {
+//				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
+//				final ITransferableDataObject ob  = (ITransferableDataObject)sel;
+//				if (ob==null) return;
+//				chooseFilterFile(ob);
+//			}
+//		};
+//		bars.getToolBarManager().add(createFilter);
+//		createFilter.setEnabled(false);
+//		
+//		final Action clearFilter = new Action("Clear filter", Activator.getImageDescriptor("icons/delete_filter.png")) {
+//			public void run() {
+//				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
+//				final ITransferableDataObject ob  = (ITransferableDataObject)sel;
+//				if (ob==null) return;
+//				clearFilterFile(ob);
+//			}
+//		};
+//		bars.getToolBarManager().add(clearFilter);
+//		clearFilter.setEnabled(false);
 		
 		dataViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
@@ -693,8 +699,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				menuManager.add(paste);
 				menuManager.add(delete);
 				menuManager.add(new Separator(getClass().getName()+".filter"));
-				menuManager.add(createFilter);
-				menuManager.add(clearFilter);
+				if (createFilter!=null) menuManager.add(createFilter);
+				if (clearFilter!=null)  menuManager.add(clearFilter);
 				
 				updateActions(copy, paste, delete, createFilter, clearFilter, ob, null);
 
@@ -872,18 +878,22 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			delete.setEnabled(false);
 		}
 		
-		if (ob!=null) {
-			createFilter.setText("Filter plot of '"+ob.getName()+"' using python");
-			createFilter.setEnabled(true);
-		} else {
-			createFilter.setEnabled(false);
+		if (createFilter!=null) {
+			if (ob!=null) {
+				createFilter.setText("Filter plot of '"+ob.getName()+"' using python");
+				createFilter.setEnabled(true);
+			} else {
+				createFilter.setEnabled(false);
+			}
 		}
 		
-		if (ob!=null && ob.getFilterPath()!=null) {
-			deleteFilter.setText("Clear filter of '"+ob.getName()+"'");
-			deleteFilter.setEnabled(true);
-		} else {
-			deleteFilter.setEnabled(false);
+		if (deleteFilter!=null) {
+			if (ob!=null && ob.getFilterPath()!=null) {
+				deleteFilter.setText("Clear filter of '"+ob.getName()+"'");
+				deleteFilter.setEnabled(true);
+			} else {
+				deleteFilter.setEnabled(false);
+			}
 		}
 
 		if (bars!=null) {
@@ -1045,8 +1055,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		final ITransferableDataObject ob  = (ITransferableDataObject)sel;
 		if (ob==null) return false;
 		ILazyDataset lazy = ob.getLazyData(null);
-		if (lazy.getRank() >= 3)
-			return true;
+		if (lazy!=null && lazy.getRank() >= 3) return true;
 		return false;
 	}
 	
@@ -1439,9 +1448,10 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 						                      "Expression '"+check.getName()+"' is not valid.\n\n"+
 						                       names+" cannot be resolved.");
 			} else {
-				MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Expression '"+check.getName()+"' is not valid.",
-	                      "Expression '"+check.getName()+"' is not valid.");
-			}
+				ErrorDialog.openError(Display.getDefault().getActiveShell(), "Expression '"+check.getName()+"' is not valid.", 
+						"Expression '"+check.getName()+"' is not valid.", 
+						new Status(IStatus.ERROR, "org.dawb.workbench.ui", check.getExpression().getInvalidReason()));
+				}
 			return true;
 		}
 		
@@ -1591,7 +1601,11 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	public ILazyDataset getDataValue(String dataName, final IMonitor monitor) {
 		for (ITransferableDataObject ob : data) {
 			if (ob.getName().equals(dataName)) {
-				return ob.getLazyData(monitor);
+				if (ob.isExpression()) {
+					return ob.getExpression().getCachedLazyDataSet();
+				} else {
+				    return ob.getLazyData(monitor);
+				}
 			}
 		}
         return null;

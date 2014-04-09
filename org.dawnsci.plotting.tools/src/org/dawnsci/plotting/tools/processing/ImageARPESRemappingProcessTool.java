@@ -473,12 +473,14 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 		// Finally calculate k parallel
 		AbstractDataset kParallel = Maths.multiply(k, Maths.sin(Maths.toRadians(angleRegion)));
 		
-		// get the energy Axis
-		AbstractDataset energyAxis = energyRegion.getSlice(new int[] {0,0}, new int[] {1,energyRegion.getShape()[1]}, new int[] {1,1}).squeeze();
+		// Caluclate the axis for display
+		double bindingEnergyValue = photonEnergy - workFunction;
+		double kValue = Math.sqrt(bindingEnergyValue) * 0.51168;
+		AbstractDataset kParaAxis = Maths.multiply(Maths.sin(Maths.toRadians(angleRegion.getSlice(new int[] {0,0}, new int[] {angleRegion.getShape()[0],1}, new int[] {1,1}).squeeze())), kValue);
 		
-		int fermiSurfacePosition = Maths.square(energyAxis).minPos()[0];
+		//logger.error("Max and min values are {} and {}", kParallel1D.min(), kParallel1D.max());
 		
-		AbstractDataset kParaAxis = kParallel.getSlice(new int[] {0,fermiSurfacePosition}, new int[] {kParallel.getShape()[0],fermiSurfacePosition+1}, new int[] {1,1}).squeeze();
+		//AbstractDataset kParaAxis = kParallel.getSlice(new int[] {0,fermiSurfacePosition}, new int[] {kParallel.getShape()[0],fermiSurfacePosition+1}, new int[] {1,1}).squeeze();
 		logger.error("Max and min values are {} and {}", kParaAxis.min(), kParaAxis.max());
 
 		// make axis correction to regrid here
@@ -489,8 +491,11 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 		// AbstractDataset remappedRegion = InterpolatorUtils.remapAxis(dataRegion, 0, kParallel, kParaAxis);
 		AbstractDataset remappedRegion = dataRegion;
 		ArrayList<IDataset> remappedAxes = new ArrayList<IDataset>();
-		kParaAxis.setName("K Parallel");
-		remappedAxes.add(energyRegion.getSlice(new int[] {0,0}, new int[] {1,energyRegion.getShapeRef()[1]}, new int[] {1,1}).squeeze());
+		kParaAxis.setName("K Parallel (A-1)");
+		AbstractDataset energyAxis = energyRegion.getSlice(new int[] {0,0}, new int[] {1,energyRegion.getShapeRef()[1]}, new int[] {1,1}).squeeze();
+		energyAxis.imultiply(-1.0);
+		energyAxis.setName("Binding Energy (eV)");
+		remappedAxes.add(energyAxis);
 		remappedAxes.add(kParaAxis);
 		
 		userPlotBean.addList("remapped", remappedRegion.clone());
@@ -504,6 +509,9 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 		if (auxiliaryData != null) {
 			userPlotBean.addList("auxiliaryData", auxiliaryData.clone());
 		}
+		
+		userPlotBean.addScalar("photonEnergy", photonEnergy.toString());
+		userPlotBean.addScalar("workFunction", workFunction.toString());
 		
 		getPlottingSystem().createPlot2D(remappedRegion, remappedAxes , null);
 		

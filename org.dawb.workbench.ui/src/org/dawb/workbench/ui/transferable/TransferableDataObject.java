@@ -149,16 +149,21 @@ public class TransferableDataObject implements H5Path, ITransferableDataObject{
 	}
 
 	@Override
-	public int[] getShape(boolean squeeze) {
+	public int[] getShape(boolean force) {
 		
 		if (isExpression()) {
 		    try {
 		    	final IExpressionObject expr = getExpression();
-				final ILazyDataset lz = expr.getLazyDataSet(getVariable(), new IMonitor.Stub());
-			    return lz.getShape();
+		    	if (force) {
+					final ILazyDataset lz = expr.getLazyDataSet(getVariable(), new IMonitor.Stub());
+				    return lz.getShape();
+		    	} else {
+		    		final ILazyDataset lz = expr.getCachedLazyDataSet();
+		    		return lz!=null ? lz.getShape() : null;
+		    	}
 			} catch (Exception e) {
 				logger.error("Could not get shape of "+getVariable());
-				return new int[]{1};
+				return force ? new int[]{1} : null;
 			}
 		}
 		
@@ -167,11 +172,11 @@ public class TransferableDataObject implements H5Path, ITransferableDataObject{
 			final ILazyDataset set = getLazyData(null);
 			// Assuming it has been squeezed already
 			if (set!=null) return set.getShape();
-			return new int[]{1};
+			return force ? new int[]{1} : null;
 
 		} else if (metaData.getDataShapes().containsKey(name)) {
 			final int[] shape = metaData.getDataShapes().get(name);
-			if (squeeze) {
+			if (force) {
 				final List<Integer> ret = new ArrayList<Integer>(shape.length);
 				for (int i : shape) if (i>1) ret.add(i);
 				Integer[] ia = ret.toArray(new Integer[ret.size()]);
@@ -404,6 +409,8 @@ public class TransferableDataObject implements H5Path, ITransferableDataObject{
 
 	@Override
 	public String getFileName() {
+		if (holder==null) return null;
+		if (holder.getFilePath()==null) return null;
 		return (new File(holder.getFilePath())).getName();
 	}
 

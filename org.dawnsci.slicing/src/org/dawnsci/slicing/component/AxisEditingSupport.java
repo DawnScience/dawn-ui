@@ -165,8 +165,8 @@ class AxisEditingSupport extends EditingSupport {
 				final int size = lazySet.getShape()[idim-1];
 				
 				for (IExpressionObject iExpressionObject : exprs) {
-					final ILazyDataset set = iExpressionObject.getLazyDataSet(iExpressionObject.getExpressionName(), new IMonitor.Stub());
-					if (set.getRank()==1 && set.getSize()==size){
+					final ILazyDataset set = iExpressionObject.getCachedLazyDataSet();
+					if (set!=null && set.getRank()==1 && set.getSize()==size){
 						final String name = iExpressionObject.getExpressionName()+" [Expression]";
 						names.add(name);
 						final IDataset axisData = iExpressionObject.getDataSet(iExpressionObject.getExpressionName(), new IMonitor.Stub());

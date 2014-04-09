@@ -116,7 +116,9 @@ class LineSelection extends AbstractSelectionRegion {
 					
 					int labelWid    = label.length()*gc.getFontMetrics().getAverageCharWidth();
 					int labelHeight = gc.getFontMetrics().getHeight();
-					setBounds(getBounds().getUnion(new Rectangle(cen.x, cen.y, labelWid, labelHeight)));
+					
+					Rectangle bnds = getBounds().getUnion(new Rectangle(cen.x, cen.y, labelWid, labelHeight));
+					this.bounds = bnds;
 				}
 
 			}

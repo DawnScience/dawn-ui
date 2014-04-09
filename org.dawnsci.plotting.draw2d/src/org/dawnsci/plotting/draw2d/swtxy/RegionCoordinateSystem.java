@@ -54,7 +54,7 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 	@Override
 	public int[] getValuePosition(double... value) {
 		if (isDisposed) throw new RuntimeException(getClass().getName()+" is disposed!");
-		if (isReversed()) {
+		if (isTransposed()) {
 			return new int[]{x.getValuePosition(value[1]), y.getValuePosition(value[0])};
 		} else {
 			return new int[]{x.getValuePosition(value[0]), y.getValuePosition(value[1])};
@@ -65,7 +65,7 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 		if (isDisposed) throw new RuntimeException(getClass().getName()+" is disposed!");
 
 		double[] pos = new double[]{x.getValuePosition(value.preciseX()), y.getValuePosition(value.preciseY())};
-		if (isReversed()) {
+		if (isTransposed()) {
 			return new PrecisionPoint(pos[1], pos[0]);
 		}
 		return new PrecisionPoint(pos[0], pos[1]);
@@ -85,7 +85,7 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 		if (isDisposed) throw new RuntimeException(getClass().getName()+" is disposed!");
 		
 		double[] value = new double[]{x.getPositionValue(position[0]), y.getPositionValue(position[1])};
-		if (isReversed()) {
+		if (isTransposed()) {
 			return new double[]{value[1], value[0]};
 		}
 		return value;
@@ -95,10 +95,31 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 		if (isDisposed) throw new RuntimeException(getClass().getName()+" is disposed!");
 
 		double[] value = new double[]{x.getPositionValue(position.x), y.getPositionValue(position.y)};
-		if (isReversed()) {
+		if (isTransposed()) {
 			return new PrecisionPoint(value[1], value[0]);
 		}
 		return new PrecisionPoint(value[0], value[1]);
+	}
+
+	@Override
+	public double[] getPositionFromValue(double... value) {
+		if (isDisposed) throw new RuntimeException(getClass().getName()+" is disposed!");
+
+		if (isTransposed()) {
+			return new double[] {x.getPositionFromValue(value[1]), y.getPositionFromValue(value[0])};
+		}
+		return new double[] {x.getPositionFromValue(value[0]), y.getPositionFromValue(value[1])};
+	}
+
+	@Override
+	public double[] getValueFromPosition(double... position) {
+		if (isDisposed) throw new RuntimeException(getClass().getName()+" is disposed!");
+
+		double[] value = new double[]{x.getValueFromPosition(position[0]), y.getValueFromPosition(position[1])};
+		if (isTransposed()) {
+			return new double[] {value[1], value[0]};
+		}
+		return value;
 	}
 
 	private Collection<ICoordinateSystemListener> coordinateListeners;
@@ -132,7 +153,7 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 		}
 	}
 	
-	private boolean isReversed() {
+	private boolean isTransposed() {
 		if (imageTrace==null) return false;
 		if (imageTrace.getImageOrigin()==ImageOrigin.TOP_LEFT || 
 			imageTrace.getImageOrigin()==ImageOrigin.BOTTOM_RIGHT) {

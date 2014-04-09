@@ -54,52 +54,69 @@ public class TraceUtils {
 		}
 		return system.createLineTrace(name);
 	}
-	
+
 	/**
-	 * Determine if IImageTrace has custom axes or not.
+	 * Determine if given IImageTrace has any custom axes
+	 * @param trace
+	 * @return true if it does have custom axes
 	 */
 	public static boolean isCustomAxes(ICoordinateSystemTrace trace) {
-		
-		if (trace==null) return false;
-		List<IDataset> axes = trace.getAxes();
-		int[]         shape = trace.getData().getShape();
+		if (trace == null) {
+			return false;
+		}
 
-		if (axes==null)     return false;
-		if (axes.isEmpty()) return false;
-		
-		final Class<?> xClazz = axes.get(0).elementClass();
-		final Class<?> yClazz = axes.get(1).elementClass();
-		if (!xClazz.isInstance(int.class) || !yClazz.isInstance(int.class)) {
-			return true;
+		List<IDataset> axes = trace.getAxes();
+		if (axes == null || axes.isEmpty()) {
+			return false;
 		}
-		
-		if (axes.get(0).getSize() == shape[1] &&
-		    axes.get(1).getSize() == shape[0]) {
-			boolean startZero = axes.get(0).getDouble(0)==0d  &&
-				                axes.get(1).getDouble(0)==0d;
-			
-			if (!startZero) return true;
-			
-			double xEnd = axes.get(0).getDouble(shape[1]-1);
-			double yEnd = axes.get(1).getDouble(shape[0]-1);
-			
-			boolean maxSame =	xEnd==shape[1]-1 &&
-				                yEnd==shape[0]-1;
-			
-			if (maxSame) return false;
+
+		int[] shape = trace.getData().getShape();
+		if (shape.length != axes.size()) {
+			throw new IllegalArgumentException("Trace has strange number of axes: they should be equal to rank of data");
 		}
-		
-		return true;
+		int d = shape.length - 1;
+		for (IDataset a : axes) {
+			if (isAxisCustom(a, shape[d--]))
+				return true;
+		}
+		return false;
 	}
 
-	
-	public static void transform(IDataset label, int index, double[]... points) {
+	/**
+	 * Determine if axis is custom
+	 * @param axis dataset of axis values
+	 * @param length number of axis values
+	 * @return true if it is custom
+	 */
+	public static boolean isAxisCustom(IDataset axis, int length) {
+		if (axis == null)
+			return false;
+
+		final Class<?> clazz = axis.elementClass();
+		if (clazz != Integer.class) {
+			return true;
+		}
+
+		if (axis.getSize() != length)
+			return true;
+
+		length--;
+		return axis.getDouble(0) != 0 && axis.getDouble(length) != length;
+	}
+
+	public final static void transform(IDataset label, int index, double[]... points) {
 		if (label!=null) {
 			for (double[] ds : points) {
-				int dataIndex = (int)ds[index];
-				ds[index] = label.getDouble(dataIndex);
+				double dataIndex = ds[index];
+				
+				double floor = Math.floor(dataIndex);
+				double lo    = label.getDouble((int)floor);
+				double hi    = label.getDouble((int)Math.ceil(dataIndex));
+
+				double frac = dataIndex-floor;
+				ds[index] = (1-frac)*lo + frac*hi;
+			
 			}
 		}		
 	}
-
 }

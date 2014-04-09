@@ -16,39 +16,25 @@
 
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
-import org.dawnsci.plotting.api.region.IRegion;
-import org.dawnsci.plotting.api.region.IRegionContainer;
-import org.dawnsci.plotting.api.region.ROIEvent;
-import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
-import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationEvent;
-import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
 import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
-import org.dawnsci.plotting.draw2d.swtxy.util.RotatableRectangle;
 import org.eclipse.draw2d.Figure;
-import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.Graphics;
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.MouseEvent;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
-import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
-import uk.ac.diamond.scisoft.analysis.roi.handler.HandleStatus;
+import uk.ac.diamond.scisoft.analysis.roi.handler.ROIHandler;
 import uk.ac.diamond.scisoft.analysis.roi.handler.RectangularROIHandler;
 
-public class BoxSelection extends AbstractSelectionRegion {
+class BoxSelection extends AbstractSelectionRegion {
 
-	DecoratedRectangle rect;
+	Box box;
 
-	public BoxSelection(String name, ICoordinateSystem coords) {
+	BoxSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
 		setRegionColor(RegionType.BOX.getDefaultColor());
 		setAlpha(80);
@@ -56,32 +42,25 @@ public class BoxSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public void setVisible(boolean visible) {
-		getBean().setVisible(visible);
-		if (rect != null)
-			rect.setVisible(visible);
-	}
-
-	@Override
-	public void setMobile(final boolean mobile) {
-		getBean().setMobile(mobile);
-		if (rect != null)
-			rect.setMobile(mobile);
+	public void setMobile(boolean mobile) {
+		super.setMobile(mobile);
+		if (box != null)
+			box.setMobile(mobile);
 	}
 
 	@Override
 	public void createContents(Figure parent) {
-		rect = new DecoratedRectangle(parent);
-		rect.setCursor(Draw2DUtils.getRoiMoveCursor());
+		box = new Box(parent, this);
+		box.setCursor(Draw2DUtils.getRoiMoveCursor());
 
-		parent.add(rect);
+		parent.add(box);
 		sync(getBean());
 		setOpaque(false);
 	}
 
 	@Override
 	public boolean containsPoint(int x, int y) {
-		return rect.containsPoint(x, y);
+		return box.containsPoint(x, y);
 	}
 
 	@Override
@@ -91,14 +70,18 @@ public class BoxSelection extends AbstractSelectionRegion {
 
 	@Override
 	protected void updateBounds() {
-		if (rect != null) {
-			Rectangle b = rect.updateFromHandles();
-			rect.setBounds(b);
+		if (box != null) {
+			Rectangle b = box.updateFromHandles();
+			if (b != null)
+				box.setBounds(b);
 		}
 	}
 
 	@Override
 	public void paintBeforeAdded(Graphics g, PointList clicks, Rectangle parentBounds) {
+		if (clicks.size() <= 1)
+			return;
+
 		g.setLineStyle(SWT.LINE_DOT);
 		final Rectangle bounds = new Rectangle(clicks.getFirstPoint(), clicks.getLastPoint());
 		g.drawRectangle(bounds);
@@ -109,8 +92,8 @@ public class BoxSelection extends AbstractSelectionRegion {
 
 	@Override
 	public void initialize(PointList clicks) {
-		if (rect != null) {
-			rect.setup(clicks);
+		if (box != null) {
+			box.setup(clicks);
 			fireROIChanged(getROI());
 		}
 	}
@@ -122,39 +105,16 @@ public class BoxSelection extends AbstractSelectionRegion {
 
 	@Override
 	protected IROI createROI(boolean recordResult) {
-		final PointList pl = rect.getPoints();
-		if (pl.size() < 2)
-			return super.getROI();
-
-		final RectangularROI rroi = new RectangularROI();
-		rroi.setName(getName());
-		rroi.setAngle(Math.toRadians(rect.getAngleDegrees()));
-		Point p;
-		p = pl.getPoint(0);
-		double[] pa = coords.getPositionValue(p.x(), p.y());
-		p = pl.getPoint(1);
-		double[] pb = coords.getPositionValue(p.x(), p.y());
-		p = pl.getPoint(2);
-		double[] pc = coords.getPositionValue(p.x(), p.y());
-		double la = Math.hypot(pa[0] - pb[0], pa[1] - pb[1]);
-		double lb = Math.hypot(pc[0] - pb[0], pc[1] - pb[1]);
-		rroi.setPoint(pa);
-		rroi.setLengths(la,  lb);
-		if (roi != null) {
-			rroi.setPlot(roi.isPlot());
-			// set the Region isActive flag
-			this.setActive(roi.isPlot());
+		if (recordResult) {
+			roi = box.croi;
 		}
-		if (recordResult)
-			roi = rroi;
-
-		return rroi;
+		return box.croi;
 	}
 
 	@Override
 	protected void updateRegion() {
-		if (rect != null && roi instanceof RectangularROI) {
-			rect.updateFromROI((RectangularROI) roi);
+		if (box != null && roi instanceof RectangularROI) {
+			box.updateFromROI((RectangularROI) roi);
 			sync(getBean());
 		}
 	}
@@ -167,281 +127,116 @@ public class BoxSelection extends AbstractSelectionRegion {
 	@Override
 	public void dispose() {
 		super.dispose();
-		if (rect != null) {
-			rect.dispose();
+		if (box != null) {
+			box.dispose();
 		}
 	}
 
 	protected void drawRectangle(Graphics g) {
-		rect.internalOutline(g);
+		box.internalOutline(g);
 	}
 
 	protected void fillRectangle(Graphics g) {
-		rect.internalFill(g);
+		box.internalFill(g);
 	}
 
-	class DecoratedRectangle extends RotatableRectangle implements IRegionContainer {
-		List<IFigure> handles;
-		List<FigureTranslator> fTranslators;
-		private Figure parent;
-		private static final int SIDE = 8;
-		private RectangularROIHandler roiHandler;
-		private TranslationListener handleListener;
-		private FigureListener moveListener;
-		private boolean isMobile;
+	@Override
+	public IROI getROI() {
+		return box != null ? box.getROI() : super.getROI();
+	}
 
-		public DecoratedRectangle(Figure parent) {
-			super();
-			handles = new ArrayList<IFigure>();
-			fTranslators = new ArrayList<FigureTranslator>();
-			this.parent = parent;
-			roiHandler = new RectangularROIHandler((RectangularROI) roi);
-			handleListener = createHandleNotifier();
-			moveListener = new FigureListener() {
-				@Override
-				public void figureMoved(IFigure source) {
-					DecoratedRectangle.this.parent.repaint();
-				}
-			};
+	class Box extends ROIShape<RectangularROI> {
+
+		public Box(Figure parent, AbstractSelectionRegion region) {
+			super(parent, region);
 		}
 
-		public void dispose() {
-			for (IFigure f : handles) {
-				((SelectionHandle) f).removeMouseListeners();
-			}
-			for (FigureTranslator t : fTranslators) {
-				t.removeTranslationListeners();
-			}
-			removeFigureListener(moveListener);
+		@Override
+		protected ROIHandler createROIHandler(IROI roi) {
+			return new RectangularROIHandler((RectangularROI) roi);
 		}
 
-		public void setup(PointList points) {
-			final Point pa = points.getFirstPoint();
-			final Point pc = points.getLastPoint();
+		@Override
+		public void setCentre(Point nc) {
+			double[] pt = cs.getPositionValue(nc.x(), nc.y());
+			double[] pc = croi.getMidPoint();
+			pt[0] -= pc[0];
+			pt[1] -= pc[1];
+			croi.addPoint(pt);
+			dirty = true;
+			calcBox(croi, true);
+		}
 
-			setOrigin(Math.min(pa.x(), pc.x()), Math.min(pa.y(), pc.y()));
-			setLengths(Math.abs(pa.x() - pc.x()), Math.abs(pa.y() - pc.y()));
+		@Override
+		public void setup(PointList corners) {
+			final Point pa = corners.getFirstPoint();
+			final Point pc = corners.getLastPoint();
+
+			double[] a = cs.getPositionValue(pa.x(), pa.y());
+			double[] c = cs.getPositionValue(pc.x(), pc.y());
+			double ox = Math.min(a[0], c[0]);
+			double oy = Math.min(a[1], c[1]);
+			double lx = Math.abs(a[0] - c[0]);
+			double ly = Math.abs(a[1] - c[1]);
+			double angle = 0;
+			if (lx < ly) {
+				angle = 0.5*Math.PI;
+				ox += lx;
+				double t = lx;
+				lx = ly;
+				ly = t;
+			}
+			croi = new RectangularROI(ox, oy, lx, ly, angle);
 
 			roiHandler.setROI(createROI(true));
 			configureHandles();
 		}
 
-		private void configureHandles() {
-			boolean mobile = isMobile();
-			boolean visible = isVisible() && mobile;
-			// handles
-			FigureTranslator mover;
-			final int imax = roiHandler.size();
-			for (int i = 0; i < imax; i++) {
-				double[] hpt = roiHandler.getAnchorPoint(i, SIDE);
-				roiHandler.set(i, i);
-				
-				int[] p = coords.getValuePosition(hpt);
-				RectangularHandle h = new RectangularHandle(coords, getRegionColor(), this, SIDE, p[0], p[1]);
-				h.setVisible(visible);
-				parent.add(h);
-				mover = new FigureTranslator(getXyGraph(), h);
-				mover.setActive(mobile);
-				mover.addTranslationListener(handleListener);
-				fTranslators.add(mover);
-				h.addFigureListener(moveListener);
-				handles.add(h);
-			}
-
-			addFigureListener(moveListener);
-			mover = new FigureTranslator(getXyGraph(), parent, this, handles) {
-				public void mouseDragged(MouseEvent event) {
-					super.mouseDragged(event);
-				}
-			};
-			mover.setActive(mobile);
-			mover.addTranslationListener(createRegionNotifier());
-			fTranslators.add(mover);
-			setRegionObjects(this, handles);
-			Rectangle b = getBounds();
-			if (b != null)
-				setBounds(b);
-		}
-
-		private TranslationListener createRegionNotifier() {
-			return new TranslationListener() {
-				@Override
-				public void translateBefore(TranslationEvent evt) {
-				}
-
-				@Override
-				public void translationAfter(TranslationEvent evt) {
-					updateBounds();
-					fireROIDragged(createROI(false), ROIEvent.DRAG_TYPE.TRANSLATE);
-				}
-
-				@Override
-				public void translationCompleted(TranslationEvent evt) {
-					fireROIChanged(createROI(true));
-					roiHandler.setROI(roi);
-					fireROISelection();
-				}
-
-				@Override
-				public void onActivate(TranslationEvent evt) {
-				}
-			};
-		}
-
-		private TranslationListener createHandleNotifier() {
-			return new TranslationListener() {
-				private int[] spt;
-
-				@Override
-				public void onActivate(TranslationEvent evt) {
-					Object src = evt.getSource();
-					if (src instanceof FigureTranslator) {
-						final FigureTranslator translator = (FigureTranslator) src;
-						Point start = translator.getStartLocation();
-						double[] c = coords.getPositionValue(start.x(), start.y());
-						spt = new int[]{(int)c[0], (int)c[1]};
-						final IFigure handle = translator.getRedrawFigure();
-						final int h = handles.indexOf(handle);
-						HandleStatus status = h == 4 ? HandleStatus.RMOVE : HandleStatus.RESIZE;
-						roiHandler.configureDragging(h, status);
-					}
-				}
-
-				@Override
-				public void translateBefore(TranslationEvent evt) {
-				}
-
-				@Override
-				public void translationAfter(TranslationEvent evt) {
-					Object src = evt.getSource();
-					if (src instanceof FigureTranslator) {
-						final FigureTranslator translator = (FigureTranslator) src;
-						Point end = translator.getEndLocation();
-						
-						if (end==null) return;
-						double[] c = coords.getPositionValue(end.x(), end.y());
-						int[] r = new int[] { (int) c[0], (int) c[1] };
-
-						RectangularROI croi = (RectangularROI) roiHandler.interpretMouseDragging(spt, r);
-
-						intUpdateFromROI(croi);
-						fireROIDragged(croi, roiHandler.getStatus() == HandleStatus.RESIZE ?
-								ROIEvent.DRAG_TYPE.RESIZE : ROIEvent.DRAG_TYPE.TRANSLATE);
-					}
-				}
-
-				@Override
-				public void translationCompleted(TranslationEvent evt) {
-					Object src = evt.getSource();
-					if (src instanceof FigureTranslator) {
-						final FigureTranslator translator = (FigureTranslator) src;
-						Point end = translator.getEndLocation();
-
-						double[] c = coords.getPositionValue(end.x(), end.y());
-						int[] r = new int[] { (int) c[0], (int) c[1] };
-
-						RectangularROI croi = (RectangularROI) roiHandler.interpretMouseDragging(spt, r);
-
-						updateFromROI(croi);
-						roiHandler.unconfigureDragging();
-						roi = croi;
-
-						fireROIChanged(croi);
-						fireROISelection();
-					}
-				}
-			};
-		}
-
-		private Rectangle updateFromHandles() {
-			if (handles.size() > 0) {
-				IFigure f = handles.get(4); // centre point
-				if (f instanceof SelectionHandle) {
-					SelectionHandle h = (SelectionHandle) f;
-					setCentre(h.getSelectionPoint());
-				}
-			}
-			return getBounds();
-		}
-
 		@Override
-		public void setVisible(boolean visible) {
-			super.setVisible(visible);
-			for (IFigure h : handles) {
-				if (isMobile && visible && !h.isVisible())
-					h.setVisible(true);
-			}
+		public String toString() {
+			if (croi == null)
+				return "BoxSel: undefined";
+
+			int[] pt = cs.getValuePosition(croi.getPointRef());
+			Point start = new Point(pt[0], pt[1]);
+			int[] pta = cs.getValuePosition(0, 0);
+			int[] ptb = cs.getValuePosition(croi.getLengths());
+
+			return "BoxSel: start=" + start + ", major=" + (ptb[0] - pta[0]) + ", minor=" + (ptb[1] - pta[1]) + ", ang=" + croi.getAngleDegrees();
 		}
 
-		public void setMobile(boolean mobile) {
-			if (mobile == isMobile)
-				return;
-			isMobile = mobile;
+		protected PointList generatePointList() {
+			PointList pl = new PointList(4);
+			int[] pt;
+			RectangularROI proi = getROI();
+			pt = cs.getValuePosition(proi.getPointRef());
+			pl.addPoint(pt[0], pt[1]);
+			pt = cs.getValuePosition(proi.getPoint(1, 0));
+			pl.addPoint(pt[0], pt[1]);
+			pt = cs.getValuePosition(proi.getPoint(1, 1));
+			pl.addPoint(pt[0], pt[1]);
+			pt = cs.getValuePosition(proi.getPoint(0, 1));
+			pl.addPoint(pt[0], pt[1]);
 
-			for (IFigure h : handles) {
-				if (h.isVisible() != mobile)
-					h.setVisible(mobile);
-			}
-			for (FigureTranslator f : fTranslators) {
-				f.setActive(mobile);
-			}
+			return pl;
 		}
 
-		/**
-		 * Update according to ROI
-		 * @param rroi
-		 */
-		public void updateFromROI(RectangularROI rroi) {
-			roiHandler.setROI(rroi);
-			intUpdateFromROI(rroi);
+		private void internalFill(Graphics graphics) {
+			graphics.pushState();
+			graphics.setAdvanced(true);
+			graphics.setAntialias(SWT.ON);
+			graphics.fillPolygon(generatePointList());
+			graphics.popState();
 		}
 
-		/**
-		 * Update according to ROI
-		 * @param rroi
-		 */
-		private void intUpdateFromROI(RectangularROI rroi) {
-			int[] pta = coords.getValuePosition(0,0);
-			int[] ptb = coords.getValuePosition(rroi.getLengths());
+		private void internalOutline(Graphics graphics) {
+			graphics.pushState();
+			graphics.setAdvanced(true);
+			graphics.setAntialias(SWT.ON);
 
-			double ratio = coords.getAspectRatio();
-			affine.setAspectRatio(ratio);
-			setLengths(Math.abs(pta[0] - ptb[0]), (int) Math.round(Math.abs(pta[1] - ptb[1])/ratio));
-
-			pta  = coords.getValuePosition(rroi.getPointRef());
-			setOrigin(pta[0], pta[1]);
-
-			setAngle(rroi.getAngleDegrees());
-
-			int imax = handles.size();
-			if (imax != roiHandler.size()) {
-				configureHandles();
-			} else {
-				RectangularROIHandler handler = new RectangularROIHandler(rroi);
-				for (int i = 0; i < imax; i++) {
-					double[] hpt = handler.getAnchorPoint(i, SIDE);
-					SelectionHandle handle = (SelectionHandle) handles.get(i);
-					pta  = coords.getValuePosition(hpt);
-					handle.setSelectionPoint(new PrecisionPoint(pta[0], pta[1]));
-				}
-			}
-		}
-
-		@Override
-		public IRegion getRegion() {
-			return BoxSelection.this;
-		}
-
-		@Override
-		public void setRegion(IRegion region) {
-		}
-
-		private void internalOutline(Graphics g) {
-			super.outlineShape(g);
-		}
-
-		private void internalFill(Graphics g) {
-			super.fillShape(g);
+			Rectangle bnds = parent.getBounds();
+			Draw2DUtils.drawClippedPolyline(graphics, generatePointList(), bnds, true);
+			graphics.popState();
 		}
 
 		@Override

@@ -69,8 +69,7 @@ class ParabolaSelection extends AbstractSelectionRegion implements ILockableRegi
 
 	@Override
 	public void createContents(Figure parent) {
-		parabola = new Parabola(parent);
-		parabola.setCoordinateSystem(coords);
+		parabola = new Parabola(parent, coords);
 
 		parent.add(parabola);
 		sync(getBean());
@@ -125,12 +124,6 @@ class ParabolaSelection extends AbstractSelectionRegion implements ILockableRegi
 
 	@Override
 	protected IROI createROI(boolean recordResult) {
-//		proi.setName(getName());
-//		if (roi != null) {
-//			proi.setPlot(roi.isPlot());
-//			// set the Region isActive flag
-//			this.setActive(roi.isPlot());
-//		}
 		if (recordResult) {
 			roi = parabola.croi;
 		}
@@ -167,33 +160,29 @@ class ParabolaSelection extends AbstractSelectionRegion implements ILockableRegi
 		private FigureListener moveListener;
 		private static final int SIDE = 8;
 		private Rectangle box;
+		private ICoordinateSystem cs;
+		private ParabolicROI croi;
 
-		public Parabola(Figure parent) {
+		public Parabola(Figure parent, ICoordinateSystem system) {
 			super();
+			this.parent = parent;
+			cs = system;
 			handles = new ArrayList<IFigure>();
 			fTranslators = new ArrayList<FigureTranslator>();
-			this.parent = parent;
-			setFill(false);
 			handleListener = createHandleNotifier();
-			showMajorAxis(true);
 			moveListener = new FigureListener() {
 				@Override
 				public void figureMoved(IFigure source) {
 					Parabola.this.parent.repaint();
 				}
 			};
+			setFill(false);
+			showMajorAxis(true);
 		}
-
-		private ICoordinateSystem cs;
-		private ParabolicROI croi;
 
 		@Override
 		public void setCoordinateSystem(ICoordinateSystem system) {
 			cs = system;
-		}
-
-		public ICoordinateSystem getCoordinateSystem() {
-			return cs;
 		}
 
 		/**
@@ -320,7 +309,7 @@ class ParabolaSelection extends AbstractSelectionRegion implements ILockableRegi
 			graphics.setAntialias(SWT.ON);
 
 			double max = getMaxRadius();
-			double start = croi.getStartAngle(max);
+			double start = croi.getStartParameter(max);
 			Rectangle bnds = parent.getBounds();
 			if (!Draw2DUtils.drawCurve(graphics, bnds, false, this, start, 2*Math.PI - start, Math.PI/100)) {
 				graphics.popState();
@@ -397,7 +386,7 @@ class ParabolaSelection extends AbstractSelectionRegion implements ILockableRegi
 		}
 
 		private void addHandle(Point p, boolean mobile, boolean visible) {
-			RectangularHandle h = new RectangularHandle(getCoordinateSystem(), getRegionColor(), this, SIDE,
+			RectangularHandle h = new RectangularHandle(cs, getRegionColor(), this, SIDE,
 					p.preciseX(), p.preciseY());
 			h.setVisible(visible);
 			parent.add(h);
@@ -411,7 +400,7 @@ class ParabolaSelection extends AbstractSelectionRegion implements ILockableRegi
 
 		private void addFocusHandle(boolean mobile, boolean visible) {
 			Point c = getFocus();
-			RectangularHandle h = new RectangularHandle(getCoordinateSystem(), getRegionColor(), this, SIDE, c.preciseX(), c.preciseY());
+			RectangularHandle h = new RectangularHandle(cs, getRegionColor(), this, SIDE, c.preciseX(), c.preciseY());
 			h.setVisible(visible);
 			parent.add(h);
 			FigureTranslator mover = new FigureTranslator(getXyGraph(), h, h, handles);

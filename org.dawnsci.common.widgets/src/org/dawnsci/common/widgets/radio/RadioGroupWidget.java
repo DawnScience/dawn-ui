@@ -52,6 +52,15 @@ public class RadioGroupWidget {
 	 * @param actions
 	 */
 	public void setActions(List<Action> actions) {
+		setActions(actions, false);
+	}
+
+	/**
+	 * Creates a list of Actions as Menu items or Buttons given the parent Widget<br>
+	 * The radio item text is coming from the text defined for each action
+	 * @param actions
+	 */
+	public void setActions(List<Action> actions, boolean repectCurrentSelections) {
 		if(actions == null) return;
 		if (parent instanceof Composite) {
 			int i = 0;
@@ -68,7 +77,7 @@ public class RadioGroupWidget {
 							action.run();
 					}
 				});
-				if(i == 0)
+				if((!repectCurrentSelections && i == 0) || action.isChecked())
 					radioButton.setSelection(true);
 				radiosList.add(radioButton);
 				i++;
@@ -86,7 +95,7 @@ public class RadioGroupWidget {
 							action.run();
 					}
 				});
-				if(i == 0)
+				if((!repectCurrentSelections && i == 0) || action.isChecked())
 					radioButton.setSelection(true);
 				radiosList.add(radioButton);
 				i++;

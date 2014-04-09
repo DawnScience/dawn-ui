@@ -188,6 +188,9 @@ public abstract class AbstractSelectionRegion extends AbstractRegion implements 
 
 	@Override
 	public void coordinatesChanged(CoordinateSystemEvent evt) {
+		if (!isVisible())
+			return;
+
 		try {
 			regionEventsActive = false;
 			updateRegion();

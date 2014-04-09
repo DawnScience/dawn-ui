@@ -120,6 +120,7 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 		// Required fix after someone thought it would be a laugh to send
 		// null ROIs over.
 		if (roi == null) throw new NullPointerException("Cannot have a null region position!");
+		setActive(roi.isPlot()); // set the region isActive flag
 		if (this.roi == roi)
 			return; // do not fire event
 
@@ -130,11 +131,13 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 		} else {
 			setName(name);
 		}
-		try {
-			regionEventsActive = false;
-			updateRegion();
-		} finally {
-			regionEventsActive = true;
+		if (isVisible()) {
+			try {
+				regionEventsActive = false;
+				updateRegion();
+			} finally {
+				regionEventsActive = true;
+			}
 		}
 		fireROIChanged(this.roi);
 	}

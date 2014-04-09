@@ -63,7 +63,7 @@ public class DataSet3DPlot1DStack extends DataSet3DPlot1D {
 	private DefaultTextShader dtsZAxisLabel;
 	private DefaultTextShader dtsZTicks;
 	private String zAxisLabelStr = null;
-	private TickFormatting zLabelMode = TickFormatting.roundAndChopMode;
+	private TickFormatting zLabelMode = null;
 	private final static double TICKWIDTH = 0.25;
 	private final static double INITROTATION = -0.25 * Math.PI;
 	private double zOffset;
@@ -130,9 +130,10 @@ public class DataSet3DPlot1DStack extends DataSet3DPlot1D {
 	@Override
 	public SceneGraphComponent buildGraph(List<IDataset> datasets,
 			SceneGraphComponent graph) {
-		zGapBetweenGraphs = MAXY / datasets.size();
+		int plots = datasets.size();
+		zGapBetweenGraphs = MAXY / plots;
 		if (zGapBetweenGraphs > 1.0) zGapBetweenGraphs = 1.0;
-		zAxisLength = zGapBetweenGraphs * datasets.size();
+		zAxisLength = zGapBetweenGraphs * plots;
 		SceneGraphComponent returnGraph = super.buildGraph(datasets, graph);
 		Camera sceneCamera = CameraUtility.getCamera(app.getCurrentViewer());
 		sceneCamera.setFar(500.0);
@@ -140,7 +141,7 @@ public class DataSet3DPlot1DStack extends DataSet3DPlot1D {
 		graph.removeTool(tool);
 		
 		if (zAxisValues == null) {
-			zAxisValues = new AxisValues(AbstractDataset.arange(1+datasets.size()+zOffset, AbstractDataset.FLOAT64));
+			zAxisValues = new AxisValues(AbstractDataset.arange(1+plots+zOffset, AbstractDataset.FLOAT64));
 		}
 		
 		if (zTicks != null)
@@ -151,7 +152,7 @@ public class DataSet3DPlot1DStack extends DataSet3DPlot1D {
 		updateGraphsZPosition();
 		return returnGraph;
 	}
-	
+
 	@Override
 	public void enableZoomTool(boolean enabled)
 	{
@@ -280,18 +281,19 @@ public class DataSet3DPlot1DStack extends DataSet3DPlot1D {
 	
 	@Override
 	public void updateGraph(List<IDataset> datasets) {
-		zGapBetweenGraphs = MAXY / datasets.size();
+		int plots = datasets.size();
+		zGapBetweenGraphs = MAXY / plots;
 		if (zGapBetweenGraphs  > 1.0) zGapBetweenGraphs = 1.0;
-		zAxisLength = zGapBetweenGraphs * datasets.size();
+		zAxisLength = zGapBetweenGraphs * plots;
 
 		super.updateGraph(datasets);
 		if (zAxisValues != null) {
-			if (zAxisValues.size() < datasets.size()) {
-				DoubleDataset values = DoubleDataset.arange(zOffset+1, zOffset + 1 + datasets.size(), 1);
+			if (zAxisValues.size() < plots) {
+				DoubleDataset values = DoubleDataset.arange(zOffset+1, zOffset + 1 + plots, 1);
 				zAxisValues.addValues(values.getData());
 			}
 		} else {
-			zAxisValues = new AxisValues(AbstractDataset.arange(1+datasets.size()+zOffset, AbstractDataset.FLOAT64));
+			zAxisValues = new AxisValues(AbstractDataset.arange(1+plots+zOffset, AbstractDataset.FLOAT64));
 		}
 		updateGraphsZPosition();
 		
@@ -302,9 +304,8 @@ public class DataSet3DPlot1DStack extends DataSet3DPlot1D {
 			zLabels.setGeometry(createZLabelsGeometry());
 		if (zTicks != null)
 			zTicks.setGeometry(createZTicksGeometry());		
-
 	}
-	
+
 	@Override
 	protected IndexedLineSet createAxisGeometry() {
 		IndexedLineSetFactory factory  = new IndexedLineSetFactory();
@@ -381,10 +382,27 @@ public class DataSet3DPlot1DStack extends DataSet3DPlot1D {
 		}
 		return null;
 	}
-	
+
+	private boolean isNotAnInteger(double x) {
+		double pos = Math.abs(x);
+		return pos > Math.floor(pos);
+	}
+
+	private TickFormatting getTickFormatting() {
+		if (zLabelMode != null) {
+			return zLabelMode;
+		}
+		if (zAxisValues.isData()) {
+			if (isNotAnInteger(zAxisValues.getValue(0)) && isNotAnInteger(zAxisValues.distBetween(0, 1))) {
+				return TickFormatting.plainMode;
+			}
+		}
+		return TickFormatting.roundAndChopMode;
+	}
+
 	private PointSet createZLabelsGeometry()
 	{
-		tickFactory.setTickMode(zLabelMode);
+		tickFactory.setTickMode(getTickFormatting());
 		
 		LinkedList<Tick> ticks = 
 			tickFactory.generateTicks(Math.min(15, zAxisValues.size()), zAxisValues.getMinValue(), zAxisValues.getMaxValue(), (short) 2, false);
@@ -418,7 +436,7 @@ public class DataSet3DPlot1DStack extends DataSet3DPlot1D {
 	
 	private IndexedLineSet createZTicksGeometry()
 	{
-		tickFactory.setTickMode(zLabelMode);
+		tickFactory.setTickMode(getTickFormatting());
 		LinkedList<Tick> ticks = 
 			tickFactory.generateTicks(Math.min(15, zAxisValues.size()), zAxisValues.getMinValue(), zAxisValues.getMaxValue(), (short) 2, false);
 
@@ -454,8 +472,8 @@ public class DataSet3DPlot1DStack extends DataSet3DPlot1D {
 	
 	@Override
 	public void buildZCoordLabeling(SceneGraphComponent zTicks) {
-		this.zTicks = zTicks;
 		if (zTicks != null) {
+			this.zTicks = zTicks;
 			zLabels = SceneGraphUtility.createFullSceneGraphComponent("zLabels");
 			zTicks.addChild(zLabels);
 			Appearance tickAppearance = new Appearance();

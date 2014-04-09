@@ -190,19 +190,21 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		viewer.getTree().setHeaderVisible(true);
 		
 		Composite status = new Composite(control, SWT.NONE);
+		status.setLayoutData(new GridData(SWT.FILL, GridData.FILL, true, false));
 		status.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		status.setLayout(new GridLayout(2, true));
-		
-		statusMessage = new Label(status, SWT.NONE);
-		statusMessage.setLayoutData(new GridData(GridData.BEGINNING, GridData.CENTER, true, false));
+		GridUtils.removeMargins(status);
+	
+		statusMessage = new Label(status, SWT.LEFT);
+		statusMessage.setLayoutData(new GridData(SWT.FILL, GridData.CENTER, true, false));
 		ColorRegistry colorRegistry = JFaceResources.getColorRegistry();
 		statusMessage.setForeground(new Color(statusMessage.getDisplay(), colorRegistry.getRGB(JFacePreferences.QUALIFIER_COLOR)));
 		statusMessage.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		if (statusString != null && statusString[0] != null)
 			statusMessage.setText(statusString[0]);
 
-		final Label label = new Label(status, SWT.NONE);
-		label.setLayoutData(new GridData(GridData.END, GridData.CENTER, true, false));
+		final Label label = new Label(status, SWT.RIGHT);
+		label.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 		label.setForeground(new Color(label.getDisplay(), colorRegistry.getRGB(JFacePreferences.QUALIFIER_COLOR)));
 		label.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		label.setText("* Click to change value  ");
@@ -355,13 +357,13 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	
 	private IDiffractionMetadata getDiffractionMetaData() {
 		IDataset image = getImageTrace() == null ? null : getImageTrace().getData();
+		if (image == null) return null;
 		IWorkbenchPart part = getPart();
 		String altPath = null;
 		if(part instanceof IEditorPart){
 			altPath = EclipseUtils.getFilePath(((IEditorPart) part).getEditorInput());
 		} else if (part instanceof IViewPart){
 			try {
-				if (image == null) return null;
 				IMetaData md = image.getMetadata();
 				if(md != null)
 					altPath = md.getFilePath();
@@ -369,7 +371,10 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				logger.debug("Exception getting the image metadata", e);
 			}
 		}
-		return DiffractionUtils.getDiffractionMetadata(image, altPath, service, statusString);
+		//Add the meta data to the data set
+		IDiffractionMetadata md = DiffractionUtils.getDiffractionMetadata(image, altPath, service, statusString);
+		image.setMetadata(md);
+		return md;
 	}
 
 
@@ -1200,24 +1205,24 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	public void roiSelected(ROIEvent evt) {}
 	
 	private void updateBeamCentre(ROIEvent evt) {
-		IROI roi = evt.getROI();
-		if(roi == null)return;
-		PointROI eroi = roi instanceof PointROI ? (PointROI)roi : null;		
-		if(eroi == null) return;
-		if (!(evt.getSource() instanceof IRegion)) return;
-		
-		IRegion point = (IRegion)evt.getSource();
-		Object ob = point.getUserObject();
-		if (ob == null) return;
-		
-		String ringType = ob.toString(); // TODO this is hacky!
-		if (!"CALIBRANT".equals(ringType) && !"BEAM_POSITION_HANDLE".equals(ringType)) return;
-		
-		double ptx = eroi.getPointX();
-		double pty = eroi.getPointY();
-		IDiffractionMetadata data = getDiffractionMetaData();
-		DetectorProperties detprop = data.getDetector2DProperties();
-		detprop.setBeamCentreCoords(new double[]{ptx, pty});
+//		IROI roi = evt.getROI();
+//		if(roi == null)return;
+//		PointROI eroi = roi instanceof PointROI ? (PointROI)roi : null;		
+//		if(eroi == null) return;
+//		if (!(evt.getSource() instanceof IRegion)) return;
+//		
+//		IRegion point = (IRegion)evt.getSource();
+//		Object ob = point.getUserObject();
+//		if (ob == null) return;
+//		
+//		String ringType = ob.toString(); // TODO this is hacky!
+//		if (!"CALIBRANT".equals(ringType) && !"BEAM_POSITION_HANDLE".equals(ringType)) return;
+//		
+//		double ptx = eroi.getPointX();
+//		double pty = eroi.getPointY();
+//		IDiffractionMetadata data = getDiffractionMetaData();
+//		DetectorProperties detprop = data.getDetector2DProperties();
+//		detprop.setBeamCentreCoords(new double[]{ptx, pty});
 	}
 
 }

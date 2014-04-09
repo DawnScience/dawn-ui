@@ -62,6 +62,7 @@ import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 public class DiffractionPreferencePage extends PreferencePage implements IWorkbenchPreferencePage, CalibrantSelectedListener {
 
 	public static final String ID = "org.dawb.workbench.plotting.preference.diffraction.calibrantPreferencePage";
+	private static final String MAX_NUMBER_ID = "org.dawb.workbench.plotting.preference.diffraction.calibrantPreferencePage.maxNumber";
 	private static final Logger logger = LoggerFactory.getLogger(DiffractionPreferencePage.class);
 	
 	private VerticalListEditor hkls;
@@ -152,10 +153,22 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 		Composite      hklEditor = new DiffractionRingsComposite(hkls, SWT.NONE); 
 		hklEditor.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
+		int maxItems = 50;
+		
+		String maxString = getPreferenceStore().getString(MAX_NUMBER_ID);
+		
+		if (maxString != null && !maxString.equals("")) {
+			try {
+				maxItems = Integer.parseInt(getPreferenceStore().getString(MAX_NUMBER_ID));
+			} catch (Exception e) {
+				//Ignore
+			}
+		}
+		
 		hkls.setRequireSelectionPack(false);
 		hkls.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		hkls.setMinItems(0);
-		hkls.setMaxItems(25);
+		hkls.setMaxItems(maxItems);
 		hkls.setDefaultName("Position");
 		hkls.setEditorClass(HKL.class);
 		hkls.setEditorUI(hklEditor);

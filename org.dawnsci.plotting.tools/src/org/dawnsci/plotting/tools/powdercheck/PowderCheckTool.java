@@ -248,7 +248,8 @@ public class PowderCheckTool extends AbstractToolPage {
 									return (int) Math.signum(o1.getCalibrantQValue()-o2.getCalibrantQValue());
 								}
 							});
-							viewer.setInput(resultsList);
+							
+							if (viewer != null && !viewer.getTable().isDisposed()) viewer.setInput(resultsList);
 						}
 					});
 				}
@@ -272,6 +273,7 @@ public class PowderCheckTool extends AbstractToolPage {
 			public void run() {
 				modeSelect.setSelectedAction(this);
 				sashForm.setMaximizedControl(system.getPlotComposite());
+				if (updatePlotJob == null) update();
 				updatePlotJob.cancel();
 				updatePlotJob.setCheckMode(PowderCheckMode.FullImage);
 				updatePlotJob.schedule();
@@ -288,6 +290,7 @@ public class PowderCheckTool extends AbstractToolPage {
 			public void run() {
 				modeSelect.setSelectedAction(this);
 				sashForm.setMaximizedControl(system.getPlotComposite());
+				if (updatePlotJob == null) update();
 				updatePlotJob.cancel();
 				updatePlotJob.setCheckMode(PowderCheckMode.Quadrants);
 				updatePlotJob.schedule();
@@ -313,6 +316,7 @@ public class PowderCheckTool extends AbstractToolPage {
 				});
 				
 				sashForm.setMaximizedControl(null);
+				if (updatePlotJob == null) update();
 				updatePlotJob.cancel();
 				updatePlotJob.setCheckMode(PowderCheckMode.PeakFit);
 				updatePlotJob.setAxisMode(xAxis);
