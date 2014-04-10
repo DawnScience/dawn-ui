@@ -178,15 +178,7 @@ class BoxSelection extends AbstractSelectionRegion {
 			double oy = Math.min(a[1], c[1]);
 			double lx = Math.abs(a[0] - c[0]);
 			double ly = Math.abs(a[1] - c[1]);
-			double angle = 0;
-			if (lx < ly) {
-				angle = 0.5*Math.PI;
-				ox += lx;
-				double t = lx;
-				lx = ly;
-				ly = t;
-			}
-			croi = new RectangularROI(ox, oy, lx, ly, angle);
+			croi = new RectangularROI(ox, oy, lx, ly, 0);
 
 			roiHandler.setROI(createROI(true));
 			configureHandles();
