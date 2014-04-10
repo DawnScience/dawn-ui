@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashSet;
 
 import org.dawnsci.common.widgets.celleditor.FloatSpinnerCellEditor;
+import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -253,8 +254,10 @@ class RegionEditingSupport extends EditingSupport {
 			}
 
 			tool.setRoi(myRoi);
-			IRegion myregion = tool.getPlottingSystem().getRegion(region.getName());
+			IPlottingSystem system = tool.getPlottingSystem();
+			IRegion myregion = system.getRegion(region.getName());
 			if(myregion!= null)
 				myregion.setROI(myRoi);
+			system.repaint(false);
 		}
 	}
