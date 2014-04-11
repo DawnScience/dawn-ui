@@ -18,6 +18,9 @@ public interface ISettablePlotView {
 	 * list of IPeak objects to define the peaks.
 	 * 
 	 * @param data
+	 * @param clazz
 	 */
-	void setPlottedData(Serializable data);
+	public void updateData(Serializable data, Class<?> clazz);
+
+	
 }
