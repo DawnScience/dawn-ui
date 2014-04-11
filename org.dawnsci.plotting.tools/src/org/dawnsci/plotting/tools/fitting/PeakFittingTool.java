@@ -601,6 +601,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 			public void run() {
 				if (!isActive()) return;
 				if (fittedFunctions!=null) fittedFunctions.deleteSelectedFunction(getPlottingSystem());
+				pushFunctionsToPlotter();
 				viewer.refresh();
 			}
 		};
