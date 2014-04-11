@@ -215,5 +215,61 @@
             content="intro/introContribution.xml">
       </configExtension>
    </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.dawnsci.spectrum.ui.views.SpectrumFileView">
+         <command
+               commandId="uk.ac.diamond.sda.navigator.exploreros"
+               icon="icons/folder.png"
+               label="Open in File Explorer"
+               style="push">
+         </command>
+         <command
+               commandId="org.dawnsci.conversion.convertWizard"
+               icon="icons/convert.png"
+               label="Convert..."
+               style="push">
+            <visibleWhen
+                  checkEnabled="true">
+            </visibleWhen>
+         </command>
+         <separator
+               name="org.dawnsci.spectrum.ui.separator3">
+         </separator>
+         <command
+               commandId="uk.ac.diamond.sda.navigator.refresh"
+               icon="icons/refresh.gif"
+               style="push"
+               tooltip="Refresh file tree">
+         </command>
+         <command
+               commandId="uk.ac.diamond.sda.navigator.collapseAll"
+               icon="icons/CollapseAll.png"
+               label="Collapse All"
+               style="push">
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.dawnsci.spectrum.ui.views.SpectrumFileView">
+         <separator
+               name="org.dawnsci.spectrum.ui.separator4">
+         </separator>
+         <command
+               commandId="uk.ac.diamond.sda.navigator.collapseAll"
+               icon="icons/CollapseAll.png"
+               label="Collapse All"
+               style="push">
+         </command>
+         <command
+               commandId="uk.ac.diamond.sda.navigator.refresh"
+               icon="icons/refresh.gif"
+               style="push"
+               tooltip="Refresh file tree">
+         </command>
+      </menuContribution>
+   </extension>
 
 </plugin>
