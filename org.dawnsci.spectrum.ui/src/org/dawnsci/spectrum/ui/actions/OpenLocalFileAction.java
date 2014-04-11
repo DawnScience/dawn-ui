@@ -18,6 +18,7 @@ import org.eclipse.ui.PlatformUI;
 public class OpenLocalFileAction extends Action implements IWorkbenchWindowActionDelegate {
 
 	private IWorkbenchWindow window;
+	private String filterPath;
 
 	@Override
 	public void run(IAction action) {
@@ -28,17 +29,22 @@ public class OpenLocalFileAction extends Action implements IWorkbenchWindowActio
 	public void run() {
 		FileDialog dialog =  new FileDialog(window.getShell(), SWT.OPEN | SWT.MULTI);
 		dialog.setText("Open file");
-		//dialog.setFilterPath(filterPath);
+		dialog.setFilterPath(filterPath);
 		dialog.open();
 		String[] names =  dialog.getFileNames();
-		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-		IViewPart view = page.findView("org.dawnsci.spectrum.ui.views.SpectrumView");
-		if (view==null) return;
 		
-		final SpectrumFileManager manager = (SpectrumFileManager)view.getAdapter(SpectrumFileManager.class);
-		if (manager != null) {
-			for (String name : names) {
-				manager.addFile(dialog.getFilterPath() + File.separator + name);
+		if (names != null) {
+			filterPath =  dialog.getFilterPath();
+
+			IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+			IViewPart view = page.findView("org.dawnsci.spectrum.ui.views.SpectrumView");
+			if (view==null) return;
+
+			final SpectrumFileManager manager = (SpectrumFileManager)view.getAdapter(SpectrumFileManager.class);
+			if (manager != null) {
+				for (String name : names) {
+					manager.addFile(dialog.getFilterPath() + File.separator + name);
+				}
 			}
 		}
 	}
@@ -52,11 +58,13 @@ public class OpenLocalFileAction extends Action implements IWorkbenchWindowActio
 	@Override
 	public void dispose() {
 		window = null;
+		filterPath = null;
 	}
 
 	@Override
 	public void init(IWorkbenchWindow window) {
 		this.window =  window;
+		filterPath =  System.getProperty("user.home");
 	}
 
 }
