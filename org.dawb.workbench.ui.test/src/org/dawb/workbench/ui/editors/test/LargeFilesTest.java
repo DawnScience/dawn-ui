@@ -12,7 +12,7 @@ package org.dawb.workbench.ui.editors.test;
 import java.io.File;
 
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawb.passerelle.common.utils.ModelUtils;
+import org.dawb.passerelle.common.project.PasserelleProjectUtils;
 import org.dawb.workbench.ui.project.DataProjectUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -42,7 +42,7 @@ public class LargeFilesTest {
 	@BeforeClass
 	public static void before() throws Exception {
 		
-		ModelUtils.createWorkflowProject("workflows", ResourcesPlugin.getWorkspace().getRoot(), true, null);
+		PasserelleProjectUtils.createWorkflowProject("workflows", ResourcesPlugin.getWorkspace().getRoot(), true, null);
 		DataProjectUtils.createDataProject("data", ResourcesPlugin.getWorkspace().getRoot(), true, null);
 		ResourcesPlugin.getWorkspace().getRoot().refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 		

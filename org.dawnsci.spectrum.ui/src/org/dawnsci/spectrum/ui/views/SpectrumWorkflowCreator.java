@@ -3,7 +3,7 @@ package org.dawnsci.spectrum.ui.views;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
-import org.dawb.passerelle.common.utils.ModelUtils;
+import org.dawb.passerelle.common.project.PasserelleProjectUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -51,7 +51,7 @@ public class SpectrumWorkflowCreator {
 		final IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		if (root==null) return null;
 		try {
-			IProject project = ModelUtils.createWorkflowProject(projectName, root, false, null);
+			IProject project = PasserelleProjectUtils.createWorkflowProject(projectName, root, false, null);
 			project.open(new NullProgressMonitor());
 			return project;
 		} catch (Exception e) {
