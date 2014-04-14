@@ -295,7 +295,7 @@ public class FittedFunctions {
 	}
 
 	public void addFittedFunctions(List<FittedFunction> peakList) {
-		this.fittedPeakList.addAll(peakList);
+		this.fittedPeakList.addAll(0, peakList);
 	}
 
     /**

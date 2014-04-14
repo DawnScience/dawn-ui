@@ -272,6 +272,7 @@ public class RegionArea extends PlotArea {
 			fireRegionRemoved(new RegionEvent(gone));
 			revalidate();
 		}
+		clearRegionTool();
 		return gone!=null;
 	}
 	
@@ -479,7 +480,6 @@ public class RegionArea extends PlotArea {
 	public void disposeRegion(AbstractSelectionRegion region) {
 		removeRegion(region);
 		setCursor(null);
-		clearRegionTool();
 	}
 	
 	

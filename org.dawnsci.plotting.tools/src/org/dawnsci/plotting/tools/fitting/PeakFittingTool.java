@@ -261,23 +261,27 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		    		boolean requireTrace = Activator.getPlottingPreferenceStore().getBoolean(FittingConstants.SHOW_FITTING_TRACE);
 		    		boolean requireAnnot = Activator.getPlottingPreferenceStore().getBoolean(FittingConstants.SHOW_ANNOTATION_AT_PEAK);
 
-		    		int ipeak = 1;
 					// Draw the regions
-					for (FittedFunction fp : newBean.getFunctionList()) {
-						
-						if (fp.isSaved()) continue;
+					for (int i = 0; i < newBean.size(); i++) {
+
+						FittedFunction fp = newBean.getFunctionList().get(i); // TODO proper encapsulation					
+						final int ipeak = i+1;
+
+						if (fp.isSaved())       continue;
+						if (fp.getFwhm()!=null) continue;  // Already got some UI
 						
 						RectangularROI rb = fp.getRoi();
-						final IRegion area = RegionUtils.replaceCreateRegion(getPlottingSystem(), "Peak Area "+ipeak, RegionType.XAXIS);
+						final IRegion area = getPlottingSystem().createRegion("Peak Area "+ipeak, RegionType.XAXIS);
 						area.setRegionColor(ColorConstants.orange);
 						area.setROI(rb);
 						area.setMobile(false);
+						area.setUserObject(FittedFunction.class);
 						getPlottingSystem().addRegion(area);
 						fp.setFwhm(area);
 						if (!requireFWHMSelections) area.setVisible(false);
 												
 						final AbstractDataset[] pair = fp.getPeakFunctions();
-						final ILineTrace trace = TraceUtils.replaceCreateLineTrace(getPlottingSystem(), "Peak "+ipeak);
+						final ILineTrace trace = getPlottingSystem().createLineTrace("Peak "+ipeak);
 						//set user trace false before setting data otherwise the trace sent to events will be a true by default
 						trace.setUserTrace(false);
 						trace.setData(pair[0], pair[1]);
@@ -287,13 +291,13 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 						fp.setTrace(trace);
 						if (!requireTrace) trace.setVisible(false);
 
-	                   	final IAnnotation ann = AnnotationUtils.replaceCreateAnnotation(getPlottingSystem(), "Peak "+ipeak);
+	                   	final IAnnotation ann = getPlottingSystem().createAnnotation("Peak "+ipeak);
                     	ann.setLocation(fp.getPosition(), fp.getPeakValue());                  	
                     	getPlottingSystem().addAnnotation(ann);                   	
                     	fp.setAnnotation(ann);
                     	if (!requireAnnot) ann.setVisible(false);
                     	
-						final IRegion line = RegionUtils.replaceCreateRegion(getPlottingSystem(), "Peak Line "+ipeak, RegionType.XAXIS_LINE);
+						final IRegion line = getPlottingSystem().createRegion("Peak Line "+ipeak, RegionType.XAXIS_LINE);
 						line.setRegionColor(ColorConstants.black);
 						line.setAlpha(150);
 						line.setLineWidth(1);
@@ -303,8 +307,6 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 						fp.setCenter(line);
 						if (!requirePeakSelections) line.setVisible(false);
 
-
-					    ++ipeak;
 					}
 				
 					PeakFittingTool.this.fittedFunctions = newBean;
@@ -419,6 +421,25 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		};
 		createNewSelection.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit.png"));
 		getSite().getActionBars().getToolBarManager().add(createNewSelection);
+		
+		final Action addMode = new Action("Add peaks to those already found", IAction.AS_CHECK_BOX) {
+			public void run() {
+				setAddingPeaks(isChecked());
+				Activator.getPlottingPreferenceStore().setValue(FittingConstants.ADD_PEAK_MODE, isChecked());
+				if (!isChecked()) {
+					if (fitRegion!=null) {
+						getPlottingSystem().removeRegion(fitRegion);
+						fitRegion = null;
+					}
+				}
+			}
+		};
+		addMode.setImageDescriptor(Activator.getImageDescriptor("icons/add.png"));
+		getSite().getActionBars().getToolBarManager().add(addMode);
+		addMode.setChecked(Activator.getPlottingPreferenceStore().getBoolean(FittingConstants.ADD_PEAK_MODE));
+		setAddingPeaks(addMode.isChecked());
+		
+		
 		getSite().getActionBars().getToolBarManager().add(new Separator());
 		
 		final Action showAnns = new Action("Show annotations at the peak position.", IAction.AS_CHECK_BOX) {

@@ -70,10 +70,12 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 	protected FittingJob        fittingJob;
 
 	private RectangularROI fitBounds;
-	private IRegion        fitRegion;
+	protected IRegion        fitRegion;
 	
 	private ISelectionChangedListener viewUpdateListener;
 	private ITraceListener traceListener;
+
+	private boolean addingPeaks=false;
 
 	public AbstractFittingTool() {
 		super();
@@ -385,6 +387,10 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 	public void regionsRemoved(RegionEvent evt) {
 		
 	}
+	
+	protected void setAddingPeaks(boolean addPeaksToList) {
+		this.addingPeaks = addPeaksToList;
+	}
 
 	protected final class FittingJob extends Job {
 		
@@ -408,7 +414,7 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 			composite.getDisplay().syncExec(new Runnable() {
 				public void run() {
 					getPlottingSystem().removeRegion(fitRegion);
-					if (fittedFunctions!=null) {
+					if (fittedFunctions!=null && !addingPeaks) {
 						fittedFunctions.removeSelections(getPlottingSystem(), false);
 					}
 				}
@@ -455,6 +461,13 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 					return Status.CANCEL_STATUS;
 				}
 			}
+			
+			if (addingPeaks) composite.getDisplay().syncExec(new Runnable() {
+				public void run() {
+					createNewFit();
+				}
+			});
+
 			return Status.OK_STATUS;
 		}
 
@@ -600,8 +613,18 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 			fittedFunctions.removeSelections(getPlottingSystem(), true);
 			fittedFunctions.dispose();
 			fittedFunctions = null;
+						
 			pushFunctionsToPlotter();
 		}
+		
+		// We sometimes get lagging regions, delete these too.
+		final Collection<IRegion> regions = getPlottingSystem().getRegions();
+		for (IRegion iRegion : regions) {
+			if (iRegion.getUserObject()==FittedFunction.class) {
+				getPlottingSystem().removeRegion(iRegion);
+			}
+		}
+
 		viewer.refresh();
 	}
 
