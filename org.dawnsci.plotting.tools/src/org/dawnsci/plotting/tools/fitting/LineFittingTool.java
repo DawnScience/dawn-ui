@@ -19,6 +19,7 @@ import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.TraceUtils;
+import org.dawnsci.plotting.api.views.ISettablePlotView;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -38,6 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
@@ -385,6 +387,13 @@ public class LineFittingTool extends AbstractFittingTool {
 		}
 
 		return file.getAbsolutePath();
+	}
+
+	@Override
+	void pushFunctionsToPlotter() {
+		if (getPart() instanceof ISettablePlotView) {
+			//TODO
+		}
 	}
 
 }

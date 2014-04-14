@@ -29,6 +29,7 @@ import org.dawnsci.plotting.api.region.IRegionListener;
 import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.TraceUtils;
+import org.dawnsci.plotting.api.views.ISettablePlotView;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.FittingPreferencePage;
 import org.eclipse.core.runtime.Status;
@@ -600,6 +601,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 			public void run() {
 				if (!isActive()) return;
 				if (fittedFunctions!=null) fittedFunctions.deleteSelectedFunction(getPlottingSystem());
+				pushFunctionsToPlotter();
 				viewer.refresh();
 			}
 		};
@@ -677,5 +679,20 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		
 		return file.getAbsolutePath();
     }
+
+	@Override
+	void pushFunctionsToPlotter() {
+		if (getPart() instanceof ISettablePlotView) {
+			ISettablePlotView plotView = (ISettablePlotView) getPart();
+			ArrayList<IPeak> peaks = new ArrayList<IPeak>();
+			if (fittedFunctions != null) {
+				for (FittedFunction func : fittedFunctions.getFunctionList()) {
+					IPeak peak = func.getPeak();
+					peaks.add(peak);
+				}
+			}
+			plotView.updateData(peaks, IPeak.class);
+		}
+	}
 
 }

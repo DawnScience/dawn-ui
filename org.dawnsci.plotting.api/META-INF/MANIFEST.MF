@@ -35,4 +35,5 @@ Export-Package: org.dawnsci.plotting.api,
  org.dawnsci.plotting.api.preferences,
  org.dawnsci.plotting.api.region,
  org.dawnsci.plotting.api.tool,
- org.dawnsci.plotting.api.trace
+ org.dawnsci.plotting.api.trace,
+ org.dawnsci.plotting.api.views

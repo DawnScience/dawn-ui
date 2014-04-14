@@ -448,7 +448,8 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 		    		if (fittedFunctions!=null && !fittedFunctions.isEmpty() && bean!=null) {
 		    			bean.addFittedFunctions(fittedFunctions.getFunctionList());
 		    		}
-		    		createFittedFunctionUI(bean);
+					createFittedFunctionUI(bean);
+					pushFunctionsToPlotter();
 				} catch (Exception ne) {
 					logger.error("Cannot fit functions!", ne);
 					return Status.CANCEL_STATUS;
@@ -462,7 +463,11 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 			schedule();
 		}
 	};
-	
+
+	/**
+	 * If the plottingsystem is in a PlotView, we push the functions to the GuiBean
+	 */
+	abstract void pushFunctionsToPlotter();
 
 	/**
 	 * 
@@ -595,6 +600,7 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 			fittedFunctions.removeSelections(getPlottingSystem(), true);
 			fittedFunctions.dispose();
 			fittedFunctions = null;
+			pushFunctionsToPlotter();
 		}
 		viewer.refresh();
 	}
