@@ -281,6 +281,7 @@ public class RegionControlWindow {
 				samplingMode, samplingMode, 
 				xAspectRatio, 
 				yAspectRatio);
+		sroi.setLengths(width, height);
 		sroi.setXBinShape(binShape);
 		sroi.setYBinShape(binShape);
 

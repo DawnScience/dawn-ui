@@ -390,6 +390,7 @@ public class WindowTool extends AbstractToolPage {
 				samplingMode, samplingMode,
 				xAspectRatio, 
 				yAspectRatio);
+		sroi.setLengths(Double.valueOf(endX - startX), Double.valueOf(endY - startY));
 		sroi.setXBinShape(binShape);
 		sroi.setYBinShape(binShape);
 		return sroi;

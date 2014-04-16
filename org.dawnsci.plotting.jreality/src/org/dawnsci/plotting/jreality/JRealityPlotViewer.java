@@ -60,7 +60,6 @@ import org.dawnsci.plotting.jreality.tool.SceneDragTool;
 import org.dawnsci.plotting.jreality.util.JOGLChecker;
 import org.dawnsci.plotting.jreality.util.PlotColorUtility;
 import org.dawnsci.plotting.roi.SurfacePlotROI;
-import org.dawnsci.plotting.util.PlottingUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -558,18 +557,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 
 		try {
 			if (window == null && mode == PlottingMode.SURF2D) {
-				// Apply some downsampling to the surfacePlotROI
-				int width = data.get(0).getShape()[1];
-				int height = data.get(0).getShape()[0];
-				int binShape = 1, samplingMode = 0;
-				binShape = PlottingUtils.getBinShape(width, height, false);
-				if (binShape != 1) {
-					// DownsampleMode.MEAN = 2
-					samplingMode = 2; 
-				}
-				window = new SurfacePlotROI(0, 0, width, height, samplingMode, samplingMode, 0, 0);
-				((SurfacePlotROI)window).setXBinShape(binShape);
-				((SurfacePlotROI)window).setYBinShape(binShape);
+				window = SurfaceTrace.createSurfacePlotROI(data.get(0));
 			}
 			if (mode == PlottingMode.SURF2D && window instanceof SurfacePlotROI && !window.equals(getDataWindow())) {
 				((DataSet3DPlot3D) plotter).setDataWindow(data, (SurfacePlotROI)window, null);

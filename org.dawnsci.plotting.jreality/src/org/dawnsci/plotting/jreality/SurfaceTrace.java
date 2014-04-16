@@ -8,18 +8,15 @@ import org.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.roi.SurfacePlotROI;
+import org.dawnsci.plotting.util.PlottingUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.PlatformUI;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
-
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
-import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 /**
  * A class for holding surface trace data.
@@ -37,7 +34,6 @@ public class SurfaceTrace extends Image3DTrace implements ISurfaceTrace{
 	public SurfaceTrace(JRealityPlotViewer plotter, String name) {
 		super(plotter, name);
 		plotType = PlottingMode.SURF2D;
-		this.window = new RectangularROI(100, 100, 400, 400, 0);
 	}
 
 	/**
@@ -84,6 +80,8 @@ public class SurfaceTrace extends Image3DTrace implements ISurfaceTrace{
 	@SuppressWarnings("unchecked")
 	@Override
 	public void setData(final IDataset data, List<? extends IDataset> axes) {
+		if (window == null)
+			window = SurfaceTrace.createSurfacePlotROI(data);
 
 		if (imageServiceBean==null) imageServiceBean = new ImageServiceBean();
 		imageServiceBean.setImage(data);
@@ -108,6 +106,26 @@ public class SurfaceTrace extends Image3DTrace implements ISurfaceTrace{
 				plottingSystem.fireTraceUpdated(new TraceEvent(this));
 			}
 		}
+	}
+
+	/**
+	 * Creates a SurfacePlotROI 1/4 the size of the dataset given as a parameter
+	 */
+	public static SurfacePlotROI createSurfacePlotROI(IDataset data) {
+		// Apply some downsampling to the surfacePlotROI
+		int width = data.getShape()[1]/2;
+		int height = data.getShape()[0]/2;
+		int binShape = 1, samplingMode = 0;
+		binShape = PlottingUtils.getBinShape(width, height, false);
+		if (binShape != 1) {
+			// DownsampleMode.MEAN = 2
+			samplingMode = 2; 
+		}
+		SurfacePlotROI window = new SurfacePlotROI(0, 0, width, height, samplingMode, samplingMode, 0, 0);
+		window.setLengths(new double[]{Double.valueOf(width), Double.valueOf(height)});
+		window.setXBinShape(binShape);
+		window.setYBinShape(binShape);
+		return window;
 	}
 
 	@Override
