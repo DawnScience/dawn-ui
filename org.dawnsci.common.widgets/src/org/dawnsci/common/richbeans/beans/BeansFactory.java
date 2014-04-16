@@ -201,13 +201,17 @@ public class BeansFactory {
 			}
 			
 			tryDirectValue = false;
-			final Method method;
+			Method method=null;
 			if (value != null) {
-				method = bean.getClass().getMethod(setterName, value.getClass());
+				try {
+				    method = bean.getClass().getMethod(setterName, value.getClass());
+				} catch (NoSuchMethodException ne) {
+					method = bean.getClass().getMethod(setterName, Object.class);
+				}
 			} else {
 				method = bean.getClass().getMethod(setterName, Object.class);
 			}
-			method.invoke(bean, value);
+			if (method!=null) method.invoke(bean, value);
 
 		} catch (NoSuchMethodException ne) {
 			
