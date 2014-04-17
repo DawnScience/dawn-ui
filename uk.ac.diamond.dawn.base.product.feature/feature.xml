@@ -65,6 +65,10 @@
          id="org.dawnsci.usagedata.feature"
          version="0.0.0"/>
 
+   <includes
+         id="org.dawnsci.commandserver.feature"
+         version="0.0.0"/>
+
    <plugin
          id="uk.ac.diamond.scisoft.mx.rcp"
          os="linux"
