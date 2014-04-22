@@ -21,14 +21,12 @@ import org.dawb.hdf5.IHierarchicalDataFile;
 import org.dawb.hdf5.Nexus;
 import org.dawb.hdf5.nexus.NexusUtils;
 import org.dawnsci.io.h5.H5Utils;
-import org.dawnsci.plotting.api.annotation.AnnotationUtils;
 import org.dawnsci.plotting.api.annotation.IAnnotation;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.IRegionListener;
 import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.api.trace.ILineTrace;
-import org.dawnsci.plotting.api.trace.TraceUtils;
 import org.dawnsci.plotting.api.views.ISettablePlotView;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.FittingPreferencePage;
@@ -265,13 +263,14 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 					for (int i = 0; i < newBean.size(); i++) {
 
 						FittedFunction fp = newBean.getFunctionList().get(i); // TODO proper encapsulation					
-						final int ipeak = i+1;
 
 						if (fp.isSaved())       continue;
 						if (fp.getFwhm()!=null) continue;  // Already got some UI
 						
 						RectangularROI rb = fp.getRoi();
-						final IRegion area = getPlottingSystem().createRegion("Peak Area "+ipeak, RegionType.XAXIS);
+						String areaName = RegionUtils.getUniqueName("Peak Area", getPlottingSystem());
+						String suffix = areaName.replaceAll("Peak Area", "");
+						final IRegion area = getPlottingSystem().createRegion(areaName, RegionType.XAXIS);
 						area.setRegionColor(ColorConstants.orange);
 						area.setROI(rb);
 						area.setMobile(false);
@@ -281,7 +280,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 						if (!requireFWHMSelections) area.setVisible(false);
 												
 						final AbstractDataset[] pair = fp.getPeakFunctions();
-						final ILineTrace trace = getPlottingSystem().createLineTrace("Peak "+ipeak);
+						final ILineTrace trace = getPlottingSystem().createLineTrace("Peak"+suffix);
 						//set user trace false before setting data otherwise the trace sent to events will be a true by default
 						trace.setUserTrace(false);
 						trace.setData(pair[0], pair[1]);
@@ -291,13 +290,13 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 						fp.setTrace(trace);
 						if (!requireTrace) trace.setVisible(false);
 
-	                   	final IAnnotation ann = getPlottingSystem().createAnnotation("Peak "+ipeak);
+	                   	final IAnnotation ann = getPlottingSystem().createAnnotation("Peak"+suffix);
                     	ann.setLocation(fp.getPosition(), fp.getPeakValue());                  	
                     	getPlottingSystem().addAnnotation(ann);                   	
                     	fp.setAnnotation(ann);
                     	if (!requireAnnot) ann.setVisible(false);
                     	
-						final IRegion line = getPlottingSystem().createRegion("Peak Line "+ipeak, RegionType.XAXIS_LINE);
+						final IRegion line = getPlottingSystem().createRegion("Peak Line"+suffix, RegionType.XAXIS_LINE);
 						line.setRegionColor(ColorConstants.black);
 						line.setAlpha(150);
 						line.setLineWidth(1);
