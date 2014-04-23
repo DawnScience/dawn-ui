@@ -15,8 +15,9 @@ import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 import uk.ac.diamond.scisoft.analysis.dataset.function.AbstractPixelIntegration;
 import uk.ac.diamond.scisoft.analysis.dataset.function.NonPixelSplittingIntegration;
+import uk.ac.diamond.scisoft.analysis.dataset.function.NonPixelSplittingIntegration2D;
+import uk.ac.diamond.scisoft.analysis.dataset.function.PixelIntegrationUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.function.PixelSplittingIntegration;
-import uk.ac.diamond.scisoft.analysis.dataset.function.PixelSplittingIntegration2D;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
@@ -32,9 +33,11 @@ public class PowderIntegrationJob extends Job {
 	IntegrationMode mode = IntegrationMode.NONSPLITTING;
 	AbstractDataset data;
 	AbstractDataset mask;
+	AbstractDataset correction;
 	IROI roi;
 	int nBins;
 	boolean correctSolidAngle = false;
+	boolean correctPolarisation = false;
 
 	public enum IntegrationMode{NONSPLITTING,SPLITTING,SPLITTING2D}
 	
@@ -88,15 +91,21 @@ public class PowderIntegrationJob extends Job {
 		if (integrator == null) {
 			updateIntegrator();
 		}
-		integrator.setCorrectSolidAngle(correctSolidAngle);
+		
 		integrator.setMask(mask);
 		integrator.setROI(roi);
 		integrator.setAxisType(xAxis);
 		
 		//non splitting should be fast
 		if (mode != IntegrationMode.NONSPLITTING) system.setEnabled(false);
+
+		AbstractDataset processed = applyCorrections(data);
+		double maxd = data.max().doubleValue();
+		double max = processed.max().doubleValue();
+		max = max + 0;
+		maxd = maxd + 0;
+		final List<AbstractDataset> out = integrator.value(processed);
 		
-		final List<AbstractDataset> out = integrator.value(data);
 		system.setEnabled(true);
 		
 		if (mode != IntegrationMode.SPLITTING2D) {
@@ -127,14 +136,44 @@ public class PowderIntegrationJob extends Job {
 		
 		if (integrator == null) {
 			updateIntegrator();
-			integrator.setCorrectSolidAngle(correctSolidAngle);
 			integrator.setMask(mask);
 			integrator.setROI(roi);
 			integrator.setAxisType(xAxis);
 		}
-	
-		return integrator.value(data);
 		
+		AbstractDataset processed = applyCorrections(data);
+		
+		List<AbstractDataset> out = integrator.value(processed);
+		
+		return out;
+		
+	}
+	
+	private AbstractDataset applyCorrections(AbstractDataset data) {
+		if (!correctSolidAngle && !correctPolarisation) return data;
+		
+		correction = null;
+		
+		if (correction == null) {
+			correction = AbstractDataset.ones(data, AbstractDataset.FLOAT32);
+			
+			AbstractDataset tth = null;
+			
+			if (correctSolidAngle) {
+				
+				tth = PixelIntegrationUtils.generate2ThetaArrayRadians(data.getShape(), md);
+				
+				PixelIntegrationUtils.solidAngleCorrection(correction,tth);
+			}
+			
+//			if (correctPolarisation) {
+//				if (tth == null) tth = PixelIntegrationUtils.generate2ThetaArrayRadians(data.getShape(), md);
+//				AbstractDataset az = PixelIntegrationUtils.generateAzimuthalArrayRadians(md.getDetector2DProperties().getBeamCentreCoords(), data.getShape());
+//				PixelIntegrationUtils.polarisationCorrection(correction, tth, az, 0.95);
+//			}
+		}
+		
+		return Maths.divide(data,correction);
 	}
 	
 	private void updateIntegrator() {
@@ -146,7 +185,7 @@ public class PowderIntegrationJob extends Job {
 			integrator = new PixelSplittingIntegration(qSpace, nBins);
 			break;
 		case SPLITTING2D:
-			integrator = new PixelSplittingIntegration2D(qSpace, nBins,nBins);
+			integrator = new NonPixelSplittingIntegration2D(qSpace, nBins,nBins);
 			break;
 		}
 	}
