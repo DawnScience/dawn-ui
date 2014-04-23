@@ -44,6 +44,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
@@ -63,6 +64,8 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 	
 	protected Composite         composite;
 	protected FittedFunctions   fittedFunctions;
+	protected List<FittedFunction>   previousFittedFunctions;
+
 	protected MenuAction        tracesMenu;
 	protected List<ILineTrace>  selectedTraces;
 	protected TableViewer       viewer;
@@ -71,7 +74,7 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 
 	private RectangularROI fitBounds;
 	protected IRegion        fitRegion;
-	
+
 	private ISelectionChangedListener viewUpdateListener;
 	private ITraceListener traceListener;
 
@@ -88,7 +91,6 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 		this.selectedTraces = new Vector<ILineTrace>(31);
 		
 		this.traceListener = new ITraceListener.Stub() {
-			
 			@Override
 			public void tracesUpdated(TraceEvent evt) {
 				fittingJob.schedule();
@@ -105,7 +107,7 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 				}
 				if (traces!=null && !traces.isEmpty()) {
 					final int size = updateTracesChoice(traces.get(traces.size()-1));	
-					if (size>0) fittingJob.schedule();
+					if (size>0) fittingJob.fit(true);
 				}
 			}
 			
@@ -137,7 +139,7 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 				}
 
 				final int size = updateTracesChoice(trace);	
-				if (size>0) fittingJob.schedule();
+				if (size>0) fittingJob.fit(true);
 
 			}
 		};
@@ -241,7 +243,6 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 			}
 		};
 	}
-
 
 	/**
 	 * Implement method to provide colums with information on the type of fit
@@ -373,7 +374,7 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 			return;
 		}
 		if (evt.getRegion()==fitRegion) {
-			fittingJob.fit();
+			fittingJob.fit(false);
 		}
 	}
 
@@ -393,7 +394,9 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 	}
 
 	protected final class FittingJob extends Job {
-		
+
+		boolean autoUpdate;
+
 		public FittingJob() {
 			super("Fit peaks");
 			setPriority(Job.INTERACTIVE);
@@ -405,9 +408,42 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 			if (composite==null)        return Status.CANCEL_STATUS;
 			if (composite.isDisposed()) return Status.CANCEL_STATUS;
 
-			final RectangularROI bounds = (RectangularROI) fitRegion.getROI();
-			if (fitRegion==null || bounds==null) return Status.CANCEL_STATUS;
+			if (fitRegion == null) return Status.CANCEL_STATUS;
+			RectangularROI bounds = (RectangularROI) fitRegion.getROI();
+			if (bounds == null && !autoUpdate) return Status.CANCEL_STATUS;
+			if (bounds == null && autoUpdate) {
+				if (fittedFunctions == null) return Status.CANCEL_STATUS;
+				Display.getDefault().syncExec(new Runnable() {
+					@Override
+					public void run() {
+						previousFittedFunctions = fittedFunctions.getFunctionList();
+						clearAll();
+					}
+				});
+				for (FittedFunction function : previousFittedFunctions) {
+					IRegion region = function.getFwhm();
+					if (region != null && region.getROI() instanceof RectangularROI) {
+						// change the fwhm by 2xfwhm where
+						// <--width--> becomes <--width/2--><--width--><--width/2-->
+						RectangularROI rectangle = (RectangularROI)region.getROI();
+						double width = rectangle.getLength(0);
+						double xPoint = rectangle.getPointX();
+						double[] startPoint = rectangle.getPoint();
+						double[] endPoint = rectangle.getEndPoint();
+						double newStartXPoint = xPoint - (width/2);
+						double newEndXPoint = endPoint[0] + (width/2);
+						rectangle.setPoint(newStartXPoint, startPoint[1]);
+						rectangle.setEndPoint(new double[]{newEndXPoint, endPoint[1]});
+						IStatus status = doFit(rectangle, monitor);
+						if (status == Status.CANCEL_STATUS) return Status.CANCEL_STATUS;
+					}
+				}
+			} else if (bounds != null)
+				return doFit(bounds, monitor);
+			return Status.OK_STATUS;
+		}
 
+		private IStatus doFit(RectangularROI bounds, IProgressMonitor monitor) {
 			setFitBounds(bounds);
 			getPlottingSystem().removeRegionListener(AbstractFittingTool.this);
 
@@ -467,11 +503,15 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 					createNewFit();
 				}
 			});
-
 			return Status.OK_STATUS;
 		}
 
-		public void fit() {
+		/**
+		 * 
+		 * @param autoUpdate
+		 */
+		public void fit(boolean autoUpdate) {
+			this.autoUpdate = autoUpdate;
 			cancel();
 			schedule();
 		}
@@ -528,7 +568,7 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 						selectedTraces.add(ta.iTrace);
 					}
 					if (fittingJob!=null&&isActive()) {
-						fittingJob.fit();
+						fittingJob.fit(false);
 					}
 				}
 			};
@@ -542,7 +582,7 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 						ta.setChecked(false);
 					}
 					if (fittingJob!=null&&isActive()) {
-						fittingJob.fit();
+						fittingJob.fit(false);
 					}
 				}
 			};
@@ -597,7 +637,7 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 			}
 			tracesMenu.setSelectedAction(this);
 			if (fittingJob!=null&&isActive()) {
-				fittingJob.fit();
+				fittingJob.fit(false);
 			}
 		}
 	};

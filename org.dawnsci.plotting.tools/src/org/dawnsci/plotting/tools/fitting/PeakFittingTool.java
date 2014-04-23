@@ -71,15 +71,13 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 
 	public PeakFittingTool() {
 		super();
-		
-		
+
 		Activator.getPlottingPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener() {
-			
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				if (isActive()) {
 					if (isInterestedProperty(event)) {
-						if (isActive()) fittingJob.fit();
+						if (isActive()) fittingJob.fit(false);
 						
 						if (FittingConstants.PEAK_NUMBER.equals(event.getProperty())) {
 							final int ipeak = Activator.getPlottingPreferenceStore().getInt(FittingConstants.PEAK_NUMBER);
@@ -522,7 +520,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 				public void run() {
 					Activator.getPlottingPreferenceStore().setValue(FittingConstants.PEAK_TYPE, peak.getName());
 					setChecked(true);
-					if (fittingJob!=null&&isActive()) fittingJob.fit();
+					if (fittingJob!=null&&isActive()) fittingJob.fit(false);
 					peakType.setSelectedAction(this);
 				}
 			};

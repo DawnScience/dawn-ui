@@ -39,7 +39,6 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
@@ -259,7 +258,7 @@ public class LineFittingTool extends AbstractFittingTool {
 					Activator.getPlottingPreferenceStore().setValue(FittingConstants.POLY_ORDER, peak);
 					numberPeaks.setSelectedAction(this);
 					setChecked(true);
-					if (isActive()) fittingJob.fit();
+					if (isActive()) fittingJob.fit(false);
 				}
 			};
 			
