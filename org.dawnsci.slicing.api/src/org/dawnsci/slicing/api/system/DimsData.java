@@ -118,7 +118,11 @@ public class DimsData implements Serializable {
 	}
 
 	public void setSliceRange(String sliceRange) {
-		if (sliceRange!=null) setPlotAxis(AxisType.RANGE);
+		setSliceRange(sliceRange, false);
+	}
+	
+	public void setSliceRange(String sliceRange, boolean changeAxis) {
+		if (changeAxis && sliceRange!=null) setPlotAxis(AxisType.RANGE);
 		this.sliceRange = sliceRange;
 	}
 
@@ -165,6 +169,7 @@ public class DimsData implements Serializable {
 	
 	public String getUserString(final int upperRange){ 
 		if (!plotAxis.hasValue()) return plotAxis.getLabel();
+		if (isSlice()&&!getPlotAxis().isAdvanced()) return String.valueOf(getSlice());
 		if (sliceRange!=null) return sliceRange;
 		if (upperRange>0) return slice+";"+(upperRange-1)+";1";
         return String.valueOf(slice);

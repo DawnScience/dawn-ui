@@ -79,7 +79,7 @@ class SliceEditingSupport extends EditingSupport {
                 final DimsData data  = (DimsData)((IStructuredSelection)((TableViewer)getViewer()).getSelection()).getFirstElement();
                 final int value = ((Number)spinnerEditor.getValue()).intValue();
                 data.setSlice(value);
-                data.setSliceRange(null);
+                data.setSliceRange(null, false);
          		if (system.synchronizeSliceData(data)) system.slice(false);
 			}
 			
@@ -119,7 +119,7 @@ class SliceEditingSupport extends EditingSupport {
 		final Scale   scale = (Scale)scaleEditor.getControl();
 		final int     value = scale.getSelection();
 		data.setSlice(value);
-		data.setSliceRange(null);
+		data.setSliceRange(null, false);
 		scale.setToolTipText(getScaleTooltip(data, scale.getMinimum(), scale.getMaximum()));		
 		if (doSlice&&system.synchronizeSliceData(data)) system.slice(false);
 	}
@@ -215,7 +215,7 @@ class SliceEditingSupport extends EditingSupport {
 		if (value instanceof Integer) {
 			data.setSlice((Integer)value);
 		} else {
-			data.setSliceRange((String)value);
+			data.setSliceRange((String)value, true);
 		}
 		system.update(data, true);
 	}

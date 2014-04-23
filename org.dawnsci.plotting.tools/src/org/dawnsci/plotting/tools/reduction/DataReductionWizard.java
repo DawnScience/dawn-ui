@@ -160,9 +160,9 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 				if (dd.isSlice()) {
 					context.addSliceDimension(dd.getDimension(), String.valueOf(dd.getSlice()));
 					if (dd.getSlice()>0) {
-					    dd.setSliceRange(dd.getSlice()+":"+(lazy.getShape()[dd.getDimension()]-1));
+					    dd.setSliceRange(dd.getSlice()+":"+(lazy.getShape()[dd.getDimension()]-1), true);
 					} else {
-						dd.setSliceRange("all");
+						dd.setSliceRange("all", true);
 					}
 				    break; // Only one range allowed.
 				} 
