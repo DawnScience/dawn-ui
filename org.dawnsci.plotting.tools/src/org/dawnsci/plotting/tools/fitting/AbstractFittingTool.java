@@ -3,6 +3,8 @@ package org.dawnsci.plotting.tools.fitting;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
 
@@ -64,7 +66,6 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 	
 	protected Composite         composite;
 	protected FittedFunctions   fittedFunctions;
-	protected List<FittedFunction>   previousFittedFunctions;
 
 	protected MenuAction        tracesMenu;
 	protected List<ILineTrace>  selectedTraces;
@@ -396,6 +397,7 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 	protected final class FittingJob extends Job {
 
 		boolean autoUpdate;
+		private List<FittedFunction> previousFittedFunctions;
 
 		public FittingJob() {
 			super("Fit peaks");
@@ -404,7 +406,6 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-
 			if (composite==null)        return Status.CANCEL_STATUS;
 			if (composite.isDisposed()) return Status.CANCEL_STATUS;
 
@@ -416,7 +417,8 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 				Display.getDefault().syncExec(new Runnable() {
 					@Override
 					public void run() {
-						previousFittedFunctions = fittedFunctions.getFunctionList();
+						previousFittedFunctions = new ArrayList<FittedFunction>(fittedFunctions.getFunctionList());
+						sortFunctionsByName(previousFittedFunctions);
 						clearAll();
 					}
 				});
@@ -516,6 +518,15 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 			schedule();
 		}
 	};
+
+	private void sortFunctionsByName(List<FittedFunction> functions) {
+		Collections.sort(functions, new Comparator<FittedFunction>() {
+			@Override
+			public int compare(FittedFunction f1, FittedFunction f2) {
+				return f1.getPeakName().compareTo(f2.getPeakName());
+			}
+		});
+	}
 
 	/**
 	 * If the plottingsystem is in a PlotView, we push the functions to the GuiBean
