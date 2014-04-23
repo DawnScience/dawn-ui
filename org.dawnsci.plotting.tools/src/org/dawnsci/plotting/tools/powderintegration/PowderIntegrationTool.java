@@ -226,6 +226,17 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 
 		};
 		
+		final Action pixelAction = new Action("pixel") {
+			@Override
+			public void run() {
+				PowderIntegrationTool.this.fullImageJob.setAxisType(XAxis.PIXEL);
+				xAxis = XAxis.PIXEL;
+				axisSelect.setSelectedAction(this);
+				update(null);
+			}
+
+		};
+		
 		final MenuAction corrections= new MenuAction("Corrections");
 		final Action solidAngle = new Action("Solid Angle Correction",IAction.AS_CHECK_BOX) {
 			@Override
@@ -309,6 +320,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		axisSelect.add(qAction);
 		axisSelect.add(tthAction);
 		axisSelect.add(dAction);
+		axisSelect.add(pixelAction);
 		axisSelect.setSelectedAction(qAction);
 		
 		corrections.add(solidAngle);

@@ -179,13 +179,13 @@ public class PowderIntegrationJob extends Job {
 	private void updateIntegrator() {
 		switch (mode) {
 		case NONSPLITTING:
-			integrator = new NonPixelSplittingIntegration(qSpace, nBins);
+			integrator = new NonPixelSplittingIntegration(md, nBins);
 			break;
 		case SPLITTING:
-			integrator = new PixelSplittingIntegration(qSpace, nBins);
+			integrator = new PixelSplittingIntegration(md, nBins);
 			break;
 		case SPLITTING2D:
-			integrator = new NonPixelSplittingIntegration2D(qSpace, nBins,nBins);
+			integrator = new NonPixelSplittingIntegration2D(md, nBins,nBins);
 			break;
 		}
 	}

@@ -131,7 +131,7 @@ public class PowderCheckJob extends Job {
 		if (centre[1] < shape[1]/2.0) farCorner[1] = shape[1];
 
 		int maxDistance = (int)Math.sqrt(Math.pow(centre[0]-farCorner[0],2)+Math.pow(centre[1]-farCorner[1],2));
-		PixelSplittingIntegration2D npsi = new PixelSplittingIntegration2D(qSpace, maxDistance,maxDistance);
+		PixelSplittingIntegration2D npsi = new PixelSplittingIntegration2D(md, maxDistance,maxDistance);
 		npsi.setAxisType(xAxis);
 
 		List<AbstractDataset> out = npsi.value(data);
@@ -211,7 +211,7 @@ public class PowderCheckJob extends Job {
 		double[] centre = md.getDetector2DProperties().getBeamCentreCoords();
 
 		int maxDistance = AbstractPixelIntegration.calculateNumberOfBins(centre, shape);
-		NonPixelSplittingIntegration npsi = new NonPixelSplittingIntegration(qSpace, maxDistance);
+		NonPixelSplittingIntegration npsi = new NonPixelSplittingIntegration(md, maxDistance);
 		npsi.setAxisType(xAxis);
 		
 		List<AbstractDataset> out = npsi.value(data);
