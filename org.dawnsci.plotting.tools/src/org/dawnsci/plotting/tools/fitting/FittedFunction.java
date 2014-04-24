@@ -373,4 +373,8 @@ public class FittedFunction  {
 		return null;
 	}
 	
+	public String getName() {
+		return peakName;
+	}
+	
 }
