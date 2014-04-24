@@ -376,5 +376,8 @@ public class FittedFunction  {
 	public String getName() {
 		return peakName;
 	}
+	public String toString() {
+		return getName();
+	}
 	
 }
