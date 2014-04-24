@@ -268,6 +268,10 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 						RectangularROI rb = fp.getRoi();
 						String areaName = RegionUtils.getUniqueName("Peak Area", getPlottingSystem());
 						String suffix = areaName.replaceAll("Peak Area", "");
+						// if one digit we zero pad the digit (add a zero in front) to more easily sort the peaks
+						if (suffix.length() == 2) {
+							suffix = " 0".concat(suffix.trim());
+						}
 						final IRegion area = getPlottingSystem().createRegion(areaName, RegionType.XAXIS);
 						area.setRegionColor(ColorConstants.orange);
 						area.setROI(rb);
@@ -621,6 +625,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 				if (fittedFunctions!=null) fittedFunctions.deleteSelectedFunction(getPlottingSystem());
 				pushFunctionsToPlotter();
 				viewer.refresh();
+				createNewFit();
 			}
 		};
 		delete.setToolTipText("Delete peak selected, if any");

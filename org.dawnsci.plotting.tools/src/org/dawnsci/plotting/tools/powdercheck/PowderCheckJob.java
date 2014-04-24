@@ -35,11 +35,11 @@ import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 import uk.ac.diamond.scisoft.analysis.dataset.Stats;
-import uk.ac.diamond.scisoft.analysis.dataset.function.AbstractPixelIntegration;
-import uk.ac.diamond.scisoft.analysis.dataset.function.NonPixelSplittingIntegration;
-import uk.ac.diamond.scisoft.analysis.dataset.function.PixelSplittingIntegration;
-import uk.ac.diamond.scisoft.analysis.dataset.function.PixelSplittingIntegration2D;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
+import uk.ac.diamond.scisoft.analysis.diffraction.powder.AbstractPixelIntegration;
+import uk.ac.diamond.scisoft.analysis.diffraction.powder.NonPixelSplittingIntegration;
+import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelSplittingIntegration;
+import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelSplittingIntegration2D;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
@@ -131,10 +131,10 @@ public class PowderCheckJob extends Job {
 		if (centre[1] < shape[1]/2.0) farCorner[1] = shape[1];
 
 		int maxDistance = (int)Math.sqrt(Math.pow(centre[0]-farCorner[0],2)+Math.pow(centre[1]-farCorner[1],2));
-		PixelSplittingIntegration2D npsi = new PixelSplittingIntegration2D(qSpace, maxDistance,maxDistance);
+		PixelSplittingIntegration2D npsi = new PixelSplittingIntegration2D(md, maxDistance,maxDistance);
 		npsi.setAxisType(xAxis);
 
-		List<AbstractDataset> out = npsi.value(data);
+		List<AbstractDataset> out = npsi.integrate(data);
 
 		system.updatePlot2D(out.remove(1), out, monitor);
 		setPlottingSystemAxes();
@@ -211,10 +211,10 @@ public class PowderCheckJob extends Job {
 		double[] centre = md.getDetector2DProperties().getBeamCentreCoords();
 
 		int maxDistance = AbstractPixelIntegration.calculateNumberOfBins(centre, shape);
-		NonPixelSplittingIntegration npsi = new NonPixelSplittingIntegration(qSpace, maxDistance);
+		NonPixelSplittingIntegration npsi = new NonPixelSplittingIntegration(md, maxDistance);
 		npsi.setAxisType(xAxis);
 		
-		List<AbstractDataset> out = npsi.value(data);
+		List<AbstractDataset> out = npsi.integrate(data);
 		
 		double max = out.get(1).max().doubleValue();
 		int argmax = out.get(1).argMax();
