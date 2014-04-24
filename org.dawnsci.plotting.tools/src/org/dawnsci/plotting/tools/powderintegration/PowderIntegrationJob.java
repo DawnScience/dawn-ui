@@ -104,7 +104,7 @@ public class PowderIntegrationJob extends Job {
 		double max = processed.max().doubleValue();
 		max = max + 0;
 		maxd = maxd + 0;
-		final List<AbstractDataset> out = integrator.value(processed);
+		final List<AbstractDataset> out = integrator.integrate(processed);
 		
 		system.setEnabled(true);
 		
@@ -143,7 +143,7 @@ public class PowderIntegrationJob extends Job {
 		
 		AbstractDataset processed = applyCorrections(data);
 		
-		List<AbstractDataset> out = integrator.value(processed);
+		List<AbstractDataset> out = integrator.integrate(processed);
 		
 		return out;
 		

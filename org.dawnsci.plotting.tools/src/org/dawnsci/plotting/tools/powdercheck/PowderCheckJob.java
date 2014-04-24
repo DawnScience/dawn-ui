@@ -134,7 +134,7 @@ public class PowderCheckJob extends Job {
 		PixelSplittingIntegration2D npsi = new PixelSplittingIntegration2D(md, maxDistance,maxDistance);
 		npsi.setAxisType(xAxis);
 
-		List<AbstractDataset> out = npsi.value(data);
+		List<AbstractDataset> out = npsi.integrate(data);
 
 		system.updatePlot2D(out.remove(1), out, monitor);
 		setPlottingSystemAxes();
@@ -214,7 +214,7 @@ public class PowderCheckJob extends Job {
 		NonPixelSplittingIntegration npsi = new NonPixelSplittingIntegration(md, maxDistance);
 		npsi.setAxisType(xAxis);
 		
-		List<AbstractDataset> out = npsi.value(data);
+		List<AbstractDataset> out = npsi.integrate(data);
 		
 		double max = out.get(1).max().doubleValue();
 		int argmax = out.get(1).argMax();
