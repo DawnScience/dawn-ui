@@ -6,11 +6,15 @@ import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.RegionEvent;
 import org.dawnsci.plotting.api.region.RegionUtils;
 import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.preference.RegionEditorConstants;
 import org.dawnsci.plotting.tools.region.MeasurementLabelProvider.LabelType;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -111,14 +115,13 @@ public class RegionEditTool extends AbstractRegionTableTool {
 		return iRegion.isUserRegion();
 	}
 
-	private String MOBILE_REGION_SETTING = "org.dawnsci.plotting.tools.mobileRegionSetting";
-	
 	protected void createActions() {
+		final IPreferenceStore store = Activator.getPlottingPreferenceStore();
+
 		IToolBarManager man = getSite().getActionBars().getToolBarManager();
 		final Action immobileWhenAdded = new Action("Allow regions to be moved graphically", IAction.AS_CHECK_BOX) {
 			public void run() {
-				Activator.getLocalPreferenceStore().setValue(MOBILE_REGION_SETTING, isChecked());
-				
+				store.setValue(RegionEditorConstants.MOBILE_REGION_SETTING, isChecked());
 				// We also set all regions mobile or immobile
 				final Collection<IRegion> regions = getPlottingSystem().getRegions();
 				for (IRegion iRegion : regions) {
@@ -127,7 +130,26 @@ public class RegionEditTool extends AbstractRegionTableTool {
 			}
 		};
 		immobileWhenAdded.setImageDescriptor(Activator.getImageDescriptor("icons/traffic-light-green.png"));
-		immobileWhenAdded.setChecked(Activator.getLocalPreferenceStore().getBoolean(MOBILE_REGION_SETTING));
+		immobileWhenAdded.setChecked(store.getBoolean(RegionEditorConstants.MOBILE_REGION_SETTING));
+		store.addPropertyChangeListener(new IPropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent event) {
+				if (isActive()) {
+					if(isInterestedProperty(event)) {
+						boolean isChecked = store.getBoolean(RegionEditorConstants.MOBILE_REGION_SETTING);
+						immobileWhenAdded.setChecked(isChecked);
+						// We also set all regions mobile or immobile
+						final Collection<IRegion> regions = getPlottingSystem().getRegions();
+						for (IRegion iRegion : regions) {
+							if (iRegion.isUserRegion() && iRegion.isVisible()) iRegion.setMobile(isChecked);
+						}
+					}
+				}
+ 			}
+			private boolean isInterestedProperty(PropertyChangeEvent event) {
+				return RegionEditorConstants.MOBILE_REGION_SETTING.equals(event.getProperty());
+			}
+		});
 		man.add(immobileWhenAdded);
 		man.add(new Separator());
 		man.add(getReselectAction());
@@ -145,7 +167,7 @@ public class RegionEditTool extends AbstractRegionTableTool {
 		if (!isActive()) return;
 		super.regionAdded(evt);
 		
-		boolean isMobile = Activator.getLocalPreferenceStore().getBoolean(MOBILE_REGION_SETTING);
+		boolean isMobile = Activator.getPlottingPreferenceStore().getBoolean(RegionEditorConstants.MOBILE_REGION_SETTING);
 		evt.getRegion().setMobile(isMobile);
 	}
 
