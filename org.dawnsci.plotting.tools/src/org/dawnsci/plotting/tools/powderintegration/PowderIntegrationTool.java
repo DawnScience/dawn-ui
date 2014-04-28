@@ -192,6 +192,16 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		};
 		split2DAction.setImageDescriptor(Activator.getImageDescriptor("icons/cake.png"));
 		
+		final Action nonSplit2DAction = new Action("Non pixel splitting 2D") {
+			@Override
+			public void run() {
+				mode = IntegrationMode.NONSPLITTING2D;
+				modeSelect.setSelectedAction(this);
+				update(null);
+			}
+		};
+		nonSplit2DAction.setImageDescriptor(Activator.getImageDescriptor("icons/cake.png"));
+		
 		final MenuAction axisSelect= new MenuAction("Select Axis");
 
 		final Action qAction = new Action("Q") {
@@ -315,6 +325,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		modeSelect.add(nonAction);
 		modeSelect.add(splitAction);
 		modeSelect.add(split2DAction);
+		modeSelect.add(nonSplit2DAction);
 		modeSelect.setSelectedAction(nonAction);
 		
 		axisSelect.add(qAction);

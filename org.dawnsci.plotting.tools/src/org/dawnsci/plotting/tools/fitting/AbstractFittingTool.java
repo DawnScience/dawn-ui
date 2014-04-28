@@ -4,13 +4,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
 
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.util.GridUtils;
+import org.dawb.common.util.list.SortNatural;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegionListener;
 import org.dawnsci.plotting.api.region.RegionEvent;
@@ -418,7 +418,7 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 					@Override
 					public void run() {
 						previousFittedFunctions = new ArrayList<FittedFunction>(fittedFunctions.getFunctionList());
-						sortFunctionsByName(previousFittedFunctions);
+						Collections.sort(previousFittedFunctions, new SortNatural<FittedFunction>(true));
 						clearAll();
 					}
 				});
@@ -518,15 +518,6 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 			schedule();
 		}
 	};
-
-	private void sortFunctionsByName(List<FittedFunction> functions) {
-		Collections.sort(functions, new Comparator<FittedFunction>() {
-			@Override
-			public int compare(FittedFunction f1, FittedFunction f2) {
-				return f1.getPeakName().compareTo(f2.getPeakName());
-			}
-		});
-	}
 
 	/**
 	 * If the plottingsystem is in a PlotView, we push the functions to the GuiBean

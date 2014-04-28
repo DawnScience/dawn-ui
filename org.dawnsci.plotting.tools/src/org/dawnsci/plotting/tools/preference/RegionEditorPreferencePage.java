@@ -26,6 +26,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
@@ -42,6 +43,7 @@ public class RegionEditorPreferencePage extends PreferencePage implements IWorkb
 	private Text pointFormat;
 	private Text intensityFormat;
 	private Text sumFormat;
+	private Button regionMoveableCheckbox;
 
 	public RegionEditorPreferencePage() {
 
@@ -70,11 +72,21 @@ public class RegionEditorPreferencePage extends PreferencePage implements IWorkb
 		GridData gdc = new GridData(SWT.FILL, SWT.FILL, true, true);
 		comp.setLayoutData(gdc);
 
+		regionMoveableCheckbox = new Button(comp, SWT.CHECK);
+		regionMoveableCheckbox.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, false, false));
+		regionMoveableCheckbox.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				storeRegionMoveable();
+			}
+		});
+		regionMoveableCheckbox.setText("Allow regions to be moved");
+		regionMoveableCheckbox.setToolTipText("Allow the regions to be moved graphically");
+
 		Group formatGrp = new Group(comp, SWT.NONE);
 		formatGrp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		formatGrp.setLayout(new GridLayout(2, false));
 		formatGrp.setText("Number Format");
-		
+
 		Label label = new Label(formatGrp, SWT.NONE);
 		label.setText("Region Point Format");
 		label.setToolTipText("Format for the region point values shown in the Region Editor tool");
@@ -131,6 +143,7 @@ public class RegionEditorPreferencePage extends PreferencePage implements IWorkb
 	}
 
 	private void initializePage() {
+		regionMoveableCheckbox.setSelection(getRegionMoveable());
 		pointFormat.setText(getPointFormat());
 		intensityFormat.setText(getIntensityFormat());
 		sumFormat.setText(getSumFormat());
@@ -157,11 +170,18 @@ public class RegionEditorPreferencePage extends PreferencePage implements IWorkb
 
 	@Override
 	protected void performDefaults() {
+		regionMoveableCheckbox.setSelection(getDefaultRegionMoveable());
 		pointFormat.setText(getDefaultPointFormat());
 		intensityFormat.setText(getDefaultIntensityFormat());
 		sumFormat.setText(getDefaultSumFormat());
 	}
 
+	private boolean storeRegionMoveable() {
+		boolean regionMoveable = regionMoveableCheckbox.getSelection();
+		if (!isValid()) return false;
+		setRegionMoveable(regionMoveable);
+		return true;
+	}
 
 	private boolean storePreferences() {
 		String format = pointFormat.getText();
@@ -177,9 +197,21 @@ public class RegionEditorPreferencePage extends PreferencePage implements IWorkb
 		format = sumFormat.getText();
 		checkState(format);
 		if (!isValid()) return false;
-		setSumFormat(sumFormat.getText());
+		setSumFormat(format);
 
 		return true;
+	}
+
+	private boolean getDefaultRegionMoveable() {
+		return getPreferenceStore().getDefaultBoolean(RegionEditorConstants.MOBILE_REGION_SETTING);
+	}
+
+	private boolean getRegionMoveable() {
+		return getPreferenceStore().getBoolean(RegionEditorConstants.MOBILE_REGION_SETTING);
+	}
+
+	private void setRegionMoveable(boolean isMoveable) {
+		getPreferenceStore().setValue(RegionEditorConstants.MOBILE_REGION_SETTING, isMoveable);
 	}
 
 	private String getDefaultPointFormat() {
