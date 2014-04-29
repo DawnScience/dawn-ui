@@ -94,7 +94,7 @@ public class PowderIntegrationJob extends Job {
 		}
 		
 		integrator.setMask(mask);
-		integrator.setROI(roi);
+//		integrator.setROI(roi);
 		integrator.setAxisType(xAxis);
 		
 		//all accept 2d no splitting should be fast
@@ -138,7 +138,7 @@ public class PowderIntegrationJob extends Job {
 		if (integrator == null) {
 			updateIntegrator();
 			integrator.setMask(mask);
-			integrator.setROI(roi);
+//			integrator.setROI(roi);
 			integrator.setAxisType(xAxis);
 		}
 		
