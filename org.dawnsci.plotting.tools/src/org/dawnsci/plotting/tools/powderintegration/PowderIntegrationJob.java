@@ -169,7 +169,7 @@ public class PowderIntegrationJob extends Job {
 			
 		}
 		
-		return Maths.divide(data,correction);
+		return Maths.multiply(data,correction);
 	}
 	
 	private void updateIntegrator() {
