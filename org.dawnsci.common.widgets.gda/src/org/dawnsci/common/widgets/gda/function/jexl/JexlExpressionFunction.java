@@ -10,7 +10,10 @@ import org.dawb.common.services.ServiceManager;
 import org.dawb.common.services.expressions.IExpressionEngine;
 import org.dawb.common.services.expressions.IExpressionService;
 
+import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CoordinatesIterator;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
@@ -92,7 +95,6 @@ public class JexlExpressionFunction extends AFunction {
 	private transient IExpressionEngine engine;
 	private transient JexlExpressionFunctionError expressionError = JexlExpressionFunctionError.NO_EXPRESSION;
 	private transient Map<String, IParameter> beforeParametersMap;
-	private transient Map<String, Object> jexlLoadedValues;
 	private transient IExpressionService service;
 
 	/**
@@ -274,11 +276,12 @@ public class JexlExpressionFunction extends AFunction {
 
 	private void calcCachedParameters() {
 		int noOfParameters = getNoOfParameters();
-		jexlLoadedValues = new HashMap<String, Object>(noOfParameters + 1);
+		HashMap<String, Object> jexlLoadedValues = new HashMap<String, Object>(noOfParameters + 1);
 		for (int i = 0; i < noOfParameters; i++) {
 			jexlLoadedValues.put(getParameter(i).getName(),
 					getParameterValue(i));
 		}
+		engine.addLoadedVariables(jexlLoadedValues);
 
 		setDirty(false);
 	}
@@ -298,9 +301,7 @@ public class JexlExpressionFunction extends AFunction {
 		if (isDirty())
 			calcCachedParameters();
 
-		jexlLoadedValues.put(X, values[0]);
-
-		engine.addLoadedVariables(jexlLoadedValues);
+		engine.addLoadedVariable(X, values[0]);
 
 		Object ob;
 		try {
@@ -318,22 +319,38 @@ public class JexlExpressionFunction extends AFunction {
 	}
 
 	@Override
-	public void fillWithValues(DoubleDataset data, CoordinatesIterator it) {
+	public DoubleDataset calculateValues(IDataset... coords) {
 		if (expressionError != JexlExpressionFunctionError.NO_ERROR)
 			// where to record this error?
-			return;
+			return null;
 
 		if (isDirty())
 			calcCachedParameters();
 
-		// TODO review implementation
-		it.reset();
-		double[] coords = it.getCoordinates();
-		int i = 0;
-		double[] buffer = data.getData();
-		while (it.hasNext()) {
-			buffer[i++] = val(coords[0]);
+		engine.addLoadedVariable(X, coords);
+		Object ob;
+		try {
+			ob = engine.evaluate();
+			if (ob instanceof AbstractDataset) {
+				if (!(ob instanceof DoubleDataset)) {
+					ob = ((AbstractDataset) ob).cast(AbstractDataset.FLOAT64);
+				}
+				return (DoubleDataset) ob;
+			} else if (ob instanceof IDataset) {
+				ob = DatasetUtils.convertToAbstractDataset((IDataset) ob);
+				if (!(ob instanceof DoubleDataset)) {
+					ob = ((AbstractDataset) ob).cast(AbstractDataset.FLOAT64);
+				}
+				return (DoubleDataset) ob;
+			}
+		} catch (Exception e) {
 		}
+		return null;
+	}
+
+	@Override
+	public void fillWithValues(DoubleDataset data, CoordinatesIterator it) {
+		data.fill(calculateValues(it.getValues()));
 	}
 
 	@Override
