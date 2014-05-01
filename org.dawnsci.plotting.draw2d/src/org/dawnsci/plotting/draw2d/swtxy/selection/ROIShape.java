@@ -49,7 +49,7 @@ public abstract class ROIShape<T extends IROI> extends Shape implements IRegionC
 	protected ICoordinateSystem cs;
 	protected List<IFigure> handles;
 	protected List<FigureTranslator> fTranslators;
-	protected ROIHandler roiHandler;
+	protected ROIHandler<T> roiHandler;
 	private TranslationListener handleListener;
 	protected FigureListener moveListener;
 	private boolean isMobile;
@@ -77,7 +77,7 @@ public abstract class ROIShape<T extends IROI> extends Shape implements IRegionC
 		};
 	}
 
-	abstract protected ROIHandler createROIHandler(IROI roi);
+	abstract protected ROIHandler<T> createROIHandler(T roi);
 
 	abstract public void setCentre(Point nc);
 
@@ -201,7 +201,6 @@ public abstract class ROIShape<T extends IROI> extends Shape implements IRegionC
 			public void translateBefore(TranslationEvent evt) {
 			}
 
-			@SuppressWarnings("unchecked")
 			@Override
 			public void translationAfter(TranslationEvent evt) {
 				Object src = evt.getSource();
@@ -211,7 +210,7 @@ public abstract class ROIShape<T extends IROI> extends Shape implements IRegionC
 					
 					if (end==null) return;
 					double[] c = cs.getPositionValue(end.x(), end.y());
-					troi = (T) roiHandler.interpretMouseDragging(spt, c);
+					troi = roiHandler.interpretMouseDragging(spt, c);
 
 					intUpdateFromROI(troi);
 					region.fireROIDragged(troi, roiHandler.getStatus() == HandleStatus.RESIZE ?
@@ -228,8 +227,7 @@ public abstract class ROIShape<T extends IROI> extends Shape implements IRegionC
 					Point end = translator.getEndLocation();
 
 					double[] c = cs.getPositionValue(end.x(), end.y());
-					@SuppressWarnings("unchecked")
-					T croi = (T) roiHandler.interpretMouseDragging(spt, c);
+					T croi = roiHandler.interpretMouseDragging(spt, c);
 
 					updateFromROI(croi);
 					roiHandler.unconfigureDragging();
@@ -330,14 +328,13 @@ public abstract class ROIShape<T extends IROI> extends Shape implements IRegionC
 	 * Update according to ROI
 	 * @param rroi
 	 */
-	private void intUpdateFromROI(IROI rroi) {
+	private void intUpdateFromROI(T rroi) {
 		int imax = handles.size();
 		if (imax != roiHandler.size()) {
 			configureHandles();
 		} else {
-			ROIHandler handler = createROIHandler(rroi);
 			for (int i = 0; i < imax; i++) {
-				double[] hpt = handler.getAnchorPoint(i, SIDE);
+				double[] hpt = roiHandler.getAnchorPoint(i, SIDE);
 				SelectionHandle handle = (SelectionHandle) handles.get(i);
 				int[] pta = cs.getValuePosition(hpt);
 				handle.setSelectionPoint(new Point(pta[0], pta[1]));

@@ -55,6 +55,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.RGBDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Downsample;
 import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
+import uk.ac.diamond.scisoft.analysis.roi.IPolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
@@ -1347,18 +1348,18 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			TraceUtils.transform(yl,1,sp,ep);
 			return new LinearROI(sp, ep);
 			
-		} else if (roi instanceof PolylineROI) {
-			PolylineROI proi = (PolylineROI)roi;
+		} else if (roi instanceof IPolylineROI) {
+			IPolylineROI proi = (IPolylineROI)roi;
 			final PolylineROI ret = (proi instanceof PolygonalROI) ? new PolygonalROI() : new PolylineROI();
-			for (PointROI pointROI : proi) {
-				double[] dp = pointROI.getPoint();
+			for (IROI pointROI : proi) {
+				double[] dp = pointROI.getPointRef();
 				TraceUtils.transform(xl,0,dp);
 				TraceUtils.transform(yl,1,dp);
 				ret.insertPoint(dp);
 			}
 			
 		} else if (roi instanceof PointROI) {
-			double[] dp = ((PointROI)roi).getPoint();
+			double[] dp = roi.getPointRef();
 			TraceUtils.transform(xl,0,dp);
 			TraceUtils.transform(yl,1,dp);
 			return new PointROI(dp);

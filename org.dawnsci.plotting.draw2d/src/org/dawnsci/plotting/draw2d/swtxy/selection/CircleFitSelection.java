@@ -52,8 +52,8 @@ import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.CircleFitter;
 import uk.ac.diamond.scisoft.analysis.roi.CircularFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
+import uk.ac.diamond.scisoft.analysis.roi.IPolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
-import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 
 public class CircleFitSelection extends AbstractSelectionRegion {
@@ -602,7 +602,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 			setCentre(p1[0], p1[1]);
 
 			int imax = handles.size() - 1;
-			PolylineROI proi = croi.getPoints();
+			IPolylineROI proi = croi.getPoints();
 
 			if (imax != proi.getNumberOfPoints()) {
 				for (int i = imax; i >= 0; i--) {
@@ -611,8 +611,8 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 				}
 				imax = proi.getNumberOfPoints();
 				for (int i = 0; i < imax; i++) {
-					PointROI p = proi.getPoint(i);
-					int[] pos = coords.getValuePosition(p.getPoint());
+					IROI p = proi.getPoint(i);
+					int[] pos = coords.getValuePosition(p.getPointRef());
 					Point np = new Point(pos[0], pos[1]);
 					addHandle(np);
 				}
@@ -623,8 +623,8 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 				setMobile(b.isMobile());
 			} else {
 				for (int i = 0; i < imax; i++) {
-					PointROI p = proi.getPoint(i);
-					int[] pos = coords.getValuePosition(p.getPoint());
+					IROI p = proi.getPoint(i);
+					int[] pos = coords.getValuePosition(p.getPointRef());
 					Point np = new Point(pos[0], pos[1]);
 					SelectionHandle h = (SelectionHandle) handles.get(i);
 					h.setSelectionPoint(np);

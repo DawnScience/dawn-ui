@@ -47,8 +47,8 @@ import uk.ac.diamond.scisoft.analysis.fitting.EllipseFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.IConicSectionFitter;
 import uk.ac.diamond.scisoft.analysis.roi.CircularFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
+import uk.ac.diamond.scisoft.analysis.roi.IPolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
-import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 
 class EllipseFitSelection extends AbstractSelectionRegion implements IEllipseFitSelection {
@@ -445,7 +445,7 @@ class EllipseFitSelection extends AbstractSelectionRegion implements IEllipseFit
 			final double[] xy = roi.getPointRef();
 			int[] p1 = getCoordinateSystem().getValuePosition(xy[0], xy[1]);
 			int[] p2;
-			PolylineROI proi;
+			IPolylineROI proi;
 			if (roi instanceof CircularFitROI) {
 				CircularFitROI croi = (CircularFitROI) roi;
 				double d = 2 * croi.getRadius();
@@ -474,8 +474,8 @@ class EllipseFitSelection extends AbstractSelectionRegion implements IEllipseFit
 				}
 				imax = proi.getNumberOfPoints();
 				for (int i = 0; i < imax; i++) {
-					PointROI p = proi.getPoint(i);
-					int[] pos = getCoordinateSystem().getValuePosition(p.getPoint());
+					IROI p = proi.getPoint(i);
+					int[] pos = getCoordinateSystem().getValuePosition(p.getPointRef());
 					Point np = new Point(pos[0], pos[1]);
 					addHandle(np);
 				}
@@ -486,8 +486,8 @@ class EllipseFitSelection extends AbstractSelectionRegion implements IEllipseFit
 				setMobile(b.isMobile());
 			} else {
 				for (int i = 0; i < imax; i++) {
-					PointROI p = proi.getPoint(i);
-					int[] pos = getCoordinateSystem().getValuePosition(p.getPoint());
+					IROI p = proi.getPoint(i);
+					int[] pos = getCoordinateSystem().getValuePosition(p.getPointRef());
 					Point np = new Point(pos[0], pos[1]);
 					SelectionHandle h = (SelectionHandle) handles.get(i);
 					h.setSelectionPoint(np);

@@ -55,9 +55,8 @@ import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
+import uk.ac.diamond.scisoft.analysis.roi.IPolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
-import uk.ac.diamond.scisoft.analysis.roi.PointROI;
-import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 
 /**
  * Class containing static methods used in Diffraction calibration views
@@ -202,13 +201,9 @@ public class DiffractionCalibrationUtils {
 		if (froi instanceof EllipticalFitROI) {
 //			EllipticalFitROI efroi = (EllipticalFitROI)froi;
 			ef = (EllipticalFitROI)froi.copy();
-			PolylineROI points = ef.getPoints();
-			for (int i = 0; i< points.getNumberOfPoints(); i++) {
-				PointROI proi = points.getPoint(i);
-				double[] point = proi.getPoint();
-				point[1] += 0.5;
-				point[0] += 0.5;
-				proi.setPoint(point);
+			IPolylineROI points = ef.getPoints();
+			for (IROI p : points) {
+				p.addPoint(0.5, 0.5);
 			}
 		}
 		

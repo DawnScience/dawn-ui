@@ -39,6 +39,7 @@ import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
 import uk.ac.diamond.scisoft.analysis.roi.GridROI;
 import uk.ac.diamond.scisoft.analysis.roi.HyperbolicROI;
+import uk.ac.diamond.scisoft.analysis.roi.IPolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.ParabolicROI;
@@ -177,7 +178,7 @@ public class ROIEditTable  {
 			ed.setFormat(7, 3);
 			ed.setIncrement(0.1d);
 			
-			if (element instanceof LinearROI || element instanceof PointROI || element instanceof PolylineROI
+			if (element instanceof LinearROI || element instanceof PointROI || element instanceof IPolylineROI
 			   || element instanceof RectangularROI || element instanceof PerimeterBoxROI) {
 				if (column==1) {
 		            if (!Double.isNaN(xLowerBound)) ed.setMinimum(xLowerBound);
@@ -318,8 +319,8 @@ public class ROIEditTable  {
 			ret.add(new RegionRow("End Point (x,y)",   "pixel", getAxis(coords, lr.getEndPoint())));
 			ret.add(new RegionRow("Rotation (°)",      "°",     lr.getAngleDegrees(), Double.NaN));
 			
-		} else if (roi instanceof PolylineROI) {
-			final PolylineROI pr = (PolylineROI)roi;
+		} else if (roi instanceof IPolylineROI) {
+			final IPolylineROI pr = (IPolylineROI)roi;
 			for (int i = 0, imax = pr.getNumberOfPoints(); i < imax; i++) {
 				ret.add(new RegionRow("Point "+(i+1)+"  (x,y)", "pixel", getAxis(coords, pr.getPoint(i).getPoint())));
 			}
@@ -357,7 +358,7 @@ public class ROIEditTable  {
 			if (cr instanceof CircularFitROI) {
 				ret.get(0).setEnabled(false);
 				ret.get(1).setEnabled(false);
-				final PolylineROI pr = ((CircularFitROI) cr).getPoints();
+				final IPolylineROI pr = ((CircularFitROI) cr).getPoints();
 				for (int i = 0, imax = pr.getNumberOfPoints(); i < imax; i++) {
 					ret.add(new RegionRow("Point "+(i+1)+"  (x,y)", "pixel", getAxis(coords, pr.getPoint(i).getPoint())));
 				}
@@ -372,7 +373,7 @@ public class ROIEditTable  {
 				ret.get(0).setEnabled(false);
 				ret.get(1).setEnabled(false);
 				ret.get(2).setEnabled(false);
-				final PolylineROI pr = ((EllipticalFitROI) er).getPoints();
+				final IPolylineROI pr = ((EllipticalFitROI) er).getPoints();
 				for (int i = 0, imax = pr.getNumberOfPoints(); i < imax; i++) {
 					ret.add(new RegionRow("Point "+(i+1)+"  (x,y)", "pixel", getAxis(coords, pr.getPoint(i).getPoint())));
 				}
@@ -434,7 +435,7 @@ public class ROIEditTable  {
 				ret = lr;
 			}
 			
-		} else if (roi instanceof PolylineROI) {
+		} else if (roi instanceof IPolylineROI) {
 			PolylineROI pr = (roi instanceof PolygonalROI) ? new PolygonalROI() : new PolylineROI();
 			for (RegionRow regionRow : rows) {
 				pr.insertPoint(getPoint(coords, regionRow));

@@ -151,9 +151,10 @@ class BoxSelection extends AbstractSelectionRegion {
 			super(parent, region);
 		}
 
+
 		@Override
-		protected ROIHandler createROIHandler(IROI roi) {
-			return new RectangularROIHandler((RectangularROI) roi);
+		protected ROIHandler<RectangularROI> createROIHandler(RectangularROI roi) {
+			return new RectangularROIHandler(roi);
 		}
 
 		@Override
@@ -180,7 +181,7 @@ class BoxSelection extends AbstractSelectionRegion {
 			double ly = Math.abs(a[1] - c[1]);
 			croi = new RectangularROI(ox, oy, lx, ly, 0);
 
-			roiHandler.setROI(createROI(true));
+			roiHandler.setROI((RectangularROI) createROI(true));
 			configureHandles();
 		}
 

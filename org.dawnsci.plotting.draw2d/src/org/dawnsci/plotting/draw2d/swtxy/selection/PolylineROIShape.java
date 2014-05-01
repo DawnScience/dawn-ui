@@ -23,15 +23,15 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 
+import uk.ac.diamond.scisoft.analysis.roi.IPolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
-import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.handler.ROIHandler;
 
 /**
  * Class for a shape based on a polyline ROI and does not use a ROIHandler
  */
-abstract public class PolylineROIShape extends ROIShape<PolylineROI> {
+abstract public class PolylineROIShape<T extends IPolylineROI> extends ROIShape<T> {
 	protected PointList points;
 
 	public PolylineROIShape(Figure parent, AbstractSelectionRegion region) {
@@ -39,7 +39,7 @@ abstract public class PolylineROIShape extends ROIShape<PolylineROI> {
 	}
 
 	@Override
-	protected ROIHandler createROIHandler(IROI roi) {
+	protected ROIHandler<T> createROIHandler(IPolylineROI roi) {
 		return null;
 	}
 
@@ -47,19 +47,17 @@ abstract public class PolylineROIShape extends ROIShape<PolylineROI> {
 	public void setCentre(Point nc) {
 	}
 
-	protected PolylineROI createPolylineROI() {
-		return new PolylineROI();
-	}
-	
+	abstract protected T createNewROI();
+
 	@Override
 	public void setup(PointList points) {
-		croi = createPolylineROI();
+		croi = createNewROI();
 		this.points = points;
 
 		final Point p = new Point();
 		for (int i = 0, imax = points.size(); i < imax; i++) {
 			points.getPoint(p, i);
-			croi.insertPoint(cs.getPositionValue(p.x(), p.y()));
+			croi.insertPoint(new PointROI(cs.getPositionValue(p.x(), p.y())));
 		}
 
 		region.createROI(true);
@@ -102,7 +100,7 @@ abstract public class PolylineROIShape extends ROIShape<PolylineROI> {
 				SelectionHandle h = (SelectionHandle) f;
 				Point pt = h.getSelectionPoint();
 				points.setPoint(pt, i);
-				croi.setPoint(i++, cs.getPositionValue(pt.x(), pt.y()));
+				croi.setPoint(i++, new PointROI(cs.getPositionValue(pt.x(), pt.y())));
 				if (b == null) {
 					b = new Rectangle(h.getBounds());
 				} else {
@@ -141,7 +139,7 @@ abstract public class PolylineROIShape extends ROIShape<PolylineROI> {
 	 * Update according to ROI
 	 * @param proi
 	 */
-	public void updateFromROI(PolylineROI proi) {
+	public void updateFromROI(T proi) {
 		int imax = handles.size();
 		if (points == null) {
 			points = new PointList(proi.getNumberOfPoints());
@@ -158,11 +156,9 @@ abstract public class PolylineROIShape extends ROIShape<PolylineROI> {
 			for (int i = imax-1; i >= 0; i--) {
 				removeHandle((SelectionHandle) handles.remove(i));
 			}
-			imax = proi.getNumberOfPoints();
 			boolean mobile = region.isMobile();
 			boolean visible = isVisible() && mobile;
-			for (int i = 0; i < imax; i++) {
-				PointROI r = proi.getPoint(i);
+			for (IROI r: proi) {
 				if (proi != croi)
 					croi.insertPoint(r);
 				int[] pnt  = cs.getValuePosition(r.getPointRef());
@@ -182,7 +178,7 @@ abstract public class PolylineROIShape extends ROIShape<PolylineROI> {
 			region.setRegionObjects(this, handles);
 		} else {
 			for (int i = 0; i < imax; i++) {
-				PointROI p = proi.getPoint(i);
+				IROI p = proi.getPoint(i);
 				if (proi != croi)
 					croi.setPoint(i, p);
 				int[] pnt = cs.getValuePosition(p.getPointRef());

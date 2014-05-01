@@ -25,7 +25,7 @@ import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
+import uk.ac.diamond.scisoft.analysis.roi.IPolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 
 public class PolylineSelection extends AbstractSelectionRegion {
@@ -97,7 +97,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected IROI createROI(boolean recordResult) {
+	protected IPolylineROI createROI(boolean recordResult) {
 		if (recordResult) {
 			roi = polyline.croi;
 		}
@@ -106,7 +106,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 
 	@Override
 	protected void updateRegion() {
-		if (polyline != null && roi instanceof PolylineROI) {
+		if (polyline != null && roi instanceof IPolylineROI) {
 			polyline.updateFromROI((PolylineROI) roi);
 			sync(getBean());
 		}
@@ -125,7 +125,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 		}
 	}
 
-	class Polyline extends PolylineROIShape {
+	class Polyline extends PolylineROIShape<IPolylineROI> {
 
 		public Polyline(Figure parent, AbstractSelectionRegion region) {
 			super(parent, region);
@@ -134,10 +134,16 @@ public class PolylineSelection extends AbstractSelectionRegion {
 		private final static int TOLERANCE = 2;
 
 		@Override
+		protected IPolylineROI createNewROI() {
+			return new PolylineROI();
+		}
+
+		@Override
 		public boolean containsPoint(int x, int y) {
 			if (croi == null)
 				return super.containsPoint(x, y);
-			return croi.isNearOutline(cs.getPositionValue(x, y), TOLERANCE);
+			double[] pt = cs.getPositionValue(x, y);
+			return croi.isNearOutline(pt[0], pt[1], TOLERANCE);
 		}
 
 		@Override

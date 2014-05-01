@@ -27,7 +27,6 @@ import org.eclipse.swt.graphics.Color;
 
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolygonalROI;
-import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 
 public class PolygonSelection extends AbstractSelectionRegion {
 
@@ -108,8 +107,8 @@ public class PolygonSelection extends AbstractSelectionRegion {
 
 	@Override
 	protected void updateRegion() {
-		if (polygon != null && roi instanceof PolylineROI) {
-			polygon.updateFromROI((PolylineROI) roi);
+		if (polygon != null && roi instanceof PolygonalROI) {
+			polygon.updateFromROI((PolygonalROI) roi);
 			sync(getBean());
 		}
 	}
@@ -127,7 +126,7 @@ public class PolygonSelection extends AbstractSelectionRegion {
 		}
 	}
 
-	class Polygon extends PolylineROIShape {
+	class Polygon extends PolylineROIShape<PolygonalROI> {
 
 		public Polygon(Figure parent, AbstractSelectionRegion region) {
 			super(parent, region);
@@ -141,20 +140,7 @@ public class PolygonSelection extends AbstractSelectionRegion {
 		}
 
 		@Override
-		public void updateFromROI(PolylineROI proi) {
-			if (croi == null) {
-				if (proi instanceof PolygonalROI) {
-					croi = (PolygonalROI) proi;
-				} else {
-					croi = new PolygonalROI();
-				}
-			}
-
-			super.updateFromROI(proi);
-		}
-
-		@Override
-		protected PolylineROI createPolylineROI() {
+		protected PolygonalROI createNewROI() {
 			return new PolygonalROI();
 		}
 
