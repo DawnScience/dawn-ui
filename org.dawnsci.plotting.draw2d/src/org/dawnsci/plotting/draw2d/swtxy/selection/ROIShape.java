@@ -124,18 +124,18 @@ public abstract class ROIShape<T extends IROI> extends Shape implements IRegionC
 		final int imax = roiHandler.size();
 		for (int i = 0; i < imax; i++) {
 			double[] hpt = roiHandler.getAnchorPoint(i, SIDE);
-			roiHandler.set(i, i);
-			
 			int[] p = cs.getValuePosition(hpt);
 			RectangularHandle h = new RectangularHandle(cs, region.getRegionColor(), this, SIDE, p[0], p[1]);
 			h.setVisible(visible);
+			handles.add(h);
+			roiHandler.set(i, handles.indexOf(h));
 			parent.add(h);
+
 			mover = new FigureTranslator(region.getXyGraph(), h);
 			mover.setActive(mobile);
 			mover.addTranslationListener(handleListener);
 			fTranslators.add(mover);
 			h.addFigureListener(moveListener);
-			handles.add(h);
 		}
 
 		addFigureListener(moveListener);
@@ -212,7 +212,9 @@ public abstract class ROIShape<T extends IROI> extends Shape implements IRegionC
 					double[] c = cs.getPositionValue(end.x(), end.y());
 					troi = roiHandler.interpretMouseDragging(spt, c);
 
+					roiHandler.setROI(troi);
 					intUpdateFromROI(troi);
+					roiHandler.setROI(croi);
 					region.fireROIDragged(troi, roiHandler.getStatus() == HandleStatus.RESIZE ?
 							ROIEvent.DRAG_TYPE.RESIZE : ROIEvent.DRAG_TYPE.TRANSLATE);
 				}
