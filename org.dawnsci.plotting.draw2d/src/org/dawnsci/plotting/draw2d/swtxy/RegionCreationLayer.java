@@ -52,7 +52,7 @@ public class RegionCreationLayer extends Layer {
 			regionOverlayArea.setOpaque(true);
 			regionOverlayArea.addMouseListener(rl);
 			regionOverlayArea.addMouseMotionListener(rl);
-			final AbstractSelectionRegion regionBeingAdded = regionListener.getRegionBeingAdded();
+			final AbstractSelectionRegion<?> regionBeingAdded = regionListener.getRegionBeingAdded();
 			if (regionBeingAdded!=null) {
 				regionOverlayArea.setCursor(regionBeingAdded.getRegionCursor());
 			}
@@ -72,7 +72,7 @@ public class RegionCreationLayer extends Layer {
 		super.paintClientArea(graphics);
 
 		if (regionListener!=null) {
-			final AbstractSelectionRegion regionBeingAdded = regionListener.getRegionBeingAdded();
+			final AbstractSelectionRegion<?> regionBeingAdded = regionListener.getRegionBeingAdded();
 			final PointList regionPoints   = regionListener.getRegionPoints();
 			if (regionBeingAdded!=null && regionPoints!=null && regionPoints.size() > 0) {
 				regionBeingAdded.paintBeforeAdded(graphics, regionPoints, getBounds());

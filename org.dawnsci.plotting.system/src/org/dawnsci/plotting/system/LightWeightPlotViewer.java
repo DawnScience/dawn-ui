@@ -410,7 +410,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
  				} else if (e.keyCode==127) {//Delete
 					IFigure fig = getFigureAtCurrentMousePosition(IRegionContainer.class);
  					if (fig!=null && fig instanceof IRegionContainer) {
- 						xyGraph.removeRegion((AbstractSelectionRegion)((IRegionContainer)fig).getRegion());
+ 						xyGraph.removeRegion((AbstractSelectionRegion<?>) ((IRegionContainer)fig).getRegion());
  					}
  				}
 				if (e.keyCode == 131072) { // SHIFT
@@ -586,9 +586,9 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			if (SelectionRegionFactory.getStaticBuffer()!=null) {
 				final Action pasteRegion = new Action("Paste '"+SelectionRegionFactory.getStaticBuffer().getName()+"'", PlottingSystemActivator.getImageDescriptor("icons/RegionPaste.png")) {
 					public void run() {
-						AbstractSelectionRegion region = null;
+						AbstractSelectionRegion<?> region = null;
 						try {
-							region = (AbstractSelectionRegion)sys.createRegion(SelectionRegionFactory.getStaticBuffer().getName(), SelectionRegionFactory.getStaticBuffer().getRegionType());
+							region = (AbstractSelectionRegion<?>) sys.createRegion(SelectionRegionFactory.getStaticBuffer().getName(), SelectionRegionFactory.getStaticBuffer().getRegionType());
 							region.sync(SelectionRegionFactory.getStaticBuffer().getBean());
 						} catch (Exception ne) {
 							final String name = RegionUtils.getUniqueName("Region", sys);
@@ -596,7 +596,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 									                   "A region with the name '"+SelectionRegionFactory.getStaticBuffer().getName()+"' already exists.\n\nWould you like to name the region '"+name+"'?");
 							if (ok) {
 								try {
-									region = (AbstractSelectionRegion)sys.createRegion(name, SelectionRegionFactory.getStaticBuffer().getRegionType());
+									region = (AbstractSelectionRegion<?>) sys.createRegion(name, SelectionRegionFactory.getStaticBuffer().getRegionType());
 								} catch (Exception e) {
 									logger.error("Cannot create new region.", e);
 									return;
@@ -1050,7 +1050,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	 * @param region
 	 */
 	public void addRegion(final IRegion region) {
-		final AbstractSelectionRegion r = (AbstractSelectionRegion) region;
+		final AbstractSelectionRegion<?> r = (AbstractSelectionRegion<?>) region;
 		if (xyGraph!=null) xyGraph.addRegion(r);
 	}
 
@@ -1059,14 +1059,14 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	 * @param region
 	 */
 	public void removeRegion(final IRegion region) {
-		final AbstractSelectionRegion r = (AbstractSelectionRegion) region;
+		final AbstractSelectionRegion<?> r = (AbstractSelectionRegion<?>) region;
 		if (xyGraph!=null) xyGraph.removeRegion(r);
 	}
 
 	@Override
 	public void renameRegion(final IRegion region, String name) {
 		if (xyGraph == null) return;
-		if (xyGraph!=null) xyGraph.renameRegion((AbstractSelectionRegion) region, name);
+		if (xyGraph != null) xyGraph.renameRegion((AbstractSelectionRegion<?>) region, name);
 	}
 
 	/**
@@ -1102,7 +1102,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	 */
 	public Collection<IRegion> getRegions() {
 		if (xyGraph == null) return null;
-		List<AbstractSelectionRegion> regions = xyGraph.getRegions();
+		List<AbstractSelectionRegion<?>> regions = xyGraph.getRegions();
 		return new ArrayList<IRegion>(regions);
 	}
 	

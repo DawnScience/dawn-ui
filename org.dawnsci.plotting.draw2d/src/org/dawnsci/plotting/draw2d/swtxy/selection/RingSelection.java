@@ -19,7 +19,6 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Display;
 
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.RingROI;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
@@ -57,7 +56,7 @@ import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
  *     
  * @author fcp94556
  */
-class RingSelection extends AbstractSelectionRegion {
+class RingSelection extends AbstractSelectionRegion<RingROI> {
 		
 	private static final int SIDE      = 8;
 	
@@ -190,7 +189,7 @@ class RingSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public IROI createROI(boolean recordResult) {
+	public RingROI createROI(boolean recordResult) {
 		if (center!=null) {
 			final Point     cen = center.getSelectionPoint();
 			final int outerRad = outerControl.getSelectionPoint().y-cen.y;

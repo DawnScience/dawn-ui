@@ -57,7 +57,7 @@ public class RegionArea extends PlotArea {
 	private static final Logger logger = LoggerFactory.getLogger(RegionArea.class);
 	
 	protected ISelectionProvider                      selectionProvider;
-	private final Map<String,AbstractSelectionRegion> regions;
+	private final Map<String,AbstractSelectionRegion<?>> regions;
 	private final Map<String,ImageTrace>              imageTraces;
 	private       Map<String,VectorTrace>             vectorTraces;
 	
@@ -67,7 +67,7 @@ public class RegionArea extends PlotArea {
 
 	public RegionArea(XYRegionGraph xyGraph) {
 		super(xyGraph);
-		this.regions     = new LinkedHashMap<String,AbstractSelectionRegion>();
+		this.regions     = new LinkedHashMap<String,AbstractSelectionRegion<?>>();
 		this.imageTraces = new LinkedHashMap<String,ImageTrace>();	
 		
 		addMouseMotionListener(new MouseMotionListener.Stub() {
@@ -250,11 +250,11 @@ public class RegionArea extends PlotArea {
 	}
 
 
-	public void addRegion(final AbstractSelectionRegion region) {
+	public void addRegion(final AbstractSelectionRegion<?> region) {
 		addRegion(region, true);
 	}
 
-	void addRegion(final AbstractSelectionRegion region, boolean fireListeners) {
+	void addRegion(final AbstractSelectionRegion<?> region, boolean fireListeners) {
 		regions.put(region.getName(), region);
 		region.setXyGraph(xyGraph);
 		region.createContents(this);
@@ -264,9 +264,9 @@ public class RegionArea extends PlotArea {
 		revalidate();
 	}
 
-	public boolean removeRegion(final AbstractSelectionRegion region) {
+	public boolean removeRegion(final AbstractSelectionRegion<?> region) {
 		if (region==null) return false;
-	    final AbstractSelectionRegion gone = regions.remove(region.getName());
+	    final AbstractSelectionRegion<?> gone = regions.remove(region.getName());
 		if (gone!=null){
 			gone.remove(); // Clears up children (you can live without this
 			fireRegionRemoved(new RegionEvent(gone));
@@ -276,13 +276,13 @@ public class RegionArea extends PlotArea {
 		return gone!=null;
 	}
 	
-	public void renameRegion(final AbstractSelectionRegion region, String name) {
+	public void renameRegion(final AbstractSelectionRegion<?> region, String name) {
 		
 		// Fix http://jira.diamond.ac.uk/browse/SCI-1056, do not loose order on rename		
-		final Map<String, AbstractSelectionRegion> sameOrder = new LinkedHashMap<String, AbstractSelectionRegion>(regions.size());
+		final Map<String, AbstractSelectionRegion<?>> sameOrder = new LinkedHashMap<String, AbstractSelectionRegion<?>>(regions.size());
 
-		final Set<Entry<String,AbstractSelectionRegion>> entries = regions.entrySet();
-		for (Entry<String, AbstractSelectionRegion> entry : entries) {
+		final Set<Entry<String,AbstractSelectionRegion<?>>> entries = regions.entrySet();
+		for (Entry<String, AbstractSelectionRegion<?>> entry : entries) {
 			
 			if (entry.getKey().equals(region.getName())) {
 			    region.setName(name);
@@ -306,7 +306,7 @@ public class RegionArea extends PlotArea {
 		if (regions==null) return;
 		
 		final Collection<String> deleted = new HashSet<String>(5);
-		for (AbstractSelectionRegion region : regions.values()) {
+		for (AbstractSelectionRegion<?> region : regions.values()) {
 			if (!region.isUserRegion() && !force) continue;
 			deleted.add(region.getName());
 			region.remove();
@@ -453,14 +453,14 @@ public class RegionArea extends PlotArea {
 	 * @return region
 	 * @throws Exception
 	 */
-	public AbstractSelectionRegion createRegion(String name, IAxis x, IAxis y, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
+	public AbstractSelectionRegion<?> createRegion(String name, IAxis x, IAxis y, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
 
 		if (regions!=null) {
 			if (regions.containsKey(name)) throw new Exception("The region '"+name+"' already exists.");
 		}
 		
 		ICoordinateSystem       coords  = new RegionCoordinateSystem(getImageTrace(), x, y);
-		AbstractSelectionRegion region  = SelectionRegionFactory.createSelectionRegion(name, coords, regionType);
+		AbstractSelectionRegion<?> region  = SelectionRegionFactory.createSelectionRegion(name, coords, regionType);
 		if (startingWithMouseEvent) {
 			xyGraph.setZoomType(ZoomType.NONE);
 		    
@@ -477,7 +477,7 @@ public class RegionArea extends PlotArea {
 		this.regionLayer = regionLayer;
 	}
 
-	public void disposeRegion(AbstractSelectionRegion region) {
+	public void disposeRegion(AbstractSelectionRegion<?> region) {
 		removeRegion(region);
 		setCursor(null);
 	}
@@ -650,8 +650,8 @@ public class RegionArea extends PlotArea {
 		if (imageTraceListeners==null) return;
 		for (ITraceListener l : imageTraceListeners) l.traceRemoved(evt);
 	}
-	public List<AbstractSelectionRegion> getRegions() {
-		List<AbstractSelectionRegion> ret = new ArrayList<AbstractSelectionRegion>(regions.size());
+	public List<AbstractSelectionRegion<?>> getRegions() {
+		List<AbstractSelectionRegion<?>> ret = new ArrayList<AbstractSelectionRegion<?>>(regions.size());
 		for (String key : regions.keySet()) {
 			ret.add(regions.get(key));
 		}
@@ -668,7 +668,7 @@ public class RegionArea extends PlotArea {
 	}
 
 
-	public AbstractSelectionRegion getRegion(String name) {
+	public AbstractSelectionRegion<?> getRegion(String name) {
 		if (regions==null) return null;
 		return regions.get(name);
 	}

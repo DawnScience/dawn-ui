@@ -21,7 +21,7 @@ public class RemoveRegionDialog extends Dialog {
 	
 	private XYRegionGraph xyGraph;
 	private Combo regionCombo;
-	private AbstractSelectionRegion removedRegion;
+	private AbstractSelectionRegion<?> removedRegion;
 	
 	public RemoveRegionDialog(Shell parentShell, XYRegionGraph xyGraph) {
 		super(parentShell);	
@@ -52,7 +52,7 @@ public class RemoveRegionDialog extends Dialog {
 	        
 	        final RegionArea regArea = (RegionArea)xyGraph.getPlotArea();
 	        for (String name : regArea.getRegionNames()) {
-	        	final AbstractSelectionRegion region = regArea.getRegion(name);
+	        	final AbstractSelectionRegion<?> region = regArea.getRegion(name);
 	        	if (!region.isUserRegion()) continue;
 	        	regionCombo.add(region.getName());
 	        }
@@ -76,7 +76,7 @@ public class RemoveRegionDialog extends Dialog {
 	/**
 	 * @return the annotation to be removed.
 	 */
-	public AbstractSelectionRegion getRegion() {
+	public AbstractSelectionRegion<?> getRegion() {
 		return removedRegion;
 	}
 }

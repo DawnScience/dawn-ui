@@ -51,7 +51,7 @@ import uk.ac.diamond.scisoft.analysis.roi.IPolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 
-class EllipseFitSelection extends AbstractSelectionRegion implements IEllipseFitSelection {
+class EllipseFitSelection extends AbstractSelectionRegion<EllipticalFitROI> implements IEllipseFitSelection {
 	private final static Logger logger = LoggerFactory.getLogger(EllipseFitSelection.class);
 
 	private static final int CIR_POINTS = 3; // minimum number of points to define circle
@@ -193,7 +193,7 @@ class EllipseFitSelection extends AbstractSelectionRegion implements IEllipseFit
 	}
 
 	@Override
-	protected IROI createROI(boolean recordResult) {
+	protected EllipticalFitROI createROI(boolean recordResult) {
 		final PointList pl = ellipse.getPoints();
 		if (pl == null) {
 			return null;
@@ -230,14 +230,19 @@ class EllipseFitSelection extends AbstractSelectionRegion implements IEllipseFit
 		if (ellipse == null)
 			return;
 
-		if (roi instanceof PolylineROI) {
-			roi = new EllipticalFitROI((PolylineROI)roi);
+		ellipse.updateFromROI(roi);
+		sync(getBean());
+	}
+
+	@Override
+	protected EllipticalFitROI convertROI(IROI oroi) {
+		if (oroi instanceof IPolylineROI) {
+			return new EllipticalFitROI((PolylineROI) oroi);
+		} else if (oroi instanceof CircularFitROI) {
+			return new EllipticalFitROI(((CircularFitROI) oroi).getPoints(), circleOnly);
 		}
-		
-		if (roi instanceof EllipticalFitROI || roi instanceof CircularFitROI) {
-			ellipse.updateFromROI(roi);
-			sync(getBean());
-		}
+
+		return super.convertROI(oroi);
 	}
 
 	@Override

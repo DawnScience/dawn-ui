@@ -63,11 +63,11 @@ public class SelectionRegionFactory {
 	 * @param regionType
 	 * @return
 	 */
-	public static AbstractSelectionRegion createSelectionRegion(final String            name,
+	public static AbstractSelectionRegion<?> createSelectionRegion(final String            name,
 			                                                    final ICoordinateSystem coords,
 			                                                    final RegionType        regionType) {
 
-		AbstractSelectionRegion region = null;
+		AbstractSelectionRegion<?> region = null;
 		switch (regionType) {
 		case BOX:
 			region = new BoxSelection(name, coords);
@@ -134,8 +134,8 @@ public class SelectionRegionFactory {
 		return SUPPORTED_REGIONS.contains(type);
 	}
 
-	private static AbstractSelectionRegion staticBuffer;
-	public static AbstractSelectionRegion getStaticBuffer() {
+	private static AbstractSelectionRegion<?> staticBuffer;
+	public static AbstractSelectionRegion<?> getStaticBuffer() {
 		return staticBuffer;
 	}
 	
@@ -162,14 +162,14 @@ public class SelectionRegionFactory {
 		
 		final Action delete = new Action("Delete '"+region.getName()+"'", Activator.getImageDescriptor("icons/RegionDelete.png")) {
 			public void run() {
-				xyGraph.removeRegion((AbstractSelectionRegion)region);
+				xyGraph.removeRegion((AbstractSelectionRegion<?>) region);
 			}
 		};
 		if (region instanceof AbstractSelectionRegion) manager.add(delete);
 		
 		final Action copy = new Action("Copy '"+region.getName()+"'", Activator.getImageDescriptor("icons/RegionCopy.png")) {
 			public void run() {
-				staticBuffer = (AbstractSelectionRegion)region;
+				staticBuffer = (AbstractSelectionRegion<?>) region;
 				
 				// We also copy the region as a pastable into workflows.
 				ITransferService service=null;

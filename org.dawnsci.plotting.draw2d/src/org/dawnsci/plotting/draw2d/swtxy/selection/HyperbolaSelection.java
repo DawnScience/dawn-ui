@@ -43,9 +43,8 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Display;
 
 import uk.ac.diamond.scisoft.analysis.roi.HyperbolicROI;
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
-class HyperbolaSelection extends AbstractSelectionRegion implements ILockableRegion {
+class HyperbolaSelection extends AbstractSelectionRegion<HyperbolicROI> implements ILockableRegion {
 
 	Hyperbola hyperbola;
 
@@ -123,7 +122,7 @@ class HyperbolaSelection extends AbstractSelectionRegion implements ILockableReg
 	}
 
 	@Override
-	protected IROI createROI(boolean recordResult) {
+	protected HyperbolicROI createROI(boolean recordResult) {
 		if (recordResult) {
 			roi = hyperbola.croi;
 		}

@@ -16,7 +16,6 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 
 /**                 startBox2 (if isCrossHair()) 
@@ -36,7 +35,7 @@ import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
  * @author fcp94556
  *
  */
-class LineSelection extends AbstractSelectionRegion {
+class LineSelection extends AbstractSelectionRegion<LinearROI> {
 
 	private static final int SIDE      = 8;
 	
@@ -179,7 +178,7 @@ class LineSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public IROI createROI(boolean recordResult) {
+	public LinearROI createROI(boolean recordResult) {
 		if (startBox != null) {
 			final double[] p1 = startBox.getPosition();
 			final double[] p2 = endBox.getPosition();

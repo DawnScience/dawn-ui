@@ -28,7 +28,7 @@ import org.eclipse.swt.SWT;
 import uk.ac.diamond.scisoft.analysis.roi.IPolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 
-public class PolylineSelection extends AbstractSelectionRegion {
+public class PolylineSelection extends AbstractSelectionRegion<IPolylineROI> {
 
 	Polyline polyline;
 
@@ -107,7 +107,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 	@Override
 	protected void updateRegion() {
 		if (polyline != null && roi instanceof IPolylineROI) {
-			polyline.updateFromROI((PolylineROI) roi);
+			polyline.updateFromROI((IPolylineROI) roi);
 			sync(getBean());
 		}
 	}
@@ -127,7 +127,7 @@ public class PolylineSelection extends AbstractSelectionRegion {
 
 	class Polyline extends PolylineROIShape<IPolylineROI> {
 
-		public Polyline(Figure parent, AbstractSelectionRegion region) {
+		public Polyline(Figure parent, AbstractSelectionRegion<IPolylineROI> region) {
 			super(parent, region);
 		}
 

@@ -14,25 +14,25 @@ import org.eclipse.nebula.visualization.xygraph.undo.IUndoableCommand;
 public class RemoveRegionCommand implements IUndoableCommand {
 	
 	private XYRegionGraph xyGraph;
-	private List<AbstractSelectionRegion> regions;
+	private List<AbstractSelectionRegion<?>> regions;
 	
-	public RemoveRegionCommand(XYRegionGraph xyGraph, AbstractSelectionRegion region) {
+	public RemoveRegionCommand(XYRegionGraph xyGraph, AbstractSelectionRegion<?> region) {
 		this.xyGraph = xyGraph;
-		this.regions = new ArrayList<AbstractSelectionRegion>();
+		this.regions = new ArrayList<AbstractSelectionRegion<?>>();
 		regions.add(region);
 	}
 
-	public RemoveRegionCommand(XYRegionGraph xyGraph, List<AbstractSelectionRegion> regions) {
+	public RemoveRegionCommand(XYRegionGraph xyGraph, List<AbstractSelectionRegion<?>> regions) {
 		this.xyGraph = xyGraph;
 		this.regions = regions;
 	}
 
 	public void redo() {
-		for (AbstractSelectionRegion region : regions)  xyGraph.removeRegion(region);
+		for (AbstractSelectionRegion<?> region : regions)  xyGraph.removeRegion(region);
 	}
 
 	public void undo() {		
-		for (AbstractSelectionRegion region : regions)  xyGraph.addRegion(region);
+		for (AbstractSelectionRegion<?> region : regions)  xyGraph.addRegion(region);
 	}
 	
 	@Override

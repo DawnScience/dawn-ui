@@ -23,7 +23,7 @@ public class RegionFillFigure extends Figure implements IRegionContainer {
 	
 	private IRegion region;
 
-	public RegionFillFigure(AbstractSelectionRegion region) {
+	public RegionFillFigure(AbstractSelectionRegion<?> region) {
 		this.region = region;
 	}
 

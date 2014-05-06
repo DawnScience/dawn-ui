@@ -1,7 +1,6 @@
 package org.dawnsci.plotting.system.dialog;
 
 import java.util.List;
-import java.util.Map;
 
 import org.dawnsci.plotting.draw2d.swtxy.RegionArea;
 import org.dawnsci.plotting.draw2d.swtxy.RegionBean;
@@ -36,9 +35,9 @@ public class XYRegionConfigCommand extends XYGraphConfigCommand {
 		super.saveXYGraphPropsToMemento(xyGraph, memento);
 		
 		int i=0;
-		final List<AbstractSelectionRegion>     regionList     = ((RegionArea)xyGraph.getPlotArea()).getRegions();
+		final List<AbstractSelectionRegion<?>>     regionList     = ((RegionArea)xyGraph.getPlotArea()).getRegions();
 		final List<RegionBean> regionBeanList = ((XYRegionMemento)memento).getRegionBeanList();
-		for(AbstractSelectionRegion region : regionList) {
+		for(AbstractSelectionRegion<?> region : regionList) {
 			saveRegionPropsToMemento(region,regionBeanList.get(i));
 			++i;
 		}
@@ -56,11 +55,11 @@ public class XYRegionConfigCommand extends XYGraphConfigCommand {
 	}
 	
 	
-	private void saveRegionPropsToMemento(AbstractSelectionRegion region, RegionBean memento){		
+	private void saveRegionPropsToMemento(AbstractSelectionRegion<?> region, RegionBean memento){		
 		memento.sync(region.getBean());
 	}
 	
-	private void restoreRegionPropsFromMemento(AbstractSelectionRegion region, RegionBean regionBean){		
+	private void restoreRegionPropsFromMemento(AbstractSelectionRegion<?> region, RegionBean regionBean){		
 		region.sync(regionBean);	
 	}
 }

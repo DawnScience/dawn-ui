@@ -46,9 +46,8 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Display;
 
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
-class EllipseSelection extends AbstractSelectionRegion implements ILockableRegion {
+class EllipseSelection extends AbstractSelectionRegion<EllipticalROI> implements ILockableRegion {
 
 	DecoratedEllipse ellipse;
 
@@ -127,7 +126,7 @@ class EllipseSelection extends AbstractSelectionRegion implements ILockableRegio
 	}
 
 	@Override
-	protected IROI createROI(boolean recordResult) {
+	protected EllipticalROI createROI(boolean recordResult) {
 		final EllipticalROI eroi = new EllipticalROI();
 		Point p = ellipse.getCentre();
 		eroi.setPoint(coords.getPositionValue(p.x(), p.y()));

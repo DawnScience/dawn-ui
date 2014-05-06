@@ -29,7 +29,7 @@ import uk.ac.diamond.scisoft.analysis.roi.IROI;
  * @author fcp94556
  *
  */
-public abstract class AbstractRegion extends Figure implements IRegion, IRegionContainer {
+public abstract class AbstractRegion<T extends IROI> extends Figure implements IRegion, IRegionContainer {
 
 	private Collection<IROIListener> roiListeners;
 	protected boolean regionEventsActive = true;
@@ -38,6 +38,8 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 	protected Color labelColour = null;
 	protected Font labelFont = new Font(Display.getCurrent(), "Dialog", 10, SWT.NORMAL);
 	protected Dimension labeldim;
+
+	protected T roi;
 
 	@Override
 	public boolean addROIListener(final IROIListener l) {
@@ -64,7 +66,7 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 		}
 	}
 	
-	protected void fireROIDragged(IROI roi, ROIEvent.DRAG_TYPE type) {
+	protected void fireROIDragged(T roi, ROIEvent.DRAG_TYPE type) {
 		if (roiListeners==null) return;
 		if (!regionEventsActive) return;
 		
@@ -81,7 +83,7 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 	
 	private static final Logger logger = LoggerFactory.getLogger(AbstractRegion.class);
 	
-	protected void fireROIChanged(IROI roi) {
+	protected void fireROIChanged(T roi) {
 		if (roiListeners==null)  return;
 		if (!regionEventsActive) return;
 		
@@ -94,7 +96,8 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 			}
 		}
 	}
-	protected void fireROISelected(IROI roi) {
+
+	protected void fireROISelected(T roi) {
 		if (roiListeners==null)  return;
 		if (!regionEventsActive) return;
 		
@@ -108,23 +111,33 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 		}
 	}
 
-	protected IROI roi;
-
 	@Override
-	public IROI getROI() {
+	public T getROI() {
 		return roi;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void setROI(IROI roi) {
 		// Required fix after someone thought it would be a laugh to send
 		// null ROIs over.
 		if (roi == null) throw new NullPointerException("Cannot have a null region position!");
 		setActive(roi.isPlot()); // set the region isActive flag
-		if (this.roi == roi)
-			return; // do not fire event
+		if (this.roi == roi) {
+			// return; // do not fire event
+			logger.warn("Setting ROI same");
+		}
 
-		this.roi = roi;
+		try {
+			this.roi = (T) roi;
+		} catch (ClassCastException ex) {
+			T troi = convertROI(roi);
+			if (troi == null) {
+				logger.error("Could not convert {}", roi);
+				return;
+			}
+		}
+
 		String name = roi.getName();
 		if (name == null || name.isEmpty() || name.trim().isEmpty()) {
 			roi.setName(getName());
@@ -146,7 +159,16 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 	 * Implement to return the region of interest
 	 * @param recordResult if true this calculation changes the recorded absolute position
 	 */
-	protected abstract IROI createROI(boolean recordResult);
+	protected abstract T createROI(boolean recordResult);
+
+	/**
+	 * Override this to allow other types of ROIs to be set
+	 * @param oroi
+	 * @return converted ROI
+	 */
+	protected T convertROI(IROI oroi) {
+		return null;
+	}
 
 	/**
 	 * Implement this method to redraw the figure to the axis coordinates (only).
@@ -249,7 +271,7 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 	 * Returns whether the region is active or not
 	 */
 	@Override
-	public boolean isActive(){
+	public boolean isActive() {
 		return isActive;
 	}
 
@@ -258,7 +280,7 @@ public abstract class AbstractRegion extends Figure implements IRegion, IRegionC
 	 * @param b
 	 */
 	@Override
-	public void setActive(boolean b){
+	public void setActive(boolean b) {
 		this.isActive = b;
 	}
 

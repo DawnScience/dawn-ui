@@ -32,6 +32,7 @@ import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 /**
@@ -58,7 +59,7 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  * Programmatic modifications happen via {@link #setROI(uk.ac.diamond.scisoft.analysis.roi.IROI)}
  * and GUI manipulations use {@link TranslationListener}s.
  */
-public abstract class AbstractSelectionRegion extends AbstractRegion implements ICoordinateSystemListener {
+public abstract class AbstractSelectionRegion<T extends IROI> extends AbstractRegion<T> implements ICoordinateSystemListener {
 
 	private RegionBean bean;
     private ISelectionProvider selectionProvider;

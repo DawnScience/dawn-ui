@@ -56,7 +56,7 @@ import uk.ac.diamond.scisoft.analysis.roi.IPolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 
-public class CircleFitSelection extends AbstractSelectionRegion {
+public class CircleFitSelection extends AbstractSelectionRegion<CircularROI> {
 	private final static Logger logger = LoggerFactory.getLogger(CircleFitSelection.class);
 
 	private static final int MIN_POINTS = 3; // minimum number of points to define ellipse
@@ -178,7 +178,7 @@ public class CircleFitSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected IROI createROI(boolean recordResult) {
+	protected CircularROI createROI(boolean recordResult) {
 		final PointList pl = circle.getPoints();
 		if (pl == null) {
 			return null;

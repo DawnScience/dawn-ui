@@ -470,7 +470,7 @@ class LightWeightPlotActions {
 		List<Axis> visX = getVisibleAxisList(xyGraph.getXAxisList());
 		List<Axis> visY = getVisibleAxisList(xyGraph.getYAxisList());
 		if (visX.size()==1 && visY.size()==1) {
-			AbstractSelectionRegion region = xyGraph.createRegion(RegionUtils.getUniqueName(type.getName(), viewer.getSystem()), viewer.getSelectedXAxis(), viewer.getSelectedYAxis(), type, true);
+			AbstractSelectionRegion<?> region = xyGraph.createRegion(RegionUtils.getUniqueName(type.getName(), viewer.getSystem()), viewer.getSelectedXAxis(), viewer.getSelectedYAxis(), type, true);
 			// Set the plottype to know which plot type the region was created with
 			region.setPlotType(viewer.getSystem().getPlotType());
 			if (userObject!=null) region.setUserObject(userObject);

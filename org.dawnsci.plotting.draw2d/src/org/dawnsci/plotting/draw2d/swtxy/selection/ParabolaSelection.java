@@ -42,10 +42,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Display;
 
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.ParabolicROI;
 
-class ParabolaSelection extends AbstractSelectionRegion implements ILockableRegion {
+class ParabolaSelection extends AbstractSelectionRegion<ParabolicROI> implements ILockableRegion {
 
 	Parabola parabola;
 
@@ -123,7 +122,7 @@ class ParabolaSelection extends AbstractSelectionRegion implements ILockableRegi
 	}
 
 	@Override
-	protected IROI createROI(boolean recordResult) {
+	protected ParabolicROI createROI(boolean recordResult) {
 		if (recordResult) {
 			roi = parabola.croi;
 		}

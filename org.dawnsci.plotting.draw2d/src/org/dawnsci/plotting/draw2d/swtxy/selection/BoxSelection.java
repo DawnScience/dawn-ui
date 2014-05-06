@@ -25,12 +25,11 @@ import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import uk.ac.diamond.scisoft.analysis.roi.handler.ROIHandler;
 import uk.ac.diamond.scisoft.analysis.roi.handler.RectangularROIHandler;
 
-class BoxSelection extends AbstractSelectionRegion {
+class BoxSelection extends AbstractSelectionRegion<RectangularROI> {
 
 	Box box;
 
@@ -104,7 +103,7 @@ class BoxSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected IROI createROI(boolean recordResult) {
+	protected RectangularROI createROI(boolean recordResult) {
 		if (recordResult) {
 			roi = box.croi;
 		}
@@ -113,8 +112,8 @@ class BoxSelection extends AbstractSelectionRegion {
 
 	@Override
 	protected void updateRegion() {
-		if (box != null && roi instanceof RectangularROI) {
-			box.updateFromROI((RectangularROI) roi);
+		if (box != null) {
+			box.updateFromROI(roi);
 			sync(getBean());
 		}
 	}
@@ -141,13 +140,13 @@ class BoxSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public IROI getROI() {
+	public RectangularROI getROI() {
 		return box != null ? box.getROI() : super.getROI();
 	}
 
 	class Box extends ROIShape<RectangularROI> {
 
-		public Box(Figure parent, AbstractSelectionRegion region) {
+		public Box(Figure parent, AbstractSelectionRegion<RectangularROI> region) {
 			super(parent, region);
 		}
 

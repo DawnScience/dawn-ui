@@ -34,12 +34,12 @@ import uk.ac.diamond.scisoft.analysis.roi.handler.ROIHandler;
 abstract public class PolylineROIShape<T extends IPolylineROI> extends ROIShape<T> {
 	protected PointList points;
 
-	public PolylineROIShape(Figure parent, AbstractSelectionRegion region) {
+	public PolylineROIShape(Figure parent, AbstractSelectionRegion<T> region) {
 		super(parent, region);
 	}
 
 	@Override
-	protected ROIHandler<T> createROIHandler(IPolylineROI roi) {
+	protected ROIHandler<T> createROIHandler(T roi) {
 		return null;
 	}
 

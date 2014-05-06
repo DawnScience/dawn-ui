@@ -28,7 +28,7 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  *     
  * @author fcp94556
  */
-public class GridSelection extends BoxSelection implements IGridSelection{
+public class GridSelection extends BoxSelection implements IGridSelection {
 		
 	private Color pointColor = ColorConstants.white;
 	private Color gridColor  = ColorConstants.lightGray;
@@ -150,16 +150,15 @@ public class GridSelection extends BoxSelection implements IGridSelection{
 
 
 	@Override
-	public IROI createROI(boolean recordResult) {
-		IROI croi = super.createROI(recordResult);
+	public RectangularROI createROI(boolean recordResult) {
+		RectangularROI croi = super.createROI(recordResult);
 		if (croi == null)
 			return super.getROI();
 
-		RectangularROI rroi = (RectangularROI) croi;
-		final GridROI    groi = new GridROI(rroi.getPointX(), rroi.getPointY(), rroi.getLength(0), rroi.getLength(1), rroi.getAngle());
-			
-		if (getROI() != null && getROI() instanceof GridROI) {
-			GridROI oldRoi = (GridROI)getROI();
+		final GridROI groi = new GridROI(croi.getPointX(), croi.getPointY(), croi.getLength(0), croi.getLength(1), croi.getAngle());
+
+		if (croi instanceof GridROI) {
+			GridROI oldRoi = (GridROI) croi;
 			// Copy grid, preferences, etc from existing GridROI
 			// This maintains spacing etc. until it is changed in setROI(...)
 			// These things are determined externally by the user of the ROI

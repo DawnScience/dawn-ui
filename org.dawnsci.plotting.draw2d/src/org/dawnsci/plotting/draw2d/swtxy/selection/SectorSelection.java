@@ -44,7 +44,6 @@ import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 import uk.ac.diamond.scisoft.analysis.roi.handler.HandleStatus;
@@ -54,7 +53,7 @@ import uk.ac.diamond.scisoft.analysis.roi.handler.SectorROIHandler;
  * You should not call this concrete class outside of the draw2d 
  * extensions unless absolutely required.
  */
-class SectorSelection extends AbstractSelectionRegion implements ILockableRegion {
+class SectorSelection extends AbstractSelectionRegion<SectorROI> implements ILockableRegion {
 
 	Sector sector;
 
@@ -211,7 +210,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 	}
 
 	@Override
-	protected IROI createROI(boolean recordResult) {
+	protected SectorROI createROI(boolean recordResult) {
 		if (recordResult) {
 			roi = sector.croi;
 		}
@@ -220,8 +219,8 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 
 	@Override
 	protected void updateRegion() {
-		if (sector != null && roi instanceof SectorROI) {
-			sector.updateFromROI((SectorROI) roi);
+		if (sector != null) {
+			sector.updateFromROI(roi);
 			sync(getBean());
 		}
 	}
@@ -341,7 +340,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 			if (parent == null) { // for last click rendering
 				return;
 			}
-			roiHandler.setROI((SectorROI)createROI(true));
+			roiHandler.setROI(createROI(true));
 			configureHandles();
 		}
 
@@ -511,7 +510,7 @@ class SectorSelection extends AbstractSelectionRegion implements ILockableRegion
 				@Override
 				public void translationCompleted(TranslationEvent evt) {
 					fireROIChanged(createROI(true));
-					roiHandler.setROI((SectorROI)roi);
+					roiHandler.setROI(roi);
 					fireROISelection();
 				}
 

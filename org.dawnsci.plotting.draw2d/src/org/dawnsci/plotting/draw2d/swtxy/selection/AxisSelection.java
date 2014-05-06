@@ -41,7 +41,7 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  *     
  * @author fcp94556
  */
-class AxisSelection extends AbstractSelectionRegion {
+class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 		
 	private static final int WIDTH = 8;
 	
@@ -340,7 +340,7 @@ class AxisSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	public IROI createROI(boolean recordResult) {
+	public RectangularROI createROI(boolean recordResult) {
 		if (line1!=null) {
 			final Rectangle rect = getRectangleFromVertices();
 			final RectangularROI rroi = getRoiFromRectangle(rect);
@@ -359,23 +359,32 @@ class AxisSelection extends AbstractSelectionRegion {
 		double[] spt = null;
 		double[] ept = null;
 
+		if (!(roi instanceof RectangularROI)) {
+			roi = convertROI(roi);
+		}
 		if (roi instanceof RectangularROI) {
 			RectangularROI rroi = (RectangularROI) roi;
 			spt = rroi.getPointRef();
 			ept = rroi.getEndPoint();
-		} else if (roi instanceof LinearROI) {
-			LinearROI lroi = (LinearROI) roi;
-			spt = lroi.getPointRef();
-			ept = lroi.getEndPoint();			
+		} else {
+			return;
 		}
-		
+
 		final int[] p1 = coords.getValuePosition(spt);
 		final int[] p2 = coords.getValuePosition(ept);
 
 		final Rectangle local = new Rectangle(new Point(p1[0], p1[1]), new Point(p2[0], p2[1]));
 		setLocalBounds(local, line1.getParent().getBounds());
 		updateBounds();
+	}
 
+	@Override
+	protected RectangularROI convertROI(IROI oroi) {
+		if (oroi instanceof LinearROI) {
+			LinearROI lroi = (LinearROI) oroi;
+			return new RectangularROI(lroi.getPoint(), lroi.getEndPoint());
+		}
+		return super.convertROI(oroi);
 	}
 
 	/**

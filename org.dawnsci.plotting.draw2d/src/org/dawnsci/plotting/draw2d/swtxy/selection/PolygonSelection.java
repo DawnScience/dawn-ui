@@ -25,10 +25,11 @@ import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 
+import uk.ac.diamond.scisoft.analysis.roi.IPolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolygonalROI;
 
-public class PolygonSelection extends AbstractSelectionRegion {
+public class PolygonSelection extends AbstractSelectionRegion<PolygonalROI> {
 
 	Polygon polygon;
 	private static final Color magenta = new Color(null, 238, 0,	238);
@@ -98,11 +99,19 @@ public class PolygonSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected IROI createROI(boolean recordResult) {
+	protected PolygonalROI createROI(boolean recordResult) {
 		if (recordResult) {
 			roi = polygon.croi;
 		}
 		return polygon.croi;
+	}
+
+	@Override
+	protected PolygonalROI convertROI(IROI oroi) {
+		if (oroi instanceof IPolylineROI) {
+			return new PolygonalROI((IPolylineROI) oroi);
+		}
+		return super.convertROI(oroi);
 	}
 
 	@Override
@@ -128,7 +137,7 @@ public class PolygonSelection extends AbstractSelectionRegion {
 
 	class Polygon extends PolylineROIShape<PolygonalROI> {
 
-		public Polygon(Figure parent, AbstractSelectionRegion region) {
+		public Polygon(Figure parent, AbstractSelectionRegion<PolygonalROI> region) {
 			super(parent, region);
 		}
 

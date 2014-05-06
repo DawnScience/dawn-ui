@@ -47,7 +47,7 @@ public class RegionEditComposite extends Composite {
 	private CCombo regionType;
 	private CCombo xCombo, yCombo;
 	private Button showPoints;
-	private AbstractSelectionRegion editingRegion;
+	private AbstractSelectionRegion<?> editingRegion;
 	private ColorSelector colorSelector;
 	private Spinner alpha;
 	private Button mobile;
@@ -114,7 +114,7 @@ public class RegionEditComposite extends Composite {
 			nameText.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
-					AbstractSelectionRegion region = getEditingRegion();
+					AbstractSelectionRegion<?> region = getEditingRegion();
 					region.repaint();
 				}
 			});
@@ -150,7 +150,7 @@ public class RegionEditComposite extends Composite {
 			colorSelector.addListener(new IPropertyChangeListener() {
 				@Override
 				public void propertyChange(PropertyChangeEvent event) {
-					AbstractSelectionRegion region = getEditingRegion();
+					AbstractSelectionRegion<?> region = getEditingRegion();
 					region.repaint();
 				}
 			});
@@ -173,7 +173,7 @@ public class RegionEditComposite extends Composite {
 			alpha.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					AbstractSelectionRegion region = getEditingRegion();
+					AbstractSelectionRegion<?> region = getEditingRegion();
 					region.repaint();
 				}
 			});
@@ -188,7 +188,7 @@ public class RegionEditComposite extends Composite {
 			mobile.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					AbstractSelectionRegion region = getEditingRegion();
+					AbstractSelectionRegion<?> region = getEditingRegion();
 					region.repaint();
 				}
 			});
@@ -202,7 +202,7 @@ public class RegionEditComposite extends Composite {
 			showPoints.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					AbstractSelectionRegion region = getEditingRegion();
+					AbstractSelectionRegion<?> region = getEditingRegion();
 					region.repaint();
 				}
 			});
@@ -217,7 +217,7 @@ public class RegionEditComposite extends Composite {
 			visible.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					AbstractSelectionRegion region = getEditingRegion();
+					AbstractSelectionRegion<?> region = getEditingRegion();
 					region.repaint();
 				}
 			});
@@ -233,7 +233,7 @@ public class RegionEditComposite extends Composite {
 			showLabel.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					AbstractSelectionRegion region = getEditingRegion();
+					AbstractSelectionRegion<?> region = getEditingRegion();
 					region.repaint();
 				}
 			});
@@ -248,7 +248,7 @@ public class RegionEditComposite extends Composite {
 			fillRegion.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					AbstractSelectionRegion region = getEditingRegion();
+					AbstractSelectionRegion<?> region = getEditingRegion();
 					region.repaint();
 				}
 			});
@@ -312,12 +312,12 @@ public class RegionEditComposite extends Composite {
 	}
 
 
-	public AbstractSelectionRegion createRegion() throws Exception {
+	public AbstractSelectionRegion<?> createRegion() throws Exception {
 		
 		final AspectAxis xAxis = getAxis(xyGraph.getXAxisList(), xCombo.getSelectionIndex());
 		final AspectAxis yAxis = getAxis(xyGraph.getYAxisList(), yCombo.getSelectionIndex());
 		
-		AbstractSelectionRegion region=null;
+		AbstractSelectionRegion<?> region=null;
 		
 		final String txt = nameText.getText();
 		final Pattern pattern = Pattern.compile(".* (\\d+)");
@@ -337,7 +337,7 @@ public class RegionEditComposite extends Composite {
 	
 	private IROIListener roiListener;
 	
-	public void setEditingRegion(final AbstractSelectionRegion region) {
+	public void setEditingRegion(final AbstractSelectionRegion<?> region) {
 		
         this.editingRegion = region;
         this.roiViewer.setRegion(region.getROI(), region.getRegionType(), region.getCoordinateSystem());
@@ -399,7 +399,7 @@ public class RegionEditComposite extends Composite {
 		super.dispose();
 	}
 	
-	public AbstractSelectionRegion getEditingRegion() {
+	public AbstractSelectionRegion<?> getEditingRegion() {
 		
 		final String txt = nameText.getText();
 		xyGraph.renameRegion(editingRegion, txt);
@@ -441,7 +441,7 @@ public class RegionEditComposite extends Composite {
 
 	public void applyChanges() {
 //		this.roiViewer.cancelEditing();
-		AbstractSelectionRegion region = getEditingRegion();
+		AbstractSelectionRegion<?> region = getEditingRegion();
 		if (region.isVisible())
 			region.repaint();
 	}
@@ -455,7 +455,7 @@ public class RegionEditComposite extends Composite {
 	}
 
 
-	public void disposeRegion(AbstractSelectionRegion region) {
+	public void disposeRegion(AbstractSelectionRegion<?> region) {
 		 xyGraph.disposeRegion(region);
 	}
 

@@ -70,13 +70,13 @@ public class XYRegionGraph extends XYGraph {
         return new RegionArea(this);
 	}
 
-	public void addRegion(final AbstractSelectionRegion region) {
+	public void addRegion(final AbstractSelectionRegion<?> region) {
 		getRegionArea().addRegion(region);
 	}
-	public void removeRegion(final AbstractSelectionRegion region) {
+	public void removeRegion(final AbstractSelectionRegion<?> region) {
 		getRegionArea().removeRegion(region);
 	}
-	public void renameRegion(final AbstractSelectionRegion region, String name) {
+	public void renameRegion(final AbstractSelectionRegion<?> region, String name) {
 		getRegionArea().renameRegion(region, name);
 	}
 	public void setSelectionProvider(final ISelectionProvider provider) {
@@ -93,10 +93,10 @@ public class XYRegionGraph extends XYGraph {
 	 * @return region
 	 * @throws Exception
 	 */
-	public AbstractSelectionRegion createRegion(String name, IAxis xAxis, IAxis yAxis, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
+	public AbstractSelectionRegion<?> createRegion(String name, IAxis xAxis, IAxis yAxis, RegionType regionType, boolean startingWithMouseEvent) throws Exception {
 		return getRegionArea().createRegion(name, xAxis, yAxis, regionType, startingWithMouseEvent);
 	}
-	public void disposeRegion(final AbstractSelectionRegion region) {
+	public void disposeRegion(final AbstractSelectionRegion<?> region) {
 		getRegionArea().disposeRegion(region);
 	}
 
@@ -131,14 +131,14 @@ public class XYRegionGraph extends XYGraph {
 		return getRegionArea().removeRegionListener(l);
 	}
 
-	public AbstractSelectionRegion getRegion(String name) {
+	public AbstractSelectionRegion<?> getRegion(String name) {
 		return getRegionArea().getRegion(name);
 	}
 
 	public void clearRegions(boolean force) {
 		getRegionArea().clearRegions(force);
 	}
-	public List<AbstractSelectionRegion> getRegions() {
+	public List<AbstractSelectionRegion<?>> getRegions() {
 		return getRegionArea().getRegions();
 	}
 

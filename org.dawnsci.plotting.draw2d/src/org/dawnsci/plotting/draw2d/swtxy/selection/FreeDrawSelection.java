@@ -26,7 +26,7 @@ import uk.ac.diamond.scisoft.analysis.roi.IROI;
  * @author fcp94556
  *
  */
-class FreeDrawSelection extends AbstractSelectionRegion {
+class FreeDrawSelection extends AbstractSelectionRegion<FreeDrawROI> {
 
 	private PointList points;
 
@@ -164,7 +164,7 @@ class FreeDrawSelection extends AbstractSelectionRegion {
 	}
 
 	@Override
-	protected IROI createROI(boolean recordResult) {
+	protected FreeDrawROI createROI(boolean recordResult) {
 		if (points == null) return getROI();
 		
 		final FreeDrawROI proi = new FreeDrawROI();

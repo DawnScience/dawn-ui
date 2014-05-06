@@ -25,12 +25,12 @@ class RegionMouseListener extends MouseMotionListener.Stub implements MouseListe
 	
 	private final RegionArea          regionArea;
 	private PointList                 regionPoints;
-	private AbstractSelectionRegion   regionBeingAdded;
+	private AbstractSelectionRegion<?>   regionBeingAdded;
 	private RegionCreationLayer      regionLayer;
 
 	public RegionMouseListener(RegionCreationLayer    regionLayer,
 			                   RegionArea              regionArea, 
-			                   AbstractSelectionRegion regionBeingAdded, 
+			                   AbstractSelectionRegion<?> regionBeingAdded, 
 			                   final int minPresses, final int maxPresses) {
 		
 		this.regionLayer      = regionLayer;
@@ -143,7 +143,7 @@ class RegionMouseListener extends MouseMotionListener.Stub implements MouseListe
 		this.regionPoints = null;
 	}
 
-	public AbstractSelectionRegion getRegionBeingAdded() {
+	public AbstractSelectionRegion<?> getRegionBeingAdded() {
 		return regionBeingAdded;
 	}
 

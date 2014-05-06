@@ -45,22 +45,29 @@ import uk.ac.diamond.scisoft.analysis.roi.handler.ROIHandler;
  */
 public abstract class ROIShape<T extends IROI> extends Shape implements IRegionContainer {
 	protected Figure parent;
-	protected AbstractSelectionRegion region;
+	protected AbstractSelectionRegion<T> region;
 	protected ICoordinateSystem cs;
 	protected List<IFigure> handles;
 	protected List<FigureTranslator> fTranslators;
 	protected ROIHandler<T> roiHandler;
-	private TranslationListener handleListener;
+	protected TranslationListener handleListener;
 	protected FigureListener moveListener;
 	private boolean isMobile;
 	protected Rectangle bnds;
 	protected boolean dirty = true;
 	protected T croi;
-	private T troi = null; // temporary ROI used in dragging
+	protected T troi = null; // temporary ROI used in dragging
 
 	protected static final int SIDE = 8;
+	protected static final double HALF_SIDE = SIDE/2.0;
 
-	public ROIShape(final Figure parent, AbstractSelectionRegion region) {
+	public ROIShape() {
+		super();
+		handles = new ArrayList<IFigure>();
+		fTranslators = null;
+	}
+
+	public ROIShape(final Figure parent, AbstractSelectionRegion<T> region) {
 		super();
 		this.parent = parent;
 		this.region = region;
@@ -96,6 +103,8 @@ public abstract class ROIShape<T extends IROI> extends Shape implements IRegionC
 		int[] bp = cs.getValuePosition(rroi.getPointRef());
 		int[] ep = cs.getValuePosition(rroi.getEndPoint());
 		bnds = new Rectangle(new Point(bp[0], bp[1]), new Point(ep[0], ep[1]));
+		bnds.translate(-1, -1);
+		bnds.expand(2, 2);
 		if (redraw) {
 			setBounds(bnds);
 		}
@@ -178,7 +187,7 @@ public abstract class ROIShape<T extends IROI> extends Shape implements IRegionC
 		};
 	}
 
-	private TranslationListener createHandleNotifier() {
+	protected TranslationListener createHandleNotifier() {
 		return new TranslationListener() {
 			private double[] spt;
 
@@ -301,8 +310,9 @@ public abstract class ROIShape<T extends IROI> extends Shape implements IRegionC
 
 	@Override
 	public Rectangle getBounds() {
-		if (getROI() != null && dirty)
-			calcBox(getROI(), false);
+		T lroi = getROI();
+		if (lroi != null && dirty)
+			calcBox(lroi, false);
 		dirty = false;
 		Rectangle b = bnds == null ? super.getBounds() : new Rectangle(bnds);
 		if (handles != null) {

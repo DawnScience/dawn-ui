@@ -54,13 +54,13 @@ public class AddRegionDialog extends Dialog {
 		super.okPressed();
 	}
 
-	private AbstractSelectionRegion region;
+	private AbstractSelectionRegion<?> region;
 	
 
 	/**
 	 * @return the annotation
 	 */
-	public AbstractSelectionRegion getRegion() {
+	public AbstractSelectionRegion<?> getRegion() {
 		return region;
 	}
 }

@@ -11,9 +11,9 @@ import org.eclipse.nebula.visualization.xygraph.undo.IUndoableCommand;
 public class AddRegionCommand implements IUndoableCommand {
 	
 	private XYRegionGraph xyGraph;
-	private AbstractSelectionRegion region;
+	private AbstractSelectionRegion<?> region;
 	
-	public AddRegionCommand(XYRegionGraph xyGraph, AbstractSelectionRegion region) {
+	public AddRegionCommand(XYRegionGraph xyGraph, AbstractSelectionRegion<?> region) {
 		this.xyGraph = xyGraph;
 		this.region = region;
 	}

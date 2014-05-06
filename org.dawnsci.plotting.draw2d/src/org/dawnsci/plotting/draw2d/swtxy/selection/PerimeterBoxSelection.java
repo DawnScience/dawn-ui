@@ -10,7 +10,6 @@ import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.PerimeterBoxROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
@@ -155,13 +154,12 @@ public class PerimeterBoxSelection extends BoxSelection {
 	}
 
 	@Override
-	public IROI createROI(boolean recordResult) {
-		IROI croi = super.createROI(recordResult);
+	public RectangularROI createROI(boolean recordResult) {
+		RectangularROI croi = super.createROI(recordResult);
 		if (croi == null)
 			return super.getROI();
 
-		RectangularROI rroi = (RectangularROI) croi;
-		final PerimeterBoxROI proi = new PerimeterBoxROI(rroi.getPointX(), rroi.getPointY(), rroi.getLength(0), rroi.getLength(1), rroi.getAngle());
+		final PerimeterBoxROI proi = new PerimeterBoxROI(croi.getPointX(), croi.getPointY(), croi.getLength(0), croi.getLength(1), croi.getAngle());
 
 		proi.setName(getName());
 		if (recordResult) roi = proi;
