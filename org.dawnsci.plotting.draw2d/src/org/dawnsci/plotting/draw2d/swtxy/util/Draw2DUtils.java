@@ -355,6 +355,14 @@ public class Draw2DUtils {
 		if (pts < 2)
 			return;
 
+		if (bounds == null) {
+			if (isPolygon)
+				g.drawPolygon(points);
+			else
+				g.drawPolyline(points);
+			return;
+		}
+
 		double xl = bounds.preciseX();
 		double xh = xl + bounds.preciseWidth();
 		double yl = bounds.preciseY();
@@ -393,7 +401,7 @@ public class Draw2DUtils {
 					if (t[1] < 1) {
 						Point p = new Point((int) Math.round(x0 + t[1] * dx), (int) Math.round(y0 + t[1] * dy));
 						list.addPoint(p);
-						g.drawPolygon(list);
+						g.drawPolyline(list);
 					} else {
 						first = false;
 						list.addPoint(new Point((int) Math.round(p1.preciseX()), (int) Math.round(p1.preciseY())));
