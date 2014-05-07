@@ -15,6 +15,8 @@ import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.AbstractPixelIntegration;
+import uk.ac.diamond.scisoft.analysis.diffraction.powder.AbstractPixelIntegration1D;
+import uk.ac.diamond.scisoft.analysis.diffraction.powder.AbstractPixelIntegration2D;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.NonPixelSplittingIntegration;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.NonPixelSplittingIntegration2D;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelIntegrationUtils;
@@ -35,6 +37,7 @@ public class PowderIntegrationJob extends Job {
 	AbstractDataset data;
 	AbstractDataset mask;
 	AbstractDataset correction;
+	PowderIntegrationModel model;
 	IROI roi;
 	int nBins;
 	boolean correctSolidAngle = false;
@@ -84,13 +87,41 @@ public class PowderIntegrationJob extends Job {
 	}
 
 	public void setCorrectSolidAngle(boolean correctSolidAngle) {
-		this.correctSolidAngle = correctSolidAngle;
+		if (correctSolidAngle != this.correctSolidAngle) {
+			this.correctSolidAngle = correctSolidAngle;
+			correction = null;
+		}
+		
+	}
+	
+	public void setModel(PowderIntegrationModel model) {
+		this.model = model;
+		updateIntegratorFromModel();
+	}
+	
+	public void updateIntegratorFromModel() {
+		if (integrator == null) {
+			updateIntegrator();
+		}
+		if (model != null) {
+			integrator.setRadialRange(model.getRadialRange());
+			integrator.setAzimuthalRange(model.getAzimuthalRange());
+			integrator.setNumberOfBins(model.getNumberOfPrimaryBins());
+			
+			if (integrator instanceof AbstractPixelIntegration2D) {
+				((AbstractPixelIntegration2D)integrator).setNumberOfAzimuthalBins(model.getNumberOfSecondaryBins());
+			}
+			
+			if (integrator instanceof AbstractPixelIntegration1D) {
+				((AbstractPixelIntegration1D)integrator).setAzimuthalIntegration(model.isAzimuthal());
+			}
+		}
 	}
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		if (integrator == null) {
-			updateIntegrator();
+			updateIntegratorFromModel();
 		}
 		
 		integrator.setMask(mask);
@@ -136,7 +167,7 @@ public class PowderIntegrationJob extends Job {
 	public List<AbstractDataset> process(AbstractDataset data) {
 		
 		if (integrator == null) {
-			updateIntegrator();
+			updateIntegratorFromModel();
 			integrator.setMask(mask);
 //			integrator.setROI(roi);
 			integrator.setAxisType(xAxis);
@@ -152,8 +183,6 @@ public class PowderIntegrationJob extends Job {
 	
 	private AbstractDataset applyCorrections(AbstractDataset data) {
 		if (!correctSolidAngle && !correctPolarisation) return data;
-		
-		correction = null;
 		
 		if (correction == null) {
 			correction = AbstractDataset.ones(data, AbstractDataset.FLOAT32);

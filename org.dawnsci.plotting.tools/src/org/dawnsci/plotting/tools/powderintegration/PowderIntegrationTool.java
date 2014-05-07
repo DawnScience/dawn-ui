@@ -1,5 +1,7 @@
 package org.dawnsci.plotting.tools.powderintegration;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.List;
 
@@ -21,6 +23,7 @@ import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.hdf5.IHierarchicalDataFile;
 import org.dawb.hdf5.Nexus;
 import org.dawb.hdf5.nexus.NexusUtils;
+import org.dawnsci.common.widgets.decorator.FloatDecorator;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.PlottingFactory;
@@ -37,7 +40,14 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -45,13 +55,14 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.IPageSite;
-
+import org.mihalis.opal.checkBoxGroup.CheckBoxGroup;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
@@ -72,11 +83,15 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	private Label statusMessage;
 	String[] statusString;
 	ILoaderService service;
-	Composite baseComposite;
+	//Composite baseComposite;
 	XAxis xAxis = XAxis.Q;
 	IntegrationMode mode = IntegrationMode.NONSPLITTING;
 	boolean correctSolidAngle = false;
 	IDiffractionMetadata importedMeta;
+	SashForm sashForm;
+	TableViewer viewer;
+	PowderIntegrationModel model;
+	IntegrationSetupWidget integratorSetup;
 	
 	public PowderIntegrationTool() {
 		try {
@@ -130,29 +145,46 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	@Override
 	public void createControl(Composite parent) {
 		
-		baseComposite = new Composite(parent, SWT.NONE);
-		baseComposite.setLayout(new GridLayout());
-		
+		sashForm = new SashForm(parent, SWT.VERTICAL);
+		Composite base = new Composite(sashForm, SWT.NONE);
+		base.setLayout(new GridLayout(1,true));
 		createActions();
 		
 		final IPageSite site = getSite();
 		IActionBars actionbars = site!=null?site.getActionBars():null;
-		system.createPlotPart(baseComposite, 
+
+		system.createPlotPart(base, 
 				getTitle(), 
 				actionbars, 
 				PlotType.XY,
 				this.getViewPart());
-		
-		system.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		system.getSelectedYAxis().setAxisAutoscaleTight(true);
+		system.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		statusMessage = new Label(baseComposite, SWT.WRAP);
+		getPlottingSystem().addTraceListener(traceListener);
+		
+		statusMessage = new Label(base, SWT.WRAP);
 		statusMessage.setText("Status...");
 		statusMessage.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
 		statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
 		statusMessage.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		
+		Composite setupComposite = new Composite(sashForm, SWT.None);
+		integratorSetup = new IntegrationSetupWidget(setupComposite, metadata);
+		model = integratorSetup.getModelList().get(0);
+		integratorSetup.enableFor1D(true);
+		
+		model.addPropertyChangeListener(new PropertyChangeListener() {
+			
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				update(null);
+				
+			}
+		});
+		
+		sashForm.setWeights(new int[]{60,40});
 		update(null);
 	}
 	
@@ -165,6 +197,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			public void run() {
 				mode = IntegrationMode.NONSPLITTING;
 				modeSelect.setSelectedAction(this);
+				if (integratorSetup != null) integratorSetup.enableFor1D(true);
 				update(null);
 			}
 		};
@@ -176,6 +209,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			public void run() {
 				mode = IntegrationMode.SPLITTING;
 				modeSelect.setSelectedAction(this);
+				if (integratorSetup != null) integratorSetup.enableFor1D(true);
 				update(null);
 			}
 		};
@@ -187,6 +221,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			public void run() {
 				mode = IntegrationMode.SPLITTING2D;
 				modeSelect.setSelectedAction(this);
+				if (integratorSetup != null) integratorSetup.enableFor1D(false);
 				update(null);
 			}
 		};
@@ -197,6 +232,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			public void run() {
 				mode = IntegrationMode.NONSPLITTING2D;
 				modeSelect.setSelectedAction(this);
+				if (integratorSetup != null) integratorSetup.enableFor1D(false);
 				update(null);
 			}
 		};
@@ -351,7 +387,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 
 	@Override
 	public Control getControl() {
-		return baseComposite;
+		return sashForm;
 	}
 
 	@Override
@@ -414,6 +450,10 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		fullImageJob.setAxisType(xAxis);
 		fullImageJob.setIntegrationMode(mode);
 		fullImageJob.setCorrectSolidAngle(correctSolidAngle);
+		
+		if (model != null) {
+			fullImageJob.setModel(model);
+		}
 		
 		fullImageJob.schedule();
 	}

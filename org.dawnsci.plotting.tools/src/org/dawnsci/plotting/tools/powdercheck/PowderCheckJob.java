@@ -122,8 +122,7 @@ public class PowderCheckJob extends Job {
 	}
 	
 	private IStatus integrateCake(AbstractDataset data, IDiffractionMetadata md, IProgressMonitor monitor) {
-		
-		QSpace qSpace = new QSpace(md.getDetector2DProperties(), md.getDiffractionCrystalEnvironment());
+
 		int[] shape = data.getShape();
 		double[] farCorner = new double[]{0,0};
 		double[] centre = md.getDetector2DProperties().getBeamCentreCoords();
@@ -144,55 +143,70 @@ public class PowderCheckJob extends Job {
 	}
 
 	private IStatus integrateQuadrants(AbstractDataset data, IDiffractionMetadata md, IProgressMonitor monitor) {
-		QSpace qSpace = new QSpace(md.getDetector2DProperties(), md.getDiffractionCrystalEnvironment());
-		double[] bc = md.getDetector2DProperties().getBeamCentreCoords();
-		int[] shape = data.getShape();
-
-		double[] farCorner = new double[]{0,0};
-		double[] centre = md.getDetector2DProperties().getBeamCentreCoords();
-		if (centre[0] < shape[0]/2.0) farCorner[0] = shape[0];
-		if (centre[1] < shape[1]/2.0) farCorner[1] = shape[1];
-		double maxDistance = Math.sqrt(Math.pow(centre[0]-farCorner[0],2)+Math.pow(centre[1]-farCorner[1],2));
-		SectorROI sroi = new SectorROI(bc[0], bc[1], 0, maxDistance, Math.PI/4 - Math.PI/8, Math.PI/4 + Math.PI/8, 1, true, SectorROI.INVERT);
-		AbstractDataset[] profile = ROIProfile.sector(data, null, sroi, true, false, false, qSpace, xAxis, false);
-
-		ArrayList<IDataset> y = new ArrayList<IDataset> ();
-		profile[0].setName("Bottom right");
-		y.add(profile[0]);
-		if (system == null) {
-			logger.error("Plotting system is null");
-			return Status.CANCEL_STATUS;
+//		QSpace qSpace = new QSpace(md.getDetector2DProperties(), md.getDiffractionCrystalEnvironment());
+//		double[] bc = md.getDetector2DProperties().getBeamCentreCoords();
+//		int[] shape = data.getShape();
+//
+//		double[] farCorner = new double[]{0,0};
+//		double[] centre = md.getDetector2DProperties().getBeamCentreCoords();
+//		if (centre[0] < shape[0]/2.0) farCorner[0] = shape[0];
+//		if (centre[1] < shape[1]/2.0) farCorner[1] = shape[1];
+//		double maxDistance = Math.sqrt(Math.pow(centre[0]-farCorner[0],2)+Math.pow(centre[1]-farCorner[1],2));
+//		SectorROI sroi = new SectorROI(bc[0], bc[1], 0, maxDistance, Math.PI/4 - Math.PI/8, Math.PI/4 + Math.PI/8, 1, true, SectorROI.INVERT);
+//		AbstractDataset[] profile = ROIProfile.sector(data, null, sroi, true, false, false, qSpace, xAxis, false);
+//
+//		ArrayList<IDataset> y = new ArrayList<IDataset> ();
+//		profile[0].setName("Bottom right");
+//		y.add(profile[0]);
+//		if (system == null) {
+//			logger.error("Plotting system is null");
+//			return Status.CANCEL_STATUS;
+//		}
+//
+//		List<ITrace> traces = system.updatePlot1D(profile[4], y, null);
+//		//((ILineTrace)traces.get(0)).setTraceColor(ColorConstants.darkBlue);
+//		y.remove(0);
+//
+//		final AbstractDataset reflection = profile[2];
+//		final AbstractDataset axref = profile[6];
+//		reflection.setName("Top left");
+//		y.add(reflection);
+//		traces = system.updatePlot1D(axref, y, null);
+//		//((ILineTrace)traces.get(0)).setTraceColor(ColorConstants.lightBlue);
+//		y.remove(0);
+//
+//		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+//
+//		sroi = new SectorROI(bc[0], bc[1], 0, maxDistance, 3*Math.PI/4 - Math.PI/8, 3*Math.PI/4 + Math.PI/8, 1, true, SectorROI.INVERT);
+//		profile = ROIProfile.sector(data, null, sroi, true, false, false, qSpace, xAxis, false);
+//
+//		profile[0].setName("Bottom left");
+//		y.add(profile[0]);
+//		traces = system.updatePlot1D(profile[4], y, null);
+//		//((ILineTrace)traces.get(0)).setTraceColor(ColorConstants.darkGreen);
+//		y.remove(0);
+//
+//		final AbstractDataset reflection2 = profile[2];
+//		final AbstractDataset axref2 = profile[6];
+//		reflection2.setName("Top right");
+//		y.add(reflection2);
+//		traces = system.updatePlot1D(axref2, y, null);
+		//((ILineTrace)traces.get(0)).setTraceColor(ColorConstants.lightGreen);
+		
+		
+		NonPixelSplittingIntegration npsi = new NonPixelSplittingIntegration(md);
+		npsi.setAxisType(xAxis);
+		
+		for (int i = -180; i <= 170; i+=10) {
+			npsi.setAzimuthalRange(new double[]{i, i+10});
+			List<AbstractDataset> out = npsi.integrate(data);
+			out.get(1).setName("Line: " + i +" to " + (i+10));
+			system.updatePlot1D(out.get(0), Arrays.asList(new IDataset[]{out.get(1)}), null);
 		}
 
-		List<ITrace> traces = system.updatePlot1D(profile[4], y, null);
-		//((ILineTrace)traces.get(0)).setTraceColor(ColorConstants.darkBlue);
-		y.remove(0);
-
-		final AbstractDataset reflection = profile[2];
-		final AbstractDataset axref = profile[6];
-		reflection.setName("Top left");
-		y.add(reflection);
-		traces = system.updatePlot1D(axref, y, null);
-		//((ILineTrace)traces.get(0)).setTraceColor(ColorConstants.lightBlue);
-		y.remove(0);
-
-		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-
-		sroi = new SectorROI(bc[0], bc[1], 0, maxDistance, 3*Math.PI/4 - Math.PI/8, 3*Math.PI/4 + Math.PI/8, 1, true, SectorROI.INVERT);
-		profile = ROIProfile.sector(data, null, sroi, true, false, false, qSpace, xAxis, false);
-
-		profile[0].setName("Bottom left");
-		y.add(profile[0]);
-		traces = system.updatePlot1D(profile[4], y, null);
-		//((ILineTrace)traces.get(0)).setTraceColor(ColorConstants.darkGreen);
-		y.remove(0);
-
-		final AbstractDataset reflection2 = profile[2];
-		final AbstractDataset axref2 = profile[6];
-		reflection2.setName("Top right");
-		y.add(reflection2);
-		traces = system.updatePlot1D(axref2, y, null);
-		//((ILineTrace)traces.get(0)).setTraceColor(ColorConstants.lightGreen);
+//		system.updatePlot1D(out.get(0), Arrays.asList(new IDataset[]{out.get(1)}), null);
+		setPlottingSystemAxes();
+		
 		setPlottingSystemAxes();
 		updateCalibrantLines();
 
@@ -206,22 +220,11 @@ public class PowderCheckJob extends Job {
 	}
 	
 	private List<AbstractDataset> integrateFullSector(AbstractDataset data, IDiffractionMetadata md, IProgressMonitor monitor) {
-		QSpace qSpace = new QSpace(md.getDetector2DProperties(), md.getDiffractionCrystalEnvironment());
-		int[] shape = data.getShape();
-		double[] centre = md.getDetector2DProperties().getBeamCentreCoords();
 
-		int maxDistance = AbstractPixelIntegration.calculateNumberOfBins(centre, shape);
-		NonPixelSplittingIntegration npsi = new NonPixelSplittingIntegration(md, maxDistance);
+		NonPixelSplittingIntegration npsi = new NonPixelSplittingIntegration(md);
 		npsi.setAxisType(xAxis);
 		
 		List<AbstractDataset> out = npsi.integrate(data);
-		
-		double max = out.get(1).max().doubleValue();
-		int argmax = out.get(1).argMax();
-		double maxqAtVal = out.get(0).getDouble(argmax);
-		double min = out.get(1).min().doubleValue();
-		double maxq = out.get(0).max().doubleValue();
-		double minq = out.get(0).min().doubleValue();
 
 		system.updatePlot1D(out.get(0), Arrays.asList(new IDataset[]{out.get(1)}), null);
 		setPlottingSystemAxes();
