@@ -13,9 +13,11 @@ import javax.measure.quantity.Quantity;
 import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
 import org.dawnsci.common.widgets.celleditor.FloatSpinnerCellEditor;
 import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.CheckboxCellEditor;
 import org.eclipse.jface.viewers.ColorCellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.ICellEditorListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -45,6 +47,9 @@ public class ValueEditingSupport extends EditingSupport {
 		}
 		if (element instanceof ComboNode) {
 			return createComboEditor(element);
+		}
+		if (element instanceof BooleanNode) {
+			return createBooleanEditor(element);
 		}
 		return null;
 	}
@@ -90,6 +95,29 @@ public class ValueEditingSupport extends EditingSupport {
 		return cce;
 	}
 
+	private CellEditor createBooleanEditor(final Object element) {
+		final BooleanNode node = (BooleanNode)element;
+		final CheckboxCellEditor fse = new CheckboxCellEditor((Composite)viewer.getControl(), SWT.NONE);
+		fse.addListener(new ICellEditorListener() {
+			@Override
+			public void editorValueChanged(boolean oldValidState, boolean newValidState) {
+				setValue(element, newValidState);
+			}
+
+			@Override
+			public void cancelEditor() {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void applyEditorValue() {
+				node.setValue((Boolean) fse.getValue());
+			}
+		});
+		return fse;
+	}
+
 	@Override
 	protected boolean canEdit(Object element) {
 		if (!(element instanceof LabelNode)) return false;
@@ -103,15 +131,18 @@ public class ValueEditingSupport extends EditingSupport {
 			return node.getDoubleValue();
 		}
 		if (element instanceof ColorNode) {
-			ColorNode node = (ColorNode)element;
+			ColorNode node = (ColorNode) element;
 			return node.getColor().getRGB();
 		}
-		
+
 		if (element instanceof ComboNode) {
-			ComboNode node = (ComboNode)element;
+			ComboNode node = (ComboNode) element;
 			return node.getValue();
 		}
-		
+		if (element instanceof BooleanNode) {
+			BooleanNode node = (BooleanNode) element;
+			return node.getValue();
+		}
 		return null;
 	}
 
@@ -137,9 +168,10 @@ public class ValueEditingSupport extends EditingSupport {
 			ComboNode node = (ComboNode)element;
 			node.setValue((Integer) value);
 		}
-		
+		if (element instanceof BooleanNode) {
+			BooleanNode node = (BooleanNode) element;
+			node.setValue((Boolean) value);
+		}
 		viewer.refresh(element);
 	}
-
-	
 }

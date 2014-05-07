@@ -41,7 +41,9 @@ public class NodeLabelProvider extends ColumnLabelProvider implements IStyledLab
 			
 		} else if (element instanceof ComboNode){
 			getStyledText(ret, (ComboNode)element);
-		} else  if (element instanceof ObjectNode) {
+		} else if (element instanceof BooleanNode) {
+			//TODO
+		} else if (element instanceof ObjectNode) {
 			final ObjectNode on = (ObjectNode)element;
 			if (on.isSubClass()) return ret;
 			getStyledText(ret, on);
