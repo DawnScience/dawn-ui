@@ -310,10 +310,6 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
             <condition><not><isset property="product.parent.directory.location" /></not></condition>
         </fail>
         <antcall target="setup.directory">
-            <param name="setup.directory.name" value="${buckminster.root.prefix}" />
-            <param name="setup.directory.delete.previous" value="${buckminster.root.prefix.delete.previous}" />
-        </antcall>
-        <antcall target="setup.directory">
             <param name="setup.directory.name" value="${buckminster.output.root}" />
             <param name="setup.directory.delete.previous" value="${buckminster.output.root.delete.previous}" />
         </antcall>
