@@ -33,6 +33,7 @@ import org.eclipse.draw2d.MouseEvent;
 import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
+import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
 
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
@@ -94,18 +95,23 @@ public abstract class ROIShape<T extends IROI> extends Shape implements IRegionC
 	public boolean containsPoint(int x, int y) {
 		if (croi == null)
 			return super.containsPoint(x, y);
-		double[] pt = cs.getPositionValue(x, y);
+		double[] pt = cs.getValueFromPosition(x, y);
 		return croi.containsPoint(pt[0], pt[1]);
 	}
 
 	protected void calcBox(IROI proi, boolean redraw) {
 		RectangularROI rroi = (RectangularROI) proi.getBounds();
-		int[] bp = cs.getValuePosition(rroi.getPointRef());
-		int[] ep = cs.getValuePosition(rroi.getEndPoint());
-		bnds = new Rectangle(new Point(bp[0], bp[1]), new Point(ep[0], ep[1]));
-		bnds.translate(-1, -1);
-		bnds.expand(2, 2);
-		if (redraw) {
+		if (rroi == null) { // unbounded shape
+			if (parent != null) {
+				bnds = parent.getBounds();
+			}
+		} else {
+			double[] bp = cs.getPositionFromValue(rroi.getPointRef());
+			double[] ep = cs.getPositionFromValue(rroi.getEndPoint());
+			bnds = new Rectangle(new PrecisionPoint(bp[0], bp[1]), new PrecisionPoint(ep[0], ep[1]));
+			bnds.expand(1, 1);
+		}
+		if (redraw && bnds != null) {
 			setBounds(bnds);
 		}
 		dirty = false;
@@ -133,7 +139,7 @@ public abstract class ROIShape<T extends IROI> extends Shape implements IRegionC
 		final int imax = roiHandler.size();
 		for (int i = 0; i < imax; i++) {
 			double[] hpt = roiHandler.getAnchorPoint(i, SIDE);
-			int[] p = cs.getValuePosition(hpt);
+			double[] p = cs.getPositionFromValue(hpt);
 			RectangularHandle h = new RectangularHandle(cs, region.getRegionColor(), this, SIDE, p[0], p[1]);
 			h.setVisible(visible);
 			handles.add(h);
@@ -198,7 +204,7 @@ public abstract class ROIShape<T extends IROI> extends Shape implements IRegionC
 				if (src instanceof FigureTranslator) {
 					final FigureTranslator translator = (FigureTranslator) src;
 					Point start = translator.getStartLocation();
-					spt = cs.getPositionValue(start.x(), start.y());
+					spt = cs.getValueFromPosition(start.x(), start.y());
 					final IFigure handle = translator.getRedrawFigure();
 					final int h = handles.indexOf(handle);
 					HandleStatus status = h == roiHandler.getCentreHandle() ? HandleStatus.RMOVE : HandleStatus.RESIZE;
@@ -218,7 +224,7 @@ public abstract class ROIShape<T extends IROI> extends Shape implements IRegionC
 					Point end = translator.getEndLocation();
 					
 					if (end==null) return;
-					double[] c = cs.getPositionValue(end.x(), end.y());
+					double[] c = cs.getValueFromPosition(end.x(), end.y());
 					troi = roiHandler.interpretMouseDragging(spt, c);
 
 					roiHandler.setROI(troi);
@@ -237,7 +243,7 @@ public abstract class ROIShape<T extends IROI> extends Shape implements IRegionC
 					final FigureTranslator translator = (FigureTranslator) src;
 					Point end = translator.getEndLocation();
 
-					double[] c = cs.getPositionValue(end.x(), end.y());
+					double[] c = cs.getValueFromPosition(end.x(), end.y());
 					T croi = roiHandler.interpretMouseDragging(spt, c);
 
 					updateFromROI(croi);
@@ -348,8 +354,8 @@ public abstract class ROIShape<T extends IROI> extends Shape implements IRegionC
 			for (int i = 0; i < imax; i++) {
 				double[] hpt = roiHandler.getAnchorPoint(i, SIDE);
 				SelectionHandle handle = (SelectionHandle) handles.get(i);
-				int[] pta = cs.getValuePosition(hpt);
-				handle.setSelectionPoint(new Point(pta[0], pta[1]));
+				double[] pta = cs.getPositionFromValue(hpt);
+				handle.setSelectionPoint(new PrecisionPoint(pta[0], pta[1]));
 			}
 		}
 		dirty = true;
