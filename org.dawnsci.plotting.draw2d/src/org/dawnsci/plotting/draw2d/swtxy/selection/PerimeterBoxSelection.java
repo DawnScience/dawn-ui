@@ -59,7 +59,7 @@ public class PerimeterBoxSelection extends BoxSelection {
 	protected void drawRectangle(Graphics g) {
 		super.drawRectangle(g);
 
-		PointList points = box.generatePointList();
+		PointList points = ((Box) shape).generatePointList();
 		if (points.size() == 4)
 			drawColouredEdges(g, points);
 	}

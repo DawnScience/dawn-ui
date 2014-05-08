@@ -44,7 +44,7 @@ import uk.ac.diamond.scisoft.analysis.roi.handler.ROIHandler;
 /**
  * Class for a shape based on a ROI and uses a ROIHandler
  */
-public abstract class ROIShape<T extends IROI> extends Shape implements IRegionContainer {
+abstract public class ROIShape<T extends IROI> extends Shape implements IRegionContainer {
 	protected Figure parent;
 	protected AbstractSelectionRegion<T> region;
 	protected ICoordinateSystem cs;

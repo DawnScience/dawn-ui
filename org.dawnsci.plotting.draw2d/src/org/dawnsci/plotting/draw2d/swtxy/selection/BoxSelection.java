@@ -29,51 +29,21 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import uk.ac.diamond.scisoft.analysis.roi.handler.ROIHandler;
 import uk.ac.diamond.scisoft.analysis.roi.handler.RectangularROIHandler;
 
-class BoxSelection extends AbstractSelectionRegion<RectangularROI> {
-
-	Box box;
+class BoxSelection extends ROISelectionRegion<RectangularROI> {
 
 	BoxSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
 		setRegionColor(RegionType.BOX.getDefaultColor());
-		setAlpha(80);
-		setLineWidth(2);
 	}
 
 	@Override
-	public void setMobile(boolean mobile) {
-		super.setMobile(mobile);
-		if (box != null)
-			box.setMobile(mobile);
-	}
-
-	@Override
-	public void createContents(Figure parent) {
-		box = new Box(parent, this);
-		box.setCursor(Draw2DUtils.getRoiMoveCursor());
-
-		parent.add(box);
-		sync(getBean());
-		setOpaque(false);
-	}
-
-	@Override
-	public boolean containsPoint(int x, int y) {
-		return box.containsPoint(x, y);
+	protected ROIShape<RectangularROI> createShape(Figure parent) {
+		return new Box(parent, this);
 	}
 
 	@Override
 	public RegionType getRegionType() {
 		return RegionType.BOX;
-	}
-
-	@Override
-	protected void updateBounds() {
-		if (box != null) {
-			Rectangle b = box.updateFromHandles();
-			if (b != null)
-				box.setBounds(b);
-		}
 	}
 
 	@Override
@@ -90,32 +60,8 @@ class BoxSelection extends AbstractSelectionRegion<RectangularROI> {
 	}
 
 	@Override
-	public void initialize(PointList clicks) {
-		if (box != null) {
-			box.setup(clicks);
-			fireROIChanged(getROI());
-		}
-	}
-
-	@Override
 	protected String getCursorPath() {
 		return "icons/Cursor-box.png";
-	}
-
-	@Override
-	protected RectangularROI createROI(boolean recordResult) {
-		if (recordResult) {
-			roi = box.croi;
-		}
-		return box.croi;
-	}
-
-	@Override
-	protected void updateRegion() {
-		if (box != null) {
-			box.updateFromROI(roi);
-			sync(getBean());
-		}
 	}
 
 	@Override
@@ -123,25 +69,17 @@ class BoxSelection extends AbstractSelectionRegion<RectangularROI> {
 		return 2;
 	}
 
-	@Override
-	public void dispose() {
-		super.dispose();
-		if (box != null) {
-			box.dispose();
-		}
-	}
-
 	protected void drawRectangle(Graphics g) {
-		box.internalOutline(g);
+		((Box) shape).internalOutline(g);
 	}
 
 	protected void fillRectangle(Graphics g) {
-		box.internalFill(g);
+		((Box) shape).internalFill(g);
 	}
 
 	@Override
 	public RectangularROI getROI() {
-		return box != null ? box.getROI() : super.getROI();
+		return shape != null ? shape.getROI() : super.getROI();
 	}
 
 	class Box extends ROIShape<RectangularROI> {
