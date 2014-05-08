@@ -29,51 +29,22 @@ import uk.ac.diamond.scisoft.analysis.roi.IPolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolygonalROI;
 
-public class PolygonSelection extends AbstractSelectionRegion<PolygonalROI> {
+public class PolygonSelection extends ROISelectionRegion<PolygonalROI> {
 
-	Polygon polygon;
 	private static final Color magenta = new Color(null, 238, 0,	238);
 
 	public PolygonSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
 		setRegionColor(magenta);
-		setAlpha(80);
-		setLineWidth(2);
 	}
 
-	@Override
-	public void setMobile(boolean mobile) {
-		super.setMobile(mobile);
-		if (polygon != null)
-			polygon.setMobile(mobile);
-	}
-
-	@Override
-	public void createContents(Figure parent) {
-		polygon = new Polygon(parent, this);
-		polygon.setCursor(Draw2DUtils.getRoiMoveCursor());
-
-		parent.add(polygon);
-		sync(getBean());
-		setOpaque(false);
-	}
-
-	@Override
-	public boolean containsPoint(int x, int y) {
-		return polygon.containsPoint(x, y);
+	protected ROIShape<PolygonalROI> createShape(Figure parent) {
+		return new Polygon(parent, this);
 	}
 
 	@Override
 	public RegionType getRegionType() {
 		return RegionType.POLYGON;
-	}
-
-	@Override
-	protected void updateBounds() {
-		if (polygon != null) {
-			Rectangle b = polygon.updateFromHandles();
-			polygon.setBounds(b);
-		}
 	}
 
 	@Override
@@ -86,24 +57,8 @@ public class PolygonSelection extends AbstractSelectionRegion<PolygonalROI> {
 	}
 
 	@Override
-	public void initialize(PointList clicks) {
-		if (polygon != null) {
-			polygon.setup(clicks);
-			fireROIChanged(createROI(true));
-		}
-	}
-
-	@Override
 	protected String getCursorPath() {
 		return "icons/Cursor-polygon.png";
-	}
-
-	@Override
-	protected PolygonalROI createROI(boolean recordResult) {
-		if (recordResult) {
-			roi = polygon.croi;
-		}
-		return polygon.croi;
 	}
 
 	@Override
@@ -115,24 +70,8 @@ public class PolygonSelection extends AbstractSelectionRegion<PolygonalROI> {
 	}
 
 	@Override
-	protected void updateRegion() {
-		if (polygon != null && roi instanceof PolygonalROI) {
-			polygon.updateFromROI((PolygonalROI) roi);
-			sync(getBean());
-		}
-	}
-
-	@Override
 	public int getMaximumMousePresses() {
 		return 0; // signifies unlimited presses
-	}
-
-	@Override
-	public void dispose() {
-		super.dispose();
-		if (polygon != null) {
-			polygon.dispose();
-		}
 	}
 
 	class Polygon extends PolylineROIShape<PolygonalROI> {

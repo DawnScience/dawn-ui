@@ -28,50 +28,21 @@ import org.eclipse.swt.SWT;
 import uk.ac.diamond.scisoft.analysis.roi.IPolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 
-public class PolylineSelection extends AbstractSelectionRegion<IPolylineROI> {
-
-	Polyline polyline;
+public class PolylineSelection extends ROISelectionRegion<IPolylineROI> {
 
 	public PolylineSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
 		setRegionColor(ColorConstants.cyan);
-		setAlpha(80);
-		setLineWidth(2);
 	}
 
 	@Override
-	public void setMobile(boolean mobile) {
-		super.setMobile(mobile);
-		if (polyline != null)
-			polyline.setMobile(mobile);
-	}
-
-	@Override
-	public void createContents(Figure parent) {
-		polyline = new Polyline(parent, this);
-		polyline.setCursor(Draw2DUtils.getRoiMoveCursor());
-
-		parent.add(polyline);
-		sync(getBean());
-		setOpaque(false);
-	}
-
-	@Override
-	public boolean containsPoint(int x, int y) {
-		return polyline.containsPoint(x, y);
+	protected ROIShape<IPolylineROI> createShape(Figure parent) {
+		return new Polyline(parent, this);
 	}
 
 	@Override
 	public RegionType getRegionType() {
 		return RegionType.POLYLINE;
-	}
-
-	@Override
-	protected void updateBounds() {
-		if (polyline != null) {
-			Rectangle b = polyline.updateFromHandles();
-			polyline.setBounds(b);
-		}
 	}
 
 	@Override
@@ -84,45 +55,13 @@ public class PolylineSelection extends AbstractSelectionRegion<IPolylineROI> {
 	}
 
 	@Override
-	public void initialize(PointList clicks) {
-		if (polyline != null) {
-			polyline.setup(clicks);
-			fireROIChanged(createROI(true));
-		}
-	}
-
-	@Override
 	protected String getCursorPath() {
 		return "icons/Cursor-polyline.png";
 	}
 
 	@Override
-	protected IPolylineROI createROI(boolean recordResult) {
-		if (recordResult) {
-			roi = polyline.croi;
-		}
-		return polyline.croi;
-	}
-
-	@Override
-	protected void updateRegion() {
-		if (polyline != null && roi instanceof IPolylineROI) {
-			polyline.updateFromROI((IPolylineROI) roi);
-			sync(getBean());
-		}
-	}
-
-	@Override
 	public int getMaximumMousePresses() {
 		return 0; // signifies unlimited presses
-	}
-
-	@Override
-	public void dispose() {
-		super.dispose();
-		if (polyline != null) {
-			polyline.dispose();
-		}
 	}
 
 	class Polyline extends PolylineROIShape<IPolylineROI> {
