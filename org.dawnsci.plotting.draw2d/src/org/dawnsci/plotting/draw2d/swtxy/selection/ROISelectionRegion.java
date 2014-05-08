@@ -88,6 +88,7 @@ abstract class ROISelectionRegion<T extends IROI> extends AbstractSelectionRegio
 	public void initialize(PointList clicks) {
 		if (shape != null) {
 			shape.setup(clicks);
+			shape.croi.setName(getName());
 			fireROIChanged(getROI());
 		}
 	}
