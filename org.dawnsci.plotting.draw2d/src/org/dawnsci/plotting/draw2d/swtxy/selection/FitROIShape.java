@@ -18,7 +18,6 @@ package org.dawnsci.plotting.draw2d.swtxy.selection;
 
 import java.util.EventObject;
 
-import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationEvent;
@@ -43,10 +42,8 @@ import uk.ac.diamond.scisoft.analysis.roi.handler.ROIHandler;
 /**
  * Class for a parametric shape fitted to a polyline ROI and does not use a ROIHandler
  */
-abstract public class FitROIShape<T extends IFitROI> extends ROIShape<T> implements PointFunction {
+abstract public class FitROIShape<T extends IFitROI> extends ParametricROIShapeBase<T> implements PointFunction {
 	protected IPolylineROI proi;
-	private int tolerance = 2;
-	private boolean outlineOnly = true;
 
 	public FitROIShape() {
 		super();
@@ -54,27 +51,6 @@ abstract public class FitROIShape<T extends IFitROI> extends ROIShape<T> impleme
 
 	public FitROIShape(Figure parent, AbstractSelectionRegion<T> region) {
 		super(parent, region);
-	}
-
-	/**
-	 * Set tolerance of hit detection of shape
-	 * @param tolerance (number of pixels between point and segment)
-	 */
-	public void setTolerance(int tolerance) {
-		this.tolerance = tolerance;
-	}
-
-	@Override
-	public boolean containsPoint(int x, int y) {
-		if (croi == null)
-			return super.containsPoint(x, y);
-
-		double[] pt = cs.getValueFromPosition(x, y);
-		if (outlineOnly) {
-			return croi.isNearOutline(pt[0], pt[1], tolerance);
-		}
-
-		return croi.containsPoint(pt[0], pt[1]);
 	}
 
 	@Override
@@ -87,11 +63,6 @@ abstract public class FitROIShape<T extends IFitROI> extends ROIShape<T> impleme
 	}
 
 	abstract protected T createNewROI(IPolylineROI lroi);
-
-	@Override
-	public void setup(PointList corners) {
-		setup(corners, true);
-	}
 
 	public void setup(PointList points, boolean withHandles) {
 		dirty = true;
@@ -195,12 +166,6 @@ abstract public class FitROIShape<T extends IFitROI> extends ROIShape<T> impleme
 		} else {
 			region.fireROIChanged(region.createROI(true));
 			region.fireROISelection();
-		}
-	}
-
-	public void setMobile(boolean mobile) {
-		for (FigureTranslator f : fTranslators) {
-			f.setActive(mobile);
 		}
 	}
 
@@ -336,61 +301,6 @@ abstract public class FitROIShape<T extends IFitROI> extends ROIShape<T> impleme
 		if (b  != null)
 			setBounds(b);
 	}
-
-	@Override
-	public void setCoordinateSystem(ICoordinateSystem system) {
-		cs = system;
-	}
-
-	/**
-	 * Get point on ROI
-	 * @param parameter
-	 * @return point
-	 */
-	public Point getPoint(double parameter) {
-		T lroi = getROI();
-		if (lroi == null) {
-			return null;
-		}
-		double[] pt = cs.getPositionFromValue(lroi.getPoint(parameter));
-		return new PrecisionPoint(pt[0], pt[1]);
-	}
-
-	@Override
-	public Point calculatePoint(double... parameter) {
-		return getPoint(parameter[0]);
-	}
-
-	@Override
-	public double[] calculateXIntersectionParameters(int x) {
-		T lroi = getROI();
-		if (lroi == null) {
-			return null;
-		}
-		double dx = cs.getValueFromPosition(x, 0)[0];
-		return lroi.getVerticalIntersectionParameters(dx);
-	}
-
-	@Override
-	public double[] calculateYIntersectionParameters(int y) {
-		T lroi = getROI();
-		if (lroi == null) {
-			return null;
-		}
-		double dy = cs.getValueFromPosition(0, y)[1];
-		return lroi.getHorizontalIntersectionParameters(dy);
-	}
-
-	protected Point getCentre() {
-		T lroi = getROI();
-		if (lroi == null) {
-			return null;
-		}
-		double[] pt = cs.getPositionFromValue(lroi.getPointRef());
-		return new PrecisionPoint(pt[0], pt[1]);
-	}
-
-	abstract protected void outlineShape(Graphics graphics, Rectangle parentBounds);
 
 	protected void outlineShape(Graphics graphics, Rectangle parentBounds, boolean isClosed) {
 		T lroi = getROI();

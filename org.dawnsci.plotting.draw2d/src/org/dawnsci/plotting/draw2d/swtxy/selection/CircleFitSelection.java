@@ -17,11 +17,9 @@
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
-import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
-import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 import org.slf4j.Logger;
@@ -32,40 +30,19 @@ import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
 import uk.ac.diamond.scisoft.analysis.roi.IPolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.handler.ParametricROIHandler;
 
-public class CircleFitSelection extends AbstractSelectionRegion<CircularFitROI> {
+public class CircleFitSelection extends FitSelectionRegion<CircularFitROI> {
 	private final static Logger logger = LoggerFactory.getLogger(CircleFitSelection.class);
 
 	private static final int MIN_POINTS = 3; // minimum number of points to define ellipse
-	FRShape shape;
 
 	public CircleFitSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
 		setRegionColor(ColorConstants.yellow);
-		setAlpha(80);
-		setLineWidth(2);
-		labelColour = ColorConstants.black;
 	}
 
 	@Override
-	public void setMobile(boolean mobile) {
-		super.setMobile(mobile);
-		if (shape != null)
-			shape.setMobile(mobile);
-	}
-
-	@Override
-	public void createContents(Figure parent) {
-		shape = new FRShape(parent, this);
-		shape.setCursor(Draw2DUtils.getRoiMoveCursor());
-
-		parent.add(shape);
-		sync(getBean());
-		shape.setLineWidth(getLineWidth());
-	}
-
-	@Override
-	public boolean containsPoint(int x, int y) {
-		return shape.containsPoint(x, y);
+	protected FitROIShape<CircularFitROI> createShape(Figure parent) {
+		return parent == null ? new FRShape() : new FRShape(parent, this);
 	}
 
 	@Override
@@ -74,62 +51,8 @@ public class CircleFitSelection extends AbstractSelectionRegion<CircularFitROI> 
 	}
 
 	@Override
-	protected void updateBounds() {
-		if (shape != null) {
-			Rectangle b = shape.updateFromHandles();
-			if (b != null)
-				shape.setBounds(b);
-		}
-	}
-
-	private FRShape tempShape = null;
-
-	@Override
-	public void paintBeforeAdded(Graphics g, PointList clicks, Rectangle parentBounds) {
-		g.setLineWidth(2);
-		g.setForegroundColor(getRegionColor());
-		g.setAlpha(getAlpha());
-		g.setLineStyle(Graphics.LINE_DOT);
-		g.drawPolyline(clicks);
-		if (clicks.size() >= MIN_POINTS) {
-			if (tempShape == null) {
-				tempShape = new FRShape();
-				tempShape.setOutline(true);
-				tempShape.setFill(false);
-			}
-			tempShape.setup(clicks, false);
-			if (tempShape.isFitted()) {
-				tempShape.setVisible(true);
-				tempShape.paintFigure(g);
-			} else {
-				tempShape.setVisible(false);
-			}
-		}
-	}
-
-	@Override
-	public void initialize(PointList clicks) {
-		if (tempShape != null) {
-			tempShape.setVisible(false);
-		}
-		if (shape != null) {
-			shape.setup(clicks);
-			roi = shape.croi;
-			fireROIChanged(getROI());
-		}
-	}
-
-	@Override
 	protected String getCursorPath() {
 		return "icons/Cursor-circle.png";
-	}
-
-	@Override
-	protected CircularFitROI createROI(boolean recordResult) {
-		if (recordResult) {
-			roi = shape.croi;
-		}
-		return shape.croi;
 	}
 
 	private void updateLabel(CircularROI croi) {
@@ -138,32 +61,15 @@ public class CircleFitSelection extends AbstractSelectionRegion<CircularFitROI> 
 
 	@Override
 	protected void updateRegion() {
-		if (shape != null && roi instanceof CircularFitROI) {
-			shape.updateFromROI((CircularFitROI) roi);
-			sync(getBean());
+		super.updateRegion();
+		if (roi instanceof CircularROI) {
 			updateLabel((CircularROI) roi);
 		}
 	}
 
 	@Override
-	public int getMaximumMousePresses() {
-		return 0;
-	}
-
-	@Override
 	public int getMinimumMousePresses() {
 		return MIN_POINTS;
-	}
-
-	@Override
-	public void dispose() {
-		super.dispose();
-		if (shape != null) {
-			shape.dispose();
-		}
-		if (tempShape != null) {
-			tempShape.dispose();
-		}
 	}
 
 	class FRShape extends FitROIShape<CircularFitROI> {
