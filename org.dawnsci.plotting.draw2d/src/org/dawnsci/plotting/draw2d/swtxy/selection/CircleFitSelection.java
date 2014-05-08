@@ -32,13 +32,13 @@ import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
 import uk.ac.diamond.scisoft.analysis.roi.IPolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.handler.ParametricROIHandler;
 
-public class CircleFitSelectionA extends AbstractSelectionRegion<CircularFitROI> {
-	private final static Logger logger = LoggerFactory.getLogger(CircleFitSelectionA.class);
+public class CircleFitSelection extends AbstractSelectionRegion<CircularFitROI> {
+	private final static Logger logger = LoggerFactory.getLogger(CircleFitSelection.class);
 
 	private static final int MIN_POINTS = 3; // minimum number of points to define ellipse
 	FRShape shape;
 
-	public CircleFitSelectionA(String name, ICoordinateSystem coords) {
+	public CircleFitSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
 		setRegionColor(ColorConstants.yellow);
 		setAlpha(80);
@@ -200,9 +200,9 @@ public class CircleFitSelectionA extends AbstractSelectionRegion<CircularFitROI>
 		
 		@Override
 		protected void outlineShape(Graphics graphics, Rectangle parentBounds) {
-			graphics.setLineWidth(CircleFitSelectionA.this.getLineWidth());
+			graphics.setLineWidth(CircleFitSelection.this.getLineWidth());
 			graphics.setForegroundColor(getRegionColor());
-			graphics.setAlpha(CircleFitSelectionA.this.getAlpha());
+			graphics.setAlpha(CircleFitSelection.this.getAlpha());
 			outlineShape(graphics, parentBounds, true);
 
 			if (label != null && isShowLabel()) {
