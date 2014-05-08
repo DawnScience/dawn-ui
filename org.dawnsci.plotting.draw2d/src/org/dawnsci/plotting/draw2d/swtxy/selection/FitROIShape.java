@@ -25,7 +25,6 @@ import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
 import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
 import org.dawnsci.plotting.draw2d.swtxy.util.PointFunction;
-import org.dawnsci.plotting.draw2d.swtxy.util.PrecisionPointList;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
@@ -45,7 +44,6 @@ import uk.ac.diamond.scisoft.analysis.roi.handler.ROIHandler;
  * Class for a parametric shape fitted to a polyline ROI and does not use a ROIHandler
  */
 abstract public class FitROIShape<T extends IFitROI> extends ROIShape<T> implements PointFunction {
-	protected PrecisionPointList points;
 	protected IPolylineROI proi;
 	private int tolerance = 2;
 	private boolean outlineOnly = true;
@@ -99,8 +97,6 @@ abstract public class FitROIShape<T extends IFitROI> extends ROIShape<T> impleme
 		dirty = true;
 		proi = new PolylineROI();
 		
-		this.points = new PrecisionPointList(points);
-
 		final Point p = new Point();
 		for (int i = 0, imax = points.size(); i < imax; i++) {
 			points.getPoint(p, i);
@@ -127,10 +123,9 @@ abstract public class FitROIShape<T extends IFitROI> extends ROIShape<T> impleme
 	protected void configureHandles() {
 		boolean mobile = region.isMobile();
 		boolean visible = isVisible() && mobile;
-		final Point p = new Point();
-		for (int i = 0, imax = points.size(); i < imax; i++) {
-			points.getPoint(p, i);
-			addHandle(p.x, p.y(), mobile, visible, handleListener);
+		for (IROI p : proi) {
+			double[] pt = cs.getPositionFromValue(p.getPointRef());
+			addHandle(pt[0], pt[1], mobile, visible, handleListener);
 		}
 
 		addCentreHandle(mobile, visible);
@@ -156,7 +151,6 @@ abstract public class FitROIShape<T extends IFitROI> extends ROIShape<T> impleme
 				Point pt = h.getSelectionPoint();
 				double[] p = cs.getValueFromPosition(pt.x(), pt.y());
 				if (i < imax) {
-					points.setPoint(pt, i);
 					proi.setPoint(i++, new PointROI(p));
 				} else {
 					croi.setPoint(p);
@@ -181,7 +175,6 @@ abstract public class FitROIShape<T extends IFitROI> extends ROIShape<T> impleme
 			p.addPoint(delta);
 			double[] pnt = cs.getPositionFromValue(p.getPointRef());
 			Point pt = new PrecisionPoint(pnt[0], pnt[1]);
-			points.setPoint(pt, i);
 			SelectionHandle h = (SelectionHandle) handles.get(i);
 			h.setSelectionPoint(pt);
 			i++;
@@ -296,9 +289,6 @@ abstract public class FitROIShape<T extends IFitROI> extends ROIShape<T> impleme
 	public void updateFromROI(T uroi) {
 		IPolylineROI puroi = uroi.getPoints();
 		int imax = handles.size() - 1;
-		if (points == null) {
-			points = new PrecisionPointList(puroi.getNumberOfPoints());
-		}
 		if (croi == null) {
 			croi = uroi;
 			proi = puroi;
@@ -307,8 +297,7 @@ abstract public class FitROIShape<T extends IFitROI> extends ROIShape<T> impleme
 		if (imax != puroi.getNumberOfPoints()) {
 			if (puroi != proi)
 				proi.removeAllPoints();
-			points.removeAllPoints();
-			for (int i = imax-1; i >= 0; i--) {
+			for (int i = imax; i >= 0; i--) {
 				removeHandle((SelectionHandle) handles.remove(i));
 			}
 			boolean mobile = region.isMobile();
@@ -317,9 +306,9 @@ abstract public class FitROIShape<T extends IFitROI> extends ROIShape<T> impleme
 				if (puroi != proi)
 					proi.insertPoint(r);
 				double[] pnt  = cs.getPositionFromValue(r.getPointRef());
-				points.addPoint(pnt[0], pnt[1]);
 				addHandle(pnt[0], pnt[1], mobile, visible, region.createRegionNotifier());
 			}
+			croi.setPoints(proi);
 			addCentreHandle(mobile, visible);
 //			addFigureListener(moveListener);
 //			FigureTranslator mover = new FigureTranslator(region.getXyGraph(), parent, this, handles);
@@ -334,10 +323,10 @@ abstract public class FitROIShape<T extends IFitROI> extends ROIShape<T> impleme
 					proi.setPoint(i, p);
 				double[] pnt = cs.getPositionFromValue(p.getPointRef());
 				Point pt = new PrecisionPoint(pnt[0], pnt[1]);
-				points.setPoint(pt, i);
 				SelectionHandle h = (SelectionHandle) handles.get(i);
 				h.setSelectionPoint(pt);
 			}
+			croi.setPoints(proi);
 			SelectionHandle h = (SelectionHandle) handles.get(imax);
 			h.setSelectionPoint(getCentre());
 		}
