@@ -1,80 +1,30 @@
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
-import org.dawnsci.plotting.api.region.IRegion;
-import org.dawnsci.plotting.api.region.IRegionContainer;
-import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
-import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
-import org.dawnsci.plotting.draw2d.swtxy.util.RotatablePolygonShape;
-import org.dawnsci.plotting.draw2d.swtxy.util.RotatableRectangle;
+import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
-import org.eclipse.draw2d.Shape;
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.swt.graphics.Color;
 
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
+import uk.ac.diamond.scisoft.analysis.roi.handler.ROIHandler;
 
-public class PointSelection extends AbstractSelectionRegion<PointROI> {
+public class PointSelection extends ROISelectionRegion<PointROI> {
 
-	private final class RegionContainerRectangularHandle extends RectangularHandle  {
-
-		public RegionContainerRectangularHandle(ICoordinateSystem coords,
-												Color regionColor, 
-												Figure parent, 
-												int lineWidth, 
-												double d,
-												double e) {
-			
-			super(coords, regionColor, parent, lineWidth, d, e);
-			setLocationAbsolute(true);
-		}
-
-		@Override
-		public Shape createHandleShape(Figure parent, int side, double[] params) {
-			double angle;
-			if (parent instanceof RotatablePolygonShape) {
-				RotatablePolygonShape pg = (RotatablePolygonShape) parent;
-				angle = pg.getAngleDegrees();
-			} else {
-				angle = 0;
-			}
-			location = new PrecisionPoint(params[0], params[1]);
-			return new RegionContainerRotatableRectangle(location.x(), location.y(), side, side, angle);
-		}
-
-	}
-	
-	private class RegionContainerRotatableRectangle extends RotatableRectangle implements IRegionContainer {
-
-		public RegionContainerRotatableRectangle(int x, int y, int width,
-				int height, double angle) {
-			super(x, y, width, height, angle);
-		}
-
-		@Override
-		public IRegion getRegion() {
-			return PointSelection.this;
-		}
-
-		@Override
-		public void setRegion(IRegion region) {
-			// Cannot change this selection.
-		}
-		
-	}
-
-	private SelectionHandle  point;
-	private FigureTranslator mover;
-	
-	public PointSelection(String name, ICoordinateSystem coords) {
+	PointSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
 		setRegionColor(RegionType.POINT.getDefaultColor());
 		setLineWidth(7);
 		setAlpha(120);
+	}
+
+	@Override
+	protected ROIShape<PointROI> createShape(Figure parent) {
+		return new RPoint(parent, this);
 	}
 
 	@Override
@@ -83,61 +33,13 @@ public class PointSelection extends AbstractSelectionRegion<PointROI> {
 	}
 
 	@Override
-	protected void updateBounds() {
-		
-	}
-
-	@Override
-	public boolean containsPoint(int x, int y) {
-		final Point pnt = point.getSelectionPoint();
-		return pnt.x == x && pnt.y == y;
-	}
-	
-	@Override
-	public void paintBeforeAdded(Graphics g, 
-			                     PointList clicks,
-			                     Rectangle parentBounds) {
-		
-		if (clicks.size()<1) return;
-		final Point pnt    = clicks.getLastPoint();
-		final int   offset = getLineWidth()/2; // int maths ok here
-        g.setForegroundColor(getRegionColor());
-        g.fillRectangle(pnt.x-offset, pnt.y-offset, getLineWidth(), getLineWidth());
-	}
-
-	@Override
-	public void createContents(Figure parent) {
-		this.point = new RegionContainerRectangularHandle(coords, getRegionColor(), parent, getLineWidth(), 100d, 100d);
-		parent.add(point);
-		mover = new FigureTranslator(getXyGraph(), point);	
-		mover.addTranslationListener(createRegionNotifier());
-		setMobile(isMobile());
-		point.setShowPosition(false);
-		setRegionObjects(point);
-	}
-	
-	@Override
-	public void setMobile(final boolean mobile) {
-		getBean().setMobile(mobile);
-		if (mover!=null && point!=null) {
-			mover.setActive(mobile);
-			if (mobile) point.setCursor(Draw2DUtils.getRoiControlPointCursor()) ;
-			else 	    point.setCursor(null) ; 
-		}
-	}
-	
-	@Override
-	public void setVisible(boolean visible) {
-		if (point!=null) point.setVisible(visible);
-		getBean().setVisible(visible);
-	}
-
-	@Override
-	public void initialize(PointList clicks) {
-		if (clicks.size()<1) return;
-		final Point last = clicks.getLastPoint();
-		point.setSelectionPoint(last);
-		fireROIChanged(createROI(true));
+	public void paintBeforeAdded(Graphics g, PointList clicks, Rectangle parentBounds) {
+		if (clicks.size() < 1)
+			return;
+		final Point pnt = clicks.getLastPoint();
+		final int offset = getLineWidth() / 2; // int maths ok here
+		g.setForegroundColor(getRegionColor());
+		g.fillRectangle(pnt.x - offset, pnt.y - offset, getLineWidth(), getLineWidth());
 	}
 
 	@Override
@@ -146,30 +48,120 @@ public class PointSelection extends AbstractSelectionRegion<PointROI> {
 	}
 
 	@Override
-	protected PointROI createROI(boolean recordResult) {
-		if (point == null) return getROI();
-		final PointROI proi = new PointROI(point.getPosition());
-		if (roi!=null) {
-			proi.setPlot(roi.isPlot());
-			// set the Region isActive flag
-			this.setActive(roi.isPlot());
-		}
-		if (recordResult) roi = proi;
-
-		return proi;
-	}
-
-	@Override
-	protected void updateRegion() {
-		if (point != null && roi instanceof PointROI) {
-	        point.setPosition(roi.getPointRef());
-	        updateBounds();
-	        sync(getBean());
-		}
-    }
-
-	@Override
 	public int getMaximumMousePresses() {
 		return 1;
+	}
+
+	class RPoint extends ROIShape<PointROI> {
+
+		public RPoint(final Figure parent, AbstractSelectionRegion<PointROI> region) {
+			super(parent, region);
+		}
+
+		@Override
+		protected ROIHandler<PointROI> createROIHandler(PointROI roi) {
+			return null;
+		}
+
+		@Override
+		public void setCentre(Point nc) {
+		}
+
+		@Override
+		public void setup(PointList points) {
+			croi = new PointROI();
+
+			final Point p = points.getFirstPoint();
+			croi.setPoint(cs.getPositionValue(p.x(), p.y()));
+
+			region.createROI(true);
+			configureHandles();
+		}
+
+		@Override
+		protected TranslationListener createHandleNotifier() {
+			return region.createRegionNotifier();
+		}
+
+		@Override
+		protected void configureHandles() {
+			boolean mobile = region.isMobile();
+			boolean visible = isVisible() && mobile;
+			double[] pt = cs.getPositionFromValue(croi.getPointRef());
+			Rectangle b = addHandle(pt[0], pt[1], mobile, visible, handleListener).getBounds();
+
+			region.setRegionObjects(this, handles);
+			if (b != null)
+				setBounds(b);
+		}
+
+		@Override
+		protected RectangularHandle addHandle(double x, double y, boolean mobile, boolean visible,
+				TranslationListener listener) {
+			RectangularHandle h = super.addHandle(x, y, mobile, visible, listener);
+			h.setLocationAbsolute(true);
+			return h;
+		}
+
+		@Override
+		protected Rectangle updateFromHandles() {
+			Rectangle b = null;
+			for (IFigure f : handles) { // this is called first so update points
+				if (f instanceof SelectionHandle) {
+					SelectionHandle h = (SelectionHandle) f;
+					Point pt = h.getSelectionPoint();
+					double[] p = cs.getValueFromPosition(pt.x(), pt.y());
+					croi.setPoint(p);
+					if (b == null) {
+						b = new Rectangle(h.getBounds());
+					} else {
+						b.union(h.getBounds());
+					}
+				}
+			}
+			return b;
+		}
+
+		/**
+		 * Update according to ROI
+		 * @param proi
+		 */
+		public void updateFromROI(PointROI proi) {
+			int imax = handles.size();
+			if (croi == null) {
+				croi = proi;
+			}
+
+			double[] p = proi.getPoint();
+			if (croi != proi)
+				croi.setPoint(p[0], p[1]);
+			double[] pnt  = cs.getPositionFromValue(p);
+			Rectangle b = null;
+			if (imax != 1) {
+				for (int i = imax-1; i >= 0; i--) {
+					removeHandle((SelectionHandle) handles.remove(i));
+				}
+				boolean mobile = region.isMobile();
+				boolean visible = isVisible() && mobile;
+				b = addHandle(pnt[0], pnt[1], mobile, visible, handleListener).getBounds();
+				region.setRegionObjects(this, handles);
+			} else {
+				Point pt = new PrecisionPoint(pnt[0], pnt[1]);
+				SelectionHandle h = (SelectionHandle) handles.get(0);
+				h.setSelectionPoint(pt);
+				b = h.getBounds();
+			}
+
+			if (b != null)
+				setBounds(b);
+		}
+
+		@Override
+		protected void fillShape(Graphics graphics) {
+		}
+
+		@Override
+		protected void outlineShape(Graphics graphics) {
+		}
 	}
 }
