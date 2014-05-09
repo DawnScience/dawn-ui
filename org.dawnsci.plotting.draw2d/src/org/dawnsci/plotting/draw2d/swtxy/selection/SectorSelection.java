@@ -16,83 +16,41 @@
 
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.region.ILockableRegion;
-import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegionContainer;
-import org.dawnsci.plotting.api.region.ROIEvent;
-import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
-import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationEvent;
-import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
 import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
 import org.dawnsci.plotting.draw2d.swtxy.util.PointFunction;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
-import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.Graphics;
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.MouseEvent;
-import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
-import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
 
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
-import uk.ac.diamond.scisoft.analysis.roi.handler.HandleStatus;
+import uk.ac.diamond.scisoft.analysis.roi.handler.ROIHandler;
 import uk.ac.diamond.scisoft.analysis.roi.handler.SectorROIHandler;
 
 /**
  * You should not call this concrete class outside of the draw2d 
  * extensions unless absolutely required.
  */
-class SectorSelection extends AbstractSelectionRegion<SectorROI> implements ILockableRegion {
+class SectorSelection extends ROISelectionRegion<SectorROI> implements ILockableRegion {
 
-	Sector sector;
+	Sector shape;
 
 	SectorSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
 		setRegionColor(ColorConstants.red);
-		setAlpha(80);
-		setLineWidth(2);
-	}
-	
-	public void setRegionColor(Color regionColor) {
-
-		super.setRegionColor(regionColor);
-		if (sector!=null) {
-			sector.setForegroundColor(regionColor);
-			sector.setBackgroundColor(regionColor);
-		}
 	}
 
 	@Override
-	public void setMobile(boolean mobile) {
-		super.setMobile(mobile);
-		if (sector != null)
-			sector.setMobile(mobile);
-	}
-
-	@Override
-	public void createContents(Figure parent) {
-		sector = new Sector(parent, coords);
-		sector.setCursor(Draw2DUtils.getRoiMoveCursor());
-
-		parent.add(sector);
-		sync(getBean());
-		sector.setLineWidth(getLineWidth());
-	}
-
-	@Override
-	public boolean containsPoint(int x, int y) {
-		return sector.containsPoint(x, y);
+	protected ROIShape<SectorROI> createShape(Figure parent) {
+		return new Sector(parent, this);
 	}
 
 	@Override
@@ -100,14 +58,7 @@ class SectorSelection extends AbstractSelectionRegion<SectorROI> implements ILoc
 		return RegionType.SECTOR;
 	}
 
-	@Override
-	protected void updateBounds() { // called after a handle translation
-		if (sector != null) {
-			Rectangle b = sector.updateFromHandles();
-			if (b != null)
-				sector.setBounds(b);
-		}
-	}
+	private ROIShape<SectorROI> tempShape;
 
 	@Override
 	public void paintBeforeAdded(Graphics g, PointList clicks, Rectangle parentBounds) {
@@ -130,13 +81,23 @@ class SectorSelection extends AbstractSelectionRegion<SectorROI> implements ILoc
 			g.drawOval((int) Math.round(cen.preciseX() - ri), (int) Math.round(cen.preciseY() - ri * ratio),
 					(int) Math.round(2*ri), (int) Math.round(2*ri*ratio));
 		} else {
-			Sector s = new Sector(null, coords);
-			s.setup(clicks);
- 		    s.setLineStyle(Graphics.LINE_DOT);
-			s.setLineWidth(getLineWidth());
-			s.setForegroundColor(getRegionColor());
-			s.setBackgroundColor(getRegionColor());
-			s.paintFigure(g);
+			if (tempShape == null) {
+				tempShape = createShape(null);
+			}
+			tempShape.setup(clicks);
+			tempShape.setLineStyle(Graphics.LINE_DOT);
+			tempShape.setLineWidth(getLineWidth());
+			tempShape.setForegroundColor(getRegionColor());
+			tempShape.setBackgroundColor(getRegionColor());
+			tempShape.paintFigure(g);
+		}
+	}
+
+	@Override
+	public void dispose() {
+		super.dispose();
+		if (tempShape != null) {
+			tempShape.dispose();
 		}
 	}
 
@@ -197,32 +158,8 @@ class SectorSelection extends AbstractSelectionRegion<SectorROI> implements ILoc
 	}
 
 	@Override
-	public void initialize(PointList clicks) {
-		if (sector != null) {
-			sector.setup(clicks);
-			fireROIChanged(getROI());
-		}
-	}
-
-	@Override
 	protected String getCursorPath() {
 		return "icons/Cursor-sector.png";
-	}
-
-	@Override
-	protected SectorROI createROI(boolean recordResult) {
-		if (recordResult) {
-			roi = sector.croi;
-		}
-		return sector.croi;
-	}
-
-	@Override
-	protected void updateRegion() {
-		if (sector != null) {
-			sector.updateFromROI(roi);
-			sync(getBean());
-		}
 	}
 
 	@Override
@@ -230,47 +167,18 @@ class SectorSelection extends AbstractSelectionRegion<SectorROI> implements ILoc
 		return 3;
 	}
 
-	@Override
-	public void dispose() {
-		super.dispose();
-		if (sector != null) {
-			sector.dispose();
-		}
-	}
-
 	private boolean isCentreMovable=true;
 
-	class Sector extends Shape implements IRegionContainer, PointFunction {
-		private List<IFigure> handles;
-		private List<FigureTranslator> fTranslators;
-		private Figure parent;
-		private static final int SIDE = 8;
-		private SectorROIHandler roiHandler;
-		private TranslationListener handleListener;
-		private FigureListener moveListener;
-		private boolean isMobile;
-		private Rectangle bnds;
-		private boolean dirty = true;
-		private ICoordinateSystem cs;
-		private SectorROI croi;
-		private SectorROI troi = null; // temporary ROI used in dragging
+	class Sector extends ROIShape<SectorROI> implements IRegionContainer, PointFunction {
 		private PointFunction innerFunction;
 		private PointFunction outerFunction;
 
-		public Sector(Figure parent, ICoordinateSystem system) {
+		public Sector() {
 			super();
-			this.parent = parent;
-			cs = system;
-			handles = new ArrayList<IFigure>();
-			fTranslators = new ArrayList<FigureTranslator>();
-			roiHandler = new SectorROIHandler((SectorROI) roi);
-			handleListener = createHandleNotifier();
-			moveListener = new FigureListener() {
-				@Override
-				public void figureMoved(IFigure source) {
-					Sector.this.parent.repaint();
-				}
-			};
+		}
+
+		public Sector(Figure parent, SectorSelection sectorSelection) {
+			super(parent, sectorSelection);
 			setBackgroundColor(getRegionColor());
 
 			innerFunction = new PointFunction.Stub() {
@@ -288,12 +196,13 @@ class SectorSelection extends AbstractSelectionRegion<SectorROI> implements ILoc
 			};
 		}
 
-		public SectorROI getROI() {
-			return troi != null ? troi : croi;
+		@Override
+		protected ROIHandler<SectorROI> createROIHandler(SectorROI roi) {
+			return new SectorROIHandler(roi);
 		}
 
 		public void setCentre(Point nc) {
-			double[] pt = cs.getPositionValue(nc.x(), nc.y());
+			double[] pt = cs.getValueFromPosition(nc.x(), nc.y());
 			double[] pc = croi.getPointRef();
 			pt[0] -= pc[0];
 			pt[1] -= pc[1];
@@ -302,20 +211,7 @@ class SectorSelection extends AbstractSelectionRegion<SectorROI> implements ILoc
 			calcBox(croi, true);
 		}
 
-		public void dispose() {
-			for (IFigure f : handles) {
-				((SelectionHandle) f).removeMouseListeners();
-			}
-			for (FigureTranslator t : fTranslators) {
-				t.removeTranslationListeners();
-			}
-			removeFigureListener(moveListener);
-		}
-
-		/**
-		 * Set up sector according to clicks
-		 * @param points
-		 */
+		@Override
 		public void setup(PointList points) {
 			final Point cen = points.getFirstPoint();
 			double[] pc = cs.getPositionValue(cen.x(), cen.y());
@@ -377,81 +273,7 @@ class SectorSelection extends AbstractSelectionRegion<SectorROI> implements ILoc
 
 		@Override
 		public void setCoordinateSystem(ICoordinateSystem system) {
-		}
-
-		@Override
-		public boolean containsPoint(int x, int y) {
-			if (croi == null)
-				return super.containsPoint(x, y);
-			return croi.containsPoint(cs.getPositionValue(x, y));
-		}
-
-		public void setMobile(boolean mobile) {
-			if (isMobile == mobile)
-				return;
-			isMobile = mobile;
-		
-			for (FigureTranslator f : fTranslators) {
-				f.setActive(mobile);
-			}
-			
-			if (mobile) {
-				setOpaque(true);
-				setCursor(Draw2DUtils.getRoiMoveCursor());
-				addFigureListener(moveListener);
-			} else {
-				setOpaque(false);
-				setCursor(null);
-				removeFigureListener(moveListener);
-			}
-			parent.revalidate();
-		}
-
-		@Override
-		public void setVisible(boolean visible) {
-			super.setVisible(visible);
-			for (IFigure h : handles) {
-				if (isMobile && visible && !h.isVisible())
-					h.setVisible(true);
-			}
-		}
-
-		private void configureHandles() {
-			boolean mobile = isMobile();
-			boolean visible = isVisible() && mobile;
-			// handles
-			FigureTranslator mover;
-			final int imax = roiHandler.size();
-			for (int i = 0; i < imax; i++) {
-				double[] hpt = roiHandler.getAnchorPoint(i, SIDE);
-				roiHandler.set(i, i);
-				
-				int[] p = coords.getValuePosition(hpt);
-				RectangularHandle h = new RectangularHandle(coords, getRegionColor(), this, SIDE, p[0], p[1]);
-				h.setVisible(visible);
-				parent.add(h);
-				mover = new FigureTranslator(getXyGraph(), h);
-				mover.setActive(mobile);
-				mover.addTranslationListener(handleListener);
-				fTranslators.add(mover);
-				h.addFigureListener(moveListener);
-				handles.add(h);
-			}
-
-			addFigureListener(moveListener);
-			mover = new FigureTranslator(getXyGraph(), parent, this, handles) {
-				public void mouseDragged(MouseEvent event) {
-					if (!isCentreMovable) return;
-					super.mouseDragged(event);
-				}
-			};
-			mover.setActive(mobile);
-			mover.addTranslationListener(createRegionNotifier());
-			fTranslators.add(mover);
-			setRegionObjects(this, handles);
-			Rectangle b = getBounds();
-			if (b != null)
-				setBounds(b);
+			cs = system;
 		}
 
 		@Override
@@ -495,130 +317,8 @@ class SectorSelection extends AbstractSelectionRegion<SectorROI> implements ILoc
 			graphics.popState();
 		}
 
-		private TranslationListener createRegionNotifier() {
-			return new TranslationListener() {
-				@Override
-				public void translateBefore(TranslationEvent evt) {
-				}
-
-				@Override
-				public void translationAfter(TranslationEvent evt) {
-					updateBounds();
-					fireROIDragged(createROI(false), ROIEvent.DRAG_TYPE.TRANSLATE);
-				}
-
-				@Override
-				public void translationCompleted(TranslationEvent evt) {
-					fireROIChanged(createROI(true));
-					roiHandler.setROI(roi);
-					fireROISelection();
-				}
-
-				@Override
-				public void onActivate(TranslationEvent evt) {
-				}
-			};
-		}
-
-		private TranslationListener createHandleNotifier() {
-			return new TranslationListener() {
-				private double[] spt;
-
-				@Override
-				public void onActivate(TranslationEvent evt) {
-					Object src = evt.getSource();
-					if (src instanceof FigureTranslator) {
-						final FigureTranslator translator = (FigureTranslator) src;
-						Point start = translator.getStartLocation();
-						spt = coords.getPositionValue(start.x(), start.y());
-						final IFigure handle = translator.getRedrawFigure();
-						final int h = handles.indexOf(handle);
-						HandleStatus status = HandleStatus.RESIZE;
-						if (h == (roiHandler.size()-1)) {
-							status = HandleStatus.CMOVE;
-						} else if (h == 4) {
-							status = HandleStatus.RMOVE;
-						}
-						roiHandler.configureDragging(h, status);
-					}
-				}
-
-				@Override
-				public void translateBefore(TranslationEvent evt) {
-				}
-
-				@Override
-				public void translationAfter(TranslationEvent evt) {
-					Object src = evt.getSource();
-					if (src instanceof FigureTranslator) {
-						final FigureTranslator translator = (FigureTranslator) src;
-						Point end = translator.getEndLocation();
-						
-						if (end==null) return;
-						double[] c = coords.getPositionValue(end.x(), end.y());
-
-						troi = (SectorROI)roiHandler.interpretMouseDragging(spt, c);
-
-						intUpdateFromROI(troi);
-						fireROIDragged(troi, roiHandler.getStatus() == HandleStatus.RESIZE ?
-								ROIEvent.DRAG_TYPE.RESIZE : ROIEvent.DRAG_TYPE.TRANSLATE);
-					}
-				}
-
-				@Override
-				public void translationCompleted(TranslationEvent evt) {
-					Object src = evt.getSource();
-					if (src instanceof FigureTranslator) {
-						troi = null;
-						final FigureTranslator translator = (FigureTranslator) src;
-						Point end = translator.getEndLocation();
-
-						double[] c = coords.getPositionValue(end.x(), end.y());
-
-						SectorROI croi = (SectorROI)roiHandler.interpretMouseDragging(spt, c);
-
-						updateFromROI(croi);
-						roiHandler.unconfigureDragging();
-						roi = croi;
-
-						fireROIChanged(croi);
-						fireROISelection();
-					}
-				}
-			};
-		}
-
-		/**
-		 * Update selection according to centre handle
-		 */
-		private Rectangle updateFromHandles() {
-			if (handles.size() > 0) {
-				IFigure f = handles.get(roiHandler.size() - 1);
-				if (f instanceof SelectionHandle) {
-					SelectionHandle h = (SelectionHandle) f;
-					setCentre(h.getSelectionPoint());
-				}
-			}
-			return getBounds();
-		}
-
 		@Override
-		public Rectangle getBounds() {
-			if (getROI() != null && dirty)
-				calcBox(getROI(), false);
-			dirty = false;
-			Rectangle b = bnds == null ? super.getBounds() : new Rectangle(bnds);
-			if (handles != null)
-				for (IFigure f : handles) {
-					if (f instanceof SelectionHandle) {
-						SelectionHandle h = (SelectionHandle) f;
-						b.union(h.getBounds());
-					}
-				}
-			return b;
-		}
-
-		private void calcBox(SectorROI proi, boolean redraw) {
+		protected void calcBox(SectorROI proi, boolean redraw) {
 			RectangularROI rroi = proi.getBounds();
 			int[] bp = cs.getValuePosition(rroi.getPointRef());
 			int[] ep = cs.getValuePosition(rroi.getEndPoint());
@@ -633,51 +333,9 @@ class SectorSelection extends AbstractSelectionRegion<SectorROI> implements ILoc
 			dirty = false;
 		}
 
-		/**
-		 * Update according to ROI
-		 * @param sroi
-		 */
-		public void updateFromROI(SectorROI sroi) {
-			croi = sroi;
-			roiHandler.setROI(sroi);
-			intUpdateFromROI(sroi);
-		}
-
-		/**
-		 * Update according to ROI
-		 * @param sroi
-		 */
-		private void intUpdateFromROI(SectorROI sroi) {
-			int imax = handles.size();
-			if (imax != roiHandler.size()) {
-				configureHandles();
-			} else {
-				SectorROIHandler handler = new SectorROIHandler(sroi);
-				for (int i = 0; i < imax; i++) {
-					double[] hpt = handler.getAnchorPoint(i, SIDE);
-					SelectionHandle handle = (SelectionHandle) handles.get(i);
-					int[] pnt  = coords.getValuePosition(hpt);
-					handle.setSelectionPoint(new PrecisionPoint(pnt[0], pnt[1]));
-				}
-			}
-			dirty = true;
-			calcBox(sroi, true);
-		}
-
-		@Override
-		public IRegion getRegion() {
-			return SectorSelection.this;
-		}
-
-		@Override
-		public void setRegion(IRegion region) {
-		}
-
-		public List<FigureTranslator> getHandleTranslators() {
-			return fTranslators;
-		}
-		public List<IFigure> getHandles() {
-			return handles;
+		public void setCentreHandleMoveable(boolean moveable) {
+			fTranslators.get(0).setActive(moveable);
+			handles.get(0).setVisible(moveable);
 		}
 	}
 
@@ -689,14 +347,13 @@ class SectorSelection extends AbstractSelectionRegion<SectorROI> implements ILoc
 	@Override
 	public void setCentreMovable(boolean isCentreMovable) {
 		this.isCentreMovable = isCentreMovable;
+
 		if (isCentreMovable) {
-			sector.setCursor(Draw2DUtils.getRoiMoveCursor());
-			sector.getHandleTranslators().get(sector.getHandleTranslators().size()-1).setActive(true);
-			sector.getHandles().get(sector.getHandles().size()-1).setVisible(true);
+			shape.setCursor(Draw2DUtils.getRoiMoveCursor());
+			shape.setCentreHandleMoveable(true);
 		} else {
-			sector.setCursor(null);			
-			sector.getHandleTranslators().get(sector.getHandleTranslators().size()-1).setActive(false);
-			sector.getHandles().get(sector.getHandles().size()-1).setVisible(false);
+			shape.setCursor(null);			
+			shape.setCentreHandleMoveable(false);
 		}
 	}
 
