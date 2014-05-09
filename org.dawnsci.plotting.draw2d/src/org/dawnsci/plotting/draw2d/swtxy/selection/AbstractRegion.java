@@ -141,8 +141,6 @@ public abstract class AbstractRegion<T extends IROI> extends Figure implements I
 		String name = roi.getName();
 		if (name == null || name.isEmpty() || name.trim().isEmpty()) {
 			roi.setName(getName());
-		} else {
-			setName(name);
 		}
 		if (isVisible()) {
 			try {
