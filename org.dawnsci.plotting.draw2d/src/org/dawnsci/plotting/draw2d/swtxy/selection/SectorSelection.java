@@ -18,7 +18,6 @@ package org.dawnsci.plotting.draw2d.swtxy.selection;
 
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.region.ILockableRegion;
-import org.dawnsci.plotting.api.region.IRegionContainer;
 import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
 import org.dawnsci.plotting.draw2d.swtxy.util.PointFunction;
 import org.eclipse.draw2d.ColorConstants;
@@ -41,8 +40,6 @@ import uk.ac.diamond.scisoft.analysis.roi.handler.SectorROIHandler;
  * extensions unless absolutely required.
  */
 class SectorSelection extends ROISelectionRegion<SectorROI> implements ILockableRegion {
-
-	Sector shape;
 
 	SectorSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
@@ -168,7 +165,7 @@ class SectorSelection extends ROISelectionRegion<SectorROI> implements ILockable
 		return 3;
 	}
 
-	class Sector extends ROIShape<SectorROI> implements IRegionContainer, PointFunction {
+	class Sector extends ROIShape<SectorROI> implements PointFunction {
 		private PointFunction innerFunction;
 		private PointFunction outerFunction;
 
@@ -351,10 +348,10 @@ class SectorSelection extends ROISelectionRegion<SectorROI> implements ILockable
 
 		if (isCentreMovable) {
 			shape.setCursor(Draw2DUtils.getRoiMoveCursor());
-			shape.setCentreHandleMoveable(true);
+			((Sector) shape).setCentreHandleMoveable(true);
 		} else {
 			shape.setCursor(null);			
-			shape.setCentreHandleMoveable(false);
+			((Sector) shape).setCentreHandleMoveable(false);
 		}
 	}
 
