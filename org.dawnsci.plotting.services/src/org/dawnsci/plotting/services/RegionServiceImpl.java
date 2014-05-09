@@ -105,11 +105,11 @@ public class RegionServiceImpl implements IRegionService {
 				type = RegionType.BOX;
 			}
 		
-		} else if (roi instanceof SectorROI) {
-			if(roi instanceof RingROI){
-				type = RegionType.RING;
-			} else {
+		} else if (roi instanceof RingROI) {
+			if (roi instanceof SectorROI) {
 				type = RegionType.SECTOR;
+			} else {
+				type = RegionType.RING;
 			}
 		} else if (roi instanceof CircularROI) {
 			type = RegionType.CIRCLE;

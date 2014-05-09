@@ -342,13 +342,12 @@ public class ROIEditTable  {
 			ret.add(new RegionRow("Rotation (°)",      "°",     rr.getAngleDegrees(), Double.NaN));
 
 			
-		} else if (roi instanceof SectorROI) {
-			final SectorROI sr = (SectorROI)roi;
+		} else if (roi instanceof RingROI) {
+			final RingROI sr = (RingROI)roi;
 			ret.add(new RegionRow("Centre (x,y)",         "pixel", getAxis(coords, sr.getPoint())));
 			ret.add(new RegionRow("Radii (inner, outer)", "pixel", sr.getRadii()));
-			ret.add(new RegionRow("Angles (°)",           "°",     sr.getAngleDegrees(0), sr.getAngleDegrees(1)));			
-			if (roi instanceof RingROI) {
-				ret.get(2).setEnabled(false);
+			if (roi instanceof SectorROI) {
+				ret.add(new RegionRow("Angles (°)",           "°",     sr.getAngleDegrees(0), sr.getAngleDegrees(1)));			
 			}
 		} else if (roi instanceof CircularROI) {
 			final CircularROI cr = (CircularROI) roi;
@@ -473,32 +472,30 @@ public class ROIEditTable  {
 				ret = rr;
 			}
 			
-		} else if (roi instanceof SectorROI) {
-			SectorROI orig = (SectorROI)roi;
+		} else if (roi instanceof RingROI) {
+			RingROI orig = (RingROI) roi;
 			final double[] cent  = getPoint(coords, rows.get(0));
 			final double[] radii = rows.get(1).getPoint();
 
-			if (roi instanceof RingROI) {
+			if (roi instanceof SectorROI) {
+				SectorROI sr = new SectorROI(cent[0],
+						 cent[1],
+						 radii[0],
+						 radii[1],
+						 Math.toRadians(rows.get(2).getxLikeVal()),
+						 Math.toRadians(rows.get(2).getyLikeVal()),
+						 orig.getDpp(),
+						 orig.isClippingCompensation(),
+						 orig.getSymmetry());
+
+				sr.setCombineSymmetry(orig.isCombineSymmetry());
+				ret = sr;
+			} else {
 				RingROI rr = new RingROI(radii[0], radii[1]);
 
 				rr.setPoint(cent);
 				ret = rr;
-			} else {
-				SectorROI sr = new SectorROI(cent[0],
-											 cent[1],
-											 radii[0],
-											 radii[1],
-											 Math.toRadians(rows.get(2).getxLikeVal()),
-											 Math.toRadians(rows.get(2).getyLikeVal()),
-											 orig.getDpp(),
-											 orig.isClippingCompensation(),
-											 orig.getSymmetry());
-
-				sr.setCombineSymmetry(orig.isCombineSymmetry());
-				ret = sr;
 			}
-			
-			
 		} else if (roi instanceof CircularFitROI) {
 			PolylineROI pr = new PolylineROI();
 
