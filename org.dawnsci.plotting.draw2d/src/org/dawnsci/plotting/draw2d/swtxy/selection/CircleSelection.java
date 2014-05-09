@@ -16,36 +16,22 @@
 
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
-import org.dawnsci.plotting.api.region.IRegion;
-import org.dawnsci.plotting.api.region.IRegionContainer;
-import org.dawnsci.plotting.api.region.ROIEvent;
-import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
-import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationEvent;
-import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
 import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
-import org.dawnsci.plotting.draw2d.swtxy.util.PointFunction;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
-import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.Graphics;
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.Shape;
-import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
-import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 
 import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
+import uk.ac.diamond.scisoft.analysis.roi.handler.ParametricROIHandler;
 
 public class CircleSelection extends AbstractSelectionRegion<CircularROI> {
 
-	DecoratedCircle circle;
+	PRShape shape;
 
 	public CircleSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
@@ -57,24 +43,23 @@ public class CircleSelection extends AbstractSelectionRegion<CircularROI> {
 	@Override
 	public void setMobile(boolean mobile) {
 		super.setMobile(mobile);
-		if (circle != null)
-			circle.setMobile(mobile);
+		if (shape != null)
+			shape.setMobile(mobile);
 	}
 
 	@Override
 	public void createContents(Figure parent) {
-		circle = new DecoratedCircle(parent);
-		circle.setCoordinateSystem(coords);
-		circle.setCursor(Draw2DUtils.getRoiMoveCursor());
+		shape = new PRShape(parent, this);
+		shape.setCursor(Draw2DUtils.getRoiMoveCursor());
 
-		parent.add(circle);
+		parent.add(shape);
 		sync(getBean());
-		circle.setLineWidth(getLineWidth());
+		shape.setLineWidth(getLineWidth());
 	}
 
 	@Override
 	public boolean containsPoint(int x, int y) {
-		return circle.containsPoint(x, y);
+		return shape.containsPoint(x, y);
 	}
 
 	@Override
@@ -84,13 +69,14 @@ public class CircleSelection extends AbstractSelectionRegion<CircularROI> {
 
 	@Override
 	protected void updateBounds() {
-		if (circle != null) {
-			circle.updateFromHandles();
-			Rectangle b = circle.getBounds();
+		if (shape != null) {
+			Rectangle b = shape.updateFromHandles();
 			if (b != null)
-				circle.setBounds(b);
+				shape.setBounds(b);
 		}
 	}
+
+	private PRShape tempShape = null;
 
 	@Override
 	public void paintBeforeAdded(Graphics g, PointList clicks, Rectangle parentBounds) {
@@ -101,22 +87,18 @@ public class CircleSelection extends AbstractSelectionRegion<CircularROI> {
 		g.setLineWidth(2);
 		g.setForegroundColor(getRegionColor());
 		g.setAlpha(getAlpha());
-		Rectangle r = new Rectangle(clicks.getFirstPoint(), clicks.getLastPoint());
-		double ratio = coords.getAspectRatio();
-		double w = r.preciseWidth();
-		double h = r.preciseHeight()/ratio;
-		if (w < h) {
-			r.width = (int) h;
-		} else {
-			r.height = (int) (r.width * ratio);
+		if (tempShape == null) {
+			tempShape = new PRShape();
 		}
-		g.drawOval(r);
+		tempShape.setup(clicks, false);
+		
+		tempShape.outlineShape(g, parentBounds);
 	}
 
 	@Override
 	public void initialize(PointList clicks) {
-		if (circle != null) {
-			circle.setup(clicks);
+		if (shape != null) {
+			shape.setup(clicks);
 			fireROIChanged(getROI());
 		}
 	}
@@ -128,28 +110,16 @@ public class CircleSelection extends AbstractSelectionRegion<CircularROI> {
 
 	@Override
 	protected CircularROI createROI(boolean recordResult) {
-		final CircularROI croi = new CircularROI();
-		Point p = circle.getCentre();
-		croi.setPoint(coords.getPositionValue(p.x(), p.y()));
-		double r = circle.getRadius();
-		double[] v = coords.getPositionValue((int) (p.preciseX() + r), (int) (p.preciseY() + r));
-		croi.setRadius(v[0] - croi.getPointX()); // NB do not use y as aspect ratio can change(!)
-		croi.setName(getName());
-		if (roi != null) {
-			croi.setPlot(roi.isPlot());
-			// set the Region isActive flag
-			this.setActive(roi.isPlot());
-		}
 		if (recordResult) {
-			roi = croi;
+			roi = shape.croi;
 		}
-		return croi;
+		return shape.croi;
 	}
 
 	@Override
 	protected void updateRegion() {
-		if (circle != null && roi instanceof CircularROI) {
-			circle.updateFromROI((CircularROI) roi);
+		if (shape != null && roi instanceof CircularROI) {
+			shape.updateFromROI((CircularROI) roi);
 			sync(getBean());
 		}
 	}
@@ -159,349 +129,70 @@ public class CircleSelection extends AbstractSelectionRegion<CircularROI> {
 		return 2;
 	}
 
-	class DecoratedCircle extends Shape implements IRegionContainer, PointFunction {
-		private int tolerance = 2;
-		double radius = 1;
-		double cx, cy;
-		private boolean outlineOnly = true;
+	@Override
+	public void dispose() {
+		super.dispose();
+		if (shape != null) {
+			shape.dispose();
+		}
+		if (tempShape != null) {
+			tempShape.dispose();
+		}
+	}
 
-		List<IFigure> handles;
-		List<FigureTranslator> fTranslators;
-		private Figure parent;
-		private TranslationListener handleListener;
-		private FigureListener moveListener;
-		private static final int SIDE = 8;
+	class PRShape extends ParametricROIShape<CircularROI> {
 
-		public DecoratedCircle(Figure parent) {
+		public PRShape() {
 			super();
-			handles = new ArrayList<IFigure>();
-			fTranslators = new ArrayList<FigureTranslator>();
-			this.parent = parent;
+			setCoordinateSystem(coords);
+		}
+
+		public PRShape(Figure parent, AbstractSelectionRegion<CircularROI> region) {
+			super(parent, region);
 			setFill(false);
-			handleListener = createHandleNotifier();
-			moveListener = new FigureListener() {
-				@Override
-				public void figureMoved(IFigure source) {
-					DecoratedCircle.this.parent.repaint();
-				}
-			};
 		}
-
-		private ICoordinateSystem cs;
 
 		@Override
-		public void setCoordinateSystem(ICoordinateSystem system) {
-			cs = system;
+		protected ParametricROIHandler<CircularROI> createROIHandler(CircularROI roi) {
+			return new ParametricROIHandler<CircularROI>(roi, true);
 		}
 
-		public void setup(PointList corners) {
-			Rectangle r = new Rectangle(corners.getFirstPoint(), corners.getLastPoint());
-			double ratio = cs.getAspectRatio();
-			double w = r.preciseWidth();
-			double h = r.preciseHeight()/ratio;
-			if (w < h) {
-				r.width = (int) h;
-			} else {
-				r.height = (int) (r.width * ratio);
-			}
-			setRadius(0.5*r.width);
-			
-			Point c = r.getCenter();
-			setCentre(c.preciseX(), c.preciseY());
+		@Override
+		public void setup(PointList corners, boolean withHandles) {
+			final Point pa = corners.getFirstPoint();
+			final Point pc = corners.getLastPoint();
 
-			createHandles(true);
-		}
+			double[] a = cs.getValueFromPosition(pa.x(), pa.y());
+			double[] c = cs.getValueFromPosition(pc.x(), pc.y());
+			double cx = Math.min(a[0], c[0]);
+			double cy = Math.min(a[1], c[1]);
+			double rad = 0.5 * Math.min(Math.abs(a[0] - c[0]), Math.abs(a[1] - c[1]));
 
-		private void createHandles(boolean createROI) {
-			// handles
-			for (int i = 0; i < 4; i++) {
-				addHandle(getPoint(i*90));
-			}
-			addCentreHandle();
+			croi = new CircularROI(rad, cx+rad, cy+rad);
 
-			// figure move
-			addFigureListener(moveListener);
-			FigureTranslator mover = new FigureTranslator(getXyGraph(), parent, this, handles);
-			mover.setActive(isMobile());
-			mover.addTranslationListener(createRegionNotifier());
-			fTranslators.add(mover);
-
-			if (createROI)
-				createROI(true);
-
-			setRegionObjects(this, handles);
-			Rectangle b = getBounds();
-			if (b != null)
-				setBounds(b);
-		}
-
-		public void setMobile(boolean mobile) {
-			for (FigureTranslator f : fTranslators) {
-				f.setActive(mobile);
+			if (withHandles) {
+				roiHandler.setROI(createROI(true));
+				configureHandles();
 			}
 		}
 
-		private Point getPoint(double degrees) {
-			double angle = -Math.toRadians(degrees);
-			return new PrecisionPoint(radius * Math.cos(angle) + cx, radius * Math.sin(angle) * cs.getAspectRatio() + cy);
-		}
-
 		@Override
-		public Point calculatePoint(double... parameter) {
-			return getPoint(parameter[0]);
-		}
-
-		private void setCentre(double x, double y) {
-			cx = x;
-			cy = y;
-		}
-
-		private void setRadius(double r) {
-			radius = r;
-		}
-
-		private double getRadius() {
-			return radius;
-		}
-
-		private Point getCentre() {
-			return new PrecisionPoint(cx, cy);
-		}
-
-		@Override
-		protected void fillShape(Graphics graphics) {
-//			graphics.setBackgroundColor(ColorConstants.cyan);
-//			
-//			PointList points = Draw2DUtils.generateCurve(DecoratedCircle.this, 0, 360, 1, 3, Math.toRadians(1));
-//			Draw2DUtils.fillClippedPolygon(graphics, points, getParent().getBounds());
-		}
-		
-		@Override
-		protected void outlineShape(Graphics graphics) {
-			PointList points = Draw2DUtils.generateCurve(DecoratedCircle.this, 0, 360);
-			Draw2DUtils.drawClippedPolyline(graphics, points, getParent().getBounds(), true);
+		protected void outlineShape(Graphics graphics, Rectangle parentBounds) {
+			outlineShape(graphics, parentBounds, true);
 
 			if (label != null && isShowLabel()) {
 				graphics.setAlpha(192);
 				graphics.setForegroundColor(labelColour);
 				graphics.setBackgroundColor(ColorConstants.white);
 				graphics.setFont(labelFont);
-				graphics.fillString(label, getPoint(45));
+				graphics.fillString(label, getPoint(Math.PI/4));
 			}
-		}
-
-		// remove handles from parent and draw directly...
-		private void addHandle(Point p) {
-			RectangularHandle h = new RectangularHandle(cs, getRegionColor(), this, SIDE,
-					p.preciseX(), p.preciseY());
-			h.setVisible(isVisible() && isMobile());
-			parent.add(h);
-			FigureTranslator mover = new FigureTranslator(getXyGraph(), h);
-			mover.setActive(isMobile());
-			mover.addTranslationListener(handleListener);
-			fTranslators.add(mover);
-			h.addFigureListener(moveListener);
-			handles.add(h);
-		}
-
-		private void addCentreHandle() {
-			RectangularHandle h = new RectangularHandle(cs, getRegionColor(), this, SIDE, cx, cy);
-			h.setVisible(isVisible() && isMobile());
-			parent.add(h);
-			FigureTranslator mover = new FigureTranslator(getXyGraph(), h, h, handles);
-			mover.setActive(isMobile());
-			mover.addTranslationListener(createRegionNotifier());
-			fTranslators.add(mover);
-			h.addFigureListener(moveListener);
-			handles.add(h);
 		}
 
 		@Override
 		public String toString() {
-			return "CirSel: cen=" + getCentre() + ", rad=" + getRadius();
-		}
-
-		@Override
-		public void setFill(boolean b) {
-			super.setFill(b);
-			outlineOnly   = !b;
-		}
-
-		@Override
-		public boolean containsPoint(int x, int y) {
-			double r = Math.hypot(x - cx, (y - cy)/cs.getAspectRatio());
-
-			if (outlineOnly) {
-				return Math.abs(r - radius) < tolerance; 
-			}
-
-			return r <= radius;
-		}
-
-		/**
-		 * Set tolerance of hit detection of shape
-		 * @param tolerance (number of pixels between point and segment)
-		 */
-		public void setTolerance(int tolerance) {
-			this.tolerance = tolerance;
-		}
-
-		private TranslationListener createHandleNotifier() {
-			return new TranslationListener() {
-				SelectionHandle ha;
-				private boolean major;
-				private Point centre;
-
-				@Override
-				public void onActivate(TranslationEvent evt) {
-					Object src = evt.getSource();
-					if (src instanceof FigureTranslator) {
-						ha = (SelectionHandle) ((FigureTranslator) src).getRedrawFigure();
-						centre = getCentre();
-						int current = handles.indexOf(ha);
-						switch (current) {
-						case 0: case 2:
-							major = true;
-							break;
-						case 1: case 3:
-							major = false;
-							break;
-						default:
-							ha = null;
-							centre = null;
-							break;
-						}
-					}
-				}
-
-				@Override
-				public void translateBefore(TranslationEvent evt) {
-				}
-
-				@Override
-				public void translationAfter(TranslationEvent evt) {
-					Object src = evt.getSource();
-					if (src instanceof FigureTranslator) {
-						if (ha != null) {
-							Point pa = new PrecisionPoint(ha.getSelectionPoint());
-							Dimension d = pa.getDifference(centre);
-							double r = major ? Math.abs(d.preciseWidth()) : Math.abs(d.preciseHeight()/cs.getAspectRatio());
-							setRadius(r);
-							updateHandlePositions();
-						}
-						fireROIDragged(createROI(false), ROIEvent.DRAG_TYPE.RESIZE);
-					}
-				}
-
-				@Override
-				public void translationCompleted(TranslationEvent evt) {
-					Object src = evt.getSource();
-					if (src instanceof FigureTranslator) {
-						fireROIChanged(createROI(true));
-						fireROISelection();
-					}
-					ha = null;
-					centre = null;
-				}
-			};
-		}
-
-		/**
-		 * @return list of handle points (can be null)
-		 */
-		public PointList getPoints() {
-			int imax = handles.size() - 1;
-			if (imax < 0)
-				return null;
-
-			PointList pts = new PointList(imax);
-			for (int i = 0; i < imax; i++) {
-				IFigure f = handles.get(i);
-				if (f instanceof SelectionHandle) {
-					SelectionHandle h = (SelectionHandle) f;
-					pts.addPoint(h.getSelectionPoint());
-				}
-			}
-			return pts;
-		}
-
-		/**
-		 * Update selection according to centre handle
-		 */
-		private void updateFromHandles() {
-			if (handles.size() > 0) {
-				IFigure f = handles.get(handles.size() - 1);
-				if (f instanceof SelectionHandle) {
-					SelectionHandle h = (SelectionHandle) f;
-					Point p = h.getSelectionPoint();
-					setCentre(p.preciseX(), p.preciseY());
-				}
-			}
-		}
-
-		@Override
-		public Rectangle getBounds() {
-			Rectangle b = super.getBounds();
-			if (handles != null)
-				for (IFigure f : handles) {
-					if (f instanceof SelectionHandle) {
-						SelectionHandle h = (SelectionHandle) f;
-						b.union(h.getBounds());
-					}
-				}
-			return b;
-		}
-
-		/**
-		 * Update according to ROI
-		 * @param croi
-		 */
-		public void updateFromROI(CircularROI croi) {
-			final double[] xy = croi.getPointRef();
-			int[] p1 = cs.getValuePosition(xy[0], xy[1]);
-			int[] p2 = cs.getValuePosition(croi.getRadius() + xy[0], croi.getRadius() + xy[1]);
-
-			setRadius(p2[0] - p1[0]);
-
-			setCentre(p1[0], p1[1]);
-
-			updateHandlePositions();
-		}
-
-		private void updateHandlePositions() {
-			final int imax = handles.size() - 1;
-			if (imax > 0) {
-				for (int i = 0; i < imax; i++) {
-					Point np = getPoint(90 * i);
-					SelectionHandle h = (SelectionHandle) handles.get(i);
-					h.setSelectionPoint(np);
-				}
-				SelectionHandle h = (SelectionHandle) handles.get(imax);
-				h.setSelectionPoint(getCentre());
-			} else {
-				createHandles(false);
-			}
-		}
-
-		@Override
-		public IRegion getRegion() {
-			return CircleSelection.this;
-		}
-
-		@Override
-		public void setRegion(IRegion region) {
-		}
-
-		@Override
-		public double[] calculateXIntersectionParameters(int x) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public double[] calculateYIntersectionParameters(int y) {
-			// TODO Auto-generated method stub
-			return null;
+			double rad = cs.getPositionFromValue(getROI().getRadius())[0];
+			return "CirSel: cen=" + getCentre() + ", rad=" + rad;
 		}
 	}
 }
