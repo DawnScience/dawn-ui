@@ -241,7 +241,7 @@ class SectorSelection extends ROISelectionRegion<SectorROI> implements ILockable
 		}
 
 		/**
-		 * Get point on ellipse at given angle
+		 * Get point on sector at given angle
 		 * @param angle (positive for anti-clockwise)
 		 * @return
 		 */
