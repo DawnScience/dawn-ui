@@ -140,17 +140,8 @@ abstract public class ROIShape<T extends IROI> extends Shape implements IRegionC
 		for (int i = 0; i < imax; i++) {
 			double[] hpt = roiHandler.getAnchorPoint(i, SIDE);
 			double[] p = cs.getPositionFromValue(hpt);
-			RectangularHandle h = new RectangularHandle(cs, region.getRegionColor(), this, SIDE, p[0], p[1]);
-			h.setVisible(visible);
-			handles.add(h);
+			RectangularHandle h = addHandle(p[0], p[1], mobile, visible, handleListener);
 			roiHandler.set(i, handles.indexOf(h));
-			parent.add(h);
-
-			mover = new FigureTranslator(region.getXyGraph(), h);
-			mover.setActive(mobile);
-			mover.addTranslationListener(handleListener);
-			fTranslators.add(mover);
-			h.addFigureListener(moveListener);
 		}
 
 		addFigureListener(moveListener);
@@ -166,6 +157,25 @@ abstract public class ROIShape<T extends IROI> extends Shape implements IRegionC
 		Rectangle b = getBounds();
 		if (b != null)
 			setBounds(b);
+	}
+
+	protected RectangularHandle addHandle(double x, double y, boolean mobile, boolean visible, TranslationListener listener) {
+		RectangularHandle h = new RectangularHandle(cs, region.getRegionColor(), this, SIDE, x, y);
+		h.setVisible(visible);
+		parent.add(h);
+		FigureTranslator mover = new FigureTranslator(region.getXyGraph(), h);
+		mover.setActive(mobile);
+		mover.addTranslationListener(listener);
+		fTranslators.add(mover);
+		h.addFigureListener(moveListener);
+		handles.add(h);
+		return h;
+	}
+
+	protected void removeHandle(SelectionHandle h) {
+		parent.remove(h);
+		h.removeMouseListeners();
+		h.removeFigureListener(moveListener);
 	}
 
 	private TranslationListener createRegionNotifier() {
