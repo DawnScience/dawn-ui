@@ -343,11 +343,12 @@ public class ROIEditTable  {
 
 			
 		} else if (roi instanceof RingROI) {
-			final RingROI sr = (RingROI)roi;
-			ret.add(new RegionRow("Centre (x,y)",         "pixel", getAxis(coords, sr.getPoint())));
-			ret.add(new RegionRow("Radii (inner, outer)", "pixel", sr.getRadii()));
+			final RingROI rr = (RingROI)roi;
+			ret.add(new RegionRow("Centre (x,y)",         "pixel", getAxis(coords, rr.getPoint())));
+			ret.add(new RegionRow("Radii (inner, outer)", "pixel", rr.getRadii()));
 			if (roi instanceof SectorROI) {
-				ret.add(new RegionRow("Angles (°)",           "°",     sr.getAngleDegrees(0), sr.getAngleDegrees(1)));			
+				SectorROI sr = (SectorROI) rr;
+				ret.add(new RegionRow("Angles (°)",           "°", sr.getAngleDegrees(0), sr.getAngleDegrees(1)));			
 			}
 		} else if (roi instanceof CircularROI) {
 			final CircularROI cr = (CircularROI) roi;
@@ -477,18 +478,19 @@ public class ROIEditTable  {
 			final double[] cent  = getPoint(coords, rows.get(0));
 			final double[] radii = rows.get(1).getPoint();
 
-			if (roi instanceof SectorROI) {
+			if (orig instanceof SectorROI) {
+				SectorROI so = (SectorROI) orig;
 				SectorROI sr = new SectorROI(cent[0],
 						 cent[1],
 						 radii[0],
 						 radii[1],
 						 Math.toRadians(rows.get(2).getxLikeVal()),
 						 Math.toRadians(rows.get(2).getyLikeVal()),
-						 orig.getDpp(),
-						 orig.isClippingCompensation(),
-						 orig.getSymmetry());
+						 so.getDpp(),
+						 so.isClippingCompensation(),
+						 so.getSymmetry());
 
-				sr.setCombineSymmetry(orig.isCombineSymmetry());
+				sr.setCombineSymmetry(so.isCombineSymmetry());
 				ret = sr;
 			} else {
 				RingROI rr = new RingROI(radii[0], radii[1]);
