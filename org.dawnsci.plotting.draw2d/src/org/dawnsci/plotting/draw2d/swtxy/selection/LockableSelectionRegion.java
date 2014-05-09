@@ -89,9 +89,6 @@ abstract class LockableSelectionRegion<T extends IParametricROI> extends ROISele
 	@Override
 	public void dispose() {
 		super.dispose();
-		if (shape != null) {
-			shape.dispose();
-		}
 		if (tempShape != null) {
 			tempShape.dispose();
 		}
