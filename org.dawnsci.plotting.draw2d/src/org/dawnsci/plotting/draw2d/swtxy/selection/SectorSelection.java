@@ -27,6 +27,7 @@ import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
+import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 
@@ -167,8 +168,6 @@ class SectorSelection extends ROISelectionRegion<SectorROI> implements ILockable
 		return 3;
 	}
 
-	private boolean isCentreMovable=true;
-
 	class Sector extends ROIShape<SectorROI> implements IRegionContainer, PointFunction {
 		private PointFunction innerFunction;
 		private PointFunction outerFunction;
@@ -214,17 +213,17 @@ class SectorSelection extends ROISelectionRegion<SectorROI> implements ILockable
 		@Override
 		public void setup(PointList points) {
 			final Point cen = points.getFirstPoint();
-			double[] pc = cs.getPositionValue(cen.x(), cen.y());
+			double[] pc = cs.getValueFromPosition(cen.x(), cen.y());
 
 			Point inn = points.getPoint(1);
-			double[] pa = cs.getPositionValue(inn.x(), inn.y());
+			double[] pa = cs.getValueFromPosition(inn.x(), inn.y());
 			pa[0] -= pc[0];
 			pa[1] -= pc[1];
 			double as = Math.atan2(pa[1], pa[0]);
 			final double ri = Math.hypot(pa[0], pa[1]);
 
 			Point out = points.getPoint(2);
-			double[] pb = cs.getPositionValue(out.x(), out.y());
+			double[] pb = cs.getValueFromPosition(out.x(), out.y());
 			pb[0] -= pc[0];
 			pb[1] -= pc[1];
 
@@ -252,8 +251,8 @@ class SectorSelection extends ROISelectionRegion<SectorROI> implements ILockable
 			}
 			double r = sroi.getRadius(i);
 			double[] c = sroi.getPointRef();
-			int[] pt = cs.getValuePosition(c[0] + r * Math.cos(angle), c[1] + r * Math.sin(angle));
-			return new Point(pt[0], pt[1]);
+			double[] pt = cs.getPositionFromValue(c[0] + r * Math.cos(angle), c[1] + r * Math.sin(angle));
+			return new PrecisionPoint(pt[0], pt[1]);
 		}
 
 		@Override
@@ -320,13 +319,13 @@ class SectorSelection extends ROISelectionRegion<SectorROI> implements ILockable
 		@Override
 		protected void calcBox(SectorROI proi, boolean redraw) {
 			RectangularROI rroi = proi.getBounds();
-			int[] bp = cs.getValuePosition(rroi.getPointRef());
-			int[] ep = cs.getValuePosition(rroi.getEndPoint());
-			bnds = new Rectangle(new Point(bp[0], bp[1]), new Point(ep[0], ep[1]));
-			ep = cs.getValuePosition(rroi.getPoint(0, 1));
-			bnds.union(new Point(ep[0], ep[1]));
-			ep = cs.getValuePosition(rroi.getPoint(1, 0));
-			bnds.union(new Point(ep[0], ep[1]));
+			double[] bp = cs.getPositionFromValue(rroi.getPointRef());
+			double[] ep = cs.getPositionFromValue(rroi.getEndPoint());
+			bnds = new Rectangle(new PrecisionPoint(bp[0], bp[1]), new PrecisionPoint(ep[0], ep[1]));
+			ep = cs.getPositionFromValue(rroi.getPoint(0, 1));
+			bnds.union(new PrecisionPoint(ep[0], ep[1]));
+			ep = cs.getPositionFromValue(rroi.getPoint(1, 0));
+			bnds.union(new PrecisionPoint(ep[0], ep[1]));
 			if (redraw) {
 				setBounds(bnds);
 			}
@@ -338,6 +337,8 @@ class SectorSelection extends ROISelectionRegion<SectorROI> implements ILockable
 			handles.get(0).setVisible(moveable);
 		}
 	}
+
+	private boolean isCentreMovable = true;
 
 	@Override
 	public boolean isCentreMovable() {
