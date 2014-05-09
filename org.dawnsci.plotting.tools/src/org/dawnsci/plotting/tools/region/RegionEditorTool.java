@@ -52,7 +52,10 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.preference.PreferenceDialog;
+import org.eclipse.jface.resource.ColorRegistry;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
@@ -76,6 +79,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.progress.UIJob;
@@ -137,7 +141,6 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		});
 
 		traceListener = new ITraceListener() {
-			
 			@Override
 			public void tracesUpdated(TraceEvent evt) {
 			}
@@ -199,6 +202,19 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		viewer.setContentProvider(new TreeNodeContentProvider()); // Swing tree nodes
 		viewer.getTree().setLinesVisible(true);
 		viewer.getTree().setHeaderVisible(true);
+
+		Composite status = new Composite(control, SWT.NONE);
+		status.setLayoutData(new GridData(SWT.FILL, GridData.FILL, true, false));
+		status.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		status.setLayout(new GridLayout(1, true));
+		GridUtils.removeMargins(status);
+
+		ColorRegistry colorRegistry = JFaceResources.getColorRegistry();
+		final Label label = new Label(status, SWT.RIGHT);
+		label.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
+		label.setForeground(new Color(label.getDisplay(), colorRegistry.getRGB(JFacePreferences.QUALIFIER_COLOR)));
+		label.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		label.setText("* Click to change value  ");
 
 		createRegionEditorModel(true);
 		createActions();
@@ -412,8 +428,10 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 					final LabelNode regionNode = (LabelNode)sel.getFirstElement();
 					String regionName = regionNode.getLabel();
 					IRegion region = getPlottingSystem().getRegion(regionName);
-					if (region != null)
+					if (region != null) {
+						region.removeROIListener(RegionEditorTool.this);
 						getPlottingSystem().removeRegion(region);
+					}
 					model.removeRegion(regionNode);
 				}
 			}
@@ -459,15 +477,17 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		toolBarMan.add(exportRegion);
 		toolBarMan.add(new Separator());
 		toolBarMan.add(copy);
-		menuMan.add(copy);
 		toolBarMan.add(delete);
-		menuMan.add(delete);
 		toolBarMan.add(new Separator());
-		menuMan.add(new Separator());
 		toolBarMan.add(show);
-		menuMan.add(show);
 		toolBarMan.add(clear);
+
+		menuMan.add(copy);
+		menuMan.add(delete);
+		menuMan.add(new Separator());
+		menuMan.add(show);
 		menuMan.add(clear);
+		menuMan.add(new Separator());
 		menuMan.add(preferences);
 		createRightClickMenu();
 	}
@@ -630,7 +650,7 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			region.getROI().setPlot(true);
 			// set the Region isActive flag
 			region.setActive(true);
-			model.addRegion(region);
+			model.addRegion(region, getMaxIntensity(region), getSum(region));
 			if (model.getRoot().getChildren() != null)
 				viewer.setInput(model.getRoot());
 
@@ -643,12 +663,19 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 
 	@Override
 	public void regionRemoved(RegionEvent evt) {
-		if (!isActive()) return;
-		if (viewer!=null) viewer.refresh();
-		if (evt.getRegion()!=null) {
-			evt.getRegion().removeROIListener(this);
+		if (!isActive())
+			return;
+		IRegion region = evt.getRegion();
+		if (region != null) {
+			LabelNode regionNode = (LabelNode)model.getNode("/"+region.getName());
+			if (regionNode == null)
+				return;
+			model.removeRegion(regionNode);
+			region.removeROIListener(this);
+			getPlottingSystem().removeRegion(region);
 		}
 	}
+
 	@Override
 	public void regionsRemoved(RegionEvent evt) {
 		if (!isActive()) return;
@@ -657,7 +684,7 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 	
 	@Override
 	public void roiDragged(ROIEvent evt) {
-		model.setIsDragged(true);
+		model.setRegionDragged(true);
 		viewer.cancelEditing();
 		if (!isActive()) return;
 		updateRegion(evt);
@@ -665,11 +692,13 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 
 	@Override
 	public void roiChanged(ROIEvent evt) {
-		if (!isActive()) return;
-		updateRegion(evt);
-		if((IRegion)evt.getSource() == null) return;
-		updateColorSelection((IRegion)evt.getSource());
-		model.setIsDragged(false);
+		model.setRegionDragged(false);
+		if (!model.isTreeModified()) {
+			if (!isActive()) return;
+			updateRegion(evt);
+			if((IRegion)evt.getSource() == null) return;
+			updateColorSelection((IRegion)evt.getSource());
+		}
 	}
 
 	@Override
