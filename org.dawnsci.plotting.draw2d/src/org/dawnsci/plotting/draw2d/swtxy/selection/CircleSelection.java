@@ -17,49 +17,26 @@
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
-import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.swt.SWT;
 
 import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
 import uk.ac.diamond.scisoft.analysis.roi.handler.ParametricROIHandler;
 
-public class CircleSelection extends AbstractSelectionRegion<CircularROI> {
-
-	PRShape shape;
+public class CircleSelection extends LockableSelectionRegion<CircularROI> {
 
 	public CircleSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
 		setRegionColor(ColorConstants.yellow);
-		setAlpha(80);
-		setLineWidth(2);
 	}
 
 	@Override
-	public void setMobile(boolean mobile) {
-		super.setMobile(mobile);
-		if (shape != null)
-			shape.setMobile(mobile);
-	}
-
-	@Override
-	public void createContents(Figure parent) {
-		shape = new PRShape(parent, this);
-		shape.setCursor(Draw2DUtils.getRoiMoveCursor());
-
-		parent.add(shape);
-		sync(getBean());
-		shape.setLineWidth(getLineWidth());
-	}
-
-	@Override
-	public boolean containsPoint(int x, int y) {
-		return shape.containsPoint(x, y);
+	protected ParametricROIShape<CircularROI> createShape(Figure parent) {
+		return parent == null ? new PRShape() : new PRShape(parent, this);
 	}
 
 	@Override
@@ -68,76 +45,13 @@ public class CircleSelection extends AbstractSelectionRegion<CircularROI> {
 	}
 
 	@Override
-	protected void updateBounds() {
-		if (shape != null) {
-			Rectangle b = shape.updateFromHandles();
-			if (b != null)
-				shape.setBounds(b);
-		}
-	}
-
-	private PRShape tempShape = null;
-
-	@Override
-	public void paintBeforeAdded(Graphics g, PointList clicks, Rectangle parentBounds) {
-		if (clicks.size() <= 1)
-			return;
-
-		g.setLineStyle(SWT.LINE_DOT);
-		g.setLineWidth(2);
-		g.setForegroundColor(getRegionColor());
-		g.setAlpha(getAlpha());
-		if (tempShape == null) {
-			tempShape = new PRShape();
-		}
-		tempShape.setup(clicks, false);
-		
-		tempShape.outlineShape(g, parentBounds);
-	}
-
-	@Override
-	public void initialize(PointList clicks) {
-		if (shape != null) {
-			shape.setup(clicks);
-			fireROIChanged(getROI());
-		}
-	}
-
-	@Override
 	protected String getCursorPath() {
 		return "icons/Cursor-circle.png";
 	}
 
 	@Override
-	protected CircularROI createROI(boolean recordResult) {
-		if (recordResult) {
-			roi = shape.croi;
-		}
-		return shape.croi;
-	}
-
-	@Override
-	protected void updateRegion() {
-		if (shape != null && roi instanceof CircularROI) {
-			shape.updateFromROI((CircularROI) roi);
-			sync(getBean());
-		}
-	}
-
-	@Override
 	public int getMaximumMousePresses() {
 		return 2;
-	}
-
-	@Override
-	public void dispose() {
-		super.dispose();
-		if (shape != null) {
-			shape.dispose();
-		}
-		if (tempShape != null) {
-			tempShape.dispose();
-		}
 	}
 
 	class PRShape extends ParametricROIShape<CircularROI> {
