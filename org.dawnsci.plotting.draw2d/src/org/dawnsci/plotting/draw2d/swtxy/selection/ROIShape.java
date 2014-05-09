@@ -99,7 +99,7 @@ abstract public class ROIShape<T extends IROI> extends Shape implements IRegionC
 		return croi.containsPoint(pt[0], pt[1]);
 	}
 
-	protected void calcBox(IROI proi, boolean redraw) {
+	protected void calcBox(T proi, boolean redraw) {
 		RectangularROI rroi = (RectangularROI) proi.getBounds();
 		if (rroi == null) { // unbounded shape
 			if (parent != null) {
