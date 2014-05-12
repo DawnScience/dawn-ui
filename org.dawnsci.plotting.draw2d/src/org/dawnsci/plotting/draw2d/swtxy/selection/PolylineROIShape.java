@@ -17,10 +17,12 @@
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
 import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
+import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
+import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
 
 import uk.ac.diamond.scisoft.analysis.roi.IPolylineROI;
@@ -65,6 +67,11 @@ abstract public class PolylineROIShape<T extends IPolylineROI> extends ROIShape<
 	}
 
 	@Override
+	protected TranslationListener createHandleNotifier() {
+		return region.createRegionNotifier();
+	}
+
+	@Override
 	protected void configureHandles() {
 		Rectangle b = null;
 		boolean mobile = region.isMobile();
@@ -72,7 +79,7 @@ abstract public class PolylineROIShape<T extends IPolylineROI> extends ROIShape<
 		final Point p = new Point();
 		for (int i = 0, imax = points.size(); i < imax; i++) {
 			points.getPoint(p, i);
-			Rectangle bh = addHandle(p.x, p.y(), mobile, visible);
+			Rectangle bh = addHandle(p.x, p.y(), mobile, visible, handleListener).getBounds();
 			if (b == null) {
 				b = new Rectangle(bh);
 			} else {
@@ -111,30 +118,6 @@ abstract public class PolylineROIShape<T extends IPolylineROI> extends ROIShape<
 		return b;
 	}
 
-	public void setMobile(boolean mobile) {
-		for (FigureTranslator f : fTranslators) {
-			f.setActive(mobile);
-		}
-	}
-
-	private void removeHandle(SelectionHandle h) {
-		parent.remove(h);
-		h.removeMouseListeners();
-	}
-
-	private Rectangle addHandle(int x, int y, boolean mobile, boolean visible) {
-		RectangularHandle h = new RectangularHandle(cs, region.getRegionColor(), this, SIDE, x, y);
-		h.setVisible(visible);
-		parent.add(h);
-		FigureTranslator mover = new FigureTranslator(region.getXyGraph(), h);
-		mover.setActive(mobile);
-		mover.addTranslationListener(region.createRegionNotifier());
-		fTranslators.add(mover);
-		h.addFigureListener(moveListener);
-		handles.add(h);
-		return h.getBounds();
-	}
-
 	/**
 	 * Update according to ROI
 	 * @param proi
@@ -161,9 +144,9 @@ abstract public class PolylineROIShape<T extends IPolylineROI> extends ROIShape<
 			for (IROI r: proi) {
 				if (proi != croi)
 					croi.insertPoint(r);
-				int[] pnt  = cs.getValuePosition(r.getPointRef());
-				points.addPoint(pnt[0], pnt[1]);
-				Rectangle hb = addHandle(pnt[0], pnt[1], mobile, visible);
+				double[] pnt  = cs.getPositionFromValue(r.getPointRef());
+				points.addPoint((int) pnt[0], (int) pnt[1]);
+				Rectangle hb = addHandle(pnt[0], pnt[1], mobile, visible, handleListener).getBounds();
 				if (b == null) {
 					b = new Rectangle(hb);
 				} else {
@@ -181,10 +164,11 @@ abstract public class PolylineROIShape<T extends IPolylineROI> extends ROIShape<
 				IROI p = proi.getPoint(i);
 				if (proi != croi)
 					croi.setPoint(i, p);
-				int[] pnt = cs.getValuePosition(p.getPointRef());
-				points.setPoint(new Point(pnt[0], pnt[1]), i);
+				double[] pnt = cs.getPositionFromValue(p.getPointRef());
+				Point pt = new PrecisionPoint(pnt[0], pnt[1]);
+				points.setPoint(pt, i);
 				SelectionHandle h = (SelectionHandle) handles.get(i);
-				h.setSelectionPoint(new Point(pnt[0], pnt[1]));
+				h.setSelectionPoint(pt);
 				Rectangle hb = h.getBounds();
 				if (b == null) {
 					b = new Rectangle(hb);

@@ -361,6 +361,14 @@
             id="org.dawnsci.plotting.tools.DerivativeToolExternalPlot"
             label="Derivative View">
       </plotting_tool_page>
+      <plotting_tool_page
+            cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.region.editor"
+            class="org.dawnsci.plotting.tools.region.RegionEditorTool"
+            icon="icons/plot-tool-region-edit.png"
+            id="org.dawb.workbench.plotting.tools.region.tree.editor"
+            label="Region Tree Editor"
+            tooltip="A tool which manages rectangular regions.">
+      </plotting_tool_page>
    </extension>
 
   <extension

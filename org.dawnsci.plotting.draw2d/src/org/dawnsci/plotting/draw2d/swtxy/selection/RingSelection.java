@@ -1,26 +1,39 @@
+/*-
+ * Copyright 2012 Diamond Light Source Ltd.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
-import java.util.Arrays;
-
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
-import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
-import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator.LockType;
+import org.dawnsci.plotting.api.region.ILockableRegion;
 import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
+import org.dawnsci.plotting.draw2d.swtxy.util.PointFunction;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.UpdateManager;
+import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
+import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.widgets.Display;
 
+import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import uk.ac.diamond.scisoft.analysis.roi.RingROI;
-import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
+import uk.ac.diamond.scisoft.analysis.roi.handler.ROIHandler;
+import uk.ac.diamond.scisoft.analysis.roi.handler.RingROIHandler;
 
 /**
 
@@ -46,141 +59,72 @@ import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
               `"Yba,                     ,adP"'
                  `"Y8ba,             ,ad8P"'
                       ``""YYbaaadPP""''
- *         
- *     
+ *
+ *
  *    1. Center 
  *    2. Inner Radius
  *    3. Outer Radius
- *    
- *    Currently the inner radius and outer radius can only be modified programmatically.
- *     
- * @author fcp94556
+ *
+ * You should not call this concrete class outside of the draw2d extensions
+ * unless absolutely required.
  */
-class RingSelection extends AbstractSelectionRegion<RingROI> {
-		
-	private static final int SIDE      = 8;
-	
-	private SelectionHandle center;
-
-	private Figure             connection;
-	private SelectionHandle innerControl, outerControl;
-	
-	public RingSelection(String name, ICoordinateSystem coords) {
+class RingSelection extends ROISelectionRegion<RingROI> implements ILockableRegion {
+	RingSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
-		setRegionColor(ColorConstants.yellow);	
-		setAlpha(80);
-		labelColour = ColorConstants.black; 
-		labelFont = new Font(Display.getCurrent(), "Dialog", 10, SWT.BOLD);
+		setRegionColor(ColorConstants.yellow);
 	}
 
 	@Override
-	public void createContents(final Figure parent) {
-		
-		this.center = new RectangularHandle(coords, getRegionColor(), connection, SIDE, 100, 100);
-		center.setCursor(Draw2DUtils.getRoiMoveCursor());
+	protected ROIShape<RingROI> createShape(Figure parent) {
+		return new RShape(parent, this);
+	}
 
-		this.innerControl = createSelectionHandle();
-		this.outerControl = createSelectionHandle();
+	@Override
+	public RegionType getRegionType() {
+		return RegionType.RING;
+	}
 
-		this.connection = new RegionFillFigure(this) {
+	private ROIShape<RingROI> tempShape;
 
-			@Override
-			public void paintFigure(Graphics gc) {
-				//super.paintFigure(gc);
+	@Override
+	public void paintBeforeAdded(Graphics g, PointList clicks, Rectangle parentBounds) {
+		if (clicks.size() < 2)
+			return;
 
-				// We get a bound half the size of the 
-				// two rectangles and then draw a ring
-				gc.setAlpha(getAlpha());
-				
-				final Point    cen = center.getSelectionPoint();
-				final int outerRad = outerControl.getSelectionPoint().y-cen.y;
-				final int innerRad = innerControl.getSelectionPoint().y-cen.y;
+		g.setLineStyle(Graphics.LINE_DOT);
+		g.setForegroundColor(getRegionColor());
+		g.setAlpha(getAlpha());
 
-				gc.setLineWidth(outerRad-innerRad);
-				gc.setForegroundColor(getRegionColor());
-				
-				final Rectangle out = new Rectangle(new Point(cen.x-outerRad, cen.y-outerRad), new Point(cen.x+outerRad, cen.y+outerRad));
-				final Rectangle in  = new Rectangle(new Point(cen.x-innerRad, cen.y-innerRad), new Point(cen.x+innerRad, cen.y+innerRad));
-				final Point     tl  = (new Rectangle(out.getTopLeft(),     in.getTopLeft())).getCenter();
-				final Point     br  = (new Rectangle(out.getBottomRight(), in.getBottomRight())).getCenter();
-				final Rectangle mid = new Rectangle(tl, br);
-				gc.drawOval(mid); 
-				if (label != null && isShowLabel()) {
-					gc.setAlpha(255);
-					gc.setForegroundColor(labelColour);
-					gc.setFont(labelFont);
-					gc.drawText(label, new Point(cen.x + outerRad - innerRad, cen.y-outerRad));
-				}
+		final Point cen = clicks.getFirstPoint();
+		Point inn = clicks.getPoint(1);
+		Dimension rd = inn.getDifference(cen);
+		double ratio = coords.getAspectRatio();
+		double h = -rd.preciseHeight() / ratio;
+		double w = rd.preciseWidth();
+		final double ri = Math.hypot(w, h);
+		if (clicks.size() == 2) {
+			g.setLineWidth(getLineWidth());
+			g.drawOval((int) Math.round(cen.preciseX() - ri), (int) Math.round(cen.preciseY() - ri * ratio),
+					(int) Math.round(2 * ri), (int) Math.round(2 * ri * ratio));
+		} else {
+			if (tempShape == null) {
+				tempShape = createShape(null);
 			}
-
-			@Override
-			public boolean containsPoint(int x, int y) {
-				if (!super.containsPoint(x, y)) return false;
-
-				final Point    cen = center.getSelectionPoint();
-				final int outerRad = outerControl.getSelectionPoint().y-cen.y;
-				final int innerRad = innerControl.getSelectionPoint().y-cen.y;
-				double rad = cen.getDistance(Point.SINGLETON.setLocation(x, y)); 
-				return rad <= outerRad && rad > innerRad;
-			}
-		};
-
-		
-		connection.setCursor(Draw2DUtils.getRoiMoveCursor());
-		connection.setBackgroundColor(getRegionColor());
-		connection.setBounds(new Rectangle(0,0,100,100));
-		connection.setOpaque(false);
-
-		parent.add(connection);
-		parent.add(center);
-		parent.add(innerControl);
-		parent.add(outerControl);
-		
-		FigureTranslator mover = new FigureTranslator(getXyGraph(), parent, connection, Arrays.asList(new IFigure[]{center, connection, innerControl, outerControl}));
-		// Add a translation listener to be notified when the mover will translate so that
-		// we do not recompute point locations during the move.
-		mover.addTranslationListener(createRegionNotifier());
-		
-		mover= new FigureTranslator(getXyGraph(), parent, this.center, Arrays.asList(new IFigure[]{center, connection, innerControl, outerControl}));
-		mover.addTranslationListener(createRegionNotifier());
-		
-		setRegionObjects(connection, center, innerControl, outerControl);
-		sync(getBean());
-		outerControl.setForegroundColor(ColorConstants.blue);
-		innerControl.setForegroundColor(ColorConstants.red);
-	}
-	
-	@Override
-	public boolean containsPoint(int x, int y) {
-		return connection.containsPoint(x, y);
-	}
-	
-	private RectangularHandle createSelectionHandle() {
-		
-		RectangularHandle ret = new RectangularHandle(coords, getRegionColor(), connection, SIDE, 100, 100);
-		FigureTranslator trans = new FigureTranslator(getXyGraph(), ret);
-		trans.setLockedDirection(LockType.Y);
-		trans.addTranslationListener(createRegionNotifier());
-
-		return ret;
+			tempShape.setup(clicks);
+			tempShape.setLineStyle(Graphics.LINE_DOT);
+			tempShape.setLineWidth(getLineWidth());
+			tempShape.setForegroundColor(getRegionColor());
+			tempShape.setBackgroundColor(getRegionColor());
+			tempShape.paintFigure(g);
+		}
 	}
 
 	@Override
-	public void paintBeforeAdded(final Graphics gc, PointList clicks, Rectangle parentBounds) {
-		gc.setLineStyle(Graphics.LINE_DOT);
-
-		Point cen = clicks.getFirstPoint();
-		int diff = (int)Math.round(cen.getDistance(clicks.getLastPoint()));
-		Rectangle bounds = new Rectangle(new Point(cen.x-diff, cen.y-diff), new Point(cen.x+diff, cen.y+diff));
-		gc.drawOval(bounds);
-
-		gc.setLineWidth(diff/4);
-		diff = Math.round(0.875f*diff);
-		bounds = new Rectangle(new Point(cen.x-diff, cen.y-diff), new Point(cen.x+diff, cen.y+diff));
-		gc.setLineStyle(Graphics.LINE_SOLID);
-		gc.setForegroundColor(getRegionColor());
-		gc.setAlpha(getAlpha());
-		gc.drawOval(bounds);
+	public void dispose() {
+		super.dispose();
+		if (tempShape != null) {
+			tempShape.dispose();
+		}
 	}
 
 	@Override
@@ -189,121 +133,201 @@ class RingSelection extends AbstractSelectionRegion<RingROI> {
 	}
 
 	@Override
-	public RingROI createROI(boolean recordResult) {
-		if (center!=null) {
-			final Point     cen = center.getSelectionPoint();
-			final int outerRad = outerControl.getSelectionPoint().y-cen.y;
-			final int innerRad = innerControl.getSelectionPoint().y-cen.y;
-
-			final Rectangle out = new Rectangle(new Point(cen.x+outerRad, cen.y+outerRad), new Point(cen.x-outerRad, cen.y-outerRad));
-			final Rectangle in  = new Rectangle(new Point(cen.x+innerRad, cen.y+innerRad), new Point(cen.x-innerRad, cen.y-innerRad));
-			
-			double[] rcen = coords.getPositionValue(cen.x,cen.y);
-			double cenY   = rcen[1];
-			double inRad  = coords.getPositionValue(0,in.getTop().y)[1]-cenY;
-			double outRad = coords.getPositionValue(0,out.getTop().y)[1]-cenY;
-			if (inRad < 0)
-				inRad = -inRad;
-			if (outRad < 0)
-				outRad = -outRad;
-
-			final RingROI sroi = new RingROI(inRad, outRad);
-			sroi.setName(getName());
-			sroi.setPoint(rcen);
-			if (roi != null) {
-				sroi.setPlot(roi.isPlot());
-				// set the Region isActive flag
-				this.setActive(roi.isPlot());
-			}
-			if (recordResult)
-				roi = sroi;
-			return sroi;
-		}
-		return super.getROI();
-	}
-
-	@Override
-	protected void updateRegion() {
-		if (center != null && roi instanceof SectorROI) {
-			SectorROI sroi = (SectorROI) roi;
-			center.setPosition(sroi.getPointRef());
-			double y = sroi.getPointY();
-			int[] cen = coords.getValuePosition(sroi.getPoint());
-			
-			int innerRad = coords.getValuePosition(0,y+sroi.getRadius(0))[1]-cen[1];
-			int outerRad = coords.getValuePosition(0,y+sroi.getRadius(1))[1]-cen[1];
-			setControlPositions(innerRad, outerRad);
-			updateBounds();
-			sync(getBean());
-		}
-	}
-
-	private void setControlPositions(int innerRad, int outerRad) {
-		final Point cen = center.getSelectionPoint();
-		innerControl.setSelectionPoint(new Point(cen.x, cen.y+innerRad));
-		outerControl.setSelectionPoint(new Point(cen.x, cen.y+outerRad));
-	}
-
-	/**
-	 * Sets the local in local coordinates
-	 * @param bounds
-	 */
-	@Override
-	public void initialize(PointList clicks) {
-		Point cen = clicks.getFirstPoint();
-
-		int diff = (int)Math.round(cen.getDistance(clicks.getLastPoint()));
-		if (center!=null)   {
-			center.setSelectionPoint(cen);
-			
-			int outerRad = diff;
-			int innerRad = Math.round(0.75f * diff);
-			setControlPositions(innerRad, outerRad);
-		}
-		
-		updateBounds();
-		fireROIChanged(createROI(true));
-	}
-
-	@Override
-	protected void updateBounds() {
-		if (connection==null) return;
-		final Point     cen = center.getSelectionPoint();
-		final int outerRad  = outerControl.getSelectionPoint().y;
-		final int innerRad  = innerControl.getSelectionPoint().y;
-		
-		// this maths looks wrong but it passes the unit test and human usage:
-		int diff      = Math.round(1.1f*((Math.max(outerRad, innerRad)-cen.y)));
-		Rectangle out = new Rectangle(new Point(cen.x-diff, cen.y-diff), new Point(cen.x+diff, cen.y+diff));
-		diff          = Math.round(1.1f*((Math.min(outerRad, innerRad)-cen.y)));
-		out.union(new Rectangle(new Point(cen.x-diff, cen.y-diff), new Point(cen.x+diff, cen.y+diff)));
-
-		UpdateManager updateMgr = null;
-		try {
-			updateMgr = connection.getParent()!=null
-	                  ? connection.getParent().getUpdateManager()
-	                  : connection.getUpdateManager();
-		} catch (Throwable ignored) {
-			// We intentionally allow the code to continue without the UpdateManager
-		}
-
-		connection.setBounds(out);
-		if (updateMgr!=null) updateMgr.addDirtyRegion(connection, out);
-	}
-	
-	@Override
-	public RegionType getRegionType() {
-		return RegionType.RING;
-	}
-
-	@Override
 	public int getMaximumMousePresses() {
-		return 2;
+		return 3;
+	}
+
+	class RShape extends ROIShape<RingROI> implements PointFunction {
+		private PointFunction innerFunction;
+		private PointFunction outerFunction;
+
+		public RShape() {
+			super();
+		}
+
+		public RShape(Figure parent, RingSelection sectorSelection) {
+			super(parent, sectorSelection);
+			setBackgroundColor(getRegionColor());
+
+			innerFunction = new PointFunction.Stub() {
+				@Override
+				public Point calculatePoint(double... parameter) {
+					return RShape.this.getPoint(parameter[0], 0);
+				}
+			};
+
+			outerFunction = new PointFunction.Stub() {
+				@Override
+				public Point calculatePoint(double... parameter) {
+					return RShape.this.getPoint(parameter[0], 1);
+				}
+			};
+		}
+
+		@Override
+		protected ROIHandler<RingROI> createROIHandler(RingROI roi) {
+			return new RingROIHandler(roi);
+		}
+
+		public void setCentre(Point nc) {
+			double[] pt = cs.getValueFromPosition(nc.x(), nc.y());
+			double[] pc = croi.getPointRef();
+			pt[0] -= pc[0];
+			pt[1] -= pc[1];
+			croi.addPoint(pt);
+			dirty = true;
+			calcBox(croi, true);
+		}
+
+		@Override
+		public void setup(PointList points) {
+			final Point cen = points.getFirstPoint();
+			double[] pc = cs.getValueFromPosition(cen.x(), cen.y());
+
+			Point inn = points.getPoint(1);
+			double[] pa = cs.getValueFromPosition(inn.x(), inn.y());
+			pa[0] -= pc[0];
+			pa[1] -= pc[1];
+			final double ri = Math.hypot(pa[0], pa[1]);
+
+			Point out = points.getPoint(2);
+			double[] pb = cs.getValueFromPosition(out.x(), out.y());
+			pb[0] -= pc[0];
+			pb[1] -= pc[1];
+
+			final double ro = Math.hypot(pb[0], pb[1]);
+			croi = new RingROI(pc[0], pc[1], ri, ro);
+
+			if (parent == null) { // for last click rendering
+				return;
+			}
+			roiHandler.setROI(createROI(true));
+			configureHandles();
+		}
+
+		/**
+		 * Get point on ring at given angle
+		 * 
+		 * @param angle
+		 *            (positive for anti-clockwise)
+		 * @return
+		 */
+		public Point getPoint(double angle, int i) {
+			RingROI sroi = getROI();
+			if (sroi == null) {
+				return null;
+			}
+			double r = sroi.getRadius(i);
+			double[] c = sroi.getPointRef();
+			double[] pt = cs.getPositionFromValue(c[0] + r * Math.cos(angle), c[1] + r * Math.sin(angle));
+			return new PrecisionPoint(pt[0], pt[1]);
+		}
+
+		@Override
+		public Point calculatePoint(double... parameter) {
+			return null;
+		}
+
+		@Override
+		public double[] calculateXIntersectionParameters(int x) {
+			return null;
+		}
+
+		@Override
+		public double[] calculateYIntersectionParameters(int y) {
+			return null;
+		}
+
+		@Override
+		public void setCoordinateSystem(ICoordinateSystem system) {
+			cs = system;
+		}
+
+		@Override
+		protected void fillShape(Graphics graphics) {
+			graphics.pushState();
+			graphics.setAdvanced(true);
+			graphics.setAntialias(SWT.ON);
+
+			fillRing(graphics);
+			graphics.popState();
+		}
+
+		private final static double TWO_PI = 2.0 * Math.PI;
+
+		private void fillRing(Graphics graphics) {
+			PointList points = Draw2DUtils.generateCurve(innerFunction, 0, TWO_PI);
+			PointList oPoints = Draw2DUtils.generateCurve(outerFunction, 0, TWO_PI);
+			oPoints.reverse();
+			points.addAll(oPoints);
+			graphics.fillPolygon(points);
+		}
+
+		@Override
+		protected void outlineShape(Graphics graphics) {
+			graphics.pushState();
+			graphics.setAdvanced(true);
+			graphics.setAntialias(SWT.ON);
+
+			Rectangle bnd = new Rectangle();
+			graphics.getClip(bnd);
+			PointList points = Draw2DUtils.generateCurve(innerFunction, 0, TWO_PI);
+			Draw2DUtils.drawClippedPolyline(graphics, points, bnd, true);
+
+			points = Draw2DUtils.generateCurve(outerFunction, 0, TWO_PI);
+			Draw2DUtils.drawClippedPolyline(graphics, points, bnd, true);
+			graphics.popState();
+		}
+
+		@Override
+		protected void calcBox(RingROI proi, boolean redraw) {
+			RectangularROI rroi = proi.getBounds();
+			double[] bp = cs.getPositionFromValue(rroi.getPointRef());
+			double[] ep = cs.getPositionFromValue(rroi.getEndPoint());
+			bnds = new Rectangle(new PrecisionPoint(bp[0], bp[1]), new PrecisionPoint(ep[0], ep[1]));
+			ep = cs.getPositionFromValue(rroi.getPoint(0, 1));
+			bnds.union(new PrecisionPoint(ep[0], ep[1]));
+			ep = cs.getPositionFromValue(rroi.getPoint(1, 0));
+			bnds.union(new PrecisionPoint(ep[0], ep[1]));
+			if (redraw) {
+				setBounds(bnds);
+			}
+			dirty = false;
+		}
+
+		public void setCentreHandleMoveable(boolean moveable) {
+			fTranslators.get(0).setActive(moveable);
+			handles.get(0).setVisible(moveable);
+		}
+	}
+
+	private boolean isCentreMovable = true;
+
+	@Override
+	public boolean isCentreMovable() {
+		return isCentreMovable;
 	}
 
 	@Override
-	public void setRegionColor(Color regionColor) {
-		super.setRegionColor(regionColor);
-		labelColour = regionColor;
+	public void setCentreMovable(boolean isCentreMovable) {
+		this.isCentreMovable = isCentreMovable;
+
+		if (isCentreMovable) {
+			shape.setCursor(Draw2DUtils.getRoiMoveCursor());
+			((RShape) shape).setCentreHandleMoveable(true);
+		} else {
+			shape.setCursor(null);
+			((RShape) shape).setCentreHandleMoveable(false);
+		}
+	}
+
+	@Override
+	public boolean isOuterMovable() {
+		throw new RuntimeException("Cannot call isOuterMovable on " + getClass().getName());
+	}
+
+	@Override
+	public void setOuterMovable(boolean isOuterMovable) {
+		throw new RuntimeException("Cannot call setOuterMovable on " + getClass().getName());
 	}
 }

@@ -169,23 +169,6 @@ abstract public class FitROIShape<T extends IFitROI> extends ParametricROIShapeB
 		}
 	}
 
-	private void removeHandle(SelectionHandle h) {
-		parent.remove(h);
-		h.removeMouseListeners();
-	}
-
-	private void addHandle(double x, double y, boolean mobile, boolean visible, TranslationListener listener) {
-		RectangularHandle h = new RectangularHandle(cs, region.getRegionColor(), this, SIDE, x, y);
-		h.setVisible(visible);
-		parent.add(h);
-		FigureTranslator mover = new FigureTranslator(region.getXyGraph(), h);
-		mover.setActive(mobile);
-		mover.addTranslationListener(listener);
-		fTranslators.add(mover);
-		h.addFigureListener(moveListener);
-		handles.add(h);
-	}
-
 	private void addCentreHandle(boolean mobile, boolean visible) {
 		Point c = getCentre();
 		addHandle(c.preciseX() - HALF_SIDE, c.preciseX() - HALF_SIDE, mobile, visible, createCentreNotifier());
@@ -271,7 +254,7 @@ abstract public class FitROIShape<T extends IFitROI> extends ParametricROIShapeB
 				if (puroi != proi)
 					proi.insertPoint(r);
 				double[] pnt  = cs.getPositionFromValue(r.getPointRef());
-				addHandle(pnt[0], pnt[1], mobile, visible, region.createRegionNotifier());
+				addHandle(pnt[0], pnt[1], mobile, visible, handleListener);
 			}
 			croi.setPoints(proi);
 			addCentreHandle(mobile, visible);
