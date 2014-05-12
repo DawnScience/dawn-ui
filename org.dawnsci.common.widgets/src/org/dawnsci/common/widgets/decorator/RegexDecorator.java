@@ -9,6 +9,7 @@
 package org.dawnsci.common.widgets.decorator;
 
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.swt.events.VerifyEvent;
@@ -70,6 +71,16 @@ public class RegexDecorator {
 		text.removeVerifyListener(verifyListener);
 	}
 
-
+	/**
+	 * Checks the current value against the expression to see if it
+	 * matches.
+	 * 
+	 * @return true if error.
+	 */
+    public boolean isError() {
+    	Matcher matcher = pattern.matcher(text.getText());
+    	if (matcher.matches()) return false;
+    	return true;
+    }
 
 }
