@@ -17,10 +17,10 @@ import org.dawb.common.ui.wizard.persistence.PersistenceImportWizard;
 import org.dawnsci.common.widgets.tree.ClearableFilteredTree;
 import org.dawnsci.common.widgets.tree.DelegatingProviderWithTooltip;
 import org.dawnsci.common.widgets.tree.IResettableExpansion;
-import org.dawnsci.common.widgets.tree.LabelNode;
 import org.dawnsci.common.widgets.tree.NodeFilter;
 import org.dawnsci.common.widgets.tree.NodeLabelProvider;
 import org.dawnsci.common.widgets.tree.NumericNode;
+import org.dawnsci.common.widgets.tree.RegionNode;
 import org.dawnsci.common.widgets.tree.UnitEditingSupport;
 import org.dawnsci.common.widgets.tree.ValueEditingSupport;
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
@@ -262,9 +262,9 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		public void selectionChanged(SelectionChangedEvent event) {
 
 			final IStructuredSelection sel = (IStructuredSelection) event.getSelection();
-			if (!(sel.getFirstElement() instanceof LabelNode))
+			if (!(sel.getFirstElement() instanceof RegionNode))
 				return;
-			final LabelNode regionNode = (LabelNode) sel.getFirstElement();
+			final RegionNode regionNode = (RegionNode) sel.getFirstElement();
 			IRegion region = getPlottingSystem().getRegion(regionNode.getLabel());
 			if (region == null)
 				return;
@@ -407,12 +407,12 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 				if (sel == null)
 					return;
 				Object obj = sel.getFirstElement();
-				if (!(obj instanceof LabelNode))
+				if (!(obj instanceof RegionNode))
 					return;
-				if (obj instanceof LabelNode && obj instanceof NumericNode<?>)
+				if (obj instanceof RegionNode && obj instanceof NumericNode<?>)
 					return;
 				if (obj!=null) {
-					final LabelNode regionNode = (LabelNode)sel.getFirstElement();
+					final RegionNode regionNode = (RegionNode)sel.getFirstElement();
 					String regionName = regionNode.getLabel();
 					IRegion region = getPlottingSystem().getRegion(regionName);
 					if (region != null) {
@@ -628,7 +628,7 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			return;
 		IRegion region = evt.getRegion();
 		if (region != null) {
-			LabelNode regionNode = (LabelNode)model.getNode("/"+region.getName());
+			RegionNode regionNode = (RegionNode)model.getNode("/"+region.getName());
 			if (regionNode == null)
 				return;
 			model.removeRegion(regionNode);

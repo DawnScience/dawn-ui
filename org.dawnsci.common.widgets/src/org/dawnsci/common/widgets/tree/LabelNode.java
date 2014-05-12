@@ -119,7 +119,11 @@ public class LabelNode implements TreeNode {
 	public void setLabel(String label) {
 		this.label = label;
 	}
-	
+
+	public void setParent(LabelNode parent) {
+		this.parent = parent;
+	}
+
 	public String toString() {
 		return label!=null?label:"";
 	}

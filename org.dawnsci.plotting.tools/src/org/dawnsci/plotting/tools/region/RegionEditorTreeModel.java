@@ -10,15 +10,19 @@ import java.util.Set;
 import javax.measure.quantity.Angle;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Length;
+import javax.measure.quantity.Quantity;
 import javax.measure.unit.NonSI;
+import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 import javax.swing.tree.TreeNode;
 
 import org.dawnsci.common.widgets.tree.AbstractNodeModel;
 import org.dawnsci.common.widgets.tree.AmountEvent;
 import org.dawnsci.common.widgets.tree.AmountListener;
-import org.dawnsci.common.widgets.tree.LabelNode;
 import org.dawnsci.common.widgets.tree.NumericNode;
+import org.dawnsci.common.widgets.tree.RegionNode;
+import org.dawnsci.common.widgets.tree.UnitEvent;
+import org.dawnsci.common.widgets.tree.UnitListener;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.tools.Activator;
@@ -45,7 +49,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 
 	private boolean isTreeModified = false;
 	private Collection<IRegion> regions;
-	private List<LabelNode> regionNodes = new ArrayList<LabelNode>();
+	private List<RegionNode> regionNodes = new ArrayList<RegionNode>();
 	private IPlottingSystem plottingSystem;
 
 	public RegionEditorTreeModel(IPlottingSystem plottingSystem, Collection<IRegion> regions) throws Exception {
@@ -69,14 +73,14 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		regionNodes.add(createRegion(region, maxIntensity, sum));
 	}
 
-	private LabelNode createRegion(IRegion region, double maxIntensity, double sum) {
+	private RegionNode createRegion(IRegion region, double maxIntensity, double sum) {
 		IPreferenceStore store = Activator.getPlottingPreferenceStore();
 		String pointFormat = store.getString(RegionEditorConstants.POINT_FORMAT);
 		String intensityFormat = store.getString(RegionEditorConstants.INTENSITY_FORMAT);
 		String sumFormat = store.getString(RegionEditorConstants.SUM_FORMAT);
 		double increment = getDecimal(pointFormat);
 
-		final LabelNode node = new LabelNode(region.getName(), root);
+		final RegionNode node = new RegionNode(region.getName(), root);
 		node.setTooltip(region.getLabel());
 		node.setEditable(true);
 		registerNode(node);
@@ -91,9 +95,12 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		Set<Entry<String,Double>> set = roiInfos.entrySet();
 		for (Entry<String, Double> entry : set) {
 			String key = entry.getKey();
-			if (key.contains("Angle"))
-				createAngleNode(node, entry.getKey(), true, increment, pointFormat, NonSI.DEGREE_ANGLE, entry.getValue());
-			else if (key.equals("Max Intensity"))
+			if (key.contains("Angle")) {
+				if (node.isAngleInRadian())
+					createAngleNode(node, entry.getKey(), true, increment, pointFormat, SI.RADIAN, Math.toRadians(entry.getValue()));
+				else
+					createAngleNode(node, entry.getKey(), true, increment, pointFormat, NonSI.DEGREE_ANGLE, entry.getValue());
+			} else if (key.equals("Max Intensity"))
 				createLengthNode(node, key, false, increment, intensityFormat, Dimensionless.UNIT, maxIntensity);
 			else if (key.equals("Sum"))
 				createLengthNode(node, key, false, increment, sumFormat, Dimensionless.UNIT, sum);
@@ -103,9 +110,9 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		return node;
 	}
 
-	private void createAngleNode(final LabelNode labelNode, String nodeName, boolean editable,
+	private void createAngleNode(final RegionNode labelNode, String nodeName, boolean editable,
 			double increment, String pointFormat, Unit<Angle> unit, double value) {
-		NumericNode<Angle> node = new NumericNode<Angle>(nodeName, labelNode, unit);
+		final NumericNode<Angle> node = new NumericNode<Angle>(nodeName, labelNode, unit);
 		registerNode(node);
 		node.setEditable(editable);
 		node.setValue(value, unit);
@@ -126,10 +133,22 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 					}
 				}
 			});
+			node.setUnits(NonSI.DEGREE_ANGLE, SI.RADIAN);
+			node.addUnitListener(new UnitListener() {
+				@Override
+				public void unitChanged(UnitEvent<? extends Quantity> evt) {
+					if (evt.getUnit().equals(NonSI.DEGREE_ANGLE)) {
+						labelNode.setAngleInRadian(false);
+					} else {
+						labelNode.setAngleInRadian(true);
+					}
+					viewer.refresh();
+				}
+			});
 		}
 	}
 
-	private void createLengthNode(final LabelNode labelNode, String nodeName, boolean editable,
+	private void createLengthNode(final RegionNode labelNode, String nodeName, boolean editable,
 			double increment, String pointFormat, Unit<?> unit, double value) {
 		if (unit.isCompatible(NonSI.PIXEL)) {
 			NumericNode<Length> node = new NumericNode<Length>(nodeName, labelNode, (Unit<Length>) unit);
@@ -163,7 +182,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		}
 	}
 
-	protected void setValue(LabelNode regionNode) {
+	protected void setValue(RegionNode regionNode) {
 		IRegion region = plottingSystem.getRegion(regionNode.getLabel());
 		if (region == null)
 			return;
@@ -176,7 +195,10 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 			double angle = ((NumericNode<?>)regionNode.getChildAt(4)).getDoubleValue();
 			((RectangularROI) roi).setPoint(new double[] { xStart, yStart });
 			((RectangularROI) roi).setLengths(new double[] { width, height });
-			((RectangularROI) roi).setAngledegrees(angle);
+			if (regionNode.isAngleInRadian())
+				((RectangularROI) roi).setAngle(angle);
+			else
+				((RectangularROI) roi).setAngledegrees(angle);
 		} else if (roi instanceof LinearROI) {
 			double xStart = ((NumericNode<?>)regionNode.getChildAt(0)).getDoubleValue();
 			double yStart = ((NumericNode<?>)regionNode.getChildAt(1)).getDoubleValue();
@@ -185,7 +207,10 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 			double angle = ((NumericNode<?>)regionNode.getChildAt(4)).getDoubleValue();
 			((LinearROI) roi).setPoint(new double[] { xStart, yStart });
 			((LinearROI) roi).setEndPoint(new double[] { xEnd, yEnd });
-			((LinearROI) roi).setAngledegrees(angle);
+			if (regionNode.isAngleInRadian())
+				((LinearROI) roi).setAngle(angle);
+			else
+				((LinearROI) roi).setAngledegrees(angle);
 		} else if (roi instanceof SectorROI) {
 			double xStart = ((NumericNode<?>)regionNode.getChildAt(0)).getDoubleValue();
 			double yStart = ((NumericNode<?>)regionNode.getChildAt(1)).getDoubleValue();
@@ -196,6 +221,10 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 			((SectorROI) roi).setPoint(new double[] { xStart, yStart });
 			((SectorROI) roi).setRadii(innerRadius, outerRadius);
 			((SectorROI) roi).setAnglesdegrees(new double[] {angle1, angle2});
+			if (regionNode.isAngleInRadian())
+				((SectorROI) roi).setAngles(new double[] {angle1, angle2});
+			else
+				((SectorROI) roi).setAnglesdegrees(new double[] {angle1, angle2});
 		} else if (roi instanceof RingROI) {
 			double xStart = ((NumericNode<?>)regionNode.getChildAt(0)).getDoubleValue();
 			double yStart = ((NumericNode<?>)regionNode.getChildAt(1)).getDoubleValue();
@@ -230,7 +259,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 	}
 
 	public void updateRegion(IRegion region, double maxIntensity, double sum) {
-		for (LabelNode node : regionNodes) {
+		for (RegionNode node : regionNodes) {
 			String label = node.getLabel();
 			if (label.equals(region.getName())) {
 				List<TreeNode> children = node.getChildren();
@@ -246,6 +275,8 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 						aChild.setDoubleValue(maxIntensity);
 					else if (key.equals("Sum"))
 						aChild.setDoubleValue(sum);
+					else if (key.contains("Angle") && node.isAngleInRadian())
+						aChild.setDoubleValue(Math.toRadians(entry.getValue()));
 					else
 						aChild.setDoubleValue(entry.getValue());
 					i++;
@@ -254,7 +285,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		}
 	}
 
-	public void removeRegion(LabelNode regionNode) {
+	public void removeRegion(RegionNode regionNode) {
 		int childrenNumber = root.getChildCount();
 		regionNodes.remove(regionNode);
 		root.removeChild(regionNode);
