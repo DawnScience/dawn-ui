@@ -214,7 +214,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	
 	private void createActions() {
 		
-		final Action showOptions = new Action("Show Options", Action.AS_CHECK_BOX) {
+		final Action showOptions = new Action("Show Advanced Options", Action.AS_CHECK_BOX) {
 			@Override
 			public void run() {
 				if (isChecked()) {
@@ -225,7 +225,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			}
 		};
 		
-		showOptions.setImageDescriptor(Activator.getImageDescriptor("icons/function.png"));
+		showOptions.setImageDescriptor(Activator.getImageDescriptor("icons/graduation-hat.png"));
 		
 		final MenuAction modeSelect= new MenuAction("Select Mode");
 		
