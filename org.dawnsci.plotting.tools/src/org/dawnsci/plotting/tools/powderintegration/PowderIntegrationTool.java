@@ -91,6 +91,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	SashForm sashForm;
 	TableViewer viewer;
 	PowderIntegrationModel model;
+	PowderCorrectionModel corModel;
 	IntegrationSetupWidget integratorSetup;
 	
 	public PowderIntegrationTool() {
@@ -170,8 +171,12 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
 		statusMessage.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		
+		//Call update here so we get the metadata
+		update(null);
 		Composite setupComposite = new Composite(sashForm, SWT.None);
-		integratorSetup = new IntegrationSetupWidget(setupComposite, metadata);
+		setupComposite.setLayout(new GridLayout());
+		Composite widget1 = new Composite(setupComposite, SWT.NONE);
+		integratorSetup = new IntegrationSetupWidget(widget1, metadata);
 		model = integratorSetup.getModelList().get(0);
 		integratorSetup.enableFor1D(true);
 		
@@ -179,16 +184,48 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
+				if (fullImageJob !=  null) {
+					fullImageJob.cancel();
+				}
 				update(null);
-				
 			}
 		});
 		
-		sashForm.setWeights(new int[]{60,40});
-		update(null);
+		Composite widget2 = new Composite(setupComposite, SWT.None);
+		
+		PowderCorrectionWidget pcw = new PowderCorrectionWidget(widget2);
+		
+		corModel = pcw.getModel();
+		
+		corModel.addPropertyChangeListener(new PropertyChangeListener() {
+			
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				if (fullImageJob !=  null) {
+					fullImageJob.cancel();
+					fullImageJob.clearCorrectionArray();
+				}
+				update(null);
+			}
+		});
+		
+		sashForm.setWeights(new int[]{100,0});
 	}
 	
 	private void createActions() {
+		
+		final Action showOptions = new Action("Show Options", Action.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				if (isChecked()) {
+					sashForm.setWeights(new int[]{50,50});
+				} else {
+					sashForm.setWeights(new int[]{100,0});
+				}
+			}
+		};
+		
+		showOptions.setImageDescriptor(Activator.getImageDescriptor("icons/function.png"));
 		
 		final MenuAction modeSelect= new MenuAction("Select Mode");
 		
@@ -283,18 +320,6 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 
 		};
 		
-		final MenuAction corrections= new MenuAction("Corrections");
-		final Action solidAngle = new Action("Solid Angle Correction",IAction.AS_CHECK_BOX) {
-			@Override
-			public void run() {
-				correctSolidAngle = isChecked();
-				update(null);
-			}
-
-		};
-		
-		corrections.setImageDescriptor(Activator.getImageDescriptor("icons/function.png"));
-
 		final Action clearImported = new Action("Clear imported metadata") {
 			@Override
 			public void run() {
@@ -370,16 +395,14 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		axisSelect.add(pixelAction);
 		axisSelect.setSelectedAction(qAction);
 		
-		corrections.add(solidAngle);
+		getSite().getActionBars().getToolBarManager().add(showOptions);
+		getSite().getActionBars().getMenuManager().add(showOptions);
 		
 		getSite().getActionBars().getToolBarManager().add(modeSelect);
 		getSite().getActionBars().getMenuManager().add(modeSelect);
 		
 		getSite().getActionBars().getToolBarManager().add(axisSelect);
 		getSite().getActionBars().getMenuManager().add(axisSelect);
-		
-		getSite().getActionBars().getToolBarManager().add(corrections);
-		getSite().getActionBars().getMenuManager().add(corrections);
 		
 		getSite().getActionBars().getToolBarManager().add(loadMeta);
 		getSite().getActionBars().getMenuManager().add(loadMeta);
@@ -449,10 +472,9 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		
 		fullImageJob.setAxisType(xAxis);
 		fullImageJob.setIntegrationMode(mode);
-		fullImageJob.setCorrectSolidAngle(correctSolidAngle);
 		
 		if (model != null) {
-			fullImageJob.setModel(model);
+			fullImageJob.setModels(model, corModel);
 		}
 		
 		fullImageJob.schedule();

@@ -9,6 +9,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
@@ -28,6 +30,8 @@ import uk.ac.diamond.scisoft.analysis.roi.ROIProfile.XAxis;
 
 public class PowderIntegrationJob extends Job {
 
+	private final static Logger logger = LoggerFactory.getLogger(PowderIntegrationJob.class);
+	
 	IPlottingSystem system;
 	IDiffractionMetadata md;
 	QSpace qSpace;
@@ -38,10 +42,9 @@ public class PowderIntegrationJob extends Job {
 	AbstractDataset mask;
 	AbstractDataset correction;
 	PowderIntegrationModel model;
+	PowderCorrectionModel corModel;
 	IROI roi;
 	int nBins;
-	boolean correctSolidAngle = false;
-	boolean correctPolarisation = false;
 
 	public enum IntegrationMode{NONSPLITTING,SPLITTING,SPLITTING2D,NONSPLITTING2D}
 	
@@ -82,20 +85,14 @@ public class PowderIntegrationJob extends Job {
 		return mode;
 	}
 	
-	public boolean isCorrectSolidAngle() {
-		return correctSolidAngle;
+	public void clearCorrectionArray() {
+		correction = null;
 	}
 
-	public void setCorrectSolidAngle(boolean correctSolidAngle) {
-		if (correctSolidAngle != this.correctSolidAngle) {
-			this.correctSolidAngle = correctSolidAngle;
-			correction = null;
-		}
-		
-	}
 	
-	public void setModel(PowderIntegrationModel model) {
+	public void setModels(PowderIntegrationModel model, PowderCorrectionModel corModel) {
 		this.model = model;
+		this.corModel = corModel;
 		updateIntegratorFromModel();
 	}
 	
@@ -104,8 +101,14 @@ public class PowderIntegrationJob extends Job {
 			updateIntegrator();
 		}
 		if (model != null) {
-			integrator.setRadialRange(model.getRadialRange());
-			integrator.setAzimuthalRange(model.getAzimuthalRange());
+			//clone incase they get nulled
+			
+			if (model.getRadialRange() == null) integrator.setRadialRange(null);
+			else integrator.setRadialRange(model.getRadialRange().clone());
+			
+			if (model.getAzimuthalRange() == null) integrator.setAzimuthalRange(null);
+			else integrator.setAzimuthalRange(model.getAzimuthalRange().clone());
+			
 			integrator.setNumberOfBins(model.getNumberOfPrimaryBins());
 			
 			if (integrator instanceof AbstractPixelIntegration2D) {
@@ -124,19 +127,34 @@ public class PowderIntegrationJob extends Job {
 			updateIntegratorFromModel();
 		}
 		
+		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+		
 		integrator.setMask(mask);
 //		integrator.setROI(roi);
 		integrator.setAxisType(xAxis);
+		
+		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 		
 		//all accept 2d no splitting should be fast
 		if (mode == IntegrationMode.SPLITTING2D) system.setEnabled(false);
 
 		AbstractDataset processed = applyCorrections(data);
+		
+		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+		
 		double maxd = data.max().doubleValue();
 		double max = processed.max().doubleValue();
 		max = max + 0;
 		maxd = maxd + 0;
-		final List<AbstractDataset> out = integrator.integrate(processed);
+		
+		final List<AbstractDataset> out;
+		
+		try {
+			out = integrator.integrate(processed);
+		} catch (Exception e) {
+			logger.error("Someones probably just toggling buttons to quickly, but if something looks wrong check here!");
+			return Status.CANCEL_STATUS;
+		}
 		
 		system.setEnabled(true);
 		
@@ -182,23 +200,34 @@ public class PowderIntegrationJob extends Job {
 	}
 	
 	private AbstractDataset applyCorrections(AbstractDataset data) {
-		if (!correctSolidAngle && !correctPolarisation) return data;
+		
+		if (corModel == null) return data;
+		
+		if (!corModel.isApplyPolarisationCorrection() && !corModel.isApplySolidAngleCorrection()) return data;
+		
+		AbstractDataset localRef;
 		
 		if (correction == null) {
 			correction = AbstractDataset.ones(data, AbstractDataset.FLOAT32);
 			
-			AbstractDataset tth = null;
+			//incase correction gets nulled while job is running
+			localRef = correction;
+			AbstractDataset tth = PixelIntegrationUtils.generate2ThetaArrayRadians(data.getShape(), md);
 			
-			if (correctSolidAngle) {
-				
-				tth = PixelIntegrationUtils.generate2ThetaArrayRadians(data.getShape(), md);
-				
-				PixelIntegrationUtils.solidAngleCorrection(correction,tth);
+			if (corModel.isApplySolidAngleCorrection()) {
+				PixelIntegrationUtils.solidAngleCorrection(localRef,tth);
 			}
 			
+			if (corModel.isApplyPolarisationCorrection()) {
+				AbstractDataset az = PixelIntegrationUtils.generateAzimuthalArrayRadians(data.getShape(), md);
+				az.iadd(Math.toRadians(corModel.getPolarisationAngularOffset()));
+				PixelIntegrationUtils.polarisationCorrection(localRef, tth, az, corModel.getPolarisationFactor());
+			}
+		} else {
+			localRef = correction;
 		}
 		
-		return Maths.multiply(data,correction);
+		return Maths.multiply(data,localRef);
 	}
 	
 	private void updateIntegrator() {
