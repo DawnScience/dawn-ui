@@ -59,14 +59,12 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
-import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
@@ -80,6 +78,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.progress.UIJob;
@@ -262,26 +261,14 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		@Override
 		public void selectionChanged(SelectionChangedEvent event) {
 
-			resetSelectionColor();
-
 			final IStructuredSelection sel = (IStructuredSelection) event.getSelection();
-			if (!(sel.getFirstElement() instanceof IRegion))
+			if (!(sel.getFirstElement() instanceof LabelNode))
 				return;
-			final IRegion region = (IRegion) sel.getFirstElement();
-			previousRegion = region;
-			if ((region != null) && region.isActive()) {
-				region.setRegionColor(ColorConstants.green);
-				region.setAlpha(51); // 20%
-			} else if ((region != null) && !region.isActive()){
-				region.setRegionColor(ColorConstants.gray);
-				region.setAlpha(51); // 20%
-			}
-			previousColor  = region!=null ? region.getRegionColor() : null;
-
-			if (region!=null) {
-				region.setRegionColor(ColorConstants.red);
-				region.setAlpha(51); // 20%
-			}
+			final LabelNode regionNode = (LabelNode) sel.getFirstElement();
+			IRegion region = getPlottingSystem().getRegion(regionNode.getLabel());
+			if (region == null)
+				return;
+			updateColorSelection(region);
 		}
 
 		private void resetSelectionColor() {
@@ -432,7 +419,6 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 						region.removeROIListener(RegionEditorTool.this);
 						getPlottingSystem().removeRegion(region);
 					}
-					model.removeRegion(regionNode);
 				}
 			}
 		};
@@ -497,31 +483,6 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		for (IContributionItem item : getSite().getActionBars().getMenuManager().getItems())
 			menuManager.add(item);
 		viewer.getControl().setMenu(menuManager.createContextMenu(viewer.getControl()));
-	}
-
-	@SuppressWarnings("unused")
-	private IContentProvider createActorContentProvider(final int numerOfPeaks) {
-		return new IStructuredContentProvider() {
-			@Override
-			public void dispose() {
-			}
-
-			@Override
-			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {}
-
-			@Override
-			public Object[] getElements(Object inputElement) {
-
-				if (numerOfPeaks < 0)
-					return new Integer[] { 0 };
-
-				List<Integer> indices = new ArrayList<Integer>(numerOfPeaks);
-				for (int ipeak = 0; ipeak < numerOfPeaks; ipeak++) {
-					indices.add(ipeak); // autoboxing
-				}
-				return indices.toArray(new Integer[indices.size()]);
-			}
-		};
 	}
 
 	private void createColumns(final TreeViewer viewer) {
@@ -696,8 +657,17 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		if (!model.isTreeModified()) {
 			if (!isActive()) return;
 			updateRegion(evt);
-			if((IRegion)evt.getSource() == null) return;
-			updateColorSelection((IRegion)evt.getSource());
+			IRegion region = (IRegion)evt.getSource();
+			if(region == null) return;
+			updateColorSelection(region);
+			TreeItem[] treeItems = viewer.getTree().getItems();
+			for (int i = 0; i < treeItems.length; i++) {
+				String name = treeItems[i].getText();
+				if(region.getName().equals(name)){
+					viewer.getTree().setSelection(treeItems[i]);
+					break;
+				}
+			}
 		}
 	}
 
@@ -716,14 +686,6 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 				else if (!iRegion.isActive()) iRegion.setRegionColor(ColorConstants.gray);
 			}
 		}
-//		ISelection regionItems = viewer.getSelection();
-//		for (TableItem tableItem : regionItems) {
-//			IRegion myRegion = (IRegion)tableItem.getData();
-//			if(region.getName().equals(myRegion.getName())){
-//				viewer.getTable().setSelection(tableItem);
-//				break;
-//			}
-//		}
 	}
 
 	/**
