@@ -239,11 +239,6 @@ class RingSelection extends ROISelectionRegion<RingROI> implements ILockableRegi
 		}
 
 		@Override
-		public void setCoordinateSystem(ICoordinateSystem system) {
-			cs = system;
-		}
-
-		@Override
 		protected void fillShape(Graphics graphics) {
 			graphics.pushState();
 			graphics.setAdvanced(true);

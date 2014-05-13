@@ -171,13 +171,13 @@ class BoxSelection extends ROISelectionRegion<RectangularROI> {
 		}
 
 		@Override
-		protected void outlineShape(Graphics g) {
-			drawRectangle(g);
+		protected void outlineShape(Graphics graphics) {
+			drawRectangle(graphics);
 		}
 
 		@Override
-		protected void fillShape(Graphics g) {
-			fillRectangle(g);
+		protected void fillShape(Graphics graphics) {
+			fillRectangle(graphics);
 		}
 	}
 }

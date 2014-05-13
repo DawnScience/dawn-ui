@@ -16,7 +16,6 @@
 
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
-import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.draw2d.swtxy.util.PointFunction;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
@@ -40,11 +39,6 @@ abstract public class ParametricROIShapeBase<T extends IParametricROI> extends R
 
 	public ParametricROIShapeBase(Figure parent, AbstractSelectionRegion<T> region) {
 		super(parent, region);
-	}
-
-	@Override
-	public void setCoordinateSystem(ICoordinateSystem system) {
-		cs = system;
 	}
 
 	@Override
