@@ -70,18 +70,18 @@ public class PolylineSelection extends ROISelectionRegion<IPolylineROI> {
 			super(parent, region);
 		}
 
-		private final static int TOLERANCE = 2;
-
 		@Override
 		protected IPolylineROI createNewROI() {
 			return new PolylineROI();
 		}
 
+		private final static int TOLERANCE = 2;
+
 		@Override
 		public boolean containsPoint(int x, int y) {
 			if (croi == null)
 				return super.containsPoint(x, y);
-			double[] pt = cs.getPositionValue(x, y);
+			double[] pt = cs.getValueFromPosition(x, y);
 			return croi.isNearOutline(pt[0], pt[1], TOLERANCE);
 		}
 

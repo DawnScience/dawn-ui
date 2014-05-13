@@ -23,6 +23,7 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.MouseEvent;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
+import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
 
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
@@ -370,10 +371,10 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 			return;
 		}
 
-		final int[] p1 = coords.getValuePosition(spt);
-		final int[] p2 = coords.getValuePosition(ept);
+		final double[] p1 = coords.getPositionFromValue(spt);
+		final double[] p2 = coords.getPositionFromValue(ept);
 
-		final Rectangle local = new Rectangle(new Point(p1[0], p1[1]), new Point(p2[0], p2[1]));
+		final Rectangle local = new Rectangle(new PrecisionPoint(p1[0], p1[1]), new PrecisionPoint(p2[0], p2[1]));
 		setLocalBounds(local, line1.getParent().getBounds());
 		updateBounds();
 	}

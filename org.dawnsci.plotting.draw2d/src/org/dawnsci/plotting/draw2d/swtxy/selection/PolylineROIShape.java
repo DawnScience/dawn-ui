@@ -59,7 +59,7 @@ abstract public class PolylineROIShape<T extends IPolylineROI> extends ROIShape<
 		final Point p = new Point();
 		for (int i = 0, imax = points.size(); i < imax; i++) {
 			points.getPoint(p, i);
-			croi.insertPoint(new PointROI(cs.getPositionValue(p.x(), p.y())));
+			croi.insertPoint(new PointROI(cs.getValueFromPosition(p.x(), p.y())));
 		}
 
 		region.createROI(true);
@@ -107,7 +107,7 @@ abstract public class PolylineROIShape<T extends IPolylineROI> extends ROIShape<
 				SelectionHandle h = (SelectionHandle) f;
 				Point pt = h.getSelectionPoint();
 				points.setPoint(pt, i);
-				croi.setPoint(i++, new PointROI(cs.getPositionValue(pt.x(), pt.y())));
+				croi.setPoint(i++, new PointROI(cs.getValueFromPosition(pt.x(), pt.y())));
 				if (b == null) {
 					b = new Rectangle(h.getBounds());
 				} else {

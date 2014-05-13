@@ -72,7 +72,7 @@ public class PointSelection extends ROISelectionRegion<PointROI> {
 			croi = new PointROI();
 
 			final Point p = points.getFirstPoint();
-			croi.setPoint(cs.getPositionValue(p.x(), p.y()));
+			croi.setPoint(cs.getValueFromPosition(p.x(), p.y()));
 
 			region.createROI(true);
 			configureHandles();

@@ -554,8 +554,8 @@ public abstract class AbstractSelectionRegion<T extends IROI> extends AbstractRe
 
 	protected RectangularROI getRoiFromRectangle(final Rectangle rect) {
 
-		double[] a1 = coords.getPositionValue(rect.x, rect.y);
-		double[] a2 = coords.getPositionValue(rect.x+rect.width, rect.y+rect.height);
+		double[] a1 = coords.getValueFromPosition(rect.x, rect.y);
+		double[] a2 = coords.getValueFromPosition(rect.x+rect.width, rect.y+rect.height);
 		if (coords.isXReversed()) reverse(a1,a2,0);
 		if (coords.isYReversed()) reverse(a1,a2,1);
 
