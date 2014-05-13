@@ -53,7 +53,6 @@ abstract public class ROIShape<T extends IROI> extends Shape implements IRegionC
 	protected ROIHandler<T> roiHandler;
 	protected TranslationListener handleListener;
 	protected FigureListener moveListener;
-	private boolean isMobile;
 	protected Rectangle bnds;
 	protected boolean dirty = true;
 	protected T croi;
@@ -286,29 +285,6 @@ abstract public class ROIShape<T extends IROI> extends Shape implements IRegionC
 		return getBounds();
 	}
 
-	@Override
-	public void setVisible(boolean visible) {
-		super.setVisible(visible);
-		for (IFigure h : handles) {
-			if (isMobile && visible && !h.isVisible())
-				h.setVisible(true);
-		}
-	}
-
-	public void setMobile(boolean mobile) {
-		if (mobile == isMobile)
-			return;
-		isMobile = mobile;
-
-		for (IFigure h : handles) {
-			if (h.isVisible() != mobile)
-				h.setVisible(mobile);
-		}
-		for (FigureTranslator f : fTranslators) {
-			f.setActive(mobile);
-		}
-	}
-
 	/**
 	 * @return list of handle points (can be null)
 	 */
@@ -363,6 +339,9 @@ abstract public class ROIShape<T extends IROI> extends Shape implements IRegionC
 	private void intUpdateFromROI(T rroi) {
 		int imax = handles.size();
 		if (imax != roiHandler.size()) {
+			for (int i = imax-1; i >= 0; i--) {
+				removeHandle((SelectionHandle) handles.remove(i));
+			}
 			configureHandles();
 		} else {
 			for (int i = 0; i < imax; i++) {
