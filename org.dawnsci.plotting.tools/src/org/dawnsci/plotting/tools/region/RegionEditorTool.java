@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.roi.data.LinearROIData;
 import org.dawb.common.ui.plot.roi.data.ROIData;
 import org.dawb.common.ui.plot.roi.data.RectangularROIData;
@@ -24,6 +25,7 @@ import org.dawnsci.common.widgets.tree.RegionNode;
 import org.dawnsci.common.widgets.tree.UnitEditingSupport;
 import org.dawnsci.common.widgets.tree.ValueEditingSupport;
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
+import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -45,6 +47,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IMenuManager;
@@ -65,6 +68,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
@@ -226,7 +230,6 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 	}
 
 	private void createRegionEditorModel(boolean force) {
-
 		if (!force && model != null)
 			return;
 		if (force && model != null) {
@@ -240,15 +243,10 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		try {
 			model = new RegionEditorTreeModel(getPlottingSystem(), regions);
 			model.setViewer(viewer);
-			model.activate();
-
 		} catch (Exception e) {
 			logger.error("Cannot create model!", e);
 			return;
 		}
-
-		model.activate();
-
 		resetExpansion();
 		getSite().setSelectionProvider(viewer);
 	}
@@ -400,6 +398,9 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		};
 		copy.setToolTipText("Copies the region values as text to clipboard which can then be pasted externally.");
 
+		final MenuAction removeRegionDropDown = new MenuAction("Delete selection region(s)");
+		removeRegionDropDown.setId(BasePlottingConstants.REMOVE_REGION);
+
 		final Action delete = new Action("Delete selected region", Activator.getImageDescriptor("icons/RegionDelete.png")) {
 			public void run() {
 				if (!isActive()) return;
@@ -467,6 +468,13 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		toolBarMan.add(new Separator());
 		toolBarMan.add(show);
 		toolBarMan.add(clear);
+
+		ActionContributionItem menu = (ActionContributionItem)getPlottingSystem().getActionBars().getToolBarManager().find(BasePlottingConstants.REMOVE_REGION);
+		MenuAction menuAction = (MenuAction) menu.getAction();
+		if (menu!=null) {
+			menuAction = (MenuAction)menu.getAction();	
+			toolBarMan.add(menuAction);
+		}
 
 		menuMan.add(copy);
 		menuMan.add(delete);
@@ -544,6 +552,11 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 					iRegion.addROIListener(this);
 				if (!isDedicatedView()) {
 					createNewRegion(false);
+				} else {
+					for (IRegion iRegion : regions) {
+						if (model != null)
+							model.addRegion(iRegion, getMaxIntensity(iRegion), getSum(iRegion));
+					}
 				}
 			} catch (Exception e) {
 				logger.error("Cannot add region listeners!", e);
@@ -642,8 +655,17 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 
 	@Override
 	public void regionsRemoved(RegionEvent evt) {
-		if (!isActive()) return;
-		if (viewer!=null) viewer.refresh();
+//		if (!isActive())
+//			return;
+		Collection<IRegion> regions = getPlottingSystem().getRegions();
+		for (IRegion region : regions) {
+			RegionNode regionNode = (RegionNode) model.getNode("/" + region.getName());
+			if (regionNode == null)
+				return;
+			model.removeRegion(regionNode);
+			region.removeROIListener(this);
+			getPlottingSystem().removeRegion(region);
+		}
 	}
 	
 	@Override

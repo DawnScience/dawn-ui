@@ -44,7 +44,6 @@ import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
  */
 public class RegionEditorTreeModel extends AbstractNodeModel {
 
-	private boolean isActive = false;
 	private boolean isRegionDragged = false;
 
 	private boolean isTreeModified = false;
@@ -58,14 +57,6 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		for (IRegion region : regions) {
 			addRegion(region, 0, 0);
 		}
-	}
-
-	public void activate() {
-		this.isActive = true;
-	}
-
-	public void deactivate() {
-		this.isActive = false;
 	}
 
 	public void addRegion(IRegion region, double maxIntensity, double sum) {
@@ -86,10 +77,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		registerNode(node);
 		node.setDefaultExpanded(true);
 
-		IROI roi = region.getROI();
-		if (roi == null)
-			return null;
-		Map<String, Double> roiInfos = roi.getROIInfos();
+		Map<String, Double> roiInfos = RegionNodeFactory.getRegionNodeInfos(region);
 		if (roiInfos == null)
 			return null;
 		Set<Entry<String,Double>> set = roiInfos.entrySet();
@@ -256,7 +244,6 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 	@Override
 	public void dispose() {
 		super.dispose();
-		deactivate();
 	}
 
 	public void updateRegion(IRegion region, double maxIntensity, double sum) {
@@ -264,9 +251,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 			String label = node.getLabel();
 			if (label.equals(region.getName())) {
 				List<TreeNode> children = node.getChildren();
-				IROI roi = region.getROI();
-				
-				Map<String, Double> roiInfos = roi.getROIInfos();
+				Map<String, Double> roiInfos = RegionNodeFactory.getRegionNodeInfos(region);
 				Set<Entry<String,Double>> set = roiInfos.entrySet();
 				int i = 0;
 				for (Entry<String, Double> entry : set) {
