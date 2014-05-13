@@ -28,17 +28,21 @@ public interface ICoordinateSystem {
 
 	
 	/**
+	 * @deprecated Use {@link #getPositionFromValue(double...)}
 	 * The position in pixels of a given value.
 	 * @param value
 	 * @return
 	 */
+	@Deprecated
 	public int[] getValuePosition(double... value);
 	
 	/**
+	 * @deprecated Use {@link #getValueFromPosition(double...)}
 	 * The value for a position in pixels.
 	 * @param position
 	 * @return
 	 */
+	@Deprecated
 	public double[] getPositionValue(int... position);
 
 	/**

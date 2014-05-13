@@ -84,7 +84,7 @@ public class PolygonSelection extends ROISelectionRegion<PolygonalROI> {
 		public boolean containsPoint(int x, int y) {
 			if (croi == null)
 				return super.containsPoint(x, y);
-			return croi.containsPoint(cs.getPositionValue(x, y));
+			return croi.containsPoint(cs.getValueFromPosition(x, y));
 		}
 
 		@Override

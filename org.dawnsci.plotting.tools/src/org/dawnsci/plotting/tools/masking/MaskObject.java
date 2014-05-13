@@ -463,8 +463,8 @@ public class MaskObject {
          */
 		public double getScreenPixelWidth(IRegion region) {
 			final int widPix = region.getLineWidth();
-			double[] s = region.getCoordinateSystem().getPositionValue(new int[]{0, 0});
-			double[] e = region.getCoordinateSystem().getPositionValue(new int[]{widPix, widPix});
+			double[] s = region.getCoordinateSystem().getValueFromPosition(new double[]{0, 0});
+			double[] e = region.getCoordinateSystem().getValueFromPosition(new double[]{widPix, widPix});
 			//return Math.pow((Math.pow(e[0]-s[0], 2)+Math.pow(e[1]-s[1], 2)), 0.5);
 			// FIXME This is not right but works for many images that we have. 
 			// Those with significantly different axis scales, it will not.

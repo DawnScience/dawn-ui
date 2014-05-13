@@ -85,6 +85,10 @@ abstract public class ROIShape<T extends IROI> extends Shape implements IRegionC
 		};
 	}
 
+	public void setCoordinateSystem(ICoordinateSystem system) {
+		cs = system;
+	}
+
 	abstract protected ROIHandler<T> createROIHandler(T roi);
 
 	abstract public void setCentre(Point nc);

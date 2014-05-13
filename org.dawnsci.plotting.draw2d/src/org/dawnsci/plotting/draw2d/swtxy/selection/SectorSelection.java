@@ -268,11 +268,6 @@ class SectorSelection extends ROISelectionRegion<SectorROI> implements ILockable
 		}
 
 		@Override
-		public void setCoordinateSystem(ICoordinateSystem system) {
-			cs = system;
-		}
-
-		@Override
 		protected void fillShape(Graphics graphics) {
 			graphics.pushState();
 			graphics.setAdvanced(true);

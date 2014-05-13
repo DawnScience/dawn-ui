@@ -22,6 +22,7 @@ import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
+import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 
@@ -96,7 +97,7 @@ class BoxSelection extends ROISelectionRegion<RectangularROI> {
 
 		@Override
 		public void setCentre(Point nc) {
-			double[] pt = cs.getPositionValue(nc.x(), nc.y());
+			double[] pt = cs.getValueFromPosition(nc.x(), nc.y());
 			double[] pc = croi.getMidPoint();
 			pt[0] -= pc[0];
 			pt[1] -= pc[1];
@@ -110,8 +111,8 @@ class BoxSelection extends ROISelectionRegion<RectangularROI> {
 			final Point pa = corners.getFirstPoint();
 			final Point pc = corners.getLastPoint();
 
-			double[] a = cs.getPositionValue(pa.x(), pa.y());
-			double[] c = cs.getPositionValue(pc.x(), pc.y());
+			double[] a = cs.getValueFromPosition(pa.x(), pa.y());
+			double[] c = cs.getValueFromPosition(pc.x(), pc.y());
 			double ox = Math.min(a[0], c[0]);
 			double oy = Math.min(a[1], c[1]);
 			double lx = Math.abs(a[0] - c[0]);
@@ -127,26 +128,26 @@ class BoxSelection extends ROISelectionRegion<RectangularROI> {
 			if (croi == null)
 				return "BoxSel: undefined";
 
-			int[] pt = cs.getValuePosition(croi.getPointRef());
-			Point start = new Point(pt[0], pt[1]);
-			int[] pta = cs.getValuePosition(0, 0);
-			int[] ptb = cs.getValuePosition(croi.getLengths());
+			double[] pt = cs.getPositionFromValue(croi.getPointRef());
+			Point start = new PrecisionPoint(pt[0], pt[1]);
+			double[] pta = cs.getPositionFromValue(0, 0);
+			double[] ptb = cs.getPositionFromValue(croi.getLengths());
 
 			return "BoxSel: start=" + start + ", major=" + (ptb[0] - pta[0]) + ", minor=" + (ptb[1] - pta[1]) + ", ang=" + croi.getAngleDegrees();
 		}
 
 		protected PointList generatePointList() {
 			PointList pl = new PointList(4);
-			int[] pt;
+			double[] pt;
 			RectangularROI proi = getROI();
-			pt = cs.getValuePosition(proi.getPointRef());
-			pl.addPoint(pt[0], pt[1]);
-			pt = cs.getValuePosition(proi.getPoint(1, 0));
-			pl.addPoint(pt[0], pt[1]);
-			pt = cs.getValuePosition(proi.getPoint(1, 1));
-			pl.addPoint(pt[0], pt[1]);
-			pt = cs.getValuePosition(proi.getPoint(0, 1));
-			pl.addPoint(pt[0], pt[1]);
+			pt = cs.getPositionFromValue(proi.getPointRef());
+			pl.addPoint((int) pt[0], (int) pt[1]);
+			pt = cs.getPositionFromValue(proi.getPoint(1, 0));
+			pl.addPoint((int) pt[0], (int) pt[1]);
+			pt = cs.getPositionFromValue(proi.getPoint(1, 1));
+			pl.addPoint((int) pt[0], (int) pt[1]);
+			pt = cs.getPositionFromValue(proi.getPoint(0, 1));
+			pl.addPoint((int) pt[0], (int) pt[1]);
 
 			return pl;
 		}
@@ -170,13 +171,13 @@ class BoxSelection extends ROISelectionRegion<RectangularROI> {
 		}
 
 		@Override
-		protected void outlineShape(Graphics g) {
-			drawRectangle(g);
+		protected void outlineShape(Graphics graphics) {
+			drawRectangle(graphics);
 		}
 
 		@Override
-		protected void fillShape(Graphics g) {
-			fillRectangle(g);
+		protected void fillShape(Graphics graphics) {
+			fillRectangle(graphics);
 		}
 	}
 }

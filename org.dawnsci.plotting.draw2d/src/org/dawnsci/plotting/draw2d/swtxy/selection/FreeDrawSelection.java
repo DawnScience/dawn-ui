@@ -7,28 +7,22 @@ import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
-import org.eclipse.draw2d.geometry.Geometry;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
+import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
 
 import uk.ac.diamond.scisoft.analysis.roi.FreeDrawROI;
-import uk.ac.diamond.scisoft.analysis.roi.IPolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
+import uk.ac.diamond.scisoft.analysis.roi.PointROI;
+import uk.ac.diamond.scisoft.analysis.roi.handler.ROIHandler;
 
 /**
  * Used for masking. This region can be transformed into the masking
  * dataset using MaskCreator (or code similar to).
- * 
- * The region bounds from this selection is a polyline region
- * bounds consisting of the 
- * 
- * @author fcp94556
  *
- */
-class FreeDrawSelection extends AbstractSelectionRegion<FreeDrawROI> {
-
-	private PointList points;
+ */public class FreeDrawSelection extends ROISelectionRegion<FreeDrawROI> {
+	protected PointList points;
 
 	public FreeDrawSelection(String name, ICoordinateSystem coords) {
 		super(name, coords);
@@ -38,26 +32,8 @@ class FreeDrawSelection extends AbstractSelectionRegion<FreeDrawROI> {
 	}
 
 	@Override
-	public void createContents(Figure parent) {
-		parent.add(this);
-		updateBounds();
-	}
-
-	@Override
-	public boolean containsPoint(int x, int y) {
-		if (!getBounds().contains(x, y)) return false;
-		return Geometry.polylineContainsPoint(points, x, y, (int)Math.round(getLineWidth()/2d));
-	}
-	
-	@Override
-	public boolean isMobile() {
-		return false; // You cannot move this figure yet...
-	}
-
-	@Override
-	public void setLineWidth(int width) {
-		super.setLineWidth(width);
-		updateBounds();
+	protected ROIShape<FreeDrawROI> createShape(Figure parent) {
+		return new Polyline(parent, this);
 	}
 
 	@Override
@@ -66,86 +42,36 @@ class FreeDrawSelection extends AbstractSelectionRegion<FreeDrawROI> {
 	}
 
 	@Override
-	protected void updateBounds() {
-		if (points==null) return;
-		final Rectangle pntBounds = points.getBounds().getCopy();
-		pntBounds.x     -=getLineWidth(); 
-		pntBounds.y     -=getLineWidth(); 
-		pntBounds.width +=2*getLineWidth(); 
-		pntBounds.height+=2*getLineWidth(); 
-		setBounds(pntBounds);
-	}
-
-	@Override
-	public void paintBeforeAdded(Graphics g, 
-			                     PointList clicks,
-			                     Rectangle parentBounds) {
-		
-		if (points==null) {
+	public void paintBeforeAdded(Graphics g, PointList clicks, Rectangle parentBounds) {
+		if (points == null) { // 
 			points = new PointList();
 			points.addPoint(clicks.getFirstPoint());
 		}
 		points.addPoint(clicks.getLastPoint());
-		
+
+		g.setLineWidth(getLineWidth());
 		g.setForegroundColor(getRegionColor());
 		g.setAlpha(getAlpha());
-		g.setLineWidth(getLineWidth());
 		g.drawPolyline(points);
 	}
-	
+
 	@Override
-	public void paintFigure(Graphics g) {
-		
-		super.paintFigure(g);
-		g.setForegroundColor(getRegionColor());
-		g.setAlpha(getAlpha());
-		g.setLineWidth(getLineWidth());
-		g.drawPolyline(points);
-		
-		g.setAlpha(255);
-		g.setForegroundColor(ColorConstants.black);
-		if (isShowPosition()) {
-			drawPointText(g, points.getFirstPoint());
-			drawPointText(g, points.getLastPoint());
-		}
-		
-		if (isShowLabel()) {
-			g.drawText(getName(), points.getMidpoint());
-		}
+	protected String getCursorPath() {
+		return "icons/Cursor-free.png";
 	}
 
-	private void drawPointText(Graphics g, Point pnt) {
-		
-		double[] loc = coords.getPositionValue(pnt.x, pnt.y);
-        final String text = getLabelPositionText(loc);
-        g.drawString(text, pnt);
-
-	}
-	
-	private NumberFormat format = new DecimalFormat("######0.00");
-	
-	protected String getLabelPositionText(double[] p) {
-		
-		if (Double.isNaN(p[0])||Double.isNaN(p[1])) return "";
-		final StringBuilder buf = new StringBuilder();
-		buf.append("(");
-		buf.append(format.format(p[0]));
-		buf.append(", ");
-		buf.append(format.format(p[1]));
-		buf.append(")");
-		return buf.toString();
+	@Override
+	public int getMaximumMousePresses() {
+		return 1;
 	}
 
 	@Override
 	public void initialize(PointList clicks) {
 		points = removeContiguousDuplicates(points);
-		updateBounds();
-		createROI(true);
-		fireROIChanged(getROI());
+		super.initialize(points);
 	}
 
 	private PointList removeContiguousDuplicates(PointList pnts) {
-		
 		PointList ret = new PointList();
 		if (pnts==null || pnts.size()<1) return pnts;
 		ret.addPoint(pnts.getPoint(0));
@@ -158,50 +84,120 @@ class FreeDrawSelection extends AbstractSelectionRegion<FreeDrawROI> {
 		return ret;
 	}
 
-	@Override
-	protected String getCursorPath() {
-		return "icons/Cursor-free.png";
+	private void drawPointText(Graphics g, Point pnt) {
+		double[] loc = coords.getValueFromPosition(pnt.x, pnt.y);
+        final String text = getLabelPositionText(loc);
+        g.drawString(text, pnt);
+	}
+	
+	private NumberFormat format = new DecimalFormat("######0.00");
+	
+	protected String getLabelPositionText(double[] p) {
+		if (Double.isNaN(p[0])||Double.isNaN(p[1])) return "";
+		final StringBuilder buf = new StringBuilder();
+		buf.append("(");
+		buf.append(format.format(p[0]));
+		buf.append(", ");
+		buf.append(format.format(p[1]));
+		buf.append(")");
+		return buf.toString();
 	}
 
-	@Override
-	protected FreeDrawROI createROI(boolean recordResult) {
-		if (points == null) return getROI();
-		
-		final FreeDrawROI proi = new FreeDrawROI();
-		proi.setName(getName());
-		for (int i = 0, imax = points.size(); i < imax; i++) {
-			final Point pnt = points.getPoint(i);
-			proi.insertPoint(i, coords.getPositionValue(pnt.x(),pnt.y()));
+	class Polyline extends ROIShape<FreeDrawROI> {
+		public Polyline(Figure parent, AbstractSelectionRegion<FreeDrawROI> region) {
+			super(parent, region);
+			setLineWidth(region.getLineWidth());
+			setAlpha(region.getAlpha());
 		}
-		if (roi != null) {
-			proi.setPlot(roi.isPlot());
-			// set the Region isActive flag
-			this.setActive(roi.isPlot());
-		}
-		if (recordResult)
-			roi = proi;
-		
-		return proi;
-	}
 
-	@Override
-	protected void updateRegion() {
-		if (roi instanceof IPolylineROI) {
-			final IPolylineROI proi = (IPolylineROI) roi;
-			if (points==null) points = new PointList();
-	        points.removeAllPoints();
-	        
-	        for (IROI p : proi) {
-	           	final int[] pix = coords.getValuePosition(p.getPoint());
-	           	points.addPoint(new Point(pix[0],pix[1]));
+		@Override
+		public void setup(PointList clicks) {
+			croi = new FreeDrawROI();
+
+			final Point p = new Point();
+			for (int i = 0, imax = points.size(); i < imax; i++) {
+				points.getPoint(p, i);
+				croi.insertPoint(new PointROI(cs.getValueFromPosition(p.x(), p.y())));
 			}
-	        updateBounds();
+
+			region.createROI(true);
+			int w = getLineWidth();
+			setBounds(points.getBounds().expand(w, w));
 		}
 
-	}
+		@Override
+		public boolean containsPoint(int x, int y) {
+			if (croi == null)
+				return super.containsPoint(x, y);
+			double[] pt = cs.getValueFromPosition(x, y);
+			return croi.isNearOutline(pt[0], pt[1], getLineWidth() / 2.);
+		}
 
-	@Override
-	public int getMaximumMousePresses() {
-		return 1;
+		@Override
+		public void updateFromROI(FreeDrawROI proi) {
+			int imax = croi == null ? 0 : croi.getNumberOfPoints();
+			if (points == null) {
+				points = new PointList(proi.getNumberOfPoints());
+			}
+			if (croi == null) {
+				croi = proi;
+			}
+
+			if (imax != proi.getNumberOfPoints()) {
+				if (proi != croi)
+					croi.removeAllPoints();
+				points.removeAllPoints();
+				for (IROI r: proi) {
+					if (proi != croi)
+						croi.insertPoint(r);
+					double[] pnt  = cs.getPositionFromValue(r.getPointRef());
+					points.addPoint((int) pnt[0], (int) pnt[1]);
+				}
+			} else {
+				for (int i = 0; i < imax; i++) {
+					IROI p = proi.getPoint(i);
+					if (proi != croi)
+						croi.setPoint(i, p);
+					double[] pnt = cs.getPositionFromValue(p.getPointRef());
+					Point pt = new PrecisionPoint(pnt[0], pnt[1]);
+					points.setPoint(pt, i);
+				}
+			}
+			int w = getLineWidth();
+			setBounds(points.getBounds().expand(w, w));
+		}
+
+		@Override
+		protected void fillShape(Graphics graphics) {
+			// do nothing
+		}
+
+		@Override
+		protected void outlineShape(Graphics graphics) {
+			graphics.setForegroundColor(getRegionColor());
+			graphics.setAlpha(getAlpha());
+			graphics.setLineWidth(getLineWidth());
+			graphics.drawPolyline(points);
+
+			graphics.setAlpha(255);
+			graphics.setForegroundColor(ColorConstants.black);
+			if (isShowPosition()) {
+				drawPointText(graphics, points.getFirstPoint());
+				drawPointText(graphics, points.getLastPoint());
+			}
+			
+			if (isShowLabel()) {
+				graphics.drawText(getName(), points.getMidpoint());
+			}
+		}
+
+		@Override
+		protected ROIHandler<FreeDrawROI> createROIHandler(FreeDrawROI roi) {
+			return null;
+		}
+
+		@Override
+		public void setCentre(Point nc) {
+		}
 	}
 }

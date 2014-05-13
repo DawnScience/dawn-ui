@@ -54,12 +54,12 @@ public class GridSelection extends BoxSelection implements IGridSelection {
 	}
 
 	protected void drawMidPoint(double x, double y, Graphics gc) {
-		int[] pnt = coords.getValuePosition(x, y);
+		double[] pnt = coords.getPositionFromValue(x, y);
 		gc.pushState();
 		gc.setAlpha(255);
 		gc.setForegroundColor(pointColor);
 		gc.setBackgroundColor(pointColor);
-		gc.fillOval(pnt[0], pnt[1], 5, 5);
+		gc.fillOval((int) pnt[0], (int) pnt[1], 5, 5);
 		gc.popState();
 	}
 	
@@ -133,15 +133,15 @@ public class GridSelection extends BoxSelection implements IGridSelection {
 		int yGrids = gridLines[1].length;
 		if (xGrids != 0 && yGrids != 0) {
 			for (int i = 0; i < xGrids; i++) {
-				int[] pnt1 = coords.getValuePosition(gridLines[0][i], spt[1]);
-				int[] pnt2 = coords.getValuePosition(gridLines[0][i], spt[1] + len[1]);
-				gc.drawLine(pnt1[0], pnt1[1], pnt2[0], pnt2[1]);
+				double[] pnt1 = coords.getPositionFromValue(gridLines[0][i], spt[1]);
+				double[] pnt2 = coords.getPositionFromValue(gridLines[0][i], spt[1] + len[1]);
+				gc.drawLine((int) pnt1[0], (int) pnt1[1], (int) pnt2[0], (int) pnt2[1]);
 			}
 			
 			for (int i = 0; i < yGrids; i++) {
-				int[] pnt1 = coords.getValuePosition(spt[0], gridLines[1][i]);
-				int[] pnt2 = coords.getValuePosition(spt[0] + len[0], gridLines[1][i]);
-				gc.drawLine(pnt1[0], pnt1[1], pnt2[0], pnt2[1]);
+				double[] pnt1 = coords.getPositionFromValue(spt[0], gridLines[1][i]);
+				double[] pnt2 = coords.getPositionFromValue(spt[0] + len[0], gridLines[1][i]);
+				gc.drawLine((int) pnt1[0], (int) pnt1[1], (int) pnt2[0], (int) pnt2[1]);
 			}
 		}
 		
