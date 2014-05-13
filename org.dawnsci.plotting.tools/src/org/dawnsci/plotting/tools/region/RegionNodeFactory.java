@@ -3,8 +3,6 @@ package org.dawnsci.plotting.tools.region;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.dawnsci.plotting.api.region.IRegion;
-
 import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
@@ -13,7 +11,7 @@ import uk.ac.diamond.scisoft.analysis.roi.RingROI;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
 /**
- * Class used to create nodes with ROI related information
+ * Class used to create nodes with
  * @author wqk87977
  *
  */
@@ -24,12 +22,10 @@ public class RegionNodeFactory {
 	 * @param region
 	 * @return a Map of key-value pairs defining a ROI
 	 */
-	public static Map<String, Double> getRegionNodeInfos(IRegion region) {
-		Map<String, Double> roiInfos = new LinkedHashMap<String, Double>();
-
-		IROI roi = region.getROI();
+	public static Map<String, Double> getRegionNodeInfos(IROI roi) {
 		if (roi == null)
 			return null;
+		Map<String, Double> roiInfos = new LinkedHashMap<String, Double>();
 		if (roi instanceof RectangularROI) {
 			roiInfos.put("X Start", ((RectangularROI)roi).getPointX());
 			roiInfos.put("Y Start", ((RectangularROI)roi).getPointY());

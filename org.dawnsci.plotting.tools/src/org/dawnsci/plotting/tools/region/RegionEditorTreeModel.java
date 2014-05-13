@@ -77,7 +77,8 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		registerNode(node);
 		node.setDefaultExpanded(true);
 
-		Map<String, Double> roiInfos = RegionNodeFactory.getRegionNodeInfos(region);
+		IROI roi = region.getROI();
+		Map<String, Double> roiInfos = RegionNodeFactory.getRegionNodeInfos(roi);
 		if (roiInfos == null)
 			return null;
 		Set<Entry<String,Double>> set = roiInfos.entrySet();
@@ -251,7 +252,8 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 			String label = node.getLabel();
 			if (label.equals(region.getName())) {
 				List<TreeNode> children = node.getChildren();
-				Map<String, Double> roiInfos = RegionNodeFactory.getRegionNodeInfos(region);
+				IROI roi = region.getROI();
+				Map<String, Double> roiInfos = RegionNodeFactory.getRegionNodeInfos(roi);
 				Set<Entry<String,Double>> set = roiInfos.entrySet();
 				int i = 0;
 				for (Entry<String, Double> entry : set) {
