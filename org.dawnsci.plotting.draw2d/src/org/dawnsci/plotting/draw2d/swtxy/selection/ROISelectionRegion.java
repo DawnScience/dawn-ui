@@ -47,13 +47,6 @@ abstract class ROISelectionRegion<T extends IROI> extends AbstractSelectionRegio
 	}
 
 	@Override
-	public void setMobile(boolean mobile) {
-		super.setMobile(mobile);
-		if (shape != null)
-			shape.setMobile(mobile);
-	}
-
-	@Override
 	public boolean containsPoint(int x, int y) {
 		return shape.containsPoint(x, y);
 	}
