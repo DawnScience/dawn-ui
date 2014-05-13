@@ -21,7 +21,8 @@ import uk.ac.diamond.scisoft.analysis.roi.handler.ROIHandler;
  * Used for masking. This region can be transformed into the masking
  * dataset using MaskCreator (or code similar to).
  *
- */public class FreeDrawSelection extends ROISelectionRegion<FreeDrawROI> {
+ */
+public class FreeDrawSelection extends ROISelectionRegion<FreeDrawROI> {
 	protected PointList points;
 
 	public FreeDrawSelection(String name, ICoordinateSystem coords) {
@@ -58,6 +59,11 @@ import uk.ac.diamond.scisoft.analysis.roi.handler.ROIHandler;
 	@Override
 	protected String getCursorPath() {
 		return "icons/Cursor-free.png";
+	}
+
+	@Override
+	public boolean isMobile() {
+		return false; // You cannot move this figure yet...
 	}
 
 	@Override
@@ -121,6 +127,7 @@ import uk.ac.diamond.scisoft.analysis.roi.handler.ROIHandler;
 			}
 
 			region.createROI(true);
+			region.setRegionObjects(this);
 			int w = getLineWidth();
 			setBounds(points.getBounds().expand(w, w));
 		}
