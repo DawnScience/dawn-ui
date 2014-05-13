@@ -24,6 +24,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -269,10 +270,11 @@ public abstract class AbstractNavigationView extends ViewPart implements ISelect
 	
 	protected void createActions() {
 		
-		final IToolBarManager man = getViewSite().getActionBars().getToolBarManager();
-		
+		final IToolBarManager man     = getViewSite().getActionBars().getToolBarManager();
+		final MenuManager     menuMan = new MenuManager();
 		
 		man.add(new Separator("breadcrumb.group"));
+		menuMan.add(new Separator("breadcrumb.group"));
 		
 		Action add = new Action("Add another breadcrumb search", Activator.getImageDescriptor("icons/ui-tooltip--plus.png")) {
 			public void run() {
@@ -280,8 +282,10 @@ public abstract class AbstractNavigationView extends ViewPart implements ISelect
 			}
 		};
 		man.add(add);
-
+		menuMan.add(add);
+		
 		man.add(new Separator("refresh.group"));
+		menuMan.add(new Separator("refresh.group"));
 
 		Action refresh = new Action("Refresh table", Activator.getImageDescriptor("icons/refresh_16x16.png")) {
 			public void run() {
@@ -299,12 +303,13 @@ public abstract class AbstractNavigationView extends ViewPart implements ISelect
 			}
 		};
 		man.add(refresh);
+		menuMan.add(refresh);
 
 		// Actions to search data collection table
 		for(INavigationDelegateMode mode : pages.keySet()) {
 			INavigationDelegate delegate = pages.get(mode);
 			if (delegate instanceof AbstractTableDelegate) {
-			    ((AbstractTableDelegate)delegate).createActions(getViewSite().getActionBars().getToolBarManager());
+			    ((AbstractTableDelegate)delegate).createActions(getViewSite().getActionBars().getToolBarManager(), menuMan);
 			}
 		}
         
@@ -312,6 +317,7 @@ public abstract class AbstractNavigationView extends ViewPart implements ISelect
 		connectionManager.createLogActions(getViewSite().getActionBars().getToolBarManager());
 		
 		man.add(new Separator("preference.group"));
+		menuMan.add(new Separator("preference.group"));
 
 		if (getPreferencePageId()!=null) {
 			Action ispyPref = new Action("Preferences... (Connection and polling)", Activator.getImageDescriptor("icons/data.gif")) {
@@ -334,6 +340,7 @@ public abstract class AbstractNavigationView extends ViewPart implements ISelect
 		};
 		
 		getViewSite().getActionBars().getMenuManager().add(prefs);
+		menuMan.add(prefs);
 
 	    man.add(new SpacerContributionItem(50));
 		
@@ -365,6 +372,7 @@ public abstract class AbstractNavigationView extends ViewPart implements ISelect
 			}
 		}
 		man.add(new Separator("tablemode.group"));
+		menuMan.add(new Separator("tablemode.group"));
 		 		
 		Activator.getDefault().getPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener() {
 			
@@ -383,6 +391,13 @@ public abstract class AbstractNavigationView extends ViewPart implements ISelect
 				}	
 			}
 		});
+
+		for(INavigationDelegateMode mode : pages.keySet()) {
+			INavigationDelegate delegate = pages.get(mode);
+			if (delegate instanceof AbstractTableDelegate) {
+			    ((AbstractTableDelegate)delegate).setMenu(menuMan);
+			}
+		}
 
 	}
 

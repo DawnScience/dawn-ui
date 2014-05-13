@@ -25,6 +25,7 @@ import org.dawnsci.breadcrumb.navigation.table.ISortableLazyContentProvider;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
@@ -483,9 +484,10 @@ public abstract class AbstractTableDelegate implements INavigationDelegate {
 	}
 
 
-	public void createActions(IContributionManager man) {
+	public void createActions(IContributionManager man, IContributionManager menuMan) {
 		
 		man.add(new Separator("search.group."+tableId));
+		menuMan.add(new Separator("search.group."+tableId));
 		
 		final List<Action> searchActions = new ArrayList<Action>(7);
 		actions.put("search.group."+tableId, searchActions);
@@ -551,6 +553,7 @@ public abstract class AbstractTableDelegate implements INavigationDelegate {
 		}
 		
 		man.add(new Separator("export.group"+tableId));
+		menuMan.add(new Separator("export.group"+tableId));
 		Action export = new ExportTableAction(tableViewer, firstColumn.allValues().length);
 		export.setId("export.group.action"+tableId);
 		actions.put("export.group"+tableId, Arrays.asList(export));
@@ -600,6 +603,11 @@ public abstract class AbstractTableDelegate implements INavigationDelegate {
 
 	public String getTableId() {
 		return tableId;
+	}
+
+
+	public void setMenu(MenuManager menuMan) {
+		tableViewer.getControl().setMenu(menuMan.createContextMenu(tableViewer.getControl()));
 	}
 
 }
