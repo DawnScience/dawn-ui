@@ -157,6 +157,24 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 		repaint();
 	}
 
+	private boolean locked = false;
+
+	public void setVisibilityLock(boolean locked) {
+		this.locked = locked;
+	}
+
+	@Override
+	public void setVisible(boolean visible) {
+		if (isVisible() == visible || locked)
+			return;
+
+		shape.setVisible(visible);
+		if (!visible) {
+			label.setVisible(false);
+		}
+		super.setVisible(visible);
+	}
+
 	public void setForegroundColor(Color fg) {
 		shape.setForegroundColor(fg);
 		super.setForegroundColor(fg);
