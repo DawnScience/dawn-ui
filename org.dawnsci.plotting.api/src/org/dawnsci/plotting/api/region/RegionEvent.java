@@ -8,6 +8,7 @@
  */
 package org.dawnsci.plotting.api.region;
 
+import java.util.Collection;
 import java.util.EventObject;
 
 /**
@@ -18,17 +19,27 @@ import java.util.EventObject;
  */
 public class RegionEvent extends EventObject {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3121767937881041584L;
+
+	private Collection<IRegion> regions;
+
 	public RegionEvent(Object source) {
 		super(source);
+	}
+	public RegionEvent(Object source, Collection<IRegion> regions) {
+		super(source);
+		this.regions = regions;
 	}
 	
 	public IRegion getRegion() {
 		return (IRegion)getSource();
 	}
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 3121767937881041584L;
+	
+	public Collection<IRegion> getRegions() {
+		return regions;
+	}
 
 }

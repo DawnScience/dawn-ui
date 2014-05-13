@@ -305,14 +305,16 @@ public class RegionArea extends PlotArea {
 		clearRegionTool();
 		if (regions==null) return;
 		
-		final Collection<String> deleted = new HashSet<String>(5);
+		final Collection<String>  deleted = new HashSet<String>(5);
+		final Collection<IRegion> removed = new HashSet<IRegion>(5);
 		for (AbstractSelectionRegion<?> region : regions.values()) {
 			if (!region.isUserRegion() && !force) continue;
 			deleted.add(region.getName());
+			removed.add(region);
 			region.remove();
 		}
 		regions.keySet().removeAll(deleted);
-		fireRegionsRemoved(new RegionEvent(this));
+		fireRegionsRemoved(new RegionEvent(this, removed));
 
 	}
 	
