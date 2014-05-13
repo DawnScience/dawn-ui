@@ -212,19 +212,20 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 			else
 				((LinearROI) roi).setAngledegrees(angle);
 		} else if (roi instanceof SectorROI) {
-			double xStart = ((NumericNode<?>)regionNode.getChildAt(0)).getDoubleValue();
-			double yStart = ((NumericNode<?>)regionNode.getChildAt(1)).getDoubleValue();
-			double innerRadius = ((NumericNode<?>)regionNode.getChildAt(2)).getDoubleValue();
-			double outerRadius = ((NumericNode<?>)regionNode.getChildAt(3)).getDoubleValue();
-			double angle1 = ((NumericNode<?>)regionNode.getChildAt(4)).getDoubleValue();
-			double angle2 = ((NumericNode<?>)regionNode.getChildAt(5)).getDoubleValue();
-			((SectorROI) roi).setPoint(new double[] { xStart, yStart });
-			((SectorROI) roi).setRadii(innerRadius, outerRadius);
-			((SectorROI) roi).setAnglesdegrees(new double[] {angle1, angle2});
-			if (regionNode.isAngleInRadian())
-				((SectorROI) roi).setAngles(new double[] {angle1, angle2});
-			else
-				((SectorROI) roi).setAnglesdegrees(new double[] {angle1, angle2});
+			if (regionNode.getChildCount() == 6) {
+				double xStart = ((NumericNode<?>)regionNode.getChildAt(0)).getDoubleValue();
+				double yStart = ((NumericNode<?>)regionNode.getChildAt(1)).getDoubleValue();
+				double innerRadius = ((NumericNode<?>)regionNode.getChildAt(2)).getDoubleValue();
+				double outerRadius = ((NumericNode<?>)regionNode.getChildAt(3)).getDoubleValue();
+				double angle1 = ((NumericNode<?>)regionNode.getChildAt(4)).getDoubleValue();
+				double angle2 = ((NumericNode<?>)regionNode.getChildAt(5)).getDoubleValue();
+				((SectorROI) roi).setPoint(new double[] { xStart, yStart });
+				((SectorROI) roi).setRadii(innerRadius, outerRadius);
+				if (regionNode.isAngleInRadian())
+					((SectorROI) roi).setAngles(new double[] {angle1, angle2});
+				else
+					((SectorROI) roi).setAnglesdegrees(new double[] {angle1, angle2});
+			}
 		} else if (roi instanceof RingROI) {
 			double xStart = ((NumericNode<?>)regionNode.getChildAt(0)).getDoubleValue();
 			double yStart = ((NumericNode<?>)regionNode.getChildAt(1)).getDoubleValue();

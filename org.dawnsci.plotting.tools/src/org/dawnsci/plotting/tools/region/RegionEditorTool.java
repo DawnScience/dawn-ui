@@ -605,10 +605,13 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 	@Override
 	public void regionAdded(RegionEvent evt) {
 		if (!isActive()) return;
-		if (evt.getRegion()!=null) {
-			IRegion region = evt.getRegion();
+		IRegion region = evt.getRegion();
+		if (region != null) {
 			region.addROIListener(this);
-			region.getROI().setPlot(true);
+			IROI roi = region.getROI();
+			if (roi == null)
+				return;
+			roi.setPlot(true);
 			// set the Region isActive flag
 			region.setActive(true);
 			model.addRegion(region, getMaxIntensity(region), getSum(region));
