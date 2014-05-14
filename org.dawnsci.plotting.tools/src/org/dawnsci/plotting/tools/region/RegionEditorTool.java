@@ -489,39 +489,40 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		ColumnViewerToolTipSupport.enableFor(viewer);
 
 		TreeViewerColumn var = new TreeViewerColumn(viewer, SWT.LEFT, 0);
-		var.getColumn().setText("Name"); // Selected
+		var.getColumn().setText("Name");
 		var.getColumn().setWidth(260);
+		var.setEditingSupport(new RegionEditorEditingSupport(viewer, 0));
 		var.setLabelProvider(new NodeLabelProvider(1));
 
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 1);
-		var.getColumn().setText("Value"); // Selected
+		var.getColumn().setText("Value");
 		var.getColumn().setWidth(100);
 		var.setLabelProvider(new DelegatingProviderWithTooltip(new NodeLabelProvider(2)));
-		var.setEditingSupport(new ValueEditingSupport(viewer));
+		var.setEditingSupport(new RegionEditorEditingSupport(viewer, 1));
 
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 2);
-		var.getColumn().setText("Unit"); // Selected
+		var.getColumn().setText("Unit");
 		var.getColumn().setWidth(90);
 		var.setLabelProvider(new DelegatingProviderWithTooltip(new NodeLabelProvider(3)));
 		var.setEditingSupport(new UnitEditingSupport(viewer));
 
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 3);
-		var.getColumn().setText("Visible"); // Selected
+		var.getColumn().setText("Visible");
 		var.getColumn().setWidth(60);
 		var.setLabelProvider(new DelegatingProviderWithTooltip(new NodeLabelProvider(4)));
-		var.setEditingSupport(new ValueEditingSupport(viewer));
+		var.setEditingSupport(new RegionEditorEditingSupport(viewer, 3));
 
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 4);
-		var.getColumn().setText("Active"); // Selected
+		var.getColumn().setText("Active");
 		var.getColumn().setWidth(60);
 		var.setLabelProvider(new DelegatingProviderWithTooltip(new NodeLabelProvider(5)));
-		var.setEditingSupport(new ValueEditingSupport(viewer));
+		var.setEditingSupport(new RegionEditorEditingSupport(viewer, 4));
 
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 5);
-		var.getColumn().setText("Mobile"); // Selected
+		var.getColumn().setText("Mobile");
 		var.getColumn().setWidth(60);
 		var.setLabelProvider(new DelegatingProviderWithTooltip(new NodeLabelProvider(6)));
-		var.setEditingSupport(new ValueEditingSupport(viewer));
+		var.setEditingSupport(new RegionEditorEditingSupport(viewer, 5));
 	}
 
 	@Override
