@@ -36,28 +36,26 @@ public class ValueEditingSupport extends EditingSupport {
 
 	@Override
 	protected CellEditor getCellEditor(final Object element) {
-		
 		if (element instanceof NumericNode) {
-			return createNumericEditor(element);
+			return createNumericEditor((NumericNode<?>) element);
 		}
 		if (element instanceof ColorNode) {
-			return createColorEditor(element);
+			return createColorEditor((ColorNode) element);
 		}
 		if (element instanceof ComboNode) {
-			return createComboEditor(element);
+			return createComboEditor((ComboNode) element);
 		}
 		return null;
 	}
-	
-	protected CellEditor createColorEditor(final Object element) {
 
-		final ColorCellEditor ce = new ColorCellEditor((Composite)viewer.getControl(), SWT.NONE);
+	protected CellEditor createColorEditor(final ColorNode element) {
+		final ColorCellEditor ce = new ColorCellEditor((Composite) viewer.getControl(), SWT.NONE);
 		return ce;
 	}
 
-	protected CellEditor createNumericEditor(final Object element) {
+	protected CellEditor createNumericEditor(final NumericNode<?> element) {
 		
-		final NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
+		final NumericNode<? extends Quantity> node = element;
 		final FloatSpinnerCellEditor fse = new FloatSpinnerCellEditor((Composite)viewer.getControl(), SWT.NONE);
 		fse.setFormat(7, node.getDecimalPlaces());
 		fse.setIncrement(node.getIncrement());
@@ -78,10 +76,8 @@ public class ValueEditingSupport extends EditingSupport {
 		return fse;
 	}
 	
-	protected CellEditor createComboEditor(final Object element) {
-		
-		ComboNode node = (ComboNode)element;
-		final CComboCellEditor cce = new CComboCellEditor((Composite)viewer.getControl(), node.getStringValues(), SWT.READ_ONLY);
+	protected CellEditor createComboEditor(final ComboNode element) {
+		final CComboCellEditor cce = new CComboCellEditor((Composite)viewer.getControl(), element.getStringValues(), SWT.READ_ONLY);
 		cce.getCombo().addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				setValue(element, cce.getValue());
@@ -99,14 +95,13 @@ public class ValueEditingSupport extends EditingSupport {
 	@Override
 	protected Object getValue(Object element) {
 		if (element instanceof NumericNode) {
-			NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
+			NumericNode<? extends Quantity> node = (NumericNode<?>)element;
 			return node.getDoubleValue();
 		}
 		if (element instanceof ColorNode) {
 			ColorNode node = (ColorNode) element;
 			return node.getColor().getRGB();
 		}
-
 		if (element instanceof ComboNode) {
 			ComboNode node = (ComboNode) element;
 			return node.getValue();
@@ -116,18 +111,17 @@ public class ValueEditingSupport extends EditingSupport {
 
 	@Override
 	protected void setValue(Object element, Object value) {
-		if (element instanceof NumericNode)  {
-		
-			NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
-			node.setDoubleValue((Double)value);
-		} 
-		
+		if (element instanceof NumericNode) {
+			NumericNode<? extends Quantity> node = (NumericNode<?>) element;
+			node.setDoubleValue((Double) value);
+		}
+
 		if (element instanceof ColorNode) {
-			ColorNode node = (ColorNode)element;
+			ColorNode node = (ColorNode) element;
 			if (value instanceof RGB) {
-			    node.setColor(new Color(null, (RGB)value));
+				node.setColor(new Color(null, (RGB) value));
 			} else {
-				node.setColor((Color)value);
+				node.setColor((Color) value);
 			}
 			viewer.setSelection(null);
 		}
