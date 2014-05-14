@@ -223,6 +223,11 @@ public class PowderIntegrationJob extends Job {
 				az.iadd(Math.toRadians(corModel.getPolarisationAngularOffset()));
 				PixelIntegrationUtils.polarisationCorrection(localRef, tth, az, corModel.getPolarisationFactor());
 			}
+			
+			if (corModel.isAppyDetectorTransmissionCorrection()) {
+				PixelIntegrationUtils.detectorTranmissionCorrection(localRef, tth, corModel.getTransmittedFraction());
+			}
+			
 		} else {
 			localRef = correction;
 		}

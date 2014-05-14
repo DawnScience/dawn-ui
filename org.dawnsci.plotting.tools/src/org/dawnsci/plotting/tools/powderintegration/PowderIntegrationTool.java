@@ -55,6 +55,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
@@ -173,12 +175,19 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		
 		//Call update here so we get the metadata
 		update(null);
-		Composite setupComposite = new Composite(sashForm, SWT.None);
+		
+		TabFolder folder = new TabFolder(sashForm, SWT.NONE);
+		
+		TabItem tab1 = new TabItem(folder, SWT.NONE);
+	    tab1.setText("Integration Options");
+		
+		Composite setupComposite = new Composite(folder, SWT.None);
 		setupComposite.setLayout(new GridLayout());
 		Composite widget1 = new Composite(setupComposite, SWT.NONE);
 		integratorSetup = new IntegrationSetupWidget(widget1, metadata);
 		model = integratorSetup.getModelList().get(0);
 		integratorSetup.enableFor1D(true);
+		tab1.setControl(setupComposite);
 		
 		model.addPropertyChangeListener(new PropertyChangeListener() {
 			
@@ -191,11 +200,14 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			}
 		});
 		
-		Composite widget2 = new Composite(setupComposite, SWT.None);
+		TabItem tab2 = new TabItem(folder, SWT.NONE);
+		tab2.setText("Correction Options");
+		
+		Composite widget2 = new Composite(folder, SWT.None);
 		
 		PowderCorrectionWidget pcw = new PowderCorrectionWidget(widget2);
-		
 		corModel = pcw.getModel();
+		tab2.setControl(widget2);
 		
 		corModel.addPropertyChangeListener(new PropertyChangeListener() {
 			

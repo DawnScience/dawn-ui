@@ -92,6 +92,47 @@ public class PowderCorrectionWidget {
 		});
 		
 		
+		final CheckBoxGroup transGroup = new CheckBoxGroup(composite, SWT.NONE);
+		transGroup.setText("Apply Detector Transmission Correction");
+		content = transGroup.getContent();
+		content.setLayout(new GridLayout(2,true));
+		lbl = new Label(content, SWT.None);
+		lbl.setText("Tranmission Factor:");
+		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER,true, false));
+		
+		final Text transTxt = new Text(content, SWT.SINGLE | SWT.RIGHT);
+		transTxt.setLayoutData(new GridData(SWT.FILL, SWT.CENTER,true, false));
+		transTxt.setText(String.valueOf(model.getTransmittedFraction()));
+		final FloatDecorator fdt = new FloatDecorator(factoTxt);
+		fdt.setMinimum(0);
+		fdt.setMaximum(1);
+		
+		transTxt.addModifyListener(new ModifyListener() {
+			
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if (!fdt.isError()) {
+					try {
+						model.setTransmittedFraction(Double.parseDouble(factoTxt.getText()));
+					} catch (NumberFormatException nfe) {
+						//do nothing
+					}
+				}
+			}
+		});
+		
+		transGroup.addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				model.setAppyDetectorTransmissionCorrection(transGroup.isActivated());
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		});
+		
 		final Button solidAngleCorrection = new Button(composite, SWT.CHECK);
 		solidAngleCorrection.setText("Apply Solid Angle Correction");
 		

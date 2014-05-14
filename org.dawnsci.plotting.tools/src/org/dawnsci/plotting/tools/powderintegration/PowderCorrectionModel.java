@@ -6,8 +6,10 @@ public class PowderCorrectionModel extends AbstractModelObject {
 
 	boolean isApplySolidAngleCorrection = false;
 	boolean isApplyPolarisationCorrection = false;
+	boolean isAppyDetectorTransmissionCorrection = false;
 	double polarisationFactor = 0.9;
 	double polarisationAngularOffset = 0;
+	double transmittedFraction = 0;
 	
 	public boolean isApplySolidAngleCorrection() {
 		return isApplySolidAngleCorrection;
@@ -32,5 +34,19 @@ public class PowderCorrectionModel extends AbstractModelObject {
 	}
 	public void setPolarisationAngularOffset(double polarisationAngularOffset) {
 		firePropertyChange("polarisationAngularOffset", this.polarisationAngularOffset, this.polarisationAngularOffset = polarisationAngularOffset);
+	}
+	
+	public boolean isAppyDetectorTransmissionCorrection() {
+		return isAppyDetectorTransmissionCorrection;
+	}
+	public void setAppyDetectorTransmissionCorrection(
+			boolean isAppyDetectorTransmissionCorrection) {
+		firePropertyChange("isAppyDetectorTransmissionCorrection", this.isAppyDetectorTransmissionCorrection, this.isAppyDetectorTransmissionCorrection = isAppyDetectorTransmissionCorrection);
+	}
+	public double getTransmittedFraction() {
+		return transmittedFraction;
+	}
+	public void setTransmittedFraction(double transmittedFraction) {
+		firePropertyChange("transmittedFraction", this.transmittedFraction, this.transmittedFraction = transmittedFraction);
 	}
 }
