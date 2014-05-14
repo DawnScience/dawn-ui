@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Diamond Light Source Ltd.
+ * Copyright (c) 2014 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -46,6 +46,12 @@ public class RegionNode extends LabelNode {
 			((LabelNode) getParent()).addChild(this);
 	}
 
+	public void setName(String value) {
+		setLabel(value);
+		region.getROI().setName(value);
+		region.setName(value);
+	}
+
 	public boolean isVisible() {
 		return isVisible;
 	}
@@ -80,5 +86,4 @@ public class RegionNode extends LabelNode {
 	public void setAngleInRadian(boolean angleInRadian) {
 		this.angleInRadian = angleInRadian;
 	}
-
 }

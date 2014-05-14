@@ -35,45 +35,47 @@ public class RegionEditorEditingSupport extends ValueEditingSupport {
 		switch (column) {
 		case 0:
 			if (element instanceof RegionNode)
-				return new TextCellEditor((Composite)viewer.getControl());
+				return createTextEditor((RegionNode)element);
 			break;
 		case 1:
 			if (element instanceof NumericNode)
-				return createNumericEditor(element);
+				return createNumericEditor((NumericNode<?>)element);
 			break;
 		case 2:
 			if (element instanceof ComboNode)
-				return createComboEditor(element);
+				return createComboEditor((ComboNode)element);
 			break;
 		case 3:
 			if (element instanceof RegionNode)
-				return createBooleanEditor(element);
+				return createBooleanEditor((RegionNode)element);
 			break;
 		case 4:
 			if (element instanceof RegionNode)
-				return createBooleanEditor(element);
+				return createBooleanEditor((RegionNode)element);
 			break;
 		case 5:
 			if (element instanceof RegionNode)
-				return createBooleanEditor(element);
+				return createBooleanEditor((RegionNode)element);
 			break;
 		}
 		return null;
 	}
 
-	protected CellEditor createBooleanEditor(final Object element) {
-		final RegionNode node = (RegionNode)element;
+	protected CellEditor createTextEditor(final RegionNode node) {
+		final TextCellEditor tce = new TextCellEditor((Composite)viewer.getControl(), SWT.NONE);
+		return tce;
+	}
+
+	protected CellEditor createBooleanEditor(final RegionNode node) {
 		final CheckboxCellEditor fse = new CheckboxCellEditor((Composite)viewer.getControl(), SWT.NONE);
 		fse.addListener(new ICellEditorListener() {
 			@Override
 			public void editorValueChanged(boolean oldValidState, boolean newValidState) {
-				setValue(element, newValidState);
+				setValue(node, newValidState);
 			}
 
 			@Override
 			public void cancelEditor() {
-				// TODO Auto-generated method stub
-
 			}
 
 			@Override
@@ -172,7 +174,7 @@ public class RegionEditorEditingSupport extends ValueEditingSupport {
 		case 0:
 			if (element instanceof RegionNode) {
 				RegionNode node = (RegionNode)element;
-				node.setLabel((String) value);
+				node.setName((String) value);
 			}
 			break;
 		case 1:
