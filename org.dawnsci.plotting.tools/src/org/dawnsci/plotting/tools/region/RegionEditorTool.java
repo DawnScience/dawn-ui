@@ -20,7 +20,6 @@ import org.dawnsci.common.widgets.tree.DelegatingProviderWithTooltip;
 import org.dawnsci.common.widgets.tree.IResettableExpansion;
 import org.dawnsci.common.widgets.tree.NodeFilter;
 import org.dawnsci.common.widgets.tree.NodeLabelProvider;
-import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.common.widgets.tree.RegionNode;
 import org.dawnsci.common.widgets.tree.UnitEditingSupport;
 import org.dawnsci.common.widgets.tree.ValueEditingSupport;
@@ -352,6 +351,24 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			}
 		});
 
+		final Action expandAll = new Action("Expand All", Activator.getImageDescriptor("icons/expand_all.png")) {
+			public void run() {
+				if (viewer != null) {
+					viewer.expandAll();
+				}
+			}
+		};
+		expandAll.setToolTipText("Expand All");
+
+		final Action collapseAll = new Action("Collapse All", Activator.getImageDescriptor("icons/collapse_all.png")) {
+			public void run() {
+				if (viewer != null) {
+					viewer.collapseAll();
+				}
+			}
+		};
+		collapseAll.setToolTipText("Collapse All");
+
 		final Action exportRegion = new Action("Export region to file", Activator.getImageDescriptor("icons/mask-export-wiz.png")) {
 			public void run() {
 				try {
@@ -400,30 +417,6 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		final MenuAction removeRegionDropDown = new MenuAction("Delete selection region(s)");
 		removeRegionDropDown.setId(BasePlottingConstants.REMOVE_REGION);
 
-		final Action delete = new Action("Delete selected region", Activator.getImageDescriptor("icons/RegionDelete.png")) {
-			public void run() {
-				if (!isActive()) return;
-				final IStructuredSelection sel = (IStructuredSelection)viewer.getSelection();
-				if (sel == null)
-					return;
-				Object obj = sel.getFirstElement();
-				if (!(obj instanceof RegionNode))
-					return;
-				if (obj instanceof RegionNode && obj instanceof NumericNode<?>)
-					return;
-				if (obj!=null) {
-					final RegionNode regionNode = (RegionNode)sel.getFirstElement();
-					String regionName = regionNode.getLabel();
-					IRegion region = getPlottingSystem().getRegion(regionName);
-					if (region != null) {
-						region.removeROIListener(RegionEditorTool.this);
-						getPlottingSystem().removeRegion(region);
-					}
-				}
-			}
-		};
-		delete.setToolTipText("Delete selected region, if there is one.");
-
 		final Action show = new Action("Show all vertex values", Activator.getImageDescriptor("icons/plot-tool-measure-vertices.png")) {
 			public void run() {
 				if (!isActive()) return;
@@ -455,31 +448,29 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		};
 		preferences.setToolTipText("Open Region Editor preferences");
 
-		toolBarMan.add(immobileWhenAdded);
 		toolBarMan.add(new Separator());
 		toolBarMan.add(getReselectAction());
+		toolBarMan.add(new Separator());
+		toolBarMan.add(expandAll);
+		toolBarMan.add(collapseAll);
 		toolBarMan.add(new Separator());
 		toolBarMan.add(importRegion);
 		toolBarMan.add(exportRegion);
 		toolBarMan.add(new Separator());
 		toolBarMan.add(copy);
-		toolBarMan.add(delete);
-		toolBarMan.add(new Separator());
 		toolBarMan.add(show);
 		toolBarMan.add(clear);
+		toolBarMan.add(new Separator());
 
-		ActionContributionItem menu = (ActionContributionItem)getPlottingSystem().getActionBars().getToolBarManager().find(BasePlottingConstants.REMOVE_REGION);
-		MenuAction menuAction = (MenuAction) menu.getAction();
-		if (menu!=null) {
-			menuAction = (MenuAction)menu.getAction();	
-			toolBarMan.add(menuAction);
-		}
+		ActionContributionItem deleteMenu = (ActionContributionItem)getPlottingSystem().getActionBars().getToolBarManager().find(BasePlottingConstants.REMOVE_REGION);
+		MenuAction deleteMenuAction = (MenuAction) deleteMenu.getAction();
+		toolBarMan.add(deleteMenuAction);
 
 		menuMan.add(copy);
-		menuMan.add(delete);
-		menuMan.add(new Separator());
 		menuMan.add(show);
 		menuMan.add(clear);
+		menuMan.add(new Separator());
+		menuMan.add(deleteMenuAction);
 		menuMan.add(new Separator());
 		menuMan.add(preferences);
 		createRightClickMenu();
@@ -551,18 +542,15 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 					iRegion.addROIListener(this);
 				if (!isDedicatedView()) {
 					createNewRegion(false);
-				} else {
-					for (IRegion iRegion : regions) {
-						if (model != null)
-							model.addRegion(iRegion, getMaxIntensity(iRegion), getSum(iRegion));
-					}
 				}
+				for (IRegion iRegion : regions) {
+					if (model != null)
+						model.addRegion(iRegion, getMaxIntensity(iRegion), getSum(iRegion));
+				}
+				if (model != null && model.getRoot() != null && model.getRoot().getChildren() != null)
+					viewer.setInput(model.getRoot());
 			} catch (Exception e) {
 				logger.error("Cannot add region listeners!", e);
-			}
-
-			if (viewer != null) {
-				viewer.refresh();
 			}
 
 		} catch (Exception e) {
@@ -654,9 +642,9 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 
 	@Override
 	public void regionsRemoved(RegionEvent evt) {
-//		if (!isActive())
-//			return;
-		Collection<IRegion> regions = getPlottingSystem().getRegions();
+		if (!isActive())
+			return;
+		Collection<IRegion> regions = evt.getRegions();
 		for (IRegion region : regions) {
 			RegionNode regionNode = (RegionNode) model.getNode("/" + region.getName());
 			if (regionNode == null)
@@ -666,7 +654,7 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			getPlottingSystem().removeRegion(region);
 		}
 	}
-	
+
 	@Override
 	public void roiDragged(ROIEvent evt) {
 		model.setRegionDragged(true);
