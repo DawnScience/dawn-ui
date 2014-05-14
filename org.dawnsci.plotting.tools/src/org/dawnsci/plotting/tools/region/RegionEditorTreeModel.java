@@ -60,8 +60,19 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 	}
 
 	public void addRegion(IRegion region, double maxIntensity, double sum) {
-		regions.add(region);
-		regionNodes.add(createRegion(region, maxIntensity, sum));
+		String name = region.getName();
+		if (!nodeExist(regionNodes, name)) {
+			regions.add(region);
+			regionNodes.add(createRegion(region, maxIntensity, sum));
+		}
+	}
+
+	private boolean nodeExist(List<RegionNode> node, String name) {
+		for (RegionNode regionNode : node) {
+			if(regionNode.getLabel().equals(name))
+				return true;
+		}
+		return false;
 	}
 
 	private RegionNode createRegion(IRegion region, double maxIntensity, double sum) {
