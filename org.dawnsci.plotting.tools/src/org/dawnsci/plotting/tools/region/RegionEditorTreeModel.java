@@ -81,7 +81,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		String sumFormat = store.getString(RegionEditorConstants.SUM_FORMAT);
 		double increment = getDecimal(pointFormat);
 
-		final RegionNode node = new RegionNode(region.getName(), root);
+		final RegionNode node = new RegionNode(region, root);
 		node.setTooltip(region.getLabel());
 		node.setEditable(true);
 		node.setVisible(region.isVisible());

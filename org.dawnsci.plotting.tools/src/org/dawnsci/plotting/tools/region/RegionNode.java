@@ -9,6 +9,7 @@
 package org.dawnsci.plotting.tools.region;
 
 import org.dawnsci.common.widgets.tree.LabelNode;
+import org.dawnsci.plotting.api.region.IRegion;
 
 /**
  * This class is a custom LabelNode to hold data about Region nodes in 
@@ -23,6 +24,7 @@ public class RegionNode extends LabelNode {
 	private boolean isActive;
 	private boolean isMobile;
 	private boolean angleInRadian = false;
+	private IRegion region;
 
 	public RegionNode() {
 		super(null, null);
@@ -36,8 +38,9 @@ public class RegionNode extends LabelNode {
 		super(label, null);
 	}
 
-	public RegionNode(String label, LabelNode parent) {
-		setLabel(label);
+	public RegionNode(IRegion region, LabelNode parent) {
+		this.region = region;
+		setLabel(region.getName());
 		setParent(parent);
 		if (getParent() != null)
 			((LabelNode) getParent()).addChild(this);
@@ -49,6 +52,7 @@ public class RegionNode extends LabelNode {
 
 	public void setVisible(boolean isVisible) {
 		this.isVisible = isVisible;
+		region.setVisible(isVisible);
 	}
 
 	public boolean isActive() {
@@ -57,6 +61,7 @@ public class RegionNode extends LabelNode {
 
 	public void setActive(boolean isActive) {
 		this.isActive = isActive;
+		region.setActive(isActive);
 	}
 
 	public boolean isMobile() {
@@ -65,6 +70,7 @@ public class RegionNode extends LabelNode {
 
 	public void setMobile(boolean isMobile) {
 		this.isMobile = isMobile;
+		region.setMobile(isMobile);
 	}
 
 	public boolean isAngleInRadian() {
