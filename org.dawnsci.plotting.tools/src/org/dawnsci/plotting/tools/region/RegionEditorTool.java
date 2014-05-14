@@ -351,6 +351,24 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			}
 		});
 
+		final Action expandAll = new Action("Expand All", Activator.getImageDescriptor("icons/expand_all.png")) {
+			public void run() {
+				if (viewer != null) {
+					viewer.expandAll();
+				}
+			}
+		};
+		expandAll.setToolTipText("Expand All");
+
+		final Action collapseAll = new Action("Collapse All", Activator.getImageDescriptor("icons/collapse_all.png")) {
+			public void run() {
+				if (viewer != null) {
+					viewer.collapseAll();
+				}
+			}
+		};
+		collapseAll.setToolTipText("Collapse All");
+
 		final Action exportRegion = new Action("Export region to file", Activator.getImageDescriptor("icons/mask-export-wiz.png")) {
 			public void run() {
 				try {
@@ -430,9 +448,11 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		};
 		preferences.setToolTipText("Open Region Editor preferences");
 
-		toolBarMan.add(immobileWhenAdded);
 		toolBarMan.add(new Separator());
 		toolBarMan.add(getReselectAction());
+		toolBarMan.add(new Separator());
+		toolBarMan.add(expandAll);
+		toolBarMan.add(collapseAll);
 		toolBarMan.add(new Separator());
 		toolBarMan.add(importRegion);
 		toolBarMan.add(exportRegion);
