@@ -6,7 +6,9 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.dawnsci.common.widgets.tree;
+package org.dawnsci.plotting.tools.region;
+
+import org.dawnsci.common.widgets.tree.LabelNode;
 
 /**
  * This class is a custom LabelNode to hold data about Region nodes in 

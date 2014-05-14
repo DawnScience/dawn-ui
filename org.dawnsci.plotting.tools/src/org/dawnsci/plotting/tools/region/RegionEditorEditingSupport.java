@@ -10,7 +10,6 @@ package org.dawnsci.plotting.tools.region;
 
 import org.dawnsci.common.widgets.tree.ComboNode;
 import org.dawnsci.common.widgets.tree.NumericNode;
-import org.dawnsci.common.widgets.tree.RegionNode;
 import org.dawnsci.common.widgets.tree.ValueEditingSupport;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxCellEditor;

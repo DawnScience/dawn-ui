@@ -20,7 +20,6 @@ import org.dawnsci.common.widgets.tree.AbstractNodeModel;
 import org.dawnsci.common.widgets.tree.AmountEvent;
 import org.dawnsci.common.widgets.tree.AmountListener;
 import org.dawnsci.common.widgets.tree.NumericNode;
-import org.dawnsci.common.widgets.tree.RegionNode;
 import org.dawnsci.common.widgets.tree.UnitEvent;
 import org.dawnsci.common.widgets.tree.UnitListener;
 import org.dawnsci.plotting.api.IPlottingSystem;
@@ -82,9 +81,12 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		String sumFormat = store.getString(RegionEditorConstants.SUM_FORMAT);
 		double increment = getDecimal(pointFormat);
 
-		final RegionNode node = new RegionNode(region.getName(), root);
+		final RegionNode node = new RegionNode(region.getName(), null, root);
 		node.setTooltip(region.getLabel());
 		node.setEditable(true);
+		node.setVisible(region.isVisible());
+		node.setActive(region.isActive());
+		node.setMobile(region.isMobile());
 		registerNode(node);
 		node.setDefaultExpanded(true);
 

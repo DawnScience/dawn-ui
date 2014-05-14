@@ -19,10 +19,7 @@ import org.dawnsci.common.widgets.tree.ClearableFilteredTree;
 import org.dawnsci.common.widgets.tree.DelegatingProviderWithTooltip;
 import org.dawnsci.common.widgets.tree.IResettableExpansion;
 import org.dawnsci.common.widgets.tree.NodeFilter;
-import org.dawnsci.common.widgets.tree.NodeLabelProvider;
-import org.dawnsci.common.widgets.tree.RegionNode;
 import org.dawnsci.common.widgets.tree.UnitEditingSupport;
-import org.dawnsci.common.widgets.tree.ValueEditingSupport;
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.dawnsci.plotting.api.region.IROIListener;
@@ -492,36 +489,36 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		var.getColumn().setText("Name");
 		var.getColumn().setWidth(260);
 		var.setEditingSupport(new RegionEditorEditingSupport(viewer, 0));
-		var.setLabelProvider(new NodeLabelProvider(1));
+		var.setLabelProvider(new RegionEditorLabelProvider(0));
 
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 1);
 		var.getColumn().setText("Value");
 		var.getColumn().setWidth(100);
-		var.setLabelProvider(new DelegatingProviderWithTooltip(new NodeLabelProvider(2)));
+		var.setLabelProvider(new DelegatingProviderWithTooltip(new RegionEditorLabelProvider(1)));
 		var.setEditingSupport(new RegionEditorEditingSupport(viewer, 1));
 
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 2);
 		var.getColumn().setText("Unit");
 		var.getColumn().setWidth(90);
-		var.setLabelProvider(new DelegatingProviderWithTooltip(new NodeLabelProvider(3)));
+		var.setLabelProvider(new DelegatingProviderWithTooltip(new RegionEditorLabelProvider(2)));
 		var.setEditingSupport(new UnitEditingSupport(viewer));
 
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 3);
 		var.getColumn().setText("Visible");
 		var.getColumn().setWidth(60);
-		var.setLabelProvider(new DelegatingProviderWithTooltip(new NodeLabelProvider(4)));
+		var.setLabelProvider(new DelegatingProviderWithTooltip(new RegionEditorLabelProvider(3)));
 		var.setEditingSupport(new RegionEditorEditingSupport(viewer, 3));
 
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 4);
 		var.getColumn().setText("Active");
 		var.getColumn().setWidth(60);
-		var.setLabelProvider(new DelegatingProviderWithTooltip(new NodeLabelProvider(5)));
+		var.setLabelProvider(new DelegatingProviderWithTooltip(new RegionEditorLabelProvider(4)));
 		var.setEditingSupport(new RegionEditorEditingSupport(viewer, 4));
 
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 5);
 		var.getColumn().setText("Mobile");
 		var.getColumn().setWidth(60);
-		var.setLabelProvider(new DelegatingProviderWithTooltip(new NodeLabelProvider(6)));
+		var.setLabelProvider(new DelegatingProviderWithTooltip(new RegionEditorLabelProvider(5)));
 		var.setEditingSupport(new RegionEditorEditingSupport(viewer, 5));
 	}
 
