@@ -47,7 +47,7 @@ import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 
-import uk.ac.diamond.scisoft.analysis.dataset.ADataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
@@ -74,7 +74,7 @@ public class SWTXYTraceTest {
 
 		final IPlottingSystem     sys    = (IPlottingSystem)oa[0];
 		
-		AbstractDataset vectors = AbstractDataset.zeros(new int[]{20, 20, 2}, ADataset.FLOAT32);
+		AbstractDataset vectors = AbstractDataset.zeros(new int[]{20, 20, 2}, Dataset.FLOAT32);
 		
 		for (int x = 0; x < 20; x++) {
 			for (int y = 0; y < 20; y++) {
@@ -83,8 +83,8 @@ public class SWTXYTraceTest {
 			}
 		}
 		
-		final IDataset xAxis = AbstractDataset.zeros(new int[]{20}, ADataset.FLOAT32);
-		final IDataset yAxis = AbstractDataset.zeros(new int[]{20}, ADataset.FLOAT32);
+		final IDataset xAxis = AbstractDataset.zeros(new int[]{20}, Dataset.FLOAT32);
+		final IDataset yAxis = AbstractDataset.zeros(new int[]{20}, Dataset.FLOAT32);
 		for (int i = 0; i < 20; i++) {
 			xAxis.set(i*5, i);
 			yAxis.set(i*5, i);
@@ -122,7 +122,7 @@ public class SWTXYTraceTest {
 		
 		final AbstractPlottingSystem sys = (AbstractPlottingSystem)PlottingFactory.getPlottingSystem(part.getTitle());
 		
-		AbstractDataset vectors = AbstractDataset.zeros(new int[]{20, 20, 2}, ADataset.FLOAT32);
+		AbstractDataset vectors = AbstractDataset.zeros(new int[]{20, 20, 2}, Dataset.FLOAT32);
 		
 		for (int x = 0; x < 20; x++) {
 			for (int y = 0; y < 20; y++) {
@@ -131,8 +131,8 @@ public class SWTXYTraceTest {
 			}
 		}
 		
-		final IDataset xAxis = AbstractDataset.zeros(new int[]{20}, ADataset.FLOAT32);
-		final IDataset yAxis = AbstractDataset.zeros(new int[]{20}, ADataset.FLOAT32);
+		final IDataset xAxis = AbstractDataset.zeros(new int[]{20}, Dataset.FLOAT32);
+		final IDataset yAxis = AbstractDataset.zeros(new int[]{20}, Dataset.FLOAT32);
 		for (int i = 0; i < 20; i++) {
 			xAxis.set(i*100, i);
 			yAxis.set(i*100, i);
