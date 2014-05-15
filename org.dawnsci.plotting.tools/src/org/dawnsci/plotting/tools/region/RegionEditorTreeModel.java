@@ -2,6 +2,8 @@ package org.dawnsci.plotting.tools.region;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -46,13 +48,11 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 	private boolean isRegionDragged = false;
 
 	private boolean isTreeModified = false;
-	private Collection<IRegion> regions;
-	private List<RegionNode> regionNodes = new ArrayList<RegionNode>();
+	private Collection<RegionNode> regionNodes = new HashSet<RegionNode>();
 	private IPlottingSystem plottingSystem;
 
 	public RegionEditorTreeModel(IPlottingSystem plottingSystem, Collection<IRegion> regions) throws Exception {
 		this.plottingSystem = plottingSystem;
-		this.regions = regions;
 		for (IRegion region : regions) {
 			addRegion(region, 0, 0);
 		}
@@ -61,12 +61,11 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 	public void addRegion(IRegion region, double maxIntensity, double sum) {
 		String name = region.getName();
 		if (!nodeExist(regionNodes, name)) {
-			regions.add(region);
 			regionNodes.add(createRegion(region, maxIntensity, sum));
 		}
 	}
 
-	private boolean nodeExist(List<RegionNode> node, String name) {
+	private boolean nodeExist(Collection<RegionNode> node, String name) {
 		for (RegionNode regionNode : node) {
 			if(regionNode.getLabel().equals(name))
 				return true;
@@ -82,7 +81,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		double increment = getDecimal(pointFormat);
 
 		final RegionNode node = new RegionNode(region, root);
-		node.setTooltip(region.getLabel());
+		node.setTooltip(region.getName());
 		node.setEditable(true);
 		node.setVisible(region.isVisible());
 		node.setActive(region.isActive());
@@ -112,9 +111,9 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		return node;
 	}
 
-	private void createAngleNode(final RegionNode labelNode, String nodeName, boolean editable,
+	private void createAngleNode(final RegionNode regionNode, String nodeName, boolean editable,
 			double increment, String pointFormat, Unit<Angle> unit, double value) {
-		final NumericNode<Angle> node = new NumericNode<Angle>(nodeName, labelNode, unit);
+		final NumericNode<Angle> node = new NumericNode<Angle>(nodeName, regionNode, unit);
 		registerNode(node);
 		node.setEditable(editable);
 		node.setValue(value, unit);
@@ -129,7 +128,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 					try {
 						isTreeModified = true;
 						if(!isRegionDragged)
-							setValue(labelNode);
+							setValue(regionNode);
 					} finally {
 						isTreeModified = false;
 					}
@@ -140,9 +139,9 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 				@Override
 				public void unitChanged(UnitEvent<? extends Quantity> evt) {
 					if (evt.getUnit().equals(NonSI.DEGREE_ANGLE)) {
-						labelNode.setAngleInRadian(false);
+						regionNode.setAngleInRadian(false);
 					} else {
-						labelNode.setAngleInRadian(true);
+						regionNode.setAngleInRadian(true);
 					}
 					viewer.refresh();
 				}
@@ -150,10 +149,10 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		}
 	}
 
-	private void createLengthNode(final RegionNode labelNode, String nodeName, boolean editable,
+	private void createLengthNode(final RegionNode regionNode, String nodeName, boolean editable,
 			double increment, String pointFormat, Unit<?> unit, double value) {
 		if (unit.isCompatible(NonSI.PIXEL)) {
-			NumericNode<Length> node = new NumericNode<Length>(nodeName, labelNode, (Unit<Length>) unit);
+			NumericNode<Length> node = new NumericNode<Length>(nodeName, regionNode, (Unit<Length>) unit);
 			registerNode(node);
 			node.setEditable(editable);
 			node.setFormat(pointFormat);
@@ -168,7 +167,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 						try {
 							isTreeModified = true;
 							if(!isRegionDragged)
-								setValue(labelNode);
+								setValue(regionNode);
 						} finally {
 							isTreeModified = false;
 						}
@@ -176,7 +175,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 				});
 			}
 		} else if (unit.isCompatible(Dimensionless.UNIT)) {
-			NumericNode<Dimensionless> node = new NumericNode<Dimensionless>(nodeName, labelNode, (Unit<Dimensionless>) unit);
+			NumericNode<Dimensionless> node = new NumericNode<Dimensionless>(nodeName, regionNode, (Unit<Dimensionless>) unit);
 			registerNode(node);
 			node.setEditable(editable);
 			node.setFormat(pointFormat);
