@@ -78,9 +78,10 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 	private RegionNode createRegion(IRegion region, double maxIntensity, double sum) {
 		IPreferenceStore store = Activator.getPlottingPreferenceStore();
 		String pointFormat = store.getString(RegionEditorConstants.POINT_FORMAT);
+		String angleFormat = store.getString(RegionEditorConstants.ANGLE_FORMAT);
 		String intensityFormat = store.getString(RegionEditorConstants.INTENSITY_FORMAT);
 		String sumFormat = store.getString(RegionEditorConstants.SUM_FORMAT);
-		double increment = getDecimal(pointFormat);
+		double increment = RegionEditorTool.getDecimal(pointFormat);
 
 		final RegionNode node = new RegionNode(region, root);
 		node.setTooltip(region.getName());
@@ -102,7 +103,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 				if (node.isAngleInRadian())
 					createAngleNode(node, entry.getKey(), true, increment, pointFormat, SI.RADIAN, Math.toRadians(entry.getValue()));
 				else
-					createAngleNode(node, entry.getKey(), true, increment, pointFormat, NonSI.DEGREE_ANGLE, entry.getValue());
+					createAngleNode(node, entry.getKey(), true, increment, angleFormat, NonSI.DEGREE_ANGLE, entry.getValue());
 			} else if (key.equals("Max Intensity"))
 				createLengthNode(node, key, false, increment, intensityFormat, Dimensionless.UNIT, maxIntensity);
 			else if (key.equals("Sum"))
@@ -247,15 +248,6 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		plottingSystem.repaint(false);
 	}
 
-	private double getDecimal(String format) {
-		int decimal = format.split(".").length > 0 ? format.split(".")[1].length() : 0;
-		double increment = 1;
-		for (int i = 0; i < decimal; i++) {
-			increment = (double) increment / 100;
-		}
-		return increment;
-	}
-
 	@Override
 	public void dispose() {
 		super.dispose();
@@ -293,7 +285,6 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 
 	public void removeRegion(RegionNode regionNode) {
 		int childrenNumber = root.getChildCount();
-//		regionNodes.remove(regionNode);
 		root.removeChild(regionNode);
 		regionNode.dispose();
 		if (childrenNumber < 2) {

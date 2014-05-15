@@ -41,9 +41,19 @@ public class RegionEditorPreferencePage extends PreferencePage implements IWorkb
 	public static final String ID = "org.dawb.workbench.plotting.regionEditorPreferencePage";
 
 	private Text pointFormat;
+	private Text angleFormat;
 	private Text intensityFormat;
 	private Text sumFormat;
 	private Button regionMoveableCheckbox;
+	private final String toolTipText = "Set the number format such as \'###0.#\' where\r" +
+										"-\'#\' is a digit \r" +
+										"-\'0\' is a digit that will be always displayed (0 if none)\r" +
+										"-\'.\' is the decimal point";
+	private final String sciToolTipText = "Set the number format such as \'0.##E0#\' where\r" +
+										"-\'#\' is a digit \r" +
+										"-\'0\' is a digit that will be always displayed (0 if none)\r" +
+										"-\'.\' is the decimal point\r" +
+										"-\'E\' is the scientific notation character";
 
 	public RegionEditorPreferencePage() {
 
@@ -98,10 +108,20 @@ public class RegionEditorPreferencePage extends PreferencePage implements IWorkb
 				storePreferences();
 			}
 		});
-		pointFormat.setToolTipText("Set the number format such as \'###0.#\' where\r" +
-									"-\'#\' is a digit \r" +
-									"-\'0\' is a digit that will be always displayed (0 if none)\r" +
-									"-\'.\' is the decimal point");
+		pointFormat.setToolTipText(toolTipText);
+
+		label = new Label(formatGrp, SWT.NONE);
+		label.setText("Region Angle Format");
+		label.setToolTipText("Format for the region angle values shown in the Region Editor tool");
+
+		angleFormat = new Text(formatGrp, SWT.BORDER);
+		angleFormat.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
+		angleFormat.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				storePreferences();
+			}
+		});
+		angleFormat.setToolTipText(toolTipText);
 
 		label = new Label(formatGrp, SWT.NONE);
 		label.setText("Intensity Format");
@@ -114,11 +134,7 @@ public class RegionEditorPreferencePage extends PreferencePage implements IWorkb
 				storePreferences();
 			}
 		});
-		intensityFormat.setToolTipText("Set the number format such as \'0.##E0#\' where\r" +
-										"-\'#\' is a digit \r" +
-										"-\'0\' is a digit that will be always displayed (0 if none)\r" +
-										"-\'.\' is the decimal point\r" +
-										"-\'E\' is the scientific notation character");
+		intensityFormat.setToolTipText(sciToolTipText);
 
 		label = new Label(formatGrp, SWT.NONE);
 		label.setText("Sum format");
@@ -131,11 +147,7 @@ public class RegionEditorPreferencePage extends PreferencePage implements IWorkb
 				storePreferences();
 			}
 		});
-		sumFormat.setToolTipText("Set the number format such as \'0.##E0#\' where\r" +
-									"-\'#\' is a digit \r" +
-									"-\'0\' is a digit that will be always displayed (0 if none)\r" +
-									"-\'.\' is the decimal point\r" +
-									"-\'E\' is the scientific notation character");
+		sumFormat.setToolTipText(sciToolTipText);
 
 		// initialize
 		initializePage();
@@ -145,6 +157,7 @@ public class RegionEditorPreferencePage extends PreferencePage implements IWorkb
 	private void initializePage() {
 		regionMoveableCheckbox.setSelection(getRegionMoveable());
 		pointFormat.setText(getPointFormat());
+		angleFormat.setText(getAngleFormat());
 		intensityFormat.setText(getIntensityFormat());
 		sumFormat.setText(getSumFormat());
 	}
@@ -172,6 +185,7 @@ public class RegionEditorPreferencePage extends PreferencePage implements IWorkb
 	protected void performDefaults() {
 		regionMoveableCheckbox.setSelection(getDefaultRegionMoveable());
 		pointFormat.setText(getDefaultPointFormat());
+		angleFormat.setText(getDefaultAngleFormat());
 		intensityFormat.setText(getDefaultIntensityFormat());
 		sumFormat.setText(getDefaultSumFormat());
 	}
@@ -188,6 +202,11 @@ public class RegionEditorPreferencePage extends PreferencePage implements IWorkb
 		checkState(format);
 		if (!isValid()) return false;
 		setPointFormat(format);
+
+		format = angleFormat.getText();
+		checkState(format);
+		if (!isValid()) return false;
+		setAngleFormat(format);
 
 		format = intensityFormat.getText();
 		checkState(format);
@@ -214,6 +233,10 @@ public class RegionEditorPreferencePage extends PreferencePage implements IWorkb
 		getPreferenceStore().setValue(RegionEditorConstants.MOBILE_REGION_SETTING, isMoveable);
 	}
 
+	public void setPointFormat(String format) {
+		getPreferenceStore().setValue(RegionEditorConstants.POINT_FORMAT, format);
+	}
+
 	private String getDefaultPointFormat() {
 		return getPreferenceStore().getDefaultString(RegionEditorConstants.POINT_FORMAT);
 	}
@@ -222,8 +245,16 @@ public class RegionEditorPreferencePage extends PreferencePage implements IWorkb
 		return getPreferenceStore().getString(RegionEditorConstants.POINT_FORMAT);
 	}
 
-	public void setPointFormat(String format) {
-		getPreferenceStore().setValue(RegionEditorConstants.POINT_FORMAT, format);
+	public void setAngleFormat(String format) {
+		getPreferenceStore().setValue(RegionEditorConstants.ANGLE_FORMAT, format);
+	}
+
+	private String getDefaultAngleFormat() {
+		return getPreferenceStore().getDefaultString(RegionEditorConstants.ANGLE_FORMAT);
+	}
+
+	private String getAngleFormat() {
+		return getPreferenceStore().getString(RegionEditorConstants.ANGLE_FORMAT);
 	}
 
 	private String getDefaultIntensityFormat() {

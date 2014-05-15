@@ -9,8 +9,9 @@ public class RegionEditorPreferenceInitializer extends AbstractPreferenceInitial
 	@Override
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = Activator.getPlottingPreferenceStore();
-		store.setDefault(RegionEditorConstants.MOBILE_REGION_SETTING, false);
+		store.setDefault(RegionEditorConstants.MOBILE_REGION_SETTING, true);
 		store.setDefault(RegionEditorConstants.POINT_FORMAT,     "##0");
+		store.setDefault(RegionEditorConstants.ANGLE_FORMAT,     "##0");
 		store.setDefault(RegionEditorConstants.INTENSITY_FORMAT, "0.######E0#");
 		store.setDefault(RegionEditorConstants.SUM_FORMAT,       "0.######E0#");
 	}

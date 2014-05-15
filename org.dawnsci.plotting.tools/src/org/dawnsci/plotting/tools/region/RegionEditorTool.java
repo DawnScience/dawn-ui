@@ -6,6 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.measure.quantity.Dimensionless;
+import javax.measure.unit.NonSI;
+import javax.measure.unit.SI;
+import javax.measure.unit.Unit;
+import javax.swing.tree.TreeNode;
+
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.roi.data.LinearROIData;
 import org.dawb.common.ui.plot.roi.data.ROIData;
@@ -18,7 +24,9 @@ import org.dawb.common.ui.wizard.persistence.PersistenceImportWizard;
 import org.dawnsci.common.widgets.tree.ClearableFilteredTree;
 import org.dawnsci.common.widgets.tree.DelegatingProviderWithTooltip;
 import org.dawnsci.common.widgets.tree.IResettableExpansion;
+import org.dawnsci.common.widgets.tree.LabelNode;
 import org.dawnsci.common.widgets.tree.NodeFilter;
+import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.common.widgets.tree.UnitEditingSupport;
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
@@ -106,83 +114,22 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 	private ClearableFilteredTree filteredTree;
 
 	private RegionColorListener viewUpdateListener;
+	private ITraceListener traceListener;
+	private IPropertyChangeListener propertyListener;
 
 	/**
 	 * A map to store dragBounds which are not the official bounds
 	 * of the selection until the user lets go.
 	 */
 	private Map<String,IROI> dragBounds;
-
-	private ITraceListener traceListener;
-
 	private RegionBoundsUIJob updateJob;
 
 	public RegionEditorTool() {
 		super();
 		dragBounds = new HashMap<String,IROI>(7);
-
-		Activator.getPlottingPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent event) {
-				if (isActive()) {
-					if(isInterestedProperty(event))
-						viewer.refresh();
-				}
- 			}
-
-			private boolean isInterestedProperty(PropertyChangeEvent event) {
-				final String propName = event.getProperty();
-				return RegionEditorConstants.POINT_FORMAT.equals(propName) ||
-						RegionEditorConstants.INTENSITY_FORMAT.equals(propName) ||
-						RegionEditorConstants.SUM_FORMAT.equals(propName);
-			}
-		});
-
-		traceListener = new ITraceListener() {
-			@Override
-			public void tracesUpdated(TraceEvent evt) {
-			}
-			
-			@Override
-			public void tracesRemoved(TraceEvent evet) {
-			}
-			
-			@Override
-			public void tracesAdded(TraceEvent evt) {
-			}
-			
-			@Override
-			public void traceWillPlot(TraceWillPlotEvent evt) {
-			}
-			
-			@Override
-			public void traceUpdated(TraceEvent evt) {
-				if (viewer != null && viewer.getControl().isDisposed())
-					return;
-				viewer.refresh();
-			}
-			
-			@Override
-			public void traceRemoved(TraceEvent evt) {
-				if (viewer != null && viewer.getControl().isDisposed())
-					return;
-				viewer.refresh();
-			}
-			
-			@Override
-			public void traceCreated(TraceEvent evt) {
-				if (viewer != null && viewer.getControl().isDisposed())
-					return;
-				viewer.refresh();
-			}
-			
-			@Override
-			public void traceAdded(TraceEvent evt) {
-				if (viewer != null && viewer.getControl().isDisposed())
-					return;
-				viewer.refresh();
-			}
-		};
+		propertyListener = new FormatChangeListener();
+		Activator.getPlottingPreferenceStore().addPropertyChangeListener(propertyListener);
+		traceListener = new TraceListener();
 	}
 
 	@Override
@@ -246,14 +193,114 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		getSite().setSelectionProvider(viewer);
 	}
 
-	public class RegionColorListener implements ISelectionChangedListener {
+	// Listeners
+	class TraceListener implements ITraceListener {
+		@Override
+		public void traceUpdated(TraceEvent evt) {
+			if (viewer != null && viewer.getControl().isDisposed())
+				return;
+			viewer.refresh();
+		}
+		
+		@Override
+		public void traceRemoved(TraceEvent evt) {
+			if (viewer != null && viewer.getControl().isDisposed())
+				return;
+			viewer.refresh();
+		}
+		
+		@Override
+		public void traceCreated(TraceEvent evt) {
+			if (viewer != null && viewer.getControl().isDisposed())
+				return;
+			viewer.refresh();
+		}
+		
+		@Override
+		public void traceAdded(TraceEvent evt) {
+			if (viewer != null && viewer.getControl().isDisposed())
+				return;
+			viewer.refresh();
+		}
+
+		@Override
+		public void tracesUpdated(TraceEvent evt) {
+		}
+
+		@Override
+		public void tracesRemoved(TraceEvent evet) {
+		}
+
+		@Override
+		public void tracesAdded(TraceEvent evt) {
+		}
+
+		@Override
+		public void traceWillPlot(TraceWillPlotEvent evt) {
+		}
+	};
+
+	class FormatChangeListener implements IPropertyChangeListener {
+		@Override
+		public void propertyChange(PropertyChangeEvent event) {
+			if (isActive()) {
+				if(isInterestedProperty(event)) {
+					updateFormat();
+				}
+			}
+		}
+
+		private boolean isInterestedProperty(PropertyChangeEvent event) {
+			final String propName = event.getProperty();
+			return RegionEditorConstants.POINT_FORMAT.equals(propName) ||
+					RegionEditorConstants.ANGLE_FORMAT.equals(propName) ||
+					RegionEditorConstants.INTENSITY_FORMAT.equals(propName) ||
+					RegionEditorConstants.SUM_FORMAT.equals(propName);
+		}
+
+		private void updateFormat() {
+			IPreferenceStore store = Activator.getPlottingPreferenceStore();
+			String pointFormat = store.getString(RegionEditorConstants.POINT_FORMAT);
+			String angleFormat = store.getString(RegionEditorConstants.ANGLE_FORMAT);
+			String maxIntensityFormat = store.getString(RegionEditorConstants.INTENSITY_FORMAT);
+			String sumFormat = store.getString(RegionEditorConstants.SUM_FORMAT);
+
+			LabelNode root = model.getRoot();
+			List<TreeNode> nodes = root.getChildren();
+			for (TreeNode node : nodes) {
+				RegionNode regionNode = (RegionNode) node;
+				List<TreeNode> regionChildren = regionNode.getChildren();
+				for (TreeNode child : regionChildren) {
+					if (child instanceof NumericNode<?>) {
+						NumericNode<?> numNode = (NumericNode<?>) child;
+						Unit<?> unit = numNode.getUnit();
+						if (unit.equals(Dimensionless.UNIT)) {
+							if (numNode.getLabel().equals("Max Intensity"))
+								numNode.setFormat(maxIntensityFormat);
+							else if (numNode.getLabel().equals("Sum"))
+								numNode.setFormat(sumFormat);
+						} else if (unit.equals(NonSI.DEGREE_ANGLE)
+								|| unit.equals(SI.RADIAN)) {
+							numNode.setIncrement(getDecimal(angleFormat));
+							numNode.setFormat(angleFormat);
+						} else if (unit.equals(NonSI.PIXEL)) {
+							numNode.setIncrement(getDecimal(pointFormat));
+							numNode.setFormat(pointFormat);
+						}
+					}
+				}
+			}
+			viewer.refresh();
+		}
+	};
+
+	class RegionColorListener implements ISelectionChangedListener {
 
 		private IRegion previousRegion;
 		private Color previousColor;
 
 		@Override
 		public void selectionChanged(SelectionChangedEvent event) {
-
 			final IStructuredSelection sel = (IStructuredSelection) event.getSelection();
 			if (!(sel.getFirstElement() instanceof RegionNode))
 				return;
@@ -572,7 +619,8 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			for (IRegion iRegion : regions) iRegion.removeROIListener(this);
 		} catch (Exception e) {
 			logger.error("Cannot remove region listeners!", e);
-		}		
+		}
+		Activator.getPlottingPreferenceStore().removePropertyChangeListener(propertyListener);
 	}
 
 	@Override
@@ -896,5 +944,19 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		} catch (Throwable ne) {
 			// intentionally silent
 		}
+	}
+
+	/**
+	 * 
+	 * @param format
+	 * @return the increment value given a String format
+	 */
+	static public double getDecimal(String format) {
+		int decimal = format.split("\\.").length > 1 ? format.split("\\.")[1].length() : 0;
+		double increment = 1;
+		for (int i = 0; i < decimal; i++) {
+			increment = (double) increment / 10;
+		}
+		return increment;
 	}
 }
