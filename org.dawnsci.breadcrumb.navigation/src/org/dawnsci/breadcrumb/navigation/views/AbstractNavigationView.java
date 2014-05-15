@@ -274,7 +274,6 @@ public abstract class AbstractNavigationView extends ViewPart implements ISelect
 		final MenuManager     menuMan = new MenuManager();
 		
 		man.add(new Separator("breadcrumb.group"));
-		menuMan.add(new Separator("breadcrumb.group"));
 		
 		Action add = new Action("Add another breadcrumb search", Activator.getImageDescriptor("icons/ui-tooltip--plus.png")) {
 			public void run() {
@@ -282,7 +281,6 @@ public abstract class AbstractNavigationView extends ViewPart implements ISelect
 			}
 		};
 		man.add(add);
-		menuMan.add(add);
 		
 		man.add(new Separator("refresh.group"));
 		menuMan.add(new Separator("refresh.group"));
@@ -303,7 +301,6 @@ public abstract class AbstractNavigationView extends ViewPart implements ISelect
 			}
 		};
 		man.add(refresh);
-		menuMan.add(refresh);
 
 		// Actions to search data collection table
 		for(INavigationDelegateMode mode : pages.keySet()) {
