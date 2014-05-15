@@ -1049,21 +1049,21 @@ public class HistogramToolPage extends AbstractToolPage {
 		// set the minmax values
 		minMaxValue.setMin(MIN_LABEL, scaleMin);
 		minMaxValue.setMax(MIN_LABEL, scaleMax);
-		if (!minMaxValue.isSpinner(MIN_LABEL, event)) minMaxValue.setValue(MIN_LABEL, histoMin);
+		if (event != null && !minMaxValue.isSpinner(MIN_LABEL, event)) minMaxValue.setValue(MIN_LABEL, histoMin);
 
 		minMaxValue.setMin(MAX_LABEL, scaleMin);
 		minMaxValue.setMax(MAX_LABEL, scaleMax);
-		if (!minMaxValue.isSpinner(MAX_LABEL, event)) minMaxValue.setValue(MAX_LABEL, histoMax);
+		if( event != null && !minMaxValue.isSpinner(MAX_LABEL, event)) minMaxValue.setValue(MAX_LABEL, histoMax);
 
 		// Set the brightness
 		brightnessContrastValue.setMin(BRIGHTNESS_LABEL, scaleMin);
 		brightnessContrastValue.setMax(BRIGHTNESS_LABEL, scaleMax);
-		if (!brightnessContrastValue.isSpinner(BRIGHTNESS_LABEL, event)) brightnessContrastValue.setValue(BRIGHTNESS_LABEL, (histoMax+histoMin)/2.0);
+		if (event != null && !brightnessContrastValue.isSpinner(BRIGHTNESS_LABEL, event)) brightnessContrastValue.setValue(BRIGHTNESS_LABEL, (histoMax+histoMin)/2.0);
 
 		// Set the contrast
 		brightnessContrastValue.setMin(CONTRAST_LABEL, 0.0);
 		brightnessContrastValue.setMax(CONTRAST_LABEL, scaleMax-scaleMin);
-		if (!brightnessContrastValue.isSpinner(CONTRAST_LABEL, event)) brightnessContrastValue.setValue(CONTRAST_LABEL, histoMax-histoMin);
+		if (event != null && !brightnessContrastValue.isSpinner(CONTRAST_LABEL, event)) brightnessContrastValue.setValue(CONTRAST_LABEL, histoMax-histoMin);
 		
 		if (!rangeSlider.isEventSource(event)) {
 			double tempMin = scaleMin;
