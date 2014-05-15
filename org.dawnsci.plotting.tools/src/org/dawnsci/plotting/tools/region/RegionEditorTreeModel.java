@@ -1,9 +1,6 @@
 package org.dawnsci.plotting.tools.region;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -48,7 +45,6 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 	private boolean isRegionDragged = false;
 
 	private boolean isTreeModified = false;
-	private Collection<RegionNode> regionNodes = new HashSet<RegionNode>();
 	private IPlottingSystem plottingSystem;
 
 	public RegionEditorTreeModel(IPlottingSystem plottingSystem, Collection<IRegion> regions) throws Exception {
@@ -60,15 +56,21 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 
 	public void addRegion(IRegion region, double maxIntensity, double sum) {
 		String name = region.getName();
-		if (!nodeExist(regionNodes, name)) {
-			regionNodes.add(createRegion(region, maxIntensity, sum));
+		List<TreeNode> nodes = root.getChildren();
+		if (!nodeExist(nodes, name)) {
+			createRegion(region, maxIntensity, sum);
 		}
 	}
 
-	private boolean nodeExist(Collection<RegionNode> node, String name) {
-		for (RegionNode regionNode : node) {
-			if(regionNode.getLabel().equals(name))
-				return true;
+	private boolean nodeExist(List<TreeNode> nodes, String name) {
+		if (nodes == null)
+			return false;
+		for (TreeNode node : nodes) {
+			if (node instanceof RegionNode) {
+				RegionNode regionNode = (RegionNode) node;
+				if(regionNode.getLabel().equals(name))
+					return true;
+			}
 		}
 		return false;
 	}
@@ -260,26 +262,30 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 	}
 
 	public void updateRegion(IRegion region, double maxIntensity, double sum) {
-		for (RegionNode node : regionNodes) {
-			String label = node.getLabel();
-			if (label.equals(region.getName())) {
-				List<TreeNode> children = node.getChildren();
-				IROI roi = region.getROI();
-				Map<String, Double> roiInfos = RegionNodeFactory.getRegionNodeInfos(roi);
-				Set<Entry<String,Double>> set = roiInfos.entrySet();
-				int i = 0;
-				for (Entry<String, Double> entry : set) {
-					NumericNode<?> aChild = (NumericNode<?>) children.get(i);
-					String key = entry.getKey();
-					if (key.equals("Max Intensity"))
-						aChild.setDoubleValue(maxIntensity);
-					else if (key.equals("Sum"))
-						aChild.setDoubleValue(sum);
-					else if (key.contains("Angle") && node.isAngleInRadian())
-						aChild.setDoubleValue(Math.toRadians(entry.getValue()));
-					else
-						aChild.setDoubleValue(entry.getValue());
-					i++;
+		List<TreeNode> nodes = root.getChildren();
+		for (TreeNode node : nodes) {
+			if (node instanceof RegionNode) {
+				RegionNode regionNode = (RegionNode) node;
+				String label = regionNode.getLabel();
+				if (label.equals(region.getName())) {
+					List<TreeNode> children = regionNode.getChildren();
+					IROI roi = region.getROI();
+					Map<String, Double> roiInfos = RegionNodeFactory.getRegionNodeInfos(roi);
+					Set<Entry<String,Double>> set = roiInfos.entrySet();
+					int i = 0;
+					for (Entry<String, Double> entry : set) {
+						NumericNode<?> aChild = (NumericNode<?>) children.get(i);
+						String key = entry.getKey();
+						if (key.equals("Max Intensity"))
+							aChild.setDoubleValue(maxIntensity);
+						else if (key.equals("Sum"))
+							aChild.setDoubleValue(sum);
+						else if (key.contains("Angle") && regionNode.isAngleInRadian())
+							aChild.setDoubleValue(Math.toRadians(entry.getValue()));
+						else
+							aChild.setDoubleValue(entry.getValue());
+						i++;
+					}
 				}
 			}
 		}
@@ -287,7 +293,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 
 	public void removeRegion(RegionNode regionNode) {
 		int childrenNumber = root.getChildCount();
-		regionNodes.remove(regionNode);
+//		regionNodes.remove(regionNode);
 		root.removeChild(regionNode);
 		regionNode.dispose();
 		if (childrenNumber < 2) {
