@@ -480,6 +480,13 @@ public abstract class AbstractRegionTableTool extends AbstractToolPage implement
 	@Override
 	public void regionCancelled(RegionEvent evt) {
 	}
+
+	@Override
+	public void regionNameChanged(RegionEvent evt, String oldName) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	@Override
 	public void regionAdded(RegionEvent evt) {
 		if (!isActive()) return;

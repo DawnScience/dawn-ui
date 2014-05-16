@@ -478,6 +478,11 @@ public abstract class AbstractPlottingSystem implements IPlottingSystem, IToolPa
 		for (IRegionListener l : regionListeners) l.regionCreated(evt);
 	}
 
+	protected void fireRegionNameChanged(RegionEvent evt, String oldName) {
+		if (regionListeners==null) return;
+		for (IRegionListener l : regionListeners) l.regionNameChanged(evt, oldName);
+	}
+
 	protected void fireRegionAdded(RegionEvent evt) {
 		if (regionListeners==null) return;
 		for (IRegionListener l : regionListeners) l.regionAdded(evt);
@@ -507,7 +512,7 @@ public abstract class AbstractPlottingSystem implements IPlottingSystem, IToolPa
 
 	@Override
 	public void renameRegion(final IRegion region, String name) {
-		// Do nothing
+		fireRegionNameChanged(new RegionEvent(region), region.getName());
 	}
 
 	@Override

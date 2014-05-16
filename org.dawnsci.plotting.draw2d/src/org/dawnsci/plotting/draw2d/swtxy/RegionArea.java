@@ -277,7 +277,7 @@ public class RegionArea extends PlotArea {
 	}
 	
 	public void renameRegion(final AbstractSelectionRegion<?> region, String name) {
-		
+		String oldName = region.getName();
 		// Fix http://jira.diamond.ac.uk/browse/SCI-1056, do not loose order on rename		
 		final Map<String, AbstractSelectionRegion<?>> sameOrder = new LinkedHashMap<String, AbstractSelectionRegion<?>>(regions.size());
 
@@ -287,11 +287,12 @@ public class RegionArea extends PlotArea {
 			if (entry.getKey().equals(region.getName())) {
 			    region.setName(name);
 			    region.setLabel(name);
-			    sameOrder.put(name, region);				
+			    sameOrder.put(name, region);
 			} else {
 				sameOrder.put(entry.getKey(), entry.getValue());
 			}
 		}
+		fireRegionNameChanged(new RegionEvent(region), oldName);
 		regions.clear();
 		regions.putAll(sameOrder);
 	}
@@ -578,6 +579,18 @@ public class RegionArea extends PlotArea {
 				l.regionCancelled(evt);
 			} catch (Throwable ne) {
 				logger.error("Notifying of region add being cancelled", ne);
+				continue;
+			}
+		}
+	}
+
+	protected void fireRegionNameChanged(RegionEvent evt, String oldName) {
+		if (regionListeners==null) return;
+		for (IRegionListener l : regionListeners) {
+			try {
+				l.regionNameChanged(evt, oldName);
+			} catch (Throwable ne) {
+				logger.error("Notifying of region changed", ne);
 				continue;
 			}
 		}

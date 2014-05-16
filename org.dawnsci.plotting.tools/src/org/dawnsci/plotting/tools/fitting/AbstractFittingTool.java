@@ -369,6 +369,12 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 	}
 
 	@Override
+	public void regionNameChanged(RegionEvent evt, String oldName) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
 	public void regionAdded(RegionEvent evt) {
 		if (evt==null || evt.getRegion()==null) {
 			getPlottingSystem().clearRegions();

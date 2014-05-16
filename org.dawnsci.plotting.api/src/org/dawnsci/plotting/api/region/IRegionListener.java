@@ -24,6 +24,11 @@ public interface IRegionListener extends EventListener {
 		}
 
 		@Override
+		public void regionNameChanged(RegionEvent evt, String oldName) {
+			update(evt);
+		}
+	
+		@Override
 		public void regionAdded(RegionEvent evt) {
 			update(evt);
 		}
@@ -55,7 +60,14 @@ public interface IRegionListener extends EventListener {
 	 * @param evt
 	 */
 	void regionCancelled(final RegionEvent evt);
-	
+
+	/**
+	 * Called when region name changes.
+	 * @param evt
+	 * @param oldName
+	 */
+	void regionNameChanged(final RegionEvent evt, String oldName);
+
 	/**
 	 * Called when region added to graph.
 	 * @param evt
