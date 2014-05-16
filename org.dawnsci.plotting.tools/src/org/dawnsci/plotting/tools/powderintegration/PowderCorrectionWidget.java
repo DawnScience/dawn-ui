@@ -20,8 +20,21 @@ public class PowderCorrectionWidget {
 	
 	public PowderCorrectionWidget(Composite composite) {
 		
-		composite.setLayout(new GridLayout());
+		composite.setLayout(new GridLayout(2, false));
 		
+		setUpPolarisationCorrection(composite);
+		setUpNoInputCorrections(composite);
+		setUpTranmissionCorrection(composite);
+		
+		
+		
+	}
+	
+	public PowderCorrectionModel getModel() {
+		return model;
+	}
+	
+	private void setUpPolarisationCorrection(Composite composite) {
 		final CheckBoxGroup polarGroup = new CheckBoxGroup(composite, SWT.NONE);
 		polarGroup.setText("Apply Polarisation Correction");
 		Composite content = polarGroup.getContent();
@@ -90,20 +103,21 @@ public class PowderCorrectionWidget {
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
-		
-		
+	}
+	
+	private void setUpTranmissionCorrection(Composite composite) {
 		final CheckBoxGroup transGroup = new CheckBoxGroup(composite, SWT.NONE);
 		transGroup.setText("Apply Detector Transmission Correction");
-		content = transGroup.getContent();
+		Composite content = transGroup.getContent();
 		content.setLayout(new GridLayout(2,true));
-		lbl = new Label(content, SWT.None);
+		Label lbl = new Label(content, SWT.None);
 		lbl.setText("Tranmission Factor:");
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER,true, false));
 		
 		final Text transTxt = new Text(content, SWT.SINGLE | SWT.RIGHT);
 		transTxt.setLayoutData(new GridData(SWT.FILL, SWT.CENTER,true, false));
 		transTxt.setText(String.valueOf(model.getTransmittedFraction()));
-		final FloatDecorator fdt = new FloatDecorator(factoTxt);
+		final FloatDecorator fdt = new FloatDecorator(transTxt);
 		fdt.setMinimum(0);
 		fdt.setMaximum(1);
 		
@@ -113,13 +127,17 @@ public class PowderCorrectionWidget {
 			public void modifyText(ModifyEvent e) {
 				if (!fdt.isError()) {
 					try {
-						model.setTransmittedFraction(Double.parseDouble(factoTxt.getText()));
+						model.setTransmittedFraction(Double.parseDouble(transTxt.getText()));
 					} catch (NumberFormatException nfe) {
 						//do nothing
 					}
 				}
 			}
 		});
+		
+		
+		if (model.isAppyDetectorTransmissionCorrection()) transGroup.activate();
+		else transGroup.deactivate(); 
 		
 		transGroup.addSelectionListener(new SelectionListener() {
 
@@ -132,8 +150,14 @@ public class PowderCorrectionWidget {
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
+	}
+	
+	private void setUpNoInputCorrections(Composite composite) {
 		
-		final Button solidAngleCorrection = new Button(composite, SWT.CHECK);
+		Composite noIn = new Composite(composite, SWT.NONE);
+		noIn.setLayout(new GridLayout());
+		
+		final Button solidAngleCorrection = new Button(noIn, SWT.CHECK);
 		solidAngleCorrection.setText("Apply Solid Angle Correction");
 		
 		solidAngleCorrection.addSelectionListener(new SelectionListener() {
@@ -148,9 +172,24 @@ public class PowderCorrectionWidget {
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
-	}
-	
-	public PowderCorrectionModel getModel() {
-		return model;
+		
+		
+		
+		
+		final Button lorentzCorrection = new Button(noIn, SWT.CHECK);
+		lorentzCorrection.setText("Apply Lorentz Correction");
+		
+		lorentzCorrection.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				model.setApplyLorentzCorrection(lorentzCorrection.getSelection());
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		});
 	}
 }
