@@ -649,6 +649,32 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 	}
 
 	@Override
+	public void regionNameChanged(RegionEvent evt, String oldName) {
+		if (!isActive())
+			return;
+		IRegion region = evt.getRegion();
+		if (region == null)
+			return;
+		LabelNode root = model.getRoot();
+		if (root == null)
+			return;
+		List<TreeNode> nodes = root.getChildren();
+		if (nodes == null)
+			return;
+		for (TreeNode node : nodes) {
+			if (node instanceof RegionNode) {
+				RegionNode regionNode = (RegionNode) node;
+				if (regionNode.getLabel().equals(oldName)) {
+					regionNode.setLabel(region.getName());
+					if (viewer!=null)
+						viewer.refresh();
+					break;
+				}
+			}
+		}
+	}
+
+	@Override
 	public void regionAdded(RegionEvent evt) {
 		if (!isActive()) return;
 		IRegion region = evt.getRegion();
@@ -677,12 +703,23 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			return;
 		IRegion region = evt.getRegion();
 		if (region != null) {
-			RegionNode regionNode = (RegionNode)model.getNode("/"+region.getName());
-			if (regionNode == null)
+			LabelNode root = model.getRoot();
+			if (root == null)
 				return;
-			model.removeRegion(regionNode);
-			region.removeROIListener(this);
-			getPlottingSystem().removeRegion(region);
+			List<TreeNode> nodes = root.getChildren();
+			if (nodes == null)
+				return;
+			for (TreeNode node : nodes) {
+				if (node instanceof RegionNode) {
+					RegionNode regionNode = (RegionNode) node;
+					if (regionNode.getLabel().equals(region.getName())) {
+						model.removeRegion(regionNode);
+						region.removeROIListener(this);
+						getPlottingSystem().removeRegion(region);
+						break;
+					}
+				}
+			}
 		}
 	}
 

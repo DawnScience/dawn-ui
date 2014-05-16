@@ -9,6 +9,7 @@
 package org.dawnsci.plotting.tools.region;
 
 import org.dawnsci.common.widgets.tree.LabelNode;
+import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IRegion;
 
 /**
@@ -25,6 +26,7 @@ public class RegionNode extends LabelNode {
 	private boolean isMobile;
 	private boolean angleInRadian = false;
 	private IRegion region;
+	private IPlottingSystem plottingSystem;
 
 	public RegionNode() {
 		super(null, null);
@@ -38,7 +40,8 @@ public class RegionNode extends LabelNode {
 		super(label, null);
 	}
 
-	public RegionNode(IRegion region, LabelNode parent) {
+	public RegionNode(IPlottingSystem plottingSystem, IRegion region, LabelNode parent) {
+		this.plottingSystem = plottingSystem;
 		this.region = region;
 		setLabel(region.getName());
 		setParent(parent);
@@ -48,8 +51,13 @@ public class RegionNode extends LabelNode {
 
 	public void setName(String value) {
 		setLabel(value);
+		setTooltip(value);
 		region.getROI().setName(value);
-		region.setName(value);
+		try {
+			plottingSystem.renameRegion(region, value);
+		} catch (Exception e) {
+			System.err.println("Error renaming region:"+ e.getMessage());
+		}
 	}
 
 	public boolean isVisible() {

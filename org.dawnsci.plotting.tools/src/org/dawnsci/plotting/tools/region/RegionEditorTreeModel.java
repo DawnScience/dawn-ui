@@ -83,7 +83,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		String sumFormat = store.getString(RegionEditorConstants.SUM_FORMAT);
 		double increment = RegionEditorTool.getDecimal(pointFormat);
 
-		final RegionNode node = new RegionNode(region, root);
+		final RegionNode node = new RegionNode(plottingSystem, region, root);
 		node.setTooltip(region.getName());
 		node.setEditable(true);
 		node.setVisible(region.isVisible());
@@ -187,7 +187,12 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 	}
 
 	protected void setValue(RegionNode regionNode) {
-		IRegion region = plottingSystem.getRegion(regionNode.getLabel());
+		IRegion region = null;
+		Collection<IRegion> regions = plottingSystem.getRegions();
+		for (IRegion iRegion : regions) {
+			if (iRegion.getName().equals(regionNode.getLabel()))
+				region = iRegion;
+		}
 		if (region == null)
 			return;
 		IROI roi = region.getROI();
