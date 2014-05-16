@@ -243,11 +243,11 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 	class FormatChangeListener implements IPropertyChangeListener {
 		@Override
 		public void propertyChange(PropertyChangeEvent event) {
-			if (isActive()) {
+//			if (isActive()) {
 				if(isInterestedProperty(event)) {
 					updateFormat();
 				}
-			}
+//			}
 		}
 
 		private boolean isInterestedProperty(PropertyChangeEvent event) {
@@ -264,7 +264,8 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			String angleFormat = store.getString(RegionEditorConstants.ANGLE_FORMAT);
 			String maxIntensityFormat = store.getString(RegionEditorConstants.INTENSITY_FORMAT);
 			String sumFormat = store.getString(RegionEditorConstants.SUM_FORMAT);
-
+			if(model == null)
+				return;
 			LabelNode root = model.getRoot();
 			List<TreeNode> nodes = root.getChildren();
 			for (TreeNode node : nodes) {
@@ -620,7 +621,6 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		} catch (Exception e) {
 			logger.error("Cannot remove region listeners!", e);
 		}
-		Activator.getPlottingPreferenceStore().removePropertyChangeListener(propertyListener);
 	}
 
 	@Override
@@ -777,8 +777,10 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			if(region.getName().equals(iRegion.getName())){
 				iRegion.setRegionColor(ColorConstants.red);
 			} else {
-				if(iRegion.isActive()) iRegion.setRegionColor(ColorConstants.green);
-				else if (!iRegion.isActive()) iRegion.setRegionColor(ColorConstants.gray);
+				if (iRegion.isActive())
+					iRegion.setRegionColor(ColorConstants.green);
+				else if (!iRegion.isActive())
+					iRegion.setRegionColor(ColorConstants.gray);
 			}
 		}
 	}

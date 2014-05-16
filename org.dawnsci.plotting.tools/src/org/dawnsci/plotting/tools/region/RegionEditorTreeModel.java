@@ -82,6 +82,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		String intensityFormat = store.getString(RegionEditorConstants.INTENSITY_FORMAT);
 		String sumFormat = store.getString(RegionEditorConstants.SUM_FORMAT);
 		double increment = RegionEditorTool.getDecimal(pointFormat);
+		double incrementAngle = RegionEditorTool.getDecimal(angleFormat);
 
 		final RegionNode node = new RegionNode(plottingSystem, region, root);
 		node.setTooltip(region.getName());
@@ -101,9 +102,9 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 			String key = entry.getKey();
 			if (key.contains("Angle")) {
 				if (node.isAngleInRadian())
-					createAngleNode(node, entry.getKey(), true, increment, pointFormat, SI.RADIAN, Math.toRadians(entry.getValue()));
+					createAngleNode(node, entry.getKey(), true, incrementAngle, pointFormat, SI.RADIAN, Math.toRadians(entry.getValue()));
 				else
-					createAngleNode(node, entry.getKey(), true, increment, angleFormat, NonSI.DEGREE_ANGLE, entry.getValue());
+					createAngleNode(node, entry.getKey(), true, incrementAngle, angleFormat, NonSI.DEGREE_ANGLE, entry.getValue());
 			} else if (key.equals("Max Intensity"))
 				createLengthNode(node, key, false, increment, intensityFormat, Dimensionless.UNIT, maxIntensity);
 			else if (key.equals("Sum"))
