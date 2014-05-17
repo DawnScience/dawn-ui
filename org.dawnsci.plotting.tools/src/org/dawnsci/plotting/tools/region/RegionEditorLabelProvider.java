@@ -62,7 +62,7 @@ public class RegionEditorLabelProvider extends ColumnLabelProvider implements IS
 				ret.append(node.getLabel());
 				ret.append(" *", StyledString.QUALIFIER_STYLER);
 			} else {
-				ret.append(node.getLabel(), StyledString.DECORATIONS_STYLER);
+				ret.append(node.getLabel(), StyledString.QUALIFIER_STYLER);
 			}
 		}
 		return ret;
@@ -71,7 +71,7 @@ public class RegionEditorLabelProvider extends ColumnLabelProvider implements IS
 	private StyledString getStyledText(StyledString ret, NumericNode<? extends Quantity> node) {
 		switch(column) {
 		case 0: // Name
-			return ret.append(node.getDefaultValue(true), StyledString.QUALIFIER_STYLER);
+			return ret.append(node.getLabel(), StyledString.QUALIFIER_STYLER);
 		case 1: // Value
 			if (node.isNaN()) {
 				if (node.isEditable()) {

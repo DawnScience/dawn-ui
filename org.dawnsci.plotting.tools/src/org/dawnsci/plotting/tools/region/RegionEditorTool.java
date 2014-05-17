@@ -536,8 +536,8 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		TreeViewerColumn var = new TreeViewerColumn(viewer, SWT.LEFT, 0);
 		var.getColumn().setText("Name");
 		var.getColumn().setWidth(260);
+		var.setLabelProvider(new DelegatingProviderWithTooltip(new RegionEditorLabelProvider(0)));
 		var.setEditingSupport(new RegionEditorEditingSupport(viewer, 0));
-		var.setLabelProvider(new RegionEditorLabelProvider(0));
 
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 1);
 		var.getColumn().setText("Value");
