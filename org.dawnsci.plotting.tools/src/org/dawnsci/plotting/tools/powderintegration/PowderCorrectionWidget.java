@@ -26,8 +26,6 @@ public class PowderCorrectionWidget {
 		setUpNoInputCorrections(composite);
 		setUpTranmissionCorrection(composite);
 		
-		
-		
 	}
 	
 	public PowderCorrectionModel getModel() {
@@ -165,25 +163,6 @@ public class PowderCorrectionWidget {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				model.setApplySolidAngleCorrection(solidAngleCorrection.getSelection());
-				
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
-		});
-		
-		
-		
-		
-		final Button lorentzCorrection = new Button(noIn, SWT.CHECK);
-		lorentzCorrection.setText("Apply Lorentz Correction");
-		
-		lorentzCorrection.addSelectionListener(new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				model.setApplyLorentzCorrection(lorentzCorrection.getSelection());
 				
 			}
 			

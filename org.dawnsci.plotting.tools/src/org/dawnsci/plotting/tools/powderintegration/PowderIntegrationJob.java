@@ -205,8 +205,7 @@ public class PowderIntegrationJob extends Job {
 		
 		if (!corModel.isApplyPolarisationCorrection() &&
 				!corModel.isApplySolidAngleCorrection() &&
-				!corModel.isAppyDetectorTransmissionCorrection() &&
-				!corModel.isApplyLorentzCorrection()) return data;
+				!corModel.isAppyDetectorTransmissionCorrection()) return data;
 		
 		AbstractDataset localRef;
 		
@@ -229,10 +228,6 @@ public class PowderIntegrationJob extends Job {
 			
 			if (corModel.isAppyDetectorTransmissionCorrection()) {
 				PixelIntegrationUtils.detectorTranmissionCorrection(localRef, tth, corModel.getTransmittedFraction());
-			}
-			
-			if (corModel.isApplyLorentzCorrection()) {
-				PixelIntegrationUtils.lorentzCorrection(localRef, tth);
 			}
 			
 		} else {
