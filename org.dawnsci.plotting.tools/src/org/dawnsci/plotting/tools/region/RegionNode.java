@@ -94,4 +94,8 @@ public class RegionNode extends LabelNode {
 	public void setAngleInRadian(boolean angleInRadian) {
 		this.angleInRadian = angleInRadian;
 	}
+
+	public IRegion getRegion() {
+		return region;
+	}
 }

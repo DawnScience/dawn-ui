@@ -53,7 +53,6 @@ import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
@@ -67,8 +66,8 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
@@ -443,44 +442,44 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 
 		final Action copy = new Action("Copy region values to clipboard", Activator.getImageDescriptor("icons/plot-tool-measure-copy.png")) {
 			public void run() {
-				if (!isActive()) return;
-				final IStructuredSelection sel = (IStructuredSelection)viewer.getSelection();
-				if (!(sel.getFirstElement() instanceof IRegion)) return;
-				if (sel!=null && sel.getFirstElement()!=null) {
-					final IRegion region = (IRegion)sel.getFirstElement();
-					if (region==null||region.getROI()==null) return;
-					final IROI bounds = region.getROI();
-					if (bounds.getPointRef()==null) return;
-					
-					final Clipboard cb = new Clipboard(control.getDisplay());
-					TextTransfer textTransfer = TextTransfer.getInstance();
-					cb.setContents(new Object[]{region.getName()+"  "+bounds}, new Transfer[]{textTransfer});
-				}
+				if (!isActive())
+					return;
+				ITreeSelection selected = (ITreeSelection)viewer.getSelection();
+				if (selected == null)
+					return;
+				if (!(selected.getFirstElement() instanceof RegionNode))
+					return;
+				RegionNode regionNode = (RegionNode) selected.getFirstElement();
+				IRegion region = regionNode.getRegion();
+				if (region == null || region.getROI() == null)
+					return;
+				IROI bounds = region.getROI();
+				if (bounds.getPointRef() == null)
+					return;
+				Clipboard cb = new Clipboard(control.getDisplay());
+				TextTransfer textTransfer = TextTransfer.getInstance();
+				cb.setContents(new Object[]{region.getName()+"  "+bounds}, new Transfer[]{textTransfer});
 			}
 		};
-		copy.setToolTipText("Copies the region values as text to clipboard which can then be pasted externally.");
+		copy.setToolTipText("Copies the selected region values as text to clipboard which can then be pasted externally");
 
 		final MenuAction removeRegionDropDown = new MenuAction("Delete selection region(s)");
 		removeRegionDropDown.setId(BasePlottingConstants.REMOVE_REGION);
 
 		final Action show = new Action("Show all vertex values", Activator.getImageDescriptor("icons/plot-tool-measure-vertices.png")) {
 			public void run() {
-				if (!isActive()) return;
-				final Object[] oa = ((IStructuredContentProvider)viewer.getContentProvider()).getElements(null);
-				for (Object object : oa) {
-					if (object instanceof IRegion) ((IRegion)object).setShowPosition(true);
-				}
+				if (!isActive())
+					return;
+				showRegionVertices(true);
 			}
 		};
 		show.setToolTipText("Show vertices in all visible regions");
 
 		final Action clear = new Action("Show no vertex values", Activator.getImageDescriptor("icons/plot-tool-measure-clear.png")) {
 			public void run() {
-				if (!isActive()) return;
-				final Object[] oa = ((IStructuredContentProvider)viewer.getContentProvider()).getElements(null);
-				for (Object object : oa) {
-					if (object instanceof IRegion) ((IRegion)object).setShowPosition(false);
-				}
+				if (!isActive())
+					return;
+				showRegionVertices(false);
 			}
 		};
 		clear.setToolTipText("Clear all vertices shown in the plotting");
@@ -494,6 +493,7 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		};
 		preferences.setToolTipText("Open Region Editor preferences");
 
+		//toolbar buttons
 		toolBarMan.add(new Separator());
 		toolBarMan.add(getReselectAction());
 		toolBarMan.add(new Separator());
@@ -512,6 +512,15 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		MenuAction deleteMenuAction = (MenuAction) deleteMenu.getAction();
 		toolBarMan.add(deleteMenuAction);
 
+		// right click menu buttons
+		MenuManager rightClickMenuMan = new MenuManager();
+		rightClickMenuMan.add(copy);
+		rightClickMenuMan.add(show);
+		rightClickMenuMan.add(clear);
+		rightClickMenuMan.add(deleteMenuAction);
+		viewer.getControl().setMenu(rightClickMenuMan.createContextMenu(viewer.getControl()));
+
+		// menu buttons
 		menuMan.add(copy);
 		menuMan.add(show);
 		menuMan.add(clear);
@@ -519,54 +528,67 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		menuMan.add(deleteMenuAction);
 		menuMan.add(new Separator());
 		menuMan.add(preferences);
-		createRightClickMenu();
 	}
 
-	private void createRightClickMenu() {
-		final MenuManager menuManager = new MenuManager();
-		for (IContributionItem item : getSite().getActionBars().getMenuManager().getItems())
-			menuManager.add(item);
-		viewer.getControl().setMenu(menuManager.createContextMenu(viewer.getControl()));
+	private void showRegionVertices(boolean isShown) {
+		if (model == null)
+			return;
+		LabelNode root = model.getRoot();
+		if (root == null)
+			return;
+		List<TreeNode> nodes = root.getChildren();
+		for (TreeNode node : nodes) {
+			if (node instanceof RegionNode) {
+				RegionNode regionNode = (RegionNode) node;
+				IRegion region = regionNode.getRegion();
+				region.setShowPosition(isShown);
+			}
+		}
 	}
 
 	private void createColumns(final TreeViewer viewer) {
-
 		viewer.setColumnProperties(new String[] { "Name", "Value", "Unit", "Visible", "Active", "Mobile" });
 		ColumnViewerToolTipSupport.enableFor(viewer);
 
 		TreeViewerColumn var = new TreeViewerColumn(viewer, SWT.LEFT, 0);
 		var.getColumn().setText("Name");
-		var.getColumn().setWidth(260);
+		var.getColumn().setWidth(190);
+		var.getColumn().setMoveable(true);
 		var.setLabelProvider(new DelegatingProviderWithTooltip(new RegionEditorLabelProvider(0)));
 		var.setEditingSupport(new RegionEditorEditingSupport(viewer, 0));
 
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 1);
 		var.getColumn().setText("Value");
 		var.getColumn().setWidth(100);
+		var.getColumn().setMoveable(true);
 		var.setLabelProvider(new DelegatingProviderWithTooltip(new RegionEditorLabelProvider(1)));
 		var.setEditingSupport(new RegionEditorEditingSupport(viewer, 1));
 
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 2);
 		var.getColumn().setText("Unit");
 		var.getColumn().setWidth(90);
+		var.getColumn().setMoveable(true);
 		var.setLabelProvider(new DelegatingProviderWithTooltip(new RegionEditorLabelProvider(2)));
 		var.setEditingSupport(new UnitEditingSupport(viewer));
 
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 3);
 		var.getColumn().setText("Visible");
 		var.getColumn().setWidth(60);
+		var.getColumn().setMoveable(true);
 		var.setLabelProvider(new DelegatingProviderWithTooltip(new RegionEditorLabelProvider(3)));
 		var.setEditingSupport(new RegionEditorEditingSupport(viewer, 3));
 
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 4);
 		var.getColumn().setText("Active");
 		var.getColumn().setWidth(60);
+		var.getColumn().setMoveable(true);
 		var.setLabelProvider(new DelegatingProviderWithTooltip(new RegionEditorLabelProvider(4)));
 		var.setEditingSupport(new RegionEditorEditingSupport(viewer, 4));
 
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 5);
 		var.getColumn().setText("Mobile");
 		var.getColumn().setWidth(60);
+		var.getColumn().setMoveable(true);
 		var.setLabelProvider(new DelegatingProviderWithTooltip(new RegionEditorLabelProvider(5)));
 		var.setEditingSupport(new RegionEditorEditingSupport(viewer, 5));
 	}
@@ -764,7 +786,8 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			updateColorSelection(region);
 			TreeItem[] treeItems = viewer.getTree().getItems();
 			for (int i = 0; i < treeItems.length; i++) {
-				String name = treeItems[i].getText();
+				RegionNode node = (RegionNode)treeItems[i].getData();
+				String name = node.getLabel();
 				if(region.getName().equals(name)){
 					viewer.getTree().setSelection(treeItems[i]);
 					break;
