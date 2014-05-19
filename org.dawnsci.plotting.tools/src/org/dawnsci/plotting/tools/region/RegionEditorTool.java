@@ -328,7 +328,8 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 				for (IRegion iRegion : regions) {
 					if (iRegion.isUserRegion() && iRegion.isVisible()) {
 						// We have one already, do not go into create mode :)
-						if (iRegion.getRegionType() == IRegion.RegionType.BOX) return;
+						if (iRegion.getRegionType() == IRegion.RegionType.BOX)
+							return;
 					}
 				}
 			}
@@ -584,14 +585,18 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			try {
 				getPlottingSystem().addRegionListener(this);
 				final Collection<IRegion> regions = getPlottingSystem().getRegions();
-				for (IRegion iRegion : regions)
-					iRegion.addROIListener(this);
-				if (!isDedicatedView()) {
-					createNewRegion(false);
+				// Clean the model if there is no region
+				if (regions.isEmpty()) {
+					if (model != null)
+						model.removeAll();
 				}
 				for (IRegion iRegion : regions) {
+					iRegion.addROIListener(this);
 					if (model != null)
 						model.addRegion(iRegion, getMaxIntensity(iRegion), getSum(iRegion));
+				}
+				if (!isDedicatedView()) {
+					createNewRegion(false);
 				}
 				if (model != null && model.getRoot() != null && model.getRoot().getChildren() != null)
 					viewer.setInput(model.getRoot());
@@ -703,6 +708,8 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			return;
 		IRegion region = evt.getRegion();
 		if (region != null) {
+			if (model ==  null)
+				return;
 			LabelNode root = model.getRoot();
 			if (root == null)
 				return;

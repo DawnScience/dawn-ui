@@ -299,6 +299,11 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		viewer.refresh();
 	}
 
+	public void removeAll() {
+		viewer.remove(root);
+		viewer.refresh();
+	}
+
 	public boolean isRegionDragged() {
 		return isRegionDragged;
 	}
