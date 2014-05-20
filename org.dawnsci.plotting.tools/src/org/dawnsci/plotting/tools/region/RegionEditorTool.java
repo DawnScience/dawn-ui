@@ -92,7 +92,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.function.MapToRotatedCartesianAndIntegrate;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
@@ -938,30 +937,34 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 					RectangularROI rroi = (RectangularROI)roi;
 					int xStart = (int)rroi.getPoint()[0];
 					int yStart = (int)rroi.getPoint()[1];
-					int width = (int)rroi.getLengths()[0];
-					int height = (int)rroi.getLengths()[1];
+//					int width = (int)rroi.getLengths()[0];
+//					int height = (int)rroi.getLengths()[1];
+					int xStop = (int) rroi.getEndPoint()[0];
+					int yStop = (int) rroi.getEndPoint()[1];
 					double angle = rroi.getAngle();
+					// clip if region is out of bounds of trace
+					if (xStart < 0)
+						xStart = 0;
+					if (yStart < 0)
+						yStart = 0;
+					if (xStop > dataRegion.getShape()[1])
+						xStop = dataRegion.getShape()[1];
+					if (yStop > dataRegion.getShape()[0])
+						yStop = dataRegion.getShape()[0];
 					if (angle == 0) {
-						
-						int xStop = (int) rroi.getEndPoint()[0];
-						int yStop = (int) rroi.getEndPoint()[1];
 						int xInc = rroi.getPoint()[0]<rroi.getEndPoint()[0] ? 1 : -1;
 						int yInc = rroi.getPoint()[1]<rroi.getEndPoint()[1] ? 1 : -1;
-						if (dataRegion == null)
-							return result;
+						System.out.println("xstart:"+xStart);
+						System.out.println("ystart:"+yStart);
+						System.out.println("xend:"+xStop);
+						System.out.println("yend:"+yStop);
 						dataRegion = dataRegion.getSlice(
 								new int[] { yStart, xStart },
 								new int[] { yStop, xStop },
 								new int[] {yInc, xInc});
 						result = (Double)dataRegion.sum(true);
 					} else {
-						MapToRotatedCartesianAndIntegrate rcmapint = new MapToRotatedCartesianAndIntegrate(xStart, yStart, width, height, angle, false);
-						List<AbstractDataset> dsets = rcmapint.value(getPlottingSystem().getTraces().iterator().next().getData());
-						if (dsets == null)
-							return Double.NaN;
-						result = (Double)dsets.get(0).sum();
-//						profiles[0] = dsets.get(1);
-//						profiles[1] = dsets.get(0);
+						// TODO do calculation if non-null angle
 						return result;
 					}
 				} else if (roi instanceof LinearROI){
