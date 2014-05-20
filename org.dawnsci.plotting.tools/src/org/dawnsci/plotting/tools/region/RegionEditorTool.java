@@ -954,10 +954,6 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 					if (angle == 0) {
 						int xInc = rroi.getPoint()[0]<rroi.getEndPoint()[0] ? 1 : -1;
 						int yInc = rroi.getPoint()[1]<rroi.getEndPoint()[1] ? 1 : -1;
-						System.out.println("xstart:"+xStart);
-						System.out.println("ystart:"+yStart);
-						System.out.println("xend:"+xStop);
-						System.out.println("yend:"+yStop);
 						dataRegion = dataRegion.getSlice(
 								new int[] { yStart, xStart },
 								new int[] { yStop, xStop },
