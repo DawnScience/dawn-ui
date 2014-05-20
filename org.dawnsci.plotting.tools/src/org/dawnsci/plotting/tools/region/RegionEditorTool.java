@@ -92,6 +92,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.function.MapToRotatedCartesianAndIntegrate;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
@@ -608,9 +609,13 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 				getPlottingSystem().addRegionListener(this);
 				final Collection<IRegion> regions = getPlottingSystem().getRegions();
 				// Clean the model if there is no region
-				if (regions.isEmpty()) {
-					if (model != null)
-						model.removeAll();
+				if (viewer != null) {
+					TreeItem[] items = viewer.getTree().getItems();
+					for (int i = 0; i < items.length; i++) {
+						RegionNode regionNode = (RegionNode) items[i].getData();
+						if (model != null)
+							model.removeRegion(regionNode);
+					}
 				}
 				for (IRegion iRegion : regions) {
 					iRegion.addROIListener(this);
@@ -931,19 +936,34 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			try {
 				if(roi instanceof RectangularROI){
 					RectangularROI rroi = (RectangularROI)roi;
-					int xStart = (int) rroi.getPoint()[0];
-					int yStart = (int) rroi.getPoint()[1];
-					int xStop = (int) rroi.getEndPoint()[0];
-					int yStop = (int) rroi.getEndPoint()[1];
-					int xInc = rroi.getPoint()[0]<rroi.getEndPoint()[0] ? 1 : -1;
-					int yInc = rroi.getPoint()[1]<rroi.getEndPoint()[1] ? 1 : -1;
-					if (dataRegion == null)
+					int xStart = (int)rroi.getPoint()[0];
+					int yStart = (int)rroi.getPoint()[1];
+					int width = (int)rroi.getLengths()[0];
+					int height = (int)rroi.getLengths()[1];
+					double angle = rroi.getAngle();
+					if (angle == 0) {
+						
+						int xStop = (int) rroi.getEndPoint()[0];
+						int yStop = (int) rroi.getEndPoint()[1];
+						int xInc = rroi.getPoint()[0]<rroi.getEndPoint()[0] ? 1 : -1;
+						int yInc = rroi.getPoint()[1]<rroi.getEndPoint()[1] ? 1 : -1;
+						if (dataRegion == null)
+							return result;
+						dataRegion = dataRegion.getSlice(
+								new int[] { yStart, xStart },
+								new int[] { yStop, xStop },
+								new int[] {yInc, xInc});
+						result = (Double)dataRegion.sum(true);
+					} else {
+						MapToRotatedCartesianAndIntegrate rcmapint = new MapToRotatedCartesianAndIntegrate(xStart, yStart, width, height, angle, false);
+						List<AbstractDataset> dsets = rcmapint.value(getPlottingSystem().getTraces().iterator().next().getData());
+						if (dsets == null)
+							return Double.NaN;
+						result = (Double)dsets.get(0).sum();
+//						profiles[0] = dsets.get(1);
+//						profiles[1] = dsets.get(0);
 						return result;
-					dataRegion = dataRegion.getSlice(
-							new int[] { yStart, xStart },
-							new int[] { yStop, xStop },
-							new int[] {yInc, xInc});
-					result = (Double)dataRegion.sum(true);
+					}
 				} else if (roi instanceof LinearROI){
 //					LinearROI lroi = (LinearROI)roi;
 //					int xStart = (int) lroi.getPoint()[0];
