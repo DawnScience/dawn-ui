@@ -339,20 +339,21 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 						}
 					}
 				};
-				getAbstractPlottingSystem().addToolChangeListener(toolListener);
+				if (getAbstractPlottingSystem() != null)
+					getAbstractPlottingSystem().addToolChangeListener(toolListener);
 			}
-			
-			getAbstractPlottingSystem().addPropertyChangeListener(new IPropertyChangeListener() {				
-				@Override
-				public void propertyChange(PropertyChangeEvent event) {
-					try {
-						saveAxisSettings(".xAxis", getPlottingSystem().getSelectedXAxis());
-						saveAxisSettings(".yAxis", getPlottingSystem().getSelectedYAxis());
-					} catch (Throwable ne) {
-						logger.error("Cannot save settings for plotting configuration!", ne);
+			if (getAbstractPlottingSystem() != null)
+				getAbstractPlottingSystem().addPropertyChangeListener(new IPropertyChangeListener() {
+					@Override
+					public void propertyChange(PropertyChangeEvent event) {
+						try {
+							saveAxisSettings(".xAxis", getPlottingSystem().getSelectedXAxis());
+							saveAxisSettings(".yAxis", getPlottingSystem().getSelectedYAxis());
+						} catch (Throwable ne) {
+							logger.error("Cannot save settings for plotting configuration!", ne);
+						}
 					}
-				}
-			});	
+				});
 			
 			readAxisSettings(".xAxis", getPlottingSystem().getSelectedXAxis());
 			readAxisSettings(".yAxis", getPlottingSystem().getSelectedYAxis());
