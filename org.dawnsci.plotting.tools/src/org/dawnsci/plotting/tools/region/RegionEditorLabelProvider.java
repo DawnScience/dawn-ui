@@ -102,7 +102,6 @@ public class RegionEditorLabelProvider extends ColumnLabelProvider implements IS
 
 	@Override
 	public String getToolTipText(Object element) {
-
 		if (!(element instanceof LabelNode))
 			return super.getToolTipText(element);
 
@@ -117,8 +116,16 @@ public class RegionEditorLabelProvider extends ColumnLabelProvider implements IS
 			buf.append("\n");
 		}
 
-		if (ln.isEditable())
-			buf.append(" Click to edit the value or the units.\n");
+		if (ln.isEditable()) {
+			if (column == 3)
+				buf.append(" Enable/Disable the visibility of a region.\n");
+			else if (column == 4)
+				buf.append(" Enable/Disable the ROI active flag.\n");
+			else if (column == 5)
+				buf.append(" Enable/Disable the mobility of a region.\n");
+			else
+				buf.append(" Click to edit the value or the units.\n");
+		}
 		buf.append(" Right click to copy or reset value.");
 		return buf.toString();
 	}
