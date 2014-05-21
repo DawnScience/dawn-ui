@@ -146,7 +146,8 @@ public interface IRegion {
 	public IROI getROI();
 
 	/**
-	 * Set the region of interest (in coordinate frame of the axis that region is added to)
+	 * Set the region of interest (in coordinate frame of the axis that region is added to).
+	 * It is important to do this <emph>after</emph> adding the region to a plotting system
 	 */
 	public void setROI(IROI roi);
 
