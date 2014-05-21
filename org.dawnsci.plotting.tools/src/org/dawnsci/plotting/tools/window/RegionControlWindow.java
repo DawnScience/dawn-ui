@@ -241,6 +241,7 @@ public class RegionControlWindow {
 
 				ISurfaceTrace surface = getSurfaceTrace();
 				IROI window = surface != null ? surface.getWindow() : null;
+				windowSystem.addRegion(region);
 				if (window == null) {
 					int height = surface.getData().getShape()[0];
 					int width = surface.getData().getShape()[1];
@@ -249,8 +250,6 @@ public class RegionControlWindow {
 				} else {
 					region.setROI(window);
 				}
-
-				windowSystem.addRegion(region);
 			}
 		} catch (Exception e) {
 			logger.debug("Cannot create region for surface!", e);

@@ -173,9 +173,8 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 				try {
 					IRegion region = plot.createRegion(name, RegionType.SECTOR);
 					SectorROI sector = getFullSector();
-					region.setROI(sector);
 					plot.addRegion(region);
-					
+					region.setROI(sector);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

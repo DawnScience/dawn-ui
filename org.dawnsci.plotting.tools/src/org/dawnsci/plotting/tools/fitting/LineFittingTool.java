@@ -121,9 +121,9 @@ public class LineFittingTool extends AbstractFittingTool {
 						RectangularROI rb = fp.getRoi();
 						final IRegion area = RegionUtils.replaceCreateRegion(getPlottingSystem(), "Fit Area "+ifit, RegionType.XAXIS);
 						area.setRegionColor(ColorConstants.orange);
-						area.setROI(rb);
 						area.setMobile(false);
 						getPlottingSystem().addRegion(area);
+						area.setROI(rb);
 						fp.setFwhm(area);
 						if (!requireRange) area.setVisible(false);
 												

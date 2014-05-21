@@ -521,10 +521,10 @@ public class PowderCheckJob extends Job {
 						if (reg!=null) system.removeRegion(reg);
 						
 						final IRegion area = system.createRegion("Q value: " + qVals[i], RegionType.XAXIS_LINE);
-						area.setROI(roi);
 						area.setRegionColor(ColorConstants.gray);
 						area.setUserRegion(false);
 						system.addRegion(area);
+						area.setROI(roi);
 						area.setMobile(false);
 					} catch (Exception e) {
 						logger.error("Region is already there", e);

@@ -374,13 +374,11 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 				double x = getPlottingSystem().getSelectedXAxis().getPositionValue(evt.getX());
 				double y = getPlottingSystem().getSelectedYAxis().getPositionValue(evt.getY());
 				regionBounds.setPoint(new double[]{x,y});
-				point.setROI(regionBounds);
 				point.setMobile(true);
 				point.setTrackMouse(true);
 
 				getPlottingSystem().addRegion(point);
-
-
+				point.setROI(regionBounds);
 			} catch (Exception e) {
 				logger.error("Cannot create point!", e);
 			}

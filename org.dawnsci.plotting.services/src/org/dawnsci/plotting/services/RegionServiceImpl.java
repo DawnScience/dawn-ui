@@ -131,9 +131,8 @@ public class RegionServiceImpl implements IRegionService {
 		if (type==null) return null;
 		
 		IRegion newRegion = plottingSystem.createRegion(roiName, type);
-		newRegion.setROI(roi);
 		plottingSystem.addRegion(newRegion);
-
+		newRegion.setROI(roi);
 		return newRegion;
 
 	}

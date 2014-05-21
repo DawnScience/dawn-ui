@@ -285,7 +285,6 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			final LinearROI lroi = new LinearROI(length, 0);
 			lroi.setMidPoint(beamCentre);
 			lroi.setCrossHair(true);
-			crosshairs.setROI(lroi);
 			crosshairs.setRegionColor(colour);
 			crosshairs.setAlpha(100);
 			crosshairs.setShowPosition(false);
@@ -295,6 +294,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			crosshairs.setShowLabel(true);
 
 			plottingSystem.addRegion(crosshairs);
+			crosshairs.setROI(lroi);
 			crosshairs.setMobile(false); // NOTE: Must be done **AFTER** calling the
 										// addRegion method.
 			crosshairs.toBack();
@@ -539,7 +539,6 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			}
 
 			final PointROI proi = new PointROI(beamCentrePC);
-			beamPosition.setROI(proi);
 			beamPosition.setRegionColor(ColorConstants.red);
 			beamPosition.setAlpha(100);
 			beamPosition.setUserRegion(false);
@@ -549,6 +548,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			beamPosition.addROIListener(roilistener);
 
 			plottingSystem.addRegion(beamPosition);
+			beamPosition.setROI(proi);
 			beamPosition.setMobile(true); // NOTE: Must be done **AFTER** calling the
 										// addRegion method.
 		} else {

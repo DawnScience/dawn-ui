@@ -491,7 +491,6 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		double dbc[] = {(double)beamCentre[0], (double)beamCentre[1]};
 		lroi.setMidPoint(dbc);
 		lroi.setCrossHair(true);
-		region.setROI(lroi);
 		region.setRegionColor(colour);
 		region.setAlpha(100);
 		region.setUserRegion(false);
@@ -502,6 +501,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		region.setShowLabel(false);
 		
 		getPlottingSystem().addRegion(region);
+		region.setROI(lroi);
 		region.setMobile(false); // NOTE: Must be done **AFTER** calling the addRegion method.
 	
 		return region;
