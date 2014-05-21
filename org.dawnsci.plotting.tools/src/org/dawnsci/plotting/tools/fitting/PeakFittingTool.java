@@ -53,6 +53,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
@@ -367,31 +368,49 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 			int index = 1;
 			for (FittedFunction fp : bean.getFunctionList()) {
 
-				H5Datatype dType = new H5Datatype(Datatype.CLASS_FLOAT, 64/8, Datatype.NATIVE, Datatype.NATIVE);
-
-				IHierarchicalDataFile file = slice.getFile();
+//				IHierarchicalDataFile file = slice.getFile();
+//				final String peakName = "Peak"+index;
+//				Dataset s = file.appendDataset(peakName+"_fit",  dType,  new long[]{1},new double[]{fp.getPeakValue()}, slice.getParent());
+//				file.setNexusAttribute(s, Nexus.SDS);
+//				file.setIntAttribute(s, NexusUtils.SIGNAL, 1);
+				
 				final String peakName = "Peak"+index;
-				Dataset s = file.appendDataset(peakName+"_fit",  dType,  new long[]{1},new double[]{fp.getPeakValue()}, slice.getParent());
-				file.setNexusAttribute(s, Nexus.SDS);
-				file.setIntAttribute(s, NexusUtils.SIGNAL, 1);
+				DoubleDataset sdd = new DoubleDataset(new double[]{fp.getPeakValue()}, new int[]{1});
+				sdd.setName(peakName+"_fit");
+				slice.appendData(sdd);
+//				
+//				s = file.appendDataset(peakName+"_xposition",  dType,  new long[]{1}, new double[]{fp.getPosition()}, slice.getParent());
+//				file.setNexusAttribute(s, Nexus.SDS);
+//				file.setIntAttribute(s, NexusUtils.SIGNAL, 1);
 				
-				s = file.appendDataset(peakName+"_xposition",  dType,  new long[]{1}, new double[]{fp.getPosition()}, slice.getParent());
-				file.setNexusAttribute(s, Nexus.SDS);
-				file.setIntAttribute(s, NexusUtils.SIGNAL, 1);
+				sdd = new DoubleDataset(new double[]{fp.getPosition()}, new int[]{1});
+				sdd.setName(peakName+"_xposition");
+				slice.appendData(sdd);
+//				
+//				s = file.appendDataset(peakName+"_fwhm",  dType,  new long[]{1}, new double[]{fp.getFWHM()}, slice.getParent());
+//				file.setNexusAttribute(s, Nexus.SDS);
+//				file.setIntAttribute(s, NexusUtils.SIGNAL, 1);
 				
-				s = file.appendDataset(peakName+"_fwhm",  dType,  new long[]{1}, new double[]{fp.getFWHM()}, slice.getParent());
-				file.setNexusAttribute(s, Nexus.SDS);
-				file.setIntAttribute(s, NexusUtils.SIGNAL, 1);
+				sdd = new DoubleDataset(new double[]{fp.getFWHM()}, new int[]{1});
+				sdd.setName(peakName+"_fwhm");
+				slice.appendData(sdd);
+//				
+//				s = file.appendDataset(peakName+"_area",  dType,  new long[]{1}, new double[]{fp.getArea()}, slice.getParent());
+//				file.setNexusAttribute(s, Nexus.SDS);
+//				file.setIntAttribute(s, NexusUtils.SIGNAL, 1);
 				
-				s = file.appendDataset(peakName+"_area",  dType,  new long[]{1}, new double[]{fp.getArea()}, slice.getParent());
-				file.setNexusAttribute(s, Nexus.SDS);
-				file.setIntAttribute(s, NexusUtils.SIGNAL, 1);
-
+				sdd = new DoubleDataset(new double[]{fp.getArea()}, new int[]{1});
+				sdd.setName(peakName+"_area");
+				slice.appendData(sdd);
+//
 				final AbstractDataset[] pair = fp.getPeakFunctions();
 				AbstractDataset     function = pair[1];
-				s = file.appendDataset(peakName+"_function",  dType,  H5Utils.getLong(function.getShape()), function.getBuffer(), slice.getParent());
-				file.setNexusAttribute(s, Nexus.SDS);
-				file.setIntAttribute(s, NexusUtils.SIGNAL, 1);
+//				s = file.appendDataset(peakName+"_function",  dType,  H5Utils.getLong(function.getShape()), function.getBuffer(), slice.getParent());
+//				file.setNexusAttribute(s, Nexus.SDS);
+//				file.setIntAttribute(s, NexusUtils.SIGNAL, 1);
+				AbstractDataset fc = function.clone();
+				fc.setName(peakName+"_function");
+				slice.appendData(fc);
 
 
 				++index;

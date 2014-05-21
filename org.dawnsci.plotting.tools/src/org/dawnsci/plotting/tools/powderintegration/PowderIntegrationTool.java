@@ -613,9 +613,9 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 				file.setIntAttribute(s, NexusUtils.AXIS, 2);
 			}
 			
-			IPersistenceService service = (IPersistenceService)ServiceManager.getService(IPersistenceService.class);
-			IPersistentFile pf = service.createPersistentFile(file);
-			pf.setDiffractionMetadata(metadata);
+//			IPersistenceService service = (IPersistenceService)ServiceManager.getService(IPersistenceService.class);
+//			IPersistentFile pf = service.createPersistentFile(file);
+//			pf.setDiffractionMetadata(metadata);
 		}
 		
 		AbstractDataset signal = out.get(1);

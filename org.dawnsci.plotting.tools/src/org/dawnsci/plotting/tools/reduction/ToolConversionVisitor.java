@@ -52,7 +52,7 @@ class ToolConversionVisitor implements IConversionVisitor {
 		if (context.getMonitor()!=null && context.getMonitor().isCancelled()) return;
 		
 		Group grp = createGroupIfRequired(context);
-		DataReductionSlice bean = new DataReductionSlice(output, grp, slice, object, context.getMonitor());
+		DataReductionSlice bean = new DataReductionSlice(output, grp, slice, object, context.getSelectedSlice(), context.getSelectedShape(), context.getMonitor());
 		bean.setAxes(nexusAxes);
 		DataReductionInfo  info = tool.export(bean);
 		if (info.getStatus().isOK()) object = info.getUserData();
