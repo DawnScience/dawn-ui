@@ -51,8 +51,6 @@ import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
 import org.dawnsci.plotting.draw2d.swtxy.VectorTrace;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.jreality.JRealityPlotViewer;
-import org.dawnsci.plotting.jreality.SurfaceTrace;
-import org.dawnsci.plotting.roi.SurfacePlotROI;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.draw2d.Cursors;
@@ -89,7 +87,6 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IErrorDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 /**
  * An implementation of IPlottingSystem, not designed to be public.
