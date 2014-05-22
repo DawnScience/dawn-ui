@@ -397,18 +397,17 @@ public abstract class AbstractSelectionRegion<T extends IROI> extends AbstractRe
 
 	@Override
 	public void setMobile(boolean mobile) {
-		
 		bean.setMobile(mobile);
 		if (!bean.isVisible()) return;
-		
-		if (regionObjects!=null) {
+
+		if (regionObjects != null) {
 			for (IFigure ob : regionObjects) {
 				if (ob instanceof IMobileFigure) {
 					if (mobile != ob.isVisible())
 						ob.setVisible(mobile);
 				} else if (ob instanceof RegionFillFigure) {
-					if (((RegionFillFigure) ob).isMobile() != mobile)
-						((RegionFillFigure) ob).setMobile(mobile);
+					if (((RegionFillFigure<?>) ob).isMobile() != mobile)
+						((RegionFillFigure<?>) ob).setMobile(mobile);
 				}
 			}
 		}

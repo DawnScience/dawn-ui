@@ -112,6 +112,11 @@ abstract public class FitROIShape<T extends IFitROI> extends ParametricROIShapeB
 	}
 
 	@Override
+	protected FigureTranslator getFigureMover() {
+		return null; // as no shape mover
+	}
+
+	@Override
 	protected Rectangle updateFromHandles() {
 		int imax = handles.size() - 1;
 		int i = 0;

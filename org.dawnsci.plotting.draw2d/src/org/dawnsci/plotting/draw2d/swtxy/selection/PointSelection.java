@@ -52,6 +52,17 @@ public class PointSelection extends ROISelectionRegion<PointROI> {
 		return 1;
 	}
 
+	@Override
+	public void setMobile(boolean mobile) {
+		if (mobile == isMobile())
+			return;
+
+		super.setMobile(mobile);
+		if (!mobile) {
+			((RPoint) shape).setHandleVisible(); // always show handle
+		}
+	}
+
 	class RPoint extends ROIShape<PointROI> {
 
 		public RPoint(final Figure parent, AbstractSelectionRegion<PointROI> region) {
@@ -154,6 +165,15 @@ public class PointSelection extends ROISelectionRegion<PointROI> {
 
 			if (b != null)
 				setBounds(b);
+		}
+
+		public void setHandleVisible() {
+			if (handles.size() > 0) {
+				IFigure h = handles.get(0);
+				if (!h.isVisible()) { // ensure handle is always visible
+					h.setVisible(true);
+				}
+			}
 		}
 
 		@Override

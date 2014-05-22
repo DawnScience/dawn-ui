@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
-import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegionContainer;
 import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
@@ -29,8 +28,6 @@ import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.MouseEvent;
-import org.eclipse.draw2d.Shape;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
@@ -44,9 +41,8 @@ import uk.ac.diamond.scisoft.analysis.roi.handler.ROIHandler;
 /**
  * Class for a shape based on a ROI and uses a ROIHandler
  */
-abstract public class ROIShape<T extends IROI> extends Shape implements IRegionContainer {
+abstract public class ROIShape<T extends IROI> extends RegionFillFigure<T> implements IRegionContainer {
 	protected Figure parent;
-	protected AbstractSelectionRegion<T> region;
 	protected ICoordinateSystem cs;
 	protected List<IFigure> handles;
 	protected List<FigureTranslator> fTranslators;
@@ -62,15 +58,14 @@ abstract public class ROIShape<T extends IROI> extends Shape implements IRegionC
 	protected static final double HALF_SIDE = SIDE/2.0;
 
 	public ROIShape() {
-		super();
+		super(null);
 		handles = new ArrayList<IFigure>();
 		fTranslators = null;
 	}
 
 	public ROIShape(final Figure parent, AbstractSelectionRegion<T> region) {
-		super();
+		super(region);
 		this.parent = parent;
-		this.region = region;
 		cs = region.getCoordinateSystem();
 		handles = new ArrayList<IFigure>();
 		fTranslators = new ArrayList<FigureTranslator>();
@@ -148,11 +143,7 @@ abstract public class ROIShape<T extends IROI> extends Shape implements IRegionC
 		}
 
 		addFigureListener(moveListener);
-		mover = new FigureTranslator(region.getXyGraph(), parent, this, handles) {
-			public void mouseDragged(MouseEvent event) {
-				super.mouseDragged(event);
-			}
-		};
+		mover = new FigureTranslator(region.getXyGraph(), parent, this, handles);
 		mover.setActive(mobile);
 		mover.addTranslationListener(createRegionNotifier());
 		fTranslators.add(mover);
@@ -160,6 +151,12 @@ abstract public class ROIShape<T extends IROI> extends Shape implements IRegionC
 		Rectangle b = getBounds();
 		if (b != null)
 			setBounds(b);
+	}
+
+	@Override
+	protected FigureTranslator getFigureMover() {
+		int n = fTranslators.size();
+		return n > 0 ? fTranslators.get(n - 1) : null;
 	}
 
 	protected RectangularHandle addHandle(double x, double y, boolean mobile, boolean visible, TranslationListener listener) {
@@ -354,14 +351,4 @@ abstract public class ROIShape<T extends IROI> extends Shape implements IRegionC
 		dirty = true;
 		calcBox(rroi, true);
 	}
-
-	@Override
-	public IRegion getRegion() {
-		return region;
-	}
-
-	@Override
-	public void setRegion(IRegion region) {
-	}
-
 }
