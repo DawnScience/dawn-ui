@@ -122,7 +122,7 @@ class LineSelection extends ROISelectionRegion<LinearROI> {
 			return "LineSel: start=" + start + ", end=" + end + ", ang=" + croi.getAngleDegrees();
 		}
 
-		private static final double CROSSHAIR_LENGTH = 0.25;
+		private static final double CROSSHAIR_LENGTH = 0.5;
 
 		@Override
 		protected void outlineShape(Graphics graphics) {
