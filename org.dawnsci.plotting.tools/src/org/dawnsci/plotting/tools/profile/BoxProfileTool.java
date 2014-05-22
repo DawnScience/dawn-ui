@@ -61,8 +61,25 @@ public class BoxProfileTool extends ProfileTool {
 		if (!isRegionTypeSupported(region.getRegionType())) return;
 
 		final RectangularROI bounds = (RectangularROI) (rbs==null ? region.getROI() : rbs);
-		if (bounds==null) return;
-		if (!region.isVisible()) return;
+		if (bounds==null)
+			return;
+		// if region is not active check the traces to clear them from the profile plotting system
+		if (!bounds.isPlot()) {
+			final ILineTrace x_trace = (ILineTrace) profilePlottingSystem.getTrace("X " + region.getName());
+			final ILineTrace y_trace = (ILineTrace) profilePlottingSystem.getTrace("Y " + region.getName());
+			if (x_trace != null && y_trace != null) {
+				getControl().getDisplay().syncExec(new Runnable() {
+					@Override
+					public void run() {
+						profilePlottingSystem.removeTrace(x_trace);
+						profilePlottingSystem.removeTrace(y_trace);
+					}
+				});
+			}
+			return;
+		}
+		if (!region.isVisible())
+			return;
 
 		if (monitor.isCanceled()) return;
 		
@@ -87,19 +104,15 @@ public class BoxProfileTool extends ProfileTool {
 		final ILineTrace y_trace = (ILineTrace)profilePlottingSystem.getTrace("Y "+region.getName());
 		
 		if (tryUpdate && x_trace!=null && y_trace!=null) {
-			
 			getControl().getDisplay().syncExec(new Runnable() {
 				public void run() {
 					profilePlottingSystem.setSelectedXAxis(xPixelAxis);
 					x_trace.setData(x_indices, x_intensity);
 					profilePlottingSystem.setSelectedXAxis(yPixelAxis);
-					y_trace.setData(y_indices, y_intensity);						
+					y_trace.setData(y_indices, y_intensity);
 				}
 			});
-
-			
 		} else {
-						
 			profilePlottingSystem.setSelectedXAxis(xPixelAxis);
 			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(x_indices, Arrays.asList(new IDataset[]{x_intensity}), monitor);
 			registerTraces(region, plotted);
@@ -107,9 +120,7 @@ public class BoxProfileTool extends ProfileTool {
 			profilePlottingSystem.setSelectedXAxis(yPixelAxis);
 			plotted = profilePlottingSystem.updatePlot1D(y_indices, Arrays.asList(new IDataset[]{y_intensity}), monitor);
 			registerTraces(region, plotted);
-			
 		}
-			
 	}
 	
 	@Override

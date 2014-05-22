@@ -12,6 +12,8 @@ import org.dawnsci.common.widgets.tree.LabelNode;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IRegion;
 
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
+
 /**
  * This class is a custom LabelNode to hold data about Region nodes in 
  * the tree viewer Region Editor
@@ -76,6 +78,11 @@ public class RegionNode extends LabelNode {
 	public void setActive(boolean isActive) {
 		this.isActive = isActive;
 		region.setActive(isActive);
+		IROI roi = region.getROI();
+		if (roi == null)
+			return;
+		roi.setPlot(isActive);
+		region.setROI(roi);
 	}
 
 	public boolean isMobile() {

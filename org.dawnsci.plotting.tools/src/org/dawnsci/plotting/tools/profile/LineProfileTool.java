@@ -41,8 +41,23 @@ public class LineProfileTool extends ProfileTool {
 		if (!isRegionTypeSupported(region.getRegionType())) return;
 
 		final LinearROI bounds = (LinearROI) (rbs==null ? region.getROI() : rbs);
-		if (bounds==null) return;
-		if (!region.isVisible()) return;
+		if (bounds==null)
+			return;
+		// if region is not active check the trace to remove if it is in the profile plotting system
+		if (!bounds.isPlot()) {
+			final ILineTrace trace = (ILineTrace)profilePlottingSystem.getTrace(region.getName());
+			if (trace != null ) {
+				getControl().getDisplay().syncExec(new Runnable() {
+					@Override
+					public void run() {
+						profilePlottingSystem.removeTrace(trace);
+					}
+				});
+			}
+			return;
+		}
+		if (!region.isVisible())
+			return;
 
 		if (monitor.isCanceled()) return;
 		AbstractDataset[] profileData = ROIProfile.line((AbstractDataset)image.getData(), (AbstractDataset)image.getMask(), bounds, 1d, true);
