@@ -20,6 +20,7 @@ import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
+import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 import org.slf4j.Logger;
@@ -115,13 +116,14 @@ public class EllipseFitSelection extends FitSelectionRegion<EllipticalFitROI> {
 
 			if (label != null && isShowLabel()) {
 				graphics.setLineStyle(SWT.LINE_DASH);
-				Rectangle r = new Rectangle(getPoint(0.75 * Math.PI), getCentre());
-				graphics.drawLine(r.getTopLeft(), r.getBottomRight());
+				Point pa = getPoint(0.75 * Math.PI);
+				Point pb = getCentre();
+				graphics.drawLine(pa, pb);
 				graphics.setAlpha(192);
 				graphics.setBackgroundColor(ColorConstants.white);
 				graphics.setForegroundColor(labelColour);
 				graphics.setFont(labelFont);
-				graphics.fillString(label, r.getCenter().getTranslated(0, -labeldim.height));
+				graphics.fillString(label, pa.translate(pb).scale(0.5).translate(0, -labeldim.height));
 			}
 		}
 	}
