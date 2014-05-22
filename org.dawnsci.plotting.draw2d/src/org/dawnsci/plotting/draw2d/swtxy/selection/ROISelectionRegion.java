@@ -44,6 +44,8 @@ abstract class ROISelectionRegion<T extends IROI> extends AbstractSelectionRegio
 		parent.add(shape);
 		sync(getBean());
 		shape.setLineWidth(getLineWidth());
+		if (roi != null)
+			shape.updateFromROI(roi);
 	}
 
 	@Override
