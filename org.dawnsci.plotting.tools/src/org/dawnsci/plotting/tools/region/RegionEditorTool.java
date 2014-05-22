@@ -720,12 +720,11 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			model.addRegion(region, getMaxIntensity(region), getSum(region));
 			if (model.getRoot().getChildren() != null)
 				viewer.setInput(model.getRoot());
-
+			if (viewer!=null)
+				viewer.refresh();
+			boolean isMobile = Activator.getPlottingPreferenceStore().getBoolean(RegionEditorConstants.MOBILE_REGION_SETTING);
+			region.setMobile(isMobile);
 		}
-		if (viewer!=null) viewer.refresh();
-		
-		boolean isMobile = Activator.getPlottingPreferenceStore().getBoolean(RegionEditorConstants.MOBILE_REGION_SETTING);
-		evt.getRegion().setMobile(isMobile);
 	}
 
 	@Override

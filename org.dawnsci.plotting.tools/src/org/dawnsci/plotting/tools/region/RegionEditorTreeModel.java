@@ -261,6 +261,8 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 
 	public void updateRegion(IRegion region, double maxIntensity, double sum) {
 		List<TreeNode> nodes = root.getChildren();
+		if (nodes == null)
+			return;
 		for (TreeNode node : nodes) {
 			if (node instanceof RegionNode) {
 				RegionNode regionNode = (RegionNode) node;
