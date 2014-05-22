@@ -73,7 +73,7 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
      	
      	if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS) {
     	    this.line2  = new LineFigure(false, parent.getBounds());
-    	    this.connection = new RegionFillFigure(this) {
+    	    this.connection = new RegionFillFigure<RectangularROI>(this) {
     	    	@Override
     	    	public void paintFigure(Graphics gc) {
     	    		super.paintFigure(gc);
@@ -84,6 +84,14 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 
     	    		AxisSelection.this.drawLabel(gc, size);
     	    	}
+
+				@Override
+				protected void fillShape(Graphics graphics) {
+				}
+
+				@Override
+				protected void outlineShape(Graphics graphics) {
+				}
     	    };
     	    connection.setCursor(Draw2DUtils.getRoiMoveCursor());
     	    connection.setBackgroundColor(getRegionColor());

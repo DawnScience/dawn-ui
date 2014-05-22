@@ -6,8 +6,10 @@ import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegionContainer;
 import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
 import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
-import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.MouseListener;
+import org.eclipse.draw2d.Shape;
+
+import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 /**
  * You do not have to use this class for the figure which fills the region and
@@ -19,11 +21,11 @@ import org.eclipse.draw2d.MouseListener;
  * @author fcp94556
  *
  */
-public class RegionFillFigure extends Figure implements IRegionContainer {
+public abstract class RegionFillFigure<T extends IROI> extends Shape implements IRegionContainer {
 	
-	private IRegion region;
+	protected AbstractSelectionRegion<T> region;
 
-	public RegionFillFigure(AbstractSelectionRegion<?> region) {
+	public RegionFillFigure(AbstractSelectionRegion<T> region) {
 		this.region = region;
 	}
 
@@ -48,7 +50,7 @@ public class RegionFillFigure extends Figure implements IRegionContainer {
 		return mover.isActive();
 	}
 
-	private FigureTranslator getFigureMover() {
+	protected FigureTranslator getFigureMover() {
 		final Iterator<?> it = getListeners(MouseListener.class);
 		if (it!=null && it.hasNext()) {
 			MouseListener l = null;
@@ -65,7 +67,9 @@ public class RegionFillFigure extends Figure implements IRegionContainer {
 		return region;
 	}
 
+	@SuppressWarnings("unchecked")
 	public void setRegion(IRegion region) {
-		this.region = region;
+		if (region instanceof AbstractSelectionRegion<?>)
+			this.region = (AbstractSelectionRegion<T>) region;
 	}
 }
