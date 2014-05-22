@@ -8,11 +8,19 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import ncsa.hdf.object.Dataset;
+import ncsa.hdf.object.Datatype;
+import ncsa.hdf.object.h5.H5Datatype;
+
 import org.dawb.common.ui.image.IconUtils;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.util.EclipseUtils;
+import org.dawb.hdf5.IHierarchicalDataFile;
+import org.dawb.hdf5.Nexus;
+import org.dawb.hdf5.nexus.NexusUtils;
+import org.dawnsci.io.h5.H5Utils;
 import org.dawnsci.plotting.api.annotation.IAnnotation;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -264,10 +272,10 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 
 						final IRegion area = getPlottingSystem().createRegion(areaName, RegionType.XAXIS);
 						area.setRegionColor(ColorConstants.orange);
+						area.setROI(rb);
 						area.setMobile(false);
 						area.setUserObject(FittedFunction.class);
 						getPlottingSystem().addRegion(area);
-						area.setROI(rb);
 						fp.setFwhm(area);
 						if (!requireFWHMSelections) area.setVisible(false);
 												

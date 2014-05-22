@@ -217,11 +217,11 @@ public class DiffractionCalibrationUtils {
 			public void run() {
 				try {
 					IRegion region = plotter.createRegion(RegionUtils.getUniqueName(REGION_PREFIX, plotter), circle ? RegionType.CIRCLEFIT : RegionType.ELLIPSEFIT);
+					region.setROI(fr);
 					region.setRegionColor(circle ? ColorConstants.cyan : ColorConstants.orange);
 					monitor.subTask("Add region");
 					region.setUserRegion(false);
 					plotter.addRegion(region);
-					region.setROI(fr);
 					monitor.worked(1);
 				} catch (Exception e) {
 					status[0] = false;

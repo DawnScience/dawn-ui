@@ -110,6 +110,7 @@ import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
+import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
@@ -984,6 +985,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			public void run() {
 				try {
 					IRegion region = plotter.createRegion(RegionUtils.getUniqueName("Pixel peaks", plotter), circle ? RegionType.CIRCLEFIT : RegionType.ELLIPSEFIT);
+					region.setROI(froi);
 					region.setRegionColor(circle ? ColorConstants.cyan : ColorConstants.orange);
 					plotter.removeRegion(tmpRegion);
 					monitor.subTask("Add region");
@@ -992,7 +994,6 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					tmpRegion.addROIListener(roiListener);
 					roiListener.roiSelected(new ROIEvent(tmpRegion, froi)); // trigger beam centre update
 					plotter.addRegion(region);
-					region.setROI(froi);
 					monitor.worked(1);
 					findOuter.setEnabled(true);
 				} catch (Exception e) {
@@ -1026,10 +1027,10 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 						logger.debug("Ellipse from peaks: {}, {}", i, e);
 						IRegion region = plotter.createRegion(RegionUtils.getUniqueName(RING_PREFIX, plotter), e instanceof EllipticalFitROI ? RegionType.ELLIPSEFIT : RegionType.ELLIPSE);
 						region.setMobile(false);
+						region.setROI(e);
 						region.setRegionColor(ColorConstants.orange);
 						region.setUserRegion(false);
 						plotter.addRegion(region);
-						region.setROI(e);
 						monitor.worked(1);
 					}
 					// TODO set beam centre in case of all circles

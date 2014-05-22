@@ -253,9 +253,9 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 		try {
 			IRegion region = selectionPlottingSystem.createRegion(RegionUtils.getUniqueName(getRegionName(), getPlottingSystem()), getCreateRegionType());
 			double width = getImageTrace().getData().getShape()[0];
+			region.setROI(new XAxisBoxROI(width, 0));
 			region.setPlotType(PlotType.IMAGE);
 			selectionPlottingSystem.addRegion(region);
-			region.setROI(new XAxisBoxROI(width, 0));
 		} catch (Exception e) {
 			logger.error("Cannot create region for profile tool!");
 		}

@@ -606,8 +606,9 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 								return;
 							}
 						}
-						sys.addRegion(region);
+						
 						region.setROI(SelectionRegionFactory.getStaticBuffer().getROI());
+						sys.addRegion(region);
 					}
 				};
 				manager.add(pasteRegion);

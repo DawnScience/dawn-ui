@@ -247,12 +247,13 @@ public class FunctionFittingTool extends AbstractToolPage implements
 			if (region == null) {
 				region = getPlottingSystem().createRegion("fit_region",
 						RegionType.XAXIS);
-				getPlottingSystem().addRegion(region);
+
 				region.setROI(new RectangularROI(getPlottingSystem()
 						.getSelectedXAxis().getLower(), 0, getPlottingSystem()
 						.getSelectedXAxis().getUpper()
 						- getPlottingSystem().getSelectedXAxis().getLower(),
 						100, 0));
+				getPlottingSystem().addRegion(region);
 			} else {
 				region.setVisible(true);
 			}

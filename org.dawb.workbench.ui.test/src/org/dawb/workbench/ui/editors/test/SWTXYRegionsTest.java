@@ -82,8 +82,9 @@ public class SWTXYRegionsTest {
 		image.repaint();
 		
 		final IRegion lineRegion = system.createRegion("Line Profile Test", IRegion.RegionType.LINE);
-		system.addRegion(lineRegion);
 		lineRegion.setROI(new LinearROI(new double[]{50,50}, new double[]{1200,1200}));
+		
+		system.addRegion(lineRegion);
 		
 		// We show the line profile tool
 		system.setToolVisible("org.dawb.workbench.plotting.tools.lineProfileTool",
@@ -129,10 +130,10 @@ public class SWTXYRegionsTest {
 		// Give the region a position
 		RectangularROI r1 = new RectangularROI(10, 0.1, 790, 0.9, 0);
 //		RegionBounds r1 = new RegionBounds(new double[]{10,1},new double[]{800,0.1});
+		region.setROI(r1);
 		
 		// We now add the region.
 		sys.addRegion(region);
-		region.setROI(r1);
 		
 		boolean duplicatedName = false;
 		try {
@@ -225,13 +226,13 @@ public class SWTXYRegionsTest {
 						
 						// Give the region a position
 						RectangularROI r1 = new RectangularROI(i*100, 0.1, 50, 0.9, 0);
+						region.setROI(r1);
 						region.setRegionColor(Display.getDefault().getSystemColor(SWT.COLOR_BLUE));
 						region.setMobile(false);
 						region.setAlpha(50);
 						
 						// We now add the region.
 						sys.addRegion(region);
-						region.setROI(r1);
 						addedNames.add(name);
 					}
 
@@ -247,9 +248,10 @@ public class SWTXYRegionsTest {
 		
 		// Give the region a position
 		RectangularROI r1 = new RectangularROI(10, 0.1, 790, 0.9, 0);
+		region.setROI(r1);
+
 		// We now add the region.
 		sys.addRegion(region);
-		region.setROI(r1);
 
 		EclipseUtils.delay(2000);
 		
@@ -407,12 +409,12 @@ public class SWTXYRegionsTest {
 		// Give the region a position
 		SectorROI r1 = new SectorROI(0.1, 0.2);
 		r1.setPoint(500, 0.5);
+		region.setROI(r1);
 		region.setRegionColor(ColorConstants.blue);
 		region.setAlpha(100);
 		
 		// We now add the region.
 		sys.addRegion(region);
-		region.setROI(r1);
 		
 		// Try resizing the region
 	    for (int i = 1; i < 10; i++) {
@@ -443,12 +445,12 @@ public class SWTXYRegionsTest {
 			r1 = new SectorROI(i*50, i*50+5);
 			r1.setPoint(500, 0.5);
 	    	r1.setRadii(i*50, i*50+5);
+	    	region.setROI(r1);
 			region.setRegionColor(ColorConstants.blue);
 			region.setAlpha(100);
 			
 			// We now add the region.
 			sys.addRegion(region);
-			region.setROI(r1);
 	    	
 	    	EclipseUtils.delay(500);
 		}
@@ -471,10 +473,10 @@ public class SWTXYRegionsTest {
 		// Give the region a position
 		SectorROI r1 = new SectorROI(0.1, 0.2, 0.0, Math.PI);
 		r1.setPoint(500, 0.5);
+		region.setROI(r1);
 		
 		// We now add the region.
 		sys.addRegion(region);
-		region.setROI(r1);
 		
 		// Try resizing the region
 	    for (int i = 1; i < 10; i++) {
@@ -495,10 +497,10 @@ public class SWTXYRegionsTest {
 	    	region = sys.createRegion("Sector "+(i+1), RegionType.SECTOR);
 			r1 = new SectorROI(50, 250, 0.0, Math.PI);
 			r1.setPoint(i*150, i*150+250);
+	    	region.setROI(r1);
 			
 			// We now add the region.
 			sys.addRegion(region);
-			region.setROI(r1);
 	    	
 	    	EclipseUtils.delay(500);
 		}

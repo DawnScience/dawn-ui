@@ -200,10 +200,11 @@ public class HyperComponent {
 			updateRight(region, rroi);
 			
 			IRegion windowRegion = sideSystem.createRegion("Trace Region 1", sideReducer.getSupportedRegionType().get(0));
+			
+			windowRegion.setROI(broi);
 			windowRegion.setUserRegion(false);
 			windowRegion.addROIListener(this.roiListenerRight);
 			sideSystem.addRegion(windowRegion);
-			windowRegion.setROI(broi);
 			updateLeft(windowRegion,broi);
 			
 		} catch (Exception e) {
