@@ -17,7 +17,6 @@
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
-import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
@@ -34,15 +33,6 @@ abstract class FitSelectionRegion<T extends IFitROI> extends ROISelectionRegion<
 	}
 
 	@Override
-	public void createContents(Figure parent) {
-		shape = createShape(parent);
-		shape.setCursor(Draw2DUtils.getRoiMoveCursor());
-
-		parent.add(shape);
-		sync(getBean());
-		shape.setLineWidth(getLineWidth());
-	}
-
 	abstract protected FitROIShape<T> createShape(Figure parent);
 
 	private FitROIShape<T> tempShape = null;
