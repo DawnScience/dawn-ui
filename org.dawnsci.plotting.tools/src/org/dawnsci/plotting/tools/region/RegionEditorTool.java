@@ -3,6 +3,7 @@ package org.dawnsci.plotting.tools.region;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -53,6 +54,7 @@ import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
@@ -77,6 +79,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -123,6 +127,10 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 	private Map<String,IROI> dragBounds;
 	private RegionBoundsUIJob updateJob;
 
+	private Action visibleToggleAction;
+	private Action activeToggleAction;
+	private Action mobileToggleAction;
+
 	public RegionEditorTool() {
 		super();
 		dragBounds = new HashMap<String,IROI>(7);
@@ -139,13 +147,32 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		control.setLayout(new GridLayout(1, false));
 		GridUtils.removeMargins(control);
 
-		this.filteredTree = new ClearableFilteredTree(control, SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER, new NodeFilter(this), true, "Enter search string to filter the tree.\nThis will match on name, value or units");		
+		this.filteredTree = new ClearableFilteredTree(control, SWT.MULTI | SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER, new NodeFilter(this), true, "Enter search string to filter the tree.\nThis will match on name, value or units");		
 		viewer = filteredTree.getViewer();
 		viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		createColumns(viewer);
 		viewer.setContentProvider(new TreeNodeContentProvider()); // Swing tree nodes
 		viewer.getTree().setLinesVisible(true);
 		viewer.getTree().setHeaderVisible(true);
+		viewer.getControl().addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(final KeyEvent e) {
+				if (e.keyCode == SWT.DEL) {
+					ITreeSelection selection = (ITreeSelection) viewer.getSelection();
+					Iterator<?> it = selection.iterator();
+					while (it.hasNext()) {
+						Object object = (Object) it.next();
+						if (object instanceof RegionNode) {
+							RegionNode regionNode = (RegionNode) object;
+							IRegion region = getPlottingSystem().getRegion(regionNode.getRegion().getName());
+							model.removeRegion(regionNode);
+							region.removeROIListener(RegionEditorTool.this);
+							getPlottingSystem().removeRegion(region);
+						}
+					}
+				}
+			}
+		});
 
 		Composite status = new Composite(control, SWT.NONE);
 		status.setLayoutData(new GridData(SWT.FILL, GridData.FILL, true, false));
@@ -445,20 +472,26 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 				if (!isActive())
 					return;
 				ITreeSelection selected = (ITreeSelection)viewer.getSelection();
-				if (selected == null)
-					return;
-				if (!(selected.getFirstElement() instanceof RegionNode))
-					return;
-				RegionNode regionNode = (RegionNode) selected.getFirstElement();
-				IRegion region = regionNode.getRegion();
-				if (region == null || region.getROI() == null)
-					return;
-				IROI bounds = region.getROI();
-				if (bounds.getPointRef() == null)
+				Iterator<?> it = selected.iterator();
+				String txtCopy = "";
+				while (it.hasNext()) {
+					Object object = (Object) it.next();
+					if (object instanceof RegionNode) {
+						RegionNode regionNode = (RegionNode) object;
+						IRegion region = regionNode.getRegion();
+						if (region == null || region.getROI() == null)
+							return;
+						IROI bounds = region.getROI();
+						if (bounds.getPointRef() == null)
+							return;
+						txtCopy = txtCopy + region.getName() + "  " + bounds + System.getProperty("line.separator");
+					}
+				}
+				if (txtCopy.isEmpty())
 					return;
 				Clipboard cb = new Clipboard(control.getDisplay());
 				TextTransfer textTransfer = TextTransfer.getInstance();
-				cb.setContents(new Object[]{region.getName()+"  "+bounds}, new Transfer[]{textTransfer});
+				cb.setContents(new Object[]{ txtCopy }, new Transfer[]{textTransfer});
 			}
 		};
 		copy.setToolTipText("Copies the selected region values as text to clipboard which can then be pasted externally");
@@ -514,6 +547,7 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 
 		// right click menu buttons
 		MenuManager rightClickMenuMan = new MenuManager();
+		addRightClickMenuCheckActions(rightClickMenuMan);
 		rightClickMenuMan.add(copy);
 		rightClickMenuMan.add(show);
 		rightClickMenuMan.add(clear);
@@ -528,6 +562,83 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		menuMan.add(deleteMenuAction);
 		menuMan.add(new Separator());
 		menuMan.add(preferences);
+	}
+
+	private void addRightClickMenuCheckActions(MenuManager menuManager) {
+		visibleToggleAction = new Action("Enable/disable region visibility", IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				if (!isActive())
+					return;
+				ITreeSelection selected = (ITreeSelection) viewer.getSelection();
+				Iterator<?> it = selected.iterator();
+				while (it.hasNext()) {
+					Object object = (Object) it.next();
+					if (object instanceof RegionNode) {
+						RegionNode regionNode = (RegionNode) object;
+						regionNode.setVisible(visibleToggleAction.isChecked());
+						viewer.refresh();
+					}
+				}
+			}
+		};
+		visibleToggleAction.setChecked(true);
+		activeToggleAction = new Action("Enable/disable region Active flag", IAction.AS_CHECK_BOX) {
+			public void run() {
+				if (!isActive())
+					return;
+				ITreeSelection selected = (ITreeSelection) viewer.getSelection();
+				Iterator<?> it = selected.iterator();
+				while (it.hasNext()) {
+					Object object = (Object) it.next();
+					if (object instanceof RegionNode) {
+						RegionNode regionNode = (RegionNode) object;
+						regionNode.setActive(activeToggleAction.isChecked());
+						viewer.refresh();
+					}
+				}
+			}
+		};
+		activeToggleAction.setChecked(true);
+		mobileToggleAction = new Action("Enable/disable region mobility", IAction.AS_CHECK_BOX) {
+			public void run() {
+				if (!isActive())
+					return;
+				ITreeSelection selected = (ITreeSelection) viewer.getSelection();
+				Iterator<?> it = selected.iterator();
+				while (it.hasNext()) {
+					Object object = (Object) it.next();
+					if (object instanceof RegionNode) {
+						RegionNode regionNode = (RegionNode) object;
+						regionNode.setMobile(mobileToggleAction.isChecked());
+						viewer.refresh();
+					}
+				}
+			}
+		};
+		mobileToggleAction.setChecked(true);
+		menuManager.add(visibleToggleAction);
+		menuManager.add(activeToggleAction);
+		menuManager.add(mobileToggleAction);
+		menuManager.add(new Separator());
+		menuManager.addMenuListener(new IMenuListener() {
+			@Override
+			public void menuAboutToShow(IMenuManager manager) {
+				if (!isActive())
+					return;
+				ITreeSelection selected = (ITreeSelection) viewer.getSelection();
+				Iterator<?> it = selected.iterator();
+				while (it.hasNext()) {
+					Object object = (Object) it.next();
+					if (object instanceof RegionNode) {
+						RegionNode regionNode = (RegionNode) object;
+						visibleToggleAction.setChecked(regionNode.isVisible());
+						activeToggleAction.setChecked(regionNode.isActive());
+						mobileToggleAction.setChecked(regionNode.isMobile());
+					}
+				}
+			}
+		});
 	}
 
 	private void showRegionVertices(boolean isShown) {
