@@ -165,7 +165,7 @@ public abstract class AbstractSelectionRegion<T extends IROI> extends AbstractRe
 		setMobile(bean.isMobile());
 		setShowLabel(bean.isShowLabel());
 	}
-	
+
 	private Cursor cursor;
 	/**
 	 * A new cursor is created on each call.

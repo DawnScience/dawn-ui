@@ -40,17 +40,8 @@ abstract class LockableSelectionRegion<T extends IParametricROI> extends ROISele
 		labelFont = new Font(Display.getCurrent(), "Dialog", 10, SWT.BOLD);
 	}
 
-	abstract protected ParametricROIShape<T> createShape(Figure parent);
-
 	@Override
-	public void createContents(Figure parent) {
-		shape = createShape(parent);
-		shape.setCursor(Draw2DUtils.getRoiMoveCursor());
-
-		parent.add(shape);
-		sync(getBean());
-		shape.setLineWidth(getLineWidth());
-	}
+	abstract protected ParametricROIShape<T> createShape(Figure parent);
 
 	private ParametricROIShape<T> tempShape = null;
 
