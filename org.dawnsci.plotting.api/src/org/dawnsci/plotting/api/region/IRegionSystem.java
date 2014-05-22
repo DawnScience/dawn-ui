@@ -39,7 +39,6 @@ public interface IRegionSystem {
 	
 	/**
 	 * Add a selection region to the graph. Not thread safe, call from UI thread.
-	 * It is important to do this <emph>before</emph> setting a ROI for the region
 	 * @param region
 	 */
 	public void addRegion(final IRegion region);
