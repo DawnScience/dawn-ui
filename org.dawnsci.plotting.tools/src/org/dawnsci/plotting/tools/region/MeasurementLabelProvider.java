@@ -8,7 +8,6 @@ import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.RegionEditorConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.slf4j.Logger;
@@ -17,46 +16,26 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
-import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
 public class MeasurementLabelProvider extends ColumnLabelProvider {
 	
 	public enum LabelType {
-		ROINAME, STARTX, STARTY, ENDX, ENDY, MAX, SUM, ROITYPE, DX, DY, LENGTH, INNERRAD, OUTERRAD, ROISTRING, ACTIVE, VISIBLE;
+		ROINAME, STARTX, STARTY, ROITYPE, DX, DY, LENGTH, ROISTRING;
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger(MeasurementLabelProvider.class);
-	
 	private LabelType column;
-	private AbstractRegionTableTool tool;
+	private MeasurementTool tool;
 	private Image checkedIcon;
 	private Image uncheckedIcon;
 	private int precision = 3;
 
-	public MeasurementLabelProvider(AbstractRegionTableTool tool, LabelType i) {
+	public MeasurementLabelProvider(MeasurementTool tool, LabelType i) {
 		this.column = i;
 		this.tool   = tool;
-		ImageDescriptor id = Activator.getImageDescriptor("icons/ticked.png");
-		checkedIcon   = id.createImage();
-		id = Activator.getImageDescriptor("icons/unticked.gif");
-		uncheckedIcon =  id.createImage();
 	}
 
 	private static final String NA = "-";
-
-	@Override
-	public Image getImage(Object element){
-		
-		if (!(element instanceof IRegion)) return null;
-		if (column==LabelType.ACTIVE){
-			final IRegion region = (IRegion)element;
-			return region.isActive() && tool.getControl().isEnabled() ? checkedIcon : uncheckedIcon;
-		}else if (column==LabelType.VISIBLE){
-			final IRegion region = (IRegion)element;
-			return region.isVisible() && tool.getControl().isEnabled() ? checkedIcon : uncheckedIcon;
-		}
-		return null;
-	}
 
 	@Override
 	public String getText(Object element) {
@@ -72,12 +51,6 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 			ICoordinateSystem coords = region.getCoordinateSystem();
 			if(roi == null) return "";
 			double[] startPoint = getAxisPoint(coords, roi.getPoint());
-			double[] endPoint = {0, 0};
-			if(roi instanceof RectangularROI){
-				endPoint = getAxisPoint(coords, ((RectangularROI)roi).getEndPoint());
-			} else if (roi instanceof LinearROI){
-				endPoint = getAxisPoint(coords, ((LinearROI)roi).getEndPoint());
-			}
 
 			IPreferenceStore store = Activator.getPlottingPreferenceStore();
 			DecimalFormat pointFormat = new DecimalFormat(store.getString(RegionEditorConstants.POINT_FORMAT));
@@ -91,24 +64,6 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 			case STARTY: // dx
 				fobj = startPoint[1];
 				return fobj == null ? NA : pointFormat.format((Double)fobj);
-			case ENDX: // dy
-				fobj = endPoint[0];
-				return fobj == null ? NA : pointFormat.format((Double)fobj);
-			case ENDY: // length
-				fobj = endPoint[1];
-				return fobj == null ? NA : pointFormat.format((Double)fobj);
-			case MAX: // max
-				final double max = tool.getMaxIntensity(region);
-				DecimalFormat intensityFormat = new DecimalFormat(store.getString(RegionEditorConstants.INTENSITY_FORMAT));
-				if (Double.isNaN(max)) return NA;
-				return intensityFormat.format(max);
-				//return DoubleUtils.formatDouble(max, 5);
-			case SUM: // sum
-				final double sum = tool.getSum(region);
-				DecimalFormat sumFormat = new DecimalFormat(store.getString(RegionEditorConstants.SUM_FORMAT));
-				if(Double.isNaN(sum)) return NA;
-				return sumFormat.format(sum);
-//				return DoubleUtils.formatDouble(sum, 5);
 			case ROITYPE: //ROI type
 				return region.getRegionType().getName();
 			case DX: // dx
@@ -143,25 +98,11 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 					fobj = Math.hypot(lens[0], lens[1]);
 				}
 				return fobj == null ? NA : getCalibratedValue((Double)fobj);
-			case INNERRAD: // in rad
-				if (roi instanceof SectorROI) {
-					SectorROI sroi = (SectorROI) roi;
-					fobj = sroi.getRadius(0);
-				}
-				return fobj == null ? NA : String.valueOf(DoubleUtils.roundDouble((Double)fobj, precision));
-			case OUTERRAD: // out rad
-				if (roi instanceof SectorROI) {
-					SectorROI sroi = (SectorROI) roi;
-					fobj = sroi.getRadius(1);
-				}
-				return fobj == null ? NA : String.valueOf(DoubleUtils.roundDouble((Double)fobj, precision));
 			case ROISTRING: // region
 				return tool.getROI(region).toString();
 			default:
 				return "";
 			}
-			
-			
 		} catch (Throwable ne) {
 			// One must not throw RuntimeExceptions like null pointers from this
 			// method because the user gets an eclipse dialog confusing them with 
