@@ -67,7 +67,6 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -116,7 +115,7 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 	private RegionEditorTreeModel model;
 	private ClearableFilteredTree filteredTree;
 
-	private RegionColorListener viewUpdateListener;
+	private RegionEditorColorListener viewUpdateListener;
 	private ITraceListener traceListener;
 	private IPropertyChangeListener propertyListener;
 
@@ -192,7 +191,7 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 
 		getSite().setSelectionProvider(viewer);
 
-		this.viewUpdateListener = new RegionColorListener();
+		this.viewUpdateListener = new RegionEditorColorListener();
 
 		activate();
 	}
@@ -321,11 +320,7 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		}
 	};
 
-	class RegionColorListener implements ISelectionChangedListener {
-
-		private IRegion previousRegion;
-		private Color previousColor;
-
+	class RegionEditorColorListener extends RegionColorListener {
 		@Override
 		public void selectionChanged(SelectionChangedEvent event) {
 			final IStructuredSelection sel = (IStructuredSelection) event.getSelection();
@@ -336,13 +331,6 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			if (region == null)
 				return;
 			updateColorSelection(region);
-		}
-
-		private void resetSelectionColor() {
-			if (previousRegion != null)
-				previousRegion.setRegionColor(previousColor);
-			previousRegion = null;
-			previousColor  = null;
 		}
 	}
 
