@@ -15,7 +15,7 @@ import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
  * @author wqk87977
  *
  */
-public class RegionNodeFactory {
+public class RegionEditorNodeFactory {
 
 	/**
 	 * 

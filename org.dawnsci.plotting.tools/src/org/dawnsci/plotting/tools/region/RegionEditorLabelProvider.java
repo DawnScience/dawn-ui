@@ -34,8 +34,8 @@ public class RegionEditorLabelProvider extends ColumnLabelProvider implements IS
 		if (!(element instanceof LabelNode)) {
 			return ret;
 		}
-		if (element instanceof RegionNode) {
-			getStyledText(ret, (RegionNode)element);
+		if (element instanceof RegionEditorNode) {
+			getStyledText(ret, (RegionEditorNode)element);
 		} else if (element instanceof NumericNode) {
 			getStyledText(ret, (NumericNode<?>)element);
 		} else if (element instanceof ComboNode){
@@ -56,7 +56,7 @@ public class RegionEditorLabelProvider extends ColumnLabelProvider implements IS
 		return ret;
 	}
 
-	private StyledString getStyledText(StyledString ret, RegionNode node) {
+	private StyledString getStyledText(StyledString ret, RegionEditorNode node) {
 		if(column == 0) { // Name
 			if (node.isEditable()) {
 				ret.append(node.getLabel());
@@ -138,16 +138,16 @@ public class RegionEditorLabelProvider extends ColumnLabelProvider implements IS
 	public Image getImage(Object element) {
 		switch (column) {
 		case 3:// Visible
-			if (element instanceof RegionNode)
-				return getCheckBoxImage(((RegionNode) element).isVisible());
+			if (element instanceof RegionEditorNode)
+				return getCheckBoxImage(((RegionEditorNode) element).isVisible());
 			break;
 		case 4://active
-			if (element instanceof RegionNode)
-				return getCheckBoxImage(((RegionNode) element).isActive());
+			if (element instanceof RegionEditorNode)
+				return getCheckBoxImage(((RegionEditorNode) element).isActive());
 			break;
 		case 5://mobile
-			if (element instanceof RegionNode)
-				return getCheckBoxImage(((RegionNode) element).isMobile());
+			if (element instanceof RegionEditorNode)
+				return getCheckBoxImage(((RegionEditorNode) element).isMobile());
 			break;
 		}
 		return null;

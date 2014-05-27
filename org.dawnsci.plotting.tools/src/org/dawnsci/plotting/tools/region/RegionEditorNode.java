@@ -21,7 +21,7 @@ import uk.ac.diamond.scisoft.analysis.roi.IROI;
  * @author wqk87977
  *
  */
-public class RegionNode extends LabelNode {
+public class RegionEditorNode extends LabelNode {
 
 	private boolean isVisible;
 	private boolean isActive;
@@ -30,19 +30,19 @@ public class RegionNode extends LabelNode {
 	private IRegion region;
 	private IPlottingSystem plottingSystem;
 
-	public RegionNode() {
+	public RegionEditorNode() {
 		super(null, null);
 	}
 
-	public RegionNode(RegionNode parent) {
+	public RegionEditorNode(RegionEditorNode parent) {
 		super(null, parent);
 	}
 
-	public RegionNode(String label) {
+	public RegionEditorNode(String label) {
 		super(label, null);
 	}
 
-	public RegionNode(IPlottingSystem plottingSystem, IRegion region, LabelNode parent) {
+	public RegionEditorNode(IPlottingSystem plottingSystem, IRegion region, LabelNode parent) {
 		this.plottingSystem = plottingSystem;
 		this.region = region;
 		setLabel(region.getName());

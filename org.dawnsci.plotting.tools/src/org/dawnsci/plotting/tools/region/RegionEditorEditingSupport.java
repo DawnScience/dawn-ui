@@ -34,8 +34,8 @@ public class RegionEditorEditingSupport extends ValueEditingSupport {
 	protected CellEditor getCellEditor(final Object element) {
 		switch (column) {
 		case 0:
-			if (element instanceof RegionNode)
-				return createTextEditor((RegionNode)element);
+			if (element instanceof RegionEditorNode)
+				return createTextEditor((RegionEditorNode)element);
 			break;
 		case 1:
 			if (element instanceof NumericNode)
@@ -46,27 +46,27 @@ public class RegionEditorEditingSupport extends ValueEditingSupport {
 				return createComboEditor((ComboNode)element);
 			break;
 		case 3:
-			if (element instanceof RegionNode)
-				return createBooleanEditor((RegionNode)element);
+			if (element instanceof RegionEditorNode)
+				return createBooleanEditor((RegionEditorNode)element);
 			break;
 		case 4:
-			if (element instanceof RegionNode)
-				return createBooleanEditor((RegionNode)element);
+			if (element instanceof RegionEditorNode)
+				return createBooleanEditor((RegionEditorNode)element);
 			break;
 		case 5:
-			if (element instanceof RegionNode)
-				return createBooleanEditor((RegionNode)element);
+			if (element instanceof RegionEditorNode)
+				return createBooleanEditor((RegionEditorNode)element);
 			break;
 		}
 		return null;
 	}
 
-	protected CellEditor createTextEditor(final RegionNode node) {
+	protected CellEditor createTextEditor(final RegionEditorNode node) {
 		final TextCellEditor tce = new TextCellEditor((Composite)viewer.getControl(), SWT.NONE);
 		return tce;
 	}
 
-	protected CellEditor createBooleanEditor(final RegionNode node) {
+	protected CellEditor createBooleanEditor(final RegionEditorNode node) {
 		final CheckboxCellEditor fse = new CheckboxCellEditor((Composite)viewer.getControl(), SWT.NONE);
 		fse.addListener(new ICellEditorListener() {
 			@Override
@@ -102,23 +102,23 @@ public class RegionEditorEditingSupport extends ValueEditingSupport {
 	protected boolean canEdit(Object element) {
 		switch (column) {
 		case 0:
-			if (!(element instanceof RegionNode))
+			if (!(element instanceof RegionEditorNode))
 				return false;
-			return ((RegionNode)element).isEditable();
+			return ((RegionEditorNode)element).isEditable();
 		case 1:
 			if (!(element instanceof NumericNode<?>))
 				return false;
 			return ((NumericNode<?>)element).isEditable();
 		case 3:
-			if (!(element instanceof RegionNode))
+			if (!(element instanceof RegionEditorNode))
 				return false;
 			return true;
 		case 4:
-			if (!(element instanceof RegionNode))
+			if (!(element instanceof RegionEditorNode))
 				return false;
 			return true;
 		case 5:
-			if (!(element instanceof RegionNode))
+			if (!(element instanceof RegionEditorNode))
 				return false;
 			return true;
 		}
@@ -129,8 +129,8 @@ public class RegionEditorEditingSupport extends ValueEditingSupport {
 	protected Object getValue(Object element) {
 		switch (column) {
 		case 0:
-			if (element instanceof RegionNode) {
-				RegionNode node = (RegionNode)element;
+			if (element instanceof RegionEditorNode) {
+				RegionEditorNode node = (RegionEditorNode)element;
 				return node.getLabel();
 			}
 			break;
@@ -147,20 +147,20 @@ public class RegionEditorEditingSupport extends ValueEditingSupport {
 			}
 			break;
 		case 3:
-			if (element instanceof RegionNode) {
-				RegionNode node = (RegionNode)element;
+			if (element instanceof RegionEditorNode) {
+				RegionEditorNode node = (RegionEditorNode)element;
 				return node.isVisible();
 			}
 			break;
 		case 4:
-			if (element instanceof RegionNode) {
-				RegionNode node = (RegionNode)element;
+			if (element instanceof RegionEditorNode) {
+				RegionEditorNode node = (RegionEditorNode)element;
 				return node.isActive();
 			}
 			break;
 		case 5:
-			if (element instanceof RegionNode) {
-				RegionNode node = (RegionNode)element;
+			if (element instanceof RegionEditorNode) {
+				RegionEditorNode node = (RegionEditorNode)element;
 				return node.isMobile();
 			}
 			break;
@@ -172,8 +172,8 @@ public class RegionEditorEditingSupport extends ValueEditingSupport {
 	protected void setValue(Object element, Object value) {
 		switch (column) {
 		case 0:
-			if (element instanceof RegionNode) {
-				RegionNode node = (RegionNode)element;
+			if (element instanceof RegionEditorNode) {
+				RegionEditorNode node = (RegionEditorNode)element;
 				node.setName((String) value);
 			}
 			break;
@@ -190,20 +190,20 @@ public class RegionEditorEditingSupport extends ValueEditingSupport {
 			}
 			break;
 		case 3:
-			if (element instanceof RegionNode) {
-				RegionNode node = (RegionNode) element;
+			if (element instanceof RegionEditorNode) {
+				RegionEditorNode node = (RegionEditorNode) element;
 				node.setVisible((Boolean) value);
 			}
 			break;
 		case 4:
-			if (element instanceof RegionNode) {
-				RegionNode node = (RegionNode) element;
+			if (element instanceof RegionEditorNode) {
+				RegionEditorNode node = (RegionEditorNode) element;
 				node.setActive((Boolean) value);
 			}
 			break;
 		case 5:
-			if (element instanceof RegionNode) {
-				RegionNode node = (RegionNode) element;
+			if (element instanceof RegionEditorNode) {
+				RegionEditorNode node = (RegionEditorNode) element;
 				node.setMobile((Boolean) value);
 			}
 			break;
