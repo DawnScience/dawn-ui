@@ -11,7 +11,7 @@ import uk.ac.diamond.scisoft.analysis.roi.RingROI;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
 /**
- * Class used to create nodes with
+ * Class used to create nodes with for the Region Tree Editor
  * @author wqk87977
  *
  */
