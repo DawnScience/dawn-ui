@@ -80,7 +80,7 @@ public abstract class AbstractRegion<T extends IROI> extends Figure implements I
 			}
 		}
 	}
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(AbstractRegion.class);
 	
 	protected void fireROIChanged(T roi) {
@@ -157,7 +157,7 @@ public abstract class AbstractRegion<T extends IROI> extends Figure implements I
 	 * Implement to return the region of interest
 	 * @param recordResult if true this calculation changes the recorded absolute position
 	 */
-	protected abstract T createROI(boolean recordResult);
+	protected abstract T createROI(boolean recordResult);  // TODO not required
 
 	/**
 	 * Override this to allow other types of ROIs to be set

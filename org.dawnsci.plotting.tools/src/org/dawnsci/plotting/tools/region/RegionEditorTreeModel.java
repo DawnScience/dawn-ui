@@ -66,8 +66,8 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		if (nodes == null)
 			return false;
 		for (TreeNode node : nodes) {
-			if (node instanceof RegionNode) {
-				RegionNode regionNode = (RegionNode) node;
+			if (node instanceof RegionEditorNode) {
+				RegionEditorNode regionNode = (RegionEditorNode) node;
 				if(regionNode.getLabel().equals(name))
 					return true;
 			}
@@ -75,7 +75,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		return false;
 	}
 
-	private RegionNode createRegion(IRegion region, double maxIntensity, double sum) {
+	private RegionEditorNode createRegion(IRegion region, double maxIntensity, double sum) {
 		IPreferenceStore store = Activator.getPlottingPreferenceStore();
 		String pointFormat = store.getString(RegionEditorConstants.POINT_FORMAT);
 		String angleFormat = store.getString(RegionEditorConstants.ANGLE_FORMAT);
@@ -84,7 +84,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		double increment = RegionEditorTool.getDecimal(pointFormat);
 		double incrementAngle = RegionEditorTool.getDecimal(angleFormat);
 
-		final RegionNode node = new RegionNode(plottingSystem, region, root);
+		final RegionEditorNode node = new RegionEditorNode(plottingSystem, region, root);
 		node.setTooltip(region.getName());
 		node.setEditable(true);
 		node.setVisible(region.isVisible());
@@ -94,7 +94,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		node.setDefaultExpanded(true);
 
 		IROI roi = region.getROI();
-		Map<String, Double> roiInfos = RegionNodeFactory.getRegionNodeInfos(roi);
+		Map<String, Double> roiInfos = RegionEditorNodeFactory.getRegionNodeInfos(roi);
 		if (roiInfos == null)
 			return null;
 		Set<Entry<String,Double>> set = roiInfos.entrySet();
@@ -115,7 +115,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		return node;
 	}
 
-	private void createAngleNode(final RegionNode regionNode, String nodeName, boolean editable,
+	private void createAngleNode(final RegionEditorNode regionNode, String nodeName, boolean editable,
 			double increment, String pointFormat, Unit<Angle> unit, double value) {
 		final NumericNode<Angle> node = new NumericNode<Angle>(nodeName, regionNode, unit);
 		registerNode(node);
@@ -153,7 +153,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		}
 	}
 
-	private void createLengthNode(final RegionNode regionNode, String nodeName, boolean editable,
+	private void createLengthNode(final RegionEditorNode regionNode, String nodeName, boolean editable,
 			double increment, String pointFormat, Unit<?> unit, double value) {
 		if (unit.isCompatible(NonSI.PIXEL)) {
 			NumericNode<Length> node = new NumericNode<Length>(nodeName, regionNode, (Unit<Length>) unit);
@@ -187,7 +187,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		}
 	}
 
-	protected void setValue(RegionNode regionNode) {
+	protected void setValue(RegionEditorNode regionNode) {
 		IRegion region = null;
 		Collection<IRegion> regions = plottingSystem.getRegions();
 		for (IRegion iRegion : regions) {
@@ -264,13 +264,13 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		if (nodes == null)
 			return;
 		for (TreeNode node : nodes) {
-			if (node instanceof RegionNode) {
-				RegionNode regionNode = (RegionNode) node;
+			if (node instanceof RegionEditorNode) {
+				RegionEditorNode regionNode = (RegionEditorNode) node;
 				String label = regionNode.getLabel();
 				if (label.equals(region.getName())) {
 					List<TreeNode> children = regionNode.getChildren();
 					IROI roi = region.getROI();
-					Map<String, Double> roiInfos = RegionNodeFactory.getRegionNodeInfos(roi);
+					Map<String, Double> roiInfos = RegionEditorNodeFactory.getRegionNodeInfos(roi);
 					Set<Entry<String,Double>> set = roiInfos.entrySet();
 					int i = 0;
 					for (Entry<String, Double> entry : set) {
@@ -291,7 +291,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		}
 	}
 
-	public void removeRegion(RegionNode regionNode) {
+	public void removeRegion(RegionEditorNode regionNode) {
 		int childrenNumber = root.getChildCount();
 		root.removeChild(regionNode);
 		regionNode.dispose();

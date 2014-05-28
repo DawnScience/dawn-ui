@@ -41,7 +41,7 @@ import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.tools.preference.InfoPixelConstants;
 import org.dawnsci.plotting.tools.preference.InfoPixelPreferencePage;
-import org.dawnsci.plotting.tools.region.AbstractRegionTableTool.RegionColorListener;
+import org.dawnsci.plotting.tools.region.RegionColorListener;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;

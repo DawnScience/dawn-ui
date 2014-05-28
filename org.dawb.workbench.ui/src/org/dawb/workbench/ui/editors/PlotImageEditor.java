@@ -78,7 +78,7 @@ import uk.ac.diamond.scisoft.analysis.io.ImageStackLoader;
 /**
  * An editor which combines a plot with a graph of data sets.
  * 
- * Currently this is for 1D analyses only so if the data does not contain 1D, this
+ * Currently this is for 2D analysis only so if the data does not contain 1D, this
  * editor will not show.
  * 
  */
@@ -336,8 +336,8 @@ public class PlotImageEditor extends EditorPart implements IEditorExtension, IRe
      	super.dispose();
     }
 
+    @Override
     public Object getAdapter(@SuppressWarnings("rawtypes") final Class clazz) {
-		
 		if (clazz == Page.class) {
 			return new HeaderTablePage(EclipseUtils.getFilePath(getEditorInput()));
 		} else if (clazz == IToolPageSystem.class || clazz == IPlottingSystem.class) {
@@ -346,9 +346,10 @@ public class PlotImageEditor extends EditorPart implements IEditorExtension, IRe
 		
 		return super.getAdapter(clazz);
 	}
+
     @Override
     public IPlottingSystem getPlottingSystem() {
-    	return this.plottingSystem;
+    	return plottingSystem;
     }
 
 	@Override

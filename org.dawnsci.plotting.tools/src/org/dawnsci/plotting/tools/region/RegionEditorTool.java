@@ -67,7 +67,6 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -116,7 +115,7 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 	private RegionEditorTreeModel model;
 	private ClearableFilteredTree filteredTree;
 
-	private RegionColorListener viewUpdateListener;
+	private RegionEditorColorListener viewUpdateListener;
 	private ITraceListener traceListener;
 	private IPropertyChangeListener propertyListener;
 
@@ -162,8 +161,8 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 					Iterator<?> it = selection.iterator();
 					while (it.hasNext()) {
 						Object object = (Object) it.next();
-						if (object instanceof RegionNode) {
-							RegionNode regionNode = (RegionNode) object;
+						if (object instanceof RegionEditorNode) {
+							RegionEditorNode regionNode = (RegionEditorNode) object;
 							IRegion region = getPlottingSystem().getRegion(regionNode.getRegion().getName());
 							model.removeRegion(regionNode);
 							region.removeROIListener(RegionEditorTool.this);
@@ -192,7 +191,7 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 
 		getSite().setSelectionProvider(viewer);
 
-		this.viewUpdateListener = new RegionColorListener();
+		this.viewUpdateListener = new RegionEditorColorListener();
 
 		activate();
 	}
@@ -295,7 +294,7 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			LabelNode root = model.getRoot();
 			List<TreeNode> nodes = root.getChildren();
 			for (TreeNode node : nodes) {
-				RegionNode regionNode = (RegionNode) node;
+				RegionEditorNode regionNode = (RegionEditorNode) node;
 				List<TreeNode> regionChildren = regionNode.getChildren();
 				for (TreeNode child : regionChildren) {
 					if (child instanceof NumericNode<?>) {
@@ -321,28 +320,17 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		}
 	};
 
-	class RegionColorListener implements ISelectionChangedListener {
-
-		private IRegion previousRegion;
-		private Color previousColor;
-
+	class RegionEditorColorListener extends RegionColorListener {
 		@Override
 		public void selectionChanged(SelectionChangedEvent event) {
 			final IStructuredSelection sel = (IStructuredSelection) event.getSelection();
-			if (!(sel.getFirstElement() instanceof RegionNode))
+			if (!(sel.getFirstElement() instanceof RegionEditorNode))
 				return;
-			final RegionNode regionNode = (RegionNode) sel.getFirstElement();
+			final RegionEditorNode regionNode = (RegionEditorNode) sel.getFirstElement();
 			IRegion region = getPlottingSystem().getRegion(regionNode.getLabel());
 			if (region == null)
 				return;
 			updateColorSelection(region);
-		}
-
-		private void resetSelectionColor() {
-			if (previousRegion != null)
-				previousRegion.setRegionColor(previousColor);
-			previousRegion = null;
-			previousColor  = null;
 		}
 	}
 
@@ -476,8 +464,8 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 				String txtCopy = "";
 				while (it.hasNext()) {
 					Object object = (Object) it.next();
-					if (object instanceof RegionNode) {
-						RegionNode regionNode = (RegionNode) object;
+					if (object instanceof RegionEditorNode) {
+						RegionEditorNode regionNode = (RegionEditorNode) object;
 						IRegion region = regionNode.getRegion();
 						if (region == null || region.getROI() == null)
 							return;
@@ -574,8 +562,8 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 				Iterator<?> it = selected.iterator();
 				while (it.hasNext()) {
 					Object object = (Object) it.next();
-					if (object instanceof RegionNode) {
-						RegionNode regionNode = (RegionNode) object;
+					if (object instanceof RegionEditorNode) {
+						RegionEditorNode regionNode = (RegionEditorNode) object;
 						regionNode.setVisible(visibleToggleAction.isChecked());
 						viewer.refresh();
 					}
@@ -591,8 +579,8 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 				Iterator<?> it = selected.iterator();
 				while (it.hasNext()) {
 					Object object = (Object) it.next();
-					if (object instanceof RegionNode) {
-						RegionNode regionNode = (RegionNode) object;
+					if (object instanceof RegionEditorNode) {
+						RegionEditorNode regionNode = (RegionEditorNode) object;
 						regionNode.setActive(activeToggleAction.isChecked());
 						viewer.refresh();
 					}
@@ -608,8 +596,8 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 				Iterator<?> it = selected.iterator();
 				while (it.hasNext()) {
 					Object object = (Object) it.next();
-					if (object instanceof RegionNode) {
-						RegionNode regionNode = (RegionNode) object;
+					if (object instanceof RegionEditorNode) {
+						RegionEditorNode regionNode = (RegionEditorNode) object;
 						regionNode.setMobile(mobileToggleAction.isChecked());
 						viewer.refresh();
 					}
@@ -630,8 +618,8 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 				Iterator<?> it = selected.iterator();
 				while (it.hasNext()) {
 					Object object = (Object) it.next();
-					if (object instanceof RegionNode) {
-						RegionNode regionNode = (RegionNode) object;
+					if (object instanceof RegionEditorNode) {
+						RegionEditorNode regionNode = (RegionEditorNode) object;
 						visibleToggleAction.setChecked(regionNode.isVisible());
 						activeToggleAction.setChecked(regionNode.isActive());
 						mobileToggleAction.setChecked(regionNode.isMobile());
@@ -649,8 +637,8 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			return;
 		List<TreeNode> nodes = root.getChildren();
 		for (TreeNode node : nodes) {
-			if (node instanceof RegionNode) {
-				RegionNode regionNode = (RegionNode) node;
+			if (node instanceof RegionEditorNode) {
+				RegionEditorNode regionNode = (RegionEditorNode) node;
 				IRegion region = regionNode.getRegion();
 				region.setShowPosition(isShown);
 			}
@@ -722,7 +710,7 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 				if (viewer != null) {
 					TreeItem[] items = viewer.getTree().getItems();
 					for (int i = 0; i < items.length; i++) {
-						RegionNode regionNode = (RegionNode) items[i].getData();
+						RegionEditorNode regionNode = (RegionEditorNode) items[i].getData();
 						if (model != null)
 							model.removeRegion(regionNode);
 					}
@@ -804,8 +792,8 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		if (nodes == null)
 			return;
 		for (TreeNode node : nodes) {
-			if (node instanceof RegionNode) {
-				RegionNode regionNode = (RegionNode) node;
+			if (node instanceof RegionEditorNode) {
+				RegionEditorNode regionNode = (RegionEditorNode) node;
 				if (regionNode.getLabel().equals(oldName)) {
 					regionNode.setLabel(region.getName());
 					if (viewer!=null)
@@ -853,8 +841,8 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			if (nodes == null)
 				return;
 			for (TreeNode node : nodes) {
-				if (node instanceof RegionNode) {
-					RegionNode regionNode = (RegionNode) node;
+				if (node instanceof RegionEditorNode) {
+					RegionEditorNode regionNode = (RegionEditorNode) node;
 					if (regionNode.getLabel().equals(region.getName())) {
 						model.removeRegion(regionNode);
 						region.removeROIListener(this);
@@ -872,7 +860,7 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			return;
 		Collection<IRegion> regions = evt.getRegions();
 		for (IRegion region : regions) {
-			RegionNode regionNode = (RegionNode) model.getNode("/" + region.getName());
+			RegionEditorNode regionNode = (RegionEditorNode) model.getNode("/" + region.getName());
 			if (regionNode == null)
 				return;
 			model.removeRegion(regionNode);
@@ -900,7 +888,7 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			updateColorSelection(region);
 			TreeItem[] treeItems = viewer.getTree().getItems();
 			for (int i = 0; i < treeItems.length; i++) {
-				RegionNode node = (RegionNode)treeItems[i].getData();
+				RegionEditorNode node = (RegionEditorNode)treeItems[i].getData();
 				String name = node.getLabel();
 				if(region.getName().equals(name)){
 					viewer.getTree().setSelection(treeItems[i]);
