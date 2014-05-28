@@ -409,45 +409,52 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 		}
 	}
 
-	    
-    public Image getIconForFile(File file) {
-    	
-    	if (file.isDirectory()) {
-    		return getFolderImage(file);
-    	}
+	public Image getIconForFile(final File file) {
+		if (file.isDirectory()) {
+			return getFolderImage(file);
+		}
 
-    	final String ext = FileUtils.getFileExtension(file);
-    	if (imageRegistry == null) imageRegistry = new ImageRegistry();
-    	
-    	Image returnImage = imageRegistry.get(ext);
-    	if (returnImage != null) return returnImage;   	
-    	    	
-    	// Eclipse icon
-    	ECLISPE_BLOCK: if (returnImage==null) {
-    		final IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(file.getAbsolutePath());
-    		if (desc==null) break ECLISPE_BLOCK;
-    		final ImageDescriptor imageDescriptor = desc.getImageDescriptor();
-    		if (imageDescriptor==null) break ECLISPE_BLOCK;
-	    	returnImage = imageDescriptor.createImage();
-    	}
+		final String ext = FileUtils.getFileExtension(file);
+		if (imageRegistry == null)
+			imageRegistry = new ImageRegistry();
 
-    	
-    	// Program icon from system
-    	if (returnImage==null) {
-	    	final Program program = Program.findProgram(ext);
-	    	
-	    	if (program!=null) {
-		    	ImageData iconData=Program.findProgram(ext).getImageData();
-		    	returnImage = new Image(Display.getCurrent(), iconData);
-	    	}
-    	}
-    	    	
-    	if (returnImage==null)	returnImage = getImageSWT(file);
-    	
-    	imageRegistry.put(ext, returnImage);
-    	
-    	return returnImage;
-    }
+		Image returnImage = imageRegistry.get(ext);
+		if (returnImage != null)
+			return returnImage;
+
+		// Eclipse icon
+		ECLISPE_BLOCK: if (returnImage == null) {
+			final IEditorDescriptor desc = PlatformUI.getWorkbench()
+					.getEditorRegistry()
+					.getDefaultEditor(file.getAbsolutePath());
+			if (desc == null)
+				break ECLISPE_BLOCK;
+			final ImageDescriptor imageDescriptor = desc.getImageDescriptor();
+			if (imageDescriptor == null)
+				break ECLISPE_BLOCK;
+			returnImage = imageDescriptor.createImage();
+		}
+
+		// Program icon from system
+		if (returnImage == null) {
+			final Program program = Program.findProgram(ext);
+			if (program != null) {
+				ImageData iconData = Program.findProgram(ext).getImageData();
+				returnImage = new Image(Display.getCurrent(), iconData);
+			}
+		}
+		if (returnImage == null)
+			returnImage = getImageSWT(file);
+
+		/* Not storing null image for ext, because the reason of null is the
+		 * broken file. Even if a broken file icon would be gotten in the
+		 * future, the image still should not be attached to ext.
+		 */
+		if (returnImage != null)
+			imageRegistry.put(ext, returnImage);
+
+		return returnImage;
+	}
     
     static ImageData convertToSWT(BufferedImage bufferedImage) {
         if (bufferedImage.getColorModel() instanceof DirectColorModel) {
@@ -496,6 +503,8 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
     
     static Image getImageSWT(File file) {
         ImageIcon systemIcon = (ImageIcon) FileSystemView.getFileSystemView().getSystemIcon(file);
+        if (systemIcon == null) // Happens when file does not exist
+            return null;
         java.awt.Image image = systemIcon.getImage();
         if (image instanceof BufferedImage) {
             return new Image(Display.getDefault(), convertToSWT((BufferedImage)image));
