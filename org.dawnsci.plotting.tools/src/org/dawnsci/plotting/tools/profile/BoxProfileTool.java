@@ -63,21 +63,6 @@ public class BoxProfileTool extends ProfileTool {
 		final RectangularROI bounds = (RectangularROI) (rbs==null ? region.getROI() : rbs);
 		if (bounds==null)
 			return;
-		// if region is not active check the traces to clear them from the profile plotting system
-		if (!bounds.isPlot()) {
-			final ILineTrace x_trace = (ILineTrace) profilePlottingSystem.getTrace("X " + region.getName());
-			final ILineTrace y_trace = (ILineTrace) profilePlottingSystem.getTrace("Y " + region.getName());
-			if (x_trace != null && y_trace != null) {
-				getControl().getDisplay().syncExec(new Runnable() {
-					@Override
-					public void run() {
-						profilePlottingSystem.removeTrace(x_trace);
-						profilePlottingSystem.removeTrace(y_trace);
-					}
-				});
-			}
-			return;
-		}
 		if (!region.isVisible())
 			return;
 
