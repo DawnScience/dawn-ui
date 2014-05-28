@@ -301,7 +301,6 @@ public abstract class AbstractSelectionRegion<T extends IROI> extends AbstractRe
 		return bean.getRegionColor();
 	}
 
-
 	public void setRegionColor(Color regionColor) {
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {
 			if (ob!=null) {
@@ -482,7 +481,7 @@ public abstract class AbstractSelectionRegion<T extends IROI> extends AbstractRe
 	public void setLineWidth(int lineWidth) {
 		this.lineWidth = lineWidth;
 	}
-	
+
 	/**
 	 * This will work for WAY1 only. If using WAY2 you will need to override.
 	 * See comment at top of this class.

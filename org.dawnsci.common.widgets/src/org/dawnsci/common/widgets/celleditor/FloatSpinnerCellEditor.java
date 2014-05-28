@@ -46,7 +46,7 @@ public class FloatSpinnerCellEditor extends CellEditor {
 	private static final int defaultStyle = SWT.NONE;
 
 	/**
-	 * Creates a new cell editor with no control and no st of choices.
+	 * Creates a new cell editor with no control and no set of choices.
 	 * Initially, the cell editor has no cell validator.
 	 *
 	 * @since 2.1
