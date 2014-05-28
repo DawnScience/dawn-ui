@@ -39,9 +39,9 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 			colourSchemeName = "Film Negative";
 		}
 		ColourSchemeContribution csc = extensionManager.getColourSchemeContribution(colourSchemeName);
-		int[] red   = extensionManager.getTransferFunctionByID(csc.getRedID()).getFunction().getArray();
-		int[] green = extensionManager.getTransferFunctionByID(csc.getGreenID()).getFunction().getArray();
-		int[] blue  = extensionManager.getTransferFunctionByID(csc.getBlueID()).getFunction().getArray();
+		int[] red   = extensionManager.getTransferFunctionFromID(csc.getRedID()).getFunction().getArray();
+		int[] green = extensionManager.getTransferFunctionFromID(csc.getGreenID()).getFunction().getArray();
+		int[] blue  = extensionManager.getTransferFunctionFromID(csc.getBlueID()).getFunction().getArray();
 		
 		if (csc.getRedInverted()) {
 			red = invert(red);
@@ -70,7 +70,7 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 	}
 
 	@Override
-	public Object create(Class           serviceInterface, 
+	public Object create(@SuppressWarnings("rawtypes") Class serviceInterface, 
 			             IServiceLocator parentLocator,
 			             IServiceLocator locator) {
 		
@@ -87,10 +87,10 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 		}
 		ColourSchemeContribution csc = extensionManager.getColourSchemeContribution(colourSchemeName);
 		
-		ITransferFunction    red  = extensionManager.getTransferFunctionByID(csc.getRedID()).getFunction();
-		ITransferFunction   blue  = extensionManager.getTransferFunctionByID(csc.getBlueID()).getFunction();
-		ITransferFunction    grn  = extensionManager.getTransferFunctionByID(csc.getGreenID()).getFunction();
-		ITransferFunction   alpha = extensionManager.getTransferFunctionByID(csc.getAlphaID()).getFunction();
+		ITransferFunction    red  = extensionManager.getTransferFunctionFromID(csc.getRedID()).getFunction();
+		ITransferFunction   blue  = extensionManager.getTransferFunctionFromID(csc.getBlueID()).getFunction();
+		ITransferFunction    grn  = extensionManager.getTransferFunctionFromID(csc.getGreenID()).getFunction();
+		ITransferFunction   alpha = extensionManager.getTransferFunctionFromID(csc.getAlphaID()).getFunction();
 		if (red==null || blue == null || grn == null ) return null;
 		return new FunctionContainer(red, grn, blue, alpha, csc.getRedInverted(), csc.getGreenInverted(), csc.getBlueInverted(), csc.getAlphaInverted());
 	}

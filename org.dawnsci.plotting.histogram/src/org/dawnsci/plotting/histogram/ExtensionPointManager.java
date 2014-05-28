@@ -12,12 +12,11 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 
 public class ExtensionPointManager {
-	
 	private static final String TRANSFER_FUNCTION_ID = "org.dawnsci.plotting.histogram.channelColourScheme";
 	private static final String COLOUR_SCHEME_ID = "org.dawnsci.plotting.histogram.colourScheme";
 	private List<TransferFunctionContribution> transferFunctions;
 	private List<ColourSchemeContribution> colourSchemes;
-	
+
 	private static ExtensionPointManager staticManager;
 	public static ExtensionPointManager getManager() {
 		if (staticManager==null) staticManager = new ExtensionPointManager();
@@ -26,7 +25,7 @@ public class ExtensionPointManager {
 	private ExtensionPointManager() {
 		
 	}
-	
+
 	/**
 	 * Get all the extensions for a particular ID
 	 * @param extensionPointId The ID which is referenced
@@ -38,18 +37,17 @@ public class ExtensionPointManager {
 		IExtension[] extensions = point.getExtensions();
 		return extensions;
 	}
-	
-	
+
 	/**
 	 * Get all the relevant transfer Function Contributions
 	 * @return
 	 */
 	public List<TransferFunctionContribution> getTransferFunctionContributions() {
 
-		if(transferFunctions != null) {
+		if (transferFunctions != null) {
 			return transferFunctions;
 		}
-		
+
 		transferFunctions = new ArrayList<TransferFunctionContribution>();
 		
 		IExtension[] extensions = getExtensions(TRANSFER_FUNCTION_ID);
@@ -69,17 +67,17 @@ public class ExtensionPointManager {
 		
 		return transferFunctions;
 	}	
-	
+
 	/**
 	 * Get all the Colour Scheme Contributions
 	 * @return
 	 */
 	public List<ColourSchemeContribution> getColourSchemeContributions() {
 
-		if(colourSchemes != null) {
+		if (colourSchemes != null) {
 			return colourSchemes;
 		}
-		
+
 		colourSchemes = new ArrayList<ColourSchemeContribution>();
 		
 		IExtension[] extensions = getExtensions(COLOUR_SCHEME_ID);
@@ -106,29 +104,24 @@ public class ExtensionPointManager {
 	 * @return
 	 */
 	public TransferFunctionContribution getTransferFunction(String name) {
-		if (transferFunctions==null) getTransferFunctionContributions();
-		for (TransferFunctionContribution function : transferFunctions) {
+		for (TransferFunctionContribution function : getTransferFunctionContributions()) {
 			if (function.getName().compareTo(name) == 0) {
 				return function;
 			}
 		}
 		throw new IllegalArgumentException("Could not find an appropriate Transfer Function");
 	}
+
 	/**
 	 * Get a transfer function contribution by name
 	 * @param name the name of the Function
 	 * @return
+	 * @deprecated Use {@link #getTransferFunctionFromID(String)}
 	 */
+	@Deprecated
 	public TransferFunctionContribution getTransferFunctionByID(String id) {
-		if (transferFunctions==null) getTransferFunctionContributions();
-		for (TransferFunctionContribution function : transferFunctions) {
-			if (function.getId().compareTo(id) == 0) {
-				return function;
-			}
-		}
-		throw new IllegalArgumentException("Could not find an appropriate Transfer Function");
+		return getTransferFunctionFromID(id);
 	}
-
 
 	/**
 	 * Get a colour scheme contribution by name
@@ -144,20 +137,17 @@ public class ExtensionPointManager {
 		throw new IllegalArgumentException("Could not find an appropriate Colour Scheme '" + name + "'");
 	}
 
-
 	/**
 	 * Get a transfer function contribution by ID
-	 * @param ID the ID of the function
+	 * @param id the ID of the function
 	 * @return
 	 */
-	public TransferFunctionContribution getTransferFunctionFromID(String ID) {
-		for (TransferFunctionContribution function : transferFunctions) {
-			if (function.getId().compareTo(ID) == 0) {
+	public TransferFunctionContribution getTransferFunctionFromID(String id) {
+		for (TransferFunctionContribution function : getTransferFunctionContributions()) {
+			if (function.getId().compareTo(id) == 0) {
 				return function;
 			}
 		}
-		throw new IllegalArgumentException("Could Not find an appropriate ID");
+		throw new IllegalArgumentException("Could not find an appropriate id");
 	}	
-	
-		
 }
