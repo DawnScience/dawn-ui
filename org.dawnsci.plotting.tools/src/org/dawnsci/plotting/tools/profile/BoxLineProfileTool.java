@@ -395,11 +395,11 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 			AbstractDataset axis, double startPoint){
 		// shift the xaxis by yStart
 		try {
-			double xStart = axis.getElementDoubleAbs((int)Math.round(startPoint));
+			double xStart = axis.getDouble((int)Math.round(startPoint));
 			double min = axis.getDouble(0);
 
 			axis = new DoubleDataset(axis);
-			xStart = axis.getElementDoubleAbs((int)Math.round(startPoint));
+			xStart = axis.getDouble((int)Math.round(startPoint));
 			min = axis.getDouble(0);
 			axis.iadd(xStart-min);
 
@@ -416,7 +416,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 				profiles.get(2).setData(axis.getSlice(new Slice(0, lines.get(2).getShape()[0], 1)), lines.get(2));
 			}
 
-			double max = axis.getDouble(axis.argMax());
+			double max = axis.getElementDoubleAbs(axis.argMax());
 			xPixelAxis.setTitle(axis.getName());
 			xAxisROI = createXAxisBoxRegion(profilePlottingSystem, new RectangularROI(min, 0, (max-min)/2, 100, 0), "X_Axis_box");
 		

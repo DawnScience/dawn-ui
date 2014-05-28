@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Comparisons;
+import uk.ac.diamond.scisoft.analysis.dataset.IndexIterator;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.IRectangularROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
@@ -357,15 +358,12 @@ public class MaskObject {
 			
 			double              lo  = minNumber!=null ? minNumber.doubleValue() : Double.NaN;
 			double              hi  = maxNumber!=null ? maxNumber.doubleValue() : Double.NaN;
-			
-			final int size = imageDataset.getSize();
-			for (int i = 0; i < size; i++) {
-				
-				double x = imageDataset.getElementDoubleAbs(i);
+			IndexIterator it = imageDataset.getIterator();
+			for (int i = 0; it.hasNext(); i++) {
+				double x = imageDataset.getElementDoubleAbs(it.index);
 				boolean isValid = isValid(x, lo, hi);
 				if (ignoreAlreadyMasked && isValid && !maskDataset.getAbs(i)) continue;
 				maskDataset.setAbs(i, isValid);
-				
 			}
 		}
 
