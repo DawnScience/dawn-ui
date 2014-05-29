@@ -261,7 +261,6 @@ abstract public class FitROIShape<T extends IFitROI> extends ParametricROIShapeB
 				double[] pnt  = cs.getPositionFromValue(r.getPointRef());
 				addHandle(pnt[0], pnt[1], mobile, visible, handleListener);
 			}
-			croi.setPoints(proi);
 			addCentreHandle(mobile, visible);
 //			addFigureListener(moveListener);
 //			FigureTranslator mover = new FigureTranslator(region.getXyGraph(), parent, this, handles);
@@ -279,7 +278,6 @@ abstract public class FitROIShape<T extends IFitROI> extends ParametricROIShapeB
 				SelectionHandle h = (SelectionHandle) handles.get(i);
 				h.setSelectionPoint(pt);
 			}
-			croi.setPoints(proi);
 			SelectionHandle h = (SelectionHandle) handles.get(imax);
 			h.setSelectionPoint(getCentre());
 		}
