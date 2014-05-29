@@ -311,7 +311,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		}
 		
 		if (monitor!=null && monitor.isCanceled()) return false;
-		
+		if (imageData == null)
+			return false;
+
 		try {
 			
 			isMaximumZoom = false;
