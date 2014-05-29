@@ -224,10 +224,12 @@ public abstract class AbstractSelectionRegion<T extends IROI> extends AbstractRe
 			}
 		};
 		for (IFigure iFigure : ro) {
-			try {
-				iFigure.addMouseListener(selectionListener);
-			} catch (Throwable ne) {
-				continue;// Probably will not happen
+			if (iFigure != null) {
+				try {
+					iFigure.addMouseListener(selectionListener);
+				} catch (Throwable ne) {
+					continue;// Probably will not happen
+				}
 			}
 		}
 	}
