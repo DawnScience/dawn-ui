@@ -97,6 +97,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
+import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 /**
@@ -1000,6 +1001,9 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			} else if (type == RegionType.LINE && bounds instanceof LinearROI) {
 				final LinearROI roi = (LinearROI) bounds;
 				rd = new LinearROIData(roi, (AbstractDataset) trace.getData(), 1d);
+			} else if (type == RegionType.POINT && bounds instanceof PointROI) {
+				final PointROI roi = (PointROI) bounds;
+				return ((AbstractDataset) trace.getData()).getDouble((int)roi.getPointX(), (int)roi.getPointY());
 			} else
 				return Double.NaN;
 			if (rd != null) {

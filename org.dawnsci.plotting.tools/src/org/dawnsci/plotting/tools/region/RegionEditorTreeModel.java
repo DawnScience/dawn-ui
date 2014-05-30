@@ -30,6 +30,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
+import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import uk.ac.diamond.scisoft.analysis.roi.RingROI;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
@@ -105,9 +106,9 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 					createAngleNode(node, entry.getKey(), true, incrementAngle, pointFormat, SI.RADIAN, Math.toRadians(entry.getValue()));
 				else
 					createAngleNode(node, entry.getKey(), true, incrementAngle, angleFormat, NonSI.DEGREE_ANGLE, entry.getValue());
-			} else if (key.equals("Max Intensity"))
+			} else if (key.contains("Intensity"))
 				createLengthNode(node, key, false, increment, intensityFormat, Dimensionless.UNIT, maxIntensity);
-			else if (key.equals("Sum"))
+			else if (key.contains("Sum"))
 				createLengthNode(node, key, false, increment, sumFormat, Dimensionless.UNIT, sum);
 			else
 				createLengthNode(node, key, true, increment, pointFormat, NonSI.PIXEL, entry.getValue());
@@ -249,6 +250,10 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 			double radius = ((NumericNode<?>)regionNode.getChildAt(2)).getDoubleValue();
 			((CircularROI) roi).setPoint(new double[] { xStart, yStart });
 			((CircularROI) roi).setRadius(radius);
+		} else if (roi instanceof PointROI) {
+			double xStart = ((NumericNode<?>)regionNode.getChildAt(0)).getDoubleValue();
+			double yStart = ((NumericNode<?>)regionNode.getChildAt(1)).getDoubleValue();
+			((PointROI) roi).setPoint(new double[] {xStart, yStart} );
 		}
 		region.setROI(roi);
 		plottingSystem.repaint(false);
@@ -276,9 +281,9 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 					for (Entry<String, Double> entry : set) {
 						NumericNode<?> aChild = (NumericNode<?>) children.get(i);
 						String key = entry.getKey();
-						if (key.equals("Max Intensity"))
+						if (key.contains("Intensity"))
 							aChild.setDoubleValue(maxIntensity);
-						else if (key.equals("Sum"))
+						else if (key.contains("Sum"))
 							aChild.setDoubleValue(sum);
 						else if (key.contains("Angle") && regionNode.isAngleInRadian())
 							aChild.setDoubleValue(Math.toRadians(entry.getValue()));

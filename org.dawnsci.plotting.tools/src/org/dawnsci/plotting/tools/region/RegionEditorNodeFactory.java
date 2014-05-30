@@ -6,6 +6,7 @@ import java.util.Map;
 import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
+import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 import uk.ac.diamond.scisoft.analysis.roi.RingROI;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
@@ -57,6 +58,10 @@ public class RegionEditorNodeFactory {
 			roiInfos.put("Y Centre", ((RingROI)roi).getPointY());
 			roiInfos.put("Inner Radius", ((RingROI)roi).getRadii()[0]);
 			roiInfos.put("Outer Radius", ((RingROI)roi).getRadii()[1]);
+		} if (roi instanceof PointROI) {
+			roiInfos.put("X Start", ((PointROI)roi).getPointX());
+			roiInfos.put("Y Start", ((PointROI)roi).getPointY());
+			roiInfos.put("Intensity", Double.NaN);
 		}
 		return roiInfos;
 	}
