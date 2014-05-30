@@ -33,7 +33,7 @@ public class RegionEditorNodeFactory {
 			roiInfos.put("Width", ((RectangularROI)roi).getLengths()[0]);
 			roiInfos.put("Height", ((RectangularROI)roi).getLengths()[1]);
 			roiInfos.put("Angle", ((RectangularROI)roi).getAngleDegrees());
-			roiInfos.put("Max Intensity", Double.NaN);
+			roiInfos.put("Max Line Intensity", Double.NaN);
 			roiInfos.put("Sum", Double.NaN);
 		} else if (roi instanceof LinearROI) {
 			roiInfos.put("X Start", ((LinearROI)roi).getPointX());
@@ -41,7 +41,7 @@ public class RegionEditorNodeFactory {
 			roiInfos.put("X End", ((LinearROI)roi).getEndPoint()[0]);
 			roiInfos.put("Y End", ((LinearROI)roi).getEndPoint()[1]);
 			roiInfos.put("Angle", ((LinearROI)roi).getAngleDegrees());
-			roiInfos.put("Max Intensity", Double.NaN);
+			roiInfos.put("Intensity", Double.NaN);
 		} else if (roi instanceof CircularROI) {
 			roiInfos.put("X Centre", ((CircularROI)roi).getPointX());
 			roiInfos.put("Y Centre", ((CircularROI)roi).getPointY());
