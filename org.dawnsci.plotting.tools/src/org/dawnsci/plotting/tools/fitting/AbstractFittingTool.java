@@ -284,9 +284,8 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 		
 		if (viewUpdateListener!=null) viewer.addSelectionChangedListener(viewUpdateListener);
 		if (this.traceListener!=null) getPlottingSystem().addTraceListener(traceListener);
-		final int size = updateTracesChoice(null);	
-		if (size > 0)
-			fittingJob.fitNoCancel();
+		updateTracesChoice(null);
+		
 		createNewFit();
 	}
 	
@@ -320,30 +319,15 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 		}
 		
 		if (getPlottingSystem()!=null) {
-			if (this.traceListener!=null)
-				getPlottingSystem().removeTraceListener(traceListener);
+			if (this.traceListener!=null) getPlottingSystem().removeTraceListener(traceListener);
 	
 			try {
 				getPlottingSystem().removeRegionListener(this);
-				if (fittedFunctions!=null)
-					fittedFunctions.deactivate();
+				if (fittedFunctions!=null) fittedFunctions.deactivate();
+				
 			} catch (Exception e) {
 				logger.error("Cannot put the selection into fitting region mode!", e);
-			}
-			// remove fitted traces and regions and annotations
-			if (fittedFunctions != null) {
-				List<FittedFunction> fitted = fittedFunctions.getFunctionList();
-				if (fitted == null)
-					return;
-				for (FittedFunction fittedFunction : fitted) {
-					if (getPlottingSystem() != null) {
-						getPlottingSystem().removeTrace(fittedFunction.getTrace());
-						getPlottingSystem().removeRegion(fittedFunction.getFwhm());
-						getPlottingSystem().removeAnnotation(fittedFunction.getAnnotation());
-						getPlottingSystem().removeRegion(fittedFunction.getCenter());
-					}
-				}
-			}
+			}		
 		}
 	}
 
@@ -435,17 +419,11 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 			RectangularROI bounds = (RectangularROI) fitRegion.getROI();
 			if (bounds == null && !autoUpdate) return Status.CANCEL_STATUS;
 			if (bounds == null && autoUpdate) {
-				if (fittedFunctions == null)
-					return Status.CANCEL_STATUS;
+				if (fittedFunctions == null) return Status.CANCEL_STATUS;
 				Display.getDefault().syncExec(new Runnable() {
 					@Override
 					public void run() {
-						if (previousFittedFunctions == null) {
-							previousFittedFunctions = new ArrayList<FittedFunction>(fittedFunctions.getFunctionList());
-						} else {
-							previousFittedFunctions.clear();
-							previousFittedFunctions.addAll(fittedFunctions.getFunctionList());
-						}
+						previousFittedFunctions = new ArrayList<FittedFunction>(fittedFunctions.getFunctionList());
 						Collections.sort(previousFittedFunctions, new SortNatural<FittedFunction>(true));
 						clearAll();
 					}
@@ -453,8 +431,17 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 				for (FittedFunction function : previousFittedFunctions) {
 					IRegion region = function.getFwhm();
 					if (region != null && region.getROI() instanceof RectangularROI) {
+						// change the fwhm by 2xfwhm where
+						// <--width--> becomes <--width/2--><--width--><--width/2-->
 						RectangularROI rectangle = (RectangularROI)region.getROI();
-						rectangle = createFitArea(rectangle);
+						double width = rectangle.getLength(0);
+						double xPoint = rectangle.getPointX();
+						double[] startPoint = rectangle.getPoint();
+						double[] endPoint = rectangle.getEndPoint();
+						double newStartXPoint = xPoint - (width/2);
+						double newEndXPoint = endPoint[0] + (width/2);
+						rectangle.setPoint(newStartXPoint, startPoint[1]);
+						rectangle.setEndPoint(new double[]{newEndXPoint, endPoint[1]});
 						IStatus status = doFit(rectangle, monitor);
 						if (status == Status.CANCEL_STATUS) return Status.CANCEL_STATUS;
 					}
@@ -536,22 +523,7 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 			cancel();
 			schedule();
 		}
-
-		/**
-		 * Schedule a fitting job with no cancel (used when activating the tool)
-		 */
-		public void fitNoCancel() {
-			this.autoUpdate = true;
-			schedule();
-		}
 	};
-
-	/**
-	 * For Peak fitting, enlarge the fitting area
-	 * @param bounds
-	 * @return
-	 */
-	abstract protected RectangularROI createFitArea(RectangularROI bounds);
 
 	/**
 	 * If the plottingsystem is in a PlotView, we push the functions to the GuiBean
@@ -588,9 +560,7 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 		
 		final Collection<ITrace> traces = getPlottingSystem().getTraces();
 		if (traces==null || traces.size()<0) return 0;
-		if (fittedFunctions!=null) {
-			traces.removeAll(fittedFunctions.getFittedTraces());
-		}
+		if (fittedFunctions!=null) traces.removeAll(fittedFunctions.getFittedTraces());
 		
 		selectedTraces.clear();
 		int index = 0;
