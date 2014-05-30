@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbench;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,21 +48,42 @@ public class FittedPeaksExportWizard extends Wizard implements IExportWizard {
 	public boolean performFinish() {
 		
 		final IViewPart view = (IViewPart)EclipseUtils.getPage().findView("org.dawb.workbench.plotting.views.toolPageView.1D");
-		if (!(view instanceof IToolContainer)) return false;
-		
+		if (!(view instanceof IToolContainer))
+			return false;
 		final IToolContainer container = (IToolContainer)view;
-		if (view == null || container.getActiveTool()==null || !(container.getActiveTool() instanceof AbstractFittingTool)) {
-			MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot find active Fit Tool",
-					                "Cannot find a fitting tool to export the fitted peaks from.\n\n"+
-			                        "Please ensure that there is a fitting tool active with some\n"+
-					                "peaks in the peak table.");
+		final IViewReference viewFixed = (IViewReference)EclipseUtils.getPage().findViewReference("org.dawb.workbench.plotting.views.toolPageView.fixed", "org.dawb.workbench.plotting.tools.fittingTool");
+		if (!(viewFixed.getView(false) instanceof IToolContainer))
+			return false;
+		final IToolContainer containerFixed = (IToolContainer)viewFixed.getView(false);
+
+		boolean isFixed = false, isPeakToolActive = false;
+		if (view != null && container.getActiveTool()!=null && (container.getActiveTool() instanceof AbstractFittingTool)) {
+			isFixed = false;
+			isPeakToolActive = true;
+		}
+		if (viewFixed != null && containerFixed.getActiveTool()!=null && (containerFixed.getActiveTool() instanceof AbstractFittingTool)) {
+			isFixed = true;
+			isPeakToolActive = true;
+		}
+		if (!isPeakToolActive) {
+			MessageDialog
+					.openError(
+							Display.getDefault().getActiveShell(),
+							"Cannot find active Fit Tool",
+							"Cannot find a fitting tool to export the fitted peaks from.\n\n"
+									+ "Please ensure that there is a fitting tool active with some\n"
+									+ "peaks in the peak table.");
 			return false;
 		}
 		
 		final ExportPage ep = (ExportPage)getPages()[0];
 		try {
-			final String exportPath = ((AbstractFittingTool)container.getActiveTool()).exportFittedData(ep.getPath());
-			
+			String exportPath = "";
+			if (!isFixed)
+				exportPath = ((AbstractFittingTool)container.getActiveTool()).exportFittedData(ep.getPath());
+			else
+				exportPath = ((AbstractFittingTool)containerFixed.getActiveTool()).exportFittedData(ep.getPath());
+
 			if (ep.isOpen()) {
 				EclipseUtils.openExternalEditor(exportPath);
 			}
