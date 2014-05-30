@@ -8,11 +8,19 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import ncsa.hdf.object.Dataset;
+import ncsa.hdf.object.Datatype;
+import ncsa.hdf.object.h5.H5Datatype;
+
 import org.dawb.common.ui.image.IconUtils;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.util.EclipseUtils;
+import org.dawb.hdf5.IHierarchicalDataFile;
+import org.dawb.hdf5.Nexus;
+import org.dawb.hdf5.nexus.NexusUtils;
+import org.dawnsci.io.h5.H5Utils;
 import org.dawnsci.plotting.api.annotation.IAnnotation;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -726,18 +734,4 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		}
 	}
 
-	@Override
-	protected RectangularROI createFitArea(RectangularROI bounds) {
-		// change the fwhm by 2xfwhm where
-		// <--width--> becomes <--width/2--><--width--><--width/2-->
-		double width = bounds.getLength(0);
-		double xPoint = bounds.getPointX();
-		double[] startPoint = bounds.getPoint();
-		double[] endPoint = bounds.getEndPoint();
-		double newStartXPoint = xPoint - (width/2);
-		double newEndXPoint = endPoint[0] + (width/2);
-		bounds.setPoint(newStartXPoint, startPoint[1]);
-		bounds.setEndPoint(new double[]{newEndXPoint, endPoint[1]});
-		return bounds;
-	}
 }

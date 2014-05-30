@@ -395,9 +395,4 @@ public class LineFittingTool extends AbstractFittingTool {
 		}
 	}
 
-	@Override
-	protected RectangularROI createFitArea(RectangularROI bounds) {
-		return bounds;
-	}
-
 }
