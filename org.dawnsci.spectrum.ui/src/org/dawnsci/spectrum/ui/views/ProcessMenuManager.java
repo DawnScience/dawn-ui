@@ -15,6 +15,7 @@ import org.dawnsci.spectrum.ui.processing.AverageProcess;
 import org.dawnsci.spectrum.ui.processing.DerivativeProcess;
 import org.dawnsci.spectrum.ui.processing.DivisionProcess;
 import org.dawnsci.spectrum.ui.processing.MultiplicationProcess;
+import org.dawnsci.spectrum.ui.processing.MultiplyMinusOneProcess;
 import org.dawnsci.spectrum.ui.processing.PolySmoothProcess;
 import org.dawnsci.spectrum.ui.processing.RollingBallBaselineProcess;
 import org.dawnsci.spectrum.ui.processing.SubtractionProcess;
@@ -65,6 +66,8 @@ public class ProcessMenuManager {
 
 		process = new DerivativeProcess();
 		addProcessAction(process, menuProcess, "Derivative",((IStructuredSelection)viewer.getSelection()).size() >= 1);
+		process = new MultiplyMinusOneProcess();
+		addProcessAction(process, menuProcess, "Multiply by -1",((IStructuredSelection)viewer.getSelection()).size() >= 1);
 		//process = new PolySmoothProcess();
 		//addProcessAction(process, menuProcess, "Polynomial smoothing",((IStructuredSelection)viewer.getSelection()).size() >= 1);
 		menuProcess.addSeparator();
