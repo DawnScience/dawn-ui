@@ -206,8 +206,22 @@ public class BeansFactory {
 				try {
 				    method = bean.getClass().getMethod(setterName, value.getClass());
 				} catch (NoSuchMethodException ne) {
-					method = bean.getClass().getMethod(setterName, Object.class);
+					
+					// Look for interfaces.
+					final Class[] interfaces = value.getClass().getInterfaces();
+					if (interfaces!=null) for (Class class1 : interfaces) {
+						try {
+							method = bean.getClass().getMethod(setterName, class1);
+						} catch (NoSuchMethodException neOther) {
+							continue;
+						}
+						if (method!=null) break;
+					}
+					if (method==null) {
+						method = bean.getClass().getMethod(setterName, Object.class);
+					}
 				}
+				
 			} else {
 				method = bean.getClass().getMethod(setterName, Object.class);
 			}
