@@ -8,6 +8,7 @@ import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
+import org.dawnsci.plotting.tools.utils.ToolUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.widgets.Display;
@@ -66,76 +67,12 @@ public class ZoomTool extends ProfileTool {
 
 		final int yInc = bounds.getPoint()[1]<bounds.getEndPoint()[1] ? 1 : -1;
 		final int xInc = bounds.getPoint()[0]<bounds.getEndPoint()[0] ? 1 : -1;
-		
+
 		try {
 			AbstractDataset slice = null;
+			getClass();
 			AbstractDataset im    = (AbstractDataset)image.getData();
-			double xStart = bounds.getPoint()[0];
-			double yStart = bounds.getPoint()[1];
-			double xEnd = bounds.getEndPoint()[0];
-			double yEnd = bounds.getEndPoint()[1];
-			int[] shape = im.getShape();
-			// Check for most of the possible cases where a region might be out of bounds
-			if(xStart < 0 && yStart >= 0 && xEnd <= shape[0] && yEnd <= shape[1])
-				slice = im.getSlice(new int[] { (int) yStart, 0 },
-						new int[] { (int) yEnd, (int) xEnd },
-						new int[] {yInc, xInc});
-			else if(xStart < 0 && yStart < 0 && xEnd <= shape[0] && yEnd <= shape[1])
-				slice = im.getSlice(new int[] { 0, 0 },
-						new int[] { (int) yEnd, (int) xEnd },
-						new int[] {yInc, xInc});
-			else if(xStart < 0 && yStart >= 0 && xEnd > shape[0] && yEnd <= shape[1])
-				slice = im.getSlice(new int[] { (int) yStart, 0 },
-						new int[] { (int) yEnd, shape[0] },
-						new int[] {yInc, xInc});
-			else if(xStart < 0 && yStart < 0 && xEnd <= shape[0] && yEnd > shape[1])
-				slice = im.getSlice(new int[] { 0, 0 },
-						new int[] { shape[1], (int) xEnd },
-						new int[] {yInc, xInc});
-			else if(xStart < 0 && yStart >= 0 && xEnd > shape[0] && yEnd <= shape[1])
-				slice = im.getSlice(new int[] { (int) yStart, 0 },
-						new int[] { (int) yEnd, shape[0] },
-						new int[] {yInc, xInc});
-			else if(xStart < 0 && yStart >= 0 && xEnd <= shape[0] && yEnd > shape[1])
-				slice = im.getSlice(new int[] { (int) yStart, 0 },
-						new int[] { shape[1], (int) xEnd },
-						new int[] {yInc, xInc});
-			else if(xStart < 0 && yStart >= 0 && xEnd > shape[0] && yEnd > shape[1])
-				slice = im.getSlice(new int[] { (int) yStart, 0 },
-						new int[] { shape[1], shape[0] },
-						new int[] {yInc, xInc});
-			else if(xStart >= 0 && yStart < 0 && xEnd > shape[0] && yEnd > shape[1])
-				slice = im.getSlice(new int[] { 0, (int) xStart },
-						new int[] { shape[1], shape[0] },
-						new int[] {yInc, xInc});
-			else if(xStart >= 0 && yStart < 0 && xEnd > shape[0] && yEnd <= shape[1])
-				slice = im.getSlice(new int[] { 0, (int) xStart },
-						new int[] { (int) yEnd, shape[0] },
-						new int[] {yInc, xInc});
-			else if (xStart >= 0 && yStart < 0 && xEnd <= shape[0] && yEnd <= shape[1])
-				slice = im.getSlice(new int[] { 0, (int) xStart },
-						new int[] { (int) yEnd, (int) xEnd },
-						new int[] {yInc, xInc});
-			else if(xStart >= 0 && yStart < 0 && xEnd <= shape[0] && yEnd > shape[1])
-				slice = im.getSlice(new int[] { 0, (int) xStart },
-						new int[] { shape[1], (int) xEnd },
-						new int[] {yInc, xInc});
-			else if(xStart >= 0 && yStart >= 0 && xEnd > shape[0] && yEnd <= shape[1])
-				slice = im.getSlice(new int[] { (int) yStart, (int) xStart },
-						new int[] { (int) yEnd, shape[0] },
-						new int[] {yInc, xInc});
-			else if(xStart >= 0 && yStart >= 0 && xEnd <= shape[0] && yEnd > shape[1])
-				slice = im.getSlice(new int[] { (int) yStart, (int) xStart },
-						new int[] { shape[1], (int) xEnd },
-						new int[] {yInc, xInc});
-			else if(xStart >= 0 && yStart >= 0 && xEnd > shape[0] && yEnd > shape[1])
-				slice = im.getSlice(new int[] { (int) yStart, (int) xStart },
-						new int[] { shape[1], shape[0] },
-						new int[] {yInc, xInc});
-			else slice = im.getSlice(new int[] { (int) yStart, (int) xStart },
-					new int[] { (int) yEnd, (int) xEnd },
-					new int[] {yInc, xInc});
-	
+			slice = (AbstractDataset) ToolUtils.getClippedSlice(im, bounds);
 			slice.setName(region.getName());
 			// Calculate axes to have real values not size
 			AbstractDataset yLabels = null;

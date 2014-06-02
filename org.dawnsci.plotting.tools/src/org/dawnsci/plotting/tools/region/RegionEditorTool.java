@@ -14,9 +14,6 @@ import javax.measure.unit.Unit;
 import javax.swing.tree.TreeNode;
 
 import org.dawb.common.ui.menu.MenuAction;
-import org.dawb.common.ui.plot.roi.data.LinearROIData;
-import org.dawb.common.ui.plot.roi.data.ROIData;
-import org.dawb.common.ui.plot.roi.data.RectangularROIData;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.viewers.TreeNodeContentProvider;
@@ -33,7 +30,6 @@ import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.dawnsci.plotting.api.region.IROIListener;
 import org.dawnsci.plotting.api.region.IRegion;
-import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.api.region.IRegionListener;
 import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.api.region.RegionEvent;
@@ -47,6 +43,7 @@ import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.RegionEditorConstants;
 import org.dawnsci.plotting.tools.preference.RegionEditorPreferencePage;
+import org.dawnsci.plotting.tools.utils.ToolUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -302,16 +299,16 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 						NumericNode<?> numNode = (NumericNode<?>) child;
 						Unit<?> unit = numNode.getUnit();
 						if (unit.equals(Dimensionless.UNIT)) {
-							if (numNode.getLabel().equals("Max Intensity"))
+							if (numNode.getLabel().contains(RegionEditorNodeFactory.INTENSITY))
 								numNode.setFormat(maxIntensityFormat);
-							else if (numNode.getLabel().equals("Sum"))
+							else if (numNode.getLabel().contains(RegionEditorNodeFactory.SUM))
 								numNode.setFormat(sumFormat);
 						} else if (unit.equals(NonSI.DEGREE_ANGLE)
 								|| unit.equals(SI.RADIAN)) {
-							numNode.setIncrement(getDecimal(angleFormat));
+							numNode.setIncrement(ToolUtils.getDecimal(angleFormat));
 							numNode.setFormat(angleFormat);
 						} else if (unit.equals(NonSI.PIXEL)) {
-							numNode.setIncrement(getDecimal(pointFormat));
+							numNode.setIncrement(ToolUtils.getDecimal(pointFormat));
 							numNode.setFormat(pointFormat);
 						}
 					}
@@ -718,8 +715,10 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 				}
 				for (IRegion iRegion : regions) {
 					iRegion.addROIListener(this);
-					if (model != null)
-						model.addRegion(iRegion, getMaxIntensity(iRegion), getSum(iRegion));
+					if (model != null) {
+						double[] intensitySum = getIntensityAndSum(iRegion);
+						model.addRegion(iRegion, intensitySum[0], intensitySum[1]);
+					}
 				}
 				if (!isDedicatedView()) {
 					createNewRegion(false);
@@ -817,7 +816,10 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			roi.setPlot(true);
 			// set the Region isActive flag
 			region.setActive(true);
-			model.addRegion(region, getMaxIntensity(region), getSum(region));
+
+			double[] intensitySum = getIntensityAndSum(region);
+			model.addRegion(region, intensitySum[0], intensitySum[1]);
+
 			if (model.getRoot().getChildren() != null)
 				viewer.setInput(model.getRoot());
 			if (viewer!=null)
@@ -896,6 +898,7 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 					break;
 				}
 			}
+			updateRegion(evt);
 		}
 	}
 
@@ -954,7 +957,10 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 				IROI rb = evt.getROI();
 				if (model == null)
 					return Status.CANCEL_STATUS;
-				model.updateRegion(region, getMaxIntensity(region), getSum(region));
+
+				double[] intensitySum = getIntensityAndSum(region);
+				model.updateRegion(region, intensitySum[0], intensitySum[1]);
+
 				if (monitor.isCanceled())
 					return Status.CANCEL_STATUS;
 				dragBounds.put(region.getName(), rb);
@@ -972,119 +978,32 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 	};
 
 	/**
-	 * Gets intensity for images and lines.
+	 * Returns the Intensity and the Sum of the region for Rectangle, lines and Point
 	 * @param region
 	 * @return
 	 */
-	public double getMaxIntensity(IRegion region) {
-
-		final Collection<ITrace> traces = getPlottingSystem().getTraces();
-		IROI bounds = null;
-		if (dragBounds!=null&&dragBounds.containsKey(region.getName()))
-			bounds = dragBounds.get(region.getName());
-		else
-			bounds = region.getROI();
-
-		if (bounds == null)
-			return Double.NaN;
-
+	private double[] getIntensityAndSum(IRegion region) {
+		double[] intensityAndSum = new double[] {0, 0};
+		Collection<ITrace> traces = getPlottingSystem().getTraces();
 		if (traces != null && traces.size() == 1
 				&& traces.iterator().next() instanceof IImageTrace) {
 			final IImageTrace trace = (IImageTrace) traces.iterator().next();
-			ROIData rd = null;
-			RegionType type = region.getRegionType();
-
-			if ((type == RegionType.BOX || type == RegionType.PERIMETERBOX)
-					&& bounds instanceof RectangularROI) {
-				final RectangularROI roi = (RectangularROI) bounds;
-				rd = new RectangularROIData(roi, (AbstractDataset) trace.getData());
-			} else if (type == RegionType.LINE && bounds instanceof LinearROI) {
-				final LinearROI roi = (LinearROI) bounds;
-				rd = new LinearROIData(roi, (AbstractDataset) trace.getData(), 1d);
-			} else if (type == RegionType.POINT && bounds instanceof PointROI) {
-				final PointROI roi = (PointROI) bounds;
-				return ((AbstractDataset) trace.getData()).getDouble((int)roi.getPointX(), (int)roi.getPointY());
-			} else
-				return Double.NaN;
-			if (rd != null) {
-				try {
-					double max2 = rd.getProfileData().length > 1
-							&& rd.getProfileData()[1] != null
-							? rd.getProfileData()[1].max().doubleValue()
-							: -Double.MAX_VALUE;
-					return Math.max(rd.getProfileData()[0].max().doubleValue(), max2);
-				} catch (Throwable ne) {
-					return Double.NaN;
-				}
-			}
-		}
-		return Double.NaN;
-	}
-
-	/**
-	 * Method that gets the sum of all pixels for the region
-	 * @param region
-	 * @return
-	 */
-	public double getSum(IRegion region){
-		double result = Double.NaN;
-		Collection<ITrace> traces = getPlottingSystem().getTraces();
-		
-		if (traces!=null&&traces.size()==1&&traces.iterator().next() instanceof IImageTrace) {
-			final IImageTrace     trace        = (IImageTrace)traces.iterator().next();
 			IROI roi = region.getROI();
-			AbstractDataset dataRegion =  (AbstractDataset)trace.getData();
-			try {
-				if(roi instanceof RectangularROI){
-					RectangularROI rroi = (RectangularROI)roi;
-					int xStart = (int)rroi.getPoint()[0];
-					int yStart = (int)rroi.getPoint()[1];
-//					int width = (int)rroi.getLengths()[0];
-//					int height = (int)rroi.getLengths()[1];
-					int xStop = (int) rroi.getEndPoint()[0];
-					int yStop = (int) rroi.getEndPoint()[1];
-					double angle = rroi.getAngle();
-					// clip if region is out of bounds of trace
-					if (xStart < 0)
-						xStart = 0;
-					if (yStart < 0)
-						yStart = 0;
-					if (xStop > dataRegion.getShape()[1])
-						xStop = dataRegion.getShape()[1];
-					if (yStop > dataRegion.getShape()[0])
-						yStop = dataRegion.getShape()[0];
-					if (angle == 0) {
-						int xInc = rroi.getPoint()[0]<rroi.getEndPoint()[0] ? 1 : -1;
-						int yInc = rroi.getPoint()[1]<rroi.getEndPoint()[1] ? 1 : -1;
-						dataRegion = dataRegion.getSlice(
-								new int[] { yStart, xStart },
-								new int[] { yStop, xStop },
-								new int[] {yInc, xInc});
-						result = (Double)dataRegion.sum(true);
-					} else {
-						// TODO do calculation if non-null angle
-						return result;
-					}
-				} else if (roi instanceof LinearROI){
-//					LinearROI lroi = (LinearROI)roi;
-//					int xStart = (int) lroi.getPoint()[0];
-//					int yStart = (int) lroi.getPoint()[1];
-//					int xStop = (int) lroi.getEndPoint()[0];
-//					int yStop = (int) lroi.getEndPoint()[1];
-//					int xInc = lroi.getPoint()[0]<lroi.getEndPoint()[0] ? 1 : -1;
-//					int yInc = lroi.getPoint()[1]<lroi.getEndPoint()[1] ? 1 : -1;
-//					dataRegion = dataRegion.getSlice(
-//							new int[] { yStart, xStart },
-//							new int[] { yStop, xStop },
-//							new int[] {yInc, xInc});
-				}
-				
-			} catch (IllegalArgumentException e) {
-				logger.debug("Error getting region data:"+ e);
+			if (roi instanceof RectangularROI) {
+				RectangularROI rroi = (RectangularROI) roi;
+					AbstractDataset dataRegion = (AbstractDataset) ToolUtils
+							.getClippedSlice(trace.getData(), rroi);
+					intensityAndSum[0] = ToolUtils.getRectangleMaxIntensity(dataRegion);
+					intensityAndSum[1] = ToolUtils.getRectangleSum(dataRegion);
+			} else if (roi instanceof LinearROI) {
+				LinearROI lroi = (LinearROI) roi;
+				intensityAndSum[0] = ToolUtils.getLineIntensity(trace.getData(), lroi);
+			} else if (roi instanceof PointROI) {
+				PointROI proi = (PointROI) roi;
+				intensityAndSum[0] = ((AbstractDataset) trace.getData()).getDouble((int)proi.getPointY(), (int)proi.getPointX());
 			}
-			
 		}
-		return result;
+		return intensityAndSum;
 	}
 
 	/**
@@ -1136,17 +1055,4 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		}
 	}
 
-	/**
-	 * 
-	 * @param format
-	 * @return the increment value given a String format
-	 */
-	static public double getDecimal(String format) {
-		int decimal = format.split("\\.").length > 1 ? format.split("\\.")[1].length() : 0;
-		double increment = 1;
-		for (int i = 0; i < decimal; i++) {
-			increment = (double) increment / 10;
-		}
-		return increment;
-	}
 }
