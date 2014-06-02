@@ -221,7 +221,7 @@ public class PowderIntegrationJob extends Job {
 			}
 			
 			if (corModel.isApplyPolarisationCorrection()) {
-				AbstractDataset az = PixelIntegrationUtils.generateAzimuthalArrayRadians(data.getShape(), md);
+				AbstractDataset az = PixelIntegrationUtils.generateAzimuthalArray(data.getShape(), md, true);
 				az.iadd(Math.toRadians(corModel.getPolarisationAngularOffset()));
 				PixelIntegrationUtils.polarisationCorrection(localRef, tth, az, corModel.getPolarisationFactor());
 			}
