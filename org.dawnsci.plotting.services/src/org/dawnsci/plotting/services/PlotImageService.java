@@ -519,25 +519,39 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
     }
     
     private static Image folderImage;
+    private static Image rootFolderImage;
     
 	private Image getFolderImage(File file) {
-		
-		if (folderImage==null) {
-			
-			if (file==null) file = isWindowsOS() ? new File("C:/Windows/") : new File("/");
-			/**
-			 * On windows, use windows icon for folder,
-			 * on unix folder icon can be not very nice looking, use folder.png
-			 */
-	        if (isWindowsOS()) {
-	        	folderImage = getImageSWT(file);
-	        } else {
-	        	folderImage = Activator.getImageDescriptor("icons/folder.gif").createImage();
-
-	        }
- 			
+		//file should not be null, but if it is, then try a folder name (next line should be deleted)
+//		if (file==null) file = isWindowsOS() ? new File("C:/Windows/") : new File("/etc");
+		//if next line causes NPE, then uncommenting previous line is quick fix, but not optimal
+		if( file.getName().isEmpty() ) { //It is a root folder
+			if (rootFolderImage==null) {
+				/**
+				 * On windows, use windows icon for folder,
+				 * on unix folder icon can be not very nice looking, use folder.png
+				 */
+				if (isWindowsOS()) {
+					rootFolderImage = getImageSWT(file);
+				} else {
+					rootFolderImage = Activator.getImageDescriptor("icons/folder.gif").createImage();
+				}
+			}
+			return rootFolderImage;
+		} else {
+			if (folderImage==null) {
+				/**
+				 * On windows, use windows icon for folder,
+				 * on unix folder icon can be not very nice looking, use folder.png
+				 */
+				if (isWindowsOS()) {
+					folderImage = getImageSWT(file);
+				} else {
+					folderImage = Activator.getImageDescriptor("icons/folder.gif").createImage();
+				}
+			}
+			return folderImage;
 		}
-		return folderImage;
 	}
 
 	/**
