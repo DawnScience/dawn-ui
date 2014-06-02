@@ -74,63 +74,64 @@ public class ZoomTool extends ProfileTool {
 			double yStart = bounds.getPoint()[1];
 			double xEnd = bounds.getEndPoint()[0];
 			double yEnd = bounds.getEndPoint()[1];
+			// shape[0] = y, shape[1] = x
 			int[] shape = im.getShape();
 			// Check for most of the possible cases where a region might be out of bounds
-			if(xStart < 0 && yStart >= 0 && xEnd <= shape[0] && yEnd <= shape[1])
+			if(xStart < 0 && yStart >= 0 && xEnd <= shape[1] && yEnd <= shape[0])
 				slice = im.getSlice(new int[] { (int) yStart, 0 },
 						new int[] { (int) yEnd, (int) xEnd },
 						new int[] {yInc, xInc});
-			else if(xStart < 0 && yStart < 0 && xEnd <= shape[0] && yEnd <= shape[1])
+			else if(xStart < 0 && yStart < 0 && xEnd <= shape[1] && yEnd <= shape[0])
 				slice = im.getSlice(new int[] { 0, 0 },
 						new int[] { (int) yEnd, (int) xEnd },
 						new int[] {yInc, xInc});
-			else if(xStart < 0 && yStart >= 0 && xEnd > shape[0] && yEnd <= shape[1])
+			else if(xStart < 0 && yStart >= 0 && xEnd > shape[1] && yEnd <= shape[0])
 				slice = im.getSlice(new int[] { (int) yStart, 0 },
 						new int[] { (int) yEnd, shape[0] },
 						new int[] {yInc, xInc});
-			else if(xStart < 0 && yStart < 0 && xEnd <= shape[0] && yEnd > shape[1])
+			else if(xStart < 0 && yStart < 0 && xEnd <= shape[1] && yEnd > shape[0])
 				slice = im.getSlice(new int[] { 0, 0 },
 						new int[] { shape[1], (int) xEnd },
 						new int[] {yInc, xInc});
-			else if(xStart < 0 && yStart >= 0 && xEnd > shape[0] && yEnd <= shape[1])
+			else if(xStart < 0 && yStart >= 0 && xEnd > shape[1] && yEnd <= shape[0])
 				slice = im.getSlice(new int[] { (int) yStart, 0 },
-						new int[] { (int) yEnd, shape[0] },
+						new int[] { (int) yEnd, shape[1] },
 						new int[] {yInc, xInc});
-			else if(xStart < 0 && yStart >= 0 && xEnd <= shape[0] && yEnd > shape[1])
+			else if(xStart < 0 && yStart >= 0 && xEnd <= shape[1] && yEnd > shape[0])
 				slice = im.getSlice(new int[] { (int) yStart, 0 },
-						new int[] { shape[1], (int) xEnd },
+						new int[] { shape[0], (int) xEnd },
 						new int[] {yInc, xInc});
-			else if(xStart < 0 && yStart >= 0 && xEnd > shape[0] && yEnd > shape[1])
+			else if(xStart < 0 && yStart >= 0 && xEnd > shape[1] && yEnd > shape[0])
 				slice = im.getSlice(new int[] { (int) yStart, 0 },
-						new int[] { shape[1], shape[0] },
+						new int[] { shape[0], shape[1] },
 						new int[] {yInc, xInc});
-			else if(xStart >= 0 && yStart < 0 && xEnd > shape[0] && yEnd > shape[1])
+			else if(xStart >= 0 && yStart < 0 && xEnd > shape[1] && yEnd > shape[0])
 				slice = im.getSlice(new int[] { 0, (int) xStart },
-						new int[] { shape[1], shape[0] },
+						new int[] { shape[0], shape[1] },
 						new int[] {yInc, xInc});
-			else if(xStart >= 0 && yStart < 0 && xEnd > shape[0] && yEnd <= shape[1])
+			else if(xStart >= 0 && yStart < 0 && xEnd > shape[1] && yEnd <= shape[0])
 				slice = im.getSlice(new int[] { 0, (int) xStart },
-						new int[] { (int) yEnd, shape[0] },
+						new int[] { (int) yEnd, shape[1] },
 						new int[] {yInc, xInc});
-			else if (xStart >= 0 && yStart < 0 && xEnd <= shape[0] && yEnd <= shape[1])
+			else if (xStart >= 0 && yStart < 0 && xEnd <= shape[1] && yEnd <= shape[0])
 				slice = im.getSlice(new int[] { 0, (int) xStart },
 						new int[] { (int) yEnd, (int) xEnd },
 						new int[] {yInc, xInc});
-			else if(xStart >= 0 && yStart < 0 && xEnd <= shape[0] && yEnd > shape[1])
+			else if(xStart >= 0 && yStart < 0 && xEnd <= shape[1] && yEnd > shape[0])
 				slice = im.getSlice(new int[] { 0, (int) xStart },
-						new int[] { shape[1], (int) xEnd },
+						new int[] { shape[0], (int) xEnd },
 						new int[] {yInc, xInc});
-			else if(xStart >= 0 && yStart >= 0 && xEnd > shape[0] && yEnd <= shape[1])
+			else if(xStart >= 0 && yStart >= 0 && xEnd > shape[1] && yEnd <= shape[0])
 				slice = im.getSlice(new int[] { (int) yStart, (int) xStart },
-						new int[] { (int) yEnd, shape[0] },
+						new int[] { (int) yEnd, shape[1] },
 						new int[] {yInc, xInc});
-			else if(xStart >= 0 && yStart >= 0 && xEnd <= shape[0] && yEnd > shape[1])
+			else if(xStart >= 0 && yStart >= 0 && xEnd <= shape[1] && yEnd > shape[0])
 				slice = im.getSlice(new int[] { (int) yStart, (int) xStart },
-						new int[] { shape[1], (int) xEnd },
+						new int[] { shape[0], (int) xEnd },
 						new int[] {yInc, xInc});
-			else if(xStart >= 0 && yStart >= 0 && xEnd > shape[0] && yEnd > shape[1])
+			else if(xStart >= 0 && yStart >= 0 && xEnd > shape[1] && yEnd > shape[0])
 				slice = im.getSlice(new int[] { (int) yStart, (int) xStart },
-						new int[] { shape[1], shape[0] },
+						new int[] { shape[0], shape[1] },
 						new int[] {yInc, xInc});
 			else slice = im.getSlice(new int[] { (int) yStart, (int) xStart },
 					new int[] { (int) yEnd, (int) xEnd },
