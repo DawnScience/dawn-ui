@@ -18,6 +18,10 @@ import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
  */
 public class RegionEditorNodeFactory {
 
+	public static final String ANGLE = "Angle";
+	public static final String INTENSITY = "Intensity";
+	public static final String SUM = "Sum";
+
 	/**
 	 * 
 	 * @param region
@@ -33,7 +37,7 @@ public class RegionEditorNodeFactory {
 			roiInfos.put("Width", ((RectangularROI)roi).getLengths()[0]);
 			roiInfos.put("Height", ((RectangularROI)roi).getLengths()[1]);
 			roiInfos.put("Angle", ((RectangularROI)roi).getAngleDegrees());
-			roiInfos.put("Max Line Intensity", Double.NaN);
+			roiInfos.put("Max Intensity", Double.NaN);
 			roiInfos.put("Sum", Double.NaN);
 		} else if (roi instanceof LinearROI) {
 			roiInfos.put("X Start", ((LinearROI)roi).getPointX());

@@ -25,6 +25,7 @@ import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.RegionEditorConstants;
+import org.dawnsci.plotting.tools.utils.ToolUtils;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
@@ -82,8 +83,8 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		String angleFormat = store.getString(RegionEditorConstants.ANGLE_FORMAT);
 		String intensityFormat = store.getString(RegionEditorConstants.INTENSITY_FORMAT);
 		String sumFormat = store.getString(RegionEditorConstants.SUM_FORMAT);
-		double increment = RegionEditorTool.getDecimal(pointFormat);
-		double incrementAngle = RegionEditorTool.getDecimal(angleFormat);
+		double increment = ToolUtils.getDecimal(pointFormat);
+		double incrementAngle = ToolUtils.getDecimal(angleFormat);
 
 		final RegionEditorNode node = new RegionEditorNode(plottingSystem, region, root);
 		node.setTooltip(region.getName());
@@ -101,14 +102,14 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		Set<Entry<String,Double>> set = roiInfos.entrySet();
 		for (Entry<String, Double> entry : set) {
 			String key = entry.getKey();
-			if (key.contains("Angle")) {
+			if (key.contains(RegionEditorNodeFactory.ANGLE)) {
 				if (node.isAngleInRadian())
 					createAngleNode(node, entry.getKey(), true, incrementAngle, pointFormat, SI.RADIAN, Math.toRadians(entry.getValue()));
 				else
 					createAngleNode(node, entry.getKey(), true, incrementAngle, angleFormat, NonSI.DEGREE_ANGLE, entry.getValue());
-			} else if (key.contains("Intensity"))
+			} else if (key.contains(RegionEditorNodeFactory.INTENSITY))
 				createLengthNode(node, key, false, increment, intensityFormat, Dimensionless.UNIT, maxIntensity);
-			else if (key.contains("Sum"))
+			else if (key.contains(RegionEditorNodeFactory.SUM))
 				createLengthNode(node, key, false, increment, sumFormat, Dimensionless.UNIT, sum);
 			else
 				createLengthNode(node, key, true, increment, pointFormat, NonSI.PIXEL, entry.getValue());
@@ -188,6 +189,10 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		}
 	}
 
+	/**
+	 * TODO make this method more generic
+	 * @param regionNode
+	 */
 	protected void setValue(RegionEditorNode regionNode) {
 		IRegion region = null;
 		Collection<IRegion> regions = plottingSystem.getRegions();
