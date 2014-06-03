@@ -281,8 +281,8 @@ public abstract class AbstractSelectionRegion<T extends IROI> extends AbstractRe
 	
 	public void setName(String name) {
 		bean.setName(name);
-		if (label==null)
-			setLabel(name);
+		if (label==null) setLabel(name);
+		if (getROI()!=null) getROI().setName(name);
 	}
 
 	@Override

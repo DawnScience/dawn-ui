@@ -147,6 +147,7 @@ class LineSelection extends ROISelectionRegion<LinearROI> {
 				graphics.drawLine(pa, pb);
 			}
 			graphics.popState();
+			drawLabel(graphics, getROI().getMidPoint());
 		}
 
 		@Override
