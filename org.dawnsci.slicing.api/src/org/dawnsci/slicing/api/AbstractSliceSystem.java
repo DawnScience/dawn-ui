@@ -27,6 +27,7 @@ import org.dawnsci.slicing.api.system.DimensionalListener;
 import org.dawnsci.slicing.api.system.DimsDataList;
 import org.dawnsci.slicing.api.system.ISliceGallery;
 import org.dawnsci.slicing.api.system.ISliceSystem;
+import org.dawnsci.slicing.api.system.RangeMode;
 import org.dawnsci.slicing.api.tool.ISlicingTool;
 import org.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -67,6 +68,7 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 	protected String          sliceReceiverId;
 	private List<IAction>     customActions;
 	protected SliceObject     sliceObject;
+	protected RangeMode       rangeMode=RangeMode.NO_RANGES;
 	
 	protected Enum        sliceType=PlotType.IMAGE;
 	protected IToolBarManager sliceToolbar;
@@ -316,14 +318,6 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 		return window.getActivePage();
 	}
 
-	private boolean rangesAllowed = false;
-	public void setRangesAllowed(boolean isVis) {
-		rangesAllowed = isVis;
-	}
-	public boolean isRangesAllowed() {
-		return rangesAllowed;
-	}
-
 	public void addCustomAction(IAction customAction) {
 		if (customActions == null)customActions = new ArrayList<IAction>();
 		customActions.add(customAction);
@@ -487,5 +481,13 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 	}
 	protected void setAdvanced(boolean advanced) {
 		Activator.getDefault().getPreferenceStore().setValue(ADVANCED, advanced);
+	}
+
+	public RangeMode getRangeMode() {
+		return rangeMode;
+	}
+
+	public void setRangeMode(RangeMode rm) {
+		this.rangeMode = rm;
 	}
 }

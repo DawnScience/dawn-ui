@@ -11,6 +11,7 @@ package org.dawnsci.slicing.api;
 import org.dawb.common.services.ServiceManager;
 import org.dawnsci.slicing.api.system.DimsDataList;
 import org.dawnsci.slicing.api.system.ISliceSystem;
+import org.dawnsci.slicing.api.system.RangeMode;
 import org.dawnsci.slicing.api.system.SliceSource;
 import org.dawnsci.slicing.api.util.ProgressMonitorWrapper;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -112,8 +113,8 @@ public class SliceDialog extends Dialog {
 		super.okPressed();
 	}
 
-	public void setRangesAllowed(boolean b) {
-		sliceComponent.setRangesAllowed(b);
+	public void setRangeMode(RangeMode mode) {
+		sliceComponent.setRangeMode(mode);
 	}
 
 }

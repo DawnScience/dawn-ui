@@ -10,6 +10,7 @@ import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.slicing.api.system.DimsData;
 import org.dawnsci.slicing.api.system.AxisType;
+import org.dawnsci.slicing.api.system.RangeMode;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;
@@ -185,10 +186,10 @@ class TypeEditingSupport extends EditingSupport {
 
 		final int rank = (system.getLazyDataset()!=null) ? system.getLazyDataset().getRank() : Integer.MAX_VALUE;
 		if (rank>ret.size()) {
-			if (system.isRangesAllowed()) ret.add(AxisType.RANGE.getLabel());
+			if (system.getRangeMode().isRange()) ret.add(AxisType.RANGE.getLabel());
 			ret.add(AxisType.SLICE.getLabel());
 			
-			if (!system.isRangesAllowed() && system.isAdvanced()) { // Allow mathematics
+			if (!system.getRangeMode().isRange() && system.isAdvanced()) { // Allow mathematics
 				for (AxisType a : AxisType.getMathsTypes()) ret.add(a.getLabel());
 			}
 		}

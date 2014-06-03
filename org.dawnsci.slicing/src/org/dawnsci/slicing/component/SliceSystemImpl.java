@@ -43,6 +43,7 @@ import org.dawnsci.slicing.api.system.AxisChoiceEvent;
 import org.dawnsci.slicing.api.system.AxisType;
 import org.dawnsci.slicing.api.system.DimsData;
 import org.dawnsci.slicing.api.system.DimsDataList;
+import org.dawnsci.slicing.api.system.RangeMode;
 import org.dawnsci.slicing.api.system.SliceSource;
 import org.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -556,7 +557,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		reverse.setEnabled(sliceType==PlotType.IMAGE||sliceType==PlotType.SURFACE);
 		
 		// Parse if ranges allowed to try to assign at least one dims data to a range
-		if (isRangesAllowed() && lazySet!=null) {
+		if (getRangeMode().isRange() && lazySet!=null) {
 			final int[] shape = this.lazySet.getShape();
 			for (int dim = 0; dim < shape.length; dim++) {
 				DimsData dd = dimsDataList.getDimsData(dim);
@@ -578,11 +579,15 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 	protected boolean synchronizeSliceData(final DimsData data) {
 		
 		// SLICE is currently the only PlotAxis type which can be set on multiple
-		// different axes.
+		// different axes. Range can be multiple if the RangeMode is set to MULTI
 		final AxisType usedAxis = data!=null ? data.getPlotAxis() : AxisType.NONE;		
 		for (int i = 0; i < dimsDataList.size(); i++) {
 			if (dimsDataList.getDimsData(i).equals(data)) continue;
-			if (dimsDataList.getDimsData(i).getPlotAxis()==usedAxis) dimsDataList.getDimsData(i).setPlotAxis(AxisType.SLICE);
+			if (dimsDataList.getDimsData(i).getPlotAxis()==usedAxis) {
+				if (getRangeMode()!=RangeMode.MULTI_RANGE) {
+				    dimsDataList.getDimsData(i).setPlotAxis(AxisType.SLICE);
+				}
+			}
 		}
 		
 		Display.getCurrent().syncExec(new Runnable() {
@@ -608,7 +613,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		if (!ok) {
 			errorLabel.setText(errorMessage);
 		}
-		GridUtils.setVisible(errorLabel,         !(ok||isRangesAllowed()));
+		GridUtils.setVisible(errorLabel,         !(ok||getRangeMode().isRange()));
 		isErrorCondition = errorLabel.isVisible();
 		updateAutomatically.setEnabled(ok&&plottingSystem!=null);
 		errorLabel.getParent().layout(new Control[]{errorLabel});

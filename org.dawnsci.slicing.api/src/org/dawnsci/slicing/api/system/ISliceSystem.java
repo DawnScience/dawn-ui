@@ -151,12 +151,6 @@ public interface ISliceSystem {
 	public void setVisible(boolean vis);
 
 	/**
-	 * Set if the user should be able to enter slice ranges that average or sum several slices.
-	 * @param b
-	 */
-	public void setRangesAllowed(boolean allowed);
-
-	/**
 	 * If the slice component has specialist slice actions in a toolbar
 	 * or tabbed panes. This will disable or enable the actions.
 	 * @param b
@@ -287,5 +281,15 @@ public interface ISliceSystem {
 	 */
 	public boolean isEnabled();
 
-
+    /**
+     * Set the mode with which to slice the data. 
+     * @param mode
+     */
+	public void setRangeMode(RangeMode mode);
+	
+    /**
+     * Set the mode with which to slice the data. 
+     * @param mode
+     */
+	public RangeMode getRangeMode();
 }
