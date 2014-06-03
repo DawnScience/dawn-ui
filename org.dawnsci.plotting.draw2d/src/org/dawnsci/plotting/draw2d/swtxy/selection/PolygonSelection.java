@@ -18,6 +18,7 @@ package org.dawnsci.plotting.draw2d.swtxy.selection;
 
 import org.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.PointList;
@@ -99,8 +100,21 @@ public class PolygonSelection extends ROISelectionRegion<PolygonalROI> {
 
 		@Override
 		protected void outlineShape(Graphics graphics) {
+			
+			graphics.pushState();
 			Rectangle b = getParent().getBounds();
 			Draw2DUtils.drawClippedPolyline(graphics, points, b, true);
+			
+			if (isShowLabel()) {
+				try {
+					graphics.setForegroundColor(ColorConstants.black);
+					graphics.setAlpha(255);
+					graphics.drawString(getName(), points.getMidpoint());
+				} catch (IndexOutOfBoundsException ignored) {
+					// Ok no label then.
+				}
+			}
+			graphics.popState();
 		}
 	}
 }

@@ -501,6 +501,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 			// if the trace is in the registered traces object
 			if (currentRegion==null) {
 				final Collection<IRegion> regions = getPlottingSystem().getRegions();
+				profilePlottingSystem.clear();
 				if (regions!=null) {
 					for (IRegion iRegion : regions) {
 						if (!iRegion.isUserRegion()) continue;

@@ -292,9 +292,9 @@ public class RegionArea extends PlotArea {
 				sameOrder.put(entry.getKey(), entry.getValue());
 			}
 		}
-		fireRegionNameChanged(new RegionEvent(region), oldName);
 		regions.clear();
 		regions.putAll(sameOrder);
+		fireRegionNameChanged(new RegionEvent(region), oldName);
 	}
 	
 	public void clearRegions(boolean force) {

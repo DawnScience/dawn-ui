@@ -94,6 +94,15 @@ public class PolylineSelection extends ROISelectionRegion<IPolylineROI> {
 		protected void outlineShape(Graphics graphics) {
 			Rectangle b = getParent().getBounds();
 			Draw2DUtils.drawClippedPolyline(graphics, points, b, false);
+			if (isShowLabel()) {
+				try {
+					graphics.setForegroundColor(ColorConstants.black);
+					graphics.setAlpha(255);
+					graphics.drawString(getName(), points.getMidpoint());
+				} catch (IndexOutOfBoundsException ignored) {
+					// Ok no label then.
+				}
+			}
 		}
 	}
 }
