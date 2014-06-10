@@ -26,6 +26,7 @@ class ToolConversionVisitor implements IConversionVisitor {
 	
 	private List<IDataset>         nexusAxes;
 	private IDataReductionToolPage tool;
+	private List<String>           expandedDatasets;
 
 	public ToolConversionVisitor(IDataReductionToolPage tool) {
 		this.tool = tool;
@@ -54,7 +55,7 @@ class ToolConversionVisitor implements IConversionVisitor {
 		Group grp = createGroupIfRequired(context);
 		DataReductionSlice bean = new DataReductionSlice(output, grp, slice, object, context.getSelectedSlice(), context.getSelectedShape(), context.getMonitor());
 		bean.setAxes(nexusAxes);
-		bean.setDatasetRegEx(context.getDatasetNames());
+		bean.setExpandedDatasetNames(getExpandedDatasets());
 		DataReductionInfo  info = tool.export(bean);
 		if (info.getStatus().isOK()) object = info.getUserData();
 
@@ -111,7 +112,12 @@ class ToolConversionVisitor implements IConversionVisitor {
 	public void close(IConversionContext context) throws Exception {
 		
 		// Notify tool of closure
-		tool.exportFinished();
+		Exception onFinish = null;
+		try {
+		    tool.exportFinished();
+		} catch (Exception ne) {
+			onFinish = ne;
+		}
 		
 		// Close actual file.
 		if (group!=null) try {
@@ -121,6 +127,8 @@ class ToolConversionVisitor implements IConversionVisitor {
 		} finally {
 		    if (output!=null) output.close();
 		}
+		
+		if (onFinish!=null) throw onFinish;
 	}
 
 
@@ -136,6 +144,14 @@ class ToolConversionVisitor implements IConversionVisitor {
 
 	public IToolPage getTool() {
 		return tool;
+	}
+
+	public List<String> getExpandedDatasets() {
+		return expandedDatasets;
+	}
+
+	public void setExpandedDatasets(List<String> expandedDatasets) {
+		this.expandedDatasets = expandedDatasets;
 	}
 
 }

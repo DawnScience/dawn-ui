@@ -440,12 +440,23 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
         list.add(item);
 	}
 
+	/**
+	 * The user may enter a regular expression for their dataset name. In this case 
+	 * all datasets matching it will be fitted for peaks. If they do this, we attempt to 
+	 * detect that they selected more than one dataset and write a single list of the peaks
+	 * and other scalars. This is used for EDXD to process individual separate elements in the
+	 * results file which should be a single block, but isnt. Example /dls/i12/data/2014/cm4963-2/rawdata/36153.nxs
+	 */
 	public void exportFinished() throws Exception {
 		
 		if (fit==null || xpos==null || fwhm==null || area==null || functions==null || lastSlice==null) return;
 		
+		if (lastSlice.getExpandedDatasetNames()==null || lastSlice.getExpandedDatasetNames().size()<2) return;
+		
 		final String nodeName = getTitle().replace(' ', '_');
-		Group container = (Group)lastSlice.getFile().group(nodeName, (Group)lastSlice.getFile().getData("entry1"));
+		
+		Group entry     = (Group)lastSlice.getFile().getRoot();
+		Group container = (Group)lastSlice.getFile().group(nodeName, entry);
 		for (int i = 1; i <= fit.size(); i++) {
 			
 			final String peakName = "Peak"+i;
