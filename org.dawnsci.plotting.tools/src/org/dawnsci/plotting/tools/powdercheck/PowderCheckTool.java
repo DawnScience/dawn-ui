@@ -273,7 +273,11 @@ public class PowderCheckTool extends AbstractToolPage {
 			public void run() {
 				modeSelect.setSelectedAction(this);
 				sashForm.setMaximizedControl(system.getPlotComposite());
-				if (updatePlotJob == null) update();
+				if (updatePlotJob == null) {
+					update();
+				}
+				
+				if (updatePlotJob == null) return;
 				updatePlotJob.cancel();
 				updatePlotJob.setCheckMode(PowderCheckMode.FullImage);
 				updatePlotJob.schedule();
