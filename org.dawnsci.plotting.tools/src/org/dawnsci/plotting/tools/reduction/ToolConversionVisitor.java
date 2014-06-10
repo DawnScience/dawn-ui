@@ -54,6 +54,7 @@ class ToolConversionVisitor implements IConversionVisitor {
 		Group grp = createGroupIfRequired(context);
 		DataReductionSlice bean = new DataReductionSlice(output, grp, slice, object, context.getSelectedSlice(), context.getSelectedShape(), context.getMonitor());
 		bean.setAxes(nexusAxes);
+		bean.setDatasetRegEx(context.getDatasetNames());
 		DataReductionInfo  info = tool.export(bean);
 		if (info.getStatus().isOK()) object = info.getUserData();
 
@@ -108,6 +109,11 @@ class ToolConversionVisitor implements IConversionVisitor {
 
 	@Override
 	public void close(IConversionContext context) throws Exception {
+		
+		// Notify tool of closure
+		tool.exportFinished();
+		
+		// Close actual file.
 		if (group!=null) try {
 			group.close(groupId);
 		} catch (Exception ne) {

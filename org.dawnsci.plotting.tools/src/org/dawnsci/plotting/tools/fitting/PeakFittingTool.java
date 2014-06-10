@@ -6,13 +6,20 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+
+import ncsa.hdf.object.Datatype;
+import ncsa.hdf.object.Group;
 
 import org.dawb.common.ui.image.IconUtils;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.util.EclipseUtils;
+import org.dawb.hdf5.IHierarchicalDataFile;
+import org.dawnsci.io.h5.H5Utils;
 import org.dawnsci.plotting.api.annotation.IAnnotation;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -45,7 +52,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
@@ -328,6 +338,10 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		return buf.toString();
 	}
 	
+	private Map<Integer,List<Double>> fit, xpos, fwhm, area;
+	private Map<Integer,List<IDataset>> functions;
+	private DataReductionSlice lastSlice;
+	
 	public DataReductionInfo export(DataReductionSlice slice) throws Exception {
 				
 		final RectangularROI roi = getFitBounds();
@@ -349,8 +363,14 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		if (slice.getUserData()==null) {
 			identifiedPeaks = Generic1DFitter.parseDataDerivative(x, y, FittingUtils.getSmoothing());
 		}
-		DataReductionInfo status = new DataReductionInfo(Status.OK_STATUS, identifiedPeaks);
 
+		if (fit==null)  fit  = new LinkedHashMap<Integer,List<Double>>(7);
+		if (xpos==null) xpos = new LinkedHashMap<Integer,List<Double>>(7);
+		if (fwhm==null) fwhm = new LinkedHashMap<Integer,List<Double>>(7);
+		if (area==null) area = new LinkedHashMap<Integer,List<Double>>(7);
+		if (functions==null) functions = new LinkedHashMap<Integer,List<IDataset>>(7); 
+		lastSlice = slice;
+		
 		try {
 			final FittedPeaksInfo info = new FittedPeaksInfo(x, y, slice.getMonitor());
 			info.setIdentifiedPeaks(identifiedPeaks);
@@ -359,61 +379,114 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 			
 			int index = 1;
 			for (FittedFunction fp : bean.getFunctionList()) {
-
-//				IHierarchicalDataFile file = slice.getFile();
-//				final String peakName = "Peak"+index;
-//				Dataset s = file.appendDataset(peakName+"_fit",  dType,  new long[]{1},new double[]{fp.getPeakValue()}, slice.getParent());
-//				file.setNexusAttribute(s, Nexus.SDS);
-//				file.setIntAttribute(s, NexusUtils.SIGNAL, 1);
 				
 				final String peakName = "Peak"+index;
 				DoubleDataset sdd = new DoubleDataset(new double[]{fp.getPeakValue()}, new int[]{1});
+				addValue(fit, index, fp.getPeakValue());
 				sdd.setName(peakName+"_fit");
 				slice.appendData(sdd);
-//				
-//				s = file.appendDataset(peakName+"_xposition",  dType,  new long[]{1}, new double[]{fp.getPosition()}, slice.getParent());
-//				file.setNexusAttribute(s, Nexus.SDS);
-//				file.setIntAttribute(s, NexusUtils.SIGNAL, 1);
 				
 				sdd = new DoubleDataset(new double[]{fp.getPosition()}, new int[]{1});
+				addValue(xpos, index, fp.getPosition());
 				sdd.setName(peakName+"_xposition");
 				slice.appendData(sdd);
-//				
-//				s = file.appendDataset(peakName+"_fwhm",  dType,  new long[]{1}, new double[]{fp.getFWHM()}, slice.getParent());
-//				file.setNexusAttribute(s, Nexus.SDS);
-//				file.setIntAttribute(s, NexusUtils.SIGNAL, 1);
 				
 				sdd = new DoubleDataset(new double[]{fp.getFWHM()}, new int[]{1});
+				addValue(fwhm, index, fp.getFWHM());
 				sdd.setName(peakName+"_fwhm");
 				slice.appendData(sdd);
-//				
-//				s = file.appendDataset(peakName+"_area",  dType,  new long[]{1}, new double[]{fp.getArea()}, slice.getParent());
-//				file.setNexusAttribute(s, Nexus.SDS);
-//				file.setIntAttribute(s, NexusUtils.SIGNAL, 1);
 				
 				sdd = new DoubleDataset(new double[]{fp.getArea()}, new int[]{1});
+				addValue(area, index, fp.getArea());
 				sdd.setName(peakName+"_area");
 				slice.appendData(sdd);
-//
+
 				final AbstractDataset[] pair = fp.getPeakFunctions();
 				AbstractDataset     function = pair[1];
-//				s = file.appendDataset(peakName+"_function",  dType,  H5Utils.getLong(function.getShape()), function.getBuffer(), slice.getParent());
-//				file.setNexusAttribute(s, Nexus.SDS);
-//				file.setIntAttribute(s, NexusUtils.SIGNAL, 1);
 				AbstractDataset fc = function.clone();
 				fc.setName(peakName+"_function");
 				slice.appendData(fc);
-
+				addList(functions, index, fc);
 
 				++index;
 			}
-
+			
 		} catch (Exception ne) {
 			logger.error("Cannot fit peaks!", ne);
 			return new DataReductionInfo(Status.CANCEL_STATUS, null);
 		}
 		
+		DataReductionInfo status = new DataReductionInfo(Status.OK_STATUS, identifiedPeaks);
 		return status;
+	}
+	
+
+	private void addValue(Map<Integer, List<Double>> col, int index, double value) {
+
+        List<Double> values = col.get(index);
+        if (values == null) {
+        	values = new ArrayList<Double>(31);
+        	col.put(index, values);
+        }
+        values.add(value);
+	}
+	
+	private void addList(Map<Integer, List<IDataset>> lists, int index, IDataset item) {
+        List<IDataset> list = lists.get(index);
+        if (list == null) {
+        	list = new ArrayList<IDataset>(31);
+        	lists.put(index, list);
+        }
+        list.add(item);
+	}
+
+	public void exportFinished() throws Exception {
+		
+		if (fit==null || xpos==null || fwhm==null || area==null || functions==null || lastSlice==null) return;
+		
+		final String nodeName = getTitle().replace(' ', '_');
+		Group container = (Group)lastSlice.getFile().group(nodeName, (Group)lastSlice.getFile().getData("entry1"));
+		for (int i = 1; i <= fit.size(); i++) {
+			
+			final String peakName = "Peak"+i;
+
+			final IDataset fits  = DatasetFactory.createFromList(fit.get(i));
+			fits.setName(peakName+"_fit_byElement");
+			lastSlice.appendData(fits, container);
+			
+			final IDataset xposi = DatasetFactory.createFromList(xpos.get(i));
+			xposi.setName(peakName+"_xposition_byElement");
+			lastSlice.appendData(xposi, container);
+
+			final IDataset fwhms = DatasetFactory.createFromList(fwhm.get(i));
+			fwhms.setName(peakName+"_fwhm_byElement");
+			lastSlice.appendData(fwhms, container);
+
+			final IDataset areas = DatasetFactory.createFromList(area.get(i));
+			areas.setName(peakName+"_area_byElement");
+			lastSlice.appendData(areas, container);
+			
+			final List<IDataset> fs = functions.get(i);
+			for (IDataset iDataset : fs) {
+				Dataset ds = (Dataset)iDataset.squeeze();
+				ds.setName(peakName+"_functions");
+				
+				Datatype type = H5Utils.getDatatype(ds);
+				long[] bufferShape = H5Utils.getLong(ds.getShape());
+				
+				// Append directly into file.
+				lastSlice.getFile().appendDataset(ds.getName(), type, bufferShape, ds.getBuffer(), container);
+			}
+
+		}
+		
+		fit.clear();
+		xpos.clear();
+		fwhm.clear();
+		area.clear();
+		functions.clear();
+		lastSlice = null;
+
 	}
 
 	/**

@@ -462,4 +462,12 @@ public abstract class AbstractToolPage extends Page implements IToolPage, IAdapt
         }
         return this;
 	}
+	
+	/**
+	 * Optionally override to do something when a data reduction with a tool has finished. 
+	 * For instance write final datasets.
+	 */
+	public void exportFinished()  throws Exception {
+		
+	}
 }
