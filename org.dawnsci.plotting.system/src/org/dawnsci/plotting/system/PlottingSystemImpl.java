@@ -635,9 +635,6 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			List<ILineTrace> lines = lightWeightViewer.createLineTraces(title, xIn, ysIn, dataNames, traceMap, colorMap, monitor);
 			traces = new ArrayList<ITrace>(lines.size());
 			traces.addAll(lines);
-			for (ILineTrace iLineTrace : lines) {
-				iLineTrace.setErrorBarEnabled(errorBarEnabled);
-			}
 			
 		} else if (plottingMode.isScatter3D()) {
 			traceMap.clear();
@@ -667,6 +664,12 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			traceMap.put(trace.getName(), trace);
 			traces = Arrays.asList((ITrace)trace);
 		}
+		
+		Collection<ITrace> lineTraces = getTraces(ILineTrace.class);
+		if (lineTraces!=null) for (ITrace iTrace : lineTraces) {
+			((ILineTrace)iTrace).setErrorBarEnabled(errorBarEnabled);
+		}
+
 		  	
 		fireTracesPlotted(new TraceEvent(traces));
         return traces;
