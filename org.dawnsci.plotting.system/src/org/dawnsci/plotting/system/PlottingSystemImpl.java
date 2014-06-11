@@ -605,7 +605,9 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		IPreferenceStore store = getPreferenceStore();
 		
 		boolean errorBarEnabled = store.getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS);
-		if (errorBarEnabled && ysIn.size() >= store.getInt(PlottingConstants.AUTO_HIDE_ERROR_SIZE)) errorBarEnabled = false;
+		Collection<ITrace> existing = getTraces(ILineTrace.class);
+		int traceCount = ysIn.size() + (existing!=null ? existing.size() : 0);
+		if (errorBarEnabled && traceCount >= store.getInt(PlottingConstants.AUTO_HIDE_ERROR_SIZE)) errorBarEnabled = false;
 
 		PlotType newType = null;
 		if (plottingMode.is1Dor2D()) {
