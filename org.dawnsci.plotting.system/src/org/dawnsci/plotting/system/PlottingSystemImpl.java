@@ -603,18 +603,10 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		
 		// Switch off error bars if very many plots.
 		IPreferenceStore store = getPreferenceStore();
-		if (ysIn.size() > store.getInt(PlottingConstants.AUTO_HIDE_ERROR_SIZE)) {
-			store.setValue(PlottingConstants.GLOBAL_SHOW_ERROR_BARS, false);
-			
-		} else { // If the total traces are low enough, turn error bars back on
-			int already = getTraces()!=null ? getTraces().size() : 0;
-			int nplots  = already+ysIn.size();
-			if (nplots > store.getInt(PlottingConstants.AUTO_HIDE_ERROR_SIZE)) {
-				store.setValue(PlottingConstants.GLOBAL_SHOW_ERROR_BARS, false);				
-			} else {
-				store.setValue(PlottingConstants.GLOBAL_SHOW_ERROR_BARS, true);
-			}
-		}
+		
+		boolean errorBarEnabled = store.getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS);
+		if (errorBarEnabled && ysIn.size() >= store.getInt(PlottingConstants.AUTO_HIDE_ERROR_SIZE)) errorBarEnabled = false;
+
 		PlotType newType = null;
 		if (plottingMode.is1Dor2D()) {
 		    newType = PlotType.XY;
@@ -638,7 +630,12 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		List<ITrace> traces=null;
 		if (plottingMode.is1D()) {
 			if (lightWeightViewer.getControl()==null) return null;	
-			traces = lightWeightViewer.createLineTraces(title, xIn, ysIn, dataNames, traceMap, colorMap, monitor);
+			List<ILineTrace> lines = lightWeightViewer.createLineTraces(title, xIn, ysIn, dataNames, traceMap, colorMap, monitor);
+			traces = new ArrayList<ITrace>(lines.size());
+			traces.addAll(lines);
+			for (ILineTrace iLineTrace : lines) {
+				iLineTrace.setErrorBarEnabled(errorBarEnabled);
+			}
 			
 		} else if (plottingMode.isScatter3D()) {
 			traceMap.clear();

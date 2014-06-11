@@ -740,7 +740,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	 * @param traceMap, may be null
 	 * @return
 	 */
-	protected List<ITrace> createLineTraces(final String                title, 
+	protected List<ILineTrace> createLineTraces(final String                title, 
 			                                    final IDataset          x, 
 			                                    final List<? extends IDataset> ys,
 			                                    final List<String>          dataNames,
@@ -771,7 +771,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		//create a trace data provider, which will provide the data to the trace.
 		int iplot = 0;
 		
-		final List<ITrace> traces = new ArrayList<ITrace>(ys.size());
+		final List<ILineTrace> traces = new ArrayList<ILineTrace>(ys.size());
 		for (int i = 0; i < ys.size(); i++) {
 
 			IDataset y = ys.get(i);

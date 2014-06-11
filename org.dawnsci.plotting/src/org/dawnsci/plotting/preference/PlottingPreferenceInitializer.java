@@ -56,12 +56,8 @@ public class PlottingPreferenceInitializer extends AbstractPreferenceInitializer
 		store.setDefault(PlottingConstants.ZOOM_INTO_WHITESPACE, false);
 		store.setDefault(PlottingConstants.USE_PALETTE_FUNCTIONS, false);
 		
-		if (store.getInt(PlottingConstants.AUTO_HIDE_ERROR_SIZE)<1) {
-			store.setValue(PlottingConstants.GLOBAL_SHOW_ERROR_BARS, true);
-			store.setValue(PlottingConstants.AUTO_HIDE_ERROR_SIZE,   200);
-		}
 		store.setDefault(PlottingConstants.GLOBAL_SHOW_ERROR_BARS, true);
-		store.setDefault(PlottingConstants.AUTO_HIDE_ERROR_SIZE,   200);
+		store.setDefault(PlottingConstants.AUTO_HIDE_ERROR_SIZE,   25);
 		
 	}
 }

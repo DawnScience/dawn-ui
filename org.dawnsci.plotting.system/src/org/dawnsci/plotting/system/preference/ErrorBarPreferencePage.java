@@ -5,6 +5,9 @@ import org.dawnsci.plotting.system.PlottingSystemActivator;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IntegerFieldEditor;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -24,10 +27,23 @@ public class ErrorBarPreferencePage extends FieldEditorPreferencePage implements
 
 	@Override
 	protected void createFieldEditors() {
-		addField(new BooleanFieldEditor(PlottingConstants.GLOBAL_SHOW_ERROR_BARS, "Show error bars (global setting)", getFieldEditorParent()));
-		IntegerFieldEditor sizeEditor = new IntegerFieldEditor(PlottingConstants.AUTO_HIDE_ERROR_SIZE, "Number of traces to automatically set error bars off", getFieldEditorParent());
+		
+		BooleanFieldEditor bfe = new BooleanFieldEditor(PlottingConstants.GLOBAL_SHOW_ERROR_BARS, "Show error bars (global setting)", getFieldEditorParent());
+		addField(bfe);
+		
+		final IntegerFieldEditor sizeEditor = new IntegerFieldEditor(PlottingConstants.AUTO_HIDE_ERROR_SIZE, "Number of traces to automatically set error bars off", getFieldEditorParent());
 		addField(sizeEditor);
-		sizeEditor.setValidRange(1, 1000);
+		sizeEditor.setValidRange(2, 1000);
+		sizeEditor.setEnabled(getPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS), getFieldEditorParent());
+
+		final Button button = (Button)bfe.getDescriptionControl(getFieldEditorParent());
+		button.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				sizeEditor.setEnabled(button.getSelection(), getFieldEditorParent());
+			}	
+		});
+		
 	}
 
-  }
+}
+
