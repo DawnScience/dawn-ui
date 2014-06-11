@@ -350,7 +350,9 @@ public class JexlExpressionFunction extends AFunction {
 
 	@Override
 	public void fillWithValues(DoubleDataset data, CoordinatesIterator it) {
-		data.fill(calculateValues(it.getValues()));
+		DoubleDataset values = calculateValues(it.getValues());
+		if (values != null)
+			data.fill(values);
 	}
 
 	@Override
