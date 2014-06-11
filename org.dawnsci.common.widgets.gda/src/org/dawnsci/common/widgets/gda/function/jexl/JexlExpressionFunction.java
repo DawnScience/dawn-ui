@@ -327,7 +327,15 @@ public class JexlExpressionFunction extends AFunction {
 		if (isDirty())
 			calcCachedParameters();
 
-		engine.addLoadedVariable(X, coords);
+		DoubleDataset ob = evaluate(coords);
+		if (ob == null) { // array of datasets failed so attempt with just first coordinate dataset
+			ob = evaluate(coords[0]);
+		}
+		return ob;
+	}
+
+	private DoubleDataset evaluate(Object value) {
+		engine.addLoadedVariable(X, value);
 		Object ob;
 		try {
 			ob = engine.evaluate();
