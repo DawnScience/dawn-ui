@@ -84,6 +84,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IErrorDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
@@ -608,6 +609,18 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		Collection<ITrace> existing = getTraces(ILineTrace.class);
 		int traceCount = ysIn.size() + (existing!=null ? existing.size() : 0);
 		if (errorBarEnabled && traceCount >= store.getInt(PlottingConstants.AUTO_HIDE_ERROR_SIZE)) errorBarEnabled = false;
+		
+		if (errorBarEnabled) {
+			// No error dataset there then false again
+			boolean foundErrors = false;
+			for (IDataset ids : ysIn) {
+				if (((Dataset)ids).hasErrors()) {
+					foundErrors = true;
+					break;
+				}
+			}
+			if (!foundErrors) errorBarEnabled = false;
+		}
 
 		PlotType newType = null;
 		if (plottingMode.is1Dor2D()) {
