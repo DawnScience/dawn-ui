@@ -18,7 +18,6 @@ import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawb.hdf5.IHierarchicalDataFile;
 import org.dawnsci.io.h5.H5Utils;
 import org.dawnsci.plotting.api.annotation.IAnnotation;
 import org.dawnsci.plotting.api.region.IRegion;
