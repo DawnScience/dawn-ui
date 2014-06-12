@@ -353,10 +353,8 @@ class SectorSelection extends ROISelectionRegion<SectorROI> implements ILockable
 		this.isCentreMovable = isCentreMovable;
 
 		if (isCentreMovable) {
-			shape.setCursor(Draw2DUtils.getRoiMoveCursor());
 			((Sector) shape).setCentreHandleMoveable(true);
 		} else {
-			shape.setCursor(null);			
 			((Sector) shape).setCentreHandleMoveable(false);
 		}
 	}

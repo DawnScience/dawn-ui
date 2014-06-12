@@ -39,7 +39,6 @@ abstract class ROISelectionRegion<T extends IROI> extends AbstractSelectionRegio
 	@Override
 	public void createContents(Figure parent) {
 		shape = createShape(parent);
-		shape.setCursor(Draw2DUtils.getRoiMoveCursor());
 
 		parent.add(shape);
 		sync(getBean());

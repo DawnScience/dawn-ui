@@ -64,15 +64,17 @@ public class RegionArea extends PlotArea {
 	private Collection<IRegionListener>     regionListeners;
 	private Collection<ITraceListener>      imageTraceListeners;
 	private boolean                         containsMouse=false;
+	private MouseMotionListener             positionListener;
 
 	public RegionArea(XYRegionGraph xyGraph) {
 		super(xyGraph);
 		this.regions     = new LinkedHashMap<String,AbstractSelectionRegion<?>>();
 		this.imageTraces = new LinkedHashMap<String,ImageTrace>();	
 		
-		addMouseMotionListener(new MouseMotionListener.Stub() {
+		this.positionListener = new MouseMotionListener.Stub() {
 			@Override
 			public void mouseMoved(MouseEvent me) {
+				
 				firePositionListeners(new PositionEvent(RegionArea.this, 
 						                               (AspectAxis)getRegionGraph().primaryXAxis,
 						                               (AspectAxis)getRegionGraph().primaryYAxis,
@@ -94,7 +96,8 @@ public class RegionArea extends PlotArea {
 				containsMouse = false;
 			}
 			
-		});
+		};
+		addMouseMotionListener(positionListener);
 		
 		addMouseListener(new MouseListener() {
 
@@ -255,6 +258,7 @@ public class RegionArea extends PlotArea {
 	}
 
 	void addRegion(final AbstractSelectionRegion<?> region, boolean fireListeners) {
+		
 		regions.put(region.getName(), region);
 		region.setXyGraph(xyGraph);
 		region.createContents(this);
@@ -763,6 +767,7 @@ public class RegionArea extends PlotArea {
 	
 	public void dispose() {
 		
+		removeMouseMotionListener(positionListener);
 		clearTraces();
 		clearRegionsInternal(true);
 		if (regionListeners!=null)     regionListeners.clear();

@@ -96,7 +96,6 @@ abstract class LockableSelectionRegion<T extends IParametricROI> extends ROISele
 	@Override
 	public void setCentreMovable(boolean isCenterMovable) {
 		this.isCentreMovable = isCenterMovable;
-		shape.setCursor(isCenterMovable ? Draw2DUtils.getRoiMoveCursor() : null);
 		((ParametricROIShape<?>) shape).setCentreMobile(isCenterMovable);
 	}
 
@@ -108,11 +107,6 @@ abstract class LockableSelectionRegion<T extends IParametricROI> extends ROISele
 	@Override
 	public void setOuterMovable(boolean isOuterMovable) {
 		this.isOuterMovable = isOuterMovable;
-		if (isOuterMovable)
-			shape.setCursor(Draw2DUtils.getRoiMoveCursor());
-		else
-			shape.setCursor(null);
-
 		((ParametricROIShape<?>) shape).setOuterMobile(isOuterMovable);
 	}
 }

@@ -309,10 +309,8 @@ class RingSelection extends ROISelectionRegion<RingROI> implements ILockableRegi
 		this.isCentreMovable = isCentreMovable;
 
 		if (isCentreMovable) {
-			shape.setCursor(Draw2DUtils.getRoiMoveCursor());
 			((RShape) shape).setCentreHandleMoveable(true);
 		} else {
-			shape.setCursor(null);
 			((RShape) shape).setCentreHandleMoveable(false);
 		}
 	}

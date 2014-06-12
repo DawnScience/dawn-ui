@@ -93,11 +93,12 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 				protected void outlineShape(Graphics graphics) {
 				}
     	    };
+       	    connection.setOpaque(false);
+    	    connection.setEnabled(true);
     	    connection.setCursor(Draw2DUtils.getRoiMoveCursor());
     	    connection.setBackgroundColor(getRegionColor());
     	    connection.setBounds(new Rectangle(line1.getLocation(), line2.getBounds().getBottomRight()));
-    	    connection.setOpaque(false);
-
+ 
     		parent.add(connection);
     		parent.add(line2);
         }
@@ -455,7 +456,10 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 	        	line1.getParent().removeMouseMotionListener(mouseTrackListener);
 	        	line1.getParent().setCursor(null);
 	        	line1.setEnabled(true);// This starts the figure part of mouse listeners
-	        	if (connection!=null) connection.setCursor(Draw2DUtils.getRoiMoveCursor());
+	        	if (connection!=null) {
+	        	    connection.setEnabled(true);
+	        		connection.setCursor(Draw2DUtils.getRoiMoveCursor());
+	        	}
 				if (regionType==RegionType.XAXIS|| regionType==RegionType.XAXIS_LINE) {
 					line1.setCursor(Cursors.SIZEWE);
 				} else {

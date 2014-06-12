@@ -5,7 +5,7 @@ import java.util.Iterator;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegionContainer;
 import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
-import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
+import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.MouseListener;
 import org.eclipse.draw2d.Shape;
 
@@ -27,6 +27,7 @@ public abstract class RegionFillFigure<T extends IROI> extends Shape implements 
 
 	public RegionFillFigure(AbstractSelectionRegion<T> region) {
 		this.region = region;
+		setEnabled(false); // Allows mouse events to see through content to report position
 	}
 
 	public void setMobile(final boolean mobile) {
@@ -35,12 +36,6 @@ public abstract class RegionFillFigure<T extends IROI> extends Shape implements 
 		if (mover==null) return;
 		
 		mover.setActive(mobile);
-		
-		if (mobile) {
-			setCursor(Draw2DUtils.getRoiMoveCursor());
-		} else {
-			setCursor(null);
-		}
 	}
 
 	public boolean isMobile() {
@@ -72,4 +67,21 @@ public abstract class RegionFillFigure<T extends IROI> extends Shape implements 
 		if (region instanceof AbstractSelectionRegion<?>)
 			this.region = (AbstractSelectionRegion<T>) region;
 	}
+	
+	/**
+	 * Overridden so that we can set enabled to false and have the
+	 * shape draw the same.
+	 */
+	public void paintFigure(Graphics graphics) {
+		if (getAntialias() != null) {
+			graphics.setAntialias(getAntialias().intValue());
+		}
+		if (getAlpha() != null) {
+			graphics.setAlpha(getAlpha().intValue());
+		}
+		fillShape(graphics);
+		outlineShape(graphics);
+		
+	}
+
 }
