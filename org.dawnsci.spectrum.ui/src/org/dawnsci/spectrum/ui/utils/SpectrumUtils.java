@@ -10,6 +10,7 @@ import org.apache.commons.math3.stat.descriptive.MultivariateSummaryStatistics;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.spectrum.ui.file.IContain1DData;
 import org.dawnsci.spectrum.ui.file.ISpectrumFile;
+import org.dawnsci.spectrum.ui.file.SpectrumFileManager;
 import org.dawnsci.spectrum.ui.file.SpectrumInMemory;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -242,5 +243,37 @@ public class SpectrumUtils {
 		return output;
 	}
 	
+	public static String getPythonLoadString(SpectrumFileManager manager) {
+		StringBuilder sb = new StringBuilder();
+		
+		
+		String nl = System.getProperty("line.separator");
+		int counter = 0;
+		
+		for (ISpectrumFile file: manager.getFiles()) {
+			if (!file.isShowPlot()) continue;
+			if (file.canBeSaved()) continue;
+			
+			sb.append("x"+counter+getFileLoad(file.getLongName(), file.getxDatasetName()));
+			sb.append(nl);
+			
+			int i = 0;
+			
+			for (String name : file.getyDatasetNames()) {
+				sb.append("y"+counter+"_"+(i++)+getFileLoad(file.getLongName(), name));
+				sb.append(nl);
+			}
+			
+			counter++;
+			
+		}
+		
+		return sb.toString();
+	}
 	
+	private static String getFileLoad(String file, String dataset) {
+		String dnpio = "=dnp.io.load(r\"";
+		return dnpio+ file +"\")"+"[\""+dataset+"\"][...]";
+		
+	}
 }
