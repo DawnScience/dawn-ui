@@ -8,9 +8,8 @@ import java.util.List;
 import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
-import org.dawnsci.slicing.api.system.DimsData;
 import org.dawnsci.slicing.api.system.AxisType;
-import org.dawnsci.slicing.api.system.RangeMode;
+import org.dawnsci.slicing.api.system.DimsData;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;
@@ -126,10 +125,10 @@ class TypeEditingSupport extends EditingSupport {
 				}
 			}
 			if (axis==data.getPlotAxis()) return;
-			if (axis==AxisType.Y_MANY) axis = AxisType.Y; // Y_MANY does not currrently require different slice code.
 			
 			data.setPlotAxis(axis);
 			if (axis.isAdvanced()) system.setAdvancedColumnsVisible(true);
+			system.getDimsDataList().removeLargeStacks(system, 100);
 			system.updateAxesChoices();
 			system.update(data, false);
 			system.fireDimensionalListeners();

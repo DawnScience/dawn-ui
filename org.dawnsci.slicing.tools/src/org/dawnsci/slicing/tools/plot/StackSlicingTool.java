@@ -1,9 +1,12 @@
 package org.dawnsci.slicing.tools.plot;
 
 import org.dawnsci.plotting.api.PlotType;
+import org.dawnsci.slicing.api.system.DimsData;
 import org.dawnsci.slicing.api.system.DimsDataList;
 import org.dawnsci.slicing.api.system.AxisType;
 import org.dawnsci.slicing.api.tool.AbstractSlicingTool;
+
+import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 
 /**
  * This is a simple type of slice tool based on the available plot
@@ -15,6 +18,8 @@ import org.dawnsci.slicing.api.tool.AbstractSlicingTool;
  */
 public class StackSlicingTool extends AbstractSlicingTool {
 
+	private static final int MAX_STACK = 100;
+	
 	@Override
 	public void militarize() {
 		
@@ -22,7 +27,10 @@ public class StackSlicingTool extends AbstractSlicingTool {
 		getSlicingSystem().setSliceType(getSliceType());
 		
 		final DimsDataList dimsDataList = getSlicingSystem().getDimsDataList();
-		if (dimsDataList!=null) dimsDataList.setTwoAxesOnly(AxisType.X, AxisType.Y);   		
+		if (dimsDataList!=null) {
+			dimsDataList.setTwoAxesOnly(AxisType.X, AxisType.Y_MANY);
+			dimsDataList.removeLargeStacks(getSlicingSystem(), MAX_STACK);
+		}
 
 		getSlicingSystem().update(true);
 	}

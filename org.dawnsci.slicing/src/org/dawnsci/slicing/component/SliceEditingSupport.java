@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 import org.dawb.common.ui.components.cell.ScaleCellEditor;
 import org.dawnsci.common.widgets.celleditor.PlayCellEditor;
+import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.slicing.Activator; // On purpose! Gets preference from expected place.
 import org.dawnsci.slicing.api.system.AxisType;
 import org.dawnsci.slicing.api.system.DimsData;
@@ -180,6 +181,7 @@ class SliceEditingSupport extends EditingSupport {
 		int[] dataShape = system.getLazyDataset().getShape();
 		final DimsData data = (DimsData)element;
 		if (data.isTextRange()) return rangeEditor;
+			
 		if (Activator.getDefault().getPreferenceStore().getInt(SliceConstants.SLICE_EDITOR)==1) {
             spinnerEditor.setMaximum(dataShape[data.getDimension()]-1);
 		    return spinnerEditor;
@@ -199,13 +201,14 @@ class SliceEditingSupport extends EditingSupport {
 		final int[] dataShape = system.getLazyDataset().getShape();
 		if (dataShape[data.getDimension()]<2) return false;
 		if (data.isTextRange()) return true;
+				
 		return data.getPlotAxis()==AxisType.SLICE || data.getPlotAxis().isAdvanced();
 	}
 
 	@Override
 	protected Object getValue(Object element) {
 		final DimsData data = (DimsData)element;
-		if (data.isTextRange()) return data.getSliceRange() != null ? data.getSliceRange() : "all";
+		if (data.isTextRange()) return data.getSliceRange(true) != null ? data.getSliceRange(true) : "all";
 		return data.getSlice();
 	}
 
@@ -215,7 +218,7 @@ class SliceEditingSupport extends EditingSupport {
 		if (value instanceof Integer) {
 			data.setSlice((Integer)value);
 		} else {
-			data.setSliceRange((String)value, true);
+			data.setSliceRange((String)value, data.getPlotAxis()!=AxisType.Y_MANY);
 		}
 		system.update(data, true);
 	}

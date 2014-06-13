@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
+
 public class DimsDataList implements Serializable {
 
 	
@@ -425,6 +427,24 @@ public class DimsDataList implements Serializable {
 	 */
 	public void setDimsData(List<DimsData> dimsData) {
 		this.dimsData = dimsData;
+	}
+
+	public void removeLargeStacks(ISliceSystem slicingSystem, int maxStack) {
+		
+		for (DimsData dd : getDimsData()) {
+			if (dd.getPlotAxis().isStack(slicingSystem)) {
+				if (dd.getSliceRange(true)==null || "".equals(dd.getSliceRange(true)) || "all".equals(dd.getSliceRange(true))) {
+					final ILazyDataset lz = slicingSystem.getData().getLazySet();
+					if (lz!=null) {
+						final int size = lz.getShape()[dd.getDimension()];
+						if (size>=maxStack) { // We set a default slice
+							dd.setSliceRange("0:25");
+						}
+					}
+				}
+			}
+		}
+		
 	}
 
 }

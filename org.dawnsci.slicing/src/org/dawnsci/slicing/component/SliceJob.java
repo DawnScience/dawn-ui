@@ -9,7 +9,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.internal.presentations.UpdatingActionContributionItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
