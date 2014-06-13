@@ -26,7 +26,9 @@ import java.util.List;
 
 import javax.vecmath.Vector3d;
 
-import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
+import org.dawb.common.services.IPersistenceService;
+import org.dawb.common.services.IPersistentFile;
+import org.dawb.common.services.ServiceManager;
 import org.dawb.workbench.ui.diffraction.table.DiffractionDataManager;
 import org.dawb.workbench.ui.diffraction.table.DiffractionTableData;
 import org.dawnsci.plotting.api.IPlottingSystem;
@@ -44,16 +46,11 @@ import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
-import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
-import uk.ac.diamond.scisoft.analysis.diffraction.PowderRingsUtils;
-import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
-import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.IPolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
@@ -82,102 +79,102 @@ public class DiffractionCalibrationUtils {
 	 * @param postFixedWavelengthFit if true and useFixedWavelength true then fit wavelength afterwards
 	 * @return job that needs to be scheduled
 	 */
-	public static Job calibrateImages(final Display display,
-									   final IPlottingSystem plottingSystem,
-									   final List<DiffractionTableData> model,
-									   final DiffractionTableData currentData,
-									   final boolean useFixedWavelength,
-									   final boolean postFixedWavelengthFit) {
-		Job job = new Job("Calibrate detector") {
-			@Override
-			protected IStatus run(final IProgressMonitor monitor) {
-				IStatus stat = Status.OK_STATUS;
-				final ProgressMonitorWrapper mon = new ProgressMonitorWrapper(monitor);
-				monitor.beginTask("Calibrate detector", IProgressMonitor.UNKNOWN);
-				List<HKL> spacings = CalibrationFactory.getCalibrationStandards().getCalibrant().getHKLs();
-				List<List<? extends IROI>> lROIs = new ArrayList<List<? extends IROI>>();
-				List<DetectorProperties> dps = new ArrayList<DetectorProperties>();
-				DiffractionCrystalEnvironment env = null;
-				for (DiffractionTableData data : model) {
-					IDiffractionMetadata md = data.getMetaData();
-					if (!data.isUse() || data.getNrois() <= 0 || md == null) {
-						continue;
-					}
-					if (env == null) {
-						env = md.getDiffractionCrystalEnvironment();
-					}
-					data.setQ(null);
-
-					DetectorProperties dp = md.getDetector2DProperties();
-					if (dp == null) {
-						continue;
-					}
-					dps.add(dp);
-					lROIs.add(data.getRois());
-				}
-				List<QSpace> qs = null;
-				if (useFixedWavelength) {
-					monitor.subTask("Fitting all rings");
-					try {
-						qs = PowderRingsUtils.fitAllEllipsesToAllQSpacesAtFixedWavelength(mon, dps, env, lROIs, spacings, postFixedWavelengthFit);
-					} catch (IllegalArgumentException e) {
-						logger.debug("Problem in calibrating all image: {}", e);
-					}
-				} else {
-					try {
-						qs = PowderRingsUtils.fitAllEllipsesToAllQSpaces(mon, dps, env, lROIs, spacings);
-					} catch (IllegalArgumentException e) {
-						logger.debug("Problem in calibrating all image: {}", e);
-					}
-				}
-
-				int i = 0;
-				for (DiffractionTableData data : model) {
-					IDiffractionMetadata md = data.getMetaData();
-					if (!data.isUse() || data.getNrois() <= 0 || md == null) {
-						continue;
-					}
-
-					DetectorProperties dp = md.getDetector2DProperties();
-					if (dp == null) {
-						continue;
-					}
-					data.setQ(qs.get(i++));
-					logger.debug("Q-space = {}", data.getQ());
-				}
-
-				display.syncExec(new Runnable() {
-					@Override
-					public void run() {
-						for (DiffractionTableData data : model) {
-							IDiffractionMetadata md = data.getMetaData();
-							if (data.getQ() == null || !data.isUse() || data.getNrois() <= 0 || md == null) {
-								continue;
-							}
-							DetectorProperties dp = md.getDetector2DProperties();
-							DiffractionCrystalEnvironment ce = md.getDiffractionCrystalEnvironment();
-							if (dp == null || ce == null) {
-								continue;
-							}
-
-							DetectorProperties fp = data.getQ().getDetectorProperties();
-							dp.setGeometry(fp);
-							ce.setWavelength(data.getQ().getWavelength());
-						}
-
-						if (currentData == null || currentData.getMetaData() == null || currentData.getQ() == null)
-							return;
-
-						hideFoundRings(plottingSystem);
-						//drawCalibrantRings(currentData.augmenter);
-					}
-				});
-				return stat;
-			}
-		};
-		job.setPriority(Job.SHORT);
-		return job;
-	}
+//	public static Job calibrateImages(final Display display,
+//									   final IPlottingSystem plottingSystem,
+//									   final List<DiffractionTableData> model,
+//									   final DiffractionTableData currentData,
+//									   final boolean useFixedWavelength,
+//									   final boolean postFixedWavelengthFit) {
+//		Job job = new Job("Calibrate detector") {
+//			@Override
+//			protected IStatus run(final IProgressMonitor monitor) {
+//				IStatus stat = Status.OK_STATUS;
+//				final ProgressMonitorWrapper mon = new ProgressMonitorWrapper(monitor);
+//				monitor.beginTask("Calibrate detector", IProgressMonitor.UNKNOWN);
+//				List<HKL> spacings = CalibrationFactory.getCalibrationStandards().getCalibrant().getHKLs();
+//				List<List<? extends IROI>> lROIs = new ArrayList<List<? extends IROI>>();
+//				List<DetectorProperties> dps = new ArrayList<DetectorProperties>();
+//				DiffractionCrystalEnvironment env = null;
+//				for (DiffractionTableData data : model) {
+//					IDiffractionMetadata md = data.getMetaData();
+//					if (!data.isUse() || data.getNrois() <= 0 || md == null) {
+//						continue;
+//					}
+//					if (env == null) {
+//						env = md.getDiffractionCrystalEnvironment();
+//					}
+//					data.setQ(null);
+//
+//					DetectorProperties dp = md.getDetector2DProperties();
+//					if (dp == null) {
+//						continue;
+//					}
+//					dps.add(dp);
+//					lROIs.add(data.getRois());
+//				}
+//				List<QSpace> qs = null;
+//				if (useFixedWavelength) {
+//					monitor.subTask("Fitting all rings");
+//					try {
+//						qs = PowderRingsUtils.fitAllEllipsesToAllQSpacesAtFixedWavelength(mon, dps, env, lROIs, spacings, postFixedWavelengthFit);
+//					} catch (IllegalArgumentException e) {
+//						logger.debug("Problem in calibrating all image: {}", e);
+//					}
+//				} else {
+//					try {
+//						qs = PowderRingsUtils.fitAllEllipsesToAllQSpaces(mon, dps, env, lROIs, spacings);
+//					} catch (IllegalArgumentException e) {
+//						logger.debug("Problem in calibrating all image: {}", e);
+//					}
+//				}
+//
+//				int i = 0;
+//				for (DiffractionTableData data : model) {
+//					IDiffractionMetadata md = data.getMetaData();
+//					if (!data.isUse() || data.getNrois() <= 0 || md == null) {
+//						continue;
+//					}
+//
+//					DetectorProperties dp = md.getDetector2DProperties();
+//					if (dp == null) {
+//						continue;
+//					}
+//					data.setQ(qs.get(i++));
+//					logger.debug("Q-space = {}", data.getQ());
+//				}
+//
+//				display.syncExec(new Runnable() {
+//					@Override
+//					public void run() {
+//						for (DiffractionTableData data : model) {
+//							IDiffractionMetadata md = data.getMetaData();
+//							if (data.getQ() == null || !data.isUse() || data.getNrois() <= 0 || md == null) {
+//								continue;
+//							}
+//							DetectorProperties dp = md.getDetector2DProperties();
+//							DiffractionCrystalEnvironment ce = md.getDiffractionCrystalEnvironment();
+//							if (dp == null || ce == null) {
+//								continue;
+//							}
+//
+//							DetectorProperties fp = data.getQ().getDetectorProperties();
+//							dp.setGeometry(fp);
+//							ce.setWavelength(data.getQ().getWavelength());
+//						}
+//
+//						if (currentData == null || currentData.getMetaData() == null || currentData.getQ() == null)
+//							return;
+//
+//						hideFoundRings(plottingSystem);
+//						//drawCalibrantRings(currentData.augmenter);
+//					}
+//				});
+//				return stat;
+//			}
+//		};
+//		job.setPriority(Job.SHORT);
+//		return job;
+//	}
 
 	/**
 	 * 
@@ -492,6 +489,28 @@ public class DiffractionCalibrationUtils {
 		} catch (IOException e) {
 			e.printStackTrace();
 			logger.error("Error saving metadata:"+e);
+		}
+	}
+	
+	public static void saveToNexusFile(DiffractionDataManager manager, String filepath) throws Exception {
+		
+		DiffractionTableData cd = manager.getCurrentData();
+		
+		IPersistenceService service = (IPersistenceService)ServiceManager.getService(IPersistenceService.class);
+		IPersistentFile file = service.createPersistentFile(filepath);
+		try {
+			if (cd.getCalibrationInfo()!= null) {
+				file.setPowderCalibrationInformation(cd.getImage(), cd.getMetaData(), cd.getCalibrationInfo());
+			} else {
+				file.setData(cd.getImage());
+				file.setDiffractionMetadata(cd.getMetaData());
+			}
+			
+			
+		} catch(Exception e) {
+			//do nothing
+		} finally {
+			file.close();
 		}
 	}
 

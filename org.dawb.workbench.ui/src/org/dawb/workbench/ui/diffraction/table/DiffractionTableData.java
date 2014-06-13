@@ -19,6 +19,7 @@ package org.dawb.workbench.ui.diffraction.table;
 import java.util.List;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.diffraction.IPowderCalibrationInfo;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
@@ -47,7 +48,7 @@ public class DiffractionTableData {
 	private double od = Double.NaN;
 	private double distance;
 	private boolean use = false;
-	private double residual;
+	private IPowderCalibrationInfo calibrationInfo;
 	
 	/**
 	 *  TODO FIXME rois is not encapsulated, external classes can edit it.
@@ -60,24 +61,24 @@ public class DiffractionTableData {
 
 	
 	// Auto-generated stuff - thanks eclipse!
-	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result
+				+ ((calibrationInfo == null) ? 0 : calibrationInfo.hashCode());
 		long temp;
 		temp = Double.doubleToLongBits(distance);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		result = prime * result + ((image == null) ? 0 : image.hashCode());
-		result = prime * result + ((metaData == null) ? 0 : metaData.hashCode());
+		result = prime * result
+				+ ((metaData == null) ? 0 : metaData.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + nrois;
 		temp = Double.doubleToLongBits(od);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		result = prime * result + ((path == null) ? 0 : path.hashCode());
 		result = prime * result + ((q == null) ? 0 : q.hashCode());
-		temp = Double.doubleToLongBits(residual);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
 		result = prime * result + ((rois == null) ? 0 : rois.hashCode());
 		result = prime * result + (use ? 1231 : 1237);
 		return result;
@@ -91,6 +92,11 @@ public class DiffractionTableData {
 		if (getClass() != obj.getClass())
 			return false;
 		DiffractionTableData other = (DiffractionTableData) obj;
+		if (calibrationInfo == null) {
+			if (other.calibrationInfo != null)
+				return false;
+		} else if (!calibrationInfo.equals(other.calibrationInfo))
+			return false;
 		if (Double.doubleToLongBits(distance) != Double
 				.doubleToLongBits(other.distance))
 			return false;
@@ -123,9 +129,6 @@ public class DiffractionTableData {
 				return false;
 		} else if (!q.equals(other.q))
 			return false;
-		if (Double.doubleToLongBits(residual) != Double
-				.doubleToLongBits(other.residual))
-			return false;
 		if (rois == null) {
 			if (other.rois != null)
 				return false;
@@ -135,9 +138,12 @@ public class DiffractionTableData {
 			return false;
 		return true;
 	}
+	
+	
 	public String getPath() {
 		return path;
 	}
+	
 	public void setPath(String path) {
 		this.path = path;
 	}
@@ -196,9 +202,15 @@ public class DiffractionTableData {
 		this.use = use;
 	}
 	public double getResidual() {
-		return residual;
+		
+		if (calibrationInfo != null) return calibrationInfo.getResidual();
+		else return 0;
 	}
-	public void setResidual(double residual) {
-		this.residual = residual;
+
+	public IPowderCalibrationInfo getCalibrationInfo() {
+		return calibrationInfo;
+	}
+	public void setCalibrationInfo(IPowderCalibrationInfo calibrationInfo) {
+		this.calibrationInfo = calibrationInfo;
 	}
 }
