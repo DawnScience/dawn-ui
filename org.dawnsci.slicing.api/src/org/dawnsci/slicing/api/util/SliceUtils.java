@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDatasetMathsService;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Slice;
 import uk.ac.diamond.scisoft.analysis.io.IDataHolder;
 import uk.ac.diamond.scisoft.analysis.io.ILoaderService;
 import uk.ac.diamond.scisoft.analysis.io.SliceObject;
@@ -109,12 +110,14 @@ public class SliceUtils {
     			x = service.arange(dataShape[i], IDatasetMathsService.INT);
     			x.setName("Dimension "+(dimsData.getDimension()+1));
     			currentSlice.setX(dimsData.getDimension());
-    			
+    			currentSlice.setxSize(x.getSize());
     		}
-    		if (dimsData.getPlotAxis()==AxisType.Y) {
+    		if (dimsData.getPlotAxis()==AxisType.Y || dimsData.getPlotAxis()==AxisType.Y_MANY) {
        			y = service.arange(dataShape[i], IDatasetMathsService.INT);
     			y.setName("Dimension "+(dimsData.getDimension()+1));
     			currentSlice.setY(dimsData.getDimension());
+    			final int count = DOEUtils.getSize(dimsData.getSliceRange(true), null);
+    			currentSlice.setySize(count>-1?count:y.getSize());
     		}
     		
         	if (dimsData.getSliceRange()!=null&&!dimsData.getPlotAxis().hasValue()) {
@@ -129,10 +132,10 @@ public class SliceUtils {
      	}
     	
     	if (y!=null) {
-    	    currentSlice.setSlicedShape(new int[]{x.getSize(),y.getSize()});
+    	    currentSlice.setSlicedShape(new int[]{currentSlice.getxSize(),currentSlice.getySize()});
         	currentSlice.setAxes(Arrays.asList(new IDataset[]{x,y}));
     	} else {
-    		currentSlice.setSlicedShape(new int[]{x.getSize()});
+    		currentSlice.setSlicedShape(new int[]{currentSlice.getxSize()});
         	currentSlice.setAxes(Arrays.asList(new IDataset[]{x}));
    	    }
     	
@@ -245,21 +248,22 @@ public class SliceUtils {
 	}
 
 	private static int getStart(DimsData dimsData) {
-		if (!dimsData.getPlotAxis().hasValue()) {
+		if (dimsData.isTextRange()) {
+			final double[] exp = DOEUtils.getRange(dimsData.getSliceRange(true), null);
+			return exp!=null ? (int)exp[0] : 0;
+			
+		} else if (!dimsData.getPlotAxis().hasValue()) {
 			return 0;
-		} else  if (dimsData.getSliceRange()!=null) {
-			final double[] exp = DOEUtils.getRange(dimsData.getSliceRange(), null);
-			return (int)exp[0];
-		}
+		} 
 		return dimsData.getSlice();
 	}
 	
 	private static int getStop(DimsData dimsData, final int size) {
-		if (!dimsData.getPlotAxis().hasValue()) {
+		if (dimsData.isTextRange()) {
+			final double[] exp = DOEUtils.getRange(dimsData.getSliceRange(true), null);
+			return exp!=null ? (int)exp[1] : size;
+		} else if (!dimsData.getPlotAxis().hasValue()) {
 			return size;
-		} else  if (dimsData.getSliceRange()!=null) {
-			final double[] exp = DOEUtils.getRange(dimsData.getSliceRange(), null);
-			return (int)exp[1];
 			
 		}  else if (dimsData.getPlotAxis().isAdvanced()) {
 			int ispan = dimsData.getSlice()+dimsData.getSliceSpan();
@@ -270,11 +274,11 @@ public class SliceUtils {
 	}
 
 	private static int getStep(DimsData dimsData) {
-		if (!dimsData.getPlotAxis().hasValue()) {
+		if (dimsData.isTextRange()) {
+			final double[] exp = DOEUtils.getRange(dimsData.getSliceRange(true), null);
+			return exp!=null ? (int)exp[2] : 1; 
+		} else if (!dimsData.getPlotAxis().hasValue()) {
 			return 1;
-		} else  if (dimsData.getSliceRange()!=null) {
-			final double[] exp = DOEUtils.getRange(dimsData.getSliceRange(), null);
-			return (int)exp[2];
 			
 		}
 		return 1;
@@ -338,36 +342,38 @@ public class SliceUtils {
 					plottingSystem.getSelectedYAxis().setTitle("");
 				}
 			});
+			
 		} else if (type==PlotType.XY_STACKED || type==PlotType.XY_STACKED_3D || type == PlotType.XY_SCATTER_3D) {
-			final IDataset xAxis = getAxis(currentSlice, sliceSource.getVariableManager(), slice.getShape()[0], currentSlice.getX()+1, true, monitor);
+			
 			plottingSystem.clear();
-			// We separate the 2D image into several 1d plots
+						
 			final int[]         shape = slice.getShape();
-			final List<double[]> sets = new ArrayList<double[]>(shape[1]);
-			for (int x = 0; x < shape[0]; x++) {
-				for (int y = 0; y < shape[1]; y++) {
-					
-					if (y > (sets.size()-1)) sets.add(new double[shape[0]]);
-					double[] data = sets.get(y);
-					data[x] = slice.getDouble(x,y);
-				}
+			// We look for the dimension with the same size as x
+			int ySize = currentSlice.getySize();
+			int xd    = 0;
+			for (int i = 0; i < shape.length; i++) {
+			    if (shape[i] == ySize) {
+			    	xd = i; // 0 or 1
+			    	break;
+			    }
 			}
-			final List<IDataset> ys    = new ArrayList<IDataset>(shape[1]);
-			final List<String>   names = new ArrayList<String>(shape[1]);
-			int index = 0;
-
-			final IDatasetMathsService service = (IDatasetMathsService)ServiceManager.getService(IDatasetMathsService.class);
-
-			for (double[] da : sets) {
-				final IDataset dds = service.createDoubleDataset(da, da.length);
-				dds.setName(String.valueOf(index));
-				ys.add(dds);
-				names.add(sliceSource.getDataName()); // They are all the same data name.
-				++index;
+			int yd    = xd==0 ? 1 : 0;
+		
+			final List<IDataset> ys    = new ArrayList<IDataset>(shape[xd]);
+			final IDataset xAxis = getAxis(currentSlice, sliceSource.getVariableManager(), shape[yd], yd, true, monitor);
+			
+			final Slice[] slices = new Slice[2];
+			for (int index = 0; index < shape[xd]; index++) {
+				slices[xd]  = new Slice(index, index+1, 1);
+				IDataset set = (IDataset)slice.getSliceView(slices);
+				set = set.squeeze();
+				set.setName(String.valueOf(index));
+				ys.add(set);
 			}
+
 			plottingSystem.setXFirst(true);
 			plottingSystem.setPlotType(type);
-			plottingSystem.createPlot1D(xAxis, ys, names, null, monitor);
+			plottingSystem.createPlot1D(xAxis, ys, currentSlice.getName(), monitor);
 
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {

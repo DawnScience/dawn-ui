@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.dawnsci.doe.DOEUtils;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.slicing.api.system.AxisChoiceEvent;
@@ -24,6 +25,7 @@ import org.dawnsci.slicing.api.system.AxisChoiceListener;
 import org.dawnsci.slicing.api.system.AxisType;
 import org.dawnsci.slicing.api.system.DimensionalEvent;
 import org.dawnsci.slicing.api.system.DimensionalListener;
+import org.dawnsci.slicing.api.system.DimsData;
 import org.dawnsci.slicing.api.system.DimsDataList;
 import org.dawnsci.slicing.api.system.ISliceGallery;
 import org.dawnsci.slicing.api.system.ISliceSystem;
@@ -204,6 +206,10 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 		for (int i = 0; i < dimsDataList.size(); i++) {
 			if (dimsDataList.getDimsData(i).getPlotAxis()==AxisType.Y) isY = true;
 		}
+		boolean isYMany = false;
+		for (int i = 0; i < dimsDataList.size(); i++) {
+			if (dimsDataList.getDimsData(i).getPlotAxis()==AxisType.Y_MANY) isYMany = true;
+		}
 		boolean isZ = false;
 		for (int i = 0; i < dimsDataList.size(); i++) {
 			if (dimsDataList.getDimsData(i).getPlotAxis()==AxisType.Z) isZ = true;
@@ -218,11 +224,32 @@ public abstract class AbstractSliceSystem implements ISliceSystem {
 			ok = isX;
 			errorMessage = "Please set an X axis.";
 		} else if (dimCount==2){
-			ok = isX&&isY;
-			errorMessage = "Please set an X and Y axis or switch to 'Slice as line plot'.";
+			ok = (isX&&isY&&getSliceType()!=PlotType.XY_STACKED)     ||
+				 (isX&&isYMany&&getSliceType()==PlotType.XY_STACKED) ;
+			
+			errorMessage = !isYMany
+					     ? "Please set an X and Y (Many) axis or switch to 'Slice as line plot'."
+					     : "Please set an X and Y axis or switch to 'Slice as line plot'.";
 		} else if (dimCount==3){
 			ok = isX&&isY&&isZ;
 			errorMessage = "Please set an X, Y and Z axis or switch to 'Slice as image plot'.";
+		}
+		
+		if (ok) { // Check size of ranges.
+			try {
+				for (DimsData dd : dimsDataList.iterable()) {
+					if (dd.isTextRange()) {
+						final int size = DOEUtils.getSize(dd.getSliceRange(true), null);
+						if (size>=getData().getLazySet().getShape()[dd.getDimension()] || size<1) {
+							errorMessage = "The slice '"+dd.getSliceRange(true)+"' does not fit the data.";
+							ok = false;
+							break;
+						}
+					}
+				}
+			} catch (Exception ignored) {
+				// ignore problem 
+			}
 		}
 
 		return ok ? null : errorMessage;

@@ -4,11 +4,10 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 import org.dawnsci.plotting.api.PlotType;
-import org.dawnsci.slicing.api.system.DimsData;
 import org.dawnsci.slicing.api.system.AxisType;
+import org.dawnsci.slicing.api.system.DimsData;
 import org.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TableViewer;
@@ -46,7 +45,8 @@ class SliceColumnLabelProvider extends ColumnLabelProvider implements IStyledLab
 			break;
 		case 2:
 			if (data.isTextRange()) {
-				ret.append(data.getSliceRange()!=null? new StyledString(data.getSliceRange()) : new StyledString("all"));
+				ret.append(data.getSliceRange(true)!=null ? new StyledString(data.getSliceRange(true)) 
+				                                          : new StyledString("all"));
 			} else {
 				final int slice = data.getSlice();
 				String formatValue = String.valueOf(slice);
@@ -133,7 +133,7 @@ class SliceColumnLabelProvider extends ColumnLabelProvider implements IStyledLab
         	return axis.getLabel();
         }
 		
-		if (data.isTextRange()) return AxisType.RANGE.getLabel();
+		if (data.isTextRange()) return data.getPlotAxis().getLabel();
 		if (data.getPlotAxis().isAdvanced()) return data.getPlotAxis().getLabel();
 		
 		// Bit naughty but we test the kind of slice they have
@@ -142,10 +142,9 @@ class SliceColumnLabelProvider extends ColumnLabelProvider implements IStyledLab
 			return axis.getIndex()>-1 ? AxisType.X.getLabel() : AxisType.SLICE.getLabel();
 		}
 		if (sliceType==PlotType.XY_STACKED) {
-			return axis==AxisType.X ? AxisType.X.getLabel() 
-					                : (axis==AxisType.Y || axis==AxisType.Y_MANY) ? AxisType.Y_MANY.getLabel()
-					                		                                      : AxisType.SLICE.getLabel();
+			if (axis == AxisType.X) return axis.getLabel();
 		}
+
 		if (sliceType instanceof PlotType && system.getPlottingSystem()!=null) {
 			if (system.isReversedImage()) {
 				return axis==AxisType.X ? AxisType.Y.getLabel() : axis==AxisType.Y ? AxisType.X.getLabel() : AxisType.SLICE.getLabel();				

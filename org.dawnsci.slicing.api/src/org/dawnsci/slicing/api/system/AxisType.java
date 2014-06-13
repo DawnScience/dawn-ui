@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawb.common.services.ServiceManager;
+import org.dawnsci.plotting.api.PlotType;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDatasetMathsService;
@@ -117,6 +118,20 @@ public enum AxisType {
 
 		
 		throw new Exception(getName()+" Has not yet been implemented! Sorry!");
+	}
+	
+	public boolean isStack() {
+		return isStack(null);
+	}
+	/**
+	 * 
+	 * @param system -  may be null
+	 * @return
+	 */
+	public boolean isStack(ISliceSystem system) {
+		if (this==Y_MANY) return true;
+        if (system==null) return false;
+		return system.getSliceType()==PlotType.XY_STACKED && this==Y;
 	}
 
 }

@@ -113,7 +113,10 @@ public class DimsData implements Serializable {
 	}
 
 	public String getSliceRange() {
-		if (!plotAxis.hasValue()) return null;
+		return getSliceRange(false);
+	}
+	public String getSliceRange(boolean force) {
+		if (!force && !plotAxis.hasValue()) return null;
 		return sliceRange;
 	}
 
@@ -242,7 +245,7 @@ public class DimsData implements Serializable {
 		return getPlotAxis()==AxisType.SLICE;
 	}
 	public boolean isTextRange() {
-		return getPlotAxis()==AxisType.RANGE;
+		return getPlotAxis()==AxisType.RANGE || getPlotAxis()==AxisType.Y_MANY;
 	}
 
 	public int getSliceSpan() {

@@ -9,15 +9,14 @@ import java.util.Map;
 
 import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.services.IExpressionObjectService;
-import org.dawb.common.ui.preferences.ViewConstants;
 import org.dawb.hdf5.HierarchicalDataFactory;
 import org.dawb.hdf5.nexus.NexusUtils;
 import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
 import org.dawnsci.slicing.api.Activator;
 import org.dawnsci.slicing.api.system.AxisChoiceEvent;
+import org.dawnsci.slicing.api.system.AxisType;
 import org.dawnsci.slicing.api.system.DimsData;
 import org.dawnsci.slicing.api.system.DimsDataList;
-import org.dawnsci.slicing.api.system.AxisType;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;
