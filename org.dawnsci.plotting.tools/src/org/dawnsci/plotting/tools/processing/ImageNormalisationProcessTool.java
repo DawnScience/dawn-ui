@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Comparisons;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
@@ -292,7 +293,7 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 				if(!selectionData.equals(originalData))
 					selectionPlottingSystem.updatePlot2D(originalData, originalAxes, monitor);
 			}
-			profile = AbstractDataset.ones(DatasetUtils.convertToAbstractDataset(originalAxes.get(1)));
+			profile = (AbstractDataset) DatasetFactory.ones(DatasetUtils.convertToAbstractDataset(originalAxes.get(1)));
 		} else if (type.equals(NormaliseType.ROI) || type.equals(NormaliseType.AUX)){
 			if(roi == null) return;
 	

@@ -120,7 +120,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		ImageOrigin     origin   = bean.getOrigin();
 		if (origin==null) origin = ImageOrigin.TOP_LEFT;
 		PaletteData     palette  = bean.getPalette();
-		
+
 		if (image instanceof RGBDataset) {
 			switch (origin) {
 			case TOP_LEFT:

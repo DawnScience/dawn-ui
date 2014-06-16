@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractCompoundDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.CompoundByteDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.CompoundDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.CompoundIntegerDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.CompoundLongDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.CompoundShortDataset;
@@ -333,9 +334,9 @@ public class DataSet3DPlot2DMulti extends DataSet3DPlot2D {
 							if (texture != null) {
 								boolean useRGB = 
 									(currentData instanceof RGBDataset) ||
-									(currentData instanceof AbstractCompoundDataset &&
-									(((AbstractCompoundDataset)currentData).getElementsPerItem() == 3 ||
-					 				 ((AbstractCompoundDataset)currentData).getElementsPerItem() == 4));
+									(currentData instanceof CompoundDataset &&
+									(currentData.getElementsPerItem() == 3 ||
+					 				 currentData.getElementsPerItem() == 4));
 								isRGB[numGraphs] = (useRGB ? 1 : 0);
 								generateTexture(currentData, texture, x,y, texWidth, texHeight,useRGB);
 							}
@@ -397,7 +398,7 @@ public class DataSet3DPlot2DMulti extends DataSet3DPlot2D {
 		}
 	}	
 	
-	private void generateRGBTexture(AbstractCompoundDataset data,
+	private void generateRGBTexture(CompoundDataset data,
 			Texture2D currentTexture,
 			int xpos,
 			int ypos,
@@ -496,7 +497,7 @@ public class DataSet3DPlot2DMulti extends DataSet3DPlot2D {
 				for (int y = 0; y < height; y++) {
 					int yDataPos = srcHeight -1 -ypos-(height-1-y);
 					for (int x = 0; x < width; x++) {
-						int[] rgba = ciData.getIntegerArray(yDataPos, x + xpos);
+						int[] rgba = ciData.getIntArray(yDataPos, x + xpos);
 						int sRed = rgba[0];
 						int sGreen = rgba[1];
 						int sBlue = rgba[2];
@@ -829,9 +830,9 @@ public class DataSet3DPlot2DMulti extends DataSet3DPlot2D {
 					if (texture != null) {
 						boolean useRGB = 
 							(currentData instanceof RGBDataset) ||
-							(currentData instanceof AbstractCompoundDataset &&
-							(((AbstractCompoundDataset)currentData).getElementsPerItem() == 3 ||
-			 				 ((AbstractCompoundDataset)currentData).getElementsPerItem() == 4));
+							(currentData instanceof CompoundDataset &&
+							(currentData.getElementsPerItem() == 3 ||
+			 				 currentData.getElementsPerItem() == 4));
 						isRGB[numGraphs] = (useRGB ? 1 : 0);
 						generateTexture(currentData, texture, x,y, texWidth, texHeight,useRGB);
 					}

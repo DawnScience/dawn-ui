@@ -853,7 +853,7 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 					for (int y = 0; y < height; y++) {
 						int yDataPos = srcHeight -1 -ypos-(height-1-y);
 						for (int x = 0; x < width; x++) {
-							int[] rgba = ciData.getIntegerArray(yDataPos, x + xpos);
+							int[] rgba = ciData.getIntArray(yDataPos, x + xpos);
 							int sRed = rgba[0];
 							int sGreen = rgba[1];
 							int sBlue = rgba[2];
