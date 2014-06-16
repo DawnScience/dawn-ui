@@ -277,7 +277,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 				update(null);
 			}
 		};
-		split2DAction.setImageDescriptor(Activator.getImageDescriptor("icons/cake.png"));
+		split2DAction.setImageDescriptor(Activator.getImageDescriptor("icons/splitCake.png"));
 		
 		final Action nonSplit2DAction = new Action("Non pixel splitting 2D") {
 			@Override
