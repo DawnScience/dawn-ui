@@ -51,8 +51,6 @@ import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
-import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
-import uk.ac.diamond.scisoft.analysis.roi.IPolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 /**
@@ -193,28 +191,12 @@ public class DiffractionCalibrationUtils {
 	public static IStatus drawFoundRing(final IProgressMonitor monitor, Display display, final IPlottingSystem plotter, final IROI froi, final boolean circle) {
 		final boolean[] status = {true};
 		
-		IROI roi = null;
-		EllipticalFitROI ef = null;
-		if (froi instanceof EllipticalFitROI) {
-//			EllipticalFitROI efroi = (EllipticalFitROI)froi;
-			ef = (EllipticalFitROI)froi.copy();
-			IPolylineROI points = ef.getPoints();
-			for (IROI p : points) {
-				p.addPoint(0.5, 0.5);
-			}
-		}
-		
-		if (ef != null)  roi = ef;
-		else roi = froi;
-		
-		final IROI fr = roi;
-		
 		display.syncExec(new Runnable() {
 
 			public void run() {
 				try {
 					IRegion region = plotter.createRegion(RegionUtils.getUniqueName(REGION_PREFIX, plotter), circle ? RegionType.CIRCLEFIT : RegionType.ELLIPSEFIT);
-					region.setROI(fr);
+					region.setROI(froi);
 					region.setRegionColor(circle ? ColorConstants.cyan : ColorConstants.orange);
 					monitor.subTask("Add region");
 					region.setUserRegion(false);
