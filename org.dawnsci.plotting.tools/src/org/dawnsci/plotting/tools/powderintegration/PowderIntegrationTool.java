@@ -43,6 +43,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionEvent;
@@ -176,9 +178,10 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		//Call update here so we get the metadata
 		update(null);
 		
-		TabFolder folder = new TabFolder(sashForm, SWT.NONE);
-		
-		TabItem tab1 = new TabItem(folder, SWT.NONE);
+		CTabFolder folder = new CTabFolder (sashForm, SWT.NONE);
+		folder.setBorderVisible(true);
+		folder.setSimple(true);
+		CTabItem tab1 = new CTabItem(folder, SWT.NONE);
 	    tab1.setText("Integration Options");
 		
 		Composite setupComposite = new Composite(folder, SWT.None);
@@ -200,7 +203,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			}
 		});
 		
-		TabItem tab2 = new TabItem(folder, SWT.NONE);
+		CTabItem tab2 = new CTabItem(folder, SWT.NONE);
 		tab2.setText("Correction Options");
 		
 		Composite widget2 = new Composite(folder, SWT.None);
@@ -220,7 +223,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 				update(null);
 			}
 		});
-		
+		folder.setSelection(0);
 		sashForm.setWeights(new int[]{100,0});
 	}
 	

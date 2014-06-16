@@ -12,6 +12,7 @@ import org.dawnsci.spectrum.ui.file.SpectrumInMemory;
 import org.dawnsci.spectrum.ui.processing.AbstractProcess;
 import org.dawnsci.spectrum.ui.processing.AdditionProcess;
 import org.dawnsci.spectrum.ui.processing.AverageProcess;
+import org.dawnsci.spectrum.ui.processing.CombineProcess;
 import org.dawnsci.spectrum.ui.processing.DerivativeProcess;
 import org.dawnsci.spectrum.ui.processing.DivisionProcess;
 import org.dawnsci.spectrum.ui.processing.MultiplicationProcess;
@@ -63,6 +64,8 @@ public class ProcessMenuManager {
 		
 		AbstractProcess process = new AverageProcess();
 		addProcessAction(process, menuProcess, "Average",((IStructuredSelection)viewer.getSelection()).size() > 1);
+		process = new CombineProcess();
+		addProcessAction(process, menuProcess, "Combine",((IStructuredSelection)viewer.getSelection()).size() > 1);
 
 		process = new DerivativeProcess();
 		addProcessAction(process, menuProcess, "Derivative",((IStructuredSelection)viewer.getSelection()).size() >= 1);

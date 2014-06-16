@@ -72,6 +72,7 @@ import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetAdapter;
@@ -380,18 +381,18 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 		menuManager.add(configDefaults);
 	}
 
-	private void fillContextMenu(IMenuManager manager) {
+	private void fillContextMenu(IMenuManager menuManager) {
 		
-		processMenuManager.fillProcessMenu(manager);
+		processMenuManager.fillProcessMenu(menuManager);
 
-		manager.add(new Separator());
+		menuManager.add(new Separator());
 		
 		if (((IStructuredSelection)viewer.getSelection()).size() == 1) {
 
 			List<ISpectrumFile> file = SpectrumUtils.getSpectrumFilesList((IStructuredSelection)viewer.getSelection());
 
 			if (!file.isEmpty() && file.get(0) instanceof SpectrumInMemory) {
-				manager.add(new Action("Save HDF5...") {
+				menuManager.add(new Action("Save HDF5...") {
 					public void run() {
 						SpectrumWizard sw = new SpectrumWizard();
 						ISelection selection = viewer.getSelection();
@@ -403,7 +404,7 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 					}
 				});
 				
-				manager.add(new Action("Save text...") {
+				menuManager.add(new Action("Save text...") {
 					public void run() {
 						SpectrumWizard sw = new SpectrumWizard();
 						ISelection selection = viewer.getSelection();
@@ -415,16 +416,16 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 					}
 				});
 				
-				manager.add(new Separator());
+				menuManager.add(new Separator());
 			}
 		}
 		
-		manager.add(removeAction);
+		menuManager.add(removeAction);
 
 		// Other plug-ins can contribute there actions here
 		
-		manager.add(new Separator());
-		manager.add(new Action("Check Selected", Activator.imageDescriptorFromPlugin("org.dawnsci.spectrum.ui","icons/ticked.png")) {
+		menuManager.add(new Separator());
+		menuManager.add(new Action("Check Selected", Activator.imageDescriptorFromPlugin("org.dawnsci.spectrum.ui","icons/ticked.png")) {
 			@Override
 			public void run() {
 				setSelectionChecked(true);
@@ -432,7 +433,7 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 
 		});
 		
-		manager.add(new Action("Uncheck Selected", Activator.imageDescriptorFromPlugin("org.dawnsci.spectrum.ui","icons/unticked.gif")) {
+		menuManager.add(new Action("Uncheck Selected", Activator.imageDescriptorFromPlugin("org.dawnsci.spectrum.ui","icons/unticked.gif")) {
 			@Override
 			public void run() {
 				setSelectionChecked(false);
@@ -442,9 +443,9 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 		
 		if (((IStructuredSelection)viewer.getSelection()).size() == 1) {
 
-			manager.add(new Separator());
+			menuManager.add(new Separator());
 
-			manager.add(new Action("Open in Data Browsing Perspective",Activator.imageDescriptorFromPlugin("org.dawnsci.spectrum.ui","icons/application_view_gallery.png")) {
+			menuManager.add(new Action("Open in Data Browsing Perspective",Activator.imageDescriptorFromPlugin("org.dawnsci.spectrum.ui","icons/application_view_gallery.png")) {
 				@Override
 				public void run() {
 					try {
@@ -467,9 +468,20 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 			});
 		}
 		
-		manager.add(new Separator());
-		manager.add(configDefaults);
-		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+		menuManager.add(new Separator());
+		menuManager.add(configDefaults);
+		menuManager.add(new Separator());
+		menuManager.add( new Action("Copy Python Code to Clipboard",Activator.imageDescriptorFromPlugin("org.dawnsci.spectrum.ui","icons/clipboard.png")) {
+			@Override
+			public void run() {
+				String code = SpectrumUtils.getPythonLoadString(manager);
+				Clipboard cb = new Clipboard(Display.getCurrent());
+				TextTransfer textTransfer = TextTransfer.getInstance();
+		        cb.setContents(new Object[] { code },
+		            new Transfer[] { textTransfer });
+			}
+		});
+		menuManager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
 	
 //	private void configureCacheActions(MenuManager manager) {
