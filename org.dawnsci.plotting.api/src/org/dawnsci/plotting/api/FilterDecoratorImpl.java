@@ -51,6 +51,7 @@ class FilterDecoratorImpl implements IFilterDecorator {
 				if (!filterActive)       return;
 				if (!processingAllowed)  return;
 				if (system.isDisposed()) return;
+				if (evt.getTrace() != null && !evt.getTrace().isUserTrace()) return;
 				process(evt);
 			}
 		};
