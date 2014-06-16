@@ -86,10 +86,8 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractCompoundDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.CompoundByteDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.CompoundIntegerDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.CompoundLongDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.CompoundShortDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.CompoundDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.FloatDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
@@ -753,7 +751,7 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 	}
 	
 
-	private void generateRGBTexture(AbstractCompoundDataset data,
+	private void generateRGBTexture(CompoundDataset data,
 									Appearance ap,
 									int xpos,
 									int ypos,
@@ -789,13 +787,12 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 			int isize = data.getElementsPerItem();
 			switch(data.getDtype()) {
 			
-				case AbstractDataset.ARRAYINT8:
+				case Dataset.ARRAYINT8:
 				{
-					CompoundByteDataset cbData = (CompoundByteDataset)data;
 					for (int y = 0; y < height; y++) {
 						int yDataPos = srcHeight -1 -ypos-(height-1-y);
 						for (int x = 0; x < width; x++) {
-							byte[] rgba = cbData.getByteArray(yDataPos, x + xpos);
+							byte[] rgba = data.getByteArray(yDataPos, x + xpos);
 							softwareImageRGBAdata[si++] = rgba[0];
 							softwareImageRGBAdata[si++] = rgba[1];
 							softwareImageRGBAdata[si++] = rgba[2];
@@ -804,9 +801,8 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 					}
 				}
 				break;
-				case AbstractDataset.ARRAYINT16:
+				case Dataset.ARRAYINT16:
 				{
-					CompoundShortDataset csData = (CompoundShortDataset)data;
 					double mins[] = data.minItem();
 					double maxs[] = data.maxItem();
 					short redRange = (short) Math.max(1,(short)(maxs[0]-mins[0]));
@@ -817,7 +813,7 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 					for (int y = 0; y < height; y++) {
 						int yDataPos = srcHeight -1 -ypos-(height-1-y);
 						for (int x = 0; x < width; x++) {
-							short[] rgba = csData.getShortArray(yDataPos, x + xpos);
+							short[] rgba = data.getShortArray(yDataPos, x + xpos);
 							short sRed = rgba[0];
 							short sGreen = rgba[1];
 							short sBlue = rgba[2];
@@ -840,9 +836,8 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 					}
 				}
 				break;
-				case AbstractDataset.ARRAYINT32:
+				case Dataset.ARRAYINT32:
 				{
-					CompoundIntegerDataset ciData = (CompoundIntegerDataset)data;
 					double mins[] = data.minItem();
 					double maxs[] = data.maxItem();
 					int redRange = (int)Math.max(1, (maxs[0]-mins[0]));
@@ -853,7 +848,7 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 					for (int y = 0; y < height; y++) {
 						int yDataPos = srcHeight -1 -ypos-(height-1-y);
 						for (int x = 0; x < width; x++) {
-							int[] rgba = ciData.getIntArray(yDataPos, x + xpos);
+							int[] rgba = data.getIntArray(yDataPos, x + xpos);
 							int sRed = rgba[0];
 							int sGreen = rgba[1];
 							int sBlue = rgba[2];
@@ -877,9 +872,8 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 					}
 				}
 				break;
-				case AbstractDataset.ARRAYINT64:
+				case Dataset.ARRAYINT64:
 				{
-					CompoundLongDataset clData = (CompoundLongDataset) data;
 					double mins[] = data.minItem();
 					double maxs[] = data.maxItem();
 					long redRange = (long)Math.max(1, (maxs[0]-mins[0]));
@@ -890,7 +884,7 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 					for (int y = 0; y < height; y++) {
 						int yDataPos = srcHeight -1 -ypos-(height-1-y);
 						for (int x = 0; x < width; x++) {
-							long[] rgba = clData.getLongArray(yDataPos, x + xpos);
+							long[] rgba = data.getLongArray(yDataPos, x + xpos);
 							long sRed = rgba[0];
 							long sGreen = rgba[1];
 							long sBlue = rgba[2];
@@ -914,8 +908,8 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 					}
 				}
 				break;
-				case AbstractDataset.ARRAYFLOAT32:
-				case AbstractDataset.ARRAYFLOAT64:
+				case Dataset.ARRAYFLOAT32:
+				case Dataset.ARRAYFLOAT64:
 				{
 					double mins[] = data.minItem();
 					double maxs[] = data.maxItem();
@@ -982,9 +976,9 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 			boolean createNewTexture = false;
 			boolean useRGB = 
 				(data instanceof RGBDataset) ||
- 	  	  	    (data instanceof AbstractCompoundDataset &&
-				(((AbstractCompoundDataset)data).getElementsPerItem() == 3 ||
-		 		 ((AbstractCompoundDataset)data).getElementsPerItem() == 4));
+ 	  	  	    (data instanceof CompoundDataset &&
+				(data.getElementsPerItem() == 3 ||
+		 		 data.getElementsPerItem() == 4));
 			
 			if (!useRGB) {
 				currentImageType = 0;
@@ -1003,7 +997,7 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 						currentImageType != lastImageType) {
 						createNewTexture = true;
 					}
-				generateRGBTexture((AbstractCompoundDataset) data,ap,xPos,yPos,width,height,createNewTexture);
+				generateRGBTexture((CompoundDataset) data,ap,xPos,yPos,width,height,createNewTexture);
 			}
 			if (lastImageType != currentImageType)
 				loadGLSLProgram(tableMin,tableMax);
