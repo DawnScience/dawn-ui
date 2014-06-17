@@ -188,7 +188,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		setupComposite.setLayout(new GridLayout());
 		Composite widget1 = new Composite(setupComposite, SWT.NONE);
 		integratorSetup = new IntegrationSetupWidget(widget1, metadata);
-		model = integratorSetup.getModelList().get(0);
+		model = integratorSetup.getModel();
 		integratorSetup.enableFor1D(true);
 		tab1.setControl(setupComposite);
 		

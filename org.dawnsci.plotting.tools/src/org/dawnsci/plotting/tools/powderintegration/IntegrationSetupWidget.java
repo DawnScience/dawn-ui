@@ -25,42 +25,46 @@ import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 
 public class IntegrationSetupWidget {
 	
-	List<PowderIntegrationModel> models;
+	PowderIntegrationModel model;
 	List<Control> disableFor1D;
 	List<Control> disableFor2D;
+	int longestAxisInPixels = 0;
 	
 	public IntegrationSetupWidget(Composite composite, IDiffractionMetadata metadata) {
 		
 		disableFor1D = new ArrayList<Control>();
 		disableFor2D = new ArrayList<Control>();
 		
-		models = new ArrayList<PowderIntegrationModel>();
-		PowderIntegrationModel model = new PowderIntegrationModel();
+		model = new PowderIntegrationModel();
 		model.setAzimuthal(true);
 		
-		int nBins = 1000;
+		longestAxisInPixels = 1000;
 		
 		if (metadata != null) {
 			int[] shape = new int[]{metadata.getDetector2DProperties().getPy(), metadata.getDetector2DProperties().getPx()};
-			nBins = AbstractPixelIntegration.calculateNumberOfBins(metadata.getDetector2DProperties().getBeamCentreCoords(), shape);
+			longestAxisInPixels = AbstractPixelIntegration.calculateNumberOfBins(metadata.getDetector2DProperties().getBeamCentreCoords(), shape);
 		}
-		model.setNumberOfPrimaryBins(nBins);
-		model.setNumberOfSecondaryBins(nBins);
+		model.setNumberOfPrimaryBins(longestAxisInPixels);
+		model.setNumberOfSecondaryBins(longestAxisInPixels);
 		
 		composite.setLayout(new GridLayout(3, false));
 		createOptionsGroup(composite, model);
 		createRadialRangeGroup(composite, model);
 		createAzimuthalRangeGroup(composite, model);
-		models.add(model);
 	}
 	
-	public List<PowderIntegrationModel> getModelList(){
-		return models;
+	public PowderIntegrationModel getModel(){
+		return model;
 	}
 	
 	public void enableFor1D(boolean for1D){
 		for (Control c: disableFor1D) c.setEnabled(!for1D);
 		for (Control c: disableFor2D) c.setEnabled(for1D);
+	}
+	
+	private void resetNumberOfBins() {
+		model.setNumberOfPrimaryBins(longestAxisInPixels);
+		model.setNumberOfSecondaryBins(longestAxisInPixels);
 	}
 	
 	private void createRadialRangeGroup(Composite composite, final PowderIntegrationModel model) {
@@ -316,6 +320,21 @@ public class IntegrationSetupWidget {
 				if (!id2.isError()) {
 					model.setNumberOfSecondaryBins(Integer.parseInt(secondaryTxt.getText()));
 				}
+			}
+		});
+		
+		Button reset = new Button(group, SWT.NONE);
+		reset.setText("Reset");
+		reset.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				binsTxt.setText(String.valueOf(longestAxisInPixels));
+				secondaryTxt.setText(String.valueOf(longestAxisInPixels));
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
 	}
