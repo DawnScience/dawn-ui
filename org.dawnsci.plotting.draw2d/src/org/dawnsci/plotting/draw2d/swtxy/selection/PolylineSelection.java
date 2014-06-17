@@ -68,6 +68,7 @@ public class PolylineSelection extends ROISelectionRegion<IPolylineROI> {
 
 		public Polyline(Figure parent, AbstractSelectionRegion<IPolylineROI> region) {
 			super(parent, region);
+			setAreaTranslatable(true);
 		}
 
 		@Override

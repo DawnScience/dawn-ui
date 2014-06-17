@@ -5,6 +5,7 @@ import java.util.Iterator;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegionContainer;
 import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
+import org.eclipse.draw2d.Cursors;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.MouseListener;
 import org.eclipse.draw2d.Shape;
@@ -68,20 +69,40 @@ public abstract class RegionFillFigure<T extends IROI> extends Shape implements 
 			this.region = (AbstractSelectionRegion<T>) region;
 	}
 	
+	private boolean areaTranslatable = false;
 	/**
 	 * Overridden so that we can set enabled to false and have the
 	 * shape draw the same.
 	 */
 	public void paintFigure(Graphics graphics) {
-		if (getAntialias() != null) {
-			graphics.setAntialias(getAntialias().intValue());
-		}
-		if (getAlpha() != null) {
-			graphics.setAlpha(getAlpha().intValue());
-		}
-		fillShape(graphics);
-		outlineShape(graphics);
 		
+		if (!areaTranslatable) {
+			if (getAntialias() != null) {
+				graphics.setAntialias(getAntialias().intValue());
+			}
+			if (getAlpha() != null) {
+				graphics.setAlpha(getAlpha().intValue());
+			}
+			fillShape(graphics);
+			outlineShape(graphics);
+		} else {
+			super.paintFigure(graphics);
+		}
+		
+	}
+
+	public boolean isAreaTranslatable() {
+		return areaTranslatable;
+	}
+
+	/**
+	 * Call to set if the area of the region allows the user to click and translate the shape.
+	 * @param areaTranslatable
+	 */
+	public void setAreaTranslatable(boolean areaTranslatable) {
+		this.areaTranslatable = areaTranslatable;
+		setEnabled(areaTranslatable); // Allows mouse events to see through content to report position
+		setCursor(areaTranslatable?Cursors.HAND:null);
 	}
 
 }

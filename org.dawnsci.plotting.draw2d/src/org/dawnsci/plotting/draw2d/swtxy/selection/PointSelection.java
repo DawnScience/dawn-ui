@@ -67,6 +67,7 @@ public class PointSelection extends ROISelectionRegion<PointROI> {
 
 		public RPoint(final Figure parent, AbstractSelectionRegion<PointROI> region) {
 			super(parent, region);
+			setAreaTranslatable(true);
 		}
 
 		@Override

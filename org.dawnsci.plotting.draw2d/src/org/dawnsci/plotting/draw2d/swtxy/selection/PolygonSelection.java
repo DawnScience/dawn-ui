@@ -79,6 +79,7 @@ public class PolygonSelection extends ROISelectionRegion<PolygonalROI> {
 
 		public Polygon(Figure parent, AbstractSelectionRegion<PolygonalROI> region) {
 			super(parent, region);
+			setAreaTranslatable(true);
 		}
 
 		@Override
