@@ -450,7 +450,11 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 			}		
 			
 			if (viewer!=null) {
-				viewer.refresh();
+				try {
+					viewer.refresh();
+				} catch (Throwable ignored) {
+					// Can happen when model invalid.
+				}
 			}
 			
 		} catch (Exception e) {
@@ -476,7 +480,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 			getPlottingSystem().removeTraceListener(traceListener);
 			getPlottingSystem().removeRegionListener(this);
 			final Collection<IRegion> regions = getPlottingSystem().getRegions();
-			for (IRegion iRegion : regions) iRegion.removeROIListener(this);
+			if (regions!=null) for (IRegion iRegion : regions) iRegion.removeROIListener(this);
 		} catch (Exception e) {
 			logger.error("Cannot remove region listeners!", e);
 		}

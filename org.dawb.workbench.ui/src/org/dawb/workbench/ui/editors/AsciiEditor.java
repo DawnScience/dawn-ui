@@ -102,7 +102,7 @@ public class AsciiEditor extends MultiPageEditorPart implements IPlottingSystemS
 				
 			}
 
-		} catch (PartInitException e) {
+		} catch (Exception e) {
 			logger.error("Cannot initiate "+getClass().getName()+"!", e);
 		}
 	}
