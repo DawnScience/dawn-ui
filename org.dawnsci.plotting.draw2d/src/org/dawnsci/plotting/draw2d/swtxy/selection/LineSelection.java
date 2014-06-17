@@ -98,18 +98,6 @@ class LineSelection extends ROISelectionRegion<LinearROI> {
 		}
 
 		@Override
-		protected void configureHandles() {
-			super.configureHandles();
-
-			// hide centre handle
-			int hc = roiHandler.getCentreHandle();
-			SelectionHandle h = (SelectionHandle) handles.get(hc);
-			h.setVisible(false);
-			h.setVisibilityLock(true);
-			fTranslators.get(hc).setActive(false);
-		}
-
-		@Override
 		public String toString() {
 			if (croi == null)
 				return "LineSel: undefined";
