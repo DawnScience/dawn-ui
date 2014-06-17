@@ -16,11 +16,7 @@
 -Xmx1024m
 -XX:PermSize=128m
 -XX:MaxPermSize=256m
--Dosgi.requiredJavaVersion=1.7.0
--Dcolour=on
 -Dcom.isencia.require.file.source=true
--Ddbconnect=config/dbconnect.ispyb.properties
--Dentry=MyVisitsEntryPoint
 -Dorg.dawb.editor.h5.use.default=false
 -Dosgi.locking=none</vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>

@@ -16,10 +16,7 @@
 -Xmx1024m
 -XX:PermSize=128m
 -XX:MaxPermSize=256m
--Dcolour=on
 -Dcom.isencia.require.file.source=true
--Ddbconnect=config/dbconnect.ispyb.properties
--Dentry=MyVisitsEntryPoint
 -Dorg.dawb.editor.h5.use.default=true
 -Dosgi.locking=none</vmArgs>
       <vmArgsLin>-Xmx2048m</vmArgsLin>
