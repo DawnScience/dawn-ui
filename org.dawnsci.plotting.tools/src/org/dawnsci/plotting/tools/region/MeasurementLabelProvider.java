@@ -137,8 +137,10 @@ public class MeasurementLabelProvider extends ColumnLabelProvider {
 	@Override
 	public void dispose(){
 		super.dispose();
-		checkedIcon.dispose();
-		uncheckedIcon.dispose();
+		if (checkedIcon != null && uncheckedIcon != null) {
+			checkedIcon.dispose();
+			uncheckedIcon.dispose();
+		}
 	}
 
 	/**

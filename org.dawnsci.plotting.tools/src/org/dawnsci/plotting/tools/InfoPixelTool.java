@@ -328,10 +328,17 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 			}
 
 			plotter.clear();
-
-			if (getPlottingSystem()!=null) {
-				getPlottingSystem().removeTraceListener(traceListener);
-				getPlottingSystem().removeRegionListener(this);
+			try {
+				if (getPlottingSystem()!=null) {
+					getPlottingSystem().removeTraceListener(traceListener);
+					getPlottingSystem().removeRegionListener(this);
+					final Collection<IRegion> regions = getPlottingSystem().getRegions();
+					if (regions!=null)
+						for (IRegion iRegion : regions)
+							iRegion.removeROIListener(this);
+				}
+			} catch (Exception e) {
+				logger.error("Cannot remove region listeners!", e);
 			}
 		}
 	}
