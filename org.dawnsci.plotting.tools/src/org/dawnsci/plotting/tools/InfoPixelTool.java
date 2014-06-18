@@ -255,6 +255,8 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 	}
 	
 	public void activate() {
+		super.activate();
+		if (viewer!=null && viewer.getControl().isDisposed()) return;
 		if (!isActive()) {
 			createRegions();
 			if (xHair!=null) {
@@ -288,9 +290,6 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 		} catch (Throwable ignored) {
 			// Not a failure if we cannot refresh.
 		}
-
-		if (!isActive())
-			super.activate();
 	}
 	
 	private void setOtherRegionsEnabled(boolean isVisible) {
@@ -327,7 +326,7 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 				getPlottingSystem().setDefaultCursor(IPlottingSystem.NORMAL_CURSOR);
 			}
 
-			plotter.clear();
+			//plotter.clear();
 			try {
 				if (getPlottingSystem()!=null) {
 					getPlottingSystem().removeTraceListener(traceListener);
@@ -414,14 +413,17 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 				if (!isActive()) return;
 				final IStructuredSelection sel = (IStructuredSelection)viewer.getSelection();
 				if (sel!=null && sel.getFirstElement()!=null) {
-					final IRegion region = (IRegion)sel.getFirstElement();
-					if (region==null||region.getROI()==null) return;
-					final IROI bounds = region.getROI();
-					if (bounds.getPointRef()==null) return;
+					Object selected = sel.getFirstElement();
+					if (selected instanceof IRegion) {
+						final IRegion region = (IRegion)sel.getFirstElement();
+						if (region==null||region.getROI()==null) return;
+						final IROI bounds = region.getROI();
+						if (bounds.getPointRef()==null) return;
 
-					final Clipboard cb = new Clipboard(composite.getDisplay());
-					TextTransfer textTransfer = TextTransfer.getInstance();
-					cb.setContents(new Object[]{region.getName()+"  "+bounds}, new Transfer[]{textTransfer});
+						final Clipboard cb = new Clipboard(composite.getDisplay());
+						TextTransfer textTransfer = TextTransfer.getInstance();
+						cb.setContents(new Object[]{region.getName()+"  "+bounds}, new Transfer[]{textTransfer});
+					}
 				}
 			}
 		};
