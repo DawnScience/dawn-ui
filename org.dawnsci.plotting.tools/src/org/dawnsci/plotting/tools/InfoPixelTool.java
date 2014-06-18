@@ -255,7 +255,6 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 	}
 	
 	public void activate() {
-		super.activate();
 		if (viewer!=null && viewer.getControl().isDisposed()) return;
 		if (!isActive()) {
 			createRegions();
@@ -289,6 +288,9 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 			}
 		} catch (Throwable ignored) {
 			// Not a failure if we cannot refresh.
+		}
+		if (!isActive()) {
+			super.activate();
 		}
 	}
 	
@@ -326,7 +328,7 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 				getPlottingSystem().setDefaultCursor(IPlottingSystem.NORMAL_CURSOR);
 			}
 
-			//plotter.clear();
+			plotter.clear();
 			try {
 				if (getPlottingSystem()!=null) {
 					getPlottingSystem().removeTraceListener(traceListener);
