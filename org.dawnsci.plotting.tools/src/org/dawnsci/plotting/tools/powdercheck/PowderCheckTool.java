@@ -289,7 +289,7 @@ public class PowderCheckTool extends AbstractToolPage {
 		modeSelect.add(fullImage);
 		modeSelect.setSelectedAction(fullImage);
 		
-		final Action quad = new Action("Quadrants") {
+		final Action quad = new Action("Sections") {
 			@Override
 			public void run() {
 				modeSelect.setSelectedAction(this);
