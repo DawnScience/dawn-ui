@@ -670,7 +670,10 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 				if (!isActive)         return;
 				if (!canUpdate)        return;
 				if (evt.hasWavelengthChanged()) {
+					int unit = lambda.getUnitIndex();
 					lambda.setValueQuietly(dce.getWavelength(), NonSI.ANGSTROM);
+					lambda.setUnitIndex(unit);
+					
 					if (viewer!=null) viewer.refresh(lambda);
 				}
 			}

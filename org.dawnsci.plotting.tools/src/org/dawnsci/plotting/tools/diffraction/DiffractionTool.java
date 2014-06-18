@@ -110,7 +110,6 @@ import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
-import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
@@ -136,6 +135,8 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	private IROIListener roiListener;
 	private IDetectorPropertyListener detpropListener;
 	private IDiffractionCrystalEnvironmentListener difcrysListener;
+	
+	private int lastWavelengthUnit = 0;
 	
 	protected DiffractionImageAugmenter augmenter;
 
@@ -287,7 +288,17 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	private void createDiffractionModel(boolean force) {
 		
 		if (!force && model!=null)  return;
+		
 		if (force && model!=null) {
+			TreeNode node = model.getNode("/experimental information/wavelength");
+			if (node != null) {
+				try {
+					lastWavelengthUnit = ((NumericNode<?>)node).getUnitIndex();
+				} catch (Exception e) {
+					//nothing
+				}
+				
+			}
 			model.dispose();
 			model= null;
 		}
@@ -300,6 +311,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				return;
 			}
 			model = new DiffractionTreeModel(data, hide);
+			
 			model.setViewer(viewer);
 			model.activate();
 			if (augmenter != null) {
@@ -329,6 +341,16 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			
 			data.getDetector2DProperties().addDetectorPropertyListener(detpropListener);
 			data.getDiffractionCrystalEnvironment().addDiffractionCrystalEnvironmentListener(difcrysListener);
+			
+			TreeNode node = model.getNode("/experimental information/wavelength");
+			if (node != null) {
+				try {
+					((NumericNode<?>)node).setUnitIndex(lastWavelengthUnit);
+				} catch (Exception e) {
+					//nothing
+				}
+				
+			}
 			
 		} catch (Exception e) {
 			logger.error("Cannot create model!", e);
