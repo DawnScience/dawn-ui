@@ -935,7 +935,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		for (Axis axis : xyGraph.getAxisList()) {
 			if (axis!=xyGraph.primaryXAxis && axis!=xyGraph.primaryYAxis) {
 				axis.setVisible(false);
-				removeAxis((IAxis) axis);
+				//removeAxis((IAxis) axis);
 			}
 		}
 	}
