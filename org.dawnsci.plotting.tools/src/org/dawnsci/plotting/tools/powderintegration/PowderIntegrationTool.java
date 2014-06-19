@@ -20,10 +20,10 @@ import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.util.EclipseUtils;
+import org.dawb.common.util.eclipse.BundleUtils;
 import org.dawb.hdf5.IHierarchicalDataFile;
 import org.dawb.hdf5.Nexus;
 import org.dawb.hdf5.nexus.NexusUtils;
-import org.dawnsci.common.widgets.decorator.FloatDecorator;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.PlottingFactory;
@@ -38,18 +38,12 @@ import org.dawnsci.plotting.tools.diffraction.DiffractionUtils;
 import org.dawnsci.plotting.tools.powderintegration.PowderIntegrationJob.IntegrationMode;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -57,16 +51,12 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.IPageSite;
-import org.mihalis.opal.checkBoxGroup.CheckBoxGroup;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
@@ -559,11 +549,11 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		if (fullImageJob == null) throw new IllegalArgumentException("Integration not correctly configured!");
 		
 		IHierarchicalDataFile file = slice.getFile();
-		Group dataGroup = slice.getParent();
+		Group resultGroup = slice.getParent();
 		
-		Group resultGroup = file.group("integration_result", dataGroup);
-		file.setNexusAttribute(resultGroup, Nexus.DATA);
-		slice.setParent(resultGroup);
+//		Group resultGroup = file.group("integration_result", dataGroup);
+//		file.setNexusAttribute(resultGroup, Nexus.DATA);
+//		slice.setParent(resultGroup);
 		
 		List<AbstractDataset> out = fullImageJob.process(DatasetUtils.convertToAbstractDataset(slice.getData()));
 		
@@ -604,7 +594,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			
 			file.setNexusAttribute(s, Nexus.SDS);
 			
-			if (mode == IntegrationMode.SPLITTING2D) {
+			if (mode == IntegrationMode.SPLITTING2D || mode == IntegrationMode.NONSPLITTING2D) {
 				file.setIntAttribute(s, NexusUtils.AXIS, 3);
 				axis = out.get(2);
 				axis = axis.squeeze();
@@ -616,9 +606,12 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 				file.setIntAttribute(s, NexusUtils.AXIS, 2);
 			}
 			
-//			IPersistenceService service = (IPersistenceService)ServiceManager.getService(IPersistenceService.class);
-//			IPersistentFile pf = service.createPersistentFile(file);
-//			pf.setDiffractionMetadata(metadata);
+			IPersistenceService service = (IPersistenceService)ServiceManager.getService(IPersistenceService.class);
+			IPersistentFile pf = service.createPersistentFile(file);
+			pf.setDiffractionMetadata(metadata);
+			
+			writeProcessInformation(file, resultGroup.getParent());
+			
 		}
 		
 		AbstractDataset signal = out.get(1);
@@ -635,6 +628,91 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		}
 		
 		return new DataReductionInfo(Status.OK_STATUS);
+	}
+	
+	private void writeProcessInformation(IHierarchicalDataFile file, Group group) throws Exception {
+		Group process = file.group("process", group);
+		file.setNexusAttribute(process, "NXprocess");
+		file.createDataset("program", "DAWN-powder integration tool", process);
+		
+		String version =  BundleUtils.getDawnVersion();
+		if (version != null) file.createDataset("version", version, process);
+		
+		Group note = file.group("1_correction", process);
+		file.setNexusAttribute(note, "NXnote");
+		file.createDataset("description", "Correction process details", note);
+		
+		String solid = "No";
+		if (corModel.isApplySolidAngleCorrection()) {
+			solid = "Yes";
+		}
+		
+		file.createDataset("solid_angle_corrected", solid, note);
+		
+		String polar = "No";
+		if (corModel.isApplyPolarisationCorrection()) {
+			polar = "Yes";
+			createDoubleDataset("polarisation_factor", new double[]{corModel.getPolarisationFactor()}, file, note);
+			createDoubleDataset("polarisation_angular", new double[]{corModel.getPolarisationAngularOffset()}, file, note);
+		}
+		
+		file.createDataset("polarisation_corrected", polar, note);
+		
+		String trans = "No";
+		if (corModel.isAppyDetectorTransmissionCorrection()) {
+			trans = "Yes";
+			createDoubleDataset("transmitted_fraction", new double[]{corModel.getTransmittedFraction()}, file, note);
+		}
+		
+		file.createDataset("detector_tranmission_corrected", trans, note);
+		
+		note = file.group("2_integration", process);
+		file.setNexusAttribute(note, "NXnote");
+		file.createDataset("description", "Integration process details", note);
+		
+		String integrationRoutine = "unknown";
+		String integrationDirection = "unknown";
+		
+		switch (mode) {
+		case NONSPLITTING:
+			integrationRoutine = "Non-pixel splitting 1D";
+			integrationDirection = model.isAzimuthal() ? "Azimuthal" : "Radial";
+			break;
+		case NONSPLITTING2D:
+			integrationRoutine = "Non-pixel splitting 2D";
+			integrationDirection = "2D";
+			break;
+		case SPLITTING:
+			integrationRoutine = "Pixel splitting 1D";
+			integrationDirection = model.isAzimuthal() ? "Azimuthal" : "Radial";
+			break;
+		case SPLITTING2D:
+			integrationRoutine = "Pixel splitting 2D";
+			integrationDirection = "2D";
+			break;
+		default:
+			break;
+
+		}
+		
+		file.createDataset("integration_routine", integrationRoutine, note);
+		file.createDataset("integration_direction", integrationDirection, note);
+		
+		if (model.getRadialRange() != null) {
+			createDoubleDataset("radial_range", model.getRadialRange(), file, note);
+		}
+		
+		if (model.getAzimuthalRange() != null) {
+			createDoubleDataset("azimuthal_range", model.getAzimuthalRange(), file, note);
+		}
+		
+	}
+	
+	private static Dataset createDoubleDataset(String name, double[] val, IHierarchicalDataFile file, Group group) throws Exception {
+		
+		return file.createDataset(name, new H5Datatype(Datatype.CLASS_FLOAT, 64/8, Datatype.NATIVE, Datatype.NATIVE),
+				new long[]{val.length}, val, group);
+		
 	}
 	
 	@Override
