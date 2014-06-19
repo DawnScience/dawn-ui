@@ -1,22 +1,18 @@
 package org.dawnsci.plotting.tools;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.dawb.common.ui.menu.MenuAction;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.plotting.api.PlottingFactory;
 import org.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.dawnsci.plotting.api.tool.IToolPageSystem;
-import org.dawnsci.plotting.api.trace.ColorOption;
 import org.dawnsci.plotting.api.trace.ILineTrace;
 import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.api.trace.ITraceListener;
 import org.dawnsci.plotting.api.trace.TraceEvent;
-import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.dawnsci.plotting.util.ColorUtility;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -33,7 +29,6 @@ import org.eclipse.ui.part.IPageSite;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 
 public class DerivativeToolExternalPlot extends AbstractToolPage {
@@ -113,6 +108,8 @@ public class DerivativeToolExternalPlot extends AbstractToolPage {
 				for (ITrace t : system.getTraces(ILineTrace.class)) {
 					if (t.getUserObject().equals(evt.getSource())) {
 						system.removeTrace(t);
+						// autoscale when we remove the trace in case the range of the left over traces is different
+						system.autoscaleAxes();
 					}
 				}
 				
