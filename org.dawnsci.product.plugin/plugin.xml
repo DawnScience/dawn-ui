@@ -26,7 +26,7 @@
          </property>
          <property
                name="aboutImage"
-               value="icons/Temp-3Col-Splash.png">
+               value="icons/Temp-48x48-icon.png">
          </property>
          <property
                name="introBrandingImage"
@@ -35,6 +35,10 @@
          <property
                name="introTitle"
                value="Welcome to DAWN">
+         </property>
+         <property
+               name="aboutText"
+               value="Data Analysis Workbench &#x0D;&#x0A;Copyright, 2010 - 2014, Diamond Light Source&#x0D;&#x0A;Version 1.6">
          </property>
       </product>
    </extension>

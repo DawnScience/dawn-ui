@@ -7,9 +7,9 @@
       <image path="/org.dawnsci.product.plugin/icons/Temp-48x48-icon.png"/>
       <text>
          Welcome to Data Analysis Workbench the tools set for online data analysis
-Copyright, 2010 - 2012 Diamond Light Source and ESRF
+Copyright, 2010 - 2014 Diamond Light Source
 
-Version 1.1 Beta
+Version 1.6
 
 This version of Data Analysis Workbench is licensed under
 the Eclipse Public License version 1.0.
@@ -59,6 +59,7 @@ openFile
          <bmp/>
       </win>
    </launcher>
+
 
    <vm>
    </vm>
