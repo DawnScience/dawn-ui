@@ -409,7 +409,7 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 
 	private void createActions() {
 
-		final Action copy = new Action("Copy region values to clipboard", Activator.getImageDescriptor("icons/plot-tool-measure-copy.png")) {
+		final Action copy = new Action("Copy point values to clipboard", Activator.getImageDescriptor("icons/plot-tool-measure-copy.png")) {
 			@Override
 			public void run() {
 				if (!isActive()) return;
@@ -429,12 +429,12 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 				}
 			}
 		};
-		copy.setToolTipText("Copies the region values as text to clipboard which can then be pasted externally.");
+		copy.setToolTipText("Copies the point values as text to clipboard which can then be pasted externally.");
 
 		getSite().getActionBars().getToolBarManager().add(copy);
 		getSite().getActionBars().getMenuManager().add(copy);
 
-		final Action delete = new Action("Delete selected region", Activator.getImageDescriptor("icons/plot-tool-measure-delete.png")) {
+		final Action delete = new Action("Delete selected point", Activator.getImageDescriptor("icons/plot-tool-measure-delete.png")) {
 			@Override
 			public void run() {
 				if (!isActive()) return;
@@ -448,7 +448,7 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 				}
 			}
 		};
-		delete.setToolTipText("Delete selected region, if there is one.");
+		delete.setToolTipText("Delete selected point, if there is one.");
 
 		getSite().getActionBars().getToolBarManager().add(delete);
 		getSite().getActionBars().getMenuManager().add(delete);
