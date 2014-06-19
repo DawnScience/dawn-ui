@@ -67,9 +67,21 @@ class ToolConversionVisitor implements IConversionVisitor {
 
 	private Group createGroupIfRequired(IConversionContext context) throws Exception {
 		
-		if (currentH5Path!=null && currentH5Path.equals(context.getSelectedH5Path())) {
-			return group;
+		//Group made and not h5, return group
+		if (group != null && context.getSelectedH5Path() == null) return group;
+		
+		String path = "data";
+		
+		if (context.getSelectedH5Path() != null) {
+			String flatPath = context.getSelectedH5Path().replace("/", "_");
+			//group made, h5 and same
+			if (currentH5Path!=null && currentH5Path.equals(flatPath) && group != null) return group;
+			
+			currentH5Path = flatPath;
+			path = flatPath;
 		}
+		
+		//else build new group using either h5 [/ replaced with _] or default data path
 		
 		try {
 		    if (group!=null) group.close(groupId);
@@ -81,31 +93,12 @@ class ToolConversionVisitor implements IConversionVisitor {
 			}
 		}
 		
-		final String h5Path = context.getSelectedH5Path();
-		if (h5Path != null) {
-			final String[] rps  = 	h5Path.split("/");
-			group=(Group)output.getData(h5Path);
-
-			if (group==null) for (String stub : rps) {
-				if (stub==null || "".equals(stub)) continue;
-				if (group==null) {
-					group = output.group(stub);
-				} else {
-					group = output.group(stub, group);
-				}
-				output.setNexusAttribute(group, Nexus.DATA);
-			}
-
-			currentH5Path = context.getSelectedH5Path();
-			groupId       = group.open();
-			return group;
-		} else { // if not path, we create a default entry
-			Group entryGroup = output.group("entry");
-			output.setNexusAttribute(entryGroup, Nexus.ENTRY);
-			group = output.group("data", entryGroup);
-			output.setNexusAttribute(group, Nexus.DATA);
-			return group;
-		}
+		Group entryGroup = output.group("entry");
+		output.setNexusAttribute(entryGroup, Nexus.ENTRY);
+		group = output.group(path, entryGroup);
+		output.setNexusAttribute(group, Nexus.DATA);
+		return group;
+		
 	}
 
 	@Override
