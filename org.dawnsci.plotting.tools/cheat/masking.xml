@@ -37,7 +37,7 @@
     <item
          title="Upper and lower mask">
       <description>
-         Go to the 'Masking' tool view to the right of the image and click on 'Enable lower mask' and 'Enable upper mask'. No go down to the bottom of the tool and press the 'Apply' button. You will see intensity values higher or lower than the upper and lower values will be coloured green. There is a 'Mask colour' button for changing this colour.
+         Go to the 'Masking' tool view to the right of the image and click on 'Enable lower mask' and 'Enable upper mask'. Now go down to the bottom of the tool and press the 'Apply' button. You will see intensity values higher or lower than the upper and lower values will be coloured green. There is a 'Mask colour' button for changing this colour.
       </description>
    </item>
    
@@ -84,7 +84,7 @@
     <item
          title="Save mask">
        <description>
-      We can save the mask to a buffer and re-apply it to other images. In the 'Masking' view selection there is a toolbar at the top with the tool-tip 'Save the mask into a buffer'. Select this then open the file (choose 'click to perform', below), choose the masking tool and select 'Merge the previously saved mask from buffer'. You will see your mask applied to the new image.
+      We can save the mask to a buffer and re-apply it to other images. In the 'Masking' view selection there is a toolbar at the top with the tool-tip 'Export the mask into a temporary buffer'. Select this then open the file (choose 'click to perform', below), choose the masking tool and select 'Import the mast from temporary buffer'. You will see your mask applied to the new image.
       </description>
       <command
             required="true"

@@ -30,15 +30,14 @@
    <item
          title="Select 'Circle/Ellipse Fitting' tool">
       <description>
-         Select the 'Circle/Ellipse Fitting' tool from the toolbar above the plot, tools labelled 'Image
-         tools used to profile and inspect images'. These tools may be obscured on Linux if the
+         Click on the Tool button labelled 'Image tools used to profile and inspect images'. Select the 'Circle/Ellipse Fitting' tool available in the 'Maths and Fitting' sub menu. These tools may be obscured on Linux if the
          window containing the plot is too small.
       </description>
    </item>
    <item
          title="Circle-only fitting">
       <description>
-         A button near the top left of the tool view can be toggled on to restrict the shape
+         A button near the top right of the tool view can be toggled on to restrict the shape
          fitted to a circle instead of an ellipse. It affects the current fit and any future fits.
       </description>
    </item>

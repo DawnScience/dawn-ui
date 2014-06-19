@@ -37,7 +37,7 @@
     <item
          title="Add a sector">
       <description>
-         Find approximate centre of the image and click and drag your sector from the centre outwards a little way, now let go and click again further out - you have now created a sector. Note that you can move your sector after it is added by using the control points or by translating it, again by clicking and dragging it. You can also add more than one sector.
+         Find approximate centre of the image and click and drag your sector from the centre outwards a little way, now let go and click again further out - you have now created a sector. Note that you can move your sector after it is added by using the control points or by translating it, again by clicking and dragging it. You can also add more than one sector by clicking on the 'Create new profile' button of the Azimuthal Profile tool bar.
       </description>
    </item>
  

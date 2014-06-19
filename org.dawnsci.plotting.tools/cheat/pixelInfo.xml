@@ -84,7 +84,7 @@ Select the 'Pixel Information' tool from the toolbar above the plot, tools label
 
                A click on the plot creates a point region and its corresponding information (x, y positions, intensity, etc) is recorded in the table.<br/>
 
-         Created point regions can be moved or deleted using the mouse .<br/>
+         Created point regions can be deleted by selecting them in the 'Pixel Information' view table and then clicking on the 'Delete selected point, if there is one' button of the tool bar. It can also be done by selecting 'Delete selected point' of the right-click menu.<br/>
 
          In each of the above operations the table view values are updated accordingly.
 

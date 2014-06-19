@@ -33,12 +33,12 @@
    </item>
    <item title="Select 'Derivative' tool">
       <description>
-         Now on the toolbar above this plot, there will be a drop down of available tools. These tools may be obscured on Linux if the window containing the plot is too small. On the drop down action labelled 'Plotting tools (used for images and X/Y plots)' select the 'Derivative' tool. You will see the tool become available under the plot, and the plot become the derivative of what was being observed.
+         Click on the 'X/Y Plotting Tools' button in the tool bar of the plot. Then on the drop down menu click on 'Math and Fitting' then 'Derivative View'. These tools may be obscured on Linux if the window containing the plot is too small. A new window called 'Derivative View' which shows the derivative plot of the original data plotted is then showed.
       </description>
    </item>
    <item title="View the other derivatives or the raw data">
       <description>
-      	In the Derivative tool, there are several checkboxes which toggle the display of the various derivatives, check them all on to see all the data and derivatives overlaid.<br/><br/>
+      	In the Derivative view tool bar, there are several buttons (fx, f'x, f''x) which toggle the display of the various derivatives, check them all on to see all the data and derivatives overlaid.<br/><br/>
       	You can also un-select them in the same way, just keep the derivative selected( f'(Data) ) 
       </description>
    </item>
@@ -50,13 +50,13 @@
    </item>
    <item title="Clearing the derivatives">
       <description>
-         To clear all the derivatives from the plot, either select the <b>Clear Tool</b> from the tool menu or close the tool tab.  This will then get you back to the raw data.  The derivatives are also returned to the raw data when another tool is selected (e.g. the peak fitting tool)
+         To clear all the derivatives from the plot, either select the <b>Clear Tool</b> from the tool menu or close the Derivative View tab.  This will then get you back to the raw data.  The derivatives are also returned to the raw data when another tool is selected (e.g. the peak fitting tool)
       </description>
    </item>
     <item title="Processing the derivatives">
       <description>
          If you wish to form some further operation on the derivatives, the tool must be opened in a dedicated window to prevent the new tool replacing the derivatives with the raw data.<br/><br/>
-	To do this, open the derivative tool as normal, then in the <b>View Menu</b> (next to the derivative tab minimise button) select <b>open &apos;derivative&apos; in dedicated window</b>. The tool will close and open in a new tab. Opening a new tool will no longer make the plot display the raw data. <br/><br/>
+	To do this, open the derivative tool as normal, then in the <b>View Menu</b> (next to the derivative tab minimise button) select <b>open &apos;Derivative View&apos; in dedicated window</b>. The tool will close and open in a new tab. Opening a new tool will no longer make the plot display the raw data. <br/><br/>
 	When the derivative tool is opened in a dedicated window, all new trace data, even from new files, will be processed before plotting. The raw data can be returned to the plot by simply closing the derivative tab.<br/><br/>
          For example, select &apos;sum&apos; only from the data table, and then select the Derivative tool and open in a dedicated window.<br/><br/>
          Now select the <b>Measurement Tool</b> and you will notice that the Derivative tool is still open and the plot stays as the derivative.<br/><br/>
