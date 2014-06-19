@@ -41,7 +41,8 @@ openFile
 -Dosgi.requiredJavaVersion=1.7.0
 -Dcom.isencia.require.file.source=true
 -Dorg.dawb.editor.h5.use.default=true
--Dosgi.locking=none</vmArgs>
+-Dosgi.locking=non
+-Dorg.dawnsci.passerelle.do.not.break.osgi=true</vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>
    </launcherArgs>
 
