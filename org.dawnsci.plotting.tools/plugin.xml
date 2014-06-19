@@ -106,6 +106,13 @@
             visible="false">
       </plotting_tool_page>
       <plotting_tool_page
+            category="org.dawnsci.plotting.tools.plotting_tool_category.fitting"
+            class="org.dawnsci.plotting.tools.DerivativeToolExternalPlot"
+            icon="icons/plot-tool-derivative.png"
+            id="org.dawnsci.plotting.tools.DerivativeToolExternalPlot"
+            label="Derivative View">
+      </plotting_tool_page>
+      <plotting_tool_page
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.measurement"
             class="org.dawnsci.plotting.tools.region.MeasurementTool"
             icon="icons/plot-tool-measure.png"
@@ -353,13 +360,6 @@
             id="org.dawnsci.plotting.tools.plotting_tool_hyper2d"
             label="Hyper2d"
             visible="false">
-      </plotting_tool_page>
-      <plotting_tool_page
-            category="org.dawnsci.plotting.tools.plotting_tool_category.fitting"
-            class="org.dawnsci.plotting.tools.DerivativeToolExternalPlot"
-            icon="icons/plot-tool-derivative.png"
-            id="org.dawnsci.plotting.tools.DerivativeToolExternalPlot"
-            label="Derivative View">
       </plotting_tool_page>
    </extension>
 
