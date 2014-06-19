@@ -551,6 +551,20 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		IHierarchicalDataFile file = slice.getFile();
 		Group resultGroup = slice.getParent();
 		
+		//dont want to fail reduction just because cant save filename - hence try-catch
+		try {
+			if (slice.getData().getMetadata() != null && slice.getData().getMetadata().getFilePath()!= null) {
+				Group collection = file.group("files", resultGroup.getParent());
+				file.setNexusAttribute(collection, "NXcollection");
+				String path = slice.getData().getMetadata().getFilePath();
+				String[] arrayValue = {path};
+				Datatype dtype = new H5Datatype(Datatype.CLASS_STRING, arrayValue[0].length()+1, -1, -1);
+				file.appendDataset("files", dtype, new long[]{1}, arrayValue, collection);
+			}
+		} catch (Exception e) {
+			//ignore
+		}
+		
 //		Group resultGroup = file.group("integration_result", dataGroup);
 //		file.setNexusAttribute(resultGroup, Nexus.DATA);
 //		slice.setParent(resultGroup);
@@ -588,7 +602,8 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 				String ang = unitFormat.format(NonSI.ANGSTROM);
 				file.setAttribute(s, "units", ang);
 				break;
-			default:
+			case PIXEL:
+				file.setAttribute(s, "units", "pixels");
 				break;
 			}
 			
