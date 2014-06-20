@@ -3,14 +3,10 @@ package org.dawnsci.plotting.tools.profile;
 import java.util.Arrays;
 import java.util.Collection;
 
-import ncsa.hdf.object.Dataset;
-import ncsa.hdf.object.Datatype;
 import ncsa.hdf.object.Group;
-import ncsa.hdf.object.h5.H5Datatype;
 
 import org.dawb.hdf5.IHierarchicalDataFile;
 import org.dawb.hdf5.Nexus;
-import org.dawb.hdf5.nexus.NexusUtils;
 import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.plotting.api.axis.IAxis;
 import org.dawnsci.plotting.api.region.IRegion;
@@ -23,6 +19,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.SWT;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
@@ -165,23 +163,22 @@ public class BoxProfileTool extends ProfileTool {
 					new int[] { (int) bounds.getEndPoint()[1],(int) bounds.getEndPoint()[0] },
 					new int[] {yInc, xInc});
 			//mean
-			H5Datatype dType = new H5Datatype(Datatype.CLASS_FLOAT, 64/8, Datatype.NATIVE, Datatype.NATIVE);
 			Object mean = dataRegion.mean();
-			Dataset s = file.appendDataset("Mean",  dType,  new long[]{1}, new double[]{(Double)mean}, regionGroup);
-			file.setNexusAttribute(s, Nexus.SDS);
-			file.setIntAttribute(s, NexusUtils.SIGNAL, 1);
+			Dataset meands = DatasetFactory.createFromObject(mean);
+			meands.setName("Mean");
+			slice.appendData(meands,regionGroup);
 
 			//Sum
 			Object sum = dataRegion.sum();
-			s = file.appendDataset("Sum",  dType,  new long[]{1}, new double[]{(Double)sum}, regionGroup);
-			file.setNexusAttribute(s, Nexus.SDS);
-			file.setIntAttribute(s, NexusUtils.SIGNAL, 1);
+			Dataset sumds = DatasetFactory.createFromObject(sum);
+			sumds.setName("Sum");
+			slice.appendData(sumds,regionGroup);
 
 			//Standard deviation
 			Object std = dataRegion.stdDeviation();
-			s = file.appendDataset("Std_Deviation",  dType,  new long[]{1}, new double[]{(Double)std}, regionGroup);
-			file.setNexusAttribute(s, Nexus.SDS);
-			file.setIntAttribute(s, NexusUtils.SIGNAL, 1);
+			Dataset stds = DatasetFactory.createFromObject(std);
+			stds.setName("Std_Deviation");
+			slice.appendData(stds,regionGroup);
 
 			//region
 			slice.setParent(regionGroup);
