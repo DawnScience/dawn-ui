@@ -23,6 +23,7 @@ openFile
 --launcher.appendVmargs</programArgs>
       <vmArgs>-Xms256m
 -Xmx1024m
+-XX:PermSize=128m
 -XX:MaxPermSize=256m
 -Dosgi.requiredJavaVersion=1.7.0
 -Dcom.isencia.require.file.source=true
