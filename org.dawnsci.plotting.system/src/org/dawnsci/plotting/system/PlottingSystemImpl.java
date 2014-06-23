@@ -128,6 +128,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 							   final IActionBars    bars,
 							   final PlotType       hint,
 							   final IWorkbenchPart part) {
+		
 		super.createPlotPart(container, plotName, bars, hint, part);
 
 		if (container.getLayout() instanceof GridLayout) {

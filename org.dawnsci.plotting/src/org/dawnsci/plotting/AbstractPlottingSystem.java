@@ -418,6 +418,10 @@ public abstract class AbstractPlottingSystem implements IPlottingSystem, IToolPa
 							   final PlotType       hint,
 							   final IWorkbenchPart part) {
 
+		// TODO Put this test in but not right now before a release.
+//		if (plotName == null || "".equals(plotName)) {
+//			throw new NullPointerException("The plot name cannot be null or empty string!");
+//		}
 		this.plotName = plotName;
 		this.plottingMode = hint;
 		this.part = part;
