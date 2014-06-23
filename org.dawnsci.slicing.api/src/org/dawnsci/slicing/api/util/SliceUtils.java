@@ -360,7 +360,7 @@ public class SliceUtils {
 			int yd    = xd==0 ? 1 : 0;
 		
 			final List<IDataset> ys    = new ArrayList<IDataset>(shape[xd]);
-			final IDataset xAxis = getAxis(currentSlice, sliceSource.getVariableManager(), shape[yd], yd, true, monitor);
+			final IDataset xAxis = getAxis(currentSlice, sliceSource.getVariableManager(), shape[yd], xd+1, true, monitor);
 			
 			final Slice[] slices = new Slice[2];
 			for (int index = 0; index < shape[xd]; index++) {
