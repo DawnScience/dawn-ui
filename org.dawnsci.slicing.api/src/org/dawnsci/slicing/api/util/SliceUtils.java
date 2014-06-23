@@ -348,19 +348,30 @@ public class SliceUtils {
 			plottingSystem.clear();
 						
 			final int[]         shape = slice.getShape();
-			// We look for the dimension with the same size as x
-			int ySize = currentSlice.getySize();
-			int xd    = 0;
-			for (int i = 0; i < shape.length; i++) {
-			    if (shape[i] == ySize) {
-			    	xd = i; // 0 or 1
-			    	break;
-			    }
+			
+			IDataset xAxis = null;
+			int xd = currentSlice.getX();
+			int yd = currentSlice.getY();
+			if (type==PlotType.XY_STACKED) {
+				// We look for the dimension with the same size as x
+				int ySize = currentSlice.getySize();
+				xd    = 0;
+				for (int i = 0; i < shape.length; i++) {
+				    if (shape[i] == ySize) {
+				    	xd = i; // 0 or 1
+				    	break;
+				    }
+				}
+				yd    = xd==0 ? 1 : 0;
+				
+				xAxis = getAxis(currentSlice, sliceSource.getVariableManager(), shape[yd], xd+1, true, monitor);
+				
+			} else {
+				
+				xAxis = getAxis(currentSlice, sliceSource.getVariableManager(), shape[xd], xd+1, true, monitor);
 			}
-			int yd    = xd==0 ? 1 : 0;
 		
 			final List<IDataset> ys    = new ArrayList<IDataset>(shape[xd]);
-			final IDataset xAxis = getAxis(currentSlice, sliceSource.getVariableManager(), shape[yd], xd+1, true, monitor);
 			
 			final Slice[] slices = new Slice[2];
 			for (int index = 0; index < shape[xd]; index++) {
@@ -375,9 +386,10 @@ public class SliceUtils {
 			plottingSystem.setPlotType(type);
 			plottingSystem.createPlot1D(xAxis, ys, currentSlice.getName(), monitor);
 
+			final IDataset xAxisFinal = xAxis;
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
-					plottingSystem.getSelectedXAxis().setTitle(xAxis.getName());
+					plottingSystem.getSelectedXAxis().setTitle(xAxisFinal.getName());
 					plottingSystem.getSelectedYAxis().setTitle("");
 				}
 			});
