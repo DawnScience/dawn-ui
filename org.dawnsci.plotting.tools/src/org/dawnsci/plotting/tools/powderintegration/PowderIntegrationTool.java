@@ -584,6 +584,8 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		}
 
 		if (!axisMade) {
+			//FIXME needs to be this name so the NCD to ascii convert works
+			resultGroup.setName("integration_result");
 			H5Datatype dType = new H5Datatype(Datatype.CLASS_FLOAT, 64/8, Datatype.NATIVE, Datatype.NATIVE);
 			axis = axis.squeeze();
 			Dataset s = file.createDataset(axis.getName(),  dType,  new long[]{axis.getShape()[0]}, axis.getBuffer(), resultGroup);
