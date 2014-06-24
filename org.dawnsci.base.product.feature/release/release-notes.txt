@@ -1,4 +1,4 @@
-RELEASE NOTES FOR DAWN 1.6.0 Beta 'Eagle'
+RELEASE NOTES FOR DAWN 1.6.0 'Eagle'
 
 
 1. Use the '-data' switch to specify a different workspace if the disk access at your facility
