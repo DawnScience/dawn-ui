@@ -1,4 +1,4 @@
-/*
+/*-
  * Copyright (c) 2012 European Synchrotron Radiation Facility,
  *                    Diamond Light Source Ltd.
  *
@@ -11,10 +11,8 @@ package org.dawnsci.plotting.services.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,7 +39,7 @@ public class DatasetTitleUtils {
 		if (ysIn==null) {
 			ys = new ArrayList<IDataset>(1);
 			ys.add(xIn);
-			x = DoubleDataset.arange(ys.get(0).getSize());
+			x = DoubleDataset.createRange(ys.get(0).getSize());
 			x.setName("Index of "+xIn.getName());
 		} else {
 			x  = xIn;

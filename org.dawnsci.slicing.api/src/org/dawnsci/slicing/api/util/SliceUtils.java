@@ -105,13 +105,13 @@ public class SliceUtils {
 
     		final IDatasetMathsService service = (IDatasetMathsService)ServiceManager.getService(IDatasetMathsService.class);
     		if (dimsData.getPlotAxis()==AxisType.X) {
-    			x = service.arange(dataShape[i], IDatasetMathsService.INT);
+    			x = service.createRange(dataShape[i], IDatasetMathsService.INT);
     			x.setName("Dimension "+(dimsData.getDimension()+1));
     			currentSlice.setX(dimsData.getDimension());
     			currentSlice.setxSize(x.getSize());
     		}
     		if (dimsData.getPlotAxis()==AxisType.Y || dimsData.getPlotAxis()==AxisType.Y_MANY) {
-       			y = service.arange(dataShape[i], IDatasetMathsService.INT);
+       			y = service.createRange(dataShape[i], IDatasetMathsService.INT);
     			y.setName("Dimension "+(dimsData.getDimension()+1));
     			currentSlice.setY(dimsData.getDimension());
     			final int count = DOEUtils.getSize(dimsData.getSliceRange(true), null);
@@ -449,7 +449,7 @@ public class SliceUtils {
 		final IDatasetMathsService service = (IDatasetMathsService)ServiceManager.getService(IDatasetMathsService.class);
 		if ("indices".equals(axisName) || axisName==null) {
 			if (requireIndicesOnError) {
-				IDataset indices = service.arange(length, IDatasetMathsService.INT); // Save time
+				IDataset indices = service.createRange(length, IDatasetMathsService.INT); // Save time
 				indices.setName("");
 				return indices;
 			} else {
@@ -468,7 +468,7 @@ public class SliceUtils {
 		} catch (Throwable ne) {
 			logger.error("Cannot get nexus axis during slice!", ne);
 			if (requireIndicesOnError) {
-				IDataset indices = service.arange(length, IDatasetMathsService.INT); // Save time
+				IDataset indices = service.createRange(length, IDatasetMathsService.INT); // Save time
 				indices.setName("");
 				return indices;
 

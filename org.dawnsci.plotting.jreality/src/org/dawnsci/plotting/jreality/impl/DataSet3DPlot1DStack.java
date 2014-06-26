@@ -1,4 +1,4 @@
-/*
+/*-
  * Copyright 2012 Diamond Light Source Ltd.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -289,7 +289,7 @@ public class DataSet3DPlot1DStack extends DataSet3DPlot1D {
 		super.updateGraph(datasets);
 		if (zAxisValues != null) {
 			if (zAxisValues.size() < plots) {
-				DoubleDataset values = DoubleDataset.arange(zOffset+1, zOffset + 1 + plots, 1);
+				DoubleDataset values = DoubleDataset.createRange(zOffset+1, zOffset + 1 + plots, 1);
 				zAxisValues.addValues(values.getData());
 			}
 		} else {

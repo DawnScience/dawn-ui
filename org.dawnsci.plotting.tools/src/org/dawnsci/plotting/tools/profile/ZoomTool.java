@@ -84,8 +84,8 @@ public class ZoomTool extends ProfileTool {
 				if (yl!=null) yLabels = getLabelsFromLabels(yl, bounds, 1);
 			}
 			
-			if (yLabels==null) yLabels = IntegerDataset.arange(bounds.getPoint()[1], bounds.getEndPoint()[1], yInc);
-			if (xLabels==null) xLabels = IntegerDataset.arange(bounds.getPoint()[0], bounds.getEndPoint()[0], xInc);
+			if (yLabels==null) yLabels = IntegerDataset.createRange(bounds.getPoint()[1], bounds.getEndPoint()[1], yInc);
+			if (xLabels==null) xLabels = IntegerDataset.createRange(bounds.getPoint()[0], bounds.getEndPoint()[0], xInc);
 			
 			final IImageTrace zoom_trace = (IImageTrace)profilePlottingSystem.updatePlot2D(slice, Arrays.asList(new IDataset[]{xLabels, yLabels}), monitor);
 			registerTraces(region, Arrays.asList(new ITrace[]{zoom_trace}));

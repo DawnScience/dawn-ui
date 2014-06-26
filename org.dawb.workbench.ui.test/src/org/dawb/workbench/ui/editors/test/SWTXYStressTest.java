@@ -1,4 +1,4 @@
-/*
+/*-
  * Copyright (c) 2012 European Synchrotron Radiation Facility,
  *                    Diamond Light Source Ltd.
  *
@@ -167,7 +167,7 @@ public class SWTXYStressTest {
 		sys.addRegion(region);
 		
 		final ILineTrace trace = sys.createLineTrace("Test line plot");
-		trace.setData(IntegerDataset.arange(2048, AbstractDataset.INT32), data);
+		trace.setData(IntegerDataset.createRange(2048), data);
 		sys.addTrace(trace);
 
 		System.gc();
@@ -180,7 +180,7 @@ public class SWTXYStressTest {
         	Display.getDefault().syncExec(new Runnable() {
         		public void run() {
         			AbstractDataset data = Random.rand(new int[]{2048});
-         			trace.setData(IntegerDataset.arange(2048, AbstractDataset.INT32), data);
+         			trace.setData(IntegerDataset.createRange(2048), data);
         			sys.repaint();
           		}
         	});

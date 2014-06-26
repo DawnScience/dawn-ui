@@ -72,13 +72,13 @@ public class BoxProfileTool extends ProfileTool {
 				
 		final AbstractDataset x_intensity = box[0];
 		x_intensity.setName("X "+region.getName());
-		AbstractDataset xi = IntegerDataset.arange(x_intensity.getSize());
+		AbstractDataset xi = IntegerDataset.createRange(x_intensity.getSize());
 		final AbstractDataset x_indices = xi; // Maths.add(xi, bounds.getX()); // Real position
 		x_indices.setName("X Pixel");
 		
 		final AbstractDataset y_intensity = box[1];
 		y_intensity.setName("Y "+region.getName());
-		AbstractDataset yi = IntegerDataset.arange(y_intensity.getSize());
+		AbstractDataset yi = IntegerDataset.createRange(y_intensity.getSize());
 		final AbstractDataset y_indices = yi; // Maths.add(yi, bounds.getY()); // Real position
 		y_indices.setName("Y Pixel");
 
