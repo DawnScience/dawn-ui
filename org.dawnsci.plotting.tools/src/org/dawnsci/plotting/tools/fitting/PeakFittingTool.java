@@ -454,8 +454,8 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		
 		final String nodeName = getTitle().replace(' ', '_');
 		
-		Group entry     = (Group)lastSlice.getFile().getRoot();
-		Group container = (Group)lastSlice.getFile().group(nodeName, entry);
+		String entry     = (String)lastSlice.getFile().getRoot();
+		String container = (String)lastSlice.getFile().group(nodeName, entry);
 		for (int i = 1; i <= fit.size(); i++) {
 			
 			final String peakName = "Peak"+i;

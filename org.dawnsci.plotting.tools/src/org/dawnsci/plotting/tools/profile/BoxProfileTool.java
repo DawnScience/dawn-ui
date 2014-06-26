@@ -126,7 +126,7 @@ public class BoxProfileTool extends ProfileTool {
 		final Collection<IRegion> regions = getPlottingSystem().getRegions();
 		IHierarchicalDataFile file = slice.getFile();
 
-		Group dataGroup = slice.getParent();
+		String dataGroup = slice.getParent();
 
 		for (IRegion region : regions) {
 			if (!isRegionTypeSupported(region.getRegionType())) continue;
@@ -136,11 +136,11 @@ public class BoxProfileTool extends ProfileTool {
 			RectangularROI bounds = (RectangularROI)region.getROI();
 			
 			//create roi name group
-			Group regionGroup = file.group(region.getName().replace(' ', '_'), dataGroup);
+			String regionGroup = file.group(region.getName().replace(' ', '_'), dataGroup);
 			file.setNexusAttribute(regionGroup, Nexus.DATA);
 
 			//box profiles
-			Group profileGroup = file.group("profile", regionGroup);
+			String profileGroup = file.group("profile", regionGroup);
 			file.setNexusAttribute(profileGroup, Nexus.DATA);
 			slice.setParent(profileGroup);
 

@@ -3,7 +3,6 @@ package org.dawnsci.plotting.tools.reduction;
 import java.util.List;
 
 import ncsa.hdf.hdf5lib.exceptions.HDF5FunctionArgumentException;
-import ncsa.hdf.object.Group;
 
 import org.dawb.common.services.conversion.IConversionContext;
 import org.dawb.common.services.conversion.IConversionVisitor;
@@ -38,7 +37,7 @@ class ToolConversionVisitor implements IConversionVisitor {
 	}
 
 	private IHierarchicalDataFile output;
-	private Group                 group;
+	private String                group;
 	
 	@Override
 	public void init(IConversionContext context) throws Exception {
@@ -52,7 +51,7 @@ class ToolConversionVisitor implements IConversionVisitor {
 		
 		if (context.getMonitor()!=null && context.getMonitor().isCancelled()) return;
 		
-		Group grp = createGroupIfRequired(context);
+		String grp = createGroupIfRequired(context);
 		DataReductionSlice bean = new DataReductionSlice(output, grp, slice, object, context.getSelectedSlice(), context.getSelectedShape(), context.getMonitor());
 		bean.setAxes(nexusAxes);
 		bean.setExpandedDatasetNames(getExpandedDatasets());
@@ -62,10 +61,9 @@ class ToolConversionVisitor implements IConversionVisitor {
 		if (context.getMonitor()!=null) context.getMonitor().worked(1);
 	}
 	
-	private int     groupId;
 	private String  currentH5Path;     
 
-	private Group createGroupIfRequired(IConversionContext context) throws Exception {
+	private String createGroupIfRequired(IConversionContext context) throws Exception {
 		
 		//Group made and not h5, return group
 		if (group != null && context.getSelectedH5Path() == null) return group;
@@ -84,7 +82,10 @@ class ToolConversionVisitor implements IConversionVisitor {
 		//else build new group using either h5 [/ replaced with _] or default data path
 		
 		try {
-		    if (group!=null) group.close(groupId);
+//		    if (group!=null) {
+//		    	
+//		    	group.close(groupId);
+//		    }
 		} catch (Exception ne) {
 			if (ne instanceof HDF5FunctionArgumentException) {
 				// We carry on
@@ -93,7 +94,7 @@ class ToolConversionVisitor implements IConversionVisitor {
 			}
 		}
 		
-		Group entryGroup = output.group("entry");
+		String entryGroup = output.group("entry");
 		output.setNexusAttribute(entryGroup, Nexus.ENTRY);
 		group = output.group(path, entryGroup);
 		output.setNexusAttribute(group, Nexus.DATA);
@@ -113,13 +114,7 @@ class ToolConversionVisitor implements IConversionVisitor {
 		}
 		
 		// Close actual file.
-		if (group!=null) try {
-			group.close(groupId);
-		} catch (Exception ne) {
-			throw ne;
-		} finally {
-		    if (output!=null) output.close();
-		}
+		if (output!=null) output.close();
 		
 		if (onFinish!=null) throw onFinish;
 	}

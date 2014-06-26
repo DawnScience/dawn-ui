@@ -17,8 +17,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import ncsa.hdf.object.Group;
-
 import org.dawb.common.services.IVariableManager;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.hdf5.HierarchicalDataFactory;
@@ -522,9 +520,9 @@ public class SliceUtils {
 			IHierarchicalDataFile file = null;
 			try {
 				file = HierarchicalDataFactory.getReader(currentSlice.getPath());
-				final Group  group    = file.getParent(currentSlice.getName());
+				final String  group    = file.getParent(currentSlice.getName());
 				
-				final String fullName = group.getFullName()+"/"+axisName;
+				final String fullName = group+"/"+axisName;
 				
 				final ILoaderService service = (ILoaderService)ServiceManager.getService(ILoaderService.class);
 				axis = service.getDataset(currentSlice.getPath(), fullName, new ProgressMonitorWrapper(monitor));

@@ -549,12 +549,12 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		if (fullImageJob == null) throw new IllegalArgumentException("Integration not correctly configured!");
 		
 		IHierarchicalDataFile file = slice.getFile();
-		Group resultGroup = slice.getParent();
+		String resultGroup = slice.getParent();
 		
 		//dont want to fail reduction just because cant save filename - hence try-catch
 		try {
 			if (slice.getData().getMetadata() != null && slice.getData().getMetadata().getFilePath()!= null) {
-				Group collection = file.group("files", resultGroup.getParent());
+				String collection = file.group("files", file.getParent(resultGroup));
 				file.setNexusAttribute(collection, "NXcollection");
 				String path = slice.getData().getMetadata().getFilePath();
 				String[] arrayValue = {path};
@@ -576,8 +576,8 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		//Test if axis is made
 		boolean axisMade = false;
 		
-		for (HObject ob : resultGroup.getMemberList()) {
-			if (ob.getName().equals(axis.getName())) { 
+		for (String ob : file.memberList(resultGroup)) {
+			if (ob.equals(axis.getName())) { 
 				axisMade = true;
 				break;
 			}
@@ -585,7 +585,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 
 		if (!axisMade) {
 			//FIXME needs to be this name so the NCD to ascii convert works
-			resultGroup.setName("integration_result");
+			resultGroup = file.rename(resultGroup, "integration_result");
 			H5Datatype dType = new H5Datatype(Datatype.CLASS_FLOAT, 64/8, Datatype.NATIVE, Datatype.NATIVE);
 			axis = axis.squeeze();
 			Dataset s = file.createDataset(axis.getName(),  dType,  new long[]{axis.getShape()[0]}, axis.getBuffer(), resultGroup);
@@ -594,40 +594,40 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			switch (xAxis) {
 			case Q:
 				String angstrom = unitFormat.format(NonSI.ANGSTROM.inverse());
-				file.setAttribute(s, "units", angstrom);
+				file.setAttribute(s.getFullName(), "units", angstrom);
 				break;
 			case ANGLE:
 				String degrees = unitFormat.format(NonSI.DEGREE_ANGLE);
-				file.setAttribute(s, "units", degrees);
+				file.setAttribute(s.getFullName(), "units", degrees);
 				break;
 			case RESOLUTION:
 				String ang = unitFormat.format(NonSI.ANGSTROM);
-				file.setAttribute(s, "units", ang);
+				file.setAttribute(s.getFullName(), "units", ang);
 				break;
 			case PIXEL:
-				file.setAttribute(s, "units", "pixels");
+				file.setAttribute(s.getFullName(), "units", "pixels");
 				break;
 			}
 			
-			file.setNexusAttribute(s, Nexus.SDS);
+			file.setNexusAttribute(s.getFullName(), Nexus.SDS);
 			
 			if (mode == IntegrationMode.SPLITTING2D || mode == IntegrationMode.NONSPLITTING2D) {
-				file.setIntAttribute(s, NexusUtils.AXIS, 3);
+				file.setIntAttribute(s.getFullName(), NexusUtils.AXIS, 3);
 				axis = out.get(2);
 				axis = axis.squeeze();
 				Dataset s2 = file.createDataset(axis.getName(),  dType,  new long[]{axis.getShape()[0]}, axis.getBuffer(), resultGroup);
-				file.setAttribute(s2, "units", unitFormat.format(NonSI.DEGREE_ANGLE));
-				file.setIntAttribute(s2, NexusUtils.AXIS, 2);
+				file.setAttribute(s2.getFullName(), "units", unitFormat.format(NonSI.DEGREE_ANGLE));
+				file.setIntAttribute(s2.getFullName(), NexusUtils.AXIS, 2);
 				
 			} else {
-				file.setIntAttribute(s, NexusUtils.AXIS, 2);
+				file.setIntAttribute(s.getFullName(), NexusUtils.AXIS, 2);
 			}
 			
 			IPersistenceService service = (IPersistenceService)ServiceManager.getService(IPersistenceService.class);
 			IPersistentFile pf = service.createPersistentFile(file);
 			pf.setDiffractionMetadata(metadata);
 			
-			writeProcessInformation(file, resultGroup.getParent());
+			writeProcessInformation(file, file.getParent(resultGroup));
 			
 		}
 		
@@ -636,10 +636,10 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		slice.appendData(signal);
 		
 		if (!axisMade) {
-			for (HObject ob :resultGroup.getMemberList()) {
-				if (ob instanceof Dataset && ob.getName().equals(signal.getName())) {
-					Dataset ds = (Dataset)ob;
-					file.setIntAttribute(ds, NexusUtils.SIGNAL, 1);
+			for (String path : file.memberList(resultGroup)) {
+				final String name = path.substring(path.lastIndexOf('/')+1);
+				if (file.isDataset(path) && name.equals(signal.getName())) {
+					file.setIntAttribute(path, NexusUtils.SIGNAL, 1);
 				}
 			}
 		}
@@ -647,15 +647,15 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		return new DataReductionInfo(Status.OK_STATUS);
 	}
 	
-	private void writeProcessInformation(IHierarchicalDataFile file, Group group) throws Exception {
-		Group process = file.group("process", group);
+	private void writeProcessInformation(IHierarchicalDataFile file, String group) throws Exception {
+		String process = file.group("process", group);
 		file.setNexusAttribute(process, "NXprocess");
 		file.createDataset("program", "DAWN-powder integration tool", process);
 		
 		String version =  BundleUtils.getDawnVersion();
 		if (version != null) file.createDataset("version", version, process);
 		
-		Group note = file.group("1_correction", process);
+		String note = file.group("1_correction", process);
 		file.setNexusAttribute(note, "NXnote");
 		file.createDataset("description", "Correction process details", note);
 		
@@ -725,7 +725,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		
 	}
 	
-	private static Dataset createDoubleDataset(String name, double[] val, IHierarchicalDataFile file, Group group) throws Exception {
+	private static Dataset createDoubleDataset(String name, double[] val, IHierarchicalDataFile file, String group) throws Exception {
 		
 		return file.createDataset(name, new H5Datatype(Datatype.CLASS_FLOAT, 64/8, Datatype.NATIVE, Datatype.NATIVE),
 				new long[]{val.length}, val, group);
