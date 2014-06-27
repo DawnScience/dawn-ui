@@ -99,7 +99,7 @@ public abstract class AbstractSlicingTool implements ISlicingTool {
 			}
             if (axis==null) {
             	final IDatasetMathsService service = (IDatasetMathsService)ServiceManager.getService(IDatasetMathsService.class);
-            	axis = service.arange(dataShape[dd.getDimension()], IDatasetMathsService.INT);
+            	axis = service.createRange(dataShape[dd.getDimension()], IDatasetMathsService.INT);
             }
             ret.add(axis);
 		}

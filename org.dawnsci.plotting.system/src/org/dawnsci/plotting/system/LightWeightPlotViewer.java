@@ -1449,7 +1449,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		if (ysIn==null) {
 			ys = new ArrayList<IDataset>(1);
 			ys.add(xIn);
-			x = DoubleDataset.arange(ys.get(0).getSize());
+			x = DoubleDataset.createRange(ys.get(0).getSize());
 			x.setName("Index of "+xIn.getName());
 		} else {
 			x  = xIn;

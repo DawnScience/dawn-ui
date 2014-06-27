@@ -32,7 +32,7 @@ public class AxisExample extends XYExample {
 			final IDatasetMathsService mservice = (IDatasetMathsService)Activator.getService(IDatasetMathsService.class);
 			
 			// Create a 1D dataset programmatically. Can also use 
-			final IDataset set = mservice.arange(0, 100000, 1000, IDatasetMathsService.INT);
+			final IDataset set = mservice.createRange(0, 100000, 1000, IDatasetMathsService.INT);
 			set.setName("Different scale data");
 			
 			final IAxis otherX = system.createAxis("top", false, SWT.TOP);

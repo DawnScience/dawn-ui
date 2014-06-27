@@ -1,4 +1,4 @@
-/*
+/*-
  * Copyright (c) 2012 European Synchrotron Radiation Facility,
  *                    Diamond Light Source Ltd.
  *
@@ -68,7 +68,7 @@ public class SWTXYTraceTest {
 	@Test
     public void testVectorSimple1D() throws Throwable {
 		
-		final AbstractDataset da1 = DoubleDataset.arange(0, 100, 1);    
+		final AbstractDataset da1 = DoubleDataset.createRange(0, 100, 1);    
 		
 		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{da1}));
 
@@ -201,7 +201,7 @@ public class SWTXYTraceTest {
 	@Test
     public void testErrorBarsSimple() throws Throwable {
 		
-		final DoubleDataset da1 = DoubleDataset.arange(0, 100, 1);
+		final DoubleDataset da1 = DoubleDataset.createRange(0, 100, 1);
         da1.setError(5d);
         
       
@@ -221,7 +221,7 @@ public class SWTXYTraceTest {
 	@Test
     public void testFilterDectorator() throws Throwable {
 		
-		final IDataset y = DoubleDataset.arange(0, 100, 1);
+		final IDataset y = DoubleDataset.createRange(0, 100, 1);
 		final IDataset x = AbstractDataset.arange(0, y.getSize(), 1, AbstractDataset.INT32);
      
       
@@ -257,7 +257,7 @@ public class SWTXYTraceTest {
 	@Test
     public void testFilterDectoratorMultiple() throws Throwable {
 		
-		final IDataset y = DoubleDataset.arange(0, 100, 1);
+		final IDataset y = DoubleDataset.createRange(0, 100, 1);
 		y.setName("Test Data");
 		final IDataset x = AbstractDataset.arange(0, y.getSize(), 1, AbstractDataset.INT32);
      
@@ -357,7 +357,7 @@ public class SWTXYTraceTest {
 		final PlotDataEditor plotter   = (PlotDataEditor)editor.getActiveEditor();
 		final IPlottingSystem sys = plotter.getPlottingSystem();
 
-		final IDataset y = DoubleDataset.arange(0, 100, 1);
+		final IDataset y = DoubleDataset.createRange(0, 100, 1);
 		final IDataset x = AbstractDataset.arange(0, y.getSize(), 1, AbstractDataset.INT32);
   	
 		// Add a decorator that squares the data.
@@ -445,8 +445,8 @@ public class SWTXYTraceTest {
 	@Test
     public void testErrorBarsExponential() throws Throwable {
 		
-		final AbstractDataset da1 = Maths.square(DoubleDataset.arange(0, 100, 1));    
-		final AbstractDataset err = Maths.square(DoubleDataset.arange(0, 100, 1).imultiply(0.2d));
+		final AbstractDataset da1 = Maths.square(DoubleDataset.createRange(0, 100, 1));    
+		final AbstractDataset err = Maths.square(DoubleDataset.createRange(0, 100, 1).imultiply(0.2d));
 		da1.setError(err);
 		
 		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{da1}));
@@ -467,8 +467,8 @@ public class SWTXYTraceTest {
 	@Test
     public void testErrorBarsExponentialLogAxes() throws Throwable {
 		
-		final AbstractDataset da1 = Maths.square(DoubleDataset.arange(0, 100, 1));    
-		final AbstractDataset err = Maths.square(DoubleDataset.arange(0, 100, 1).imultiply(0.2d));
+		final AbstractDataset da1 = Maths.square(DoubleDataset.createRange(0, 100, 1));    
+		final AbstractDataset err = Maths.square(DoubleDataset.createRange(0, 100, 1).imultiply(0.2d));
 		da1.setError(err);
 		
 		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{da1}));
@@ -490,7 +490,7 @@ public class SWTXYTraceTest {
 	@Test
     public void testXErrorBars() throws Throwable {
 		
-		final DoubleDataset da1 = DoubleDataset.arange(0, 100, 1);     
+		final DoubleDataset da1 = DoubleDataset.createRange(0, 100, 1);     
 		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{da1}));
 
 		final IPlottingSystem     sys    = (IPlottingSystem)oa[0];
@@ -525,7 +525,7 @@ public class SWTXYTraceTest {
 	
 	
 	private void funnyNumberTest(double funny, String name) throws Throwable {
-		final DoubleDataset da1 = DoubleDataset.arange(0, 100, 1);
+		final DoubleDataset da1 = DoubleDataset.createRange(0, 100, 1);
 		da1.set(funny, 0);
 		
 		da1.set(funny, 50);

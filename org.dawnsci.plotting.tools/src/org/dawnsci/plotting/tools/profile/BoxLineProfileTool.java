@@ -199,17 +199,17 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 
 		AbstractDataset line1 = boxLine[0];
 		line1.setName(traceName1);
-		AbstractDataset xi = IntegerDataset.arange(line1.getSize());
+		AbstractDataset xi = IntegerDataset.createRange(line1.getSize());
 		final AbstractDataset x_indices = xi;
 
 		AbstractDataset line2 = boxLine[1];
 		line2.setName(traceName2);
-		AbstractDataset yi = IntegerDataset.arange(line2.getSize());
+		AbstractDataset yi = IntegerDataset.createRange(line2.getSize());
 		final AbstractDataset y_indices = yi;
 
 		// Average profile
 		line3.setName(traceName3);
-		AbstractDataset av_indices = IntegerDataset.arange(line3.getSize());
+		AbstractDataset av_indices = IntegerDataset.createRange(line3.getSize());
 
 		final List<AbstractDataset> lines = new ArrayList<AbstractDataset>(3);
 		lines.add(line1);
@@ -259,12 +259,12 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 
 		AbstractDataset line1 = boxLine[0];
 		line1.setName(traceName1);
-		AbstractDataset xi = IntegerDataset.arange(line1.getSize());
+		AbstractDataset xi = IntegerDataset.createRange(line1.getSize());
 		final AbstractDataset x_indices = xi;
 
 		AbstractDataset line2 = boxLine[1];
 		line2.setName(traceName2);
-		AbstractDataset yi = IntegerDataset.arange(line2.getSize());
+		AbstractDataset yi = IntegerDataset.createRange(line2.getSize());
 		final AbstractDataset y_indices = yi;
 
 		final List<AbstractDataset> lines = new ArrayList<AbstractDataset>(3);
@@ -312,7 +312,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 
 		// Average profile
 		line3.setName(traceName3);
-		AbstractDataset av_indices = IntegerDataset.arange(line3.getSize());
+		AbstractDataset av_indices = IntegerDataset.createRange(line3.getSize());
 
 		final List<AbstractDataset> lines = new ArrayList<AbstractDataset>(1);
 		lines.add(line3);
