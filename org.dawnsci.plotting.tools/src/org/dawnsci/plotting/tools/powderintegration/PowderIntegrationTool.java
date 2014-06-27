@@ -8,12 +8,6 @@ import java.util.List;
 import javax.measure.unit.NonSI;
 import javax.measure.unit.UnitFormat;
 
-import ncsa.hdf.object.Dataset;
-import ncsa.hdf.object.Datatype;
-import ncsa.hdf.object.Group;
-import ncsa.hdf.object.HObject;
-import ncsa.hdf.object.h5.H5Datatype;
-
 import org.dawb.common.services.IPersistenceService;
 import org.dawb.common.services.IPersistentFile;
 import org.dawb.common.services.ServiceManager;
@@ -557,9 +551,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 				String collection = file.group("files", file.getParent(resultGroup));
 				file.setNexusAttribute(collection, "NXcollection");
 				String path = slice.getData().getMetadata().getFilePath();
-				String[] arrayValue = {path};
-				Datatype dtype = new H5Datatype(Datatype.CLASS_STRING, arrayValue[0].length()+1, -1, -1);
-				file.appendDataset("files", dtype, new long[]{1}, arrayValue, collection);
+				file.appendDataset("files", AbstractDataset.STRING, new long[]{1}, path, collection);
 			}
 		} catch (Exception e) {
 			//ignore
@@ -586,41 +578,40 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		if (!axisMade) {
 			//FIXME needs to be this name so the NCD to ascii convert works
 			resultGroup = file.rename(resultGroup, "integration_result");
-			H5Datatype dType = new H5Datatype(Datatype.CLASS_FLOAT, 64/8, Datatype.NATIVE, Datatype.NATIVE);
 			axis = axis.squeeze();
-			Dataset s = file.createDataset(axis.getName(),  dType,  new long[]{axis.getShape()[0]}, axis.getBuffer(), resultGroup);
+			String s = file.createDataset(axis.getName(),  axis, resultGroup);
 			UnitFormat unitFormat = UnitFormat.getUCUMInstance();
 			
 			switch (xAxis) {
 			case Q:
 				String angstrom = unitFormat.format(NonSI.ANGSTROM.inverse());
-				file.setAttribute(s.getFullName(), "units", angstrom);
+				file.setAttribute(s, "units", angstrom);
 				break;
 			case ANGLE:
 				String degrees = unitFormat.format(NonSI.DEGREE_ANGLE);
-				file.setAttribute(s.getFullName(), "units", degrees);
+				file.setAttribute(s, "units", degrees);
 				break;
 			case RESOLUTION:
 				String ang = unitFormat.format(NonSI.ANGSTROM);
-				file.setAttribute(s.getFullName(), "units", ang);
+				file.setAttribute(s, "units", ang);
 				break;
 			case PIXEL:
-				file.setAttribute(s.getFullName(), "units", "pixels");
+				file.setAttribute(s, "units", "pixels");
 				break;
 			}
 			
-			file.setNexusAttribute(s.getFullName(), Nexus.SDS);
+			file.setNexusAttribute(s, Nexus.SDS);
 			
 			if (mode == IntegrationMode.SPLITTING2D || mode == IntegrationMode.NONSPLITTING2D) {
-				file.setIntAttribute(s.getFullName(), NexusUtils.AXIS, 3);
+				file.setIntAttribute(s, NexusUtils.AXIS, 3);
 				axis = out.get(2);
 				axis = axis.squeeze();
-				Dataset s2 = file.createDataset(axis.getName(),  dType,  new long[]{axis.getShape()[0]}, axis.getBuffer(), resultGroup);
-				file.setAttribute(s2.getFullName(), "units", unitFormat.format(NonSI.DEGREE_ANGLE));
-				file.setIntAttribute(s2.getFullName(), NexusUtils.AXIS, 2);
+				String s2 = file.createDataset(axis.getName(),  axis, resultGroup);
+				file.setAttribute(s2, "units", unitFormat.format(NonSI.DEGREE_ANGLE));
+				file.setIntAttribute(s2, NexusUtils.AXIS, 2);
 				
 			} else {
-				file.setIntAttribute(s.getFullName(), NexusUtils.AXIS, 2);
+				file.setIntAttribute(s, NexusUtils.AXIS, 2);
 			}
 			
 			IPersistenceService service = (IPersistenceService)ServiceManager.getService(IPersistenceService.class);
@@ -650,21 +641,21 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	private void writeProcessInformation(IHierarchicalDataFile file, String group) throws Exception {
 		String process = file.group("process", group);
 		file.setNexusAttribute(process, "NXprocess");
-		file.createDataset("program", "DAWN-powder integration tool", process);
+		file.createStringDataset("program", "DAWN-powder integration tool", process);
 		
 		String version =  BundleUtils.getDawnVersion();
-		if (version != null) file.createDataset("version", version, process);
+		if (version != null) file.createStringDataset("version", version, process);
 		
 		String note = file.group("1_correction", process);
 		file.setNexusAttribute(note, "NXnote");
-		file.createDataset("description", "Correction process details", note);
+		file.createStringDataset("description", "Correction process details", note);
 		
 		String solid = "No";
 		if (corModel.isApplySolidAngleCorrection()) {
 			solid = "Yes";
 		}
 		
-		file.createDataset("solid_angle_corrected", solid, note);
+		file.createStringDataset("solid_angle_corrected", solid, note);
 		
 		String polar = "No";
 		if (corModel.isApplyPolarisationCorrection()) {
@@ -673,7 +664,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			createDoubleDataset("polarisation_angular", new double[]{corModel.getPolarisationAngularOffset()}, file, note);
 		}
 		
-		file.createDataset("polarisation_corrected", polar, note);
+		file.createStringDataset("polarisation_corrected", polar, note);
 		
 		String trans = "No";
 		if (corModel.isAppyDetectorTransmissionCorrection()) {
@@ -681,11 +672,11 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			createDoubleDataset("transmitted_fraction", new double[]{corModel.getTransmittedFraction()}, file, note);
 		}
 		
-		file.createDataset("detector_tranmission_corrected", trans, note);
+		file.createStringDataset("detector_tranmission_corrected", trans, note);
 		
 		note = file.group("2_integration", process);
 		file.setNexusAttribute(note, "NXnote");
-		file.createDataset("description", "Integration process details", note);
+		file.createStringDataset("description", "Integration process details", note);
 		
 		String integrationRoutine = "unknown";
 		String integrationDirection = "unknown";
@@ -712,8 +703,8 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 
 		}
 		
-		file.createDataset("integration_routine", integrationRoutine, note);
-		file.createDataset("integration_direction", integrationDirection, note);
+		file.createStringDataset("integration_routine", integrationRoutine, note);
+		file.createStringDataset("integration_direction", integrationDirection, note);
 		
 		if (model.getRadialRange() != null) {
 			createDoubleDataset("radial_range", model.getRadialRange(), file, note);
@@ -725,10 +716,9 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		
 	}
 	
-	private static Dataset createDoubleDataset(String name, double[] val, IHierarchicalDataFile file, String group) throws Exception {
+	private static String createDoubleDataset(String name, double[] val, IHierarchicalDataFile file, String group) throws Exception {
 		
-		return file.createDataset(name, new H5Datatype(Datatype.CLASS_FLOAT, 64/8, Datatype.NATIVE, Datatype.NATIVE),
-				new long[]{val.length}, val, group);
+		return file.createDataset(name, AbstractDataset.FLOAT64, new long[]{val.length}, val, group);
 		
 	}
 	

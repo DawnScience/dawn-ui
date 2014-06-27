@@ -18,7 +18,7 @@ import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawnsci.io.h5.H5Utils;
+import org.dawb.hdf5.H5Utils;
 import org.dawnsci.plotting.api.annotation.IAnnotation;
 import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -481,11 +481,9 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 				Dataset ds = (Dataset)iDataset.squeeze();
 				ds.setName(peakName+"_functions");
 				
-				Datatype type = H5Utils.getDatatype(ds);
-				long[] bufferShape = H5Utils.getLong(ds.getShape());
 				
 				// Append directly into file.
-				lastSlice.getFile().appendDataset(ds.getName(), type, bufferShape, ds.getBuffer(), container);
+				lastSlice.getFile().appendDataset(ds.getName(), ds, container);
 			}
 
 		}
