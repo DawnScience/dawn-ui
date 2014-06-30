@@ -539,6 +539,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	@Override
 	public String exportInit() {
 		firstExportIteration = true;
+		//FIXME needs to be this name so the NCD to ascii convert works
 		return "integration_result";
 	}
 	
@@ -574,8 +575,6 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		AbstractDataset axis = out.get(0);
 
 		if (firstExportIteration) {
-			//FIXME needs to be this name so the NCD to ascii convert works
-			resultGroup = file.rename(resultGroup, "integration_result");
 			axis = axis.squeeze();
 			String s = file.createDataset(axis.getName(),  axis, resultGroup);
 			UnitFormat unitFormat = UnitFormat.getUCUMInstance();
