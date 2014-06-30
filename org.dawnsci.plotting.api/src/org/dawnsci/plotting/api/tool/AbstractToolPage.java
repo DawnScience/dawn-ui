@@ -470,4 +470,11 @@ public abstract class AbstractToolPage extends Page implements IToolPage, IAdapt
 	public void exportFinished()  throws Exception {
 		
 	}
+	
+	/**
+	 * Optionally override to do return an initial name for the NXData class saved at export 
+	 */
+	public String exportInit() {
+		return null;
+	}
 }

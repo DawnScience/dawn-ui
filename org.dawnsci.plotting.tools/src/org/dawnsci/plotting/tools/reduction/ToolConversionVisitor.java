@@ -38,10 +38,12 @@ class ToolConversionVisitor implements IConversionVisitor {
 
 	private IHierarchicalDataFile output;
 	private String                group;
+	private String                initName;
 	
 	@Override
 	public void init(IConversionContext context) throws Exception {
 		output = HierarchicalDataFactory.getWriter(context.getOutputPath());
+		initName = tool.exportInit();
 	}
 
 	private Object  object;
@@ -66,9 +68,12 @@ class ToolConversionVisitor implements IConversionVisitor {
 	private String createGroupIfRequired(IConversionContext context) throws Exception {
 		
 		//Group made and not h5, return group
-		if (group != null && context.getSelectedH5Path() == null) return group;
+		if (group != null && context.getSelectedH5Path() == null) {
+			
+			return output.group(group);
+		}
 		
-		String path = "data";
+		String path = initName == null ?"data" : initName;
 		
 		if (context.getSelectedH5Path() != null) {
 			String flatPath = context.getSelectedH5Path().replace("/", "_");

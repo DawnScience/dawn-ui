@@ -534,6 +534,14 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		return DiffractionUtils.getDiffractionMetadata(image, altPath, service, statusString);
 	}
 	
+	boolean firstExportIteration = false;
+	
+	@Override
+	public String exportInit() {
+		firstExportIteration = true;
+		return "integration_result";
+	}
+	
 	/**
 	 * Same tool called recursively from the DataReductionWizard
 	 */
@@ -564,18 +572,8 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		List<AbstractDataset> out = fullImageJob.process(DatasetUtils.convertToAbstractDataset(slice.getData()));
 		
 		AbstractDataset axis = out.get(0);
-		
-		//Test if axis is made
-		boolean axisMade = false;
-		
-		for (String ob : file.memberList(resultGroup)) {
-			if (ob.equals(axis.getName())) { 
-				axisMade = true;
-				break;
-			}
-		}
 
-		if (!axisMade) {
+		if (firstExportIteration) {
 			//FIXME needs to be this name so the NCD to ascii convert works
 			resultGroup = file.rename(resultGroup, "integration_result");
 			axis = axis.squeeze();
@@ -626,7 +624,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		signal.setName("data");
 		slice.appendData(signal);
 		
-		if (!axisMade) {
+		if (firstExportIteration) {
 			for (String path : file.memberList(resultGroup)) {
 				final String name = path.substring(path.lastIndexOf('/')+1);
 				if (file.isDataset(path) && name.equals(signal.getName())) {
@@ -634,6 +632,8 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 				}
 			}
 		}
+		
+		firstExportIteration = false;
 		
 		return new DataReductionInfo(Status.OK_STATUS);
 	}
