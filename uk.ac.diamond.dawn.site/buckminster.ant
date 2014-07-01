@@ -395,9 +395,11 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
         <property.expand property="destination.zipfile" definition="${zip.file.name}"/>
         <echo>Zipping ${destination} (including the directory) into ${destination.parent}/${destination.zipfile}.zip using platform zip command</echo>
         <exec executable="zip" osfamily="unix" dir="${destination.parent}" failonerror="true">
-            <arg value="-qr" />
-            <arg value="-n" />
-            <arg value=".jar" />
+            <arg value="--quiet" />
+            <arg value="--recurse-paths" />
+            <arg value="--symlinks" />  <!-- Required since the MacOS product contains a symlink -->
+            <arg value="--suffixes" />
+            <arg value=".gif:.jar:.png:" />
             <arg value="${destination.zipfile}.zip" />
             <arg value="${destination.directory}" />
         </exec>

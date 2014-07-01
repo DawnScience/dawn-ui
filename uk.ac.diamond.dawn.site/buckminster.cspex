@@ -114,7 +114,7 @@
                 <property key="product.ws" value="cocoa" />
                 <property key="product.arch" value="x86" />
                 <property key="profile" value="DawnDiamondProfile" />
-                <property key="iu" value="uk.ac.diamond.dawn.base.product" />
+                <property key="iu" value="uk.ac.diamond.dawn.product" />
             </properties>
             <prerequisites>
                 <attribute name="create.product.setup" />
