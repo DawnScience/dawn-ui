@@ -22,6 +22,10 @@
          version="0.0.0"/>
 
    <includes
+         id="org.dawnsci.commandserver.feature"
+         version="0.0.0"/>
+
+   <includes
          id="uk.ac.diamond.scisoft.peema.feature"
          version="0.0.0"/>
 
@@ -99,5 +103,11 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
+   <plugin
+         id="uk.ac.diamond.scisoft.mrc.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
 
 </feature>

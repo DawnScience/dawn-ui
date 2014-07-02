@@ -27,8 +27,4 @@
          os="linux,win32"
          arch="x86,x86_64"/>
 
-   <includes
-         id="org.dawnsci.commandserver.feature"
-         version="0.0.0"/>
-
 </feature>
