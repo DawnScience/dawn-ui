@@ -51,7 +51,6 @@ import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -408,7 +407,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		final Button ignoreAlreadyMasked =  new Button(minMaxComp, SWT.CHECK);
 		enableControls.add(ignoreAlreadyMasked);
 		ignoreAlreadyMasked.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 2,1));
-		ignoreAlreadyMasked.setText("Keep pixels aleady masked");
+		ignoreAlreadyMasked.setText("Keep pixels already masked");
 		ignoreAlreadyMasked.setToolTipText("When using bounds, pixels already masked can be ignored and not checked for range.\nThis setting is ignored when removing the bounds mask.");
 
 		ignoreAlreadyMasked.addSelectionListener(new SelectionAdapter() {
