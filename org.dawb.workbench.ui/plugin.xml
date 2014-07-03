@@ -58,7 +58,7 @@
       <editor
             class="org.dawb.workbench.ui.editors.ImageEditor"
             default="true"
-            extensions="tif, tiff, cbf, img, ciff, mccd, edf, pgm, cor, bruker, jpg, png, f2d, msk, mib, mar3450, pck3450, raw, mrc"
+            extensions="tif, tiff, cbf, img, ciff, mccd, edf, pgm, cor, bruker, jpg, jpeg, png, f2d, msk, mib, mar3450, pck3450, raw, mrc"
             icon="icons/image_editor.png"
             id="org.dawb.workbench.editors.ImageEditor"
             name="Image Editor">
