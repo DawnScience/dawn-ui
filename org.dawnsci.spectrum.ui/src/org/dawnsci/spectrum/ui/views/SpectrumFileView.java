@@ -1,6 +1,7 @@
 package org.dawnsci.spectrum.ui.views;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.dawnsci.spectrum.ui.file.SpectrumFileManager;
 import org.eclipse.ui.IViewPart;
@@ -19,17 +20,17 @@ public class SpectrumFileView extends FileView {
 	
 	@Override
 	public void openSelectedFile() {
-		final File file = getSelectedFile();
+		final Path file = getSelectedPath();
 		if (file==null) return;
 		
-		if (!file.isDirectory()) {
+		if (!Files.isDirectory(file)) {
 			IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 			IViewPart view = page.findView("org.dawnsci.spectrum.ui.views.SpectrumView");
 			if (view==null) return;
 			
 			final SpectrumFileManager manager = (SpectrumFileManager)view.getAdapter(SpectrumFileManager.class);
 			if (manager != null) {
-				manager.addFile(file.getAbsolutePath());
+				manager.addFile(file.toAbsolutePath().toString());
 			} else {
 				logger.error("Could not get file manager");
 			}

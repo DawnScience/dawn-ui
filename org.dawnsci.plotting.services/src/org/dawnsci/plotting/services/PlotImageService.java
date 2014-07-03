@@ -561,4 +561,9 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 		return (System.getProperty("os.name").indexOf("Windows") == 0);
 	}
 
+	@Override
+	public Image getIconForFile(String path) {
+		return getIconForFile(new File(path));
+	}
+
 }
