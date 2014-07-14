@@ -11,7 +11,6 @@ package org.dawnsci.plotting.api.preferences;
 
 public class PlottingConstants extends BasePlottingConstants {
 
-	public static final String PLOTTING_SYSTEM_CHOICE = "org.dawb.plotting.system.choice";
 
 	public static final String PLOT_X_DATASET = "org.dawb.lightweight.plot.x.choice";
 
