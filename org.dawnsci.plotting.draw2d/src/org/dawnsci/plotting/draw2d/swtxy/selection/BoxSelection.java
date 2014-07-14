@@ -173,6 +173,7 @@ class BoxSelection extends ROISelectionRegion<RectangularROI> {
 		@Override
 		protected void outlineShape(Graphics graphics) {
 			drawRectangle(graphics);
+			drawLabel(graphics, getROI().getMidPoint());
 		}
 
 		@Override

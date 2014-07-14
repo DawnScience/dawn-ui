@@ -25,8 +25,10 @@ import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureListener;
+import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
@@ -350,5 +352,18 @@ abstract public class ROIShape<T extends IROI> extends RegionFillFigure<T> imple
 		}
 		dirty = true;
 		calcBox(rroi, true);
+	}
+
+	protected void drawLabel(Graphics graphics, double[] roiMidPoint) {
+		if (region.isShowLabel()) {
+			graphics.pushState();
+			
+			double[] pta = cs.getPositionFromValue(roiMidPoint);
+			graphics.setForegroundColor(ColorConstants.black);
+			graphics.setAlpha(255);
+			graphics.drawText(region.getName(), new PrecisionPoint(pta[0], pta[1]));
+			
+			graphics.popState();
+		}
 	}
 }

@@ -271,6 +271,7 @@ class RingSelection extends ROISelectionRegion<RingROI> implements ILockableRegi
 
 			points = Draw2DUtils.generateCurve(outerFunction, 0, TWO_PI);
 			Draw2DUtils.drawClippedPolyline(graphics, points, bnd, true);
+			drawLabel(graphics, getROI().getPoint());
 			graphics.popState();
 		}
 

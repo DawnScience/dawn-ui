@@ -16,7 +16,6 @@ import javax.swing.tree.TreeNode;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.roi.data.LinearROIData;
 import org.dawb.common.ui.plot.roi.data.ROIData;
-import org.dawb.common.ui.plot.roi.data.RectangularROIData;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.viewers.TreeNodeContentProvider;
@@ -996,7 +995,29 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			if ((type == RegionType.BOX || type == RegionType.PERIMETERBOX)
 					&& bounds instanceof RectangularROI) {
 				final RectangularROI roi = (RectangularROI) bounds;
-				rd = new RectangularROIData(roi, (AbstractDataset) trace.getData());
+				int xStart = (int)roi.getPoint()[0];
+				int yStart = (int)roi.getPoint()[1];
+				int xStop = (int) roi.getEndPoint()[0];
+				int yStop = (int) roi.getEndPoint()[1];
+				// clip if region is out of bounds of trace
+				if (xStart < 0)
+					xStart = 0;
+				if (yStart < 0)
+					yStart = 0;
+				if (xStop > trace.getData().getShape()[1])
+					xStop = trace.getData().getShape()[1];
+				if (yStop > trace.getData().getShape()[0])
+					yStop = trace.getData().getShape()[0];
+				int xInc = roi.getPoint()[0]<roi.getEndPoint()[0] ? 1 : -1;
+				int yInc = roi.getPoint()[1]<roi.getEndPoint()[1] ? 1 : -1;
+				AbstractDataset rectangleSlice = (AbstractDataset) trace.getData().getSlice(
+						new int[] { yStart, xStart },
+						new int[] { yStop, xStop },
+						new int[] {yInc, xInc});;
+				if (rectangleSlice == null)
+					return Double.NaN;
+				int[] maxPos = rectangleSlice.maxPos();
+				return rectangleSlice.getDouble(maxPos[0], maxPos[1]);
 			} else if (type == RegionType.LINE && bounds instanceof LinearROI) {
 				final LinearROI roi = (LinearROI) bounds;
 				rd = new LinearROIData(roi, (AbstractDataset) trace.getData(), 1d);

@@ -305,6 +305,17 @@ class SectorSelection extends ROISelectionRegion<SectorROI> implements ILockable
 			graphics.getClip(bnd);
 			Draw2DUtils.drawClippedPolyline(graphics, points, bnd, true);
 
+			graphics.setForegroundColor(ColorConstants.black);
+			graphics.setAlpha(255);
+			
+			if (isShowLabel()) {
+				try {
+					graphics.drawString(getName(), ((SelectionHandle)handles.get(4)).getSelectionPoint());
+				} catch (IndexOutOfBoundsException ignored) {
+					// Ok no label then.
+				}
+			}
+			
 			graphics.popState();
 		}
 
