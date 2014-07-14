@@ -136,6 +136,7 @@ Export-Package: org.dawnsci.plotting.tools;
    org.dawnsci.plotting.api.tool,
    org.eclipse.swt.widgets,
    org.dawnsci.plotting.api.trace",
+ org.dawnsci.plotting.tools.hyper2d,
  org.dawnsci.plotting.tools.masking;
   uses:="uk.ac.diamond.scisoft.analysis.dataset,
    org.eclipse.core.runtime,
