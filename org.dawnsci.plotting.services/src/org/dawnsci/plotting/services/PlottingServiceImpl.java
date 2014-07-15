@@ -7,6 +7,10 @@ import org.dawnsci.plotting.api.filter.IFilterDecorator;
 import org.dawnsci.plotting.api.tool.IToolPageSystem;
 
 public class PlottingServiceImpl implements IPlottingService {
+	
+	public PlottingServiceImpl() {
+		System.out.println("Starting plotting service");
+	}
 
 	@Override
 	public IPlottingSystem createPlottingSystem() throws Exception {

@@ -89,7 +89,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 	}
 
 	public ImageService() {
-		
+		System.out.println("Starting image service");
 	}
 	
 	/**

@@ -25,6 +25,10 @@ public class ClassLoaderService extends AbstractServiceFactory implements IClass
 
 	private ClassLoader originalLoader;
 	
+	public ClassLoaderService() {
+		System.out.println("Starting plotting class loader service");
+	}
+	
 	@Override
 	public void setDataAnalysisClassLoaderActive(boolean active) {
 		

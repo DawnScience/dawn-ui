@@ -31,6 +31,10 @@ import uk.ac.diamond.scisoft.analysis.roi.YAxisLineBoxROI;
 
 public class RegionServiceImpl implements IRegionService {
 
+	public RegionServiceImpl() {
+		System.out.println("Starting region service");
+	}
+
 	private static Map<Object,Object> roiMap;
 	
 	private synchronized static Map<Object,Object> getRoiMap() {
