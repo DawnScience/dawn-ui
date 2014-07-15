@@ -119,10 +119,6 @@ This Agreement is governed by the laws of the State of New York and the intellec
          version="0.0.0"/>
 
    <includes
-         id="org.dawb.fable.feature"
-         version="0.0.0"/>
-
-   <includes
          id="org.dawnsci.common.services.feature"
          version="0.0.0"/>
 
@@ -162,12 +158,6 @@ This Agreement is governed by the laws of the State of New York and the intellec
          unpack="false"/>
 
    <plugin
-         id="org.dawb.jep"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
          id="org.dawb.jlchart"
          download-size="0"
          install-size="0"
@@ -175,12 +165,6 @@ This Agreement is governed by the laws of the State of New York and the intellec
 
    <plugin
          id="org.dawb.jmol"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.lwjgl.opengl"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
