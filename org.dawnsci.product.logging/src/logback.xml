@@ -67,7 +67,7 @@
 		</filter>
 		<smtpHost>localhost</smtpHost>
 		<to>mark.basham@diamond.ac.uk</to>
-		<from>${user.name}@${os.name}</from>
+		<from>${user.name}@diamond.ac.uk</from>
 		<subject>[SDA-ERRORS] %logger{20} - %m</subject>
 		<layout class="ch.qos.logback.classic.PatternLayout">
 			<pattern>%date %-5level %logger{35} - %message%n</pattern>
