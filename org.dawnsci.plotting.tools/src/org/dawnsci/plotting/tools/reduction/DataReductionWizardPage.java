@@ -7,13 +7,13 @@ import java.util.Map;
 
 import org.dawb.common.services.conversion.IConversionContext;
 import org.dawb.common.ui.wizard.AbstractSliceConversionPage;
-import org.dawnsci.plotting.api.tool.IToolPage;
-import org.dawnsci.slicing.api.system.DimensionalEvent;
-import org.dawnsci.slicing.api.system.DimensionalListener;
-import org.dawnsci.slicing.api.system.DimsData;
-import org.dawnsci.slicing.api.system.DimsDataList;
-import org.dawnsci.slicing.api.system.AxisType;
-import org.dawnsci.slicing.api.util.SliceUtils;
+import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
+import org.eclipse.dawnsci.slicing.api.system.AxisType;
+import org.eclipse.dawnsci.slicing.api.system.DimensionalEvent;
+import org.eclipse.dawnsci.slicing.api.system.DimensionalListener;
+import org.eclipse.dawnsci.slicing.api.system.DimsData;
+import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
+import org.eclipse.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Composite;
 

@@ -6,10 +6,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
-import org.dawnsci.plotting.api.IPlottingSystem;
-import org.dawnsci.plotting.api.PlotType;
-import org.dawnsci.slicing.api.system.AxisType;
-import org.dawnsci.slicing.api.system.DimsData;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.PlotType;
+import org.eclipse.dawnsci.slicing.api.system.AxisType;
+import org.eclipse.dawnsci.slicing.api.system.DimsData;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;

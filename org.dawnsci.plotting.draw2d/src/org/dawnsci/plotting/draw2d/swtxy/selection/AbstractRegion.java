@@ -5,12 +5,12 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-import org.dawnsci.plotting.api.region.IROIListener;
-import org.dawnsci.plotting.api.region.IRegion;
-import org.dawnsci.plotting.api.region.IRegionContainer;
-import org.dawnsci.plotting.api.region.MouseListener;
-import org.dawnsci.plotting.api.region.MouseMotionListener;
-import org.dawnsci.plotting.api.region.ROIEvent;
+import org.eclipse.dawnsci.plotting.api.region.IROIListener;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegionContainer;
+import org.eclipse.dawnsci.plotting.api.region.MouseListener;
+import org.eclipse.dawnsci.plotting.api.region.MouseMotionListener;
+import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureUtilities;
 import org.eclipse.draw2d.geometry.Dimension;

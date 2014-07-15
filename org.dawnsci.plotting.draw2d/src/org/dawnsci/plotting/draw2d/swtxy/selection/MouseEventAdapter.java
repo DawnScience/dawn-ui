@@ -1,6 +1,6 @@
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
-import org.dawnsci.plotting.api.region.MouseEvent;
+import org.eclipse.dawnsci.plotting.api.region.MouseEvent;
 
 public class MouseEventAdapter extends MouseEvent {
 

@@ -11,21 +11,21 @@ import java.util.Map;
 
 import org.dawnsci.plotting.actions.ActionBarWrapper;
 import org.dawnsci.plotting.actions.EmptyActionBars;
-import org.dawnsci.plotting.api.ActionType;
-import org.dawnsci.plotting.api.EmptyPageSite;
-import org.dawnsci.plotting.api.IPlotActionSystem;
-import org.dawnsci.plotting.api.IPlottingSystem;
-import org.dawnsci.plotting.api.ITraceActionProvider;
-import org.dawnsci.plotting.api.ManagerType;
-import org.dawnsci.plotting.api.PlotType;
-import org.dawnsci.plotting.api.tool.IToolChangeListener;
-import org.dawnsci.plotting.api.tool.IToolPage;
-import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
-import org.dawnsci.plotting.api.tool.ToolChangeEvent;
-import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.views.EmptyTool;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.dawnsci.plotting.api.ActionType;
+import org.eclipse.dawnsci.plotting.api.EmptyPageSite;
+import org.eclipse.dawnsci.plotting.api.IPlotActionSystem;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.ITraceActionProvider;
+import org.eclipse.dawnsci.plotting.api.ManagerType;
+import org.eclipse.dawnsci.plotting.api.PlotType;
+import org.eclipse.dawnsci.plotting.api.tool.IToolChangeListener;
+import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
+import org.eclipse.dawnsci.plotting.api.tool.ToolChangeEvent;
+import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
+import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
@@ -291,7 +291,7 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 		final Map<String, MenuAction> subMenus = new LinkedHashMap<String, MenuAction>(3);
 	       	
 		// This list will not be large so we loop over it more than once for each ToolPageRole type
-	    final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.plotting.api.toolPage");
+	    final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.eclipse.dawnsci.plotting.api.toolPage");
 	    
 	    // Menus at top.
 	    for (final IConfigurationElement e : configs) {
@@ -552,7 +552,7 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 		if (id==null)        return null;
 		IToolPage page = toolPages.get(id);
 		if (page==null) {
-		    final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.plotting.api.toolPage");
+		    final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.eclipse.dawnsci.plotting.api.toolPage");
 		    for (final IConfigurationElement e : configs) {
 	        	if (!e.getName().equals("plotting_tool_page")) continue;
 		    	if (id.equals(e.getAttribute("id"))) {
@@ -585,7 +585,7 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 	 * @throws Exception 
 	 */
 	public boolean setToolVisible(final String toolId, final ToolPageRole role, final String viewId) throws Exception {
-		final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.plotting.api.toolPage");
+		final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.eclipse.dawnsci.plotting.api.toolPage");
 	    for (IConfigurationElement e : configs) {
 			
 	    	if (!e.getName().equals("plotting_tool_page")) continue;

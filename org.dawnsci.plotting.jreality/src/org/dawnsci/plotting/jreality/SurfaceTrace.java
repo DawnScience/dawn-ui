@@ -3,15 +3,15 @@ package org.dawnsci.plotting.jreality;
 import java.util.Arrays;
 import java.util.List;
 
-import org.dawnsci.plotting.api.histogram.IImageService;
-import org.dawnsci.plotting.api.histogram.ImageServiceBean;
-import org.dawnsci.plotting.api.trace.ISurfaceTrace;
-import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.roi.SurfacePlotROI;
 import org.dawnsci.plotting.util.PlottingUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
+import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
+import org.eclipse.dawnsci.plotting.api.trace.ISurfaceTrace;
+import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.ui.PlatformUI;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;

@@ -18,19 +18,19 @@ import java.util.Map;
 import java.util.Set;
 
 import org.dawnsci.plotting.Activator;
-import org.dawnsci.plotting.api.IPlottingSystem;
-import org.dawnsci.plotting.api.tool.AbstractToolPage;
-import org.dawnsci.plotting.api.tool.IToolChangeListener;
-import org.dawnsci.plotting.api.tool.IToolContainer;
-import org.dawnsci.plotting.api.tool.IToolPage;
-import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
-import org.dawnsci.plotting.api.tool.IToolPageSystem;
-import org.dawnsci.plotting.api.tool.ToolChangeEvent;
-import org.dawnsci.plotting.api.trace.IImageTrace;
-import org.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.core.commands.common.EventManager;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
+import org.eclipse.dawnsci.plotting.api.tool.IToolChangeListener;
+import org.eclipse.dawnsci.plotting.api.tool.IToolContainer;
+import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
+import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
+import org.eclipse.dawnsci.plotting.api.tool.ToolChangeEvent;
+import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.Separator;
@@ -701,7 +701,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	private String getTitleForToolPage(String toolId) {
 		
 		if (toolTitleOverride!=null) return toolTitleOverride;
-		final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.plotting.api.toolPage");
+		final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.eclipse.dawnsci.plotting.api.toolPage");
 	    for (IConfigurationElement e : configs) {
 			
 	    	if (!e.getName().equals("plotting_tool_page")) continue;
@@ -723,7 +723,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		}
 		
 		if (toolImageOverride!=null) return toolImageOverride;
-		final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.plotting.api.toolPage");
+		final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor("org.eclipse.dawnsci.plotting.api.toolPage");
 	    for (IConfigurationElement e : configs) {
 			
 	    	if (!e.getName().equals("plotting_tool_page")) continue;

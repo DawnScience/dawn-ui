@@ -21,11 +21,11 @@ import org.dawnsci.common.widgets.tree.AmountListener;
 import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.common.widgets.tree.UnitEvent;
 import org.dawnsci.common.widgets.tree.UnitListener;
-import org.dawnsci.plotting.api.IPlottingSystem;
-import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.RegionEditorConstants;
 import org.dawnsci.plotting.tools.utils.ToolUtils;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import uk.ac.diamond.scisoft.analysis.roi.CircularROI;

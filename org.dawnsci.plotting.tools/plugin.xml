@@ -70,7 +70,7 @@
    </extension>
 
    <extension
-         point="org.dawnsci.plotting.api.toolPage">
+         point="org.eclipse.dawnsci.plotting.api.toolPage">
       <plotting_tool_category
             icon="icons/axis.png"
             id="org.dawnsci.plotting.tools.category.Profile"

@@ -1,9 +1,9 @@
 package org.dawnsci.plotting.draw2d.swtxy;
 
-import org.dawnsci.plotting.api.preferences.PlottingConstants;
-import org.dawnsci.plotting.api.trace.ITrace;
-import org.dawnsci.plotting.api.trace.ITraceContainer;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
+import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.dawnsci.plotting.api.trace.ITraceContainer;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.nebula.visualization.xygraph.dataprovider.IDataProvider;

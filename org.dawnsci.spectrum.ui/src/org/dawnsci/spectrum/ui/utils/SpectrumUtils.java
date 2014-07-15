@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.math3.stat.descriptive.MultivariateSummaryStatistics;
-import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.spectrum.ui.file.IContain1DData;
 import org.dawnsci.spectrum.ui.file.ISpectrumFile;
 import org.dawnsci.spectrum.ui.file.SpectrumFileManager;
 import org.dawnsci.spectrum.ui.file.SpectrumInMemory;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;

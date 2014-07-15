@@ -6,8 +6,8 @@ import org.eclipse.draw2d.MouseMotionListener;
 public class MouseMotionAdapter implements MouseMotionListener {
 
 	
-	private org.dawnsci.plotting.api.region.MouseMotionListener deligate;
-	public MouseMotionAdapter(org.dawnsci.plotting.api.region.MouseMotionListener l) {
+	private org.eclipse.dawnsci.plotting.api.region.MouseMotionListener deligate;
+	public MouseMotionAdapter(org.eclipse.dawnsci.plotting.api.region.MouseMotionListener l) {
 		this.deligate = l;
 	}
 	

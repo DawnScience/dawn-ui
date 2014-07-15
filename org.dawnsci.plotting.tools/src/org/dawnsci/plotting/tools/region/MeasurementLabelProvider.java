@@ -3,10 +3,10 @@ package org.dawnsci.plotting.tools.region;
 import java.text.DecimalFormat;
 
 import org.dawb.common.util.number.DoubleUtils;
-import org.dawnsci.plotting.api.axis.ICoordinateSystem;
-import org.dawnsci.plotting.api.region.IRegion;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.RegionEditorConstants;
+import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.swt.graphics.Image;

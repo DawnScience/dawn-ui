@@ -1,13 +1,13 @@
 package org.dawnsci.plotting.system;
 
-import org.dawnsci.plotting.api.axis.IAxis;
-import org.dawnsci.plotting.api.preferences.PlottingConstants;
-import org.dawnsci.plotting.api.trace.ILineTrace;
-import org.dawnsci.plotting.api.trace.ITraceContainer;
-import org.dawnsci.plotting.api.trace.TraceEvent;
-import org.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
+import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ITraceContainer;
+import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
+import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.nebula.visualization.xygraph.dataprovider.IDataProvider;

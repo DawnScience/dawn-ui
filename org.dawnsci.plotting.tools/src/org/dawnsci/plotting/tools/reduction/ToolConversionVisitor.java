@@ -9,10 +9,10 @@ import org.dawb.common.services.conversion.IConversionVisitor;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage.DataReductionInfo;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage.DataReductionSlice;
-import org.dawb.hdf5.HierarchicalDataFactory;
-import org.dawb.hdf5.IHierarchicalDataFile;
-import org.dawb.hdf5.Nexus;
-import org.dawnsci.plotting.api.tool.IToolPage;
+import org.eclipse.dawnsci.hdf5.HierarchicalDataFactory;
+import org.eclipse.dawnsci.hdf5.IHierarchicalDataFile;
+import org.eclipse.dawnsci.hdf5.Nexus;
+import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 

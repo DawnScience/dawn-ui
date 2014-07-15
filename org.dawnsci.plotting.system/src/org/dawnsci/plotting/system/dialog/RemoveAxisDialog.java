@@ -3,9 +3,9 @@ package org.dawnsci.plotting.system.dialog;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dawnsci.plotting.api.IPlottingSystem;
-import org.dawnsci.plotting.api.axis.AxisUtils;
-import org.dawnsci.plotting.api.axis.IAxis;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.axis.AxisUtils;
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;

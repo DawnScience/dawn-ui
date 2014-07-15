@@ -11,12 +11,12 @@
 package org.dawnsci.plotting.preference;
 
 import org.dawnsci.plotting.Activator;
-import org.dawnsci.plotting.api.histogram.HistogramBound;
-import org.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
-import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
-import org.dawnsci.plotting.api.preferences.PlottingConstants;
-import org.dawnsci.plotting.api.trace.IImageTrace.DownsampleType;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
+import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
+import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
+import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
+import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace.DownsampleType;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 

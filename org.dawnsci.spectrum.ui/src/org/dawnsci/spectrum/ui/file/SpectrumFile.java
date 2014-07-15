@@ -6,13 +6,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.dawnsci.plotting.api.IPlottingSystem;
-import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.spectrum.ui.utils.DatasetManager;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

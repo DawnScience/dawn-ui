@@ -2,7 +2,7 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         point="org.dawnsci.slicing.api.slicingSystem">
+         point="org.eclipse.dawnsci.slicing.api.slicingSystem">
       <slice_component
             class="org.dawnsci.slicing.component.SliceSystemImpl"
             id="org.dawnsci.slicing.sliceSystemBasic"

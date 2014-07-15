@@ -3,7 +3,7 @@
 <plugin
 >
    <extension
-         point="org.dawnsci.plotting.api.plottingClass">
+         point="org.eclipse.dawnsci.plotting.api.plottingClass">
       <plottingSystem
             class="org.dawnsci.plotting.system.PlottingSystemImpl"
             id="org.dawb.workbench.editors.plotting.lightWeightPlottingSystem"
@@ -35,7 +35,7 @@
    <!-- Example of how to add a custom action to the plotting toolbar.
    
    <extension
-         point="org.dawnsci.plotting.api.plottingAction">
+         point="org.eclipse.dawnsci.plotting.api.plottingAction">
       <plotting_action
             command_id="org.dawnsci.plotting.system.example.TestCommand"
             icon="icons/error.png"

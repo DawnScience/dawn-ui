@@ -1,6 +1,6 @@
 package org.dawnsci.plotting.jmx;
 
-import org.dawnsci.plotting.api.axis.IAxisSystem;
+import org.eclipse.dawnsci.plotting.api.axis.IAxisSystem;
 
 /**
  * For those that want to reduce dependencies individual interfaces which make up

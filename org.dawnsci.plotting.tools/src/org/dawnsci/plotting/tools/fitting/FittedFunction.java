@@ -5,13 +5,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.dawnsci.plotting.tools.Activator;
-import org.dawnsci.plotting.api.IPlottingSystem;
-import org.dawnsci.plotting.api.annotation.AnnotationUtils;
-import org.dawnsci.plotting.api.annotation.IAnnotation;
-import org.dawnsci.plotting.api.region.IRegion;
-import org.dawnsci.plotting.api.region.RegionUtils;
-import org.dawnsci.plotting.api.trace.ITrace;
-import org.dawnsci.plotting.api.trace.TraceUtils;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.annotation.AnnotationUtils;
+import org.eclipse.dawnsci.plotting.api.annotation.IAnnotation;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
+import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.dawnsci.plotting.api.trace.TraceUtils;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;

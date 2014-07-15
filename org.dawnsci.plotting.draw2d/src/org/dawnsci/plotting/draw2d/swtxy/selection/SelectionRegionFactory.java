@@ -5,12 +5,12 @@ import java.util.HashSet;
 
 import org.dawb.common.services.ITransferService;
 import org.dawb.common.services.ServiceManager;
-import org.dawnsci.plotting.api.IPlottingSystem;
-import org.dawnsci.plotting.api.axis.ICoordinateSystem;
-import org.dawnsci.plotting.api.region.IRegion;
-import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.draw2d.Activator;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.gef.ui.actions.Clipboard;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IContributionManager;

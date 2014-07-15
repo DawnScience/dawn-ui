@@ -16,9 +16,9 @@ import java.util.List;
 
 import org.dawb.common.ui.widgets.LabelFieldEditor;
 import org.dawb.workbench.ui.Activator;
-import org.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
@@ -128,7 +128,7 @@ public class EditorPreferencePage extends FieldEditorPreferencePage implements I
 	public static String[][] getPlottingPreferenceChoices() {
 		
 		final List<String[]> choices = new ArrayList<String[]>(7);
-        IConfigurationElement[] systems = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.plotting.api.plottingClass");
+        IConfigurationElement[] systems = Platform.getExtensionRegistry().getConfigurationElementsFor("org.eclipse.dawnsci.plotting.api.plottingClass");
         for (IConfigurationElement ia : systems) {
         	choices.add(new String[]{ia.getAttribute("visible_type"), ia.getAttribute("id")});
 		}

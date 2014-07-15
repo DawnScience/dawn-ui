@@ -5,8 +5,8 @@ import org.eclipse.draw2d.MouseListener;
 
 public class MouseListenerAdapter implements MouseListener {
 
-	private final org.dawnsci.plotting.api.region.MouseListener deligate;
-	public MouseListenerAdapter(org.dawnsci.plotting.api.region.MouseListener l) {
+	private final org.eclipse.dawnsci.plotting.api.region.MouseListener deligate;
+	public MouseListenerAdapter(org.eclipse.dawnsci.plotting.api.region.MouseListener l) {
 		deligate = l;
 	}
 	public int hashCode() {

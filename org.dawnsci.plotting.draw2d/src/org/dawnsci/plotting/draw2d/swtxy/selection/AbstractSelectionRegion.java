@@ -2,17 +2,17 @@ package org.dawnsci.plotting.draw2d.swtxy.selection;
 
 import java.util.List;
 
-import org.dawnsci.plotting.api.PlotType;
-import org.dawnsci.plotting.api.axis.CoordinateSystemEvent;
-import org.dawnsci.plotting.api.axis.ICoordinateSystem;
-import org.dawnsci.plotting.api.axis.ICoordinateSystemListener;
-import org.dawnsci.plotting.api.region.ROIEvent;
 import org.dawnsci.plotting.draw2d.Activator;
 import org.dawnsci.plotting.draw2d.swtxy.IMobileFigure;
 import org.dawnsci.plotting.draw2d.swtxy.ImageTrace;
 import org.dawnsci.plotting.draw2d.swtxy.RegionBean;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
+import org.eclipse.dawnsci.plotting.api.PlotType;
+import org.eclipse.dawnsci.plotting.api.axis.CoordinateSystemEvent;
+import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
+import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystemListener;
+import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;

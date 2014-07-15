@@ -3,11 +3,11 @@ package org.dawnsci.plotting.tools.powderintegration;
 import java.util.Arrays;
 import java.util.List;
 
-import org.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,8 +1,8 @@
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
-import org.dawnsci.plotting.api.axis.ICoordinateSystem;
-import org.dawnsci.plotting.api.region.IGridSelection;
-import org.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
+import org.eclipse.dawnsci.plotting.api.region.IGridSelection;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.swt.SWT;

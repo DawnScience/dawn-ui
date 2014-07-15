@@ -3,7 +3,7 @@ package org.dawb.workbench.ui.data;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dawnsci.slicing.api.data.ITransferableDataObject;
+import org.eclipse.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;

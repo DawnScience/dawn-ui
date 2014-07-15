@@ -3,8 +3,8 @@ package org.dawnsci.plotting.tools.fitting;
 import java.util.List;
 
 import org.dawnsci.plotting.tools.Activator;
-import org.dawnsci.plotting.api.IPlottingSystem;
-import org.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;

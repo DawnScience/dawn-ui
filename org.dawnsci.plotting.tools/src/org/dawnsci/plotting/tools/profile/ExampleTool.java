@@ -1,7 +1,7 @@
 package org.dawnsci.plotting.tools.profile;
 
 import org.dawb.common.ui.util.GridUtils;
-import org.dawnsci.plotting.api.tool.AbstractToolPage;
+import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;

@@ -1,13 +1,13 @@
 package org.dawnsci.slicing.component;
 
-import org.dawnsci.plotting.api.PlotType;
-import org.dawnsci.slicing.api.system.ISliceSystem;
-import org.dawnsci.slicing.api.system.SliceSource;
-import org.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.plotting.api.PlotType;
+import org.eclipse.dawnsci.slicing.api.system.ISliceSystem;
+import org.eclipse.dawnsci.slicing.api.system.SliceSource;
+import org.eclipse.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

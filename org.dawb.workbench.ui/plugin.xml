@@ -361,7 +361,7 @@
       <serviceFactory
             factoryClass="org.dawb.workbench.ui.transferable.TransferableDataService">
          <service
-               serviceClass="org.dawnsci.slicing.api.data.ITransferableDataService">
+               serviceClass="org.eclipse.dawnsci.slicing.api.data.ITransferableDataService">
          </service>
       </serviceFactory>
    </extension>

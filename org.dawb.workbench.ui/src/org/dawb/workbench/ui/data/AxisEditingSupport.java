@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.dawb.workbench.ui.transferable.TransferableDataObject;
 import org.dawnsci.plotting.AbstractPlottingSystem;
-import org.dawnsci.plotting.api.IPlottingSystem;
-import org.dawnsci.slicing.api.data.ITransferableDataObject;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ComboBoxCellEditor;

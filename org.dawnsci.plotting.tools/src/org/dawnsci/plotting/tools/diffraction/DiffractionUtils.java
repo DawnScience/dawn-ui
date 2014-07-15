@@ -1,9 +1,9 @@
 package org.dawnsci.plotting.tools.diffraction;
 
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
-import org.dawnsci.plotting.api.IPlottingSystem;
-import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

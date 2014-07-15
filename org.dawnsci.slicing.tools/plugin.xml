@@ -2,7 +2,7 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         point="org.dawnsci.slicing.api.slicingTool">
+         point="org.eclipse.dawnsci.slicing.api.slicingTool">
       <slicing_tool
             class="org.dawnsci.slicing.tools.plot.LineSlicingTool"
             icon="icons/TraceLine.png"

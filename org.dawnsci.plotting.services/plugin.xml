@@ -17,7 +17,7 @@
       <serviceFactory
             factoryClass="org.dawnsci.plotting.services.ImageService">
          <service
-               serviceClass="org.dawnsci.plotting.api.histogram.IImageService">
+               serviceClass="org.eclipse.dawnsci.plotting.api.histogram.IImageService">
          </service>
       </serviceFactory>
    </extension>

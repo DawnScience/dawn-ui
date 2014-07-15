@@ -11,7 +11,7 @@ package org.dawb.workbench.ui.data;
 
 import java.util.Arrays;
 
-import org.dawnsci.slicing.api.data.ITransferableDataObject;
+import org.eclipse.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 

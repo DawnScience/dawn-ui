@@ -1,9 +1,9 @@
 package org.dawnsci.plotting.system;
 
 import org.dawb.common.ui.menu.MenuAction;
-import org.dawnsci.plotting.api.region.IRegionAction;
-import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
+import org.eclipse.dawnsci.plotting.api.region.IRegionAction;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.slf4j.Logger;

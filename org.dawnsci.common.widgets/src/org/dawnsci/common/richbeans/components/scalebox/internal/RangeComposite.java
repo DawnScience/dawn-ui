@@ -18,7 +18,7 @@ import org.dawnsci.common.richbeans.components.wrappers.LabelWrapper;
 import org.dawnsci.common.richbeans.event.ValueAdapter;
 import org.dawnsci.common.richbeans.event.ValueEvent;
 import org.dawnsci.common.richbeans.event.ValueListener;
-import org.dawnsci.doe.DOEUtils;
+import org.eclipse.dawnsci.doe.DOEUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;

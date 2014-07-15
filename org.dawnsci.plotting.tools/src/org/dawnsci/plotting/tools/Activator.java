@@ -1,8 +1,8 @@
 package org.dawnsci.plotting.tools;
 
-import org.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;

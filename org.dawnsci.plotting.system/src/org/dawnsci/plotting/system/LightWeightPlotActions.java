@@ -10,23 +10,6 @@ import java.util.Map;
 
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
-import org.dawnsci.plotting.api.ActionType;
-import org.dawnsci.plotting.api.ManagerType;
-import org.dawnsci.plotting.api.PlotType;
-import org.dawnsci.plotting.api.axis.AxisUtils;
-import org.dawnsci.plotting.api.axis.IAxis;
-import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
-import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
-import org.dawnsci.plotting.api.preferences.PlottingConstants;
-import org.dawnsci.plotting.api.preferences.ToolbarConfigurationConstants;
-import org.dawnsci.plotting.api.region.IRegion.RegionType;
-import org.dawnsci.plotting.api.region.IRegionAction;
-import org.dawnsci.plotting.api.region.RegionUtils;
-import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
-import org.dawnsci.plotting.api.trace.IImageTrace;
-import org.dawnsci.plotting.api.trace.ITrace;
-import org.dawnsci.plotting.api.trace.ITraceListener;
-import org.dawnsci.plotting.api.trace.TraceEvent;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.dawnsci.plotting.system.dialog.AddAxisDialog;
@@ -39,6 +22,23 @@ import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.dawnsci.plotting.api.ActionType;
+import org.eclipse.dawnsci.plotting.api.ManagerType;
+import org.eclipse.dawnsci.plotting.api.PlotType;
+import org.eclipse.dawnsci.plotting.api.axis.AxisUtils;
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
+import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
+import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
+import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
+import org.eclipse.dawnsci.plotting.api.preferences.ToolbarConfigurationConstants;
+import org.eclipse.dawnsci.plotting.api.region.IRegionAction;
+import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
+import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
@@ -155,7 +155,7 @@ class LightWeightPlotActions {
 		
 		final ICommandService service = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
 
-		final IConfigurationElement[] eles = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.plotting.api.plottingAction");
+		final IConfigurationElement[] eles = Platform.getExtensionRegistry().getConfigurationElementsFor("org.eclipse.dawnsci.plotting.api.plottingAction");
 	    if (eles==null) return;
 	    
 	    for (IConfigurationElement ie : eles) {

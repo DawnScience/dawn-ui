@@ -3,7 +3,6 @@ package org.dawnsci.spectrum.ui.views;
 import java.util.List;
 
 import org.dawb.common.ui.menu.MenuAction;
-import org.dawnsci.plotting.api.IPlottingSystem;
 import org.dawnsci.spectrum.ui.Activator;
 import org.dawnsci.spectrum.ui.file.IContain1DData;
 import org.dawnsci.spectrum.ui.file.ISpectrumFile;
@@ -29,6 +28,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;

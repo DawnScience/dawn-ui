@@ -8,13 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.dawnsci.plotting.api.IPlottingSystem;
-import org.dawnsci.plotting.api.PlottingFactory;
-import org.dawnsci.plotting.api.filter.IFilterDecorator;
-import org.dawnsci.plotting.api.filter.IPlottingFilter;
-import org.dawnsci.plotting.api.filter.UniqueNamedPlottingFilter;
 import org.dawnsci.python.rpc.AnalysisRpcPythonPyDevService;
-import org.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
@@ -22,6 +16,12 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.PlottingFactory;
+import org.eclipse.dawnsci.plotting.api.filter.IFilterDecorator;
+import org.eclipse.dawnsci.plotting.api.filter.IPlottingFilter;
+import org.eclipse.dawnsci.plotting.api.filter.UniqueNamedPlottingFilter;
+import org.eclipse.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

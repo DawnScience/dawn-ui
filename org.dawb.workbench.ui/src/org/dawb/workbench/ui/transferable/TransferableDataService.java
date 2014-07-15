@@ -1,8 +1,8 @@
 package org.dawb.workbench.ui.transferable;
 
 import org.dawb.common.services.IExpressionObject;
-import org.dawnsci.slicing.api.data.ITransferableDataObject;
-import org.dawnsci.slicing.api.data.ITransferableDataService;
+import org.eclipse.dawnsci.slicing.api.data.ITransferableDataObject;
+import org.eclipse.dawnsci.slicing.api.data.ITransferableDataService;
 import org.eclipse.ui.services.AbstractServiceFactory;
 import org.eclipse.ui.services.IServiceLocator;
 

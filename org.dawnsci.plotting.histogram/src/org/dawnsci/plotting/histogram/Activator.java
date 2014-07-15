@@ -2,8 +2,8 @@ package org.dawnsci.plotting.histogram;
 
 import java.util.Hashtable;
 
-import org.dawnsci.plotting.api.histogram.IPaletteService;
 import org.dawnsci.plotting.histogram.service.PaletteService;
+import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;

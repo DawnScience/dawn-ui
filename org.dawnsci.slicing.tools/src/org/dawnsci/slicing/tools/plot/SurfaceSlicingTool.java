@@ -1,11 +1,11 @@
 package org.dawnsci.slicing.tools.plot;
 
-import org.dawnsci.plotting.api.PlotType;
-import org.dawnsci.plotting.api.tool.IToolPageSystem;
-import org.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
-import org.dawnsci.slicing.api.system.DimsDataList;
-import org.dawnsci.slicing.api.system.AxisType;
-import org.dawnsci.slicing.api.tool.AbstractSlicingTool;
+import org.eclipse.dawnsci.plotting.api.PlotType;
+import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
+import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
+import org.eclipse.dawnsci.slicing.api.system.AxisType;
+import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
+import org.eclipse.dawnsci.slicing.api.tool.AbstractSlicingTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

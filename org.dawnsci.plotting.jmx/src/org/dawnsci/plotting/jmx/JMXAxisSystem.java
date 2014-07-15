@@ -2,10 +2,10 @@ package org.dawnsci.plotting.jmx;
 
 import java.util.List;
 
-import org.dawnsci.plotting.api.axis.IAxis;
-import org.dawnsci.plotting.api.axis.IAxisSystem;
-import org.dawnsci.plotting.api.axis.IClickListener;
-import org.dawnsci.plotting.api.axis.IPositionListener;
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
+import org.eclipse.dawnsci.plotting.api.axis.IAxisSystem;
+import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
+import org.eclipse.dawnsci.plotting.api.axis.IPositionListener;
 
 /**
  * Class for calling remove plotting system methods from Jython.

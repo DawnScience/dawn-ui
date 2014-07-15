@@ -1,7 +1,7 @@
 package org.dawnsci.slicing.component;
 
 import org.dawnsci.common.widgets.celleditor.SpinnerCellEditor;
-import org.dawnsci.slicing.api.system.DimsData;
+import org.eclipse.dawnsci.slicing.api.system.DimsData;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;

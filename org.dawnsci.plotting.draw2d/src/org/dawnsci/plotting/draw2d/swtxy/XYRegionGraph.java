@@ -5,13 +5,13 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import org.dawnsci.plotting.api.axis.IAxis;
-import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
-import org.dawnsci.plotting.api.preferences.BasePlottingConstants;
-import org.dawnsci.plotting.api.region.IRegionListener;
-import org.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
+import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
+import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
+import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;

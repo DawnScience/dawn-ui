@@ -12,8 +12,8 @@ package org.dawb.workbench.ui;
 import java.util.Hashtable;
 
 import org.dawb.workbench.ui.transferable.TransferableDataService;
-import org.dawnsci.slicing.api.data.ITransferableDataService;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.dawnsci.slicing.api.data.ITransferableDataService;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;

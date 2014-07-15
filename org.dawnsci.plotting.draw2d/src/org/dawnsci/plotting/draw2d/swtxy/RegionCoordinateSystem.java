@@ -3,14 +3,14 @@ package org.dawnsci.plotting.draw2d.swtxy;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.dawnsci.plotting.api.axis.AxisEvent;
-import org.dawnsci.plotting.api.axis.CoordinateSystemEvent;
-import org.dawnsci.plotting.api.axis.IAxis;
-import org.dawnsci.plotting.api.axis.IAxisListener;
-import org.dawnsci.plotting.api.axis.ICoordinateSystem;
-import org.dawnsci.plotting.api.axis.ICoordinateSystemListener;
-import org.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
-import org.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.dawnsci.plotting.api.axis.AxisEvent;
+import org.eclipse.dawnsci.plotting.api.axis.CoordinateSystemEvent;
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
+import org.eclipse.dawnsci.plotting.api.axis.IAxisListener;
+import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
+import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystemListener;
+import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
 

@@ -4,7 +4,7 @@
    <extension-point id="org.dawnsci.plotting.histogram.channelColourScheme" name="Single Channel Colour Scheme" schema="schema/channelColourScheme.exsd"/>
    <extension-point id="org.dawnsci.plotting.histogram.colourScheme" name="Colour Scheme" schema="schema/colourScheme.exsd"/>
    <extension
-         point="org.dawnsci.plotting.api.toolPage">
+         point="org.eclipse.dawnsci.plotting.api.toolPage">
       <plotting_tool_page
             class="org.dawnsci.plotting.histogram.HistogramToolPage"
             icon="icons/brightness_contrast.gif"
@@ -364,7 +364,7 @@
       <serviceFactory
             factoryClass="org.dawnsci.plotting.histogram.service.PaletteService">
          <service
-               serviceClass="org.dawnsci.plotting.api.histogram.IPaletteService">
+               serviceClass="org.eclipse.dawnsci.plotting.api.histogram.IPaletteService">
          </service>
       </serviceFactory>
    </extension>

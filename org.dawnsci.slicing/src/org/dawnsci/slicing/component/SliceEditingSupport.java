@@ -7,12 +7,12 @@ import java.util.regex.Pattern;
 
 import org.dawb.common.ui.components.cell.ScaleCellEditor;
 import org.dawnsci.common.widgets.celleditor.PlayCellEditor;
-import org.dawnsci.plotting.api.PlotType;
 import org.dawnsci.slicing.Activator; // On purpose! Gets preference from expected place.
-import org.dawnsci.slicing.api.system.AxisType;
-import org.dawnsci.slicing.api.system.DimsData;
-import org.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.plotting.api.PlotType;
+import org.eclipse.dawnsci.slicing.api.system.AxisType;
+import org.eclipse.dawnsci.slicing.api.system.DimsData;
+import org.eclipse.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;

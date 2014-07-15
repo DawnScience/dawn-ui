@@ -3,8 +3,8 @@ package org.dawnsci.plotting.views;
 import java.util.Collection;
 
 import org.dawnsci.plotting.Activator;
-import org.dawnsci.plotting.api.region.IRegion;
-import org.dawnsci.plotting.api.tool.AbstractToolPage;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;

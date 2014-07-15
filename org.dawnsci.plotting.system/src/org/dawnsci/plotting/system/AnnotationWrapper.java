@@ -1,6 +1,6 @@
 package org.dawnsci.plotting.system;
 
-import org.dawnsci.plotting.api.annotation.IAnnotation;
+import org.eclipse.dawnsci.plotting.api.annotation.IAnnotation;
 import org.eclipse.nebula.visualization.xygraph.figures.Annotation;
 import org.eclipse.nebula.visualization.xygraph.figures.Axis;
 import org.eclipse.nebula.visualization.xygraph.figures.Annotation.CursorLineStyle;

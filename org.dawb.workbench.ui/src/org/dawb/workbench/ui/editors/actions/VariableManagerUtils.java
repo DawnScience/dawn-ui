@@ -12,8 +12,8 @@ package org.dawb.workbench.ui.editors.actions;
 
 import org.dawb.common.services.IVariableManager;
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawnsci.plotting.api.tool.IToolContainer;
-import org.dawnsci.plotting.api.tool.IToolPage;
+import org.eclipse.dawnsci.plotting.api.tool.IToolContainer;
+import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.IPage;

@@ -12,7 +12,7 @@ package org.dawnsci.common.richbeans.components.scalebox.internal;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dawnsci.doe.DOEUtils;
+import org.eclipse.dawnsci.doe.DOEUtils;
 
 /**
  * Vanilla class to act as a bean for a single value.

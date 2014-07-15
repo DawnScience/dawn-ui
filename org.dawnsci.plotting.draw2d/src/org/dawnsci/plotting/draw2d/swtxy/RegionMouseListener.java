@@ -1,7 +1,7 @@
 package org.dawnsci.plotting.draw2d.swtxy;
 
-import org.dawnsci.plotting.api.region.RegionEvent;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
+import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
 import org.eclipse.draw2d.MouseEvent;
 import org.eclipse.draw2d.MouseListener;
 import org.eclipse.draw2d.MouseMotionListener;

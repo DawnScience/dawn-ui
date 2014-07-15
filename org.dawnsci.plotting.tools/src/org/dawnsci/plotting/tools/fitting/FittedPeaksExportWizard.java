@@ -3,7 +3,7 @@ package org.dawnsci.plotting.tools.fitting;
 import java.io.File;
 
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawnsci.plotting.api.tool.IToolContainer;
+import org.eclipse.dawnsci.plotting.api.tool.IToolContainer;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;

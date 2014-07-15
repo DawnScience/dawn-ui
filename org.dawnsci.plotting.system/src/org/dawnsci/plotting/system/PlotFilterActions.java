@@ -1,10 +1,10 @@
 package org.dawnsci.plotting.system;
 
 import org.dawb.common.ui.menu.MenuAction;
-import org.dawnsci.plotting.api.IPlottingSystem;
-import org.dawnsci.plotting.api.PlottingFactory;
-import org.dawnsci.plotting.api.filter.AbstractPlottingFilter;
-import org.dawnsci.plotting.api.filter.IFilterDecorator;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.PlottingFactory;
+import org.eclipse.dawnsci.plotting.api.filter.AbstractPlottingFilter;
+import org.eclipse.dawnsci.plotting.api.filter.IFilterDecorator;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 

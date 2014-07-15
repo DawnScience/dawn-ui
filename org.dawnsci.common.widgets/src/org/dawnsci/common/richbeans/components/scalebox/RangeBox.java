@@ -16,7 +16,7 @@ import org.dawnsci.common.richbeans.beans.IExpressionManager;
 import org.dawnsci.common.richbeans.beans.IRangeWidget;
 import org.dawnsci.common.richbeans.components.scalebox.internal.RangeDialog;
 import org.dawnsci.common.widgets.Activator;
-import org.dawnsci.doe.DOEUtils;
+import org.eclipse.dawnsci.doe.DOEUtils;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;

@@ -2,9 +2,9 @@ package org.dawnsci.plotting.tools.profile;
 
 import java.util.Collection;
 
-import org.dawnsci.plotting.api.region.IRegion;
-import org.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;

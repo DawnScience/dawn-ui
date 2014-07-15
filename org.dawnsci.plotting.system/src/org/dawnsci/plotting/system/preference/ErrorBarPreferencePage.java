@@ -1,7 +1,7 @@
 package org.dawnsci.plotting.system.preference;
 
-import org.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.dawnsci.plotting.system.PlottingSystemActivator;
+import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IntegerFieldEditor;

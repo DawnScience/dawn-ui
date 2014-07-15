@@ -1,6 +1,6 @@
 package org.dawnsci.plotting.histogram.functions.classes;
 
-import org.dawnsci.plotting.api.histogram.ITransferFunction;
+import org.eclipse.dawnsci.plotting.api.histogram.ITransferFunction;
 
 public abstract class AbstractTransferFunction implements ITransferFunction {
 

@@ -10,11 +10,11 @@ import java.util.Map;
 
 import javax.vecmath.Vector3d;
 
-import org.dawnsci.plotting.api.trace.IImageTrace;
-import org.dawnsci.plotting.api.trace.ITrace;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.Vector3dutil;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

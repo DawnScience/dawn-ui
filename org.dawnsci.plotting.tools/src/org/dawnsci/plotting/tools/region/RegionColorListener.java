@@ -1,6 +1,6 @@
 package org.dawnsci.plotting.tools.region;
 
-import org.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;

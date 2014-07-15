@@ -1,10 +1,10 @@
 package org.dawnsci.plotting.services;
 
-import org.dawnsci.plotting.api.IPlottingService;
-import org.dawnsci.plotting.api.IPlottingSystem;
-import org.dawnsci.plotting.api.PlottingFactory;
-import org.dawnsci.plotting.api.filter.IFilterDecorator;
-import org.dawnsci.plotting.api.tool.IToolPageSystem;
+import org.eclipse.dawnsci.plotting.api.IPlottingService;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.PlottingFactory;
+import org.eclipse.dawnsci.plotting.api.filter.IFilterDecorator;
+import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 
 public class PlottingServiceImpl implements IPlottingService {
 	

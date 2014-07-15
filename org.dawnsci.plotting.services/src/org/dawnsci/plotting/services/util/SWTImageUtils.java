@@ -16,9 +16,9 @@
 
 package org.dawnsci.plotting.services.util;
 
-import org.dawnsci.plotting.api.histogram.IImageService;
-import org.dawnsci.plotting.api.histogram.ITransferFunction;
-import org.dawnsci.plotting.api.histogram.ImageServiceBean;
+import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
+import org.eclipse.dawnsci.plotting.api.histogram.ITransferFunction;
+import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;

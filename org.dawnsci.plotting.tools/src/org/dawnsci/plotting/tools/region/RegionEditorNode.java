@@ -9,8 +9,8 @@
 package org.dawnsci.plotting.tools.region;
 
 import org.dawnsci.common.widgets.tree.LabelNode;
-import org.dawnsci.plotting.api.IPlottingSystem;
-import org.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
 
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 

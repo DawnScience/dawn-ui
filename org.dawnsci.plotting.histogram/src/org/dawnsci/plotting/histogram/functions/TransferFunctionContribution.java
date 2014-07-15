@@ -1,8 +1,8 @@
 package org.dawnsci.plotting.histogram.functions;
 
-import org.dawnsci.plotting.api.histogram.ITransferFunction;
 import org.dawnsci.plotting.histogram.functions.classes.AbstractTransferFunction;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.dawnsci.plotting.api.histogram.ITransferFunction;
 
 /**
  * This class wrappers a Transfer Function extension point so that it can be easily accessed

@@ -1,10 +1,10 @@
 package org.dawnsci.plotting.system.example;
 
-import org.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 
 public class TestCommand extends AbstractHandler implements IHandler {
 

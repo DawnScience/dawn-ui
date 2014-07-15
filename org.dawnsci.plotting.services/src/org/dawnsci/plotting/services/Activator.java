@@ -2,9 +2,9 @@ package org.dawnsci.plotting.services;
 
 import java.util.Hashtable;
 
-import org.dawnsci.plotting.api.IPlottingService;
-import org.dawnsci.plotting.api.histogram.IImageService;
-import org.dawnsci.plotting.api.region.IRegionService;
+import org.eclipse.dawnsci.plotting.api.IPlottingService;
+import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
+import org.eclipse.dawnsci.plotting.api.region.IRegionService;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
