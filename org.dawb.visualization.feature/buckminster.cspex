@@ -5,7 +5,6 @@
 	xmlns="http://www.eclipse.org/buckminster/CSpec-1.0">
     <dependencies>
         <dependency name="org.dawb.test" componentType="osgi.bundle"/>
-        <dependency name="org.dawb.fable.imageviewer.test" componentType="osgi.bundle"/>
         <dependency name="org.dawb.workbench.ui.test" componentType="osgi.bundle"/>
     </dependencies>
 	<generators>
