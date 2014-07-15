@@ -15,6 +15,7 @@ import java.beans.XMLEncoder;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -31,8 +32,8 @@ import org.dawnsci.slicing.Activator;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
-import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
+import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
@@ -81,8 +82,11 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LazyDataset;
+import uk.ac.diamond.scisoft.analysis.io.IDataHolder;
+import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.io.SliceObject;
 
 
@@ -922,4 +926,32 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		return enabled;
 	}
 
+	/**
+	 * Utility method used to save out 3D datasets as double[][][]
+	 * @param args
+	 * @throws Exception
+	 */
+	public static void main(String[] args) throws Exception {
+		
+		final IDataHolder holder = LoaderFactory.getData("C:/Users/fcp94556/Desktop/test.nxs");
+		final IDataset    set    = holder.getLazyDataset("/entry1/data/data").getSlice();
+		final double[][][] da    = new double[set.getShape()[0]][set.getShape()[1]][set.getShape()[2]];
+		for (int i = 0; i < set.getShape()[0]; i++) {
+			for (int j = 0; j < set.getShape()[1]; j++) {
+				for (int k = 0; k < set.getShape()[2]; k++) {
+					da[i][j][k] = set.getDouble(i,j,k);
+				}
+			}
+		}
+		
+		FileOutputStream fout = new FileOutputStream("C:\\Users\\fcp94556\\Desktop\\test.ser");
+		ObjectOutputStream oos = new ObjectOutputStream(fout);
+		try {
+			oos.writeObject(da);
+		} finally {
+			oos.close();
+		}
+		
+		
+	}
 }
