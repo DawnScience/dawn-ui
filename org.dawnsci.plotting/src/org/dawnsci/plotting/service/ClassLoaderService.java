@@ -25,8 +25,12 @@ public class ClassLoaderService extends AbstractServiceFactory implements IClass
 
 	private ClassLoader originalLoader;
 	
-	public ClassLoaderService() {
+	static {
 		System.out.println("Starting plotting class loader service");
+	}
+	
+	public ClassLoaderService() {
+		// Important do nothing here, OSGI may start the service more than once.
 	}
 	
 	@Override

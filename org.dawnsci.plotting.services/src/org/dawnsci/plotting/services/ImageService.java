@@ -88,8 +88,11 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		// This now applies for the whole workbench
 	}
 
-	public ImageService() {
+	static {
 		System.out.println("Starting image service");
+	}
+	public ImageService() {
+		// Important do nothing here, OSGI may start the service more than once.
 	}
 	
 	/**

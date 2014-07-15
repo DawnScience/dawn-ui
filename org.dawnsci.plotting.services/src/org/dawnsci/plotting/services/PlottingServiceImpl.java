@@ -8,8 +8,11 @@ import org.dawnsci.plotting.api.tool.IToolPageSystem;
 
 public class PlottingServiceImpl implements IPlottingService {
 	
-	public PlottingServiceImpl() {
+	static {
 		System.out.println("Starting plotting service");
+	}
+	public PlottingServiceImpl() {
+		// Important do nothing here, OSGI may start the service more than once.
 	}
 
 	@Override
