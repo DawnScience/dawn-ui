@@ -58,7 +58,6 @@ openFile
    </features>
 
    <configurations>
-      <plugin id="uk.ac.diamond.scisoft" autoStart="true" startLevel="1" />
       <property name="preferenceCustomization" value="platform:/feature/uk.ac.diamond.dawn.base.product.feature/plugin_customization.ini" />
    </configurations>
 
