@@ -87,7 +87,7 @@
            Fix to http://jira.diamond.ac.uk/browse/SCI-1200
        -->
       <editor
-            class="org.dawb.hdf5.editor.H5Editor"
+            class="org.eclipse.dawnsci.hdf5.editor.H5Editor"
             default="false"
             extensions="h5, hd5, hdf5, nxs, nexus, hdf, mat"
             icon="icons/h5_editor.png"
@@ -315,7 +315,7 @@
       </wizard>
       <wizard
             category="org.edna.common.ui.project.DataCategory"
-            class="org.dawb.hdf5.editor.H5Wizard"
+            class="org.eclipse.dawnsci.hdf5.editor.H5Wizard"
             icon="icons/h5_editor.png"
             id="org.edna.common.ui.project.H5Wizard"
             name="H5 File"
