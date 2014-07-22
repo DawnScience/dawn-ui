@@ -293,7 +293,7 @@ public class MaskObject {
 	 */
 	private void toggleMask(MaskOperation op, boolean mv, int y, int x) {
 		if (maskDataset.getBoolean(y,x)!=mv) {
-			op.addVertex(mv, y, x);		
+			op.addVertex(mv, y, x);
 		}
 	}
 	
@@ -334,7 +334,7 @@ public class MaskObject {
 	}
 
 	/**
-	 * Processes the while of the dataset and sets those values in bounds 
+	 * Processes the whole of the dataset and sets those values in bounds 
 	 * to be false and those outside to be true in the mask.
 	 * 
 	 * Nullifies the mask if max and min are null.
@@ -581,7 +581,7 @@ public class MaskObject {
 							continue;
 						try {
 							if (roi.isNearOutline(x, y, distance)) {
-								toggleMask(op, !isMasking, y, x);
+								op.addVertex(!isMasking, y, x);
 							}
 						} catch (Throwable ne) {
 							logger.trace("Cannot process point " + (new Point(x, y)), ne);
