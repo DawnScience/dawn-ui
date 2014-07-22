@@ -505,6 +505,9 @@ public class MaskObject {
 			
 			// We use the bounding box of the region.
 			final IRectangularROI bounds = roi.getBounds();
+			if (bounds == null)
+				return; // unbounded region
+
 			final double[] beg = bounds.getPoint();
 			final double[] end = bounds.getEndPoint();
 
