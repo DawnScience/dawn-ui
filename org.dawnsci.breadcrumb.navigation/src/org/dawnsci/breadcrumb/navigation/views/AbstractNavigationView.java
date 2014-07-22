@@ -114,7 +114,7 @@ public abstract class AbstractNavigationView extends ViewPart implements ISelect
 	 * 
 	 * @return the label provider for the breadcrumbs
 	 */
-	protected abstract IStyledTreeLabelProvider createBeadcrumbLabelProvider();
+	protected abstract IStyledTreeLabelProvider createBreadcrumbLabelProvider();
 
 	/**
 	 * Please implement to return your implementation of the StyledTreeBreadcrumbViewer
@@ -212,7 +212,7 @@ public abstract class AbstractNavigationView extends ViewPart implements ISelect
 		}
 		
 		ITreeContentProvider prov = new TreeNodeContentProvider();
-		bviewer.setLabelProvider(createBeadcrumbLabelProvider());
+		bviewer.setLabelProvider(createBreadcrumbLabelProvider());
 		bviewer.setToolTipLabelProvider(new ColumnLabelProvider());
 		bviewer.setContentProvider(prov);
 		
