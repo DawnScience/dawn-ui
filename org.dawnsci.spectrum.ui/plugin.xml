@@ -43,13 +43,6 @@
             name="Datasets"
             restorable="true">
       </view>
-      <view
-            class="org.dawnsci.spectrum.ui.views.SpectrumFileView"
-            icon="icons/spectrumpe.png"
-            id="org.dawnsci.spectrum.ui.views.SpectrumFileView"
-            name="File Navigator"
-            restorable="true">
-      </view>
    </extension>
    <extension
          point="org.eclipse.ui.navigator.navigatorContent">
@@ -270,6 +263,14 @@
                tooltip="Refresh file tree">
          </command>
       </menuContribution>
+   </extension>
+   <extension
+         point="uk.ac.diamond.sda.navigator.openFile">
+      <fileOpen
+            class="org.dawnsci.spectrum.ui.views.SpectrumFileOpen"
+            id="org.dawnsci.spectrum.ui.views.spectrumFileOpen"
+            perspective="org.dawnsci.spectrum.ui.perspective">
+      </fileOpen>
    </extension>
 
 </plugin>

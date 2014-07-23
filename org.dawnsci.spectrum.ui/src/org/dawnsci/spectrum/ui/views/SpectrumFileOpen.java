@@ -10,17 +10,16 @@ import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.sda.navigator.views.FileView;
+import uk.ac.diamond.sda.navigator.views.IOpenFileAction;
 
-public class SpectrumFileView extends FileView {
+public class SpectrumFileOpen implements IOpenFileAction {
 	
-	public static final String ID = "org.dawnsci.spectrum.ui.views.SpectrumFileView";
 	
-	private static final Logger logger = LoggerFactory.getLogger(SpectrumFileView.class);
+	private static final Logger logger = LoggerFactory.getLogger(SpectrumFileOpen.class);
 	
 	@Override
-	public void openSelectedFile() {
-		final Path file = getSelectedPath();
+	public void openFile(Path file) {
+
 		if (file==null) return;
 		
 		if (!Files.isDirectory(file)) {
