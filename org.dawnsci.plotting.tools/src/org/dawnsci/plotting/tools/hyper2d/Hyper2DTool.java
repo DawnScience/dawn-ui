@@ -1,24 +1,21 @@
 package org.dawnsci.plotting.tools.hyper2d;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.dawnsci.plotting.tools.Activator;
-import org.dawnsci.plotting.tools.powderintegration.PowderIntegrationTool;
 import org.dawnsci.slicing.tools.hyper.HyperComponent;
 import org.dawnsci.slicing.tools.hyper.IDatasetROIReducer;
 import org.dawnsci.slicing.tools.hyper.IProvideReducerActions;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
-import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
-import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -27,8 +24,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Slice;
@@ -78,11 +73,8 @@ public class Hyper2DTool extends AbstractToolPage {
 		
 		IDataset ds = im.getData();
 		List<IDataset> ax = im.getAxes();
-		List<AbstractDataset> axds = new ArrayList<AbstractDataset>(ax.size());
 		
-		for (IDataset id : ax) axds.add(DatasetUtils.convertToAbstractDataset(id));
-		
-		component.setData(ds, axds, new Slice[2], new int[]{0,1}, new MainReducer(), new SideReducer());
+		component.setData(ds, ax, new Slice[2], new int[]{0,1}, new MainReducer(), new SideReducer());
 	}
 	
 	@Override
@@ -119,7 +111,7 @@ public class Hyper2DTool extends AbstractToolPage {
 
 	private class MainReducer implements IDatasetROIReducer, IProvideReducerActions {
 
-		AbstractDataset axis;
+		IDataset axis;
 		
 		@Override
 		public boolean isOutput1D() {
@@ -127,7 +119,7 @@ public class Hyper2DTool extends AbstractToolPage {
 		}
 
 		@Override
-		public IDataset reduce(ILazyDataset data, List<AbstractDataset> axes,
+		public IDataset reduce(ILazyDataset data, List<IDataset> axes,
 				IROI roi, Slice[] slices, int[] order) {
 			
 			axis = axes.get(0);
@@ -149,7 +141,7 @@ public class Hyper2DTool extends AbstractToolPage {
 		}
 
 		@Override
-		public IROI getInitialROI(List<AbstractDataset> axes, int[] order) {
+		public IROI getInitialROI(List<IDataset> axes, int[] order) {
 			double min = axes.get(1).getSlice().min().doubleValue();
 			double max = axes.get(1).getSlice().max().doubleValue();
 
@@ -177,7 +169,7 @@ public class Hyper2DTool extends AbstractToolPage {
 	
 	private class SideReducer implements IDatasetROIReducer, IProvideReducerActions {
 
-	AbstractDataset axis;
+		IDataset axis;
 		
 		@Override
 		public boolean isOutput1D() {
@@ -185,7 +177,7 @@ public class Hyper2DTool extends AbstractToolPage {
 		}
 
 		@Override
-		public IDataset reduce(ILazyDataset data, List<AbstractDataset> axes,
+		public IDataset reduce(ILazyDataset data, List<IDataset> axes,
 				IROI roi, Slice[] slices, int[] order) {
 			
 			axis = axes.get(1);
@@ -206,7 +198,7 @@ public class Hyper2DTool extends AbstractToolPage {
 		}
 
 		@Override
-		public IROI getInitialROI(List<AbstractDataset> axes, int[] order) {
+		public IROI getInitialROI(List<IDataset> axes, int[] order) {
 			double min = axes.get(0).getSlice().min().doubleValue();
 			double max = axes.get(0).getSlice().max().doubleValue();
 

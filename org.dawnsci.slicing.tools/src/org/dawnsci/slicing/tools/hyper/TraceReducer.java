@@ -6,19 +6,18 @@ import java.util.List;
 
 import org.dawnsci.slicing.tools.Activator;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
-import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.swt.SWT;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Slice;
@@ -32,11 +31,11 @@ public class TraceReducer implements IDatasetROIReducer, IProvideReducerActions 
 	private List<IDataset> traceAxes;
 	
 	@Override
-	public IDataset reduce(ILazyDataset data, List<AbstractDataset> axes,
+	public IDataset reduce(ILazyDataset data, List<IDataset> axes,
 			IROI roi, Slice[] slices, int[] order) {
 		if (roi instanceof RectangularROI) {
 			
-			AbstractDataset output = (AbstractDataset)ROISliceUtils.getDataset(data, (RectangularROI)roi, slices, new int[]{order[0],order[1]}, 1);
+			Dataset output = (Dataset)ROISliceUtils.getDataset(data, (RectangularROI)roi, slices, new int[]{order[0],order[1]}, 1);
 			
 			if (order[0] > order[1]) output = output.mean(order[0]).mean(order[1]);
 			else output = output.mean(order[1]).mean(order[0]);
@@ -66,7 +65,7 @@ public class TraceReducer implements IDatasetROIReducer, IProvideReducerActions 
 	
 	
 	@Override
-	public IROI getInitialROI(List<AbstractDataset> axes, int[] order) {
+	public IROI getInitialROI(List<IDataset> axes, int[] order) {
 		int[] x = axes.get(0).getShape();
 		int[] y = axes.get(1).getShape();
 		

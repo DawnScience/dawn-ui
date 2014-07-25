@@ -21,7 +21,7 @@ import java.util.List;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ViewPart;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Slice;
 
@@ -39,7 +39,7 @@ public class HyperView extends ViewPart {
 		hyperWindow.createControl(parent);
 	}
 	
-	public void setData(ILazyDataset lazy, List<AbstractDataset> daxes, Slice[] slices, int[] order, HyperType hyperType) {
+	public void setData(ILazyDataset lazy, List<IDataset> daxes, Slice[] slices, int[] order, HyperType hyperType) {
 		
 		switch (hyperType) {
 		case Box_Axis:
