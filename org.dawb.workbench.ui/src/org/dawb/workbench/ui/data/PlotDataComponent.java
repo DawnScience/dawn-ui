@@ -39,6 +39,7 @@ import org.dawb.workbench.ui.data.wizard.PythonFilterWizard;
 import org.dawb.workbench.ui.editors.preference.EditorConstants;
 import org.dawb.workbench.ui.editors.preference.EditorPreferencePage;
 import org.dawb.workbench.ui.transferable.TransferableDataObject;
+import org.dawnsci.conversion.ui.ConvertWizard;
 import org.dawnsci.io.h5.H5Loader;
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.dawnsci.plotting.services.util.DatasetTitleUtils;
@@ -651,12 +652,31 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 //		bars.getToolBarManager().add(clearFilter);
 //		clearFilter.setEnabled(false);
 		
+		
+		final Action export = new Action("Export...", Activator.getImageDescriptor("icons/export_wiz.gif")) {
+			public void run() {
+				
+				final ConvertWizard cwizard = new ConvertWizard();
+				final IStructuredSelection sel = (IStructuredSelection) dataViewer.getSelection();
+				cwizard.setSelectionOverride(sel.toList());
+				WizardDialog dialog = new WizardDialog(container.getShell(), cwizard);
+		        dialog.setPageSize(new Point(400, 450));
+		        dialog.create();
+		        dialog.open();
+
+			}
+		};
+		export.setEnabled(false);
+		bars.getToolBarManager().add(new Separator());
+		bars.getToolBarManager().add(export);
+		bars.getToolBarManager().add(new Separator());
+
 		dataViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
 				final ITransferableDataObject ob  = (ITransferableDataObject)sel;
-				updateActions(copy, paste, delete, createFilter, clearFilter, ob, bars);
+				updateActions(copy, paste, delete, createFilter, clearFilter, export, ob, bars);
 			}
 		});
 		
@@ -703,8 +723,10 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				if (createFilter!=null) menuManager.add(createFilter);
 				if (clearFilter!=null)  menuManager.add(clearFilter);
 				
-				updateActions(copy, paste, delete, createFilter, clearFilter, ob, null);
+				updateActions(copy, paste, delete, createFilter, clearFilter, export, ob, null);
 
+				menuManager.add(new Separator(getClass().getName()+".export"));
+				menuManager.add(export);
 
 				if (H5Loader.isH5(getFileName())) {
 					menuManager.add(new Separator(getClass().getName()+"sep2"));
@@ -853,14 +875,19 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 					             Action delete, 
 					             Action createFilter, 
 					             Action deleteFilter, 
+					             Action export,
 			                     ITransferableDataObject ob,
 			                     IActionBars bars) {
 		
 		if (ob!=null) {
 		    copy.setText("Copy '"+ob.getName()+"' (can be paste to other data).");
 			copy.setEnabled(true);
+			export.setText("Export '"+ob.getName()+"'");
+			export.setEnabled(true);
 		} else {
 			copy.setEnabled(false);
+			export.setText("Export");
+			export.setEnabled(false);
 		}
 		
 		ITransferableDataObject currentCopiedData = transferableService.getBuffer();
