@@ -1,8 +1,8 @@
 package org.dawnsci.plotting.tools.powderintegration;
 
-import org.dawb.common.ui.databinding.AbstractModelObject;
+import uk.ac.diamond.scisoft.analysis.processing.model.AbstractOperationModel;
 
-public class PowderIntegrationModel extends AbstractModelObject {
+public class PowderIntegrationModel extends AbstractOperationModel {
 
 	boolean isAzimuthal;
 	int numberOfPrimaryBins;

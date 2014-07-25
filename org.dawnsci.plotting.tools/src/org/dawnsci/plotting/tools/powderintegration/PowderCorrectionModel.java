@@ -1,8 +1,8 @@
 package org.dawnsci.plotting.tools.powderintegration;
 
-import org.dawb.common.ui.databinding.AbstractModelObject;
+import uk.ac.diamond.scisoft.analysis.processing.model.AbstractOperationModel;
 
-public class PowderCorrectionModel extends AbstractModelObject {
+public class PowderCorrectionModel extends AbstractOperationModel {
 
 	boolean isApplySolidAngleCorrection = false;
 	boolean isApplyPolarisationCorrection = false;
