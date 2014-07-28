@@ -6,7 +6,9 @@ import java.util.List;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Slice;
@@ -14,19 +16,19 @@ import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.ROISliceUtils;
 
-public class ArpesMainImageReducer implements IDatasetROIReducer{
+public class ArpesMainImageReducer implements IDatasetROIReducer {
 	
 	private final RegionType regionType = RegionType.LINE;
 	private List<IDataset> imageAxes;
 	
 	
 	@Override
-	public IDataset reduce(ILazyDataset data, List<AbstractDataset> axes,
+	public IDataset reduce(ILazyDataset data, List<IDataset> axes,
 			IROI roi, Slice[] slices, int[] order) {
 		if (roi instanceof LinearROI) {
-			final IDataset image = ((AbstractDataset)ROISliceUtils.getDataset(data, (LinearROI)roi, slices,new int[]{order[0],order[1]},1)).transpose();
+			final IDataset image = DatasetUtils.transpose(ROISliceUtils.getDataset(data, (LinearROI)roi, slices,new int[]{order[0],order[1]},1));
 			
-			IDataset length = AbstractDataset.arange(image.getShape()[1], AbstractDataset.INT32);
+			IDataset length = DatasetFactory.createRange(image.getShape()[1], Dataset.INT32);
 			length.setName("Line Length");
 			
 			this.imageAxes = new ArrayList<IDataset>();
@@ -55,7 +57,7 @@ public class ArpesMainImageReducer implements IDatasetROIReducer{
 	}
 	
 	@Override
-	public IROI getInitialROI(List<AbstractDataset> axes, int[] order) {
+	public IROI getInitialROI(List<IDataset> axes, int[] order) {
 
 		
 		int[] x = axes.get(0).getShape();

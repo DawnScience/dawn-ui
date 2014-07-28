@@ -6,14 +6,13 @@ import java.util.List;
 
 import org.dawnsci.slicing.tools.Activator;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.swt.SWT;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Slice;
@@ -29,13 +28,12 @@ public class ImageTrapeziumBaselineReducer implements IDatasetROIReducer, IProvi
 	private boolean subtractBaseline = false;
 	
 	@Override
-	public IDataset reduce(ILazyDataset data, List<AbstractDataset> axes,
+	public IDataset reduce(ILazyDataset data, List<IDataset> axes,
 			IROI roi, Slice[] slices, int[] order) {
 		if (roi instanceof RectangularROI) {
 			IDataset image = ROISliceUtils.getAxisDatasetTrapzSumBaselined(data,axes.get(2).getSlice(),(RectangularROI)roi, slices, order[2],1, subtractBaseline);
-			
-			if (order[0] < order[1]) image = ((AbstractDataset)image).transpose();
-			
+
+			if (order[0] < order[1]) image = DatasetUtils.transpose(image);
 			
 			this.imageAxes = new ArrayList<IDataset>();
 			this.imageAxes.add(axes.get(0).getSlice());
@@ -70,7 +68,7 @@ public class ImageTrapeziumBaselineReducer implements IDatasetROIReducer, IProvi
 	}
 	
 	@Override
-	public IROI getInitialROI(List<AbstractDataset> axes, int[] order) {
+	public IROI getInitialROI(List<IDataset> axes, int[] order) {
 		double min = axes.get(2).getSlice().min().doubleValue();
 		double max = axes.get(2).getSlice().max().doubleValue();
 		

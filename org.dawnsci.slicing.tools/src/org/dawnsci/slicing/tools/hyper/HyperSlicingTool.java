@@ -23,7 +23,8 @@ import org.eclipse.swt.widgets.Control;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Slice;
@@ -125,7 +126,7 @@ public class HyperSlicingTool extends AbstractSlicingTool {
         }
 	}
 
-	public void setData(ILazyDataset lazy, List<AbstractDataset> daxes, Slice[] slices, int[] order, HyperType hyperType) {
+	public void setData(ILazyDataset lazy, List<IDataset> daxes, Slice[] slices, int[] order, HyperType hyperType) {
 		
 		try {
 			getSlicingSystem().setEnabled(false);
@@ -182,7 +183,7 @@ public class HyperSlicingTool extends AbstractSlicingTool {
 		return ret;
 	}
 	
-	private List<AbstractDataset> getAbstractNexusAxes() throws Exception {
+	private List<IDataset> getAbstractNexusAxes() throws Exception {
 		
 		final int[] dataShape    = getSlicingSystem().getData().getLazySet().getShape();
 		List<IDataset> nexusAxes = getNexusAxes();
@@ -197,7 +198,7 @@ public class HyperSlicingTool extends AbstractSlicingTool {
 		
 		final DimsDataList ddl = getSlicingSystem().getDimsDataList();
 		
-		AbstractDataset[] ret = new AbstractDataset[3];
+		IDataset[] ret = new IDataset[3];
 		ret.toString();
 		for (int i = 0; i < ddl.size(); i++) {
 			int axis = ddl.getDimsData(i).getPlotAxis().getIndex();
@@ -205,10 +206,10 @@ public class HyperSlicingTool extends AbstractSlicingTool {
 			if (axis > -1 && axis < 3) {
 				IDataset id = ia.get(i);
 				if (id == null) {
-					id = AbstractDataset.arange(dataShape[i], AbstractDataset.INT);
+					id = DatasetFactory.createRange(dataShape[i], Dataset.INT);
 					id.setName("indices");
 				}
-				ret[axis] = ((AbstractDataset)id);
+				ret[axis] = ((Dataset)id);
 			}
 			
 		}
@@ -247,13 +248,14 @@ public class HyperSlicingTool extends AbstractSlicingTool {
 		demilitarize();
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public Enum getSliceType() {
 		return hyperType;
 	}
 
 	@Override
-	public Object getAdapter(Class clazz) {
+	public Object getAdapter(@SuppressWarnings("rawtypes") Class clazz) {
 		if (clazz == HyperComponent.class) {
 			return hyperComponent;
 		}else if (clazz == HyperType.class) {

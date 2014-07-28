@@ -6,7 +6,7 @@ import java.util.List;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Slice;
@@ -21,12 +21,12 @@ public class ArpesSideImageReducer implements IDatasetROIReducer {
 	private List<IDataset> imageAxes;
 	
 	@Override
-	public IDataset reduce(ILazyDataset data, List<AbstractDataset> axes,
+	public IDataset reduce(ILazyDataset data, List<IDataset> axes,
 			IROI roi, Slice[] slices, int[] order) {
 		if (roi instanceof RectangularROI) {
 			IDataset image = ROISliceUtils.getYAxisDataset2DAverage(data, (RectangularROI)roi, slices, order[2]);
 			
-			if (order[0] < order[1]) image = ((AbstractDataset)image).transpose();
+			if (order[0] < order[1]) image = DatasetUtils.transpose(image);
 			
 			this.imageAxes = new ArrayList<IDataset>();
 			this.imageAxes.add(axes.get(0).getSlice());
@@ -83,8 +83,8 @@ public class ArpesSideImageReducer implements IDatasetROIReducer {
 	}
 
 	@Override
-	public IROI getInitialROI(List<AbstractDataset> axes, int[] order) {
-		double len = axes.get(2).count();
+	public IROI getInitialROI(List<IDataset> axes, int[] order) {
+		double len = axes.get(2).getSize();
 		
 		return new YAxisBoxROI(0,len/10,0,len/20, 0);
 	}

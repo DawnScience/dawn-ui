@@ -25,7 +25,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.dawnsci.slicing.api;bundle-version="1.0.0",
  uk.ac.diamond.scisoft.analysis.xmlrpc;bundle-version="1.0.0",
  org.dawnsci.python.rpc;bundle-version="1.0.0",
- org.dawnsci.plotting.services;bundle-version="1.0.0"
+ org.dawnsci.plotting.services;bundle-version="1.0.0",
+ org.dawnsci.conversion.ui;bundle-version="1.2.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: javax.measure.quantity;version="4.3.1",

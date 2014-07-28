@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            allowMultiple="false"
+            category="uk.ac.diamond.scisoft.analysis.rcp"
+            class="org.dawnsci.processing.ui.ProcessingView"
+            icon="icons/image-sharpen.png"
+            id="org.dawnsci.processing.ui.processingView"
+            name="Processing"
+            restorable="true">
+      </view>
+   </extension>
+
+</plugin>

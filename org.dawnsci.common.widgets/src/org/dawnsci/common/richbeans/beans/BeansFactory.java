@@ -302,8 +302,7 @@ public class BeansFactory {
 	 * @return String
 	 */
 	public static String getSetterName(final String fieldName) {
-		if (fieldName == null)
-			return null;
+		if (fieldName == null) return null;
 		return BeansFactory.getName("set", fieldName);
 	}
 

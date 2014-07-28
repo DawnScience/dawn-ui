@@ -414,6 +414,13 @@ public class TransferableDataObject implements H5Path, ITransferableDataObject{
 		return (new File(holder.getFilePath())).getName();
 	}
 
+	@Override
+	public String getFilePath() {
+		if (holder==null) return null;
+		if (holder.getFilePath()==null) return null;
+		return holder.getFilePath();
+	}
+
 	public boolean isTransientData() {
 		return transientData;
 	}

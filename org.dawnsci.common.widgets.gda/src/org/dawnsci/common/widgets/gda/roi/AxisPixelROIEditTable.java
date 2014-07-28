@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.dawb.common.ui.databinding.AbstractModelObject;
 import org.dawb.common.util.number.DoubleUtils;
 import org.dawnsci.common.richbeans.components.cell.FieldComponentCellEditor;
 import org.dawnsci.common.richbeans.components.wrappers.FloatSpinnerWrapper;
@@ -36,6 +35,7 @@ import org.eclipse.swt.widgets.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.processing.model.AbstractOperationModel;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
@@ -617,7 +617,7 @@ public class AxisPixelROIEditTable {
 	 * @author wqk87977
 	 *
 	 */
-	private class AxisPixelRowDataModel extends AbstractModelObject {
+	private class AxisPixelRowDataModel extends AbstractOperationModel {
 		private String name;
 		private double start;
 		private double end;

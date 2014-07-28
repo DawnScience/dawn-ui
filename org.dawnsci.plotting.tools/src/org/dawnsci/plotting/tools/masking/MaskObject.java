@@ -293,7 +293,7 @@ public class MaskObject {
 	 */
 	private void toggleMask(MaskOperation op, boolean mv, int y, int x) {
 		if (maskDataset.getBoolean(y,x)!=mv) {
-			op.addVertex(mv, y, x);		
+			op.addVertex(mv, y, x);
 		}
 	}
 	
@@ -334,7 +334,7 @@ public class MaskObject {
 	}
 
 	/**
-	 * Processes the while of the dataset and sets those values in bounds 
+	 * Processes the whole of the dataset and sets those values in bounds 
 	 * to be false and those outside to be true in the mask.
 	 * 
 	 * Nullifies the mask if max and min are null.
@@ -505,6 +505,9 @@ public class MaskObject {
 			
 			// We use the bounding box of the region.
 			final IRectangularROI bounds = roi.getBounds();
+			if (bounds == null)
+				return; // unbounded region
+
 			final double[] beg = bounds.getPoint();
 			final double[] end = bounds.getEndPoint();
 
@@ -578,7 +581,7 @@ public class MaskObject {
 							continue;
 						try {
 							if (roi.isNearOutline(x, y, distance)) {
-								toggleMask(op, !isMasking, y, x);
+								op.addVertex(!isMasking, y, x);
 							}
 						} catch (Throwable ne) {
 							logger.trace("Cannot process point " + (new Point(x, y)), ne);
@@ -587,23 +590,51 @@ public class MaskObject {
 					}
 				}
 			} else {
+				row_loop:
 				for (int y = yStart; y < yEnd; ++y) {
 					if (monitor.isCanceled())
 						return;
 					monitor.worked(1);
 
-					for (int x = xStart; x < xEnd; ++x) {
+					// use scanlines
+					double[] xs = roi.findHorizontalIntersections(y);
+					if (xs == null)
+						continue row_loop;
 
-						if (maskDataset.getBoolean(y, x) != isMasking)
-							continue;
-						try {
-							if (roi.containsPoint(x, y)) {
-								toggleMask(op, !isMasking, y, x);
-							}
-						} catch (Throwable ne) {
-							logger.trace("Cannot process point " + (new Point(x, y)), ne);
-							return;
+					int xe = (int) xs[0];
+					if (xe >= xEnd)
+						continue row_loop;
+					if (xs.length == 1) {
+						if (xe >= xStart) {
+							toggleMask(op, !isMasking, y, xe);
 						}
+						continue row_loop;
+					}
+
+					int i = 1;
+					int xb;
+					do { // find first pair where end is past the start
+						xb = xe;
+						if (i >= xs.length)
+							continue row_loop;
+						xe = (int) xs[i++];
+					} while (xe < xStart);
+
+					while (true) {
+						if (xb >= xEnd) {
+							continue row_loop;
+						}
+
+						if (roi.containsPoint((xb + xe)/2, y)) {
+							for (int k = Math.max(xStart, xb); k <= Math.min(xEnd - 1, xe); k++) {
+								toggleMask(op, !isMasking, y, k);
+							}
+						}
+
+						xb = xe;
+						if (i >= xs.length)
+							continue row_loop;
+						xe = (int) xs[i++];
 					}
 				}
 			}

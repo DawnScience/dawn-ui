@@ -23,7 +23,6 @@ import java.util.List;
 
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
-import org.dawnsci.slicing.tools.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -36,15 +35,12 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
-import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
-import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
+import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ColorOption;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.TraceUtils;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IMenuManager;
@@ -65,7 +61,8 @@ import org.eclipse.ui.part.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Slice;
@@ -82,8 +79,8 @@ public class HyperComponent {
 	private IRegionListener regionListenerRight;
 	private IROIListener roiListenerLeft;
 	private IROIListener roiListenerRight;
-	private HyperDeligateJob leftJob;
-	private HyperDeligateJob rightJob;
+	private HyperDelegateJob leftJob;
+	private HyperDelegateJob rightJob;
 	private Composite mainComposite;
 	private IWorkbenchPart part;
 	private SashForm sashForm;
@@ -118,20 +115,20 @@ public class HyperComponent {
     	return sashForm;
     }
 	
-	public void setData(ILazyDataset lazy, List<AbstractDataset> daxes, Slice[] slices, int[] order) {
+	public void setData(ILazyDataset lazy, List<IDataset> daxes, Slice[] slices, int[] order) {
 		this.setData(lazy, daxes, slices, order, new TraceReducer(), new ImageTrapeziumBaselineReducer());
 	}
 	
-	public void setData(ILazyDataset lazy, List<AbstractDataset> daxes, Slice[] slices, int[] order,
+	public void setData(ILazyDataset lazy, List<IDataset> daxes, Slice[] slices, int[] order,
 			IDatasetROIReducer mainReducer, IDatasetROIReducer sideReducer) {
 		//FIXME needs to be made more generic
-		this.leftJob = new HyperDeligateJob("Left update",
+		this.leftJob = new HyperDelegateJob("Left update",
 				sideSystem,
 				lazy,
 				daxes,
 				slices, order, mainReducer);
 		
-		this.rightJob = new HyperDeligateJob("Right update",
+		this.rightJob = new HyperDelegateJob("Right update",
 				mainSystem,
 				lazy,
 				daxes,
@@ -159,10 +156,10 @@ public class HyperComponent {
 		if (mainReducer.isOutput1D()) {
 			axisCount++;
 		} else {
-			List<AbstractDataset> ax2d = new ArrayList<AbstractDataset>();
+			List<IDataset> ax2d = new ArrayList<IDataset>();
 			ax2d.add(daxes.get(axisCount++));
 			ax2d.add(daxes.get(axisCount++));
-			mainSystem.createPlot2D(AbstractDataset.zeros(new int[] {(int)ax2d.get(0).count(), (int)ax2d.get(1).count()}, AbstractDataset.INT16), ax2d, null);
+			mainSystem.createPlot2D(DatasetFactory.zeros(new int[] {ax2d.get(0).getSize(), ax2d.get(1).getSize()}, Dataset.INT16), ax2d, null);
 		}
 		
 		for (IRegion region : mainSystem.getRegions()) {
@@ -173,16 +170,16 @@ public class HyperComponent {
 		sideSystem.getAxes().clear();
 		
 		if (mainReducer.isOutput1D()) {
-			List<AbstractDataset> xd = new ArrayList<AbstractDataset>();
-			AbstractDataset axis = daxes.get(axisCount++);
-			xd.add(AbstractDataset.zeros(new int[] {(int)axis.count()},AbstractDataset.INT16));
+			List<IDataset> xd = new ArrayList<IDataset>();
+			IDataset axis = daxes.get(axisCount++);
+			xd.add(DatasetFactory.zeros(new int[] {(int)axis.getSize()},Dataset.INT16));
 			
 			sideSystem.createPlot1D(axis,xd, null);
 		} else {
-			List<AbstractDataset> xd = new ArrayList<AbstractDataset>();
-			xd.add(AbstractDataset.arange(10, AbstractDataset.INT32));
+			List<IDataset> xd = new ArrayList<IDataset>();
+			xd.add(DatasetFactory.createRange(10, Dataset.INT32));
 			xd.add(daxes.get(axisCount++));
-			sideSystem.createPlot2D(AbstractDataset.ones(new int[] {10,(int)xd.get(1).count()}, AbstractDataset.INT32), xd, null);
+			sideSystem.createPlot2D(DatasetFactory.ones(new int[] {10,(int)xd.get(1).getSize()}, Dataset.INT32), xd, null);
 		}
 		
 		for (IRegion region : sideSystem.getRegions()) {
@@ -543,22 +540,22 @@ public class HyperComponent {
 		
 	}
 
-	private class HyperDeligateJob extends Job {
+	private class HyperDelegateJob extends Job {
 		
 		private IRegion currentRegion;
 		private IROI currentROI;
 		private IPlottingSystem plot;
 		private ILazyDataset data;
-		private List<AbstractDataset> axes;
+		private List<IDataset> axes;
 		private int[] order;
 		private Slice[] slices;
 		private IDatasetROIReducer reducer;
 		
 		
-		public HyperDeligateJob(String name,
+		public HyperDelegateJob(String name,
 				IPlottingSystem plot,
 				ILazyDataset data,
-				List<AbstractDataset> axes,
+				List<IDataset> axes,
 				Slice[] slices,
 				int[] order,
 				IDatasetROIReducer reducer) {
