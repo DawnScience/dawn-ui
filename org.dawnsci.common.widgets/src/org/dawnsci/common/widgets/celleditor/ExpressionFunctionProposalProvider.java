@@ -1,4 +1,4 @@
-package org.dawb.workbench.ui.expressions;
+package org.dawnsci.common.widgets.celleditor;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;

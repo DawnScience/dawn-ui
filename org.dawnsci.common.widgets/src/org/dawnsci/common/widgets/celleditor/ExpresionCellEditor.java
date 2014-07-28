@@ -1,4 +1,4 @@
-package org.dawb.workbench.ui.expressions;
+package org.dawnsci.common.widgets.celleditor;
 
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
@@ -12,12 +12,12 @@ import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-public class TextCellEditorWithContentProposal extends TextCellEditor {
+public class ExpresionCellEditor extends TextCellEditor {
 	
 	private ContentProposalAdapter contentProposalAdapter;
 	private boolean popupOpen = false; // true, iff popup is currently open
 
-	public TextCellEditorWithContentProposal(Composite parent, IContentProposalProvider contentProposalProvider,
+	public ExpresionCellEditor(Composite parent, IContentProposalProvider contentProposalProvider,
 			KeyStroke keyStroke, char[] autoActivationCharacters) {
 		super(parent);
 
@@ -49,7 +49,7 @@ public class TextCellEditorWithContentProposal extends TextCellEditor {
 			public void proposalAccepted(IContentProposal proposal) {
 				IContentProposalProvider provider = contentProposalAdapter.getContentProposalProvider();
 
-				Control control = TextCellEditorWithContentProposal.this.getControl();
+				Control control = ExpresionCellEditor.this.getControl();
 
 				if (provider != null && provider instanceof ExpressionFunctionProposalProvider) {
 

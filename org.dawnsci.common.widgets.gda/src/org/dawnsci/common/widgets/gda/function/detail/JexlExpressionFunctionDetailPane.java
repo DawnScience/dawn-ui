@@ -2,12 +2,12 @@ package org.dawnsci.common.widgets.gda.function.detail;
 
 import java.util.Collections;
 
+import org.dawnsci.common.widgets.celleditor.OpenableContentAssistCommandAdapter;
 import org.dawnsci.common.widgets.gda.function.IFittedFunctionInvalidatedEvent;
 import org.dawnsci.common.widgets.gda.function.IFunctionModifiedEvent;
 import org.dawnsci.common.widgets.gda.function.IModelModifiedListener;
 import org.dawnsci.common.widgets.gda.function.IParameterModifiedEvent;
 import org.dawnsci.common.widgets.gda.function.internal.ContentProposalLabelProvider;
-import org.dawnsci.common.widgets.gda.function.internal.FunctionContentAssistCommandAdapter;
 import org.dawnsci.common.widgets.gda.function.internal.JexlContentProposalListener;
 import org.dawnsci.common.widgets.gda.function.jexl.ExpressionFunctionProposalProvider;
 import org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunction;
@@ -102,7 +102,7 @@ public class JexlExpressionFunctionDetailPane implements IFunctionDetailPane {
 	private IModelModifiedListenerImplementation modelModifiedListener;
 	private FocusAdapterExtension focusListener;
 	private Font fxyFont;
-	private FunctionContentAssistCommandAdapter contentProposalAdapter;
+	private OpenableContentAssistCommandAdapter contentProposalAdapter;
 	private ExpressionFunctionProposalProvider proposalProvider;
 
 	@Override
@@ -129,7 +129,7 @@ public class JexlExpressionFunctionDetailPane implements IFunctionDetailPane {
 
 		proposalProvider = new ExpressionFunctionProposalProvider(
 				Collections.<String, Object> emptyMap());
-		contentProposalAdapter = new FunctionContentAssistCommandAdapter(
+		contentProposalAdapter = new OpenableContentAssistCommandAdapter(
 				jexlTextEditor, new TextContentAdapter(), proposalProvider,
 				null, null, true);
 		contentProposalAdapter

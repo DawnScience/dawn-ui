@@ -1,5 +1,7 @@
 package org.dawnsci.common.widgets.gda.function.internal;
 
+import org.dawnsci.common.widgets.gda.function.internal.JexlContentProposalListener;
+import org.dawnsci.common.widgets.celleditor.TextCellEditorWithContentProposal;
 import org.dawnsci.common.widgets.gda.function.FunctionTreeViewer;
 import org.dawnsci.common.widgets.gda.function.descriptors.IFunctionDescriptor;
 import org.dawnsci.common.widgets.gda.function.descriptors.IFunctionDescriptorProvider;
@@ -12,17 +14,17 @@ import org.eclipse.jface.viewers.TextCellEditor;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 
-public class FunctionSelectionEditingSupport extends EditingSupport implements
-		ITextEditingSupport {
+public class FunctionSelectionEditingSupport extends EditingSupport implements ITextEditingSupport {
+	
 	private TextCellEditorWithContentProposal cellEditor;
 	private FunctionTreeViewer functionTreeViewer;
 
-	public FunctionSelectionEditingSupport(
-			FunctionTreeViewer functionTreeViewer) {
+	public FunctionSelectionEditingSupport(FunctionTreeViewer functionTreeViewer) {
 		super(functionTreeViewer.getTreeViewer());
 		this.functionTreeViewer = functionTreeViewer;
-		cellEditor = new TextCellEditorWithContentProposal(
-				this.functionTreeViewer.getTreeViewer().getTree(), null, null);
+		cellEditor = new TextCellEditorWithContentProposal(this.functionTreeViewer.getTreeViewer().getTree(), null, null);
+		cellEditor.setLabelProvider(new ContentProposalLabelProvider());
+		cellEditor.addContentProposalListener(new JexlContentProposalListener(cellEditor.getContentProposalAdapter(), cellEditor.getControl()));
 	}
 
 	@Override

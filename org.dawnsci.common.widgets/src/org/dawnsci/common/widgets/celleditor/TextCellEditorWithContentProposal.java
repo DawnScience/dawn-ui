@@ -1,22 +1,25 @@
-package org.dawnsci.common.widgets.gda.function.internal;
+package org.dawnsci.common.widgets.celleditor;
 
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
+import org.eclipse.jface.fieldassist.IContentProposalListener;
 import org.eclipse.jface.fieldassist.IContentProposalListener2;
 import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.widgets.Composite;
 
 public class TextCellEditorWithContentProposal extends TextCellEditor {
 
-	private FunctionContentAssistCommandAdapter contentProposalAdapter;
+	private OpenableContentAssistCommandAdapter contentProposalAdapter;
 	private boolean popupOpen = false; // true, iff popup is currently open
 	private KeyStroke keyStroke;
 	private char[] autoActivationCharacters;
+	private ILabelProvider labelProvider;
+	private IContentProposalProvider contentProposalProvider;
 
-	public TextCellEditorWithContentProposal(Composite parent,
-			KeyStroke keyStroke, char[] autoActivationCharacters) {
+	public TextCellEditorWithContentProposal(Composite parent, KeyStroke keyStroke, char[] autoActivationCharacters) {
 		super(parent);
 		this.keyStroke = keyStroke;
 		this.autoActivationCharacters = autoActivationCharacters;
@@ -30,20 +33,22 @@ public class TextCellEditorWithContentProposal extends TextCellEditor {
 			this.openPopup();
 		}
 	}
+	
+	public void setLabelProvider(ILabelProvider prov) {
+		this.labelProvider = prov;
+	}
 
 	private void enableContentProposal(
 			IContentProposalProvider contentProposalProvider,
 			KeyStroke keyStroke, char[] autoActivationCharacters) {
 
-		contentProposalAdapter = new FunctionContentAssistCommandAdapter(text,
+		contentProposalAdapter = new OpenableContentAssistCommandAdapter(text,
 				new TextContentAdapter(), contentProposalProvider, null, null,
 				true);
 		contentProposalAdapter.setAutoActivationDelay(0);
 
-		contentProposalAdapter
-				.setLabelProvider(new ContentProposalLabelProvider());
-		contentProposalAdapter
-				.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_IGNORE);
+		contentProposalAdapter.setLabelProvider(labelProvider);
+		contentProposalAdapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_IGNORE);
 		// Listen for popup open/close events to be able to handle focus
 		// events correctly
 		contentProposalAdapter
@@ -62,9 +67,9 @@ public class TextCellEditorWithContentProposal extends TextCellEditor {
 					}
 				});
 
-		contentProposalAdapter
-				.addContentProposalListener(new JexlContentProposalListener(
-						contentProposalAdapter, getControl()));
+	}
+	public void addContentProposalListener(IContentProposalListener l) {
+		contentProposalAdapter.addContentProposalListener(l);
 	}
 
 	/**
@@ -101,9 +106,13 @@ public class TextCellEditorWithContentProposal extends TextCellEditor {
 		return false;
 	}
 
-	public void setContentProposalProvider(
-			IContentProposalProvider contentProposalProvider) {
-		enableContentProposal(contentProposalProvider, keyStroke,
-				autoActivationCharacters);
+	public void setContentProposalProvider( IContentProposalProvider contentProposalProvider) {
+		
+		this.contentProposalProvider = contentProposalProvider;
+		enableContentProposal(contentProposalProvider, keyStroke, autoActivationCharacters);
+	}
+
+	public IContentProposalProvider getContentProposalProvider() {
+		return contentProposalProvider;
 	}
 }

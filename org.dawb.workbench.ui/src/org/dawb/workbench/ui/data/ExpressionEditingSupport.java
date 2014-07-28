@@ -6,9 +6,9 @@ import org.dawb.common.services.IExpressionObjectService;
 import org.dawb.common.services.IVariableManager;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
-import org.dawb.workbench.ui.expressions.ExpressionFunctionProposalProvider;
-import org.dawb.workbench.ui.expressions.TextCellEditorWithContentProposal;
 import org.dawb.workbench.ui.transferable.TransferableDataObject;
+import org.dawnsci.common.widgets.celleditor.ExpressionFunctionProposalProvider;
+import org.dawnsci.common.widgets.celleditor.ExpresionCellEditor;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -52,7 +52,7 @@ class ExpressionEditingSupport extends EditingSupport {
 		
 		if (exObj != null) {
 			IContentProposalProvider contentProposalProvider = new ExpressionFunctionProposalProvider(exObj.getFunctions());
-			cellEditor = new TextCellEditorWithContentProposal((Composite)getViewer().getControl(), contentProposalProvider, keystroke, new char[]{':'});
+			cellEditor = new ExpresionCellEditor((Composite)getViewer().getControl(), contentProposalProvider, keystroke, new char[]{':'});
 		} else {
 			cellEditor = new TextCellEditor((Composite)getViewer().getControl());
 			logger.error("Expression Object service returned null");

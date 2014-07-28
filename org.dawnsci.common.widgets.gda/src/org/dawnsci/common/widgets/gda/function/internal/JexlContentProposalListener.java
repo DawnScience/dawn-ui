@@ -1,6 +1,7 @@
 package org.dawnsci.common.widgets.gda.function.internal;
 
 import org.dawnsci.common.widgets.gda.function.jexl.JexlProposal;
+import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.IContentProposal;
 import org.eclipse.jface.fieldassist.IContentProposalListener;
 import org.eclipse.jface.fieldassist.IControlContentAdapter;
@@ -8,11 +9,10 @@ import org.eclipse.swt.widgets.Control;
 
 public class JexlContentProposalListener implements IContentProposalListener {
 
-	private FunctionContentAssistCommandAdapter contentProposalAdapter;
+	private ContentProposalAdapter contentProposalAdapter;
 	private Control control;
 
-	public JexlContentProposalListener(
-			FunctionContentAssistCommandAdapter contentProposalAdapter,
+	public JexlContentProposalListener(ContentProposalAdapter contentProposalAdapter,
 			Control control) {
 		this.contentProposalAdapter = contentProposalAdapter;
 		this.control = control;

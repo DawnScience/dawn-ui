@@ -1,4 +1,4 @@
-package org.dawnsci.common.widgets.gda.function.internal;
+package org.dawnsci.common.widgets.celleditor;
 
 import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.eclipse.jface.fieldassist.IControlContentAdapter;
@@ -10,11 +10,11 @@ import org.eclipse.ui.fieldassist.ContentAssistCommandAdapter;
  * us to provide access to the openProposalPopup method
  *
  */
-public class FunctionContentAssistCommandAdapter extends
+public class OpenableContentAssistCommandAdapter extends
 		ContentAssistCommandAdapter {
 
 
-	public FunctionContentAssistCommandAdapter(Control control,
+	public OpenableContentAssistCommandAdapter(Control control,
 			IControlContentAdapter controlContentAdapter,
 			IContentProposalProvider proposalProvider, String commandId,
 			char[] autoActivationCharacters, boolean installDecoration) {
