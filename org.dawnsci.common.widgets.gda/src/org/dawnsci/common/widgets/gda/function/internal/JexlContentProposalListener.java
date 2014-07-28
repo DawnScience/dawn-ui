@@ -1,20 +1,16 @@
 package org.dawnsci.common.widgets.gda.function.internal;
 
+import org.dawnsci.common.widgets.celleditor.ContentProposalListenerDelegate;
 import org.dawnsci.common.widgets.gda.function.jexl.JexlProposal;
-import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.IContentProposal;
-import org.eclipse.jface.fieldassist.IContentProposalListener;
 import org.eclipse.jface.fieldassist.IControlContentAdapter;
 import org.eclipse.swt.widgets.Control;
 
-public class JexlContentProposalListener implements IContentProposalListener {
+public class JexlContentProposalListener extends ContentProposalListenerDelegate {
 
-	private ContentProposalAdapter contentProposalAdapter;
 	private Control control;
 
-	public JexlContentProposalListener(ContentProposalAdapter contentProposalAdapter,
-			Control control) {
-		this.contentProposalAdapter = contentProposalAdapter;
+	public JexlContentProposalListener(Control control) {
 		this.control = control;
 	}
 
@@ -26,8 +22,7 @@ public class JexlContentProposalListener implements IContentProposalListener {
 			int[] lastMatchBounds = jexlProposal.getProvider()
 					.getLastMatchBounds();
 			int lastPosition = jexlProposal.getProvider().getLastPosition();
-			IControlContentAdapter contentAdapter = contentProposalAdapter
-					.getControlContentAdapter();
+			IControlContentAdapter contentAdapter = adapter.getControlContentAdapter();
 			String text = contentAdapter.getControlContents(control);
 
 			if (text.isEmpty()) {
@@ -67,8 +62,7 @@ public class JexlContentProposalListener implements IContentProposalListener {
 						lastMatchBounds[0] + proposal.getContent().length());
 			}
 		} else {
-			IControlContentAdapter contentAdapter = contentProposalAdapter
-					.getControlContentAdapter();
+			IControlContentAdapter contentAdapter = adapter.getControlContentAdapter();
 			String content = proposal.getContent();
 			contentAdapter.setControlContents(control, content,
 					content.length());

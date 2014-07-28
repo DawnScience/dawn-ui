@@ -24,7 +24,7 @@ public class FunctionSelectionEditingSupport extends EditingSupport implements I
 		this.functionTreeViewer = functionTreeViewer;
 		cellEditor = new TextCellEditorWithContentProposal(this.functionTreeViewer.getTreeViewer().getTree(), null, null);
 		cellEditor.setLabelProvider(new ContentProposalLabelProvider());
-		cellEditor.addContentProposalListener(new JexlContentProposalListener(cellEditor.getContentProposalAdapter(), cellEditor.getControl()));
+		cellEditor.addContentProposalListener(new JexlContentProposalListener(cellEditor.getControl()));
 	}
 
 	@Override

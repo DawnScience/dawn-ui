@@ -18,6 +18,7 @@ public class TextCellEditorWithContentProposal extends TextCellEditor {
 	private char[] autoActivationCharacters;
 	private ILabelProvider labelProvider;
 	private IContentProposalProvider contentProposalProvider;
+	private IContentProposalListener contentProposalListener;
 
 	public TextCellEditorWithContentProposal(Composite parent, KeyStroke keyStroke, char[] autoActivationCharacters) {
 		super(parent);
@@ -66,10 +67,25 @@ public class TextCellEditorWithContentProposal extends TextCellEditor {
 						popupOpen = true;
 					}
 				});
+		
+		if (contentProposalListener!=null) {
+			registerListener(contentProposalListener);
+		}
 
 	}
+	private void registerListener( IContentProposalListener listener) {
+		if (listener instanceof ContentProposalListenerDelegate) {
+			((ContentProposalListenerDelegate)contentProposalListener).setAdapter(contentProposalAdapter);
+		}
+		contentProposalAdapter.addContentProposalListener(listener);	
+	}
+
 	public void addContentProposalListener(IContentProposalListener l) {
-		contentProposalAdapter.addContentProposalListener(l);
+		if (contentProposalAdapter!=null) {
+			registerListener(l);
+		} else {
+			contentProposalListener = l;
+		}
 	}
 
 	/**

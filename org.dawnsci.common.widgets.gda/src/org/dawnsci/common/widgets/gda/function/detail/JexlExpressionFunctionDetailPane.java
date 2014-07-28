@@ -137,8 +137,7 @@ public class JexlExpressionFunctionDetailPane implements IFunctionDetailPane {
 		contentProposalAdapter
 				.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_IGNORE);
 		contentProposalAdapter
-				.addContentProposalListener(new JexlContentProposalListener(
-						contentProposalAdapter, jexlTextEditor));
+				.addContentProposalListener(new JexlContentProposalListener(jexlTextEditor));
 
 		return composite;
 	}
