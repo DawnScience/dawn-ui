@@ -26,20 +26,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.dawnsci.plotting.jreality.core.AxisMode;
 import org.dawnsci.plotting.jreality.core.IDataSet3DCorePlot;
-import org.dawnsci.plotting.jreality.core.ScaleType;
-import org.dawnsci.plotting.jreality.data.ColourImageData;
 import org.dawnsci.plotting.jreality.overlay.Overlay1DConsumer;
-import org.dawnsci.plotting.jreality.overlay.Overlay1DProvider;
-import org.dawnsci.plotting.jreality.overlay.OverlayType;
-import org.dawnsci.plotting.jreality.overlay.VectorOverlayStyles;
-import org.dawnsci.plotting.jreality.overlay.enums.LabelOrientation;
 import org.dawnsci.plotting.jreality.overlay.primitives.BoxPrimitive;
 import org.dawnsci.plotting.jreality.overlay.primitives.LabelPrimitive;
 import org.dawnsci.plotting.jreality.overlay.primitives.LinePrimitive;
 import org.dawnsci.plotting.jreality.overlay.primitives.OverlayPrimitive;
-import org.dawnsci.plotting.jreality.overlay.primitives.PrimitiveType;
 import org.dawnsci.plotting.jreality.tick.Tick;
 import org.dawnsci.plotting.jreality.tick.TickFactory;
 import org.dawnsci.plotting.jreality.tick.TickFormatting;
@@ -52,8 +44,19 @@ import org.dawnsci.plotting.jreality.tool.PlotActionEventListener;
 import org.dawnsci.plotting.jreality.tool.PlotActionTool;
 import org.dawnsci.plotting.jreality.tool.PlotRightClickActionTool;
 import org.dawnsci.plotting.jreality.tool.SelectedWindow;
-import org.dawnsci.plotting.jreality.util.ArrayPoolUtility;
-import org.dawnsci.plotting.jreality.util.ScalingUtility;
+import org.eclipse.dawnsci.plotting.api.jreality.core.AxisMode;
+import org.eclipse.dawnsci.plotting.api.jreality.core.ScaleType;
+import org.eclipse.dawnsci.plotting.api.jreality.data.ColourImageData;
+import org.eclipse.dawnsci.plotting.api.jreality.impl.Plot1DAppearance;
+import org.eclipse.dawnsci.plotting.api.jreality.impl.Plot1DGraphTable;
+import org.eclipse.dawnsci.plotting.api.jreality.impl.PlotException;
+import org.eclipse.dawnsci.plotting.api.jreality.overlay.Overlay1DProvider;
+import org.eclipse.dawnsci.plotting.api.jreality.overlay.OverlayType;
+import org.eclipse.dawnsci.plotting.api.jreality.overlay.VectorOverlayStyles;
+import org.eclipse.dawnsci.plotting.api.jreality.overlay.enums.LabelOrientation;
+import org.eclipse.dawnsci.plotting.api.jreality.overlay.primitives.PrimitiveType;
+import org.eclipse.dawnsci.plotting.api.jreality.util.ArrayPoolUtility;
+import org.eclipse.dawnsci.plotting.api.jreality.util.ScalingUtility;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.widgets.Composite;
 import org.slf4j.Logger;
@@ -1246,7 +1249,7 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 		graphAppearance.setAttribute(CommonAttributes.ATTENUATE_POINT_SIZE, false);
 		DefaultLineShader dls = (DefaultLineShader) dgs.createLineShader("default");
 		Plot1DAppearance plotApp = graphColours.getLegendEntry(idx);
-		plotApp.updateGraph(dls, dgs);
+		Plot1DAppearanceUpdater.updateGraph(plotApp,dls, dgs);
 		graphLineShaders.add(dls);
 		graphShaders.add(dgs);
 		graphGroupNode.addChild(subGraph);
@@ -1326,7 +1329,8 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 				graphAppearance.setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
 				DefaultLineShader dls = (DefaultLineShader) dgs.createLineShader("default");
 				Plot1DAppearance plotApp = graphColours.getLegendEntry(numGraphs);
-				plotApp.updateGraph(dls, dgs);
+				Plot1DAppearanceUpdater.updateGraph(plotApp,dls, dgs);
+				
 				graphLineShaders.add(dls);
 				graphShaders.add(dgs);
 				graphGroupNode.addChild(subGraph);
@@ -2462,7 +2466,8 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 			DefaultLineShader currentShader = graphLineShaders.get(graphNr);
 			DefaultGeometryShader currentGeomShader = graphShaders.get(graphNr);
 			Plot1DAppearance plotApp = graphColours.getLegendEntry(graphNr);
-			plotApp.updateGraph(currentShader, currentGeomShader);
+			Plot1DAppearanceUpdater.updateGraph(plotApp,currentShader, currentGeomShader);
+			
 		}
 	}
 
@@ -2474,7 +2479,7 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 			DefaultLineShader currentShader = graphLineShaders.get(i);
 			DefaultGeometryShader currentGeomShader = graphShaders.get(i);
 			Plot1DAppearance plotApp = graphColours.getLegendEntry(i);
-			plotApp.updateGraph(currentShader, currentGeomShader);
+			Plot1DAppearanceUpdater.updateGraph(plotApp,currentShader, currentGeomShader);
 			SceneGraphComponent graph = subGraphs.get(i);
 			graph.setVisible(plotApp.isVisible());
 		}
@@ -2497,7 +2502,8 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 			graphAppearance.setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
 			DefaultLineShader dls = (DefaultLineShader) dgs.createLineShader("default");
 			Plot1DAppearance plotApp = graphColours.getLegendEntry(numGraphs);
-			plotApp.updateGraph(dls, dgs);
+			Plot1DAppearanceUpdater.updateGraph(plotApp,dls, dgs);
+			
 			graphLineShaders.add(dls);
 			graphShaders.add(dgs);
 			graphGroupNode.addChild(subGraph);

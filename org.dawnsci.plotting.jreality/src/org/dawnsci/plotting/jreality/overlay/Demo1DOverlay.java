@@ -17,8 +17,11 @@
 package org.dawnsci.plotting.jreality.overlay;
 
 
-import org.dawnsci.plotting.jreality.overlay.primitives.PrimitiveType;
 import org.dawnsci.plotting.jreality.tool.AreaSelectEvent;
+import org.eclipse.dawnsci.plotting.api.jreality.overlay.Overlay1DProvider;
+import org.eclipse.dawnsci.plotting.api.jreality.overlay.OverlayProvider;
+import org.eclipse.dawnsci.plotting.api.jreality.overlay.OverlayType;
+import org.eclipse.dawnsci.plotting.api.jreality.overlay.primitives.PrimitiveType;
 
 /**
  *

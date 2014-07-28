@@ -20,19 +20,20 @@ import java.awt.Color;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.dawnsci.plotting.jreality.core.AxisMode;
 import org.dawnsci.plotting.jreality.core.IDataSet3DCorePlot;
-import org.dawnsci.plotting.jreality.core.ScaleType;
-import org.dawnsci.plotting.jreality.data.ColourImageData;
 import org.dawnsci.plotting.jreality.tick.Tick;
 import org.dawnsci.plotting.jreality.tick.TickFactory;
 import org.dawnsci.plotting.jreality.tick.TickFormatting;
-import org.dawnsci.plotting.jreality.util.ArrayPoolUtility;
-import org.dawnsci.plotting.jreality.util.ScalingUtility;
 import org.dawnsci.plotting.roi.SurfacePlotROI;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.dawnsci.plotting.api.jreality.core.AxisMode;
+import org.eclipse.dawnsci.plotting.api.jreality.core.ScaleType;
+import org.eclipse.dawnsci.plotting.api.jreality.data.ColourImageData;
+import org.eclipse.dawnsci.plotting.api.jreality.impl.SurfPlotStyles;
+import org.eclipse.dawnsci.plotting.api.jreality.util.ArrayPoolUtility;
+import org.eclipse.dawnsci.plotting.api.jreality.util.ScalingUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

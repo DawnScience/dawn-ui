@@ -19,8 +19,8 @@ package org.dawnsci.plotting.jreality.overlay.primitives;
 import java.awt.Color;
 import java.awt.Font;
 
-import org.dawnsci.plotting.jreality.overlay.VectorOverlayStyles;
-import org.dawnsci.plotting.jreality.overlay.enums.LabelOrientation;
+import org.eclipse.dawnsci.plotting.api.jreality.overlay.VectorOverlayStyles;
+import org.eclipse.dawnsci.plotting.api.jreality.overlay.enums.LabelOrientation;
 
 import de.jreality.geometry.PointSetFactory;
 import de.jreality.math.MatrixBuilder;

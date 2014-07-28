@@ -18,8 +18,10 @@ package org.dawnsci.plotting.jreality.core;
 
 import java.util.List;
 
-import org.dawnsci.plotting.jreality.data.ColourImageData;
 import org.dawnsci.plotting.jreality.tick.TickFormatting;
+import org.eclipse.dawnsci.plotting.api.jreality.core.AxisMode;
+import org.eclipse.dawnsci.plotting.api.jreality.core.ScaleType;
+import org.eclipse.dawnsci.plotting.api.jreality.data.ColourImageData;
 
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;

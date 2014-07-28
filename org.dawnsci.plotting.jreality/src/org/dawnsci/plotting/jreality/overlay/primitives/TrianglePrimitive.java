@@ -18,7 +18,7 @@ package org.dawnsci.plotting.jreality.overlay.primitives;
 
 import java.awt.Color;
 
-import org.dawnsci.plotting.jreality.overlay.VectorOverlayStyles;
+import org.eclipse.dawnsci.plotting.api.jreality.overlay.VectorOverlayStyles;
 
 import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.math.MatrixBuilder;

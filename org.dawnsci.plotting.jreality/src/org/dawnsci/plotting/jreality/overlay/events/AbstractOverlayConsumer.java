@@ -20,10 +20,10 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.dawnsci.plotting.jreality.overlay.Overlay1DConsumer;
-import org.dawnsci.plotting.jreality.overlay.Overlay2DConsumer;
-import org.dawnsci.plotting.jreality.overlay.OverlayProvider;
 import org.dawnsci.plotting.jreality.tool.AreaSelectEvent;
-import org.dawnsci.plotting.jreality.tool.IImagePositionEvent;
+import org.eclipse.dawnsci.plotting.api.jreality.overlay.Overlay2DConsumer;
+import org.eclipse.dawnsci.plotting.api.jreality.overlay.OverlayProvider;
+import org.eclipse.dawnsci.plotting.api.jreality.tool.IImagePositionEvent;
 import org.eclipse.swt.widgets.Display;
 
 

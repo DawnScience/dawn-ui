@@ -32,11 +32,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.dawnsci.plotting.jreality.compositing.CompositeEntry;
-import org.dawnsci.plotting.jreality.data.ColourImageData;
 import org.dawnsci.plotting.jreality.tool.PanningTool;
 import org.dawnsci.plotting.jreality.util.JOGLChecker;
-import org.dawnsci.plotting.jreality.util.JOGLGLSLShaderGenerator;
+import org.eclipse.dawnsci.plotting.api.jreality.compositing.CompositeEntry;
+import org.eclipse.dawnsci.plotting.api.jreality.data.ColourImageData;
+import org.eclipse.dawnsci.plotting.api.jreality.util.JOGLGLSLShaderGenerator;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.widgets.Composite;
 import org.slf4j.Logger;

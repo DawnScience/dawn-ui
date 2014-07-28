@@ -21,9 +21,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.dawnsci.plotting.jreality.core.AxisMode;
 import org.dawnsci.plotting.jreality.tool.SelectedWindow;
 import org.dawnsci.plotting.jreality.util.ErrorHelpers;
+import org.eclipse.dawnsci.plotting.api.jreality.core.AxisMode;
+import org.eclipse.dawnsci.plotting.api.jreality.impl.Plot1DAppearance;
+import org.eclipse.dawnsci.plotting.api.jreality.impl.Plot1DGraphTable;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.widgets.Composite;
 
@@ -427,7 +429,8 @@ public class DataSetScatterPlot2D extends DataSet3DPlot1D {
 		for (int i = 0; i < graphShaders.size(); i++) {
 			Plot1DAppearance plotApp = graphColours.getLegendEntry(i);
 			DefaultPointShader currentShader = graphPointShaders.get(i);
-			plotApp.updateGraph(currentShader);
+			Plot1DAppearanceUpdater.updateGraph(plotApp,currentShader);
+			
 			SceneGraphComponent graph = subGraphs.get(i);
 			graph.setVisible(plotApp.isVisible());
 		}

@@ -18,6 +18,9 @@ package org.dawnsci.plotting.jreality.tool;
 
 import java.util.List;
 
+import org.eclipse.dawnsci.plotting.api.jreality.tool.DataPositionEvent;
+import org.eclipse.dawnsci.plotting.api.jreality.tool.IImagePositionEvent;
+
 
 /**
  * An event object that occurs when an Mouse position event is happening

@@ -16,7 +16,7 @@
 
 package org.dawnsci.plotting.jreality.overlay.primitives;
 
-import org.dawnsci.plotting.jreality.overlay.VectorOverlayStyles;
+import org.eclipse.dawnsci.plotting.api.jreality.overlay.VectorOverlayStyles;
 
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;

@@ -19,8 +19,8 @@ package org.dawnsci.plotting.jreality.impl;
 import java.util.Iterator;
 import java.util.List;
 
-import org.dawnsci.plotting.jreality.core.AxisMode;
-import org.dawnsci.plotting.jreality.data.ColourImageData;
+import org.eclipse.dawnsci.plotting.api.jreality.core.AxisMode;
+import org.eclipse.dawnsci.plotting.api.jreality.data.ColourImageData;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import de.jreality.geometry.PointSetFactory;

@@ -16,6 +16,7 @@
 
 package org.dawnsci.plotting.jreality.overlay;
 import org.dawnsci.plotting.jreality.tool.AreaSelectEventListener;
+import org.eclipse.dawnsci.plotting.api.jreality.overlay.OverlayConsumer;
 
 /**
  * Overlay1D Consumer interface allows drawing overlays on a 1D Graph plot it
