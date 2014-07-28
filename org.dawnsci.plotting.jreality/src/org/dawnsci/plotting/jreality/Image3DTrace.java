@@ -3,7 +3,6 @@ package org.dawnsci.plotting.jreality;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.dawnsci.plotting.jreality.data.ColourImageData;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
 import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
@@ -11,6 +10,7 @@ import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
+import org.eclipse.dawnsci.plotting.api.jreality.data.ColourImageData;
 import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.trace.IImage3DTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;

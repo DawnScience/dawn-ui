@@ -16,8 +16,8 @@
 
 package org.dawnsci.plotting.jreality.overlay.events;
 
-import org.dawnsci.plotting.jreality.overlay.OverlayProvider;
 import org.dawnsci.plotting.jreality.tool.AreaSelectEvent;
+import org.eclipse.dawnsci.plotting.api.jreality.overlay.OverlayProvider;
 
 /**
  * A simple event to wrap data involved in user making a selection

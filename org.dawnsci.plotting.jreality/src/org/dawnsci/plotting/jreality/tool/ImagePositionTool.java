@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.ListIterator;
 
 import org.dawnsci.plotting.jreality.core.IDataSet3DCorePlot;
+import org.eclipse.dawnsci.plotting.api.jreality.tool.IDataPositionEvent;
+import org.eclipse.dawnsci.plotting.api.jreality.tool.IImagePositionEvent;
+import org.eclipse.dawnsci.plotting.api.jreality.tool.ImagePositionListener;
 
 import de.jreality.math.Matrix;
 import de.jreality.scene.pick.PickResult;

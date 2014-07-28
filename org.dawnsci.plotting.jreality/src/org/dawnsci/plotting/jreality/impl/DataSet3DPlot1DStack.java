@@ -21,10 +21,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.dawnsci.plotting.jreality.core.AxisMode;
 import org.dawnsci.plotting.jreality.tick.Tick;
 import org.dawnsci.plotting.jreality.tick.TickFormatting;
-import org.dawnsci.plotting.jreality.util.ArrayPoolUtility;
+import org.eclipse.dawnsci.plotting.api.jreality.core.AxisMode;
+import org.eclipse.dawnsci.plotting.api.jreality.impl.Plot1DGraphTable;
+import org.eclipse.dawnsci.plotting.api.jreality.util.ArrayPoolUtility;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.widgets.Composite;
 

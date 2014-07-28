@@ -22,8 +22,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 
-import org.dawnsci.plotting.jreality.impl.Plot1DAppearance;
-import org.dawnsci.plotting.jreality.impl.Plot1DGraphTable;
+import org.eclipse.dawnsci.plotting.api.jreality.impl.Plot1DAppearance;
+import org.eclipse.dawnsci.plotting.api.jreality.impl.Plot1DGraphTable;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.FileTransfer;

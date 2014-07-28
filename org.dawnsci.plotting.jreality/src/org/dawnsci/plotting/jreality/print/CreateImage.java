@@ -16,7 +16,7 @@
 
 package org.dawnsci.plotting.jreality.print;
 
-import org.dawnsci.plotting.jreality.impl.Plot1DGraphTable;
+import org.eclipse.dawnsci.plotting.api.jreality.impl.Plot1DGraphTable;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.printing.PrinterData;
 import org.eclipse.swt.widgets.Display;
