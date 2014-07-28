@@ -1,6 +1,8 @@
 package org.dawnsci.common.widgets.table;
 
+import org.dawnsci.common.widgets.celleditor.ContentProposalListenerDelegate;
 import org.dawnsci.common.widgets.celleditor.TextCellEditorWithContentProposal;
+import org.eclipse.jface.fieldassist.IContentProposal;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;
@@ -16,6 +18,14 @@ public class SeriesEditingSupport extends EditingSupport {
 		super(viewer);
 		cellEditor = new TextCellEditorWithContentProposal((Composite)viewer.getControl(), null, null);
 		cellEditor.setLabelProvider(renderer);
+		cellEditor.addContentProposalListener(new ContentProposalListenerDelegate() {
+
+			@Override
+			public void proposalAccepted(IContentProposal proposal) {
+				System.out.println(("hello"));
+			}
+			
+		});
 	}
 	
 	public void setSeriesItemDescriptorProvider(ISeriesItemDescriptorProvider content) {
@@ -24,7 +34,7 @@ public class SeriesEditingSupport extends EditingSupport {
 
 	@Override
 	protected boolean canEdit(Object element) {
-		return true;
+		return element instanceof ISeriesItemDescriptor;
 	}
 
 	@Override
@@ -36,7 +46,9 @@ public class SeriesEditingSupport extends EditingSupport {
 
 	@Override
 	protected Object getValue(Object element) {
-		return "Fred"; // TODO
+		final ISeriesItemDescriptor des = (ISeriesItemDescriptor)element;
+		// TODO 
+		return "";
 	}
 
 	@Override

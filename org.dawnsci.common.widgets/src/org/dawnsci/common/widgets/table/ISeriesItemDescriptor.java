@@ -34,14 +34,6 @@ public interface ISeriesItemDescriptor extends IAdaptable {
 	String getDescription();
 
 	/**
-	 * Provides the long description of the function, for example may include
-	 * parameter information
-	 *
-	 * @return String description of the function
-	 */
-	String getLongDescription();
-
-	/**
 	 * Function Descriptors can choose to adapt to:
 	 * <ul>
 	 * <li> {@link IContentProposalProvider} - if the function descriptor is
@@ -70,11 +62,6 @@ public interface ISeriesItemDescriptor extends IAdaptable {
 		@Override
 		public String getDescription() {
 			return "Add a choosable item to the list of items.";
-		}
-
-		@Override
-		public String getLongDescription() {
-			return getDescription();
 		}
 
 		@Override

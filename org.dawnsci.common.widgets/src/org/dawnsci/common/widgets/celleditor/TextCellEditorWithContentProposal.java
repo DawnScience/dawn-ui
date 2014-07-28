@@ -39,9 +39,8 @@ public class TextCellEditorWithContentProposal extends TextCellEditor {
 		this.labelProvider = prov;
 	}
 
-	private void enableContentProposal(
-			IContentProposalProvider contentProposalProvider,
-			KeyStroke keyStroke, char[] autoActivationCharacters) {
+	private void enableContentProposal(IContentProposalProvider contentProposalProvider,
+			                           KeyStroke keyStroke, char[] autoActivationCharacters) {
 
 		contentProposalAdapter = new OpenableContentAssistCommandAdapter(text,
 				new TextContentAdapter(), contentProposalProvider, null, null,

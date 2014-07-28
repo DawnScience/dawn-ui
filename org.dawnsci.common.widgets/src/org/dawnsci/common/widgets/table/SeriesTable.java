@@ -1,6 +1,7 @@
 package org.dawnsci.common.widgets.table;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import org.eclipse.jface.bindings.keys.IKeyLookup;
 import org.eclipse.jface.bindings.keys.KeyLookupFactory;
@@ -17,6 +18,7 @@ import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 
 /**
@@ -45,10 +47,11 @@ public class SeriesTable {
 	 */
 	public void createControl(Composite parent, IStyledLabelProvider iconProvider) {
 		
-		tableViewer = new TableViewer(parent, SWT.BORDER | SWT.FULL_SELECTION);
+		tableViewer = new TableViewer(parent, SWT.BORDER | SWT.FULL_SELECTION | SWT.SINGLE);
 
 		tableViewer.getTable().setLinesVisible(true);
 		tableViewer.getTable().setHeaderVisible(true);
+		tableViewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		TableViewerFocusCellManager focusCellManager = new TableViewerFocusCellManager(tableViewer, new FocusCellOwnerDrawHighlighter(tableViewer));
 		ColumnViewerEditorActivationStrategy actSupport = new ColumnViewerEditorActivationStrategy(tableViewer) {
@@ -94,8 +97,9 @@ public class SeriesTable {
 	 */
 	public void setInput(Collection<ISeriesItemDescriptor> currentItems, ISeriesItemDescriptorProvider content) {
 		
-		tableViewer.setInput(currentItems);
 		editingSupport.setSeriesItemDescriptorProvider(content);
+		if (currentItems==null) currentItems = Collections.emptyList();
+		tableViewer.setInput(currentItems);
 	}
 
 	/**
@@ -114,10 +118,11 @@ public class SeriesTable {
 
 		this.editingSupport = new SeriesEditingSupport(tableViewer, new ColumnLabelProvider() {
 			public String getText(Object element) {
-				return ((ISeriesItemDescriptor)element).getDescription();
+				return ((SeriesItemContentProposal)element).getLabel();
 			}
 			public Image getImage(Object element) {
-				return delegate.getImage(element);
+				SeriesItemContentProposal prop = (SeriesItemContentProposal)element;
+				return delegate.getImage(prop.getDesriptor());
 			}
 		});
 		nameColumn.setEditingSupport(editingSupport);

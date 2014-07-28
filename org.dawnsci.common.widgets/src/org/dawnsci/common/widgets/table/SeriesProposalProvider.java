@@ -1,7 +1,6 @@
 package org.dawnsci.common.widgets.table;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -35,11 +34,7 @@ public class SeriesProposalProvider implements IContentProposalProvider {
 		List<IContentProposal> proposals = new ArrayList<IContentProposal>();
 		
 		for (ISeriesItemDescriptor descriptor : delegate.getDescriptors(itemDescriptor)) {
-			final IContentProposalProvider provider = (IContentProposalProvider) descriptor.getAdapter(IContentProposalProvider.class);
-			if (provider != null) {
-				IContentProposal[] proposals2 = provider.getProposals(contents, position);
-				proposals.addAll(Arrays.asList(proposals2));
-			}
+			proposals.add(new SeriesItemContentProposal(descriptor));
 		}
 		Collections.sort(proposals, proposalComparator);
 		return proposals.toArray(new IContentProposal[proposals.size()]);
