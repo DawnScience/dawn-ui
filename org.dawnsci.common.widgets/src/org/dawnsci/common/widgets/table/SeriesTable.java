@@ -126,6 +126,10 @@ public class SeriesTable {
 
 	
 	public void dispose() {
-		tableViewer.getTable().dispose();
+		tableViewer.getControl().dispose();
+	}
+
+	public void setFocus() {
+		tableViewer.getControl().setFocus();
 	}
 }

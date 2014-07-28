@@ -1,5 +1,7 @@
 package org.dawnsci.common.widgets.table;
 
+import java.util.Collection;
+
 public interface ISeriesItemDescriptorProvider {
 
 	/**
@@ -10,6 +12,6 @@ public interface ISeriesItemDescriptorProvider {
 	 * @param itemDescriptor, may be null
 	 * @return
 	 */
-	ISeriesItemDescriptor[] getDescriptors(ISeriesItemDescriptor itemDescriptor);
+	Collection<ISeriesItemDescriptor> getDescriptors(ISeriesItemDescriptor itemDescriptor);
 
 }
