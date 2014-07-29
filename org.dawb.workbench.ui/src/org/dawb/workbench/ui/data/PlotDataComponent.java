@@ -567,7 +567,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				} catch (Exception e) {
 					logger.error("Cannot open wizard "+DataReductionWizard.ID, e);
 				}
-				wiz.setData(getIFile(true),
+				wiz.setData(getFile(),
 						    getSelectionNames().get(0),
 						    (IDataReductionToolPage)getAbstractPlottingSystem().getActiveTool(),
 						    getSliceSet());
@@ -1003,6 +1003,24 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		return selections.get(0).getLazyData(new IMonitor.Stub());
 	}
 
+	public File getFile() {
+		File file = null;
+		
+		if (editor instanceof IEditorPart) {
+			IEditorInput input = ((IEditorPart)editor).getEditorInput();				         
+			try {
+				file = EclipseUtils.getFile(input);
+			} catch (Throwable ne) {
+				file = null;
+			}
+		} else {
+			IFile ifile = (IFile)editor.getAdapter(IFile.class);
+			file = new File(ifile.getLocation().toOSString());
+		}
+		
+		return file;
+	}
+	
 	public IFile getIFile(boolean createNewFile) {
 		
 		IFile  file = null;
