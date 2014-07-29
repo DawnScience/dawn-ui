@@ -14,7 +14,7 @@ public class SeriesLabelProvider extends ColumnLabelProvider implements ILabelPr
 	}
 	
 	public String getText(Object element) {
-		return ((SeriesItemContentProposal)element).getLabel();
+		return "  "+((SeriesItemContentProposal)element).getLabel();
 	}
 	
 	public Image getImage(Object element) {

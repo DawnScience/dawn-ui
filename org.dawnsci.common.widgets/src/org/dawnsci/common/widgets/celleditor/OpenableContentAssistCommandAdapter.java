@@ -10,8 +10,7 @@ import org.eclipse.ui.fieldassist.ContentAssistCommandAdapter;
  * us to provide access to the openProposalPopup method
  *
  */
-public class OpenableContentAssistCommandAdapter extends
-		ContentAssistCommandAdapter {
+public class OpenableContentAssistCommandAdapter extends ContentAssistCommandAdapter {
 
 
 	public OpenableContentAssistCommandAdapter(Control control,

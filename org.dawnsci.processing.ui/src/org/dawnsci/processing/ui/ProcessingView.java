@@ -59,7 +59,7 @@ public class ProcessingView extends ViewPart {
 		content.setLayout(new GridLayout(1, false));
 		GridUtils.removeMargins(content);
 
-		seriesTable.createControl(content, new LabelProvider());
+		seriesTable.createControl(content, new OperationLabelProvider());
 		seriesTable.registerSelectionProvider(getViewSite());		
 		seriesTable.setInput(saved, operationFiler);
 		

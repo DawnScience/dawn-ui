@@ -43,8 +43,8 @@ public class TextCellEditorWithContentProposal extends TextCellEditor {
 			                           KeyStroke keyStroke, char[] autoActivationCharacters) {
 
 		contentProposalAdapter = new OpenableContentAssistCommandAdapter(text,
-				new TextContentAdapter(), contentProposalProvider, null, null,
-				true);
+																		new TextContentAdapter(), contentProposalProvider, null, null,
+																		true);
 		contentProposalAdapter.setAutoActivationDelay(0);
 
 		contentProposalAdapter.setLabelProvider(labelProvider);

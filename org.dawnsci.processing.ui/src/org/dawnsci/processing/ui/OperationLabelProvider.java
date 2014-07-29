@@ -5,13 +5,15 @@ import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelP
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
 
-class LabelProvider extends ColumnLabelProvider implements IStyledLabelProvider {
+class OperationLabelProvider extends ColumnLabelProvider implements IStyledLabelProvider {
 
 	@Override
 	public StyledString getStyledText(Object element) {
 		if(!(element instanceof OperationDescriptor)) return null;
 		OperationDescriptor des = (OperationDescriptor)element;
-		return new StyledString(des.getName());
+		
+		StyledString ret = new StyledString("  "+des.getName());
+		return ret;
 	}
 	public Image getImage(Object element) {
 		if(!(element instanceof OperationDescriptor)) return null;
