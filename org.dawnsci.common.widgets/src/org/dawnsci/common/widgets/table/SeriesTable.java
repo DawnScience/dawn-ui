@@ -96,11 +96,18 @@ public class SeriesTable {
 	 * 
 	 * @param input
 	 */
-	public void setInput(Collection<ISeriesItemDescriptor> currentItems, ISeriesItemFilter content) {
+	public void setInput(Collection<? extends ISeriesItemDescriptor> currentItems, ISeriesItemFilter content) {
 		
 		editingSupport.setSeriesItemDescriptorProvider(content);
 		if (currentItems==null) currentItems = Collections.emptyList();
 		tableViewer.setInput(currentItems);
+	}
+	
+	/**
+	 * Call to remove all items from the list.
+	 */
+	public void clear() {
+		tableViewer.setInput(Collections.emptyList());
 	}
 
 	/**
@@ -147,5 +154,18 @@ public class SeriesTable {
 		SeriesContentProvider prov = (SeriesContentProvider)tableViewer.getContentProvider();
 		prov.setLockEditing(checked);
 		tableViewer.refresh();
+	}
+
+	public Collection<ISeriesItemDescriptor> getSeriesItems() {
+		SeriesContentProvider prov = (SeriesContentProvider)tableViewer.getContentProvider();
+		return prov.getSeriesItems();
+	}
+
+	/**
+	 * Add a new operation to the list.
+	 */
+	public void addNew() {
+		tableViewer.cancelEditing();
+		tableViewer.editElement(ISeriesItemDescriptor.NEW, 0);
 	}
 }

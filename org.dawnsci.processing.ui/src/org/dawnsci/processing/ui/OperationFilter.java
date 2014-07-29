@@ -2,6 +2,7 @@ package org.dawnsci.processing.ui;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
 import org.dawnsci.common.widgets.table.ISeriesItemFilter;
@@ -39,5 +40,11 @@ public final class OperationFilter implements ISeriesItemFilter {
 			logger.error("Cannot get operations!", e);
 			return null;
 		}
+	}
+
+	public List<OperationDescriptor> createDescriptors(List<String> ids) {
+		List<OperationDescriptor> descriptions = new ArrayList<OperationDescriptor>();
+		for (String id : ids) descriptions.add(new OperationDescriptor(id, service));
+		return descriptions;
 	}
 }

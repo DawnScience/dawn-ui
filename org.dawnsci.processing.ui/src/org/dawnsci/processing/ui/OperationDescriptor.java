@@ -14,9 +14,10 @@ import uk.ac.diamond.scisoft.analysis.processing.IOperationService;
 
 public class OperationDescriptor implements ISeriesItemDescriptor {
 
-	private IOperation        operation;
-	private String            id;
-	private IOperationService service;
+	private IOperation              operation;
+	private final String            id;
+	private final IOperationService service;
+	
 	public OperationDescriptor(String id, IOperationService service) {
 		this.id      = id;
 		this.service = service;
@@ -119,5 +120,9 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 
 	public void dispose() {
 		if (image!=null) image.dispose();
+	}
+
+	public String getId() {
+		return id;
 	}
 }

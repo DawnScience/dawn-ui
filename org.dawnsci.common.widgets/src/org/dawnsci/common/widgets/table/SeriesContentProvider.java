@@ -44,4 +44,8 @@ public class SeriesContentProvider implements IStructuredContentProvider {
 		this.lockEditing=checked;
 	}
 
+	public Collection<ISeriesItemDescriptor> getSeriesItems() {
+		return input;
+	}
+
 }
