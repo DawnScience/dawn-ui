@@ -26,9 +26,9 @@ public class SeriesItemLabelProvider extends BaseLabelProvider implements IStyle
 		final Image dele  = delegate.getImage(element);
 		if (dele!=null) return dele;
 		
-		if (element == ISeriesItemDescriptor.ADD) {
+		if (element == ISeriesItemDescriptor.NEW) {
 			return PlatformUI.getWorkbench().getSharedImages()
-					.getImage(ISharedImages.IMG_OBJ_ADD);
+					.getImage(ISharedImages.IMG_TOOL_NEW_WIZARD);
 
 		}
 		return null;

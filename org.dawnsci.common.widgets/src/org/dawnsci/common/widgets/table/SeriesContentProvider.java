@@ -34,7 +34,7 @@ public class SeriesContentProvider implements IStructuredContentProvider {
 		final Collection<ISeriesItemDescriptor> copy = input!=null && input.size()>0
 				                          ? new ArrayList<ISeriesItemDescriptor>(input)
 				                          : new ArrayList<ISeriesItemDescriptor>();
-		copy.add(ISeriesItemDescriptor.ADD);
+		copy.add(ISeriesItemDescriptor.NEW);
 		
 		return copy.toArray(new ISeriesItemDescriptor[copy.size()]);
 	}

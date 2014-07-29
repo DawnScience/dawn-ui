@@ -12,7 +12,7 @@ public class SeriesProposalProvider implements IContentProposalProvider {
 
 	private ProposalComparator proposalComparator = new ProposalComparator();
 	
-	private ISeriesItemDescriptorProvider delegate;
+	private ISeriesItemFilter             delegate;
 	private ISeriesItemDescriptor         itemDescriptor;
 	
 	private static class ProposalComparator implements Comparator<IContentProposal> {
@@ -24,7 +24,7 @@ public class SeriesProposalProvider implements IContentProposalProvider {
 
 	}
 
-	public SeriesProposalProvider(ISeriesItemDescriptorProvider delegate) {
+	public SeriesProposalProvider(ISeriesItemFilter delegate) {
 		this.delegate = delegate;
 	}
 
@@ -33,7 +33,7 @@ public class SeriesProposalProvider implements IContentProposalProvider {
 		
 		List<IContentProposal> proposals = new ArrayList<IContentProposal>();
 		
-		for (ISeriesItemDescriptor descriptor : delegate.getDescriptors(itemDescriptor)) {
+		for (ISeriesItemDescriptor descriptor : delegate.getDescriptors(contents, position, itemDescriptor)) {
 			proposals.add(new SeriesItemContentProposal(descriptor));
 		}
 		Collections.sort(proposals, proposalComparator);
