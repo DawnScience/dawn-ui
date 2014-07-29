@@ -1,6 +1,8 @@
 package org.dawnsci.processing.ui;
 
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -17,6 +19,11 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 	private IOperation              operation;
 	private final String            id;
 	private final IOperationService service;
+	
+	// We never dispose these static images. They are small
+	// in number and we just leave the VM to tidy them up...
+	private static Map<String, Image>   icons;
+	private static Map<String, Boolean> visible;
 	
 	public OperationDescriptor(String id, IOperationService service) {
 		this.id      = id;
@@ -91,59 +98,42 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 		return true;
 	}
 
-	private boolean readImage = false;
-	private Image image;
 	
 	// Reads the declared operations from extension point, if they have not been already.
 	public synchronized Image getImage() {
 		
-		if (readImage) return image;
-		readImage = true;
-		
-		IConfigurationElement[] eles = Platform.getExtensionRegistry().getConfigurationElementsFor("uk.ac.diamond.scisoft.analysis.api.operation");
-		for (IConfigurationElement e : eles) {
-			final String     identity = e.getAttribute("id");
-			if (identity.equals(this.id)) {
-				
-				final String icon = e.getAttribute("icon");
-				if (icon !=null) {
-			    	final String   cont  = e.getContributor().getName();
-			    	final Bundle   bundle= Platform.getBundle(cont);
-			    	final URL      entry = bundle.getEntry(icon);
-			    	final ImageDescriptor des = ImageDescriptor.createFromURL(entry);
-                    image = des.createImage();			
-                    break;
-				}
-			}
-		}
-		return null;
+		if (icons==null) read();
+		return icons.get(id);
+	}
+
+	public synchronized boolean isVisible() {
+		if (visible==null) read();
+		return visible.get(id);
 	}
 	
-	private boolean isVisible = true;
-	private boolean foundVisible;
-	public boolean isVisible() {
-		if (foundVisible) return isVisible;
+	private static synchronized void read() {
 		
-		foundVisible = true;
+		icons   = new HashMap<String, Image>(7);
+		visible = new HashMap<String, Boolean>(7);
+		
 		IConfigurationElement[] eles = Platform.getExtensionRegistry().getConfigurationElementsFor("uk.ac.diamond.scisoft.analysis.api.operation");
 		for (IConfigurationElement e : eles) {
 			final String     identity = e.getAttribute("id");
-			if (identity.equals(this.id)) {
-				final String     vis = e.getAttribute("visible");
-				if (vis==null) {
-					isVisible = true;
-				} else {
-				    isVisible = Boolean.parseBoolean(vis);
-				}
-				break;
+				
+			final String     vis = e.getAttribute("visible");
+			boolean isVisible = vis==null ? true : Boolean.parseBoolean(vis);
+			visible.put(identity, isVisible);
+
+			final String icon = e.getAttribute("icon");
+			if (icon !=null) {
+				final String   cont  = e.getContributor().getName();
+				final Bundle   bundle= Platform.getBundle(cont);
+				final URL      entry = bundle.getEntry(icon);
+				final ImageDescriptor des = ImageDescriptor.createFromURL(entry);
+				icons.put(identity, des.createImage());		
 			}
 		}
-		return isVisible;
-
-	}
-
-	public void dispose() {
-		if (image!=null) image.dispose();
+		
 	}
 
 	public String getId() {

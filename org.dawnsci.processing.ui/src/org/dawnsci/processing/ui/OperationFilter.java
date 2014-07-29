@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
 import org.dawnsci.common.widgets.table.ISeriesItemFilter;
-import org.eclipse.ui.internal.contexts.ContextService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +31,7 @@ public final class OperationFilter implements ISeriesItemFilter {
 			for (String id : ops) {
 				final OperationDescriptor des = new OperationDescriptor(id, service);
 				if (!des.isVisible()) continue;
-				if (contents!=null && !des.getName().toLowerCase().startsWith(contents.toLowerCase())) continue;
+				if (contents!=null && !des.getName().toLowerCase().contains(contents.toLowerCase())) continue;
 				ret.add(des);
 			}
 			return ret;

@@ -5,7 +5,6 @@ import java.util.Collections;
 
 import org.eclipse.jface.bindings.keys.IKeyLookup;
 import org.eclipse.jface.bindings.keys.KeyLookupFactory;
-import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
@@ -17,7 +16,6 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IViewSite;
@@ -101,6 +99,7 @@ public class SeriesTable {
 		editingSupport.setSeriesItemDescriptorProvider(content);
 		if (currentItems==null) currentItems = Collections.emptyList();
 		tableViewer.setInput(currentItems);
+		tableViewer.refresh();
 	}
 	
 	/**
@@ -124,15 +123,7 @@ public class SeriesTable {
 		
 		nameColumn.setLabelProvider(new DelegatingStyledCellLabelProvider(new SeriesItemLabelProvider(delegate)));
 
-		this.editingSupport = new SeriesEditingSupport(tableViewer, new ColumnLabelProvider() {
-			public String getText(Object element) {
-				return ((SeriesItemContentProposal)element).getLabel();
-			}
-			public Image getImage(Object element) {
-				SeriesItemContentProposal prop = (SeriesItemContentProposal)element;
-				return delegate.getImage(prop.getDescriptor());
-			}
-		});
+		this.editingSupport = new SeriesEditingSupport(tableViewer, new SeriesLabelProvider(delegate));
 		nameColumn.setEditingSupport(editingSupport);
 
 	}

@@ -96,9 +96,16 @@ public class ProcessingView extends ViewPart {
 			public void run() {
 				Activator.getDefault().getPreferenceStore().setValue(ProcessingConstants.LOCK_PIPELINE, isChecked());
 				seriesTable.setLockEditing(isChecked());
+				add.setEnabled(!isChecked());
+				clear.setEnabled(!isChecked());
 			}
 		};
 		lock.setImageDescriptor(Activator.getImageDescriptor("icons/lock.png"));
+
+		lock.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(ProcessingConstants.LOCK_PIPELINE));
+		add.setEnabled(!lock.isChecked());
+		clear.setEnabled(!lock.isChecked());
+		seriesTable.setLockEditing(lock.isChecked());
 		
 		getViewSite().getActionBars().getToolBarManager().add(lock);
 		getViewSite().getActionBars().getMenuManager().add(lock);
