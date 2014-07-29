@@ -1,15 +1,14 @@
 package org.dawnsci.common.widgets.table;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.graphics.Image;
 
 public class SeriesLabelProvider extends ColumnLabelProvider implements ILabelProvider {
 
-	private IStyledLabelProvider delegate;
+	private ILabelProvider delegate;
 	
-	public SeriesLabelProvider(IStyledLabelProvider delegate) {
+	public SeriesLabelProvider(ILabelProvider delegate) {
 		this.delegate = delegate;
 	}
 	

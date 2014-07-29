@@ -1,22 +1,36 @@
 package org.dawnsci.processing.ui;
 
-import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
-import org.eclipse.jface.viewers.StyledString;
+import org.dawnsci.common.widgets.table.SeriesItemLabelProvider;
 import org.eclipse.swt.graphics.Image;
 
-class OperationLabelProvider extends ColumnLabelProvider implements IStyledLabelProvider {
+class OperationLabelProvider extends SeriesItemLabelProvider  {
 
 	@Override
-	public StyledString getStyledText(Object element) {
-		if(!(element instanceof OperationDescriptor)) return null;
+	public String getText(Object element) {
+		
+		if(!(element instanceof OperationDescriptor)) return super.getText(element);
+		
 		OperationDescriptor des = (OperationDescriptor)element;
 		
-		StyledString ret = new StyledString("  "+des.getName());
-		return ret;
+		// Other columns
+		if (column>0) {
+			try {
+				switch (column) {
+				case 1:
+					return des.getSeriesObject().getInputRank().getLabel();
+				case 2:
+					return des.getSeriesObject().getOutputRank().getLabel();
+				}
+			} catch (Exception ne) {
+				return ne.getMessage();
+			}
+		}
+		return "  "+des.getName();
 	}
+	
 	public Image getImage(Object element) {
-		if(!(element instanceof OperationDescriptor)) return null;
+		if (column>0) return null;
+		if(!(element instanceof OperationDescriptor)) return super.getImage(element);
 		OperationDescriptor des = (OperationDescriptor)element;
 		return des.getImage();
 	}

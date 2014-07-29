@@ -11,8 +11,12 @@ import org.dawnsci.common.widgets.table.SeriesTable;
 import org.dawnsci.processing.ui.preference.ProcessingConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IContributionManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.ViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -35,6 +39,7 @@ public class ProcessingView extends ViewPart {
 	private SeriesTable               seriesTable;
 	private OperationFilter           operationFiler;
 	private List<OperationDescriptor> saved;
+	private TableViewerColumn inputs, outputs;
 
 	public ProcessingView() {
 		this.seriesTable    = new SeriesTable();
@@ -59,14 +64,33 @@ public class ProcessingView extends ViewPart {
 		content.setLayout(new GridLayout(1, false));
 		GridUtils.removeMargins(content);
 
-		seriesTable.createControl(content, new OperationLabelProvider());
+		final OperationLabelProvider prov = new OperationLabelProvider();
+		seriesTable.createControl(content, prov);
 		seriesTable.registerSelectionProvider(getViewSite());		
-		seriesTable.setInput(saved, operationFiler);
 		
-		createActions();
+		final MenuManager rightClick = new MenuManager();
+		createActions(rightClick);
+		createColumns(prov);
+		
+		// Here's the data, lets show it!
+		seriesTable.setMenuManager(rightClick);
+		seriesTable.setInput(saved, operationFiler);
+
 	}
 
-	private void createActions() {
+	private void createColumns(OperationLabelProvider prov) {
+		
+		this.inputs  = seriesTable.createColumn("Input Rank",  SWT.LEFT, 0, prov);
+		inputs.getColumn().setWidth(0);
+		inputs.getColumn().setResizable(false);
+
+		this.outputs = seriesTable.createColumn("Output Rank", SWT.LEFT, 0, prov);
+		outputs.getColumn().setWidth(0);
+		outputs.getColumn().setResizable(false);
+		
+	}
+
+	private void createActions(IContributionManager rightClick) {
 		
 		final IAction add = new Action("Add operation to pipeline", Activator.getImageDescriptor("icons/clipboard-list.png")) {
 			public void run() {
@@ -75,6 +99,7 @@ public class ProcessingView extends ViewPart {
 		};
 		getViewSite().getActionBars().getToolBarManager().add(add);
 		getViewSite().getActionBars().getMenuManager().add(add);
+		rightClick.add(add);
 
 
 		
@@ -87,10 +112,12 @@ public class ProcessingView extends ViewPart {
 		};
 		getViewSite().getActionBars().getToolBarManager().add(clear);
 		getViewSite().getActionBars().getMenuManager().add(clear);
+		rightClick.add(clear);
 
 		
 		getViewSite().getActionBars().getToolBarManager().add(new Separator());
 		getViewSite().getActionBars().getMenuManager().add(new Separator());
+		rightClick.add(new Separator());
 		
 		final IAction lock = new Action("Lock pipeline editing", IAction.AS_CHECK_BOX) {
 			public void run() {
@@ -109,6 +136,21 @@ public class ProcessingView extends ViewPart {
 		
 		getViewSite().getActionBars().getToolBarManager().add(lock);
 		getViewSite().getActionBars().getMenuManager().add(lock);
+		rightClick.add(lock);
+
+		final IAction showRanks = new Action("Show input and output ranks", IAction.AS_CHECK_BOX) {
+			public void run() {
+				inputs.getColumn().setWidth(isChecked() ? 100 : 0);
+				inputs.getColumn().setResizable(isChecked() ? true : false);
+				outputs.getColumn().setWidth(isChecked() ? 100 : 0);
+				outputs.getColumn().setResizable(isChecked() ? true : false);
+			}
+		};
+		showRanks.setImageDescriptor(Activator.getImageDescriptor("icons/application-tile-horizontal.png"));
+
+		getViewSite().getActionBars().getToolBarManager().add(showRanks);
+		getViewSite().getActionBars().getMenuManager().add(showRanks);
+		rightClick.add(showRanks);
 
 	}
 

@@ -1,33 +1,29 @@
 package org.dawnsci.common.widgets.table;
 
 import org.dawnsci.common.widgets.Activator;
-import org.eclipse.jface.viewers.BaseLabelProvider;
-import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
-import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 
 /**
  * This class may be extended to provide custom rendering.
  * @author fcp94556
  *
  */
-public class SeriesItemLabelProvider extends BaseLabelProvider implements IStyledLabelProvider {
+public class SeriesItemLabelProvider extends ColumnLabelProvider  {
 
-
-	private IStyledLabelProvider delegate;
 	private Image newImage;
+	protected int column=-1;
 
-	public SeriesItemLabelProvider(IStyledLabelProvider delegate) {
-		this.delegate = delegate;
+	public void update(ViewerCell cell) {
+		this.column = cell.getColumnIndex();
+        super.update(cell);
+		this.column = -1;
 	}
-
+	
 	@Override
 	public Image getImage(Object element) {
-		final Image dele  = delegate.getImage(element);
-		if (dele!=null) return dele;
-		
+				
 		if (element == ISeriesItemDescriptor.NEW) {
 			if (newImage == null) newImage = Activator.getImage("icons/new.png");
 			return newImage;
@@ -37,17 +33,14 @@ public class SeriesItemLabelProvider extends BaseLabelProvider implements IStyle
 	}
 
 	@Override
-	public StyledString getStyledText(Object element) {
+	public String getText(Object element) {
 		
-		final StyledString dele  = delegate.getStyledText(element);
-		if (dele!=null) return dele;
-
-		return new StyledString(((ISeriesItemDescriptor)element).getName());
+		if (column==0) return ((ISeriesItemDescriptor)element).getName();
+		return null;
 	}
 
 	public void dispose() {
 		super.dispose();
 		newImage.dispose();
-		delegate.dispose();
 	}
 }

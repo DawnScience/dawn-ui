@@ -3,13 +3,13 @@ package org.dawnsci.common.widgets.table;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.bindings.keys.IKeyLookup;
 import org.eclipse.jface.bindings.keys.KeyLookupFactory;
+import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
-import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
-import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.FocusCellOwnerDrawHighlighter;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -44,7 +44,7 @@ public class SeriesTable {
 	 * @param parent       - the SWT composite to add the table to.
 	 * @param iconProvider - a provider which must at least give the icon for a given SeriesItem
 	 */
-	public void createControl(Composite parent, IStyledLabelProvider iconProvider) {
+	public void createControl(Composite parent, SeriesItemLabelProvider iconProvider) {
 		
 		tableViewer = new TableViewer(parent, SWT.BORDER | SWT.FULL_SELECTION | SWT.SINGLE);
 
@@ -84,7 +84,7 @@ public class SeriesTable {
 	 * columns which are optionally editable.
 	 * 
 	 */
-	protected void createColumns(IStyledLabelProvider iconProv) {
+	protected void createColumns(SeriesItemLabelProvider iconProv) {
 		createNameColumn("Name", iconProv);
 	}
 
@@ -99,7 +99,6 @@ public class SeriesTable {
 		editingSupport.setSeriesItemDescriptorProvider(content);
 		if (currentItems==null) currentItems = Collections.emptyList();
 		tableViewer.setInput(currentItems);
-		tableViewer.refresh();
 	}
 	
 	/**
@@ -114,14 +113,14 @@ public class SeriesTable {
 	 * @param name
 	 * @param prov
 	 */
-	protected void createNameColumn(final String name, final IStyledLabelProvider delegate) {
+	protected void createNameColumn(final String name, final SeriesItemLabelProvider delegate) {
 		
 		TableViewerColumn nameColumn = new TableViewerColumn(tableViewer, SWT.NONE);
-		nameColumn.getColumn().setWidth(250);
+		nameColumn.getColumn().setWidth(300);
 		nameColumn.getColumn().setMoveable(true);
 		nameColumn.getColumn().setText(name);
 		
-		nameColumn.setLabelProvider(new DelegatingStyledCellLabelProvider(new SeriesItemLabelProvider(delegate)));
+		nameColumn.setLabelProvider(delegate);
 
 		this.editingSupport = new SeriesEditingSupport(tableViewer, new SeriesLabelProvider(delegate));
 		nameColumn.setEditingSupport(editingSupport);
@@ -158,5 +157,20 @@ public class SeriesTable {
 	public void addNew() {
 		tableViewer.cancelEditing();
 		tableViewer.editElement(ISeriesItemDescriptor.NEW, 0);
+	}
+
+	public TableViewerColumn createColumn(String name, int mod, int width, final CellLabelProvider prov) {
+		
+		final TableViewerColumn col = new TableViewerColumn(tableViewer, SWT.LEFT);
+		col.getColumn().setWidth(width);
+		col.getColumn().setMoveable(true);
+		col.getColumn().setText(name);
+		
+		col.setLabelProvider(prov);
+		return col;
+	}
+
+	public void setMenuManager(MenuManager rightClick) {
+		tableViewer.getControl().setMenu(rightClick.createContextMenu(tableViewer.getControl()));
 	}
 }
