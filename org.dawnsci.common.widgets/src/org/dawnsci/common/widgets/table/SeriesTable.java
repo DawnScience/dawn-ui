@@ -20,6 +20,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IViewSite;
 
 /**
  * This class is a table of a series of operations.
@@ -33,7 +34,7 @@ import org.eclipse.swt.widgets.Composite;
  */
 public class SeriesTable {
 
-	protected TableViewer tableViewer;
+	private TableViewer          tableViewer;
 	private SeriesEditingSupport editingSupport;
 	
 	/**
@@ -95,7 +96,7 @@ public class SeriesTable {
 	 * 
 	 * @param input
 	 */
-	public void setInput(Collection<ISeriesItemDescriptor> currentItems, ISeriesItemDescriptorProvider content) {
+	public void setInput(Collection<ISeriesItemDescriptor> currentItems, ISeriesItemFilter content) {
 		
 		editingSupport.setSeriesItemDescriptorProvider(content);
 		if (currentItems==null) currentItems = Collections.emptyList();
@@ -122,7 +123,7 @@ public class SeriesTable {
 			}
 			public Image getImage(Object element) {
 				SeriesItemContentProposal prop = (SeriesItemContentProposal)element;
-				return delegate.getImage(prop.getDesriptor());
+				return delegate.getImage(prop.getDescriptor());
 			}
 		});
 		nameColumn.setEditingSupport(editingSupport);
@@ -136,5 +137,9 @@ public class SeriesTable {
 
 	public void setFocus() {
 		tableViewer.getControl().setFocus();
+	}
+
+	public void registerSelectionProvider(IViewSite viewSite) {
+		viewSite.setSelectionProvider(tableViewer);
 	}
 }

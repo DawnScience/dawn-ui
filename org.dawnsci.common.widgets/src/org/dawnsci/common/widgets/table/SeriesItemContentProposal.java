@@ -47,7 +47,7 @@ public class SeriesItemContentProposal implements IContentProposal, IAdaptable {
 		return getLabel();
 	}
 
-	public Object getDesriptor() {
+	public ISeriesItemDescriptor getDescriptor() {
 		return desriptor;
 	}
 }

@@ -1,6 +1,13 @@
 package org.dawnsci.processing.ui;
 
+import java.net.URL;
+
 import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.graphics.Image;
+import org.osgi.framework.Bundle;
 
 import uk.ac.diamond.scisoft.analysis.processing.IOperation;
 import uk.ac.diamond.scisoft.analysis.processing.IOperationService;
@@ -83,4 +90,34 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 		return true;
 	}
 
+	private boolean readImage = false;
+	private Image image;
+	
+	// Reads the declared operations from extension point, if they have not been already.
+	public synchronized Image getImage() {
+		
+		if (readImage) return image;
+		readImage = true;
+		
+		IConfigurationElement[] eles = Platform.getExtensionRegistry().getConfigurationElementsFor("uk.ac.diamond.scisoft.analysis.api.operation");
+		for (IConfigurationElement e : eles) {
+			final String     identity = e.getAttribute("id");
+			if (identity.equals(this.id)) {
+				
+				final String icon = e.getAttribute("icon");
+				if (icon !=null) {
+			    	final String   cont  = e.getContributor().getName();
+			    	final Bundle   bundle= Platform.getBundle(cont);
+			    	final URL      entry = bundle.getEntry(icon);
+			    	final ImageDescriptor des = ImageDescriptor.createFromURL(entry);
+                    image = des.createImage();					
+				}
+			}
+		}
+		return null;
+	}
+
+	public void dispose() {
+		if (image!=null) image.dispose();
+	}
 }

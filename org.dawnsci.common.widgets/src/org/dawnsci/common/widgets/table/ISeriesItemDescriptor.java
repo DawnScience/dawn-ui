@@ -47,7 +47,7 @@ public interface ISeriesItemDescriptor extends IAdaptable {
 	Object getAdapter(@SuppressWarnings("rawtypes") Class clazz);
 	
 	
-	ISeriesItemDescriptor ADD = new ISeriesItemDescriptor() {
+	ISeriesItemDescriptor NEW = new ISeriesItemDescriptor() {
 
 		@Override
 		public Object getSeriesObject() throws InstantiationException {
@@ -56,7 +56,7 @@ public interface ISeriesItemDescriptor extends IAdaptable {
 
 		@Override
 		public String getName() {
-			return "Add...";
+			return "New...";
 		}
 
 		@Override
