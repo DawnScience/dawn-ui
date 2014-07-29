@@ -180,34 +180,29 @@ public class PlottingUtils {
 	 */
 	public static int getBinShape(double width, double height, boolean isDrag) {
 		int binShape = 1;
-
 		if (isDrag && 
 				((width > 300 && width < 900 && height > 300 && width < 900)// size above 300x300 and below 900x900
 				|| (width < 300 && height > 300)					// if width below 300 but height above
 				|| (width > 300 && height < 300))) {				// if width above 300 but height below
-			return (int)(((width + height) / 2) / 100) - 1;
+			binShape = (int)(((width + height) / 2) / 100) - 1;
 		} else if (!isDrag && 
 				((width > 300 && width < 900 && height > 300 && width < 900)
 						|| (width < 300 && height > 300)
 						|| (width > 300 && height < 300))) {
-			return (int)(((width + height) / 2) / 100) - 2;
-		}
-		// if size is below 300x300
-		if (width < 300 && height < 300) {
-			return 1;
-		}
-		// if size is bigger than 900x900
-		if (isDrag && 
+			binShape = (int)(((width + height) / 2) / 100) - 2;
+		} else if (isDrag &&					// if size is bigger than 900x900 
 				((width > 900 && height > 900)
 				||(width > 900 && height < 900)
 				||(width < 900 && height > 900))) {
-			return (int)(((width + height) / 2) / 100);
+			binShape = (int)(((width + height) / 2) / 100);
 		} else if (!isDrag && 
 				((width > 900 && height > 900)
 				||(width > 900 && height < 900)
 				||(width < 900 && height > 900))) {
-			return (int)(((width + height) / 2) / 100) - 1;
+			binShape = (int)(((width + height) / 2) / 100) - 1;
 		}
+		if (binShape == 0) // reset to 1 if binShape is zero
+			binShape = 1;
 		return binShape;
 	}
 }
