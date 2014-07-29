@@ -142,4 +142,10 @@ public class SeriesTable {
 	public void registerSelectionProvider(IViewSite viewSite) {
 		viewSite.setSelectionProvider(tableViewer);
 	}
+
+	public void setLockEditing(boolean checked) {
+		SeriesContentProvider prov = (SeriesContentProvider)tableViewer.getContentProvider();
+		prov.setLockEditing(checked);
+		tableViewer.refresh();
+	}
 }

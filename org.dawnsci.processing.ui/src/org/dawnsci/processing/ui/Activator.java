@@ -1,5 +1,6 @@
 package org.dawnsci.processing.ui;
 
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -54,6 +55,10 @@ public class Activator extends AbstractUIPlugin {
 		ServiceReference<?> ref = bundleContext.getServiceReference(serviceClass);
 		if (ref==null) return null;
 		return bundleContext.getService(ref);
+	}
+
+	public static ImageDescriptor getImageDescriptor(String imageFilePath) {
+		return imageDescriptorFromPlugin(PLUGIN_ID, imageFilePath);
 	}
 
 }

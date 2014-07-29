@@ -1,5 +1,6 @@
 package org.dawnsci.common.widgets.table;
 
+import org.dawnsci.common.widgets.Activator;
 import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
@@ -16,6 +17,7 @@ public class SeriesItemLabelProvider extends BaseLabelProvider implements IStyle
 
 
 	private IStyledLabelProvider delegate;
+	private Image newImage;
 
 	public SeriesItemLabelProvider(IStyledLabelProvider delegate) {
 		this.delegate = delegate;
@@ -27,8 +29,8 @@ public class SeriesItemLabelProvider extends BaseLabelProvider implements IStyle
 		if (dele!=null) return dele;
 		
 		if (element == ISeriesItemDescriptor.NEW) {
-			return PlatformUI.getWorkbench().getSharedImages()
-					.getImage(ISharedImages.IMG_TOOL_NEW_WIZARD);
+			if (newImage == null) newImage = Activator.getImage("icons/new.png");
+			return newImage;
 
 		}
 		return null;
@@ -43,4 +45,9 @@ public class SeriesItemLabelProvider extends BaseLabelProvider implements IStyle
 		return new StyledString(((ISeriesItemDescriptor)element).getName());
 	}
 
+	public void dispose() {
+		super.dispose();
+		newImage.dispose();
+		delegate.dispose();
+	}
 }

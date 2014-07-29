@@ -16,6 +16,7 @@ import org.eclipse.jface.viewers.Viewer;
 public class SeriesContentProvider implements IStructuredContentProvider {
 
 	private Collection<ISeriesItemDescriptor> input;
+	private boolean lockEditing;
 
 	@Override
 	public void dispose() {
@@ -34,9 +35,13 @@ public class SeriesContentProvider implements IStructuredContentProvider {
 		final Collection<ISeriesItemDescriptor> copy = input!=null && input.size()>0
 				                          ? new ArrayList<ISeriesItemDescriptor>(input)
 				                          : new ArrayList<ISeriesItemDescriptor>();
-		copy.add(ISeriesItemDescriptor.NEW);
+		if (!lockEditing) copy.add(ISeriesItemDescriptor.NEW);
 		
 		return copy.toArray(new ISeriesItemDescriptor[copy.size()]);
+	}
+
+	public void setLockEditing(boolean checked) {
+		this.lockEditing=checked;
 	}
 
 }
