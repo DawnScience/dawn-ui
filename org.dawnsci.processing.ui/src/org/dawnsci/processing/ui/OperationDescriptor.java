@@ -111,11 +111,35 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 			    	final Bundle   bundle= Platform.getBundle(cont);
 			    	final URL      entry = bundle.getEntry(icon);
 			    	final ImageDescriptor des = ImageDescriptor.createFromURL(entry);
-                    image = des.createImage();					
+                    image = des.createImage();			
+                    break;
 				}
 			}
 		}
 		return null;
+	}
+	
+	private boolean isVisible = true;
+	private boolean foundVisible;
+	public boolean isVisible() {
+		if (foundVisible) return isVisible;
+		
+		foundVisible = true;
+		IConfigurationElement[] eles = Platform.getExtensionRegistry().getConfigurationElementsFor("uk.ac.diamond.scisoft.analysis.api.operation");
+		for (IConfigurationElement e : eles) {
+			final String     identity = e.getAttribute("id");
+			if (identity.equals(this.id)) {
+				final String     vis = e.getAttribute("visible");
+				if (vis==null) {
+					isVisible = true;
+				} else {
+				    isVisible = Boolean.parseBoolean(vis);
+				}
+				break;
+			}
+		}
+		return isVisible;
+
 	}
 
 	public void dispose() {

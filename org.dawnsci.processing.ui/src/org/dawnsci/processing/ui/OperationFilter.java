@@ -24,13 +24,14 @@ public final class OperationFilter implements ISeriesItemFilter {
 	
 	@Override
 	public Collection<ISeriesItemDescriptor> getDescriptors(String contents, int position, ISeriesItemDescriptor previous) {
-		// TODO make descriptors for relative case
+		// TODO use previous
 		try {
 			final Collection<String>                ops = service.getRegisteredOperations();
 			final Collection<ISeriesItemDescriptor> ret = new ArrayList<ISeriesItemDescriptor>(7);
 			
 			for (String id : ops) {
 				final OperationDescriptor des = new OperationDescriptor(id, service);
+				if (!des.isVisible()) continue;
 				if (contents!=null && !des.getName().toLowerCase().startsWith(contents.toLowerCase())) continue;
 				ret.add(des);
 			}
@@ -44,7 +45,11 @@ public final class OperationFilter implements ISeriesItemFilter {
 
 	public List<OperationDescriptor> createDescriptors(List<String> ids) {
 		List<OperationDescriptor> descriptions = new ArrayList<OperationDescriptor>();
-		for (String id : ids) descriptions.add(new OperationDescriptor(id, service));
+		for (String id : ids) {
+			final OperationDescriptor des = new OperationDescriptor(id, service);
+			if (!des.isVisible()) continue;
+			descriptions.add(des);
+		}
 		return descriptions;
 	}
 }
