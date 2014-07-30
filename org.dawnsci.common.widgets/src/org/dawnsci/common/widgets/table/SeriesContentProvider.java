@@ -47,8 +47,8 @@ public class SeriesContentProvider implements IStructuredContentProvider {
 		this.lockEditing=checked;
 	}
 
-	public Collection<ISeriesItemDescriptor> getSeriesItems() {
-		return input;
+	public List<ISeriesItemDescriptor> getSeriesItems() {
+		return new ArrayList<ISeriesItemDescriptor>(input);
 	}
 
 	public boolean delete(ISeriesItemDescriptor selected) {

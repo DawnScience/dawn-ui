@@ -46,13 +46,36 @@ public interface ISeriesItemDescriptor extends IAdaptable {
 	@Override
 	Object getAdapter(@SuppressWarnings("rawtypes") Class clazz);
 	
-	
-	ISeriesItemDescriptor NEW = new ISeriesItemDescriptor() {
+	public class Stub implements ISeriesItemDescriptor {
 
 		@Override
 		public Object getSeriesObject() throws InstantiationException {
+			// TODO Auto-generated method stub
 			return null;
 		}
+
+		@Override
+		public String getName() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public String getDescription() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public Object getAdapter(Class clazz) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
+	}
+	
+	
+	ISeriesItemDescriptor NEW = new Stub() {
 
 		@Override
 		public String getName() {
@@ -62,12 +85,19 @@ public interface ISeriesItemDescriptor extends IAdaptable {
 		@Override
 		public String getDescription() {
 			return "Add a choosable item to the list of items.";
+		}		
+	};
+	
+	ISeriesItemDescriptor INSERT = new Stub() {
+		@Override
+		public String getName() {
+			return "Insert...";
 		}
 
 		@Override
-		public Object getAdapter(Class clazz) {
-			return null;
-		}
+		public String getDescription() {
+			return "Insert a choosable item to the list of items.";
+		}		
 		
 	};
 

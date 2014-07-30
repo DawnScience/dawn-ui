@@ -16,7 +16,6 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TableViewerColumn;
-import org.eclipse.jface.viewers.ViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -93,7 +92,7 @@ public class ProcessingView extends ViewPart {
 
 	private void createActions(IContributionManager rightClick) {
 		
-		final IAction add = new Action("Add operation to pipeline", Activator.getImageDescriptor("icons/clipboard-list.png")) {
+		final IAction add = new Action("Insert operation", Activator.getImageDescriptor("icons/clipboard-list.png")) {
 			public void run() {
 				seriesTable.addNew();
 			}
@@ -133,6 +132,7 @@ public class ProcessingView extends ViewPart {
 				Activator.getDefault().getPreferenceStore().setValue(ProcessingConstants.LOCK_PIPELINE, isChecked());
 				seriesTable.setLockEditing(isChecked());
 				add.setEnabled(!isChecked());
+				delete.setEnabled(!isChecked());
 				clear.setEnabled(!isChecked());
 			}
 		};
@@ -140,6 +140,7 @@ public class ProcessingView extends ViewPart {
 
 		lock.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(ProcessingConstants.LOCK_PIPELINE));
 		add.setEnabled(!lock.isChecked());
+		delete.setEnabled(!lock.isChecked());
 		clear.setEnabled(!lock.isChecked());
 		seriesTable.setLockEditing(lock.isChecked());
 		

@@ -27,7 +27,7 @@ final class OperationDescriptor implements ISeriesItemDescriptor {
 	private final String            id;
 	private final IOperationService service;
 	
-	// Operations of the same id and service are 
+	// Operations of the same id and service are required to be differentiated
 	private final String            uniqueId;
 	
 	public OperationDescriptor(String id, IOperationService service) {

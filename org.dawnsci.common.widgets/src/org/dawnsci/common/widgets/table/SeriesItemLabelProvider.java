@@ -24,7 +24,7 @@ public class SeriesItemLabelProvider extends ColumnLabelProvider  {
 	@Override
 	public Image getImage(Object element) {
 				
-		if (element == ISeriesItemDescriptor.NEW) {
+		if (element == ISeriesItemDescriptor.NEW || element == ISeriesItemDescriptor.INSERT) {
 			if (newImage == null) newImage = Activator.getImage("icons/new.png");
 			return newImage;
 

@@ -20,9 +20,11 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IViewSite;
 
 /**
@@ -40,7 +42,8 @@ public class SeriesTable {
 	private TableViewer          tableViewer;
 	private SeriesEditingSupport editingSupport;
     private ISeriesValidator     validator;
-	private CLabel errorLabel;
+	private Label errorLabel;
+	private Composite error;
 	/**
 	 * Create the control for the table. The icon provider is checked for label and
 	 * icon for the first, name column in the table. It must provide at least an
@@ -85,10 +88,21 @@ public class SeriesTable {
 
 		tableViewer.setContentProvider(new SeriesContentProvider());
 		
-		this.errorLabel = new CLabel(parent, SWT.WRAP);
+		this.error = new Composite(parent, SWT.NONE);
+		error.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		error.setLayout(new GridLayout(2, false));
+		error.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		
+		Label errorIcon = new Label(error, SWT.NONE);
+		errorIcon.setImage(Activator.getImageDescriptor("icons/error.png").createImage());
+		errorIcon.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		errorIcon.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		
+		this.errorLabel = new Label(error, SWT.WRAP);
+		errorLabel.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		errorLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		errorLabel.setImage(Activator.getImageDescriptor("icons/error.png").createImage());
-		GridUtils.setVisible(errorLabel,         false);
+		
+		GridUtils.setVisible(error,         false);
 
 		createColumns(iconProvider);
 		
@@ -97,10 +111,18 @@ public class SeriesTable {
 	
 	protected void checkValid(List<ISeriesItemDescriptor> series) {
 		
+		if (series.contains(ISeriesItemDescriptor.INSERT)) {
+			GridUtils.setVisible(error,         true);
+			errorLabel.setText("Please choose an operation to insert");
+			error.getParent().layout();
+			return;
+		}
+		
 		if (validator==null) return;
 		final String errorMessage = validator.getErrorMessage(series);
-		GridUtils.setVisible(errorLabel,         errorMessage!=null);
+		GridUtils.setVisible(error,         errorMessage!=null);
 		errorLabel.setText(errorMessage!=null ? errorMessage : "");
+		error.getParent().layout();
 	}
 
 	/**
@@ -172,7 +194,7 @@ public class SeriesTable {
 		tableViewer.refresh();
 	}
 
-	public Collection<ISeriesItemDescriptor> getSeriesItems() {
+	public List<ISeriesItemDescriptor> getSeriesItems() {
 		SeriesContentProvider prov = (SeriesContentProvider)tableViewer.getContentProvider();
 		return prov.getSeriesItems();
 	}
@@ -182,6 +204,17 @@ public class SeriesTable {
 	 */
 	public void addNew() {
 		tableViewer.cancelEditing();
+		
+		final ISeriesItemDescriptor selected = getSelected();
+		if (selected!=null && !selected.equals(ISeriesItemDescriptor.NEW)) {
+			final List<ISeriesItemDescriptor> items = getSeriesItems();
+			final int index = items.indexOf(selected);
+			items.add(index+1, ISeriesItemDescriptor.INSERT);
+			tableViewer.setInput(items);
+			tableViewer.editElement(ISeriesItemDescriptor.INSERT, 0);
+			return;
+		}
+
 		tableViewer.editElement(ISeriesItemDescriptor.NEW, 0);
 	}
 	
@@ -191,13 +224,19 @@ public class SeriesTable {
      */
 	public boolean delete() {
 		
-		final IStructuredSelection  sel      = (IStructuredSelection)tableViewer.getSelection();
-		final ISeriesItemDescriptor selected = (ISeriesItemDescriptor)sel.getFirstElement();
+		final ISeriesItemDescriptor selected = getSelected();
 		if (selected==null) return false;
 		if (selected==ISeriesItemDescriptor.NEW) return false;
 		
 		SeriesContentProvider prov = (SeriesContentProvider)tableViewer.getContentProvider();
         return prov.delete(selected);
+	}
+
+
+	private ISeriesItemDescriptor getSelected() {
+		final IStructuredSelection  sel      = (IStructuredSelection)tableViewer.getSelection();
+		final ISeriesItemDescriptor selected = (ISeriesItemDescriptor)sel.getFirstElement();
+		return selected;
 	}
 
 

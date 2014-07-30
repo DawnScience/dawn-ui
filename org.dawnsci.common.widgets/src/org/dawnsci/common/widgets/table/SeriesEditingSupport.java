@@ -11,7 +11,6 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.swt.widgets.Composite;
 
 public class SeriesEditingSupport extends EditingSupport {
@@ -39,7 +38,14 @@ public class SeriesEditingSupport extends EditingSupport {
                 
                 SeriesItemContentProposal  sprop = (SeriesItemContentProposal)proposal;
                 final ISeriesItemDescriptor desc = sprop.getDescriptor();
-                ret.add(desc);
+                
+                if (ret.contains(ISeriesItemDescriptor.INSERT)) {
+                	final int index = ret.indexOf(ISeriesItemDescriptor.INSERT);
+                	ret.remove(index);
+                	ret.add(index, desc);
+                } else {
+                    ret.add(desc);
+                }
                 
                 getViewer().setInput(ret);
 			}
@@ -53,18 +59,23 @@ public class SeriesEditingSupport extends EditingSupport {
 
 	@Override
 	protected boolean canEdit(Object element) {
-		return ISeriesItemDescriptor.NEW.equals(element);
+		return ISeriesItemDescriptor.NEW.equals(element) || ISeriesItemDescriptor.INSERT.equals(element);
 	}
 
 	@Override
 	protected CellEditor getCellEditor(Object element) {
 		
-		final Object[] data = ((IStructuredContentProvider)getViewer().getContentProvider()).getElements(element);
+		final List<ISeriesItemDescriptor> data = ((SeriesContentProvider)getViewer().getContentProvider()).getSeriesItems();
 		
 		// We get the last non-add item or null if there is not one.
-		ISeriesItemDescriptor previous = data.length>1
-				                       ? (ISeriesItemDescriptor)data[data.length-2]
-				                       : null;
+		ISeriesItemDescriptor previous;
+		if (element.equals(ISeriesItemDescriptor.NEW)) {
+			previous = data.size()>1 ? data.get(data.size()-1) : null;
+		} else if (data.size()>1 && data.contains(element)) {
+			previous = data.get(data.indexOf(element)-1);
+		} else{
+			previous = null;
+		}
 		
 		SeriesProposalProvider sprov = (SeriesProposalProvider)cellEditor.getContentProposalProvider();
 		sprov.setSeriesItemDescriptor(previous);
