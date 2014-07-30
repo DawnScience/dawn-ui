@@ -139,4 +139,27 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 	public String getId() {
 		return id;
 	}
+
+	public boolean isCompatibleWith(Object previous) {
+		
+		try {
+			if (previous == null) return true;
+	        if (!getClass().isInstance(previous)) return false;
+	        
+	        // TODO Nice to do this without making the operations...
+	        final IOperation op = ((OperationDescriptor)previous).getSeriesObject();
+	        final IOperation ot = this.getSeriesObject();
+	        
+			return op.getOutputRank().isCompatibleWith(ot.getInputRank());
+			
+		} catch (Exception ne) {
+			ne.printStackTrace();
+			return false;
+		}
+
+	}
+	
+	public String toString() {
+		return getName();
+	}
 }

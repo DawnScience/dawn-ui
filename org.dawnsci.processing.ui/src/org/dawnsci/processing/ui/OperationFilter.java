@@ -9,6 +9,7 @@ import org.dawnsci.common.widgets.table.ISeriesItemFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.processing.IOperation;
 import uk.ac.diamond.scisoft.analysis.processing.IOperationService;
 
 public final class OperationFilter implements ISeriesItemFilter {
@@ -32,6 +33,7 @@ public final class OperationFilter implements ISeriesItemFilter {
 				final OperationDescriptor des = new OperationDescriptor(id, service);
 				if (!des.isVisible()) continue;
 				if (contents!=null && !des.getName().toLowerCase().contains(contents.toLowerCase())) continue;
+				if (!des.isCompatibleWith(previous)) continue;
 				ret.add(des);
 			}
 			return ret;
