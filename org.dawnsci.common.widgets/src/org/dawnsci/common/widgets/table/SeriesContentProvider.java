@@ -2,6 +2,7 @@ package org.dawnsci.common.widgets.table;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -15,8 +16,9 @@ import org.eclipse.jface.viewers.Viewer;
  */
 public class SeriesContentProvider implements IStructuredContentProvider {
 
-	private Collection<ISeriesItemDescriptor> input;
+	private List<ISeriesItemDescriptor> input;
 	private boolean lockEditing;
+	private Viewer viewer;
 
 	@Override
 	public void dispose() {
@@ -26,13 +28,14 @@ public class SeriesContentProvider implements IStructuredContentProvider {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		this.input = (Collection<ISeriesItemDescriptor>)newInput;
+		this.viewer = viewer;
+		this.input = (List<ISeriesItemDescriptor>)newInput;
 	}
 
 	@Override
 	public Object[] getElements(Object inputElement) {
 		
-		final Collection<ISeriesItemDescriptor> copy = input!=null && input.size()>0
+		final List<ISeriesItemDescriptor> copy = input!=null && input.size()>0
 				                          ? new ArrayList<ISeriesItemDescriptor>(input)
 				                          : new ArrayList<ISeriesItemDescriptor>();
 		if (!lockEditing) copy.add(ISeriesItemDescriptor.NEW);
@@ -46,6 +49,13 @@ public class SeriesContentProvider implements IStructuredContentProvider {
 
 	public Collection<ISeriesItemDescriptor> getSeriesItems() {
 		return input;
+	}
+
+	public boolean delete(ISeriesItemDescriptor selected) {
+		if (input==null) return false;
+		boolean ok = input.remove(selected);
+		if (ok) viewer.setInput(input);
+		return ok;
 	}
 
 }

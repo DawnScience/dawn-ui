@@ -64,6 +64,7 @@ public class ProcessingView extends ViewPart {
 		content.setLayout(new GridLayout(1, false));
 		GridUtils.removeMargins(content);
 
+		seriesTable.setValidator(new OperationValidator());
 		final OperationLabelProvider prov = new OperationLabelProvider();
 		seriesTable.createControl(content, prov);
 		seriesTable.registerSelectionProvider(getViewSite());		
@@ -101,6 +102,14 @@ public class ProcessingView extends ViewPart {
 		getViewSite().getActionBars().getMenuManager().add(add);
 		rightClick.add(add);
 
+		final IAction delete = new Action("Delete selected operation", Activator.getImageDescriptor("icons/clipboard--minus.png")) {
+			public void run() {
+				seriesTable.delete();
+			}
+		};
+		getViewSite().getActionBars().getToolBarManager().add(delete);
+		getViewSite().getActionBars().getMenuManager().add(delete);
+		rightClick.add(delete);
 
 		
 		final IAction clear = new Action("Clear list of operations", Activator.getImageDescriptor("icons/clipboard-empty.png")) {

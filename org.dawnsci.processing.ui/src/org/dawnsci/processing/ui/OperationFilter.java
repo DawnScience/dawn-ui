@@ -9,10 +9,9 @@ import org.dawnsci.common.widgets.table.ISeriesItemFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.processing.IOperation;
 import uk.ac.diamond.scisoft.analysis.processing.IOperationService;
 
-public final class OperationFilter implements ISeriesItemFilter {
+final class OperationFilter implements ISeriesItemFilter {
 	
 	private static final Logger logger = LoggerFactory.getLogger(OperationFilter.class);
 	

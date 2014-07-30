@@ -3,6 +3,7 @@ package org.dawnsci.processing.ui;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -14,20 +15,25 @@ import org.osgi.framework.Bundle;
 import uk.ac.diamond.scisoft.analysis.processing.IOperation;
 import uk.ac.diamond.scisoft.analysis.processing.IOperationService;
 
-public class OperationDescriptor implements ISeriesItemDescriptor {
+final class OperationDescriptor implements ISeriesItemDescriptor {
 
-	private IOperation              operation;
-	private final String            id;
-	private final IOperationService service;
-	
 	// We never dispose these static images. They are small
 	// in number and we just leave the VM to tidy them up...
 	private static Map<String, Image>   icons;
 	private static Map<String, Boolean> visible;
 	
+
+	private IOperation              operation;
+	private final String            id;
+	private final IOperationService service;
+	
+	// Operations of the same id and service are 
+	private final String            uniqueId;
+	
 	public OperationDescriptor(String id, IOperationService service) {
-		this.id      = id;
-		this.service = service;
+		this.id       = id;
+		this.service  = service;
+		this.uniqueId = UUID.randomUUID().toString()+"_"+System.currentTimeMillis();
 	}
 
 	@Override
@@ -72,7 +78,7 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 		int result = 1;
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result
-				+ ((operation == null) ? 0 : operation.hashCode());
+				+ ((uniqueId == null) ? 0 : uniqueId.hashCode());
 		return result;
 	}
 
@@ -90,10 +96,10 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 				return false;
 		} else if (!id.equals(other.id))
 			return false;
-		if (operation == null) {
-			if (other.operation != null)
+		if (uniqueId == null) {
+			if (other.uniqueId != null)
 				return false;
-		} else if (!operation.equals(other.operation))
+		} else if (!uniqueId.equals(other.uniqueId))
 			return false;
 		return true;
 	}

@@ -2,7 +2,10 @@ package org.dawnsci.common.widgets.table;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
+import org.dawnsci.common.richbeans.internal.GridUtils;
+import org.dawnsci.common.widgets.Activator;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.bindings.keys.IKeyLookup;
 import org.eclipse.jface.bindings.keys.KeyLookupFactory;
@@ -11,11 +14,13 @@ import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
 import org.eclipse.jface.viewers.FocusCellOwnerDrawHighlighter;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IViewSite;
@@ -34,7 +39,8 @@ public class SeriesTable {
 
 	private TableViewer          tableViewer;
 	private SeriesEditingSupport editingSupport;
-	
+    private ISeriesValidator     validator;
+	private CLabel errorLabel;
 	/**
 	 * Create the control for the table. The icon provider is checked for label and
 	 * icon for the first, name column in the table. It must provide at least an
@@ -46,7 +52,12 @@ public class SeriesTable {
 	 */
 	public void createControl(Composite parent, SeriesItemLabelProvider iconProvider) {
 		
-		tableViewer = new TableViewer(parent, SWT.BORDER | SWT.FULL_SELECTION | SWT.SINGLE);
+		tableViewer = new TableViewer(parent, SWT.BORDER | SWT.FULL_SELECTION | SWT.SINGLE) {
+		    protected void inputChanged(Object input, Object oldInput) {
+		    	super.inputChanged(input, oldInput);
+		    	checkValid((List<ISeriesItemDescriptor>)input);
+		    }
+		};
 
 		tableViewer.getTable().setLinesVisible(true);
 		tableViewer.getTable().setHeaderVisible(true);
@@ -73,10 +84,25 @@ public class SeriesTable {
 
 
 		tableViewer.setContentProvider(new SeriesContentProvider());
+		
+		this.errorLabel = new CLabel(parent, SWT.WRAP);
+		errorLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		errorLabel.setImage(Activator.getImageDescriptor("icons/error.png").createImage());
+		GridUtils.setVisible(errorLabel,         false);
 
 		createColumns(iconProvider);
+		
 	}
 	
+	
+	protected void checkValid(List<ISeriesItemDescriptor> series) {
+		
+		if (validator==null) return;
+		final String errorMessage = validator.getErrorMessage(series);
+		GridUtils.setVisible(errorLabel,         errorMessage!=null);
+		errorLabel.setText(errorMessage!=null ? errorMessage : "");
+	}
+
 	/**
 	 * This method is called to create the columns of the table.
 	 * The columns required may be overridden depending on the 
@@ -158,6 +184,22 @@ public class SeriesTable {
 		tableViewer.cancelEditing();
 		tableViewer.editElement(ISeriesItemDescriptor.NEW, 0);
 	}
+	
+    /**
+     * Remove the selected item, if any.
+     * @return true if something is selected and we deleted it.
+     */
+	public boolean delete() {
+		
+		final IStructuredSelection  sel      = (IStructuredSelection)tableViewer.getSelection();
+		final ISeriesItemDescriptor selected = (ISeriesItemDescriptor)sel.getFirstElement();
+		if (selected==null) return false;
+		if (selected==ISeriesItemDescriptor.NEW) return false;
+		
+		SeriesContentProvider prov = (SeriesContentProvider)tableViewer.getContentProvider();
+        return prov.delete(selected);
+	}
+
 
 	public TableViewerColumn createColumn(String name, int mod, int width, final CellLabelProvider prov) {
 		
@@ -172,5 +214,15 @@ public class SeriesTable {
 
 	public void setMenuManager(MenuManager rightClick) {
 		tableViewer.getControl().setMenu(rightClick.createContextMenu(tableViewer.getControl()));
+	}
+
+
+	public ISeriesValidator getValidator() {
+		return validator;
+	}
+
+
+	public void setValidator(ISeriesValidator validator) {
+		this.validator = validator;
 	}
 }

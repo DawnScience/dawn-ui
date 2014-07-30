@@ -3,7 +3,7 @@ package org.dawnsci.processing.ui;
 import org.dawnsci.common.widgets.table.SeriesItemLabelProvider;
 import org.eclipse.swt.graphics.Image;
 
-class OperationLabelProvider extends SeriesItemLabelProvider  {
+final class OperationLabelProvider extends SeriesItemLabelProvider  {
 
 	@Override
 	public String getText(Object element) {
