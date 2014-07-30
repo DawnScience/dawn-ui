@@ -26,7 +26,6 @@ import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelSplittingIntegrati
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelSplittingIntegration2D;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIProfile.XAxis;
 
 public class PowderIntegrationJob extends Job {
 
@@ -36,8 +35,8 @@ public class PowderIntegrationJob extends Job {
 	IDiffractionMetadata md;
 	QSpace qSpace;
 	AbstractPixelIntegration integrator;
-	XAxis xAxis = XAxis.Q;
-	IntegrationMode mode = IntegrationMode.NONSPLITTING;
+//	XAxis xAxis = XAxis.Q;
+//	IntegrationMode mode = IntegrationMode.NONSPLITTING;
 	AbstractDataset data;
 	AbstractDataset mask;
 	AbstractDataset correction;
@@ -63,35 +62,15 @@ public class PowderIntegrationJob extends Job {
 				data.getShape());
 	}
 	
-	public void setAxisType(XAxis xAxis) {
-		if (this.xAxis != xAxis) {
-			this.xAxis = xAxis;
-			integrator = null;
-		}
-	}
-	
-	public XAxis getAxisType() {
-		return xAxis;
-	}
-	
-	public void setIntegrationMode(IntegrationMode mode) {
-		if (this.mode != mode) {
-			this.mode = mode;
-			integrator = null;
-		}
-	}
-	
-	public IntegrationMode getIntegrationMode() {
-		return mode;
-	}
-	
 	public void clearCorrectionArray() {
 		correction = null;
 	}
 
 	
 	public void setModels(PowderIntegrationModel model, PowderCorrectionModel corModel) {
-		this.model = model;
+		
+		if (this.model == null) this.model = model;
+		if (!isCompatibleIntegrator(integrator, model.getIntegrationMode())) integrator = null;
 		this.corModel = corModel;
 		updateIntegratorFromModel();
 	}
@@ -102,6 +81,8 @@ public class PowderIntegrationJob extends Job {
 		}
 		if (model != null) {
 			//clone incase they get nulled
+			
+			integrator.setAxisType(model.getAxisType());
 			
 			if (model.getRadialRange() == null) integrator.setRadialRange(null);
 			else integrator.setRadialRange(model.getRadialRange().clone());
@@ -123,20 +104,22 @@ public class PowderIntegrationJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		if (integrator == null) {
-			updateIntegratorFromModel();
-		}
+		if (integrator != null) {
+			if (!isCompatibleIntegrator(integrator, model.getIntegrationMode())) integrator = null;
+		} 
+		
+		updateIntegratorFromModel();
 		
 		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 		
 		integrator.setMask(mask);
 //		integrator.setROI(roi);
-		integrator.setAxisType(xAxis);
+//		integrator.setAxisType(model.axisType);
 		
 		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 		
 		//all accept 2d no splitting should be fast
-		if (mode == IntegrationMode.SPLITTING2D) system.setEnabled(false);
+		if (model.getIntegrationMode() == IntegrationMode.SPLITTING2D) system.setEnabled(false);
 
 		AbstractDataset processed = applyCorrections(data);
 		
@@ -158,7 +141,7 @@ public class PowderIntegrationJob extends Job {
 		
 		system.setEnabled(true);
 		
-		if (mode == IntegrationMode.NONSPLITTING || mode ==IntegrationMode.SPLITTING) {
+		if (model.getIntegrationMode() == IntegrationMode.NONSPLITTING || model.getIntegrationMode() ==IntegrationMode.SPLITTING) {
 			if (system.is2D()) system.reset();
 			out.get(1).setName("Intensity");
 
@@ -189,7 +172,7 @@ public class PowderIntegrationJob extends Job {
 			updateIntegratorFromModel();
 			integrator.setMask(mask);
 //			integrator.setROI(roi);
-			integrator.setAxisType(xAxis);
+//			integrator.setAxisType(xAxis);
 		}
 		
 		AbstractDataset processed = applyCorrections(data);
@@ -239,7 +222,7 @@ public class PowderIntegrationJob extends Job {
 	}
 	
 	private void updateIntegrator() {
-		switch (mode) {
+		switch (model.getIntegrationMode()) {
 		case NONSPLITTING:
 			integrator = new NonPixelSplittingIntegration(md, nBins);
 			break;
@@ -253,6 +236,26 @@ public class PowderIntegrationJob extends Job {
 			integrator = new NonPixelSplittingIntegration2D(md, nBins,nBins);
 			break;
 		}
+		
+		integrator.setAxisType(model.getAxisType());
+	}
+	
+	private boolean isCompatibleIntegrator(AbstractPixelIntegration integrator, IntegrationMode mode) {
+		
+		if (integrator == null) return false;
+		
+		switch (mode) {
+		case NONSPLITTING:
+			return integrator instanceof NonPixelSplittingIntegration;
+		case SPLITTING:
+			return integrator instanceof PixelSplittingIntegration;
+		case SPLITTING2D:
+			return integrator instanceof PixelSplittingIntegration2D;
+		case NONSPLITTING2D:
+			return integrator instanceof NonPixelSplittingIntegration2D;
+		}
+		return false;
+		
 	}
 
 }

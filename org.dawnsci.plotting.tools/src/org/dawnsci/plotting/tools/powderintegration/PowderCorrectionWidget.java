@@ -16,9 +16,11 @@ import org.mihalis.opal.checkBoxGroup.CheckBoxGroup;
 
 public class PowderCorrectionWidget {
 
-	PowderCorrectionModel model = new PowderCorrectionModel();
+	PowderCorrectionModel model;
 	
-	public PowderCorrectionWidget(Composite composite) {
+	public PowderCorrectionWidget(Composite composite, PowderCorrectionModel model) {
+		
+		this.model = model;
 		
 		composite.setLayout(new GridLayout(2, false));
 		

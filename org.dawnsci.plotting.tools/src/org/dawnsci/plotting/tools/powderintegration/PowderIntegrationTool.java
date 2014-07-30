@@ -56,6 +56,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
+import uk.ac.diamond.scisoft.analysis.diffraction.powder.AbstractPixelIntegration;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.ILoaderService;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
@@ -72,8 +73,8 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	String[] statusString;
 	ILoaderService service;
 	//Composite baseComposite;
-	XAxis xAxis = XAxis.Q;
-	IntegrationMode mode = IntegrationMode.NONSPLITTING;
+//	XAxis xAxis = XAxis.Q;
+//	IntegrationMode mode = IntegrationMode.NONSPLITTING;
 	boolean correctSolidAngle = false;
 	IDiffractionMetadata importedMeta;
 	SashForm sashForm;
@@ -134,6 +135,9 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	@Override
 	public void createControl(Composite parent) {
 		
+		model = new PowderIntegrationModel();
+		corModel = new PowderCorrectionModel();
+		
 		sashForm = new SashForm(parent, SWT.VERTICAL);
 		Composite base = new Composite(sashForm, SWT.NONE);
 		base.setLayout(new GridLayout(1,true));
@@ -171,8 +175,15 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		Composite setupComposite = new Composite(folder, SWT.None);
 		setupComposite.setLayout(new GridLayout());
 		Composite widget1 = new Composite(setupComposite, SWT.NONE);
-		integratorSetup = new IntegrationSetupWidget(widget1, metadata);
-		model = integratorSetup.getModel();
+		
+		int longest = 1000;
+		if (metadata != null) {
+			int[] shape = new int[]{metadata.getDetector2DProperties().getPy(), metadata.getDetector2DProperties().getPx()};
+			longest = AbstractPixelIntegration.calculateNumberOfBins(metadata.getDetector2DProperties().getBeamCentreCoords(), shape);
+		}
+		
+		integratorSetup = new IntegrationSetupWidget(widget1, model,longest);
+
 		integratorSetup.enableFor1D(true);
 		tab1.setControl(setupComposite);
 		
@@ -192,8 +203,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		
 		Composite widget2 = new Composite(folder, SWT.None);
 		
-		PowderCorrectionWidget pcw = new PowderCorrectionWidget(widget2);
-		corModel = pcw.getModel();
+		new PowderCorrectionWidget(widget2, corModel);
 		tab2.setControl(widget2);
 		
 		corModel.addPropertyChangeListener(new PropertyChangeListener() {
@@ -231,10 +241,10 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		final Action nonAction = new Action("Non pixel splitting") {
 			@Override
 			public void run() {
-				mode = IntegrationMode.NONSPLITTING;
+				model.setIntegrationMode(IntegrationMode.NONSPLITTING);
 				modeSelect.setSelectedAction(this);
-				if (integratorSetup != null) integratorSetup.enableFor1D(true);
-				update(null);
+//				if (integratorSetup != null) integratorSetup.enableFor1D(true);
+//				update(null);
 			}
 		};
 		
@@ -243,10 +253,10 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		final Action splitAction = new Action("Pixel splitting") {
 			@Override
 			public void run() {
-				mode = IntegrationMode.SPLITTING;
+				model.setIntegrationMode(IntegrationMode.SPLITTING);
 				modeSelect.setSelectedAction(this);
-				if (integratorSetup != null) integratorSetup.enableFor1D(true);
-				update(null);
+//				if (integratorSetup != null) integratorSetup.enableFor1D(true);
+//				update(null);
 			}
 		};
 		
@@ -255,10 +265,10 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		final Action split2DAction = new Action("Pixel splitting 2D") {
 			@Override
 			public void run() {
-				mode = IntegrationMode.SPLITTING2D;
+				model.setIntegrationMode(IntegrationMode.SPLITTING2D);
 				modeSelect.setSelectedAction(this);
-				if (integratorSetup != null) integratorSetup.enableFor1D(false);
-				update(null);
+//				if (integratorSetup != null) integratorSetup.enableFor1D(false);
+//				update(null);
 			}
 		};
 		split2DAction.setImageDescriptor(Activator.getImageDescriptor("icons/splitCake.png"));
@@ -266,10 +276,10 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		final Action nonSplit2DAction = new Action("Non pixel splitting 2D") {
 			@Override
 			public void run() {
-				mode = IntegrationMode.NONSPLITTING2D;
+				model.setIntegrationMode(IntegrationMode.NONSPLITTING2D);
 				modeSelect.setSelectedAction(this);
-				if (integratorSetup != null) integratorSetup.enableFor1D(false);
-				update(null);
+//				if (integratorSetup != null) integratorSetup.enableFor1D(false);
+//				update(null);
 			}
 		};
 		nonSplit2DAction.setImageDescriptor(Activator.getImageDescriptor("icons/cake.png"));
@@ -279,20 +289,21 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		final Action qAction = new Action("Q") {
 			@Override
 			public void run() {
-				PowderIntegrationTool.this.fullImageJob.setAxisType(XAxis.Q);
-				xAxis = XAxis.Q;
+//				PowderIntegrationTool.this.fullImageJob.setAxisType(XAxis.Q);
+				model.setAxisType(XAxis.Q);
 				axisSelect.setSelectedAction(this);
-				update(null);
+//				update(null);
 			}
 		};
 
 		final Action tthAction = new Action("2\u03b8") {
 			@Override
 			public void run() {
-				PowderIntegrationTool.this.fullImageJob.setAxisType(XAxis.ANGLE);
-				xAxis = XAxis.ANGLE;
+//				PowderIntegrationTool.this.fullImageJob.setAxisType(XAxis.ANGLE);
+//				xAxis = XAxis.ANGLE;
+				model.setAxisType(XAxis.ANGLE);
 				axisSelect.setSelectedAction(this);
-				update(null);
+//				update(null);
 			}
 
 		};
@@ -300,10 +311,11 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		final Action dAction = new Action("d") {
 			@Override
 			public void run() {
-				PowderIntegrationTool.this.fullImageJob.setAxisType(XAxis.RESOLUTION);
-				xAxis = XAxis.RESOLUTION;
+//				PowderIntegrationTool.this.fullImageJob.setAxisType(XAxis.RESOLUTION);
+//				xAxis = XAxis.RESOLUTION;
+				model.setAxisType(XAxis.RESOLUTION);
 				axisSelect.setSelectedAction(this);
-				update(null);
+//				update(null);
 			}
 
 		};
@@ -311,10 +323,11 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		final Action pixelAction = new Action("pixel") {
 			@Override
 			public void run() {
-				PowderIntegrationTool.this.fullImageJob.setAxisType(XAxis.PIXEL);
-				xAxis = XAxis.PIXEL;
+//				PowderIntegrationTool.this.fullImageJob.setAxisType(XAxis.PIXEL);
+//				xAxis = XAxis.PIXEL;
+				model.setAxisType(XAxis.PIXEL);
 				axisSelect.setSelectedAction(this);
-				update(null);
+//				update(null);
 			}
 
 		};
@@ -439,7 +452,10 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 				statusMessage.setText("Using imported metadata");
 				statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
 			}
-			if (fullImageJob == null) fullImageJob = new PowderIntegrationJob(importedMeta, system);
+			if (fullImageJob == null) {
+				fullImageJob = new PowderIntegrationJob(importedMeta, system);
+				fullImageJob.setModels(model, corModel);
+			}
 		} else {
 			
 			IDiffractionMetadata m = getUpdatedMetadata(ds, statusString);
@@ -449,17 +465,22 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			if (metadata == null) {
 				metadata = m;
 				fullImageJob = new PowderIntegrationJob(metadata, system);
+				fullImageJob.setModels(model, corModel);
 			} else {
 				if (m != null && (!metadata.getDetector2DProperties().equals(m.getDetector2DProperties()) ||
 						!metadata.getDiffractionCrystalEnvironment().equals(m.getDiffractionCrystalEnvironment()))) {
 					metadata = m;
 					fullImageJob = new PowderIntegrationJob(metadata, system);
+					fullImageJob.setModels(model, corModel);
 					statusMessage.setText("Meta data updated");
 					statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
 				}
 			}
 			
-			if (fullImageJob == null) fullImageJob = new PowderIntegrationJob(metadata, system);
+			if (fullImageJob == null) {
+				fullImageJob = new PowderIntegrationJob(metadata, system);
+				fullImageJob.setModels(model, corModel);
+			}
 		}
 		
 		AbstractDataset mask = null;
@@ -469,12 +490,12 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		fullImageJob.setData(DatasetUtils.convertToAbstractDataset(ds),
 				mask, null);
 		
-		fullImageJob.setAxisType(xAxis);
-		fullImageJob.setIntegrationMode(mode);
+//		fullImageJob.setAxisType(xAxis);
+//		fullImageJob.setIntegrationMode(mode);
 		
-		if (model != null) {
-			fullImageJob.setModels(model, corModel);
-		}
+//		if (model != null) {
+//			fullImageJob.setModels(model, corModel);
+//		}
 		
 		fullImageJob.schedule();
 	}
@@ -579,7 +600,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			String s = file.createDataset(axis.getName(),  axis, resultGroup);
 			UnitFormat unitFormat = UnitFormat.getUCUMInstance();
 			
-			switch (xAxis) {
+			switch (model.getAxisType()) {
 			case Q:
 				String angstrom = unitFormat.format(NonSI.ANGSTROM.inverse());
 				file.setAttribute(s, "units", angstrom);
@@ -599,7 +620,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			
 			file.setNexusAttribute(s, Nexus.SDS);
 			
-			if (mode == IntegrationMode.SPLITTING2D || mode == IntegrationMode.NONSPLITTING2D) {
+			if (model.getIntegrationMode() == IntegrationMode.SPLITTING2D || model.getIntegrationMode() == IntegrationMode.NONSPLITTING2D) {
 				file.setIntAttribute(s, NexusUtils.AXIS, 3);
 				axis = out.get(2);
 				axis = axis.squeeze();
@@ -680,7 +701,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		String integrationRoutine = "unknown";
 		String integrationDirection = "unknown";
 		
-		switch (mode) {
+		switch (model.getIntegrationMode()) {
 		case NONSPLITTING:
 			integrationRoutine = "Non-pixel splitting 1D";
 			integrationDirection = model.isAzimuthal() ? "Azimuthal" : "Radial";
