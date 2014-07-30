@@ -1,15 +1,33 @@
 package org.dawnsci.plotting.tools.powderintegration;
 
+import org.dawnsci.plotting.tools.powderintegration.PowderIntegrationJob.IntegrationMode;
+
 import uk.ac.diamond.scisoft.analysis.processing.model.AbstractOperationModel;
+import uk.ac.diamond.scisoft.analysis.roi.ROIProfile.XAxis;
 
 public class PowderIntegrationModel extends AbstractOperationModel {
 
-	boolean isAzimuthal;
-	int numberOfPrimaryBins;
-	int numberOfSecondaryBins;
-	double[] radialRange;
-	double[] azimuthalRange;
+	boolean isAzimuthal = true;
+	int numberOfPrimaryBins = 1000;
+	int numberOfSecondaryBins = 1000;;
+	double[] radialRange = null;
+	double[] azimuthalRange = null;
+	IntegrationMode integrationMode = IntegrationMode.NONSPLITTING;
+	XAxis axisType = XAxis.Q;
 	
+	public IntegrationMode getIntegrationMode() {
+		return integrationMode;
+	}
+	public void setIntegrationMode(IntegrationMode integrationMode) {
+		firePropertyChange("integrationMode", this.integrationMode, this.integrationMode = integrationMode);
+	}
+	public XAxis getAxisType() {
+		return axisType;
+	}
+	
+	public void setAxisType(XAxis axisType) {
+		firePropertyChange("axisType", this.axisType, this.axisType = axisType);
+	}
 	public boolean isAzimuthal() {
 		return isAzimuthal;
 	}

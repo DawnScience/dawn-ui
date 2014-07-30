@@ -1,10 +1,13 @@
 package org.dawnsci.plotting.tools.powderintegration;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.dawnsci.common.widgets.decorator.FloatDecorator;
 import org.dawnsci.common.widgets.decorator.IntegerDecorator;
+import org.dawnsci.plotting.tools.powderintegration.PowderIntegrationJob.IntegrationMode;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -21,6 +24,7 @@ import org.eclipse.swt.widgets.Text;
 import org.mihalis.opal.checkBoxGroup.CheckBoxGroup;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.AbstractPixelIntegration;
+import uk.ac.diamond.scisoft.analysis.diffraction.powder.AbstractPixelIntegration1D;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 
 public class IntegrationSetupWidget {
@@ -30,20 +34,24 @@ public class IntegrationSetupWidget {
 	List<Control> disableFor2D;
 	int longestAxisInPixels = 0;
 	
-	public IntegrationSetupWidget(Composite composite, IDiffractionMetadata metadata) {
+	public IntegrationSetupWidget(Composite composite, PowderIntegrationModel model) {
+		this(composite,model, 1000);
+	}
+	
+	public IntegrationSetupWidget(Composite composite, PowderIntegrationModel model,int longestAxisInPixels) {
 		
 		disableFor1D = new ArrayList<Control>();
 		disableFor2D = new ArrayList<Control>();
 		
-		model = new PowderIntegrationModel();
+		this.model = model;
 		model.setAzimuthal(true);
 		
-		longestAxisInPixels = 1000;
+		this.longestAxisInPixels = longestAxisInPixels;
 		
-		if (metadata != null) {
-			int[] shape = new int[]{metadata.getDetector2DProperties().getPy(), metadata.getDetector2DProperties().getPx()};
-			longestAxisInPixels = AbstractPixelIntegration.calculateNumberOfBins(metadata.getDetector2DProperties().getBeamCentreCoords(), shape);
-		}
+//		if (metadata != null) {
+//			int[] shape = new int[]{metadata.getDetector2DProperties().getPy(), metadata.getDetector2DProperties().getPx()};
+//			longestAxisInPixels = AbstractPixelIntegration.calculateNumberOfBins(metadata.getDetector2DProperties().getBeamCentreCoords(), shape);
+//		}
 		model.setNumberOfPrimaryBins(longestAxisInPixels);
 		model.setNumberOfSecondaryBins(longestAxisInPixels);
 		
@@ -51,10 +59,23 @@ public class IntegrationSetupWidget {
 		createOptionsGroup(composite, model);
 		createRadialRangeGroup(composite, model);
 		createAzimuthalRangeGroup(composite, model);
+		
+		model.addPropertyChangeListener("integrationMode", new PropertyChangeListener() {
+			
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				if (evt.getNewValue() == IntegrationMode.NONSPLITTING || evt.getNewValue() == IntegrationMode.SPLITTING) enableFor1D(true);
+				else enableFor1D(false);
+			}
+		});
 	}
 	
 	public PowderIntegrationModel getModel(){
 		return model;
+	}
+	
+	public void setLongestDistance(int distance) {
+		longestAxisInPixels = distance;
 	}
 	
 	public void enableFor1D(boolean for1D){
