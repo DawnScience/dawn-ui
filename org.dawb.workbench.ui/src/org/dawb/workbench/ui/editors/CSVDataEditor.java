@@ -200,7 +200,14 @@ public class CSVDataEditor extends EditorPart implements IReusableEditor, IPageC
 			main.layout();
 			return;
 		}
-					
+		//check if data is not 3d
+		if (data.values().size()==1 && data.values().iterator().next().getShape().length==3) {
+			errorLabel.setText("The Data tab cannot display 3D dataset.");
+			GridUtils.setVisible(errorLabel, true);
+			main.layout();
+			return;
+		}
+
 		final Table table = new Table(main, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 		this.tableViewer  = new TableViewer(table);
 		table.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -237,20 +244,26 @@ public class CSVDataEditor extends EditorPart implements IReusableEditor, IPageC
 	    createActions(menuManager);
 
 		final RowObject[] rowData = getRowData(data.values());
+
 		tableViewer.setContentProvider(new IStructuredContentProvider() {
 			@Override
-			public void dispose() {}
+			public void dispose() {
+			}
+
 			@Override
-			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {}
+			public void inputChanged(Viewer viewer, Object oldInput,
+					Object newInput) {
+			}
+
 			@Override
 			public Object[] getElements(Object inputElement) {
 				return rowData;
 			}
-		});		
+		});
 		tableViewer.setInput(rowData);
 		main.layout();
 	}
-	
+
 	/**
 	 * The data sets are the columns, we need an array of the rows to work
 	 * best with TableViewer.
@@ -258,9 +271,7 @@ public class CSVDataEditor extends EditorPart implements IReusableEditor, IPageC
 	 * @return an array of RowObjects
 	 */
 	protected RowObject[] getRowData(final Collection<IDataset> sets) {
-		
 		if (sets.size()==1 && sets.iterator().next().getShape().length==2) {
-			
 			final AbstractDataset set  = (AbstractDataset)sets.iterator().next();
 			final int[]          shape = set.getShape();
 			final List<RowObject> rows = new ArrayList<RowObject>(shape[0]);
@@ -272,9 +283,7 @@ public class CSVDataEditor extends EditorPart implements IReusableEditor, IPageC
 				}
 			}
 			return rows.toArray(new RowObject[rows.size()]);
-			
 		} else {
-			
 			// Find max
 			int max = Integer.MIN_VALUE;
 			for (IDataset set : sets) max = Math.max(max, set.getSize());
