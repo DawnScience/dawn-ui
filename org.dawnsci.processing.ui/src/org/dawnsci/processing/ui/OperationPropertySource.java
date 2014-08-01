@@ -3,7 +3,9 @@ package org.dawnsci.processing.ui;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.TreeSet;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -44,7 +46,7 @@ class OperationPropertySource implements IPropertySource {
 		allFields.addAll(Arrays.asList(model.getClass().getSuperclass().getDeclaredFields()));
 		
 		// The returned descriptor
-		final List<IPropertyDescriptor> ret = new ArrayList<IPropertyDescriptor>(allFields.size());
+		final Collection<IPropertyDescriptor> ret = new TreeSet<IPropertyDescriptor>();
 		
 		// fields
 		for (Field field : allFields) {
