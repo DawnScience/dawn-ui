@@ -1,7 +1,6 @@
 package org.dawnsci.plotting.tools.powderintegration;
 
-import org.dawnsci.plotting.tools.powderintegration.PowderIntegrationJob.IntegrationMode;
-
+import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelIntegrationUtils.IntegrationMode;
 import uk.ac.diamond.scisoft.analysis.processing.model.AbstractOperationModel;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile.XAxis;
 

@@ -22,6 +22,7 @@ import uk.ac.diamond.scisoft.analysis.diffraction.powder.AbstractPixelIntegratio
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.NonPixelSplittingIntegration;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.NonPixelSplittingIntegration2D;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelIntegrationUtils;
+import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelIntegrationUtils.IntegrationMode;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelSplittingIntegration;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelSplittingIntegration2D;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
@@ -44,8 +45,6 @@ public class PowderIntegrationJob extends Job {
 	PowderCorrectionModel corModel;
 	IROI roi;
 	int nBins;
-
-	public enum IntegrationMode{NONSPLITTING,SPLITTING,SPLITTING2D,NONSPLITTING2D}
 	
 	public PowderIntegrationJob(IDiffractionMetadata md, IPlottingSystem system) {
 		super("Integration");

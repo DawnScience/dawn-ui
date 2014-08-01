@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.dawnsci.common.widgets.decorator.FloatDecorator;
 import org.dawnsci.common.widgets.decorator.IntegerDecorator;
-import org.dawnsci.plotting.tools.powderintegration.PowderIntegrationJob.IntegrationMode;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -25,6 +24,7 @@ import org.mihalis.opal.checkBoxGroup.CheckBoxGroup;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.AbstractPixelIntegration;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.AbstractPixelIntegration1D;
+import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelIntegrationUtils.IntegrationMode;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 
 public class IntegrationSetupWidget {
