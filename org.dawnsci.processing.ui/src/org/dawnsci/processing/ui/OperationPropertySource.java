@@ -21,11 +21,11 @@ import uk.ac.diamond.scisoft.analysis.processing.model.OperationModelField;
  * @author fcp94556
  *
  */
-class OperationModelSource implements IPropertySource {
+class OperationPropertySource implements IPropertySource {
 	
 	private IOperationModel model;
 
-	OperationModelSource(final IOperationModel model) {
+	OperationPropertySource(final IOperationModel model) {
 		this.model = model;
 	}
 

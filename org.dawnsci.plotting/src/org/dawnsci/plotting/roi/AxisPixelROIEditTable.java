@@ -1,4 +1,4 @@
-package org.dawnsci.common.widgets.gda.roi;
+package org.dawnsci.plotting.roi;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;

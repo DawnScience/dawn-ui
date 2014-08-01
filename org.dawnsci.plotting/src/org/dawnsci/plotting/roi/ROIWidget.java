@@ -1,4 +1,4 @@
-package org.dawnsci.common.widgets.gda.roi;
+package org.dawnsci.plotting.roi;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -6,15 +6,14 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
-import org.dawnsci.common.widgets.gda.roi.AxisPixelROIEditTable;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
-import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;

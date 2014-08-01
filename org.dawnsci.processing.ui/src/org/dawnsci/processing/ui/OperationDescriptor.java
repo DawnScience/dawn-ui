@@ -74,7 +74,7 @@ final class OperationDescriptor implements ISeriesItemDescriptor {
 	@Override
 	public Object getAdapter(Class clazz) {
 		if (clazz == IPropertySource.class) {
-			return new OperationModelSource(getModel());
+			return new OperationPropertySource(getModel());
 		}
 		return null;
 	}
