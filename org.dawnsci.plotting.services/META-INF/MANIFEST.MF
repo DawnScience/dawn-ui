@@ -20,4 +20,7 @@ Bundle-ActivationPolicy: lazy
 Import-Package: org.slf4j;version="[1.7.6,1.7.7)"
 Export-Package: org.dawnsci.plotting.services,
  org.dawnsci.plotting.services.util
-Service-Component: OSGI-INF/*.xml
+Service-Component: OSGI-INF/imageservice.xml,
+ OSGI-INF/plotimageservice.xml,
+ OSGI-INF/plottingservice.xml,
+ OSGI-INF/regionservice.xml
