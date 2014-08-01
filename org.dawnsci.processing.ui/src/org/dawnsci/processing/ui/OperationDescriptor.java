@@ -6,14 +6,18 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.views.properties.IPropertySource;
 import org.osgi.framework.Bundle;
 
 import uk.ac.diamond.scisoft.analysis.processing.IOperation;
 import uk.ac.diamond.scisoft.analysis.processing.IOperationService;
+import uk.ac.diamond.scisoft.analysis.processing.model.AbstractOperationModel;
+import uk.ac.diamond.scisoft.analysis.processing.model.IOperationModel;
 
 final class OperationDescriptor implements ISeriesItemDescriptor {
 
@@ -21,6 +25,7 @@ final class OperationDescriptor implements ISeriesItemDescriptor {
 	// in number and we just leave the VM to tidy them up...
 	private static Map<String, Image>   icons;
 	private static Map<String, Boolean> visible;
+	private static Map<String, Class<? extends AbstractOperationModel>> models;
 	
 
 	private IOperation              operation;
@@ -68,8 +73,28 @@ final class OperationDescriptor implements ISeriesItemDescriptor {
 
 	@Override
 	public Object getAdapter(Class clazz) {
-		// TODO Auto-generated method stub
+		if (clazz == IPropertySource.class) {
+			return new OperationModelSource(getModel());
+		}
 		return null;
+	}
+
+	private IOperationModel getModel() {
+		
+		if (operation!=null && operation.getModel()!=null) return operation.getModel();
+		
+		if (models==null) read();
+        try {
+			AbstractOperationModel model = models.get(id).newInstance();
+			IOperation op = getSeriesObject();
+			op.setModel(model);
+			return model;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+        
 	}
 
 	@Override
@@ -121,6 +146,7 @@ final class OperationDescriptor implements ISeriesItemDescriptor {
 		
 		icons   = new HashMap<String, Image>(7);
 		visible = new HashMap<String, Boolean>(7);
+		models  = new HashMap<String, Class<? extends AbstractOperationModel>>(7);
 		
 		IConfigurationElement[] eles = Platform.getExtensionRegistry().getConfigurationElementsFor("uk.ac.diamond.scisoft.analysis.api.operation");
 		for (IConfigurationElement e : eles) {
@@ -137,6 +163,15 @@ final class OperationDescriptor implements ISeriesItemDescriptor {
 				final URL      entry = bundle.getEntry(icon);
 				final ImageDescriptor des = ImageDescriptor.createFromURL(entry);
 				icons.put(identity, des.createImage());		
+			}
+			
+			try {
+				final String modelClass = e.getAttribute("model");
+				if (modelClass==null || "".equals(modelClass)) continue;
+				models.put(identity, ((AbstractOperationModel)e.createExecutableExtension("model")).getClass());
+			} catch (CoreException e1) {
+				e1.printStackTrace();
+				continue;
 			}
 		}
 		

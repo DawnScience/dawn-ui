@@ -12,6 +12,14 @@
             name="Processing"
             restorable="true">
       </view>
+      <view
+            category="uk.ac.diamond.scisoft.analysis.rcp"
+            class="org.eclipse.ui.views.properties.PropertySheet"
+            icon="icons/image--pencil.png"
+            id="org.dawnsci.processing.ui.propertySheet"
+            name="Model"
+            restorable="true">
+      </view>
    </extension>
 
 </plugin>
