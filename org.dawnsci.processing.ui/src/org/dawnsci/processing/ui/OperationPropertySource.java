@@ -2,13 +2,13 @@ package org.dawnsci.processing.ui;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 
 import uk.ac.diamond.scisoft.analysis.processing.model.IOperationModel;
-import uk.ac.diamond.scisoft.analysis.processing.model.OperationModelField;
 
 /**
  * @see https://www.eclipse.org/articles/Article-Properties-View/properties-view.html
@@ -39,13 +39,15 @@ class OperationPropertySource implements IPropertySource {
 		
 		// Decided not to use the obvious BeanMap here because class problems with
 		// GDA and we have to read annotations anyway.
-		final Field[] fields = model.getClass().getDeclaredFields();
+		final List<Field> allFields = new ArrayList<Field>(31);
+		allFields.addAll(Arrays.asList(model.getClass().getDeclaredFields()));
+		allFields.addAll(Arrays.asList(model.getClass().getSuperclass().getDeclaredFields()));
 		
 		// The returned descriptor
-		final List<IPropertyDescriptor> ret = new ArrayList<IPropertyDescriptor>(fields.length);
+		final List<IPropertyDescriptor> ret = new ArrayList<IPropertyDescriptor>(allFields.size());
 		
 		// fields
-		for (Field field : fields) {
+		for (Field field : allFields) {
 			
 			// If there is a getter/isser for the field we assume it is a model field.
 			try {

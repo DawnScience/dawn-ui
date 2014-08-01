@@ -47,7 +47,8 @@ public class RegionCellEditor extends DialogCellEditor {
         if ( getDefaultLabel() == null) {
 			return;
 		}
-        getDefaultLabel().setText(transformer!=null ? transformer.getRendererText() : getValue().toString());
+        if (value == null && transformer==null) return;
+        getDefaultLabel().setText(transformer!=null ? transformer.getRendererText() : value.toString());
     }
 
 };
