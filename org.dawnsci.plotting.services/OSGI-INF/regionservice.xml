@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="false" name="Region Service">
+   <implementation class="org.dawnsci.plotting.services.RegionServiceImpl"/>
+   <service>
+      <provide interface="org.eclipse.dawnsci.plotting.api.region.IRegionService"/>
+   </service>
+</scr:component>

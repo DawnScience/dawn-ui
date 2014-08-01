@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="false" name="Plot Image Service">
+   <implementation class="org.dawnsci.plotting.services.PlotImageService"/>
+   <service>
+      <provide interface="org.dawb.common.services.IPlotImageService"/>
+   </service>
+</scr:component>
