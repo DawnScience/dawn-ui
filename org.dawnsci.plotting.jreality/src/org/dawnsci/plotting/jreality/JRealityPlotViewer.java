@@ -91,6 +91,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
@@ -409,15 +410,51 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		}
 	}
 
-	protected IStatus setSurfaceWindow(IROI window, IProgressMonitor monitor) {
+	/**
+	 * 
+	 * @param window
+	 * @param updateClipping
+	 * @param monitor
+	 * @return
+	 */
+	protected IStatus setSurfaceWindow(IROI window, boolean updateClipping, IProgressMonitor monitor) {
 		if (currentMode == PlottingMode.SURF2D) {
 			final SurfacePlotROI surfRoi = getWindow(window);
+			if (updateClipping)
+				updateClipping(surfRoi);
 			IStatus status = ((DataSet3DPlot3D) plotter).setDataWindow(null, surfRoi, monitor);
 			if (status == Status.CANCEL_STATUS)
 				return status;
 			refresh(false);
 		}
 		return Status.OK_STATUS;
+	}
+
+	// Used to record the original data when clipping is applied
+	private IDataset originalData;
+
+	private void updateClipping(SurfacePlotROI roi) {
+		if (roi.isClippingApplied()) {
+			int lowerClipping = roi.getLowerClipping();
+			int upperClipping = roi.getUpperClipping();
+
+			// allow a delta of 10000 max
+			if ((upperClipping - lowerClipping) < 10000)
+				return;
+			// if the data in the trace is the original one we save it.
+			if (!currentTrace.getData().getName().equals("clip()")) {
+				originalData = currentTrace.getData().clone();
+			}
+			((SurfaceTrace)currentTrace).setData(Maths.clip(currentTrace.getData(), 
+					lowerClipping, upperClipping), ((SurfaceTrace)currentTrace).getAxes());
+			plotter.handleColourCast(((SurfaceTrace)currentTrace).createImageData(), graph, lowerClipping, upperClipping);
+		} else if (currentTrace.getData().getName().equals("clip()")) { // if the data in the trace is clipped and we are not in clipping mode
+			((SurfaceTrace)currentTrace).setData(originalData, ((SurfaceTrace)currentTrace).getAxes());
+			plotter.handleColourCast(((SurfaceTrace)currentTrace).createImageData(), graph, 
+					(Double)currentTrace.getData().min(true).doubleValue(), 
+					(Double)currentTrace.getData().max(true).doubleValue());
+		}
+		refresh(false);
 	}
 
 	public void setStackWindow(IROI window) {

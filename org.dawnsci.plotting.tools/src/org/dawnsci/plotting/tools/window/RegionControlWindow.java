@@ -51,10 +51,14 @@ public class RegionControlWindow {
 	private Button btnOverwriteAspect;
 	private Spinner spnXAspect;
 	private Spinner spnYAspect;
+	private Button btnApplyClipping;
+	private Spinner spnLowerClipping;
+	private Spinner spnUpperClipping;
 	private IPlottingSystem windowSystem;
 	private SelectionAdapter selectionListener;
 	private IPlottingSystem plottingSystem;
 	private boolean isOverwriteAspect;
+	private boolean isApplyClipping;
 
 	public RegionControlWindow(Composite parent, 
 			final IPlottingSystem plottingSystem, 
@@ -67,6 +71,7 @@ public class RegionControlWindow {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				isOverwriteAspect = btnOverwriteAspect.getSelection();
+				isApplyClipping = btnApplyClipping.getSelection();
 
 				int startPosX = spnStartX.getSelection();
 				int startPosY = spnStartY.getSelection();
@@ -81,15 +86,18 @@ public class RegionControlWindow {
 				IRegion region = windowSystem.getRegion("Window");
 				RectangularROI rroi = new RectangularROI(startPosX, startPosY, width, height, 0);
 
-				if (!e.getSource().equals(btnOverwriteAspect)) {
+				if (!e.getSource().equals(btnOverwriteAspect) && !e.getSource().equals(btnApplyClipping)) {
 					if (region != null)
 						region.setROI(rroi);
 				} else if (e.getSource().equals(btnOverwriteAspect)) {
 					spnXAspect.setEnabled(isOverwriteAspect);
 					spnYAspect.setEnabled(isOverwriteAspect);
+				} else if (e.getSource().equals(btnApplyClipping)) {
+					spnLowerClipping.setEnabled(isApplyClipping);
+					spnUpperClipping.setEnabled(isApplyClipping);
 				}
 				SurfacePlotROI sroi = createSurfacePlotROI(width, height, true);
-				windowJob.schedule(sroi);
+				windowJob.schedule(sroi, true);
 			}
 		};
 	}
@@ -115,12 +123,28 @@ public class RegionControlWindow {
 		return isOverwriteAspect;
 	}
 
+	public boolean isApplyClipping() {
+		return isApplyClipping;
+	}
+
+	public void setApplyClipping(boolean isApplyClipping) {
+		this.isApplyClipping = isApplyClipping;
+	}
+
 	public int getXAspectRatio() {
 		return spnXAspect.getSelection();
 	}
 
 	public int getYAspectRatio() {
 		return spnYAspect.getSelection();
+	}
+
+	public int getLowerClipping() {
+		return spnLowerClipping.getSelection();
+	}
+
+	public int getUpperClipping() {
+		return spnUpperClipping.getSelection();
 	}
 
 	public Composite createRegionControl(String title, IPageSite site, IViewPart viewPart, ImageDescriptor imageDescriptor) {
@@ -221,13 +245,40 @@ public class RegionControlWindow {
 		spnYAspect.setIncrement(1);
 		spnYAspect.addSelectionListener(selectionListener);
 
+		btnApplyClipping = new Button(aspectComp,SWT.CHECK);
+		btnApplyClipping.setText("Apply clipping");
+		btnApplyClipping.setToolTipText("Upper - Lower >= 10000");
+		btnApplyClipping.addSelectionListener(selectionListener);
+
+		spnLowerClipping = new Spinner(aspectComp,SWT.BORDER);
+		spnLowerClipping.setEnabled(false);
+		spnLowerClipping.setMinimum(0);
+		spnLowerClipping.setMaximum(Integer.MAX_VALUE);
+		spnLowerClipping.setSelection(0);
+		spnLowerClipping.setIncrement(100);
+		spnLowerClipping.setToolTipText("Lower");
+		spnLowerClipping.addSelectionListener(selectionListener);
+
+		lblDelimiter = new Label(aspectComp,SWT.NONE);
+		lblDelimiter.setText(":");
+
+		spnUpperClipping = new Spinner(aspectComp,SWT.BORDER);
+		spnUpperClipping.setEnabled(false);
+		spnUpperClipping.setMinimum(0);
+		spnUpperClipping.setMaximum(Integer.MAX_VALUE);
+		spnUpperClipping.setSelection(100000);
+		spnUpperClipping.setIncrement(100);
+		spnUpperClipping.setToolTipText("Upper");
+		spnUpperClipping.addSelectionListener(selectionListener);
+
 		return windowComposite;
 	}
 
 	public boolean isControlReady() {
 		if (spnStartX == null || spnStartY == null || spnWidth == null
 				|| spnHeight == null || spnXAspect == null || spnYAspect == null
-				|| btnOverwriteAspect == null)
+				|| btnOverwriteAspect == null || btnApplyClipping == null
+				|| spnLowerClipping == null || spnUpperClipping == null)
 			return false;
 		return true;
 	}
@@ -264,10 +315,15 @@ public class RegionControlWindow {
 	 * @return
 	 */
 	public SurfacePlotROI createSurfacePlotROI(int width, int height, boolean isDrag) {
-		int xAspectRatio = 0, yAspectRatio = 0, binShape = 1, samplingMode = 0;
+		int xAspectRatio = 0, yAspectRatio = 0, binShape = 1, samplingMode = 0, 
+				lowerClipping = 0, upperClipping = 100000;
 		if (isOverwriteAspect) {
 			xAspectRatio = getXAspectRatio();
 			yAspectRatio = getYAspectRatio();
+		}
+		if (isApplyClipping) {
+			lowerClipping = getLowerClipping();
+			upperClipping = getUpperClipping();
 		}
 		binShape = PlottingUtils.getBinShape(width, height, isDrag);
 		if (binShape != 1) {
@@ -279,12 +335,13 @@ public class RegionControlWindow {
 				spnStartX.getSelection() + spnWidth.getSelection(), 
 				spnStartY.getSelection() + spnHeight.getSelection(), 
 				samplingMode, samplingMode, 
-				xAspectRatio, 
-				yAspectRatio);
+				xAspectRatio, yAspectRatio);
 		sroi.setLengths(width, height);
 		sroi.setXBinShape(binShape);
 		sroi.setYBinShape(binShape);
-
+		sroi.setLowerClipping(lowerClipping);
+		sroi.setUpperClipping(upperClipping);
+		sroi.setIsClippingApplied(isApplyClipping);
 		return sroi;
 	}
 

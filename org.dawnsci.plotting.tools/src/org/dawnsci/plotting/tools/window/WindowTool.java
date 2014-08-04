@@ -147,7 +147,7 @@ public class WindowTool extends AbstractToolPage {
 					IROI roi = evt.getROI();
 					if (roi!=null && roi instanceof RectangularROI){
 						SurfacePlotROI sroi = getSurfacePlotROI((RectangularROI)roi, true);
-						windowJob.schedule(sroi);
+						windowJob.schedule(sroi, false);
 					}
 				}
 
@@ -156,7 +156,7 @@ public class WindowTool extends AbstractToolPage {
 					IROI roi = evt.getROI();
 					if (roi != null && roi instanceof RectangularROI){
 						SurfacePlotROI sroi = getSurfacePlotROI((RectangularROI)roi, false);
-						windowJob.schedule(sroi);
+						windowJob.schedule(sroi, false);
 					}
 				}
 
@@ -175,9 +175,8 @@ public class WindowTool extends AbstractToolPage {
 				@Override
 				public void regionRemoved(RegionEvent evt) {
 					evt.getRegion().removeROIListener(roiListener);
-				}			
+				}
 			};
-
 		} catch (Exception e) {
 			logger.error("Cannot create a plotting system, something bad happened!", e);
 		}
@@ -191,9 +190,8 @@ public class WindowTool extends AbstractToolPage {
 		content.setLayout(stackLayout);
 
 		this.regionControlWindow = new RegionControlWindow(content, getPlottingSystem(), windowSystem, windowJob);
-
 		this.windowControl = regionControlWindow.createRegionControl(getTitle(), getSite(), getViewPart(), getImageDescriptor());
-        this.sliceControl = createSliceControl();
+		this.sliceControl = createSliceControl();
    
         final ITrace trace = getTrace();
 		if (trace instanceof ISurfaceTrace) {
@@ -372,10 +370,14 @@ public class WindowTool extends AbstractToolPage {
 		int endY = (int)Math.round(rroi.getEndPoint()[1]);
 		regionControlWindow.setSpinnerValues(startX, startY, roiWidth, roiHeight);
 
-		int xAspectRatio = 0, yAspectRatio = 0, binShape = 1, samplingMode = 0;
+		int xAspectRatio = 0, yAspectRatio = 0, binShape = 1, samplingMode = 0, lowerClipping = 0, upperClipping = 100000;
 		if (regionControlWindow.isOverwriteAspect()){
 			xAspectRatio = regionControlWindow.getXAspectRatio();
 			yAspectRatio = regionControlWindow.getYAspectRatio();
+		}
+		if (regionControlWindow.isApplyClipping()) {
+			lowerClipping = regionControlWindow.getLowerClipping();
+			upperClipping = regionControlWindow.getUpperClipping();
 		}
 		binShape = PlottingUtils.getBinShape(rroi.getLengths()[0], rroi.getLengths()[1], isDrag);
 
@@ -384,15 +386,15 @@ public class WindowTool extends AbstractToolPage {
 			samplingMode = 2; 
 		}
 		SurfacePlotROI sroi = new SurfacePlotROI(startX, 
-				startY, 
-				endX, 
-				endY, 
+				startY, endX, endY, 
 				samplingMode, samplingMode,
-				xAspectRatio, 
-				yAspectRatio);
+				xAspectRatio, yAspectRatio);
 		sroi.setLengths(Double.valueOf(endX - startX), Double.valueOf(endY - startY));
 		sroi.setXBinShape(binShape);
 		sroi.setYBinShape(binShape);
+		sroi.setLowerClipping(lowerClipping);
+		sroi.setUpperClipping(upperClipping);
+		sroi.setIsClippingApplied(regionControlWindow.isApplyClipping());
 		return sroi;
 	}
 
@@ -495,6 +497,7 @@ public class WindowTool extends AbstractToolPage {
 	public class WindowJob extends Job {
 
 		private IROI window;
+		private boolean updateClipping;
 
 		public WindowJob() {
 			super("Window");
@@ -502,11 +505,16 @@ public class WindowTool extends AbstractToolPage {
 			setUser(false);
 			setSystem(true);
 		}
-		
+
 		protected void schedule(IROI window) {
 			cancel();
 			this.window = window;
 			schedule();
+		}
+
+		protected void schedule(IROI window, boolean updateClipping) {
+			this.updateClipping = updateClipping;
+			schedule(window);
 		}
 
 		@Override
@@ -518,7 +526,12 @@ public class WindowTool extends AbstractToolPage {
 					public void run() {
 						if (monitor.isCanceled()) return;
 						monitor.beginTask("Sending data to plot", 100);
-						IStatus result = windowTrace.setWindow(window, monitor);
+						IStatus result = null;
+						if (windowTrace instanceof ISurfaceTrace) {
+							result = ((ISurfaceTrace)windowTrace).setWindow(window, updateClipping, monitor);
+						} else {
+							result = windowTrace.setWindow(window, monitor);
+						}
 						if (result == Status.CANCEL_STATUS) return;
 						monitor.worked(100);
 					}

@@ -36,14 +36,18 @@ public class SurfaceTrace extends Image3DTrace implements ISurfaceTrace{
 		plotType = PlottingMode.SURF2D;
 	}
 
+	@Override
+	public IStatus setWindow(IROI window, IProgressMonitor monitor) {
+		return setWindow(window, false, monitor);
+	}
+
 	/**
 	 * Also ignores data windows outside the data size.
 	 * @param window
-	 * @param monitor
-	 * @return status
+	 * @param updateClipping
 	 */
 	@Override
-	public IStatus setWindow(IROI window, IProgressMonitor monitor) {
+	public IStatus setWindow(IROI window, boolean updateClipping, IProgressMonitor monitor) {
 		// if a surface roi, we make sure there are no negative values
 		if (window instanceof SurfacePlotROI) {
 			int stXPt = (int) window.getPointX();
@@ -53,14 +57,10 @@ public class SurfaceTrace extends Image3DTrace implements ISurfaceTrace{
 			((SurfacePlotROI)window).setPoint(stXPt, stYPt);
 		}
 		this.window = window;
-		if (plotter!=null && this.isActive())
-			return plotter.setSurfaceWindow(this.window, monitor);
+		if (plotter!=null && this.isActive()) {
+			return plotter.setSurfaceWindow(this.window, updateClipping, monitor);
+		}
 		return Status.OK_STATUS;
-	}
-
-	@Override
-	public void setWindow(IROI window) {
-		setWindow(window, null);
 	}
 
 	@Override
@@ -125,6 +125,8 @@ public class SurfaceTrace extends Image3DTrace implements ISurfaceTrace{
 		window.setLengths(new double[]{Double.valueOf(width), Double.valueOf(height)});
 		window.setXBinShape(binShape);
 		window.setYBinShape(binShape);
+		window.setLowerClipping(0);
+		window.setUpperClipping(Integer.MAX_VALUE);
 		return window;
 	}
 

@@ -39,7 +39,21 @@ public class SurfacePlotROI extends RectangularROI {
 	private int yAspect;
 	private int xBinShape = 1;
 	private int yBinShape = 1;
-	
+	private int lowerClipping;
+	private int upperClipping;
+	private boolean isClippingApplied;
+
+	/**
+	 * 
+	 * @param startX
+	 * @param startY
+	 * @param endX
+	 * @param endY
+	 * @param xSamplingMode
+	 * @param ySamplingMode
+	 * @param xAspect
+	 * @param yAspect
+	 */
 	public SurfacePlotROI(int startX, int startY,
 			              int endX, int endY,
 			              int xSamplingMode, int ySamplingMode,
@@ -113,5 +127,29 @@ public class SurfacePlotROI extends RectangularROI {
 	
 	public void setYBinShape(int yBinShape) {
 		this.yBinShape = yBinShape;
+	}
+
+	public int getLowerClipping() {
+		return lowerClipping;
+	}
+
+	public int getUpperClipping() {
+		return upperClipping;
+	}
+
+	public void setLowerClipping(int lowerClipping) {
+		this.lowerClipping = lowerClipping;
+	}
+
+	public void setUpperClipping(int upperClipping) {
+		this.upperClipping = upperClipping;
+	}
+
+	public void setIsClippingApplied(boolean isClippingApplied) {
+		this.isClippingApplied = isClippingApplied;
+	}
+
+	public boolean isClippingApplied() {
+		return isClippingApplied;
 	}
 }
