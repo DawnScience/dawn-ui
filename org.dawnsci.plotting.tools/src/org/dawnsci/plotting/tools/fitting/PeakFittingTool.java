@@ -10,9 +10,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import ncsa.hdf.object.Datatype;
-import ncsa.hdf.object.Group;
-
 import org.dawb.common.ui.image.IconUtils;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
@@ -21,7 +18,6 @@ import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.FittingPreferencePage;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.dawnsci.hdf5.H5Utils;
 import org.eclipse.dawnsci.plotting.api.annotation.IAnnotation;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
@@ -328,7 +324,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		StringBuilder buf = new StringBuilder("Fit attempted: '");
 		buf.append(FittingUtils.getPeaksRequired());
 		buf.append("' ");
-		buf.append(FittingUtils.getPeakClass().getClass().getSimpleName());
+		buf.append(FittingUtils.getPeakClass().getSimpleName());
 		buf.append("'s using ");
 		buf.append(FittingUtils.getOptimizer().getClass().getSimpleName());
 		buf.append(" with smoothing of '");
