@@ -306,11 +306,11 @@
             name="Data Browsing">
       </category>
       <wizard
-            category="org.dawb.workbench.ui.dataCategory"
+            category="uk.ac.diamond.scisoft.analysis.rcp.wizards"
             class="org.dawb.workbench.ui.project.DataNewProjectWizard"
             icon="icons/Project-data.png"
             id="org.edna.common.ui.project.DataWizard"
-            name="Data Project"
+            name="Data Project (empty or with example data)"
             project="true">
       </wizard>
       <wizard
