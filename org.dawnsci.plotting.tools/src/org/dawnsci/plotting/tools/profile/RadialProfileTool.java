@@ -1,6 +1,7 @@
 package org.dawnsci.plotting.tools.profile;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 import javax.vecmath.Vector3d;
 
@@ -165,19 +166,35 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 			}
 		};
 		
-		final Action addFullSector = new Action("Add full area sector", IAction.AS_PUSH_BUTTON) {
+		final String fullImageSector = "Full_Image_Sector";
+		
+		final Action addFullSector = new Action("Add full area sector", IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
-				IPlottingSystem plot = getPlottingSystem();
-				String name = RegionUtils.getUniqueName(getRegionName(), plot);
-				try {
-					IRegion region = plot.createRegion(name, RegionType.SECTOR);
-					SectorROI sector = getFullSector();
-					region.setROI(sector);
-					plot.addRegion(region);
-					
-				} catch (Exception e) {
-					e.printStackTrace();
+				
+				if (this.isChecked()) {
+					IPlottingSystem plot = getPlottingSystem();
+					String name = RegionUtils.getUniqueName(getRegionName() +" Full Image", plot);
+					try {
+						IRegion region = plot.createRegion(name, RegionType.SECTOR);
+						SectorROI sector = getFullSector();
+						region.setROI(sector);
+						region.setUserObject(fullImageSector);
+						plot.addRegion(region);
+						
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				} else {
+					IPlottingSystem plot = getPlottingSystem();
+					Collection<IRegion> regions = plot.getRegions();
+					if (regions != null && !regions.isEmpty()) {
+						Iterator<IRegion> iterator = regions.iterator();
+						while (iterator.hasNext()) {
+							IRegion next = iterator.next();
+							if (fullImageSector == next.getUserObject()) plot.removeRegion(next);
+						}
+					}
 				}
 			}
 		};
