@@ -51,7 +51,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.IPageSite;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
@@ -483,11 +483,11 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			}
 		}
 		
-		AbstractDataset mask = null;
+		Dataset mask = null;
 		
-		if (im != null) mask = DatasetUtils.convertToAbstractDataset(im.getMask());
+		if (im != null) mask = DatasetUtils.convertToDataset(im.getMask());
 		
-		fullImageJob.setData(DatasetUtils.convertToAbstractDataset(ds),
+		fullImageJob.setData(DatasetUtils.convertToDataset(ds),
 				mask, null);
 		
 //		fullImageJob.setAxisType(xAxis);
@@ -581,7 +581,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 				String collection = file.group("files", file.getParent(resultGroup));
 				file.setNexusAttribute(collection, "NXcollection");
 				String path = slice.getData().getMetadata().getFilePath();
-				file.appendDataset("files", AbstractDataset.STRING, new long[]{1}, path, collection);
+				file.appendDataset("files", Dataset.STRING, new long[]{1}, path, collection);
 			}
 		} catch (Exception e) {
 			//ignore
@@ -591,9 +591,9 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 //		file.setNexusAttribute(resultGroup, Nexus.DATA);
 //		slice.setParent(resultGroup);
 		
-		List<AbstractDataset> out = fullImageJob.process(DatasetUtils.convertToAbstractDataset(slice.getData()));
+		List<Dataset> out = fullImageJob.process(DatasetUtils.convertToDataset(slice.getData()));
 		
-		AbstractDataset axis = out.get(0);
+		Dataset axis = out.get(0);
 
 		if (firstExportIteration) {
 			axis = axis.squeeze();
@@ -640,7 +640,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			
 		}
 		
-		AbstractDataset signal = out.get(1);
+		Dataset signal = out.get(1);
 		signal.setName("data");
 		slice.appendData(signal);
 		
@@ -738,7 +738,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	
 	private static String createDoubleDataset(String name, double[] val, IHierarchicalDataFile file, String group) throws Exception {
 		
-		return file.createDataset(name, AbstractDataset.FLOAT64, new long[]{val.length}, val, group);
+		return file.createDataset(name, Dataset.FLOAT64, new long[]{val.length}, val, group);
 		
 	}
 	

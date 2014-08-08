@@ -12,7 +12,8 @@ import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
@@ -38,9 +39,9 @@ public class PowderIntegrationJob extends Job {
 	AbstractPixelIntegration integrator;
 //	XAxis xAxis = XAxis.Q;
 //	IntegrationMode mode = IntegrationMode.NONSPLITTING;
-	AbstractDataset data;
-	AbstractDataset mask;
-	AbstractDataset correction;
+	Dataset data;
+	Dataset mask;
+	Dataset correction;
 	PowderIntegrationModel model;
 	PowderCorrectionModel corModel;
 	IROI roi;
@@ -53,7 +54,7 @@ public class PowderIntegrationJob extends Job {
 		this.qSpace = new QSpace(md.getDetector2DProperties(), md.getDiffractionCrystalEnvironment());
 	}
 	
-	public void setData(AbstractDataset data, AbstractDataset mask, IROI roi) {
+	public void setData(Dataset data, Dataset mask, IROI roi) {
 		this.data = data;
 		this.mask = mask;
 		this.roi = roi;
@@ -120,7 +121,7 @@ public class PowderIntegrationJob extends Job {
 		//all accept 2d no splitting should be fast
 		if (model.getIntegrationMode() == IntegrationMode.SPLITTING2D) system.setEnabled(false);
 
-		AbstractDataset processed = applyCorrections(data);
+		Dataset processed = applyCorrections(data);
 		
 		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 		
@@ -129,7 +130,7 @@ public class PowderIntegrationJob extends Job {
 		max = max + 0;
 		maxd = maxd + 0;
 		
-		final List<AbstractDataset> out;
+		final List<Dataset> out;
 		
 		try {
 			out = integrator.integrate(processed);
@@ -165,7 +166,7 @@ public class PowderIntegrationJob extends Job {
 		return Status.OK_STATUS;
 	}
 	
-	public List<AbstractDataset> process(AbstractDataset data) {
+	public List<Dataset> process(Dataset data) {
 		
 		if (integrator == null) {
 			updateIntegratorFromModel();
@@ -174,15 +175,15 @@ public class PowderIntegrationJob extends Job {
 //			integrator.setAxisType(xAxis);
 		}
 		
-		AbstractDataset processed = applyCorrections(data);
+		Dataset processed = applyCorrections(data);
 		
-		List<AbstractDataset> out = integrator.integrate(processed);
+		List<Dataset> out = integrator.integrate(processed);
 		
 		return out;
 		
 	}
 	
-	private AbstractDataset applyCorrections(AbstractDataset data) {
+	private Dataset applyCorrections(Dataset data) {
 		
 		if (corModel == null) return data;
 		
@@ -190,21 +191,21 @@ public class PowderIntegrationJob extends Job {
 				!corModel.isApplySolidAngleCorrection() &&
 				!corModel.isAppyDetectorTransmissionCorrection()) return data;
 		
-		AbstractDataset localRef;
+		Dataset localRef;
 		
 		if (correction == null) {
-			correction = AbstractDataset.ones(data, AbstractDataset.FLOAT32);
+			correction = DatasetFactory.ones(data, Dataset.FLOAT32);
 			
 			//incase correction gets nulled while job is running
 			localRef = correction;
-			AbstractDataset tth = PixelIntegrationUtils.generate2ThetaArrayRadians(data.getShape(), md);
+			Dataset tth = PixelIntegrationUtils.generate2ThetaArrayRadians(data.getShape(), md);
 			
 			if (corModel.isApplySolidAngleCorrection()) {
 				PixelIntegrationUtils.solidAngleCorrection(localRef,tth);
 			}
 			
 			if (corModel.isApplyPolarisationCorrection()) {
-				AbstractDataset az = PixelIntegrationUtils.generateAzimuthalArray(data.getShape(), md, true);
+				Dataset az = PixelIntegrationUtils.generateAzimuthalArray(data.getShape(), md, true);
 				az.iadd(Math.toRadians(corModel.getPolarisationAngularOffset()));
 				PixelIntegrationUtils.polarisationCorrection(localRef, tth, az, corModel.getPolarisationFactor());
 			}

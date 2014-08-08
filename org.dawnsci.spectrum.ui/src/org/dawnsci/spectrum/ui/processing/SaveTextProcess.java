@@ -6,6 +6,7 @@ import java.util.List;
 import org.dawnsci.spectrum.ui.file.IContain1DData;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.io.ASCIIDataWithHeadingSaver;
@@ -57,7 +58,7 @@ public class SaveTextProcess extends AbstractSaveProcess {
 	}
 
 	@Override
-	protected AbstractDataset process(AbstractDataset x, AbstractDataset y) {
+	protected Dataset process(Dataset x, Dataset y) {
 		return null;
 	}
 

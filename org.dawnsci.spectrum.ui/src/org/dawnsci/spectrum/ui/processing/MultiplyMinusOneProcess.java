@@ -1,12 +1,12 @@
 package org.dawnsci.spectrum.ui.processing;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 
 public class MultiplyMinusOneProcess extends AbstractProcess {
 
 	@Override
-	protected AbstractDataset process(AbstractDataset x, AbstractDataset y) {
+	protected Dataset process(Dataset x, Dataset y) {
 		return Maths.multiply(y, -1);
 	}
 

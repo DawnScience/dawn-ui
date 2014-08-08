@@ -21,7 +21,6 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
-import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
@@ -30,15 +29,13 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 import uk.ac.diamond.scisoft.analysis.dataset.Stats;
-import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
-import uk.ac.diamond.scisoft.analysis.diffraction.powder.AbstractPixelIntegration;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.NonPixelSplittingIntegration;
-import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelSplittingIntegration;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelSplittingIntegration2D;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
@@ -46,11 +43,9 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Gaussian;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
-import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
+import uk.ac.diamond.scisoft.analysis.roi.ROIProfile.XAxis;
 import uk.ac.diamond.scisoft.analysis.roi.ROISliceUtils;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
-import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
-import uk.ac.diamond.scisoft.analysis.roi.ROIProfile.XAxis;
 
 public class PowderCheckJob extends Job {
 
@@ -121,7 +116,7 @@ public class PowderCheckJob extends Job {
 		return Status.OK_STATUS;
 	}
 	
-	private IStatus integrateCake(AbstractDataset data, IDiffractionMetadata md, IProgressMonitor monitor) {
+	private IStatus integrateCake(Dataset data, IDiffractionMetadata md, IProgressMonitor monitor) {
 
 		int[] shape = data.getShape();
 		double[] farCorner = new double[]{0,0};
@@ -133,7 +128,7 @@ public class PowderCheckJob extends Job {
 		PixelSplittingIntegration2D npsi = new PixelSplittingIntegration2D(md, maxDistance,maxDistance);
 		npsi.setAxisType(xAxis);
 
-		List<AbstractDataset> out = npsi.integrate(data);
+		List<Dataset> out = npsi.integrate(data);
 
 		system.updatePlot2D(out.remove(1), out, monitor);
 		setPlottingSystemAxes();
@@ -142,7 +137,7 @@ public class PowderCheckJob extends Job {
 		
 	}
 
-	private IStatus integrateQuadrants(AbstractDataset data, IDiffractionMetadata md, IProgressMonitor monitor) {
+	private IStatus integrateQuadrants(Dataset data, IDiffractionMetadata md, IProgressMonitor monitor) {
 //		QSpace qSpace = new QSpace(md.getDetector2DProperties(), md.getDiffractionCrystalEnvironment());
 //		double[] bc = md.getDetector2DProperties().getBeamCentreCoords();
 //		int[] shape = data.getShape();
@@ -199,7 +194,7 @@ public class PowderCheckJob extends Job {
 		
 		for (int i = -180; i <= 170; i+=10) {
 			npsi.setAzimuthalRange(new double[]{i, i+10});
-			List<AbstractDataset> out = npsi.integrate(data);
+			List<Dataset> out = npsi.integrate(data);
 			out.get(1).setName("Line: " + i +" to " + (i+10));
 			system.updatePlot1D(out.get(0), Arrays.asList(new IDataset[]{out.get(1)}), null);
 		}
@@ -213,18 +208,18 @@ public class PowderCheckJob extends Job {
 		return Status.OK_STATUS;
 	}
 
-	private IStatus integrateFullSectorAndShowLines(AbstractDataset data, IDiffractionMetadata md, IProgressMonitor monitor) {
+	private IStatus integrateFullSectorAndShowLines(Dataset data, IDiffractionMetadata md, IProgressMonitor monitor) {
 		integrateFullSector(data, md, monitor);
 		updateCalibrantLines();
 		return Status.OK_STATUS;
 	}
 	
-	private List<AbstractDataset> integrateFullSector(AbstractDataset data, IDiffractionMetadata md, IProgressMonitor monitor) {
+	private List<Dataset> integrateFullSector(Dataset data, IDiffractionMetadata md, IProgressMonitor monitor) {
 
 		NonPixelSplittingIntegration npsi = new NonPixelSplittingIntegration(md);
 		npsi.setAxisType(xAxis);
 		
-		List<AbstractDataset> out = npsi.integrate(data);
+		List<Dataset> out = npsi.integrate(data);
 
 		system.updatePlot1D(out.get(0), Arrays.asList(new IDataset[]{out.get(1)}), null);
 		setPlottingSystemAxes();
@@ -232,11 +227,11 @@ public class PowderCheckJob extends Job {
 		return out;
 	}
 	
-	private IStatus integrateFullSectorPeakFit(AbstractDataset data, IDiffractionMetadata md, IProgressMonitor monitor) {
+	private IStatus integrateFullSectorPeakFit(Dataset data, IDiffractionMetadata md, IProgressMonitor monitor) {
 		
-		List<AbstractDataset> out =  integrateFullSector(data, md, monitor);
+		List<Dataset> out =  integrateFullSector(data, md, monitor);
 		
-		AbstractDataset baseline = rollingBallBaselineCorrection(out.get(1), 10);
+		Dataset baseline = rollingBallBaselineCorrection(out.get(1), 10);
 		
 		List<PowderCheckResult> result = fitPeaksToTrace(out.get(0),Maths.subtract(out.get(1), baseline), baseline);
 
@@ -259,7 +254,7 @@ public class PowderCheckJob extends Job {
 
 	private static final int EDGE_PIXEL_NUMBER = 10;
 
-	private List<PowderCheckResult> fitPeaksToTrace(final AbstractDataset xIn, final AbstractDataset yIn, AbstractDataset baselineIn) {
+	private List<PowderCheckResult> fitPeaksToTrace(final Dataset xIn, final Dataset yIn, Dataset baselineIn) {
 
 		resultList.clear();
 		
@@ -295,10 +290,10 @@ public class PowderCheckJob extends Job {
 		minXidx = minXidx < 0 ? 0 : minXidx;
 		maxXidx = maxXidx > maxSize-1 ? maxSize-1 : maxXidx;
 
-		final AbstractDataset x = xIn.getSlice(new int[] {minXidx}, new int[] {maxXidx}, null);
-		final AbstractDataset y = yIn.getSlice(new int[] {minXidx}, new int[] {maxXidx}, null);
+		final Dataset x = xIn.getSlice(new int[] {minXidx}, new int[] {maxXidx}, null);
+		final Dataset y = yIn.getSlice(new int[] {minXidx}, new int[] {maxXidx}, null);
 		y.setName("Fit");
-		AbstractDataset baseline = baselineIn.getSlice(new int[] {minXidx}, new int[] {maxXidx}, null);
+		Dataset baseline = baselineIn.getSlice(new int[] {minXidx}, new int[] {maxXidx}, null);
 
 		List<APeak> peaks = Generic1DFitter.fitPeaks(x, y, Gaussian.class, count+10);
 
@@ -436,10 +431,10 @@ public class PowderCheckJob extends Job {
 		qList.remove(minQIdx);
 	}
 
-	private AbstractDataset rollingBallBaselineCorrection(AbstractDataset y, int width) {
+	private Dataset rollingBallBaselineCorrection(Dataset y, int width) {
 
-		AbstractDataset t1 = AbstractDataset.zeros(y);
-		AbstractDataset t2 = AbstractDataset.zeros(y);
+		Dataset t1 = DatasetFactory.zeros(y);
+		Dataset t2 = DatasetFactory.zeros(y);
 
 		for (int i = 0 ; i < y.getSize()-1; i++) {
 			int start = (i-width) < 0 ? 0 : (i - width);

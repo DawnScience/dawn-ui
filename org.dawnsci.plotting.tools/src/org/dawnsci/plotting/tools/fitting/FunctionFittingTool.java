@@ -19,8 +19,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
-import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
@@ -50,7 +50,7 @@ import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
@@ -330,11 +330,11 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 					// We peak fit only the first of the data sets plotted
 					// for now.
-					AbstractDataset x = (AbstractDataset) trace.getXData();
-					AbstractDataset y = (AbstractDataset) trace.getYData();
+					Dataset x = (Dataset) trace.getXData();
+					Dataset y = (Dataset) trace.getYData();
 
 					try {
-						AbstractDataset[] a = Generic1DFitter.xintersection(x,
+						Dataset[] a = Generic1DFitter.xintersection(x,
 								y, p1[0], p2[0]);
 						x = a[0];
 						y = a[1];
@@ -371,8 +371,8 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		getPlottingSystem().addTraceListener(traceListener);
 	}
 
-	private void updateFittedPlot(boolean force, final AbstractDataset x,
-			final AbstractDataset y) {
+	private void updateFittedPlot(boolean force, final Dataset x,
+			final Dataset y) {
 
 		if (force || autoRefit) {
 
@@ -392,10 +392,10 @@ public class FunctionFittingTool extends AbstractToolPage implements
 			super(name);
 		}
 
-		private AbstractDataset x;
-		private AbstractDataset y;
+		private Dataset x;
+		private Dataset y;
 
-		public void setData(AbstractDataset x, AbstractDataset y) {
+		public void setData(Dataset x, Dataset y) {
 			this.x = x.clone();
 			this.y = y.clone();
 		}
@@ -429,7 +429,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 						for (IFunction function : compFunction.getFunctions()) {
 							resultFunction.addFunction(function);
 						}
-						Fitter.ApacheNelderMeadFit(new AbstractDataset[] {x}, y, resultFunction, 1000);
+						Fitter.ApacheNelderMeadFit(new Dataset[] {x}, y, resultFunction, 1000);
 						break;
 					case GENETIC:
 						fitMethod = new GeneticAlg(accuracy);

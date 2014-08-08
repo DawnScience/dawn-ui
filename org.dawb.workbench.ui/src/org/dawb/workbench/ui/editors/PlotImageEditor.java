@@ -69,7 +69,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LazyDataset;
 import uk.ac.diamond.scisoft.analysis.io.ILoaderService;
 import uk.ac.diamond.scisoft.analysis.io.ImageStackLoader;
@@ -184,10 +184,10 @@ public class PlotImageEditor extends EditorPart implements IEditorExtension, IRe
 				final boolean isStackAllowed = store.getBoolean("org.dawb.workbench.plotting.preference.loadImageStacks");
 				
 				if (!isStackAllowed) {
-					AbstractDataset set;
+					Dataset set;
 					try {
 						final ILoaderService service = (ILoaderService)ServiceManager.getService(ILoaderService.class);
-						set = (AbstractDataset)service.getDataset(filePath, null);
+						set = (Dataset)service.getDataset(filePath, null);
 					} catch (Throwable e) {
 						logger.error("Cannot load file "+filePath, e);
 						return Status.CANCEL_STATUS;

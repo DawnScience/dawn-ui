@@ -7,6 +7,7 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
@@ -20,22 +21,22 @@ import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 public class FittedPeaksInfo {
 
 	private List<IdentifiedPeak> identifiedPeaks;
-	private AbstractDataset  x; 
-	private AbstractDataset  y;
+	private Dataset  x; 
+	private Dataset  y;
 	private IMonitor monitor;
 
 	private IPlottingSystem plottingSystem;
 	private ILineTrace selectedTrace;
 	private int numPeaks = -1;
 	
-	public FittedPeaksInfo(AbstractDataset x, AbstractDataset y, IMonitor monitor) {
+	public FittedPeaksInfo(Dataset x, Dataset y, IMonitor monitor) {
 		this.x = x;
 		this.y = y;
 		this.monitor = monitor;
 	}
 
-	public FittedPeaksInfo(final AbstractDataset  x, 
-			final AbstractDataset  y,
+	public FittedPeaksInfo(final Dataset  x, 
+			final Dataset  y,
 			final IMonitor monitor,
 			IPlottingSystem plottingSystem, 
 			ILineTrace selectedTrace){
@@ -44,8 +45,8 @@ public class FittedPeaksInfo {
 		this.setSelectedTrace(selectedTrace);
 	}
 
-	public FittedPeaksInfo(final AbstractDataset  x, 
-			final AbstractDataset  y,
+	public FittedPeaksInfo(final Dataset  x, 
+			final Dataset  y,
 			final IMonitor monitor,
 			IPlottingSystem plottingSystem,
 			ILineTrace selectedTrace,
@@ -63,15 +64,15 @@ public class FittedPeaksInfo {
 		this.identifiedPeaks = ideedPeaks;
 	}
 	public AbstractDataset getX() {
-		return x;
+		return (AbstractDataset) x;
 	}
-	public void setX(AbstractDataset x) {
+	public void setX(Dataset x) {
 		this.x = x;
 	}
 	public AbstractDataset getY() {
-		return y;
+		return (AbstractDataset) y;
 	}
-	public void setY(AbstractDataset y) {
+	public void setY(Dataset y) {
 		this.y = y;
 	}
 	public IMonitor getMonitor() {

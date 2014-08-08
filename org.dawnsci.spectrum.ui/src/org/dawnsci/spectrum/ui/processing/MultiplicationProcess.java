@@ -2,7 +2,7 @@ package org.dawnsci.spectrum.ui.processing;
 
 import org.dawnsci.spectrum.ui.file.IContain1DData;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 
@@ -13,9 +13,9 @@ public class MultiplicationProcess extends AbstractCacheProcess {
 	}
 
 	@Override
-	protected AbstractDataset process(AbstractDataset x, AbstractDataset y) {
-		AbstractDataset y1 = DatasetUtils.convertToAbstractDataset(cachedData.getyDatasets().get(0));
-		AbstractDataset out = Maths.multiply(y, y1);
+	protected Dataset process(Dataset x, Dataset y) {
+		Dataset y1 = DatasetUtils.convertToDataset(cachedData.getyDatasets().get(0));
+		Dataset out = Maths.multiply(y, y1);
 		out.setName(y.getName()+ "_multiplied_"+y1.getName());
 		return out;
 	}

@@ -4,14 +4,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.math3.stat.descriptive.MultivariateSummaryStatistics;
 import org.dawnsci.spectrum.ui.file.IContain1DData;
 import org.dawnsci.spectrum.ui.utils.Contain1DDataImpl;
 import org.dawnsci.spectrum.ui.utils.SpectrumUtils;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
-import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 public class CombineProcess extends AbstractProcess {
@@ -48,7 +46,7 @@ public class CombineProcess extends AbstractProcess {
 		}
 		List<IDataset> sets = new ArrayList<IDataset>();
 		
-		AbstractDataset conc = DatasetUtils.concatenate(all, 0);
+		Dataset conc = DatasetUtils.concatenate(all, 0);
 		
 		conc.setName("Combination");
 		sets.add(conc);
@@ -58,7 +56,7 @@ public class CombineProcess extends AbstractProcess {
 	}
 	
 	@Override
-	protected AbstractDataset process(AbstractDataset x, AbstractDataset y) {
+	protected Dataset process(Dataset x, Dataset y) {
 		return null;
 	}
 

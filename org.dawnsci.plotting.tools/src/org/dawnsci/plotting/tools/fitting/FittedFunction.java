@@ -14,6 +14,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.TraceUtils;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
@@ -29,8 +30,8 @@ public class FittedFunction  {
 	private CompositeFunction function;
 	private boolean           saved=false;
 	private String            peakName;
-	private AbstractDataset   x,y;
-	private AbstractDataset[] peakFunctions;
+	private Dataset   x,y;
+	private Dataset[] peakFunctions;
 	
 	private IRegion           fwhm;
 	private IRegion           center;
@@ -41,10 +42,10 @@ public class FittedFunction  {
 	private Vector3d q;
 
 	public AbstractDataset getX() {
-		return x;
+		return (AbstractDataset) x;
 	}
 
-	public void setX(AbstractDataset x) {
+	public void setX(Dataset x) {
 		this.x = x;
 	}
 
@@ -71,17 +72,17 @@ public class FittedFunction  {
 	    peakName = trace.getName();
 	}
 
-	public FittedFunction(CompositeFunction peak, RectangularROI bounds, AbstractDataset[] pf) {
+	public FittedFunction(CompositeFunction peak, RectangularROI bounds, Dataset[] pf) {
 		this.function = peak;
 		this.roi  = bounds;
 		this.peakFunctions = pf;
 	}
 
-	public AbstractDataset[] getPeakFunctions() {
+	public Dataset[] getPeakFunctions() {
 		return peakFunctions;
 	}
 
-	public void setPeakFunctions(AbstractDataset[] peakFunctions) {
+	public void setPeakFunctions(Dataset[] peakFunctions) {
 		this.peakFunctions = peakFunctions;
 	}
 
@@ -110,10 +111,10 @@ public class FittedFunction  {
 	}
 
 	public AbstractDataset getY() {
-		return y;
+		return (AbstractDataset) y;
 	}
 
-	public void setY(AbstractDataset y) {
+	public void setY(Dataset y) {
 		this.y = y;
 	}
 

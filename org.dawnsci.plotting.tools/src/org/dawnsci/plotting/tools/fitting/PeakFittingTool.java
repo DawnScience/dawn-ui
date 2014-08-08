@@ -20,9 +20,9 @@ import org.dawnsci.plotting.tools.preference.FittingPreferencePage;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.plotting.api.annotation.IAnnotation;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
-import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.views.ISettablePlotView;
 import org.eclipse.draw2d.ColorConstants;
@@ -46,7 +46,6 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
@@ -276,7 +275,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 						fp.setFwhm(area);
 						if (!requireFWHMSelections) area.setVisible(false);
 												
-						final AbstractDataset[] pair = fp.getPeakFunctions();
+						final Dataset[] pair = fp.getPeakFunctions();
 						final ILineTrace trace = getPlottingSystem().createLineTrace("Peak"+suffix);
 						//set user trace false before setting data otherwise the trace sent to events will be a true by default
 						trace.setUserTrace(false);
@@ -345,12 +344,12 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		final double[] p1 = roi.getPointRef();
 		final double[] p2 = roi.getEndPoint();
 
-		AbstractDataset x  = slice.getAxes()!=null && !slice.getAxes().isEmpty()
-				           ? (AbstractDataset)slice.getAxes().get(0)
+		Dataset x  = slice.getAxes()!=null && !slice.getAxes().isEmpty()
+				           ? (Dataset)slice.getAxes().get(0)
 				           : IntegerDataset.createRange(slice.getData().getSize());
 
-		AbstractDataset[] a= Generic1DFitter.xintersection(x,(AbstractDataset)slice.getData(),p1[0],p2[0]);
-		x = a[0]; AbstractDataset y=a[1];
+		Dataset[] a= Generic1DFitter.xintersection(x,(Dataset)slice.getData(),p1[0],p2[0]);
+		x = a[0]; Dataset y=a[1];
 		
 		// If the IdentifiedPeaks are null, we make them.
 		@SuppressWarnings("unchecked")
@@ -396,9 +395,9 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 				sdd.setName(peakName+"_area");
 				slice.appendData(sdd);
 
-				final AbstractDataset[] pair = fp.getPeakFunctions();
-				AbstractDataset     function = pair[1];
-				AbstractDataset fc = function.clone();
+				final Dataset[] pair = fp.getPeakFunctions();
+				Dataset     function = pair[1];
+				Dataset fc = function.clone();
 				fc.setName(peakName+"_function");
 				slice.appendData(fc);
 				addList(functions, index, fc);

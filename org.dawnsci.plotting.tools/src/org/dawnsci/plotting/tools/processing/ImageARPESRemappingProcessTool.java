@@ -41,7 +41,7 @@ import org.eclipse.ui.part.ResourceTransfer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
@@ -74,10 +74,10 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 	private Text inputLocation;
 	private String inputFile;
 	private Button inputBrowse;
-	private AbstractDataset correctedData;
+	private Dataset correctedData;
 	private List<IDataset> correctedAxes;
-	private AbstractDataset energyMap;
-	private AbstractDataset angleMap;
+	private Dataset energyMap;
+	private Dataset angleMap;
 	private Text photonEnergyText;
 	private Text workFunctionText;
 	private Label workFunctionLabel;
@@ -308,16 +308,16 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 		
 		logger.debug("Calling the energy remapping update");
 		
-		correctedData = (AbstractDataset) originalData.clone();
+		correctedData = (Dataset) originalData.clone();
 		correctedAxes = originalAxes;
 		
 		if (auxiliaryData != null) {
 			
-			AbstractDataset tmpProfile = (AbstractDataset) auxiliaryData.clone();
+			Dataset tmpProfile = (Dataset) auxiliaryData.clone();
 			
 			if(smoothLevel > 1){
 				try {
-					tmpProfile = ApachePolynomial.getPolynomialSmoothed((AbstractDataset)originalAxes.get(1), tmpProfile, smoothLevel, 3);
+					tmpProfile = ApachePolynomial.getPolynomialSmoothed((Dataset)originalAxes.get(1), tmpProfile, smoothLevel, 3);
 				} catch (Exception e) {
 					logger.error("Could not smooth the plot", e);
 				}
@@ -328,13 +328,13 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 			ys.add(tmpProfile);
 			reviewPlottingSystem.updatePlot1D(x, ys, null);
 			
-			AbstractDataset newEnergyAxis = Maths.subtract(originalAxes.get(0), auxiliaryData.mean());
+			Dataset newEnergyAxis = Maths.subtract(originalAxes.get(0), auxiliaryData.mean());
 			
-			AbstractDataset differences = Maths.subtract(auxiliaryData, auxiliaryData.mean());
+			Dataset differences = Maths.subtract(auxiliaryData, auxiliaryData.mean());
 			
 			double meanSteps = (originalAxes.get(0).max().doubleValue()-originalAxes.get(0).min().doubleValue())/(float)originalAxes.get(0).getShape()[0];
 			
-			AbstractDataset differenceInts = Maths.floor(Maths.divide(differences, meanSteps));
+			Dataset differenceInts = Maths.floor(Maths.divide(differences, meanSteps));
 			int[] shape = originalData.getShape();
 			correctedData = new DoubleDataset(shape);
 			for(int y = 0; y < shape[0]; y++) {
@@ -347,7 +347,7 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 				}
 			}
 			
-			//correctedData = InterpolatorUtils.remapOneAxis((AbstractDataset) originalData, 1, (AbstractDataset) tmpProfile, (AbstractDataset) originalAxes.get(0), newEnergyAxis);
+			//correctedData = InterpolatorUtils.remapOneAxis((Dataset) originalData, 1, (Dataset) tmpProfile, (Dataset) originalAxes.get(0), newEnergyAxis);
 			correctedAxes = new ArrayList<IDataset>();
 			correctedAxes.add(newEnergyAxis.clone());
 			correctedAxes.add(originalAxes.get(1).clone());
@@ -356,8 +356,8 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 		selectionPlottingSystem.createPlot2D(correctedData, correctedAxes, null);
 		
 		
-//		AbstractDataset data = (AbstractDataset)image.getData();
-//		AbstractDataset ds = data.clone();
+//		Dataset data = (Dataset)image.getData();
+//		Dataset ds = data.clone();
 //
 //		if(originalData == null) return;
 //		IDataset currentData = getPlottingSystem().getTraces().iterator().next().getData();
@@ -405,18 +405,18 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 		
 		// modify the axes of the main plot if offset
 		ArrayList<IDataset> updatedAxes = new ArrayList<IDataset>();
-		updatedAxes.add(Maths.add((AbstractDataset)correctedAxes.get(0),energyOffset));
-		updatedAxes.add(Maths.add((AbstractDataset)correctedAxes.get(1),angleOffset));
+		updatedAxes.add(Maths.add((Dataset)correctedAxes.get(0),energyOffset));
+		updatedAxes.add(Maths.add((Dataset)correctedAxes.get(1),angleOffset));
 
 		
 		selectionPlottingSystem.updatePlot2D(correctedData, updatedAxes, monitor);
 		// Now create the full size maps
-		energyMap = (AbstractDataset) updatedAxes.get(0);
+		energyMap = (Dataset) updatedAxes.get(0);
 		energyMap = energyMap.reshape(1,energyMap.getSize());
 		energyMap = DatasetUtils.tile(energyMap, correctedData.getShapeRef()[0], 1);
 		
 		// need to calculate angleRegion here
-		angleMap = (AbstractDataset) updatedAxes.get(1);
+		angleMap = (Dataset) updatedAxes.get(1);
 		angleMap = angleMap.reshape(angleMap.getShapeRef()[0],1);
 		angleMap = DatasetUtils.tile(angleMap, correctedData.getShapeRef()[1]);
 		
@@ -446,9 +446,9 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 		IRegion roi = selectionPlottingSystem.getRegion("Processed Region 1");
 		MapToRotatedCartesian map = new MapToRotatedCartesian((RectangularROI)roi.getROI());
 
-		AbstractDataset dataRegion = map.value(correctedData).get(0);
-		AbstractDataset energyRegion = map.value(energyMap).get(0);
-		AbstractDataset angleRegion = map.value(angleMap).get(0);
+		Dataset dataRegion = map.value(correctedData).get(0);
+		Dataset energyRegion = map.value(energyMap).get(0);
+		Dataset angleRegion = map.value(angleMap).get(0);
 	
 		
 		// No calculate the energies
@@ -468,31 +468,31 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 		}
 		
 		//TODO this is an approximate value, should probably be corrected.
-		AbstractDataset k = Maths.sqrt(bindingEnergy).imultiply(0.51168);
+		Dataset k = Maths.sqrt(bindingEnergy).imultiply(0.51168);
 				
 		// Finally calculate k parallel
-		AbstractDataset kParallel = Maths.multiply(k, Maths.sin(Maths.toRadians(angleRegion)));
+		Dataset kParallel = Maths.multiply(k, Maths.sin(Maths.toRadians(angleRegion)));
 		
 		// Caluclate the axis for display
 		double bindingEnergyValue = photonEnergy - workFunction;
 		double kValue = Math.sqrt(bindingEnergyValue) * 0.51168;
-		AbstractDataset kParaAxis = Maths.multiply(Maths.sin(Maths.toRadians(angleRegion.getSlice(new int[] {0,0}, new int[] {angleRegion.getShape()[0],1}, new int[] {1,1}).squeeze())), kValue);
+		Dataset kParaAxis = Maths.multiply(Maths.sin(Maths.toRadians(angleRegion.getSlice(new int[] {0,0}, new int[] {angleRegion.getShape()[0],1}, new int[] {1,1}).squeeze())), kValue);
 		
 		//logger.error("Max and min values are {} and {}", kParallel1D.min(), kParallel1D.max());
 		
-		//AbstractDataset kParaAxis = kParallel.getSlice(new int[] {0,fermiSurfacePosition}, new int[] {kParallel.getShape()[0],fermiSurfacePosition+1}, new int[] {1,1}).squeeze();
+		//Dataset kParaAxis = kParallel.getSlice(new int[] {0,fermiSurfacePosition}, new int[] {kParallel.getShape()[0],fermiSurfacePosition+1}, new int[] {1,1}).squeeze();
 		logger.error("Max and min values are {} and {}", kParaAxis.min(), kParaAxis.max());
 
 		// make axis correction to regrid here
 		//double KPStep = kParallel.peakToPeak().doubleValue()/(dataRegion.getShape()[0]-1);
-		//AbstractDataset kParaAxis = AbstractDataset.arange(kParallel.min().doubleValue()+(KPStep), kParallel.max().doubleValue()-(KPStep), KPStep, AbstractDataset.FLOAT64);
+		//Dataset kParaAxis = Dataset.arange(kParallel.min().doubleValue()+(KPStep), kParallel.max().doubleValue()-(KPStep), KPStep, Dataset.FLOAT64);
 				
 		// prepare the results
-		// AbstractDataset remappedRegion = InterpolatorUtils.remapAxis(dataRegion, 0, kParallel, kParaAxis);
-		AbstractDataset remappedRegion = dataRegion;
+		// Dataset remappedRegion = InterpolatorUtils.remapAxis(dataRegion, 0, kParallel, kParaAxis);
+		Dataset remappedRegion = dataRegion;
 		ArrayList<IDataset> remappedAxes = new ArrayList<IDataset>();
 		kParaAxis.setName("K Parallel (A-1)");
-		AbstractDataset energyAxis = energyRegion.getSlice(new int[] {0,0}, new int[] {1,energyRegion.getShapeRef()[1]}, new int[] {1,1}).squeeze();
+		Dataset energyAxis = energyRegion.getSlice(new int[] {0,0}, new int[] {1,energyRegion.getShapeRef()[1]}, new int[] {1,1}).squeeze();
 		energyAxis.imultiply(-1.0);
 		energyAxis.setName("Binding Energy (eV)");
 		remappedAxes.add(energyAxis);

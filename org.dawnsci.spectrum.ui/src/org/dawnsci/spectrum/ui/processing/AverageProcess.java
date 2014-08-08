@@ -6,11 +6,11 @@ import java.util.List;
 
 import org.apache.commons.math3.stat.descriptive.MultivariateSummaryStatistics;
 import org.dawnsci.spectrum.ui.file.IContain1DData;
-import org.dawnsci.spectrum.ui.file.SpectrumInMemory;
 import org.dawnsci.spectrum.ui.utils.Contain1DDataImpl;
 import org.dawnsci.spectrum.ui.utils.SpectrumUtils;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
@@ -64,7 +64,7 @@ public class AverageProcess extends AbstractProcess {
 	}
 	
 	@Override
-	protected AbstractDataset process(AbstractDataset x, AbstractDataset y) {
+	protected Dataset process(Dataset x, Dataset y) {
 		return null;
 	}
 

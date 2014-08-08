@@ -1,6 +1,7 @@
 package org.dawnsci.spectrum.ui.processing;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 
 public class RollingBallBaselineProcess extends AbstractProcess {
@@ -16,7 +17,7 @@ public class RollingBallBaselineProcess extends AbstractProcess {
 	}
 
 	@Override
-	protected AbstractDataset process(AbstractDataset x, AbstractDataset y) {
+	protected Dataset process(Dataset x, Dataset y) {
 		return rollingBallBaselineCorrection(y, width);
 	}
 
@@ -26,10 +27,10 @@ public class RollingBallBaselineProcess extends AbstractProcess {
 		return "_rolling_baseline_"+width;
 	}
 	
-	private  AbstractDataset rollingBallBaselineCorrection(AbstractDataset y, int width) {
+	private  Dataset rollingBallBaselineCorrection(Dataset y, int width) {
 
-		AbstractDataset t1 = AbstractDataset.zeros(y);
-		AbstractDataset t2 = AbstractDataset.zeros(y);
+		Dataset t1 = DatasetFactory.zeros(y);
+		Dataset t2 = DatasetFactory.zeros(y);
 
 		for (int i = 0 ; i < y.getSize()-1; i++) {
 			int start = (i-width) < 0 ? 0 : (i - width);

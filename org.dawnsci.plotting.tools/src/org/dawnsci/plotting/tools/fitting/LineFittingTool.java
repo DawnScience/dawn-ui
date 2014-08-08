@@ -15,8 +15,8 @@ import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.dawnsci.plotting.api.annotation.AnnotationUtils;
 import org.eclipse.dawnsci.plotting.api.annotation.IAnnotation;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
-import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.TraceUtils;
 import org.eclipse.dawnsci.plotting.api.views.ISettablePlotView;
@@ -37,7 +37,7 @@ import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
@@ -127,7 +127,7 @@ public class LineFittingTool extends AbstractFittingTool {
 						fp.setFwhm(area);
 						if (!requireRange) area.setVisible(false);
 												
-						final AbstractDataset[] pair = fp.getPeakFunctions();
+						final Dataset[] pair = fp.getPeakFunctions();
 						final ILineTrace trace = TraceUtils.replaceCreateLineTrace(getPlottingSystem(), "Fit "+ifit);
 						//set user trace false before setting data otherwise the trace sent to events will be a true by default
 						trace.setUserTrace(false);

@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Comparisons;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
@@ -59,7 +60,7 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 public class ImageNormalisationProcessTool extends ImageProcessingTool {
 
 	private final Logger logger = LoggerFactory.getLogger(ImageNormalisationProcessTool.class);
-	private AbstractDataset profile;
+	private Dataset profile;
 
 	private Spinner smoothingSpinner;
 	private int smoothLevel = 1;
@@ -277,8 +278,8 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 
 	@Override
 	protected void createSelectionProfile(IImageTrace image, IROI roi, IProgressMonitor monitor) {
-		AbstractDataset data = (AbstractDataset)image.getData();
-		AbstractDataset ds = data.clone();
+		Dataset data = (Dataset)image.getData();
+		Dataset ds = data.clone();
 
 		if(type.equals(NormaliseType.NONE)) {
 			if(originalData == null) return;
@@ -293,7 +294,7 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 				if(!selectionData.equals(originalData))
 					selectionPlottingSystem.updatePlot2D(originalData, originalAxes, monitor);
 			}
-			profile = (AbstractDataset) DatasetFactory.ones(DatasetUtils.convertToAbstractDataset(originalAxes.get(1)));
+			profile = (Dataset) DatasetFactory.ones(DatasetUtils.convertToAbstractDataset(originalAxes.get(1)));
 		} else if (type.equals(NormaliseType.ROI) || type.equals(NormaliseType.AUX)){
 			if(roi == null) return;
 	
@@ -310,11 +311,11 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 		List<IDataset> data = new ArrayList<IDataset>();
 
 		// smooth the review plot
-		AbstractDataset tmpProfile = profile.clone();
+		Dataset tmpProfile = profile.clone();
 		
 		if(smoothLevel > 1){
 			try {
-				tmpProfile = ApachePolynomial.getPolynomialSmoothed((AbstractDataset)originalAxes.get(1), profile, smoothLevel, 3);
+				tmpProfile = ApachePolynomial.getPolynomialSmoothed((Dataset)originalAxes.get(1), profile, smoothLevel, 3);
 				BooleanDataset comp = Comparisons.lessThanOrEqualTo(tmpProfile, 1);
 				tmpProfile.setByBoolean(1, comp);
 			} catch (Exception e) {
@@ -329,11 +330,11 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 		reviewPlottingSystem.clear();
 		reviewPlottingSystem.updatePlot1D(originalAxes.get(1), data, monitor);
 
-		AbstractDataset tile = tmpProfile.reshape(tmpProfile.getShapeRef()[0],1);
+		Dataset tile = tmpProfile.reshape(tmpProfile.getShapeRef()[0],1);
 
-		AbstractDataset ds = (AbstractDataset) originalData.clone();
+		Dataset ds = (Dataset) originalData.clone();
 
-		AbstractDataset correctionDataset = DatasetUtils.tile(tile, ds.getShapeRef()[1]);
+		Dataset correctionDataset = DatasetUtils.tile(tile, ds.getShapeRef()[1]);
 		ds.idivide(correctionDataset);
 
 		userPlotBean.addList("norm", ds.clone());

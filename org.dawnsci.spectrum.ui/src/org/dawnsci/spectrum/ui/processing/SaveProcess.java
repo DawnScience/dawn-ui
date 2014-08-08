@@ -9,7 +9,7 @@ import org.dawb.common.services.IPersistentFile;
 import org.dawb.common.services.ServiceManager;
 import org.dawnsci.spectrum.ui.file.IContain1DData;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 public class SaveProcess extends AbstractSaveProcess {
@@ -39,7 +39,7 @@ public class SaveProcess extends AbstractSaveProcess {
 	}
 
 	@Override
-	protected AbstractDataset process(AbstractDataset x, AbstractDataset y) {
+	protected Dataset process(Dataset x, Dataset y) {
 		return null;
 	}
 

@@ -54,6 +54,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionSquirts;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionSquirts.Squirt;
@@ -476,11 +477,11 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 	
 				// We peak fit only the first of the data sets plotted for now.
 				if (selectedTrace==null || selectedTrace.getXData()==null || selectedTrace.getYAxis()==null) continue;
-				AbstractDataset x  = (AbstractDataset)selectedTrace.getXData().squeeze();
-				AbstractDataset y  = (AbstractDataset)selectedTrace.getYData().squeeze();
+				Dataset x  = (Dataset)selectedTrace.getXData().squeeze();
+				Dataset y  = (Dataset)selectedTrace.getYData().squeeze();
 	
 				try {
-					AbstractDataset[] a= Generic1DFitter.xintersection(x,y,p1[0],p2[0]);
+					Dataset[] a= Generic1DFitter.xintersection(x,y,p1[0],p2[0]);
 					x = a[0]; y=a[1];
 				} catch (Throwable npe) {
 					logger.debug("Cannot fit!", npe);
