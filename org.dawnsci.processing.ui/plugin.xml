@@ -5,7 +5,7 @@
          point="org.eclipse.ui.views">
       <view
             allowMultiple="false"
-            category="uk.ac.diamond.scisoft.analysis.rcp"
+            category="org.dawb.workbench.ui.beta.views.category"
             class="org.dawnsci.processing.ui.ProcessingView"
             icon="icons/image-sharpen.png"
             id="org.dawnsci.processing.ui.processingView"
@@ -13,7 +13,7 @@
             restorable="true">
       </view>
       <view
-            category="uk.ac.diamond.scisoft.analysis.rcp"
+            category="org.dawb.workbench.ui.beta.views.category"
             class="org.eclipse.ui.views.properties.PropertySheet"
             icon="icons/image--pencil.png"
             id="org.dawnsci.processing.ui.propertySheet"

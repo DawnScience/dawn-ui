@@ -47,9 +47,10 @@ public class ProcessingView extends ViewPart {
 	
 	@Override
     public void init(IViewSite site, IMemento memento) throws PartInitException {
+		
 		super.init(site, memento);
 
-		final String key = memento.getString(ProcessingConstants.OPERATION_IDS);
+		final String key = memento!=null ? memento.getString(ProcessingConstants.OPERATION_IDS) : null;
 		if (key!=null && !"".equals(key)) {
 			List<String> ids = ListUtils.getList(key);
 			this.saved = operationFiler.createDescriptors(ids);

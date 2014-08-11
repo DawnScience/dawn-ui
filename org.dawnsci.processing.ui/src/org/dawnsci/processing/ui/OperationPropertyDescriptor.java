@@ -1,7 +1,10 @@
 package org.dawnsci.processing.ui;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 
+import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
+import org.dawnsci.common.widgets.decorator.BoundsDecorator;
 import org.dawnsci.common.widgets.decorator.FloatDecorator;
 import org.dawnsci.common.widgets.decorator.IntegerDecorator;
 import org.dawnsci.plotting.roi.RegionCellEditor;
@@ -32,7 +35,7 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
 		this.name  = name;
 	}
 	
-    private static String getDisplayName(IOperationModel model, String fieldName) {
+	private static OperationModelField getAnnotation(IOperationModel model, String fieldName) {
 		
 		try {
 			Field field;
@@ -44,16 +47,26 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
 	        if (field!=null) {
 	        	OperationModelField anot = field.getAnnotation(OperationModelField.class);
 	        	if (anot!=null) {
-	        		String label = anot.label();
-	        		if (label!=null && !"".equals(label)) return label;
+	        		return anot;
 	        	}
 	        }
-	        return fieldName;
+	        return null;
 	        
 		} catch (NoSuchFieldException | SecurityException e) {
 			e.printStackTrace();
-			return fieldName;
+			return null;
 		}
+		
+	}
+	
+    private static String getDisplayName(IOperationModel model, String fieldName) {
+    	
+    	OperationModelField anot = getAnnotation(model, fieldName);
+    	if (anot!=null) {
+    		String label = anot.label();
+    		if (label!=null && !"".equals(label)) return label;
+    	}
+    	return fieldName;
 	}
 
 	public ILabelProvider getLabelProvider() {
@@ -82,10 +95,32 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
         	
         } else if (value instanceof IROI) {        	
         	return new RegionCellEditor(parent);
+        	
+        } else if (value instanceof Enum) {
+        	return getChoiceEditor((Enum)value, parent);
         }
         
         return null;
     }
+
+	private CellEditor getChoiceEditor(final Enum<? extends Object> value, Composite parent) {
+		
+		final Enum[]   values = value.getClass().getEnumConstants();
+	    final String[] items  = Arrays.toString(values).replaceAll("^.|.$", "").split(", ");
+		
+		CComboCellEditor cellEd = new CComboCellEditor(parent, items) {
+    	    protected void doSetValue(Object value) {
+                if (value instanceof Enum) value = ((Enum) value).ordinal();
+                super.doSetValue(value);
+    	    }
+    		protected Object doGetValue() {
+    			Integer ordinal = (Integer)super.doGetValue();
+    			return values[ordinal];
+    		}
+		};
+		
+		return cellEd;
+	}
 
 	private CellEditor getNumberEditor(final Number number, Composite parent) {
     	
@@ -110,11 +145,19 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
     	
     	final Text           text   = (Text) textEd.getControl();
     	
-    	// TODO Bounds / units!
+    	BoundsDecorator deco = null;
     	if (isFloat) {
-    		new FloatDecorator(text);
+    		deco = new FloatDecorator(text);
     	} else if (isInt) {
-       		new IntegerDecorator(text);
+    		deco = new IntegerDecorator(text);
+    	}
+    	
+    	if (deco!=null) {
+        	OperationModelField anot = getAnnotation(model, name);
+            if (anot!=null) {
+            	deco.setMaximum(anot.max());
+            	deco.setMinimum(anot.min());
+            }
     	}
     	
     	return textEd;
@@ -122,6 +165,7 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
 
 	private class LabelProvider extends BaseLabelProvider implements ILabelProvider {
 
+		private Image ticked, unticked;
 		/**
 		 * Creates a new label provider.
 		 */
@@ -135,6 +179,12 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
 		 * Subclasses may override.
 		 */
 		public Image getImage(Object element) {
+			if (element instanceof Boolean) {
+				if (ticked==null)   ticked   = Activator.getImageDescriptor("icons/ticked.png").createImage();
+				if (unticked==null) unticked = Activator.getImageDescriptor("icons/unticked.gif").createImage();
+				Boolean val = (Boolean)element;
+				return val ? ticked : unticked;
+			}
 			return null;
 		}
 
@@ -144,7 +194,13 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
 		 * <code>toString</code> string. Subclasses may override.
 		 */
 		public String getText(Object element) {
+			if (element instanceof Boolean) return "";
 			return element == null ? "" : element.toString();//$NON-NLS-1$
+		}
+		
+		public void dispose() {
+			if (ticked!=null)   ticked.dispose();
+			if (unticked!=null) unticked.dispose();
 		}
 	}
 
