@@ -42,7 +42,11 @@ public class RegexDecorator {
 		verifyListener = new VerifyListener() {			
 			@Override
 			public void verifyText(VerifyEvent e) {
-				if (!"".equals(e.text) && !pattern.matcher(e.text).matches()) {
+				
+				boolean allStringMatch = pattern.matcher(text.getText()+e.text).matches();
+				boolean changeMatch    = pattern.matcher(e.text).matches();
+				
+				if (!"".equals(e.text) && !allStringMatch && !changeMatch) {
 					e.doit = false;
 					return;
 				}

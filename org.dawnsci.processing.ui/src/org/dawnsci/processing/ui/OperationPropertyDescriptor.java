@@ -1,11 +1,17 @@
 package org.dawnsci.processing.ui;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.List;
 
+import org.dawb.common.util.list.ListUtils;
+import org.dawb.common.util.text.StringUtils;
 import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
 import org.dawnsci.common.widgets.decorator.BoundsDecorator;
+import org.dawnsci.common.widgets.decorator.FloatArrayDecorator;
 import org.dawnsci.common.widgets.decorator.FloatDecorator;
+import org.dawnsci.common.widgets.decorator.IntegerArrayDecorator;
 import org.dawnsci.common.widgets.decorator.IntegerDecorator;
 import org.dawnsci.plotting.roi.RegionCellEditor;
 import org.eclipse.jface.viewers.BaseLabelProvider;
@@ -90,18 +96,26 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
         if (value instanceof Boolean) {
         	return new CheckboxCellEditor(parent, SWT.NONE);
         	
-        } else if (value instanceof Number) {        	
-        	return getNumberEditor((Number)value, parent);
+        } else if (value instanceof Number || isNumberArray(value)) {        	
+        	return getNumberEditor(value, parent);
         	
         } else if (value instanceof IROI) {        	
         	return new RegionCellEditor(parent);
         	
         } else if (value instanceof Enum) {
         	return getChoiceEditor((Enum)value, parent);
+        
         }
+        
         
         return null;
     }
+
+	private boolean isNumberArray(Object value) {
+		if (value==null) return false;
+		if (!value.getClass().isArray()) return false;
+		return value instanceof double[] || value instanceof float[] || value instanceof int[] || value instanceof float[];
+	}
 
 	private CellEditor getChoiceEditor(final Enum<? extends Object> value, Composite parent) {
 		
@@ -122,23 +136,45 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
 		return cellEd;
 	}
 
-	private CellEditor getNumberEditor(final Number number, Composite parent) {
+	private CellEditor getNumberEditor(final Object number, Composite parent) {
     	
-		final boolean isFloat = number instanceof Double || number instanceof Float;
-		final boolean isInt   = number instanceof Integer || number instanceof Long;
+		final boolean isFloat      = number instanceof Double   || number instanceof Float;
+		final boolean isFloatArray = number instanceof double[] || number instanceof float[];
+		
+		final boolean isInt        = number instanceof Integer || number instanceof Long;
+		final boolean isIntArray   = number instanceof int[] || number instanceof long[];
 		
 		
     	final TextCellEditor textEd = new TextCellEditor(parent, SWT.NONE) {
     	    protected void doSetValue(Object value) {
-                if (value instanceof Number) value = value.toString();
+                if (value instanceof Number)    value = value.toString();
+                if (value.getClass().isArray()) {
+                	String returnVal = StringUtils.toString(value);
+      				if (returnVal.startsWith("[")) returnVal = returnVal.substring(1);
+      				if (returnVal.endsWith("]"))   returnVal = returnVal.substring(0,returnVal.length()-1);
+      				value = returnVal;
+                }
                 super.doSetValue(value);
     	    }
     		protected Object doGetValue() {
+    			
     			String stringValue = (String)super.doGetValue();
+    			
+    			if (stringValue==null || "".equals(stringValue)) return null;
+    			stringValue = stringValue.trim();
+    			
       			if (number instanceof Double)  return new Double(stringValue);
       			if (number instanceof Float)   return new Float(stringValue);
       			if (number instanceof Integer) return new Integer(stringValue);
       			if (number instanceof Long)    return new Long(stringValue);
+      			
+      			if (number.getClass().isArray()) {
+      				if (stringValue.startsWith("[")) stringValue = stringValue.substring(1);
+      				if (stringValue.endsWith("]"))   stringValue = stringValue.substring(0,stringValue.length()-1);
+      				final List<String> strVals = ListUtils.getList(stringValue);
+      				return getPrimitiveArray(number, strVals);
+      			}
+      			
     			return stringValue;
     		}
     	};
@@ -150,6 +186,10 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
     		deco = new FloatDecorator(text);
     	} else if (isInt) {
     		deco = new IntegerDecorator(text);
+    	} else if (isFloatArray) {
+    		deco = new FloatArrayDecorator(text);
+    	} else if (isIntArray) {
+    		deco = new IntegerArrayDecorator(text);
     	}
     	
     	if (deco!=null) {
@@ -158,9 +198,38 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
             	deco.setMaximum(anot.max());
             	deco.setMinimum(anot.min());
             }
-    	}
+    	} 
     	
     	return textEd;
+	}
+
+	/**
+	 * Not fast or pretty...
+	 * 
+	 * @param number
+	 * @param strVals
+	 * @return
+	 */
+	protected Object getPrimitiveArray(Object number, List<String> strVals) {
+		
+		if (strVals==null || strVals.isEmpty()) return null;
+	
+		Object array = null;
+		if (number instanceof double[]) array = new double[strVals.size()];
+		if (number instanceof float[])  array = new float[strVals.size()];
+		if (number instanceof int[])    array = new int[strVals.size()];
+		if (number instanceof long[])   array = new long[strVals.size()];
+		
+		for (int i = 0; i < strVals.size(); i++) {
+			Object value = null;
+			if (number instanceof double[]) value = Double.parseDouble(strVals.get(i));
+			if (number instanceof float[])  value = Float.parseFloat(strVals.get(i));
+			if (number instanceof int[])    value = Integer.parseInt(strVals.get(i));
+			if (number instanceof long[])   value = Long.parseLong(strVals.get(i));
+			
+			Array.set(array, i, value);
+		}
+		return array;
 	}
 
 	private class LabelProvider extends BaseLabelProvider implements ILabelProvider {
@@ -195,6 +264,7 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
 		 */
 		public String getText(Object element) {
 			if (element instanceof Boolean) return "";
+			if (element.getClass().isArray()) return StringUtils.toString(element);
 			return element == null ? "" : element.toString();//$NON-NLS-1$
 		}
 		
@@ -232,5 +302,10 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
 	@Override
 	public int compareTo(OperationPropertyDescriptor o) {
 		return name.compareTo(o.name);
+	}
+	
+	@Override
+	public String toString() {
+		return name;
 	}
 }
