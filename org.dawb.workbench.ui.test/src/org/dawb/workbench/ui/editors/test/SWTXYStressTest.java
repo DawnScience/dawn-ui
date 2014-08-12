@@ -191,7 +191,7 @@ public class SWTXYStressTest {
 		
  		LoaderFactory.clear();
 		System.gc();
-		EclipseUtils.delay(1000);
+		EclipseUtils.delay(5000);
 		
 		long sizeEnd = Runtime.getRuntime().freeMemory();
         if ((sizeStart-sizeEnd)>10000) throw new Exception("Unexpected memory leak - "+(sizeStart-sizeEnd));
@@ -241,7 +241,7 @@ public class SWTXYStressTest {
 	
  		LoaderFactory.clear();
 		System.gc();
-		EclipseUtils.delay(1000);
+		EclipseUtils.delay(5000);
 		
 		long sizeEnd = Runtime.getRuntime().freeMemory();
 		if ((sizeStart-sizeEnd)>10000) throw new Exception("Unexpected memory leak - "+(sizeStart-sizeEnd));
@@ -298,7 +298,7 @@ public class SWTXYStressTest {
     			long start = System.currentTimeMillis();
 
     			double average = Double.NaN;
-    			for (int i = 0; i < 10; i++) {
+    			for (int i = 0; i < 100; i++) {
 
     				for (int j = 0; j < data.length; j++) {
 
