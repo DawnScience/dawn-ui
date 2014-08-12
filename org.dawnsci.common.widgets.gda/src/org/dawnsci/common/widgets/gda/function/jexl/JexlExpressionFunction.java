@@ -360,7 +360,7 @@ public class JexlExpressionFunction extends AFunction {
 	public void fillWithValues(DoubleDataset data, CoordinatesIterator it) {
 		DoubleDataset values = calculateValues(it.getValues());
 		if (values != null)
-			data.fill(values);
+			data.setSlice(values);
 	}
 
 	@Override
