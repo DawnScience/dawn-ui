@@ -8,6 +8,7 @@ import java.util.List;
 import org.dawb.common.util.list.ListUtils;
 import org.dawb.common.util.text.StringUtils;
 import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
+import org.dawnsci.common.widgets.celleditor.ClassCellEditor;
 import org.dawnsci.common.widgets.decorator.BoundsDecorator;
 import org.dawnsci.common.widgets.decorator.FloatArrayDecorator;
 import org.dawnsci.common.widgets.decorator.FloatDecorator;
@@ -29,11 +30,24 @@ import uk.ac.diamond.scisoft.analysis.processing.model.IOperationModel;
 import uk.ac.diamond.scisoft.analysis.processing.model.OperationModelField;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
+/**
+ * Current supported values in models which can be edited by this descriptor:
+ * 
+ *  o Boolean/boolean, Double/double, Float/float, Integer/int, Long/long
+ *  o Enums (as choice list)
+ *  o double[] float[] int[] long[]
+ *  o String
+ * 
+ * 
+ * @author fcp94556
+ *
+ */
 public class OperationPropertyDescriptor extends PropertyDescriptor implements Comparable<OperationPropertyDescriptor> {
 
-	private IOperationModel model;
-	private String          name;
+
 	private ILabelProvider labelProvider;
+	private IOperationModel model;
+	private String name;
 
 	public OperationPropertyDescriptor(IOperationModel model, String name) {
 		super(name, getDisplayName(model, name));
@@ -85,7 +99,8 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
         if (labelProvider != null) {
 			return labelProvider;
 		}
-		return new LabelProvider();
+        labelProvider = new LabelProvider();
+        return labelProvider;
     }
 
 
@@ -125,6 +140,8 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
         } else if (Enum.class.isAssignableFrom(clazz)) {
         	return getChoiceEditor((Class<? extends Enum>)clazz, parent);
         
+        } else if (String.class.equals(clazz)) {
+        	return new TextCellEditor(parent);
         }
         
         
@@ -161,99 +178,15 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
 
 	private CellEditor getNumberEditor(final Class<? extends Object> clazz, Composite parent) {
     	
-		final boolean isFloat      = Double.class.isAssignableFrom(clazz)   || Float.class.isAssignableFrom(clazz);
-		final boolean isFloatArray = double[].class.isAssignableFrom(clazz) || float[].class.isAssignableFrom(clazz);
-		
-		final boolean isInt        = Integer.class.isAssignableFrom(clazz)  || Long.class.isAssignableFrom(clazz);
-		final boolean isIntArray   = int[].class.isAssignableFrom(clazz)    || long[].class.isAssignableFrom(clazz);
-		
-		
-    	final TextCellEditor textEd = new TextCellEditor(parent, SWT.NONE) {
-    	    protected void doSetValue(Object value) {
-                if (value instanceof Number)    value = value.toString();
-                if (clazz.isArray()) {
-                	String returnVal = StringUtils.toString(value);
-      				if (returnVal!=null && returnVal.startsWith("[")) returnVal = returnVal.substring(1);
-      				if (returnVal!=null && returnVal.endsWith("]"))   returnVal = returnVal.substring(0,returnVal.length()-1);
-      				value = returnVal;
-                }
-                if (value==null) return;
-                super.doSetValue(value);
-    	    }
-    		protected Object doGetValue() {
-    			
-    			String stringValue = (String)super.doGetValue();
-    			
-    			if (stringValue==null || "".equals(stringValue)) return null;
-    			stringValue = stringValue.trim();
-    			
-      			if (Double.class.isAssignableFrom(clazz))  return new Double(stringValue);
-      			if (Float.class.isAssignableFrom(clazz))   return new Float(stringValue);
-      			if (Integer.class.isAssignableFrom(clazz)) return new Integer(stringValue);
-      			if (Long.class.isAssignableFrom(clazz))    return new Long(stringValue);
-      			
-      			if (clazz.isArray()) {
-      				if (stringValue.startsWith("[")) stringValue = stringValue.substring(1);
-      				if (stringValue.endsWith("]"))   stringValue = stringValue.substring(0,stringValue.length()-1);
-      				final List<String> strVals = ListUtils.getList(stringValue);
-      				return getPrimitiveArray(clazz, strVals);
-      			}
-      			
-    			return stringValue;
-    		}
-    	};
-    	
-    	final Text           text   = (Text) textEd.getControl();
-    	
-    	BoundsDecorator deco = null;
-    	if (isFloat) {
-    		deco = new FloatDecorator(text);
-    	} else if (isInt) {
-    		deco = new IntegerDecorator(text);
-    	} else if (isFloatArray) {
-    		deco = new FloatArrayDecorator(text);
-    	} else if (isIntArray) {
-    		deco = new IntegerArrayDecorator(text);
-    	}
-    	
-    	if (deco!=null) {
-        	OperationModelField anot = getAnnotation(model, name);
-            if (anot!=null) {
-            	deco.setMaximum(anot.max());
-            	deco.setMinimum(anot.min());
-            }
-    	} 
-    	
-    	return textEd;
-	}
+		OperationModelField anot = getAnnotation(model, name);
+		CellEditor textEd = null;
+	    if (anot!=null) {
+	    	textEd = new ClassCellEditor(parent, clazz, anot.min(), anot.max(), anot.unit(), SWT.NONE);
+	    } else {
+	    	textEd = new ClassCellEditor(parent, clazz, SWT.NONE);
+	    }
 
-	/**
-	 * Not fast or pretty...
-	 * 
-	 * @param number
-	 * @param strVals
-	 * @return
-	 */
-	protected Object getPrimitiveArray(Class<? extends Object> clazz, List<String> strVals) {
-		
-		if (strVals==null || strVals.isEmpty()) return null;
-	
-		Object array = null;
-		if (double[].class.isAssignableFrom(clazz)) array = new double[strVals.size()];
-		if (float[].class.isAssignableFrom(clazz))  array = new float[strVals.size()];
-		if (int[].class.isAssignableFrom(clazz))    array = new int[strVals.size()];
-		if (long[].class.isAssignableFrom(clazz))   array = new long[strVals.size()];
-		
-		for (int i = 0; i < strVals.size(); i++) {
-			Object value = null;
-			if (double[].class.isAssignableFrom(clazz)) value = Double.parseDouble(strVals.get(i));
-			if (float[].class.isAssignableFrom(clazz))  value = Float.parseFloat(strVals.get(i));
-			if (int[].class.isAssignableFrom(clazz))    value = Integer.parseInt(strVals.get(i));
-			if (long[].class.isAssignableFrom(clazz))   value = Long.parseLong(strVals.get(i));
-			
-			Array.set(array, i, value);
-		}
-		return array;
+    	return textEd;
 	}
 
 	private class LabelProvider extends BaseLabelProvider implements ILabelProvider {
@@ -287,9 +220,20 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
 		 * <code>toString</code> string. Subclasses may override.
 		 */
 		public String getText(Object element) {
+			
+			if (element == null)            return "";
 			if (element instanceof Boolean) return "";
-			if (element.getClass().isArray()) return StringUtils.toString(element);
-			return element == null ? "" : element.toString();//$NON-NLS-1$
+			
+			StringBuilder buf = new StringBuilder();
+			if (element.getClass().isArray()) {
+				buf.append( StringUtils.toString(element) );
+			} else {
+			    buf.append(element.toString());//$NON-NLS-1$
+			}
+			
+			OperationModelField anot = getAnnotation(model, name);
+			if (anot!=null) buf.append(" "+anot.unit());
+			return buf.toString();
 		}
 		
 		public void dispose() {

@@ -211,8 +211,8 @@ public class BoundsDecorator extends RegexDecorator {
 	}
 
 	public void setMaximum(Object maximum) {
-		if (maximum instanceof Double) {
-			double dbl = ((Double)maximum).doubleValue();
+		if (maximum instanceof Number) {
+			double dbl = ((Number)maximum).doubleValue();
 			if (Double.isNaN(dbl) || Double.isInfinite(dbl)) {
 				this.maximum = null;
 				return;
@@ -259,8 +259,8 @@ public class BoundsDecorator extends RegexDecorator {
 	}
 
 	public void setMinimum(Object minimum) {
-		if (minimum instanceof Double) {
-			double dbl = ((Double)minimum).doubleValue();
+		if (minimum instanceof Number) {
+			double dbl = ((Number)minimum).doubleValue();
 			if (Double.isNaN(dbl) || Double.isInfinite(dbl)) {
 				this.minimum = null;
 				return;
