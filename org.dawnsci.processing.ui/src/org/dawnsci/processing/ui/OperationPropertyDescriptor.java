@@ -1,29 +1,27 @@
 package org.dawnsci.processing.ui;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.List;
 
-import org.dawb.common.util.list.ListUtils;
 import org.dawb.common.util.text.StringUtils;
 import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
 import org.dawnsci.common.widgets.celleditor.ClassCellEditor;
-import org.dawnsci.common.widgets.decorator.BoundsDecorator;
-import org.dawnsci.common.widgets.decorator.FloatArrayDecorator;
-import org.dawnsci.common.widgets.decorator.FloatDecorator;
-import org.dawnsci.common.widgets.decorator.IntegerArrayDecorator;
-import org.dawnsci.common.widgets.decorator.IntegerDecorator;
 import org.dawnsci.plotting.roi.RegionCellEditor;
 import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxCellEditor;
+import org.eclipse.jface.viewers.ICellEditorListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.TextCellEditor;
+import org.eclipse.jface.window.DefaultToolTip;
+import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 
 import uk.ac.diamond.scisoft.analysis.processing.model.IOperationModel;
@@ -128,25 +126,59 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
 			
 		}
         
+		CellEditor ed = null;
         if (clazz == Boolean.class) {
-        	return new CheckboxCellEditor(parent, SWT.NONE);
+        	ed = new CheckboxCellEditor(parent, SWT.NONE);
         	
         } else if (Number.class.isAssignableFrom(clazz) || isNumberArray(clazz)) {        	
-        	return getNumberEditor(clazz, parent);
+        	ed = getNumberEditor(clazz, parent);
         	
         } else if (IROI.class.isAssignableFrom(clazz)) {        	
-        	return new RegionCellEditor(parent);
+        	ed = new RegionCellEditor(parent);
         	
         } else if (Enum.class.isAssignableFrom(clazz)) {
-        	return getChoiceEditor((Class<? extends Enum>)clazz, parent);
+        	ed = getChoiceEditor((Class<? extends Enum>)clazz, parent);
         
         } else if (String.class.equals(clazz)) {
-        	return new TextCellEditor(parent);
+        	ed = new TextCellEditor(parent);
         }
         
+        // Show the tooltip, if there is one
+        if (ed!=null) {
+        	final OperationModelField anot = getAnnotation(model, name);
+        	if (anot!=null) {
+        		String hint = anot.hint();
+        		if (hint!=null && !"".equals(hint)) {
+        			showHint(hint, ed);
+        		}
+        	}
+        }
         
-        return null;
+        return ed;
     }
+
+	private void showHint(final String hint, final CellEditor cellEd) {
+		
+		final Control control = cellEd.getControl();
+		control.getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				
+				final DefaultToolTip tooltip = new DefaultToolTip(control, ToolTip.NO_RECREATE, true);
+				tooltip.setText(hint);
+				tooltip.setHideOnMouseDown(true);
+				control.addListener(SWT.Dispose, new Listener() {
+					
+					@Override
+					public void handleEvent(Event event) {
+						if (!control.isDisposed()) tooltip.hide();
+					}
+				});
+
+				tooltip.show(new Point(control.getSize().x, 0));
+				
+			}
+		});
+	}
 
 	private boolean isNumberArray(Class<? extends Object> clazz) {
 		
