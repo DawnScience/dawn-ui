@@ -126,6 +126,9 @@ class ExpressionObject implements IExpressionObject {
 			if (lazySet!=null) return true;
 			
 			//if (engine==null) engine = JexlUtils.getDawnJexlEngine();
+			if (expressionString == null || expressionString.isEmpty())
+				return false;
+
 			engine.createExpression(expressionString);
 			Collection<String> names = engine.getVariableNamesFromExpression();
 			
