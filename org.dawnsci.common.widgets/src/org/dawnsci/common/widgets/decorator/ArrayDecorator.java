@@ -19,6 +19,7 @@ class ArrayDecorator extends BoundsDecorator {
 	protected boolean check(String totalString, String delta) {
 
 		final List<String> strings = getList(totalString, delimiter);
+		if (strings==null) return true;
 		for (String string : strings) {
 			if (!super.check(string, delta)) return false;
 		}

@@ -44,12 +44,7 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
 	private static OperationModelField getAnnotation(IOperationModel model, String fieldName) {
 		
 		try {
-			Field field;
-			try {
-				field = model.getClass().getDeclaredField(fieldName);
-			} catch (Exception ne) {
-				field = model.getClass().getSuperclass().getDeclaredField(fieldName);
-			}
+			Field field = getField(model, fieldName);
 	        if (field!=null) {
 	        	OperationModelField anot = field.getAnnotation(OperationModelField.class);
 	        	if (anot!=null) {
@@ -65,7 +60,18 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
 		
 	}
 	
-    private static String getDisplayName(IOperationModel model, String fieldName) {
+    private static Field getField(IOperationModel model, String fieldName) throws NoSuchFieldException, SecurityException {
+		
+    	Field field;
+		try {
+			field = model.getClass().getDeclaredField(fieldName);
+		} catch (Exception ne) {
+			field = model.getClass().getSuperclass().getDeclaredField(fieldName);
+		}
+		return field;
+	}
+
+	private static String getDisplayName(IOperationModel model, String fieldName) {
     	
     	OperationModelField anot = getAnnotation(model, fieldName);
     	if (anot!=null) {
@@ -92,18 +98,32 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
 			e.printStackTrace();
 			return null;
 		}
+		
+		Class<? extends Object> clazz = null;
+		if (value!=null) {
+			clazz = value.getClass();
+		} else {
+			try {
+				Field field = getField(model, name);
+				clazz = field.getType();
+			} catch (NoSuchFieldException | SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
         
-        if (value instanceof Boolean) {
+        if (clazz == Boolean.class) {
         	return new CheckboxCellEditor(parent, SWT.NONE);
         	
-        } else if (value instanceof Number || isNumberArray(value)) {        	
-        	return getNumberEditor(value, parent);
+        } else if (Number.class.isAssignableFrom(clazz) || isNumberArray(clazz)) {        	
+        	return getNumberEditor(clazz, parent);
         	
-        } else if (value instanceof IROI) {        	
+        } else if (IROI.class.isAssignableFrom(clazz)) {        	
         	return new RegionCellEditor(parent);
         	
-        } else if (value instanceof Enum) {
-        	return getChoiceEditor((Enum)value, parent);
+        } else if (Enum.class.isAssignableFrom(clazz)) {
+        	return getChoiceEditor((Class<? extends Enum>)clazz, parent);
         
         }
         
@@ -111,15 +131,18 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
         return null;
     }
 
-	private boolean isNumberArray(Object value) {
-		if (value==null) return false;
-		if (!value.getClass().isArray()) return false;
-		return value instanceof double[] || value instanceof float[] || value instanceof int[] || value instanceof float[];
+	private boolean isNumberArray(Class<? extends Object> clazz) {
+		
+		if (clazz==null)      return false;
+		if (!clazz.isArray()) return false;
+		
+		return double[].class.isAssignableFrom(clazz) || float[].class.isAssignableFrom(clazz) ||
+               int[].class.isAssignableFrom(clazz)    || long[].class.isAssignableFrom(clazz);
 	}
 
-	private CellEditor getChoiceEditor(final Enum<? extends Object> value, Composite parent) {
+	private CellEditor getChoiceEditor(final Class<? extends Enum> clazz, Composite parent) {
 		
-		final Enum[]   values = value.getClass().getEnumConstants();
+		final Enum[]   values = clazz.getEnumConstants();
 	    final String[] items  = Arrays.toString(values).replaceAll("^.|.$", "").split(", ");
 		
 		CComboCellEditor cellEd = new CComboCellEditor(parent, items) {
@@ -136,24 +159,25 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
 		return cellEd;
 	}
 
-	private CellEditor getNumberEditor(final Object number, Composite parent) {
+	private CellEditor getNumberEditor(final Class<? extends Object> clazz, Composite parent) {
     	
-		final boolean isFloat      = number instanceof Double   || number instanceof Float;
-		final boolean isFloatArray = number instanceof double[] || number instanceof float[];
+		final boolean isFloat      = Double.class.isAssignableFrom(clazz)   || Float.class.isAssignableFrom(clazz);
+		final boolean isFloatArray = double[].class.isAssignableFrom(clazz) || float[].class.isAssignableFrom(clazz);
 		
-		final boolean isInt        = number instanceof Integer || number instanceof Long;
-		final boolean isIntArray   = number instanceof int[] || number instanceof long[];
+		final boolean isInt        = Integer.class.isAssignableFrom(clazz)  || Long.class.isAssignableFrom(clazz);
+		final boolean isIntArray   = int[].class.isAssignableFrom(clazz)    || long[].class.isAssignableFrom(clazz);
 		
 		
     	final TextCellEditor textEd = new TextCellEditor(parent, SWT.NONE) {
     	    protected void doSetValue(Object value) {
                 if (value instanceof Number)    value = value.toString();
-                if (value.getClass().isArray()) {
+                if (clazz.isArray()) {
                 	String returnVal = StringUtils.toString(value);
-      				if (returnVal.startsWith("[")) returnVal = returnVal.substring(1);
-      				if (returnVal.endsWith("]"))   returnVal = returnVal.substring(0,returnVal.length()-1);
+      				if (returnVal!=null && returnVal.startsWith("[")) returnVal = returnVal.substring(1);
+      				if (returnVal!=null && returnVal.endsWith("]"))   returnVal = returnVal.substring(0,returnVal.length()-1);
       				value = returnVal;
                 }
+                if (value==null) return;
                 super.doSetValue(value);
     	    }
     		protected Object doGetValue() {
@@ -163,16 +187,16 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
     			if (stringValue==null || "".equals(stringValue)) return null;
     			stringValue = stringValue.trim();
     			
-      			if (number instanceof Double)  return new Double(stringValue);
-      			if (number instanceof Float)   return new Float(stringValue);
-      			if (number instanceof Integer) return new Integer(stringValue);
-      			if (number instanceof Long)    return new Long(stringValue);
+      			if (Double.class.isAssignableFrom(clazz))  return new Double(stringValue);
+      			if (Float.class.isAssignableFrom(clazz))   return new Float(stringValue);
+      			if (Integer.class.isAssignableFrom(clazz)) return new Integer(stringValue);
+      			if (Long.class.isAssignableFrom(clazz))    return new Long(stringValue);
       			
-      			if (number.getClass().isArray()) {
+      			if (clazz.isArray()) {
       				if (stringValue.startsWith("[")) stringValue = stringValue.substring(1);
       				if (stringValue.endsWith("]"))   stringValue = stringValue.substring(0,stringValue.length()-1);
       				final List<String> strVals = ListUtils.getList(stringValue);
-      				return getPrimitiveArray(number, strVals);
+      				return getPrimitiveArray(clazz, strVals);
       			}
       			
     			return stringValue;
@@ -210,22 +234,22 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
 	 * @param strVals
 	 * @return
 	 */
-	protected Object getPrimitiveArray(Object number, List<String> strVals) {
+	protected Object getPrimitiveArray(Class<? extends Object> clazz, List<String> strVals) {
 		
 		if (strVals==null || strVals.isEmpty()) return null;
 	
 		Object array = null;
-		if (number instanceof double[]) array = new double[strVals.size()];
-		if (number instanceof float[])  array = new float[strVals.size()];
-		if (number instanceof int[])    array = new int[strVals.size()];
-		if (number instanceof long[])   array = new long[strVals.size()];
+		if (double[].class.isAssignableFrom(clazz)) array = new double[strVals.size()];
+		if (float[].class.isAssignableFrom(clazz))  array = new float[strVals.size()];
+		if (int[].class.isAssignableFrom(clazz))    array = new int[strVals.size()];
+		if (long[].class.isAssignableFrom(clazz))   array = new long[strVals.size()];
 		
 		for (int i = 0; i < strVals.size(); i++) {
 			Object value = null;
-			if (number instanceof double[]) value = Double.parseDouble(strVals.get(i));
-			if (number instanceof float[])  value = Float.parseFloat(strVals.get(i));
-			if (number instanceof int[])    value = Integer.parseInt(strVals.get(i));
-			if (number instanceof long[])   value = Long.parseLong(strVals.get(i));
+			if (double[].class.isAssignableFrom(clazz)) value = Double.parseDouble(strVals.get(i));
+			if (float[].class.isAssignableFrom(clazz))  value = Float.parseFloat(strVals.get(i));
+			if (int[].class.isAssignableFrom(clazz))    value = Integer.parseInt(strVals.get(i));
+			if (long[].class.isAssignableFrom(clazz))   value = Long.parseLong(strVals.get(i));
 			
 			Array.set(array, i, value);
 		}
