@@ -11,6 +11,7 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Composite;
 
 public class SeriesEditingSupport extends EditingSupport {
@@ -48,6 +49,7 @@ public class SeriesEditingSupport extends EditingSupport {
                 }
                 
                 getViewer().setInput(ret);
+                getViewer().setSelection(new StructuredSelection(desc));
 			}
 			
 		});

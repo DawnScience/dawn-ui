@@ -1,7 +1,6 @@
 package org.dawnsci.common.widgets.table;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
