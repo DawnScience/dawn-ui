@@ -24,7 +24,7 @@ import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.PlatformUI;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IndexIterator;
 import uk.ac.diamond.scisoft.analysis.dataset.RGBDataset;
 
@@ -86,7 +86,7 @@ public class SWTImageUtils {
 		return img;
 	}
 	
-	static private ImageData createImageFromDataset(AbstractDataset a,
+	static private ImageData createImageFromDataset(Dataset a,
 													double minv,
 													double maxv,
 													ITransferFunction redFunc,
@@ -114,7 +114,7 @@ public class SWTImageUtils {
 		return img;
 	}
 
-	static private ImageData createImageFromDataset(AbstractDataset a, PaletteData paletteData) throws Exception {
+	static private ImageData createImageFromDataset(Dataset a, PaletteData paletteData) throws Exception {
 		final IImageService iservice = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
 		ImageServiceBean ibean = new ImageServiceBean();
 		ibean.setImage(a);
@@ -137,7 +137,7 @@ public class SWTImageUtils {
 	 * @param inverseBlue
 	 * @return an ImageData object for SWT
 	 */
-	static public ImageData createImageData(AbstractDataset a, Number max,
+	static public ImageData createImageData(Dataset a, Number max,
 											ITransferFunction redFunc,
 											ITransferFunction greenFunc,
 											ITransferFunction blueFunc,
@@ -163,7 +163,7 @@ public class SWTImageUtils {
 	 * @param inverseBlue
 	 * @return an ImageData object for SWT
 	 */
-	static public ImageData createImageData(AbstractDataset a, Number min, Number max,
+	static public ImageData createImageData(Dataset a, Number min, Number max,
 			                                ITransferFunction redFunc,
 											ITransferFunction greenFunc,
 											ITransferFunction blueFunc,
@@ -194,7 +194,7 @@ public class SWTImageUtils {
 	 * @return an ImageData object for SWT
 	 * @throws Exception
 	 */
-	static public ImageData createImageData(AbstractDataset a, Number min, Number max,
+	static public ImageData createImageData(Dataset a, Number min, Number max,
 											PaletteData paletteData) throws Exception {
 		ImageData img;
 		if (a instanceof RGBDataset) {

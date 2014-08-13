@@ -57,7 +57,7 @@ import org.eclipse.swt.widgets.Scale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
@@ -100,7 +100,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
      * the wrong data being used as the base because the plot
      * will be changing.
      */
-    private AbstractDataset originalData;
+    private Dataset originalData;
 	private MathsJob        updateJob;
 
 	private IOperation operation;
@@ -141,11 +141,11 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 				if (updatingPlotsAlready)      return;
 				if (evt.getImageTrace()==null) return;
 				if (evt.getImageTrace().getUserObject()==ImageHistoryMarker.MARKER) return;
-				originalData = (AbstractDataset)evt.getImage();
+				originalData = (Dataset)evt.getImage();
 				if (getImageTrace()==null) return;
 				if (!isActiveSelections()) return;
 		
-				AbstractDataset set = getCombinedData(null);
+				Dataset set = getCombinedData(null);
 				if (set==null) return;
 				if (set.getSize()==1) {
 					evt.doit = false;
@@ -169,7 +169,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
         	
         	final IImageTrace imageTrace = getImageTrace();
         	if (imageTrace!=null && imageTrace.getUserObject()!=ImageHistoryMarker.MARKER)  {
-        	    this.originalData = imageTrace!=null ? (AbstractDataset)imageTrace.getData() : null;
+        	    this.originalData = imageTrace!=null ? (Dataset)imageTrace.getData() : null;
         	}
 		}
 		super.activate();
@@ -203,14 +203,14 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 					if (plotName==null || "".equals(plotName)) {
 						plotName = imageTrace.getName();
 					}
-					addImageToHistory((AbstractDataset)imageTrace.getData(),plotName);
+					addImageToHistory((Dataset)imageTrace.getData(),plotName);
 				}
 				refresh();
 			}
 		};	
 	}
 	
-	protected void addImageToHistory(final AbstractDataset data, String name) {
+	protected void addImageToHistory(final Dataset data, String name) {
 		
 		if (name==null || "".equals(name)) name = data.getName();
 		if ("".equals(name)) name = null;
@@ -248,7 +248,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		
 		final IAction revert = new Action("Revert plot", Activator.getImageDescriptor("icons/reset.gif")) {
 			public void run() {
-				AbstractDataset plot = getOriginalData();
+				Dataset plot = getOriginalData();
 				if (plot==null) return;
 				
 				for (String key : imageHistory.keySet()) {
@@ -293,7 +293,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		return manager;
 	}
 
-	protected AbstractDataset getOriginalData() {
+	protected Dataset getOriginalData() {
 		
 		// Try and read the original data from the editor.
 		return originalData; // We attempt to cache it otherwise.
@@ -351,7 +351,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 				if (!getPlottingSystem().getPlotType().is2D()) return Status.CANCEL_STATUS;
 				
 				final long start = System.currentTimeMillis();
-				AbstractDataset a = getCombinedData(monitor);
+				Dataset a = getCombinedData(monitor);
 				if (a==null) return Status.CANCEL_STATUS;
 				if (a.getSize()==1) {
 					getPlottingSystem().clear();
@@ -376,12 +376,12 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 	 * 
 	 * @return Data to plot, size 1 dataset to do clear, null to do nothing
 	 */
-	private AbstractDataset getCombinedData(IProgressMonitor monitor) {
+	private Dataset getCombinedData(IProgressMonitor monitor) {
 		
 		boolean includeCurrentPlot = Activator.getPlottingPreferenceStore().getBoolean(PlottingConstants.INCLUDE_ORIGINAL);
 		
 		// Loop over history and reprocess maths.
-		AbstractDataset od = getOriginalData();
+		Dataset od = getOriginalData();
 		if (!isActiveSelections()) {
 			if (includeCurrentPlot) {
 			    return od;
@@ -390,7 +390,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 			}
 		}
 		
-		AbstractDataset a  = od!=null&&includeCurrentPlot
+		Dataset a  = od!=null&&includeCurrentPlot
 				           ? od 
 				           : null;
 		if (od!=null && od.getRank()!=2) return null; // This is image compare!
@@ -421,7 +421,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 				continue;
 			}
 			
-			AbstractDataset data = bean.getData();
+			Dataset data = bean.getData();
 			if (bean.getWeighting()<100) { // Reduce its intensity
 				data = operation.process(data, bean.getWeighting()/100d, Operator.MULTIPLY);
 			}
@@ -431,7 +431,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		return a;
 	}
 	
-	public void setPlotImage(final AbstractDataset plot) {
+	public void setPlotImage(final Dataset plot) {
 		
 		Display.getDefault().syncExec(new Runnable() {
 			public void run () {
@@ -640,7 +640,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 		}
 
 		private boolean isShapeCompatible(Object element) {
-			final AbstractDataset od = getOriginalData();
+			final Dataset od = getOriginalData();
 			if (od==null) return true;
 			if (!(element instanceof HistoryBean)) return true;
 			HistoryBean bean = (HistoryBean)element;
@@ -793,8 +793,8 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 			List<?> images = (List<?>)obj;
 			clearCache();
 			for (Object image : images) {
-				if(image instanceof AbstractDataset)
-					addImageToHistory((AbstractDataset)image, ((AbstractDataset)image).getName());
+				if(image instanceof Dataset)
+					addImageToHistory((Dataset)image, ((Dataset)image).getName());
 			}
 		}
 	}
