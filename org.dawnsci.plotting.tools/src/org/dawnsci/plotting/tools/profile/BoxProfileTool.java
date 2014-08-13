@@ -3,8 +3,6 @@ package org.dawnsci.plotting.tools.profile;
 import java.util.Arrays;
 import java.util.Collection;
 
-import ncsa.hdf.object.Group;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.hdf5.IHierarchicalDataFile;
@@ -18,7 +16,6 @@ import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.swt.SWT;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
@@ -66,20 +63,20 @@ public class BoxProfileTool extends ProfileTool {
 
 		if (monitor.isCanceled()) return;
 		
-		AbstractDataset[] box = ROIProfile.box((AbstractDataset)image.getData(), (AbstractDataset)image.getMask(), bounds, true);
+		Dataset[] box = ROIProfile.box((Dataset)image.getData(), (Dataset)image.getMask(), bounds, true);
         if (box==null) return;
 		//if (monitor.isCanceled()) return;
 				
-		final AbstractDataset x_intensity = box[0];
+		final Dataset x_intensity = box[0];
 		x_intensity.setName("X "+region.getName());
-		AbstractDataset xi = IntegerDataset.createRange(x_intensity.getSize());
-		final AbstractDataset x_indices = xi; // Maths.add(xi, bounds.getX()); // Real position
+		Dataset xi = IntegerDataset.createRange(x_intensity.getSize());
+		final Dataset x_indices = xi; // Maths.add(xi, bounds.getX()); // Real position
 		x_indices.setName("X Pixel");
 		
-		final AbstractDataset y_intensity = box[1];
+		final Dataset y_intensity = box[1];
 		y_intensity.setName("Y "+region.getName());
-		AbstractDataset yi = IntegerDataset.createRange(y_intensity.getSize());
-		final AbstractDataset y_indices = yi; // Maths.add(yi, bounds.getY()); // Real position
+		Dataset yi = IntegerDataset.createRange(y_intensity.getSize());
+		final Dataset y_indices = yi; // Maths.add(yi, bounds.getY()); // Real position
 		y_indices.setName("Y Pixel");
 
 		//if (monitor.isCanceled()) return;
@@ -144,13 +141,13 @@ public class BoxProfileTool extends ProfileTool {
 			file.setNexusAttribute(profileGroup, Nexus.DATA);
 			slice.setParent(profileGroup);
 
-			AbstractDataset[] box = ROIProfile.box((AbstractDataset)slice.getData(), (AbstractDataset)image.getMask(), (RectangularROI)region.getROI(), false);
+			Dataset[] box = ROIProfile.box((Dataset)slice.getData(), (Dataset)image.getMask(), (RectangularROI)region.getROI(), false);
 
-			final AbstractDataset x_intensity = box[0];
+			final Dataset x_intensity = box[0];
 			x_intensity.setName("X_Profile");
 			slice.appendData(x_intensity);
 
-			final AbstractDataset y_intensity = box[1];
+			final Dataset y_intensity = box[1];
 			y_intensity.setName("Y_Profile");
 			slice.appendData(y_intensity);
 
@@ -158,7 +155,7 @@ public class BoxProfileTool extends ProfileTool {
 			int xInc = bounds.getPoint()[0]<bounds.getEndPoint()[0] ? 1 : -1;
 			int yInc = bounds.getPoint()[1]<bounds.getEndPoint()[1] ? 1 : -1;
 
-			AbstractDataset dataRegion = ((AbstractDataset)slice.getData()).getSlice(
+			Dataset dataRegion = ((Dataset)slice.getData()).getSlice(
 					new int[] { (int) bounds.getPoint()[1], (int) bounds.getPoint()[0] },
 					new int[] { (int) bounds.getEndPoint()[1],(int) bounds.getEndPoint()[0] },
 					new int[] {yInc, xInc});

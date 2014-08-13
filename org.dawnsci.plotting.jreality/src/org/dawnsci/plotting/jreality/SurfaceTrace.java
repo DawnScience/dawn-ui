@@ -14,7 +14,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.ui.PlatformUI;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
@@ -29,7 +29,7 @@ import uk.ac.diamond.scisoft.analysis.roi.IROI;
 public class SurfaceTrace extends Image3DTrace implements ISurfaceTrace{
 
 	//private static Logger logger = LoggerFactory.getLogger(SurfaceTrace.class);
-	private AbstractDataset        data;
+	private Dataset        data;
 
 	public SurfaceTrace(JRealityPlotViewer plotter, String name) {
 		super(plotter, name);
@@ -97,7 +97,7 @@ public class SurfaceTrace extends Image3DTrace implements ISurfaceTrace{
 			axes = Arrays.asList(axes.get(0), axes.get(1), null);
 		}
 		
-		this.data = (AbstractDataset)data;
+		this.data = (Dataset)data;
 		this.axes = (List<IDataset>) axes;
 		if (isActive()) {
 			plotter.updatePlot(createAxisValues(), plotter.getWindow(getWindow()), plotType, this.data);

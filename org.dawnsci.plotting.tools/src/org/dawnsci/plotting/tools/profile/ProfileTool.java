@@ -45,7 +45,7 @@ import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
@@ -549,7 +549,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		// and image traces were returning different metadata
 		IMetaData metaData = null;
 		if (getImageTrace()!= null && getImageTrace().getData() != null)
-			metaData = ((AbstractDataset)getImageTrace().getData()).getMetadata();
+			metaData = ((Dataset)getImageTrace().getData()).getMetadata();
 		
 		if (metaData != null) return metaData;
 		

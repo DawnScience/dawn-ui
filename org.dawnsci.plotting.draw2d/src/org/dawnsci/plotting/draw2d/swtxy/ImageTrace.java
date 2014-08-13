@@ -47,7 +47,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
@@ -82,7 +82,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private Axis             xAxis;
 	private Axis             yAxis;
 	private ColorMapRamp     intensityScale;
-	private AbstractDataset  image;
+	private Dataset  image;
 	private DownsampleType   downsampleType=DownsampleType.MAXIMUM;
 	private int              currentDownSampleBin=-1;
 	private List<IDataset>    axes;
@@ -175,7 +175,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		yAxis.setTicksIndexBased(true);
 	}
 
-	public AbstractDataset getImage() {
+	public Dataset getImage() {
 		return image;
 	}
 
@@ -256,7 +256,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			try {
 				imageCreationAllowed = false;
 				if (image==null) return false;
-				AbstractDataset reducedFullImage = getDownsampled(image);
+				Dataset reducedFullImage = getDownsampled(image);
 
 				imageServiceBean.setImage(reducedFullImage);
 				imageServiceBean.setMonitor(monitor);
@@ -270,7 +270,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				
 				if (rescaleType==ImageScaleType.REHISTOGRAM) { // Avoids changing colouring to 
 					                                           // max and min of new selection.
-					AbstractDataset  slice     = slice(getYAxis().getRange(), getXAxis().getRange(), (AbstractDataset)getData());
+					Dataset  slice     = slice(getYAxis().getRange(), getXAxis().getRange(), (Dataset)getData());
 					ImageServiceBean histoBean = imageServiceBean.clone();
 					histoBean.setImage(slice);
 					if (fullMask!=null) histoBean.setMask(slice(getYAxis().getRange(), getXAxis().getRange(), fullMask));
@@ -500,7 +500,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private Map<Integer, Reference<Object>> maskMap;
 	private Collection<IDownSampleListener> downsampleListeners;
 	
-	private AbstractDataset getDownsampled(AbstractDataset image) {
+	private Dataset getDownsampled(Dataset image) {
 	
 		return getDownsampled(image, getDownsampleTypeDiamond());
  	}
@@ -511,7 +511,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * @param mode
 	 * @return
 	 */
-	private AbstractDataset getDownsampled(AbstractDataset image, DownsampleMode mode) {
+	private Dataset getDownsampled(Dataset image, DownsampleMode mode) {
 		
 		// Down sample, no point histogramming the whole thing
         final int bin = getDownsampleBin();
@@ -526,23 +526,23 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				return image; // nothing to downsample
 			}
 			
-			if (image.getDtype()!=AbstractDataset.BOOL) {
+			if (image.getDtype()!=Dataset.BOOL) {
 				if (mipMap!=null && mipMap.containsKey(bin) && mipMap.get(bin).get()!=null) {
 			        logger.trace("Downsample bin used, "+bin);
-					return (AbstractDataset)mipMap.get(bin).get();
+					return (Dataset)mipMap.get(bin).get();
 				}
 			} else {
 				if (maskMap!=null && maskMap.containsKey(bin) && maskMap.get(bin).get()!=null) {
 			        logger.trace("Downsample mask bin used, "+bin);
-					return (AbstractDataset)maskMap.get(bin).get();
+					return (Dataset)maskMap.get(bin).get();
 				}
 			}
 			
 			final Downsample downSampler = new Downsample(mode, new int[]{bin,bin});
-			List<AbstractDataset>   sets = downSampler.value(image);
-			final AbstractDataset set = sets.get(0);
+			List<? extends Dataset>   sets = downSampler.value(image);
+			final Dataset set = sets.get(0);
 			
-			if (image.getDtype()!=AbstractDataset.BOOL) {
+			if (image.getDtype()!=Dataset.BOOL) {
 				if (mipMap==null) mipMap = new HashMap<Integer,Reference<Object>>(3);
 				mipMap.put(bin, new SoftReference<Object>(set));
 		        logger.trace("Downsample bin created, "+bin);
@@ -592,11 +592,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 	
 	@Override
-	public AbstractDataset getDownsampled() {
+	public Dataset getDownsampled() {
 		return getDownsampled(getImage());
 	}
 	
-	public AbstractDataset getDownsampledMask() {
+	public Dataset getDownsampledMask() {
 		if (getMask()==null) return null;
 		return getDownsampled(getMask(), DownsampleMode.MINIMUM);
 	}
@@ -605,7 +605,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * Returns the bin for downsampling, either 1,2,4 or 8 currently.
 	 * This gives a pixel count of 1,4,16 or 64 for the bin. If 1 no
 	 * binning at all is done and no downsampling is being done, getDownsampled()
-	 * will return the AbstractDataset ok even if bin is one (no downsampling).
+	 * will return the Dataset ok even if bin is one (no downsampling).
 	 * 
 	 * @param slice
 	 * @param bounds
@@ -748,7 +748,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * @param yr
 	 * @return
 	 */
-	private final AbstractDataset slice(Range xr, Range yr, final AbstractDataset data) {
+	private final Dataset slice(Range xr, Range yr, final Dataset data) {
 		
 		// Check that a slice needed, this speeds up the initial show of the image.
 		final int[] shape = data.getShape();
@@ -934,7 +934,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		// We do not currently reflect it as it takes too long. Instead in the slice
 		// method, we allow for the fact that the dataset is in a different orientation to 
 		// what is plotted.
-		this.image = (AbstractDataset)image;
+		this.image = (Dataset)image;
 		if (this.mipMap!=null)  mipMap.clear();
 		if (scaledImage!=null && !scaledImage.isDisposed()) scaledImage.dispose();
 		scaledImage = null;
@@ -1257,12 +1257,12 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		fireNanBoundsListeners();
 	}
 	
-    private AbstractDataset fullMask;
+    private Dataset fullMask;
 	/**
 	 * The masking dataset of there is one, normally null.
 	 * @return
 	 */
-	public AbstractDataset getMask() {
+	public Dataset getMask() {
 		return fullMask;
 	}
 	
@@ -1296,7 +1296,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			mask = maskDataset;
 		}
 		if (maskMap!=null) maskMap.clear();
-		fullMask = (AbstractDataset)mask;
+		fullMask = (Dataset)mask;
 		remask();
 	}
 
@@ -1390,7 +1390,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		final double[] ret = point.clone();
 		final int[] shape = image.getShapeRef();
 		
-		final AbstractDataset xl = (AbstractDataset)axes.get(0); // May be null
+		final Dataset xl = (Dataset)axes.get(0); // May be null
 		if (TraceUtils.isAxisCustom(xl, shape[1])) {
 			TraceUtils.transform(xl, 0, ret);
 		}
@@ -1398,7 +1398,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (axes.size() < 2)
 			return ret;
 
-		final AbstractDataset yl = (AbstractDataset)axes.get(1); // May be null
+		final Dataset yl = (Dataset)axes.get(1); // May be null
 		if (TraceUtils.isAxisCustom(yl, shape[0])) {
 			TraceUtils.transform(yl, 1, ret);
 		}
@@ -1413,7 +1413,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		final double[] ret = axisLocation.clone();
 		final int[] shape = image.getShapeRef();
 
-		final AbstractDataset xl = (AbstractDataset) axes.get(0); // May be null
+		final Dataset xl = (Dataset) axes.get(0); // May be null
 		if (TraceUtils.isAxisCustom(xl, shape[1])) {
 			double x = axisLocation[0];
 			ret[0] = Double.isNaN(x) ? Double.NaN : DatasetUtils.crossings(xl, x).get(0);
@@ -1422,7 +1422,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (axes.size() < 2)
 			return ret;
 
-		final AbstractDataset yl = (AbstractDataset) axes.get(1); // May be null
+		final Dataset yl = (Dataset) axes.get(1); // May be null
 		if (TraceUtils.isAxisCustom(yl, shape[0])) {
 			double y = axisLocation[1];
 			ret[1] = Double.isNaN(y) ? Double.NaN : DatasetUtils.crossings(yl, y).get(0);

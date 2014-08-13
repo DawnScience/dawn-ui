@@ -58,7 +58,7 @@ import org.eclipse.ui.part.EditorPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 
@@ -222,7 +222,7 @@ public class CSVDataEditor extends EditorPart implements IReusableEditor, IPageC
 		int i = 0;
 		for (String name : data.keySet()) {
 
-			final AbstractDataset set = (AbstractDataset)data.get(name);
+			final Dataset set = (Dataset)data.get(name);
 
 			final TableViewerColumn col   = new TableViewerColumn(tableViewer, SWT.RIGHT, i);
 			final String colName = set.getName()!=null?set.getName():"";
@@ -272,7 +272,7 @@ public class CSVDataEditor extends EditorPart implements IReusableEditor, IPageC
 	 */
 	protected RowObject[] getRowData(final Collection<IDataset> sets) {
 		if (sets.size()==1 && sets.iterator().next().getShape().length==2) {
-			final AbstractDataset set  = (AbstractDataset)sets.iterator().next();
+			final Dataset set  = (Dataset)sets.iterator().next();
 			final int[]          shape = set.getShape();
 			final List<RowObject> rows = new ArrayList<RowObject>(shape[0]);
 			for (int row = 0; row < shape[0]; row++) {

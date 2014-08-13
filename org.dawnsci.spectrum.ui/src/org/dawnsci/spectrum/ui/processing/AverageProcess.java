@@ -9,7 +9,6 @@ import org.dawnsci.spectrum.ui.file.IContain1DData;
 import org.dawnsci.spectrum.ui.utils.Contain1DDataImpl;
 import org.dawnsci.spectrum.ui.utils.SpectrumUtils;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
@@ -41,7 +40,7 @@ public class AverageProcess extends AbstractProcess {
 				DoubleDataset dd;
 				if (ds instanceof DoubleDataset) dd = (DoubleDataset)ds;
 				else {
-					dd = (DoubleDataset)DatasetUtils.cast((AbstractDataset)ds, AbstractDataset.FLOAT64);
+					dd = (DoubleDataset)DatasetUtils.cast((Dataset)ds, Dataset.FLOAT64);
 				}
 				double[] raw = dd.getData();
 				ms.addValue(raw);

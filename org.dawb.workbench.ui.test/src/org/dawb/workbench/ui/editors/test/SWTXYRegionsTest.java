@@ -30,9 +30,9 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
-import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
@@ -45,7 +45,7 @@ import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LongDataset;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
@@ -309,7 +309,7 @@ public class SWTXYRegionsTest {
 		return new Object[]{sys,editor,dir};
 	}
 	
-	private Object[] createSomethingPlotted(final List<AbstractDataset> ys, boolean multipleAxes) throws Throwable {
+	private Object[] createSomethingPlotted(final List<Dataset> ys, boolean multipleAxes) throws Throwable {
 		
 		final Bundle bun  = Platform.getBundle("org.dawb.workbench.ui.test");
 
@@ -330,7 +330,7 @@ public class SWTXYRegionsTest {
 			
 		sys.clear();
 		
-		AbstractDataset indices = ys.get(0).getIndices();
+		Dataset indices = ys.get(0).getIndices();
 
 		
 		final IAxis primaryY       = sys.getSelectedYAxis();
@@ -344,7 +344,7 @@ public class SWTXYRegionsTest {
 		List<ITrace> traces = new ArrayList<ITrace>();
 		for (int i = 0; i < ys.size(); i++) {
 
-			final AbstractDataset y = ys.get(i);
+			final Dataset y = ys.get(i);
 			if (i%2==0) {
 				sys.setSelectedYAxis(primaryY);
 			} else {
@@ -360,9 +360,9 @@ public class SWTXYRegionsTest {
 	}
 
 	
-	private List<AbstractDataset> createTestArraysRandom(final int numberPlots, final int size) {
+	private List<Dataset> createTestArraysRandom(final int numberPlots, final int size) {
 		
-		final List<AbstractDataset> ys = new ArrayList<AbstractDataset>(numberPlots);
+		final List<Dataset> ys = new ArrayList<Dataset>(numberPlots);
 		for (int i = 0; i < numberPlots; i++) {
 			final long[] buffer = new long[size];
 			for (int j = 0; j < size; j++) buffer[j] = Math.round(Math.random()*10000);
@@ -373,9 +373,9 @@ public class SWTXYRegionsTest {
 		return ys;
 	}
 	
-	private List<AbstractDataset> createTestArraysCoherant(final int numberPlots, final int size, final String name) {
+	private List<Dataset> createTestArraysCoherant(final int numberPlots, final int size, final String name) {
 		
-		final List<AbstractDataset> ys = new ArrayList<AbstractDataset>(numberPlots);
+		final List<Dataset> ys = new ArrayList<Dataset>(numberPlots);
 		for (int i = 0; i < numberPlots; i++) {
 			
 			double rand = Math.random();

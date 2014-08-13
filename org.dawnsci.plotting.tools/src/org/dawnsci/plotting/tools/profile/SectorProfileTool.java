@@ -25,7 +25,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
@@ -275,11 +275,11 @@ public abstract class SectorProfileTool extends ProfileTool {
  	}
 
 	private double[] getImageCenter() {
-    	final AbstractDataset image = (AbstractDataset)getImageTrace().getData();
+    	final Dataset image = (Dataset)getImageTrace().getData();
     	return new double[]{image.getShape()[1]/2d, image.getShape()[0]/2d};
 	}
 
-	protected abstract AbstractDataset[] getXAxis(final SectorROI sroi, final AbstractDataset[] integrals);
+	protected abstract Dataset[] getXAxis(final SectorROI sroi, final Dataset[] integrals);
 	
 	/**
 	 * Please name the integral the same as the name you would like to plot.
@@ -291,8 +291,8 @@ public abstract class SectorProfileTool extends ProfileTool {
 	 * @param isDrag
 	 * @return either array size 1 or 2. If 2, 2 plots are created on the profile
 	 */
-	protected abstract AbstractDataset[] getIntegral( final AbstractDataset data,
-										              final AbstractDataset mask, 
+	protected abstract Dataset[] getIntegral( final Dataset data,
+										              final Dataset mask, 
 										              final SectorROI       sroi, 
 						                              final IRegion         region,
 										              final boolean         isDrag,
@@ -317,8 +317,8 @@ public abstract class SectorProfileTool extends ProfileTool {
 		if (!region.isVisible()) return;
 
 		if (monitor.isCanceled()) return;
-		final AbstractDataset data = isDrag ? (AbstractDataset)image.getDownsampled()     : (AbstractDataset)image.getData();
-		final AbstractDataset mask = isDrag ? (AbstractDataset)image.getDownsampledMask() : (AbstractDataset)image.getMask();
+		final Dataset data = isDrag ? (Dataset)image.getDownsampled()     : (Dataset)image.getData();
+		final Dataset mask = isDrag ? (Dataset)image.getDownsampledMask() : (Dataset)image.getMask();
 		
 		SectorROI downsroi = null;
 		if (isDrag) {
@@ -326,15 +326,15 @@ public abstract class SectorProfileTool extends ProfileTool {
 			downsroi.downsample(image.getDownsampleBin());
 		}
 			
-		final AbstractDataset[] integrals = getIntegral(data, mask, isDrag ? downsroi : sroi, region, isDrag, isDrag ? image.getDownsampleBin() : 1);	
+		final Dataset[] integrals = getIntegral(data, mask, isDrag ? downsroi : sroi, region, isDrag, isDrag ? image.getDownsampleBin() : 1);	
         if (integrals==null) return;
 				
-		final AbstractDataset[] xis = getXAxis(sroi, integrals);
+		final Dataset[] xis = getXAxis(sroi, integrals);
 
 		for (int i = 0; i < 2; i++) {
 			if (integrals[i] != null) {
-				final AbstractDataset integral = integrals[i];
-				final AbstractDataset xi = xis[i];
+				final Dataset integral = integrals[i];
+				final Dataset xi = xis[i];
 
 				if (integral != null) {
 					final ILineTrace x_trace = (ILineTrace) profilePlottingSystem.getTrace(integral.getName());

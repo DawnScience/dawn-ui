@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
@@ -60,7 +60,7 @@ public class PowderCheckJob extends Job {
 	private static final int MAX_EVAL = 100000;
 	
 	IPlottingSystem system;
-	AbstractDataset dataset;
+	Dataset dataset;
 	IDiffractionMetadata metadata;
 	List<PowderCheckResult> resultList;
 	XAxis xAxis = XAxis.ANGLE;
@@ -72,7 +72,7 @@ public class PowderCheckJob extends Job {
 		resultList = new ArrayList<PowderCheckResult>();
 	}
 
-	public void setData(AbstractDataset dataset, IDiffractionMetadata metadata) {
+	public void setData(Dataset dataset, IDiffractionMetadata metadata) {
 		this.dataset = dataset;
 		this.metadata = metadata;
 	}
@@ -148,7 +148,7 @@ public class PowderCheckJob extends Job {
 //		if (centre[1] < shape[1]/2.0) farCorner[1] = shape[1];
 //		double maxDistance = Math.sqrt(Math.pow(centre[0]-farCorner[0],2)+Math.pow(centre[1]-farCorner[1],2));
 //		SectorROI sroi = new SectorROI(bc[0], bc[1], 0, maxDistance, Math.PI/4 - Math.PI/8, Math.PI/4 + Math.PI/8, 1, true, SectorROI.INVERT);
-//		AbstractDataset[] profile = ROIProfile.sector(data, null, sroi, true, false, false, qSpace, xAxis, false);
+//		Dataset[] profile = ROIProfile.sector(data, null, sroi, true, false, false, qSpace, xAxis, false);
 //
 //		ArrayList<IDataset> y = new ArrayList<IDataset> ();
 //		profile[0].setName("Bottom right");
@@ -162,8 +162,8 @@ public class PowderCheckJob extends Job {
 //		//((ILineTrace)traces.get(0)).setTraceColor(ColorConstants.darkBlue);
 //		y.remove(0);
 //
-//		final AbstractDataset reflection = profile[2];
-//		final AbstractDataset axref = profile[6];
+//		final Dataset reflection = profile[2];
+//		final Dataset axref = profile[6];
 //		reflection.setName("Top left");
 //		y.add(reflection);
 //		traces = system.updatePlot1D(axref, y, null);
@@ -181,8 +181,8 @@ public class PowderCheckJob extends Job {
 //		//((ILineTrace)traces.get(0)).setTraceColor(ColorConstants.darkGreen);
 //		y.remove(0);
 //
-//		final AbstractDataset reflection2 = profile[2];
-//		final AbstractDataset axref2 = profile[6];
+//		final Dataset reflection2 = profile[2];
+//		final Dataset axref2 = profile[6];
 //		reflection2.setName("Top right");
 //		y.add(reflection2);
 //		traces = system.updatePlot1D(axref2, y, null);
@@ -321,7 +321,7 @@ public class PowderCheckJob extends Job {
 			}
 		}
 
-		final AbstractDataset yfit = AbstractDataset.zeros(x, AbstractDataset.FLOAT64);
+		final Dataset yfit = DatasetFactory.zeros(x, Dataset.FLOAT64);
 
 		MultivariateOptimizer opt = new SimplexOptimizer(REL_TOL,ABS_TOL);
 
@@ -352,9 +352,9 @@ public class PowderCheckJob extends Job {
 				new ObjectiveFunction(fun), new MaxEval(MAX_EVAL),
 				new NelderMeadSimplex(initParam.length));	
 
-		AbstractDataset fit = Maths.add(yfit, baseline);
+		Dataset fit = Maths.add(yfit, baseline);
 		fit.setName("Fit");
-		AbstractDataset residual = Maths.subtract(y,yfit);
+		Dataset residual = Maths.subtract(y,yfit);
 		residual.setName("Residual");
 		
 		system.updatePlot1D(x, Arrays.asList(new IDataset[]{fit,residual}) , null);

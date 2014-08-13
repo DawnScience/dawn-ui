@@ -38,7 +38,7 @@ import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
@@ -61,7 +61,7 @@ public class BeamCenterRefinement implements MultivariateFunction {
 	private IProgressMonitor monitor;
 	private ArrayList<IPeak> initPeaks;
 
-	private AbstractDataset dataset, mask;
+	private Dataset dataset, mask;
 	private SectorROI sroi;
 	private XAxis axis;
 
@@ -73,7 +73,7 @@ public class BeamCenterRefinement implements MultivariateFunction {
 
 	private static final Logger logger = LoggerFactory.getLogger(BeamCenterRefinement.class);
 
-	public BeamCenterRefinement(AbstractDataset dataset, AbstractDataset mask, SectorROI sroi) {
+	public BeamCenterRefinement(Dataset dataset, Dataset mask, SectorROI sroi) {
 		super();
 		this.dataset = dataset;
 		this.mask = mask;
@@ -160,8 +160,8 @@ public class BeamCenterRefinement implements MultivariateFunction {
 		    	qSpace = new QSpace(detprops, diffexp);
 	    	}
 		}
-		AbstractDataset[] intresult = ROIProfile.sector(dataset, mask, tmpRoi, true, false, false, qSpace, axis, false);
-		AbstractDataset axis = intresult[4];
+		Dataset[] intresult = ROIProfile.sector(dataset, mask, tmpRoi, true, false, false, qSpace, axis, false);
+		Dataset axis = intresult[4];
 		double error = 0.0;
 		ArrayList<IPeak> peaks = new ArrayList<IPeak>(initPeaks.size());
 		List<CompositeFunction> fittedGaussian = Generic1DFitter.fitPeakFunctions(axis, intresult[0], Gaussian.class, new GeneticAlg(0.0001),

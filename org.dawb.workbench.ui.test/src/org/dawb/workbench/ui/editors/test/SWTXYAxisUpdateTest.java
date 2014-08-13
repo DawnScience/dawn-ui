@@ -28,7 +28,8 @@ import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LongDataset;
@@ -115,10 +116,10 @@ public class SWTXYAxisUpdateTest {
 		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);
 			
 		
-		if (((AbstractDataset)ys.get(0)).getBuffer()==null || ys.get(0).getSize()<1) {
+		if (((Dataset)ys.get(0)).getBuffer()==null || ys.get(0).getSize()<1) {
 		    sys.createPlot1D(new IntegerDataset(), ys, null);
 		} else {
-		    sys.createPlot1D(AbstractDataset.arange(0, ys.get(0).getSize(), 1, AbstractDataset.INT32), ys, null);
+		    sys.createPlot1D(DatasetFactory.createRange(0, ys.get(0).getSize(), 1, Dataset.INT32), ys, null);
 		}
 		final IAxis alternateYaxis = sys.createAxis("Alternate", true, SWT.RIGHT);
 		sys.setSelectedYAxis(alternateYaxis);
@@ -132,11 +133,11 @@ public class SWTXYAxisUpdateTest {
 				
 				final IDataset y = ys.get(i);
 				
-				final int index =  (((AbstractDataset)ys.get(0)).getBuffer()==null || ys.get(0).getSize()<1) 
+				final int index =  (((Dataset)ys.get(0)).getBuffer()==null || ys.get(0).getSize()<1) 
 						        ? total+1
 						        : y.getSize()+total+1;
 				
-				// Adding values to AbstractDatasets is really cumbersome :(
+				// Adding values to Datasets is really cumbersome :(
 				final double yValue;
 				if (isRandom) {
 					yValue = Math.round(Math.random()*10000d);
@@ -163,7 +164,7 @@ public class SWTXYAxisUpdateTest {
 			}
 			
 			if (!APPEND) {
-			    sys.createPlot1D(AbstractDataset.arange(0, ys.get(0).getSize(), 1, AbstractDataset.INT32), ys, null);
+			    sys.createPlot1D(DatasetFactory.createRange(0, ys.get(0).getSize(), 1, Dataset.INT32), ys, null);
 			}
 			
 			EclipseUtils.delay(10);

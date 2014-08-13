@@ -27,7 +27,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.part.IPageSite;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 
@@ -273,8 +273,8 @@ public class DerivativeToolExternalPlot extends AbstractToolPage {
 			for (ITrace trace : traces) {
 				if (trace instanceof ILineTrace) {
 					final ILineTrace t = (ILineTrace)trace;
-					AbstractDataset x = DatasetUtils.convertToAbstractDataset(t.getXData());
-					AbstractDataset y = DatasetUtils.convertToAbstractDataset(t.getYData());
+					Dataset x = DatasetUtils.convertToDataset(t.getXData());
+					Dataset y = DatasetUtils.convertToDataset(t.getYData());
 					
 					if (x == null || y == null) return Status.CANCEL_STATUS;
 					
@@ -288,8 +288,8 @@ public class DerivativeToolExternalPlot extends AbstractToolPage {
 						break;
 					}
 					
-					final AbstractDataset yf = y;
-					final AbstractDataset xf = x;
+					final Dataset yf = y;
+					final Dataset xf = x;
 					
 					Display.getDefault().syncExec(new Runnable() {
 						

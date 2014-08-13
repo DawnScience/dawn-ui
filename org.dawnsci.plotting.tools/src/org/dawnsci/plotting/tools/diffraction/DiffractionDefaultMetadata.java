@@ -27,7 +27,7 @@ public class DiffractionDefaultMetadata {
 	 * from the preferences store
 	 * 
 	 * @param shape
-	 *            shape from the AbstractDataset the detector properties are created for
+	 *            shape from the Dataset the detector properties are created for
 	 *            Used to produce the initial detector origin
 	 *            
 	 */
@@ -54,7 +54,7 @@ public class DiffractionDefaultMetadata {
 	 * from the preferences store
 	 * 
 	 * @param shape
-	 *            shape from the AbstractDataset the detector properties are created for
+	 *            shape from the Dataset the detector properties are created for
 	 *            Used to produce the initial detector origin
 	 *            
 	 */
@@ -161,7 +161,7 @@ public class DiffractionDefaultMetadata {
 	 * from the preferences store
 	 * 
 	 * @param shape
-	 *            shape from the AbstractDataset the detector properties are created for
+	 *            shape from the Dataset the detector properties are created for
 	 *            Used to produce the initial detector origin
 	 *            
 	 */

@@ -12,7 +12,7 @@ import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
@@ -47,14 +47,14 @@ public class LineProfileTool extends ProfileTool {
 			return;
 
 		if (monitor.isCanceled()) return;
-		AbstractDataset[] profileData = ROIProfile.line((AbstractDataset)image.getData(), (AbstractDataset)image.getMask(), bounds, 1d, true);
+		Dataset[] profileData = ROIProfile.line((Dataset)image.getData(), (Dataset)image.getMask(), bounds, 1d, true);
         if (profileData==null) return;
 
 		if (monitor.isCanceled()) return;
 		
-		final AbstractDataset intensity = profileData[0];
+		final Dataset intensity = profileData[0];
 		intensity.setName(region.getName());
-		final AbstractDataset indices = IntegerDataset.createRange(0, intensity.getSize(), 1d);
+		final Dataset indices = IntegerDataset.createRange(0, intensity.getSize(), 1d);
 		indices.setName("Pixel");
 		
 		final ILineTrace trace = (ILineTrace)profilePlottingSystem.getTrace(region.getName());
@@ -96,8 +96,8 @@ public class LineProfileTool extends ProfileTool {
 			if (!region.isVisible())    continue;
 			if (!region.isUserRegion()) continue;
 			
-			AbstractDataset[] profileData = ROIProfile.line((AbstractDataset)slice.getData(), (AbstractDataset)image.getMask(), (LinearROI)region.getROI(), 1d, false);
-			final AbstractDataset intensity = profileData[0];
+			Dataset[] profileData = ROIProfile.line((Dataset)slice.getData(), (Dataset)image.getMask(), (LinearROI)region.getROI(), 1d, false);
+			final Dataset intensity = profileData[0];
 			intensity.setName(region.getName().replace(' ', '_'));
 			slice.appendData(intensity);
 		}

@@ -66,6 +66,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Histogram;
@@ -101,10 +102,10 @@ public class HistogramToolPage extends AbstractToolPage {
 	private double histoMax = 50.0;
 	private double histoMin = 25.0;
 
-	private AbstractDataset imageDataset;
+	private Dataset imageDataset;
 
-	private AbstractDataset histogramX;
-	private AbstractDataset histogramY;
+	private Dataset histogramX;
+	private Dataset histogramY;
 	private int num_bins = MAX_BINS;
 
 	private boolean histogramDirty = true;
@@ -885,7 +886,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		
 		if (image != null) {
 
-			// make sure that auto update is dissabled if needed
+			// make sure that auto update is disabled if needed
 			if (mode == FIXED) {
 				image.setRescaleHistogram(false);
 			} else {
@@ -895,7 +896,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			// get the image data
 			imageDataset = getImageData(image);
 
-			if (AbstractDataset.getDType(imageDataset) == AbstractDataset.RGB ) {
+			if (AbstractDataset.getDType(imageDataset) == Dataset.RGB ) {
 				hide();
 				return;
 			}
@@ -956,9 +957,9 @@ public class HistogramToolPage extends AbstractToolPage {
 		}				
 	}
 
-	private AbstractDataset getImageData(IPaletteTrace image) {
-		AbstractDataset im = (AbstractDataset)image.getImageServiceBean().getImage();
-		if (im==null) im = (AbstractDataset)image.getData();
+	private Dataset getImageData(IPaletteTrace image) {
+		Dataset im = (Dataset)image.getImageServiceBean().getImage();
+		if (im==null) im = (Dataset)image.getData();
 		if (im==null && imageDataset!=null) im = imageDataset;
 		if (im==null) im = new DoubleDataset(new double[]{0,1,2,3}, new int[]{2,2});
  		return im;
@@ -999,7 +1000,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	 * This will take an image, and pull out all the parameters required to calculate the histogram
 	 * @param image the image to histogram
 	 */
-	private void generateHistogram(AbstractDataset image) {
+	private void generateHistogram(Dataset image) {
 		// calculate the histogram for the whole image
 		double rMax = rangeMax;
 		double rMin = rangeMin;
@@ -1007,7 +1008,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		if (Double.isInfinite(rMin)) rMin = imageDataset.min(true).doubleValue();
 
 		Histogram hist = new Histogram(num_bins, rMin, rMax, true);
-		List<AbstractDataset> histogram_values = hist.value(image);
+		List<? extends Dataset> histogram_values = hist.value(image);
 		histogramX = histogram_values.get(1).getSlice(
 				new int[] {0},
 				new int[] {num_bins},
@@ -1268,7 +1269,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			creatingRegion = false;
 		}
 	}
-	
+
 	public boolean isStaticTool() {
 		return true;
 	}

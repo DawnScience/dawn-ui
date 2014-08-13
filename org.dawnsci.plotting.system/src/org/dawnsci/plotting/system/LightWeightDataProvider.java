@@ -9,30 +9,30 @@ import org.eclipse.nebula.visualization.xygraph.dataprovider.ISample;
 import org.eclipse.nebula.visualization.xygraph.dataprovider.Sample;
 import org.eclipse.nebula.visualization.xygraph.linearscale.Range;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IErrorDataset;
 
 /**
- * A IDataProvider which uses an AbstractDataset for its data.
+ * A IDataProvider which uses a Dataset for its data.
  * 
  * @author fcp94556
  *
  */
 class LightWeightDataProvider implements IDataProvider {
 	
-	private AbstractDataset x;
-	private AbstractDataset y;
+	private Dataset x;
+	private Dataset y;
 	private Range cachedXRange, cachedYRange;
 
 	public LightWeightDataProvider() {
 		
 	}
 	public LightWeightDataProvider(final IDataset x, final IDataset y) {
-		this.x = (AbstractDataset)x;
-		this.y = (AbstractDataset)y;
+		this.x = (Dataset)x;
+		this.y = (Dataset)y;
 	}
 
 	@Override
@@ -84,11 +84,11 @@ class LightWeightDataProvider implements IDataProvider {
 		}
 	}
 	
-	private double getMin(AbstractDataset a) {
+	private double getMin(Dataset a) {
 		return a.min(true).doubleValue();
 	}
 
-	private double getMax(AbstractDataset a) {
+	private double getMax(Dataset a) {
 		return a.max(true).doubleValue();
 	}
 
@@ -118,8 +118,8 @@ class LightWeightDataProvider implements IDataProvider {
 	}
 
 	public void setData(IDataset xData, IDataset yData) {
-		this.x = (AbstractDataset)xData;
-		this.y = (AbstractDataset)yData;
+		this.x = (Dataset)xData;
+		this.y = (Dataset)yData;
 		this.cachedXRange = null;
 		this.cachedYRange = null;
 		
@@ -133,11 +133,11 @@ class LightWeightDataProvider implements IDataProvider {
 		}
 	}
 
-	public AbstractDataset getY() {
+	public Dataset getY() {
 		return y;
 	}
 	
-	public AbstractDataset getX() {
+	public Dataset getX() {
 		return x;
 	}
 
@@ -152,10 +152,10 @@ class LightWeightDataProvider implements IDataProvider {
 	public void append(Number xValue, Number yValue) {
 
 		final double[] xArray = x!=null && x.getShape()!=null && x.getShape().length>0
-				              ? (double[])DatasetUtils.cast(x, AbstractDataset.FLOAT64).getBuffer()
+				              ? (double[])DatasetUtils.cast(x, Dataset.FLOAT64).getBuffer()
 		                      : new double[0];
 		final double[] yArray = y!=null && y.getShape()!=null && y.getShape().length>0
-	                          ? (double[])DatasetUtils.cast(y, AbstractDataset.FLOAT64).getBuffer()
+	                          ? (double[])DatasetUtils.cast(y, Dataset.FLOAT64).getBuffer()
                               : new double[0];
 	                          
 	    final double[] xa = new double[xArray.length+1];

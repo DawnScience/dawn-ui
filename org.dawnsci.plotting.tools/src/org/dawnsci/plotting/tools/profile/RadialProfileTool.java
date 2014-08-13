@@ -21,7 +21,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.ui.PlatformUI;
 import org.dawnsci.plotting.tools.Activator;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorPropertyEvent;
@@ -270,13 +270,13 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 	}
 
 	@Override
-	protected AbstractDataset[] getXAxis(final SectorROI sroi, AbstractDataset[] integrals) {
+	protected Dataset[] getXAxis(final SectorROI sroi, Dataset[] integrals) {
 		
 		if (integrals[2] != null) {
-			return new AbstractDataset[]{integrals[2], integrals[3]};
+			return new Dataset[]{integrals[2], integrals[3]};
 		}
 		
-		final AbstractDataset xi = DatasetUtils.linSpace(sroi.getRadius(0), sroi.getRadius(1), integrals[0].getSize(), AbstractDataset.FLOAT64);
+		final Dataset xi = DatasetUtils.linSpace(sroi.getRadius(0), sroi.getRadius(1), integrals[0].getSize(), Dataset.FLOAT64);
 		xi.setName("Radius (pixel)");
 		
 		IMetaData meta = getMetaData();
@@ -285,22 +285,22 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 			
 			if (isValidMetadata(meta)) {
 				setActionsEnabled(true);
-				return new AbstractDataset[]{pixelToValue(xi,(IDiffractionMetadata)meta)};
+				return new Dataset[]{pixelToValue(xi,(IDiffractionMetadata)meta)};
 			}
 			
-			return new AbstractDataset[]{xi};
+			return new Dataset[]{xi};
 			
 		} else {
 
-			final AbstractDataset xii = DatasetUtils.linSpace(sroi.getRadius(0), sroi.getRadius(1), integrals[1].getSize(), AbstractDataset.FLOAT64);
+			final Dataset xii = DatasetUtils.linSpace(sroi.getRadius(0), sroi.getRadius(1), integrals[1].getSize(), Dataset.FLOAT64);
 			xii.setName("Radius (pixel)");
 			
 			if (isValidMetadata(meta)) {
 				setActionsEnabled(true);
-				return new AbstractDataset[]{pixelToValue(xi,(IDiffractionMetadata)meta),pixelToValue(xii,(IDiffractionMetadata)meta)};
+				return new Dataset[]{pixelToValue(xi,(IDiffractionMetadata)meta),pixelToValue(xii,(IDiffractionMetadata)meta)};
 			}
 
-			return new AbstractDataset[]{xi, xii};
+			return new Dataset[]{xi, xii};
 		}
 		
 	}
@@ -364,7 +364,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 	}
 	
 	
-	private AbstractDataset pixelToValue(AbstractDataset dataset, IDiffractionMetadata metadata) {
+	private Dataset pixelToValue(Dataset dataset, IDiffractionMetadata metadata) {
 		if (!isValidMetadata(metadata)) return dataset;
 
 		try {
@@ -412,8 +412,8 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 	}
 
 	@Override
-	protected AbstractDataset[] getIntegral(AbstractDataset data,
-			                              AbstractDataset mask, 
+	protected Dataset[] getIntegral(Dataset data,
+			                              Dataset mask, 
 			                              SectorROI       sroi, 
 			                              IRegion         region,
 			                              boolean         isDrag,
@@ -448,27 +448,27 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 			// continue as normal
 		}
 
-		AbstractDataset[] profile = ROIProfile.sector(data, mask, sroi, true, false, false, qSpace, axis, false);
+		Dataset[] profile = ROIProfile.sector(data, mask, sroi, true, false, false, qSpace, axis, false);
 		
         if (profile == null) {
         	return null;
         }
         
-		final AbstractDataset integral = profile[0];
-		final AbstractDataset ax = profile[4];
+		final Dataset integral = profile[0];
+		final Dataset ax = profile[4];
 		integral.setName("Radial Profile "+region.getName());
 		
 		// If not symmetry profile[2] is null, otherwise plot it.
 	    if (profile.length>=3 && profile[2]!=null && sroi.hasSeparateRegions()) {
 	    	
-			final AbstractDataset reflection = profile[2];
-			final AbstractDataset axref = profile[6];
+			final Dataset reflection = profile[2];
+			final Dataset axref = profile[6];
 			reflection.setName("Symmetry "+region.getName());
 
-			return new AbstractDataset[]{integral, reflection, ax, axref};
+			return new Dataset[]{integral, reflection, ax, axref};
 	    	
 	    } else {
-	    	return new AbstractDataset[]{integral, null, ax, null};
+	    	return new Dataset[]{integral, null, ax, null};
 	    }
 	}
 
@@ -484,14 +484,14 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 			if (!region.isUserRegion()) continue;
 			
 			final SectorROI sroi = (SectorROI)region.getROI();
-			AbstractDataset[] profile = ROIProfile.sector((AbstractDataset)slice.getData(), (AbstractDataset)image.getMask(), sroi, true, false, false);
+			Dataset[] profile = ROIProfile.sector((Dataset)slice.getData(), (Dataset)image.getMask(), sroi, true, false, false);
 		
-			AbstractDataset integral = profile[0];
+			Dataset integral = profile[0];
 			integral.setName("radial_"+region.getName().replace(' ', '_'));     
 			slice.appendData(integral);
 			
 		    if (profile.length>=3 && profile[2]!=null && sroi.hasSeparateRegions()) {
-				final AbstractDataset reflection = profile[2];
+				final Dataset reflection = profile[2];
 				reflection.setName("radial_sym_"+region.getName().replace(' ', '_'));     
 				slice.appendData(reflection);
 		    }

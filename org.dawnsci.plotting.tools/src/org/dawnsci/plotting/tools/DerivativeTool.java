@@ -57,17 +57,18 @@ import org.eclipse.swt.widgets.Label;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 
 public class DerivativeTool extends AbstractToolPage  {
 	
 	//Class for conveniently passing around a x,y pair of datasets
-	private class AbstractDatasetPair {
-		public AbstractDataset x;
-		public AbstractDataset y;
+	private class DatasetPair {
+		public Dataset x;
+		public Dataset y;
 		
-		public AbstractDatasetPair(AbstractDataset xIn, AbstractDataset yIn) {
+		public DatasetPair(Dataset xIn, Dataset yIn) {
 			x = xIn;
 			y= yIn;
 		}
@@ -84,8 +85,8 @@ public class DerivativeTool extends AbstractToolPage  {
 	//Trace/Dataset pair lists
 	private List<ITrace> eventTraceList= new ArrayList<ITrace>();
 	private List<ITrace> dataTraces = new ArrayList<ITrace>();
-	private ArrayList<AbstractDatasetPair> dervsPair  = new ArrayList<AbstractDatasetPair>();
-	private ArrayList<AbstractDatasetPair> dervs2Pair  = new ArrayList<AbstractDatasetPair>();
+	private ArrayList<DatasetPair> dervsPair  = new ArrayList<DatasetPair>();
+	private ArrayList<DatasetPair> dervs2Pair  = new ArrayList<DatasetPair>();
 	boolean data = false;
 	boolean deriv = true;
 	boolean deriv2 = false;
@@ -415,7 +416,7 @@ public class DerivativeTool extends AbstractToolPage  {
 			}
 			
 			//plot all required data, original data from traces
-			// derivative data from AbstractDataset pairs
+			// derivative data from Dataset pairs
 			if (data) {
 				for (ITrace trace : dataTraces) {
 					getPlottingSystem().addTrace(trace);
@@ -423,7 +424,7 @@ public class DerivativeTool extends AbstractToolPage  {
 			}
 			if (deriv) {
 				int ic = dataTraces.size();
-				for (AbstractDatasetPair dataset : dervsPair) {
+				for (DatasetPair dataset : dervsPair) {
 					ILineTrace traceNew = getPlottingSystem().createLineTrace(dataset.y.getName());
 					traceNew.setUserObject(DerivativeTool.class);
 					traceNew.setUserTrace(true);
@@ -435,7 +436,7 @@ public class DerivativeTool extends AbstractToolPage  {
 			}
 			if (deriv2) {
 				int ic = dataTraces.size()*2;
-				for (AbstractDatasetPair dataset : dervs2Pair) {
+				for (DatasetPair dataset : dervs2Pair) {
 					ILineTrace traceNew = getPlottingSystem().createLineTrace(dataset.y.getName());
 					traceNew.setUserObject(DerivativeTool.class);
 					traceNew.setUserTrace(true);
@@ -460,26 +461,26 @@ public class DerivativeTool extends AbstractToolPage  {
 		}
 	}
 	
-	private AbstractDatasetPair processTrace(ITrace trace, Derivative type){
+	private DatasetPair processTrace(ITrace trace, Derivative type){
 		
 		// Calculate the derivative from the data in trace,
 		// return as an abstract dataset since we dont want to interact with the plot here
 		// to generate the traces
-		final AbstractDataset traceData =  (AbstractDataset)trace.getData();
+		final Dataset traceData =  (Dataset)trace.getData();
 		
 		//Get x data if present or if not generate index range
-		final AbstractDataset x = (trace instanceof ILineTrace) 
-				? (AbstractDataset)((ILineTrace)trace).getXData() 
-			    : AbstractDataset.arange(0, traceData.getSize(), 1, AbstractDataset.INT32);
+		final Dataset x = (trace instanceof ILineTrace) 
+				? (Dataset)((ILineTrace)trace).getXData() 
+			    : DatasetFactory.createRange(0, traceData.getSize(), 1, Dataset.INT32);
 
-		AbstractDataset derv = null;
+		Dataset derv = null;
 		
 		if (type == Derivative.FIRST)
 			derv = Maths.derivative(x, traceData, SMOOTHING);
 		else if (type==Derivative.SECOND)
 			derv = Maths.derivative(x,Maths.derivative(x, traceData, SMOOTHING), SMOOTHING);
 		
-		return new AbstractDatasetPair(x,derv);
+		return new DatasetPair(x,derv);
 	}
 }
 	

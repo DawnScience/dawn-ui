@@ -9,7 +9,7 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 
@@ -122,8 +122,8 @@ public abstract class AbstractSpectrumFile implements ISpectrumFile {
 		int matchingDim = getMatchingDim(axis, data);
 		
 		if (axis == null || matchingDim == -1) {
-			AbstractDataset mean = (AbstractDataset)data;
-			AbstractDataset std = (AbstractDataset)data;
+			Dataset mean = (Dataset)data;
+			Dataset std = (Dataset)data;
 			for (int i = 0; i < data.getRank() -1; i++ ) {
 				mean = mean.mean(0);
 				std = std.stdDeviation(0);
@@ -133,8 +133,8 @@ public abstract class AbstractSpectrumFile implements ISpectrumFile {
 		} else {
 			
 			int i = data.getRank()-1 ;
-			AbstractDataset mean = (AbstractDataset)data;
-			AbstractDataset std = (AbstractDataset)data;
+			Dataset mean = (Dataset)data;
+			Dataset std = (Dataset)data;
 			for (; i >= 0; i--) {
 				if (i == matchingDim) {
 					continue;

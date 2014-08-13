@@ -18,7 +18,7 @@ package org.dawnsci.plotting.jreality.util;
 
 import java.awt.Color;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 import de.jreality.geometry.IndexedLineSetFactory;
@@ -223,7 +223,7 @@ public class ErrorHelpers {
 		}
 		double[] data = new double[dataset.getShape()[0]];
 
-		AbstractDataset ds = (AbstractDataset) dataset; 
+		Dataset ds = (Dataset) dataset; 
 		
 		for(int i = 0; i < data.length; i++) {
 			data[i] = ds.getError(i) * (worldmax/(graphmax - graphmin));

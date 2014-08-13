@@ -23,7 +23,7 @@ import org.eclipse.nebula.visualization.xygraph.linearscale.LinearScaleTickMarks
 import org.eclipse.nebula.visualization.xygraph.linearscale.Range;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
@@ -39,7 +39,7 @@ public class AspectAxis extends Axis implements IAxis {
 	private AspectAxis relativeTo;
 	private Range      maximumRange;
     private boolean    keepAspect; // This is so that the user may have images with and without aspect in the same application.
-	private AbstractDataset labelData;
+	private Dataset labelData;
 	
 	public AspectAxis(String title, boolean yAxis) {
 		super(title, yAxis);
@@ -378,7 +378,7 @@ public class AspectAxis extends Axis implements IAxis {
 		if (labels!=null && labels.getRank()!=1) {
 			return;
 		}
-		labelData = DatasetUtils.convertToAbstractDataset(labels);
+		labelData = DatasetUtils.convertToDataset(labels);
 		String text = getTitleFromLabelData(labels);
 		if (text != null) {
 			setTitle(text);

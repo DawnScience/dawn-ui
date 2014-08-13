@@ -6,7 +6,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
@@ -14,50 +14,50 @@ import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 public class AzimuthalProfileTool extends SectorProfileTool {
 	
 	@Override
-	protected AbstractDataset[] getXAxis(final SectorROI sroi, AbstractDataset[] integral) {
+	protected Dataset[] getXAxis(final SectorROI sroi, Dataset[] integral) {
 		
-		final AbstractDataset xi;
+		final Dataset xi;
 		
 		if (sroi.getSymmetry() != SectorROI.FULL)
-			xi = DatasetUtils.linSpace(sroi.getAngleDegrees(0), sroi.getAngleDegrees(1),integral[0].getSize(), AbstractDataset.FLOAT64);
+			xi = DatasetUtils.linSpace(sroi.getAngleDegrees(0), sroi.getAngleDegrees(1),integral[0].getSize(), Dataset.FLOAT64);
 		else
-			xi = DatasetUtils.linSpace(sroi.getAngleDegrees(0), sroi.getAngleDegrees(0) + 360., integral[0].getSize(), AbstractDataset.FLOAT64);
+			xi = DatasetUtils.linSpace(sroi.getAngleDegrees(0), sroi.getAngleDegrees(0) + 360., integral[0].getSize(), Dataset.FLOAT64);
 		xi.setName("Angle (\u00b0)");
 		
-		if (!sroi.hasSeparateRegions())  return new AbstractDataset[]{xi};
+		if (!sroi.hasSeparateRegions())  return new Dataset[]{xi};
 		
-		AbstractDataset xii = DatasetUtils.linSpace(sroi.getAngleDegrees(0), sroi.getAngleDegrees(1), integral[1].getSize(), AbstractDataset.FLOAT64);
+		Dataset xii = DatasetUtils.linSpace(sroi.getAngleDegrees(0), sroi.getAngleDegrees(1), integral[1].getSize(), Dataset.FLOAT64);
 		xii.setName("Angle (\u00b0)");
 	
-		return new AbstractDataset[]{xi, xii};
+		return new Dataset[]{xi, xii};
 	}
 
 	@Override
-	protected AbstractDataset[] getIntegral(AbstractDataset data,
-			                              AbstractDataset mask, 
+	protected Dataset[] getIntegral(Dataset data,
+			                              Dataset mask, 
 			                              SectorROI       sroi, 
 			                              IRegion         region,
 			                              boolean         isDrag,
 			                              int             downsample) {
 
 
-		final AbstractDataset[] profile = ROIProfile.sector(data, mask, sroi, false, true, false);
+		final Dataset[] profile = ROIProfile.sector(data, mask, sroi, false, true, false);
 		if (profile==null) return null;
 		
-		AbstractDataset integral = profile[1];
+		Dataset integral = profile[1];
 		integral.setName("Azimuthal Profile "+region.getName());
 		
 
 		// If not symmetry profile[3] is null, otherwise plot it.
 	    if (profile.length>=4 && profile[3]!=null && sroi.hasSeparateRegions()) {
 	    	
-			final AbstractDataset reflection = profile[3];
+			final Dataset reflection = profile[3];
 			reflection.setName("Symmetry "+region.getName());
 
-			return new AbstractDataset[]{integral, reflection};
+			return new Dataset[]{integral, reflection};
 	    	
 	    } else {
-	    	return new AbstractDataset[]{integral, null};
+	    	return new Dataset[]{integral, null};
 	    }
 	}
 
@@ -73,14 +73,14 @@ public class AzimuthalProfileTool extends SectorProfileTool {
 			if (!region.isUserRegion()) continue;
 			
 			final SectorROI sroi = (SectorROI)region.getROI();
-			final AbstractDataset[] profile = ROIProfile.sector((AbstractDataset)slice.getData(), (AbstractDataset)image.getMask(), sroi, false, true, false);
+			final Dataset[] profile = ROIProfile.sector((Dataset)slice.getData(), (Dataset)image.getMask(), sroi, false, true, false);
 		
-			AbstractDataset integral = profile[1];
+			Dataset integral = profile[1];
 			integral.setName("azimuthal_"+region.getName().replace(' ', '_'));     
 			slice.appendData(integral);
 			
 		    if (profile.length>=4 && profile[3]!=null && sroi.hasSeparateRegions()) {
-				final AbstractDataset reflection = profile[3];
+				final Dataset reflection = profile[3];
 				reflection.setName("azimuthal_sym_"+region.getName().replace(' ', '_'));     
 				slice.appendData(reflection);
 		    }

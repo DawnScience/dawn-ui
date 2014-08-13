@@ -22,12 +22,11 @@ import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
@@ -133,7 +132,7 @@ public class SpectrumSubtractionWizardPage extends WizardPage implements ISpectr
 			        IDataset y = dataList.get(0).getyDatasets().get(0).clone();
 			        y.setName("data");
 			        IDataset sub = process.getSubtrahend().getyDatasets().get(0).clone();
-			        AbstractDataset suba = DatasetUtils.convertToAbstractDataset(sub);
+			        Dataset suba = DatasetUtils.convertToDataset(sub);
 			        suba.imultiply(scale);
 			        suba.setName("subtrahend");
 					//system.clear();

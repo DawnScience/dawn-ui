@@ -42,8 +42,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractCompoundDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.CompoundByteDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.CompoundDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.CompoundIntegerDataset;
@@ -270,7 +269,7 @@ public class DataSet3DPlot2DMulti extends DataSet3DPlot2D {
 								subGraph.setGeometry(createGraphGeometry((xStart+xSubSize > sizes[0] ? sizes[0]-xStart : xSubSize),
 																		 (yStart+ySubSize > sizes[1] ? sizes[1]-yStart : ySubSize),
 																		  xStart,yStart));
-								if (currentData instanceof AbstractCompoundDataset) {
+								if (currentData instanceof CompoundDataset) {
 									tableMin = 0;
 									tableMax = 0;
 								} else {
@@ -374,7 +373,7 @@ public class DataSet3DPlot2DMulti extends DataSet3DPlot2D {
 			imageDatas.put(tex, imageData);
 		}
 		float[] imageData = (float[])imageDatas.get(tex);
-		FloatDataset fdata = (FloatDataset)DatasetUtils.cast(DatasetUtils.convertToAbstractDataset(data), AbstractDataset.FLOAT32);
+		FloatDataset fdata = (FloatDataset)DatasetUtils.cast(DatasetUtils.convertToDataset(data), Dataset.FLOAT32);
 		if (width == fdata.getShape()[1] &&	height == fdata.getShape()[0]) 
 		{
 			imageData = fdata.getData();
@@ -433,7 +432,7 @@ public class DataSet3DPlot2DMulti extends DataSet3DPlot2D {
 			int isize = data.getElementsPerItem();
 			switch(data.getDtype()) {
 
-			case AbstractDataset.ARRAYINT8:
+			case Dataset.ARRAYINT8:
 			{
 				CompoundByteDataset cbData = (CompoundByteDataset)data;
 				for (int y = 0; y < height; y++) {
@@ -448,7 +447,7 @@ public class DataSet3DPlot2DMulti extends DataSet3DPlot2D {
 				}
 			}
 			break;
-			case AbstractDataset.ARRAYINT16:
+			case Dataset.ARRAYINT16:
 			{
 				CompoundShortDataset csData = (CompoundShortDataset)data;
 				double mins[] = data.minItem();
@@ -484,7 +483,7 @@ public class DataSet3DPlot2DMulti extends DataSet3DPlot2D {
 				}
 			}
 			break;
-			case AbstractDataset.ARRAYINT32:
+			case Dataset.ARRAYINT32:
 			{
 				CompoundIntegerDataset ciData = (CompoundIntegerDataset)data;
 				double mins[] = data.minItem();
@@ -521,7 +520,7 @@ public class DataSet3DPlot2DMulti extends DataSet3DPlot2D {
 				}
 			}
 			break;
-			case AbstractDataset.ARRAYINT64:
+			case Dataset.ARRAYINT64:
 			{
 				CompoundLongDataset clData = (CompoundLongDataset) data;
 				double mins[] = data.minItem();
@@ -558,8 +557,8 @@ public class DataSet3DPlot2DMulti extends DataSet3DPlot2D {
 				}
 			}
 			break;
-			case AbstractDataset.ARRAYFLOAT32:
-			case AbstractDataset.ARRAYFLOAT64:
+			case Dataset.ARRAYFLOAT32:
+			case Dataset.ARRAYFLOAT64:
 			{
 				double mins[] = data.minItem();
 				double maxs[] = data.maxItem();
@@ -628,7 +627,7 @@ public class DataSet3DPlot2DMulti extends DataSet3DPlot2D {
 				((byte[])imageData).length != (width * height * 4)) {
 				createNewTexture = true;
 			}
-			generateRGBTexture((AbstractCompoundDataset) data,texture,xPos,yPos,width,height,createNewTexture);
+			generateRGBTexture((CompoundDataset) data,texture,xPos,yPos,width,height,createNewTexture);
 		}
 	} 
 	

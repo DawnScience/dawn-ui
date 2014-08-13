@@ -90,7 +90,7 @@ import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectionEvent;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
@@ -609,6 +609,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 						plotter.removeRegion(tmpRegion);
 					}
 					tmpRegion = plotter.createRegion(RegionUtils.getUniqueName("RingPicker", plotter), IRegion.RegionType.ELLIPSEFIT);
+					tmpRegion.setShowLabel(false);
 					tmpRegion.setUserRegion(false);
 					tmpRegion.addROIListener(roiListener);
 					findOuter.setEnabled(true);
@@ -695,8 +696,8 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 						throw new IllegalStateException();
 					}
 					SectorROI sroi = (SectorROI) regions.iterator().next().getROI();
-					AbstractDataset dataset = (AbstractDataset)t.getData();
-					AbstractDataset mask    = (AbstractDataset)t.getMask();
+					Dataset dataset = (Dataset)t.getData();
+					Dataset mask    = (Dataset)t.getMask();
 					final BeamCenterRefinement beamOffset = new BeamCenterRefinement(dataset, mask, sroi);
 					List<IPeak> peaks = loadPeaks();
 					if (peaks==null) throw new Exception("Cannot find peaks!");
@@ -961,11 +962,10 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			return null;
 
 		String shape = circle ? "circle" : "ellipse";
-		logger.debug("Attempting to fit {} from peaks in {}", shape, roi);
 		final ProgressMonitorWrapper mon = new ProgressMonitorWrapper(monitor);
 		monitor.beginTask("Refine " + shape + " fit", IProgressMonitor.UNKNOWN);
 		monitor.subTask("Find POIs near initial " + shape);
-		AbstractDataset image = (AbstractDataset) t.getData();
+		Dataset image = (Dataset) t.getData();
 		BooleanDataset mask = (BooleanDataset) t.getMask();
 		PolylineROI points;
 		EllipticalFitROI efroi;
@@ -1006,6 +1006,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 
 			public void run() {
 				try {
+					long t = - System.currentTimeMillis();
 					IRegion region = plotter.createRegion(RegionUtils.getUniqueName("Pixel peaks", plotter), circle ? RegionType.CIRCLEFIT : RegionType.ELLIPSEFIT);
 					region.setROI(froi);
 					region.setRegionColor(circle ? ColorConstants.cyan : ColorConstants.orange);
@@ -1016,6 +1017,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					tmpRegion.addROIListener(roiListener);
 					roiListener.roiSelected(new ROIEvent(tmpRegion, froi)); // trigger beam centre update
 					plotter.addRegion(region);
+					System.err.println("Time taken " + (t + System.currentTimeMillis()) + "ms");
 					monitor.worked(1);
 					findOuter.setEnabled(true);
 				} catch (Exception e) {
@@ -1034,7 +1036,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		if (roi instanceof CircularFitROI) {
 			roi = new EllipticalFitROI(((CircularFitROI) roi).getPoints(), true);
 		}
-		final List<EllipticalROI> ells = PowderRingsUtils.findOtherEllipses(mon, (AbstractDataset)t.getData(), (BooleanDataset) t.getMask(), (EllipticalROI) roi);
+		final List<EllipticalROI> ells = PowderRingsUtils.findOtherEllipses(mon, (Dataset)t.getData(), (BooleanDataset) t.getMask(), (EllipticalROI) roi);
 		final boolean[] status = {true};
 		display.syncExec(new Runnable() {
 
@@ -1085,7 +1087,9 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			IDiffractionMetadata md = getDiffractionMetaData();
 			final DetectorProperties det = md.getDetector2DProperties();
 			final DiffractionCrystalEnvironment env = md.getDiffractionCrystalEnvironment();
-			final QSpace q = PowderRingsUtils.fitEllipsesToQSpace(mon, det, env, rois, spacings, true);
+//			final QSpace q = PowderRingsUtils.fitEllipsesToQSpace(mon, det, env, rois, spacings, true);
+			final QSpace q = PowderRingsUtils.fitEllipsesToQSpace(mon, det, env, rois, spacings, false);
+//			final QSpace q = PowderRingsUtils.fitAllEllipsesToQSpace(mon, det, env, rois, spacings, false);
 			if (q == null)
 				return Status.CANCEL_STATUS;
 			display.syncExec(new Runnable() {
@@ -1141,9 +1145,9 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					if (augmenter != null && !augmenter.isShowingBeamCenter()) {
 						augmenter.drawBeamCentre(true);
 					}
-					tmpRegion.setShowLabel(true);
+//					tmpRegion.setShowLabel(true);
 				}
-				if(evt.getRegion() != null)
+				if (evt.getRegion() != null)
 					evt.getRegion().addROIListener(DiffractionTool.this);
 			}
 

@@ -17,7 +17,7 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 
 import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 /**
@@ -219,8 +219,8 @@ public class VectorTrace extends Figure implements IVectorTrace {
 	private void normalize() {
 		
 		int[] shape = vectors.getShape();
-        normalizedMagnitude = AbstractDataset.zeros(new int[]{shape[0], shape[1]}, Dataset.FLOAT);
-        normalizedAngle     = AbstractDataset.zeros(new int[]{shape[0], shape[1]}, Dataset.FLOAT);
+        normalizedMagnitude = DatasetFactory.zeros(new int[]{shape[0], shape[1]}, Dataset.FLOAT);
+        normalizedAngle     = DatasetFactory.zeros(new int[]{shape[0], shape[1]}, Dataset.FLOAT);
         
         double maxMag  = -Double.MAX_VALUE;
         double maxAng  = -Double.MAX_VALUE;

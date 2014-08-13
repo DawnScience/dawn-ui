@@ -125,7 +125,7 @@ import org.eclipse.ui.commands.ICommandService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
@@ -851,7 +851,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			xyGraph.addImageTrace((ImageTrace)image);
 			removeAdditionalAxes(); // Do not have others with images.
 			
-			if (((AbstractDataset)trace.getData()).getDtype() == AbstractDataset.RGB) {
+			if (((Dataset)trace.getData()).getDtype() == Dataset.RGB) {
 				intensity.setVisible(false);
 			} else {
 			    intensity.setVisible(PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.SHOW_INTENSITY));

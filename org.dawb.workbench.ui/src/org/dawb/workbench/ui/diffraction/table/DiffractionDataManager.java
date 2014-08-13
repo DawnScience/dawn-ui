@@ -21,7 +21,7 @@ import org.eclipse.ui.dialogs.ListDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
@@ -236,7 +236,7 @@ public class DiffractionDataManager {
 		if (model!=null) model.clear(); // Helps garbage collector.
 	}
 
-	public AbstractDataset getDistances() {
+	public Dataset getDistances() {
 		
 		if (!isValidModel()) return null; // Or raise exception?
 		

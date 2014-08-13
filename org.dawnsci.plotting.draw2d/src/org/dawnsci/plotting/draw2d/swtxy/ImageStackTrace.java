@@ -14,7 +14,7 @@ import org.eclipse.nebula.visualization.widgets.figureparts.ColorMapRamp;
 import org.eclipse.nebula.visualization.xygraph.figures.Axis;
 import org.eclipse.swt.widgets.Display;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 
@@ -58,7 +58,7 @@ public class ImageStackTrace extends ImageTrace implements IImageStackTrace {
 										  new int[]{index+1,stack.getShape()[1], stack.getShape()[2]},
 										  new int[]{1,1,1});
 			set = (IDataset)set.squeeze();
-			setData((AbstractDataset)set, getAxes(), false);
+			setData((Dataset)set, getAxes(), false);
 			
 		}
 	}
@@ -88,7 +88,7 @@ public class ImageStackTrace extends ImageTrace implements IImageStackTrace {
 											  new int[]{index+1,stack.getShape()[1], stack.getShape()[2]},
 											  new int[]{1,1,1});
 				set = (IDataset)set.squeeze();
-				final AbstractDataset absData = (AbstractDataset)set;
+				final Dataset absData = (Dataset)set;
 				
 				Display.getDefault().syncExec(new Runnable() {
 					public void run() {

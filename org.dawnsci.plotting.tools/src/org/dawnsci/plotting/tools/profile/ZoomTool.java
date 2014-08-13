@@ -15,7 +15,7 @@ import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
@@ -69,18 +69,18 @@ public class ZoomTool extends ProfileTool {
 		final int xInc = bounds.getPoint()[0]<bounds.getEndPoint()[0] ? 1 : -1;
 
 		try {
-			AbstractDataset slice = null;
+			Dataset slice = null;
 			getClass();
-			AbstractDataset im    = (AbstractDataset)image.getData();
-			slice = (AbstractDataset) ToolUtils.getClippedSlice(im, bounds);
+			Dataset im    = (Dataset)image.getData();
+			slice = (Dataset) ToolUtils.getClippedSlice(im, bounds);
 			slice.setName(region.getName());
 			// Calculate axes to have real values not size
-			AbstractDataset yLabels = null;
-			AbstractDataset xLabels = null;
+			Dataset yLabels = null;
+			Dataset xLabels = null;
 			if (image.getAxes()!=null && image.getAxes().size() > 0) {
-				AbstractDataset xl = (AbstractDataset)image.getAxes().get(0);
+				Dataset xl = (Dataset)image.getAxes().get(0);
 				if (xl!=null) xLabels = getLabelsFromLabels(xl, bounds, 0);
-				AbstractDataset yl = (AbstractDataset)image.getAxes().get(1);
+				Dataset yl = (Dataset)image.getAxes().get(1);
 				if (yl!=null) yLabels = getLabelsFromLabels(yl, bounds, 1);
 			}
 			
@@ -104,12 +104,12 @@ public class ZoomTool extends ProfileTool {
 
 	}
 
-	private AbstractDataset getLabelsFromLabels(AbstractDataset xl, RectangularROI bounds, int axisIndex) {
+	private Dataset getLabelsFromLabels(Dataset xl, RectangularROI bounds, int axisIndex) {
 		try {
 			int fromIndex = (int)bounds.getPoint()[axisIndex];
 			int toIndex   = (int)bounds.getEndPoint()[axisIndex];
 			int step      = toIndex>fromIndex ? 1 : -1;
-			final AbstractDataset slice = xl.getSlice(new int[]{fromIndex}, new int[]{toIndex}, new int[]{step});
+			final Dataset slice = xl.getSlice(new int[]{fromIndex}, new int[]{toIndex}, new int[]{step});
 			return slice;
 		} catch (Exception ne) {
 			return null;
@@ -131,7 +131,7 @@ public class ZoomTool extends ProfileTool {
 			final int yInc = bounds.getPoint()[1]<bounds.getEndPoint()[1] ? 1 : -1;
 			final int xInc = bounds.getPoint()[0]<bounds.getEndPoint()[0] ? 1 : -1;
 			
-			final AbstractDataset slice = ((AbstractDataset)drslice.getData()).getSlice(new int[] { (int) bounds.getPoint()[1],   (int) bounds.getPoint()[0]    },
+			final Dataset slice = ((Dataset)drslice.getData()).getSlice(new int[] { (int) bounds.getPoint()[1],   (int) bounds.getPoint()[0]    },
 											                       new int[] { (int) bounds.getEndPoint()[1],(int) bounds.getEndPoint()[0] },
 											                       new int[] {yInc, xInc});
 			slice.setName(region.getName().replace(' ','_'));

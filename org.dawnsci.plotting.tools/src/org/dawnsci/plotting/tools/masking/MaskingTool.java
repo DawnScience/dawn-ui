@@ -103,7 +103,7 @@ import org.eclipse.ui.IViewPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 
 public class MaskingTool extends AbstractToolPage implements MouseListener{
@@ -1076,7 +1076,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		if (getImageTrace()!=null) {
 			if (savedMask==null) return;
 			if (maskObject.getImageDataset()==null){
-				maskObject.setImageDataset((AbstractDataset)getImageTrace().getData());
+				maskObject.setImageDataset((Dataset)getImageTrace().getData());
 			}
 			maskObject.process(savedMask);
 			getImageTrace().setMask(maskObject.getMaskDataset());
@@ -1476,13 +1476,13 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				if (maskObject.getMaskDataset()==null) {
 					// The mask must be maintained as a BooleanDataset so that there is the option
 					// of applying the same mask to many images.
-					final AbstractDataset unmasked = (AbstractDataset)image.getData();
+					final Dataset unmasked = (Dataset)image.getData();
 					maskObject.setMaskDataset(new BooleanDataset(unmasked.getShape()), true);
 					maskObject.setImageDataset(unmasked);
 				}
 				
 				if (maskObject.getImageDataset()==null) {
-					final AbstractDataset unmasked = (AbstractDataset)image.getData();
+					final Dataset unmasked = (Dataset)image.getData();
 					maskObject.setImageDataset(unmasked);
 				}
 				

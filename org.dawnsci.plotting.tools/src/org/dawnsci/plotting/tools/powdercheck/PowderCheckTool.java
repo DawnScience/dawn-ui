@@ -88,7 +88,7 @@ import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectionEvent;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.FFT;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
@@ -218,7 +218,7 @@ public class PowderCheckTool extends AbstractToolPage {
 			return;
 		}
 		
-		final AbstractDataset ds = (AbstractDataset)im.getData();
+		final Dataset ds = (Dataset)im.getData();
 		if (ds==null) return;
 			
 		final IMetaData       m  = ds.getMetadata();

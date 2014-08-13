@@ -81,7 +81,7 @@ import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 
@@ -258,11 +258,11 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 				// if data is locked
 				if(((SelectedData)viewer.getElementAt(0)).isLocked()){
 					IDataset dataImage = ((SelectedData)viewer.getElementAt(0)).getImage();
-					final AbstractDataset aDataImage = (AbstractDataset)dataImage;
+					final Dataset aDataImage = (Dataset)dataImage;
 					Job divide = new Job("Running Divide process") {
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
-							AbstractDataset divideResult = Maths.divide(aDataImage, (AbstractDataset)image);
+							Dataset divideResult = Maths.divide(aDataImage, (Dataset)image);
 							PlottingUtils.plotData(plottingSystem, fileTitle, (IDataset)divideResult);
 							return Status.OK_STATUS;
 						}
@@ -275,11 +275,11 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 				// if data is locked
 				if(((SelectedData)viewer.getElementAt(0)).isLocked()){
 					IDataset dataImage = ((SelectedData)viewer.getElementAt(0)).getImage();
-					final AbstractDataset aDataImage = (AbstractDataset)dataImage;
+					final Dataset aDataImage = (Dataset)dataImage;
 					Job subtract = new Job("Running Subtract process") {
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
-							AbstractDataset subtractResult = Maths.subtract(aDataImage, (AbstractDataset)image);
+							Dataset subtractResult = Maths.subtract(aDataImage, (Dataset)image);
 							PlottingUtils.plotData(plottingSystem, fileTitle, (IDataset)subtractResult);
 							return Status.OK_STATUS;
 						}

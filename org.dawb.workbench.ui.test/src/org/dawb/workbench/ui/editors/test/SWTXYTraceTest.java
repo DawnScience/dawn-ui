@@ -32,10 +32,10 @@ import org.eclipse.dawnsci.plotting.api.filter.IPlottingFilter;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
-import org.eclipse.dawnsci.plotting.api.trace.ITrace;
-import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.PointStyle;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.TraceType;
+import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace.ArrowConfiguration;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace.ArrowHistogram;
 import org.eclipse.draw2d.ColorConstants;
@@ -48,7 +48,7 @@ import org.junit.Test;
 import org.osgi.framework.Bundle;
 
 import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IErrorDataset;
@@ -68,13 +68,13 @@ public class SWTXYTraceTest {
 	@Test
     public void testVectorSimple1D() throws Throwable {
 		
-		final AbstractDataset da1 = DoubleDataset.createRange(0, 100, 1);    
+		final Dataset da1 = DoubleDataset.createRange(0, 100, 1);    
 		
 		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{da1}));
 
 		final IPlottingSystem     sys    = (IPlottingSystem)oa[0];
 		
-		AbstractDataset vectors = AbstractDataset.zeros(new int[]{20, 20, 2}, Dataset.FLOAT32);
+		Dataset vectors = DatasetFactory.zeros(new int[]{20, 20, 2}, Dataset.FLOAT32);
 		
 		for (int x = 0; x < 20; x++) {
 			for (int y = 0; y < 20; y++) {
@@ -83,8 +83,8 @@ public class SWTXYTraceTest {
 			}
 		}
 		
-		final IDataset xAxis = AbstractDataset.zeros(new int[]{20}, Dataset.FLOAT32);
-		final IDataset yAxis = AbstractDataset.zeros(new int[]{20}, Dataset.FLOAT32);
+		final IDataset xAxis = DatasetFactory.zeros(new int[]{20}, Dataset.FLOAT32);
+		final IDataset yAxis = DatasetFactory.zeros(new int[]{20}, Dataset.FLOAT32);
 		for (int i = 0; i < 20; i++) {
 			xAxis.set(i*5, i);
 			yAxis.set(i*5, i);
@@ -122,7 +122,7 @@ public class SWTXYTraceTest {
 		
 		final AbstractPlottingSystem sys = (AbstractPlottingSystem)PlottingFactory.getPlottingSystem(part.getTitle());
 		
-		AbstractDataset vectors = AbstractDataset.zeros(new int[]{20, 20, 2}, Dataset.FLOAT32);
+		Dataset vectors = DatasetFactory.zeros(new int[]{20, 20, 2}, Dataset.FLOAT32);
 		
 		for (int x = 0; x < 20; x++) {
 			for (int y = 0; y < 20; y++) {
@@ -131,8 +131,8 @@ public class SWTXYTraceTest {
 			}
 		}
 		
-		final IDataset xAxis = AbstractDataset.zeros(new int[]{20}, Dataset.FLOAT32);
-		final IDataset yAxis = AbstractDataset.zeros(new int[]{20}, Dataset.FLOAT32);
+		final IDataset xAxis = DatasetFactory.zeros(new int[]{20}, Dataset.FLOAT32);
+		final IDataset yAxis = DatasetFactory.zeros(new int[]{20}, Dataset.FLOAT32);
 		for (int i = 0; i < 20; i++) {
 			xAxis.set(i*100, i);
 			yAxis.set(i*100, i);
@@ -182,7 +182,7 @@ public class SWTXYTraceTest {
 		IDataset                   data   = imt.getData();
 		
 		// Create a short line of invalid values...
-		data = ((AbstractDataset)data).cast(AbstractDataset.FLOAT64);
+		data = ((Dataset)data).cast(Dataset.FLOAT64);
 		for (int i = 0; i <20; i++) {
 			data.set(value, i*10,i*10);
 		}
@@ -222,7 +222,7 @@ public class SWTXYTraceTest {
     public void testFilterDectorator() throws Throwable {
 		
 		final IDataset y = DoubleDataset.createRange(0, 100, 1);
-		final IDataset x = AbstractDataset.arange(0, y.getSize(), 1, AbstractDataset.INT32);
+		final IDataset x = DatasetFactory.createRange(0, y.getSize(), 1, Dataset.INT32);
      
       
 		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{y}));
@@ -238,7 +238,7 @@ public class SWTXYTraceTest {
 				return 1;
 			}
 			protected IDataset[] filter(IDataset x,    IDataset y) {
-				return new IDataset[]{null, Maths.square((AbstractDataset)y)};
+				return new IDataset[]{null, Maths.square((Dataset)y)};
 			}
 		};
 		dec.addFilter(filter);
@@ -259,7 +259,7 @@ public class SWTXYTraceTest {
 		
 		final IDataset y = DoubleDataset.createRange(0, 100, 1);
 		y.setName("Test Data");
-		final IDataset x = AbstractDataset.arange(0, y.getSize(), 1, AbstractDataset.INT32);
+		final IDataset x = DatasetFactory.createRange(0, y.getSize(), 1, Dataset.INT32);
      
       
 		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{y}));
@@ -276,7 +276,7 @@ public class SWTXYTraceTest {
 				return 1;
 			}
 			protected IDataset[] filter(IDataset x,    IDataset y) {
-				y = Maths.square((AbstractDataset)y);
+				y = Maths.square((Dataset)y);
 				y.setName("Test Data");
 
 				return new IDataset[]{null, y};
@@ -289,7 +289,7 @@ public class SWTXYTraceTest {
 				return 1;
 			}
 			protected IDataset[] filter(IDataset x,    IDataset y) {
-				y = Maths.sqrt((AbstractDataset)y);
+				y = Maths.sqrt((Dataset)y);
 				y.setName("Test Data");
 				return new IDataset[]{null, y};
 			}
@@ -301,7 +301,7 @@ public class SWTXYTraceTest {
 				return 1;
 			}
 			protected IDataset[] filter(IDataset x,    IDataset y) {
-				y = Maths.add((AbstractDataset)y, 10);
+				y = Maths.add((Dataset)y, 10);
 				y.setName("Test Data");
 				return new IDataset[]{null, y};
 			}
@@ -358,7 +358,7 @@ public class SWTXYTraceTest {
 		final IPlottingSystem sys = plotter.getPlottingSystem();
 
 		final IDataset y = DoubleDataset.createRange(0, 100, 1);
-		final IDataset x = AbstractDataset.arange(0, y.getSize(), 1, AbstractDataset.INT32);
+		final IDataset x = DatasetFactory.createRange(0, y.getSize(), 1, Dataset.INT32);
   	
 		// Add a decorator that squares the data.
 		IFilterDecorator dec = PlottingFactory.createFilterDecorator(sys);	
@@ -368,7 +368,7 @@ public class SWTXYTraceTest {
 				return 1;
 			}
 			protected IDataset[] filter(IDataset x,    IDataset y) {
-				return new IDataset[]{null, Maths.square((AbstractDataset)y)};
+				return new IDataset[]{null, Maths.square((Dataset)y)};
 			}
 		};
 		dec.addFilter(filter);
@@ -404,7 +404,7 @@ public class SWTXYTraceTest {
 				System.out.println("Processing image filter...");
 				// Lets make it really noisy
 				for (int i = 0; i < 10; i++) {
-					data = Maths.multiply((AbstractDataset)data, Random.rand(0, 100, data.getShape()));
+					data = Maths.multiply((Dataset)data, Random.rand(0, 100, data.getShape()));
 				}
 				return new Object[]{data, axes};
 			}
@@ -445,8 +445,8 @@ public class SWTXYTraceTest {
 	@Test
     public void testErrorBarsExponential() throws Throwable {
 		
-		final AbstractDataset da1 = Maths.square(DoubleDataset.createRange(0, 100, 1));    
-		final AbstractDataset err = Maths.square(DoubleDataset.createRange(0, 100, 1).imultiply(0.2d));
+		final Dataset da1 = Maths.square(DoubleDataset.createRange(0, 100, 1));    
+		final Dataset err = Maths.square(DoubleDataset.createRange(0, 100, 1).imultiply(0.2d));
 		da1.setError(err);
 		
 		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{da1}));
@@ -467,8 +467,8 @@ public class SWTXYTraceTest {
 	@Test
     public void testErrorBarsExponentialLogAxes() throws Throwable {
 		
-		final AbstractDataset da1 = Maths.square(DoubleDataset.createRange(0, 100, 1));    
-		final AbstractDataset err = Maths.square(DoubleDataset.createRange(0, 100, 1).imultiply(0.2d));
+		final Dataset da1 = Maths.square(DoubleDataset.createRange(0, 100, 1));    
+		final Dataset err = Maths.square(DoubleDataset.createRange(0, 100, 1).imultiply(0.2d));
 		da1.setError(err);
 		
 		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{da1}));
@@ -643,7 +643,7 @@ public class SWTXYTraceTest {
 			
 		sys.clear();
 		
-		IDataset indices = AbstractDataset.arange(0, ys.get(0).getSize(), 1, AbstractDataset.INT32);
+		IDataset indices = DatasetFactory.createRange(0, ys.get(0).getSize(), 1, Dataset.INT32);
 
 		List<ITrace> traces = sys.createPlot1D(indices, ys, null);
 

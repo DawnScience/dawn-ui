@@ -29,7 +29,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
@@ -217,12 +218,12 @@ public class MeasurementCalibrationDialog extends Dialog {
 			// TODO FIXME only for standard orientation
 			// TODO FIXME only for square
 			final int[] shape = set.getShape();
-			AbstractDataset y = AbstractDataset.arange(shape[0], AbstractDataset.FLOAT64);
+			Dataset y = DatasetFactory.createRange(shape[0], Dataset.FLOAT64);
 			y.imultiply(ratio);
 			String unit = measurementUnit.getText();
 			y.setName(unit);
 			
-			AbstractDataset x = AbstractDataset.arange(shape[1], AbstractDataset.FLOAT64);
+			Dataset x = DatasetFactory.createRange(shape[1], Dataset.FLOAT64);
 			x.imultiply(ratio);
 			x.setName(measurementUnit.getText());
 		

@@ -12,7 +12,7 @@ import org.eclipse.ui.PlatformUI;
 //import org.slf4j.LoggerFactory;
 
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 /**
@@ -53,7 +53,7 @@ public class Multi2DTrace extends Image3DTrace implements IMulti2DTrace{
 		this.axes  = (List<IDataset>) axes;
 		
 		if (isActive()) {
-			plotter.updatePlot(createAxisValues(), null, plotType, (AbstractDataset[])data);
+			plotter.updatePlot(createAxisValues(), null, plotType, (Dataset[])data);
 			
 			if (plottingSystem!=null) {
 				plottingSystem.fireTraceUpdated(new TraceEvent(this));

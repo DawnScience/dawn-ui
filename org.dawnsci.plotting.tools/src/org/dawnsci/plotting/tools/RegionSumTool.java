@@ -47,7 +47,7 @@ import org.eclipse.ui.part.IPageSite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
@@ -455,7 +455,7 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 		int yInc = bounds.getPoint()[1]<bounds.getEndPoint()[1] ? 1 : -1;
 
 		if(image == null) return;
-		AbstractDataset dataRegion = (AbstractDataset)image.getData();
+		Dataset dataRegion = (Dataset)image.getData();
 
 		if(dataRegion == null) return;
 		try {
