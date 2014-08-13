@@ -140,7 +140,16 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 	public Control createPartControl(Composite parent) {
 		
 		this.area = new Composite(parent, SWT.NONE);
-		area.setLayout(new GridLayout(1, false));
+		GridLayout layout = new GridLayout(1, false);
+		layout.horizontalSpacing=0;
+		layout.verticalSpacing  =0;
+		layout.marginBottom     =0;
+		layout.marginTop        =5;
+		layout.marginLeft       =0;
+		layout.marginRight      =0;
+		layout.marginHeight     =0;
+		layout.marginWidth      =0;
+		area.setLayout(layout);
 		
 		this.explain = new CLabel(area, SWT.WRAP);
 		final GridData eData = new GridData(SWT.FILL, SWT.CENTER, true, false);
