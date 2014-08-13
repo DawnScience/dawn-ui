@@ -24,6 +24,9 @@ import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ViewPart;
 
+import uk.ac.diamond.scisoft.analysis.processing.IOperation;
+import uk.ac.diamond.scisoft.analysis.processing.IOperationService;
+
 /**
  * A view for constructing and executing a processing pipeline.
  * 
@@ -77,6 +80,26 @@ public class ProcessingView extends ViewPart {
 		seriesTable.setMenuManager(rightClick);
 		seriesTable.setInput(saved, operationFiler);
 
+	}
+	
+	@Override
+	public Object getAdapter(Class clazz) {
+		
+		if (clazz==IOperation.class) {
+			final List<ISeriesItemDescriptor> desi = seriesTable.getSeriesItems();
+			if (desi==null || desi.isEmpty()) return null;
+			final IOperation[] pipeline = new IOperation[desi.size()];
+			for (int i = 0; i < desi.size(); i++) {
+				try {
+					pipeline[i] = (IOperation)desi.get(i).getSeriesObject();
+				} catch (InstantiationException e) {
+					e.printStackTrace();
+					return null;
+				}
+ 			}
+			return pipeline;
+		} 
+		return super.getAdapter(clazz);
 	}
 
 	private void createColumns(OperationLabelProvider prov) {
