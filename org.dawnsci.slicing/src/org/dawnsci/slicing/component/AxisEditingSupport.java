@@ -22,7 +22,13 @@ import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.window.DefaultToolTip;
+import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +82,30 @@ class AxisEditingSupport extends EditingSupport {
 	}
 	@Override
 	protected CellEditor getCellEditor(Object element) {
+
+		final DimsData data = (DimsData)element;
+		final int idim  = data.getDimension()+1;
+		final List<String> names = dimensionNames.get(idim);
 		
+		String hint;
+		if (names.size()<2) {
+			hint = "No nexus axes or other data of the correct size has been found for\n"+
+		           "dimension '"+idim+"'. Therefore only indices can be selected as the axis for this dimension.";
+		
+		} else if (system.getRangeMode().isRange()){
+			hint = "Choose an axis using the drop down list.\n\n"+
+			           "Axes available are defined by the Nexus standard or simply the same size\n"+
+					   "as this dimension, which is dimension '"+idim+"'.";
+			
+		} else {
+			hint = "Choose an axis using the drop down list. The slice and plot title will\n"+
+		           "then show the value sliced in this axis or label the graph axes using\n"+
+				   "your chosen axis.\n\n"+
+		           "Axes available are defined by the Nexus standard or simply the same size\n"+
+				   "as this dimension, which is dimension '"+idim+"'.";
+		}
+		Hinter.showHint(axisDataEditor, hint);
+
 		return axisDataEditor;
 	}
 

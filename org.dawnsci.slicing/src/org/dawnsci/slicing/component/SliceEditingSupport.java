@@ -19,6 +19,8 @@ import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
+import org.eclipse.jface.window.DefaultToolTip;
+import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -26,8 +28,12 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Scale;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
@@ -111,7 +117,7 @@ class SliceEditingSupport extends EditingSupport {
 				}			
 			}
 		});
-		((Text)rangeEditor.getControl()).setToolTipText("Please enter \"all\" or a range of the form <int>:<int>.");
+		((Text)rangeEditor.getControl()).setToolTipText("Please enter \"all\" or a range of the form <start>:<stop>.");
 
 	}
 	
@@ -180,19 +186,40 @@ class SliceEditingSupport extends EditingSupport {
 		
 		int[] dataShape = system.getLazyDataset().getShape();
 		final DimsData data = (DimsData)element;
-		if (data.isTextRange()) return rangeEditor;
+		
+		CellEditor ret = null;
+		final String     text;
+		if (data.isTextRange()) {
+			ret = rangeEditor;
+			text = "Please enter a range <start>:<stop>, for instance '0:10' or 'all'.\n\n"+
+				   "This range will slice a whole section out of the dimension '"+(data.getDimension()+1)+"'.\n"+
+				   "Change the 'Type' column to '(Slice)' for a discrete value or to set as an axis.\n"+
+				   "Currently ranges must be done using the data indices not the axis value.";
 			
-		if (Activator.getDefault().getPreferenceStore().getInt(SliceConstants.SLICE_EDITOR)==1) {
+		}else if (Activator.getDefault().getPreferenceStore().getInt(SliceConstants.SLICE_EDITOR)==1) {
             spinnerEditor.setMaximum(dataShape[data.getDimension()]-1);
-		    return spinnerEditor;
+            ret = spinnerEditor;
+            
+			text = "This is the slice value, type a new to change the slice.\n\n"+
+				   "The play button, when pressed, will play the slices like a movie.\n"+
+				   "There is a preference to change the play speed.";
 		} else {
 			final Scale scale = (Scale)scaleEditor.getControl();
 			scale.setMaximum(dataShape[data.getDimension()]-1);
 			scale.setPageIncrement(scale.getMaximum()/10);
 
 			scale.setToolTipText(getScaleTooltip(data, scale.getMinimum(), scale.getMaximum()));
-			return scaleEditor;
+			ret  = scaleEditor;
+			
+			text = "Moving this slider changes the slice for the dimension '"+(data.getDimension()+1)+"' of the data.\n"+
+				   "If you are slicing large data it might take a moment to pull out the slice.\n\n"+
+			       "There is a menu button on the toolbar to change from a slider to a value.\n"+
+				   "(The value option also has a play button to play the slices like a video.)";
 		}
+		
+		Hinter.showHint(ret, text);
+
+		return ret;
 	}
 
 	@Override

@@ -70,7 +70,26 @@ class TypeEditingSupport extends EditingSupport {
 	}
 
 	@Override
-	protected CellEditor getCellEditor(Object element) {			
+	protected CellEditor getCellEditor(Object element) {	
+		
+		final DimsData data = (DimsData)element;
+		final StringBuilder text = new StringBuilder();
+		
+		// We append something about the current slice type.
+		if (system.getSliceType() instanceof PlotType) {
+			switch ((PlotType)system.getSliceType()) {
+			case XY:
+				text.append("Define one X-axis and others should be slices or ranges.");
+			case SURFACE:
+			case IMAGE:
+				text.append("Define two axes, one X and one Y. The others should be slices or ranges.");
+				break;
+			}
+		}
+		
+		Hinter.showHint(typeEditor, text.toString());
+
+		
 		return typeEditor;
 	}
 
