@@ -16,6 +16,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 		
 		store.setDefault(SliceConstants.SLICE_EDITOR,     0);
+		store.setDefault(SliceConstants.SHOW_HINTS,       true);
 
 	}
 

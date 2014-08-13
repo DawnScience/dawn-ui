@@ -200,9 +200,13 @@ class SliceEditingSupport extends EditingSupport {
             spinnerEditor.setMaximum(dataShape[data.getDimension()]-1);
             ret = spinnerEditor;
             
-			text = "This is the slice value, type a new to change the slice.\n\n"+
+    		final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawb.workbench.ui");
+    		int time = store.getInt("data.format.slice.play.speed");
+
+			text = "This is the slice value which can by typing or using the up/down arrows.\n\n"+
 				   "The play button, when pressed, will play the slices like a movie.\n"+
-				   "There is a preference to change the play speed.";
+				   "There is a preference to change the play speed; the current frame rate is 1 per "+time+" ms.\n"+
+				   "Click the play button again to stop playback.";
 		} else {
 			final Scale scale = (Scale)scaleEditor.getControl();
 			scale.setMaximum(dataShape[data.getDimension()]-1);
@@ -212,9 +216,9 @@ class SliceEditingSupport extends EditingSupport {
 			ret  = scaleEditor;
 			
 			text = "Moving this slider changes the slice for the dimension '"+(data.getDimension()+1)+"' of the data.\n"+
-				   "If you are slicing large data it might take a moment to pull out the slice.\n\n"+
-			       "There is a menu button on the toolbar to change from a slider to a value.\n"+
-				   "(The value option also has a play button to play the slices like a video.)";
+				   "If you are slicing large data at the moment, it might take a moment to do the slice.\n\n"+
+			       "There is a menu button on the toolbar to change from a slider to entering a value directly.\n"+
+				   "(It also has a play button to play through slices like video.)";
 		}
 		
 		Hinter.showHint(ret, text);

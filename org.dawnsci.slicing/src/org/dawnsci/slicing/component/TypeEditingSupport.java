@@ -72,23 +72,40 @@ class TypeEditingSupport extends EditingSupport {
 	@Override
 	protected CellEditor getCellEditor(Object element) {	
 		
-		final DimsData data = (DimsData)element;
-		final StringBuilder text = new StringBuilder();
+		final StringBuilder text = new StringBuilder("'Type' defines how a data dimension should be treated.\n");
+		text.append("For instance as an X direction in the plotted data or as a slice.\n\n");
 		
-		// We append something about the current slice type.
-		if (system.getSliceType() instanceof PlotType) {
-			switch ((PlotType)system.getSliceType()) {
-			case XY:
-				text.append("Define one X-axis and others should be slices or ranges.");
-			case SURFACE:
-			case IMAGE:
-				text.append("Define two axes, one X and one Y. The others should be slices or ranges.");
+		try {
+			// We append something about the current slice type.
+			Method dims = system.getSliceType().getClass().getMethod("getDimensions");
+			int    size = (Integer)dims.invoke(system.getSliceType());
+				
+			switch (size) {
+			case 1:
+				text.append("Please define one X-axis ");
+				break;
+			case 2:
+				text.append("Please define two axes, one X and one Y ");
+				break;
+			case 3:
+				text.append("Please define three axes, one X, one Y and one Z ");
 				break;
 			}
+			
+			text.append("for this dataset '"+system.getLazyDataset().getName()+"'");
+	
+			if (system.getLazyDataset().getRank()>size) {
+				text.append("\nother 'types' should be slices or ranges");
+			}
+			text.append(".");
+			text.append("\n\nAn error message will be shown below the table if the types are not consistent.");
+			text.append("\n\nYou can choose the 'Advanced slicing' option from the toolbar above to see more options.");
+			text.append("\nFor example mean, median, sum... etc."); 
+		} catch (Exception ne) {
+			ne.printStackTrace();
 		}
 		
 		Hinter.showHint(typeEditor, text.toString());
-
 		
 		return typeEditor;
 	}

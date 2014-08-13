@@ -1,5 +1,6 @@
 package org.dawnsci.slicing.component;
 
+import org.dawnsci.slicing.Activator;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.window.DefaultToolTip;
 import org.eclipse.jface.window.ToolTip;
@@ -14,27 +15,32 @@ class Hinter {
 
 	public static void showHint(CellEditor cellEd, final String hint) {
 		
+		if (!Activator.getDefault().getPreferenceStore().getBoolean(SliceConstants.SHOW_HINTS)) return;
+		
 		final Control control = cellEd.getControl();
 		control.getDisplay().asyncExec(new Runnable() {
 			public void run() {
 
 				final DefaultToolTip tooltip = new DefaultToolTip(control, ToolTip.NO_RECREATE, true);
 				tooltip.setText(hint);
-				tooltip.setHideDelay(0);
-				control.addListener(SWT.Dispose, new Listener() {
+				tooltip.setHideOnMouseDown(true);
+				tooltip.setHideDelay(20000);
+				tooltip.setRespectDisplayBounds(true);
+				
+				Listener listener = new Listener() {
 
 					@Override
 					public void handleEvent(Event event) {
-						if (!control.isDisposed()) tooltip.hide();
+						if (!control.isDisposed()) {
+							tooltip.hide();
+						}
+						control.removeListener(SWT.FocusOut, this);
+						control.removeListener(SWT.Dispose,  this);
 					}
-				});
-				control.addListener(SWT.FocusOut, new Listener() {
+				};
+				control.addListener(SWT.Dispose, listener);
+				control.addListener(SWT.FocusOut, listener);
 
-					@Override
-					public void handleEvent(Event event) {
-						if (!control.isDisposed()) tooltip.hide();
-					}
-				});
 				final GC    gc   = new GC(control);
 				final Point size = gc.textExtent(hint);
 				tooltip.show(new Point(-size.x-15, 0));

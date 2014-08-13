@@ -328,6 +328,16 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		final ToolBarManager man = new ToolBarManager(SWT.FLAT|SWT.RIGHT|SWT.WRAP);
 		man.add(new Separator("sliceTools"));
 
+		final Action showTips = new Action("Show tooltips while editing the slice setup", IAction.AS_CHECK_BOX) {
+			public void run() {
+				Activator.getDefault().getPreferenceStore().setValue(SliceConstants.SHOW_HINTS, isChecked());
+			}
+		};
+		showTips.setImageDescriptor(Activator.getImageDescriptor("icons/wand.png"));
+		showTips.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(SliceConstants.SHOW_HINTS));
+        man.add(showTips);		
+		man.add(new Separator("group0"));
+
 		// Add action for Setting the tools into advanced mode.
 		final Action advanced = new Action("Advanced slicing.\nFor instance, shows extra options for 'Type' including mean and median.", IAction.AS_CHECK_BOX) {
 			public void run() {
@@ -338,7 +348,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		advanced.setImageDescriptor(Activator.getImageDescriptor("icons/graduation-hat.png"));
 		advanced.setChecked(isAdvanced());
         man.add(advanced);		
-		man.add(new Separator("group0"));
+		man.add(new Separator("group1"));
 
 		super.createSliceTools(man);
 		

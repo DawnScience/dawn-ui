@@ -9,4 +9,6 @@ public class SliceConstants {
 	
 	public static final String SLICE_EDITOR = "org.dawb.workbench.slicing.component.editor.type";
 
+	public static final String SHOW_HINTS = "org.dawb.workbench.slicing.component.showHints";
+
 }
