@@ -49,7 +49,7 @@ import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
@@ -99,8 +99,8 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 			if (!iTrace.isUserTrace()) continue;
 			final ILineTrace lineTrace = (ILineTrace)iTrace;
 			final HistoryBean bean = new HistoryBean(this);
-			bean.setXdata((AbstractDataset)lineTrace.getXData());
-			bean.setYdata((AbstractDataset)lineTrace.getYData());
+			bean.setXdata((Dataset)lineTrace.getXData());
+			bean.setYdata((Dataset)lineTrace.getYData());
 			bean.setTraceName(iTrace.getName());
 			if (lineTrace.getTraceColor()!=null) {
 				bean.setPlotColour(lineTrace.getTraceColor().getRGB());
@@ -430,7 +430,7 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 				return bean.getPlotName();
 			}
 			if (columnIndex==4) {
-				AbstractDataset data = bean.getYdata();
+				Dataset data = bean.getYdata();
 				if (data==null) return "-";
 				return Arrays.toString(bean.getYdata().getShape());
 			}

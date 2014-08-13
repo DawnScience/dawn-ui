@@ -12,7 +12,8 @@ import org.dawb.common.services.IVariableManager;
 import org.dawb.common.services.ServiceManager;
 import org.eclipse.swt.graphics.RGB;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
@@ -35,7 +36,7 @@ class HistoryBean {
 	}
 	
 	// Image compare
-	private AbstractDataset       data;
+	private Dataset       data;
 	private List<IDataset>        axes;
 	private Operator              operator;
 	private int                   weighting=100;
@@ -45,7 +46,7 @@ class HistoryBean {
 	private String                variable;
 	
 	// 1D history
-	private AbstractDataset xdata;
+	private Dataset xdata;
 	private RGB             plotColour;
 	private AxisType        axis=AxisType.Y1; 
 	
@@ -101,29 +102,29 @@ class HistoryBean {
 		this.fixedImageKey = key;
 	}
 
-	public AbstractDataset getXdata() {
+	public Dataset getXdata() {
 		if (xdata==null) {
-			AbstractDataset data = getData();
+			Dataset data = getData();
 			if (data!=null && data.getRank()==1) {
-				xdata = AbstractDataset.arange(data.getSize(), AbstractDataset.INT32);
+				xdata = DatasetFactory.createRange(data.getSize(), Dataset.INT32);
 			}
 		}
 		return xdata;
 	}
 
-	public AbstractDataset getData() {
+	public Dataset getData() {
 		if (expression!=null)
 			try {
-				return (AbstractDataset)expression.getDataSet(null, new IMonitor.Stub());
+				return (Dataset)expression.getDataSet(null, new IMonitor.Stub());
 			} catch (Exception e) {
 				// Allowed
 			}
 		return data;
 	}
-	public void setData(AbstractDataset data) {
+	public void setData(Dataset data) {
 		this.data = data;
 	}
-	public void setXdata(AbstractDataset xdata) {
+	public void setXdata(Dataset xdata) {
 		this.xdata = xdata;
 	}
 	public boolean isSelected() {
@@ -187,10 +188,10 @@ class HistoryBean {
 		
 		return ret;
 	}
-	public AbstractDataset getYdata() {
+	public Dataset getYdata() {
 		return getData();
 	}
-	public void setYdata(AbstractDataset data) {
+	public void setYdata(Dataset data) {
 		setData(data);
 	}
 	public RGB getPlotColour() {
