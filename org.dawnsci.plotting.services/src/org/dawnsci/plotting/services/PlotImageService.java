@@ -66,7 +66,8 @@ import org.eclipse.ui.services.AbstractServiceFactory;
 import org.eclipse.ui.services.IDisposable;
 import org.eclipse.ui.services.IServiceLocator;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.RGBDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Stats;
@@ -109,7 +110,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 		}
 		
 		try {
-			final AbstractDataset thumb = getThumbnail(f, width, height);
+			final Dataset thumb = getThumbnail(f, width, height);
 		    return createImageSWT(thumb, null);
 		    
 		} catch (Throwable ne) {
@@ -138,16 +139,16 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
         return blank;
 	}
 	
-	private AbstractDataset getThumbnail(final File f, final int wdith, final int height) throws Throwable {
+	private Dataset getThumbnail(final File f, final int wdith, final int height) throws Throwable {
 		
 	    if (H5Loader.isH5(f.getAbsolutePath())) return null; // Cannot risk loading large datasets!
 		final ILoaderService loader = (ILoaderService)ServiceManager.getService(ILoaderService.class);
-		final AbstractDataset set   = (AbstractDataset)loader.getDataset(f.getAbsolutePath(), null);
-		final AbstractDataset thumb = getThumbnail(set, wdith, height);
+		final Dataset set   = (Dataset)loader.getDataset(f.getAbsolutePath(), null);
+		final Dataset thumb = getThumbnail(set, wdith, height);
 		return thumb;
 	}
 
-	public AbstractDataset getThumbnail(final IDataset ds,  final int w, final int h) {
+	public Dataset getThumbnail(final IDataset ds,  final int w, final int h) {
 
 		if (ds!=null && ds.getRank() == 2) { // 2D datasets only!!!
 			int width = ds.getShape()[1];
@@ -157,7 +158,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 			stepping[1] = Math.max(1, width / w);
 			stepping[0] = Math.max(1, height / h);
 			Downsample down = new Downsample(DownsampleMode.POINT, stepping);
-			AbstractDataset ds_downsampled = down.value(ds).get(0);
+			Dataset ds_downsampled = down.value(ds).get(0);
 			ds_downsampled.setName(ds.getName());
 			return ds_downsampled;
 		}
@@ -192,7 +193,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 	 * @param thumbnail
 	 * @return
 	 */
-	public Image createImageDiamond(final AbstractDataset thumbail) {
+	public Image createImageDiamond(final Dataset thumbail) {
 		
 		GlobalColourMaps.InitializeColourMaps();
 		
@@ -201,13 +202,13 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 			double max;
 			if (thumbail instanceof RGBDataset) {
 				double temp;
-				max = Stats.quantile(((RGBDataset) thumbail).createRedDataset(AbstractDataset.INT16),
+				max = Stats.quantile(((RGBDataset) thumbail).createRedDataset(Dataset.INT16),
 						minimumThreshold);
-				temp = Stats.quantile(((RGBDataset) thumbail).createGreenDataset(AbstractDataset.INT16),
+				temp = Stats.quantile(((RGBDataset) thumbail).createGreenDataset(Dataset.INT16),
 						minimumThreshold);
 				if (max < temp)
 					max = temp;
-				temp = Stats.quantile(((RGBDataset) thumbail).createBlueDataset(AbstractDataset.INT16),
+				temp = Stats.quantile(((RGBDataset) thumbail).createBlueDataset(Dataset.INT16),
 						minimumThreshold);
 				if (max < temp)
 					max = temp;
@@ -254,7 +255,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 		final int    height = data.getHeight();
 		
 		if (set.getShape().length==2 && data.getType()==PlotImageType.IMAGE_ONLY) {
-			final AbstractDataset thumb = getThumbnail(set, width, height);
+			final Dataset thumb = getThumbnail(set, width, height);
 			if (thumb==null) return null;
 			return createImage(thumb, (ImageServiceBean)data.getImageServiceBean());
 			
@@ -291,8 +292,8 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 						List<IDataset> oaxes = trace.getAxes();
 						List<IDataset> axes  = new ArrayList<IDataset>(3);
 						if (oaxes==null) {
-							axes.add(AbstractDataset.arange(set.getShape()[1], AbstractDataset.INT));
-							axes.add(AbstractDataset.arange(set.getShape()[0], AbstractDataset.INT));
+							axes.add(DatasetFactory.createRange(set.getShape()[1], Dataset.INT));
+							axes.add(DatasetFactory.createRange(set.getShape()[0], Dataset.INT));
 						} else {
 							axes.add(oaxes.get(0));
 							axes.add(oaxes.get(1));
@@ -301,7 +302,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 						// z only gets larger
 						double zLow = Math.min(data.getzLower(), set.min().doubleValue());
 						double zUp  = Math.max(data.getzUpper(), set.max().doubleValue());
-						IDataset z  = AbstractDataset.arange(zLow, zUp, (zUp-zLow)/1000, AbstractDataset.FLOAT);
+						IDataset z  = DatasetFactory.createRange(zLow, zUp, (zUp-zLow)/1000, Dataset.FLOAT);
 						axes.add(z);
 						
 						trace.setData(data.getData(), axes);
