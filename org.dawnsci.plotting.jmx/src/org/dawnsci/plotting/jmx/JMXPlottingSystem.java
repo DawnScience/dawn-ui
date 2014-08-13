@@ -35,7 +35,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchPart;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 /**
@@ -400,8 +400,8 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	}
 
 	@Override
-	public AbstractDataset getData(String dataSetName) {
-		return (AbstractDataset)call(getMethodName(Thread.currentThread().getStackTrace()));
+	public Dataset getData(String dataSetName) {
+		return (Dataset)call(getMethodName(Thread.currentThread().getStackTrace()));
 	}
 
 	@Override

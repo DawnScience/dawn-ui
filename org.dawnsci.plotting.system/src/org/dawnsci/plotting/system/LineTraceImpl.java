@@ -15,7 +15,8 @@ import org.eclipse.nebula.visualization.xygraph.figures.Trace;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IErrorDataset;
 
@@ -350,7 +351,7 @@ public class LineTraceImpl implements ILineTrace {
 			settingLineData = true;
 			
 			if (xData==null && yData!=null) {
-				xData = AbstractDataset.arange(yData.getSize(), AbstractDataset.INT);
+				xData = DatasetFactory.createRange(yData.getSize(), Dataset.INT);
 			}
 			
 			LightWeightDataProvider prov = (LightWeightDataProvider)trace.getDataProvider();

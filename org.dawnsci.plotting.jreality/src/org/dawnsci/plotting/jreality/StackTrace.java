@@ -11,7 +11,8 @@ import org.eclipse.dawnsci.plotting.api.trace.ILineStackTrace;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Slice;
@@ -21,14 +22,14 @@ import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 public class StackTrace extends PlotterTrace implements ILineStackTrace {
 
 	
-	private AbstractDataset[] stack;
+	private Dataset[] stack;
 
 	public StackTrace(JRealityPlotViewer plotter2, String name2) {
 		super(plotter2, name2);
 	}
 
 	@Override
-	public AbstractDataset getData() {
+	public Dataset getData() {
 		throw new RuntimeException("Please use getStack() instead!");
 	}
 	
@@ -83,16 +84,16 @@ public class StackTrace extends PlotterTrace implements ILineStackTrace {
 			nAxes = axes.size();
 			String l = getLabel(a++);
 			for (int i = 0; i < (nAxes - 2); i++) {
-				values.add(new AxisValues(l, DatasetUtils.convertToAbstractDataset(axes.get(i))));
+				values.add(new AxisValues(l, DatasetUtils.convertToDataset(axes.get(i))));
 			}
 			y = axes.get(nAxes - 2);
 			z = axes.get(nAxes - 1);
 		}
-		values.add(new AxisValues(getLabel(a++), DatasetUtils.convertToAbstractDataset(y)));
+		values.add(new AxisValues(getLabel(a++), DatasetUtils.convertToDataset(y)));
 
 		final AxisValues zAxis;
 		if (z != null) {
-			AbstractDataset tz = DatasetUtils.convertToAbstractDataset(z);
+			Dataset tz = DatasetUtils.convertToDataset(z);
 			if (window instanceof LinearROI && tz.getRank() == 1) {
 				final int x1 = window.getIntPoint()[0];
 				final int x2 = (int) Math.ceil(((LinearROI) window).getEndPoint()[0]);
@@ -103,7 +104,7 @@ public class StackTrace extends PlotterTrace implements ILineStackTrace {
 			final int x1 = window.getIntPoint()[0];
 			final int x2 = (int) Math.ceil(((LinearROI) window).getEndPoint()[0]);
 			final int len = x2 - x1;
-			zAxis = new AxisValues(getLabel(a), AbstractDataset.arange(len, AbstractDataset.INT32));
+			zAxis = new AxisValues(getLabel(a), DatasetFactory.createRange(len, Dataset.INT32));
 		} else {
 			zAxis = new AxisValues(getLabel(a), null);
 		}

@@ -8,7 +8,7 @@ import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionMetadataUtils;
@@ -153,7 +153,7 @@ public class DiffractionUtils {
 
 		final ProgressMonitorWrapper mon = new ProgressMonitorWrapper(monitor);
 		monitor.subTask("Find POIs near initial ellipse");
-		AbstractDataset image = (AbstractDataset) t.getData();
+		Dataset image = (Dataset) t.getData();
 		BooleanDataset mask = (BooleanDataset) t.getMask();
 		PolylineROI points;
 		monitor.subTask("Fit POIs");
@@ -189,7 +189,7 @@ public class DiffractionUtils {
 //
 //		final ProgressMonitorWrapper mon = new ProgressMonitorWrapper(monitor);
 //		monitor.subTask("Find POIs near initial ellipse");
-//		AbstractDataset image = (AbstractDataset) t.getData();
+//		Dataset image = (Dataset) t.getData();
 //		BooleanDataset mask = (BooleanDataset) t.getMask();
 //		PolylineROI points;
 //		EllipticalFitROI efroi;

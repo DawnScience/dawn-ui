@@ -18,16 +18,10 @@ import org.dawnsci.spectrum.ui.file.SpectrumFile;
 import org.dawnsci.spectrum.ui.file.SpectrumFileManager;
 import org.dawnsci.spectrum.ui.file.SpectrumFileOpenedEvent;
 import org.dawnsci.spectrum.ui.file.SpectrumInMemory;
-import org.dawnsci.spectrum.ui.processing.AbstractProcess;
-import org.dawnsci.spectrum.ui.processing.AverageProcess;
-import org.dawnsci.spectrum.ui.processing.DerivativeProcess;
-import org.dawnsci.spectrum.ui.processing.DivisionProcess;
 import org.dawnsci.spectrum.ui.processing.SaveProcess;
 import org.dawnsci.spectrum.ui.processing.SaveTextProcess;
-import org.dawnsci.spectrum.ui.processing.SubtractionProcess;
 import org.dawnsci.spectrum.ui.utils.SpectrumUtils;
 import org.dawnsci.spectrum.ui.wizard.SaveFileWizardPage;
-import org.dawnsci.spectrum.ui.wizard.SpectrumSubtractionWizardPage;
 import org.dawnsci.spectrum.ui.wizard.SpectrumWizard;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -101,7 +95,7 @@ import org.eclipse.ui.part.ResourceTransfer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
@@ -639,7 +633,7 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 
 			protected IDataset[] filter(IDataset x, IDataset y) {
 				Collection<ITrace>  traces = system.getTraces(ILineTrace.class);
-				IDataset newY = Maths.add(DatasetUtils.norm((AbstractDataset)y),(traces.size()*0.2));
+				IDataset newY = Maths.add(DatasetUtils.norm((Dataset)y),(traces.size()*0.2));
 				newY.setName(y.getName());
 
 				return new IDataset[]{x, newY};
@@ -654,7 +648,7 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 			}
 
 			protected IDataset[] filter(IDataset x, IDataset y) {
-				IDataset newY = DatasetUtils.norm((AbstractDataset)y);
+				IDataset newY = DatasetUtils.norm((Dataset)y);
 				return new IDataset[]{x, newY};
 			}
 		};
@@ -668,7 +662,7 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 
 			protected IDataset[] filter(IDataset x, IDataset y) {
 				Collection<ITrace>  traces = system.getTraces(ILineTrace.class);
-				IDataset newY = Maths.add(DatasetUtils.norm((AbstractDataset)y),(traces.size()*1));
+				IDataset newY = Maths.add(DatasetUtils.norm((Dataset)y),(traces.size()*1));
 				newY.setName(y.getName());
 
 				return new IDataset[]{x, newY};

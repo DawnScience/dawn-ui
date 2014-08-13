@@ -89,7 +89,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
@@ -480,7 +480,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	protected final boolean updatePlot(final List<AxisValues>    axes, 
 						               final IROI             window,
 						               final PlottingMode        mode,
-						               final AbstractDataset...  data) {
+						               final Dataset...  data) {
 		return plot(axes, window, mode, true, data);
 	}
 
@@ -1236,8 +1236,8 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	}
 
 	private boolean checkForNan(IDataset data) {
-		if (data instanceof AbstractDataset)
-			return ((AbstractDataset) data).containsNans();
+		if (data instanceof Dataset)
+			return ((Dataset) data).containsNans();
 
 		for (int i = 0; i < data.getShape()[0]; i++)
 			if (Double.isNaN(data.getDouble(i)))
@@ -1246,8 +1246,8 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	}
 
 	private boolean checkForInf(IDataset data) {
-		if (data instanceof AbstractDataset)
-			return ((AbstractDataset) data).containsInfs();
+		if (data instanceof Dataset)
+			return ((Dataset) data).containsInfs();
 
 		for (int i = 0; i < data.getShape()[0]; i++)
 			if (Double.isInfinite(data.getDouble(i)))

@@ -6,7 +6,7 @@ import java.util.Comparator;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
@@ -19,12 +19,12 @@ public class PolynomialInterpolator1D {
 		
 		//TODO more sanity checks on inputs
 		
-		DoubleDataset dx = (DoubleDataset)DatasetUtils.cast((AbstractDataset)oldx,AbstractDataset.FLOAT64);
-		DoubleDataset dy = (DoubleDataset)DatasetUtils.cast((AbstractDataset)oldy,AbstractDataset.FLOAT64);
+		DoubleDataset dx = (DoubleDataset)DatasetUtils.cast(oldx,Dataset.FLOAT64);
+		DoubleDataset dy = (DoubleDataset)DatasetUtils.cast(oldy,Dataset.FLOAT64);
 		
 		boolean sorted = true;
 		double maxtest = oldx.getDouble(0);
-		for (int i = 1; i < ((AbstractDataset)oldx).count(); i++) {
+		for (int i = 1; i < ((Dataset)oldx).count(); i++) {
 			if (maxtest > oldx.getDouble(i))  {
 				sorted = false;
 				break;
@@ -55,7 +55,7 @@ public class PolynomialInterpolator1D {
 		IDataset newy = newx.clone();
 		newy.setName(oldy.getName()+"_interpolated");
 		
-		for (int i = 0; i < ((AbstractDataset)newx).count(); i++) {
+		for (int i = 0; i < ((Dataset)newx).count(); i++) {
 			newy.set(poly.value(newx.getDouble(i)),i);
 		}
 		

@@ -6,7 +6,6 @@ import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
@@ -63,14 +62,14 @@ public class FittedPeaksInfo {
 	public void setIdentifiedPeaks(List<IdentifiedPeak> ideedPeaks) {
 		this.identifiedPeaks = ideedPeaks;
 	}
-	public AbstractDataset getX() {
-		return (AbstractDataset) x;
+	public Dataset getX() {
+		return (Dataset) x;
 	}
 	public void setX(Dataset x) {
 		this.x = x;
 	}
-	public AbstractDataset getY() {
-		return (AbstractDataset) y;
+	public Dataset getY() {
+		return (Dataset) y;
 	}
 	public void setY(Dataset y) {
 		this.y = y;

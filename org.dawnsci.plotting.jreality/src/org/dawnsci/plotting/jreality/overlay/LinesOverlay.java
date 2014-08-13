@@ -26,7 +26,7 @@ import org.eclipse.dawnsci.plotting.api.jreality.overlay.OverlayType;
 import org.eclipse.dawnsci.plotting.api.jreality.overlay.primitives.PrimitiveType;
 import org.eclipse.swt.widgets.Display;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 /**
@@ -74,7 +74,7 @@ public class LinesOverlay extends AbstractOverlayConsumer {
     	this.xValues = xValues;
     }
 
-	public void setY(final AbstractDataset y) {
+	public void setY(final Dataset y) {
 		this.min = y.min().doubleValue();
 		this.max = y.min().doubleValue();
 	}

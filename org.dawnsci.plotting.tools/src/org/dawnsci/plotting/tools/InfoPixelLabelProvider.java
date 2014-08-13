@@ -45,7 +45,7 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
@@ -122,9 +122,9 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 			if (Double.isNaN(yLabel)) yLabel = yIndex;
 	
 			IDiffractionMetadata dmeta = null;
-			AbstractDataset set = null;
+			Dataset set = null;
 			if (trace!=null) {
-				set = (AbstractDataset)trace.getData();
+				set = (Dataset)trace.getData();
 				final IMetaData      meta = set.getMetadata();
 				if (meta instanceof IDiffractionMetadata) {
 	

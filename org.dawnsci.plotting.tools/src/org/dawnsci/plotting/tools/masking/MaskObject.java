@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Comparisons;
 import uk.ac.diamond.scisoft.analysis.dataset.IndexIterator;
@@ -74,7 +74,7 @@ public class MaskObject {
      * true to leave, that way multiply will work.
      */
     private BooleanDataset  maskDataset;
-    private AbstractDataset imageDataset;
+    private Dataset imageDataset;
     
     /**
      * Used for undoable masking operations.
@@ -351,7 +351,7 @@ public class MaskObject {
 		createMaskIfNeeded();
 		monitor.worked(1);
 	
-        // Slightly wrong AbstractDataset loop, but it is faster...
+        // Slightly wrong Dataset loop, but it is faster...
 		if (minNumber!=null || maxNumber!=null) {
 			final int           as  = imageDataset.getElementsPerItem();
 			if (as!=1) throw new RuntimeException("Cannot deal with mulitple elements in mask processing!");
@@ -700,11 +700,11 @@ public class MaskObject {
 		if (maskDataset!=null && requireFill) maskDataset.fill(true);
 	}
 
-	public AbstractDataset getImageDataset() {
+	public Dataset getImageDataset() {
 		return imageDataset;
 	}
 
-	public void setImageDataset(AbstractDataset imageDataset) {
+	public void setImageDataset(Dataset imageDataset) {
 		this.imageDataset = imageDataset;
 	}
 

@@ -8,7 +8,7 @@ import org.eclipse.dawnsci.plotting.api.filter.IFilterDecorator;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Maths;
@@ -45,8 +45,8 @@ public class PlotFilterActions {
 
 			protected IDataset[] filter(IDataset x, IDataset y) {
 
-				return new IDataset[]{x, Maths.derivative(DatasetUtils.convertToAbstractDataset(x),
-						DatasetUtils.convertToAbstractDataset(y), 1)};
+				return new IDataset[]{x, Maths.derivative(DatasetUtils.convertToDataset(x),
+						DatasetUtils.convertToDataset(y), 1)};
 			}
 		};
 		
@@ -59,8 +59,8 @@ public class PlotFilterActions {
 
 			protected IDataset[] filter(IDataset x, IDataset y) {
 
-				AbstractDataset xds = DatasetUtils.convertToAbstractDataset(x);
-				AbstractDataset yds = DatasetUtils.convertToAbstractDataset(y);
+				Dataset xds = DatasetUtils.convertToDataset(x);
+				Dataset yds = DatasetUtils.convertToDataset(y);
 				
 				return new IDataset[]{x, Maths.derivative(xds,Maths.derivative(xds, yds,1),1)};
 			}

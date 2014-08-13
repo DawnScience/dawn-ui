@@ -43,7 +43,8 @@ import org.eclipse.ui.part.IPageSite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 public class CrossHairProfileTool extends AbstractToolPage implements IROIListener, MouseListener  {
@@ -450,8 +451,8 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 				return false;
 			}
 
-			final AbstractDataset data = (AbstractDataset)image.getData();
-			AbstractDataset slice=null, sliceIndex=null;
+			final Dataset data = (Dataset)image.getData();
+			Dataset slice=null, sliceIndex=null;
 			if (monitor.isCanceled())return  false;
 			try {
 				int[] shape = data.getShape();
@@ -471,7 +472,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 			slice = slice.flatten();
 			if (monitor.isCanceled()) return  false;
 			final int size = slice.getSize();
-			sliceIndex = AbstractDataset.arange(size, AbstractDataset.INT);
+			sliceIndex = DatasetFactory.createRange(size, Dataset.INT);
 			if (trace==null) return false;
 			slice.setName(trace.getName());
 			trace.setData(sliceIndex, slice);

@@ -37,7 +37,7 @@ import org.eclipse.ui.part.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 
 
 public class ZipEditor extends MultiPageEditorPart implements  IPlottingSystemSelection {
@@ -236,10 +236,10 @@ public class ZipEditor extends MultiPageEditorPart implements  IPlottingSystemSe
     
 
 	@Override
-	public AbstractDataset setDatasetSelected(String name, boolean clearOthers) {
+	public Dataset setDatasetSelected(String name, boolean clearOthers) {
 		IVariableManager man = (IVariableManager)getAdapter(IVariableManager.class);
 		if (man==null) return null;
-		return (AbstractDataset)((IPlottingSystemSelection)man).setDatasetSelected(name, clearOthers);
+		return (Dataset)((IPlottingSystemSelection)man).setDatasetSelected(name, clearOthers);
 	}
 
 	@Override

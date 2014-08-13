@@ -4,7 +4,7 @@ import org.dawb.common.ui.plot.roi.data.LinearROIData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
@@ -124,7 +124,7 @@ public class ToolUtils {
 	 * @return the line intensity of the linearROI given an image dataset
 	 */
 	public static double getLineIntensity(IDataset im, LinearROI lroi) {
-		LinearROIData lrd = new LinearROIData(lroi, (AbstractDataset) im, 1d);
+		LinearROIData lrd = new LinearROIData(lroi, (Dataset) im, 1d);
 		try {
 			double max2 = lrd.getProfileData().length > 1
 					&& lrd.getProfileData()[1] != null
@@ -144,7 +144,7 @@ public class ToolUtils {
 	public static double getRectangleSum(IDataset rectangleSlice) {
 		if (rectangleSlice == null)
 			return Double.NaN;
-		return (Double)((AbstractDataset)rectangleSlice).sum(true);
+		return (Double)((Dataset)rectangleSlice).sum(true);
 	}
 
 	/**

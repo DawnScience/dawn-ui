@@ -62,7 +62,8 @@ import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
@@ -377,7 +378,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 	}
 
 	private IDataset getCalibratedAxis(double factor, int size) {
-		AbstractDataset axis = AbstractDataset.arange(size, AbstractDataset.FLOAT64);
+		Dataset axis = DatasetFactory.createRange(size, Dataset.FLOAT64);
 		axis.imultiply(factor);
 		axis.setName(unitName);
 		return axis;

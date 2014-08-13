@@ -4,6 +4,8 @@ import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.vecmath.Vector3d;
+
 import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.annotation.AnnotationUtils;
@@ -13,7 +15,6 @@ import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.TraceUtils;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
@@ -21,8 +22,6 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
-
-import javax.vecmath.Vector3d;
 
 public class FittedFunction  {
 
@@ -41,8 +40,8 @@ public class FittedFunction  {
 	
 	private Vector3d q;
 
-	public AbstractDataset getX() {
-		return (AbstractDataset) x;
+	public Dataset getX() {
+		return (Dataset) x;
 	}
 
 	public void setX(Dataset x) {
@@ -110,8 +109,8 @@ public class FittedFunction  {
 		return ret;
 	}
 
-	public AbstractDataset getY() {
-		return (AbstractDataset) y;
+	public Dataset getY() {
+		return (Dataset) y;
 	}
 
 	public void setY(Dataset y) {

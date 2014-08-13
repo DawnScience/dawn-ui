@@ -91,7 +91,7 @@ import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
@@ -991,7 +991,7 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			IROI roi = region.getROI();
 			if (roi instanceof RectangularROI) {
 				RectangularROI rroi = (RectangularROI) roi;
-					AbstractDataset dataRegion = (AbstractDataset) ToolUtils
+					Dataset dataRegion = (Dataset) ToolUtils
 							.getClippedSlice(trace.getData(), rroi);
 					intensityAndSum[0] = ToolUtils.getRectangleMaxIntensity(dataRegion);
 					intensityAndSum[1] = ToolUtils.getRectangleSum(dataRegion);
@@ -1000,7 +1000,7 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 				intensityAndSum[0] = ToolUtils.getLineIntensity(trace.getData(), lroi);
 			} else if (roi instanceof PointROI) {
 				PointROI proi = (PointROI) roi;
-				intensityAndSum[0] = ((AbstractDataset) trace.getData()).getDouble((int)proi.getPointY(), (int)proi.getPointX());
+				intensityAndSum[0] = ((Dataset) trace.getData()).getDouble((int)proi.getPointY(), (int)proi.getPointX());
 			}
 		}
 		return intensityAndSum;

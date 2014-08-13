@@ -46,7 +46,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
@@ -266,7 +266,7 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 		final int xInc = bounds.getPoint()[0]<bounds.getEndPoint()[0] ? 1 : -1;
 		
 		try {
-			final AbstractDataset slice = ((AbstractDataset)image.getData()).getSlice(new int[] { (int) bounds.getPoint()[1],    (int) bounds.getPoint()[0] },
+			final Dataset slice = ((Dataset)image.getData()).getSlice(new int[] { (int) bounds.getPoint()[1],    (int) bounds.getPoint()[0] },
 					                                               new int[] { (int) bounds.getEndPoint()[1], (int) bounds.getEndPoint()[0] },
 					                                               new int[] {yInc, xInc});
 		
@@ -286,7 +286,7 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 
 	}
 
-	protected void updateTable(final AbstractDataset slice) {
+	protected void updateTable(final Dataset slice) {
 		
 
 		this.table = new Table(main, SWT.FULL_SELECTION | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER| SWT.VIRTUAL);
@@ -480,6 +480,6 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 			}
 		}
 		
-		return ((AbstractDataset)getImageTrace().getData()).getMetadata();
+		return ((Dataset)getImageTrace().getData()).getMetadata();
 	}
 }

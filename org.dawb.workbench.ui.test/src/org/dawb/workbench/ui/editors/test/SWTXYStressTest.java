@@ -38,7 +38,8 @@ import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
@@ -95,7 +96,7 @@ public class SWTXYStressTest {
 				
 		final long start = System.currentTimeMillis();
 		
-		sys.createPlot1D(AbstractDataset.arange(0, ys.get(0).getSize(), 1, AbstractDataset.INT32), ys, null);
+		sys.createPlot1D(DatasetFactory.createRange(0, ys.get(0).getSize(), 1, Dataset.INT32), ys, null);
 		EclipseUtils.delay(10);
 		
 		final long end  = System.currentTimeMillis();
@@ -158,7 +159,7 @@ public class SWTXYStressTest {
 		final PlotDataEditor plotter   = (PlotDataEditor)editor.getActiveEditor();
 		final IPlottingSystem sys = plotter.getPlottingSystem();
 		
-    	AbstractDataset data = Random.rand(new int[]{2048});
+    	Dataset data = Random.rand(new int[]{2048});
     	
     	final IRegion region = sys.createRegion(RegionUtils.getUniqueName("Y Profile", sys), IRegion.RegionType.XAXIS_LINE);
 		region.setTrackMouse(true);
@@ -179,7 +180,7 @@ public class SWTXYStressTest {
         	
         	Display.getDefault().syncExec(new Runnable() {
         		public void run() {
-        			AbstractDataset data = Random.rand(new int[]{2048});
+        			Dataset data = Random.rand(new int[]{2048});
          			trace.setData(IntegerDataset.createRange(2048), data);
         			sys.repaint();
           		}

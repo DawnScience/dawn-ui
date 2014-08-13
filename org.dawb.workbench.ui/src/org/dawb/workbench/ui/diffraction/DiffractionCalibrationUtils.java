@@ -46,7 +46,8 @@ import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
@@ -336,7 +337,7 @@ public class DiffractionCalibrationUtils {
 				}
 				Polynomial p = new Polynomial(1);
 				try {
-					Fitter.polyFit(new AbstractDataset[] {AbstractDataset.createFromList(odist)}, AbstractDataset.createFromList(ndist), 1e-15, p);
+					Fitter.polyFit(new Dataset[] {DatasetFactory.createFromList(odist)}, DatasetFactory.createFromList(ndist), 1e-15, p);
 				} catch (Exception e) {
 					logger.error("Problem with fit", e);
 					return Status.CANCEL_STATUS;

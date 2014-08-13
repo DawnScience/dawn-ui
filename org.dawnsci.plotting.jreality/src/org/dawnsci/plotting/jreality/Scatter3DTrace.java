@@ -10,7 +10,8 @@ import org.eclipse.dawnsci.plotting.api.trace.IScatter3DTrace;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
@@ -18,14 +19,14 @@ import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 public class Scatter3DTrace extends PlotterTrace implements IScatter3DTrace {
 
 	
-	private AbstractDataset scatter;
+	private Dataset scatter;
 
 	public Scatter3DTrace(JRealityPlotViewer plotter2, String name2) {
 		super(plotter2, name2);
 	}
 
 	@Override
-	public AbstractDataset getData() {
+	public Dataset getData() {
 		return scatter;
 	}
 
@@ -35,7 +36,7 @@ public class Scatter3DTrace extends PlotterTrace implements IScatter3DTrace {
 		if (axes!=null && axes.size()==2) {
 			axes = Arrays.asList(axes.get(0), axes.get(1), null);
 		}
-		this.scatter = (AbstractDataset) data;
+		this.scatter = (Dataset) data;
 		this.axes  = (List<IDataset>) axes;
 		
 		if (isActive()) {
@@ -49,16 +50,16 @@ public class Scatter3DTrace extends PlotterTrace implements IScatter3DTrace {
 
 	@Override
 	protected List<AxisValues> createAxisValues() {
-		final AxisValues xAxis = new AxisValues(getLabel(0), axes!=null?(AbstractDataset)axes.get(0):null);
-		final AxisValues yAxis = new AxisValues(getLabel(1), axes!=null?(AbstractDataset)axes.get(1):null);
+		final AxisValues xAxis = new AxisValues(getLabel(0), axes!=null?(Dataset)axes.get(0):null);
+		final AxisValues yAxis = new AxisValues(getLabel(1), axes!=null?(Dataset)axes.get(1):null);
 		final AxisValues zAxis;
 		if (window instanceof LinearROI) {
 			final int x1 = window.getIntPoint()[0];
 			final int x2 = (int)Math.round(((LinearROI) window).getEndPoint()[0]);
 			final int len = x2-x1;
-			zAxis = new AxisValues(getLabel(2), AbstractDataset.arange(len, AbstractDataset.INT32));
+			zAxis = new AxisValues(getLabel(2), DatasetFactory.createRange(len, Dataset.INT32));
 		} else {
-			zAxis = new AxisValues(getLabel(2), axes!=null?(AbstractDataset)axes.get(2):null);
+			zAxis = new AxisValues(getLabel(2), axes!=null?(Dataset)axes.get(2):null);
 		}
 		return Arrays.asList(xAxis, yAxis, zAxis);
 	}

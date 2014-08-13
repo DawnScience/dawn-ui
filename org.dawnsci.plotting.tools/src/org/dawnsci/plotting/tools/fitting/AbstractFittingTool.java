@@ -53,7 +53,7 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionSquirts;
@@ -491,8 +491,8 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 				try {
 					final FittedFunctions bean = getFittedFunctions(new FittedPeaksInfo(x, y, new ProgressMonitorWrapper(monitor), getPlottingSystem(), selectedTrace));
 					if (bean!=null) for (FittedFunction p : bean.getFunctionList()) {
-		    			p.setX((AbstractDataset)selectedTrace.getXData());
-		    			p.setY((AbstractDataset)selectedTrace.getYData());
+		    			p.setX((Dataset)selectedTrace.getXData());
+		    			p.setY((Dataset)selectedTrace.getYData());
 		    			p.setDataTrace(selectedTrace);
 					}
 					// Add saved peaks if any.

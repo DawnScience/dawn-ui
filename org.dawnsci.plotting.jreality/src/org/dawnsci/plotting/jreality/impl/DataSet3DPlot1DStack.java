@@ -30,7 +30,8 @@ import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.widgets.Composite;
 
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import de.jreality.geometry.IndexedLineSetFactory;
@@ -142,7 +143,7 @@ public class DataSet3DPlot1DStack extends DataSet3DPlot1D {
 		graph.removeTool(tool);
 		
 		if (zAxisValues == null) {
-			zAxisValues = new AxisValues(AbstractDataset.arange(1+plots+zOffset, AbstractDataset.FLOAT64));
+			zAxisValues = new AxisValues(DatasetFactory.createRange(1+plots+zOffset, Dataset.FLOAT64));
 		}
 		
 		if (zTicks != null)
@@ -294,7 +295,7 @@ public class DataSet3DPlot1DStack extends DataSet3DPlot1D {
 				zAxisValues.addValues(values.getData());
 			}
 		} else {
-			zAxisValues = new AxisValues(AbstractDataset.arange(1+plots+zOffset, AbstractDataset.FLOAT64));
+			zAxisValues = new AxisValues(DatasetFactory.createRange(1+plots+zOffset, Dataset.FLOAT64));
 		}
 		updateGraphsZPosition();
 		

@@ -7,7 +7,7 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
@@ -33,9 +33,9 @@ class PlotterTrace {
 		window=null;
 	}
 	
-	protected static AbstractDataset[] getStack(IDataset... s) {
-		AbstractDataset[] stack = new AbstractDataset[s.length];
-		for (int i = 0; i < s.length; i++) stack[i] = DatasetUtils.convertToAbstractDataset(s[i]);
+	protected static Dataset[] getStack(IDataset... s) {
+		Dataset[] stack = new Dataset[s.length];
+		for (int i = 0; i < s.length; i++) stack[i] = DatasetUtils.convertToDataset(s[i]);
 		return stack;
 	}
 
@@ -63,9 +63,9 @@ class PlotterTrace {
 	}
 	protected List<AxisValues> createAxisValues() {
 		
-		final AxisValues xAxis = new AxisValues(getLabel(0), axes!=null?(AbstractDataset)axes.get(0):null);
-		final AxisValues yAxis = new AxisValues(getLabel(1), axes!=null?(AbstractDataset)axes.get(1):null);
-		final AxisValues zAxis = new AxisValues(getLabel(2), axes!=null?(AbstractDataset)axes.get(2):null);
+		final AxisValues xAxis = new AxisValues(getLabel(0), axes!=null?(Dataset)axes.get(0):null);
+		final AxisValues yAxis = new AxisValues(getLabel(1), axes!=null?(Dataset)axes.get(1):null);
+		final AxisValues zAxis = new AxisValues(getLabel(2), axes!=null?(Dataset)axes.get(2):null);
 		return Arrays.asList(xAxis, yAxis, zAxis);
 	}
 

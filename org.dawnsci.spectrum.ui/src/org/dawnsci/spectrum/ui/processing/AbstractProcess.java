@@ -20,7 +20,7 @@ public abstract class AbstractProcess {
 		
 		List<IDataset> out = new ArrayList<IDataset>();
 		
-		Dataset x = DatasetUtils.convertToAbstractDataset(data.getxDataset());
+		Dataset x = DatasetUtils.convertToDataset(data.getxDataset());
 		
 		for (IDataset y : data.getyDatasets()) {
 			out.add(process(x, DatasetUtils.convertToDataset(y)));

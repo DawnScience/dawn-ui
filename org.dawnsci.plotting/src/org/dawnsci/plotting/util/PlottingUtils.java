@@ -28,7 +28,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
@@ -145,10 +145,10 @@ public class PlottingUtils {
 	 *             the name of the data
 	 * @param dataPath
 	 *             if a NXS file, the data path, otherwise can be null
-	 * @return the data loaded as an AbstractDataset, null if none or not found
+	 * @return the data loaded as an Dataset, null if none or not found
 	 */
-	public static AbstractDataset loadData(final String fileName, final String dataPath){
-		AbstractDataset dataset = null;
+	public static Dataset loadData(final String fileName, final String dataPath){
+		Dataset dataset = null;
 		try {
 			IDataHolder data = LoaderFactory.getData(fileName, null);
 			IMetaData md = data.getMetadata();
@@ -158,7 +158,7 @@ public class PlottingUtils {
 
 			ILazyDataset value = tmpvalue.squeeze();
 			if(value.getShape().length == 2) {
-				dataset = DatasetUtils.convertToAbstractDataset(value.getSlice(new Slice(null)));
+				dataset = DatasetUtils.convertToDataset(value.getSlice(new Slice(null)));
 				dataset.setMetadata(md);
 				return dataset;
 			}

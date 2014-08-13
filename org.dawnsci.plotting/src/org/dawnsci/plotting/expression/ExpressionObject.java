@@ -25,7 +25,7 @@ import org.dawb.common.services.ServiceManager;
 import org.dawb.common.services.expressions.IExpressionEngine;
 import org.dawb.common.services.expressions.IExpressionService;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.io.ILazyLoader;
@@ -33,7 +33,7 @@ import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
 /**
  * An object which can be used to hold data about expressions in tables
- * of data (which data is AbstractDataset).
+ * of data (which data is Dataset).
  * 
  * @author fcp94556
  *
@@ -45,7 +45,7 @@ class ExpressionObject implements IExpressionObject {
 	private IVariableManager provider;
 	private IExpressionEngine engine;
 	private Reference<ILazyDataset>    lazySet;
-	private Reference<AbstractDataset> dataSet;
+	private Reference<Dataset> dataSet;
 	
 	public ExpressionObject(final IVariableManager provider, String expressionName, String expression) {
 		this.provider         = provider;
@@ -234,7 +234,7 @@ class ExpressionObject implements IExpressionObject {
 			    
 			    if (largestShape!=null) {
 		        	ILazyLoader loader = new ExpressionLazyLoader(suggestedName, getExpressionString(), provider);
-		        	lazy = new ExpressionLazyDataset(suggestedName, AbstractDataset.FLOAT64, largestShape, loader);
+		        	lazy = new ExpressionLazyDataset(suggestedName, Dataset.FLOAT64, largestShape, loader);
 			    }
 
 			}
@@ -252,7 +252,7 @@ class ExpressionObject implements IExpressionObject {
 		return function.matcher(expr).matches();
 	}
 
-	public AbstractDataset getDataSet(String suggestedName, IMonitor mon) throws Exception {
+	public Dataset getDataSet(String suggestedName, IMonitor mon) throws Exception {
 		
 		if (dataSet!=null&&dataSet.get()!=null) return dataSet.get();
 		
@@ -264,10 +264,10 @@ class ExpressionObject implements IExpressionObject {
 		
 		Object output = engine.evaluate();
         
-		//AbstractDataset ads = (AbstractDataset)ex.evaluate(context);
+		//Dataset ads = (Dataset)ex.evaluate(context);
 		
-		if (!(output instanceof AbstractDataset))return null;
-		AbstractDataset ads = (AbstractDataset)output;
+		if (!(output instanceof Dataset))return null;
+		Dataset ads = (Dataset)output;
 		
 		if (suggestedName==null) {
 			ads.setName(getExpressionString());
@@ -278,7 +278,7 @@ class ExpressionObject implements IExpressionObject {
 		if (lazySet!=null && lazySet.get() instanceof ExpressionLazyDataset) {
 			((ExpressionLazyDataset)lazySet.get()).setShapeSilently(ads.getShape());
 		}
-		if (ads!=null) dataSet = new SoftReference<AbstractDataset>(ads);
+		if (ads!=null) dataSet = new SoftReference<Dataset>(ads);
 		return ads;
 	}
 

@@ -84,8 +84,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractCompoundDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.CompoundDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
@@ -716,7 +714,7 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 		}
 		float[] imageData = imageDatas.get(ap);
 		Texture2D currentTexture = textures.get(ap);
-		FloatDataset fdata = (FloatDataset)DatasetUtils.cast(DatasetUtils.convertToAbstractDataset(data), AbstractDataset.FLOAT32);
+		FloatDataset fdata = (FloatDataset)DatasetUtils.cast(DatasetUtils.convertToDataset(data), Dataset.FLOAT32);
 		if (width == fdata.getShape()[1] &&	height == fdata.getShape()[0]) 
 		{
 			imageData = fdata.getData();
@@ -1353,7 +1351,7 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 						subGraph.setGeometry(createGraphGeometry((xStart+xSubSize > sizes[0] ? sizes[0]-xStart : xSubSize),
 																 (yStart+ySubSize > sizes[1] ? sizes[1]-yStart : ySubSize),
 																 xStart,yStart));
-						if (currentData instanceof AbstractCompoundDataset) {
+						if (currentData instanceof CompoundDataset) {
 							tableMin = 0;
 							tableMax = 0;
 						} else {

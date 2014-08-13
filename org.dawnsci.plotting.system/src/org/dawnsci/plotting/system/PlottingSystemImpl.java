@@ -83,8 +83,8 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IErrorDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
@@ -341,7 +341,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 		if (xIn == null) {
 			final int max = getMaxSize(ysIn);
-			x = AbstractDataset.arange(0, max, 1, AbstractDataset.INT32);
+			x = DatasetFactory.createRange(0, max, 1, Dataset.INT32);
 			if (ysIn.size() == 1)
 				x.setName("Index of " + ysIn.get(0).getName());
 			else
@@ -582,7 +582,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	}
 
 	/**
-	 * An IdentityHashMap used to map AbstractDataset to color used to plot it.
+	 * An IdentityHashMap used to map Dataset to color used to plot it.
 	 * records keys for both strings and sets so that different models for the
 	 * file being plotted work. Sometimes dataset name is unique but the set is
 	 * not, sometimes the dataset is unique but its name is not.
@@ -654,8 +654,8 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			traceMap.clear();
 			IScatter3DTrace trace = jrealityViewer.createScatter3DTrace(title);
 			final IDataset x = xIn;
-			final AbstractDataset y = (AbstractDataset) ysIn.get(1);
-			final AbstractDataset z = (AbstractDataset) ysIn.get(2);
+			final Dataset y = (Dataset) ysIn.get(1);
+			final Dataset z = (Dataset) ysIn.get(2);
 			if (dataNames!=null) trace.setDataName(dataNames.get(0));
 			trace.setData(x, Arrays.asList(x,y,z));
 			jrealityViewer.addTrace(trace);
@@ -670,10 +670,10 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			else
 				trace = jrealityViewer.createStackTrace(title, ysIn.size());
 			final IDataset x = xIn;
-			final AbstractDataset y = AbstractDataset.arange(getMaxSize(ysIn), AbstractDataset.INT32);
-			final AbstractDataset z = AbstractDataset.arange(ysIn.size(), AbstractDataset.INT32);
+			final Dataset y = DatasetFactory.createRange(getMaxSize(ysIn), Dataset.INT32);
+			final Dataset z = DatasetFactory.createRange(ysIn.size(), Dataset.INT32);
 			if (dataNames!=null) trace.setDataName(dataNames.get(0));
-			trace.setData(Arrays.asList(x,y,z), ysIn.toArray(new AbstractDataset[ysIn.size()]));
+			trace.setData(Arrays.asList(x,y,z), ysIn.toArray(new Dataset[ysIn.size()]));
 			jrealityViewer.addTrace(trace);
 			traceMap.put(trace.getName(), trace);
 			traces = Arrays.asList((ITrace)trace);
@@ -697,11 +697,11 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	}
 
 	@SuppressWarnings("unused")
-	private boolean isAllInts(List<AbstractDataset> ysIn) {
-		for (AbstractDataset a : ysIn) {
-			if (a.getDtype()!=AbstractDataset.INT16 &&
-				a.getDtype()!=AbstractDataset.INT32 &&
-				a.getDtype()!=AbstractDataset.INT64) {
+	private boolean isAllInts(List<Dataset> ysIn) {
+		for (Dataset a : ysIn) {
+			if (a.getDtype()!=Dataset.INT16 &&
+				a.getDtype()!=Dataset.INT32 &&
+				a.getDtype()!=Dataset.INT64) {
 				return false;
 			}
 		}
@@ -890,7 +890,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
      * Thread safe method
      */
 	@Override
-	public AbstractDataset getData(String name) {
+	public Dataset getData(String name) {
 		
 		final ITrace wrapper = traceMap.get(name);
 		if (wrapper==null) return null;
@@ -908,7 +908,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 * @param isY
 	 * @return
 	 */
-	protected AbstractDataset getData(String name, Trace trace, boolean isY) {
+	protected Dataset getData(String name, Trace trace, boolean isY) {
 
 		if (trace==null) return null;
 		

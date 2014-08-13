@@ -10,7 +10,7 @@ import org.dawb.common.services.ServiceManager;
 import org.dawb.common.services.expressions.IExpressionEngine;
 import org.dawb.common.services.expressions.IExpressionService;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
@@ -339,15 +339,15 @@ public class JexlExpressionFunction extends AFunction {
 		Object ob;
 		try {
 			ob = engine.evaluate();
-			if (ob instanceof AbstractDataset) {
+			if (ob instanceof Dataset) {
 				if (!(ob instanceof DoubleDataset)) {
-					ob = ((AbstractDataset) ob).cast(AbstractDataset.FLOAT64);
+					ob = ((Dataset) ob).cast(Dataset.FLOAT64);
 				}
 				return (DoubleDataset) ob;
 			} else if (ob instanceof IDataset) {
-				ob = DatasetUtils.convertToAbstractDataset((IDataset) ob);
+				ob = DatasetUtils.convertToDataset((IDataset) ob);
 				if (!(ob instanceof DoubleDataset)) {
-					ob = ((AbstractDataset) ob).cast(AbstractDataset.FLOAT64);
+					ob = ((Dataset) ob).cast(Dataset.FLOAT64);
 				}
 				return (DoubleDataset) ob;
 			}

@@ -18,7 +18,8 @@ import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
@@ -86,7 +87,7 @@ public class FittingUtils {
 			CompositeFunction comp = new CompositeFunction();
 			comp.addFunction(localPeak);
 			comp.addFunction(offset);
-			optimizer.optimize(new AbstractDataset[] { info.getX() }, info.getY(), comp);
+			optimizer.optimize(new Dataset[] { info.getX() }, info.getY(), comp);
 
 			composites = new ArrayList<CompositeFunction>(1);
 			composites.add(comp);
@@ -110,7 +111,7 @@ public class FittingUtils {
 			final double position = peak.getPosition();
 			RectangularROI bounds = new RectangularROI(position - w/2, 0, w, 0, 0);
 			
-			final AbstractDataset[] pf = getPeakFunction(info.getX(), info.getY(), function);
+			final Dataset[] pf = getPeakFunction(info.getX(), info.getY(), function);
 			
 			bean.addFittedPeak(new FittedFunction(function, bounds, pf));
 
@@ -119,8 +120,8 @@ public class FittingUtils {
 		bean.setOptimizer(optimizer);
 		if (bean != null && info.getSelectedTrace()!=null)
 			for (FittedFunction p : bean.getFunctionList()) {
-				p.setX((AbstractDataset)info.getSelectedTrace().getXData());
-				p.setY((AbstractDataset)info.getSelectedTrace().getYData());
+				p.setX((Dataset)info.getSelectedTrace().getXData());
+				p.setY((Dataset)info.getSelectedTrace().getYData());
 				p.setDataTrace(info.getSelectedTrace());
 				p.setQ(getQ(info, p));
 			}
@@ -144,7 +145,7 @@ public class FittingUtils {
 		final IImageTrace trace = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next() : null;
 		if (trace!=null) {
 			set = trace.getData();
-			final IMetaData      meta = ((AbstractDataset)set).getMetadata();
+			final IMetaData      meta = ((Dataset)set).getMetadata();
 			if (meta instanceof IDiffractionMetadata) {
 
 				dmeta = (IDiffractionMetadata)meta;
@@ -174,7 +175,7 @@ public class FittingUtils {
 	}
 
 	public static List<IdentifiedPeak> getIdentifiedPeaks(final FittedFunctions      fittedPeaks,
-			                                              final AbstractDataset  x,
+			                                              final Dataset  x,
 								                          final IProgressMonitor monitor) throws Exception {
 		
 		if (fittedPeaks==null) return null;
@@ -208,12 +209,12 @@ public class FittingUtils {
 	 * @param peak
 	 * @return
 	 */
-	private static AbstractDataset[] getPeakFunction(AbstractDataset x, final AbstractDataset y, CompositeFunction peak) {
+	private static Dataset[] getPeakFunction(Dataset x, final Dataset y, CompositeFunction peak) {
 
 //		double min = peak.getPosition() - (peak.getFWHM()); // Quite wide
 //		double max = peak.getPosition() + (peak.getFWHM());
 //
-//		final AbstractDataset[] a = xintersection(x,y,min,max);
+//		final Dataset[] a = xintersection(x,y,min,max);
 //		x=a[0];
 //		y=a[1];
 		
@@ -228,9 +229,9 @@ public class FittingUtils {
 		final double xmin = x.min().doubleValue();
 		final double xmax = x.max().doubleValue();
 		final double step = (xmax-xmin)/(x.getSize()*factor);
-		x = AbstractDataset.arange(xmin, xmax, step, AbstractDataset.FLOAT64);
+		x = DatasetFactory.createRange(xmin, xmax, step, Dataset.FLOAT64);
 
-		return new AbstractDataset[]{x,peak.calculateValues(x)};
+		return new Dataset[]{x,peak.calculateValues(x)};
 		
 	}
 
@@ -286,7 +287,7 @@ public class FittingUtils {
 	
 	public static FittedFunctions getFittedPolynomial(final FittedPeaksInfo info) throws Exception {
 		
-		Polynomial poly = Fitter.polyFit(new AbstractDataset[] {info.getX()}, info.getY(), 1e-8, getPolynomialOrderRequired());
+		Polynomial poly = Fitter.polyFit(new Dataset[] {info.getX()}, info.getY(), 1e-8, getPolynomialOrderRequired());
 		
 		CompositeFunction function = new CompositeFunction();
 		function.addFunction(poly);
@@ -300,7 +301,7 @@ public class FittingUtils {
 		
 		RectangularROI bounds = new RectangularROI(min,0,max-min,0,0);
 
-		final AbstractDataset[] pf = getPeakFunction(info.getX(), info.getY(), function);
+		final Dataset[] pf = getPeakFunction(info.getX(), info.getY(), function);
 
 		bean.addFittedPeak(new FittedFunction(function, bounds, pf));
 

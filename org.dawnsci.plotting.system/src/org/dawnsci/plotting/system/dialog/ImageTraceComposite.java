@@ -38,7 +38,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.RGBDataset;
 /**
  * TODO Replace with alternate widget library.
@@ -88,10 +88,10 @@ public class ImageTraceComposite extends Composite {
 		group.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
 		group.setLayout(new GridLayout(2, false));
 		
-		final int dType = ((AbstractDataset)imageTrace.getData()).getDtype();
-		boolean isInt = dType==AbstractDataset.INT16 ||
-				        dType==AbstractDataset.INT32 ||
-				        dType==AbstractDataset.INT64;
+		final int dType = ((Dataset)imageTrace.getData()).getDtype();
+		boolean isInt = dType==Dataset.INT16 ||
+				        dType==Dataset.INT32 ||
+				        dType==Dataset.INT64;
 
 		label = new Label(group, SWT.NONE);
 		label.setText("Minimum Intensity");

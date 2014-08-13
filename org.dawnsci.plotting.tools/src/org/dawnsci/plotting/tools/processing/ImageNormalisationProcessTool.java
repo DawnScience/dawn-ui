@@ -39,7 +39,6 @@ import org.eclipse.ui.part.ResourceTransfer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Comparisons;
 import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
@@ -294,13 +293,13 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 				if(!selectionData.equals(originalData))
 					selectionPlottingSystem.updatePlot2D(originalData, originalAxes, monitor);
 			}
-			profile = (Dataset) DatasetFactory.ones(DatasetUtils.convertToAbstractDataset(originalAxes.get(1)));
+			profile = (Dataset) DatasetFactory.ones(DatasetUtils.convertToDataset(originalAxes.get(1)));
 		} else if (type.equals(NormaliseType.ROI) || type.equals(NormaliseType.AUX)){
 			if(roi == null) return;
 	
 			double width = ((RectangularROI)roi).getLengths()[0];
 
-			AbstractDataset[] profiles = ROIProfile.box(ds, (RectangularROI)roi);
+			Dataset[] profiles = ROIProfile.box(ds, (RectangularROI)roi);
 			profile = profiles[1];
 			profile.idivide(width);
 		}

@@ -37,7 +37,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.eclipse.ui.services.AbstractServiceFactory;
 import org.eclipse.ui.services.IServiceLocator;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IndexIterator;
@@ -119,7 +119,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 	 */
 	public ImageData getImageData(ImageServiceBean bean) {
 		
-		AbstractDataset image    = getImageLoggedData(bean);
+		Dataset image    = getImageLoggedData(bean);
 		ImageOrigin     origin   = bean.getOrigin();
 		if (origin==null) origin = ImageOrigin.TOP_LEFT;
 		PaletteData     palette  = bean.getPalette();
@@ -204,7 +204,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		if (bean.isCancelled()) return null;
 		
 		BooleanDataset mask = bean.getMask()!=null
-				            ? (BooleanDataset)DatasetUtils.cast((AbstractDataset)bean.getMask(), AbstractDataset.BOOL)
+				            ? (BooleanDataset)DatasetUtils.cast((Dataset)bean.getMask(), Dataset.BOOL)
 				            : null;
 				            
  		ImageData imageData = null;
@@ -408,17 +408,17 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		return (byte) (0x000000FF & ((int) scaled_pixel));
 	}
 	
-	private AbstractDataset getImageLoggedData(ImageServiceBean bean) {
-		AbstractDataset imageDataset = (AbstractDataset)bean.getImage();
+	private Dataset getImageLoggedData(ImageServiceBean bean) {
+		Dataset imageDataset = (Dataset)bean.getImage();
 //		if (bean.isLogColorScale()) {
-//			AbstractDataset result = Maths.subtract(imageDataset, bean.getLogOffset());
+//			Dataset result = Maths.subtract(imageDataset, bean.getLogOffset());
 //			imageDataset = Maths.log10(result);
 //		}
 		return imageDataset;
 	}
 
 	/**
-	 * Fast statistics as a rough guide - this is faster than AbstractDataset.getMin()
+	 * Fast statistics as a rough guide - this is faster than Dataset.getMin()
 	 * and getMax() which may cache but slows the opening of images too much.
 	 * The return array[2] was added in "Updated for Diffraction Tool." commit,
 	 * but no trace of such usage. However it should not be removed, because
@@ -429,7 +429,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 	 */
 	public float[] getFastStatistics(ImageServiceBean bean) {
 		
-		AbstractDataset image    = getImageLoggedData(bean);
+		Dataset image    = getImageLoggedData(bean);
 		if(bean.isLogColorScale()) {
 			image = Maths.log10(image);
 		}
@@ -460,7 +460,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		int size = 0;
 		
 		BooleanDataset mask = bean.getMask()!=null
-	                        ? (BooleanDataset)DatasetUtils.cast((AbstractDataset)bean.getMask(), AbstractDataset.BOOL)
+	                        ? (BooleanDataset)DatasetUtils.cast((Dataset)bean.getMask(), Dataset.BOOL)
 	                        : null;
 
 	    // Big loop warning:
@@ -505,7 +505,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 			try {
 				median = ((Number)Stats.median(image)).floatValue(); // SLOW
 			} catch (Exception ne) {
-				median = ((Number)Stats.median(image.cast(AbstractDataset.INT16))).floatValue();// SLOWER
+				median = ((Number)Stats.median(image.cast(Dataset.INT16))).floatValue();// SLOWER
 			}
 			retMax = 2f*median;
 			retExtra=median;

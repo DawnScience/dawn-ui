@@ -39,7 +39,7 @@ import org.eclipse.ui.part.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.rcp.editors.HDF5TreeEditor;
@@ -222,10 +222,10 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
     
 
 	@Override
-	public AbstractDataset setDatasetSelected(String name, boolean clearOthers) {
+	public Dataset setDatasetSelected(String name, boolean clearOthers) {
 		IVariableManager man = (IVariableManager)getAdapter(IVariableManager.class);
 		if (man==null) return null;
-		return (AbstractDataset)((IPlottingSystemSelection)man).setDatasetSelected(name, clearOthers);
+		return (Dataset)((IPlottingSystemSelection)man).setDatasetSelected(name, clearOthers);
 	}
 
 	@Override

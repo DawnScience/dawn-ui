@@ -38,7 +38,7 @@ import org.eclipse.draw2d.ColorConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
@@ -188,30 +188,30 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 			final IImageTrace image, final RectangularROI bounds,
 			IRegion region, boolean tryUpdate,
 			IProgressMonitor monitor) {
-		AbstractDataset[] boxLine = ROIProfile.boxLine((AbstractDataset)image.getData(), (AbstractDataset)image.getMask(), bounds, true, isVertical);
-		AbstractDataset[] boxMean = ROIProfile.boxMean((AbstractDataset)image.getData(), (AbstractDataset)image.getMask(), bounds, true);
+		Dataset[] boxLine = ROIProfile.boxLine((Dataset)image.getData(), (Dataset)image.getMask(), bounds, true, isVertical);
+		Dataset[] boxMean = ROIProfile.boxMean((Dataset)image.getData(), (Dataset)image.getMask(), bounds, true);
 
 		if (boxLine == null) return;
 		if (boxMean == null) return;
 
 		setTraceNames();
-		AbstractDataset line3 = boxMean[isVertical ? 1 : 0];
+		Dataset line3 = boxMean[isVertical ? 1 : 0];
 
-		AbstractDataset line1 = boxLine[0];
+		Dataset line1 = boxLine[0];
 		line1.setName(traceName1);
-		AbstractDataset xi = IntegerDataset.createRange(line1.getSize());
-		final AbstractDataset x_indices = xi;
+		Dataset xi = IntegerDataset.createRange(line1.getSize());
+		final Dataset x_indices = xi;
 
-		AbstractDataset line2 = boxLine[1];
+		Dataset line2 = boxLine[1];
 		line2.setName(traceName2);
-		AbstractDataset yi = IntegerDataset.createRange(line2.getSize());
-		final AbstractDataset y_indices = yi;
+		Dataset yi = IntegerDataset.createRange(line2.getSize());
+		final Dataset y_indices = yi;
 
 		// Average profile
 		line3.setName(traceName3);
-		AbstractDataset av_indices = IntegerDataset.createRange(line3.getSize());
+		Dataset av_indices = IntegerDataset.createRange(line3.getSize());
 
-		final List<AbstractDataset> lines = new ArrayList<AbstractDataset>(3);
+		final List<Dataset> lines = new ArrayList<Dataset>(3);
 		lines.add(line1);
 		lines.add(line2);
 		lines.add(line3);
@@ -252,22 +252,22 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 			final IImageTrace image, final RectangularROI bounds,
 			IRegion region, boolean tryUpdate,
 			IProgressMonitor monitor) {
-		AbstractDataset[] boxLine = ROIProfile.boxLine((AbstractDataset)image.getData(), (AbstractDataset)image.getMask(), bounds, true, isVertical);
+		Dataset[] boxLine = ROIProfile.boxLine((Dataset)image.getData(), (Dataset)image.getMask(), bounds, true, isVertical);
 		if (boxLine == null) return;
 
 		setTraceNames();
 
-		AbstractDataset line1 = boxLine[0];
+		Dataset line1 = boxLine[0];
 		line1.setName(traceName1);
-		AbstractDataset xi = IntegerDataset.createRange(line1.getSize());
-		final AbstractDataset x_indices = xi;
+		Dataset xi = IntegerDataset.createRange(line1.getSize());
+		final Dataset x_indices = xi;
 
-		AbstractDataset line2 = boxLine[1];
+		Dataset line2 = boxLine[1];
 		line2.setName(traceName2);
-		AbstractDataset yi = IntegerDataset.createRange(line2.getSize());
-		final AbstractDataset y_indices = yi;
+		Dataset yi = IntegerDataset.createRange(line2.getSize());
+		final Dataset y_indices = yi;
 
-		final List<AbstractDataset> lines = new ArrayList<AbstractDataset>(3);
+		final List<Dataset> lines = new ArrayList<Dataset>(3);
 		lines.add(line1);
 		lines.add(line2);
 
@@ -303,18 +303,18 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 			final IImageTrace image, final RectangularROI bounds,
 			IRegion region, boolean tryUpdate,
 			IProgressMonitor monitor) {
-		AbstractDataset[] boxMean = ROIProfile.boxMean((AbstractDataset)image.getData(), (AbstractDataset)image.getMask(), bounds, true);
+		Dataset[] boxMean = ROIProfile.boxMean((Dataset)image.getData(), (Dataset)image.getMask(), bounds, true);
 
 		if (boxMean==null) return;
 
 		setTraceNames();
-		AbstractDataset line3 = boxMean[isVertical ? 1 : 0];
+		Dataset line3 = boxMean[isVertical ? 1 : 0];
 
 		// Average profile
 		line3.setName(traceName3);
-		AbstractDataset av_indices = IntegerDataset.createRange(line3.getSize());
+		Dataset av_indices = IntegerDataset.createRange(line3.getSize());
 
-		final List<AbstractDataset> lines = new ArrayList<AbstractDataset>(1);
+		final List<Dataset> lines = new ArrayList<Dataset>(1);
 		lines.add(line3);
 
 		av_trace = (ILineTrace) profilePlottingSystem.getTrace(traceName3);
@@ -347,16 +347,16 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 		}
 	}
 
-	private void updateAxes(final IImageTrace image, final List<ILineTrace> traces, final List<AbstractDataset> lines, final RectangularROI bounds){
+	private void updateAxes(final IImageTrace image, final List<ILineTrace> traces, final List<Dataset> lines, final RectangularROI bounds){
 		DisplayUtils.runInDisplayThread(false, getControl(), new Runnable() {
 			@Override
 			public void run() {
 				List<IDataset> axes = image.getAxes();
 				if (axes != null && axes.size() > 0) {
 					if (isVertical) {
-						updateAxes(traces, lines, (AbstractDataset)axes.get(1), bounds.getPointY());
+						updateAxes(traces, lines, (Dataset)axes.get(1), bounds.getPointY());
 					} else {
-						updateAxes(traces, lines, (AbstractDataset)axes.get(0), bounds.getPointX());
+						updateAxes(traces, lines, (Dataset)axes.get(0), bounds.getPointX());
 					}
 				} else { // if no axes we set them manually according to
 							// the data shape
@@ -366,14 +366,14 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 						for (int i = 0; i < verticalAxis.length; i++) {
 							verticalAxis[i] = i;
 						}
-						AbstractDataset vertical = new IntegerDataset(verticalAxis, shapes[1]);
+						Dataset vertical = new IntegerDataset(verticalAxis, shapes[1]);
 						updateAxes(traces, lines, vertical, bounds.getPointY());
 					} else {
 						int[] horizontalAxis = new int[shapes[0]];
 						for (int i = 0; i < horizontalAxis.length; i++) {
 							horizontalAxis[i] = i;
 						}
-						AbstractDataset horizontal = new IntegerDataset(horizontalAxis, shapes[0]);
+						Dataset horizontal = new IntegerDataset(horizontalAxis, shapes[0]);
 						updateAxes(traces, lines, horizontal, bounds.getPointX());
 					}
 				}
@@ -391,8 +391,8 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	 * @param axis
 	 * @param startPoint
 	 */
-	private void updateAxes(List<ILineTrace> profiles, List<AbstractDataset> lines, 
-			AbstractDataset axis, double startPoint){
+	private void updateAxes(List<ILineTrace> profiles, List<Dataset> lines, 
+			Dataset axis, double startPoint){
 		// shift the xaxis by yStart
 		try {
 			double xStart = axis.getDouble((int)Math.round(startPoint));

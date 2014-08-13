@@ -82,7 +82,7 @@ import org.mihalis.opal.rangeSlider.RangeSlider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
@@ -399,7 +399,7 @@ public class WindowTool extends AbstractToolPage {
 	}
 
 	protected void updateWindowPlot(ISurfaceTrace trace) {
-		AbstractDataset data =  (AbstractDataset)trace.getData();
+		Dataset data =  (Dataset)trace.getData();
 		List<IDataset> axes = trace.getAxes();
 		if (axes!=null) axes = Arrays.asList(axes.get(0), axes.get(1));
 		windowSystem.updatePlot2D(data, axes, null);

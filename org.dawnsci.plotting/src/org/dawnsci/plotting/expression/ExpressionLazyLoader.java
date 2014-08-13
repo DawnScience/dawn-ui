@@ -9,7 +9,7 @@ import org.dawb.common.services.ServiceManager;
 import org.dawb.common.services.expressions.IExpressionEngine;
 import org.dawb.common.services.expressions.IExpressionService;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.io.ILazyLoader;
@@ -52,7 +52,7 @@ class ExpressionLazyLoader implements ILazyLoader {
 	}
 
 	@Override
-	public AbstractDataset getDataset(IMonitor mon,
+	public Dataset getDataset(IMonitor mon,
 			 							int[] shape,
 			 							int[] start,
 			 							int[] stop, 
@@ -96,8 +96,8 @@ class ExpressionLazyLoader implements ILazyLoader {
 		} catch (Exception e) {
 			return null;
 		}
-	    if (!(output instanceof AbstractDataset))return null;
-		AbstractDataset value = (AbstractDataset)output;
+	    if (!(output instanceof Dataset))return null;
+		Dataset value = (Dataset)output;
 		value.setName("Slice of "+variableName);
 		
 		return value;
