@@ -146,6 +146,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		final GridData eData = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		eData.heightHint=44;
 		explain.setLayoutData(eData);
+		GridUtils.setVisible(explain, false);
 	
 		this.sliceToolbar = createSliceTools();
 		final ToolBar        tool    = ((ToolBarManager)sliceToolbar).createControl(area);
@@ -757,7 +758,9 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 	}
 	
 	public void setLabel(final String text) {
+		GridUtils.setVisible(explain, true);
 		explain.setText(text);
+		explain.getParent().layout();
 	}
 
 
