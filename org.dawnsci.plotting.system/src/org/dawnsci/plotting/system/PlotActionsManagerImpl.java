@@ -145,7 +145,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 			}			
 		};
 		
-		final Action convert = new Action("Convert plot data to tiff/dat...", PlottingSystemActivator.getImageDescriptor("icons/convert.png")) {
+		final Action convert = new Action("Export plot data to tiff/dat...", PlottingSystemActivator.getImageDescriptor("icons/mask-export-wiz.png")) {
 			public void run() {
 				try {
 					IWizard wiz = EclipseUtils.openWizard(PlotDataConversionWizard.ID, false);

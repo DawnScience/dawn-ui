@@ -564,7 +564,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			manager.add(visible);
 			
 			if (trace instanceof LineTraceImpl) {
-				final Action export = new Action("Convert '"+name+"' to ascii (dat file)", PlottingSystemActivator.getImageDescriptor("icons/convert.png")) {
+				final Action export = new Action("Export '"+name+"' to ascii (dat file)", PlottingSystemActivator.getImageDescriptor("icons/mask-export-wiz.png")) {
 					public void run() {
 						try {
 							final ICommandService service = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
