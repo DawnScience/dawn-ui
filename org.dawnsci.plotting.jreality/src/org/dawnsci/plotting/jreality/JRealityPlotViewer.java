@@ -1235,6 +1235,18 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		// System.gc();
 	}
 
+	private void cleanNan(IDataset data, double value) {
+		for (int i = 0; i < data.getShape()[0]; i++) {
+			for (int j = 0; j < data.getShape()[1]; j++) {
+				double val = data.getDouble(i, j);
+				if (Double.isNaN(val)) {
+					data.set(value, i, j);
+				}
+			}
+		}
+	}
+
+	@SuppressWarnings("unused")
 	private boolean checkForNan(IDataset data) {
 		if (data instanceof Dataset)
 			return ((Dataset) data).containsNans();
@@ -1261,8 +1273,9 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		Iterator<? extends IDataset> iter = datasets.iterator();
 		while (iter.hasNext()) {
 			IDataset dataset = iter.next();
-
-			if (checkForNan(dataset) || checkForInf(dataset)) {
+			// replace Nans by zeros
+			cleanNan(dataset, 0);
+			if (checkForInf(dataset)) {
 				throw new PlotException(ERROR_MESG);
 			}
 		}
