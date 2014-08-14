@@ -32,8 +32,6 @@ import org.dawnsci.slicing.Activator;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
-import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
-import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
@@ -68,15 +66,12 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ToolBar;
@@ -107,7 +102,6 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 	private TableViewer     viewer;
 
 	private CLabel          errorLabel, explain, infoLabel;
-	private Link            openWindowing;
 	private Composite       area;
 	private boolean         isErrorCondition=false;
     private SliceJob        sliceJob;
@@ -162,7 +156,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		tool.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
 		
 		final Composite tableComp = new Composite(area, SWT.NONE);
-		tableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		tableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		TableColumnLayout tableColumnLayout = new TableColumnLayout();
 		tableComp.setLayout(tableColumnLayout);
@@ -197,28 +191,12 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		infoLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		GridUtils.setVisible(infoLabel,         false);
 
-		this.openWindowing = new Link(area, SWT.WRAP);
-		openWindowing.setText("Data is being viewed using a <a>window</a>");
-		openWindowing.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		GridUtils.setVisible(openWindowing,         false);
-		openWindowing.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				if (plottingSystem!=null) {
-					showWindowTool();
-				}
-			}
-		});
-		
-		final Composite bottom = new Composite(area, SWT.NONE);
-		bottom.setLayout(new GridLayout(4, false));
-		bottom.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));					
-
 		// Something to tell them their image orientation (X and Y may be mixed up!)
 		if (plottingSystem!=null) {
-			final StyledText imageOrientation = new StyledText(bottom, SWT.NONE);
+			final StyledText imageOrientation = new StyledText(area, SWT.NONE);
 			imageOrientation.setEditable(false);
-			imageOrientation.setBackground(bottom.getBackground());
-			imageOrientation.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
+			imageOrientation.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+			imageOrientation.setBackground(area.getBackground());
 			GridUtils.setVisible(imageOrientation, plottingSystem.is2D());
 			
 			addImageOrientationListener(imageOrientation);
@@ -233,6 +211,10 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 			};
 			imageOrientation.setToolTipText("The image orientation currently set by the plotting.");
 			plottingSystem.addTraceListener(traceListener);
+		}
+		
+		for (String id : sliceTools.keySet()) {
+			sliceTools.get(id).createToolComponent(area);
 		}
 
 		// Same action on slice table
@@ -266,17 +248,6 @@ public class SliceSystemImpl extends AbstractSliceSystem {
    	
 		return area;
 	}
-	
-	protected void showWindowTool() {
-		try {
-			final IToolPageSystem system = (IToolPageSystem)plottingSystem.getAdapter(IToolPageSystem.class);
-			system.setToolVisible("org.dawb.workbench.plotting.tools.windowTool", ToolPageRole.ROLE_3D, 
-					                      "org.dawb.workbench.plotting.views.toolPageView.3D");
-		} catch (Exception e1) {
-			logger.error("Cannot open window tool!", e1);
-		}
-	}
-
 
 	@Override
 	public void setSliceTypeInfo(String label, ImageDescriptor icon) {
@@ -440,8 +411,6 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		
 		viewer.refresh();
 		reverse.setEnabled(sliceType==PlotType.IMAGE||sliceType==PlotType.SURFACE);
-		GridUtils.setVisible(openWindowing, is3D() && plottingSystem!=null);
-		openWindowing.getParent().layout(new Control[]{openWindowing});
 
 		// Save preference
 		Activator.getDefault().getPreferenceStore().setValue(SliceConstants.PLOT_CHOICE, sliceType.toString());

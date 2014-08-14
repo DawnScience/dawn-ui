@@ -1,11 +1,19 @@
 package org.dawnsci.slicing.tools.plot;
 
+import org.dawb.common.ui.util.GridUtils;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.eclipse.dawnsci.slicing.api.system.AxisType;
 import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.dawnsci.slicing.api.tool.AbstractSlicingTool;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Link;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,10 +28,31 @@ import org.slf4j.LoggerFactory;
 public class SurfaceSlicingTool extends AbstractSlicingTool {
 	
 	private static final Logger logger = LoggerFactory.getLogger(SurfaceSlicingTool.class);
+	
+	private Link openWindowing;
+
+	@Override
+	public void createToolComponent(Composite area) {
+		this.openWindowing = new Link(area, SWT.WRAP);
+		openWindowing.setText("Data is being viewed using a <a>window</a>");
+		openWindowing.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		GridUtils.setVisible(openWindowing,         false);
+		openWindowing.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				if (getSlicingSystem().getPlottingSystem()!=null) {
+					showWindowTool();
+				}
+			}
+		});
+		
+	}
 
 	@Override
 	public void militarize() {
 		
+		GridUtils.setVisible(openWindowing, getSlicingSystem().getPlottingSystem()!=null);
+		openWindowing.getParent().layout(new Control[]{openWindowing});
+
 		getSlicingSystem().setSliceType(getSliceType());
 		
 		final DimsDataList dimsDataList = getSlicingSystem().getDimsDataList();
@@ -34,6 +63,13 @@ public class SurfaceSlicingTool extends AbstractSlicingTool {
 		showWindowTool();
 		
 	}
+	
+	@Override
+	public void demilitarize() {
+		GridUtils.setVisible(openWindowing, false);
+		openWindowing.getParent().layout(new Control[]{openWindowing});
+	}
+
 	protected void showWindowTool() {
 		try {
 			final IToolPageSystem system = (IToolPageSystem)getSlicingSystem().getPlottingSystem().getAdapter(IToolPageSystem.class);
