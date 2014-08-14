@@ -12,6 +12,7 @@ import org.dawnsci.spectrum.ui.processing.AbstractProcess;
 import org.dawnsci.spectrum.ui.processing.AdditionProcess;
 import org.dawnsci.spectrum.ui.processing.AverageProcess;
 import org.dawnsci.spectrum.ui.processing.CombineProcess;
+import org.dawnsci.spectrum.ui.processing.CropProcess;
 import org.dawnsci.spectrum.ui.processing.DerivativeProcess;
 import org.dawnsci.spectrum.ui.processing.DivisionProcess;
 import org.dawnsci.spectrum.ui.processing.MultiplicationProcess;
@@ -21,6 +22,7 @@ import org.dawnsci.spectrum.ui.processing.RollingBallBaselineProcess;
 import org.dawnsci.spectrum.ui.processing.SubtractionProcess;
 import org.dawnsci.spectrum.ui.utils.Contain1DDataImpl;
 import org.dawnsci.spectrum.ui.utils.SpectrumUtils;
+import org.dawnsci.spectrum.ui.wizard.CropWizardPage;
 import org.dawnsci.spectrum.ui.wizard.IntegerInputDialog;
 import org.dawnsci.spectrum.ui.wizard.SpectrumSubtractionWizardPage;
 import org.dawnsci.spectrum.ui.wizard.SpectrumWizard;
@@ -41,6 +43,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
@@ -208,6 +211,7 @@ public class ProcessMenuManager {
 				sw.addPage(new SpectrumSubtractionWizardPage(manager.getCachedFile(),list));
 				sw.setData(list);
 				WizardDialog wd = new WizardDialog(Display.getDefault().getActiveShell(),sw);
+				wd.setPageSize(new Point(800, 400));
 				if (wd.open() == WizardDialog.OK) {
 					List<IContain1DData> out = sw.getOutputData();
 
@@ -260,11 +264,32 @@ public class ProcessMenuManager {
 			}
 		};
 		
+		IAction cropWizard = new Action("Crop wizard...") {
+			public void run() {
+				ISelection selection = viewer.getSelection();
+				SpectrumWizard sw = new SpectrumWizard();
+				List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
+				sw.addPage(new CropWizardPage(list));
+				sw.setData(list);
+				WizardDialog wd = new WizardDialog(Display.getDefault().getActiveShell(),sw);
+				wd.setPageSize(new Point(600, 400));
+				if (wd.open() == WizardDialog.OK) {
+					List<IContain1DData> out = sw.getOutputData();
+
+					for(IContain1DData data : out) {
+						SpectrumInMemory mem = new SpectrumInMemory(data.getLongName(), data.getName(), data.getxDataset(), data.getyDatasets(), system);
+						ProcessMenuManager.this.manager.addFile(mem);
+					}
+				}
+			}
+		};
+		
 		subtractionWizard.setEnabled(enabled);
 		rollingBaseline.setEnabled(((IStructuredSelection)viewer.getSelection()).size() >= 1);
 
 		menu.add(subtractionWizard);
 		menu.add(rollingBaseline);
+		menu.add(cropWizard);
 		menuManager.add(menu);
 	}
 	

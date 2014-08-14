@@ -13,24 +13,24 @@ import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 public abstract class AbstractProcess {
 	
 	public List<IContain1DData> process(List<IContain1DData> list) {
-	
-	List<IContain1DData> output = new ArrayList<IContain1DData>();
-	
-	for (IContain1DData data : list) {
-		
-		List<IDataset> out = new ArrayList<IDataset>();
-		
-		Dataset x = DatasetUtils.convertToDataset(data.getxDataset());
-		
-		for (IDataset y : data.getyDatasets()) {
-			out.add(process(x, DatasetUtils.convertToDataset(y)));
+
+		List<IContain1DData> output = new ArrayList<IContain1DData>();
+
+		for (IContain1DData data : list) {
+
+			List<IDataset> out = new ArrayList<IDataset>();
+
+			Dataset x = DatasetUtils.convertToDataset(data.getxDataset());
+
+			for (IDataset y : data.getyDatasets()) {
+				out.add(process(x, DatasetUtils.convertToDataset(y)));
+			}
+
+			output.add(new Contain1DDataImpl(x, out, data.getName() + getAppendingName(), data.getLongName() + getAppendingName()));
 		}
-		
-		output.add(new Contain1DDataImpl(x, out, data.getName() + getAppendingName(), data.getLongName() + getAppendingName()));
+
+		return output;
 	}
-	
-	return output;
-}
 	
 	protected abstract Dataset process(Dataset x, Dataset y);
 	
