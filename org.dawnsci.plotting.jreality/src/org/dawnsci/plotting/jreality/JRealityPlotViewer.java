@@ -1246,7 +1246,6 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		}
 	}
 
-	@SuppressWarnings("unused")
 	private boolean checkForNan(IDataset data) {
 		if (data instanceof Dataset)
 			return ((Dataset) data).containsNans();
@@ -1273,9 +1272,11 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		Iterator<? extends IDataset> iter = datasets.iterator();
 		while (iter.hasNext()) {
 			IDataset dataset = iter.next();
-			// replace Nans by min value
-			double minValue = dataset.min(true, true).doubleValue();
-			cleanNan(dataset, minValue);
+			if (checkForNan(dataset)) {
+				// replace Nans by min value
+				double minValue = dataset.min(true, true).doubleValue();
+				cleanNan(dataset, minValue);
+			}
 			if (checkForInf(dataset)) {
 				throw new PlotException(ERROR_MESG);
 			}
