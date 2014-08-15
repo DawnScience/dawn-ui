@@ -20,6 +20,12 @@
             name="Model"
             restorable="true">
       </view>
+      <view
+            class="org.dawnsci.processing.ui.DataFileSliceView"
+            id="org.dawnsci.processing.ui.DataFileSliceView"
+            name="Data Slice View"
+            restorable="true">
+      </view>
    </extension>
 
 </plugin>
