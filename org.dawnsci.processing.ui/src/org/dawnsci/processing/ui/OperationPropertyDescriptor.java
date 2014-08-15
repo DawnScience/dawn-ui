@@ -6,11 +6,11 @@ import java.util.Arrays;
 import org.dawb.common.util.text.StringUtils;
 import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
 import org.dawnsci.common.widgets.celleditor.ClassCellEditor;
+import org.dawnsci.common.widgets.celleditor.FileDialogCellEditor;
 import org.dawnsci.plotting.roi.RegionCellEditor;
 import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxCellEditor;
-import org.eclipse.jface.viewers.ICellEditorListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.window.DefaultToolTip;
@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 
+import uk.ac.diamond.scisoft.analysis.processing.model.FileType;
 import uk.ac.diamond.scisoft.analysis.processing.model.IOperationModel;
 import uk.ac.diamond.scisoft.analysis.processing.model.OperationModelField;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
@@ -127,6 +128,8 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
 		}
         
 		CellEditor ed = null;
+    	final OperationModelField anot = getAnnotation(model, name);
+    	
         if (clazz == Boolean.class) {
         	ed = new CheckboxCellEditor(parent, SWT.NONE);
         	
@@ -138,6 +141,15 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
         	
         } else if (Enum.class.isAssignableFrom(clazz)) {
         	ed = getChoiceEditor((Class<? extends Enum>)clazz, parent);
+        	
+        } else if (FileDialogCellEditor.isEditorFor(clazz) || (anot!=null && anot.file()!=FileType.NONE)) {
+        	FileDialogCellEditor fe = new FileDialogCellEditor(parent);
+        	fe.setValueClass(clazz);
+        	ed = fe;
+        	if (anot!=null) {
+        		fe.setDirectory(anot.file().isDirectory());
+        		fe.setNewFile(anot.file().isNewFile());
+        	}
         
         } else if (String.class.equals(clazz)) {
         	ed = new TextCellEditor(parent);
@@ -145,7 +157,6 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
         
         // Show the tooltip, if there is one
         if (ed!=null) {
-        	final OperationModelField anot = getAnnotation(model, name);
         	if (anot!=null) {
         		String hint = anot.hint();
         		if (hint!=null && !"".equals(hint)) {
