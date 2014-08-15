@@ -1273,6 +1273,10 @@ public class HistogramToolPage extends AbstractToolPage {
 	public boolean isStaticTool() {
 		return true;
 	}
+	@Override
+	public boolean isAlwaysSeparateView() {
+		return true;
+	}
 	
 	private void hide() {
 		introLabel.setText("No Colour Map tools available for Colour Images");
