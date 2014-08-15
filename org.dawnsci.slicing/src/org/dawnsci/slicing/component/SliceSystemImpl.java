@@ -156,7 +156,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		tool.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
 		
 		final Composite tableComp = new Composite(area, SWT.NONE);
-		tableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		tableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, getRangeMode().isRange()));
 
 		TableColumnLayout tableColumnLayout = new TableColumnLayout();
 		tableComp.setLayout(tableColumnLayout);
