@@ -69,6 +69,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.eclipse.dawnsci.slicing.api.data.ITransferableDataService;
+import org.eclipse.dawnsci.slicing.api.system.DimsData;
 import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.dawnsci.slicing.api.system.ISliceSystem;
 import org.eclipse.dawnsci.slicing.api.util.SliceUtils;
@@ -181,6 +182,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 
 	private ITransferableDataService transferableService;
 	private IExpressionObjectService expressionService;
+
 	
 	public PlotDataComponent(final IWorkbenchPart editor) throws Exception {
 				
@@ -582,7 +584,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				wd.open();
 			}
 		};
-
+		
 		final Action copy = new Action("Copy selected data (it can then be pasted to another data list.)", Activator.getImageDescriptor("icons/copy.gif")) {
 			public void run() {
 				final ITransferableDataObject sel = (ITransferableDataObject)((IStructuredSelection)dataViewer.getSelection()).getFirstElement();
@@ -986,6 +988,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	} 
 
 	public IAction getDataReductionAction() {
+		
 		return dataReduction;
 	}
 	
@@ -1083,12 +1086,28 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		return names;
 	}
 
-	protected boolean isDataReductionToolActive() {
+	public boolean isDataReductionToolActive() {
 		
 		if (H5Loader.isH5(getFileName()) || isSelectionReducible()) {
+			
 			IToolPageSystem toolSystem = (IToolPageSystem)getPlottingSystem().getAdapter(IToolPageSystem.class);
 			IToolPage tool = toolSystem.getActiveTool();
-			return tool!=null && tool instanceof IDataReductionToolPage;
+			boolean probablyOk = tool!=null && tool instanceof IDataReductionToolPage;
+			
+			// Check for advanced axes
+			dataReduction.setText("Data reduction...");
+			if (probablyOk) {
+				final DimsDataList ddl = getSliceData();
+				if (ddl!=null) for (DimsData dd : ddl.iterable()) {
+					
+					if (dd.getPlotAxis().isAdvanced()) {
+						dataReduction.setText("Data reduction cannot be used with advanced axes.");
+						return false;
+					}
+				}
+			}
+			
+			return probablyOk;
 		}
 		return false;
 	}
@@ -1756,6 +1775,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			filterProvider.dispose();
 			filterProvider = null;
 		}
+		
 	}
 
 	public void addExpression() {

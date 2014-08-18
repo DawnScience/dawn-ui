@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.services.IVariableManager;
+import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.workbench.ui.data.PlotDataComponent;
 import org.dawb.workbench.ui.transferable.TransferableDataObject;
@@ -31,6 +32,10 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.dawnsci.slicing.api.SlicingFactory;
 import org.eclipse.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.eclipse.dawnsci.slicing.api.editor.ISlicablePlottingPart;
+import org.eclipse.dawnsci.slicing.api.system.DimensionalEvent;
+import org.eclipse.dawnsci.slicing.api.system.DimensionalListener;
+import org.eclipse.dawnsci.slicing.api.system.DimsData;
+import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.dawnsci.slicing.api.system.ISliceSystem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.Separator;
@@ -85,6 +90,8 @@ public class PlotDataPage extends Page implements IAdaptable {
 	private PlotDataPage(ISlicablePlottingPart ed) {
 		this.editor = ed;
 	}
+
+	private DimensionalListener dataReductionDimensionalListener;
 
 	@Override
 	public void createControl(Composite parent) {
@@ -168,6 +175,15 @@ public class PlotDataPage extends Page implements IAdaptable {
 			sliceComponent.addCustomAction(dataSetComponent.getDataReductionAction());
 			sliceComponent.createPartControl(form);
 			sliceComponent.setVisible(false);
+			
+			
+			dataReductionDimensionalListener = new DimensionalListener() {
+				@Override
+				public void dimensionsChanged(DimensionalEvent evt) {
+					dataSetComponent.getDataReductionAction().setEnabled(dataSetComponent.isDataReductionToolActive());
+				}
+			};
+			sliceComponent.addDimensionalListener(dataReductionDimensionalListener);
 	
 			form.setWeights(new int[] {40, 60});
 		} catch (Exception ne) {
@@ -191,7 +207,10 @@ public class PlotDataPage extends Page implements IAdaptable {
             workspace.removeResourceChangeListener(resourceListener);
 		}
 		if (dataSetComponent!=null) dataSetComponent.dispose();
+		
+		sliceComponent.removeDimensionalListener(dataReductionDimensionalListener);
 		if (sliceComponent!=null)   sliceComponent.dispose();
+		
  		super.dispose();
 	}
 
