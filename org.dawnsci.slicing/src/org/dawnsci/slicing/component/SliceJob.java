@@ -38,17 +38,22 @@ class SliceJob extends Job {
 			monitor.worked(1);
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 		
+			if (system.getActiveTool()!=null && !system.getActiveTool().isSliceRequired()) {
+				return Status.CANCEL_STATUS;
+			}
+
 			if (sliceType instanceof PlotType) {
 				final SliceSource data = system.getData();
 				// TODO FIXME Allow the current slice tool to dictate how to 
 				// process the slice?
 				SliceUtils.plotSlice(data,
-						             slice, 
-						             (PlotType)sliceType, 
-						             system.getPlottingSystem(), 
-						             monitor);
-				
+						slice, 
+						(PlotType)sliceType, 
+						system.getPlottingSystem(), 
+						monitor);
+
 			}
+
 		} catch (Exception e) {
 			logger.error("Cannot slice "+slice.getName(), e);
 			System.out.println(slice);
