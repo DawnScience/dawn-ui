@@ -32,19 +32,26 @@ public class ZipUtils {
 	}
 	
 	
+	public static boolean isExtensionSupported(final String ext) {
+		return CLASSES.containsKey(ext);
+	}
+
 	public static InputStream getStreamForFile(final String path) throws Exception {
-		
-		final File file = new File(path);
-		return getStreamForFile(file);
+		return getStreamForStream(new FileInputStream(new File(path)), FileUtils.getFileExtension(path));
 	}
 
 	public static InputStream getStreamForFile(final File file) throws Exception {
+		return getStreamForStream(new FileInputStream(file), FileUtils.getFileExtension(file));
+	}
+
+	public static InputStream getStreamForStream(final InputStream inputStream, final String ext) throws Exception {
 		
-		final String ext = FileUtils.getFileExtension(file);
 		final Class<? extends InputStream> clazz = CLASSES.get(ext);
+		if (clazz == null)
+			throw new IllegalArgumentException("Can not handle the extension: " + ext);
 		final Constructor<? extends InputStream> c = clazz.getConstructor(InputStream.class);
 		
-		final InputStream in = c.newInstance(new FileInputStream(file));
+		final InputStream in = c.newInstance(inputStream);
 		
 		// Hack zip files
 		if (in instanceof ZipInputStream) {
