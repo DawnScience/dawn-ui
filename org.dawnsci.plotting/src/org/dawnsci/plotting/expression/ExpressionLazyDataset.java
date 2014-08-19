@@ -1,6 +1,5 @@
 package org.dawnsci.plotting.expression;
 
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LazyDataset;
 import uk.ac.diamond.scisoft.analysis.io.ILazyLoader;
 
@@ -16,13 +15,11 @@ class ExpressionLazyDataset extends LazyDataset {
 	}
 	
 	public void setShapeSilently(final int[] shape) {
-		this.shape = shape;
 		try {
-			size = AbstractDataset.calcSize(shape);
+			setShape(shape);
 		} catch (IllegalArgumentException e) {
 			size = Integer.MAX_VALUE; // this indicates that the entire dataset cannot be read in! 
 		}
-		if (lazyErrorDelegate!=null) lazyErrorDelegate.setShape(shape);
 	}
 
 }
