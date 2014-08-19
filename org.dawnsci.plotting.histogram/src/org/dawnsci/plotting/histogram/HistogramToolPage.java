@@ -460,12 +460,12 @@ public class HistogramToolPage extends AbstractToolPage {
 			@Override
 			public void roiDragged(ROIEvent evt) {
 				regionDragging = true;
-				logger.debug("Dragging ROI");
+				//logger.debug("Dragging ROI");
 			}
 
 			@Override
 			public void roiChanged(ROIEvent evt) {
-				logger.debug("Stopped Dragging");
+				//logger.debug("Stopped Dragging");
 				regionDragging = false;
 				if (evt.getROI() instanceof RectangularROI) {
 					IRegion region = histogramPlot.getRegion("Histogram Region");
@@ -1157,7 +1157,7 @@ public class HistogramToolPage extends AbstractToolPage {
 					histogramDirty = false;
 				}
 				if(!regionDragging ) {
-					logger.debug("Repainting Histogram");
+					//logger.debug("Repainting Histogram");
 					createRegion();
 					redTrace.setData(RGBX, R);
 					greenTrace.setData(RGBX, G);
