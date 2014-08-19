@@ -743,9 +743,9 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				 * What follows is adding some actions for setting errors on other plotted data sets.
 				 * The logic is a bit convoluted at the moment.
 				 */
-				final ILazyDataset currentSelecedData  = ob!=null ? getLazyValue(ob.getVariable(), null) : null;
+				final ILazyDataset currentSelectedData  = ob!=null ? getLazyValue(ob.getVariable(), null) : null;
 
-				if (currentSelecedData!=null) {
+				if (currentSelectedData!=null) {
 					if (selections!=null && selections.size() > 0) {
 						menuManager.add(new Action("Set '"+ob.getName()+"' as error on other plotted data...") {
 							@Override
@@ -762,7 +762,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 										errSet.setError(getVariableValue(ob.getVariable(), null));
 										
 									} else { // Set errors lazily
-										set.setLazyErrors(currentSelecedData);
+										set.setError(currentSelectedData);
 									}
 									fireSelectionListeners(selections);
 
@@ -771,13 +771,13 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 						});
 					}
 
-					final boolean isDatasetError = currentSelecedData instanceof IErrorDataset && ((IErrorDataset)currentSelecedData).hasErrors();
-					final boolean isLazyError    = currentSelecedData.getLazyErrors()!=null;
+					final boolean isDatasetError = currentSelectedData instanceof IErrorDataset && ((IErrorDataset)currentSelectedData).hasErrors();
+					final boolean isLazyError    = currentSelectedData.getError() != null;
 					if (isDatasetError || isLazyError) {
-						menuManager.add(new Action("Clear error on '"+currentSelecedData.getName()+"'") {
+						menuManager.add(new Action("Clear error on '"+currentSelectedData.getName()+"'") {
 							@Override
 							public void run() {
-								currentSelecedData.setLazyErrors(null);
+								currentSelectedData.setError(null);
 								fireSelectionListeners(selections);
 							}
 						});

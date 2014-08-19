@@ -263,4 +263,10 @@ public class HyperSlicingTool extends AbstractSlicingTool {
 		}
 		return super.getAdapter(clazz);
 	}
+	
+	@Override
+	public boolean isSliceRequired() {
+		return false;
+	}
+
 }

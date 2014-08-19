@@ -82,7 +82,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private Axis             xAxis;
 	private Axis             yAxis;
 	private ColorMapRamp     intensityScale;
-	private Dataset  image;
+	private Dataset          image;
 	private DownsampleType   downsampleType=DownsampleType.MAXIMUM;
 	private int              currentDownSampleBin=-1;
 	private List<IDataset>    axes;
@@ -667,7 +667,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		final Point         loc    = graph.getRegionArea().getLocation();
 		
 		// Offsets and scaled image are calculated in the createScaledImage method.
-		graphics.drawImage(scaledImage, loc.x-((int)xOffset), loc.y-((int)yOffset));
+		if (scaledImage!=null) graphics.drawImage(scaledImage, loc.x-((int)xOffset), loc.y-((int)yOffset));
 		
 		if (isLabelZoom && scaledImage!=null) {
 			if (intensityLabelPainter==null) intensityLabelPainter = new IntensityLabelPainter(plottingSystem, this);
@@ -687,6 +687,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 //        remove();
 //	}
 	
+	public void sleep() {
+		if (mipMap!=null)           mipMap.clear();
+		if (maskMap!=null)          maskMap.clear();
+		if (scaledImage!=null)      scaledImage.dispose();
+	}
 	public void remove() {
 		
 		if (mipMap!=null)           mipMap.clear();
