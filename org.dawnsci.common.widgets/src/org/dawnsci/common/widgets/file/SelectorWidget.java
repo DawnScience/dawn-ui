@@ -60,11 +60,11 @@ public abstract class SelectorWidget {
 	 * @param parent
 	 */
 	public SelectorWidget(Composite parent) {
-		this(parent, "", "Path to File", "Select File", false);
+		this(parent, "", "Path to File", "Select File");
 	}
 
 	/**
-	 * Widget constructor with default set to File Selector
+	 * Widget constructor with default set to Folder Selector
 	 * @param parent
 	 *           parent composite
 	 * @param inputText
@@ -75,7 +75,7 @@ public abstract class SelectorWidget {
 	 *           Tooltip of the browse button
 	 */
 	public SelectorWidget(Composite parent, String inputText, String textTooltip, String browseBtnTooltip) {
-		this(parent, inputText, textTooltip, browseBtnTooltip, false, new String[] {""}, new String[] {""});
+		this(parent, inputText, textTooltip, browseBtnTooltip, true, new String[] {""}, new String[] {""});
 	}
 
 	/**
