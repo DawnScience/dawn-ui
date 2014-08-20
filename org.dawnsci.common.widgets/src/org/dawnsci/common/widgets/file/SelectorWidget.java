@@ -116,8 +116,10 @@ public abstract class SelectorWidget {
 		inputLocation.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
-				if (hasBackgroundColor)
+				if (hasBackgroundColor) {
 					verifyDirectory();
+					loadPath(inputLocation.getText());
+				}
 			}
 		});
 		DropTarget dt = new DropTarget(inputLocation, DND.DROP_MOVE| DND.DROP_DEFAULT| DND.DROP_COPY);
