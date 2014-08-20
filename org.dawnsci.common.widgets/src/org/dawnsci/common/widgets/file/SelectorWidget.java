@@ -21,10 +21,11 @@ import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -54,6 +55,9 @@ public abstract class SelectorWidget {
 	private boolean isFolderSelector;
 	private String[] fileExtensions;
 	private String[] fileTypes;
+	private Color red;
+	private Color white;
+	private boolean hasBackgroundColor = false;
 
 	/**
 	 * 
@@ -97,6 +101,8 @@ public abstract class SelectorWidget {
 		this.isFolderSelector = isFolderSelector;
 		this.fileTypes = extensions[0];
 		this.fileExtensions = extensions[1];
+		this.red = new Color(Display.getDefault(), 255,0,0);
+		this.white = new Color(Display.getDefault(), 255, 255, 255);
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(2, false));
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -107,14 +113,11 @@ public abstract class SelectorWidget {
 		ContentProposalAdapter ad = new ContentProposalAdapter(inputLocation, new TextContentAdapter(), prov, null, null);
 		ad.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
 		inputLocation.setToolTipText(textTooltip);
-		inputLocation.addKeyListener(new KeyAdapter() {
+		inputLocation.addModifyListener(new ModifyListener() {
 			@Override
-			public void keyPressed(KeyEvent e) {
-				if (e.keyCode == SWT.CR) {
-					String path = inputLocation.getText();
-					if (checkDirectory(path, true))
-						loadPath(path);
-				}
+			public void modifyText(ModifyEvent e) {
+				if (hasBackgroundColor)
+					verifyDirectory();
 			}
 		});
 		DropTarget dt = new DropTarget(inputLocation, DND.DROP_MOVE| DND.DROP_DEFAULT| DND.DROP_COPY);
@@ -145,6 +148,15 @@ public abstract class SelectorWidget {
 				openDialog();
 			}
 		});
+	}
+
+	/**
+	 * If True, the background colour will be changed to red if a file or folder
+	 * does not exist. Set to False by default.
+	 * @param hasBackgroundColor
+	 */
+	public void setHasBackgroundColor(boolean hasBackgroundColor) {
+		this.hasBackgroundColor = hasBackgroundColor;
 	}
 
 	public void setText(String inputText) {
@@ -186,8 +198,7 @@ public abstract class SelectorWidget {
 			inputLocation.setText(path);
 		else
 			path = inputLocation.getText();
-		if (checkDirectory(path, true))
-			loadPath(path);
+		loadPath(path);
 	}
 
 	/**
@@ -207,6 +218,16 @@ public abstract class SelectorWidget {
 			return false;
 		}
 		return forRead ? f.canRead() : f.canWrite();
+	}
+
+	private void verifyDirectory() {
+		File dir = new File(inputLocation.getText());
+		if ((isFolderSelector && dir.isDirectory())
+				|| (!isFolderSelector && dir.isFile())) {
+			inputLocation.setBackground(white);
+		} else {
+			inputLocation.setBackground(red);
+		}
 	}
 
 	/**
