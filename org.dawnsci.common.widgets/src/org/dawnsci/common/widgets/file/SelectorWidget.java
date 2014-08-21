@@ -101,7 +101,7 @@ public abstract class SelectorWidget {
 		this.isFolderSelector = isFolderSelector;
 		this.fileTypes = extensions[0];
 		this.fileExtensions = extensions[1];
-		this.red = new Color(Display.getDefault(), 255,0,0);
+		this.red = new Color(Display.getDefault(), 255,80,80);
 		this.white = new Color(Display.getDefault(), 255, 255, 255);
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(2, false));
