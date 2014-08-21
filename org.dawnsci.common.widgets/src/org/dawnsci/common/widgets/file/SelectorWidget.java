@@ -57,46 +57,28 @@ public abstract class SelectorWidget {
 	private String[] fileExtensions;
 	private String[] fileTypes;
 	private boolean isModified;
+	private String text = "";
+	private String textTooltip = "";
+	private String buttonTooltip = "";
 
 	/**
 	 * 
 	 * @param parent
 	 */
 	public SelectorWidget(Composite parent) {
-		this(parent, "", "Path to File", "Select File");
-	}
-
-	/**
-	 * Widget constructor with default set to Folder Selector
-	 * @param parent
-	 *           parent composite
-	 * @param inputText
-	 *           default input text of Text field
-	 * @param textTooltip
-	 *           Tooltip of the path text field
-	 * @param browseBtnTooltip
-	 *           Tooltip of the browse button
-	 */
-	public SelectorWidget(Composite parent, String inputText, String textTooltip, String browseBtnTooltip) {
-		this(parent, inputText, textTooltip, browseBtnTooltip, true, new String[] {""}, new String[] {""});
+		this(parent, true, new String[] {""}, new String[] {""});
 	}
 
 	/**
 	 * 
 	 * @param parent
 	 *           parent composite
-	 * @param inputText
-	 *           default input text of Text field
-	 * @param textTooltip
-	 *           Tooltip of the path text field
-	 * @param browseBtnTooltip
-	 *           Tooltip of the browse button
 	 * @param isFolderSelector
 	 *           if True, the button will be a Folder selector, if False, a File selector
 	 * @param extensions
 	 *           Array of Strings defining possible file extensions and names if isFolderSelector is False
 	 */
-	public SelectorWidget(Composite parent, String inputText, String textTooltip, String browseBtnTooltip, boolean isFolderSelector, String[]... extensions) {
+	public SelectorWidget(Composite parent, boolean isFolderSelector, String[]... extensions) {
 		this.isFolderSelector = isFolderSelector;
 		this.fileTypes = extensions[0];
 		this.fileExtensions = extensions[1];
@@ -106,7 +88,7 @@ public abstract class SelectorWidget {
 		gridData.widthHint = 150;
 		container.setLayoutData(gridData);
 		inputLocation = new Text(container, SWT.BORDER);
-		inputLocation.setText(inputText);
+		inputLocation.setText(text);
 		inputLocation.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		FileContentProposalProvider prov = new FileContentProposalProvider();
 		ContentProposalAdapter ad = new ContentProposalAdapter(inputLocation, new TextContentAdapter(), prov, null, null);
@@ -149,7 +131,7 @@ public abstract class SelectorWidget {
 
 		inputBrowse = new Button(container, SWT.NONE);
 		inputBrowse.setText("...");
-		inputBrowse.setToolTipText(browseBtnTooltip);
+		inputBrowse.setToolTipText(buttonTooltip);
 		inputBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -242,5 +224,27 @@ public abstract class SelectorWidget {
 	 */
 	public boolean isModifiedEvent() {
 		return isModified;
+	}
+
+	/**
+	 * 
+	 * @param textTooltip 
+	 *             Tooltip of the path text field
+	 */
+	public void setTextToolTip(String textTooltip) {
+		this.textTooltip = textTooltip;
+		if (inputLocation != null)
+			inputLocation.setToolTipText(textTooltip);
+	}
+
+	/**
+	 * 
+	 * @param buttonTooltip 
+	 *             Tooltip of the browse button
+	 */
+	public void setButtonToolTip(String buttonTooltip) {
+		this.buttonTooltip = buttonTooltip;
+		if (inputBrowse != null)
+			inputBrowse.setToolTipText(buttonTooltip);
 	}
 }
