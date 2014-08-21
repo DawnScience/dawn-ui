@@ -1,6 +1,7 @@
 package org.dawnsci.plotting.tools.preference;
 
 public class DiffractionToolConstants {
+	public static final String NUMBER_FORMAT                = "org.dawb.workbench.plotting.tools.diffraction.numberFormat";
 	public static final String REMEMBER_DIFFRACTION_META 	= "org.dawb.workbench.plotting.tools.diffraction.rememberMetaData";
 	public static final String PIXEL_SIZE_X 				= "org.dawb.workbench.plotting.tools.diffraction.pixelSizeX";
 	public static final String PIXEL_SIZE_Y 				= "org.dawb.workbench.plotting.tools.diffraction.pixelSizeY";

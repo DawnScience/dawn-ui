@@ -8,7 +8,10 @@
  */
 package org.dawnsci.common.widgets.tree;
 
+import java.text.DecimalFormat;
+
 import javax.measure.quantity.Quantity;
+import javax.measure.unit.Unit;
 
 import org.dawnsci.common.widgets.Activator;
 import org.dawnsci.common.widgets.tree.LabelNode;
@@ -85,10 +88,15 @@ public class NodeLabelProvider extends ColumnLabelProvider implements IStyledLab
 
 	private StyledString getStyledText(StyledString ret, NumericNode<? extends Quantity> node) {
 		
+		String pattern = node.getFormat();
+		DecimalFormat format = new DecimalFormat(pattern);
+		
+		double value;
 		switch(icolumn) {
 		
 		case 1: // Default
-			return ret.append(node.getDefaultValue(true), StyledString.QUALIFIER_STYLER);
+			value = node.getDefaultDoubleValue();
+			return ret.append(format.format(value), StyledString.QUALIFIER_STYLER);
 			
 		case 2: // Value
 			if (node.isNaN()) {
@@ -100,11 +108,12 @@ public class NodeLabelProvider extends ColumnLabelProvider implements IStyledLab
 				}
 			    return ret;
 			}
+			value = node.getDoubleValue();
 			if (node.isEditable()) {
-				ret.append(node.getValue(true));
+				ret.append(format.format(value));
 				ret.append(" *", StyledString.QUALIFIER_STYLER);
 			} else {
-				ret.append(node.getValue(true), StyledString.DECORATIONS_STYLER);
+				ret.append(format.format(value), StyledString.DECORATIONS_STYLER);
 			}
 			return ret;
 			

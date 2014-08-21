@@ -8,8 +8,6 @@
  */
 package org.dawnsci.common.widgets.tree;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -43,7 +41,6 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	private Amount<E>  upperBound;
 	private Unit<E>    defaultUnit;
 	private double     increment;
-	private NumberFormat format;
 	
 	/**
 	 * allowedUnits does not have to be E intentionally
@@ -51,15 +48,7 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	 * which knows about the Planck constant relationship.
 	 */
 	private List<Unit> allowedUnits;
-
-	/**
-	 * Unit must not be null.
-	 * @param label
-	 * @param unit, nit null
-	 */
-	public NumericNode(String label, Unit<E> unit) {
-		this(label, null, unit);
-	}
+	private String format;
 	
 	/**
 	 * Unit must not be null.
@@ -67,12 +56,15 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	 * @param unit
 	 */
 	public NumericNode(String label, LabelNode parent, Unit<E> unit) {
-		super(label, parent);
-		this.defaultUnit = unit;
-		this.increment   = 0.1;
-		this.format  = new DecimalFormat("#0.####");
+		this(label, parent, unit, "#0.####");
 	}
 
+	public NumericNode(String label, LabelNode parent, Unit<E> unit, String numberFormat) {
+		super(label, parent);
+		this.defaultUnit  = unit;
+		this.increment    = 0.1;
+		this.format = numberFormat;
+	}
 
 	public boolean isNaN() {
 		return value==null&&defaultValue==null;
@@ -100,19 +92,15 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 
 		return Double.NaN;
 	}
-	
-	public String getValue(boolean isFormat) {
-		if (isFormat) {
-			return format.format(getValue(getValue().getUnit()));
-		} else {
-			return String.valueOf(getValue(getValue().getUnit()));
-		}
-	}
 
 	public double getDoubleValue() {
 		final Amount<E> val = getValue();
-		double value =  val!=null? val.doubleValue(val.getUnit()) : Double.NaN;
-		return Double.parseDouble(format.format(value));
+		return  val!=null? val.doubleValue(val.getUnit()) : Double.NaN;
+	}
+	
+	public double getDefaultDoubleValue() {
+		final Amount<E> val = getDefaultValue();
+		return  val!=null? val.doubleValue(val.getUnit()) : Double.NaN;
 	}
 	
 	public void setDoubleValue(double val) {
@@ -318,13 +306,6 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 		if (defaultValue!=null) return defaultValue;
 		return Amount.valueOf(Double.NaN, getUnit());
 	}
-	public String getDefaultValue(boolean isFormat) {
-		if (isFormat) {
-			return format.format(getDefaultValue().doubleValue(getDefaultValue().getUnit()));
-		} else {
-			return String.valueOf(getDefaultValue().doubleValue(getDefaultValue().getUnit()));
-		}
-	}
 	
 	public Unit<E> getDefaultUnit() {
 		return defaultUnit;
@@ -413,17 +394,6 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 		this.increment = increment;
 	}
 
-	public NumberFormat getFormat() {
-		return format;
-	}
-
-	public void setFormat(NumberFormat format) {
-		this.format = format;
-	}
-	public void setFormat(String format) {
-		this.format = new DecimalFormat(format);
-	}
-
 	public List<Unit> getUnits() {
 		return allowedUnits;
 	}
@@ -459,14 +429,6 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 		return ret;
 	}
 
-	/**
-	 * Gets the decimal places used to view the number
-	 * @return
-	 */
-	public int getDecimalPlaces() {
-		return format.getMaximumFractionDigits();
-	}
-
 	public void dispose() {
 		super.dispose();
 		if (listeners!=null) listeners.clear();
@@ -499,7 +461,6 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 				+ ((defaultUnit == null) ? 0 : defaultUnit.hashCode());
 		result = prime * result
 				+ ((defaultValue == null) ? 0 : defaultValue.hashCode());
-		result = prime * result + ((format == null) ? 0 : format.hashCode());
 		long temp;
 		temp = Double.doubleToLongBits(increment);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
@@ -535,11 +496,6 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 				return false;
 		} else if (!defaultValue.equals(other.defaultValue))
 			return false;
-		if (format == null) {
-			if (other.format != null)
-				return false;
-		} else if (!format.equals(other.format))
-			return false;
 		if (Double.doubleToLongBits(increment) != Double
 				.doubleToLongBits(other.increment))
 			return false;
@@ -561,4 +517,11 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 		return true;
 	}
 
+	public String getFormat() {
+		return format;
+	}
+
+	public void setFormat(String format) {
+		this.format = format;
+	}
 }

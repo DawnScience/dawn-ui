@@ -10,6 +10,7 @@ public class DiffractionToolPreferenceInitializer extends
 	@Override
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = Activator.getPlottingPreferenceStore();
+		store.setDefault(DiffractionToolConstants.NUMBER_FORMAT, "#0.0###");
 		store.setDefault(DiffractionToolConstants.REMEMBER_DIFFRACTION_META, "prompt");
 		store.setDefault(DiffractionToolConstants.PIXEL_SIZE_X,  0.1024);
 		store.setDefault(DiffractionToolConstants.PIXEL_SIZE_Y,  0.1024);

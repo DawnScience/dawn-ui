@@ -1,30 +1,26 @@
 package org.dawnsci.plotting.tools.preference;
 
-import javax.measure.quantity.Quantity;
+import java.text.DecimalFormat;
 
 import org.dawb.common.ui.viewers.TreeNodeContentProvider;
-import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
-import org.dawnsci.common.widgets.celleditor.FloatSpinnerCellEditor;
+import org.dawnsci.common.widgets.tree.LabelNode;
 import org.dawnsci.common.widgets.tree.NodeLabelProvider;
-import org.dawnsci.common.widgets.tree.NumericNode;
+import org.dawnsci.common.widgets.tree.ObjectNode;
+import org.dawnsci.common.widgets.tree.UnitEditingSupport;
+import org.dawnsci.common.widgets.tree.ValueEditingSupport;
+import org.dawnsci.common.widgets.tree.ValueEvent;
+import org.dawnsci.common.widgets.tree.ValueListener;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.diffraction.DiffractionDefaultMetadata;
 import org.dawnsci.plotting.tools.diffraction.DiffractionTreeModel;
 import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
-import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -43,8 +39,7 @@ import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 
 //Uses the Diffraction tools treeview to allow the diffraction metadata values in the
 // preference store to be edited
-public class DiffractionDefaultsPreferencePage extends PreferencePage implements
-		IWorkbenchPreferencePage {
+public class DiffractionDefaultsPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 	
 	private FilteredTree filteredTree;
 	private TreeViewer viewer;
@@ -130,6 +125,23 @@ public class DiffractionDefaultsPreferencePage extends PreferencePage implements
 		try {
 			model = new DiffractionTreeModel(metaData);
 			model.setViewer(viewer);
+			
+			final LabelNode  format  = new LabelNode("Format", model.getRoot());
+			final ObjectNode numeric = new ObjectNode("Numbers", Activator.getPlottingPreferenceStore().getString(DiffractionToolConstants.NUMBER_FORMAT), format);
+			numeric.setEditable(true);
+			
+			numeric.addValueListener(new ValueListener() {			
+				@Override
+				public void valueChanged(ValueEvent evt) {
+					try {
+						final String formatString = evt.getValue().toString();
+						final DecimalFormat f     = new DecimalFormat(formatString);
+						Activator.getPlottingPreferenceStore().setValue(DiffractionToolConstants.NUMBER_FORMAT, formatString);
+					} catch (Exception ne) {
+						logger.error("Cannot set "+DiffractionToolConstants.NUMBER_FORMAT+" to "+evt.getValue());
+					}
+				}
+			});
 		} catch (Exception e) {
 			logger.error("Cannot create model!", e);
 			return;
@@ -168,114 +180,5 @@ public class DiffractionDefaultsPreferencePage extends PreferencePage implements
 		var.setEditingSupport(new UnitEditingSupport(viewer));
 	}
 
-	@SuppressWarnings("unchecked")
-	private class ValueEditingSupport extends EditingSupport {
-
-		public ValueEditingSupport(ColumnViewer viewer) {
-			super(viewer);
-		}
-
-		@Override
-		protected CellEditor getCellEditor(final Object element) {
-			if (element instanceof NumericNode) {
-				final NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
-				final FloatSpinnerCellEditor fse = new FloatSpinnerCellEditor(viewer.getTree(), SWT.NONE);
-				fse.setFormat(7, node.getDecimalPlaces()+1);
-				fse.setIncrement(node.getIncrement());
-				fse.setMaximum(node.getUpperBoundDouble());
-				fse.setMinimum(node.getLowerBoundDouble());
-				fse.addKeyListener(new KeyAdapter() {
-					public void keyPressed(KeyEvent e) {
-						if (e.character=='\n') {
-							setValue(element, fse.getValue());
-						}
-					}
-				});
-				fse.addSelectionListener(new SelectionAdapter() {
-					public void widgetSelected(SelectionEvent e) {
-						node.setValue((Double)fse.getValue(), null);
-					}
-				});
-				return fse;
-			}
-			return null;
-		}
-
-		@Override
-		protected boolean canEdit(Object element) {
-			if (!(element instanceof NumericNode)) return false;
-			return ((NumericNode<?>)element).isEditable();
-		}
-
-		@Override
-		protected Object getValue(Object element) {
-			if (!(element instanceof NumericNode)) return null;
-			
-			NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
-			
-			return node.getDoubleValue();
-		}
-
-		@Override
-		protected void setValue(Object element, Object value) {
-			if (!(element instanceof NumericNode)) return;
-			
-			NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
-			node.setDoubleValue((Double)value);
-			viewer.refresh(element);
-		}
-
-		
-	}
 	
-	@SuppressWarnings("unchecked")
-	private class UnitEditingSupport extends EditingSupport {
-
-		public UnitEditingSupport(ColumnViewer viewer) {
-			super(viewer);
-		}
-
-		@Override
-		protected CellEditor getCellEditor(final Object element) {
-			if (element instanceof NumericNode) {
-				NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
-				final CComboCellEditor cce = new CComboCellEditor(viewer.getTree(), node.getUnitsString(), SWT.READ_ONLY);
-				cce.getCombo().addSelectionListener(new SelectionAdapter() {
-					public void widgetSelected(SelectionEvent e) {
-						setValue(element, cce.getValue());
-					}
-				});
-				return cce;
-			}
-			return null;
-		}
-
-		@Override
-		protected boolean canEdit(Object element) {
-			if (!(element instanceof NumericNode)) return false;
-			NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
-			return node.isEditable() && node.getUnits()!=null;
-		}
-
-		@Override
-		protected Object getValue(Object element) {
-			if (!(element instanceof NumericNode)) return null;
-			
-			NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
-			
-			return node.getUnitIndex();
-		}
-
-		@Override
-		protected void setValue(Object element, Object value) {
-			if (!(element instanceof NumericNode)) return;
-			
-			NumericNode<? extends Quantity> node = (NumericNode<? extends Quantity>)element;
-			node.setUnitIndex((Integer)value);
-			viewer.refresh(element);
-		}
-
-		
-	}
-
 }

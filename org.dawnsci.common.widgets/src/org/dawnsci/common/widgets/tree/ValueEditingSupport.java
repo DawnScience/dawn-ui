@@ -16,6 +16,7 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColorCellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -45,6 +46,9 @@ public class ValueEditingSupport extends EditingSupport {
 		if (element instanceof ComboNode) {
 			return createComboEditor((ComboNode) element);
 		}
+		if (element instanceof LabelNode) {
+			return new TextCellEditor((Composite)viewer.getControl(), SWT.NONE);
+		}
 		return null;
 	}
 
@@ -53,16 +57,22 @@ public class ValueEditingSupport extends EditingSupport {
 		return ce;
 	}
 
+	private boolean somethingChanged = false;
+	
 	protected CellEditor createNumericEditor(final NumericNode<?> element) {
 		
 		final NumericNode<? extends Quantity> node = element;
-		final FloatSpinnerCellEditor fse = new FloatSpinnerCellEditor((Composite)viewer.getControl(), SWT.NONE);
-		fse.setFormat(7, node.getDecimalPlaces());
+		
+		somethingChanged = false;
+		
+		final FloatSpinnerCellEditor fse = new NumericNodeEditor(element, (Composite)viewer.getControl(), SWT.NONE);
+		fse.setFormat(7, getDecimalPlaces(node));
 		fse.setIncrement(node.getIncrement());
 		fse.setMaximum(node.getUpperBoundDouble());
 		fse.setMinimum(node.getLowerBoundDouble());
 		fse.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
+				somethingChanged = true;
 				if (e.character=='\n') {
 					setValue(element, fse.getValue());
 				}
@@ -70,10 +80,55 @@ public class ValueEditingSupport extends EditingSupport {
 		});
 		fse.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
+				somethingChanged = true;
 				node.setValue((Double)fse.getValue(), null);
 			}
 		});
 		return fse;
+	}
+	
+
+	/**
+	 * Gets the decimal places used to view the number
+	 * @return
+	 */
+	private int getDecimalPlaces(NumericNode<? extends Quantity> node) {
+		final String formatString = node.getFormat();
+		try {
+			if (formatString!=null && formatString.indexOf('.')>-1) {
+				return formatString.split("\\.")[1].length()+1;
+			}
+		} catch (Exception ignored) {
+			// Just use getMaximumFractionDigits();
+		}
+		return 4;
+	}
+
+	
+	private class NumericNodeEditor extends FloatSpinnerCellEditor {
+		
+		private NumericNode<?> element;
+		public NumericNodeEditor(NumericNode<?> element, Composite control, int switches) {
+			super(control, switches);
+			this.element = element;
+		}
+		@Override
+		protected Object doGetValue() {
+			if (somethingChanged) {
+			    return super.doGetValue();
+			} else {
+				return element.getDoubleValue();
+			}
+		}
+		@Override
+		protected void doSetValue(Object value) {
+			super.doSetValue(value);
+		}
+		@Override
+		public void dispose() {
+			super.dispose();
+			somethingChanged = false;
+		}
 	}
 	
 	protected CellEditor createComboEditor(final ComboNode element) {
@@ -106,6 +161,10 @@ public class ValueEditingSupport extends EditingSupport {
 			ComboNode node = (ComboNode) element;
 			return node.getValue();
 		}
+		if (element instanceof ObjectNode) {
+			ObjectNode node = (ObjectNode) element;
+			return node.isEditable() ? node.getValue() : null;
+		}
 		return null;
 	}
 
@@ -130,6 +189,12 @@ public class ValueEditingSupport extends EditingSupport {
 			ComboNode node = (ComboNode)element;
 			node.setValue((Integer) value);
 		}
+		
+		if (element instanceof ObjectNode) {
+			ObjectNode node = (ObjectNode)element;
+			node.setValue((String) value);
+		}
+
 		viewer.refresh(element);
 	}
 }

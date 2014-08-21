@@ -1665,7 +1665,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	 */
 	public ILazyDataset getDataValue(String dataName, final IMonitor monitor) {
 		for (ITransferableDataObject ob : data) {
-			if (ob.getName().equals(dataName)) {
+			if (ob==null) continue;
+			if (ob.getName()!=null && ob.getName().equals(dataName)) {
 				if (ob.isExpression()) {
 					return ob.getExpression().getCachedLazyDataSet();
 				} else {
