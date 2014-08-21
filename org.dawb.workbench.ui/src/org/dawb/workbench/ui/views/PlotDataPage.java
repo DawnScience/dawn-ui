@@ -18,6 +18,7 @@ import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.services.IVariableManager;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.util.EclipseUtils;
+import org.dawb.common.ui.util.GridUtils;
 import org.dawb.workbench.ui.data.PlotDataComponent;
 import org.dawb.workbench.ui.transferable.TransferableDataObject;
 import org.eclipse.core.resources.IFile;
@@ -99,6 +100,7 @@ public class PlotDataPage extends Page implements IAdaptable {
 		try {
 			this.content = new Composite(parent, SWT.NONE);
 			content.setLayout(new GridLayout(1, true));
+			GridUtils.removeMargins(content);
 			
 			final SashForm form = new SashForm(content, SWT.VERTICAL);
 			form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

@@ -255,10 +255,10 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 			GridUtils.setVisible(infoLabel,         false);
 		} else {
 		    GridUtils.setVisible(infoLabel,         true);
-		    infoLabel.setText(label);
+		    infoLabel.setText(" "+label);
 		    if (icon==null) icon = getActionByPlotType(sliceType).getImageDescriptor();
 		    infoLabel.setImage(icon.createImage(Display.getDefault()));
-		    infoLabel.setText(label);
+		    infoLabel.setText(" "+label);
 		}
 	}
 
@@ -423,7 +423,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 
 	private void setImageOrientationText(final StyledText text) {
 		text.setText("");
-		text.append("Image Orientation: ");
+		text.append(" Image Orientation: ");
 		Iterator<ITrace> it = plottingSystem.getTraces(IImageTrace.class).iterator();
 		if (it.hasNext()) {
 			final IImageTrace trace  = (IImageTrace) it.next();
@@ -604,7 +604,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 				
 		boolean ok = errorMessage==null;
 		if (!ok) {
-			errorLabel.setText(errorMessage);
+			errorLabel.setText(" "+errorMessage);
 		}
 		GridUtils.setVisible(errorLabel,         !(ok||getRangeMode().isRange()));
 		isErrorCondition = errorLabel.isVisible();
