@@ -26,6 +26,8 @@ import org.dawnsci.common.widgets.tree.UnitEvent;
 import org.dawnsci.common.widgets.tree.UnitListener;
 import org.dawnsci.common.widgets.tree.ValueEvent;
 import org.dawnsci.common.widgets.tree.ValueListener;
+import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.preference.DiffractionToolConstants;
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetectorHelper;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
@@ -250,7 +252,8 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 		});
 		registerNode(detectorName);
 		
-		final NumericNode<Duration> exposure = new NumericNode<Duration>("Exposure Time", detectorMeta, SI.SECOND);
+		final String format = Activator.getPlottingPreferenceStore().getString(DiffractionToolConstants.NUMBER_FORMAT);
+		final NumericNode<Duration> exposure = new NumericNode<Duration>("Exposure Time", detectorMeta, SI.SECOND, format);
 		registerNode(exposure);
 		if (dce != null) {
 			exposure.setDefault(odce.getExposureTime(), SI.SECOND);
@@ -259,13 +262,13 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 
 		final LabelNode size = new LabelNode("Size", detectorMeta);
 		registerNode(size);
-		xSize = new NumericNode<Length>("x", size, SI.MILLIMETRE);
+		xSize = new NumericNode<Length>("x", size, SI.MILLIMETRE, format);
 		registerNode(xSize);
 		if (detprop != null) {
 			xSize.setDefault(odetprop.getDetectorSizeH(), SI.MILLIMETRE);
 			xSize.setValue(detprop.getDetectorSizeH(), SI.MILLIMETRE);
 		}
-		ySize = new NumericNode<Length>("y", size, SI.MILLIMETRE);
+		ySize = new NumericNode<Length>("y", size, SI.MILLIMETRE, format);
 		registerNode(ySize);
 		if (detprop != null) {
 			ySize.setDefault(odetprop.getDetectorSizeV(), SI.MILLIMETRE);
@@ -275,7 +278,7 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 		final LabelNode pixel = new LabelNode("Pixel", detectorMeta);
 		registerNode(pixel);
 
-		xPixelSize = new NumericNode<Length>("x-size", pixel, SI.MILLIMETRE);
+		xPixelSize = new NumericNode<Length>("x-size", pixel, SI.MILLIMETRE, format);
 		registerNode(xPixelSize);
 		if (detprop != null) {
 			xPixelSize.setDefault(odetprop.getHPxSize(), SI.MILLIMETRE);
@@ -294,7 +297,7 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 		xPixelSize.setLowerBound(0.001);
 		xPixelSize.setUpperBound(1000);
 
-		yPixelSize = new NumericNode<Length>("y-size", pixel, SI.MILLIMETRE);
+		yPixelSize = new NumericNode<Length>("y-size", pixel, SI.MILLIMETRE, format);
 		registerNode(yPixelSize);
 		if (detprop != null) {
 			yPixelSize.setDefault(odetprop.getVPxSize(), SI.MILLIMETRE);
@@ -320,11 +323,11 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 		registerNode(beamCen);
 		beamCen.setDefaultExpanded(true);
 
-		beamX = new NumericNode<Length>("X", beamCen, SI.MILLIMETRE);
+		beamX = new NumericNode<Length>("X", beamCen, SI.MILLIMETRE, format);
 		registerNode(beamX);
 		beamX.setEditable(true);
 
-		beamY = new NumericNode<Length>("Y", beamCen, SI.MILLIMETRE);
+		beamY = new NumericNode<Length>("Y", beamCen, SI.MILLIMETRE, format);
 		registerNode(beamY);
 		beamY.setEditable(true);
 
@@ -366,9 +369,10 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 		registerNode(pixelValue);
 		pixelValue.setDefaultExpanded(true);
 
-		this.max = new NumericNode<Dimensionless>("Data Maximum", pixelValue, Dimensionless.UNIT);
+		final String format = Activator.getPlottingPreferenceStore().getString(DiffractionToolConstants.NUMBER_FORMAT);
+		this.max = new NumericNode<Dimensionless>("Data Maximum", pixelValue, Dimensionless.UNIT, format);
 		registerNode(max);
-		this.min = new NumericNode<Dimensionless>("Data Minimum", pixelValue, Dimensionless.UNIT);
+		this.min = new NumericNode<Dimensionless>("Data Minimum", pixelValue, Dimensionless.UNIT, format);
 		registerNode(min);
 
 	}
@@ -383,7 +387,8 @@ public class DiffractionTreeModel extends AbstractNodeModel {
         registerNode(experimentalInfo);
         experimentalInfo.setDefaultExpanded(true);
        
-        lambda = new NumericNode<Length>("Wavelength", experimentalInfo, NonSI.ANGSTROM);
+		final String format = Activator.getPlottingPreferenceStore().getString(DiffractionToolConstants.NUMBER_FORMAT);
+        lambda = new NumericNode<Length>("Wavelength", experimentalInfo, NonSI.ANGSTROM, format);
         registerNode(lambda);
         if (dce!=null) {
            	lambda.setDefault(odce.getWavelength(), NonSI.ANGSTROM);
@@ -421,7 +426,7 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 		});
 
 		// Moved node SCI-775
-		dist = new NumericNode<Length>("Distance", experimentalInfo, SI.MILLIMETRE);
+		dist = new NumericNode<Length>("Distance", experimentalInfo, SI.MILLIMETRE, format);
 		dist.setTooltip("Distance from sample to beam centre");
 		registerNode(dist);
 		if (detprop != null) {
@@ -444,20 +449,20 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 
 		// if in powder mode, do not show the oscillation nodes
 		if (!powderMode) {
-			NumericNode<Angle> start = new NumericNode<Angle>("Oscillation Start", experimentalInfo, NonSI.DEGREE_ANGLE);
+			NumericNode<Angle> start = new NumericNode<Angle>("Oscillation Start", experimentalInfo, NonSI.DEGREE_ANGLE, format);
 			registerNode(start);
 			if (dce!=null)  {
 				start.setDefault(odce.getPhiStart(), NonSI.DEGREE_ANGLE);
 				start.setValue(dce.getPhiStart(), NonSI.DEGREE_ANGLE);
 			}
-			NumericNode<Angle> stop = new NumericNode<Angle>("Oscillation Stop", experimentalInfo, NonSI.DEGREE_ANGLE);
+			NumericNode<Angle> stop = new NumericNode<Angle>("Oscillation Stop", experimentalInfo, NonSI.DEGREE_ANGLE, format);
 			registerNode(stop);
 			if (dce!=null)  {
 				stop.setDefault(odce.getPhiStart()+dce.getPhiRange(), NonSI.DEGREE_ANGLE);
 				stop.setValue(dce.getPhiStart()+dce.getPhiRange(), NonSI.DEGREE_ANGLE);
 			}
 
-			NumericNode<Angle> osci = new NumericNode<Angle>("Oscillation Range", experimentalInfo, NonSI.DEGREE_ANGLE);
+			NumericNode<Angle> osci = new NumericNode<Angle>("Oscillation Range", experimentalInfo, NonSI.DEGREE_ANGLE, format);
 			registerNode(osci);
 			if (dce!=null)  {
 				osci.setDefault(odce.getPhiRange(), NonSI.DEGREE_ANGLE);
@@ -474,7 +479,8 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 			                                     final int index,
 			                                     LabelNode normal) {
 		
-		NumericNode<Angle> node = new NumericNode<Angle>(label, normal, NonSI.DEGREE_ANGLE);
+		final String format = Activator.getPlottingPreferenceStore().getString(DiffractionToolConstants.NUMBER_FORMAT);
+		NumericNode<Angle> node = new NumericNode<Angle>(label, normal, NonSI.DEGREE_ANGLE, format);
         registerNode(node);
         if (orientation!=null)  {
         	node.setDefault(oorientation[index], NonSI.DEGREE_ANGLE);

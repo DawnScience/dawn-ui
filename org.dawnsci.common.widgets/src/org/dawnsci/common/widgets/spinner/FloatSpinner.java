@@ -153,6 +153,11 @@ public class FloatSpinner extends Composite {
 	 * @param value
 	 */
 	public void setDouble(double value) {
+		
+		// We round to the precision.
+		double factor = Math.pow(10d, precision);
+		value =	(long) (value * factor + 0.5) / factor;
+
 		if (Double.isInfinite(value)||Double.isNaN(value)) {
 			((StackLayout)content.getLayout()).topControl = errorLabel;
 			errorLabel.setText(String.valueOf(value));
