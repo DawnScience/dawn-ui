@@ -26,6 +26,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -55,9 +56,7 @@ public abstract class SelectorWidget {
 	private boolean isFolderSelector;
 	private String[] fileExtensions;
 	private String[] fileTypes;
-	private Color red;
-	private Color white;
-	private boolean hasBackgroundColor = false;
+	private boolean isModified;
 
 	/**
 	 * 
@@ -101,8 +100,6 @@ public abstract class SelectorWidget {
 		this.isFolderSelector = isFolderSelector;
 		this.fileTypes = extensions[0];
 		this.fileExtensions = extensions[1];
-		this.red = new Color(Display.getDefault(), 255,80,80);
-		this.white = new Color(Display.getDefault(), 255, 255, 255);
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(2, false));
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -118,10 +115,15 @@ public abstract class SelectorWidget {
 		inputLocation.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
-				if (hasBackgroundColor) {
-					verifyDirectory();
+				File tmp = new File(inputLocation.getText());
+				if ((SelectorWidget.this.isFolderSelector && tmp.isDirectory())
+						|| (!SelectorWidget.this.isFolderSelector && tmp.isFile())) {
+					inputLocation.setForeground(new Color(Display.getDefault(), new RGB(0, 0, 0)));
 					loadPath(inputLocation.getText());
+				} else {
+					inputLocation.setForeground(new Color(Display.getDefault(), new RGB(255, 80, 80)));
 				}
+				isModified = true;
 			}
 		});
 		DropTarget dt = new DropTarget(inputLocation, DND.DROP_MOVE| DND.DROP_DEFAULT| DND.DROP_COPY);
@@ -137,6 +139,8 @@ public abstract class SelectorWidget {
 						if (dir.exists() && dir.isDirectory()) {
 							inputLocation.setText(dir.getAbsolutePath());
 							inputLocation.notifyListeners(SWT.Modify, null);
+							loadPath(dir.getAbsolutePath());
+							isModified = false;
 						}
 					}
 				}
@@ -150,17 +154,9 @@ public abstract class SelectorWidget {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				openDialog();
+				isModified = false;
 			}
 		});
-	}
-
-	/**
-	 * If True, the background colour will be changed to red if a file or folder
-	 * does not exist. Set to False by default.
-	 * @param hasBackgroundColor
-	 */
-	public void setHasBackgroundColor(boolean hasBackgroundColor) {
-		this.hasBackgroundColor = hasBackgroundColor;
 	}
 
 	public void setText(String inputText) {
@@ -224,16 +220,6 @@ public abstract class SelectorWidget {
 		return forRead ? f.canRead() : f.canWrite();
 	}
 
-	private void verifyDirectory() {
-		File dir = new File(inputLocation.getText());
-		if ((isFolderSelector && dir.isDirectory())
-				|| (!isFolderSelector && dir.isFile())) {
-			inputLocation.setBackground(white);
-		} else {
-			inputLocation.setBackground(red);
-		}
-	}
-
 	/**
 	 * To be overridden with the action that needs to be run once that a path is chosen
 	 * @param path
@@ -246,5 +232,15 @@ public abstract class SelectorWidget {
 				&& inputBrowse != null && !inputBrowse.isDisposed())
 			return false;
 		return true;
+	}
+
+	/**
+	 * 
+	 * @return
+	 *     True if the listener event occurred in the ModifiedListener of the Text field
+	 *     False otherwise
+	 */
+	public boolean isModifiedEvent() {
+		return isModified;
 	}
 }
