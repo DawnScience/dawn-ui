@@ -105,7 +105,9 @@ public abstract class SelectorWidget {
 		this.white = new Color(Display.getDefault(), 255, 255, 255);
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(2, false));
-		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gridData.widthHint = 150;
+		container.setLayoutData(gridData);
 		inputLocation = new Text(container, SWT.BORDER);
 		inputLocation.setText(inputText);
 		inputLocation.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
