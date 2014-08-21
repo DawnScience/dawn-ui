@@ -401,6 +401,17 @@ public class TransferableDataObject implements H5Path, ITransferableDataObject{
 	@Override
 	public String getDisplayName(String rootName) {
 		String setName = toString();
+		
+		if (!isExpression() && metaData!=null) {
+			String attr = setName.concat("@local_name");
+			try {
+				Object localattr = metaData.getMetaValue(attr);
+				if (localattr != null) return localattr.toString();
+			} catch (Exception e) {
+				logger.error("Cannot get meta value for "+attr, e);
+			}
+		}
+
 		if (!isExpression() && rootName!=null && setName.startsWith(rootName)) {
 			setName = setName.substring(rootName.length());
 		}
