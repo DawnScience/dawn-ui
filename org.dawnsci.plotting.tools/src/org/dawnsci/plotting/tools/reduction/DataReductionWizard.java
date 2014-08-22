@@ -141,7 +141,7 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 		this.context  = service.open(file.getAbsolutePath());
 		this.visitor  = new ToolConversionVisitor(tool);;
 
-		final String sugFileName = FileUtils.getFileNameNoExtension(file.getName()).replace(' ',  '_')+"_"+tool.getTitle().replace(' ', '_')+".h5";
+		final String sugFileName = FileUtils.getFileNameNoExtension(file.getName()).replace(' ',  '_')+"_"+tool.getTitle().replace(' ', '_')+".nxs";
 		context.setOutputPath(file.getParent()+File.separator+sugFileName);
 		context.setConversionVisitor(visitor);
 		// if a h5path and the file is an hdf5 format, other wise try with lazydataset

@@ -124,6 +124,11 @@ public class BoxProfileTool extends ProfileTool {
 		IHierarchicalDataFile file = slice.getFile();
 
 		String dataGroup = slice.getParent();
+		
+		// Fix to http://jira.diamond.ac.uk/browse/SCI-1898
+		file.setNexusAttribute(dataGroup, Nexus.SUBENTRY);
+		
+		if (slice.getMonitor()!=null && slice.getMonitor().isCancelled()) return null;
 
 		for (IRegion region : regions) {
 			if (!isRegionTypeSupported(region.getRegionType())) continue;
@@ -133,11 +138,15 @@ public class BoxProfileTool extends ProfileTool {
 			RectangularROI bounds = (RectangularROI)region.getROI();
 			
 			//create roi name group
-			String regionGroup = file.group(region.getName().replace(' ', '_'), dataGroup);
+			String datasetName = region.getName();
+			if (datasetName.startsWith(dataGroup)) datasetName = datasetName.substring(dataGroup.length());
+			datasetName = datasetName.replace(' ', '_');
+			
+			String regionGroup = file.group(datasetName, dataGroup);
 			file.setNexusAttribute(regionGroup, Nexus.DATA);
 
 			//box profiles
-			String profileGroup = file.group("profile", regionGroup);
+			String profileGroup = file.group("profile", dataGroup);
 			file.setNexusAttribute(profileGroup, Nexus.DATA);
 			slice.setParent(profileGroup);
 

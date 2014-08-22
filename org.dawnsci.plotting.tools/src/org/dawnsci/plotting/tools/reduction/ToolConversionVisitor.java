@@ -51,7 +51,7 @@ class ToolConversionVisitor implements IConversionVisitor {
 	@Override
 	public void visit(IConversionContext context, IDataset slice) throws Exception {
 		
-		if (context.getMonitor()!=null && context.getMonitor().isCancelled()) return;
+		if (context.getMonitor()!=null && context.getMonitor().isCancelled()) throw new Exception("Execution cancelled!");
 		
 		String grp = createGroupIfRequired(context);
 		DataReductionSlice bean = new DataReductionSlice(output, grp, slice, object, context.getSelectedSlice(), context.getSelectedShape(), context.getMonitor());
@@ -76,7 +76,12 @@ class ToolConversionVisitor implements IConversionVisitor {
 		String path = initName == null ?"data" : initName;
 		
 		if (context.getSelectedH5Path() != null) {
-			String flatPath = context.getSelectedH5Path().replace("/", "_");
+			
+			String flatPath = context.getSelectedH5Path();
+			if (flatPath.startsWith("/entry/"))  flatPath = flatPath.substring("/entry/".length());
+			if (flatPath.startsWith("/entry1/")) flatPath = flatPath.substring("/entry1/".length());
+			flatPath = flatPath.replace("/", "_");
+			
 			//group made, h5 and same
 			if (currentH5Path!=null && currentH5Path.equals(flatPath) && group != null) return group;
 			
@@ -102,7 +107,9 @@ class ToolConversionVisitor implements IConversionVisitor {
 		String entryGroup = output.group("entry");
 		output.setNexusAttribute(entryGroup, Nexus.ENTRY);
 		group = output.group(path, entryGroup);
-		output.setNexusAttribute(group, Nexus.DATA);
+		// Fix to http://jira.diamond.ac.uk/browse/SCI-1898
+		// We switch this to NXsubentry later and must have enough chars to change attribute
+		output.setNexusAttribute(group, Nexus.DATA+"     ");
 		return group;
 		
 	}
