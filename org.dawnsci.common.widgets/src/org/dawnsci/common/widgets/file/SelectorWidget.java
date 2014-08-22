@@ -25,6 +25,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.TypedEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
@@ -56,7 +57,6 @@ public abstract class SelectorWidget {
 	private boolean isFolderSelector;
 	private String[] fileExtensions;
 	private String[] fileTypes;
-	private boolean isModified;
 	private String text = "";
 	private String textTooltip = "";
 	private String buttonTooltip = "";
@@ -97,12 +97,11 @@ public abstract class SelectorWidget {
 		inputLocation.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
-				isModified = true;
 				File tmp = new File(inputLocation.getText());
 				if ((SelectorWidget.this.isFolderSelector && tmp.isDirectory())
 						|| (!SelectorWidget.this.isFolderSelector && tmp.isFile())) {
 					inputLocation.setForeground(new Color(Display.getDefault(), new RGB(0, 0, 0)));
-					loadPath(inputLocation.getText());
+					loadPath(inputLocation.getText(), e);
 				} else {
 					inputLocation.setForeground(new Color(Display.getDefault(), new RGB(255, 80, 80)));
 				}
@@ -113,7 +112,6 @@ public abstract class SelectorWidget {
 		dt.addDropListener(new DropTargetAdapter() {
 			@Override
 			public void drop(DropTargetEvent event) {
-				isModified = false;
 				Object data = event.data;
 				if (data instanceof String[]) {
 					String[] stringData = (String[]) data;
@@ -123,7 +121,7 @@ public abstract class SelectorWidget {
 								|| (!SelectorWidget.this.isFolderSelector && dir.isFile())) {
 							inputLocation.setText(dir.getAbsolutePath());
 							inputLocation.notifyListeners(SWT.Modify, null);
-							loadPath(dir.getAbsolutePath());
+							loadPath(dir.getAbsolutePath(), event);
 						}
 					}
 				}
@@ -136,8 +134,7 @@ public abstract class SelectorWidget {
 		inputBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				isModified = false;
-				openDialog();
+				openDialog(e);
 			}
 		});
 	}
@@ -160,7 +157,7 @@ public abstract class SelectorWidget {
 			inputBrowse.setEnabled(isEnabled);
 	}
 
-	private void openDialog() {
+	private void openDialog(TypedEvent event) {
 		Shell shell = Display.getDefault().getActiveShell();
 		String path = inputLocation.getText();
 		if (isFolderSelector) {
@@ -181,7 +178,7 @@ public abstract class SelectorWidget {
 			inputLocation.setText(path);
 		else
 			path = inputLocation.getText();
-		loadPath(path);
+		loadPath(path, event);
 	}
 
 	/**
@@ -207,24 +204,16 @@ public abstract class SelectorWidget {
 	 * To be overridden with the action that needs to be run once that a path is chosen
 	 * @param path
 	 *          path to file or folder
+	 * @param event
+	 *          used to check the type of event
 	 */
-	public abstract void loadPath(String path);
+	public abstract void loadPath(String path, TypedEvent event);
 
 	public boolean isDisposed() {
 		if (inputLocation != null && !inputLocation.isDisposed()
 				&& inputBrowse != null && !inputBrowse.isDisposed())
 			return false;
 		return true;
-	}
-
-	/**
-	 * 
-	 * @return
-	 *     True if the listener event occurred in the ModifiedListener of the Text field
-	 *     False otherwise
-	 */
-	public boolean isTextEvent() {
-		return isModified;
 	}
 
 	/**
