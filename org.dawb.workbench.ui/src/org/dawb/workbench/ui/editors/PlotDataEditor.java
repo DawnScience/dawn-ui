@@ -539,7 +539,6 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 				final String       path       = EclipseUtils.getFilePath(input);
 				final IMetaData    meta       = LoaderFactory.getMetaData(path, new ProgressMonitorWrapper(monitor));
 				final IDataHolder  dataHolder = LoaderFactory.getData(path, true, true, null);
-				if (meta==null && dataHolder==null) return Status.CANCEL_STATUS;
 				if (monitor.isCanceled())           return Status.CANCEL_STATUS;
 
 				// Update UI

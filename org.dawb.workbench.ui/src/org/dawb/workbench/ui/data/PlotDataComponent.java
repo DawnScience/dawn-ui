@@ -234,6 +234,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 					setColumnVisible(5, 100, (Boolean)event.getNewValue());
 				} else if (event.getProperty().equals(EditorConstants.SHOW_VARNAME)) {
 					setColumnVisible(6, 100, (Boolean)event.getNewValue());
+				} else if (event.getProperty().equals(EditorConstants.SHOW_LOCALNAME)) {
+					dataViewer.refresh();
 				}
 			}
 		};
