@@ -222,7 +222,7 @@ public abstract class SelectorWidget {
 	 *     True if the listener event occurred in the ModifiedListener of the Text field
 	 *     False otherwise
 	 */
-	public boolean isModifiedEvent() {
+	public boolean isTextEvent() {
 		return isModified;
 	}
 
