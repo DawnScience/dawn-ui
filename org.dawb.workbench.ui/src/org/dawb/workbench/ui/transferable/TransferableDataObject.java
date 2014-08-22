@@ -16,6 +16,8 @@ import java.util.List;
 import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.services.IExpressionObjectService;
 import org.dawb.common.services.IVariableManager;
+import org.dawb.workbench.ui.Activator;
+import org.dawb.workbench.ui.editors.preference.EditorConstants;
 import org.eclipse.dawnsci.hdf5.editor.H5Path;
 import org.eclipse.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.eclipse.ui.PlatformUI;
@@ -402,7 +404,8 @@ public class TransferableDataObject implements H5Path, ITransferableDataObject{
 	public String getDisplayName(String rootName) {
 		String setName = toString();
 		
-		if (!isExpression() && metaData!=null) {
+		boolean localNameAllowed = Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_LOCALNAME);
+		if (localNameAllowed && !isExpression() && metaData!=null) {
 			String attr = setName.concat("@local_name");
 			try {
 				Object localattr = metaData.getMetaValue(attr);

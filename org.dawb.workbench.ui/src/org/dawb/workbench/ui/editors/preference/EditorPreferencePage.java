@@ -92,6 +92,9 @@ public class EditorPreferencePage extends FieldEditorPreferencePage implements I
  
 		BooleanFieldEditor showVarName = new BooleanFieldEditor(EditorConstants.SHOW_VARNAME, "Show expression variable name.",getFieldEditorParent());
       	addField(showVarName);
+      	
+		BooleanFieldEditor showLocalName = new BooleanFieldEditor(EditorConstants.SHOW_LOCALNAME, "Use local name attribute.",getFieldEditorParent());
+      	addField(showLocalName);
 
       	new LabelFieldEditor("\nEditors with a 'Data' tab, show the data of the current plot.\nThis option sets the number format for the table and the csv file, if the data is exported.", getFieldEditorParent());
 

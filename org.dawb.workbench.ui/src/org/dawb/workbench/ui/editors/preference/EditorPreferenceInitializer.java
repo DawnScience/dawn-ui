@@ -27,6 +27,7 @@ public class EditorPreferenceInitializer extends AbstractPreferenceInitializer {
 		store.setDefault(EditorConstants.SHOW_DIMS,              false);
 		store.setDefault(EditorConstants.SHOW_VARNAME,           false);
 		store.setDefault(EditorConstants.SHOW_SHAPE,             true);
+		store.setDefault(EditorConstants.SHOW_LOCALNAME,         true);
 		store.setDefault(EditorConstants.DATA_FORMAT,            "#0.00");
 		store.setDefault(EditorConstants.PLAY_SPEED,             1500);
 		store.setDefault(EditorConstants.PLOTTING_SYSTEM_CHOICE, "org.dawb.workbench.editors.plotting.lightWeightPlottingSystem");
