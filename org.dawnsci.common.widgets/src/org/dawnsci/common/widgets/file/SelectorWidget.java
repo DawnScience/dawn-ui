@@ -97,6 +97,7 @@ public abstract class SelectorWidget {
 		inputLocation.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
+				isModified = true;
 				File tmp = new File(inputLocation.getText());
 				if ((SelectorWidget.this.isFolderSelector && tmp.isDirectory())
 						|| (!SelectorWidget.this.isFolderSelector && tmp.isFile())) {
@@ -105,7 +106,6 @@ public abstract class SelectorWidget {
 				} else {
 					inputLocation.setForeground(new Color(Display.getDefault(), new RGB(255, 80, 80)));
 				}
-				isModified = true;
 			}
 		});
 		DropTarget dt = new DropTarget(inputLocation, DND.DROP_MOVE| DND.DROP_DEFAULT| DND.DROP_COPY);
@@ -113,16 +113,17 @@ public abstract class SelectorWidget {
 		dt.addDropListener(new DropTargetAdapter() {
 			@Override
 			public void drop(DropTargetEvent event) {
+				isModified = false;
 				Object data = event.data;
 				if (data instanceof String[]) {
 					String[] stringData = (String[]) data;
 					if (stringData.length > 0) {
 						File dir = new File(stringData[0]);
-						if (dir.exists() && dir.isDirectory()) {
+						if ((SelectorWidget.this.isFolderSelector && dir.isDirectory())
+								|| (!SelectorWidget.this.isFolderSelector && dir.isFile())) {
 							inputLocation.setText(dir.getAbsolutePath());
 							inputLocation.notifyListeners(SWT.Modify, null);
 							loadPath(dir.getAbsolutePath());
-							isModified = false;
 						}
 					}
 				}
@@ -135,8 +136,8 @@ public abstract class SelectorWidget {
 		inputBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				openDialog();
 				isModified = false;
+				openDialog();
 			}
 		});
 	}
