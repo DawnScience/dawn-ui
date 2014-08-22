@@ -479,6 +479,8 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 				if (selectedTrace==null || selectedTrace.getXData()==null || selectedTrace.getYAxis()==null) continue;
 				Dataset x  = (Dataset)selectedTrace.getXData().squeeze();
 				Dataset y  = (Dataset)selectedTrace.getYData().squeeze();
+				
+				if (monitor.isCanceled()) break;
 	
 				try {
 					Dataset[] a= Generic1DFitter.xintersection(x,y,p1[0],p2[0]);
