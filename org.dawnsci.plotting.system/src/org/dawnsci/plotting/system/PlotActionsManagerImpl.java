@@ -130,7 +130,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 			}
 		};
 
-		final Action export = new Action("Export plot data to HDF5...", PlottingSystemActivator.getImageDescriptor("icons/mask-export-wiz.png")) {
+		final Action export = new Action("Export plot data to Nexus (HDF5)...", PlottingSystemActivator.getImageDescriptor("icons/mask-export-wiz.png")) {
 			public void run() {
 				try {
 					system.setFocus();
