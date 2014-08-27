@@ -406,7 +406,9 @@ public class TransferableDataObject implements H5Path, ITransferableDataObject{
 			String attr = setName.concat("@local_name");
 			try {
 				Object localattr = metaData.getMetaValue(attr);
-				if (localattr != null) return localattr.toString();
+				if (localattr != null && !"".equals(localattr)) {
+					return localattr.toString();
+				}
 			} catch (Exception e) {
 				logger.error("Cannot get meta value for "+attr, e);
 			}
