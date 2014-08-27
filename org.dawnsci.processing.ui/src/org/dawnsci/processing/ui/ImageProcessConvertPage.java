@@ -1,18 +1,11 @@
 package org.dawnsci.processing.ui;
 
 import java.io.File;
-import java.lang.reflect.Array;
 
 import org.dawb.common.services.conversion.IConversionContext;
-import org.dawb.common.services.conversion.IProcessingConversionInfo;
 import org.dawb.common.ui.wizard.AbstractSliceConversionPage;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPage;
-
-import uk.ac.diamond.scisoft.analysis.processing.IExecutionVisitor;
-import uk.ac.diamond.scisoft.analysis.processing.IOperation;
 
 public class ImageProcessConvertPage extends AbstractSliceConversionPage  {
 
@@ -41,6 +34,11 @@ public class ImageProcessConvertPage extends AbstractSliceConversionPage  {
 	public void setWorkbench(IWorkbench workbench) {
 		this.workbench = workbench;
 	}
+	
+	@Override
+	public boolean isPageComplete() {
+    	return true;
+    }
 	
 	@Override
 	public IConversionContext getContext() {

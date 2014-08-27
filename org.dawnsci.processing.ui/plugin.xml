@@ -26,6 +26,26 @@
             name="Data Slice View"
             restorable="true">
       </view>
+      <view
+            class="uk.ac.diamond.scisoft.analysis.rcp.views.PlotView"
+            id="org.dawnsci.processing.ui.input"
+            name="Input"
+            restorable="true">
+      </view>
+      <view
+            class="uk.ac.diamond.scisoft.analysis.rcp.views.PlotView"
+            id="org.dawnsci.processing.ui.output"
+            name="Output"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="org.dawnsci.processing.ui.ProcessingPerspective"
+            id="org.dawnsci.processing.ui.ProcessingPerspective"
+            name="Processing">
+      </perspective>
    </extension>
 
 </plugin>
