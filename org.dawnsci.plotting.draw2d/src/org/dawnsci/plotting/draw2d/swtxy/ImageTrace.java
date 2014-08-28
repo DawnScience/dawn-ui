@@ -185,6 +185,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	public void setPaletteData(PaletteData paletteData) {
+		if (paletteData==null)      return;
 		if (imageServiceBean==null) return;
 		imageServiceBean.setPalette(paletteData);
 		createScaledImage(ImageScaleType.FORCE_REIMAGE, null);

@@ -229,7 +229,9 @@ public class HistogramToolPage extends AbstractToolPage {
 					it = (IPaletteTrace)evt.getSource();
 				}
 				updateImage(it, false);
-				if (it.isRescaleHistogram()) updatePalette(it, null, true);
+				if (it.isRescaleHistogram() && paletteData!=null) {
+					updatePalette(it, null, true);
+				}
 			}
 			@Override
 			public void tracesAdded(TraceEvent evt) {
@@ -491,6 +493,8 @@ public class HistogramToolPage extends AbstractToolPage {
 
 	private double      maxLast=0, minLast=0;
 	private PaletteData palLast=null;
+
+	private IPropertyChangeListener propChangeListener;
 	/**
 	 * 
 	 * @param mon, may be null
@@ -519,7 +523,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				image.setMin(histoMin);
 				if (mon!=null && mon.isCanceled()) return false;
 	
-				image.setPaletteData(paletteData);
+				if (paletteData!=null) image.setPaletteData(paletteData);
 				logger.trace("Set palette data on image id = "+image.getName());
 				if (mon!=null && mon.isCanceled()) return false;
 	
@@ -811,10 +815,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			}
 		});
 		
-		// Activate this so the initial screen has content
-		activate();		
-		
-		store.addPropertyChangeListener(new IPropertyChangeListener() {			
+		this.propChangeListener = new IPropertyChangeListener() {			
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				if ("org.dawb.plotting.system.colourSchemeName".equals(event.getProperty())) {
@@ -824,7 +825,12 @@ public class HistogramToolPage extends AbstractToolPage {
 					cmbColourMap.select(Arrays.asList(cmbColourMap.getItems()).indexOf(schemeName));
 				}
 			}
-		});
+		};
+		store.addPropertyChangeListener(propChangeListener);
+
+		// Activate this so the initial screen has content
+		activate();		
+		
 
 	}
 
@@ -1200,6 +1206,17 @@ public class HistogramToolPage extends AbstractToolPage {
 		}
 	}
 
+	public void dispose() {
+		
+		// You must remove listeners!
+		final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
+		store.removePropertyChangeListener(propChangeListener);
+        
+		super.dispose();
+		
+		// Ensures that any listeners added here are killed off too.
+        histogramPlot.dispose();
+	}
 
 	@Override
 	public Control getControl() {
