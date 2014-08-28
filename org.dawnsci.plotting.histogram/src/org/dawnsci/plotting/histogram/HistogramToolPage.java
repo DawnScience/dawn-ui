@@ -16,18 +16,18 @@ import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
-import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.TraceType;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.PaletteEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
-import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.TraceType;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -436,6 +436,10 @@ public class HistogramToolPage extends AbstractToolPage {
 		colourSchemeLogListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
+				if (isDisposed()) {
+					((Button)arg0.getSource()).removeSelectionListener(this);
+					return;
+				}
 				IPaletteTrace image = getPaletteTrace();
 				if (image!=null) {
 					image.getImageServiceBean().setLogColorScale(btnColourMapLog.getSelection());
@@ -880,6 +884,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		}
 	}
 
+	private IPaletteTrace imageLast;
 	/**
 	 * Update when a new image comes in, this involves getting the data and then setting 
 	 * up all the local parameters
@@ -892,6 +897,10 @@ public class HistogramToolPage extends AbstractToolPage {
 		
 		if (image != null) {
 
+			if (imageLast!=null && imageLast!=image) {
+				imageLast.removePaletteListener(paletteListener);
+			}
+			
 			// make sure that auto update is disabled if needed
 			if (mode == FIXED) {
 				image.setRescaleHistogram(false);
@@ -960,6 +969,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			// finally tie in the listener to the palette data changes
 			image.addPaletteListener(paletteListener);
+			imageLast = image;
 		}				
 	}
 
@@ -1278,7 +1288,11 @@ public class HistogramToolPage extends AbstractToolPage {
 			}
 
 			RectangularROI rroi = new RectangularROI(histoMin, 0, histoMax-histoMin, 1, 0);
+			
+			// Stop unneeded events firing when roi is set by removing listeners.
+			region.removeROIListener(histogramRegionListener);
 			region.setROI(rroi);
+			region.addROIListener(histogramRegionListener);
 			
 		} catch (Exception e) {
 			logger.error("Couldn't open histogram view and create ROI", e);
