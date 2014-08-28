@@ -16,7 +16,6 @@
 
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
-import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.geometry.PointList;
