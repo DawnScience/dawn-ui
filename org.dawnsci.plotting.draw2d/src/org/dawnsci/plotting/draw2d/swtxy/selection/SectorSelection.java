@@ -16,6 +16,7 @@
 
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
+import org.dawnsci.plotting.draw2d.swtxy.IMobileFigure;
 import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
 import org.dawnsci.plotting.draw2d.swtxy.util.PointFunction;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
@@ -23,6 +24,7 @@ import org.eclipse.dawnsci.plotting.api.region.ILockableRegion;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
@@ -336,8 +338,8 @@ class SectorSelection extends ROISelectionRegion<SectorROI> implements ILockable
 		}
 
 		public void setCentreHandleMoveable(boolean moveable) {
-			fTranslators.get(0).setActive(moveable);
-			handles.get(0).setVisible(moveable);
+			fTranslators.get(9).setActive(moveable);
+			handles.get(9).setVisible(moveable);
 		}
 	}
 
@@ -351,11 +353,32 @@ class SectorSelection extends ROISelectionRegion<SectorROI> implements ILockable
 	@Override
 	public void setCentreMovable(boolean isCentreMovable) {
 		this.isCentreMovable = isCentreMovable;
+		((Sector) shape).setCentreHandleMoveable(isCentreMovable);
+	}
+	
+	@Override
+	public void setMobile(boolean mobile) {
+		
+		bean.setMobile(mobile);
+		if (!bean.isVisible()) return;
 
-		if (isCentreMovable) {
-			((Sector) shape).setCentreHandleMoveable(true);
-		} else {
-			((Sector) shape).setCentreHandleMoveable(false);
+		if (regionObjects != null) {
+			for (IFigure ob : regionObjects) {
+				if (ob instanceof IMobileFigure) {
+					
+					if (mobile != ob.isVisible()) {
+						if (ob == ((Sector) shape).handles.get(9)) {
+						    ob.setVisible(mobile&&isCentreMovable);
+						} else {
+						    ob.setVisible(mobile);
+						}
+					}
+						
+				} else if (ob instanceof RegionFillFigure) {
+					if (((RegionFillFigure<?>) ob).isMobile() != mobile)
+						((RegionFillFigure<?>) ob).setMobile(mobile);
+				}
+			}
 		}
 	}
 

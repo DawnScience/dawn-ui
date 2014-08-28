@@ -62,9 +62,9 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  */
 public abstract class AbstractSelectionRegion<T extends IROI> extends AbstractRegion<T> implements ICoordinateSystemListener {
 
-	private RegionBean bean;
+	protected RegionBean bean;
     private ISelectionProvider selectionProvider;
-    private IFigure[] regionObjects;
+    protected IFigure[] regionObjects;
     private int lineWidth=0;
 
     protected ICoordinateSystem coords;
