@@ -912,23 +912,24 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	private RGBDataset rgbDataset;
 	@Override
-	public boolean setData(IDataset image, List<? extends IDataset> axes, boolean performAuto) {
+	public boolean setData(IDataset im, List<? extends IDataset> axes, boolean performAuto) {
 		
-		if (getPreferenceStore().getBoolean(PlottingConstants.IGNORE_RGB) && image instanceof RGBDataset) {
-			RGBDataset rgb = (RGBDataset)image;
-			image = getSum(rgb);
+		if (getPreferenceStore().getBoolean(PlottingConstants.IGNORE_RGB) && im instanceof RGBDataset) {
+			RGBDataset rgb = (RGBDataset)im;
+			im = getSum(rgb);
 			rgbDataset = rgb;
+			
 		} else {
 			rgbDataset = null;
 		}
 		if (plottingSystem!=null) try {
 			final TraceWillPlotEvent evt = new TraceWillPlotEvent(this, false);
-			evt.setImageData(image, axes);
+			evt.setImageData(im, axes);
 			evt.setNewImageDataSet(false);
 			plottingSystem.fireWillPlot(evt);
 			if (!evt.doit) return false;
 			if (evt.isNewImageDataSet()) {
-				image = evt.getImage();
+				im = evt.getImage();
 				axes  = evt.getAxes();
 			}
 		} catch (Throwable ignored) {
@@ -939,14 +940,14 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		// We do not currently reflect it as it takes too long. Instead in the slice
 		// method, we allow for the fact that the dataset is in a different orientation to 
 		// what is plotted.
-		this.image = (Dataset)image;
+		this.image = (Dataset)im;
 		if (this.mipMap!=null)  mipMap.clear();
 		if (scaledImage!=null && !scaledImage.isDisposed()) scaledImage.dispose();
 		scaledImage = null;
 		imageData   = null;
 		
 		if (imageServiceBean==null) imageServiceBean = new ImageServiceBean();
-		imageServiceBean.setImage(image);
+		imageServiceBean.setImage(im);
 		
 		if (service==null) service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
 		if (rescaleHistogram) {
@@ -964,6 +965,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		} catch (Throwable ignored) {
 			// We allow things to proceed without a warning.
 		}
+		
+		getPlottingSystem().setShowIntensity(!(im instanceof RGBDataset));
 
 		return true;
 	}
