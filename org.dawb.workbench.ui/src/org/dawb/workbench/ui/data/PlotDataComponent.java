@@ -1412,7 +1412,10 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				    final int inc       = (fromIndex<toIndex) ? 1 : -1;
 				    
 				    for (int i = fromIndex+inc; inc==1?i<toIndex:i>toIndex; i+=inc) {
-				    	selectionChanged(data.get(i), false);
+				    	ITransferableDataObject element = data.get(i);
+				    	if (dataFilter.isElementVisible(element)) {
+				    	    selectionChanged(element, false);
+				    	}
 					}
 			    	selectionChanged(clicked, true);
 			    	
