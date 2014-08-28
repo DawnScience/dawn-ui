@@ -71,7 +71,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 			traceSelectGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true, false));
 			traceSelectGroup.setText("Select Trace");
 			traceSelectGroup.setLayout(new GridLayout(1, false));    	        
-			this.imageTraceCombo = new Combo(traceSelectGroup, SWT.DROP_DOWN);
+			this.imageTraceCombo = new Combo(traceSelectGroup, SWT.DROP_DOWN|SWT.READ_ONLY);
 			imageTraceCombo.setLayoutData(new GridData(SWT.FILL, 0, true, false));
 			for(String traceName : regionGraph.getRegionArea().getImageTraces().keySet())
 				imageTraceCombo.add(traceName);	   
@@ -115,7 +115,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
         			SWT.FILL, SWT.FILL,true, false));
         	regionSelectGroup.setText("Selection Region");
         	regionSelectGroup.setLayout(new GridLayout(1, false));    	        
-        	final Combo regionCombo = new Combo(regionSelectGroup, SWT.DROP_DOWN);
+        	final Combo regionCombo = new Combo(regionSelectGroup, SWT.DROP_DOWN|SWT.READ_ONLY);
         	regionCombo.setLayoutData(new GridData(SWT.FILL, 0, true, false));
         	
         	
