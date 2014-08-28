@@ -29,6 +29,11 @@ class DataTableFilter extends ViewerFilter {
 	
 	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
+		return isElementVisible(element);
+	}
+	
+	public boolean isElementVisible(Object element) {
+		
 		if (searchString == null || searchString.length() == 0) {
 			return true;
 		}
@@ -55,6 +60,7 @@ class DataTableFilter extends ViewerFilter {
 		}
 
 		return false;
+
 	}
 
 	public void setMetaData(IMetaData metaData) {
