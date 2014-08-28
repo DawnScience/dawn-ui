@@ -92,6 +92,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 		toolbarManager.add(exportActionDropDown);
 	}
 
+	private static String lastPath;
 	private IAction getExportActions() {
 		
 		final MenuAction exportActionsDropDown = new MenuAction("Export/Print");
@@ -145,14 +146,17 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 			}			
 		};
 		
-		final Action convert = new Action("Export plot data to tiff/dat...", PlottingSystemActivator.getImageDescriptor("icons/mask-export-wiz.png")) {
+		final Action convert = new Action("Export plot data to tif/dat...", PlottingSystemActivator.getImageDescriptor("icons/mask-export-wiz.png")) {
 			public void run() {
 				try {
-					IWizard wiz = EclipseUtils.openWizard(PlotDataConversionWizard.ID, false);
+					PlotDataConversionWizard wiz = (PlotDataConversionWizard)EclipseUtils.openWizard(PlotDataConversionWizard.ID, false);
+					wiz.setFilePath(lastPath);
 					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
 					wd.setTitle(wiz.getWindowTitle());
 					if (wiz instanceof PlotDataConversionWizard) ((PlotDataConversionWizard)wiz).setPlottingSystem(system);
 					wd.open();
+					lastPath = wiz.getFilePath();
+					
 					exportActionsDropDown.setSelectedAction(this);
 				} catch (Exception e) {
 					logger.error("Problem opening convert!", e);
