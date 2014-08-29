@@ -18,10 +18,7 @@ package org.dawnsci.plotting.tools;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 
 import org.dawnsci.plotting.tools.preference.InfoPixelConstants;
 import org.dawnsci.plotting.tools.preference.InfoPixelPreferencePage;
@@ -31,19 +28,17 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.MouseEvent;
 import org.eclipse.dawnsci.plotting.api.region.MouseListener;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
-import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
-import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.draw2d.ColorConstants;
@@ -79,16 +74,13 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 
 	private final static Logger logger = LoggerFactory.getLogger(InfoPixelTool.class);
 	
-	protected IPlottingSystem        plotter;
 	private   ITraceListener         traceListener;
 	private   IRegion                xHair, yHair;
 	
 	private Composite     composite;
 	private TableViewer   viewer;
 	private RegionColorListener viewUpdateListener;
-	private Map<String,IROI> dragBounds;
-	private double xValues [] = new double[1];	
-	private double yValues [] = new double[1];
+
 
 	// Jobs
 	private Job updateInfoPixelData;
@@ -96,20 +88,14 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 	// Internal jobs items
 	@SuppressWarnings("unused")
 	private boolean isUpdateRunning = false;
-	
-	// values arrayList
-    ArrayList<String> values = new ArrayList<String>();
-	
-	// values hashmap
-    Hashtable<String, ArrayList<String>> valuesHash = new Hashtable<String, ArrayList<String>>();
+
+	private IPropertyChangeListener propListener;
 
 			
 	public InfoPixelTool() {
-		dragBounds = new HashMap<String,IROI>(7);
 		
 		try {
 			
-			plotter = PlottingFactory.createPlottingSystem();
 			this.traceListener = new ITraceListener.Stub() {
 				@Override
 				public void tracesAdded(TraceEvent evt) {
@@ -125,7 +111,7 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 			logger.error("Cannot get plotting system!", e);
 		}
 
-		Activator.getPlottingPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener() {
+		this.propListener = new IPropertyChangeListener() {
 			
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
@@ -143,7 +129,7 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 						InfoPixelConstants.THETA_FORMAT.equals(propName)    ||
 						InfoPixelConstants.RESOLUTION_FORMAT.equals(propName);
 			}
-		});
+		};
 	}
 	
 
@@ -203,16 +189,6 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 		activate();
 	}
 	
-
-	@Override
-	public Object getAdapter(@SuppressWarnings("rawtypes") Class clazz) {
-		if (clazz == IToolPageSystem.class) {
-			return plotter;
-		} else {
-			return super.getAdapter(clazz);
-		}
-	}
-
 	private void createRegions() {
 				
 		if (getPlottingSystem()==null) return;
@@ -246,39 +222,32 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 		if (viewer!=null && !viewer.getControl().isDisposed()) viewer.getControl().setFocus();
 	}
 	
-	public double[] getXValues() {
-		return this.xValues;
-	}
-	
-	public double[] getYValues() {
-		return this.yValues;
-	}
-	
 	public void activate() {
+		
 		if (viewer!=null && viewer.getControl().isDisposed()) return;
-		if (!isActive()) {
-			createRegions();
-			if (xHair!=null) {
-				if (!isActive()) xHair.addMouseListener(this);
-				xHair.setVisible(true);
-				xHair.addROIListener(this);
-			}
-			if (yHair!=null) {
-				yHair.setVisible(true);
-				yHair.addROIListener(this);
-			}
-
-			if (getPlottingSystem()!=null) {
-				getPlottingSystem().addTraceListener(traceListener);
-				getPlottingSystem().addRegionListener(this);
-				getPlottingSystem().setDefaultCursor(IPlottingSystem.CROSS_CURSOR);
-			}
-
-			// We stop the adding of other regions because this tool does
-			// not like it when other regions are added.
-			setOtherRegionsEnabled(false);
+		Activator.getPlottingPreferenceStore().addPropertyChangeListener(propListener);
+		
+		createRegions();
+		if (xHair!=null) {
+			xHair.addMouseListener(this);
+			xHair.setVisible(true);
+			xHair.addROIListener(this);
+		}
+		if (yHair!=null) {
+			yHair.setVisible(true);
+			yHair.addROIListener(this);
 		}
 
+		if (getPlottingSystem()!=null) {
+			getPlottingSystem().addTraceListener(traceListener);
+			getPlottingSystem().addRegionListener(this);
+			getPlottingSystem().setDefaultCursor(IPlottingSystem.CROSS_CURSOR);
+		}
+
+		// We stop the adding of other regions because this tool does
+		// not like it when other regions are added.
+		setOtherRegionsEnabled(false);
+		
 		// Needed to refresh the table when activated as other tools may create points
 		// which should be in the table.
 		try {
@@ -289,9 +258,8 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 		} catch (Throwable ignored) {
 			// Not a failure if we cannot refresh.
 		}
-		if (!isActive()) {
-			super.activate();
-		}
+		super.activate();
+	
 	}
 	
 	private void setOtherRegionsEnabled(boolean isVisible) {
@@ -308,55 +276,49 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 	}
 
 	public void deactivate() {
-		if (isActive()) {
-			super.deactivate();
-			setOtherRegionsEnabled(true);
+		
+		super.deactivate();
+		Activator.getPlottingPreferenceStore().removePropertyChangeListener(propListener);
+		setOtherRegionsEnabled(true);
 
-			if (xHair!=null) {
-				xHair.removeMouseListener(this);
-				xHair.setVisible(false);
-				xHair.removeROIListener(this);
-				getPlottingSystem().removeRegion(xHair);
-				xHair = null;
-				updateInfoPixelData = null;
-			}
-			if (yHair!=null) {
-				yHair.setVisible(false);
-				yHair.removeROIListener(this);
-				getPlottingSystem().removeRegion(yHair);
-				yHair = null;
-				getPlottingSystem().setDefaultCursor(IPlottingSystem.NORMAL_CURSOR);
-			}
+		if (xHair!=null) {
+			xHair.removeMouseListener(this);
+			xHair.setVisible(false);
+			xHair.removeROIListener(this);
+			getPlottingSystem().removeRegion(xHair);
+			xHair = null;
+			updateInfoPixelData = null;
+		}
+		if (yHair!=null) {
+			yHair.setVisible(false);
+			yHair.removeROIListener(this);
+			getPlottingSystem().removeRegion(yHair);
+			yHair = null;
+			getPlottingSystem().setDefaultCursor(IPlottingSystem.NORMAL_CURSOR);
+		}
 
-			plotter.clear();
-			try {
-				if (getPlottingSystem()!=null) {
-					getPlottingSystem().removeTraceListener(traceListener);
-					getPlottingSystem().removeRegionListener(this);
-					final Collection<IRegion> regions = getPlottingSystem().getRegions();
-					if (regions!=null)
-						for (IRegion iRegion : regions)
-							iRegion.removeROIListener(this);
-				}
-			} catch (Exception e) {
-				logger.error("Cannot remove region listeners!", e);
+		try {
+			if (getPlottingSystem()!=null) {
+				getPlottingSystem().removeTraceListener(traceListener);
+				getPlottingSystem().removeRegionListener(this);
+				final Collection<IRegion> regions = getPlottingSystem().getRegions();
+				if (regions!=null)
+					for (IRegion iRegion : regions)
+						iRegion.removeROIListener(this);
 			}
+		} catch (Exception e) {
+			logger.error("Cannot remove region listeners!", e);
 		}
 	}
-	
+
 	public void dispose() {
 		
-		if (isActive()){
-			deactivate();
-		}
+		Activator.getPlottingPreferenceStore().removePropertyChangeListener(propListener);
 		
 		if (viewUpdateListener!=null) viewer.removeSelectionChangedListener(viewUpdateListener);
 		viewUpdateListener = null;
 
 		if (viewer!=null) viewer.getControl().dispose();
-
-		dragBounds.clear();
-		dragBounds = null;
 
 		super.dispose();
 	}
@@ -384,7 +346,6 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 				regionBounds.setPoint(new double[]{x,y});
 				point.setROI(regionBounds);
 				point.setMobile(true);
-				point.setTrackMouse(true);
 
 				getPlottingSystem().addRegion(point);
 
@@ -494,7 +455,6 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 	
 	
 	public IROI getBounds(IRegion region) {
-		if (dragBounds!=null&&dragBounds.containsKey(region.getName())) return dragBounds.get(region.getName());
 		return region.getROI();
 	}
 	
@@ -504,20 +464,10 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 			IRegion region = null;
 			try {
 				region = (IRegion)evt.getSource();
-			
-				if (region.getRegionType() == RegionType.XAXIS_LINE){
-				this.xValues[0] = evt.getROI().getPointX();
-			  }
-			    if (region.getRegionType() == RegionType.YAXIS_LINE){
-				this.yValues[0] = evt.getROI().getPointY();
-			  }
-							    
-			    IROI rb = evt.getROI();
-							
-				dragBounds.put(region.getName(), rb);
+
 				//viewer.refresh(region);
 				updateInfoPixel(region);
-				
+
 			} catch (Exception e) {
 				logger.error("problem creating point region:", e);
 			} 
@@ -570,10 +520,7 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 			IRegion region = (IRegion) evt.getSource();
 
 			if (region.getRegionType() == RegionType.POINT) {
-				// update table for current point region
-				IROI rb = evt.getROI();
-				
-				dragBounds.put(region.getName(), rb);
+				// update table for current point region				
 				viewer.refresh(region);
 				//updateInfoPixel(region);
 			} else {

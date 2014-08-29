@@ -101,9 +101,11 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 						}
 					}
 					
-				} else {
-					xIndex = tool.getXValues()[0];
-					yIndex = tool.getYValues()[0];
+				} else if (region.getRegionType() == RegionType.XAXIS_LINE){
+
+					xIndex = region.getROI().getPointX();
+					yIndex = region.getROI().getPointY();
+			
 					final double[] dp = new double[]{xIndex, yIndex};
 					try {
 						if (trace!=null) trace.getPointInAxisCoordinates(dp);

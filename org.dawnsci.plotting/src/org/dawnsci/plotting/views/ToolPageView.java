@@ -1144,7 +1144,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			
 			if (isFixedTool()) {
 				try {
-					tool = sys.createToolPage(getViewSite().getSecondaryId());
+					tool = sys.getToolPage(getViewSite().getSecondaryId());
 				} catch (Exception e) {
 					logger.error("Cannot clone tool "+getViewSite().getSecondaryId(), e);
 					return null;
