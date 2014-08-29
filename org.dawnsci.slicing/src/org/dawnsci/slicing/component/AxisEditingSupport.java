@@ -177,13 +177,14 @@ class AxisEditingSupport extends EditingSupport {
                 // cannot read nexus
 			}
 			
-			if (!ddl.isExpression()) {				
-				// We add any datasets in the DataHolder which are the right size to be this
-				// axis.
-				names.addAll(getNonNexusDataAxes(idim, names));
-			}
-
 			
+			// Fix to http://jira.diamond.ac.uk/browse/SCI-1778
+			// We do the adding of any the right size, even for expressions.
+			// We add any datasets in the DataHolder which are the right size to be this
+			// axis.
+			names.addAll(getNonNexusDataAxes(idim, names));
+
+
 			// Add any expressions 
 	    	final IExpressionObjectService service = (IExpressionObjectService)PlatformUI.getWorkbench().getService(IExpressionObjectService.class);
 	        final List<IExpressionObject>  exprs   = service.getActiveExpressions(sliceObject.getPath());
