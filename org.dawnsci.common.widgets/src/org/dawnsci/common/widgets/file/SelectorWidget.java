@@ -10,7 +10,15 @@ package org.dawnsci.common.widgets.file;
 
 import java.io.File;
 
+import org.dawnsci.common.widgets.Activator;
 import org.dawnsci.common.widgets.content.FileContentProposalProvider;
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.emf.common.ui.dialogs.WorkspaceResourceDialog;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.swt.SWT;
@@ -35,8 +43,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,14 +62,17 @@ public abstract class SelectorWidget {
 
 	private static final Logger logger = LoggerFactory.getLogger(SelectorWidget.class);
 	private Text inputLocation;
-	private Button inputBrowse;
 	private boolean isFolderSelector;
 	private String[] fileExtensions;
 	private String[] fileTypes;
-	private String text = "";
+	private String path = "";
 	private String textTooltip = "";
 	private String buttonTooltip = "";
 	private Composite container;
+	private Button fileButton;
+	private Button resourceButton;
+	private boolean newFile;
+	private Label label;
 
 	/**
 	 * 
@@ -81,16 +93,25 @@ public abstract class SelectorWidget {
 	 */
 	public SelectorWidget(Composite parent, boolean isFolderSelector, String[]... extensions) {
 		this.isFolderSelector = isFolderSelector;
-		this.fileTypes = extensions[0];
-		this.fileExtensions = extensions[1];
+		if (extensions != null && extensions.length == 2) {
+			this.fileTypes = extensions[0];
+			this.fileExtensions = extensions[1];
+		} else {
+			this.fileTypes = new String[] {"All Files"};
+			this.fileExtensions = new String[] {"*.*"};
+		}
 		container = new Composite(parent, SWT.NONE);
-		container.setLayout(new GridLayout(2, false));
-		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gridData.widthHint = 150;
+		container.setLayout(new GridLayout(4, false));
+		GridData gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
 		container.setLayoutData(gridData);
+
+		label = new Label(container, SWT.NONE);
+		label.setText((isFolderSelector ? "Folder:" : "File:"));
 		inputLocation = new Text(container, SWT.BORDER);
-		inputLocation.setText(text);
-		inputLocation.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		inputLocation.setText(path);
+		gridData = new GridData(SWT.FILL, SWT.TOP, true, false);
+		gridData.widthHint = 150;
+		inputLocation.setLayoutData(gridData);
 		FileContentProposalProvider prov = new FileContentProposalProvider();
 		ContentProposalAdapter ad = new ContentProposalAdapter(inputLocation, new TextContentAdapter(), prov, null, null);
 		ad.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
@@ -102,7 +123,7 @@ public abstract class SelectorWidget {
 				if ((SelectorWidget.this.isFolderSelector && tmp.isDirectory())
 						|| (!SelectorWidget.this.isFolderSelector && tmp.isFile())) {
 					inputLocation.setForeground(new Color(Display.getDefault(), new RGB(0, 0, 0)));
-					loadPath(inputLocation.getText(), e);
+					pathChanged(inputLocation.getText(), e);
 				} else {
 					inputLocation.setForeground(new Color(Display.getDefault(), new RGB(255, 80, 80)));
 				}
@@ -120,29 +141,54 @@ public abstract class SelectorWidget {
 						File dir = new File(stringData[0]);
 						if ((SelectorWidget.this.isFolderSelector && dir.isDirectory())
 								|| (!SelectorWidget.this.isFolderSelector && dir.isFile())) {
-							inputLocation.setText(dir.getAbsolutePath());
+							setText(dir.getAbsolutePath());
 							inputLocation.notifyListeners(SWT.Modify, null);
-							loadPath(dir.getAbsolutePath(), event);
+							pathChanged(dir.getAbsolutePath(), event);
 						}
 					}
 				}
 			}
 		});
 
-		inputBrowse = new Button(container, SWT.NONE);
-		inputBrowse.setText("...");
-		inputBrowse.setToolTipText(buttonTooltip);
-		inputBrowse.addSelectionListener(new SelectionAdapter() {
+		resourceButton = new Button(container, SWT.PUSH);
+		resourceButton.setImage(Activator.getImageDescriptor("icons/Project-data.png").createImage());
+		resourceButton.setToolTipText("Browse to "+(isFolderSelector?"folder":"file")+" inside a project");
+		resourceButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				openDialog(e);
+				handleResourceBrowse(e);
+			}
+		});
+
+		fileButton = new Button(container, SWT.PUSH);
+		fileButton.setImage(Activator.getImageDescriptor("icons/folder.png").createImage());
+		fileButton.setToolTipText("Browse to an external "+(isFolderSelector?"folder":"file")+".");
+		fileButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				handleFileBrowse(e);
 			}
 		});
 	}
 
+	/**
+	 * 
+	 * @param inputText text of the main text widget
+	 */
 	public void setText(String inputText) {
+		this.path = inputText;
 		if (inputLocation != null)
 			inputLocation.setText(inputText);
+	}
+
+	/**
+	 * 
+	 * @param textLabel label in front of the text widget.
+	 *    If none, will be defaulted to File or Folder
+	 */
+	public void setLabel(String textLabel) {
+		if (label != null)
+			label.setText(textLabel);
 	}
 
 	public String getText() {
@@ -154,32 +200,10 @@ public abstract class SelectorWidget {
 	public void setEnabled (boolean isEnabled) {
 		if (inputLocation != null)
 			inputLocation.setEnabled(isEnabled);
-		if (inputBrowse != null)
-			inputBrowse.setEnabled(isEnabled);
-	}
-
-	private void openDialog(TypedEvent event) {
-		Shell shell = Display.getDefault().getActiveShell();
-		String path = inputLocation.getText();
-		if (isFolderSelector) {
-			DirectoryDialog dChooser = new DirectoryDialog(shell);
-			dChooser.setText(inputBrowse.getToolTipText());
-			dChooser.setFilterPath(inputLocation.getText());
-			path = dChooser.open();
-		} else {
-			FileDialog fChooser = new FileDialog(Display.getDefault()
-					.getActiveShell());
-			fChooser.setText(inputBrowse.getToolTipText());
-			fChooser.setFilterPath(inputLocation.getText());
-			fChooser.setFilterNames(fileTypes);
-			fChooser.setFilterExtensions(fileExtensions);
-			path = fChooser.open();
-		}
-		if (path != null)
-			inputLocation.setText(path);
-		else
-			path = inputLocation.getText();
-		loadPath(path, event);
+		if (resourceButton != null)
+			resourceButton.setEnabled(isEnabled);
+		if (fileButton != null)
+			fileButton.setEnabled(isEnabled);
 	}
 
 	/**
@@ -208,11 +232,12 @@ public abstract class SelectorWidget {
 	 * @param event
 	 *          used to check the type of event
 	 */
-	public abstract void loadPath(String path, TypedEvent event);
+	public abstract void pathChanged(String path, TypedEvent event);
 
 	public boolean isDisposed() {
 		if (inputLocation != null && !inputLocation.isDisposed()
-				&& inputBrowse != null && !inputBrowse.isDisposed())
+				&& resourceButton != null && !resourceButton.isDisposed()
+				&& fileButton != null && !fileButton.isDisposed())
 			return false;
 		return true;
 	}
@@ -235,11 +260,151 @@ public abstract class SelectorWidget {
 	 */
 	public void setButtonToolTip(String buttonTooltip) {
 		this.buttonTooltip = buttonTooltip;
-		if (inputBrowse != null)
-			inputBrowse.setToolTipText(buttonTooltip);
+		if (resourceButton != null) {
+			resourceButton.setToolTipText(this.buttonTooltip + " (from project location)");
+		}
+		if (fileButton != null) {
+			fileButton.setToolTipText(this.buttonTooltip + " (from external location)");
+		}
 	}
 
 	public Composite getComposite() {
 		return container;
+	}
+
+	public boolean isNewFile() {
+		return newFile;
+	}
+
+	public void setNewFile(boolean newFile) {
+		this.newFile = newFile;
+	}
+
+	public void setEditable(boolean isEditable) {
+		if (inputLocation != null)
+			inputLocation.setEditable(isEditable);
+	}
+
+	private void handleResourceBrowse(TypedEvent event) {
+		IResource[] res = null;
+		if (isFolderSelector) {
+			res = WorkspaceResourceDialog.openFolderSelection(PlatformUI
+					.getWorkbench().getDisplay().getActiveShell(),
+					"Directory location", "Please choose a location.", false,
+					new Object[] { getIResource() }, null);
+		} else {
+			if (isNewFile()) {
+				final IResource cur = getIResource();
+				final IPath path = cur != null ? cur.getFullPath() : null;
+				IFile file = WorkspaceResourceDialog.openNewFile(PlatformUI
+						.getWorkbench().getDisplay().getActiveShell(),
+						"File location", "Please choose a location.", path,
+						null);
+				res = file != null ? new IResource[] { file } : null;
+			} else {
+				res = WorkspaceResourceDialog.openFileSelection(PlatformUI
+						.getWorkbench().getDisplay().getActiveShell(),
+						"File location", "Please choose a location.", false,
+						new Object[] { getIResource() }, null);
+			}
+		}
+
+		if (res != null && res.length > 0) {
+			setText(res[0].getLocation().toOSString());
+			pathChanged(path, event);
+		}
+	}
+
+	protected IResource getIResource() {
+		IResource res = null;
+		if (path != null) {
+			res = ResourcesPlugin.getWorkspace().getRoot().findMember(path);
+		}
+		if (res == null && path != null) {
+			final String workspace = ResourcesPlugin.getWorkspace().getRoot()
+					.getLocation().toOSString();
+			if (path.startsWith(workspace)) {
+				String relPath = path.substring(workspace.length());
+				res = ResourcesPlugin.getWorkspace().getRoot().findMember(relPath);
+			}
+		}
+		return res;
+	}
+
+	private void handleFileBrowse(TypedEvent event) {
+		String path = null;
+		if (isFolderSelector) {
+			final DirectoryDialog dialog = new DirectoryDialog(Display.getDefault().getActiveShell(), SWT.OPEN);
+			dialog.setText("Choose folder");
+			final String filePath = getAbsoluteFilePath();
+			if (filePath!=null) {
+				File file = new File(filePath);
+				if (file.exists()) {
+					// Nothing
+				} else if (file.getParentFile().exists()) {
+					file = file.getParentFile();
+				}
+				if (file.isDirectory()) {
+					dialog.setFilterPath(file.getAbsolutePath());
+				} else {
+					dialog.setFilterPath(file.getParent());
+				}
+			}
+			path = dialog.open();
+		} else {
+			final FileDialog dialog = new FileDialog(Display.getDefault().getActiveShell(), (isNewFile()?SWT.SAVE:SWT.OPEN));
+			dialog.setText("Choose file");
+			final String filePath = getAbsoluteFilePath();
+			if (filePath!=null) {
+				final File file = new File(filePath);
+				if (file.exists()) {
+					if (file.isDirectory()) {
+						dialog.setFilterPath(file.getAbsolutePath());
+					} else {
+						dialog.setFilterNames(fileTypes);
+						dialog.setFilterExtensions(fileExtensions);
+						dialog.setFilterPath(file.getParent());
+						dialog.setFileName(file.getName());
+					}
+				}
+			}
+			path = dialog.open();
+		}
+		if (path!=null) {
+			setText(path);
+			pathChanged(path, event);
+		}
+	}
+
+	public String getAbsoluteFilePath() {
+		try {
+			IResource res = ResourcesPlugin.getWorkspace().getRoot().findMember(this.path);
+			if (res != null)
+				return res.getLocation().toOSString();
+			if (isNewFile()) { // We try for a new file
+				final File file = new File(this.path);
+				String parDir = file.getParent();
+				IContainer folder = (IContainer) ResourcesPlugin.getWorkspace()
+						.getRoot().findMember(parDir);
+				if (folder != null) {
+					final IFile newFile = folder.getFile(new Path(file.getName()));
+					if (newFile.exists())
+						newFile.touch(null);
+					return newFile.getLocation().toOSString();
+				}
+			}
+			return path;
+		} catch (Throwable ignored) {
+			return null;
+		}
+	}
+
+	public void setVisible(boolean enabled) {
+		if (inputLocation != null && !inputLocation.isDisposed())
+			inputLocation.setVisible(enabled);
+		if (resourceButton != null && !resourceButton.isDisposed())
+			resourceButton.setVisible(enabled);
+		if (fileButton != null && !fileButton.isDisposed())
+			fileButton.setVisible(enabled);
 	}
 }
