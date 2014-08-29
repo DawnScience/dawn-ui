@@ -131,7 +131,13 @@ public abstract class SelectorWidget {
 			this.fileExtensions = new String[] {"*.*"};
 		}
 		container = new Composite(parent, SWT.NONE);
-		container.setLayout(new GridLayout(4, false));
+		GridLayout layout = new GridLayout();
+		layout.makeColumnsEqualWidth = false;
+		if (hasResourceButton)
+			layout.numColumns = 4;
+		else
+			layout.numColumns = 3;
+		container.setLayout(layout);
 		GridData gridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
 		container.setLayoutData(gridData);
 
