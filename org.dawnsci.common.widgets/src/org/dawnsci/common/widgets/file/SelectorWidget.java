@@ -159,10 +159,10 @@ public abstract class SelectorWidget {
 				if ((SelectorWidget.this.isFolderSelector && tmp.isDirectory())
 						|| (!SelectorWidget.this.isFolderSelector && tmp.isFile())) {
 					inputLocation.setForeground(new Color(Display.getDefault(), new RGB(0, 0, 0)));
-					pathChanged(inputLocation.getText(), e);
 				} else {
 					inputLocation.setForeground(new Color(Display.getDefault(), new RGB(255, 80, 80)));
 				}
+				pathChanged(inputLocation.getText(), e);
 			}
 		});
 		DropTarget dt = new DropTarget(inputLocation, DND.DROP_MOVE| DND.DROP_DEFAULT| DND.DROP_COPY);
@@ -200,7 +200,7 @@ public abstract class SelectorWidget {
 
 		fileButton = new Button(container, SWT.PUSH);
 		fileButton.setImage(Activator.getImageDescriptor("icons/folder.png").createImage());
-		fileButton.setToolTipText("Browse to an external "+(isFolderSelector?"folder":"file")+".");
+		fileButton.setToolTipText("Browse to an external "+(isFolderSelector?"folder":"file"));
 		fileButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
