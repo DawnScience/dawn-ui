@@ -88,10 +88,40 @@ public abstract class SelectorWidget {
 	 *           parent composite
 	 * @param isFolderSelector
 	 *           if True, the button will be a Folder selector, if False, a File selector
+	 * @param hasResourceButton
+	 *           if True, the widget will also have a Project type of link, if False only 
+	 *           the button opening the external file dialog will be there.
+	 */
+	public SelectorWidget(Composite parent, boolean isFolderSelector, boolean hasResourceButton) {
+		this(parent, isFolderSelector, hasResourceButton, new String[] {"All Files"}, new String[] {"*.*"});
+	}
+
+	/**
+	 * 
+	 * @param parent
+	 *           parent composite
+	 * @param isFolderSelector
+	 *           if True, the button will be a Folder selector, if False, a File selector
 	 * @param extensions
 	 *           Array of Strings defining possible file extensions and names if isFolderSelector is False
 	 */
 	public SelectorWidget(Composite parent, boolean isFolderSelector, String[]... extensions) {
+		this(parent, isFolderSelector, true, new String[] {"All Files"}, new String[] {"*.*"});
+	}
+
+	/**
+	 * 
+	 * @param parent
+	 *           parent composite
+	 * @param isFolderSelector
+	 *           if True, the button will be a Folder selector, if False, a File selector
+	 * @param hasResourceButton
+	 *           if True, the widget will also have a Project type of link, if False only 
+	 *           the button opening the external file dialog will be there.
+	 * @param extensions
+	 *           Array of Strings defining possible file extensions and names if isFolderSelector is False
+	 */
+	public SelectorWidget(Composite parent, boolean isFolderSelector, boolean hasResourceButton, String[]... extensions) {
 		this.isFolderSelector = isFolderSelector;
 		if (extensions != null && extensions.length == 2) {
 			this.fileTypes = extensions[0];
@@ -150,15 +180,17 @@ public abstract class SelectorWidget {
 			}
 		});
 
-		resourceButton = new Button(container, SWT.PUSH);
-		resourceButton.setImage(Activator.getImageDescriptor("icons/Project-data.png").createImage());
-		resourceButton.setToolTipText("Browse to "+(isFolderSelector?"folder":"file")+" inside a project");
-		resourceButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				handleResourceBrowse(e);
-			}
-		});
+		if (hasResourceButton) {
+			resourceButton = new Button(container, SWT.PUSH);
+			resourceButton.setImage(Activator.getImageDescriptor("icons/Project-data.png").createImage());
+			resourceButton.setToolTipText("Browse to "+(isFolderSelector?"folder":"file")+" inside a project");
+			resourceButton.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					handleResourceBrowse(e);
+				}
+			});
+		}
 
 		fileButton = new Button(container, SWT.PUSH);
 		fileButton.setImage(Activator.getImageDescriptor("icons/folder.png").createImage());
@@ -235,9 +267,7 @@ public abstract class SelectorWidget {
 	public abstract void pathChanged(String path, TypedEvent event);
 
 	public boolean isDisposed() {
-		if (inputLocation != null && !inputLocation.isDisposed()
-				&& resourceButton != null && !resourceButton.isDisposed()
-				&& fileButton != null && !fileButton.isDisposed())
+		if (inputLocation != null && !inputLocation.isDisposed())
 			return false;
 		return true;
 	}
@@ -399,12 +429,12 @@ public abstract class SelectorWidget {
 		}
 	}
 
-	public void setVisible(boolean enabled) {
+	public void setVisible(boolean isVisible) {
 		if (inputLocation != null && !inputLocation.isDisposed())
-			inputLocation.setVisible(enabled);
+			inputLocation.setVisible(isVisible);
 		if (resourceButton != null && !resourceButton.isDisposed())
-			resourceButton.setVisible(enabled);
+			resourceButton.setVisible(isVisible);
 		if (fileButton != null && !fileButton.isDisposed())
-			fileButton.setVisible(enabled);
+			fileButton.setVisible(isVisible);
 	}
 }
