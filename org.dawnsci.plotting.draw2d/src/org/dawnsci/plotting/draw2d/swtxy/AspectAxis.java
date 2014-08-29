@@ -19,6 +19,7 @@ import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.nebula.visualization.xygraph.figures.Axis;
+import org.eclipse.nebula.visualization.xygraph.linearscale.ITicksProvider;
 import org.eclipse.nebula.visualization.xygraph.linearscale.LinearScaleTickMarks;
 import org.eclipse.nebula.visualization.xygraph.linearscale.Range;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
@@ -512,4 +513,25 @@ public class AspectAxis extends Axis implements IAxis {
 	public boolean areLabelCustomised() {
 		return labelData != null;
 	}
+	
+	// Fix to http://jira.diamond.ac.uk/browse/SCI-1444
+	@Override
+    protected String getAutoFormat(double min, double max) {
+    	ITicksProvider ticks = getTicksProvider();
+    	if (labelData!=null && ticks!=null) {
+    		try {
+    			if (min>=labelData.getSize()) min-=1;
+    			if (max>=labelData.getSize()) max-=1;
+    			min = labelData.getDouble((int)Math.round(min));
+    			max = labelData.getDouble((int)Math.round(max));
+    			
+    			return ticks.getDefaultFormatPattern(min, max);
+
+    		} catch (Exception ignored) {
+    			// We just let the super implementation do the work instead.
+    		}
+    	}
+    	return super.getAutoFormat(min, max);
+    }
+
 }
