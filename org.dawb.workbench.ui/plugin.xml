@@ -79,7 +79,7 @@
             extensions="h5, hd5, hdf5, nxs, nexus, hdf, mat"
             icon="icons/h5_editor.png"
             id="org.dawb.workbench.editor.H5Editor"
-            name="HDF5 Editor">
+            name="Nexus/HDF5 Editor">
       </editor>
       <!-- 
            Peter Chang this editor is needed for some large tree files
@@ -92,7 +92,7 @@
             extensions="h5, hd5, hdf5, nxs, nexus, hdf, mat"
             icon="icons/h5_editor.png"
             id="org.dawb.hdf5.editor.raw.tree"
-            name="HDF5 Tree Editor">
+            name="Big Tree Editor">
       </editor> 
    </extension>
    <extension
