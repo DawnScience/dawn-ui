@@ -20,6 +20,7 @@ public class EditorConstants {
 	public static final String SHOW_DIMS              = "show.dims.in.nexus.editor";
 	public static final String SHOW_SHAPE             = "show.shape.in.nexus.editor";
 	public static final String SHOW_VARNAME           = "show.variable.name.in.nexus.editor";
+	public static final String SHOW_SIGNAL_ONLY       = "show.signal.data.only";
 	public static final String SHOW_LOCALNAME         = "use.local.name.in.nexus.editor";
 	public static final String DATA_FORMAT            = "data.format.editor.view";
 	public static final String PLAY_SPEED             = "data.format.slice.play.speed";
