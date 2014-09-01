@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.EventObject;
 import java.util.List;
 
+import org.dawnsci.common.widgets.decorator.BoundsDecorator;
+import org.dawnsci.common.widgets.decorator.FloatDecorator;
 import org.dawnsci.plotting.histogram.functions.ColourSchemeContribution;
 import org.dawnsci.plotting.histogram.functions.TransferFunctionContribution;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -36,6 +38,7 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
@@ -165,10 +168,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	private ExpandableComposite deadZingerExpander;
 	private Composite deadZingerComposite;
 	private SelectionListener deadZingerValueListener;
-	private Label deadPixelLabel;
-	private Text deadPixelText;
-	private Label zingerLabel;
-	private Text zingerText;
+    private BoundsDecorator deadDeco, zingerDeco;	
 
 	private Button resetButton;
 	private SelectionListener resetListener;
@@ -273,7 +273,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				if (internalEvent > 0) return;
 				logger.trace("paletteListener maxCutChanged firing");
 				rangeMax = ((IPaletteTrace)evt.getSource()).getImageServiceBean().getMaximumCutBound().getBound().doubleValue();
-				zingerText.setText(Double.toString(rangeMax));
+				zingerDeco.setValue(rangeMax);
 				if(histoMax > rangeMax) histoMax = rangeMax;
 				generateHistogram(imageDataset);
 				updateHistogramToolElements(evt.getTrace(), null, false, true);
@@ -284,7 +284,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				if (internalEvent > 0) return;
 				logger.trace("paletteListener minCutChanged firing");
 				rangeMin = ((IPaletteTrace)evt.getSource()).getImageServiceBean().getMinimumCutBound().getBound().doubleValue();
-				deadPixelText.setText(Double.toString(rangeMin));
+				deadDeco.setValue(rangeMin);
 				if(histoMin < rangeMin) histoMin = rangeMin;
 				generateHistogram(imageDataset);
 				updateHistogramToolElements(evt.getTrace(), null, false, true);
@@ -363,11 +363,11 @@ public class HistogramToolPage extends AbstractToolPage {
 
 		deadZingerValueListener = new SelectionAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent event) {
+			public void widgetDefaultSelected(SelectionEvent event) {
 				logger.trace("deadZingerValueListener");
 				try {
-					rangeMax = Double.parseDouble(zingerText.getText());
-					rangeMin = Double.parseDouble(deadPixelText.getText());
+					rangeMax = zingerDeco.getValue().doubleValue();
+					rangeMin = deadDeco.getValue().doubleValue();
 					if (rangeMax < rangeMin) rangeMax = rangeMin;
 					if (histoMax > rangeMax) histoMax = rangeMax;
 					if (histoMin < rangeMin) histoMin = rangeMin;
@@ -383,6 +383,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 					updateHistogramToolElements(event, true, false);
 				} catch (Exception e) {
+					logger.error("Problem updating zinger/dead pixels", e);
 					// ignore this for now, might need to be a popup to the user
 				}
 			}
@@ -401,8 +402,9 @@ public class HistogramToolPage extends AbstractToolPage {
 					image.setMinCut(new HistogramBound(rangeMin, image.getMinCut().getColor()));
 				}
 
-				zingerText.setText(Double.toString(rangeMax));
-				deadPixelText.setText(Double.toString(rangeMin));
+
+				deadDeco.setValue(rangeMin);
+				zingerDeco.setValue(rangeMax);	
 
 				// calculate the histogram
 				generateHistogram(imageDataset);
@@ -720,19 +722,28 @@ public class HistogramToolPage extends AbstractToolPage {
 		deadZingerComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		deadZingerComposite.setLayout(new GridLayout(2, false));
 
-		deadPixelLabel = new Label(deadZingerComposite, SWT.NONE);
+		Label deadPixelLabel = new Label(deadZingerComposite, SWT.NONE);
 		deadPixelLabel.setText(DEAD_PIXEL_LABEL);
-		deadPixelText = new Text(deadZingerComposite, SWT.NONE);
+		Text deadPixelText = new Text(deadZingerComposite, SWT.BORDER);
 		deadPixelText.addSelectionListener(deadZingerValueListener);
+		deadPixelText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		deadDeco = new FloatDecorator(deadPixelText);
 
-		zingerLabel = new Label(deadZingerComposite, SWT.NONE);
+		Label zingerLabel = new Label(deadZingerComposite, SWT.NONE);
 		zingerLabel.setText(ZINGER_LABEL);
-		zingerText = new Text(deadZingerComposite, SWT.NONE);
+		Text zingerText = new Text(deadZingerComposite, SWT.BORDER);
 		zingerText.addSelectionListener(deadZingerValueListener);
+		zingerText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		zingerDeco = new FloatDecorator(zingerText);
 
 		resetButton = new Button(deadZingerComposite, SWT.NONE);
 		resetButton.setText("Reset");
 		resetButton.addSelectionListener(resetListener);
+		
+		final CLabel info = new CLabel(deadZingerComposite, SWT.NONE);
+		info.setImage(Activator.getImageDescriptor("icons/info.png").createImage());
+		info.setText("Press enter to update the plot");
+		info.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
 		deadZingerExpander.setClient(deadZingerComposite);
 		deadZingerExpander.addExpansionListener(expansionAdapter);
@@ -946,8 +957,8 @@ public class HistogramToolPage extends AbstractToolPage {
 				break;
 			}
 
-			zingerText.setText(Double.toString(image.getMaxCut().getBound().doubleValue()));
-			deadPixelText.setText(Double.toString(image.getMinCut().getBound().doubleValue()));
+			zingerDeco.setValue(image.getMaxCut().getBound());
+			deadDeco.setValue(image.getMinCut().getBound());
 
 			// Update the paletteData
 			if (paletteData==null) paletteData = image.getPaletteData();
