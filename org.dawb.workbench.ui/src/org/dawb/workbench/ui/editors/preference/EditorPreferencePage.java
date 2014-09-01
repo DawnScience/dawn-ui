@@ -10,23 +10,31 @@
 
 package org.dawb.workbench.ui.editors.preference;
 
+import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.dawb.common.ui.widgets.LabelFieldEditor;
 import org.dawb.workbench.ui.Activator;
+import org.dawb.workbench.ui.data.PlotDataSelection;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.dawnsci.plotting.api.PlottingFactory;
+import org.eclipse.dawnsci.plotting.api.PlottingSelectionProvider;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -37,6 +45,8 @@ public class EditorPreferencePage extends FieldEditorPreferencePage implements I
 	public static final String ID = "org.edna.workbench.editors.preferencePage";
 	
 	private StringFieldEditor formatFieldEditor;
+
+	private IPropertyChangeListener dataModeListener;
 	/**
 	 * @wbp.parser.constructor
 	 */
@@ -117,8 +127,23 @@ public class EditorPreferencePage extends FieldEditorPreferencePage implements I
 		
 		new LabelFieldEditor("\n", getFieldEditorParent());
 		new LabelFieldEditor("\n", getFieldEditorParent());
-		BooleanFieldEditor saveDataSelected = new BooleanFieldEditor(EditorConstants.SAVE_SEL_DATA, "Save the last selected data by name.",getFieldEditorParent());
-      	addField(saveDataSelected);
+		
+		PlotDataSelection[] pds = PlotDataSelection.values();
+		int nTypes = pds.length;
+		String[][] pdsTypes = new String[nTypes][1];
+		for (int i = 0; i < nTypes; i++) {
+			String label = pds[i].getLabel();
+			String name  = pds[i].toString();
+			pdsTypes[i] = new String[] {label, name};
+		}
+
+		OpenComboFieldEditor saveDataChoice = new OpenComboFieldEditor(EditorConstants.SAVE_SEL_DATA, "Automatically open dataset(s)", pdsTypes, getFieldEditorParent());
+      	addField(saveDataChoice);
+      	
+      	final StringFieldEditor datasetNameEditor = new StringFieldEditor(EditorConstants.DATA_SEL, "Data name(s)", getFieldEditorParent());
+      	addField(datasetNameEditor);
+      	datasetNameEditor.setEnabled(PlotDataSelection.isFixed(getPreferenceStore().getString(EditorConstants.SAVE_SEL_DATA)), getFieldEditorParent());
+      	
 		BooleanFieldEditor saveLogFormat = new BooleanFieldEditor(EditorConstants.SAVE_LOG_FORMAT, "Save the last axis log format by file extension.",getFieldEditorParent());
       	addField(saveLogFormat);
 		BooleanFieldEditor saveTimeFormat = new BooleanFieldEditor(EditorConstants.SAVE_TIME_FORMAT, "Save the last axis time format by file extension.",getFieldEditorParent());
@@ -126,7 +151,43 @@ public class EditorPreferencePage extends FieldEditorPreferencePage implements I
 		BooleanFieldEditor saveFormatString = new BooleanFieldEditor(EditorConstants.SAVE_FORMAT_STRING, "Save the last axis format string by file extension.",getFieldEditorParent());
       	addField(saveFormatString);
 
+      	dataModeListener = new IPropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent event) {
+				
+				final String propValue = getPreferenceStore().getString(EditorConstants.SAVE_SEL_DATA);
+				updateMode(datasetNameEditor, PlotDataSelection.valueOf(propValue));
+			}
+      	};
+      	getPreferenceStore().addPropertyChangeListener(dataModeListener);
+      	
+      	final Combo combo = saveDataChoice.getCombo(getFieldEditorParent());
+      	if (combo!=null) {
+      		combo.addSelectionListener(new SelectionAdapter() {
+      			public void widgetSelected(SelectionEvent e) {
+      				PlotDataSelection sel = PlotDataSelection.values()[combo.getSelectionIndex()];
+    				updateMode(datasetNameEditor, sel);
+     			}
+			});
+      	}
+ 	}
+	
+    protected void updateMode(StringFieldEditor datasetNameEditor,
+			                  PlotDataSelection pds) {
+    	
+      	datasetNameEditor.setEnabled(pds.isFixed(), getFieldEditorParent());
+      	if (!pds.isActive()) {
+      		datasetNameEditor.setStringValue("");
+      	} else {
+      		datasetNameEditor.setStringValue(getPreferenceStore().getString(EditorConstants.DATA_SEL));
+      	}
+		
 	}
+
+	public void dispose() {
+    	getPreferenceStore().removePropertyChangeListener(dataModeListener);
+        super.dispose();
+    }
 	
 	public static String[][] getPlottingPreferenceChoices() {
 		
@@ -180,4 +241,25 @@ public class EditorPreferencePage extends FieldEditorPreferencePage implements I
 		
 	}
 
+	private class OpenComboFieldEditor extends ComboFieldEditor {
+
+		public OpenComboFieldEditor(String name, String labelText,
+				String[][] entryNamesAndValues, Composite parent) {
+			super(name, labelText, entryNamesAndValues, parent);
+		}
+		public Combo getCombo(Composite parent) {
+			try {
+	            final Method method = ComboFieldEditor.class.getDeclaredMethod("getComboBoxControl", parent.getClass());
+	            try {
+	                method.setAccessible(true);
+	                return (Combo)method.invoke(this, parent);
+	            } finally {
+	                method.setAccessible(false);
+	            }
+			} catch (Exception ne) {
+				ne.printStackTrace();
+				return null;
+			}
+		}
+	}
 }

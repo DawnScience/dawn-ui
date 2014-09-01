@@ -1534,14 +1534,16 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		if (selections==null) return;
 
 		// Record selections
-		if (Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SAVE_SEL_DATA)) try {
+		final String autoType = Activator.getDefault().getPreferenceStore().getString(EditorConstants.SAVE_SEL_DATA);
+		if (PlotDataSelection.isAuto(autoType)) try { // If we are automatic we set the values for the fixed plot.
 			StringBuilder buf = new StringBuilder();
 			for (ITransferableDataObject ob : selections) {
 				buf.append(ob.getName());
 				buf.append(",");
 			}
 			
-			Activator.getDefault().getPreferenceStore().setValue(DATA_SEL, buf.toString());
+			Activator.getDefault().getPreferenceStore().setValue(EditorConstants.DATA_SEL, buf.toString());
+			
 		} catch (Throwable ne) {
 			logger.error("Cannot save last selections!", ne);
 		}
@@ -1850,7 +1852,6 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		return patterns;
 	}
 	
-	private static final String DATA_SEL = "org.dawb.workbench.ui.editors.plotdata.selected";
 	/**
 	 * Used when the view is being controlled from a Dialog.
 	 * 
@@ -1884,10 +1885,11 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		}
 		
 		// Some of the meta data
-		if (Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SAVE_SEL_DATA)) {
+		final String autoType = Activator.getDefault().getPreferenceStore().getString(EditorConstants.SAVE_SEL_DATA);
+		if (PlotDataSelection.isActive(autoType)) {
 			try {
 
-				final String prop = Activator.getDefault().getPreferenceStore().getString(DATA_SEL);
+				final String prop = Activator.getDefault().getPreferenceStore().getString(EditorConstants.DATA_SEL);
 				if (prop!=null) {
 					final Collection<String> saveSelections = Arrays.asList(prop.split(","));
 					if (data!=null && !data.isEmpty()) {

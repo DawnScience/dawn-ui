@@ -11,6 +11,7 @@
 package org.dawb.workbench.ui.editors.preference;
 
 import org.dawb.workbench.ui.Activator;
+import org.dawb.workbench.ui.data.PlotDataSelection;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -33,7 +34,7 @@ public class EditorPreferenceInitializer extends AbstractPreferenceInitializer {
 		store.setDefault(EditorConstants.PLOTTING_SYSTEM_CHOICE, "org.dawb.workbench.editors.plotting.lightWeightPlottingSystem");
         store.setDefault(EditorConstants.HIGHLIGHT_ACTORS_CHOICE, true);
         
-		store.setDefault(EditorConstants.SAVE_SEL_DATA,           true);
+		store.setDefault(EditorConstants.SAVE_SEL_DATA,           PlotDataSelection.AUTO.toString());
 		store.setDefault(EditorConstants.SAVE_LOG_FORMAT,         false);
 		store.setDefault(EditorConstants.SAVE_TIME_FORMAT,        false);
 		store.setDefault(EditorConstants.SAVE_FORMAT_STRING,      false);
