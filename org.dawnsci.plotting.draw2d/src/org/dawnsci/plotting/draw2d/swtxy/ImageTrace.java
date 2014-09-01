@@ -47,8 +47,8 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.BooleanDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
@@ -967,7 +967,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			// We allow things to proceed without a warning.
 		}
 		
-		getPlottingSystem().setShowIntensity(!(im instanceof RGBDataset));
+		final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting.system");
+		if (store.getBoolean(PlottingConstants.SHOW_INTENSITY)) {
+			getPlottingSystem().setShowIntensity(!(im instanceof RGBDataset));
+		}
 
 		return true;
 	}
