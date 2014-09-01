@@ -37,7 +37,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
@@ -320,7 +319,7 @@ public class CalibrantPositioningWidget {
 						dia.run(true, true, CalibrantPositioningWidget.this.ringFinder);
 					} catch (InvocationTargetException e1) {
 						// TODO Auto-generated catch block
-						MessageDialog.openError(Display.getCurrent().getActiveShell(), "Calibration Error", "An error occured: " + e1.getTargetException().getMessage());
+						MessageDialog.openError(Display.getCurrent().getActiveShell(), "Calibration Error", "An error occured during ring finding, please contact your support representative: "+ e1.getTargetException().getLocalizedMessage());
 					} catch (InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();

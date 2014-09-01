@@ -2,6 +2,7 @@ package org.dawnsci.plotting.tools.profile;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
@@ -65,19 +66,60 @@ public class BoxProfileTool extends ProfileTool {
 		
 		Dataset[] box = ROIProfile.box((Dataset)image.getData(), (Dataset)image.getMask(), bounds, true);
         if (box==null) return;
+        
+        Dataset xi = null;
+        Dataset yi = null;
+        
+        double ang = bounds.getAngle();
+        //TODO probably better to deal with this in ROIProfile class, but this will do for now.
+        if (image.getAxes() !=  null && ang == 0) {
+        	List<IDataset> axes = image.getAxes();
+        	
+        	int[] spt = bounds.getIntPoint();
+    		int[] len = bounds.getIntLengths();
+        	
+        	final int xstart  = Math.max(0,  spt[1]);
+			final int xend   = Math.min(spt[1] + len[1],  image.getData().getShape()[0]);
+			final int ystart = Math.max(0,  spt[0]);
+			final int yend   = Math.min(spt[0] + len[0],  image.getData().getShape()[1]);
+			
+			try {
+				IDataset xFull = axes.get(0);
+			    xi = (Dataset)xFull.getSlice(new int[]{ystart}, new int[]{yend},new int[]{1});
+			    xi.setName(xFull.getName());
+			} catch (Exception ne) {
+				//ignore
+			}
+			
+			try {
+				IDataset yFull = axes.get(1);
+			    yi = (Dataset)yFull.getSlice(new int[]{xstart}, new int[]{xend},new int[]{1});
+			    yi.setName(yFull.getName());
+			} catch (Exception ne) {
+				//ignore
+			}
+        	
+        }
+        
 		//if (monitor.isCanceled()) return;
 				
 		final Dataset x_intensity = box[0];
 		x_intensity.setName("X "+region.getName());
-		Dataset xi = IntegerDataset.createRange(x_intensity.getSize());
+		if (xi == null || !Arrays.equals(xi.getShape(), x_intensity.getShape())){
+			xi = IntegerDataset.createRange(x_intensity.getSize());
+			xi.setName("X Pixel");
+		}
 		final Dataset x_indices = xi; // Maths.add(xi, bounds.getX()); // Real position
-		x_indices.setName("X Pixel");
+		
 		
 		final Dataset y_intensity = box[1];
 		y_intensity.setName("Y "+region.getName());
-		Dataset yi = IntegerDataset.createRange(y_intensity.getSize());
+		if (yi == null || !Arrays.equals(yi.getShape(), y_intensity.getShape())) {
+			yi = IntegerDataset.createRange(y_intensity.getSize());
+			yi.setName("Y Pixel");
+		}
 		final Dataset y_indices = yi; // Maths.add(yi, bounds.getY()); // Real position
-		y_indices.setName("Y Pixel");
+		
 
 		//if (monitor.isCanceled()) return;
 		final ILineTrace x_trace = (ILineTrace)profilePlottingSystem.getTrace("X "+region.getName());
