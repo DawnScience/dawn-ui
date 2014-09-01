@@ -41,6 +41,6 @@ public class SeriesItemLabelProvider extends ColumnLabelProvider  {
 
 	public void dispose() {
 		super.dispose();
-		newImage.dispose();
+		if (newImage!=null) newImage.dispose();
 	}
 }
