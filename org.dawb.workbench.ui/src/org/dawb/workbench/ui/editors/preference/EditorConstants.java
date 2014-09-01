@@ -35,6 +35,8 @@ public class EditorConstants {
 	
 	// Properties for saving
 	public static final String SAVE_SEL_DATA         = "data.selected.save";
+	public static final String DATA_SEL = "org.dawb.workbench.ui.editors.plotdata.selected";
+	
 	public static final String SAVE_LOG_FORMAT       = "data.format.save.log.format";
 	public static final String SAVE_TIME_FORMAT      = "data.format.save.time.format";
 	public static final String SAVE_FORMAT_STRING    = "data.format.save.time.format";
