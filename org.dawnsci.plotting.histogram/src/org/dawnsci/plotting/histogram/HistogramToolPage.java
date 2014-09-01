@@ -16,6 +16,7 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
+import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -228,7 +229,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				if (evt.getSource() instanceof IPaletteTrace) {
 					it = (IPaletteTrace)evt.getSource();
 				}
-				updateImage(it, false);
+				//updateImage(it, false);
 				if (it.isRescaleHistogram() && paletteData!=null) {
 					updatePalette(it, null, true);
 				}
@@ -237,6 +238,13 @@ public class HistogramToolPage extends AbstractToolPage {
 			public void tracesAdded(TraceEvent evt) {
 				if (!isActive()) return;
 
+				if (!lockAction.isChecked() && getImageTrace()!=null) {
+                    ImageServiceBean bean = getImageTrace().getImageServiceBean();
+                    if (bean!=null) {
+                       	HistogramToolPage.this.setHistoMin( bean.getMin().doubleValue() );
+                       	HistogramToolPage.this.setHistoMax( bean.getMax().doubleValue() );
+                    }
+				}
 				logger.trace("tracelistener firing");
 				updateImage(null, false);
 			}
@@ -256,7 +264,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			public void minChanged(PaletteEvent event) {
 				if (internalEvent > 0) return;
 				logger.trace("paletteListener minChanged firing");
-				histoMin = ((IPaletteTrace)event.getSource()).getImageServiceBean().getMin().doubleValue();
+				setHistoMin( ((IPaletteTrace)event.getSource()).getImageServiceBean().getMin().doubleValue());
 				updateHistogramToolElements(event.getTrace(), null, false, false);
 			}
 
@@ -264,7 +272,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			public void maxChanged(PaletteEvent event) {
 				if (internalEvent > 0) return;
 				logger.trace("paletteListener maxChanged firing");
-				histoMax = ((IPaletteTrace)event.getSource()).getImageServiceBean().getMax().doubleValue();
+				setHistoMax( ((IPaletteTrace)event.getSource()).getImageServiceBean().getMax().doubleValue());
 				updateHistogramToolElements(event.getTrace(), null, false, false);
 			}
 
@@ -274,7 +282,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				logger.trace("paletteListener maxCutChanged firing");
 				rangeMax = ((IPaletteTrace)evt.getSource()).getImageServiceBean().getMaximumCutBound().getBound().doubleValue();
 				zingerDeco.setValue(rangeMax);
-				if(histoMax > rangeMax) histoMax = rangeMax;
+				if(histoMax > rangeMax) setHistoMax( rangeMax );
 				generateHistogram(imageDataset);
 				updateHistogramToolElements(evt.getTrace(), null, false, true);
 			}
@@ -285,7 +293,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				logger.trace("paletteListener minCutChanged firing");
 				rangeMin = ((IPaletteTrace)evt.getSource()).getImageServiceBean().getMinimumCutBound().getBound().doubleValue();
 				deadDeco.setValue(rangeMin);
-				if(histoMin < rangeMin) histoMin = rangeMin;
+				if(histoMin < rangeMin) setHistoMin( rangeMin );
 				generateHistogram(imageDataset);
 				updateHistogramToolElements(evt.getTrace(), null, false, true);
 			}
@@ -307,10 +315,10 @@ public class HistogramToolPage extends AbstractToolPage {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				logger.trace("minMaxValueListener");
-				histoMax = minMaxValue.getValue(MAX_LABEL);
-				histoMin = minMaxValue.getValue(MIN_LABEL);
+				setHistoMax ( minMaxValue.getValue(MAX_LABEL) );
+				setHistoMin ( minMaxValue.getValue(MIN_LABEL) );
 				if (histoMax < histoMin) {
-					histoMax = histoMin;
+					setHistoMax ( histoMin );
 				}
 				updateHistogramToolElements(event, true, false);
 			}
@@ -320,8 +328,8 @@ public class HistogramToolPage extends AbstractToolPage {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				logger.trace("rangelisteer");
-				histoMax = rangeSlider.getMaxValue();
-				histoMin = rangeSlider.getMinValue();
+				setHistoMax ( rangeSlider.getMaxValue());
+				setHistoMin ( rangeSlider.getMinValue());
 				updateHistogramToolElements(event, true, false);
 			}
 		};
@@ -330,8 +338,8 @@ public class HistogramToolPage extends AbstractToolPage {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				logger.trace("rangelisteer");
-				histoMax = rangeSlider.getMaxValue();
-				histoMin = rangeSlider.getMinValue();
+				setHistoMax ( rangeSlider.getMaxValue() );
+				setHistoMin ( rangeSlider.getMinValue() );
 				updateHistogramToolElements(e, true, false);
 				
 			}
@@ -339,8 +347,8 @@ public class HistogramToolPage extends AbstractToolPage {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				logger.trace("rangelisteer");
-				histoMax = rangeSlider.getMaxValue();
-				histoMin = rangeSlider.getMinValue();
+				setHistoMax( rangeSlider.getMaxValue());
+				setHistoMin( rangeSlider.getMinValue());
 				updateHistogramToolElements(e, true, false);
 				
 			}
@@ -350,12 +358,12 @@ public class HistogramToolPage extends AbstractToolPage {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				logger.trace("brightnessContrastListener");
-				histoMax = brightnessContrastValue.getValue(BRIGHTNESS_LABEL)+
-						brightnessContrastValue.getValue(CONTRAST_LABEL)/2.0;
-				histoMin = brightnessContrastValue.getValue(BRIGHTNESS_LABEL)-
-						brightnessContrastValue.getValue(CONTRAST_LABEL)/2.0;
+				setHistoMax( brightnessContrastValue.getValue(BRIGHTNESS_LABEL)+
+						brightnessContrastValue.getValue(CONTRAST_LABEL)/2.0);
+				setHistoMin( brightnessContrastValue.getValue(BRIGHTNESS_LABEL)-
+						brightnessContrastValue.getValue(CONTRAST_LABEL)/2.0);
 				if (histoMax < histoMin) {
-					histoMax = histoMin;
+					setHistoMax( histoMin);
 				}
 				updateHistogramToolElements(event, true, false);
 			}
@@ -369,8 +377,8 @@ public class HistogramToolPage extends AbstractToolPage {
 					rangeMax = zingerDeco.getValue().doubleValue();
 					rangeMin = deadDeco.getValue().doubleValue();
 					if (rangeMax < rangeMin) rangeMax = rangeMin;
-					if (histoMax > rangeMax) histoMax = rangeMax;
-					if (histoMin < rangeMin) histoMin = rangeMin;
+					if (histoMax > rangeMax) setHistoMax( rangeMax);
+					if (histoMin < rangeMin) setHistoMin( rangeMin);
 
 					IPaletteTrace image = getPaletteTrace();
 					if (image!=null) {
@@ -445,6 +453,14 @@ public class HistogramToolPage extends AbstractToolPage {
 				IPaletteTrace image = getPaletteTrace();
 				if (image!=null) {
 					image.getImageServiceBean().setLogColorScale(btnColourMapLog.getSelection());
+					if (image instanceof IImageTrace && !lockAction.isChecked()) {
+						try {
+							image.removePaletteListener(paletteListener);
+							((IImageTrace)image).rehistogram();
+						} finally {
+							image.addPaletteListener(paletteListener);
+						}
+					}
 					updateImage(null, true);
 					imagerepaintJob.schedule();
 				}
@@ -478,8 +494,8 @@ public class HistogramToolPage extends AbstractToolPage {
 				if (evt.getROI() instanceof RectangularROI) {
 					IRegion region = histogramPlot.getRegion("Histogram Region");
 					RectangularROI roi = (RectangularROI) region.getROI();
-					histoMin = roi.getPoint()[0];
-					histoMax = roi.getEndPoint()[0];
+					setHistoMin( roi.getPoint()[0]);
+					setHistoMax( roi.getEndPoint()[0]);
 					updateHistogramToolElements(null, true, false);
 				}
 			}
@@ -508,10 +524,12 @@ public class HistogramToolPage extends AbstractToolPage {
 	protected boolean updatePalette(IPaletteTrace eventsImage, IProgressMonitor mon, boolean force) {
 		logger.trace("imagerepaintJob running");
 		internalEvent++;
+		
+		IPaletteTrace image = eventsImage!=null ? eventsImage : getPaletteTrace();
 		try {
-			IPaletteTrace image = eventsImage!=null ? eventsImage : getPaletteTrace();
 			
 			if (image!=null) {
+				image.removePaletteListener(paletteListener);
 				
 				if (!force &&
 					maxLast == histoMax &&
@@ -542,7 +560,9 @@ public class HistogramToolPage extends AbstractToolPage {
 		} catch (Exception e) {
 			logger.warn("Failed to update plot due to an exception", e);
 			return false;
-		}finally {
+			
+		} finally {
+			if (image!=null) image.addPaletteListener(paletteListener);
 			internalEvent--;			
 		}
 	}
@@ -947,8 +967,8 @@ public class HistogramToolPage extends AbstractToolPage {
 			case AUTO:
 				rangeMax = image.getImageServiceBean().getMaximumCutBound().getBound().doubleValue();
 				rangeMin = image.getImageServiceBean().getMinimumCutBound().getBound().doubleValue();
-				histoMax = image.getImageServiceBean().getMax().doubleValue();
-				histoMin = image.getImageServiceBean().getMin().doubleValue();
+				setHistoMax( image.getImageServiceBean().getMax().doubleValue());
+				setHistoMin( image.getImageServiceBean().getMin().doubleValue());
 				break;
 			case FIXED:
 				// Do nothing?
@@ -957,12 +977,12 @@ public class HistogramToolPage extends AbstractToolPage {
 				// this is the FULL implementation (a good default)
 				rangeMax = image.getImageServiceBean().getMaximumCutBound().getBound().doubleValue();
 				rangeMin = image.getImageServiceBean().getMinimumCutBound().getBound().doubleValue();
-				histoMax = image.getImageServiceBean().getMax()!=null
+				setHistoMax( image.getImageServiceBean().getMax()!=null
 						 ? image.getImageServiceBean().getMax().doubleValue()
-						 : 1;
-				histoMin = image.getImageServiceBean().getMin()!=null
+						 : 1);
+				setHistoMin( image.getImageServiceBean().getMin()!=null
 						 ? image.getImageServiceBean().getMin().doubleValue()
-						 : 0;
+						 : 0);
 				break;
 			}
 
@@ -1340,6 +1360,22 @@ public class HistogramToolPage extends AbstractToolPage {
 		rangeOpalExpander.setVisible(true);
 		deadZingerExpander.setVisible(true);
 		histogramExpander.setVisible(true);
+	}
+
+	protected double getHistoMax() {
+		return histoMax;
+	}
+
+	protected void setHistoMax(double histoMax) {
+		this.histoMax = histoMax;
+	}
+
+	protected double getHistoMin() {
+		return histoMin;
+	}
+
+	protected void setHistoMin(double histoMin) {
+		this.histoMin = histoMin;
 	}
 
 }

@@ -119,7 +119,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 	 */
 	public ImageData getImageData(ImageServiceBean bean) {
 		
-		Dataset image    = getImageLoggedData(bean);
+		Dataset image    = (Dataset)bean.getImage();
 		ImageOrigin     origin   = bean.getOrigin();
 		if (origin==null) origin = ImageOrigin.TOP_LEFT;
 		PaletteData     palette  = bean.getPalette();
@@ -156,7 +156,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		
 		// now deal with the log if needed
 		if(bean.isLogColorScale()) {
-			image = Maths.log10(image);
+			image = getImageLoggedData(bean);
 			max = (float) Math.log10(max);
 			min = (float) Math.log10(min);
 			if (min <= 0 || Float.isNaN(min)) min = (float) 0.0000001;
@@ -409,12 +409,15 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 	}
 	
 	private Dataset getImageLoggedData(ImageServiceBean bean) {
-		Dataset imageDataset = (Dataset)bean.getImage();
-//		if (bean.isLogColorScale()) {
-//			Dataset result = Maths.subtract(imageDataset, bean.getLogOffset());
-//			imageDataset = Maths.log10(result);
-//		}
-		return imageDataset;
+		Dataset ret = (Dataset)bean.getImage();
+		if (bean.isLogColorScale()) {
+			if (!Double.isNaN(bean.getLogOffset()) &&
+				Double.isFinite(bean.getLogOffset())) {
+				ret = Maths.subtract(ret, bean.getLogOffset());
+			}
+			ret = Maths.log10(ret);
+		}
+		return ret;
 	}
 
 	/**
@@ -430,28 +433,26 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 	public float[] getFastStatistics(ImageServiceBean bean) {
 		
 		Dataset image    = getImageLoggedData(bean);
-		if(bean.isLogColorScale()) {
-			image = Maths.log10(image);
-		}
 		
-		if (bean.getHistogramType()==HistoType.OUTLIER_VALUES) {
+		if (bean.getHistogramType()==HistoType.OUTLIER_VALUES && !bean.isLogColorScale()) {
 
+			float[] ret = null;
 			try {
 			    double[] stats = Stats.outlierValues(image, bean.getLo(), bean.getHi(), -1);
+			    ret = new float[]{(float)stats[0], (float)stats[1], -1};
 			    
-			    if (bean.isLogColorScale()) {
-			    	return new float[]{(float)Math.pow(stats[0],10), (float)Math.pow(stats[1],10), -1};
-				}
-			    return new float[]{(float)stats[0], (float)stats[1], -1};
 			} catch (IllegalArgumentException iae) {
 				bean.setLo(10);
 				bean.setHi(90);
 			    double[] stats = Stats.outlierValues(image, bean.getLo(), bean.getHi(), -1);
-			    if (bean.isLogColorScale()) {
-			    	return new float[]{(float)Math.pow(stats[0],10), (float)Math.pow(stats[1],10), -1};
-				}
-			    return new float[]{(float)stats[0], (float)stats[1], -1};
+			    ret = new float[]{(float)stats[0], (float)stats[1], -1};
 			}
+			
+		    if (bean.isLogColorScale() && ret!=null) {
+		    	ret = new float[]{(float)Math.pow(ret[0],10), (float)Math.pow(ret[1],10), -1};
+			}
+
+			return ret;
 		}
 		
 		float min = Float.MAX_VALUE;
@@ -494,12 +495,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		float retMax = Float.NaN;
 		float retExtra = Float.NaN;
 		
-		if (bean.getHistogramType()==HistoType.MEAN) {
-			float mean = sum / size;
-			retMax = ((float)Math.E)*mean; // Not statistical, E seems to be better than 3...
-			retExtra=mean;
-			
-		} else if (bean.getHistogramType()==HistoType.MEDIAN) { 
+		if (bean.getHistogramType()==HistoType.MEDIAN) { 
 			
 			float median = Float.NaN;
 			try {
@@ -509,6 +505,12 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 			}
 			retMax = 2f*median;
 			retExtra=median;
+			
+		} else { // Use mean based histo
+			float mean = sum / size;
+			retMax = ((float)Math.E)*mean; // Not statistical, E seems to be better than 3...
+			retExtra=mean;
+
 		}
 		
 		if (retMax > max)	retMax = max;
