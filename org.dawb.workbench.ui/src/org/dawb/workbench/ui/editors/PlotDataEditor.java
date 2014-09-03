@@ -65,6 +65,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.IPage;
+import org.eclipse.ui.part.MultiPageEditor;
 import org.eclipse.ui.part.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,13 +94,19 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 	private InitJob                     initJob;
 	private ActionBarWrapper            wrapper;
 	private ReentrantLock               lock;
+	private ITitledEditor               parent;
 
 	public PlotDataEditor(final PlotType defaultPlotType) {
+		this(defaultPlotType, null);
+	}
+	
+	public PlotDataEditor(final PlotType defaultPlotType, ITitledEditor parent) {
 		
 	    this.axisMap = new HashMap<Integer, IAxis>(4);
 	    this.plotJob = new PlotJob();
 	    this.initJob = new InitJob();
 	    this.lock    = new ReentrantLock();
+	    this.parent  = parent;
 		try {
 			this.defaultPlotType= defaultPlotType;
 	        this.plottingSystem = PlottingFactory.createPlottingSystem();
@@ -669,7 +676,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 	@Override
 	public void setPartTitle(String name) {
 		super.setPartName(name);
-		
+		if (parent!=null) parent.setPartTitle(name);
 	}
 	
 }

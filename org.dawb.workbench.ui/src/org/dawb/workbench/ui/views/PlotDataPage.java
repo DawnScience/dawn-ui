@@ -16,7 +16,6 @@ import java.util.List;
 
 import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.services.IVariableManager;
-import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.workbench.ui.data.PlotDataComponent;
@@ -35,8 +34,6 @@ import org.eclipse.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.eclipse.dawnsci.slicing.api.editor.ISlicablePlottingPart;
 import org.eclipse.dawnsci.slicing.api.system.DimensionalEvent;
 import org.eclipse.dawnsci.slicing.api.system.DimensionalListener;
-import org.eclipse.dawnsci.slicing.api.system.DimsData;
-import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.dawnsci.slicing.api.system.ISliceSystem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.Separator;
@@ -178,6 +175,7 @@ public class PlotDataPage extends Page implements IAdaptable {
 			sliceComponent.createPartControl(form);
 			sliceComponent.setVisible(false);
 			
+			getSite().setSelectionProvider(sliceComponent.getSelectionProvider());
 			
 			dataReductionDimensionalListener = new DimensionalListener() {
 				@Override
@@ -226,6 +224,7 @@ public class PlotDataPage extends Page implements IAdaptable {
 	
 	@Override
 	public Object getAdapter(Class type) {
+	
 		if (type == String.class) {
 			return "Data";
 		} else if (type == List.class) {

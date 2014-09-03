@@ -28,6 +28,7 @@ import org.dawb.common.ui.DawbUtils;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.util.GridUtils;
+import org.dawnsci.common.widgets.editor.ITitledEditor;
 import org.dawnsci.slicing.Activator;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -58,6 +59,7 @@ import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -75,12 +77,14 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LazyDataset;
 import uk.ac.diamond.scisoft.analysis.io.IDataHolder;
+import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.io.SliceObject;
 
@@ -247,6 +251,31 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		setAdvancedColumnsVisible(isAdvanced());	
    	
 		return area;
+	}
+	
+	@Override
+	public ISelectionProvider getSelectionProvider() {
+		return viewer;
+	}
+	
+	@Override
+	public void setSliceMetadata(final IMetaData sliceMeta) {
+		
+        super.setSliceMetadata(sliceMeta);
+        
+        Display.getDefault().syncExec(new Runnable() {
+        	public void run() {
+               viewer.setSelection(viewer.getSelection()); 
+               
+               if (sliceMeta!=null && sliceMeta.getFilePath()!=null) {
+	               final IWorkbenchPart part = getPlottingSystem() != null ? getPlottingSystem().getPart() : null;
+	               if (part!=null && part instanceof ITitledEditor) {
+	            	   final File file = new File(sliceMeta.getFilePath());
+	            	   ((ITitledEditor)part).setPartTitle(file.getName());
+	               }
+               }
+        	}
+        });
 	}
 
 	@Override

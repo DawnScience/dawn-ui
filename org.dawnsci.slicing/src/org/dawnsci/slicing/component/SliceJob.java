@@ -12,6 +12,7 @@ import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.io.SliceObject;
 
 class SliceJob extends Job {
@@ -44,14 +45,13 @@ class SliceJob extends Job {
 
 			if (sliceType instanceof PlotType) {
 				final SliceSource data = system.getData();
-				// TODO FIXME Allow the current slice tool to dictate how to 
-				// process the slice?
-				SliceUtils.plotSlice(data,
-						slice, 
-						(PlotType)sliceType, 
-						system.getPlottingSystem(), 
-						monitor);
+				IDataset slicedData = SliceUtils.plotSlice(data,
+															slice, 
+															(PlotType)sliceType, 
+															system.getPlottingSystem(), 
+															monitor);
 
+				system.setSliceMetadata(slicedData!=null ? slicedData.getMetadata() : null);
 			}
 
 		} catch (Exception e) {
