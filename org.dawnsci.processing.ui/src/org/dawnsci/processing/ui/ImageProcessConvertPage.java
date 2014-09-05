@@ -41,6 +41,15 @@ public class ImageProcessConvertPage extends AbstractSliceConversionPage  {
     }
 	
 	@Override
+	public void setContext(IConversionContext context) {
+		
+		super.setContext(context);
+		if (context.getOutputPath()!=null) {
+			setPath(context.getOutputPath());
+		}
+	}
+	
+	@Override
 	public IConversionContext getContext() {
 		if (context == null) return null;
 		IConversionContext context = super.getContext();

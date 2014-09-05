@@ -1,5 +1,6 @@
 package org.dawnsci.processing.ui;
 
+import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
@@ -26,9 +27,10 @@ import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.LocalSelectionTransfer;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeSelection;
@@ -50,6 +52,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
@@ -74,7 +77,7 @@ import uk.ac.diamond.scisoft.analysis.processing.visitors.HierarchicalFileExecut
 import uk.ac.diamond.scisoft.analysis.slice.SliceVisitor;
 import uk.ac.diamond.scisoft.analysis.slice.Slicer;
 
-import org.dawnsci.conversion.ConversionContext;;
+import org.dawnsci.conversion.ConversionContext;
 
 public class DataFileSliceView extends ViewPart {
 
@@ -98,9 +101,11 @@ public class DataFileSliceView extends ViewPart {
 		
 		viewer = new TableViewer(parent);
 		viewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		viewer.setLabelProvider(new LabelProvider());
+		viewer.setLabelProvider(new ViewLabelProvider());
 		viewer.setContentProvider(new BasicContentProvider());
 		viewer.setInput(filePaths.toArray(new String[filePaths.size()]));
+		
+		ColumnViewerToolTipSupport.enableFor(viewer);
 		
 		DropTargetAdapter dropListener = new DropTargetAdapter() {
 			@Override
@@ -130,6 +135,59 @@ public class DataFileSliceView extends ViewPart {
 				FileTransfer.getInstance(), ResourceTransfer.getInstance(),
 				LocalSelectionTransfer.getTransfer() });
 		dt.addDropListener(dropListener);
+		
+		Label datasetLabel = new Label(parent, SWT.WRAP);
+		datasetLabel.setText("Dataset name not selected");
+		
+		Label outputPath = new Label(parent, SWT.WRAP);
+		outputPath.setText("Output path not selected");
+		
+		Button edit = new Button(parent, SWT.NONE);
+		edit.setText("Edit");
+		edit.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Wizard wiz = new Wizard() {
+					//set 
+					@Override
+					public boolean performFinish() {
+						return true;
+					}
+				};
+				
+				wiz.setNeedsProgressMonitor(true);
+				convertPage = null;
+				convertPage = new ImageProcessConvertPage();
+				wiz.addPage(convertPage);
+				final WizardDialog wd = new WizardDialog(getSite().getShell(),wiz);
+				wd.create();
+				convertPage.setContext(context);
+				
+				
+
+				if (wd.open() == WizardDialog.OK) {
+					context = convertPage.getContext();
+					context.setConversionScheme(ConversionScheme.PROCESS);
+					
+					try {
+						
+						update(null);
+						
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					
+				}
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 		
 		Button clear = new Button(parent, SWT.NONE);
 		clear.setText("Clear");
@@ -186,13 +244,15 @@ public class DataFileSliceView extends ViewPart {
 				}
 					
 				ProgressMonitorDialog dia = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
-
+				
 				try {
-					dia.run(true, false, new IRunnableWithProgress() {
+					dia.run(true, true, new IRunnableWithProgress() {
 
 						@Override
 						public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
+							//TODO properly populate the number steps
+							monitor.beginTask("Processing", 100);
 							context.setMonitor(new ProgressMonitorWrapper(monitor));
 							try {
 								service.process(context);
@@ -524,5 +584,26 @@ public class DataFileSliceView extends ViewPart {
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
 	}
+	
+	private class ViewLabelProvider extends ColumnLabelProvider {
+	
+		@Override
+		public String getText(Object obj) {
+			
+			if (obj instanceof String) {
+				File f = new File((String)obj);
+				if (f.isFile()) return f.getName();
+			}
+			
+			return getText(obj);
+		}
+		
+		@Override
+		public String getToolTipText(Object obj) {
+			return obj.toString();
+		}
+		
+	}
+	
 
 }
