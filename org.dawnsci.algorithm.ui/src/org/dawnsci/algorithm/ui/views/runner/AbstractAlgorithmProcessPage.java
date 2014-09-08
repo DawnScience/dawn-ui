@@ -31,4 +31,9 @@ public abstract class AbstractAlgorithmProcessPage implements IAlgorithmProcessP
 	public Object getAdapter(Class adapter) {
 		return null;
 	}
+	
+	@Override
+	public boolean showRunButtons() {
+		return true;
+	}
 }

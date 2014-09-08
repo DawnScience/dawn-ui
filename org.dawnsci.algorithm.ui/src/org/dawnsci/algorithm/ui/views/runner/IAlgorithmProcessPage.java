@@ -92,4 +92,10 @@ public interface IAlgorithmProcessPage extends IAdaptable {
 	 */
 	public void dispose();
 
+	/**
+	 * Show the run and stop buttons
+	 * @return
+	 */
+	public boolean showRunButtons();
+
 }

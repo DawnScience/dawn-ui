@@ -94,7 +94,7 @@ public class AlgorithmView extends ViewPart {
 
 	@Override
 	public void createPartControl(Composite parent) {
-		createActions();
+		createActions(runner);
 		component  = runner.createPartControl(parent);
 		
 		// TODO Do we need a component at the bottom
@@ -104,7 +104,7 @@ public class AlgorithmView extends ViewPart {
 
 	private IAlgorithmProcessContext context;
 	
-	private void createActions() {
+	private void createActions(IAlgorithmProcessPage runner) {
 
 		IConfigurationElement[] elements = configuration.getChildren("connection");
         if (elements!=null && elements.length>0) {
@@ -184,10 +184,11 @@ public class AlgorithmView extends ViewPart {
 		};
 		runAction.setId(IAlgorithmProcessContext.RUN_ID_STUB+title);
 
-		
-		getViewSite().getActionBars().getToolBarManager().add(runAction);
-		getViewSite().getActionBars().getToolBarManager().add(stopAction);
-		getViewSite().getActionBars().getToolBarManager().add(new Separator());
+		if (runner.showRunButtons()) {
+			getViewSite().getActionBars().getToolBarManager().add(runAction);
+			getViewSite().getActionBars().getToolBarManager().add(stopAction);
+			getViewSite().getActionBars().getToolBarManager().add(new Separator());
+		}
 	}
 
 	@Override

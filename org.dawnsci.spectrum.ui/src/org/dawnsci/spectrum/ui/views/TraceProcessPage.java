@@ -259,6 +259,11 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 		return viewer.getTable();
 	}
 	
+	
+	@Override
+	public boolean showRunButtons() {
+		return false;
+	}
 
 	@Override
 	public String getTitle() {
