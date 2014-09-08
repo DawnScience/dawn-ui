@@ -54,6 +54,14 @@
             id="org.dawb.workbench.editors.AsciiEditor"
             name="Ascii Data Editor">
       </editor>
+      <editor
+            class="org.dawb.workbench.ui.editors.AsciiEditor"
+            default="false"
+            extensions="txt"
+            icon="icons/ascii_editor.png"
+            id="org.dawb.workbench.editors.AsciiEditorTxt"
+            name="Ascii Data Editor">
+      </editor>
 
       <editor
             class="org.dawb.workbench.ui.editors.ImageEditor"
