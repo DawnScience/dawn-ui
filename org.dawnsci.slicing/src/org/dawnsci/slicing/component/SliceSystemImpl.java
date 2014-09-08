@@ -339,7 +339,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		man.add(new Separator("group0"));
 
 		// Add action for Setting the tools into advanced mode.
-		final Action advanced = new Action("Advanced slicing.\nFor instance, shows extra options for 'Type' including mean and median.", IAction.AS_CHECK_BOX) {
+		advanced = new Action("Advanced slicing.\nFor instance, shows extra options for 'Type' including mean and median.", IAction.AS_CHECK_BOX) {
 			public void run() {
 				setAdvanced(isChecked());
 				viewer.cancelEditing();

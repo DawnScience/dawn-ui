@@ -99,17 +99,18 @@ public class HyperSlicingTool extends AbstractSlicingTool {
 	@Override
 	public void demilitarize() {
 		
-		if (originalPlotControl==null) return;
-        final IPlottingSystem plotSystem = getSlicingSystem().getPlottingSystem();
-		plotSystem.setControl(originalPlotControl, true);
-		originalPlotControl = null;
-		
 		if (dimensionalListener!=null) {
 			getSlicingSystem().removeDimensionalListener(dimensionalListener);
 		}
 		if (axisChoiceListener!=null) {
 			getSlicingSystem().removeAxisChoiceListener(axisChoiceListener);
 		}
+
+		if (originalPlotControl==null) return;
+        final IPlottingSystem plotSystem = getSlicingSystem().getPlottingSystem();
+		plotSystem.setControl(originalPlotControl, true);
+		originalPlotControl = null;
+		
 
 	}
 
@@ -266,6 +267,11 @@ public class HyperSlicingTool extends AbstractSlicingTool {
 	
 	@Override
 	public boolean isSliceRequired() {
+		return false;
+	}
+
+	@Override
+	public boolean isAdvancedSupported() {
 		return false;
 	}
 
