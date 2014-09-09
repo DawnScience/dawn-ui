@@ -2,11 +2,15 @@ package org.dawnsci.isosurface;
 
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.Scene;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.CullFace;
@@ -35,6 +39,7 @@ public class SurfaceDisplayer extends Scene{
     private double mouseOldY;
     private double mouseDeltaX;
     private double mouseDeltaY;
+	private Label positionLabel;
 
     /**
      * Constructor for the class:
@@ -63,10 +68,25 @@ public class SurfaceDisplayer extends Scene{
         
         frameCam(this);
         
-        root.getChildren().addAll(camOffset);
+        root.getChildren().add(camOffset);
+        root.getChildren().add(generateControls());
         
         createListeners();
        
+	}
+	
+	private VBox generateControls(){
+		
+		VBox controls = new VBox();	
+		controls.setAlignment(Pos.BOTTOM_RIGHT);
+		      
+        positionLabel = new Label("");
+        positionLabel.setAlignment(Pos.BOTTOM_RIGHT);
+        positionLabel.setContentDisplay(ContentDisplay.RIGHT);
+ 		
+        controls.getChildren().add(positionLabel);
+		
+        return controls;
 	}
 
 
@@ -204,12 +224,15 @@ public class SurfaceDisplayer extends Scene{
 			public void handle(MouseEvent event) {
 				// TODO Auto-generated method stub
 
-				double temporaryX = event.getX();
-				double temporaryY = event.getY();
-				double temporaryZ = event.getZ();
+				StringBuilder buf = new StringBuilder("[");
+				buf.append(Math.round(event.getX()));
+				buf.append(", ");
+				buf.append(Math.round(event.getY()));
+				buf.append(", ");
+				buf.append(Math.round(event.getZ()));
+				buf.append("]");
 
-				//					System.out.println("point: " + temporaryX + ", " + temporaryY + ", " + temporaryZ);
-
+				positionLabel.setText(buf.toString());
 			}
 
 		});

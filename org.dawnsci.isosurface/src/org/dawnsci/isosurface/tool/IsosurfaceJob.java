@@ -127,6 +127,7 @@ public class IsosurfaceJob extends Job {
 						if (scene==null){
 							Group    root   = new Group();
 							MeshView result = new MeshView(finalSurface.createTrangleMesh());
+							result.setCursor(Cursor.CROSSHAIR);
 							scene = new SurfaceDisplayer(root, result);
 							
 							final FXCanvas canvas = tool.getCanvas();
