@@ -128,19 +128,23 @@ public class IsosurfaceJob extends Job {
 		Platform.runLater(new Runnable() {			
 			public void run() {			
 				try {
-					MeshView result = new MeshView(finalSurface);
-					Group root = new Group();
 
 					if (scene==null){
+						Group    root   = new Group();
+						MeshView result = new MeshView(finalSurface);
 						scene = new SurfaceDisplayer(root, result);
+						
+						final FXCanvas canvas = tool.getCanvas();
+						canvas.setScene(scene);
 						
 					} else {
 						scene.updateTransforms();
-						scene.setIsosurface(result);
+						scene.getIsosurface().setMesh(finalSurface);
 						scene.updateSurface();
+						
+						final FXCanvas canvas = tool.getCanvas();
+						canvas.redraw();
 					}			
-					final FXCanvas canvas = tool.getCanvas();
-					canvas.setScene(scene);
 					
 				} catch (OutOfMemoryError e){
 					e.printStackTrace();
