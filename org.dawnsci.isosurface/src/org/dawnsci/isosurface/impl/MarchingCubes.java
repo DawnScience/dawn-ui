@@ -440,7 +440,7 @@ public class MarchingCubes implements IsosurfaceGenerator {
 				if (cubeIndex != 0 && cubeIndex != 255) {
 					surfaceGridCellIntesection(currentCell, cubeIndex, isovalue);
 					currentCell.setTrianglesList(createTriangles(vertices, currentCell, cubeIndex));
-					if(vertices.size()>=1000000){
+					if(vertices.size()>=1000000){ // TODO Configure this?
 						throw new UnsupportedOperationException("The number of verices has exceeded 1,000,000. The surface cannot be rendered.");
 					}
 					triangles.addAll(currentCell.getTrianglesList());

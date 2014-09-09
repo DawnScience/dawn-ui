@@ -52,7 +52,7 @@ public class IsosurfaceJob extends Job {
 	}
 	
 	/**
-	 * Call to update if laxy data changed.
+	 * Call to update if lazy data changed.
 	 * Regenerates the box size and isoValue.
 	 * 
 	 * @param slice
@@ -88,19 +88,13 @@ public class IsosurfaceJob extends Job {
 			
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 			
-			Surface surface = null;
 			try {
-				surface = generator.execute();
+				Surface surface = generator.execute();
+				drawSurface(surface);
 				
 			} catch (UnsupportedOperationException e){
 				e.printStackTrace();
-				Display.getDefault().syncExec(new Runnable(){
-					@Override
-					public void run() {
-						MessageDialog.openError(Display.getDefault().getActiveShell(), "The number of vertices has exceeded 1,000,000.", "The surface cannot be rendered. Please increase the box size.");
-					}
-					
-				});
+				showErrorMessage("The number of vertices has exceeded 1,000,000.", "The surface cannot be rendered. Please increase the box size.");
 				return Status.CANCEL_STATUS;
 				
 			} catch (Exception e) {
@@ -109,57 +103,57 @@ public class IsosurfaceJob extends Job {
 				
 			} catch (OutOfMemoryError e){
 				e.printStackTrace();
-				Display.getDefault().syncExec(new Runnable(){
-	
-					@Override
-					public void run() {
-						MessageDialog.openError(Display.getDefault().getActiveShell(), "Out of memory Error", "There is not enough memory to render the surface. Please increase the box size.");
-					}
-				});
+				showErrorMessage("Out of memory Error", "There is not enough memory to render the surface. Please increase the box size.");
 				return Status.CANCEL_STATUS;
 			}
 					
-			final Surface finalSurface = surface;
-			Platform.runLater(new Runnable() {			
-				public void run() {			
-					try {
-	
-						if (scene==null){
-							Group    root   = new Group();
-							MeshView result = new MeshView(finalSurface.createTrangleMesh());
-							result.setCursor(Cursor.CROSSHAIR);
-							scene = new SurfaceDisplayer(root, result);
-							
-							final FXCanvas canvas = tool.getCanvas();
-							canvas.setScene(scene);
-							
-						} else {
-							scene.updateTransforms();
-							TriangleMesh mesh = (TriangleMesh)scene.getIsosurface().getMesh();
-							finalSurface.marry(mesh);
-							
-							final FXCanvas canvas = tool.getCanvas();
-							canvas.redraw();
-						}			
-						
-					} catch (OutOfMemoryError e){
-						e.printStackTrace();
-						Display.getDefault().asyncExec(new Runnable(){
-	
-							@Override
-							public void run() {
-						        MessageDialog.openError(Display.getDefault().getActiveShell(), "Out of memory Error", "There is not enough memory to render the surface. Please increase the box size.");
-					
-							}
-						});
-					}
-				}
-			});		
+			
 			return Status.OK_STATUS;
 			
 		} finally {
 			setCursor(Cursor.DEFAULT);
 		}
+	}
+
+	private void showErrorMessage(final String title, final String message) {
+		Display.getDefault().syncExec(new Runnable(){
+			@Override
+			public void run() {
+				MessageDialog.openError(Display.getDefault().getActiveShell(), title, message);
+			}
+		});
+	}
+
+	private void drawSurface(final Surface surface) {
+		
+		Platform.runLater(new Runnable() {			
+			public void run() {			
+				try {
+
+					if (scene==null){
+						Group    root   = new Group();
+						MeshView result = new MeshView(surface.createTrangleMesh());
+						result.setCursor(Cursor.CROSSHAIR);
+						scene = new SurfaceDisplayer(root, result);
+						
+						final FXCanvas canvas = tool.getCanvas();
+						canvas.setScene(scene);
+						
+					} else {
+						scene.updateTransforms();
+						TriangleMesh mesh = (TriangleMesh)scene.getIsosurface().getMesh();
+						surface.marry(mesh);
+						
+						final FXCanvas canvas = tool.getCanvas();
+						canvas.redraw();
+					}			
+					
+				} catch (OutOfMemoryError e){
+					e.printStackTrace();
+					showErrorMessage("Out of memory Error", "There is not enough memory to render the surface. Please increase the box size.");
+				}
+			}
+		});		
 	}
 
 	private void setCursor(final Cursor cursor) {

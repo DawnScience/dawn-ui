@@ -225,11 +225,11 @@ public class SurfaceDisplayer extends Scene{
 				// TODO Auto-generated method stub
 
 				StringBuilder buf = new StringBuilder("[");
-				buf.append(Math.round(event.getX()));
+				buf.append(Math.round(event.getZ()));
 				buf.append(", ");
 				buf.append(Math.round(event.getY()));
 				buf.append(", ");
-				buf.append(Math.round(event.getZ()));
+				buf.append(Math.round(event.getX()));
 				buf.append("]");
 
 				positionLabel.setText(buf.toString());
