@@ -2,6 +2,7 @@ package org.dawnsci.isosurface.tool;
 
 import javafx.application.Platform;
 import javafx.embed.swt.FXCanvas;
+import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
@@ -65,91 +66,109 @@ public class IsosurfaceJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-	
-		final IsosurfaceGenerator generator = tool.getGenerator();
-		if (lazyData!=null) {
-						
-		    generator.setData(lazyData); // We want to do this task from the thread
-		                                 // because it can take a while too
+		
 
-		    Display.getDefault().syncExec(new Runnable() {
-		    	public void run() {
-		    		// We set the estimated values for the slicing which will
-		    		// have changed if the lazyData has.
-                    tool.updateUI();
-		    	}
-		    });
-		}
-		
-		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-		
-		Surface surface = null;
 		try {
-			surface = generator.execute();
-			
-		} catch (UnsupportedOperationException e){
-			e.printStackTrace();
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "The number of vertices has exceeded 1,000,000.", "The surface cannot be rendered. Please increase the box size.");
-				}
-				
-			});
-			return Status.CANCEL_STATUS;
-			
-		} catch (Exception e) {
-			logger.error("Cannot run algorithm "+generator.getClass().getSimpleName(), e);
-			return Status.CANCEL_STATUS;
-			
-		} catch (OutOfMemoryError e){
-			e.printStackTrace();
-			Display.getDefault().syncExec(new Runnable(){
-
-				@Override
-				public void run() {
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Out of memory Error", "There is not enough memory to render the surface. Please increase the box size.");
-				}
-			});
-			return Status.CANCEL_STATUS;
-		}
-				
-		final Surface finalSurface = surface;
-		Platform.runLater(new Runnable() {			
-			public void run() {			
-				try {
-
-					if (scene==null){
-						Group    root   = new Group();
-						MeshView result = new MeshView(finalSurface.createTrangleMesh());
-						scene = new SurfaceDisplayer(root, result);
-						
-						final FXCanvas canvas = tool.getCanvas();
-						canvas.setScene(scene);
-						
-					} else {
-						scene.updateTransforms();
-						TriangleMesh mesh = (TriangleMesh)scene.getIsosurface().getMesh();
-						finalSurface.marry(mesh);
-						
-						final FXCanvas canvas = tool.getCanvas();
-						canvas.redraw();
-					}			
-					
-				} catch (OutOfMemoryError e){
-					e.printStackTrace();
-					Display.getDefault().asyncExec(new Runnable(){
-
-						@Override
-						public void run() {
-					        MessageDialog.openError(Display.getDefault().getActiveShell(), "Out of memory Error", "There is not enough memory to render the surface. Please increase the box size.");
-				
-						}
-					});
-				}
+			setCursor(Cursor.WAIT);
+	
+			final IsosurfaceGenerator generator = tool.getGenerator();
+			if (lazyData!=null) {
+							
+			    generator.setData(lazyData); // We want to do this task from the thread
+			                                 // because it can take a while too
+	
+			    Display.getDefault().syncExec(new Runnable() {
+			    	public void run() {
+			    		// We set the estimated values for the slicing which will
+			    		// have changed if the lazyData has.
+	                    tool.updateUI();
+			    	}
+			    });
 			}
+			
+			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+			
+			Surface surface = null;
+			try {
+				surface = generator.execute();
+				
+			} catch (UnsupportedOperationException e){
+				e.printStackTrace();
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						MessageDialog.openError(Display.getDefault().getActiveShell(), "The number of vertices has exceeded 1,000,000.", "The surface cannot be rendered. Please increase the box size.");
+					}
+					
+				});
+				return Status.CANCEL_STATUS;
+				
+			} catch (Exception e) {
+				logger.error("Cannot run algorithm "+generator.getClass().getSimpleName(), e);
+				return Status.CANCEL_STATUS;
+				
+			} catch (OutOfMemoryError e){
+				e.printStackTrace();
+				Display.getDefault().syncExec(new Runnable(){
+	
+					@Override
+					public void run() {
+						MessageDialog.openError(Display.getDefault().getActiveShell(), "Out of memory Error", "There is not enough memory to render the surface. Please increase the box size.");
+					}
+				});
+				return Status.CANCEL_STATUS;
+			}
+					
+			final Surface finalSurface = surface;
+			Platform.runLater(new Runnable() {			
+				public void run() {			
+					try {
+	
+						if (scene==null){
+							Group    root   = new Group();
+							MeshView result = new MeshView(finalSurface.createTrangleMesh());
+							scene = new SurfaceDisplayer(root, result);
+							
+							final FXCanvas canvas = tool.getCanvas();
+							canvas.setScene(scene);
+							
+						} else {
+							scene.updateTransforms();
+							TriangleMesh mesh = (TriangleMesh)scene.getIsosurface().getMesh();
+							finalSurface.marry(mesh);
+							
+							final FXCanvas canvas = tool.getCanvas();
+							canvas.redraw();
+						}			
+						
+					} catch (OutOfMemoryError e){
+						e.printStackTrace();
+						Display.getDefault().asyncExec(new Runnable(){
+	
+							@Override
+							public void run() {
+						        MessageDialog.openError(Display.getDefault().getActiveShell(), "Out of memory Error", "There is not enough memory to render the surface. Please increase the box size.");
+					
+							}
+						});
+					}
+				}
+			});		
+			return Status.OK_STATUS;
+			
+		} finally {
+			setCursor(Cursor.DEFAULT);
+		}
+	}
+
+	private void setCursor(final Cursor cursor) {
+		if (scene!=null) Platform.runLater(new Runnable() {
+		    @Override
+		    public void run() {
+		        // Do some stuff
+		         scene.setCursor(cursor);
+		    }
 		});		
-		return Status.OK_STATUS;
 	}
 
 
