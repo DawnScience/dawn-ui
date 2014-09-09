@@ -379,7 +379,11 @@ public class DataFileSliceView extends ViewPart {
 					final IDataset firstSlice = Slicer.getFirstSlice(new RichDataset(lazyDataset, null), context.getSliceDimensions());
 					SDAPlotter.imagePlot("Input", firstSlice);
 					
-					EscapableSliceVisitor sliceVisitor = getSliceVisitor(getOperations(), getOutputExecutionVisitor(), lazyDataset, Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions()));
+					EscapableSliceVisitor sliceVisitor = new EscapableSliceVisitor(lazyDataset, 
+							                                                       getOutputExecutionVisitor(), 
+							                                                       Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions()), 
+							                                                       getOperations(), 
+							                                                       monitor, context);
 					sliceVisitor.setEndOperation(end);
 					sliceVisitor.visit(firstSlice, null, null);
 					} catch (Exception e) {
@@ -408,12 +412,6 @@ public class DataFileSliceView extends ViewPart {
 		}
 		
 		return ops;
-	}
-	
-	private EscapableSliceVisitor getSliceVisitor(final IOperation[] series, final IExecutionVisitor visitor, final ILazyDataset lz, final int[] dataDims) {
-		
-		return new EscapableSliceVisitor(lz, visitor, dataDims, series);
-		
 	}
 	
 	private IExecutionVisitor getOutputExecutionVisitor() {
@@ -536,12 +534,18 @@ public class DataFileSliceView extends ViewPart {
 		private int[] dataDims;
 		private IOperation[] series;
 		private IOperation endOperation;
+		private IProgressMonitor monitor;
+		private IConversionContext context;
 		
-		public EscapableSliceVisitor(ILazyDataset lz, IExecutionVisitor visitor, int[] dataDims, IOperation[] series) {
+		public EscapableSliceVisitor(ILazyDataset lz, IExecutionVisitor visitor, 
+				                     int[] dataDims, IOperation[] series, 
+				                     IProgressMonitor monitor, IConversionContext context) {
 			this.lz = lz;
 			this.visitor = visitor;
 			this.dataDims = dataDims;
 			this.series = series;
+			this.monitor= monitor;
+			this.context= context;
 		}
 		
 		public void setEndOperation(IOperation op) {
@@ -565,8 +569,14 @@ public class DataFileSliceView extends ViewPart {
 			
 			visitor.executed(data, null, slices, shape, dataDims); // Send result.
 		}
-		
-		
+
+		@Override
+		public boolean isCancelled() {
+			if (monitor != null && monitor.isCanceled()) return true;
+			// Overkill warning, context probably is being used here without a monitor, but just in case:
+			if (context != null && context.getMonitor()!=null && context.getMonitor().isCancelled()) return true;
+			return false;
+		}
 	}
 	
 	private class BasicContentProvider implements IStructuredContentProvider {
