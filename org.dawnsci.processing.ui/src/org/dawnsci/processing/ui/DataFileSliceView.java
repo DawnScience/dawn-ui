@@ -60,6 +60,8 @@ import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 
 import uk.ac.diamond.scisoft.analysis.SDAPlotter;
+import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Slice;
@@ -86,6 +88,9 @@ public class DataFileSliceView extends ViewPart {
 	IConversionService service;
 	IConversionContext context;
 	ImageProcessConvertPage convertPage;
+	UpdateJob job;
+	int maxImage = 0;
+	int currentImage = 0;
 	
 	@Override
 	public void createPartControl(Composite parent) {
@@ -307,6 +312,7 @@ public class DataFileSliceView extends ViewPart {
 		
 		if (context == null) {
 			context = service.open(filePath);
+			job = new UpdateJob(context);
 			
 			Wizard wiz = new Wizard() {
 				//set 
@@ -326,6 +332,7 @@ public class DataFileSliceView extends ViewPart {
 
 			if (wd.open() == WizardDialog.OK) {
 				context = convertPage.getContext();
+				job = new UpdateJob(context);
 				context.setConversionScheme(ConversionScheme.PROCESS);
 				
 				try {
@@ -338,6 +345,36 @@ public class DataFileSliceView extends ViewPart {
 				}
 				
 				filePaths.add(filePath);
+				
+				IDataHolder dh;
+				try {
+					dh = LoaderFactory.getData(context.getFilePaths().get(0));
+					ILazyDataset lazy = dh.getLazyDataset(context.getDatasetNames().get(0));
+					int[] shape = lazy.getShape();
+					
+					//single image/line
+//					if (context.getSliceDimensions() == null){
+//						for (int i = 0; i < shape.length; i++) context.addSliceDimension(i, "all");
+//					}
+					
+					int[] dd = Slicer.getDataDimensions(shape, context.getSliceDimensions());
+					
+					Arrays.sort(dd);
+					
+					int work = 1;
+					
+					for (int i = 0; i< shape.length; i++) {
+						if (Arrays.binarySearch(dd, i) < 0) work*=shape[i];
+					}
+					
+					maxImage = work;
+					
+					
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 			}
 		} else {
 			String dsName = context.getDatasetNames().get(0);
@@ -396,6 +433,11 @@ public class DataFileSliceView extends ViewPart {
 			};
 			
 			update.schedule();
+			if (job != null) {
+				job.cancel();
+				job.setEndOperation(end);
+				job.schedule();
+			}
 		
 	}
 	
@@ -524,6 +566,48 @@ public class DataFileSliceView extends ViewPart {
 	public void setFocus() {
 		if (viewer != null) viewer.getTable().setFocus();
 
+	}
+	
+	private class UpdateJob extends Job {
+
+		IConversionContext context;
+		IOperation end;
+		
+		public UpdateJob(IConversionContext context) {
+			super("Update...");
+			this.context = context;
+		}
+		
+		public void setEndOperation(IOperation end) {
+			this.end = end;
+		}
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			try {
+				
+				final IDataHolder   dh = LoaderFactory.getData(context.getFilePaths().get(0));
+				ILazyDataset lazyDataset = dh.getLazyDataset(context.getDatasetNames().get(0));
+				
+				final IDataset firstSlice = Slicer.getFirstSlice(new RichDataset(lazyDataset, null), context.getSliceDimensions());
+				SDAPlotter.imagePlot("Input", firstSlice);
+				
+				EscapableSliceVisitor sliceVisitor = getSliceVisitor(getOperations(), getOutputExecutionVisitor(), lazyDataset, Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions()));
+				sliceVisitor.setEndOperation(end);
+				sliceVisitor.visit(firstSlice, null, null);
+				} catch (Exception e) {
+					e.printStackTrace();
+					return Status.CANCEL_STATUS;
+				}
+				
+				return Status.OK_STATUS;
+		}
+		
+	}
+	
+	private EscapableSliceVisitor getSliceVisitor(IOperation[] series,IExecutionVisitor visitor,ILazyDataset lz,  
+            int[] dataDims) {
+		return new EscapableSliceVisitor(lz,visitor,dataDims,series,null,context);
 	}
 	
 	private class EscapableSliceVisitor implements SliceVisitor {
