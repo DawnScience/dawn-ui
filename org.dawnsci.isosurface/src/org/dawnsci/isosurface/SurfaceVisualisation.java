@@ -299,7 +299,7 @@ public class SurfaceVisualisation extends Application{
 		Group group = new Group();
 		
 		Surface result = generator.execute();
-		this.isosurface = new MeshView(result);
+		this.isosurface = new MeshView(result.createTrangleMesh());
 
 		isosurface.setMaterial(new PhongMaterial(Color.GOLDENROD));
 		isosurface.setCullFace(CullFace.NONE);

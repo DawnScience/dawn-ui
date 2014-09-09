@@ -1,5 +1,7 @@
 package org.dawnsci.isosurface;
 
+import java.time.temporal.IsoFields;
+
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.scene.Group;
@@ -219,6 +221,10 @@ public class SurfaceDisplayer extends Scene{
 		this.isosurface = isosurface;
 	}
 
+	public MeshView getIsosurface() {
+		return isosurface;
+	}
+
 	/**
 	 * Whenever the isovalue or the box size are changed this method is called to update the GUI
 	 */
@@ -251,6 +257,7 @@ public class SurfaceDisplayer extends Scene{
         	
         });
 	}
+
 
 
 }

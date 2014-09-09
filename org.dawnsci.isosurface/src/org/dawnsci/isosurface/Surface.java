@@ -1,6 +1,8 @@
 package org.dawnsci.isosurface;
 
+import javafx.scene.shape.Mesh;
 import javafx.scene.shape.TriangleMesh;
+
 
 /**
  * 
@@ -8,7 +10,7 @@ import javafx.scene.shape.TriangleMesh;
  * A Surface object is defined by the 3 arrays to help build the triangle mesh of JavaFX
  */
 
-public class Surface extends TriangleMesh {
+public class Surface  {
 
 	private float[] points;
 	private float[] texCoords;
@@ -19,9 +21,6 @@ public class Surface extends TriangleMesh {
 		this.texCoords = texCoords;
 		this.faces = faces;
 		
-		this.getPoints().setAll(points);
-        this.getTexCoords().setAll(texCoords);
-        this.getFaces().setAll(faces);
 	}
 
 	
@@ -52,4 +51,16 @@ public class Surface extends TriangleMesh {
 		return faces;
 	}
 
+
+	public Mesh createTrangleMesh() {
+		final TriangleMesh mesh = new TriangleMesh();
+		marry(mesh);
+		return mesh;
+	}
+
+	public void marry(TriangleMesh mesh) {
+		mesh.getPoints().setAll(points);
+		mesh.getTexCoords().setAll(texCoords);
+		mesh.getFaces().setAll(faces);
+	}
 }

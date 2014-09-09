@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.embed.swt.FXCanvas;
 import javafx.scene.Group;
 import javafx.scene.shape.MeshView;
+import javafx.scene.shape.TriangleMesh;
 
 import org.dawnsci.isosurface.IsosurfaceGenerator;
 import org.dawnsci.isosurface.Surface;
@@ -131,7 +132,7 @@ public class IsosurfaceJob extends Job {
 
 					if (scene==null){
 						Group    root   = new Group();
-						MeshView result = new MeshView(finalSurface);
+						MeshView result = new MeshView(finalSurface.createTrangleMesh());
 						scene = new SurfaceDisplayer(root, result);
 						
 						final FXCanvas canvas = tool.getCanvas();
@@ -139,7 +140,8 @@ public class IsosurfaceJob extends Job {
 						
 					} else {
 						scene.updateTransforms();
-						scene.getIsosurface().setMesh(finalSurface);
+						TriangleMesh mesh = (TriangleMesh)scene.getIsosurface().getMesh();
+						finalSurface.marry(mesh);
 						scene.updateSurface();
 						
 						final FXCanvas canvas = tool.getCanvas();
