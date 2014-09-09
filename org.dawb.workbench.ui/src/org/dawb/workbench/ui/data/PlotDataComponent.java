@@ -1463,6 +1463,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				}
 			} else{
  			    selectionChanged(clicked, true);
+ 			    dataViewer.refresh();
 			}
 	        dataViewer.cancelEditing();
 		}
