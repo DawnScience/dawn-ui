@@ -746,6 +746,8 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 
 		this.sliceSource = source;
 		this.lazySet     = source.getLazySet();
+		selectSliceTool();
+		
 		final SliceObject object = new SliceObject();
 		object.setPath(source.getFilePath());
 		object.setName(source.getDataName());
@@ -773,7 +775,8 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 
 		checkToolDimenionsOk();
 	}
-	
+
+
 	public void setLabel(final String text) {
 		GridUtils.setVisible(explain, true);
 		explain.setText(text);
@@ -870,7 +873,6 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 	 * @param vis
 	 */
 	public void setVisible(final boolean vis) {
-		super.setVisible(vis);
 		area.setVisible(vis);
 		area.getParent().layout(new Control[]{area});
 		//if (plottingSystem!=null && !vis) plottingSystem.setPlotType(PlotType.XY);

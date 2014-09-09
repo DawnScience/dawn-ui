@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.dawnsci.slicing.api.slicingTool">
+      <slicing_tool
+            class="org.dawnsci.isosurface.tool.IsosurfaceTool"
+            icon="icons/TraceSurface.png"
+            id="org.dawnsci.isosurface.tool.isosurfaceTool"
+            tooltip="Slice data using an iso-surface.">
+      </slicing_tool>
+   </extension>
+
+</plugin>

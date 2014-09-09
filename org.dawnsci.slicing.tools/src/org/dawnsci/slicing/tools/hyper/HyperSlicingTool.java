@@ -166,23 +166,6 @@ public class HyperSlicingTool extends AbstractSlicingTool {
 		
 		return ret;
 	}
-
-	private Slice[] getSlices() {
-		
-		int[] dataShape         = getSlicingSystem().getData().getLazySet().getShape();
-		final DimsDataList dims = getSlicingSystem().getDimsDataList();
-		
-		final Slice[] ret = new Slice[dims.size()];
-		for (int i = 0; i < dims.size(); i++) {
-			DimsData dd = dims.getDimsData(i);			
-			if (dd.isSlice()) {
-				ret[i] = new Slice(dd.getSlice(), dd.getSlice()+1);
-			} else {
-				ret[i] = new Slice(dataShape[dd.getDimension()]);
-			}
-		}
-		return ret;
-	}
 	
 	private List<IDataset> getAbstractNexusAxes() throws Exception {
 		
