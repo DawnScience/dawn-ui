@@ -1,7 +1,5 @@
 package org.dawnsci.isosurface;
 
-import java.time.temporal.IsoFields;
-
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.scene.Group;
@@ -67,7 +65,7 @@ public class SurfaceDisplayer extends Scene{
         
         root.getChildren().addAll(camOffset);
         
-        actions();
+        createListeners();
        
 	}
 
@@ -152,7 +150,8 @@ public class SurfaceDisplayer extends Scene{
 	/**
 	 * The actions() method has all the listeners for the events of the transformations of the surface
 	 */
-	public void actions(){
+	private void createListeners(){
+		
 		this.setOnMousePressed(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent me) {
                 mousePosX = me.getX();
@@ -198,8 +197,22 @@ public class SurfaceDisplayer extends Scene{
         		cam.scaling.setZ(cam.scaling.getZ() + event.getDeltaY()/800);
         	}
         });
-		
-		getCurrentCoordinates();
+
+		isosurface.setOnMouseMoved(new EventHandler<MouseEvent>(){
+
+			@Override
+			public void handle(MouseEvent event) {
+				// TODO Auto-generated method stub
+
+				double temporaryX = event.getX();
+				double temporaryY = event.getY();
+				double temporaryZ = event.getZ();
+
+				//					System.out.println("point: " + temporaryX + ", " + temporaryY + ", " + temporaryZ);
+
+			}
+
+		});
 	}
 
 	/**
@@ -216,48 +229,8 @@ public class SurfaceDisplayer extends Scene{
 		surfaceScaleY = isosurface.getScaleY();
 		surfaceScaleZ = isosurface.getScaleZ();
 	}
-	
-	public void setIsosurface(MeshView isosurface) {
-		this.isosurface = isosurface;
-	}
 
 	public MeshView getIsosurface() {
 		return isosurface;
 	}
-
-	/**
-	 * Whenever the isovalue or the box size are changed this method is called to update the GUI
-	 */
-	public void updateSurface() {
-		cam.getChildren().remove(0);
-		cam.getChildren().add(surfaceGenerator());
-		getCurrentCoordinates();
-	}
-	
-	/**
-	 * The getCurrentCoordinates() method is a compensation for the lack of axes
-	 * It prints  the coordinates of the point that the mouse points to 
-	 * 
-	 * Three text boxes should be added to the user interface so that the user can see the coordinates
-	 */
-	public void getCurrentCoordinates(){
-        isosurface.setOnMouseMoved(new EventHandler<MouseEvent>(){
-
-			@Override
-			public void handle(MouseEvent event) {
-				// TODO Auto-generated method stub
-				
-				double temporaryX = event.getX();
-				double temporaryY = event.getY();
-				double temporaryZ = event.getZ();
-				
-//				System.out.println("point: " + temporaryX + ", " + temporaryY + ", " + temporaryZ);
-				
-			}
-        	
-        });
-	}
-
-
-
 }

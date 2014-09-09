@@ -68,10 +68,7 @@ public class IsosurfaceJob extends Job {
 	
 		final IsosurfaceGenerator generator = tool.getGenerator();
 		if (lazyData!=null) {
-			
-			
-			final boolean newScene = generator.getData()!=lazyData;
-			
+						
 		    generator.setData(lazyData); // We want to do this task from the thread
 		                                 // because it can take a while too
 
@@ -80,14 +77,6 @@ public class IsosurfaceJob extends Job {
 		    		// We set the estimated values for the slicing which will
 		    		// have changed if the lazyData has.
                     tool.updateUI();
-		    		
-		    		if (newScene && scene!=null) {
-		    			scene.dispose();
-		    			scene = null;
-		    			
-						final FXCanvas canvas = tool.getCanvas();
-						canvas.setScene(null);
-		    		}
 		    	}
 		    });
 		}
@@ -142,7 +131,6 @@ public class IsosurfaceJob extends Job {
 						scene.updateTransforms();
 						TriangleMesh mesh = (TriangleMesh)scene.getIsosurface().getMesh();
 						finalSurface.marry(mesh);
-						scene.updateSurface();
 						
 						final FXCanvas canvas = tool.getCanvas();
 						canvas.redraw();
@@ -150,7 +138,14 @@ public class IsosurfaceJob extends Job {
 					
 				} catch (OutOfMemoryError e){
 					e.printStackTrace();
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Out of memory Error", "There is not enough memory to render the surface. Please increase the box size.");
+					Display.getDefault().asyncExec(new Runnable(){
+
+						@Override
+						public void run() {
+					        MessageDialog.openError(Display.getDefault().getActiveShell(), "Out of memory Error", "There is not enough memory to render the surface. Please increase the box size.");
+				
+						}
+					});
 				}
 			}
 		});		
