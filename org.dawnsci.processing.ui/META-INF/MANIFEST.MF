@@ -18,8 +18,7 @@ Require-Bundle: org.eclipse.ui,
  uk.ac.diamond.scisoft.analysis.rcp;bundle-version="1.3.0",
  uk.ac.diamond.scisoft.analysis.plotserver;bundle-version="1.0.0",
  uk.ac.diamond.scisoft.analysis.dataset;bundle-version="1.0.0",
- uk.ac.diamond.scisoft.analysis,
- org.dawnsci.conversion;bundle-version="1.2.0"
+ uk.ac.diamond.scisoft.analysis
 Bundle-ActivationPolicy: lazy
 Import-Package: org.dawb.common.services,
  org.dawb.common.services.conversion,

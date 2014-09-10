@@ -60,8 +60,6 @@ import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 
 import uk.ac.diamond.scisoft.analysis.SDAPlotter;
-import uk.ac.diamond.scisoft.analysis.dataset.AbstractDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.Slice;
@@ -78,8 +76,6 @@ import uk.ac.diamond.scisoft.analysis.processing.RichDataset;
 import uk.ac.diamond.scisoft.analysis.processing.visitors.HierarchicalFileExecutionVisitor;
 import uk.ac.diamond.scisoft.analysis.slice.SliceVisitor;
 import uk.ac.diamond.scisoft.analysis.slice.Slicer;
-
-import org.dawnsci.conversion.ConversionContext;
 
 public class DataFileSliceView extends ViewPart {
 
@@ -383,10 +379,7 @@ public class DataFileSliceView extends ViewPart {
 				ILazyDataset lazyDataset = holder.getLazyDataset(dsName);
 				if (lazyDataset != null) {
 					filePaths.add(filePath);
-					if (context instanceof ConversionContext) {
-						((ConversionContext)context).setFilePaths(filePaths.toArray(new String[filePaths.size()]));
-					}
-					
+					context.setFilePaths(filePaths.toArray(new String[filePaths.size()]));
 				}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
