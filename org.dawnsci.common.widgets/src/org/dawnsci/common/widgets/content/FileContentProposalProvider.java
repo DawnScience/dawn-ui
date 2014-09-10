@@ -96,6 +96,7 @@ public class FileContentProposalProvider implements IContentProposalProvider {
 		int index = contents.lastIndexOf('/');
 		if (index<0) index = contents.lastIndexOf('\\');
 		if (index>-1)contents = contents.substring(0,index);
+		if (contents.endsWith(":")) contents = contents.concat("/");
 		return new File(contents);
 	}
 
