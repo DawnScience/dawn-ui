@@ -159,6 +159,7 @@ public abstract class SelectorWidget {
 				if ((SelectorWidget.this.isFolderSelector && tmp.isDirectory())
 						|| (!SelectorWidget.this.isFolderSelector && tmp.isFile())) {
 					inputLocation.setForeground(new Color(Display.getDefault(), new RGB(0, 0, 0)));
+					path = tmp.getAbsolutePath();
 				} else {
 					inputLocation.setForeground(new Color(Display.getDefault(), new RGB(255, 80, 80)));
 				}
