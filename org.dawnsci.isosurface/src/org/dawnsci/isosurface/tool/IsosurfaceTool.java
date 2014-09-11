@@ -4,7 +4,6 @@ import javafx.embed.swt.FXCanvas;
 
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.common.widgets.decorator.FloatDecorator;
-import org.dawnsci.common.widgets.decorator.IntegerDecorator;
 import org.dawnsci.isosurface.Activator;
 import org.dawnsci.isosurface.alg.MarchingCubesModel;
 import org.dawnsci.isosurface.alg.Surface;
@@ -25,12 +24,14 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Scale;
+import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +62,8 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 	private FXCanvas  canvas;
 	private Composite controls;
 	private Scale     isovalue;
-	private Text      isoText, xDim, yDim, zDim;
+	private Text      isoText;
+	private Spinner   xDim, yDim, zDim;
 	
 	@SuppressWarnings("unchecked")
 	public IsosurfaceTool() {
@@ -100,32 +102,71 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 	public void createToolComponent(Composite parent) {
 
 		controls = new Composite(parent, SWT.NONE);
-		controls.setLayout(new GridLayout(4, false));
+		controls.setLayout(new GridLayout(6, false));
 		controls.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		Label isovalueLabel = new Label(controls, SWT.NONE);
 		isovalueLabel.setText("Isovalue");
+		isovalueLabel.setToolTipText("Use the box at the end to enter an actual value or the left and right arrows to nudge.");
 		
 		this.isovalue = new Scale(controls, SWT.NONE);		
  		isovalue.setMaximum(1000);
 		isovalue.setMinimum(0);
 		isovalue.setIncrement(1);
-		isovalue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		isovalue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
+		isovalue.setToolTipText("Use the box at the end to enter an actual value or the left and right arrows to nudge.");
 
 		this.isoText  = new Text(controls, SWT.BORDER);
 		isoText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
 		Label boxLabel = new Label(controls, SWT.NONE);
 		boxLabel.setText("Box Size   ");
+		boxLabel.setToolTipText("The box size is the size of box used for the marching cubes algorithm.");
 
-	    this.zDim = new Text(controls, SWT.BORDER);
+	    this.zDim = new Spinner(controls, SWT.BORDER);
+	    zDim.setMinimum(1);
 		zDim.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
-
-		this.xDim = new Text(controls, SWT.BORDER);
+		
+		this.yDim = new Spinner(controls, SWT.BORDER);
+		yDim.setMinimum(1);
+	    yDim.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
+	    	    
+		this.xDim = new Spinner(controls, SWT.BORDER);
+		xDim.setMinimum(1);
 		xDim.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
 		
-		this.yDim = new Text(controls, SWT.BORDER);
-	    yDim.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
+		final Button decrease = new Button(controls, SWT.PUSH);
+		decrease.setToolTipText("Nudge whole box 10% smaller");
+		decrease.setImage(Activator.getImage("icons/down.png").createImage());
+		decrease.setLayoutData(new GridData(SWT.RIGHT, SWT.NONE, false, false));
+		decrease.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				nudge(-0.1f, xDim, 2);
+				nudge(-0.1f, yDim, 1);
+				nudge(-0.1f, zDim, 0);
+				MarchingCubesModel model = generator.getModel();
+				int[] boxSize = new int[]{xDim.getSelection(), yDim.getSelection(), zDim.getSelection()};
+				model.setBoxSize(boxSize);
+				job.compute();
+			}
+		});
+		
+		final Button increase = new Button(controls, SWT.PUSH);
+		increase.setToolTipText("Nudge whoile box 10% larger");
+		increase.setImage(Activator.getImage("icons/up.png").createImage());
+		increase.setLayoutData(new GridData(SWT.LEFT, SWT.NONE, false, false));
+		increase.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				nudge(0.1f, xDim, 2);
+				nudge(0.1f, yDim, 1);
+				nudge(0.1f, zDim, 0);
+				
+				MarchingCubesModel model = generator.getModel();
+				int[] boxSize = new int[]{xDim.getSelection(), yDim.getSelection(), zDim.getSelection()};
+				model.setBoxSize(boxSize);
+				job.compute();
+			}
+		});
 	    
 		isovalue.addListener(SWT.Selection, new Listener() {
 
@@ -160,69 +201,54 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 
 		});
 
-		xDim.addModifyListener(new ModifyListener(){
-
-			IntegerDecorator intText = new IntegerDecorator(xDim);
-
-			@Override
-			public void modifyText(ModifyEvent e) {
+		xDim.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
 				if (!isOn()) return;
-				double xSize =  intText.getValue().doubleValue();
+				int xSize =  xDim.getSelection();
 				
 				MarchingCubesModel model = generator.getModel();
 				if (xSize > 0 && xSize < model.getLazyData().getShape()[2]){
-					int[] boxSize = new int[] {(int) xSize, model.getBoxSize()[1], model.getBoxSize()[2]};
+					int[] boxSize = new int[] {xSize, model.getBoxSize()[1], model.getBoxSize()[2]};
 					model.setBoxSize(boxSize);
 				}
+				job.compute();
 			}
 
-		});
-		xDim.addSelectionListener(new SelectionAdapter() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				job.compute();
 			}
 		});
 
-		yDim.addModifyListener(new ModifyListener(){
 
-			IntegerDecorator intText = new IntegerDecorator(yDim);
-
-			@Override
-			public void modifyText(ModifyEvent e) {
+		yDim.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
 				if (!isOn()) return;
-				double ySize = intText.getValue().doubleValue();
+				int ySize =  yDim.getSelection();
 
 				MarchingCubesModel model = generator.getModel();
 				if(ySize > 0 && ySize < model.getLazyData().getShape()[1]){
-					int[] boxSize = new int[] {model.getBoxSize()[0], (int) ySize, model.getBoxSize()[2]};
+					int[] boxSize = new int[] {model.getBoxSize()[0], ySize, model.getBoxSize()[2]};
 					model.setBoxSize(boxSize);
 				}
+				job.compute();
 			}
-
-		});
-		yDim.addSelectionListener(new SelectionAdapter() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				job.compute();
 			}
 		});
 
-		zDim.addModifyListener(new ModifyListener() {
-
-			IntegerDecorator intText = new IntegerDecorator(zDim);
-
-			@Override
-			public void modifyText(ModifyEvent e) {
+		zDim.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
 				if (!isOn()) return;
-				double zSize = intText.getValue().doubleValue();
+				int zSize =  zDim.getSelection();
 
 				MarchingCubesModel model = generator.getModel();
 				if(zSize > 0 && zSize < model.getLazyData().getShape()[0]){
-					int[] boxSize = new int[] {model.getBoxSize()[0], model.getBoxSize()[1], (int) zSize};
+					int[] boxSize = new int[] {model.getBoxSize()[0], model.getBoxSize()[1], zSize};
 					model.setBoxSize(boxSize);
 				}
+				job.compute();
 			}
-		});
-		zDim.addSelectionListener(new SelectionAdapter() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				job.compute();
 			}
@@ -230,6 +256,19 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 		
 		setControlsVisible(false);
 
+	}
+
+	protected void nudge(float factor, Spinner spinner, int dim) {
+		
+		float amount = spinner.getSelection()*factor;
+		if (0<amount && amount<1)  amount =  1; // Increment less than 1 not much good.
+		if (-1<amount && amount<0) amount = -1;
+		
+		float val = spinner.getSelection()+amount;
+		final int size = generator.getModel().getLazyData().getShape()[dim];
+		if (val > size/5f) val = Math.round(size/5f);
+		if (val<1) val = 1;
+		spinner.setSelection(Math.round(val));
 	}
 
 	/**
@@ -345,11 +384,23 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 			setOn(false);
 			
 			MarchingCubesModel model = generator.getModel();
+		    final ILazyDataset set   = model.getLazyData();
+		    final int[] shape        = set.getShape();
+			
 			isovalue.setSelection((int) ((model.getIsovalue()- model.getIsovalueMin())*1000/(model.getIsovalueMax()-model.getIsovalueMin()) ));
 			isoText.setText(String.valueOf(model.getIsovalue()));
-			xDim.setText(String.valueOf(model.getBoxSize()[0]));
-			yDim.setText(String.valueOf(model.getBoxSize()[1]));
-			zDim.setText(String.valueOf(model.getBoxSize()[2]));
+			
+			xDim.setMaximum(shape[2]/5);
+			xDim.setToolTipText("1 - "+shape[2]);
+			xDim.setSelection(model.getBoxSize()[0]);
+
+			yDim.setMaximum(shape[1]/5);
+			xDim.setToolTipText("1 - "+shape[1]);
+			yDim.setSelection(model.getBoxSize()[1]);
+			
+			zDim.setMaximum(shape[0]/5);
+			xDim.setToolTipText("1 - "+shape[0]);
+			zDim.setSelection(model.getBoxSize()[2]);
 			
 		} finally {
 			setOn(true);
