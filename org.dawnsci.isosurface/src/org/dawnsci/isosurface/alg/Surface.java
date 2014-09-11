@@ -1,4 +1,4 @@
-package org.dawnsci.isosurface.impl;
+package org.dawnsci.isosurface.alg;
 
 import java.io.Serializable;
 

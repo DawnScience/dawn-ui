@@ -13,7 +13,7 @@
    <extension
          point="uk.ac.diamond.scisoft.analysis.api.operation">
       <operation
-            class="org.dawnsci.isosurface.impl.MarchingCubes"
+            class="org.dawnsci.isosurface.alg.MarchingCubes"
             icon="icons/TraceSurface.png"
             id="org.dawnsci.isosurface.marchingCubes"
             name="Marching Cubes">

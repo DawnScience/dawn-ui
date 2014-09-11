@@ -24,8 +24,8 @@ import javafx.scene.shape.CullFace;
 import javafx.scene.shape.MeshView;
 import javafx.stage.Stage;
 
-import org.dawnsci.isosurface.impl.MarchingCubesModel;
-import org.dawnsci.isosurface.impl.Surface;
+import org.dawnsci.isosurface.alg.MarchingCubesModel;
+import org.dawnsci.isosurface.alg.Surface;
 
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.io.IDataHolder;

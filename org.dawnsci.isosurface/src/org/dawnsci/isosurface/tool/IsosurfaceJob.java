@@ -9,8 +9,8 @@ import javafx.scene.shape.TriangleMesh;
 
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawnsci.isosurface.SurfaceDisplayer;
-import org.dawnsci.isosurface.impl.MarchingCubesModel;
-import org.dawnsci.isosurface.impl.Surface;
+import org.dawnsci.isosurface.alg.MarchingCubesModel;
+import org.dawnsci.isosurface.alg.Surface;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
