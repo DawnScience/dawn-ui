@@ -41,7 +41,7 @@ public class EmptyTool extends AbstractToolPage {
 		// Make any mouse following regions, inactive
 		if (getPlottingSystem()!=null) {
 			final Collection<IRegion> regions = getPlottingSystem().getRegions();
-			for (IRegion iRegion : regions) {
+			if (regions!=null) for (IRegion iRegion : regions) {
 				if (iRegion.isTrackMouse()) {
 					getPlottingSystem().removeRegion(iRegion);
 				}

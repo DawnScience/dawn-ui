@@ -17,6 +17,7 @@ import org.dawb.common.ui.printing.PlotExportPrintUtil;
 import org.dawb.common.ui.printing.PlotPrintPreviewDialog;
 import org.dawb.common.ui.printing.PrintSettings;
 import org.dawnsci.plotting.AbstractPlottingSystem;
+import org.dawnsci.plotting.AbstractPlottingViewer;
 import org.dawnsci.plotting.draw2d.swtxy.AspectAxis;
 import org.dawnsci.plotting.draw2d.swtxy.ImageStackTrace;
 import org.dawnsci.plotting.draw2d.swtxy.ImageTrace;
@@ -31,8 +32,10 @@ import org.dawnsci.plotting.system.dialog.XYRegionConfigDialog;
 import org.dawnsci.plotting.util.ColorUtility;
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
 import org.eclipse.dawnsci.plotting.api.IPrintablePlotting;
 import org.eclipse.dawnsci.plotting.api.ITraceActionProvider;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -47,24 +50,25 @@ import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.histogram.functions.FunctionContainer;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionContainer;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegionSystem;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
-import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.trace.ColorOption;
 import org.eclipse.dawnsci.plotting.api.trace.IImageStackTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.PointStyle;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.TraceType;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceContainer;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace;
 import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
-import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.PointStyle;
-import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.TraceType;
 import org.eclipse.draw2d.BorderLayout;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.Cursors;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureCanvas;
 import org.eclipse.draw2d.GridData;
@@ -75,6 +79,8 @@ import org.eclipse.draw2d.Layer;
 import org.eclipse.draw2d.LayeredPane;
 import org.eclipse.draw2d.LightweightSystem;
 import org.eclipse.draw2d.LineBorder;
+import org.eclipse.draw2d.MouseListener;
+import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.draw2d.PrintFigureOperation;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
@@ -113,7 +119,6 @@ import org.eclipse.swt.printing.Printer;
 import org.eclipse.swt.printing.PrinterData;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.ui.IActionBars;
@@ -136,7 +141,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
  * @author fcp94556
  *
  */
-class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSystem, IPrintablePlotting, ITraceActionProvider {
+public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPlottingSystemViewer, IAnnotationSystem, IRegionSystem, IAxisSystem, IPrintablePlotting, ITraceActionProvider, IAdaptable {
 
 	private static final Logger logger = LoggerFactory.getLogger(LightWeightPlotViewer.class);
 	
@@ -152,8 +157,8 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	private ColorMapRamp           intensity;
     private ScaledSliderFigure     folderScale;
 
-	public void init(PlottingSystemImpl system) {
-		this.system = system;
+	public void init(IPlottingSystem system) {
+		this.system = (PlottingSystemImpl)system;
 	}
 
 	/**
@@ -279,7 +284,10 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		
 		
 	}
-	
+	public boolean isPlotTypeSupported(PlotType type) {
+		return type.is1D() || type.is2D();
+	}
+
 	private void setStackIndex(int index) {
 		if (system.getTraces()!=null && !system.getTraces().isEmpty()) {
 			final ITrace trace = system.getTraces().iterator().next();
@@ -667,7 +675,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	}
 
 
-	public Control getControl() {
+	public Composite getControl() {
 		return xyCanvas;
 	}
 
@@ -686,38 +694,62 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		if (xyGraph!=null) xyGraph.clearTraces();
 	}
 
-	protected ITrace createLightWeightImage(String traceName, IDataset data, List<? extends IDataset> axes, String dataName, IProgressMonitor monitor) {
-		
-		final Axis xAxis = ((AspectAxis)system.getSelectedXAxis());
-		final Axis yAxis = ((AspectAxis)system.getSelectedYAxis());
-		xAxis.setLogScale(false);
-		yAxis.setLogScale(false);
-
-		if (data.getName()!=null) xyGraph.setTitle(data.getName());
-		xyGraph.clearTraces();
-
-		
-		final ImageTrace trace = xyGraph.createImageTrace(traceName, xAxis, yAxis, intensity);
-		trace.setDataName(dataName);
-		trace.setPlottingSystem(system);
-		
-		@SuppressWarnings("unchecked")
-		final TraceWillPlotEvent evt = new TraceWillPlotEvent(trace, data, (List<IDataset>)axes);
-		system.fireWillPlot(evt);
-		if (!evt.doit) return null;
-
-		if (!trace.setData(evt.getImage(), evt.getAxes(), true)) return trace; // But not plotted
-		
-		addTrace(trace);
-		return trace;
-	}
 
 	protected IImageTrace createImageTrace(String traceName) {
 		final Axis xAxis = (Axis)getSelectedXAxis();
 		final Axis yAxis = (Axis)getSelectedYAxis();
+		xAxis.setLogScale(false);
+		yAxis.setLogScale(false);
 		
 		final ImageTrace trace = xyGraph.createImageTrace(traceName, xAxis, yAxis, intensity);
 		trace.setPlottingSystem(system);
+		return trace;
+	}
+	
+	public boolean isTraceTypeSupported(Class<? extends ITrace> clazz) {
+		if (ILineTrace.class.isAssignableFrom(clazz)) {
+			return true;
+		} else if (IVectorTrace.class.isAssignableFrom(clazz)) {
+			return true;
+		} else if (IImageTrace.class.isAssignableFrom(clazz)) {
+			return true;
+		} else if (IImageStackTrace.class.isAssignableFrom(clazz)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public ITrace createTrace(String name, Class<? extends ITrace> clazz) {
+		if (ILineTrace.class.isAssignableFrom(clazz)) {
+			return createLineTrace(name);
+		} else if (IVectorTrace.class.isAssignableFrom(clazz)) {
+			return createVectorTrace(name);
+		} else if (IImageTrace.class.isAssignableFrom(clazz)) {
+			return createImageTrace(name);
+		} else if (IImageStackTrace.class.isAssignableFrom(clazz)) {
+			return createImageStackTrace(name);
+		} else {
+			throw new RuntimeException("Trace type not supported "+clazz.getSimpleName());
+		}
+	}
+
+	protected ILineTrace createLineTrace(String traceName) {
+		final Axis xAxis = (Axis)getSelectedXAxis();
+		final Axis yAxis = (Axis)getSelectedYAxis();
+
+		LightWeightDataProvider traceDataProvider = new LightWeightDataProvider();
+		final LineTrace   trace    = new LineTrace(traceName);
+		trace.init(xAxis, yAxis, traceDataProvider);
+		final LineTraceImpl wrapper = new LineTraceImpl(getSystem(), trace);
+		return wrapper;
+	}
+
+	protected IVectorTrace createVectorTrace(String traceName) {
+		final Axis xAxis = (Axis)getSelectedXAxis();
+		final Axis yAxis = (Axis)getSelectedYAxis();
+
+		final VectorTrace trace    = new VectorTrace(traceName, xAxis, yAxis);
 		return trace;
 	}
 	
@@ -740,8 +772,8 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 	 * @param traceMap, may be null
 	 * @return
 	 */
-	protected List<ILineTrace> createLineTraces(final String                title, 
-			                                    final IDataset          x, 
+	public List<ILineTrace> createLineTraces(final String                title, 
+			                                    final IDataset              x, 
 			                                    final List<? extends IDataset> ys,
 			                                    final List<String>          dataNames,
 			                                    final Map<String,ITrace>    traceMap,
@@ -833,7 +865,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		return traces;
 	}
 
-	public void addTrace(ITrace trace) {
+	public boolean addTrace(ITrace trace) {
 		
 		if (trace instanceof IImageTrace) {
 			system.setPlotType(PlotType.IMAGE); // Only one image allowed at a time
@@ -843,11 +875,14 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			
 		final TraceWillPlotEvent evt = new TraceWillPlotEvent(trace, true);
 		system.fireWillPlot(evt);
-		if (!evt.doit) return;
-
+		if (!evt.doit) return false;
+    
 		if (trace instanceof IImageTrace) {
 
 			final IImageTrace image = (IImageTrace)trace;
+		    if (!image.setData(evt.getImage(), evt.getAxes(), true)) return false; // But not plotted
+
+			
 			xyGraph.addImageTrace((ImageTrace)image);
 			removeAdditionalAxes(); // Do not have others with images.
 			
@@ -888,6 +923,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		if (xyCanvas != null & !xyCanvas.isDisposed())
 			xyCanvas.redraw();
 	
+		return true;
 	}
 
 	public void removeTrace(ITrace trace) {
@@ -1039,7 +1075,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		xyGraph.clearRegions(force);
 	}		
 	
-	protected void clearRegionTool() {
+	public void clearRegionTool() {
 		if (xyGraph==null) return;
 		
 		xyGraph.clearRegionTool();
@@ -1376,7 +1412,10 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		return xyGraph.getTitle();
 	}
 
-	public void setDefaultPlotCursor(Cursor cursor) {
+	public void setDefaultCursor(int cursorType) {
+		Cursor cursor = Cursors.ARROW;
+		if (cursorType == IPlottingSystem.CROSS_CURSOR) cursor = Cursors.CROSS;
+
 		if (xyGraph==null || xyGraph.getRegionArea()==null) return;
 		xyGraph.getRegionArea().setCursor(cursor);
 		ZoomType.NONE.setCursor(cursor);
@@ -1397,7 +1436,7 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 		intensity.setVisible(type.is2D()&&shouldShow);
 	}
 
-	protected void setShowIntensity(boolean checked) {
+	public void setShowIntensity(boolean checked) {
 		intensity.setVisible(checked);
 	}
 
@@ -1498,4 +1537,37 @@ class LightWeightPlotViewer implements IAnnotationSystem, IRegionSystem, IAxisSy
 			return x.getName();
 		}
 	}
+
+	@Override
+	public Object getAdapter(Class adapter) {
+		if (adapter == XYRegionGraph.class) {
+			return getXYRegionGraph();
+		} 
+		return null;
+	}
+	
+	public Cursor getSelectedCursor() {
+		return getXYRegionGraph().getRegionArea().getSelectedCursor();
+	}
+
+	public void addMouseMotionListener(MouseMotionListener mml) {
+		getXYRegionGraph().getRegionArea().addAuxilliaryMotionListener(mml);
+	}
+
+	public void addMouseClickListener(MouseListener mcl) {
+		getXYRegionGraph().getRegionArea().addAuxilliaryClickListener(mcl);
+	}
+
+	public void removeMouseMotionListener(MouseMotionListener mml) {
+		getXYRegionGraph().getRegionArea().removeAuxilliaryMotionListener(mml);
+	}
+
+	/**
+	 * Please override for draw2d listeners.
+	 * @deprecated draw2d Specific
+	 */
+	public void removeMouseClickListener(MouseListener mcl) {
+	    getXYRegionGraph().getRegionArea().removeAuxilliaryClickListener(mcl);
+	}
+
 }

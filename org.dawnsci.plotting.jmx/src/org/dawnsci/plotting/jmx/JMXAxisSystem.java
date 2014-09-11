@@ -91,4 +91,9 @@ class JMXAxisSystem extends JMXSystemObject implements IAxisSystem{
 		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[]{IClickListener.class}, l);
 	}
 
+	@Override
+	public void resetAxes() {
+		call(getMethodName(Thread.currentThread().getStackTrace()));
+	}
+
 }

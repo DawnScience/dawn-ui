@@ -1,5 +1,6 @@
 package org.dawnsci.plotting.system;
 
+import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
@@ -30,10 +31,10 @@ public class LineTraceImpl implements ILineTrace {
 
 	private LineTrace          trace;
 	private String             dataName;
-	private PlottingSystemImpl sys;
+	private AbstractPlottingSystem sys;
 	private boolean errorBarExplicitySet;
 
-	LineTraceImpl(PlottingSystemImpl sys, final LineTrace trace) {
+	LineTraceImpl(AbstractPlottingSystem sys, final LineTrace trace) {
 		this.sys   = sys;
 		this.trace = trace;
 		if (trace instanceof ITraceContainer) {
@@ -316,12 +317,16 @@ public class LineTraceImpl implements ILineTrace {
 
 	@Override
 	public IDataset getYData() {
-		return sys.getData(getName(), trace, true);
+		LightWeightDataProvider prov = (LightWeightDataProvider)trace.getDataProvider();
+		if (prov==null) return null;
+		return prov.getY();
 	}
 	
 	@Override
 	public IDataset getXData() {
-		return sys.getData(getName(), trace, false);
+		LightWeightDataProvider prov = (LightWeightDataProvider)trace.getDataProvider();
+		if (prov==null) return null;
+		return prov.getX();
 	}
 
 	public int getErrorBarWidth() {

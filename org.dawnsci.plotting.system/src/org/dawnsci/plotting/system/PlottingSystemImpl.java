@@ -22,12 +22,15 @@ import java.util.Map;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.dawnsci.plotting.PlottingActionBarManager;
-import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
-import org.dawnsci.plotting.draw2d.swtxy.VectorTrace;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
-import org.dawnsci.plotting.jreality.JRealityPlotViewer;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
+import org.eclipse.dawnsci.plotting.api.IPrintablePlotting;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.annotation.IAnnotation;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
@@ -38,8 +41,8 @@ import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.preferences.ToolbarConfigurationConstants;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
-import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.trace.ColorOption;
 import org.eclipse.dawnsci.plotting.api.trace.IImage3DTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageStackTrace;
@@ -61,7 +64,6 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.nebula.visualization.xygraph.figures.Axis;
 import org.eclipse.nebula.visualization.xygraph.figures.Trace;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
@@ -107,14 +109,38 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	private StackLayout    stackLayout;
 
 	private PlotActionsManagerImpl       actionBarManager;
-	private LightWeightPlotViewer        lightWeightViewer;
-	private JRealityPlotViewer           jrealityViewer;
+	
+	private List<IPlottingSystemViewer>  viewers;
+	private IPlottingSystemViewer        activeViewer;
 
 	public PlottingSystemImpl() {
+		
 		super();
 		this.actionBarManager     = (PlotActionsManagerImpl)super.actionBarManager;
-		this.lightWeightViewer    = new LightWeightPlotViewer();
-		this.jrealityViewer       = new JRealityPlotViewer();
+		viewers = createViewerList();
+		
+		for (IPlottingSystemViewer v : viewers) {
+			if (v instanceof LightWeightPlotViewer) {
+				activeViewer      = v;
+				break;
+			}
+		}
+	}
+
+	private List<IPlottingSystemViewer> createViewerList() {
+		
+		IConfigurationElement[] es = Platform.getExtensionRegistry().getConfigurationElementsFor("org.eclipse.dawnsci.plotting.api.plottingViewer");
+        if (es == null || es.length <1) throw new RuntimeException("There are no plot viewers defined!");
+        
+        List<IPlottingSystemViewer>  viewers = new ArrayList<IPlottingSystemViewer>(es.length);
+        for (IConfigurationElement ie : es) {
+        	try {
+				viewers.add((IPlottingSystemViewer)ie.createExecutableExtension("class"));
+			} catch (CoreException e) {
+				throw new RuntimeException("Fatal Plotting Error! Cannot create "+ie.getAttribute("class"));
+			}
+		}  
+		return viewers;
 	}
 
 	private boolean containerOverride = false;
@@ -150,7 +176,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 		// We ignore hint, we create a light weight plot as default because
 		// it looks nice. We swap this for a 3D one if required.
-		createLightWeightUI();
+		IPlottingSystemViewer lightWeightViewer = createViewer(PlotType.XY);
 		
 		if (parent.getLayout() instanceof StackLayout) {
 			final StackLayout layout = (StackLayout)parent.getLayout();
@@ -188,51 +214,63 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	@Override
 	public Composite getPlotComposite() {
-		if (containerOverride) return parent;
-		if (plottingMode!=null && plottingMode.is3D()) return (Composite)jrealityViewer.getControl();
-		if (lightWeightViewer.getControl()!=null)      return (Composite)lightWeightViewer.getControl();
+		if (containerOverride)  return parent;
+		if (activeViewer!=null) return (Composite)activeViewer.getControl();
 		return null;
 	}
 
-	private void createLightWeightUI() {
-		if (lightWeightViewer.getControl()!=null) return;
-		lightWeightViewer.init(this);
-		lightWeightViewer.createControl(parent);
+	/**
+	 * Does nothing if the viewer is already created.
+	 * @param type
+	 */
+	private IPlottingSystemViewer createViewer(PlotType type) {
+		
+		IPlottingSystemViewer viewer = getViewer(type);
+		if (viewer.getControl()!=null) {
+			return viewer;
+		}
+		viewer.init(this);
+		viewer.createControl(parent);
 		parent.layout();
+		return viewer;
 	}
 
-	private void createJRealityUI() {
-
-		if (jrealityViewer.getControl()!=null) return;
-		jrealityViewer.init(this);
-		jrealityViewer.createControl(parent);
-		parent.layout();
+	private IPlottingSystemViewer getViewer(PlotType type) {
+        for (IPlottingSystemViewer v : viewers) {
+        	if (v.isPlotTypeSupported(type)) return v;
+		}
+        return null;
+	}
+	private IPlottingSystemViewer getViewer(Class<? extends ITrace> type) {
+        for (IPlottingSystemViewer v : viewers) {
+        	if (v.isTraceTypeSupported(type)) return v;
+		}
+        return null;
 	}
 
 	public void setFocus() {
-		lightWeightViewer.setFocus();
+		if (activeViewer!=null) activeViewer.setFocus();
 	}
 
 	public void addTraceListener(final ITraceListener l) {
 		super.addTraceListener(l);
-		lightWeightViewer.addImageTraceListener(l);
+		if (activeViewer!=null) activeViewer.addImageTraceListener(l);
 	}
 
 	public void removeTraceListener(final ITraceListener l) {
 		super.removeTraceListener(l);
-		lightWeightViewer.removeImageTraceListener(l);
+		if (activeViewer!=null) activeViewer.removeImageTraceListener(l);
 	}
 
 	@Override
 	public void setEnabled(final boolean enabled) {
-		if (lightWeightViewer == null)
-			return;
+		if (activeViewer == null) return;
 		if (getDisplay().getThread() == Thread.currentThread()) {
-			lightWeightViewer.setEnabled(enabled);
+			if (activeViewer!=null) activeViewer.setEnabled(enabled);
 		} else {
 			getDisplay().syncExec(new Runnable() {
 				public void run() {
-					lightWeightViewer.setEnabled(enabled);
+					if (activeViewer!=null) activeViewer.setEnabled(enabled);
 				}
 			});
 		}
@@ -240,8 +278,8 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	@Override
 	public boolean isEnabled() {
-		if (lightWeightViewer==null) return true;
-		return lightWeightViewer.isEnabled();
+		if (activeViewer==null) return true;
+		return activeViewer.isEnabled();
 	}
 
 
@@ -473,7 +511,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 								      final String dataName,
 								      final IProgressMonitor      monitor) {
 		
-		if (data.getName()!=null) lightWeightViewer.setTitle(data.getName());
+		if (data.getName()!=null) if (activeViewer!=null) activeViewer.setTitle(data.getName());
 		
 		if (monitor!=null&&monitor.isCanceled()) return null;
 		try {
@@ -553,14 +591,21 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 				trace.setDataName(dataName);
 				((ISurfaceTrace)trace).setData(data, axes);
 				addTrace(trace);
+				
 			} else {
-				trace = lightWeightViewer.createLightWeightImage(traceName, data, axes, dataName, monitor);
-				traceMap.put(trace.getName(), trace);
-				// No need to fire trace listener, the LightWeightViewer should fire it from
-				// RegionAreas list of image trace listeners - but this seems to break fixed tools in powder calibration perspective
-				fireTraceAdded(new TraceEvent(trace));
+				final IPlottingSystemViewer viewer = getViewer(IImageTrace.class);
+				IImageTrace imageTrace = createImageTrace(traceName);
+				imageTrace.setData(data, axes, false);
+				trace = imageTrace;
+				
+				viewer.clearTraces();
+				imageTrace.setDataName(dataName);
+
+				addTrace(trace);
+				if (data.getName()!=null) viewer.setTitle(data.getName());
 			}
 			return trace;
+			
 		} catch (Throwable e) {
 			logger.error("Cannot load file "+data.getName(), e);
 			return null;
@@ -569,14 +614,14 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	@Override
 	public IImageTrace createImageTrace(String traceName) {
-		IImageTrace trace = lightWeightViewer.createImageTrace(traceName);
+		IImageTrace trace = (IImageTrace)getViewer(IImageTrace.class).createTrace(traceName, IImageTrace.class);
 		fireTraceCreated(new TraceEvent(trace));
 		return trace;
 	}
 
 	@Override
 	public IImageStackTrace createImageStackTrace(String traceName) {
-		IImageStackTrace trace = lightWeightViewer.createImageStackTrace(traceName);
+		IImageStackTrace trace = (IImageStackTrace)getViewer(IImageStackTrace.class).createTrace(traceName, IImageStackTrace.class);
 		fireTraceCreated(new TraceEvent(trace));
 		return trace;
 	}
@@ -643,38 +688,37 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		}
 		if (traceMap==null) traceMap = new LinkedHashMap<String, ITrace>(31);
 	
+		final IPlottingSystemViewer viewer = getViewer(plottingMode);
 		List<ITrace> traces=null;
+		
 		if (plottingMode.is1D()) {
-			if (lightWeightViewer.getControl()==null) return null;	
-			List<ILineTrace> lines = lightWeightViewer.createLineTraces(title, xIn, ysIn, dataNames, traceMap, colorMap, monitor);
+			if (viewer.getControl()==null) return null;	
+			List<ILineTrace> lines = viewer.createLineTraces(title, xIn, ysIn, dataNames, traceMap, colorMap, monitor);
 			traces = new ArrayList<ITrace>(lines.size());
 			traces.addAll(lines);
 			
 		} else if (plottingMode.isScatter3D()) {
 			traceMap.clear();
-			IScatter3DTrace trace = jrealityViewer.createScatter3DTrace(title);
+			IScatter3DTrace trace = (IScatter3DTrace)viewer.createTrace(title, IScatter3DTrace.class);
 			final IDataset x = xIn;
 			final Dataset y = (Dataset) ysIn.get(1);
 			final Dataset z = (Dataset) ysIn.get(2);
 			if (dataNames!=null) trace.setDataName(dataNames.get(0));
 			trace.setData(x, Arrays.asList(x,y,z));
-			jrealityViewer.addTrace(trace);
+			viewer.addTrace(trace);
 			traceMap.put(trace.getName(), trace);
 			traces = Arrays.asList((ITrace)trace);
+			
 		} else if (plottingMode.isStacked3D()) {
 			traceMap.clear();
-			ILineStackTrace trace = null;
-			// Limit the number of stack plots
-			if (ysIn.size() > ILineStackTrace.MAXIMUM_STACK)
-				trace = jrealityViewer.createStackTrace(title, ILineStackTrace.MAXIMUM_STACK);
-			else
-				trace = jrealityViewer.createStackTrace(title, ysIn.size());
+			
+			ILineStackTrace trace = (ILineStackTrace)viewer.createTrace(title, ILineStackTrace.class);
 			final IDataset x = xIn;
 			final Dataset y = DatasetFactory.createRange(getMaxSize(ysIn), Dataset.INT32);
 			final Dataset z = DatasetFactory.createRange(ysIn.size(), Dataset.INT32);
 			if (dataNames!=null) trace.setDataName(dataNames.get(0));
 			trace.setData(Arrays.asList(x,y,z), ysIn.toArray(new Dataset[ysIn.size()]));
-			jrealityViewer.addTrace(trace);
+			viewer.addTrace(trace);
 			traceMap.put(trace.getName(), trace);
 			traces = Arrays.asList((ITrace)trace);
 		}
@@ -709,35 +753,24 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	}
 
 	public ILineTrace createLineTrace(String traceName) {
-		final Axis xAxis = (Axis)getSelectedXAxis();
-		final Axis yAxis = (Axis)getSelectedYAxis();
-
-		LightWeightDataProvider traceDataProvider = new LightWeightDataProvider();
-		final LineTrace   trace    = new LineTrace(traceName);
-		trace.init(xAxis, yAxis, traceDataProvider);
-		final LineTraceImpl wrapper = new LineTraceImpl(this, trace);
-		fireTraceCreated(new TraceEvent(wrapper));
-		return wrapper;
+		ILineTrace trace = (ILineTrace)getViewer(ILineTrace.class).createTrace(traceName, ILineTrace.class);
+		return trace;
 	}
 
 	public IVectorTrace createVectorTrace(String traceName) {
-		final Axis xAxis = (Axis)getSelectedXAxis();
-		final Axis yAxis = (Axis)getSelectedYAxis();
-
-		final VectorTrace trace    = new VectorTrace(traceName, xAxis, yAxis);
-		fireTraceCreated(new TraceEvent(trace));
+		IVectorTrace trace = (IVectorTrace)getViewer(IVectorTrace.class).createTrace(traceName, IVectorTrace.class);
 		return trace;
 	}
 
 	@Override
 	public ISurfaceTrace createSurfaceTrace(String traceName) {
-		ISurfaceTrace trace = jrealityViewer.createSurfaceTrace(traceName);
+		ISurfaceTrace trace = (ISurfaceTrace)getViewer(ISurfaceTrace.class).createTrace(traceName, ISurfaceTrace.class);
 		return (ISurfaceTrace) setPaletteData(trace);
 	}
 
 	@Override
 	public IMulti2DTrace createMulti2DTrace(String traceName) {
-		IMulti2DTrace trace = jrealityViewer.createMulti2DTrace(traceName);
+		IMulti2DTrace trace = (IMulti2DTrace)getViewer(IMulti2DTrace.class).createTrace(traceName, IMulti2DTrace.class);
 		return (IMulti2DTrace) setPaletteData(trace);
 	}
 
@@ -765,17 +798,15 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	@Override
 	public ILineStackTrace createLineStackTrace(String traceName) {
-		return jrealityViewer.createStackTrace(traceName, ILineStackTrace.MAXIMUM_STACK);
+		ILineStackTrace trace = (ILineStackTrace)getViewer(ILineStackTrace.class).createTrace(traceName, ILineStackTrace.class);
+		return trace;
 	}
 
-	@Override
-	public ILineStackTrace createLineStackTrace(String traceName, int stackplots) {	
-		return jrealityViewer.createStackTrace(traceName, stackplots);
-	}
 
 	@Override
 	public IScatter3DTrace createScatter3DTrace(String traceName) {
-		return jrealityViewer.createScatter3DTrace(traceName);
+		IScatter3DTrace trace = (IScatter3DTrace)getViewer(IScatter3DTrace.class).createTrace(traceName, IScatter3DTrace.class);
+		return trace;
 	}
 
 	protected void switchPlottingType(PlotType type) {
@@ -784,15 +815,12 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		actionBarManager.switchActions(plottingMode);
 
 		Control top = null;
-		if (type.is3D()) { 
-			createJRealityUI();
-			top = jrealityViewer.getControl();
-			jrealityViewer.updatePlottingRole(type);
-		} else {
-			createLightWeightUI();
-			top = lightWeightViewer.getControl();
-			lightWeightViewer.updatePlottingRole(type);
-		}
+		
+		IPlottingSystemViewer viewer = createViewer(type);
+		activeViewer = viewer;
+		top          = viewer.getControl();
+		viewer.updatePlottingRole(type);
+
 		if (parent != null && !parent.isDisposed() && parent.getLayout() instanceof StackLayout) {
 			final StackLayout layout = (StackLayout)parent.getLayout();
 			layout.topControl = top;
@@ -816,17 +844,14 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 */
 	public void addTrace(ITrace trace) {
 		
+		IPlottingSystemViewer viewer = getViewer(trace.getClass());
+		boolean ok = viewer.addTrace(trace);
+		if (!ok) return; // it has not added.
+
 		if (traceMap==null) this.traceMap = new HashMap<String, ITrace>(7);
 		traceMap.put(trace.getName(), trace);
-		
-		if (trace.is3DTrace()) {
-			jrealityViewer.addTrace(trace);
-			fireTraceAdded(new TraceEvent(trace));
-			
-		} else { // 1D, an image or LineTrace
-			lightWeightViewer.addTrace(trace);
-			fireTraceAdded(new TraceEvent(trace));
-		}
+
+		fireTraceAdded(new TraceEvent(trace));
 	}
 
 	/**
@@ -837,18 +862,8 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	public void removeTrace(ITrace trace) {
 		if (traceMap!=null) traceMap.remove(trace.getName());
 		
-		if (trace instanceof ISurfaceTrace) {
-			jrealityViewer.removeSurfaceTrace((ISurfaceTrace)trace);
-		} else if (trace instanceof IMulti2DTrace) {
-			jrealityViewer.removeMulti2DTrace((IMulti2DTrace)trace);
-		} else if (trace instanceof ILineStackTrace) {
-			jrealityViewer.removeStackTrace((ILineStackTrace)trace);
-		} else if (trace instanceof IScatter3DTrace) {
-			jrealityViewer.removeScatter3DTrace((IScatter3DTrace)trace);
-		} else {
-			lightWeightViewer.removeTrace(trace);
-		}
-
+		IPlottingSystemViewer viewer = getViewer(trace.getClass());
+		viewer.removeTrace(trace);
 		fireTraceRemoved(new TraceEvent(trace));
 	}
 
@@ -885,58 +900,17 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 		prov.append(xValue, yValue);
 	}
-
-    /**
-     * Thread safe method
-     */
-	@Override
-	public Dataset getData(String name) {
-		
-		final ITrace wrapper = traceMap.get(name);
-		if (wrapper==null) return null;
-		
-		final Trace trace = ((LineTraceImpl)wrapper).getTrace();
-		if (trace==null) return null;
-		
-		return getData(name, trace, true);
-	}
-
-	/**
-	 * Thread safe method
-	 * @param name
-	 * @param trace
-	 * @param isY
-	 * @return
-	 */
-	protected Dataset getData(String name, Trace trace, boolean isY) {
-
-		if (trace==null) return null;
-		
-		LightWeightDataProvider prov = (LightWeightDataProvider)trace.getDataProvider();
-		if (prov==null) return null;
-		
-		return isY ? prov.getY() : prov.getX();
-	}
-
 	/**
 	 * Override this method to provide an implementation of title setting.
 	 * @param title
 	 */
 	public void setTitle(final String title) {
 		super.setTitle(title);
-		if (plottingMode.is3D()) {
-			jrealityViewer.setTitle(title);
-		} else {
-			lightWeightViewer.setTitle(title);
-		}
+		activeViewer.setTitle(title);
 	}
 
 	public String getTitle() {
-		if (plottingMode.is3D()) {
-			return jrealityViewer.getTitle();
-		} else {
-			return lightWeightViewer.getTitle();
-		}
+		return activeViewer.getTitle();
 	}	
 
 	@Override
@@ -946,15 +920,16 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		if (action != null) {
 			action.setChecked(b);
 		}
-		if (lightWeightViewer != null) {
-			lightWeightViewer.setShowLegend(b);
+
+		if (activeViewer != null) {
+			activeViewer.setShowLegend(b);
 		}
 	}
 
 	@Override
 	public void setShowIntensity(boolean b){
-		lightWeightViewer.setShowIntensity(b);
-		lightWeightViewer.getSystem().repaint(false);
+		if (activeViewer!=null) activeViewer.setShowIntensity(b);
+		repaint(false);
 	}
 
 	public Color get1DPlotColor(Object object) {
@@ -996,8 +971,9 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	private void resetInternal() {
 		if (traceMap!=null) traceMap.clear();
 		if (colorMap!=null) colorMap.clear();
-		lightWeightViewer.reset(true);
-		jrealityViewer.reset();
+		for (IPlottingSystemViewer v : viewers) {
+			if (v.getControl()!=null) v.reset(true);
+		}
 		fireTracesCleared(new TraceEvent(this));
 	}
 
@@ -1016,7 +992,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	}
 
 	private void clearInternal() {
-		if (lightWeightViewer.getControl()!=null) {
+		if (activeViewer.getControl()!=null) {
 			try {
 				clearTraces();
 				if (colorMap!=null) colorMap.clear();
@@ -1035,13 +1011,16 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			colorMap = null;
 		}
 		clearTraces();
-		lightWeightViewer.dispose();
-		jrealityViewer.dispose();
+		for (IPlottingSystemViewer v : viewers) {
+			if (v.getControl()!=null) v.dispose();
+		}
 	}
 
 	private void clearTraces() {
 		
-		if (lightWeightViewer!=null)  lightWeightViewer.clearTraces();
+		for (IPlottingSystemViewer v : viewers) {
+		  if (v.getControl()!=null)  v.clearTraces();
+		}
 		if (traceMap!=null) traceMap.clear();
 		fireTracesCleared(new TraceEvent(this));
 	}
@@ -1051,7 +1030,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	}
 
 	public void repaint(final boolean autoScale) {
-		lightWeightViewer.repaint(autoScale);
+		if (activeViewer!=null) activeViewer.repaint(autoScale);
 	}
 
 	/**
@@ -1061,11 +1040,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 */
 	@Override
 	public Image getImage(Rectangle size) {
-		if (getPlotType().is3D()) {
-			return jrealityViewer.getImage(size);	
-		} else {
-		    return lightWeightViewer.getImage(size);
-		}
+		return activeViewer.getImage(size);
 	}
 
 	/**
@@ -1078,64 +1053,52 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 */
 	@Override
 	public IAxis createAxis(final String title, final boolean isYAxis, int side) {
-		
-		if (lightWeightViewer.getControl() == null) createLightWeightUI();
 					
-		return lightWeightViewer.createAxis(title, isYAxis, side);
+		return activeViewer.createAxis(title, isYAxis, side);
 	}
 
 	@Override
-	public IAxis removeAxis(final IAxis axis) {
-		
-		if (lightWeightViewer.getControl() == null) createLightWeightUI();
-					
-		return lightWeightViewer.removeAxis(axis);
+	public IAxis removeAxis(final IAxis axis) {		
+		return activeViewer.removeAxis(axis);
 	}
 
 	@Override
 	public List<IAxis> getAxes() {
-		
-		if (lightWeightViewer.getControl() == null) createLightWeightUI();
 					
-		return lightWeightViewer.getAxes();
+		return activeViewer.getAxes();
 	}
 	
 	@Override
 	public IAxis getAxis(String name) {
-		
-		if (lightWeightViewer.getControl() == null) createLightWeightUI();
-					
-		return lightWeightViewer.getAxis(name);
+		return activeViewer.getAxis(name);
 	}
 
 	@Override
 	public IAxis getSelectedXAxis() {
-		return lightWeightViewer.getSelectedXAxis();
+		return activeViewer.getSelectedXAxis();
 	}
 
 	@Override
 	public void setSelectedXAxis(IAxis selectedXAxis) {
-		lightWeightViewer.setSelectedXAxis(selectedXAxis);
+		activeViewer.setSelectedXAxis(selectedXAxis);
 	}
 
 	@Override
 	public IAxis getSelectedYAxis() {
-		return lightWeightViewer.getSelectedYAxis();
+		return activeViewer.getSelectedYAxis();
 	}
 
 	@Override
 	public void setSelectedYAxis(IAxis selectedYAxis) {
-		lightWeightViewer.setSelectedYAxis(selectedYAxis);
+		activeViewer.setSelectedYAxis(selectedYAxis);
 	}
 
 	public boolean addRegionListener(final IRegionListener l) {
-		if (lightWeightViewer.getControl() == null) createLightWeightUI();
-		return lightWeightViewer.addRegionListener(l);
+		return activeViewer.addRegionListener(l);
 	}
 
 	public boolean removeRegionListener(final IRegionListener l) {
-		if (lightWeightViewer.getControl() == null) createLightWeightUI();
-		return lightWeightViewer.removeRegionListener(l);
+		return activeViewer.removeRegionListener(l);
 	}
 
 	/**
@@ -1143,32 +1106,29 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 * @throws Exception 
 	 */
 	public IRegion createRegion(final String name, final RegionType regionType) throws Exception  {
-		if (lightWeightViewer.getControl() == null) createLightWeightUI();
-		return lightWeightViewer.createRegion(name, regionType);
+		return activeViewer.createRegion(name, regionType);
 	}
 
 	public void clearRegions() {
-		lightWeightViewer.clearRegions();
+		activeViewer.clearRegions();
 	}
 
 	@Override
 	public void resetAxes() {
 		if (getDisplay().getThread() == Thread.currentThread()) {
-			lightWeightViewer.resetAxes();
+			activeViewer.resetAxes();
 		} else {
 			getDisplay().syncExec(new Runnable() {
 				@Override
 				public void run() {
-					lightWeightViewer.resetAxes();
+					activeViewer.resetAxes();
 				}
 			});
 		}
 	}
 
-	protected void clearRegionTool() {
-		if (lightWeightViewer.getControl() == null) return;
-		
-		lightWeightViewer.clearRegionTool();
+	public void clearRegionTool() {
+		activeViewer.clearRegionTool();
 	}
 
 	/**
@@ -1176,8 +1136,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 * @param region
 	 */
 	public void addRegion(final IRegion region) {
-		if (lightWeightViewer.getControl() == null) createLightWeightUI();
-		lightWeightViewer.addRegion(region);
+		activeViewer.addRegion(region);
 	}
 
 	/**
@@ -1185,14 +1144,12 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 * @param region
 	 */
 	public void removeRegion(final IRegion region) {
-		if (lightWeightViewer.getControl() == null) createLightWeightUI();
-		lightWeightViewer.removeRegion(region);
+		activeViewer.removeRegion(region);
 	}
 
 	@Override
 	public void renameRegion(final IRegion region, String name) {
-		if (lightWeightViewer.getControl() == null) return;
-		lightWeightViewer.renameRegion(region, name);
+		activeViewer.renameRegion(region, name);
 	}
 
 	/**
@@ -1201,8 +1158,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 * @return
 	 */
 	public IRegion getRegion(final String name) {
-		if (lightWeightViewer.getControl() == null) return null;
-		return lightWeightViewer.getRegion(name);
+		return activeViewer.getRegion(name);
 	}
 
 	/**
@@ -1211,88 +1167,96 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 * @return
 	 */
 	public Collection<IRegion> getRegions() {
-		if (lightWeightViewer.getControl() == null) return null;
-		return lightWeightViewer.getRegions();
+		return activeViewer.getRegions();
 	}
 	
 	@Override
 	public Collection<IRegion> getRegions(final RegionType type) {
-		if (lightWeightViewer.getControl() == null) return null;
-        return lightWeightViewer.getRegions(type);
+       return activeViewer.getRegions(type);
 	}
 
 	@Override
 	public IAnnotation createAnnotation(final String name) throws Exception {
-		if (lightWeightViewer.getControl() == null) createLightWeightUI();
-        return lightWeightViewer.createAnnotation(name);
+        return activeViewer.createAnnotation(name);
 	}
 
 	@Override
 	public void addAnnotation(final IAnnotation annotation) {
-		lightWeightViewer.addAnnotation(annotation);
+		activeViewer.addAnnotation(annotation);
 	}
 
 	@Override
 	public void removeAnnotation(final IAnnotation annotation) {
-		lightWeightViewer.removeAnnotation(annotation);
+		activeViewer.removeAnnotation(annotation);
 	}
 
 	@Override
 	public void renameAnnotation(final IAnnotation annotation, String name) {
-		lightWeightViewer.renameAnnotation(annotation, name);
+		activeViewer.renameAnnotation(annotation, name);
 	}
 	
 	@Override
 	public void clearAnnotations(){
-		lightWeightViewer.clearAnnotations();
+		activeViewer.clearAnnotations();
 	}
 
 
 	@Override
 	public IAnnotation getAnnotation(final String name) {
-		return lightWeightViewer.getAnnotation(name);
+		return activeViewer.getAnnotation(name);
 	}
 
 	@Override
 	public void autoscaleAxes() {
-		lightWeightViewer.autoscaleAxes();
+		activeViewer.autoscaleAxes();
 	}
 
 	@Override
 	public void printPlotting(){
-		lightWeightViewer.printPlotting();
+		if (activeViewer instanceof IPrintablePlotting) {
+		    ((IPrintablePlotting)activeViewer).printPlotting();
+		}
 	}
 
 	/**
 	 * Print scaled plotting to printer
 	 */
 	public void printScaledPlotting(){
-		lightWeightViewer.printScaledPlotting();
+		if (activeViewer instanceof IPrintablePlotting) {
+		    ((IPrintablePlotting)activeViewer).printScaledPlotting();
+		}
 	}
 
 	@Override
 	public void copyPlotting(){
-		lightWeightViewer.copyPlotting();
+		if (activeViewer instanceof IPrintablePlotting) {
+		    ((IPrintablePlotting)activeViewer).copyPlotting();
+		}
 	}
 
 	@Override
 	public String savePlotting(String filename) throws Exception{
-		return lightWeightViewer.savePlotting(filename);
+		if (activeViewer instanceof IPrintablePlotting) {
+		    ((IPrintablePlotting)activeViewer).savePlotting(filename);
+		}
+		return null;
 	}
 
 	@Override
 	public void savePlotting(String filename, String filetype) throws Exception{
-		lightWeightViewer.savePlotting(filename, filetype);
+		if (activeViewer instanceof IPrintablePlotting) {
+		    ((IPrintablePlotting)activeViewer).savePlotting(filename, filetype);
+		}
 	}
 
 	public void setXFirst(boolean xfirst) {
 		super.setXFirst(xfirst);
-		lightWeightViewer.setXFirst(xfirst);
+		activeViewer.setXFirst(xfirst);
 	}
 
 	public void setRescale(boolean rescale) {
 		super.setRescale(rescale);
-		lightWeightViewer.setRescale(rescale);
+		activeViewer.setRescale(rescale);
 	}
 
 	/**
@@ -1309,13 +1273,13 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	@Override
 	public void addPropertyChangeListener(IPropertyChangeListener listener) {
 		super.addPropertyChangeListener(listener);
-		lightWeightViewer.addPropertyChangeListener(listener);
+		activeViewer.addPropertyChangeListener(listener);
 	}
 
 	@Override
 	public void removePropertyChangeListener(IPropertyChangeListener listener) {
 		super.removePropertyChangeListener(listener);
-		lightWeightViewer.removePropertyChangeListener(listener);
+		activeViewer.removePropertyChangeListener(listener);
 	}
 	
 	public void setActionBars(IActionBars bars) {
@@ -1324,104 +1288,44 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	@Override
 	public void setDefaultCursor(int cursorType) {
-		Cursor cursor = Cursors.ARROW;
-		if (cursorType == CROSS_CURSOR) cursor = Cursors.CROSS;
-		lightWeightViewer.setDefaultPlotCursor(cursor);
-	}
-
-	/**
-	 * Set the cursor using a custom icon on the plot.
-	 * This may get cancelled if other tools are used!
-	 */
-	@Override
-	public void setSelectedCursor(Cursor cursor) {
-		
-		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return;
-		lightWeightViewer.setSelectedCursor(cursor);
-	}
-
-	@Override
-	public void setShiftPoint(Point point) {
-		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return;
-		lightWeightViewer.setShiftPoint(point);
-	}
-
-	@Override
-	public Point getShiftPoint() {
-		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return null;
-		return lightWeightViewer.getShiftPoint();
-	}
-
-	@Override
-	public Cursor getSelectedCursor() {
-		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return null;
-		return lightWeightViewer.getXYRegionGraph().getRegionArea().getSelectedCursor();
+		activeViewer.setDefaultCursor(cursorType);
 	}
 
 	@Override
 	public void addPositionListener(IPositionListener l) {
-		if (lightWeightViewer==null) return;
-		lightWeightViewer.addPositionListener(l);
+		activeViewer.addPositionListener(l);
 	}
 
 	@Override
 	public void removePositionListener(IPositionListener l) {
-		if (lightWeightViewer==null) return;
-		lightWeightViewer.removePositionListener(l);
+		activeViewer.removePositionListener(l);
 	}
 	
 	@Override
 	public void addClickListener(IClickListener l) {
-		if (lightWeightViewer==null) return;
-		lightWeightViewer.addClickListener(l);
+		activeViewer.addClickListener(l);
 	}
 
 	@Override
 	public void removeClickListener(IClickListener l) {
-		if (lightWeightViewer==null) return;
-		lightWeightViewer.removeClickListener(l);
-	}
-
-
-	@Override
-	public void addMouseMotionListener(MouseMotionListener mml) {
-		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return;
-		lightWeightViewer.getXYRegionGraph().getRegionArea().addAuxilliaryMotionListener(mml);
-	}
-
-	@Override
-	public void addMouseClickListener(MouseListener mcl) {
-		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return;
-		lightWeightViewer.getXYRegionGraph().getRegionArea().addAuxilliaryClickListener(mcl);
-	}
-
-	@Override
-	public void removeMouseMotionListener(MouseMotionListener mml) {
-		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return;
-		lightWeightViewer.getXYRegionGraph().getRegionArea().removeAuxilliaryMotionListener(mml);
-	}
-
-	/**
-	 * Please override for draw2d listeners.
-	 * @deprecated draw2d Specific
-	 */
-	@Override
-	public void removeMouseClickListener(MouseListener mcl) {
-		if (isDisposed() || lightWeightViewer==null || lightWeightViewer.getXYRegionGraph()==null) return;
-		lightWeightViewer.getXYRegionGraph().getRegionArea().removeAuxilliaryClickListener(mcl);
+		activeViewer.removeClickListener(l);
 	}
 
 	public void setKeepAspect(boolean checked){
-		lightWeightViewer.setKeepAspect(checked);
+		activeViewer.setKeepAspect(checked);
 	}
 	
 	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
-		if (adapter == XYRegionGraph.class) {
-			return lightWeightViewer!=null ? lightWeightViewer.getXYRegionGraph() : null;
-		} else if (adapter == LightWeightPlotViewer.class) {
-			return lightWeightViewer;
-		} else if (adapter == JRealityPlotViewer.class) {
-			return jrealityViewer;
+		
+		if (adapter.getClass().isAssignableFrom(getClass())) return this;
+		
+		for (IPlottingSystemViewer v : viewers) {
+			if (v.getClass() == adapter) return v;
+			if (adapter.getClass().isAssignableFrom(v.getClass())) return v;
+			if (v instanceof IAdaptable) {
+				Object inst = ((IAdaptable)v).getAdapter(adapter);
+				if (inst!=null) return inst;
+			}
 		}
 		return super.getAdapter(adapter);
 	}

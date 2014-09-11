@@ -14,8 +14,8 @@ import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
 import org.eclipse.dawnsci.plotting.api.axis.IPositionListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
-import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.trace.ColorOption;
 import org.eclipse.dawnsci.plotting.api.trace.IImageStackTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
@@ -35,7 +35,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchPart;
 
-import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 /**
@@ -105,11 +104,6 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	@Override
 	public ILineStackTrace createLineStackTrace(String traceName) {
 		return (ILineStackTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName);
-	}
-
-	@Override
-	public ILineStackTrace createLineStackTrace(String traceName, int stackplots) {
-		return (ILineStackTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName, stackplots);
 	}
 
 	@Override
@@ -208,7 +202,7 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	}
 
 	@Override
-	public void renameRegion(IRegion region, String name) throws Exception {
+	public void renameRegion(IRegion region, String name) {
 		call(getMethodName(Thread.currentThread().getStackTrace()), region, name);
 	}
 
@@ -270,8 +264,7 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	}
 
 	@Override
-	public void renameAnnotation(IAnnotation annotation, String name)
-			throws Exception {
+	public void renameAnnotation(IAnnotation annotation, String name) {
 		call(getMethodName(Thread.currentThread().getStackTrace()), annotation, name);
 	}
 
@@ -397,11 +390,6 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	@Override
 	public ISelectionProvider getSelectionProvider() {
 		throw new RuntimeException("ISelectionProvider is not serializable!");
-	}
-
-	@Override
-	public Dataset getData(String dataSetName) {
-		return (Dataset)call(getMethodName(Thread.currentThread().getStackTrace()));
 	}
 
 	@Override
@@ -578,6 +566,15 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	@Override
 	public void removeClickListener(IClickListener l) {
 		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[]{IClickListener.class}, l);
+	}
+	@Override
+	public void clearRegionTool() {
+		call(getMethodName(Thread.currentThread().getStackTrace()));
+	}
+
+	@Override
+	public void printScaledPlotting() {
+		call(getMethodName(Thread.currentThread().getStackTrace()));
 	}
 
 }

@@ -31,6 +31,13 @@
             name="Error Bars">
       </page>
    </extension>
+   <extension
+         point="org.eclipse.dawnsci.plotting.api.plottingViewer">
+      <plottingViewer
+            class="org.dawnsci.plotting.system.LightWeightPlotViewer"
+            id="org.dawnsci.plotting.system.lightWeightPlotViewer">
+      </plottingViewer>
+   </extension>
    
    <!-- Example of how to add a custom action to the plotting toolbar.
    
