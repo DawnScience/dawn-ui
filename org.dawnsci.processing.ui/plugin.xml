@@ -39,7 +39,6 @@
             restorable="true">
       </view>
    </extension>
-   <!--
    <extension
          point="org.eclipse.ui.perspectives">
       <perspective
@@ -48,6 +47,5 @@
             name="Processing">
       </perspective>
    </extension>
-   -->
 
 </plugin>
