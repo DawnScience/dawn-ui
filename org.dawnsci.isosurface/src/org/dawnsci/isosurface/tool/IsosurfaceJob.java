@@ -7,9 +7,10 @@ import javafx.scene.Group;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 
-import org.dawnsci.isosurface.IsosurfaceGenerator;
-import org.dawnsci.isosurface.Surface;
+import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawnsci.isosurface.SurfaceDisplayer;
+import org.dawnsci.isosurface.impl.MarchingCubesModel;
+import org.dawnsci.isosurface.impl.Surface;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -20,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
+import uk.ac.diamond.scisoft.analysis.processing.IOperation;
 /**
  * 
  * @author nnb55016
@@ -71,10 +73,11 @@ public class IsosurfaceJob extends Job {
 		try {
 			setCursor(Cursor.WAIT);
 	
-			final IsosurfaceGenerator generator = tool.getGenerator();
+			final IOperation<MarchingCubesModel, Surface> generator = tool.getGenerator();
 			if (lazyData!=null) {
-							
-			    generator.setData(lazyData); // We want to do this task from the thread
+				
+				final MarchingCubesModel model = generator.getModel();
+				model.setLazyData(lazyData); // We want to do this task from the thread
 			                                 // because it can take a while too
 	
 			    Display.getDefault().syncExec(new Runnable() {
@@ -89,7 +92,7 @@ public class IsosurfaceJob extends Job {
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 			
 			try {
-				Surface surface = generator.execute();
+				Surface surface    = generator.execute(null, new ProgressMonitorWrapper(monitor));
 				drawSurface(surface);
 				
 			} catch (UnsupportedOperationException e){

@@ -7,37 +7,75 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.dawnsci.isosurface.Activator;
-import org.dawnsci.isosurface.IsosurfaceGenerator;
-import org.dawnsci.isosurface.Surface;
-import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
-import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
-import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
-
-import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
+import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
+import uk.ac.diamond.scisoft.analysis.processing.AbstractOperation;
+import uk.ac.diamond.scisoft.analysis.processing.OperationException;
+import uk.ac.diamond.scisoft.analysis.processing.OperationRank;
 /**
  * 
  * @author nnb55016
  * The MarchingCubes class holds the algorithm with the same name which provides the triangular
  * mesh for a particular three dimensional dataset
  */
-public class MarchingCubes implements IsosurfaceGenerator {
+public class MarchingCubes extends AbstractOperation<MarchingCubesModel, Surface> {
 
- 
-	private ILazyDataset lazyData;
-	private double isovalue;
-	private int[] boxSize;
-	
 	private int index = 0;
 	
-	private double isovalueMin = Integer.MAX_VALUE;
-	private double isovalueMax = Integer.MIN_VALUE;
-	
 	public MarchingCubes() {
+		setModel(new MarchingCubesModel()); // We must always have a model for this maths.
 	}
 	
+	@Override
+	public String getId() {
+		return "org.dawnsci.isosurface.marchingCubes";
+	}
+
+	@Override
+	public Surface execute(IDataset slice, IMonitor monitor) throws OperationException {
+		
+		this.index = 0;
+		
+		final Object[]           data      = parseVertices();
+		final Set<Triangle>      triangles = (Set<Triangle>) data[0];
+		final Map<Point,Integer> v         = (Map<Point, Integer>) data[1];
+
+		Point[] vertices = v.keySet().toArray(new Point[v.size()]);
+		
+		float[] points = getCoordinates(vertices);
+
+		float[] texCoords = { 0, 0, (float) 0.5, (float) 0.5, 1, 1 };
+
+		int[] faces = new int[6 * triangles.size()];
+
+		int k = 0;
+
+		for (Triangle t: triangles) {
+			
+			faces[k] = v.get(t.getC());
+			faces[k + 1] = 0;
+			faces[k + 2] = v.get(t.getB());
+			faces[k + 3] = 1;
+			faces[k + 4] = v.get(t.getA());
+			faces[k + 5] = 2;
+			k += 6;
+		}
+
+		if (points==null || points.length<1) throw new OperationException(this, "No isosurface found!");
+
+		return new Surface(points, texCoords, faces);
+	}
+
+	@Override
+	public OperationRank getInputRank() {
+		return OperationRank.THREE;
+	}
+
+	@Override
+	public OperationRank getOutputRank() {
+		return OperationRank.NONE;
+	}
 	/**
 	 * The edge table maps the vertices under the isosurface to the intersecting
 	 * edges. An 8-bit index is formed (this is the cubeIndex) where each bit
@@ -349,25 +387,13 @@ public class MarchingCubes implements IsosurfaceGenerator {
 			{ 0, 3, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
 			{ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 } };
 
-	@Override
-	public void setData(ILazyDataset lz) {
-		
-		if (lazyData!=lz) computeExtents(lz);
-		this.lazyData = lz;
-	}
-	
-	private void computeExtents(ILazyDataset lz) {
-		// If we have just set new data, reset the values for box size and isovalue
-		this.boxSize  = getEstimatedBoxSize(lz);
-		this.isovalue = getEstimatedIsovalue(lz); // Also estimates max and min slider range
-	}
-	
-	public ILazyDataset getData() {
-		return lazyData;
-	}
 
 	@SuppressWarnings("unchecked")
-	private Object[] parseVertices() throws Exception {	
+	private Object[] parseVertices() throws OperationException {	
+		
+		final ILazyDataset lazyData = model.getLazyData();
+		final int[] boxSize         = model.getBoxSize();
+		final double isovalue       = model.getIsovalue();
 		
 		int xLimit = lazyData.getShape()[2];
 		int yLimit = lazyData.getShape()[1];
@@ -440,8 +466,8 @@ public class MarchingCubes implements IsosurfaceGenerator {
 				if (cubeIndex != 0 && cubeIndex != 255) {
 					surfaceGridCellIntesection(currentCell, cubeIndex, isovalue);
 					currentCell.setTrianglesList(createTriangles(vertices, currentCell, cubeIndex));
-					if(vertices.size()>=1000000){ // TODO Configure this?
-						throw new UnsupportedOperationException("The number of verices has exceeded 1,000,000. The surface cannot be rendered.");
+					if(vertices.size()>=model.getVertexLimit()){
+						throw new UnsupportedOperationException("The number of verices has exceeded "+model.getVertexLimit()+". The surface cannot be rendered.");
 					}
 					triangles.addAll(currentCell.getTrianglesList());
 				}
@@ -702,141 +728,4 @@ public class MarchingCubes implements IsosurfaceGenerator {
 		return new Object[]{values, points};
 	}
 	
-	/**
-	 * The execute() method is where the algorithm runs
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public Surface execute() throws Exception {
-		
-		this.index = 0;
-		final Object[] data = parseVertices();
-		final Set<Triangle>     triangles = (Set<Triangle>) data[0];
-		final Map<Point,Integer> v  = (Map<Point, Integer>) data[1];
-
-		Point[] vertices = v.keySet().toArray(new Point[v.size()]);
-		
-		float[] points = getCoordinates(vertices);
-
-		float[] texCoords = { 0, 0, (float) 0.5, (float) 0.5, 1, 1 };
-
-		int[] faces = new int[6 * triangles.size()];
-
-		int k = 0;
-
-		for (Triangle t: triangles) {
-			
-			faces[k] = v.get(t.getC());
-			faces[k + 1] = 0;
-			faces[k + 2] = v.get(t.getB());
-			faces[k + 3] = 1;
-			faces[k + 4] = v.get(t.getA());
-			faces[k + 5] = 2;
-			k += 6;
-		}
-
-		if (points==null || points.length<1) throw new Exception("No isosurface found!");
-
-		return new Surface(points, texCoords, faces);
-	}
-
-	
-	/**
-	 * Setters and getters...
-	 * 
-	 */
-
-	public double getIsovalue() {
-		return isovalue;
-	}
-
-	public int[] getBoxSize() {
-		return boxSize;
-	}
-	
-	public void setIsovalue(double isovalue){
-		this.isovalue = isovalue;
-	}
-	
-	public void setBoxSize(int[] boxSize){
-		this.boxSize = boxSize;
-	}
-
-
-	/**
-	 * Method for computing the default box size
-	 */
-    private static int[] getEstimatedBoxSize(ILazyDataset lz) {
-		int[] defaultBoxSize= new int[] {(int) Math.max(1, Math.ceil(lz.getShape()[2]/20.0)),
-	                                     (int) Math.max(1, Math.ceil(lz.getShape()[1]/20.0)),
-	                                     (int) Math.max(1, Math.ceil(lz.getShape()[0]/20.0))};
-		
-		return defaultBoxSize;
-	}
-
-
-	/**
-	 * Method for computing the default isovalue 
-	 */
-	private double getEstimatedIsovalue(ILazyDataset lz) {
-		// TODO Auto-generated method stub
-		IDataset slicedImage;
-		
-		
-		slicedImage = lz.getSlice(new int[] { lz.getShape()[0]/3, 0,0}, 
-				                              new int[] {1+lz.getShape()[0]/3, lz.getShape()[1], lz.getShape()[2]},
-				                              new int[] {1,1,1});
-		
-		final IImageService service = (IImageService)Activator.getService(IImageService.class);
-		float[] stats = service.getFastStatistics(new ImageServiceBean((Dataset)slicedImage, HistoType.MEAN));
-		
-		if(stats[0]<isovalueMin){
-			isovalueMin = stats[0];
-		}
-		
-		if(stats[1]>isovalueMax){
-			isovalueMax = stats[1];
-		}
-		
-		slicedImage = lz.getSlice(new int[] { lz.getShape()[0]/2, 0,0}, 
-                new int[] {1+ lz.getShape()[0]/2, lz.getShape()[1], lz.getShape()[2]},
-                new int[] {1,1,1});
-		
-        stats = service.getFastStatistics(new ImageServiceBean((Dataset)slicedImage, HistoType.MEAN));
-		
-		if(stats[0]<isovalueMin){
-			isovalueMin = stats[0];
-		}
-		
-		if(stats[1]>isovalueMax){
-			isovalueMax = stats[1];
-		}
-		
-		slicedImage = lz.getSlice(new int[] { 2*lz.getShape()[0]/3, 0,0}, 
-                new int[] {1 + 2*lz.getShape()[0]/3, lz.getShape()[1], lz.getShape()[2]},
-                new int[] {1,1,1});
-		
-		stats = service.getFastStatistics(new ImageServiceBean((Dataset)slicedImage, HistoType.MEAN));
-		
-		if(stats[0]<isovalueMin){
-			isovalueMin = stats[0];
-		}
-		
-		if(stats[1]>isovalueMax){
-			isovalueMax = stats[1];
-		}
-		
-		return (isovalueMin + isovalueMax)/2d;
-		
-	}
-
-
-	public double getIsovalueMin() {
-		return isovalueMin;
-	}
-
-
-	public double getIsovalueMax() {
-		return isovalueMax;
-	}
 }

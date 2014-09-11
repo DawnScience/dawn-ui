@@ -1,5 +1,8 @@
-package org.dawnsci.isosurface;
+package org.dawnsci.isosurface.impl;
 
+import java.io.Serializable;
+
+import uk.ac.diamond.scisoft.analysis.processing.OperationData;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.TriangleMesh;
 
@@ -10,13 +13,20 @@ import javafx.scene.shape.TriangleMesh;
  * A Surface object is defined by the 3 arrays to help build the triangle mesh of JavaFX
  */
 
-public class Surface  {
+public class Surface extends OperationData implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3131741986216278390L;
+
+	
 	private float[] points;
 	private float[] texCoords;
 	private int[] faces;
 	
 	public Surface(float[] points, float[] texCoords, int[] faces){
+		super();
 		this.points = points;
 		this.texCoords = texCoords;
 		this.faces = faces;

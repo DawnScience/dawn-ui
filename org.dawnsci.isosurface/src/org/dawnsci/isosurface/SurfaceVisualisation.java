@@ -2,31 +2,37 @@ package org.dawnsci.isosurface;
 
 import java.util.List;
 
-import org.dawnsci.isosurface.impl.MarchingCubes;
-import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
-import uk.ac.diamond.scisoft.analysis.io.IDataHolder;
-import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-import javafx.scene.control.Slider;
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Bounds;
 import javafx.scene.Group;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.Scene;
-import javafx.stage.Stage;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.CullFace;
 import javafx.scene.shape.MeshView;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.scene.control.Label;
-import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.VBox;
-import javafx.event.ActionEvent;
-import javafx.geometry.Bounds;
+import javafx.stage.Stage;
+
+import org.dawnsci.isosurface.impl.MarchingCubesModel;
+import org.dawnsci.isosurface.impl.Surface;
+
+import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
+import uk.ac.diamond.scisoft.analysis.io.IDataHolder;
+import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
+import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
+import uk.ac.diamond.scisoft.analysis.processing.IOperation;
+import uk.ac.diamond.scisoft.analysis.processing.IOperationService;
 
 /**
  * 
@@ -44,7 +50,8 @@ import javafx.geometry.Bounds;
 @SuppressWarnings("restriction")
 public class SurfaceVisualisation extends Application{
 
-	private final IsosurfaceGenerator generator = GeneratorFactory.createMarchingCubes();
+	private IOperation<MarchingCubesModel, Surface> generator;
+	
 	private ILazyDataset lazyLoaded;
 	private Slider isovalue;
 	private Label isovalueLabel;
@@ -84,7 +91,13 @@ public class SurfaceVisualisation extends Application{
 	
 		scene.setCamera(new PerspectiveCamera());
 
-		generator.setData(lazyLoaded);
+		final IOperationService service = (IOperationService)Activator.getService(IOperationService.class);
+		try {
+			generator = (IOperation<MarchingCubesModel, Surface>) service.create("org.dawnsci.isosurface.marchingCubes");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		generator.getModel().setLazyData(lazyLoaded);
 		
 		cam.getChildren().add(surfaceAxisGenerator());
 		
@@ -107,9 +120,9 @@ public class SurfaceVisualisation extends Application{
 				updateTransforms();
 				cam.getChildren().remove(0);
 				try {
-					((MarchingCubes)generator).setIsovalue(newValue.doubleValue());
+					generator.getModel().setIsovalue(newValue.doubleValue());
 					cam.getChildren().add(surfaceAxisGenerator());
-			        isovalueLabel.textProperty().set("Isovalue of " + ((MarchingCubes)generator).getIsovalue());
+			        isovalueLabel.textProperty().set("Isovalue of " + generator.getModel().getIsovalue());
 
 			        getCurrentCoordinates();
 				} catch (Exception e) {
@@ -129,10 +142,10 @@ public class SurfaceVisualisation extends Application{
 						(Integer.parseInt(xDimenssion.getText()) > 0
 						&& Integer.parseInt(xDimenssion.getText()) < lazyLoaded.getShape()[2])){
 					
-					((MarchingCubes) generator).setBoxSize(new int[] {
+					generator.getModel().setBoxSize(new int[] {
 							Integer.parseInt(xDimenssion.getText()),
-							((MarchingCubes) generator).getBoxSize()[1],
-							((MarchingCubes) generator).getBoxSize()[2] });
+							generator.getModel().getBoxSize()[1],
+							generator.getModel().getBoxSize()[2] });
 					
 					updateTransforms();
 					cam.getChildren().remove(0);
@@ -150,7 +163,7 @@ public class SurfaceVisualisation extends Application{
 				}
 				
 				else {
-					xDimenssion.setText("" + ((MarchingCubes) generator).getBoxSize()[0]);
+					xDimenssion.setText("" + generator.getModel().getBoxSize()[0]);
 				}
 			}
 			
@@ -165,10 +178,10 @@ public class SurfaceVisualisation extends Application{
 						(Integer.parseInt(yDimenssion.getText()) > 0
 						&& Integer.parseInt(yDimenssion.getText()) < lazyLoaded.getShape()[1])) {
 					
-					((MarchingCubes) generator).setBoxSize(new int[] {
-							((MarchingCubes) generator).getBoxSize()[0],
+					generator.getModel().setBoxSize(new int[] {
+							generator.getModel().getBoxSize()[0],
 							Integer.parseInt(yDimenssion.getText()),
-							((MarchingCubes) generator).getBoxSize()[2] });
+							generator.getModel().getBoxSize()[2] });
 					
 					updateTransforms();
 					cam.getChildren().remove(0);
@@ -185,7 +198,7 @@ public class SurfaceVisualisation extends Application{
 				}
 				
 				else {
-					xDimenssion.setText("" + ((MarchingCubes) generator).getBoxSize()[1]);
+					xDimenssion.setText("" + generator.getModel().getBoxSize()[1]);
 				}
 			}
 			
@@ -200,9 +213,9 @@ public class SurfaceVisualisation extends Application{
 						(Integer.parseInt(zDimenssion.getText()) > 0
 						&& Integer.parseInt(zDimenssion.getText()) < lazyLoaded.getShape()[0])){
 					
-					((MarchingCubes) generator).setBoxSize(new int[] {
-							((MarchingCubes) generator).getBoxSize()[0],
-							((MarchingCubes) generator).getBoxSize()[1],
+					generator.getModel().setBoxSize(new int[] {
+							generator.getModel().getBoxSize()[0],
+							generator.getModel().getBoxSize()[1],
 							Integer.parseInt(zDimenssion.getText()) });
 					
 					updateTransforms();
@@ -218,7 +231,7 @@ public class SurfaceVisualisation extends Application{
 					}
 				}
 				else {
-					xDimenssion.setText("" + ((MarchingCubes) generator).getBoxSize()[2]);
+					xDimenssion.setText("" + generator.getModel().getBoxSize()[2]);
 				}
 			}
 			
@@ -298,7 +311,7 @@ public class SurfaceVisualisation extends Application{
 	public Group surfaceAxisGenerator() throws Exception{
 		Group group = new Group();
 		
-		Surface result = generator.execute();
+		Surface result = generator.execute(null, new IMonitor.Stub());
 		this.isosurface = new MeshView(result.createTrangleMesh());
 
 		isosurface.setMaterial(new PhongMaterial(Color.GOLDENROD));
@@ -320,17 +333,17 @@ public class SurfaceVisualisation extends Application{
 		
 		VBox controls = new VBox();	
 		
-		this.isovalue =  new Slider(generator.getIsovalueMin(), generator.getIsovalueMax(), ((MarchingCubes)generator).getIsovalue());
+		this.isovalue =  new Slider(generator.getModel().getIsovalueMin(), generator.getModel().getIsovalueMax(), generator.getModel().getIsovalue());
 		isovalue.setMajorTickUnit(1);
         isovalue.setSnapToTicks(true);
         
-        isovalueLabel = new Label("Isovalue of " + ((MarchingCubes)generator).getIsovalue(), isovalue);
+        isovalueLabel = new Label("Isovalue of " + generator.getModel().getIsovalue(), isovalue);
         isovalueLabel.setContentDisplay(ContentDisplay.LEFT);
         
         Group slider = new Group();
         slider.getChildren().addAll(isovalue, isovalueLabel);
         
-        xDimenssion = new TextField("" + ((MarchingCubes)generator).getBoxSize()[0]);
+        xDimenssion = new TextField("" + generator.getModel().getBoxSize()[0]);
         xDimenssion.setPrefColumnCount(2);
         
         Label xLabel = new Label("Size of the cube in x direction", xDimenssion);
@@ -339,7 +352,7 @@ public class SurfaceVisualisation extends Application{
         Group x = new Group();
         x.getChildren().addAll(xDimenssion, xLabel);
         
-        yDimenssion = new TextField("" + ((MarchingCubes)generator).getBoxSize()[1]);
+        yDimenssion = new TextField("" + generator.getModel().getBoxSize()[1]);
         yDimenssion.setPrefColumnCount(2);
         
         Label yLabel = new Label("Size of the cube in y direction", yDimenssion);
@@ -348,7 +361,7 @@ public class SurfaceVisualisation extends Application{
         Group y = new Group();
         y.getChildren().addAll(yDimenssion, yLabel);
         
-        zDimenssion = new TextField("" + ((MarchingCubes)generator).getBoxSize()[2]);
+        zDimenssion = new TextField("" + generator.getModel().getBoxSize()[2]);
         zDimenssion.setPrefColumnCount(2);
         
         Label zLabel = new Label("Size of the cube in z direction", zDimenssion);

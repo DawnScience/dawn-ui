@@ -5,8 +5,9 @@ import javafx.embed.swt.FXCanvas;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.common.widgets.decorator.FloatDecorator;
 import org.dawnsci.common.widgets.decorator.IntegerDecorator;
-import org.dawnsci.isosurface.GeneratorFactory;
-import org.dawnsci.isosurface.IsosurfaceGenerator;
+import org.dawnsci.isosurface.Activator;
+import org.dawnsci.isosurface.impl.MarchingCubesModel;
+import org.dawnsci.isosurface.impl.Surface;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.slicing.api.system.AxisChoiceEvent;
@@ -35,6 +36,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
+import uk.ac.diamond.scisoft.analysis.processing.IOperation;
+import uk.ac.diamond.scisoft.analysis.processing.IOperationService;
 
 /**
  * 
@@ -50,7 +53,7 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 	private AxisChoiceListener  axisChoiceListener;
 	
 	// Maths
-	private IsosurfaceGenerator generator;
+	private IOperation<MarchingCubesModel, Surface> generator;
 	private IsosurfaceJob       job;
 	
 	// UI Stuff
@@ -60,9 +63,15 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 	private Scale     isovalue;
 	private Text      isoText, xDim, yDim, zDim;
 	
+	@SuppressWarnings("unchecked")
 	public IsosurfaceTool() {
 		
-		generator = GeneratorFactory.createMarchingCubes();
+		final IOperationService service = (IOperationService)Activator.getService(IOperationService.class);
+		try {
+			generator = (IOperation<MarchingCubesModel, Surface>) service.create("org.dawnsci.isosurface.marchingCubes");
+		} catch (Exception e) {
+			logger.error("Cannot get operation service!", e);
+		}
 
 		this.dimensionalListener = new DimensionalListener() {			
 			@Override
@@ -124,9 +133,11 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 			public void handleEvent(Event event) {
 				if (!isOn()) return;
 				int currentValue = isovalue.getSelection();
-				double isoVal = ((generator.getIsovalueMax() - generator.getIsovalueMin()) / 1000.0) * currentValue + generator.getIsovalueMin();
+				
+				MarchingCubesModel model = generator.getModel();
+				double isoVal = ((model.getIsovalueMax() - model.getIsovalueMin()) / 1000.0) * currentValue + model.getIsovalueMin();
 				isoText.setText(String.valueOf(isoVal));
-				generator.setIsovalue(isoVal);
+				model.setIsovalue(isoVal);
 				job.compute();
 			}
 
@@ -140,8 +151,10 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 			public void modifyText(ModifyEvent e) {
 				if (!isOn()) return;
 				double currentValue = floatText.getValue().doubleValue();
-				isovalue.setSelection((int) ((currentValue-generator.getIsovalueMin())*1000.0 / (generator.getIsovalueMax() - generator.getIsovalueMin())));
-				generator.setIsovalue(currentValue);
+
+				MarchingCubesModel model = generator.getModel();
+				isovalue.setSelection((int) ((currentValue-model.getIsovalueMin())*1000.0 / (model.getIsovalueMax() - model.getIsovalueMin())));
+				model.setIsovalue(currentValue);
 				job.compute();
 			}
 
@@ -155,9 +168,11 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 			public void modifyText(ModifyEvent e) {
 				if (!isOn()) return;
 				double xSize =  intText.getValue().doubleValue();
-				if (xSize > 0 && xSize < generator.getData().getShape()[2]){
-					int[] boxSize = new int[] {(int) xSize, generator.getBoxSize()[1], generator.getBoxSize()[2]};
-					generator.setBoxSize(boxSize);
+				
+				MarchingCubesModel model = generator.getModel();
+				if (xSize > 0 && xSize < model.getLazyData().getShape()[2]){
+					int[] boxSize = new int[] {(int) xSize, model.getBoxSize()[1], model.getBoxSize()[2]};
+					model.setBoxSize(boxSize);
 				}
 			}
 
@@ -176,9 +191,11 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 			public void modifyText(ModifyEvent e) {
 				if (!isOn()) return;
 				double ySize = intText.getValue().doubleValue();
-				if(ySize > 0 && ySize < generator.getData().getShape()[1]){
-					int[] boxSize = new int[] {generator.getBoxSize()[0], (int) ySize, generator.getBoxSize()[2]};
-					generator.setBoxSize(boxSize);
+
+				MarchingCubesModel model = generator.getModel();
+				if(ySize > 0 && ySize < model.getLazyData().getShape()[1]){
+					int[] boxSize = new int[] {model.getBoxSize()[0], (int) ySize, model.getBoxSize()[2]};
+					model.setBoxSize(boxSize);
 				}
 			}
 
@@ -197,9 +214,11 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 			public void modifyText(ModifyEvent e) {
 				if (!isOn()) return;
 				double zSize = intText.getValue().doubleValue();
-				if(zSize > 0 && zSize < generator.getData().getShape()[0]){
-					int[] boxSize = new int[] {generator.getBoxSize()[0], generator.getBoxSize()[1], (int) zSize};
-					generator.setBoxSize(boxSize);
+
+				MarchingCubesModel model = generator.getModel();
+				if(zSize > 0 && zSize < model.getLazyData().getShape()[0]){
+					int[] boxSize = new int[] {model.getBoxSize()[0], model.getBoxSize()[1], (int) zSize};
+					model.setBoxSize(boxSize);
 				}
 			}
 		});
@@ -255,13 +274,15 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 		
 		try {
 			final SliceSource data = getSlicingSystem().getData();
-			if (data.getLazySet()==generator.getData()) return;
+			
+			MarchingCubesModel model = generator.getModel();
+			if (data.getLazySet()==model.getLazyData()) return;
 			
 			ILazyDataset slice = data.getLazySet().getSliceView(getSlices());
 			slice = slice.squeeze();
 			slice.setName("Sliced "+data.getLazySet().getName());
 			if (slice.getRank()!=3) throw new RuntimeException("Invalid slice for isosurface tool!");
-			if (slice==generator.getData()) return; // Unlikely, will be new instances
+			if (slice==model.getLazyData()) return; // Unlikely, will be new instances
 			
 			job.compute(slice);
 			
@@ -309,7 +330,7 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 		return false;
 	}
 	
-	protected IsosurfaceGenerator getGenerator() {
+	protected IOperation<MarchingCubesModel, Surface> getGenerator() {
 		return generator;
 	}
 
@@ -322,11 +343,13 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 		if (!isOn()) return;
 		try {
 			setOn(false);
-			isovalue.setSelection((int) ((generator.getIsovalue()- generator.getIsovalueMin())*1000/(generator.getIsovalueMax()-generator.getIsovalueMin()) ));
-			isoText.setText(String.valueOf(generator.getIsovalue()));
-			xDim.setText(String.valueOf(generator.getBoxSize()[0]));
-			yDim.setText(String.valueOf(generator.getBoxSize()[1]));
-			zDim.setText(String.valueOf(generator.getBoxSize()[2]));
+			
+			MarchingCubesModel model = generator.getModel();
+			isovalue.setSelection((int) ((model.getIsovalue()- model.getIsovalueMin())*1000/(model.getIsovalueMax()-model.getIsovalueMin()) ));
+			isoText.setText(String.valueOf(model.getIsovalue()));
+			xDim.setText(String.valueOf(model.getBoxSize()[0]));
+			yDim.setText(String.valueOf(model.getBoxSize()[1]));
+			zDim.setText(String.valueOf(model.getBoxSize()[2]));
 			
 		} finally {
 			setOn(true);
