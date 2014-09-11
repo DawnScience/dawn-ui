@@ -152,7 +152,7 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 		});
 		
 		final Button increase = new Button(controls, SWT.PUSH);
-		increase.setToolTipText("Nudge whoile box 10% larger");
+		increase.setToolTipText("Nudge whole box 10% larger");
 		increase.setImage(Activator.getImage("icons/up.png").createImage());
 		increase.setLayoutData(new GridData(SWT.LEFT, SWT.NONE, false, false));
 		increase.addSelectionListener(new SelectionAdapter() {
