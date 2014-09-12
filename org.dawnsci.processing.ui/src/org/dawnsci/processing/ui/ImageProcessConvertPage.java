@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.dawb.common.services.conversion.IConversionContext;
 import org.dawb.common.ui.wizard.AbstractSliceConversionPage;
+import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 
@@ -19,7 +20,6 @@ public class ImageProcessConvertPage extends AbstractSliceConversionPage  {
 	}
 
 	public boolean isOpen() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -29,6 +29,14 @@ public class ImageProcessConvertPage extends AbstractSliceConversionPage  {
 		final File source = new File(getSourcePath(context));
 		setPath(source.getParent()+File.separator+"output");
 
+
+	}
+	
+	@Override
+	protected void createContentAfterFileChoose(Composite container) {
+		super.createContentAfterFileChoose(container);
+		sliceComponent.setSliceActionEnabled(PlotType.XY,      true);
+		sliceComponent.setSliceActionEnabled(PlotType.IMAGE,   true);
 	}
 
 	public void setWorkbench(IWorkbench workbench) {
@@ -55,39 +63,6 @@ public class ImageProcessConvertPage extends AbstractSliceConversionPage  {
 		IConversionContext context = super.getContext();
 		
 		return context;
-		
-//		if (workbench == null) return context;
-//		
-//		IWorkbenchPage page = workbench.getActiveWorkbenchWindow().getActivePage();
-//		IViewPart view = page.findView("org.dawnsci.processing.ui.processingView");
-//		
-//		Object ob = view.getAdapter(IOperation.class);
-//		IOperation[] ops = null;
-//		
-//		if (ob.getClass().isArray() && Array.get(ob, 0) instanceof IOperation) {
-//			ops = (IOperation[])ob;
-//		}
-//		
-//		if (ops != null) {
-//			
-//			final IOperation[] fop = ops;
-//			
-//			context.setUserObject(new IProcessingConversionInfo() {
-//
-//				@Override
-//				public IOperation[] getOperationSeries() {
-//					return fop;
-//				}
-//
-//				@Override
-//				public IExecutionVisitor getExecutionVisitor(String fileName) {
-//					//return new HierarchicalFileExecutionVisitor(fileName);
-//					return null;
-//				}
-//
-//			});
-//		}
-//		return context;
 	}
 	
 }

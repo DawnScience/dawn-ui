@@ -15,6 +15,7 @@ import org.osgi.framework.Bundle;
 
 import uk.ac.diamond.scisoft.analysis.processing.IOperation;
 import uk.ac.diamond.scisoft.analysis.processing.IOperationService;
+import uk.ac.diamond.scisoft.analysis.processing.OperationData;
 import uk.ac.diamond.scisoft.analysis.processing.model.IOperationModel;
 
 final class OperationDescriptor implements ISeriesItemDescriptor {
@@ -25,7 +26,7 @@ final class OperationDescriptor implements ISeriesItemDescriptor {
 	private static Map<String, Boolean> visible;
 	
 
-	private IOperation              operation;
+	private IOperation<? extends IOperationModel, ? extends OperationData>              operation;
 	private final String            id;
 	private final IOperationService service;
 	
@@ -37,9 +38,16 @@ final class OperationDescriptor implements ISeriesItemDescriptor {
 		this.service  = service;
 		this.uniqueId = UUID.randomUUID().toString()+"_"+System.currentTimeMillis();
 	}
+	
+	public OperationDescriptor(IOperation<? extends IOperationModel, ? extends OperationData> operation, IOperationService service) {
+		this.id       = operation.getId();
+		this.operation= operation;
+		this.service  = service;
+		this.uniqueId = UUID.randomUUID().toString()+"_"+System.currentTimeMillis();
+	}
 
 	@Override
-	public IOperation getSeriesObject() throws InstantiationException {
+	public IOperation<? extends IOperationModel, ? extends OperationData> getSeriesObject() throws InstantiationException {
 		if (operation==null) {
 			try {
 				operation = service.create(id);
@@ -175,8 +183,8 @@ final class OperationDescriptor implements ISeriesItemDescriptor {
 	        if (!getClass().isInstance(previous)) return false;
 	        
 	        // TODO Nice to do this without making the operations...
-	        final IOperation op = ((OperationDescriptor)previous).getSeriesObject();
-	        final IOperation ot = this.getSeriesObject();
+	        final IOperation<? extends IOperationModel, ? extends OperationData> op = ((OperationDescriptor)previous).getSeriesObject();
+	        final IOperation<? extends IOperationModel, ? extends OperationData> ot = this.getSeriesObject();
 	        
 			return op.getOutputRank().isCompatibleWith(ot.getInputRank());
 			
