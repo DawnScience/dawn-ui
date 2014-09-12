@@ -1,7 +1,5 @@
 package org.dawnsci.isosurface.tool;
 
-import javafx.embed.swt.FXCanvas;
-
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.common.widgets.decorator.FloatDecorator;
 import org.dawnsci.isosurface.Activator;
@@ -26,7 +24,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -58,8 +55,6 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 	private IsosurfaceJob       job;
 	
 	// UI Stuff
-	private Control   originalPlotControl;
-	private FXCanvas  canvas;
 	private Composite controls;
 	private Scale     isovalue;
 	private Text      isoText;
@@ -68,6 +63,8 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 	@SuppressWarnings("unchecked")
 	public IsosurfaceTool() {
 		
+		job    = new IsosurfaceJob("Computing isosurface", this);
+
 		final IOperationService service = (IOperationService)Activator.getService(IOperationService.class);
 		try {
 			generator = (IOperation<MarchingCubesModel, Surface>) service.create("org.dawnsci.isosurface.marchingCubes");
@@ -93,8 +90,7 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 	@Override
 	public void dispose() {
 		super.dispose();
-        if (canvas!=null) canvas.dispose();
-	}
+ 	}
 	
 	/**
 	 *  Create controls for the surface in the user interface
@@ -281,13 +277,6 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 
 		final IPlottingSystem plotSystem = getSlicingSystem().getPlottingSystem();
         
-		// We make the 3D canvas and job the first time.
-		if (canvas==null){
-			canvas = new FXCanvas(plotSystem.getPlotComposite(), SWT.NONE);
-			job    = new IsosurfaceJob("Computing isosurface", this);
-		}
-		originalPlotControl = plotSystem.setControl(canvas, false);
-				
 		setControlsVisible(true);
 		
  		final DimsDataList dimsDataList = getSlicingSystem().getDimsDataList();
@@ -344,12 +333,6 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 		}
 
 		setControlsVisible(false);
-		
-		if (originalPlotControl==null) return;
-        final IPlottingSystem plotSystem = getSlicingSystem().getPlottingSystem();
-		plotSystem.setControl(originalPlotControl, true);
-		
-		originalPlotControl = null;
 
 	}
 
@@ -371,10 +354,6 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 	
 	protected IOperation<MarchingCubesModel, Surface> getGenerator() {
 		return generator;
-	}
-
-	protected FXCanvas getCanvas() {
-		return canvas;
 	}
 
 	protected void updateUI() {

@@ -3,8 +3,6 @@ package org.dawnsci.isosurface.alg;
 import java.io.Serializable;
 
 import uk.ac.diamond.scisoft.analysis.processing.OperationData;
-import javafx.scene.shape.Mesh;
-import javafx.scene.shape.TriangleMesh;
 
 
 /**
@@ -47,30 +45,18 @@ public class Surface extends OperationData implements Serializable {
 	}
 
 
-	public float[] GetPoints() {
+	public float[] getPoints() {
 		return points;
 	}
 
 
-	public float[] GetTexCoords() {
+	public float[] getTexCoords() {
 		return texCoords;
 	}
 
 
-	public int[] GetFaces() {
+	public int[] getFaces() {
 		return faces;
 	}
 
-
-	public Mesh createTrangleMesh() {
-		final TriangleMesh mesh = new TriangleMesh();
-		marry(mesh);
-		return mesh;
-	}
-
-	public void marry(TriangleMesh mesh) {
-		mesh.getPoints().setAll(points);
-		mesh.getTexCoords().setAll(texCoords);
-		mesh.getFaces().setAll(faces);
-	}
 }

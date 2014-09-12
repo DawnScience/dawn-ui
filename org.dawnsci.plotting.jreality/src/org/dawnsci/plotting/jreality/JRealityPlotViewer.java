@@ -171,7 +171,6 @@ public class JRealityPlotViewer extends IPlottingSystemViewer.Stub implements IP
 	private Cursor defaultCursor;
 
 	private JRealityPlotActions plotActions;
-	private IPlottingSystem     system;
 	
 	public void init(IPlottingSystem system) {
 		this.system = system;

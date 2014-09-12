@@ -1,26 +1,24 @@
 package org.dawnsci.isosurface.tool;
 
-import javafx.application.Platform;
-import javafx.embed.swt.FXCanvas;
-import javafx.scene.Cursor;
-import javafx.scene.Group;
-import javafx.scene.shape.MeshView;
-import javafx.scene.shape.TriangleMesh;
-
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
-import org.dawnsci.isosurface.SurfaceDisplayer;
 import org.dawnsci.isosurface.alg.MarchingCubesModel;
 import org.dawnsci.isosurface.alg.Surface;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.PlotType;
+import org.eclipse.dawnsci.plotting.api.trace.IIsosurfaceTrace;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.dataset.FloatDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
+import uk.ac.diamond.scisoft.analysis.dataset.IntegerDataset;
 import uk.ac.diamond.scisoft.analysis.processing.IOperation;
 /**
  * 
@@ -31,10 +29,9 @@ public class IsosurfaceJob extends Job {
 
 	private static final Logger logger = LoggerFactory.getLogger(IsosurfaceJob.class);
 	
-	
+	private       IIsosurfaceTrace    trace;
 	private       IsosurfaceTool      tool;
-    private       SurfaceDisplayer    scene;
-	private       ILazyDataset        lazyData;
+ 	private       ILazyDataset        lazyData;
 
 	public IsosurfaceJob(String name, IsosurfaceTool  tool) {
 		
@@ -70,8 +67,9 @@ public class IsosurfaceJob extends Job {
 	protected IStatus run(IProgressMonitor monitor) {
 		
 
+		final IPlottingSystem system = tool.getSlicingSystem().getPlottingSystem();
 		try {
-			setCursor(Cursor.WAIT);
+			system.setDefaultCursor(IPlottingSystem.WAIT_CURSOR);
 	
 			final IOperation<MarchingCubesModel, Surface> generator = tool.getGenerator();
 			if (lazyData!=null) {
@@ -89,15 +87,36 @@ public class IsosurfaceJob extends Job {
 			    });
 			}
 			
+		    Display.getDefault().syncExec(new Runnable() {
+		    	public void run() {
+					system.setPlotType(PlotType.ISOSURFACE);
+		    	}
+		    });
+			
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 			
 			try {
 				Surface surface    = generator.execute(null, new ProgressMonitorWrapper(monitor));
-				drawSurface(surface);
 				
+				IDataset points     = new FloatDataset(surface.getPoints(), surface.getPoints().length);
+				IDataset textCoords = new FloatDataset(surface.getTexCoords(), surface.getTexCoords().length);
+				IDataset faces      = new IntegerDataset(surface.getFaces(), surface.getFaces().length);
+				
+				if (trace == null) {
+					trace = system.createIsosurfaceTrace("isosurface");
+					trace.setData(points, textCoords, faces, null);
+				    Display.getDefault().syncExec(new Runnable() {
+				    	public void run() {
+							system.addTrace(trace); // doing this is not thread safe!
+				    	}
+				    });
+				} else {
+					trace.setData(points, textCoords, faces, null);
+				}
+                
 			} catch (UnsupportedOperationException e){
 				e.printStackTrace();
-				showErrorMessage("The number of vertices has exceeded 1,000,000.", "The surface cannot be rendered. Please increase the box size.");
+				showErrorMessage("The number of vertices has exceeded "+generator.getModel().getVertexLimit(), "The surface cannot be rendered. Please increase the box size.");
 				return Status.CANCEL_STATUS;
 				
 			} catch (Exception e) {
@@ -114,7 +133,7 @@ public class IsosurfaceJob extends Job {
 			return Status.OK_STATUS;
 			
 		} finally {
-			setCursor(Cursor.DEFAULT);
+			system.setDefaultCursor(IPlottingSystem.NORMAL_CURSOR);
 		}
 	}
 
@@ -125,48 +144,6 @@ public class IsosurfaceJob extends Job {
 				MessageDialog.openError(Display.getDefault().getActiveShell(), title, message);
 			}
 		});
-	}
-
-	private void drawSurface(final Surface surface) {
-		
-		Platform.runLater(new Runnable() {			
-			public void run() {			
-				try {
-
-					if (scene==null){
-						Group    root   = new Group();
-						MeshView result = new MeshView(surface.createTrangleMesh());
-						result.setCursor(Cursor.CROSSHAIR);
-						scene = new SurfaceDisplayer(root, result);
-						
-						final FXCanvas canvas = tool.getCanvas();
-						canvas.setScene(scene);
-						
-					} else {
-						scene.updateTransforms();
-						TriangleMesh mesh = (TriangleMesh)scene.getIsosurface().getMesh();
-						surface.marry(mesh);
-						
-						final FXCanvas canvas = tool.getCanvas();
-						canvas.redraw();
-					}			
-					
-				} catch (OutOfMemoryError e){
-					e.printStackTrace();
-					showErrorMessage("Out of memory Error", "There is not enough memory to render the surface. Please increase the box size.");
-				}
-			}
-		});		
-	}
-
-	private void setCursor(final Cursor cursor) {
-		if (scene!=null) Platform.runLater(new Runnable() {
-		    @Override
-		    public void run() {
-		        // Do some stuff
-		         scene.setCursor(cursor);
-		    }
-		});		
 	}
 
 

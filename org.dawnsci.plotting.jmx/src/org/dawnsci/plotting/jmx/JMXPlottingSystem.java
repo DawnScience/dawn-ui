@@ -19,6 +19,7 @@ import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.trace.ColorOption;
 import org.eclipse.dawnsci.plotting.api.trace.IImageStackTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.dawnsci.plotting.api.trace.IIsosurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineStackTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IMulti2DTrace;
@@ -94,6 +95,10 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	@Override
 	public ISurfaceTrace createSurfaceTrace(String traceName) {
 		return (ISurfaceTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName);
+	}
+	@Override
+	public IIsosurfaceTrace createIsosurfaceTrace(String traceName) {
+		return (IIsosurfaceTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName);
 	}
 
 	@Override

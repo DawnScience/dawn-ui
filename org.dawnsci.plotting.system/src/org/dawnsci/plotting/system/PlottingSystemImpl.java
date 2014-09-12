@@ -47,6 +47,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ColorOption;
 import org.eclipse.dawnsci.plotting.api.trace.IImage3DTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageStackTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.dawnsci.plotting.api.trace.IIsosurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineStackTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IMulti2DTrace;
@@ -767,6 +768,13 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		ISurfaceTrace trace = (ISurfaceTrace)getViewer(ISurfaceTrace.class).createTrace(traceName, ISurfaceTrace.class);
 		return (ISurfaceTrace) setPaletteData(trace);
 	}
+	
+	@Override
+	public IIsosurfaceTrace createIsosurfaceTrace(String traceName) {
+		IIsosurfaceTrace trace = (IIsosurfaceTrace)getViewer(IIsosurfaceTrace.class).createTrace(traceName, IIsosurfaceTrace.class);
+		return (IIsosurfaceTrace) setPaletteData(trace);
+	}
+
 
 	@Override
 	public IMulti2DTrace createMulti2DTrace(String traceName) {
