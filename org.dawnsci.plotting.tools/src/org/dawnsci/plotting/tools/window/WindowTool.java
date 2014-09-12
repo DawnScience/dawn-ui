@@ -520,25 +520,31 @@ public class WindowTool extends AbstractToolPage {
 		@Override
 		protected IStatus run(final IProgressMonitor monitor) {
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+			
+			monitor.beginTask("Sending data to plot", 100);
+			
 			final IWindowTrace windowTrace = getWindowTrace();
 			if (windowTrace!=null) {
 				Display.getDefault().syncExec(new Runnable() {
 					public void run() {
 						if (monitor.isCanceled()) return;
-						monitor.beginTask("Sending data to plot", 100);
-						IStatus result = null;
-						if (windowTrace instanceof ISurfaceTrace) {
-							result = ((ISurfaceTrace)windowTrace).setWindow(window, updateClipping, monitor);
-						} else {
-							result = windowTrace.setWindow(window, monitor);
+						try {
+							IStatus result = null;
+							if (windowTrace instanceof ISurfaceTrace) {
+								result = ((ISurfaceTrace)windowTrace).setWindow(window, updateClipping, monitor);
+							} else {
+								result = windowTrace.setWindow(window, monitor);
+							}
+							if (result == Status.CANCEL_STATUS) return;
+						} catch (Exception ne) {
+							logger.error("Cannot window surface!", ne);
 						}
-						if (result == Status.CANCEL_STATUS) return;
-						monitor.worked(100);
 					}
 				});
 			} else {
 				return Status.CANCEL_STATUS;
 			}
+			monitor.done();
 			return Status.OK_STATUS;
 		}
 	}

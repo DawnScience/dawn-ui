@@ -10,6 +10,7 @@ import java.util.concurrent.RecursiveAction;
 
 import org.dawb.common.ui.image.ShapeType;
 import org.dawnsci.plotting.AbstractPlottingSystem;
+import org.dawnsci.plotting.AbstractPlottingViewer;
 import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.operations.DefaultOperationHistory;
@@ -150,7 +151,9 @@ public class MaskObject {
         final IAxis xAxis = system.getSelectedXAxis();
         final IAxis yAxis = system.getSelectedYAxis();
 
-        final Point startLocation = ((AbstractPlottingSystem)system).getShiftPoint();
+		AbstractPlottingViewer viewer = (AbstractPlottingViewer)system.getAdapter(AbstractPlottingViewer.class);
+        
+		final Point startLocation = viewer.getShiftPoint();
         final Collection<Point> locations;
         if (startLocation==null) {
         	locations = new HashSet<Point>(7);

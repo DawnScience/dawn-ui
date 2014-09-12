@@ -42,6 +42,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.jreality.compositing.CompositeEntry;
 import org.eclipse.dawnsci.plotting.api.jreality.compositing.CompositeOp;
@@ -80,7 +81,6 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
@@ -118,7 +118,7 @@ import de.jreality.util.SystemProperties;
  * @author fcp94556
  *
  */
-public class JRealityPlotViewer implements SelectionListener, PaintListener, Listener {
+public class JRealityPlotViewer extends IPlottingSystemViewer.Stub implements IPlottingSystemViewer, SelectionListener, PaintListener, Listener {
 
 	
 	private static Logger logger = LoggerFactory.getLogger(JRealityPlotViewer.class);
@@ -191,14 +191,14 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		system.getActionBars().updateActionBars();
 	}
 
-	public Control getControl() {
+	public Composite getControl() {
 		return container;
 	}
 
-	public ILineStackTrace createStackTrace(final String name, int numberOfPlots) {
+	public ILineStackTrace createStackTrace(final String name) {
 		StackTrace stack = new StackTrace(this, name);
 		// No more than stackPlots number in the stack.
-		stack.setWindow(new LinearROI(new double[]{0.0,0.0}, new double[]{numberOfPlots,0.0}));
+		stack.setWindow(new LinearROI(new double[]{0.0,0.0}, new double[]{ILineStackTrace.MAXIMUM_STACK,0.0}));
 		return stack;
 	}
 
@@ -215,6 +215,49 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			refresh(true);
 		}
 		stack.setActive(true);
+	}
+	
+	public boolean isTraceTypeSupported(Class<? extends ITrace> trace) {
+		if (ISurfaceTrace.class.isAssignableFrom(trace)) {
+			return true;
+		} else if (IMulti2DTrace.class.isAssignableFrom(trace)) {
+			return true;
+		} else if (ILineStackTrace.class.isAssignableFrom(trace)) {
+			return true;
+		} else if (IScatter3DTrace.class.isAssignableFrom(trace)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public ITrace createTrace(String name, Class<? extends ITrace> trace) {
+		
+		if (ISurfaceTrace.class.isAssignableFrom(trace)) {
+			return createSurfaceTrace(name);
+		} else if (IMulti2DTrace.class.isAssignableFrom(trace)) {
+			return createMulti2DTrace(name);
+		} else if (ILineStackTrace.class.isAssignableFrom(trace)) {
+			return createStackTrace(name);
+		} else if (IScatter3DTrace.class.isAssignableFrom(trace)) {
+			return createScatter3DTrace(name);	
+		} else {
+		    throw new RuntimeException("Trace type not supported "+trace.getClass().getSimpleName());
+		}
+	}
+	public void removeTrace(ITrace trace) {
+		
+		if (trace instanceof ISurfaceTrace) {
+			removeSurfaceTrace((ISurfaceTrace)trace);
+		} else if (trace instanceof IMulti2DTrace) {
+			removeMulti2DTrace((IMulti2DTrace)trace);
+		} else if (trace instanceof ILineStackTrace) {
+			removeStackTrace((ILineStackTrace)trace);
+		} else if (trace instanceof IScatter3DTrace) {
+			removeScatter3DTrace((IScatter3DTrace)trace);	
+		} else {
+		    throw new RuntimeException("Trace type not supported "+trace.getClass().getSimpleName());
+		}
 	}
 	
 	/**
@@ -275,7 +318,24 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 
 	private ITrace currentTrace;
 
-	public void addTrace(ITrace trace) {
+	/**
+	 * 
+	 * @param type
+	 * @return true if this viewer deals with this plot type.
+	 */
+	public boolean isPlotTypeSupported(PlotType type){
+		switch(type) {
+		case SURFACE:
+		case XY_STACKED_3D:
+		case XY_SCATTER_3D:
+		case MULTI_IMAGE:
+		    return true;
+		default:
+			return false;
+		}
+	}
+	
+	public boolean addTrace(ITrace trace) {
 		currentTrace = trace;
 		if (trace instanceof ISurfaceTrace) {
 			system.setPlotType(PlotType.SURFACE);
@@ -285,10 +345,13 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			system.setPlotType(PlotType.XY_SCATTER_3D);
 		} else if (trace instanceof IMulti2DTrace) {
 			system.setPlotType(PlotType.MULTI_IMAGE);
+		} else{
+			throw new RuntimeException("Trace class not supported "+trace.getClass().getSimpleName());
 		}
+		
 		TraceWillPlotEvent evt = new TraceWillPlotEvent(trace, true);
 		system.fireWillPlot(evt);
-		if (!evt.doit) return;
+		if (!evt.doit) return false;
 
 		if (trace instanceof ISurfaceTrace) {
 			addSurfaceTrace((ISurfaceTrace)trace);
@@ -298,7 +361,10 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			addScatter3DTrace((IScatter3DTrace)trace);
 		} else if (trace instanceof IMulti2DTrace) {
 			addMulti2DTrace((IMulti2DTrace)trace);
+		} else{
+			throw new RuntimeException("Trace class not supported "+trace.getClass().getSimpleName());
 		}
+		return true;
 	}
 
 	/**
@@ -420,11 +486,9 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 	protected IStatus setSurfaceWindow(IROI window, boolean updateClipping, IProgressMonitor monitor) {
 		if (currentMode == PlottingMode.SURF2D) {
 			final SurfacePlotROI surfRoi = getWindow(window);
-			if (updateClipping)
-				updateClipping(surfRoi);
+			if (updateClipping) updateClipping(surfRoi);
 			IStatus status = ((DataSet3DPlot3D) plotter).setDataWindow(null, surfRoi, monitor);
-			if (status == Status.CANCEL_STATUS)
-				return status;
+			if (status == Status.CANCEL_STATUS) return status;
 			refresh(false);
 		}
 		return Status.OK_STATUS;
@@ -954,7 +1018,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 													   (showScrollBars ? vBar : null));
 	}
 
-	public void setUseLegend(final boolean useLeg) {
+	public void setShowLegend(final boolean useLeg) {
 		this.useLegend = useLeg;
 		if (useLegend) {
 			if (legendTable == null) buildLegendTable();
@@ -1100,7 +1164,7 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			setPerspectiveCamera(true,false);
 			break;
 		case SURF2D:
-			setUseLegend(false);
+			setShowLegend(false);
 			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(toolNode);
 			MatrixBuilder.euclidean().translate(0.0, 0.0, 0.0).assignTo(root);
 			plotter = new DataSet3DPlot3D(viewerApp, hasJOGL, true);
@@ -1288,14 +1352,18 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 		refresh(false);
 	}
 
-	public void reset() {
+	public void reset(boolean ignored) {
 		if (plotter!=null) {
 			removeOldSceneNodes();
 		}
 	}
+	
+	public void clearTraces() {
+		reset(true);
+	}
 
 	public void dispose() {
-		reset();
+		reset(true);
 		if (plotActions!=null) {
 			plotActions.dispose();
 		}
@@ -1546,5 +1614,10 @@ public class JRealityPlotViewer implements SelectionListener, PaintListener, Lis
 			return data;
 		}
 		return null;
+	}
+
+	@Override
+	public void setFocus() {
+		if (plotArea!=null) plotArea.setFocus();
 	}
 }

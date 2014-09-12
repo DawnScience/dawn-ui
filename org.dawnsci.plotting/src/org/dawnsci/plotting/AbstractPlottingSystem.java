@@ -27,14 +27,14 @@ import org.eclipse.dawnsci.plotting.api.PlottingSelectionProvider;
 import org.eclipse.dawnsci.plotting.api.annotation.IAnnotation;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
-import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.tool.IToolChangeListener;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
+import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.tool.ToolChangeEvent;
-import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.eclipse.dawnsci.plotting.api.trace.ColorOption;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
@@ -42,9 +42,6 @@ import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
-import org.eclipse.draw2d.MouseListener;
-import org.eclipse.draw2d.MouseMotionListener;
-import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -683,7 +680,7 @@ public abstract class AbstractPlottingSystem implements IPlottingSystem, IToolPa
 		return emptyTool;
 	}
 
-	protected void clearRegionTool() {
+	public void clearRegionTool() {
 		// TODO Implement to clear any region tool which the plotting system may
 		// be adding if createRegion(...) has been called.
 	}
@@ -859,62 +856,10 @@ public abstract class AbstractPlottingSystem implements IPlottingSystem, IToolPa
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * Please override for draw2d listeners.
-	 * @deprecated draw2d Specific. Can still be used for code that does not mind draw2d link.
-	 */
-	@Deprecated
-	public void addMouseMotionListener(MouseMotionListener mml) {
-		throw new UnsupportedOperationException();
-	}
-	
-	/**
-	 * Please override for draw2d listeners.
-	 * @deprecated draw2d Specific. Can still be used for code that does not mind draw2d link.
-	 */
-	@Deprecated
-	public void addMouseClickListener(MouseListener mcl) {
-		throw new UnsupportedOperationException();
-	}
-	/**
-	 * Please override for draw2d listeners.
-	 * @deprecated draw2d Specific. Can still be used for code that does not mind draw2d link.
-	 */
-	@Deprecated
-	public void removeMouseMotionListener(MouseMotionListener mml) {
-		throw new UnsupportedOperationException();		
-	}
-	
-	/**
-	 * Please override for draw2d listeners.
-	 * @deprecated draw2d Specific. Can still be used for code that does not mind draw2d link.
-	 */
-	@Deprecated
-	public void removeMouseClickListener(MouseListener mcl) {
-		throw new UnsupportedOperationException();
-	}
-
 	@Override
 	public void setKeepAspect(boolean checked){
 		
 	}
-
-    /**
-     * Call this method to set a point. When the shift key is pressed the plotting system
-     * draws a line from the 
-     * @param object
- 	 * @deprecated draw2d Specific. Can still be used for code that does not mind draw2d link.
-    */
-	@Deprecated
-	public void setShiftPoint(Point object) {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Deprecated
-	public Point getShiftPoint() {
-		throw new UnsupportedOperationException();
-	}
-	
 
 	public boolean isAutoHideRegions() {
 		return isAutoHideRegions;

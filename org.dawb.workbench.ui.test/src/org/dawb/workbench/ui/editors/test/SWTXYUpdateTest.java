@@ -169,7 +169,7 @@ public class SWTXYUpdateTest {
 		
 		// Check sizes
 		for (IDataset a : ys) {
-			final IDataset set = sys.getData(a.getName());
+			final IDataset set = sys.getTrace(a.getName()).getData();
 			if (set==null) throw new Exception("There must be a data set called "+set.getName());
 			try {
 				if (set.getSize()!=(updateAmount+a.getSize())) {

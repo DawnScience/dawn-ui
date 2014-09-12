@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="jars/jfxrt.jar"/>
+	<classpathentry exported="true" kind="lib" path="jars/jfxrt.jar" sourcepath="C:/Program Files/Java/jdk1.8.0_05/javafx-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="jars/jfxswt.jar" sourcepath="C:/Program Files/Java/jdk1.8.0_05/javafx-src.zip"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>

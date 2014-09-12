@@ -915,6 +915,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	@Override
 	public boolean setData(IDataset im, List<? extends IDataset> axes, boolean performAuto) {
 		
+		// We are just assigning the data before the image is live.
+		if (getParent()==null && !performAuto) {
+			this.image = (Dataset)im;
+			this.axes  = (List<IDataset>)axes;
+			return false;
+		}
+		
 		if (getPreferenceStore().getBoolean(PlottingConstants.IGNORE_RGB) && im instanceof RGBDataset) {
 			RGBDataset rgb = (RGBDataset)im;
 			im = getSum(rgb);

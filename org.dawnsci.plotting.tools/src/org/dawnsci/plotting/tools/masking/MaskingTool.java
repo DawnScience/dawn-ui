@@ -18,6 +18,7 @@ import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
 import org.dawb.common.ui.wizard.persistence.PersistenceImportWizard;
 import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.plotting.AbstractPlottingSystem;
+import org.dawnsci.plotting.AbstractPlottingViewer;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.util.ColorUtility;
 import org.eclipse.core.commands.operations.IOperationHistoryListener;
@@ -272,7 +273,8 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		@Override
 		public void mouseReleased(org.eclipse.draw2d.MouseEvent me) {
 			// record shift point
-			((AbstractPlottingSystem)getPlottingSystem()).setShiftPoint(me.getLocation());
+			AbstractPlottingViewer viewer = (AbstractPlottingViewer)getPlottingSystem().getAdapter(AbstractPlottingViewer.class);
+			viewer.setShiftPoint(me.getLocation());
 		}
 
 		@Override
@@ -1369,9 +1371,10 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			if (getImageTrace()!=null) {
 				getImageTrace().addPaletteListener(paletteListener);
 			}
-
-			((AbstractPlottingSystem)getPlottingSystem()).addMouseClickListener(clickListener);
-			((AbstractPlottingSystem)getPlottingSystem()).addMouseMotionListener(clickListener);
+			
+			AbstractPlottingViewer viewer = (AbstractPlottingViewer)getPlottingSystem().getAdapter(AbstractPlottingViewer.class);
+			viewer.addMouseClickListener(clickListener);
+			viewer.addMouseMotionListener(clickListener);
 		}
 		if (this.regionTable!=null && !regionTable.getControl().isDisposed()) {
 			regionTable.refresh();
@@ -1403,10 +1406,11 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				getImageTrace().removePaletteListener(paletteListener);
 			}
 
-			((AbstractPlottingSystem)getPlottingSystem()).removeMouseClickListener(clickListener);
-			((AbstractPlottingSystem)getPlottingSystem()).removeMouseMotionListener(clickListener);
-			((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(null);
-			((AbstractPlottingSystem)getPlottingSystem()).setShiftPoint(null);
+			AbstractPlottingViewer viewer = (AbstractPlottingViewer)getPlottingSystem().getAdapter(AbstractPlottingViewer.class);
+			viewer.removeMouseClickListener(clickListener);
+			viewer.removeMouseMotionListener(clickListener);
+			viewer.setSelectedCursor(null);
+			viewer.setShiftPoint(null);
 
 		}
 	}
