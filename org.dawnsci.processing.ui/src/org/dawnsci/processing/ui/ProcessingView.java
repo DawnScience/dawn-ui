@@ -37,6 +37,8 @@ import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.processing.IOperation;
 import uk.ac.diamond.scisoft.analysis.processing.IOperationService;
@@ -58,6 +60,8 @@ public class ProcessingView extends ViewPart {
 	private OperationFilter           operationFiler;
 	private List<OperationDescriptor> saved;
 	private TableViewerColumn inputs, outputs;
+	
+	private final static Logger logger = LoggerFactory.getLogger(ProcessingView.class);
 
 	public ProcessingView() {
 		this.seriesTable    = new SeriesTable();
@@ -132,13 +136,13 @@ public class ProcessingView extends ViewPart {
 			IOperationService os = (IOperationService)ServiceManager.getService(IOperationService.class);
 			IPersistentFile pf = service.getPersistentFile(filename);
 			IOperation<? extends IOperationModel, ? extends OperationData>[] operations = pf.getOperations();
-			
+			if (operations == null) return;
 			List<OperationDescriptor> list = new ArrayList<OperationDescriptor>(operations.length);
 			for (IOperation<? extends IOperationModel, ? extends OperationData> op : operations) list.add(new OperationDescriptor(op, os));
 			
 			if (operations != null) seriesTable.setInput(list, operationFiler);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Could not read operations from file", e);
 		}
 		
 	}
