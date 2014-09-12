@@ -24,13 +24,19 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IContributionManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeSelection;
@@ -45,11 +51,8 @@ import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -72,7 +75,7 @@ import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 import uk.ac.diamond.scisoft.analysis.processing.IExecutionVisitor;
 import uk.ac.diamond.scisoft.analysis.processing.IOperation;
 import uk.ac.diamond.scisoft.analysis.processing.OperationData;
-import uk.ac.diamond.scisoft.analysis.processing.RichDataset;
+import uk.ac.diamond.scisoft.analysis.processing.model.IOperationModel;
 import uk.ac.diamond.scisoft.analysis.processing.visitors.HierarchicalFileExecutionVisitor;
 import uk.ac.diamond.scisoft.analysis.slice.SliceVisitor;
 import uk.ac.diamond.scisoft.analysis.slice.Slicer;
@@ -85,8 +88,9 @@ public class DataFileSliceView extends ViewPart {
 	IConversionContext context;
 	ImageProcessConvertPage convertPage;
 	UpdateJob job;
-	int maxImage = 0;
-	int currentImage = 0;
+	Label currentSliceLabel;
+	ChangeSliceWidget csw;
+	String selectedFile = null;
 	
 	@Override
 	public void createPartControl(Composite parent) {
@@ -105,7 +109,18 @@ public class DataFileSliceView extends ViewPart {
 		viewer.setLabelProvider(new ViewLabelProvider());
 		viewer.setContentProvider(new BasicContentProvider());
 		viewer.setInput(filePaths.toArray(new String[filePaths.size()]));
-		
+		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				if (event.getSelection() instanceof StructuredSelection) {
+					selectedFile = (String)((StructuredSelection)event.getSelection()).getFirstElement();
+					update(null);
+				}
+				
+				
+			}
+		});
 		ColumnViewerToolTipSupport.enableFor(viewer);
 		
 		DropTargetAdapter dropListener = new DropTargetAdapter() {
@@ -137,102 +152,186 @@ public class DataFileSliceView extends ViewPart {
 				LocalSelectionTransfer.getTransfer() });
 		dt.addDropListener(dropListener);
 		
-		Label datasetLabel = new Label(parent, SWT.WRAP);
-		datasetLabel.setText("Dataset name not selected");
+//		SelectorWidget sw = new SelectorWidget(parent,true,true) {
+//			
+//			@Override
+//			public void pathChanged(String path, TypedEvent event) {
+//				
+//			}
+//		};
+//		sw.setLabel("Output:");
 		
-		Label outputPath = new Label(parent, SWT.WRAP);
-		outputPath.setText("Output path not selected");
-		
-		Button edit = new Button(parent, SWT.NONE);
-		edit.setText("Edit");
-		edit.addSelectionListener(new SelectionListener() {
+		csw = new ChangeSliceWidget(parent);
+		csw.addSliceChangeListener(new ISliceChangeListener() {
 			
 			@Override
-			public void widgetSelected(SelectionEvent e) {
-				Wizard wiz = new Wizard() {
-					//set 
-					@Override
-					public boolean performFinish() {
-						return true;
-					}
-				};
+			public void sliceChanged(SliceChangeEvent event) {
+				String ss = Slice.createString(csw.getCurrentSlice());
+				currentSliceLabel.setText("Current slice of data: [" +ss + "]");
+				currentSliceLabel.getParent().layout(true);
+				update(null);
+			}
+		});
+		
+//		Button edit = new Button(parent, SWT.NONE);
+//		edit.setText("Edit");
+//		edit.addSelectionListener(new SelectionListener() {
+//			
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				Wizard wiz = new Wizard() {
+//					//set 
+//					@Override
+//					public boolean performFinish() {
+//						return true;
+//					}
+//				};
+//				
+//				wiz.setNeedsProgressMonitor(true);
+//				convertPage = null;
+//				convertPage = new ImageProcessConvertPage();
+//				wiz.addPage(convertPage);
+//				final WizardDialog wd = new WizardDialog(getSite().getShell(),wiz);
+//				wd.create();
+//				convertPage.setContext(context);
+//				
+//				
+//
+//				if (wd.open() == WizardDialog.OK) {
+//					context = convertPage.getContext();
+//					context.setConversionScheme(ConversionScheme.PROCESS);
+//					
+//					try {
+//						
+//						update(null);
+//						
+//					} catch (Exception e1) {
+//						// TODO Auto-generated catch block
+//						e1.printStackTrace();
+//					}
+//					
+//				}
+//			}
+//			
+//			@Override
+//			public void widgetDefaultSelected(SelectionEvent e) {
+//				// TODO Auto-generated method stub
+//				
+//			}
+//		});
+		
+		
+		
+		final MenuManager rightClick = new MenuManager();
+		createActions(rightClick);
+		viewer.getControl().setMenu(rightClick.createContextMenu(viewer.getControl()));
+		
+//		Button run = new Button(parent, SWT.NONE);
+//		run.setText("Run");
+//		run.addSelectionListener(new SelectionListener() {
+//			
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				
+//				IOperation[] ops = getOperations();
+//				
+//				if (ops != null) {
+//					
+//					final IOperation[] fop = ops;
+//					
+//					context.setUserObject(new IProcessingConversionInfo() {
+//
+//						@Override
+//						public IOperation[] getOperationSeries() {
+//							return fop;
+//						}
+//
+//						@Override
+//						public IExecutionVisitor getExecutionVisitor(String fileName) {
+//							return new HierarchicalFileExecutionVisitor(fileName);
+//						}
+//
+//					});
+//				}
+//					
+//				ProgressMonitorDialog dia = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
+//				
+//				try {
+//					dia.run(true, true, new IRunnableWithProgress() {
+//
+//						@Override
+//						public void run(IProgressMonitor monitor) throws InvocationTargetException,
+//						InterruptedException {
+//							//TODO properly populate the number steps
+//							monitor.beginTask("Processing", 100);
+//							context.setMonitor(new ProgressMonitorWrapper(monitor));
+//							try {
+//								service.process(context);
+//							} catch (Exception e) {
+//								// TODO Auto-generated catch block
+//								e.printStackTrace();
+//							}
+//
+//						}
+//					});
+//				} catch (InvocationTargetException e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				} catch (InterruptedException e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				}
+//				
+//			}
+//			
+//			@Override
+//			public void widgetDefaultSelected(SelectionEvent e) {
+//				// TODO Auto-generated method stub
+//				
+//			}
+//		});
+		
+		getSite().getPage().addSelectionListener("org.dawnsci.processing.ui.processingView",new ISelectionListener() {
+			
+			@Override
+			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+				selection.toString();
 				
-				wiz.setNeedsProgressMonitor(true);
-				convertPage = null;
-				convertPage = new ImageProcessConvertPage();
-				wiz.addPage(convertPage);
-				final WizardDialog wd = new WizardDialog(getSite().getShell(),wiz);
-				wd.create();
-				convertPage.setContext(context);
-				
-				
-
-				if (wd.open() == WizardDialog.OK) {
-					context = convertPage.getContext();
-					context.setConversionScheme(ConversionScheme.PROCESS);
-					
+				if (selection instanceof StructuredSelection && ((StructuredSelection)selection).getFirstElement() instanceof OperationDescriptor) {
+					OperationDescriptor des = (OperationDescriptor)((StructuredSelection)selection).getFirstElement();
 					try {
-						
-						update(null);
-						
-					} catch (Exception e1) {
+						update(des.getSeriesObject());
+					} catch (InstantiationException e) {
 						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						e.printStackTrace();
 					}
-					
 				}
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
+				
+				//update(null);
 				
 			}
 		});
 		
-		Button clear = new Button(parent, SWT.NONE);
-		clear.setText("Clear");
-		clear.addSelectionListener(new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				filePaths.clear();
-				context = null;
-				try {
-					SDAPlotter.clearPlot("Output");
-					SDAPlotter.clearPlot("Input");
-				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				
-				viewer.setInput(filePaths.toArray(new String[filePaths.size()]));
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
+		currentSliceLabel = new Label(parent, SWT.WRAP);
+		currentSliceLabel.setText("Current slice of data: [ - - - - -]");
 		
-		Button run = new Button(parent, SWT.NONE);
-		run.setText("Run");
-		run.addSelectionListener(new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				
-				IOperation[] ops = getOperations();
-				
+
+	}
+	
+	private void createActions(IContributionManager rightClick) {
+		
+		final IAction run = new Action("Process all files", Activator.getImageDescriptor("icons/run_workflow.gif")) {
+			public void run() {
+				IOperation<? extends IOperationModel, ? extends OperationData>[] ops = getOperations();
+
 				if (ops != null) {
-					
-					final IOperation[] fop = ops;
-					
+
+					final IOperation<? extends IOperationModel, ? extends OperationData>[] fop = ops;
+
 					context.setUserObject(new IProcessingConversionInfo() {
 
 						@Override
-						public IOperation[] getOperationSeries() {
+						public IOperation<? extends IOperationModel, ? extends OperationData>[] getOperationSeries() {
 							return fop;
 						}
 
@@ -243,9 +342,9 @@ public class DataFileSliceView extends ViewPart {
 
 					});
 				}
-					
+
 				ProgressMonitorDialog dia = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
-				
+
 				try {
 					dia.run(true, true, new IRunnableWithProgress() {
 
@@ -271,37 +370,70 @@ public class DataFileSliceView extends ViewPart {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				
 			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
+		};
+		getViewSite().getActionBars().getToolBarManager().add(run);
+		getViewSite().getActionBars().getMenuManager().add(run);
+		rightClick.add(run);
 		
-		getSite().getPage().addSelectionListener("org.dawnsci.processing.ui.processingView",new ISelectionListener() {
-			
-			@Override
-			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-				selection.toString();
-				
-				if (selection instanceof StructuredSelection && ((StructuredSelection)selection).getFirstElement() instanceof OperationDescriptor) {
-					OperationDescriptor des = (OperationDescriptor)((StructuredSelection)selection).getFirstElement();
-					try {
-						update(des.getSeriesObject());
-					} catch (InstantiationException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+		final IAction clear = new Action("Clear all files", Activator.getImageDescriptor("icons/delete.gif")) {
+			public void run() {
+				filePaths.clear();
+				context = null;
+				try {
+					SDAPlotter.clearPlot("Output");
+					SDAPlotter.clearPlot("Input");
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
 				
-				//update(null);
-				
+				viewer.setInput(filePaths.toArray(new String[filePaths.size()]));
 			}
-		});
+		};
+		
+		getViewSite().getActionBars().getToolBarManager().add(clear);
+		getViewSite().getActionBars().getMenuManager().add(clear);
+		rightClick.add(clear);
+		
+		final IAction edit = new Action("Edit slice configuration", Activator.getImageDescriptor("icons/clipboard-list.png")) {
+			public void run() {
+				Wizard wiz = new Wizard() {
+					//set 
+					@Override
+					public boolean performFinish() {
+						return true;
+					}
+				};
+				
+				wiz.setNeedsProgressMonitor(true);
+				convertPage = null;
+				convertPage = new ImageProcessConvertPage();
+				wiz.addPage(convertPage);
+				final WizardDialog wd = new WizardDialog(getSite().getShell(),wiz);
+				wd.create();
+				convertPage.setContext(context);
+				
+				if (wd.open() == WizardDialog.OK) {
+					context = convertPage.getContext();
+					context.setConversionScheme(ConversionScheme.PROCESS);
+					
+					try {
+						
+						update(null);
+						
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					
+				}
+			}
+		};
 
+		getViewSite().getActionBars().getToolBarManager().add(edit);
+		getViewSite().getActionBars().getMenuManager().add(edit);
+		rightClick.add(edit);
 	}
 	
 	private void addFile(String filePath) {
@@ -348,22 +480,25 @@ public class DataFileSliceView extends ViewPart {
 					ILazyDataset lazy = dh.getLazyDataset(context.getDatasetNames().get(0));
 					int[] shape = lazy.getShape();
 					
+//					datasetLabel.setText(context.getDatasetNames().get(0));
 					//single image/line
 //					if (context.getSliceDimensions() == null){
 //						for (int i = 0; i < shape.length; i++) context.addSliceDimension(i, "all");
 //					}
 					
 					int[] dd = Slicer.getDataDimensions(shape, context.getSliceDimensions());
-					
-					Arrays.sort(dd);
-					
-					int work = 1;
-					
-					for (int i = 0; i< shape.length; i++) {
-						if (Arrays.binarySearch(dd, i) < 0) work*=shape[i];
-					}
-					
-					maxImage = work;
+					Slice[] slices = Slicer.getSliceArrayFromSliceDimensions(context.getSliceDimensions(), shape);
+					csw.setDatasetShapeInformation(shape, dd.clone(), slices);
+					currentSliceLabel.setText(Slice.createString(csw.getCurrentSlice()));
+//					Arrays.sort(dd);
+//					
+//					int work = 1;
+//					
+//					for (int i = 0; i< shape.length; i++) {
+//						if (Arrays.binarySearch(dd, i) < 0) work*=shape[i];
+//					}
+//					
+//					maxImage = work;
 					
 					
 				} catch (Exception e) {
@@ -391,54 +526,24 @@ public class DataFileSliceView extends ViewPart {
 		
 	}
 	
-	private void update(final IOperation end) {
+	private void update(final IOperation<? extends IOperationModel, ? extends OperationData> end) {
 	
 			if (context == null) return;
 			
-			Job update = new Job("update") {
-				
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					
-					try {
-						
-					
-					final IDataHolder   dh = LoaderFactory.getData(context.getFilePaths().get(0));
-					ILazyDataset lazyDataset = dh.getLazyDataset(context.getDatasetNames().get(0));
-					
-					final IDataset firstSlice = Slicer.getFirstSlice(new RichDataset(lazyDataset, null), context.getSliceDimensions());
-					SDAPlotter.imagePlot("Input", firstSlice);
-					
-					EscapableSliceVisitor sliceVisitor = new EscapableSliceVisitor(lazyDataset, 
-							                                                       getOutputExecutionVisitor(), 
-							                                                       Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions()), 
-							                                                       getOperations(), 
-							                                                       monitor, context);
-					sliceVisitor.setEndOperation(end);
-					sliceVisitor.visit(firstSlice, null, null);
-					} catch (Exception e) {
-						e.printStackTrace();
-						return Status.CANCEL_STATUS;
-					}
-					
-					return Status.OK_STATUS;
-				}
-			};
-			
-			update.schedule();
 			if (job != null) {
 				job.cancel();
+				job.setPath(selectedFile); 
 				job.setEndOperation(end);
 				job.schedule();
 			}
 		
 	}
 	
-	private IOperation[] getOperations() {
+	private IOperation<? extends IOperationModel, ? extends OperationData>[] getOperations() {
 		IViewPart view = getSite().getPage().findView("org.dawnsci.processing.ui.processingView");
 		
 		Object ob = view.getAdapter(IOperation.class);
-		IOperation[] ops = null;
+		IOperation<? extends IOperationModel, ? extends OperationData>[] ops = null;
 		
 		if (ob == null) return null;
 		
@@ -453,26 +558,26 @@ public class DataFileSliceView extends ViewPart {
 		return new IExecutionVisitor() {
 			
 			@Override
-			public void passDataThroughUnmodified(IOperation... operations) {
+			public void passDataThroughUnmodified(IOperation<? extends IOperationModel, ? extends OperationData>... operations) {
 				// TODO Auto-generated method stub
 				
 			}
 			
 			@Override
-			public void notify(IOperation intermediateData, OperationData data,
+			public void notify(IOperation<? extends IOperationModel, ? extends OperationData> intermediateData, OperationData data,
 					Slice[] slices, int[] shape, int[] dataDims) {
 				// TODO Auto-generated method stub
 				
 			}
 			
 			@Override
-			public boolean isRequiredToModifyData(IOperation operation) {
+			public boolean isRequiredToModifyData(IOperation<? extends IOperationModel, ? extends OperationData> operation) {
 				// TODO Auto-generated method stub
 				return true;
 			}
 			
 			@Override
-			public void init() throws Exception {
+			public void init(IOperation<? extends IOperationModel, ? extends OperationData>[] series) throws Exception {
 				// TODO Auto-generated method stub
 				
 			}
@@ -564,26 +669,37 @@ public class DataFileSliceView extends ViewPart {
 	private class UpdateJob extends Job {
 
 		IConversionContext context;
-		IOperation end;
+		IOperation<? extends IOperationModel, ? extends OperationData> end;
+		String path = null;
 		
 		public UpdateJob(IConversionContext context) {
 			super("Update...");
 			this.context = context;
 		}
 		
-		public void setEndOperation(IOperation end) {
+		public void setEndOperation(IOperation<? extends IOperationModel, ? extends OperationData> end) {
 			this.end = end;
+		}
+		
+		public void setPath(String path) {
+			this.path = path;
 		}
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			try {
 				
-				final IDataHolder   dh = LoaderFactory.getData(context.getFilePaths().get(0));
+				if (path == null) path = context.getFilePaths().get(0);
+				
+				final IDataHolder   dh = LoaderFactory.getData(path);
 				ILazyDataset lazyDataset = dh.getLazyDataset(context.getDatasetNames().get(0));
 				
-				final IDataset firstSlice = Slicer.getFirstSlice(new RichDataset(lazyDataset, null), context.getSliceDimensions());
-				SDAPlotter.imagePlot("Input", firstSlice);
+				final IDataset firstSlice = lazyDataset.getSlice(csw.getCurrentSlice()).squeeze();
+//				final IDataset firstSlice = Slicer.getFirstSlice(new RichDataset(lazyDataset, null), context.getSliceDimensions());
+				if (firstSlice.getRank() == 2) SDAPlotter.imagePlot("Input", firstSlice);
+				else {
+					SDAPlotter.plot("Input", firstSlice);
+				}
 				
 				EscapableSliceVisitor sliceVisitor = getSliceVisitor(getOperations(), getOutputExecutionVisitor(), lazyDataset, Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions()));
 				sliceVisitor.setEndOperation(end);
@@ -598,7 +714,7 @@ public class DataFileSliceView extends ViewPart {
 		
 	}
 	
-	private EscapableSliceVisitor getSliceVisitor(IOperation[] series,IExecutionVisitor visitor,ILazyDataset lz,  
+	private EscapableSliceVisitor getSliceVisitor(IOperation<? extends IOperationModel, ? extends OperationData>[] series,IExecutionVisitor visitor,ILazyDataset lz,  
             int[] dataDims) {
 		return new EscapableSliceVisitor(lz,visitor,dataDims,series,null,context);
 	}
@@ -609,13 +725,13 @@ public class DataFileSliceView extends ViewPart {
 		private ILazyDataset lz;
 		private IExecutionVisitor visitor;
 		private int[] dataDims;
-		private IOperation[] series;
-		private IOperation endOperation;
+		private IOperation<? extends IOperationModel, ? extends OperationData>[] series;
+		private IOperation<? extends IOperationModel, ? extends OperationData> endOperation;
 		private IProgressMonitor monitor;
 		private IConversionContext context;
 		
 		public EscapableSliceVisitor(ILazyDataset lz, IExecutionVisitor visitor, 
-				                     int[] dataDims, IOperation[] series, 
+				                     int[] dataDims, IOperation<? extends IOperationModel, ? extends OperationData>[] series, 
 				                     IProgressMonitor monitor, IConversionContext context) {
 			this.lz = lz;
 			this.visitor = visitor;
@@ -625,7 +741,7 @@ public class DataFileSliceView extends ViewPart {
 			this.context= context;
 		}
 		
-		public void setEndOperation(IOperation op) {
+		public void setEndOperation(IOperation<? extends IOperationModel, ? extends OperationData> op) {
 			endOperation = op;
 		}
 		
@@ -637,7 +753,7 @@ public class DataFileSliceView extends ViewPart {
 			
 			OperationData  data = new OperationData(slice, (Serializable[])null);
 								
-			for (IOperation i : series) {
+			for (IOperation<? extends IOperationModel, ? extends OperationData> i : series) {
 				OperationData tmp = i.execute(data.getData(), null);
 				data = visitor.isRequiredToModifyData(i) ? tmp : data;
 				visitor.notify(i, data, slices, shape, dataDims); // Optionally send intermediate result

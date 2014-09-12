@@ -1,31 +1,49 @@
 package org.dawnsci.processing.ui;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.dawb.common.services.IPersistenceService;
+import org.dawb.common.services.IPersistentFile;
+import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.util.list.ListUtils;
 import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
 import org.dawnsci.common.widgets.table.SeriesTable;
 import org.dawnsci.processing.ui.preference.ProcessingConstants;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.dnd.DropTargetAdapter;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.FileTransfer;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.processing.IOperation;
 import uk.ac.diamond.scisoft.analysis.processing.IOperationService;
+import uk.ac.diamond.scisoft.analysis.processing.OperationData;
+import uk.ac.diamond.scisoft.analysis.processing.model.IOperationModel;
 
 /**
  * A view for constructing and executing a processing pipeline.
@@ -42,6 +60,8 @@ public class ProcessingView extends ViewPart {
 	private OperationFilter           operationFiler;
 	private List<OperationDescriptor> saved;
 	private TableViewerColumn inputs, outputs;
+	
+	private final static Logger logger = LoggerFactory.getLogger(ProcessingView.class);
 
 	public ProcessingView() {
 		this.seriesTable    = new SeriesTable();
@@ -79,7 +99,52 @@ public class ProcessingView extends ViewPart {
 		// Here's the data, lets show it!
 		seriesTable.setMenuManager(rightClick);
 		seriesTable.setInput(saved, operationFiler);
+		DropTarget dt = seriesTable.getDropTarget();
+		dt.setTransfer(new Transfer[] { TextTransfer.getInstance(),
+				FileTransfer.getInstance(), ResourceTransfer.getInstance(),
+				LocalSelectionTransfer.getTransfer() });
+		dt.addDropListener(new DropTargetAdapter() {
+			
+			@Override
+			public void drop(DropTargetEvent event) {
+				Object dropData = event.data;
+				if (dropData instanceof TreeSelection) {
+					TreeSelection selectedNode = (TreeSelection) dropData;
+					Object obj[] = selectedNode.toArray();
+					for (int i = 0; i < obj.length; i++) {
+						if (obj[i] instanceof IFile) {
+							IFile file = (IFile) obj[i];
+							readOperationsFromFile(file.getLocation().toOSString());
+							return;
+						}
+					}
+				} else if (dropData instanceof String[]) {
+					for (String path : (String[])dropData){
+						readOperationsFromFile(path);
+						return;
+					}
+				}
+				
+			}
+		});
 
+	}
+	
+	private void readOperationsFromFile(String filename) {
+		try {
+			IPersistenceService service = (IPersistenceService)ServiceManager.getService(IPersistenceService.class);
+			IOperationService os = (IOperationService)ServiceManager.getService(IOperationService.class);
+			IPersistentFile pf = service.getPersistentFile(filename);
+			IOperation<? extends IOperationModel, ? extends OperationData>[] operations = pf.getOperations();
+			if (operations == null) return;
+			List<OperationDescriptor> list = new ArrayList<OperationDescriptor>(operations.length);
+			for (IOperation<? extends IOperationModel, ? extends OperationData> op : operations) list.add(new OperationDescriptor(op, os));
+			
+			if (operations != null) seriesTable.setInput(list, operationFiler);
+		} catch (Exception e) {
+			logger.error("Could not read operations from file", e);
+		}
+		
 	}
 	
 	@Override
@@ -88,10 +153,10 @@ public class ProcessingView extends ViewPart {
 		if (clazz==IOperation.class) {
 			final List<ISeriesItemDescriptor> desi = seriesTable.getSeriesItems();
 			if (desi==null || desi.isEmpty()) return null;
-			final IOperation[] pipeline = new IOperation[desi.size()];
+			final IOperation<? extends IOperationModel, ? extends OperationData>[] pipeline = new IOperation[desi.size()];
 			for (int i = 0; i < desi.size(); i++) {
 				try {
-					pipeline[i] = (IOperation)desi.get(i).getSeriesObject();
+					pipeline[i] = (IOperation<? extends IOperationModel, ? extends OperationData>)desi.get(i).getSeriesObject();
 				} catch (InstantiationException e) {
 					e.printStackTrace();
 					return null;

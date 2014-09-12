@@ -25,6 +25,7 @@ Import-Package: org.dawb.common.services,
  org.eclipse.core.resources,
  org.eclipse.dawnsci.plotting.api,
  org.eclipse.dawnsci.plotting.api.trace,
+ org.eclipse.dawnsci.slicing.api.system,
  org.eclipse.ui.part,
  org.slf4j;version="1.7.6",
  uk.ac.diamond.scisoft.analysis.processing.visitors
