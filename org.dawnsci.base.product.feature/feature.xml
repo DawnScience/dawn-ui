@@ -2,7 +2,7 @@
 <feature
       id="org.dawnsci.base.product.feature"
       label="DAWN Science"
-      version="1.7.0.qualifier"
+      version="1.7.1.qualifier"
       provider-name="DAWN Collaboration">
 
    <description url="http://www.example.com/description">
