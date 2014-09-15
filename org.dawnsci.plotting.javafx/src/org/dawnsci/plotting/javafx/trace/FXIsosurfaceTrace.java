@@ -21,6 +21,12 @@ import org.eclipse.swt.widgets.Display;
 import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
+/**
+ * 
+ * @author fcp94556
+ *
+ * @Internal
+ */
 public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace {
 
 	private FXCanvas           canvas;
@@ -75,11 +81,32 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace 
 		});
 	}
 
-	protected void create() {
+	/**
+	 * Internal use only.
+	 */
+	public void create() {
+		if (Platform.isFxApplicationThread()) {
+			createInternal();
+		} else {
+			Platform.runLater(new Runnable() {			
+				public void run() {			
+					try {
+						createInternal();
+					} catch (OutOfMemoryError e){
+						e.printStackTrace();
+						showErrorMessage("Out of memory Error", "There is not enough memory to render the surface. Please increase the box size.");
+					}
+				};
+			});
+		}
+	}
+	
+	private void createInternal() {
+		
 		Group    root   = new Group();
 		MeshView result = new MeshView(createTrangleMesh());
 		result.setCursor(Cursor.CROSSHAIR);
-		
+
 		Material material;
 		if (rgb == null) {
 			material = new PhongMaterial(Color.GOLDENROD);
@@ -87,12 +114,12 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace 
 			Color color = Color.rgb(rgb[0], rgb[1], rgb[2], opacity);
 			material = new PhongMaterial(color); 
 		}
-		
+
 		scene = new SurfaceDisplayer(root, result, material, toJavaFX());
-		
+
 		canvas.setScene(scene);
 	}
-	
+
 	private javafx.scene.shape.CullFace toJavaFX() {
 		switch(cullFace) {
 		case NONE:

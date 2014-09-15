@@ -13,6 +13,12 @@ import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
+/**
+ * TODO The implementation of this plotter viewer is not complete.
+ * 
+ * @author fcp94556
+ *
+ */
 public class FXPlotViewer extends IPlottingSystemViewer.Stub {
 
 	private FXCanvas canvas;
@@ -27,6 +33,10 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub {
         this.canvas = new FXCanvas(parent, SWT.NONE);
 	} 
 	
+	public void updatePlottingRole(PlotType type) {
+		// TODO
+	}
+
 	public Composite getControl() {
 		return canvas;
 	}
@@ -71,8 +81,9 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub {
 		
 		currentTrace = trace;
 		if (trace instanceof IIsosurfaceTrace) {
-			IIsosurfaceTrace itrace = (IIsosurfaceTrace)trace;
+			FXIsosurfaceTrace itrace = (FXIsosurfaceTrace)trace;
 			if (itrace.getData()==null) throw new RuntimeException("Trace has no data "+trace.getName());
+			itrace.create();
 			
 		} else {
 		    throw new RuntimeException("Trace type not supported "+trace.getClass().getSimpleName());
