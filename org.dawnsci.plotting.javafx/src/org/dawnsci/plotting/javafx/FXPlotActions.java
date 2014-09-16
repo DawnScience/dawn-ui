@@ -7,7 +7,7 @@ import org.eclipse.dawnsci.plotting.api.ManagerType;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 
-public class FXPlotActions {
+class FXPlotActions {
 
 	private FXPlotViewer      viewer;
 	private IPlottingSystem   system;
@@ -19,7 +19,7 @@ public class FXPlotActions {
 		this.actionMan = system.getPlotActionSystem();
 	}
 
-	public void createActions() {
+	protected void createActions() {
 		
 		String gridLineGroupNameAction = "javafx.plotting.grid.line.actions";
 		actionMan.registerGroup(gridLineGroupNameAction, ManagerType.TOOLBAR);

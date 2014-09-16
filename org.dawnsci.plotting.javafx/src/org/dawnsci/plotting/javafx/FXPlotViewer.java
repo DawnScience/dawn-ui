@@ -55,7 +55,7 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub {
 
 	
 	public void updatePlottingRole(PlotType type) {
-		// TODO
+		
 	}
 
 	/**

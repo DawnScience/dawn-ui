@@ -274,9 +274,7 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 	public void militarize() {
 		
 	    getSlicingSystem().setSliceType(getSliceType());
-
-		final IPlottingSystem plotSystem = getSlicingSystem().getPlottingSystem();
-        
+       
 		setControlsVisible(true);
 		
  		final DimsDataList dimsDataList = getSlicingSystem().getDimsDataList();

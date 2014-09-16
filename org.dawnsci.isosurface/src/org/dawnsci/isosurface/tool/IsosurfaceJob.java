@@ -87,12 +87,6 @@ public class IsosurfaceJob extends Job {
 			    });
 			}
 			
-		    Display.getDefault().syncExec(new Runnable() {
-		    	public void run() {
-					system.setPlotType(PlotType.ISOSURFACE);
-		    	}
-		    });
-			
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 			
 			try {
