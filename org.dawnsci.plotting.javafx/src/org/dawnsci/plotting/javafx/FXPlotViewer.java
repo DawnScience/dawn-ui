@@ -3,6 +3,8 @@ package org.dawnsci.plotting.javafx;
 import javafx.application.Platform;
 import javafx.embed.swt.FXCanvas;
 import javafx.scene.Cursor;
+import javafx.scene.ParallelCamera;
+import javafx.scene.PerspectiveCamera;
 
 import org.dawnsci.plotting.javafx.trace.FXIsosurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -21,8 +23,16 @@ import org.eclipse.swt.widgets.Composite;
  */
 public class FXPlotViewer extends IPlottingSystemViewer.Stub {
 
-	private FXCanvas canvas;
-	private ITrace   currentTrace;
+	private FXCanvas      canvas;
+	private ITrace        currentTrace;
+	private FXPlotActions plotActions;
+	
+	/**
+	 * Must have no-argument constructor.
+	 */
+	public FXPlotViewer() {
+		
+	}
 	
 	/**
 	 * Call to create plotting
@@ -30,15 +40,22 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub {
 	 * @param initialMode may be null
 	 */
 	public void createControl(final Composite parent) {
-        this.canvas = new FXCanvas(parent, SWT.NONE);
+        
+		this.canvas = new FXCanvas(parent, SWT.NONE);
+        
+		plotActions = new FXPlotActions(this, system);
+		plotActions.createActions();
+		system.getActionBars().getToolBarManager().update(true);
+		system.getActionBars().updateActionBars();
 	} 
-	
-	public void updatePlottingRole(PlotType type) {
-		// TODO
-	}
 
 	public Composite getControl() {
 		return canvas;
+	}
+
+	
+	public void updatePlottingRole(PlotType type) {
+		// TODO
 	}
 
 	/**
@@ -110,5 +127,26 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub {
 			return true;
 		}
 		return false;
+	}
+
+	public void setParallelCamera(final boolean isParallel) {
+		if (Platform.isFxApplicationThread()) {
+			setParallelCameraInternal(isParallel);
+		} else {
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {
+					setParallelCameraInternal(isParallel);
+				}
+			});
+		}
+	}
+
+	private void setParallelCameraInternal(boolean isParallel) {
+		if (isParallel) {
+		    canvas.getScene().setCamera(new ParallelCamera());
+		} else {
+		    canvas.getScene().setCamera(new PerspectiveCamera());
+		}
 	}
 }
