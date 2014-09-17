@@ -9,7 +9,17 @@ RELEASE NOTES FOR DAWN 1.7.1 'Duck Hawk'
    of wrapping, some toolbar actions disappear. They can normally be found on the menu to the 
    right of the toolbar (the white down arrow).
 
-2. Workflows do not support Jython actors in the Beta version.
+3. To reliably find the Dawn version you are using go to:
+   * Help->About Dawn.
+
+
+
+Workflows:
+---------------
+
+1. Workflows are not supported on Windows XP, 32-bit.
+
+2. Workflows do not support Jython actors.
 
 3. If using the .zip download version of Dawn, on Linux 32: It is sometimes necessary to delete 
    the 'jre' folder from the install location. This is due to file permissions. 
@@ -31,15 +41,3 @@ RELEASE NOTES FOR DAWN 1.7.1 'Duck Hawk'
 
 7. When using the Python actor in the workflows, you must declare something for 'Dataset Outputs'. 
    If you do not read information back into the workflow, create a dummy variable for this.
-
-8. On windows 32 there is a defect with 'Dataset Plot' view. If using the 'DExplore' perspective, 
-   you may see this. Try using the plotting inside 'Data Browsing' perspective in this case.
-
-9. Macos build of Dawn is experimental and 'CBF' files are not supported in version 1.1 Beta.
-
-10. To reliably find the Dawn version you are using go to:
-   * Help->About Dawn.
-   * Installation Details' button.
-   * On the 'Installed Software' tab, there is a version column.
-   
-11. Workflows are no longer supported on Windows XP, 32-bit.
