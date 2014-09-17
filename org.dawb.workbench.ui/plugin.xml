@@ -105,54 +105,6 @@
    </extension>
    <extension
          point="org.eclipse.ui.editorActions">
-       <editorContribution
-            id="org.edna.workbench.editors.asciiEditorContribution"
-            targetID="org.dawb.workbench.editors.AsciiEditor">
-         <action
-               class="org.dawb.workbench.ui.editors.actions.DeleteExpressionHandler"
-               definitionId="org.dawb.workbench.editors.deleteExpression"
-               icon="icons/delete_expression.png"
-               id="org.edna.workbench.editors.deleteExpressionEditorAction"
-               label="Delete Expression"
-               style="push"
-               toolbarPath="Normal/additions"
-               tooltip="Delete an expression">
-         </action>
-         <action
-               class="org.dawb.workbench.ui.editors.actions.AddExpressionHandler"
-               definitionId="org.dawb.workbench.editors.addExpression"
-               icon="icons/add_expression.png"
-               id="org.edna.workbench.editors.addExpressionEditorAction"
-               label="Add Expression"
-               style="radio"
-               toolbarPath="Normal/additions"
-               tooltip="Add an expression of the other data sets">
-         </action>
-      </editorContribution>
-       <editorContribution
-             id="org.edna.workbench.editors.h5EditorContribution"
-             targetID="org.dawb.workbench.editor.H5Editor">
-          <action
-                class="org.dawb.workbench.ui.editors.actions.DeleteExpressionHandler"
-                definitionId="org.dawb.workbench.editors.deleteExpression"
-                icon="icons/delete_expression.png"
-                id="org.edna.workbench.editors.deleteExpressionEditorAction1"
-                label="Delete Expression"
-                style="push"
-                toolbarPath="Normal/additions"
-                tooltip="Delete an expression">
-          </action>
-          <action
-                class="org.dawb.workbench.ui.editors.actions.AddExpressionHandler"
-                definitionId="org.dawb.workbench.editors.addExpression"
-                icon="icons/add_expression.png"
-                id="org.edna.workbench.editors.addExpressionEditorAction1"
-                label="Add Expression"
-                style="radio"
-                toolbarPath="Normal/additions"
-                tooltip="Add an expression of the other data sets">
-          </action>
-       </editorContribution>
        
        <editorContribution
              id="org.edna.workbench.editors.modelEditorContribution"
