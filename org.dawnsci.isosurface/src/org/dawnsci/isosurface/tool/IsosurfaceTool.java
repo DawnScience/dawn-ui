@@ -274,7 +274,7 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 	public void militarize(boolean newData) {
 		
 		boolean alreadyIso = getSlicingSystem().getSliceType() == getSliceType();
-		if (alreadyIso) return;
+		if (!newData && alreadyIso) return;
 		
 	    getSlicingSystem().setSliceType(getSliceType());
        
@@ -287,7 +287,9 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 		getSlicingSystem().addDimensionalListener(dimensionalListener);
 		getSlicingSystem().addAxisChoiceListener(axisChoiceListener);
 		
-		if (newData) update();
+		if (newData || generator.getModel().getLazyData()==null) {
+			update();
+		}
 	}
 
 
