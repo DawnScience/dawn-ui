@@ -303,8 +303,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			final ITrace trace = getTrace(y.getName());
 			if (trace!=null && trace instanceof ILineTrace) {
 				
-				if (x == null)
-					x = IntegerDataset.createRange(y.getSize());
+				if (x == null) x = IntegerDataset.createRange(y.getSize());
 				final IDataset finalX = x;
 				final ILineTrace lineTrace = (ILineTrace) trace;
 				updatedAndCreated.add(lineTrace);

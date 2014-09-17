@@ -49,52 +49,13 @@ public class ZoomTool extends ProfileTool {
 	@Override
 	protected void createProfile(final IImageTrace  image, 
 			                     IRegion      region,
-			                     IROI      rbs, 
+			                     IROI         rbs, 
 			                     boolean      tryUpdate, 
 			                     boolean      isDrag,
 			                     IProgressMonitor monitor) {
 		
-		if (monitor.isCanceled()) return;
-		if (image==null) return;
-		
-		if ((region.getRegionType()!=RegionType.BOX)&&(region.getRegionType()!=RegionType.PERIMETERBOX)) return;
-
-		final RectangularROI bounds = (RectangularROI) (rbs==null ? region.getROI() : rbs);
-		if (bounds==null) return;
-		if (!region.isVisible()) return;
-
-		if (monitor.isCanceled()) return;
-
-		final int yInc = bounds.getPoint()[1]<bounds.getEndPoint()[1] ? 1 : -1;
-		final int xInc = bounds.getPoint()[0]<bounds.getEndPoint()[0] ? 1 : -1;
-
 		try {
-			Dataset slice = null;
-			getClass();
-			Dataset im    = (Dataset)image.getData();
-			slice = (Dataset) ToolUtils.getClippedSlice(im, bounds);
-			slice.setName(region.getName());
-			// Calculate axes to have real values not size
-			Dataset yLabels = null;
-			Dataset xLabels = null;
-			if (image.getAxes()!=null && image.getAxes().size() > 0) {
-				Dataset xl = (Dataset)image.getAxes().get(0);
-				if (xl!=null) xLabels = getLabelsFromLabels(xl, bounds, 0);
-				Dataset yl = (Dataset)image.getAxes().get(1);
-				if (yl!=null) yLabels = getLabelsFromLabels(yl, bounds, 1);
-			}
-			
-			if (yLabels==null) yLabels = IntegerDataset.createRange(bounds.getPoint()[1], bounds.getEndPoint()[1], yInc);
-			if (xLabels==null) xLabels = IntegerDataset.createRange(bounds.getPoint()[0], bounds.getEndPoint()[0], xInc);
-			
-			final IImageTrace zoom_trace = (IImageTrace)profilePlottingSystem.updatePlot2D(slice, Arrays.asList(new IDataset[]{xLabels, yLabels}), monitor);
-			registerTraces(region, Arrays.asList(new ITrace[]{zoom_trace}));
-			Display.getDefault().syncExec(new Runnable()  {
-				public void run() {
-				     zoom_trace.setPaletteData(image.getPaletteData());
-				}
-			});
-			
+		    createZoom(image, region, rbs, tryUpdate, isDrag, monitor);
 		} catch (IllegalArgumentException ne) {
 			// Occurs when slice outside
 			logger.trace("Slice outside bounds of image!", ne);
@@ -103,8 +64,56 @@ public class ZoomTool extends ProfileTool {
 		}
 
 	}
+	
 
-	private Dataset getLabelsFromLabels(Dataset xl, RectangularROI bounds, int axisIndex) {
+	protected Dataset createZoom(final IImageTrace  image, 
+					            IRegion      region,
+					            IROI         rbs, 
+					            boolean      tryUpdate, 
+					            boolean      isDrag,
+					            IProgressMonitor monitor) {
+
+		final RectangularROI bounds = (RectangularROI) (rbs==null ? region.getROI() : rbs);
+		if (bounds==null) return null;
+		if (!region.isVisible()) return null;
+
+		if (monitor.isCanceled()) return null;
+
+		final int yInc = bounds.getPoint()[1]<bounds.getEndPoint()[1] ? 1 : -1;
+		final int xInc = bounds.getPoint()[0]<bounds.getEndPoint()[0] ? 1 : -1;
+
+		Dataset slice = null;
+		getClass();
+		Dataset im    = (Dataset)image.getData();
+		slice = (Dataset) ToolUtils.getClippedSlice(im, bounds);
+		slice.setName(region.getName());
+		// Calculate axes to have real values not size
+		Dataset yLabels = null;
+		Dataset xLabels = null;
+		if (image.getAxes()!=null && image.getAxes().size() > 0) {
+			Dataset xl = (Dataset)image.getAxes().get(0);
+			if (xl!=null) xLabels = ZoomTool.getLabelsFromLabels(xl, bounds, 0);
+			Dataset yl = (Dataset)image.getAxes().get(1);
+			if (yl!=null) yLabels = ZoomTool.getLabelsFromLabels(yl, bounds, 1);
+		}
+
+		if (yLabels==null) yLabels = IntegerDataset.createRange(bounds.getPoint()[1], bounds.getEndPoint()[1], yInc);
+		if (xLabels==null) xLabels = IntegerDataset.createRange(bounds.getPoint()[0], bounds.getEndPoint()[0], xInc);
+
+		final IImageTrace zoom_trace = (IImageTrace)profilePlottingSystem.updatePlot2D(slice, Arrays.asList(new IDataset[]{xLabels, yLabels}), monitor);
+		registerTraces(region, Arrays.asList(new ITrace[]{zoom_trace}));
+		Display.getDefault().syncExec(new Runnable()  {
+			public void run() {
+				zoom_trace.setPaletteData(image.getPaletteData());
+			}
+		});
+
+		return slice;
+
+	}
+
+
+	static Dataset getLabelsFromLabels(Dataset xl, RectangularROI bounds, int axisIndex) {
 		try {
 			int fromIndex = (int)bounds.getPoint()[axisIndex];
 			int toIndex   = (int)bounds.getEndPoint()[axisIndex];

@@ -172,6 +172,14 @@
       </plotting_tool_page>
       <plotting_tool_page
             category="org.dawnsci.plotting.tools.category.Profile"
+            class="org.dawnsci.plotting.tools.profile.SpotTool"
+            icon="icons/plot-tool-spot-profile.png"
+            id="org.dawnsci.plotting.tools.profile.spotTool"
+            label="Spot Profile"
+            tooltip="Spot profile, a combination of zoom and box profiles.">
+      </plotting_tool_page>
+      <plotting_tool_page
+            category="org.dawnsci.plotting.tools.category.Profile"
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.boxprofile"
             class="org.dawnsci.plotting.tools.profile.BoxLineProfileTool"
             icon="icons/plot-tool-color-box.png"

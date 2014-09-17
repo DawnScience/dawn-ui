@@ -51,21 +51,70 @@ public class BoxProfileTool extends ProfileTool {
 			                     boolean      isDrag,
 			                     IProgressMonitor monitor) {
         
-		if (monitor.isCanceled()) return;
-		if (image==null) return;
+		Dataset[] profile = getProfile(image, region, rbs, tryUpdate, isDrag, monitor);
+		if (profile == null) return;
+
+		final Dataset x_indices   = profile[0];
+		final Dataset x_intensity = profile[1];
+		final Dataset y_indices   = profile[2];
+		final Dataset y_intensity = profile[3];
 		
-		if (!isRegionTypeSupported(region.getRegionType())) return;
+		//if (monitor.isCanceled()) return;
+		final ILineTrace y_trace = (ILineTrace)profilePlottingSystem.getTrace("X "+region.getName());
+		final ILineTrace x_trace = (ILineTrace)profilePlottingSystem.getTrace("Y "+region.getName());
+		
+		if (tryUpdate && x_trace!=null && y_trace!=null) {
+			getControl().getDisplay().syncExec(new Runnable() {
+				public void run() {
+					profilePlottingSystem.setSelectedXAxis(xPixelAxis);
+					x_trace.setData(x_indices, x_intensity);
+					profilePlottingSystem.setSelectedXAxis(yPixelAxis);
+					y_trace.setData(y_indices, y_intensity);
+				}
+			});
+		} else {
+			profilePlottingSystem.setSelectedXAxis(xPixelAxis);
+			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(x_indices, Arrays.asList(new IDataset[]{x_intensity}), monitor);
+			registerTraces(region, plotted);
+			
+			profilePlottingSystem.setSelectedXAxis(yPixelAxis);
+			plotted = profilePlottingSystem.updatePlot1D(y_indices, Arrays.asList(new IDataset[]{y_intensity}), monitor);
+			registerTraces(region, plotted);
+		}
+	}
+	
+	/**
+	 * 
+	 * @param image
+	 * @param region
+	 * @param rbs
+	 * @param tryUpdate
+	 * @param isDrag
+	 * @param monitor
+	 * @return x_indices, x_intensity, y_indices, y_intensity   OR null
+	 */
+	protected Dataset[] getProfile(IImageTrace  image, 
+					            IRegion      region, 
+					            IROI      rbs, 
+					            boolean      tryUpdate,
+					            boolean      isDrag,
+					            IProgressMonitor monitor) {
+		
+		if (monitor.isCanceled()) return null;
+		if (image==null) return null;
+		
+		if (!isRegionTypeSupported(region.getRegionType())) return null;
 
 		final RectangularROI bounds = (RectangularROI) (rbs==null ? region.getROI() : rbs);
 		if (bounds==null)
-			return;
+			return null;
 		if (!region.isVisible())
-			return;
+			return null;
 
-		if (monitor.isCanceled()) return;
+		if (monitor.isCanceled()) return null;
 		
 		Dataset[] box = ROIProfile.box((Dataset)image.getData(), (Dataset)image.getMask(), bounds, true);
-        if (box==null) return;
+        if (box==null) return null;
         
         Dataset xi = null;
         Dataset yi = null;
@@ -120,34 +169,12 @@ public class BoxProfileTool extends ProfileTool {
 		}
 		final Dataset y_indices = yi; // Maths.add(yi, bounds.getY()); // Real position
 		
-
-		//if (monitor.isCanceled()) return;
-		final ILineTrace x_trace = (ILineTrace)profilePlottingSystem.getTrace("X "+region.getName());
-		final ILineTrace y_trace = (ILineTrace)profilePlottingSystem.getTrace("Y "+region.getName());
-		
-		if (tryUpdate && x_trace!=null && y_trace!=null) {
-			getControl().getDisplay().syncExec(new Runnable() {
-				public void run() {
-					profilePlottingSystem.setSelectedXAxis(xPixelAxis);
-					x_trace.setData(x_indices, x_intensity);
-					profilePlottingSystem.setSelectedXAxis(yPixelAxis);
-					y_trace.setData(y_indices, y_intensity);
-				}
-			});
-		} else {
-			profilePlottingSystem.setSelectedXAxis(xPixelAxis);
-			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(x_indices, Arrays.asList(new IDataset[]{x_intensity}), monitor);
-			registerTraces(region, plotted);
-			
-			profilePlottingSystem.setSelectedXAxis(yPixelAxis);
-			plotted = profilePlottingSystem.updatePlot1D(y_indices, Arrays.asList(new IDataset[]{y_intensity}), monitor);
-			registerTraces(region, plotted);
-		}
+        return new Dataset[]{x_indices, x_intensity, y_indices, y_intensity};
 	}
 	
 	@Override
 	protected boolean isRegionTypeSupported(RegionType type) {
-		return (type==RegionType.BOX)||(type==RegionType.XAXIS)||(type==RegionType.YAXIS);
+		return (type==RegionType.BOX)||(type==RegionType.XAXIS)||(type==RegionType.YAXIS)||type==RegionType.PERIMETERBOX;
 	}
 
 	@Override
