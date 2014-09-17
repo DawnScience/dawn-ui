@@ -1,6 +1,7 @@
 package org.dawnsci.plotting.tools.profile;
 
 import java.util.Arrays;
+import java.util.Collection;
 
 import org.dawb.common.ui.util.GridUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -10,6 +11,9 @@ import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
@@ -111,21 +115,21 @@ public class SpotTool extends ZoomTool {
 		Dataset slice = createZoom(image, region, rbs, tryUpdate, isDrag, monitor);
 		
         Dataset yData = slice.sum(0);
+		yData.setName("Intensity");
         Dataset xData = slice.sum(1);
-		
+        xData.setName("Intensity");
+	
 		final RectangularROI bounds = (RectangularROI) (rbs==null ? region.getROI() : rbs);
  		final Dataset y_indices   = AbstractDataset.arange(bounds.getPoint()[0], bounds.getPoint()[0]+bounds.getLength(0), 1, Dataset.FLOAT);
-		y_indices.setName("Y Location");
+		y_indices.setName("X Location");
 		
-		yData.setName("Intensity");
 		topSystem.updatePlot1D(y_indices, Arrays.asList(new IDataset[]{yData}), monitor);
 		topSystem.repaint();
 
 		final Dataset x_indices   = AbstractDataset.arange(bounds.getPoint()[1]+bounds.getLength(1), bounds.getPoint()[1], -1, Dataset.FLOAT);
 		x_indices.setName("Y Location");
 	
-		x_indices.setName("Indices in Y");
-		rightSystem.updatePlot1D(xData, Arrays.asList(new IDataset[]{x_indices}), monitor);
+		final Collection<ITrace> right = rightSystem.updatePlot1D(xData, Arrays.asList(new IDataset[]{x_indices}), monitor);
 		rightSystem.repaint();		
 
 		Display.getDefault().syncExec(new Runnable() {
@@ -134,6 +138,9 @@ public class SpotTool extends ZoomTool {
 			public void run() {
 				topSystem.setTitle("");
 				rightSystem.setTitle("");
+				
+				ILineTrace line = (ILineTrace)right.iterator().next();
+				line.setTraceColor(ColorConstants.red);
 			}
 		});
 	}
