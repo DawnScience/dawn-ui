@@ -454,6 +454,11 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	}
 
 	@Override
+	public boolean isShowIntensity() {
+		return (Boolean)call(getMethodName(Thread.currentThread().getStackTrace()));
+	}
+
+	@Override
 	public void setShowIntensity(boolean b) {
 		call(getMethodName(Thread.currentThread().getStackTrace()), new Class[] { boolean.class }, b);
 	}

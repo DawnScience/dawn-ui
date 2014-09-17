@@ -976,7 +976,12 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		
 		final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting.system");
 		if (store.getBoolean(PlottingConstants.SHOW_INTENSITY)) {
-			getPlottingSystem().setShowIntensity(!(im instanceof RGBDataset));
+			boolean isRGB = im instanceof RGBDataset;
+			if (isRGB && getPlottingSystem().isShowIntensity()) {
+				getPlottingSystem().setShowIntensity(false);
+			} else if (!isRGB && !getPlottingSystem().isShowIntensity()) {
+				getPlottingSystem().setShowIntensity(true);
+			}
 		}
 
 		return true;

@@ -865,6 +865,8 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 		return traces;
 	}
 
+	private boolean showIntensity = PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.SHOW_INTENSITY);
+	
 	public boolean addTrace(ITrace trace) {
 		
 		if (trace instanceof IImageTrace) {
@@ -889,7 +891,7 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 			if (((Dataset)trace.getData()).getDtype() == Dataset.RGB) {
 				intensity.setVisible(false);
 			} else {
-			    intensity.setVisible(PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.SHOW_INTENSITY));
+			    intensity.setVisible(showIntensity);
 			}
 			
 			// If we are a stack, show the scale for iterating images.
@@ -1432,11 +1434,15 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 	}
 
 	public void updatePlottingRole(PlotType type) {
-		boolean shouldShow = PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.SHOW_INTENSITY);
-		intensity.setVisible(type.is2D()&&shouldShow);
+		intensity.setVisible(type.is2D()&&showIntensity);
+	}
+
+	public boolean isShowIntensity() {
+		return showIntensity;
 	}
 
 	public void setShowIntensity(boolean checked) {
+		showIntensity = checked;
 		intensity.setVisible(checked);
 	}
 

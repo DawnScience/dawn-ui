@@ -928,6 +928,11 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	}
 
 	@Override
+	public boolean isShowIntensity(){
+		if (activeViewer!=null) return activeViewer.isShowIntensity();
+		return false;
+	}
+	@Override
 	public void setShowIntensity(boolean b){
 		if (activeViewer!=null) activeViewer.setShowIntensity(b);
 		repaint(false);
