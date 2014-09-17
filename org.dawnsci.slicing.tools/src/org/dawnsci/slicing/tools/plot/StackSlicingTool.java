@@ -21,7 +21,7 @@ public class StackSlicingTool extends AbstractSlicingTool {
 	private static final int MAX_STACK = 100;
 	
 	@Override
-	public void militarize() {
+	public void militarize(boolean newData) {
 		
 		
 		getSlicingSystem().setSliceType(getSliceType());

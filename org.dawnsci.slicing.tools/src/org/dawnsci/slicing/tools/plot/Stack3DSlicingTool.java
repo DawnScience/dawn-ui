@@ -16,7 +16,7 @@ import org.eclipse.dawnsci.slicing.api.tool.AbstractSlicingTool;
 public class Stack3DSlicingTool extends AbstractSlicingTool {
 
 	@Override
-	public void militarize() {
+	public void militarize(boolean newData) {
 		
 		getSlicingSystem().setSliceType(getSliceType());
 		

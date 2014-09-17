@@ -68,7 +68,7 @@ public class HyperSlicingTool extends AbstractSlicingTool {
 	 * We actually install the HyperComponent instead of the plotting system.
 	 */
 	@Override
-	public void militarize() {
+	public void militarize(boolean newData) {
 		
 		getSlicingSystem().setSliceType(getSliceType());
 		getSlicingSystem().setSliceTypeInfo(hyperType.getLabel(), Activator.getImageDescriptor(hyperType.getIconPath()));

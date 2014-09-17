@@ -747,7 +747,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 
 		this.sliceSource = source;
 		this.lazySet     = source.getLazySet();
-		if (getActiveTool()!=null) getActiveTool().militarize();
+		if (getActiveTool()!=null) getActiveTool().militarize(true);
 		
 		final SliceObject object = new SliceObject();
 		object.setPath(source.getFilePath());

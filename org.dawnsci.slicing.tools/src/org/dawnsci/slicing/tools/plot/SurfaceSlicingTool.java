@@ -48,7 +48,7 @@ public class SurfaceSlicingTool extends AbstractSlicingTool {
 	}
 
 	@Override
-	public void militarize() {
+	public void militarize(boolean newData) {
 		
 		GridUtils.setVisible(openWindowing, getSlicingSystem().getPlottingSystem()!=null);
 		openWindowing.getParent().layout(new Control[]{openWindowing});

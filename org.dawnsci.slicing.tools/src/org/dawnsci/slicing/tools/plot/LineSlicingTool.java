@@ -16,7 +16,7 @@ import org.eclipse.dawnsci.slicing.api.tool.AbstractSlicingTool;
 public class LineSlicingTool extends AbstractSlicingTool {
 
 	@Override
-	public void militarize() {
+	public void militarize(boolean newData) {
 		
 		
 		boolean wasImage = getSlicingSystem().getSliceType()==PlotType.IMAGE || 

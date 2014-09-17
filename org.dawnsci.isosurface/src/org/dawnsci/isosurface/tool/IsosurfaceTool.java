@@ -271,7 +271,10 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 	 * Method that shows the display of the isosurface while the corresponding button is selected
 	 */
 	@Override
-	public void militarize() {
+	public void militarize(boolean newData) {
+		
+		boolean alreadyIso = getSlicingSystem().getSliceType() == getSliceType();
+		if (alreadyIso) return;
 		
 	    getSlicingSystem().setSliceType(getSliceType());
        
@@ -284,7 +287,7 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 		getSlicingSystem().addDimensionalListener(dimensionalListener);
 		getSlicingSystem().addAxisChoiceListener(axisChoiceListener);
 		
-		update();
+		if (newData) update();
 	}
 
 
