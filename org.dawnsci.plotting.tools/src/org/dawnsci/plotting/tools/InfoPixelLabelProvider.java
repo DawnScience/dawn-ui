@@ -103,6 +103,7 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 					
 				} else if (region.getRegionType() == RegionType.XAXIS_LINE){
 
+					if (region.getROI()==null) return null;
 					xIndex = region.getROI().getPointX();
 					yIndex = region.getROI().getPointY();
 			
