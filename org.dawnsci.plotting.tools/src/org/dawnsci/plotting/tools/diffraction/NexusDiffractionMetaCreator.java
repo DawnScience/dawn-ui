@@ -8,8 +8,8 @@ import org.dawnsci.plotting.tools.preference.detector.DiffractionDetectorHelper;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.io.DiffractionMetadata;
-import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.NexusDiffractionMetaReader;
+import uk.ac.diamond.scisoft.analysis.metadata.IDiffractionMetadata;
 
 
 public class NexusDiffractionMetaCreator {
