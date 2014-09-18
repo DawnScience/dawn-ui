@@ -2,7 +2,7 @@ package org.dawnsci.isosurface.alg;
 
 import java.io.Serializable;
 
-import uk.ac.diamond.scisoft.analysis.processing.OperationData;
+import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 
 
 /**

@@ -4,18 +4,6 @@
 	<classpathentry exported="true" kind="lib" path="jars/jfxswt.jar" sourcepath="C:/Program Files/Java/jdk1.8.0_05/javafx-src.zip"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/uk.ac.diamond.scisoft.analysis"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/uk.ac.diamond.scisoft.analysis.dataset"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/uk.ac.diamond.scisoft.analysis.api"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/de.desy.file.loader"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/ncsa.hdf">
-		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="U:/WorkspaceDawn/DAWN_git/dawn-third.git/ncsa.hdf/lib/win32-x86_64"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.eclipse.dawnsci.hdf5"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.eclipse.dawnsci.hdf5.editor"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/uk.ac.diamond.CBFlib"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

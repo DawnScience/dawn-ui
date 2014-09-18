@@ -11,7 +11,7 @@
       </slicing_tool>
    </extension>
    <extension
-         point="uk.ac.diamond.scisoft.analysis.api.operation">
+         point="org.eclipse.dawnsci.analysis.api.operation">
       <operation
             class="org.dawnsci.isosurface.alg.MarchingCubes"
             icon="icons/TraceSurface.png"
