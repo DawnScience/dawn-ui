@@ -3,7 +3,6 @@ package org.dawnsci.spectrum.ui.actions;
 import java.io.File;
 
 import org.dawnsci.spectrum.ui.file.SpectrumFileManager;
-import org.dawnsci.spectrum.ui.views.TraceProcessPage;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;

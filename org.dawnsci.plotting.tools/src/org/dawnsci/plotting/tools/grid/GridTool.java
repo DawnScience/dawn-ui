@@ -164,7 +164,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 	}
 	
 //  Example metadata object expected by the grid tool to correctly populate the grid preferences
-//	private IMetaData getGDAGridPreferences() {
+//	private IMetadata getGDAGridPreferences() {
 //
 //		Map<String,GridPreferences> gdaMap = new HashMap<String, GridPreferences>();
 //		

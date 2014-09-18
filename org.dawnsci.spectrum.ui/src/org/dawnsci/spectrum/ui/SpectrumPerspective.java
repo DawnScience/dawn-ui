@@ -1,7 +1,6 @@
 package org.dawnsci.spectrum.ui;
 
 //import org.dawnsci.spectrum.views.SpectrumView;
-import org.dawnsci.spectrum.ui.views.TraceProcessPage;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;

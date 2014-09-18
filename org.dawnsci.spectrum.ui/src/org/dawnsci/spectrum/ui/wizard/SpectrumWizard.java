@@ -3,10 +3,6 @@ package org.dawnsci.spectrum.ui.wizard;
 import java.util.List;
 
 import org.dawnsci.spectrum.ui.file.IContain1DData;
-import org.dawnsci.spectrum.ui.file.ISpectrumFile;
-import org.dawnsci.spectrum.ui.file.SpectrumInMemory;
-import org.dawnsci.spectrum.ui.processing.AbstractProcess;
-import org.dawnsci.spectrum.ui.views.ProcessMenuManager;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 

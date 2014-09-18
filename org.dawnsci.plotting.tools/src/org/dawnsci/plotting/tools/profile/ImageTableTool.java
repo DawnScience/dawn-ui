@@ -467,7 +467,7 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 
 	/**
 	 * Tries to get the meta from the editor part or uses the one in AbtractDataset of the image
-	 * @return IMetaData, may be null
+	 * @return IMetadata, may be null
 	 */
 	protected IMetadata getMetaData() {
 		

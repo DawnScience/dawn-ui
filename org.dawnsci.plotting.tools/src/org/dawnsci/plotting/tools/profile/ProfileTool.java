@@ -541,7 +541,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 
 	/**
 	 * Tries to get the meta from the editor part or uses the one in AbtractDataset of the image
-	 * @return IMetaData, may be null
+	 * @return IMetadata, may be null
 	 */
 	protected IMetadata getMetaData() {
 		//Changed to try and get the metadata from the image first

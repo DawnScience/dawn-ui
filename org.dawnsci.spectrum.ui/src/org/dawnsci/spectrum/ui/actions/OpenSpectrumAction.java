@@ -13,8 +13,6 @@ import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.sda.navigator.views.FileView;
-
 public class OpenSpectrumAction extends Action {
 	
 	private static final Logger logger = LoggerFactory.getLogger(OpenLocalFileAction.class);

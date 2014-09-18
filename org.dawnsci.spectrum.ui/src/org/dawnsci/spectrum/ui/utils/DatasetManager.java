@@ -8,10 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
-import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 import uk.ac.diamond.scisoft.analysis.io.IDataHolder;
-import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
+import uk.ac.diamond.scisoft.analysis.metadata.IMetadata;
 
 public class DatasetManager {
 	
@@ -30,9 +29,9 @@ public class DatasetManager {
 		try {
 			
 			//should work, doesn't
-			//IMetaData meta = LoaderFactory.getMetaData(path, null);
+			//IMetadata meta = LoaderFactory.getMetaData(path, null);
 			IDataHolder dh = LoaderFactory.getData(path);
-			IMetaData meta =dh.getMetadata();
+			IMetadata meta =dh.getMetadata();
 
 			
 			if (meta != null) {
@@ -86,7 +85,7 @@ public class DatasetManager {
 		return names;
 	}
 	
-	private static DatasetManager getDatasetManager(IMetaData meta) {
+	private static DatasetManager getDatasetManager(IMetadata meta) {
 		
 		Map<Integer, List<String>> axis = new HashMap<Integer, List<String>>();
 		Map<Integer, List<String>> all = new HashMap<Integer, List<String>>();
