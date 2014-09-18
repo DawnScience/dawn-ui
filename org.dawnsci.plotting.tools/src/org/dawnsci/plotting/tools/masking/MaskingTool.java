@@ -1372,8 +1372,10 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			}
 			
 			AbstractPlottingViewer viewer = (AbstractPlottingViewer)getPlottingSystem().getAdapter(AbstractPlottingViewer.class);
-			viewer.addMouseClickListener(clickListener);
-			viewer.addMouseMotionListener(clickListener);
+			if (viewer!=null) {
+				viewer.addMouseClickListener(clickListener);
+				viewer.addMouseMotionListener(clickListener);
+			}
 		}
 		if (this.regionTable!=null && !regionTable.getControl().isDisposed()) {
 			regionTable.refresh();

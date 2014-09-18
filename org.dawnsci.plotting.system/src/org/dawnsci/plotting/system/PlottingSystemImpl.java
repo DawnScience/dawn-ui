@@ -1322,11 +1322,11 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	
 	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
 		
-		if (adapter.getClass().isAssignableFrom(getClass())) return this;
+		if (adapter.isAssignableFrom(getClass())) return this;
 		
 		for (IPlottingSystemViewer v : viewers) {
 			if (v.getClass() == adapter) return v;
-			if (adapter.getClass().isAssignableFrom(v.getClass())) return v;
+			if (adapter.isAssignableFrom(v.getClass())) return v;
 			if (v instanceof IAdaptable) {
 				Object inst = ((IAdaptable)v).getAdapter(adapter);
 				if (inst!=null) return inst;
