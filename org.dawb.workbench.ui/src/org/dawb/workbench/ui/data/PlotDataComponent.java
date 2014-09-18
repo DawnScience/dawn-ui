@@ -206,7 +206,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 							@Override
 							public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 								try {
-									final IMetadata  meta = LoaderFactory.getMetaData(filePath, new ProgressMonitorWrapper(monitor));
+									final IMetadata  meta = LoaderFactory.getMetadata(filePath, new ProgressMonitorWrapper(monitor));
 									Display.getDefault().syncExec(new Runnable() {
 										public void run() {
 											try {

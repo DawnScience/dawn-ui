@@ -122,7 +122,7 @@ public class DiffractionUtils {
 		if (mdImage == null && filePath != null) {
 			IMetadata md = null;
 			try {
-				md = service.getMetaData(filePath, null);
+				md = service.getMetadata(filePath, null);
 			} catch (Exception e) {
 				logger.error("Cannot read meta data from part", e);
 			}

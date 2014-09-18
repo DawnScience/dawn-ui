@@ -81,7 +81,7 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
 		
         IMetadata metaData = null;
 		try {
-			metaData = LoaderFactory.getMetaData(EclipseUtils.getFilePath(getEditorInput()), null);
+			metaData = LoaderFactory.getMetadata(EclipseUtils.getFilePath(getEditorInput()), null);
 		} catch (Exception e1) {
 			// Allowed to have no meta data at this point.
 		}

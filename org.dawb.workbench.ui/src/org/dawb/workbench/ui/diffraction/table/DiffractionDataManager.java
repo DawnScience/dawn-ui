@@ -165,7 +165,7 @@ public class DiffractionDataManager {
 			
 			if (image == null &&  fullName == null) {
 				try {
-					IMetadata metaData = LoaderFactory.getMetaData(path, null);
+					IMetadata metaData = LoaderFactory.getMetadata(path, null);
 					Map<String, int[]> dataShapes = metaData.getDataShapes();
 					final List<String> dataNames = new ArrayList<String>();
 					for (String name : dataShapes.keySet()) {

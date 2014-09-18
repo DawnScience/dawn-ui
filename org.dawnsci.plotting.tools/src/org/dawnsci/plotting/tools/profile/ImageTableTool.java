@@ -474,7 +474,7 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 		if (getPart() instanceof IEditorPart) {
 			IEditorPart editor = (IEditorPart)getPart();
 	    	try {
-				return LoaderFactory.getMetaData(EclipseUtils.getFilePath(editor.getEditorInput()), null);
+				return LoaderFactory.getMetadata(EclipseUtils.getFilePath(editor.getEditorInput()), null);
 			} catch (Exception e) {
 				logger.error("Cannot get meta data for "+EclipseUtils.getFilePath(editor.getEditorInput()), e);
 			}
