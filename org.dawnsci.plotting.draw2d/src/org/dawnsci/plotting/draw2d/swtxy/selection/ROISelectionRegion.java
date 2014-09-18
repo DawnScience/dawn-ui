@@ -16,12 +16,11 @@
 
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
-
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 abstract class ROISelectionRegion<T extends IROI> extends AbstractSelectionRegion<T> {
 

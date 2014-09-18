@@ -10,13 +10,13 @@ import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.DiffractionToolConstants;
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetectorHelper;
+import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
+import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironment;
+import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
-import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.io.DiffractionMetadata;
-import uk.ac.diamond.scisoft.analysis.metadata.IDiffractionMetadata;
 
 public class DiffractionDefaultMetadata {
 	

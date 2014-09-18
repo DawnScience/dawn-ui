@@ -22,6 +22,7 @@ import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.ActionType;
 import org.eclipse.dawnsci.plotting.api.ManagerType;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -77,8 +78,6 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 /**
  * Delegating class for light-weight actions.
  * 

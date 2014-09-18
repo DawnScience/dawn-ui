@@ -4,9 +4,8 @@ import java.util.List;
 
 import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
 import org.dawnsci.common.widgets.table.ISeriesValidator;
-
-import uk.ac.diamond.scisoft.analysis.processing.IOperation;
-import uk.ac.diamond.scisoft.analysis.processing.IOperationService;
+import org.eclipse.dawnsci.analysis.api.processing.IOperation;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 
 final class OperationValidator implements ISeriesValidator {
 

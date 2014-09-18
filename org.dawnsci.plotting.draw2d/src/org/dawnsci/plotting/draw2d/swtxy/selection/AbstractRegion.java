@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegionContainer;
@@ -20,8 +21,6 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 /**
  * This is a Figure, disabled for mouse events. 

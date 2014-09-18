@@ -1,7 +1,7 @@
 package org.dawnsci.spectrum.ui.processing;
 
-import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
-import uk.ac.diamond.scisoft.analysis.dataset.Maths;
+import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
 
 public class DerivativeProcess extends AbstractProcess {
 

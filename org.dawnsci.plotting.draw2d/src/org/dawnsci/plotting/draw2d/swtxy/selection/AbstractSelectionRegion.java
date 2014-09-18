@@ -8,6 +8,8 @@ import org.dawnsci.plotting.draw2d.swtxy.ImageTrace;
 import org.dawnsci.plotting.draw2d.swtxy.RegionBean;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.axis.CoordinateSystemEvent;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
@@ -33,9 +35,6 @@ import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
-import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
-
 /**
  * An AbstractSelectionRegion has two purposes:
  * 1. To draw the 2d shapes for selection in the diagram.
@@ -56,8 +55,8 @@ import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
  * can be used directly also there are no bounds of this figure to deal with.
  * 
  * Implementations of selection regions are constructed by a factory then {@link #createContents(Figure)}
- * is called followed by either {@link #initialize(PointList)} or {@link #setROI(uk.ac.diamond.scisoft.analysis.roi.IROI)}.
- * Programmatic modifications happen via {@link #setROI(uk.ac.diamond.scisoft.analysis.roi.IROI)}
+ * is called followed by either {@link #initialize(PointList)} or {@link #setROI(org.eclipse.dawnsci.analysis.api.roi.IROI)}.
+ * Programmatic modifications happen via {@link #setROI(org.eclipse.dawnsci.analysis.api.roi.IROI)}
  * and GUI manipulations use {@link TranslationListener}s.
  */
 public abstract class AbstractSelectionRegion<T extends IROI> extends AbstractRegion<T> implements ICoordinateSystemListener {

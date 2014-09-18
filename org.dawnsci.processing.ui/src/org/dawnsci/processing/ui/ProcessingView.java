@@ -14,6 +14,10 @@ import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
 import org.dawnsci.common.widgets.table.SeriesTable;
 import org.dawnsci.processing.ui.preference.ProcessingConstants;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.dawnsci.analysis.api.processing.IOperation;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
+import org.eclipse.dawnsci.analysis.api.processing.OperationData;
+import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
@@ -39,11 +43,6 @@ import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import uk.ac.diamond.scisoft.analysis.processing.IOperation;
-import uk.ac.diamond.scisoft.analysis.processing.IOperationService;
-import uk.ac.diamond.scisoft.analysis.processing.OperationData;
-import uk.ac.diamond.scisoft.analysis.processing.model.IOperationModel;
 
 /**
  * A view for constructing and executing a processing pipeline.

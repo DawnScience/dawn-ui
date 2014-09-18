@@ -3,8 +3,7 @@ package org.dawnsci.spectrum.ui.utils;
 import java.util.List;
 
 import org.dawnsci.spectrum.ui.file.IContain1DData;
-
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 
 public class Contain1DDataImpl implements IContain1DData {
 	

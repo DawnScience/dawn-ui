@@ -1,6 +1,6 @@
 package org.dawnsci.plotting.tools.powderintegration;
 
-import uk.ac.diamond.scisoft.analysis.processing.model.AbstractOperationModel;
+import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
 
 public class PowderCorrectionModel extends AbstractOperationModel {
 

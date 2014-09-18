@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetectorHelper;
+import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironment;
+import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 
-import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.io.DiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.NexusDiffractionMetaReader;
-import uk.ac.diamond.scisoft.analysis.metadata.IDiffractionMetadata;
 
 
 public class NexusDiffractionMetaCreator {

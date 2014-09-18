@@ -1,7 +1,8 @@
 package org.dawnsci.plotting.tools.powderintegration;
 
+import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
+
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelIntegrationUtils.IntegrationMode;
-import uk.ac.diamond.scisoft.analysis.processing.model.AbstractOperationModel;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile.XAxis;
 
 public class PowderIntegrationModel extends AbstractOperationModel {

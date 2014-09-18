@@ -17,6 +17,9 @@
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
 import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
+import org.eclipse.dawnsci.analysis.api.roi.IPolylineROI;
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.PolygonalROI;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
@@ -25,10 +28,6 @@ import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
-
-import uk.ac.diamond.scisoft.analysis.roi.IPolylineROI;
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
-import uk.ac.diamond.scisoft.analysis.roi.PolygonalROI;
 
 public class PolygonSelection extends ROISelectionRegion<PolygonalROI> {
 

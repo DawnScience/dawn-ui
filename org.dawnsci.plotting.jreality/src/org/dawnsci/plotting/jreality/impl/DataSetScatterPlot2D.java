@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.dawnsci.plotting.jreality.tool.SelectedWindow;
 import org.dawnsci.plotting.jreality.util.ErrorHelpers;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.jreality.core.AxisMode;
 import org.eclipse.dawnsci.plotting.api.jreality.impl.Plot1DAppearance;
 import org.eclipse.dawnsci.plotting.api.jreality.impl.Plot1DGraphTable;
@@ -30,7 +31,6 @@ import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.widgets.Composite;
 
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import de.jreality.geometry.PointSetFactory;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;

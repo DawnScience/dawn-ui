@@ -1,7 +1,7 @@
 package org.dawnsci.plotting.expression;
 
-import uk.ac.diamond.scisoft.analysis.dataset.LazyDataset;
-import uk.ac.diamond.scisoft.analysis.io.ILazyLoader;
+import org.eclipse.dawnsci.analysis.api.io.ILazyLoader;
+import org.eclipse.dawnsci.analysis.dataset.impl.LazyDataset;
 
 class ExpressionLazyDataset extends LazyDataset {
 

@@ -21,6 +21,8 @@ import org.dawb.common.ui.util.GridUtils;
 import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.editors.preference.EditorConstants;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.slicing.api.editor.ISelectedPlotting;
 import org.eclipse.dawnsci.slicing.api.editor.ISlicablePlottingPart;
 import org.eclipse.jface.action.Action;
@@ -57,9 +59,6 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.part.EditorPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 
 /**

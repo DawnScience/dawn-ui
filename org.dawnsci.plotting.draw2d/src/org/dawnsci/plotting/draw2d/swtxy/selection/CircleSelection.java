@@ -16,6 +16,8 @@
 
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
+import org.eclipse.dawnsci.analysis.dataset.roi.CircularROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.handler.ParametricROIHandler;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
@@ -23,9 +25,6 @@ import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
-
-import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
-import uk.ac.diamond.scisoft.analysis.roi.handler.ParametricROIHandler;
 
 public class CircleSelection extends LockableSelectionRegion<CircularROI> {
 

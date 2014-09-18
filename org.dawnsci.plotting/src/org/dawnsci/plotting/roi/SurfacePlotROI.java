@@ -16,7 +16,7 @@
 
 package org.dawnsci.plotting.roi;
 
-import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 
 /**
  * This is a region of interest selection object for the 3D surface plotting 

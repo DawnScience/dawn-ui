@@ -1,5 +1,6 @@
 package org.dawnsci.plotting.roi;
 
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
@@ -13,8 +14,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 /**
  * A dialog for editing a ROI. Uses ROIViewer table.

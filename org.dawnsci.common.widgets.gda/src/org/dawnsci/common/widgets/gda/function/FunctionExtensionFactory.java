@@ -22,8 +22,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
-
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 
 public class FunctionExtensionFactory {
 

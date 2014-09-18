@@ -1,17 +1,18 @@
 package org.dawnsci.plotting.roi;
 
 
-import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
-import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
-import uk.ac.diamond.scisoft.analysis.roi.PerimeterBoxROI;
-import uk.ac.diamond.scisoft.analysis.roi.PointROI;
-import uk.ac.diamond.scisoft.analysis.roi.RingROI;
-import uk.ac.diamond.scisoft.analysis.roi.XAxisBoxROI;
-import uk.ac.diamond.scisoft.analysis.roi.YAxisBoxROI;
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.EllipticalROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.PerimeterBoxROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.RingROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.SectorROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.XAxisBoxROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.YAxisBoxROI;
+
 //import uk.ac.diamond.scisoft.analysis.roi.PolygonalROI;
-import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
-import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
 public enum ROIType {
 

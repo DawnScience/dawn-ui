@@ -24,6 +24,11 @@ import org.dawnsci.common.widgets.tree.UnitEditingSupport;
 import org.dawnsci.common.widgets.tree.ValueEditingSupport;
 import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
+import org.eclipse.dawnsci.analysis.dataset.roi.GridPreferences;
+import org.eclipse.dawnsci.analysis.dataset.roi.GridROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
@@ -73,12 +78,6 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.jscience.physics.amount.Amount;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
-import uk.ac.diamond.scisoft.analysis.metadata.IMetadata;
-import uk.ac.diamond.scisoft.analysis.roi.GridPreferences;
-import uk.ac.diamond.scisoft.analysis.roi.GridROI;
-import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
 
 /**
  * Tool to draw and configure a grid.

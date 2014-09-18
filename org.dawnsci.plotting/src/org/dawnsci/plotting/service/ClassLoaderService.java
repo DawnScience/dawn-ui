@@ -7,10 +7,9 @@ import javax.vecmath.Vector3d;
 
 import org.dawb.common.services.IClassLoaderService;
 import org.dawb.workbench.jmx.UserPlotBean;
+import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.ui.services.AbstractServiceFactory;
 import org.eclipse.ui.services.IServiceLocator;
-
-import uk.ac.diamond.scisoft.analysis.dataset.Slice;
 
 import com.thoughtworks.xstream.core.util.CompositeClassLoader;
 
@@ -59,7 +58,7 @@ public class ClassLoaderService extends AbstractServiceFactory implements IClass
 
 	private ClassLoader createClassLoader() {
 		final CompositeClassLoader loader = new CompositeClassLoader();
-	    loader.add(uk.ac.diamond.scisoft.analysis.dataset.Activator.class.getClassLoader());
+	    loader.add(org.eclipse.dawnsci.analysis.dataset.impl.Activator.class.getClassLoader());
 	    loader.add(uk.ac.diamond.scisoft.analysis.Activator.class.getClassLoader());
 		loader.add(Slice.class.getClassLoader());           // analysis.api
 		loader.add(UserPlotBean.class.getClassLoader());    // workbench.jmx

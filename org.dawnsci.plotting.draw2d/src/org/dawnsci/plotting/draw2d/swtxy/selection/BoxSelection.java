@@ -17,6 +17,9 @@
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
 import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
+import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.handler.ROIHandler;
+import org.eclipse.dawnsci.analysis.dataset.roi.handler.RectangularROIHandler;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
@@ -25,10 +28,6 @@ import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
-
-import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
-import uk.ac.diamond.scisoft.analysis.roi.handler.ROIHandler;
-import uk.ac.diamond.scisoft.analysis.roi.handler.RectangularROIHandler;
 
 class BoxSelection extends ROISelectionRegion<RectangularROI> {
 

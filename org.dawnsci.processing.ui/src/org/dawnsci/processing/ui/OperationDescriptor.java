@@ -8,15 +8,14 @@ import java.util.UUID;
 import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.dawnsci.analysis.api.processing.IOperation;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
+import org.eclipse.dawnsci.analysis.api.processing.OperationData;
+import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.osgi.framework.Bundle;
-
-import uk.ac.diamond.scisoft.analysis.processing.IOperation;
-import uk.ac.diamond.scisoft.analysis.processing.IOperationService;
-import uk.ac.diamond.scisoft.analysis.processing.OperationData;
-import uk.ac.diamond.scisoft.analysis.processing.model.IOperationModel;
 
 final class OperationDescriptor implements ISeriesItemDescriptor {
 

@@ -1,5 +1,8 @@
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.GridROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.dawnsci.plotting.api.region.IGridSelection;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -7,10 +10,6 @@ import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
-
-import uk.ac.diamond.scisoft.analysis.roi.GridROI;
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
-import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 
 /**

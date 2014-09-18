@@ -1,6 +1,6 @@
 package org.dawnsci.plotting.roi;
 
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
 
 public interface IRegionTransformer {
 

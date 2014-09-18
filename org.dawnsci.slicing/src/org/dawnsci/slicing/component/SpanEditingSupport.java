@@ -1,6 +1,7 @@
 package org.dawnsci.slicing.component;
 
 import org.dawnsci.common.widgets.celleditor.SpinnerCellEditor;
+import org.eclipse.dawnsci.analysis.dataset.impl.LazyDataset;
 import org.eclipse.dawnsci.slicing.api.system.DimsData;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
@@ -11,8 +12,6 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import uk.ac.diamond.scisoft.analysis.dataset.LazyDataset;
 
 public class SpanEditingSupport extends EditingSupport {
 	

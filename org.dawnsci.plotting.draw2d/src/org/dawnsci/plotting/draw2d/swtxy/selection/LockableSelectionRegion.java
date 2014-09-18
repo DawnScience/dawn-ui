@@ -17,6 +17,7 @@
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
 import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
+import org.eclipse.dawnsci.analysis.api.roi.IParametricROI;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.dawnsci.plotting.api.region.ILockableRegion;
 import org.eclipse.draw2d.ColorConstants;
@@ -27,8 +28,6 @@ import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Display;
-
-import uk.ac.diamond.scisoft.analysis.roi.IParametricROI;
 
 abstract class LockableSelectionRegion<T extends IParametricROI> extends ROISelectionRegion<T> implements ILockableRegion {
 

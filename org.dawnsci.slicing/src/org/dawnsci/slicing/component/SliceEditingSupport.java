@@ -9,6 +9,7 @@ import org.dawb.common.ui.components.cell.ScaleCellEditor;
 import org.dawnsci.common.widgets.celleditor.PlayCellEditor;
 import org.dawnsci.slicing.Activator; // On purpose! Gets preference from expected place.
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.slicing.api.system.AxisType;
 import org.eclipse.dawnsci.slicing.api.system.DimsData;
@@ -37,8 +38,6 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Scale;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
-
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 
 class SliceEditingSupport extends EditingSupport {

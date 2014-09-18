@@ -23,6 +23,12 @@ import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
 import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
 import org.dawnsci.plotting.draw2d.swtxy.util.PointFunction;
+import org.eclipse.dawnsci.analysis.api.roi.IFitROI;
+import org.eclipse.dawnsci.analysis.api.roi.IPolylineROI;
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.PolylineROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.handler.ROIHandler;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
@@ -31,13 +37,6 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
-
-import uk.ac.diamond.scisoft.analysis.roi.IFitROI;
-import uk.ac.diamond.scisoft.analysis.roi.IPolylineROI;
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
-import uk.ac.diamond.scisoft.analysis.roi.PointROI;
-import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
-import uk.ac.diamond.scisoft.analysis.roi.handler.ROIHandler;
 
 /**
  * Class for a parametric shape fitted to a polyline ROI and does not use a ROIHandler

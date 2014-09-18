@@ -3,13 +3,13 @@ package org.dawnsci.plotting.tools.fitting;
 import java.util.List;
 
 import org.dawnsci.plotting.tools.Activator;
+import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
+import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 
-import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
-import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
 /**
  * A bean to hold information required to do a fit.

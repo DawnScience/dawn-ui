@@ -1,6 +1,6 @@
 package org.dawnsci.common.widgets.gda.function.descriptors;
 
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 
 public class TemplatedFunctionDescriptor extends FunctionDescriptor {
 

@@ -7,10 +7,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.TreeSet;
 
+import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
-
-import uk.ac.diamond.scisoft.analysis.processing.model.IOperationModel;
 
 /**
  * @see https://www.eclipse.org/articles/Article-Properties-View/properties-view.html

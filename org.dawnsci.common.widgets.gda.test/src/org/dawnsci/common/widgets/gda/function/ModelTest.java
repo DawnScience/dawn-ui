@@ -19,14 +19,14 @@ import org.dawnsci.common.widgets.gda.function.internal.model.FunctionModelEleme
 import org.dawnsci.common.widgets.gda.function.internal.model.FunctionModelRoot;
 import org.dawnsci.common.widgets.gda.function.internal.model.ParameterModel;
 import org.dawnsci.common.widgets.gda.function.internal.model.SetFunctionModel;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IParameter;
 import org.junit.Test;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Fermi;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Gaussian;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IParameter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Lorentzian;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Subtract;
 

@@ -12,6 +12,9 @@ import org.dawnsci.common.widgets.gda.function.handlers.NewFunctionHandler;
 import org.dawnsci.common.widgets.gda.function.handlers.PasteHandler;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IOperator;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IParameter;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
@@ -32,9 +35,6 @@ import org.eclipse.ui.menus.CommandContributionItemParameter;
 import org.eclipse.ui.services.IServiceLocator;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IOperator;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IParameter;
 
 public class FunctionFittingWidget extends Composite implements IFunctionViewer {
 

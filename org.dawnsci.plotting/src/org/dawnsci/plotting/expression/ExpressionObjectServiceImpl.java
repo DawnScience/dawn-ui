@@ -6,6 +6,7 @@ import org.dawb.common.services.IExpressionObject;
 import org.dawb.common.services.IExpressionObjectService;
 import org.dawb.common.services.IVariableManager;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
@@ -13,8 +14,6 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.services.AbstractServiceFactory;
 import org.eclipse.ui.services.IServiceLocator;
-
-import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
 public class ExpressionObjectServiceImpl extends AbstractServiceFactory implements IExpressionObjectService {
 

@@ -6,6 +6,7 @@ import java.util.List;
 import javax.management.MalformedObjectNameException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.IPlotActionSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -35,8 +36,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchPart;
-
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 /**
  * This class implements IPlottingSystem but can be used 

@@ -5,9 +5,8 @@ import org.dawnsci.common.widgets.gda.function.FunctionTreeViewer;
 import org.dawnsci.common.widgets.gda.function.IFunctionViewer;
 import org.dawnsci.common.widgets.gda.function.internal.model.FunctionModelElement;
 import org.dawnsci.common.widgets.gda.function.internal.model.ParameterModel;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IParameter;
 import org.eclipse.jface.action.Action;
-
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IParameter;
 
 public class ToggleFixedAction extends Action {
 	private FunctionTreeViewer viewer;

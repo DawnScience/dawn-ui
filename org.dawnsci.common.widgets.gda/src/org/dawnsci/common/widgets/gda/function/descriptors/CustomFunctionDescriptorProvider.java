@@ -6,8 +6,7 @@ import java.util.Map;
 
 import org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunction;
 import org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunctionDescriptor;
-
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 
 public class CustomFunctionDescriptorProvider implements
 		IFunctionDescriptorProvider {

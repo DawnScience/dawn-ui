@@ -13,6 +13,7 @@ import org.dawb.common.services.IVariableManager;
 import org.dawb.workbench.ui.views.PlotDataPage;
 import org.dawnsci.common.widgets.editor.ITitledEditor;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemSelection;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -29,7 +30,6 @@ import org.eclipse.ui.part.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.rcp.editors.TextDataEditor;
 
 

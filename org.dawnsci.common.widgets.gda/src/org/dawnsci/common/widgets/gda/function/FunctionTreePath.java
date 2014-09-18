@@ -1,10 +1,9 @@
 package org.dawnsci.common.widgets.gda.function;
 
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IOperator;
 import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.TreePath;
-
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IOperator;
 
 public class FunctionTreePath {
 

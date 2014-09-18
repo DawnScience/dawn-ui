@@ -25,6 +25,7 @@ import org.dawb.workbench.ui.diffraction.table.DiffractionTableData;
 import org.dawb.workbench.ui.diffraction.table.IRefreshable;
 import org.dawb.workbench.ui.views.RepeatingMouseAdapter;
 import org.dawb.workbench.ui.views.SlowFastRunnable;
+import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -38,8 +39,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-
-import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 
 /**
  * 

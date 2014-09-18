@@ -1,10 +1,9 @@
 package org.dawnsci.common.widgets.gda.function.descriptors;
 
 import org.eclipse.core.runtime.PlatformObject;
-
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IOperator;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IParameter;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IOperator;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IParameter;
 
 public abstract class FunctionDescriptor extends PlatformObject implements
 		IFunctionDescriptor {

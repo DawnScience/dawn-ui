@@ -4,30 +4,29 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.CircularFitROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.CircularROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.EllipticalFitROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.EllipticalROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.FreeDrawROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.GridROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.PerimeterBoxROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.PolygonalROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.PolylineROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.RingROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.SectorROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.XAxisBoxROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.XAxisLineBoxROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.YAxisBoxROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.YAxisLineBoxROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegionService;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
-
-import uk.ac.diamond.scisoft.analysis.roi.CircularFitROI;
-import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
-import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
-import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
-import uk.ac.diamond.scisoft.analysis.roi.FreeDrawROI;
-import uk.ac.diamond.scisoft.analysis.roi.GridROI;
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
-import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
-import uk.ac.diamond.scisoft.analysis.roi.PerimeterBoxROI;
-import uk.ac.diamond.scisoft.analysis.roi.PointROI;
-import uk.ac.diamond.scisoft.analysis.roi.PolygonalROI;
-import uk.ac.diamond.scisoft.analysis.roi.PolylineROI;
-import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
-import uk.ac.diamond.scisoft.analysis.roi.RingROI;
-import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
-import uk.ac.diamond.scisoft.analysis.roi.XAxisBoxROI;
-import uk.ac.diamond.scisoft.analysis.roi.XAxisLineBoxROI;
-import uk.ac.diamond.scisoft.analysis.roi.YAxisBoxROI;
-import uk.ac.diamond.scisoft.analysis.roi.YAxisLineBoxROI;
 
 public class RegionServiceImpl implements IRegionService {
 

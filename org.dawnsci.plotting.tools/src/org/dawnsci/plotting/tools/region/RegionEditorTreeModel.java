@@ -24,17 +24,16 @@ import org.dawnsci.common.widgets.tree.UnitListener;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.RegionEditorConstants;
 import org.dawnsci.plotting.tools.utils.ToolUtils;
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.CircularROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.RingROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.SectorROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.jface.preference.IPreferenceStore;
-
-import uk.ac.diamond.scisoft.analysis.roi.CircularROI;
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
-import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
-import uk.ac.diamond.scisoft.analysis.roi.PointROI;
-import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
-import uk.ac.diamond.scisoft.analysis.roi.RingROI;
-import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
 /**
  * Holds data for the Region Editor model.

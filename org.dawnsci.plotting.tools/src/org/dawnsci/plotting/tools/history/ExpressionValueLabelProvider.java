@@ -1,12 +1,11 @@
 package org.dawnsci.plotting.tools.history;
 
 import org.dawb.common.services.IExpressionObject;
+import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
-
-import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
 /**
  * TODO This class is actually generic, could be used elsewhere.

@@ -15,6 +15,7 @@ import org.dawnsci.common.widgets.gda.function.internal.model.FunctionModel;
 import org.dawnsci.common.widgets.gda.function.internal.model.FunctionModelRoot;
 import org.dawnsci.common.widgets.gda.function.internal.model.ParameterModel;
 import org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunction;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 import org.junit.Before;
@@ -24,7 +25,6 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Fermi;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Gaussian;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Parameter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Subtract;
 

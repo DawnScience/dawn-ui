@@ -18,8 +18,8 @@ package org.dawnsci.plotting.jreality.util;
 
 import java.awt.Color;
 
-import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 
 import de.jreality.geometry.IndexedLineSetFactory;
 import de.jreality.scene.Appearance;

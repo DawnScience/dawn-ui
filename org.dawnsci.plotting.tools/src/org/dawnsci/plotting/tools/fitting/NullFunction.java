@@ -1,12 +1,13 @@
 package org.dawnsci.plotting.tools.fitting;
 
-import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IOperator;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IParameter;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IOperator;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IParameter;
+import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
+import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
+
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
-import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
 public class NullFunction implements IPeak {
 

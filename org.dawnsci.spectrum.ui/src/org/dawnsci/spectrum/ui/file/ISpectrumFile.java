@@ -3,7 +3,7 @@ package org.dawnsci.spectrum.ui.file;
 import java.util.Collection;
 import java.util.List;
 
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 
 public interface ISpectrumFile extends IContain1DData {
 

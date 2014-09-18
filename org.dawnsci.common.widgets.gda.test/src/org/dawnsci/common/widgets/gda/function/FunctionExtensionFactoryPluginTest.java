@@ -23,9 +23,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.junit.Test;
-
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 
 public class FunctionExtensionFactoryPluginTest {
 

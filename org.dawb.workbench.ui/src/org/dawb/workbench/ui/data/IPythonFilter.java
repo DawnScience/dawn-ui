@@ -1,6 +1,7 @@
 package org.dawb.workbench.ui.data;
 
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+
 import uk.ac.diamond.scisoft.analysis.rpc.AnalysisRpcException;
 
 public interface IPythonFilter {

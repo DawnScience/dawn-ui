@@ -9,10 +9,9 @@
 package org.dawnsci.plotting.tools.region;
 
 import org.dawnsci.common.widgets.tree.LabelNode;
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
-
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 /**
  * This class is a custom LabelNode to hold data about Region nodes in 

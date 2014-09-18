@@ -16,11 +16,12 @@
 
 package org.dawnsci.common.widgets.gda.function;
 
-import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IParameter;
+import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
+
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CoordinatesIterator;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IParameter;
 
 public class KichwaFunction extends AFunction implements IFunction {
 	private static final double[] params = new double[]{};

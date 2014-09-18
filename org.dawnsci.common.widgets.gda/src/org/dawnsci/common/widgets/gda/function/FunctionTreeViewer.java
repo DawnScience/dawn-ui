@@ -15,6 +15,9 @@ import org.dawnsci.common.widgets.gda.function.internal.model.FunctionModelRoot;
 import org.dawnsci.common.widgets.gda.function.internal.model.OperatorModel;
 import org.dawnsci.common.widgets.gda.function.internal.model.ParameterModel;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IOperator;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IParameter;
 import org.eclipse.jface.bindings.keys.IKeyLookup;
 import org.eclipse.jface.bindings.keys.KeyLookupFactory;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
@@ -45,9 +48,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Tree;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IOperator;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IParameter;
 
 public class FunctionTreeViewer implements IFunctionViewer {
 	protected static final DecimalFormat DOUBLE_FORMAT = new DecimalFormat(

@@ -9,6 +9,8 @@ import org.dawnsci.common.richbeans.components.cell.FieldComponentCellEditor;
 import org.dawnsci.common.richbeans.components.wrappers.BooleanWrapper;
 import org.dawnsci.common.richbeans.components.wrappers.FloatSpinnerWrapper;
 import org.dawnsci.common.richbeans.components.wrappers.SpinnerWrapper;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IParameter;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewer;
@@ -36,8 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionFactory;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IParameter;
 
 /**
  * A table widget for editing any Function

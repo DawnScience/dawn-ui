@@ -7,12 +7,11 @@ import org.dawnsci.common.widgets.gda.function.descriptors.IFunctionDescriptor;
 import org.dawnsci.common.widgets.gda.function.descriptors.IFunctionDescriptorProvider;
 import org.dawnsci.common.widgets.gda.function.internal.model.FunctionModelElement;
 import org.dawnsci.common.widgets.gda.function.internal.model.FunctionModifiedEvent;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TextCellEditor;
-
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 
 public class FunctionSelectionEditingSupport extends EditingSupport implements ITextEditingSupport {
 	

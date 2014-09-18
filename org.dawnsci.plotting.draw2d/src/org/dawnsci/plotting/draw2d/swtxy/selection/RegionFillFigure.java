@@ -3,14 +3,13 @@ package org.dawnsci.plotting.draw2d.swtxy.selection;
 import java.util.Iterator;
 
 import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegionContainer;
 import org.eclipse.draw2d.Cursors;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.MouseListener;
 import org.eclipse.draw2d.Shape;
-
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 /**
  * You do not have to use this class for the figure which fills the region and

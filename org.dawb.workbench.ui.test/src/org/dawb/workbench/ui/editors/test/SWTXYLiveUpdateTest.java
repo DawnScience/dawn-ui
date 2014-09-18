@@ -1,11 +1,11 @@
 package org.dawb.workbench.ui.editors.test;
 
 import org.dawb.common.ui.util.EclipseUtils;
+import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.ui.IWorkbenchPage;
 import org.junit.Test;
 
 import uk.ac.diamond.scisoft.analysis.SDAPlotter;
-import uk.ac.diamond.scisoft.analysis.dataset.DoubleDataset;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 

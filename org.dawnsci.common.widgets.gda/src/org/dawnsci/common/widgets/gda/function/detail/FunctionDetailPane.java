@@ -1,11 +1,10 @@
 package org.dawnsci.common.widgets.gda.function.detail;
 
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 
 public class FunctionDetailPane implements IFunctionDetailPane {
 

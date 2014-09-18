@@ -1,13 +1,12 @@
 package org.dawnsci.plotting.roi;
 
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.DialogCellEditor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 public class RegionCellEditor extends DialogCellEditor {
 

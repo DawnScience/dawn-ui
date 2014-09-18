@@ -2,8 +2,8 @@ package org.dawnsci.algorithm.ui.workflow;
 
 import java.util.Map;
 
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
 
 /**
  * Interface used to update programmatically a moml file

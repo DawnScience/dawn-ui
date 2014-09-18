@@ -19,6 +19,10 @@ package org.dawnsci.plotting.draw2d.swtxy.selection;
 import org.dawnsci.plotting.draw2d.swtxy.IMobileFigure;
 import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
 import org.dawnsci.plotting.draw2d.swtxy.util.PointFunction;
+import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.SectorROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.handler.ROIHandler;
+import org.eclipse.dawnsci.analysis.dataset.roi.handler.SectorROIHandler;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.dawnsci.plotting.api.region.ILockableRegion;
 import org.eclipse.draw2d.ColorConstants;
@@ -31,11 +35,6 @@ import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
-
-import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
-import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
-import uk.ac.diamond.scisoft.analysis.roi.handler.ROIHandler;
-import uk.ac.diamond.scisoft.analysis.roi.handler.SectorROIHandler;
 
 /**
  * You should not call this concrete class outside of the draw2d 

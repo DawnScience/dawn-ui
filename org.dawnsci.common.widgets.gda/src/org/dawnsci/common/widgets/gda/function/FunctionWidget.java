@@ -5,6 +5,7 @@ import java.util.Vector;
 import org.dawb.common.ui.plot.function.FunctionModifiedEvent;
 import org.dawb.common.ui.plot.function.FunctionType;
 import org.dawb.common.ui.plot.function.IFunctionModifiedListener;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
@@ -18,7 +19,6 @@ import org.eclipse.swt.widgets.Spinner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
 
 /**

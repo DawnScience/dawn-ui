@@ -11,6 +11,8 @@ import org.dawb.passerelle.actors.ui.config.FieldBean;
 import org.dawb.passerelle.actors.ui.config.FieldContainer;
 import org.dawb.passerelle.actors.ui.config.FieldParameter;
 import org.dawb.passerelle.common.parameter.function.FunctionParameter;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,8 +21,6 @@ import ptolemy.data.expr.StringParameter;
 import ptolemy.kernel.ComponentEntity;
 import ptolemy.kernel.util.Attribute;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 import com.isencia.passerelle.model.Flow;
 import com.isencia.passerelle.model.FlowManager;

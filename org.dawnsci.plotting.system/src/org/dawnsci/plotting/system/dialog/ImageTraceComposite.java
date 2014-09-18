@@ -11,6 +11,8 @@ import org.dawnsci.common.widgets.decorator.ValueChangeEvent;
 import org.dawnsci.plotting.system.PlottingSystemActivator;
 import org.dawnsci.plotting.util.ColorUtility;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
@@ -37,9 +39,6 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
-import uk.ac.diamond.scisoft.analysis.dataset.RGBDataset;
 /**
  * TODO Replace with alternate widget library.
  */

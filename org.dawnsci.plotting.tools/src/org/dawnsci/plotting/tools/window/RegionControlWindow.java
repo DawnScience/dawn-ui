@@ -6,6 +6,8 @@ import org.dawb.common.ui.util.DisplayUtils;
 import org.dawnsci.plotting.roi.SurfacePlotROI;
 import org.dawnsci.plotting.tools.window.WindowTool.WindowJob;
 import org.dawnsci.plotting.util.PlottingUtils;
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -30,9 +32,6 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.part.IPageSite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
-import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 /**
  * Class used to create the composite with spinners to control the Window tool

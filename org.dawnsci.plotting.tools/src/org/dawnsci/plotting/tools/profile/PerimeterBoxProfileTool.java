@@ -8,6 +8,7 @@ import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.plotting.roi.ROIWidget;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.RegionSumTool;
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -49,8 +50,6 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.part.IPageSite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 /**
  * Perimeter Box tool that creates a tool page with 3 plotting systems and a composite:<br>

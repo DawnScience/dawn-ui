@@ -5,12 +5,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
-
-import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 
 public abstract class AbstractSpectrumFile implements ISpectrumFile {

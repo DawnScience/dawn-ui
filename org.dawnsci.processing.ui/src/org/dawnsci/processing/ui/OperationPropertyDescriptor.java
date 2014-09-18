@@ -8,6 +8,10 @@ import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
 import org.dawnsci.common.widgets.celleditor.ClassCellEditor;
 import org.dawnsci.common.widgets.celleditor.FileDialogCellEditor;
 import org.dawnsci.plotting.roi.RegionCellEditor;
+import org.eclipse.dawnsci.analysis.api.processing.model.FileType;
+import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
+import org.eclipse.dawnsci.analysis.api.processing.model.OperationModelField;
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxCellEditor;
@@ -23,11 +27,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
-
-import uk.ac.diamond.scisoft.analysis.processing.model.FileType;
-import uk.ac.diamond.scisoft.analysis.processing.model.IOperationModel;
-import uk.ac.diamond.scisoft.analysis.processing.model.OperationModelField;
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 /**
  * Current supported values in models which can be edited by this descriptor:

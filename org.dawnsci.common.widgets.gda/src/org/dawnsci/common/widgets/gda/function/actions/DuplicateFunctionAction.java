@@ -5,13 +5,12 @@ import org.dawnsci.common.widgets.gda.function.IFunctionViewer;
 import org.dawnsci.common.widgets.gda.function.internal.model.FunctionModel;
 import org.dawnsci.common.widgets.gda.function.internal.model.FunctionModelElement;
 import org.dawnsci.common.widgets.gda.function.internal.model.OperatorModel;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.jface.action.Action;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 
 public class DuplicateFunctionAction extends Action {
 	private static final Logger logger = LoggerFactory

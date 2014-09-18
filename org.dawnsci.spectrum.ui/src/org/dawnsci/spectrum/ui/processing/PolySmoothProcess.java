@@ -1,6 +1,7 @@
 package org.dawnsci.spectrum.ui.processing;
 
-import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+
 import uk.ac.diamond.scisoft.analysis.optimize.ApachePolynomial;
 
 public class PolySmoothProcess extends AbstractProcess {

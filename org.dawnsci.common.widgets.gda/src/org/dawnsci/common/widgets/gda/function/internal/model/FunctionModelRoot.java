@@ -27,11 +27,11 @@ import org.dawnsci.common.widgets.gda.function.IParameterModifiedEvent;
 import org.dawnsci.common.widgets.gda.function.descriptors.IFunctionDescriptor;
 import org.dawnsci.common.widgets.gda.function.descriptors.IFunctionDescriptorProvider;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IOperator;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IParameter;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IOperator;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IParameter;
 
 /**
  * Root domain object for function model 

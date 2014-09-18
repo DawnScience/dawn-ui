@@ -1,5 +1,7 @@
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
+import org.eclipse.dawnsci.analysis.dataset.roi.PerimeterBoxROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.draw2d.ColorConstants;
@@ -9,9 +11,6 @@ import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
-
-import uk.ac.diamond.scisoft.analysis.roi.PerimeterBoxROI;
-import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 /**
  *     A BoxSelection with coloured edges

@@ -5,6 +5,9 @@ import java.text.DecimalFormat;
 import org.dawb.common.util.number.DoubleUtils;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.RegionEditorConstants;
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -12,10 +15,6 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
-import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
-import uk.ac.diamond.scisoft.analysis.roi.RectangularROI;
 
 public class MeasurementLabelProvider extends ColumnLabelProvider {
 	

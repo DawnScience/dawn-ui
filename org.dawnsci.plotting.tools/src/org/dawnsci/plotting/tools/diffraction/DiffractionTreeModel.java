@@ -30,17 +30,16 @@ import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.DiffractionToolConstants;
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetectorHelper;
+import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
+import org.eclipse.dawnsci.analysis.api.diffraction.DetectorPropertyEvent;
+import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironment;
+import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironmentEvent;
+import org.eclipse.dawnsci.analysis.api.diffraction.IDetectorPropertyListener;
+import org.eclipse.dawnsci.analysis.api.diffraction.IDiffractionCrystalEnvironmentListener;
+import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
+import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.jscience.physics.amount.Amount;
-
-import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
-import uk.ac.diamond.scisoft.analysis.diffraction.DetectorPropertyEvent;
-import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
-import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironmentEvent;
-import uk.ac.diamond.scisoft.analysis.diffraction.IDetectorPropertyListener;
-import uk.ac.diamond.scisoft.analysis.diffraction.IDiffractionCrystalEnvironmentListener;
-import uk.ac.diamond.scisoft.analysis.metadata.IDiffractionMetadata;
-import uk.ac.diamond.scisoft.analysis.metadata.IMetadata;
 
 /**
  * Holds data for the Diffraction model.

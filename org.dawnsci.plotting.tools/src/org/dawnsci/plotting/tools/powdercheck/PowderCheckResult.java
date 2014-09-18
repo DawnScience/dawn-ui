@@ -1,6 +1,6 @@
 package org.dawnsci.plotting.tools.powdercheck;
 
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 
 public class PowderCheckResult {
 	

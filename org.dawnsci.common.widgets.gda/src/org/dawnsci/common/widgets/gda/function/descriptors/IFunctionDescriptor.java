@@ -1,10 +1,9 @@
 package org.dawnsci.common.widgets.gda.function.descriptors;
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IOperator;
 import org.eclipse.jface.fieldassist.IContentProposalProvider;
-
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IOperator;
 
 /**
  * An interface for providing fitting functions by providing the name and

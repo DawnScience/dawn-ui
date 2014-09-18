@@ -1,9 +1,8 @@
 package org.dawnsci.common.widgets.gda.function.internal.model;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
-
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IOperator;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IOperator;
 
 /**
  * Represents an operator in the function model

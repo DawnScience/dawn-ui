@@ -16,14 +16,13 @@
 
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
+import org.eclipse.dawnsci.analysis.api.roi.IFitROI;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
-
-import uk.ac.diamond.scisoft.analysis.roi.IFitROI;
 
 abstract class FitSelectionRegion<T extends IFitROI> extends ROISelectionRegion<T> {
 

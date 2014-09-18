@@ -18,11 +18,12 @@ package org.dawb.workbench.ui.diffraction.table;
 
 import java.util.List;
 
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
-import uk.ac.diamond.scisoft.analysis.diffraction.IPowderCalibrationInfo;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.diffraction.IPowderCalibrationInfo;
+import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
+
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
-import uk.ac.diamond.scisoft.analysis.metadata.IDiffractionMetadata;
-import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
 /**
  * Data item used in the table viewer of the Diffraction calibration views

@@ -3,6 +3,7 @@ package org.dawnsci.plotting.draw2d.swtxy;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
@@ -13,8 +14,6 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 /**
  * Paints the labels on the image trace.

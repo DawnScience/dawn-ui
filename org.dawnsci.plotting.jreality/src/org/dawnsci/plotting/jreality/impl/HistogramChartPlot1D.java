@@ -28,6 +28,7 @@ import org.dawnsci.plotting.jreality.tick.Tick;
 import org.dawnsci.plotting.jreality.tool.AreaSelectEvent;
 import org.dawnsci.plotting.jreality.tool.AreaSelectEventListener;
 import org.dawnsci.plotting.jreality.tool.SelectedWindow;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.jreality.core.ScaleType;
 import org.eclipse.dawnsci.plotting.api.jreality.data.ColourImageData;
 import org.eclipse.dawnsci.plotting.api.jreality.impl.Plot1DAppearance;
@@ -36,7 +37,6 @@ import org.eclipse.dawnsci.plotting.api.jreality.util.ArrayPoolUtility;
 import org.eclipse.dawnsci.plotting.api.jreality.util.ScalingUtility;
 
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import de.jreality.geometry.IndexedLineSetFactory;
 import de.jreality.geometry.PointSetFactory;
 import de.jreality.geometry.QuadMeshFactory;

@@ -18,6 +18,8 @@ import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.workbench.ui.views.PlotDataPage;
 import org.dawnsci.common.widgets.editor.ITitledEditor;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
+import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.hdf5.editor.H5Editor;
 import org.eclipse.dawnsci.hdf5.editor.H5ValuePage;
 import org.eclipse.dawnsci.hdf5.editor.IH5Editor;
@@ -39,9 +41,7 @@ import org.eclipse.ui.part.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-import uk.ac.diamond.scisoft.analysis.metadata.IMetadata;
 import uk.ac.diamond.scisoft.analysis.rcp.editors.HDF5TreeEditor;
 
 

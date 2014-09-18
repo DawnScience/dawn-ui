@@ -3,6 +3,10 @@ package org.dawnsci.plotting.system;
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.IErrorDataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
@@ -15,11 +19,6 @@ import org.eclipse.nebula.visualization.xygraph.dataprovider.IDataProvider;
 import org.eclipse.nebula.visualization.xygraph.figures.Trace;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
-
-import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
-import uk.ac.diamond.scisoft.analysis.dataset.DatasetFactory;
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.IErrorDataset;
 
 /**
  * This class only wraps line traces, images have their own IImageTrace implementor.

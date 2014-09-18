@@ -18,14 +18,13 @@ package org.dawnsci.plotting.draw2d.swtxy.selection;
 
 import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
 import org.dawnsci.plotting.draw2d.swtxy.util.PointFunction;
+import org.eclipse.dawnsci.analysis.api.roi.IParametricROI;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
-
-import uk.ac.diamond.scisoft.analysis.roi.IParametricROI;
 
 /**
  * Class for a shape whose outline is defined parametrically 

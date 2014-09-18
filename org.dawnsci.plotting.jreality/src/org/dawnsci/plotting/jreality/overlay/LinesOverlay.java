@@ -20,14 +20,13 @@ import java.util.List;
 
 import org.dawnsci.plotting.jreality.overlay.events.AbstractOverlayConsumer;
 import org.dawnsci.plotting.jreality.overlay.events.OverlayDrawingEvent;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.plotting.api.jreality.overlay.Overlay1DProvider;
 import org.eclipse.dawnsci.plotting.api.jreality.overlay.OverlayProvider;
 import org.eclipse.dawnsci.plotting.api.jreality.overlay.OverlayType;
 import org.eclipse.dawnsci.plotting.api.jreality.overlay.primitives.PrimitiveType;
 import org.eclipse.swt.widgets.Display;
-
-import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 /**
  * Draws one or more vertical lines at various places in the data.

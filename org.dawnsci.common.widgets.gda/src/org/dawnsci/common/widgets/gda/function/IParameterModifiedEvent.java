@@ -1,7 +1,7 @@
 package org.dawnsci.common.widgets.gda.function;
 
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IParameter;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IParameter;
 
 public interface IParameterModifiedEvent {
 

@@ -5,6 +5,9 @@ import java.util.Collection;
 
 import org.dawb.common.util.text.NumberUtils;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.plotting.api.axis.AxisEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.axis.IAxisListener;
@@ -23,10 +26,6 @@ import org.eclipse.nebula.visualization.xygraph.linearscale.ITicksProvider;
 import org.eclipse.nebula.visualization.xygraph.linearscale.LinearScaleTickMarks;
 import org.eclipse.nebula.visualization.xygraph.linearscale.Range;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
-
-import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
-import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 /**
  * An axis which can keep aspect with another and have a maximum possible extend which cannot

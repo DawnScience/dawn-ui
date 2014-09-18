@@ -15,15 +15,14 @@ import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.common.widgets.tree.ObjectNode;
 import org.dawnsci.common.widgets.tree.ValueEvent;
 import org.dawnsci.common.widgets.tree.ValueListener;
+import org.eclipse.dawnsci.analysis.dataset.roi.GridPreferences;
+import org.eclipse.dawnsci.analysis.dataset.roi.GridROI;
 import org.eclipse.dawnsci.plotting.api.region.IGridSelection;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.swt.graphics.Color;
 import org.jscience.physics.amount.Amount;
-
-import uk.ac.diamond.scisoft.analysis.roi.GridPreferences;
-import uk.ac.diamond.scisoft.analysis.roi.GridROI;
 
 /**
  * A Grid Model used to edit any GridROI.

@@ -2,6 +2,7 @@ package org.dawnsci.plotting.tools;
 
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -9,8 +10,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.osgi.framework.BundleContext;
-
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 public class Activator extends AbstractUIPlugin {
 

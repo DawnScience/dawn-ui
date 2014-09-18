@@ -16,8 +16,9 @@
 
 package org.dawnsci.plotting.jreality.tool;
 
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 
 /**
  * Complex Plot Action event that not only provides the position on the graph

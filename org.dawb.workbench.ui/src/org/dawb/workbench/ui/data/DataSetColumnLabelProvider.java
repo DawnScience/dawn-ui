@@ -5,6 +5,9 @@ import java.util.Arrays;
 import org.dawb.common.services.IExpressionObject;
 import org.dawb.workbench.ui.Activator;
 import org.dawnsci.plotting.AbstractPlottingSystem;
+import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
+import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -15,10 +18,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PlatformUI;
-
-import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
-import uk.ac.diamond.scisoft.analysis.metadata.IMetadata;
-import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
 /**
  * Label provider for PlotDataComponent

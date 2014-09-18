@@ -1,8 +1,7 @@
 package org.dawnsci.plotting.tools.diffraction;
 
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
-
-import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
+import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 
 public class DetectorBean {
 	private DetectorProperties detprop;

@@ -1,17 +1,16 @@
 package org.dawnsci.plotting.system;
 
 import org.dawb.common.ui.menu.MenuAction;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
+import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.filter.AbstractPlottingFilter;
 import org.eclipse.dawnsci.plotting.api.filter.IFilterDecorator;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
-
-import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
-import uk.ac.diamond.scisoft.analysis.dataset.DatasetUtils;
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
-import uk.ac.diamond.scisoft.analysis.dataset.Maths;
 
 
 /**

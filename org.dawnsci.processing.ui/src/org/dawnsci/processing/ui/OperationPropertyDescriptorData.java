@@ -1,8 +1,7 @@
 package org.dawnsci.processing.ui;
 
+import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.jface.viewers.ILabelProvider;
-
-import uk.ac.diamond.scisoft.analysis.processing.model.IOperationModel;
 
 public class OperationPropertyDescriptorData {
 	public IOperationModel model;
