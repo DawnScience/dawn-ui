@@ -17,7 +17,6 @@ import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
 import org.dawb.common.ui.wizard.persistence.PersistenceImportWizard;
 import org.dawnsci.common.widgets.spinner.FloatSpinner;
-import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.dawnsci.plotting.AbstractPlottingViewer;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.util.ColorUtility;
@@ -274,7 +273,6 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		@Override
 		public void mouseReleased(org.eclipse.draw2d.MouseEvent me) {
 			// record shift point
-			AbstractPlottingViewer viewer = (AbstractPlottingViewer)getPlottingSystem().getAdapter(AbstractPlottingViewer.class);
 			viewer.setShiftPoint(me.getLocation());
 		}
 
