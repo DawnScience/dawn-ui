@@ -36,12 +36,12 @@ import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionAction;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
-import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
@@ -244,13 +244,15 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		maskJob.setUser(false);
 	}
 
+	private AbstractPlottingViewer viewer;
+	
 	protected final class MaskMouseListener extends MouseMotionListener.Stub implements org.eclipse.draw2d.MouseListener		 {
 
 		@Override
 		public void mousePressed(org.eclipse.draw2d.MouseEvent me) {	
 			if (me.button!=1) return;
 			
-			if (((AbstractPlottingSystem)getPlottingSystem()).getSelectedCursor()==null) {
+			if (viewer.getSelectedCursor()==null) {
 				ActionContributionItem item = (ActionContributionItem)directToolbar.find(ShapeType.NONE.getId());
 				if (item!=null) item.getAction().setChecked(true);
 				return;
@@ -261,7 +263,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		@Override
 		public void mouseDragged(org.eclipse.draw2d.MouseEvent me) {
 			if (me.button!=0) return;
-			if (((AbstractPlottingSystem)getPlottingSystem()).getSelectedCursor()==null) {
+			if (viewer.getSelectedCursor()==null) {
 				ActionContributionItem item = (ActionContributionItem)directToolbar.find(ShapeType.NONE.getId());
 				if (item!=null) item.getAction().setChecked(true);
 				return;
@@ -667,7 +669,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				Activator.getPlottingPreferenceStore().setValue(PlottingConstants.MASK_DRAW_TYPE, "region");
 				layout.topControl = regionComp;
 				drawContent.layout();
-				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(null);
+				viewer.setSelectedCursor(null);
 				setRegionsVisible(true);
 			}
 		});
@@ -751,7 +753,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 					
 					ShapeType penShape = ShapeType.valueOf(Activator.getPlottingPreferenceStore().getString(PlottingConstants.MASK_PEN_SHAPE));
 					if (penShape!=null) {
-					    ((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(CursorUtils.getPenCursor(pensize, penShape));
+						viewer.setSelectedCursor(CursorUtils.getPenCursor(pensize, penShape));
 					}
 				}
 
@@ -780,7 +782,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			public void run() {
 				int pensize = Activator.getPlottingPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
 				ShapeType penShape = ShapeType.SQUARE;
-				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(CursorUtils.getPenCursor(pensize, penShape));
+				viewer.setSelectedCursor(CursorUtils.getPenCursor(pensize, penShape));
 				Activator.getPlottingPreferenceStore().setValue(PlottingConstants.MASK_PEN_SHAPE, penShape.name());
 			}
 		};
@@ -792,7 +794,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			public void run() {
 				int pensize = Activator.getPlottingPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
 				ShapeType penShape = ShapeType.TRIANGLE;
-				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(CursorUtils.getPenCursor(pensize, penShape));
+				viewer.setSelectedCursor(CursorUtils.getPenCursor(pensize, penShape));
 				Activator.getPlottingPreferenceStore().setValue(PlottingConstants.MASK_PEN_SHAPE, penShape.name());
 			}
 		};
@@ -804,7 +806,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			public void run() {
 				int pensize = Activator.getPlottingPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
 				ShapeType penShape = ShapeType.CIRCLE;
-				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(CursorUtils.getPenCursor(pensize, penShape));
+				viewer.setSelectedCursor(CursorUtils.getPenCursor(pensize, penShape));
 				Activator.getPlottingPreferenceStore().setValue(PlottingConstants.MASK_PEN_SHAPE, penShape.name());
 			}
 		};
@@ -816,7 +818,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			public void run() {
 				ShapeType penShape = ShapeType.NONE;
 				Activator.getPlottingPreferenceStore().setValue(PlottingConstants.MASK_PEN_SHAPE, penShape.name());
-				((AbstractPlottingSystem)getPlottingSystem()).setSelectedCursor(null);
+				viewer.setSelectedCursor(null);
 			}
 		};
 		action.setId(ShapeType.NONE.getId());
@@ -1371,7 +1373,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				getImageTrace().addPaletteListener(paletteListener);
 			}
 			
-			AbstractPlottingViewer viewer = (AbstractPlottingViewer)getPlottingSystem().getAdapter(AbstractPlottingViewer.class);
+			this.viewer = (AbstractPlottingViewer)getPlottingSystem().getAdapter(AbstractPlottingViewer.class);
 			if (viewer!=null) {
 				viewer.addMouseClickListener(clickListener);
 				viewer.addMouseMotionListener(clickListener);

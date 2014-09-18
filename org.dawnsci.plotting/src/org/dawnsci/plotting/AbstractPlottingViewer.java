@@ -29,7 +29,25 @@ public abstract class AbstractPlottingViewer implements IPlottingSystemViewer {
 
 	public abstract void removeMouseMotionListener(MouseMotionListener clickListener);
 
-	public abstract void setSelectedCursor(Cursor object);
-
 	public abstract Point getShiftPoint();
+	
+	
+	/**
+	 * Can be overridden to detect any custom cursor 
+	 * set on the plot. This cursor can also be lost 
+	 * if a zoom is done.
+	 * 
+	 * @return
+	 */
+	@Deprecated
+	public abstract Cursor getSelectedCursor();
+	
+	/**
+	 * Set the cursor using a custom icon on the plot.
+	 * This may get cancelled if other tools are used!
+	 * 
+	 * @deprecated SWT Specific. Can still be used for code that does not mind SWT link.
+	 */
+	@Deprecated
+	public abstract void setSelectedCursor(Cursor des);
 }

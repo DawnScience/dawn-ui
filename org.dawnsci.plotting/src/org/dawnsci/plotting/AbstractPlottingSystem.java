@@ -831,30 +831,7 @@ public abstract class AbstractPlottingSystem implements IPlottingSystem, IToolPa
 	public void setToolComposite(Composite toolComposite) {
 		this.actionBarManager.setToolComposite(toolComposite);
 	}
-	
-	/**
-	 * Can be overridden to detect any custom cursor 
-	 * set on the plot. This cursor can also be lost 
-	 * if a zoom is done.
-	 * 
-	 * @return
-	 */
-	@Deprecated
-	public Cursor getSelectedCursor() {
-		
-		return null;
-	}
-	
-	/**
-	 * Set the cursor using a custom icon on the plot.
-	 * This may get cancelled if other tools are used!
-	 * 
-	 * @deprecated SWT Specific. Can still be used for code that does not mind SWT link.
-	 */
-	@Deprecated
-	public void setSelectedCursor(Cursor des) {
-		throw new UnsupportedOperationException();
-	}
+
 
 	@Override
 	public void setKeepAspect(boolean checked){
