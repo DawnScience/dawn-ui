@@ -140,7 +140,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IErrorDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.io.IDataHolder;
-import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.io.IMetadata;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 import uk.ac.diamond.scisoft.analysis.utils.OSUtils;
@@ -178,7 +178,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	private IToolChangeListener      toolListener;
 
     private IDataHolder dataHolder;
-	private IMetaData   metaData;
+	private IMetadata   metaData;
 
 	private ITransferableDataService transferableService;
 	private IExpressionObjectService expressionService;
@@ -206,7 +206,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 							@Override
 							public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 								try {
-									final IMetaData  meta = LoaderFactory.getMetaData(filePath, new ProgressMonitorWrapper(monitor));
+									final IMetadata  meta = LoaderFactory.getMetaData(filePath, new ProgressMonitorWrapper(monitor));
 									Display.getDefault().syncExec(new Runnable() {
 										public void run() {
 											try {
@@ -1901,7 +1901,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	 * @param meta
 	 * @throws Exception 
 	 */
-	public void setData(final IDataHolder dh, IMetaData meta) {
+	public void setData(final IDataHolder dh, IMetadata meta) {
 		
 		this.data.clear();
 		this.dataHolder=dh.clone();
@@ -2066,7 +2066,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		return null;
 	}
 
-	IMetaData getMetaData() {
+	IMetadata getMetaData() {
 		return metaData;
 	}
 

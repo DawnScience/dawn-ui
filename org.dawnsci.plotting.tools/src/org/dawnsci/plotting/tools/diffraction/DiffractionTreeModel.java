@@ -40,7 +40,7 @@ import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironmentE
 import uk.ac.diamond.scisoft.analysis.diffraction.IDetectorPropertyListener;
 import uk.ac.diamond.scisoft.analysis.diffraction.IDiffractionCrystalEnvironmentListener;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
-import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.io.IMetadata;
 
 /**
  * Holds data for the Diffraction model.
@@ -112,7 +112,7 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 		}
 	}
 
-	private void createDiffractionModel(IMetaData metaData, boolean powderMode) throws Exception {
+	private void createDiffractionModel(IMetadata metaData, boolean powderMode) throws Exception {
 		final DiffractionCrystalEnvironment  dce = getCrystalEnvironment();
 		final DiffractionCrystalEnvironment odce = getOriginalCrystalEnvironment();
 		final DetectorProperties         detprop = getDetectorProperties();
@@ -193,7 +193,7 @@ public class DiffractionTreeModel extends AbstractNodeModel {
         beamY.addUnitListener(createPixelFormatListener(beamY));		
 	}
 
-	private void createRaw(IMetaData metaData) throws Exception {
+	private void createRaw(IMetadata metaData) throws Exception {
 		
         if (metaData!=null && metaData.getMetaNames()!=null && metaData.getMetaNames().size()>0) {
             final LabelNode rawMeta = new LabelNode("Raw Meta", root);

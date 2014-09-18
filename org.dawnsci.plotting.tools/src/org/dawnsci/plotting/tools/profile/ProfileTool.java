@@ -46,7 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
-import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.io.IMetadata;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 
@@ -543,11 +543,11 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	 * Tries to get the meta from the editor part or uses the one in AbtractDataset of the image
 	 * @return IMetaData, may be null
 	 */
-	protected IMetaData getMetaData() {
+	protected IMetadata getMetaData() {
 		//Changed to try and get the metadata from the image first
 		//This works around issues that were arrising when the loader factory
 		// and image traces were returning different metadata
-		IMetaData metaData = null;
+		IMetadata metaData = null;
 		if (getImageTrace()!= null && getImageTrace().getData() != null)
 			metaData = ((Dataset)getImageTrace().getData()).getMetadata();
 		

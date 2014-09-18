@@ -32,7 +32,7 @@ import uk.ac.diamond.scisoft.analysis.diffraction.IDiffractionCrystalEnvironment
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.ILoaderService;
-import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.io.IMetadata;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile.XAxis;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
@@ -122,7 +122,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 			@Override
 			public void run() {
 				if (isChecked()) {
-					IMetaData meta = getMetaData();
+					IMetadata meta = getMetaData();
 					profileAxis.setEnabled(true);
 
 					if (isValidMetadata(meta)) {
@@ -232,7 +232,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 		
 		//setup the lock action to work for valid metadata
 		if (metaLock == null) return;
-		IMetaData meta = getMetaData();
+		IMetadata meta = getMetaData();
 		if (meta==null) return;
 		
 		if (metaLock.isChecked()) {
@@ -279,7 +279,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 		final Dataset xi = DatasetUtils.linSpace(sroi.getRadius(0), sroi.getRadius(1), integrals[0].getSize(), Dataset.FLOAT64);
 		xi.setName("Radius (pixel)");
 		
-		IMetaData meta = getMetaData();
+		IMetadata meta = getMetaData();
 		
 		if (!sroi.hasSeparateRegions())  {
 			
@@ -309,7 +309,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 		metaLock.setEnabled(enable);
 	}
 	
-	private boolean isValidMetadata(IMetaData meta) {
+	private boolean isValidMetadata(IMetadata meta) {
 		if (meta != null && (meta instanceof IDiffractionMetadata)) {
 			IDiffractionMetadata idm = (IDiffractionMetadata) meta;
 			if (idm.getDiffractionCrystalEnvironment() == null)
@@ -323,7 +323,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 	}
 	
 	@Override
-	protected IMetaData getMetaData() {
+	protected IMetadata getMetaData() {
 		
 		ILoaderService service = (ILoaderService)PlatformUI.getWorkbench().getService(ILoaderService.class);
 		
@@ -346,7 +346,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 	}
 	
 	private void registerMetadataListeners() {
-		IMetaData meta = getMetaData();
+		IMetadata meta = getMetaData();
 		if (meta!=null && (meta instanceof IDiffractionMetadata)) {
 			IDiffractionMetadata dm = (IDiffractionMetadata)meta;
 			dm.getDetector2DProperties().addDetectorPropertyListener(this);
@@ -355,7 +355,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 	}
 	
 	private void unregisterMetadataListeners() {
-		IMetaData meta = getMetaData();
+		IMetadata meta = getMetaData();
 		if (meta!=null && (meta instanceof IDiffractionMetadata)) {
 			IDiffractionMetadata dm = (IDiffractionMetadata)meta;
 			dm.getDetector2DProperties().removeDetectorPropertyListener(this);
@@ -421,7 +421,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 
 
 		IDiffractionMetadata dm = null;
-		IMetaData meta = getMetaData();
+		IMetadata meta = getMetaData();
 		QSpace qSpace = null;
 
 		try {

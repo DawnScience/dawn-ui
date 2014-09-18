@@ -84,7 +84,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.LazyDataset;
 import uk.ac.diamond.scisoft.analysis.io.IDataHolder;
-import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.io.IMetadata;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.io.SliceObject;
 
@@ -260,7 +260,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 	}
 	
 	@Override
-	public void setSliceMetadata(final IMetaData sliceMeta) {
+	public void setSliceMetadata(final IMetadata sliceMeta) {
 		
         super.setSliceMetadata(sliceMeta);
         

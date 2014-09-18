@@ -16,7 +16,7 @@ import uk.ac.diamond.scisoft.analysis.diffraction.PeakFittingEllipseFinder;
 import uk.ac.diamond.scisoft.analysis.diffraction.PowderRingsUtils;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.ILoaderService;
-import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.io.IMetadata;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalFitROI;
 import uk.ac.diamond.scisoft.analysis.roi.EllipticalROI;
 import uk.ac.diamond.scisoft.analysis.roi.IParametricROI;
@@ -45,7 +45,7 @@ public class DiffractionUtils {
 			return lockedMeta;
 
 		int[] shape = image.getShape();
-		IMetaData mdImage = null;
+		IMetadata mdImage = null;
 		try {
 			mdImage = image.getMetadata();
 		} catch (Exception e1) {
@@ -120,7 +120,7 @@ public class DiffractionUtils {
 
 		// if it is null try and get it from the loader service
 		if (mdImage == null && filePath != null) {
-			IMetaData md = null;
+			IMetadata md = null;
 			try {
 				md = service.getMetaData(filePath, null);
 			} catch (Exception e) {

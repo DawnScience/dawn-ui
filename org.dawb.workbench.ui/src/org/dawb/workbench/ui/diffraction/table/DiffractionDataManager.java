@@ -28,7 +28,7 @@ import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.diffraction.IDetectorPropertyListener;
 import uk.ac.diamond.scisoft.analysis.io.ILoaderService;
-import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.io.IMetadata;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class DiffractionDataManager {
@@ -165,7 +165,7 @@ public class DiffractionDataManager {
 			
 			if (image == null &&  fullName == null) {
 				try {
-					IMetaData metaData = LoaderFactory.getMetaData(path, null);
+					IMetadata metaData = LoaderFactory.getMetaData(path, null);
 					Map<String, int[]> dataShapes = metaData.getDataShapes();
 					final List<String> dataNames = new ArrayList<String>();
 					for (String name : dataShapes.keySet()) {

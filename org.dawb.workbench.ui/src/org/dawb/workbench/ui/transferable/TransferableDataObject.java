@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.io.IDataHolder;
-import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.io.IMetadata;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 
@@ -36,7 +36,7 @@ public class TransferableDataObject implements H5Path, ITransferableDataObject{
 	private static final Logger logger = LoggerFactory.getLogger(TransferableDataObject.class);
 
 	private IDataHolder       holder;
-	private IMetaData         metaData;
+	private IMetadata         metaData;
 
 	private boolean           checked;
 	/**
@@ -74,7 +74,7 @@ public class TransferableDataObject implements H5Path, ITransferableDataObject{
 		
 	}
 	
-	protected TransferableDataObject(IDataHolder holder, IMetaData meta) {
+	protected TransferableDataObject(IDataHolder holder, IMetadata meta) {
 		this.holder   = holder;
 		this.metaData = meta;
 		expressionCount++;
@@ -82,7 +82,7 @@ public class TransferableDataObject implements H5Path, ITransferableDataObject{
 		this.service  = (IExpressionObjectService)PlatformUI.getWorkbench().getService(IExpressionObjectService.class);
 	}
 
-	protected TransferableDataObject(IDataHolder holder, IMetaData meta, final String name) {
+	protected TransferableDataObject(IDataHolder holder, IMetadata meta, final String name) {
 		this.holder   = holder;
 		this.metaData = meta;
 		this.name     = name;
@@ -90,7 +90,7 @@ public class TransferableDataObject implements H5Path, ITransferableDataObject{
 		this.variable = service.getSafeName(name);
 	}
 
-	protected TransferableDataObject(IDataHolder holder, IMetaData meta, IExpressionObject expression2) {
+	protected TransferableDataObject(IDataHolder holder, IMetadata meta, IExpressionObject expression2) {
 		this.holder     = holder;
 		this.metaData   = meta;
 		this.expression = expression2;

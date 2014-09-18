@@ -50,7 +50,7 @@ import uk.ac.diamond.scisoft.analysis.diffraction.DetectorProperties;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionCrystalEnvironment;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
-import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.io.IMetadata;
 import uk.ac.diamond.scisoft.analysis.roi.PointROI;
 
 public class InfoPixelLabelProvider extends ColumnLabelProvider {
@@ -127,7 +127,7 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 			Dataset set = null;
 			if (trace!=null) {
 				set = (Dataset)trace.getData();
-				final IMetaData      meta = set.getMetadata();
+				final IMetadata      meta = set.getMetadata();
 				if (meta instanceof IDiffractionMetadata) {
 	
 					dmeta = (IDiffractionMetadata)meta;

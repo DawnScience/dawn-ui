@@ -7,7 +7,7 @@ import org.eclipse.ui.services.AbstractServiceFactory;
 import org.eclipse.ui.services.IServiceLocator;
 
 import uk.ac.diamond.scisoft.analysis.io.IDataHolder;
-import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.io.IMetadata;
 
 /**
  * 
@@ -17,17 +17,17 @@ import uk.ac.diamond.scisoft.analysis.io.IMetaData;
 public class TransferableDataService extends AbstractServiceFactory implements ITransferableDataService {
 
 	@Override
-	public ITransferableDataObject createData(IDataHolder holder, IMetaData meta, String name) {
+	public ITransferableDataObject createData(IDataHolder holder, IMetadata meta, String name) {
 		return new TransferableDataObject(holder, meta, name);
 	}
 
 	@Override
-	public ITransferableDataObject createExpression(IDataHolder holder, IMetaData meta) {
+	public ITransferableDataObject createExpression(IDataHolder holder, IMetadata meta) {
 		return new TransferableDataObject(holder, meta);
 	}
 
 	@Override
-	public ITransferableDataObject createExpression(IDataHolder holder, IMetaData meta, IExpressionObject expression) {
+	public ITransferableDataObject createExpression(IDataHolder holder, IMetadata meta, IExpressionObject expression) {
 		return new TransferableDataObject(holder, meta, expression);
 	}
 

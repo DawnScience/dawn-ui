@@ -40,7 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
-import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.io.IMetadata;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.rcp.editors.HDF5TreeEditor;
 
@@ -79,7 +79,7 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
 	@Override
 	protected void createPages() {
 		
-        IMetaData metaData = null;
+        IMetadata metaData = null;
 		try {
 			metaData = LoaderFactory.getMetaData(EclipseUtils.getFilePath(getEditorInput()), null);
 		} catch (Exception e1) {

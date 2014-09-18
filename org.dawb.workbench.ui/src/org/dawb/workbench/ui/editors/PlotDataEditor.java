@@ -73,7 +73,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.dataset.ILazyDataset;
 import uk.ac.diamond.scisoft.analysis.io.IDataHolder;
-import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.io.IMetadata;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 
@@ -544,7 +544,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 				
 				// Load data in Job
 				final String       path       = EclipseUtils.getFilePath(input);
-				final IMetaData    meta       = LoaderFactory.getMetaData(path, new ProgressMonitorWrapper(monitor));
+				final IMetadata    meta       = LoaderFactory.getMetaData(path, new ProgressMonitorWrapper(monitor));
 				final IDataHolder  dataHolder = LoaderFactory.getData(path, true, true, null);
 				if (monitor.isCanceled())           return Status.CANCEL_STATUS;
 

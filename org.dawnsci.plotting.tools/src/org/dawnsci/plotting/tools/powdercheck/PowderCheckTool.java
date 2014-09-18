@@ -102,7 +102,7 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Gaussian;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
-import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.io.IMetadata;
 import uk.ac.diamond.scisoft.analysis.monitor.IMonitor;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile.XAxis;
@@ -221,7 +221,7 @@ public class PowderCheckTool extends AbstractToolPage {
 		final Dataset ds = (Dataset)im.getData();
 		if (ds==null) return;
 			
-		final IMetaData       m  = ds.getMetadata();
+		final IMetadata       m  = ds.getMetadata();
 
 		if (m == null || !(m instanceof IDiffractionMetadata)) {
 			//TODO nicer error

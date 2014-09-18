@@ -28,7 +28,7 @@ import org.eclipse.swt.widgets.Display;
 import uk.ac.diamond.scisoft.analysis.dataset.Dataset;
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
-import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.io.IMetadata;
 import uk.ac.diamond.scisoft.analysis.roi.IROI;
 import uk.ac.diamond.scisoft.analysis.roi.SectorROI;
 
@@ -261,7 +261,7 @@ public abstract class SectorProfileTool extends ProfileTool {
 
 	protected double[] getBeamCenter() {
 		
-        IMetaData meta = getMetaData();
+        IMetadata meta = getMetaData();
         if (meta==null || !(meta instanceof IDiffractionMetadata)) {
         	return getImageCenter();
         }

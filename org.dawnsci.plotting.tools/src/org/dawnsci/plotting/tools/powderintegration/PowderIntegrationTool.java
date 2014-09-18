@@ -59,7 +59,7 @@ import uk.ac.diamond.scisoft.analysis.diffraction.powder.AbstractPixelIntegratio
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelIntegrationUtils.IntegrationMode;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.ILoaderService;
-import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.io.IMetadata;
 import uk.ac.diamond.scisoft.analysis.io.NexusDiffractionMetaReader;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile.XAxis;
 
@@ -545,7 +545,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		} else if (part instanceof IViewPart){
 			try {
 				if (image == null) return null;
-				IMetaData md = image.getMetadata();
+				IMetadata md = image.getMetadata();
 				if(md != null)
 					altPath = md.getFilePath();
 			} catch (Exception e) {

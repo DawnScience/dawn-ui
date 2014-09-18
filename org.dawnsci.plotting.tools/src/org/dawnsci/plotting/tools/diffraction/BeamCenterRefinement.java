@@ -47,7 +47,7 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Gaussian;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.io.IDiffractionMetadata;
-import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.io.IMetadata;
 import uk.ac.diamond.scisoft.analysis.optimize.GeneticAlg;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile.XAxis;
@@ -151,7 +151,7 @@ public class BeamCenterRefinement implements MultivariateFunction {
 		SectorROI tmpRoi = new SectorROI(sroi.getPointX(), sroi.getPointY(), sroi.getRadius(0), sroi.getRadius(1), sroi.getAngle(0),
 				sroi.getAngle(1), 1.0, true, sroi.getSymmetry());
 		QSpace qSpace = null;
-		IMetaData metadata = dataset.getMetadata();
+		IMetadata metadata = dataset.getMetadata();
 		if (metadata instanceof IDiffractionMetadata) {
 			IDiffractionMetadata dm = (IDiffractionMetadata)metadata;
 			DetectorProperties detprops = dm.getDetector2DProperties();

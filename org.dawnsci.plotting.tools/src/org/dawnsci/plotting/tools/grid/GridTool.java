@@ -75,7 +75,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
-import uk.ac.diamond.scisoft.analysis.io.IMetaData;
+import uk.ac.diamond.scisoft.analysis.io.IMetadata;
 import uk.ac.diamond.scisoft.analysis.roi.GridPreferences;
 import uk.ac.diamond.scisoft.analysis.roi.GridROI;
 import uk.ac.diamond.scisoft.analysis.roi.LinearROI;
@@ -646,7 +646,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 	
 	private GridPreferences getGridPreferences() {
 		try {
-			IMetaData m = getImageTrace().getData().getMetadata();
+			IMetadata m = getImageTrace().getData().getMetadata();
 			if (m != null && m.getMetaNames().contains(GDA_GRID_METADATA)) {
 				Object ob = m.getMetaValue(GDA_GRID_METADATA);
 				if (ob instanceof GridPreferences) {
