@@ -12,8 +12,6 @@ import java.util.Arrays;
 
 import org.dawb.workbench.ui.Activator;
 import org.dawnsci.plotting.AbstractPlottingSystem;
-import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObject;

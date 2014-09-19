@@ -14,8 +14,8 @@
  */
 package org.apache.tools.bzip2;
 
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * An input stream that decompresses from the BZip2 format (without the file

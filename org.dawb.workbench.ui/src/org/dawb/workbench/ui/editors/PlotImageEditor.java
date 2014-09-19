@@ -23,7 +23,6 @@ import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawb.common.util.io.FileUtils;
 import org.dawb.common.util.list.SortNatural;
 import org.dawb.workbench.ui.Activator;
-import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;

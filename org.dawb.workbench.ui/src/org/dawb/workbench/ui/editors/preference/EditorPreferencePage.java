@@ -19,7 +19,6 @@ import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.data.PlotDataSelection;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.dawnsci.plotting.api.PlottingSelectionProvider;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;

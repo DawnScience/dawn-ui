@@ -11,12 +11,10 @@ package org.dawb.workbench.ui;
 import java.util.Hashtable;
 
 import org.dawb.workbench.ui.transferable.TransferableDataService;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.dawnsci.slicing.api.data.ITransferableDataService;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
