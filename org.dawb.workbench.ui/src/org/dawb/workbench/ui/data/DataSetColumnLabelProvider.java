@@ -10,13 +10,13 @@ package org.dawb.workbench.ui.data;
 
 import java.util.Arrays;
 
-import org.dawb.common.services.IExpressionObject;
 import org.dawb.workbench.ui.Activator;
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObject;
 import org.eclipse.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;

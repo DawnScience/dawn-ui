@@ -8,10 +8,10 @@
  */
 package org.dawb.workbench.ui.data;
 
-import org.dawb.common.services.IExpressionObjectService;
-import org.dawb.common.services.IVariableManager;
 import org.dawb.common.services.ServiceManager;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObjectService;
+import org.eclipse.dawnsci.plotting.api.expressions.IVariableManager;
 import org.eclipse.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.CellEditor;

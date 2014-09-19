@@ -11,7 +11,6 @@ package org.dawb.workbench.ui.editors;
 
 import java.util.Collection;
 
-import org.dawb.common.services.IVariableManager;
 import org.dawb.common.ui.editors.EditorExtensionFactory;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.workbench.ui.views.PlotDataPage;
@@ -25,6 +24,7 @@ import org.eclipse.dawnsci.hdf5.editor.IH5Editor;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemSelection;
 import org.eclipse.dawnsci.plotting.api.PlotType;
+import org.eclipse.dawnsci.plotting.api.expressions.IVariableManager;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ColorOption;
 import org.eclipse.dawnsci.slicing.api.system.ISliceSystem;

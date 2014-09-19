@@ -12,7 +12,6 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.InputStream;
 
-import org.dawb.common.services.IVariableManager;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.util.io.FileUtils;
 import org.dawb.workbench.ui.editors.zip.ZipUtils;
@@ -24,6 +23,7 @@ import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemSelection;
 import org.eclipse.dawnsci.plotting.api.PlotType;
+import org.eclipse.dawnsci.plotting.api.expressions.IVariableManager;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.slicing.api.system.ISliceSystem;
 import org.eclipse.ui.IEditorInput;

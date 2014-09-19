@@ -9,9 +9,6 @@
 package org.dawb.workbench.ui.data;
 
 
-import org.dawb.common.services.IExpressionObject;
-import org.dawb.common.services.IExpressionObjectService;
-import org.dawb.common.services.IVariableManager;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.workbench.ui.transferable.TransferableDataObject;
@@ -21,6 +18,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObject;
+import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObjectService;
+import org.eclipse.dawnsci.plotting.api.expressions.IVariableManager;
 import org.eclipse.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.bindings.keys.ParseException;

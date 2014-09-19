@@ -18,8 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.dawb.common.services.IExpressionObject;
-import org.dawb.common.services.IVariableManager;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.services.expressions.IExpressionEngine;
 import org.dawb.common.services.expressions.IExpressionService;
@@ -28,6 +26,8 @@ import org.eclipse.dawnsci.analysis.api.io.ILazyLoader;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
+import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObject;
+import org.eclipse.dawnsci.plotting.api.expressions.IVariableManager;
 
 /**
  * An object which can be used to hold data about expressions in tables

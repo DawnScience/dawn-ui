@@ -10,11 +10,11 @@ package org.dawnsci.plotting.expression;
 
 import java.util.List;
 
-import org.dawb.common.services.IExpressionObject;
-import org.dawb.common.services.IExpressionObjectService;
-import org.dawb.common.services.IVariableManager;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
+import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObject;
+import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObjectService;
+import org.eclipse.dawnsci.plotting.api.expressions.IVariableManager;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
