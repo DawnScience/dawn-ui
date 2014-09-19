@@ -220,7 +220,10 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	private IPlottingSystemViewer createViewer(PlotType type) {
 		
 		IPlottingSystemViewer viewer = getViewer(type);
-		if (viewer == null) return null;
+		if (viewer == null) {
+			logger.error("Cannot find a plot viewer for plot type "+type);
+			return null;
+		}
 		if (viewer.getControl()!=null) {
 			return viewer;
 		}
