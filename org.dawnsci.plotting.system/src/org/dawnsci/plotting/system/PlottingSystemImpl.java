@@ -172,7 +172,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		// it looks nice. We swap this for a 3D one if required.
 		IPlottingSystemViewer lightWeightViewer = createViewer(PlotType.XY);
 		
-		if (parent.getLayout() instanceof StackLayout) {
+		if (lightWeightViewer!=null && parent.getLayout() instanceof StackLayout) {
 			final StackLayout layout = (StackLayout)parent.getLayout();
 			layout.topControl = lightWeightViewer.getControl();
 			container.layout();
@@ -220,6 +220,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	private IPlottingSystemViewer createViewer(PlotType type) {
 		
 		IPlottingSystemViewer viewer = getViewer(type);
+		if (viewer == null) return null;
 		if (viewer.getControl()!=null) {
 			return viewer;
 		}
@@ -817,6 +818,8 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		Control top = null;
 		
 		IPlottingSystemViewer viewer = createViewer(type);
+		if (viewer == null) return;
+		
 		activeViewer = viewer;
 		top          = viewer.getControl();
 		viewer.updatePlottingRole(type);
