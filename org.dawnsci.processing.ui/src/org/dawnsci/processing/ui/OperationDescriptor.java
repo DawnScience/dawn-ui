@@ -158,7 +158,7 @@ final class OperationDescriptor implements ISeriesItemDescriptor {
 		icons   = new HashMap<String, Image>(7);
 		visible = new HashMap<String, Boolean>(7);
 		
-		IConfigurationElement[] eles = Platform.getExtensionRegistry().getConfigurationElementsFor("uk.ac.diamond.scisoft.analysis.api.operation");
+		IConfigurationElement[] eles = Platform.getExtensionRegistry().getConfigurationElementsFor("org.eclipse.dawnsci.analysis.api.operation");
 		for (IConfigurationElement e : eles) {
 			final String     identity = e.getAttribute("id");
 				
