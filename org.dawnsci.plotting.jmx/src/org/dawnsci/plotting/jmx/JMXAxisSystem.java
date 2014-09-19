@@ -18,7 +18,7 @@ import org.eclipse.dawnsci.plotting.api.axis.IPositionListener;
 /**
  * Class for calling remove plotting system methods from Jython.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 class JMXAxisSystem extends JMXSystemObject implements IAxisSystem{

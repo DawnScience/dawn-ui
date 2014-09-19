@@ -68,7 +68,7 @@ import org.slf4j.LoggerFactory;
  * 
  * This class provides switching between actions registered in different roles.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class PlottingActionBarManager implements IPlotActionSystem {

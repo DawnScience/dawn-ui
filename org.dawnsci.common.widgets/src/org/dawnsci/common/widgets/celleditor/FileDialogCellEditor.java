@@ -43,7 +43,7 @@ import org.eclipse.ui.PlatformUI;
  * Use setNewFile(...) to define a path for a new file, rather than choose an existing one (default).
  * Use setDirectory(...) to define a path for a directory (default is file).
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class FileDialogCellEditor extends TextCellEditor {

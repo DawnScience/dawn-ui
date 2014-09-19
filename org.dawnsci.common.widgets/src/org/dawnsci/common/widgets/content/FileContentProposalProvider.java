@@ -28,7 +28,7 @@ import org.eclipse.jface.fieldassist.IContentProposalProvider;
    </p>
    </code>
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class FileContentProposalProvider implements IContentProposalProvider {

@@ -18,7 +18,7 @@ import org.dawnsci.common.richbeans.components.scalebox.ScaleBox;
  * Custom event object used in notification of custom widgets
  * 
  * @see ScaleBox
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class ValueEvent extends EventObject {

@@ -60,7 +60,7 @@ import org.jscience.physics.amount.Amount;
  * 
  * 
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class DiffractionTreeModel extends AbstractNodeModel {

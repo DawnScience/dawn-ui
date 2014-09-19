@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * 
  * These filters have a pydev interpreter which runs the user defined filter.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 final class PlotDataFilterProvider implements IResourceChangeListener {
@@ -95,7 +95,7 @@ final class PlotDataFilterProvider implements IResourceChangeListener {
 	/**
 	 * A named filter able to deal with 1D and 2D data.
 	 * 
-	 * @author fcp94556
+	 * @author Matthew Gerring
 	 *
 	 */
 	public class PythonPlottingFilter extends UniqueNamedPlottingFilter {

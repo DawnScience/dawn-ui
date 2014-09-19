@@ -10,7 +10,7 @@ package org.dawnsci.plotting.tools.profile;
 
 /**
  * Enum marking traces as part of a profile plot
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public enum ProfileType {

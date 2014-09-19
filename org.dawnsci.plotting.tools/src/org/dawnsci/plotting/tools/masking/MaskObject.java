@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  * 
  * The intention is to make the maths available separate to the side plot system.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class MaskObject {
@@ -552,7 +552,7 @@ public class MaskObject {
 	/**
 	 * Each PixelAction does around 100,000 of the pixels.
 	 * 
-	 * @author fcp94556
+	 * @author Matthew Gerring
 	 */
 	private class PixelAction extends RegionAction {
 

@@ -36,7 +36,7 @@ import org.eclipse.swt.widgets.Label;
  * You may optionally specify a unit, in which case when editing the text,
  * the unit appears on the right hand side.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class ClassCellEditor extends TextCellEditor {

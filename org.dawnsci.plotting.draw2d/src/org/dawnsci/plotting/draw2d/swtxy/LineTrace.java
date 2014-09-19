@@ -22,7 +22,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 /**
  * Trace with drawPolyline(...) for faster rendering.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class LineTrace extends Trace implements ITraceContainer {

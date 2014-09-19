@@ -30,7 +30,7 @@ import org.eclipse.ui.PlatformUI;
  * 
  * We may need to abstract some parts to a general 3D trace as more options are supported.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class SurfaceTrace extends Image3DTrace implements ISurfaceTrace{

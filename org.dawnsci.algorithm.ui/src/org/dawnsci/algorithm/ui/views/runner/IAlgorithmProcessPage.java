@@ -18,7 +18,7 @@ import org.eclipse.ui.PartInitException;
 
 /**
  * Please ensure that your implementation has a no argument constructor.
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public interface IAlgorithmProcessPage extends IAdaptable {

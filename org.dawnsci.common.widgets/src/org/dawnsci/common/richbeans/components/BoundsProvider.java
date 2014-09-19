@@ -15,7 +15,7 @@ import org.dawnsci.common.richbeans.event.ValueListener;
  * Interface used to override bounds settings.
  * Used when input devices are bound to each other in value.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public interface BoundsProvider {

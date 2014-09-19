@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.Control;
  * This is similar to a page view in that that the content of the visit view may
  * be swapped.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public interface INavigationDelegate {

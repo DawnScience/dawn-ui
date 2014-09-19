@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.jobs.Job;
 /**
  * Job to populate table, required for AbstractTableDelegates.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public abstract class AbstractTableUpdateJob extends Job {

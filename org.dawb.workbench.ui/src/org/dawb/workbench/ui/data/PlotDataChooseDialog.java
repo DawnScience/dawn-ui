@@ -30,7 +30,7 @@ import org.eclipse.swt.widgets.Shell;
  * 
  * Can be used for setting error for instance.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 class PlotDataChooseDialog extends Dialog {

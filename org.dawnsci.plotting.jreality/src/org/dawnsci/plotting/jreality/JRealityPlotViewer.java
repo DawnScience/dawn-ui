@@ -123,7 +123,7 @@ import de.jreality.util.SystemProperties;
  * 
  * Code lifted out of DataSetPlotter. Could refactor at some point.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class JRealityPlotViewer extends IPlottingSystemViewer.Stub implements IPlottingSystemViewer, SelectionListener, PaintListener, Listener {

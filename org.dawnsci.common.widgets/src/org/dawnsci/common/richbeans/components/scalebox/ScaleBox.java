@@ -37,7 +37,7 @@ import org.eclipse.swt.widgets.Shell;
  * 1. Bounds are checked whenever a value is changed.
  * 2. ValueListeners are notified whenever the value changes.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class ScaleBox extends NumberBox  {

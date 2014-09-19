@@ -31,7 +31,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 /**
  * This class only wraps line traces, images have their own IImageTrace implementor.
  * @see ILineTrace
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class LineTraceImpl implements ILineTrace {

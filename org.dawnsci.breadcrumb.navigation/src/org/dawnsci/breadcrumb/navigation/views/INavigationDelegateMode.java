@@ -16,7 +16,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
  * This interface is used at a key for holding delegates, if is not an enum you *must*
  * ensure that hashcode and equals are implemented.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public interface INavigationDelegateMode {

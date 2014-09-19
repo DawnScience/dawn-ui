@@ -44,7 +44,7 @@ import org.eclipse.ui.IViewSite;
  * item into the table. You may extend this table to provide for instance
  * a table which edits series of mathematical functions.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class SeriesTable {

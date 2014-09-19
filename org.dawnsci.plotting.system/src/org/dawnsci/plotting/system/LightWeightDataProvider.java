@@ -25,7 +25,7 @@ import org.eclipse.nebula.visualization.xygraph.linearscale.Range;
 /**
  * A IDataProvider which uses a Dataset for its data.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 class LightWeightDataProvider implements IDataProvider {

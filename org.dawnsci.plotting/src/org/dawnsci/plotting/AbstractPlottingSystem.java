@@ -75,7 +75,7 @@ import org.slf4j.LoggerFactory;
  * IPlottingSystem interface and keep your special methods in your class using the
  * plotting system.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  *
  * @Internal Usage of this class is discouraged in external API. Use IPlottingSystem instead please.

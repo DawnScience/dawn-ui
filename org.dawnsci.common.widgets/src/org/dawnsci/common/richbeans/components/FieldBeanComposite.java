@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * If subclassing you need to call addValueListeners() after setting
  * the setEditorClass or your values will not take.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class FieldBeanComposite extends FieldComposite implements IFieldCollection, IExpressionWidget, IFieldProvider, BeanProvider {

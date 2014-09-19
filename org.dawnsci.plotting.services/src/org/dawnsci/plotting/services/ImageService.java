@@ -75,7 +75,7 @@ import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 ----------------++------------**---------+----------**----+---------------**+---------------++
 
  
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class ImageService extends AbstractServiceFactory implements IImageService {

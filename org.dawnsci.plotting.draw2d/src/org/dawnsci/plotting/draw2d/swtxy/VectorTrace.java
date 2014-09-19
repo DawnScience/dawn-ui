@@ -34,7 +34,7 @@ import org.eclipse.swt.widgets.Display;
  * 
  * TODO No downsampling currently implemented.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class VectorTrace extends Figure implements IVectorTrace {

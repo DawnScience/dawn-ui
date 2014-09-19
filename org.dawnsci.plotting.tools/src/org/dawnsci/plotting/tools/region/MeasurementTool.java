@@ -77,7 +77,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This tool shows the measurements of selected regions.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class MeasurementTool extends AbstractToolPage implements IRegionListener, IROIListener {

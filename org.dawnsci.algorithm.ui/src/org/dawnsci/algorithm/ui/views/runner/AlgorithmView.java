@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * Now your view will have the custom UI and be able to run workflows using the 
  * IAlgorithmContext passed into the run method when the run action is pressed.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class AlgorithmView extends ViewPart {

@@ -71,7 +71,7 @@ import org.slf4j.LoggerFactory;
  * 
  * This view is the entry to navigating the visit. 
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public abstract class AbstractNavigationView extends ViewPart implements ISelectionChangedListener, ISortParticipant {

@@ -22,7 +22,7 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 /**
  * A bean to hold information required to do a fit.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class FittedPeaksInfo {

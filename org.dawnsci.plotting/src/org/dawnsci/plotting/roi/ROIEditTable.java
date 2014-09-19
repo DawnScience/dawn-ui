@@ -61,7 +61,7 @@ import org.eclipse.swt.widgets.Label;
 /**
  * A widget for editing any ROI
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class ROIEditTable  {

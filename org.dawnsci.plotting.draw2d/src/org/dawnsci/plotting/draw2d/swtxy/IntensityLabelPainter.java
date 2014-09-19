@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Paints the labels on the image trace.
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 class IntensityLabelPainter {

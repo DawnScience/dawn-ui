@@ -49,7 +49,7 @@ import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
  * NOTE This class does not use preferences because the CalibrationFactory should
  * work without eclipse preferences. It simply saves the object using XML serialization.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class DiffractionPreferencePage extends PreferencePage implements IWorkbenchPreferencePage, CalibrantSelectedListener {

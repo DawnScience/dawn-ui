@@ -29,7 +29,7 @@ import org.eclipse.ui.PlatformUI;
 
 /**
  * Label provider for PlotDataComponent
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 class DataSetColumnLabelProvider extends ColumnLabelProvider implements IStyledLabelProvider {

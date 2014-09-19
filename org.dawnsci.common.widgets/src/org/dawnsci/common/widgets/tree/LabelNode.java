@@ -22,7 +22,7 @@ import javax.swing.tree.TreeNode;
  * elsewhere. They have not been moved somewhere generic yet because they create a 
  * dependency on jscience.
 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class LabelNode implements TreeNode {

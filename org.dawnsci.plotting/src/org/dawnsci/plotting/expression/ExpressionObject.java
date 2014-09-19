@@ -33,7 +33,7 @@ import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
  * An object which can be used to hold data about expressions in tables
  * of data (which data is Dataset).
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 class ExpressionObject implements IExpressionObject {

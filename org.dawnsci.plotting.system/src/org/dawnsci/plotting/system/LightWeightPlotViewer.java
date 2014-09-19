@@ -145,7 +145,7 @@ import org.slf4j.LoggerFactory;
  * Package private. This class deals with plotting actions specific to the
  * LightWeight (non-3D) part of the plotting.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPlottingSystemViewer, IAnnotationSystem, IRegionSystem, IAxisSystem, IPrintablePlotting, ITraceActionProvider, IAdaptable {

@@ -27,7 +27,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
  * We make a properties source to allow editing of the model. We read annotations from the
  * model to provide the correct editor for a field or provide a custom editor.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 class OperationPropertySource implements IPropertySource {

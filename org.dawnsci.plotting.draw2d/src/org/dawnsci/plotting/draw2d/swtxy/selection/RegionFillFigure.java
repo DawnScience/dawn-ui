@@ -26,7 +26,7 @@ import org.eclipse.draw2d.Shape;
  * It also has a right click menu which will appear when the user presses right click.
  * This moves the region up or down in order and 
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public abstract class RegionFillFigure<T extends IROI> extends Shape implements IRegionContainer {

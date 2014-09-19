@@ -40,7 +40,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 /**
  * This is an XYGraph which supports regions of interest.
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class XYRegionGraph extends XYGraph {

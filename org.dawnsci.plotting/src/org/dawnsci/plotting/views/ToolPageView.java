@@ -97,7 +97,7 @@ import org.slf4j.LoggerFactory;
  * @see ToolPageView#TOOLPAGE_1AND2D_VIEW_ID
  * 
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class ToolPageView extends ViewPart implements IPartListener, IToolChangeListener, IToolContainer { // Important: whole part must be IToolChangeListener

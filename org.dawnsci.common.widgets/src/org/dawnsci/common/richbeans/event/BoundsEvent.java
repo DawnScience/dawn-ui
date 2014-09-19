@@ -15,7 +15,7 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.eclipse.swt.widgets.Widget;
 
 /**
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class BoundsEvent extends EventObject {

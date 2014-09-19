@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.Label;
 
 /**
  * A class for editing one DHKL.
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class DiffractionRingsComposite extends Composite {

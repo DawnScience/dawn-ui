@@ -77,7 +77,7 @@ import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 /**
  * A service to provide SWT Image objects for 2D data.
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class PlotImageService extends AbstractServiceFactory implements IPlotImageService {

@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Class which encapsulates code for generically adding a table to the visit navigation view.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public abstract class AbstractTableDelegate implements INavigationDelegate {

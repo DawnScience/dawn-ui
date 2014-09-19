@@ -18,7 +18,7 @@ import org.eclipse.ui.services.IServiceLocator;
 
 /**
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class TransferableDataService extends AbstractServiceFactory implements ITransferableDataService {

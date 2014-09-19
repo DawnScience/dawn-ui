@@ -35,7 +35,7 @@ import org.jscience.physics.amount.Amount;
 /**
  * A Grid Model used to edit any GridROI.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class GridTreeModel extends AbstractNodeModel {

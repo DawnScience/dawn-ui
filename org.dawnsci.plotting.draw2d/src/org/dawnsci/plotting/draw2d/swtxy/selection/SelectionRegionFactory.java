@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Class giving access to selection regions.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class SelectionRegionFactory {

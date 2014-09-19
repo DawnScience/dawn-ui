@@ -19,7 +19,7 @@ import org.eclipse.swt.widgets.Widget;
 /**
  * Can be used to add space to a toolbar.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class SpacerContributionItem extends ContributionItem {

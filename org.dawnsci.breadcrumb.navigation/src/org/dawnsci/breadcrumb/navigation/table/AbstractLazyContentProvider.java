@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * search in the content provider. This is wrong but allows
  * the content to be lazy unless searched - which is right :)
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public abstract class AbstractLazyContentProvider implements ISortableLazyContentProvider, IIndexProvider {

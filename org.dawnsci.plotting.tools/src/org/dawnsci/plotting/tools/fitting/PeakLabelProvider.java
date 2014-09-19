@@ -30,7 +30,7 @@ import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
  * 4. Area
  * 5. Algorithm type
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class PeakLabelProvider extends ColumnLabelProvider {

@@ -21,7 +21,7 @@ import org.eclipse.swt.graphics.Cursor;
  * with the plotting system properly. Once this old code has been replaced, these methods
  * will be removed.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 @Deprecated

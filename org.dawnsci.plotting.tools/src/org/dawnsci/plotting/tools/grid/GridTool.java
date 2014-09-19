@@ -101,7 +101,7 @@ import org.slf4j.LoggerFactory;
  * with the key "GDA_GRID_METADATA" (public static on this class)
  * 
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class GridTool extends AbstractToolPage implements IResettableExpansion{

@@ -30,7 +30,7 @@ import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
  * Stores various information about the fit, including the IRegions
  * and other GUI things.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class FittedFunctions {	

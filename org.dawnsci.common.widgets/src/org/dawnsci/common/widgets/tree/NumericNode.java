@@ -29,7 +29,7 @@ import org.jscience.physics.amount.Constants;
  * elsewhere. They have not been moved somewhere generic yet because they create a 
  * dependency on jscience.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 @SuppressWarnings({"rawtypes", "unchecked"})

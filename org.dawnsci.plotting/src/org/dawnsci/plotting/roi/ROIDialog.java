@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A dialog for editing a ROI. Uses ROIViewer table.
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class ROIDialog extends Dialog {

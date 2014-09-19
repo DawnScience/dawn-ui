@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * A label provider that can get fast and slow text in order to allow
  * data to be retrieved slowly if required.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public abstract class AbstractLazyLabelProvider extends CellLabelProvider {

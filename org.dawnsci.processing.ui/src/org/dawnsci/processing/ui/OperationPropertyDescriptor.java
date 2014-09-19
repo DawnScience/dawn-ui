@@ -45,7 +45,7 @@ import org.eclipse.ui.views.properties.PropertyDescriptor;
  *  o String
  * 
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class OperationPropertyDescriptor extends PropertyDescriptor implements Comparable<OperationPropertyDescriptor> {

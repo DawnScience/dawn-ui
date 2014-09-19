@@ -15,7 +15,7 @@ import org.eclipse.swt.graphics.Image;
 
 /**
  * This class may be extended to provide custom rendering.
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class SeriesItemLabelProvider extends ColumnLabelProvider  {

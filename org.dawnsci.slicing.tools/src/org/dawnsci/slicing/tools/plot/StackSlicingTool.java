@@ -20,7 +20,7 @@ import org.eclipse.dawnsci.slicing.api.tool.AbstractSlicingTool;
  * options of the plotting system. However custom slice tools may
  * exist which have more complex UI.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class StackSlicingTool extends AbstractSlicingTool {

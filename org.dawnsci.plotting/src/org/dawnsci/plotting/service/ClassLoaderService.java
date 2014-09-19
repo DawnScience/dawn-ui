@@ -25,7 +25,7 @@ import com.thoughtworks.xstream.core.util.CompositeClassLoader;
  * Defines the class loader that should be used for RMI communications.
  * The Loader will be able to load analysis classes which are communicated via RMI.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class ClassLoaderService extends AbstractServiceFactory implements IClassLoaderService {

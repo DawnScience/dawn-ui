@@ -21,7 +21,7 @@ import org.eclipse.draw2d.geometry.PointList;
  * being added. Once the region is added it goes down to the graph layer (TODO Should there
  * be a separate layer for the regions?)
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class RegionCreationLayer extends Layer {

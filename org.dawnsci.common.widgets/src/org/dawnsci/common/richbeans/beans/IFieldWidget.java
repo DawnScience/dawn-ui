@@ -12,7 +12,7 @@ package org.dawnsci.common.richbeans.beans;
 import org.dawnsci.common.richbeans.event.ValueListener;
 
 /**
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public interface IFieldWidget {

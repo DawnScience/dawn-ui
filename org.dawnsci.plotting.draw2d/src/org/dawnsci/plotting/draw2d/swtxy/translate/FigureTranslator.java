@@ -26,7 +26,7 @@ import org.eclipse.nebula.visualization.xygraph.figures.XYGraph;
 
 /**
  * Class from SWT examples which allows a draw2D figure to move.
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class FigureTranslator implements MouseListener, MouseMotionListener {

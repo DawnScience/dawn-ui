@@ -47,7 +47,7 @@ import org.eclipse.draw2d.geometry.Rectangle;
  *     ------------
  *     ------------
  *     
- * @author fcp94556
+ * @author Matthew Gerring
  */
 class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 		

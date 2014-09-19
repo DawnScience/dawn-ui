@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
  * 
  * IDEA initiate pipeline from secondary id that make the pipeline static unless they edit it.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class ProcessingView extends ViewPart {

@@ -14,7 +14,7 @@ import org.eclipse.dawnsci.plotting.api.axis.IAxisSystem;
  * For those that want to reduce dependencies individual interfaces which make up
  * IPlottingSystem may be retrieved here.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class JMXPlottingFactory {

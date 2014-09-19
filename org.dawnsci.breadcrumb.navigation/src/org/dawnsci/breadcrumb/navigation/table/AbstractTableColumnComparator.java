@@ -16,7 +16,7 @@ import org.eclipse.swt.SWT;
 
 /**
  * Compares data by string for table row objects using the string value of the label provider.
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public abstract class AbstractTableColumnComparator implements Comparator<Object> {

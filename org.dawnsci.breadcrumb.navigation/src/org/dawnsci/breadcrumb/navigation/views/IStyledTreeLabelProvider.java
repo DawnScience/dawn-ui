@@ -14,7 +14,7 @@ import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelP
 /**
  * This interface must be used to render a StyledTreeBreadcrumbViewer.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public interface IStyledTreeLabelProvider extends ILabelProvider, IStyledLabelProvider{

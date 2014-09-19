@@ -18,7 +18,7 @@ import org.eclipse.jface.viewers.Viewer;
  * A content provider that returns the current series plus an additional
  * item on the end which is used to add more items to the series.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class SeriesContentProvider implements IStructuredContentProvider {

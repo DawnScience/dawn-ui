@@ -15,7 +15,7 @@ import org.eclipse.swt.widgets.Display;
 
 /**
  * TODO This class is actually generic, could be used elsewhere.
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class VariableNameLabelProvider extends ColumnLabelProvider {

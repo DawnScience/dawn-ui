@@ -22,7 +22,7 @@ import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
  * 
  * This is very useful for getting the plot server working!
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class SWTXYLiveUpdateTest {

@@ -58,7 +58,7 @@ import org.eclipse.ui.IWorkbenchPart;
  * To have less things in the class path e.g. on GDA Server, one
  * can use @see JMXPlottingFactory.getXXXSystem(...)
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 @SuppressWarnings("unchecked")

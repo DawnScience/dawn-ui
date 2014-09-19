@@ -84,7 +84,7 @@ import org.slf4j.LoggerFactory;
  * A tool which has one box region for configuring the region
  * which defines the window of a 3D plot.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class WindowTool extends AbstractToolPage {

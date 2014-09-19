@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Spinner;
 
 /**
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class SpinnerWrapper extends ButtonComposite implements IFieldWidget {

@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.Text;
  * A regexp decorator which will only accept numbers and 
  * will color invalid bounds red.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class BoundsDecorator extends RegexDecorator {

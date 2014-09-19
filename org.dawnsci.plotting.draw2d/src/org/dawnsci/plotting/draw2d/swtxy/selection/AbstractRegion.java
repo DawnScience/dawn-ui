@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This is a Figure, disabled for mouse events. 
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public abstract class AbstractRegion<T extends IROI> extends Figure implements IRegion, IRegionContainer {

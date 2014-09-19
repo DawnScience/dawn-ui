@@ -13,7 +13,7 @@ import org.eclipse.ui.ISourceProvider;
 
 /**
  * This class provides resources for running a algorithm/workflow in a custom way.
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public interface IAlgorithmProcessContext {

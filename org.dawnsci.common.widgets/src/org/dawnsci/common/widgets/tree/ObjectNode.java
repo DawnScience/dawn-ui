@@ -20,7 +20,7 @@ import java.util.HashSet;
  * elsewhere. They have not been moved somewhere generic yet because they create a 
  * dependency on jscience.
 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class ObjectNode extends LabelNode {

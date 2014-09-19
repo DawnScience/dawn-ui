@@ -25,7 +25,7 @@ import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
 
 /**
  * A conversion visitor that delegates to a tool.
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 class ToolConversionVisitor implements IConversionVisitor {

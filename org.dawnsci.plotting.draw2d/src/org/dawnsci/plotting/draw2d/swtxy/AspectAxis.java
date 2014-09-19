@@ -39,7 +39,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
  * An axis which can keep aspect with another and have a maximum possible extend which cannot
  * be altered.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class AspectAxis extends Axis implements IAxis {

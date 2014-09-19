@@ -31,7 +31,7 @@ import org.eclipse.ui.ISourceProvider;
  * 
  * This class shows how to use the IWorkflowRunPage interface.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class ExampleRunPage extends AbstractAlgorithmProcessPage {

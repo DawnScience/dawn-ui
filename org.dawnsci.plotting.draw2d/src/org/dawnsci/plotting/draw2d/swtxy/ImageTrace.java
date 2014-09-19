@@ -74,7 +74,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
 /**
  * A trace which draws an image to the plot.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class ImageTrace extends Figure implements IImageTrace, IAxisListener, ITraceContainer {

@@ -33,7 +33,7 @@ import org.eclipse.swt.graphics.Color;
  *     
  *     Normally concrete class of IRegion should not be used
  *     
- * @author fcp94556
+ * @author Matthew Gerring
  */
 public class GridSelection extends BoxSelection implements IGridSelection {
 		

@@ -14,7 +14,7 @@ import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.widgets.Composite;
 
 /**
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class TreeTextCellEditor extends TextCellEditor {

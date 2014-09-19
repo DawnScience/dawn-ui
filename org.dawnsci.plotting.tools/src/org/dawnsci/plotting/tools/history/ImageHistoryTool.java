@@ -74,7 +74,7 @@ import org.slf4j.LoggerFactory;
  * operations. TODO Create a static method for adding images, for instance
  * from the Project Explorer.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class ImageHistoryTool extends AbstractHistoryTool implements MouseListener {

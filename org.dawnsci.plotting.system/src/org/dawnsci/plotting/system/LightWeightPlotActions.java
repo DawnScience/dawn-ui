@@ -91,7 +91,7 @@ import org.slf4j.LoggerFactory;
  * 
  * This class creates actions for the lightweight plotting system.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 class LightWeightPlotActions {

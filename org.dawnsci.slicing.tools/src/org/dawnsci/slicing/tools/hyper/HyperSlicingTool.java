@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * replaces the traditional plotting system with an alternative
  * slicer.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class HyperSlicingTool extends AbstractSlicingTool {
