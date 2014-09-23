@@ -84,6 +84,7 @@ import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 
 import uk.ac.diamond.scisoft.analysis.SDAPlotter;
+import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.metadata.OriginMetadataImpl;
 import uk.ac.diamond.scisoft.analysis.processing.visitors.HierarchicalFileExecutionVisitor;
@@ -497,7 +498,8 @@ public class DataFileSliceView extends ViewPart {
 					int[] dd = Slicer.getDataDimensions(shape, context.getSliceDimensions());
 					Slice[] slices = Slicer.getSliceArrayFromSliceDimensions(context.getSliceDimensions(), shape);
 					csw.setDatasetShapeInformation(shape, dd.clone(), slices);
-					currentSliceLabel.setText(Slice.createString(csw.getCurrentSlice()));
+					String ss = Slice.createString(csw.getCurrentSlice());
+					currentSliceLabel.setText("Current slice of data: [" +ss + "]");
 //					Arrays.sort(dd);
 //					
 //					int work = 1;
@@ -544,6 +546,23 @@ public class DataFileSliceView extends ViewPart {
 				job.setEndOperation(end);
 				job.schedule();
 			}
+		
+	}
+	
+	private void updateSliceWidget(String path) {
+		try {
+			IDataHolder dh = LoaderFactory.getData(path);
+			ILazyDataset lazy = dh.getLazyDataset(context.getDatasetNames().get(0));
+			int[] shape = lazy.getShape();
+			
+			int[] dd = Slicer.getDataDimensions(shape, context.getSliceDimensions());
+			Slice[] slices = Slicer.getSliceArrayFromSliceDimensions(context.getSliceDimensions(), shape);
+			csw.setDatasetShapeInformation(shape, dd.clone(), slices);
+			String ss = Slice.createString(csw.getCurrentSlice());
+			currentSliceLabel.setText("Current slice of data: [" +ss + "]");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 	}
 	
@@ -690,7 +709,14 @@ public class DataFileSliceView extends ViewPart {
 		}
 		
 		public void setPath(String path) {
-			this.path = path;
+			
+			if (path == null) return;
+			
+			if (!path.equals(this.path)) {
+			
+				updateSliceWidget(path);
+				this.path = path;
+			}
 		}
 
 		@Override
@@ -708,8 +734,9 @@ public class DataFileSliceView extends ViewPart {
 				else {
 					SDAPlotter.plot("Input", firstSlice);
 				}
-				
-				EscapableSliceVisitor sliceVisitor = getSliceVisitor(getOperations(), getOutputExecutionVisitor(), lazyDataset, Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions()));
+				IOperation<? extends IOperationModel, ? extends OperationData>[] ops = getOperations();
+				if (ops == null) return Status.OK_STATUS;
+				EscapableSliceVisitor sliceVisitor = getSliceVisitor(ops, getOutputExecutionVisitor(), lazyDataset, Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions()));
 				sliceVisitor.setEndOperation(end);
 				sliceVisitor.visit(firstSlice, null, null);
 				} catch (Exception e) {
