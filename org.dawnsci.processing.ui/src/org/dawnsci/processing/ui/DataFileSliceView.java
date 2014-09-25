@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.services.conversion.IConversionContext;
@@ -86,6 +87,7 @@ import org.eclipse.ui.part.ViewPart;
 import uk.ac.diamond.scisoft.analysis.SDAPlotter;
 import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
+import uk.ac.diamond.scisoft.analysis.metadata.AxesMetadataImpl;
 import uk.ac.diamond.scisoft.analysis.metadata.OriginMetadataImpl;
 import uk.ac.diamond.scisoft.analysis.processing.visitors.HierarchicalFileExecutionVisitor;
 
@@ -727,6 +729,36 @@ public class DataFileSliceView extends ViewPart {
 				
 				final IDataHolder   dh = LoaderFactory.getData(path);
 				ILazyDataset lazyDataset = dh.getLazyDataset(context.getDatasetNames().get(0));
+				
+				Map<Integer, String> axesNames = context.getAxesNames();
+				
+				if (axesNames != null) {
+					
+					AxesMetadataImpl axMeta = null;
+					
+					try {
+						axMeta = new AxesMetadataImpl(lazyDataset.getRank());
+						for (Integer key : axesNames.keySet()) {
+							String axesName = axesNames.get(key);
+							IDataHolder dataHolder = LoaderFactory.getData(path);
+							ILazyDataset lazyAx = dataHolder.getLazyDataset(axesName);
+							if (lazyAx != null && lazyAx.getRank() != lazyDataset.getRank()) {
+								lazyAx = lazyAx.getSliceView();
+								int[] shape = new int[lazyDataset.getRank()];
+								Arrays.fill(shape, 1);
+								shape[key-1]= lazyAx.getShape()[0];
+								lazyAx.setShape(shape);
+							}
+							
+							axMeta.setAxis(key-1, new ILazyDataset[] {lazyAx});
+						}
+						
+						lazyDataset.setMetadata(axMeta);
+					} catch (Exception e) {
+						//no axes metadata
+						e.printStackTrace();
+					}
+				}
 				
 				final IDataset firstSlice = lazyDataset.getSlice(csw.getCurrentSlice()).squeeze();
 //				final IDataset firstSlice = Slicer.getFirstSlice(new RichDataset(lazyDataset, null), context.getSliceDimensions());
