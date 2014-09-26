@@ -429,12 +429,15 @@ public class FunctionFittingTool extends AbstractToolPage implements
 				int algoId = prefs.getInt(FittingConstants.FIT_ALGORITHM);
 				FIT_ALGORITHMS algorithm = FIT_ALGORITHMS.fromId(algoId);
 
-
+				// We need to run the fit on a copy of the compFunction
+				// otherwise the fit will affect the input values.
+				CompositeFunction compFunctionCopy = compFunction.copy();
+				IFunction[] functionCopies = compFunctionCopy.getFunctions();
 				switch (algorithm) {
 				default:
 				case APACHENELDERMEAD:
 					resultFunction = new CompositeFunction();
-					for (IFunction function : compFunction.getFunctions()) {
+					for (IFunction function : functionCopies) {
 						resultFunction.addFunction(function);
 					}
 					Fitter.ApacheNelderMeadFit(new Dataset[] { x }, y,
@@ -442,8 +445,8 @@ public class FunctionFittingTool extends AbstractToolPage implements
 					break;
 				case GENETIC:
 					IOptimizer fitMethod = new GeneticAlg(accuracy);
-					resultFunction = Fitter.fit(x, y, fitMethod, compFunction
-							.copy().getFunctions());
+					resultFunction = Fitter
+							.fit(x, y, fitMethod, functionCopies);
 					break;
 				}
 
