@@ -70,7 +70,6 @@ import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants.FIT_ALGORITHMS;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
-import uk.ac.diamond.scisoft.analysis.optimize.ApacheNelderMead;
 import uk.ac.diamond.scisoft.analysis.optimize.GeneticAlg;
 import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
 
@@ -430,26 +429,22 @@ public class FunctionFittingTool extends AbstractToolPage implements
 				int algoId = prefs.getInt(FittingConstants.FIT_ALGORITHM);
 				FIT_ALGORITHMS algorithm = FIT_ALGORITHMS.fromId(algoId);
 
-				IOptimizer fitMethod = null;
-				if (algorithm == null) {
-					fitMethod = new ApacheNelderMead();
-				} else {
-					switch (algorithm) {
-					default:
-					case APACHENELDERMEAD:
-						resultFunction = new CompositeFunction();
-						for (IFunction function : compFunction.getFunctions()) {
-							resultFunction.addFunction(function);
-						}
-						Fitter.ApacheNelderMeadFit(new Dataset[] { x }, y,
-								resultFunction, 1000);
-						break;
-					case GENETIC:
-						fitMethod = new GeneticAlg(accuracy);
-						resultFunction = Fitter.fit(x, y, fitMethod,
-								compFunction.copy().getFunctions());
-						break;
+
+				switch (algorithm) {
+				default:
+				case APACHENELDERMEAD:
+					resultFunction = new CompositeFunction();
+					for (IFunction function : compFunction.getFunctions()) {
+						resultFunction.addFunction(function);
 					}
+					Fitter.ApacheNelderMeadFit(new Dataset[] { x }, y,
+							resultFunction, 1000);
+					break;
+				case GENETIC:
+					IOptimizer fitMethod = new GeneticAlg(accuracy);
+					resultFunction = Fitter.fit(x, y, fitMethod, compFunction
+							.copy().getFunctions());
+					break;
 				}
 
 				// TODO (review race condition) this copy of compFunction
