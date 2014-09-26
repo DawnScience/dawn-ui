@@ -70,7 +70,6 @@ import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants.FIT_ALGORITHMS;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
-import uk.ac.diamond.scisoft.analysis.optimize.ApacheNelderMead;
 import uk.ac.diamond.scisoft.analysis.optimize.GeneticAlg;
 import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
 
@@ -189,7 +188,9 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(functionWidget);
 
 		// Initialise with a simple function.
-		if (compFunction == null) compFunction = new CompositeFunction();
+		if (compFunction == null) {
+			compFunction = new CompositeFunction();
+		}
 		functionWidget.setInput(compFunction);
 		functionWidget.expandAll();
 
@@ -292,7 +293,9 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 	private void setChiSquaredValue(double value, boolean notConverged) {
 		String text = Double.toString(value);
-		if (notConverged) text = text + " (Not converged)";
+		if (notConverged) {
+			text = text + " (Not converged)";
+		}
 		chiSquaredValueText.setText(text);
 	}
 
@@ -342,8 +345,8 @@ public class FunctionFittingTool extends AbstractToolPage implements
 					Dataset y = (Dataset) trace.getYData();
 
 					try {
-						Dataset[] a = Generic1DFitter.xintersection(x,
-								y, p1[0], p2[0]);
+						Dataset[] a = Generic1DFitter.xintersection(x, y,
+								p1[0], p2[0]);
 						x = a[0];
 						y = a[1];
 					} catch (Throwable npe) {
@@ -426,25 +429,25 @@ public class FunctionFittingTool extends AbstractToolPage implements
 				int algoId = prefs.getInt(FittingConstants.FIT_ALGORITHM);
 				FIT_ALGORITHMS algorithm = FIT_ALGORITHMS.fromId(algoId);
 
-				IOptimizer fitMethod = null;
-				if (algorithm == null) {
-					fitMethod = new ApacheNelderMead();
-				} else {
-					switch (algorithm) {
-					default:
-					case APACHENELDERMEAD:
-						resultFunction = new CompositeFunction();
-						for (IFunction function : compFunction.getFunctions()) {
-							resultFunction.addFunction(function);
-						}
-						Fitter.ApacheNelderMeadFit(new Dataset[] {x}, y, resultFunction, 1000);
-						break;
-					case GENETIC:
-						fitMethod = new GeneticAlg(accuracy);
-						resultFunction = Fitter.fit(x, y, fitMethod, compFunction
-								.copy().getFunctions());
-						break;
+				// We need to run the fit on a copy of the compFunction
+				// otherwise the fit will affect the input values.
+				CompositeFunction compFunctionCopy = compFunction.copy();
+				IFunction[] functionCopies = compFunctionCopy.getFunctions();
+				switch (algorithm) {
+				default:
+				case APACHENELDERMEAD:
+					resultFunction = new CompositeFunction();
+					for (IFunction function : functionCopies) {
+						resultFunction.addFunction(function);
 					}
+					Fitter.ApacheNelderMeadFit(new Dataset[] { x }, y,
+							resultFunction, 1000);
+					break;
+				case GENETIC:
+					IOptimizer fitMethod = new GeneticAlg(accuracy);
+					resultFunction = Fitter
+							.fit(x, y, fitMethod, functionCopies);
+					break;
 				}
 
 				// TODO (review race condition) this copy of compFunction
@@ -462,20 +465,22 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 			} catch (TooManyEvaluationsException me) {
 				tooManyItterations = true;
-				
+
 			} catch (Exception e) {
 				return Status.CANCEL_STATUS;
 			}
 
 			final boolean notConverged = tooManyItterations;
-			
+
 			PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 
 				@Override
 				public void run() {
 					getPlottingSystem().removeTraceListener(traceListener);
-					setChiSquaredValue(resultFunction.residual(true, y, null,
-							new IDataset[] { x }) / x.count(), notConverged);
+					setChiSquaredValue(
+							resultFunction.residual(true, y, null,
+									new IDataset[] { x }) / x.count(),
+							notConverged);
 
 					fitTrace = (ILineTrace) getPlottingSystem().getTrace("Fit");
 					if (fitTrace == null) {
