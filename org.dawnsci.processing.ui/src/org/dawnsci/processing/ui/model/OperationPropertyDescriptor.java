@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.dawnsci.processing.ui;
+package org.dawnsci.processing.ui.model;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -16,6 +16,7 @@ import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
 import org.dawnsci.common.widgets.celleditor.ClassCellEditor;
 import org.dawnsci.common.widgets.celleditor.FileDialogCellEditor;
 import org.dawnsci.plotting.roi.RegionCellEditor;
+import org.dawnsci.processing.ui.Activator;
 import org.eclipse.dawnsci.analysis.api.processing.model.FileType;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.OperationModelField;

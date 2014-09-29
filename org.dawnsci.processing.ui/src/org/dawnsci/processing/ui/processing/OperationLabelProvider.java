@@ -6,9 +6,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.dawnsci.processing.ui;
+package org.dawnsci.processing.ui.processing;
 
 import org.dawnsci.common.widgets.table.SeriesItemLabelProvider;
+import org.dawnsci.processing.ui.model.OperationDescriptor;
 import org.eclipse.swt.graphics.Image;
 
 final class OperationLabelProvider extends SeriesItemLabelProvider  {

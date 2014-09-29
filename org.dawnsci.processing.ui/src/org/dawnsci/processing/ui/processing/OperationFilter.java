@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.dawnsci.processing.ui;
+package org.dawnsci.processing.ui.processing;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,6 +14,8 @@ import java.util.List;
 
 import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
 import org.dawnsci.common.widgets.table.ISeriesItemFilter;
+import org.dawnsci.processing.ui.Activator;
+import org.dawnsci.processing.ui.model.OperationDescriptor;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

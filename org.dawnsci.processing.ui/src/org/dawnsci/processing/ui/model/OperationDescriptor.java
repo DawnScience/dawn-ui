@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.dawnsci.processing.ui;
+package org.dawnsci.processing.ui.model;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -25,7 +25,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.osgi.framework.Bundle;
 
-final class OperationDescriptor implements ISeriesItemDescriptor {
+public class OperationDescriptor implements ISeriesItemDescriptor {
 
 	// We never dispose these static images. They are small
 	// in number and we just leave the VM to tidy them up...

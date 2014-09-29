@@ -11,7 +11,7 @@
  *     Semion Chichelnitsky (semion@il.ibm.com) - bug 272564
  *     Craig Foote (Footeware.ca) - https://bugs.eclipse.org/325743
  *******************************************************************************/
-package org.dawnsci.processing.ui;
+package org.dawnsci.processing.ui.model;
 
 import java.util.HashSet;
 

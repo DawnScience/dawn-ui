@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.dawnsci.processing.ui;
+package org.dawnsci.processing.ui.slice;
 
 import java.io.File;
 import java.io.Serializable;
@@ -24,6 +24,8 @@ import org.dawb.common.services.conversion.IConversionContext.ConversionScheme;
 import org.dawb.common.services.conversion.IConversionService;
 import org.dawb.common.services.conversion.IProcessingConversionInfo;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
+import org.dawnsci.processing.ui.Activator;
+import org.dawnsci.processing.ui.model.OperationDescriptor;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;

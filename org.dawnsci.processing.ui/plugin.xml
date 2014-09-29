@@ -6,7 +6,7 @@
       <view
             allowMultiple="false"
             category="org.dawb.workbench.ui.beta.views.category"
-            class="org.dawnsci.processing.ui.ProcessingView"
+            class="org.dawnsci.processing.ui.processing.ProcessingView"
             icon="icons/image-sharpen.png"
             id="org.dawnsci.processing.ui.processingView"
             name="Processing"
@@ -14,14 +14,14 @@
       </view>
       <view
             category="org.dawb.workbench.ui.beta.views.category"
-            class="org.dawnsci.processing.ui.OperationModelView"
+            class="org.dawnsci.processing.ui.model.OperationModelView"
             icon="icons/image--pencil.png"
             id="org.dawnsci.processing.ui.propertySheet"
             name="Model"
             restorable="true">
       </view>
       <view
-            class="org.dawnsci.processing.ui.DataFileSliceView"
+            class="org.dawnsci.processing.ui.slice.DataFileSliceView"
             id="org.dawnsci.processing.ui.DataFileSliceView"
             name="Data Slice View"
             restorable="true">
