@@ -110,6 +110,28 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
         return labelProvider;
     }
 
+	public boolean isFileProperty() {
+		
+		Class<? extends Object> clazz = null;
+		try {
+			Field field = getField(model, name);
+			clazz = field.getType();
+		} catch (NoSuchFieldException | SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+		
+    	final OperationModelField anot = getAnnotation(model, name);
+
+		return FileDialogCellEditor.isEditorFor(clazz) || (anot!=null && anot.file()!=FileType.NONE);
+	}
+	
+
+	public void setValue(Object value) throws Exception {
+		model.set(name, value);
+	}
+
 
     public CellEditor createPropertyEditor(Composite parent) {
     	

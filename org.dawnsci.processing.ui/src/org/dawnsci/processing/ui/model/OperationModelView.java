@@ -144,13 +144,13 @@ public class OperationModelView extends PageBookView implements ISelectionListen
      * Returns the default property sheet page.
      */
     protected IPage createDefaultPage(PageBook book) {
-        IPageBookViewPage page = (IPageBookViewPage) ViewsPlugin.getAdapter(this,
-                IPropertySheetPage.class, false);
-        if(page == null) {
-        	page = new PropertySheetPage();
+        IPageBookViewPage page = (IPageBookViewPage) ViewsPlugin.getAdapter(this, IPropertySheetPage.class, false);
+        if (page == null) {
+        	page = new OperationModelPage();
         }
         initPage(page);
         page.createControl(book);
+ 
         return page;
     }
 
@@ -378,7 +378,7 @@ public class OperationModelView extends PageBookView implements ISelectionListen
         // pass the selection to the page
         IPropertySheetPage page = (IPropertySheetPage) getCurrentPage();
         if (page != null) {
-			page.selectionChanged(currentPart, currentSelection);
+			page.selectionChanged(currentPart, currentSelection);			
 		}
         
         updateContentDescription();

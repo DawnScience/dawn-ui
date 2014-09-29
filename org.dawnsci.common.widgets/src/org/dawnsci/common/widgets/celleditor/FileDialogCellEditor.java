@@ -27,6 +27,13 @@ import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.dnd.DropTargetAdapter;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.FileTransfer;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -114,6 +121,24 @@ public class FileDialogCellEditor extends TextCellEditor {
 		ContentProposalAdapter ad = new ContentProposalAdapter(text, new TextContentAdapter(), prov, null, null);
 		ad.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
 		text.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, true));
+		
+		DropTarget target = new DropTarget(text, DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_DEFAULT);
+		final TextTransfer textTransfer = TextTransfer.getInstance();
+		final FileTransfer fileTransfer = FileTransfer.getInstance();
+		Transfer[] types = new Transfer[] {fileTransfer, textTransfer};
+		target.setTransfer(types);
+		target.addDropListener(new DropTargetAdapter() {
+			 public void drop(DropTargetEvent event) {		
+				 if (textTransfer.isSupportedType(event.currentDataType)) {
+					 String txt = (String)event.data;
+					 text.setText(txt);
+				 }
+				 if (fileTransfer.isSupportedType(event.currentDataType)){
+					 String[] files = (String[])event.data;
+					 text.setText(files[0]);
+				 }
+			 }
+		});
 		
 		// Couple of buttons
 		final ToolBarManager toolbar = new ToolBarManager(SWT.FLAT);

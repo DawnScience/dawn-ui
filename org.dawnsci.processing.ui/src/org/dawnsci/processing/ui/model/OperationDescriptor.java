@@ -83,15 +83,18 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 		}
 	}
 
+	private OperationPropertySource modelSource;
+	
 	@Override
 	public Object getAdapter(Class clazz) {
 		if (clazz == IPropertySource.class) {
-			return new OperationPropertySource(getModel());
+			if (modelSource==null) modelSource = new OperationPropertySource(getModel());
+			return modelSource;
 		}
 		return null;
 	}
 
-	private IOperationModel getModel() {
+	public IOperationModel getModel() {
 		
 		if (operation!=null && operation.getModel()!=null) return operation.getModel();
 		
