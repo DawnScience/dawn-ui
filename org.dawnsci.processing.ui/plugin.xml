@@ -14,7 +14,7 @@
       </view>
       <view
             category="org.dawb.workbench.ui.beta.views.category"
-            class="org.eclipse.ui.views.properties.PropertySheet"
+            class="org.dawnsci.processing.ui.OperationModelView"
             icon="icons/image--pencil.png"
             id="org.dawnsci.processing.ui.propertySheet"
             name="Model"
@@ -43,6 +43,7 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             class="org.dawnsci.processing.ui.ProcessingPerspective"
+            icon="icons/image-sharpen.png"
             id="org.dawnsci.processing.ui.ProcessingPerspective"
             name="Processing">
       </perspective>
