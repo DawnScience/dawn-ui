@@ -37,6 +37,7 @@ import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.api.metadata.MaskMetadata;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.api.processing.IExecutionVisitor;
+import org.eclipse.dawnsci.analysis.api.processing.IExportOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
@@ -83,6 +84,8 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
+
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.IO;
 
 import uk.ac.diamond.scisoft.analysis.SDAPlotter;
 import uk.ac.diamond.scisoft.analysis.io.DataHolder;
@@ -583,110 +586,8 @@ public class DataFileSliceView extends ViewPart {
 		return ops;
 	}
 	
-	private IExecutionVisitor getOutputExecutionVisitor() {
-		return new IExecutionVisitor() {
-			
-			@Override
-			public void passDataThroughUnmodified(IOperation<? extends IOperationModel, ? extends OperationData>... operations) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void notify(IOperation<? extends IOperationModel, ? extends OperationData> intermediateData, OperationData data,
-					Slice[] slices, int[] shape, int[] dataDims) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public boolean isRequiredToModifyData(IOperation<? extends IOperationModel, ? extends OperationData> operation) {
-				// TODO Auto-generated method stub
-				return true;
-			}
-			
-			@Override
-			public void init(IOperation<? extends IOperationModel, ? extends OperationData>[] series) throws Exception {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void executed(OperationData result, IMonitor monitor,
-					Slice[] slices, int[] shape, int[] dataDims) throws Exception {
-				IDataset out = result.getData();
-				
-				out = out.squeeze();
-				SDAPlotter.clearPlot("Output");
-				if (out.getRank() == 2)  {
-					
-					List<AxesMetadata> axList = result.getData().getMetadata(AxesMetadata.class);
-					
-					if (axList == null || axList.isEmpty()) {
-						SDAPlotter.imagePlot("Output", out);
-					} else {
-						ILazyDataset[] axes = axList.get(0).getAxes();
-						ILazyDataset lz0 = axes[dataDims[0]];
-						ILazyDataset lz1 = axes[dataDims[1]];
-						IDataset ax0 = null;
-						IDataset ax1 = null;
-						if (lz0 != null) ax0 = lz0.getSlice().squeeze();
-						if (lz1 != null) ax1 = lz1.getSlice().squeeze();
-						
-						SDAPlotter.imagePlot("Output", ax0,ax1,out);
-					}
-					
-					List<MaskMetadata> mList = result.getData().getMetadata(MaskMetadata.class);
-					
-					if (mList == null || mList.isEmpty()) return;
-					
-					MaskMetadata m = mList.get(0);
-					ILazyDataset mask = m.getMask();
-					
-					final IDataset md = mask.getSlice().squeeze();
-					
-					if (!Arrays.equals(md.getShape(), out.getShape())) return;
-					
-					Display.getDefault().syncExec(new Runnable() {
-						
-						@Override
-						public void run() {
-							IPlottingSystem system = PlottingFactory.getPlottingSystem("Output");
-							if (system == null) return;
-							Collection<ITrace> traces = system.getTraces(IImageTrace.class);
-							if (traces == null || traces.isEmpty()) return;
-							IImageTrace t = (IImageTrace)traces.iterator().next();
-							t.setMask(md);
-							system.repaint();							
-						}
-					});
-					
-				}
-				
-				if (out.getRank() == 1) {
-					List<AxesMetadata> mList = result.getData().getMetadata(AxesMetadata.class);
-					if (mList == null || mList.isEmpty()) {
-						SDAPlotter.plot("Output", out);
-					}
-					
-					ILazyDataset[] axes = mList.get(0).getAxes();
-					ILazyDataset lz = axes[dataDims[0]];
-					IDataset ax = null;
-					if (lz != null) ax = lz.getSlice().squeeze();
-					
-					if (ax != null && Arrays.equals(ax.getShape(), out.getShape())) {
-						SDAPlotter.plot("Output", ax, out);
-					}
-				}
-				
-			}
-			
-			@Override
-			public void close() throws Exception {
-				// TODO Auto-generated method stub
-				
-			}
-		};
+	private UIExecutionVisitor getOutputExecutionVisitor() {
+		return new UIExecutionVisitor();
 	}
 
 	@Override
@@ -781,7 +682,7 @@ public class DataFileSliceView extends ViewPart {
 		
 	}
 	
-	private EscapableSliceVisitor getSliceVisitor(IOperation<? extends IOperationModel, ? extends OperationData>[] series,IExecutionVisitor visitor,ILazyDataset lz,  
+	private EscapableSliceVisitor getSliceVisitor(IOperation<? extends IOperationModel, ? extends OperationData>[] series,UIExecutionVisitor visitor,ILazyDataset lz,  
             int[] dataDims) {
 		return new EscapableSliceVisitor(lz,visitor,dataDims,series,null,context);
 	}
@@ -790,14 +691,14 @@ public class DataFileSliceView extends ViewPart {
 
 		
 		private ILazyDataset lz;
-		private IExecutionVisitor visitor;
+		private UIExecutionVisitor visitor;
 		private int[] dataDims;
 		private IOperation<? extends IOperationModel, ? extends OperationData>[] series;
 		private IOperation<? extends IOperationModel, ? extends OperationData> endOperation;
 		private IProgressMonitor monitor;
 		private IConversionContext context;
 		
-		public EscapableSliceVisitor(ILazyDataset lz, IExecutionVisitor visitor, 
+		public EscapableSliceVisitor(ILazyDataset lz, UIExecutionVisitor visitor, 
 				                     int[] dataDims, IOperation<? extends IOperationModel, ? extends OperationData>[] series, 
 				                     IProgressMonitor monitor, IConversionContext context) {
 			this.lz = lz;
@@ -809,7 +710,7 @@ public class DataFileSliceView extends ViewPart {
 		}
 		
 		public void setEndOperation(IOperation<? extends IOperationModel, ? extends OperationData> op) {
-			endOperation = op;
+			visitor.setEndOperation(op);
 		}
 		
 		@Override
@@ -821,9 +722,14 @@ public class DataFileSliceView extends ViewPart {
 			OperationData  data = new OperationData(slice, (Serializable[])null);
 								
 			for (IOperation<? extends IOperationModel, ? extends OperationData> i : series) {
-				OperationData tmp = i.execute(data.getData(), null);
-				data = visitor.isRequiredToModifyData(i) ? tmp : data;
-				visitor.notify(i, data, slices, shape, dataDims); // Optionally send intermediate result
+				 if (i instanceof IExportOperation) {
+					 visitor.notify(i, data, slices, shape, dataDims);
+				 } else {
+					 OperationData tmp = i.execute(data.getData(), null);
+					 visitor.notify(i, tmp, slices, shape, dataDims); // Optionally send intermediate result
+					data = i.isPassUnmodifiedData() ? data : tmp;
+				 }
+				
 				if (i == endOperation) break;
 			}
 			
@@ -837,6 +743,113 @@ public class DataFileSliceView extends ViewPart {
 			if (context != null && context.getMonitor()!=null && context.getMonitor().isCancelled()) return true;
 			return false;
 		}
+	}
+	
+	private class UIExecutionVisitor implements IExecutionVisitor {
+
+		private IOperation<? extends IOperationModel, ? extends OperationData> endOp;
+		
+		public void setEndOperation(IOperation<? extends IOperationModel, ? extends OperationData> op) {
+			endOp = op;
+		}
+		
+		@Override
+		public void notify(IOperation<? extends IOperationModel, ? extends OperationData> intermediateData, OperationData data,
+				Slice[] slices, int[] shape, int[] dataDims) {
+			
+			try {
+				if (intermediateData == endOp) displayData(data,dataDims);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+		}
+		
+		@Override
+		public void init(IOperation<? extends IOperationModel, ? extends OperationData>[] series) throws Exception {
+			
+		}
+		
+		@Override
+		public void executed(OperationData result, IMonitor monitor,
+				Slice[] slices, int[] shape, int[] dataDims) throws Exception {
+			
+			
+		}
+		
+		@Override
+		public void close() throws Exception {
+			// TODO Auto-generated method stub
+			
+		}
+		
+		private void displayData(OperationData result, int[] dataDims) throws Exception {
+			IDataset out = result.getData();
+
+			out = out.squeeze();
+			SDAPlotter.clearPlot("Output");
+			if (out.getRank() == 2)  {
+
+				List<AxesMetadata> axList = result.getData().getMetadata(AxesMetadata.class);
+
+				if (axList == null || axList.isEmpty()) {
+					SDAPlotter.imagePlot("Output", out);
+				} else {
+					ILazyDataset[] axes = axList.get(0).getAxes();
+					ILazyDataset lz0 = axes[dataDims[0]];
+					ILazyDataset lz1 = axes[dataDims[1]];
+					IDataset ax0 = null;
+					IDataset ax1 = null;
+					if (lz0 != null) ax0 = lz0.getSlice().squeeze();
+					if (lz1 != null) ax1 = lz1.getSlice().squeeze();
+
+					SDAPlotter.imagePlot("Output", ax0,ax1,out);
+				}
+
+				List<MaskMetadata> mList = result.getData().getMetadata(MaskMetadata.class);
+
+				if (mList == null || mList.isEmpty()) return;
+
+				MaskMetadata m = mList.get(0);
+				ILazyDataset mask = m.getMask();
+
+				final IDataset md = mask.getSlice().squeeze();
+
+				if (!Arrays.equals(md.getShape(), out.getShape())) return;
+
+				Display.getDefault().syncExec(new Runnable() {
+
+					@Override
+					public void run() {
+						IPlottingSystem system = PlottingFactory.getPlottingSystem("Output");
+						if (system == null) return;
+						Collection<ITrace> traces = system.getTraces(IImageTrace.class);
+						if (traces == null || traces.isEmpty()) return;
+						IImageTrace t = (IImageTrace)traces.iterator().next();
+						t.setMask(md);
+						system.repaint();							
+					}
+				});
+
+			}
+
+			if (out.getRank() == 1) {
+				List<AxesMetadata> mList = result.getData().getMetadata(AxesMetadata.class);
+				if (mList == null || mList.isEmpty()) {
+					SDAPlotter.plot("Output", out);
+				}
+
+				ILazyDataset[] axes = mList.get(0).getAxes();
+				ILazyDataset lz = axes[dataDims[0]];
+				IDataset ax = null;
+				if (lz != null) ax = lz.getSlice().squeeze();
+
+				if (ax != null && Arrays.equals(ax.getShape(), out.getShape())) {
+					SDAPlotter.plot("Output", ax, out);
+				}
+			}
+		}
+
 	}
 	
 	private class BasicContentProvider implements IStructuredContentProvider {
