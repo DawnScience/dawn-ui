@@ -13,8 +13,6 @@ import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -36,7 +34,6 @@ import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
-import org.eclipse.dawnsci.analysis.api.metadata.MaskMetadata;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.api.processing.IExecutionVisitor;
 import org.eclipse.dawnsci.analysis.api.processing.IExportOperation;
@@ -47,8 +44,6 @@ import org.eclipse.dawnsci.analysis.api.slice.SliceVisitor;
 import org.eclipse.dawnsci.analysis.api.slice.Slicer;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
-import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
-import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
@@ -76,6 +71,7 @@ import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -87,12 +83,8 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.IO;
-
 import uk.ac.diamond.scisoft.analysis.SDAPlotter;
-import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-import uk.ac.diamond.scisoft.analysis.metadata.AxesMetadataImpl;
 import uk.ac.diamond.scisoft.analysis.metadata.OriginMetadataImpl;
 import uk.ac.diamond.scisoft.analysis.processing.visitors.HierarchicalFileExecutionVisitor;
 
@@ -169,15 +161,6 @@ public class DataFileSliceView extends ViewPart {
 				LocalSelectionTransfer.getTransfer() });
 		dt.addDropListener(dropListener);
 		
-//		SelectorWidget sw = new SelectorWidget(parent,true,true) {
-//			
-//			@Override
-//			public void pathChanged(String path, TypedEvent event) {
-//				
-//			}
-//		};
-//		sw.setLabel("Output:");
-		
 		csw = new ChangeSliceWidget(parent);
 		csw.addSliceChangeListener(new ISliceChangeListener() {
 			
@@ -191,123 +174,9 @@ public class DataFileSliceView extends ViewPart {
 			}
 		});
 		
-//		Button edit = new Button(parent, SWT.NONE);
-//		edit.setText("Edit");
-//		edit.addSelectionListener(new SelectionListener() {
-//			
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				Wizard wiz = new Wizard() {
-//					//set 
-//					@Override
-//					public boolean performFinish() {
-//						return true;
-//					}
-//				};
-//				
-//				wiz.setNeedsProgressMonitor(true);
-//				convertPage = null;
-//				convertPage = new ImageProcessConvertPage();
-//				wiz.addPage(convertPage);
-//				final WizardDialog wd = new WizardDialog(getSite().getShell(),wiz);
-//				wd.create();
-//				convertPage.setContext(context);
-//				
-//				
-//
-//				if (wd.open() == WizardDialog.OK) {
-//					context = convertPage.getContext();
-//					context.setConversionScheme(ConversionScheme.PROCESS);
-//					
-//					try {
-//						
-//						update(null);
-//						
-//					} catch (Exception e1) {
-//						// TODO Auto-generated catch block
-//						e1.printStackTrace();
-//					}
-//					
-//				}
-//			}
-//			
-//			@Override
-//			public void widgetDefaultSelected(SelectionEvent e) {
-//				// TODO Auto-generated method stub
-//				
-//			}
-//		});
-		
-		
-		
 		final MenuManager rightClick = new MenuManager();
 		createActions(rightClick);
 		viewer.getControl().setMenu(rightClick.createContextMenu(viewer.getControl()));
-		
-//		Button run = new Button(parent, SWT.NONE);
-//		run.setText("Run");
-//		run.addSelectionListener(new SelectionListener() {
-//			
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				
-//				IOperation[] ops = getOperations();
-//				
-//				if (ops != null) {
-//					
-//					final IOperation[] fop = ops;
-//					
-//					context.setUserObject(new IProcessingConversionInfo() {
-//
-//						@Override
-//						public IOperation[] getOperationSeries() {
-//							return fop;
-//						}
-//
-//						@Override
-//						public IExecutionVisitor getExecutionVisitor(String fileName) {
-//							return new HierarchicalFileExecutionVisitor(fileName);
-//						}
-//
-//					});
-//				}
-//					
-//				ProgressMonitorDialog dia = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
-//				
-//				try {
-//					dia.run(true, true, new IRunnableWithProgress() {
-//
-//						@Override
-//						public void run(IProgressMonitor monitor) throws InvocationTargetException,
-//						InterruptedException {
-//							//TODO properly populate the number steps
-//							monitor.beginTask("Processing", 100);
-//							context.setMonitor(new ProgressMonitorWrapper(monitor));
-//							try {
-//								service.process(context);
-//							} catch (Exception e) {
-//								// TODO Auto-generated catch block
-//								e.printStackTrace();
-//							}
-//
-//						}
-//					});
-//				} catch (InvocationTargetException e1) {
-//					// TODO Auto-generated catch block
-//					e1.printStackTrace();
-//				} catch (InterruptedException e1) {
-//					// TODO Auto-generated catch block
-//					e1.printStackTrace();
-//				}
-//				
-//			}
-//			
-//			@Override
-//			public void widgetDefaultSelected(SelectionEvent e) {
-//				// TODO Auto-generated method stub
-//				
-//			}
-//		});
 		
 		getSite().getPage().addSelectionListener("org.dawnsci.processing.ui.processingView",new ISelectionListener() {
 			
@@ -474,6 +343,7 @@ public class DataFileSliceView extends ViewPart {
 			convertPage = new ImageProcessConvertPage();
 			wiz.addPage(convertPage);
 			final WizardDialog wd = new WizardDialog(getSite().getShell(),wiz);
+			wd.setPageSize(new Point(800, 800));
 			wd.create();
 			convertPage.setContext(context);
 
@@ -639,39 +509,17 @@ public class DataFileSliceView extends ViewPart {
 				Map<Integer, String> axesNames = context.getAxesNames();
 				
 				if (axesNames != null) {
-					
-					AxesMetadataImpl axMeta = null;
-					
-					try {
-						axMeta = new AxesMetadataImpl(lazyDataset.getRank());
-						for (Integer key : axesNames.keySet()) {
-							String axesName = axesNames.get(key);
-							IDataHolder dataHolder = LoaderFactory.getData(path);
-							ILazyDataset lazyAx = dataHolder.getLazyDataset(axesName);
-							if (lazyAx != null && lazyAx.getRank() != lazyDataset.getRank()) {
-								lazyAx = lazyAx.getSliceView();
-								int[] shape = new int[lazyDataset.getRank()];
-								Arrays.fill(shape, 1);
-								shape[key-1]= lazyAx.getShape()[0];
-								lazyAx.setShape(shape);
-							}
-							
-							axMeta.setAxis(key-1, new ILazyDataset[] {lazyAx});
-						}
-						
-						lazyDataset.setMetadata(axMeta);
-					} catch (Exception e) {
-						//no axes metadata
-						e.printStackTrace();
-					}
+
+					AxesMetadata axMeta = SlicedDataUtils.createAxisMetadata(path, lazyDataset.getRank(), axesNames);
+					lazyDataset.setMetadata(axMeta);
+
 				}
 				
 				final IDataset firstSlice = lazyDataset.getSlice(csw.getCurrentSlice()).squeeze();
-//				final IDataset firstSlice = Slicer.getFirstSlice(new RichDataset(lazyDataset, null), context.getSliceDimensions());
-				if (firstSlice.getRank() == 2) SDAPlotter.imagePlot("Input", firstSlice);
-				else {
-					SDAPlotter.plot("Input", firstSlice);
-				}
+				
+				IPlottingSystem system = PlottingFactory.getPlottingSystem("Input");
+				SlicedDataUtils.plotDataWithMetadata(firstSlice, system, Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions()));
+				
 				IOperation<? extends IOperationModel, ? extends OperationData>[] ops = getOperations();
 				if (ops == null) return Status.OK_STATUS;
 				EscapableSliceVisitor sliceVisitor = getSliceVisitor(ops, getOutputExecutionVisitor(), lazyDataset, Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions()));
@@ -792,67 +640,10 @@ public class DataFileSliceView extends ViewPart {
 			IDataset out = result.getData();
 
 			out = out.squeeze();
-			SDAPlotter.clearPlot("Output");
-			if (out.getRank() == 2)  {
+			
+			IPlottingSystem system = PlottingFactory.getPlottingSystem("Output");
+			SlicedDataUtils.plotDataWithMetadata(out, system, dataDims);
 
-				List<AxesMetadata> axList = result.getData().getMetadata(AxesMetadata.class);
-
-				if (axList == null || axList.isEmpty()) {
-					SDAPlotter.imagePlot("Output", out);
-				} else {
-					ILazyDataset[] axes = axList.get(0).getAxes();
-					ILazyDataset lz0 = axes[dataDims[0]];
-					ILazyDataset lz1 = axes[dataDims[1]];
-					IDataset ax0 = null;
-					IDataset ax1 = null;
-					if (lz0 != null) ax0 = lz0.getSlice().squeeze();
-					if (lz1 != null) ax1 = lz1.getSlice().squeeze();
-
-					SDAPlotter.imagePlot("Output", ax0,ax1,out);
-				}
-
-				List<MaskMetadata> mList = result.getData().getMetadata(MaskMetadata.class);
-
-				if (mList == null || mList.isEmpty()) return;
-
-				MaskMetadata m = mList.get(0);
-				ILazyDataset mask = m.getMask();
-
-				final IDataset md = mask.getSlice().squeeze();
-
-				if (!Arrays.equals(md.getShape(), out.getShape())) return;
-
-				Display.getDefault().syncExec(new Runnable() {
-
-					@Override
-					public void run() {
-						IPlottingSystem system = PlottingFactory.getPlottingSystem("Output");
-						if (system == null) return;
-						Collection<ITrace> traces = system.getTraces(IImageTrace.class);
-						if (traces == null || traces.isEmpty()) return;
-						IImageTrace t = (IImageTrace)traces.iterator().next();
-						t.setMask(md);
-						system.repaint();							
-					}
-				});
-
-			}
-
-			if (out.getRank() == 1) {
-				List<AxesMetadata> mList = result.getData().getMetadata(AxesMetadata.class);
-				if (mList == null || mList.isEmpty()) {
-					SDAPlotter.plot("Output", out);
-				}
-
-				ILazyDataset[] axes = mList.get(0).getAxes();
-				ILazyDataset lz = axes[dataDims[0]];
-				IDataset ax = null;
-				if (lz != null) ax = lz.getSlice().squeeze();
-
-				if (ax != null && Arrays.equals(ax.getShape(), out.getShape())) {
-					SDAPlotter.plot("Output", ax, out);
-				}
-			}
 		}
 
 	}
