@@ -40,6 +40,8 @@ import org.dawnsci.io.h5.H5Loader;
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.dawnsci.plotting.services.util.DatasetTitleUtils;
 import org.dawnsci.plotting.tools.reduction.DataReductionWizard;
+import org.dawnsci.python.rpc.action.InjectPyDevConsole;
+import org.dawnsci.python.rpc.action.InjectPyDevConsoleAction;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -722,6 +724,10 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			}
 		});
 		
+		final InjectPyDevConsoleAction inject = new InjectPyDevConsoleAction("Open Scripting", Activator.getImageDescriptor("icons/application_osx_terminal.png"));
+		inject.setParameter(InjectPyDevConsole.CREATE_NEW_CONSOLE_PARAM, Boolean.TRUE.toString());
+		inject.setParameter(InjectPyDevConsole.SETUP_SCISOFTPY_PARAM, InjectPyDevConsole.SetupScisoftpy.ALWAYS.toString());
+		
 		menuManager.addMenuListener(new IMenuListener() {
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
@@ -823,7 +829,15 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 						});
 					}
 				}
+				
+				// TODO Send the dataset via the flattening service.
+				if (currentSelectedData!=null && currentSelectedData instanceof IDataset) {
+					
+					inject.setData(ob.getVariable(), (IDataset)currentSelectedData);
+					inject.setText("Open '"+currentSelectedData.getName()+"' in scripting console");
 
+                    menuManager.add(inject);
+				}
 				
 				menuManager.add(new Separator(getClass().getName()+"sep3"));
 				menuManager.add(new Action("Preferences...") {
