@@ -65,11 +65,12 @@ class SliceJob extends Job {
 				}
 
 				IDataset slicedData = plotSlice(data,
-									slice, 
-									(PlotType)sliceType, 
-									system.getPlottingSystem(), 
-									monitor);
+												slice, 
+												(PlotType)sliceType, 
+												system.getPlottingSystem(), 
+												monitor);
 
+				system.setSlice(slicedData);
 				system.setSliceMetadata(slicedData!=null ? slicedData.getMetadata() : null);
 			}
 
