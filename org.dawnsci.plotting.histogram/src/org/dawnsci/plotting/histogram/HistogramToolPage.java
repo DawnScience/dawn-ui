@@ -992,6 +992,9 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			// update all based on slider positions
 			updateHistogramToolElements(image, null, repaintImage, true);
+			
+			// update colour scheme
+			setColourScheme(image.getPaletteName());
 
 			// finally tie in the listener to the palette data changes
 			image.addPaletteListener(paletteListener);
