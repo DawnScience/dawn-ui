@@ -1302,13 +1302,14 @@ public class HistogramToolPage extends AbstractToolPage {
 		if (btnBlueInverse.getSelection()) {
 			blue = invert(blue);
 		}
-
-		paletteData.colors = new RGB[256];
-
+		
+		PaletteData data = getPaletteTrace().getPaletteData();
+		data.colors = new RGB[256];
 
 		for (int i = 0; i < 256; i++) {
-			paletteData.colors[i] = new RGB(red[i], green[i], blue[i]);
+			data.colors[i] = new RGB(red[i], green[i], blue[i]);
 		}
+		getPaletteTrace().setPaletteData(data);
 	}
 
 	private int[] invert(int[] array) {
