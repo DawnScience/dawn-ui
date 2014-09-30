@@ -502,7 +502,7 @@ public class HistogramToolPage extends AbstractToolPage {
 					RectangularROI roi = (RectangularROI) region.getROI();
 					setHistoMin( roi.getPoint()[0]);
 					setHistoMax( roi.getEndPoint()[0]);
-					updateHistogramToolElements(null, true, false);
+					updateHistogramToolElements(evt, true, false);
 				}
 			}
 		};
@@ -1028,7 +1028,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	}
 	
 	/**
-	 * Update everything based on the new slider positions  
+	 * Update histogram plot, histogram range, histogram range % and brightness & contrast
 	 * @param event  MAY BE NULL
 	 */
 	private void updateHistogramToolElements(IPaletteTrace trace, EventObject event, boolean repaintImage, boolean updateAxis) {
@@ -1097,11 +1097,13 @@ public class HistogramToolPage extends AbstractToolPage {
 		// set the minmax values
 		minMaxValue.setMin(MIN_LABEL, scaleMin);
 		minMaxValue.setMax(MIN_LABEL, scaleMax);
-		if (event != null && !minMaxValue.isSpinner(MIN_LABEL, event)) minMaxValue.setValue(MIN_LABEL, histoMin);
+		if (event != null && !minMaxValue.isSpinner(MIN_LABEL, event))
+			minMaxValue.setValue(MIN_LABEL, histoMin);
 
 		minMaxValue.setMin(MAX_LABEL, scaleMin);
 		minMaxValue.setMax(MAX_LABEL, scaleMax);
-		if( event != null && !minMaxValue.isSpinner(MAX_LABEL, event)) minMaxValue.setValue(MAX_LABEL, histoMax);
+		if (event != null && !minMaxValue.isSpinner(MAX_LABEL, event))
+			minMaxValue.setValue(MAX_LABEL, histoMax);
 
 		// Set the brightness
 		brightnessContrastValue.setMin(BRIGHTNESS_LABEL, scaleMin);
