@@ -1225,8 +1225,11 @@ public class HistogramToolPage extends AbstractToolPage {
 	 * Add the trace listener and plot initial data
 	 */
 	public void activate() {
+		deactivate();
+		
 		logger.debug("HistogramToolPage: activate ", this.hashCode() );
 		super.activate();
+		
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().addTraceListener(traceListener);
 			
@@ -1244,6 +1247,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		if (getPlottingSystem()!=null) {
 			removeImagePaletteListener();
 			getPlottingSystem().removeTraceListener(traceListener);
+			paletteData = null;
 		}
 	}
 
