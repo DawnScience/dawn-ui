@@ -439,7 +439,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				logger.trace("colourSchemeListener");
 				maxLast = minLast = 0;
 				palLast = null;
-				updateColourScheme();
+				updateColourSchemeRGB();
 				setPaletteName();
 				buildPaletteData();
 				updateHistogramToolElements(event, true, false);
@@ -878,7 +878,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	/**
 	 * Use the controls from the GUI to set the individual colour elements from the selected colour scheme
 	 */
-	protected void updateColourScheme() {
+	protected void updateColourSchemeRGB() {
 		ColourSchemeContribution colourScheme = extensionPointManager.getColourSchemeContribution(cmbColourMap.getText());
 		String red = extensionPointManager.getTransferFunctionFromID(colourScheme.getRedID()).getName();
 		String green = extensionPointManager.getTransferFunctionFromID(colourScheme.getGreenID()).getName();
