@@ -196,6 +196,10 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 	        final IOperation<? extends IOperationModel, ? extends OperationData> op = ((OperationDescriptor)previous).getSeriesObject();
 	        final IOperation<? extends IOperationModel, ? extends OperationData> ot = this.getSeriesObject();
 	        
+	        if (op.isPassUnmodifiedData()) {
+	        	return op.getInputRank().isCompatibleWith(ot.getInputRank());
+	        }
+	        
 			return op.getOutputRank().isCompatibleWith(ot.getInputRank());
 			
 		} catch (Exception ne) {

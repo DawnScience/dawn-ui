@@ -107,6 +107,7 @@ public class DataFileSliceView extends ViewPart {
 	Label currentSliceLabel;
 	ChangeSliceWidget csw;
 	String selectedFile = null;
+	IOperation<? extends IOperationModel, ? extends OperationData> currentOperation = null;
 	
 	@Override
 	public void createPartControl(Composite parent) {
@@ -131,7 +132,7 @@ public class DataFileSliceView extends ViewPart {
 			public void selectionChanged(SelectionChangedEvent event) {
 				if (event.getSelection() instanceof StructuredSelection) {
 					selectedFile = (String)((StructuredSelection)event.getSelection()).getFirstElement();
-					update(null);
+					update(currentOperation);
 				}
 				
 				
@@ -185,7 +186,8 @@ public class DataFileSliceView extends ViewPart {
 				String ss = Slice.createString(csw.getCurrentSlice());
 				currentSliceLabel.setText("Current slice of data: [" +ss + "]");
 				currentSliceLabel.getParent().layout(true);
-				update(null);
+				
+				update(currentOperation);
 			}
 		});
 		
@@ -316,7 +318,8 @@ public class DataFileSliceView extends ViewPart {
 				if (selection instanceof StructuredSelection && ((StructuredSelection)selection).getFirstElement() instanceof OperationDescriptor) {
 					OperationDescriptor des = (OperationDescriptor)((StructuredSelection)selection).getFirstElement();
 					try {
-						update(des.getSeriesObject());
+						currentOperation = des.getSeriesObject();
+						update(currentOperation);
 					} catch (InstantiationException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -776,7 +779,7 @@ public class DataFileSliceView extends ViewPart {
 		public void executed(OperationData result, IMonitor monitor,
 				Slice[] slices, int[] shape, int[] dataDims) throws Exception {
 			
-			
+			if (endOp == null) displayData(result,dataDims);
 		}
 		
 		@Override

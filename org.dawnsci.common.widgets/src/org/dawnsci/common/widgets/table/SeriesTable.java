@@ -243,7 +243,7 @@ public class SeriesTable {
 	}
 
 
-	private ISeriesItemDescriptor getSelected() {
+	public ISeriesItemDescriptor getSelected() {
 		final IStructuredSelection  sel      = (IStructuredSelection)tableViewer.getSelection();
 		final ISeriesItemDescriptor selected = (ISeriesItemDescriptor)sel.getFirstElement();
 		return selected;
@@ -277,5 +277,10 @@ public class SeriesTable {
 	
 	public DropTarget getDropTarget() {
 		return new DropTarget(tableViewer.getControl(), DND.DROP_MOVE | DND.DROP_DEFAULT | DND.DROP_COPY);
+	}
+	
+	public void refreshTable() {
+		tableViewer.refresh();
+		checkValid(getSeriesItems());
 	}
 }

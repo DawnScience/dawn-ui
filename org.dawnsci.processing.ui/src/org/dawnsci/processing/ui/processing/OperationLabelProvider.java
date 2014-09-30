@@ -34,7 +34,26 @@ final class OperationLabelProvider extends SeriesItemLabelProvider  {
 				return ne.getMessage();
 			}
 		}
-		return "  "+des.getName();
+		
+		String decorator = "";
+
+		try {
+			if (des.getSeriesObject().isStoreOutput() && des.getSeriesObject().isPassUnmodifiedData()) {
+				decorator = " [Save/Pass]";
+			} else if (des.getSeriesObject().isStoreOutput()) {
+				decorator = " [Save]";
+			} else if (des.getSeriesObject().isPassUnmodifiedData()) {
+				decorator = " [Pass]";
+			}
+
+
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return "  "+des.getName() + decorator;
+		
 	}
 	
 	public Image getImage(Object element) {

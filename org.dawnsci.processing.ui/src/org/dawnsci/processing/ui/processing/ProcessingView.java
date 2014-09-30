@@ -31,6 +31,8 @@ import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -101,8 +103,17 @@ public class ProcessingView extends ViewPart {
 		seriesTable.createControl(content, prov);
 		seriesTable.registerSelectionProvider(getViewSite());		
 		
-		final MenuManager rightClick = new MenuManager();
+		final MenuManager rightClick = new MenuManager("#PopupMenu");
+		rightClick.setRemoveAllWhenShown(true);
 		createActions(rightClick);
+		rightClick.addMenuListener(new IMenuListener() {
+			
+			@Override
+			public void menuAboutToShow(IMenuManager manager) {
+				createActions(rightClick);
+				setDynamicMenuOptions(manager);
+			}
+		});
 		createColumns(prov);
 		
 		// Here's the data, lets show it!
@@ -259,7 +270,53 @@ public class ProcessingView extends ViewPart {
 		getViewSite().getActionBars().getToolBarManager().add(showRanks);
 		getViewSite().getActionBars().getMenuManager().add(showRanks);
 		rightClick.add(showRanks);
-
+	}
+	
+	private void setDynamicMenuOptions(IMenuManager mm) {
+		
+		IOperation<? extends IOperationModel, ? extends OperationData> op = null;
+		
+		try {
+			op = ((OperationDescriptor)seriesTable.getSelected()).getSeriesObject();
+		} catch (InstantiationException e1) {
+		}
+		
+		final IAction saveInter = new Action("Save output", IAction.AS_CHECK_BOX) {
+			public void run() {
+				ISeriesItemDescriptor current = seriesTable.getSelected();
+				if (current instanceof OperationDescriptor) {
+					try {
+						((OperationDescriptor)current).getSeriesObject().setStoreOutput(isChecked());
+						seriesTable.refreshTable();
+					} catch (InstantiationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		};
+		
+		if (op != null && op.isStoreOutput()) saveInter.setChecked(true);
+		
+		mm.add(saveInter);
+		
+		final IAction passUnMod = new Action("Pass through", IAction.AS_CHECK_BOX) {
+			public void run() {
+				ISeriesItemDescriptor current = seriesTable.getSelected();
+				if (current instanceof OperationDescriptor) {
+					try {
+						((OperationDescriptor)current).getSeriesObject().setPassUnmodifiedData(isChecked());
+						seriesTable.refreshTable();
+					} catch (InstantiationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		};
+		
+		if (op != null && op.isPassUnmodifiedData()) passUnMod.setChecked(true);
+		mm.add(passUnMod);
 	}
 
 	@Override
