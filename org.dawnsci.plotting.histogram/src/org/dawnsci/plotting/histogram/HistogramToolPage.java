@@ -258,7 +258,8 @@ public class HistogramToolPage extends AbstractToolPage {
 				updateHistogramToolElements(event.getTrace(), null, false, false);
 				
 				if (event.getTrace() != null)
-					setColourScheme(event.getTrace().getPaletteName());
+					updateColourScheme(event.getTrace().getPaletteName());
+					updateColourSchemeRGB(event.getTrace().getPaletteName());
 				
 			}
 
@@ -439,7 +440,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				logger.trace("colourSchemeListener");
 				maxLast = minLast = 0;
 				palLast = null;
-				updateColourSchemeRGB();
+				updateColourSchemeRGB(cmbColourMap.getText());
 				setPaletteName();
 				buildPaletteData();
 				updateHistogramToolElements(event, true, false);
@@ -874,8 +875,8 @@ public class HistogramToolPage extends AbstractToolPage {
 	/**
 	 * Use the controls from the GUI to set the individual colour elements from the selected colour scheme
 	 */
-	protected void updateColourSchemeRGB() {
-		ColourSchemeContribution colourScheme = extensionPointManager.getColourSchemeContribution(cmbColourMap.getText());
+	protected void updateColourSchemeRGB(String colourMap) {
+		ColourSchemeContribution colourScheme = extensionPointManager.getColourSchemeContribution(colourMap);
 		String red = extensionPointManager.getTransferFunctionFromID(colourScheme.getRedID()).getName();
 		String green = extensionPointManager.getTransferFunctionFromID(colourScheme.getGreenID()).getName();
 		String blue = extensionPointManager.getTransferFunctionFromID(colourScheme.getBlueID()).getName();
@@ -985,7 +986,8 @@ public class HistogramToolPage extends AbstractToolPage {
 			updateHistogramToolElements(image, null, repaintImage, true);
 			
 			// update colour scheme
-			setColourScheme(image.getPaletteName());
+			updateColourScheme(image.getPaletteName());
+			updateColourSchemeRGB(image.getPaletteName());
 
 			// finally tie in the listener to the palette data changes
 			image.addPaletteListener(paletteListener);
@@ -1380,7 +1382,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		this.histoMin = histoMin;
 	}
 
-	private void setColourScheme(String schemeName) {
+	private void updateColourScheme(String schemeName) {
 		if (updatingColorSchemeInternally)
 			return;
 		if (cmbColourMap == null || cmbColourMap.isDisposed())
