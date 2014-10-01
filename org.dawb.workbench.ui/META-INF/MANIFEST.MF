@@ -9,7 +9,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.editors,
  org.eclipse.core.resources,
  uk.ac.diamond.scisoft.analysis,
- org.eclipse.dawnsci.analysis.api;bundle-version="1.0.0",
  org.eclipse.dawnsci.hdf5.editor,
  org.dawb.common.ui,
  org.dawb.common.util,
@@ -28,20 +27,14 @@ Require-Bundle: org.eclipse.ui,
  org.dawnsci.plotting.services;bundle-version="1.0.0",
  org.dawnsci.conversion.ui;bundle-version="1.2.0",
  org.eclipse.dawnsci.hdf5;bundle-version="1.2.0",
- org.dawb.common.python;bundle-version="1.2.0"
+ org.python.pydev.core;bundle-version="3.6.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: javax.measure.quantity;version="4.3.1",
- javax.measure.unit;version="4.3.1",
- org.dawb.common.services,
- org.dawnsci.common.widgets.tree,
- org.dawnsci.common.widgets.utils,
+Import-Package: org.dawb.common.services,
  org.dawnsci.plotting.tools.reduction,
  org.eclipse.core.filesystem,
  org.eclipse.draw2d,
- org.eclipse.nebula.widgets.formattedtext,
  org.eclipse.ui.ide,
- org.python.pydev.core;bundle-version="[3.6.0,3.6.1)",
  org.slf4j;version="[1.7.6,1.7.7)",
  uk.ac.diamond.scisoft.analysis.rcp.editors
 Bundle-ClassPath: .
