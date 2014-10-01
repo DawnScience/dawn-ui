@@ -727,6 +727,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		final InjectPyDevConsoleAction inject = new InjectPyDevConsoleAction("Open Scripting");
 		inject.setParameter(InjectPyDevConsole.CREATE_NEW_CONSOLE_PARAM, Boolean.TRUE.toString());
 		inject.setParameter(InjectPyDevConsole.SETUP_SCISOFTPY_PARAM, InjectPyDevConsole.SetupScisoftpy.ALWAYS.toString());
+		inject.setParameter(InjectPyDevConsole.VIEW_NAME_PARAM, editor.getTitle());
 		
 		menuManager.addMenuListener(new IMenuListener() {
 			@Override

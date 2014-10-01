@@ -373,6 +373,9 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		this.inject = new InjectPyDevConsoleAction("Open Scripting");
 		inject.setParameter(InjectPyDevConsole.CREATE_NEW_CONSOLE_PARAM, Boolean.TRUE.toString());
 		inject.setParameter(InjectPyDevConsole.SETUP_SCISOFTPY_PARAM, InjectPyDevConsole.SetupScisoftpy.ALWAYS.toString());
+		if (getPlottingSystem()!=null && getPlottingSystem().getPart()!=null) {
+			inject.setParameter(InjectPyDevConsole.VIEW_NAME_PARAM, getPlottingSystem().getPart().getTitle());
+		}
 		man.add(inject);
 
 		man.add(new Separator("group3"));
