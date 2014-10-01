@@ -269,8 +269,10 @@ public class DataFileSliceView extends ViewPart {
 				filePaths.clear();
 				context = null;
 				try {
-					SDAPlotter.clearPlot("Output");
-					SDAPlotter.clearPlot("Input");
+					IPlottingSystem system = PlottingFactory.getPlottingSystem("Input");
+					system.clear();
+					system = PlottingFactory.getPlottingSystem("Output");
+					system.clear();
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -354,7 +356,7 @@ public class DataFileSliceView extends ViewPart {
 				
 				try {
 					
-					update(null);
+					update(currentOperation);
 					
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
@@ -638,8 +640,6 @@ public class DataFileSliceView extends ViewPart {
 		
 		private void displayData(OperationData result, int[] dataDims) throws Exception {
 			IDataset out = result.getData();
-
-			out = out.squeeze();
 			
 			IPlottingSystem system = PlottingFactory.getPlottingSystem("Output");
 			SlicedDataUtils.plotDataWithMetadata(out, system, dataDims);
