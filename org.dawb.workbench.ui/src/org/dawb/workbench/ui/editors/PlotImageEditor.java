@@ -345,7 +345,6 @@ public class PlotImageEditor extends EditorPart implements IEditorExtension, IRe
 		return super.getAdapter(clazz);
 	}
 
-    @Override
     public IPlottingSystem getPlottingSystem() {
     	return plottingSystem;
     }
