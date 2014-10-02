@@ -65,21 +65,20 @@ public class SlicedDataUtils {
 		
 		if (data.getRank() == 2) {
 			if (!system.is2D()) system.clear();
+			
 			final ITrace t = system.updatePlot2D(data, Arrays.asList(new IDataset[]{x,y}), null);
-			if (mask != null)  {
 				
-				final IDataset m = mask;
+			final IDataset m = mask;
+
+			Display.getDefault().syncExec(new Runnable() {
+
+				@Override
+				public void run() {
+					((IImageTrace)t).setMask(m);
+					system.repaint();
+				}
+			});
 				
-				Display.getDefault().syncExec(new Runnable() {
-					
-					@Override
-					public void run() {
-						((IImageTrace)t).setMask(m);
-						system.repaint();
-					}
-				});
-				
-			}
 			
 		} else if (data.getRank() == 1) {
 			system.clear();
