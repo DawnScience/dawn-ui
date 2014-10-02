@@ -65,7 +65,6 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IReusableEditor;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.IPage;
@@ -74,8 +73,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-import uk.ac.diamond.scisoft.analysis.plotclient.IPlotWindow;
-import uk.ac.diamond.scisoft.analysis.plotclient.PlotWindowManager;
 import uk.ac.diamond.scisoft.analysis.plotclient.ScriptingConnection;
 
 
@@ -84,7 +81,7 @@ import uk.ac.diamond.scisoft.analysis.plotclient.ScriptingConnection;
  * 
  * 
  */
-public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlicablePlottingPart, ITitledEditor, ISelectedPlotting, IPlotWindow {
+public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlicablePlottingPart, ITitledEditor, ISelectedPlotting {
 	
 	private static Logger logger = LoggerFactory.getLogger(PlotDataEditor.class);
 	
@@ -97,6 +94,8 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 	private ActionBarWrapper            wrapper;
 	private ReentrantLock               lock;
 	private ITitledEditor               parent;
+
+	private ScriptingConnection connection;
 
 	public PlotDataEditor(final PlotType defaultPlotType) {
 		this(defaultPlotType, null);
@@ -212,10 +211,8 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 		plottingSystem.setRescale(Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.RESCALE_SETTING));
 		
 		// Test script connection
-		ScriptingConnection connection = new ScriptingConnection(getPartName());
+		this.connection = new ScriptingConnection(getPartName());
 		connection.setPlottingSystem(plottingSystem);
-		
-		PlotWindowManager.getPrivateManager().registerPlotWindow(this);
 
  	}
 
@@ -618,8 +615,9 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
     @Override
     public void dispose() {
 
+    	connection.dispose();
+    	
      	if (plottingSystem!=null) plottingSystem.dispose();
-		PlotWindowManager.getPrivateManager().unregisterPlotWindow(this);
 
      	super.dispose();
     }
@@ -688,16 +686,5 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 	public void setPartTitle(String name) {
 		super.setPartName(name);
 		if (parent!=null) parent.setPartTitle(name);
-	}
-
-	@Override
-	public IWorkbenchPart getPart() {
-		return this;
-	}
-
-	@Override
-	public String getName() {
-		return getPartName();
-	}
-	
+	}	
 }
