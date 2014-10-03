@@ -210,7 +210,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 
 		plottingSystem.setRescale(Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.RESCALE_SETTING));
 		
-		// Test script connection
+		// Script connection
 		this.connection = new ScriptingConnection(getPartName());
 		connection.setPlottingSystem(plottingSystem);
 
