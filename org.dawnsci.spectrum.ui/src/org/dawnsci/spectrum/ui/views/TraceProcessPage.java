@@ -577,6 +577,10 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 				super.run();
 			}
 		};
+		console.setParameter(InjectPyDevConsole.CREATE_NEW_CONSOLE_PARAM, Boolean.TRUE.toString());
+		console.setParameter(InjectPyDevConsole.SETUP_SCISOFTPY_PARAM, InjectPyDevConsole.SetupScisoftpy.ALWAYS.toString());
+		console.setParameter(InjectPyDevConsole.VIEW_NAME_PARAM, system.getPlotName());
+		
         manager.add(console);
 		
 		createXYFiltersActions(manager);
