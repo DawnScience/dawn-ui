@@ -11,6 +11,7 @@ package org.dawnsci.slicing;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -59,6 +60,19 @@ public class Activator extends AbstractUIPlugin {
 
 	public static ImageDescriptor getImageDescriptor(String imageFilePath) {
 		return imageDescriptorFromPlugin(PLUGIN_ID, imageFilePath);
+	}
+
+	/**
+	 * Looks for OSGI service, used by ServiceManager
+	 * 
+	 * @param clazz
+	 * @return
+	 */
+	public static Object getService(Class<?> clazz) {
+		if (plugin.getBundle().getBundleContext()==null) return null;
+		ServiceReference<?> ref = plugin.getBundle().getBundleContext().getServiceReference(clazz);
+		if (ref==null) return null;
+		return plugin.getBundle().getBundleContext().getService(ref);
 	}
 
 }

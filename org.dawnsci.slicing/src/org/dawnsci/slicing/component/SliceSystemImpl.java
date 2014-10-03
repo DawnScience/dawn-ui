@@ -37,8 +37,10 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.io.SliceObject;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
+import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.dataset.impl.LazyDataset;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
@@ -88,8 +90,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
-
-import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 
 /**
@@ -1008,9 +1008,10 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 	 * @param args
 	 * @throws Exception
 	 */
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws Throwable {
 		
-		final IDataHolder holder = LoaderFactory.getData("C:/Users/fcp94556/Desktop/test.nxs");
+		final ILoaderService service = (ILoaderService)Activator.getService(ILoaderService.class);
+		final IDataHolder holder = service.getData("C:/Users/fcp94556/Desktop/test.nxs", new IMonitor.Stub());
 		final IDataset    set    = holder.getLazyDataset("/entry1/data/data").getSlice();
 		final double[][][] da    = new double[set.getShape()[0]][set.getShape()[1]][set.getShape()[2]];
 		for (int i = 0; i < set.getShape()[0]; i++) {

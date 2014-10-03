@@ -9,7 +9,8 @@
 package org.dawnsci.slicing.component;
 
 import org.dawnsci.common.widgets.celleditor.SpinnerCellEditor;
-import org.eclipse.dawnsci.analysis.dataset.impl.LazyDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
 import org.eclipse.dawnsci.slicing.api.system.DimsData;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
@@ -39,7 +40,7 @@ public class SpanEditingSupport extends EditingSupport {
 			final DimsData data = (DimsData)element;
 			int dimension = data.getDimension();
 			ret.setMinimum(1);
-			final int max = (int)Math.round(LazyDataset.getMaxSliceLength(system.getData().getLazySet(), dimension));
+			final int max = (int)Math.round(getMaxSliceLength(system.getData().getLazySet(), dimension));
 			ret.setMaximum(max);
 			ret.getSpinner().setToolTipText("The maximum value of a slice of dimension '"+(dimension+1)+"' is '"+max+"',\nbased on available memory.");
 			
@@ -58,6 +59,53 @@ public class SpanEditingSupport extends EditingSupport {
 			logger.error("Cannot set bounds of spinner, invalid data!", ne);
 			return null;
 		}
+	}
+	
+	/**
+	 * Gets the maximum size of a slice of a dataset in a given dimension
+	 * which should normally fit in memory. Note that it might be possible
+	 * to get more in memory, this is a conservative estimate and seems to
+	 * almost always work at the size returned; providing Xmx is less than
+	 * the physical memory.
+	 * 
+	 * To get more in memory increase -Xmx setting or use an expression
+	 * which calls a rolling function (like rmean) instead of slicing directly
+	 * to memory.
+	 * 
+	 * @param lazySet
+	 * @param dimension
+	 * @return maximum size of dimension that can be sliced.
+	 */
+	public static int getMaxSliceLength(ILazyDataset lazySet, int dimension) {
+		// size in bytes of each item
+		final double size = AbstractDataset.getItemsize(AbstractDataset.getDTypeFromClass(lazySet.elementClass()), lazySet.getElementsPerItem());
+		
+		// Max in bytes takes into account our minimum requirement
+		final double max  = Math.max(Runtime.getRuntime().totalMemory(), Runtime.getRuntime().maxMemory());
+		
+        // Firstly if the whole dataset it likely to fit in memory, then we allow it.
+		// Space specified in bytes per item available
+		final double space = max/lazySet.getSize();
+
+		// If we have room for this whole dataset, then fine
+		int[] shape = lazySet.getShape();
+		if (space >= size)
+			return shape[dimension];
+		
+		// Otherwise estimate what we can fit in, conservatively.
+		// First get size of one slice, see it that fits, if not, still return 1
+		double sizeOneSlice = size; // in bytes
+		for (int dim = 0; dim < shape.length; dim++) {
+			if (dim == dimension)
+				continue;
+			sizeOneSlice *= shape[dim];
+		}
+		double avail = max / sizeOneSlice;
+		if (avail < 1)
+			return 1;
+
+		// We fudge this to leave some room
+		return (int) Math.floor(avail/4d);
 	}
 
 	@Override
