@@ -26,7 +26,6 @@ import org.eclipse.dawnsci.slicing.api.system.AxisChoiceListener;
 import org.eclipse.dawnsci.slicing.api.system.AxisType;
 import org.eclipse.dawnsci.slicing.api.system.DimensionalEvent;
 import org.eclipse.dawnsci.slicing.api.system.DimensionalListener;
-import org.eclipse.dawnsci.slicing.api.system.DimsData;
 import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.dawnsci.slicing.api.system.SliceSource;
 import org.eclipse.dawnsci.slicing.api.tool.AbstractSlicingTool;

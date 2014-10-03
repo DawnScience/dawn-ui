@@ -18,6 +18,7 @@ import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
+import org.eclipse.dawnsci.analysis.dataset.roi.ROISliceUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.XAxisBoxROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -26,8 +27,6 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.swt.SWT;
-
-import uk.ac.diamond.scisoft.analysis.roi.ROISliceUtils;
 
 public class ImageTrapeziumBaselineReducer implements IDatasetROIReducer, IProvideReducerActions {
 

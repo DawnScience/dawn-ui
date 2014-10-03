@@ -16,8 +16,7 @@ import org.dawnsci.spectrum.ui.utils.Contain1DDataImpl;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
-
-import uk.ac.diamond.scisoft.analysis.roi.ROISliceUtils;
+import org.eclipse.dawnsci.analysis.dataset.roi.ROISliceUtils;
 
 public class CropProcess extends AbstractProcess {
 	

@@ -18,8 +18,7 @@ import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
-
-import uk.ac.diamond.scisoft.analysis.roi.ROISliceUtils;
+import org.eclipse.dawnsci.analysis.dataset.roi.ROISliceUtils;
 
 public class PolynomialInterpolator1D {
 
