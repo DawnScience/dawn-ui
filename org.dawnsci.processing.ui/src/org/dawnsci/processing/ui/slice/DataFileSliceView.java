@@ -43,7 +43,6 @@ import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.slice.SliceVisitor;
 import org.eclipse.dawnsci.analysis.api.slice.Slicer;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
@@ -79,6 +78,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
@@ -90,7 +90,8 @@ import uk.ac.diamond.scisoft.analysis.processing.visitors.HierarchicalFileExecut
 
 public class DataFileSliceView extends ViewPart {
 
-	List<String> filePaths = new ArrayList<String>();
+//	List<String> filePaths = new ArrayList<String>();
+	FileManager fileManager;
 	TableViewer viewer;
 	IConversionService service;
 	IConversionContext context;
@@ -100,6 +101,8 @@ public class DataFileSliceView extends ViewPart {
 	ChangeSliceWidget csw;
 	String selectedFile = null;
 	IOperation<? extends IOperationModel, ? extends OperationData> currentOperation = null;
+	IPlottingSystem input;
+	IPlottingSystem output;
 	
 	@Override
 	public void createPartControl(Composite parent) {
@@ -117,7 +120,8 @@ public class DataFileSliceView extends ViewPart {
 		viewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		viewer.setLabelProvider(new ViewLabelProvider());
 		viewer.setContentProvider(new BasicContentProvider());
-		viewer.setInput(filePaths.toArray(new String[filePaths.size()]));
+		viewer.setInput(fileManager);
+		//viewer.setInput(filePaths.toArray(new String[filePaths.size()]));
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
@@ -139,19 +143,25 @@ public class DataFileSliceView extends ViewPart {
 				if (dropData instanceof TreeSelection) {
 					TreeSelection selectedNode = (TreeSelection) dropData;
 					Object obj[] = selectedNode.toArray();
+					List<String> paths = new ArrayList<String>();
 					for (int i = 0; i < obj.length; i++) {
 						if (obj[i] instanceof IFile) {
 							IFile file = (IFile) obj[i];
-							addFile(file.getLocation().toOSString());
+							paths.add(file.getLocation().toOSString());
+							//addFiles(new String[]{file.getLocation().toOSString()});
 						}
 					}
+					
+					if (!paths.isEmpty()) addFiles(paths.toArray(new String[paths.size()]));
+					
 				} else if (dropData instanceof String[]) {
-					for (String path : (String[])dropData){
-						addFile(path);
-					}
+					addFiles((String[])dropData);
+//					for (String path : (String[])dropData){
+//						addFile(path);
+//					}
 				}
-				
-				viewer.setInput(filePaths.toArray(new String[filePaths.size()]));
+				viewer.setInput(fileManager);
+				//viewer.setInput(filePaths.toArray(new String[filePaths.size()]));
 			}
 		};
 		
@@ -202,6 +212,12 @@ public class DataFileSliceView extends ViewPart {
 		
 		currentSliceLabel = new Label(parent, SWT.WRAP);
 		currentSliceLabel.setText("Current slice of data: [ - - - - -]");
+		
+		IWorkbenchPage page = getSite().getPage();
+		IViewPart view = page.findView("org.dawnsci.processing.ui.output");
+		output = (IPlottingSystem)view.getAdapter(IPlottingSystem.class);
+		view = page.findView("org.dawnsci.processing.ui.input");
+		input = (IPlottingSystem)view.getAdapter(IPlottingSystem.class);
 		
 
 	}
@@ -266,19 +282,17 @@ public class DataFileSliceView extends ViewPart {
 		
 		final IAction clear = new Action("Clear all files", Activator.getImageDescriptor("icons/delete.gif")) {
 			public void run() {
-				filePaths.clear();
+				fileManager = null;
 				context = null;
 				try {
-					IPlottingSystem system = PlottingFactory.getPlottingSystem("Input");
-					system.clear();
-					system = PlottingFactory.getPlottingSystem("Output");
-					system.clear();
+					input.reset();
+					output.reset();
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				
-				viewer.setInput(filePaths.toArray(new String[filePaths.size()]));
+				viewer.setInput(fileManager);
 			}
 		};
 		
@@ -326,12 +340,12 @@ public class DataFileSliceView extends ViewPart {
 		rightClick.add(edit);
 	}
 	
-	private void addFile(String filePath) {
+	private void addFiles(String[] filePath) {
 		
 		if (context == null) {
 			context = service.open(filePath);
 			job = new UpdateJob(context);
-			
+
 			Wizard wiz = new Wizard() {
 				//set 
 				@Override
@@ -339,7 +353,7 @@ public class DataFileSliceView extends ViewPart {
 					return true;
 				}
 			};
-			
+
 			wiz.setNeedsProgressMonitor(true);
 			convertPage = null;
 			convertPage = new ImageProcessConvertPage();
@@ -353,69 +367,77 @@ public class DataFileSliceView extends ViewPart {
 				context = convertPage.getContext();
 				job = new UpdateJob(context);
 				context.setConversionScheme(ConversionScheme.PROCESS);
-				
+
 				try {
-					
+
 					update(currentOperation);
-					
+
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
-				filePaths.add(filePath);
-				
+
+				fileManager = new FileManager(context);
+				fileManager.addFileListener(new IFilesAddedListener() {
+
+					@Override
+					public void filesAdded(FileAddedEvent event) {
+						update(currentOperation);
+						Display.getDefault().syncExec(new Runnable() {
+
+							@Override
+							public void run() {
+								viewer.refresh();
+							}
+						});
+
+					}
+				});
+				//filePaths.add(filePath);
+
 				IDataHolder dh;
 				try {
 					dh = LoaderFactory.getData(context.getFilePaths().get(0));
 					ILazyDataset lazy = dh.getLazyDataset(context.getDatasetNames().get(0));
 					int[] shape = lazy.getShape();
-					
-//					datasetLabel.setText(context.getDatasetNames().get(0));
+
+					//					datasetLabel.setText(context.getDatasetNames().get(0));
 					//single image/line
-//					if (context.getSliceDimensions() == null){
-//						for (int i = 0; i < shape.length; i++) context.addSliceDimension(i, "all");
-//					}
-					
+					//					if (context.getSliceDimensions() == null){
+					//						for (int i = 0; i < shape.length; i++) context.addSliceDimension(i, "all");
+					//					}
+
 					int[] dd = Slicer.getDataDimensions(shape, context.getSliceDimensions());
 					Slice[] slices = Slicer.getSliceArrayFromSliceDimensions(context.getSliceDimensions(), shape);
 					csw.setDatasetShapeInformation(shape, dd.clone(), slices);
 					String ss = Slice.createString(csw.getCurrentSlice());
 					currentSliceLabel.setText("Current slice of data: [" +ss + "]");
-//					Arrays.sort(dd);
-//					
-//					int work = 1;
-//					
-//					for (int i = 0; i< shape.length; i++) {
-//						if (Arrays.binarySearch(dd, i) < 0) work*=shape[i];
-//					}
-//					
-//					maxImage = work;
-					
-					
+					//					Arrays.sort(dd);
+					//					
+					//					int work = 1;
+					//					
+					//					for (int i = 0; i< shape.length; i++) {
+					//						if (Arrays.binarySearch(dd, i) < 0) work*=shape[i];
+					//					}
+					//					
+					//					maxImage = work;
+
+
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
+			} else {
+				context = null;
 			}
+			
+			
 		} else {
-			String dsName = context.getDatasetNames().get(0);
-			try {
-				IDataHolder holder = LoaderFactory.getData(filePath, null);
-				ILazyDataset lazyDataset = holder.getLazyDataset(dsName);
-				if (lazyDataset != null) {
-					filePaths.add(filePath);
-					context.setFilePaths(filePaths.toArray(new String[filePaths.size()]));
-				}
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			fileManager.addFiles(filePath);
 		}
-		
-		
-		
+
+
+
 	}
 	
 	private void update(final IOperation<? extends IOperationModel, ? extends OperationData> end) {
@@ -519,8 +541,7 @@ public class DataFileSliceView extends ViewPart {
 				
 				final IDataset firstSlice = lazyDataset.getSlice(csw.getCurrentSlice()).squeeze();
 				
-				IPlottingSystem system = PlottingFactory.getPlottingSystem("Input");
-				SlicedDataUtils.plotDataWithMetadata(firstSlice, system, Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions()));
+				SlicedDataUtils.plotDataWithMetadata(firstSlice, input, Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions()));
 				
 				IOperation<? extends IOperationModel, ? extends OperationData>[] ops = getOperations();
 				if (ops == null) return Status.OK_STATUS;
@@ -565,6 +586,7 @@ public class DataFileSliceView extends ViewPart {
 		}
 		
 		public void setEndOperation(IOperation<? extends IOperationModel, ? extends OperationData> op) {
+			endOperation = op;
 			visitor.setEndOperation(op);
 		}
 		
@@ -641,8 +663,7 @@ public class DataFileSliceView extends ViewPart {
 		private void displayData(OperationData result, int[] dataDims) throws Exception {
 			IDataset out = result.getData();
 			
-			IPlottingSystem system = PlottingFactory.getPlottingSystem("Output");
-			SlicedDataUtils.plotDataWithMetadata(out, system, dataDims);
+			SlicedDataUtils.plotDataWithMetadata(out, output, dataDims);
 
 		}
 
@@ -652,7 +673,10 @@ public class DataFileSliceView extends ViewPart {
 
 		@Override
 		public Object[] getElements(Object inputElement) {
-			return (String[]) inputElement;
+			if (inputElement instanceof FileManager)
+				return ((FileManager)inputElement).getFilePaths().toArray();
+			
+			return null;
 		}
 
 		@Override

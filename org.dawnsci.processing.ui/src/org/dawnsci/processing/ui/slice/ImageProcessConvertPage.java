@@ -18,6 +18,7 @@ import org.dawb.common.ui.wizard.AbstractSliceConversionPage;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.api.slice.Slicer;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -167,6 +168,8 @@ public class ImageProcessConvertPage extends AbstractSliceConversionPage  {
 			
 			
 			IDataset firstSlice = Slicer.getFirstSlice(lazyDataset, sliceDims);
+			AxesMetadata amd = SlicedDataUtils.createAxisMetadata(path, lazyDataset.getRank(), sliceComponent.getAxesNames());
+			firstSlice.addMetadata(amd);
 			SlicedDataUtils.plotDataWithMetadata(firstSlice, system, Slicer.getDataDimensions(lazyDataset.getShape(), sliceDims));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
