@@ -327,7 +327,7 @@ public class JRealityPlotActions {
 
 		actionMan.registerGroup("jreality.plotting.export.actions", ManagerType.TOOLBAR);
 
-		Action saveGraph = new Action("Save graph") {
+		Action saveGraph = new Action("Save screenshot as...") {
 
 			// Cache file name otherwise they have to keep
 			// choosing the folder.
