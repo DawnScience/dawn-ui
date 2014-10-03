@@ -9,6 +9,7 @@
 
 package org.dawnsci.plotting.system;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -20,6 +21,8 @@ import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.wizard.PlotDataConversionWizard;
 import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
 import org.dawnsci.plotting.PlottingActionBarManager;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.plotting.api.ActionType;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.ManagerType;
@@ -38,6 +41,8 @@ import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.wizard.IWizard;
@@ -103,7 +108,12 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 				try {
 					lastscreeshot_filename = system.savePlotting(lastscreeshot_filename);
 				} catch (Exception e) {
-					logger.error("Cannot save "+lastscreeshot_filename, e);
+					
+					final File file     = new File(lastscreeshot_filename);
+					final Status status = new Status(IStatus.ERROR, "org.dawnsci.plotting.system", e.getMessage());
+					ErrorDialog.openError(Display.getDefault().getActiveShell(), "Cannot save to "+file.getName(), 
+							                "Cannot save to the file '"+file.getName()+"'\n\n"+
+									        "The location might be in a read only directory or invalid.", status);
 					return;
 				}
 				exportActionsDropDown.setSelectedAction(this);
