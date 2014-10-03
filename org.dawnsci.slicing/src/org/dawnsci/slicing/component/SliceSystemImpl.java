@@ -435,37 +435,12 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		super.setSlice(slice);
 		if (inject!=null) {
 			try {
-				inject.setData(getLegalVarName(slice.getName()), slice);
+				inject.setData(InjectPyDevConsole.getLegalVarName(slice.getName()), slice);
 			} catch (Exception e) {
 				logger.error("Cannot set data to use with inject, using name 'x' instead", e);
 				inject.setData("x", slice);
 			}
 		}
-	}
-	
-	/**
-	 * Attempts to generate legal variable name. Does not take into account key words.
-	 * @param setName
-	 * @return
-	 * @throws Exception 
-	 */
-	private static String getLegalVarName(String setName) throws Exception {
-		
-		if (setName.endsWith("/"))   setName = setName.substring(0,setName.length()-1);
-		if (setName.indexOf('/')>-1) setName = setName.substring(setName.lastIndexOf('/'));
-		
-		setName = setName.replaceAll(" ", "_");
-		setName = setName.replaceAll("[^a-zA-Z0-9_]", "");
-		final Matcher matcher = Pattern.compile("(\\d+)(.+)").matcher(setName);
-		if (matcher.matches()) {
-			setName = matcher.group(2);
-		}
-		
-		if (Pattern.compile("(\\d+)").matcher(setName).matches()) {
-			throw new Exception("Variable name of numbers only not possible!");
-		}
-		
-		return setName;
 	}
 	
 
