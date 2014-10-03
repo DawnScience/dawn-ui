@@ -150,7 +150,13 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 					wd.open();
 					exportActionsDropDown.setSelectedAction(this);
 				} catch (Exception e) {
-					logger.error("Problem opening export!", e);
+					
+					final Status status = new Status(IStatus.ERROR, "org.dawnsci.plotting.system", e.getMessage());
+					ErrorDialog.openError(Display.getDefault().getActiveShell(), "Cannot Export Plot", 
+							                "Cannot export the plot to HDF5.\n\n"+
+									        "The location might be in a read only directory or invalid.", status);
+
+					logger.error("Problem exporting!", e);
 				}
 			}			
 		};
@@ -168,7 +174,12 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 					
 					exportActionsDropDown.setSelectedAction(this);
 				} catch (Exception e) {
-					logger.error("Problem opening convert!", e);
+					final Status status = new Status(IStatus.ERROR, "org.dawnsci.plotting.system", e.getMessage());
+					ErrorDialog.openError(Display.getDefault().getActiveShell(), "Cannot Export Plot", 
+							                "Cannot export the plot to tif/dat.\n\n"+
+									        "The location might be in a read only directory or invalid.", status);
+
+					logger.error("Problem exporting!", e);
 				}
 			}			
 		};
