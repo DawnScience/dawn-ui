@@ -1246,11 +1246,6 @@ public class HistogramToolPage extends AbstractToolPage {
 	}
 
 	public void dispose() {
-		
-		// You must remove listeners!
-//		final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
-//		store.removePropertyChangeListener(propChangeListener);
-        
 		super.dispose();
 		
 		// Ensures that any listeners added here are killed off too.
@@ -1384,6 +1379,10 @@ public class HistogramToolPage extends AbstractToolPage {
 		this.histoMin = histoMin;
 	}
 
+	/**
+	 * Update the colour scheme combo on this page
+	 * @param schemeName colour scheme name
+	 */
 	private void updateColourScheme(String schemeName) {
 		if (updatingColorSchemeInternally)
 			return;
