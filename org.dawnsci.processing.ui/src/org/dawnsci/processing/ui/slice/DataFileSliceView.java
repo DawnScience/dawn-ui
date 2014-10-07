@@ -47,6 +47,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.LocalSelectionTransfer;
@@ -82,6 +83,8 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.SDAPlotter;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
@@ -103,6 +106,8 @@ public class DataFileSliceView extends ViewPart {
 	IOperation<? extends IOperationModel, ? extends OperationData> currentOperation = null;
 	IPlottingSystem input;
 	IPlottingSystem output;
+	
+	private final static Logger logger = LoggerFactory.getLogger(DataFileSliceView.class);
 	
 	@Override
 	public void createPartControl(Composite parent) {
@@ -201,7 +206,7 @@ public class DataFileSliceView extends ViewPart {
 						update(currentOperation);
 					} catch (InstantiationException e) {
 						// TODO Auto-generated catch block
-						e.printStackTrace();
+						logger.error(e.getMessage(),e);
 					}
 				}
 				
@@ -260,19 +265,21 @@ public class DataFileSliceView extends ViewPart {
 							context.setMonitor(new ProgressMonitorWrapper(monitor));
 							try {
 								service.process(context);
-							} catch (Exception e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+							} catch (final Exception e) {
+								Display.getDefault().asyncExec(new Runnable() {
+									public void run() {
+										MessageDialog.openError(DataFileSliceView.this.getViewSite().getShell(), "Error processing files!", e.getMessage());
+									}
+								});
+								
+								logger.error(e.getMessage(), e);
 							}
-
 						}
 					});
 				} catch (InvocationTargetException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					logger.error(e1.getMessage(), e1);
 				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					logger.error(e1.getMessage(), e1);
 				}
 			}
 		};
@@ -373,8 +380,7 @@ public class DataFileSliceView extends ViewPart {
 					update(currentOperation);
 
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error(e.getMessage(), e);
 				}
 
 				fileManager = new FileManager(context);
@@ -424,8 +430,7 @@ public class DataFileSliceView extends ViewPart {
 
 
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error(e.getMessage(), e);
 				}
 			} else {
 				context = null;
@@ -465,7 +470,7 @@ public class DataFileSliceView extends ViewPart {
 			String ss = Slice.createString(csw.getCurrentSlice());
 			currentSliceLabel.setText("Current slice of data: [" +ss + "]");
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 		
 	}
@@ -549,7 +554,7 @@ public class DataFileSliceView extends ViewPart {
 				sliceVisitor.setEndOperation(end);
 				sliceVisitor.visit(firstSlice, null, null);
 				} catch (Exception e) {
-					e.printStackTrace();
+					logger.error(e.getMessage(), e);
 					return Status.CANCEL_STATUS;
 				}
 				
@@ -637,7 +642,7 @@ public class DataFileSliceView extends ViewPart {
 			try {
 				if (intermediateData == endOp) displayData(data,dataDims);
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error(e.getMessage());
 			}
 			
 		}

@@ -27,7 +27,7 @@ public class SlicedDataUtils {
 			IDataHolder dataHolder = LoaderFactory.getData(path);
 			ILazyDataset lazyAx = dataHolder.getLazyDataset(axesName);
 			if (lazyAx != null && lazyAx.getRank() != rank) {
-				lazyAx = lazyAx.getSliceView();
+				lazyAx = lazyAx.getSlice();
 				int[] shape = new int[rank];
 				Arrays.fill(shape, 1);
 				shape[key-1]= lazyAx.getShape()[0];
