@@ -361,12 +361,12 @@ public class DataFileSliceView extends ViewPart {
 			final WizardDialog wd = new WizardDialog(getSite().getShell(),wiz);
 			wd.setPageSize(new Point(800, 800));
 			wd.create();
+			context.setConversionScheme(ConversionScheme.PROCESS);
 			convertPage.setContext(context);
 
 			if (wd.open() == WizardDialog.OK) {
 				context = convertPage.getContext();
 				job = new UpdateJob(context);
-				context.setConversionScheme(ConversionScheme.PROCESS);
 
 				try {
 
