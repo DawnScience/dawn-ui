@@ -34,7 +34,7 @@ public class SlicedDataUtils {
 				lazyAx.setShape(shape);
 			}
 			
-			axMeta.setAxis(key-1, new ILazyDataset[] {lazyAx});
+			if (lazyAx != null) axMeta.setAxis(key-1, new ILazyDataset[] {lazyAx});
 		}
 		
 		return axMeta;
@@ -46,15 +46,17 @@ public class SlicedDataUtils {
 		IDataset y = null;
 		IDataset mask = null;
 		
+		data = data.getSliceView().squeeze();
+		
 		List<AxesMetadata> amd = data.getMetadata(AxesMetadata.class);
 		List<MaskMetadata> mmd = data.getMetadata(MaskMetadata.class);
 		
 		if (amd != null && !amd.isEmpty()) {
 			AxesMetadata am = amd.get(0);
 			ILazyDataset[] axes = am.getAxes();
-			ILazyDataset lz0 = axes[dataDims[0]];
+			ILazyDataset lz0 = axes[0];
 			ILazyDataset lz1 = null;
-			if (data.getRank() > 1) lz1 = axes[dataDims[1]];
+			if (data.getRank() > 1) lz1 = axes[1];
 			if (lz0 != null) x = lz0.getSlice().squeeze();
 			if (lz1 != null) y = lz1.getSlice().squeeze();
 		}

@@ -544,8 +544,7 @@ public class DataFileSliceView extends ViewPart {
 
 				}
 				
-				final IDataset firstSlice = lazyDataset.getSlice(csw.getCurrentSlice()).squeeze();
-				
+				final IDataset firstSlice = lazyDataset.getSlice(csw.getCurrentSlice());
 				SlicedDataUtils.plotDataWithMetadata(firstSlice, input, Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions()));
 				
 				IOperation<? extends IOperationModel, ? extends OperationData>[] ops = getOperations();
