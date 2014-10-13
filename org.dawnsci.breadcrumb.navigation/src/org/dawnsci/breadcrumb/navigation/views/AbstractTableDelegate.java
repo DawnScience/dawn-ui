@@ -618,4 +618,17 @@ public abstract class AbstractTableDelegate implements INavigationDelegate {
 		tableViewer.getControl().setMenu(menuMan.createContextMenu(tableViewer.getControl()));
 	}
 
+	/**
+	 * Override to give them some content.
+	 */
+	@Override
+	public Object getAdapter(Class adapter) {
+		
+		if (adapter == Collection.class || adapter == List.class) {
+			AbstractLazyContentProvider prov = (AbstractLazyContentProvider)tableViewer.getContentProvider(); 
+			return prov.getFullData();
+		}
+		return null;
+	}
+
 }

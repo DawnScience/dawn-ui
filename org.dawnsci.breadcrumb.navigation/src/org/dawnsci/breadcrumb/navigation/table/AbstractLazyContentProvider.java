@@ -449,5 +449,10 @@ public abstract class AbstractLazyContentProvider implements ISortableLazyConten
 		return String.valueOf(max);
 	}
 
+	public Collection<Object> getFullData() {
+		if (fullData==null) return null;
+		return new ArrayList<Object>(fullData);
+	}
+
 
 }

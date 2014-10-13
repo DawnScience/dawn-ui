@@ -615,4 +615,18 @@ public abstract class AbstractNavigationView extends ViewPart implements ISelect
 	protected void setNavigationMode(INavigationDelegateMode mode) {
 		this.navigationMode = mode;
 	}
+	
+	@Override
+    public Object getAdapter(Class adapter) {
+		
+        if (navigationMode!=null) {
+     	   INavigationDelegate dele = pages.get(this.navigationMode);
+     	   if (dele!=null) {
+     		   Object ret = dele.getAdapter(adapter);
+     		   if (ret!=null) return ret;
+     	   }
+        } 	
+        return super.getAdapter(adapter);
+	}
+
 }

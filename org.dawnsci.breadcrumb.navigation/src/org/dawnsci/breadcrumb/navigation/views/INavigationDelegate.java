@@ -8,6 +8,7 @@
  */
 package org.dawnsci.breadcrumb.navigation.views;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.graphics.Cursor;
@@ -23,7 +24,7 @@ import org.eclipse.swt.widgets.Control;
  * @author Matthew Gerring
  *
  */
-public interface INavigationDelegate {
+public interface INavigationDelegate extends IAdaptable {
 
 	/**
 	 * Called to create the GUI
