@@ -19,7 +19,7 @@ public class IntegerArrayDecorator extends ArrayDecorator {
 	}
 
 	public IntegerArrayDecorator(Text text, String delimiter) {
-		super(text, "[-0-9∞]+", new DecimalFormat("##########0"), delimiter);
+		super(text, "[-0-9∞]+", new DecimalFormat("##########0"), delimiter, -1);
 	}
 
 }

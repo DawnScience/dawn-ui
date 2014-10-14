@@ -17,10 +17,12 @@ import org.eclipse.swt.widgets.Text;
 class ArrayDecorator extends BoundsDecorator {
 
 	protected String delimiter;
+	private int      size;
 
-	public ArrayDecorator(Text text, String numberPattern, NumberFormat numFormat, String delimiter) {
+	public ArrayDecorator(Text text, String numberPattern, NumberFormat numFormat, String delimiter, int size) {
 		super(text, "("+numberPattern+delimiter+"? *)+", numFormat);
 		this.delimiter = delimiter;
+		this.size      = size;
 	}
 
 	@Override
@@ -31,6 +33,7 @@ class ArrayDecorator extends BoundsDecorator {
 		for (String string : strings) {
 			if (!super.check(string, delta)) return false;
 		}
+		if (size>0 && size!=strings.size()) return false;
 		return true;
 	}
 	
@@ -45,7 +48,10 @@ class ArrayDecorator extends BoundsDecorator {
 		if ("".equals(value.trim())) return null;
 		final String[]    vals = value.split(delimiter);
 		final List<String> ret = new ArrayList<String>(vals.length);
-		for (int i = 0; i < vals.length; i++) ret.add(vals[i].trim());
+		for (int i = 0; i < vals.length; i++) {
+			if ("".equals(vals[i].trim())) continue;
+			ret.add(vals[i].trim());
+		}
 		return ret;
 	}
 

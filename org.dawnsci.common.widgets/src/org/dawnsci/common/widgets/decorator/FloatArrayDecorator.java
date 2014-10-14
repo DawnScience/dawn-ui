@@ -19,7 +19,16 @@ public class FloatArrayDecorator extends ArrayDecorator {
 	}
 
 	public FloatArrayDecorator(Text text, String delimiter) {
-		super(text, "[-0-9\\.∞]+", new DecimalFormat("##########0.0###"), delimiter);
+		this(text, delimiter, -1);
+	}
+	
+	public FloatArrayDecorator(Text text, String delimiter, int size) {
+		
+		super(text, "[-0-9\\.∞]+", 
+		     new DecimalFormat("##########0.0###"), 
+		     delimiter, size);
+		
+		
 	}
 
 }
