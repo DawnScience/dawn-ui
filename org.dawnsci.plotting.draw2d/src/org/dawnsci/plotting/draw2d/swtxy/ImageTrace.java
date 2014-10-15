@@ -283,7 +283,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					ImageServiceBean histoBean = imageServiceBean.clone();
 					histoBean.setImage(slice);
 					if (fullMask!=null) histoBean.setMask(slice(getYAxis().getRange(), getXAxis().getRange(), fullMask));
-					float[] fa = service.getFastStatistics(histoBean);
+					double[] fa = service.getFastStatistics(histoBean);
 					setMin(fa[0]);
 					setMax(fa[1]);
 
@@ -966,7 +966,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		
 		if (service==null) service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
 		if (rescaleHistogram) {
-			final float[] fa = service.getFastStatistics(imageServiceBean);
+			final double[] fa = service.getFastStatistics(imageServiceBean);
 			setMin(fa[0]);
 			setMax(fa[1]);
 		}

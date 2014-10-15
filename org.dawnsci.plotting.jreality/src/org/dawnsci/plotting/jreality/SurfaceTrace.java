@@ -95,7 +95,7 @@ public class SurfaceTrace extends Image3DTrace implements ISurfaceTrace{
 		
 		if (service==null) service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
 		if (rescaleHistogram) {
-			final float[] fa = service.getFastStatistics(imageServiceBean);
+			final double[] fa = service.getFastStatistics(imageServiceBean);
 			setMin(fa[0]);
 			setMax(fa[1]);
 		}
