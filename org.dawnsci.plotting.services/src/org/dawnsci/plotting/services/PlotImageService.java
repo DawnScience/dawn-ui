@@ -409,6 +409,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 		}
 	}
 
+	int asd=0;
 	public Image getIconForFile(final File file) {
 		if (file.isDirectory()) {
 			return getFolderImage(file);
@@ -439,8 +440,9 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 		if (returnImage == null) {
 			final Program program = Program.findProgram(ext);
 			if (program != null) {
-				ImageData iconData = Program.findProgram(ext).getImageData();
-				returnImage = new Image(Display.getCurrent(), iconData);
+				final ImageData iconData = Program.findProgram(ext).getImageData();
+				if (iconData != null) //Might happen it does not exist
+					returnImage = new Image(Display.getCurrent(), iconData);
 			}
 		}
 		if (returnImage == null)
