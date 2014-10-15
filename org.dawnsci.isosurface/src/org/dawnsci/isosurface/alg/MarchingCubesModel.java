@@ -68,7 +68,7 @@ public class MarchingCubesModel extends AbstractOperationModel {
 				                              new int[] {1,1,1});
 		
 		final IImageService service = (IImageService)Activator.getService(IImageService.class);
-		float[] stats = service.getFastStatistics(new ImageServiceBean((Dataset)slicedImage, HistoType.MEAN));
+		double[] stats = service.getFastStatistics(new ImageServiceBean((Dataset)slicedImage, HistoType.MEAN));
 		
 		if(stats[0]<isovalueMin){
 			isovalueMin = stats[0];
