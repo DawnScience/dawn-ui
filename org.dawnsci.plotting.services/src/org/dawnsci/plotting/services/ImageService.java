@@ -448,7 +448,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 			}
 			
 		    if (bean.isLogColorScale() && ret!=null) {
-		    	ret = new float[]{(float)Math.pow(ret[0],10), (float)Math.pow(ret[1],10), -1};
+		    	ret = new float[]{(float)Math.pow(10, ret[0]), (float)Math.pow(10, ret[1]), -1};
 			}
 
 			return ret;
@@ -515,7 +515,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		if (retMax > max)	retMax = max;
 		
 		if (bean.isLogColorScale()) {
-			return new float[]{(float) Math.pow(retMin,10), (float) Math.pow(retMax,10), (float) Math.pow(retExtra,10)};
+			return new float[]{(float) Math.pow(10, retMin), (float) Math.pow(10, retMax), (float) Math.pow(10, retExtra)};
 		}		
 		return new float[]{retMin, retMax, retExtra, max};
 
