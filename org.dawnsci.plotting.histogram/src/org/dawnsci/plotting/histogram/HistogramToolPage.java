@@ -236,7 +236,7 @@ public class HistogramToolPage extends AbstractToolPage {
 					it = (IPaletteTrace)evt.getSource();
 				}
 				//updateImage(it, false);
-				if (it.isRescaleHistogram() && paletteData!=null) {
+				if (it != null && it.isRescaleHistogram() && paletteData!=null) {
 					updatePalette(it, null, true);
 				}
 			}
@@ -1263,6 +1263,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		}
 	}
 
+	@Override
 	public void dispose() {
 		super.dispose();
 		
@@ -1362,7 +1363,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	public boolean isAlwaysSeparateView() {
 		return true;
 	}
-	
+
 	private void hide() {
 		introLabel.setText("No Colour Map tools available for Colour Images");
 		colourSchemeExpander.setVisible(false);

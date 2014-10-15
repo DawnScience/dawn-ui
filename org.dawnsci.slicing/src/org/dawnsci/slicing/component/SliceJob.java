@@ -99,6 +99,7 @@ class SliceJob extends Job {
 	 * @param type
 	 * @param plottingSystem - may be null, but if so no plotting will happen.
 	 * @param monitor
+	 * @return dataset, may be null
 	 * @throws Exception
 	 */
 	private static IDataset plotSlice(final SliceSource       sliceSource,

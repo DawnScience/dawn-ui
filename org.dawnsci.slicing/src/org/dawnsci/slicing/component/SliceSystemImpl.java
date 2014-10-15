@@ -22,8 +22,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.dawb.common.ui.DawbUtils;
 import org.dawb.common.ui.menu.CheckableActionGroup;
@@ -433,7 +431,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 	
 	public void setSlice(IDataset slice) {
 		super.setSlice(slice);
-		if (inject!=null) {
+		if (inject!=null && slice != null) {
 			try {
 				inject.setData(InjectPyDevConsole.getLegalVarName(slice.getName()), slice);
 			} catch (Exception e) {
@@ -442,8 +440,6 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 			}
 		}
 	}
-	
-
 	
 	private Map<Enum, DimsDataList> sliceSettings;
 	
