@@ -143,6 +143,12 @@ public class SpaceGroup extends Widget {
 	}
 
 	public void setSpacegroup(String sg) {
+		
+		if (sg==null) {
+		    lattice.setText(primitiveTriclinic);
+		    spacegroup.setText(primitiveTriclinicSG[0]);
+		}
+		
 		// Remove spaces which ISPyB sometimes has in its value.
     	sg = sg.replace(" ", "");
 		
