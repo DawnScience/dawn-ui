@@ -198,10 +198,12 @@ public class SpaceGroup extends Widget {
 
 	public void addSelectionListener(SelectionListener s) {
 		spacegroup.addSelectionListener(s);
+		lattice.addSelectionListener(s);
 	}
 	
 	public void removeSelectionListener(SelectionListener s) {
 		spacegroup.removeSelectionListener(s);
+		lattice.removeSelectionListener(s);
 	}
 	
 }
