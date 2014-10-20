@@ -34,6 +34,7 @@ import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
+import org.eclipse.dawnsci.analysis.api.metadata.OriginMetadata;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.api.processing.IExecutionVisitor;
 import org.eclipse.dawnsci.analysis.api.processing.IExportOperation;
@@ -544,9 +545,17 @@ public class DataFileSliceView extends ViewPart {
 
 				}
 				
-				final IDataset firstSlice = lazyDataset.getSlice(csw.getCurrentSlice());
-				SlicedDataUtils.plotDataWithMetadata(firstSlice, input, Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions()));
+				Slice[] viewSlice = Slicer.getSliceArrayFromSliceDimensions(context.getSliceDimensions(), lazyDataset.getShape());
 				
+				int[] dataDims = Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions());
+				
+				final IDataset firstSlice = lazyDataset.getSlice(csw.getCurrentSlice());
+				SlicedDataUtils.plotDataWithMetadata(firstSlice, input, dataDims);
+				
+				OriginMetadataImpl om = new OriginMetadataImpl(lazyDataset, viewSlice, dataDims, path, context.getDatasetNames().get(0));
+				om.setCurrentSlice(csw.getCurrentSlice());
+			
+				lazyDataset.setMetadata(om);
 				IOperation<? extends IOperationModel, ? extends OperationData>[] ops = getOperations();
 				if (ops == null) return Status.OK_STATUS;
 				EscapableSliceVisitor sliceVisitor = getSliceVisitor(ops, getOutputExecutionVisitor(), lazyDataset, Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions()));
@@ -598,7 +607,15 @@ public class DataFileSliceView extends ViewPart {
 		public void visit(IDataset slice, Slice[] slices,
 				int[] shape) throws Exception {
 			
-			slice.addMetadata(new OriginMetadataImpl(lz, slices, dataDims));
+			OriginMetadata om = null;
+			
+			try {
+				om = lz.getMetadata(OriginMetadata.class).get(0);
+			} catch (Exception e1) {
+				throw new IllegalArgumentException("No origin!!!!");
+			}
+			
+			slice.setMetadata(om);
 			
 			OperationData  data = new OperationData(slice, (Serializable[])null);
 								
