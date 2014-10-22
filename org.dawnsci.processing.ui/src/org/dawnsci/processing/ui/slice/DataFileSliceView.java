@@ -560,7 +560,10 @@ public class DataFileSliceView extends ViewPart {
 				if (ops == null) return Status.OK_STATUS;
 				EscapableSliceVisitor sliceVisitor = getSliceVisitor(ops, getOutputExecutionVisitor(), lazyDataset, Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions()));
 				sliceVisitor.setEndOperation(end);
+				long start = System.currentTimeMillis();
 				sliceVisitor.visit(firstSlice, null, null);
+				logger.debug("Ran in: " +(System.currentTimeMillis()-start)/1000. + " s");
+				
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 					return Status.CANCEL_STATUS;
@@ -618,7 +621,7 @@ public class DataFileSliceView extends ViewPart {
 			slice.setMetadata(om);
 			
 			OperationData  data = new OperationData(slice, (Serializable[])null);
-								
+			
 			for (IOperation<? extends IOperationModel, ? extends OperationData> i : series) {
 				 if (i instanceof IExportOperation) {
 					 visitor.notify(i, data, slices, shape, dataDims);
