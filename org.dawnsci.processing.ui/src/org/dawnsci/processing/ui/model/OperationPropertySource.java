@@ -53,7 +53,7 @@ class OperationPropertySource implements IPropertySource {
 		allFields.addAll(Arrays.asList(model.getClass().getSuperclass().getDeclaredFields()));
 		
 		// The returned descriptor
-		final Collection<IPropertyDescriptor> ret = new TreeSet<IPropertyDescriptor>();
+		final Collection<IPropertyDescriptor> ret = new ArrayList<IPropertyDescriptor>();
 		
 		// fields
 		for (Field field : allFields) {
