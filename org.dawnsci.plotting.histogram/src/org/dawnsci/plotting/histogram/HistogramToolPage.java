@@ -35,8 +35,6 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.CLabel;
@@ -258,6 +256,11 @@ public class HistogramToolPage extends AbstractToolPage {
 				logger.trace("paletteChanged");
 				paletteData = event.getPaletteData();
 				updateHistogramToolElements(event.getTrace(), null, false, false);
+				
+				if (event.getTrace() != null)
+					updateColourScheme(event.getTrace().getPaletteName());
+					updateColourSchemeRGB(event.getTrace().getPaletteName());
+				
 			}
 
 			@Override
@@ -437,10 +440,13 @@ public class HistogramToolPage extends AbstractToolPage {
 				logger.trace("colourSchemeListener");
 				maxLast = minLast = 0;
 				palLast = null;
-				updateColourScheme();
+				updateColourSchemeRGB(cmbColourMap.getText());
+				setPaletteName();
 				buildPaletteData();
 				updateHistogramToolElements(event, true, false);
 			}
+
+
 		};
 
 		colourSchemeLogListener = new SelectionAdapter() {
@@ -492,7 +498,7 @@ public class HistogramToolPage extends AbstractToolPage {
 					RectangularROI roi = (RectangularROI) region.getROI();
 					setHistoMin( roi.getPoint()[0]);
 					setHistoMax( roi.getEndPoint()[0]);
-					updateHistogramToolElements(null, true, false);
+					updateHistogramToolElements(evt, true, false);
 				}
 			}
 		};
@@ -512,7 +518,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	private double      maxLast=0, minLast=0;
 	private PaletteData palLast=null;
 
-	private IPropertyChangeListener propChangeListener;
+	//private IPropertyChangeListener propChangeListener;
 	/**
 	 * 
 	 * @param mon, may be null
@@ -579,6 +585,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 	@Override
 	public void createControl(final Composite parent) {
+		logger.debug("HistogramToolPage: createControls ", this.hashCode() );
 		// Set up the composite to hold all the information
 		sc = new ScrolledComposite(parent, SWT.V_SCROLL | SWT.H_SCROLL);
 		sc.setLayout(new GridLayout(1, false));	
@@ -846,18 +853,16 @@ public class HistogramToolPage extends AbstractToolPage {
 			}
 		});
 		
-		this.propChangeListener = new IPropertyChangeListener() {			
-			@Override
-			public void propertyChange(PropertyChangeEvent event) {
-				if ("org.dawb.plotting.system.colourSchemeName".equals(event.getProperty())) {
-					if (updatingColorSchemeInternally) return;
-					final String schemeName = (String)event.getNewValue();
-					if(cmbColourMap == null || cmbColourMap.isDisposed()) return;
-					cmbColourMap.select(Arrays.asList(cmbColourMap.getItems()).indexOf(schemeName));
-				}
-			}
-		};
-		store.addPropertyChangeListener(propChangeListener);
+//		this.propChangeListener = new IPropertyChangeListener() {			
+//			@Override
+//			public void propertyChange(PropertyChangeEvent event) {
+//				if ("org.dawb.plotting.system.colourSchemeName".equals(event.getProperty())) {
+//					final String schemeName = (String)event.getNewValue();
+//					setColourScheme(schemeName);
+//				}
+//			}
+//		};
+//		store.addPropertyChangeListener(propChangeListener);
 
 		// Activate this so the initial screen has content
 		activate();		
@@ -870,8 +875,8 @@ public class HistogramToolPage extends AbstractToolPage {
 	/**
 	 * Use the controls from the GUI to set the individual colour elements from the selected colour scheme
 	 */
-	protected void updateColourScheme() {
-		ColourSchemeContribution colourScheme = extensionPointManager.getColourSchemeContribution(cmbColourMap.getText());
+	protected void updateColourSchemeRGB(String colourMap) {
+		ColourSchemeContribution colourScheme = extensionPointManager.getColourSchemeContribution(colourMap);
 		String red = extensionPointManager.getTransferFunctionFromID(colourScheme.getRedID()).getName();
 		String green = extensionPointManager.getTransferFunctionFromID(colourScheme.getGreenID()).getName();
 		String blue = extensionPointManager.getTransferFunctionFromID(colourScheme.getBlueID()).getName();
@@ -886,15 +891,6 @@ public class HistogramToolPage extends AbstractToolPage {
 		btnGreenInverse.setSelection(colourScheme.getGreenInverted());
 		btnBlueInverse.setSelection(colourScheme.getBlueInverted());
 		btnAlphaInverse.setSelection(colourScheme.getAlphaInverted());
-
-		// Store as default preference
-		try {
-			updatingColorSchemeInternally=true;
-			final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
-			store.setValue("org.dawb.plotting.system.colourSchemeName", colourScheme.getName());
-		} finally {
-			updatingColorSchemeInternally = false;
-		}
 	}
 
 	/**
@@ -988,6 +984,10 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			// update all based on slider positions
 			updateHistogramToolElements(image, null, repaintImage, true);
+			
+			// update colour scheme
+			updateColourScheme(image.getPaletteName());
+			updateColourSchemeRGB(image.getPaletteName());
 
 			// finally tie in the listener to the palette data changes
 			image.addPaletteListener(paletteListener);
@@ -1018,7 +1018,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	}
 	
 	/**
-	 * Update everything based on the new slider positions  
+	 * Update histogram plot, histogram range, histogram range % and brightness & contrast
 	 * @param event  MAY BE NULL
 	 */
 	private void updateHistogramToolElements(IPaletteTrace trace, EventObject event, boolean repaintImage, boolean updateAxis) {
@@ -1087,21 +1087,23 @@ public class HistogramToolPage extends AbstractToolPage {
 		// set the minmax values
 		minMaxValue.setMin(MIN_LABEL, scaleMin);
 		minMaxValue.setMax(MIN_LABEL, scaleMax);
-		if (event != null && !minMaxValue.isSpinner(MIN_LABEL, event)) minMaxValue.setValue(MIN_LABEL, histoMin);
+		if (!minMaxValue.isSpinner(MIN_LABEL, event))
+			minMaxValue.setValue(MIN_LABEL, histoMin);
 
 		minMaxValue.setMin(MAX_LABEL, scaleMin);
 		minMaxValue.setMax(MAX_LABEL, scaleMax);
-		if( event != null && !minMaxValue.isSpinner(MAX_LABEL, event)) minMaxValue.setValue(MAX_LABEL, histoMax);
+		if (!minMaxValue.isSpinner(MAX_LABEL, event))
+			minMaxValue.setValue(MAX_LABEL, histoMax);
 
 		// Set the brightness
 		brightnessContrastValue.setMin(BRIGHTNESS_LABEL, scaleMin);
 		brightnessContrastValue.setMax(BRIGHTNESS_LABEL, scaleMax);
-		if (event != null && !brightnessContrastValue.isSpinner(BRIGHTNESS_LABEL, event)) brightnessContrastValue.setValue(BRIGHTNESS_LABEL, (histoMax+histoMin)/2.0);
+		if (!brightnessContrastValue.isSpinner(BRIGHTNESS_LABEL, event)) brightnessContrastValue.setValue(BRIGHTNESS_LABEL, (histoMax+histoMin)/2.0);
 
 		// Set the contrast
 		brightnessContrastValue.setMin(CONTRAST_LABEL, 0.0);
 		brightnessContrastValue.setMax(CONTRAST_LABEL, scaleMax-scaleMin);
-		if (event != null && !brightnessContrastValue.isSpinner(CONTRAST_LABEL, event)) brightnessContrastValue.setValue(CONTRAST_LABEL, histoMax-histoMin);
+		if (!brightnessContrastValue.isSpinner(CONTRAST_LABEL, event)) brightnessContrastValue.setValue(CONTRAST_LABEL, histoMax-histoMin);
 		
 		if (!rangeSlider.isEventSource(event)) {
 			double tempMin = scaleMin;
@@ -1217,7 +1219,11 @@ public class HistogramToolPage extends AbstractToolPage {
 	 * Add the trace listener and plot initial data
 	 */
 	public void activate() {
+		deactivate();
+		
+		logger.debug("HistogramToolPage: activate ", this.hashCode() );
 		super.activate();
+		
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().addTraceListener(traceListener);
 			
@@ -1229,20 +1235,17 @@ public class HistogramToolPage extends AbstractToolPage {
 	 * remove the trace listener to avoid unneeded event triggering
 	 */
 	public void deactivate() {
+		logger.trace("HistogramToolPage: deactivate ", this.hashCode() );
 		super.deactivate();
 
 		if (getPlottingSystem()!=null) {
 			removeImagePaletteListener();
 			getPlottingSystem().removeTraceListener(traceListener);
+			paletteData = null;
 		}
 	}
 
 	public void dispose() {
-		
-		// You must remove listeners!
-		final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
-		store.removePropertyChangeListener(propChangeListener);
-        
 		super.dispose();
 		
 		// Ensures that any listeners added here are killed off too.
@@ -1259,6 +1262,16 @@ public class HistogramToolPage extends AbstractToolPage {
 		if (composite!=null && !composite.isDisposed()) composite.setFocus();
 	}
 
+	
+	/**
+	 * Set the image palette name based on the combo setting
+	 */
+	private void setPaletteName() {
+		ColourSchemeContribution colourScheme = extensionPointManager.getColourSchemeContribution(cmbColourMap.getText());
+		getPaletteTrace().setPaletteName(colourScheme.getName());
+		
+	}
+	
 	/**
 	 * Build a palette data from the RGB values which have been set in the GUI
 	 */
@@ -1278,12 +1291,14 @@ public class HistogramToolPage extends AbstractToolPage {
 		if (btnBlueInverse.getSelection()) {
 			blue = invert(blue);
 		}
-
-		paletteData.colors = new RGB[256];
+		
+		PaletteData data = getPaletteTrace().getPaletteData();
+		data.colors = new RGB[256];
 
 		for (int i = 0; i < 256; i++) {
-			paletteData.colors[i] = new RGB(red[i], green[i], blue[i]);
+			data.colors[i] = new RGB(red[i], green[i], blue[i]);
 		}
+		getPaletteTrace().setPaletteData(data);
 	}
 
 	private int[] invert(int[] array) {
@@ -1362,6 +1377,21 @@ public class HistogramToolPage extends AbstractToolPage {
 
 	protected void setHistoMin(double histoMin) {
 		this.histoMin = histoMin;
+	}
+
+	/**
+	 * Update the colour scheme combo on this page
+	 * @param schemeName colour scheme name
+	 */
+	private void updateColourScheme(String schemeName) {
+		if (updatingColorSchemeInternally)
+			return;
+		if (cmbColourMap == null || cmbColourMap.isDisposed())
+			return;
+		if (schemeName == null)
+			return;
+		cmbColourMap.select(Arrays.asList(cmbColourMap.getItems()).indexOf(
+				schemeName));
 	}
 
 }

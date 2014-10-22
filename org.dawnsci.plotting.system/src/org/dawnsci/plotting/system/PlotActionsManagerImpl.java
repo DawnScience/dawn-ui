@@ -230,8 +230,8 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 		if (traces!=null) for (final ITrace trace: traces) {
 			if (trace instanceof IPaletteTrace) {
 				final IPaletteTrace paletteTrace = (IPaletteTrace) trace;
-				paletteTrace.setPaletteData(data);
 				paletteTrace.setPaletteName(paletteName);
+				paletteTrace.setPaletteData(data);
 			}
 		}
 	}
