@@ -667,7 +667,7 @@ public class DataFileSliceView extends ViewPart {
 		}
 		
 		@Override
-		public void init(IOperation<? extends IOperationModel, ? extends OperationData>[] series) throws Exception {
+		public void init(IOperation<? extends IOperationModel, ? extends OperationData>[] series, OriginMetadata origin) throws Exception {
 			
 		}
 		
