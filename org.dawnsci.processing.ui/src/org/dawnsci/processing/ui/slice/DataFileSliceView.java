@@ -40,6 +40,7 @@ import org.eclipse.dawnsci.analysis.api.processing.IExecutionVisitor;
 import org.eclipse.dawnsci.analysis.api.processing.IExportOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
+import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.slice.SliceVisitor;
 import org.eclipse.dawnsci.analysis.api.slice.Slicer;
@@ -107,6 +108,7 @@ public class DataFileSliceView extends ViewPart {
 	IOperation<? extends IOperationModel, ? extends OperationData> currentOperation = null;
 	IPlottingSystem input;
 	IPlottingSystem output;
+	IOperationErrorInformer informer;
 	
 	private final static Logger logger = LoggerFactory.getLogger(DataFileSliceView.class);
 	
@@ -225,6 +227,9 @@ public class DataFileSliceView extends ViewPart {
 		view = page.findView("org.dawnsci.processing.ui.input");
 		input = (IPlottingSystem)view.getAdapter(IPlottingSystem.class);
 		
+		view = getSite().getPage().findView("org.dawnsci.processing.ui.processingView");
+		
+		informer = (IOperationErrorInformer)view.getAdapter(IOperationErrorInformer.class);
 
 	}
 	
@@ -550,6 +555,7 @@ public class DataFileSliceView extends ViewPart {
 				int[] dataDims = Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions());
 				
 				final IDataset firstSlice = lazyDataset.getSlice(csw.getCurrentSlice());
+				informer.setTestData(firstSlice.getSliceView().squeeze());
 				SlicedDataUtils.plotDataWithMetadata(firstSlice, input, dataDims);
 				
 				OriginMetadataImpl om = new OriginMetadataImpl(lazyDataset, viewSlice, dataDims, path, context.getDatasetNames().get(0));
@@ -563,9 +569,18 @@ public class DataFileSliceView extends ViewPart {
 				long start = System.currentTimeMillis();
 				sliceVisitor.visit(firstSlice, null, null);
 				logger.debug("Ran in: " +(System.currentTimeMillis()-start)/1000. + " s");
-				
+				informer.setInErrorState(null);
+				} catch (OperationException e) {
+					logger.error(e.getMessage(), e);
+					if (informer != null) informer.setInErrorState(e);
+					return Status.CANCEL_STATUS;
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
+					if (informer != null) {
+						String message = e.getMessage();
+						if (message == null) message = "Unexpected error!";
+						informer.setInErrorState(new OperationException(null, message));
+					}
 					return Status.CANCEL_STATUS;
 				}
 				
