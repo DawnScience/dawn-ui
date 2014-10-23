@@ -476,7 +476,8 @@ public class AxisPixelROIEditTable {
 	 */
 	public void setTableValues(IROI region) {
 		roi = region;
-
+		if (!(roi instanceof RectangularROI))
+			return;
 		RectangularROI rroi = (RectangularROI)roi;
 		if(roi == null) return;
 		double xStart = roi.getPointX();
