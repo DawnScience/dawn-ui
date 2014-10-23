@@ -82,7 +82,7 @@ public class SpectrumFileManager implements IDataMailListener {
         	
         	Map<String,IDataset> sorted = new TreeMap<String, IDataset>(evt.getData());
         	
-        	// TODO What about sending the x-axis
+        	// TODO What about sending the x-axis?
         	final SpectrumInMemory mem = new SpectrumInMemory(evt.getFullName(), evt.getFullName(), null, sorted.values(), system);
     		removeFile(evt.getFullName());
             addFile(mem);
