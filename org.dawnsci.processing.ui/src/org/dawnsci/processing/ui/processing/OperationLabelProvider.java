@@ -13,13 +13,28 @@ import org.dawnsci.processing.ui.model.OperationDescriptor;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
-final class OperationLabelProvider extends SeriesItemLabelProvider  {
+final class OperationLabelProvider extends SeriesItemLabelProvider implements IStyledLabelProvider {
+
+
+	@Override
+	public StyledString getStyledText(Object element) {
+
+		if(!(element instanceof OperationDescriptor)) return null;
+
+		final StyledString ret = new StyledString(getText(element));
+		
+		OperationDescriptor des = (OperationDescriptor)element;
+        ret.append(des.getCategoryLabel(), StyledString.DECORATIONS_STYLER);
+		return ret;
+	}
 
 	@Override
 	public String getText(Object element) {
@@ -107,4 +122,5 @@ final class OperationLabelProvider extends SeriesItemLabelProvider  {
 			italicFont = null;
 		}
 	}
+
 }

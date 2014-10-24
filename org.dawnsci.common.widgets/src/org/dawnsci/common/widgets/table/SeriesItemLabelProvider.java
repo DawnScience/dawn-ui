@@ -10,6 +10,7 @@ package org.dawnsci.common.widgets.table;
 
 import org.dawnsci.common.widgets.Activator;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.graphics.Image;
 
@@ -18,7 +19,7 @@ import org.eclipse.swt.graphics.Image;
  * @author Matthew Gerring
  *
  */
-public class SeriesItemLabelProvider extends ColumnLabelProvider  {
+public abstract class SeriesItemLabelProvider extends ColumnLabelProvider implements DelegatingStyledCellLabelProvider.IStyledLabelProvider  {
 
 	private Image newImage;
 	protected int column=-1;

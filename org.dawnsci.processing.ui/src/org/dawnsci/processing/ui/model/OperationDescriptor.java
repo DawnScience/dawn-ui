@@ -16,8 +16,10 @@ import java.util.UUID;
 import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.dawnsci.analysis.api.processing.AbstractOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
+import org.eclipse.dawnsci.analysis.api.processing.OperationCategory;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -211,5 +213,16 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 	
 	public String toString() {
 		return getName();
+	}
+
+	public String getCategoryLabel() {
+		
+		if (operation==null) return "";
+		if (!(operation instanceof AbstractOperation)) return "";
+		
+		AbstractOperation<IOperationModel, OperationData> aop = (AbstractOperation<IOperationModel, OperationData>)operation;
+        if (aop.getCategory()==null) return "";
+        final OperationCategory cat = aop.getCategory();
+        return "("+cat.getName()+")";
 	}
 }
