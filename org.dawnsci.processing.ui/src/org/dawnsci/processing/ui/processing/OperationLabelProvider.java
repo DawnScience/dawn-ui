@@ -27,7 +27,7 @@ final class OperationLabelProvider extends SeriesItemLabelProvider implements IS
 	@Override
 	public StyledString getStyledText(Object element) {
 
-		if(!(element instanceof OperationDescriptor)) return null;
+		if(!(element instanceof OperationDescriptor)) return new StyledString();
 
 		final StyledString ret = new StyledString(getText(element));
 		
