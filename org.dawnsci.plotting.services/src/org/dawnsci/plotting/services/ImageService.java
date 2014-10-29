@@ -163,7 +163,13 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 			// no guarantees for minCut though
 			minCut = minCut <= 0 ? Double.NEGATIVE_INFINITY : Math.log10(minCut);
 		}
-		
+
+		if (oImage.isComplex()) { // handle complex datasets by creating RGB dataset
+			Dataset hue = Maths.angle(oImage, true);
+			image = RGBDataset.createFromHSV(hue, null, getImageLoggedData(bean));
+			return SWTImageUtils.createImageData(image, 0, 255, null, null, null, false, false, false);
+		}
+
 		if (bean.getFunctionObject()!=null && bean.getFunctionObject() instanceof FunctionContainer) {
 			final FunctionContainer fc = (FunctionContainer)bean.getFunctionObject();
 			// TODO This does not support masking or cut bounds for zingers and dead pixels.

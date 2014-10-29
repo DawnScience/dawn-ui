@@ -236,7 +236,12 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private double xOffset;
 	private double yOffset;
 	private org.eclipse.swt.graphics.Rectangle  screenRectangle;
-	
+
+	/**
+	 * number of entries in intensity scale
+	 */
+	final static int INTENSITY_SCALE_ENTRIES = 256;
+
 	private boolean createScaledImage(ImageScaleType rescaleType, final IProgressMonitor monitor) {
 			
 		if (!imageCreationAllowed) return false;
@@ -270,7 +275,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				imageServiceBean.setImage(reducedFullImage);
 				imageServiceBean.setMonitor(monitor);
 				if (fullMask!=null) {
-					// For masks, we preserve the min (the falses) to avoid loosing fine lines
+					// For masks, we preserve the min (the falses) to avoid losing fine lines
 					// which are masked.
 					imageServiceBean.setMask(getDownsampled(fullMask, DownsampleMode.MINIMUM));
 				} else {
@@ -297,10 +302,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					// We send the image drawn with the same palette to the 
 					// intensityScale
 					// TODO FIXME This will not work in log mode
-					final DoubleDataset dds = new DoubleDataset(256,1);
+					final DoubleDataset dds = new DoubleDataset(INTENSITY_SCALE_ENTRIES,1);
 					double max = getMax().doubleValue();
-					double inc = (max - getMin().doubleValue())/256d;
-					for (int i = 0; i < 256; i++) {
+					double inc = (max - getMin().doubleValue())/INTENSITY_SCALE_ENTRIES;
+					for (int i = 0; i < INTENSITY_SCALE_ENTRIES; i++) {
 						dds.set(max - (i*inc), i, 0);
 					}
 					intensityScaleBean.setImage(dds);
@@ -920,9 +925,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	private RGBDataset rgbDataset;
+	@SuppressWarnings({ "unchecked" })
 	@Override
 	public boolean setData(IDataset im, List<? extends IDataset> axes, boolean performAuto) {
-		
 		// We are just assigning the data before the image is live.
 		if (getParent()==null && !performAuto) {
 			this.image = (Dataset)im;
