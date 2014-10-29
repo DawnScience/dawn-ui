@@ -117,8 +117,8 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 	 * This method should be thread safe.
 	 */
 	public ImageData getImageData(ImageServiceBean bean) {
-		
-		Dataset image    = (Dataset)bean.getImage();
+		Dataset oImage    = (Dataset)bean.getImage();
+		Dataset image    = oImage;
 		ImageOrigin     origin   = bean.getOrigin();
 		if (origin==null) origin = ImageOrigin.TOP_LEFT;
 		PaletteData     palette  = bean.getPalette();
@@ -142,38 +142,39 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 			RGBDataset rgbImage = (RGBDataset) image;
 			return SWTImageUtils.createImageData(rgbImage, 0, 255, null, null, null, false, false, false);
 		}
-		
+
 		int depth = bean.getDepth();
 		final int size  = (int)Math.round(Math.pow(2, depth));
-		
+
 		createMaxMin(bean);
 		double max = getMax(bean);
 		double min = getMin(bean);
-		
+
 		double maxCut = getMaxCut(bean);
 		double minCut = getMinCut(bean);
-		
+
 		// now deal with the log if needed
-		if(bean.isLogColorScale()) {
+		if (bean.isLogColorScale()) {
 			image = getImageLoggedData(bean);
-			max = (float) Math.log10(max);
-			min = (float) Math.log10(min);
-			if (min <= 0 || Double.isNaN(min)) min = (float) 0.0000001;
-			maxCut = (float) Math.log10(maxCut);
-			minCut = (float) Math.log10(minCut);
+			max = Math.log10(max);
+			// note createMaxMin() -> getFastStatistics() -> getImageLogged() which ensures min >= 0 
+			min = Math.log10(min);
+			maxCut = Math.log10(maxCut);
+			// no guarantees for minCut though
+			minCut = minCut <= 0 ? Double.NEGATIVE_INFINITY : Math.log10(minCut);
 		}
 		
 		if (bean.getFunctionObject()!=null && bean.getFunctionObject() instanceof FunctionContainer) {
 			final FunctionContainer fc = (FunctionContainer)bean.getFunctionObject();
 			// TODO This does not support masking or cut bounds for zingers and dead pixels.
 			return SWTImageUtils.createImageData(image, min, max, fc.getRedFunc(), 
-					                                              fc.getGreenFunc(), 
-					                                              fc.getBlueFunc(), 
-					                                              fc.isInverseRed(), 
-					                                              fc.isInverseGreen(), 
-					                                              fc.isInverseBlue());
+																  fc.getGreenFunc(), 
+																  fc.getBlueFunc(), 
+																  fc.isInverseRed(), 
+																  fc.isInverseGreen(), 
+																  fc.isInverseBlue());
 		}
-		
+
 		if (depth>8) { // Depth > 8 will not work properly at the moment.
 			throw new RuntimeException(getClass().getSimpleName()+" only supports 8-bit images unless a FunctionContainer has been set!");
 			//if (depth == 16) palette = new PaletteData(0x7C00, 0x3E0, 0x1F);
@@ -194,24 +195,24 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		double maxPixel;
 		if (max > min) {
 			// 4 because 1 less than size and then 1 for each bound colour is lost.
-			scale = (size-4) / (max - min);
+			scale = (size - 4) / (max - min);
 			maxPixel = max - min;
 		} else {
-			scale = 1f;
+			scale = 1;
 			maxPixel = 0xFF;
 		}
 		if (bean.isCancelled()) return null;
 		
 		BooleanDataset mask = bean.getMask()!=null
-				            ? (BooleanDataset)DatasetUtils.cast((Dataset)bean.getMask(), Dataset.BOOL)
-				            : null;
-				            
- 		ImageData imageData = null;
- 		
- 		// We use a byte array directly as this is faster than using setPixel(...)
- 		// on image data. Set pixel does extra floating point operations. The downside
- 		// is that by doing this we certainly have to have 8 bit as getPixelColorIndex(...)
- 		// forces the use of on byte.
+							? (BooleanDataset)DatasetUtils.cast((Dataset)bean.getMask(), Dataset.BOOL)
+							: null;
+
+		ImageData imageData = null;
+
+		// We use a byte array directly as this is faster than using setPixel(...)
+		// on image data. Set pixel does extra floating point operations. The downside
+		// is that by doing this we certainly have to have 8 bit as getPixelColorIndex(...)
+		// forces the use of on byte.
 		final byte[] scaledImageAsByte = new byte[len];
 
 		if (origin==ImageOrigin.TOP_LEFT) { 
@@ -224,8 +225,8 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 					
 					// This saves a value lookup when the pixel is certainly masked.
 					scaledImageAsByte[index] = mask==null || mask.getBoolean(i,j)
-						            ? getPixelColorIndex(image.getDouble(i,j), min, max, scale, maxPixel, minCut, maxCut)
-					                : NAN_PIX_BYTE;
+									? getPixelColorIndex(image.getDouble(i,j), min, max, scale, maxPixel, minCut, maxCut)
+									: NAN_PIX_BYTE;
 					++index;
 				}
 			}
@@ -242,8 +243,8 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 					
 					// This saves a value lookup when the pixel is certainly masked.
 					scaledImageAsByte[index]  = mask==null || mask.getBoolean(j,i)
-				                    ? getPixelColorIndex(image.getDouble(j,i), min, max, scale, maxPixel, minCut, maxCut)
-			                        : NAN_PIX_BYTE;
+									? getPixelColorIndex(image.getDouble(j,i), min, max, scale, maxPixel, minCut, maxCut)
+									: NAN_PIX_BYTE;
 					index++;
 				}
 			}
@@ -256,13 +257,12 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 			// However it reorders data for the axes
 			for (int i = shape[0]-1; i>=0; --i) {
 				if (bean.isCancelled()) return null;
-			    for (int j = shape[1]-1; j>=0; --j) {
-				
+				for (int j = shape[1]-1; j>=0; --j) {
 
 					// This saves a value lookup when the pixel is certainly masked.
 					scaledImageAsByte[index] = mask==null || mask.getBoolean(i,j)
-						            ? getPixelColorIndex(image.getDouble(i,j), min, max, scale, maxPixel, minCut, maxCut)
-					                : NAN_PIX_BYTE;
+									? getPixelColorIndex(image.getDouble(i,j), min, max, scale, maxPixel, minCut, maxCut)
+									: NAN_PIX_BYTE;
 						index++;
 				}
 			}
@@ -276,42 +276,41 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 			for (int i = 0; i<shape[1]; ++i) {
 				if (bean.isCancelled()) return null;
 				for (int j = shape[0]-1; j>=0; --j) {
-					
 					scaledImageAsByte[index]  = mask==null || mask.getBoolean(j,i)
-		                            ? getPixelColorIndex(image.getDouble(j, i), min, max, scale, maxPixel, minCut, maxCut)
-	                                : NAN_PIX_BYTE;
-		        	index++;
+									? getPixelColorIndex(image.getDouble(j, i), min, max, scale, maxPixel, minCut, maxCut)
+									: NAN_PIX_BYTE;
+					index++;
 				}
 			}
 			imageData = new ImageData(shape[0], shape[1], 8, palette, 1, scaledImageAsByte);
 		}
-				
+
 		return imageData;
 	}
 
 	private double getMax(ImageServiceBean bean) {
-		if (bean.getMaximumCutBound()==null ||  bean.getMaximumCutBound().getBound()==null) {
+		if (bean.getMaximumCutBound()==null || bean.getMaximumCutBound().getBound()==null) {
 			return bean.getMax().doubleValue();
 		}
 		return Math.min(bean.getMax().doubleValue(), bean.getMaximumCutBound().getBound().doubleValue());
 	}
 	
 	private double getMin(ImageServiceBean bean) {
-		if (bean.getMinimumCutBound()==null ||  bean.getMinimumCutBound().getBound()==null) {
+		if (bean.getMinimumCutBound()==null || bean.getMinimumCutBound().getBound()==null) {
 			return bean.getMin().doubleValue();
 		}
 		return Math.max(bean.getMin().doubleValue(), bean.getMinimumCutBound().getBound().doubleValue());
 	}
 	
 	private double getMaxCut(ImageServiceBean bean) {
-		if (bean.getMaximumCutBound()==null ||  bean.getMaximumCutBound().getBound()==null) {
+		if (bean.getMaximumCutBound()==null || bean.getMaximumCutBound().getBound()==null) {
 			return Double.POSITIVE_INFINITY;
 		}
 		return bean.getMaximumCutBound().getBound().doubleValue();
 	}
 	
 	private double getMinCut(ImageServiceBean bean) {
-		if (bean.getMinimumCutBound()==null ||  bean.getMinimumCutBound().getBound()==null) {
+		if (bean.getMinimumCutBound()==null || bean.getMinimumCutBound().getBound()==null) {
 			return Double.NEGATIVE_INFINITY;
 		}
 		return bean.getMinimumCutBound().getBound().doubleValue();
@@ -385,15 +384,14 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 												 final double  maxPixel,
 												 final double  minCut,
 												 final double  maxCut) {
-	    
+
 		// Deal with bounds
-	    if (val<=minCut) return MIN_PIX_BYTE;		
-		
 		if (Double.isNaN(val)) return NAN_PIX_BYTE;
-	    
-		if (val>=maxCut) return MAX_PIX_BYTE;	
-		
-		// If the pixel is within the bounds		
+
+		if (val<=minCut) return MIN_PIX_BYTE;
+		if (val>=maxCut) return MAX_PIX_BYTE;
+
+		// If the pixel is within the bounds
 		double scaled_pixel;
 		if (val < min) {
 			scaled_pixel = 0;
@@ -403,12 +401,26 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 			scaled_pixel = val - min;
 		}
 		scaled_pixel = scaled_pixel * scale;
-		
+
 		return (byte) (0x000000FF & ((int) scaled_pixel));
 	}
-	
+
+	/**
+	 * 
+	 * @param bean
+	 * @return a dataset that can be absolute, if complex, and also be logged according to bean
+	 */
 	private Dataset getImageLoggedData(ImageServiceBean bean) {
-		Dataset ret = (Dataset)bean.getImage();
+		Dataset ret = (Dataset) bean.getImageValue();
+		if (ret != null)
+			return ret;
+
+		ret = (Dataset) bean.getImage();
+
+		if (ret.isComplex()) {
+			ret = Maths.abs(ret);
+			bean.setImageValue(ret);
+		}
 		if (bean.isLogColorScale()) {
 			double offset = bean.getLogOffset();
 			if (!Double.isNaN(offset) &&
@@ -416,6 +428,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 				ret.isubtract(offset);
 			}
 			ret = Maths.log10(ret);
+			bean.setImageValue(ret);
 		}
 		return ret;
 	}
@@ -440,14 +453,13 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 			try {
 			    double[] stats = Stats.outlierValues(image, bean.getLo(), bean.getHi(), -1);
 			    ret = new double[]{stats[0], stats[1], -1};
-			    
 			} catch (IllegalArgumentException iae) {
 				bean.setLo(10);
 				bean.setHi(90);
 			    double[] stats = Stats.outlierValues(image, bean.getLo(), bean.getHi(), -1);
 			    ret = new double[]{stats[0], stats[1], -1};
 			}
-			
+
 		    if (bean.isLogColorScale() && ret!=null) {
 		    	ret = new double[]{Math.pow(10, ret[0]), Math.pow(10, ret[1]), -1};
 			}
@@ -506,13 +518,13 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 
 		}
 		
-		if (retMax > max)	retMax = max;
+		if (retMax > max) retMax = max;
 		
 		if (bean.isLogColorScale()) {
 			return new double[]{Math.pow(10, min), Math.pow(10, retMax), Math.pow(10, retExtra)};
-		}		
-		return new double[]{min, retMax, retExtra, max};
+		}
 
+		return new double[]{min, retMax, retExtra, max};
 	}
 
 	@Override

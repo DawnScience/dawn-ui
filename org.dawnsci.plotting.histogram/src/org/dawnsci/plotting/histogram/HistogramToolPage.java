@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
@@ -116,7 +117,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 	private Dataset histogramX;
 	private Dataset histogramY;
-	private int num_bins = MAX_BINS;
+	private int numBins = MAX_BINS;
 
 	private boolean histogramDirty = true;
 
@@ -194,7 +195,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 	// HELPERS
 	private ExtensionPointManager extensionPointManager;
-	private UIJob imagerepaintJob;
+	private UIJob imageRepaintJob;
 	private PaletteData paletteData;
 	private int internalEvent = 0; // This is very likely to go wrong, suggest avoid
 								   // having counters for events.
@@ -247,8 +248,8 @@ public class HistogramToolPage extends AbstractToolPage {
 				if (!lockAction.isChecked() && getImageTrace()!=null) {
                     ImageServiceBean bean = getImageTrace().getImageServiceBean();
                     if (bean!=null) {
-                       	HistogramToolPage.this.setHistoMin( bean.getMin().doubleValue() );
-                       	HistogramToolPage.this.setHistoMax( bean.getMax().doubleValue() );
+                       	HistogramToolPage.this.setHistoMin(bean.getMin().doubleValue());
+                       	HistogramToolPage.this.setHistoMax(bean.getMax().doubleValue());
                     }
 				}
 				logger.trace("tracelistener firing");
@@ -294,7 +295,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				rangeMax = ((IPaletteTrace)evt.getSource()).getImageServiceBean().getMaximumCutBound().getBound().doubleValue();
 				zingerDeco.setValue(rangeMax);
 				if(histoMax > rangeMax) setHistoMax( rangeMax );
-				generateHistogram(imageDataset);
+				generateHistogram();
 				updateHistogramToolElements(evt.getTrace(), null, false, true);
 			}
 
@@ -305,7 +306,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				rangeMin = ((IPaletteTrace)evt.getSource()).getImageServiceBean().getMinimumCutBound().getBound().doubleValue();
 				deadDeco.setValue(rangeMin);
 				if(histoMin < rangeMin) setHistoMin( rangeMin );
-				generateHistogram(imageDataset);
+				generateHistogram();
 				updateHistogramToolElements(evt.getTrace(), null, false, true);
 			}
 
@@ -398,7 +399,7 @@ public class HistogramToolPage extends AbstractToolPage {
 					}
 
 					// calculate the histogram
-					generateHistogram(imageDataset);
+					generateHistogram();
 
 					updateHistogramToolElements(event, true, false);
 				} catch (Exception e) {
@@ -426,7 +427,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				zingerDeco.setValue(rangeMax);	
 
 				// calculate the histogram
-				generateHistogram(imageDataset);
+				generateHistogram();
 
 				updateHistogramToolElements(event, true, false);
 
@@ -476,7 +477,7 @@ public class HistogramToolPage extends AbstractToolPage {
 						}
 					}
 					updateImage(null, true);
-					imagerepaintJob.schedule();
+					imageRepaintJob.schedule();
 				}
 			}
 		};
@@ -516,7 +517,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		};
 
 		// Set up the repaint job
-		imagerepaintJob = new UIJob("Colour Scale Image Update") {			
+		imageRepaintJob = new UIJob("Colour Scale Image Update") {			
 
 			@Override
 			public IStatus runInUIThread(IProgressMonitor mon) {
@@ -959,34 +960,30 @@ public class HistogramToolPage extends AbstractToolPage {
 
 			logger.trace("Image Data is of type :" + imageDataset.getDtype());
 			if (imageDataset.hasFloatingPointElements()) {
-				num_bins = MAX_BINS;
+				numBins = MAX_BINS;
 			} else {
 				// set the number of points to the range
-				num_bins = (Integer) imageDataset.max(true).intValue() - imageDataset.min(true).intValue();
-				if (num_bins > MAX_BINS) num_bins = MAX_BINS;
+				numBins = (Integer) imageDataset.max(true).intValue() - imageDataset.min(true).intValue();
+				if (numBins > MAX_BINS) numBins = MAX_BINS;
 			}
 
-
+			ImageServiceBean bean = image.getImageServiceBean();
 			switch (mode) {
 			case AUTO:
-				rangeMax = image.getImageServiceBean().getMaximumCutBound().getBound().doubleValue();
-				rangeMin = image.getImageServiceBean().getMinimumCutBound().getBound().doubleValue();
-				setHistoMax( image.getImageServiceBean().getMax().doubleValue());
-				setHistoMin( image.getImageServiceBean().getMin().doubleValue());
+				rangeMax = bean.getMaximumCutBound().getBound().doubleValue();
+				rangeMin = bean.getMinimumCutBound().getBound().doubleValue();
+				setHistoMax(bean.getMax().doubleValue());
+				setHistoMin(bean.getMin().doubleValue());
 				break;
 			case FIXED:
 				// Do nothing?
 				break;
 			default:
 				// this is the FULL implementation (a good default)
-				rangeMax = image.getImageServiceBean().getMaximumCutBound().getBound().doubleValue();
-				rangeMin = image.getImageServiceBean().getMinimumCutBound().getBound().doubleValue();
-				setHistoMax( image.getImageServiceBean().getMax()!=null
-						 ? image.getImageServiceBean().getMax().doubleValue()
-						 : 1);
-				setHistoMin( image.getImageServiceBean().getMin()!=null
-						 ? image.getImageServiceBean().getMin().doubleValue()
-						 : 0);
+				rangeMax = bean.getMaximumCutBound().getBound().doubleValue();
+				rangeMin = bean.getMinimumCutBound().getBound().doubleValue();
+				setHistoMax(bean.getMax()!=null ? bean.getMax().doubleValue() : 1);
+				setHistoMin(bean.getMin()!=null ? bean.getMin().doubleValue() : 0);
 				break;
 			}
 
@@ -997,7 +994,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			if (paletteData==null) paletteData = image.getPaletteData();
 
 			// calculate the histogram
-			generateHistogram(imageDataset);
+			generateHistogram();
 
 			// update all based on slider positions
 			updateHistogramToolElements(image, null, repaintImage, true);
@@ -1013,10 +1010,12 @@ public class HistogramToolPage extends AbstractToolPage {
 	}
 
 	private Dataset getImageData(IPaletteTrace image) {
-		Dataset im = (Dataset)image.getImageServiceBean().getImage();
+		Dataset im = (Dataset)image.getImageServiceBean().getImageValue();
+		if (im == null)
+			im = (Dataset)image.getImageServiceBean().getImage();
 		if (im==null) im = (Dataset)image.getData();
 		if (im==null && imageDataset!=null) im = imageDataset;
-		if (im==null) im = new DoubleDataset(new double[]{0,1,2,3}, new int[]{2,2});
+		if (im==null) im = new DoubleDataset(new double[]{0,1,2,3}, 2, 2);
  		return im;
 	}
 
@@ -1047,27 +1046,23 @@ public class HistogramToolPage extends AbstractToolPage {
 		plotHistogram(trace, updateAxis);
 
 		// repaint the image if required
-		if(repaintImage) imagerepaintJob.schedule();
+		if(repaintImage) imageRepaintJob.schedule();
 	}
 
 
 	/**
 	 * This will take an image, and pull out all the parameters required to calculate the histogram
-	 * @param image the image to histogram
 	 */
-	private void generateHistogram(Dataset image) {
+	private void generateHistogram() {
 		// calculate the histogram for the whole image
 		double rMax = rangeMax;
 		double rMin = rangeMin;
 		if (Double.isInfinite(rMax)) rMax = imageDataset.max(true).doubleValue();
 		if (Double.isInfinite(rMin)) rMin = imageDataset.min(true).doubleValue();
 
-		Histogram hist = new Histogram(num_bins, rMin, rMax, true);
-		List<? extends Dataset> histogram_values = hist.value(image);
-		histogramX = histogram_values.get(1).getSlice(
-				new int[] {0},
-				new int[] {num_bins},
-				new int[] {1});
+		Histogram hist = new Histogram(numBins, rMin, rMax, true);
+		List<? extends Dataset> histogram_values = hist.value(imageDataset);
+		histogramX = histogram_values.get(1).getSliceView(new Slice(numBins));
 		histogramX.setName("Intensity");
 		histogramY = histogram_values.get(0);
 		histogramY = Maths.log10((Maths.add(histogramY, 1.0)));
