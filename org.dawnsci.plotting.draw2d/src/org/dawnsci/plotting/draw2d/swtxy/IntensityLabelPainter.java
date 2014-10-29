@@ -71,14 +71,17 @@ class IntensityLabelPainter {
 			final int yLower = Math.max(0, (int)Math.floor(Math.min(yAxis.getLower(), yAxis.getUpper())));
 			final int yUpper = Math.min(shape[0], (int) Math.ceil(Math.max(yAxis.getLower(), yAxis.getUpper())));
 
+			data.setStringFormat(format);
 			for (int x = xLower; x < xUpper; x++) {
 				for (int y = yLower; y < yUpper; y++) {
 					// TODO FIXME check rotations.
-					final double intensity = image.getData().getDouble(y, x);
+					String lText = data.getString(y, x);
+					int lx = xAxis.getValuePosition(x+0.5);
+					int ly = yAxis.getValuePosition(y+0.5);
 					graphics.setAlpha(75);
-					graphics.fillString(format.format(intensity), xAxis.getValuePosition(x+0.5), yAxis.getValuePosition(y+0.5));
+					graphics.fillString(lText, lx, ly);
 					graphics.setAlpha(255);
-					graphics.drawString(format.format(intensity), xAxis.getValuePosition(x+0.5), yAxis.getValuePosition(y+0.5));
+					graphics.drawString(lText, lx, ly);
 				}
 			}
 		} catch (Throwable ne) {
