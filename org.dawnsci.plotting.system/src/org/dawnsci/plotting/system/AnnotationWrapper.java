@@ -15,15 +15,15 @@ import org.eclipse.nebula.visualization.xygraph.figures.Annotation.CursorLineSty
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 
-class AnnotationWrapper implements IAnnotation {
+public class AnnotationWrapper implements IAnnotation {
 
 	private Annotation annotation;
 
-	AnnotationWrapper(String name, Axis xAxis, Axis yAxis) {
+	public AnnotationWrapper(String name, Axis xAxis, Axis yAxis) {
 		this.annotation = new Annotation(name, xAxis, yAxis);
 	}
 
-	AnnotationWrapper(Annotation annotation) {
+	public AnnotationWrapper(Annotation annotation) {
 		this.annotation = annotation;
 	}
 
