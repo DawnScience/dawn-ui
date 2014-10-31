@@ -166,7 +166,15 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 
 		if (oImage.isComplex()) { // handle complex datasets by creating RGB dataset
 			Dataset hue = Maths.angle(oImage, true);
-			image = RGBDataset.createFromHSV(hue, null, getImageLoggedData(bean));
+			Dataset value = getImageLoggedData(bean);
+			double maxmax = Math.max(Math.abs(max), Math.abs(min));
+			if (max - min > Math.ulp(maxmax)) {
+				value.isubtract(min);
+				value.imultiply(1./(max - min));
+			} else {
+				value.imultiply(1./maxmax);
+			}
+			image = RGBDataset.createFromHSV(hue, null, value);
 			return SWTImageUtils.createImageData(image, 0, 255, null, null, null, false, false, false);
 		}
 
