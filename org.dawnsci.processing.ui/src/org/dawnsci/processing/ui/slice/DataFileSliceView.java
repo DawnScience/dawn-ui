@@ -39,6 +39,7 @@ import org.eclipse.dawnsci.analysis.api.processing.ExecutionEvent;
 import org.eclipse.dawnsci.analysis.api.processing.IExecutionVisitor;
 import org.eclipse.dawnsci.analysis.api.processing.IExportOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
@@ -603,6 +604,7 @@ public class DataFileSliceView extends ViewPart {
 		private IOperation<? extends IOperationModel, ? extends OperationData> endOperation;
 		private IProgressMonitor monitor;
 		private IConversionContext context;
+		private IOperationService operationService;
 		
 		public EscapableSliceVisitor(ILazyDataset lz, UIExecutionVisitor visitor, 
 				                     int[] dataDims, IOperation<? extends IOperationModel, ? extends OperationData>[] series, 
@@ -613,6 +615,7 @@ public class DataFileSliceView extends ViewPart {
 			this.series = series;
 			this.monitor= monitor;
 			this.context= context;
+			this.operationService = (IOperationService)Activator.getService(IOperationService.class);
 		}
 		
 		public void setEndOperation(IOperation<? extends IOperationModel, ? extends OperationData> op) {
@@ -621,8 +624,7 @@ public class DataFileSliceView extends ViewPart {
 		}
 		
 		@Override
-		public void visit(IDataset slice, Slice[] slices,
-				int[] shape) throws Exception {
+		public void visit(IDataset slice, Slice[] slices, int[] shape) throws Exception {
 			
 			OriginMetadata om = null;
 			
@@ -638,7 +640,7 @@ public class DataFileSliceView extends ViewPart {
 			
 			for (IOperation<? extends IOperationModel, ? extends OperationData> i : series) {
 				
-				final ExecutionEvent evt = new ExecutionEvent(i, data, slices, shape, dataDims);
+				final ExecutionEvent evt = new ExecutionEvent(operationService, i, data, slices, shape, dataDims);
 				 if (i instanceof IExportOperation) {
 					 visitor.notify(evt);
 				 } else {
@@ -650,7 +652,7 @@ public class DataFileSliceView extends ViewPart {
 				if (i == endOperation) break;
 			}
 			
-			visitor.executed(new ExecutionEvent(null, data, slices, shape, dataDims)); // Send result.
+			visitor.executed(new ExecutionEvent(operationService, null, data, slices, shape, dataDims)); // Send result.
 		}
 
 		@Override
