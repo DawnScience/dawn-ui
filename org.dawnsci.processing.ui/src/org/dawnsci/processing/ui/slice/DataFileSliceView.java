@@ -34,11 +34,14 @@ import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
-import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
+import org.eclipse.dawnsci.analysis.api.metadata.OriginMetadata;
+import org.eclipse.dawnsci.analysis.api.processing.ExecutionEvent;
 import org.eclipse.dawnsci.analysis.api.processing.IExecutionVisitor;
 import org.eclipse.dawnsci.analysis.api.processing.IExportOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
+import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.slice.SliceVisitor;
 import org.eclipse.dawnsci.analysis.api.slice.Slicer;
@@ -86,7 +89,6 @@ import org.eclipse.ui.part.ViewPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.SDAPlotter;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.metadata.OriginMetadataImpl;
 import uk.ac.diamond.scisoft.analysis.processing.visitors.HierarchicalFileExecutionVisitor;
@@ -106,6 +108,7 @@ public class DataFileSliceView extends ViewPart {
 	IOperation<? extends IOperationModel, ? extends OperationData> currentOperation = null;
 	IPlottingSystem input;
 	IPlottingSystem output;
+	IOperationErrorInformer informer;
 	
 	private final static Logger logger = LoggerFactory.getLogger(DataFileSliceView.class);
 	
@@ -224,6 +227,9 @@ public class DataFileSliceView extends ViewPart {
 		view = page.findView("org.dawnsci.processing.ui.input");
 		input = (IPlottingSystem)view.getAdapter(IPlottingSystem.class);
 		
+		view = getSite().getPage().findView("org.dawnsci.processing.ui.processingView");
+		
+		informer = (IOperationErrorInformer)view.getAdapter(IOperationErrorInformer.class);
 
 	}
 	
@@ -544,16 +550,37 @@ public class DataFileSliceView extends ViewPart {
 
 				}
 				
-				final IDataset firstSlice = lazyDataset.getSlice(csw.getCurrentSlice());
-				SlicedDataUtils.plotDataWithMetadata(firstSlice, input, Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions()));
+				Slice[] viewSlice = Slicer.getSliceArrayFromSliceDimensions(context.getSliceDimensions(), lazyDataset.getShape());
 				
+				int[] dataDims = Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions());
+				
+				final IDataset firstSlice = lazyDataset.getSlice(csw.getCurrentSlice());
+				informer.setTestData(firstSlice.getSliceView().squeeze());
+				SlicedDataUtils.plotDataWithMetadata(firstSlice, input, dataDims);
+				
+				OriginMetadataImpl om = new OriginMetadataImpl(lazyDataset, viewSlice, dataDims, path, context.getDatasetNames().get(0));
+				om.setCurrentSlice(csw.getCurrentSlice());
+			
+				lazyDataset.setMetadata(om);
 				IOperation<? extends IOperationModel, ? extends OperationData>[] ops = getOperations();
 				if (ops == null) return Status.OK_STATUS;
 				EscapableSliceVisitor sliceVisitor = getSliceVisitor(ops, getOutputExecutionVisitor(), lazyDataset, Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions()));
 				sliceVisitor.setEndOperation(end);
+				long start = System.currentTimeMillis();
 				sliceVisitor.visit(firstSlice, null, null);
+				logger.debug("Ran in: " +(System.currentTimeMillis()-start)/1000. + " s");
+				informer.setInErrorState(null);
+				} catch (OperationException e) {
+					logger.error(e.getMessage(), e);
+					if (informer != null) informer.setInErrorState(e);
+					return Status.CANCEL_STATUS;
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
+					if (informer != null) {
+						String message = e.getMessage();
+						if (message == null) message = "Unexpected error!";
+						informer.setInErrorState(new OperationException(null, message));
+					}
 					return Status.CANCEL_STATUS;
 				}
 				
@@ -577,6 +604,7 @@ public class DataFileSliceView extends ViewPart {
 		private IOperation<? extends IOperationModel, ? extends OperationData> endOperation;
 		private IProgressMonitor monitor;
 		private IConversionContext context;
+		private IOperationService operationService;
 		
 		public EscapableSliceVisitor(ILazyDataset lz, UIExecutionVisitor visitor, 
 				                     int[] dataDims, IOperation<? extends IOperationModel, ? extends OperationData>[] series, 
@@ -587,6 +615,7 @@ public class DataFileSliceView extends ViewPart {
 			this.series = series;
 			this.monitor= monitor;
 			this.context= context;
+			this.operationService = (IOperationService)Activator.getService(IOperationService.class);
 		}
 		
 		public void setEndOperation(IOperation<? extends IOperationModel, ? extends OperationData> op) {
@@ -595,26 +624,35 @@ public class DataFileSliceView extends ViewPart {
 		}
 		
 		@Override
-		public void visit(IDataset slice, Slice[] slices,
-				int[] shape) throws Exception {
+		public void visit(IDataset slice, Slice[] slices, int[] shape) throws Exception {
 			
-			slice.addMetadata(new OriginMetadataImpl(lz, slices, dataDims));
+			OriginMetadata om = null;
+			
+			try {
+				om = lz.getMetadata(OriginMetadata.class).get(0);
+			} catch (Exception e1) {
+				throw new IllegalArgumentException("No origin!!!!");
+			}
+			
+			slice.setMetadata(om);
 			
 			OperationData  data = new OperationData(slice, (Serializable[])null);
-								
+			
 			for (IOperation<? extends IOperationModel, ? extends OperationData> i : series) {
+				
+				final ExecutionEvent evt = new ExecutionEvent(operationService, i, data, slices, shape, dataDims);
 				 if (i instanceof IExportOperation) {
-					 visitor.notify(i, data, slices, shape, dataDims);
+					 visitor.notify(evt);
 				 } else {
 					 OperationData tmp = i.execute(data.getData(), null);
-					 visitor.notify(i, tmp, slices, shape, dataDims); // Optionally send intermediate result
+					 visitor.notify(evt); // Optionally send intermediate result
 					data = i.isPassUnmodifiedData() ? data : tmp;
 				 }
 				
 				if (i == endOperation) break;
 			}
 			
-			visitor.executed(data, null, slices, shape, dataDims); // Send result.
+			visitor.executed(new ExecutionEvent(operationService, null, data, slices, shape, dataDims)); // Send result.
 		}
 
 		@Override
@@ -635,11 +673,10 @@ public class DataFileSliceView extends ViewPart {
 		}
 		
 		@Override
-		public void notify(IOperation<? extends IOperationModel, ? extends OperationData> intermediateData, OperationData data,
-				Slice[] slices, int[] shape, int[] dataDims) {
+		public void notify(ExecutionEvent evt) {
 			
 			try {
-				if (intermediateData == endOp) displayData(data,dataDims);
+				if (evt.getIntermediateData() == endOp) displayData(evt.getData(),evt.getDataDims());
 			} catch (Exception e) {
 				logger.error(e.getMessage());
 			}
@@ -647,15 +684,14 @@ public class DataFileSliceView extends ViewPart {
 		}
 		
 		@Override
-		public void init(IOperation<? extends IOperationModel, ? extends OperationData>[] series) throws Exception {
+		public void init(ExecutionEvent evt) throws Exception {
 			
 		}
 		
 		@Override
-		public void executed(OperationData result, IMonitor monitor,
-				Slice[] slices, int[] shape, int[] dataDims) throws Exception {
+		public void executed(ExecutionEvent evt) throws Exception {
 			
-			if (endOp == null) displayData(result,dataDims);
+			if (endOp == null) displayData(evt.getData(),evt.getDataDims());
 		}
 		
 		@Override

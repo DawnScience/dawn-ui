@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,15 +27,20 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.plotclient.dataset.DataMailEvent;
+import uk.ac.diamond.scisoft.analysis.plotclient.dataset.DatasetMailman;
+import uk.ac.diamond.scisoft.analysis.plotclient.dataset.IDataMailListener;
+
 /**
 * Manages the loading of files and the setting of the default x and y dataset names
 */
-public class SpectrumFileManager {
+public class SpectrumFileManager implements IDataMailListener {
 	
 	private IPlottingSystem system;
 	private Map<String,ISpectrumFile> spectrumFiles;
@@ -44,18 +50,44 @@ public class SpectrumFileManager {
 	private IContain1DData cachedFile;
 
 
+	/**
+	 * There should be one of these per TraceProcessPage
+	 * @param system
+	 */
 	public SpectrumFileManager(IPlottingSystem system) {
 		spectrumFiles = new LinkedHashMap<String,ISpectrumFile>();
 		listeners     = new HashSet<ISpectrumFileListener>();
 		this.system   = system;
+		
+		DatasetMailman.getLocalManager().addMailListener(this);
 	}
 	
 
 	public void dispose() {
 		spectrumFiles.clear();
 		listeners.clear();
+		DatasetMailman.getLocalManager().removeMailListener(this);
 	}
 
+	@Override
+	public void mailReceived(DataMailEvent evt) {
+		
+        if (evt.getData()==null || evt.getData().isEmpty()) {
+        	removeFile(evt.getFullName());
+        } else {
+        	// Make sure the names match.
+        	for (String name : evt.getData().keySet()) {
+        		evt.getData().get(name).setName(name);
+ 			}
+        	
+        	Map<String,IDataset> sorted = new TreeMap<String, IDataset>(evt.getData());
+        	
+        	// TODO What about sending the x-axis?
+        	final SpectrumInMemory mem = new SpectrumInMemory(evt.getFullName(), evt.getFullName(), null, sorted.values(), system);
+    		removeFile(evt.getFullName());
+            addFile(mem);
+        }
+	}
 
 	public void addFile(ISpectrumFile file) {
 		if (spectrumFiles.containsKey(file.getLongName())) return;
@@ -83,11 +115,13 @@ public class SpectrumFileManager {
 		return spectrumFiles.values();
 	}
 	
-	public void removeFile(String path) {
+	public ISpectrumFile removeFile(String path) {
 		ISpectrumFile file = spectrumFiles.get(path);
+		if (file == null) return null;
 		spectrumFiles.remove(path);
 		file.removeAllFromPlot();
 		fireFileListeners(new SpectrumFileOpenedEvent(this, file));
+		return file;
 	}
 	
 	public void addFileListener(ISpectrumFileListener listener) {

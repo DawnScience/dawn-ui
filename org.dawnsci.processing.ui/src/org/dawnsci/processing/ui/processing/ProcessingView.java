@@ -23,6 +23,8 @@ import org.dawnsci.common.widgets.table.SeriesTable;
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.model.OperationDescriptor;
 import org.dawnsci.processing.ui.preference.ProcessingConstants;
+import org.dawnsci.processing.ui.slice.IOperationErrorInformer;
+import org.dawnsci.processing.ui.slice.OperationInformerImpl;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
@@ -36,6 +38,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.util.IOpenEventListener;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeSelection;
@@ -71,6 +74,7 @@ public class ProcessingView extends ViewPart {
 	private OperationFilter           operationFiler;
 	private List<OperationDescriptor> saved;
 	private TableViewerColumn inputs, outputs;
+	private IOperationErrorInformer informer;
 	
 	private final static Logger logger = LoggerFactory.getLogger(ProcessingView.class);
 
@@ -97,8 +101,13 @@ public class ProcessingView extends ViewPart {
 		final Composite content = new Composite(parent, SWT.NONE);
 		content.setLayout(new GridLayout(1, false));
 		GridUtils.removeMargins(content);
+		
+		
+		OperationValidator val = new OperationValidator();
+		informer = new OperationInformerImpl(seriesTable);
+		val.setOperationErrorInformer(informer);
 
-		seriesTable.setValidator(new OperationValidator());
+		seriesTable.setValidator(val);
 		final OperationLabelProvider prov = new OperationLabelProvider();
 		seriesTable.createControl(content, prov);
 		seriesTable.registerSelectionProvider(getViewSite());		
@@ -183,7 +192,11 @@ public class ProcessingView extends ViewPart {
 				}
  			}
 			return pipeline;
-		} 
+		}
+		
+		if (clazz == IOperationErrorInformer.class) {
+			return informer;
+		}
 		return super.getAdapter(clazz);
 	}
 

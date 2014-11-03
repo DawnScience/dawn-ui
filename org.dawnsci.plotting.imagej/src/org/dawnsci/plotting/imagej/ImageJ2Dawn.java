@@ -1,12 +1,13 @@
 package org.dawnsci.plotting.imagej;
 
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
+
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.Roi;
 import ij.plugin.filter.PlugInFilter;
-import uk.ac.diamond.scisoft.analysis.dataset.IDataset;
-import uk.ac.diamond.scisoft.analysis.roi.IRectangularROI;
 
 public class ImageJ2Dawn {
 
@@ -18,7 +19,7 @@ public class ImageJ2Dawn {
 	 * @param commandName - command for filter to process
 	 * @param args        - arguments to the filter if any.
 	 * @return Filtered data
-	 * @throws Exception  - Thrown for a range of invlaid conditions, also where the filter is not applicable with an appropriate message.
+	 * @throws Exception  - Thrown for a range of invalid conditions, also where the filter is not applicable with an appropriate message.
 	 */
 	public static IDataset processFilter(IDataset data, IRectangularROI rroi, String className, String commandName, String args) throws Exception {
 		

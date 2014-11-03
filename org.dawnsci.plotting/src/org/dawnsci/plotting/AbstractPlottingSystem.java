@@ -654,13 +654,16 @@ public abstract class AbstractPlottingSystem implements IPlottingSystem, IToolPa
 	}
 
 	protected void fireToolChangeListeners(final ToolChangeEvent evt) {
-		if (toolChangeListeners == null)
-			return;
+		
+		if (toolChangeListeners == null) return;
 
-		if (evt.getOldPage() != null)
-			evt.getOldPage().deactivate();
-		if (evt.getNewPage() != null)
+		if (evt.getOldPage() != null) evt.getOldPage().deactivate();
+		
+		// If we have a new page and it has a control, activate it
+		// Fix to http://jira.diamond.ac.uk/browse/DAWNSCI-5691
+		if (evt.getNewPage() != null && evt.getNewPage().getControl()!=null) {
 			evt.getNewPage().activate();
+		}
 
 		for (IToolChangeListener l : toolChangeListeners) {
 			l.toolChanged(evt);

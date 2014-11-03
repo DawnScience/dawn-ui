@@ -1522,6 +1522,9 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		
 		try {
 			if (staticTool!=null && !(staticTool instanceof EmptyTool)) {
+				if (staticTool.getControl()!=null) {
+					staticTool.deactivate();
+				}
 				IToolPageSystem sys = (IToolPageSystem)part.getAdapter(IToolPageSystem.class);
 				staticTool.setToolSystem(sys);
 				if (sys instanceof IPlottingSystem) {

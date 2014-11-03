@@ -21,6 +21,7 @@ import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.FocusCellOwnerDrawHighlighter;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
@@ -250,14 +251,14 @@ public class SeriesTable {
 	}
 
 
-	public TableViewerColumn createColumn(String name, int mod, int width, final CellLabelProvider prov) {
+	public TableViewerColumn createColumn(String name, int mod, int width, final SeriesItemLabelProvider prov) {
 		
 		final TableViewerColumn col = new TableViewerColumn(tableViewer, SWT.LEFT);
 		col.getColumn().setWidth(width);
 		col.getColumn().setMoveable(true);
 		col.getColumn().setText(name);
 		
-		col.setLabelProvider(prov);
+		col.setLabelProvider(new DelegatingStyledCellLabelProvider(prov));
 		return col;
 	}
 

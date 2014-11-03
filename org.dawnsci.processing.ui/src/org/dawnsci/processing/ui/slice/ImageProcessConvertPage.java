@@ -169,7 +169,7 @@ public class ImageProcessConvertPage extends AbstractSliceConversionPage  {
 			
 			IDataset firstSlice = Slicer.getFirstSlice(lazyDataset, sliceDims);
 			AxesMetadata amd = SlicedDataUtils.createAxisMetadata(path, lazyDataset.getRank(), sliceComponent.getAxesNames());
-			firstSlice.addMetadata(amd);
+			firstSlice.setMetadata(amd);
 			SlicedDataUtils.plotDataWithMetadata(firstSlice, system, Slicer.getDataDimensions(lazyDataset.getShape(), sliceDims));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

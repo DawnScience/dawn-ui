@@ -6,7 +6,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.dawnsci.plotting.imagej.Activator
 Bundle-Vendor: Diamond Light Source
 Require-Bundle: org.eclipse.core.runtime,
- uk.ac.diamond.scisoft.analysis.api
+ org.eclipse.dawnsci.analysis.api
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,

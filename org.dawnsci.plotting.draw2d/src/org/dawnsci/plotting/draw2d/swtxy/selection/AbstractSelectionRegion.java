@@ -29,9 +29,10 @@ import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.MouseEvent;
 import org.eclipse.draw2d.MouseListener;
-import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.draw2d.Shape;
+import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
+import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -191,7 +192,7 @@ public abstract class AbstractSelectionRegion<T extends IROI> extends AbstractRe
 		if (isShowLabel() && getLabel()!=null) {
 			gc.setAlpha(255);
 			gc.setForegroundColor(ColorConstants.black);
-			gc.drawText(getLabel(), size.getCenter());
+			gc.drawText(getLabel(), new PrecisionPoint(size.getCenter().x-getLabel().length()*4, size.getCenter().y));
 		}
 	}
 
