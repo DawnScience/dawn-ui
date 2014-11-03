@@ -71,87 +71,54 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 		
 		final IImageTrace trace = tool.getImageTrace();
 		ICoordinateSystem coords = null;
+		String regionName = "";
 		try {
-			if (element instanceof IRegion){
-				
-				final IRegion region = (IRegion)element;
-				coords = region.getCoordinateSystem();
-
-				if (region.getRegionType()==RegionType.POINT) {
-					PointROI pr = (PointROI)tool.getBounds(region);
-					xIndex = pr.getPointX();
-					yIndex = pr.getPointY();
-					
-					// Sometimes the image can have axes set. In this case we need the point
-					// ROI in the axes coordinates
-					if (trace!=null) {
-						try {
-							pr = (PointROI)trace.getRegionInAxisCoordinates(pr);
-							xLabel = pr.getPointX();
-							yLabel = pr.getPointY();
-						} catch (Exception aie) {
-						    return "-";
-						}
-					}
-					
-				} else if (region.getRegionType() == RegionType.XAXIS_LINE){
-
-					if (region.getROI()==null) return null;
-					xIndex = region.getROI().getPointX();
-					yIndex = region.getROI().getPointY();
-			
-					final double[] dp = new double[]{xIndex, yIndex};
-					try {
-						if (trace!=null) trace.getPointInAxisCoordinates(dp);
-						xLabel = dp[0];
-						yLabel = dp[1];
-					} catch (Exception aie) {
-					    return "-";
-					}
-				}
-	
-			}else {
+			if (!(element instanceof IRegion))
 				return null;
-			}
-			
-			if (Double.isNaN(xLabel)) xLabel = xIndex;
-			if (Double.isNaN(yLabel)) yLabel = yIndex;
-	
-			IDiffractionMetadata dmeta = null;
-			Dataset set = null;
-			if (trace!=null) {
-				set = (Dataset)trace.getData();
-				final IMetadata      meta = set.getMetadata();
-				if (meta instanceof IDiffractionMetadata) {
-	
-					dmeta = (IDiffractionMetadata)meta;
-				}
-			}
-	
-			QSpace qSpace  = null;
-			Vector3dutil vectorUtil= null;
-			if (dmeta != null) {
-	
-				try {
-					DetectorProperties detector2dProperties = dmeta.getDetector2DProperties();
-					DiffractionCrystalEnvironment diffractionCrystalEnvironment = dmeta.getDiffractionCrystalEnvironment();
-					
-					if (!(detector2dProperties == null)){
-						qSpace = new QSpace(detector2dProperties,
-								diffractionCrystalEnvironment);
-										
-						vectorUtil = new Vector3dutil(qSpace, xIndex, yIndex);
+			final IRegion region = (IRegion)element;
+			coords = region.getCoordinateSystem();
+
+			if (region.getRegionType()==RegionType.POINT) {
+				regionName = region.getName();
+				PointROI pr = (PointROI)tool.getBounds(region);
+				xIndex = pr.getPointX();
+				yIndex = pr.getPointY();
+				
+				// Sometimes the image can have axes set. In this case we need the point
+				// ROI in the axes coordinates
+				if (trace!=null) {
+					try {
+						pr = (PointROI)trace.getRegionInAxisCoordinates(pr);
+						xLabel = pr.getPointX();
+						yLabel = pr.getPointY();
+					} catch (Exception aie) {
+						return "-";
 					}
-				} catch (Exception e) {
-					logger.error("Could not create a detector properties object from metadata", e);
+				}
+				
+			} else if (region.getRegionType() == RegionType.XAXIS_LINE){
+
+				if (region.getROI()==null) return null;
+				xIndex = region.getROI().getPointX();
+				yIndex = region.getROI().getPointY();
+		
+				final double[] dp = new double[]{xIndex, yIndex};
+				try {
+					if (trace!=null) trace.getPointInAxisCoordinates(dp);
+					xLabel = dp[0];
+					yLabel = dp[1];
+				} catch (Exception aie) {
+					return "-";
 				}
 			}
-							
+	
 			final boolean isCustom = TraceUtils.isCustomAxes(trace)  || tool.getToolPageRole() == ToolPageRole.ROLE_1D;
 			if (isCustom && (column == 1 || column == 2)) {
 				if (coords == null) return null;
 				double[] axisPt = new double[2];
 				try {
+					if (Double.isNaN(xLabel)) xLabel = xIndex;
+					if (Double.isNaN(yLabel)) yLabel = yIndex;
 					axisPt = coords.getValueAxisLocation(new double[]{xLabel, yLabel});
 					xLabel = axisPt[0];
 					yLabel = axisPt[1];
@@ -160,69 +127,105 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 				}
 			}
 
-			IPreferenceStore store = Activator.getPlottingPreferenceStore();
-
-			switch(column) {
-			case 0: // "Point Id"
-				return ( ( (IRegion)element).getRegionType() == RegionType.POINT) ? ((IRegion)element).getName(): "";
-			case 1: // "X position"
-				DecimalFormat pixelPosFormat   = new DecimalFormat(store.getString(InfoPixelConstants.PIXEL_POS_FORMAT));
-				return pixelPosFormat.format(xLabel);
-				//return isCustom ? String.format("% 1.1f", xLabel)
-				//		: String.format("% 1d", (int)Math.floor(xLabel));
-			case 2: // "Y position"
-				pixelPosFormat   = new DecimalFormat(store.getString(InfoPixelConstants.PIXEL_POS_FORMAT));
-				return pixelPosFormat.format(yLabel);
-				//return isCustom ? String.format("% 1.1f", yLabel)
-				//		: String.format("% 1d", (int)Math.floor(yLabel));
-			case 3: // "Data value"
-				//if (set == null || vectorUtil==null || vectorUtil.getQMask(qSpace, x, y) == null) return "-";
-				if (set == null) return "-";
-				DecimalFormat dataFormat   = new DecimalFormat(store.getString(InfoPixelConstants.DATA_FORMAT));
-				return dataFormat.format(set.getDouble((int)Math.floor(yIndex), (int) Math.floor(xIndex)));
-//				return String.format("% 4.4f", set.getDouble((int)Math.floor(yIndex), (int) Math.floor(xIndex)));
-			case 4: // q X
-				//if (vectorUtil==null || vectorUtil.getQMask(qSpace, x, y) == null) return "-";
-				if (vectorUtil==null ) return "-";
-				DecimalFormat qFormat   = new DecimalFormat(store.getString(InfoPixelConstants.Q_FORMAT));
-				return qFormat.format(vectorUtil.getQx());
-//				return String.format("% 4.4f", vectorUtil.getQx());
-			case 5: // q Y
-				//if (vectorUtil==null ||vectorUtil.getQMask(qSpace, x, y) == null) return "-";
-				if (vectorUtil==null) return "-";
-				qFormat   = new DecimalFormat(store.getString(InfoPixelConstants.Q_FORMAT));
-				return qFormat.format(vectorUtil.getQy());
-//				return String.format("% 4.4f", vectorUtil.getQy());
-			case 6: // q Z
-				//if (vectorUtil==null ||vectorUtil.getQMask(qSpace, x, y) == null) return "-";
-				if (vectorUtil==null) return "-";
-				qFormat   = new DecimalFormat(store.getString(InfoPixelConstants.Q_FORMAT));
-				return qFormat.format(vectorUtil.getQz());
-//				return String.format("% 4.4f", vectorUtil.getQz());
-			case 7: // 20
-				if (vectorUtil==null || qSpace == null) return "-";
-				DecimalFormat thetaFormat   = new DecimalFormat(store.getString(InfoPixelConstants.THETA_FORMAT));
-				return thetaFormat.format(Math.toDegrees(vectorUtil.getQScatteringAngle(qSpace)));
-//				return String.format("% 3.3f", Math.toDegrees(vectorUtil.getQScatteringAngle(qSpace)));
-			case 8: // resolution
-				//if (vectorUtil==null ||vectorUtil.getQMask(qSpace, x, y) == null) return "-";
-				if (vectorUtil==null ) return "-";
-				DecimalFormat resolutionFormat   = new DecimalFormat(store.getString(InfoPixelConstants.RESOLUTION_FORMAT));
-				return resolutionFormat.format((2*Math.PI)/vectorUtil.getQlength());
-//				return String.format("% 4.4f", (2*Math.PI)/vectorUtil.getQlength());
-			case 9: // Dataset name
-				if (set == null) return "-";
-				return set.getName();
-	
-			default:
-				return "Not found";
-			}
+			Dataset set = null;
+			if (trace!=null)
+				set = (Dataset)trace.getData();
+			return getText(xIndex, yIndex, xLabel, yLabel, set, regionName);
 		} catch (Throwable ne) { 
 			// Must not throw anything from this method - user sees millions of messages!
 			logger.error("Cannot get label!", ne);
 			return "";
 		}
-		
+	}
+
+	public String getText(final double xIndex, final double yIndex, double xLabel, double yLabel, final Dataset set, final String regionName) {
+		if (Double.isNaN(xLabel)) xLabel = xIndex;
+		if (Double.isNaN(yLabel)) yLabel = yIndex;
+
+		IDiffractionMetadata dmeta = null;
+		if (set!=null) {
+			final IMetadata      meta = set.getMetadata();
+			if (meta instanceof IDiffractionMetadata) {
+				dmeta = (IDiffractionMetadata)meta;
+			}
+		}
+
+		QSpace qSpace  = null;
+		Vector3dutil vectorUtil= null;
+		if (dmeta != null) {
+
+			try {
+				DetectorProperties detector2dProperties = dmeta.getDetector2DProperties();
+				DiffractionCrystalEnvironment diffractionCrystalEnvironment = dmeta.getDiffractionCrystalEnvironment();
+				
+				if (!(detector2dProperties == null)){
+					qSpace = new QSpace(detector2dProperties,
+							diffractionCrystalEnvironment);
+									
+					vectorUtil = new Vector3dutil(qSpace, xIndex, yIndex);
+				}
+			} catch (Exception e) {
+				logger.error("Could not create a detector properties object from metadata", e);
+			}
+		}
+						
+		IPreferenceStore store = Activator.getPlottingPreferenceStore();
+
+		switch(column) {
+		case 0: // "Point Id"
+			return regionName;
+		case 1: // "X position"
+			DecimalFormat pixelPosFormat   = new DecimalFormat(store.getString(InfoPixelConstants.PIXEL_POS_FORMAT));
+			return pixelPosFormat.format(xLabel);
+			//return isCustom ? String.format("% 1.1f", xLabel)
+			//		: String.format("% 1d", (int)Math.floor(xLabel));
+		case 2: // "Y position"
+			pixelPosFormat   = new DecimalFormat(store.getString(InfoPixelConstants.PIXEL_POS_FORMAT));
+			return pixelPosFormat.format(yLabel);
+			//return isCustom ? String.format("% 1.1f", yLabel)
+			//		: String.format("% 1d", (int)Math.floor(yLabel));
+		case 3: // "Data value"
+			//if (set == null || vectorUtil==null || vectorUtil.getQMask(qSpace, x, y) == null) return "-";
+			if (set == null) return "-";
+			DecimalFormat dataFormat   = new DecimalFormat(store.getString(InfoPixelConstants.DATA_FORMAT));
+			return dataFormat.format(set.getDouble((int)Math.floor(yIndex), (int) Math.floor(xIndex)));
+//				return String.format("% 4.4f", set.getDouble((int)Math.floor(yIndex), (int) Math.floor(xIndex)));
+		case 4: // q X
+			//if (vectorUtil==null || vectorUtil.getQMask(qSpace, x, y) == null) return "-";
+			if (vectorUtil==null ) return "-";
+			DecimalFormat qFormat   = new DecimalFormat(store.getString(InfoPixelConstants.Q_FORMAT));
+			return qFormat.format(vectorUtil.getQx());
+//				return String.format("% 4.4f", vectorUtil.getQx());
+		case 5: // q Y
+			//if (vectorUtil==null ||vectorUtil.getQMask(qSpace, x, y) == null) return "-";
+			if (vectorUtil==null) return "-";
+			qFormat   = new DecimalFormat(store.getString(InfoPixelConstants.Q_FORMAT));
+			return qFormat.format(vectorUtil.getQy());
+//				return String.format("% 4.4f", vectorUtil.getQy());
+		case 6: // q Z
+			//if (vectorUtil==null ||vectorUtil.getQMask(qSpace, x, y) == null) return "-";
+			if (vectorUtil==null) return "-";
+			qFormat   = new DecimalFormat(store.getString(InfoPixelConstants.Q_FORMAT));
+			return qFormat.format(vectorUtil.getQz());
+//				return String.format("% 4.4f", vectorUtil.getQz());
+		case 7: // 20
+			if (vectorUtil==null || qSpace == null) return "-";
+			DecimalFormat thetaFormat   = new DecimalFormat(store.getString(InfoPixelConstants.THETA_FORMAT));
+			return thetaFormat.format(Math.toDegrees(vectorUtil.getQScatteringAngle(qSpace)));
+//				return String.format("% 3.3f", Math.toDegrees(vectorUtil.getQScatteringAngle(qSpace)));
+		case 8: // resolution
+			//if (vectorUtil==null ||vectorUtil.getQMask(qSpace, x, y) == null) return "-";
+			if (vectorUtil==null ) return "-";
+			DecimalFormat resolutionFormat   = new DecimalFormat(store.getString(InfoPixelConstants.RESOLUTION_FORMAT));
+			return resolutionFormat.format((2*Math.PI)/vectorUtil.getQlength());
+//				return String.format("% 4.4f", (2*Math.PI)/vectorUtil.getQlength());
+		case 9: // Dataset name
+			if (set == null) return "-";
+			return set.getName();
+
+		default:
+			return "Not found";
+		}
 	}
 
 	@Override
