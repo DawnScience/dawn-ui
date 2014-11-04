@@ -36,7 +36,7 @@ import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.api.metadata.OriginMetadata;
-import org.eclipse.dawnsci.analysis.api.processing.ExecutionEvent;
+import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.api.processing.IExecutionVisitor;
 import org.eclipse.dawnsci.analysis.api.processing.IExportOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
@@ -96,6 +96,7 @@ import org.eclipse.ui.part.ViewPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.SDAPlotter;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.metadata.OriginMetadataImpl;
 import uk.ac.diamond.scisoft.analysis.processing.visitors.HierarchicalFileExecutionVisitor;
@@ -657,20 +658,21 @@ public class DataFileSliceView extends ViewPart {
 			OperationData  data = new OperationData(slice, (Serializable[])null);
 			
 			for (IOperation<? extends IOperationModel, ? extends OperationData> i : series) {
-				
-				final ExecutionEvent evt = new ExecutionEvent(operationService, i, data, slices, shape, dataDims);
+
 				 if (i instanceof IExportOperation) {
-					 visitor.notify(evt);
+					 visitor.notify(i, data, slices, shape, dataDims);
 				 } else {
 					 OperationData tmp = i.execute(data.getData(), null);
-					 visitor.notify(evt); // Optionally send intermediate result
+					 visitor.notify(i, tmp, slices, shape, dataDims); // Optionally send intermediate result
 					data = i.isPassUnmodifiedData() ? data : tmp;
 				 }
 				
 				if (i == endOperation) break;
 			}
 			
-			visitor.executed(new ExecutionEvent(operationService, null, data, slices, shape, dataDims)); // Send result.
+
+			visitor.executed(data, null, slices, shape, dataDims); // Send result.
+
 		}
 
 		@Override
@@ -691,10 +693,11 @@ public class DataFileSliceView extends ViewPart {
 		}
 		
 		@Override
-		public void notify(ExecutionEvent evt) {
+		public void notify(IOperation<? extends IOperationModel, ? extends OperationData> intermediateData, OperationData data,
+				Slice[] slices, int[] shape, int[] dataDims) {
 			
 			try {
-				if (evt.getIntermediateData() == endOp) displayData(evt.getData(),evt.getDataDims());
+				if (intermediateData == endOp) displayData(data,dataDims);
 			} catch (Exception e) {
 				logger.error(e.getMessage());
 			}
@@ -702,14 +705,15 @@ public class DataFileSliceView extends ViewPart {
 		}
 		
 		@Override
-		public void init(ExecutionEvent evt) throws Exception {
+		public void init(IOperation<? extends IOperationModel, ? extends OperationData>[] series, OriginMetadata origin) throws Exception {
 			
 		}
 		
 		@Override
-		public void executed(ExecutionEvent evt) throws Exception {
+		public void executed(OperationData result, IMonitor monitor,
+				Slice[] slices, int[] shape, int[] dataDims) throws Exception {
 			
-			if (endOp == null) displayData(evt.getData(),evt.getDataDims());
+			if (endOp == null) displayData(result,dataDims);
 		}
 		
 		@Override
