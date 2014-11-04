@@ -632,6 +632,8 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 			if (dimsDataList.getDimsData(i).getPlotAxis()==usedAxis) {
 				if (getRangeMode()!=RangeMode.MULTI_RANGE) {
 				    dimsDataList.getDimsData(i).setPlotAxis(AxisType.SLICE);
+				} else if (data.getPlotAxis() != AxisType.RANGE && data.getPlotAxis() != AxisType.SLICE) {
+					dimsDataList.getDimsData(i).setPlotAxis(AxisType.RANGE);
 				}
 			}
 		}

@@ -22,6 +22,7 @@ import org.dawb.common.services.conversion.IConversionContext.ConversionScheme;
 import org.dawb.common.services.conversion.IConversionService;
 import org.dawb.common.services.conversion.IProcessingConversionInfo;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
+import org.dawnsci.common.widgets.file.SelectorWidget;
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.model.OperationDescriptor;
 import org.eclipse.core.resources.IFile;
@@ -50,6 +51,8 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -74,12 +77,16 @@ import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.TypedEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -100,7 +107,7 @@ public class DataFileSliceView extends ViewPart {
 	TableViewer viewer;
 	IConversionService service;
 	IConversionContext context;
-	ImageProcessConvertPage convertPage;
+	SetUpProcessWizardPage convertPage;
 	UpdateJob job;
 	Label currentSliceLabel;
 	ChangeSliceWidget csw;
@@ -257,6 +264,14 @@ public class DataFileSliceView extends ViewPart {
 
 					});
 				}
+				
+				final File source = new File(context.getFilePaths().get(0));
+				String path  = source.getParent()+File.separator+"output";
+				OutputPathDialog opd = new OutputPathDialog(Display.getCurrent().getActiveShell(), path);
+				opd.create();
+				if (opd.open() == Dialog.CANCEL) return;
+				context.setOutputPath(opd.getPath());
+				
 
 				ProgressMonitorDialog dia = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
 
@@ -325,14 +340,14 @@ public class DataFileSliceView extends ViewPart {
 				
 				wiz.setNeedsProgressMonitor(true);
 				convertPage = null;
-				convertPage = new ImageProcessConvertPage();
+				convertPage = new SetUpProcessWizardPage(context);
 				wiz.addPage(convertPage);
 				final WizardDialog wd = new WizardDialog(getSite().getShell(),wiz);
 				wd.create();
-				convertPage.setContext(context);
+//				convertPage.setContext(context);
 				
 				if (wd.open() == WizardDialog.OK) {
-					context = convertPage.getContext();
+//					context = convertPage.getContext();
 					context.setConversionScheme(ConversionScheme.PROCESS);
 					
 					try {
@@ -359,26 +374,29 @@ public class DataFileSliceView extends ViewPart {
 			context = service.open(filePath);
 			job = new UpdateJob(context);
 
+			convertPage = null;
+			convertPage = new SetUpProcessWizardPage(context);
+			
 			Wizard wiz = new Wizard() {
 				//set 
 				@Override
 				public boolean performFinish() {
+					convertPage.populateContext();
 					return true;
 				}
 			};
 
 			wiz.setNeedsProgressMonitor(true);
-			convertPage = null;
-			convertPage = new ImageProcessConvertPage();
+			
 			wiz.addPage(convertPage);
 			final WizardDialog wd = new WizardDialog(getSite().getShell(),wiz);
-			wd.setPageSize(new Point(800, 800));
+			wd.setPageSize(new Point(900, 500));
 			wd.create();
 			context.setConversionScheme(ConversionScheme.PROCESS);
-			convertPage.setContext(context);
+//			convertPage.setContext(context);
 
 			if (wd.open() == WizardDialog.OK) {
-				context = convertPage.getContext();
+//				context = convertPage.getContext();
 				job = new UpdateJob(context);
 
 				try {
@@ -747,6 +765,62 @@ public class DataFileSliceView extends ViewPart {
 		}
 		
 	}
+	
+	private class OutputPathDialog extends Dialog {
+
+		SelectorWidget sw;
+		String path;
+		
+		  public OutputPathDialog(Shell parentShell, String path) {
+		    super(parentShell);
+		    this.path = path;
+		  }
+
+		  @Override
+		  protected Control createDialogArea(Composite parent) {
+			  
+//			  final File source = new File(context.getFilePaths().get(0));
+//				String path  = source.getParent()+File.separator+"output";
+			  
+		    final SelectorWidget sw = new SelectorWidget(parent) {
+				
+				@Override
+				public void pathChanged(String path, TypedEvent event) {
+
+						Button button = OutputPathDialog.this.getButton(OK);
+						if (button != null) {
+							boolean canOK = this.checkDirectory(path, false);
+							button.setEnabled(canOK);
+							OutputPathDialog.this.path = path;
+						}
+					
+				}
+			};
+			sw.setNewFile(false);
+			sw.setText(path);
+			
+		    return parent;
+		  }
+		  
+		  public String getPath() {
+			  return path;
+		  }
+		  
+
+		  // overriding this methods allows you to set the
+		  // title of the custom dialog
+		  @Override
+		  protected void configureShell(Shell newShell) {
+		    super.configureShell(newShell);
+		    newShell.setText("Select output directory");
+		  }
+
+		  @Override
+		  protected Point getInitialSize() {
+		    return new Point(450, 300);
+		  }
+
+		} 
 	
 
 }

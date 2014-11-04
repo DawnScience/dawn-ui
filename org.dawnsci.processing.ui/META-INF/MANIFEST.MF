@@ -22,11 +22,13 @@ Require-Bundle: org.eclipse.ui,
 Bundle-ActivationPolicy: lazy
 Import-Package: org.dawb.common.services,
  org.dawb.common.services.conversion,
+ org.dawnsci.plotting.services.util,
  org.eclipse.core.resources,
  org.eclipse.dawnsci.plotting.api,
  org.eclipse.dawnsci.plotting.api.trace,
  org.eclipse.dawnsci.slicing.api,
  org.eclipse.dawnsci.slicing.api.system,
+ org.eclipse.dawnsci.slicing.api.tool,
  org.eclipse.ui.part,
  org.slf4j;version="1.7.6",
  uk.ac.diamond.scisoft.analysis.processing.visitors

@@ -27,14 +27,18 @@ public class SlicedDataUtils {
 			IDataHolder dataHolder = LoaderFactory.getData(path);
 			ILazyDataset lazyAx = dataHolder.getLazyDataset(axesName);
 			if (lazyAx != null && lazyAx.getRank() != rank) {
-				lazyAx = lazyAx.getSlice();
+				lazyAx = lazyAx.getSliceView();
 				int[] shape = new int[rank];
 				Arrays.fill(shape, 1);
-				shape[key-1]= lazyAx.getShape()[0];
+				if (lazyAx.getRank() != 0) {
+					shape[key-1]= lazyAx.getShape()[0];
+				} 
+				
 				lazyAx.setShape(shape);
 			}
 			
 			if (lazyAx != null) axMeta.setAxis(key-1, new ILazyDataset[] {lazyAx});
+			else axMeta.setAxis(key-1, new ILazyDataset[1]);
 		}
 		
 		return axMeta;
