@@ -18,6 +18,7 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.slicing.api.system.AxisType;
 import org.eclipse.dawnsci.slicing.api.system.DimsData;
+import org.eclipse.dawnsci.slicing.api.system.RangeMode;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;
@@ -172,7 +173,7 @@ class TypeEditingSupport extends EditingSupport {
 			
 			data.setPlotAxis(axis);
 			if (axis.isAdvanced()) system.setAdvancedColumnsVisible(true);
-			system.getDimsDataList().removeLargeStacks(system, 100);
+			if (system.getRangeMode() != RangeMode.MULTI_RANGE) system.getDimsDataList().removeLargeStacks(system, 100);
 			system.updateAxesChoices();
 			system.update(data, false);
 			system.fireDimensionalListeners();
