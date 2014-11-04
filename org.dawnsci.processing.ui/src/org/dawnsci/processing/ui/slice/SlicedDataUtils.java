@@ -72,7 +72,7 @@ public class SlicedDataUtils {
 		if (data.getRank() == 2) {
 			if (!system.is2D()) system.clear();
 			
-			final ITrace t = system.updatePlot2D(data, Arrays.asList(new IDataset[]{x,y}), null);
+			final ITrace t = system.updatePlot2D(data, Arrays.asList(new IDataset[]{y,x}), null);
 				
 			final IDataset m = mask;
 
