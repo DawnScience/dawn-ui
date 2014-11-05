@@ -110,6 +110,13 @@
                      </equals>
                   </not>
                </or>
+               <or>
+                  <not>
+                     <equals
+                           value="org.dawnsci.processing.ui.ProcessingPerspective">
+                     </equals>
+                  </not>
+               </or>
             </with>
          </enabledWhen>
       </activity>

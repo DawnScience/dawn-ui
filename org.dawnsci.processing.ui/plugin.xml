@@ -48,5 +48,81 @@
             name="Processing">
       </perspective>
    </extension>
+   <extension
+         point="org.eclipse.ui.navigator.navigatorContent">
+      <actionProvider
+            class="org.dawnsci.processing.ui.fileactions.ProcessingActionProvider"
+            id="org.dawnsci.processing.ui.fileactions.ProcessingActionProvider"
+            overrides="org.eclipse.ui.navigator.resources.actions.EditActions"
+            priority="highest">
+         <enablement>
+            <with
+                  variable="activeWorkbenchWindow.activePerspective">
+               <equals
+                     value="org.dawnsci.processing.ui.ProcessingPerspective">
+               </equals>
+            </with>
+         </enablement>
+      </actionProvider>
+      <actionProvider
+            class="org.dawnsci.processing.ui.fileactions.ProcessingActionProvider"
+            id="org.dawnsci.processing.ui.fileactions.ProcessingActionProvider2"
+            overrides="org.eclipse.ui.navigator.resources.OpenActions"
+            priority="highest">
+         <enablement>
+            <with
+                  variable="activeWorkbenchWindow.activePerspective">
+               <equals
+                     value="org.dawnsci.processing.ui.ProcessingPerspective">
+               </equals>
+            </with>
+         </enablement>
+      </actionProvider>
+   </extension>
+   <extension
+         point="org.eclipse.ui.navigator.viewer">
+      <viewer
+            viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+      </viewer>
+      <viewerActionBinding
+            viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+         <includes>
+            <actionExtension
+                  pattern="org.dawnsci.processing.ui.fileactions.*">
+            </actionExtension>
+         </includes>
+      </viewerActionBinding>
+   </extension>
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            id="org.dawnsci.processing.ui.fileactions.fileOpenAction"
+            label="Open File to Process...">
+         <action
+               class="org.dawnsci.processing.ui.fileactions.OpenLocalFileAction"
+               id="org.dawnsci.processing.ui.fileactions.actionOpen"
+               label="Open File to Process..."
+               menubarPath="file/new"
+               style="push">
+         </action>
+      </actionSet>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.dawnsci.processing.ui.ProcessingPerspective">
+         <actionSet
+               id="org.dawnsci.processing.ui.fileactions.fileOpenAction">
+         </actionSet>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="uk.ac.diamond.sda.navigator.openFile">
+      <fileOpen
+            class="org.dawnsci.processing.ui.fileactions.NavigatorOpen"
+            id="org.dawnsci.processing.ui.fileactions.NavigatorOpen"
+            perspective="org.dawnsci.processing.ui.ProcessingPerspective">
+      </fileOpen>
+   </extension>
 
 </plugin>

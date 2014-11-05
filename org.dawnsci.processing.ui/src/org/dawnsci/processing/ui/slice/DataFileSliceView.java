@@ -107,7 +107,7 @@ public class DataFileSliceView extends ViewPart {
 	FileManager fileManager;
 	TableViewer viewer;
 	IConversionService service;
-	IConversionContext context;
+//	IConversionContext context;
 	SetUpProcessWizardPage convertPage;
 	UpdateJob job;
 	Label currentSliceLabel;
@@ -129,7 +129,7 @@ public class DataFileSliceView extends ViewPart {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
+		fileManager = new FileManager(new SetupContextHelper());
 		parent.setLayout(new GridLayout());
 		
 		viewer = new TableViewer(parent);
@@ -168,16 +168,12 @@ public class DataFileSliceView extends ViewPart {
 						}
 					}
 					
-					if (!paths.isEmpty()) addFiles(paths.toArray(new String[paths.size()]));
+					if (!paths.isEmpty()) fileManager.addFiles(paths.toArray(new String[paths.size()]));
 					
 				} else if (dropData instanceof String[]) {
-					addFiles((String[])dropData);
-//					for (String path : (String[])dropData){
-//						addFile(path);
-//					}
+					fileManager.addFiles((String[])dropData);
 				}
 				viewer.setInput(fileManager);
-				//viewer.setInput(filePaths.toArray(new String[filePaths.size()]));
 			}
 		};
 		
@@ -199,6 +195,7 @@ public class DataFileSliceView extends ViewPart {
 				update(currentOperation);
 			}
 		});
+		csw.disable();
 		
 		final MenuManager rightClick = new MenuManager();
 		createActions(rightClick);
@@ -238,6 +235,27 @@ public class DataFileSliceView extends ViewPart {
 		view = getSite().getPage().findView("org.dawnsci.processing.ui.processingView");
 		
 		informer = (IOperationErrorInformer)view.getAdapter(IOperationErrorInformer.class);
+		
+		fileManager.addFileListener(new IFilesAddedListener() {
+
+			@Override
+			public void filesAdded(FileAddedEvent event) {
+				
+				final String path = event.getPaths()[0];
+				
+				Display.getDefault().syncExec(new Runnable() {
+
+					@Override
+					public void run() {
+						viewer.refresh();
+//						viewer.getTable().setSelection(0);
+						viewer.setSelection(new StructuredSelection(path),true);
+					}
+				});
+				//update(currentOperation);
+				//selectedFile
+			}
+		});
 
 	}
 	
@@ -251,7 +269,7 @@ public class DataFileSliceView extends ViewPart {
 
 					final IOperation<? extends IOperationModel, ? extends OperationData>[] fop = ops;
 
-					context.setUserObject(new IProcessingConversionInfo() {
+					fileManager.setProcessingConversionInfo(new IProcessingConversionInfo() {
 
 						@Override
 						public IOperation<? extends IOperationModel, ? extends OperationData>[] getOperationSeries() {
@@ -266,12 +284,12 @@ public class DataFileSliceView extends ViewPart {
 					});
 				}
 				
-				final File source = new File(context.getFilePaths().get(0));
+				final File source = new File(fileManager.getFilePaths().get(0));
 				String path  = source.getParent()+File.separator+"output";
 				OutputPathDialog opd = new OutputPathDialog(Display.getCurrent().getActiveShell(), path);
 				opd.create();
 				if (opd.open() == Dialog.CANCEL) return;
-				context.setOutputPath(opd.getPath());
+				fileManager.setOutputPath(opd.getPath());
 				
 
 				ProgressMonitorDialog dia = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
@@ -284,9 +302,9 @@ public class DataFileSliceView extends ViewPart {
 						InterruptedException {
 							//TODO properly populate the number steps
 							monitor.beginTask("Processing", 100);
-							context.setMonitor(new ProgressMonitorWrapper(monitor));
+							fileManager.getContext().setMonitor(new ProgressMonitorWrapper(monitor));
 							try {
-								service.process(context);
+								service.process(fileManager.getContext());
 							} catch (final Exception e) {
 								Display.getDefault().asyncExec(new Runnable() {
 									public void run() {
@@ -309,13 +327,51 @@ public class DataFileSliceView extends ViewPart {
 		getViewSite().getActionBars().getMenuManager().add(run);
 		rightClick.add(run);
 		
-		final IAction clear = new Action("Clear all files", Activator.getImageDescriptor("icons/delete.gif")) {
+		final IAction clear = new Action("Clear selected file", Activator.getImageDescriptor("icons/delete.gif")) {
 			public void run() {
-				fileManager = null;
-				context = null;
+				fileManager.getFilePaths().remove(selectedFile);
+				
+				if (fileManager.getFilePaths().isEmpty()) {
+					fileManager.clear();
+					csw.disable();
+				} else {
+					viewer.setSelection(new StructuredSelection(fileManager.getFilePaths().get(0)),true);
+				}
+				
+				
+				job = null;
+				currentSliceLabel.setText("Current slice of data: [ - - - - -]");
 				try {
 					input.reset();
 					output.reset();
+					
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+				viewer.setInput(fileManager);
+			}
+		};
+		
+		final IAction clearAll = new Action("Clear all files", Activator.getImageDescriptor("icons/delete.gif")) {
+			public void run() {
+				fileManager.getFilePaths().remove(selectedFile);
+				
+				if (fileManager.getFilePaths().isEmpty()) {
+					fileManager.clear();
+					csw.disable();
+				} else {
+					viewer.setSelection(new StructuredSelection(fileManager.getFilePaths().get(0)),true);
+				}
+				
+				
+				job = null;
+				currentSliceLabel.setText("Current slice of data: [ - - - - -]");
+				try {
+					input.reset();
+					output.reset();
+					
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -329,38 +385,13 @@ public class DataFileSliceView extends ViewPart {
 		getViewSite().getActionBars().getMenuManager().add(clear);
 		rightClick.add(clear);
 		
+		getViewSite().getActionBars().getToolBarManager().add(clearAll);
+		getViewSite().getActionBars().getMenuManager().add(clearAll);
+		rightClick.add(clearAll);
+		
 		final IAction edit = new Action("Edit slice configuration", Activator.getImageDescriptor("icons/clipboard-list.png")) {
 			public void run() {
-				Wizard wiz = new Wizard() {
-					//set 
-					@Override
-					public boolean performFinish() {
-						return true;
-					}
-				};
-				
-				wiz.setNeedsProgressMonitor(true);
-				convertPage = null;
-				convertPage = new SetUpProcessWizardPage(context);
-				wiz.addPage(convertPage);
-				final WizardDialog wd = new WizardDialog(getSite().getShell(),wiz);
-				wd.create();
-//				convertPage.setContext(context);
-				
-				if (wd.open() == WizardDialog.OK) {
-//					context = convertPage.getContext();
-					context.setConversionScheme(ConversionScheme.PROCESS);
-					
-					try {
-						
-						update(null);
-						
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					
-				}
+				fileManager.setUpContext();
 			}
 		};
 
@@ -369,131 +400,35 @@ public class DataFileSliceView extends ViewPart {
 		rightClick.add(edit);
 	}
 	
-	private void addFiles(String[] filePath) {
-		
-		if (context == null) {
-			context = service.open(filePath);
-			job = new UpdateJob(context);
-
-			convertPage = null;
-			convertPage = new SetUpProcessWizardPage(context);
-			
-			Wizard wiz = new Wizard() {
-				//set 
-				@Override
-				public boolean performFinish() {
-					convertPage.populateContext();
-					return true;
-				}
-			};
-
-			wiz.setNeedsProgressMonitor(true);
-			
-			wiz.addPage(convertPage);
-			final WizardDialog wd = new WizardDialog(getSite().getShell(),wiz);
-			wd.setPageSize(new Point(900, 500));
-			wd.create();
-			context.setConversionScheme(ConversionScheme.PROCESS);
-//			convertPage.setContext(context);
-
-			if (wd.open() == WizardDialog.OK) {
-//				context = convertPage.getContext();
-				job = new UpdateJob(context);
-
-				try {
-
-					update(currentOperation);
-
-				} catch (Exception e) {
-					logger.error(e.getMessage(), e);
-				}
-
-				fileManager = new FileManager(context);
-				fileManager.addFileListener(new IFilesAddedListener() {
-
-					@Override
-					public void filesAdded(FileAddedEvent event) {
-						update(currentOperation);
-						Display.getDefault().syncExec(new Runnable() {
-
-							@Override
-							public void run() {
-								viewer.refresh();
-							}
-						});
-
-					}
-				});
-				//filePaths.add(filePath);
-
-				IDataHolder dh;
-				try {
-					dh = LoaderFactory.getData(context.getFilePaths().get(0));
-					ILazyDataset lazy = dh.getLazyDataset(context.getDatasetNames().get(0));
-					int[] shape = lazy.getShape();
-
-					//					datasetLabel.setText(context.getDatasetNames().get(0));
-					//single image/line
-					//					if (context.getSliceDimensions() == null){
-					//						for (int i = 0; i < shape.length; i++) context.addSliceDimension(i, "all");
-					//					}
-
-					int[] dd = Slicer.getDataDimensions(shape, context.getSliceDimensions());
-					Slice[] slices = Slicer.getSliceArrayFromSliceDimensions(context.getSliceDimensions(), shape);
-					csw.setDatasetShapeInformation(shape, dd.clone(), slices);
-					String ss = Slice.createString(csw.getCurrentSlice());
-					currentSliceLabel.setText("Current slice of data: [" +ss + "]");
-					//					Arrays.sort(dd);
-					//					
-					//					int work = 1;
-					//					
-					//					for (int i = 0; i< shape.length; i++) {
-					//						if (Arrays.binarySearch(dd, i) < 0) work*=shape[i];
-					//					}
-					//					
-					//					maxImage = work;
-
-
-				} catch (Exception e) {
-					logger.error(e.getMessage(), e);
-				}
-			} else {
-				context = null;
-			}
-			
-			
-		} else {
-			fileManager.addFiles(filePath);
-		}
-
-
-
-	}
 	
 	private void update(final IOperation<? extends IOperationModel, ? extends OperationData> end) {
 	
-			if (context == null) return;
+			if (fileManager.getContext() == null) return;
 			
-			if (job != null) {
+			if (job == null) {
+				job = new UpdateJob(fileManager.getContext());
+			} else {
 				job.cancel();
-				job.setPath(selectedFile); 
-				job.setEndOperation(end);
-				job.schedule();
+				
 			}
+			job.setPath(selectedFile); 
+			job.setEndOperation(end);
+			job.schedule();
 		
 	}
 	
 	private void updateSliceWidget(String path) {
 		try {
 			IDataHolder dh = LoaderFactory.getData(path);
-			ILazyDataset lazy = dh.getLazyDataset(context.getDatasetNames().get(0));
+			ILazyDataset lazy = dh.getLazyDataset(fileManager.getContext().getDatasetNames().get(0));
 			int[] shape = lazy.getShape();
 			
-			int[] dd = Slicer.getDataDimensions(shape, context.getSliceDimensions());
-			Slice[] slices = Slicer.getSliceArrayFromSliceDimensions(context.getSliceDimensions(), shape);
+			int[] dd = Slicer.getDataDimensions(shape, fileManager.getContext().getSliceDimensions());
+			Slice[] slices = Slicer.getSliceArrayFromSliceDimensions(fileManager.getContext().getSliceDimensions(), shape);
 			csw.setDatasetShapeInformation(shape, dd.clone(), slices);
 			String ss = Slice.createString(csw.getCurrentSlice());
 			currentSliceLabel.setText("Current slice of data: [" +ss + "]");
+			currentSliceLabel.getParent().layout(true);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -560,6 +495,11 @@ public class DataFileSliceView extends ViewPart {
 				final IDataHolder   dh = LoaderFactory.getData(path);
 				ILazyDataset lazyDataset = dh.getLazyDataset(context.getDatasetNames().get(0));
 				
+				if (lazyDataset == null) {
+					logger.error("Selected dataset not in file!!!!");
+					return Status.CANCEL_STATUS;
+				}
+				
 				Map<Integer, String> axesNames = context.getAxesNames();
 				
 				if (axesNames != null) {
@@ -572,8 +512,8 @@ public class DataFileSliceView extends ViewPart {
 				Slice[] viewSlice = Slicer.getSliceArrayFromSliceDimensions(context.getSliceDimensions(), lazyDataset.getShape());
 				
 				int[] dataDims = Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions());
-				
-				final IDataset firstSlice = lazyDataset.getSlice(csw.getCurrentSlice());
+				Slice[] s = csw.getCurrentSlice();
+				final IDataset firstSlice = lazyDataset.getSlice(s);
 				informer.setTestData(firstSlice.getSliceView().squeeze());
 				SlicedDataUtils.plotDataWithMetadata(firstSlice, input, dataDims);
 				
@@ -582,7 +522,10 @@ public class DataFileSliceView extends ViewPart {
 			
 				lazyDataset.setMetadata(om);
 				IOperation<? extends IOperationModel, ? extends OperationData>[] ops = getOperations();
-				if (ops == null) return Status.OK_STATUS;
+				if (ops == null) {
+					output.clear();
+					return Status.OK_STATUS;
+				}
 				EscapableSliceVisitor sliceVisitor = getSliceVisitor(ops, getOutputExecutionVisitor(), lazyDataset, Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions()));
 				sliceVisitor.setEndOperation(end);
 				long start = System.currentTimeMillis();
@@ -610,7 +553,13 @@ public class DataFileSliceView extends ViewPart {
 	
 	private EscapableSliceVisitor getSliceVisitor(IOperation<? extends IOperationModel, ? extends OperationData>[] series,UIExecutionVisitor visitor,ILazyDataset lz,  
             int[] dataDims) {
-		return new EscapableSliceVisitor(lz,visitor,dataDims,series,null,context);
+		return new EscapableSliceVisitor(lz,visitor,dataDims,series,null,fileManager.getContext());
+	}
+	
+	@Override
+	public Object getAdapter(final Class clazz) {
+		if (clazz == FileManager.class) return fileManager;
+		return super.getAdapter(clazz);
 	}
 	
 	private class EscapableSliceVisitor implements SliceVisitor {
@@ -771,8 +720,6 @@ public class DataFileSliceView extends ViewPart {
 	}
 	
 	private class OutputPathDialog extends Dialog {
-
-		SelectorWidget sw;
 		String path;
 		
 		  public OutputPathDialog(Shell parentShell, String path) {
@@ -826,5 +773,64 @@ public class DataFileSliceView extends ViewPart {
 
 		} 
 	
+	private class SetupContextHelper implements ISetupContext {
+
+		@Override
+		public IConversionContext init(String path) {
+			
+			IConversionContext context = service.open(path);
+			
+			final SetUpProcessWizardPage convertPage = new SetUpProcessWizardPage(context);
+			
+			Wizard wiz = new Wizard() {
+				//set 
+				@Override
+				public boolean performFinish() {
+					convertPage.populateContext();
+					return true;
+				}
+			};
+
+			wiz.setNeedsProgressMonitor(true);
+			wiz.addPage(convertPage);
+			final WizardDialog wd = new WizardDialog(getSite().getShell(),wiz);
+			wd.setPageSize(new Point(900, 500));
+			wd.create();
+			context.setConversionScheme(ConversionScheme.PROCESS);
+
+
+			if (wd.open() == WizardDialog.OK) return context;
+			
+			return null;
+		}
+		
+		@Override
+		public boolean setup(IConversionContext context) {
+			
+			final SetUpProcessWizardPage convertPage = new SetUpProcessWizardPage(context);
+			
+			Wizard wiz = new Wizard() {
+				//set 
+				@Override
+				public boolean performFinish() {
+					convertPage.populateContext();
+					return true;
+				}
+			};
+
+			wiz.setNeedsProgressMonitor(true);
+			wiz.addPage(convertPage);
+			final WizardDialog wd = new WizardDialog(getSite().getShell(),wiz);
+			wd.setPageSize(new Point(900, 500));
+			wd.create();
+			context.setConversionScheme(ConversionScheme.PROCESS);
+
+
+			if (wd.open() == WizardDialog.OK) return true;
+			
+			return false;
+		}
+		
+	}
 
 }

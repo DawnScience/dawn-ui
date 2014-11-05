@@ -76,7 +76,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 	IPlottingSystem system;
 	IConversionContext context;
 	ComboViewer cviewer;
-	String rootName = "";
+	String rootName = null;
 	
 	protected SetUpProcessWizardPage(IConversionContext context) {
 		super("Set up input data");
@@ -113,7 +113,23 @@ public class SetUpProcessWizardPage extends WizardPage {
 		cviewer.setContentProvider(new BasicContentProvider());
 		cviewer.setLabelProvider(new ViewLabelProvider());
 		cviewer.setInput(datasetNames);
-		cviewer.getCombo().select(0);
+		
+		if (context.getDatasetNames() != null) {
+			String name = context.getDatasetNames().get(0);
+			int i = 0;
+			for (String n: datasetNames.keySet()) {
+				if (name.equals(n)) {
+					cviewer.getCombo().select(i);
+					break;
+				}
+				
+				i++;
+			}
+		} else {
+			cviewer.getCombo().select(0);
+		}
+		
+		
 		cviewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
@@ -164,7 +180,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 				getSlicingSystem().setSliceType(getSliceType());
 				
 				final DimsDataList dimsDataList = getSlicingSystem().getDimsDataList();
-				if (dimsDataList!=null) dimsDataList.setTwoAxesOnly(AxisType.X, AxisType.Y);   		
+				if (dimsDataList!=null) dimsDataList.setTwoAxesOnly(AxisType.Y, AxisType.X);   		
 				getSlicingSystem().refresh();
 				getSlicingSystem().update(false);
 			}
@@ -246,7 +262,14 @@ public class SetUpProcessWizardPage extends WizardPage {
 			}
 		});
 		
-		String dsName = datasetNames.keySet().iterator().next();
+		String dsName = "";
+		
+		if (context.getDatasetNames() != null) {
+			dsName = context.getDatasetNames().get(0);
+		} else {
+			dsName = datasetNames.keySet().iterator().next();
+		}
+		
 		IDataHolder dh;
 		try {
 			dh = LoaderFactory.getData(context.getFilePaths().get(0), true, true, null);
@@ -259,8 +282,16 @@ public class SetUpProcessWizardPage extends WizardPage {
 		}
 //		sliceComponent.setRangeMode(RangeMode.MULTI_RANGE);
 		DimsDataList ddl = sliceComponent.getDimsDataList();
-		for (DimsData dd : ddl.getDimsData()) {
-			if (dd.isSlice()) dd.setSliceRange("all");
+//		for (DimsData dd : ddl.getDimsData()) {
+//			if (dd.isSlice()) {
+//				dd.setPlotAxis(AxisType.RANGE);
+//				dd.setSliceRange("all");
+//			}
+//		}
+		
+		if (context.getSliceDimensions() != null) {
+			
+			
 		}
 		
 		Composite plotComp = new Composite(right, SWT.NONE);
@@ -303,10 +334,10 @@ public class SetUpProcessWizardPage extends WizardPage {
 				}
 			}
 			
-			
-			IDataset firstSlice = Slicer.getFirstSlice(lazyDataset, sliceDims);
 			AxesMetadata amd = SlicedDataUtils.createAxisMetadata(path, lazyDataset.getRank(), sliceComponent.getAxesNames());
-			firstSlice.setMetadata(amd);
+			lazyDataset.setMetadata(amd);
+			IDataset firstSlice = Slicer.getFirstSlice(lazyDataset, sliceDims);
+			
 			SlicedDataUtils.plotDataWithMetadata(firstSlice, system, Slicer.getDataDimensions(lazyDataset.getShape(), sliceDims));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -377,7 +408,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 			public int compare(Entry<String, int[]> o1, Entry<String, int[]> o2) {
 				int val = Integer.compare(o2.getValue().length, o1.getValue().length);
 				
-				if (val == 0) val = Integer.compare(o2.getKey().length(), o1.getKey().length());
+				if (val == 0) val = Integer.compare(o1.getKey().length(), o2.getKey().length());
 				
 				return val;
 			}
@@ -432,7 +463,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 		public String getText(Object obj) {
 			Entry<String, int[]> ent = (Entry<String, int[]>)obj;
 			String name = ent.getKey();
-			name = name.substring(rootName.length());
+			if (rootName != null) name = name.substring(rootName.length());
 			return name + " " + Arrays.toString(ent.getValue());
 		}
 		

@@ -194,5 +194,12 @@ public class ChangeSliceWidget {
 			stepforwardBtn.setEnabled(false);
 		}
 	}
+	
+	public void disable() {
+		startBtn.setEnabled(false);
+		stepbackBtn.setEnabled(false);
+		endBtn.setEnabled(false);
+		stepforwardBtn.setEnabled(false);
+	}
 
 }

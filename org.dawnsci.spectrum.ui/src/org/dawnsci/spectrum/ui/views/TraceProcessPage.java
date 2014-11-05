@@ -329,7 +329,7 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 	@Override
 	public Object getAdapter(final Class clazz) {
 		if (clazz == SpectrumFileManager.class) return manager;
-		return null;
+		return super.getAdapter(clazz);
 	}
 
 	private void hookContextMenu() {
