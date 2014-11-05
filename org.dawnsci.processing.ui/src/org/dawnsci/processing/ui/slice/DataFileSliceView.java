@@ -103,12 +103,9 @@ import uk.ac.diamond.scisoft.analysis.processing.visitors.HierarchicalFileExecut
 
 public class DataFileSliceView extends ViewPart {
 
-//	List<String> filePaths = new ArrayList<String>();
 	FileManager fileManager;
 	TableViewer viewer;
 	IConversionService service;
-//	IConversionContext context;
-	SetUpProcessWizardPage convertPage;
 	UpdateJob job;
 	Label currentSliceLabel;
 	ChangeSliceWidget csw;
@@ -126,18 +123,16 @@ public class DataFileSliceView extends ViewPart {
 		try {
 			service = (IConversionService)ServiceManager.getService(IConversionService.class);
 		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			logger.error("Conversion service not found, nothing is going to work");
 		}
 		fileManager = new FileManager(new SetupContextHelper());
-		parent.setLayout(new GridLayout());
 		
+		parent.setLayout(new GridLayout());
 		viewer = new TableViewer(parent);
 		viewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		viewer.setLabelProvider(new ViewLabelProvider());
 		viewer.setContentProvider(new BasicContentProvider());
 		viewer.setInput(fileManager);
-		//viewer.setInput(filePaths.toArray(new String[filePaths.size()]));
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
@@ -164,7 +159,6 @@ public class DataFileSliceView extends ViewPart {
 						if (obj[i] instanceof IFile) {
 							IFile file = (IFile) obj[i];
 							paths.add(file.getLocation().toOSString());
-							//addFiles(new String[]{file.getLocation().toOSString()});
 						}
 					}
 					
@@ -191,10 +185,10 @@ public class DataFileSliceView extends ViewPart {
 				String ss = Slice.createString(csw.getCurrentSlice());
 				currentSliceLabel.setText("Current slice of data: [" +ss + "]");
 				currentSliceLabel.getParent().layout(true);
-				
 				update(currentOperation);
 			}
 		});
+		
 		csw.disable();
 		
 		final MenuManager rightClick = new MenuManager();
@@ -205,7 +199,6 @@ public class DataFileSliceView extends ViewPart {
 			
 			@Override
 			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-				selection.toString();
 				
 				if (selection instanceof StructuredSelection && ((StructuredSelection)selection).getFirstElement() instanceof OperationDescriptor) {
 					OperationDescriptor des = (OperationDescriptor)((StructuredSelection)selection).getFirstElement();
@@ -213,13 +206,9 @@ public class DataFileSliceView extends ViewPart {
 						currentOperation = des.getSeriesObject();
 						update(currentOperation);
 					} catch (InstantiationException e) {
-						// TODO Auto-generated catch block
 						logger.error(e.getMessage(),e);
 					}
 				}
-				
-				//update(null);
-				
 			}
 		});
 		
@@ -229,11 +218,11 @@ public class DataFileSliceView extends ViewPart {
 		IWorkbenchPage page = getSite().getPage();
 		IViewPart view = page.findView("org.dawnsci.processing.ui.output");
 		output = (IPlottingSystem)view.getAdapter(IPlottingSystem.class);
+		
 		view = page.findView("org.dawnsci.processing.ui.input");
 		input = (IPlottingSystem)view.getAdapter(IPlottingSystem.class);
 		
 		view = getSite().getPage().findView("org.dawnsci.processing.ui.processingView");
-		
 		informer = (IOperationErrorInformer)view.getAdapter(IOperationErrorInformer.class);
 		
 		fileManager.addFileListener(new IFilesAddedListener() {
@@ -248,12 +237,9 @@ public class DataFileSliceView extends ViewPart {
 					@Override
 					public void run() {
 						viewer.refresh();
-//						viewer.getTable().setSelection(0);
 						viewer.setSelection(new StructuredSelection(path),true);
 					}
 				});
-				//update(currentOperation);
-				//selectedFile
 			}
 		});
 
@@ -347,8 +333,7 @@ public class DataFileSliceView extends ViewPart {
 					output.reset();
 					
 				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					logger.error("Could not clear plotting systems");
 				}
 				
 				viewer.refresh();
@@ -368,11 +353,16 @@ public class DataFileSliceView extends ViewPart {
 					output.reset();
 					
 				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					logger.error("Could not clear plotting systems");
 				}
 				
 				viewer.refresh();
+			}
+		};
+		
+		final IAction edit = new Action("Edit slice configuration", Activator.getImageDescriptor("icons/clipboard-list.png")) {
+			public void run() {
+				fileManager.setUpContext();
 			}
 		};
 		
@@ -384,12 +374,6 @@ public class DataFileSliceView extends ViewPart {
 		getViewSite().getActionBars().getMenuManager().add(clearAll);
 		rightClick.add(clearAll);
 		
-		final IAction edit = new Action("Edit slice configuration", Activator.getImageDescriptor("icons/clipboard-list.png")) {
-			public void run() {
-				fileManager.setUpContext();
-			}
-		};
-
 		getViewSite().getActionBars().getToolBarManager().add(edit);
 		getViewSite().getActionBars().getMenuManager().add(edit);
 		rightClick.add(edit);
@@ -725,9 +709,6 @@ public class DataFileSliceView extends ViewPart {
 		  @Override
 		  protected Control createDialogArea(Composite parent) {
 			  
-//			  final File source = new File(context.getFilePaths().get(0));
-//				String path  = source.getParent()+File.separator+"output";
-			  
 		    final SelectorWidget sw = new SelectorWidget(parent) {
 				
 				@Override
@@ -753,8 +734,6 @@ public class DataFileSliceView extends ViewPart {
 		  }
 		  
 
-		  // overriding this methods allows you to set the
-		  // title of the custom dialog
 		  @Override
 		  protected void configureShell(Shell newShell) {
 		    super.configureShell(newShell);
