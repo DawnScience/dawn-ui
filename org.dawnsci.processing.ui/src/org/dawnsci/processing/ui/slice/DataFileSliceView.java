@@ -334,13 +334,14 @@ public class DataFileSliceView extends ViewPart {
 				if (fileManager.getFilePaths().isEmpty()) {
 					fileManager.clear();
 					csw.disable();
+					currentSliceLabel.setText("Current slice of data: [ - - - - -]");
 				} else {
 					viewer.setSelection(new StructuredSelection(fileManager.getFilePaths().get(0)),true);
 				}
 				
 				
 				job = null;
-				currentSliceLabel.setText("Current slice of data: [ - - - - -]");
+				
 				try {
 					input.reset();
 					output.reset();
@@ -350,22 +351,16 @@ public class DataFileSliceView extends ViewPart {
 					e1.printStackTrace();
 				}
 				
-				viewer.setInput(fileManager);
+				viewer.refresh();
 			}
 		};
 		
 		final IAction clearAll = new Action("Clear all files", Activator.getImageDescriptor("icons/delete.gif")) {
 			public void run() {
-				fileManager.getFilePaths().remove(selectedFile);
-				
-				if (fileManager.getFilePaths().isEmpty()) {
-					fileManager.clear();
-					csw.disable();
-				} else {
-					viewer.setSelection(new StructuredSelection(fileManager.getFilePaths().get(0)),true);
-				}
-				
-				
+
+				fileManager.clear();
+				csw.disable();
+
 				job = null;
 				currentSliceLabel.setText("Current slice of data: [ - - - - -]");
 				try {
@@ -377,7 +372,7 @@ public class DataFileSliceView extends ViewPart {
 					e1.printStackTrace();
 				}
 				
-				viewer.setInput(fileManager);
+				viewer.refresh();
 			}
 		};
 		
