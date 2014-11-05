@@ -15,7 +15,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorPropertyEvent;
 import org.eclipse.dawnsci.analysis.api.diffraction.IDetectorPropertyListener;
-import org.eclipse.dawnsci.hdf5.api.HDF5NodeLink;
+import org.eclipse.dawnsci.analysis.api.tree.NodeLink;
+import org.eclipse.dawnsci.analysis.api.tree.TreeFile;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -156,11 +157,11 @@ public class DiffractionDelegate implements IRefreshable {
 					TreeSelection selectedNode = (TreeSelection) dropData;
 					Object obj[] = selectedNode.toArray();
 					for (int i = 0; i < obj.length; i++) {
-						if (obj[i] instanceof HDF5NodeLink) {
-							HDF5NodeLink node = (HDF5NodeLink) obj[i];
-							if (node == null)
+						if (obj[i] instanceof NodeLink) {
+							NodeLink node = (NodeLink) obj[i];
+							if (node == null || !(node.getTree() instanceof TreeFile))
 								return;
-							manager.loadData(node.getFile().getFilename(), node.getFullName());
+							manager.loadData(((TreeFile) node.getTree()).getFilename(), node.getFullName());
 						} else if (obj[i] instanceof IFile) {
 							IFile file = (IFile) obj[i];
 							manager.loadData(file.getLocation().toOSString(), null);
