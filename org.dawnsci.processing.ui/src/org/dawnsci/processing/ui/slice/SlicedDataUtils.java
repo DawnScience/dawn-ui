@@ -19,13 +19,16 @@ import uk.ac.diamond.scisoft.analysis.metadata.AxesMetadataImpl;
 
 public class SlicedDataUtils {
 
-	public static AxesMetadata createAxisMetadata(String path, int rank, Map<Integer, String> axesNames) throws Exception {
+	public static AxesMetadata createAxisMetadata(String path, ILazyDataset ds, Map<Integer, String> axesNames) throws Exception {
+		
+		int rank = ds.getRank();
 		
 		AxesMetadataImpl axMeta = new AxesMetadataImpl(rank);
 		for (Integer key : axesNames.keySet()) {
 			String axesName = axesNames.get(key);
 			IDataHolder dataHolder = LoaderFactory.getData(path);
 			ILazyDataset lazyAx = dataHolder.getLazyDataset(axesName);
+			if (ds == lazyAx) throw new IllegalArgumentException("Axes metadata should not contain original dataset!");
 			if (lazyAx != null && lazyAx.getRank() != rank) {
 				lazyAx = lazyAx.getSlice();
 				int[] shape = new int[rank];

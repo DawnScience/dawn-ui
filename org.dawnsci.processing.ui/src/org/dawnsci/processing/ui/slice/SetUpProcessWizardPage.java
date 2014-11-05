@@ -334,7 +334,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 				}
 			}
 			
-			AxesMetadata amd = SlicedDataUtils.createAxisMetadata(path, lazyDataset.getRank(), sliceComponent.getAxesNames());
+			AxesMetadata amd = SlicedDataUtils.createAxisMetadata(path, lazyDataset, sliceComponent.getAxesNames());
 			lazyDataset.setMetadata(amd);
 			IDataset firstSlice = Slicer.getFirstSlice(lazyDataset, sliceDims);
 			

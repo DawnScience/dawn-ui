@@ -208,6 +208,10 @@ public class DataFileSliceView extends ViewPart {
 					} catch (InstantiationException e) {
 						logger.error(e.getMessage(),e);
 					}
+				} else {
+					if (getOperations() == null || getOperations().length == 0) {
+						output.clear();
+					}
 				}
 			}
 		});
@@ -467,6 +471,7 @@ public class DataFileSliceView extends ViewPart {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
+			output.setEnabled(false);
 			try {
 				
 				if (path == null) path = context.getFilePaths().get(0);
@@ -483,7 +488,7 @@ public class DataFileSliceView extends ViewPart {
 				
 				if (axesNames != null) {
 
-					AxesMetadata axMeta = SlicedDataUtils.createAxisMetadata(path, lazyDataset.getRank(), axesNames);
+					AxesMetadata axMeta = SlicedDataUtils.createAxisMetadata(path, lazyDataset, axesNames);
 					lazyDataset.setMetadata(axMeta);
 
 				}
@@ -523,6 +528,8 @@ public class DataFileSliceView extends ViewPart {
 						informer.setInErrorState(new OperationException(null, message));
 					}
 					return Status.CANCEL_STATUS;
+				} finally {
+					output.setEnabled(true);
 				}
 				
 				return Status.OK_STATUS;
@@ -589,6 +596,8 @@ public class DataFileSliceView extends ViewPart {
 
 				 if (i instanceof IExportOperation) {
 					 visitor.notify(i, data, slices, shape, dataDims);
+				 } else if (i.isPassUnmodifiedData() && i != endOperation) {
+					 //do nothing
 				 } else {
 					 OperationData tmp = i.execute(data.getData(), null);
 					 visitor.notify(i, tmp, slices, shape, dataDims); // Optionally send intermediate result
