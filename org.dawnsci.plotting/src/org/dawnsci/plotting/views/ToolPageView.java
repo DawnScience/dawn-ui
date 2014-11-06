@@ -1439,7 +1439,8 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
              * For dedicated tools we do not want to link them to parts that are tools and also
              * have the wrong dimensionality
              */
-            if (!isDimensionalityOk(activeRec.tool, sys)) return;
+            if (activeRec != null)
+            	if (!isDimensionalityOk(activeRec.tool, sys)) return;
             if (!isDimensionalityOk(tool, sys))           return;
                        
             /** End bodge warning. **/
