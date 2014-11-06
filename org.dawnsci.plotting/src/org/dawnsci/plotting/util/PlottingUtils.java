@@ -21,9 +21,11 @@ import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
+import org.eclipse.dawnsci.analysis.api.tree.NodeLink;
+import org.eclipse.dawnsci.analysis.api.tree.Tree;
+import org.eclipse.dawnsci.analysis.api.tree.TreeFile;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
-import org.eclipse.dawnsci.hdf5.api.HDF5NodeLink;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.slf4j.Logger;
@@ -81,12 +83,14 @@ public class PlottingUtils {
 						"/entry1/instrument/analyser/data");
 		}
 		// if the selection is an hdf5 tree item
-		else if (item instanceof HDF5NodeLink) {
-			HDF5NodeLink link = (HDF5NodeLink)item;
+		else if (item instanceof NodeLink) {
+			NodeLink link = (NodeLink)item;
 
-			String filename = link.getFile().getFilename();
-			return loadData(filename,
-						link.getFullName());
+			Tree tree = link.getTree();
+			if (tree instanceof TreeFile) {
+				return loadData(((TreeFile) tree).getFilename(),
+							link.getFullName());
+			}
 		}
 		return null;
 	}
@@ -102,13 +106,16 @@ public class PlottingUtils {
 			return ((IFile) item).getName();
 		}
 		// if the selection is an hdf5 tree item
-		else if (item instanceof HDF5NodeLink) {
-			HDF5NodeLink link = (HDF5NodeLink)item;
-			String fullName = link.getFile().getFilename();
-			int index = fullName.lastIndexOf(System.getProperty("file.separator"));
-			if (index != -1)
-				return fullName.substring(index+1);
-			return fullName;
+		else if (item instanceof NodeLink) {
+			NodeLink link = (NodeLink)item;
+			Tree tree = link.getTree();
+			if (tree instanceof TreeFile) {
+				String fullName = ((TreeFile) tree).getFilename();
+				int index = fullName.lastIndexOf(System.getProperty("file.separator"));
+				if (index != -1)
+					return fullName.substring(index+1);
+				return fullName;
+			}
 		}
 		return null;
 	}
@@ -124,10 +131,13 @@ public class PlottingUtils {
 			return ((IFile) item).getRawLocation().toOSString();
 		}
 		// if the selection is an hdf5 tree item
-		else if (item instanceof HDF5NodeLink) {
-			HDF5NodeLink link = (HDF5NodeLink)item;
-			String fullName = link.getFile().getFilename();
-			return fullName;
+		else if (item instanceof NodeLink) {
+			NodeLink link = (NodeLink)item;
+			Tree tree = link.getTree();
+			if (tree instanceof TreeFile) {
+					String fullName = ((TreeFile) tree).getFilename();
+				return fullName;
+			}
 		}
 		return null;
 	}

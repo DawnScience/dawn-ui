@@ -17,8 +17,6 @@ import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.org.apache.bcel.internal.generic.CPInstruction;
-
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 
