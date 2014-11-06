@@ -719,20 +719,20 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					 * run at the moment. 
 					 */
 					ConfigurableMessageDialog dialog = new ConfigurableMessageDialog(Display.getDefault().getActiveShell(),
-							"Experimental Refinement Algorithm Uncomplete",
+							"Experimental Refinement Algorithm Incomplete",
 							null,
-							"Could not read peak positons to start refinement.\nThere is a process to set up the refinement because it is in an experimental form at the moment:\n\n"+
+							"Could not read peak positions to start refinement.\nThis tool is still under development. To perform the refinement, use the following procedure:\n\n"+
 							"1. Open the 'Diffraction' tool in a dedicated view (action on the right of the toolbar).\n"+
 							"2. Open the 'Radial Profile' tool (from the plot containing the image).\n" +
 							"3. Select a sector which bisects the rings wanted.\n"+
 							"4. In the 'Radial Profile' tool press 'Lock to Metadata' button.\n"+
 							"5. Select 'q' from the 'Select x axis values' list in the 'Radial Profile' toolbar.\n"+
 							"6. In the 'Radial Profile' tool select peak fitting.\n"+
-							"7. Set up a peak fit on all the rings which the redial profile found.\n"+
+							"7. Set up a peak fit on all the rings which the radial profile found.\n"+
 							"8. Now run the refine action in the diffraction tool again.\n\n"+
 							"Please note that the algorithm may not converge. A job is run for the refinement which may be stopped.\n"+
 							"Please contact your support representative for more training/help with refinement.\n\n"+
-							"(NOTE This dialog can be kept open as a guide while doing the proceedure.)",
+							"(NOTE: This dialog can be kept open as a guide while doing the proceedure.)",
 							MessageDialog.INFORMATION,
 							new String[]{IDialogConstants.OK_LABEL},
 							0);
