@@ -364,10 +364,6 @@ public class OperationModelView extends PageBookView implements ISelectionListen
     	if (!(sel instanceof IStructuredSelection)) return;
     	final IStructuredSelection ssel = (IStructuredSelection)sel;
     	final Object selectionContent   = ssel.getFirstElement();
-    	if (!(selectionContent instanceof OperationDescriptor)) {
-    		return;
-    	}
- 
     	
         // we ignore null selection, or if we are pinned, or our own selection or same selection
 		if (sel == null || !isImportant(part) || sel.equals(currentSelection)) {
@@ -378,7 +374,7 @@ public class OperationModelView extends PageBookView implements ISelectionListen
 		if(part == null || !part.equals(currentPart)){
 		    return;
 		}
-        
+		
         currentPart = part;
         currentSelection = sel;
         
