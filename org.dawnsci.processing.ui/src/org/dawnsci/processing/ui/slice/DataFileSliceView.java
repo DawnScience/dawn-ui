@@ -16,12 +16,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.smartcardio.ATR;
+
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.services.conversion.IConversionContext;
 import org.dawb.common.services.conversion.IConversionContext.ConversionScheme;
 import org.dawb.common.services.conversion.IConversionService;
 import org.dawb.common.services.conversion.IProcessingConversionInfo;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
+import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.common.widgets.file.SelectorWidget;
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.model.OperationDescriptor;
@@ -234,8 +237,42 @@ public class DataFileSliceView extends ViewPart {
 			@Override
 			public void filesAdded(FileAddedEvent event) {
 				
-				final String path = event.getPaths()[0];
+				String[] paths = event.getPaths();
+				boolean[] success = event.getSuccess();
 				
+				int first = -1;
+				final List<String> failedPaths = new ArrayList<String>();
+				for (int i = 0; i<success.length;i++) {
+					if (success[i] && first < 0) first = i;
+					if (!success[i]) failedPaths.add(paths[i]);
+				}
+				
+				final int f = first;
+				
+				Display.getDefault().syncExec(new Runnable() {
+					
+					@Override
+					public void run() {
+						if (f < 0) {
+							MessageDialog.openError(getSite().getShell(), "Error loading files", "None of the selected files contained suitable datasets!");
+							return;
+						}
+						
+						if (!failedPaths.isEmpty()){
+							StringBuilder sb = new StringBuilder();
+							sb.append("Failed to load: ");
+							for (String p : failedPaths) sb.append(p +", ");
+							sb.append("did not contain suitable datasets");
+							MessageDialog.openError(getSite().getShell(), "Error loading some files", sb.toString());
+						}
+						
+					}
+				});
+				
+				if (f < 0) return;
+				
+ 				final String path = paths[first];
+ 				
 				Display.getDefault().syncExec(new Runnable() {
 
 					@Override
@@ -275,11 +312,12 @@ public class DataFileSliceView extends ViewPart {
 				}
 				
 				final File source = new File(fileManager.getFilePaths().get(0));
-				String path  = source.getParent()+File.separator+"output";
-				OutputPathDialog opd = new OutputPathDialog(Display.getCurrent().getActiveShell(), path);
-				opd.create();
-				if (opd.open() == Dialog.CANCEL) return;
-				fileManager.setOutputPath(opd.getPath());
+				String path  = source.getParent();
+				FileSelectionDialog fsd = new FileSelectionDialog(Display.getCurrent().getActiveShell());
+				fsd.setPath(path);
+				fsd.create();
+				if (fsd.open() == Dialog.CANCEL) return;
+				fileManager.setOutputPath(fsd.getPath());
 				
 
 				ProgressMonitorDialog dia = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
@@ -707,54 +745,54 @@ public class DataFileSliceView extends ViewPart {
 		
 	}
 	
-	private class OutputPathDialog extends Dialog {
-		String path;
-		
-		  public OutputPathDialog(Shell parentShell, String path) {
-		    super(parentShell);
-		    this.path = path;
-		  }
-
-		  @Override
-		  protected Control createDialogArea(Composite parent) {
-			  
-		    final SelectorWidget sw = new SelectorWidget(parent) {
-				
-				@Override
-				public void pathChanged(String path, TypedEvent event) {
-
-						Button button = OutputPathDialog.this.getButton(OK);
-						if (button != null) {
-							boolean canOK = this.checkDirectory(path, false);
-							button.setEnabled(canOK);
-							OutputPathDialog.this.path = path;
-						}
-					
-				}
-			};
-			sw.setNewFile(false);
-			sw.setText(path);
-			
-		    return parent;
-		  }
-		  
-		  public String getPath() {
-			  return path;
-		  }
-		  
-
-		  @Override
-		  protected void configureShell(Shell newShell) {
-		    super.configureShell(newShell);
-		    newShell.setText("Select output directory");
-		  }
-
-		  @Override
-		  protected Point getInitialSize() {
-		    return new Point(450, 300);
-		  }
-
-		} 
+//	private class OutputPathDialog extends Dialog {
+//		String path;
+//		
+//		  public OutputPathDialog(Shell parentShell, String path) {
+//		    super(parentShell);
+//		    this.path = path;
+//		  }
+//
+//		  @Override
+//		  protected Control createDialogArea(Composite parent) {
+//			  
+//		    final SelectorWidget sw = new SelectorWidget(parent) {
+//				
+//				@Override
+//				public void pathChanged(String path, TypedEvent event) {
+//
+//						Button button = OutputPathDialog.this.getButton(OK);
+//						if (button != null) {
+//							boolean canOK = this.checkDirectory(path, false);
+//							button.setEnabled(canOK);
+//							OutputPathDialog.this.path = path;
+//						}
+//					
+//				}
+//			};
+//			sw.setNewFile(false);
+//			sw.setText(path);
+//			
+//		    return parent;
+//		  }
+//		  
+//		  public String getPath() {
+//			  return path;
+//		  }
+//		  
+//
+//		  @Override
+//		  protected void configureShell(Shell newShell) {
+//		    super.configureShell(newShell);
+//		    newShell.setText("Select output directory");
+//		  }
+//
+//		  @Override
+//		  protected Point getInitialSize() {
+//		    return new Point(450, 300);
+//		  }
+//
+//		} 
 	
 	private class SetupContextHelper implements ISetupContext {
 

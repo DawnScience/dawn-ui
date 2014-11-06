@@ -281,7 +281,10 @@ public class SeriesTable {
 	}
 	
 	public void refreshTable() {
-		tableViewer.refresh();
-		checkValid(getSeriesItems());
+		if (!tableViewer.getTable().isDisposed()){
+			tableViewer.refresh();
+			checkValid(getSeriesItems());
+		}
+		
 	}
 }

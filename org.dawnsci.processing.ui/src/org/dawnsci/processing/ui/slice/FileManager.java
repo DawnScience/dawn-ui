@@ -121,10 +121,9 @@ public class FileManager {
 				try {
 					IDataHolder holder = LoaderFactory.getData(paths[i], null);
 					goodFile = holder.contains(datasetName);
-					filePaths.add(paths[i]);
-					goodFile = true;
+					if (goodFile) filePaths.add(paths[i]);
 				} catch (Exception e) {
-					//TODO logger
+					logger.error("Problem reading " + paths[i], e);
 				}
 				
 				//TODO test axes
@@ -135,7 +134,6 @@ public class FileManager {
 				} catch (Exception e) {
 					logger.error("Files not added to context!", e);
 				}
-				
 			}
 			
 			fireFileListeners(new FileAddedEvent(this, paths, out));

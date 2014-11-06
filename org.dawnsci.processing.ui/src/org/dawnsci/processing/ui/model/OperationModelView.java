@@ -238,6 +238,7 @@ public class OperationModelView extends PageBookView implements ISelectionListen
      */
     protected IWorkbenchPart getBootstrapPart() {
         IWorkbenchPage page = getSite().getPage();
+        if (page.getActivePart() == null || page.getActivePart().getAdapter(IOperation.class) == null) return null;
         if (page != null) {
             bootstrapSelection = page.getSelection();
             return page.getActivePart();
@@ -273,9 +274,10 @@ public class OperationModelView extends PageBookView implements ISelectionListen
      */
     protected boolean isImportant(IWorkbenchPart part) {
     	
-    	if (part.getAdapter(IOperation.class) == null) return false;
+//    	if (!part.getSite().getId().equals("org.dawnsci.processing.ui.processing.ProcessingView")) return false;
 		// Don't interfere with other property views
     	String partID = part.getSite().getId();
+    	if (!partID.equals("org.dawnsci.processing.ui.processingView")) return false;
 		boolean isPropertyView = getSite().getId().equals(partID);
 		return !isPinned() && !isPropertyView && !isViewIgnored(partID);
     }
@@ -299,6 +301,10 @@ public class OperationModelView extends PageBookView implements ISelectionListen
 	 */
 	protected void partVisible(IWorkbenchPart part) {
 	    super.partVisible(part);
+	    if (part.getSite().getId().equals("org.dawnsci.processing.ui.propertySheet")){
+	    	 partActivated(part);
+	    }
+	   
 	}
 	
     /* (non-Javadoc)
@@ -322,6 +328,7 @@ public class OperationModelView extends PageBookView implements ISelectionListen
         IContributedContentsView view = (IContributedContentsView) ViewsPlugin.getAdapter(part,
                 IContributedContentsView.class, true);
         IWorkbenchPart source = null;
+//        if (!(part.getSite().getId().equals("org.dawnsci.processing.ui.processing.ProcessingView") || part.getSite().getId().equals("org.dawnsci.processing.ui.propertySheet"))) return;
         if (view != null) {
 			source = view.getContributingPart();
 		}

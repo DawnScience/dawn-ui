@@ -51,9 +51,11 @@ import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 import org.slf4j.Logger;
@@ -75,6 +77,10 @@ public class ProcessingView extends ViewPart {
 	private List<OperationDescriptor> saved;
 	private TableViewerColumn inputs, outputs;
 	private IOperationErrorInformer informer;
+	private IAction add;
+	private IAction delete;
+	private IAction clear;
+	
 	
 	private final static Logger logger = LoggerFactory.getLogger(ProcessingView.class);
 
@@ -110,16 +116,16 @@ public class ProcessingView extends ViewPart {
 		seriesTable.setValidator(val);
 		final OperationLabelProvider prov = new OperationLabelProvider();
 		seriesTable.createControl(content, prov);
-		seriesTable.registerSelectionProvider(getViewSite());		
-		
+		seriesTable.registerSelectionProvider(getViewSite());	
+		createToobarActions();
 		final MenuManager rightClick = new MenuManager("#PopupMenu");
 		rightClick.setRemoveAllWhenShown(true);
-		createActions(rightClick);
+		//createActions(rightClick);
 		rightClick.addMenuListener(new IMenuListener() {
 			
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
-				createActions(rightClick);
+				createDynamicActions(rightClick);
 				setDynamicMenuOptions(manager);
 			}
 		});
@@ -212,42 +218,36 @@ public class ProcessingView extends ViewPart {
 		
 	}
 
-	private void createActions(IContributionManager rightClick) {
-		
-		final IAction add = new Action("Insert operation", Activator.getImageDescriptor("icons/clipboard-list.png")) {
+	private void createToobarActions() {
+		add = new Action("Insert operation", Activator.getImageDescriptor("icons/clipboard-list.png")) {
 			public void run() {
 				seriesTable.addNew();
 			}
 		};
-		getViewSite().getActionBars().getToolBarManager().add(add);
-		getViewSite().getActionBars().getMenuManager().add(add);
-		rightClick.add(add);
 
-		final IAction delete = new Action("Delete selected operation", Activator.getImageDescriptor("icons/clipboard--minus.png")) {
+
+		delete = new Action("Delete selected operation", Activator.getImageDescriptor("icons/clipboard--minus.png")) {
 			public void run() {
 				seriesTable.delete();
 			}
 		};
-		getViewSite().getActionBars().getToolBarManager().add(delete);
-		getViewSite().getActionBars().getMenuManager().add(delete);
-		rightClick.add(delete);
 
-		
-		final IAction clear = new Action("Clear list of operations", Activator.getImageDescriptor("icons/clipboard-empty.png")) {
+		clear = new Action("Clear list of operations", Activator.getImageDescriptor("icons/clipboard-empty.png")) {
 			public void run() {
 			    boolean ok = MessageDialog.openQuestion(getViewSite().getShell(), "Confirm Clear Pipeline", "Do you want to clear the pipeline?");
 			    if (!ok) return;
 				seriesTable.clear();
 			}
 		};
+		
+		getViewSite().getActionBars().getToolBarManager().add(add);
+		getViewSite().getActionBars().getMenuManager().add(add);
+		getViewSite().getActionBars().getToolBarManager().add(delete);
+		getViewSite().getActionBars().getMenuManager().add(delete);
 		getViewSite().getActionBars().getToolBarManager().add(clear);
 		getViewSite().getActionBars().getMenuManager().add(clear);
-		rightClick.add(clear);
-
-		
 		getViewSite().getActionBars().getToolBarManager().add(new Separator());
 		getViewSite().getActionBars().getMenuManager().add(new Separator());
-		rightClick.add(new Separator());
 		
 		final IAction lock = new Action("Lock pipeline editing", IAction.AS_CHECK_BOX) {
 			public void run() {
@@ -268,7 +268,6 @@ public class ProcessingView extends ViewPart {
 		
 		getViewSite().getActionBars().getToolBarManager().add(lock);
 		getViewSite().getActionBars().getMenuManager().add(lock);
-		rightClick.add(lock);
 
 		final IAction showRanks = new Action("Show input and output ranks", IAction.AS_CHECK_BOX) {
 			public void run() {
@@ -282,15 +281,28 @@ public class ProcessingView extends ViewPart {
 
 		getViewSite().getActionBars().getToolBarManager().add(showRanks);
 		getViewSite().getActionBars().getMenuManager().add(showRanks);
-		rightClick.add(showRanks);
+	}
+	
+	private void createDynamicActions(IContributionManager rightClick) {
+		
+//		rightClick.add(add);
+//		rightClick.add(delete);
+//		rightClick.add(clear);
 	}
 	
 	private void setDynamicMenuOptions(IMenuManager mm) {
 		
+		mm.add(add);
+		mm.add(delete);
+		mm.add(clear);
+		mm.add(new Separator());
+		
 		IOperation<? extends IOperationModel, ? extends OperationData> op = null;
 		
 		try {
-			op = ((OperationDescriptor)seriesTable.getSelected()).getSeriesObject();
+			ISeriesItemDescriptor selected = seriesTable.getSelected();
+			if (!(selected instanceof OperationDescriptor)) return;
+			op = ((OperationDescriptor)selected).getSeriesObject();
 		} catch (InstantiationException e1) {
 		}
 		
@@ -354,3 +366,4 @@ public class ProcessingView extends ViewPart {
 		return buf.toString();
 	}
 }
+
