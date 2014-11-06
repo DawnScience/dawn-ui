@@ -824,7 +824,8 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			public void run() {
 				ShapeType penShape = ShapeType.NONE;
 				Activator.getPlottingPreferenceStore().setValue(PlottingConstants.MASK_PEN_SHAPE, penShape.name());
-				viewer.setSelectedCursor(null);
+				if (viewer != null)
+					viewer.setSelectedCursor(null);
 			}
 		};
 		action.setId(ShapeType.NONE.getId());
