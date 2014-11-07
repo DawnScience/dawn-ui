@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +39,7 @@ import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
+import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.api.metadata.OriginMetadata;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.api.processing.IExecutionVisitor;
@@ -49,6 +51,7 @@ import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.slice.SliceVisitor;
 import org.eclipse.dawnsci.analysis.api.slice.Slicer;
+import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -329,7 +332,7 @@ public class DataFileSliceView extends ViewPart {
 						public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 							//TODO properly populate the number steps
-							monitor.beginTask("Processing", 100);
+							monitor.beginTask("Processing", getAmountOfWork(fileManager.getContext()));
 							fileManager.getContext().setMonitor(new ProgressMonitorWrapper(monitor));
 							try {
 								service.process(fileManager.getContext());
@@ -382,7 +385,7 @@ public class DataFileSliceView extends ViewPart {
 			}
 		};
 		
-		final IAction clearAll = new Action("Clear all files", Activator.getImageDescriptor("icons/delete.gif")) {
+		final IAction clearAll = new Action("Clear all files", Activator.getImageDescriptor("icons/deleteAll.gif")) {
 			public void run() {
 
 				fileManager.clear();
@@ -475,6 +478,46 @@ public class DataFileSliceView extends ViewPart {
 		return new UIExecutionVisitor();
 	}
 
+	private int getAmountOfWork(IConversionContext context) {
+		int c = 0;
+		String name = context.getDatasetNames().get(0);
+		int[] dd = null;
+		Map<Integer, String> sliceDimensions = context.getSliceDimensions();
+		
+		
+		for (String path : context.getFilePaths()) {
+			try {
+				IMetadata metadata = LoaderFactory.getMetadata(path, null);
+				int[] s = metadata.getDataShapes().get(name);
+				
+				Slice[] init = Slicer.getSliceArrayFromSliceDimensions(sliceDimensions,s);
+				int[] dataDims = Slicer.getDataDimensions(s, sliceDimensions);
+				Slice[] slices = Slicer.getSliceArrayFromSliceDimensions(sliceDimensions, s);
+				int[] start =new int[s.length];
+				int[] stop= new int[s.length];
+				int[] step = new int[s.length];
+				Slice.convertFromSlice(slices, s, start, stop, step);
+				int[] nShape = AbstractDataset.checkSlice(s, start, stop, start, stop, step);
+				
+				if (dd == null) {
+					dd = Slicer.getDataDimensions(s, context.getSliceDimensions());
+					Arrays.sort(dd);
+				}
+				 int n = 1;
+				 for (int i = 0; i < nShape.length; i++) {
+					 if (Arrays.binarySearch(dd, i) < 0) n *= nShape[i];
+				 }
+				
+				c += n;
+				
+			} catch (Exception e) {
+				logger.warn("cannot load metadata for {}, assuming one frame", path);
+				c++;
+			}
+		}
+		return c;
+	}
+	
 	@Override
 	public void setFocus() {
 		if (viewer != null) viewer.getTable().setFocus();
@@ -527,7 +570,8 @@ public class DataFileSliceView extends ViewPart {
 				if (axesNames != null) {
 
 					AxesMetadata axMeta = SlicedDataUtils.createAxisMetadata(path, lazyDataset, axesNames);
-					lazyDataset.setMetadata(axMeta);
+					if (axMeta != null) lazyDataset.setMetadata(axMeta);
+					else lazyDataset.clearMetadata(AxesMetadata.class);
 
 				}
 				
@@ -628,7 +672,7 @@ public class DataFileSliceView extends ViewPart {
 			
 			slice.setMetadata(om);
 			
-			OperationData  data = new OperationData(slice, (Serializable[])null);
+			OperationData  data = new OperationData(slice);
 			
 			for (IOperation<? extends IOperationModel, ? extends OperationData> i : series) {
 
@@ -847,7 +891,11 @@ public class DataFileSliceView extends ViewPart {
 			context.setConversionScheme(ConversionScheme.PROCESS);
 
 
-			if (wd.open() == WizardDialog.OK) return true;
+			if (wd.open() == WizardDialog.OK) {
+				job = null;
+				viewer.setSelection(new StructuredSelection(context.getFilePaths().get(0)),true);
+				return true;
+			}
 			
 			return false;
 		}

@@ -20,8 +20,13 @@ public class FileSelectionDialog extends Dialog {
 	private String[] extensions = new String[]{"*.*"};
 	
 	public FileSelectionDialog(Shell parentShell) {
+		this(parentShell, System.getProperty("user.home"));
+	}
+	
+	public FileSelectionDialog(Shell parentShell, String path) {
 		super(parentShell);
-		setShellStyle(getShellStyle() | SWT.RESIZE); 
+		setShellStyle(getShellStyle() | SWT.RESIZE);
+		this.path = path;
 	}
 	
 	  public void setPath(String path) {
@@ -30,7 +35,7 @@ public class FileSelectionDialog extends Dialog {
 
 	@Override
 	  protected Control createDialogArea(Composite parent) {
-
+		
 	    final SelectorWidget sw = new SelectorWidget(parent, isFolderSelector, hasResourceButton, files, extensions){
 			
 			@Override
@@ -38,7 +43,8 @@ public class FileSelectionDialog extends Dialog {
 
 					Button button = FileSelectionDialog.this.getButton(OK);
 					if (button != null) {
-						boolean canOK = this.checkDirectory(path, false);
+						boolean canOK = true;
+						if (isFolderSelector) canOK = this.checkDirectory(path, false);
 						button.setEnabled(canOK);
 						FileSelectionDialog.this.path = path;
 					}

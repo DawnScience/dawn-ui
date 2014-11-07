@@ -377,20 +377,22 @@ public class SetUpProcessWizardPage extends WizardPage {
         			} 
         		}
         	}
-        } else {
+        }
+        
+        if (names.isEmpty()) {
         	final IDataHolder  dataHolder = LoaderFactory.getData(context.getFilePaths().get(0), true, true, null);
-            if (dataHolder!=null) for (String name : dataHolder.getNames()) {
-            	if (name.contains("Image Stack")) continue;
-    			if (!names.containsKey(name)) {
+        	if (dataHolder!=null) for (String name : dataHolder.getNames()) {
+        		if (name.contains("Image Stack")) continue;
+        		if (!names.containsKey(name)) {
 
-    				int[] shape = dataHolder.getLazyDataset(name).getShape();
-    				int[] ss = AbstractDataset.squeezeShape(shape, false);
+        			int[] shape = dataHolder.getLazyDataset(name).getShape();
+        			int[] ss = AbstractDataset.squeezeShape(shape, false);
         			if (scheme!=null && scheme.isRankSupported(ss.length)) {
         				names.put(name, shape);
         			} 
-    				
-    			}
-    		}
+
+        		}
+        	}
         }
 
         rootName = DatasetTitleUtils.getRootName(names.keySet());
