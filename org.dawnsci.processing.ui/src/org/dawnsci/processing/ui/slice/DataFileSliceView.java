@@ -51,6 +51,7 @@ import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.slice.SliceVisitor;
 import org.eclipse.dawnsci.analysis.api.slice.Slicer;
+import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -481,18 +482,30 @@ public class DataFileSliceView extends ViewPart {
 		int c = 0;
 		String name = context.getDatasetNames().get(0);
 		int[] dd = null;
+		Map<Integer, String> sliceDimensions = context.getSliceDimensions();
+		
 		
 		for (String path : context.getFilePaths()) {
 			try {
 				IMetadata metadata = LoaderFactory.getMetadata(path, null);
 				int[] s = metadata.getDataShapes().get(name);
+				
+				Slice[] init = Slicer.getSliceArrayFromSliceDimensions(sliceDimensions,s);
+				int[] dataDims = Slicer.getDataDimensions(s, sliceDimensions);
+				Slice[] slices = Slicer.getSliceArrayFromSliceDimensions(sliceDimensions, s);
+				int[] start =new int[s.length];
+				int[] stop= new int[s.length];
+				int[] step = new int[s.length];
+				Slice.convertFromSlice(slices, s, start, stop, step);
+				int[] nShape = AbstractDataset.checkSlice(s, start, stop, start, stop, step);
+				
 				if (dd == null) {
 					dd = Slicer.getDataDimensions(s, context.getSliceDimensions());
 					Arrays.sort(dd);
 				}
 				 int n = 1;
-				 for (int i = 0; i < s.length; i++) {
-					 if (Arrays.binarySearch(dd, i) < 0) n *= s[i];
+				 for (int i = 0; i < nShape.length; i++) {
+					 if (Arrays.binarySearch(dd, i) < 0) n *= nShape[i];
 				 }
 				
 				c += n;
@@ -878,7 +891,11 @@ public class DataFileSliceView extends ViewPart {
 			context.setConversionScheme(ConversionScheme.PROCESS);
 
 
-			if (wd.open() == WizardDialog.OK) return true;
+			if (wd.open() == WizardDialog.OK) {
+				job = null;
+				viewer.setSelection(new StructuredSelection(context.getFilePaths().get(0)),true);
+				return true;
+			}
 			
 			return false;
 		}
