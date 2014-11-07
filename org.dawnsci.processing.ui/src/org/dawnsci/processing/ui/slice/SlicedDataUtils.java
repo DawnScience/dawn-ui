@@ -41,8 +41,19 @@ public class SlicedDataUtils {
 			}
 			
 			if (lazyAx != null) axMeta.setAxis(key-1, new ILazyDataset[] {lazyAx});
-			else axMeta.setAxis(key-1, new ILazyDataset[1]);
+//			else axMeta.setAxis(key-1, new ILazyDataset[1]);
 		}
+		
+//		ILazyDataset[] axes = axMeta.getAxes();
+//		boolean allNull = true;
+//		for (ILazyDataset ld : axes) {
+//			if (ld != null ) {
+//				allNull = false;
+//				break;
+//			}
+//		}
+//		
+//		if (allNull) return null;
 		
 		return axMeta;
 	}

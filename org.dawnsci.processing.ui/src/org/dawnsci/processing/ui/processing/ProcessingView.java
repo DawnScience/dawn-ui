@@ -18,6 +18,7 @@ import org.dawb.common.services.IPersistentFile;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.util.list.ListUtils;
+import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
 import org.dawnsci.common.widgets.table.SeriesTable;
 import org.dawnsci.processing.ui.Activator;
@@ -37,6 +38,7 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.IOpenEventListener;
 import org.eclipse.jface.util.LocalSelectionTransfer;
@@ -80,6 +82,7 @@ public class ProcessingView extends ViewPart {
 	private IAction add;
 	private IAction delete;
 	private IAction clear;
+	private String lastPath = null;
 	
 	
 	private final static Logger logger = LoggerFactory.getLogger(ProcessingView.class);
@@ -125,7 +128,6 @@ public class ProcessingView extends ViewPart {
 			
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
-				createDynamicActions(rightClick);
 				setDynamicMenuOptions(manager);
 			}
 		});
@@ -182,28 +184,43 @@ public class ProcessingView extends ViewPart {
 		
 	}
 	
+	private void saveOperationsToFile(String filename, IOperation[] op) {
+		try {
+			
+			IPersistenceService service = (IPersistenceService)ServiceManager.getService(IPersistenceService.class);
+			IPersistentFile pf = service.getPersistentFile(filename);
+			pf.setOperations(op);
+		} catch (Exception e) {
+			logger.error("Could not write operations to file", e);
+		}
+	}
+	
 	@Override
 	public Object getAdapter(Class clazz) {
 		
 		if (clazz==IOperation.class) {
-			final List<ISeriesItemDescriptor> desi = seriesTable.getSeriesItems();
-			if (desi==null || desi.isEmpty()) return null;
-			final IOperation<? extends IOperationModel, ? extends OperationData>[] pipeline = new IOperation[desi.size()];
-			for (int i = 0; i < desi.size(); i++) {
-				try {
-					pipeline[i] = (IOperation<? extends IOperationModel, ? extends OperationData>)desi.get(i).getSeriesObject();
-				} catch (InstantiationException e) {
-					e.printStackTrace();
-					return null;
-				}
- 			}
-			return pipeline;
+			return getOperations();
 		}
 		
 		if (clazz == IOperationErrorInformer.class) {
 			return informer;
 		}
 		return super.getAdapter(clazz);
+	}
+	
+	private IOperation[] getOperations() {
+		final List<ISeriesItemDescriptor> desi = seriesTable.getSeriesItems();
+		if (desi==null || desi.isEmpty()) return null;
+		final IOperation<? extends IOperationModel, ? extends OperationData>[] pipeline = new IOperation[desi.size()];
+		for (int i = 0; i < desi.size(); i++) {
+			try {
+				pipeline[i] = (IOperation<? extends IOperationModel, ? extends OperationData>)desi.get(i).getSeriesObject();
+			} catch (InstantiationException e) {
+				e.printStackTrace();
+				return null;
+			}
+			}
+		return pipeline;
 	}
 
 	private void createColumns(OperationLabelProvider prov) {
@@ -249,6 +266,51 @@ public class ProcessingView extends ViewPart {
 		getViewSite().getActionBars().getToolBarManager().add(new Separator());
 		getViewSite().getActionBars().getMenuManager().add(new Separator());
 		
+		final IAction save = new Action("Save configured pipeline", IAction.AS_PUSH_BUTTON) {
+			public void run() {
+				
+				IOperation[] op = getOperations();
+				
+				if (op == null) return;
+				FileSelectionDialog dialog = new FileSelectionDialog(ProcessingView.this.getSite().getShell());
+				if (lastPath != null) dialog.setPath(lastPath);
+				dialog.setNewFile(true);
+				dialog.setFolderSelector(false);
+				
+				dialog.create();
+				if (dialog.open() == Dialog.CANCEL) return;
+				String path = dialog.getPath();
+				saveOperationsToFile(path, op);
+				lastPath = path;
+			}
+		};
+		
+		final IAction load = new Action("Load configured pipeline", IAction.AS_PUSH_BUTTON) {
+			public void run() {
+				
+				FileSelectionDialog dialog = new FileSelectionDialog(ProcessingView.this.getSite().getShell());
+				dialog.setNewFile(false);
+				dialog.setFolderSelector(false);
+				if (lastPath != null) dialog.setPath(lastPath);
+				
+				dialog.create();
+				if (dialog.open() == Dialog.CANCEL) return;
+				String path = dialog.getPath();
+				readOperationsFromFile(path);
+				lastPath = path;
+			}
+		};
+		save.setImageDescriptor(Activator.getImageDescriptor("icons/mask-import-wiz.png"));
+		load.setImageDescriptor(Activator.getImageDescriptor("icons/mask-export-wiz.png"));
+	
+		getViewSite().getActionBars().getToolBarManager().add(save);
+		getViewSite().getActionBars().getMenuManager().add(save);
+		getViewSite().getActionBars().getToolBarManager().add(load);
+		getViewSite().getActionBars().getMenuManager().add(load);
+		
+		getViewSite().getActionBars().getToolBarManager().add(new Separator());
+		getViewSite().getActionBars().getMenuManager().add(new Separator());
+		
 		final IAction lock = new Action("Lock pipeline editing", IAction.AS_CHECK_BOX) {
 			public void run() {
 				Activator.getDefault().getPreferenceStore().setValue(ProcessingConstants.LOCK_PIPELINE, isChecked());
@@ -281,13 +343,6 @@ public class ProcessingView extends ViewPart {
 
 		getViewSite().getActionBars().getToolBarManager().add(showRanks);
 		getViewSite().getActionBars().getMenuManager().add(showRanks);
-	}
-	
-	private void createDynamicActions(IContributionManager rightClick) {
-		
-//		rightClick.add(add);
-//		rightClick.add(delete);
-//		rightClick.add(clear);
 	}
 	
 	private void setDynamicMenuOptions(IMenuManager mm) {
