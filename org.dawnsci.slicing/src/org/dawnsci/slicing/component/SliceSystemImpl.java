@@ -64,9 +64,7 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
-import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -160,21 +158,15 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		final ToolBar        tool    = ((ToolBarManager)sliceToolbar).createControl(area);
 		tool.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
 		
-		final Composite tableComp = new Composite(area, SWT.NONE);
-		tableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, getRangeMode().isRange()));
-
-		TableColumnLayout tableColumnLayout = new TableColumnLayout();
-		tableComp.setLayout(tableColumnLayout);
-
-		this.viewer = new TableViewer(tableComp, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+		this.viewer = new TableViewer(area, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 		viewer.getTable().addListener(SWT.MouseDoubleClick, new Listener() {
 			public void handleEvent(Event event) {
 				event.doit=false;
 				// Do nothing disabled
 			}
 		});		
+		viewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		
 		viewer.getTable().setLinesVisible(true);
 		viewer.getTable().setHeaderVisible(true);
 		viewer.getTable().addListener(SWT.MeasureItem, new Listener() {
@@ -183,16 +175,20 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 			}
 		});
 
-		createColumns(viewer, tableColumnLayout);
+		createColumns(viewer);
 		viewer.setUseHashlookup(true);
 		viewer.setColumnProperties(COLUMN_PROPERTIES.toArray(new String[COLUMN_PROPERTIES.size()]));			
 		
-		this.errorLabel = new CLabel(area, SWT.WRAP);
+		final Composite bottom = new Composite(area, SWT.NONE);
+		bottom.setLayout(new GridLayout(1, false));
+		bottom.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		this.errorLabel = new CLabel(bottom, SWT.WRAP);
 		errorLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		errorLabel.setImage(Activator.getImageDescriptor("icons/error.png").createImage());
 		GridUtils.setVisible(errorLabel,         false);
 		
-		this.infoLabel = new CLabel(area, SWT.NONE);
+		this.infoLabel = new CLabel(bottom, SWT.NONE);
 		infoLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		GridUtils.setVisible(infoLabel,         false);
 
@@ -671,23 +667,23 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 
 	private List<TableViewerColumn> advancedColumns;
 
-	private void createColumns(final TableViewer viewer, TableColumnLayout layout) {
+	private void createColumns(final TableViewer viewer) {
 		
 		final TableViewerColumn dim   = new TableViewerColumn(viewer, SWT.LEFT, 0);
 		dim.getColumn().setText("Dim");
-		layout.setColumnData(dim.getColumn(), new ColumnWeightData(42));
+		dim.getColumn().setWidth(42);
 		dim.setLabelProvider(new DelegatingStyledCellLabelProvider(new SliceColumnLabelProvider(this, viewer, 0)));
 		
 		final TableViewerColumn type   = new TableViewerColumn(viewer, SWT.LEFT, 1);
 		type.getColumn().setText("Type");
-		layout.setColumnData(type.getColumn(), new ColumnWeightData(65));
+		type.getColumn().setWidth(65);
 		type.setLabelProvider(new DelegatingStyledCellLabelProvider(new SliceColumnLabelProvider(this, viewer,1)));
 		this.typeEditingSupport = new TypeEditingSupport(this, viewer);
 		type.setEditingSupport(typeEditingSupport);
 
 		final TableViewerColumn slice   = new TableViewerColumn(viewer, SWT.LEFT, 2);
 		slice.getColumn().setText("Slice Value");
-		layout.setColumnData(slice.getColumn(), new ColumnWeightData(140));
+		slice.getColumn().setWidth(140);
 		slice.setLabelProvider(new DelegatingStyledCellLabelProvider(new SliceColumnLabelProvider(this, viewer,2)));
 		this.sliceEditingSupport = new SliceEditingSupport(this, viewer);
 		slice.setEditingSupport(sliceEditingSupport);
@@ -695,7 +691,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		if (axesVisible) {
 			final TableViewerColumn axis   = new TableViewerColumn(viewer, SWT.LEFT, 3);
 			axis.getColumn().setText("Axis Data");
-			layout.setColumnData(axis.getColumn(), new ColumnWeightData(140));
+			axis.getColumn().setWidth(140);
 			axis.setLabelProvider(new DelegatingStyledCellLabelProvider(new SliceColumnLabelProvider(this, viewer,3)));
 			this.axisEditingSupport = new AxisEditingSupport(this, viewer);
 			axis.setEditingSupport(axisEditingSupport);
@@ -703,7 +699,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 			advancedColumns = new ArrayList<TableViewerColumn>();
 			final TableViewerColumn span   = new TableViewerColumn(viewer, SWT.LEFT, 4);
 			span.getColumn().setText("Span");
-			layout.setColumnData(span.getColumn(), new ColumnWeightData(0, 0, false));
+			span.getColumn().setWidth(0);
 			span.setLabelProvider(new DelegatingStyledCellLabelProvider(new SliceColumnLabelProvider(this, viewer,4)));
 			span.setEditingSupport(new SpanEditingSupport(this, viewer));
 			advancedColumns.add(span);
@@ -712,16 +708,14 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 	
 	protected void setAdvancedColumnsVisible(boolean isVis) {
 		
-		final Composite parent = viewer.getTable().getParent();
-		final TableColumnLayout layout = (TableColumnLayout)parent.getLayout();
 		if (advancedColumns==null) return;
 		for (TableViewerColumn col : advancedColumns) {
 			col.getColumn().setWidth(isVis?80:0);
 			col.getColumn().setResizable(isVis?true:false);
 			if (isVis) {
-				layout.setColumnData(col.getColumn(), new ColumnWeightData(80, 20, true));
+				col.getColumn().setWidth(80);
 			} else {
-				layout.setColumnData(col.getColumn(), new ColumnWeightData(0, 0, false));
+				col.getColumn().setWidth(0);
 			}
 		}
 	}
@@ -901,8 +895,11 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 	 */
 	public void setVisible(final boolean vis) {
 		if (getActiveTool()!=null) getActiveTool().demilitarize();
+		if (Display.getDefault().getThread()!=Thread.currentThread()) {
+			throw new RuntimeException("Thread '"+Thread.currentThread()+"' is not the UI thread!");
+		}
 		area.setVisible(vis);
-		area.getParent().layout(new Control[]{area});
+		area.getParent().layout();
 		//if (plottingSystem!=null && !vis) plottingSystem.setPlotType(PlotType.XY);
 		if (!vis) {
 			sliceJob.cancel();

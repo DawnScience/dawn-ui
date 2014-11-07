@@ -91,9 +91,9 @@ public class PlotDataPage extends Page implements IAdaptable {
 	private DimensionalListener dataReductionDimensionalListener;
 
 	@Override
-	public void createControl(Composite parent) {
+	public void createControl(final Composite parent) {
 		
-		try {
+		try {			
 			this.content = new Composite(parent, SWT.NONE);
 			content.setLayout(new GridLayout(1, true));
 			GridUtils.removeMargins(content);
@@ -185,6 +185,7 @@ public class PlotDataPage extends Page implements IAdaptable {
 			sliceComponent.addDimensionalListener(dataReductionDimensionalListener);
 	
 			form.setWeights(new int[] {40, 60});
+			
 		} catch (Exception ne) {
 			logger.error("Cannot create "+getClass().getName(), ne);
 		}
