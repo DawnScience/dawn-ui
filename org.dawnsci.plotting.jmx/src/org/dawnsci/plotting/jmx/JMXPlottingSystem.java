@@ -207,6 +207,10 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	public void clearRegions() {
 		call(getMethodName(Thread.currentThread().getStackTrace()));
 	}
+	@Override
+	public void clearTraces() {
+		call(getMethodName(Thread.currentThread().getStackTrace()));
+	}
 
 	@Override
 	public Collection<IRegion> getRegions() {

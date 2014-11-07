@@ -572,7 +572,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			if (plottingMode.is1D()) {
 				switchPlottingType(PlotType.IMAGE);
 			}
-			clearTraces(); // Only one image at a time!
+			clearPlotViewer(); // Only one image at a time!
 			if (traceMap==null) traceMap = new LinkedHashMap<String, ITrace>(31);
 			traceMap.clear();
 			
@@ -1005,7 +1005,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	private void clearInternal() {
 		if (activeViewer.getControl()!=null) {
 			try {
-				clearTraces();
+				clearPlotViewer();
 				if (colorMap!=null) colorMap.clear();
 			} catch (Throwable e) {
 				logger.error("Cannot remove traces!", e);
@@ -1021,13 +1021,37 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			colorMap.clear();
 			colorMap = null;
 		}
-		clearTraces();
+		clearPlotViewer();
 		for (IPlottingSystemViewer v : viewers) {
 			if (v.getControl()!=null) v.dispose();
 		}
 	}
 
-	private void clearTraces() {
+	@Override
+	public void clearTraces() {
+		if (getDisplay().getThread() == Thread.currentThread()) {
+			removeAllTraces();
+		} else {
+			getDisplay().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					removeAllTraces();
+				}
+			});
+		}
+	}
+	
+	private void removeAllTraces() {
+		final Collection<ITrace> traces = getTraces();
+		for (ITrace iTrace : traces) {
+			removeTrace(iTrace);
+		}
+	}
+
+	/**
+	 * 
+	 */
+	private void clearPlotViewer() {
 		
 		for (IPlottingSystemViewer v : viewers) {
 		  if (v.getControl()!=null)  v.clearTraces();

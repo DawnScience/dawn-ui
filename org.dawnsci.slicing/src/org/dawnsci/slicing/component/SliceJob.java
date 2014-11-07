@@ -10,6 +10,7 @@ package org.dawnsci.slicing.component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.dawb.common.services.ServiceManager;
@@ -24,6 +25,7 @@ import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.api.io.SliceObject;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.slicing.api.system.ISliceSystem;
 import org.eclipse.dawnsci.slicing.api.system.SliceSource;
@@ -138,11 +140,32 @@ class SliceJob extends Job {
 		boolean requireScale = plottingSystem.isRescale()
 				               || type!=plottingSystem.getPlotType();
 
+		
+		// TODO FIXME This test has got too big. Reduce to methods or table prototype design pattern.
+		// Cannot do now because in middle of release.
 		if (type==PlotType.XY) {
-			plottingSystem.clear();
-			final IDataset x = SliceUtils.getAxis(currentSlice, sliceSource.getVariableManager(), slice.getShape()[0], currentSlice.getX()+1, true, monitor);
-			plottingSystem.setXFirst(true);
-			plottingSystem.createPlot1D(x, Arrays.asList((IDataset)slice), Arrays.asList(sliceSource.getDataName()), slice.getName(), monitor);
+  		    final IDataset x = SliceUtils.getAxis(currentSlice, sliceSource.getVariableManager(), slice.getShape()[0], currentSlice.getX()+1, true, monitor);
+			if (!plottingSystem.isXFirst()) plottingSystem.setXFirst(true);
+				
+			// If we have 1 line trace plotted only, reuse that.
+			Collection<ITrace> traces = plottingSystem.getTraces();
+			if (traces!=null && traces.size()==1 && traces.iterator().next() instanceof ILineTrace) {
+				
+				final ITrace line = traces.iterator().next();
+				final IDataset s  = slice;
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						ILineTrace lt = (ILineTrace)line;
+						lt.setData(x, s);
+						lt.setName(sliceSource.getDataName());
+						plottingSystem.setTitle(s.getName());
+					}
+				});
+			} else {
+				plottingSystem.clearTraces();
+				plottingSystem.createPlot1D(x, Arrays.asList(slice), Arrays.asList(sliceSource.getDataName()), slice.getName(), monitor);
+			}
+			
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
 					if (plottingSystem.getSelectedXAxis()!=null) plottingSystem.getSelectedXAxis().setTitle(x.getName());
@@ -152,7 +175,7 @@ class SliceJob extends Job {
 			
 		} else if (type==PlotType.XY_STACKED || type==PlotType.XY_STACKED_3D || type == PlotType.XY_SCATTER_3D) {
 			
-			plottingSystem.clear();
+			plottingSystem.clearTraces();
 						
 			final int[]         shape = slice.getShape();
 			

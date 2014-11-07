@@ -166,7 +166,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 			}
 		});		
 		viewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
+		viewer.getTable().setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		viewer.getTable().setLinesVisible(true);
 		viewer.getTable().setHeaderVisible(true);
 		viewer.getTable().addListener(SWT.MeasureItem, new Listener() {
