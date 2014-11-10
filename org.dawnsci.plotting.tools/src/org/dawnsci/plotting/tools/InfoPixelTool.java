@@ -213,7 +213,9 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 	public void setFocus() {
 		if (viewer!=null && !viewer.getControl().isDisposed()) viewer.getControl().setFocus();
 	}
-	
+
+	private boolean isListenerAdded = false;
+
 	public void activate() {
 		
 		if (viewer!=null && viewer.getControl().isDisposed()) return;
@@ -221,7 +223,10 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 		
 		createRegions();
 		if (xHair!=null) {
-			xHair.addMouseListener(this);
+			if (!isListenerAdded) {
+				xHair.addMouseListener(this);
+				isListenerAdded = true;
+			}
 			xHair.setVisible(true);
 			xHair.addROIListener(this);
 		}
@@ -275,6 +280,7 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 
 		if (xHair!=null) {
 			xHair.removeMouseListener(this);
+			isListenerAdded = false;
 			xHair.setVisible(false);
 			xHair.removeROIListener(this);
 			getPlottingSystem().removeRegion(xHair);

@@ -266,10 +266,12 @@ public class HistogramToolPage extends AbstractToolPage {
 				paletteData = event.getPaletteData();
 				updateHistogramToolElements(event.getTrace(), null, false, false);
 				
-				if (event.getTrace() != null)
-					updateColourScheme(event.getTrace().getPaletteName());
-					updateColourSchemeRGB(event.getTrace().getPaletteName());
-				
+				IPaletteTrace trace = event.getTrace();
+				String name = trace != null ? trace.getPaletteName() : null;
+				if (name != null) {
+					updateColourScheme(name);
+					updateColourSchemeRGB(name);
+				}
 			}
 
 			@Override
@@ -1000,8 +1002,11 @@ public class HistogramToolPage extends AbstractToolPage {
 			updateHistogramToolElements(image, null, repaintImage, true);
 			
 			// update colour scheme
-			updateColourScheme(image.getPaletteName());
-			updateColourSchemeRGB(image.getPaletteName());
+			String name = image.getPaletteName();
+			if (name != null) {
+				updateColourScheme(name);
+				updateColourSchemeRGB(name);
+			}
 
 			// finally tie in the listener to the palette data changes
 			image.addPaletteListener(paletteListener);

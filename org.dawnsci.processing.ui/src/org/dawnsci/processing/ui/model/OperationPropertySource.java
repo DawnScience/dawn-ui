@@ -11,9 +11,9 @@ package org.dawnsci.processing.ui.model;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.TreeSet;
 
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
@@ -53,7 +53,7 @@ class OperationPropertySource implements IPropertySource {
 		allFields.addAll(Arrays.asList(model.getClass().getSuperclass().getDeclaredFields()));
 		
 		// The returned descriptor
-		final Collection<IPropertyDescriptor> ret = new ArrayList<IPropertyDescriptor>();
+		final List<IPropertyDescriptor> ret = new ArrayList<IPropertyDescriptor>();
 		
 		// fields
 		for (Field field : allFields) {
@@ -68,6 +68,14 @@ class OperationPropertySource implements IPropertySource {
 				continue;
 			}
 		}
+		
+		Collections.sort(ret, new Comparator<IPropertyDescriptor>() {
+			@Override
+			public int compare(IPropertyDescriptor o1, IPropertyDescriptor o2) {
+				return o1.getDisplayName().toLowerCase().compareTo(o2.getDisplayName().toLowerCase());
+			}
+		});
+		
 		return ret.toArray(new IPropertyDescriptor[ret.size()]);
 		
 	}
