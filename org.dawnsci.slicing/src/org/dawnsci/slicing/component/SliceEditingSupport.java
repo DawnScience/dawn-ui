@@ -114,7 +114,7 @@ class SliceEditingSupport extends EditingSupport {
 					final int[] shape = system.getLazyDataset().getShape();
 					int start = Integer.parseInt(matcher.group(1));
 					int end   = Integer.parseInt(matcher.group(2));
-					if (start>-1&&end>-1&&start<shape[data.getDimension()]&&end<shape[data.getDimension()]) {
+					if (start>-1&&end>-1&&end>start&&start<shape[data.getDimension()]&&end<=shape[data.getDimension()]) {
 					    text.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_BLACK));
 					} else {
 						text.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
