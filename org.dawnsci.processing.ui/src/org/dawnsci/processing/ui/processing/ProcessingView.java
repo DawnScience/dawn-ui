@@ -33,14 +33,12 @@ import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.util.IOpenEventListener;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeSelection;
@@ -53,11 +51,9 @@ import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 import org.slf4j.Logger;
@@ -117,7 +113,7 @@ public class ProcessingView extends ViewPart {
 		val.setOperationErrorInformer(informer);
 
 		seriesTable.setValidator(val);
-		final OperationLabelProvider prov = new OperationLabelProvider();
+		final OperationLabelProvider prov = new OperationLabelProvider(0);
 		seriesTable.createControl(content, prov);
 		seriesTable.registerSelectionProvider(getViewSite());	
 		createToobarActions();
@@ -131,7 +127,7 @@ public class ProcessingView extends ViewPart {
 				setDynamicMenuOptions(manager);
 			}
 		});
-		createColumns(prov);
+		createColumns();
 		
 		// Here's the data, lets show it!
 		seriesTable.setMenuManager(rightClick);
@@ -223,13 +219,13 @@ public class ProcessingView extends ViewPart {
 		return pipeline;
 	}
 
-	private void createColumns(OperationLabelProvider prov) {
+	private void createColumns() {
 		
-		this.inputs  = seriesTable.createColumn("Input Rank",  SWT.LEFT, 0, prov);
+		this.inputs  = seriesTable.createColumn("Input Rank",  SWT.LEFT, 0, new OperationLabelProvider(1));
 		inputs.getColumn().setWidth(0);
 		inputs.getColumn().setResizable(false);
 
-		this.outputs = seriesTable.createColumn("Output Rank", SWT.LEFT, 0, prov);
+		this.outputs = seriesTable.createColumn("Output Rank", SWT.LEFT, 0, new OperationLabelProvider(2));
 		outputs.getColumn().setWidth(0);
 		outputs.getColumn().setResizable(false);
 		

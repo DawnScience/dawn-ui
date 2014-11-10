@@ -24,15 +24,20 @@ import org.eclipse.swt.widgets.Display;
 final class OperationLabelProvider extends SeriesItemLabelProvider implements IStyledLabelProvider {
 
 
+	public OperationLabelProvider(int column) {
+		super(column);
+	}
+
 	@Override
 	public StyledString getStyledText(Object element) {
 
 		if(!(element instanceof OperationDescriptor)) return new StyledString();
 
 		final StyledString ret = new StyledString(getText(element));
-		
-		OperationDescriptor des = (OperationDescriptor)element;
-        ret.append(des.getCategoryLabel(), StyledString.DECORATIONS_STYLER);
+		if (column==0) {
+			OperationDescriptor des = (OperationDescriptor)element;
+	        ret.append(des.getCategoryLabel(), StyledString.DECORATIONS_STYLER);
+		}
 		return ret;
 	}
 

@@ -11,7 +11,6 @@ package org.dawnsci.common.widgets.table;
 import org.dawnsci.common.widgets.Activator;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
-import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.graphics.Image;
 
 /**
@@ -22,12 +21,10 @@ import org.eclipse.swt.graphics.Image;
 public abstract class SeriesItemLabelProvider extends ColumnLabelProvider implements DelegatingStyledCellLabelProvider.IStyledLabelProvider  {
 
 	private Image newImage;
-	protected int column=-1;
-
-	public void update(ViewerCell cell) {
-		this.column = cell.getColumnIndex();
-        super.update(cell);
-		this.column = -1;
+	protected int column;
+	
+	public SeriesItemLabelProvider(int column) {
+		this.column = column;
 	}
 	
 	@Override
