@@ -484,7 +484,7 @@ public class DiffractionCalibrationUtils {
 			
 			
 		} catch(Exception e) {
-			//do nothing
+			logger.error(e.getMessage());
 		} finally {
 			file.close();
 		}

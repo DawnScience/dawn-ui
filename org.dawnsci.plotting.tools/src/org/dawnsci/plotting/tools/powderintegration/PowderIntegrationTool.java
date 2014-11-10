@@ -23,6 +23,7 @@ import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.util.eclipse.BundleUtils;
+import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.diffraction.DiffractionUtils;
 import org.eclipse.core.runtime.Status;
@@ -46,6 +47,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
@@ -90,6 +92,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	PowderIntegrationModel model;
 	PowderCorrectionModel corModel;
 	IntegrationSetupWidget integratorSetup;
+	String lastPath = null;
 	
 	public PowderIntegrationTool() {
 		try {
@@ -359,14 +362,25 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			public void run() {
 				try {
 
-					FileDialog dialog =  new FileDialog(getViewPart().getSite().getShell(), SWT.OPEN);
-					dialog.setText("Open metadata file");
-					dialog.setFilterExtensions(new String[]{"*.nxs"});
-					dialog.open();
-					String[] names =  dialog.getFileNames();
-					if (names.length == 0) return;
-
-					NexusDiffractionMetaReader nexusDiffReader = new NexusDiffractionMetaReader(dialog.getFilterPath() + File.separator + names[0]);
+					FileSelectionDialog dialog = new FileSelectionDialog(Display.getDefault().getActiveShell());
+//					FileDialog dialog = new FileDialog(Display.getDefault().getActiveShell(), SWT.SAVE);
+					dialog.setNewFile(false);
+					dialog.setFolderSelector(false);
+					if (lastPath != null) {
+						File f = new File(lastPath);
+						if (!f.isDirectory()) {
+							lastPath = f.getParent();
+						}
+						dialog.setPath(lastPath);
+					} else {
+						dialog.setPath(System.getProperty("user.home"));
+					}
+					
+					dialog.create();
+					if (dialog.open() == Dialog.CANCEL ) return;
+					lastPath = dialog.getPath();
+					
+					NexusDiffractionMetaReader nexusDiffReader = new NexusDiffractionMetaReader(dialog.getPath());
 
 					IDiffractionMetadata md = nexusDiffReader.getDiffractionMetadataFromNexus(null);
 
