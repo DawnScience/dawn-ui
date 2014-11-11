@@ -22,18 +22,21 @@
       </view>
       <view
             class="org.dawnsci.processing.ui.slice.DataFileSliceView"
+            icon="icons/procfolder.png"
             id="org.dawnsci.processing.ui.DataFileSliceView"
             name="Data Slice View"
             restorable="true">
       </view>
       <view
             class="uk.ac.diamond.scisoft.analysis.rcp.views.PlotView"
+            icon="icons/input.png"
             id="org.dawnsci.processing.ui.input"
             name="Input"
             restorable="true">
       </view>
       <view
             class="uk.ac.diamond.scisoft.analysis.rcp.views.PlotView"
+            icon="icons/output.png"
             id="org.dawnsci.processing.ui.output"
             name="Output"
             restorable="true">
