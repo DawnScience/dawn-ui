@@ -75,6 +75,13 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 			return e.getMessage();
 		}
 	}
+	@Override
+	public String getLabel() {
+		StringBuilder buf = new StringBuilder(getName());
+		buf.append("   ");
+		buf.append(getCategoryLabel());
+		return buf.toString();
+	}
 
 	@Override
 	public String getDescription() {
@@ -224,6 +231,6 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 		AbstractOperation<IOperationModel, OperationData> aop = (AbstractOperation<IOperationModel, OperationData>)operation;
         if (aop.getCategory()==null) return "";
         final OperationCategory cat = aop.getCategory();
-        return "("+cat.getName()+")";
+        return "["+cat.getName()+"]";
 	}
 }

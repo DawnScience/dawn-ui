@@ -34,6 +34,12 @@ public interface ISeriesItemDescriptor extends IAdaptable {
 	 */
 	String getName();
 
+    /**
+     * The label shown when choosing the item, might also include category
+     * @return
+     */
+	String getLabel();
+
 	/**
 	 * Provides the description of the function
 	 *
@@ -76,6 +82,12 @@ public interface ISeriesItemDescriptor extends IAdaptable {
 
 		@Override
 		public Object getAdapter(Class clazz) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public String getLabel() {
 			// TODO Auto-generated method stub
 			return null;
 		}

@@ -20,10 +20,19 @@ public class SeriesLabelProvider extends DelegatingStyledCellLabelProvider imple
 	}
 	
 	public String getText(Object element) {
+		if (!(element instanceof SeriesItemContentProposal)) {
+			return ((ILabelProvider)getStyledStringProvider()).getText(element);
+		}
+		
 		return "  "+((SeriesItemContentProposal)element).getLabel();
 	}
 	
 	public Image getImage(Object element) {
+		
+		if (!(element instanceof SeriesItemContentProposal)) {
+			return ((ILabelProvider)getStyledStringProvider()).getImage(element);
+		}
+		
 		SeriesItemContentProposal prop = (SeriesItemContentProposal)element;
 		return getStyledStringProvider().getImage(prop.getDescriptor());
 	}
