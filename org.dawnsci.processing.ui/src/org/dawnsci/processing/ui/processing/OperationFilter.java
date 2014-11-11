@@ -11,12 +11,16 @@ package org.dawnsci.processing.ui.processing;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
 import org.dawnsci.common.widgets.table.ISeriesItemFilter;
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.model.OperationDescriptor;
+import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
+import org.eclipse.dawnsci.analysis.api.processing.OperationData;
+import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,15 +38,20 @@ final class OperationFilter implements ISeriesItemFilter {
 	public Collection<ISeriesItemDescriptor> getDescriptors(String contents, int position, ISeriesItemDescriptor previous) {
 		// TODO use previous
 		try {
-			final Collection<String>                ops = service.getRegisteredOperations();
+			final Map<String, Collection<IOperation<? extends IOperationModel, ? extends OperationData>>>  ops = service.getCategorizedOperations();
 			final Collection<ISeriesItemDescriptor> ret = new ArrayList<ISeriesItemDescriptor>(7);
 			
-			for (String id : ops) {
-				final OperationDescriptor des = new OperationDescriptor(id, service);
-				if (!des.isVisible()) continue;
-				if (contents!=null && !des.getName().toLowerCase().contains(contents.toLowerCase())) continue;
-				if (!des.isCompatibleWith(previous)) continue;
-				ret.add(des);
+			for (String catName : ops.keySet()) {
+				
+				final Collection<IOperation<? extends IOperationModel, ? extends OperationData>> col = ops.get(catName);
+				for (IOperation<? extends IOperationModel, ? extends OperationData> op : col) {
+					
+					final OperationDescriptor des = new OperationDescriptor(op, service);
+					if (!des.isVisible()) continue;
+					if (contents!=null && !des.getName().toLowerCase().contains(contents.toLowerCase())) continue;
+					if (!des.isCompatibleWith(previous)) continue;
+					ret.add(des);
+				}
 			}
 			return ret;
 			
