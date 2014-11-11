@@ -179,9 +179,10 @@ public class SeriesTable {
 		nameColumn.getColumn().setMoveable(true);
 		nameColumn.getColumn().setText(name);
 		
-		nameColumn.setLabelProvider(delegate);
+		SeriesLabelProvider prov = new SeriesLabelProvider(delegate);
+		nameColumn.setLabelProvider(prov);
 
-		this.editingSupport = new SeriesEditingSupport(tableViewer, new SeriesLabelProvider(delegate));
+		this.editingSupport = new SeriesEditingSupport(tableViewer,  prov);
 		nameColumn.setEditingSupport(editingSupport);
 
 	}

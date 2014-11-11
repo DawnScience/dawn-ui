@@ -159,17 +159,11 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 				final List<IRegion> visible = new ArrayList<IRegion>();
 				
 				for (IRegion region : regions) {
-					
-					if (region.getRegionType() == RegionType.XAXIS_LINE)
-						visible.add(region);
-					
+					if (region.getRegionType() == RegionType.XAXIS_LINE) visible.add(region);
 				}
 				
 				for (IRegion region : regions) {
-					
-					if (region.getRegionType() == RegionType.POINT)
-						visible.add(region);
-					
+					if (region.getRegionType() == RegionType.POINT) visible.add(region);
 				}
 
 				return visible.toArray(new IRegion[visible.size()]);
@@ -199,6 +193,14 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 		} catch (Exception ne) {
 			logger.error("Cannot create initial regions in pixel info tool!", ne);
 		}
+	}
+	
+	protected IROI getXHair() {
+		return xHair.getROI();
+	}
+	
+	protected IROI getYHair() {
+		return yHair.getROI();
 	}
 	
 	private void addRegion(String jobName, IRegion region) {

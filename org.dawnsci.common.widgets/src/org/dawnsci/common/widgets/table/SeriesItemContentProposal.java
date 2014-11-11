@@ -42,7 +42,7 @@ public class SeriesItemContentProposal implements IContentProposal, IAdaptable {
 
 	@Override
 	public String getLabel() {
-		return desriptor.getName();
+		return desriptor.getLabel();
 	}
 
 	@Override

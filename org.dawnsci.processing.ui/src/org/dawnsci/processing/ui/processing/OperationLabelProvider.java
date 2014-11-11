@@ -36,6 +36,7 @@ final class OperationLabelProvider extends SeriesItemLabelProvider implements IS
 		final StyledString ret = new StyledString(getText(element));
 		if (column==0) {
 			OperationDescriptor des = (OperationDescriptor)element;
+			ret.append("    ");
 	        ret.append(des.getCategoryLabel(), StyledString.DECORATIONS_STYLER);
 		}
 		return ret;

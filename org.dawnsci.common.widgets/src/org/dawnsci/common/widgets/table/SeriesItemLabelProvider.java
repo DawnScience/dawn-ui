@@ -40,7 +40,7 @@ public abstract class SeriesItemLabelProvider extends ColumnLabelProvider implem
 
 	@Override
 	public String getText(Object element) {
-		
+		if (!(element instanceof ISeriesItemDescriptor)) return null;
 		if (column==0) return ((ISeriesItemDescriptor)element).getName();
 		return null;
 	}

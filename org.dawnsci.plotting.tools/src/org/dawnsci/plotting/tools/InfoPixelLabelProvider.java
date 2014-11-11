@@ -73,8 +73,7 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 		ICoordinateSystem coords = null;
 		String regionName = "";
 		try {
-			if (!(element instanceof IRegion))
-				return null;
+			if (!(element instanceof IRegion)) return null;
 			final IRegion region = (IRegion)element;
 			coords = region.getCoordinateSystem();
 
@@ -99,8 +98,8 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 			} else if (region.getRegionType() == RegionType.XAXIS_LINE){
 
 				if (region.getROI()==null) return null;
-				xIndex = region.getROI().getPointX();
-				yIndex = region.getROI().getPointY();
+				xIndex = tool.getXHair().getPointX();
+				yIndex = tool.getYHair().getPointY();
 		
 				final double[] dp = new double[]{xIndex, yIndex};
 				try {
