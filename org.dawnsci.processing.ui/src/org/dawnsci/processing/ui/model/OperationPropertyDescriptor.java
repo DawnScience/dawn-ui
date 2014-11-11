@@ -201,7 +201,7 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
 	private void showHint(final String hint, final CellEditor cellEd) {
 		
 		final Control control = cellEd.getControl();
-		control.getDisplay().asyncExec(new Runnable() {
+		if (control!=null) control.getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				
 				final DefaultToolTip tooltip = new DefaultToolTip(control, ToolTip.NO_RECREATE, true);
