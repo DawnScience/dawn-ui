@@ -356,6 +356,7 @@ public class DataFileSliceView extends ViewPart {
 					fileManager.clear();
 					csw.disable();
 					currentSliceLabel.setText("Current slice of data: [ - - - - -]");
+					informer.setTestData(null);
 				} else {
 					viewer.setSelection(new StructuredSelection(fileManager.getFilePaths().get(0)),true);
 				}
@@ -380,7 +381,7 @@ public class DataFileSliceView extends ViewPart {
 
 				fileManager.clear();
 				csw.disable();
-
+				informer.setTestData(null);
 				job = null;
 				currentSliceLabel.setText("Current slice of data: [ - - - - -]");
 				try {
