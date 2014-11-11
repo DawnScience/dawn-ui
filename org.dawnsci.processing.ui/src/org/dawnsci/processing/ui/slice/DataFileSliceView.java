@@ -396,7 +396,7 @@ public class DataFileSliceView extends ViewPart {
 			}
 		};
 		
-		final IAction edit = new Action("Edit slice configuration", Activator.getImageDescriptor("icons/clipboard-list.png")) {
+		final IAction edit = new Action("Edit slice configuration", Activator.getImageDescriptor("icons/book-brown-setting.png")) {
 			public void run() {
 				fileManager.setUpContext();
 			}
