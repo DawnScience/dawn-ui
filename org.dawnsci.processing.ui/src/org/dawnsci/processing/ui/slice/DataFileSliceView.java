@@ -836,6 +836,28 @@ public class DataFileSliceView extends ViewPart {
 			
 			IConversionContext context = service.open(path);
 			
+			return setupwizard(context);
+		}
+		
+		@Override
+		public boolean setup(IConversionContext context) {
+			
+			if (context.getSliceDimensions() != null) {
+				context.getSliceDimensions().clear();
+			}
+
+			IConversionContext c = setupwizard(context);
+
+			if (c != null) {
+				job = null;
+				viewer.setSelection(new StructuredSelection(context.getFilePaths().get(0)),true);
+				return true;
+			}
+			
+			return false;
+		}
+		
+		private IConversionContext setupwizard(IConversionContext context) {
 			final SetUpProcessWizardPage convertPage = new SetUpProcessWizardPage(context);
 			
 			Wizard wiz = new Wizard() {
@@ -858,37 +880,6 @@ public class DataFileSliceView extends ViewPart {
 			if (wd.open() == WizardDialog.OK) return context;
 			
 			return null;
-		}
-		
-		@Override
-		public boolean setup(IConversionContext context) {
-			
-			final SetUpProcessWizardPage convertPage = new SetUpProcessWizardPage(context);
-			
-			Wizard wiz = new Wizard() {
-				//set 
-				@Override
-				public boolean performFinish() {
-					convertPage.populateContext();
-					return true;
-				}
-			};
-
-			wiz.setNeedsProgressMonitor(true);
-			wiz.addPage(convertPage);
-			final WizardDialog wd = new WizardDialog(getSite().getShell(),wiz);
-			wd.setPageSize(new Point(900, 500));
-			wd.create();
-			context.setConversionScheme(ConversionScheme.PROCESS);
-
-
-			if (wd.open() == WizardDialog.OK) {
-				job = null;
-				viewer.setSelection(new StructuredSelection(context.getFilePaths().get(0)),true);
-				return true;
-			}
-			
-			return false;
 		}
 		
 	}
