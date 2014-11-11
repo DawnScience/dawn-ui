@@ -1,6 +1,5 @@
 package org.dawnsci.processing.ui.slice;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -13,14 +12,9 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import org.dawb.common.services.conversion.IConversionContext;
-import org.dawb.common.services.conversion.IConversionVisitor;
 import org.dawb.common.services.conversion.IConversionContext.ConversionScheme;
-import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
-import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.plotting.services.util.DatasetTitleUtils;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
@@ -44,10 +38,8 @@ import org.eclipse.dawnsci.slicing.api.system.RangeMode;
 import org.eclipse.dawnsci.slicing.api.system.SliceSource;
 import org.eclipse.dawnsci.slicing.api.tool.AbstractSlicingTool;
 import org.eclipse.dawnsci.slicing.api.tool.ISlicingTool;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -66,7 +58,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.ui.internal.dnd.SwtUtil;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
@@ -144,7 +135,16 @@ public class SetUpProcessWizardPage extends WizardPage {
 		d1.setText("Line [1D]");
 		final Button d2 = new Button(left, SWT.RADIO);
 		d2.setText("Image [2D]");
-		d2.setSelection(true);
+		
+		Entry<String, int[]> sel =(Entry<String, int[]>)((StructuredSelection)cviewer.getSelection()).getFirstElement();
+		
+		if (sel.getValue().length < 2) {
+			d1.setSelection(true);
+			d2.setSelection(false);
+		} else {
+			d1.setSelection(false);
+			d2.setSelection(true);
+		}
 		
 		try {
 			this.sliceComponent = SlicingFactory.createSliceSystem("org.dawb.workbench.views.h5GalleryView");
@@ -166,7 +166,6 @@ public class SetUpProcessWizardPage extends WizardPage {
 			
 			@Override
 			public void axisChoicePerformed(AxisChoiceEvent evt) {
-				Entry<String, int[]> selection = (Entry<String, int[]>)((IStructuredSelection)cviewer.getSelection()).getFirstElement();
 				updatePlot(context);
 				
 			}
@@ -183,6 +182,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 				if (dimsDataList!=null) dimsDataList.setTwoAxesOnly(AxisType.Y, AxisType.X);   		
 				getSlicingSystem().refresh();
 				getSlicingSystem().update(false);
+				
 			}
 
 			@Override
@@ -257,8 +257,26 @@ public class SetUpProcessWizardPage extends WizardPage {
 			
 			@Override
 			public void dimensionsChanged(DimensionalEvent evt) {
-				Entry<String, int[]> selection = (Entry<String, int[]>)((IStructuredSelection)cviewer.getSelection()).getFirstElement();
 				updatePlot(context);
+			}
+		});
+		
+		cviewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				Entry<String, int[]> sel =(Entry<String, int[]>)((StructuredSelection)event.getSelection()).getFirstElement();
+				updateDataset(sel.getKey());
+				if (sel.getValue().length < 2) {
+					d1.setSelection(true);
+					d2.setSelection(false);
+					sliceComponent.militarize(line);
+				} else {
+					sliceComponent.militarize(image);
+					d2.setSelection(true);
+					d1.setSelection(false);
+				}
+				
 			}
 		});
 		
@@ -282,17 +300,6 @@ public class SetUpProcessWizardPage extends WizardPage {
 		}
 //		sliceComponent.setRangeMode(RangeMode.MULTI_RANGE);
 		DimsDataList ddl = sliceComponent.getDimsDataList();
-//		for (DimsData dd : ddl.getDimsData()) {
-//			if (dd.isSlice()) {
-//				dd.setPlotAxis(AxisType.RANGE);
-//				dd.setSliceRange("all");
-//			}
-//		}
-		
-		if (context.getSliceDimensions() != null) {
-			
-			
-		}
 		
 		Composite plotComp = new Composite(right, SWT.NONE);
 		plotComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
@@ -375,6 +382,10 @@ public class SetUpProcessWizardPage extends WizardPage {
         			if (scheme!=null && scheme.isRankSupported(ss.length)) {
         				names.put(name, shape);
         			} 
+        		} else {
+        			//null shape is a bad sign
+        			names.clear();
+        			break;
         		}
         	}
         }
