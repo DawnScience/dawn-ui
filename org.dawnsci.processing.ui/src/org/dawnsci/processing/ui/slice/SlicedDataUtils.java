@@ -40,7 +40,7 @@ public class SlicedDataUtils {
 				lazyAx.setShape(shape);
 			}
 			
-			if (lazyAx != null) axMeta.setAxis(key-1, new ILazyDataset[] {lazyAx});
+			if (lazyAx != null) axMeta.setAxis(key-1, lazyAx);
 			else axMeta.setAxis(key-1, new ILazyDataset[1]);
 		}
 		
