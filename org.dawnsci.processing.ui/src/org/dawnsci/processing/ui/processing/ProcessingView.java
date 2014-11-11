@@ -111,6 +111,7 @@ public class ProcessingView extends ViewPart {
 		OperationValidator val = new OperationValidator();
 		informer = new OperationInformerImpl(seriesTable);
 		val.setOperationErrorInformer(informer);
+		operationFiler.setOperationErrorInformer(informer);
 
 		seriesTable.setValidator(val);
 		final OperationLabelProvider prov = new OperationLabelProvider(0);
