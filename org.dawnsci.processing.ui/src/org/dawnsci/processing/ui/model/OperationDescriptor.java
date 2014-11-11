@@ -155,9 +155,8 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 
 	public synchronized boolean isVisible() {
 		if (visible==null) read();
-		System.out.println(visible==null);
-		System.out.println(id==null);
-		return visible.get(id);
+		Boolean b = visible.get(id);
+		return b!=null ? b : true;
 	}
 	
 	private static synchronized void read() {

@@ -44,7 +44,6 @@ public class SeriesProposalProvider implements IContentProposalProvider {
 		for (ISeriesItemDescriptor descriptor : delegate.getDescriptors(contents, position, itemDescriptor)) {
 			proposals.add(new SeriesItemContentProposal(descriptor));
 		}
-		Collections.sort(proposals, proposalComparator);
 		return proposals.toArray(new IContentProposal[proposals.size()]);
 	}
 
