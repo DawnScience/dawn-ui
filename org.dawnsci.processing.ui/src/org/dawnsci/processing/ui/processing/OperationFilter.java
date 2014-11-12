@@ -63,7 +63,7 @@ final class OperationFilter implements ISeriesItemFilter {
 				final Collection<IOperation<? extends IOperationModel, ? extends OperationData>> col = ops.get(catName);
 				for (IOperation<? extends IOperationModel, ? extends OperationData> op : col) {
 					
-					final OperationDescriptor des = new OperationDescriptor(op, service);
+					final OperationDescriptor des = new OperationDescriptor(op.getId(), service);
 					try {
 						if (!des.isVisible()) continue;
 						if (contents!=null && !des.getName().toLowerCase().contains(contents.toLowerCase())) continue;

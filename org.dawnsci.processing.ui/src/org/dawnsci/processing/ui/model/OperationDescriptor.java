@@ -225,12 +225,8 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 
 	public String getCategoryLabel() {
 		
-		if (operation==null) return "";
-		if (!(operation instanceof AbstractOperation)) return "";
-		
-		AbstractOperation<IOperationModel, OperationData> aop = (AbstractOperation<IOperationModel, OperationData>)operation;
-        if (aop.getCategory()==null) return "";
-        final OperationCategory cat = aop.getCategory();
+		final OperationCategory cat = service.getCategory(id);
+		if (cat == null) return "";
         return "["+cat.getName()+"]";
 	}
 }
