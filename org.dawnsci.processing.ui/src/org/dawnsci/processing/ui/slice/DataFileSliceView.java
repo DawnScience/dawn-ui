@@ -111,6 +111,8 @@ public class DataFileSliceView extends ViewPart {
 	IPlottingSystem output;
 	IOperationErrorInformer informer;
 	
+	String lastPath = null;
+	
 	private final static Logger logger = LoggerFactory.getLogger(DataFileSliceView.class);
 	
 	@Override
@@ -304,12 +306,16 @@ public class DataFileSliceView extends ViewPart {
 					});
 				}
 				
-				final File source = new File(fileManager.getFilePaths().get(0));
-				String path  = source.getParent();
 				FileSelectionDialog fsd = new FileSelectionDialog(Display.getCurrent().getActiveShell());
-				fsd.setPath(path);
+				if (lastPath == null) {
+					final File source = new File(fileManager.getFilePaths().get(0));
+					lastPath  = source.getParent();
+				}
+				
+				fsd.setPath(lastPath);
 				fsd.create();
 				if (fsd.open() == Dialog.CANCEL) return;
+				lastPath = fsd.getPath();
 				fileManager.setOutputPath(fsd.getPath());
 				
 
