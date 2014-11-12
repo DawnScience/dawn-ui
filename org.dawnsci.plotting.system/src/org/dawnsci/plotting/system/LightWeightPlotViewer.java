@@ -1210,6 +1210,7 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 	
 	@Override
 	public IAxis getSelectedXAxis() {
+		if (xyGraph==null) return null;
 		return xyGraph.getSelectedXAxis();
 	}
 
@@ -1220,6 +1221,7 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 
 	@Override
 	public IAxis getSelectedYAxis() {
+		if (xyGraph==null) return null;
 		return xyGraph.getSelectedYAxis();
 	}
 
@@ -1229,6 +1231,7 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 	}
 
 	public Image getImage(Rectangle size) {
+		if (xyGraph==null) return null;
 		return xyGraph.getImage(size);
 	}
 

@@ -258,10 +258,10 @@ public class LineFittingTool extends AbstractFittingTool {
 		CheckableActionGroup group = new CheckableActionGroup();
 		
 		final int npeak = Activator.getPlottingPreferenceStore().getDefaultInt(FittingConstants.POLY_CHOICES);
-		for (int ipeak = 1; ipeak <= npeak; ipeak++) {
+		for (int m = 0; m <= npeak; m++) {
 			
-			final int peak = ipeak;
-			final Action action = new Action("Polynomial Order: " + String.valueOf(ipeak), IAction.AS_CHECK_BOX) {
+			final int peak = m;
+			final Action action = new Action("Polynomial Order: " + String.valueOf(m), IAction.AS_CHECK_BOX) {
 				public void run() {
 					Activator.getPlottingPreferenceStore().setValue(FittingConstants.POLY_ORDER, peak);
 					numberPeaks.setSelectedAction(this);
@@ -270,17 +270,17 @@ public class LineFittingTool extends AbstractFittingTool {
 				}
 			};
 			
-			action.setImageDescriptor(IconUtils.createIconDescriptor(String.valueOf(ipeak)));
+			action.setImageDescriptor(IconUtils.createIconDescriptor(String.valueOf(m)));
 			numberPeaks.add(action);
 			group.add(action);
 			action.setChecked(false);
-			action.setToolTipText("Fit "+ipeak+" peak(s)");
+			action.setToolTipText("Polynomial order "+m);
 			
 		}
 
 		final int ipeak = Activator.getPlottingPreferenceStore().getInt(FittingConstants.POLY_ORDER);
-		numberPeaks.setSelectedAction(ipeak-1);
-		numberPeaks.setCheckedAction(ipeak-1, true);
+		numberPeaks.setSelectedAction(ipeak);
+		numberPeaks.setCheckedAction(ipeak, true);
 		
 		getSite().getActionBars().getToolBarManager().add(numberPeaks);
 		

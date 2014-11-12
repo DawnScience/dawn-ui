@@ -203,6 +203,11 @@ class AxisEditingSupport extends EditingSupport {
 				for (IExpressionObject iExpressionObject : exprs) {
 					final ILazyDataset set = iExpressionObject.getCachedLazyDataSet();
 					if (set!=null && set.getRank()==1 && set.getSize()==size){
+						
+						if (names.contains(iExpressionObject.getExpressionString())) {
+							names.remove(iExpressionObject.getExpressionString());
+						}
+						
 						final String name = iExpressionObject.getExpressionName()+" [Expression]";
 						names.add(name);
 						final IDataset axisData = iExpressionObject.getDataSet(iExpressionObject.getExpressionName(), new IMonitor.Stub());
