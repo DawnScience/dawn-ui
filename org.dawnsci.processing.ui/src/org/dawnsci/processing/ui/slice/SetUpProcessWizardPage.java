@@ -1,5 +1,6 @@
 package org.dawnsci.processing.ui.slice;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -15,6 +16,7 @@ import org.dawb.common.services.conversion.IConversionContext;
 import org.dawb.common.services.conversion.IConversionContext.ConversionScheme;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.plotting.services.util.DatasetTitleUtils;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
@@ -38,6 +40,7 @@ import org.eclipse.dawnsci.slicing.api.system.RangeMode;
 import org.eclipse.dawnsci.slicing.api.system.SliceSource;
 import org.eclipse.dawnsci.slicing.api.tool.AbstractSlicingTool;
 import org.eclipse.dawnsci.slicing.api.tool.ISlicingTool;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -57,20 +60,27 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class SetUpProcessWizardPage extends WizardPage {
 
-	ISliceSystem sliceComponent;
-	IPlottingSystem system;
-	IConversionContext context;
-	ComboViewer cviewer;
-	String rootName = null;
+	private ISliceSystem sliceComponent;
+	private IPlottingSystem system;
+	private IConversionContext context;
+	private ComboViewer cviewer;
+	private String rootName = null;
+	
+	private final static Logger logger = LoggerFactory.getLogger(SetUpProcessWizardPage.class);
 	
 	protected SetUpProcessWizardPage(IConversionContext context) {
 		super("Set up input data");
+		setDescription("Select dataset, axes, whether to process as images [2D] or lines [1D] and which dimensions of the array are the data dimensions");
+		setTitle("Set up data for processing");
 		this.context = context;
 		context.setConversionScheme(ConversionScheme.PROCESS);
 	}
@@ -83,19 +93,10 @@ public class SetUpProcessWizardPage extends WizardPage {
 		
 		setControl(sashForm);
 		
-		Composite left = new Composite(sashForm, SWT.NONE);
+		final Composite left = new Composite(sashForm, SWT.NONE);
 		left.setLayout(new GridLayout(2, false));
 		Composite right = new Composite(sashForm, SWT.NONE);
 		right.setLayout(new GridLayout());
-		
-		Map<String,int[]> datasetNames = null;
-		
-		try {
-			datasetNames = getDatasetInfo();
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
 		
 		Label l = new Label(left, SWT.NONE);
 		l.setText("Select dataset:");
@@ -103,23 +104,6 @@ public class SetUpProcessWizardPage extends WizardPage {
 		cviewer = new ComboViewer(left);
 		cviewer.setContentProvider(new BasicContentProvider());
 		cviewer.setLabelProvider(new ViewLabelProvider());
-		cviewer.setInput(datasetNames);
-		
-		if (context.getDatasetNames() != null) {
-			String name = context.getDatasetNames().get(0);
-			int i = 0;
-			for (String n: datasetNames.keySet()) {
-				if (name.equals(n)) {
-					cviewer.getCombo().select(i);
-					break;
-				}
-				
-				i++;
-			}
-		} else {
-			cviewer.getCombo().select(0);
-		}
-		
 		
 		cviewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			
@@ -136,20 +120,10 @@ public class SetUpProcessWizardPage extends WizardPage {
 		final Button d2 = new Button(left, SWT.RADIO);
 		d2.setText("Image [2D]");
 		
-		Entry<String, int[]> sel =(Entry<String, int[]>)((StructuredSelection)cviewer.getSelection()).getFirstElement();
-		
-		if (sel.getValue().length < 2) {
-			d1.setSelection(true);
-			d2.setSelection(false);
-		} else {
-			d1.setSelection(false);
-			d2.setSelection(true);
-		}
-		
 		try {
 			this.sliceComponent = SlicingFactory.createSliceSystem("org.dawb.workbench.views.h5GalleryView");
 		} catch (Exception e) {
-//			logger.error("Cannot create slice system!", e);
+			logger.error("Cannot create slice system!", e);
 			return;
 		}
 
@@ -171,54 +145,10 @@ public class SetUpProcessWizardPage extends WizardPage {
 			}
 		});
 		
-		final ISlicingTool image = new AbstractSlicingTool() {
-			
-			@Override
-			public void militarize(boolean newData) {
-				
-				getSlicingSystem().setSliceType(getSliceType());
-				
-				final DimsDataList dimsDataList = getSlicingSystem().getDimsDataList();
-				if (dimsDataList!=null) dimsDataList.setTwoAxesOnly(AxisType.Y, AxisType.X);   		
-				getSlicingSystem().refresh();
-				getSlicingSystem().update(false);
-				
-			}
-
-			@Override
-			public Enum getSliceType() {
-				return PlotType.IMAGE;
-			}
-		};
+		final ISlicingTool image = getImageSlicingTool();
 		image.setSlicingSystem(sliceComponent);
 		
-		final ISlicingTool line = new AbstractSlicingTool() {
-			
-			@Override
-			public void militarize(boolean newData) {
-				
-				
-				boolean wasImage = getSlicingSystem().getSliceType()==PlotType.IMAGE || 
-						           getSlicingSystem().getSliceType()==PlotType.SURFACE;
-				getSlicingSystem().setSliceType(getSliceType());
-				
-				final DimsDataList dimsDataList = getSlicingSystem().getDimsDataList();
-				if (dimsDataList!=null) {
-					if (wasImage&&dimsDataList.isXFirst()) {
-						dimsDataList.setSingleAxisOnly(AxisType.Y, AxisType.X);   		
-					} else {
-						dimsDataList.setSingleAxisOnly(AxisType.X, AxisType.X);
-					}
-				}
-				getSlicingSystem().update(false);
-			}
-
-			@Override
-			public Enum getSliceType() {
-				return PlotType.XY;
-			}
-		};
-		
+		final ISlicingTool line = getLineSliceTool();
 		line.setSlicingSystem(sliceComponent);
 		
 		d1.addSelectionListener(new SelectionListener() {
@@ -280,46 +210,135 @@ public class SetUpProcessWizardPage extends WizardPage {
 			}
 		});
 		
-		String dsName = "";
 		
-		if (context.getDatasetNames() != null) {
-			dsName = context.getDatasetNames().get(0);
-		} else {
-			dsName = datasetNames.keySet().iterator().next();
-		}
+		createPlottingSystem(right);
 		
-		IDataHolder dh;
-		try {
-			dh = LoaderFactory.getData(context.getFilePaths().get(0), true, true, null);
-			ILazyDataset lz  = dh.getLazyDataset(dsName);
-			final SliceSource source = new SliceSource(dh, lz, dsName, context.getFilePaths().get(0), false);
-			sliceComponent.setData(source);
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-//		sliceComponent.setRangeMode(RangeMode.MULTI_RANGE);
-		DimsDataList ddl = sliceComponent.getDimsDataList();
-		
-		Composite plotComp = new Composite(right, SWT.NONE);
-		plotComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
-		plotComp.setLayout(new GridLayout());
-		ActionBarWrapper actionBarWrapper = ActionBarWrapper.createActionBars(plotComp, null);
-		Composite displayPlotComp  = new Composite(plotComp, SWT.BORDER);
-		displayPlotComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		displayPlotComp.setLayout(new FillLayout());
-		
+		//Everything that needs datasetnames after here
 		
 		try {
-			system = PlottingFactory.createPlottingSystem();
-			system.createPlotPart(displayPlotComp, "Slice", actionBarWrapper, PlotType.IMAGE, null);
-			
+			getContainer().run(true, true, new IRunnableWithProgress() {
+
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					
+					try {
+						final Map<String,int[]> datasetNames = getDatasetInfo();
+						String dsName = "";
+						if (context.getDatasetNames() != null) {
+							dsName = context.getDatasetNames().get(0);
+						} else {
+							dsName = datasetNames.keySet().iterator().next();
+						}
+						
+						final String dn = dsName;
+
+						final IDataHolder dh = LoaderFactory.getData(context.getFilePaths().get(0), true, true, null);
+						final ILazyDataset lz  = dh.getLazyDataset(dsName);
+						
+						Display.getDefault().asyncExec(new Runnable() {
+							
+							@Override
+							public void run() {
+								cviewer.setInput(datasetNames);
+								
+								if (context.getDatasetNames() != null) {
+									String name = context.getDatasetNames().get(0);
+									int i = 0;
+									for (String n: datasetNames.keySet()) {
+										if (name.equals(n)) {
+											cviewer.getCombo().select(i);
+											break;
+										}
+										
+										i++;
+									}
+								} else {
+									cviewer.getCombo().select(0);
+								}
+								
+								left.layout();
+								
+								Entry<String, int[]> sel =(Entry<String, int[]>)((StructuredSelection)cviewer.getSelection()).getFirstElement();
+								
+								if (sel.getValue().length < 2) {
+									d1.setSelection(true);
+									d2.setSelection(false);
+								} else {
+									d1.setSelection(false);
+									d2.setSelection(true);
+								}
+								
+								final SliceSource source = new SliceSource(dh, lz, dn, context.getFilePaths().get(0), false);
+								sliceComponent.setData(source);
+
+								updatePlot(context);
+								
+							}
+						});
+						
+					} catch (Exception e) {
+						logger.error("Error getting dataset information",e);
+					}
+					
+				}
+			});
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Error getting dataset infomation",e);
 		}
 		
-		updatePlot(context);
+//		Map<String,int[]> datasetNames = null;
+//		
+//		try {
+//			datasetNames = getDatasetInfo();
+//		} catch (Exception e1) {
+//			logger.error("Error getting dataset info",e1);
+//		}
+//		cviewer.setInput(datasetNames);
+//		
+//		if (context.getDatasetNames() != null) {
+//			String name = context.getDatasetNames().get(0);
+//			int i = 0;
+//			for (String n: datasetNames.keySet()) {
+//				if (name.equals(n)) {
+//					cviewer.getCombo().select(i);
+//					break;
+//				}
+//				
+//				i++;
+//			}
+//		} else {
+//			cviewer.getCombo().select(0);
+//		}
+//		
+//		left.layout();
+//		
+//		Entry<String, int[]> sel =(Entry<String, int[]>)((StructuredSelection)cviewer.getSelection()).getFirstElement();
+//		
+//		if (sel.getValue().length < 2) {
+//			d1.setSelection(true);
+//			d2.setSelection(false);
+//		} else {
+//			d1.setSelection(false);
+//			d2.setSelection(true);
+//		}
+//		
+//		String dsName = "";
+//		
+//		if (context.getDatasetNames() != null) {
+//			dsName = context.getDatasetNames().get(0);
+//		} else {
+//			dsName = datasetNames.keySet().iterator().next();
+//		}	
+//		
+//		IDataHolder dh;
+//		try {
+//			dh = LoaderFactory.getData(context.getFilePaths().get(0), true, true, null);
+//			ILazyDataset lz  = dh.getLazyDataset(dsName);
+//			final SliceSource source = new SliceSource(dh, lz, dsName, context.getFilePaths().get(0), false);
+//			sliceComponent.setData(source);
+//		} catch (Exception e1) {
+//			logger.error("Cannot get data", e1);
+//		}
+//		updatePlot(context);
 	}
 	
 	private void updatePlot(IConversionContext context) {
@@ -449,6 +468,76 @@ public class SetUpProcessWizardPage extends WizardPage {
 		}
 		
 		context.setAxesNames(sliceComponent.getAxesNames());
+	}
+	
+	private ISlicingTool getLineSliceTool(){
+		return new AbstractSlicingTool() {
+			
+			@Override
+			public void militarize(boolean newData) {
+				
+				
+				boolean wasImage = getSlicingSystem().getSliceType()==PlotType.IMAGE || 
+						           getSlicingSystem().getSliceType()==PlotType.SURFACE;
+				getSlicingSystem().setSliceType(getSliceType());
+				
+				final DimsDataList dimsDataList = getSlicingSystem().getDimsDataList();
+				if (dimsDataList!=null) {
+					if (wasImage&&dimsDataList.isXFirst()) {
+						dimsDataList.setSingleAxisOnly(AxisType.Y, AxisType.X);   		
+					} else {
+						dimsDataList.setSingleAxisOnly(AxisType.X, AxisType.X);
+					}
+				}
+				getSlicingSystem().update(false);
+			}
+
+			@Override
+			public Enum getSliceType() {
+				return PlotType.XY;
+			}
+		};
+	}
+	
+	private ISlicingTool getImageSlicingTool() {
+		return new AbstractSlicingTool() {
+			
+			@Override
+			public void militarize(boolean newData) {
+				
+				getSlicingSystem().setSliceType(getSliceType());
+				
+				final DimsDataList dimsDataList = getSlicingSystem().getDimsDataList();
+				if (dimsDataList!=null) dimsDataList.setTwoAxesOnly(AxisType.Y, AxisType.X);   		
+				getSlicingSystem().refresh();
+				getSlicingSystem().update(false);
+				
+			}
+
+			@Override
+			public Enum getSliceType() {
+				return PlotType.IMAGE;
+			}
+		};
+	}
+	
+	private void createPlottingSystem(Composite right){
+		Composite plotComp = new Composite(right, SWT.NONE);
+		plotComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
+		plotComp.setLayout(new GridLayout());
+		ActionBarWrapper actionBarWrapper = ActionBarWrapper.createActionBars(plotComp, null);
+		Composite displayPlotComp  = new Composite(plotComp, SWT.BORDER);
+		displayPlotComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		displayPlotComp.setLayout(new FillLayout());
+		
+		
+		try {
+			system = PlottingFactory.createPlottingSystem();
+			system.createPlotPart(displayPlotComp, "Slice", actionBarWrapper, PlotType.IMAGE, null);
+			
+		} catch (Exception e) {
+			logger.error("cannot create plotting system",e);
+		}
 	}
 	
 	private class BasicContentProvider implements IStructuredContentProvider {
