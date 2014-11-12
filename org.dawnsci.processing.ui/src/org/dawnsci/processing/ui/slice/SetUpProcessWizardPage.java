@@ -233,6 +233,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 
 						final IDataHolder dh = LoaderFactory.getData(context.getFilePaths().get(0), true, true, null);
 						final ILazyDataset lz  = dh.getLazyDataset(dsName);
+						lz.clearMetadata(null);
 						
 						Display.getDefault().asyncExec(new Runnable() {
 							
@@ -284,61 +285,6 @@ public class SetUpProcessWizardPage extends WizardPage {
 		} catch (Exception e) {
 			logger.error("Error getting dataset infomation",e);
 		}
-		
-//		Map<String,int[]> datasetNames = null;
-//		
-//		try {
-//			datasetNames = getDatasetInfo();
-//		} catch (Exception e1) {
-//			logger.error("Error getting dataset info",e1);
-//		}
-//		cviewer.setInput(datasetNames);
-//		
-//		if (context.getDatasetNames() != null) {
-//			String name = context.getDatasetNames().get(0);
-//			int i = 0;
-//			for (String n: datasetNames.keySet()) {
-//				if (name.equals(n)) {
-//					cviewer.getCombo().select(i);
-//					break;
-//				}
-//				
-//				i++;
-//			}
-//		} else {
-//			cviewer.getCombo().select(0);
-//		}
-//		
-//		left.layout();
-//		
-//		Entry<String, int[]> sel =(Entry<String, int[]>)((StructuredSelection)cviewer.getSelection()).getFirstElement();
-//		
-//		if (sel.getValue().length < 2) {
-//			d1.setSelection(true);
-//			d2.setSelection(false);
-//		} else {
-//			d1.setSelection(false);
-//			d2.setSelection(true);
-//		}
-//		
-//		String dsName = "";
-//		
-//		if (context.getDatasetNames() != null) {
-//			dsName = context.getDatasetNames().get(0);
-//		} else {
-//			dsName = datasetNames.keySet().iterator().next();
-//		}	
-//		
-//		IDataHolder dh;
-//		try {
-//			dh = LoaderFactory.getData(context.getFilePaths().get(0), true, true, null);
-//			ILazyDataset lz  = dh.getLazyDataset(dsName);
-//			final SliceSource source = new SliceSource(dh, lz, dsName, context.getFilePaths().get(0), false);
-//			sliceComponent.setData(source);
-//		} catch (Exception e1) {
-//			logger.error("Cannot get data", e1);
-//		}
-//		updatePlot(context);
 	}
 	
 	private void updatePlot(IConversionContext context) {
@@ -348,7 +294,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 		try {
 			dh = LoaderFactory.getData(path);
 			ILazyDataset lazyDataset = dh.getLazyDataset(selection.getKey());
-			
+			lazyDataset.clearMetadata(null);
 			final DimsDataList dims = sliceComponent.getDimsDataList();
 			Map<Integer, String> sliceDims = new HashMap<Integer, String>();
 			
