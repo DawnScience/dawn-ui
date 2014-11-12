@@ -38,6 +38,34 @@
             id="org.dawnsci.plotting.system.lightWeightPlotViewer">
       </plottingViewer>
    </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <!-- default commands in main menu and main toolbar (save as, print and copy) active when the plot view is active -->
+      <handler
+            class="org.dawnsci.plotting.system.PlotCopyHandler"
+            commandId="org.eclipse.ui.edit.copy">
+         <activeWhen>
+               <with
+                     variable="activePartId">
+                  <equals
+                         value="uk.ac.diamond.scisoft.analysis.rcp.plotViewDP">
+                  </equals>
+               </with>
+         </activeWhen>
+      </handler>
+      <handler
+            class="org.dawnsci.plotting.system.PlotPrintHandler"
+            commandId="org.eclipse.ui.file.print">
+         <activeWhen>
+               <with
+                     variable="activePartId">
+                  <equals
+                         value="uk.ac.diamond.scisoft.analysis.rcp.plotViewDP">
+                  </equals>
+               </with>
+         </activeWhen>
+      </handler>
+   </extension>
    
    <!-- Example of how to add a custom action to the plotting toolbar.
    

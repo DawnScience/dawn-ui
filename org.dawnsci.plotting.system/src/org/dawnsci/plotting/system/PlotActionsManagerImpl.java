@@ -42,7 +42,6 @@ import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.wizard.IWizard;
@@ -120,12 +119,13 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 			}
 		};
 
-		Action copyToClipboardButton = new Action("Copy to clip-board       Ctrl+C", PlottingSystemActivator.getImageDescriptor("icons/copy_edit_on.gif")) {
+		Action copyToClipboardButton = new Action("Copy to clip-board", PlottingSystemActivator.getImageDescriptor("icons/copy_edit_on.gif")) {
 			public void run() {
 				system.copyPlotting();
 				exportActionsDropDown.setSelectedAction(this);
 			}
 		};
+		copyToClipboardButton.setActionDefinitionId("org.eclipse.ui.edit.copy");
 
 		Action snapShotButton = new Action("Print plot", PlottingSystemActivator.getImageDescriptor("icons/camera.gif")) {
 			public void run(){
@@ -133,12 +133,13 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 				exportActionsDropDown.setSelectedAction(this);
 			}
 		};
-		Action printButton = new Action("Print scaled plot         Ctrl+P", PlottingSystemActivator.getImageDescriptor("icons/printer.png")) {
+		Action printButton = new Action("Print scaled plot", PlottingSystemActivator.getImageDescriptor("icons/printer.png")) {
 			public void run() {
 				system.printPlotting();
 				exportActionsDropDown.setSelectedAction(this);
 			}
 		};
+		printButton.setActionDefinitionId("org.eclipse.ui.file.print");
 
 		final Action export = new Action("Export plot data to Nexus (HDF5)...", PlottingSystemActivator.getImageDescriptor("icons/mask-export-wiz.png")) {
 			public void run() {
