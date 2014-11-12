@@ -58,16 +58,20 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class SetUpProcessWizardPage extends WizardPage {
 
-	ISliceSystem sliceComponent;
-	IPlottingSystem system;
-	IConversionContext context;
-	ComboViewer cviewer;
-	String rootName = null;
+	private ISliceSystem sliceComponent;
+	private IPlottingSystem system;
+	private IConversionContext context;
+	private ComboViewer cviewer;
+	private String rootName = null;
+	
+	private final static Logger logger = LoggerFactory.getLogger(SetUpProcessWizardPage.class);
 	
 	protected SetUpProcessWizardPage(IConversionContext context) {
 		super("Set up input data");
@@ -149,7 +153,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 		try {
 			this.sliceComponent = SlicingFactory.createSliceSystem("org.dawb.workbench.views.h5GalleryView");
 		} catch (Exception e) {
-//			logger.error("Cannot create slice system!", e);
+			logger.error("Cannot create slice system!", e);
 			return;
 		}
 
@@ -295,10 +299,9 @@ public class SetUpProcessWizardPage extends WizardPage {
 			final SliceSource source = new SliceSource(dh, lz, dsName, context.getFilePaths().get(0), false);
 			sliceComponent.setData(source);
 		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			logger.error("Cannot get data", e1);
 		}
-//		sliceComponent.setRangeMode(RangeMode.MULTI_RANGE);
+
 		DimsDataList ddl = sliceComponent.getDimsDataList();
 		
 		Composite plotComp = new Composite(right, SWT.NONE);
@@ -315,8 +318,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 			system.createPlotPart(displayPlotComp, "Slice", actionBarWrapper, PlotType.IMAGE, null);
 			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("cannot create plotting system",e);
 		}
 		
 		updatePlot(context);
