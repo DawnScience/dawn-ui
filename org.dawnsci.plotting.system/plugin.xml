@@ -31,6 +31,68 @@
             name="Error Bars">
       </page>
    </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <!-- default commands in main menu and main toolbar (save as, print and copy) active when the plot view is active -->
+      <handler
+            class="org.dawnsci.plotting.system.PlotCopyHandler"
+            commandId="org.eclipse.ui.edit.copy">
+         <activeWhen>
+               <with
+                     variable="activePartId">
+                  <or>
+                     <equals
+                           value="uk.ac.diamond.scisoft.analysis.rcp.plotViewDP">
+                     </equals>
+                     <equals
+                           value="uk.ac.diamond.scisoft.analysis.rcp.plotViewMultiple">
+                     </equals>
+                     <equals
+                           value="uk.ac.diamond.scisoft.analysis.rcp.plotView1">
+                     </equals>
+                     <equals
+                           value="uk.ac.diamond.scisoft.analysis.rcp.plotView2">
+                     </equals>
+                     <equals
+                           value="uk.ac.diamond.scisoft.analysis.rcp.plotView3">
+                     </equals>
+                     <equals
+                           value="org.dawb.workbench.editors.ImageEditor">
+                     </equals>
+                  </or>
+               </with>
+         </activeWhen>
+      </handler>
+      <handler
+            class="org.dawnsci.plotting.system.PlotPrintHandler"
+            commandId="org.eclipse.ui.file.print">
+         <activeWhen>
+               <with
+                     variable="activePartId">
+                  <or>
+                     <equals
+                           value="uk.ac.diamond.scisoft.analysis.rcp.plotViewDP">
+                     </equals>
+                     <equals
+                           value="uk.ac.diamond.scisoft.analysis.rcp.plotViewMultiple">
+                     </equals>
+                     <equals
+                           value="uk.ac.diamond.scisoft.analysis.rcp.plotView1">
+                     </equals>
+                     <equals
+                           value="uk.ac.diamond.scisoft.analysis.rcp.plotView2">
+                     </equals>
+                     <equals
+                           value="uk.ac.diamond.scisoft.analysis.rcp.plotView3">
+                     </equals>
+                     <equals
+                           value="org.dawb.workbench.editors.ImageEditor">
+                     </equals>
+                  </or>
+               </with>
+         </activeWhen>
+      </handler>
+   </extension>
    
    <!-- Example of how to add a custom action to the plotting toolbar.
    
