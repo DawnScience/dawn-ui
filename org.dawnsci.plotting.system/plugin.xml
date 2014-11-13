@@ -47,9 +47,26 @@
          <activeWhen>
                <with
                      variable="activePartId">
-                  <equals
-                         value="uk.ac.diamond.scisoft.analysis.rcp.plotViewDP">
-                  </equals>
+                  <or>
+                     <equals
+                           value="uk.ac.diamond.scisoft.analysis.rcp.plotViewDP">
+                     </equals>
+                     <equals
+                           value="uk.ac.diamond.scisoft.analysis.rcp.plotViewMultiple">
+                     </equals>
+                     <equals
+                           value="uk.ac.diamond.scisoft.analysis.rcp.plotView1">
+                     </equals>
+                     <equals
+                           value="uk.ac.diamond.scisoft.analysis.rcp.plotView2">
+                     </equals>
+                     <equals
+                           value="uk.ac.diamond.scisoft.analysis.rcp.plotView3">
+                     </equals>
+                     <equals
+                           value="org.dawb.workbench.editors.ImageEditor">
+                     </equals>
+                  </or>
                </with>
          </activeWhen>
       </handler>
@@ -59,9 +76,26 @@
          <activeWhen>
                <with
                      variable="activePartId">
-                  <equals
-                         value="uk.ac.diamond.scisoft.analysis.rcp.plotViewDP">
-                  </equals>
+                  <or>
+                     <equals
+                           value="uk.ac.diamond.scisoft.analysis.rcp.plotViewDP">
+                     </equals>
+                     <equals
+                           value="uk.ac.diamond.scisoft.analysis.rcp.plotViewMultiple">
+                     </equals>
+                     <equals
+                           value="uk.ac.diamond.scisoft.analysis.rcp.plotView1">
+                     </equals>
+                     <equals
+                           value="uk.ac.diamond.scisoft.analysis.rcp.plotView2">
+                     </equals>
+                     <equals
+                           value="uk.ac.diamond.scisoft.analysis.rcp.plotView3">
+                     </equals>
+                     <equals
+                           value="org.dawb.workbench.editors.ImageEditor">
+                     </equals>
+                  </or>
                </with>
          </activeWhen>
       </handler>
