@@ -69,10 +69,10 @@
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
-                  The fully qualified name of a class that implements &lt;code&gt;uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction&lt;/code&gt;. Clients may extend &lt;code&gt;uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction&lt;/code&gt;.
+                  The fully qualified name of a class that implements &lt;code&gt;org.eclipse.dawnsci.analysis.api.fittin.functions.IFunction&lt;/code&gt;. Clients may extend &lt;code&gt;uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction&lt;/code&gt;.
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction"/>
+                  <meta.attribute kind="java" basedOn="org.eclipse.dawnsci.analysis.api.fittin.functions.IFunction"/>
                </appinfo>
             </annotation>
          </attribute>
