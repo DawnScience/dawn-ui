@@ -291,7 +291,7 @@ public abstract class AbstractLazyContentProvider implements ISortableLazyConten
 			try {
 				enablable.setEnabled(false);
 				
-				monitor.beginTask("Query '"+expression+"'", fullData.size());
+				monitor.beginTask("Query '"+expression+"'", fullData!=null ? fullData.size() : 100);
 				if (reducedSearch==null) reducedSearch = new ArrayList<Object>(31);
 				reducedSearch.clear();
 	

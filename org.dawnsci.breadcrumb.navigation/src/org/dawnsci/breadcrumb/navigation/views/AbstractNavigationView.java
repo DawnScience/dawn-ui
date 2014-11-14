@@ -259,6 +259,7 @@ public abstract class AbstractNavigationView extends ViewPart implements ISelect
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
 				final ToolBarManager man = (ToolBarManager)getViewSite().getActionBars().getToolBarManager();
+				if (man==null || man.getControl()==null) return;
 				man.getControl().setEnabled(enabled);
 				
 				for (BreadcrumbViewer bviewer : bviewers) bviewer.getControl().setEnabled(enabled);
