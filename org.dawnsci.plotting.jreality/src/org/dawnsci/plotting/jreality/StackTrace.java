@@ -38,7 +38,8 @@ public class StackTrace extends PlotterTrace implements ILineStackTrace {
 
 	@Override
 	public Dataset getData() {
-		throw new RuntimeException("Please use getStack() instead!");
+		// don't throw an exception here... 
+		return null;
 	}
 	
 	@Override
