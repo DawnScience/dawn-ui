@@ -1023,6 +1023,17 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				if (rc == Window.OK) {
 					ITransferableDataObject clone = original.clone();
 					clone.setName(dialog.getValue());
+					
+					final String varName = clone.getVariable();
+					
+					if (isVariableName(varName, null)) {
+						int i = 1;
+						while(isVariableName(varName+i, null)) {
+							++i;
+						}
+						clone.setVariable(varName+i);
+					}
+					
 					return clone;
 			    } else {
 			    	return null;
