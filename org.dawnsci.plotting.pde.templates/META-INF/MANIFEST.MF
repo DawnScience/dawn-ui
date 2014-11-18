@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Templates
+Bundle-SymbolicName: org.dawnsci.plotting.pde.templates;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.dawnsci.plotting.pde.templates.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.pde.ui,
+ org.eclipse.core.resources;bundle-version="3.8.1"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy

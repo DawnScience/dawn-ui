@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.pde.ui.templates">
+      <template
+            class="org.dawnsci.plotting.pde.templates.NewFittingFunctionTemplate"
+            contributingId="org.dawnsci.common.functions"
+            id="org.dawnsci.plotting.pde.templates.fittingfunction"
+            name="New Fitting Function">
+      </template>
+   </extension>
+   <extension
+         point="org.eclipse.pde.ui.newExtension">
+      <wizard
+            availableAsShortcut="true"
+            category="dawn_templates"
+            id="org.dawnsci.plotting.pde.templates.functions"
+            name="Fitting Function"
+            template="org.dawnsci.plotting.pde.templates.fittingfunction">
+         <description>
+            A wizard to create a new fitting function.
+         </description>
+      </wizard>
+      <category
+            id="dawn_templates"
+            name="DAWN templates">
+      </category>
+      <wizard
+            class="test2"
+            id="org.dawnsci.plotting.pde.templates.wizard2"
+            name="test 2">
+      </wizard>
+   </extension>
+   <extension
+         point="org.eclipse.pde.ui.pluginContent">
+      <wizard
+            class="org.dawnsci.plotting.pde.templates.NewFittingFunctionWizard"
+            id="org.dawnsci.plotting.pde.pluginContent.functions"
+            java="true"
+            name="Fitting Function"
+            pureOSGi="false"
+            rcp="false"
+            requiresActivator="false"
+            ui-content="true">
+         <description>
+            A sample fitting function wizard
+         </description>
+      </wizard>
+   </extension>
+
+</plugin>
