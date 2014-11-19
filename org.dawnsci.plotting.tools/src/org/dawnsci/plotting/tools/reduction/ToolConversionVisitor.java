@@ -92,6 +92,8 @@ class ToolConversionVisitor implements IConversionVisitor {
 		}
 		if (all1D) return nexusAxes; // No need to slice them.
 		
+		// Do not read on unless you want to wake up in a cold sweat...
+		
 		// TODO Might be able to use these meta-data things but not sure how to relate these to the slice
 		// We know the axis name but this information cannot be looked up in AxesMetadata
 		// therefore AxesMetadata is a bit useless in thin context? Might need to change it
@@ -100,20 +102,26 @@ class ToolConversionVisitor implements IConversionVisitor {
 		final List<IDataset> ret = new ArrayList<IDataset>(nexusAxes.size());
 		
 		// This sucks, sorry.
-		for (IDataset i : nexusAxes) {
+		for (int index = 0; index < nexusAxes.size(); index++) {
+			
+			IDataset i = nexusAxes.get(index);
 			if (i.getRank()>1) {
 				
 			    // FIXME Yuckiness warning: we have the full path to the 
 				// axis but the AxesMetadata has sets named badly (arguable...)
 				try {
 					// We need to slice em 
-					String name = slice.getName();
+					String name = i.getName();
 					name = name.substring(name.lastIndexOf("/")+1);
 					
 					// Search for axes by name.
                     AXIS_LOOP: for (AxesMetadata amd : adata) {
-						for (ILazyDataset axis : amd.getAxes()) {
-							if (axis.getName().contains("'"+name+"'")) {
+                    	final ILazyDataset[] lza = amd.getAxis(index);
+						for (ILazyDataset axis : lza) {
+							
+							// This is horrible
+							String frag = name+"[0,:]";
+							if (axis.getName().indexOf(frag)>-1) {
 								i = axis.getSlice();
 								break AXIS_LOOP;
 							}
@@ -124,6 +132,10 @@ class ToolConversionVisitor implements IConversionVisitor {
 					i = ((Dataset)i).mean(0);
 				}
 			}
+			if (i.getRank()==2) {
+                i = ((Dataset)i).mean(0);	
+			}
+			
 			ret.add(i);
 		}
 		return ret;
