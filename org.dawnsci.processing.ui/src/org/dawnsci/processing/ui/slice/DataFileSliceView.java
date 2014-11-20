@@ -751,10 +751,13 @@ public class DataFileSliceView extends ViewPart {
 
 		@Override
 		public Object[] getElements(Object inputElement) {
-			if (inputElement instanceof FileManager)
+			if (inputElement instanceof FileManager) {
+				if (((FileManager)inputElement).getFilePaths() == null) return new String[0];
 				return ((FileManager)inputElement).getFilePaths().toArray();
+			}
+				
 			
-			return null;
+			return new String[0];
 		}
 
 		@Override
@@ -776,7 +779,7 @@ public class DataFileSliceView extends ViewPart {
 				if (f.isFile()) return f.getName();
 			}
 			
-			return getText(obj);
+			return "";
 		}
 		
 		@Override
