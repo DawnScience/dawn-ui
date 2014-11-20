@@ -11,9 +11,11 @@ package org.dawnsci.slicing.component;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.slicing.api.system.AxisType;
 import org.eclipse.dawnsci.slicing.api.system.DimsData;
+import org.eclipse.dawnsci.slicing.api.system.SliceSource;
 import org.eclipse.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
@@ -74,14 +76,16 @@ class SliceColumnLabelProvider extends ColumnLabelProvider implements IStyledLab
 				}
 				ret.append( slice>-1 ? formatValue : "" );
 			}
-			
-			try {
-				final int[] shape = system.getLazyDataset().getShape();
-				if ((data.isSlice() || data.isTextRange()) && !system.isErrorVisible() && shape[data.getDimension()]>1) {
-					ret.append(new StyledString(" (click to change)", StyledString.QUALIFIER_STYLER));
+			ILazyDataset lazy = system.getLazyDataset();
+			if (lazy != null) {
+				try {
+					final int[] shape = lazy.getShape();
+					if ((data.isSlice() || data.isTextRange()) && !system.isErrorVisible() && shape[data.getDimension()]>1) {
+						ret.append(new StyledString(" (click to change)", StyledString.QUALIFIER_STYLER));
+					}
+				} catch (Throwable largelyIgnored) {
+					logger.error("Unable to determine if editable.");
 				}
-			} catch (Throwable largelyIgnored) {
-				logger.error("Unable to determine if editable.");
 			}
 			break;
 		case 3:
@@ -105,8 +109,11 @@ class SliceColumnLabelProvider extends ColumnLabelProvider implements IStyledLab
 	
 	
 	private String getFormatValue(DimsData data, int index) {
-		
-		int max = system.getData().getLazySet().getShape()[data.getDimension()];
+		SliceSource d = system.getData();
+		if (d == null)
+			return String.valueOf(index);
+
+		int max = d.getLazySet().getShape()[data.getDimension()];
 		if (index>=max) index = max-1;
 		String formatValue = String.valueOf(index);
 		try {
