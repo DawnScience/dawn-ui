@@ -594,7 +594,7 @@ public class DataFileSliceView extends ViewPart {
 						
 						if (pos != 0){
 							firstSlice = inputData.getInputData();
-							ops = Arrays.copyOfRange(ops, pos, ops.length);
+							ops = Arrays.copyOfRange(ops, pos-1, ops.length);
 						}
 						
 					} else {
