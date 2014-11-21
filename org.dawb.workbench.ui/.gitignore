@@ -1,4 +1,4 @@
-# Ignores that are common to all Eclipse GDA plugin projects
+# Ignores that are common to all plugin projects
 /@dot
 /@dot.log
 /bin
