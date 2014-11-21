@@ -13,8 +13,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.dawb.common.services.IPersistenceService;
-import org.dawb.common.services.IPersistentFile;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.util.list.ListUtils;
@@ -27,6 +25,8 @@ import org.dawnsci.processing.ui.preference.ProcessingConstants;
 import org.dawnsci.processing.ui.slice.IOperationErrorInformer;
 import org.dawnsci.processing.ui.slice.OperationInformerImpl;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
+import org.eclipse.dawnsci.analysis.api.persistence.IPersistentFile;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
