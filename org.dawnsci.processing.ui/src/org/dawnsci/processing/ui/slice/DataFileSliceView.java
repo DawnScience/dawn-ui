@@ -42,7 +42,7 @@ import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.slice.Slicer;
-import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.SliceND;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -484,12 +484,9 @@ public class DataFileSliceView extends ViewPart {
 				int[] s = metadata.getDataShapes().get(name);
 				
 				Slice[] slices = Slicer.getSliceArrayFromSliceDimensions(sliceDimensions, s);
-				int[] start =new int[s.length];
-				int[] stop= new int[s.length];
-				int[] step = new int[s.length];
-				Slice.convertFromSlice(slices, s, start, stop, step);
-				int[] nShape = AbstractDataset.checkSlice(s, start, stop, start, stop, step);
-				
+				SliceND slice = new SliceND(s, slices);
+				int[] nShape = slice.getShape();
+
 				if (dd == null) {
 					dd = Slicer.getDataDimensions(s, context.getSliceDimensions());
 					Arrays.sort(dd);
@@ -597,7 +594,7 @@ public class DataFileSliceView extends ViewPart {
 						
 						if (pos != 0){
 							firstSlice = inputData.getInputData();
-							ops = Arrays.copyOfRange(ops, pos, ops.length);
+							ops = Arrays.copyOfRange(ops, pos-1, ops.length);
 						}
 						
 					} else {
