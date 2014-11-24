@@ -73,6 +73,10 @@
          id="org.dawnsci.hpc.client.feature"
          version="0.0.0"/>
 
+   <includes
+         id="uk.ac.diamond.scisoft.ptychography.feature"
+         version="0.0.0"/>
+
    <plugin
          id="uk.ac.diamond.scisoft.mx.rcp"
          os="linux"
