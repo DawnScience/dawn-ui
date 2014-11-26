@@ -13,6 +13,7 @@ import java.util.HashSet;
 
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.IErrorDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
@@ -32,14 +33,15 @@ class LightWeightDataProvider implements IDataProvider {
 	
 	private Dataset x;
 	private Dataset y;
+	private Dataset xerr;
+	private Dataset yerr;
 	private Range cachedXRange, cachedYRange;
 
 	public LightWeightDataProvider() {
 		
 	}
 	public LightWeightDataProvider(final IDataset x, final IDataset y) {
-		this.x = (Dataset)x;
-		this.y = (Dataset)y;
+		setDataInternal(x, y);
 	}
 
 	@Override
@@ -56,10 +58,8 @@ class LightWeightDataProvider implements IDataProvider {
 			final double xDat = x.getDouble(index);
 			final double yDat = y.getDouble(index);
 
-			final double xErr = x instanceof IErrorDataset && ((IErrorDataset) x).hasErrors() ? ((IErrorDataset) x)
-					.getError(index) : 0d;
-			final double yErr = y instanceof IErrorDataset && ((IErrorDataset) y).hasErrors() ? ((IErrorDataset) y)
-					.getError(index) : 0d;
+			final double xErr = xerr != null ? xerr.getDouble(index) : 0d;
+			final double yErr = yerr != null ? yerr.getDouble(index) : 0d;
 
 			return new Sample(xDat, yDat, yErr, yErr, xErr, xErr);
 		} catch (Throwable ne) {
@@ -125,12 +125,19 @@ class LightWeightDataProvider implements IDataProvider {
 	}
 
 	public void setData(IDataset xData, IDataset yData) {
-		this.x = (Dataset)xData;
-		this.y = (Dataset)yData;
+		setDataInternal(xData, yData);
+		fireDataProviderListeners();
+	}
+	
+	private void setDataInternal(IDataset xData, IDataset yData) {
+		this.x = DatasetUtils.convertToDataset(xData);
+		this.y = DatasetUtils.convertToDataset(yData);
+		ILazyDataset xel = x.getError();
+		ILazyDataset yel = y.getError();
+		if (xel != null) this.xerr = DatasetUtils.convertToDataset(xel.getSlice());
+		if (yel != null) this.yerr = DatasetUtils.convertToDataset(yel.getSlice());
 		this.cachedXRange = null;
 		this.cachedYRange = null;
-		
-		fireDataProviderListeners();
 	}
 
 	private void fireDataProviderListeners() {
