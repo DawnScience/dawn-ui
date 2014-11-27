@@ -24,7 +24,7 @@ import org.dawb.common.services.conversion.IProcessingConversionInfo;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.processing.ui.Activator;
-import org.dawnsci.processing.ui.model.OperationDescriptor;
+import org.dawnsci.processing.ui.processing.OperationDescriptor;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;

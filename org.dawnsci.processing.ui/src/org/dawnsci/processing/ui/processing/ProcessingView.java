@@ -20,7 +20,6 @@ import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
 import org.dawnsci.common.widgets.table.SeriesTable;
 import org.dawnsci.processing.ui.Activator;
-import org.dawnsci.processing.ui.model.OperationDescriptor;
 import org.dawnsci.processing.ui.preference.ProcessingConstants;
 import org.dawnsci.processing.ui.slice.IOperationErrorInformer;
 import org.dawnsci.processing.ui.slice.OperationInformerImpl;

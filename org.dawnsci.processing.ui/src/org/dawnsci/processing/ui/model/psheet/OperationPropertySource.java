@@ -6,16 +6,14 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.dawnsci.processing.ui.model;
+package org.dawnsci.processing.ui.model.psheet;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.Collection;
 
+import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
+import org.eclipse.dawnsci.analysis.api.processing.model.ModelField;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 
@@ -30,11 +28,11 @@ import org.eclipse.ui.views.properties.IPropertySource;
  * @author Matthew Gerring
  *
  */
-class OperationPropertySource implements IPropertySource {
+public class OperationPropertySource implements IPropertySource {
 	
 	private IOperationModel model;
 
-	OperationPropertySource(final IOperationModel model) {
+	public OperationPropertySource(final IOperationModel model) {
 		this.model = model;
 	}
 
@@ -46,37 +44,15 @@ class OperationPropertySource implements IPropertySource {
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
 		
-		// Decided not to use the obvious BeanMap here because class problems with
-		// GDA and we have to read annotations anyway.
-		final List<Field> allFields = new ArrayList<Field>(31);
-		allFields.addAll(Arrays.asList(model.getClass().getDeclaredFields()));
-		allFields.addAll(Arrays.asList(model.getClass().getSuperclass().getDeclaredFields()));
-		
-		// The returned descriptor
-		final List<IPropertyDescriptor> ret = new ArrayList<IPropertyDescriptor>();
-		
-		// fields
-		for (Field field : allFields) {
-			
-			// If there is a getter/isser for the field we assume it is a model field.
-			try {
-				if (model.isModelField(field.getName())) {			
-					ret.add(new OperationPropertyDescriptor(model, field.getName()));
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				continue;
-			}
+		try {
+			final Collection<ModelField> fields = ((AbstractOperationModel)model).getModelFields();
+			final Collection<IPropertyDescriptor> ret = new ArrayList<IPropertyDescriptor>(fields.size());
+			for (ModelField field : fields) ret.add(new OperationPropertyDescriptor(field));
+			return ret.toArray(new IPropertyDescriptor[ret.size()]);
+		} catch (Exception ne) {
+			ne.printStackTrace();
+			return null;
 		}
-		
-		Collections.sort(ret, new Comparator<IPropertyDescriptor>() {
-			@Override
-			public int compare(IPropertyDescriptor o1, IPropertyDescriptor o2) {
-				return o1.getDisplayName().toLowerCase().compareTo(o2.getDisplayName().toLowerCase());
-			}
-		});
-		
-		return ret.toArray(new IPropertyDescriptor[ret.size()]);
 		
 	}
 

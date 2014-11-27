@@ -16,7 +16,6 @@ import java.util.Map;
 import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
 import org.dawnsci.common.widgets.table.ISeriesItemFilter;
 import org.dawnsci.processing.ui.Activator;
-import org.dawnsci.processing.ui.model.OperationDescriptor;
 import org.dawnsci.processing.ui.slice.IOperationErrorInformer;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;

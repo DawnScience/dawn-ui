@@ -9,7 +9,6 @@
 package org.dawnsci.processing.ui.processing;
 
 import org.dawnsci.common.widgets.table.SeriesItemLabelProvider;
-import org.dawnsci.processing.ui.model.OperationDescriptor;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;

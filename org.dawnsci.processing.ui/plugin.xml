@@ -14,7 +14,7 @@
       </view>
       <view
             category="org.dawb.workbench.ui.beta.views.category"
-            class="org.dawnsci.processing.ui.model.OperationModelView"
+            class="org.dawnsci.processing.ui.model.psheet.OperationModelPropertySheetView"
             icon="icons/image--pencil.png"
             id="org.dawnsci.processing.ui.propertySheet"
             name="Model"

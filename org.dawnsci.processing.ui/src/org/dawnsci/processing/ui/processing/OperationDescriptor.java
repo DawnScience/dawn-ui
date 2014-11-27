@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.dawnsci.processing.ui.model;
+package org.dawnsci.processing.ui.processing;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -14,9 +14,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
+import org.dawnsci.processing.ui.model.psheet.OperationPropertySource;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.dawnsci.analysis.api.processing.AbstractOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.processing.OperationCategory;

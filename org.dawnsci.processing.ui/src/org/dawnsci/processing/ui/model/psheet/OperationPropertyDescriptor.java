@@ -6,9 +6,8 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.dawnsci.processing.ui.model;
+package org.dawnsci.processing.ui.model.psheet;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 
 import org.dawb.common.util.text.StringUtils;
@@ -18,7 +17,7 @@ import org.dawnsci.common.widgets.celleditor.FileDialogCellEditor;
 import org.dawnsci.plotting.roi.RegionCellEditor;
 import org.dawnsci.processing.ui.Activator;
 import org.eclipse.dawnsci.analysis.api.processing.model.FileType;
-import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
+import org.eclipse.dawnsci.analysis.api.processing.model.ModelField;
 import org.eclipse.dawnsci.analysis.api.processing.model.OperationModelField;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.jface.viewers.BaseLabelProvider;
@@ -49,57 +48,15 @@ import org.eclipse.ui.views.properties.PropertyDescriptor;
  * @author Matthew Gerring
  *
  */
-public class OperationPropertyDescriptor extends PropertyDescriptor implements Comparable<OperationPropertyDescriptor> {
+class OperationPropertyDescriptor extends PropertyDescriptor implements Comparable<OperationPropertyDescriptor> {
 
 
 	private ILabelProvider labelProvider;
-	private IOperationModel model;
-	private String name;
+	private ModelField     field;
 
-	public OperationPropertyDescriptor(IOperationModel model, String name) {
-		super(name, getDisplayName(model, name));
-		this.model = model;
-		this.name  = name;
-	}
-	
-	private static OperationModelField getAnnotation(IOperationModel model, String fieldName) {
-		
-		try {
-			Field field = getField(model, fieldName);
-	        if (field!=null) {
-	        	OperationModelField anot = field.getAnnotation(OperationModelField.class);
-	        	if (anot!=null) {
-	        		return anot;
-	        	}
-	        }
-	        return null;
-	        
-		} catch (NoSuchFieldException | SecurityException e) {
-			e.printStackTrace();
-			return null;
-		}
-		
-	}
-	
-    private static Field getField(IOperationModel model, String fieldName) throws NoSuchFieldException, SecurityException {
-		
-    	Field field;
-		try {
-			field = model.getClass().getDeclaredField(fieldName);
-		} catch (Exception ne) {
-			field = model.getClass().getSuperclass().getDeclaredField(fieldName);
-		}
-		return field;
-	}
-
-	private static String getDisplayName(IOperationModel model, String fieldName) {
-    	
-    	OperationModelField anot = getAnnotation(model, fieldName);
-    	if (anot!=null) {
-    		String label = anot.label();
-    		if (label!=null && !"".equals(label)) return label;
-    	}
-    	return fieldName;
+	public OperationPropertyDescriptor(ModelField     field) {
+		super(field.getName(), field.getDisplayName());
+		this.field = field;
 	}
 
 	public ILabelProvider getLabelProvider() {
@@ -111,25 +68,12 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
     }
 
 	public boolean isFileProperty() {
-		
-		Class<? extends Object> clazz = null;
-		try {
-			Field field = getField(model, name);
-			clazz = field.getType();
-		} catch (NoSuchFieldException | SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return false;
-		}
-		
-    	final OperationModelField anot = getAnnotation(model, name);
-
-		return FileDialogCellEditor.isEditorFor(clazz) || (anot!=null && anot.file()!=FileType.NONE);
+		return field.isFileProperty();
 	}
 	
 
 	public void setValue(Object value) throws Exception {
-		model.set(name, value);
+		field.set(value);
 	}
 
 
@@ -137,7 +81,7 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
     	
         Object value;
 		try {
-			value = model.get(name);
+			value = field.get();
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -148,7 +92,6 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
 			clazz = value.getClass();
 		} else {
 			try {
-				Field field = getField(model, name);
 				clazz = field.getType();
 			} catch (NoSuchFieldException | SecurityException e) {
 				// TODO Auto-generated catch block
@@ -158,7 +101,7 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
 		}
         
 		CellEditor ed = null;
-    	final OperationModelField anot = getAnnotation(model, name);
+    	final OperationModelField anot = field.getAnnotation();
     	
         if (clazz == Boolean.class) {
         	ed = new CheckboxCellEditor(parent, SWT.NONE);
@@ -251,7 +194,7 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
 
 	private CellEditor getNumberEditor(final Class<? extends Object> clazz, Composite parent) {
     	
-		OperationModelField anot = getAnnotation(model, name);
+		OperationModelField anot = field.getAnnotation();
 		CellEditor textEd = null;
 	    if (anot!=null) {
 	    	textEd = new ClassCellEditor(parent, clazz, anot.min(), anot.max(), anot.unit(), SWT.NONE);
@@ -304,7 +247,7 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
 			    buf.append(element.toString());//$NON-NLS-1$
 			}
 			
-			OperationModelField anot = getAnnotation(model, name);
+			OperationModelField anot = field.getAnnotation();
 			if (anot!=null) buf.append(" "+anot.unit());
 			return buf.toString();
 		}
@@ -319,7 +262,7 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((field == null) ? 0 : field.hashCode());
 		return result;
 	}
 
@@ -332,21 +275,21 @@ public class OperationPropertyDescriptor extends PropertyDescriptor implements C
 		if (getClass() != obj.getClass())
 			return false;
 		OperationPropertyDescriptor other = (OperationPropertyDescriptor) obj;
-		if (name == null) {
-			if (other.name != null)
+		if (field == null) {
+			if (other.field != null)
 				return false;
-		} else if (!name.equals(other.name))
+		} else if (!field.equals(other.field))
 			return false;
 		return true;
 	}
 
 	@Override
 	public int compareTo(OperationPropertyDescriptor o) {
-		return name.compareTo(o.name);
+		return field.getName().compareTo(o.field.getName());
 	}
 	
 	@Override
 	public String toString() {
-		return name;
+		return field.getName();
 	}
 }
