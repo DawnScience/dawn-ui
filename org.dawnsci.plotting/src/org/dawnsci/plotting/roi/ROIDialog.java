@@ -80,6 +80,7 @@ public class ROIDialog extends Dialog {
 	}
 
 	public void setROI(IROI roi) {
+		if (roi==null) return;
 		final int index = ROIType.getIndex(roi.getClass());
 		roiType.select(index);
 		roiEditor.setRegion(roi, null, null);
