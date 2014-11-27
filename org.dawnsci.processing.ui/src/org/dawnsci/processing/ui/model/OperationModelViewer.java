@@ -4,6 +4,9 @@ import java.util.Collection;
 
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
+import org.eclipse.dawnsci.analysis.api.processing.IOperation;
+import org.eclipse.dawnsci.analysis.api.processing.OperationData;
+import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.ModelField;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.IContentProvider;
@@ -35,6 +38,11 @@ import org.eclipse.ui.IWorkbenchPart;
  * Class for editing an operation model. Shows a table or other
  * relevant GUI for editing the model.
  * 
+ * This class simply listens to the current selection and shows a GUI for editing
+ * it if the selection is an IOperation.
+ * 
+ * You can also call setOperation(...) to programmatically set the editing operation.
+ * 
  * @author fcp94556
  *
  */
@@ -43,10 +51,19 @@ public class OperationModelViewer implements ISelectionListener {
 	
 	private TableViewer           viewer;
 	
+	public OperationModelViewer() {
+		this(true);
+	}
+	
+	public OperationModelViewer(boolean addListener) {
+		super();
+		if (addListener) {
+			EclipseUtils.getPage().addSelectionListener(this);
+		}
+	}
+
 	public void createPartControl(Composite parent) {
 		
-		EclipseUtils.getPage().addSelectionListener(this);
-
 		this.viewer = new TableViewer(parent, SWT.SINGLE | SWT.BORDER | SWT.FULL_SELECTION);
 		viewer.setContentProvider(createContentProvider());
 		
@@ -104,19 +121,18 @@ public class OperationModelViewer implements ISelectionListener {
 				if (!checkLocation(event)) return;
 				
 				TableItem item = (TableItem)event.item;
-				final int row = table.indexOf(item);
 				
-//				if (source!=null) {
-//					OperationPropertyDescriptor des = (OperationPropertyDescriptor)source.getPropertyDescriptors()[row];
-//					if (des.isFileProperty()) {
-//						try {
-//							des.setValue(path);
-//							refresh();
-//						} catch (Exception e) {
-//							e.printStackTrace();
-//						}
-//					}
-//				}
+				ModelField field = (ModelField)item.getData();				
+				if (field!=null) {
+					if (field.isFileProperty()) {
+						try {
+							field.set(path);
+							refresh();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}
 			}
 		});
 	}
@@ -125,7 +141,7 @@ public class OperationModelViewer implements ISelectionListener {
 		
         TableViewerColumn var   = new TableViewerColumn(viewer, SWT.LEFT, 0);
 		var.getColumn().setText("Name");
-		var.getColumn().setWidth(150);
+		var.getColumn().setWidth(200);
 		var.setLabelProvider(new ColumnLabelProvider() {
 			public String getText(Object element) {
 				return ((ModelField)element).getDisplayName();
@@ -155,13 +171,23 @@ public class OperationModelViewer implements ISelectionListener {
 		if (selection instanceof IStructuredSelection) {
 			Object ob = ((IStructuredSelection)selection).getFirstElement();
 			if (ob instanceof OperationDescriptor) {
-				OperationDescriptor des = (OperationDescriptor)ob;
-				viewer.setInput(des);
+				try {
+					setOperation(((OperationDescriptor)ob).getSeriesObject());
+				} catch (InstantiationException e) {
+					setOperation(null);
+				}
 			}
 		}
 	}
 	
-	
+	/**
+	 * Specifically set the operation we would like to edit
+	 * @param des
+	 */
+	public void setOperation(IOperation<? extends IOperationModel, ? extends OperationData> des) {
+		viewer.setInput(des);
+	}
+
 	private IContentProvider createContentProvider() {
 		return new IStructuredContentProvider() {
 			@Override
@@ -175,9 +201,13 @@ public class OperationModelViewer implements ISelectionListener {
 
 			@Override
 			public Object[] getElements(Object inputElement) {
-				OperationDescriptor           des = (OperationDescriptor)inputElement;
-				final Collection<ModelField>  col = (Collection<ModelField>)des.getAdapter(ModelField.class);
-				return col.toArray(new ModelField[col.size()]);
+				IOperation<IOperationModel, OperationData> op = (IOperation<IOperationModel, OperationData>)inputElement;
+				try {
+					final Collection<ModelField>  col = op.getModel().getModelFields();
+					return col.toArray(new ModelField[col.size()]);
+				} catch (Exception ne) {
+					return new ModelField[]{};
+				}
 			}
 		};
 	}
