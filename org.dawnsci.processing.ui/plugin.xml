@@ -17,7 +17,7 @@
             class="org.dawnsci.processing.ui.model.psheet.OperationModelPropertySheetView"
             icon="icons/image--pencil.png"
             id="org.dawnsci.processing.ui.propertySheet"
-            name="Model"
+            name="Property Sheet Model"
             restorable="true">
       </view>
       <view

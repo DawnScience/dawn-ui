@@ -46,8 +46,8 @@ public class ProcessingPerspective implements IPerspectiveFactory {
 		vLayout.setCloseable(false);
 		
 		IFolderLayout bottomRight = layout.createFolder("modelView", IPageLayout.RIGHT, 0.5f, "procView");
-		bottomRight.addView("org.dawnsci.processing.ui.propertySheet");
-		vLayout = layout.getViewLayout("org.dawnsci.processing.ui.propertySheet");
+		bottomRight.addView("org.dawnsci.processing.ui.modelView");
+		vLayout = layout.getViewLayout("org.dawnsci.processing.ui.modelView");
 		vLayout.setCloseable(false);
 		
 		

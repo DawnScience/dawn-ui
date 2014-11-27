@@ -11,7 +11,6 @@ package org.dawnsci.processing.ui.model.psheet;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.ModelField;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;

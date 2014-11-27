@@ -8,7 +8,10 @@ import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.ModelField;
+import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewer;
+import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -24,6 +27,8 @@ import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -73,6 +78,27 @@ public class OperationModelViewer implements ISelectionListener {
 		
 		createColumns(viewer);
 		createDropTarget(viewer);
+
+		viewer.getTable().addKeyListener(new KeyListener() {
+	        public void keyReleased(KeyEvent e) {
+	        }
+
+	        public void keyPressed(KeyEvent e) {
+	          if (e.keyCode == SWT.F1) {
+	              // TODO Help!
+	          }
+	          if (e.character == SWT.DEL) {
+	        	  try {
+	        	      Object ob = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
+	        	      ((ModelField)ob).set(null);
+	        	      viewer.refresh(ob);
+	        	  } catch (Exception ignored) {
+	        		  // Ok delete did not work...
+	        	  }
+ 
+	          }
+	        }
+	      });
 
 	}
 
@@ -152,6 +178,7 @@ public class OperationModelViewer implements ISelectionListener {
 		var.getColumn().setText("Value");
 		var.getColumn().setWidth(200);
 		var.setLabelProvider(new ModelFieldLabelProvider());
+		var.setEditingSupport(new ModelFieldEditingSupport(viewer));
 	}
 
 	public void setFocus() {
@@ -210,6 +237,40 @@ public class OperationModelViewer implements ISelectionListener {
 				}
 			}
 		};
+	}
+
+	
+	class ModelFieldEditingSupport extends EditingSupport {
+
+		public ModelFieldEditingSupport(ColumnViewer viewer) {
+			super(viewer);
+		}
+
+		@Override
+		protected CellEditor getCellEditor(Object element) {
+			return ModelFieldEditors.createEditor((ModelField)element, viewer.getTable());
+		}
+
+		@Override
+		protected boolean canEdit(Object element) {
+			return true;
+		}
+
+		@Override
+		protected Object getValue(Object element) {
+			return ((ModelField)element).get();
+		}
+
+		@Override
+		protected void setValue(Object element, Object value) {
+			try {
+				((ModelField)element).set(value);
+				viewer.refresh(element);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
 	}
 
 }
