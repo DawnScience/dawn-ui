@@ -41,7 +41,12 @@ import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
+import org.eclipse.dawnsci.analysis.api.slice.ShapeInformation;
+import org.eclipse.dawnsci.analysis.api.slice.SliceFromSeriesMetadata;
+import org.eclipse.dawnsci.analysis.api.slice.SliceInformation;
 import org.eclipse.dawnsci.analysis.api.slice.Slicer;
+import org.eclipse.dawnsci.analysis.api.slice.SourceInformation;
+import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.SliceND;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.jface.action.Action;
@@ -603,6 +608,12 @@ public class DataFileSliceView extends ViewPart {
 					}
 					
 				}
+				
+				SourceInformation si = new SourceInformation(path, context.getDatasetNames().get(0), lazyDataset);
+				SliceInformation sli = new SliceInformation(csw.getCurrentSlice(), viewSlice, 0);
+				//TODO replace with check shape
+				ShapeInformation shi = new ShapeInformation(lazyDataset.getSliceView(viewSlice).getShape(), dataDims, 1);
+				firstSlice.setMetadata(new SliceFromSeriesMetadata(si,shi,sli));
 				
 				OriginMetadataImpl om = new OriginMetadataImpl(lazyDataset, viewSlice, dataDims, path, context.getDatasetNames().get(0));
 				om.setCurrentSlice(csw.getCurrentSlice());

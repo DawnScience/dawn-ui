@@ -12,8 +12,12 @@ import org.eclipse.dawnsci.analysis.api.processing.IExportOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
+import org.eclipse.dawnsci.analysis.api.slice.SliceFromSeriesMetadata;
+import org.eclipse.dawnsci.analysis.api.slice.SliceInformation;
 import org.eclipse.dawnsci.analysis.api.slice.SliceVisitor;
+import org.eclipse.dawnsci.analysis.api.slice.SourceInformation;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.slicing.api.system.SliceSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,13 +56,18 @@ public class EscapableSliceVisitor implements SliceVisitor {
 	public void visit(IDataset slice, Slice[] slices, int[] shape) throws Exception {
 
 		OriginMetadata om = null;
+		SourceInformation ssource = null;
 
 		try {
+			ssource = lz.getMetadata(SliceFromSeriesMetadata.class).get(0).getSourceInfo();
 			om = lz.getMetadata(OriginMetadata.class).get(0);
 		} catch (Exception e1) {
 			throw new IllegalArgumentException("No origin!!!!");
 		}
-
+		SliceFromSeriesMetadata ssm = slice.getMetadata(SliceFromSeriesMetadata.class).get(0);
+		SliceFromSeriesMetadata fullssm = new SliceFromSeriesMetadata(ssource, ssm.getShapeInfo(), ssm.getSliceInfo());
+		slice.setMetadata(fullssm);
+		
 		slice.setMetadata(om);
 
 		OperationData  data = new OperationData(slice);
@@ -66,7 +75,7 @@ public class EscapableSliceVisitor implements SliceVisitor {
 		for (IOperation<? extends IOperationModel, ? extends OperationData> i : series) {
 
 			if (i instanceof IExportOperation) {
-				visitor.notify(i, data, slices, shape, dataDims);
+				visitor.notify(i, data);
 			} else if (i.isPassUnmodifiedData() && i != endOperation) {
 				//do nothing
 			} else {
@@ -74,7 +83,7 @@ public class EscapableSliceVisitor implements SliceVisitor {
 				if (i == endOperation) inputData = new OperationInputDataImpl(data.getData(),i); 
 				
 				OperationData tmp = i.execute(data.getData(), null);
-				visitor.notify(i, tmp, slices, shape, dataDims); // Optionally send intermediate result
+				visitor.notify(i, tmp); // Optionally send intermediate result
 				data = i.isPassUnmodifiedData() ? data : tmp;
 			}
 
@@ -82,7 +91,7 @@ public class EscapableSliceVisitor implements SliceVisitor {
 		}
 
 
-		visitor.executed(data, null, slices, shape, dataDims); // Send result.
+		visitor.executed(data, null); // Send result.
 
 	}
 	
@@ -107,8 +116,7 @@ public class EscapableSliceVisitor implements SliceVisitor {
 		}
 		
 		@Override
-		public void notify(IOperation<? extends IOperationModel, ? extends OperationData> intermediateData, OperationData data,
-				Slice[] slices, int[] shape, int[] dataDims) {
+		public void notify(IOperation<? extends IOperationModel, ? extends OperationData> intermediateData, OperationData data) {
 			
 			try {
 				if (intermediateData == endOp) displayData(data,dataDims);
@@ -119,13 +127,12 @@ public class EscapableSliceVisitor implements SliceVisitor {
 		}
 		
 		@Override
-		public void init(IOperation<? extends IOperationModel, ? extends OperationData>[] series, OriginMetadata origin) throws Exception {
+		public void init(IOperation<? extends IOperationModel, ? extends OperationData>[] series, ILazyDataset dataset) throws Exception {
 			inputData = null;
 		}
 		
 		@Override
-		public void executed(OperationData result, IMonitor monitor,
-				Slice[] slices, int[] shape, int[] dataDims) throws Exception {
+		public void executed(OperationData result, IMonitor monitor) throws Exception {
 			
 			if (endOp == null) displayData(result,dataDims);
 		}
