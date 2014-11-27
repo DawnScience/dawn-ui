@@ -45,7 +45,7 @@ public class OperationPropertySource implements IPropertySource {
 	public IPropertyDescriptor[] getPropertyDescriptors() {
 		
 		try {
-			final Collection<ModelField> fields = ((AbstractOperationModel)model).getModelFields();
+			final Collection<ModelField> fields = model.getModelFields();
 			final Collection<IPropertyDescriptor> ret = new ArrayList<IPropertyDescriptor>(fields.size());
 			for (ModelField field : fields) ret.add(new OperationPropertyDescriptor(field));
 			return ret.toArray(new IPropertyDescriptor[ret.size()]);

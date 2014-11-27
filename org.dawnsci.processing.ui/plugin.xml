@@ -21,6 +21,14 @@
             restorable="true">
       </view>
       <view
+            category="org.dawb.workbench.ui.beta.views.category"
+            class="org.dawnsci.processing.ui.model.OperationModelView"
+            icon="icons/image--pencil.png"
+            id="org.dawnsci.processing.ui.modelView"
+            name="Model"
+            restorable="true">
+      </view>
+      <view
             class="org.dawnsci.processing.ui.slice.DataFileSliceView"
             icon="icons/procfolder.png"
             id="org.dawnsci.processing.ui.DataFileSliceView"

@@ -1,11 +1,18 @@
 package org.dawnsci.processing.ui.model;
 
+import java.util.Collection;
+
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
+import org.eclipse.dawnsci.analysis.api.processing.model.ModelField;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
@@ -36,14 +43,12 @@ public class OperationModelViewer implements ISelectionListener {
 	
 	private TableViewer           viewer;
 	
-	public OperationModelViewer() {
-		EclipseUtils.getPage().addSelectionListener(this);
-	}
-
 	public void createPartControl(Composite parent) {
 		
+		EclipseUtils.getPage().addSelectionListener(this);
+
 		this.viewer = new TableViewer(parent, SWT.SINGLE | SWT.BORDER | SWT.FULL_SELECTION);
-		viewer.setContentProvider(new OperationModelContentProvider());
+		viewer.setContentProvider(createContentProvider());
 		
 		viewer.getTable().setLinesVisible(true);
 		viewer.getTable().setHeaderVisible(true);
@@ -53,7 +58,7 @@ public class OperationModelViewer implements ISelectionListener {
 		createDropTarget(viewer);
 
 	}
-	
+
 	private void createDropTarget(TableViewer viewer) {
 		
 		final Table table = (Table)viewer.getControl();
@@ -120,9 +125,17 @@ public class OperationModelViewer implements ISelectionListener {
 		
         TableViewerColumn var   = new TableViewerColumn(viewer, SWT.LEFT, 0);
 		var.getColumn().setText("Name");
-		var.getColumn().setWidth(80);
+		var.getColumn().setWidth(150);
+		var.setLabelProvider(new ColumnLabelProvider() {
+			public String getText(Object element) {
+				return ((ModelField)element).getDisplayName();
+			}
+		});
 		
-		
+		var   = new TableViewerColumn(viewer, SWT.LEFT, 1);
+		var.getColumn().setText("Value");
+		var.getColumn().setWidth(200);
+		var.setLabelProvider(new ModelFieldLabelProvider());
 	}
 
 	public void setFocus() {
@@ -130,7 +143,7 @@ public class OperationModelViewer implements ISelectionListener {
 	}
 	
 	public void refresh() {
-		
+		viewer.refresh();
 	}
 	
 	public void dispose() {
@@ -147,4 +160,26 @@ public class OperationModelViewer implements ISelectionListener {
 			}
 		}
 	}
+	
+	
+	private IContentProvider createContentProvider() {
+		return new IStructuredContentProvider() {
+			@Override
+			public void dispose() {
+			}
+
+			@Override
+			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+
+			}
+
+			@Override
+			public Object[] getElements(Object inputElement) {
+				OperationDescriptor           des = (OperationDescriptor)inputElement;
+				final Collection<ModelField>  col = (Collection<ModelField>)des.getAdapter(ModelField.class);
+				return col.toArray(new ModelField[col.size()]);
+			}
+		};
+	}
+
 }

@@ -21,7 +21,9 @@ import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.processing.OperationCategory;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
+import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
+import org.eclipse.dawnsci.analysis.api.processing.model.ModelField;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -99,6 +101,13 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 		if (clazz == IPropertySource.class) {
 			if (modelSource==null) modelSource = new OperationPropertySource(getModel());
 			return modelSource;
+		} if (clazz == ModelField.class) {
+			try {
+				return getModel().getModelFields();
+			} catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			} 
 		}
 		return null;
 	}
