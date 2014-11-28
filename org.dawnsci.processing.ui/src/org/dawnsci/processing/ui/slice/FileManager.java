@@ -1,6 +1,5 @@
 package org.dawnsci.processing.ui.slice;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -22,7 +21,6 @@ import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class FileManager {
 	
-	private List<String> filePaths = new ArrayList<String>();
 	IConversionContext context;
 	//TODO image/1d stacks
 //	private List<ILazyDataset> dataStacks;
@@ -45,13 +43,14 @@ public class FileManager {
 	
 	public boolean[] addFiles(String[] paths) {
 		
-		if (filePaths.isEmpty()) {
+		if (context == null) {
 			context = contextHelper.init(paths[0]);
 			if (context == null) {
 				boolean[] falses = new boolean[paths.length];
 				Arrays.fill(falses, false);
 				return falses;
 			}
+			context.getFilePaths().clear();
 		}
 		
 		FileLoaderJob job = new FileLoaderJob(context.getDatasetNames().get(0), paths);
@@ -70,7 +69,8 @@ public class FileManager {
 	}
 	
 	public List<String> getFilePaths() {
-		return filePaths;
+		if (context == null)return null;
+		return context.getFilePaths();
 	}
 	
 	public void removeFileListener(IFilesAddedListener listener) {
@@ -83,7 +83,6 @@ public class FileManager {
 	
 	public void clear() {
 		context = null;
-		filePaths.clear();
 		if (axesNames != null) axesNames.clear();
 	}
 	
@@ -121,7 +120,14 @@ public class FileManager {
 				try {
 					IDataHolder holder = LoaderFactory.getData(paths[i], null);
 					goodFile = holder.contains(datasetName);
-					if (goodFile) filePaths.add(paths[i]);
+					if (goodFile) {
+						if (context.getFilePaths().contains(paths[i])){
+							out[i] = goodFile;
+							continue;
+						}
+							
+						context.getFilePaths().add(paths[i]);
+					}
 				} catch (Exception e) {
 					logger.error("Problem reading " + paths[i], e);
 				}
@@ -129,11 +135,6 @@ public class FileManager {
 				//TODO test axes
 				
 				out[i] = goodFile;
-				try {
-					context.setFilePaths(filePaths.toArray(new String[filePaths.size()]));
-				} catch (Exception e) {
-					logger.error("Files not added to context!", e);
-				}
 			}
 			
 			fireFileListeners(new FileAddedEvent(this, paths, out));

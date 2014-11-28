@@ -152,23 +152,24 @@ public class AsciiEditor extends MultiPageEditorPart implements IPlottingSystemS
 	}
 	
 	public Object getAdapter(final Class clazz) {
-		
     	// TODO FIXME for IContentProvider return a Page which shows the value
-    	// of plotted data. Bascially the same as the CSVPage.
-    	
-		if (clazz == Page.class) {
-			final PlotDataEditor      ed  = getDataSetEditor();
-			return PlotDataPage.getPageFor(ed);
-		} else if (clazz == IToolPageSystem.class) {
-			if (dataSetEditor!=null) return dataSetEditor.getPlottingSystem();
-		} else if (clazz == IPlottingSystem.class) {
-			if (dataSetEditor!=null) return dataSetEditor.getPlottingSystem();
-		} else if (clazz == IVariableManager.class) {
-			return dataSetEditor.getDataSetComponent();
-		} else if (clazz == ISliceSystem.class) {
-			return dataSetEditor.getSliceComponent();
+    	// of plotted data. Basically the same as the CSVPage.
+
+    	if (clazz == Page.class) {
+			return PlotDataPage.getPageFor(dataSetEditor);
 		}
-		
+		if (dataSetEditor != null) {
+			if (clazz == IToolPageSystem.class) {
+				return dataSetEditor.getPlottingSystem();
+			} else if (clazz == IPlottingSystem.class) {
+				return dataSetEditor.getPlottingSystem();
+			} else if (clazz == IVariableManager.class) {
+				return dataSetEditor.getDataSetComponent();
+			} else if (clazz == ISliceSystem.class) {
+				return dataSetEditor.getSliceComponent();
+			}
+		}
+
 		return super.getAdapter(clazz);
 	}
 

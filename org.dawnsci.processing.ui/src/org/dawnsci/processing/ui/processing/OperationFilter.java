@@ -16,7 +16,6 @@ import java.util.Map;
 import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
 import org.dawnsci.common.widgets.table.ISeriesItemFilter;
 import org.dawnsci.processing.ui.Activator;
-import org.dawnsci.processing.ui.model.OperationDescriptor;
 import org.dawnsci.processing.ui.slice.IOperationErrorInformer;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
@@ -66,7 +65,7 @@ final class OperationFilter implements ISeriesItemFilter {
 					final OperationDescriptor des = new OperationDescriptor(op.getId(), service);
 					try {
 						if (!des.isVisible()) continue;
-						if (contents!=null && !des.getName().toLowerCase().contains(contents.toLowerCase())) continue;
+						if (contents!=null && !des.matches(contents)) continue;
 					} catch (NullPointerException ne) {
 						// Occurs when id in class does not match id in extension point
 						logger.error("The operation '"+op.getClass().getSimpleName()+"' has a different id to extenions point definition. The code and the extension point must be the same!");

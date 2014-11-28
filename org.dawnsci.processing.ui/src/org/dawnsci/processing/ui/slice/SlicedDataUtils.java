@@ -64,8 +64,14 @@ public class SlicedDataUtils {
 			ILazyDataset lz0 = axes[0];
 			ILazyDataset lz1 = null;
 			if (data.getRank() > 1) lz1 = axes[1];
-			if (lz0 != null) x = lz0.getSlice().squeeze();
-			if (lz1 != null) y = lz1.getSlice().squeeze();
+			if (lz0 != null){
+//				lz0.clearMetadata(null);
+				x = lz0.getSlice().squeeze();
+			}
+			if (lz1 != null) {
+//				lz1.clearMetadata(null);
+				y = lz1.getSlice().squeeze();
+			}
 		}
 		
 		if (mmd != null && !mmd.isEmpty()) {

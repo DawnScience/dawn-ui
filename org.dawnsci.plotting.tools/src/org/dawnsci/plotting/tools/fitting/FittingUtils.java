@@ -30,6 +30,7 @@ import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.slf4j.Logger;
@@ -137,13 +138,11 @@ public class FittingUtils {
 	}
 
 	public static Vector3d getQ(FittedPeaksInfo info,FittedFunction p) {
-		LinearROI bounds;
-		try {
-			
-			bounds = (LinearROI)(info.getPlottingSystem().getRegion(info.getSelectedTrace().getName()).getROI());
-		} catch (Throwable e1) {
+		IRegion region = info.getPlottingSystem().getRegion(info.getSelectedTrace().getName());
+		if (region == null)
 			return null;
-		}
+
+		LinearROI bounds = (LinearROI) region.getROI();
 		double l=bounds.getLength();
 		double [] pt = bounds.getPoint(p.getPosition()/l);
 		
