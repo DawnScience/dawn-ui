@@ -615,10 +615,10 @@ public class DataFileSliceView extends ViewPart {
 				ShapeInformation shi = new ShapeInformation(lazyDataset.getSliceView(viewSlice).getShape(), dataDims, 1);
 				firstSlice.setMetadata(new SliceFromSeriesMetadata(si,shi,sli));
 				
-				OriginMetadataImpl om = new OriginMetadataImpl(lazyDataset, viewSlice, dataDims, path, context.getDatasetNames().get(0));
-				om.setCurrentSlice(csw.getCurrentSlice());
+//				OriginMetadataImpl om = new OriginMetadataImpl(lazyDataset, viewSlice, dataDims, path, context.getDatasetNames().get(0));
+//				om.setCurrentSlice(csw.getCurrentSlice());
 
-				lazyDataset.setMetadata(om);
+//				lazyDataset.setMetadata(om);
 
 				EscapableSliceVisitor sliceVisitor = getSliceVisitor(ops, lazyDataset, Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions()));
 				sliceVisitor.setEndOperation(end);

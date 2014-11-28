@@ -55,21 +55,6 @@ public class EscapableSliceVisitor implements SliceVisitor {
 	@Override
 	public void visit(IDataset slice, Slice[] slices, int[] shape) throws Exception {
 
-		OriginMetadata om = null;
-		SourceInformation ssource = null;
-
-		try {
-			ssource = lz.getMetadata(SliceFromSeriesMetadata.class).get(0).getSourceInfo();
-			om = lz.getMetadata(OriginMetadata.class).get(0);
-		} catch (Exception e1) {
-			throw new IllegalArgumentException("No origin!!!!");
-		}
-		SliceFromSeriesMetadata ssm = slice.getMetadata(SliceFromSeriesMetadata.class).get(0);
-		SliceFromSeriesMetadata fullssm = new SliceFromSeriesMetadata(ssource, ssm.getShapeInfo(), ssm.getSliceInfo());
-		slice.setMetadata(fullssm);
-		
-		slice.setMetadata(om);
-
 		OperationData  data = new OperationData(slice);
 
 		for (IOperation<? extends IOperationModel, ? extends OperationData> i : series) {
