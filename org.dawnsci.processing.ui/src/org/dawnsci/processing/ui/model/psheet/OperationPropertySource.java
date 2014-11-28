@@ -13,6 +13,7 @@ import java.util.Collection;
 
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.ModelField;
+import org.eclipse.dawnsci.analysis.api.processing.model.ModelUtils;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 
@@ -44,7 +45,7 @@ public class OperationPropertySource implements IPropertySource {
 	public IPropertyDescriptor[] getPropertyDescriptors() {
 		
 		try {
-			final Collection<ModelField> fields = model.getModelFields();
+			final Collection<ModelField> fields = ModelUtils.getModelFields(model);
 			final Collection<IPropertyDescriptor> ret = new ArrayList<IPropertyDescriptor>(fields.size());
 			for (ModelField field : fields) ret.add(new OperationPropertyDescriptor(field));
 			return ret.toArray(new IPropertyDescriptor[ret.size()]);

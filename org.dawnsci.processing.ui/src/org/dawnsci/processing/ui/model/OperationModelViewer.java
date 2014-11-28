@@ -8,6 +8,7 @@ import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.ModelField;
+import org.eclipse.dawnsci.analysis.api.processing.model.ModelUtils;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewer;
@@ -230,7 +231,7 @@ public class OperationModelViewer implements ISelectionListener {
 			public Object[] getElements(Object inputElement) {
 				IOperation<IOperationModel, OperationData> op = (IOperation<IOperationModel, OperationData>)inputElement;
 				try {
-					final Collection<ModelField>  col = op.getModel().getModelFields();
+					final Collection<ModelField>  col = ModelUtils.getModelFields(op.getModel());
 					return col.toArray(new ModelField[col.size()]);
 				} catch (Exception ne) {
 					return new ModelField[]{};
