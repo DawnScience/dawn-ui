@@ -238,4 +238,16 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 		if (cat == null) return "";
         return "["+cat.getName()+"]";
 	}
+
+	/**
+	 * Checks if a given string is in the name or category of this descriptor
+	 * @param contents
+	 * @return
+	 */
+	public boolean matches(String contents) {
+		if (contents  == null || "".equals(contents)) return true;
+		if (getName().toLowerCase().contains(contents.toLowerCase())) return true;
+		if (getCategoryLabel()!=null && getCategoryLabel().toLowerCase().contains(contents.toLowerCase())) return true;
+		return false;
+	}
 }

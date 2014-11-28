@@ -9,8 +9,6 @@
 package org.dawnsci.common.widgets.table;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.jface.fieldassist.IContentProposal;
@@ -18,20 +16,10 @@ import org.eclipse.jface.fieldassist.IContentProposalProvider;
 
 public class SeriesProposalProvider implements IContentProposalProvider {
 
-	private ProposalComparator proposalComparator = new ProposalComparator();
 	
 	private ISeriesItemFilter             delegate;
 	private ISeriesItemDescriptor         itemDescriptor;
 	
-	private static class ProposalComparator implements Comparator<IContentProposal> {
-
-		@Override
-		public int compare(IContentProposal o1, IContentProposal o2) {
-			return o1.getLabel().toLowerCase().compareTo(o2.getLabel().toLowerCase());
-		}
-
-	}
-
 	public SeriesProposalProvider(ISeriesItemFilter delegate) {
 		this.delegate = delegate;
 	}

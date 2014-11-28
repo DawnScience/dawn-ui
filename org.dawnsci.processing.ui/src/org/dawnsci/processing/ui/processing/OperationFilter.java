@@ -65,7 +65,7 @@ final class OperationFilter implements ISeriesItemFilter {
 					final OperationDescriptor des = new OperationDescriptor(op.getId(), service);
 					try {
 						if (!des.isVisible()) continue;
-						if (contents!=null && !des.getName().toLowerCase().contains(contents.toLowerCase())) continue;
+						if (contents!=null && !des.matches(contents)) continue;
 					} catch (NullPointerException ne) {
 						// Occurs when id in class does not match id in extension point
 						logger.error("The operation '"+op.getClass().getSimpleName()+"' has a different id to extenions point definition. The code and the extension point must be the same!");
