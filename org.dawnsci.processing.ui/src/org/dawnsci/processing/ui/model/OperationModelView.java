@@ -19,6 +19,8 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 
 		modelEditor = new OperationModelViewer();
 		modelEditor.createPartControl(parent);
+		
+		getSite().setSelectionProvider(modelEditor);
 	}
 
 	@Override
@@ -28,8 +30,8 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 	
 	@Override
 	public void dispose() {
-		modelEditor.dispose();
-		EclipseUtils.getPage().removeSelectionListener(this);
+		if (modelEditor!=null) modelEditor.dispose();
+		if (EclipseUtils.getPage()!=null) EclipseUtils.getPage().removeSelectionListener(this);
 		super.dispose();
 	}
 

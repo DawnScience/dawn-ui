@@ -2,6 +2,7 @@ package org.dawnsci.processing.ui.model;
 
 import java.util.Arrays;
 
+import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
 import org.dawnsci.common.widgets.celleditor.ClassCellEditor;
 import org.dawnsci.common.widgets.celleditor.FileDialogCellEditor;
@@ -12,6 +13,7 @@ import org.eclipse.dawnsci.analysis.api.processing.model.OperationModelField;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxCellEditor;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.window.DefaultToolTip;
 import org.eclipse.jface.window.ToolTip;
@@ -21,9 +23,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.ui.ISelectionListener;
+import org.eclipse.ui.IWorkbenchPart;
 
 public class ModelFieldEditors {
 
+	private static ISelectionListener selectionListener;
+	private static ToolTip            currentHint;
 	/**
 	 * Create a new editor for a field.
 	 * @param field
@@ -85,7 +91,7 @@ public class ModelFieldEditors {
         	if (anot!=null) {
         		String hint = anot.hint();
         		if (hint!=null && !"".equals(hint)) {
-        			showHint(hint, ed);
+        			showHint(hint, parent);
         		}
         	}
         }
@@ -95,25 +101,30 @@ public class ModelFieldEditors {
 	}
 	
 
-	private static void showHint(final String hint, final CellEditor cellEd) {
+	private static void showHint(final String hint, final Composite parent) {
 		
-		final Control control = cellEd.getControl();
-		if (control!=null) control.getDisplay().asyncExec(new Runnable() {
+		if (parent.isDisposed()) return;
+		if (parent!=null) parent.getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				
-				final DefaultToolTip tooltip = new DefaultToolTip(control, ToolTip.NO_RECREATE, true);
-				tooltip.setText(hint);
-				tooltip.setHideOnMouseDown(true);
-				control.addListener(SWT.Dispose, new Listener() {
-					
-					@Override
-					public void handleEvent(Event event) {
-						if (!control.isDisposed()) tooltip.hide();
-					}
-				});
-
-				tooltip.show(new Point(control.getSize().x, 0));
+				currentHint = new DefaultToolTip(parent, ToolTip.NO_RECREATE, true);
+				((DefaultToolTip)currentHint).setText(hint);
+				currentHint.setHideOnMouseDown(true);
+				currentHint.show(new Point(0, parent.getSize().y));
 				
+				if (selectionListener==null) {
+					if (EclipseUtils.getPage()!=null) {
+						selectionListener = new ISelectionListener() {
+							@Override
+							public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+								if (currentHint!=null) currentHint.hide();
+							} 
+						};
+						
+						EclipseUtils.getPage().addSelectionListener(selectionListener);
+					}
+
+				}
 			}
 		});
 	}
