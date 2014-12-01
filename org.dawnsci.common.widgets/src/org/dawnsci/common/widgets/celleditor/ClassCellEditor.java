@@ -66,7 +66,7 @@ public class ClassCellEditor extends TextCellEditor {
 		if (unit == null) {
 			ret = super.createControl(parent);
 		} else {
-			final Composite comp = new Composite(parent, SWT.None);
+			final Composite comp = new Composite(parent, SWT.None|SWT.NO_FOCUS);
 			comp.setLayout(new GridLayout(2, false));
 			comp.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 			GridUtils.removeMargins(comp);

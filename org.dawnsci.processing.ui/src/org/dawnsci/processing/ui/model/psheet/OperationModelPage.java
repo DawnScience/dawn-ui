@@ -1,5 +1,6 @@
-package org.dawnsci.processing.ui.model;
+package org.dawnsci.processing.ui.model.psheet;
 
+import org.dawnsci.processing.ui.processing.OperationDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.dnd.DND;

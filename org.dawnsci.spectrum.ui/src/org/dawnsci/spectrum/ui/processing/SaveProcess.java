@@ -12,11 +12,11 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
-import org.dawb.common.services.IPersistenceService;
-import org.dawb.common.services.IPersistentFile;
 import org.dawb.common.services.ServiceManager;
 import org.dawnsci.spectrum.ui.file.IContain1DData;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
+import org.eclipse.dawnsci.analysis.api.persistence.IPersistentFile;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 
 public class SaveProcess extends AbstractSaveProcess {

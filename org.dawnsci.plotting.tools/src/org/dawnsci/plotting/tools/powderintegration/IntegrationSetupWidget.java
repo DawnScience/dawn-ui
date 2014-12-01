@@ -15,7 +15,6 @@ import java.util.List;
 
 import org.dawnsci.common.widgets.decorator.FloatDecorator;
 import org.dawnsci.common.widgets.decorator.IntegerDecorator;
-import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -31,8 +30,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.mihalis.opal.checkBoxGroup.CheckBoxGroup;
 
-import uk.ac.diamond.scisoft.analysis.diffraction.powder.AbstractPixelIntegration;
-import uk.ac.diamond.scisoft.analysis.diffraction.powder.AbstractPixelIntegration1D;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelIntegrationUtils.IntegrationMode;
 
 public class IntegrationSetupWidget {

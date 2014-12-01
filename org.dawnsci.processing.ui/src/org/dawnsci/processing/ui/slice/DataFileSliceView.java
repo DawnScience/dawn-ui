@@ -24,7 +24,7 @@ import org.dawb.common.services.conversion.IProcessingConversionInfo;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.processing.ui.Activator;
-import org.dawnsci.processing.ui.model.OperationDescriptor;
+import org.dawnsci.processing.ui.processing.OperationDescriptor;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -36,18 +36,18 @@ import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
-import org.eclipse.dawnsci.analysis.api.metadata.OriginMetadata;
-import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.api.processing.IExecutionVisitor;
-import org.eclipse.dawnsci.analysis.api.processing.IExportOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
-import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
-import org.eclipse.dawnsci.analysis.api.slice.SliceVisitor;
+import org.eclipse.dawnsci.analysis.api.slice.ShapeInformation;
+import org.eclipse.dawnsci.analysis.api.slice.SliceFromSeriesMetadata;
+import org.eclipse.dawnsci.analysis.api.slice.SliceInformation;
 import org.eclipse.dawnsci.analysis.api.slice.Slicer;
+import org.eclipse.dawnsci.analysis.api.slice.SourceInformation;
 import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.SliceND;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -110,6 +110,7 @@ public class DataFileSliceView extends ViewPart {
 	IPlottingSystem input;
 	IPlottingSystem output;
 	IOperationErrorInformer informer;
+	IOperationInputData inputData = null;
 	
 	String lastPath = null;
 	
@@ -136,6 +137,7 @@ public class DataFileSliceView extends ViewPart {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				if (event.getSelection() instanceof StructuredSelection) {
+					inputData = null;
 					selectedFile = (String)((StructuredSelection)event.getSelection()).getFirstElement();
 					update(currentOperation);
 				}
@@ -180,6 +182,7 @@ public class DataFileSliceView extends ViewPart {
 			
 			@Override
 			public void sliceChanged(SliceChangeEvent event) {
+				inputData = null;
 				String ss = Slice.createString(csw.getCurrentSlice());
 				currentSliceLabel.setText("Current slice of data: [" +ss + "]");
 				currentSliceLabel.getParent().layout(true);
@@ -201,6 +204,9 @@ public class DataFileSliceView extends ViewPart {
 				if (selection instanceof StructuredSelection && ((StructuredSelection)selection).getFirstElement() instanceof OperationDescriptor) {
 					OperationDescriptor des = (OperationDescriptor)((StructuredSelection)selection).getFirstElement();
 					try {
+						
+
+						
 						currentOperation = des.getSeriesObject();
 						update(currentOperation);
 					} catch (InstantiationException e) {
@@ -327,7 +333,6 @@ public class DataFileSliceView extends ViewPart {
 						@Override
 						public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-							//TODO properly populate the number steps
 							monitor.beginTask("Processing", getAmountOfWork(fileManager.getContext()));
 							fileManager.getContext().setMonitor(new ProgressMonitorWrapper(monitor));
 							try {
@@ -470,10 +475,6 @@ public class DataFileSliceView extends ViewPart {
 		
 		return ops;
 	}
-	
-	private UIExecutionVisitor getOutputExecutionVisitor() {
-		return new UIExecutionVisitor();
-	}
 
 	private int getAmountOfWork(IConversionContext context) {
 		int c = 0;
@@ -487,15 +488,10 @@ public class DataFileSliceView extends ViewPart {
 				IMetadata metadata = LoaderFactory.getMetadata(path, null);
 				int[] s = metadata.getDataShapes().get(name);
 				
-				Slice[] init = Slicer.getSliceArrayFromSliceDimensions(sliceDimensions,s);
-				int[] dataDims = Slicer.getDataDimensions(s, sliceDimensions);
 				Slice[] slices = Slicer.getSliceArrayFromSliceDimensions(sliceDimensions, s);
-				int[] start =new int[s.length];
-				int[] stop= new int[s.length];
-				int[] step = new int[s.length];
-				Slice.convertFromSlice(slices, s, start, stop, step);
-				int[] nShape = AbstractDataset.checkSlice(s, start, stop, start, stop, step);
-				
+				SliceND slice = new SliceND(s, slices);
+				int[] nShape = slice.getShape();
+
 				if (dd == null) {
 					dd = Slicer.getDataDimensions(s, context.getSliceDimensions());
 					Arrays.sort(dd);
@@ -576,25 +572,64 @@ public class DataFileSliceView extends ViewPart {
 				
 				int[] dataDims = Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions());
 				Slice[] s = csw.getCurrentSlice();
-				final IDataset firstSlice = lazyDataset.getSlice(s);
+				//Plot input, probably a bit wasteful to do each time
+				IDataset firstSlice = lazyDataset.getSlice(s);
 				informer.setTestData(firstSlice.getSliceView().squeeze());
 				SlicedDataUtils.plotDataWithMetadata(firstSlice, input, dataDims);
 				
-				OriginMetadataImpl om = new OriginMetadataImpl(lazyDataset, viewSlice, dataDims, path, context.getDatasetNames().get(0));
-				om.setCurrentSlice(csw.getCurrentSlice());
-			
-				lazyDataset.setMetadata(om);
+				
 				IOperation<? extends IOperationModel, ? extends OperationData>[] ops = getOperations();
 				if (ops == null) {
 					output.clear();
 					return Status.OK_STATUS;
 				}
-				EscapableSliceVisitor sliceVisitor = getSliceVisitor(ops, getOutputExecutionVisitor(), lazyDataset, Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions()));
+				//Only run what is necessary
+				if (inputData != null) {
+					
+					if (inputData.getCurrentOperation() != end) {
+						int pos = 0;
+						for (int i = 0; i< ops.length; i++) {
+							if (ops[i] == end) break;
+							if (ops[i] == inputData.getCurrentOperation()) {
+								pos = i;
+								pos++;
+								break;
+							}
+						}
+						
+						if (pos != 0){
+							firstSlice = inputData.getInputData();
+							ops = Arrays.copyOfRange(ops, pos-1, ops.length);
+						}
+						
+					} else {
+						firstSlice = inputData.getInputData();
+						ops = new IOperation[]{inputData.getCurrentOperation()};
+					}
+					
+				}
+				
+				SourceInformation si = new SourceInformation(path, context.getDatasetNames().get(0), lazyDataset);
+				SliceInformation sli = new SliceInformation(csw.getCurrentSlice(), viewSlice, 0);
+				//TODO replace with check shape
+				ShapeInformation shi = new ShapeInformation(lazyDataset.getSliceView(viewSlice).getShape(), dataDims, 1);
+				firstSlice.setMetadata(new SliceFromSeriesMetadata(si,shi,sli));
+				
+//				OriginMetadataImpl om = new OriginMetadataImpl(lazyDataset, viewSlice, dataDims, path, context.getDatasetNames().get(0));
+//				om.setCurrentSlice(csw.getCurrentSlice());
+
+//				lazyDataset.setMetadata(om);
+
+				EscapableSliceVisitor sliceVisitor = getSliceVisitor(ops, lazyDataset, Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions()));
 				sliceVisitor.setEndOperation(end);
 				long start = System.currentTimeMillis();
 				sliceVisitor.visit(firstSlice, null, null);
+				inputData = sliceVisitor.getOperationInputData();
 				logger.debug("Ran in: " +(System.currentTimeMillis()-start)/1000. + " s");
 				informer.setInErrorState(null);
+
+				
+				
 				} catch (OperationException e) {
 					logger.error(e.getMessage(), e);
 					if (informer != null) informer.setInErrorState(e);
@@ -616,145 +651,33 @@ public class DataFileSliceView extends ViewPart {
 		
 	}
 	
-	private EscapableSliceVisitor getSliceVisitor(IOperation<? extends IOperationModel, ? extends OperationData>[] series,UIExecutionVisitor visitor,ILazyDataset lz,  
+	private EscapableSliceVisitor getSliceVisitor(IOperation<? extends IOperationModel, ? extends OperationData>[] series,ILazyDataset lz,  
             int[] dataDims) {
-		return new EscapableSliceVisitor(lz,visitor,dataDims,series,null,fileManager.getContext());
+		return new EscapableSliceVisitor(lz,dataDims,series,null,fileManager.getContext(),output);
 	}
 	
 	@Override
 	public Object getAdapter(final Class clazz) {
 		if (clazz == FileManager.class) return fileManager;
+		if (clazz == IOperationInputData.class) {
+			return inputData;
+		}
 		return super.getAdapter(clazz);
 	}
 	
-	private class EscapableSliceVisitor implements SliceVisitor {
-
-		
-		private ILazyDataset lz;
-		private UIExecutionVisitor visitor;
-		private int[] dataDims;
-		private IOperation<? extends IOperationModel, ? extends OperationData>[] series;
-		private IOperation<? extends IOperationModel, ? extends OperationData> endOperation;
-		private IProgressMonitor monitor;
-		private IConversionContext context;
-		private IOperationService operationService;
-		
-		public EscapableSliceVisitor(ILazyDataset lz, UIExecutionVisitor visitor, 
-				                     int[] dataDims, IOperation<? extends IOperationModel, ? extends OperationData>[] series, 
-				                     IProgressMonitor monitor, IConversionContext context) {
-			this.lz = lz;
-			this.visitor = visitor;
-			this.dataDims = dataDims;
-			this.series = series;
-			this.monitor= monitor;
-			this.context= context;
-			this.operationService = (IOperationService)Activator.getService(IOperationService.class);
-		}
-		
-		public void setEndOperation(IOperation<? extends IOperationModel, ? extends OperationData> op) {
-			endOperation = op;
-			visitor.setEndOperation(op);
-		}
-		
-		@Override
-		public void visit(IDataset slice, Slice[] slices, int[] shape) throws Exception {
-			
-			OriginMetadata om = null;
-			
-			try {
-				om = lz.getMetadata(OriginMetadata.class).get(0);
-			} catch (Exception e1) {
-				throw new IllegalArgumentException("No origin!!!!");
-			}
-			
-			slice.setMetadata(om);
-			
-			OperationData  data = new OperationData(slice);
-			
-			for (IOperation<? extends IOperationModel, ? extends OperationData> i : series) {
-
-				 if (i instanceof IExportOperation) {
-					 visitor.notify(i, data, slices, shape, dataDims);
-				 } else if (i.isPassUnmodifiedData() && i != endOperation) {
-					 //do nothing
-				 } else {
-					 OperationData tmp = i.execute(data.getData(), null);
-					 visitor.notify(i, tmp, slices, shape, dataDims); // Optionally send intermediate result
-					data = i.isPassUnmodifiedData() ? data : tmp;
-				 }
-				
-				if (i == endOperation) break;
-			}
-			
-
-			visitor.executed(data, null, slices, shape, dataDims); // Send result.
-
-		}
-
-		@Override
-		public boolean isCancelled() {
-			if (monitor != null && monitor.isCanceled()) return true;
-			// Overkill warning, context probably is being used here without a monitor, but just in case:
-			if (context != null && context.getMonitor()!=null && context.getMonitor().isCancelled()) return true;
-			return false;
-		}
-	}
 	
-	private class UIExecutionVisitor implements IExecutionVisitor {
-
-		private IOperation<? extends IOperationModel, ? extends OperationData> endOp;
-		
-		public void setEndOperation(IOperation<? extends IOperationModel, ? extends OperationData> op) {
-			endOp = op;
-		}
-		
-		@Override
-		public void notify(IOperation<? extends IOperationModel, ? extends OperationData> intermediateData, OperationData data,
-				Slice[] slices, int[] shape, int[] dataDims) {
-			
-			try {
-				if (intermediateData == endOp) displayData(data,dataDims);
-			} catch (Exception e) {
-				logger.error(e.getMessage());
-			}
-			
-		}
-		
-		@Override
-		public void init(IOperation<? extends IOperationModel, ? extends OperationData>[] series, OriginMetadata origin) throws Exception {
-			
-		}
-		
-		@Override
-		public void executed(OperationData result, IMonitor monitor,
-				Slice[] slices, int[] shape, int[] dataDims) throws Exception {
-			
-			if (endOp == null) displayData(result,dataDims);
-		}
-		
-		@Override
-		public void close() throws Exception {
-			// TODO Auto-generated method stub
-			
-		}
-		
-		private void displayData(OperationData result, int[] dataDims) throws Exception {
-			IDataset out = result.getData();
-			
-			SlicedDataUtils.plotDataWithMetadata(out, output, dataDims);
-
-		}
-
-	}
 	
 	private class BasicContentProvider implements IStructuredContentProvider {
 
 		@Override
 		public Object[] getElements(Object inputElement) {
-			if (inputElement instanceof FileManager)
+			if (inputElement instanceof FileManager) {
+				if (((FileManager)inputElement).getFilePaths() == null) return new String[0];
 				return ((FileManager)inputElement).getFilePaths().toArray();
+			}
+				
 			
-			return null;
+			return new String[0];
 		}
 
 		@Override
@@ -776,7 +699,7 @@ public class DataFileSliceView extends ViewPart {
 				if (f.isFile()) return f.getName();
 			}
 			
-			return getText(obj);
+			return "";
 		}
 		
 		@Override
@@ -785,55 +708,6 @@ public class DataFileSliceView extends ViewPart {
 		}
 		
 	}
-	
-//	private class OutputPathDialog extends Dialog {
-//		String path;
-//		
-//		  public OutputPathDialog(Shell parentShell, String path) {
-//		    super(parentShell);
-//		    this.path = path;
-//		  }
-//
-//		  @Override
-//		  protected Control createDialogArea(Composite parent) {
-//			  
-//		    final SelectorWidget sw = new SelectorWidget(parent) {
-//				
-//				@Override
-//				public void pathChanged(String path, TypedEvent event) {
-//
-//						Button button = OutputPathDialog.this.getButton(OK);
-//						if (button != null) {
-//							boolean canOK = this.checkDirectory(path, false);
-//							button.setEnabled(canOK);
-//							OutputPathDialog.this.path = path;
-//						}
-//					
-//				}
-//			};
-//			sw.setNewFile(false);
-//			sw.setText(path);
-//			
-//		    return parent;
-//		  }
-//		  
-//		  public String getPath() {
-//			  return path;
-//		  }
-//		  
-//
-//		  @Override
-//		  protected void configureShell(Shell newShell) {
-//		    super.configureShell(newShell);
-//		    newShell.setText("Select output directory");
-//		  }
-//
-//		  @Override
-//		  protected Point getInitialSize() {
-//		    return new Point(450, 300);
-//		  }
-//
-//		} 
 	
 	private class SetupContextHelper implements ISetupContext {
 
@@ -881,7 +755,6 @@ public class DataFileSliceView extends ViewPart {
 			wd.setPageSize(new Point(900, 500));
 			wd.create();
 			context.setConversionScheme(ConversionScheme.PROCESS);
-
 
 			if (wd.open() == WizardDialog.OK) return context;
 			

@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.dawnsci.processing.ui.model;
+package org.dawnsci.processing.ui.processing;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -14,14 +14,16 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
+import org.dawnsci.processing.ui.model.psheet.OperationPropertySource;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.dawnsci.analysis.api.processing.AbstractOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.processing.OperationCategory;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
+import org.eclipse.dawnsci.analysis.api.processing.model.ModelField;
+import org.eclipse.dawnsci.analysis.api.processing.model.ModelUtils;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -99,6 +101,13 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 		if (clazz == IPropertySource.class) {
 			if (modelSource==null) modelSource = new OperationPropertySource(getModel());
 			return modelSource;
+		} if (clazz == ModelField.class) {
+			try {
+				return ModelUtils.getModelFields(getModel());
+			} catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			} 
 		}
 		return null;
 	}
@@ -228,5 +237,17 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 		final OperationCategory cat = service.getCategory(id);
 		if (cat == null) return "";
         return "["+cat.getName()+"]";
+	}
+
+	/**
+	 * Checks if a given string is in the name or category of this descriptor
+	 * @param contents
+	 * @return
+	 */
+	public boolean matches(String contents) {
+		if (contents  == null || "".equals(contents)) return true;
+		if (getName().toLowerCase().contains(contents.toLowerCase())) return true;
+		if (getCategoryLabel()!=null && getCategoryLabel().toLowerCase().contains(contents.toLowerCase())) return true;
+		return false;
 	}
 }
