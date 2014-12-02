@@ -168,6 +168,11 @@
             id="uk.ac.diamond.scisoft.analysis.quadratic"
             name="Quadratic">
       </function>
+      <function
+            class="uk.ac.diamond.scisoft.analysis.fitting.functions.SmoothGoldEdgeFunction"
+            id="uk.ac.diamond.scisoft.arpes.smoothedgoldedge"
+            name="Smoothed Gold Edge">
+      </function>
    </extension>
 
 </plugin>
