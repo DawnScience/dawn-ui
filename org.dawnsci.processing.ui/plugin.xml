@@ -36,14 +36,14 @@
             restorable="true">
       </view>
       <view
-            class="uk.ac.diamond.scisoft.analysis.rcp.views.PlotView"
+            class="uk.ac.diamond.scisoft.analysis.plotclient.view.ScriptablePlottingSystemView"
             icon="icons/input.png"
             id="org.dawnsci.processing.ui.input"
             name="Input"
             restorable="true">
       </view>
       <view
-            class="uk.ac.diamond.scisoft.analysis.rcp.views.PlotView"
+            class="uk.ac.diamond.scisoft.analysis.plotclient.view.ScriptablePlottingSystemView"
             icon="icons/output.png"
             id="org.dawnsci.processing.ui.output"
             name="Output"
