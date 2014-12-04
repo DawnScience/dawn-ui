@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.dawb.common.services.ServiceManager;
 import org.dawb.common.services.conversion.IConversionContext;
 import org.dawb.common.services.conversion.IConversionContext.ConversionScheme;
 import org.dawb.common.services.conversion.IConversionService;
@@ -38,6 +37,8 @@ import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.api.processing.IExecutionVisitor;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationContext;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
@@ -46,13 +47,13 @@ import org.eclipse.dawnsci.analysis.api.slice.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.api.slice.SliceInformation;
 import org.eclipse.dawnsci.analysis.api.slice.Slicer;
 import org.eclipse.dawnsci.analysis.api.slice.SourceInformation;
-import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.SliceND;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -63,6 +64,7 @@ import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
@@ -94,23 +96,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-import uk.ac.diamond.scisoft.analysis.metadata.OriginMetadataImpl;
 import uk.ac.diamond.scisoft.analysis.processing.visitors.HierarchicalFileExecutionVisitor;
 
 public class DataFileSliceView extends ViewPart {
 
-	FileManager fileManager;
-	TableViewer viewer;
-	IConversionService service;
-	UpdateJob job;
-	Label currentSliceLabel;
-	ChangeSliceWidget csw;
-	String selectedFile = null;
-	IOperation<? extends IOperationModel, ? extends OperationData> currentOperation = null;
-	IPlottingSystem input;
-	IPlottingSystem output;
-	IOperationErrorInformer informer;
-	IOperationInputData inputData = null;
+	private static IConversionService cservice;
+	public static void setConversionService(IConversionService s) {
+		cservice = s;
+	}
+	private static IOperationService  oservice;
+	public static void setOperationService(IOperationService s) {
+		oservice = s;
+	}
+
+	
+	private FileManager fileManager;
+	private TableViewer viewer;
+	private UpdateJob job;
+	private Label currentSliceLabel;
+	private ChangeSliceWidget csw;
+	private String selectedFile = null;
+	private IOperation<? extends IOperationModel, ? extends OperationData> currentOperation = null;
+	private IPlottingSystem input;
+	private IPlottingSystem output;
+	private IOperationErrorInformer informer;
+	private IOperationInputData inputData = null;
 	
 	String lastPath = null;
 	
@@ -119,11 +129,6 @@ public class DataFileSliceView extends ViewPart {
 	@Override
 	public void createPartControl(Composite parent) {
 		
-		try {
-			service = (IConversionService)ServiceManager.getService(IConversionService.class);
-		} catch (Exception e1) {
-			logger.error("Conversion service not found, nothing is going to work");
-		}
 		fileManager = new FileManager(new SetupContextHelper());
 		
 		parent.setLayout(new GridLayout());
@@ -336,7 +341,7 @@ public class DataFileSliceView extends ViewPart {
 							monitor.beginTask("Processing", getAmountOfWork(fileManager.getContext()));
 							fileManager.getContext().setMonitor(new ProgressMonitorWrapper(monitor));
 							try {
-								service.process(fileManager.getContext());
+								cservice.process(fileManager.getContext());
 							} catch (final Exception e) {
 								Display.getDefault().asyncExec(new Runnable() {
 									public void run() {
@@ -413,6 +418,24 @@ public class DataFileSliceView extends ViewPart {
 			}
 		};
 		
+		final IAction export = new OperationExportAction() {
+			public IOperationContext createContext() {
+				
+				IOperationContext ocontext  = oservice.createContext();
+				ocontext.setSeries(getOperations());
+
+				final String selectedPath  = (String)((IStructuredSelection)viewer.getSelection()).getFirstElement();
+				ocontext.setFilePath(selectedPath);
+				
+				IConversionContext ccontext = fileManager.getContext();
+				ocontext.setSlicing(ccontext.getSliceDimensions());
+				ocontext.setDatasetPath(ccontext.getDatasetNames().get(0));
+				
+                return ocontext;
+			}
+		};
+
+		
 		getViewSite().getActionBars().getToolBarManager().add(clear);
 		getViewSite().getActionBars().getMenuManager().add(clear);
 		rightClick.add(clear);
@@ -424,6 +447,15 @@ public class DataFileSliceView extends ViewPart {
 		getViewSite().getActionBars().getToolBarManager().add(edit);
 		getViewSite().getActionBars().getMenuManager().add(edit);
 		rightClick.add(edit);
+		
+		getViewSite().getActionBars().getToolBarManager().add(new Separator());
+		getViewSite().getActionBars().getMenuManager().add(new Separator());
+		rightClick.add(new Separator());
+
+		getViewSite().getActionBars().getToolBarManager().add(export);
+		getViewSite().getActionBars().getMenuManager().add(export);
+		rightClick.add(export);
+
 	}
 	
 	
@@ -714,7 +746,7 @@ public class DataFileSliceView extends ViewPart {
 		@Override
 		public IConversionContext init(String path) {
 			
-			IConversionContext context = service.open(path);
+			IConversionContext context = cservice.open(path);
 			
 			return setupwizard(context);
 		}
