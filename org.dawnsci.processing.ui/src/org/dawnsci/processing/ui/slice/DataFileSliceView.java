@@ -428,6 +428,10 @@ public class DataFileSliceView extends ViewPart {
 				ocontext.setFilePath(selectedPath);
 				
 				IConversionContext ccontext = fileManager.getContext();
+				if (ccontext == null) {
+			    	MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Please Choose File", "Please ensure that a slice and file have been chosen.");
+                    return null;
+				}
 				ocontext.setSlicing(ccontext.getSliceDimensions());
 				ocontext.setDatasetPath(ccontext.getDatasetNames().get(0));
 				
