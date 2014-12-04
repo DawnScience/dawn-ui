@@ -9,8 +9,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.dawb.common.services.conversion.IConversionContext;
 import org.dawb.common.services.conversion.IConversionContext.ConversionScheme;
@@ -20,8 +20,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
+import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.api.slice.Slicer;
 import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -65,9 +67,12 @@ import org.eclipse.swt.widgets.Label;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-
 public class SetUpProcessWizardPage extends WizardPage {
+
+	private static ILoaderService lservice;
+	public static void setLoaderService(ILoaderService s) {
+		lservice = s;
+	}
 
 	private ISliceSystem sliceComponent;
 	private IPlottingSystem system;
@@ -231,8 +236,11 @@ public class SetUpProcessWizardPage extends WizardPage {
 						
 						final String dn = dsName;
 
-						final IDataHolder dh = LoaderFactory.getData(context.getFilePaths().get(0), true, true, null);
-						final ILazyDataset lz  = dh.getLazyDataset(dsName);
+						// TODO Changed this to leave loading image stacks
+						// out of this because we are looking for dsName
+						// which should be there - is this right?
+						final IDataHolder dh  = lservice.getData(context.getFilePaths().get(0), null);
+						final ILazyDataset lz = dh.getLazyDataset(dsName);
 						lz.clearMetadata(null);
 						
 						Display.getDefault().asyncExec(new Runnable() {
@@ -292,7 +300,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 		String path = context.getFilePaths().get(0);
 		IDataHolder dh;
 		try {
-			dh = LoaderFactory.getData(path);
+			dh = lservice.getData(path, new IMonitor.Stub());
 			ILazyDataset lazyDataset = dh.getLazyDataset(selection.getKey());
 			lazyDataset.clearMetadata(null);
 			final DimsDataList dims = sliceComponent.getDimsDataList();
@@ -320,7 +328,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 	private void updateDataset(String name) {
 		IDataHolder dh;
 		try {
-			dh = LoaderFactory.getData(context.getFilePaths().get(0), true, true, null);
+			dh = lservice.getData(context.getFilePaths().get(0), null);
 			ILazyDataset lz  = dh.getLazyDataset(name);
 			final SliceSource source = new SliceSource(dh, lz, name, context.getFilePaths().get(0), false);
 			sliceComponent.setData(source);
@@ -335,7 +343,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 	private Map<String, int[]> getDatasetInfo() throws Exception{
 		
 		final ConversionScheme scheme = context.getConversionScheme();
-		final IMetadata        meta   = LoaderFactory.getMetadata(context.getFilePaths().get(0), null);
+		final IMetadata        meta   = lservice.getMetadata(context.getFilePaths().get(0), null);
         final Map<String, int[]>     names  = new HashMap<String, int[]>();
         
         if (meta!=null && !meta.getDataNames().isEmpty()){
@@ -356,7 +364,7 @@ public class SetUpProcessWizardPage extends WizardPage {
         }
         
         if (names.isEmpty()) {
-        	final IDataHolder  dataHolder = LoaderFactory.getData(context.getFilePaths().get(0), true, true, null);
+        	final IDataHolder  dataHolder = lservice.getData(context.getFilePaths().get(0), null);
         	if (dataHolder!=null) for (String name : dataHolder.getNames()) {
         		if (name.contains("Image Stack")) continue;
         		if (!names.containsKey(name)) {

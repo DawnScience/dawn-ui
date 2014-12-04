@@ -33,8 +33,10 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
+import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.api.processing.IExecutionVisitor;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationContext;
@@ -95,7 +97,6 @@ import org.eclipse.ui.part.ViewPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.processing.visitors.HierarchicalFileExecutionVisitor;
 
 public class DataFileSliceView extends ViewPart {
@@ -107,6 +108,10 @@ public class DataFileSliceView extends ViewPart {
 	private static IOperationService  oservice;
 	public static void setOperationService(IOperationService s) {
 		oservice = s;
+	}
+	private static ILoaderService lservice;
+	public static void setLoaderService(ILoaderService s) {
+		lservice = s;
 	}
 
 	
@@ -481,7 +486,7 @@ public class DataFileSliceView extends ViewPart {
 	
 	private void updateSliceWidget(String path) {
 		try {
-			IDataHolder dh = LoaderFactory.getData(path);
+			IDataHolder dh = lservice.getData(path, new IMonitor.Stub());
 			ILazyDataset lazy = dh.getLazyDataset(fileManager.getContext().getDatasetNames().get(0));
 			int[] shape = lazy.getShape();
 			
@@ -521,7 +526,7 @@ public class DataFileSliceView extends ViewPart {
 		
 		for (String path : context.getFilePaths()) {
 			try {
-				IMetadata metadata = LoaderFactory.getMetadata(path, null);
+				IMetadata metadata = lservice.getMetadata(path, null);
 				int[] s = metadata.getDataShapes().get(name);
 				
 				Slice[] slices = Slicer.getSliceArrayFromSliceDimensions(sliceDimensions, s);
@@ -586,7 +591,7 @@ public class DataFileSliceView extends ViewPart {
 				
 				if (path == null) path = context.getFilePaths().get(0);
 				
-				final IDataHolder   dh = LoaderFactory.getData(path);
+				final IDataHolder   dh = lservice.getData(path, new IMonitor.Stub());
 				ILazyDataset lazyDataset = dh.getLazyDataset(context.getDatasetNames().get(0));
 				
 				if (lazyDataset == null) {

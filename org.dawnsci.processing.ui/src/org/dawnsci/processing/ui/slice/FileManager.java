@@ -13,13 +13,18 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-
 
 public class FileManager {
+	
+	private static ILoaderService lservice;
+	public static void setLoaderService(ILoaderService s) {
+		lservice = s;
+	}
+
 	
 	IConversionContext context;
 	//TODO image/1d stacks
@@ -118,7 +123,7 @@ public class FileManager {
 				
 				boolean goodFile = false;
 				try {
-					IDataHolder holder = LoaderFactory.getData(paths[i], null);
+					IDataHolder holder = lservice.getData(paths[i], null);
 					goodFile = holder.contains(datasetName);
 					if (goodFile) {
 						if (context.getFilePaths().contains(paths[i])){
