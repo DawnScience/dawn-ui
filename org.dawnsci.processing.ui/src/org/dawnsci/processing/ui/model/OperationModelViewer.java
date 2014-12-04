@@ -314,6 +314,7 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 		if (event.getSelection() instanceof IStructuredSelection) {
 			IStructuredSelection ss = (IStructuredSelection)event.getSelection();
 			final ModelField     mf = (ModelField)ss.getFirstElement();
+			// TODO 
 		}
 	}
 

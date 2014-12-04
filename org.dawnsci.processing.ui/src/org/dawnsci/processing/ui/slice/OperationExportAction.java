@@ -4,11 +4,12 @@ import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.processing.ui.Activator;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.dawnsci.analysis.api.processing.ExecutionType;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationContext;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationExporter;
 import org.eclipse.emf.common.ui.dialogs.WorkspaceResourceDialog;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -16,7 +17,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 
-import uk.ac.diamond.scisoft.analysis.processing.runner.GraphBuilder;
+import uk.ac.diamond.scisoft.analysis.processing.runner.OperationExporterFactory;
 
 /**
  * Class to use for exporting any pipeline to a moml file.
@@ -50,8 +51,9 @@ public abstract class OperationExportAction extends Action{
 	    }
 	    
 	    try {
-		    final GraphBuilder buf = new GraphBuilder(context);
-			buf.export(newFile.getLocation().toOSString());
+		    final IOperationExporter exp = OperationExporterFactory.getExporter(ExecutionType.GRAPH);
+		    exp.init(context);
+		    exp.export(newFile.getLocation().toOSString());
 			
 			newFile.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
 			
