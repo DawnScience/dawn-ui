@@ -24,7 +24,9 @@ public class FileManager {
 	public static void setLoaderService(ILoaderService s) {
 		lservice = s;
 	}
-
+	public FileManager() { // Used by OSGI only.
+		
+	}
 	
 	IConversionContext context;
 	//TODO image/1d stacks

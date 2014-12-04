@@ -73,6 +73,9 @@ public class SetUpProcessWizardPage extends WizardPage {
 	public static void setLoaderService(ILoaderService s) {
 		lservice = s;
 	}
+	public SetUpProcessWizardPage() {// Used by OSGI only.
+		super("Set up input data");
+	}
 
 	private ISliceSystem sliceComponent;
 	private IPlottingSystem system;
