@@ -9,6 +9,7 @@
 package org.dawnsci.common.widgets.gda.function;
 
 import org.dawnsci.common.widgets.gda.function.actions.DuplicateFunctionAction;
+import org.dawnsci.common.widgets.gda.function.actions.RemoveFunctionAction;
 import org.dawnsci.common.widgets.gda.function.actions.ToggleFixedAction;
 import org.dawnsci.common.widgets.gda.function.actions.UpdateFittedParamAction;
 import org.dawnsci.common.widgets.gda.function.descriptors.IFunctionDescriptorProvider;
@@ -220,6 +221,7 @@ public class FunctionFittingWidget extends Composite implements IFunctionViewer 
 				new CommandContributionItemParameter(site, null,
 						IWorkbenchCommandConstants.EDIT_DELETE,
 						CommandContributionItem.STYLE_PUSH)));
+		menuManager.add(new RemoveFunctionAction(funcTree));
 		menuManager.add(new UpdateFittedParamAction(funcTree));
 		menuManager.add(new DuplicateFunctionAction(funcTree));
 		menuManager.add(new ToggleFixedAction(funcTree));

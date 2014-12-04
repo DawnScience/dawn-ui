@@ -18,6 +18,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISourceProvider;
 
 import com.isencia.passerelle.workbench.model.editor.ui.editor.actions.StopAction;
@@ -57,13 +58,19 @@ class AlgorithmProcessContext implements IAlgorithmProcessContext {
 				modelRunner = null;
 				
 			} finally {
-				ActionContributionItem run = (ActionContributionItem)view.getViewSite().getActionBars().getToolBarManager().find(IAlgorithmProcessContext.RUN_ID_STUB+getTitle());
-				run.getAction().setEnabled(true);
-				ActionContributionItem stop = (ActionContributionItem)view.getViewSite().getActionBars().getToolBarManager().find(IAlgorithmProcessContext.STOP_ID_STUB+getTitle());
-				stop.getAction().setEnabled(false);
-				
-				// RemoteWorkbenchImpl sets the status to the actor running.
-				view.getViewSite().getActionBars().getStatusLineManager().setMessage("");
+				Display.getDefault().syncExec(new Runnable() {
+					
+					@Override
+					public void run() {
+						ActionContributionItem run = (ActionContributionItem)view.getViewSite().getActionBars().getToolBarManager().find(IAlgorithmProcessContext.RUN_ID_STUB+getTitle());
+						run.getAction().setEnabled(true);
+						ActionContributionItem stop = (ActionContributionItem)view.getViewSite().getActionBars().getToolBarManager().find(IAlgorithmProcessContext.STOP_ID_STUB+getTitle());
+						stop.getAction().setEnabled(false);
+						
+						// RemoteWorkbenchImpl sets the status to the actor running.
+						view.getViewSite().getActionBars().getStatusLineManager().setMessage("");
+					}
+				});
 			}
 			
 		} else {
