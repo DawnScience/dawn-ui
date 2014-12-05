@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
-import org.dawnsci.processing.ui.model.psheet.OperationPropertySource;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
@@ -26,7 +25,6 @@ import org.eclipse.dawnsci.analysis.api.processing.model.ModelField;
 import org.eclipse.dawnsci.analysis.api.processing.model.ModelUtils;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.views.properties.IPropertySource;
 import org.osgi.framework.Bundle;
 
 public class OperationDescriptor implements ISeriesItemDescriptor {
@@ -93,15 +91,10 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 			return e.getMessage();
 		}
 	}
-
-	private OperationPropertySource modelSource;
 	
 	@Override
 	public Object getAdapter(Class clazz) {
-		if (clazz == IPropertySource.class) {
-			if (modelSource==null) modelSource = new OperationPropertySource(getModel());
-			return modelSource;
-		} if (clazz == ModelField.class) {
+		if (clazz == ModelField.class) {
 			try {
 				return ModelUtils.getModelFields(getModel());
 			} catch (Exception e) {
