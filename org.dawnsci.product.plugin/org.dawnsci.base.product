@@ -25,6 +25,8 @@ openFile
 -Xmx1024m
 -XX:PermSize=128m
 -XX:MaxPermSize=256m
+-Dorg.eclipse.swt.internal.gtk.cairoGraphics=false
+-Dorg.eclipse.swt.internal.gtk.useCairo=false
 -Dosgi.requiredJavaVersion=1.7.0
 -Dcom.isencia.require.file.source=true
 -Dorg.dawb.editor.h5.use.default=true
