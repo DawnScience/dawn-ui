@@ -422,7 +422,7 @@ public class DataFileSliceView extends ViewPart {
 			}
 		};
 		
-		final IAction export = new OperationExportAction() {
+		final IAction export = new OperationExportAction("Export to Workflow", Activator.getImageDescriptor("icons/flow.png")) {
 			public IOperationContext createContext() {
 				
 				IOperationContext ocontext  = oservice.createContext();

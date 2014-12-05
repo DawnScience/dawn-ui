@@ -1,7 +1,6 @@
 package org.dawnsci.processing.ui.slice;
 
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawnsci.processing.ui.Activator;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
@@ -15,6 +14,7 @@ import org.eclipse.emf.common.ui.dialogs.WorkspaceResourceDialog;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 
@@ -23,7 +23,7 @@ import org.eclipse.swt.widgets.Display;
  * @author fcp94556
  *
  */
-public abstract class OperationExportAction extends Action{
+public class OperationExportAction extends Action{
 	
 	private static IOperationExporterService eservice;
 	public static void setOperationExporter(IOperationExporterService s) {
@@ -31,7 +31,11 @@ public abstract class OperationExportAction extends Action{
 	}
 
 	public OperationExportAction() {
-		super("Export to Workflow", Activator.getImageDescriptor("icons/flow.png"));
+		super();
+	}
+	
+	public OperationExportAction(String label, ImageDescriptor icon) {
+		super(label, icon);
 	}
 	
 	public void run() {
@@ -73,8 +77,11 @@ public abstract class OperationExportAction extends Action{
 	}
 	
 	/**
-	 * Implement to return a fully configured 
+	 * Override to return a fully configured.
+	 * This is not abstract because OSGI injects a service here which cannot happen to an abstract class.
 	 * @return
 	 */
-	public abstract IOperationContext createContext();
+	public IOperationContext createContext() {
+		return null;
+	}
 }
