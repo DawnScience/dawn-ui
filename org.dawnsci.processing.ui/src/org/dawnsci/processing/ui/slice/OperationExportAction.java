@@ -5,6 +5,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.processing.ExecutionType;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationContext;
@@ -44,13 +45,12 @@ public class OperationExportAction extends Action{
 		
 		// TODO Add filter to enforce .moml
 		IFile newFile = WorkspaceResourceDialog.openNewFile(Display.getDefault().getActiveShell(), "Export Pipeline to Workflows", 
-				                           "Please select a workflow file to export the operation pipeline to.", null, null);
+				                           "Please create a workflow file (*.moml) to export the operation pipeline to.", null, null);
 	
 	    if (newFile==null) return;
 	    
 	    if (!newFile.getName().toLowerCase().endsWith(".moml")) {
-	    	MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Must end with '.moml.", "Please make sure that the file exported has the extension '.moml'.");
-	        return;
+	    	newFile = newFile.getParent().getFile(new Path(newFile.getName()+".moml"));
 	    }
 	    
 	    if (newFile.exists()) {
