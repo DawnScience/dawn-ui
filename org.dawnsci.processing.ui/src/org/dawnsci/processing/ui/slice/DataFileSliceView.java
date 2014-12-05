@@ -50,6 +50,7 @@ import org.eclipse.dawnsci.analysis.api.slice.SliceInformation;
 import org.eclipse.dawnsci.analysis.api.slice.Slicer;
 import org.eclipse.dawnsci.analysis.api.slice.SourceInformation;
 import org.eclipse.dawnsci.analysis.dataset.impl.SliceND;
+import org.eclipse.dawnsci.hdf5.operation.HierarchicalFileExecutionVisitor;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -96,8 +97,6 @@ import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import uk.ac.diamond.scisoft.analysis.processing.visitors.HierarchicalFileExecutionVisitor;
 
 public class DataFileSliceView extends ViewPart {
 

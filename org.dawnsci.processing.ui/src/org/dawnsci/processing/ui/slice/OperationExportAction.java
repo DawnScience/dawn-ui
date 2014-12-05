@@ -10,6 +10,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.processing.ExecutionType;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationContext;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationExporter;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationExporterService;
 import org.eclipse.emf.common.ui.dialogs.WorkspaceResourceDialog;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -17,14 +18,17 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 
-import uk.ac.diamond.scisoft.analysis.processing.runner.OperationExporterFactory;
-
 /**
  * Class to use for exporting any pipeline to a moml file.
  * @author fcp94556
  *
  */
 public abstract class OperationExportAction extends Action{
+	
+	private static IOperationExporterService eservice;
+	public static void setOperationExporter(IOperationExporterService s) {
+		eservice = s;
+	}
 
 	public OperationExportAction() {
 		super("Export to Workflow", Activator.getImageDescriptor("icons/flow.png"));
@@ -51,7 +55,7 @@ public abstract class OperationExportAction extends Action{
 	    }
 	    
 	    try {
-		    final IOperationExporter exp = OperationExporterFactory.getExporter(ExecutionType.GRAPH);
+		    final IOperationExporter exp = eservice.getExporter(ExecutionType.GRAPH);
 		    exp.init(context);
 		    exp.export(newFile.getLocation().toOSString());
 			

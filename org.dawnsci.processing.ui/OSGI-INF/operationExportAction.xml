@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true" name="Operation Export Action">
+   <implementation class="org.dawnsci.processing.ui.slice.OperationExportAction"/>
+   <reference bind="setOperationExporter" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.processing.IOperationExporterService" name="IOperationExporterService" policy="static"/>
+</scr:component>

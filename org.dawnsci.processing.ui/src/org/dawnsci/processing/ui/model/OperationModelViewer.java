@@ -3,7 +3,7 @@ package org.dawnsci.processing.ui.model;
 import java.util.Collection;
 
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawnsci.processing.ui.processing.OperationDescriptor;
+import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
@@ -232,9 +232,9 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 		if (selection instanceof IStructuredSelection) {
 			Object ob = ((IStructuredSelection)selection).getFirstElement();
-			if (ob instanceof OperationDescriptor) {
+			if (ob instanceof ISeriesItemDescriptor) {
 				try {
-					setOperation(((OperationDescriptor)ob).getSeriesObject());
+					setOperation((IOperation)((ISeriesItemDescriptor)ob).getSeriesObject());
 				} catch (InstantiationException e) {
 					setOperation(null);
 				}
