@@ -429,6 +429,10 @@ public class DataFileSliceView extends ViewPart {
 				ocontext.setSeries(getOperations());
 
 				final String selectedPath  = (String)((IStructuredSelection)viewer.getSelection()).getFirstElement();
+				if (selectedPath == null) {
+			    	MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Please Choose File", "Please select a file to use with export.\n\nOne file only may be exported to workflows at a time.");
+                    return null;
+				}
 				ocontext.setFilePath(selectedPath);
 				
 				IConversionContext ccontext = fileManager.getContext();
