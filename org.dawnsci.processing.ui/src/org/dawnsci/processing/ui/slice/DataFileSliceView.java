@@ -16,6 +16,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.dawb.common.services.IFileIconService;
+import org.dawb.common.services.ServiceManager;
 import org.dawb.common.services.conversion.IConversionContext;
 import org.dawb.common.services.conversion.IConversionContext.ConversionScheme;
 import org.dawb.common.services.conversion.IConversionService;
@@ -83,6 +85,7 @@ import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -735,6 +738,15 @@ public class DataFileSliceView extends ViewPart {
 	
 	private class ViewLabelProvider extends ColumnLabelProvider {
 	
+		private IFileIconService service;
+		ViewLabelProvider() {
+		    try {
+				this.service = (IFileIconService)ServiceManager.getService(IFileIconService.class);
+			} catch (Exception e) {
+				// Ignored, we just have no icon then
+			}
+		}
+
 		@Override
 		public String getText(Object obj) {
 			
@@ -745,6 +757,20 @@ public class DataFileSliceView extends ViewPart {
 			
 			return "";
 		}
+		
+		@Override
+		public Image getImage(Object obj) {
+
+			try {
+				if (obj instanceof String) {
+					return service.getIconForFile((String)obj);
+				}
+			} catch (Exception ignored) {
+				// Not end of world if no icon!
+			}
+			return null;
+		}
+
 		
 		@Override
 		public String getToolTipText(Object obj) {
