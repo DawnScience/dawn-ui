@@ -22,6 +22,7 @@ import java.util.Set;
 import org.dawb.common.ui.image.CursorUtils;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.dawnsci.plotting.draw2d.swtxy.selection.SelectionRegionFactory;
+import org.eclipse.dawnsci.macro.api.DeleteEventObject;
 import org.eclipse.dawnsci.macro.api.MacroEventObject;
 import org.eclipse.dawnsci.macro.api.RenameEventObject;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
@@ -638,6 +639,9 @@ public class RegionArea extends PlotArea {
 				logger.error("Notifying of region removal", ne);
 				continue;
 			}
+		}
+		if (ServiceHolder.getMacroService()!=null) {	
+			ServiceHolder.getMacroService().publish(new DeleteEventObject(evt.getRegion(), evt.getRegion().getName()));
 		}
 	}
 	protected void fireRegionsRemoved(RegionEvent evt) {
