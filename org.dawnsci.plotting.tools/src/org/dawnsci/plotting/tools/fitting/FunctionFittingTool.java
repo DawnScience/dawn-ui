@@ -102,6 +102,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 	private FunctionFittingWidget functionWidget;
 
 	private Button updateAllButton;
+	private Button findPeaksButton;
 
 	private IPreferenceStore prefs = Activator.getPlottingPreferenceStore();
 
@@ -156,7 +157,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		});
 
 		fitOnceButton = new Button(actionComposite, SWT.PUSH);
-		fitOnceButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,
+		fitOnceButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
 				false, 1, 1));
 		fitOnceButton.setText("Fit Once");
 		fitOnceButton.setEnabled(true);
@@ -164,6 +165,18 @@ public class FunctionFittingTool extends AbstractToolPage implements
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				updateFunctionPlot(true);
+			}
+		});
+		
+		findPeaksButton = new Button(actionComposite, SWT.PUSH);
+		findPeaksButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
+				false, 1, 1));
+		findPeaksButton.setText("Find Peaks...");
+		findPeaksButton.setEnabled(true);
+		findPeaksButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				System.out.println("Time to find some peaks!");
 			}
 		});
 
