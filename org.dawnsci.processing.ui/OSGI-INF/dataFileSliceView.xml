@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true" name="DataFileSliceView">
+   <implementation class="org.dawnsci.processing.ui.slice.DataFileSliceView"/>
+   <reference bind="setConversionService" cardinality="1..1" interface="org.dawb.common.services.conversion.IConversionService" name="IConversionService" policy="static"/>
+   <reference bind="setOperationService" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.processing.IOperationService" name="IOperationService" pdynamic="static"/>
+   <reference bind="setLoaderService" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.io.ILoaderService" name="ILoaderService" policy="static"/>
+</scr:component>

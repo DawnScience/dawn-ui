@@ -22,6 +22,9 @@ import java.util.Set;
 import org.dawb.common.ui.image.CursorUtils;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.dawnsci.plotting.draw2d.swtxy.selection.SelectionRegionFactory;
+import org.eclipse.dawnsci.macro.api.DeleteEventObject;
+import org.eclipse.dawnsci.macro.api.MacroEventObject;
+import org.eclipse.dawnsci.macro.api.RenameEventObject;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
@@ -30,9 +33,9 @@ import org.eclipse.dawnsci.plotting.api.axis.IPositionListener;
 import org.eclipse.dawnsci.plotting.api.axis.PositionEvent;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
-import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
@@ -62,12 +65,13 @@ import org.slf4j.LoggerFactory;
 
 public class RegionArea extends PlotArea {
 
+	
 	private static final Logger logger = LoggerFactory.getLogger(RegionArea.class);
 	
 	protected ISelectionProvider                      selectionProvider;
-	private final Map<String,AbstractSelectionRegion<?>> regions;
-	private final Map<String,ImageTrace>              imageTraces;
-	private       Map<String,VectorTrace>             vectorTraces;
+	private Map<String,AbstractSelectionRegion<?>>    regions;
+	private Map<String,ImageTrace>                    imageTraces;
+	private Map<String,VectorTrace>                   vectorTraces;
 	
 	private Collection<IRegionListener>     regionListeners;
 	private Collection<ITraceListener>      imageTraceListeners;
@@ -596,6 +600,21 @@ public class RegionArea extends PlotArea {
 		}
 	}
 
+	protected void fireRegionAdded(RegionEvent evt) {
+		if (regionListeners==null) return;
+		for (IRegionListener l : regionListeners) {
+			try {
+				l.regionAdded(evt);
+			} catch (Throwable ne) {
+				logger.error("Notifying of region add", ne);
+				continue;
+			}
+		}
+		if (ServiceHolder.getMacroService()!=null) {
+			ServiceHolder.getMacroService().publish(new MacroEventObject(evt.getRegion()));
+		}
+	}
+
 	protected void fireRegionNameChanged(RegionEvent evt, String oldName) {
 		if (regionListeners==null) return;
 		for (IRegionListener l : regionListeners) {
@@ -606,17 +625,8 @@ public class RegionArea extends PlotArea {
 				continue;
 			}
 		}
-	}
-
-	protected void fireRegionAdded(RegionEvent evt) {
-		if (regionListeners==null) return;
-		for (IRegionListener l : regionListeners) {
-			try {
-				l.regionAdded(evt);
-			} catch (Throwable ne) {
-				logger.error("Notifying of region add", ne);
-				continue;
-			}
+		if (ServiceHolder.getMacroService()!=null) {	
+			ServiceHolder.getMacroService().publish(new RenameEventObject(evt.getRegion(), evt.getRegion().getName(), oldName));
 		}
 	}
 	
@@ -629,6 +639,9 @@ public class RegionArea extends PlotArea {
 				logger.error("Notifying of region removal", ne);
 				continue;
 			}
+		}
+		if (ServiceHolder.getMacroService()!=null) {	
+			ServiceHolder.getMacroService().publish(new DeleteEventObject(evt.getRegion(), evt.getRegion().getName()));
 		}
 	}
 	protected void fireRegionsRemoved(RegionEvent evt) {

@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IDataBasedFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunctionService;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
@@ -364,6 +365,12 @@ public class FunctionFittingTool extends AbstractToolPage implements
 					}
 
 					if (compFunction != null) {
+						for ( IFunction function : compFunction.getFunctions()) {
+							if (function instanceof IDataBasedFunction) {
+								IDataBasedFunction dataBasedFunction = (IDataBasedFunction) function;
+								dataBasedFunction.setData(x, y);
+							}
+						}
 						DoubleDataset functionData = compFunction
 								.calculateValues(x);
 						estimate.setData(x, functionData);
@@ -439,6 +446,10 @@ public class FunctionFittingTool extends AbstractToolPage implements
 					resultFunction = new CompositeFunction();
 					for (IFunction function : functionCopies) {
 						resultFunction.addFunction(function);
+						if (function instanceof IDataBasedFunction) {
+							IDataBasedFunction dataBasedFunction = (IDataBasedFunction) function;
+							dataBasedFunction.setData(x, y);
+						}
 					}
 					Fitter.ApacheNelderMeadFit(new Dataset[] { x }, y,
 							resultFunction, 1000);
@@ -703,10 +714,15 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 		int count = 0;
 		for (String key : functions.keySet()) {
-			functions.put(key, compFunction.getFunction(count));
-			count++;
+			if (count < compFunction.getNoOfFunctions()) {
+				functions.put(key, compFunction.getFunction(count));
+				count++;
+			}
 		}
 
+		// Also add the composite function
+		functions.put("Comp", compFunction);
+		
 		bean.setFunctions(functions); // We only set functions because it does a
 										// replace merge.
 

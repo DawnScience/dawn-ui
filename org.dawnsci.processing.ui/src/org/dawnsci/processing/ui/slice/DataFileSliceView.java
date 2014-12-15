@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.dawb.common.services.IFileIconService;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.services.conversion.IConversionContext;
 import org.dawb.common.services.conversion.IConversionContext.ConversionScheme;
@@ -34,25 +35,30 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
+import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.api.processing.IExecutionVisitor;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationContext;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
-import org.eclipse.dawnsci.analysis.api.slice.ShapeInformation;
-import org.eclipse.dawnsci.analysis.api.slice.SliceFromSeriesMetadata;
-import org.eclipse.dawnsci.analysis.api.slice.SliceInformation;
-import org.eclipse.dawnsci.analysis.api.slice.Slicer;
-import org.eclipse.dawnsci.analysis.api.slice.SourceInformation;
-import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.SliceND;
+import org.eclipse.dawnsci.analysis.dataset.slicer.ShapeInformation;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
+import org.eclipse.dawnsci.analysis.dataset.slicer.Slicer;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
+import org.eclipse.dawnsci.hdf5.operation.HierarchicalFileExecutionVisitor;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -63,6 +69,7 @@ import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
@@ -78,6 +85,7 @@ import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -93,24 +101,33 @@ import org.eclipse.ui.part.ViewPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-import uk.ac.diamond.scisoft.analysis.metadata.OriginMetadataImpl;
-import uk.ac.diamond.scisoft.analysis.processing.visitors.HierarchicalFileExecutionVisitor;
-
 public class DataFileSliceView extends ViewPart {
 
-	FileManager fileManager;
-	TableViewer viewer;
-	IConversionService service;
-	UpdateJob job;
-	Label currentSliceLabel;
-	ChangeSliceWidget csw;
-	String selectedFile = null;
-	IOperation<? extends IOperationModel, ? extends OperationData> currentOperation = null;
-	IPlottingSystem input;
-	IPlottingSystem output;
-	IOperationErrorInformer informer;
-	IOperationInputData inputData = null;
+	private static IConversionService cservice;
+	public static void setConversionService(IConversionService s) {
+		cservice = s;
+	}
+	private static IOperationService  oservice;
+	public static void setOperationService(IOperationService s) {
+		oservice = s;
+	}
+	private static ILoaderService lservice;
+	public static void setLoaderService(ILoaderService s) {
+		lservice = s;
+	}
+
+	
+	private FileManager fileManager;
+	private TableViewer viewer;
+	private UpdateJob job;
+	private Label currentSliceLabel;
+	private ChangeSliceWidget csw;
+	private String selectedFile = null;
+	private IOperation<? extends IOperationModel, ? extends OperationData> currentOperation = null;
+	private IPlottingSystem input;
+	private IPlottingSystem output;
+	private IOperationErrorInformer informer;
+	private IOperationInputData inputData = null;
 	
 	String lastPath = null;
 	
@@ -119,11 +136,6 @@ public class DataFileSliceView extends ViewPart {
 	@Override
 	public void createPartControl(Composite parent) {
 		
-		try {
-			service = (IConversionService)ServiceManager.getService(IConversionService.class);
-		} catch (Exception e1) {
-			logger.error("Conversion service not found, nothing is going to work");
-		}
 		fileManager = new FileManager(new SetupContextHelper());
 		
 		parent.setLayout(new GridLayout());
@@ -336,7 +348,7 @@ public class DataFileSliceView extends ViewPart {
 							monitor.beginTask("Processing", getAmountOfWork(fileManager.getContext()));
 							fileManager.getContext().setMonitor(new ProgressMonitorWrapper(monitor));
 							try {
-								service.process(fileManager.getContext());
+								cservice.process(fileManager.getContext());
 							} catch (final Exception e) {
 								Display.getDefault().asyncExec(new Runnable() {
 									public void run() {
@@ -413,6 +425,32 @@ public class DataFileSliceView extends ViewPart {
 			}
 		};
 		
+		final IAction export = new OperationExportAction("Export to Workflow", Activator.getImageDescriptor("icons/flow.png")) {
+			public IOperationContext createContext() {
+				
+				IOperationContext ocontext  = oservice.createContext();
+				ocontext.setSeries(getOperations());
+
+				final String selectedPath  = (String)((IStructuredSelection)viewer.getSelection()).getFirstElement();
+				if (selectedPath == null) {
+			    	MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Please Choose File", "Please select a file to use with export.\n\nOne file only may be exported to workflows at a time.");
+                    return null;
+				}
+				ocontext.setFilePath(selectedPath);
+				
+				IConversionContext ccontext = fileManager.getContext();
+				if (ccontext == null) {
+			    	MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Please Choose File", "Please ensure that a slice and file have been chosen.");
+                    return null;
+				}
+				ocontext.setSlicing(ccontext.getSliceDimensions());
+				ocontext.setDatasetPath(ccontext.getDatasetNames().get(0));
+				
+                return ocontext;
+			}
+		};
+
+		
 		getViewSite().getActionBars().getToolBarManager().add(clear);
 		getViewSite().getActionBars().getMenuManager().add(clear);
 		rightClick.add(clear);
@@ -424,6 +462,15 @@ public class DataFileSliceView extends ViewPart {
 		getViewSite().getActionBars().getToolBarManager().add(edit);
 		getViewSite().getActionBars().getMenuManager().add(edit);
 		rightClick.add(edit);
+		
+		getViewSite().getActionBars().getToolBarManager().add(new Separator());
+		getViewSite().getActionBars().getMenuManager().add(new Separator());
+		rightClick.add(new Separator());
+
+		getViewSite().getActionBars().getToolBarManager().add(export);
+		getViewSite().getActionBars().getMenuManager().add(export);
+		rightClick.add(export);
+
 	}
 	
 	
@@ -445,7 +492,7 @@ public class DataFileSliceView extends ViewPart {
 	
 	private void updateSliceWidget(String path) {
 		try {
-			IDataHolder dh = LoaderFactory.getData(path);
+			IDataHolder dh = lservice.getData(path, new IMonitor.Stub());
 			ILazyDataset lazy = dh.getLazyDataset(fileManager.getContext().getDatasetNames().get(0));
 			int[] shape = lazy.getShape();
 			
@@ -485,7 +532,7 @@ public class DataFileSliceView extends ViewPart {
 		
 		for (String path : context.getFilePaths()) {
 			try {
-				IMetadata metadata = LoaderFactory.getMetadata(path, null);
+				IMetadata metadata = lservice.getMetadata(path, null);
 				int[] s = metadata.getDataShapes().get(name);
 				
 				Slice[] slices = Slicer.getSliceArrayFromSliceDimensions(sliceDimensions, s);
@@ -550,7 +597,7 @@ public class DataFileSliceView extends ViewPart {
 				
 				if (path == null) path = context.getFilePaths().get(0);
 				
-				final IDataHolder   dh = LoaderFactory.getData(path);
+				final IDataHolder   dh = lservice.getData(path, new IMonitor.Stub());
 				ILazyDataset lazyDataset = dh.getLazyDataset(context.getDatasetNames().get(0));
 				
 				if (lazyDataset == null) {
@@ -691,6 +738,15 @@ public class DataFileSliceView extends ViewPart {
 	
 	private class ViewLabelProvider extends ColumnLabelProvider {
 	
+		private IFileIconService service;
+		ViewLabelProvider() {
+		    try {
+				this.service = (IFileIconService)ServiceManager.getService(IFileIconService.class);
+			} catch (Exception e) {
+				// Ignored, we just have no icon then
+			}
+		}
+
 		@Override
 		public String getText(Object obj) {
 			
@@ -701,6 +757,20 @@ public class DataFileSliceView extends ViewPart {
 			
 			return "";
 		}
+		
+		@Override
+		public Image getImage(Object obj) {
+
+			try {
+				if (obj instanceof String) {
+					return service.getIconForFile((String)obj);
+				}
+			} catch (Exception ignored) {
+				// Not end of world if no icon!
+			}
+			return null;
+		}
+
 		
 		@Override
 		public String getToolTipText(Object obj) {
@@ -714,7 +784,7 @@ public class DataFileSliceView extends ViewPart {
 		@Override
 		public IConversionContext init(String path) {
 			
-			IConversionContext context = service.open(path);
+			IConversionContext context = cservice.open(path);
 			
 			return setupwizard(context);
 		}

@@ -7,17 +7,22 @@ import java.util.Map;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.api.metadata.MaskMetadata;
+import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
+import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.swt.widgets.Display;
 
-import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-import uk.ac.diamond.scisoft.analysis.metadata.AxesMetadataImpl;
-
 public class SlicedDataUtils {
+
+	private static ILoaderService lservice;
+	public static void setLoaderService(ILoaderService s) {
+		lservice = s;
+	}
 
 	public static AxesMetadata createAxisMetadata(String path, ILazyDataset ds, Map<Integer, String> axesNames) throws Exception {
 		
@@ -26,7 +31,7 @@ public class SlicedDataUtils {
 		AxesMetadataImpl axMeta = new AxesMetadataImpl(rank);
 		for (Integer key : axesNames.keySet()) {
 			String axesName = axesNames.get(key);
-			IDataHolder dataHolder = LoaderFactory.getData(path);
+			IDataHolder dataHolder = lservice.getData(path, new IMonitor.Stub());
 			ILazyDataset lazyAx = dataHolder.getLazyDataset(axesName);
 			if (ds == lazyAx) throw new IllegalArgumentException("Axes metadata should not contain original dataset!");
 			if (lazyAx != null && lazyAx.getRank() != rank) {

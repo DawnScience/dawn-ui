@@ -14,14 +14,6 @@
       </view>
       <view
             category="org.dawb.workbench.ui.beta.views.category"
-            class="org.dawnsci.processing.ui.model.psheet.OperationModelPropertySheetView"
-            icon="icons/image--pencil.png"
-            id="org.dawnsci.processing.ui.propertySheet"
-            name="Property Sheet Model"
-            restorable="true">
-      </view>
-      <view
-            category="org.dawb.workbench.ui.beta.views.category"
             class="org.dawnsci.processing.ui.model.OperationModelView"
             icon="icons/image--pencil.png"
             id="org.dawnsci.processing.ui.modelView"
@@ -36,14 +28,14 @@
             restorable="true">
       </view>
       <view
-            class="uk.ac.diamond.scisoft.analysis.rcp.views.PlotView"
+            class="org.dawnsci.processing.ui.view.VanillaPlottingSystemView"
             icon="icons/input.png"
             id="org.dawnsci.processing.ui.input"
             name="Input"
             restorable="true">
       </view>
       <view
-            class="uk.ac.diamond.scisoft.analysis.rcp.views.PlotView"
+            class="org.dawnsci.processing.ui.view.VanillaPlottingSystemView"
             icon="icons/output.png"
             id="org.dawnsci.processing.ui.output"
             name="Output"

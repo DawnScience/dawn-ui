@@ -12,10 +12,10 @@ import org.eclipse.dawnsci.analysis.api.processing.IExportOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
-import org.eclipse.dawnsci.analysis.api.slice.SliceFromSeriesMetadata;
-import org.eclipse.dawnsci.analysis.api.slice.SliceInformation;
-import org.eclipse.dawnsci.analysis.api.slice.SliceVisitor;
-import org.eclipse.dawnsci.analysis.api.slice.SourceInformation;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SliceVisitor;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.slicing.api.system.SliceSource;
 import org.slf4j.Logger;
@@ -56,7 +56,8 @@ public class EscapableSliceVisitor implements SliceVisitor {
 	public void visit(IDataset slice, Slice[] slices, int[] shape) throws Exception {
 
 		OperationData  data = new OperationData(slice);
-
+		SliceFromSeriesMetadata ssm = slice.getMetadata(SliceFromSeriesMetadata.class).get(0);
+		
 		for (IOperation<? extends IOperationModel, ? extends OperationData> i : series) {
 
 			if (i instanceof IExportOperation) {
@@ -68,6 +69,7 @@ public class EscapableSliceVisitor implements SliceVisitor {
 				if (i == endOperation) inputData = new OperationInputDataImpl(data.getData(),i); 
 				
 				OperationData tmp = i.execute(data.getData(), null);
+				tmp.getData().setMetadata(ssm);
 				visitor.notify(i, tmp); // Optionally send intermediate result
 				data = i.isPassUnmodifiedData() ? data : tmp;
 			}

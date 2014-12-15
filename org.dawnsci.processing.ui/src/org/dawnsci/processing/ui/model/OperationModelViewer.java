@@ -3,7 +3,7 @@ package org.dawnsci.processing.ui.model;
 import java.util.Collection;
 
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawnsci.processing.ui.processing.OperationDescriptor;
+import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
@@ -67,6 +67,7 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 
 	
 	private TableViewer           viewer;
+	private IOperationModel       model;
 	
 	public OperationModelViewer() {
 		this(true);
@@ -232,9 +233,9 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 		if (selection instanceof IStructuredSelection) {
 			Object ob = ((IStructuredSelection)selection).getFirstElement();
-			if (ob instanceof OperationDescriptor) {
+			if (ob instanceof ISeriesItemDescriptor) {
 				try {
-					setOperation(((OperationDescriptor)ob).getSeriesObject());
+					setOperation((IOperation)((ISeriesItemDescriptor)ob).getSeriesObject());
 				} catch (InstantiationException e) {
 					setOperation(null);
 				}
@@ -247,9 +248,19 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 	 * @param des
 	 */
 	public void setOperation(IOperation<? extends IOperationModel, ? extends OperationData> des) {
+		this.model = des.getModel();
 		viewer.setInput(des);
 	}
 
+	public void setModel(IOperationModel model) {
+		this.model = model;
+		viewer.setInput(model);
+	}
+	
+	public IOperationModel getModel() {
+		return model;
+	}
+	
 	private IContentProvider createContentProvider() {
 		return new IStructuredContentProvider() {
 			@Override
@@ -263,9 +274,16 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 
 			@Override
 			public Object[] getElements(Object inputElement) {
-				IOperation<IOperationModel, OperationData> op = (IOperation<IOperationModel, OperationData>)inputElement;
+				
+				IOperationModel model = null;
+				if (inputElement instanceof IOperation) {
+					IOperation<IOperationModel, OperationData> op = (IOperation<IOperationModel, OperationData>)inputElement;
+					model = op.getModel();
+				} else if (inputElement instanceof IOperationModel) {
+					model = (IOperationModel)inputElement;
+				}
 				try {
-					final Collection<ModelField>  col = ModelUtils.getModelFields(op.getModel());
+					final Collection<ModelField>  col = ModelUtils.getModelFields(model);
 					return col.toArray(new ModelField[col.size()]);
 				} catch (Exception ne) {
 					return new ModelField[]{};
@@ -299,8 +317,9 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 		@Override
 		protected void setValue(Object element, Object value) {
 			try {
-				((ModelField)element).set(value);
-				viewer.refresh(element);
+				ModelField field = (ModelField)element;
+				field.set(value); // Changes model value, getModel() will now return a model with the value changed.
+				viewer.refresh(field);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -314,6 +333,7 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 		if (event.getSelection() instanceof IStructuredSelection) {
 			IStructuredSelection ss = (IStructuredSelection)event.getSelection();
 			final ModelField     mf = (ModelField)ss.getFirstElement();
+			// TODO 
 		}
 	}
 

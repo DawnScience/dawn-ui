@@ -13,7 +13,10 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
+import org.dawnsci.plotting.draw2d.swtxy.ServiceHolder;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.macro.api.IMacroService;
+import org.eclipse.dawnsci.macro.api.MacroEventObject;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegionContainer;
@@ -102,6 +105,7 @@ public abstract class AbstractRegion<T extends IROI> extends Figure implements I
 				logger.error("Unexpected exception in drawning!", ne);
 			}
 		}
+		if (ServiceHolder.getMacroService()!=null) ServiceHolder.getMacroService().publish(new MacroEventObject(this));
 	}
 
 	protected void fireROISelected(T roi) {

@@ -18,8 +18,10 @@ import org.dawb.common.ui.wizard.AbstractSliceConversionPage;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
-import org.eclipse.dawnsci.analysis.api.slice.Slicer;
+import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
+import org.eclipse.dawnsci.analysis.dataset.slicer.Slicer;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
@@ -39,9 +41,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbench;
 
-import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-
 public class ImageProcessConvertPage extends AbstractSliceConversionPage  {
+
+	private static ILoaderService lservice;
+	public static void setLoaderService(ILoaderService s) {
+		lservice = s;
+	}
+
 
 	IWorkbench workbench;
 	IPlottingSystem system;
@@ -152,7 +158,7 @@ public class ImageProcessConvertPage extends AbstractSliceConversionPage  {
 		String path = context.getFilePaths().get(0);
 		IDataHolder dh;
 		try {
-			dh = LoaderFactory.getData(path);
+			dh = lservice.getData(path, new IMonitor.Stub());
 			ILazyDataset lazyDataset = dh.getLazyDataset(datasetName);
 			
 			final DimsDataList dims = sliceComponent.getDimsDataList();

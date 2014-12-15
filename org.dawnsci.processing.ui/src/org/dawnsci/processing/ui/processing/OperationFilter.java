@@ -68,7 +68,7 @@ final class OperationFilter implements ISeriesItemFilter {
 						if (contents!=null && !des.matches(contents)) continue;
 					} catch (NullPointerException ne) {
 						// Occurs when id in class does not match id in extension point
-						logger.error("The operation '"+op.getClass().getSimpleName()+"' has a different id to extenions point definition. The code and the extension point must be the same!");
+						logger.error("The operation '"+op.getClass().getSimpleName()+"' has a different id to extension point definition. The code and the extension point must be the same!");
 					}
 					if (!des.isCompatibleWith(previous)) continue;
 					ret.add(des);
