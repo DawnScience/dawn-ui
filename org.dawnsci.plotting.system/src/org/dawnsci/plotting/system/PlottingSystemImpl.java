@@ -33,6 +33,8 @@ import org.eclipse.dawnsci.analysis.api.dataset.IErrorDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
+import org.eclipse.dawnsci.macro.api.IMacroService;
+import org.eclipse.dawnsci.macro.api.MacroEventObject;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
 import org.eclipse.dawnsci.plotting.api.IPrintablePlotting;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -98,6 +100,11 @@ import org.slf4j.LoggerFactory;
 public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	private Logger logger = LoggerFactory.getLogger(PlottingSystemImpl.class);
+	
+	private static IMacroService mservice;
+	public void setMacroService(IMacroService s) {
+		mservice = s;
+	}
 
 	private Composite      parent;
 	private StackLayout    stackLayout;
@@ -387,15 +394,13 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 		if (getDisplay().getThread() == Thread.currentThread()) {
 			List<ITrace> ts = createPlot1DInternal(x, ysIn, dataNames, title, monitor);
-			if (ts != null)
-				traces.addAll(ts);
+			if (ts != null) traces.addAll(ts);
 		} else {
 			getDisplay().syncExec(new Runnable() {
 				@Override
 				public void run() {
 					List<ITrace> ts = createPlot1DInternal(x, ysIn, dataNames, title, monitor);
-					if (ts != null)
-						traces.addAll(ts);
+					if (ts != null) traces.addAll(ts);
 				}
 			});
 		}
@@ -639,7 +644,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 */
 	private Map<String, ITrace> traceMap; // Warning can be mem leak
 
-	private List<ITrace> createPlot1DInternal(final IDataset       xIn, 
+	private List<ITrace> createPlot1DInternal(final IDataset              xIn, 
 										      final List<? extends IDataset> ysIn,
 										      final List<String>   dataNames,
 										      final String                title,
@@ -725,7 +730,10 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			((ILineTrace)iTrace).setErrorBarEnabled(errorBarEnabled);
 		}
 
-		  	
+		if (mservice!=null) {
+			mservice.publish(new MacroEventObject(ysIn));
+			mservice.publish(new MacroEventObject(xIn));
+		}
 		fireTracesPlotted(new TraceEvent(traces));
         return traces;
 	}
