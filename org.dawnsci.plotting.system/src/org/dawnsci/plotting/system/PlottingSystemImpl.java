@@ -606,6 +606,12 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 				addTrace(trace);
 				if (data.getName()!=null) viewer.setTitle(data.getName());
 			}
+			
+			if (mservice!=null) {
+				mservice.publish(new MacroEventObject(data));
+				if (axes!=null && !axes.isEmpty()) mservice.publish(new MacroEventObject(axes));
+			}
+
 			return trace;
 			
 		} catch (Throwable e) {
