@@ -30,6 +30,8 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IDataBasedFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunctionService;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IOperator;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IParameter;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
@@ -777,9 +779,49 @@ public class FunctionFittingTool extends AbstractToolPage implements
 						continue;
 					}
 					List<CompositeFunction> initialPeaks = FittingUtils.getInitialPeaks(x, y, null);
+					for (IOperator bkgPeak : initialPeaks) {
+						for (IFunction function : bkgPeak.getFunctions()) {
+							if (function.getName() == "PseudoVoight") { //this string needs to be got from somewhere else (i.e. UI)
+								IParameter[] peakParameters = function.getParameters();
+							}
+						}
+					}
+					//Problem is this is a list of composite functions.
+//					
+//					
+//					estimate = (ILineTrace) getPlottingSystem().getTrace(
+//							"Estimate");
+//					if (estimate == null) {
+//						estimate = getPlottingSystem().createLineTrace(
+//								"Estimate");
+//						estimate.setUserTrace(false);
+//						estimate.setTraceType(ILineTrace.TraceType.DASH_LINE);
+//						getPlottingSystem().addTrace(estimate);
+//					}
+//
+//					if (compFunction != null) {
+//						for ( IFunction function : compFunction.getFunctions()) {
+//							if (function instanceof IDataBasedFunction) {
+//								IDataBasedFunction dataBasedFunction = (IDataBasedFunction) function;
+//								dataBasedFunction.setData(x, y);
+//							}
+//						}
+//						DoubleDataset functionData = compFunction.calculateValues(x);
+//						estimate.setData(x, functionData);
+//					}
+//
+//					// System.out.println(x);
+//					// System.out.println(y);
+//
+//					getPlottingSystem().repaint();
+//
+//					boolean force = false;
+//					updateFittedPlot(force, x, y);
 				}
 			}
 		}
+		refreshViewer();
+		getPlottingSystem().addTraceListener(traceListener);
 	}
 
 }
