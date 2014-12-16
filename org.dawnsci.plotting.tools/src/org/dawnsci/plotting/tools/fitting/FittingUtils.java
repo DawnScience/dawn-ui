@@ -77,6 +77,35 @@ public class FittingUtils {
 	 * 
 	 * @return
 	 */
+	
+	public static List<CompositeFunction> getInitialPeaks(Dataset xDataSet, Dataset yDataSet, Integer nPeaks) {
+		
+		//Set variables for peak finding and fitting
+		List<CompositeFunction> initialPeaks;
+		Integer nrPeaks = nPeaks;
+		IOptimizer optimizer = getOptimizer();
+		Class<? extends APeak> peakFunction = getPeakClass();
+		int smoothing = getSmoothing();
+		
+		if (nrPeaks == null) {
+			//Don't know how many peaks we are looking for, so just see how many we can find
+			List<IdentifiedPeak> foundPeaks = Generic1DFitter.parseDataDerivative(xDataSet, yDataSet, smoothing);
+			nrPeaks = foundPeaks.size();
+			if (nrPeaks == null || nrPeaks == 0) {
+				//In case no peaks were found
+				logger.error("No peaks were found!");
+				return null;
+			}
+			//Fit the peaks we found
+			initialPeaks = Generic1DFitter.fitPeakFunctions(foundPeaks, xDataSet, yDataSet, peakFunction, optimizer, smoothing, nrPeaks, 0.0, false, false, null);
+		} else {
+			//Find the and fit a given number of peaks
+			initialPeaks = Generic1DFitter.fitPeakFunctions(xDataSet, yDataSet, peakFunction, nPeaks);
+		}
+		
+		return initialPeaks;
+	}
+	
 	public static FittedFunctions getFittedPeaks(final FittedPeaksInfo info) throws Exception {
 		
 		List<CompositeFunction> composites=null;
