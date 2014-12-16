@@ -11,6 +11,7 @@ package org.dawnsci.plotting.tools.fitting;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
@@ -176,7 +177,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		findPeaksButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				System.out.println("Time to find some peaks!");
+				findInitialPeaks();
 			}
 		});
 
@@ -740,6 +741,45 @@ public class FunctionFittingTool extends AbstractToolPage implements
 										// replace merge.
 
 		return bean;
+	}
+	
+	private void findInitialPeaks() {
+		System.out.println("Time to find some peaks!");
+		if (!functionWidget.isValid()) {
+			return;
+		}
+		getPlottingSystem().removeTraceListener(traceListener);
+		boolean firstTrace = true;
+		for (ITrace selectedTrace : getPlottingSystem().getTraces()) {
+			if (selectedTrace instanceof ILineTrace) {
+				ILineTrace trace = (ILineTrace) selectedTrace;
+				if (trace.isUserTrace() && firstTrace) {
+					firstTrace = false;
+					// We chop x and y by the region bounds. We assume the
+					// plot is an XAXIS selection therefore the indices in
+					// y = indices chosen in x.
+					RectangularROI roi = (RectangularROI) region.getROI();
+
+					final double[] p1 = roi.getPointRef();
+					final double[] p2 = roi.getEndPoint();
+
+					// We peak fit only the first of the data sets plotted
+					// for now.
+					Dataset x = (Dataset) trace.getXData();
+					Dataset y = (Dataset) trace.getYData();
+
+					try {
+						Dataset[] a = Generic1DFitter.xintersection(x, y,
+								p1[0], p2[0]);
+						x = a[0];
+						y = a[1];
+					} catch (Throwable npe) {
+						continue;
+					}
+					List<CompositeFunction> initialPeaks = FittingUtils.getInitialPeaks(x, y, null);
+				}
+			}
+		}
 	}
 
 }
