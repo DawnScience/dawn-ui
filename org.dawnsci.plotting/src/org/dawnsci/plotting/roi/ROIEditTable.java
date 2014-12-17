@@ -44,7 +44,6 @@ import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.EditingSupport;
-import org.eclipse.jface.viewers.ICellEditorListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TableViewer;
@@ -189,28 +188,17 @@ public class ROIEditTable  {
 			
 			if (element instanceof SymmetryRow) {
 				Collection<String> values = SectorROI.getSymmetriesPossible().values();
-
-				final CComboCellEditor ed = new CComboCellEditor(((TableViewer)getViewer()).getTable(), (String[]) values.toArray(new String[values.size()]));
-				ed.addListener(new ICellEditorListener() {
-					
-					@Override
-					public void editorValueChanged(boolean oldValidState, boolean newValidState) {
-						setValue(element, ed.getValue(), false);
-						
-					}
-					
-					@Override
-					public void cancelEditor() {
-						//
-						
-					}
-					
-					@Override
-					public void applyEditorValue() {
-						setValue(element, ed.getValue(), false);
-						
-					}
-				});
+				final String[] items =  (String[]) values.toArray(new String[values.size()]);
+				final CComboCellEditor ed = new CComboCellEditor(((TableViewer)getViewer()).getTable(), items) {
+		    	    protected void doSetValue(Object value) {
+		                Integer ordinal = SectorROI.getSymmetry((String)value);
+		                super.doSetValue(ordinal);
+		    	    }
+		    		protected Object doGetValue() {
+		    			Integer ordinal = (Integer)super.doGetValue();
+		    			return items[ordinal];
+		    		}
+				};
 				return ed;
 			}
 			final FloatSpinnerCellEditor ed = new FloatSpinnerCellEditor(((TableViewer)getViewer()).getTable(),SWT.RIGHT);
@@ -267,7 +255,7 @@ public class ROIEditTable  {
 					return ((RegionRow)row).getyLikeVal();
 				}
 			}
-			return ((SymmetryRow) row).getSymmetryNumber();
+			return ((SymmetryRow) row).getSymmetryName();
 		}
 
 		@Override
@@ -278,8 +266,8 @@ public class ROIEditTable  {
 		protected void setValue(Object element, Object value, boolean tableRefresh) {
 			
             final IRegionRow row = (IRegionRow)element;
-            final Number    val = (Number)value;
             if (row instanceof RegionRow) {
+                final Number    val = (Number)value;
             	if (column==1) {
             		((RegionRow)row).setxLikeVal(val.doubleValue());
             	} else {
@@ -288,7 +276,7 @@ public class ROIEditTable  {
             }
             else {
             	if (column==1) {
-            		((SymmetryRow)row).setSymmetryNumber(val.intValue());
+            		((SymmetryRow)row).setSymmetryName((String)value);
             	}
             }
             if (tableRefresh) {
@@ -344,7 +332,7 @@ public class ROIEditTable  {
 				return row.getName();
 			case 1:	
 				if (row instanceof SymmetryRow) {
-					return ((Integer)((SymmetryRow) row).getSymmetryNumber()).toString();
+					return ((SymmetryRow)row).getSymmetryName();
 				}
 				if (Double.isNaN(((RegionRow)row).getxLikeVal())) return "-";
 				return format.format(((RegionRow)row).getxLikeVal());
@@ -408,7 +396,7 @@ public class ROIEditTable  {
 			if (roi instanceof SectorROI) {
 				SectorROI sr = (SectorROI) rr;
 				ret.add(new RegionRow("Angles (°)",           "°", sr.getAngleDegrees(0), sr.getAngleDegrees(1)));			
-				ret.add(new SymmetryRow("Symmetry", sr.getSymmetry()));
+				ret.add(new SymmetryRow("Symmetry", sr.getSymmetryText()));
 			}
 		} else if (roi instanceof CircularROI) {
 			final CircularROI cr = (CircularROI) roi;
@@ -537,7 +525,7 @@ public class ROIEditTable  {
 			RingROI orig = (RingROI) roi;
 			final double[] cent  = getPoint(coords, (RegionRow)rows.get(0));
 			final double[] radii = ((RegionRow)rows.get(1)).getPoint();
-			final int symmetryNumber = ((SymmetryRow)rows.get(3)).getSymmetryNumber();
+			final String symmetryName = ((SymmetryRow)rows.get(3)).getSymmetryName();
 
 			if (orig instanceof SectorROI) {
 				SectorROI so = (SectorROI) orig;
@@ -550,7 +538,7 @@ public class ROIEditTable  {
 						 so.getDpp(),
 						 so.isClippingCompensation(),
 						 so.getSymmetry());
-				sr.setSymmetry(symmetryNumber);
+				sr.setSymmetry(SectorROI.getSymmetry(symmetryName));
 				sr.setCombineSymmetry(so.isCombineSymmetry());
 				ret = sr;
 			} else {
@@ -653,20 +641,19 @@ public class ROIEditTable  {
 	}
 	
 	private class SymmetryRow extends IRegionRow {
-		private int symmetryNumber;
+		private String symmetryName;
 
-		public int getSymmetryNumber() {
-			return symmetryNumber;
+		public String getSymmetryName() {
+			return symmetryName;
 		}
 
-		@SuppressWarnings("unused")
-		public void setSymmetryNumber(int symmetryNumber) {
-			this.symmetryNumber = symmetryNumber;
+		public void setSymmetryName(String symmetryName) {
+			this.symmetryName = symmetryName;
 		}
 		
-		public SymmetryRow(String name, int symmetryNumber) {
+		public SymmetryRow(String name, String symmetryName) {
 			this.name = name;
-			this.symmetryNumber = symmetryNumber;
+			this.symmetryName = symmetryName;
 		}
 	}
 
