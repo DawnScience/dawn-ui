@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
 import org.dawnsci.common.widgets.celleditor.FloatSpinnerCellEditor;
 import org.eclipse.dawnsci.analysis.api.roi.IPolylineROI;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
@@ -43,6 +44,7 @@ import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.ICellEditorListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TableViewer;
@@ -185,30 +187,56 @@ public class ROIEditTable  {
 		@Override
 		protected CellEditor getCellEditor(final Object element) {
 			
+			if (element instanceof SymmetryRow) {
+				Collection<String> values = SectorROI.getSymmetriesPossible().values();
+
+				final CComboCellEditor ed = new CComboCellEditor(((TableViewer)getViewer()).getTable(), (String[]) values.toArray(new String[values.size()]));
+				ed.addListener(new ICellEditorListener() {
+					
+					@Override
+					public void editorValueChanged(boolean oldValidState, boolean newValidState) {
+						setValue(element, ed.getValue(), false);
+						
+					}
+					
+					@Override
+					public void cancelEditor() {
+						//
+						
+					}
+					
+					@Override
+					public void applyEditorValue() {
+						setValue(element, ed.getValue(), false);
+						
+					}
+				});
+				return ed;
+			}
 			final FloatSpinnerCellEditor ed = new FloatSpinnerCellEditor(((TableViewer)getViewer()).getTable(),SWT.RIGHT);
 			ed.setFormat(7, 3);
 			ed.setIncrement(0.1d);
-			
+
 			if (element instanceof LinearROI || element instanceof PointROI || element instanceof IPolylineROI
-			   || element instanceof RectangularROI || element instanceof PerimeterBoxROI) {
+					|| element instanceof RectangularROI || element instanceof PerimeterBoxROI) {
 				if (column==1) {
-		            if (!Double.isNaN(xLowerBound)) ed.setMinimum(xLowerBound);
-		            if (!Double.isNaN(xUpperBound)) ed.setMaximum(xUpperBound);
+					if (!Double.isNaN(xLowerBound)) ed.setMinimum(xLowerBound);
+					if (!Double.isNaN(xUpperBound)) ed.setMaximum(xUpperBound);
 				} else {
-		            if (!Double.isNaN(yLowerBound)) ed.setMinimum(yLowerBound);
-		            if (!Double.isNaN(yUpperBound)) ed.setMaximum(yUpperBound);
+					if (!Double.isNaN(yLowerBound)) ed.setMinimum(yLowerBound);
+					if (!Double.isNaN(yUpperBound)) ed.setMaximum(yUpperBound);
 				}
 			} else {
 				ed.setMaximum(Double.MAX_VALUE);
 				ed.setMinimum(-Double.MAX_VALUE);
 			}
-			
-            ed.addSelectionListener(new SelectionAdapter() {
+
+			ed.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-				    setValue(element, ed.getValue(), false);
+					setValue(element, ed.getValue(), false);
 				}
-			});	
+			});
 			return ed;
 		}
 
@@ -226,7 +254,7 @@ public class ROIEditTable  {
 
 				return !Double.isNaN(val);
 			}
-			return false;
+			return true;
 		}
 
 		@Override
@@ -509,7 +537,7 @@ public class ROIEditTable  {
 			RingROI orig = (RingROI) roi;
 			final double[] cent  = getPoint(coords, (RegionRow)rows.get(0));
 			final double[] radii = ((RegionRow)rows.get(1)).getPoint();
-			final int symmetryNumber = ((SymmetryRow)rows.get(2)).getSymmetryNumber();
+			final int symmetryNumber = ((SymmetryRow)rows.get(3)).getSymmetryNumber();
 
 			if (orig instanceof SectorROI) {
 				SectorROI so = (SectorROI) orig;
