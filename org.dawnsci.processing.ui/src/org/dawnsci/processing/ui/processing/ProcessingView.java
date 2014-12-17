@@ -22,14 +22,20 @@ import org.dawnsci.common.widgets.table.SeriesTable;
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.preference.ProcessingConstants;
 import org.dawnsci.processing.ui.slice.IOperationErrorInformer;
+import org.dawnsci.processing.ui.slice.IOperationGUIRunnerListener;
+import org.dawnsci.processing.ui.slice.IOperationInputData;
+import org.dawnsci.processing.ui.slice.OperationEventManager;
 import org.dawnsci.processing.ui.slice.OperationInformerImpl;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
 import org.eclipse.dawnsci.analysis.api.persistence.IPersistentFile;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
+import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
@@ -51,6 +57,7 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ResourceTransfer;
@@ -73,7 +80,6 @@ public class ProcessingView extends ViewPart {
 	private OperationFilter           operationFiler;
 	private List<OperationDescriptor> saved;
 	private TableViewerColumn inputs, outputs;
-	private IOperationErrorInformer informer;
 	private IAction add;
 	private IAction delete;
 	private IAction clear;
@@ -108,7 +114,7 @@ public class ProcessingView extends ViewPart {
 		
 		
 		OperationValidator val = new OperationValidator();
-		informer = new OperationInformerImpl(seriesTable);
+		final OperationInformerImpl informer = new OperationInformerImpl(seriesTable);
 		val.setOperationErrorInformer(informer);
 		operationFiler.setOperationErrorInformer(informer);
 
@@ -160,6 +166,32 @@ public class ProcessingView extends ViewPart {
 				
 			}
 		});
+		
+		IViewPart view = getSite().getPage().findView("org.dawnsci.processing.ui.DataFileSliceView");
+		OperationEventManager man = (OperationEventManager)view.getAdapter(OperationEventManager.class);
+		man.addOperationRunnerListener(new IOperationGUIRunnerListener() {
+			
+			@Override
+			public void inputDataAvaliable(IOperationInputData data) {
+			}
+			
+			@Override
+			public void initialDataAvaliable(IDataset data) {
+				informer.setTestData(data);
+			}
+			
+			@Override
+			public void inErrorState(OperationException e) {
+				informer.setInErrorState(e);
+				
+			}
+
+			@Override
+			public void updateRequested() {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 
 	}
 	
@@ -198,9 +230,6 @@ public class ProcessingView extends ViewPart {
 			return getOperations();
 		}
 		
-		if (clazz == IOperationErrorInformer.class) {
-			return informer;
-		}
 		return super.getAdapter(clazz);
 	}
 	
