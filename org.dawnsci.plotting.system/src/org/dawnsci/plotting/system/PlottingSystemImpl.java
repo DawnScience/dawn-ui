@@ -180,6 +180,16 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			parent.setBackground(getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		}
 
+		// We make the viewerless plotting system before the viewer so that 
+		// any macro listener can import numpy.
+		try {
+			RMIServerProvider.getInstance().exportAndRegisterObject(IPlottingSystem.RMI_PREFIX+plotName, new RemotePlottingSystem(this));
+		} catch (Exception e) {
+			logger.error("Unable to register plotting system "+plotName, e);
+		}
+		
+		if (mservice!=null) mservice.publish(new MacroEventObject(this));
+
 		// We ignore hint, we create a light weight plot as default because
 		// it looks nice. We swap this for a 3D one if required.
 		IPlottingSystemViewer lightWeightViewer = createViewer(PlotType.XY);
@@ -189,14 +199,6 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			layout.topControl = lightWeightViewer.getControl();
 			container.layout();
 		}
-		
-		try {
-			RMIServerProvider.getInstance().exportAndRegisterObject(IPlottingSystem.RMI_PREFIX+plotName, new RemotePlottingSystem(this));
-		} catch (Exception e) {
-			logger.error("Unable to register plotting system "+plotName, e);
-		}
-		
-		if (mservice!=null) mservice.publish(new MacroEventObject(this));
 	}
 	
 	@Override

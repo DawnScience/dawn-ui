@@ -199,11 +199,6 @@ public class XYRegionGraph extends XYGraph {
 		if (ServiceHolder.getMacroService()!=null) ServiceHolder.getMacroService().publish(new MethodEventObject("ps", this, title));
 	}
 
-	public void setShowTitle(boolean showTitle){
-		super.setShowTitle(showTitle);
-		if (ServiceHolder.getMacroService()!=null) ServiceHolder.getMacroService().publish(new MethodEventObject("ps", this, showTitle));
-	}
-
 	/**
 	 * @return the showLegend
 	 */

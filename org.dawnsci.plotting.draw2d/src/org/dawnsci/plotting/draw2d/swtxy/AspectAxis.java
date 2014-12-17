@@ -16,6 +16,8 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
+import org.eclipse.dawnsci.macro.api.MacroEventObject;
+import org.eclipse.dawnsci.macro.api.MethodEventObject;
 import org.eclipse.dawnsci.plotting.api.axis.AxisEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.axis.IAxisListener;
@@ -52,6 +54,28 @@ public class AspectAxis extends Axis implements IAxis {
 	public AspectAxis(String title, boolean yAxis) {
 		super(title, yAxis);
 		keepAspect = getPreferenceStore().getBoolean(BasePlottingConstants.ASPECT);
+	}
+	
+	public void setTitle(final String title) {
+		final String oldName = getTitle();
+        super.setTitle(title);
+        
+        if (oldName!=null && oldName.equals(title)) return;
+        
+        // To deal with API and concept of selected axis
+        if (ServiceHolder.getMacroService()!=null) {
+        	String methodName = null;
+        	if (isPrimaryAxis()) {
+        		methodName = isYAxis() ? "getSelectedYAxis().setTitle"
+        				               : "getSelectedYAxis().setTitle";
+        		
+        	} else if (oldName!=null && !"".equals(oldName)) {
+        		methodName = "getAxis(\""+oldName+"\").setTitle";
+        	}
+        	if (methodName!=null) {
+        		ServiceHolder.getMacroService().publish(new MethodEventObject("ps",methodName,this,title));
+        	}
+        }
 	}
 	
 	private IPreferenceStore store;
