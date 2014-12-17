@@ -1,7 +1,7 @@
 package org.dawnsci.processing.ui.model;
 
 import org.dawb.common.ui.util.EclipseUtils;
-
+import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
 import org.dawnsci.processing.ui.slice.IOperationGUIRunnerListener;
 import org.dawnsci.processing.ui.slice.IOperationInputData;
@@ -36,7 +36,7 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 		IViewPart view = EclipseUtils.getPage(getSite()).findView("org.dawnsci.processing.ui.DataFileSliceView");
 		final OperationEventManager man = (OperationEventManager)view.getAdapter(OperationEventManager.class);
 		
-		configure = new Action("Configure") {
+		configure = new Action("Live setup", Activator.getImageDescriptor("icons/application-dialog.png")) {
 			public void run() {
 				IOperationModel model = modelEditor.getModel();
 				if (inputData == null) return;
