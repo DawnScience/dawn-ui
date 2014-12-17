@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.analysis.api.RMIServerProvider;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.IErrorDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
@@ -35,9 +36,11 @@ import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.macro.api.IMacroService;
 import org.eclipse.dawnsci.macro.api.MacroEventObject;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
 import org.eclipse.dawnsci.plotting.api.IPrintablePlotting;
 import org.eclipse.dawnsci.plotting.api.PlotType;
+import org.eclipse.dawnsci.plotting.api.RemotePlottingSystem;
 import org.eclipse.dawnsci.plotting.api.annotation.IAnnotation;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
@@ -150,6 +153,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		return Display.getDefault();
 	}
 
+	@Override
 	public void createPlotPart(final Composite      container,
 							   final String         plotName,
 							   final IActionBars    bars,
@@ -183,6 +187,12 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			final StackLayout layout = (StackLayout)parent.getLayout();
 			layout.topControl = lightWeightViewer.getControl();
 			container.layout();
+		}
+		
+		try {
+			RMIServerProvider.getInstance().exportAndRegisterObject(IPlottingSystem.RMI_PREFIX+plotName, new RemotePlottingSystem(this));
+		} catch (Exception e) {
+			logger.error("Unable to register plotting system "+plotName, e);
 		}
 	}
 	
@@ -1038,6 +1048,11 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		clearPlotViewer();
 		for (IPlottingSystemViewer v : viewers) {
 			if (v.getControl()!=null) v.dispose();
+		}
+		try {
+			RMIServerProvider.getInstance().unbind(IPlottingSystem.RMI_PREFIX+plotName);
+		} catch (Exception e) {
+			logger.error("Unable to deregister plotting system");
 		}
 	}
 
