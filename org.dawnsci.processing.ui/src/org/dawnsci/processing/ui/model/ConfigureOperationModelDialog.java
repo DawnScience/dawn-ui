@@ -70,21 +70,22 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 		SashForm sashForm= new SashForm(parent, SWT.HORIZONTAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,2,1));
 		
-		final Composite left = new Composite(sashForm, SWT.NONE);
+		final SashForm left = new SashForm(sashForm, SWT.VERTICAL);
 		left.setLayout(new GridLayout(2, false));
-		final Composite mid = new Composite(sashForm, SWT.NONE);
-		mid.setLayout(new GridLayout(2, false));
+//		final Composite mid = new Composite(sashForm, SWT.NONE);
+//		mid.setLayout(new GridLayout(2, false));
 		Composite right = new Composite(sashForm, SWT.NONE);
 		right.setLayout(new GridLayout());
 		
-		sashForm.setWeights(new int[]{40,20,40});
+		sashForm.setWeights(new int[]{40,60});
+		
 		
 		input = createPlottingSystem(left);
 		modelViewer = new OperationModelViewer();
-		modelViewer.createPartControl(mid);
+		modelViewer.createPartControl(left);
 		
 		output = createPlottingSystem(right);
-		
+		left.setWeights(new int[]{70,30});
 		return parent;
 	}
 	
@@ -144,7 +145,6 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 			try {
 				final IRegionService rservice = (IRegionService)ServiceManager.getService(IRegionService.class);
 				IRegion reg = rservice.createRegion(input,entry.getValue(),entry.getKey());
-				reg.setROI(entry.getValue());
 				input.addRegion(reg);
 				final String name = entry.getKey();
 				reg.addROIListener(new IROIListener.Stub() {
@@ -200,7 +200,7 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 
 	@Override
 	protected Point getInitialSize() {
-		return new Point(1500, 750);
+		return new Point(1200, 600);
 	}
 
 	private void update() {
