@@ -72,7 +72,7 @@ public class ROIEditTable  {
 	private IROI        originalRoi;
 	private double      xLowerBound=Double.NaN, xUpperBound=Double.NaN; // Optional bounds
 	private double      yLowerBound=Double.NaN, yUpperBound=Double.NaN; // Optional bounds
-	private List<RegionRow> rows;
+	private List<IRegionRow> rows;
 
 
 	public Control createPartControl(Composite parent) {
@@ -90,7 +90,11 @@ public class ROIEditTable  {
 		round.setLayoutData(new GridData(SWT.LEFT, SWT.NONE, true, false));
 		round.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				for (RegionRow row : rows) row.round();
+				for (IRegionRow row : rows) {
+					if (row instanceof RegionRow) {
+						((RegionRow)row).round();
+					}
+				}
 				regionTable.refresh();
 	            roi = createRoi(rows, null, coords);
 				fireROIListeners();
@@ -128,7 +132,7 @@ public class ROIEditTable  {
 			
 			@Override
 			public Object[] getElements(Object inputElement) {
-				return rows.toArray(new RegionRow[rows.size()]);
+				return rows.toArray(new IRegionRow[rows.size()]);
 			}			
 		});
 		
@@ -211,24 +215,31 @@ public class ROIEditTable  {
 		@Override
 		protected boolean canEdit(Object element) {
 			double val;
-			final RegionRow row = (RegionRow)element;
+			final IRegionRow row = (IRegionRow)element;
 			if (!row.isEnabled()) return false;
-			if (column==1) {
-				val = row.getxLikeVal();
-			} else {
-				val = row.getyLikeVal();
+			if (row instanceof RegionRow) {
+				if (column==1) {
+					val = ((RegionRow)row).getxLikeVal();
+				} else {
+					val = ((RegionRow)row).getyLikeVal();
+				}
+
+				return !Double.isNaN(val);
 			}
-			return !Double.isNaN(val);
+			return false;
 		}
 
 		@Override
 		protected Object getValue(Object element) {
-			final RegionRow row = (RegionRow)element;
-			if (column==1) {
-				return row.getxLikeVal();
-			} else {
-				return row.getyLikeVal();
+			final IRegionRow row = (IRegionRow)element;
+			if (row instanceof RegionRow) {
+				if (column==1) {
+					return ((RegionRow)row).getxLikeVal();
+				} else {
+					return ((RegionRow)row).getyLikeVal();
+				}
 			}
+			return ((SymmetryRow) row).getSymmetryNumber();
 		}
 
 		@Override
@@ -238,12 +249,19 @@ public class ROIEditTable  {
 		
 		protected void setValue(Object element, Object value, boolean tableRefresh) {
 			
-            final RegionRow row = (RegionRow)element;
+            final IRegionRow row = (IRegionRow)element;
             final Number    val = (Number)value;
-            if (column==1) {
-            	row.setxLikeVal(val.doubleValue());
-            } else {
-            	row.setyLikeVal(val.doubleValue());
+            if (row instanceof RegionRow) {
+            	if (column==1) {
+            		((RegionRow)row).setxLikeVal(val.doubleValue());
+            	} else {
+            		((RegionRow)row).setyLikeVal(val.doubleValue());
+            	}
+            }
+            else {
+            	if (column==1) {
+            		((SymmetryRow)row).setSymmetryNumber(val.intValue());
+            	}
             }
             if (tableRefresh) {
             	getViewer().refresh();
@@ -292,16 +310,22 @@ public class ROIEditTable  {
 		
 		public String getText(Object element) {
 			
-			final RegionRow row = (RegionRow)element;
+			final IRegionRow row = (IRegionRow)element;
 			switch (column) {
 			case 0:			
 				return row.getName();
 			case 1:	
-				if (Double.isNaN(row.getxLikeVal())) return "-";
-				return format.format(row.getxLikeVal());
+				if (row instanceof SymmetryRow) {
+					return ((Integer)((SymmetryRow) row).getSymmetryNumber()).toString();
+				}
+				if (Double.isNaN(((RegionRow)row).getxLikeVal())) return "-";
+				return format.format(((RegionRow)row).getxLikeVal());
 			case 2:			
-				if (Double.isNaN(row.getyLikeVal())) return "-";
-				return format.format(row.getyLikeVal());
+				if (row instanceof SymmetryRow) {
+					return "";
+				}
+				if (Double.isNaN(((RegionRow)row).getyLikeVal())) return "-";
+				return format.format(((RegionRow)row).getyLikeVal());
 			}
 			return "";
 		}
@@ -316,9 +340,9 @@ public class ROIEditTable  {
 		}
 	}
 
-	private List<RegionRow> createRegionRows(IROI roi, final ICoordinateSystem coords) {
+	private List<IRegionRow> createRegionRows(IROI roi, final ICoordinateSystem coords) {
     	
-		final List<RegionRow> ret = new ArrayList<ROIEditTable.RegionRow>();
+		final List<IRegionRow> ret = new ArrayList<ROIEditTable.IRegionRow>();
 		
 		if (roi instanceof LinearROI) {
 			final LinearROI lr = (LinearROI)roi;
@@ -356,6 +380,7 @@ public class ROIEditTable  {
 			if (roi instanceof SectorROI) {
 				SectorROI sr = (SectorROI) rr;
 				ret.add(new RegionRow("Angles (°)",           "°", sr.getAngleDegrees(0), sr.getAngleDegrees(1)));			
+				ret.add(new SymmetryRow("Symmetry", sr.getSymmetry()));
 			}
 		} else if (roi instanceof CircularROI) {
 			final CircularROI cr = (CircularROI) roi;
@@ -428,36 +453,36 @@ public class ROIEditTable  {
 	 * @param coords
 	 * @return
 	 */
-	private IROI createRoi(List<RegionRow> rows, RegionRow changed, ICoordinateSystem coords) {
+	private IROI createRoi(List<IRegionRow> rows, IRegionRow changed, ICoordinateSystem coords) {
 				
 		IROI ret = null; 
 		if (roi instanceof LinearROI) {
 			if (changed!=null && changed==rows.get(2)) {
-				LinearROI lr = new LinearROI(getPoint(coords, rows.get(0)), getPoint(coords, rows.get(1)));
-				lr.setAngle(Math.toRadians(rows.get(2).getxLikeVal()));
+				LinearROI lr = new LinearROI(getPoint(coords, (RegionRow)rows.get(0)), getPoint(coords, (RegionRow)rows.get(1)));
+				lr.setAngle(Math.toRadians(((RegionRow)rows.get(2)).getxLikeVal()));
 				ret = lr;
 			} else {
-				LinearROI lr = new LinearROI(getPoint(coords, rows.get(0)), getPoint(coords, rows.get(1)));
-				if (changed==rows.get(1)) rows.get(2).setxLikeVal(0d);
+				LinearROI lr = new LinearROI(getPoint(coords, (RegionRow)rows.get(0)), getPoint(coords, (RegionRow)rows.get(1)));
+				if (changed==rows.get(1)) ((RegionRow)rows.get(2)).setxLikeVal(0d);
 				ret = lr;
 			}
 			
 		} else if (roi instanceof IPolylineROI) {
 			PolylineROI pr = (roi instanceof PolygonalROI) ? new PolygonalROI() : new PolylineROI();
-			for (RegionRow regionRow : rows) {
-				pr.insertPoint(getPoint(coords, regionRow));
+			for (IRegionRow regionRow : rows) {
+				pr.insertPoint(getPoint(coords, (RegionRow)regionRow));
 			}
 			ret = pr;
 			
 		} else if (roi instanceof PointROI || roi==null) {
-			PointROI pr = new PointROI(getPoint(coords, rows.get(0)));
+			PointROI pr = new PointROI(getPoint(coords, (RegionRow)rows.get(0)));
 			ret = pr;
 			
 		} else if (roi instanceof RectangularROI) {
 			
-			final double[] start = getPoint(coords, rows.get(0));
-			final double[] length   = getPoint(coords, rows.get(1));
-			final double angle = Math.toRadians(rows.get(2).getxLikeVal());
+			final double[] start = getPoint(coords, (RegionRow)rows.get(0));
+			final double[] length   = getPoint(coords, (RegionRow)rows.get(1));
+			final double angle = Math.toRadians(((RegionRow)rows.get(2)).getxLikeVal());
 			
 			// TODO don't have to do it this way - reflection would solve all the tests with identical blocks.
 			if (roi instanceof PerimeterBoxROI) {
@@ -482,8 +507,9 @@ public class ROIEditTable  {
 			
 		} else if (roi instanceof RingROI) {
 			RingROI orig = (RingROI) roi;
-			final double[] cent  = getPoint(coords, rows.get(0));
-			final double[] radii = rows.get(1).getPoint();
+			final double[] cent  = getPoint(coords, (RegionRow)rows.get(0));
+			final double[] radii = ((RegionRow)rows.get(1)).getPoint();
+			final int symmetryNumber = ((SymmetryRow)rows.get(2)).getSymmetryNumber();
 
 			if (orig instanceof SectorROI) {
 				SectorROI so = (SectorROI) orig;
@@ -491,12 +517,12 @@ public class ROIEditTable  {
 						 cent[1],
 						 radii[0],
 						 radii[1],
-						 Math.toRadians(rows.get(2).getxLikeVal()),
-						 Math.toRadians(rows.get(2).getyLikeVal()),
+						 Math.toRadians(((RegionRow)rows.get(2)).getxLikeVal()),
+						 Math.toRadians(((RegionRow)rows.get(2)).getyLikeVal()),
 						 so.getDpp(),
 						 so.isClippingCompensation(),
 						 so.getSymmetry());
-
+				sr.setSymmetry(symmetryNumber);
 				sr.setCombineSymmetry(so.isCombineSymmetry());
 				ret = sr;
 			} else {
@@ -509,13 +535,13 @@ public class ROIEditTable  {
 			PolylineROI pr = new PolylineROI();
 
 			for (int i = 2, imax = rows.size(); i < imax; i++) {
-				pr.insertPoint(getPoint(coords, rows.get(i)));
+				pr.insertPoint(getPoint(coords, (RegionRow)rows.get(i)));
 			}
 			ret = new CircularFitROI(pr);
 		} else if (roi instanceof CircularROI) {
 			
-			final double[] cent = getPoint(coords, rows.get(0));
-			final double   rad  = rows.get(1).getxLikeVal();
+			final double[] cent = getPoint(coords, (RegionRow)rows.get(0));
+			final double   rad  = ((RegionRow)rows.get(1)).getxLikeVal();
 
 			CircularROI cr = new CircularROI(Math.abs(rad), cent[0], cent[1]);
 			ret = cr;
@@ -523,14 +549,14 @@ public class ROIEditTable  {
 			PolylineROI pr = new PolylineROI();
 
 			for (int i = 3, imax = rows.size(); i < imax; i++) {
-				pr.insertPoint(getPoint(coords, rows.get(i)));
+				pr.insertPoint(getPoint(coords, (RegionRow)rows.get(i)));
 			}
 			ret = new EllipticalFitROI(pr);
 		} else if (roi instanceof EllipticalROI) {
 			
-			final double[] cent = getPoint(coords, rows.get(0));
-			final double[] maj  = rows.get(1).getPoint();
-			final double   ang  = rows.get(2).getxLikeVal();
+			final double[] cent = getPoint(coords, (RegionRow)rows.get(0));
+			final double[] maj  = ((RegionRow)rows.get(1)).getPoint();
+			final double   ang  = ((RegionRow)rows.get(2)).getxLikeVal();
 			
 			EllipticalROI er = new EllipticalROI(maj[0],maj[1],
 					                             Math.toRadians(ang), 
@@ -538,17 +564,17 @@ public class ROIEditTable  {
 					                             cent[1]);
 			ret = er;
 		} else if (roi instanceof ParabolicROI) {
-			final double[] cent = getPoint(coords, rows.get(0));
-			final double   fpar  = rows.get(1).getxLikeVal();
-			final double   ang  = rows.get(2).getxLikeVal();
+			final double[] cent = getPoint(coords, (RegionRow)rows.get(0));
+			final double   fpar  = ((RegionRow)rows.get(1)).getxLikeVal();
+			final double   ang  = ((RegionRow)rows.get(2)).getxLikeVal();
 
 			ParabolicROI pr = new ParabolicROI(fpar, Math.toRadians(ang), cent[0], cent[1]);
 			ret = pr;
 		} else if (roi instanceof HyperbolicROI) {
-			final double[] cent = getPoint(coords, rows.get(0));
-			final double   semi = rows.get(1).getxLikeVal();
-			final double   ecc  = rows.get(2).getxLikeVal();
-			final double   ang  = rows.get(3).getxLikeVal();
+			final double[] cent = getPoint(coords, (RegionRow)rows.get(0));
+			final double   semi = ((RegionRow)rows.get(1)).getxLikeVal();
+			final double   ecc  = ((RegionRow)rows.get(2)).getxLikeVal();
+			final double   ang  = ((RegionRow)rows.get(3)).getxLikeVal();
 
 			HyperbolicROI hr = new HyperbolicROI(semi, ecc, Math.toRadians(ang), cent[0], cent[1]);
 			ret = hr;
@@ -583,12 +609,43 @@ public class ROIEditTable  {
 		rows=null;
     }
     
-    private final static class RegionRow {
-       	private String name;
+	private abstract class IRegionRow {
+		protected String name;
+		protected boolean enabled=true;
+		public String getName() {
+			return name;
+		}
+		public boolean isEnabled() {
+			return enabled;
+		}
+
+		public void setEnabled(boolean enabled) {
+			this.enabled = enabled;
+		}
+	}
+	
+	private class SymmetryRow extends IRegionRow {
+		private int symmetryNumber;
+
+		public int getSymmetryNumber() {
+			return symmetryNumber;
+		}
+
+		@SuppressWarnings("unused")
+		public void setSymmetryNumber(int symmetryNumber) {
+			this.symmetryNumber = symmetryNumber;
+		}
+		
+		public SymmetryRow(String name, int symmetryNumber) {
+			this.name = name;
+			this.symmetryNumber = symmetryNumber;
+		}
+	}
+
+    private class RegionRow extends IRegionRow {
        	private String unit;
         private double xLikeVal;
     	private double yLikeVal;
-    	private boolean enabled=true;
 		public RegionRow(String name, String unit, double... vals) {
 			this.name     = name;
 			this.unit     = unit;
@@ -601,9 +658,6 @@ public class ROIEditTable  {
 		}
 		public double[] getPoint() {
 			return new double[]{xLikeVal, yLikeVal};
-		}
-		public String getName() {
-			return name;
 		}
 		public double getxLikeVal() {
 			return xLikeVal;
@@ -664,14 +718,6 @@ public class ROIEditTable  {
 		@SuppressWarnings("unused")
 		public void setUnit(String unit) {
 			this.unit = unit;
-		}
-
-		public boolean isEnabled() {
-			return enabled;
-		}
-
-		public void setEnabled(boolean enabled) {
-			this.enabled = enabled;
 		}
     }
 
