@@ -36,6 +36,7 @@ import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.macro.api.IMacroService;
 import org.eclipse.dawnsci.macro.api.MacroEventObject;
+import org.eclipse.dawnsci.macro.api.MethodEventObject;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
 import org.eclipse.dawnsci.plotting.api.IPrintablePlotting;
@@ -194,6 +195,8 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		} catch (Exception e) {
 			logger.error("Unable to register plotting system "+plotName, e);
 		}
+		
+		if (mservice!=null) mservice.publish(new MacroEventObject(this));
 	}
 	
 	@Override
@@ -936,7 +939,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 */
 	public void setTitle(final String title) {
 		super.setTitle(title);
-		activeViewer.setTitle(title);
+		activeViewer.setTitle(title);		
 	}
 
 	public String getTitle() {

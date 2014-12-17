@@ -15,11 +15,13 @@ import java.util.List;
 
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.macro.api.IMacroService;
+import org.eclipse.dawnsci.macro.api.MethodEventObject;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
-import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -44,6 +46,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
  *
  */
 public class XYRegionGraph extends XYGraph {
+	
 	
 	public XYRegionGraph() {
 		super();
@@ -185,8 +188,22 @@ public class XYRegionGraph extends XYGraph {
 	public void setShowLegend(boolean showLeg) {
 		super.setShowLegend(showLeg);
 		getPreferenceStore().setValue(BasePlottingConstants.XY_SHOWLEGEND, showLeg);
+		if (ServiceHolder.getMacroService()!=null) ServiceHolder.getMacroService().publish(new MethodEventObject("ps", this, showLeg));
 	}
 	
+	/**
+	 * @param title the title to set
+	 */
+	public void setTitle(String title) {
+		super.setTitle(title);
+		if (ServiceHolder.getMacroService()!=null) ServiceHolder.getMacroService().publish(new MethodEventObject("ps", this, title));
+	}
+
+	public void setShowTitle(boolean showTitle){
+		super.setShowTitle(showTitle);
+		if (ServiceHolder.getMacroService()!=null) ServiceHolder.getMacroService().publish(new MethodEventObject("ps", this, showTitle));
+	}
+
 	/**
 	 * @return the showLegend
 	 */
