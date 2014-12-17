@@ -176,7 +176,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		findPeaksButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				findInitialPeaks();
+				updateFunctionPlot(false, true);;
 			}
 		});
 
@@ -335,6 +335,10 @@ public class FunctionFittingTool extends AbstractToolPage implements
 	}
 
 	private void updateFunctionPlot(boolean force) {
+		updateFunctionPlot(force, false);
+	}
+
+	private void updateFunctionPlot(boolean force, boolean initialPeaks) {
 		if (!functionWidget.isValid()) {
 			return;
 		}
@@ -365,6 +369,10 @@ public class FunctionFittingTool extends AbstractToolPage implements
 						y = a[1];
 					} catch (Throwable npe) {
 						continue;
+					}
+					
+					if (initialPeaks) {
+						findInitialPeaks(x, y);
 					}
 
 					estimate = (ILineTrace) getPlottingSystem().getTrace(
@@ -742,78 +750,90 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		return bean;
 	}
 	
-	private void findInitialPeaks() {
-		System.out.println("Time to find some peaks!");
-		if (!functionWidget.isValid()) {
-			return;
-		}
-		getPlottingSystem().removeTraceListener(traceListener);
-		boolean firstTrace = true;
-		for (ITrace selectedTrace : getPlottingSystem().getTraces()) {
-			if (selectedTrace instanceof ILineTrace) {
-				ILineTrace trace = (ILineTrace) selectedTrace;
-				if (trace.isUserTrace() && firstTrace) {
-					firstTrace = false;
-					// We chop x and y by the region bounds. We assume the
-					// plot is an XAXIS selection therefore the indices in
-					// y = indices chosen in x.
-					RectangularROI roi = (RectangularROI) region.getROI();
+	private void findInitialPeaks(Dataset xData, Dataset yData) {
+		//Get the initial peaks and reset the composite function
+		compFunction = FittingUtils.getInitialPeaks(xData, yData, null);
 
-					final double[] p1 = roi.getPointRef();
-					final double[] p2 = roi.getEndPoint();
-
-					// We peak fit only the first of the data sets plotted
-					// for now.
-					Dataset x = (Dataset) trace.getXData();
-					Dataset y = (Dataset) trace.getYData();
-
-					try {
-						Dataset[] a = Generic1DFitter.xintersection(x, y,
-								p1[0], p2[0]);
-						x = a[0];
-						y = a[1];
-					} catch (Throwable npe) {
-						continue;
-					}
-					//Get the initial peaks and reset the composite function
-					compFunction = FittingUtils.getInitialPeaks(x, y, null);
-			//		functionWidget.setInput(compFunction);
-			//		functionWidget.setFittedInput(resultFunction);
-					
-					
-					estimate = (ILineTrace) getPlottingSystem().getTrace(
-							"Estimate");
-					if (estimate == null) {
-						estimate = getPlottingSystem().createLineTrace(
-								"Estimate");
-						estimate.setUserTrace(false);
-						estimate.setTraceType(ILineTrace.TraceType.DASH_LINE);
-						getPlottingSystem().addTrace(estimate);
-					}
-
-					if (compFunction != null) {
-						for ( IFunction function : compFunction.getFunctions()) {
-							if (function instanceof IDataBasedFunction) {
-								IDataBasedFunction dataBasedFunction = (IDataBasedFunction) function;
-								dataBasedFunction.setData(x, y);
-							}
-						}
-						DoubleDataset functionData = compFunction.calculateValues(x);
-						estimate.setData(x, functionData);
-					}
-
-					// System.out.println(x);
-					// System.out.println(y);
-
-					getPlottingSystem().repaint();
-
-					boolean force = false;
-					updateFittedPlot(force, x, y);
-				}
-			}
-		}
-		refreshViewer();
-		getPlottingSystem().addTraceListener(traceListener);
+		//Update the UI elements to show the peak(s)
+		functionWidget.setInput(compFunction);
+		functionWidget.setFittedInput(null);
+		compFunctionModified();
+//		functionWidget.refresh();
 	}
+	
+//	private void findInitialPeaks() {
+//		System.out.println("Time to find some peaks!");
+//		if (!functionWidget.isValid()) {
+//			return;
+//		}
+//		getPlottingSystem().removeTraceListener(traceListener);
+//		boolean firstTrace = true;
+//		for (ITrace selectedTrace : getPlottingSystem().getTraces()) {
+//			if (selectedTrace instanceof ILineTrace) {
+//				ILineTrace trace = (ILineTrace) selectedTrace;
+//				if (trace.isUserTrace() && firstTrace) {
+//					firstTrace = false;
+//					// We chop x and y by the region bounds. We assume the
+//					// plot is an XAXIS selection therefore the indices in
+//					// y = indices chosen in x.
+//					RectangularROI roi = (RectangularROI) region.getROI();
+//
+//					final double[] p1 = roi.getPointRef();
+//					final double[] p2 = roi.getEndPoint();
+//
+//					// We peak fit only the first of the data sets plotted
+//					// for now.
+//					Dataset x = (Dataset) trace.getXData();
+//					Dataset y = (Dataset) trace.getYData();
+//
+//					try {
+//						Dataset[] a = Generic1DFitter.xintersection(x, y,
+//								p1[0], p2[0]);
+//						x = a[0];
+//						y = a[1];
+//					} catch (Throwable npe) {
+//						continue;
+//					}
+//					
+//				}
+//			}
+//		}
+//	}
+
+//					
+//					
+//					estimate = (ILineTrace) getPlottingSystem().getTrace(
+//							"Estimate");
+//					if (estimate == null) {
+//						estimate = getPlottingSystem().createLineTrace(
+//								"Estimate");
+//						estimate.setUserTrace(false);
+//						estimate.setTraceType(ILineTrace.TraceType.DASH_LINE);
+//						getPlottingSystem().addTrace(estimate);
+//					}
+//
+//					if (compFunction != null) {
+//						for ( IFunction function : compFunction.getFunctions()) {
+//							if (function instanceof IDataBasedFunction) {
+//								IDataBasedFunction dataBasedFunction = (IDataBasedFunction) function;
+//								dataBasedFunction.setData(x, y);
+//							}
+//						}
+//						DoubleDataset functionData = compFunction.calculateValues(x);
+//						estimate.setData(x, functionData);
+//					}
+//
+//					// System.out.println(x);
+//					// System.out.println(y);
+//
+//					getPlottingSystem().repaint();
+//
+//					boolean force = false;
+//					updateFittedPlot(force, x, y);
+//				}
+//			}
+//		}
+//		refreshViewer();
+//		getPlottingSystem().addTraceListener(traceListener);
 
 }
