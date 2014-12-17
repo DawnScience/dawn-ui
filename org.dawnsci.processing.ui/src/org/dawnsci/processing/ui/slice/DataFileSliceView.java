@@ -118,6 +118,7 @@ public class DataFileSliceView extends ViewPart {
 
 	
 	private FileManager fileManager;
+	private OperationEventManager eventManager;
 	private TableViewer viewer;
 	private UpdateJob job;
 	private Label currentSliceLabel;
@@ -126,7 +127,6 @@ public class DataFileSliceView extends ViewPart {
 	private IOperation<? extends IOperationModel, ? extends OperationData> currentOperation = null;
 	private IPlottingSystem input;
 	private IPlottingSystem output;
-	private IOperationErrorInformer informer;
 	private IOperationInputData inputData = null;
 	
 	String lastPath = null;
@@ -150,6 +150,7 @@ public class DataFileSliceView extends ViewPart {
 			public void selectionChanged(SelectionChangedEvent event) {
 				if (event.getSelection() instanceof StructuredSelection) {
 					inputData = null;
+					eventManager.sendInputDataUpdate(null);
 					selectedFile = (String)((StructuredSelection)event.getSelection()).getFirstElement();
 					update(currentOperation);
 				}
@@ -195,6 +196,7 @@ public class DataFileSliceView extends ViewPart {
 			@Override
 			public void sliceChanged(SliceChangeEvent event) {
 				inputData = null;
+				eventManager.sendInputDataUpdate(null);
 				String ss = Slice.createString(csw.getCurrentSlice());
 				currentSliceLabel.setText("Current slice of data: [" +ss + "]");
 				currentSliceLabel.getParent().layout(true);
@@ -216,8 +218,6 @@ public class DataFileSliceView extends ViewPart {
 				if (selection instanceof StructuredSelection && ((StructuredSelection)selection).getFirstElement() instanceof OperationDescriptor) {
 					OperationDescriptor des = (OperationDescriptor)((StructuredSelection)selection).getFirstElement();
 					try {
-						
-
 						
 						currentOperation = des.getSeriesObject();
 						update(currentOperation);
@@ -241,9 +241,6 @@ public class DataFileSliceView extends ViewPart {
 		
 		view = page.findView("org.dawnsci.processing.ui.input");
 		input = (IPlottingSystem)view.getAdapter(IPlottingSystem.class);
-		
-		view = getSite().getPage().findView("org.dawnsci.processing.ui.processingView");
-		informer = (IOperationErrorInformer)view.getAdapter(IOperationErrorInformer.class);
 		
 		fileManager.addFileListener(new IFilesAddedListener() {
 
@@ -294,6 +291,14 @@ public class DataFileSliceView extends ViewPart {
 						viewer.setSelection(new StructuredSelection(path),true);
 					}
 				});
+			}
+		});
+		
+		eventManager = new OperationEventManager();
+		eventManager.addOperationRunnerListener(new  IOperationGUIRunnerListener.Stub() {
+			@Override
+			public void updateRequested() {
+				update(currentOperation);
 			}
 		});
 
@@ -379,7 +384,7 @@ public class DataFileSliceView extends ViewPart {
 					fileManager.clear();
 					csw.disable();
 					currentSliceLabel.setText("Current slice of data: [ - - - - -]");
-					informer.setTestData(null);
+					eventManager.sendInitialDataUpdate(null);
 				} else {
 					viewer.setSelection(new StructuredSelection(fileManager.getFilePaths().get(0)),true);
 				}
@@ -404,7 +409,7 @@ public class DataFileSliceView extends ViewPart {
 
 				fileManager.clear();
 				csw.disable();
-				informer.setTestData(null);
+				eventManager.sendInitialDataUpdate(null);
 				job = null;
 				currentSliceLabel.setText("Current slice of data: [ - - - - -]");
 				try {
@@ -621,7 +626,7 @@ public class DataFileSliceView extends ViewPart {
 				Slice[] s = csw.getCurrentSlice();
 				//Plot input, probably a bit wasteful to do each time
 				IDataset firstSlice = lazyDataset.getSlice(s);
-				informer.setTestData(firstSlice.getSliceView().squeeze());
+				eventManager.sendInitialDataUpdate(firstSlice.getSliceView().squeeze());
 				SlicedDataUtils.plotDataWithMetadata(firstSlice, input, dataDims);
 				
 				
@@ -672,22 +677,22 @@ public class DataFileSliceView extends ViewPart {
 				long start = System.currentTimeMillis();
 				sliceVisitor.visit(firstSlice, null, null);
 				inputData = sliceVisitor.getOperationInputData();
+				eventManager.sendInputDataUpdate(inputData);
 				logger.debug("Ran in: " +(System.currentTimeMillis()-start)/1000. + " s");
-				informer.setInErrorState(null);
+				eventManager.sendErrorUpdate(null);
 
 				
 				
 				} catch (OperationException e) {
 					logger.error(e.getMessage(), e);
-					if (informer != null) informer.setInErrorState(e);
+					eventManager.sendErrorUpdate(e);
 					return Status.CANCEL_STATUS;
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
-					if (informer != null) {
-						String message = e.getMessage();
-						if (message == null) message = "Unexpected error!";
-						informer.setInErrorState(new OperationException(null, message));
-					}
+
+					String message = e.getMessage();
+					if (message == null) message = "Unexpected error!";
+					eventManager.sendErrorUpdate(new OperationException(null, message));
 					return Status.CANCEL_STATUS;
 				} finally {
 					output.setEnabled(true);
@@ -706,9 +711,7 @@ public class DataFileSliceView extends ViewPart {
 	@Override
 	public Object getAdapter(final Class clazz) {
 		if (clazz == FileManager.class) return fileManager;
-		if (clazz == IOperationInputData.class) {
-			return inputData;
-		}
+		if (clazz == OperationEventManager.class) return eventManager;
 		return super.getAdapter(clazz);
 	}
 	

@@ -49,6 +49,7 @@ import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.ISelectionListener;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 
 /**
@@ -74,11 +75,14 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 	}
 	
 	public OperationModelViewer(boolean addListener) {
-		super();
-		if (addListener) {
-			EclipseUtils.getPage().addSelectionListener(this);
-		}
+		this(addListener ? EclipseUtils.getPage() : null);
 	}
+	
+	public OperationModelViewer(IWorkbenchPage page) {
+		super();
+		if (page != null) page.addSelectionListener(this);
+	}
+	
 
 	public void createPartControl(Composite parent) {
 		
@@ -233,6 +237,7 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 		if (selection instanceof IStructuredSelection) {
 			Object ob = ((IStructuredSelection)selection).getFirstElement();
+			if (ob == null && !viewer.getTable().isDisposed()) viewer.setInput(null);
 			if (ob instanceof ISeriesItemDescriptor) {
 				try {
 					setOperation((IOperation)((ISeriesItemDescriptor)ob).getSeriesObject());
@@ -248,8 +253,11 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 	 * @param des
 	 */
 	public void setOperation(IOperation<? extends IOperationModel, ? extends OperationData> des) {
-		this.model = des.getModel();
+		if (viewer.getTable().isDisposed()) return;
 		viewer.setInput(des);
+		if (des == null) return;
+		this.model = des.getModel();
+		
 	}
 
 	public void setModel(IOperationModel model) {

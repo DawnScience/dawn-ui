@@ -94,6 +94,7 @@ public class SlicedDataUtils {
 
 				@Override
 				public void run() {
+					if (t == null) return;
 					((IImageTrace)t).setMask(m);
 					if (!system.isDisposed())system.repaint();
 				}

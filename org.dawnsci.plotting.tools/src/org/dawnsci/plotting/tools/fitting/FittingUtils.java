@@ -24,6 +24,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironment;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IOperator;
 import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
@@ -77,6 +79,46 @@ public class FittingUtils {
 	 * 
 	 * @return
 	 */
+	
+	public static CompositeFunction getInitialPeaks(Dataset xDataSet, Dataset yDataSet, Integer nPeaks) {
+		
+		CompositeFunction initialPeaks = new CompositeFunction();
+		
+		//Set variables for peak finding and fitting
+		List<CompositeFunction> fittedPeaksAndBkgs;
+		Integer nrPeaks = nPeaks;
+		IOptimizer optimizer = getOptimizer();
+		Class<? extends APeak> peakFunction = getPeakClass();
+		int smoothing = getSmoothing();
+		
+		if (nrPeaks == null) {
+			//Don't know how many peaks we are looking for, so just see how many we can find
+			List<IdentifiedPeak> foundPeaks = Generic1DFitter.parseDataDerivative(xDataSet, yDataSet, smoothing);
+			nrPeaks = foundPeaks.size();
+			if (nrPeaks == null || nrPeaks == 0) {
+				//In case no peaks were found
+				logger.error("No peaks were found!");
+				return null;
+			}
+			//Fit the peaks we found
+			fittedPeaksAndBkgs = Generic1DFitter.fitPeakFunctions(foundPeaks, xDataSet, yDataSet, peakFunction, optimizer, smoothing, nrPeaks, 0.0, false, false, null);
+		} else {
+			//Find the and fit a given number of peaks
+			fittedPeaksAndBkgs = Generic1DFitter.fitPeakFunctions(xDataSet, yDataSet, peakFunction, nPeaks);
+		}
+		
+		//Pick out the peak functions of the correct class & package into new composite function
+		for (IOperator peakAndBkg : fittedPeaksAndBkgs) {
+			for (IFunction partFunction : peakAndBkg.getFunctions()) {
+				if (partFunction.getClass() == peakFunction) {
+					initialPeaks.addFunction(partFunction);
+				}
+			}
+		}
+		
+		return initialPeaks;
+	}
+	
 	public static FittedFunctions getFittedPeaks(final FittedPeaksInfo info) throws Exception {
 		
 		List<CompositeFunction> composites=null;

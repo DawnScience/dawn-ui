@@ -102,6 +102,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 	private FunctionFittingWidget functionWidget;
 
 	private Button updateAllButton;
+	private Button findPeaksButton;
 
 	private IPreferenceStore prefs = Activator.getPlottingPreferenceStore();
 
@@ -156,7 +157,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		});
 
 		fitOnceButton = new Button(actionComposite, SWT.PUSH);
-		fitOnceButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,
+		fitOnceButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
 				false, 1, 1));
 		fitOnceButton.setText("Fit Once");
 		fitOnceButton.setEnabled(true);
@@ -164,6 +165,18 @@ public class FunctionFittingTool extends AbstractToolPage implements
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				updateFunctionPlot(true);
+			}
+		});
+		
+		findPeaksButton = new Button(actionComposite, SWT.PUSH);
+		findPeaksButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
+				false, 1, 1));
+		findPeaksButton.setText("Find Peaks...");
+		findPeaksButton.setEnabled(true);
+		findPeaksButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				findInitialPeaks();
 			}
 		});
 
@@ -727,6 +740,80 @@ public class FunctionFittingTool extends AbstractToolPage implements
 										// replace merge.
 
 		return bean;
+	}
+	
+	private void findInitialPeaks() {
+		System.out.println("Time to find some peaks!");
+		if (!functionWidget.isValid()) {
+			return;
+		}
+		getPlottingSystem().removeTraceListener(traceListener);
+		boolean firstTrace = true;
+		for (ITrace selectedTrace : getPlottingSystem().getTraces()) {
+			if (selectedTrace instanceof ILineTrace) {
+				ILineTrace trace = (ILineTrace) selectedTrace;
+				if (trace.isUserTrace() && firstTrace) {
+					firstTrace = false;
+					// We chop x and y by the region bounds. We assume the
+					// plot is an XAXIS selection therefore the indices in
+					// y = indices chosen in x.
+					RectangularROI roi = (RectangularROI) region.getROI();
+
+					final double[] p1 = roi.getPointRef();
+					final double[] p2 = roi.getEndPoint();
+
+					// We peak fit only the first of the data sets plotted
+					// for now.
+					Dataset x = (Dataset) trace.getXData();
+					Dataset y = (Dataset) trace.getYData();
+
+					try {
+						Dataset[] a = Generic1DFitter.xintersection(x, y,
+								p1[0], p2[0]);
+						x = a[0];
+						y = a[1];
+					} catch (Throwable npe) {
+						continue;
+					}
+					//Get the initial peaks and reset the composite function
+					compFunction = FittingUtils.getInitialPeaks(x, y, null);
+			//		functionWidget.setInput(compFunction);
+			//		functionWidget.setFittedInput(resultFunction);
+					
+					
+					estimate = (ILineTrace) getPlottingSystem().getTrace(
+							"Estimate");
+					if (estimate == null) {
+						estimate = getPlottingSystem().createLineTrace(
+								"Estimate");
+						estimate.setUserTrace(false);
+						estimate.setTraceType(ILineTrace.TraceType.DASH_LINE);
+						getPlottingSystem().addTrace(estimate);
+					}
+
+					if (compFunction != null) {
+						for ( IFunction function : compFunction.getFunctions()) {
+							if (function instanceof IDataBasedFunction) {
+								IDataBasedFunction dataBasedFunction = (IDataBasedFunction) function;
+								dataBasedFunction.setData(x, y);
+							}
+						}
+						DoubleDataset functionData = compFunction.calculateValues(x);
+						estimate.setData(x, functionData);
+					}
+
+					// System.out.println(x);
+					// System.out.println(y);
+
+					getPlottingSystem().repaint();
+
+					boolean force = false;
+					updateFittedPlot(force, x, y);
+				}
+			}
+		}
+		refreshViewer();
+		getPlottingSystem().addTraceListener(traceListener);
 	}
 
 }
