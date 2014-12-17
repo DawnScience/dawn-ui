@@ -242,7 +242,10 @@ public class ROIEditTable  {
 
 				return !Double.isNaN(val);
 			}
-			return true;
+			if (column == 1) {
+				return true;
+			}
+			return false;
 		}
 
 		@Override
@@ -255,7 +258,10 @@ public class ROIEditTable  {
 					return ((RegionRow)row).getyLikeVal();
 				}
 			}
-			return ((SymmetryRow) row).getSymmetryName();
+			if (column == 1) {
+				return ((SymmetryRow) row).getSymmetryName();
+			}
+			return null;
 		}
 
 		@Override
