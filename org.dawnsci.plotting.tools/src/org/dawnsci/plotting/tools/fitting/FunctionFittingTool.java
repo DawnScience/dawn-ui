@@ -325,16 +325,6 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		menuManager.add(new Separator());
 	}
 
-	private void updateAllParameters() {
-		if (resultFunction != null) {
-			double[] parameterValues = resultFunction.getParameterValues();
-			compFunction.setParameterValues(parameterValues);
-			functionWidget.refresh();
-			compFunctionModified();
-			updateFunctionPlot(false);
-		}
-	}
-	
 	//XXX Consider separating the trace finding and the ROI getting (Abstract method?)
 	/**
 	 * Determines the first user trace and returns the ROI limits for it
@@ -401,6 +391,16 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		}
 	}
 
+	private void updateAllParameters() {
+		if (resultFunction != null) {
+			double[] parameterValues = resultFunction.getParameterValues();
+			compFunction.setParameterValues(parameterValues);
+			functionWidget.refresh();
+			compFunctionModified();
+			updateFunctionPlot(false);
+		}
+	}
+
 	private void updateFunctionPlot(boolean force) {
 		if (!functionWidget.isValid()) {
 			return;
@@ -434,6 +434,27 @@ public class FunctionFittingTool extends AbstractToolPage implements
 			updateFittedPlotJob.schedule();
 		}
 
+	}
+
+	private void findInitialPeaks() {
+		//Get the ranges of the ROI
+		Dataset[] roiLimits = getFirstUserTraceROI();
+		
+		getPlottingSystem().removeTraceListener(traceListener);
+		
+		//Kick off the FindInitialPeaksJob here
+		if (findstartingPeaksJob == null) {
+			findstartingPeaksJob = new FindInitialPeaksJob("Find Initial Peaks");
+		}
+		findstartingPeaksJob.setData(roiLimits[0], roiLimits[1]);
+		findstartingPeaksJob.schedule();
+		
+		//Update the UI elements to show the peak(s)
+		compFunctionModified();
+		
+		getPlottingSystem().addTraceListener(traceListener);
+		getPlottingSystem().repaint();
+		refreshViewer();
 	}
 
 	// TODO this job is sometimes unstopped at shutdown, add to dispose
@@ -575,7 +596,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 				@Override
 				public void run() {
 					
-					//Get the initial peaks and reset the composite function
+					//Get the initial peaks, reset the composite function and update the functionWidget (table)
 					compFunction = FittingUtils.getInitialPeaks(x, y, null);
 					functionWidget.setInput(compFunction);
 					functionWidget.setFittedInput(null);
@@ -794,101 +815,4 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 		return bean;
 	}
-	
-	private void findInitialPeaks() {
-		//Get the ranges of the ROI
-		Dataset[] roiLimits = getFirstUserTraceROI();
-		
-		getPlottingSystem().removeTraceListener(traceListener);
-		
-		//Kick off the FindInitialPeaksJob here
-		if (findstartingPeaksJob == null) {
-			findstartingPeaksJob = new FindInitialPeaksJob("Find Initial Peaks");
-		}
-		findstartingPeaksJob.setData(roiLimits[0], roiLimits[1]);
-		findstartingPeaksJob.schedule();
-		
-		//Update the UI elements to show the peak(s)
-		compFunctionModified();
-		
-		getPlottingSystem().addTraceListener(traceListener);
-		getPlottingSystem().repaint();
-		refreshViewer();
-	}
-	
-//	private void findInitialPeaks() {
-//		System.out.println("Time to find some peaks!");
-//		if (!functionWidget.isValid()) {
-//			return;
-//		}
-//		getPlottingSystem().removeTraceListener(traceListener);
-//		boolean firstTrace = true;
-//		for (ITrace selectedTrace : getPlottingSystem().getTraces()) {
-//			if (selectedTrace instanceof ILineTrace) {
-//				ILineTrace trace = (ILineTrace) selectedTrace;
-//				if (trace.isUserTrace() && firstTrace) {
-//					firstTrace = false;
-//					// We chop x and y by the region bounds. We assume the
-//					// plot is an XAXIS selection therefore the indices in
-//					// y = indices chosen in x.
-//					RectangularROI roi = (RectangularROI) region.getROI();
-//
-//					final double[] p1 = roi.getPointRef();
-//					final double[] p2 = roi.getEndPoint();
-//
-//					// We peak fit only the first of the data sets plotted
-//					// for now.
-//					Dataset x = (Dataset) trace.getXData();
-//					Dataset y = (Dataset) trace.getYData();
-//
-//					try {
-//						Dataset[] a = Generic1DFitter.xintersection(x, y,
-//								p1[0], p2[0]);
-//						x = a[0];
-//						y = a[1];
-//					} catch (Throwable npe) {
-//						continue;
-//					}
-//					
-//				}
-//			}
-//		}
-//	}
-
-//					
-//					
-//					estimate = (ILineTrace) getPlottingSystem().getTrace(
-//							"Estimate");
-//					if (estimate == null) {
-//						estimate = getPlottingSystem().createLineTrace(
-//								"Estimate");
-//						estimate.setUserTrace(false);
-//						estimate.setTraceType(ILineTrace.TraceType.DASH_LINE);
-//						getPlottingSystem().addTrace(estimate);
-//					}
-//
-//					if (compFunction != null) {
-//						for ( IFunction function : compFunction.getFunctions()) {
-//							if (function instanceof IDataBasedFunction) {
-//								IDataBasedFunction dataBasedFunction = (IDataBasedFunction) function;
-//								dataBasedFunction.setData(x, y);
-//							}
-//						}
-//						DoubleDataset functionData = compFunction.calculateValues(x);
-//						estimate.setData(x, functionData);
-//					}
-//
-//					// System.out.println(x);
-//					// System.out.println(y);
-//
-//					getPlottingSystem().repaint();
-//
-//					boolean force = false;
-//					updateFittedPlot(force, x, y);
-//				}
-//			}
-//		}
-//		refreshViewer();
-//		getPlottingSystem().addTraceListener(traceListener);
-
 }
