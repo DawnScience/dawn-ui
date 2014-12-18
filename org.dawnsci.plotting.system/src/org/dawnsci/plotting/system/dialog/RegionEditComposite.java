@@ -14,18 +14,16 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.plotting.draw2d.swtxy.AspectAxis;
 import org.dawnsci.plotting.draw2d.swtxy.RegionArea;
 import org.dawnsci.plotting.draw2d.swtxy.RegionCoordinateSystem;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.dawnsci.plotting.roi.ROIEditTable;
-import org.eclipse.dawnsci.analysis.dataset.roi.SectorROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
-import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -63,10 +61,6 @@ public class RegionEditComposite extends Composite {
 	private Button fillRegion;
 
 	private ROIEditTable roiViewer;
-
-	private Label symmetryLabel;
-
-	private CCombo symmetry;
 
 	private boolean isImplicit;
 
@@ -261,17 +255,6 @@ public class RegionEditComposite extends Composite {
 			});
 		}
 
-		this.symmetryLabel = new Label(this, SWT.NONE);
-		symmetryLabel.setText("Symmetry");		
-		symmetryLabel.setToolTipText("Set the symmetry of the region.");
-		symmetryLabel.setLayoutData(new GridData(0, 0, false, false, 1, 1));
-		
-		this.symmetry = new CCombo(this, SWT.BORDER |SWT.NONE);
-		for (int index : SectorROI.getSymmetriesPossible().keySet()) {
-			symmetry.add(SectorROI.getSymmetryText(index));
-		}
-		symmetry.setLayoutData(new GridData(SWT.FILL, 0, true, false));
-	
 		final Label spacer = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		spacer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
@@ -383,16 +366,6 @@ public class RegionEditComposite extends Composite {
 		showLabel.setSelection(region.isShowLabel());
 		fillRegion.setSelection(region.isFill());
 		
-		if (region.getRegionType()!=RegionType.SECTOR) {
-			GridUtils.setVisible(this.symmetryLabel, false);
-			GridUtils.setVisible(this.symmetry,      false);
-		} else {
-			SectorROI sroi = (SectorROI)editingRegion.getROI();
-			if (sroi!=null) {
-				int sym = sroi.getSymmetry();
-				symmetry.select(sym);
-			}
-		}
 	}
 	
 	public void dispose() {
@@ -423,15 +396,6 @@ public class RegionEditComposite extends Composite {
 		editingRegion.setVisible(visible.getSelection());
 		editingRegion.setShowLabel(showLabel.getSelection());
 		editingRegion.setFill(fillRegion.getSelection());
-		
-		if (editingRegion.getRegionType()==RegionType.SECTOR) {
-			SectorROI sroi = (SectorROI)editingRegion.getROI();
-			if (sroi!=null) {
-				sroi = sroi.copy();
-				sroi.setSymmetry(symmetry.getSelectionIndex());
-				editingRegion.setROI(sroi);
-			}
-		}
 		
         return editingRegion;
 	}
