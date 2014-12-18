@@ -11,13 +11,13 @@ package org.dawnsci.plotting.draw2d.swtxy;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.dawb.common.ui.macro.AxisMacroEvent;
+import org.dawb.common.ui.macro.ColorMacroEvent;
 import org.dawb.common.util.text.NumberUtils;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
-import org.eclipse.dawnsci.macro.api.MacroEventObject;
-import org.eclipse.dawnsci.macro.api.MethodEventObject;
 import org.eclipse.dawnsci.plotting.api.axis.AxisEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.axis.IAxisListener;
@@ -35,6 +35,7 @@ import org.eclipse.nebula.visualization.xygraph.figures.Axis;
 import org.eclipse.nebula.visualization.xygraph.linearscale.ITicksProvider;
 import org.eclipse.nebula.visualization.xygraph.linearscale.LinearScaleTickMarks;
 import org.eclipse.nebula.visualization.xygraph.linearscale.Range;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 /**
@@ -57,26 +58,31 @@ public class AspectAxis extends Axis implements IAxis {
 	}
 	
 	public void setTitle(final String title) {
+		
 		final String oldName = getTitle();
-        super.setTitle(title);
-        
         if (oldName!=null && oldName.equals(title)) return;
         
         // To deal with API and concept of selected axis
         if (ServiceHolder.getMacroService()!=null) {
-        	String methodName = null;
-        	if (isPrimaryAxis()) {
-        		methodName = isYAxis() ? "getSelectedYAxis().setTitle"
-        				               : "getSelectedYAxis().setTitle";
-        		
-        	} else if (oldName!=null && !"".equals(oldName)) {
-        		methodName = "getAxis(\""+oldName+"\").setTitle";
-        	}
-        	if (methodName!=null) {
-        		ServiceHolder.getMacroService().publish(new MethodEventObject("ps",methodName,this,title));
-        	}
+        	ServiceHolder.getMacroService().publish(new AxisMacroEvent("ps",this,title));
+        }
+        super.setTitle(title);
+	}
+	
+	@Override
+	public void setForegroundColor(final Color color) {
+		
+		final Color old = super.getForegroundColor();
+        super.setForegroundColor(color);
+        
+        if (old!=null && old.equals(color)) return;
+        
+        // To deal with API and concept of selected axis
+        if (ServiceHolder.getMacroService()!=null) {
+        	ServiceHolder.getMacroService().publish(new ColorMacroEvent("ps",this,color));
         }
 	}
+
 	
 	private IPreferenceStore store;
 	private IPreferenceStore getPreferenceStore() {

@@ -221,7 +221,9 @@ public class LineTraceImpl implements ILineTrace {
 	}
 
 	public void setName(String name) {
+		if (sys!=null) sys.moveTrace(getName(), name);
 		trace.setInternalName(name);
+		trace.repaint();
 	}
 
 	public String getName() {

@@ -36,12 +36,10 @@ import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.macro.api.IMacroService;
 import org.eclipse.dawnsci.macro.api.MacroEventObject;
-import org.eclipse.dawnsci.macro.api.MethodEventObject;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
 import org.eclipse.dawnsci.plotting.api.IPrintablePlotting;
 import org.eclipse.dawnsci.plotting.api.PlotType;
-import org.eclipse.dawnsci.plotting.api.RemotePlottingSystem;
 import org.eclipse.dawnsci.plotting.api.annotation.IAnnotation;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
@@ -53,6 +51,7 @@ import org.eclipse.dawnsci.plotting.api.preferences.ToolbarConfigurationConstant
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
+import org.eclipse.dawnsci.plotting.api.remote.RemotePlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ColorOption;
 import org.eclipse.dawnsci.plotting.api.trace.IImage3DTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageStackTrace;
@@ -188,7 +187,9 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			logger.error("Unable to register plotting system "+plotName, e);
 		}
 		
-		if (mservice!=null) mservice.publish(new MacroEventObject(this));
+		if (mservice!=null) {
+			mservice.publish(new MacroEventObject(this));
+		}
 
 		// We ignore hint, we create a light weight plot as default because
 		// it looks nice. We swap this for a 3D one if required.
@@ -904,10 +905,19 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	@Override
 	public void renameTrace(final ITrace trace, String name) {
-		if (traceMap!=null) traceMap.remove(trace.getName());
+		if (name!=null && name.equals(trace.getName())) return;
 		trace.setName(name);
 		if (traceMap==null) traceMap = new LinkedHashMap<String, ITrace>(3);
 		traceMap.put(name, trace);
+	}
+	@Override
+	public void moveTrace(final String oldName, String name) {
+		
+		if (name!=null && name.equals(oldName)) return;
+		if (traceMap!=null) {
+			ITrace trace = traceMap.remove(oldName);
+			traceMap.put(name, trace);
+		}
 	}
 
 	public Collection<ITrace> getTraces() {
@@ -942,6 +952,17 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	public void setTitle(final String title) {
 		super.setTitle(title);
 		activeViewer.setTitle(title);		
+	}
+	/**
+	 * Call to set the plot title color.
+	 * @param title
+	 */
+	public void setTitleColor(final Color color) {
+		activeViewer.setTitleColor(color);		
+	}
+	@Override
+	public void setBackgroundColor(final Color color) {
+		activeViewer.setBackgroundColor(color);		
 	}
 
 	public String getTitle() {

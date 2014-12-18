@@ -88,7 +88,6 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 		if (selection instanceof IStructuredSelection) {
 			Object ob = ((IStructuredSelection)selection).getFirstElement();
-			if (ob == null) setPartName("Model");
 			if (ob instanceof OperationDescriptor) {
 				configure.setEnabled(false);
 				OperationDescriptor des = (OperationDescriptor)ob;

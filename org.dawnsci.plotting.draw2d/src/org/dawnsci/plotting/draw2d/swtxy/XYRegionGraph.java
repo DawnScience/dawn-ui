@@ -13,9 +13,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import org.dawb.common.ui.macro.ColorMacroEvent;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.dawnsci.macro.api.IMacroService;
 import org.eclipse.dawnsci.macro.api.MethodEventObject;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
@@ -37,6 +37,7 @@ import org.eclipse.nebula.visualization.xygraph.figures.Trace;
 import org.eclipse.nebula.visualization.xygraph.figures.XYGraph;
 import org.eclipse.nebula.visualization.xygraph.linearscale.AbstractScale.LabelSide;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
@@ -195,8 +196,22 @@ public class XYRegionGraph extends XYGraph {
 	 * @param title the title to set
 	 */
 	public void setTitle(String title) {
+		String oldTitle = getTitle();
+		if (oldTitle!=null && oldTitle.equals(title)) return;
 		super.setTitle(title);
-		if (ServiceHolder.getMacroService()!=null) ServiceHolder.getMacroService().publish(new MethodEventObject("ps", this, title));
+		if (ServiceHolder.getMacroService()!=null) {
+			ServiceHolder.getMacroService().publish(new MethodEventObject("ps", this, title));
+		}
+	}
+	
+	public void setTitleColor(Color titleColor) {
+    
+		Color old = getTitleColor();
+		if (old!=null && old.equals(titleColor)) return;
+		super.setTitleColor(titleColor);
+		if (ServiceHolder.getMacroService()!=null) {
+			ServiceHolder.getMacroService().publish(new ColorMacroEvent("ps", this, titleColor));
+		}
 	}
 
 	/**

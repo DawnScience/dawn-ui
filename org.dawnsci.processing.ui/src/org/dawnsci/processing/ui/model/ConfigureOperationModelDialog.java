@@ -80,16 +80,16 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 		sashForm.setWeights(new int[]{40,60});
 		
 		
-		input = createPlottingSystem(left);
+		input = createPlottingSystem(left,"DialogInput");
 		modelViewer = new OperationModelViewer();
 		modelViewer.createPartControl(left);
 		
-		output = createPlottingSystem(right);
+		output = createPlottingSystem(right,"DialogOutput");
 		left.setWeights(new int[]{70,30});
 		return parent;
 	}
 	
-	private IPlottingSystem createPlottingSystem(Composite right){
+	private IPlottingSystem createPlottingSystem(Composite right, String name){
 		Composite plotComp = new Composite(right, SWT.NONE);
 		plotComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
 		plotComp.setLayout(new GridLayout());
@@ -102,7 +102,7 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 		
 		try {
 			system = PlottingFactory.createPlottingSystem();
-			system.createPlotPart(displayPlotComp, "Slice", actionBarWrapper, PlotType.IMAGE, null);
+			system.createPlotPart(displayPlotComp, name, actionBarWrapper, PlotType.IMAGE, null);
 			
 		} catch (Exception e) {
 			return null;
