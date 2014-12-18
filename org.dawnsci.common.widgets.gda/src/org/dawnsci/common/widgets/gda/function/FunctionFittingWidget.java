@@ -185,12 +185,15 @@ public class FunctionFittingWidget extends Composite implements IFunctionViewer 
 		funcTree = new FunctionTreeViewer(sashForm, functionDescriptorProvider);
 		funcTree.addSelectionChangedListener(new SelectionChangedListener());
 
+		//XXX What is the details panel used for?
 		detailsPanelContainer = new Composite(sashForm, SWT.NONE);
 		detailsPanelContainer.setBackground(ColorConstants.white);
 		detailsPanelContainer.setLayout(new FillLayout());
 
 		sashForm.setBackground(ColorConstants.white);
-		sashForm.setWeights(new int[] { 6, 10 });
+		
+		//Formerly {6, 10}, but having more space for functions seemed more important
+		sashForm.setWeights(new int[] { 9, 1 });
 
 		if (site != null) {
 			IHandlerService serv = (IHandlerService) site
