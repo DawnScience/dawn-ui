@@ -697,6 +697,20 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
         }
 	}
 
+	@Override
+	public void setTitleColor(Color color) {
+		if(xyGraph!=null) {
+			xyGraph.setTitleColor(color);
+		}
+	}
+	
+	@Override
+	public void setBackgroundColor(Color color) {
+		if(xyGraph!=null) {
+			xyGraph.getRegionArea().setBackgroundColor(color);
+		}
+	}
+
 	public void clearTraces() {
 		if (xyGraph!=null) xyGraph.clearTraces();
 	}

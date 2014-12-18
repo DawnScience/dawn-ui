@@ -20,6 +20,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.dawb.common.ui.image.CursorUtils;
+import org.dawb.common.ui.macro.ColorMacroEvent;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.dawnsci.plotting.draw2d.swtxy.selection.SelectionRegionFactory;
 import org.eclipse.dawnsci.macro.api.DeleteEventObject;
@@ -58,6 +59,7 @@ import org.eclipse.nebula.visualization.xygraph.figures.PlotArea;
 import org.eclipse.nebula.visualization.xygraph.figures.Trace;
 import org.eclipse.nebula.visualization.xygraph.undo.ZoomType;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.PaletteData;
 import org.slf4j.Logger;
@@ -132,8 +134,16 @@ public class RegionArea extends PlotArea {
 		});
 
 	}
-	
-	
+
+	public void setBackgroundColor(Color color) {
+
+		Color old = getBackgroundColor();
+		if (old!=null && old.equals(color)) return;
+		super.setBackgroundColor(color);
+		if (ServiceHolder.getMacroService()!=null) {
+			ServiceHolder.getMacroService().publish(new ColorMacroEvent("ps", this, color));
+		}
+	}
 
 	protected ClickEvent createClickEvent(MouseEvent me) {
 		
