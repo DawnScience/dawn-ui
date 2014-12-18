@@ -237,7 +237,6 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 		if (selection instanceof IStructuredSelection) {
 			Object ob = ((IStructuredSelection)selection).getFirstElement();
-			if (ob == null && !viewer.getTable().isDisposed()) viewer.setInput(null);
 			if (ob instanceof ISeriesItemDescriptor) {
 				try {
 					setOperation((IOperation)((ISeriesItemDescriptor)ob).getSeriesObject());

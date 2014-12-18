@@ -369,6 +369,14 @@
             label="Hyper2d"
             visible="false">
       </plotting_tool_page>
+      <plotting_tool_page
+            class="org.dawnsci.plotting.tools.ImageRotateTool"
+            icon="icons/shape_rotate_clockwise.png"
+            id="org.dawnsci.plotting.tools.imageRotateTool"
+            label="Image Rotation"
+            tooltip="A tool used to rotate an Image Region of Interest"
+            visible="true">
+      </plotting_tool_page>
    </extension>
 
   <extension
