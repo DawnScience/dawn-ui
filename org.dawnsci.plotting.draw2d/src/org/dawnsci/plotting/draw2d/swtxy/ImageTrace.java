@@ -161,8 +161,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setName(String newName) {
+		if (plottingSystem!=null) plottingSystem.moveTrace(this.name, newName);
+		this.name = newName;
 	}
 
 	public AspectAxis getXAxis() {

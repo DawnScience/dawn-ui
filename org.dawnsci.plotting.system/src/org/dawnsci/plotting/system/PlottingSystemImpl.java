@@ -907,11 +907,17 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	public void renameTrace(final ITrace trace, String name) {
 		if (name!=null && name.equals(trace.getName())) return;
 		trace.setName(name);
-	}
-	void moveTrace(final ITrace trace, String name) {
-		if (traceMap!=null) traceMap.remove(trace.getName());
 		if (traceMap==null) traceMap = new LinkedHashMap<String, ITrace>(3);
 		traceMap.put(name, trace);
+	}
+	@Override
+	public void moveTrace(final String oldName, String name) {
+		
+		if (name!=null && name.equals(oldName)) return;
+		if (traceMap!=null) {
+			ITrace trace = traceMap.remove(oldName);
+			traceMap.put(name, trace);
+		}
 	}
 
 	public Collection<ITrace> getTraces() {
