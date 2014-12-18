@@ -228,3 +228,4 @@ Export-Package: org.dawnsci.plotting.tools;
    org.eclipse.jface.dialogs",
  org.dawnsci.plotting.tools.window;uses:="org.eclipse.dawnsci.plotting.api.tool,org.eclipse.swt.widgets,org.eclipse.dawnsci.plotting.api.trace"
 Bundle-ActivationPolicy: lazy
+Service-Component: OSGI-INF/*.xml
