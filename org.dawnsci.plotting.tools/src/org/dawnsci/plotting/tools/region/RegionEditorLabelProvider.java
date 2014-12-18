@@ -55,6 +55,9 @@ public class RegionEditorLabelProvider extends ColumnLabelProvider implements IS
 				ret.append(node.getStringValue(), StyledString.DECORATIONS_STYLER);
 			}
 		}
+		if (column == 0) {
+			ret.append(node.getLabel(), StyledString.QUALIFIER_STYLER);
+		}
 		return ret;
 	}
 
