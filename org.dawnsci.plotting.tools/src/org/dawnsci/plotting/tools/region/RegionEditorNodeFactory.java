@@ -35,10 +35,10 @@ public class RegionEditorNodeFactory {
 	 * @param region
 	 * @return a Map of key-value pairs defining a ROI
 	 */
-	public static Map<String, Double> getRegionNodeInfos(IROI roi) {
+	public static Map<String, Object> getRegionNodeInfos(IROI roi) {
 		if (roi == null)
 			return null;
-		Map<String, Double> roiInfos = new LinkedHashMap<String, Double>();
+		Map<String, Object> roiInfos = new LinkedHashMap<String, Object>();
 		if (roi instanceof RectangularROI) {
 			roiInfos.put("X Start", ((RectangularROI)roi).getPointX());
 			roiInfos.put("Y Start", ((RectangularROI)roi).getPointY());
@@ -65,6 +65,7 @@ public class RegionEditorNodeFactory {
 			roiInfos.put("Outer Radius", ((SectorROI)roi).getRadii()[1]);
 			roiInfos.put("Angle 1", ((SectorROI)roi).getAnglesDegrees()[0]);
 			roiInfos.put("Angle 2", ((SectorROI)roi).getAnglesDegrees()[1]);
+			roiInfos.put("Symmetry", ((SectorROI)roi).getSymmetry());
 		} else if (roi instanceof RingROI) {
 			roiInfos.put("X Centre", ((RingROI)roi).getPointX());
 			roiInfos.put("Y Centre", ((RingROI)roi).getPointY());

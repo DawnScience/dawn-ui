@@ -103,23 +103,23 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		node.setDefaultExpanded(true);
 
 		IROI roi = region.getROI();
-		Map<String, Double> roiInfos = RegionEditorNodeFactory.getRegionNodeInfos(roi);
+		Map<String, Object> roiInfos = RegionEditorNodeFactory.getRegionNodeInfos(roi);
 		if (roiInfos == null)
 			return null;
-		Set<Entry<String,Double>> set = roiInfos.entrySet();
-		for (Entry<String, Double> entry : set) {
+		Set<Entry<String,Object>> set = roiInfos.entrySet();
+		for (Entry<String, Object> entry : set) {
 			String key = entry.getKey();
 			if (key.contains(RegionEditorNodeFactory.ANGLE)) {
 				if (node.isAngleInRadian())
-					createAngleNode(node, entry.getKey(), true, incrementAngle, pointFormat, SI.RADIAN, Math.toRadians(entry.getValue()));
+					createAngleNode(node, entry.getKey(), true, incrementAngle, pointFormat, SI.RADIAN, Math.toRadians((Double)entry.getValue()));
 				else
-					createAngleNode(node, entry.getKey(), true, incrementAngle, angleFormat, NonSI.DEGREE_ANGLE, entry.getValue());
+					createAngleNode(node, entry.getKey(), true, incrementAngle, angleFormat, NonSI.DEGREE_ANGLE, (Double)entry.getValue());
 			} else if (key.contains(RegionEditorNodeFactory.INTENSITY))
 				createLengthNode(node, key, false, increment, intensityFormat, Dimensionless.UNIT, maxIntensity);
 			else if (key.contains(RegionEditorNodeFactory.SUM))
 				createLengthNode(node, key, false, increment, sumFormat, Dimensionless.UNIT, sum);
 			else
-				createLengthNode(node, key, true, increment, pointFormat, NonSI.PIXEL, entry.getValue());
+				createLengthNode(node, key, true, increment, pointFormat, NonSI.PIXEL, (Double)entry.getValue());
 		}
 		return node;
 	}
@@ -287,10 +287,10 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 				if (label.equals(region.getName())) {
 					List<TreeNode> children = regionNode.getChildren();
 					IROI roi = region.getROI();
-					Map<String, Double> roiInfos = RegionEditorNodeFactory.getRegionNodeInfos(roi);
-					Set<Entry<String,Double>> set = roiInfos.entrySet();
+					Map<String, Object> roiInfos = RegionEditorNodeFactory.getRegionNodeInfos(roi);
+					Set<Entry<String,Object>> set = roiInfos.entrySet();
 					int i = 0;
-					for (Entry<String, Double> entry : set) {
+					for (Entry<String, Object> entry : set) {
 						NumericNode<?> aChild = (NumericNode<?>) children.get(i);
 						String key = entry.getKey();
 						if (key.contains("Intensity"))
@@ -298,9 +298,9 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 						else if (key.contains("Sum"))
 							aChild.setDoubleValue(sum);
 						else if (key.contains("Angle") && regionNode.isAngleInRadian())
-							aChild.setDoubleValue(Math.toRadians(entry.getValue()));
+							aChild.setDoubleValue(Math.toRadians((Double)entry.getValue()));
 						else
-							aChild.setDoubleValue(entry.getValue());
+							aChild.setDoubleValue((Double)entry.getValue());
 						i++;
 					}
 				}
