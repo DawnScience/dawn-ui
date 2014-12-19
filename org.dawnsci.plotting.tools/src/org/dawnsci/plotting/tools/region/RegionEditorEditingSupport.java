@@ -40,6 +40,9 @@ public class RegionEditorEditingSupport extends ValueEditingSupport {
 		case 1:
 			if (element instanceof NumericNode)
 				return createNumericEditor((NumericNode<?>)element);
+			if (element instanceof ComboNode) {
+				return createComboEditor((ComboNode)element);
+			}
 			break;
 		case 2:
 			if (element instanceof ComboNode)
@@ -106,9 +109,13 @@ public class RegionEditorEditingSupport extends ValueEditingSupport {
 				return false;
 			return ((RegionEditorNode)element).isEditable();
 		case 1:
-			if (!(element instanceof NumericNode<?>))
-				return false;
-			return ((NumericNode<?>)element).isEditable();
+			if (element instanceof NumericNode<?>) {
+				return ((NumericNode<?>)element).isEditable();
+			}
+			else if (element instanceof ComboNode) {
+				return ((ComboNode)element).isEditable();
+			}
+			return false;
 		case 3:
 			if (!(element instanceof RegionEditorNode))
 				return false;
@@ -138,6 +145,10 @@ public class RegionEditorEditingSupport extends ValueEditingSupport {
 			if (element instanceof NumericNode<?>) {
 				NumericNode<?> node = (NumericNode<?>)element;
 				return node.getDoubleValue();
+			}
+			else if (element instanceof ComboNode) {
+				ComboNode node = (ComboNode) element;
+				return node.getValue();
 			}
 			break;
 		case 2:
@@ -182,6 +193,10 @@ public class RegionEditorEditingSupport extends ValueEditingSupport {
 				NumericNode<?> node = (NumericNode<?>)element;
 				node.setDoubleValue((Double)value);
 			} 
+			else if (element instanceof ComboNode) {
+				ComboNode node = (ComboNode)element;
+				node.setValue((Integer) value);
+			}
 			break;
 		case 2:
 			if (element instanceof ComboNode) {

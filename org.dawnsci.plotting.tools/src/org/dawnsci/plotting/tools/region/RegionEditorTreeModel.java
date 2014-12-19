@@ -26,9 +26,12 @@ import javax.swing.tree.TreeNode;
 import org.dawnsci.common.widgets.tree.AbstractNodeModel;
 import org.dawnsci.common.widgets.tree.AmountEvent;
 import org.dawnsci.common.widgets.tree.AmountListener;
+import org.dawnsci.common.widgets.tree.ComboNode;
 import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.common.widgets.tree.UnitEvent;
 import org.dawnsci.common.widgets.tree.UnitListener;
+import org.dawnsci.common.widgets.tree.ValueEvent;
+import org.dawnsci.common.widgets.tree.ValueListener;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.RegionEditorConstants;
 import org.dawnsci.plotting.tools.utils.ToolUtils;
@@ -103,25 +106,53 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		node.setDefaultExpanded(true);
 
 		IROI roi = region.getROI();
-		Map<String, Double> roiInfos = RegionEditorNodeFactory.getRegionNodeInfos(roi);
+		Map<String, Object> roiInfos = RegionEditorNodeFactory.getRegionNodeInfos(roi);
 		if (roiInfos == null)
 			return null;
-		Set<Entry<String,Double>> set = roiInfos.entrySet();
-		for (Entry<String, Double> entry : set) {
+		Set<Entry<String,Object>> set = roiInfos.entrySet();
+		for (Entry<String, Object> entry : set) {
 			String key = entry.getKey();
 			if (key.contains(RegionEditorNodeFactory.ANGLE)) {
 				if (node.isAngleInRadian())
-					createAngleNode(node, entry.getKey(), true, incrementAngle, pointFormat, SI.RADIAN, Math.toRadians(entry.getValue()));
+					createAngleNode(node, entry.getKey(), true, incrementAngle, pointFormat, SI.RADIAN, Math.toRadians((Double)entry.getValue()));
 				else
-					createAngleNode(node, entry.getKey(), true, incrementAngle, angleFormat, NonSI.DEGREE_ANGLE, entry.getValue());
+					createAngleNode(node, entry.getKey(), true, incrementAngle, angleFormat, NonSI.DEGREE_ANGLE, (Double)entry.getValue());
 			} else if (key.contains(RegionEditorNodeFactory.INTENSITY))
 				createLengthNode(node, key, false, increment, intensityFormat, Dimensionless.UNIT, maxIntensity);
 			else if (key.contains(RegionEditorNodeFactory.SUM))
 				createLengthNode(node, key, false, increment, sumFormat, Dimensionless.UNIT, sum);
+			else if (key.contains(RegionEditorNodeFactory.SYMMETRY))
+				createSymmetryNode(node, key, true, (Integer)entry.getValue());
 			else
-				createLengthNode(node, key, true, increment, pointFormat, NonSI.PIXEL, entry.getValue());
+				createLengthNode(node, key, true, increment, pointFormat, NonSI.PIXEL, (Double)entry.getValue());
 		}
 		return node;
+	}
+
+	private void createSymmetryNode(final RegionEditorNode regionNode, String nodeName,
+			boolean editable, int value) {
+		Collection<String> items = SectorROI.getSymmetriesPossible().values();
+		final String[] symmetries = (String[]) items.toArray(new String[items.size()]);
+		final ComboNode node = new ComboNode(nodeName, symmetries, regionNode);
+		node.setEditable(editable);
+		node.setTooltip("Symmetry type of sector ROI");
+		node.setValue(value);
+		if (editable) {
+			node.addValueListener(new ValueListener() {
+				@Override
+				public void valueChanged(ValueEvent evt) {
+					try {
+						isTreeModified = true;
+						if(!isRegionDragged)
+							setValue(regionNode);
+					} finally {
+						isTreeModified = false;
+					}
+				}
+			});
+		}
+		registerNode(node);
+
 	}
 
 	private void createAngleNode(final RegionEditorNode regionNode, String nodeName, boolean editable,
@@ -235,7 +266,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 			else
 				((LinearROI) roi).setAngledegrees(angle);
 		} else if (roi instanceof SectorROI) {
-			if (regionNode.getChildCount() == 6) {
+			if (regionNode.getChildCount() == 7) {
 				double xStart = ((NumericNode<?>)regionNode.getChildAt(0)).getDoubleValue();
 				double yStart = ((NumericNode<?>)regionNode.getChildAt(1)).getDoubleValue();
 				double innerRadius = ((NumericNode<?>)regionNode.getChildAt(2)).getDoubleValue();
@@ -248,6 +279,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 					((SectorROI) roi).setAngles(new double[] {angle1, angle2});
 				else
 					((SectorROI) roi).setAnglesdegrees(new double[] {angle1, angle2});
+				((SectorROI) roi).setSymmetry((Integer) ((ComboNode)regionNode.getChildAt(6)).getValue());
 			}
 		} else if (roi instanceof RingROI) {
 			double xStart = ((NumericNode<?>)regionNode.getChildAt(0)).getDoubleValue();
@@ -287,21 +319,30 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 				if (label.equals(region.getName())) {
 					List<TreeNode> children = regionNode.getChildren();
 					IROI roi = region.getROI();
-					Map<String, Double> roiInfos = RegionEditorNodeFactory.getRegionNodeInfos(roi);
-					Set<Entry<String,Double>> set = roiInfos.entrySet();
+					Map<String, Object> roiInfos = RegionEditorNodeFactory.getRegionNodeInfos(roi);
+					Set<Entry<String,Object>> set = roiInfos.entrySet();
 					int i = 0;
-					for (Entry<String, Double> entry : set) {
-						NumericNode<?> aChild = (NumericNode<?>) children.get(i);
-						String key = entry.getKey();
-						if (key.contains("Intensity"))
-							aChild.setDoubleValue(maxIntensity);
-						else if (key.contains("Sum"))
-							aChild.setDoubleValue(sum);
-						else if (key.contains("Angle") && regionNode.isAngleInRadian())
-							aChild.setDoubleValue(Math.toRadians(entry.getValue()));
-						else
-							aChild.setDoubleValue(entry.getValue());
-						i++;
+					for (Entry<String, Object> entry : set) {
+						if (children.get(i) instanceof NumericNode<?>) {
+							NumericNode<?> aChild = (NumericNode<?>) children.get(i);
+							String key = entry.getKey();
+							if (key.contains("Intensity"))
+								aChild.setDoubleValue(maxIntensity);
+							else if (key.contains("Sum"))
+								aChild.setDoubleValue(sum);
+							else if (key.contains("Angle") && regionNode.isAngleInRadian())
+								aChild.setDoubleValue(Math.toRadians((Double)entry.getValue()));
+							else
+								aChild.setDoubleValue((Double)entry.getValue());
+							i++;
+						}
+						else if (children.get(i) instanceof ComboNode) {
+							ComboNode aChild = (ComboNode) children.get(i);
+							String key = entry.getKey();
+							if (key.contains("Symmetry"))
+								aChild.setValue(entry.getValue());
+							i++;
+						}
 					}
 				}
 			}

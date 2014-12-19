@@ -80,7 +80,7 @@ public class FunctionTreeViewer implements IFunctionViewer {
 
 	public FunctionTreeViewer(final Composite parent,
 			IFunctionDescriptorProvider functionDescriptorProvider) {
-		Composite composite = new Composite(parent, 0);
+		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new FillLayout());
 		treeViewer = new TreeViewer(composite, SWT.BORDER | SWT.FULL_SELECTION);
 
