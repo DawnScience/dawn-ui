@@ -29,6 +29,7 @@ public class RegionEditorNodeFactory {
 	public static final String ANGLE = "Angle";
 	public static final String INTENSITY = "Intensity";
 	public static final String SUM = "Sum";
+	public static final String SYMMETRY = "Symmetry";
 
 	/**
 	 * 
