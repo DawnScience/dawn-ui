@@ -916,6 +916,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		if (name!=null && name.equals(oldName)) return;
 		if (traceMap!=null) {
 			ITrace trace = traceMap.remove(oldName);
+System.out.println("Moved "+oldName+" to "+name);
 			traceMap.put(name, trace);
 		}
 	}
