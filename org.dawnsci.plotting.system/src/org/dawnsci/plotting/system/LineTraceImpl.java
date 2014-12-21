@@ -8,6 +8,7 @@
  */
 package org.dawnsci.plotting.system;
 
+import org.dawb.common.ui.macro.ColorMacroEvent;
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -15,6 +16,10 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.IErrorDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
+import org.eclipse.dawnsci.macro.api.IMacroService;
+import org.eclipse.dawnsci.macro.api.MacroEventObject;
+import org.eclipse.dawnsci.macro.api.MacroUtils;
+import org.eclipse.dawnsci.macro.api.MethodEventObject;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
@@ -24,8 +29,11 @@ import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.nebula.visualization.xygraph.dataprovider.IDataProvider;
+import org.eclipse.nebula.visualization.xygraph.figures.Axis;
+import org.eclipse.nebula.visualization.xygraph.figures.ITraceListener;
 import org.eclipse.nebula.visualization.xygraph.figures.Trace;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 /**
@@ -34,7 +42,15 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
  * @author Matthew Gerring
  *
  */
-public class LineTraceImpl implements ILineTrace {
+public class LineTraceImpl implements ILineTrace, ITraceListener{
+
+	private static IMacroService mservice;
+	public static void setMacroService(IMacroService s) {
+		mservice = s;
+	}
+	public LineTraceImpl() { // Used for OSGi
+		
+	}
 
 	private LineTrace          trace;
 	private String             dataName;
@@ -52,6 +68,8 @@ public class LineTraceImpl implements ILineTrace {
 			trace.setErrorBarEnabled(getPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS));
 			trace.setErrorBarColor(ColorConstants.red);
 		}
+		
+		trace.addListener(this);
 	}
 	
 	private IPreferenceStore getPreferenceStore() {
@@ -220,9 +238,12 @@ public class LineTraceImpl implements ILineTrace {
 		trace.setAntiAliasing(antiAliasing);
 	}
 
-	public void setName(String name) {
+	public void setName(String name) {		
 		if (sys!=null) sys.moveTrace(getName(), name);
 		trace.setInternalName(name);
+		if (!name.equals(trace.getName())) {
+			trace.setName(name, false);
+		}
 		trace.repaint();
 	}
 
@@ -460,7 +481,11 @@ public class LineTraceImpl implements ILineTrace {
 	}
 	
 	public void dispose() {
-		if (trace!=null) trace.dispose();
+		
+		if (trace!=null) {
+			trace.removeListener(this);
+			trace.dispose();
+		}
 		sys=null;
 	}
 	@Override
@@ -484,6 +509,51 @@ public class LineTraceImpl implements ILineTrace {
 
 	public void setDataName(String dataName) {
 		this.dataName = dataName;
+	}
+
+	@Override
+	public void traceNameChanged(Trace trace, final String oldName, final String newName) {
+		if (trace == this.trace && !newName.equals(oldName)) {
+			
+			if (mservice!=null) {
+				mservice.publish(new MacroEventObject(this, MacroUtils.getLegalName(newName)+" = ps.getTrace(\""+oldName+"\")", true));
+			}
+
+			Display.getDefault().asyncExec(new Runnable() {
+				public void run() {
+					setName(newName);
+				}
+			});
+
+			if (mservice!=null) {
+			    mservice.publish(new MethodEventObject(MacroUtils.getLegalName(newName), "setName", this, newName));
+			}
+		}
+	}
+
+	@Override
+	public void traceYAxisChanged(Trace trace, Axis oldName, Axis newName) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void traceTypeChanged(
+			Trace trace,
+			org.eclipse.nebula.visualization.xygraph.figures.Trace.TraceType old,
+			org.eclipse.nebula.visualization.xygraph.figures.Trace.TraceType newTraceType) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void traceColorChanged(Trace trace, Color old, Color newColor) {
+		if (trace == this.trace && old!=null && old.equals(newColor)) return;
+		if (mservice!=null) {
+			ColorMacroEvent evt = new ColorMacroEvent(MacroUtils.getLegalName(getName()), "setTraceColor", this, newColor);
+			evt.prepend(MacroUtils.getLegalName(getName())+" = ps.getTrace(\""+getName()+"\")");
+			mservice.publish(evt);
+		}
 	}
 
 }

@@ -47,13 +47,16 @@ public class RegionEditorLabelProvider extends ColumnLabelProvider implements IS
 	}
 
 	private StyledString getStyledText(StyledString ret, ComboNode node) {
-		if (column == 2) { // Unit
+		if (column == 1) { // Value
 			if (node.isEditable()) {
 				ret.append(node.getStringValue());
 				ret.append(" *", StyledString.QUALIFIER_STYLER);
 			} else {
 				ret.append(node.getStringValue(), StyledString.DECORATIONS_STYLER);
 			}
+		}
+		if (column == 0) {
+			ret.append(node.getLabel(), StyledString.QUALIFIER_STYLER);
 		}
 		return ret;
 	}
