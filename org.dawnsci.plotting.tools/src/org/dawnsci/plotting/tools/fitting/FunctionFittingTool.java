@@ -440,6 +440,9 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		//Get the ranges of the ROI
 		final Dataset[] roiLimits = getFirstUserTraceROI();
 		
+		PeakPrepopulateTool peakFindOptions = new PeakPrepopulateTool(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
+		peakFindOptions.open();
+		
 		getPlottingSystem().removeTraceListener(traceListener);
 		
 		//Kick off the FindInitialPeaksJob here
