@@ -116,6 +116,7 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 		angleSpinner.setDigits(1);
 		angleSpinner.setToolTipText("Rotates the original image by n degrees");
 		angleSpinner.setSelection(0);
+		angleSpinner.setMinimum(-3600);
 		angleSpinner.setMaximum(3600);
 		angleSpinner.setIncrement(5);
 		GridData gridData = new GridData(SWT.FILL, SWT.TOP, false, false); 
