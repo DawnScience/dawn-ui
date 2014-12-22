@@ -8,6 +8,7 @@
  */
 package org.dawnsci.plotting.tools;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -33,8 +34,11 @@ import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -57,6 +61,8 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 	private RotateJob rotationJob;
 	private List<IDataset> axes;
 	private IRegion xHair, yHair;
+	private String xName;
+	private String yName;
 	private final static String X_PREFIX = "X Profile";
 	private final static String Y_PREFIX = "Y Profile";
 
@@ -107,7 +113,7 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 		container.setLayout(new GridLayout(1, false));
 		
 		Composite angleComp = new Composite(container, SWT.NONE | SWT.TOP);
-		angleComp.setLayout(new GridLayout(2, false));
+		angleComp.setLayout(new GridLayout(3, false));
 
 		Label labelAngle = new Label(angleComp, SWT.NONE);
 		labelAngle.setText("Rotation angle");
@@ -136,12 +142,27 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 				rotationJob.schedule();
 			}
 		});
+
+		Button centreROIButton = new Button(angleComp, SWT.PUSH);
+		centreROIButton.setText("Centre");
+		centreROIButton.setToolTipText("Centres the Vertical and Horizontal ROIs positions");
+		centreROIButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				if (rotatedSystem == null || rotatedSystem.getTraces().isEmpty())
+					return;
+				RectangularROI[] rois = getXYCenteredROIs();
+				if (rois[0] != null)
+					xHair.setROI(rois[0]);
+				if (rois[1] != null)
+					yHair.setROI(rois[1]);
+			}
+		});
 		
 		final IPageSite site = getSite();
 		IActionBars actionBars = (site != null) ? site.getActionBars() : null;
 
-		rotatedSystem.createPlotPart(container, getTitle(), actionBars,
-				PlotType.IMAGE, null);
+		rotatedSystem.createPlotPart(container, getTitle(), actionBars, PlotType.IMAGE, null);
 		rotatedSystem.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		IImageTrace image = getImageTrace();
 		IDataset data = image != null ? image.getData() : null;
@@ -158,35 +179,60 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 		return (selection / Math.pow(10, digits));
 	}
 
+	private RectangularROI[] getXYCenteredROIs() {
+		IImageTrace trace = (IImageTrace) rotatedSystem.getTraces().iterator().next();
+		Collection<IRegion> regions = rotatedSystem.getRegions();
+		RectangularROI xRoi = null, yRoi = null; 
+		if (trace != null) {
+			if (regions != null && !regions.isEmpty()) {
+				Object[] regionsArray = regions.toArray();
+				for (Object regionObj : regionsArray) {
+					IRegion region = (IRegion)regionObj;
+					if (region.getName().equals(xName)) {
+						xRoi = (RectangularROI) region.getROI();
+						xRoi.setPoint(new double[] {trace.getData().getShape()[0] / 2, 0});
+					}
+					if (region.getName().equals(yName)) {
+						yRoi = (RectangularROI) region.getROI();
+						yRoi.setPoint(new double[] {0, trace.getData().getShape()[1] / 2});
+					}
+				}
+			} else {
+				xRoi = new RectangularROI(trace.getData().getShape()[0] / 2, 0,
+						200, 200, 0);
+				xRoi.setName(xName);
+				yRoi = new RectangularROI(0, trace.getData().getShape()[1] / 2,
+						200, 200, 0);
+				yRoi.setName(yName);
+			}
+		}
+		return new RectangularROI[] { xRoi, yRoi };
+	}
+
 	private void createRegions() {
 		if (rotatedSystem == null || rotatedSystem.getTraces().isEmpty())
 			return;
-		IImageTrace trace = (IImageTrace) rotatedSystem.getTraces().iterator().next();
-		RectangularROI xRoi = null, yRoi = null; 
-		if (trace != null) {
-			xRoi = new RectangularROI(trace.getData().getShape()[0] / 2, 0, 200, 200, 0);
-			yRoi = new RectangularROI(0, trace.getData().getShape()[1] / 2, 200, 200, 0);
-		}
+		RectangularROI[] rois = getXYCenteredROIs();
 		try {
 			if (xHair == null
 					|| rotatedSystem.getRegion(xHair.getName()) == null) {
-				this.xHair = rotatedSystem.createRegion(
-						RegionUtils.getUniqueName(Y_PREFIX,
-								rotatedSystem),
+				this.xName = RegionUtils.getUniqueName(Y_PREFIX,
+						rotatedSystem);
+				this.xHair = rotatedSystem.createRegion(xName,
 						IRegion.RegionType.XAXIS_LINE);
-				if (xRoi != null)
-					xHair.setROI(xRoi);
+				if (rois[0] != null)
+					xHair.setROI(rois[0]);
 				addRegion("Updating x cross hair", xHair);
 			}
 
 			if (yHair == null
 					|| rotatedSystem.getRegion(yHair.getName()) == null) {
-				this.yHair = rotatedSystem.createRegion(
-						RegionUtils.getUniqueName(X_PREFIX,
-								getPlottingSystem()),
+				this.yName = RegionUtils.getUniqueName(X_PREFIX,
+						getPlottingSystem());
+				this.yHair = rotatedSystem.createRegion(yName,
 						IRegion.RegionType.YAXIS_LINE);
-				if (yRoi != null)
-					yHair.setROI(yRoi);
+				if (rois[1] != null)
+					yHair.setROI(rois[1]);
 				addRegion("Updating x cross hair", yHair);
 			}
 		} catch (Exception ne) {
@@ -271,6 +317,7 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 		protected IStatus run(IProgressMonitor monitor) {
 			try {
 				IDataset rotated = transformer.rotate(image, angle);
+//				rotated = MapTo2DUtils.remap2Dto2DSplitting(rotated, xO, yO, xRange, xNumber, yRange, yNumber);
 				rotated.setName("rotated-" + image.getName());
 				rotatedSystem.updatePlot2D(rotated, axes, monitor);
 			} catch (Exception e1) {
