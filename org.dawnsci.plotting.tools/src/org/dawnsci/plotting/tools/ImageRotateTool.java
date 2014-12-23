@@ -21,6 +21,7 @@ import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.MouseListener;
@@ -48,6 +49,8 @@ import org.eclipse.ui.part.IPageSite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.diffraction.powder.MapTo2DUtils;
+
 public class ImageRotateTool extends AbstractToolPage implements IROIListener, MouseListener{
 
 	private Logger logger = LoggerFactory.getLogger(ImageRotateTool.class);
@@ -65,6 +68,8 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 	private String yName;
 	private final static String X_PREFIX = "X Profile";
 	private final static String Y_PREFIX = "Y Profile";
+	// shape of resulting image (bounding box)
+	private boolean hasSameShape = true;
 
 	public ImageRotateTool() {
 		super();
@@ -113,7 +118,7 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 		container.setLayout(new GridLayout(1, false));
 		
 		Composite angleComp = new Composite(container, SWT.NONE | SWT.TOP);
-		angleComp.setLayout(new GridLayout(3, false));
+		angleComp.setLayout(new GridLayout(4, false));
 
 		Label labelAngle = new Label(angleComp, SWT.NONE);
 		labelAngle.setText("Rotation angle");
@@ -131,15 +136,7 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 		angleSpinner.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
-				angle = getSpinnerAngle();
-				if (rotationJob == null) {
-					rotationJob = new RotateJob();
-					rotationJob.setPriority(Job.INTERACTIVE);
-				}
-				if (rotationJob.getState() == Job.RUNNING)
-					rotationJob.cancel();
-				rotationJob.setAngle(angle);
-				rotationJob.schedule();
+				rotate();
 			}
 		});
 
@@ -158,6 +155,18 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 					yHair.setROI(rois[1]);
 			}
 		});
+
+		final Button resizeBBoxButton = new Button(angleComp, SWT.CHECK);
+		resizeBBoxButton.setText("Resize Bounding Box");
+		resizeBBoxButton.setToolTipText("");
+		resizeBBoxButton.setSelection(false);
+		resizeBBoxButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				hasSameShape = !resizeBBoxButton.getSelection();
+				rotate();
+			}
+		});
 		
 		final IPageSite site = getSite();
 		IActionBars actionBars = (site != null) ? site.getActionBars() : null;
@@ -171,6 +180,18 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 			axes = getImageTrace().getAxes();
 			rotatedSystem.updatePlot2D(data, axes, null);
 		}
+	}
+
+	private void rotate() {
+		angle = getSpinnerAngle();
+		if (rotationJob == null) {
+			rotationJob = new RotateJob();
+			rotationJob.setPriority(Job.INTERACTIVE);
+		}
+		if (rotationJob.getState() == Job.RUNNING)
+			rotationJob.cancel();
+		rotationJob.setAngle(angle);
+		rotationJob.schedule();
 	}
 
 	private double getSpinnerAngle() {
@@ -316,10 +337,18 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			try {
-				IDataset rotated = transformer.rotate(image, angle);
+//				List<IAxis> axes = rotatedSystem.getAxes();
+//				IAxis xAxis = axes.get(0), yAxis = axes.get(1);
+				IDataset rotated = transformer.rotate(image, angle, hasSameShape);
+//				double[] xRange = new double[]{xAxis.getLower(), xAxis.getUpper()}, 
+//						yRange = new double[]{yAxis.getUpper(), yAxis.getLower()};
+//				IImageTrace trace = (IImageTrace)rotatedSystem.getTraces().iterator().next();
+//				List<IDataset> axesD = trace.getAxes();
+//				IDataset xO = axesD.get(0), yO = axesD.get(1);
+//				int xNumber = (int)xAxis.getUpper(), yNumber = (int)yAxis.getLower();
 //				rotated = MapTo2DUtils.remap2Dto2DSplitting(rotated, xO, yO, xRange, xNumber, yRange, yNumber);
 				rotated.setName("rotated-" + image.getName());
-				rotatedSystem.updatePlot2D(rotated, axes, monitor);
+				rotatedSystem.updatePlot2D(rotated, ImageRotateTool.this.axes, monitor);
 			} catch (Exception e1) {
 				logger.error("Error rotating image:" + e1.getMessage());
 				return Status.CANCEL_STATUS;
