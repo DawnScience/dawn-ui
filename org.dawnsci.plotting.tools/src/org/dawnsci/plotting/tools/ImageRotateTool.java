@@ -8,7 +8,7 @@
  */
 package org.dawnsci.plotting.tools;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -17,11 +17,13 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.image.IImageTransform;
-import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
+import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
+import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
+import org.eclipse.dawnsci.analysis.dataset.roi.GridROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
-import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.MouseListener;
@@ -51,7 +53,8 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.MapTo2DUtils;
 
-public class ImageRotateTool extends AbstractToolPage implements IROIListener, MouseListener{
+public class ImageRotateTool extends AbstractToolPage implements IROIListener,
+		MouseListener {
 
 	private Logger logger = LoggerFactory.getLogger(ImageRotateTool.class);
 	private Spinner angleSpinner;
@@ -63,13 +66,12 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 	private ITraceListener traceListener;
 	private RotateJob rotationJob;
 	private List<IDataset> axes;
-	private IRegion xHair, yHair;
-	private String xName;
-	private String yName;
-	private final static String X_PREFIX = "X Profile";
-	private final static String Y_PREFIX = "Y Profile";
 	// shape of resulting image (bounding box)
 	private boolean hasSameShape = true;
+	protected boolean hasAxesRemapped;
+	private IRegion gridRegion;
+	private final static String PREFIX = "Grid Region";
+	private String gridName;
 
 	public ImageRotateTool() {
 		super();
@@ -101,6 +103,7 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 
 	/**
 	 * Injected by OSGI
+	 * 
 	 * @param it
 	 */
 	public static void setImageTransform(IImageTransform it) {
@@ -116,13 +119,14 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 	public void createControl(Composite parent) {
 		container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(1, false));
-		
+
 		Composite angleComp = new Composite(container, SWT.NONE | SWT.TOP);
 		angleComp.setLayout(new GridLayout(4, false));
 
 		Label labelAngle = new Label(angleComp, SWT.NONE);
 		labelAngle.setText("Rotation angle");
-		labelAngle.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		labelAngle.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false,
+				false));
 		angleSpinner = new Spinner(angleComp, SWT.BORDER);
 		angleSpinner.setDigits(1);
 		angleSpinner.setToolTipText("Rotates the original image by n degrees");
@@ -130,7 +134,7 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 		angleSpinner.setMinimum(-3600);
 		angleSpinner.setMaximum(3600);
 		angleSpinner.setIncrement(5);
-		GridData gridData = new GridData(SWT.FILL, SWT.TOP, false, false); 
+		GridData gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
 		gridData.widthHint = 50;
 		angleSpinner.setLayoutData(gridData);
 		angleSpinner.addModifyListener(new ModifyListener() {
@@ -140,25 +144,10 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 			}
 		});
 
-		Button centreROIButton = new Button(angleComp, SWT.PUSH);
-		centreROIButton.setText("Centre");
-		centreROIButton.setToolTipText("Centres the Vertical and Horizontal ROIs positions");
-		centreROIButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent event) {
-				if (rotatedSystem == null || rotatedSystem.getTraces().isEmpty())
-					return;
-				RectangularROI[] rois = getXYCenteredROIs();
-				if (rois[0] != null)
-					xHair.setROI(rois[0]);
-				if (rois[1] != null)
-					yHair.setROI(rois[1]);
-			}
-		});
-
 		final Button resizeBBoxButton = new Button(angleComp, SWT.CHECK);
 		resizeBBoxButton.setText("Resize Bounding Box");
-		resizeBBoxButton.setToolTipText("");
+		resizeBBoxButton
+				.setToolTipText("Resize the Bounding Box and do not crop the resulting rotated image");
 		resizeBBoxButton.setSelection(false);
 		resizeBBoxButton.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -167,19 +156,72 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 				rotate();
 			}
 		});
-		
+
+		final Button remapAxes = new Button(angleComp, SWT.CHECK);
+		remapAxes.setText("Remap Axes");
+		remapAxes.setToolTipText("");
+		remapAxes.setSelection(false);
+		remapAxes.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				hasAxesRemapped = remapAxes.getSelection();
+				remapAxes(hasAxesRemapped);
+				rotate();
+			}
+		});
+
 		final IPageSite site = getSite();
 		IActionBars actionBars = (site != null) ? site.getActionBars() : null;
 
-		rotatedSystem.createPlotPart(container, getTitle(), actionBars, PlotType.IMAGE, null);
-		rotatedSystem.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		rotatedSystem.createPlotPart(container, getTitle(), actionBars,
+				PlotType.IMAGE, null);
+		rotatedSystem.getPlotComposite().setLayoutData(
+				new GridData(SWT.FILL, SWT.FILL, true, true));
 		IImageTrace image = getImageTrace();
 		IDataset data = image != null ? image.getData() : null;
-		if (data !=  null) {
+		if (data != null) {
 			this.image = data;
 			axes = getImageTrace().getAxes();
 			rotatedSystem.updatePlot2D(data, axes, null);
 		}
+	}
+
+	protected void remapAxes(boolean hasAxesRemapped) {
+		if (hasAxesRemapped) {
+			IImageTrace trace = (IImageTrace) getPlottingSystem().getTraces()
+					.iterator().next();
+			List<IDataset> axes = trace.getAxes();
+			IDataset xAxis = axes.get(0), yAxis = axes.get(1);
+			double[] xRange = new double[] { xAxis.min().doubleValue(),
+					xAxis.max().doubleValue() }, yRange = new double[] {
+					yAxis.min().doubleValue(), yAxis.max().doubleValue() };
+			double xRangeValue = (xRange[1] - xRange[0]);
+			double yRangeValue = (yRange[1] - yRange[0]);
+			int[] shape = trace.getData().getShape();
+			double xStep = xRangeValue / shape[1];
+			double yStep = yRangeValue / shape[0];
+			double newStep = xStep;
+			if (yStep < xStep) {
+				newStep = yStep;
+			}
+			int xNumber = (int) (xRangeValue / newStep);
+			int yNumber = (int) (yRangeValue / newStep);
+			List<Dataset> meshAxes = DatasetUtils.meshGrid(
+					DatasetUtils.convertToDataset(yAxis),
+					DatasetUtils.convertToDataset(xAxis));
+
+			image = MapTo2DUtils.remap2Dto2DSplitting(trace.getData(),
+					meshAxes.get(0), meshAxes.get(1), yRange, yNumber, xRange,
+					xNumber);
+			image = DatasetUtils.transpose(image);
+			this.axes = new ArrayList<IDataset>();
+			this.axes.add(DoubleDataset.createRange(xRange[0], xRange[1], newStep));//  meshAxes.get(0));
+			this.axes.add(DoubleDataset.createRange(yRange[0], yRange[1], newStep));
+		} else {
+			image = getImageTrace().getData();
+			this.axes = getImageTrace().getAxes();
+		}
+		image.setName(getImageTrace().getDataName());
 	}
 
 	private void rotate() {
@@ -200,61 +242,23 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 		return (selection / Math.pow(10, digits));
 	}
 
-	private RectangularROI[] getXYCenteredROIs() {
-		IImageTrace trace = (IImageTrace) rotatedSystem.getTraces().iterator().next();
-		Collection<IRegion> regions = rotatedSystem.getRegions();
-		RectangularROI xRoi = null, yRoi = null; 
-		if (trace != null) {
-			if (regions != null && !regions.isEmpty()) {
-				Object[] regionsArray = regions.toArray();
-				for (Object regionObj : regionsArray) {
-					IRegion region = (IRegion)regionObj;
-					if (region.getName().equals(xName)) {
-						xRoi = (RectangularROI) region.getROI();
-						xRoi.setPoint(new double[] {trace.getData().getShape()[0] / 2, 0});
-					}
-					if (region.getName().equals(yName)) {
-						yRoi = (RectangularROI) region.getROI();
-						yRoi.setPoint(new double[] {0, trace.getData().getShape()[1] / 2});
-					}
-				}
-			} else {
-				xRoi = new RectangularROI(trace.getData().getShape()[0] / 2, 0,
-						200, 200, 0);
-				xRoi.setName(xName);
-				yRoi = new RectangularROI(0, trace.getData().getShape()[1] / 2,
-						200, 200, 0);
-				yRoi.setName(yName);
-			}
-		}
-		return new RectangularROI[] { xRoi, yRoi };
-	}
-
 	private void createRegions() {
 		if (rotatedSystem == null || rotatedSystem.getTraces().isEmpty())
 			return;
-		RectangularROI[] rois = getXYCenteredROIs();
+		GridROI groi = new GridROI(0, 0, image.getShape()[0],
+				image.getShape()[1], 0, 10, 10, true, false);
 		try {
-			if (xHair == null
-					|| rotatedSystem.getRegion(xHair.getName()) == null) {
-				this.xName = RegionUtils.getUniqueName(Y_PREFIX,
-						rotatedSystem);
-				this.xHair = rotatedSystem.createRegion(xName,
-						IRegion.RegionType.XAXIS_LINE);
-				if (rois[0] != null)
-					xHair.setROI(rois[0]);
-				addRegion("Updating x cross hair", xHair);
-			}
-
-			if (yHair == null
-					|| rotatedSystem.getRegion(yHair.getName()) == null) {
-				this.yName = RegionUtils.getUniqueName(X_PREFIX,
-						getPlottingSystem());
-				this.yHair = rotatedSystem.createRegion(yName,
-						IRegion.RegionType.YAXIS_LINE);
-				if (rois[1] != null)
-					yHair.setROI(rois[1]);
-				addRegion("Updating x cross hair", yHair);
+			if (gridRegion == null
+					|| rotatedSystem.getRegion(gridRegion.getName()) == null) {
+				this.gridName = RegionUtils
+						.getUniqueName(PREFIX, rotatedSystem);
+				this.gridRegion = rotatedSystem.createRegion(gridName,
+						IRegion.RegionType.GRID);
+				if (groi != null)
+					gridRegion.setROI(groi);
+				gridRegion.setRegionColor(ColorConstants.gray);
+				gridRegion.setUserRegion(true);
+				addRegion("Updating grid roi", gridRegion);
 			}
 		} catch (Exception ne) {
 			logger.error("Cannot create cross-hairs!", ne);
@@ -265,7 +269,8 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 		region.setVisible(false);
 		region.setMobile(true);
 		region.setRegionColor(ColorConstants.red);
-		region.setUserRegion(false); // They cannot see preferences or change it!
+		region.setUserRegion(false); // They cannot see preferences or change
+										// it!
 		rotatedSystem.addRegion(region);
 	}
 
@@ -277,7 +282,7 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 	@Override
 	public void setFocus() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	/**
@@ -286,26 +291,23 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 	@Override
 	public void activate() {
 		deactivate();
-		
-		logger.debug("ImageRotateTool: activate ", this.hashCode() );
+
+		logger.debug("ImageRotateTool: activate ", this.hashCode());
 		super.activate();
-		
-		if (getPlottingSystem()!=null) {
+
+		if (getPlottingSystem() != null) {
 			getPlottingSystem().addTraceListener(traceListener);
 			if (getImageTrace() != null) {
 				image = getImageTrace().getData();
 				axes = getImageTrace().getAxes();
 			}
 		}
-		createRegions();
-		if (xHair!=null) {
-			if (!isActive()) xHair.addMouseListener(this);
-			xHair.setVisible(true);
-			xHair.addROIListener(this);
-		}
-		if (yHair!=null) {
-			yHair.setVisible(true);
-			yHair.addROIListener(this);
+//		createRegions();
+		if (gridRegion != null) {
+			if (!isActive())
+				gridRegion.addMouseListener(this);
+			gridRegion.setVisible(true);
+			gridRegion.addROIListener(this);
 		}
 	}
 
@@ -314,10 +316,10 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 	 */
 	@Override
 	public void deactivate() {
-		logger.trace("ImageRotateTool: deactivate ", this.hashCode() );
+		logger.trace("ImageRotateTool: deactivate ", this.hashCode());
 		super.deactivate();
 
-		if (getPlottingSystem()!=null) {
+		if (getPlottingSystem() != null) {
 			getPlottingSystem().removeTraceListener(traceListener);
 		}
 	}
@@ -337,31 +339,23 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			try {
-//				List<IAxis> axes = rotatedSystem.getAxes();
-//				IAxis xAxis = axes.get(0), yAxis = axes.get(1);
-				IDataset rotated = transformer.rotate(image, angle, hasSameShape);
-//				double[] xRange = new double[]{xAxis.getLower(), xAxis.getUpper()}, 
-//						yRange = new double[]{yAxis.getUpper(), yAxis.getLower()};
-//				IImageTrace trace = (IImageTrace)rotatedSystem.getTraces().iterator().next();
-//				List<IDataset> axesD = trace.getAxes();
-//				IDataset xO = axesD.get(0), yO = axesD.get(1);
-//				int xNumber = (int)xAxis.getUpper(), yNumber = (int)yAxis.getLower();
-//				rotated = MapTo2DUtils.remap2Dto2DSplitting(rotated, xO, yO, xRange, xNumber, yRange, yNumber);
+				IDataset rotated = transformer.rotate(image, angle,
+						hasSameShape);
 				rotated.setName("rotated-" + image.getName());
-				rotatedSystem.updatePlot2D(rotated, ImageRotateTool.this.axes, monitor);
+				rotatedSystem.updatePlot2D(rotated, axes, monitor);
 			} catch (Exception e1) {
 				logger.error("Error rotating image:" + e1.getMessage());
 				return Status.CANCEL_STATUS;
 			}
 			return Status.OK_STATUS;
 		}
-		
+
 	}
 
 	@Override
 	public void roiDragged(ROIEvent evt) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -372,27 +366,27 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 	@Override
 	public void roiSelected(ROIEvent evt) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void mousePressed(
 			org.eclipse.dawnsci.plotting.api.region.MouseEvent me) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void mouseReleased(
 			org.eclipse.dawnsci.plotting.api.region.MouseEvent me) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void mouseDoubleClicked(
 			org.eclipse.dawnsci.plotting.api.region.MouseEvent me) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }
