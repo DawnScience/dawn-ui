@@ -40,6 +40,7 @@ import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IActionBars;
@@ -166,6 +167,11 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	@Override
 	public void renameTrace(ITrace trace, String name) throws Exception {
 		call(getMethodName(Thread.currentThread().getStackTrace()), trace, name);
+	}
+
+	@Override
+	public void moveTrace(String oldName, String name) {
+		call(getMethodName(Thread.currentThread().getStackTrace()), oldName, name);
 	}
 
 	@Override
@@ -312,6 +318,16 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	@Override
 	public void setTitle(String title) {
 		call(getMethodName(Thread.currentThread().getStackTrace()), title);
+	}
+
+	@Override
+	public void setTitleColor(Color color) {
+		call(getMethodName(Thread.currentThread().getStackTrace()), color);
+	}
+
+	@Override
+	public void setBackgroundColor(Color color) {
+		call(getMethodName(Thread.currentThread().getStackTrace()), color);
 	}
 
 	@Override
