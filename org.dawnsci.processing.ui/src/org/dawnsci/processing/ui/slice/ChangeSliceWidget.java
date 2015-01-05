@@ -126,6 +126,7 @@ public class ChangeSliceWidget {
 	
 	public void setDatasetShapeInformation(int[] shape, int[] dataDims, Slice[] slices) {
 		this.shape = shape;
+		this.dataDims = dataDims;
 		subsampling = new SliceND(shape, slices);
 		SliceNDGenerator gen = new SliceNDGenerator(shape, dataDims, new SliceND(shape, slices));
 		output = new ArrayList<SliceND>();
