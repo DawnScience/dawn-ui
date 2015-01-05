@@ -8,11 +8,15 @@
  */
 package org.dawnsci.processing.ui.slice;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 import org.dawnsci.processing.ui.Activator;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
-import org.eclipse.dawnsci.analysis.dataset.impl.PositionIterator;
+import org.eclipse.dawnsci.analysis.dataset.impl.SliceND;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SliceNDGenerator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -23,7 +27,7 @@ import org.eclipse.swt.widgets.Composite;
 
 public class ChangeSliceWidget {
 	
-	private PositionIterator iterator;
+//	private PositionIterator iterator;
 	private int current = 0;
 	private int max = 0;
 	private int[] dataDims;
@@ -31,13 +35,17 @@ public class ChangeSliceWidget {
 	private Button stepbackBtn;
 	private Button stepforwardBtn;
 	private Button endBtn;
+	private List<SliceND> input;
+	private List<SliceND> output;
+	private SliceND subsampling;
+	private int[] shape;
 	
 	private HashSet<ISliceChangeListener> listeners;
 	
 	public ChangeSliceWidget(Composite parent) {
-		
-		dataDims = new int[]{1,2};
-		iterator = new PositionIterator(new int[]{2,3,4}, dataDims);
+		input = new ArrayList<SliceND>();
+		max = 0;
+		current = 0;
 		listeners = new HashSet<ISliceChangeListener>();
 		
 		Composite baseComposite = new Composite(parent, SWT.NONE);
@@ -46,7 +54,6 @@ public class ChangeSliceWidget {
 		startBtn = new Button(baseComposite, SWT.NONE);
 		startBtn.setLayoutData(new GridData());
 		startBtn.setImage(Activator.getImageDescriptor("icons/control-stop-180.png").createImage());
-		
 		
 		stepbackBtn = new Button(baseComposite, SWT.NONE);
 		stepbackBtn.setLayoutData(new GridData());
@@ -65,8 +72,8 @@ public class ChangeSliceWidget {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				iterator.reset();
-				iterator.hasNext();
+//				iterator.reset();
+//				iterator.hasNext();
 				current = 0;
 				updateButtons();
 				fireListeners();
@@ -82,9 +89,9 @@ public class ChangeSliceWidget {
 				
 				updateButtons();
 				//Todo add step back to iterator
-				iterator.reset();
-				iterator.hasNext();
-				for (int i = 0; i < current; i++) iterator.hasNext();
+//				iterator.reset();
+//				iterator.hasNext();
+//				for (int i = 0; i < current; i++) iterator.hasNext();
 				fireListeners();
 			}
 
@@ -95,11 +102,9 @@ public class ChangeSliceWidget {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
-				iterator.hasNext();
+//				iterator.hasNext();
 				current++;
-				
 				updateButtons();
-				
 				fireListeners();
 			}
 
@@ -109,16 +114,7 @@ public class ChangeSliceWidget {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				iterator.reset();
-				iterator.hasNext();
-				current = 0;
-				while (iterator.hasNext()) {
-					current++;
-				}
-				
-				iterator.reset();
-				iterator.hasNext();
-				for (int i = 0; i < current; i++) iterator.hasNext();
+				current = max - 1;
 				
 				updateButtons();
 				
@@ -129,13 +125,14 @@ public class ChangeSliceWidget {
 	}
 	
 	public void setDatasetShapeInformation(int[] shape, int[] dataDims, Slice[] slices) {
-		iterator = new PositionIterator(shape,slices,dataDims);
-		max = -1;
-		while (iterator.hasNext()) max++;
-		iterator.reset();
-		iterator.hasNext();
-		this.dataDims = dataDims;
+		this.shape = shape;
+		subsampling = new SliceND(shape, slices);
+		SliceNDGenerator gen = new SliceNDGenerator(shape, dataDims, new SliceND(shape, slices));
+		output = new ArrayList<SliceND>();
+		input = gen.generateDataSlices(output);
+		max = input.size();
 		current = 0;
+
 		updateButtons();
 	}
 	
@@ -154,20 +151,14 @@ public class ChangeSliceWidget {
 	}
 	
 	public Slice[] getCurrentSlice() {
-		int[] pos = iterator.getPos();
-		int[] end = pos.clone();
-		for (int i = 0; i<pos.length;i++) {
-			end[i]++;
-		}
-
-		for (int i = 0; i < this.dataDims.length; i++){
-			end[this.dataDims[i]] = iterator.getShape()[this.dataDims[i]];
-		}
-
-		int[] st = pos.clone();
-		for (int i = 0; i < st.length;i++) st[i] = 1;
+		if (input.isEmpty()) return null;
+		return input.get(current).convertToSlice();
+	}
+	
+	public SliceInformation getCurrentSliceInformation() {
 		
-		return Slice.convertToSlice(pos, end, st);
+		return new SliceInformation(input.get(current), output.get(current), subsampling,shape, dataDims, max, current);
+		
 	}
 	
 	private void updateButtons() {

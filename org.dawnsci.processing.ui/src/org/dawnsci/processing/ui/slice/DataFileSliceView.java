@@ -47,7 +47,6 @@ import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.dataset.impl.SliceND;
-import org.eclipse.dawnsci.analysis.dataset.slicer.ShapeInformation;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
 import org.eclipse.dawnsci.analysis.dataset.slicer.Slicer;
@@ -620,7 +619,6 @@ public class DataFileSliceView extends ViewPart {
 
 				}
 				
-				Slice[] viewSlice = Slicer.getSliceArrayFromSliceDimensions(context.getSliceDimensions(), lazyDataset.getShape());
 				
 				int[] dataDims = Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions());
 				Slice[] s = csw.getCurrentSlice();
@@ -662,10 +660,9 @@ public class DataFileSliceView extends ViewPart {
 				}
 				
 				SourceInformation si = new SourceInformation(path, context.getDatasetNames().get(0), lazyDataset);
-				SliceInformation sli = new SliceInformation(csw.getCurrentSlice(), viewSlice, 0);
+				SliceInformation sli = csw.getCurrentSliceInformation();
 				//TODO replace with check shape
-				ShapeInformation shi = new ShapeInformation(lazyDataset.getSliceView(viewSlice).getShape(), dataDims, 1);
-				firstSlice.setMetadata(new SliceFromSeriesMetadata(si,shi,sli));
+				firstSlice.setMetadata(new SliceFromSeriesMetadata(si,sli));
 				
 //				OriginMetadataImpl om = new OriginMetadataImpl(lazyDataset, viewSlice, dataDims, path, context.getDatasetNames().get(0));
 //				om.setCurrentSlice(csw.getCurrentSlice());
