@@ -1,10 +1,6 @@
 package org.dawnsci.plotting.tools.fitting;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -22,7 +18,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
 
 public class PeakPrepopulateTool extends Dialog {
@@ -75,18 +70,18 @@ public class PeakPrepopulateTool extends Dialog {
 		return windowArea;
 	}
 	
-//	@Override
-//	protected void createButtonsForButtonBar(Composite parent) {
-//		super.createButtonsForButtonBar(parent);
-//		
-//		Button findPeaksBtn = getButton(IDialogConstants.OK_ID);
-//		findPeaksBtn.setText("Find Peaks");
-//		setButtonLayoutData(findPeaksBtn);
-//		
-//		Button closeBtn = getButton(IDialogConstants.CANCEL_ID);
-//		closeBtn.setText("Close");
-//		setButtonLayoutData(closeBtn);
-//	}
+	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+		super.createButtonsForButtonBar(parent);
+		
+		Button findPeaksBtn = getButton(IDialogConstants.OK_ID);
+		findPeaksBtn.setText("Find Peaks");
+		setButtonLayoutData(findPeaksBtn);
+		
+		Button closeBtn = getButton(IDialogConstants.CANCEL_ID);
+		closeBtn.setText("Close");
+		setButtonLayoutData(closeBtn);
+	}
 	
 	private void setAvailPeakFunctions() {
 		//Get the list of available function types and set default value
@@ -95,7 +90,7 @@ public class PeakPrepopulateTool extends Dialog {
 			peakFnMap.put(peak.getSimpleName(), peak.getName());
 		}
 		Set<String> availPeakTypeSet = peakFnMap.keySet();
-		String[] availPeakTypes = (String[]) availPeakTypeSet.toArray(new String[availPeakTypeSet.size()]);
+		availPeakTypes = (String[]) availPeakTypeSet.toArray(new String[availPeakTypeSet.size()]);
 		peakTypeCombo.setItems(availPeakTypes);
 	}
 	
