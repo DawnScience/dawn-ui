@@ -72,15 +72,20 @@ public class PeakPrepopulateTool extends Dialog {
 	
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
-		super.createButtonsForButtonBar(parent);
-		
-		Button findPeaksBtn = getButton(IDialogConstants.OK_ID);
-		findPeaksBtn.setText("Find Peaks");
-		setButtonLayoutData(findPeaksBtn);
-		
-		Button closeBtn = getButton(IDialogConstants.CANCEL_ID);
-		closeBtn.setText("Close");
-		setButtonLayoutData(closeBtn);
+		//Create Close & Find Peaks buttons.
+		createButton(parent, IDialogConstants.PROCEED_ID, "Find Peaks", true);
+		createButton(parent, IDialogConstants.CLOSE_ID, IDialogConstants.CLOSE_LABEL, false);
+	}
+	
+	@Override
+	protected void buttonPressed(int buttonId){
+		if (IDialogConstants.PROCEED_ID == buttonId) {
+			System.out.println("Find Peaks pressed");
+		}
+		else if (IDialogConstants.CLOSE_ID == buttonId) {
+			setReturnCode(OK); //This is just returning 0 - might not be needed
+			close();
+		}
 	}
 	
 	private void setAvailPeakFunctions() {
