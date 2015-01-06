@@ -209,10 +209,15 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 				remapJob = new Job("Remapping Axes") {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
-						IImageTrace trace = (IImageTrace) getPlottingSystem().getTraces()
-								.iterator().next();
+						IImageTrace trace = (IImageTrace) getPlottingSystem().getTraces().iterator().next();
+						if (trace == null)
+							return Status.CANCEL_STATUS;
 						List<IDataset> axes = trace.getAxes();
+						if (axes == null)
+							return Status.CANCEL_STATUS;
 						IDataset xAxis = axes.get(0), yAxis = axes.get(1);
+						if (xAxis == null || yAxis == null)
+							return Status.CANCEL_STATUS;
 						double[] xRange = new double[] { xAxis.min().doubleValue(),
 								xAxis.max().doubleValue() }, yRange = new double[] {
 								yAxis.min().doubleValue(), yAxis.max().doubleValue() };
