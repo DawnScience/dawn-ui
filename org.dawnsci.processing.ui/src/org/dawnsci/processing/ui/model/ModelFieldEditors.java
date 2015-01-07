@@ -1,18 +1,35 @@
 package org.dawnsci.processing.ui.model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
 import org.dawnsci.common.widgets.celleditor.ClassCellEditor;
 import org.dawnsci.common.widgets.celleditor.FileDialogCellEditor;
+import org.dawnsci.common.widgets.celleditor.TextCellEditorWithContentProposal;
 import org.dawnsci.plotting.roi.RegionCellEditor;
+import org.dawnsci.processing.ui.slice.SlicedDataUtils;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.processing.model.FileType;
 import org.eclipse.dawnsci.analysis.api.processing.model.ModelField;
 import org.eclipse.dawnsci.analysis.api.processing.model.OperationModelField;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.jface.bindings.keys.KeyStroke;
+import org.eclipse.jface.fieldassist.ContentProposal;
+import org.eclipse.jface.fieldassist.ContentProposalAdapter;
+import org.eclipse.jface.fieldassist.IContentProposal;
+import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxCellEditor;
+import org.eclipse.jface.viewers.ICellEditorListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.window.DefaultToolTip;
@@ -20,6 +37,7 @@ import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 
@@ -27,6 +45,7 @@ public class ModelFieldEditors {
 
 	private static ISelectionListener selectionListener;
 	private static ToolTip            currentHint;
+	
 	/**
 	 * Create a new editor for a field.
 	 * @param field
@@ -79,6 +98,9 @@ public class ModelFieldEditors {
         		fe.setNewFile(anot.file().isNewFile());
         	}
         
+        } else if (String.class.equals(clazz) && anot!=null && !anot.dataset().isEmpty()) {
+        	ed = getDatasetEditor(field, parent);
+        	
         } else if (String.class.equals(clazz)) {
         	ed = new TextCellEditor(parent);
         }
@@ -165,6 +187,59 @@ public class ModelFieldEditors {
 	    }
 
     	return textEd;
+	}
+	
+	private static TextCellEditor getDatasetEditor(final ModelField field, Composite parent) {
+		
+		final TextCellEditorWithContentProposal ed = new TextCellEditorWithContentProposal(parent, null, null);
+		
+		Job job = new Job("dataset name read") {
+			
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				String fileField = field.getAnnotation().dataset();
+				Object object;
+				try {
+					object = field.getModel().get(fileField);
+				} catch (Exception e) {
+					return Status.CANCEL_STATUS;
+				}
+				final Map<String, int[]> datasetInfo = SlicedDataUtils.getDatasetInfo(object.toString(), null);
+				datasetInfo.toString();
+				
+				final IContentProposalProvider cpp = new IContentProposalProvider() {
+					
+					@Override
+					public IContentProposal[] getProposals(String contents, int position) {
+						List<IContentProposal> prop = new ArrayList<IContentProposal>();
+						
+						for (String key : datasetInfo.keySet()) {
+							if (key.startsWith(contents)) prop.add(new ContentProposal(key));
+						}
+						
+						return prop.toArray(new IContentProposal[prop.size()]);
+					}
+				};
+				
+				Display.getDefault().syncExec(new Runnable() {
+					
+					@Override
+					public void run() {
+						ed.setContentProposalProvider(cpp);
+						ed.getContentProposalAdapter().setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
+						ed.getContentProposalAdapter().setAutoActivationCharacters(null);
+					}
+				});
+				
+				return Status.OK_STATUS;
+			}
+		};
+		
+		job.schedule();
+			
+		
+
+		return ed;
 	}
 
 }

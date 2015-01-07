@@ -345,46 +345,13 @@ public class SetUpProcessWizardPage extends WizardPage {
 	
 	private Map<String, int[]> getDatasetInfo() throws Exception{
 		
+		lservice.clearSoftReferenceCache();
 		final ConversionScheme scheme = context.getConversionScheme();
-		final IMetadata        meta   = lservice.getMetadata(context.getFilePaths().get(0), null);
-        final Map<String, int[]>     names  = new HashMap<String, int[]>();
-        
-        if (meta!=null && !meta.getDataNames().isEmpty()){
-        	for (String name : meta.getDataShapes().keySet()) {
-        		int[] shape = meta.getDataShapes().get(name);
-        		if (shape != null) {
-        			//squeeze to get usable rank
-        			int[] ss = AbstractDataset.squeezeShape(shape, false);
-        			if (scheme!=null && scheme.isRankSupported(ss.length)) {
-        				names.put(name, shape);
-        			} 
-        		} else {
-        			//null shape is a bad sign
-        			names.clear();
-        			break;
-        		}
-        	}
-        }
-        
-        if (names.isEmpty()) {
-        	final IDataHolder  dataHolder = lservice.getData(context.getFilePaths().get(0), null);
-        	if (dataHolder!=null) for (String name : dataHolder.getNames()) {
-        		if (name.contains("Image Stack")) continue;
-        		if (!names.containsKey(name)) {
-
-        			int[] shape = dataHolder.getLazyDataset(name).getShape();
-        			int[] ss = AbstractDataset.squeezeShape(shape, false);
-        			if (scheme!=null && scheme.isRankSupported(ss.length)) {
-        				names.put(name, shape);
-        			} 
-
-        		}
-        	}
-        }
+		final Map<String, int[]>     names = SlicedDataUtils.getDatasetInfo(context.getFilePaths().get(0), scheme);
 
         rootName = DatasetTitleUtils.getRootName(names.keySet());
         
-        return sortedByRankThenLength(names);
+        return names;
 	}
 	
 	private Map<String, int[]> sortedByRankThenLength(Map<String, int[]> map) {

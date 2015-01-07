@@ -105,7 +105,7 @@ public class TextCellEditorWithContentProposal extends TextCellEditor {
 	}
 
 	public void openPopup() {
-		contentProposalAdapter.openProposalPopup();
+		if (contentProposalAdapter != null) contentProposalAdapter.openProposalPopup();
 	}
 
 	@Override

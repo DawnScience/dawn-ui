@@ -181,7 +181,7 @@ public class ChangeSliceWidget {
 			stepbackBtn.setEnabled(false);
 		}
 		
-		if (current == max) {
+		if (current == max-1) {
 			endBtn.setEnabled(false);
 			stepforwardBtn.setEnabled(false);
 		}
