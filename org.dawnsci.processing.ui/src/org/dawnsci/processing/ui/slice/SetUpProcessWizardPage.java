@@ -345,12 +345,11 @@ public class SetUpProcessWizardPage extends WizardPage {
 	
 	private Map<String, int[]> getDatasetInfo() throws Exception{
 		
-		lservice.clearSoftReferenceCache();
 		final ConversionScheme scheme = context.getConversionScheme();
 		final Map<String, int[]>     names = SlicedDataUtils.getDatasetInfo(context.getFilePaths().get(0), scheme);
 
         rootName = DatasetTitleUtils.getRootName(names.keySet());
-        
+		lservice.clearSoftReferenceCache();
         return names;
 	}
 	

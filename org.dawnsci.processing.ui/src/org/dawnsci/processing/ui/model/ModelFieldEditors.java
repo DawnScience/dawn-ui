@@ -98,7 +98,7 @@ public class ModelFieldEditors {
         		fe.setNewFile(anot.file().isNewFile());
         	}
         
-        } else if (String.class.equals(clazz) && anot!=null && !anot.dataset().isEmpty()) {
+        } else if (String.class.equals(clazz) && anot!=null && anot.dataset() != null &&!anot.dataset().isEmpty()) {
         	ed = getDatasetEditor(field, parent);
         	
         } else if (String.class.equals(clazz)) {
@@ -204,6 +204,8 @@ public class ModelFieldEditors {
 				} catch (Exception e) {
 					return Status.CANCEL_STATUS;
 				}
+				
+				if (object == null) return Status.CANCEL_STATUS;
 				final Map<String, int[]> datasetInfo = SlicedDataUtils.getDatasetInfo(object.toString(), null);
 				datasetInfo.toString();
 				
@@ -237,8 +239,6 @@ public class ModelFieldEditors {
 		
 		job.schedule();
 			
-		
-
 		return ed;
 	}
 
