@@ -136,7 +136,7 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 		labelAngle.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		angleSpinner = new Spinner(angleComp, SWT.BORDER);
 		angleSpinner.setDigits(1);
-		angleSpinner.setToolTipText("Rotates the original image by n degrees");
+		angleSpinner.setToolTipText("Rotates the original image by n degrees around the center of the image");
 		angleSpinner.setSelection(0);
 		angleSpinner.setMinimum(-3600);
 		angleSpinner.setMaximum(3600);
@@ -153,7 +153,7 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 
 		Button centreROIButton = new Button(angleComp, SWT.PUSH);
 		centreROIButton.setText("Reset");
-		centreROIButton.setToolTipText("Reset the Vertical and Horizontal ROIs positionsto the center of the image");
+		centreROIButton.setToolTipText("Reset the Vertical and Horizontal ROIs positions to the center of the image");
 		centreROIButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
