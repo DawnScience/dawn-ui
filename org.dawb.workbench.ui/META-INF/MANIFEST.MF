@@ -37,7 +37,8 @@ Import-Package: org.dawb.common.services,
  org.eclipse.draw2d,
  org.eclipse.ui.ide,
  org.slf4j;version="[1.7.6,1.7.7)",
- uk.ac.diamond.scisoft.analysis.rcp.editors
+ uk.ac.diamond.scisoft.analysis.rcp.editors,
+ uk.ac.diamond.scisoft.analysis.rcp.views
 Bundle-ClassPath: .
 Export-Package: org.dawb.workbench.ui,
  org.dawb.workbench.ui.diffraction,
