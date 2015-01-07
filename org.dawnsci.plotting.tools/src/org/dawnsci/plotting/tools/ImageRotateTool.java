@@ -45,6 +45,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.ui.IActionBars;
@@ -183,7 +184,6 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 			public void widgetSelected(SelectionEvent event) {
 				hasAxesRemapped = remapAxes.getSelection();
 				remapAxes(hasAxesRemapped);
-				rotate();
 			}
 		});
 
@@ -243,6 +243,14 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 						ImageRotateTool.this.axes = new ArrayList<IDataset>();
 						ImageRotateTool.this.axes.add(DoubleDataset.createRange(xRange[0], xRange[1], newStep));//  meshAxes.get(0));
 						ImageRotateTool.this.axes.add(DoubleDataset.createRange(yRange[0], yRange[1], newStep));
+						image.setName(getImageTrace().getDataName());
+						// run the rotation job
+						Display.getDefault().syncExec(new Runnable() {
+							@Override
+							public void run() {
+								rotate();
+							}
+						});
 						return Status.OK_STATUS;
 					}
 				};
@@ -253,8 +261,9 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 		} else {
 			image = getImageTrace().getData();
 			this.axes = getImageTrace().getAxes();
+			image.setName(getImageTrace().getDataName());
+			rotate();
 		}
-		image.setName(getImageTrace().getDataName());
 	}
 
 	private void rotate() {
