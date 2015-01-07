@@ -16,6 +16,7 @@ import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.workbench.ui.views.PlotDataPage;
 import org.dawnsci.common.widgets.editor.ITitledEditor;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.hdf5.editor.H5Editor;
@@ -42,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.rcp.editors.HDF5TreeEditor;
+import uk.ac.diamond.scisoft.analysis.rcp.views.DatasetInspectorView;
 
 
 public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEditor, IPlottingSystemSelection, IH5Editor, ITitledEditor {
@@ -53,12 +55,13 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
 	private static final Logger logger = LoggerFactory.getLogger(H5MultiEditor.class);
 	private PlotDataEditor dataSetEditor;
 	private IReusableEditor treePage;
-	
+
 	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException{
         super.init(site, input);
 	    setPartName(input.getName());
     }
+
 	@Override
 	public void setPartTitle(String name) {
 		super.setPartName(name);	
@@ -70,17 +73,20 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
 		setPartName(input.getName());
 		if (dataSetEditor!=null) dataSetEditor.setInput(input);
 		if (treePage!=null)      treePage.setInput(input);
-	}	
+	}
+
 	/**
 	 * It might be necessary to show the tree editor on the first page.
 	 * A property can be introduced to change the page order if this is required.
 	 */
 	@Override
 	protected void createPages() {
+		IDataHolder holder = null;
 		
-        IMetadata metaData = null;
+        IMetadata metadata = null;
 		try {
-			metaData = LoaderFactory.getMetadata(EclipseUtils.getFilePath(getEditorInput()), null);
+			holder = LoaderFactory.getData(EclipseUtils.getFilePath(getEditorInput()), null);
+			metadata = holder.getMetadata();
 		} catch (Exception e1) {
 			// Allowed to have no meta data at this point.
 		}
@@ -88,14 +94,11 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
 		try {
 			
 			boolean treeOnTop = false;
-			if (metaData!=null) {
-				final Collection<String> names = SliceUtils.getSlicableNames(LoaderFactory.getData(EclipseUtils.getFilePath(getEditorInput()), null));
-				if (names==null || names.size()<1) {
+			if (metadata!=null) {
+				final Collection<String> names = SliceUtils.getSlicableNames(holder);
+				if (names==null || names.size()<1 ||
+						getEditorSite().getPage().findViewReference(DatasetInspectorView.ID) != null) {
 					treeOnTop = true;
-				} else {
-					if (getEditorSite().getPage().findViewReference("uk.ac.diamond.scisoft.analysis.rcp.views.DatasetInspectorView")!=null) {
-						treeOnTop = true;
-					}
 				}
 			}
 
@@ -108,7 +111,7 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
 				setPageText(index, "Tree");
 				index++;
 			}
-			
+
 			try {
 				Collection<IEditorPart> extensions = EditorExtensionFactory.getEditors(this);
 				if (extensions!=null && extensions.size()>0) {
@@ -144,10 +147,7 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
 		} catch (Exception e) {
 			logger.error("Cannot initiate "+getClass().getName()+"!", e);
 		}
-		
-		
  	}
-	
 	
 	public void dispose() {
 		dataSetEditor = null;
