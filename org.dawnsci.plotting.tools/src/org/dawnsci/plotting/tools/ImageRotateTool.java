@@ -87,6 +87,10 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 		// Connect to the trace listener to deal with new images coming in
 		traceListener = new ITraceListener.Stub() {
 			@Override
+			public void traceUpdated(TraceEvent evt) {
+				remapAxes(hasAxesRemapped);
+			}
+			@Override
 			public void tracesAdded(TraceEvent evt) {
 				if (!isActive())
 					return;
