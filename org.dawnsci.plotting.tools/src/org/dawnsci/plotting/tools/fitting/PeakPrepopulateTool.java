@@ -38,15 +38,16 @@ public class PeakPrepopulateTool extends Dialog {
 	private Integer nrPeaks = null;
 	private Dataset[] roiLimits;
 	
-	private FindInitialPeaksJob findStartingPeaksJob;
-	private CompositeFunction compFunction = null;
-	
 	private Map<String, Class <? extends APeak>> peakFnMap = new TreeMap<String, Class <? extends APeak>>();
 	private String[] availPeakTypes;
 	
 	private FunctionFittingTool parentFittingTool;
 	
+	private FindInitialPeaksJob findStartingPeaksJob;
+	private CompositeFunction compFunction = null;
+	
 	public PeakPrepopulateTool(Shell parentShell, FunctionFittingTool parentFittingTool, Dataset[] roiLimits) {
+		//Setup the dialog and get the parent fittingtool as well as the ROI limits we're interested in.
 		super(parentShell);
 		this.parentFittingTool = parentFittingTool;
 		this.roiLimits = roiLimits;
@@ -55,6 +56,7 @@ public class PeakPrepopulateTool extends Dialog {
 	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
+		//Set window title
 		newShell.setText("Find Initial Peaks");
 	}
 	
@@ -77,11 +79,12 @@ public class PeakPrepopulateTool extends Dialog {
 		
 		nrPeaksTxtBox = new Text(dialogContainer, SWT.BORDER); 
 		nrPeaksTxtBox.setLayoutData(nrPeaksGridData);
+		//This limits the input for the text box to +ve integers
 		final IntegerDecorator nrPeaksIDec = new IntegerDecorator(nrPeaksTxtBox);
 		nrPeaksIDec.setMinimum(0);
 		
+		//When the value in the text box is changed and valid, convert to an Integer and enable the find peaks button
 		nrPeaksTxtBox.addModifyListener(new ModifyListener() {
-			
 			@Override
 			public void modifyText(ModifyEvent e) {
 				if (!nrPeaksIDec.isError()) {
@@ -131,10 +134,11 @@ public class PeakPrepopulateTool extends Dialog {
 			close();
 		}
 	}
-	
+	/**
+	 * Gets the list of available function names and their classes from FittingUtils class
+	 * and populates combo box with them
+	 */
 	private void setAvailPeakFunctions() {
-		//Get the list of available function types and set default value
-		
 		for (final Class<? extends APeak> peak : FittingUtils.getPeakOptions().values()) {
 			peakFnMap.put(peak.getSimpleName(), peak);
 		}
@@ -143,6 +147,9 @@ public class PeakPrepopulateTool extends Dialog {
 		peakTypeCombo.setItems(availPeakTypes);
 	}
 	
+	/**
+	 * Sets default peak profile to Psuedo-Voight or Gaussian (if available)
+	 */
 	private void setDefaultPeakFunction() {
 		int defaultPeakFnIndex = Arrays.asList(availPeakTypes).indexOf("PseudoVoigt") == -1 ? Arrays.asList(availPeakTypes).indexOf("Gaussian") : Arrays.asList(availPeakTypes).indexOf("PseudoVoigt");
 		if (defaultPeakFnIndex != -1) {
@@ -150,6 +157,10 @@ public class PeakPrepopulateTool extends Dialog {
 		}
 	}
 	
+	/**
+	 * Gets the currently selected peak profile type in the combo box
+	 * @return peak function class
+	 */
 	private Class<? extends APeak> getProfileFunction(){
 		String selectedProfileName = peakTypeCombo.getText();
 		Class<? extends APeak> selectedProfile = peakFnMap.get(selectedProfileName);
@@ -157,6 +168,11 @@ public class PeakPrepopulateTool extends Dialog {
 		return selectedProfile;
 	}
 	
+	/**
+	 * Creates peak finding job and then sets parameters for the peak finding before scheduling job.
+	 * JobChangeListener waits until peak finding finishes before calling back to parent tool
+	 * to draw in located peaks.
+	 */
 	private void findInitialPeaks() {
 		if (findStartingPeaksJob == null) {
 			findStartingPeaksJob = new FindInitialPeaksJob("Find Initial Peaks");
@@ -176,6 +192,10 @@ public class PeakPrepopulateTool extends Dialog {
 		});
 	}
 	
+	/**
+	 * Job to find initial peaks. Uses getInitialPeaks method in FittingUtils 
+	 * to do the work
+	 */
 	private class FindInitialPeaksJob extends Job {
 
 		public FindInitialPeaksJob(String name) {
@@ -209,11 +229,4 @@ public class PeakPrepopulateTool extends Dialog {
 		}
 		
 	}
-//	private Integer getNrPeaksInteger() {
-//		
-//		IntegerDecorator text2Integer = new IntegerDecorator(nrPeaksTxtBox);
-//		
-//		return nrPeaks;
-//	}
-
 }
