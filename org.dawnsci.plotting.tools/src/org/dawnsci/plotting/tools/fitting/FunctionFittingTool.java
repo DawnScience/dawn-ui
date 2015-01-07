@@ -96,7 +96,6 @@ public class FunctionFittingTool extends AbstractToolPage implements
 	private CompositeFunction resultFunction;
 
 	private UpdateFitPlotJob updateFittedPlotJob;
-	private FindInitialPeaksJob findStartingPeaksJob;
 	private ITraceListener traceListener = new FunctionFittingTraceListener();
 
 	private Text chiSquaredValueText;
@@ -108,8 +107,6 @@ public class FunctionFittingTool extends AbstractToolPage implements
 	private IPreferenceStore prefs = Activator.getPlottingPreferenceStore();
 
 	private boolean connectLater;
-	
-	private Integer nPeaksToFind = null; //This stores number of peaks we tried to find last.
 
 	@Override
 	public ToolPageRole getToolPageRole() {
@@ -439,28 +436,47 @@ public class FunctionFittingTool extends AbstractToolPage implements
 	}
 	
 	private void openPeakPrepopulateTool() {
-		PeakPrepopulateTool peakFindOptions = new PeakPrepopulateTool(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), this);
-		peakFindOptions.open();
-	}
-
-	public void findInitialPeaks(Integer nrPeaks) {
-		//Get the ranges of the ROI
-		final Dataset[] roiLimits = getFirstUserTraceROI();
-		
 		getPlottingSystem().removeTraceListener(traceListener);
-		
-		//Kick off the FindInitialPeaksJob here
-		if ((findStartingPeaksJob == null) || (nPeaksToFind != nrPeaks)) {
-			nPeaksToFind = nrPeaks;
-			findStartingPeaksJob = new FindInitialPeaksJob("Find Initial Peaks", nPeaksToFind);
-		}
-		
-		findStartingPeaksJob.setData(roiLimits[0], roiLimits[1]);
-		findStartingPeaksJob.schedule();
-		
-		refreshViewer();
+		PeakPrepopulateTool peakFindOptions = new PeakPrepopulateTool(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), this, getFirstUserTraceROI());
+		peakFindOptions.open();
 		getPlottingSystem().addTraceListener(traceListener);
 	}
+	
+	public void setInitialPeaks(CompositeFunction initPeakCompFunc) {
+		compFunction = initPeakCompFunc;
+		final Dataset[] currRoiLimits = getFirstUserTraceROI(); 
+		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				functionWidget.setInput(compFunction);
+				functionWidget.setFittedInput(null);
+				
+				//From new peak(s), plot estimate line
+				plotEstimateLine(new Dataset[]{currRoiLimits[0],currRoiLimits[1]});
+				getPlottingSystem().repaint();
+				refreshViewer();
+			}
+		});
+	}
+
+//	public void findInitialPeaks(Integer nrPeaks) {
+//		//Get the ranges of the ROI
+//		final Dataset[] roiLimits = getFirstUserTraceROI();
+//		
+//		getPlottingSystem().removeTraceListener(traceListener);
+//		
+//		//Kick off the FindInitialPeaksJob here
+//		if ((findStartingPeaksJob == null) || (nPeaksToFind != nrPeaks)) {
+//			nPeaksToFind = nrPeaks;
+//			findStartingPeaksJob = new FindInitialPeaksJob("Find Initial Peaks", nPeaksToFind);
+//		}
+//		
+//		findStartingPeaksJob.setData(roiLimits[0], roiLimits[1]);
+//		findStartingPeaksJob.schedule();
+//		
+//		refreshViewer();
+//		getPlottingSystem().addTraceListener(traceListener);
+//	}
 
 	// TODO this job is sometimes unstopped at shutdown, add to dispose
 	private class UpdateFitPlotJob extends Job {
@@ -581,40 +597,40 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 	}
 	
-	private class FindInitialPeaksJob extends Job {
+//	private class FindInitialPeaksJob extends Job {
+//
+//		public FindInitialPeaksJob(String name, Integer nrPeaks) {
+//			super(name);
+//		}
+//		
+//		Dataset x;
+//		Dataset y;
+//		
+//		public void setData(Dataset x, Dataset y) {
+//			this.x = x.clone();
+//			this.y = y.clone();
+//		}
 
-		public FindInitialPeaksJob(String name, Integer nrPeaks) {
-			super(name);
-		}
-		
-		Dataset x;
-		Dataset y;
-		
-		public void setData(Dataset x, Dataset y) {
-			this.x = x.clone();
-			this.y = y.clone();
-		}
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			
-			compFunction = FittingUtils.getInitialPeaks(x, y, null);
-			
-			PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					functionWidget.setInput(compFunction);
-					functionWidget.setFittedInput(null);
-					
-					//From new peak(s), plot estimate line
-					plotEstimateLine(new Dataset[]{x,y});
-					getPlottingSystem().repaint();
-					refreshViewer();
-				}
-			});
-			return Status.OK_STATUS;
-		}
-	}
+//		@Override
+//		protected IStatus run(IProgressMonitor monitor) {
+//			
+//			compFunction = FittingUtils.getInitialPeaks(x, y, null);
+//			
+//			PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+//				@Override
+//				public void run() {
+//					functionWidget.setInput(compFunction);
+//					functionWidget.setFittedInput(null);
+//					
+//					//From new peak(s), plot estimate line
+//					plotEstimateLine(new Dataset[]{x,y});
+//					getPlottingSystem().repaint();
+//					refreshViewer();
+//				}
+//			});
+//			return Status.OK_STATUS;
+//		}
+//	}
 
 	@SuppressWarnings("rawtypes")
 	@Override

@@ -6,9 +6,18 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.dawnsci.common.widgets.decorator.IntegerDecorator;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
@@ -19,6 +28,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 
 public class PeakPrepopulateTool extends Dialog {
 	
@@ -26,15 +36,20 @@ public class PeakPrepopulateTool extends Dialog {
 	private Composite dialogContainer;
 	private Text nrPeaksTxtBox;
 	private Integer nrPeaks = null;
+	private Dataset[] roiLimits;
+	
+	private FindInitialPeaksJob findStartingPeaksJob;
+	private CompositeFunction compFunction = null;
 	
 	private Map<String, String> peakFnMap = new TreeMap<String, String>();
 	private String[] availPeakTypes;
 	
 	private FunctionFittingTool parentFittingTool;
 	
-	public PeakPrepopulateTool(Shell parentShell, FunctionFittingTool parentFittingTool) {
+	public PeakPrepopulateTool(Shell parentShell, FunctionFittingTool parentFittingTool, Dataset[] roiLimits) {
 		super(parentShell);
 		this.parentFittingTool = parentFittingTool;
+		this.roiLimits = roiLimits;
 	}
 	
 	@Override
@@ -56,9 +71,23 @@ public class PeakPrepopulateTool extends Dialog {
 		
 		nrPeaksTxtBox = new Text(dialogContainer, SWT.BORDER); 
 		nrPeaksTxtBox.setLayoutData(nrPeaksGridData);
-		
-		IntegerDecorator nrPeaksIDec = new IntegerDecorator(nrPeaksTxtBox);
+		final IntegerDecorator nrPeaksIDec = new IntegerDecorator(nrPeaksTxtBox);
 		nrPeaksIDec.setMinimum(0);
+		
+		nrPeaksTxtBox.addModifyListener(new ModifyListener() {
+			
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if (!nrPeaksIDec.isError()) {
+					try {
+						nrPeaks = Integer.parseInt(nrPeaksTxtBox.getText());
+					} catch (NumberFormatException nfe) {
+						// Move on.
+					}
+				}
+				
+			}
+		});
 		
 		//Profile type combo box
 		GridData peakTypeGridData = new GridData();
@@ -73,7 +102,6 @@ public class PeakPrepopulateTool extends Dialog {
 		setDefaultPeakFunction();
 		peakTypeCombo.setLayoutData(peakTypeGridData);
 		
-		
 		return windowArea;
 	}
 	
@@ -87,8 +115,9 @@ public class PeakPrepopulateTool extends Dialog {
 	@Override
 	protected void buttonPressed(int buttonId){
 		if (IDialogConstants.PROCEED_ID == buttonId) {
-			parentFittingTool.findInitialPeaks(nrPeaks);
+		//	parentFittingTool.findInitialPeaks(nrPeaks);
 			System.out.println("Find Peaks pressed");
+			findInitialPeaks();
 		}
 		else if (IDialogConstants.CLOSE_ID == buttonId) {
 			setReturnCode(OK); //This is just returning 0 - might not be needed
@@ -114,6 +143,54 @@ public class PeakPrepopulateTool extends Dialog {
 		}
 	}
 	
+	private void findInitialPeaks() {
+		if (findStartingPeaksJob == null) {
+			findStartingPeaksJob = new FindInitialPeaksJob("Find Initial Peaks");
+		}
+		
+		findStartingPeaksJob.setData(roiLimits[0], roiLimits[1]);
+		findStartingPeaksJob.setNrPeaks(nrPeaks);
+//		findStartingPeaksJob.setPeakProfile(getProfileFunction());
+		
+		findStartingPeaksJob.schedule();
+		
+		findStartingPeaksJob.addJobChangeListener(new JobChangeAdapter(){
+			@Override
+			public void done(IJobChangeEvent event) {
+				parentFittingTool.setInitialPeaks(compFunction);
+			}
+		});
+	}
+	
+	private class FindInitialPeaksJob extends Job {
+
+		public FindInitialPeaksJob(String name) {
+			super(name);
+		}
+		
+		Dataset x;
+		Dataset y;
+		Integer nrPeaks;
+		Class<? extends APeak> peakProfileFunction;
+		
+		
+		public void setData(Dataset x, Dataset y) {
+			this.x = x.clone();
+			this.y = y.clone();
+		}
+		
+		public void setNrPeaks(Integer nrPeaks) {
+			this.nrPeaks = nrPeaks;
+		}
+		
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			
+			compFunction = FittingUtils.getInitialPeaks(x, y, nrPeaks);
+			return Status.OK_STATUS;
+		}
+		
+	}
 //	private Integer getNrPeaksInteger() {
 //		
 //		IntegerDecorator text2Integer = new IntegerDecorator(nrPeaksTxtBox);
