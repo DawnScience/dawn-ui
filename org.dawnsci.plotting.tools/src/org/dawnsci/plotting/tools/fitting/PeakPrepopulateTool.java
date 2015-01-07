@@ -5,12 +5,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.dawnsci.common.widgets.decorator.IntegerDecorator;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -25,12 +25,16 @@ public class PeakPrepopulateTool extends Dialog {
 	private Combo peakTypeCombo;
 	private Composite dialogContainer;
 	private Text nrPeaksTxtBox;
+	private Integer nrPeaks = null;
 	
 	private Map<String, String> peakFnMap = new TreeMap<String, String>();
 	private String[] availPeakTypes;
 	
-	public PeakPrepopulateTool(Shell parentShell) {
+	private FunctionFittingTool parentFittingTool;
+	
+	public PeakPrepopulateTool(Shell parentShell, FunctionFittingTool parentFittingTool) {
 		super(parentShell);
+		this.parentFittingTool = parentFittingTool;
 	}
 	
 	@Override
@@ -52,6 +56,9 @@ public class PeakPrepopulateTool extends Dialog {
 		
 		nrPeaksTxtBox = new Text(dialogContainer, SWT.BORDER); 
 		nrPeaksTxtBox.setLayoutData(nrPeaksGridData);
+		
+		IntegerDecorator nrPeaksIDec = new IntegerDecorator(nrPeaksTxtBox);
+		nrPeaksIDec.setMinimum(0);
 		
 		//Profile type combo box
 		GridData peakTypeGridData = new GridData();
@@ -80,6 +87,7 @@ public class PeakPrepopulateTool extends Dialog {
 	@Override
 	protected void buttonPressed(int buttonId){
 		if (IDialogConstants.PROCEED_ID == buttonId) {
+			parentFittingTool.findInitialPeaks(nrPeaks);
 			System.out.println("Find Peaks pressed");
 		}
 		else if (IDialogConstants.CLOSE_ID == buttonId) {
@@ -105,5 +113,12 @@ public class PeakPrepopulateTool extends Dialog {
 			peakTypeCombo.select(defaultPeakFnIndex);
 		}
 	}
+	
+//	private Integer getNrPeaksInteger() {
+//		
+//		IntegerDecorator text2Integer = new IntegerDecorator(nrPeaksTxtBox);
+//		
+//		return nrPeaks;
+//	}
 
 }
