@@ -108,6 +108,8 @@ public class FunctionFittingTool extends AbstractToolPage implements
 	private IPreferenceStore prefs = Activator.getPlottingPreferenceStore();
 
 	private boolean connectLater;
+	
+	private Integer nPeaksToFind = null; //This stores number of peaks we tried to find last.
 
 	@Override
 	public ToolPageRole getToolPageRole() {
@@ -177,7 +179,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		findPeaksButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				findInitialPeaks();
+				openPeakPrepopulateTool();
 			}
 		});
 
@@ -435,19 +437,22 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		}
 
 	}
+	
+	private void openPeakPrepopulateTool() {
+		PeakPrepopulateTool peakFindOptions = new PeakPrepopulateTool(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), this);
+		peakFindOptions.open();
+	}
 
-	private void findInitialPeaks() {
+	public void findInitialPeaks(Integer nrPeaks) {
 		//Get the ranges of the ROI
 		final Dataset[] roiLimits = getFirstUserTraceROI();
-		
-		PeakPrepopulateTool peakFindOptions = new PeakPrepopulateTool(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
-		peakFindOptions.open();
 		
 		getPlottingSystem().removeTraceListener(traceListener);
 		
 		//Kick off the FindInitialPeaksJob here
-		if (findStartingPeaksJob == null) {
-			findStartingPeaksJob = new FindInitialPeaksJob("Find Initial Peaks");
+		if ((findStartingPeaksJob == null) || (nPeaksToFind != nrPeaks)) {
+			nPeaksToFind = nrPeaks;
+			findStartingPeaksJob = new FindInitialPeaksJob("Find Initial Peaks", nPeaksToFind);
 		}
 		
 		findStartingPeaksJob.setData(roiLimits[0], roiLimits[1]);
@@ -578,7 +583,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 	
 	private class FindInitialPeaksJob extends Job {
 
-		public FindInitialPeaksJob(String name) {
+		public FindInitialPeaksJob(String name, Integer nrPeaks) {
 			super(name);
 		}
 		
