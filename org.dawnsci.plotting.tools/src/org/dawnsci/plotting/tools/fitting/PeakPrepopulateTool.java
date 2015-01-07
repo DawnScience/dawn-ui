@@ -41,7 +41,7 @@ public class PeakPrepopulateTool extends Dialog {
 	private FindInitialPeaksJob findStartingPeaksJob;
 	private CompositeFunction compFunction = null;
 	
-	private Map<String, String> peakFnMap = new TreeMap<String, String>();
+	private Map<String, Class <? extends APeak>> peakFnMap = new TreeMap<String, Class <? extends APeak>>();
 	private String[] availPeakTypes;
 	
 	private FunctionFittingTool parentFittingTool;
@@ -50,6 +50,12 @@ public class PeakPrepopulateTool extends Dialog {
 		super(parentShell);
 		this.parentFittingTool = parentFittingTool;
 		this.roiLimits = roiLimits;
+	}
+	
+	@Override
+	protected void configureShell(Shell newShell) {
+		super.configureShell(newShell);
+		newShell.setText("Find Initial Peaks");
 	}
 	
 	@Override
@@ -79,11 +85,14 @@ public class PeakPrepopulateTool extends Dialog {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				if (!nrPeaksIDec.isError()) {
+					getButton(IDialogConstants.PROCEED_ID).setEnabled(true);
 					try {
 						nrPeaks = Integer.parseInt(nrPeaksTxtBox.getText());
 					} catch (NumberFormatException nfe) {
 						// Move on.
 					}
+				} else {
+					getButton(IDialogConstants.PROCEED_ID).setEnabled(false);
 				}
 				
 			}
@@ -115,8 +124,6 @@ public class PeakPrepopulateTool extends Dialog {
 	@Override
 	protected void buttonPressed(int buttonId){
 		if (IDialogConstants.PROCEED_ID == buttonId) {
-		//	parentFittingTool.findInitialPeaks(nrPeaks);
-			System.out.println("Find Peaks pressed");
 			findInitialPeaks();
 		}
 		else if (IDialogConstants.CLOSE_ID == buttonId) {
@@ -129,7 +136,7 @@ public class PeakPrepopulateTool extends Dialog {
 		//Get the list of available function types and set default value
 		
 		for (final Class<? extends APeak> peak : FittingUtils.getPeakOptions().values()) {
-			peakFnMap.put(peak.getSimpleName(), peak.getName());
+			peakFnMap.put(peak.getSimpleName(), peak);
 		}
 		Set<String> availPeakTypeSet = peakFnMap.keySet();
 		availPeakTypes = (String[]) availPeakTypeSet.toArray(new String[availPeakTypeSet.size()]);
@@ -143,6 +150,13 @@ public class PeakPrepopulateTool extends Dialog {
 		}
 	}
 	
+	private Class<? extends APeak> getProfileFunction(){
+		String selectedProfileName = peakTypeCombo.getText();
+		Class<? extends APeak> selectedProfile = peakFnMap.get(selectedProfileName);
+		
+		return selectedProfile;
+	}
+	
 	private void findInitialPeaks() {
 		if (findStartingPeaksJob == null) {
 			findStartingPeaksJob = new FindInitialPeaksJob("Find Initial Peaks");
@@ -150,7 +164,7 @@ public class PeakPrepopulateTool extends Dialog {
 		
 		findStartingPeaksJob.setData(roiLimits[0], roiLimits[1]);
 		findStartingPeaksJob.setNrPeaks(nrPeaks);
-//		findStartingPeaksJob.setPeakProfile(getProfileFunction());
+		findStartingPeaksJob.setPeakFunction(getProfileFunction());
 		
 		findStartingPeaksJob.schedule();
 		
@@ -171,7 +185,7 @@ public class PeakPrepopulateTool extends Dialog {
 		Dataset x;
 		Dataset y;
 		Integer nrPeaks;
-		Class<? extends APeak> peakProfileFunction;
+		Class<? extends APeak> peakFunction;
 		
 		
 		public void setData(Dataset x, Dataset y) {
@@ -183,10 +197,14 @@ public class PeakPrepopulateTool extends Dialog {
 			this.nrPeaks = nrPeaks;
 		}
 		
+		public void setPeakFunction(Class<? extends APeak> peakFunction) {
+			this.peakFunction = peakFunction;
+		}
+		
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			
-			compFunction = FittingUtils.getInitialPeaks(x, y, nrPeaks);
+			compFunction = FittingUtils.getInitialPeaks(x, y, nrPeaks, peakFunction);
 			return Status.OK_STATUS;
 		}
 		

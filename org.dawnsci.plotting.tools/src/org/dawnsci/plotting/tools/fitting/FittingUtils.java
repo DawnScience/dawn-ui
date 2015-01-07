@@ -80,17 +80,20 @@ public class FittingUtils {
 	 * @return
 	 */
 	
-	public static CompositeFunction getInitialPeaks(Dataset xDataSet, Dataset yDataSet, Integer nPeaks) {
+	public static CompositeFunction getInitialPeaks(Dataset xDataSet, Dataset yDataSet, Integer nPeaks, Class<? extends APeak> peakClass) {
 		
 		CompositeFunction initialPeaks = new CompositeFunction();
 		
 		//Set variables for peak finding and fitting
 		List<CompositeFunction> fittedPeaksAndBkgs;
-		Integer nrPeaks = nPeaks;
 		IOptimizer optimizer = getOptimizer();
-		Class<? extends APeak> peakFunction = getPeakClass();
 		int smoothing = getSmoothing();
-		
+		//Check user variables are defined
+		Class<? extends APeak> peakFunction = peakClass;
+		if (peakFunction == null) {
+			peakFunction = getPeakClass();
+		}
+		Integer nrPeaks = nPeaks;
 		if (nrPeaks == null) {
 			//Don't know how many peaks we are looking for, so just see how many we can find
 			List<IdentifiedPeak> foundPeaks = Generic1DFitter.parseDataDerivative(xDataSet, yDataSet, smoothing);
