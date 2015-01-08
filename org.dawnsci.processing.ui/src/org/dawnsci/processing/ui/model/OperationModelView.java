@@ -47,6 +47,7 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 				dialog.setOperationInputData(inputData);
 				if (dialog.open() == Dialog.OK) {
 					man.requestUpdate();
+					modelEditor.refresh();
 				}
 				
 			}

@@ -597,6 +597,7 @@ public class DataFileSliceView extends ViewPart {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			output.setEnabled(false);
+			EscapableSliceVisitor sliceVisitor = null;
 			try {
 				
 				if (path == null) path = context.getFilePaths().get(0);
@@ -669,7 +670,7 @@ public class DataFileSliceView extends ViewPart {
 
 //				lazyDataset.setMetadata(om);
 
-				EscapableSliceVisitor sliceVisitor = getSliceVisitor(ops, lazyDataset, Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions()));
+				sliceVisitor = getSliceVisitor(ops, lazyDataset, Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions()));
 				sliceVisitor.setEndOperation(end);
 				long start = System.currentTimeMillis();
 				sliceVisitor.visit(firstSlice, null, null);
@@ -692,6 +693,10 @@ public class DataFileSliceView extends ViewPart {
 					eventManager.sendErrorUpdate(new OperationException(null, message));
 					return Status.CANCEL_STATUS;
 				} finally {
+					if (sliceVisitor != null) {
+						inputData = sliceVisitor.getOperationInputData();
+						eventManager.sendInputDataUpdate(inputData);
+					}
 					output.setEnabled(true);
 				}
 				

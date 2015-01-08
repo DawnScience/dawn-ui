@@ -43,16 +43,6 @@ public class SlicedDataUtils {
 			IDataHolder dataHolder = lservice.getData(path, new IMonitor.Stub());
 			ILazyDataset lazyAx = dataHolder.getLazyDataset(axesName);
 			if (ds == lazyAx) throw new IllegalArgumentException("Axes metadata should not contain original dataset!");
-			if (lazyAx != null && lazyAx.getRank() != rank) {
-				lazyAx = lazyAx.getSlice();
-				int[] shape = new int[rank];
-				Arrays.fill(shape, 1);
-				if (lazyAx.getRank() != 0) {
-					shape[key-1]= lazyAx.getShape()[0];
-				} 
-				
-				lazyAx.setShape(shape);
-			}
 			
 			if (lazyAx != null) axMeta.setAxis(key-1, lazyAx);
 			else axMeta.setAxis(key-1, new ILazyDataset[1]);
@@ -69,24 +59,9 @@ public class SlicedDataUtils {
 		
 		data = data.getSliceView().squeeze();
 		
-		List<AxesMetadata> amd = data.getMetadata(AxesMetadata.class);
-		List<MaskMetadata> mmd = data.getMetadata(MaskMetadata.class);
+		IDataset[] axes = getAxesFromMetadata(data);
 		
-		if (amd != null && !amd.isEmpty()) {
-			AxesMetadata am = amd.get(0);
-			ILazyDataset[] axes = am.getAxes();
-			ILazyDataset lz0 = axes[0];
-			ILazyDataset lz1 = null;
-			if (data.getRank() > 1) lz1 = axes[1];
-			if (lz0 != null){
-//				lz0.clearMetadata(null);
-				x = lz0.getSlice().squeeze();
-			}
-			if (lz1 != null) {
-//				lz1.clearMetadata(null);
-				y = lz1.getSlice().squeeze();
-			}
-		}
+		List<MaskMetadata> mmd = data.getMetadata(MaskMetadata.class);
 		
 		if (mmd != null && !mmd.isEmpty()) {
 			mask = mmd.get(0).getMask().getSlice().squeeze();
@@ -94,6 +69,8 @@ public class SlicedDataUtils {
 		
 		if (data.getRank() == 2) {
 			if (!system.is2D()) system.clear();
+			x = axes == null ? null : axes[0];
+			y = axes == null ? null : axes[1];
 			
 			final ITrace t = system.updatePlot2D(data, Arrays.asList(new IDataset[]{y,x}), null);
 				
@@ -111,10 +88,55 @@ public class SlicedDataUtils {
 				
 			
 		} else if (data.getRank() == 1) {
+			x = axes == null ? null : axes[0];
 			system.clear();
 			system.updatePlot1D(x,Arrays.asList(new IDataset[]{data}),null);
 		}
 		
+	}
+	
+	public static IDataset[] getAxesFromMetadata(IDataset data) {
+		IDataset x = null;
+		IDataset y = null;
+		IDataset mask = null;
+		
+		data = data.getSliceView().squeeze();
+		
+		List<AxesMetadata> amd = null;
+		try {
+			amd = data.getMetadata(AxesMetadata.class);
+		} catch (Exception e) {
+			return new IDataset[0];
+		}
+		
+		
+		if (amd != null && !amd.isEmpty()) {
+			AxesMetadata am = amd.get(0);
+			ILazyDataset[] axes = am.getAxes();
+			ILazyDataset lz0 = axes[0];
+			ILazyDataset lz1 = null;
+			IDataset[] out;
+			if (data.getRank() > 1) {
+				out = new IDataset[2];
+				lz1 = axes[1];
+			}else {
+				out= new IDataset[1];
+			}
+			
+			if (lz0 != null){
+//				lz0.clearMetadata(null);
+				x = lz0.getSlice().squeeze();
+				out[0] = x;
+			}
+			if (lz1 != null) {
+//				lz1.clearMetadata(null);
+				y = lz1.getSlice().squeeze();
+				out[1] = y;
+			}
+			
+			return out;
+		}
+		return null;
 	}
 	
 	public static Map<String, int[]> getDatasetInfo(String path, ConversionScheme scheme) {
