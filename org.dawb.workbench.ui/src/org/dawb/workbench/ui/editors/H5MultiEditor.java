@@ -18,6 +18,7 @@ import org.dawnsci.common.widgets.editor.ITitledEditor;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
+import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.hdf5.editor.H5Editor;
 import org.eclipse.dawnsci.hdf5.editor.H5ValuePage;
@@ -41,9 +42,13 @@ import org.eclipse.ui.part.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.io.DataHolder;
+import uk.ac.diamond.scisoft.analysis.io.HDF5Loader;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
+import uk.ac.diamond.scisoft.analysis.rcp.editors.HDF5Input;
 import uk.ac.diamond.scisoft.analysis.rcp.editors.HDF5TreeEditor;
 import uk.ac.diamond.scisoft.analysis.rcp.views.DatasetInspectorView;
+import uk.ac.diamond.scisoft.analysis.utils.FileUtils;
 
 
 public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEditor, IPlottingSystemSelection, IH5Editor, ITitledEditor {
@@ -84,20 +89,32 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
 		IDataHolder holder = null;
 		
         IMetadata metadata = null;
+        Tree tree = null;
+        HDF5Loader loader = null;
 		try {
-			holder = LoaderFactory.getData(EclipseUtils.getFilePath(getEditorInput()), null);
+			String fileName = EclipseUtils.getFilePath(getEditorInput());
+			holder = LoaderFactory.fetchData(fileName, true);
+			if (holder == null) {
+				final String extension = FileUtils.getFileExtension(fileName).toLowerCase();
+				loader = (HDF5Loader) LoaderFactory.getLoader(LoaderFactory.getLoaderClass(extension), fileName);
+				loader.setAsyncLoad(true);
+				holder = loader.loadFile();
+				LoaderFactory.cacheData(holder);
+			}
+			tree = holder.getTree();
 			metadata = holder.getMetadata();
 		} catch (Exception e1) {
 			// Allowed to have no meta data at this point.
 		}
-		
+
+		HDF5Input input = new HDF5Input(getEditorInput(), tree);
+
 		try {
 			
 			boolean treeOnTop = false;
 			if (metadata!=null) {
 				final Collection<String> names = SliceUtils.getSlicableNames(holder);
-				if (names==null || names.size()<1 ||
-						getEditorSite().getPage().findViewReference(DatasetInspectorView.ID) != null) {
+				if (names == null || names.size() < 1 || getSite().getPage().findViewReference(DatasetInspectorView.ID) != null) {
 					treeOnTop = true;
 				}
 			}
@@ -107,7 +124,7 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
 			boolean useH5Editor = defaultEditorSetting == null || defaultEditorSetting.equals("true");
 			if (treeOnTop) {
 				this.treePage = useH5Editor ? new H5Editor() : new HDF5TreeEditor();
-				addPage(index, treePage,   getEditorInput());
+				addPage(index, treePage, input);
 				setPageText(index, "Tree");
 				index++;
 			}
@@ -116,7 +133,7 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
 				Collection<IEditorPart> extensions = EditorExtensionFactory.getEditors(this);
 				if (extensions!=null && extensions.size()>0) {
 					for (IEditorPart iEditorPart : extensions) {
-						addPage(index, iEditorPart,  getEditorInput());
+						addPage(index, iEditorPart, input.getInput());
 						setPageText(index, iEditorPart.getTitle());
 						index++;
 					}
@@ -135,14 +152,18 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
 			if (!treeOnTop) {
 				this.dataSetEditor = new PlotDataEditor(PlotType.XY);
 				dataSetEditor.getPlottingSystem().setColorOption(ColorOption.BY_NAME);	
-				addPage(index, dataSetEditor, getEditorInput());
+				addPage(index, dataSetEditor, input.getInput());
 				setPageText(index, "Plot");
 				index++;
 
 				this.treePage = useH5Editor ? new H5Editor() : new HDF5TreeEditor();
-				addPage(index, treePage,   getEditorInput());
+				addPage(index, treePage, input);
 				setPageText(index, "Tree");
 				index++;
+			}
+
+			if (!useH5Editor) {
+				((HDF5TreeEditor) treePage).getHDF5TreeExplorer().startUpdateThread((DataHolder) holder, loader);
 			}
 		} catch (Exception e) {
 			logger.error("Cannot initiate "+getClass().getName()+"!", e);
