@@ -22,8 +22,10 @@ import org.dawb.common.services.conversion.IConversionContext;
 import org.dawb.common.services.conversion.IConversionContext.ConversionScheme;
 import org.dawb.common.services.conversion.IConversionService;
 import org.dawb.common.services.conversion.IProcessingConversionInfo;
+import org.dawb.common.services.conversion.ProcessingOutputType;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
+import org.dawnsci.common.widgets.file.SelectorWidget;
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
 import org.eclipse.core.resources.IFile;
@@ -84,13 +86,21 @@ import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.events.TypedEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -101,7 +111,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DataFileSliceView extends ViewPart {
-
+	
 	private static IConversionService cservice;
 	public static void setConversionService(IConversionService s) {
 		cservice = s;
@@ -127,6 +137,7 @@ public class DataFileSliceView extends ViewPart {
 	private IPlottingSystem input;
 	private IPlottingSystem output;
 	private IOperationInputData inputData = null;
+	private ProcessingOutputType processingOutputType = ProcessingOutputType.PROCESSING_ONLY;
 	
 	String lastPath = null;
 	
@@ -325,10 +336,15 @@ public class DataFileSliceView extends ViewPart {
 							return new HierarchicalFileExecutionVisitor(fileName);
 						}
 
+						@Override
+						public ProcessingOutputType getProcessingOutputType() {
+							return processingOutputType;
+						}
+
 					});
 				}
 				
-				FileSelectionDialog fsd = new FileSelectionDialog(Display.getCurrent().getActiveShell());
+				ExtendedFileSelectionDialog fsd = new ExtendedFileSelectionDialog(Display.getCurrent().getActiveShell());
 				if (lastPath == null) {
 					final File source = new File(fileManager.getFilePaths().get(0));
 					lastPath  = source.getParent();
@@ -339,8 +355,7 @@ public class DataFileSliceView extends ViewPart {
 				if (fsd.open() == Dialog.CANCEL) return;
 				lastPath = fsd.getPath();
 				fileManager.setOutputPath(fsd.getPath());
-				
-
+			
 				ProgressMonitorDialog dia = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
 
 				try {
@@ -834,6 +849,47 @@ public class DataFileSliceView extends ViewPart {
 			if (wd.open() == WizardDialog.OK) return context;
 			
 			return null;
+		}
+		
+	}
+	
+	private class ExtendedFileSelectionDialog extends FileSelectionDialog {
+		
+		public ExtendedFileSelectionDialog(Shell parentShell) {
+			super(parentShell);
+		}
+		
+		@Override
+		protected Control createDialogArea(Composite parent) {
+			super.createDialogArea(parent);
+			Group group1 = new Group(parent, SWT.SHADOW_IN);
+			group1.setText("Select Output");
+			group1.setLayout(new RowLayout(SWT.VERTICAL));
+			final Button button1 = new Button(group1, SWT.RADIO);
+			button1.setText("Save only the processed data");
+			if (processingOutputType == ProcessingOutputType.PROCESSING_ONLY) button1.setSelection(true);
+			final Button button2 = new Button(group1, SWT.RADIO);
+			button2.setText("Save both the original and processed data (nxs original data only)");
+			if (processingOutputType == ProcessingOutputType.ORIGINAL_AND_PROCESSED) button2.setSelection(true);
+						
+			SelectionListener groupListener = new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					if (button2.getSelection()) {
+						processingOutputType = ProcessingOutputType.ORIGINAL_AND_PROCESSED;
+					} else {
+						processingOutputType = ProcessingOutputType.PROCESSING_ONLY;
+					}
+				}
+				@Override
+				public void widgetDefaultSelected(SelectionEvent e) {
+					widgetSelected(e);
+				}
+			};
+			button1.addSelectionListener(groupListener);
+			//button2.addSelectionListener(groupListener);
+			
+			return parent;
 		}
 		
 	}
