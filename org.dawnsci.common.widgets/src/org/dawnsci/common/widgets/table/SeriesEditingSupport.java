@@ -80,7 +80,7 @@ public class SeriesEditingSupport extends EditingSupport {
 		// We get the last non-add item or null if there is not one.
 		ISeriesItemDescriptor previous;
 		if (element.equals(ISeriesItemDescriptor.NEW)) {
-			previous = data.size()>1 ? data.get(data.size()-1) : null;
+			previous = data.size()>=1 ? data.get(data.size()-1) : null;
 		} else if (data.size()>1 && data.contains(element)) {
 			previous = data.get(data.indexOf(element)-1);
 		} else{

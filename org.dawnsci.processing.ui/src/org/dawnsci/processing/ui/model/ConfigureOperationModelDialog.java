@@ -40,6 +40,7 @@ import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.region.ILockableRegion;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionService;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.jface.dialogs.Dialog;
@@ -68,6 +69,8 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 	private IOperationModel omodel;
 	private IOperationModel model;
 	private Label errorLabel;
+	private IDataset[] axes;
+	private double[] minMax = new double[4];
 	
 	private final static Logger logger = LoggerFactory.getLogger(ConfigureOperationModelDialog.class);
 
@@ -124,11 +127,9 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 	public void setOperationInputData(final IOperationInputData data) {
 		
 		this.data = data;
-		
-		
 		modelViewer.setOperation(data.getCurrentOperation());
-		
 		model = data.getCurrentOperation().getModel();
+		
 		try {
 			omodel = (IOperationModel)BeanUtils.cloneBean(model);
 		} catch (Exception e) {
@@ -147,12 +148,44 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 		
 		update();
 		
+		axes = SlicedDataUtils.getAxesFromMetadata(data.getInputData());
+		
+		if (input.is2D()) {
+			minMax[0] = 0;
+			minMax[1] = data.getInputData().getShape()[1];
+			minMax[2] = 0;
+			minMax[3] = data.getInputData().getShape()[0];
+		} else {
+			minMax[0] = 0;
+			minMax[1] = data.getInputData().getShape()[0];
+			minMax[2] = data.getInputData().min().doubleValue();
+			minMax[3] = data.getInputData().max().doubleValue();
+		}
+		
+		if (axes != null) {
+			if (input.is2D()) { 
+				if (axes[1] != null) {
+					minMax[0] = axes[1].getDouble(0);
+					minMax[1] = axes[1].getDouble(axes[1].getSize()-1);
+				}
+				if (axes[0] != null) {
+					minMax[2] = axes[0].getDouble(0);
+					minMax[3] = axes[0].getDouble(axes[0].getSize()-1);
+				}
+			} else {
+				if (axes[0] != null) {
+					minMax[0] = axes[0].getDouble(0);
+					minMax[1] = axes[0].getDouble(axes[0].getSize()-1);
+				}
+			}
+		}
+		
 		Map<String,ROIStruct> rois = getROIs(data.getCurrentOperation().getModel(),data.getInputData());
 		boolean sector = false;
 		
 		IDiffractionMetadata d = AbstractOperation.getFirstDiffractionMetadata(data.getInputData());
 		
-		for (ROIStruct r :rois.values()) if (r.roi instanceof RingROI) {
+		if (d != null) for (ROIStruct r :rois.values()) if (r.roi instanceof RingROI) {
 			sector = true;
 			break;
 		}
@@ -162,7 +195,7 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 			sector = MessageDialog.openConfirm(this.getShell(),"Diffraction Regions", "Lock sectors to beam centre?");
 		}
 		
-		final IDataset[] axes = SlicedDataUtils.getAxesFromMetadata(data.getInputData());
+		
 		for (final Entry<String,ROIStruct> entry : rois.entrySet()) {
 			try {
 				final IRegionService rservice = (IRegionService)ServiceManager.getService(IRegionService.class);
@@ -171,7 +204,14 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 					entry.getValue().roi.setPoint(d.getDetector2DProperties().getBeamCentreCoords());
 				}
 
-				IRegion reg = rservice.createRegion(input,entry.getValue().roi,entry.getKey());
+				IRegion reg = null;
+				if (entry.getValue().type != RangeType.NONE) {
+					reg = input.createRegion(entry.getKey(), getRegionType(entry.getValue().type));
+					reg.setROI(entry.getValue().roi);
+					input.addRegion(reg);
+				} else {
+					reg = rservice.createRegion(input,entry.getValue().roi,entry.getKey());
+				}
 				
 				if (reg instanceof ILockableRegion && sector) ((ILockableRegion)reg).setCentreMovable(false);
 				
@@ -208,7 +248,7 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 								break;
 							}
 						} catch (Exception e) {
-							logger.warn("Could set values in model: " + e.getMessage());
+							logger.warn("Couldnt set values in model: " + e.getMessage());
 						}
 						
 						modelViewer.setModel(model);
@@ -240,17 +280,12 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 					rois.put(field.getName(),new ROIStruct((IROI)model.get(field.getName()),RangeType.NONE));
 
 				} else if (an != null && an.rangevalue() != RangeType.NONE) {
-
-					double[] range = new double[1];
-
-					if (an.rangevalue() == RangeType.XSINGLE || an.rangevalue() == RangeType.YSINGLE) range[0] = (double)model.get(field.getName());
-					else range = (double[])model.get(field.getName());
-
-					IROI roi = getROIFromRange(range, an.rangevalue(), axes);
+					
+					IROI roi = getRoiFromAnnotation(an, field.getName());
 					if (roi != null) rois.put(field.getName(),new ROIStruct(roi,an.rangevalue()));
 				}
 			} catch (Exception e) {
-				logger.warn("Could create roi " + e.getMessage());
+				logger.warn("Couldnt create roi " + e.getMessage());
 			}
 		}
 
@@ -290,9 +325,9 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 		return out;
 	}
 	
-	private IROI getROIFromRange(double[] range, RangeType type, IDataset[] axes) {
+	private RectangularROI getROIFromRange(double[] range, RangeType type, IDataset[] axes) {
 		
-		if (range == null) range = new double[4];
+		if (range == null) range = minMax.clone();
 		
 		switch (type) {
 		case XRANGE:
@@ -401,10 +436,101 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 			}
 		}
 	}
+	
+	private RegionType getRegionType(RangeType type) {
+		switch (type) {
+		case NONE:
+			return null;
+		case XRANGE:
+			return RegionType.XAXIS;
+		case XSINGLE:
+			return RegionType.XAXIS_LINE;
+		case XYRANGE:
+			return RegionType.BOX;
+		case YRANGE:
+			return RegionType.YAXIS;
+		case YSINGLE:
+			return RegionType.YAXIS_LINE;
+		default:
+			return null;
+		}
+	}
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
+		try {
+			IRegion region = input.getRegion(evt.getPropertyName());
+
+			Object object = data.getCurrentOperation().getModel().get(evt.getPropertyName());
+
+			if (object instanceof IROI) region.setROI((IROI)object);
+			else {
+				OperationModelField an = ModelUtils.getAnnotation(model, evt.getPropertyName());
+				
+				if (evt.getNewValue() != null && evt.getNewValue() instanceof Double) {
+					RectangularROI roi = getRoiFromAnnotation(an, evt.getPropertyName());
+					region.setROI(roi);
+				} else if (evt.getNewValue() != null && evt.getNewValue().getClass().isArray()){
+
+						if (!Arrays.equals((double[])evt.getNewValue(), (double[])evt.getOldValue())) {
+							RectangularROI roi = getRoiFromAnnotation(an, evt.getPropertyName());
+							region.setROI(roi);
+							return;
+						}
+					
+				} else if (evt.getNewValue() == null) {
+					RectangularROI roi = getRoiFromAnnotation(an, evt.getPropertyName());
+					region.setROI(roi);
+					return;
+				}
+				
+			}
+		} catch (Exception e) {
+			logger.warn("Couldnt update region");
+		}
+
+		
 		update();
+	}
+	
+	private RectangularROI getRoiFromAnnotation(OperationModelField an, String name) {
+		
+		if (an != null && an.rangevalue() != RangeType.NONE) {
+			try {
+				return getROIFromRange(getRangeFromAnnotation(an, name), an.rangevalue(), axes);
+			} catch (Exception e) {
+				logger.warn("Could not build roi");
+				return null;
+			}
+
+			
+		}
+		
+		return null;
+	}
+	
+	private double[] getRangeFromAnnotation(OperationModelField an, String name){
+		double[] range = minMax.clone();
+		
+		try {
+			Object object = model.get(name);
+			
+			if (an.rangevalue() == RangeType.XSINGLE || an.rangevalue() == RangeType.YSINGLE) {
+				if (object != null) range[0] = (double)object;
+				else if (an.rangevalue() == RangeType.YSINGLE) {
+					range[0] = range[2];
+				}
+
+			}
+			else if (object != null)  {
+				range = (double[])object;
+			}
+		} catch (Exception e) {
+			logger.warn("Could not build roi");
+			return null;
+		}
+		
+		return range;
 	}
 	
 	private class ROIStruct {
