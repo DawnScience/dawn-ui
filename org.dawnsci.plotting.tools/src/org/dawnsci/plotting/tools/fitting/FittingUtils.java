@@ -43,6 +43,7 @@ import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Gaussian;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
@@ -59,32 +60,14 @@ public class FittingUtils {
 
 	private static Logger logger = LoggerFactory.getLogger(FittingUtils.class);
 	
-	/**
-	 * This method runs a fit on data passed in. It reads preferences to 
-	 * determine which algorithm etc. the user prefers. 
-	 * 
-	 * It can take a while to run. Callers of these utils should protect the
-	 * call by running it from a Job. This method is UI thread safe and may be called
-	 * in any thread.
-	 * 
-	 * The x and y data may have been sliced if the user has completed a selection choice
-	 * which limits the peak fit range.
-	 * 
-	 * The RegionBounds returns are not computed in y. Instead the peak fitter provides the
-	 * y values as zero. So XAXIS regions should be created, then Y data is not required.
-	 * 
-	 * The method also computes x,y abstract data set pairs which are plot fragments for the
-	 * function plotted over the peak region. These can be plotted to show the user the
-	 * fitted function, which they may wish to adjust.
-	 * 
-	 * @return
-	 */
 	
-	public static CompositeFunction getInitialPeaks(Dataset xDataSet, Dataset yDataSet, Integer nPeaks, Class<? extends APeak> peakClass) {
+	
+	public static Add getInitialPeaks(Dataset xDataSet, Dataset yDataSet, Integer nPeaks, Class<? extends APeak> peakClass) {
 		
-		CompositeFunction initialPeaks = new CompositeFunction();
+		Add initialPeaks = new Add();
 		
 		//Set variables for peak finding and fitting
+		//-this has to be a list of composite functions unless we change Generic1DFitter
 		List<CompositeFunction> fittedPeaksAndBkgs;
 		IOptimizer optimizer = getOptimizer();
 		int smoothing = getSmoothing();
@@ -122,6 +105,26 @@ public class FittingUtils {
 		return initialPeaks;
 	}
 	
+	/**
+	 * This method runs a fit on data passed in. It reads preferences to 
+	 * determine which algorithm etc. the user prefers. 
+	 * 
+	 * It can take a while to run. Callers of these utils should protect the
+	 * call by running it from a Job. This method is UI thread safe and may be called
+	 * in any thread.
+	 * 
+	 * The x and y data may have been sliced if the user has completed a selection choice
+	 * which limits the peak fit range.
+	 * 
+	 * The RegionBounds returns are not computed in y. Instead the peak fitter provides the
+	 * y values as zero. So XAXIS regions should be created, then Y data is not required.
+	 * 
+	 * The method also computes x,y abstract data set pairs which are plot fragments for the
+	 * function plotted over the peak region. These can be plotted to show the user the
+	 * fitted function, which they may wish to adjust.
+	 * 
+	 * @return
+	 */
 	public static FittedFunctions getFittedPeaks(final FittedPeaksInfo info) throws Exception {
 		
 		List<CompositeFunction> composites=null;
