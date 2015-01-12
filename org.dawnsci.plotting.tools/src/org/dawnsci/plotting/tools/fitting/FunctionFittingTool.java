@@ -103,6 +103,11 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 	private Button updateAllButton;
 	private Button findPeaksButton;
+	
+	//These are controls for whether FindPeaksButton should be visible when FunctionFittingTool called (e.g.) as part of
+	//a workflow. enableFindPeaksButton is used internally only, whereas showFindPeaksWorkFlow can be used as a control.
+	private boolean showFindPeaksWorkFlow = false; 
+	private boolean enableFindPeaksButton = true;
 
 	private IPreferenceStore prefs = Activator.getPlottingPreferenceStore();
 
@@ -168,17 +173,19 @@ public class FunctionFittingTool extends AbstractToolPage implements
 			}
 		});
 		
-		findPeaksButton = new Button(actionComposite, SWT.PUSH);
-		findPeaksButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
-				false, 1, 1));
-		findPeaksButton.setText("Find Peaks...");
-		findPeaksButton.setEnabled(true);
-		findPeaksButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				openPeakPrepopulateTool();
-			}
-		});
+		if (enableFindPeaksButton) {
+			findPeaksButton = new Button(actionComposite, SWT.PUSH);
+			findPeaksButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
+					false, 1, 1));
+			findPeaksButton.setText("Find Peaks...");
+			findPeaksButton.setEnabled(true);
+			findPeaksButton.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					openPeakPrepopulateTool();
+				}
+			});
+		}
 
 		Composite resultsComposite = new Composite(infoComposite, SWT.BORDER);
 		resultsComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
@@ -797,6 +804,15 @@ public class FunctionFittingTool extends AbstractToolPage implements
 	 */
 	@Override
 	public void setToolData(Serializable toolData) {
+		
+		//Allows the user to specify whether the peak button will be shown, for example in a workflow
+		//tool. By default it is not shown. To show the button, use the setShowFindPeaksWorkFlow method
+		if (showFindPeaksWorkFlow == true) {
+			enableFindPeaksButton = true;
+		}
+		else {
+			enableFindPeaksButton = false;
+		}
 
 		final UserPlotBean bean = (UserPlotBean) toolData;
 		functions = bean.getFunctions();
@@ -837,5 +853,13 @@ public class FunctionFittingTool extends AbstractToolPage implements
 										// replace merge.
 
 		return bean;
+	}
+	
+	public void setShowFindPeaksWorkFlow(boolean buttonEnable) {
+		showFindPeaksWorkFlow = buttonEnable;
+	}
+	
+	public boolean getShowFindPeaksWorkFlow() {
+		return showFindPeaksWorkFlow;
 	}
 }
