@@ -28,7 +28,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
 
 public class PeakPrepopulateTool extends Dialog {
 	
@@ -44,7 +44,7 @@ public class PeakPrepopulateTool extends Dialog {
 	private FunctionFittingTool parentFittingTool;
 	
 	private FindInitialPeaksJob findStartingPeaksJob;
-	private CompositeFunction compFunction = null;
+	private Add compFunction = null;
 	
 	public PeakPrepopulateTool(Shell parentShell, FunctionFittingTool parentFittingTool, Dataset[] roiLimits) {
 		//Setup the dialog and get the parent fittingtool as well as the ROI limits we're interested in.
