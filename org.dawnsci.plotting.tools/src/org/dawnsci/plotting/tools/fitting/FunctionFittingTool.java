@@ -70,7 +70,7 @@ import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
 import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants.FIT_ALGORITHMS;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
 import uk.ac.diamond.scisoft.analysis.optimize.GeneticAlg;
 import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
 
@@ -90,10 +90,10 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 	protected IROIListener roiListener = new FunctionFittingROIListener();
 	protected IRegion region = null;
-	private CompositeFunction compFunction = null;
+	private Add compFunction = null;
 	protected ILineTrace estimate;
 	private ILineTrace fitTrace;
-	private CompositeFunction resultFunction;
+	private Add resultFunction;
 
 	private UpdateFitPlotJob updateFittedPlotJob;
 	private ITraceListener traceListener = new FunctionFittingTraceListener();
@@ -210,7 +210,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 		// Initialise with a simple function.
 		if (compFunction == null) {
-			compFunction = new CompositeFunction();
+			compFunction = new Add();
 		}
 		functionWidget.setInput(compFunction);
 		functionWidget.expandAll();
@@ -449,7 +449,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		getPlottingSystem().addTraceListener(traceListener);
 	}
 	
-	public void setInitialPeaks(CompositeFunction initPeakCompFunc) {
+	public void setInitialPeaks(Add initPeakCompFunc) {
 		compFunction = initPeakCompFunc;
 		final Dataset[] currRoiLimits = getFirstUserTraceROI(); 
 		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -501,12 +501,12 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 				// We need to run the fit on a copy of the compFunction
 				// otherwise the fit will affect the input values.
-				CompositeFunction compFunctionCopy = compFunction.copy();
+				Add compFunctionCopy = (Add) compFunction.copy();
 				IFunction[] functionCopies = compFunctionCopy.getFunctions();
 				switch (algorithm) {
 				default:
 				case APACHENELDERMEAD:
-					resultFunction = new CompositeFunction();
+					resultFunction = new Add();
 					for (IFunction function : functionCopies) {
 						resultFunction.addFunction(function);
 						if (function instanceof IDataBasedFunction) {
@@ -620,14 +620,14 @@ public class FunctionFittingTool extends AbstractToolPage implements
 	@Override
 	public void setFunctions(Map<String, IFunction> functions) {
 		// clear the composite function
-		compFunction = new CompositeFunction();
+		compFunction = new Add();
 		for (String key : functions.keySet()) {
 			if (key.contains("_initial_")) {
 				compFunction.addFunction((AFunction) functions.get(key));
 			}
 		}
 
-		resultFunction = new CompositeFunction();
+		resultFunction = new Add();
 		updateAllButton.setEnabled(true);
 		for (String key : functions.keySet()) {
 			if (key.contains("_result_")) {
@@ -763,7 +763,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		final UserPlotBean bean = (UserPlotBean) toolData;
 		functions = bean.getFunctions();
 
-		compFunction = new CompositeFunction();
+		compFunction = new Add();
 		for (String key : functions.keySet()) {
 			if (functions.get(key) instanceof AFunction) {
 				AFunction function = (AFunction) functions.get(key);

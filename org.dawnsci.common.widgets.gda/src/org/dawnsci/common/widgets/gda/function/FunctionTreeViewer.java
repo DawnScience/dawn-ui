@@ -55,7 +55,7 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Tree;
 
-import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
 
 public class FunctionTreeViewer implements IFunctionViewer {
 	protected static final DecimalFormat DOUBLE_FORMAT = new DecimalFormat(
@@ -335,7 +335,7 @@ public class FunctionTreeViewer implements IFunctionViewer {
 	}
 
 	@Override
-	public void setInput(CompositeFunction compositeFunction) {
+	public void setInput(Add compositeFunction) {
 		if (compositeFunction == null) {
 			modelRoot = null;
 		} else {
@@ -351,7 +351,7 @@ public class FunctionTreeViewer implements IFunctionViewer {
 	}
 
 	@Override
-	public void setFittedInput(CompositeFunction fittedCompositeFunction) {
+	public void setFittedInput(Add fittedCompositeFunction) {
 		if (modelRoot == null) {
 			setInput(fittedCompositeFunction);
 		}

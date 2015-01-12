@@ -13,7 +13,7 @@ import org.eclipse.dawnsci.analysis.api.fitting.functions.IOperator;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IParameter;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
-import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
 
 public interface IFunctionViewer extends ISelectionProvider {
 
@@ -21,17 +21,17 @@ public interface IFunctionViewer extends ISelectionProvider {
 	 * Set the input operator for this viewer
 	 *
 	 * @param operator
-	 *            the operator (a CompositeFunction)
+	 *            the operator (an Add - composite function)
 	 */
-	void setInput(CompositeFunction operator);
+	void setInput(Add operator);
 
 	/**
 	 * The the fitted/result function that matches the input.
 	 *
 	 * @param fittedCompositeFunction
-	 *            the operator (a CompositeFunction)
+	 *            the operator (an Add)
 	 */
-	void setFittedInput(CompositeFunction fittedCompositeFunction);
+	void setFittedInput(Add fittedCompositeFunction);
 
 	/**
 	 * Convert the selection that is in the internal model format to the

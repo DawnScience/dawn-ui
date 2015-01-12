@@ -43,7 +43,7 @@ import org.eclipse.ui.menus.CommandContributionItem;
 import org.eclipse.ui.menus.CommandContributionItemParameter;
 import org.eclipse.ui.services.IServiceLocator;
 
-import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
 
 public class FunctionFittingWidget extends Composite implements IFunctionViewer {
 
@@ -261,7 +261,7 @@ public class FunctionFittingWidget extends Composite implements IFunctionViewer 
 	}
 
 	@Override
-	public void setInput(CompositeFunction compFunction) {
+	public void setInput(Add compFunction) {
 		funcTree.setInput(compFunction);
 	}
 
@@ -271,7 +271,7 @@ public class FunctionFittingWidget extends Composite implements IFunctionViewer 
 	}
 
 	@Override
-	public void setFittedInput(CompositeFunction resultFunction) {
+	public void setFittedInput(Add resultFunction) {
 		funcTree.setFittedInput(resultFunction);
 	}
 

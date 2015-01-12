@@ -24,16 +24,16 @@ import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IOperator;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IParameter;
 
-import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
 
 /**
  * Root domain object for function model 
- *  Wraps around a CompositeFunction
+ *  Wraps around an Add (compositeFunction)
  */
 public class FunctionModelRoot {
 
-	private CompositeFunction root;
-	private CompositeFunction fittedRoot;
+	private Add root;
+	private Add fittedRoot;
 	private IFunctionDescriptorProvider functionDescriptorProvider;
 	private ListenerList modelModifiedListeners;
 	private FunctionModelElement[] children = new FunctionModelElement[0];
@@ -54,7 +54,7 @@ public class FunctionModelRoot {
 						rhs.functionDescriptorProvider).isEquals();
 	}
 
-	public FunctionModelRoot(CompositeFunction compositeFunction,
+	public FunctionModelRoot(Add compositeFunction,
 			IFunctionDescriptorProvider functionDescriptorProvider) {
 		this.root = compositeFunction;
 		this.functionDescriptorProvider = functionDescriptorProvider;
@@ -69,15 +69,15 @@ public class FunctionModelRoot {
 		return functionDescriptorProvider;
 	}
 
-	public CompositeFunction getRootOperator() {
+	public Add getRootOperator() {
 		return root;
 	}
 
-	public CompositeFunction getFittedRootOperator() {
+	public Add getFittedRootOperator() {
 		return fittedRoot;
 	}
 
-	public void setFittedRoot(CompositeFunction fittedCompositeRoot) {
+	public void setFittedRoot(Add fittedCompositeRoot) {
 		this.fittedRoot = fittedCompositeRoot;
 	}
 
@@ -426,7 +426,7 @@ public class FunctionModelRoot {
 		return fittedRoot != null;
 	}
 
-	public void setRoot(CompositeFunction compositeFunction) {
+	public void setRoot(Add compositeFunction) {
 		root = compositeFunction;
 	}
 
