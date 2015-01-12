@@ -60,16 +60,16 @@ public class FittedPeaksExportWizard extends Wizard implements IExportWizard {
 			return false;
 		final IToolContainer container = (IToolContainer)view;
 		final IViewReference viewFixed = (IViewReference)EclipseUtils.getPage().findViewReference("org.dawb.workbench.plotting.views.toolPageView.fixed", "org.dawb.workbench.plotting.tools.fittingTool");
-		if (!(viewFixed.getView(false) instanceof IToolContainer))
+		if (viewFixed != null && !(viewFixed.getView(false) instanceof IToolContainer))
 			return false;
-		final IToolContainer containerFixed = (IToolContainer)viewFixed.getView(false);
+		final IToolContainer containerFixed = viewFixed != null ? (IToolContainer)viewFixed.getView(false) : null;
 
 		boolean isFixed = false, isPeakToolActive = false;
 		if (view != null && container.getActiveTool()!=null && (container.getActiveTool() instanceof AbstractFittingTool)) {
 			isFixed = false;
 			isPeakToolActive = true;
 		}
-		if (viewFixed != null && containerFixed.getActiveTool()!=null && (containerFixed.getActiveTool() instanceof AbstractFittingTool)) {
+		if (viewFixed != null && containerFixed != null && containerFixed.getActiveTool()!=null && (containerFixed.getActiveTool() instanceof AbstractFittingTool)) {
 			isFixed = true;
 			isPeakToolActive = true;
 		}
