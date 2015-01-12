@@ -207,10 +207,10 @@ public class PlotDataPage extends Page implements IAdaptable {
             workspace.removeResourceChangeListener(resourceListener);
 		}
 		if (dataSetComponent!=null) dataSetComponent.dispose();
-		
-		sliceComponent.removeDimensionalListener(dataReductionDimensionalListener);
-		if (sliceComponent!=null)   sliceComponent.dispose();
-		
+		if (sliceComponent!=null) {
+			sliceComponent.removeDimensionalListener(dataReductionDimensionalListener);
+			sliceComponent.dispose();
+		}
  		super.dispose();
 	}
 
