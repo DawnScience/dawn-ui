@@ -105,6 +105,10 @@ public class FittingUtils {
 		return initialPeaks;
 	}
 	
+//	public static DataSet getTraceRemainder(DataSet xDataSet, DataSet yDataSet, Add, initialPeakFuncs) {
+//		
+//	}
+	
 	/**
 	 * This method runs a fit on data passed in. It reads preferences to 
 	 * determine which algorithm etc. the user prefers. 
