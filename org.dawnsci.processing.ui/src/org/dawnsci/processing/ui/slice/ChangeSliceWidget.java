@@ -14,7 +14,7 @@ import java.util.List;
 
 import org.dawnsci.processing.ui.Activator;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
-import org.eclipse.dawnsci.analysis.dataset.impl.SliceND;
+import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceNDGenerator;
 import org.eclipse.swt.SWT;
