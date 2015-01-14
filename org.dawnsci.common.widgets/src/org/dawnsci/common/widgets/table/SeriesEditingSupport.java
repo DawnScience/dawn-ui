@@ -77,14 +77,23 @@ public class SeriesEditingSupport extends EditingSupport {
 		
 		final List<ISeriesItemDescriptor> data = ((SeriesContentProvider)getViewer().getContentProvider()).getSeriesItems();
 		
-		// We get the last non-add item or null if there is not one.
-		ISeriesItemDescriptor previous;
+		// We get the last filterable non-add item or null if there is not one.
+		ISeriesItemDescriptor previous = null;
+		int i = -1;
 		if (element.equals(ISeriesItemDescriptor.NEW)) {
-			previous = data.size()>=1 ? data.get(data.size()-1) : null;
-		} else if (data.size()>1 && data.contains(element)) {
-			previous = data.get(data.indexOf(element)-1);
-		} else{
-			previous = null;
+			if (data.size() != 0) {
+				i = data.size()-1;
+			}
+		} else {
+			i = data.indexOf(element)-1;
+		}
+		
+		while (i >= 0) {
+			ISeriesItemDescriptor s = data.get(i--);
+			if (s.isFilterable()) {
+				previous  = s;
+				break;
+			}
 		}
 		
 		SeriesProposalProvider sprov = (SeriesProposalProvider)cellEditor.getContentProposalProvider();

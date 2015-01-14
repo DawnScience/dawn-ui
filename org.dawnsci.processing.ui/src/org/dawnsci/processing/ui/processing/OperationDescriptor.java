@@ -20,6 +20,7 @@ import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.processing.OperationCategory;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
+import org.eclipse.dawnsci.analysis.api.processing.OperationRank;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.ModelField;
 import org.eclipse.dawnsci.analysis.api.processing.model.ModelUtils;
@@ -242,5 +243,15 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 		if (getName().toLowerCase().contains(contents.toLowerCase())) return true;
 		if (getCategoryLabel()!=null && getCategoryLabel().toLowerCase().contains(contents.toLowerCase())) return true;
 		return false;
+	}
+
+	@Override
+	public boolean isFilterable() {
+		try {
+			final IOperation<? extends IOperationModel, ? extends OperationData> o = this.getSeriesObject();
+			return !(o.getInputRank() == OperationRank.ANY && o.getOutputRank() == OperationRank.SAME);
+		} catch (InstantiationException e) {
+			return true;
+		}
 	}
 }

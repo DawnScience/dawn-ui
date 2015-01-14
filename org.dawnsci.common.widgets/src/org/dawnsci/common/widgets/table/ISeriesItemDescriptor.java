@@ -46,6 +46,14 @@ public interface ISeriesItemDescriptor extends IAdaptable {
 	 * @return String description of the function
 	 */
 	String getDescription();
+	
+	/**
+	 * Determines whether this item can be used to filter
+	 * options for later items in the series
+	 * 
+	 * @return filterable
+	 */
+	boolean isFilterable();
 
 	/**
 	 * Function Descriptors can choose to adapt to:
@@ -90,6 +98,12 @@ public interface ISeriesItemDescriptor extends IAdaptable {
 		public String getLabel() {
 			// TODO Auto-generated method stub
 			return null;
+		}
+
+		@Override
+		public boolean isFilterable() {
+			// TODO Auto-generated method stub
+			return true;
 		}
 		
 	}
