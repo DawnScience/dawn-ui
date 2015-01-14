@@ -17,6 +17,7 @@ import org.dawb.common.services.expressions.IExpressionEngine;
 import org.dawb.common.services.expressions.IExpressionService;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
 import org.eclipse.dawnsci.analysis.api.io.ILazyLoader;
 import org.eclipse.dawnsci.analysis.api.io.ScanFileHolderException;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
@@ -59,11 +60,7 @@ class ExpressionLazyLoader implements ILazyLoader {
 	}
 
 	@Override
-	public Dataset getDataset(IMonitor mon,
-			 							int[] shape,
-			 							int[] start,
-			 							int[] stop, 
-			 							int[] step) throws ScanFileHolderException {
+	public Dataset getDataset(IMonitor mon, SliceND slice) throws ScanFileHolderException {
 		
 		try {
 			engine.createExpression(expressionString);
@@ -80,7 +77,7 @@ class ExpressionLazyLoader implements ILazyLoader {
 	    for (final String name : names) {
 	    	try {
 	    		ILazyDataset set = manager.getLazyValue(name, mon);
-	    		context.put(name, set.getSlice(mon, start, stop, step));
+	    		context.put(name, set.getSlice(mon, slice));
 	    		
 	    	} catch (Throwable ignored) {
 	    		// We try to add the unsliced value as they may be putting a 
