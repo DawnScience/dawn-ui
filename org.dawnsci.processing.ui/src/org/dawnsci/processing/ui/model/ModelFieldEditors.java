@@ -219,6 +219,10 @@ public class ModelFieldEditors {
 							if (key.startsWith(contents)) prop.add(new ContentProposal(key));
 						}
 						
+						if (prop.isEmpty()) {
+							for(String key : datasetInfo.keySet()) prop.add(new ContentProposal(key));
+						}
+						
 						return prop.toArray(new IContentProposal[prop.size()]);
 					}
 				};
