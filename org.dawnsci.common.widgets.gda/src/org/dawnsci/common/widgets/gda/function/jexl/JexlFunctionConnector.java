@@ -8,6 +8,8 @@
  */
 package org.dawnsci.common.widgets.gda.function.jexl;
 
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Gaussian;
 
 /**
@@ -17,6 +19,22 @@ public class JexlFunctionConnector {
 
 	public static double Gaussian(double x, double p, double w, double a) {
 		return new Gaussian(p, w, a).val(x);
+	}
+	
+	/**
+	 * Dataset implementation for Tracy
+	 * 
+	 * @param x
+	 * @param p
+	 * @param w
+	 * @param a
+	 * @return gaussian
+	 */
+	public static IDataset Gaussian2(IDataset x, double p, double w, double a) {
+		Gaussian g = new Gaussian(p, w, a);
+		return g.calculateValues(x);
+		
+		
 	}
 
 }
