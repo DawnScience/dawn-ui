@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
 
@@ -55,6 +56,8 @@ public class PeakPrepopulateTool extends Dialog {
 	private FunctionFittingTool parentFittingTool;
 	
 	private FindInitialPeaksJob findStartingPeaksJob;
+	private FitBackgroundJob fitBackgroundJob;
+	
 	private Add compFunction = null;
 	
 	public PeakPrepopulateTool(Shell parentShell, FunctionFittingTool parentFittingTool, Dataset[] roiLimits) {
@@ -168,6 +171,7 @@ public class PeakPrepopulateTool extends Dialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				System.out.println("Fitting background...");
+				fitBackground();
 			}
 		});
 		
@@ -248,6 +252,17 @@ public class PeakPrepopulateTool extends Dialog {
 		});
 	}
 	
+	private void fitBackground() {
+	if (fitBackgroundJob == null) {
+		fitBackgroundJob = new FitBackgroundJob("Fit Background");
+	}
+	
+	fitBackgroundJob.setData(roiLimits[0], roiLimits[1]);
+//	fitBackgroundJob.setBkgFunction(getBackgroundFunction());
+	
+	fitBackgroundJob.schedule();
+}
+	
 	//**********************************
 	
 	/**
@@ -277,6 +292,23 @@ public class PeakPrepopulateTool extends Dialog {
 			compFunction = FittingUtils.getInitialPeaks(x, y, nrPeaks, peakFunction);
 			return Status.OK_STATUS;
 		}
+	}
 		
+		/**
+		 * Job to find background of a dataset, removing the peaks from the 
+		 * background first.
+		 */
+	private class FitBackgroundJob extends FittingJob {
+	
+		public FitBackgroundJob(String name) {
+			super(name);
+		}
+		
+		Class<? extends AFunction> bkgFunction;
+		
+		protected IStatus run(IProgressMonitor monitor) {
+			//TODO
+			return Status.OK_STATUS;
+		}
 	}
 }
