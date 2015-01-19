@@ -104,14 +104,14 @@ public class PeakPrepopulateTool extends Dialog {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				if (!nrPeaksIDec.isError()) {
-					getButton(IDialogConstants.PROCEED_ID).setEnabled(true);
+					findPeaksButton.setEnabled(true);
 					try {
 						nrPeaks = Integer.parseInt(nrPeaksTxtBox.getText());
 					} catch (NumberFormatException nfe) {
 						// Move on.
 					}
 				} else {
-					getButton(IDialogConstants.PROCEED_ID).setEnabled(false);
+					findPeaksButton.setEnabled(false);
 				}
 				
 			}
@@ -248,6 +248,8 @@ public class PeakPrepopulateTool extends Dialog {
 			}
 		});
 	}
+	
+	//**********************************
 	
 	/**
 	 * Job to find initial peaks. Uses getInitialPeaks method in FittingUtils 
