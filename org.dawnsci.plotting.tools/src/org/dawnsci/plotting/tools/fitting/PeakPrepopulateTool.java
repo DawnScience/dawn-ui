@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.dawnsci.common.widgets.decorator.IntegerDecorator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -36,13 +35,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
-import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
-import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants.FIT_ALGORITHMS;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
-import uk.ac.diamond.scisoft.analysis.optimize.GeneticAlg;
-import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
 
 public class PeakPrepopulateTool extends Dialog {
 	
@@ -71,7 +67,7 @@ public class PeakPrepopulateTool extends Dialog {
 	private FitBackgroundJob fitBackgroundJob;
 	
 	private Add pkCompFunction = null;
-	private Add bkgFunction = null;
+	private AFunction bkgFunction = new Polynomial(3);
 	private Add compFunction = null;
 	
 	public PeakPrepopulateTool(Shell parentShell, FunctionFittingTool parentFittingTool, Dataset[] roiLimits) {
@@ -250,17 +246,22 @@ public class PeakPrepopulateTool extends Dialog {
 	 * @param bkg - new background function
 	 */
 	private void updateCompFunction(Add peaks, IFunction bkg) {
-		compFunction = new Add();
-		
-		if (peaks != null) {
-			compFunction.addFunction(peaks);
-		} else if (pkCompFunction != null) {
-			compFunction.addFunction(pkCompFunction);
+		try {// Have to copy peak function info across, otherwise we're 
+			 // updating the reference, not the object!
+			if (peaks != null) {
+				compFunction = (Add)peaks.copy();
+			} else if (pkCompFunction != null) {
+				compFunction = (Add)pkCompFunction.copy();
+			} else {
+				compFunction = new Add();
+			}
+		} catch (Exception e) {
+			logger.error("Failed to update fit with peak functions",e);
 		}
 		if (bkg != null) {
-			compFunction.addFunction(peaks);
+			compFunction.addFunction(bkg);
 		} else if (bkgFunction != null) {
-			compFunction.addFunction(pkCompFunction);
+			compFunction.addFunction(bkgFunction);
 		}
 	}
 	
@@ -352,12 +353,8 @@ public class PeakPrepopulateTool extends Dialog {
 			super(name);
 		}
 		
-		IFunction bkgFunctionType = null;
 		Add peakCompFunction = null;
 		
-		public void setBkgFunctionType(IFunction bkgFn) {
-			bkgFunctionType = bkgFn;
-		}
 		public void setPeakCompoundFunction(Add peakFn) {
 			peakCompFunction = peakFn;
 		}
@@ -370,18 +367,15 @@ public class PeakPrepopulateTool extends Dialog {
 			Dataset peakDifference = Maths.subtract(y, peakCompValues);
 			
 			//4 Fit subtracted data to given function.
+			Dataset[] coords = new Dataset[]{x};
 			try {
-				IOptimizer fitRoutine = new GeneticAlg(0.01);
-				bkgFunction = Fitter.fit(x, peakDifference, fitRoutine, bkgFunctionType);
+				Fitter.geneticFit(coords, peakDifference, bkgFunction);
 			}
 			catch (Exception e) {
 				//this covers an exception of the fit routine.
 				logger.error("Background fitting encountered an error", e);
 				return Status.CANCEL_STATUS;
 			}
-			
-			//6 Add background function to compound function
-			
 		
 			return Status.OK_STATUS;
 		}
