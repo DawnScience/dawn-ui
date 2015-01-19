@@ -138,7 +138,13 @@ public class FittingUtils {
 			double highOffset = (Double) info.getY().mean();
 			Offset offset = new Offset(lowOffset, highOffset);
 			double fwhmApprox = info.getX().peakToPeak().doubleValue()/2.0;
-			IdentifiedPeak iniPeak = new IdentifiedPeak(((Number)info.getX().mean()).doubleValue(), info.getX().min().doubleValue(), info.getX().max().doubleValue(), info.getX().peakToPeak().doubleValue()*info.getY().max().doubleValue(), info.getY().max().doubleValue(), 0, info.getX().getSize()-1, Arrays.asList(new Double[] {info.getX().min().doubleValue()+fwhmApprox, info.getX().max().doubleValue()-fwhmApprox}));
+			IdentifiedPeak iniPeak = new IdentifiedPeak(((Number)info.getX().mean()).doubleValue(),
+					info.getX().min().doubleValue(), info.getX().max().doubleValue(),
+					info.getX().peakToPeak().doubleValue()*info.getY().peakToPeak().doubleValue(),
+					info.getY().max().doubleValue(),
+					0, info.getX().getSize()-1,
+					Arrays.asList(new Double[] {info.getX().min().doubleValue()+fwhmApprox,
+							info.getX().max().doubleValue()-fwhmApprox}));
 			iniPeak.setFWHM(fwhmApprox);
 			
 			info.setIdentifiedPeaks(Arrays.asList(new IdentifiedPeak[]{iniPeak}));
