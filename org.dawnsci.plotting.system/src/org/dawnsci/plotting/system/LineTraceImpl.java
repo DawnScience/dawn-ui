@@ -549,12 +549,31 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 	}
 
 	@Override
-	public void traceTypeChanged(
-			Trace trace,
+	public void traceTypeChanged(Trace trace,
 			org.eclipse.nebula.visualization.xygraph.figures.Trace.TraceType old,
 			org.eclipse.nebula.visualization.xygraph.figures.Trace.TraceType newTraceType) {
-		// TODO Auto-generated method stub
 		
+		if (mservice!=null) {
+			String traceName = "trace_"+MacroUtils.getLegalName(getName());
+			MethodEventObject evt = new MethodEventObject(traceName, "setTraceType", this, newTraceType.name());
+			evt.prepend(traceName+" = ps.getTrace(\""+getName()+"\")");
+		    mservice.publish(evt);
+		}
+
+	}
+	
+	@Override
+	public void pointStyleChanged(Trace trace,
+			org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle old,
+			org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle newStyle) {
+		
+		if (mservice!=null) {
+			String traceName = "trace_"+MacroUtils.getLegalName(getName());
+			MethodEventObject evt = new MethodEventObject(traceName, "setPointStyle", this, newStyle.name());
+			evt.prepend(traceName+" = ps.getTrace(\""+getName()+"\")");
+		    mservice.publish(evt);
+		}
+
 	}
 
 	@Override
