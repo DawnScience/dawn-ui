@@ -5,13 +5,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.dawnsci.common.widgets.decorator.IntegerDecorator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
@@ -29,12 +32,21 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
+import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
+import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants.FIT_ALGORITHMS;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
+import uk.ac.diamond.scisoft.analysis.optimize.GeneticAlg;
+import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
 
 public class PeakPrepopulateTool extends Dialog {
+	
+	private static final Logger logger = LoggerFactory.getLogger(FunctionFittingTool.class);
 	
 	//Tool common UI elements
 	private Composite dialogContainer;
@@ -58,7 +70,9 @@ public class PeakPrepopulateTool extends Dialog {
 	private FindInitialPeaksJob findStartingPeaksJob;
 	private FitBackgroundJob fitBackgroundJob;
 	
-	private Add compFunction = null;
+	private Add pkCompFunction = null;
+	private Add bkgFunction;
+	private Add compFunction;
 	
 	public PeakPrepopulateTool(Shell parentShell, FunctionFittingTool parentFittingTool, Dataset[] roiLimits) {
 		//Setup the dialog and get the parent fittingtool as well as the ROI limits we're interested in.
@@ -247,7 +261,7 @@ public class PeakPrepopulateTool extends Dialog {
 		findStartingPeaksJob.addJobChangeListener(new JobChangeAdapter(){
 			@Override
 			public void done(IJobChangeEvent event) {
-				parentFittingTool.setInitialPeaks(compFunction);
+				parentFittingTool.setInitialPeaks(pkCompFunction);
 			}
 		});
 	}
@@ -258,6 +272,7 @@ public class PeakPrepopulateTool extends Dialog {
 	}
 	
 	fitBackgroundJob.setData(roiLimits[0], roiLimits[1]);
+	fitBackgroundJob.setPeakCompoundFunction(pkCompFunction);
 //	fitBackgroundJob.setBkgFunction(getBackgroundFunction());
 	
 	fitBackgroundJob.schedule();
@@ -289,7 +304,7 @@ public class PeakPrepopulateTool extends Dialog {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			
-			compFunction = FittingUtils.getInitialPeaks(x, y, nrPeaks, peakFunction);
+			pkCompFunction = FittingUtils.getInitialPeaks(x, y, nrPeaks, peakFunction);
 			return Status.OK_STATUS;
 		}
 	}
@@ -304,10 +319,35 @@ public class PeakPrepopulateTool extends Dialog {
 			super(name);
 		}
 		
-		Class<? extends AFunction> bkgFunction;
+		IFunction bkgFunctionType = null;
+		Add peakCompFunction = null;
+		
+		public void setBkgFunction(IFunction bkgFn) {
+			bkgFunction = bkgFn;
+		}
+		public void setPeakCompoundFunction(Add peakFn) {
+			peakCompFunction = peakFn;
+		}
 		
 		protected IStatus run(IProgressMonitor monitor) {
-			//TODO
+			//1 Calculate existing peak function
+			Dataset peakCompValues = peakCompFunction.calculateValues(x);
+			
+			//2 Subtract peak data from observed
+			Dataset peakDifference = Maths.subtract(y, peakCompValues);
+			
+			//4 Fit subtracted data to given function.
+			try {
+				IOptimizer fitRoutine = new GeneticAlg(0.01);
+				bkgFunction = Fitter.fit(x, peakDifference, fitRoutine, bkgFunctionType);
+			}
+			catch (Exception e) {
+				//this covers an exception of the fit routine.
+				logger.error("Background fitting encountered an error", e);
+				return Status.CANCEL_STATUS;
+			}
+			
+		
 			return Status.OK_STATUS;
 		}
 	}
