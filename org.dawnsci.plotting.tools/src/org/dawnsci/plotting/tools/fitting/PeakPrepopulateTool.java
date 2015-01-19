@@ -284,6 +284,7 @@ public class PeakPrepopulateTool extends Dialog {
 			@Override
 			public void done(IJobChangeEvent event) {
 				updateCompFunction(pkCompFunction, null);
+				// TODO this wants updating to use something more generic
 				parentFittingTool.setInitialPeaks(compFunction);
 			}
 		});
@@ -299,6 +300,15 @@ public class PeakPrepopulateTool extends Dialog {
 //	fitBackgroundJob.setBkgFunctionType(getBackgroundFunction());
 	
 	fitBackgroundJob.schedule();
+	
+	fitBackgroundJob.addJobChangeListener(new JobChangeAdapter(){
+		@Override
+		public void done(IJobChangeEvent event) {
+			updateCompFunction(null, bkgFunction);
+			// TODO this wants updating to use something more generic
+			parentFittingTool.setInitialPeaks(compFunction);
+		}
+	});
 }
 	
 	//**********************************
