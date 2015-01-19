@@ -10,7 +10,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.jface.dialogs.Dialog;
@@ -255,22 +254,14 @@ public class PeakPrepopulateTool extends Dialog {
 	 * Job to find initial peaks. Uses getInitialPeaks method in FittingUtils 
 	 * to do the work
 	 */
-	private class FindInitialPeaksJob extends Job {
+	private class FindInitialPeaksJob extends FittingJob {
 
 		public FindInitialPeaksJob(String name) {
 			super(name);
 		}
 		
-		Dataset x;
-		Dataset y;
 		Integer nrPeaks;
 		Class<? extends APeak> peakFunction;
-		
-		
-		public void setData(Dataset x, Dataset y) {
-			this.x = x.clone();
-			this.y = y.clone();
-		}
 		
 		public void setNrPeaks(Integer nrPeaks) {
 			this.nrPeaks = nrPeaks;
