@@ -38,7 +38,7 @@ public abstract class FittingJob extends Job {
 	 * @param limits
 	 */
 	public void setData(Dataset[] limits) {
-		this.x = limits[0];
-		this.y = limits[1];
+		this.x = limits[0].clone();
+		this.y = limits[1].clone();
 	}
 }
