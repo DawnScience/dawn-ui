@@ -222,7 +222,7 @@ public class PeakPrepopulateTool extends Dialog {
 	}
 	
 	/**
-	 * Sets default peak profile to Psuedo-Voight or Gaussian (if available)
+	 * Sets default peak profile to Pseudo-Voigt or Gaussian (if available)
 	 */
 	private void setDefaultPeakFunction() {
 		int defaultPeakFnIndex = Arrays.asList(availPeakTypes).indexOf("PseudoVoigt") == -1 ? Arrays.asList(availPeakTypes).indexOf("Gaussian") : Arrays.asList(availPeakTypes).indexOf("PseudoVoigt");
@@ -240,6 +240,28 @@ public class PeakPrepopulateTool extends Dialog {
 		Class<? extends APeak> selectedProfile = peakFnMap.get(selectedProfileName);
 		
 		return selectedProfile;
+	}
+	
+	/**
+	 * Update the composite function with either new peaks or new background.
+	 * Uses existing background if none is given and does nothing if there are
+	 * no peak or background functions.
+	 * @param peaks - new peak Add function
+	 * @param bkg - new background function
+	 */
+	private void updateCompFunction(Add peaks, IFunction bkg) {
+		compFunction = new Add();
+		
+		if (peaks != null) {
+			compFunction.addFunction(peaks);
+		} else if (pkCompFunction != null) {
+			compFunction.addFunction(pkCompFunction);
+		}
+		if (bkg != null) {
+			compFunction.addFunction(peaks);
+		} else if (bkgFunction != null) {
+			compFunction.addFunction(pkCompFunction);
+		}
 	}
 	
 	/**
@@ -261,7 +283,8 @@ public class PeakPrepopulateTool extends Dialog {
 		findStartingPeaksJob.addJobChangeListener(new JobChangeAdapter(){
 			@Override
 			public void done(IJobChangeEvent event) {
-				parentFittingTool.setInitialPeaks(pkCompFunction);
+				updateCompFunction(pkCompFunction, null);
+				parentFittingTool.setInitialPeaks(compFunction);
 			}
 		});
 	}
@@ -347,7 +370,8 @@ public class PeakPrepopulateTool extends Dialog {
 				return Status.CANCEL_STATUS;
 			}
 			
-			//6 Add background function to compound function. 
+			//6 Add background function to compound function
+			
 		
 			return Status.OK_STATUS;
 		}
