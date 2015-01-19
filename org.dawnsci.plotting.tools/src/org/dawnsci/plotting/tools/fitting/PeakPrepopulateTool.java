@@ -71,8 +71,8 @@ public class PeakPrepopulateTool extends Dialog {
 	private FitBackgroundJob fitBackgroundJob;
 	
 	private Add pkCompFunction = null;
-	private Add bkgFunction;
-	private Add compFunction;
+	private Add bkgFunction = null;
+	private Add compFunction = null;
 	
 	public PeakPrepopulateTool(Shell parentShell, FunctionFittingTool parentFittingTool, Dataset[] roiLimits) {
 		//Setup the dialog and get the parent fittingtool as well as the ROI limits we're interested in.
@@ -252,7 +252,7 @@ public class PeakPrepopulateTool extends Dialog {
 			findStartingPeaksJob = new FindInitialPeaksJob("Find Initial Peaks");
 		}
 		
-		findStartingPeaksJob.setData(roiLimits[0], roiLimits[1]);
+		findStartingPeaksJob.setData(roiLimits);
 		findStartingPeaksJob.setNrPeaks(nrPeaks);
 		findStartingPeaksJob.setPeakFunction(getProfileFunction());
 		
@@ -271,9 +271,9 @@ public class PeakPrepopulateTool extends Dialog {
 		fitBackgroundJob = new FitBackgroundJob("Fit Background");
 	}
 	
-	fitBackgroundJob.setData(roiLimits[0], roiLimits[1]);
+	fitBackgroundJob.setData(roiLimits);
 	fitBackgroundJob.setPeakCompoundFunction(pkCompFunction);
-//	fitBackgroundJob.setBkgFunction(getBackgroundFunction());
+//	fitBackgroundJob.setBkgFunctionType(getBackgroundFunction());
 	
 	fitBackgroundJob.schedule();
 }
@@ -322,8 +322,8 @@ public class PeakPrepopulateTool extends Dialog {
 		IFunction bkgFunctionType = null;
 		Add peakCompFunction = null;
 		
-		public void setBkgFunction(IFunction bkgFn) {
-			bkgFunction = bkgFn;
+		public void setBkgFunctionType(IFunction bkgFn) {
+			bkgFunctionType = bkgFn;
 		}
 		public void setPeakCompoundFunction(Add peakFn) {
 			peakCompFunction = peakFn;
@@ -347,6 +347,7 @@ public class PeakPrepopulateTool extends Dialog {
 				return Status.CANCEL_STATUS;
 			}
 			
+			//6 Add background function to compound function. 
 		
 			return Status.OK_STATUS;
 		}
