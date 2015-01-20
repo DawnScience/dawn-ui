@@ -512,11 +512,22 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 	}
 
 	@Override
+	public void traceWidthChanged(Trace trace, int old, int newWidth) {
+		if (mservice!=null) {
+			String traceName = "trace_"+MacroUtils.getLegalName(getName());
+			MethodEventObject evt = new MethodEventObject(traceName, "setLineWidth", this, newWidth);
+			evt.prepend(traceName+" = ps.getTrace(\""+getName()+"\")");
+		    mservice.publish(evt);
+		}
+	}
+
+	@Override
 	public void traceNameChanged(Trace trace, final String oldName, final String newName) {
 		if (trace == this.trace && !newName.equals(oldName)) {
 			
+			String traceName = "trace_"+MacroUtils.getLegalName(newName);
 			if (mservice!=null) {
-				mservice.publish(new MacroEventObject(this, MacroUtils.getLegalName(newName)+" = ps.getTrace(\""+oldName+"\")", true));
+				mservice.publish(new MacroEventObject(this, traceName+" = ps.getTrace(\""+oldName+"\")", true));
 			}
 
 			Display.getDefault().asyncExec(new Runnable() {
@@ -526,7 +537,7 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 			});
 
 			if (mservice!=null) {
-			    mservice.publish(new MethodEventObject(MacroUtils.getLegalName(newName), "setName", this, newName));
+			    mservice.publish(new MethodEventObject(traceName, "setName", this, newName));
 			}
 		}
 	}
@@ -538,20 +549,40 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 	}
 
 	@Override
-	public void traceTypeChanged(
-			Trace trace,
+	public void traceTypeChanged(Trace trace,
 			org.eclipse.nebula.visualization.xygraph.figures.Trace.TraceType old,
 			org.eclipse.nebula.visualization.xygraph.figures.Trace.TraceType newTraceType) {
-		// TODO Auto-generated method stub
 		
+		if (mservice!=null) {
+			String traceName = "trace_"+MacroUtils.getLegalName(getName());
+			MethodEventObject evt = new MethodEventObject(traceName, "setTraceType", this, newTraceType.name());
+			evt.prepend(traceName+" = ps.getTrace(\""+getName()+"\")");
+		    mservice.publish(evt);
+		}
+
+	}
+	
+	@Override
+	public void pointStyleChanged(Trace trace,
+			org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle old,
+			org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle newStyle) {
+		
+		if (mservice!=null) {
+			String traceName = "trace_"+MacroUtils.getLegalName(getName());
+			MethodEventObject evt = new MethodEventObject(traceName, "setPointStyle", this, newStyle.name());
+			evt.prepend(traceName+" = ps.getTrace(\""+getName()+"\")");
+		    mservice.publish(evt);
+		}
+
 	}
 
 	@Override
 	public void traceColorChanged(Trace trace, Color old, Color newColor) {
 		if (trace == this.trace && old!=null && old.equals(newColor)) return;
 		if (mservice!=null) {
-			ColorMacroEvent evt = new ColorMacroEvent(MacroUtils.getLegalName(getName()), "setTraceColor", this, newColor);
-			evt.prepend(MacroUtils.getLegalName(getName())+" = ps.getTrace(\""+getName()+"\")");
+			String traceName = "trace_"+MacroUtils.getLegalName(getName());
+			ColorMacroEvent evt = new ColorMacroEvent(traceName, "setTraceColor", this, newColor);
+			evt.prepend(traceName+" = ps.getTrace(\""+getName()+"\")");
 			mservice.publish(evt);
 		}
 	}
