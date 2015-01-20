@@ -367,9 +367,8 @@ public class PeakPrepopulateTool extends Dialog {
 			Dataset peakDifference = Maths.subtract(y, peakCompValues);
 			
 			//4 Fit subtracted data to given function.
-			Dataset[] coords = new Dataset[]{x};
 			try {
-				Fitter.geneticFit(coords, peakDifference, bkgFunction);
+				Fitter.geneticFit(new Dataset[]{x}, peakDifference, bkgFunction);
 			}
 			catch (Exception e) {
 				//this covers an exception of the fit routine.
