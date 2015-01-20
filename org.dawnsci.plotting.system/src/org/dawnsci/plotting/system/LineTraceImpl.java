@@ -9,6 +9,7 @@
 package org.dawnsci.plotting.system;
 
 import org.dawb.common.ui.macro.ColorMacroEvent;
+import org.dawb.common.ui.macro.TraceMacroEvent;
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -514,9 +515,7 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 	@Override
 	public void traceWidthChanged(Trace trace, int old, int newWidth) {
 		if (mservice!=null) {
-			String traceName = "trace_"+MacroUtils.getLegalName(getName());
-			MethodEventObject evt = new MethodEventObject(traceName, "setLineWidth", this, newWidth);
-			evt.prepend(traceName+" = ps.getTrace(\""+getName()+"\")");
+			TraceMacroEvent evt = new TraceMacroEvent(this, "setLineWidth", newWidth);
 		    mservice.publish(evt);
 		}
 	}
@@ -554,9 +553,7 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 			org.eclipse.nebula.visualization.xygraph.figures.Trace.TraceType newTraceType) {
 		
 		if (mservice!=null) {
-			String traceName = "trace_"+MacroUtils.getLegalName(getName());
-			MethodEventObject evt = new MethodEventObject(traceName, "setTraceType", this, newTraceType.name());
-			evt.prepend(traceName+" = ps.getTrace(\""+getName()+"\")");
+			TraceMacroEvent evt = new TraceMacroEvent(this, "setTraceType", newTraceType.name());
 		    mservice.publish(evt);
 		}
 
@@ -568,9 +565,7 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 			org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle newStyle) {
 		
 		if (mservice!=null) {
-			String traceName = "trace_"+MacroUtils.getLegalName(getName());
-			MethodEventObject evt = new MethodEventObject(traceName, "setPointStyle", this, newStyle.name());
-			evt.prepend(traceName+" = ps.getTrace(\""+getName()+"\")");
+			TraceMacroEvent evt = new TraceMacroEvent(this, "setPointStyle", newStyle.name());
 		    mservice.publish(evt);
 		}
 

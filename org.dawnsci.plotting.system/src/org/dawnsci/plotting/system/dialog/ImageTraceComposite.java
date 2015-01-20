@@ -10,6 +10,7 @@ package org.dawnsci.plotting.system.dialog;
 
 import java.util.Arrays;
 
+import org.dawb.common.ui.macro.TraceMacroEvent;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.common.widgets.decorator.BoundsDecorator;
 import org.dawnsci.common.widgets.decorator.FloatDecorator;
@@ -21,6 +22,7 @@ import org.dawnsci.plotting.util.ColorUtility;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
+import org.eclipse.dawnsci.macro.api.IMacroService;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
@@ -198,6 +200,15 @@ public class ImageTraceComposite extends Composite {
 					getPreferenceStore().setValue(BasePlottingConstants.HISTO_LO, evt.getValue().doubleValue());
 					maximum.setValue(imageTrace.getMax().doubleValue());
 					minimum.setValue(imageTrace.getMin().doubleValue());
+					
+					IMacroService mservice = (IMacroService)PlottingSystemActivator.getService(IMacroService.class);
+					if (mservice!=null) {
+						TraceMacroEvent mevt = new TraceMacroEvent(imageTrace);
+						mevt.append(mevt.getVarName()+".getImageServiceBean().setLo("+evt.getValue().doubleValue()+")\n");
+						mevt.append(mevt.getVarName()+".rehistogram()");
+						mservice.publish(mevt);
+					}
+					
 				} catch (Throwable ne) {
 					imageTrace.getImageServiceBean().setLo(orig);
 				}
@@ -226,6 +237,16 @@ public class ImageTraceComposite extends Composite {
 					getPreferenceStore().setValue(BasePlottingConstants.HISTO_HI, evt.getValue().doubleValue());
 					maximum.setValue(imageTrace.getMax().doubleValue());
 					minimum.setValue(imageTrace.getMin().doubleValue());
+					
+					
+					IMacroService mservice = (IMacroService)PlottingSystemActivator.getService(IMacroService.class);
+					if (mservice!=null) {
+						TraceMacroEvent mevt = new TraceMacroEvent(imageTrace);
+						mevt.append(mevt.getVarName()+".getImageServiceBean().setHi("+evt.getValue().doubleValue()+")\n");
+						mevt.append(mevt.getVarName()+".rehistogram()");
+						mservice.publish(mevt);
+					}
+
 				} catch (Throwable ne) {
 					imageTrace.getImageServiceBean().setHi(orig);
 				}

@@ -249,14 +249,11 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 	}
 
 	protected void selectedPaletteChanged(final String paletteName) {
-		final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
-		final PaletteData data = pservice.getDirectPaletteData(paletteName);
 		final Collection<ITrace> traces = system.getTraces();
 		if (traces!=null) for (final ITrace trace: traces) {
 			if (trace instanceof IPaletteTrace) {
 				final IPaletteTrace paletteTrace = (IPaletteTrace) trace;
-				paletteTrace.setPaletteName(paletteName);
-				paletteTrace.setPaletteData(data);
+				paletteTrace.setPalette(paletteName);
 			}
 		}
 	}
