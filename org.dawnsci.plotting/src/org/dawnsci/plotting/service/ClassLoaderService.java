@@ -67,7 +67,7 @@ public class ClassLoaderService extends AbstractServiceFactory implements IClass
 	private ClassLoader createClassLoader() {
 		final CompositeClassLoader loader = new CompositeClassLoader();
 	    loader.add(org.eclipse.dawnsci.analysis.dataset.impl.Activator.class.getClassLoader());
-	    loader.add(uk.ac.diamond.scisoft.analysis.Activator.class.getClassLoader());
+	    loader.add(uk.ac.diamond.scisoft.analysis.io.LoaderFactory.class.getClassLoader());
 		loader.add(Slice.class.getClassLoader());           // analysis.api
 		loader.add(UserPlotBean.class.getClassLoader());    // workbench.jmx
 		loader.add(Vector3d.class.getClassLoader());        // vecmath
