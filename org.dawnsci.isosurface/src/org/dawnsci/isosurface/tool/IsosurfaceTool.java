@@ -316,7 +316,7 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 			if (data.getLazySet()==model.getLazyData()) return;
 			
 			ILazyDataset slice = data.getLazySet().getSliceView(getSlices());
-			slice = slice.squeeze();
+			slice = slice.squeezeEnds();
 			slice.setName("Sliced "+data.getLazySet().getName());
 			if (slice.getRank()!=3) throw new RuntimeException("Invalid slice for isosurface tool!");
 			if (slice==model.getLazyData()) return; // Unlikely, will be new instances
