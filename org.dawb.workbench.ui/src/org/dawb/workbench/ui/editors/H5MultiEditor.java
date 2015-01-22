@@ -99,6 +99,8 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
 				loader = (HDF5Loader) LoaderFactory.getLoader(LoaderFactory.getLoaderClass(extension), fileName);
 				loader.setAsyncLoad(true);
 				holder = loader.loadFile();
+				holder.setLoaderClass(loader.getClass());
+				holder.setFilePath(fileName);
 				LoaderFactory.cacheData(holder);
 			}
 			tree = holder.getTree();
