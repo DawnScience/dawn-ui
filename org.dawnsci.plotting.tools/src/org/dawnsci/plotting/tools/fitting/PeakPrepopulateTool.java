@@ -67,7 +67,7 @@ public class PeakPrepopulateTool extends Dialog {
 	private FitBackgroundJob fitBackgroundJob;
 	
 	private Add pkCompFunction = null;
-	private AFunction bkgFunction = new Polynomial(3);
+	private AFunction bkgFunction = null;
 	private Add compFunction = null;
 	
 	public PeakPrepopulateTool(Shell parentShell, FunctionFittingTool parentFittingTool, Dataset[] roiLimits) {
@@ -360,6 +360,11 @@ public class PeakPrepopulateTool extends Dialog {
 		}
 		
 		protected IStatus run(IProgressMonitor monitor) {
+			//TODO FIXME Remove this block once there is a better way to set bkgFunction
+			if (bkgFunction == null) {
+				bkgFunction  = new Polynomial(3);
+			}
+			
 			//1 Calculate existing peak function
 			Dataset peakCompValues = peakCompFunction.calculateValues(x);
 			
