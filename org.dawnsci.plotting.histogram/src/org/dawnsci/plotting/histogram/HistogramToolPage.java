@@ -1376,6 +1376,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	}
 	
 	private void unhide() {
+		if (introLabel.isDisposed()) return;
 		introLabel.setText("Colour mapping Tool");
 		colourSchemeExpander.setVisible(true);
 		perChannelExpander.setVisible(true);
