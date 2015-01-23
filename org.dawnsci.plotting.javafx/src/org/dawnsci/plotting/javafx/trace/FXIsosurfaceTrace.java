@@ -191,4 +191,9 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace 
 		this.opacity = opacity;
 	}
 
+	@Override
+	public void setPalette(String paletteName) {
+		// TODO Auto-generated method stub
+	}
+
 }

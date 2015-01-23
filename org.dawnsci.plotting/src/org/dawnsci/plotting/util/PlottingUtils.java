@@ -159,7 +159,7 @@ public class PlottingUtils {
 			ILazyDataset tmpvalue = map.get(dataPath);
 			if(tmpvalue == null) tmpvalue = map.get(data.getName(0));
 
-			ILazyDataset value = tmpvalue.squeeze();
+			ILazyDataset value = tmpvalue.squeezeEnds();
 			if(value.getShape().length == 2) {
 				dataset = DatasetUtils.convertToDataset(value.getSlice(new Slice(null)));
 				dataset.setMetadata(md);

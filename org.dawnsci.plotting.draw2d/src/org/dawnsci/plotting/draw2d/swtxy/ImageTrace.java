@@ -17,6 +17,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.dawb.common.ui.macro.ColorMacroEvent;
+import org.dawb.common.ui.macro.TraceMacroEvent;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
@@ -32,9 +34,12 @@ import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.PolygonalROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.PolylineROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
+import org.eclipse.dawnsci.macro.api.MacroEventObject;
+import org.eclipse.dawnsci.macro.api.MethodEventObject;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
 import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
+import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
@@ -211,6 +216,22 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	@Override
 	public void setPaletteName(String paletteName) {
 		this.paletteName = paletteName;
+	}
+	
+	@Override
+	public void setPalette(String paletteName) {
+		
+		String orig = this.paletteName;
+		final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
+		final PaletteData paletteData = pservice.getDirectPaletteData(paletteName);
+        setPaletteName(paletteName);
+        setPaletteData(paletteData);
+     	
+		if (!paletteName.equals(orig) && ServiceHolder.getMacroService()!=null) {
+			//
+			TraceMacroEvent evt = new TraceMacroEvent(this, "setPalette", paletteName);
+			ServiceHolder.getMacroService().publish(evt);
+		}
 	}
 
 	private enum ImageScaleType {
@@ -1034,6 +1055,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	public void setMin(Number min) {
 		if (imageServiceBean==null) return;
+		
+		Number orig = imageServiceBean.getMin();
 		imageServiceBean.setMin(min);
 		try {
 			intensityScale.setMin(min.doubleValue());
@@ -1041,6 +1064,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			logger.error("Cannot set scale of intensity!",e);
 		}
 		fireMinDataListeners();
+		
+		
+		if (!min.equals(orig) && ServiceHolder.getMacroService()!=null) {
+			TraceMacroEvent evt = new TraceMacroEvent(this, "setMin", min);
+			ServiceHolder.getMacroService().publish(evt);
+		}
+
 	}
 
 	public Number getMax() {
@@ -1048,7 +1078,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 	
 	public void setMax(Number max) {
+		
 		if (imageServiceBean==null) return;
+		Number orig = imageServiceBean.getMax();
 		imageServiceBean.setMax(max);
 		try {
 			intensityScale.setMax(max.doubleValue());
@@ -1056,6 +1088,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			logger.error("Cannot set scale of intensity!",e);
 		}
 		fireMaxDataListeners();
+		
+		
+		if (!max.equals(orig) && ServiceHolder.getMacroService()!=null) {
+			TraceMacroEvent evt = new TraceMacroEvent(this, "setMax", max);
+			ServiceHolder.getMacroService().publish(evt);
+		}
+
 	}
 
 	@Override
@@ -1134,12 +1173,19 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	
 	@Override
 	public void setDownsampleType(DownsampleType type) {
+		
+		DownsampleType orig = this.downsampleType;
 		if (this.mipMap!=null)  mipMap.clear();
 		if (this.maskMap!=null) maskMap.clear();
 		this.downsampleType = type;
 		createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
 		getPreferenceStore().setValue(BasePlottingConstants.DOWNSAMPLE_PREF, type.getLabel());
 		repaint();
+		
+		if (type!=orig && ServiceHolder.getMacroService()!=null) {
+			TraceMacroEvent evt = new TraceMacroEvent(this, "setDownsampleType", type.name());
+			ServiceHolder.getMacroService().publish(evt);
+		}
 	}
 
 	private DownsampleMode getDownsampleTypeDiamond() {
@@ -1199,11 +1245,20 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 */
 	@Override
 	public boolean setHistoType(HistoType type) {
+		
 		if (imageServiceBean==null) return false;
+		HistoType orig = imageServiceBean.getHistogramType();
 		imageServiceBean.setHistogramType(type);
 		getPreferenceStore().setValue(BasePlottingConstants.HISTO_PREF, type.getLabel());
 		boolean histoOk = createScaledImage(ImageScaleType.REHISTOGRAM, null);
 		repaint();
+		
+		
+		if (type!=orig && ServiceHolder.getMacroService()!=null) {
+			TraceMacroEvent evt = new TraceMacroEvent(this, "setHistoType", type.name());
+			ServiceHolder.getMacroService().publish(evt);
+		}
+
 		return histoOk;
 	}
 
@@ -1236,8 +1291,18 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		
 		storeBound(bound, BasePlottingConstants.MIN_CUT);
 		if (imageServiceBean==null) return;
+		HistogramBound orig = imageServiceBean.getMinimumCutBound();
 		imageServiceBean.setMinimumCutBound(bound);
 		fireMinCutListeners();
+		
+		if (!bound.equals(orig) && ServiceHolder.getMacroService()!=null) {
+			
+			MacroEventObject evt = new MacroEventObject(this);
+			evt.setPythonCommand("bound = dnp.plot.createHistogramBound("+bound.getStringBound()+", "+bound.getColor()[0]+", "+bound.getColor()[1]+", "+bound.getColor()[2]+")");
+			evt.append(TraceMacroEvent.getTraceCommand(this));
+			evt.append(TraceMacroEvent.getVarName(this)+".setMinCut(bound)\n");
+			ServiceHolder.getMacroService().publish(evt);
+		}
 	}
 
 	private void storeBound(HistogramBound bound, String prop) {
@@ -1255,10 +1320,22 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	@Override
 	public void setMaxCut(HistogramBound bound) {
+		
 		storeBound(bound, BasePlottingConstants.MAX_CUT);
 		if (imageServiceBean==null) return;
+		HistogramBound orig = imageServiceBean.getMaximumCutBound();
 		imageServiceBean.setMaximumCutBound(bound);
 		fireMaxCutListeners();
+		
+		if (!bound.equals(orig) && ServiceHolder.getMacroService()!=null) {
+			
+			MacroEventObject evt = new MacroEventObject(this);
+			evt.setPythonCommand("bound = dnp.plot.createHistogramBound("+bound.getStringBound()+", "+bound.getColor()[0]+", "+bound.getColor()[1]+", "+bound.getColor()[2]+")");
+			evt.append(TraceMacroEvent.getTraceCommand(this));
+			evt.append(TraceMacroEvent.getVarName(this)+".setMaxCut(bound)\n");
+			ServiceHolder.getMacroService().publish(evt);
+		}
+
 	}
 
 	@Override

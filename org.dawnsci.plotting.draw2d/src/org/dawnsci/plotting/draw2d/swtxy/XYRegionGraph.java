@@ -187,9 +187,13 @@ public class XYRegionGraph extends XYGraph {
 	}
 	
 	public void setShowLegend(boolean showLeg) {
+		
+		boolean orig = this.showLegend;
 		super.setShowLegend(showLeg);
 		getPreferenceStore().setValue(BasePlottingConstants.XY_SHOWLEGEND, showLeg);
-		if (ServiceHolder.getMacroService()!=null) ServiceHolder.getMacroService().publish(new MethodEventObject("ps", this, showLeg));
+		if (orig!=showLeg && ServiceHolder.getMacroService()!=null) {
+			ServiceHolder.getMacroService().publish(new MethodEventObject("ps", this, showLeg));
+		}
 	}
 	
 	/**

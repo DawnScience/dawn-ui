@@ -15,12 +15,14 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 public class PlottingSystemActivator extends AbstractUIPlugin {
 
 	private final static String ID = "org.dawnsci.plotting.system";
 
 	private static PlottingSystemActivator activator;
+	private static BundleContext           context;
 
 	private static IPreferenceStore plottingPreferenceStore;
 	private static IPreferenceStore analysisRCPPreferenceStore;
@@ -45,12 +47,28 @@ public class PlottingSystemActivator extends AbstractUIPlugin {
 		return analysisRCPPreferenceStore;
 	}
 
-	public void start(BundleContext context) throws Exception {
-		super.start(context);
+	public void start(BundleContext c) throws Exception {
+		super.start(c);
 		activator = this;
+		context   = c;
 	}
 
 	public static IPreferenceStore getLocalPreferenceStore() {
 		return activator.getPreferenceStore();
 	}
+
+
+	/**
+	 * Looks for OSGI service, used by ServiceManager
+	 * 
+	 * @param clazz
+	 * @return
+	 */
+	public static Object getService(Class<?> clazz) {
+		if (context==null) return null;
+		ServiceReference<?> ref = context.getServiceReference(clazz);
+		if (ref==null) return null;
+		return context.getService(ref);
+	}
+
 }
