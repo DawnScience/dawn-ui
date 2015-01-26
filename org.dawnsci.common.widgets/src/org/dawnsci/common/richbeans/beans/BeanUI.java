@@ -348,7 +348,8 @@ public class BeanUI {
 		final Method[] methods = uiObject.getClass().getMethods();
 		for (int i = 0; i < methods.length; i++) {
 			final Method m = methods[i];
-			if (m.getReturnType() != null && m.getName().startsWith("get")) {
+			if (m.getReturnType() != null && IFieldWidget.class.isAssignableFrom(m.getReturnType()) &&
+				m.getName().startsWith("get") && m.getParameterTypes().length==0) {
 				final Object ob = m.invoke(uiObject);
 				if (ob instanceof IFieldWidget) {
 					final IFieldWidget box = (IFieldWidget) ob;
@@ -424,13 +425,38 @@ public class BeanUI {
 		try {
 			method = bean.getClass().getMethod(setter, ob.getClass());
 		} catch (java.lang.NoSuchMethodException ne) {
-			final Class[] interfacesImplemented = ob.getClass().getInterfaces();
-			for (Class clazz : interfacesImplemented) {
+			
+			final Method[] methods = ob.getClass().getMethods();
+			final Class<?> clazz   = ob.getClass();
+
+			METHOD_LOOP: for (Method m : methods) {
+				if (m.getName().equals(setter) && m.getParameterTypes().length==1) {
+					for (int i = 0; i < m.getParameterTypes().length; i++) {
+						Class type = m.getParameterTypes()[i];
+						if (!type.isAssignableFrom(clazz)) {
+							break METHOD_LOOP;
+						}
+					}
+					method = m;
+				}
+			}
+
+			if (method==null) {
 				try {
-					method = bean.getClass().getMethod(setter, clazz);
-					break;
-				}catch (Exception neOther) {
-					continue;
+
+					if (Double.class.isAssignableFrom(clazz)) {
+						method = bean.getClass().getMethod(setter, new Class[]{double.class});
+					} else if (Float.class.isAssignableFrom(clazz)) {
+						method = bean.getClass().getMethod(setter, new Class[]{float.class});
+					} else if (Long.class.isAssignableFrom(clazz)) {
+						method = bean.getClass().getMethod(setter, new Class[]{long.class});
+					} else if (Integer.class.isAssignableFrom(clazz)) {
+						method = bean.getClass().getMethod(setter, new Class[]{int.class});
+					} else if (Boolean.class.isAssignableFrom(clazz)) {
+						method = bean.getClass().getMethod(setter, new Class[]{boolean.class});
+					}
+				} catch (NoSuchMethodException nsm2) {
+					method = bean.getClass().getMethod(setter, new Class[]{Number.class});
 				}
 			}
 		}
