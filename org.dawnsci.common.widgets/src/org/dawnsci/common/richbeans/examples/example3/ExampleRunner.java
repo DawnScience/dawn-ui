@@ -41,7 +41,7 @@ public class ExampleRunner {
 		shell.setSize(420,500);
 		
 		// Wang some the values over
-		final ExampleParameters bean = new ExampleParameters();
+		final ExampleBean bean = new ExampleBean();
 	    bean.addItem(new ExampleItem(1,2));
 	    bean.addItem(new ExampleItem(2,3,ItemChoice.POLAR));
 		

@@ -28,14 +28,14 @@ import org.apache.commons.beanutils.BeanUtils;
  * @author Matthew Gerring
  *
  */
-public class ExampleParameters {
+public class ExampleBean {
 
 	private List<ExampleItem> items;
 	
 	/**
 	 * 
 	 */
-	public ExampleParameters() {
+	public ExampleBean() {
 		items = new ArrayList<ExampleItem>(31);
 	}
 	/**
