@@ -8,6 +8,7 @@
  */
 package org.dawnsci.processing.ui.processing;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -21,7 +22,6 @@ import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
 import org.dawnsci.common.widgets.table.SeriesTable;
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.preference.ProcessingConstants;
-import org.dawnsci.processing.ui.slice.IOperationErrorInformer;
 import org.dawnsci.processing.ui.slice.IOperationGUIRunnerListener;
 import org.dawnsci.processing.ui.slice.IOperationInputData;
 import org.dawnsci.processing.ui.slice.OperationEventManager;
@@ -35,7 +35,6 @@ import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
-import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
@@ -208,6 +207,7 @@ public class ProcessingView extends ViewPart {
 			if (operations != null) seriesTable.setInput(list, operationFiler);
 		} catch (Exception e) {
 			logger.error("Could not read operations from file", e);
+			MessageDialog.openInformation(getSite().getShell(), "Exception while reading operations from file", "An exception occurred while reading operations from a file.\n" + e.getMessage());
 		}
 		
 	}
@@ -215,11 +215,19 @@ public class ProcessingView extends ViewPart {
 	private void saveOperationsToFile(String filename, IOperation[] op) {
 		try {
 			
+			if (new File(filename).exists()) {
+				boolean overwriteFile = MessageDialog.openQuestion(getSite().getShell(), "Overwrite existing file?", "Do you want to overwrite the existing file '"+filename+"'?");
+				if (!overwriteFile) {
+					return;
+				}
+			}
+			
 			IPersistenceService service = (IPersistenceService)ServiceManager.getService(IPersistenceService.class);
 			IPersistentFile pf = service.getPersistentFile(filename);
 			pf.setOperations(op);
 		} catch (Exception e) {
 			logger.error("Could not write operations to file", e);
+			MessageDialog.openInformation(getSite().getShell(), "Exception while writing operations to file", "An exception occurred while writing the operations to a file.\n" + e.getMessage());
 		}
 	}
 	
