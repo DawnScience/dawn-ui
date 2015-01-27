@@ -26,7 +26,8 @@ public class ExampleRunner {
 		Display display = new Display();
 		Shell shell = new Shell(display);
 		shell.setLayout(new GridLayout(1, false));
-        
+		shell.setText("Change a value to see bean as JSON");
+       
 		// Composite
 		final ExampleComposite ui = new ExampleComposite(shell, SWT.NONE);
 		ui.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -36,7 +37,7 @@ public class ExampleRunner {
 		value.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		shell.pack();
-		shell.setSize(400,600);
+		shell.setSize(420,600);
 		
 		// Wang some the values over
 		final ExampleParameters bean = new ExampleParameters();

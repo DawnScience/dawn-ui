@@ -1,5 +1,7 @@
 package org.dawnsci.common.richbeans.examples.example3;
 
+import org.dawnsci.common.richbeans.components.selector.BeanSelectionEvent;
+import org.dawnsci.common.richbeans.components.selector.BeanSelectionListener;
 import org.dawnsci.common.richbeans.components.selector.VerticalListEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -29,6 +31,8 @@ public class ExampleComposite extends Composite {
 		items.setNameField("itemName"); // Where the name comes from if inside the bean
 		items.setListHeight(80);
 		items.setRequireSelectionPack(false);
+		
+		// Show the values of another field than itemName in the table.
 		items.setAdditionalFields(new String[]{"choice"});
 		items.setColumnWidths(new int []{100, 150});
 		items.setShowAdditionalFields(true);
@@ -38,6 +42,15 @@ public class ExampleComposite extends Composite {
 		
 		items.setEditorUI(itemComp);
 
+		// In order to update the conditional visibility you have to implement 
+		// a bean listener which will manually update value.
+		// This design allows control of when UI visibility is actually changed.
+		items.addBeanSelectionListener(new BeanSelectionListener() {
+			@Override
+			public void selectionChanged(BeanSelectionEvent evt) {
+				itemComp.updateVisibility();
+			}
+		});
 	}
 
 	public VerticalListEditor getItems() {

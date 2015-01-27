@@ -62,6 +62,7 @@ public class ExampleItem {
 		} else {
 			x = i; y = j;
 		}
+		itemName = "Fred"+(++INDEX);
 	}
 
 	public ItemChoice getChoice() {

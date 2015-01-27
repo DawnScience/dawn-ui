@@ -26,7 +26,8 @@ public class ExampleRunner {
 		Display display = new Display();
 		Shell shell = new Shell(display);
 		shell.setLayout(new GridLayout(1, false));
-        
+		shell.setText("Change a value to see bean as JSON");
+      
 		// Composite
 		final SimpleComposite ui = new SimpleComposite(shell, SWT.NONE);
 		ui.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -35,7 +36,7 @@ public class ExampleRunner {
 		final Label value= new Label(shell, SWT.WRAP);
 		
 		shell.pack();
-		shell.setSize(400,400);
+		shell.setSize(420,400);
 		
 		// Wang some the values over
 		final SimpleBean bean = new SimpleBean();

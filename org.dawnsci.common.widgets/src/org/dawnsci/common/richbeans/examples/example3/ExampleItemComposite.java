@@ -47,11 +47,7 @@ public class ExampleItemComposite extends Composite {
 		choice.addValueListener(new ValueAdapter("Conditional Visibility Example") {	
 			@Override
 			public void valueChangePerformed(ValueEvent e) {
-				GridUtils.setVisible(x,     choice.getValue() == ItemChoice.XY);
-				GridUtils.setVisible(y,     choice.getValue() == ItemChoice.XY);
-				GridUtils.setVisible(r,     choice.getValue() == ItemChoice.POLAR);
-				GridUtils.setVisible(theta, choice.getValue() == ItemChoice.POLAR);
-				layout();
+				updateVisibility();
 			}
 		});
 		choice.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -122,6 +118,14 @@ public class ExampleItemComposite extends Composite {
 	
 	public IFieldWidget getChoice() {
 		return choice;
+	}
+
+	void updateVisibility() {
+		GridUtils.setVisible(x,     choice.getValue() == ItemChoice.XY);
+		GridUtils.setVisible(y,     choice.getValue() == ItemChoice.XY);
+		GridUtils.setVisible(r,     choice.getValue() == ItemChoice.POLAR);
+		GridUtils.setVisible(theta, choice.getValue() == ItemChoice.POLAR);
+		layout();
 	}
 
 }
