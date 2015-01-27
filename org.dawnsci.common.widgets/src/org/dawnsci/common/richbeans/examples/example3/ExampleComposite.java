@@ -27,7 +27,11 @@ public class ExampleComposite extends Composite {
 		items.setDefaultName("NewItem");
 		items.setEditorClass(ExampleItem.class);
 		items.setNameField("itemName"); // Where the name comes from if inside the bean
-		items.setListHeight(80);		
+		items.setListHeight(80);
+		items.setRequireSelectionPack(false);
+		items.setAdditionalFields(new String[]{"choice"});
+		items.setColumnWidths(new int []{100, 150});
+		items.setShowAdditionalFields(true);
 		
 		final ExampleItemComposite itemComp = new ExampleItemComposite(this, SWT.NONE);
 		itemComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));

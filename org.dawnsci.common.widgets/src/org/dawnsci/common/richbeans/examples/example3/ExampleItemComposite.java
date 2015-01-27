@@ -44,7 +44,7 @@ public class ExampleItemComposite extends Composite {
 		choice = new ComboWrapper(this, SWT.READ_ONLY);
 		choice.setItems(ExampleItem.ItemChoice.names());
 		choice.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		choice.addValueListener(new ValueAdapter("Conditional Visibility") {	
+		choice.addValueListener(new ValueAdapter("Conditional Visibility Example") {	
 			@Override
 			public void valueChangePerformed(ValueEvent e) {
 				GridUtils.setVisible(x,     choice.getValue() == ItemChoice.XY);

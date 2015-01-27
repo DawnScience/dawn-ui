@@ -3,6 +3,7 @@ package org.dawnsci.common.richbeans.examples.example3;
 import org.dawnsci.common.richbeans.beans.BeanUI;
 import org.dawnsci.common.richbeans.event.ValueAdapter;
 import org.dawnsci.common.richbeans.event.ValueEvent;
+import org.dawnsci.common.richbeans.examples.example3.ExampleItem.ItemChoice;
 import org.dawnsci.common.richbeans.util.SWTUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -41,7 +42,7 @@ public class ExampleRunner {
 		// Wang some the values over
 		final ExampleParameters bean = new ExampleParameters();
 	    bean.addItem(new ExampleItem(1,2));
-	    bean.addItem(new ExampleItem(2,3));
+	    bean.addItem(new ExampleItem(2,3,ItemChoice.POLAR));
 		
 		BeanUI.beanToUI(bean, ui);
 		BeanUI.switchState(ui, true);

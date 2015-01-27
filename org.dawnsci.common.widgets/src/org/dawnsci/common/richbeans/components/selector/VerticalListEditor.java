@@ -481,7 +481,7 @@ public final class VerticalListEditor extends ListEditor {
 				final TableViewerColumn col = new TableViewerColumn(listViewer, SWT.NONE, i + 1);
 				extraColumns.add(col);
 				col.getColumn().setText(additionalField);
-				col.getColumn().setWidth(0);
+				col.getColumn().setWidth(columnWidths==null ? 0 : columnWidths[i+1]);
 
 				col.setLabelProvider(new ColumnLabelProvider() {
 					@Override
@@ -531,6 +531,9 @@ public final class VerticalListEditor extends ListEditor {
 		isShowingAdditionalFields = b;
 		listViewer.getTable().setHeaderVisible(b);
 		int colIndex = 1; // intentional 1 based
+		if (extraColumns==null && additionalFields!=null) {
+			
+		}
 		if (extraColumns!=null) for (TableViewerColumn col : extraColumns) {
 			if (b) {
 				col.getColumn().setWidth((colIndex < columnWidths.length) ? columnWidths[colIndex] : 200);

@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.dawnsci.common.richbeans.examples.example3.ExampleItem.ItemChoice;
 
 /**
  *
@@ -54,6 +55,15 @@ public class ExampleItem {
 		itemName = "Fred"+(++INDEX);
 	}
 	
+	public ExampleItem(double i, double j, ItemChoice choice) {
+		this.choice = choice;
+		if (choice == ItemChoice.POLAR) {
+			r = i; theta = j;
+		} else {
+			x = i; y = j;
+		}
+	}
+
 	public ItemChoice getChoice() {
 		return choice;
 	}
