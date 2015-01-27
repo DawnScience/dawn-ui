@@ -1,4 +1,4 @@
-package org.dawnsci.common.richbeans.examples.example2;
+package org.dawnsci.common.richbeans.examples.example3;
 
 import org.dawnsci.common.richbeans.beans.BeanUI;
 import org.dawnsci.common.richbeans.event.ValueAdapter;
@@ -36,15 +36,12 @@ public class ExampleRunner {
 		value.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		shell.pack();
-		shell.setSize(400,600);
+		shell.setSize(400,500);
 		
 		// Wang some the values over
 		final ExampleParameters bean = new ExampleParameters();
-	    bean.setElement("Fe");
-	    bean.setEdge("K");
-	    bean.setStart(100d);
-	    bean.setStop(200d);
 	    bean.addItem(new ExampleItem(1,2));
+	    bean.addItem(new ExampleItem(2,3));
 		
 		BeanUI.beanToUI(bean, ui);
 		BeanUI.switchState(ui, true);
