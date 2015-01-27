@@ -424,41 +424,41 @@ public class BeanUI {
 		Method method = null;
 		try {
 			method = bean.getClass().getMethod(setter, ob.getClass());
+			
 		} catch (java.lang.NoSuchMethodException ne) {
 			
-			final Method[] methods = ob.getClass().getMethods();
 			final Class<?> clazz   = ob.getClass();
+			try {
 
-			METHOD_LOOP: for (Method m : methods) {
-				if (m.getName().equals(setter) && m.getParameterTypes().length==1) {
-					for (int i = 0; i < m.getParameterTypes().length; i++) {
-						Class type = m.getParameterTypes()[i];
-						if (!type.isAssignableFrom(clazz)) {
-							break METHOD_LOOP;
-						}
-					}
-					method = m;
+				if (Double.class.isAssignableFrom(clazz)) {
+					method = bean.getClass().getMethod(setter, new Class[]{double.class});
+				} else if (Float.class.isAssignableFrom(clazz)) {
+					method = bean.getClass().getMethod(setter, new Class[]{float.class});
+				} else if (Long.class.isAssignableFrom(clazz)) {
+					method = bean.getClass().getMethod(setter, new Class[]{long.class});
+				} else if (Integer.class.isAssignableFrom(clazz)) {
+					method = bean.getClass().getMethod(setter, new Class[]{int.class});
+				} else if (Boolean.class.isAssignableFrom(clazz)) {
+					method = bean.getClass().getMethod(setter, new Class[]{boolean.class});
 				}
+			} catch (NoSuchMethodException nsm2) {
+				method = bean.getClass().getMethod(setter, new Class[]{Number.class});
 			}
+
 
 			if (method==null) {
-				try {
-
-					if (Double.class.isAssignableFrom(clazz)) {
-						method = bean.getClass().getMethod(setter, new Class[]{double.class});
-					} else if (Float.class.isAssignableFrom(clazz)) {
-						method = bean.getClass().getMethod(setter, new Class[]{float.class});
-					} else if (Long.class.isAssignableFrom(clazz)) {
-						method = bean.getClass().getMethod(setter, new Class[]{long.class});
-					} else if (Integer.class.isAssignableFrom(clazz)) {
-						method = bean.getClass().getMethod(setter, new Class[]{int.class});
-					} else if (Boolean.class.isAssignableFrom(clazz)) {
-						method = bean.getClass().getMethod(setter, new Class[]{boolean.class});
+				final Method[] methods = ob.getClass().getMethods();
+				for (Method m : methods) {
+					if (m.getName().equals(setter) && m.getParameterTypes().length==1) {
+						Class type = m.getParameterTypes()[0];
+						if (!type.isAssignableFrom(clazz)) {
+							continue;
+						}
+						method = m;
 					}
-				} catch (NoSuchMethodException nsm2) {
-					method = bean.getClass().getMethod(setter, new Class[]{Number.class});
 				}
 			}
+
 		}
 		
 		method.invoke(bean, ob);
