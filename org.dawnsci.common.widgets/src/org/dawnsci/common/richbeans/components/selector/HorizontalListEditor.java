@@ -14,7 +14,6 @@ import java.util.List;
 
 import org.dawnsci.common.richbeans.components.EventManagerDelegate;
 import org.dawnsci.common.richbeans.event.ValueEvent;
-import org.dawnsci.common.widgets.Activator;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.resource.ResourceManager;
@@ -131,7 +130,7 @@ public final class HorizontalListEditor extends ListEditor {
 		buttonsPanel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
 		add = new Button(buttonsPanel, SWT.NONE);
-		add.setImage(Activator.getImage("icons/add.png"));
+		add.setImage(getImageDescriptor("add.png").createImage());
 		GridData addGD = new GridData(SWT.FILL, SWT.CENTER, false, false);
 		addGD.horizontalSpan = 2;
 		add.setLayoutData(addGD);
@@ -145,7 +144,7 @@ public final class HorizontalListEditor extends ListEditor {
 		add.addSelectionListener(addListener);
 
 		delete = new Button(buttonsPanel, SWT.NONE);
-		delete.setImage(Activator.getImage("icons/delete.png"));
+		delete.setImage(getImageDescriptor("delete.png").createImage());
 		GridData deleteGD = new GridData(SWT.FILL, SWT.CENTER, false, false);
 		deleteGD.horizontalSpan = 2;
 		delete.setLayoutData(deleteGD);
@@ -186,13 +185,13 @@ public final class HorizontalListEditor extends ListEditor {
 		right.addSelectionListener(rightListener);
 
 		final MenuManager man = new MenuManager();
-		man.add(new Action("Add", Activator.getImageDescriptor("icons/add.png")) {
+		man.add(new Action("Add", getImageDescriptor("add.png")) {
 			@Override
 			public void run() {
 				addBean();
 			}
 		});
-		man.add(new Action("Delete", Activator.getImageDescriptor("icons/delete.png")) {
+		man.add(new Action("Delete", getImageDescriptor("delete.png")) {
 			@Override
 			public void run() {
 				deleteBean();

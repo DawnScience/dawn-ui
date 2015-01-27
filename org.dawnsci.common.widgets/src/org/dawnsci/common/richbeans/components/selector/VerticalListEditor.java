@@ -18,7 +18,6 @@ import java.util.List;
 import org.dawnsci.common.richbeans.beans.BeansFactory;
 import org.dawnsci.common.richbeans.components.EventManagerDelegate;
 import org.dawnsci.common.richbeans.event.ValueEvent;
-import org.dawnsci.common.widgets.Activator;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.MenuManager;
@@ -98,7 +97,7 @@ public final class VerticalListEditor extends ListEditor {
 		buttonsPanel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
 		add = new Button(buttonsPanel, SWT.NONE);
-		add.setImage(Activator.getImage("icons/add.png"));
+		add.setImage(getImageDescriptor("add.png").createImage());
 		add.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		add.setText("Add");
 		this.addListener = new SelectionAdapter() {
@@ -113,7 +112,7 @@ public final class VerticalListEditor extends ListEditor {
 		add.addSelectionListener(addListener);
 
 		delete = new Button(buttonsPanel, SWT.NONE);
-		delete.setImage(Activator.getImage("icons/delete.png"));
+		delete.setImage(getImageDescriptor("delete.png").createImage());
 		delete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		delete.setText("Delete");
 		this.deleteListener = new SelectionAdapter() {

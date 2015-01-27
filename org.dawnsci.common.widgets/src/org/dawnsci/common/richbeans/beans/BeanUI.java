@@ -447,7 +447,7 @@ public class BeanUI {
 
 
 			if (method==null) {
-				final Method[] methods = ob.getClass().getMethods();
+				final Method[] methods = bean.getClass().getMethods();
 				for (Method m : methods) {
 					if (m.getName().equals(setter) && m.getParameterTypes().length==1) {
 						Class type = m.getParameterTypes()[0];
@@ -455,6 +455,7 @@ public class BeanUI {
 							continue;
 						}
 						method = m;
+						break;
 					}
 				}
 			}

@@ -10,6 +10,7 @@
 package org.dawnsci.common.richbeans.components.selector;
 
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +23,7 @@ import org.dawnsci.common.richbeans.components.FieldBeanComposite;
 import org.dawnsci.common.richbeans.event.ValueEvent;
 import org.dawnsci.common.richbeans.event.ValueListener;
 import org.dawnsci.common.richbeans.internal.GridUtils;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.swt.SWT;
@@ -426,4 +428,12 @@ public abstract class ListEditor extends FieldBeanComposite {
 		this.listEditorUI = listEditorUI;
 	}
 
+	public ImageDescriptor getImageDescriptor(String name) {
+		try {
+			final URL url = getClass().getResource(name);
+			return ImageDescriptor.createFromURL(url);
+		} catch (Exception ne) {
+			throw new RuntimeException(ne);
+		}
+	}
 }
