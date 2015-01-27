@@ -29,7 +29,7 @@ public class ExampleItem {
 	private Double x,y;
 	
     public ExampleItem() {
-    	
+    	this(1,1);
     }
     private static int INDEX = 0;
     
