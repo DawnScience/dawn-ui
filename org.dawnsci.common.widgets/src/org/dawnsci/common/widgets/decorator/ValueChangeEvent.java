@@ -26,5 +26,9 @@ public class ValueChangeEvent extends EventObject {
 	public Number getValue() {
 		return value;
 	}
+	public void setValue(Number value) {
+		this.value = value;
+	}
+
 
 }
