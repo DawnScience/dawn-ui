@@ -70,6 +70,7 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 	protected boolean doNotUseExpressions = false;
 	protected boolean isEditable = true;
 	protected String tooltipOveride;
+	protected String fieldOveride;
 	protected String minFieldName;
 	protected Class<?> minClass;
 	protected Mode currentBoundsMode = Mode.LEGAL;
@@ -274,7 +275,7 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 		if (Double.isNaN(val))
 			return null;
 		if (isIntegerBox || getDecimalPlaces() == 0)
-			return new Integer(Math.round(Math.round(val)));
+			return new Integer((int) Math.round(val));
 		return new Double(val);
 	}
 
@@ -553,6 +554,8 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 			minSignToAppend = " < ";
 		buf.append(minSignToAppend);
 		String field = getFieldName() != null ? getFieldName() : "value";
+		if(fieldOveride!=null)
+			field = fieldOveride;
 		buf.append(field);
 		String maxSignToAppend = null;
 		if (isMaximumValid())
@@ -1072,5 +1075,13 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 	public void setPermanentlyEnabled(boolean enabled) {
 		this.permanentlyEnabled = enabled;
 	}
+	
+	public String getFieldOveride() {
+		return fieldOveride;
+	}
 
+	public void setFieldOveride(String fieldOveride) {
+		this.fieldOveride = fieldOveride;
+	}
+	
 }

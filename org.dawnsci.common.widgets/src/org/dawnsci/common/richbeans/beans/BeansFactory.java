@@ -20,7 +20,10 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
+import java.io.StringWriter;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.List;
 import java.util.Locale;
 
@@ -55,6 +58,7 @@ public class BeansFactory {
 	}
 
 
+
 	/**
 	 * Can inject classes from spring or with static method. The classes are needed to define which XML files have GDA
 	 * bean files with them.
@@ -78,6 +82,7 @@ public class BeansFactory {
 		}
 		return false;
 	}
+
 
 
 	/**

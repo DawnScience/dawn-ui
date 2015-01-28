@@ -26,9 +26,6 @@ import org.eclipse.swt.widgets.Composite;
  */
 public class BooleanWrapper extends FieldComposite{
 	
-	/**
-	 *
-	 */
 	public enum BOOLEAN_MODE {
 		/**
 		 * Default
@@ -120,6 +117,11 @@ public class BooleanWrapper extends FieldComposite{
 	public void setLabel(String label) {
 		checkBox.setText(label);
 	}
+
+	public Button getButton(){
+		return checkBox;
+	}
+
 }
 
 	
