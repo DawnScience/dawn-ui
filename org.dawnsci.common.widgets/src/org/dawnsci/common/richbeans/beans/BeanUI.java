@@ -62,6 +62,10 @@ public class BeanUI {
 				box.setFieldName(name);
 				box.setValue(value);
 			}
+			@Override
+			public boolean requireValue() {
+				return true;
+			}
 		});
 	}
 
@@ -76,7 +80,7 @@ public class BeanUI {
 
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(String name, Object value,  IFieldWidget box) throws Exception {
+			public void process(String name, Object unused,  IFieldWidget box) throws Exception {
 				box.fireValueListeners();
 			}
 		});
@@ -93,7 +97,7 @@ public class BeanUI {
 
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(String name, Object value,  IFieldWidget box) throws Exception {
+			public void process(String name, Object unused,  IFieldWidget box) throws Exception {
 				box.fireBoundsUpdaters();
 			}
 		});
@@ -114,13 +118,12 @@ public class BeanUI {
 
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(String name, Object value,  IFieldWidget box) throws Exception {
+			public void process(String name, Object unused,  IFieldWidget box) throws Exception {
 				final Object ob = box.getValue();
 				if (ob != null && !isNaN(ob) && !isInfinity(ob)) {
 					setValue(bean, name, ob);
 				}
 			}
-
 		});
 	}
 
@@ -181,7 +184,7 @@ public class BeanUI {
 
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(String name, Object value,  IFieldWidget box) throws Exception {
+			public void process(String name, Object unused,  IFieldWidget box) throws Exception {
 				box.addValueListener(listener);
 			}
 		});
@@ -232,7 +235,7 @@ public class BeanUI {
 
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(String name, Object value,  IFieldWidget box) throws Exception {
+			public void process(String name, Object unused,  IFieldWidget box) throws Exception {
 				addBeanField(bean.getClass(), name, box);
 			}
 		});
@@ -325,7 +328,7 @@ public class BeanUI {
 	public static void switchState(final Object bean, final Object uiObject, final boolean on) throws Exception {
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(String name, Object value,  IFieldWidget box) {
+			public void process(String name, Object unused,  IFieldWidget box) {
 				if (on) {
 					box.on();
 				} else {
@@ -369,7 +372,7 @@ public class BeanUI {
 	public static void setEnabled(final Object bean, final Object uiObject, final boolean isEnabled) throws Exception {
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(String name, Object value,  IFieldWidget box) {
+			public void process(String name, Object unused,  IFieldWidget box) {
 				box.setEnabled(isEnabled);
 			}
 		});
@@ -378,7 +381,7 @@ public class BeanUI {
 	public static void dispose(final Object bean, final Object uiObject) throws Exception {
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(String name, Object value,  IFieldWidget box) {
+			public void process(String name, Object unused,  IFieldWidget box) {
 				box.dispose();
 			}
 		});
@@ -397,7 +400,7 @@ public class BeanUI {
 				final IFieldWidget box = BeanUI.getFieldWiget(fieldName, uiObject);
 				// NOTE non-IFieldWidget fields will be ignored.
 				if (box != null) {
-					final Object val = getValue(bean, fieldName);
+					final Object val = worker.requireValue() ? getValue(bean, fieldName) : null;
 					worker.process(fieldName, val, box);
 				}
 			}
@@ -462,8 +465,11 @@ public class BeanUI {
 		method.invoke(bean, ob);
 	}
 
-	public static interface BeanProcessor {
-		void process(String name, Object value, IFieldWidget box) throws Exception;
+	public static abstract class BeanProcessor {
+		public abstract void process(String name, Object value, IFieldWidget box) throws Exception;
+		public boolean requireValue() {
+			return false;
+		}
 	}
 
 	/**

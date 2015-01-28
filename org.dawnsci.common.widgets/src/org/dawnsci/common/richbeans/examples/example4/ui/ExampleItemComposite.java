@@ -37,12 +37,14 @@ public class ExampleItemComposite extends Composite {
 		setLayout(new GridLayout(2, false));
 		
 		Label label = new Label(this, SWT.NONE);
+		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		label.setText("Name");
 	
 		this.itemName = new TextWrapper(this, SWT.BORDER);
 		itemName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		label = new Label(this, SWT.NONE);
+		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		label.setText("Coordinate System");
 		
 		choice = new ComboWrapper(this, SWT.READ_ONLY);
@@ -95,8 +97,12 @@ public class ExampleItemComposite extends Composite {
 		theta.setMinimum(0);
 		theta.setMaximum(2*Math.PI);
 
+		final Composite optionsComp = new Composite(this, SWT.BORDER);
+		optionsComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		optionsComp.setLayout(new GridLayout(2, false));
+
 		// List of ExampleItems
-		this.options = new VerticalListEditor(this, SWT.NONE);
+		this.options = new VerticalListEditor(optionsComp, SWT.NONE);
 		options.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		options.setMinItems(0);
 		options.setMaxItems(5);
@@ -106,7 +112,7 @@ public class ExampleItemComposite extends Composite {
 		options.setListHeight(80);
 		options.setRequireSelectionPack(false);
 		
-		final OptionComposite itemComp = new OptionComposite(this, SWT.NONE);
+		final OptionComposite itemComp = new OptionComposite(optionsComp, SWT.NONE);
 		itemComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		options.setEditorUI(itemComp);
@@ -116,7 +122,7 @@ public class ExampleItemComposite extends Composite {
 
 	}
 
-	public IFieldWidget getOptions() {
+	public VerticalListEditor getOptions() {
 		return options;
 	}
 

@@ -34,7 +34,7 @@ public class ExampleRunner {
 		shell.setText("Change a value to see bean as JSON");
         
 		// Composite
-		final ExampleComposite ui = new ExampleComposite(shell, SWT.NONE);
+		final ExampleComposite ui = new ExampleComposite(shell, SWT.BORDER);
 		ui.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		// Something to show value.

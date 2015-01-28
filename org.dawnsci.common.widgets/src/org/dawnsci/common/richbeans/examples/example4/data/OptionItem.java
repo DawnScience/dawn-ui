@@ -1,5 +1,7 @@
 package org.dawnsci.common.richbeans.examples.example4.data;
 
+import org.apache.commons.beanutils.BeanUtils;
+
 public class OptionItem {
 
     private String optionName;
@@ -100,4 +102,15 @@ public class OptionItem {
 	public void setShowData(boolean showData) {
 		this.showData = showData;
 	}
+	
+
+	@Override
+	public String toString() {
+		try {
+			return BeanUtils.describe(this).toString();
+		} catch (Exception e) {
+			return e.getMessage();
+		}
+	}
+
 }
