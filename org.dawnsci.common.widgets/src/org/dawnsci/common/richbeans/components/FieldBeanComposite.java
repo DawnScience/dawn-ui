@@ -145,7 +145,7 @@ public class FieldBeanComposite extends FieldComposite implements IFieldCollecti
 					}
 				}	
 			};
-			BeanUI.addValueListener(beanTemplate, editorUI, l, false);
+			BeanUI.addValueListener(beanTemplate, editorUI, l);
 			
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -398,6 +398,7 @@ public class FieldBeanComposite extends FieldComposite implements IFieldCollecti
 	}
 
 	/**
+	 * If you are using nested list editors, you must set a unique name for the listener.
 	 * @param listenerName The listenerName to set.
 	 */
 	public void setListenerName(String listenerName) {

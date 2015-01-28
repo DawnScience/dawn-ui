@@ -104,6 +104,8 @@ public class ExampleItemComposite extends Composite {
 		// List of ExampleItems
 		this.options = new VerticalListEditor(optionsComp, SWT.NONE);
 		options.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		// Important - Nested list editors must have explicit unique listener names set.
+		options.setListenerName("Options Listener");
 		options.setMinItems(0);
 		options.setMaxItems(5);
 		options.setDefaultName("Option");
