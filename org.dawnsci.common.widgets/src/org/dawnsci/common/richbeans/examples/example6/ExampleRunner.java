@@ -67,7 +67,7 @@ public class ExampleRunner {
 		// Wang some the values over
 		BeanUI.beanToUI(bean, ui);
 		BeanUI.switchState(ui, true);
-		BeanUI.addValueListener(bean, ui, new ValueAdapter("Exmaple listener") {			
+		BeanUI.addValueListener(bean, ui, new ValueAdapter("Example listener") {			
 			@Override
 			public void valueChangePerformed(ValueEvent e) {
 				
