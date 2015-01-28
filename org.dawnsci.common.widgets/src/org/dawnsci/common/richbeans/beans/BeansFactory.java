@@ -38,7 +38,7 @@ public class BeansFactory {
 
 	private static final Logger logger = LoggerFactory.getLogger(BeansFactory.class);
 
-	private static Class<? extends IRichBean>[] CLASSES;
+	private static Class<? extends Object>[] CLASSES;
 
 	/**
 	 * Check that CLASSES is init and throw an exception if it hasn't been yet. Using CLASSES in this file would
@@ -88,7 +88,7 @@ public class BeansFactory {
 	 * @return String - filename
 	 * @throws Exception
 	 */
-	public static String getFirstFileName(File folder, Class<? extends IRichBean> clazz) throws Exception {
+	public static String getFirstFileName(File folder, Class<? extends Object> clazz) throws Exception {
 		final File[] fa = folder.listFiles();
 		for (int i = 0; i < fa.length; i++) {
 			if (BeansFactory.isBean(fa[i], clazz)) {
@@ -105,17 +105,17 @@ public class BeansFactory {
 	 * @return true if file is a saved version of this bean
 	 * @throws Exception
 	 */
-	public static boolean isBean(final File beanFile, final Class<? extends IRichBean> beanClass) throws Exception {
+	public static boolean isBean(final File beanFile, final Class<? extends Object> beanClass) throws Exception {
 		final BufferedReader reader = new BufferedReader(new FileReader(beanFile));
 		return isBean(reader, beanClass);
 	}
 
-	public static boolean isBean(final InputStream bean, final Class<? extends IRichBean> beanClass) throws Exception {
+	public static boolean isBean(final InputStream bean, final Class<? extends Object> beanClass) throws Exception {
 		final BufferedReader reader = new BufferedReader(new InputStreamReader(bean, "UTF-8"));
 		return isBean(reader, beanClass);
 	}
 
-	private static boolean isBean(BufferedReader reader, Class<? extends IRichBean> beanClass) throws Exception {
+	private static boolean isBean(BufferedReader reader, Class<? extends Object> beanClass) throws Exception {
 		try {
 			@SuppressWarnings("unused")
 			final String titleLine = reader.readLine(); // unused.
@@ -136,13 +136,13 @@ public class BeansFactory {
 	}
 
 
-	public static Class<? extends IRichBean>[] getClasses() {
+	public static Class<? extends Object>[] getClasses() {
 		checkInit();
 
 		return CLASSES;
 	}
 
-	public static void setClasses(Class<? extends IRichBean>[] cLASSES) {
+	public static void setClasses(Class<? extends Object>[] cLASSES) {
 		if (cLASSES == null)
 			throw new NullPointerException("cLASSES must be-non null to initialzied BeansFactory");
 		CLASSES = cLASSES;
@@ -159,10 +159,10 @@ public class BeansFactory {
 		this.classList = classList;
 
 		int i = 0;
-		final Class<? extends IRichBean>[] classes = (Class<? extends IRichBean>[]) new Class<?>[classList.size()];
+		final Class<? extends Object>[] classes = (Class<? extends Object>[]) new Class<?>[classList.size()];
 		for (String clazz : classList) {
 			try {
-				classes[i] = (Class<? extends IRichBean>) Class.forName(clazz);
+				classes[i] = (Class<? extends Object>) Class.forName(clazz);
 			} catch (ClassNotFoundException e) {
 				logger.info("ClassNotFoundException, cannot load class " + clazz);
 			}
@@ -331,7 +331,7 @@ public class BeansFactory {
 	 * @param clazz
 	 * @return true if class.
 	 */
-	public static boolean isClass(Class<? extends IRichBean> clazz) {
+	public static boolean isClass(Class<? extends Object> clazz) {
 		checkInit();
 
 		for (int i = 0; i < CLASSES.length; i++) {
