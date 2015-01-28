@@ -63,10 +63,13 @@ public class ExampleRunner {
 					// whatever at this stage.
 					List<?>       beans = DOEUtils.expand(bean); // expand the beans
 					ObjectMapper mapper = new ObjectMapper();
-					StringBuilder   buf = new StringBuilder();
-					for (Object b : beans) {
+					StringBuilder   buf = new StringBuilder("Expanded beans:\n");
+					for (int i = 0; i < beans.size(); i++) {
+					    Object b    = beans.get(i);
 						String json = mapper.writeValueAsString(b);
 						buf.append(json);
+						buf.append("       ");
+						if (i%3 == 0) buf.append("\n");
 					}
 					value.setText(buf.toString());
 					
