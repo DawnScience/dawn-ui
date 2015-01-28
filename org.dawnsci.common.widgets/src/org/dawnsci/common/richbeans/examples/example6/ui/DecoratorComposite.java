@@ -48,7 +48,8 @@ public class DecoratorComposite extends Composite {
 		
 		Text y = new Text(this, SWT.NONE);
 		y.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		final BoundsDecorator ybounds = new IntegerDecorator(y);
+		final IntegerDecorator ybounds = new IntegerDecorator(y);
+		ybounds.setRequireIntegers(true);
 		ybounds.setMinimum(0);
 		ybounds.setMaximum(xbounds);
 		this.yDeco = new TextFieldDecorator(y, ybounds);

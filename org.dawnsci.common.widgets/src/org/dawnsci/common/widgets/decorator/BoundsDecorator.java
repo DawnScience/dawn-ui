@@ -57,7 +57,7 @@ public class BoundsDecorator extends RegexDecorator {
 		return allowInvalidValues||ok;
 	}
 
-	protected Number parseValue(String totalString) {
+	protected final Number parseValue(String totalString) {
 		if ("".equals(totalString)) {
 			return Double.NaN;
 		}
