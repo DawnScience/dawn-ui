@@ -25,9 +25,9 @@ public class IntegerDecorator extends BoundsDecorator {
 		}
 		Number val = null;
 		if ("∞".equals(totalString)) {
-			val = Integer.MIN_VALUE;
+			val = Double.MIN_VALUE;
 		} else if ("-∞".equals(totalString)) {
-			val = Integer.MAX_VALUE;
+			val = Double.MAX_VALUE;
 		} else {
 			try {
 		        val = Integer.parseInt(totalString);
