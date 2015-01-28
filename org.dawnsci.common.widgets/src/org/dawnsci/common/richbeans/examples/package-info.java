@@ -10,6 +10,7 @@
  * Example 3 - List of items with conditional logic to show different UI based on choice
  * Example 4 - Nesting of lists of beans
  * Example 5 - DOE range over simple bean
+ * Example 6 - Use of decorators instead of inherited widgets. Example of setting enabled by reflection.
  * 
  */
 package org.dawnsci.common.richbeans.examples;

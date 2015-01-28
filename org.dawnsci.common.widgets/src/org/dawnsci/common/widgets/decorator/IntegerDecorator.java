@@ -17,5 +17,24 @@ public class IntegerDecorator extends BoundsDecorator {
 	public IntegerDecorator(Text text) {
 		super(text, "[-0-9∞]+", new DecimalFormat("##########0"));
 	}
-
+	
+	@Override
+	protected Number parseValue(String totalString) {
+		if ("".equals(totalString)) {
+			return Double.NaN;
+		}
+		Number val = null;
+		if ("∞".equals(totalString)) {
+			val = Integer.MIN_VALUE;
+		} else if ("-∞".equals(totalString)) {
+			val = Integer.MAX_VALUE;
+		} else {
+			try {
+		        val = Integer.parseInt(totalString);
+			} catch (Exception empty) {
+				val = Double.NaN;
+			}
+		}
+		return val;
+	}
 }
