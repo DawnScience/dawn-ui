@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.dawnsci.common.richbeans.components.selector.ListEditor;
 import org.dawnsci.common.richbeans.event.ValueListener;
 
 
@@ -171,6 +172,11 @@ public class BeanUI {
 		return Double.isNaN(((Double) ob).doubleValue());
 	}
 
+	public static void addValueListener(final Object bean, final Object uiObject, final ValueListener listener)
+			throws Exception {
+
+		addValueListener(bean, uiObject, listener, true);
+	}
 	/**
 	 * Add a value listener for the UI objects, if that method exists.
 	 * 
@@ -179,12 +185,13 @@ public class BeanUI {
 	 * @param listener
 	 * @throws Exception
 	 */
-	public static void addValueListener(final Object bean, final Object uiObject, final ValueListener listener)
+	public static void addValueListener(final Object bean, final Object uiObject, final ValueListener listener, final boolean recursive)
 			throws Exception {
 
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
 			public void process(String name, Object unused,  IFieldWidget box) throws Exception {
+				if (!recursive && box instanceof ListEditor) return;
 				box.addValueListener(listener);
 			}
 		});

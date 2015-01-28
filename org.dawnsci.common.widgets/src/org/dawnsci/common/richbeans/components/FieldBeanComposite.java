@@ -135,7 +135,7 @@ public class FieldBeanComposite extends FieldComposite implements IFieldCollecti
 		
 		if (beanTemplate==null) throw new RuntimeException("You must set the editing class for with setEditorClass(...) before setting the editorUI object.");
 		try {
-			BeanUI.addValueListener(beanTemplate, editorUI, new ValueAdapter(getListenerName()) {
+			ValueListener l = new ValueAdapter(getListenerName()) {
 				@Override
 				public void valueChangePerformed(ValueEvent e) {
 					try {
@@ -144,7 +144,9 @@ public class FieldBeanComposite extends FieldComposite implements IFieldCollecti
 						logger.error("Cannot process value changed.", e1);
 					}
 				}	
-			});
+			};
+			BeanUI.addValueListener(beanTemplate, editorUI, l, false);
+			
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

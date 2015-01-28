@@ -112,10 +112,10 @@ public class ExampleItemComposite extends Composite {
 		options.setListHeight(80);
 		options.setRequireSelectionPack(false);
 		
-		final OptionComposite itemComp = new OptionComposite(optionsComp, SWT.NONE);
-		itemComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		final OptionComposite optionsUI = new OptionComposite(optionsComp, SWT.NONE);
+		optionsUI.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		options.setEditorUI(itemComp);
+		options.setEditorUI(optionsUI);
 
 		GridUtils.setVisible(r,     false);
 		GridUtils.setVisible(theta, false);

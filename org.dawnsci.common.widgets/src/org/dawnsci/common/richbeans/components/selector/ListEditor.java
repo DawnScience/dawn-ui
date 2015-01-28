@@ -438,4 +438,11 @@ public abstract class ListEditor extends FieldBeanComposite {
 			throw new RuntimeException(ne);
 		}
 	}
+	
+	public String toString() {
+		if (beanTemplate!=null && getEditorUI()!=null) {
+			return getClass().getSimpleName()+" of "+beanTemplate.getClass().getSimpleName()+" with "+getEditorUI().getClass().getSimpleName();
+		}
+		return super.toString();
+	}
 }
