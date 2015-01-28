@@ -9,14 +9,15 @@
 
 package org.dawnsci.common.richbeans.components.scalebox;
 
+import java.net.URL;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import org.dawnsci.common.richbeans.beans.IExpressionManager;
 import org.dawnsci.common.richbeans.beans.IRangeWidget;
 import org.dawnsci.common.richbeans.components.scalebox.internal.RangeDialog;
-import org.dawnsci.common.widgets.Activator;
 import org.eclipse.dawnsci.doe.DOEUtils;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -85,13 +86,21 @@ public class RangeBox extends NumberBox implements IRangeWidget {
 
 		setButtonVisible(true);
 		this.button.setToolTipText("Open range form which allows this value to be defined as a range.");
-		this.button.setImage(Activator.getImage("/icons/arrow_divide.png"));
+		this.button.setImage(getImageDescriptor("arrow_divide.png").createImage());
 		this.button.setText("");
 		final GridData bLayout = (GridData) button.getLayoutData();
 
 		// Platform dependant sizes but they work on linux RHEL5 ok.
 		bLayout.widthHint = 29;
 
+	}
+	public ImageDescriptor getImageDescriptor(String name) {
+		try {
+			final URL url = getClass().getResource(name);
+			return ImageDescriptor.createFromURL(url);
+		} catch (Exception ne) {
+			throw new RuntimeException(ne);
+		}
 	}
 
 	@Override
