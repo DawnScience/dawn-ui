@@ -1,18 +1,22 @@
-package org.dawnsci.common.richbeans.examples.example1;
+package org.dawnsci.common.richbeans.examples.example2.ui;
 
 import org.dawnsci.common.richbeans.beans.IFieldWidget;
+import org.dawnsci.common.richbeans.components.BoundsProvider;
 import org.dawnsci.common.richbeans.components.scalebox.ScaleBox;
+import org.dawnsci.common.richbeans.components.wrappers.TextWrapper;
+import org.dawnsci.common.richbeans.event.ValueListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-public class SimpleComposite extends Composite {
+public class ExampleItemComposite extends Composite {
 
+	private TextWrapper itemName;
 	private ScaleBox x,y;
 
-	public SimpleComposite(Composite parent, int style) {
+	public ExampleItemComposite(Composite parent, int style) {
 		super(parent, style);
 		createContent();
 	}
@@ -22,6 +26,12 @@ public class SimpleComposite extends Composite {
 		setLayout(new GridLayout(2, false));
 		
 		Label label = new Label(this, SWT.NONE);
+		label.setText("Name");
+	
+		this.itemName = new TextWrapper(this, SWT.BORDER);
+		itemName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		
+		label = new Label(this, SWT.NONE);
 		label.setText("x");
 		
 		x = new ScaleBox(this, SWT.NONE);
@@ -35,12 +45,25 @@ public class SimpleComposite extends Composite {
 		
 		y = new ScaleBox(this, SWT.NONE);
 		y.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		y.setIntegerBox(true);
 		y.setUnit("m");
 		y.setMinimum(0);
-		y.setMaximum(x);
+		y.setMaximum(new BoundsProvider() {
+			
+			@Override
+			public double getBoundValue() {
+				return x.getNumericValue()*10;
+			}
+			
+			@Override
+			public void addValueListener(ValueListener l) {
+				x.addValueListener(l);
+			}
+		});
 	}
 
+	public IFieldWidget getItemName() {
+		return itemName;
+	}
 	
 	public IFieldWidget getX() {
 		return x;

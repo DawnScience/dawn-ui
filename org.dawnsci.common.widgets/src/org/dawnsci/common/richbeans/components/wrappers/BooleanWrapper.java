@@ -117,7 +117,9 @@ public class BooleanWrapper extends FieldComposite{
 		checkBox.setToolTipText(string);
 	}
 	
-	
+	public void setLabel(String label) {
+		checkBox.setText(label);
+	}
 }
 
 	

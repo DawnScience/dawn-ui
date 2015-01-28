@@ -1,10 +1,13 @@
-package org.dawnsci.common.richbeans.examples.example1;
+package org.dawnsci.common.richbeans.examples.example4;
 
 import org.dawnsci.common.richbeans.beans.BeanUI;
 import org.dawnsci.common.richbeans.event.ValueAdapter;
 import org.dawnsci.common.richbeans.event.ValueEvent;
-import org.dawnsci.common.richbeans.examples.example1.data.SimpleBean;
-import org.dawnsci.common.richbeans.examples.example1.ui.SimpleComposite;
+import org.dawnsci.common.richbeans.examples.example4.data.ExampleBean;
+import org.dawnsci.common.richbeans.examples.example4.data.ExampleItem;
+import org.dawnsci.common.richbeans.examples.example4.data.OptionItem;
+import org.dawnsci.common.richbeans.examples.example4.data.ExampleItem.ItemChoice;
+import org.dawnsci.common.richbeans.examples.example4.ui.ExampleComposite;
 import org.dawnsci.common.richbeans.util.SWTUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -29,25 +32,36 @@ public class ExampleRunner {
 		Shell shell = new Shell(display);
 		shell.setLayout(new GridLayout(1, false));
 		shell.setText("Change a value to see bean as JSON");
-      
+        
 		// Composite
-		final SimpleComposite ui = new SimpleComposite(shell, SWT.NONE);
+		final ExampleComposite ui = new ExampleComposite(shell, SWT.NONE);
 		ui.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		// Something to show value.
 		final Label value= new Label(shell, SWT.WRAP);
+		value.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		shell.pack();
-		shell.setSize(420,400);
+		shell.setSize(700,700);
 		
 		// Wang some the values over
-		final SimpleBean bean = new SimpleBean();
-		bean.setX(10.0);
-		bean.setY(5);
+		// Make bean
+		final ExampleBean bean = new ExampleBean();
+		ExampleItem item = new ExampleItem(1,2);
+		item.addOption(new OptionItem(true,true,true,true));
+	    bean.addItem(item);
+	    
+	    item = new ExampleItem(2,3,ItemChoice.POLAR);
+		item.addOption(new OptionItem(true,false,true,false));
+		item.addOption(new OptionItem(false,false,false,false));
+	    bean.addItem(item);
+	    
+	    bean.addItem(new ExampleItem(3,4,ItemChoice.XY));
 		
+	    // Wang bean
 		BeanUI.beanToUI(bean, ui);
 		BeanUI.switchState(ui, true);
-		BeanUI.addValueListener(bean, ui, new ValueAdapter("Exmaple listener") {			
+		BeanUI.addValueListener(bean, ui, new ValueAdapter("Example listener") {			
 			@Override
 			public void valueChangePerformed(ValueEvent e) {
 				

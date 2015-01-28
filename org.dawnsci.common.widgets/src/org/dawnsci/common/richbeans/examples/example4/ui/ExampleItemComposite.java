@@ -1,14 +1,17 @@
-package org.dawnsci.common.richbeans.examples.example3;
+package org.dawnsci.common.richbeans.examples.example4.ui;
 
 import org.dawnsci.common.richbeans.beans.IFieldWidget;
 import org.dawnsci.common.richbeans.components.BoundsProvider;
 import org.dawnsci.common.richbeans.components.scalebox.ScaleBox;
+import org.dawnsci.common.richbeans.components.selector.VerticalListEditor;
 import org.dawnsci.common.richbeans.components.wrappers.ComboWrapper;
 import org.dawnsci.common.richbeans.components.wrappers.TextWrapper;
 import org.dawnsci.common.richbeans.event.ValueAdapter;
 import org.dawnsci.common.richbeans.event.ValueEvent;
 import org.dawnsci.common.richbeans.event.ValueListener;
-import org.dawnsci.common.richbeans.examples.example3.ExampleItem.ItemChoice;
+import org.dawnsci.common.richbeans.examples.example4.data.ExampleItem;
+import org.dawnsci.common.richbeans.examples.example4.data.OptionItem;
+import org.dawnsci.common.richbeans.examples.example4.data.ExampleItem.ItemChoice;
 import org.dawnsci.common.richbeans.internal.GridUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -22,6 +25,7 @@ public class ExampleItemComposite extends Composite {
 	private ScaleBox     x,y;
 	private ComboWrapper choice;
 	private ScaleBox     r,theta;
+	private VerticalListEditor options;
 
 	public ExampleItemComposite(Composite parent, int style) {
 		super(parent, style);
@@ -91,9 +95,29 @@ public class ExampleItemComposite extends Composite {
 		theta.setMinimum(0);
 		theta.setMaximum(2*Math.PI);
 
+		// List of ExampleItems
+		this.options = new VerticalListEditor(this, SWT.NONE);
+		options.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		options.setMinItems(0);
+		options.setMaxItems(5);
+		options.setDefaultName("Option");
+		options.setEditorClass(OptionItem.class);
+		options.setNameField("optionName"); // Where the name comes from if inside the bean
+		options.setListHeight(80);
+		options.setRequireSelectionPack(false);
+		
+		final OptionComposite itemComp = new OptionComposite(this, SWT.NONE);
+		itemComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		options.setEditorUI(itemComp);
+
 		GridUtils.setVisible(r,     false);
 		GridUtils.setVisible(theta, false);
 
+	}
+
+	public IFieldWidget getOptions() {
+		return options;
 	}
 
 	public IFieldWidget getItemName() {

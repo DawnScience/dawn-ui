@@ -13,6 +13,7 @@ import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.dawnsci.common.richbeans.beans.BeansFactory;
@@ -377,6 +378,7 @@ public final class VerticalListEditor extends ListEditor {
 	@Override
 	public void setValue(Object value) {
 
+		if (value==null) value = Collections.emptyList();
 		super.setValue(value);
 		createProviders();
 		if (!listViewer.getControl().isDisposed())

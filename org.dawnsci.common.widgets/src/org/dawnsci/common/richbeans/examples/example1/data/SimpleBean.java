@@ -1,4 +1,4 @@
-package org.dawnsci.common.richbeans.examples.example1;
+package org.dawnsci.common.richbeans.examples.example1.data;
 
 /**
  * A simple bean defining an x and y value. 

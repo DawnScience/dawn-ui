@@ -16,7 +16,7 @@
  * with GDA. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.dawnsci.common.richbeans.examples.example2;
+package org.dawnsci.common.richbeans.examples.example2.data;
 
 import java.util.ArrayList;
 import java.util.List;

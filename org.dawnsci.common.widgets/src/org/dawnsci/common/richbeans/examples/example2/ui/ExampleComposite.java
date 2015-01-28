@@ -1,9 +1,10 @@
-package org.dawnsci.common.richbeans.examples.example2;
+package org.dawnsci.common.richbeans.examples.example2.ui;
 
 import org.dawnsci.common.richbeans.components.scalebox.ScaleBox;
 import org.dawnsci.common.richbeans.components.selector.VerticalListEditor;
 import org.dawnsci.common.richbeans.components.wrappers.LabelWrapper;
 import org.dawnsci.common.richbeans.components.wrappers.TextWrapper;
+import org.dawnsci.common.richbeans.examples.example2.data.ExampleItem;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.GridData;

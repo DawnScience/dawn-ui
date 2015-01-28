@@ -16,34 +16,17 @@
  * with GDA. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.dawnsci.common.richbeans.examples.example3;
-
-import java.util.HashMap;
-import java.util.Map;
+package org.dawnsci.common.richbeans.examples.example2.data;
 
 import org.apache.commons.beanutils.BeanUtils;
-import org.dawnsci.common.richbeans.examples.example3.ExampleItem.ItemChoice;
 
 /**
  *
  */
 public class ExampleItem {
-	
-	public enum ItemChoice {
-		XY, POLAR;
 
-		public static Map<String, ItemChoice> names() {
-			final Map<String,ItemChoice> ret = new HashMap<String,ItemChoice>(2);
-			ret.put("X-Y Graph", XY);
-			ret.put("Polar",     POLAR);
-			return ret;
-		}
-	}
-
-	private String     itemName;
-	private ItemChoice choice = ItemChoice.XY;
+	private String itemName;
 	private Double x,y;
-	private double r,theta;
 	
     public ExampleItem() {
     	this(1,1);
@@ -54,25 +37,7 @@ public class ExampleItem {
 		x = i; y = j;
 		itemName = "Fred"+(++INDEX);
 	}
-	
-	public ExampleItem(double i, double j, ItemChoice choice) {
-		this.choice = choice;
-		if (choice == ItemChoice.POLAR) {
-			r = i; theta = j;
-		} else {
-			x = i; y = j;
-		}
-		itemName = "Fred"+(++INDEX);
-	}
 
-	public ItemChoice getChoice() {
-		return choice;
-	}
-
-	public void setChoice(ItemChoice choice) {
-		this.choice = choice;
-	}
-	
 	public String getItemName() {
 		return itemName;
 	}
@@ -85,14 +50,7 @@ public class ExampleItem {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((choice == null) ? 0 : choice.hashCode());
-		result = prime * result
-				+ ((itemName == null) ? 0 : itemName.hashCode());
-		long temp;
-		temp = Double.doubleToLongBits(r);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(theta);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + ((itemName == null) ? 0 : itemName.hashCode());
 		result = prime * result + ((x == null) ? 0 : x.hashCode());
 		result = prime * result + ((y == null) ? 0 : y.hashCode());
 		return result;
@@ -107,17 +65,10 @@ public class ExampleItem {
 		if (getClass() != obj.getClass())
 			return false;
 		ExampleItem other = (ExampleItem) obj;
-		if (choice != other.choice)
-			return false;
 		if (itemName == null) {
 			if (other.itemName != null)
 				return false;
 		} else if (!itemName.equals(other.itemName))
-			return false;
-		if (Double.doubleToLongBits(r) != Double.doubleToLongBits(other.r))
-			return false;
-		if (Double.doubleToLongBits(theta) != Double
-				.doubleToLongBits(other.theta))
 			return false;
 		if (x == null) {
 			if (other.x != null)
@@ -160,23 +111,6 @@ public class ExampleItem {
 		this.y = y;
 	}
 	
-	
-	public double getR() {
-		return r;
-	}
-
-	public void setR(double r) {
-		this.r = r;
-	}
-
-	public double getTheta() {
-		return theta;
-	}
-
-	public void setTheta(double theta) {
-		this.theta = theta;
-	}
-
 	@Override
 	public String toString() {
 		try {

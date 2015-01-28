@@ -1,8 +1,9 @@
-package org.dawnsci.common.richbeans.examples.example3;
+package org.dawnsci.common.richbeans.examples.example3.ui;
 
 import org.dawnsci.common.richbeans.components.selector.BeanSelectionEvent;
 import org.dawnsci.common.richbeans.components.selector.BeanSelectionListener;
 import org.dawnsci.common.richbeans.components.selector.VerticalListEditor;
+import org.dawnsci.common.richbeans.examples.example3.data.ExampleItem;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;

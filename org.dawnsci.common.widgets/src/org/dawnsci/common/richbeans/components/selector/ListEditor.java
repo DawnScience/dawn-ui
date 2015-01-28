@@ -12,6 +12,7 @@ package org.dawnsci.common.richbeans.components.selector;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -315,8 +316,9 @@ public abstract class ListEditor extends FieldBeanComposite {
 	}
 
 	@Override
-	public void setValue(final Object value) {
+	public void setValue(Object value) {
 
+		if (value==null) value = Collections.emptyList();
 		final List<?> obs = (List<?>) value;
 
 		this.clear();

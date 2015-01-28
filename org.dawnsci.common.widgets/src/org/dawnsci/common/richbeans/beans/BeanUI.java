@@ -60,9 +60,6 @@ public class BeanUI {
 			@Override
 			public void process(String name, Object value,  IFieldWidget box) throws Exception {
 				box.setFieldName(name);
-				if (value == null /*&& !box.isActivated()*/) {
-					return;
-				}
 				box.setValue(value);
 			}
 		});
