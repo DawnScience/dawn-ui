@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Diamond Light Source Ltd.
+ * Copyright (c) 2012 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,12 +13,12 @@ import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.dawnsci.common.richbeans.beans.BeansFactory;
 import org.dawnsci.common.richbeans.components.EventManagerDelegate;
 import org.dawnsci.common.richbeans.event.ValueEvent;
-import org.dawnsci.common.widgets.Activator;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.MenuManager;
@@ -48,7 +48,7 @@ import org.eclipse.swt.widgets.Menu;
  * and equals() implemented correctly. Not designed to be extended in general. Instead use setEditorUI(...) to provide a
  * composite template for editing each item.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  */
 public final class VerticalListEditor extends ListEditor {
 
@@ -98,7 +98,7 @@ public final class VerticalListEditor extends ListEditor {
 		buttonsPanel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
 		add = new Button(buttonsPanel, SWT.NONE);
-		add.setImage(Activator.getImage("icons/add.png"));
+		add.setImage(getImageDescriptor("add.png").createImage());
 		add.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		add.setText("Add");
 		this.addListener = new SelectionAdapter() {
@@ -113,7 +113,7 @@ public final class VerticalListEditor extends ListEditor {
 		add.addSelectionListener(addListener);
 
 		delete = new Button(buttonsPanel, SWT.NONE);
-		delete.setImage(Activator.getImage("icons/delete.png"));
+		delete.setImage(getImageDescriptor("delete.png").createImage());
 		delete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		delete.setText("Delete");
 		this.deleteListener = new SelectionAdapter() {
@@ -378,6 +378,7 @@ public final class VerticalListEditor extends ListEditor {
 	@Override
 	public void setValue(Object value) {
 
+		if (value==null) value = Collections.emptyList();
 		super.setValue(value);
 		createProviders();
 		if (!listViewer.getControl().isDisposed())
@@ -482,7 +483,7 @@ public final class VerticalListEditor extends ListEditor {
 				final TableViewerColumn col = new TableViewerColumn(listViewer, SWT.NONE, i + 1);
 				extraColumns.add(col);
 				col.getColumn().setText(additionalField);
-				col.getColumn().setWidth(0);
+				col.getColumn().setWidth(columnWidths==null ? 0 : columnWidths[i+1]);
 
 				col.setLabelProvider(new ColumnLabelProvider() {
 					@Override
@@ -532,6 +533,9 @@ public final class VerticalListEditor extends ListEditor {
 		isShowingAdditionalFields = b;
 		listViewer.getTable().setHeaderVisible(b);
 		int colIndex = 1; // intentional 1 based
+		if (extraColumns==null && additionalFields!=null) {
+			
+		}
 		if (extraColumns!=null) for (TableViewerColumn col : extraColumns) {
 			if (b) {
 				col.getColumn().setWidth((colIndex < columnWidths.length) ? columnWidths[colIndex] : 200);

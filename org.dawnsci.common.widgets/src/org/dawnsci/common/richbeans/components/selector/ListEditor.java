@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Diamond Light Source Ltd.
+ * Copyright (c) 2012 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -10,7 +10,9 @@
 package org.dawnsci.common.richbeans.components.selector;
 
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +24,7 @@ import org.dawnsci.common.richbeans.components.FieldBeanComposite;
 import org.dawnsci.common.richbeans.event.ValueEvent;
 import org.dawnsci.common.richbeans.event.ValueListener;
 import org.dawnsci.common.richbeans.internal.GridUtils;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.swt.SWT;
@@ -313,8 +316,9 @@ public abstract class ListEditor extends FieldBeanComposite {
 	}
 
 	@Override
-	public void setValue(final Object value) {
+	public void setValue(Object value) {
 
+		if (value==null) value = Collections.emptyList();
 		final List<?> obs = (List<?>) value;
 
 		this.clear();
@@ -426,4 +430,19 @@ public abstract class ListEditor extends FieldBeanComposite {
 		this.listEditorUI = listEditorUI;
 	}
 
+	public ImageDescriptor getImageDescriptor(String name) {
+		try {
+			final URL url = getClass().getResource(name);
+			return ImageDescriptor.createFromURL(url);
+		} catch (Exception ne) {
+			throw new RuntimeException(ne);
+		}
+	}
+	
+	public String toString() {
+		if (beanTemplate!=null && getEditorUI()!=null) {
+			return getClass().getSimpleName()+" of "+beanTemplate.getClass().getSimpleName()+" with "+getEditorUI().getClass().getSimpleName();
+		}
+		return super.toString();
+	}
 }
