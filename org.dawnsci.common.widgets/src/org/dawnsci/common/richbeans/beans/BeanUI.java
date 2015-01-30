@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Diamond Light Source Ltd.
+ * Copyright (c) 2012 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.dawnsci.common.richbeans.components.selector.ListEditor;
 import org.dawnsci.common.richbeans.event.ValueListener;
 
 
@@ -36,7 +37,7 @@ import org.dawnsci.common.richbeans.event.ValueListener;
  * confused design of BeanUI but more importantly of RichBeanEditorPart implementations. Now a IFieldWidget must
  * existing for each field in the bean mapping to each widget.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  */
 public class BeanUI {
 
@@ -60,10 +61,11 @@ public class BeanUI {
 			@Override
 			public void process(String name, Object value,  IFieldWidget box) throws Exception {
 				box.setFieldName(name);
-				if (value == null /*&& !box.isActivated()*/) {
-					return;
-				}
 				box.setValue(value);
+			}
+			@Override
+			public boolean requireValue() {
+				return true;
 			}
 		});
 	}
@@ -79,7 +81,7 @@ public class BeanUI {
 
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(String name, Object value,  IFieldWidget box) throws Exception {
+			public void process(String name, Object unused,  IFieldWidget box) throws Exception {
 				box.fireValueListeners();
 			}
 		});
@@ -96,7 +98,7 @@ public class BeanUI {
 
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(String name, Object value,  IFieldWidget box) throws Exception {
+			public void process(String name, Object unused,  IFieldWidget box) throws Exception {
 				box.fireBoundsUpdaters();
 			}
 		});
@@ -117,13 +119,12 @@ public class BeanUI {
 
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(String name, Object value,  IFieldWidget box) throws Exception {
+			public void process(String name, Object unused,  IFieldWidget box) throws Exception {
 				final Object ob = box.getValue();
 				if (ob != null && !isNaN(ob) && !isInfinity(ob)) {
 					setValue(bean, name, ob);
 				}
 			}
-
 		});
 	}
 
@@ -171,6 +172,11 @@ public class BeanUI {
 		return Double.isNaN(((Double) ob).doubleValue());
 	}
 
+	public static void addValueListener(final Object bean, final Object uiObject, final ValueListener listener)
+			throws Exception {
+
+		addValueListener(bean, uiObject, listener, true);
+	}
 	/**
 	 * Add a value listener for the UI objects, if that method exists.
 	 * 
@@ -179,12 +185,13 @@ public class BeanUI {
 	 * @param listener
 	 * @throws Exception
 	 */
-	public static void addValueListener(final Object bean, final Object uiObject, final ValueListener listener)
+	public static void addValueListener(final Object bean, final Object uiObject, final ValueListener listener, final boolean recursive)
 			throws Exception {
 
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(String name, Object value,  IFieldWidget box) throws Exception {
+			public void process(String name, Object unused,  IFieldWidget box) throws Exception {
+				if (!recursive && box instanceof ListEditor) return;
 				box.addValueListener(listener);
 			}
 		});
@@ -235,7 +242,7 @@ public class BeanUI {
 
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(String name, Object value,  IFieldWidget box) throws Exception {
+			public void process(String name, Object unused,  IFieldWidget box) throws Exception {
 				addBeanField(bean.getClass(), name, box);
 			}
 		});
@@ -328,7 +335,7 @@ public class BeanUI {
 	public static void switchState(final Object bean, final Object uiObject, final boolean on) throws Exception {
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(String name, Object value,  IFieldWidget box) {
+			public void process(String name, Object unused,  IFieldWidget box) {
 				if (on) {
 					box.on();
 				} else {
@@ -348,7 +355,8 @@ public class BeanUI {
 		final Method[] methods = uiObject.getClass().getMethods();
 		for (int i = 0; i < methods.length; i++) {
 			final Method m = methods[i];
-			if (m.getReturnType() != null && m.getName().startsWith("get")) {
+			if (m.getReturnType() != null && IFieldWidget.class.isAssignableFrom(m.getReturnType()) &&
+				m.getName().startsWith("get") && m.getParameterTypes().length==0) {
 				final Object ob = m.invoke(uiObject);
 				if (ob instanceof IFieldWidget) {
 					final IFieldWidget box = (IFieldWidget) ob;
@@ -371,7 +379,7 @@ public class BeanUI {
 	public static void setEnabled(final Object bean, final Object uiObject, final boolean isEnabled) throws Exception {
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(String name, Object value,  IFieldWidget box) {
+			public void process(String name, Object unused,  IFieldWidget box) {
 				box.setEnabled(isEnabled);
 			}
 		});
@@ -380,7 +388,7 @@ public class BeanUI {
 	public static void dispose(final Object bean, final Object uiObject) throws Exception {
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(String name, Object value,  IFieldWidget box) {
+			public void process(String name, Object unused,  IFieldWidget box) {
 				box.dispose();
 			}
 		});
@@ -399,7 +407,7 @@ public class BeanUI {
 				final IFieldWidget box = BeanUI.getFieldWiget(fieldName, uiObject);
 				// NOTE non-IFieldWidget fields will be ignored.
 				if (box != null) {
-					final Object val = getValue(bean, fieldName);
+					final Object val = worker.requireValue() ? getValue(bean, fieldName) : null;
 					worker.process(fieldName, val, box);
 				}
 			}
@@ -423,23 +431,52 @@ public class BeanUI {
 		Method method = null;
 		try {
 			method = bean.getClass().getMethod(setter, ob.getClass());
+			
 		} catch (java.lang.NoSuchMethodException ne) {
-			final Class[] interfacesImplemented = ob.getClass().getInterfaces();
-			for (Class clazz : interfacesImplemented) {
-				try {
-					method = bean.getClass().getMethod(setter, clazz);
-					break;
-				}catch (Exception neOther) {
-					continue;
+			
+			final Class<?> clazz   = ob.getClass();
+			try {
+
+				if (Double.class.isAssignableFrom(clazz)) {
+					method = bean.getClass().getMethod(setter, new Class[]{double.class});
+				} else if (Float.class.isAssignableFrom(clazz)) {
+					method = bean.getClass().getMethod(setter, new Class[]{float.class});
+				} else if (Long.class.isAssignableFrom(clazz)) {
+					method = bean.getClass().getMethod(setter, new Class[]{long.class});
+				} else if (Integer.class.isAssignableFrom(clazz)) {
+					method = bean.getClass().getMethod(setter, new Class[]{int.class});
+				} else if (Boolean.class.isAssignableFrom(clazz)) {
+					method = bean.getClass().getMethod(setter, new Class[]{boolean.class});
+				}
+			} catch (NoSuchMethodException nsm2) {
+				method = bean.getClass().getMethod(setter, new Class[]{Number.class});
+			}
+
+
+			if (method==null) {
+				final Method[] methods = bean.getClass().getMethods();
+				for (Method m : methods) {
+					if (m.getName().equals(setter) && m.getParameterTypes().length==1) {
+						Class type = m.getParameterTypes()[0];
+						if (!type.isAssignableFrom(clazz)) {
+							continue;
+						}
+						method = m;
+						break;
+					}
 				}
 			}
+
 		}
 		
 		method.invoke(bean, ob);
 	}
 
-	public static interface BeanProcessor {
-		void process(String name, Object value, IFieldWidget box) throws Exception;
+	public static abstract class BeanProcessor {
+		public abstract void process(String name, Object value, IFieldWidget box) throws Exception;
+		public boolean requireValue() {
+			return false;
+		}
 	}
 
 	/**

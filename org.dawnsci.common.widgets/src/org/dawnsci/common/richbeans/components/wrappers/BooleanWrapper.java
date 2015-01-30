@@ -118,6 +118,10 @@ public class BooleanWrapper extends FieldComposite{
 	}
 	
 	
+	public void setLabel(String label) {
+		checkBox.setText(label);
+	}
+
 }
 
 	
