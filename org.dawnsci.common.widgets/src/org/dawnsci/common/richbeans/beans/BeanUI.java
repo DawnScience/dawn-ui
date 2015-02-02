@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.dawnsci.common.richbeans.components.selector.ListEditor;
 import org.dawnsci.common.richbeans.event.ValueListener;
 
 
@@ -60,10 +61,11 @@ public class BeanUI {
 			@Override
 			public void process(String name, Object value,  IFieldWidget box) throws Exception {
 				box.setFieldName(name);
-				if (value == null /*&& !box.isActivated()*/) {
-					return;
-				}
 				box.setValue(value);
+			}
+			@Override
+			public boolean requireValue() {
+				return true;
 			}
 		});
 	}
@@ -79,7 +81,7 @@ public class BeanUI {
 
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(String name, Object value,  IFieldWidget box) throws Exception {
+			public void process(String name, Object unused,  IFieldWidget box) throws Exception {
 				box.fireValueListeners();
 			}
 		});
@@ -96,7 +98,7 @@ public class BeanUI {
 
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(String name, Object value,  IFieldWidget box) throws Exception {
+			public void process(String name, Object unused,  IFieldWidget box) throws Exception {
 				box.fireBoundsUpdaters();
 			}
 		});
@@ -117,13 +119,12 @@ public class BeanUI {
 
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(String name, Object value,  IFieldWidget box) throws Exception {
+			public void process(String name, Object unused,  IFieldWidget box) throws Exception {
 				final Object ob = box.getValue();
 				if (ob != null && !isNaN(ob) && !isInfinity(ob)) {
 					setValue(bean, name, ob);
 				}
 			}
-
 		});
 	}
 
@@ -171,6 +172,11 @@ public class BeanUI {
 		return Double.isNaN(((Double) ob).doubleValue());
 	}
 
+	public static void addValueListener(final Object bean, final Object uiObject, final ValueListener listener)
+			throws Exception {
+
+		addValueListener(bean, uiObject, listener, true);
+	}
 	/**
 	 * Add a value listener for the UI objects, if that method exists.
 	 * 
@@ -179,12 +185,13 @@ public class BeanUI {
 	 * @param listener
 	 * @throws Exception
 	 */
-	public static void addValueListener(final Object bean, final Object uiObject, final ValueListener listener)
+	public static void addValueListener(final Object bean, final Object uiObject, final ValueListener listener, final boolean recursive)
 			throws Exception {
 
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(String name, Object value,  IFieldWidget box) throws Exception {
+			public void process(String name, Object unused,  IFieldWidget box) throws Exception {
+				if (!recursive && box instanceof ListEditor) return;
 				box.addValueListener(listener);
 			}
 		});
@@ -235,7 +242,7 @@ public class BeanUI {
 
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(String name, Object value,  IFieldWidget box) throws Exception {
+			public void process(String name, Object unused,  IFieldWidget box) throws Exception {
 				addBeanField(bean.getClass(), name, box);
 			}
 		});
@@ -328,7 +335,7 @@ public class BeanUI {
 	public static void switchState(final Object bean, final Object uiObject, final boolean on) throws Exception {
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(String name, Object value,  IFieldWidget box) {
+			public void process(String name, Object unused,  IFieldWidget box) {
 				if (on) {
 					box.on();
 				} else {
@@ -372,7 +379,7 @@ public class BeanUI {
 	public static void setEnabled(final Object bean, final Object uiObject, final boolean isEnabled) throws Exception {
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(String name, Object value,  IFieldWidget box) {
+			public void process(String name, Object unused,  IFieldWidget box) {
 				box.setEnabled(isEnabled);
 			}
 		});
@@ -381,7 +388,7 @@ public class BeanUI {
 	public static void dispose(final Object bean, final Object uiObject) throws Exception {
 		BeanUI.notify(bean, uiObject, new BeanProcessor() {
 			@Override
-			public void process(String name, Object value,  IFieldWidget box) {
+			public void process(String name, Object unused,  IFieldWidget box) {
 				box.dispose();
 			}
 		});
@@ -400,7 +407,7 @@ public class BeanUI {
 				final IFieldWidget box = BeanUI.getFieldWiget(fieldName, uiObject);
 				// NOTE non-IFieldWidget fields will be ignored.
 				if (box != null) {
-					final Object val = getValue(bean, fieldName);
+					final Object val = worker.requireValue() ? getValue(bean, fieldName) : null;
 					worker.process(fieldName, val, box);
 				}
 			}
@@ -447,7 +454,7 @@ public class BeanUI {
 
 
 			if (method==null) {
-				final Method[] methods = ob.getClass().getMethods();
+				final Method[] methods = bean.getClass().getMethods();
 				for (Method m : methods) {
 					if (m.getName().equals(setter) && m.getParameterTypes().length==1) {
 						Class type = m.getParameterTypes()[0];
@@ -455,6 +462,7 @@ public class BeanUI {
 							continue;
 						}
 						method = m;
+						break;
 					}
 				}
 			}
@@ -464,8 +472,11 @@ public class BeanUI {
 		method.invoke(bean, ob);
 	}
 
-	public static interface BeanProcessor {
-		void process(String name, Object value, IFieldWidget box) throws Exception;
+	public static abstract class BeanProcessor {
+		public abstract void process(String name, Object value, IFieldWidget box) throws Exception;
+		public boolean requireValue() {
+			return false;
+		}
 	}
 
 	/**

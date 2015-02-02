@@ -28,9 +28,11 @@ Require-Bundle: org.eclipse.core.runtime,
  org.apache.commons.logging;bundle-version="1.0.4",
  com.fasterxml.jackson.core.jackson-annotations;bundle-version="2.2.0",
  com.fasterxml.jackson.core.jackson-core;bundle-version="2.2.0",
- com.fasterxml.jackson.core.jackson-databind;bundle-version="2.2.0"
+ com.fasterxml.jackson.core.jackson-databind;bundle-version="2.2.0",
+ uk.ac.diamond.org.nfunk.jep
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
+Eclipse-BuddyPolicy: registered
 Import-Package: javax.measure.quantity;version="4.3.1",
  javax.measure.unit;version="4.3.1",
  org.jscience.physics.amount;version="4.3.1",
@@ -46,6 +48,7 @@ Export-Package: org.dawnsci.common.richbeans,
  org.dawnsci.common.richbeans.components.wrappers,
  org.dawnsci.common.richbeans.dialog,
  org.dawnsci.common.richbeans.event,
+ org.dawnsci.common.richbeans.examples.example5.data,
  org.dawnsci.common.richbeans.xml,
  org.dawnsci.common.richbeans.xml.string,
  org.dawnsci.common.widgets,

@@ -1,11 +1,14 @@
-package org.dawnsci.common.richbeans.examples.example1;
+package org.dawnsci.common.richbeans.examples.example5;
+
+import java.util.List;
 
 import org.dawnsci.common.richbeans.beans.BeanUI;
 import org.dawnsci.common.richbeans.event.ValueAdapter;
 import org.dawnsci.common.richbeans.event.ValueEvent;
-import org.dawnsci.common.richbeans.examples.example1.data.SimpleBean;
-import org.dawnsci.common.richbeans.examples.example1.ui.SimpleComposite;
+import org.dawnsci.common.richbeans.examples.example5.data.SimpleBean;
+import org.dawnsci.common.richbeans.examples.example5.ui.SimpleComposite;
 import org.dawnsci.common.richbeans.util.SWTUtils;
+import org.eclipse.dawnsci.doe.DOEUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -42,8 +45,8 @@ public class ExampleRunner {
 		
 		// Wang some the values over
 		final SimpleBean bean = new SimpleBean();
-		bean.setX(10.0);
-		bean.setY(5);
+		bean.setX("10.0, 50, 1");
+		bean.setY("5");
 		
 		BeanUI.beanToUI(bean, ui);
 		BeanUI.switchState(ui, true);
@@ -58,10 +61,20 @@ public class ExampleRunner {
 					// We spit out the bean in JSON since
 					// rich bean does not care if bean in XML or
 					// whatever at this stage.
+					List<?>       beans = DOEUtils.expand(bean); // expand the beans
 					ObjectMapper mapper = new ObjectMapper();
-					String json = mapper.writeValueAsString(bean);
-					value.setText(json);
+					StringBuilder   buf = new StringBuilder("Expanded beans:\n");
+					for (int i = 0; i < beans.size(); i++) {
+					    Object b    = beans.get(i);
+						String json = mapper.writeValueAsString(b);
+						buf.append(json);
+						buf.append("       ");
+						if (i%3 == 0) buf.append("\n");
+					}
+					value.setText(buf.toString());
+					
 					value.getParent().layout();
+					
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();

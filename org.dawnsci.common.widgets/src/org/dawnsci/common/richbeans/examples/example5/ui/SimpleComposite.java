@@ -1,7 +1,6 @@
-package org.dawnsci.common.richbeans.examples.example1;
+package org.dawnsci.common.richbeans.examples.example5.ui;
 
-import org.dawnsci.common.richbeans.beans.IFieldWidget;
-import org.dawnsci.common.richbeans.components.scalebox.ScaleBox;
+import org.dawnsci.common.richbeans.components.scalebox.RangeBox;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -10,7 +9,7 @@ import org.eclipse.swt.widgets.Label;
 
 public class SimpleComposite extends Composite {
 
-	private ScaleBox x,y;
+	private RangeBox x,y;
 
 	public SimpleComposite(Composite parent, int style) {
 		super(parent, style);
@@ -24,7 +23,7 @@ public class SimpleComposite extends Composite {
 		Label label = new Label(this, SWT.NONE);
 		label.setText("x");
 		
-		x = new ScaleBox(this, SWT.NONE);
+		x = new RangeBox(this, SWT.NONE);
 		x.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		x.setUnit("°");
 		x.setMinimum(0);
@@ -33,20 +32,19 @@ public class SimpleComposite extends Composite {
 		label = new Label(this, SWT.NONE);
 		label.setText("y");
 		
-		y = new ScaleBox(this, SWT.NONE);
+		y = new RangeBox(this, SWT.NONE);
 		y.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		y.setIntegerBox(true);
 		y.setUnit("m");
 		y.setMinimum(0);
-		y.setMaximum(x);
 	}
 
 	
-	public IFieldWidget getX() {
+	public RangeBox getX() {
 		return x;
 	}
 	
-	public IFieldWidget getY() {
+	public RangeBox getY() {
 		return y;
 	}
 

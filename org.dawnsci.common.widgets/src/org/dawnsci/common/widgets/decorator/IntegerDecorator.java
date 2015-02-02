@@ -14,8 +14,30 @@ import org.eclipse.swt.widgets.Text;
 
 public class IntegerDecorator extends BoundsDecorator {
 
+	private boolean requireIntegers=false;
 	public IntegerDecorator(Text text) {
 		super(text, "[-0-9∞]+", new DecimalFormat("##########0"));
 	}
+	
+	@Override
+	public Number getValue() {
+		Number val = parseValue(text.getText());
+		return isRequireIntegers() ? val.intValue() : val;
+	}
+	
+	@Override
+	protected void fireValueChangedListeners(final ValueChangeEvent evt) {
+        if (isRequireIntegers() && evt.getValue() instanceof Double) evt.setValue(evt.getValue().intValue());
+        super.fireValueChangedListeners(evt);
+	}
+	
+	public boolean isRequireIntegers() {
+		return requireIntegers;
+	}
+
+	public void setRequireIntegers(boolean requireIntegers) {
+		this.requireIntegers = requireIntegers;
+	}
+
 
 }

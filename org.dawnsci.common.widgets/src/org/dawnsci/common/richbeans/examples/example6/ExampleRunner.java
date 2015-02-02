@@ -1,14 +1,17 @@
-package org.dawnsci.common.richbeans.examples.example1;
+package org.dawnsci.common.richbeans.examples.example6;
 
 import org.dawnsci.common.richbeans.beans.BeanUI;
 import org.dawnsci.common.richbeans.event.ValueAdapter;
 import org.dawnsci.common.richbeans.event.ValueEvent;
-import org.dawnsci.common.richbeans.examples.example1.data.SimpleBean;
-import org.dawnsci.common.richbeans.examples.example1.ui.SimpleComposite;
+import org.dawnsci.common.richbeans.examples.example6.data.DecoratorBean;
+import org.dawnsci.common.richbeans.examples.example6.ui.DecoratorComposite;
 import org.dawnsci.common.richbeans.util.SWTUtils;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -31,8 +34,12 @@ public class ExampleRunner {
 		shell.setText("Change a value to see bean as JSON");
       
 		// Composite
-		final SimpleComposite ui = new SimpleComposite(shell, SWT.NONE);
+		final DecoratorComposite ui = new DecoratorComposite(shell, SWT.NONE);
 		ui.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		final Button enable = new Button(shell, SWT.TOGGLE);
+		enable.setSelection(true);
+		enable.setText("Enable");
 		
 		// Something to show value.
 		final Label value= new Label(shell, SWT.WRAP);
@@ -40,11 +47,24 @@ public class ExampleRunner {
 		shell.pack();
 		shell.setSize(420,400);
 		
-		// Wang some the values over
-		final SimpleBean bean = new SimpleBean();
+		// Create values.
+		final DecoratorBean bean = new DecoratorBean();
 		bean.setX(10.0);
 		bean.setY(5);
 		
+		// Enable/disable by reflection
+		enable.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				try {
+					BeanUI.setEnabled(bean, ui, enable.getSelection());
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+
+		// Wang some the values over
 		BeanUI.beanToUI(bean, ui);
 		BeanUI.switchState(ui, true);
 		BeanUI.addValueListener(bean, ui, new ValueAdapter("Example listener") {			

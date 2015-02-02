@@ -57,7 +57,7 @@ public class BoundsDecorator extends RegexDecorator {
 		return allowInvalidValues||ok;
 	}
 
-	private Number parseValue(String totalString) {
+	protected final Number parseValue(String totalString) {
 		if ("".equals(totalString)) {
 			return Double.NaN;
 		}
@@ -210,16 +210,20 @@ public class BoundsDecorator extends RegexDecorator {
 		return maximum instanceof Number ? (Number)maximum : ((BoundsDecorator)maximum).getValue();
 	}
 
-	public void setMaximum(Object maximum) {
-		if (maximum instanceof Number) {
-			double dbl = ((Number)maximum).doubleValue();
-			if (Double.isNaN(dbl) || Double.isInfinite(dbl)) {
-				this.maximum = null;
-				return;
-			}
+	public void setMaximum(Number maximum) {
+		double dbl = ((Number)maximum).doubleValue();
+		if (Double.isNaN(dbl) || Double.isInfinite(dbl)) {
+			this.maximum = null;
+			return;
 		}
 		this.maximum = maximum;
+		if (text.getText()==null || "".equals(text.getText())) return;
+		checkBounds(getValue(), false);
+	}
+	
+	public void setMaximum(BoundsDecorator maximum) {
 		registerBoundsChanger(maximum, BoundsType.MAXIMUM);
+		this.maximum = maximum;
 		if (text.getText()==null || "".equals(text.getText())) return;
 		checkBounds(getValue(), false);
 	}
@@ -258,19 +262,24 @@ public class BoundsDecorator extends RegexDecorator {
 		return minimum instanceof Number ? (Number)minimum : ((BoundsDecorator)minimum).getValue();
 	}
 
-	public void setMinimum(Object minimum) {
-		if (minimum instanceof Number) {
-			double dbl = ((Number)minimum).doubleValue();
-			if (Double.isNaN(dbl) || Double.isInfinite(dbl)) {
-				this.minimum = null;
-				return;
-			}
+	public void setMinimum(Number minimum) {
+		double dbl = ((Number)minimum).doubleValue();
+		if (Double.isNaN(dbl) || Double.isInfinite(dbl)) {
+			this.minimum = null;
+			return;
 		}
 		this.minimum = minimum;
-		registerBoundsChanger(minimum, BoundsType.MINIMUM);
 		if (text.getText()==null || "".equals(text.getText())) return;
 		checkBounds(getValue(), false);
 	}
+	
+	public void setMinimum(BoundsDecorator minimum) {
+		registerBoundsChanger(minimum, BoundsType.MINIMUM);
+		this.minimum = minimum;
+		if (text.getText()==null || "".equals(text.getText())) return;
+		checkBounds(getValue(), false);
+	}
+
 
 	public NumberFormat getNumberFormat() {
 		return numberFormat;

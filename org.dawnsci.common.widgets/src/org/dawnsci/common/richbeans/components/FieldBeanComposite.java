@@ -135,7 +135,7 @@ public class FieldBeanComposite extends FieldComposite implements IFieldCollecti
 		
 		if (beanTemplate==null) throw new RuntimeException("You must set the editing class for with setEditorClass(...) before setting the editorUI object.");
 		try {
-			BeanUI.addValueListener(beanTemplate, editorUI, new ValueAdapter(getListenerName()) {
+			ValueListener l = new ValueAdapter(getListenerName()) {
 				@Override
 				public void valueChangePerformed(ValueEvent e) {
 					try {
@@ -144,7 +144,9 @@ public class FieldBeanComposite extends FieldComposite implements IFieldCollecti
 						logger.error("Cannot process value changed.", e1);
 					}
 				}	
-			});
+			};
+			BeanUI.addValueListener(beanTemplate, editorUI, l);
+			
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -241,7 +243,7 @@ public class FieldBeanComposite extends FieldComposite implements IFieldCollecti
 			if (editorUI instanceof Widget && ((Widget)editorUI).isDisposed()) return;
 			BeanUI.notify(editorBean, editorUI, new BeanProcessor() {
 				@Override
-				public void process(String name, Object val, IFieldWidget box) throws Exception {
+				public void process(String name, Object unused, IFieldWidget box) throws Exception {
 					if (box instanceof IExpressionWidget) {
 						final IExpressionWidget expressionBox = (IExpressionWidget)box;
 						expressionBox.setExpressionValue(value);
@@ -396,6 +398,7 @@ public class FieldBeanComposite extends FieldComposite implements IFieldCollecti
 	}
 
 	/**
+	 * If you are using nested list editors, you must set a unique name for the listener.
 	 * @param listenerName The listenerName to set.
 	 */
 	public void setListenerName(String listenerName) {
