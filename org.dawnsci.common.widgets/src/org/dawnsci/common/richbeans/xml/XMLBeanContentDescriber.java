@@ -26,7 +26,7 @@ import org.eclipse.core.runtime.content.ITextContentDescriber;
  * Highly linked to the castor XML at the moment as it 
  * reads the second line in the file to know the base tag.
  */
-public abstract class XMLBeanContentDescriber implements IContentDescriber, ITextContentDescriber {
+public abstract class XMLBeanContentDescriber implements ITextContentDescriber {
 
 	/**
 	 * Registers the describer with the factory.
@@ -43,6 +43,27 @@ public abstract class XMLBeanContentDescriber implements IContentDescriber, ITex
 	 * @return editor id
 	 */
 	protected abstract String getEditorId();
+	
+	public static class Stub extends XMLBeanContentDescriber {
+		
+		private Class<? extends Object> beanClass;
+		private String editorId;
+
+		Stub(Class<? extends Object> beanClass, String editorId) {
+			this.beanClass = beanClass;
+			this.editorId  = editorId;
+		}
+
+		@Override
+		protected String getBeanName() {
+			return beanClass.getName();
+		}
+
+		@Override
+		protected String getEditorId() {
+			return editorId;
+		}
+	}
 	
 	@Override
 	public int describe(Reader contents, IContentDescription description) throws IOException {
