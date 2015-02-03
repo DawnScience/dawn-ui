@@ -53,9 +53,8 @@ import org.eclipse.swt.widgets.Label;
 /**
  * Base class for any box with a range and unit. Abstract class does not currently have abstract methods, but is not
  * designed to be used directly.
- * @deprecated Use {@link FloatDecorator} with a standard Text widget in DAWN. It is faster and easier.
+ * Use {@link FloatDecorator} with a standard Text widget in DAWN. It is faster and easier.
  */
-@Deprecated
 public abstract class NumberBox extends ButtonComposite implements BoundsProvider, IFieldWidget, IExpressionWidget {
 
 	protected StyledText expressionLabel;
@@ -431,6 +430,7 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 		try {
 			numericalValue = Double.valueOf(extractedNumberString);
 		} catch (NumberFormatException e) {
+			if (this.red == null) red = getDisplay().getSystemColor(SWT.COLOR_RED);
 			text.setForeground(red);
 			return;
 		}
