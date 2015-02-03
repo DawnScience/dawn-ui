@@ -12,17 +12,16 @@ package org.dawnsci.common.richbeans.components;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.dawnsci.common.richbeans.ACTIVE_MODE;
 import org.dawnsci.common.richbeans.beans.BeanProvider;
 import org.dawnsci.common.richbeans.beans.BeanUI;
+import org.dawnsci.common.richbeans.beans.BeanUI.BeanProcessor;
 import org.dawnsci.common.richbeans.beans.IExpressionManager;
 import org.dawnsci.common.richbeans.beans.IExpressionWidget;
 import org.dawnsci.common.richbeans.beans.IFieldCollection;
 import org.dawnsci.common.richbeans.beans.IFieldProvider;
 import org.dawnsci.common.richbeans.beans.IFieldWidget;
-import org.dawnsci.common.richbeans.beans.BeanUI.BeanProcessor;
 import org.dawnsci.common.richbeans.components.selector.BeanSelectionListener;
 import org.dawnsci.common.richbeans.event.ValueAdapter;
 import org.dawnsci.common.richbeans.event.ValueEvent;
@@ -287,7 +286,6 @@ public class FieldBeanComposite extends FieldComposite implements IFieldCollecti
 	}
 	
 	// Important to start with true!
-	@SuppressWarnings("hiding")
 	protected boolean active = true;
 	/**
 	 * @return the active
