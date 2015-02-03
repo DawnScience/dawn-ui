@@ -483,7 +483,11 @@ public final class VerticalListEditor extends ListEditor {
 				final TableViewerColumn col = new TableViewerColumn(listViewer, SWT.NONE, i + 1);
 				extraColumns.add(col);
 				col.getColumn().setText(additionalField);
-				col.getColumn().setWidth(columnWidths==null ? 0 : columnWidths[i+1]);
+				int width = 300;
+				if (columnWidths!= null && columnWidths.length > i + 1){
+					width = columnWidths[i+1];
+				}
+				col.getColumn().setWidth(width);
 
 				col.setLabelProvider(new ColumnLabelProvider() {
 					@Override

@@ -378,7 +378,8 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 	    	
 	    	if (e.getAttribute("category")!=null) {
 	    		final String cat = e.getAttribute("category");
-	    		subMenus.get(cat).add(action);
+	    		if (subMenus.containsKey(cat))
+	    			subMenus.get(cat).add(action);
 	    	} else {
 	    	    toolActions.add(action);
 	    	}

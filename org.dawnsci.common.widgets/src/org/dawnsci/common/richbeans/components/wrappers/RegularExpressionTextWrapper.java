@@ -19,6 +19,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
 public class RegularExpressionTextWrapper extends TextWrapper {
@@ -39,7 +40,8 @@ public class RegularExpressionTextWrapper extends TextWrapper {
 	public RegularExpressionTextWrapper(Composite parent, int style, final Pattern pattern) {
 
 		super(parent, style);
-
+		setLayout(new GridLayout(2, false));
+		
 		this.pattern = pattern;
 		this.messageLabel = new CLabel(this, SWT.NONE);
 		messageLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
