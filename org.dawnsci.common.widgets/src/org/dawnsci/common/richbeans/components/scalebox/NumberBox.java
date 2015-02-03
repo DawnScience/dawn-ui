@@ -431,6 +431,7 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 		try {
 			numericalValue = Double.valueOf(extractedNumberString);
 		} catch (NumberFormatException e) {
+			if (red == null) red = getDisplay().getSystemColor(SWT.COLOR_RED);
 			text.setForeground(red);
 			return;
 		}
@@ -468,8 +469,7 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 		evt.setLower(getMinimum());
 		validBounds = true;
 		if (!isValidBounds(numericalValue)) {
-			if (red == null)
-				red = getDisplay().getSystemColor(SWT.COLOR_RED);
+			if (red == null) red = getDisplay().getSystemColor(SWT.COLOR_RED);
 			if (!red.isDisposed()) {
 				text.setStyleRange(null);
 				if (!isEditable()) 
