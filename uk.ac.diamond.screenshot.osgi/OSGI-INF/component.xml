@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="IScreenshotService">
+   <implementation class="uk.ac.diamond.screenshot.osgi.ScreenshotServiceImpl"/>
+   <service>
+      <provide interface="uk.ac.diamond.screenshot.api.IScreenshotService"/>
+   </service>
+</scr:component>
