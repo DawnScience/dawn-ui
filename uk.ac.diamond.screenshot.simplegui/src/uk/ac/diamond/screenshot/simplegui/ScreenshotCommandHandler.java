@@ -11,7 +11,9 @@
  */
 package uk.ac.diamond.screenshot.simplegui;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -33,7 +35,7 @@ public class ScreenshotCommandHandler extends AbstractHandler {
 	
 	private static int globalFileCount = 0;
 	private static String fileName = "screenshot_%03d.png";
-	private static File saveDir = null;
+	private static Path saveDir = null;
 	
 	private final Logger logger = LoggerFactory.getLogger(ScreenshotCommandHandler.class);
 	
@@ -55,7 +57,7 @@ public class ScreenshotCommandHandler extends AbstractHandler {
 	private IScreenshotService getScreenshotService() {
 		final IScreenshotService screenshotService = ScreenshotServiceTracker.getScreenshotService();
 		if (screenshotService == null) {
-			logger.debug("No screenshot service is set in ScreenshotServiceTracker - check OSGi status");
+			logger.warn("No screenshot service is set in ScreenshotServiceTracker - check OSGi status");
 			throw new RuntimeException("Screenshot service is not set");
 		}
 		return screenshotService;
@@ -66,23 +68,23 @@ public class ScreenshotCommandHandler extends AbstractHandler {
 		
 		// Increment file count until we find a name which doesn't exist
 		// (Should really do this outside the UI thread...)
-		File savePath;
+		Path savePath;
 		final long endTime = System.currentTimeMillis() + TIMEOUT_MILLIS;
 		do {
-			savePath = new File(saveDir, String.format(fileName, ++globalFileCount));
+			savePath = saveDir.resolve(String.format(fileName, ++globalFileCount));
 			if (System.currentTimeMillis() > endTime) {
 				logger.warn("Timed out trying to find unused filename");
 				return;
 			}
-		} while (savePath.exists());
+		} while (Files.exists(savePath));
 		
 		// Create a ScreenshotConfiguration and take a screenshot
 		final ScreenshotConfiguration screenshotConfiguration =
-				new ScreenshotConfiguration(savePath.getPath(), ScreenshotType.ACTIVE_WINDOW);
+				new ScreenshotConfiguration(savePath.toString(), ScreenshotType.ACTIVE_WINDOW);
 		getScreenshotService().takeScreenshot(screenshotConfiguration);
 	}
 
-	private File checkOrGetSaveDirectory() {
+	private Path checkOrGetSaveDirectory() {
 		if (saveDir == null) {
 			// Get the target directory from the user
 			final DirectoryDialog dialog = new DirectoryDialog(getDisplay().getActiveShell());
@@ -93,10 +95,8 @@ public class ScreenshotCommandHandler extends AbstractHandler {
 			
 			// If the user selected a directory, update the stored path
 			if (dir != null) {
-				saveDir = new File(dir);
+				saveDir = Paths.get(dir);
 				logger.debug("Selected save directory: {}", saveDir);
-				// Ensure the selected directory exists
-				saveDir.mkdirs();
 				// Flush UI event queue to ensure dialog is closed and focus is returned to the previous window
 				flushUIEventQueue();
 			}
