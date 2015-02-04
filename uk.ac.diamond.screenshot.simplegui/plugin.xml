@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+  
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="uk.ac.diamond.screenshot.simplegui.ScreenshotCommandHandler"
+            commandId="uk.ac.diamond.screenshot.simplescreenshotplugin.commands.screenshotCommand">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+         <toolbar
+               id="uk.ac.diamond.screenshot.simplescreenshotplugin.toolbars.screenshotToolbar">
+            <command
+                  commandId="uk.ac.diamond.screenshot.simplescreenshotplugin.commands.screenshotCommand"
+                  icon="icons/camera.png"
+                  id="uk.ac.diamond.screenshot.simplescreenshotplugin.toolbars.screenshotCommand"
+                  label="Take Screenshot"
+                  mnemonic="S"
+                  style="push"
+                  tooltip="Take screenshot of main window">
+            </command>
+         </toolbar>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            description="Take a single screenshot of the active workbench window"
+            id="uk.ac.diamond.screenshot.simplescreenshotplugin.commands.screenshotCommand"
+            name="Quick Screenshot (Active Window)">
+      </command>
+   </extension>
+
+</plugin>
