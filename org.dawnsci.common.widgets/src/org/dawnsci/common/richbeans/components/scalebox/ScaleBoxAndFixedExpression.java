@@ -169,16 +169,17 @@ public class ScaleBoxAndFixedExpression extends ScaleBox{
 	 * Recalculates expression
 	 */
 	@Override
-	protected void checkValue(final String txt) {
+	protected boolean checkValue(final String txt) {
         
-		super.checkValue(txt);
+		boolean ok = super.checkValue(txt);
 		if (txt==null||"".equals(txt.trim())||"-".equals(txt.trim())) {
 			GridUtils.setVisible(this.fixedExpressionLabel, false);
 			getShell().layout();
-			return;
+			return false;
 		}
 		final double num = getNumericValue();
         updateLabel(num);
+        return ok;
 	}
 	
 	private void updateLabel() {

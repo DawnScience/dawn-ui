@@ -110,21 +110,20 @@ public class RangeBox extends NumberBox implements IRangeWidget {
 	}	
 
 	@Override
-	protected void checkValue(String txt) {
+	protected boolean checkValue(String txt) {
 
 		if (txt == null)
-			return;
+			return false;
 		if ("".equals(txt.trim()))
-			return;
+			return false;
 		if ("-".equals(txt.trim()))
-			return;
+			return false;
 
 		// If a simple double value then super can deal with it.
 		try {
 			final Pattern regExp = getRegExpression();
 			if (regExp.matcher(txt).matches() || regExp.matcher(txt + " " + unit).matches()) {
-				super.checkValue(txt);
-				return;
+				return super.checkValue(txt);
 			}
 
 		} catch (Throwable ignored) {
@@ -165,7 +164,7 @@ public class RangeBox extends NumberBox implements IRangeWidget {
 
 			// Check bounds values
 			if (!checkBounds(value)) {
-				return;
+				return false;
 			}
 
 			setTooltipOveride(null);
@@ -181,6 +180,7 @@ public class RangeBox extends NumberBox implements IRangeWidget {
 					text.setForeground(grey);
 			}
 		}
+		return true;
 	}
 
 	private boolean checkBounds(final String value) {

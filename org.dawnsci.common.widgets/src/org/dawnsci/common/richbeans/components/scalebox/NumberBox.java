@@ -28,6 +28,7 @@ import org.dawnsci.common.richbeans.event.BoundsEvent;
 import org.dawnsci.common.richbeans.event.BoundsEvent.Mode;
 import org.dawnsci.common.richbeans.event.ValueEvent;
 import org.dawnsci.common.richbeans.internal.GridUtils;
+import org.dawnsci.common.widgets.decorator.FloatDecorator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
@@ -235,25 +236,26 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 		text.addFocusListener(focusListener);
 	}
 
-	protected void textUpdate() {
+	protected boolean textUpdate() {
 		if (text.isDisposed())
-			return;
+			return false;
 		if (!isOn())
-			return;
+			return false;
 		try {
 			off();
-			checkValue(text.getText());
+			return checkValue(text.getText());
 		} finally {
 			on();
 		}
 	}
 
-	protected void textUpdateAndFireListeners() {
-		textUpdate();
+	protected boolean textUpdateAndFireListeners() {
+		boolean ok = textUpdate();
 		double numericalValue = getNumericValue();
 		ValueEvent evt = new ValueEvent(NumberBox.this, getFieldName());
 		evt.setDoubleValue(numericalValue);
 		eventDelegate.notifyValueListeners(evt);
+		return ok;
 	}
 
 	/**
@@ -321,10 +323,10 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 		checkValue(text.getText());
 	}
 
-	protected void checkValue(final String txt) {
+	protected boolean checkValue(final String txt) {
 		if (txt == null || "".equals(txt.trim()) || "-".equals(txt.trim())) {
 			GridUtils.setVisible(expressionLabel, false);
-			return;
+			return false;
 		}
 
 		// If this method is being called by a method trying to
@@ -333,20 +335,19 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 			text.setText(txt);
 
 		if (expressionManager != null) {
-			processAsExpression(txt);
+			return processAsExpression(txt);
 		} else {
-			processAsNumber(txt);
+			return processAsNumber(txt);
 		}
 
 	}
 
-	private void processAsExpression(String txt) {
+	private boolean processAsExpression(String txt) {
 
 		Pattern pattern = getRegExpression();
 		Matcher matcher = pattern.matcher(txt);
 		if (matcher.matches()) {
-			processAsNumber(txt);
-			return;
+			return processAsNumber(txt);
 		}
 
 		// Remove all but expression or value (no unit etc.)
@@ -361,13 +362,12 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 		}
 
 		if ("".equals(txt) || txt == null || txt.equals(unit)) {
-			processAsNumber(txt);
-			return;
+			return processAsNumber(txt);
 		}
 		try {
 			Double.parseDouble(txt);
-			processAsNumber(txt);
-			return;
+			return processAsNumber(txt);
+
 		} catch (Throwable ignored) {
 			//
 		}
@@ -391,6 +391,7 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 		}
 		text.setCaretOffset(pos);
 		layout();
+		return true;
 	}
 
 	@Override
@@ -412,7 +413,7 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 		checkBounds(numericalValue);
 	}
 
-	private void processAsNumber(final String txt) {
+	private boolean processAsNumber(final String txt) {
 		if (expressionManager != null)
 			this.expressionManager.setExpression(null);
 		if (expressionLabel != null)
@@ -433,7 +434,7 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 		} catch (NumberFormatException e) {
 			if (red == null) red = getDisplay().getSystemColor(SWT.COLOR_RED);
 			text.setForeground(red);
-			return;
+			return false;
 		}
 		StringBuilder buf = new StringBuilder(extractedNumberString);
 		int pos = buf.toString().length() < text.getCaretOffset() ? buf.toString().length(): text.getCaretOffset();
@@ -446,6 +447,7 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 		text.setCaretOffset(pos);
 		checkBounds(numericalValue);
 		layout();
+		return true;
 	}
 
 	/**
