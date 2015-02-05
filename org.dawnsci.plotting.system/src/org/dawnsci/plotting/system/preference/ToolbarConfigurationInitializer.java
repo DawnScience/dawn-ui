@@ -20,7 +20,7 @@ public class ToolbarConfigurationInitializer extends AbstractPreferenceInitializ
 		IPreferenceStore store = PlottingSystemActivator.getLocalPreferenceStore();
 		
 		for (ToolbarConfigurationConstants constant : ToolbarConfigurationConstants.values()) {
-			store.setDefault(constant.getId(),        true);
+			store.setDefault(constant.getId(),        constant.isVis());
 		}
 
 	}
