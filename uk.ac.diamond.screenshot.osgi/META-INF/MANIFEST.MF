@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Screenshot OSGi Service Implementation
+Bundle-SymbolicName: uk.ac.diamond.screenshot.osgi
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Diamond Light Source
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: org.slf4j,
+ uk.ac.diamond.screenshot.api
+Service-Component: OSGI-INF/component.xml
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.core.runtime;bundle-version="3.0.0",
+ org.eclipse.ui;bundle-version="3.0.0"
