@@ -129,6 +129,7 @@ class LightWeightPlotActions {
  		createAspectHistoAction(xyGraph);
  		actionBarManager.createPaletteActions();
  		createOriginActions(xyGraph);
+ 		createSpecialImageActions(xyGraph);
  		createAdditionalActions(xyGraph, null);
  		createFullScreenActions(xyGraph);
  		
@@ -153,6 +154,44 @@ class LightWeightPlotActions {
 		actionBarManager.addPropertyChangeListener(switchListener);
 		
  		createPreferencesAction(); // Must be last thing
+	}
+
+	/**
+	 * Create some special image manipulation 
+	 * @param xyGraph2
+	 */
+	private void createSpecialImageActions(XYRegionGraph xyGraph2) {
+		
+		final ICommandService service = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
+
+		final Command command = service.getCommand("org.embl.cca.dviewer.phaCommand");
+   	
+
+		if (command!=null) {
+			final Action action = new Action("Run PHA algorithm to highlight spots.", IAction.AS_CHECK_BOX) {
+				public void run() {
+					final ExecutionEvent event = new ExecutionEvent(command, Collections.EMPTY_MAP, this, actionBarManager.getSystem());
+					try {
+						command.executeWithChecks(event);
+					} catch (Throwable e) {
+						logger.error("Cannot execute command '"+command.getId(), e);
+					}
+				}
+			};
+			action.setImageDescriptor(PlottingSystemActivator.getImageDescriptor("icons/pha.png"));
+			
+			final Action prefs = new Action("PHA Preferences...") {
+				public void run() {
+					PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "org.embl.cca.dviewer.rcp.preference.pha", null, null);
+					if (pref != null) pref.open();
+				}
+			};
+			prefs.setImageDescriptor(PlottingSystemActivator.getImageDescriptor("icons/pha-preferences.png"));
+	        
+			actionBarManager.registerToolBarGroup(ToolbarConfigurationConstants.SPECIALS.getId());
+	      	actionBarManager.registerAction(ToolbarConfigurationConstants.SPECIALS.getId(), action, ActionType.IMAGE, ManagerType.TOOLBAR);
+	      	actionBarManager.registerAction(ToolbarConfigurationConstants.SPECIALS.getId(), prefs, ActionType.IMAGE, ManagerType.TOOLBAR);
+		}
 	}
 
 	/**
