@@ -565,6 +565,8 @@ public class HyperComponent {
 		}
 		
 		public void profile(IRegion r, IROI rb) {
+			
+			cancel(); // Needed for large datasets but makes small ones look less responsive.
 			this.currentRegion = r;
 			this.currentROI    = rb;
 	        
