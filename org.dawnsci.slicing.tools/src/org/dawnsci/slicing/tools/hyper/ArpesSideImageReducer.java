@@ -14,6 +14,7 @@ import java.util.List;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
+import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.ROISliceUtils;
@@ -29,9 +30,12 @@ public class ArpesSideImageReducer implements IDatasetROIReducer {
 	
 	@Override
 	public IDataset reduce(ILazyDataset data, List<IDataset> axes,
-			IROI roi, Slice[] slices, int[] order) {
+			IROI roi, Slice[] slices, int[] order, IMonitor monitor) {
+		
+		if (monitor.isCancelled()) return null;
 		if (roi instanceof RectangularROI) {
 			IDataset image = ROISliceUtils.getYAxisDataset2DAverage(data, (RectangularROI)roi, slices, order[2]);
+			if (monitor.isCancelled()) return null;
 			
 			if (order[0] < order[1]) image = DatasetUtils.transpose(image);
 			

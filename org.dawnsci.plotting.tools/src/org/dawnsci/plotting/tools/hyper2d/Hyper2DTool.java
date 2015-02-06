@@ -18,6 +18,7 @@ import org.dawnsci.slicing.tools.hyper.IProvideReducerActions;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
+import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.ROISliceUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.XAxisBoxROI;
@@ -127,17 +128,18 @@ public class Hyper2DTool extends AbstractToolPage {
 
 		@Override
 		public IDataset reduce(ILazyDataset data, List<IDataset> axes,
-				IROI roi, Slice[] slices, int[] order) {
+				IROI roi, Slice[] slices, int[] order, IMonitor monitor) {
 			
 			axis = axes.get(0);
 			
 			
+			if (monitor.isCancelled()) return null;
 			double point = roi.getPoint()[0];
 			int pos = ROISliceUtils.findPositionOfClosestValueInAxis(axes.get(1), point);
+			if (monitor.isCancelled()) return null;
+			
 			Slice slice = new Slice(pos, pos+1, 1);
-			
-
-			
+		
 			IDataset sl = data.getSlice(new Slice[]{slice,null}).squeeze();
 			return sl;
 		}
@@ -185,16 +187,18 @@ public class Hyper2DTool extends AbstractToolPage {
 
 		@Override
 		public IDataset reduce(ILazyDataset data, List<IDataset> axes,
-				IROI roi, Slice[] slices, int[] order) {
+				IROI roi, Slice[] slices, int[] order, IMonitor monitor) {
 			
 			axis = axes.get(1);
 			
 			double point = roi.getPoint()[0];
 			
+			if (monitor.isCancelled()) return null;
 			int pos = ROISliceUtils.findPositionOfClosestValueInAxis(axes.get(0), point);
+			if (monitor.isCancelled()) return null;
 			
 			Slice slice = new Slice(pos, pos+1, 1);
-			
+			if (monitor.isCancelled()) return null;
 			IDataset sl = data.getSlice(new Slice[]{null,slice}).squeeze();
 			return sl;
 		}

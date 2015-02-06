@@ -16,6 +16,7 @@ import org.dawnsci.slicing.tools.Activator;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
+import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.ROISliceUtils;
@@ -36,9 +37,12 @@ public class ImageTrapeziumBaselineReducer implements IDatasetROIReducer, IProvi
 	
 	@Override
 	public IDataset reduce(ILazyDataset data, List<IDataset> axes,
-			IROI roi, Slice[] slices, int[] order) {
+			IROI roi, Slice[] slices, int[] order, IMonitor monitor) {
+
+		if (monitor.isCancelled()) return null;
 		if (roi instanceof RectangularROI) {
 			IDataset image = ROISliceUtils.getAxisDatasetTrapzSumBaselined(data,axes.get(2).getSlice(),(RectangularROI)roi, slices, order[2],1, subtractBaseline);
+			if (monitor.isCancelled()) return null;
 
 			if (order[0] < order[1]) image = DatasetUtils.transpose(image);
 			
