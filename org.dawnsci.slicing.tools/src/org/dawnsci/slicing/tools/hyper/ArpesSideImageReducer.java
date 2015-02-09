@@ -30,11 +30,11 @@ public class ArpesSideImageReducer implements IDatasetROIReducer {
 	
 	@Override
 	public IDataset reduce(ILazyDataset data, List<IDataset> axes,
-			IROI roi, Slice[] slices, int[] order, IMonitor monitor) {
+			IROI roi, Slice[] slices, int[] order, IMonitor monitor)  throws Exception{
 		
 		if (monitor.isCancelled()) return null;
 		if (roi instanceof RectangularROI) {
-			IDataset image = ROISliceUtils.getYAxisDataset2DAverage(data, (RectangularROI)roi, slices, order[2]);
+			IDataset image = ROISliceUtils.getYAxisDataset2DAverage(data, (RectangularROI)roi, slices, order[2], monitor);
 			if (monitor.isCancelled()) return null;
 			
 			if (order[0] < order[1]) image = DatasetUtils.transpose(image);

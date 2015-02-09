@@ -128,7 +128,7 @@ public class Hyper2DTool extends AbstractToolPage {
 
 		@Override
 		public IDataset reduce(ILazyDataset data, List<IDataset> axes,
-				IROI roi, Slice[] slices, int[] order, IMonitor monitor) {
+				IROI roi, Slice[] slices, int[] order, IMonitor monitor) throws Exception {
 			
 			axis = axes.get(0);
 			
@@ -140,7 +140,7 @@ public class Hyper2DTool extends AbstractToolPage {
 			
 			Slice slice = new Slice(pos, pos+1, 1);
 		
-			IDataset sl = data.getSlice(new Slice[]{slice,null}).squeeze();
+			IDataset sl = data.getSlice(monitor, slice, null).squeeze();
 			return sl;
 		}
 
@@ -187,7 +187,7 @@ public class Hyper2DTool extends AbstractToolPage {
 
 		@Override
 		public IDataset reduce(ILazyDataset data, List<IDataset> axes,
-				IROI roi, Slice[] slices, int[] order, IMonitor monitor) {
+				IROI roi, Slice[] slices, int[] order, IMonitor monitor) throws Exception {
 			
 			axis = axes.get(1);
 			
@@ -199,7 +199,7 @@ public class Hyper2DTool extends AbstractToolPage {
 			
 			Slice slice = new Slice(pos, pos+1, 1);
 			if (monitor.isCancelled()) return null;
-			IDataset sl = data.getSlice(new Slice[]{null,slice}).squeeze();
+			IDataset sl = data.getSlice(monitor, null, slice).squeeze();
 			return sl;
 		}
 

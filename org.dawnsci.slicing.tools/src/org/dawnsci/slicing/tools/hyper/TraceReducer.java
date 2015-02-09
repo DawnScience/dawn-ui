@@ -40,12 +40,12 @@ public class TraceReducer implements IDatasetROIReducer, IProvideReducerActions 
 	
 	@Override
 	public IDataset reduce(ILazyDataset data, List<IDataset> axes,
-			IROI roi, Slice[] slices, int[] order, IMonitor monitor) {
+			IROI roi, Slice[] slices, int[] order, IMonitor monitor) throws Exception {
 		
 		if (monitor.isCancelled()) return null;
 		if (roi instanceof RectangularROI) {
 			
-			Dataset output = (Dataset)ROISliceUtils.getDataset(data, (RectangularROI)roi, slices, new int[]{order[0],order[1]}, 1);
+			Dataset output = (Dataset)ROISliceUtils.getDataset(data, (RectangularROI)roi, slices, new int[]{order[0],order[1]}, 1, monitor);
 			if (monitor.isCancelled()) return null;
 			
 			if (order[0] > order[1]) output = output.mean(order[0]).mean(order[1]);

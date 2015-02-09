@@ -31,11 +31,11 @@ public class TraceLineReducer implements IDatasetROIReducer {
 	
 	@Override
 	public IDataset reduce(ILazyDataset data, List<IDataset> axes,
-			IROI roi, Slice[] slices, int[] order, IMonitor monitor) {
+			IROI roi, Slice[] slices, int[] order, IMonitor monitor) throws Exception {
 		
 		if (monitor.isCancelled()) return null;
 		if (roi instanceof LinearROI) {
-			final IDataset image = ROISliceUtils.getDataset(data, (LinearROI)roi, slices,new int[]{order[0],order[1]},1);
+			final IDataset image = ROISliceUtils.getDataset(data, (LinearROI)roi, slices,new int[]{order[0],order[1]},1, monitor);
 			if (monitor.isCancelled()) return null;
 			
 			IDataset length = DatasetFactory.createRange(image.getShape()[1], Dataset.INT32);
