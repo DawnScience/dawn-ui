@@ -144,8 +144,8 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 	 *            A hint for the width of the expression box, or -1 for no hint
 	 */
 	protected void createExpressionLabel(int expressionWidthHint) {
-		if (expressionLabel != null)
-			return;
+		
+		if (expressionLabel != null) return;
 		expressionLabel = new StyledText(this, SWT.BORDER | SWT.SINGLE | SWT.READ_ONLY);
 		GridData gridLayout = new GridData(SWT.FILL, SWT.CENTER, false, false);
 		gridLayout.widthHint = expressionWidthHint >= 0 ? expressionWidthHint : 100;

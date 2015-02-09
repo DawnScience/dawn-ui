@@ -10,8 +10,9 @@
 package org.dawnsci.common.richbeans.components;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 
 import org.dawnsci.common.richbeans.event.BoundsEvent;
@@ -38,13 +39,15 @@ public class EventListenersDelegate {
 	 */
 	public void addValueListener(final ValueListener l) {
 		if (l.getValueListenerName() != null) {
-			if (valueListenersMap == null)
-				valueListenersMap = new HashMap<String, ValueListener>(3);
+			if (valueListenersMap == null) { // Insertion order keys important
+				valueListenersMap = new LinkedHashMap<String, ValueListener>(3);
+			}
 			valueListenersMap.put(l.getValueListenerName(), l);
 			return;
 		}
-		if (valueListeners == null)
-			valueListeners = new HashSet<ValueListener>(3);
+		if (valueListeners == null) {
+			valueListeners = new LinkedHashSet<ValueListener>(3);
+		}
 		valueListeners.add(l);
 	}
 
