@@ -61,6 +61,7 @@ public class PeakPrepopulateTool extends Dialog {
 	private Dataset[] roiLimits;
 	private Map<String, Class <? extends IPeak>> peakFnMap = new TreeMap<String, Class <? extends IPeak>>();
 	private String[] availPeakTypes;
+	private String[] availBkgTypes;
 	
 	private FunctionFittingTool parentFittingTool;
 	
@@ -165,7 +166,8 @@ public class PeakPrepopulateTool extends Dialog {
 		Label bkgTypeCmbLbl = new Label(bkgLabelCombo, SWT.NONE);
 		bkgTypeCmbLbl.setText("Background Function Type:");
 		bkgTypeCombo = new Combo(bkgLabelCombo, SWT.READ_ONLY);
-		//TODO Define options here...
+		setAvailBkgFunctions();
+		//setDefaultBkgFunction();
 		bkgTypeCombo.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
 		
 		//Background function parameters
@@ -206,12 +208,12 @@ public class PeakPrepopulateTool extends Dialog {
 		}
 	}
 	/**
-	 * Gets the list of available function names and their classes from FittingUtils class
+	 * Gets the list of available peak names and their classes from FunctionFactory
 	 * and populates combo box with them
 	 */
 	private void setAvailPeakFunctions() {
 		peakFnMap = FunctionFactory.getPeakFunctions();
-		availPeakTypes = (String[]) FunctionFactory.getPeakFunctionNames().toArray();
+		availPeakTypes = FunctionFactory.getPeakNameArray();
 		peakTypeCombo.setItems(availPeakTypes);
 	}
 	
@@ -234,6 +236,26 @@ public class PeakPrepopulateTool extends Dialog {
 		Class<? extends IPeak> selectedProfile = peakFnMap.get(selectedProfileName);
 		
 		return selectedProfile;
+	}
+	
+	/**
+	 * Gets the list of available function names and their classes from FunctionFactory
+	 * and populates combo box with them
+	 */
+	private void setAvailBkgFunctions() {
+		availBkgTypes = FunctionFactory.getFunctionNameArray();
+		bkgTypeCombo.setItems(availBkgTypes);
+	}
+	
+	private IFunction getBackgroundFunction(){
+		String selectedBkgFuncName = bkgTypeCombo.getText();
+		IFunction selectedBackground = null;
+		try {
+			selectedBackground = FunctionFactory.getFunction(selectedBkgFuncName);
+		} catch (Exception ne) {
+			logger.error("Could not access selected function type.", ne);
+		}
+		return selectedBackground;
 	}
 	
 	/**
@@ -296,7 +318,7 @@ public class PeakPrepopulateTool extends Dialog {
 	
 	fitBackgroundJob.setData(roiLimits);
 	fitBackgroundJob.setPeakCompoundFunction(pkCompFunction);
-//	fitBackgroundJob.setBkgFunctionType(getBackgroundFunction());
+	fitBackgroundJob.setBkgFunction(getBackgroundFunction());
 	
 	fitBackgroundJob.schedule();
 	
@@ -352,17 +374,18 @@ public class PeakPrepopulateTool extends Dialog {
 		}
 		
 		Add peakCompFunction = null;
+		IFunction bkgFunction;
+		
+		public void setBkgFunction(IFunction bkgFunction) {
+			this.bkgFunction = bkgFunction;
+		}
+
 		
 		public void setPeakCompoundFunction(Add peakFn) {
 			peakCompFunction = peakFn;
 		}
 		
 		protected IStatus run(IProgressMonitor monitor) {
-			//TODO FIXME Remove this block once there is a better way to set bkgFunction
-			if (bkgFunction == null) {
-				bkgFunction  = new Polynomial(3);
-			}
-			
 			//1 Calculate existing peak function
 			Dataset peakCompValues = peakCompFunction.calculateValues(x);
 			
