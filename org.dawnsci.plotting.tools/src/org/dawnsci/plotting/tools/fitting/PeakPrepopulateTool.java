@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionFactory;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
 
@@ -209,9 +210,7 @@ public class PeakPrepopulateTool extends Dialog {
 	 * and populates combo box with them
 	 */
 	private void setAvailPeakFunctions() {
-		for (final Class<? extends IPeak> peak : FittingUtils.getPeakOptions().values()) {
-			peakFnMap.put(peak.getSimpleName(), peak);
-		}
+		peakFnMap = FunctionFactory.getPeakFunctions();
 		Set<String> availPeakTypeSet = peakFnMap.keySet();
 		availPeakTypes = (String[]) availPeakTypeSet.toArray(new String[availPeakTypeSet.size()]);
 		peakTypeCombo.setItems(availPeakTypes);

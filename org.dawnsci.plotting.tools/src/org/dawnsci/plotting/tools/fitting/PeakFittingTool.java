@@ -63,6 +63,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionFactory;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionSquirts;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
@@ -609,7 +610,8 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		CheckableActionGroup group = new CheckableActionGroup();
 		
 		Action selectedPeakAction = null;
-		for (final Class<? extends IPeak> peak : FittingUtils.getPeakOptions().values()) {
+		for (final Class<? extends IPeak> peak : FunctionFactory.getPeakFunctions().values()) {
+				//FittingUtils.getPeakOptions().values()) {
 			
 			final Action action = new Action(peak.getSimpleName(), IAction.AS_CHECK_BOX) {
 				public void run() {
