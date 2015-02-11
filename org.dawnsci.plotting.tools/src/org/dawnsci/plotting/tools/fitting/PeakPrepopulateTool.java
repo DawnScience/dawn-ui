@@ -211,8 +211,7 @@ public class PeakPrepopulateTool extends Dialog {
 	 */
 	private void setAvailPeakFunctions() {
 		peakFnMap = FunctionFactory.getPeakFunctions();
-		Set<String> availPeakTypeSet = peakFnMap.keySet();
-		availPeakTypes = (String[]) availPeakTypeSet.toArray(new String[availPeakTypeSet.size()]);
+		availPeakTypes = (String[]) FunctionFactory.getPeakFunctionNames().toArray();
 		peakTypeCombo.setItems(availPeakTypes);
 	}
 	
