@@ -387,11 +387,14 @@ public class PeakPrepopulateTool extends Dialog {
 		
 		protected IStatus run(IProgressMonitor monitor) {
 			//1 Calculate existing peak function
-			Dataset peakCompValues = peakCompFunction.calculateValues(x);
-			
+			Dataset peakDifference;
+			if (peakCompFunction != null) {
+				Dataset peakCompValues = peakCompFunction.calculateValues(x);
 			//2 Subtract peak data from observed
-			Dataset peakDifference = Maths.subtract(y, peakCompValues);
-			
+			peakDifference = Maths.subtract(y, peakCompValues);
+			} else {
+				peakDifference = y;
+			}
 			//4 Fit subtracted data to given function.
 			try {
 				Fitter.geneticFit(new Dataset[]{x}, peakDifference, bkgFunction);
