@@ -45,7 +45,6 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionFactory;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.Gaussian;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Offset;
@@ -328,30 +327,25 @@ public class FittingUtils {
 	}
 
 	public static Class<? extends IPeak> getPeakClass() {
+		String peakClassName = Activator.getPlottingPreferenceStore().getString(FittingConstants.PEAK_TYPE);
+		Class<? extends IPeak> peakClass = null;
 		try {
-			
-			final String peakClass = Activator.getPlottingPreferenceStore().getString(FittingConstants.PEAK_TYPE);
-			
-			/**
-			 * Could use reflection to save on objects, but there's only 4 of them.
-			 */
-			return getPeakOptions().get(peakClass);
-			
+			peakClass = FunctionFactory.getClassForPeakFunctionName(peakClassName);
 		} catch (Exception ne) {
-			logger.error("Cannot determine peak type required!", ne);
-			Activator.getPlottingPreferenceStore().setValue(FittingConstants.PEAK_TYPE, Gaussian.class.getName());
-		    return Gaussian.class;
+			peakClassName = "Gaussian";
+			Activator.getPlottingPreferenceStore().setValue(FittingConstants.PEAK_TYPE, peakClassName);
+			try {
+				peakClass = FunctionFactory.getClassForPeakFunctionName(peakClassName);
+			} catch (Exception ne2){
+				logger.error("Fallback Gaussian peak type was not found by FunctionFactory.");
+			}
 		}
+		return peakClass;
 	}	
 	
+	@Deprecated
 	public static Map<String, Class <? extends IPeak>> getPeakOptions() {
 		return FunctionFactory.getPeakFunctions();
-//		final Map<String, Class <? extends APeak>> opts = new LinkedHashMap<String, Class <? extends APeak>>(4);
-//		opts.put(Gaussian.class.getName(),    Gaussian.class);
-//		opts.put(Lorentzian.class.getName(),  Lorentzian.class);
-//		opts.put(PearsonVII.class.getName(),  PearsonVII.class);
-//		opts.put(PseudoVoigt.class.getName(), PseudoVoigt.class);
-//		return opts;
 	}
 	
 	public static int getPolynomialOrderRequired() {
