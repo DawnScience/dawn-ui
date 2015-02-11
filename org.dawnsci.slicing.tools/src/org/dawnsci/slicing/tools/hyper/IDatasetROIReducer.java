@@ -13,6 +13,7 @@ import java.util.List;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
+import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 
@@ -25,7 +26,22 @@ public interface IDatasetROIReducer {
 
 	boolean isOutput1D();
 	
-	IDataset reduce(ILazyDataset data, List<IDataset> axes, IROI roi, Slice[] slices, int[] order);
+	/**
+	 * This is the bit that does the juice. Pass in a non-null IMonitor so that
+	 * it can be passed down to the slicing. The slicing should be operated from the
+	 * UI with a cancelable IMonitor because it can create "infinitely" running jobs
+	 * when the ILazyDataset is operating a directory of images.
+	 * 
+	 * @param data
+	 * @param axes
+	 * @param roi
+	 * @param slices
+	 * @param order
+	 * @param monitor
+	 * @return
+	 * @throws Exception
+	 */
+	IDataset reduce(ILazyDataset data, List<IDataset> axes, IROI roi, Slice[] slices, int[] order, IMonitor monitor)  throws Exception;
 	
 	List<RegionType> getSupportedRegionType();
 	

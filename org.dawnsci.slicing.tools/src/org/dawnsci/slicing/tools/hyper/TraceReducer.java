@@ -16,6 +16,7 @@ import org.dawnsci.slicing.tools.Activator;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
+import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.ROISliceUtils;
@@ -39,10 +40,13 @@ public class TraceReducer implements IDatasetROIReducer, IProvideReducerActions 
 	
 	@Override
 	public IDataset reduce(ILazyDataset data, List<IDataset> axes,
-			IROI roi, Slice[] slices, int[] order) {
+			IROI roi, Slice[] slices, int[] order, IMonitor monitor) throws Exception {
+		
+		if (monitor.isCancelled()) return null;
 		if (roi instanceof RectangularROI) {
 			
-			Dataset output = (Dataset)ROISliceUtils.getDataset(data, (RectangularROI)roi, slices, new int[]{order[0],order[1]}, 1);
+			Dataset output = (Dataset)ROISliceUtils.getDataset(data, (RectangularROI)roi, slices, new int[]{order[0],order[1]}, 1, monitor);
+			if (monitor.isCancelled()) return null;
 			
 			if (order[0] > order[1]) output = output.mean(order[0]).mean(order[1]);
 			else output = output.mean(order[1]).mean(order[0]);

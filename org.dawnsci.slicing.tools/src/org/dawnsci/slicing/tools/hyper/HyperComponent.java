@@ -40,6 +40,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ColorOption;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.TraceUtils;
+import org.eclipse.dawnsci.slicing.api.util.ProgressMonitorWrapper;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IMenuManager;
@@ -564,6 +565,8 @@ public class HyperComponent {
 		}
 		
 		public void profile(IRegion r, IROI rb) {
+			
+			cancel(); // Needed for large datasets but makes small ones look less responsive.
 			this.currentRegion = r;
 			this.currentROI    = rb;
 	        
@@ -577,7 +580,11 @@ public class HyperComponent {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			try {
-				IDataset output = this.reducer.reduce(data, axes, currentROI, slices, order);
+				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+				
+				IDataset output = this.reducer.reduce(data, axes, currentROI, slices, order, new ProgressMonitorWrapper(monitor));
+				if (output==null) return Status.CANCEL_STATUS;
+				
 				List<IDataset> outputAxes = this.reducer.getAxes();
 
 				if (!this.reducer.isOutput1D()) {
