@@ -192,7 +192,7 @@ public class ValueEditingSupport extends EditingSupport {
 		
 		if (element instanceof ObjectNode) {
 			ObjectNode node = (ObjectNode)element;
-			node.setValue((String) value);
+			node.setValue(value.toString());
 		}
 
 		viewer.refresh(element);
