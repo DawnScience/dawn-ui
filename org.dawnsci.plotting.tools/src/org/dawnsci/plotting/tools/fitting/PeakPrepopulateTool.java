@@ -36,8 +36,8 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
 
 public class PeakPrepopulateTool extends Dialog {
@@ -58,7 +58,7 @@ public class PeakPrepopulateTool extends Dialog {
 	
 	private Integer nrPeaks = null;
 	private Dataset[] roiLimits;
-	private Map<String, Class <? extends APeak>> peakFnMap = new TreeMap<String, Class <? extends APeak>>();
+	private Map<String, Class <? extends IPeak>> peakFnMap = new TreeMap<String, Class <? extends IPeak>>();
 	private String[] availPeakTypes;
 	
 	private FunctionFittingTool parentFittingTool;
@@ -209,7 +209,7 @@ public class PeakPrepopulateTool extends Dialog {
 	 * and populates combo box with them
 	 */
 	private void setAvailPeakFunctions() {
-		for (final Class<? extends APeak> peak : FittingUtils.getPeakOptions().values()) {
+		for (final Class<? extends IPeak> peak : FittingUtils.getPeakOptions().values()) {
 			peakFnMap.put(peak.getSimpleName(), peak);
 		}
 		Set<String> availPeakTypeSet = peakFnMap.keySet();
@@ -231,9 +231,9 @@ public class PeakPrepopulateTool extends Dialog {
 	 * Gets the currently selected peak profile type in the combo box
 	 * @return peak function class
 	 */
-	private Class<? extends APeak> getProfileFunction(){
+	private Class<? extends IPeak> getProfileFunction(){
 		String selectedProfileName = peakTypeCombo.getText();
-		Class<? extends APeak> selectedProfile = peakFnMap.get(selectedProfileName);
+		Class<? extends IPeak> selectedProfile = peakFnMap.get(selectedProfileName);
 		
 		return selectedProfile;
 	}
@@ -325,13 +325,13 @@ public class PeakPrepopulateTool extends Dialog {
 		}
 		
 		Integer nrPeaks;
-		Class<? extends APeak> peakFunction;
+		Class<? extends IPeak> peakFunction;
 		
 		public void setNrPeaks(Integer nrPeaks) {
 			this.nrPeaks = nrPeaks;
 		}
 		
-		public void setPeakFunction(Class<? extends APeak> peakFunction) {
+		public void setPeakFunction(Class<? extends IPeak> peakFunction) {
 			this.peakFunction = peakFunction;
 		}
 		
