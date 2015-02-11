@@ -1,8 +1,7 @@
 package org.dawnsci.plotting.tools.fitting;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 import org.dawnsci.common.widgets.decorator.IntegerDecorator;
@@ -39,7 +38,6 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionFactory;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
 
 public class PeakPrepopulateTool extends Dialog {
 	
@@ -167,7 +165,7 @@ public class PeakPrepopulateTool extends Dialog {
 		bkgTypeCmbLbl.setText("Background Function Type:");
 		bkgTypeCombo = new Combo(bkgLabelCombo, SWT.READ_ONLY);
 		setAvailBkgFunctions();
-		//setDefaultBkgFunction();
+		setDefaultBkgFunction();
 		bkgTypeCombo.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
 		
 		//Background function parameters
@@ -218,10 +216,12 @@ public class PeakPrepopulateTool extends Dialog {
 	}
 	
 	/**
-	 * Sets default peak profile to Pseudo-Voigt or Gaussian (if available)
+	 * Sets default peak profile to Pseudo-Voigt (if available)
 	 */
 	private void setDefaultPeakFunction() {
-		int defaultPeakFnIndex = Arrays.asList(availPeakTypes).indexOf("PseudoVoigt") == -1 ? Arrays.asList(availPeakTypes).indexOf("Gaussian") : Arrays.asList(availPeakTypes).indexOf("PseudoVoigt");
+		//TODO FIXME This should use the preferences in DAWN, maybe through FittingUtils?
+		List<String> peakNames = FunctionFactory.getPeakFunctionNames();
+		int defaultPeakFnIndex = peakNames.indexOf("PseudoVoigt");
 		if (defaultPeakFnIndex != -1) {
 			peakTypeCombo.select(defaultPeakFnIndex);
 		}
@@ -247,6 +247,22 @@ public class PeakPrepopulateTool extends Dialog {
 		bkgTypeCombo.setItems(availBkgTypes);
 	}
 	
+	/**
+	 * Sets default background to Linear (if available)
+	 */
+	private void setDefaultBkgFunction() {
+		//TODO FIXME This should use the preferences in DAWN, maybe through FittingUtils?
+		List<String> functionNames = FunctionFactory.getFunctionNames();
+		int defaultBkgFnIndex = functionNames.indexOf("Linear");
+		if (defaultBkgFnIndex != -1) {
+			bkgTypeCombo.select(defaultBkgFnIndex);
+		}
+	}
+	
+	/**
+	 * Gets the currently selected background function type in the combo box
+	 * @return peak function class
+	 */	
 	private IFunction getBackgroundFunction(){
 		String selectedBkgFuncName = bkgTypeCombo.getText();
 		IFunction selectedBackground = null;
@@ -358,6 +374,7 @@ public class PeakPrepopulateTool extends Dialog {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			
+			//TODO FIXME Why does Generic1dFitter rely on reflection whereas Fitter et al. use concrete classes?
 			pkCompFunction = FittingUtils.getInitialPeaks(x, y, nrPeaks, peakFunction);
 			return Status.OK_STATUS;
 		}
@@ -397,6 +414,7 @@ public class PeakPrepopulateTool extends Dialog {
 			}
 			//4 Fit subtracted data to given function.
 			try {
+				//TODO This needs to return something...!
 				Fitter.geneticFit(new Dataset[]{x}, peakDifference, bkgFunction);
 			}
 			catch (Exception e) {
