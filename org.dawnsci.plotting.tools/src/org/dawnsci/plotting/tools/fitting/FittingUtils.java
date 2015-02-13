@@ -330,12 +330,12 @@ public class FittingUtils {
 		String peakClassName = Activator.getPlottingPreferenceStore().getString(FittingConstants.PEAK_TYPE);
 		Class<? extends IPeak> peakClass = null;
 		try {
-			peakClass = FunctionFactory.getClassForPeakFunctionName(peakClassName);
+			peakClass = FunctionFactory.getClassForPeakFn(peakClassName);
 		} catch (Exception ne) {
 			peakClassName = "Gaussian";
 			Activator.getPlottingPreferenceStore().setValue(FittingConstants.PEAK_TYPE, peakClassName);
 			try {
-				peakClass = FunctionFactory.getClassForPeakFunctionName(peakClassName);
+				peakClass = FunctionFactory.getClassForPeakFn(peakClassName);
 			} catch (Exception ne2){
 				logger.error("Fallback Gaussian peak type was not found by FunctionFactory.");
 			}
@@ -345,7 +345,7 @@ public class FittingUtils {
 	
 	@Deprecated
 	public static Map<String, Class <? extends IPeak>> getPeakOptions() {
-		return FunctionFactory.getPeakFunctions();
+		return FunctionFactory.getPeakFns();
 	}
 	
 	public static int getPolynomialOrderRequired() {

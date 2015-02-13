@@ -610,7 +610,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		CheckableActionGroup group = new CheckableActionGroup();
 		
 		Action selectedPeakAction = null;
-		for (final Class<? extends IPeak> peak : FunctionFactory.getPeakFunctions().values()) {
+		for (final Class<? extends IPeak> peak : FunctionFactory.getPeakFns().values()) {
 				//FittingUtils.getPeakOptions().values()) {
 			
 			final Action action = new Action(peak.getSimpleName(), IAction.AS_CHECK_BOX) {
