@@ -424,12 +424,12 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 	 * @param bean
 	 * @return a dataset that can be absolute, if complex, and also be logged according to bean
 	 */
-	private Dataset getImageLoggedData(ImageServiceBean bean) {
+	/* package */ Dataset getImageLoggedData(ImageServiceBean bean) {
 		Dataset ret = (Dataset) bean.getImageValue();
 		if (ret != null)
 			return ret;
 
-		ret = (Dataset) bean.getImage();
+		ret = (Dataset) bean.getImage(); // this is not the original data for some reason - it is result of operations so far
 
 		if (ret.isComplex()) {
 			ret = Maths.abs(ret);
@@ -442,7 +442,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 				ret.isubtract(offset);
 			}
 			ret = Maths.log10(ret);
-			bean.setImageValue(ret);
+			bean.setImageValue(ret); //should we be doing this??
 		}
 		return ret;
 	}
