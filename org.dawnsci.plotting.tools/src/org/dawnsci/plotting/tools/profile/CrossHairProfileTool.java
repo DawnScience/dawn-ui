@@ -8,6 +8,7 @@
  */
 package org.dawnsci.plotting.tools.profile;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -29,13 +30,13 @@ import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.MouseEvent;
 import org.eclipse.dawnsci.plotting.api.region.MouseListener;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
-import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
@@ -45,6 +46,8 @@ import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
@@ -60,6 +63,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 	
 	protected IPlottingSystem        profilePlotter;
 	private   ITraceListener         traceListener;
+	private   List<ITraceListener>   staticListeners;
 	private   IRegion                xHair, yHair;
 	private   IAxis                  x1,x2;
 	private   RunningJob             xUpdateJob, yUpdateJob;
@@ -76,11 +80,16 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 					if (!(evt.getSource() instanceof List<?>)) {
 						return;
 					}
-					
+					update();
+				}
+
+				private void update() {
 					if (xUpdateJob!=null) xUpdateJob.scheduleIfNotSuspended();
 					if (yUpdateJob!=null) yUpdateJob.scheduleIfNotSuspended();
 				}
 			};
+			
+			staticListeners = new ArrayList<ITraceListener>(7);
 						
 		} catch (Exception e) {
 			logger.error("Cannot get plotting system!", e);
@@ -105,22 +114,43 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 		
 		x2 = profilePlotter.createAxis("Y Slice", false, SWT.TOP);
 
+		createActions();
+		activate();
+	}
+	
+	private static String UPDATE_STATIC = "org.dawnsci.plotting.tools.profile.crosshair.updatestatic";
+	
+	private void createActions() {
+		
+		getSite().getActionBars().getMenuManager().add(new Separator("crosshair.extra.actions"));
+		Activator.getPlottingPreferenceStore().setDefault(UPDATE_STATIC, true);
+		final Action update = new Action("Update static profiles if the image changes", IAction.AS_CHECK_BOX) {
+			public void run() {
+				Activator.getPlottingPreferenceStore().setValue(UPDATE_STATIC, isChecked());
+			}
+		};
+		update.setChecked(Activator.getPlottingPreferenceStore().getBoolean(UPDATE_STATIC));
+		update.setImageDescriptor(Activator.getImageDescriptor("icons/refresh_red.png"));
+		
+		getSite().getActionBars().getToolBarManager().add(update);
+		getSite().getActionBars().getMenuManager().add(update);
+		
+		getSite().getActionBars().getMenuManager().add(new Separator("plotting.extra.actions"));
 		final Action reset = new Action("Clear cross hair profiles", Activator.getImageDescriptor("icons/axis.png")) {
 			public void run() {
 				//profilePlotter.reset();
 				for (ITrace trace : profilePlotter.getTraces(ILineTrace.class)) {
 					profilePlotter.removeTrace(trace);
 				}
-				
 				getPlottingSystem().clearRegions();
+				
+				for (ITraceListener l : staticListeners) getPlottingSystem().removeTraceListener(l);
+				staticListeners.clear();
 			}
 		};
 		getSite().getActionBars().getToolBarManager().add(reset);
 		getSite().getActionBars().getMenuManager().add(reset);
-		
-		activate();
 	}
-	
 
 	@Override
 	public Object getAdapter(@SuppressWarnings("rawtypes") Class clazz) {
@@ -189,6 +219,9 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().addTraceListener(traceListener);
 			getPlottingSystem().setDefaultCursor(IPlottingSystem.CROSS_CURSOR);
+			
+			for (ITraceListener l : staticListeners) getPlottingSystem().addTraceListener(l);
+
 		}
 		
 		// We stop the adding of other regions because this tool does
@@ -222,6 +255,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().removeTraceListener(traceListener);
 			getPlottingSystem().setDefaultCursor(IPlottingSystem.NORMAL_CURSOR);
+			for (ITraceListener l : staticListeners) getPlottingSystem().removeTraceListener(l);
 		}
 	}
 	
@@ -246,6 +280,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 	    deactivate();
 		if (profilePlotter!=null) profilePlotter.dispose();
 		profilePlotter = null;
+		staticListeners.clear();
 		super.dispose();
 	}
 	
@@ -388,6 +423,27 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
         		profile(region, evt.getROI(), false, snapShotColor, new NullProgressMonitor());
     		}
         });
+        
+        ITraceListener staticListener = new ITraceListener.Stub() {
+    		@Override
+    		public void traceUpdated(TraceEvent evt) {
+    			if (!isActive()) return;
+    			
+    			boolean updatesOn = Activator.getPlottingPreferenceStore().getBoolean(UPDATE_STATIC);
+    			if (!updatesOn) return;
+    			
+    			profile(region, region.getROI(), false, snapShotColor, new NullProgressMonitor());
+    			
+    			if (xHair!=null && profilePlotter.getTrace(xHair.getName())!=null) {
+    				profilePlotter.removeTrace(profilePlotter.getTrace(xHair.getName()));
+    			}
+    			if (yHair!=null && profilePlotter.getTrace(yHair.getName())!=null) {
+    				profilePlotter.removeTrace(profilePlotter.getTrace(yHair.getName()));
+    			}
+    		}      	
+        };
+        getPlottingSystem().addTraceListener(staticListener);
+        staticListeners.add(staticListener);
 		
 		return region;
 	}
@@ -415,7 +471,6 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 			if (monitor.isCanceled()) return  false;
 			final Collection<ITrace> traces= getPlottingSystem().getTraces(IImageTrace.class);	
 			IImageTrace image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next() : null;
-
 			if (image==null) {
 				if (monitor.isCanceled()) return  false;
 				profilePlotter.clear();
