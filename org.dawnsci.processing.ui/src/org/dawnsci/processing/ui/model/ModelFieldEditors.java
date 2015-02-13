@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
-import org.dawnsci.common.widgets.celleditor.ClassCellEditor;
+import org.dawnsci.common.widgets.celleditor.NumberCellEditor;
 import org.dawnsci.common.widgets.celleditor.FileDialogCellEditor;
 import org.dawnsci.common.widgets.celleditor.TextCellEditorWithContentProposal;
 import org.dawnsci.plotting.roi.RegionCellEditor;
@@ -177,9 +177,9 @@ public class ModelFieldEditors {
 		OperationModelField anot = field.getAnnotation();
 		CellEditor textEd = null;
 	    if (anot!=null) {
-	    	textEd = new ClassCellEditor(parent, clazz, anot.min(), anot.max(), anot.unit(), SWT.NONE);
+	    	textEd = new NumberCellEditor(parent, clazz, anot.min(), anot.max(), anot.unit(), SWT.NONE);
 	    } else {
-	    	textEd = new ClassCellEditor(parent, clazz, SWT.NONE);
+	    	textEd = new NumberCellEditor(parent, clazz, SWT.NONE);
 	    }
 
     	return textEd;

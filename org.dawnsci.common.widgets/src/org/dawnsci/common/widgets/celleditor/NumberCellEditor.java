@@ -39,18 +39,18 @@ import org.eclipse.swt.widgets.Label;
  * @author Matthew Gerring
  *
  */
-public class ClassCellEditor extends TextCellEditor {
+public class NumberCellEditor extends TextCellEditor {
 	
 	protected Class<? extends Object> clazz;
 	protected String unit;
 	protected Number max;
 	protected Number min;
 
-	public ClassCellEditor(Composite parent, Class<? extends Object> clazz, int switches) {
+	public NumberCellEditor(Composite parent, Class<? extends Object> clazz, int switches) {
 		this(parent, clazz, null, null, null, switches);
 	}
 	
-	public ClassCellEditor(Composite parent, Class<? extends Object> clazz, Number min, Number max, String unit, int switches) {
+	public NumberCellEditor(Composite parent, Class<? extends Object> clazz, Number min, Number max, String unit, int switches) {
 		setStyle(switches);
 		this.clazz = clazz;
 		this.min   = min;
