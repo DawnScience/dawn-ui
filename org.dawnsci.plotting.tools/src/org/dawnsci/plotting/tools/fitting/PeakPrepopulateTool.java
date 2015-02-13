@@ -221,7 +221,7 @@ public class PeakPrepopulateTool extends Dialog {
 	private void setDefaultPeakFunction() {
 		//TODO FIXME This should use the preferences in DAWN, maybe through FittingUtils?
 		List<String> peakNames = FunctionFactory.getPeakFnNameList();
-		int defaultPeakFnIndex = peakNames.indexOf("PseudoVoigt");
+		int defaultPeakFnIndex = peakNames.indexOf("Pseudo-Voigt");
 		if (defaultPeakFnIndex != -1) {
 			peakTypeCombo.select(defaultPeakFnIndex);
 		}
