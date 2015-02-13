@@ -1,8 +1,7 @@
 package org.dawnsci.plotting.tools.fitting;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 import org.dawnsci.common.widgets.decorator.IntegerDecorator;
@@ -10,9 +9,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
@@ -30,11 +30,18 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
+import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionFactory;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 
 public class PeakPrepopulateTool extends Dialog {
+	
+	private static final Logger logger = LoggerFactory.getLogger(FunctionFittingTool.class);
 	
 	//Tool common UI elements
 	private Composite dialogContainer;
@@ -50,12 +57,17 @@ public class PeakPrepopulateTool extends Dialog {
 	
 	private Integer nrPeaks = null;
 	private Dataset[] roiLimits;
-	private Map<String, Class <? extends APeak>> peakFnMap = new TreeMap<String, Class <? extends APeak>>();
+	private Map<String, Class <? extends IPeak>> peakFnMap = new TreeMap<String, Class <? extends IPeak>>();
 	private String[] availPeakTypes;
+	private String[] availBkgTypes;
 	
 	private FunctionFittingTool parentFittingTool;
 	
 	private FindInitialPeaksJob findStartingPeaksJob;
+	private FitBackgroundJob fitBackgroundJob;
+	
+	private Add pkCompFunction = null;
+	private AFunction bkgFunction = null;
 	private Add compFunction = null;
 	
 	public PeakPrepopulateTool(Shell parentShell, FunctionFittingTool parentFittingTool, Dataset[] roiLimits) {
@@ -104,14 +116,14 @@ public class PeakPrepopulateTool extends Dialog {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				if (!nrPeaksIDec.isError()) {
-					getButton(IDialogConstants.PROCEED_ID).setEnabled(true);
+					findPeaksButton.setEnabled(true);
 					try {
 						nrPeaks = Integer.parseInt(nrPeaksTxtBox.getText());
 					} catch (NumberFormatException nfe) {
 						// Move on.
 					}
 				} else {
-					getButton(IDialogConstants.PROCEED_ID).setEnabled(false);
+					findPeaksButton.setEnabled(false);
 				}
 				
 			}
@@ -152,7 +164,8 @@ public class PeakPrepopulateTool extends Dialog {
 		Label bkgTypeCmbLbl = new Label(bkgLabelCombo, SWT.NONE);
 		bkgTypeCmbLbl.setText("Background Function Type:");
 		bkgTypeCombo = new Combo(bkgLabelCombo, SWT.READ_ONLY);
-		//TODO Define options here...
+		setAvailBkgFunctions();
+		setDefaultBkgFunction();
 		bkgTypeCombo.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
 		
 		//Background function parameters
@@ -169,6 +182,7 @@ public class PeakPrepopulateTool extends Dialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				System.out.println("Fitting background...");
+				fitBackground();
 			}
 		});
 		
@@ -192,23 +206,22 @@ public class PeakPrepopulateTool extends Dialog {
 		}
 	}
 	/**
-	 * Gets the list of available function names and their classes from FittingUtils class
+	 * Gets the list of available peak names and their classes from FunctionFactory
 	 * and populates combo box with them
 	 */
 	private void setAvailPeakFunctions() {
-		for (final Class<? extends APeak> peak : FittingUtils.getPeakOptions().values()) {
-			peakFnMap.put(peak.getSimpleName(), peak);
-		}
-		Set<String> availPeakTypeSet = peakFnMap.keySet();
-		availPeakTypes = (String[]) availPeakTypeSet.toArray(new String[availPeakTypeSet.size()]);
+		peakFnMap = FunctionFactory.getPeakFunctions();
+		availPeakTypes = FunctionFactory.getPeakNameArray();
 		peakTypeCombo.setItems(availPeakTypes);
 	}
 	
 	/**
-	 * Sets default peak profile to Psuedo-Voight or Gaussian (if available)
+	 * Sets default peak profile to Pseudo-Voigt (if available)
 	 */
 	private void setDefaultPeakFunction() {
-		int defaultPeakFnIndex = Arrays.asList(availPeakTypes).indexOf("PseudoVoigt") == -1 ? Arrays.asList(availPeakTypes).indexOf("Gaussian") : Arrays.asList(availPeakTypes).indexOf("PseudoVoigt");
+		//TODO FIXME This should use the preferences in DAWN, maybe through FittingUtils?
+		List<String> peakNames = FunctionFactory.getPeakFunctionNames();
+		int defaultPeakFnIndex = peakNames.indexOf("PseudoVoigt");
 		if (defaultPeakFnIndex != -1) {
 			peakTypeCombo.select(defaultPeakFnIndex);
 		}
@@ -218,11 +231,74 @@ public class PeakPrepopulateTool extends Dialog {
 	 * Gets the currently selected peak profile type in the combo box
 	 * @return peak function class
 	 */
-	private Class<? extends APeak> getProfileFunction(){
+	private Class<? extends IPeak> getProfileFunction(){
 		String selectedProfileName = peakTypeCombo.getText();
-		Class<? extends APeak> selectedProfile = peakFnMap.get(selectedProfileName);
+		Class<? extends IPeak> selectedProfile = peakFnMap.get(selectedProfileName);
 		
 		return selectedProfile;
+	}
+	
+	/**
+	 * Gets the list of available function names and their classes from FunctionFactory
+	 * and populates combo box with them
+	 */
+	private void setAvailBkgFunctions() {
+		availBkgTypes = FunctionFactory.getFunctionNameArray();
+		bkgTypeCombo.setItems(availBkgTypes);
+	}
+	
+	/**
+	 * Sets default background to Linear (if available)
+	 */
+	private void setDefaultBkgFunction() {
+		//TODO FIXME This should use the preferences in DAWN, maybe through FittingUtils?
+		List<String> functionNames = FunctionFactory.getFunctionNames();
+		int defaultBkgFnIndex = functionNames.indexOf("Linear");
+		if (defaultBkgFnIndex != -1) {
+			bkgTypeCombo.select(defaultBkgFnIndex);
+		}
+	}
+	
+	/**
+	 * Gets the currently selected background function type in the combo box
+	 * @return peak function class
+	 */	
+	private IFunction getBackgroundFunction(){
+		String selectedBkgFuncName = bkgTypeCombo.getText();
+		IFunction selectedBackground = null;
+		try {
+			selectedBackground = FunctionFactory.getFunction(selectedBkgFuncName);
+		} catch (Exception ne) {
+			logger.error("Could not access selected function type.", ne);
+		}
+		return selectedBackground;
+	}
+	
+	/**
+	 * Update the composite function with either new peaks or new background.
+	 * Uses existing background if none is given and does nothing if there are
+	 * no peak or background functions.
+	 * @param peaks - new peak Add function
+	 * @param bkg - new background function
+	 */
+	private void updateCompFunction(Add peaks, IFunction bkg) {
+		try {// Have to copy peak function info across, otherwise we're 
+			 // updating the reference, not the object!
+			if (peaks != null) {
+				compFunction = (Add)peaks.copy();
+			} else if (pkCompFunction != null) {
+				compFunction = (Add)pkCompFunction.copy();
+			} else {
+				compFunction = new Add();
+			}
+		} catch (Exception e) {
+			logger.error("Failed to update fit with peak functions",e);
+		}
+		if (bkg != null) {
+			compFunction.addFunction(bkg);
+		} else if (bkgFunction != null) {
+			compFunction.addFunction(bkgFunction);
+		}
 	}
 	
 	/**
@@ -235,7 +311,7 @@ public class PeakPrepopulateTool extends Dialog {
 			findStartingPeaksJob = new FindInitialPeaksJob("Find Initial Peaks");
 		}
 		
-		findStartingPeaksJob.setData(roiLimits[0], roiLimits[1]);
+		findStartingPeaksJob.setData(roiLimits);
 		findStartingPeaksJob.setNrPeaks(nrPeaks);
 		findStartingPeaksJob.setPeakFunction(getProfileFunction());
 		
@@ -244,46 +320,110 @@ public class PeakPrepopulateTool extends Dialog {
 		findStartingPeaksJob.addJobChangeListener(new JobChangeAdapter(){
 			@Override
 			public void done(IJobChangeEvent event) {
+				updateCompFunction(pkCompFunction, null);
+				// TODO this wants updating to use something more generic
 				parentFittingTool.setInitialPeaks(compFunction);
 			}
 		});
 	}
 	
+	private void fitBackground() {
+	if (fitBackgroundJob == null) {
+		fitBackgroundJob = new FitBackgroundJob("Fit Background");
+	}
+	
+	fitBackgroundJob.setData(roiLimits);
+	fitBackgroundJob.setPeakCompoundFunction(pkCompFunction);
+	fitBackgroundJob.setBkgFunction(getBackgroundFunction());
+	
+	fitBackgroundJob.schedule();
+	
+	fitBackgroundJob.addJobChangeListener(new JobChangeAdapter(){
+		@Override
+		public void done(IJobChangeEvent event) {
+			updateCompFunction(null, bkgFunction);
+			// TODO this wants updating to use something more generic
+			parentFittingTool.setInitialPeaks(compFunction);
+		}
+	});
+}
+	
+	//**********************************
+	
 	/**
 	 * Job to find initial peaks. Uses getInitialPeaks method in FittingUtils 
 	 * to do the work
 	 */
-	private class FindInitialPeaksJob extends Job {
+	private class FindInitialPeaksJob extends FittingJob {
 
 		public FindInitialPeaksJob(String name) {
 			super(name);
 		}
 		
-		Dataset x;
-		Dataset y;
 		Integer nrPeaks;
-		Class<? extends APeak> peakFunction;
-		
-		
-		public void setData(Dataset x, Dataset y) {
-			this.x = x.clone();
-			this.y = y.clone();
-		}
+		Class<? extends IPeak> peakFunction;
 		
 		public void setNrPeaks(Integer nrPeaks) {
 			this.nrPeaks = nrPeaks;
 		}
 		
-		public void setPeakFunction(Class<? extends APeak> peakFunction) {
+		public void setPeakFunction(Class<? extends IPeak> peakFunction) {
 			this.peakFunction = peakFunction;
 		}
 		
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			
-			compFunction = FittingUtils.getInitialPeaks(x, y, nrPeaks, peakFunction);
+			//TODO FIXME Why does Generic1dFitter rely on reflection whereas Fitter et al. use concrete classes?
+			pkCompFunction = FittingUtils.getInitialPeaks(x, y, nrPeaks, peakFunction);
 			return Status.OK_STATUS;
 		}
+	}
 		
+		/**
+		 * Job to find background of a dataset, removing the peaks from the 
+		 * background first.
+		 */
+	private class FitBackgroundJob extends FittingJob {
+	
+		public FitBackgroundJob(String name) {
+			super(name);
+		}
+		
+		Add peakCompFunction = null;
+		IFunction bkgFunction;
+		
+		public void setBkgFunction(IFunction bkgFunction) {
+			this.bkgFunction = bkgFunction;
+		}
+
+		
+		public void setPeakCompoundFunction(Add peakFn) {
+			peakCompFunction = peakFn;
+		}
+		
+		protected IStatus run(IProgressMonitor monitor) {
+			//1 Calculate existing peak function
+			Dataset peakDifference;
+			if (peakCompFunction != null) {
+				Dataset peakCompValues = peakCompFunction.calculateValues(x);
+			//2 Subtract peak data from observed
+			peakDifference = Maths.subtract(y, peakCompValues);
+			} else {
+				peakDifference = y;
+			}
+			//4 Fit subtracted data to given function.
+			try {
+				//TODO This needs to return something...!
+				Fitter.geneticFit(new Dataset[]{x}, peakDifference, bkgFunction);
+			}
+			catch (Exception e) {
+				//this covers an exception of the fit routine.
+				logger.error("Background fitting encountered an error", e);
+				return Status.CANCEL_STATUS;
+			}
+		
+			return Status.OK_STATUS;
+		}
 	}
 }

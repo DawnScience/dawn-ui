@@ -937,7 +937,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			                     IActionBars bars) {
 		
 		if (ob!=null) {
-		    copy.setText("Copy '"+ob.getName()+"' (can be paste to other data).");
+		    copy.setText("Copy '"+ob.getName()+"' (can be pasted into other data).");
 			copy.setEnabled(true);
 			export.setText("Export '"+ob.getName()+"'");
 			export.setEnabled(true);

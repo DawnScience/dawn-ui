@@ -12,7 +12,6 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -45,14 +44,11 @@ import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.Gaussian;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionFactory;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.Lorentzian;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Offset;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.PearsonVII;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.PseudoVoigt;
 import uk.ac.diamond.scisoft.analysis.optimize.GeneticAlg;
 import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
 
@@ -62,7 +58,7 @@ public class FittingUtils {
 	
 	
 	
-	public static Add getInitialPeaks(Dataset xDataSet, Dataset yDataSet, Integer nPeaks, Class<? extends APeak> peakClass) {
+	public static Add getInitialPeaks(Dataset xDataSet, Dataset yDataSet, Integer nPeaks, Class<? extends IPeak> peakClass) {
 		
 		Add initialPeaks = new Add();
 		
@@ -72,10 +68,15 @@ public class FittingUtils {
 		IOptimizer optimizer = getOptimizer();
 		int smoothing = getSmoothing();
 		//Check user variables are defined
-		Class<? extends APeak> peakFunction = peakClass;
+		Class<? extends IPeak> peakFunction = peakClass;
 		if (peakFunction == null) {
-			peakFunction = getPeakClass();
+				peakFunction = getPeakClass();
 		}
+		//TODO FIXME Update Generic1DFitter to use IPeak
+		@SuppressWarnings("unchecked")
+		Class<? extends APeak> myPeakFunction = (Class<? extends APeak>)peakFunction;
+	
+		
 		Integer nrPeaks = nPeaks;
 		if (nrPeaks == null) {
 			//Don't know how many peaks we are looking for, so just see how many we can find
@@ -87,10 +88,12 @@ public class FittingUtils {
 				return null;
 			}
 			//Fit the peaks we found
-			fittedPeaksAndBkgs = Generic1DFitter.fitPeakFunctions(foundPeaks, xDataSet, yDataSet, peakFunction, optimizer, smoothing, nrPeaks, 0.0, false, false, null);
+			//TODO FIXME Change myPeakFunction to peakFunction
+			fittedPeaksAndBkgs = Generic1DFitter.fitPeakFunctions(foundPeaks, xDataSet, yDataSet, myPeakFunction, optimizer, smoothing, nrPeaks, 0.0, false, false, null);
 		} else {
 			//Find the and fit a given number of peaks
-			fittedPeaksAndBkgs = Generic1DFitter.fitPeakFunctions(xDataSet, yDataSet, peakFunction, nPeaks);
+			//TODO FIXME Change myPeakFunction to peakFunction
+			fittedPeaksAndBkgs = Generic1DFitter.fitPeakFunctions(xDataSet, yDataSet, myPeakFunction, nPeaks);
 		}
 		
 		//Pick out the peak functions of the correct class & package into new composite function
@@ -149,8 +152,8 @@ public class FittingUtils {
 			
 			info.setIdentifiedPeaks(Arrays.asList(new IdentifiedPeak[]{iniPeak}));
 			
-			Constructor<? extends APeak> ctor = getPeakClass().getConstructor(IdentifiedPeak.class);
-			APeak localPeak = ctor.newInstance(iniPeak);
+			Constructor<? extends IPeak> ctor = getPeakClass().getConstructor(IdentifiedPeak.class);
+			IPeak localPeak = ctor.newInstance(iniPeak);
 			CompositeFunction comp = new CompositeFunction();
 			comp.addFunction(localPeak);
 			comp.addFunction(offset);
@@ -163,7 +166,10 @@ public class FittingUtils {
 			if (info.getIdentifiedPeaks()==null) {
 				info.setIdentifiedPeaks(Generic1DFitter.parseDataDerivative(info.getX(), info.getY(), getSmoothing()));
 			}
-			composites =  Generic1DFitter.fitPeakFunctions(info.getIdentifiedPeaks(), info.getX(), info.getY(), getPeakClass(), optimizer, getSmoothing(), info.getNumPeaks(), 0.0, false, false,
+			//TODO FIXME Update Generic1DFitter to use IPeak
+			@SuppressWarnings("unchecked")
+			Class<? extends APeak> myPeak = (Class<? extends APeak>)getPeakClass();
+			composites =  Generic1DFitter.fitPeakFunctions(info.getIdentifiedPeaks(), info.getX(), info.getY(), myPeak, optimizer, getSmoothing(), info.getNumPeaks(), 0.0, false, false,
 					info.getMonitor());
 		}
 		
@@ -320,30 +326,26 @@ public class FittingUtils {
 		return Activator.getPlottingPreferenceStore().getDouble(FittingConstants.QUALITY);
 	}
 
-	public static Class<? extends APeak> getPeakClass() {
+	public static Class<? extends IPeak> getPeakClass() {
+		String peakClassName = Activator.getPlottingPreferenceStore().getString(FittingConstants.PEAK_TYPE);
+		Class<? extends IPeak> peakClass = null;
 		try {
-			
-			final String peakClass = Activator.getPlottingPreferenceStore().getString(FittingConstants.PEAK_TYPE);
-			
-			/**
-			 * Could use reflection to save on objects, but there's only 4 of them.
-			 */
-			return getPeakOptions().get(peakClass);
-			
+			peakClass = FunctionFactory.getClassForPeakFunctionName(peakClassName);
 		} catch (Exception ne) {
-			logger.error("Cannot determine peak type required!", ne);
-			Activator.getPlottingPreferenceStore().setValue(FittingConstants.PEAK_TYPE, Gaussian.class.getName());
-		    return Gaussian.class;
+			peakClassName = "Gaussian";
+			Activator.getPlottingPreferenceStore().setValue(FittingConstants.PEAK_TYPE, peakClassName);
+			try {
+				peakClass = FunctionFactory.getClassForPeakFunctionName(peakClassName);
+			} catch (Exception ne2){
+				logger.error("Fallback Gaussian peak type was not found by FunctionFactory.");
+			}
 		}
+		return peakClass;
 	}	
 	
-	public static Map<String, Class <? extends APeak>> getPeakOptions() {
-		final Map<String, Class <? extends APeak>> opts = new LinkedHashMap<String, Class <? extends APeak>>(4);
-		opts.put(Gaussian.class.getName(),    Gaussian.class);
-		opts.put(Lorentzian.class.getName(),  Lorentzian.class);
-		opts.put(PearsonVII.class.getName(),  PearsonVII.class);
-		opts.put(PseudoVoigt.class.getName(), PseudoVoigt.class);
-		return opts;
+	@Deprecated
+	public static Map<String, Class <? extends IPeak>> getPeakOptions() {
+		return FunctionFactory.getPeakFunctions();
 	}
 	
 	public static int getPolynomialOrderRequired() {
