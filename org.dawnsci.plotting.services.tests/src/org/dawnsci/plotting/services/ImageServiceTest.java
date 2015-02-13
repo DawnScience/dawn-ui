@@ -71,25 +71,27 @@ public class ImageServiceTest {
 
 		
 		// Check on
-		imageServiceBean.setLogColorScale(true);
-		
+		ImageServiceBean imageServiceBean1 = new ImageServiceBean();
+		imageServiceBean1.setImage(image);
+		imageServiceBean1.setLogColorScale(true);
 		double[] imageVals1 = (double[])image.getBuffer();
 		assertArrayEquals(expectedResultNoLogging, imageVals1, epsilon);
-		
-		assertEquals(-1, imageServiceBean.getLogOffset(), 0.0);
-		Dataset resultLoggingOn = imageService.getImageLoggedData(imageServiceBean);
+		assertEquals(-1, imageServiceBean1.getLogOffset(), 0.0);
+		Dataset resultLoggingOn = imageService.getImageLoggedData(imageServiceBean1);
 		double actualResultWithLogging[] = (double[])resultLoggingOn.getBuffer();
 		assertArrayEquals(expectedResultWithLogging, actualResultWithLogging, epsilon);
 		
 		
 		// Check off
-		imageServiceBean.setLogColorScale(false);
+		ImageServiceBean imageServiceBean2 = new ImageServiceBean();
+		imageServiceBean2.setImage(image);
+		imageServiceBean2.setLogColorScale(false);
 		
 		double[] imageVals2 = (double[])image.getBuffer();
 		assertArrayEquals(expectedResultNoLogging, imageVals2, epsilon);
 		
-		assertEquals(0.0, imageServiceBean.getLogOffset(), 0.0);
-		Dataset resultLoggingOff = imageService.getImageLoggedData(imageServiceBean);
+		assertEquals(0.0, imageServiceBean2.getLogOffset(), 0.0);
+		Dataset resultLoggingOff = imageService.getImageLoggedData(imageServiceBean2);
 		double actualResultNoLogging[] = (double[])resultLoggingOff.getBuffer();
 		assertArrayEquals(expectedResultNoLogging, actualResultNoLogging, epsilon);
 	
