@@ -210,8 +210,8 @@ public class PeakPrepopulateTool extends Dialog {
 	 * and populates combo box with them
 	 */
 	private void setAvailPeakFunctions() {
-		peakFnMap = FunctionFactory.getPeakFunctions();
-		availPeakTypes = FunctionFactory.getPeakNameArray();
+		peakFnMap = FunctionFactory.getPeakFns();
+		availPeakTypes = FunctionFactory.getPeakFnNameArray();
 		peakTypeCombo.setItems(availPeakTypes);
 	}
 	
@@ -220,8 +220,8 @@ public class PeakPrepopulateTool extends Dialog {
 	 */
 	private void setDefaultPeakFunction() {
 		//TODO FIXME This should use the preferences in DAWN, maybe through FittingUtils?
-		List<String> peakNames = FunctionFactory.getPeakFunctionNames();
-		int defaultPeakFnIndex = peakNames.indexOf("PseudoVoigt");
+		List<String> peakNames = FunctionFactory.getPeakFnNameList();
+		int defaultPeakFnIndex = peakNames.indexOf("Pseudo-Voigt");
 		if (defaultPeakFnIndex != -1) {
 			peakTypeCombo.select(defaultPeakFnIndex);
 		}
@@ -252,7 +252,7 @@ public class PeakPrepopulateTool extends Dialog {
 	 */
 	private void setDefaultBkgFunction() {
 		//TODO FIXME This should use the preferences in DAWN, maybe through FittingUtils?
-		List<String> functionNames = FunctionFactory.getFunctionNames();
+		List<String> functionNames = FunctionFactory.getFunctionNameList();
 		int defaultBkgFnIndex = functionNames.indexOf("Linear");
 		if (defaultBkgFnIndex != -1) {
 			bkgTypeCombo.select(defaultBkgFnIndex);
