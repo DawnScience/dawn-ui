@@ -87,7 +87,7 @@ public class FunctionDialog extends Dialog {
 						labelDegree.setVisible(false);
 						polynomialDegree.setVisible(false);
 					}
-				} catch (ReflectiveOperationException e1) {
+				} catch (Exception e1) {
 					logger.error("Cannot create function "+ functionType.getText(), e1);
 				}
 			}

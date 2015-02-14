@@ -30,7 +30,7 @@ public final class PluginFunctionDescriptor extends FunctionDescriptor {
 				IFunction myFunction = FunctionFactory.getFunction(name);
 				descList.add(new PluginFunctionDescriptor(myFunction, name));
 
-			} catch (ReflectiveOperationException e) {
+			} catch (Exception e) {
 				logger.error("Extension point defines function '" + name
 						+ "' which cannot be instantiated", e);
 			}
@@ -48,7 +48,7 @@ public final class PluginFunctionDescriptor extends FunctionDescriptor {
 	public IFunction getFunction() throws FunctionInstantiationFailedException {
 		try {
 			return FunctionFactory.getFunction(name);
-		} catch (ReflectiveOperationException e) {
+		} catch (Exception e) {
 			throw new FunctionInstantiationFailedException(e);
 		}
 	}
