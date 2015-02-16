@@ -163,6 +163,15 @@
       </plotting_tool_page>
       <plotting_tool_page
             category="org.dawnsci.plotting.tools.category.Profile"
+            cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.crossprofile"
+            class="org.dawnsci.plotting.tools.profile.CrossProfileTool"
+            icon="icons/plot-tool-cross-profile.png"
+            id="org.dawb.workbench.plotting.tools.crossProfileTool"
+            label="Cross Profile"
+            tooltip="A tool for showing line profiles of images.">
+      </plotting_tool_page>
+      <plotting_tool_page
+            category="org.dawnsci.plotting.tools.category.Profile"
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.boxprofile"
             class="org.dawnsci.plotting.tools.profile.BoxProfileTool"
             icon="icons/plot-tool-box-profile.png"

@@ -239,6 +239,18 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 				
 		isLog10 = Activator.getLocalPreferenceStore().getBoolean(getToolId()+".yAxisLogged");
 		profilePlottingSystem.getSelectedYAxis().setLog10(isLog10);
+		
+		final Action clear = new Action("Clear Profiles", Activator.getImageDescriptor("icons/axis.png")) {
+			public void run() {
+				getPlottingSystem().clearRegions();
+			}
+		};
+		if (actionbars != null){
+			actionbars.getToolBarManager().add(new Separator("org.dawb.workbench.plotting.tools.profile.clearRegionsGroup"));
+			actionbars.getToolBarManager().insertAfter("org.dawb.workbench.plotting.tools.profile.clearRegionsGroup", clear);
+			actionbars.getToolBarManager().add(new Separator("org.dawb.workbench.plotting.tools.profile.clearRegionsGroupAfter"));
+		}
+
 	}
 
 	@Override

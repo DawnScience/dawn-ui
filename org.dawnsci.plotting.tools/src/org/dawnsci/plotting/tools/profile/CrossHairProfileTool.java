@@ -25,7 +25,9 @@ import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
+import org.eclipse.dawnsci.plotting.api.axis.AxisEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
+import org.eclipse.dawnsci.plotting.api.axis.IAxisListener;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
@@ -57,7 +59,7 @@ import org.eclipse.ui.part.IPageSite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CrossHairProfileTool extends AbstractToolPage implements IROIListener, MouseListener  {
+public class CrossHairProfileTool extends AbstractToolPage implements IROIListener, MouseListener, IAxisListener  {
 
 	private final static Logger logger = LoggerFactory.getLogger(CrossHairProfileTool.class);
 	
@@ -113,6 +115,8 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 		x1.setTitle("X Slice");
 		
 		x2 = profilePlotter.createAxis("Y Slice", false, SWT.TOP);
+		
+		profilePlotter.setRescale(false); // Take it from zoom level of tool.
 
 		createActions();
 		activate();
@@ -122,8 +126,10 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 	
 	private void createActions() {
 		
-		getSite().getActionBars().getMenuManager().add(new Separator("crosshair.extra.actions"));
+		getSite().getActionBars().getToolBarManager().add(new Separator("crosshair.extra.actions"));
+		
 		Activator.getPlottingPreferenceStore().setDefault(UPDATE_STATIC, true);
+		
 		final Action update = new Action("Update static profiles if the image changes", IAction.AS_CHECK_BOX) {
 			public void run() {
 				Activator.getPlottingPreferenceStore().setValue(UPDATE_STATIC, isChecked());
@@ -135,7 +141,8 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 		getSite().getActionBars().getToolBarManager().add(update);
 		getSite().getActionBars().getMenuManager().add(update);
 		
-		getSite().getActionBars().getMenuManager().add(new Separator("plotting.extra.actions"));
+		getSite().getActionBars().getToolBarManager().add(new Separator("plotting.extra.actions"));
+		
 		final Action reset = new Action("Clear cross hair profiles", Activator.getImageDescriptor("icons/axis.png")) {
 			public void run() {
 				//profilePlotter.reset();
@@ -219,7 +226,8 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().addTraceListener(traceListener);
 			getPlottingSystem().setDefaultCursor(IPlottingSystem.CROSS_CURSOR);
-			
+			getPlottingSystem().getSelectedXAxis().addAxisListener(this);
+			getPlottingSystem().getSelectedYAxis().addAxisListener(this);
 			for (ITraceListener l : staticListeners) getPlottingSystem().addTraceListener(l);
 
 		}
@@ -246,6 +254,8 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 			yHair.setVisible(false);
 			yHair.removeROIListener(this);
 			getPlottingSystem().removeRegion(yHair);
+			getPlottingSystem().getSelectedXAxis().removeAxisListener(this);
+			getPlottingSystem().getSelectedYAxis().removeAxisListener(this);
 			yHair = null;
 			getPlottingSystem().setDefaultCursor(IPlottingSystem.NORMAL_CURSOR);
 		}
@@ -552,12 +562,20 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 					}
 
 					if (monitor.isCanceled()) return;
-					if (isRegionXAxis) {
-						x1.setRange(0, size);
-					} else {
-						x2.setRange(0, size);
+                    
+					// We set the range of y to the intensity range
+					if (profilePlotter.getTraces()!=null) {
+						double max = Double.MIN_VALUE;
+						double min = Double.MAX_VALUE;
+						for (ITrace iTrace : profilePlotter.getTraces()) {
+							max = Math.max(max, iTrace.getData().max().doubleValue());
+							min = Math.min(min, iTrace.getData().min().doubleValue());
+						}
+						if (profilePlotter.getTraces().size()>0) {
+							profilePlotter.getSelectedYAxis().setRange(min, max);
+						}
 					}
-					profilePlotter.autoscaleAxes();
+					profilePlotter.repaint(false);
 				}
 			});
 		}
@@ -573,9 +591,23 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 			   ( isYAxis && orig==ImageOrigin.TOP_RIGHT)   ||
 			   ( isYAxis && orig==ImageOrigin.BOTTOM_LEFT);
 	}
+	
 	@Override
 	public void roiSelected(ROIEvent evt) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void rangeChanged(AxisEvent evt) {
+		IPlottingSystem sys = getPlottingSystem();
+		x1.setRange(sys.getSelectedXAxis().getLower(), sys.getSelectedXAxis().getUpper());
+		x2.setRange(sys.getSelectedYAxis().getUpper(), sys.getSelectedYAxis().getLower());
+	}
+
+	@Override
+	public void revalidated(AxisEvent evt) {
+		// TODO Auto-generated method stub
+		
 	}
 }
