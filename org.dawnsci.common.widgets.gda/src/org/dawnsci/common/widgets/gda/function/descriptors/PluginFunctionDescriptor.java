@@ -11,11 +11,11 @@ package org.dawnsci.common.widgets.gda.function.descriptors;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dawnsci.common.widgets.gda.function.FunctionExtensionFactory;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionFactory;
 
 public final class PluginFunctionDescriptor extends FunctionDescriptor {
 	private static final Logger logger = LoggerFactory
@@ -24,15 +24,13 @@ public final class PluginFunctionDescriptor extends FunctionDescriptor {
 
 	public static FunctionDescriptor[] getDescriptors() {
 		List<FunctionDescriptor> descList = new ArrayList<>();
-		final FunctionExtensionFactory factory = FunctionExtensionFactory
-				.getFunctionExtensionFactory();
-		String[] fittingFunctionNames = factory.getFittingFunctionNames();
+		String[] fittingFunctionNames = FunctionFactory.getFunctionNameArray();
 		for (final String name : fittingFunctionNames) {
 			try {
-				IFunction myFunction = factory.getFittingFunction(name);
+				IFunction myFunction = FunctionFactory.getFunction(name);
 				descList.add(new PluginFunctionDescriptor(myFunction, name));
 
-			} catch (CoreException e) {
+			} catch (Exception e) {
 				logger.error("Extension point defines function '" + name
 						+ "' which cannot be instantiated", e);
 			}
@@ -49,10 +47,8 @@ public final class PluginFunctionDescriptor extends FunctionDescriptor {
 	@Override
 	public IFunction getFunction() throws FunctionInstantiationFailedException {
 		try {
-			FunctionExtensionFactory factory = FunctionExtensionFactory
-					.getFunctionExtensionFactory();
-			return factory.getFittingFunction(name);
-		} catch (CoreException e) {
+			return FunctionFactory.getFunction(name);
+		} catch (Exception e) {
 			throw new FunctionInstantiationFailedException(e);
 		}
 	}

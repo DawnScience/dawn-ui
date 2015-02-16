@@ -10,7 +10,6 @@
 package org.dawnsci.common.widgets.gda.function;
 
 //import org.dawb.common.ui.plot.function.FunctionType;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
@@ -27,6 +26,7 @@ import org.eclipse.swt.widgets.Spinner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionFactory;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
 
 /**
@@ -70,7 +70,7 @@ public class FunctionDialog extends Dialog {
 
 		functionType = new CCombo(top, SWT.READ_ONLY|SWT.BORDER);
 
-		fittingFunctionNames = FunctionExtensionFactory.getFunctionExtensionFactory().getFittingFunctionNames();
+		fittingFunctionNames = FunctionFactory.getFunctionNameArray();
 		functionType.setItems(fittingFunctionNames);
 		functionType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		functionType.addSelectionListener(new SelectionAdapter() {
@@ -78,7 +78,7 @@ public class FunctionDialog extends Dialog {
 			public void widgetSelected(SelectionEvent e) {
 				try {
 					//IFunction myFunction = FunctionType.createNew(functionType.getSelectionIndex());
-					IFunction myFunction = FunctionExtensionFactory.getFunctionExtensionFactory().getFittingFunction(functionType.getText());
+					IFunction myFunction = FunctionFactory.getFunction(functionType.getText());
 					functionEditor.setFunction(myFunction, null);
 					if(functionType.getText().equals(POLYNOMIAL)){
 						labelDegree.setVisible(true);
@@ -87,7 +87,7 @@ public class FunctionDialog extends Dialog {
 						labelDegree.setVisible(false);
 						polynomialDegree.setVisible(false);
 					}
-				} catch (CoreException e1) {
+				} catch (Exception e1) {
 					logger.error("Cannot create function "+ functionType.getText(), e1);
 				}
 			}
@@ -107,7 +107,7 @@ public class FunctionDialog extends Dialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				try {
-					IFunction myFunction = FunctionExtensionFactory.getFunctionExtensionFactory().getFittingFunction(POLYNOMIAL);
+					IFunction myFunction = FunctionFactory.getFunction(POLYNOMIAL);
 					Polynomial polynom = (Polynomial)myFunction;
 					polynom.setDegree(polynomialDegree.getSelection()-1);
 					functionEditor.setFunction(myFunction, null);

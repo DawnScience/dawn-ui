@@ -31,7 +31,7 @@ public class FunctionExtensionFactory {
 	protected Map<String, IConfigurationElement> functionsMap = new HashMap<>();
 
 
-
+	@Deprecated
 	private FunctionExtensionFactory() {
 		final IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor(
 				FUNCTIONS_EXTENSIONS);
@@ -40,6 +40,7 @@ public class FunctionExtensionFactory {
 		}
 	}
 
+	@Deprecated
 	public static synchronized FunctionExtensionFactory getFunctionExtensionFactory() {
 		if (functionExtensionFactory == null) {
 			functionExtensionFactory = new FunctionExtensionFactory();
@@ -47,10 +48,12 @@ public class FunctionExtensionFactory {
 		return functionExtensionFactory;
 	}
 
+	@Deprecated
 	public String[] getFittingFunctionNames() {
 		return functionsMap.keySet().toArray(new String[0]);
 	}
-
+	
+	@Deprecated
 	public IFunction getFittingFunction(String name) throws CoreException {
 		Object object;
 		IConfigurationElement element = functionsMap.get(name);
