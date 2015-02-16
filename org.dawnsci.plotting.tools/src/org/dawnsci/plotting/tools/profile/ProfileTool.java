@@ -406,12 +406,12 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	 * @param roi - may be null
 	 * @param monitor
 	 */
-	protected abstract void createProfile(IImageTrace image, 
-			                              IRegion region, 
-			                              IROI roi, 
-			                              boolean tryUpdate, 
-			                              boolean isDrag,
-			                              IProgressMonitor monitor);
+	protected abstract ITrace createProfile(IImageTrace image, 
+			                                IRegion region, 
+			                                IROI roi, 
+			                                boolean tryUpdate, 
+			                                boolean isDrag,
+			                                IProgressMonitor monitor);
 
 	@Override
 	public void roiDragged(ROIEvent evt) {

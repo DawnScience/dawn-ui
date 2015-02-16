@@ -36,29 +36,29 @@ public class LineProfileTool extends ProfileTool {
 	}
 
 	@Override
-	protected void createProfile(	IImageTrace  image, 
+	protected ITrace createProfile(	IImageTrace  image, 
 						            IRegion      region, 
 						            IROI         rbs, 
 						            boolean      tryUpdate,
 				                    boolean      isDrag,
 						            IProgressMonitor monitor) {
         
-		if (monitor.isCanceled()) return;
-		if (image==null) return;
+		if (monitor.isCanceled()) return null;
+		if (image==null) return null;
 		
-		if (!isRegionTypeSupported(region.getRegionType())) return;
+		if (!isRegionTypeSupported(region.getRegionType())) return null;
 
 		final LinearROI bounds = (LinearROI) (rbs==null ? region.getROI() : rbs);
 		if (bounds==null)
-			return;
+			return null;
 		if (!region.isVisible())
-			return;
+			return null;
 
-		if (monitor.isCanceled()) return;
+		if (monitor.isCanceled()) return null;
 		Dataset[] profileData = ROIProfile.line((Dataset)image.getData(), (Dataset)image.getMask(), bounds, 1d, true);
-        if (profileData==null) return;
+        if (profileData==null) return null;
 
-		if (monitor.isCanceled()) return;
+		if (monitor.isCanceled()) return null;
 		
 		final Dataset intensity = profileData[0];
 		intensity.setName(region.getName());
@@ -74,12 +74,12 @@ public class LineProfileTool extends ProfileTool {
 			});
 			
 		} else {
-			if (monitor.isCanceled()) return;
+			if (monitor.isCanceled()) return null;
 			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(indices, Arrays.asList(new IDataset[]{intensity}), monitor);
 			registerTraces(region, plotted);
-			
+			return plotted.iterator().next();
 		}
-		
+		return trace;
 	}
 
 	@Override

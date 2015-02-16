@@ -133,19 +133,19 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	}
 
 	@Override
-	protected void createProfile(IImageTrace image, IRegion region,
-			IROI rbs, boolean tryUpdate, boolean isDrag,
-			IProgressMonitor monitor) {
-		if (monitor.isCanceled()) return;
-		if (image==null) return;
+	protected ITrace createProfile(IImageTrace image, IRegion region,
+								IROI rbs, boolean tryUpdate, boolean isDrag,
+								IProgressMonitor monitor) {
+		if (monitor.isCanceled()) return null;
+		if (image==null) return null;
 		
-		if (!isRegionTypeSupported(region.getRegionType())) return;
+		if (!isRegionTypeSupported(region.getRegionType())) return null;
 
 		RectangularROI bounds = (RectangularROI) (rbs==null ? region.getROI() : rbs);
-		if (bounds==null) return;
-		if (!region.isVisible()) return;
+		if (bounds==null) return null;
+		if (!region.isVisible()) return null;
 
-		if (monitor.isCanceled()) return;
+		if (monitor.isCanceled()) return null;
 		bounds = getPositiveBounds(bounds);
 		// vertical and horizontal profiles
 		if (isEdgePlotted && !isAveragePlotted) {
@@ -157,6 +157,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 		} else if (!isEdgePlotted && !isAveragePlotted) {
 			hideTraces();
 		}
+		return null; // TODO more than one trace so for now, do not return.
 	}
 
 	private RectangularROI getPositiveBounds(RectangularROI bounds){

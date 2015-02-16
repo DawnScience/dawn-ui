@@ -107,17 +107,17 @@ public class SpotTool extends ZoomTool {
 	}
 
 	@Override
-	protected void createProfile(final IImageTrace  image, 
+	protected ITrace createProfile(final IImageTrace  image, 
 					            IRegion      region,
 					            IROI         rbs, 
 					            boolean      tryUpdate, 
 					            boolean      isDrag,
 					            IProgressMonitor monitor) {
 		
-		if (monitor.isCanceled()) return;
-		if (image==null) return;
+		if (monitor.isCanceled()) return null;
+		if (image==null) return null;
 		
-		if ((region.getRegionType()!=RegionType.BOX)&&(region.getRegionType()!=RegionType.PERIMETERBOX)) return;
+		if ((region.getRegionType()!=RegionType.BOX)&&(region.getRegionType()!=RegionType.PERIMETERBOX)) return null;
 
 		Dataset slice = createZoom(image, region, rbs, tryUpdate, isDrag, monitor);
 		
@@ -150,6 +150,9 @@ public class SpotTool extends ZoomTool {
 				line.setTraceColor(ColorConstants.red);
 			}
 		});
+		
+        return profilePlottingSystem.getTraces().iterator().next();
+
 	}
 
 }

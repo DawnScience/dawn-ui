@@ -52,7 +52,7 @@ public class BoxProfileTool extends ProfileTool {
 	}
 	
 	@Override
-	protected void createProfile(IImageTrace  image, 
+	protected ITrace createProfile(IImageTrace  image, 
 			                     IRegion      region, 
 			                     IROI      rbs, 
 			                     boolean      tryUpdate,
@@ -60,14 +60,14 @@ public class BoxProfileTool extends ProfileTool {
 			                     IProgressMonitor monitor) {
         
 		Dataset[] profile = getProfile(image, region, rbs, tryUpdate, isDrag, monitor);
-		if (profile == null) return;
+		if (profile == null) return null;
 
 		final Dataset x_indices   = profile[0];
 		final Dataset x_intensity = profile[1];
 		final Dataset y_indices   = profile[2];
 		final Dataset y_intensity = profile[3];
 		
-		//if (monitor.isCanceled()) return;
+		//if (monitor.isCanceled()) return null;
 		final ILineTrace y_trace = (ILineTrace)profilePlottingSystem.getTrace("X "+region.getName());
 		final ILineTrace x_trace = (ILineTrace)profilePlottingSystem.getTrace("Y "+region.getName());
 		
@@ -89,6 +89,8 @@ public class BoxProfileTool extends ProfileTool {
 			plotted = profilePlottingSystem.updatePlot1D(y_indices, Arrays.asList(new IDataset[]{y_intensity}), monitor);
 			registerTraces(region, plotted);
 		}
+		
+		return y_trace;
 	}
 	
 	/**

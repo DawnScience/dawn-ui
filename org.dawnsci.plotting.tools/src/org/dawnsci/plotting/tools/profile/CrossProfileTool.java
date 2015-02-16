@@ -1,6 +1,8 @@
 package org.dawnsci.plotting.tools.profile;
 
 import org.dawnsci.plotting.util.ColorUtility;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -9,6 +11,10 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.swt.widgets.Display;
 
 /**
  * A Line profile which is created by drawing a rectangle and it creates two lines
@@ -51,29 +57,45 @@ public class CrossProfileTool extends LineProfileTool {
 		LinearROI yline = new LinearROI(new double[]{roi.getPoint()[0]+roi.getLength(0)/2d, roi.getPoint()[1]},
 				                        new double[]{roi.getPoint()[0]+roi.getLength(0)/2d, roi.getPoint()[1]+roi.getLength(1)});
 		
-		update(add(yline, "Y Cross"), yline, false);
+		add(yline, "Y Cross");
 		
 		// X-line
 		LinearROI xline = new LinearROI(new double[]{roi.getPoint()[0],                  roi.getPoint()[1]+roi.getLength(1)/2d},
                                         new double[]{roi.getPoint()[0]+roi.getLength(0), roi.getPoint()[1]+roi.getLength(1)/2d});
 
-		update(add(xline, "X Cross"), xline, false);
+		add(xline, "X Cross");
 		
 		
 		sys.removeRegion(region);
-		
-		profilePlottingSystem.repaint();
+		update(null, null, false);
 	}
 	
-	private final IRegion add(LinearROI line, String name) throws Exception {
+	protected ITrace createProfile(	IImageTrace  image, 
+						            IRegion      region, 
+						            IROI         rbs, 
+						            boolean      tryUpdate,
+						            boolean      isDrag,
+						            IProgressMonitor monitor) {
+		
+		ITrace trace = super.createProfile(image, region, rbs, tryUpdate, isDrag, monitor);
+		if (trace!=null && trace instanceof ILineTrace) {
+			ILineTrace ltrace = (ILineTrace)trace;
+			ltrace.setTraceColor(region.getRegionColor());
+		}
+		return trace;
+	}
+
+	
+	private final IRegion add(final LinearROI line, String name) throws Exception {
 		
 		IPlottingSystem sys = getPlottingSystem();
-		IRegion reg = sys.createRegion(RegionUtils.getUniqueName(name, sys), RegionType.LINE);
+		final IRegion   reg = sys.createRegion(RegionUtils.getUniqueName(name, sys), RegionType.LINE);
 		reg.setROI(line);
 		if (sys.getRegions()!=null) {
 			reg.setRegionColor(ColorUtility.getSwtColour(sys.getRegions().size()));
 		}
 		sys.addRegion(reg);		
+	
 		return reg;
 	}
 

@@ -54,7 +54,7 @@ public class ZoomTool extends ProfileTool {
 	}
 
 	@Override
-	protected void createProfile(final IImageTrace  image, 
+	protected ITrace createProfile(final IImageTrace  image, 
 			                     IRegion      region,
 			                     IROI         rbs, 
 			                     boolean      tryUpdate, 
@@ -69,7 +69,7 @@ public class ZoomTool extends ProfileTool {
 		} catch (Throwable ne) {
 			logger.warn("Problem slicing image in "+getClass().getSimpleName(), ne);
 		}
-
+        return profilePlottingSystem.getTraces().iterator().next();
 	}
 	
 

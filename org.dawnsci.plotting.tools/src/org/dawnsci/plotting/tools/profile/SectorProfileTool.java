@@ -309,23 +309,23 @@ public abstract class SectorProfileTool extends ProfileTool {
 
 
 	@Override
-	protected void createProfile(IImageTrace  image, 
+	protected ITrace createProfile(IImageTrace  image, 
 			                     IRegion      region, 
 			                     IROI      rbs, 
 			                     boolean      tryUpdate,
 			                     boolean      isDrag,
 			                     IProgressMonitor monitor) {
         
-		if (monitor.isCanceled()) return;
-		if (image==null) return;
+		if (monitor.isCanceled()) return null;
+		if (image==null) return null;
 		
-		if (!isRegionTypeSupported(region.getRegionType())) return;
+		if (!isRegionTypeSupported(region.getRegionType())) return null;
 
 		final SectorROI sroi = (SectorROI) (rbs==null ? region.getROI() : rbs);
-		if (sroi==null) return;
-		if (!region.isVisible()) return;
+		if (sroi==null) return null;
+		if (!region.isVisible()) return null;
 
-		if (monitor.isCanceled()) return;
+		if (monitor.isCanceled()) return null;
 		final Dataset data = isDrag ? (Dataset)image.getDownsampled()     : (Dataset)image.getData();
 		final Dataset mask = isDrag ? (Dataset)image.getDownsampledMask() : (Dataset)image.getMask();
 		
@@ -336,7 +336,7 @@ public abstract class SectorProfileTool extends ProfileTool {
 		}
 			
 		final Dataset[] integrals = getIntegral(data, mask, isDrag ? downsroi : sroi, region, isDrag, isDrag ? image.getDownsampleBin() : 1);	
-        if (integrals==null) return;
+        if (integrals==null) return null;
 				
 		final Dataset[] xis = getXAxis(sroi, integrals);
 
@@ -360,6 +360,7 @@ public abstract class SectorProfileTool extends ProfileTool {
 				}
 			}
 		}
+		return null;
 	}
 	
 	@Override
