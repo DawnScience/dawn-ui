@@ -70,17 +70,23 @@ public class CrossProfileTool extends LineProfileTool {
 		update(null, null, false);
 	}
 	
-	protected ITrace createProfile(	IImageTrace  image, 
-						            IRegion      region, 
-						            IROI         rbs, 
-						            boolean      tryUpdate,
-						            boolean      isDrag,
+	protected ITrace createProfile(	IImageTrace   image, 
+						            final IRegion region, 
+						            IROI          rbs, 
+						            boolean       tryUpdate,
+						            boolean       isDrag,
 						            IProgressMonitor monitor) {
 		
-		ITrace trace = super.createProfile(image, region, rbs, tryUpdate, isDrag, monitor);
+		final ITrace trace = super.createProfile(image, region, rbs, tryUpdate, isDrag, monitor);
 		if (trace!=null && trace instanceof ILineTrace) {
-			ILineTrace ltrace = (ILineTrace)trace;
-			ltrace.setTraceColor(region.getRegionColor());
+			final ILineTrace ltrace = (ILineTrace)trace;
+			if (ltrace.getTraceColor()!=region.getRegionColor()) {
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						ltrace.setTraceColor(region.getRegionColor());
+					}
+				});
+			}
 		}
 		return trace;
 	}
