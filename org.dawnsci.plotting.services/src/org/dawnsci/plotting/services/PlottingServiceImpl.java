@@ -8,6 +8,7 @@
  */
 package org.dawnsci.plotting.services;
 
+import org.eclipse.dawnsci.plotting.api.IPlotRegistrationListener;
 import org.eclipse.dawnsci.plotting.api.IPlottingService;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
@@ -44,8 +45,7 @@ public class PlottingServiceImpl implements IPlottingService {
 	}
 
 	@Override
-	public IPlottingSystem registerPlottingSystem(String plotName,
-			IPlottingSystem system) {
+	public IPlottingSystem registerPlottingSystem(String plotName, IPlottingSystem system) {
 		return PlottingFactory.registerPlottingSystem(plotName, system);
 	}
 
@@ -57,6 +57,16 @@ public class PlottingServiceImpl implements IPlottingService {
 	@Override
 	public IFilterDecorator createFilterDecorator(IPlottingSystem system) {
 		return PlottingFactory.createFilterDecorator(system);
+	}
+
+	@Override
+	public void addRegistrationListener(IPlotRegistrationListener l) {
+		PlottingFactory.addRegistrationListener(l);
+	}
+
+	@Override
+	public void removeRegistrationListener(IPlotRegistrationListener l) {
+		PlottingFactory.removeRegistrationListener(l);
 	}
 
 }

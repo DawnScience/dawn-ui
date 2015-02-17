@@ -40,6 +40,7 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
 import org.eclipse.dawnsci.plotting.api.IPrintablePlotting;
 import org.eclipse.dawnsci.plotting.api.PlotType;
+import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.annotation.IAnnotation;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
@@ -200,6 +201,12 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			layout.topControl = lightWeightViewer.getControl();
 			container.layout();
 		}
+		
+		getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				PlottingFactory.notityPlottingSystemCreated(plotName, PlottingSystemImpl.this);
+			}
+		});
 	}
 	
 	@Override
