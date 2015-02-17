@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: UI Survey
+Bundle-SymbolicName: uk.ac.diamond.screenshot.uisurvey;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Diamond Light Source
+Require-Bundle: org.eclipse.ui;bundle-version="3.0.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: org.slf4j,
+ uk.ac.diamond.screenshot.api
+Service-Component: OSGI-INF/component.xml
+Bundle-ActivationPolicy: lazy
