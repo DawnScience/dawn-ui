@@ -13,8 +13,6 @@ import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionFactory;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.PseudoVoigt;
 
 public class FittingPreferenceInitializer extends AbstractPreferenceInitializer {
 
@@ -29,7 +27,7 @@ public class FittingPreferenceInitializer extends AbstractPreferenceInitializer 
 		store.setDefault(FittingConstants.SHOW_PEAK_SELECTIONS,true);
 		store.setDefault(FittingConstants.SHOW_FITTING_TRACE,  true);
 		store.setDefault(FittingConstants.SHOW_ANNOTATION_AT_PEAK,  true);
-		store.setDefault(FittingConstants.PEAK_TYPE, PseudoVoigt.class.getName());
+		store.setDefault(FittingConstants.PEAK_TYPE, "Pseudo-Voigt"); //PseudoVoigt.class.getSimpleName());
 //		try{
 //			store.setDefault(FittingConstants.PEAK_TYPE, FunctionFactory.getClassNameForFunction("Pseudo-Voigt"));
 //		} catch (Exception ne) {
