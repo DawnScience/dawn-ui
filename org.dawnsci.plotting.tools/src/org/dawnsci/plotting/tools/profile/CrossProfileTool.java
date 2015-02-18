@@ -1,5 +1,8 @@
 package org.dawnsci.plotting.tools.profile;
 
+import org.apache.commons.math3.genetics.CrossoverPolicy;
+import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.preference.CrossProfileConstants;
 import org.dawnsci.plotting.util.ColorUtility;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
@@ -14,7 +17,14 @@ import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 
 /**
  * A Line profile which is created by drawing a rectangle and it creates two lines
@@ -88,9 +98,44 @@ public class CrossProfileTool extends LineProfileTool {
 				});
 			}
 		}
+		
+		// TODO Draw z if this is a lazy dataset slice and DO_Z is true.
+		
 		return trace;
 	}
 
+	private IAction showZ, zPrefs;
+	@Override
+	protected void configurePlottingSystem(IPlottingSystem plotter) {
+
+		super.configurePlottingSystem(plotter);
+		
+		final IPreferenceStore store = Activator.getLocalPreferenceStore();
+		
+		// Now we can add the actions for z.
+		showZ = new Action("Show z profile at cross intersection.", IAction.AS_CHECK_BOX) {
+			public void run() {
+				store.setValue(CrossProfileConstants.DO_Z, isChecked());
+				update(null, null, false);
+			}
+		};
+		showZ.setImageDescriptor(Activator.getImageDescriptor("icons/z-line.png"));
+		showZ.setChecked(store.getBoolean(CrossProfileConstants.DO_Z));
+		
+		zPrefs = new Action("Edit z-profile...", Activator.getImageDescriptor("icons/z-pref.png")) {
+			public void run() {
+				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), 
+						                              "org.dawnsci.plotting.tools.crossProfilePreference", null, null);
+				if (pref != null) pref.open();
+				
+			}
+		};
+
+		getSite().getActionBars().getToolBarManager().add(new Separator(CrossProfileConstants.DO_Z+"start"));
+		getSite().getActionBars().getToolBarManager().add(showZ);
+		getSite().getActionBars().getToolBarManager().add(zPrefs);
+		getSite().getActionBars().getToolBarManager().add(new Separator(CrossProfileConstants.DO_Z+"end"));
+	}
 	
 	private final IRegion add(final LinearROI line, String name) throws Exception {
 		
@@ -116,6 +161,8 @@ public class CrossProfileTool extends LineProfileTool {
 		super.activate();
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().addRegionListener(boxListener);
+			
+			// TODO See if current data is part of an ILazyDataset, if is enable z actions
 		}
 	}
 	

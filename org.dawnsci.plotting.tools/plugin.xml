@@ -20,6 +20,9 @@
       <initializer
             class="org.dawnsci.plotting.tools.preference.DiffractionToolPreferenceInitializer">
       </initializer>
+      <initializer
+            class="org.dawnsci.plotting.tools.preference.CrossProfileInitializer">
+      </initializer>
    </extension>
 
    <extension
@@ -31,7 +34,7 @@
             name="Fitting Preferences">
       </page>
       <page
-            category="org.dawb.workbench.ui.visualizationPreferences"
+            category="org.dawnsci.preferences.root"
             class="org.dawnsci.plotting.tools.preference.InfoPixelPreferencePage"
             id="org.dawb.workbench.plotting.infoPixelPreferencePage"
             name="Pixel Information Preferences">
@@ -65,6 +68,12 @@
             class="org.dawnsci.plotting.tools.preference.detector.DiffractionDetectorPreferencePage"
             id="org.dawnsci.plotting.preference.detector"
             name="Diffraction Detectors">
+      </page>
+      <page
+            category="org.dawnsci.preferences.root"
+            class="org.dawnsci.plotting.tools.preference.CrossProfilePreferencePage"
+            id="org.dawnsci.plotting.tools.crossProfilePreference"
+            name="Cross Profile Preferences">
       </page>
      
    </extension>
