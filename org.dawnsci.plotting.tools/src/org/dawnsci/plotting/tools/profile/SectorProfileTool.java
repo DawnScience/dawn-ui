@@ -11,6 +11,7 @@ package org.dawnsci.plotting.tools.profile;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
@@ -309,7 +310,7 @@ public abstract class SectorProfileTool extends ProfileTool {
 
 
 	@Override
-	protected ITrace createProfile(IImageTrace  image, 
+	protected Collection<? extends ITrace> createProfile(IImageTrace  image, 
 			                     IRegion      region, 
 			                     IROI      rbs, 
 			                     boolean      tryUpdate,
@@ -340,6 +341,7 @@ public abstract class SectorProfileTool extends ProfileTool {
 				
 		final Dataset[] xis = getXAxis(sroi, integrals);
 
+		List<ITrace> traces = new ArrayList<ITrace>(3);
 		for (int i = 0; i < 2; i++) {
 			if (integrals[i] != null) {
 				final Dataset integral = integrals[i];
@@ -347,6 +349,7 @@ public abstract class SectorProfileTool extends ProfileTool {
 
 				if (integral != null) {
 					final ILineTrace x_trace = (ILineTrace) profilePlottingSystem.getTrace(integral.getName());
+					traces.add(x_trace);
 					if (tryUpdate && x_trace != null) {
 						getControl().getDisplay().syncExec(new Runnable() {
 							public void run() {
@@ -355,12 +358,13 @@ public abstract class SectorProfileTool extends ProfileTool {
 						});
 					} else {
 						Collection<ITrace> plotted = profilePlottingSystem.createPlot1D(xi, Arrays.asList(new IDataset[] { integral }), monitor);
+						traces.addAll(plotted);
 						registerTraces(region, plotted);
 					}
 				}
 			}
 		}
-		return null;
+		return traces;
 	}
 	
 	@Override

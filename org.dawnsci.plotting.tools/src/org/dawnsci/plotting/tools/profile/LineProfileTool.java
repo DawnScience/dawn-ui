@@ -8,8 +8,10 @@
  */
 package org.dawnsci.plotting.tools.profile;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
@@ -36,7 +38,7 @@ public class LineProfileTool extends ProfileTool {
 	}
 
 	@Override
-	protected ITrace createProfile(	IImageTrace  image, 
+	protected Collection<ITrace> createProfile(	IImageTrace  image, 
 						            IRegion      region, 
 						            IROI         rbs, 
 						            boolean      tryUpdate,
@@ -49,10 +51,8 @@ public class LineProfileTool extends ProfileTool {
 		if (!isRegionTypeSupported(region.getRegionType())) return null;
 
 		final LinearROI bounds = (LinearROI) (rbs==null ? region.getROI() : rbs);
-		if (bounds==null)
-			return null;
-		if (!region.isVisible())
-			return null;
+		if (bounds==null) return null;
+		if (!region.isVisible()) return null;
 
 		if (monitor.isCanceled()) return null;
 		Dataset[] profileData = ROIProfile.line((Dataset)image.getData(), (Dataset)image.getMask(), bounds, 1d, true);
@@ -60,26 +60,33 @@ public class LineProfileTool extends ProfileTool {
 
 		if (monitor.isCanceled()) return null;
 		
-		final Dataset intensity = profileData[0];
-		intensity.setName(region.getName());
-		final Dataset indices = IntegerDataset.createRange(0, intensity.getSize(), 1d);
+		final Dataset indices = IntegerDataset.createRange(0, profileData[0].getSize(), 1d);
 		indices.setName("Pixel");
 		
-		final ILineTrace trace = (ILineTrace)profilePlottingSystem.getTrace(region.getName());
-		if (tryUpdate && trace!=null) {
-			if (trace!=null && !monitor.isCanceled()) getControl().getDisplay().syncExec(new Runnable() {
-				public void run() {
-					trace.setData(indices, intensity);
-				}
-			});
+		List<ITrace> traces = new ArrayList<ITrace>(2);
+		for (int i = 0; i < profileData.length; i++) {
 			
-		} else {
-			if (monitor.isCanceled()) return null;
-			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(indices, Arrays.asList(new IDataset[]{intensity}), monitor);
-			registerTraces(region, plotted);
-			return plotted.iterator().next();
+			final Dataset    intensity = profileData[i];	
+			final String     name      = i==0?region.getName():region.getName()+"(Y)";
+			intensity.setName(name);
+			
+			final ILineTrace trace     = (ILineTrace)profilePlottingSystem.getTrace(name);
+			if (tryUpdate && trace!=null) {
+				traces.add(trace);
+				if (trace!=null && !monitor.isCanceled()) getControl().getDisplay().syncExec(new Runnable() {
+					public void run() {
+						trace.setData(indices, intensity);
+					}
+				});
+				
+			} else {
+				if (monitor.isCanceled()) return null;
+				Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(indices, Arrays.asList(new IDataset[]{intensity}), monitor);
+				registerTraces(name, plotted);
+				traces.add(plotted.iterator().next());
+			}
 		}
-		return trace;
+		return traces;
 	}
 
 	@Override

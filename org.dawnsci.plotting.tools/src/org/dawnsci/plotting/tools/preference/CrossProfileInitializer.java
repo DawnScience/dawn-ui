@@ -10,6 +10,8 @@ public class CrossProfileInitializer extends AbstractPreferenceInitializer {
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = Activator.getLocalPreferenceStore();
 		store.setDefault(CrossProfileConstants.DO_Z,    true);
+		store.setDefault(CrossProfileConstants.PLUS_X,  4);
+		store.setDefault(CrossProfileConstants.MINUS_X, 4);
 		store.setDefault(CrossProfileConstants.PLUS_Z,  4);
 		store.setDefault(CrossProfileConstants.MINUS_Z, 4);
 	}

@@ -107,7 +107,7 @@ public class SpotTool extends ZoomTool {
 	}
 
 	@Override
-	protected ITrace createProfile(final IImageTrace  image, 
+	protected Collection<? extends ITrace> createProfile(final IImageTrace  image, 
 					            IRegion      region,
 					            IROI         rbs, 
 					            boolean      tryUpdate, 
@@ -151,7 +151,7 @@ public class SpotTool extends ZoomTool {
 			}
 		});
 		
-        return profilePlottingSystem.getTraces().iterator().next();
+        return profilePlottingSystem.getTraces();
 
 	}
 

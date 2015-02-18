@@ -133,9 +133,9 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	}
 
 	@Override
-	protected ITrace createProfile(IImageTrace image, IRegion region,
-								IROI rbs, boolean tryUpdate, boolean isDrag,
-								IProgressMonitor monitor) {
+	protected Collection<? extends ITrace> createProfile(IImageTrace image, IRegion region,
+														IROI rbs, boolean tryUpdate, boolean isDrag,
+														IProgressMonitor monitor) {
 		if (monitor.isCanceled()) return null;
 		if (image==null) return null;
 		
@@ -149,11 +149,11 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 		bounds = getPositiveBounds(bounds);
 		// vertical and horizontal profiles
 		if (isEdgePlotted && !isAveragePlotted) {
-			updatePerimeterProfile(image, bounds, region, tryUpdate, monitor);
+			return updatePerimeterProfile(image, bounds, region, tryUpdate, monitor);
 		} else if (!isEdgePlotted && isAveragePlotted) {
-			updateAverageProfile(image, bounds, region, tryUpdate, monitor);
+			return updateAverageProfile(image, bounds, region, tryUpdate, monitor);
 		} else if (isEdgePlotted && isAveragePlotted) {
-			updatePerimeterAndAverageProfile(image, bounds, region, tryUpdate, monitor);
+			return updatePerimeterAndAverageProfile(image, bounds, region, tryUpdate, monitor);
 		} else if (!isEdgePlotted && !isAveragePlotted) {
 			hideTraces();
 		}
@@ -178,15 +178,14 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	 * @param tryUpdate
 	 * @param monitor
 	 */
-	private void updatePerimeterAndAverageProfile(
-			final IImageTrace image, final RectangularROI bounds,
-			IRegion region, boolean tryUpdate,
-			IProgressMonitor monitor) {
+	private  Collection<ILineTrace> updatePerimeterAndAverageProfile( final IImageTrace image, final RectangularROI bounds,
+													IRegion region, boolean tryUpdate,
+													IProgressMonitor monitor) {
 		Dataset[] boxLine = ROIProfile.boxLine((Dataset)image.getData(), (Dataset)image.getMask(), bounds, true, isVertical);
 		Dataset[] boxMean = ROIProfile.boxMean((Dataset)image.getData(), (Dataset)image.getMask(), bounds, true);
 
-		if (boxLine == null) return;
-		if (boxMean == null) return;
+		if (boxLine == null) return null;
+		if (boxMean == null) return null;
 
 		setTraceNames();
 		Dataset line3 = boxMean[isVertical ? 1 : 0];
@@ -232,6 +231,8 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 			registerTraces(region, plotted);
 			hideTraces();
 		}
+		
+		return traces;
 	}
 
 	/**
@@ -242,12 +243,11 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	 * @param tryUpdate
 	 * @param monitor
 	 */
-	private void updatePerimeterProfile(
-			final IImageTrace image, final RectangularROI bounds,
-			IRegion region, boolean tryUpdate,
-			IProgressMonitor monitor) {
+	private Collection<ILineTrace> updatePerimeterProfile(  final IImageTrace image, final RectangularROI bounds,
+														IRegion region, boolean tryUpdate,
+														IProgressMonitor monitor) {
 		Dataset[] boxLine = ROIProfile.boxLine((Dataset)image.getData(), (Dataset)image.getMask(), bounds, true, isVertical);
-		if (boxLine == null) return;
+		if (boxLine == null) return null;
 
 		setTraceNames();
 
@@ -283,6 +283,8 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 			plotted = profilePlottingSystem.updatePlot1D(y_indices, Arrays.asList(new IDataset[] { line2 }), monitor);
 			registerTraces(region, plotted);
 		}
+		
+		return traces;
 	}
 
 	/**
@@ -293,13 +295,13 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	 * @param tryUpdate
 	 * @param monitor
 	 */
-	private void updateAverageProfile(
+	private  Collection<ILineTrace> updateAverageProfile(
 			final IImageTrace image, final RectangularROI bounds,
 			IRegion region, boolean tryUpdate,
 			IProgressMonitor monitor) {
 		Dataset[] boxMean = ROIProfile.boxMean((Dataset)image.getData(), (Dataset)image.getMask(), bounds, true);
 
-		if (boxMean==null) return;
+		if (boxMean==null) return null;
 
 		setTraceNames();
 		Dataset line3 = boxMean[isVertical ? 1 : 0];
@@ -324,6 +326,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(av_indices, Arrays.asList(new IDataset[] { line3 }), monitor);
 			registerTraces(region, plotted);
 		}
+		return traces;
 	}
 
 	/**

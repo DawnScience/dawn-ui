@@ -1,13 +1,14 @@
 package org.dawnsci.plotting.tools.profile;
 
-import org.apache.commons.math3.genetics.CrossoverPolicy;
+import java.util.Collection;
+
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.CrossProfileConstants;
 import org.dawnsci.plotting.util.ColorUtility;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
-import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -34,16 +35,16 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
  */
 public class CrossProfileTool extends LineProfileTool {
 
-	private IRegionListener boxListener;
+	private IRegionListener pointListener;
 
 	public CrossProfileTool() {
 		super();
 		
-		this.boxListener = new IRegionListener.Stub() {
+		this.pointListener = new IRegionListener.Stub() {
 			@Override
 			public void regionAdded(RegionEvent evt) {
 				try {
-					createBoxLines(evt.getRegion());
+					createLines(evt.getRegion());
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -52,56 +53,57 @@ public class CrossProfileTool extends LineProfileTool {
 	}
 	
 	
-	protected void createBoxLines(IRegion region) throws Exception {
+	protected void createLines(IRegion region) throws Exception {
 		
 		IPlottingSystem sys = getPlottingSystem();
 		if (sys==null) return; // Unlikely.
 		if (isDisposed()) return;
 		
 		// Draws two lines, then deletes the box
-		if (region.getRegionType()!=RegionType.BOX) return;
-		IRectangularROI roi = (IRectangularROI)region.getROI();
+		if (region.getRegionType()!=RegionType.POINT) return;
+		PointROI roi = (PointROI)region.getROI();
 		
-		
-		// Y-line
-		LinearROI yline = new LinearROI(new double[]{roi.getPoint()[0]+roi.getLength(0)/2d, roi.getPoint()[1]},
-				                        new double[]{roi.getPoint()[0]+roi.getLength(0)/2d, roi.getPoint()[1]+roi.getLength(1)});
-		
-		add(yline, "Y Cross");
-		
+				
 		// X-line
-		LinearROI xline = new LinearROI(new double[]{roi.getPoint()[0],                  roi.getPoint()[1]+roi.getLength(1)/2d},
-                                        new double[]{roi.getPoint()[0]+roi.getLength(0), roi.getPoint()[1]+roi.getLength(1)/2d});
+		final double px =  Activator.getLocalPreferenceStore().getInt(CrossProfileConstants.PLUS_X);
+		final double mx =  Activator.getLocalPreferenceStore().getInt(CrossProfileConstants.MINUS_X);
+		LinearROI xline = new LinearROI(new double[]{roi.getPoint()[0]-mx,   roi.getPoint()[1]},
+                                        new double[]{roi.getPoint()[0]+px,   roi.getPoint()[1]});
 
-		add(xline, "X Cross");
+		xline.setCrossHair(true);
 		
+		add(xline, "Cross");
 		
 		sys.removeRegion(region);
 		update(null, null, false);
 	}
 	
-	protected ITrace createProfile(	IImageTrace   image, 
+	protected Collection<ITrace> createProfile(	IImageTrace   image, 
 						            final IRegion region, 
 						            IROI          rbs, 
 						            boolean       tryUpdate,
 						            boolean       isDrag,
 						            IProgressMonitor monitor) {
 		
-		final ITrace trace = super.createProfile(image, region, rbs, tryUpdate, isDrag, monitor);
-		if (trace!=null && trace instanceof ILineTrace) {
-			final ILineTrace ltrace = (ILineTrace)trace;
-			if (ltrace.getTraceColor()!=region.getRegionColor()) {
-				Display.getDefault().syncExec(new Runnable() {
-					public void run() {
-						ltrace.setTraceColor(region.getRegionColor());
-					}
-				});
+		final Collection<ITrace> traces = super.createProfile(image, region, rbs, tryUpdate, isDrag, monitor);
+		
+		for (ITrace trace : traces) {
+			if (trace!=null && trace instanceof ILineTrace) {
+				final ILineTrace ltrace = (ILineTrace)trace;
+				if (ltrace.getTraceColor()!=region.getRegionColor()) {
+					Display.getDefault().syncExec(new Runnable() {
+						public void run() {
+							ltrace.setTraceColor(region.getRegionColor());
+						}
+					});
+				}
 			}
 		}
 		
 		// TODO Draw z if this is a lazy dataset slice and DO_Z is true.
+		//if (trace!=null && trace.getData()!=null && trace.getData().getMetadata(clazz))
 		
-		return trace;
+		return traces;
 	}
 
 	private IAction showZ, zPrefs;
@@ -153,14 +155,14 @@ public class CrossProfileTool extends LineProfileTool {
 
 	@Override
 	protected RegionType getCreateRegionType() {
-		return RegionType.BOX;
+		return RegionType.POINT;
 	}
 
 	public void activate() {
 
 		super.activate();
 		if (getPlottingSystem()!=null) {
-			getPlottingSystem().addRegionListener(boxListener);
+			getPlottingSystem().addRegionListener(pointListener);
 			
 			// TODO See if current data is part of an ILazyDataset, if is enable z actions
 		}
@@ -170,7 +172,7 @@ public class CrossProfileTool extends LineProfileTool {
 
 		super.deactivate();
 		if (getPlottingSystem()!=null) {
-			getPlottingSystem().removeRegionListener(boxListener);
+			getPlottingSystem().removeRegionListener(pointListener);
 		}
 	}
 

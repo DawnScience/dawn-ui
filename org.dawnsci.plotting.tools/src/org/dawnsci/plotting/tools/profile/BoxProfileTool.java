@@ -52,7 +52,7 @@ public class BoxProfileTool extends ProfileTool {
 	}
 	
 	@Override
-	protected ITrace createProfile(IImageTrace  image, 
+	protected Collection<? extends ITrace> createProfile(IImageTrace  image, 
 			                     IRegion      region, 
 			                     IROI      rbs, 
 			                     boolean      tryUpdate,
@@ -90,7 +90,7 @@ public class BoxProfileTool extends ProfileTool {
 			registerTraces(region, plotted);
 		}
 		
-		return y_trace;
+		return Arrays.asList(y_trace, x_trace);
 	}
 	
 	/**

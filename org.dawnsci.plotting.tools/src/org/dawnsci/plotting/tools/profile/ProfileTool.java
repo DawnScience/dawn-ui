@@ -168,13 +168,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	protected void registerTraces(final IRegion region, final Collection<ITrace> traces) {
 		
 		final String name = region.getName();
-		Collection<ITrace> registered = this.registeredTraces.get(name);
-		if (registered==null) {
-			registered = new HashSet<ITrace>(7);
-			registeredTraces.put(name, registered);
-		}
-		for (ITrace iTrace : traces) iTrace.setUserObject(ProfileType.PROFILE);
-		registered.addAll(traces);
+		registerTraces(name, traces);
 		
 		// Used to set the line on the image to the same color as the plot for line profiles only.
 		if (!traces.isEmpty()) {
@@ -189,6 +183,17 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		}
 	}
 	
+	protected void registerTraces(String name, Collection<ITrace> traces) {
+		
+		Collection<ITrace> registered = this.registeredTraces.get(name);
+		if (registered==null) {
+			registered = new HashSet<ITrace>(7);
+			registeredTraces.put(name, registered);
+		}
+		for (ITrace iTrace : traces) iTrace.setUserObject(ProfileType.PROFILE);
+		registered.addAll(traces);
+	}
+
 	protected void clearTraces(final IRegion region) {
 		final String name = region.getName();
 		Collection<ITrace> registered = this.registeredTraces.get(name);
@@ -406,7 +411,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	 * @param roi - may be null
 	 * @param monitor
 	 */
-	protected abstract ITrace createProfile(IImageTrace image, 
+	protected abstract Collection<? extends ITrace> createProfile(IImageTrace image, 
 			                                IRegion region, 
 			                                IROI roi, 
 			                                boolean tryUpdate, 
