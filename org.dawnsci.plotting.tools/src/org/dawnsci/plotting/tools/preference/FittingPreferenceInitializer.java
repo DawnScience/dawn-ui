@@ -27,12 +27,8 @@ public class FittingPreferenceInitializer extends AbstractPreferenceInitializer 
 		store.setDefault(FittingConstants.SHOW_PEAK_SELECTIONS,true);
 		store.setDefault(FittingConstants.SHOW_FITTING_TRACE,  true);
 		store.setDefault(FittingConstants.SHOW_ANNOTATION_AT_PEAK,  true);
-		store.setDefault(FittingConstants.PEAK_TYPE, "Pseudo-Voigt"); //PseudoVoigt.class.getSimpleName());
-//		try{
-//			store.setDefault(FittingConstants.PEAK_TYPE, FunctionFactory.getClassNameForFunction("Pseudo-Voigt"));
-//		} catch (Exception ne) {
-//			System.out.println("ERROR: Could not set default peak type to Pseudo-Voigt. "+ne);
-//		}
+		 //PEAK_TYPE Should be name given in extension point!
+		store.setDefault(FittingConstants.PEAK_TYPE, "Pseudo-Voigt");
 		store.setDefault(FittingConstants.SMOOTHING, 1);
 		store.setDefault(FittingConstants.QUALITY,   0.01);
 		store.setDefault(FittingConstants.POLY_ORDER,   1);
