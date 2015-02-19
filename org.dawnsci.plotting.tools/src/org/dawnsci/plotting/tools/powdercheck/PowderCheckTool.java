@@ -116,7 +116,7 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Gaussian;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
-import uk.ac.diamond.scisoft.analysis.roi.ROIProfile.XAxis;
+import uk.ac.diamond.scisoft.analysis.roi.XAxis;
 
 @SuppressWarnings("unused")
 public class PowderCheckTool extends AbstractToolPage {
@@ -129,7 +129,7 @@ public class PowderCheckTool extends AbstractToolPage {
 	SashForm sashForm;
 	TableViewer viewer;
 	Action fullImage;
-	ROIProfile.XAxis xAxis = XAxis.Q;
+	XAxis xAxis = XAxis.Q;
 	private MenuAction calibrantActions;
 	private CheckableActionGroup calibrantGroup;
 	private Action     calPref;
