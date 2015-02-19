@@ -614,7 +614,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		for (final String peakName : peakFunctions.keySet() ) {
 			final Action action = new Action(peakName, IAction.AS_CHECK_BOX) {
 				public void run() {
-					Activator.getPlottingPreferenceStore().setValue(FittingConstants.PEAK_TYPE, peakFunctions.get(peakName).getName());
+					Activator.getPlottingPreferenceStore().setValue(FittingConstants.PEAK_TYPE, peakName);
 					setChecked(true);
 					if (fittingJob!=null&&isActive()) fittingJob.fit(false);
 					peakType.setSelectedAction(this);
@@ -622,7 +622,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 			};
 			peakType.add(action);
 			group.add(action);
-			if (peakFunctions.get(peakName).getName().equals(Activator.getPlottingPreferenceStore().getString(FittingConstants.PEAK_TYPE))) {
+			if (peakName.equals(Activator.getPlottingPreferenceStore().getString(FittingConstants.PEAK_TYPE))) {
 				selectedPeakAction = action;
 			}
 		}
