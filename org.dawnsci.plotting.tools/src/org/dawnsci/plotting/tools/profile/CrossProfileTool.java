@@ -102,6 +102,8 @@ public class CrossProfileTool extends LineProfileTool {
 		final Collection<ITrace> traces = super.createProfile(image, region, rbs, tryUpdate, isDrag, monitor);
 		syncColor(traces, region);
 
+		boolean doZ = Activator.getLocalPreferenceStore().getBoolean(CrossProfileConstants.DO_Z);
+		if (!doZ) return traces;
 
 		// It's time to hack in z, let's do this thing...
 		try {
@@ -173,6 +175,7 @@ public class CrossProfileTool extends LineProfileTool {
 					IDataset zimage = parent.getSlice(zSlice); // Probably will be slow...
 					zimage = zimage.squeeze();
 
+					// TODO Not sure if this is generic enough.
 					LinearROI zline     = new LinearROI(new double[]{cen[1], 0}, new double[]{cen[1], zimage.getShape()[0]});
 					Dataset[] zprofiles = ROIProfile.line((Dataset)zimage, zline, 1d);
 					if (zprofiles!=null && zprofiles.length>0) {
