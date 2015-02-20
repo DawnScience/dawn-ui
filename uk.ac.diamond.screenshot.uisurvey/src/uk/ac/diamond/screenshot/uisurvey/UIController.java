@@ -40,15 +40,15 @@ public class UIController {
 	private static final String ALL_PARTS_DIRECTORY_NAME   = "all_parts";
 	private static final String DEFAULT_SAVE_DIR           = System.getProperty("user.home") + "/screenshots/";
 	private static final String DIRECTORY_DIALOG_TITLE     = "Choose screenshot directory for this session";
-	private static final String EDITOR_FILE_NAME           = "editor:";
+	private static final String EDITOR_FILE_NAME           = "editor-";
 	private static final String FILE_BASE_NAME             = "screenshot%03d";
 	private static final String FILE_EXTENSION             = ".png";
 	private static final String FILE_NAME_PART_SEPARATOR   = "_";
 	private static final int    PART_ACTIVATION_RETRIES    = 5;
-	private static final String PERSPECTIVE_DIRECTORY_NAME = "perspective:";
+	private static final String PERSPECTIVE_DIRECTORY_NAME = "perspective-";
 	private static final String SPY_SUFFIX                 = "_spy";
 	private static final long   TIMEOUT_MILLIS             = 3000;
-	private static final String VIEW_FILE_NAME             = "view:";
+	private static final String VIEW_FILE_NAME             = "view-";
 	private static final String WHOLE_DISPLAY_FILE_NAME    = "whole_display";
 	
 	private static final Logger logger = LoggerFactory.getLogger(UIController.class);
