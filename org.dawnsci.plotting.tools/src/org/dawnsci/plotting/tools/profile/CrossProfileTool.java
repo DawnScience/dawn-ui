@@ -195,6 +195,7 @@ public class CrossProfileTool extends LineProfileTool {
 	}
 
 	private void syncColor(Collection<ITrace> traces, final IRegion region) {
+		if (traces==null) return;
 		for (ITrace trace : traces) {
 			if (trace!=null && trace instanceof ILineTrace) {
 				final ILineTrace ltrace = (ILineTrace)trace;
