@@ -552,7 +552,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 				final String       path       = EclipseUtils.getFilePath(input);
 				final IDataHolder  dataHolder = LoaderFactory.getData(path, true, true, new ProgressMonitorWrapper(monitor));
 				final IMetadata    meta       = dataHolder.getMetadata();
-				if (monitor.isCanceled())           return Status.CANCEL_STATUS;
+				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 
 				// Update UI
 				Display.getDefault().syncExec(new Runnable() {
@@ -562,7 +562,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 							setFocus();
 							final PlotDataComponent dataSetComponent = (PlotDataComponent)getDataSetComponent();
 					 		if (dataSetComponent==null) return;
-						    dataSetComponent.setData(dataHolder, meta);
+						    dataSetComponent.setData(dataHolder, meta, true);
 							dataSetComponent.refresh();
 							((AbstractPlottingSystem)getPlottingSystem()).setRootName(dataSetComponent.getRootName());
 						} catch (Throwable ignored) {
