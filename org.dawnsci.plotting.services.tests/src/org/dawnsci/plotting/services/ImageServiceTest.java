@@ -15,6 +15,9 @@ public class ImageServiceTest {
 
 	final static double EPSILON = 0.01;
 
+	/**
+	 * Regression tests http://jira.diamond.ac.uk/browse/DAWNSCI-5819
+	 */
 	@Test
 	public void testLogOffset() {
 
@@ -29,6 +32,9 @@ public class ImageServiceTest {
 
 	}
 
+	/**
+	 * Regression tests http://jira.diamond.ac.uk/browse/DAWNSCI-5819
+	 */
 	@Test
 	public void testPlot() {
 
