@@ -59,32 +59,40 @@ public class LineProfileTool extends ProfileTool {
         if (profileData==null) return null;
 
 		if (monitor.isCanceled()) return null;
-		
-		final Dataset indices = IntegerDataset.createRange(0, profileData[0].getSize(), 1d);
-		indices.setName("Pixel");
-		
+				
 		List<ITrace> traces = new ArrayList<ITrace>(2);
 		for (int i = 0; i < profileData.length; i++) {
 			
-			final Dataset    intensity = profileData[i];	
+			final IDataset   intensity = profileData[i];
 			final String     name      = i==0?region.getName():region.getName()+"(Y)";
 			intensity.setName(name);
+			traces.addAll(plotProfile(intensity, tryUpdate, monitor));
+		}
+		return traces;
+	}
+
+	protected List<ITrace>  plotProfile(final IDataset intensity, boolean tryUpdate, IProgressMonitor monitor) {
+		
+		List<ITrace> traces = new ArrayList<ITrace>(2);
+		final String name = intensity.getName();
+		
+		final Dataset indices = IntegerDataset.createRange(0, intensity.getSize(), 1d);
+		indices.setName("Pixel");
+		
+		final ILineTrace trace     = (ILineTrace)profilePlottingSystem.getTrace(name);
+		if (tryUpdate && trace!=null) {
+			traces.add(trace);
+			if (trace!=null && !monitor.isCanceled()) getControl().getDisplay().syncExec(new Runnable() {
+				public void run() {
+					trace.setData(indices, intensity);
+				}
+			});
 			
-			final ILineTrace trace     = (ILineTrace)profilePlottingSystem.getTrace(name);
-			if (tryUpdate && trace!=null) {
-				traces.add(trace);
-				if (trace!=null && !monitor.isCanceled()) getControl().getDisplay().syncExec(new Runnable() {
-					public void run() {
-						trace.setData(indices, intensity);
-					}
-				});
-				
-			} else {
-				if (monitor.isCanceled()) return null;
-				Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(indices, Arrays.asList(new IDataset[]{intensity}), monitor);
-				registerTraces(name, plotted);
-				traces.add(plotted.iterator().next());
-			}
+		} else {
+			if (monitor.isCanceled()) return null;
+			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(indices, Arrays.asList(new IDataset[]{intensity}), "Cross Profile", monitor);
+			registerTraces(name, plotted);
+			traces.add(plotted.iterator().next());
 		}
 		return traces;
 	}
