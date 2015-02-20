@@ -424,25 +424,32 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 	 * @param bean
 	 * @return a dataset that can be absolute, if complex, and also be logged according to bean
 	 */
-	private Dataset getImageLoggedData(ImageServiceBean bean) {
+	/* package */ Dataset getImageLoggedData(ImageServiceBean bean) {
 		Dataset ret = (Dataset) bean.getImageValue();
-		if (ret != null)
-			return ret;
-
-		ret = (Dataset) bean.getImage();
+		if (ret == null) {
+			ret = getImageLoggedDataCalc(bean);
+			bean.setImageValue(ret);
+		}
+		return ret;
+	}
+	/**
+	 * 
+	 * @param bean
+	 * @return a dataset that can be absolute, if complex, and also be logged according to bean
+	 */
+	/* package */ Dataset getImageLoggedDataCalc(ImageServiceBean bean) {
+		Dataset ret = (Dataset) bean.getImage();
 
 		if (ret.isComplex()) {
 			ret = Maths.abs(ret);
-			bean.setImageValue(ret);
 		}
 		if (bean.isLogColorScale()) {
 			double offset = bean.getLogOffset();
 			if (!Double.isNaN(offset) &&
 				!Double.isInfinite(offset)) {
-				ret.isubtract(offset);
+				ret = Maths.subtract(ret, offset);
 			}
 			ret = Maths.log10(ret);
-			bean.setImageValue(ret);
 		}
 		return ret;
 	}
