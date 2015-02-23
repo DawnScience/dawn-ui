@@ -420,9 +420,11 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 	}
 
 	/**
+	 * Get the logged image value and cache the result.
 	 * 
 	 * @param bean
 	 * @return a dataset that can be absolute, if complex, and also be logged according to bean
+	 * Package private for testing
 	 */
 	/* package */ Dataset getImageLoggedData(ImageServiceBean bean) {
 		Dataset ret = (Dataset) bean.getImageValue();
@@ -433,9 +435,11 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		return ret;
 	}
 	/**
+	 * Get the logged image value.
 	 * 
 	 * @param bean
 	 * @return a dataset that can be absolute, if complex, and also be logged according to bean
+	 * Package private for testing
 	 */
 	/* package */ Dataset getImageLoggedDataCalc(ImageServiceBean bean) {
 		Dataset ret = (Dataset) bean.getImage();
