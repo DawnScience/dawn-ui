@@ -315,12 +315,29 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 						             final List<? extends IDataset> ys,
 						             final IProgressMonitor      monitor) {
 		
-		return updatePlot1D(x, ys, null, monitor);
+		return updatePlot1D(x, ys, null, null, monitor);
 	}
 	
 	public List<ITrace> updatePlot1D(IDataset                      x, 
 									 final List<? extends IDataset> ys,
 									 final List<String>             dataNames,
+									 final IProgressMonitor         monitor) {
+		
+        return updatePlot1D(x, ys, dataNames, null, monitor);
+	}
+	
+	public List<ITrace> updatePlot1D(IDataset                       x, 
+									 final List<? extends IDataset> ys,
+									 final String                   plotTitle,
+									 final IProgressMonitor         monitor) {
+
+		return updatePlot1D(x, ys, null, plotTitle, monitor);
+	}
+
+	private List<ITrace> updatePlot1D(IDataset                      x, 
+									 final List<? extends IDataset> ys,
+									 final List<String>             dataNames,
+									 final String                   plotTitle,
 									 final IProgressMonitor         monitor) {
 
 		
@@ -363,7 +380,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		}
 		if (!unfoundYs.isEmpty()) {
 			if (x==null) x = IntegerDataset.createRange(unfoundYs.get(0).getSize());
-			final Collection<ITrace> news = createPlot1D(x, unfoundYs, unfoundNames, null, monitor);
+			final Collection<ITrace> news = createPlot1D(x, unfoundYs, unfoundNames, plotTitle, monitor);
 			updatedAndCreated.addAll(news);
 		}
 		return updatedAndCreated;

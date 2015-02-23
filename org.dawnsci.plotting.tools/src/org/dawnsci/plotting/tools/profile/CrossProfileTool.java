@@ -1,12 +1,19 @@
 package org.dawnsci.plotting.tools.profile;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.CrossProfileConstants;
 import org.dawnsci.plotting.util.ColorUtility;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.Slice;
+import org.eclipse.dawnsci.analysis.api.metadata.OriginMetadata;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -18,6 +25,7 @@ import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.PointStyle;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.Separator;
@@ -26,6 +34,10 @@ import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 
 /**
  * A Line profile which is created by drawing a rectangle and it creates two lines
@@ -35,6 +47,8 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
  */
 public class CrossProfileTool extends LineProfileTool {
 
+	private static final Logger logger = LoggerFactory.getLogger(CrossProfileTool.class);
+	
 	private IRegionListener pointListener;
 
 	public CrossProfileTool() {
@@ -79,14 +93,109 @@ public class CrossProfileTool extends LineProfileTool {
 	}
 	
 	protected Collection<ITrace> createProfile(	IImageTrace   image, 
-						            final IRegion region, 
-						            IROI          rbs, 
-						            boolean       tryUpdate,
-						            boolean       isDrag,
-						            IProgressMonitor monitor) {
-		
+									            final IRegion region, 
+									            IROI          rbs, 
+									            boolean       tryUpdate,
+									            boolean       isDrag,
+									            IProgressMonitor monitor) {
+
 		final Collection<ITrace> traces = super.createProfile(image, region, rbs, tryUpdate, isDrag, monitor);
-		
+		syncColor(traces, region);
+
+		boolean doZ = Activator.getLocalPreferenceStore().getBoolean(CrossProfileConstants.DO_Z);
+		if (!doZ) return traces;
+
+		// It's time to hack in z, let's do this thing...
+		try {
+
+			// Draw z if this is a lazy dataset slice and DO_Z is true.
+			if (image!=null && image.getData()!=null && rbs instanceof LinearROI) {
+
+				IDataset             data   = image.getData();
+				List<OriginMetadata> origin = data.getMetadata(OriginMetadata.class);
+				OriginMetadata       odata  = origin!=null && !origin.isEmpty() ? origin.get(0) : null;
+
+				if (odata!=null) {
+					// We have some z! but which dim is z?
+					// It is poorly defined at the slice level
+					// because we could have nD data, with several slices
+					// to get down to the image. However one of those sliced
+					// when the data > 3 dimensions must be chosen as z.
+					// Therefore if data>3, user must give us the z via a 
+					// system property.
+					final ILazyDataset parent = odata.getParent();
+					final Slice[]      slice  = odata.getSliceInOutput();
+
+					int zDim = Activator.getLocalPreferenceStore().getInt(CrossProfileConstants.Z_DIM);
+					if (parent.getRank()==3) // We find z
+						for (int i = 0; i < slice.length; i++) {
+							if (slice[i].isSliceComplete() && slice[i].getNumSteps()==1) {
+								zDim = i;
+								break;
+							}
+						}
+
+					LinearROI lroi     = (LinearROI)rbs;
+					double[]  cen      = lroi.getMidPoint(); // We assume y, then x. TODO this is not guaranteed, need a fix
+					final int location = slice[zDim].getStart();
+					int mz             = Activator.getLocalPreferenceStore().getInt(CrossProfileConstants.MINUS_Z);
+					int pz             = Activator.getLocalPreferenceStore().getInt(CrossProfileConstants.PLUS_Z);
+
+					int from = location-mz; 
+					if (from<0) from = 0;
+					int to  = location+pz;
+					if (to>parent.getShape()[zDim]) to = parent.getShape()[zDim];
+
+					// We take an image in the z-direction and use ROIProfile.line which
+					// gives a better line than a direct slice.
+					final Slice[] zSlice = new Slice[slice.length];
+					boolean xset = false, yset = false;
+					for (int i = 0; i < zSlice.length; i++) {
+						if (i==zDim) {
+							zSlice[i] = new Slice(from, to, 1);
+							continue;
+						}
+						if (slice[i].getNumSteps()==1) {
+							zSlice[i] = slice[i];
+							continue;
+						}
+						// We assume y, then x. 
+						// TODO this is not guaranteed, need a fix
+						if (!yset) { // FIXME need to set which dim is x and which is y in metadata
+							zSlice[i] =  slice[i];
+							yset = true;
+							continue;
+						}
+						if (!xset) { // FIXME need to set which dim is x and which is y in metadata
+							zSlice[i] = new Slice((int)Math.round(cen[0]), (int)Math.round(cen[0])+1);
+							xset = true;
+							continue;
+						}
+					}
+					IDataset zimage = parent.getSlice(zSlice); // Probably will be slow...
+					zimage = zimage.squeeze();
+
+					// TODO Not sure if this is generic enough.
+					LinearROI zline     = new LinearROI(new double[]{cen[1], 0}, new double[]{cen[1], zimage.getShape()[0]});
+					Dataset[] zprofiles = ROIProfile.line((Dataset)zimage, zline, 1d);
+					if (zprofiles!=null && zprofiles.length>0) {
+						IDataset zprofile = zprofiles[0];
+						zprofile.setName(region.getName()+"(Z)");
+						List<ITrace> ztrace = plotProfile(zprofile, tryUpdate, monitor);
+						syncColor(ztrace, region);
+					}
+				}
+			}
+
+		} catch (Exception ne) {
+			logger.error("Cannot process OriginMetadata", ne);
+		}
+
+		return traces;
+	}
+
+	private void syncColor(Collection<ITrace> traces, final IRegion region) {
+		if (traces==null) return;
 		for (ITrace trace : traces) {
 			if (trace!=null && trace instanceof ILineTrace) {
 				final ILineTrace ltrace = (ILineTrace)trace;
@@ -94,16 +203,19 @@ public class CrossProfileTool extends LineProfileTool {
 					Display.getDefault().syncExec(new Runnable() {
 						public void run() {
 							ltrace.setTraceColor(region.getRegionColor());
+							ltrace.setPointStyle(getPointStyle(ltrace.getName()));
+							ltrace.setPointSize(6);
 						}
 					});
 				}
 			}
 		}
-		
-		// TODO Draw z if this is a lazy dataset slice and DO_Z is true.
-		//if (trace!=null && trace.getData()!=null && trace.getData().getMetadata(clazz))
-		
-		return traces;
+	}
+
+	protected PointStyle getPointStyle(String name) {
+		if (name.contains("(Y)")) return PointStyle.TRIANGLE;
+		if (name.contains("(Z)")) return PointStyle.CIRCLE;
+		return PointStyle.XCROSS;
 	}
 
 	private IAction showZ, zPrefs;
@@ -139,13 +251,15 @@ public class CrossProfileTool extends LineProfileTool {
 		getSite().getActionBars().getToolBarManager().add(new Separator(CrossProfileConstants.DO_Z+"end"));
 	}
 	
+	private static int colourIndex = 0;
 	private final IRegion add(final LinearROI line, String name) throws Exception {
 		
 		IPlottingSystem sys = getPlottingSystem();
 		final IRegion   reg = sys.createRegion(RegionUtils.getUniqueName(name, sys), RegionType.LINE);
 		reg.setROI(line);
 		if (sys.getRegions()!=null) {
-			reg.setRegionColor(ColorUtility.getSwtColour(sys.getRegions().size()));
+			reg.setRegionColor(ColorUtility.getSwtColour(colourIndex));
+			colourIndex++;
 		}
 		sys.addRegion(reg);		
 	

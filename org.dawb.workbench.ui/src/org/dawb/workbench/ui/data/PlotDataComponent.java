@@ -20,6 +20,7 @@ import java.util.EventListener;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.dawb.common.services.ServiceManager;
@@ -30,6 +31,7 @@ import org.dawb.common.ui.util.DialogUtils;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.util.io.FileUtils;
 import org.dawb.common.util.io.PropUtils;
+import org.dawb.common.util.text.NumberUtils;
 import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.data.wizard.PythonFilterWizard;
 import org.dawb.workbench.ui.editors.preference.EditorConstants;
@@ -59,6 +61,7 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.IErrorDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -1917,6 +1920,10 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		return patterns;
 	}
 	
+	public void setData(final IDataHolder dh, IMetadata meta) {
+		setData(dh, meta, false);
+	}
+
 	/**
 	 * Used when the view is being controlled from a Dialog.
 	 * 
@@ -1926,7 +1933,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	 * @param meta
 	 * @throws Exception 
 	 */
-	public void setData(final IDataHolder dh, IMetadata meta) {
+	public void setData(final IDataHolder dh, IMetadata meta, boolean isInit) {
 		
 		this.data.clear();
 		this.dataHolder=dh.clone();
@@ -1945,39 +1952,78 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 
 		try {
 		    readExpressions();
+		    autoSelectData(isInit, names);
 		} catch (Exception ne ) {
 			logger.error("Cannot read expressions for file.", ne);
 		}
 		
-		// Some of the meta data
-		final String autoType = Activator.getDefault().getPreferenceStore().getString(EditorConstants.SAVE_SEL_DATA);
-		if (PlotDataSelection.isActive(autoType)) {
-			try {
+	}
 
-				final String prop = Activator.getDefault().getPreferenceStore().getString(EditorConstants.DATA_SEL);
-				if (prop!=null) {
-					final Collection<String> saveSelections = Arrays.asList(prop.split(","));
-					if (data!=null && !data.isEmpty()) {
-						boolean foundData = false;
-						for (ITransferableDataObject checker : data) {
-							if (saveSelections.contains(checker.getName())) {
+    /**
+     * Method reads properties set to discover what datasets should be preselected.
+     * If the file comes from an active data collection lazy dataset, this
+     * lazy set it selected and the slice set to the index.
+     * 
+     * Otherwise the setting to auto-select data is read and previous dataset
+     * names looked for.
+     */
+	private void autoSelectData(boolean isInit, final Collection<String> names) {
+		
+		// Find the name of the editor, providing we are init then it might give a clue as to what lazy dataset to auto-select.
+		boolean foundData = false;
+		if (isInit && editor!=null) { // We look to see if the name of the part matches a Lazydataset in the data holder.
+			ILoaderService  service = (ILoaderService)PlatformUI.getWorkbench().getService(ILoaderService.class);
+			final String    name    = editor.getTitle();
+			final Matcher   matcher = service.getStackMatcher(name);
+			if (matcher.matches()) {
+				String index       = matcher.group(2);
+				if (index!=null) index = NumberUtils.removeLeadingZeros(index);
+				if (Integer.parseInt(index) == 1) {
+					String lazySetName = matcher.group(1);
+                    if (dataHolder.contains(lazySetName)) {
+                    	for (ITransferableDataObject checker : data) {
+                    		if (checker.getName().equals(lazySetName)) {
 								if (!foundData) selections.clear();
 								checker.setChecked(true);
 								this.selections.add(checker);
 								foundData = true;
-							}
-						}
-
-						if (foundData) {
-							fireSelectionListeners(selections);
-						}
-					}
+                    		}
+                    	}
+                    }
 				}
-			} catch (Throwable ne) {
-				logger.error("Cannot save data previously selected!", ne);
 			}
 		}
 		
+		// Some of the meta data
+		if (!foundData) {
+			final String autoType = Activator.getDefault().getPreferenceStore().getString(EditorConstants.SAVE_SEL_DATA);
+			if (PlotDataSelection.isActive(autoType)) {
+				try {
+	
+					final String prop = Activator.getDefault().getPreferenceStore().getString(EditorConstants.DATA_SEL);
+					if (prop!=null) {
+						final Collection<String> saveSelections = Arrays.asList(prop.split(","));
+						if (data!=null && !data.isEmpty()) {
+							for (ITransferableDataObject checker : data) {
+								if (saveSelections.contains(checker.getName())) {
+									if (!foundData) selections.clear();
+									checker.setChecked(true);
+									this.selections.add(checker);
+									foundData = true;
+								}
+							}
+						}
+					}
+				} catch (Throwable ne) {
+					logger.error("Cannot save data previously selected!", ne);
+				}
+			}
+		}
+		
+		if (foundData) {
+			fireSelectionListeners(selections);
+		}
+
 		// If we are an image or a single data set, plot it.
 		final List<String> namesNoStack = new ArrayList<String>(names);
 		namesNoStack.remove("Image Stack");
@@ -1987,8 +2033,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			selectionChanged(check, true);
 			dataViewer.refresh();
 		}
+		
 	}
-
 
 	public void refresh() {
 		this.dataViewer.refresh();
