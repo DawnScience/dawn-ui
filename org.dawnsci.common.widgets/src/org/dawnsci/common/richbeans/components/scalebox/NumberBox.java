@@ -178,6 +178,9 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 		}
 		if (label != null && !label.isDisposed())
 			label.dispose();
+		
+	    // Do not dispose the colours, they are OS colours and
+		// other things will break.
 		super.dispose();
 	}
 
@@ -377,7 +380,7 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 
 		final int pos = text.getCaretOffset();
 		if (expressionManager.isExpressionValid()) {
-			text.setForeground(blue);
+			setForeground(blue);
 			text.setText(txt);
 			setExpressionValue(expressionManager.getExpressionValue());
 			checkBounds(expressionManager.getExpressionValue());
@@ -385,7 +388,7 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 		else {
 			if (this.red == null)
 				red = getDisplay().getSystemColor(SWT.COLOR_RED);
-			text.setForeground(red);
+			setForeground(red);
 			text.setText(txt);
 			GridUtils.setVisible(expressionLabel, false);
 		}
@@ -433,7 +436,7 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 			numericalValue = Double.valueOf(extractedNumberString);
 		} catch (NumberFormatException e) {
 			if (red == null) red = getDisplay().getSystemColor(SWT.COLOR_RED);
-			text.setForeground(red);
+			setForeground(red);
 			return false;
 		}
 		StringBuilder buf = new StringBuilder(extractedNumberString);
@@ -442,12 +445,22 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 			final String unitLine = " " + unit;
 			buf.append(unitLine);
 		}
-		text.setForeground(black);
+		setForeground(black);
 		text.setText(buf.toString());
 		text.setCaretOffset(pos);
 		checkBounds(numericalValue);
 		layout();
 		return true;
+	}
+	
+	public void setForeground(Color fore) {
+		super.setForeground(fore);
+		
+		if (!text.isEnabled() && !fore.equals(grey)) {
+			if (grey == null) grey = getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
+			fore = grey;
+		}
+		text.setForeground(fore);
 	}
 
 	/**
@@ -478,7 +491,7 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 					setCurrentFontStyle(text, SWT.ITALIC);
 				else
 					setCurrentFontStyle(text, SWT.NORMAL);
-				text.setForeground(red);
+				setForeground(red);
 			}
 			validBounds = false;
 			if ((numericalValue >= maximum && !isMaximumValid()) ||
@@ -501,10 +514,10 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 					black = getDisplay().getSystemColor(SWT.COLOR_BLACK);
 				if (expressionManager != null && expressionManager.isExpressionValid()) {
 					if (!blue.isDisposed())
-						text.setForeground(blue);
+						setForeground(blue);
 				} else {
 					if (!black.isDisposed())
-						text.setForeground(black);
+						setForeground(black);
 				}
 			}
 			evt.setMode(Mode.LEGAL);
@@ -514,7 +527,7 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 			if (grey == null)
 				grey = getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
 			if (!grey.isDisposed())
-				text.setForeground(grey);
+				setForeground(grey);
 		}
 
 		try {
@@ -681,14 +694,14 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 			if (grey == null)
 				grey = getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
 			if (!black.isDisposed() && !grey.isDisposed())
-				text.setForeground(isEditable ? black : grey);
+				setForeground(isEditable ? black : grey);
 
 		} 
 		else {
 			if (red == null)
 				red = getDisplay().getSystemColor(SWT.COLOR_RED);
 			if (!red.isDisposed())
-				text.setForeground(red);
+				setForeground(red);
 			if (!isEditable)
 				setCurrentFontStyle(text, SWT.ITALIC);
 		}
@@ -992,7 +1005,7 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 	public void setTooltipOveride(String tooltipOveride) {
 		this.tooltipOveride = tooltipOveride;
 	}
-
+	
 	public boolean isMaximumValid() {
 		return maximumValid;
 	}
