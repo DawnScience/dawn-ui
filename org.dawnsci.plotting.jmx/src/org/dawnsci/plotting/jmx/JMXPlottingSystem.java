@@ -363,6 +363,11 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	}
 
 	@Override
+	public List<ITrace> updatePlot1D(IDataset x, List<? extends IDataset> ys, String plotTitle, IProgressMonitor monitor) {
+		return (List<ITrace>)call(getMethodName(Thread.currentThread().getStackTrace()), x, ys, plotTitle, monitor);
+	}
+
+	@Override
 	public ITrace createPlot2D(IDataset image,
 			List<? extends IDataset> axes, IProgressMonitor monitor) {
 		return (ITrace)call(getMethodName(Thread.currentThread().getStackTrace()), image,axes,monitor);
