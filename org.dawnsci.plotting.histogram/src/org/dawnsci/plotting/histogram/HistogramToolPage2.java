@@ -1,8 +1,5 @@
 package org.dawnsci.plotting.histogram;
 
-import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.plotting.api.PlotType;
-import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -19,7 +16,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	private FormToolkit toolkit;
 	private ScrolledForm form;
 	
-	IPlottingSystem histogramPlot = null;
+	private HistogramWidget histogramWidget;
 
 	@Override
 	public ToolPageRole getToolPageRole() {
@@ -33,12 +30,15 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		form.reflow(true); // create view with no scrollbars reflowing at this point
 		
 		form.getBody().setLayout(GridLayoutFactory.fillDefaults().create());
-		createHistogramControl();
+		createHistogramControl(form.getBody());
 
 	}
-
-	public void createHistogramControl() {
-		Section section = toolkit.createSection(form.getBody(),
+	
+	/*
+	 * Create the histogram section 
+	 */
+	private void createHistogramControl(Composite comp) {
+		Section section = toolkit.createSection(comp,
 				Section.DESCRIPTION | Section.TITLE_BAR);
 		section.setLayout(GridLayoutFactory.fillDefaults().create());
 		section.setLayoutData(GridDataFactory.fillDefaults().grab(true, true)
@@ -51,22 +51,17 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		sectionClient.setLayout(GridLayoutFactory.fillDefaults().create());
 		sectionClient.setLayoutData(GridDataFactory.fillDefaults()
 				.grab(true, true).create());
-
+		
 		try {
-			histogramPlot = PlottingFactory.createPlottingSystem();
-		} catch (Exception ne) {
-			logger.error("Cannot locate any plotting systems!", ne);
+			histogramWidget = new HistogramWidget(sectionClient, getTitle(), null, null);
+		} catch (Exception e) {
+			logger.error("Cannot locate any plotting systems!", e);
 		}
+		
+		GridData create = GridDataFactory.fillDefaults().hint(0, 200).grab(true, true).create();
+		histogramWidget.setLayoutData(create);
 
-		//final IPageSite site = getSite();
-		//IActionBars actionBars = (site != null) ? site.getActionBars() : null;
-		histogramPlot.createPlotPart(sectionClient, getTitle(), null,
-				PlotType.XY, null);
-		GridData create = GridDataFactory.fillDefaults().hint(0, 200)
-				.grab(true, true).create();
-		histogramPlot.getPlotComposite().setLayoutData(create);
-		toolkit.adapt(histogramPlot.getPlotComposite());
-
+		toolkit.adapt(histogramWidget);
 		section.setClient(sectionClient);
 	}
 
