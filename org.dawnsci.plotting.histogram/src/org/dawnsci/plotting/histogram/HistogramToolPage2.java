@@ -84,7 +84,8 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		if (image == null) return;
 		
 		ImageHistogramProvider h = new ImageHistogramProvider(image);
-		Histogram hist = new Histogram(h.getNumberOfBins(), h.getMininumRange(), h.getMaximumRange(), true);
+		histogramWidget.setInput(h);
+
 		
 		
 	}

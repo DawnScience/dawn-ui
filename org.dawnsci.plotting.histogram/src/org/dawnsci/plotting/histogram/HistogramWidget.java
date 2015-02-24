@@ -1,5 +1,6 @@
 package org.dawnsci.plotting.histogram;
 
+import org.dawnsci.plotting.histogram.IHistogramProvider.IHistogramDatasets;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -32,10 +33,6 @@ public class HistogramWidget extends Composite {
 	private ILineTrace greenTrace;
 	private ILineTrace blueTrace;
 	
-
-	private double histoMax = 50.0;
-	private double histoMin = 25.0;
-
 	private IROIListener histogramRegionListener = new IROIListener.Stub() {
 		@Override
 		public void roiDragged(ROIEvent evt) {
@@ -89,8 +86,8 @@ public class HistogramWidget extends Composite {
 				null);
 		histogramPlottingSystem.setRescale(false);
 
-		createRegion();
-		createTraces();
+		//createRegion();
+		//createTraces();
 	}
 
 	protected void updateHistogramToolElements(ROIEvent evt, IROI roi) {
@@ -100,8 +97,10 @@ public class HistogramWidget extends Composite {
 
 	/**
 	 * Create the region of interest for the histogram
+	 * @param histoMax 
+	 * @param histoMin 
 	 */
-	private void createRegion() throws Exception {
+	private void createRegion(double histoMin, double histoMax) throws Exception {
 		IRegion region = histogramPlottingSystem.getRegion("Histogram Region");
 
 		// Test if the region is already there and update the currentRegion
@@ -162,6 +161,46 @@ public class HistogramWidget extends Composite {
 
 	}
 
+	/**
+	 * Set the input histogramProvider for this widget
+	 * 
+	 * @param histoProvider
+	 */
+	public void setInput(final IHistogramProvider histoProvider){
+		
+		// Finally add everything in a threadsafe way.
+		this.getParent().getDisplay().syncExec(new Runnable() {
+
+			@Override
+			public void run() {	
+				try {
+					createRegion(histoProvider.getMin(), histoProvider.getMax());
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				createTraces();
+				
+				IHistogramDatasets data = histoProvider.getDatasets();
+				histoTrace.setData(data.getX(), data.getY());
+				redTrace.setData(data.getRGBX(), data.getR());
+				greenTrace.setData(data.getRGBX(), data.getG());
+				blueTrace.setData(data.getRGBX(), data.getB());
+//				if (rescale && updateAxis) {
+				histogramPlottingSystem.getSelectedXAxis().setRange(histoProvider.getMin(), histoProvider.getMax());
+//				}
+				histogramPlottingSystem.getSelectedXAxis().setLog10(false);
+				//histogramPlottingSystem.getSelectedXAxis().setLog10(btnColourMapLog.getSelection());
+				histogramPlottingSystem.getSelectedXAxis().setTitle("Intensity");
+//				histogramPlot.getSelectedYAxis().setRange(0, finalScale*256)
+				histogramPlottingSystem.getSelectedYAxis().setTitle("Log(Frequency)");				
+				
+				histogramPlottingSystem.repaint();
+			};
+		});
+	}
+	
 	/**
 	 * Get the plotting system associated with this histogram plot
 	 * 
