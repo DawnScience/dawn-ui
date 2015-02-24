@@ -43,7 +43,7 @@ import org.dawnsci.plotting.tools.Activator;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
-import uk.ac.diamond.scisoft.analysis.roi.ROIProfile.XAxis;
+import uk.ac.diamond.scisoft.analysis.roi.XAxis;
 
 public class RadialProfileTool extends SectorProfileTool implements IDetectorPropertyListener, IDiffractionCrystalEnvironmentListener{
 	

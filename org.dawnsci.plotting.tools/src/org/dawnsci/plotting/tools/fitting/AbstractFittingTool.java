@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
@@ -388,7 +389,8 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 			getPlottingSystem().clearRegions();
 			return;
 		}
-		if (evt.getRegion()==fitRegion) {
+		if (evt.getRegion().getRegionType()==RegionType.XAXIS) {
+			fitRegion = evt.getRegion();
 			fittingJob.fit(false);
 		}
 	}

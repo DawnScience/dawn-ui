@@ -9,6 +9,7 @@
 package org.dawnsci.common.widgets.celleditor;
 
 import java.lang.reflect.Array;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,6 +46,8 @@ public class NumberCellEditor extends TextCellEditor {
 	protected String unit;
 	protected Number max;
 	protected Number min;
+	protected BoundsDecorator deco;
+
 
 	public NumberCellEditor(Composite parent, Class<? extends Object> clazz, int switches) {
 		this(parent, clazz, null, null, null, switches);
@@ -89,7 +92,6 @@ public class NumberCellEditor extends TextCellEditor {
 		final boolean isInt        = Integer.class.isAssignableFrom(clazz)  || Long.class.isAssignableFrom(clazz);
 		final boolean isIntArray   = int[].class.isAssignableFrom(clazz)    || long[].class.isAssignableFrom(clazz);
 		
-		BoundsDecorator deco = null;
 		if (isFloat) {
 			deco = new FloatDecorator(text);
 		} else if (isInt) {
@@ -108,7 +110,15 @@ public class NumberCellEditor extends TextCellEditor {
 		
 		return ret;
 	}
-
+	
+	public void setDecimalFormat(String format) {
+		deco.setDecimalFormat(format);
+	}
+	
+	public void setAllowInvalidValues(boolean allowInvalidValues) {
+		deco.setAllowInvalidValues(allowInvalidValues);
+	}
+	
 	protected void doSetValue(Object value) {
 		if (value instanceof Number)    value = value.toString();
 		if (clazz.isArray()) {

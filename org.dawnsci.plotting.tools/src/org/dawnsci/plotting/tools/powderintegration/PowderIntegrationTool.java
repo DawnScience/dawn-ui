@@ -70,7 +70,7 @@ import org.eclipse.ui.part.IPageSite;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.AbstractPixelIntegration;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelIntegrationUtils.IntegrationMode;
 import uk.ac.diamond.scisoft.analysis.io.NexusDiffractionMetaReader;
-import uk.ac.diamond.scisoft.analysis.roi.ROIProfile.XAxis;
+import uk.ac.diamond.scisoft.analysis.roi.XAxis;
 
 public class PowderIntegrationTool extends AbstractToolPage implements IDataReductionToolPage {
 	
