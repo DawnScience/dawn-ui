@@ -49,7 +49,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 				.create());
 
 		section.setText("Histogram Plot");
-		section.setDescription("");
+		section.setDescription("Histogram information for active plot view");
 
 		Composite sectionClient = toolkit.createComposite(section);
 		sectionClient.setLayout(GridLayoutFactory.fillDefaults().create());
@@ -79,6 +79,23 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			generateHistogram(getPaletteTrace()); 
 		}
 	}
+	
+	private void inputChanged (IPaletteTrace oldImage, IPaletteTrace newImage){
+//	    if(oldImage != null) {
+//	        removeListenerFrom(oldHistogramProvider);
+//	    }
+//	    if(newImage != null) {
+//	       addListenerTo(newHistogramProvider);
+//	    }
+	}
+	
+	protected void addListenerTo(ImageHistogramProvider hProvider) {
+//	    box.addListener(this);
+//	    for (Iterator iterator = box.getBoxes().iterator(); iterator.hasNext();) {
+//	       MovingBox aBox = (MovingBox) iterator.next();
+//	       addListenerTo(aBox);
+//	    }
+	}
 
 	
 	private void generateHistogram(IPaletteTrace image) {
@@ -86,9 +103,6 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		
 		ImageHistogramProvider h = new ImageHistogramProvider(image);
 		histogramWidget.setInput(h);
-
-		
-		
 	}
 
 	@Override
