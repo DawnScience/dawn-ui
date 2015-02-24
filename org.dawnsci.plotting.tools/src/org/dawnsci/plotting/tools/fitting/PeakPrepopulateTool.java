@@ -34,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionFactory;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
@@ -68,7 +67,6 @@ public class PeakPrepopulateTool extends Dialog {
 	
 	private Add pkCompFunction = null;
 	private IFunction bkgFunction = null;
-	private IFunction mybadger = null;
 	private Add compFunction = null;
 	
 	public PeakPrepopulateTool(Shell parentShell, FunctionFittingTool parentFittingTool, Dataset[] roiLimits) {
