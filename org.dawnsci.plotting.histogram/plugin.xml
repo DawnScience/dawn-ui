@@ -13,7 +13,7 @@
             tooltip="Colour mapping tool for adjusting contrast, brightness and other image colour settings">
       </plotting_tool_page>
       <plotting_tool_page
-            class="org.dawnsci.plotting.histogram.HistogramToolPage2"
+            class="org.dawnsci.plotting.histogram.ui.HistogramToolPage2"
             icon="icons/brightness_contrast.gif"
             id="org.dawnsci.plotting.histogram.histogram_tool_page_2"
             label="Histogram"

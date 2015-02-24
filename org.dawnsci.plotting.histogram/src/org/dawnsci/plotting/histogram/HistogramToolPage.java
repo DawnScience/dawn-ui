@@ -510,7 +510,9 @@ public class HistogramToolPage extends AbstractToolPage {
 				regionDragging = false;
 				if (evt.getROI() instanceof RectangularROI) {
 					IRegion region = histogramPlot.getRegion("Histogram Region");
-					RectangularROI roi = (RectangularROI) region.getROI();
+					//RectangularROI roi = (RectangularROI) region.getROI();
+					RectangularROI roi = (RectangularROI) evt.getROI();
+					System.out.println("Roi end point: " + roi.getEndPoint()[0]);
 					setHistoMin( roi.getPoint()[0]);
 					setHistoMax( roi.getEndPoint()[0]);
 					updateHistogramToolElements(evt, true, false);
@@ -1343,6 +1345,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			}
 
 			RectangularROI rroi = new RectangularROI(histoMin, 0, histoMax-histoMin, 1, 0);
+			System.out.println("New roi end point: " + rroi.getEndPoint()[0]);
 			
 			// Stop unneeded events firing when roi is set by removing listeners.
 			region.removeROIListener(histogramRegionListener);

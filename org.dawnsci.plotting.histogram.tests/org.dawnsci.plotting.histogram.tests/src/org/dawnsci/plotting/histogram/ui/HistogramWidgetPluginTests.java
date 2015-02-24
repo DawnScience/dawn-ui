@@ -1,6 +1,5 @@
-package org.dawnsci.plotting.histogram.tests;
+package org.dawnsci.plotting.histogram.ui;
 
-import org.dawnsci.plotting.histogram.HistogramWidget;
 import org.eclipse.swt.widgets.Composite;
 import org.junit.Test;
 

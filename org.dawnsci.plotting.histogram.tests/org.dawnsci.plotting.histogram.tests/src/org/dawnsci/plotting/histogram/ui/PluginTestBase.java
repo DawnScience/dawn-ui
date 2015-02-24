@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.dawnsci.plotting.histogram.tests;
+package org.dawnsci.plotting.histogram.ui;
 
 import static org.junit.Assert.*;
 

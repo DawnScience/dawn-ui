@@ -1,5 +1,6 @@
-package org.dawnsci.plotting.histogram;
+package org.dawnsci.plotting.histogram.ui;
 
+import org.dawnsci.plotting.histogram.ImageHistogramProvider;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;

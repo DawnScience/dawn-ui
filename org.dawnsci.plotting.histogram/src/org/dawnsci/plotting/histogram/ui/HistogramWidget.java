@@ -1,5 +1,6 @@
-package org.dawnsci.plotting.histogram;
+package org.dawnsci.plotting.histogram.ui;
 
+import org.dawnsci.plotting.histogram.IHistogramProvider;
 import org.dawnsci.plotting.histogram.IHistogramProvider.IHistogramDatasets;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
