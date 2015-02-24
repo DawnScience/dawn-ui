@@ -2,6 +2,7 @@ package org.dawnsci.plotting.histogram;
 
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
+import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.layout.GridData;
@@ -10,6 +11,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
+
+import uk.ac.diamond.scisoft.analysis.dataset.function.Histogram;
 
 public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
@@ -63,6 +66,27 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 		toolkit.adapt(histogramWidget);
 		section.setClient(sectionClient);
+	}
+	
+	@Override
+	public void activate() {
+		super.activate();
+		
+		if (getPlottingSystem()!=null) {
+			//getPlottingSystem().addTraceListener(traceListener);
+			
+			generateHistogram(getPaletteTrace()); 
+		}
+	}
+
+	
+	private void generateHistogram(IPaletteTrace image) {
+		if (image == null) return;
+		
+		ImageHistogramProvider h = new ImageHistogramProvider(image);
+		Histogram hist = new Histogram(h.getNumberOfBins(), h.getMininumRange(), h.getMaximumRange(), true);
+		
+		
 	}
 
 	@Override
