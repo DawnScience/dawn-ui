@@ -67,7 +67,8 @@ public class PeakPrepopulateTool extends Dialog {
 	private FitBackgroundJob fitBackgroundJob;
 	
 	private Add pkCompFunction = null;
-	private AFunction bkgFunction = null;
+	private IFunction bkgFunction = null;
+	private IFunction mybadger = null;
 	private Add compFunction = null;
 	
 	public PeakPrepopulateTool(Shell parentShell, FunctionFittingTool parentFittingTool, Dataset[] roiLimits) {
@@ -168,9 +169,9 @@ public class PeakPrepopulateTool extends Dialog {
 		setDefaultBkgFunction();
 		bkgTypeCombo.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
 		
-		//Background function parameters
-		Label bkgFnParamsPlaceHolder = new Label(bkgFindingSpace, SWT.NONE);
-		bkgFnParamsPlaceHolder.setText("Function parameters go here");
+		//Background function parameters - this should allow configuration of the function, e.g. polynomial order
+//		Label bkgFnParamsPlaceHolder = new Label(bkgFindingSpace, SWT.NONE);
+//		bkgFnParamsPlaceHolder.setText("Function parameters go here");
 		
 		//Button to call background fitting
 		fitInitialBkgButton = new Button(bkgFindingSpace, SWT.PUSH);
@@ -391,10 +392,10 @@ public class PeakPrepopulateTool extends Dialog {
 		}
 		
 		Add peakCompFunction = null;
-		IFunction bkgFunction;
+		IFunction fitBkgFunction;
 		
-		public void setBkgFunction(IFunction bkgFunction) {
-			this.bkgFunction = bkgFunction;
+		public void setBkgFunction(IFunction bkgInFunction) {
+			fitBkgFunction = bkgInFunction;
 		}
 
 		
@@ -414,8 +415,10 @@ public class PeakPrepopulateTool extends Dialog {
 			}
 			//4 Fit subtracted data to given function.
 			try {
-				//TODO This needs to return something...!
-				Fitter.geneticFit(new Dataset[]{x}, peakDifference, bkgFunction);
+				//IFunction bkgFunctionCopy = bkgFitFunction.copy();
+				//TODO Need to be able to determine which fitter
+				Fitter.geneticFit(new Dataset[]{x}, peakDifference, fitBkgFunction);
+				bkgFunction = fitBkgFunction;
 			}
 			catch (Exception e) {
 				//this covers an exception of the fit routine.
