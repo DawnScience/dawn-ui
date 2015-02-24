@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.Text;
 public class RegexDecorator {
 
 	protected Text    text;
-	private   Pattern pattern;
+	protected Pattern pattern;
 	private   VerifyListener verifyListener;
 	/**
 	 * 
