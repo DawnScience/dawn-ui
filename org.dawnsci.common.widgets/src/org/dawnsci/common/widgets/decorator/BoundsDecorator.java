@@ -287,7 +287,7 @@ public class BoundsDecorator extends RegexDecorator {
 		return numberFormat;
 	}
 
-	public void setNumberFormat(String numberFormat) {
+	public void setDecimalFormat(String numberFormat) {
 		setNumberFormat(numberFormat, new DecimalFormat(numberFormat));
 	}
 	

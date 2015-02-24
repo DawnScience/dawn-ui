@@ -43,7 +43,7 @@ public class DecoratorComposite extends Composite {
 		final BoundsDecorator xbounds = new FloatDecorator(x);
 		xbounds.setMinimum(0);
 		xbounds.setMaximum(100000);
-		xbounds.setNumberFormat("00.###E0");
+		xbounds.setDecimalFormat("00.###E0");
     	this.xDeco = new TextFieldDecorator(x, xbounds);
 		
 		label = new Label(this, SWT.NONE);

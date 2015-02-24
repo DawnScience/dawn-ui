@@ -111,8 +111,8 @@ public class NumberCellEditor extends TextCellEditor {
 		return ret;
 	}
 	
-	public void setNumberFormat(String format) {
-		deco.setNumberFormat(format);
+	public void setDecimalFormat(String format) {
+		deco.setDecimalFormat(format);
 	}
 	
 	public void setAllowInvalidValues(boolean allowInvalidValues) {
