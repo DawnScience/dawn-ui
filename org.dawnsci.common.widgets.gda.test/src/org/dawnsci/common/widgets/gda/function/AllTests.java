@@ -16,8 +16,7 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({ ModelTest.class, FunctionTreeViewerJexlPluginTest.class,
 		FunctionTreeViewerPluginTest.class,
 		FunctionTreeViewerHandlersIsHandledPluginTest.class,
-		FunctionTreeViewerHandlersExecutePluginTest.class,
-		FunctionExtensionFactoryPluginTest.class })
+		FunctionTreeViewerHandlersExecutePluginTest.class})
 public class AllTests {
 
 }
