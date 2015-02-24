@@ -8,7 +8,9 @@
  */
 package org.dawnsci.common.widgets.decorator;
 
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.regex.Pattern;
 
 import javax.swing.event.EventListenerList;
 
@@ -285,8 +287,29 @@ public class BoundsDecorator extends RegexDecorator {
 		return numberFormat;
 	}
 
-	public void setNumberFormat(NumberFormat numberFormat) {
-		this.numberFormat = numberFormat;
+	public void setNumberFormat(String numberFormat) {
+		setNumberFormat(numberFormat, new DecimalFormat(numberFormat));
+	}
+	
+	/**
+	 * If numberFormatString is set to null, the regular expression will not be
+	 * automatically adjusted to allow E in it
+	 * @param numberFormatString
+	 * @param format
+	 */
+	public void setNumberFormat(String numberFormatString, NumberFormat format) {
+
+		this.numberFormat = format;	
+		
+		if (numberFormatString!=null && (numberFormatString.contains("e")||numberFormatString.contains("E"))) {
+			final String spattern = pattern.pattern();
+			if (spattern.endsWith("]+") && !spattern.contains("eE ")) {
+				String pat = spattern.substring(0, spattern.lastIndexOf(']'));
+				pat += "eE ";
+				pat += "]+";
+				this.pattern = Pattern.compile(pat);
+			}
+		}
 	}
 
 	public boolean isError() {

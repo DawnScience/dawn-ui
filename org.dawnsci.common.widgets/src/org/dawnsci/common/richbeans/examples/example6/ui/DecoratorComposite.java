@@ -1,5 +1,7 @@
 package org.dawnsci.common.richbeans.examples.example6.ui;
 
+import java.text.DecimalFormat;
+
 import org.dawnsci.common.richbeans.beans.IFieldWidget;
 import org.dawnsci.common.richbeans.components.decorators.FieldDecorator;
 import org.dawnsci.common.richbeans.components.decorators.TextFieldDecorator;
@@ -40,8 +42,9 @@ public class DecoratorComposite extends Composite {
 		x.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		final BoundsDecorator xbounds = new FloatDecorator(x);
 		xbounds.setMinimum(0);
-		xbounds.setMaximum(1000);
-		this.xDeco = new TextFieldDecorator(x, xbounds);
+		xbounds.setMaximum(100000);
+		xbounds.setNumberFormat("00.###E0");
+    	this.xDeco = new TextFieldDecorator(x, xbounds);
 		
 		label = new Label(this, SWT.NONE);
 		label.setText("y");
