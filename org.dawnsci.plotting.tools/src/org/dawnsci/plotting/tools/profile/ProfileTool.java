@@ -554,7 +554,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 			}
 
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-			profilePlottingSystem.repaint();
+			profilePlottingSystem.repaint(true);
 
 			return Status.OK_STATUS;
 			
