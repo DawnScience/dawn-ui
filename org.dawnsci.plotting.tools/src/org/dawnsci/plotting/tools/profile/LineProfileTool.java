@@ -64,6 +64,7 @@ public class LineProfileTool extends ProfileTool {
 		for (int i = 0; i < profileData.length; i++) {
 			
 			final IDataset   intensity = profileData[i];
+			if (intensity==null) continue;
 			final String     name      = i==0?region.getName():region.getName()+"(Y)";
 			intensity.setName(name);
 			traces.addAll(plotProfile(intensity, tryUpdate, monitor));
