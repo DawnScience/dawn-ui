@@ -182,6 +182,9 @@ public class ModelFieldEditors {
 	    	textEd = new NumberCellEditor(parent, clazz, SWT.NONE);
 	    }
 
+	    if (anot.numberFormat()!=null && !"".equals(anot.numberFormat())) {
+	    	((NumberCellEditor)textEd).setDecimalFormat(anot.numberFormat());
+	    }
     	return textEd;
 	}
 	
