@@ -46,12 +46,14 @@ public class HistogramWidget extends Composite {
 		@Override
 		public void roiDragged(ROIEvent evt) {
 			IROI roi = evt.getROI();
+			System.out.println("roiDragged" + roi.toString());
 			updateHistogramToolElements(evt, roi);
 		}
 
 		@Override
 		public void roiChanged(ROIEvent evt) {
 			IROI roi = evt.getROI();
+			System.out.println("roiChanged" + roi.toString());
 			updateHistogramToolElements(evt, roi);
 		}
 	};
@@ -179,10 +181,10 @@ public class HistogramWidget extends Composite {
 		blueTrace.setTraceColor(new Color(null, 0, 0, 255));
 		
 		// Finally add everything in a threadsafe way.
-		this.getParent().getDisplay().syncExec(new Runnable() {
-
-			@Override
-			public void run() {
+//		this.getParent().getDisplay().syncExec(new Runnable() {
+//
+//			@Override
+//			public void run() {
 				histogramPlottingSystem.addTrace(histoTrace);
 				histogramPlottingSystem.addTrace(redTrace);
 				histogramPlottingSystem.addTrace(greenTrace);
@@ -194,23 +196,23 @@ public class HistogramWidget extends Composite {
 				// histogramPlot.getSelectedYAxis().setRange(0, finalScale*256);
 				histogramPlottingSystem.getSelectedYAxis().setTitle(
 						"Log(Frequency)");
-			};
-		});		
+//			};
+//		});		
 	}
 
 	/**
 	 * Update RGB traces
 	 */
 	private void updateTraces() {
-		
 		IHistogramDatasets data = histogramProvider.getDatasets();
 		histoTrace.setData(data.getX(), data.getY());
 		redTrace.setData(data.getRGBX(), data.getR());
 		greenTrace.setData(data.getRGBX(), data.getG());
 		blueTrace.setData(data.getRGBX(), data.getB());
+		blueTrace.repaint();
 		// if (rescale && updateAxis) {
-		histogramPlottingSystem.getSelectedXAxis().setRange(
-				histogramProvider.getMin(), histogramProvider.getMax());
+//		histogramPlottingSystem.getSelectedXAxis().setRange(
+//				histogramProvider.getMin(), histogramProvider.getMax());
 		// }
 		histogramPlottingSystem.getSelectedXAxis().setLog10(false);
 		//histogramPlottingSystem.getSelectedYAxis().setLog10(true);
@@ -221,24 +223,22 @@ public class HistogramWidget extends Composite {
 		// histogramPlot.getSelectedYAxis().setRange(0, finalScale*256)
 		histogramPlottingSystem.getSelectedYAxis().setTitle(
 				"Log(Frequency)");
+		
+//		histogramPlottingSystem.autoscaleAxes();
 
-		histogramPlottingSystem.repaint();
+//		histogramPlottingSystem.repaint();
 
-		if (redTrace == null){
-			createTraces();
-		}
-
-		// Finally add everything in a threadsafe way.
-		this.getParent().getDisplay().syncExec(new Runnable() {
-
-			@Override
-			public void run() {
+//		// Finally add everything in a threadsafe way.
+//		this.getParent().getDisplay().syncExec(new Runnable() {
+//
+//			@Override
+//			public void run() {
 				histoTrace.repaint();
 				redTrace.repaint();
 				greenTrace.repaint();
 				blueTrace.repaint();
-			};
-		});
+//			};
+//		});
 
 	}
 
@@ -283,6 +283,7 @@ public class HistogramWidget extends Composite {
 	 * @param provider
 	 *            the histogram provider
 	 */
+	// TODO: Subclass ContentViewer and get this for free????
 	public void setHistogramProvider(IHistogramProvider provider) {
 		Assert.isNotNull(provider);
 		IHistogramProvider oldContentProvider = this.histogramProvider;
