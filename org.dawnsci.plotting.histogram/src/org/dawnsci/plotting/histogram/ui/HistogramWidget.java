@@ -3,6 +3,9 @@ package org.dawnsci.plotting.histogram.ui;
 import org.dawnsci.plotting.histogram.IHistogramProvider;
 import org.dawnsci.plotting.histogram.IHistogramProvider.IHistogramDatasets;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -19,7 +22,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.progress.UIJob;
 
 /**
  * A reusable widget that encapsulates a histogram plot, region of interest, and
@@ -58,6 +62,15 @@ public class HistogramWidget extends Composite {
 		}
 	};
 
+	private UIJob repaintJob = new UIJob("Repaint traces") {
+
+		@Override
+		public IStatus runInUIThread(IProgressMonitor monitor) {
+			updateTraces();
+			return Status.OK_STATUS;
+		}
+	};
+
 	/**
 	 * Create a new Histogram Widget
 	 * 
@@ -80,7 +93,7 @@ public class HistogramWidget extends Composite {
 	 *             plotting system or region of interest
 	 */
 	public HistogramWidget(final Composite composite, String title,
-			IPlottingSystem plot, IWorkbenchSite site) throws Exception {
+			IPlottingSystem plot, IActionBars site) throws Exception {
 		super(composite, SWT.NONE);
 
 		setLayout(new FillLayout());
@@ -93,7 +106,7 @@ public class HistogramWidget extends Composite {
 
 		// IActionBars actionBars = (site != null) ? site.getActionBars() :
 		// null;
-		histogramPlottingSystem.createPlotPart(this, title, null, PlotType.XY,
+		histogramPlottingSystem.createPlotPart(this, title, site, PlotType.XY,
 				null);
 		histogramPlottingSystem.setRescale(false);
 
@@ -107,7 +120,7 @@ public class HistogramWidget extends Composite {
 			histogramProvider.setMax(rectangularROI.getPoint()[0]);
 			histogramProvider.setMin(rectangularROI.getEndPoint()[0]);
 		}
-		updateTraces();
+		// updateTraces();
 	}
 
 	/**
@@ -179,25 +192,23 @@ public class HistogramWidget extends Composite {
 		redTrace.setTraceColor(new Color(null, 255, 0, 0));
 		greenTrace.setTraceColor(new Color(null, 0, 255, 0));
 		blueTrace.setTraceColor(new Color(null, 0, 0, 255));
-		
-		// Finally add everything in a threadsafe way.
-//		this.getParent().getDisplay().syncExec(new Runnable() {
-//
-//			@Override
-//			public void run() {
-				histogramPlottingSystem.addTrace(histoTrace);
-				histogramPlottingSystem.addTrace(redTrace);
-				histogramPlottingSystem.addTrace(greenTrace);
-				histogramPlottingSystem.addTrace(blueTrace);
 
-				// histogramPlot.getSelectedXAxis().setLog10(btnColourMapLog.getSelection());
-				histogramPlottingSystem.getSelectedXAxis()
-						.setTitle("Intensity");
-				// histogramPlot.getSelectedYAxis().setRange(0, finalScale*256);
-				histogramPlottingSystem.getSelectedYAxis().setTitle(
-						"Log(Frequency)");
-//			};
-//		});		
+		// Finally add everything in a threadsafe way.
+		// this.getParent().getDisplay().syncExec(new Runnable() {
+		//
+		// @Override
+		// public void run() {
+		histogramPlottingSystem.addTrace(histoTrace);
+		histogramPlottingSystem.addTrace(redTrace);
+		histogramPlottingSystem.addTrace(greenTrace);
+		histogramPlottingSystem.addTrace(blueTrace);
+
+		// histogramPlot.getSelectedXAxis().setLog10(btnColourMapLog.getSelection());
+		histogramPlottingSystem.getSelectedXAxis().setTitle("Intensity");
+		// histogramPlot.getSelectedYAxis().setRange(0, finalScale*256);
+		histogramPlottingSystem.getSelectedYAxis().setTitle("Log(Frequency)");
+		// };
+		// });
 	}
 
 	/**
@@ -211,35 +222,30 @@ public class HistogramWidget extends Composite {
 		blueTrace.setData(data.getRGBX(), data.getB());
 		blueTrace.repaint();
 		// if (rescale && updateAxis) {
-//		histogramPlottingSystem.getSelectedXAxis().setRange(
-//				histogramProvider.getMin(), histogramProvider.getMax());
+		// histogramPlottingSystem.getSelectedXAxis().setRange(
+		// histogramProvider.getMin(), histogramProvider.getMax());
 		// }
 		histogramPlottingSystem.getSelectedXAxis().setLog10(false);
-		//histogramPlottingSystem.getSelectedYAxis().setLog10(true);
+		// histogramPlottingSystem.getSelectedYAxis().setLog10(true);
 		// histogramPlottingSystem.getSelectedXAxis().setLog10(btnColourMapLog.getSelection());
 
-		histogramPlottingSystem.getSelectedXAxis()
-				.setTitle("Intensity");
+		histogramPlottingSystem.getSelectedXAxis().setTitle("Intensity");
 		// histogramPlot.getSelectedYAxis().setRange(0, finalScale*256)
-		histogramPlottingSystem.getSelectedYAxis().setTitle(
-				"Log(Frequency)");
-		
-//		histogramPlottingSystem.autoscaleAxes();
+		histogramPlottingSystem.getSelectedYAxis().setTitle("Log(Frequency)");
 
-//		histogramPlottingSystem.repaint();
+		// histogramPlottingSystem.autoscaleAxes();
 
-//		// Finally add everything in a threadsafe way.
-//		this.getParent().getDisplay().syncExec(new Runnable() {
-//
-//			@Override
-//			public void run() {
-				histoTrace.repaint();
-				redTrace.repaint();
-				greenTrace.repaint();
-				blueTrace.repaint();
-//			};
-//		});
+		// histogramPlottingSystem.repaint();
 
+		// // Finally add everything in a threadsafe way.
+		// this.getParent().getDisplay().syncExec(new Runnable() {
+		//
+		// @Override
+		// public void run() {
+//		histoTrace.repaint();
+//		redTrace.repaint();
+//		greenTrace.repaint();
+//		blueTrace.repaint();
 	}
 
 	/**
@@ -271,7 +277,6 @@ public class HistogramWidget extends Composite {
 				}
 
 				updateTraces();
-
 
 			};
 		});

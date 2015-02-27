@@ -11,9 +11,11 @@ import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
+import org.eclipse.ui.part.IPageSite;
 
 public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
@@ -102,9 +104,12 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		sectionClient.setLayoutData(GridDataFactory.fillDefaults()
 				.grab(true, true).create());
 
+		final IPageSite site = getSite();
+		IActionBars actionBars = (site != null) ? site.getActionBars() : null;
+		
 		try {
 			histogramWidget = new HistogramWidget(sectionClient, getTitle(),
-					null, null);
+					null, actionBars);
 		} catch (Exception e) {
 			logger.error("Cannot locate any plotting systems!", e);
 		}

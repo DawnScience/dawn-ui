@@ -304,7 +304,6 @@ public class ImageHistogramProvider implements IHistogramProvider {
 
 	@Override
 	public void setMax(double max) {
-		bean.setMax(max);
 		image.setMax(max);
 		
 	}
