@@ -1,5 +1,6 @@
 package org.dawnsci.plotting.histogram;
 
+import org.dawnsci.plotting.histogram.ui.HistogramWidget;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 
 /**
@@ -29,6 +30,20 @@ public interface IHistogramProvider {
 	 * @return double min value
 	 */
 	public double getMin();
+	
+	/**
+	 * Sets the maximum value for the histogram
+	 * 
+	 * @param double max value
+	 */
+	public void setMax(double max);
+
+	/**
+	 * Sets the minimum value for the histogram
+	 * 
+	 * @param double min value
+	 */
+	public void setMin(double min);	
 
 	public IHistogramDatasets getDatasets();
 	
@@ -76,5 +91,10 @@ public interface IHistogramProvider {
 		public IDataset getRGBX();
 
 	}
+
+	public void inputChanged(HistogramWidget histogramWidget,
+			Object currentInput, Object object);
+
+	public void dispose();
 
 }

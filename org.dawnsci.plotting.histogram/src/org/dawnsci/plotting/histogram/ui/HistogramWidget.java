@@ -2,6 +2,7 @@ package org.dawnsci.plotting.histogram.ui;
 
 import org.dawnsci.plotting.histogram.IHistogramProvider;
 import org.dawnsci.plotting.histogram.IHistogramProvider.IHistogramDatasets;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -13,6 +14,7 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.TraceType;
+import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.FillLayout;
@@ -21,19 +23,25 @@ import org.eclipse.ui.IWorkbenchSite;
 
 /**
  * A reusable widget that encapsulates a histogram plot, region of interest, and
- * plotting system with histogram trace lines and  RGB trace lines.
- *
+ * plotting system with histogram trace lines and RGB trace lines.
+ * <p>
+ * A <code>IHistogramProvider</code> should be implemented and used with this
+ * class to connect to models that provide histogram information.
+ * </p>
  */
 public class HistogramWidget extends Composite {
 
+	private IHistogramProvider histogramProvider = null;
+
 	private IPlottingSystem histogramPlottingSystem = null;
+	private IRegion region;
 	private boolean regionDragging = false;
-	
+
 	private ILineTrace histoTrace;
 	private ILineTrace redTrace;
 	private ILineTrace greenTrace;
 	private ILineTrace blueTrace;
-	
+
 	private IROIListener histogramRegionListener = new IROIListener.Stub() {
 		@Override
 		public void roiDragged(ROIEvent evt) {
@@ -87,52 +95,79 @@ public class HistogramWidget extends Composite {
 				null);
 		histogramPlottingSystem.setRescale(false);
 
-		//createRegion();
-		//createTraces();
+		createRegion();
+		createTraces();
 	}
 
 	protected void updateHistogramToolElements(ROIEvent evt, IROI roi) {
-		// TODO Auto-generated method stub
-
+		if (roi instanceof RectangularROI) {
+			RectangularROI rectangularROI = (RectangularROI) roi;
+			histogramProvider.setMax(rectangularROI.getPoint()[0]);
+			histogramProvider.setMin(rectangularROI.getEndPoint()[0]);
+		}
+		updateTraces();
 	}
 
 	/**
 	 * Create the region of interest for the histogram
-	 * @param histoMax 
-	 * @param histoMin 
 	 */
-	private void createRegion(double histoMin, double histoMax) throws Exception {
-		IRegion region = histogramPlottingSystem.getRegion("Histogram Region");
+	private void createRegion() throws Exception {
+		region = histogramPlottingSystem.createRegion("Histogram Region",
+				RegionType.XAXIS);
+		histogramPlottingSystem.addRegion(region);
+	}
 
-		// Test if the region is already there and update the currentRegion
-		if (region == null || !region.isVisible()) {
-			region = histogramPlottingSystem.createRegion("Histogram Region",
-					RegionType.XAXIS);
-			histogramPlottingSystem.addRegion(region);
-			region.addROIListener(histogramRegionListener);
+	/**
+	 * Update Region
+	 * 
+	 * @param histoMax
+	 * @param histoMin
+	 */
+	private void updateRegion(double histoMin, double histoMax)
+			throws Exception {
+		if (region == null) {
+			createRegion();
 		}
 
 		RectangularROI rroi = new RectangularROI(histoMin, 0, histoMax
 				- histoMin, 1, 0);
-
-		// Stop unneeded events firing when roi is set by removing listeners.
 		region.removeROIListener(histogramRegionListener);
 		region.setROI(rroi);
 		region.addROIListener(histogramRegionListener);
+
+		// IRegion region =
+		// histogramPlottingSystem.getRegion("Histogram Region");
+
+		// Test if the region is already there and update the currentRegion
+		// if (region == null || !region.isVisible()) {
+		// region = histogramPlottingSystem.createRegion("Histogram Region",
+		// RegionType.XAXIS);
+		// histogramPlottingSystem.addRegion(region);
+		// region.addROIListener(histogramRegionListener);
+		// }
+		//
+		// RectangularROI rroi = new RectangularROI(histoMin, 0, histoMax
+		// - histoMin, 1, 0);
+		//
+		// // Stop unneeded events firing when roi is set by removing listeners.
+		// region.removeROIListener(histogramRegionListener);
+		// region.setROI(rroi);
+		// region.addROIListener(histogramRegionListener);
 	}
 
+	/**
+	 * Create traces
+	 */
 	private void createTraces() {
 		// Set up the histogram trace
-		histoTrace = histogramPlottingSystem
-				.createLineTrace("Histogram");
+		histoTrace = histogramPlottingSystem.createLineTrace("Histogram");
 		histoTrace.setTraceType(TraceType.AREA);
 		histoTrace.setLineWidth(1);
 		histoTrace.setTraceColor(new Color(null, 0, 0, 0));
 
 		// Set up the RGB traces
 		redTrace = histogramPlottingSystem.createLineTrace("Red");
-		greenTrace = histogramPlottingSystem
-				.createLineTrace("Green");
+		greenTrace = histogramPlottingSystem.createLineTrace("Green");
 		blueTrace = histogramPlottingSystem.createLineTrace("Blue");
 
 		redTrace.setLineWidth(2);
@@ -142,7 +177,7 @@ public class HistogramWidget extends Composite {
 		redTrace.setTraceColor(new Color(null, 255, 0, 0));
 		greenTrace.setTraceColor(new Color(null, 0, 255, 0));
 		blueTrace.setTraceColor(new Color(null, 0, 0, 255));
-
+		
 		// Finally add everything in a threadsafe way.
 		this.getParent().getDisplay().syncExec(new Runnable() {
 
@@ -152,11 +187,55 @@ public class HistogramWidget extends Composite {
 				histogramPlottingSystem.addTrace(redTrace);
 				histogramPlottingSystem.addTrace(greenTrace);
 				histogramPlottingSystem.addTrace(blueTrace);
-				
-				//histogramPlot.getSelectedXAxis().setLog10(btnColourMapLog.getSelection());
-				histogramPlottingSystem.getSelectedXAxis().setTitle("Intensity");
-				//histogramPlot.getSelectedYAxis().setRange(0, finalScale*256);
-				histogramPlottingSystem.getSelectedYAxis().setTitle("Log(Frequency)");
+
+				// histogramPlot.getSelectedXAxis().setLog10(btnColourMapLog.getSelection());
+				histogramPlottingSystem.getSelectedXAxis()
+						.setTitle("Intensity");
+				// histogramPlot.getSelectedYAxis().setRange(0, finalScale*256);
+				histogramPlottingSystem.getSelectedYAxis().setTitle(
+						"Log(Frequency)");
+			};
+		});		
+	}
+
+	/**
+	 * Update RGB traces
+	 */
+	private void updateTraces() {
+		
+		IHistogramDatasets data = histogramProvider.getDatasets();
+		histoTrace.setData(data.getX(), data.getY());
+		redTrace.setData(data.getRGBX(), data.getR());
+		greenTrace.setData(data.getRGBX(), data.getG());
+		blueTrace.setData(data.getRGBX(), data.getB());
+		// if (rescale && updateAxis) {
+		histogramPlottingSystem.getSelectedXAxis().setRange(
+				histogramProvider.getMin(), histogramProvider.getMax());
+		// }
+		histogramPlottingSystem.getSelectedXAxis().setLog10(false);
+		// histogramPlottingSystem.getSelectedXAxis().setLog10(btnColourMapLog.getSelection());
+
+		histogramPlottingSystem.getSelectedXAxis()
+				.setTitle("Intensity");
+		// histogramPlot.getSelectedYAxis().setRange(0, finalScale*256)
+		histogramPlottingSystem.getSelectedYAxis().setTitle(
+				"Log(Frequency)");
+
+		histogramPlottingSystem.repaint();
+
+		if (redTrace == null){
+			createTraces();
+		}
+
+		// Finally add everything in a threadsafe way.
+		this.getParent().getDisplay().syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				histoTrace.repaint();
+				redTrace.repaint();
+				greenTrace.repaint();
+				blueTrace.repaint();
 			};
 		});
 
@@ -167,41 +246,75 @@ public class HistogramWidget extends Composite {
 	 * 
 	 * @param histoProvider
 	 */
-	public void setInput(final IHistogramProvider histoProvider){
-		
+	public void setInput(final IPaletteTrace image) {
+
+		Assert.isTrue(getHistogramProvider() != null,
+				"Histogram Widget must have a histogram provider when input is set.");
+
+		// unmap all elements - set all internal state to null...
+
+		Object oldInput = getInput();
+		histogramProvider.inputChanged(this, oldInput, image);
+		// this.input = image;
 		// Finally add everything in a threadsafe way.
 		this.getParent().getDisplay().syncExec(new Runnable() {
 
 			@Override
-			public void run() {	
+			public void run() {
 				try {
-					createRegion(histoProvider.getMin(), histoProvider.getMax());
+					updateRegion(histogramProvider.getMin(),
+							histogramProvider.getMax());
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
-				createTraces();
-				
-				IHistogramDatasets data = histoProvider.getDatasets();
-				histoTrace.setData(data.getX(), data.getY());
-				redTrace.setData(data.getRGBX(), data.getR());
-				greenTrace.setData(data.getRGBX(), data.getG());
-				blueTrace.setData(data.getRGBX(), data.getB());
-//				if (rescale && updateAxis) {
-				histogramPlottingSystem.getSelectedXAxis().setRange(histoProvider.getMin(), histoProvider.getMax());
-//				}
-				histogramPlottingSystem.getSelectedXAxis().setLog10(false);
-				//histogramPlottingSystem.getSelectedXAxis().setLog10(btnColourMapLog.getSelection());
-				histogramPlottingSystem.getSelectedXAxis().setTitle("Intensity");
-//				histogramPlot.getSelectedYAxis().setRange(0, finalScale*256)
-				histogramPlottingSystem.getSelectedYAxis().setTitle("Log(Frequency)");				
-				
-				histogramPlottingSystem.repaint();
+
+				updateTraces();
+
+
 			};
 		});
 	}
-	
+
+	/**
+	 * Sets the histogram provider used by this widget.
+	 * 
+	 * @param provider
+	 *            the histogram provider
+	 */
+	public void setHistogramProvider(IHistogramProvider provider) {
+		Assert.isNotNull(provider);
+		IHistogramProvider oldContentProvider = this.histogramProvider;
+		this.histogramProvider = provider;
+		if (oldContentProvider != null) {
+			Object currentInput = getInput();
+			oldContentProvider.inputChanged(this, currentInput, null);
+			oldContentProvider.dispose();
+			provider.inputChanged(this, null, currentInput);
+			refresh();
+		}
+	}
+
+	public void refresh() {
+		updateTraces();
+
+	}
+
+	private Object getInput() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**
+	 * Returns the histogram provider used by this widget, or <code>null</code>
+	 * if no provider has been set yet.
+	 * 
+	 * @return the histogram provider or <code>null</code> if none
+	 */
+	public IHistogramProvider getHistogramProvider() {
+		return histogramProvider;
+	}
+
 	/**
 	 * Get the plotting system associated with this histogram plot
 	 * 

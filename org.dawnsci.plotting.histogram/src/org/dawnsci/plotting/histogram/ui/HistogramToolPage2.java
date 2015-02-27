@@ -112,6 +112,8 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		GridData create = GridDataFactory.fillDefaults().hint(0, 200)
 				.grab(true, true).create();
 		histogramWidget.setLayoutData(create);
+		
+		histogramWidget.setHistogramProvider(new ImageHistogramProvider());
 
 		toolkit.adapt(histogramWidget);
 		section.setClient(sectionClient);
@@ -124,7 +126,10 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		if (getPlottingSystem() != null) {
 			// getPlottingSystem().addTraceListener(traceListener);
 
-			generateHistogram(getPaletteTrace());
+		}
+		IPaletteTrace paletteTrace = getPaletteTrace();
+		if (paletteTrace != null){
+			histogramWidget.setInput(getPaletteTrace());
 		}
 	}
 
@@ -146,13 +151,6 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		// }
 	}
 
-	private void generateHistogram(IPaletteTrace image) {
-		if (image == null)
-			return;
-
-		ImageHistogramProvider h = new ImageHistogramProvider(image);
-		histogramWidget.setInput(h);
-	}
 
 	@Override
 	public boolean isAlwaysSeparateView() {

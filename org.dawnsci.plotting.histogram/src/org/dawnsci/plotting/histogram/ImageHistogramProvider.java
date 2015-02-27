@@ -2,6 +2,7 @@ package org.dawnsci.plotting.histogram;
 
 import java.util.List;
 
+import org.dawnsci.plotting.histogram.ui.HistogramWidget;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
@@ -9,7 +10,9 @@ import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
+import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
+import org.eclipse.dawnsci.plotting.api.trace.PaletteEvent;
 import org.eclipse.swt.graphics.PaletteData;
 
 import uk.ac.diamond.scisoft.analysis.dataset.function.Histogram;
@@ -19,6 +22,9 @@ public class ImageHistogramProvider implements IHistogramProvider {
 	private static final int MAX_BINS = 2048;
 
 	private IPaletteTrace image;
+	private IPaletteListener imageListener = new ImagePaletteListener();
+	
+	protected HistogramWidget widget; 
 
 	private IDataset imageDataset;
 	private ImageServiceBean bean;
@@ -35,11 +41,23 @@ public class ImageHistogramProvider implements IHistogramProvider {
 	 */
 	private IDataset[] histogramValues;
 
-	public ImageHistogramProvider(IPaletteTrace image) {
+	public ImageHistogramProvider() {
+
+	}
+	
+	private void resetImage(){
+		this.image = null;
+		this.imageDataset = null;
+		this.bean = null;
+		this.paletteData = null;
+	}
+	
+	private void setImage(IPaletteTrace image){
+		//TODO: connect and disconect listeners, etc... 
 		this.image = image;
 		this.imageDataset = getImageData(image);
 		this.bean = image.getImageServiceBean();
-		this.paletteData = image.getPaletteData();
+		this.paletteData = image.getPaletteData();	
 	}
 
 	/**
@@ -252,4 +270,59 @@ public class ImageHistogramProvider implements IHistogramProvider {
 		};
 	}
 
+	@Override
+	public void inputChanged(HistogramWidget histogramWidget,
+			Object oldInput, Object newInput) {
+		this.widget = histogramWidget;
+		
+		if (newInput != oldInput){
+			//remove listeners on old input
+			if (oldInput != null){
+				IPaletteTrace oldImage= 	(IPaletteTrace) oldInput;
+				oldImage.removePaletteListener(imageListener);
+			}
+			// reset cached input
+			
+			//setImage
+			if (newInput instanceof IPaletteTrace){
+				IPaletteTrace image= 	(IPaletteTrace) newInput;
+				setImage(image);
+				image.addPaletteListener(imageListener);
+				// set listeners
+			}
+			
+		}
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void dispose() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setMax(double max) {
+		bean.setMax(max);
+		image.setMax(max);
+		
+	}
+
+	@Override
+	public void setMin(double min) {
+		image.setMin(min);
+	}
+
+	private final class ImagePaletteListener extends IPaletteListener.Stub{
+		@Override
+		public void minChanged(PaletteEvent event) {
+			widget.refresh();
+		}
+
+		@Override
+		public void maxChanged(PaletteEvent event) {
+			widget.refresh();
+		}
+	}
 }
