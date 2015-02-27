@@ -22,7 +22,7 @@
          version="0.0.0"/>
 
    <includes
-         id="uk.ac.diamond.sda.enthought.feature"
+         id="org.dawnsci.miniconda.feature"
          version="0.0.0"
          os="linux,win32"
          arch="x86,x86_64"/>
