@@ -19,7 +19,7 @@ public class ImageHistogramProviderTest {
 	@Before
 	public void setUp() throws Exception {
 		image = mock(IPaletteTrace.class);
-		provider = new ImageHistogramProvider(null);
+		provider = new ImageHistogramProvider();
 	}
 
 	@Test

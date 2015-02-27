@@ -213,6 +213,7 @@ public class HistogramWidget extends Composite {
 				histogramProvider.getMin(), histogramProvider.getMax());
 		// }
 		histogramPlottingSystem.getSelectedXAxis().setLog10(false);
+		//histogramPlottingSystem.getSelectedYAxis().setLog10(true);
 		// histogramPlottingSystem.getSelectedXAxis().setLog10(btnColourMapLog.getSelection());
 
 		histogramPlottingSystem.getSelectedXAxis()
