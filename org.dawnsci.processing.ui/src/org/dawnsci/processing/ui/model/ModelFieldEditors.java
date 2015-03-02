@@ -178,13 +178,15 @@ public class ModelFieldEditors {
 		CellEditor textEd = null;
 	    if (anot!=null) {
 	    	textEd = new NumberCellEditor(parent, clazz, anot.min(), anot.max(), anot.unit(), SWT.NONE);
+	    	
+	    	if (anot.numberFormat()!=null && !"".equals(anot.numberFormat())) {
+		    	((NumberCellEditor)textEd).setDecimalFormat(anot.numberFormat());
+		    }
+	    	
 	    } else {
 	    	textEd = new NumberCellEditor(parent, clazz, SWT.NONE);
 	    }
 
-	    if (anot.numberFormat()!=null && !"".equals(anot.numberFormat())) {
-	    	((NumberCellEditor)textEd).setDecimalFormat(anot.numberFormat());
-	    }
     	return textEd;
 	}
 	
