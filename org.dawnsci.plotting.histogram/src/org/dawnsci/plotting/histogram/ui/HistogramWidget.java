@@ -18,11 +18,23 @@ import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.TraceType;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.progress.UIJob;
 
 /**
@@ -39,7 +51,6 @@ public class HistogramWidget extends Composite {
 
 	private IPlottingSystem histogramPlottingSystem = null;
 	private IRegion region;
-	private boolean regionDragging = false;
 
 	private ILineTrace histoTrace;
 	private ILineTrace redTrace;
@@ -73,7 +84,7 @@ public class HistogramWidget extends Composite {
 
 	/**
 	 * Create a new Histogram Widget
-	 * 
+	 *
 	 * @param composite
 	 *            parent composite to add widget to. Must not be
 	 *            <code>null</code>
@@ -104,8 +115,6 @@ public class HistogramWidget extends Composite {
 			histogramPlottingSystem = PlottingFactory.createPlottingSystem();
 		}
 
-		// IActionBars actionBars = (site != null) ? site.getActionBars() :
-		// null;
 		histogramPlottingSystem.createPlotPart(this, title, site, PlotType.XY,
 				null);
 		histogramPlottingSystem.setRescale(false);
@@ -124,6 +133,46 @@ public class HistogramWidget extends Composite {
 	}
 
 	/**
+	 * Create toolbar
+	 *
+	 * @param section
+	 * @param toolkit
+	 */
+	private void createSectionToolbar(Section section, FormToolkit toolkit) {
+		ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
+		ToolBar toolbar = toolBarManager.createControl(section);
+		final Cursor handCursor = new Cursor(Display.getCurrent(),
+				SWT.CURSOR_HAND);
+		toolbar.setCursor(handCursor);
+		// Cursor needs to be explicitly disposed
+		toolbar.addDisposeListener(new DisposeListener() {
+			public void widgetDisposed(DisposeEvent e) {
+				handCursor.dispose();
+			}
+		});
+
+		Action reset = new Action("Reset histogram", IAction.AS_PUSH_BUTTON) {
+			public void run() {
+
+//				final IContributionItem action = getPlottingSystem()
+//						.getActionBars().getToolBarManager()
+//						.find("org.dawb.workbench.plotting.histo");
+//				if (action != null && action.isVisible()
+//						&& action instanceof ActionContributionItem) {
+//					ActionContributionItem iaction = (ActionContributionItem) action;
+//					iaction.getAction().setChecked(
+//							!iaction.getAction().isChecked());
+//					iaction.getAction().run();
+//				}
+			}
+		};
+		toolBarManager.add(reset);
+		toolBarManager.update(true);
+
+		section.setTextClient(toolbar);
+	}
+
+	/**
 	 * Create the region of interest for the histogram
 	 */
 	private void createRegion() throws Exception {
@@ -134,7 +183,7 @@ public class HistogramWidget extends Composite {
 
 	/**
 	 * Update Region
-	 * 
+	 *
 	 * @param histoMax
 	 * @param histoMin
 	 */
@@ -149,25 +198,6 @@ public class HistogramWidget extends Composite {
 		region.removeROIListener(histogramRegionListener);
 		region.setROI(rroi);
 		region.addROIListener(histogramRegionListener);
-
-		// IRegion region =
-		// histogramPlottingSystem.getRegion("Histogram Region");
-
-		// Test if the region is already there and update the currentRegion
-		// if (region == null || !region.isVisible()) {
-		// region = histogramPlottingSystem.createRegion("Histogram Region",
-		// RegionType.XAXIS);
-		// histogramPlottingSystem.addRegion(region);
-		// region.addROIListener(histogramRegionListener);
-		// }
-		//
-		// RectangularROI rroi = new RectangularROI(histoMin, 0, histoMax
-		// - histoMin, 1, 0);
-		//
-		// // Stop unneeded events firing when roi is set by removing listeners.
-		// region.removeROIListener(histogramRegionListener);
-		// region.setROI(rroi);
-		// region.addROIListener(histogramRegionListener);
 	}
 
 	/**
@@ -193,11 +223,6 @@ public class HistogramWidget extends Composite {
 		greenTrace.setTraceColor(new Color(null, 0, 255, 0));
 		blueTrace.setTraceColor(new Color(null, 0, 0, 255));
 
-		// Finally add everything in a threadsafe way.
-		// this.getParent().getDisplay().syncExec(new Runnable() {
-		//
-		// @Override
-		// public void run() {
 		histogramPlottingSystem.addTrace(histoTrace);
 		histogramPlottingSystem.addTrace(redTrace);
 		histogramPlottingSystem.addTrace(greenTrace);
@@ -207,8 +232,6 @@ public class HistogramWidget extends Composite {
 		histogramPlottingSystem.getSelectedXAxis().setTitle("Intensity");
 		// histogramPlot.getSelectedYAxis().setRange(0, finalScale*256);
 		histogramPlottingSystem.getSelectedYAxis().setTitle("Log(Frequency)");
-		// };
-		// });
 	}
 
 	/**
@@ -234,23 +257,12 @@ public class HistogramWidget extends Composite {
 		histogramPlottingSystem.getSelectedYAxis().setTitle("Log(Frequency)");
 
 		// histogramPlottingSystem.autoscaleAxes();
-
 		// histogramPlottingSystem.repaint();
-
-		// // Finally add everything in a threadsafe way.
-		// this.getParent().getDisplay().syncExec(new Runnable() {
-		//
-		// @Override
-		// public void run() {
-//		histoTrace.repaint();
-//		redTrace.repaint();
-//		greenTrace.repaint();
-//		blueTrace.repaint();
 	}
 
 	/**
 	 * Set the input histogramProvider for this widget
-	 * 
+	 *
 	 * @param histoProvider
 	 */
 	public void setInput(final IPaletteTrace image) {
@@ -284,7 +296,7 @@ public class HistogramWidget extends Composite {
 
 	/**
 	 * Sets the histogram provider used by this widget.
-	 * 
+	 *
 	 * @param provider
 	 *            the histogram provider
 	 */
@@ -308,14 +320,13 @@ public class HistogramWidget extends Composite {
 	}
 
 	private Object getInput() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	/**
 	 * Returns the histogram provider used by this widget, or <code>null</code>
 	 * if no provider has been set yet.
-	 * 
+	 *
 	 * @return the histogram provider or <code>null</code> if none
 	 */
 	public IHistogramProvider getHistogramProvider() {
@@ -324,7 +335,7 @@ public class HistogramWidget extends Composite {
 
 	/**
 	 * Get the plotting system associated with this histogram plot
-	 * 
+	 *
 	 * @return IPlottingSystem the plotting system associated with this
 	 *         histogram
 	 */
