@@ -157,46 +157,6 @@ public class HistogramViewer extends ContentViewer {
 	}
 
 	/**
-	 * Create toolbar
-	 *
-	 * @param section
-	 * @param toolkit
-	 */
-	private void createSectionToolbar(Section section, FormToolkit toolkit) {
-		ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
-		ToolBar toolbar = toolBarManager.createControl(section);
-		final Cursor handCursor = new Cursor(Display.getCurrent(),
-				SWT.CURSOR_HAND);
-		toolbar.setCursor(handCursor);
-		// Cursor needs to be explicitly disposed
-		toolbar.addDisposeListener(new DisposeListener() {
-			public void widgetDisposed(DisposeEvent e) {
-				handCursor.dispose();
-			}
-		});
-
-		Action reset = new Action("Reset histogram", IAction.AS_PUSH_BUTTON) {
-			public void run() {
-
-//				final IContributionItem action = getPlottingSystem()
-//						.getActionBars().getToolBarManager()
-//						.find("org.dawb.workbench.plotting.histo");
-//				if (action != null && action.isVisible()
-//						&& action instanceof ActionContributionItem) {
-//					ActionContributionItem iaction = (ActionContributionItem) action;
-//					iaction.getAction().setChecked(
-//							!iaction.getAction().isChecked());
-//					iaction.getAction().run();
-//				}
-			}
-		};
-		toolBarManager.add(reset);
-		toolBarManager.update(true);
-
-		section.setTextClient(toolbar);
-	}
-
-	/**
 	 * Create the region of interest for the histogram
 	 */
 	private void createRegion() throws Exception {
@@ -252,9 +212,7 @@ public class HistogramViewer extends ContentViewer {
 		histogramPlottingSystem.addTrace(greenTrace);
 		histogramPlottingSystem.addTrace(blueTrace);
 
-		// histogramPlot.getSelectedXAxis().setLog10(btnColourMapLog.getSelection());
 		histogramPlottingSystem.getSelectedXAxis().setTitle("Intensity");
-		// histogramPlot.getSelectedYAxis().setRange(0, finalScale*256);
 		histogramPlottingSystem.getSelectedYAxis().setTitle("Log(Frequency)");
 	}
 
@@ -273,14 +231,14 @@ public class HistogramViewer extends ContentViewer {
 		// histogramProvider.getMin(), histogramProvider.getMax());
 		// }
 		histogramPlottingSystem.getSelectedXAxis().setLog10(false);
-		// histogramPlottingSystem.getSelectedYAxis().setLog10(true);
+		histogramPlottingSystem.getSelectedXAxis().setAxisAutoscaleTight(true);
 		// histogramPlottingSystem.getSelectedXAxis().setLog10(btnColourMapLog.getSelection());
 
-		histogramPlottingSystem.getSelectedXAxis().setTitle("Intensity");
-		// histogramPlot.getSelectedYAxis().setRange(0, finalScale*256)
-		histogramPlottingSystem.getSelectedYAxis().setTitle("Log(Frequency)");
+		histogramPlottingSystem.getSelectedYAxis().setAxisAutoscaleTight(true);
 
-		// histogramPlottingSystem.autoscaleAxes();
+		//do if rescale is set....
+		//TODO: under what conditions may we always autoscale??? //test for isRescaleHistogram
+		histogramPlottingSystem.autoscaleAxes();
 		// histogramPlottingSystem.repaint();
 	}
 
@@ -340,9 +298,35 @@ public class HistogramViewer extends ContentViewer {
 		super.setContentProvider(contentProvider);
 	}
 
+
+	@Override
 	public void refresh() {
+		try {
+			updateRegion(getHistogramProvider().getMin(),getHistogramProvider().getMax());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		updateTraces();
 
+	}
+
+	/**
+	 * Resets the histogram to its original conditions
+	 */
+	public void reset() {
+		//Things to reset
+		//1. histo min
+		//2. histo max
+		//3. ROI
+		//4. scaling
+		//5. ????
+
+		//Things to not reset
+		//1. colour map
+		//2. ???
+
+		// do we need a restore defaults???
 	}
 
 	/**

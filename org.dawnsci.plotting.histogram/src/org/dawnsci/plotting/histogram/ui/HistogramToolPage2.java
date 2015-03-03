@@ -8,13 +8,23 @@ import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
@@ -122,6 +132,8 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			logger.error("Cannot locate any plotting systems!", e);
 		}
 
+		createSectionToolbar(section);
+
 		GridData create = GridDataFactory.fillDefaults().hint(0, 200)
 				.grab(true, true).create();
 		histogramWidget.getControl().setLayoutData(create);
@@ -132,6 +144,45 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		section.setClient(sectionClient);
 	}
 
+	/**
+	 * Create toolbar
+	 *
+	 * @param section
+	 * @param toolkit
+	 */
+	private void createSectionToolbar(Section control) {
+		ToolBarManager toolBarManager = new ToolBarManager(SWT.FLAT);
+		ToolBar toolbar = toolBarManager.createControl(control);
+		final Cursor handCursor = new Cursor(Display.getCurrent(),
+				SWT.CURSOR_HAND);
+		toolbar.setCursor(handCursor);
+		// Cursor needs to be explicitly disposed
+		toolbar.addDisposeListener(new DisposeListener() {
+			public void widgetDisposed(DisposeEvent e) {
+				handCursor.dispose();
+			}
+		});
+
+		Action reset = new Action("Reset histogram", IAction.AS_PUSH_BUTTON) {
+			public void run() {
+
+				final IContributionItem action = getPlottingSystem()
+						.getActionBars().getToolBarManager()
+						.find("org.dawb.workbench.plotting.histo");
+				if (action != null && action.isVisible()
+						&& action instanceof ActionContributionItem) {
+					ActionContributionItem iaction = (ActionContributionItem) action;
+					iaction.getAction().setChecked(
+							!iaction.getAction().isChecked());
+					iaction.getAction().run();
+				}
+			}
+		};
+		toolBarManager.add(reset);
+		toolBarManager.update(true);
+
+		control.setTextClient(toolbar);
+	}
 	@Override
 	public void activate() {
 		super.activate();
