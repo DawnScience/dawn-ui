@@ -19,10 +19,10 @@ import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.TraceType;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.viewers.ContentViewer;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -30,6 +30,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IActionBars;
@@ -38,17 +39,19 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.progress.UIJob;
 
 /**
- * A reusable widget that encapsulates a histogram plot, region of interest, and
- * plotting system with histogram trace lines and RGB trace lines.
+ * A viewer for a histogram (composite with a histogram plot, region of interest, and
+ * plotting system with histogram trace lines and RGB trace lines.)
  * <p>
  * A <code>IHistogramProvider</code> should be implemented and used with this
  * class to connect to models that provide histogram information.
  * </p>
+ * @noextend This class is not intended to be subclassed by clients.
  */
-public class HistogramWidget extends Composite {
+public class HistogramViewer extends ContentViewer {
 
 	private IHistogramProvider histogramProvider = null;
 
+	private Composite composite;
 	private IPlottingSystem histogramPlottingSystem = null;
 	private IRegion region;
 
@@ -83,6 +86,21 @@ public class HistogramWidget extends Composite {
 	};
 
 	/**
+	 * Create a new Histogram Widget with a newly created plotting
+	 * system.
+	 *
+	 * @param composite
+	 *            parent composite to add widget to. Must not be
+	 *            <code>null</code>
+	 * @throws Exception
+	 *             throws an exception if there is a failure to create a default
+	 *             plotting system or region of interest
+	 */
+	public HistogramViewer(final Composite parent) throws Exception {
+		this (parent, null, null, null);
+	}
+
+	/**
 	 * Create a new Histogram Widget
 	 *
 	 * @param composite
@@ -103,11 +121,10 @@ public class HistogramWidget extends Composite {
 	 *             throws an exception if there is a failure to create a default
 	 *             plotting system or region of interest
 	 */
-	public HistogramWidget(final Composite composite, String title,
+	public HistogramViewer(final Composite parent, String title,
 			IPlottingSystem plot, IActionBars site) throws Exception {
-		super(composite, SWT.NONE);
-
-		setLayout(new FillLayout());
+		composite = new Composite(parent, SWT.NONE);
+		composite.setLayout(new FillLayout());
 
 		if (plot != null) {
 			histogramPlottingSystem = plot;
@@ -115,7 +132,7 @@ public class HistogramWidget extends Composite {
 			histogramPlottingSystem = PlottingFactory.createPlottingSystem();
 		}
 
-		histogramPlottingSystem.createPlotPart(this, title, site, PlotType.XY,
+		histogramPlottingSystem.createPlotPart(composite, title, site, PlotType.XY,
 				null);
 		histogramPlottingSystem.setRescale(false);
 
@@ -276,7 +293,7 @@ public class HistogramWidget extends Composite {
 		histogramProvider.inputChanged(this, oldInput, image);
 		// this.input = image;
 		// Finally add everything in a threadsafe way.
-		this.getParent().getDisplay().syncExec(new Runnable() {
+		this.getControl().getParent().getDisplay().syncExec(new Runnable() {
 
 			@Override
 			public void run() {
@@ -319,10 +336,6 @@ public class HistogramWidget extends Composite {
 
 	}
 
-	private Object getInput() {
-		return null;
-	}
-
 	/**
 	 * Returns the histogram provider used by this widget, or <code>null</code>
 	 * if no provider has been set yet.
@@ -341,5 +354,29 @@ public class HistogramWidget extends Composite {
 	 */
 	public IPlottingSystem getHistogramPlot() {
 		return histogramPlottingSystem;
+	}
+
+	@Override
+	public Control getControl() {
+		return composite;
+	}
+
+	/**
+	 * Returns the parent composite
+	 * @return composite
+	 */
+	public Composite getComposite() {
+		return composite;
+	}
+
+	@Override
+	public ISelection getSelection() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setSelection(ISelection selection, boolean reveal) {
+		// TODO Auto-generated method stub
 	}
 }

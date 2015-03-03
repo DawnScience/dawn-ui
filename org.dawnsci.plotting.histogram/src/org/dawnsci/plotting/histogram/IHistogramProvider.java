@@ -1,6 +1,6 @@
 package org.dawnsci.plotting.histogram;
 
-import org.dawnsci.plotting.histogram.ui.HistogramWidget;
+import org.dawnsci.plotting.histogram.ui.HistogramViewer;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 
 /**
@@ -94,7 +94,7 @@ public interface IHistogramProvider {
 
 	}
 
-	public void inputChanged(HistogramWidget histogramWidget,
+	public void inputChanged(HistogramViewer histogramWidget,
 			Object currentInput, Object object);
 
 	public void dispose();

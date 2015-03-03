@@ -2,7 +2,7 @@ package org.dawnsci.plotting.histogram;
 
 import java.util.List;
 
-import org.dawnsci.plotting.histogram.ui.HistogramWidget;
+import org.dawnsci.plotting.histogram.ui.HistogramViewer;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
@@ -25,7 +25,7 @@ public class ImageHistogramProvider implements IHistogramProvider {
 	private IPaletteTrace image;
 	private IPaletteListener imageListener = new ImagePaletteListener();
 
-	protected HistogramWidget widget;
+	protected HistogramViewer widget;
 
 	private IDataset imageDataset;
 	private ImageServiceBean bean;
@@ -259,7 +259,7 @@ public class ImageHistogramProvider implements IHistogramProvider {
 	}
 
 	@Override
-	public void inputChanged(HistogramWidget histogramWidget,
+	public void inputChanged(HistogramViewer histogramWidget,
 			Object oldInput, Object newInput) {
 		this.widget = histogramWidget;
 

@@ -1,6 +1,5 @@
 package org.dawnsci.plotting.histogram.ui;
 
-import org.dawnsci.plotting.histogram.HistogramToolPage;
 import org.dawnsci.plotting.histogram.ImageHistogramProvider;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
@@ -33,7 +32,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	private ScrolledForm form;
 	private CCombo colourMapCombo;
 
-	private HistogramWidget histogramWidget;
+	private HistogramViewer histogramWidget;
 
 	private ITraceListener traceListener = new TraceListener();
 
@@ -118,7 +117,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		IActionBars actionBars = (site != null) ? site.getActionBars() : null;
 
 		try {
-			histogramWidget = new HistogramWidget(sectionClient, getTitle(),
+			histogramWidget = new HistogramViewer(sectionClient, getTitle(),
 					null, actionBars);
 		} catch (Exception e) {
 			logger.error("Cannot locate any plotting systems!", e);
@@ -126,11 +125,11 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 		GridData create = GridDataFactory.fillDefaults().hint(0, 200)
 				.grab(true, true).create();
-		histogramWidget.setLayoutData(create);
+		histogramWidget.getControl().setLayoutData(create);
 
 		histogramWidget.setHistogramProvider(new ImageHistogramProvider());
 
-		toolkit.adapt(histogramWidget);
+		toolkit.adapt(histogramWidget.getComposite());
 		section.setClient(sectionClient);
 	}
 
