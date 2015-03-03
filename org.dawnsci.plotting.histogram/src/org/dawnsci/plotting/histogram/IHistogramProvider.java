@@ -2,13 +2,14 @@ package org.dawnsci.plotting.histogram;
 
 import org.dawnsci.plotting.histogram.ui.HistogramViewer;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.jface.viewers.IContentProvider;
 
 /**
  * This interface provides all the information to build up a histogram, such as
  * for use with a HistogramWidget
  *
  */
-public interface IHistogramProvider {
+public interface IHistogramProvider extends IContentProvider{
 
 	/**
 	 * Return the number of bins for this histogram
@@ -93,10 +94,4 @@ public interface IHistogramProvider {
 		public IDataset getRGBX();
 
 	}
-
-	public void inputChanged(HistogramViewer histogramWidget,
-			Object currentInput, Object object);
-
-	public void dispose();
-
 }

@@ -22,6 +22,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.ContentViewer;
+import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -37,19 +38,25 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.progress.UIJob;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A viewer for a histogram (composite with a histogram plot, region of interest, and
  * plotting system with histogram trace lines and RGB trace lines.)
  * <p>
- * A <code>IHistogramProvider</code> should be implemented and used with this
- * class to connect to models that provide histogram information.
+ * Content providers for histogram viewer must implement the
+ * <code>IHistogramProvider</code> interface and set it using <code>setContentProvider</code>
+ * </p>
+ * <p>
+ * Input to the histogram viewer must implement the <code>IPaletteTrace</code>
+ * interface and get set using <code>setInput</code> method.
  * </p>
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class HistogramViewer extends ContentViewer {
 
-	private IHistogramProvider histogramProvider = null;
+	private static final Logger logger = LoggerFactory.getLogger(HistogramViewer.class);
 
 	private Composite composite;
 	private IPlottingSystem histogramPlottingSystem = null;
@@ -143,8 +150,8 @@ public class HistogramViewer extends ContentViewer {
 	protected void updateHistogramToolElements(ROIEvent evt, IROI roi) {
 		if (roi instanceof RectangularROI) {
 			RectangularROI rectangularROI = (RectangularROI) roi;
-			histogramProvider.setMax(rectangularROI.getPoint()[0]);
-			histogramProvider.setMin(rectangularROI.getEndPoint()[0]);
+			getHistogramProvider().setMax(rectangularROI.getPoint()[0]);
+			getHistogramProvider().setMin(rectangularROI.getEndPoint()[0]);
 		}
 		// updateTraces();
 	}
@@ -255,7 +262,7 @@ public class HistogramViewer extends ContentViewer {
 	 * Update RGB traces
 	 */
 	private void updateTraces() {
-		IHistogramDatasets data = histogramProvider.getDatasets();
+		IHistogramDatasets data = getHistogramProvider().getDatasets();
 		histoTrace.setData(data.getX(), data.getY());
 		redTrace.setData(data.getRGBX(), data.getR());
 		greenTrace.setData(data.getRGBX(), data.getG());
@@ -278,28 +285,32 @@ public class HistogramViewer extends ContentViewer {
 	}
 
 	/**
-	 * Set the input histogramProvider for this widget
-	 *
-	 * @param histoProvider
+	 * Updates the region and traces
 	 */
-	public void setInput(final IPaletteTrace image) {
+	@Override
+	protected void inputChanged(Object input, Object oldInput) {
+		logger.debug("HistogramViewer: inputchanged");
 
-		Assert.isTrue(getHistogramProvider() != null,
-				"Histogram Widget must have a histogram provider when input is set.");
+		if (input == null){
+			logger.debug("HistogramViewer: inputchanged input null");
+		} else {
+			logger.debug("HistogramViewer: inputchanged input " + input);
+		}
 
-		// unmap all elements - set all internal state to null...
-
-		Object oldInput = getInput();
-		histogramProvider.inputChanged(this, oldInput, image);
-		// this.input = image;
-		// Finally add everything in a threadsafe way.
+		if (oldInput == null){
+			logger.debug("HistogramViewer: inputchanged oldInput null");
+		} else {
+			logger.debug("HistogramViewer: inputchanged oldInput " + oldInput);
+		}
+		//refresh();
+		// run our updates here? or in input changed...
 		this.getControl().getParent().getDisplay().syncExec(new Runnable() {
 
 			@Override
 			public void run() {
 				try {
-					updateRegion(histogramProvider.getMin(),
-							histogramProvider.getMax());
+					updateRegion(getHistogramProvider().getMin(),
+							getHistogramProvider().getMax());
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -309,26 +320,24 @@ public class HistogramViewer extends ContentViewer {
 
 			};
 		});
+	};
+
+	/**
+	 * Set the input for this viewer, must instantiate IPaletteTrace
+	 */
+	@Override
+	public void setInput(Object input) {
+		Assert.isTrue(input instanceof IPaletteTrace);
+		super.setInput(input);
 	}
 
 	/**
-	 * Sets the histogram provider used by this widget.
-	 *
-	 * @param provider
-	 *            the histogram provider
+	 * Set the content provider for this viewer, must instantiate IHistogramProvider
 	 */
-	// TODO: Subclass ContentViewer and get this for free????
-	public void setHistogramProvider(IHistogramProvider provider) {
-		Assert.isNotNull(provider);
-		IHistogramProvider oldContentProvider = this.histogramProvider;
-		this.histogramProvider = provider;
-		if (oldContentProvider != null) {
-			Object currentInput = getInput();
-			oldContentProvider.inputChanged(this, currentInput, null);
-			oldContentProvider.dispose();
-			provider.inputChanged(this, null, currentInput);
-			refresh();
-		}
+	@Override
+	public void setContentProvider(IContentProvider contentProvider) {
+		Assert.isTrue(contentProvider instanceof IHistogramProvider);
+		super.setContentProvider(contentProvider);
 	}
 
 	public void refresh() {
@@ -342,8 +351,18 @@ public class HistogramViewer extends ContentViewer {
 	 *
 	 * @return the histogram provider or <code>null</code> if none
 	 */
+	@Override
+	public IHistogramProvider getContentProvider() {
+		return (IHistogramProvider) super.getContentProvider();
+	}
+
+	/**
+	 * Returns the histogramProvider for this class
+	 *
+	 * @return the histogram provider or <code>null</code> if none
+	 */
 	public IHistogramProvider getHistogramProvider() {
-		return histogramProvider;
+		return (IHistogramProvider) super.getContentProvider();
 	}
 
 	/**

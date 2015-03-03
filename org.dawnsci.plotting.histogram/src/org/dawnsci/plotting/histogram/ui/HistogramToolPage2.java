@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 
 public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
-	// LOGGER
 	private static final Logger logger = LoggerFactory.getLogger(HistogramToolPage2.class);
 
 	private FormToolkit toolkit;
@@ -127,7 +126,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 				.grab(true, true).create();
 		histogramWidget.getControl().setLayoutData(create);
 
-		histogramWidget.setHistogramProvider(new ImageHistogramProvider());
+		histogramWidget.setContentProvider(new ImageHistogramProvider());
 
 		toolkit.adapt(histogramWidget.getComposite());
 		section.setClient(sectionClient);

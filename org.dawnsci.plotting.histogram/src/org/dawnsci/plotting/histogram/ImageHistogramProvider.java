@@ -14,6 +14,7 @@ import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.dawnsci.plotting.api.trace.PaletteEvent;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.PaletteData;
 
 import uk.ac.diamond.scisoft.analysis.dataset.function.Histogram;
@@ -25,7 +26,7 @@ public class ImageHistogramProvider implements IHistogramProvider {
 	private IPaletteTrace image;
 	private IPaletteListener imageListener = new ImagePaletteListener();
 
-	protected HistogramViewer widget;
+	protected HistogramViewer histogramViewer;
 
 	private IDataset imageDataset;
 	private ImageServiceBean bean;
@@ -258,31 +259,6 @@ public class ImageHistogramProvider implements IHistogramProvider {
 		};
 	}
 
-	@Override
-	public void inputChanged(HistogramViewer histogramWidget,
-			Object oldInput, Object newInput) {
-		this.widget = histogramWidget;
-
-		if (newInput != oldInput){
-			//remove listeners on old input
-			if (oldInput != null){
-				IPaletteTrace oldImage = (IPaletteTrace) oldInput;
-				oldImage.removePaletteListener(imageListener);
-			}
-			// reset cached input
-
-			//setImage
-			if (newInput instanceof IPaletteTrace){
-				IPaletteTrace image = (IPaletteTrace) newInput;
-				setImage(image);
-				image.addPaletteListener(imageListener);
-				// set listeners
-			}
-
-		}
-		// TODO Auto-generated method stub
-
-	}
 
 	@Override
 	public void dispose() {
@@ -304,12 +280,36 @@ public class ImageHistogramProvider implements IHistogramProvider {
 	private final class ImagePaletteListener extends IPaletteListener.Stub{
 		@Override
 		public void minChanged(PaletteEvent event) {
-			widget.refresh();
+			histogramViewer.refresh();
 		}
 
 		@Override
 		public void maxChanged(PaletteEvent event) {
-			widget.refresh();
+			histogramViewer.refresh();
+		}
+	}
+
+
+	@Override
+	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		this.histogramViewer = (HistogramViewer) viewer;
+
+		if (newInput != oldInput){
+			//remove listeners on old input
+			if (oldInput != null){
+				IPaletteTrace oldImage = (IPaletteTrace) oldInput;
+				oldImage.removePaletteListener(imageListener);
+			}
+			// reset cached input
+
+			//setImage
+			if (newInput instanceof IPaletteTrace){
+				IPaletteTrace image = (IPaletteTrace) newInput;
+				setImage(image);
+				image.addPaletteListener(imageListener);
+				// set listeners
+			}
+
 		}
 	}
 }
