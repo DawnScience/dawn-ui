@@ -1,12 +1,14 @@
 package org.dawnsci.plotting.histogram.ui;
 
 import java.util.Arrays;
+import java.util.Collection;
 
 import org.dawnsci.plotting.histogram.ExtensionPointManager;
 import org.dawnsci.plotting.histogram.ImageHistogramProvider;
 import org.dawnsci.plotting.histogram.functions.ColourSchemeContribution;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
@@ -37,6 +39,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
@@ -57,8 +60,6 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	private HistogramViewer histogramWidget;
 
 	private ITraceListener traceListener = new TraceListener();
-
-	private ExtensionPointManager extensionPointManager;
 
 	private IPaletteListener paletteListener;
 
@@ -116,20 +117,13 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	 * Initialize colour map combo with available colour maps
 	 */
 	private void initializeColourMap() {
-		extensionPointManager = ExtensionPointManager.getManager();
-		// TODO: 1. populate the colourMapCombo control from extension point as per HistogramToolPage
+		
+		final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
 
-		for (ColourSchemeContribution contribution : extensionPointManager.getColourSchemeContributions()) {
-			colourMapCombo.add(contribution.getName());
+		for (String colourSchemeName : pservice.getColorSchemes()) {
+			colourMapCombo.add(colourSchemeName);
 		}
 		
-		// TODO: 2. initialize the default selection to the specified colour map in preferences as per HistogramToolPage
-		final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
-		final String schemeName = store.getString("org.dawb.plotting.system.colourSchemeName");
-		colourMapCombo.select(Arrays.asList(colourMapCombo.getItems()).indexOf(schemeName));
-		
-		// TODO: 3. connect up a listener to react to changes in the colour map. Initially the colour map
-		//			should be set on the image via the PaletteTrace. Don't worry about updating histogram yet. 
 		paletteListener = new IPaletteListener.Stub(){
 			@Override
 			public void paletteChanged(PaletteEvent event) {
@@ -139,10 +133,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 				//updateHistogramToolElements(event.getTrace(), null, false, false);
 				
 				IPaletteTrace trace = event.getTrace();
-				String name = trace != null ? trace.getPaletteName() : null;
-				if (name != null) {
-					updateColourScheme(name);
-				}
+				setColourScheme(trace);
 			}
 		};
 		
@@ -150,14 +141,20 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				logger.trace("colourSchemeListener");
-				setPaletteName();
-				buildPaletteData();
+				setPalette();
 				//updateHistogramToolElements(event, true, false);
 			}
 		};
 		
 		colourMapCombo.addSelectionListener(colourSchemeListener);
 		
+	}
+	
+	private void setColourScheme(IPaletteTrace trace){
+		String name = trace != null ? trace.getPaletteName() : null;
+		if (name != null) {
+			updateColourSchemeCombo(name);
+		}
 	}
 
 	/*
@@ -252,11 +249,13 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		if (paletteTrace != null){
 			logger.debug("HistogramToolPage: activate - palette trace " + paletteTrace.hashCode());
 			histogramWidget.setInput(paletteTrace);
+			paletteTrace.addPaletteListener(paletteListener);
+			setColourScheme(paletteTrace);
+			
 		} else {
 			logger.debug("HistogramToolPage: activate - palette trace is null.");
 		}
 
-		if (paletteTrace!=null) paletteTrace.addPaletteListener(paletteListener);
 	}
 
 	@Override
@@ -270,13 +269,14 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 		// remove our trace listener
 		getPlottingSystem().removeTraceListener(traceListener);
+		getPaletteTrace().removePaletteListener(paletteListener);
 	}
 	
 	/**
 	 * Update the colour scheme combo on this page
 	 * @param schemeName colour scheme name
 	 */
-	private void updateColourScheme(String schemeName) {
+	private void updateColourSchemeCombo(String schemeName) {
 		//if (updatingColorSchemeInternally)
 			//return;
 		if (colourMapCombo == null || colourMapCombo.isDisposed())
@@ -292,29 +292,10 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	 */
 
 	
-	private void setPaletteName() {
-		ColourSchemeContribution colourScheme = extensionPointManager.getColourSchemeContribution(colourMapCombo.getText());
-		getPaletteTrace().setPaletteName(colourScheme.getName());
-		
+	private void setPalette() {
+		getPaletteTrace().setPalette(colourMapCombo.getText());
 	}
 	
-	private void buildPaletteData() {
-
-		// first get the appropriate bits from the extension points
-		ColourSchemeContribution colourScheme = extensionPointManager.getColourSchemeContribution(colourMapCombo.getText());
-	
-		int[] red = extensionPointManager.getTransferFunctionFromID(colourScheme.getRedID()).getFunction().getArray();
-		int[] green = extensionPointManager.getTransferFunctionFromID(colourScheme.getGreenID()).getFunction().getArray();
-		int[] blue = extensionPointManager.getTransferFunctionFromID(colourScheme.getBlueID()).getFunction().getArray();
-
-		PaletteData data = getPaletteTrace().getPaletteData();
-		data.colors = new RGB[256];
-
-		for (int i = 0; i < 256; i++) {
-			data.colors[i] = new RGB(red[i], green[i], blue[i]);
-		}
-		getPaletteTrace().setPaletteData(data);
-	}
 
 	@Override
 	public boolean isAlwaysSeparateView() {
@@ -364,6 +345,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			logger.debug("HistogramToolPage: traceUpdated");
 			IPaletteTrace it = (IPaletteTrace)evt.getSource();
 			histogramWidget.setInput(it);
+			setColourScheme(it);
 		}
 
 		@Override
@@ -371,6 +353,8 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			logger.debug("HistogramToolPage: traceAdded");
 			IPaletteTrace it = (IPaletteTrace)evt.getSource();
 			histogramWidget.setInput(it);
+			it.addPaletteListener(paletteListener);
+			setColourScheme(it);
 		}
 
 		@Override
