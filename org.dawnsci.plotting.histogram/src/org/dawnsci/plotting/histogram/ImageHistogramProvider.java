@@ -2,6 +2,8 @@ package org.dawnsci.plotting.histogram;
 
 import java.util.List;
 
+import org.dawnsci.plotting.histogram.ui.HistogramViewer;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
@@ -9,7 +11,10 @@ import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
+import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
+import org.eclipse.dawnsci.plotting.api.trace.PaletteEvent;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.PaletteData;
 
 import uk.ac.diamond.scisoft.analysis.dataset.function.Histogram;
@@ -19,23 +24,32 @@ public class ImageHistogramProvider implements IHistogramProvider {
 	private static final int MAX_BINS = 2048;
 
 	private IPaletteTrace image;
+	private IPaletteListener imageListener = new ImagePaletteListener();
+
+	protected HistogramViewer histogramViewer;
 
 	private IDataset imageDataset;
 	private ImageServiceBean bean;
 	private PaletteData paletteData;
-
-	// cached data set values
-	private IDataset dataR = null;
-	private IDataset dataG = null;
-	private IDataset dataB = null;
-	private IDataset dataRGBX = null;
 
 	/**
 	 * Calculated histogram, index 0 for Y values, 1 for X values
 	 */
 	private IDataset[] histogramValues;
 
-	public ImageHistogramProvider(IPaletteTrace image) {
+	public ImageHistogramProvider() {
+
+	}
+
+	private void resetImage(){
+		this.image = null;
+		this.imageDataset = null;
+		this.bean = null;
+		this.paletteData = null;
+	}
+
+	private void setImage(IPaletteTrace image){
+		//TODO: connect and disconect listeners, etc...
 		this.image = image;
 		this.imageDataset = getImageData(image);
 		this.bean = image.getImageServiceBean();
@@ -45,7 +59,7 @@ public class ImageHistogramProvider implements IHistogramProvider {
 	/**
 	 * Given an image, extract the image data. If no image data is found, return
 	 * some default dummy data
-	 * 
+	 *
 	 * @param image
 	 *            IPaletteTrace image
 	 * @return actual 2-D data of the image
@@ -92,69 +106,56 @@ public class ImageHistogramProvider implements IHistogramProvider {
 		return rMin;
 	}
 
+	/**
+	 * This implementation masks the inconsistencies of the imagebean
+	 * i.e. sometimes it can be in an intermittent state, where min is set but not max.
+	 * We default null values to 0.
+	 */
 	@Override
 	public double getMax() {
-		return bean.getMax().doubleValue();
+		double maxValue = doubleValue(bean.getMax());
+		double minValue = doubleValue(bean.getMin());
+		if (maxValue < minValue){
+			maxValue = minValue;
+		}
+
+		return maxValue;
 	}
 
+
+
+	/**
+	 * This implementation masks the inconsistencies of the imagebean
+	 * i.e. sometimes it can be in an intermittent state, where min is set but not max.
+	 * We default null values to 0.
+	 */
 	@Override
 	public double getMin() {
-		return bean.getMin().doubleValue();
+		double minValue = doubleValue(bean.getMin());
+		double maxValue = doubleValue(bean.getMax());
+		if (minValue > maxValue){
+			minValue = maxValue;
+		}
+
+		return minValue;
 	}
 
-	//
-	// @Override
-	// public IDataset getXDataset() {
-	// if (histogramValues == null){
-	// histogramValues = generateHistogramData(imageDataset, getNumberOfBins(),
-	// getMaximumRange(), getMininumRange());
-	// }
-	// return histogramValues[1];
-	// }
-	//
-	// @Override
-	// public IDataset getYDataset() {
-	// if (histogramValues == null){
-	// histogramValues = generateHistogramData(imageDataset, getNumberOfBins(),
-	// getMaximumRange(), getMininumRange());
-	// }
-	// return histogramValues[0];
-	// }
-	//
-	// @Override
-	// public IDataset getRDataset() {
-	// final DoubleDataset R = new DoubleDataset(paletteData.colors.length-3);
-	// double scale = ((histogramY.max(true).doubleValue())/256.0);
-	// if(scale <= 0) scale = 1.0/256.0;
-	// R.setName("red");
-	// for (int i = 0; i < paletteData.colors.length-3; i++) {
-	// R.set(paletteData.colors[i].red*scale, i);
-	// }
-	// return null;
-	// }
-	//
-	// @Override
-	// public IDataset getGDataset() {
-	// // TODO Auto-generated method stub
-	// return null;
-	// }
-	//
-	// @Override
-	// public IDataset getBDataset() {
-	// // TODO Auto-generated method stub
-	// return null;
-	// }
-	//
-	// @Override
-	// public IDataset getRGBDataset() {
-	// // TODO Auto-generated method stub
-	// return null;
-	// }
+	/**
+	 * Utility for obtaining min and max with defaults
+	 *
+	 * @return value as double or  0 as default if no value is available
+	 */
+	private double doubleValue(Number n) {
+		if (n == null)
+			return 0;
+		return n.doubleValue();
+	}
+
 
 	/**
 	 * This will take an image, and pull out all the parameters required to
 	 * calculate the histogram
-	 * 
+	 *
 	 * @return Calculated histogram, index 0 for Y values, 1 for X values
 	 */
 	private IDataset[] generateHistogramData(IDataset imageDataset, int numBins) {
@@ -177,8 +178,14 @@ public class ImageHistogramProvider implements IHistogramProvider {
 
 	@Override
 	public IHistogramDatasets getDatasets() {
+		Assert.isNotNull(image, "This provider must have an image set when get datasets is called");
+
+		//getmin and max - validate values and swap
+		//validate these are good numbers
 		double histoMin = getMin();
 		double histoMax = getMax();
+
+
 		IDataset[] histogramData = generateHistogramData(imageDataset,
 				getNumberOfBins());
 		final IDataset histogramY = histogramData[0];
@@ -252,4 +259,57 @@ public class ImageHistogramProvider implements IHistogramProvider {
 		};
 	}
 
+
+	@Override
+	public void dispose() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setMax(double max) {
+		image.setMax(max);
+
+	}
+
+	@Override
+	public void setMin(double min) {
+		image.setMin(min);
+	}
+
+	private final class ImagePaletteListener extends IPaletteListener.Stub{
+		@Override
+		public void minChanged(PaletteEvent event) {
+			histogramViewer.refresh();
+		}
+
+		@Override
+		public void maxChanged(PaletteEvent event) {
+			histogramViewer.refresh();
+		}
+	}
+
+
+	@Override
+	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		this.histogramViewer = (HistogramViewer) viewer;
+
+		if (newInput != oldInput){
+			//remove listeners on old input
+			if (oldInput != null){
+				IPaletteTrace oldImage = (IPaletteTrace) oldInput;
+				oldImage.removePaletteListener(imageListener);
+			}
+			// reset cached input
+
+			//setImage
+			if (newInput instanceof IPaletteTrace){
+				IPaletteTrace image = (IPaletteTrace) newInput;
+				setImage(image);
+				image.addPaletteListener(imageListener);
+				// set listeners
+			}
+
+		}
+	}
 }

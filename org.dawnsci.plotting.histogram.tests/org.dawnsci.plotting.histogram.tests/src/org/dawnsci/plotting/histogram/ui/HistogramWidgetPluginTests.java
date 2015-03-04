@@ -5,7 +5,7 @@ import org.junit.Test;
 
 public class HistogramWidgetPluginTests extends PluginTestBase{
 	
-	private HistogramWidget histogramWidget;
+	private HistogramViewer histogramWidget;
 
 
 	@Test
@@ -18,7 +18,7 @@ public class HistogramWidgetPluginTests extends PluginTestBase{
 
 	@Override
 	protected void createControl(Composite parent) throws Exception {
-		histogramWidget = new HistogramWidget(parent, "Histogram Test Widget", null, null);
+		histogramWidget = new HistogramViewer(parent, "Histogram Test Widget", null, null);
 	}
 
 }
