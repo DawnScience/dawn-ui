@@ -116,7 +116,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 		
 		x2 = profilePlotter.createAxis("Y Slice", false, SWT.TOP);
 		
-		profilePlotter.setRescale(false); // Take it from zoom level of tool.
+		profilePlotter.setRescale(true); // Take it from zoom level of tool.
 
 		createActions();
 		activate();
@@ -575,7 +575,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 							profilePlotter.getSelectedYAxis().setRange(min, max);
 						}
 					}
-					profilePlotter.repaint(false);
+					profilePlotter.repaint();
 				}
 			});
 		}
