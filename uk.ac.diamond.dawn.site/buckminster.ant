@@ -139,10 +139,14 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
         <echo message="target      : product.os=${product.os}, product.ws=${product.ws}, product.arch=${product.arch}" />
         <echo message="destination : ${destination}" />
 
-        <!-- If running Java 7, use the new Garbage Collector -->
+        <!-- Set Java runtime args based on the Java version -->
         <condition property="jvmarg.gc" value="-XX:+DisableExplicitGC -XX:+UseG1GC -XX:MaxGCPauseMillis=2000" else="-XX:+DisableExplicitGC">
-            <matches string="${java.version}" pattern="^1\.[78]\..*" />
+            <matches string="${java.version}" pattern="^1\.7\..*" />
         </condition>
+        <condition property="jvmarg.gc" value="-XX:+DisableExplicitGC -XX:+UseG1GC -XX:MaxGCPauseMillis=2000" else="-XX:+DisableExplicitGC">
+            <matches string="${java.version}" pattern="^1\.8\..*" />
+        </condition>
+
         <echo message="java        : version=${java.version}, home=${java.home}, additional jvmarg=${jvmarg.gc}" />
 
         <java jar="${equinox.launcher.jar}" fork="true" maxmemory="1536m" failonerror="true" >
@@ -302,6 +306,7 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
 
     <!-- ============================================================ -->
     <!--  Create a product (install from previously created p2 site)  -->
+	<!--  Create/Update a symlink to the product (if action selected) -->
     <!-- ============================================================ -->
 
     <target name="create.product.setup">
@@ -309,6 +314,17 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
         <fail message="ERROR: product.parent.directory.location not set - did you remember to specify a .properties file?">
             <condition><not><isset property="product.parent.directory.location" /></not></condition>
         </fail>
+        <!-- For buckminster.output.root and buckminster.temp.root, first create their immediate parent directories (if required)
+             This ensures that _directory.set.group is applied to the immediate parent(s) if we needed to create them also
+             This is a common case when buckminster.root.prefix is used, and needs to be created -->
+        <dirname property="output.root.parent" file="${buckminster.output.root}" />
+        <antcall target="setup.directory">
+            <param name="setup.directory.name" value="${output.root.parent}" />
+        </antcall>
+        <dirname property="temp.root.parent" file="${buckminster.temp.root}" />
+        <antcall target="setup.directory">
+            <param name="setup.directory.name" value="${temp.root.parent}" />
+        </antcall>
         <antcall target="setup.directory">
             <param name="setup.directory.name" value="${buckminster.output.root}" />
             <param name="setup.directory.delete.previous" value="${buckminster.output.root.delete.previous}" />
@@ -322,6 +338,29 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
     <target name="create.product" depends="install-product, lib-copy, jre-copy">
         <echo>
 == Product has been built in ${destination} ==
+        </echo>
+    </target>
+
+    <target name="check_product_symlink_exists" depends="create.product">
+        <property name="destination.symlink" location="${destination.parent}/client"/>
+        <echo message="Checking if previous symlink to product exists at : ${destination.symlink}" />
+        <condition property="product_symlink_exists">
+            <available file="${destination.symlink}" type="dir"/>
+        </condition>
+    </target>
+
+    <target name="previous_product_symlink_yes" depends="check_product_symlink_exists" if="product_symlink_exists">
+        <symlink action="delete" link="${destination.symlink}"/>
+    </target>
+    <target name="previous_product_symlink_no" depends="check_product_symlink_exists" unless="product_symlink_exists">
+        <echo message="No previous symlink to product exists at : ${destination.symlink}" />
+    </target>
+
+    <target name="create.product-with.symlink" depends="previous_product_symlink_yes, previous_product_symlink_no">
+        <symlink link="${destination.symlink}" resource="./${destination.directory}"/>
+        <echo>
+== Product has been built in ${destination} ==
+== Symlink to product created (or changed) at ${destination.symlink} ==
         </echo>
     </target>
 
@@ -399,7 +438,7 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
             <arg value="--recurse-paths" />
             <arg value="--symlinks" />  <!-- Required since the MacOS product contains a symlink -->
             <arg value="--suffixes" />
-            <arg value=".gif:.jar:.png:" />
+            <arg value=".gif:.jar:.png" />
             <arg value="${destination.zipfile}.zip" />
             <arg value="${destination.directory}" />
         </exec>
@@ -410,9 +449,10 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
         <property.expand property="destination.zipfile" definition="${zip.file.name}"/>
         <echo>Zipping ${destination} (excluding the directory) into ${destination.parent}/${destination.zipfile}.zip using platform zip command</echo>
         <exec executable="zip" osfamily="unix" dir="${destination}" failonerror="true">
-            <arg value="-qr" />
-            <arg value="-n" />
-            <arg value=".jar" />
+            <arg value="--quiet" />
+            <arg value="--recurse-paths" />
+            <arg value="--suffixes" />
+            <arg value=".gif:.jar:.png" />
             <arg value="${destination.parent}/${destination.zipfile}.zip" />
             <arg value="." />
         </exec>
