@@ -656,18 +656,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		int iwidth  = realBounds.width;
 		int iheight = realBounds.height;
 
-		if (iwidth>(rwidth/2d) || iheight>(rheight/2d)) {
-			return 1;
+		int max = 1024;
+		for (int i = 2 ; i <= max; i *= 2) {
+			if (iwidth>(rwidth/i) || iheight>(rheight/i)) {
+				return i/2;
+			}
 		}
-
-		if (iwidth>(rwidth/4d) || iheight>(rheight/4d)) {
-			return 2;
-		}
-
-		if (iwidth>(rwidth/8d) || iheight>(rheight/8d)) {
-			return 4;
-		}
-		return 8;
+		return max*2;
 	}
 
 	private double getSpan(Axis axis) {
