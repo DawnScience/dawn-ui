@@ -238,6 +238,13 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	}
 	
 	/**
+	 * Returns colour map ComboViewer for testing purposes
+	 */
+	protected ComboViewer getColourMapViewer(){
+		return colourMapViewer;
+	}
+	
+	/**
 	 * Update the colour scheme combo on this page
 	 * @param schemeName colour scheme name
 	 */
