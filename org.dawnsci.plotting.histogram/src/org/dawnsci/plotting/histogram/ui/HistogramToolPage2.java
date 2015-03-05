@@ -1,20 +1,13 @@
 package org.dawnsci.plotting.histogram.ui;
 
-import java.util.Arrays;
-import java.util.Collection;
-
-import org.dawnsci.plotting.histogram.ExtensionPointManager;
+import org.dawnsci.plotting.histogram.ColourMapProvider;
 import org.dawnsci.plotting.histogram.ImageHistogramProvider;
-import org.dawnsci.plotting.histogram.functions.ColourSchemeContribution;
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
-import org.eclipse.dawnsci.plotting.api.trace.PaletteEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.jface.action.Action;
@@ -24,27 +17,25 @@ import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Cursor;
-import org.eclipse.swt.graphics.PaletteData;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.IPageSite;
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +46,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 	private FormToolkit toolkit;
 	private ScrolledForm form;
-	private CCombo colourMapCombo;
+	private ComboViewer colourMapViewer;
 
 	private HistogramViewer histogramWidget;
 
@@ -98,44 +89,19 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		Composite colourComposite = toolkit.createComposite(section);
 		colourComposite.setLayout(GridLayoutFactory.fillDefaults()
 				.numColumns(2).create());
-		colourComposite.setLayoutData(GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).create());
-		// Label label = toolkit.createLabel(colourComposite, "Colour Scheme:");
-		colourMapCombo = new CCombo(colourComposite, SWT.FLAT | SWT.DROP_DOWN
-				| SWT.READ_ONLY | SWT.BORDER);
-		colourMapCombo.setLayoutData(GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).create());
-		toolkit.adapt(colourMapCombo);
-		toolkit.paintBordersFor(colourComposite);
+
+		GridData layoutData = GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).create();
+		
+		colourComposite.setLayoutData(layoutData);
+		
+		colourMapViewer = new ComboViewer(colourComposite, SWT.READ_ONLY);
+		colourMapViewer.getControl().setLayoutData(layoutData);
+		
+		toolkit.adapt((Composite) colourMapViewer.getControl());
 		section.setClient(colourComposite);
-
-		initializeColourMap();
-	}
-
-
-	/*
-	 * Initialize colour map combo with available colour maps
-	 */
-	private void initializeColourMap() {
 		
-		final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
-
-		for (String colourSchemeName : pservice.getColorSchemes()) {
-			colourMapCombo.add(colourSchemeName);
-		}
-		
-		paletteListener = new IPaletteListener.Stub(){
-			@Override
-			public void paletteChanged(PaletteEvent event) {
-				//if (internalEvent > 0) return;
-				logger.trace("paletteChanged");
-				//paletteData = event.getPaletteData();
-				//updateHistogramToolElements(event.getTrace(), null, false, false);
-				
-				IPaletteTrace trace = event.getTrace();
-				setColourScheme(trace);
-			}
-		};
+		colourMapViewer.setContentProvider(new ColourMapProvider());
 		
 		colourSchemeListener = new SelectionAdapter() {
 			@Override
@@ -146,10 +112,9 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			}
 		};
 		
-		colourMapCombo.addSelectionListener(colourSchemeListener);
-		
+		((Combo) colourMapViewer.getControl()).addSelectionListener(colourSchemeListener);
 	}
-	
+
 	private void setColourScheme(IPaletteTrace trace){
 		String name = trace != null ? trace.getPaletteName() : null;
 		if (name != null) {
@@ -249,7 +214,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		if (paletteTrace != null){
 			logger.debug("HistogramToolPage: activate - palette trace " + paletteTrace.hashCode());
 			histogramWidget.setInput(paletteTrace);
-			paletteTrace.addPaletteListener(paletteListener);
+			colourMapViewer.setInput(paletteTrace);
 			setColourScheme(paletteTrace);
 			
 		} else {
@@ -277,14 +242,11 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	 * @param schemeName colour scheme name
 	 */
 	private void updateColourSchemeCombo(String schemeName) {
-		//if (updatingColorSchemeInternally)
-			//return;
-		if (colourMapCombo == null || colourMapCombo.isDisposed())
+		if (colourMapViewer == null)
 			return;
 		if (schemeName == null)
 			return;
-		colourMapCombo.select(Arrays.asList(colourMapCombo.getItems()).indexOf(
-				schemeName));
+		colourMapViewer.setSelection(new StructuredSelection(schemeName), true);
 	}
 	
 	/**
@@ -293,7 +255,10 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 	
 	private void setPalette() {
-		getPaletteTrace().setPalette(colourMapCombo.getText());
+		IPaletteTrace paletteTrace = getPaletteTrace();
+		if (paletteTrace != null){
+			paletteTrace.setPalette((String)((StructuredSelection) colourMapViewer.getSelection()).getFirstElement());
+		}
 	}
 	
 
@@ -345,6 +310,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			logger.debug("HistogramToolPage: traceUpdated");
 			IPaletteTrace it = (IPaletteTrace)evt.getSource();
 			histogramWidget.setInput(it);
+			colourMapViewer.setInput(it);
 			setColourScheme(it);
 		}
 
@@ -353,7 +319,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			logger.debug("HistogramToolPage: traceAdded");
 			IPaletteTrace it = (IPaletteTrace)evt.getSource();
 			histogramWidget.setInput(it);
-			it.addPaletteListener(paletteListener);
+			colourMapViewer.setInput(it);
 			setColourScheme(it);
 		}
 
