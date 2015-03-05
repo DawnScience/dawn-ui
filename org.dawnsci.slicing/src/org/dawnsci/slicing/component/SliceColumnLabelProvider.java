@@ -81,7 +81,7 @@ class SliceColumnLabelProvider extends ColumnLabelProvider implements IStyledLab
 				try {
 					final int[] shape = lazy.getShape();
 					if ((data.isSlice() || data.isTextRange()) && !system.isErrorVisible() && shape[data.getDimension()]>1) {
-						ret.append(new StyledString(" (click to change)", StyledString.QUALIFIER_STYLER));
+						ret.append(new StyledString(" *", StyledString.DECORATIONS_STYLER));
 					}
 				} catch (Throwable largelyIgnored) {
 					logger.error("Unable to determine if editable.");

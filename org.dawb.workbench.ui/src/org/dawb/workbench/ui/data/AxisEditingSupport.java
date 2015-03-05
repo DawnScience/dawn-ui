@@ -54,7 +54,8 @@ class AxisEditingSupport extends EditingSupport {
 	@Override
 	protected boolean canEdit(Object element) {
 		ITransferableDataObject co = (ITransferableDataObject)element;
-		return co.isChecked();
+		final int[] shape  = co.getShape(false);
+		return shape==null ? co.isChecked() : co.isChecked() && shape.length==1;
 	}
 
 	@Override
