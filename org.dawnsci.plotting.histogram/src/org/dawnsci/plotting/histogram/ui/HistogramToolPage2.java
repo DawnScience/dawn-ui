@@ -1,5 +1,6 @@
 package org.dawnsci.plotting.histogram.ui;
 
+import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.plotting.histogram.ImageHistogramProvider;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
@@ -24,6 +25,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -59,9 +61,30 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		form.getBody().setLayout(GridLayoutFactory.fillDefaults().create());
 
 		createImageSettings(form.getBody());
+
 		createHistogramControl(form.getBody());
 	}
 
+	private void createMinMaxSettings(Composite comp){
+		Composite composite = new Composite(comp, SWT.NONE);
+		composite.setLayout(GridLayoutFactory.fillDefaults().numColumns(4).create());
+
+		Label minLabel = new Label(composite, SWT.NONE);
+		minLabel.setText("Min:");
+		minLabel.setLayoutData(new GridData (SWT.BEGINNING, SWT.CENTER, false, false));
+		FloatSpinner minText = new FloatSpinner(composite, SWT.BORDER);
+		minText.setLayoutData(new GridData (SWT.BEGINNING, SWT.CENTER, false, false));
+		Label maxLabel = new Label(composite, SWT.NONE);
+		maxLabel.setLayoutData(new GridData (SWT.END, SWT.CENTER, true, false));
+		maxLabel.setText("Max:");
+		FloatSpinner maxText = new FloatSpinner(composite, SWT.BORDER);
+		maxText.setLayoutData(new GridData (SWT.BEGINNING, SWT.CENTER, false, false));
+
+		minText.setFormat(12, 4);
+		maxText.setFormat(12, 4);
+		minText.setIncrement(1.0);
+		maxText.setIncrement(1.0);
+	}
 	/*
 	 * Create the image settings, i.e. colour scheme section
 	 */
@@ -124,6 +147,8 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 		final IPageSite site = getSite();
 		IActionBars actionBars = (site != null) ? site.getActionBars() : null;
+
+		createMinMaxSettings(form.getBody());
 
 		try {
 			histogramWidget = new HistogramViewer(sectionClient, getTitle(),
