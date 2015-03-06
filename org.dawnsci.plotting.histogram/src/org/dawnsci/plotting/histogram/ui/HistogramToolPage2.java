@@ -1,9 +1,11 @@
 package org.dawnsci.plotting.histogram.ui;
 
 import org.dawnsci.common.widgets.spinner.FloatSpinner;
+import org.dawnsci.plotting.histogram.Activator;
 import org.dawnsci.plotting.histogram.ColourMapProvider;
 import org.dawnsci.plotting.histogram.ImageHistogramProvider;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
@@ -206,21 +208,18 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			}
 		});
 
-		Action reset = new Action("Reset histogram", IAction.AS_PUSH_BUTTON) {
+		Action reset = new Action("Rehistogram", IAction.AS_PUSH_BUTTON) {
 			public void run() {
 
-				final IContributionItem action = getPlottingSystem()
-						.getActionBars().getToolBarManager()
-						.find("org.dawb.workbench.plotting.histo");
-				if (action != null && action.isVisible()
-						&& action instanceof ActionContributionItem) {
+				final IContributionItem action = getPlottingSystem().getActionBars().getToolBarManager().find(PlottingConstants.HISTO);
+				if (action != null && action.isVisible() && action instanceof ActionContributionItem) {
 					ActionContributionItem iaction = (ActionContributionItem) action;
-					iaction.getAction().setChecked(
-							!iaction.getAction().isChecked());
+					iaction.getAction().setChecked(!iaction.getAction().isChecked());
 					iaction.getAction().run();
 				}
 			}
 		};
+		reset.setImageDescriptor(Activator.getImageDescriptor("icons/histo.png"));
 		toolBarManager.add(reset);
 		toolBarManager.update(true);
 
