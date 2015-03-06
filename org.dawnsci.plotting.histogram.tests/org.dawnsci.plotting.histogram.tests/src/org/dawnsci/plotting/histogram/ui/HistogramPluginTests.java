@@ -1,16 +1,20 @@
 package org.dawnsci.plotting.histogram.ui;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 
-import org.dawnsci.plotting.views.ToolPageView;
+import java.util.List;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -18,11 +22,11 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.intro.IIntroPart;
-import org.junit.BeforeClass;
 import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class HistogramPluginTests {
+public class HistogramPluginTests extends PluginTestBase{
 
 	private static HistogramToolPage2 histogramToolPage;
 
@@ -53,33 +57,84 @@ public class HistogramPluginTests {
 	}
 
 	@Test
-	public void test() {
-		//uk.ac.diamond.scisoft.analysis
-		//SDAPlotter.plot(String plotName, final IDataset yValues) throws Exception
-
-		//readAndDispatchForever();
+	public void testColourViewerInitialSetting() {
+		
+		// put in protected method that returns comboViewer from HistogramToolPage1 
+		// read text, assert
+		
+		// Allow time for the trace to be created
+		readAndDispatch(5);
+		
+		IPaletteTrace trace = histogramToolPage.getPaletteTrace();
+		assertNotNull(trace);
+		
+		String colourSchemeName = trace.getPaletteName();
+		String colourSchemeNameViewer = getSelectedColourScheme();
+		assertEquals(colourSchemeName, colourSchemeNameViewer);
 	}
-
+	
+	@Test
+	public void testColourViewerUpdatesFromPalette(){
+		
+		// Allow time for the trace to be created
+		readAndDispatch(5);
+		
+		IPaletteTrace trace = histogramToolPage.getPaletteTrace();
+		assertNotNull(trace);
+		
+		// Pick the last colour scheme name from the list name to set on the combo viewer
+		List<String> colourSchemeList = getColourSchemeList();
+		String colourSchemeName = colourSchemeList.get(colourSchemeList.size()-1);
+		trace.setPalette(colourSchemeName);
+		
+		// Allow time for listeners to fire
+		readAndDispatch(5);
+		
+		String colourSchemeNameViewer = getSelectedColourScheme();
+		assertEquals(colourSchemeName, colourSchemeNameViewer);
+	}
+	
+	@Test
+	public void testPaletteUpdatesFromComboViewer(){
+		
+		// Allow time for the trace to be created
+		readAndDispatch(5);
+		
+		IPaletteTrace trace = histogramToolPage.getPaletteTrace();
+		assertNotNull(trace);
+		
+		// Pick the last colour scheme name from the list name to set on the combo viewer
+		List<String> colourSchemeList = getColourSchemeList();
+		String colourSchemeNameViewer = colourSchemeList.get(colourSchemeList.size()-1);
+		histogramToolPage.getColourMapViewer().setSelection(new StructuredSelection(colourSchemeNameViewer), true);
+		
+		// Allow time for listeners to fire
+		readAndDispatch(5);
+		String colourSchemeName = trace.getPaletteName();
+		
+		assertEquals(colourSchemeName, colourSchemeNameViewer);
+	}
+	
+	private String getSelectedColourScheme()
+	{
+		return (String)((StructuredSelection) histogramToolPage.getColourMapViewer().getSelection()).getFirstElement();
+	}
+	
+	private List<String> getColourSchemeList(){
+		final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
+		return((List<String>)(pservice.getColorSchemes()));
+	}
+	
 	@AfterClass
 	public static void afterClass() {
 ////		project.delete(true, true, null);
 ////		root.refreshLocal(IResource.DEPTH_INFINITE, null);
 	}
 
-	/**
-	 * Call this to stop at this point and be able to interact with the UI
-	 */
-	public static void readAndDispatchForever() {
-		Display display = Display.getCurrent();
-		if (display == null) {
-			display = Display.getDefault();
-		}
-		Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch()) {
-				display.sleep();
-			}
-		}
+	@Override
+	protected void createControl(Composite parent) throws Exception {
+		// TODO Auto-generated method stub
+		
 	}
 
 
