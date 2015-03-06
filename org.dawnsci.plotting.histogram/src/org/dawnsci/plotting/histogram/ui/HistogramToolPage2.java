@@ -3,6 +3,7 @@ package org.dawnsci.plotting.histogram.ui;
 import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.plotting.histogram.Activator;
 import org.dawnsci.plotting.histogram.ColourMapProvider;
+import org.dawnsci.plotting.histogram.IHistogramProvider;
 import org.dawnsci.plotting.histogram.ImageHistogramProvider;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
@@ -80,7 +81,8 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 	private void createMinMaxSettings(Composite comp){
 		Composite composite = new Composite(comp, SWT.NONE);
-		composite.setLayout(GridLayoutFactory.fillDefaults().numColumns(4).create());
+		composite.setLayout(GridLayoutFactory.swtDefaults().numColumns(4).create());
+		composite.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
 
 		Label minLabel = new Label(composite, SWT.NONE);
 		minLabel.setText("Min:");
@@ -116,8 +118,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 				.numColumns(2).create());
 
 		GridData layoutData = GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).create();
-		
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).create();	
 		colourComposite.setLayoutData(layoutData);
 		
 		colourMapViewer = new ComboViewer(colourComposite, SWT.READ_ONLY);
@@ -159,7 +160,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 		section.setText("Histogram Plot");
 		section.setDescription("Histogram information for active plot view");
-
+		
 		Composite sectionClient = toolkit.createComposite(section);
 		sectionClient.setLayout(GridLayoutFactory.fillDefaults().create());
 		sectionClient.setLayoutData(GridDataFactory.fillDefaults()
@@ -168,7 +169,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		final IPageSite site = getSite();
 		IActionBars actionBars = (site != null) ? site.getActionBars() : null;
 
-		createMinMaxSettings(form.getBody());
+		createMinMaxSettings(sectionClient);
 
 		try {
 			histogramWidget = new HistogramViewer(sectionClient, getTitle(),
@@ -266,6 +267,13 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	 */
 	protected ComboViewer getColourMapViewer(){
 		return colourMapViewer;
+	}
+	
+	/**
+	 * Returns histogram viewer for testing purposes
+	 */
+	protected HistogramViewer getHistogramViewer(){
+		return histogramWidget;
 	}
 	
 	/**
