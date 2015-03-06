@@ -143,6 +143,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 		slicer.setLayoutData(data);
 		sliceComponent.setVisible(true);
 		sliceComponent.setSliceActionsEnabled(false);
+		sliceComponent.setToolbarVisible(false);
 
 		sliceComponent.addAxisChoiceListener(new AxisChoiceListener() {
 			
