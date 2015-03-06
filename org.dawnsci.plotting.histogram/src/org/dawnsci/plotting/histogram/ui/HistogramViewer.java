@@ -382,4 +382,11 @@ public class HistogramViewer extends ContentViewer {
 	public void setSelection(ISelection selection, boolean reveal) {
 		// TODO Auto-generated method stub
 	}
+	
+	/**
+	 * For test purposes only
+	 */
+	protected ILineTrace[] getRGBTraces(){
+		return new ILineTrace[] { redTrace, greenTrace, blueTrace};
+	}
 }

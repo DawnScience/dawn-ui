@@ -1,16 +1,18 @@
 package org.dawnsci.plotting.histogram.ui;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.*;
 
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Combo;
@@ -52,8 +54,7 @@ public class HistogramPluginTests extends PluginTestBase{
 		IToolPage tool = sys.getToolPage("org.dawnsci.plotting.histogram.histogram_tool_page_2");
 		histogramToolPage = (HistogramToolPage2) tool;
 		assertNotNull(histogramToolPage);
-
-
+		
 	}
 
 	@Test
@@ -113,6 +114,30 @@ public class HistogramPluginTests extends PluginTestBase{
 		String colourSchemeName = trace.getPaletteName();
 		
 		assertEquals(colourSchemeName, colourSchemeNameViewer);
+	}
+	
+	@Test
+	public void testRGBTraceUpdatesFromPalette(){
+		// Allow time for the trace to be created
+		readAndDispatch(15);
+		
+		IPaletteTrace trace = histogramToolPage.getPaletteTrace();
+		assertNotNull(trace);
+		ILineTrace[] rgbTracesBefore = histogramToolPage.getHistogramViewer().getRGBTraces();
+		IDataset[] before = new IDataset[] {
+				rgbTracesBefore[0].getData().clone(),
+				rgbTracesBefore[1].getData().clone(),
+				rgbTracesBefore[2].getData().clone() };
+
+		// Pick the last colour scheme name from the list name to set on the combo viewer
+		List<String> colourSchemeList = getColourSchemeList();
+		String colourSchemeNameViewer = colourSchemeList.get(colourSchemeList.size()-1);
+		histogramToolPage.getColourMapViewer().setSelection(new StructuredSelection(colourSchemeNameViewer), true);
+		ILineTrace[] rgbTracesAfter = histogramToolPage.getHistogramViewer().getRGBTraces();
+		assertThat(before[0], is(not(rgbTracesAfter[0].getData())));
+		assertThat(before[1], is(not(rgbTracesAfter[1].getData())));
+		assertThat(before[2], is(not(rgbTracesAfter[2].getData())));
+		readAndDispatchForever();
 	}
 	
 	private String getSelectedColourScheme()
