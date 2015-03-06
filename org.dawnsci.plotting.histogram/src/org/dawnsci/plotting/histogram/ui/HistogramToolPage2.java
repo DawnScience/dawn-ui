@@ -313,7 +313,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 	@Override
 	public void setFocus() {
-		form.setFocus();
+		histogramWidget.getComposite().setFocus();
 	}
 
 	private final class TraceListener implements ITraceListener{

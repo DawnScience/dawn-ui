@@ -277,7 +277,15 @@ public class ImageHistogramProvider implements IHistogramProvider {
 		image.setMin(min);
 	}
 
+	//TODO: ADD IN other events... 
+	//TODO: more fine grained updating than refresh??
 	private final class ImagePaletteListener extends IPaletteListener.Stub{
+
+		@Override
+		public void paletteChanged(PaletteEvent event) {
+			histogramViewer.refresh();
+		}
+		
 		@Override
 		public void minChanged(PaletteEvent event) {
 			histogramViewer.refresh();

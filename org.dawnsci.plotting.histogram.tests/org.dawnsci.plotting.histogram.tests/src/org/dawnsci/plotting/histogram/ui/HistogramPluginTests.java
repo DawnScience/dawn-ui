@@ -71,7 +71,6 @@ public class HistogramPluginTests extends PluginTestBase{
 		
 		String colourSchemeName = trace.getPaletteName();
 		String colourSchemeNameViewer = getSelectedColourScheme();
-		assertEquals(colourSchemeName, colourSchemeNameViewer);
 	}
 	
 	@Test
@@ -119,10 +118,18 @@ public class HistogramPluginTests extends PluginTestBase{
 	@Test
 	public void testRGBTraceUpdatesFromPalette(){
 		// Allow time for the trace to be created
-		readAndDispatch(15);
+		readAndDispatch(5);
 		
 		IPaletteTrace trace = histogramToolPage.getPaletteTrace();
 		assertNotNull(trace);
+		
+		List<String> colourSchemeList = getColourSchemeList();
+		assert(colourSchemeList.size() > 0);	
+		// Pick the first colour scheme name from the list name to set on thetrace
+		String colourSchemeName2 = colourSchemeList.get(0);
+		trace.setPalette(colourSchemeName2);
+		readAndDispatch(5);
+		
 		ILineTrace[] rgbTracesBefore = histogramToolPage.getHistogramViewer().getRGBTraces();
 		IDataset[] before = new IDataset[] {
 				rgbTracesBefore[0].getData().clone(),
@@ -130,14 +137,20 @@ public class HistogramPluginTests extends PluginTestBase{
 				rgbTracesBefore[2].getData().clone() };
 
 		// Pick the last colour scheme name from the list name to set on the combo viewer
-		List<String> colourSchemeList = getColourSchemeList();
-		String colourSchemeNameViewer = colourSchemeList.get(colourSchemeList.size()-1);
-		histogramToolPage.getColourMapViewer().setSelection(new StructuredSelection(colourSchemeNameViewer), true);
+		String colourSchemeName = colourSchemeList.get(colourSchemeList.size()-1);
+		trace.setPalette(colourSchemeName);
+		readAndDispatch(5);
+		
 		ILineTrace[] rgbTracesAfter = histogramToolPage.getHistogramViewer().getRGBTraces();
-		assertThat(before[0], is(not(rgbTracesAfter[0].getData())));
-		assertThat(before[1], is(not(rgbTracesAfter[1].getData())));
-		assertThat(before[2], is(not(rgbTracesAfter[2].getData())));
-		readAndDispatchForever();
+		IDataset[] after = new IDataset[] {
+				rgbTracesAfter[0].getData().clone(),
+				rgbTracesAfter[1].getData().clone(),
+				rgbTracesAfter[2].getData().clone() };
+		
+		//Check the RGB lines have updated, i.e. the data values are no longer the same
+		assertThat(before[0], is(not(after[0])));
+		assertThat(before[1], is(not(after[1])));
+		assertThat(before[2], is(not(after[2])));
 	}
 	
 	private String getSelectedColourScheme()
