@@ -31,6 +31,7 @@ import org.eclipse.dawnsci.analysis.dataset.impl.Comparisons;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.IndexIterator;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
@@ -519,6 +520,14 @@ public class MaskObject {
 				return; // unbounded region
 
 			final double[] beg = bounds.getPoint();
+			if (roi!=null && roi instanceof PointROI) {
+				int x = Math.max(0, (int) Math.round(beg[0]));
+				int y = Math.max(0, (int) Math.round(beg[1]));
+				op.addVertex(!isMasking, y, x);
+				return; // We done it innit!
+			}
+			
+			
 			final double[] end = bounds.getEndPoint();
 
 			if (roi instanceof LinearROI) { // special case where isNearOutline is used for mask
