@@ -937,6 +937,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	@Override
 	public void setRescaleHistogram(boolean rescaleHistogram) {
 		this.rescaleHistogram = rescaleHistogram;
+		fireSetRescaleListeners();
 	}
 
 	private RGBDataset rgbDataset;
@@ -1157,6 +1158,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (!imageCreationAllowed)  return;
 		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
 		for (IPaletteListener pl : paletteListeners) pl.imageOriginChanged(evt);
+	}
+	
+	private void fireSetRescaleListeners() {
+		if (paletteListeners==null) return;
+		if (!imageCreationAllowed)  return;
+		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
+		for (IPaletteListener pl : paletteListeners) pl.histogramLockedChanged(evt);
 	}
 	
 	@Override

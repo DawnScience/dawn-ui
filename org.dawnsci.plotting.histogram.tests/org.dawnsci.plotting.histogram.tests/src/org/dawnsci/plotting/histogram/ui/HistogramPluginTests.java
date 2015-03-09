@@ -71,6 +71,7 @@ public class HistogramPluginTests extends PluginTestBase{
 		
 		String colourSchemeName = trace.getPaletteName();
 		String colourSchemeNameViewer = getSelectedColourScheme();
+		assertEquals(colourSchemeName, colourSchemeNameViewer);
 	}
 	
 	@Test
@@ -151,6 +152,42 @@ public class HistogramPluginTests extends PluginTestBase{
 		assertThat(before[0], is(not(after[0])));
 		assertThat(before[1], is(not(after[1])));
 		assertThat(before[2], is(not(after[2])));
+	}
+	
+	@Test
+	public void testPaletteUpdatesFromLockAction(){
+		// Allow time for the trace to be created
+		readAndDispatch(5);
+		IPaletteTrace trace = histogramToolPage.getPaletteTrace();
+		
+		boolean lockActionState = true;
+		histogramToolPage.getLockAction().setChecked(lockActionState);
+		histogramToolPage.getLockAction().run();
+		boolean palleteLockState = !trace.isRescaleHistogram();
+		assertEquals(palleteLockState, lockActionState);
+		
+		lockActionState = false;
+		histogramToolPage.getLockAction().setChecked(lockActionState);
+		histogramToolPage.getLockAction().run();
+		palleteLockState = !trace.isRescaleHistogram();
+		assertEquals(palleteLockState, lockActionState);
+	}
+	
+	@Test
+	public void testLockActionUpdatesFromPalette(){
+		// Allow time for the trace to be created
+		readAndDispatch(5);
+		IPaletteTrace trace = histogramToolPage.getPaletteTrace();
+		
+		boolean palleteLockState = true;
+		trace.setRescaleHistogram(!palleteLockState);
+		boolean lockActionState = histogramToolPage.getLockAction().isChecked();
+		assertEquals(palleteLockState, lockActionState);
+		
+		palleteLockState = false;
+		trace.setRescaleHistogram(!palleteLockState);
+		lockActionState = histogramToolPage.getLockAction().isChecked();
+		assertEquals(palleteLockState, lockActionState);
 	}
 	
 	private String getSelectedColourScheme()
