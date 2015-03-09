@@ -3,15 +3,16 @@ package org.dawnsci.plotting.histogram.ui;
 import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.plotting.histogram.Activator;
 import org.dawnsci.plotting.histogram.ColourMapProvider;
-import org.dawnsci.plotting.histogram.IHistogramProvider;
 import org.dawnsci.plotting.histogram.ImageHistogramProvider;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
+import org.eclipse.dawnsci.plotting.api.trace.PaletteEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.jface.action.Action;
@@ -55,17 +56,11 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	
 	private IAction lockAction;
 	
-	// MODES
-	private static final int FULL = 0;
-	private static final int AUTO = 1;
-	private static final int FIXED = 2;
-	private int mode = FULL;
-
 	private HistogramViewer histogramWidget;
 
 	private ITraceListener traceListener = new TraceListener();
 
-	private IPaletteListener paletteListener;
+	private IPaletteListener paletteListener = new PaletteListener();
 
 	private SelectionAdapter colourSchemeListener;
 
@@ -231,24 +226,14 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		reset.setImageDescriptor(Activator.getImageDescriptor("icons/histo.png"));
 		toolBarManager.add(reset);
 		
-
-		/*lockAction = new Action("Lock histogram range", IAction.AS_CHECK_BOX) {
+		lockAction = new Action("Lock histogram range", IAction.AS_CHECK_BOX) {
 			public void run() {
 				IImageTrace image = getImageTrace();
-				
-				if (mode == FIXED) {
-					setChecked(false);
-					mode=AUTO;
-					image.setRescaleHistogram(true);
-				} else {
-					setChecked(true);
-					mode=FIXED;
-					image.setRescaleHistogram(false);
-				}
+				image.setRescaleHistogram(!isChecked());
 			}
 		};
-		//lockAction.setImageDescriptor(Activator.getImageDescriptor("icons/lock.png"));
-		toolBarManager.add(lockAction);*/
+		lockAction.setImageDescriptor(Activator.getImageDescriptor("icons/lock.png"));
+		toolBarManager.add(lockAction);
 		
 		toolBarManager.update(true);
 
@@ -266,6 +251,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		IPaletteTrace paletteTrace = getPaletteTrace();
 		if (paletteTrace != null){
 			logger.debug("HistogramToolPage: activate - palette trace " + paletteTrace.hashCode());
+			paletteTrace.addPaletteListener(paletteListener);
 			histogramWidget.setInput(paletteTrace);
 			colourMapViewer.setInput(paletteTrace);
 			setColourScheme(paletteTrace);
@@ -287,7 +273,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 		// remove our trace listener
 		getPlottingSystem().removeTraceListener(traceListener);
-		//getPaletteTrace().removePaletteListener(paletteListener);
+		getPaletteTrace().removePaletteListener(paletteListener);
 	}
 	
 	/**
@@ -380,6 +366,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			IPaletteTrace it = (IPaletteTrace)evt.getSource();
 			histogramWidget.setInput(it);
 			colourMapViewer.setInput(it);
+			it.addPaletteListener(paletteListener);
 			setColourScheme(it);
 		}
 
@@ -402,6 +389,18 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		}
 
 
+	};
+	
+	private final class PaletteListener extends IPaletteListener.Stub{ 
+		public void histogramLockedChanged(PaletteEvent evt) {
+			boolean locked = !((IPaletteTrace)evt.getSource()).isRescaleHistogram();
+			lockAction.setChecked(locked);
+		}
+	}
+
+	public Object getHistogramViewer() {
+		// TODO Auto-generated method stub
+		return null;
 	};
 
 }

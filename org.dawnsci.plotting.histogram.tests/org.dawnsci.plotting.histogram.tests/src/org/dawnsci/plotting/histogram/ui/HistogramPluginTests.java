@@ -71,6 +71,7 @@ public class HistogramPluginTests extends PluginTestBase{
 		
 		String colourSchemeName = trace.getPaletteName();
 		String colourSchemeNameViewer = getSelectedColourScheme();
+		assertEquals(colourSchemeName, colourSchemeNameViewer);
 	}
 	
 	@Test
