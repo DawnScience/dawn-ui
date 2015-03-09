@@ -150,8 +150,8 @@ public class HistogramViewer extends ContentViewer {
 	protected void updateHistogramToolElements(ROIEvent evt, IROI roi) {
 		if (roi instanceof RectangularROI) {
 			RectangularROI rectangularROI = (RectangularROI) roi;
-			getHistogramProvider().setMax(rectangularROI.getPoint()[0]);
-			getHistogramProvider().setMin(rectangularROI.getEndPoint()[0]);
+			getHistogramProvider().setMin(rectangularROI.getPoint()[0]);
+			getHistogramProvider().setMax(rectangularROI.getEndPoint()[0]);
 		}
 		// updateTraces();
 	}
