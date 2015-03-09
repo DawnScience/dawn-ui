@@ -70,19 +70,17 @@ public class HistogramViewer extends ContentViewer {
 	private ILineTrace blueTrace;
 
 	private IROIListener histogramRegionListener = new IROIListener.Stub() {
-		@Override
-		public void roiDragged(ROIEvent evt) {
+		public void update(ROIEvent evt) {
 			IROI roi = evt.getROI();
-			System.out.println("roiDragged" + roi.toString());
-			updateHistogramToolElements(evt, roi);
-		}
-
-		@Override
-		public void roiChanged(ROIEvent evt) {
-			IROI roi = evt.getROI();
-			System.out.println("roiChanged" + roi.toString());
-			updateHistogramToolElements(evt, roi);
-		}
+			if (roi instanceof RectangularROI) {
+				RectangularROI rroi = (RectangularROI) roi;
+				getHistogramProvider().setMin(rroi.getPoint()[0]);
+				double max = rroi.getEndPoint()[0];
+				System.out.print("New max: " + max);
+				getHistogramProvider().setMax(max);
+				System.out.println(" - received as:" + getHistogramProvider().getMax());
+			}
+		};
 	};
 
 	private UIJob repaintJob = new UIJob("Repaint traces") {
@@ -177,15 +175,6 @@ public class HistogramViewer extends ContentViewer {
 		maxText.setIncrement(1.0);
 	}
 
-	protected void updateHistogramToolElements(ROIEvent evt, IROI roi) {
-		if (roi instanceof RectangularROI) {
-			RectangularROI rectangularROI = (RectangularROI) roi;
-			getHistogramProvider().setMin(rectangularROI.getPoint()[0]);
-			getHistogramProvider().setMax(rectangularROI.getEndPoint()[0]);
-		}
-		// updateTraces();
-	}
-
 	/**
 	 * Create the region of interest for the histogram
 	 */
@@ -205,11 +194,19 @@ public class HistogramViewer extends ContentViewer {
 	private void updateRegion(double histoMin, double histoMax) {
 		RectangularROI rroi = new RectangularROI(histoMin, 0, histoMax
 				- histoMin, 1, 0);
-		
 
 		region.removeROIListener(histogramRegionListener);
 		try {
+			double max = rroi.getEndPoint()[0];
+			System.out.println();
+			System.out.print("updateRegion histoMax: " + histoMax);
+			System.out.print(" getEndPoint: " + rroi.getEndPoint()[0]);
 			region.setROI(rroi);
+			System.out.print(" AFTER histoMax: " + histoMax);
+			System.out.print(" getEndPoint: " + rroi.getEndPoint()[0]);
+			RectangularROI afterroi = (RectangularROI)region.getROI();
+			
+			System.out.println(" REGION getEndPoint: " + afterroi.getEndPoint()[0]);
 		} finally {
 			region.addROIListener(histogramRegionListener);
 		}
@@ -311,6 +308,8 @@ public class HistogramViewer extends ContentViewer {
 			logger.debug("HistogramViewer: inputchanged oldInput " + oldInput);
 		}
 		
+		System.out.println("Input Changed: " + getHistogramProvider().getMax());
+
 		refresh();
 	};
 
@@ -335,14 +334,14 @@ public class HistogramViewer extends ContentViewer {
 
 	@Override
 	public void refresh() {
+		System.out.print("refresh max:" + getHistogramProvider().getMax());
 		updateRegion(getHistogramProvider().getMin(), getHistogramProvider()
 				.getMax());
 		updateMin(getHistogramProvider().getMin());
 		updateMax(getHistogramProvider().getMax());
 		updateTraces();
+		System.out.println(" after:" + getHistogramProvider().getMax());
 	}
-	
-
 
 	/**
 	 * Resets the histogram to its original conditions
@@ -361,11 +360,11 @@ public class HistogramViewer extends ContentViewer {
 
 		// do we need a restore defaults???
 	}
-	
+
 	/**
 	 * Clean up viewer
 	 */
-	public void dispose(){
+	public void dispose() {
 		region.removeROIListener(histogramRegionListener);
 		histogramPlottingSystem.dispose();
 	}

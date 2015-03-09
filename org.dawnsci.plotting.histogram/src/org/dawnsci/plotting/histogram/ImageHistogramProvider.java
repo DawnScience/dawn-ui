@@ -280,16 +280,19 @@ public class ImageHistogramProvider implements IHistogramProvider {
 
 		@Override
 		public void paletteChanged(PaletteEvent event) {
+			System.out.println("provider paletteChanged " + getMax());
 			histogramViewer.refresh();
 		}
 		
 		@Override
 		public void minChanged(PaletteEvent event) {
+			System.out.println("provider minChanged " + getMax());
 			histogramViewer.refresh();
 		}
 
 		@Override
 		public void maxChanged(PaletteEvent event) {
+			System.out.println("provider maxChanged " + getMax());
 			histogramViewer.refresh();
 		}
 	}
