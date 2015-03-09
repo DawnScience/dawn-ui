@@ -250,11 +250,8 @@ public class ImageHistogramProvider implements IHistogramProvider {
 		};
 	}
 
-
 	@Override
 	public void dispose() {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override

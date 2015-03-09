@@ -16,13 +16,13 @@ import org.eclipse.ui.PlatformUI;
 public class ColourMapProvider implements IStructuredContentProvider{
 
 	protected ComboViewer colourMapViewer;
-	
+
 	private IPaletteListener paletteChangedListener = new PaletteChangedListener();
 	private IPaletteTrace image;
-	
+
 	@Override
 	public void dispose() {
-		// TODO Auto-generated method stub
+
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class ColourMapProvider implements IStructuredContentProvider{
 		final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
 		return ((List<String>)(pservice.getColorSchemes())).toArray();
 	}
-	
+
 	private final class PaletteChangedListener extends IPaletteListener.Stub{
 		@Override
 		public void paletteChanged(PaletteEvent event) {
@@ -58,12 +58,12 @@ public class ColourMapProvider implements IStructuredContentProvider{
 			setColourScheme(trace);
 		}
 	};
-	
+
 	private void setImage(IPaletteTrace image){
 		this.image = image;
 
-	}	
-	
+	}
+
 	private void setColourScheme(IPaletteTrace trace){
 		String name = trace != null ? trace.getPaletteName() : null;
 		if (name != null) {

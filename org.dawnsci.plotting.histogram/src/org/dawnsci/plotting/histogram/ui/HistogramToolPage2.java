@@ -259,12 +259,6 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		getPlottingSystem().removeTraceListener(traceListener);
 	}
 
-	@Override
-	public void dispose() {
-		super.dispose();
-		histogramWidget.dispose();
-	}
-
 	/**
 	 * Returns colour map ComboViewer for testing purposes
 	 */

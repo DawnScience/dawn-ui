@@ -25,6 +25,7 @@ import org.eclipse.jface.viewers.ContentViewer;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -143,6 +144,8 @@ public class HistogramViewer extends ContentViewer {
 		createRegion();
 		createTraces();
 		installMinMaxListeners();
+
+		hookControl(getControl());
 	}
 
 	private void createMinMaxSettings(Composite comp) {
@@ -412,12 +415,11 @@ public class HistogramViewer extends ContentViewer {
 		// do we need a restore defaults???
 	}
 
-	/**
-	 * Clean up viewer
-	 */
-	public void dispose() {
+	@Override
+	protected void handleDispose(DisposeEvent event) {
 		region.removeROIListener(histogramRegionListener);
 		histogramPlottingSystem.dispose();
+		super.handleDispose(event);
 	}
 
 	/**
