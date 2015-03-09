@@ -1,15 +1,13 @@
 package org.dawnsci.plotting.histogram.ui;
 
-import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.plotting.histogram.Activator;
 import org.dawnsci.plotting.histogram.ColourMapProvider;
-import org.dawnsci.plotting.histogram.IHistogramProvider;
 import org.dawnsci.plotting.histogram.ImageHistogramProvider;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
-import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
@@ -30,11 +28,11 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -57,9 +55,9 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 	private ITraceListener traceListener = new TraceListener();
 
-	private IPaletteListener paletteListener;
-
 	private SelectionAdapter colourSchemeListener;
+
+	private Button logScaleCheck;
 
 	@Override
 	public ToolPageRole getToolPageRole() {
@@ -93,21 +91,20 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		section.setDescription("Colour scheme:");
 
 		Composite colourComposite = toolkit.createComposite(section);
-		colourComposite.setLayout(GridLayoutFactory.fillDefaults()
-				.numColumns(2).create());
+		colourComposite.setLayout(GridLayoutFactory.fillDefaults().create());
 
 		GridData layoutData = GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).create();	
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).create();
 		colourComposite.setLayoutData(layoutData);
-		
+
 		colourMapViewer = new ComboViewer(colourComposite, SWT.READ_ONLY);
 		colourMapViewer.getControl().setLayoutData(layoutData);
-		
+
 		toolkit.adapt((Composite) colourMapViewer.getControl());
 		section.setClient(colourComposite);
-		
+
 		colourMapViewer.setContentProvider(new ColourMapProvider());
-		
+
 		colourSchemeListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
@@ -116,8 +113,33 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 				//updateHistogramToolElements(event, true, false);
 			}
 		};
-		
+
 		((Combo) colourMapViewer.getControl()).addSelectionListener(colourSchemeListener);
+
+		logScaleCheck = toolkit.createButton(colourComposite, "Log Scale", SWT.CHECK);
+		logScaleCheck.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				IImageTrace image = getImageTrace();
+				if (image != null) {
+					// TODO: There should be a method on image to setLogColorScale so that
+					// it just does the right thing.
+					image.getImageServiceBean().setLogColorScale(
+							logScaleCheck.getSelection());
+					if (image.isRescaleHistogram()) {
+						image.rehistogram();
+					} else {
+						// XXX: Doing a image.repaint() is not sufficient, force
+						// more
+						// work to be done by resetting the palette data to what
+						// it already has
+						image.setPaletteData(image.getPaletteData());
+					}
+				}
+			}
+
+		});
+
 	}
 
 	private void setColourScheme(IPaletteTrace trace){
@@ -139,7 +161,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 		section.setText("Histogram Plot");
 		section.setDescription("Histogram information for active plot view");
-		
+
 		Composite sectionClient = toolkit.createComposite(section);
 		sectionClient.setLayout(GridLayoutFactory.fillDefaults().create());
 		sectionClient.setLayoutData(GridDataFactory.fillDefaults()
@@ -235,29 +257,28 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 		// remove our trace listener
 		getPlottingSystem().removeTraceListener(traceListener);
-		getPaletteTrace().removePaletteListener(paletteListener);
 	}
-	
+
 	@Override
 	public void dispose() {
 		super.dispose();
 		histogramWidget.dispose();
 	}
-	
+
 	/**
 	 * Returns colour map ComboViewer for testing purposes
 	 */
 	protected ComboViewer getColourMapViewer(){
 		return colourMapViewer;
 	}
-	
+
 	/**
 	 * Returns histogram viewer for testing purposes
 	 */
 	protected HistogramViewer getHistogramViewer(){
 		return histogramWidget;
 	}
-	
+
 	/**
 	 * Update the colour scheme combo on this page
 	 * @param schemeName colour scheme name
@@ -269,17 +290,17 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			return;
 		colourMapViewer.setSelection(new StructuredSelection(schemeName), true);
 	}
-	
+
 	/**
 	 * Use the controls from the GUI to set the individual colour elements from the selected colour scheme
-	 */	
+	 */
 	private void setPalette() {
 		IPaletteTrace paletteTrace = getPaletteTrace();
 		if (paletteTrace != null){
 			paletteTrace.setPalette((String)((StructuredSelection) colourMapViewer.getSelection()).getFirstElement());
 		}
 	}
-	
+
 
 	@Override
 	public boolean isAlwaysSeparateView() {
@@ -295,10 +316,10 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	public void setFocus() {
 		histogramWidget.getComposite().setFocus();
 	}
-	
+
 	/*
-	 * Update all the Histogram UI elements, widgets etc. 
-	 * typically done when there is a new trace or trace has been modified. 
+	 * Update all the Histogram UI elements, widgets etc.
+	 * typically done when there is a new trace or trace has been modified.
 	 */
 	private void updateHistogramUIElements(IPaletteTrace it) {
 		histogramWidget.setInput(it);

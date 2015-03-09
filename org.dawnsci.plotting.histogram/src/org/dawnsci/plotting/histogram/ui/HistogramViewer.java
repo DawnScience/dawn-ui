@@ -294,7 +294,7 @@ public class HistogramViewer extends ContentViewer {
 		// histogramPlottingSystem.getSelectedXAxis().setRange(
 		// histogramProvider.getMin(), histogramProvider.getMax());
 		// }
-		histogramPlottingSystem.getSelectedXAxis().setLog10(false);
+		histogramPlottingSystem.getSelectedXAxis().setLog10(getHistogramProvider().isLogColorScale());
 		histogramPlottingSystem.getSelectedXAxis().setAxisAutoscaleTight(true);
 		// histogramPlottingSystem.getSelectedXAxis().setLog10(btnColourMapLog.getSelection());
 

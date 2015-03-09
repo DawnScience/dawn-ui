@@ -314,4 +314,9 @@ public class ImageHistogramProvider implements IHistogramProvider {
 
 		}
 	}
+
+	@Override
+	public boolean isLogColorScale() {
+		return bean.isLogColorScale();
+	}
 }

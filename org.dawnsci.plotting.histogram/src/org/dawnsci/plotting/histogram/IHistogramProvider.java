@@ -48,6 +48,12 @@ public interface IHistogramProvider extends IContentProvider{
 	 */
 	public void setMin(double min);
 
+	/**
+	 * Return true if the Log Color Scale option is active
+	 * @return
+	 */
+	public boolean isLogColorScale();
+
 	public IHistogramDatasets getDatasets();
 
 	public interface IHistogramDatasets {
@@ -94,4 +100,5 @@ public interface IHistogramProvider extends IContentProvider{
 		public IDataset getRGBX();
 
 	}
+
 }
