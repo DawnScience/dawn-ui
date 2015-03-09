@@ -30,7 +30,6 @@ public class ImageHistogramProvider implements IHistogramProvider {
 
 	private IDataset imageDataset;
 	private ImageServiceBean bean;
-	private PaletteData paletteData;
 
 	/**
 	 * Calculated histogram, index 0 for Y values, 1 for X values
@@ -45,7 +44,6 @@ public class ImageHistogramProvider implements IHistogramProvider {
 		this.image = null;
 		this.imageDataset = null;
 		this.bean = null;
-		this.paletteData = null;
 	}
 
 	private void setImage(IPaletteTrace image){
@@ -53,28 +51,21 @@ public class ImageHistogramProvider implements IHistogramProvider {
 		this.image = image;
 		this.imageDataset = getImageData(image);
 		this.bean = image.getImageServiceBean();
-		this.paletteData = image.getPaletteData();
 	}
 
 	/**
-	 * Given an image, extract the image data. If no image data is found, return
-	 * some default dummy data
+	 * Given an image, extract the image data. If the image is complex, return the 
+	 * absolute image values. 
 	 *
 	 * @param image
 	 *            IPaletteTrace image
-	 * @return actual 2-D data of the image
+	 * @return actual 2-D data of the image or abs values if we have a complex dataset
 	 */
 	/* protected */IDataset getImageData(IPaletteTrace image) {
-		IDataset im = (Dataset) image.getImageServiceBean().getImageValue();
-		if (im == null)
-			im = (IDataset) image.getImageServiceBean().getImage();
-		if (im == null)
-			im = (IDataset) image.getData();
-		// this line below looks suspect, could lead to old data being used if
-		// lifecycle issues
-		// if (im==null && imageDataset!=null) im = imageDataset;
-		if (im == null)
-			im = new DoubleDataset(new double[] { 0, 1, 2, 3 }, 2, 2);
+		Dataset im = (Dataset)image.getImageServiceBean().getImage();
+		if (im.isComplex()){
+			im = (Dataset)image.getImageServiceBean().getImageValue();
+		}
 		return im;
 	}
 
@@ -283,16 +274,19 @@ public class ImageHistogramProvider implements IHistogramProvider {
 
 		@Override
 		public void paletteChanged(PaletteEvent event) {
+			System.out.println("provider paletteChanged " + getMax());
 			histogramViewer.refresh();
 		}
 		
 		@Override
 		public void minChanged(PaletteEvent event) {
+			System.out.println("provider minChanged " + getMax());
 			histogramViewer.refresh();
 		}
 
 		@Override
 		public void maxChanged(PaletteEvent event) {
+			System.out.println("provider maxChanged " + getMax());
 			histogramViewer.refresh();
 		}
 	}

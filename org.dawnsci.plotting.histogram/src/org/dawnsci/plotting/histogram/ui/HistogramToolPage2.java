@@ -3,6 +3,7 @@ package org.dawnsci.plotting.histogram.ui;
 import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.plotting.histogram.Activator;
 import org.dawnsci.plotting.histogram.ColourMapProvider;
+import org.dawnsci.plotting.histogram.IHistogramProvider;
 import org.dawnsci.plotting.histogram.ImageHistogramProvider;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
@@ -53,7 +54,6 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	private FormToolkit toolkit;
 	private ScrolledForm form;
 	private ComboViewer colourMapViewer;
-	
 	private IAction lockAction;
 	
 	private HistogramViewer histogramWidget;
@@ -82,27 +82,6 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		createHistogramControl(form.getBody());
 	}
 
-	private void createMinMaxSettings(Composite comp){
-		Composite composite = new Composite(comp, SWT.NONE);
-		composite.setLayout(GridLayoutFactory.swtDefaults().numColumns(4).create());
-		composite.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
-
-		Label minLabel = new Label(composite, SWT.NONE);
-		minLabel.setText("Min:");
-		minLabel.setLayoutData(new GridData (SWT.BEGINNING, SWT.CENTER, false, false));
-		FloatSpinner minText = new FloatSpinner(composite, SWT.BORDER);
-		minText.setLayoutData(new GridData (SWT.BEGINNING, SWT.CENTER, false, false));
-		Label maxLabel = new Label(composite, SWT.NONE);
-		maxLabel.setLayoutData(new GridData (SWT.END, SWT.CENTER, true, false));
-		maxLabel.setText("Max:");
-		FloatSpinner maxText = new FloatSpinner(composite, SWT.BORDER);
-		maxText.setLayoutData(new GridData (SWT.BEGINNING, SWT.CENTER, false, false));
-
-		minText.setFormat(12, 4);
-		maxText.setFormat(12, 4);
-		minText.setIncrement(1.0);
-		maxText.setIncrement(1.0);
-	}
 	/*
 	 * Create the image settings, i.e. colour scheme section
 	 */
@@ -172,7 +151,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		final IPageSite site = getSite();
 		IActionBars actionBars = (site != null) ? site.getActionBars() : null;
 
-		createMinMaxSettings(sectionClient);
+		//createMinMaxSettings(sectionClient);
 
 		try {
 			histogramWidget = new HistogramViewer(sectionClient, getTitle(),
@@ -250,12 +229,9 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 		IPaletteTrace paletteTrace = getPaletteTrace();
 		if (paletteTrace != null){
-			logger.debug("HistogramToolPage: activate - palette trace " + paletteTrace.hashCode());
 			paletteTrace.addPaletteListener(paletteListener);
-			histogramWidget.setInput(paletteTrace);
-			colourMapViewer.setInput(paletteTrace);
-			setColourScheme(paletteTrace);
-			
+			logger.debug("HistogramToolPage: activate - palette trace " + paletteTrace.hashCode());
+			updateHistogramUIElements(paletteTrace);
 		} else {
 			logger.debug("HistogramToolPage: activate - palette trace is null.");
 		}
@@ -276,11 +252,24 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		getPaletteTrace().removePaletteListener(paletteListener);
 	}
 	
+	@Override
+	public void dispose() {
+		super.dispose();
+		histogramWidget.dispose();
+	}
+	
 	/**
 	 * Returns colour map ComboViewer for testing purposes
 	 */
 	protected ComboViewer getColourMapViewer(){
 		return colourMapViewer;
+	}
+	
+	/**
+	 * Returns histogram viewer for testing purposes
+	 */
+	protected HistogramViewer getHistogramViewer(){
+		return histogramWidget;
 	}
 	
 	/**
@@ -297,9 +286,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	
 	/**
 	 * Use the controls from the GUI to set the individual colour elements from the selected colour scheme
-	 */
-
-	
+	 */	
 	private void setPalette() {
 		IPaletteTrace paletteTrace = getPaletteTrace();
 		if (paletteTrace != null){
@@ -321,6 +308,16 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	@Override
 	public void setFocus() {
 		histogramWidget.getComposite().setFocus();
+	}
+	
+	/*
+	 * Update all the Histogram UI elements, widgets etc. 
+	 * typically done when there is a new trace or trace has been modified. 
+	 */
+	private void updateHistogramUIElements(IPaletteTrace it) {
+		histogramWidget.setInput(it);
+		colourMapViewer.setInput(it);
+		setColourScheme(it);
 	}
 
 	private final class TraceListener implements ITraceListener{
@@ -355,19 +352,15 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		public void traceUpdated(TraceEvent evt) {
 			logger.debug("HistogramToolPage: traceUpdated");
 			IPaletteTrace it = (IPaletteTrace)evt.getSource();
-			histogramWidget.setInput(it);
-			colourMapViewer.setInput(it);
-			setColourScheme(it);
+			updateHistogramUIElements(it);
 		}
 
 		@Override
 		public void traceAdded(TraceEvent evt) {
 			logger.debug("HistogramToolPage: traceAdded");
 			IPaletteTrace it = (IPaletteTrace)evt.getSource();
-			histogramWidget.setInput(it);
-			colourMapViewer.setInput(it);
+			updateHistogramUIElements(it);
 			it.addPaletteListener(paletteListener);
-			setColourScheme(it);
 		}
 
 		@Override
@@ -397,10 +390,5 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			lockAction.setChecked(locked);
 		}
 	}
-
-	public Object getHistogramViewer() {
-		// TODO Auto-generated method stub
-		return null;
-	};
 
 }

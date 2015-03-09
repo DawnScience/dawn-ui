@@ -1,5 +1,6 @@
 package org.dawnsci.plotting.histogram.ui;
 
+import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.plotting.histogram.IHistogramProvider;
 import org.dawnsci.plotting.histogram.IHistogramProvider.IHistogramDatasets;
 import org.eclipse.core.runtime.Assert;
@@ -7,6 +8,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -18,49 +20,50 @@ import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.TraceType;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ContentViewer;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A viewer for a histogram (composite with a histogram plot, region of interest, and
- * plotting system with histogram trace lines and RGB trace lines.)
+ * A viewer for a histogram (composite with a histogram plot, region of
+ * interest, and plotting system with histogram trace lines and RGB trace
+ * lines.)
  * <p>
  * Content providers for histogram viewer must implement the
- * <code>IHistogramProvider</code> interface and set it using <code>setContentProvider</code>
+ * <code>IHistogramProvider</code> interface and set it using
+ * <code>setContentProvider</code>
  * </p>
  * <p>
  * Input to the histogram viewer must implement the <code>IPaletteTrace</code>
  * interface and get set using <code>setInput</code> method.
  * </p>
+ * 
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class HistogramViewer extends ContentViewer {
 
-	private static final Logger logger = LoggerFactory.getLogger(HistogramViewer.class);
+	private static final Logger logger = LoggerFactory
+			.getLogger(HistogramViewer.class);
 
 	private Composite composite;
 	private IPlottingSystem histogramPlottingSystem = null;
 	private IRegion region;
+
+	private FloatSpinner minText;
+	private FloatSpinner maxText;
 
 	private ILineTrace histoTrace;
 	private ILineTrace redTrace;
@@ -68,23 +71,20 @@ public class HistogramViewer extends ContentViewer {
 	private ILineTrace blueTrace;
 
 	private IROIListener histogramRegionListener = new IROIListener.Stub() {
-		@Override
-		public void roiDragged(ROIEvent evt) {
+		public void update(ROIEvent evt) {
 			IROI roi = evt.getROI();
-			System.out.println("roiDragged" + roi.toString());
-			updateHistogramToolElements(evt, roi);
-		}
-
-		@Override
-		public void roiChanged(ROIEvent evt) {
-			IROI roi = evt.getROI();
-			System.out.println("roiChanged" + roi.toString());
-			updateHistogramToolElements(evt, roi);
-		}
+			if (roi instanceof RectangularROI) {
+				RectangularROI rroi = (RectangularROI) roi;
+				getHistogramProvider().setMin(rroi.getPoint()[0]);
+				double max = rroi.getEndPoint()[0];
+				System.out.print("New max: " + max);
+				getHistogramProvider().setMax(max);
+				System.out.println(" - received as:" + getHistogramProvider().getMax());
+			}
+		};
 	};
 
 	private UIJob repaintJob = new UIJob("Repaint traces") {
-
 		@Override
 		public IStatus runInUIThread(IProgressMonitor monitor) {
 			updateTraces();
@@ -93,8 +93,7 @@ public class HistogramViewer extends ContentViewer {
 	};
 
 	/**
-	 * Create a new Histogram Widget with a newly created plotting
-	 * system.
+	 * Create a new Histogram Widget with a newly created plotting system.
 	 *
 	 * @param composite
 	 *            parent composite to add widget to. Must not be
@@ -104,7 +103,7 @@ public class HistogramViewer extends ContentViewer {
 	 *             plotting system or region of interest
 	 */
 	public HistogramViewer(final Composite parent) throws Exception {
-		this (parent, null, null, null);
+		this(parent, null, null, null);
 	}
 
 	/**
@@ -130,6 +129,8 @@ public class HistogramViewer extends ContentViewer {
 	 */
 	public HistogramViewer(final Composite parent, String title,
 			IPlottingSystem plot, IActionBars site) throws Exception {
+
+		createMinMaxSettings(parent);
 		composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new FillLayout());
 
@@ -139,21 +140,39 @@ public class HistogramViewer extends ContentViewer {
 			histogramPlottingSystem = PlottingFactory.createPlottingSystem();
 		}
 
-		histogramPlottingSystem.createPlotPart(composite, title, site, PlotType.XY,
-				null);
+		histogramPlottingSystem.createPlotPart(composite, title, site,
+				PlotType.XY, null);
 		histogramPlottingSystem.setRescale(false);
 
 		createRegion();
 		createTraces();
 	}
 
-	protected void updateHistogramToolElements(ROIEvent evt, IROI roi) {
-		if (roi instanceof RectangularROI) {
-			RectangularROI rectangularROI = (RectangularROI) roi;
-			getHistogramProvider().setMin(rectangularROI.getPoint()[0]);
-			getHistogramProvider().setMax(rectangularROI.getEndPoint()[0]);
-		}
-		// updateTraces();
+	private void createMinMaxSettings(Composite comp) {
+		Composite composite = new Composite(comp, SWT.NONE);
+		composite.setLayout(GridLayoutFactory.swtDefaults().numColumns(4)
+				.create());
+		composite.setLayoutData(GridDataFactory.fillDefaults()
+				.grab(true, false).create());
+
+		Label minLabel = new Label(composite, SWT.NONE);
+		minLabel.setText("Min:");
+		minLabel.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false,
+				false));
+		minText = new FloatSpinner(composite, SWT.BORDER);
+		minText.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false,
+				false));
+		Label maxLabel = new Label(composite, SWT.NONE);
+		maxLabel.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, false));
+		maxLabel.setText("Max:");
+		maxText = new FloatSpinner(composite, SWT.BORDER);
+		maxText.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false,
+				false));
+
+		minText.setFormat(12, 4);
+		maxText.setFormat(12, 4);
+		minText.setIncrement(1.0);
+		maxText.setIncrement(1.0);
 	}
 
 	/**
@@ -163,6 +182,7 @@ public class HistogramViewer extends ContentViewer {
 		region = histogramPlottingSystem.createRegion("Histogram Region",
 				RegionType.XAXIS);
 		histogramPlottingSystem.addRegion(region);
+		region.addROIListener(histogramRegionListener);
 	}
 
 	/**
@@ -171,17 +191,51 @@ public class HistogramViewer extends ContentViewer {
 	 * @param histoMax
 	 * @param histoMin
 	 */
-	private void updateRegion(double histoMin, double histoMax)
-			throws Exception {
-		if (region == null) {
-			createRegion();
+	private void updateRegion(double histoMin, double histoMax) {
+		IRectangularROI oldRoi = (IRectangularROI) region.getROI();
+		
+		if (oldRoi != null){
+			// don't bother updating region if it is the same
+			if ((oldRoi.getPoint()[0] == histoMin) && (oldRoi.getEndPoint()[0]) == histoMax){
+				return;
+			}
 		}
-
+		
 		RectangularROI rroi = new RectangularROI(histoMin, 0, histoMax
 				- histoMin, 1, 0);
 		region.removeROIListener(histogramRegionListener);
-		region.setROI(rroi);
-		region.addROIListener(histogramRegionListener);
+		try {
+			double max = rroi.getEndPoint()[0];
+			System.out.println();
+			System.out.print("updateRegion histoMax: " + histoMax);
+			System.out.print(" getEndPoint: " + rroi.getEndPoint()[0]);
+			region.setROI(rroi);
+			System.out.print(" AFTER histoMax: " + histoMax);
+			System.out.print(" getEndPoint: " + rroi.getEndPoint()[0]);
+			RectangularROI afterroi = (RectangularROI)region.getROI();
+			
+			System.out.println(" REGION getEndPoint: " + afterroi.getEndPoint()[0]);
+		} finally {
+			region.addROIListener(histogramRegionListener);
+		}
+	}
+
+	/**
+	 * Update the min widget
+	 * 
+	 * @param min
+	 */
+	private void updateMin(double min) {
+		minText.setDouble(min);
+	}
+
+	/**
+	 * Update the min widget
+	 * 
+	 * @param min
+	 */
+	private void updateMax(double max) {
+		maxText.setDouble(max);
 	}
 
 	/**
@@ -236,8 +290,9 @@ public class HistogramViewer extends ContentViewer {
 
 		histogramPlottingSystem.getSelectedYAxis().setAxisAutoscaleTight(true);
 
-		//do if rescale is set....
-		//TODO: under what conditions may we always autoscale??? //test for isRescaleHistogram
+		// do if rescale is set....
+		// TODO: under what conditions may we always autoscale??? //test for
+		// isRescaleHistogram
 		histogramPlottingSystem.autoscaleAxes();
 		// histogramPlottingSystem.repaint();
 	}
@@ -249,35 +304,21 @@ public class HistogramViewer extends ContentViewer {
 	protected void inputChanged(Object input, Object oldInput) {
 		logger.debug("HistogramViewer: inputchanged");
 
-		if (input == null){
+		if (input == null) {
 			logger.debug("HistogramViewer: inputchanged input null");
 		} else {
 			logger.debug("HistogramViewer: inputchanged input " + input);
 		}
 
-		if (oldInput == null){
+		if (oldInput == null) {
 			logger.debug("HistogramViewer: inputchanged oldInput null");
 		} else {
 			logger.debug("HistogramViewer: inputchanged oldInput " + oldInput);
 		}
-		//refresh();
-		// run our updates here? or in input changed...
-		this.getControl().getParent().getDisplay().syncExec(new Runnable() {
+		
+		System.out.println("Input Changed: " + getHistogramProvider().getMax());
 
-			@Override
-			public void run() {
-				try {
-					updateRegion(getHistogramProvider().getMin(),
-							getHistogramProvider().getMax());
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-				updateTraces();
-
-			};
-		});
+		refresh();
 	};
 
 	/**
@@ -290,7 +331,8 @@ public class HistogramViewer extends ContentViewer {
 	}
 
 	/**
-	 * Set the content provider for this viewer, must instantiate IHistogramProvider
+	 * Set the content provider for this viewer, must instantiate
+	 * IHistogramProvider
 	 */
 	@Override
 	public void setContentProvider(IContentProvider contentProvider) {
@@ -298,35 +340,41 @@ public class HistogramViewer extends ContentViewer {
 		super.setContentProvider(contentProvider);
 	}
 
-
 	@Override
 	public void refresh() {
-		try {
-			updateRegion(getHistogramProvider().getMin(),getHistogramProvider().getMax());
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		System.out.print("refresh max:" + getHistogramProvider().getMax());
+		updateRegion(getHistogramProvider().getMin(), getHistogramProvider()
+				.getMax());
+		updateMin(getHistogramProvider().getMin());
+		updateMax(getHistogramProvider().getMax());
 		updateTraces();
-
+		System.out.println(" after:" + getHistogramProvider().getMax());
 	}
 
 	/**
 	 * Resets the histogram to its original conditions
 	 */
 	public void reset() {
-		//Things to reset
-		//1. histo min
-		//2. histo max
-		//3. ROI
-		//4. scaling
-		//5. ????
+		// Things to reset
+		// 1. histo min
+		// 2. histo max
+		// 3. ROI
+		// 4. scaling
+		// 5. ????
 
-		//Things to not reset
-		//1. colour map
-		//2. ???
+		// Things to not reset
+		// 1. colour map
+		// 2. ???
 
 		// do we need a restore defaults???
+	}
+
+	/**
+	 * Clean up viewer
+	 */
+	public void dispose() {
+		region.removeROIListener(histogramRegionListener);
+		histogramPlottingSystem.dispose();
 	}
 
 	/**
@@ -366,6 +414,7 @@ public class HistogramViewer extends ContentViewer {
 
 	/**
 	 * Returns the parent composite
+	 * 
 	 * @return composite
 	 */
 	public Composite getComposite() {
@@ -382,11 +431,11 @@ public class HistogramViewer extends ContentViewer {
 	public void setSelection(ISelection selection, boolean reveal) {
 		// TODO Auto-generated method stub
 	}
-	
+
 	/**
 	 * For test purposes only
 	 */
-	protected ILineTrace[] getRGBTraces(){
-		return new ILineTrace[] { redTrace, greenTrace, blueTrace};
+	protected ILineTrace[] getRGBTraces() {
+		return new ILineTrace[] { redTrace, greenTrace, blueTrace };
 	}
 }
