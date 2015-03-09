@@ -1164,7 +1164,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (paletteListeners==null) return;
 		if (!imageCreationAllowed)  return;
 		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
-		for (IPaletteListener pl : paletteListeners) pl.histogramLockedChanged(evt);
+		// TODO add rescaleHistogramChanged to IPaletteListener
+		// for (IPaletteListener pl : paletteListeners) pl.rescaleHistogramChanged(evt);
 	}
 	
 	@Override
