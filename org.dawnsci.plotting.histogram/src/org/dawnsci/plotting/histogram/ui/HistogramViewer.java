@@ -73,6 +73,7 @@ public class HistogramViewer extends ContentViewer {
 	private ILineTrace redTrace;
 	private ILineTrace greenTrace;
 	private ILineTrace blueTrace;
+	private boolean firstUpdateTraces = true;
 
 	private IROIListener histogramRegionListener = new IROIListener.Stub() {
 		public void update(ROIEvent evt) {
@@ -300,11 +301,10 @@ public class HistogramViewer extends ContentViewer {
 
 		histogramPlottingSystem.getSelectedYAxis().setAxisAutoscaleTight(true);
 
-		// do if rescale is set....
-		// TODO: under what conditions may we always autoscale??? //test for
-		// isRescaleHistogram
-		// histogramPlottingSystem.autoscaleAxes();
-		// histogramPlottingSystem.repaint();
+		if (firstUpdateTraces) {
+			firstUpdateTraces = false;
+			histogramPlottingSystem.autoscaleAxes();
+		}
 
 		updateMinMaxSpinnerIncrements();
 
