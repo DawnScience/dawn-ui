@@ -4,9 +4,6 @@ import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.plotting.histogram.IHistogramProvider;
 import org.dawnsci.plotting.histogram.IHistogramProvider.IHistogramDatasets;
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
@@ -37,7 +34,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,20 +83,9 @@ public class HistogramViewer extends ContentViewer {
 				RectangularROI rroi = (RectangularROI) roi;
 				getHistogramProvider().setMin(rroi.getPoint()[0]);
 				double max = rroi.getEndPoint()[0];
-				System.out.print("New max: " + max);
 				getHistogramProvider().setMax(max);
-				System.out.println(" - received as:"
-						+ getHistogramProvider().getMax());
 			}
 		};
-	};
-
-	private UIJob repaintJob = new UIJob("Repaint traces") {
-		@Override
-		public IStatus runInUIThread(IProgressMonitor monitor) {
-			updateTraces();
-			return Status.OK_STATUS;
-		}
 	};
 
 	/**
@@ -186,7 +171,6 @@ public class HistogramViewer extends ContentViewer {
 		minText.setIncrement(1.0);
 		maxText.setIncrement(1.0);
 
-
 	}
 
 	/**
@@ -220,17 +204,7 @@ public class HistogramViewer extends ContentViewer {
 				- histoMin, 1, 0);
 		region.removeROIListener(histogramRegionListener);
 		try {
-			double max = rroi.getEndPoint()[0];
-			System.out.println();
-			System.out.print("updateRegion histoMax: " + histoMax);
-			System.out.print(" getEndPoint: " + rroi.getEndPoint()[0]);
 			region.setROI(rroi);
-			System.out.print(" AFTER histoMax: " + histoMax);
-			System.out.print(" getEndPoint: " + rroi.getEndPoint()[0]);
-			RectangularROI afterroi = (RectangularROI) region.getROI();
-
-			System.out.println(" REGION getEndPoint: "
-					+ afterroi.getEndPoint()[0]);
 		} finally {
 			region.addROIListener(histogramRegionListener);
 		}
@@ -300,7 +274,8 @@ public class HistogramViewer extends ContentViewer {
 		// histogramPlottingSystem.getSelectedXAxis().setRange(
 		// histogramProvider.getMin(), histogramProvider.getMax());
 		// }
-		histogramPlottingSystem.getSelectedXAxis().setLog10(getHistogramProvider().isLogColorScale());
+		histogramPlottingSystem.getSelectedXAxis().setLog10(
+				getHistogramProvider().isLogColorScale());
 		histogramPlottingSystem.getSelectedXAxis().setAxisAutoscaleTight(true);
 		// histogramPlottingSystem.getSelectedXAxis().setLog10(btnColourMapLog.getSelection());
 
@@ -355,17 +330,18 @@ public class HistogramViewer extends ContentViewer {
 			}
 		});
 
-		histogramPlottingSystem.getSelectedXAxis().addAxisListener(new IAxisListener() {
+		histogramPlottingSystem.getSelectedXAxis().addAxisListener(
+				new IAxisListener() {
 
-			@Override
-			public void revalidated(AxisEvent evt) {
-			}
+					@Override
+					public void revalidated(AxisEvent evt) {
+					}
 
-			@Override
-			public void rangeChanged(AxisEvent evt) {
-				updateMinMaxSpinnerIncrements();
-			}
-		});
+					@Override
+					public void rangeChanged(AxisEvent evt) {
+						updateMinMaxSpinnerIncrements();
+					}
+				});
 	}
 
 	/**
@@ -386,8 +362,6 @@ public class HistogramViewer extends ContentViewer {
 		} else {
 			logger.debug("HistogramViewer: inputchanged oldInput " + oldInput);
 		}
-
-		System.out.println("Input Changed: " + getHistogramProvider().getMax());
 
 		refresh();
 	};
@@ -413,13 +387,11 @@ public class HistogramViewer extends ContentViewer {
 
 	@Override
 	public void refresh() {
-		System.out.print("refresh max:" + getHistogramProvider().getMax());
 		updateRegion(getHistogramProvider().getMin(), getHistogramProvider()
 				.getMax());
 		updateMin(getHistogramProvider().getMin());
 		updateMax(getHistogramProvider().getMax());
 		updateTraces();
-		System.out.println(" after:" + getHistogramProvider().getMax());
 	}
 
 	/**
