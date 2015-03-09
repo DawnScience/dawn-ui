@@ -273,6 +273,13 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	}
 	
 	/**
+	 * Returns lock action for testing purposes
+	 */
+	protected IAction getLockAction(){
+		return lockAction;
+	}
+	
+	/**
 	 * Update the colour scheme combo on this page
 	 * @param schemeName colour scheme name
 	 */
