@@ -42,10 +42,10 @@ import org.eclipse.ui.part.IPageSite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
-	private static final Logger logger = LoggerFactory.getLogger(HistogramToolPage2.class);
+	private static final Logger logger = LoggerFactory
+			.getLogger(HistogramToolPage2.class);
 
 	private FormToolkit toolkit;
 	private ScrolledForm form;
@@ -69,7 +69,8 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		logger.debug("HistogramToolPage: createControl");
 		toolkit = new FormToolkit(parent.getDisplay());
 		form = toolkit.createScrolledForm(parent);
-		form.reflow(true); // create view with no scrollbars reflowing at this point
+		form.reflow(true); // create view with no scrollbars reflowing at this
+							// point
 		form.getBody().setLayout(GridLayoutFactory.fillDefaults().create());
 
 		createImageSettings(form.getBody());
@@ -110,19 +111,22 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			public void widgetSelected(SelectionEvent event) {
 				logger.trace("colourSchemeListener");
 				setPalette();
-				//updateHistogramToolElements(event, true, false);
+				// updateHistogramToolElements(event, true, false);
 			}
 		};
 
-		((Combo) colourMapViewer.getControl()).addSelectionListener(colourSchemeListener);
+		((Combo) colourMapViewer.getControl())
+				.addSelectionListener(colourSchemeListener);
 
-		logScaleCheck = toolkit.createButton(colourComposite, "Log Scale", SWT.CHECK);
+		logScaleCheck = toolkit.createButton(colourComposite, "Log Scale",
+				SWT.CHECK);
 		logScaleCheck.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				IImageTrace image = getImageTrace();
 				if (image != null) {
-					// TODO: There should be a method on image to setLogColorScale so that
+					// TODO: There should be a method on image to
+					// setLogColorScale so that
 					// it just does the right thing.
 					image.getImageServiceBean().setLogColorScale(
 							logScaleCheck.getSelection());
@@ -142,7 +146,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 	}
 
-	private void setColourScheme(IPaletteTrace trace){
+	private void setColourScheme(IPaletteTrace trace) {
 		String name = trace != null ? trace.getPaletteName() : null;
 		if (name != null) {
 			updateColourSchemeCombo(name);
@@ -170,7 +174,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		final IPageSite site = getSite();
 		IActionBars actionBars = (site != null) ? site.getActionBars() : null;
 
-		//createMinMaxSettings(sectionClient);
+		// createMinMaxSettings(sectionClient);
 
 		try {
 			histogramWidget = new HistogramViewer(sectionClient, getTitle(),
@@ -210,7 +214,9 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			}
 		});
 
-		Action rehistogramAndRescale = new Action("Rehistogram and restore histogram plot to default zoom", IAction.AS_PUSH_BUTTON) {
+		Action rehistogramAndRescale = new Action(
+				"Rehistogram and restore histogram plot to default zoom",
+				IAction.AS_PUSH_BUTTON) {
 			public void run() {
 				IImageTrace imageTrace = getImageTrace();
 				if (imageTrace != null) {
@@ -219,24 +225,29 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 				}
 			}
 		};
-		rehistogramAndRescale.setImageDescriptor(Activator.getImageDescriptor("icons/reset.gif"));
+		rehistogramAndRescale.setImageDescriptor(Activator
+				.getImageDescriptor("icons/reset.gif"));
 		toolBarManager.add(rehistogramAndRescale);
 		toolBarManager.update(true);
 
 		control.setTextClient(toolbar);
 	}
+
 	@Override
 	public void activate() {
 		super.activate();
 
-		Assert.isTrue(getPlottingSystem() != null, "Plotting system must not be null");
+		Assert.isTrue(getPlottingSystem() != null,
+				"Plotting system must not be null");
 
-		logger.debug("HistogramToolPage: activate. Plotting System " + getPlottingSystem().hashCode());
+		logger.debug("HistogramToolPage: activate. Plotting System "
+				+ getPlottingSystem().hashCode());
 		getPlottingSystem().addTraceListener(traceListener);
 
 		IPaletteTrace paletteTrace = getPaletteTrace();
-		if (paletteTrace != null){
-			logger.debug("HistogramToolPage: activate - palette trace " + paletteTrace.hashCode());
+		if (paletteTrace != null) {
+			logger.debug("HistogramToolPage: activate - palette trace "
+					+ paletteTrace.hashCode());
 			updateHistogramUIElements(paletteTrace);
 		} else {
 			logger.debug("HistogramToolPage: activate - palette trace is null.");
@@ -248,10 +259,12 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	public void deactivate() {
 		super.deactivate();
 
-		logger.debug("HistogramToolPage: deactivate. Plotting System " + getPlottingSystem().hashCode());
-		// comment out because at this point histogramWidget is disposed - is this right, verify
+		logger.debug("HistogramToolPage: deactivate. Plotting System "
+				+ getPlottingSystem().hashCode());
+		// comment out because at this point histogramWidget is disposed - is
+		// this right, verify
 		// that this is expected/desired behaviour
-		//histogramWidget.setInput(null);
+		// histogramWidget.setInput(null);
 
 		// remove our trace listener
 		getPlottingSystem().removeTraceListener(traceListener);
@@ -260,20 +273,22 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	/**
 	 * Returns colour map ComboViewer for testing purposes
 	 */
-	protected ComboViewer getColourMapViewer(){
+	protected ComboViewer getColourMapViewer() {
 		return colourMapViewer;
 	}
 
 	/**
 	 * Returns histogram viewer for testing purposes
 	 */
-	protected HistogramViewer getHistogramViewer(){
+	protected HistogramViewer getHistogramViewer() {
 		return histogramWidget;
 	}
 
 	/**
 	 * Update the colour scheme combo on this page
-	 * @param schemeName colour scheme name
+	 *
+	 * @param schemeName
+	 *            colour scheme name
 	 */
 	private void updateColourSchemeCombo(String schemeName) {
 		if (colourMapViewer == null)
@@ -284,15 +299,17 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	}
 
 	/**
-	 * Use the controls from the GUI to set the individual colour elements from the selected colour scheme
+	 * Use the controls from the GUI to set the individual colour elements from
+	 * the selected colour scheme
 	 */
 	private void setPalette() {
 		IPaletteTrace paletteTrace = getPaletteTrace();
-		if (paletteTrace != null){
-			paletteTrace.setPalette((String)((StructuredSelection) colourMapViewer.getSelection()).getFirstElement());
+		if (paletteTrace != null) {
+			paletteTrace
+					.setPalette((String) ((StructuredSelection) colourMapViewer
+							.getSelection()).getFirstElement());
 		}
 	}
-
 
 	@Override
 	public boolean isAlwaysSeparateView() {
@@ -310,8 +327,8 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	}
 
 	/*
-	 * Update all the Histogram UI elements, widgets etc.
-	 * typically done when there is a new trace or trace has been modified.
+	 * Update all the Histogram UI elements, widgets etc. typically done when
+	 * there is a new trace or trace has been modified.
 	 */
 	private void updateHistogramUIElements(IPaletteTrace it) {
 		histogramWidget.setInput(it);
@@ -319,19 +336,19 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		setColourScheme(it);
 	}
 
-	private final class TraceListener implements ITraceListener{
+	private final class TraceListener implements ITraceListener {
 		@Override
 		public void traceWillPlot(TraceWillPlotEvent evt) {
 			logger.debug("HistogramToolPage: traceWillPlotEvent");
 
-			//use this event to modify the trace before we plot it
+			// use this event to modify the trace before we plot it
 			// i.e. set colour palette etc
 			// note the trace may include lots of null settings e.g. min/max
 
 			// When we get this notification, the data is not ready in the trace
 			// e.g. min gets set but not max/
 			// we would have to turn off listeners or something
-			IPaletteTrace it = (IPaletteTrace)evt.getSource();
+			IPaletteTrace it = (IPaletteTrace) evt.getSource();
 			histogramWidget.setInput(it);
 		}
 
@@ -350,16 +367,14 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		@Override
 		public void traceUpdated(TraceEvent evt) {
 			logger.debug("HistogramToolPage: traceUpdated");
-			IPaletteTrace it = (IPaletteTrace)evt.getSource();
+			IPaletteTrace it = (IPaletteTrace) evt.getSource();
 			updateHistogramUIElements(it);
 		}
-
-
 
 		@Override
 		public void traceAdded(TraceEvent evt) {
 			logger.debug("HistogramToolPage: traceAdded");
-			IPaletteTrace it = (IPaletteTrace)evt.getSource();
+			IPaletteTrace it = (IPaletteTrace) evt.getSource();
 			updateHistogramUIElements(it);
 		}
 
@@ -380,7 +395,6 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			logger.debug("HistogramToolPage: tracesRemoved");
 
 		}
-
 
 	};
 
