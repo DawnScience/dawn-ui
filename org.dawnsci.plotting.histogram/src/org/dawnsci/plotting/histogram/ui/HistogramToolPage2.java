@@ -210,19 +210,17 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			}
 		});
 
-		Action reset = new Action("Rehistogram", IAction.AS_PUSH_BUTTON) {
+		Action rehistogramAndRescale = new Action("Rehistogram and restore histogram plot to default zoom", IAction.AS_PUSH_BUTTON) {
 			public void run() {
-
-				final IContributionItem action = getPlottingSystem().getActionBars().getToolBarManager().find(PlottingConstants.HISTO);
-				if (action != null && action.isVisible() && action instanceof ActionContributionItem) {
-					ActionContributionItem iaction = (ActionContributionItem) action;
-					iaction.getAction().setChecked(!iaction.getAction().isChecked());
-					iaction.getAction().run();
+				IImageTrace imageTrace = getImageTrace();
+				if (imageTrace != null) {
+					imageTrace.rehistogram();
+					histogramWidget.rescaleAxis();
 				}
 			}
 		};
-		reset.setImageDescriptor(Activator.getImageDescriptor("icons/histo.png"));
-		toolBarManager.add(reset);
+		rehistogramAndRescale.setImageDescriptor(Activator.getImageDescriptor("icons/reset.gif"));
+		toolBarManager.add(rehistogramAndRescale);
 		toolBarManager.update(true);
 
 		control.setTextClient(toolbar);

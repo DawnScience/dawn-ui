@@ -483,4 +483,8 @@ public class HistogramViewer extends ContentViewer {
 	protected ILineTrace[] getRGBTraces() {
 		return new ILineTrace[] { redTrace, greenTrace, blueTrace };
 	}
+
+	public void rescaleAxis() {
+		histogramPlottingSystem.autoscaleAxes();
+	}
 }
