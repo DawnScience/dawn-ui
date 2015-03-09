@@ -238,10 +238,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		IPaletteTrace paletteTrace = getPaletteTrace();
 		if (paletteTrace != null){
 			logger.debug("HistogramToolPage: activate - palette trace " + paletteTrace.hashCode());
-			histogramWidget.setInput(paletteTrace);
-			colourMapViewer.setInput(paletteTrace);
-			setColourScheme(paletteTrace);
-			
+			updateHistogramUIElements(paletteTrace);
 		} else {
 			logger.debug("HistogramToolPage: activate - palette trace is null.");
 		}
@@ -315,6 +312,16 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	public void setFocus() {
 		histogramWidget.getComposite().setFocus();
 	}
+	
+	/*
+	 * Update all the Histogram UI elements, widgets etc. 
+	 * typically done when there is a new trace or trace has been modified. 
+	 */
+	private void updateHistogramUIElements(IPaletteTrace it) {
+		histogramWidget.setInput(it);
+		colourMapViewer.setInput(it);
+		setColourScheme(it);
+	}
 
 	private final class TraceListener implements ITraceListener{
 		@Override
@@ -348,18 +355,16 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		public void traceUpdated(TraceEvent evt) {
 			logger.debug("HistogramToolPage: traceUpdated");
 			IPaletteTrace it = (IPaletteTrace)evt.getSource();
-			histogramWidget.setInput(it);
-			colourMapViewer.setInput(it);
-			setColourScheme(it);
+			updateHistogramUIElements(it);
 		}
+
+
 
 		@Override
 		public void traceAdded(TraceEvent evt) {
 			logger.debug("HistogramToolPage: traceAdded");
 			IPaletteTrace it = (IPaletteTrace)evt.getSource();
-			histogramWidget.setInput(it);
-			colourMapViewer.setInput(it);
-			setColourScheme(it);
+			updateHistogramUIElements(it);
 		}
 
 		@Override
