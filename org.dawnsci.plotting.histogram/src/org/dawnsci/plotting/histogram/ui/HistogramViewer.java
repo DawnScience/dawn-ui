@@ -76,6 +76,11 @@ public class HistogramViewer extends ContentViewer {
 	private boolean firstUpdateTraces = true;
 
 	private IROIListener histogramRegionListener = new IROIListener.Stub() {
+		@Override
+		public void roiDragged(ROIEvent evt) {
+			// Do nothing
+		}
+
 		public void update(ROIEvent evt) {
 			IROI roi = evt.getROI();
 			if (roi instanceof RectangularROI) {
