@@ -56,16 +56,16 @@ public class HistogramWidgetPluginTests extends PluginTestBase {
 				return null;
 			}
 		}).when(mock).setMax(any(Number.class));
-		doAnswer(new Answer() {
-
-			@Override
-			public Object answer(InvocationOnMock invocation) throws Throwable {
-				// TODO Auto-generated method stub
-				return null;
-			}
-		}).when(mock).addPaletteListener((IPaletteListener) any());
-	
-		histogramWidget.setInput(mock);
+//		doAnswer(new Answer() {
+//
+//			@Override
+//			public Object answer(InvocationOnMock invocation) throws Throwable {
+//				// TODO Auto-generated method stub
+//				return null;
+//			}
+//		}).when(mock).addPaletteListener((IPaletteListener) any());
+//	
+//		histogramWidget.setInput(mock);
 	}
 
 }

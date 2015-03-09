@@ -23,7 +23,14 @@ public class ImageHistogramProviderTest {
 
 	@Test
 	public void testGetImageData() {
+		// create normal data set
+		// get image data, make sure it is not logged
 	}
+	
+	// create complex data set
+	// get image data, make sure it is abs... 
+	
+	
 
 	@Test
 	public void testGetNumberOfBins() {

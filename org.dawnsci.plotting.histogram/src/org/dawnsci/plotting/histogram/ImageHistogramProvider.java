@@ -54,24 +54,18 @@ public class ImageHistogramProvider implements IHistogramProvider {
 	}
 
 	/**
-	 * Given an image, extract the image data. If no image data is found, return
-	 * some default dummy data
+	 * Given an image, extract the image data. If the image is complex, return the 
+	 * absolute image values. 
 	 *
 	 * @param image
 	 *            IPaletteTrace image
-	 * @return actual 2-D data of the image
+	 * @return actual 2-D data of the image or abs values if we have a complex dataset
 	 */
 	/* protected */IDataset getImageData(IPaletteTrace image) {
-		IDataset im = (Dataset) image.getImageServiceBean().getImageValue();
-		if (im == null)
-			im = (IDataset) image.getImageServiceBean().getImage();
-		if (im == null)
-			im = (IDataset) image.getData();
-		// this line below looks suspect, could lead to old data being used if
-		// lifecycle issues
-		// if (im==null && imageDataset!=null) im = imageDataset;
-		if (im == null)
-			im = new DoubleDataset(new double[] { 0, 1, 2, 3 }, 2, 2);
+		Dataset im = (Dataset)image.getImageServiceBean().getImage();
+		if (im.isComplex()){
+			im = (Dataset)image.getImageServiceBean().getImageValue();
+		}
 		return im;
 	}
 

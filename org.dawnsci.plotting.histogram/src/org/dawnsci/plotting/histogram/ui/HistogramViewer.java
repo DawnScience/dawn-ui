@@ -8,6 +8,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -84,7 +85,6 @@ public class HistogramViewer extends ContentViewer {
 	};
 
 	private UIJob repaintJob = new UIJob("Repaint traces") {
-
 		@Override
 		public IStatus runInUIThread(IProgressMonitor monitor) {
 			updateTraces();
@@ -192,9 +192,17 @@ public class HistogramViewer extends ContentViewer {
 	 * @param histoMin
 	 */
 	private void updateRegion(double histoMin, double histoMax) {
+		IRectangularROI oldRoi = (IRectangularROI) region.getROI();
+		
+		if (oldRoi != null){
+			// don't bother updating region if it is the same
+			if ((oldRoi.getPoint()[0] == histoMin) && (oldRoi.getEndPoint()[0]) == histoMax){
+				return;
+			}
+		}
+		
 		RectangularROI rroi = new RectangularROI(histoMin, 0, histoMax
 				- histoMin, 1, 0);
-
 		region.removeROIListener(histogramRegionListener);
 		try {
 			double max = rroi.getEndPoint()[0];
@@ -218,7 +226,7 @@ public class HistogramViewer extends ContentViewer {
 	 * @param min
 	 */
 	private void updateMin(double min) {
-		minText.setMinimum(min);
+		minText.setDouble(min);
 	}
 
 	/**
@@ -227,7 +235,7 @@ public class HistogramViewer extends ContentViewer {
 	 * @param min
 	 */
 	private void updateMax(double max) {
-		maxText.setMaximum(max);
+		maxText.setDouble(max);
 	}
 
 	/**

@@ -1016,13 +1016,16 @@ public class HistogramToolPage extends AbstractToolPage {
 		}
 	}
 
-	private Dataset getImageData(IPaletteTrace image) {
+	private Dataset getImageData(IPaletteTrace image) {		
 		Dataset im = (Dataset)image.getImageServiceBean().getImageValue();
 		if (im == null)
 			im = (Dataset)image.getImageServiceBean().getImage();
-		if (im==null) im = (Dataset)image.getData();
-		if (im==null && imageDataset!=null) im = imageDataset;
-		if (im==null) im = new DoubleDataset(new double[]{0,1,2,3}, 2, 2);
+		if (im==null) 
+			im = (Dataset)image.getData();
+		if (im==null && imageDataset!=null) 
+			im = imageDataset;
+		if (im==null) 
+			im = new DoubleDataset(new double[]{0,1,2,3}, 2, 2);
  		return im;
 	}
 
