@@ -143,34 +143,12 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		this.traceListener = new ITraceListener.Stub() {
 			@Override
 			public void traceAdded(TraceEvent evt) {
-				try {
-					setEnabled(getImageTrace()!=null);
-					if (evt.getSource() instanceof IImageTrace) {
-	
-						((IImageTrace)evt.getSource()).setMask(maskObject.getMaskDataset());
-						((IImageTrace)evt.getSource()).addPaletteListener(paletteListener);
-						int[] ia = ((IImageTrace)evt.getSource()).getImageServiceBean().getNanBound().getColor();
-						updateIcons(ia);
-						colorSelector.setColorValue(ColorUtility.getRGB(ia));
-
-						if (autoApplySavedMask && savedMask!=null) {
-							Display.getDefault().asyncExec(new Runnable() {
-								public void run() {
-									try {
-										mergeSavedMask();
-									} catch (Throwable ne) {
-										logger.error("Problem loading saved mask!", ne);
-									}
-								}
-							});
-						}				
-
-					} else {
-						saveMaskBuffer();
-					}
-				} catch (Exception ne) {
-					logger.error("Cannot update trace!", ne);
-				}
+				updateMask(evt);
+			}
+			@Override
+			public void traceUpdated(TraceEvent evt) {
+				if (!autoApply.getSelection()) return;
+				processMask(true, false, null);
 			}
 			@Override
 			public void traceRemoved(TraceEvent evt) {
@@ -249,6 +227,38 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		this.maskJob = new MaskJob();
 		maskJob.setPriority(Job.INTERACTIVE);
 		maskJob.setUser(false);
+	}
+	
+	private void updateMask(TraceEvent evt) {
+		try {
+			setEnabled(getImageTrace()!=null);
+			if (evt.getSource() instanceof IImageTrace) {
+
+				((IImageTrace)evt.getSource()).setMask(maskObject.getMaskDataset());
+				((IImageTrace)evt.getSource()).addPaletteListener(paletteListener);
+				int[] ia = ((IImageTrace)evt.getSource()).getImageServiceBean().getNanBound().getColor();
+				updateIcons(ia);
+				colorSelector.setColorValue(ColorUtility.getRGB(ia));
+
+				if (autoApplySavedMask && savedMask!=null) {
+					Display.getDefault().asyncExec(new Runnable() {
+						public void run() {
+							try {
+								mergeSavedMask();
+							} catch (Throwable ne) {
+								logger.error("Problem loading saved mask!", ne);
+							}
+						}
+					});
+				}				
+
+			} else {
+				saveMaskBuffer();
+			}
+		} catch (Exception ne) {
+			logger.error("Cannot update trace!", ne);
+		}
+
 	}
 
 	private AbstractPlottingViewer viewer;
@@ -631,7 +641,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				processMask(isLastActionRange(), true, null);
 			}
 		});
-		apply.setEnabled(true);
+		apply.setEnabled(!Activator.getPlottingPreferenceStore().getBoolean(PlottingConstants.MASK_AUTO_APPLY));
 		enableControls.add(apply);
 		
 		autoApply.addSelectionListener(new SelectionAdapter() {
@@ -1445,6 +1455,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		for (Control control : enableControls) {
 			if (control!=null) control.setEnabled(enabled);
 		}
+		if (autoApply.getSelection()) apply.setEnabled(false);
 	}
 
 	@Override
