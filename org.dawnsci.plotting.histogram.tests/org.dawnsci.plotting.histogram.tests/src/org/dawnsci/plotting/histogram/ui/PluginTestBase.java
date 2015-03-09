@@ -76,7 +76,7 @@ public abstract class PluginTestBase {
 		IWorkbenchWindow window = PlatformUI.getWorkbench()
 				.getActiveWorkbenchWindow();
 		shell = new Shell(window.getShell(), SWT.RESIZE);
-		shell.setText("Python Information");
+		shell.setText("Shell for " + getClass().getName());
 		shell.setSize(500, 500);
 		shell.setLayout(new FillLayout());
 		createControl(shell);

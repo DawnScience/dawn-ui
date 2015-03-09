@@ -26,7 +26,7 @@ public class ImageHistogramProvider implements IHistogramProvider {
 	private IPaletteTrace image;
 	private IPaletteListener imageListener = new ImagePaletteListener();
 
-	protected HistogramViewer histogramViewer;
+	protected Viewer viewer;
 
 	private IDataset imageDataset;
 	private ImageServiceBean bean;
@@ -54,8 +54,8 @@ public class ImageHistogramProvider implements IHistogramProvider {
 	}
 
 	/**
-	 * Given an image, extract the image data. If the image is complex, return the 
-	 * absolute image values. 
+	 * Given an image, extract the image data. If the image is complex, return the
+	 * absolute image values.
 	 *
 	 * @param image
 	 *            IPaletteTrace image
@@ -268,33 +268,33 @@ public class ImageHistogramProvider implements IHistogramProvider {
 		image.setMin(min);
 	}
 
-	//TODO: ADD IN other events... 
+	//TODO: ADD IN other events...
 	//TODO: more fine grained updating than refresh??
 	private final class ImagePaletteListener extends IPaletteListener.Stub{
 
 		@Override
 		public void paletteChanged(PaletteEvent event) {
 			System.out.println("provider paletteChanged " + getMax());
-			histogramViewer.refresh();
+			viewer.refresh();
 		}
-		
+
 		@Override
 		public void minChanged(PaletteEvent event) {
 			System.out.println("provider minChanged " + getMax());
-			histogramViewer.refresh();
+			viewer.refresh();
 		}
 
 		@Override
 		public void maxChanged(PaletteEvent event) {
 			System.out.println("provider maxChanged " + getMax());
-			histogramViewer.refresh();
+			viewer.refresh();
 		}
 	}
 
 
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		this.histogramViewer = (HistogramViewer) viewer;
+		this.viewer = viewer;
 
 		if (newInput != oldInput){
 			//remove listeners on old input
