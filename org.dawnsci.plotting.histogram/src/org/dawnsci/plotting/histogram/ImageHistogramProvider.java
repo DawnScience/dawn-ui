@@ -30,7 +30,6 @@ public class ImageHistogramProvider implements IHistogramProvider {
 
 	private IDataset imageDataset;
 	private ImageServiceBean bean;
-	private PaletteData paletteData;
 
 	/**
 	 * Calculated histogram, index 0 for Y values, 1 for X values
@@ -45,7 +44,6 @@ public class ImageHistogramProvider implements IHistogramProvider {
 		this.image = null;
 		this.imageDataset = null;
 		this.bean = null;
-		this.paletteData = null;
 	}
 
 	private void setImage(IPaletteTrace image){
@@ -53,7 +51,6 @@ public class ImageHistogramProvider implements IHistogramProvider {
 		this.image = image;
 		this.imageDataset = getImageData(image);
 		this.bean = image.getImageServiceBean();
-		this.paletteData = image.getPaletteData();
 	}
 
 	/**

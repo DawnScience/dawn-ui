@@ -79,27 +79,6 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		createHistogramControl(form.getBody());
 	}
 
-	private void createMinMaxSettings(Composite comp){
-		Composite composite = new Composite(comp, SWT.NONE);
-		composite.setLayout(GridLayoutFactory.swtDefaults().numColumns(4).create());
-		composite.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
-
-		Label minLabel = new Label(composite, SWT.NONE);
-		minLabel.setText("Min:");
-		minLabel.setLayoutData(new GridData (SWT.BEGINNING, SWT.CENTER, false, false));
-		FloatSpinner minText = new FloatSpinner(composite, SWT.BORDER);
-		minText.setLayoutData(new GridData (SWT.BEGINNING, SWT.CENTER, false, false));
-		Label maxLabel = new Label(composite, SWT.NONE);
-		maxLabel.setLayoutData(new GridData (SWT.END, SWT.CENTER, true, false));
-		maxLabel.setText("Max:");
-		FloatSpinner maxText = new FloatSpinner(composite, SWT.BORDER);
-		maxText.setLayoutData(new GridData (SWT.BEGINNING, SWT.CENTER, false, false));
-
-		minText.setFormat(12, 4);
-		maxText.setFormat(12, 4);
-		minText.setIncrement(1.0);
-		maxText.setIncrement(1.0);
-	}
 	/*
 	 * Create the image settings, i.e. colour scheme section
 	 */
@@ -169,7 +148,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		final IPageSite site = getSite();
 		IActionBars actionBars = (site != null) ? site.getActionBars() : null;
 
-		createMinMaxSettings(sectionClient);
+		//createMinMaxSettings(sectionClient);
 
 		try {
 			histogramWidget = new HistogramViewer(sectionClient, getTitle(),
@@ -259,6 +238,12 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		getPaletteTrace().removePaletteListener(paletteListener);
 	}
 	
+	@Override
+	public void dispose() {
+		super.dispose();
+		histogramWidget.dispose();
+	}
+	
 	/**
 	 * Returns colour map ComboViewer for testing purposes
 	 */
@@ -287,9 +272,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	
 	/**
 	 * Use the controls from the GUI to set the individual colour elements from the selected colour scheme
-	 */
-
-	
+	 */	
 	private void setPalette() {
 		IPaletteTrace paletteTrace = getPaletteTrace();
 		if (paletteTrace != null){
