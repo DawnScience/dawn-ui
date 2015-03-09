@@ -1,15 +1,14 @@
 package org.dawnsci.plotting.histogram;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
+import org.dawnsci.plotting.histogram.ImageHistogramProvider;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import uk.ac.diamond.scisoft.analysis.MockDataset;
+import static org.mockito.Mockito.*;
 
 public class ImageHistogramProviderTest {
 
