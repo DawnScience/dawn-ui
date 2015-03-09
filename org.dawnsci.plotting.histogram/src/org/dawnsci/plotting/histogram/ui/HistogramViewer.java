@@ -13,6 +13,8 @@ import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
+import org.eclipse.dawnsci.plotting.api.axis.AxisEvent;
+import org.eclipse.dawnsci.plotting.api.axis.IAxisListener;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -26,6 +28,8 @@ import org.eclipse.jface.viewers.ContentViewer;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
@@ -50,7 +54,7 @@ import org.slf4j.LoggerFactory;
  * Input to the histogram viewer must implement the <code>IPaletteTrace</code>
  * interface and get set using <code>setInput</code> method.
  * </p>
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class HistogramViewer extends ContentViewer {
@@ -79,7 +83,8 @@ public class HistogramViewer extends ContentViewer {
 				double max = rroi.getEndPoint()[0];
 				System.out.print("New max: " + max);
 				getHistogramProvider().setMax(max);
-				System.out.println(" - received as:" + getHistogramProvider().getMax());
+				System.out.println(" - received as:"
+						+ getHistogramProvider().getMax());
 			}
 		};
 	};
@@ -146,6 +151,7 @@ public class HistogramViewer extends ContentViewer {
 
 		createRegion();
 		createTraces();
+		installMinMaxListeners();
 	}
 
 	private void createMinMaxSettings(Composite comp) {
@@ -173,6 +179,8 @@ public class HistogramViewer extends ContentViewer {
 		maxText.setFormat(12, 4);
 		minText.setIncrement(1.0);
 		maxText.setIncrement(1.0);
+
+
 	}
 
 	/**
@@ -193,14 +201,15 @@ public class HistogramViewer extends ContentViewer {
 	 */
 	private void updateRegion(double histoMin, double histoMax) {
 		IRectangularROI oldRoi = (IRectangularROI) region.getROI();
-		
-		if (oldRoi != null){
+
+		if (oldRoi != null) {
 			// don't bother updating region if it is the same
-			if ((oldRoi.getPoint()[0] == histoMin) && (oldRoi.getEndPoint()[0]) == histoMax){
+			if ((oldRoi.getPoint()[0] == histoMin)
+					&& (oldRoi.getEndPoint()[0]) == histoMax) {
 				return;
 			}
 		}
-		
+
 		RectangularROI rroi = new RectangularROI(histoMin, 0, histoMax
 				- histoMin, 1, 0);
 		region.removeROIListener(histogramRegionListener);
@@ -212,9 +221,10 @@ public class HistogramViewer extends ContentViewer {
 			region.setROI(rroi);
 			System.out.print(" AFTER histoMax: " + histoMax);
 			System.out.print(" getEndPoint: " + rroi.getEndPoint()[0]);
-			RectangularROI afterroi = (RectangularROI)region.getROI();
-			
-			System.out.println(" REGION getEndPoint: " + afterroi.getEndPoint()[0]);
+			RectangularROI afterroi = (RectangularROI) region.getROI();
+
+			System.out.println(" REGION getEndPoint: "
+					+ afterroi.getEndPoint()[0]);
 		} finally {
 			region.addROIListener(histogramRegionListener);
 		}
@@ -222,7 +232,7 @@ public class HistogramViewer extends ContentViewer {
 
 	/**
 	 * Update the min widget
-	 * 
+	 *
 	 * @param min
 	 */
 	private void updateMin(double min) {
@@ -231,7 +241,7 @@ public class HistogramViewer extends ContentViewer {
 
 	/**
 	 * Update the min widget
-	 * 
+	 *
 	 * @param min
 	 */
 	private void updateMax(double max) {
@@ -293,8 +303,64 @@ public class HistogramViewer extends ContentViewer {
 		// do if rescale is set....
 		// TODO: under what conditions may we always autoscale??? //test for
 		// isRescaleHistogram
-		histogramPlottingSystem.autoscaleAxes();
+		// histogramPlottingSystem.autoscaleAxes();
 		// histogramPlottingSystem.repaint();
+
+		updateMinMaxSpinnerIncrements();
+
+	}
+
+	private void updateMinMaxSpinnerIncrements() {
+		// Neither of these increments work properly on log scale where
+		// depending on the current location
+		// in the log scale affects how much the increment should be
+
+		// Option 1:
+		// // Set the increment to divide the whole range in 200 values
+		// double xMin = data.getX().min(true).doubleValue();
+		// double xMax = data.getX().max(true).doubleValue();
+		// double increment = Math.abs(xMax - xMin) / 200;
+		// minText.setIncrement(increment);
+		// maxText.setIncrement(increment);
+
+		// Option 2:
+		// Set the increment to be the difference between two x pixels.
+		double val1 = histogramPlottingSystem.getSelectedXAxis()
+				.getPositionValue(1);
+		double val2 = histogramPlottingSystem.getSelectedXAxis()
+				.getPositionValue(2);
+		double increment = val2 - val1;
+		minText.setIncrement(increment);
+		maxText.setIncrement(increment);
+
+	}
+
+	private void installMinMaxListeners() {
+		minText.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				getHistogramProvider().setMin(minText.getDouble());
+			}
+		});
+
+		maxText.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				getHistogramProvider().setMax(maxText.getDouble());
+			}
+		});
+
+		histogramPlottingSystem.getSelectedXAxis().addAxisListener(new IAxisListener() {
+
+			@Override
+			public void revalidated(AxisEvent evt) {
+			}
+
+			@Override
+			public void rangeChanged(AxisEvent evt) {
+				updateMinMaxSpinnerIncrements();
+			}
+		});
 	}
 
 	/**
@@ -315,7 +381,7 @@ public class HistogramViewer extends ContentViewer {
 		} else {
 			logger.debug("HistogramViewer: inputchanged oldInput " + oldInput);
 		}
-		
+
 		System.out.println("Input Changed: " + getHistogramProvider().getMax());
 
 		refresh();
@@ -414,7 +480,7 @@ public class HistogramViewer extends ContentViewer {
 
 	/**
 	 * Returns the parent composite
-	 * 
+	 *
 	 * @return composite
 	 */
 	public Composite getComposite() {
