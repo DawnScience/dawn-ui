@@ -85,16 +85,27 @@ class DataSetColumnLabelProvider extends ColumnLabelProvider implements IStyledL
 
 	@Override
 	public StyledString getStyledText(Object element) {
+		
 		final String text = getText(element);
 		if (text==null) return null;
 		
-		StyledString ret = new StyledString(text);
+		StyledString ret = columnIndex == 3 ||  columnIndex == 4 ||  columnIndex == 5
+				         ? new StyledString(text, StyledString.DECORATIONS_STYLER)
+				         : new StyledString(text);
 		
 		final ITransferableDataObject ob = (ITransferableDataObject)element;
 		if (ob.getFilterPath()!=null) {
 			String name = ob.getFilterPath().substring(ob.getFilterPath().lastIndexOf('/')+1);
 			ret.append(new StyledString("   ["+name+"]", StyledString.QUALIFIER_STYLER));
 		}
+		
+		if (ret!=null && !"".equals(ret.getString())) {
+			
+			if (columnIndex == 2 && !"-".equals(ret.getString())) {
+				ret.append(new StyledString(" *", StyledString.DECORATIONS_STYLER));
+			}
+		}
+		
 		return ret;
 	}
 	

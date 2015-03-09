@@ -307,7 +307,11 @@ public class DerivativeToolExternalPlot extends AbstractToolPage {
 							lt.setData(xf, yf);
 							lt.setTraceColor(ColorUtility.getSwtColour(system.getTraces().size()));
 							system.addTrace(lt);
-							system.repaint();
+							
+							// For some data the XYGraph autoscale
+							// alg needs to be done twice. TODO Fix that...
+							system.autoscaleAxes();
+							system.autoscaleAxes();
 						}
 					});
 				}

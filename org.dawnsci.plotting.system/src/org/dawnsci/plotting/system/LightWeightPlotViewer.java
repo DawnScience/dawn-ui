@@ -1597,6 +1597,8 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 	 * @deprecated draw2d Specific
 	 */
 	public void removeMouseClickListener(MouseListener mcl) {
+		if (getXYRegionGraph()                ==null) return;
+		if (getXYRegionGraph().getRegionArea()==null) return;
 	    getXYRegionGraph().getRegionArea().removeAuxilliaryClickListener(mcl);
 	}
 

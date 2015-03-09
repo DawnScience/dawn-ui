@@ -76,25 +76,24 @@ public class FittingUtils {
 		@SuppressWarnings("unchecked")
 		Class<? extends APeak> myPeakFunction = (Class<? extends APeak>)peakFunction;
 	
+		//We need to find things that look like peaks in the data
+		List<IdentifiedPeak> foundPeaks = Generic1DFitter.parseDataDerivative(xDataSet, yDataSet, smoothing);
 		
+		//How many peaks are we looking for (user specified, can be null)
 		Integer nrPeaks = nPeaks;
 		if (nrPeaks == null) {
-			//Don't know how many peaks we are looking for, so just see how many we can find
-			List<IdentifiedPeak> foundPeaks = Generic1DFitter.parseDataDerivative(xDataSet, yDataSet, smoothing);
+			
 			nrPeaks = foundPeaks.size();
 			if (nrPeaks == null || nrPeaks == 0) {
 				//In case no peaks were found
 				logger.error("No peaks were found!");
 				return null;
 			}
-			//Fit the peaks we found
-			//TODO FIXME Change myPeakFunction to peakFunction
-			fittedPeaksAndBkgs = Generic1DFitter.fitPeakFunctions(foundPeaks, xDataSet, yDataSet, myPeakFunction, optimizer, smoothing, nrPeaks, 0.0, false, false, null);
-		} else {
-			//Find the and fit a given number of peaks
-			//TODO FIXME Change myPeakFunction to peakFunction
-			fittedPeaksAndBkgs = Generic1DFitter.fitPeakFunctions(xDataSet, yDataSet, myPeakFunction, nPeaks);
 		}
+		//Fit the peaks we found
+		//TODO FIXME Change myPeakFunction to peakFunction
+		fittedPeaksAndBkgs = Generic1DFitter.fitPeakFunctions(foundPeaks, xDataSet, yDataSet, myPeakFunction, optimizer, smoothing, nrPeaks,  0.0, false, false, null, true);
+		
 		
 		//Pick out the peak functions of the correct class & package into new composite function
 		for (IOperator peakAndBkg : fittedPeaksAndBkgs) {

@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.dawb.common.ui.macro.ColorMacroEvent;
 import org.dawb.common.ui.macro.TraceMacroEvent;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -35,7 +34,6 @@ import org.eclipse.dawnsci.analysis.dataset.roi.PolygonalROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.PolylineROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.macro.api.MacroEventObject;
-import org.eclipse.dawnsci.macro.api.MethodEventObject;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
 import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
@@ -658,18 +656,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		int iwidth  = realBounds.width;
 		int iheight = realBounds.height;
 
-		if (iwidth>(rwidth/2d) || iheight>(rheight/2d)) {
-			return 1;
+		int max = 1024;
+		for (int i = 2 ; i <= max; i *= 2) {
+			if (iwidth>(rwidth/i) || iheight>(rheight/i)) {
+				return i/2;
+			}
 		}
-
-		if (iwidth>(rwidth/4d) || iheight>(rheight/4d)) {
-			return 2;
-		}
-
-		if (iwidth>(rwidth/8d) || iheight>(rheight/8d)) {
-			return 4;
-		}
-		return 8;
+		return max*2;
 	}
 
 	private double getSpan(Axis axis) {
@@ -803,7 +796,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		int[] yRange = getRange(bounds, shape[1], 1, false);		
 
 		try {
-			return data.getSlice(new int[]{xRange[0],yRange[0]}, new int[]{xRange[1],yRange[1]}, null);
+			return data.getSliceView(new int[]{xRange[0],yRange[0]}, new int[]{xRange[1],yRange[1]}, null);
 			
 		} catch (IllegalArgumentException iae) {
 			logger.error("Cannot slice image", iae);

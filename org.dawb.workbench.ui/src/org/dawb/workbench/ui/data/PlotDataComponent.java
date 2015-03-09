@@ -96,7 +96,10 @@ import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.preference.PreferenceDialog;
+import org.eclipse.jface.resource.ColorRegistry;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
@@ -130,6 +133,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
@@ -274,7 +278,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		
 		this.container = new Composite(parent, SWT.NONE);
 		if (parent.getLayout() instanceof GridLayout) container.setLayoutData(new GridData(GridData.FILL_BOTH));
-
+		container.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		
 		GridLayout gl_container = new GridLayout(1, false);
 		gl_container.verticalSpacing = 0;
 		gl_container.marginWidth = 0;
@@ -294,6 +299,16 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		dataViewer.getTable().addKeyListener(this);
 		dataViewer.getTable().setLinesVisible(true);
 		dataViewer.getTable().setHeaderVisible(true);
+		
+		ColorRegistry colorRegistry = JFaceResources.getColorRegistry();
+		Label label = new Label(container, SWT.RIGHT);
+		label.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
+		label.setForeground(new Color(label.getDisplay(), colorRegistry.getRGB(JFacePreferences.QUALIFIER_COLOR)));
+		label.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		label.setText("* Click to change value  ");
+
+		label = new Label(container, SWT.HORIZONTAL|SWT.SEPARATOR);
+		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		createColumns();
         dataViewer.setColumnProperties(new String[]{"Data","Length"});
@@ -1223,26 +1238,26 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		final TableViewerColumn axis   = new TableViewerColumn(dataViewer, SWT.LEFT, 2);
 		axis.getColumn().setText(" ");
 		axis.getColumn().setWidth(32);
-		axis.setLabelProvider(new DataSetColumnLabelProvider(2, this));
+		axis.setLabelProvider(new DelegatingStyledCellLabelProvider(new DataSetColumnLabelProvider(2, this)));
 		axis.setEditingSupport(new AxisEditingSupport(dataViewer, this));
 
 		final TableViewerColumn size   = new TableViewerColumn(dataViewer, SWT.LEFT, 3);
 		size.getColumn().setText("Size");
 		size.getColumn().setWidth(150);
 		size.getColumn().setResizable(true);
-		size.setLabelProvider(new DataSetColumnLabelProvider(3, this));
+		size.setLabelProvider(new DelegatingStyledCellLabelProvider(new DataSetColumnLabelProvider(3, this)));
 			
 		final TableViewerColumn dims   = new TableViewerColumn(dataViewer, SWT.LEFT, 4);
 		dims.getColumn().setText("Dimensions");
 		dims.getColumn().setWidth(150);
 		dims.getColumn().setResizable(true);
-		dims.setLabelProvider(new DataSetColumnLabelProvider(4, this));
+		dims.setLabelProvider(new DelegatingStyledCellLabelProvider(new DataSetColumnLabelProvider(4, this)));
 		
 		final TableViewerColumn shape   = new TableViewerColumn(dataViewer, SWT.LEFT, 5);
 		shape.getColumn().setText("Shape");
 		shape.getColumn().setWidth(150);
 		shape.getColumn().setResizable(true);
-		shape.setLabelProvider(new DataSetColumnLabelProvider(5, this));
+		shape.setLabelProvider(new DelegatingStyledCellLabelProvider(new DataSetColumnLabelProvider(5, this)));
 
 		final TableViewerColumn varName   = new TableViewerColumn(dataViewer, SWT.LEFT, 6);
 		varName.getColumn().setText("Variable");

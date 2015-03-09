@@ -578,5 +578,12 @@ public final class VerticalListEditor extends ListEditor {
 	public void setRequireSelectionPack(boolean requireSelectionPack) {
 		this.requireSelectionPack = requireSelectionPack;
 	}
+	
+	public void setButtonsVisible(boolean isVisible) {
+		add.setVisible(isVisible);
+		delete.setVisible(isVisible);
+		up.setVisible(isVisible);
+		down.setVisible(isVisible);
+	}
 
 }

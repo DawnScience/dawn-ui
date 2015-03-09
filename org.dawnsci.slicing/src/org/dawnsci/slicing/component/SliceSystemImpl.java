@@ -252,6 +252,12 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 	}
 	
 	@Override
+	public void setToolbarVisible(boolean vis) {
+		GridUtils.setVisible(((ToolBarManager)sliceToolbar).getControl(), vis);
+		sliceToolbar.update(true);
+	}
+	
+	@Override
 	public ISelectionProvider getSelectionProvider() {
 		return viewer;
 	}
