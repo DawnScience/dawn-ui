@@ -52,6 +52,14 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	private FormToolkit toolkit;
 	private ScrolledForm form;
 	private ComboViewer colourMapViewer;
+	
+	private IAction lockAction;
+	
+	// MODES
+	private static final int FULL = 0;
+	private static final int AUTO = 1;
+	private static final int FIXED = 2;
+	private int mode = FULL;
 
 	private HistogramViewer histogramWidget;
 
@@ -222,6 +230,26 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		};
 		reset.setImageDescriptor(Activator.getImageDescriptor("icons/histo.png"));
 		toolBarManager.add(reset);
+		
+
+		/*lockAction = new Action("Lock histogram range", IAction.AS_CHECK_BOX) {
+			public void run() {
+				IImageTrace image = getImageTrace();
+				
+				if (mode == FIXED) {
+					setChecked(false);
+					mode=AUTO;
+					image.setRescaleHistogram(true);
+				} else {
+					setChecked(true);
+					mode=FIXED;
+					image.setRescaleHistogram(false);
+				}
+			}
+		};
+		//lockAction.setImageDescriptor(Activator.getImageDescriptor("icons/lock.png"));
+		toolBarManager.add(lockAction);*/
+		
 		toolBarManager.update(true);
 
 		control.setTextClient(toolbar);
@@ -259,7 +287,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 		// remove our trace listener
 		getPlottingSystem().removeTraceListener(traceListener);
-		getPaletteTrace().removePaletteListener(paletteListener);
+		//getPaletteTrace().removePaletteListener(paletteListener);
 	}
 	
 	/**
@@ -267,13 +295,6 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	 */
 	protected ComboViewer getColourMapViewer(){
 		return colourMapViewer;
-	}
-	
-	/**
-	 * Returns histogram viewer for testing purposes
-	 */
-	protected HistogramViewer getHistogramViewer(){
-		return histogramWidget;
 	}
 	
 	/**
