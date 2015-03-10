@@ -423,7 +423,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	};
 
 	private final class PaletteListener extends IPaletteListener.Stub{
-		// TODO add rescaleHistogramChanged to IPaletteListener @Override
+		@Override
 		public void rescaleHistogramChanged(PaletteEvent evt) {
 			boolean locked = !((IPaletteTrace)evt.getSource()).isRescaleHistogram();
 			lockAction.setChecked(locked);
