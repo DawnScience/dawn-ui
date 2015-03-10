@@ -257,12 +257,13 @@ public class ImageHistogramProvider implements IHistogramProvider {
 	@Override
 	public void setMax(double max) {
 		image.setMax(max);
-
+		image.setPaletteData(image.getPaletteData()); //Workaround to force image to repaint, see DAWNSCI-5834
 	}
 
 	@Override
 	public void setMin(double min) {
 		image.setMin(min);
+		image.setPaletteData(image.getPaletteData()); //Workaround to force image to repaint, see DAWNSCI-5834
 	}
 
 	//TODO: ADD IN other events...
