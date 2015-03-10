@@ -160,6 +160,7 @@ public class PowderIntegrationJob extends Job {
 				public void run() {
 					system.getSelectedXAxis().setTitle(out.get(0).getName());
 					system.getSelectedYAxis().setTitle(out.get(1).getName());
+					system.setTitle("Integrated Intensity");
 
 				}
 			});
