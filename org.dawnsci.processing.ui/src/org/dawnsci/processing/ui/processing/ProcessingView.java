@@ -216,10 +216,8 @@ public class ProcessingView extends ViewPart {
 		try {
 			
 			if (new File(filename).exists()) {
-				boolean overwriteFile = MessageDialog.openQuestion(getSite().getShell(), "Overwrite existing file?", "Do you want to overwrite the existing file '"+filename+"'?");
-				if (!overwriteFile) {
-					return;
-				}
+				MessageDialog.openInformation(getSite().getShell(), "File error", "Overwriting of processing information forbidden, please select a new file.");
+				return;
 			}
 			
 			IPersistenceService service = (IPersistenceService)ServiceManager.getService(IPersistenceService.class);
