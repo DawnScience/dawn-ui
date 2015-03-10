@@ -30,6 +30,8 @@ import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -115,6 +117,21 @@ public class SeriesTable {
 		GridUtils.setVisible(error,         false);
 
 		createColumns(iconProvider);
+		
+		//hook up delete key to remove from list
+		tableViewer.getTable().addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.keyCode == SWT.DEL) {
+					delete();
+				}
+			}
+		});
 		
 	}
 	
