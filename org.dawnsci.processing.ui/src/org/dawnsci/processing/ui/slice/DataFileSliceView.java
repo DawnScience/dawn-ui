@@ -98,6 +98,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IViewPart;
@@ -352,6 +353,18 @@ public class DataFileSliceView extends ViewPart {
 				fsd.create();
 				if (fsd.open() == Dialog.CANCEL) return;
 				lastPath = fsd.getPath();
+				
+				File f = new File(lastPath);
+				if (!f.canWrite()) {
+					MessageBox dialog = 
+							  new MessageBox(getViewSite().getShell(), SWT.ICON_ERROR | SWT.OK);
+					dialog.setText("File save error!");
+					dialog.setMessage("Could not save calibration file! (Do you have write access to this directory?)");
+
+					dialog.open();
+					return;
+				}
+				
 				fileManager.setOutputPath(fsd.getPath());
 			
 				ProgressMonitorDialog dia = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
@@ -637,7 +650,12 @@ public class DataFileSliceView extends ViewPart {
 				int[] dataDims = Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions());
 				Slice[] s = csw.getCurrentSlice();
 				//Plot input, probably a bit wasteful to do each time
-				IDataset firstSlice = lazyDataset.getSlice(s);
+				IDataset firstSlice = null;
+				if (lazyDataset instanceof IDataset) {
+					firstSlice = ((IDataset)lazyDataset).getSliceView(s);
+				} else {
+					firstSlice = lazyDataset.getSlice(s);
+				}
 				eventManager.sendInitialDataUpdate(firstSlice.getSliceView().squeeze());
 				SlicedDataUtils.plotDataWithMetadata(firstSlice, input, dataDims);
 				
