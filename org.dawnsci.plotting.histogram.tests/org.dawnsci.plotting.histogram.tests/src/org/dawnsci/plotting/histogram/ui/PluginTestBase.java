@@ -31,8 +31,9 @@ public abstract class PluginTestBase {
 
 	private Shell shell;
 
-	protected abstract void createControl(Composite parent) throws Exception;
-
+	//Subclasses may provide an  implementation
+	protected void createControl(Composite parent) throws Exception {
+	}
 	public PluginTestBase() {
 		super();
 	}
