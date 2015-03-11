@@ -878,20 +878,15 @@ public class DataFileSliceView extends ViewPart {
 		@Override
 		protected Control createDialogArea(Composite parent) {
 			super.createDialogArea(parent);
-			Group group1 = new Group(parent, SWT.SHADOW_IN);
-			group1.setText("Select Output");
-			group1.setLayout(new RowLayout(SWT.VERTICAL));
-			final Button button1 = new Button(group1, SWT.RADIO);
-			button1.setText("Save only the processed data");
-			if (processingOutputType == ProcessingOutputType.PROCESSING_ONLY) button1.setSelection(true);
-			final Button button2 = new Button(group1, SWT.RADIO);
-			button2.setText("Save both the original and processed data (nxs original data only)");
-			if (processingOutputType == ProcessingOutputType.ORIGINAL_AND_PROCESSED) button2.setSelection(true);
+			final Button button1 = new Button(parent, SWT.CHECK);
+			button1.setText("Include original data in output (hdf5 and NeXus only).");
+
+			if (processingOutputType == ProcessingOutputType.ORIGINAL_AND_PROCESSED) button1.setSelection(true);
 						
 			SelectionListener groupListener = new SelectionListener() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					if (button2.getSelection()) {
+					if (button1.getSelection()) {
 						processingOutputType = ProcessingOutputType.ORIGINAL_AND_PROCESSED;
 					} else {
 						processingOutputType = ProcessingOutputType.PROCESSING_ONLY;
@@ -902,8 +897,8 @@ public class DataFileSliceView extends ViewPart {
 					widgetSelected(e);
 				}
 			};
+			
 			button1.addSelectionListener(groupListener);
-			//button2.addSelectionListener(groupListener);
 			
 			return parent;
 		}
