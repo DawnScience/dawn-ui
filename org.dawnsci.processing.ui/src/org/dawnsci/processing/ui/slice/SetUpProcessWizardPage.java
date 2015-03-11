@@ -244,7 +244,9 @@ public class SetUpProcessWizardPage extends WizardPage {
 						// out of this because we are looking for dsName
 						// which should be there - is this right?
 						final IDataHolder dh  = lservice.getData(context.getFilePaths().get(0), null);
-						final ILazyDataset lz = dh.getLazyDataset(dsName);
+						ILazyDataset lzGlobal = dh.getLazyDataset(dsName);
+						//local copy since we are messing with metadata
+						final ILazyDataset lz = lzGlobal.getSliceView();
 						lz.clearMetadata(null);
 						
 						Display.getDefault().asyncExec(new Runnable() {
@@ -306,6 +308,8 @@ public class SetUpProcessWizardPage extends WizardPage {
 		try {
 			dh = lservice.getData(path, new IMonitor.Stub());
 			ILazyDataset lazyDataset = dh.getLazyDataset(selection.getKey());
+			//local copy so not to change data holder copies metadata
+			lazyDataset = lazyDataset.getSliceView();
 			lazyDataset.clearMetadata(null);
 			final DimsDataList dims = sliceComponent.getDimsDataList();
 			Map<Integer, String> sliceDims = new HashMap<Integer, String>();
@@ -334,6 +338,8 @@ public class SetUpProcessWizardPage extends WizardPage {
 		try {
 			dh = lservice.getData(context.getFilePaths().get(0), null);
 			ILazyDataset lz  = dh.getLazyDataset(name);
+			//take local copy!
+			lz = lz.getSliceView();
 			final SliceSource source = new SliceSource(dh, lz, name, context.getFilePaths().get(0), false);
 			sliceComponent.setData(source);
 		} catch (Exception e1) {
