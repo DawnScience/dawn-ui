@@ -1059,6 +1059,7 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 	public void autoscaleAxes() {
 		if (xyGraph==null) return;
 		xyGraph.performAutoScale();
+		xyGraph.performAutoScale();
 	}
 	
 	public boolean addRegionListener(final IRegionListener l) {
@@ -1306,7 +1307,10 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 	}
 	private void repaintInternal(final boolean autoScale) {
 		if (xyCanvas!=null && xyGraph != null) {
-			if (autoScale)xyGraph.performAutoScale();
+			if (autoScale){
+				xyGraph.performAutoScale();
+				xyGraph.performAutoScale();
+			}
 			xyCanvas.layout(xyCanvas.getChildren());
 			xyGraph.revalidate();
 			xyGraph.repaint();

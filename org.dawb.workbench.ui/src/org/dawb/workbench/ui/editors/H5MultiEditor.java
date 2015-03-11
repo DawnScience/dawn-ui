@@ -17,6 +17,7 @@ import org.dawb.workbench.ui.views.PlotDataPage;
 import org.dawnsci.common.widgets.editor.ITitledEditor;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.analysis.api.io.IFileLoader;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
@@ -43,11 +44,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.io.DataHolder;
-import uk.ac.diamond.scisoft.analysis.io.HDF5Loader;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.rcp.editors.HDF5Input;
 import uk.ac.diamond.scisoft.analysis.rcp.editors.HDF5TreeEditor;
-import uk.ac.diamond.scisoft.analysis.rcp.views.DatasetInspectorView;
 import uk.ac.diamond.scisoft.analysis.utils.FileUtils;
 
 
@@ -86,18 +85,21 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
 	 */
 	@Override
 	protected void createPages() {
-		IDataHolder holder = null;
 		
-        IMetadata metadata = null;
-        Tree tree = null;
-        HDF5Loader loader = null;
+		boolean treeOnTop = getSite().getPage().findViewReference("uk.ac.diamond.scisoft.analysis.rcp.views.DatasetInspectorView")!=null;
+
+		// TODO FIXME should not be using LoaderFactory to get individual loaders.
+		IDataHolder holder   = null;
+		IFileLoader loader   = null;
+        IMetadata   metadata = null;
+        Tree        tree     = null;
 		try {
 			String fileName = EclipseUtils.getFilePath(getEditorInput());
 			holder = LoaderFactory.fetchData(fileName, true);
 			if (holder == null) {
 				final String extension = FileUtils.getFileExtension(fileName).toLowerCase();
-				loader = (HDF5Loader) LoaderFactory.getLoader(LoaderFactory.getLoaderClass(extension), fileName);
-				loader.setAsyncLoad(true);
+				loader = LoaderFactory.getLoader(LoaderFactory.getLoaderClass(extension), fileName);
+				loader.setAsyncLoad(treeOnTop);
 				holder = loader.loadFile();
 				holder.setLoaderClass(loader.getClass());
 				holder.setFilePath(fileName);
@@ -113,10 +115,9 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
 
 		try {
 			
-			boolean treeOnTop = false;
 			if (metadata!=null) {
 				final Collection<String> names = SliceUtils.getSlicableNames(holder);
-				if (names == null || names.size() < 1 || getSite().getPage().findViewReference(DatasetInspectorView.ID) != null) {
+				if (names == null || names.size() < 1 || getSite().getPage().findViewReference("uk.ac.diamond.scisoft.analysis.rcp.views.DatasetInspectorView") != null) {
 					treeOnTop = true;
 				}
 			}
@@ -165,7 +166,7 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
 			}
 
 			if (!useH5Editor) {
-				((HDF5TreeEditor) treePage).getHDF5TreeExplorer().startUpdateThread((DataHolder) holder, loader);
+				((HDF5TreeEditor) treePage).startUpdateThread(holder, loader);
 			}
 		} catch (Exception e) {
 			logger.error("Cannot initiate "+getClass().getName()+"!", e);
