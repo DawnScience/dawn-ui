@@ -655,6 +655,8 @@ public class DataFileSliceView extends ViewPart {
 					logger.error("Selected dataset not in file!!!!");
 					return Status.CANCEL_STATUS;
 				}
+				//take a local view
+				lazyDataset = lazyDataset.getSliceView();
 				
 				Map<Integer, String> axesNames = context.getAxesNames();
 				
