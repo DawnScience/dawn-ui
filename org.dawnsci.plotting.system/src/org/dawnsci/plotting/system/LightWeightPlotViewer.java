@@ -879,7 +879,6 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
 					system.autoscaleAxes();
-					system.autoscaleAxes();
 				}
 			});
 		}
@@ -1058,6 +1057,7 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 	@Override
 	public void autoscaleAxes() {
 		if (xyGraph==null) return;
+		xyGraph.performAutoScale();
 		xyGraph.performAutoScale();
 	}
 	
@@ -1306,7 +1306,10 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 	}
 	private void repaintInternal(final boolean autoScale) {
 		if (xyCanvas!=null && xyGraph != null) {
-			if (autoScale)xyGraph.performAutoScale();
+			if (autoScale){
+				xyGraph.performAutoScale();
+				xyGraph.performAutoScale();
+			}
 			xyCanvas.layout(xyCanvas.getChildren());
 			xyGraph.revalidate();
 			xyGraph.repaint();

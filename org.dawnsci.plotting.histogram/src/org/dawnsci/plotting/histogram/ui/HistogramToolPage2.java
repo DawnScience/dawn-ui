@@ -274,16 +274,16 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	public void deactivate() {
 		super.deactivate();
 
-		logger.debug("HistogramToolPage: deactivate. Plotting System "
-				+ getPlottingSystem().hashCode());
-		// comment out because at this point histogramWidget is disposed - is
-		// this right, verify
-		// that this is expected/desired behaviour
-		// histogramWidget.setInput(null);
+		if (getPlottingSystem() != null){
+			logger.debug("HistogramToolPage: deactivate. Plotting System "
+					+ getPlottingSystem().hashCode());	
+			getPlottingSystem().removeTraceListener(traceListener);
+		}
 
-		// remove our trace listener
-		getPlottingSystem().removeTraceListener(traceListener);
-		getPaletteTrace().removePaletteListener(paletteListener);
+		//palette trace is not always set in the activate stage, so could be null
+		if (getPaletteTrace() != null){
+			getPaletteTrace().removePaletteListener(paletteListener);
+		}	
 	}
 
 	/**
@@ -423,7 +423,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	};
 
 	private final class PaletteListener extends IPaletteListener.Stub{
-		// TODO add rescaleHistogramChanged to IPaletteListener @Override
+		@Override
 		public void rescaleHistogramChanged(PaletteEvent evt) {
 			boolean locked = !((IPaletteTrace)evt.getSource()).isRescaleHistogram();
 			lockAction.setChecked(locked);

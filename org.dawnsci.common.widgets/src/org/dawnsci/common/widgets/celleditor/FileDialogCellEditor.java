@@ -237,7 +237,7 @@ public class FileDialogCellEditor extends TextCellEditor {
 					File file = new File(filePath);
 					if (file.exists()) {
 						// Nothing
-					} else if (file.getParentFile().exists()) {
+					} else if (file.getParentFile() != null && file.getParentFile().exists()) {
 						file = file.getParentFile();
 					}
 					if (file.isDirectory()) {

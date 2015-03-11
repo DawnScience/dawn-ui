@@ -85,6 +85,8 @@ import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
@@ -310,6 +312,21 @@ public class DataFileSliceView extends ViewPart {
 				update(currentOperation);
 			}
 		});
+		
+		//hook up delete key to remove from list
+		viewer.getTable().addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.keyCode == SWT.DEL) {
+					clearSelected();
+				}
+			}
+		});
 
 	}
 	
@@ -403,29 +420,7 @@ public class DataFileSliceView extends ViewPart {
 		
 		final IAction clear = new Action("Clear selected file", Activator.getImageDescriptor("icons/delete.gif")) {
 			public void run() {
-				fileManager.getFilePaths().remove(selectedFile);
-				
-				if (fileManager.getFilePaths().isEmpty()) {
-					fileManager.clear();
-					csw.disable();
-					currentSliceLabel.setText("Current slice of data: [ - - - - -]");
-					eventManager.sendInitialDataUpdate(null);
-				} else {
-					viewer.setSelection(new StructuredSelection(fileManager.getFilePaths().get(0)),true);
-				}
-				
-				
-				job = null;
-				
-				try {
-					input.reset();
-					output.reset();
-					
-				} catch (Exception e1) {
-					logger.error("Could not clear plotting systems");
-				}
-				
-				viewer.refresh();
+				clearSelected();
 			}
 		};
 		
@@ -503,6 +498,31 @@ public class DataFileSliceView extends ViewPart {
 
 	}
 	
+	private void clearSelected() {
+		fileManager.getFilePaths().remove(selectedFile);
+		
+		if (fileManager.getFilePaths().isEmpty()) {
+			fileManager.clear();
+			csw.disable();
+			currentSliceLabel.setText("Current slice of data: [ - - - - -]");
+			eventManager.sendInitialDataUpdate(null);
+		} else {
+			viewer.setSelection(new StructuredSelection(fileManager.getFilePaths().get(0)),true);
+		}
+		
+		
+		job = null;
+		
+		try {
+			input.reset();
+			output.reset();
+			
+		} catch (Exception e1) {
+			logger.error("Could not clear plotting systems");
+		}
+		
+		viewer.refresh();
+	}
 	
 	private void update(final IOperation<? extends IOperationModel, ? extends OperationData> end) {
 	
@@ -635,6 +655,8 @@ public class DataFileSliceView extends ViewPart {
 					logger.error("Selected dataset not in file!!!!");
 					return Status.CANCEL_STATUS;
 				}
+				//take a local view
+				lazyDataset = lazyDataset.getSliceView();
 				
 				Map<Integer, String> axesNames = context.getAxesNames();
 				
