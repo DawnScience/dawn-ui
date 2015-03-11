@@ -9,6 +9,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
@@ -188,6 +189,72 @@ public class HistogramPluginTests extends PluginTestBase{
 		trace.setRescaleHistogram(!palleteLockState);
 		lockActionState = histogramToolPage.getLockAction().isChecked();
 		assertEquals(palleteLockState, lockActionState);
+	}
+	
+	@Test
+	public void testTraceUpdatesMinMaxCutFromPalette(){
+		// Allow time for the trace to be created
+		readAndDispatch(5);
+		
+		IPaletteTrace trace = histogramToolPage.getPaletteTrace();
+		assertNotNull(trace);
+		
+		// Set the mincut/maxcut to -/+ infinity initially
+		double rangeMinInitial = Double.NEGATIVE_INFINITY;
+		double rangeMaxInitial = Double.POSITIVE_INFINITY;
+		
+		trace.setMinCut(new HistogramBound(rangeMinInitial, trace.getMinCut().getColor()));
+		trace.setMaxCut(new HistogramBound(rangeMaxInitial, trace.getMaxCut().getColor()));
+
+		IDataset xBefore = histogramToolPage.getHistogramViewer().getHistogramProvider().getDatasets().getX();
+		
+		// Get min and max, ignoring NaNs
+		double minBefore = (xBefore.min(true)).doubleValue();
+		double maxBefore = (xBefore.max(true)).doubleValue();
+		
+		// Use these to adjust minCut and maxCut - move the bounds in by 25% each
+		double oldRange = maxBefore - minBefore;
+		double rangeMin = minBefore + 0.25 * oldRange;
+		double rangeMax = maxBefore - 0.25 * oldRange;
+		
+		// Set the min/maxCut on the palette
+		trace.setMinCut(new HistogramBound(rangeMin, trace.getMinCut().getColor()));
+		trace.setMaxCut(new HistogramBound(rangeMax, trace.getMaxCut().getColor()));
+		
+		// Allow time for the listeners to be fired
+		readAndDispatch(5);
+		
+		IDataset xAfter = histogramToolPage.getHistogramViewer().getHistogramProvider().getDatasets().getX();
+		
+		// Get min and max, ignoring NaNs and infinities
+		double minAfter = (xAfter.min(true, true)).doubleValue();
+		double maxAfter = (xAfter.max(true, true)).doubleValue();
+		
+		// Check our min/max has been clipped accordingly
+		assertTrue(minAfter >= rangeMin);
+		assertTrue(maxAfter <= rangeMax);
+		
+		// Now expand the bounds out, check again
+		
+		double rangeMinExpandOut = minBefore - 0.25 * oldRange;
+		double rangeMaxExpandOut = minBefore - 0.25 * oldRange;
+		
+		// Set the min/maxCut on the palette
+		trace.setMinCut(new HistogramBound(rangeMinExpandOut, trace.getMinCut().getColor()));
+		trace.setMaxCut(new HistogramBound(rangeMaxExpandOut, trace.getMaxCut().getColor()));
+		
+		// Allow time for the listeners to be fired
+		readAndDispatch(5);
+		
+		IDataset xAfterExpandOut = histogramToolPage.getHistogramViewer().getHistogramProvider().getDatasets().getX();
+		
+		// Get min and max, ignoring NaNs and infinities
+		double minAfterExpandOut = (xAfterExpandOut.min(true, true)).doubleValue();
+		double maxAfterExpandOut = (xAfterExpandOut.max(true, true)).doubleValue();
+		
+		assertTrue(minAfterExpandOut >= rangeMinExpandOut);
+		assertTrue(maxAfterExpandOut <= rangeMaxExpandOut);
+		
 	}
 	
 	private String getSelectedColourScheme()
