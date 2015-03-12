@@ -2,7 +2,7 @@
 <introContent>
   	<extensionContent id="processing-perspective-extension" style="style.css" name="Data Processing" path="perspectives/@">
 		<group id="processing-perspective-group" style-id="content-group">
-       		<link label="Data Processing" url="http://org.eclipse.ui.intro/runAction?pluginId=org.dawnsci.intro&amp;class=org.dawnsci.intro.actions.OpenPerspectiveAction&amp;name=uk.ac.diamond.scisoft.diffraction.powder.rcp.DiffractionCalibrationPerspectiveLaunch" id="processing" style-id="content-link">
+       		<link label="Data Processing" url="http://org.eclipse.ui.intro/runAction?pluginId=org.dawnsci.intro&amp;class=org.dawnsci.intro.actions.OpenPerspectiveAction&amp;name=org.dawnsci.processing.ui.ProcessingPerspectiveLaunch" id="processing" style-id="content-link">
           		<text>Process data by linking together independent calculations. Contains both general mathematical routines and operations specific for powder diffraction, SAXS, ARPES and XAFS.</text>
        		</link>
        	</group>
