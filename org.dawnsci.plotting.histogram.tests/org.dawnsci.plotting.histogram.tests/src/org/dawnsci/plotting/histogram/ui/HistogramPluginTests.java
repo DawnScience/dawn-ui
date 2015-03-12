@@ -224,9 +224,9 @@ public class HistogramPluginTests extends PluginTestBase {
 		IDataset xBefore = histogramToolPage.getHistogramViewer()
 				.getHistogramProvider().getDatasets().getX();
 		
-		// Get min and max, ignoring NaNs
-		double minBefore = (xBefore.min(true)).doubleValue();
-		double maxBefore = (xBefore.max(true)).doubleValue();
+		// Get min and max, ignoring NaNs and infinities
+		double minBefore = (xBefore.min(true, true)).doubleValue();
+		double maxBefore = (xBefore.max(true, true)).doubleValue();
 		
 		// Use these to adjust minCut and maxCut; move the bounds in by 25% each
 		double oldRange = maxBefore - minBefore;
@@ -256,7 +256,7 @@ public class HistogramPluginTests extends PluginTestBase {
 		// Now expand the bounds out, check again
 		
 		double rangeMinExpandOut = minBefore - 0.25 * oldRange;
-		double rangeMaxExpandOut = minBefore - 0.25 * oldRange;
+		double rangeMaxExpandOut = maxBefore + 0.25 * oldRange;
 		
 		// Set the min/maxCut on the palette
 		trace.setMinCut(new HistogramBound(rangeMinExpandOut, 
