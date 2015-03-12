@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Tests
-Bundle-SymbolicName: org.dawnsci.plotting.histogram.tests
+Bundle-SymbolicName: org.dawnsci.plotting.histogram.test
 Bundle-Version: 1.0.0.qualifier
 Fragment-Host: org.dawnsci.plotting.histogram;bundle-version="1.1.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
