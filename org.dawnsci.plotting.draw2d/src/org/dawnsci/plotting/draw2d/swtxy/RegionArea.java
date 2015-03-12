@@ -303,6 +303,8 @@ public class RegionArea extends PlotArea {
 	}
 	
 	public void renameRegion(final AbstractSelectionRegion<?> region, String name) {
+		
+		if (regions.containsKey(name)) throw new RuntimeException("The name '"+name+"' already exists for a region!");
 		String oldName = region.getName();
 		// Fix http://jira.diamond.ac.uk/browse/SCI-1056, do not loose order on rename		
 		final Map<String, AbstractSelectionRegion<?>> sameOrder = new LinkedHashMap<String, AbstractSelectionRegion<?>>(regions.size());
@@ -310,7 +312,7 @@ public class RegionArea extends PlotArea {
 		final Set<Entry<String,AbstractSelectionRegion<?>>> entries = regions.entrySet();
 		for (Entry<String, AbstractSelectionRegion<?>> entry : entries) {
 			
-			if (entry.getKey().equals(region.getName())) {
+			if (entry.getKey().equals(oldName)) {
 			    region.setName(name);
 			    region.setLabel(name);
 			    sameOrder.put(name, region);

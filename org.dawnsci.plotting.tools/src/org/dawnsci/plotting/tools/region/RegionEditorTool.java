@@ -8,7 +8,6 @@
  */
 package org.dawnsci.plotting.tools.region;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -211,9 +210,8 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		if (viewer == null)
 			return;
 
-		Collection<IRegion> regions = new ArrayList<IRegion>();
 		try {
-			model = new RegionEditorTreeModel(getPlottingSystem(), regions);
+			model = new RegionEditorTreeModel(getPlottingSystem());
 			model.setViewer(viewer);
 		} catch (Exception e) {
 			logger.error("Cannot create model!", e);
@@ -518,6 +516,16 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			}
 		};
 		preferences.setToolTipText("Open Region Editor preferences");
+		
+		final Action refresh = new Action("Refresh all regions") {
+			public void run() {
+				if (viewer != null) {
+					createRegionEditorModel(true);
+					viewer.refresh();
+				}
+			}
+		};
+
 
 		//toolbar buttons
 		toolBarMan.add(new Separator());
@@ -555,6 +563,7 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		menuMan.add(deleteMenuAction);
 		menuMan.add(new Separator());
 		menuMan.add(preferences);
+		menuMan.add(refresh);
 	}
 
 	private void addRightClickMenuCheckActions(MenuManager menuManager) {
@@ -827,10 +836,8 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			double[] intensitySum = getIntensityAndSum(region);
 			model.addRegion(region, intensitySum[0], intensitySum[1]);
 
-			if (model.getRoot().getChildren() != null)
-				viewer.setInput(model.getRoot());
-			if (viewer!=null)
-				viewer.refresh();
+			if (model.getRoot().getChildren() != null) viewer.setInput(model.getRoot());
+			if (viewer!=null) viewer.refresh();
 			boolean isMobile = Activator.getPlottingPreferenceStore().getBoolean(RegionEditorConstants.MOBILE_REGION_SETTING);
 			region.setMobile(isMobile);
 		}
