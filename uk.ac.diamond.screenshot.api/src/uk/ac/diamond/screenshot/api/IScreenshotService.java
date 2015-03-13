@@ -11,20 +11,21 @@
  */
 package uk.ac.diamond.screenshot.api;
 
-
 /**
- * Implementations of this service provide screenshot methods to Eclipse applications.
+ * Implementations of this service provide screenshot methods to Eclipse
+ * applications.
  * 
  * @author lbq76021
  * 
  */
 public interface IScreenshotService {
-	
+
 	/**
 	 * Takes a screenshot.
 	 * 
-	 * @param config The screenshot configuration to use
+	 * @param config
+	 *            The screenshot configuration to use
 	 */
 	public void takeScreenshot(ScreenshotConfiguration config);
-	
+
 }

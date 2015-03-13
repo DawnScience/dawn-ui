@@ -19,16 +19,16 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.screenshot.gui.survey.GUISurveyController;
 
 public class AllPerspectivesScreenshotCommandHandler extends AbstractHandler {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(AllPerspectivesScreenshotCommandHandler.class);
-	
+
 	/**
 	 * The constructor.
 	 */
 	public AllPerspectivesScreenshotCommandHandler() {
 		// empty
 	}
-	
+
 	@Override
 	public Object execute(final ExecutionEvent event) {
 		logger.debug("All Perspectives screenshot command executing");

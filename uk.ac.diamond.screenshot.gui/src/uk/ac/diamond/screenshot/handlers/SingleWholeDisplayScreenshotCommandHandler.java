@@ -19,16 +19,16 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.screenshot.gui.ScreenshotController;
 
 public class SingleWholeDisplayScreenshotCommandHandler extends AbstractHandler {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(SingleWholeDisplayScreenshotCommandHandler.class);
-	
+
 	/**
 	 * The constructor.
 	 */
 	public SingleWholeDisplayScreenshotCommandHandler() {
 		// empty
 	}
-	
+
 	@Override
 	public Object execute(final ExecutionEvent event) {
 		logger.debug("Single Whole Display screenshot command executing");

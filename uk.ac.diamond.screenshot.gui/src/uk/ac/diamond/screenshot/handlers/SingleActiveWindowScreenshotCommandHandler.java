@@ -19,16 +19,16 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.screenshot.gui.ScreenshotController;
 
 public class SingleActiveWindowScreenshotCommandHandler extends AbstractHandler {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(SingleActiveWindowScreenshotCommandHandler.class);
-	
+
 	/**
 	 * The constructor.
 	 */
 	public SingleActiveWindowScreenshotCommandHandler() {
 		// empty
 	}
-	
+
 	@Override
 	public Object execute(final ExecutionEvent event) {
 		logger.debug("Single Active Window screenshot command executing");

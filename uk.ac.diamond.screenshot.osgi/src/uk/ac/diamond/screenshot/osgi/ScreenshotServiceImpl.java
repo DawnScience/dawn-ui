@@ -36,27 +36,27 @@ import uk.ac.diamond.screenshot.api.ScreenshotConfiguration;
  * 
  */
 public class ScreenshotServiceImpl implements IScreenshotService {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(ScreenshotServiceImpl.class);
-	
+
 	/**
 	 * The file type to use for saving images.
 	 */
 	private static final int FILE_TYPE = SWT.IMAGE_PNG;
-	
+
 	/**
-	 * The length of time (in milliseconds) to wait for the UI to be idle before taking
-	 * a screenshot anyway.
+	 * The length of time (in milliseconds) to wait for the UI to be idle before
+	 * taking a screenshot anyway.
 	 */
 	private static final long TIMEOUT_MILLIS = 5000L;
-	
+
 	/**
 	 * The constructor.
 	 */
 	public ScreenshotServiceImpl() {
 		logger.trace("Constructor called: {}", this);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -69,6 +69,7 @@ public class ScreenshotServiceImpl implements IScreenshotService {
 		} else {
 			logger.debug("Not in UI thread - starting synchronous task to take screenshot");
 			getDisplay().syncExec(new Runnable() {
+
 				@Override
 				public void run() {
 					takeScreenshotInUIThread(config);
@@ -76,11 +77,13 @@ public class ScreenshotServiceImpl implements IScreenshotService {
 			});
 		}
 	}
-	
+
 	/**
-	 * Takes a screenshot using the given configuration. Must be run from the UI thread.
+	 * Takes a screenshot using the given configuration. Must be run from the UI
+	 * thread.
 	 * 
-	 * @param config The screenshot configuration
+	 * @param config
+	 *            The screenshot configuration
 	 */
 	private void takeScreenshotInUIThread(final ScreenshotConfiguration config) {
 		Rectangle bounds;
@@ -106,15 +109,16 @@ public class ScreenshotServiceImpl implements IScreenshotService {
 	}
 
 	/**
-	 * Waits for the UI to be idle. If this method is called and returns <code>true</code> before
-	 * a screenshot is taken, then any recent changes to the UI should have been fully repainted
-	 * and will be included in the screenshot.
+	 * Waits for the UI to be idle. If this method is called and returns
+	 * <code>true</code> before a screenshot is taken, then any recent changes
+	 * to the UI should have been fully repainted and will be included in the
+	 * screenshot.
 	 * 
-	 * This implementation calls Display#readAndDispatch repeatedly to clear the UI event queue.
-	 * Must be called from the UI thread.
+	 * This implementation calls Display#readAndDispatch repeatedly to clear the
+	 * UI event queue. Must be called from the UI thread.
 	 * 
-	 * @return <code>true</code> if the queue was successfully emptied, <code>false</code> if the
-	 * operation timed out
+	 * @return <code>true</code> if the queue was successfully emptied,
+	 *         <code>false</code> if the operation timed out
 	 */
 	private boolean flushUIEventQueue() {
 		logger.debug("Flushing UI event queue...");
@@ -133,7 +137,7 @@ public class ScreenshotServiceImpl implements IScreenshotService {
 		logger.debug("Dispatched {} UI events", count);
 		return result;
 	}
-	
+
 	/**
 	 * Gets the Display instance for the workbench.
 	 * 
@@ -142,19 +146,25 @@ public class ScreenshotServiceImpl implements IScreenshotService {
 	private Display getDisplay() {
 		return PlatformUI.getWorkbench().getDisplay();
 	}
-	
+
 	/**
-	 * Sets up an Eclipse Job to save an image to a file, and disposes of the image afterwards
-	 * (even if the save operation was unsuccessful).
+	 * Sets up an Eclipse Job to save an image to a file, and disposes of the
+	 * image afterwards (even if the save operation was unsuccessful).
 	 * 
-	 * @param image the image to save
-	 * @param filePath the path of the file to save the image to
-	 * @param fileType the file type as defined by {@link ImageLoader#save(String, int)}
-	 * @throws RuntimeException if the file couldn't be saved
+	 * @param image
+	 *            the image to save
+	 * @param filePath
+	 *            the path of the file to save the image to
+	 * @param fileType
+	 *            the file type as defined by
+	 *            {@link ImageLoader#save(String, int)}
+	 * @throws RuntimeException
+	 *             if the file couldn't be saved
 	 */
 	private void saveAndDisposeImage(final Image image, final String filePath, final int fileType) {
 		logger.debug("Setting up job to save image file: {}", filePath);
 		final Job job = new Job("Saving image " + filePath) {
+
 			@Override
 			protected IStatus run(final IProgressMonitor monitor) {
 				try {
@@ -174,12 +184,14 @@ public class ScreenshotServiceImpl implements IScreenshotService {
 		job.setPriority(Job.SHORT);
 		job.schedule();
 	}
-	
+
 	/**
 	 * Copies a rectangular area of the display into an image and saves it.
 	 * 
-	 * @param filePath The path of the image file to save
-	 * @param area The area of the display to copy
+	 * @param filePath
+	 *            The path of the image file to save
+	 * @param area
+	 *            The area of the display to copy
 	 */
 	private void takeRectangleScreenshot(final String filePath, final Rectangle area) {
 		final Display display = getDisplay();

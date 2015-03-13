@@ -17,34 +17,35 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.screenshot.api.IScreenshotService;
 
 /**
- * Class to hold a reference to the current implementation of IScreenshotService. This class is
- * only <code>public</code> to allow access by Equinox DS.
+ * Class to hold a reference to the current implementation of
+ * IScreenshotService. This class must be <code>public</code> to allow access by
+ * Equinox DS.
  * 
  * @author lbq76021
- *
+ * 
  */
 public class ScreenshotServiceTracker {
-	
+
 	private final Logger logger = LoggerFactory.getLogger(ScreenshotServiceTracker.class);
-	
+
 	private static IScreenshotService screenshotService;
-	
+
 	public ScreenshotServiceTracker() {
 		logger.trace("Constructor called: {}", this);
 	}
-	
+
 	/**
 	 * @return The current IScreenshotService, or <code>null</code>
 	 */
-	static IScreenshotService getScreenshotService() {
+	public static IScreenshotService getScreenshotService() {
 		return screenshotService;
 	}
-	
+
 	public synchronized void setScreenshotService(final IScreenshotService service) {
 		logger.debug("Screenshot service set by call to: {}", this);
 		screenshotService = service;
 	}
-	
+
 	public synchronized void unsetScreenshotService(final IScreenshotService service) {
 		logger.debug("Screenshot service unset by call to: {}", this);
 		if (screenshotService == service) {

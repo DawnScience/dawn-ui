@@ -24,17 +24,16 @@ public class ScreenshotController {
 
 	private static String FILE_NAME = "screenshot%03d.png";
 
-	private final Logger logger = LoggerFactory
-			.getLogger(ScreenshotController.class);
+	private final Logger logger = LoggerFactory.getLogger(ScreenshotController.class);
 
 	public ScreenshotController() {
 		logger.trace("Constructor called: {}", this);
 	}
-	
+
 	public void takeActiveWindowScreenshot() {
 		takeScreenshot(ScreenshotType.ACTIVE_WINDOW);
 	}
-	
+
 	public void takeWholeDisplayScreenshot() {
 		takeScreenshot(ScreenshotType.WHOLE_DISPLAY);
 	}
@@ -46,12 +45,12 @@ public class ScreenshotController {
 			logger.debug("No save directory supplied, returning silently without taking screenshot");
 			return;
 		}
-		
+
 		int fileNum = FileNumberTracker.getNextFileNumber();
 		Path savePath = saveDir.resolve(String.format(FILE_NAME, fileNum));
-		
+
 		final ScreenshotConfiguration screenshotConfiguration = new ScreenshotConfiguration(savePath.toString(), type);
-		
+
 		final IScreenshotService screenshotService = getScreenshotService();
 		if (screenshotService != null) {
 			screenshotService.takeScreenshot(screenshotConfiguration);

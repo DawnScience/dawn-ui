@@ -13,15 +13,16 @@ public class GuiUtils {
 	private static final Logger logger = LoggerFactory.getLogger(GuiUtils.class);
 
 	/**
-	 * Waits for the UI to be idle. If this method is called and returns <code>true</code> before
-	 * a screenshot is taken, then any recent changes to the UI should have been fully repainted
-	 * and will be included in the screenshot.
+	 * Waits for the UI to be idle. If this method is called and returns
+	 * <code>true</code> before a screenshot is taken, then any recent changes
+	 * to the UI should have been fully repainted and will be included in the
+	 * screenshot.
 	 * 
-	 * This implementation calls Display#readAndDispatch repeatedly to clear the UI event queue.
-	 * Must be called from the UI thread.
+	 * This implementation calls Display#readAndDispatch repeatedly to clear the
+	 * UI event queue. Must be called from the UI thread.
 	 * 
-	 * @return <code>true</code> if the queue was successfully emptied, <code>false</code> if the
-	 * operation timed out
+	 * @return <code>true</code> if the queue was successfully emptied,
+	 *         <code>false</code> if the operation timed out
 	 */
 	public static boolean flushUIEventQueue() {
 		logger.debug("Flushing UI event queue...");
@@ -40,7 +41,7 @@ public class GuiUtils {
 		logger.debug("Dispatched {} UI events", count);
 		return result;
 	}
-	
+
 	/**
 	 * Gets the active workbench window.
 	 * 
