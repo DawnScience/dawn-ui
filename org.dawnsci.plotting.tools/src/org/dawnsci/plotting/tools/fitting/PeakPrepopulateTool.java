@@ -149,6 +149,14 @@ public class PeakPrepopulateTool extends Dialog {
 			}
 		});
 		
+		/*
+		 * This lot does what it's supposed to, but because Peak Finding is 
+		 * flakey it's hard to tell whether is does what it's supposed to or not.
+		 * 
+		 * 2015-03-13
+		 * Commented out so it doesn't get included in the release.
+		 * 
+		 * 
 		//Create a background finding space on the right of the window
 		Group bkgFindingSpace = new Group(dialogContainer,SWT.NONE);
 		bkgFindingSpace.setText("Fit Background");
@@ -184,7 +192,8 @@ public class PeakPrepopulateTool extends Dialog {
 				fitBackground();
 			}
 		});
-		
+		 * 
+		 */
 		return windowArea;
 	}
 	
