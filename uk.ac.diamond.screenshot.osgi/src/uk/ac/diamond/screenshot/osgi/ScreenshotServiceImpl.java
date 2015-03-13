@@ -54,7 +54,7 @@ public class ScreenshotServiceImpl implements IScreenshotService {
 	 * The constructor.
 	 */
 	public ScreenshotServiceImpl() {
-		logger.debug("Constructor called: {}", this.toString());
+		logger.trace("Constructor called: {}", this);
 	}
 	
 	/**
@@ -64,7 +64,7 @@ public class ScreenshotServiceImpl implements IScreenshotService {
 	public void takeScreenshot(final ScreenshotConfiguration config) {
 		// Check if we are in the UI thread
 		if (Display.getCurrent() != null) {
-			logger.debug("Already in UI thread - taking screenshot");
+			logger.debug("Taking screenshot");
 			takeScreenshotInUIThread(config);
 		} else {
 			logger.debug("Not in UI thread - starting synchronous task to take screenshot");

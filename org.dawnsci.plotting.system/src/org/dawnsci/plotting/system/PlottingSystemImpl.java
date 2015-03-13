@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.plotting.AbstractPlottingSystem;
+import org.dawnsci.plotting.Activator;
 import org.dawnsci.plotting.PlottingActionBarManager;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -118,9 +119,17 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	private List<IPlottingSystemViewer>  viewers;
 	private IPlottingSystemViewer        activeViewer;
 
+	/**
+	 * Boolean to set if the intensity value labels should be shown at high zoom.
+	 */
+	private boolean showValueLabels = true;
+
 	public PlottingSystemImpl() {
 		
 		super();
+		PlottingSystemActivator.getPlottingPreferenceStore().setDefault("org.dawnsci.plotting.showValueLabels", true);
+		showValueLabels = PlottingSystemActivator.getPlottingPreferenceStore().getBoolean("org.dawnsci.plotting.showValueLabels");
+
 		this.actionBarManager     = (PlotActionsManagerImpl)super.actionBarManager;
 		viewers = createViewerList();
 		
@@ -130,6 +139,15 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 				break;
 			}
 		}
+	}
+
+	public boolean isShowValueLabels() {
+		return showValueLabels;
+	}
+
+	public void setShowValueLabels(boolean showValueLabels) {
+		this.showValueLabels = showValueLabels;
+		PlottingSystemActivator.getPlottingPreferenceStore().setValue("org.dawnsci.plotting.showValueLabels", showValueLabels);
 	}
 
 	private List<IPlottingSystemViewer> createViewerList() {

@@ -59,11 +59,8 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 	private boolean isTreeModified = false;
 	private IPlottingSystem plottingSystem;
 
-	public RegionEditorTreeModel(IPlottingSystem plottingSystem, Collection<IRegion> regions) throws Exception {
+	public RegionEditorTreeModel(IPlottingSystem plottingSystem) throws Exception {
 		this.plottingSystem = plottingSystem;
-		for (IRegion region : regions) {
-			addRegion(region, 0, 0);
-		}
 	}
 
 	public void addRegion(IRegion region, double maxIntensity, double sum) {

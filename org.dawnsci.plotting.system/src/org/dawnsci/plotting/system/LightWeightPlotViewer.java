@@ -879,7 +879,6 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
 					system.autoscaleAxes();
-					system.autoscaleAxes();
 				}
 			});
 		}

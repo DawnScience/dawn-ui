@@ -12,6 +12,8 @@ import org.dawnsci.common.widgets.tree.LabelNode;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 
 /**
  * This class is a custom LabelNode to hold data about Region nodes in 
@@ -29,18 +31,7 @@ public class RegionEditorNode extends LabelNode {
 	private IRegion region;
 	private IPlottingSystem plottingSystem;
 
-	public RegionEditorNode() {
-		super(null, null);
-	}
-
-	public RegionEditorNode(RegionEditorNode parent) {
-		super(null, parent);
-	}
-
-	public RegionEditorNode(String label) {
-		super(label, null);
-	}
-
+	
 	public RegionEditorNode(IPlottingSystem plottingSystem, IRegion region, LabelNode parent) {
 		this.plottingSystem = plottingSystem;
 		this.region = region;
@@ -51,6 +42,14 @@ public class RegionEditorNode extends LabelNode {
 	}
 
 	public void setName(String value) {
+		
+		if (!value.equals(region.getName()) && plottingSystem.getRegion(value)!=null) {
+			MessageDialog.openError(Display.getDefault().getActiveShell(), "Region Exists", 
+					"The region '"+value+"' already exists.\n\n"+
+			        "Please choose a unique name for regions.");
+			return;
+		}
+		
 		setLabel(value);
 		setTooltip(value);
 		region.getROI().setName(value);
