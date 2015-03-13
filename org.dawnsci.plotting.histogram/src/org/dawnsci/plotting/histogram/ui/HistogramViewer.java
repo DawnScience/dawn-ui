@@ -29,7 +29,6 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -126,11 +125,12 @@ public class HistogramViewer extends ContentViewer {
 	 */
 	public HistogramViewer(final Composite parent, String title,
 			IPlottingSystem plot, IActionBars site) throws Exception {
-
-		createMinMaxSettings(parent);
+		
 		composite = new Composite(parent, SWT.NONE);
-		composite.setLayout(new FillLayout());
-
+		composite.setLayout(GridLayoutFactory.fillDefaults().create());
+		
+		createMinMaxSettings(composite);
+		
 		if (plot != null) {
 			histogramPlottingSystem = plot;
 		} else {
@@ -140,6 +140,8 @@ public class HistogramViewer extends ContentViewer {
 		histogramPlottingSystem.createPlotPart(composite, title, site,
 				PlotType.XY, null);
 		histogramPlottingSystem.setRescale(false);
+		histogramPlottingSystem.getPlotComposite().setLayoutData(
+				GridDataFactory.fillDefaults().grab(true, true).create());
 
 		createRegion();
 		createTraces();
