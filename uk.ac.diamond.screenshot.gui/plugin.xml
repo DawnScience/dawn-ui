@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+  
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="uk.ac.diamond.screenshot.handlers.SingleActiveWindowScreenshotCommandHandler"
+            commandId="uk.ac.diamond.screenshot.commands.singleActiveWindowScreenshotCommand">
+      </handler>
+      <handler
+            class="uk.ac.diamond.screenshot.handlers.SingleWholeDisplayScreenshotCommandHandler"
+            commandId="uk.ac.diamond.screenshot.commands.singleWholeDisplayScreenshotCommand">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+         <toolbar
+               id="uk.ac.diamond.screenshot.toolbars.screenshotToolbar">
+            <command
+                  commandId="uk.ac.diamond.screenshot.commands.singleActiveWindowScreenshotCommand"
+                  icon="icons/camera.png"
+                  id="uk.ac.diamond.screenshot.toolbars.screenshotCommand"
+                  label="Take Screenshot"
+                  mnemonic="S"
+                  style="push"
+                  tooltip="Take screenshot of main window">
+            </command>
+         </toolbar>
+      </menuContribution>
+      <menuContribution
+            locationURI="menu:file?before=additions">
+         <separator
+               name="uk.ac.diamond.screenshot.menus.separator1"
+               visible="true">
+         </separator>
+         <menu
+               icon="icons/camera.png"
+               id="uk.ac.diamond.screenshot.menus.screenshotMenu"
+               label="Take Screenshot"
+               mnemonic="M">
+            <command
+                  commandId="uk.ac.diamond.screenshot.commands.singleActiveWindowScreenshotCommand"
+                  id="uk.ac.diamond.screenshot.menus.singleActiveWindowScreenshotCommand"
+                  label="Current Window"
+                  mnemonic="S"
+                  style="push">
+            </command>
+            <command
+                  commandId="uk.ac.diamond.screenshot.commands.singleWholeDisplayScreenshotCommand"
+                  id="uk.ac.diamond.screenshot.menus.singleWholeDisplayScreenshotCommand"
+                  label="Whole Display"
+                  mnemonic="S"
+                  style="push">
+            </command>
+         </menu>
+         <separator
+               name="uk.ac.diamond.screenshot.menus.separator2"
+               visible="true">
+         </separator>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            description="Take a single screenshot of the active workbench window"
+            id="uk.ac.diamond.screenshot.commands.singleActiveWindowScreenshotCommand"
+            name="Take Screenshot (Active Window)">
+      </command>
+      <command
+            description="Take a single screenshot of the whole display"
+            id="uk.ac.diamond.screenshot.commands.singleWholeDisplayScreenshotCommand"
+            name="Take Screenshot (Whole Display)">
+      </command>
+   </extension>
+
+</plugin>

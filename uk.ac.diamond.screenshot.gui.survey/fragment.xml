@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<fragment>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="uk.ac.diamond.screenshot.handlers.AllPerspectivesScreenshotCommandHandler"
+            commandId="uk.ac.diamond.screenshot.commands.allPerspectivesScreenshotCommand">
+      </handler>
+      <handler
+            class="uk.ac.diamond.screenshot.handlers.AllPartsScreenshotCommandHandler"
+            commandId="uk.ac.diamond.screenshot.commands.allPartsScreenshotCommand">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            description="Take screenshots of all open perspectives"
+            id="uk.ac.diamond.screenshot.commands.allPerspectivesScreenshotCommand"
+            name="Screenshot Open Perspectives">
+      </command>
+      <command
+            description="Take screenshots of all visible workbench parts"
+            id="uk.ac.diamond.screenshot.commands.allPartsScreenshotCommand"
+            name="Screenshot Workbench Parts">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:uk.ac.diamond.screenshot.menus.screenshotMenu">
+         <separator
+               name="uk.ac.diamond.screenshot.menus.separator3"
+               visible="true">
+         </separator>
+         <menu
+               id="uk.ac.diamond.screenshot.menus.guiSurveyMenu"
+               label="Advanced"
+               mnemonic="S">
+            <command
+                  commandId="uk.ac.diamond.screenshot.commands.allPartsScreenshotCommand"
+                  id="uk.ac.diamond.screenshot.menus.allPartsScreenshotCommand"
+                  label="Take screenshots of all visible workbench parts"
+                  mnemonic="W"
+                  style="push">
+            </command>
+            <command
+                  commandId="uk.ac.diamond.screenshot.commands.allPerspectivesScreenshotCommand"
+                  id="uk.ac.diamond.screenshot.menus.allPerspectivesScreenshotCommand"
+                  label="Take screenshots of all parts in all open perspectives"
+                  mnemonic="P"
+                  style="push">
+            </command>
+         </menu>
+      </menuContribution>
+   </extension>
+
+</fragment>
