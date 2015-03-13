@@ -216,21 +216,25 @@ public class HistogramViewer extends ContentViewer {
 	}
 
 	/**
-	 * Update the min widget
+	 * Update the min widget if the value has changed. 
 	 *
-	 * @param min
+	 * @param min the new minimum value
 	 */
 	private void updateMin(double min) {
-		minText.setDouble(min);
+		if (minText.getDouble() != min) {
+			minText.setDouble(min);
+		}
 	}
 
 	/**
-	 * Update the min widget
+	 * Update the max widget if the value has changed. 
 	 *
-	 * @param min
+	 * @param max the new maximum value
 	 */
 	private void updateMax(double max) {
-		maxText.setDouble(max);
+		if (maxText.getDouble() != max) {
+			maxText.setDouble(max);
+		}
 	}
 
 	/**
@@ -324,14 +328,22 @@ public class HistogramViewer extends ContentViewer {
 		minText.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				getHistogramProvider().setMin(minText.getDouble());
+				double minValue = minText.getDouble();
+				if (validateMin(minValue)){
+					getHistogramProvider().setMin(minValue);
+					maxText.setMinimum(minValue);
+				}
 			}
 		});
 
 		maxText.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				getHistogramProvider().setMax(maxText.getDouble());
+				double maxValue = maxText.getDouble();
+				if (validateMax(maxValue)){
+					getHistogramProvider().setMax(maxValue);
+					minText.setMaximum(maxValue);
+				}
 			}
 		});
 
@@ -347,6 +359,28 @@ public class HistogramViewer extends ContentViewer {
 						updateMinMaxSpinnerIncrements();
 					}
 				});
+	}
+	
+	/**
+	 * Check our minimum values are valid before
+	 * applying them 
+	 */
+	private boolean validateMin(double minValue){
+		if (minValue > maxText.getDouble()){
+			return false;
+		}
+		return true;		
+	}
+
+	/**
+	 * Check our maximum values are valid before
+	 * applying them 
+	 */
+	private boolean validateMax(double maxValue){
+		if (!(maxValue > minText.getDouble())){
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -392,10 +426,11 @@ public class HistogramViewer extends ContentViewer {
 
 	@Override
 	public void refresh() {
-		updateRegion(getHistogramProvider().getMin(), getHistogramProvider()
-				.getMax());
-		updateMin(getHistogramProvider().getMin());
-		updateMax(getHistogramProvider().getMax());
+		double min = getHistogramProvider().getMin();
+		double max = getHistogramProvider().getMax();
+		updateRegion(min, max);
+		updateMin(min);
+		updateMax(max);
 		updateTraces();
 	}
 
@@ -478,15 +513,31 @@ public class HistogramViewer extends ContentViewer {
 	public void setSelection(ISelection selection, boolean reveal) {
 		// TODO Auto-generated method stub
 	}
+	
+	public void rescaleAxis() {
+		histogramPlottingSystem.autoscaleAxes();
+	}
 
 	/**
-	 * For test purposes only
+	 * For test purposes only. Return the trace lines
 	 */
 	protected ILineTrace[] getRGBTraces() {
 		return new ILineTrace[] { redTrace, greenTrace, blueTrace };
 	}
-
-	public void rescaleAxis() {
-		histogramPlottingSystem.autoscaleAxes();
+	
+	/**
+	 * For test purposes only. Return the max spinner. 
+	 */
+	protected FloatSpinner getMaxSpinner(){
+		return maxText;
 	}
+	
+	/**
+	 * For test purposes only. Return the min spinner
+	 */
+	protected FloatSpinner getMinSpinner(){
+		return minText;
+	}
+
+
 }
