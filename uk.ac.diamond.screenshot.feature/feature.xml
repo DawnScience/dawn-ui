@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="uk.ac.diamond.screenshot.feature"
-      label="UI Survey Feature"
+      label="Screenshot Feature"
       version="1.0.0.qualifier"
       provider-name="Diamond Light Source">
 
@@ -32,7 +32,7 @@
          unpack="false"/>
 
    <plugin
-         id="uk.ac.diamond.screenshot.uisurvey"
+         id="uk.ac.diamond.screenshot.gui"
          download-size="0"
          install-size="0"
          version="0.0.0"
