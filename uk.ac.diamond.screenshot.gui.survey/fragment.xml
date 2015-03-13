@@ -29,7 +29,7 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:uk.ac.diamond.screenshot.menus.screenshotMenu">
+            locationURI="menu:uk.ac.diamond.screenshot.menus.screenshotMenu?after=uk.ac.diamond.screenshot.menus.singleWholeDisplayScreenshotCommand">
          <separator
                name="uk.ac.diamond.screenshot.menus.separator3"
                visible="true">
