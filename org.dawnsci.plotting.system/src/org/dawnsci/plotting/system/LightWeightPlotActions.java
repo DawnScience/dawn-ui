@@ -659,6 +659,15 @@ class LightWeightPlotActions {
 		};
 		hideIntensity.setChecked(PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.SHOW_INTENSITY));
 		
+		final Action showPixelValues = new Action("Show values on pixels", IAction.AS_CHECK_BOX) {
+			
+		    public void run() {		    	
+		    	viewer.getSystem().setShowValueLabels(isChecked());
+		    	viewer.getSystem().repaint(false);
+		    }
+		};
+		showPixelValues.setChecked(viewer.getSystem().isShowValueLabels());
+
 		final Action lockHisto = new Action("Lock histogram", IAction.AS_CHECK_BOX) {
 			
 		    public void run() {		    	
@@ -720,6 +729,7 @@ class LightWeightPlotActions {
 	    actionBarManager.addImageAction(hideAxes);
 	    actionBarManager.addImageAction(hideIntensity);
 	    //actionBarManager.addImageAction(showStack);
+	    actionBarManager.addImageAction(showPixelValues);
 	    actionBarManager.addImageAction(ignoreRGB);
 	    actionBarManager.addImageAction(lockHisto);
 		actionBarManager.addImageAction(zoomWhitespace);
