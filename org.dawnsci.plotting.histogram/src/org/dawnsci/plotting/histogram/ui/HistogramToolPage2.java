@@ -176,8 +176,6 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		final IPageSite site = getSite();
 		IActionBars actionBars = (site != null) ? site.getActionBars() : null;
 
-		// createMinMaxSettings(sectionClient);
-
 		try {
 			histogramWidget = new HistogramViewer(sectionClient, getTitle(),
 					null, actionBars);

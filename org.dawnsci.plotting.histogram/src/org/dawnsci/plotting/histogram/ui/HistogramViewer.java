@@ -29,7 +29,6 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -126,11 +125,12 @@ public class HistogramViewer extends ContentViewer {
 	 */
 	public HistogramViewer(final Composite parent, String title,
 			IPlottingSystem plot, IActionBars site) throws Exception {
-
-		createMinMaxSettings(parent);
+		
 		composite = new Composite(parent, SWT.NONE);
-		composite.setLayout(new FillLayout());
-
+		composite.setLayout(GridLayoutFactory.fillDefaults().create());
+		
+		createMinMaxSettings(composite);
+		
 		if (plot != null) {
 			histogramPlottingSystem = plot;
 		} else {
@@ -140,6 +140,8 @@ public class HistogramViewer extends ContentViewer {
 		histogramPlottingSystem.createPlotPart(composite, title, site,
 				PlotType.XY, null);
 		histogramPlottingSystem.setRescale(false);
+		histogramPlottingSystem.getPlotComposite().setLayoutData(
+				GridDataFactory.fillDefaults().grab(true, true).create());
 
 		createRegion();
 		createTraces();
@@ -214,21 +216,25 @@ public class HistogramViewer extends ContentViewer {
 	}
 
 	/**
-	 * Update the min widget
+	 * Update the min widget if the value has changed. 
 	 *
-	 * @param min
+	 * @param min the new minimum value
 	 */
 	private void updateMin(double min) {
-		minText.setDouble(min);
+		if (minText.getDouble() != min) {
+			minText.setDouble(min);
+		}
 	}
 
 	/**
-	 * Update the min widget
+	 * Update the max widget if the value has changed. 
 	 *
-	 * @param min
+	 * @param max the new maximum value
 	 */
 	private void updateMax(double max) {
-		maxText.setDouble(max);
+		if (maxText.getDouble() != max) {
+			maxText.setDouble(max);
+		}
 	}
 
 	/**
@@ -322,14 +328,22 @@ public class HistogramViewer extends ContentViewer {
 		minText.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				getHistogramProvider().setMin(minText.getDouble());
+				double minValue = minText.getDouble();
+				if (validateMin(minValue)){
+					getHistogramProvider().setMin(minValue);
+					maxText.setMinimum(minValue);
+				}
 			}
 		});
 
 		maxText.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				getHistogramProvider().setMax(maxText.getDouble());
+				double maxValue = maxText.getDouble();
+				if (validateMax(maxValue)){
+					getHistogramProvider().setMax(maxValue);
+					minText.setMaximum(maxValue);
+				}
 			}
 		});
 
@@ -345,6 +359,28 @@ public class HistogramViewer extends ContentViewer {
 						updateMinMaxSpinnerIncrements();
 					}
 				});
+	}
+	
+	/**
+	 * Check our minimum values are valid before
+	 * applying them 
+	 */
+	private boolean validateMin(double minValue){
+		if (minValue > maxText.getDouble()){
+			return false;
+		}
+		return true;		
+	}
+
+	/**
+	 * Check our maximum values are valid before
+	 * applying them 
+	 */
+	private boolean validateMax(double maxValue){
+		if (!(maxValue > minText.getDouble())){
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -390,10 +426,11 @@ public class HistogramViewer extends ContentViewer {
 
 	@Override
 	public void refresh() {
-		updateRegion(getHistogramProvider().getMin(), getHistogramProvider()
-				.getMax());
-		updateMin(getHistogramProvider().getMin());
-		updateMax(getHistogramProvider().getMax());
+		double min = getHistogramProvider().getMin();
+		double max = getHistogramProvider().getMax();
+		updateRegion(min, max);
+		updateMin(min);
+		updateMax(max);
 		updateTraces();
 	}
 
@@ -476,15 +513,31 @@ public class HistogramViewer extends ContentViewer {
 	public void setSelection(ISelection selection, boolean reveal) {
 		// TODO Auto-generated method stub
 	}
+	
+	public void rescaleAxis() {
+		histogramPlottingSystem.autoscaleAxes();
+	}
 
 	/**
-	 * For test purposes only
+	 * For test purposes only. Return the trace lines
 	 */
 	protected ILineTrace[] getRGBTraces() {
 		return new ILineTrace[] { redTrace, greenTrace, blueTrace };
 	}
-
-	public void rescaleAxis() {
-		histogramPlottingSystem.autoscaleAxes();
+	
+	/**
+	 * For test purposes only. Return the max spinner. 
+	 */
+	protected FloatSpinner getMaxSpinner(){
+		return maxText;
 	}
+	
+	/**
+	 * For test purposes only. Return the min spinner
+	 */
+	protected FloatSpinner getMinSpinner(){
+		return minText;
+	}
+
+
 }
