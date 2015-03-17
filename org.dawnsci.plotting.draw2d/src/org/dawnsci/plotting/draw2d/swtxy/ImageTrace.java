@@ -290,7 +290,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			try {
 				imageCreationAllowed = false;
 				if (image==null) return false;
-				Dataset reducedFullImage = getDownsampled(image);
+				IDataset reducedFullImage = getDownsampled(image);
 
 				imageServiceBean.setImage(reducedFullImage);
 				imageServiceBean.setMonitor(monitor);
@@ -534,7 +534,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private Map<Integer, Reference<Object>> maskMap;
 	private Collection<IDownSampleListener> downsampleListeners;
 	
-	private Dataset getDownsampled(Dataset image) {
+	private IDataset getDownsampled(Dataset image) {
 	
 		return getDownsampled(image, getDownsampleTypeDiamond());
  	}
@@ -545,7 +545,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * @param mode
 	 * @return
 	 */
-	private Dataset getDownsampled(Dataset image, DownsampleMode mode) {
+	private IDataset getDownsampled(Dataset image, DownsampleMode mode) {
 		
 		// Down sample, no point histogramming the whole thing
         final int bin = getDownsampleBin();
@@ -573,8 +573,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			}
 			
 			final Downsample downSampler = new Downsample(mode, new int[]{bin,bin});
-			List<? extends Dataset>   sets = downSampler.value(image);
-			final Dataset set = sets.get(0);
+			List<? extends IDataset>   sets = downSampler.value(image);
+			final IDataset set = sets.get(0);
 			
 			if (image.getDtype()!=Dataset.BOOL) {
 				if (mipMap==null) mipMap = new HashMap<Integer,Reference<Object>>(3);
@@ -627,10 +627,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	
 	@Override
 	public Dataset getDownsampled() {
-		return getDownsampled(getImage());
+		return (Dataset)getDownsampled(getImage());
 	}
 	
-	public Dataset getDownsampledMask() {
+	public IDataset getDownsampledMask() {
 		if (getMask()==null) return null;
 		return getDownsampled(getMask(), DownsampleMode.MINIMUM);
 	}

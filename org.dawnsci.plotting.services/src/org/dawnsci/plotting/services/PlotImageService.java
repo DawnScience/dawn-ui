@@ -157,7 +157,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 			stepping[1] = Math.max(1, width / w);
 			stepping[0] = Math.max(1, height / h);
 			Downsample down = new Downsample(DownsampleMode.POINT, stepping);
-			Dataset ds_downsampled = down.value(ds).get(0);
+			Dataset ds_downsampled = (Dataset)down.value(ds).get(0);
 			ds_downsampled.setName(ds.getName());
 			return ds_downsampled;
 		}
