@@ -25,6 +25,7 @@ import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -38,6 +39,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
@@ -382,8 +384,13 @@ public class RegionEditComposite extends Composite {
 	public AbstractSelectionRegion<?> getEditingRegion() {
 		
 		final String txt = nameText.getText();
-		xyGraph.renameRegion(editingRegion, txt);
-		
+		try {
+			xyGraph.renameRegion(editingRegion, txt);
+		} catch (Exception e) {
+			MessageDialog.openError(Display.getDefault().getActiveShell(), "Region Exists", 
+					"The region '"+txt+"' already exists.\n\n"+
+			        "Please choose a unique name for regions.");
+		}
 		final AspectAxis x = getAxis(xyGraph.getXAxisList(), xCombo.getSelectionIndex());
 		final AspectAxis y = getAxis(xyGraph.getYAxisList(), yCombo.getSelectionIndex());
 		RegionCoordinateSystem sys = new RegionCoordinateSystem(getImageTrace(), x, y);

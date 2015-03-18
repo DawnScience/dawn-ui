@@ -41,21 +41,17 @@ public class RegionEditorNode extends LabelNode {
 	}
 
 	public void setName(String value) {
-		
-		if (!value.equals(region.getName()) && plottingSystem.getRegion(value)!=null) {
+		if (region.getName().equals(value))
+			return;
+
+		try {
+			plottingSystem.renameRegion(region, value);
+			setLabel(value);
+			setTooltip(value);
+		} catch (Exception e) {
 			MessageDialog.openError(Display.getDefault().getActiveShell(), "Region Exists", 
 					"The region '"+value+"' already exists.\n\n"+
 			        "Please choose a unique name for regions.");
-			return;
-		}
-		
-		setLabel(value);
-		setTooltip(value);
-		region.getROI().setName(value);
-		try {
-			plottingSystem.renameRegion(region, value);
-		} catch (Exception e) {
-			System.err.println("Error renaming region:"+ e.getMessage());
 		}
 	}
 
