@@ -9,7 +9,6 @@
 package org.dawnsci.common.widgets.celleditor;
 
 import java.lang.reflect.Array;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +26,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A cell editor for editing a number or number array using text.
@@ -41,6 +42,8 @@ import org.eclipse.swt.widgets.Label;
  *
  */
 public class NumberCellEditor extends TextCellEditor {
+	
+	private final static Logger logger = LoggerFactory.getLogger(NumberCellEditor.class);
 	
 	protected Class<? extends Object> clazz;
 	protected String unit;
@@ -183,12 +186,18 @@ public class NumberCellEditor extends TextCellEditor {
 		
 		for (int i = 0; i < strVals.size(); i++) {
 			Object value = null;
-			if (double[].class.isAssignableFrom(clazz)) value = Double.parseDouble(strVals.get(i));
-			if (float[].class.isAssignableFrom(clazz))  value = Float.parseFloat(strVals.get(i));
-			if (int[].class.isAssignableFrom(clazz))    value = Integer.parseInt(strVals.get(i));
-			if (long[].class.isAssignableFrom(clazz))   value = Long.parseLong(strVals.get(i));
+			try {
+				if (double[].class.isAssignableFrom(clazz)) value = Double.parseDouble(strVals.get(i));
+				if (float[].class.isAssignableFrom(clazz))  value = Float.parseFloat(strVals.get(i));
+				if (int[].class.isAssignableFrom(clazz))    value = Integer.parseInt(strVals.get(i));
+				if (long[].class.isAssignableFrom(clazz))   value = Long.parseLong(strVals.get(i));
+				Array.set(array, i, value);
+			} catch (Exception e) {
+				logger.warn("Could not parse to array! " + e.getMessage());
+			}
 			
-			Array.set(array, i, value);
+			
+			
 		}
 		return array;
 	}
