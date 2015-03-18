@@ -829,7 +829,6 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			IROI roi = region.getROI();
 			if (roi == null)
 				return;
-			roi.setPlot(true);
 			// set the Region isActive flag
 			region.setActive(true);
 

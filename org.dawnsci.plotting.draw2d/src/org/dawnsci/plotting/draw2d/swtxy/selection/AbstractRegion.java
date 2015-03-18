@@ -15,7 +15,6 @@ import java.util.Map;
 
 import org.dawnsci.plotting.draw2d.swtxy.ServiceHolder;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
-import org.eclipse.dawnsci.macro.api.IMacroService;
 import org.eclipse.dawnsci.macro.api.MacroEventObject;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -133,7 +132,7 @@ public abstract class AbstractRegion<T extends IROI> extends Figure implements I
 		// Required fix after someone thought it would be a laugh to send
 		// null ROIs over.
 		if (roi == null) throw new NullPointerException("Cannot have a null region position!");
-		setActive(roi.isPlot()); // set the region isActive flag
+		isActive = roi.isPlot(); // set the region isActive flag
 		if (this.roi == roi) {
 			// return; // do not fire event
 			logger.warn("Setting ROI same");
@@ -290,7 +289,14 @@ public abstract class AbstractRegion<T extends IROI> extends Figure implements I
 	 */
 	@Override
 	public void setActive(boolean b) {
-		this.isActive = b;
+		if (isActive == b)
+			return;
+
+		isActive = b;
+		if (roi != null) {
+			roi.setPlot(b);
+			fireROIChanged(roi);
+		}
 	}
 
 	// Record the listeners in a map so that they can be removed.
