@@ -64,7 +64,7 @@ public class EllipseFitSelection extends FitSelectionRegion<EllipticalFitROI> {
 		if (renew && shape != null) {
 			createROI(true);
 			updateRegion();
-			fireROIChanged(roi);
+			fireROIChanged();
 		}
 	}
 

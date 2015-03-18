@@ -74,7 +74,7 @@ abstract class ROISelectionRegion<T extends IROI> extends AbstractSelectionRegio
 		if (shape != null) {
 			shape.setup(clicks);
 			shape.croi.setName(getName());
-			fireROIChanged(getROI());
+			fireROIChanged();
 		}
 	}
 

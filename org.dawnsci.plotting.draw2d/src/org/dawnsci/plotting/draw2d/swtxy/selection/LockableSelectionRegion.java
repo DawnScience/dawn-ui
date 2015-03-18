@@ -9,7 +9,6 @@
 
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
-import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
 import org.eclipse.dawnsci.analysis.api.roi.IParametricROI;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.dawnsci.plotting.api.region.ILockableRegion;
@@ -65,7 +64,7 @@ abstract class LockableSelectionRegion<T extends IParametricROI> extends ROISele
 			shape.setup(clicks);
 			shape.croi.setName(getName());
 			roi = shape.croi;
-			fireROIChanged(roi);
+			fireROIChanged();
 		}
 	}
 

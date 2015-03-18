@@ -30,7 +30,6 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.MouseEvent;
 import org.eclipse.draw2d.MouseListener;
 import org.eclipse.draw2d.Shape;
-import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
@@ -229,7 +228,7 @@ public abstract class AbstractSelectionRegion<T extends IROI> extends AbstractRe
 		if (selectionListener==null) selectionListener = new MouseListener.Stub() {			
 			@Override
 			public void mousePressed(MouseEvent me) {
-				fireROISelected(getROI()); 
+				fireROISelected(); 
 			}
 		};
 		for (IFigure iFigure : ro) {

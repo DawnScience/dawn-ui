@@ -92,6 +92,10 @@ public abstract class AbstractRegion<T extends IROI> extends Figure implements I
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractRegion.class);
 	
+	protected void fireROIChanged() {
+		fireROIChanged(roi);
+	}
+
 	protected void fireROIChanged(T roi) {
 		if (roiListeners==null)  return;
 		if (!regionEventsActive) return;
@@ -105,6 +109,10 @@ public abstract class AbstractRegion<T extends IROI> extends Figure implements I
 			}
 		}
 		if (ServiceHolder.getMacroService()!=null) ServiceHolder.getMacroService().publish(new MacroEventObject(this));
+	}
+
+	protected void fireROISelected() {
+		fireROISelected(roi);
 	}
 
 	protected void fireROISelected(T roi) {
@@ -160,7 +168,7 @@ public abstract class AbstractRegion<T extends IROI> extends Figure implements I
 				regionEventsActive = true;
 			}
 		}
-		fireROIChanged(this.roi);
+		fireROIChanged();
 	}
 
 	/**
@@ -295,7 +303,7 @@ public abstract class AbstractRegion<T extends IROI> extends Figure implements I
 		isActive = b;
 		if (roi != null) {
 			roi.setPlot(b);
-			fireROIChanged(roi);
+			fireROIChanged();
 		}
 	}
 

@@ -66,7 +66,7 @@ abstract class FitSelectionRegion<T extends IFitROI> extends ROISelectionRegion<
 			shape.setup(clicks);
 			shape.croi.setName(getName());
 			roi = shape.croi;
-			fireROIChanged(roi);
+			fireROIChanged();
 		}
 	}
 

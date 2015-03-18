@@ -195,7 +195,7 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
     			} else {
     				extraFigures.add(into);
     				into.addMouseMotionListener(this);
-        			fireROIChanged(getROI());
+        			fireROIChanged();
     			}
     		}
 
@@ -413,7 +413,7 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 		if (line1!=null) {
 			setLocalBounds(new Rectangle(clicks.getFirstPoint(), clicks.getLastPoint()), regionArea.getBounds());
 			createROI(true);
-			fireROIChanged(getROI());
+			fireROIChanged();
 		}
 	}
 
