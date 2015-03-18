@@ -383,7 +383,6 @@ public class RegionEditComposite extends Composite {
 		
 		final String txt = nameText.getText();
 		xyGraph.renameRegion(editingRegion, txt);
-		editingRegion.setName(txt);
 		
 		final AspectAxis x = getAxis(xyGraph.getXAxisList(), xCombo.getSelectionIndex());
 		final AspectAxis y = getAxis(xyGraph.getYAxisList(), yCombo.getSelectionIndex());
