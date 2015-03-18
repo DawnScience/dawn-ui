@@ -468,7 +468,6 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			if(d.getPx() != ds.getShape()[1] || d.getPy() != ds.getShape()[0])  {
 				statusMessage.setText("Data shape not compatible with current metadata!!!");
 				statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
-				return;
 			} else {
 				statusMessage.setText("Using imported metadata");
 				statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
