@@ -456,6 +456,21 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 
 		return returnImage;
 	}
+	
+	/**
+	 * Create a square image from a specified file, f of given side size, size in pixels.
+	 * @param f
+	 * @param size
+	 * @return
+	 */
+	public Image createImage(final BufferedImage image) {
+		return new Image(null,convertToSWT(image) );
+	}
+	
+	public IDataset createDataset(final BufferedImage bufferedImage) {
+		return convertToRGBDataset(bufferedImage);
+	}
+
     
     static ImageData convertToSWT(BufferedImage bufferedImage) {
         if (bufferedImage.getColorModel() instanceof DirectColorModel) {
@@ -501,6 +516,55 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
         }
         return null;
     }
+    
+    static RGBDataset convertToRGBDataset(BufferedImage bufferedImage) {
+    	
+        RGBDataset data = new RGBDataset(bufferedImage.getHeight(), bufferedImage.getWidth());
+       
+        if (bufferedImage.getColorModel() instanceof DirectColorModel) {
+            DirectColorModel colorModel = (DirectColorModel)bufferedImage.getColorModel();
+            PaletteData palette = new PaletteData(colorModel.getRedMask(), colorModel.getGreenMask(), colorModel.getBlueMask());
+            for (int y = 0; y < bufferedImage.getHeight(); y++) {
+                    for (int x = 0; x < bufferedImage.getWidth(); x++) {
+                            int value = bufferedImage.getRGB(x, y);
+                            RGB rgb = new RGB((value >> 16) & 0xFF, (value >> 8) & 0xFF, value & 0xFF); 
+                            data.set(new short[]{(short)rgb.red, (short)rgb.green, (short)rgb.blue}, x, y);
+                            if (colorModel.hasAlpha()) {
+                            	// TODO
+                                    //data.set(x, y, (rgb >> 24) & 0xFF);
+                            }
+                    }
+            }
+            return data;
+            
+        } else if (bufferedImage.getColorModel() instanceof IndexColorModel) {
+        	
+            IndexColorModel colorModel = (IndexColorModel)bufferedImage.getColorModel();
+            int size = colorModel.getMapSize();
+            byte[] reds = new byte[size];
+            byte[] greens = new byte[size];
+            byte[] blues = new byte[size];
+            colorModel.getReds(reds);
+            colorModel.getGreens(greens);
+            colorModel.getBlues(blues);
+            RGB[] rgbs = new RGB[size];
+            for (int i = 0; i < rgbs.length; i++) {
+                    rgbs[i] = new RGB(reds[i] & 0xFF, greens[i] & 0xFF, blues[i] & 0xFF);
+            }
+            PaletteData palette = new PaletteData(rgbs);
+            WritableRaster raster = bufferedImage.getRaster();
+            int[] pixelArray = new int[1];
+            for (int y = 0; y < bufferedImage.getHeight(); y++) {
+                    for (int x = 0; x < bufferedImage.getWidth(); x++) {
+                            raster.getPixel(x, y, pixelArray);
+                            RGB rgb = palette.getRGB(pixelArray[0]);
+                            data.set(new short[]{(short)rgb.red, (short)rgb.green, (short)rgb.blue}, x, y);
+                    }
+            }
+        }
+        return data;
+    }
+
     
     static Image getImageSWT(File file) {
         ImageIcon systemIcon = (ImageIcon) FileSystemView.getFileSystemView().getSystemIcon(file);

@@ -33,9 +33,9 @@ import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace.DownsampleType;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
-import org.eclipse.dawnsci.plotting.api.trace.IImageTrace.DownsampleType;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
@@ -265,7 +265,7 @@ public class SWTXYStressTest {
 
 		EclipseUtils.delay(2000);
 		
-		final AbstractPlottingSystem sys = (AbstractPlottingSystem)PlottingFactory.getPlottingSystem(part.getTitle());
+		final IPlottingSystem sys = (IPlottingSystem)part.getAdapter(IPlottingSystem.class);
 
 		final Collection<ITrace>   traces= sys.getTraces(IImageTrace.class);
 		final IImageTrace          imt = (IImageTrace)traces.iterator().next();
