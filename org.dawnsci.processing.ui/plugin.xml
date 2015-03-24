@@ -41,6 +41,13 @@
             name="Output"
             restorable="true">
       </view>
+      <view
+            allowMultiple="true"
+            class="org.dawnsci.processing.ui.view.VanillaPlottingSystemView"
+            id="org.dawnsci.processing.ui.view.vanillaPlottingSystemView"
+            name="Plotting System View"
+            restorable="false">
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.perspectives">
