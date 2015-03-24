@@ -10,8 +10,11 @@ package org.dawnsci.plotting.services;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
 import java.awt.image.DirectColorModel;
 import java.awt.image.IndexColorModel;
+import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.util.ArrayList;
@@ -523,12 +526,11 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
        
         if (bufferedImage.getColorModel() instanceof DirectColorModel) {
             DirectColorModel colorModel = (DirectColorModel)bufferedImage.getColorModel();
-            PaletteData palette = new PaletteData(colorModel.getRedMask(), colorModel.getGreenMask(), colorModel.getBlueMask());
             for (int y = 0; y < bufferedImage.getHeight(); y++) {
                     for (int x = 0; x < bufferedImage.getWidth(); x++) {
                             int value = bufferedImage.getRGB(x, y);
                             RGB rgb = new RGB((value >> 16) & 0xFF, (value >> 8) & 0xFF, value & 0xFF); 
-                            data.set(new short[]{(short)rgb.red, (short)rgb.green, (short)rgb.blue}, x, y);
+                            data.set(new short[]{(short)rgb.red, (short)rgb.green, (short)rgb.blue}, y, x);
                             if (colorModel.hasAlpha()) {
                             	// TODO
                                     //data.set(x, y, (rgb >> 24) & 0xFF);
@@ -555,14 +557,28 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
             WritableRaster raster = bufferedImage.getRaster();
             int[] pixelArray = new int[1];
             for (int y = 0; y < bufferedImage.getHeight(); y++) {
-                    for (int x = 0; x < bufferedImage.getWidth(); x++) {
-                            raster.getPixel(x, y, pixelArray);
-                            RGB rgb = palette.getRGB(pixelArray[0]);
-                            data.set(new short[]{(short)rgb.red, (short)rgb.green, (short)rgb.blue}, x, y);
-                    }
+            	for (int x = 0; x < bufferedImage.getWidth(); x++) {
+            		raster.getPixel(x, y, pixelArray);
+            		RGB rgb = palette.getRGB(pixelArray[0]);
+            		data.set(new short[]{(short)rgb.red, (short)rgb.green, (short)rgb.blue}, y, x);
+            	}
             }
+        } else {
+
+        	WritableRaster raster = bufferedImage.getRaster();
+        	int[] pixelArray = new int[3];
+        	for (int y = 0; y < bufferedImage.getHeight(); y++) {
+        		for (int x = 0; x < bufferedImage.getWidth(); x++) {
+        			raster.getPixel(x, y, pixelArray);
+        			data.set(new short[]{
+        					(short)pixelArray[0], 
+        					(short)pixelArray[1], 
+        					(short)pixelArray[2]},
+        					y, x);
+        		}
+        	}  
         }
-        return data;
+       return data;
     }
 
     
