@@ -996,27 +996,31 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 	 * @return
 	 */
 	private double[] getIntensityAndSum(IRegion region) {
-		double[] intensityAndSum = new double[] {0, 0};
-		Collection<ITrace> traces = getPlottingSystem().getTraces();
-		if (traces != null && traces.size() == 1
-				&& traces.iterator().next() instanceof IImageTrace) {
-			final IImageTrace trace = (IImageTrace) traces.iterator().next();
-			IROI roi = region.getROI();
-			if (roi instanceof RectangularROI) {
-				RectangularROI rroi = (RectangularROI) roi;
-					Dataset dataRegion = (Dataset) ToolUtils
-							.getClippedSlice(trace.getData(), rroi);
-					intensityAndSum[0] = ToolUtils.getRectangleMaxIntensity(dataRegion);
-					intensityAndSum[1] = ToolUtils.getRectangleSum(dataRegion);
-			} else if (roi instanceof LinearROI) {
-				LinearROI lroi = (LinearROI) roi;
-				intensityAndSum[0] = ToolUtils.getLineIntensity(trace.getData(), lroi);
-			} else if (roi instanceof PointROI) {
-				PointROI proi = (PointROI) roi;
-				intensityAndSum[0] = ((Dataset) trace.getData()).getDouble((int)proi.getPointY(), (int)proi.getPointX());
+		try {
+			double[] intensityAndSum = new double[] {0, 0};
+			Collection<ITrace> traces = getPlottingSystem().getTraces();
+			if (traces != null && traces.size() == 1
+					&& traces.iterator().next() instanceof IImageTrace) {
+				final IImageTrace trace = (IImageTrace) traces.iterator().next();
+				IROI roi = region.getROI();
+				if (roi instanceof RectangularROI) {
+					RectangularROI rroi = (RectangularROI) roi;
+						Dataset dataRegion = (Dataset) ToolUtils
+								.getClippedSlice(trace.getData(), rroi);
+						intensityAndSum[0] = ToolUtils.getRectangleMaxIntensity(dataRegion);
+						intensityAndSum[1] = ToolUtils.getRectangleSum(dataRegion);
+				} else if (roi instanceof LinearROI) {
+					LinearROI lroi = (LinearROI) roi;
+					intensityAndSum[0] = ToolUtils.getLineIntensity(trace.getData(), lroi);
+				} else if (roi instanceof PointROI) {
+					PointROI proi = (PointROI) roi;
+					intensityAndSum[0] = ((Dataset) trace.getData()).getDouble((int)proi.getPointY(), (int)proi.getPointX());
+				}
 			}
+			return intensityAndSum;
+		} catch (java.lang.UnsupportedOperationException use) {
+			return new double[]{0,0}; // Happens with RGBDatasets coming from MJPGStream see org.dawnsci.slice.server.test.ClientPluginTest
 		}
-		return intensityAndSum;
 	}
 
 	/**
