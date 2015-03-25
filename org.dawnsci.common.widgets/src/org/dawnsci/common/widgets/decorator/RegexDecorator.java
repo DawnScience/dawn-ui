@@ -43,7 +43,8 @@ public class RegexDecorator {
 			@Override
 			public void verifyText(VerifyEvent e) {
 				
-				boolean allStringMatch = pattern.matcher(text.getText()+e.text).matches();
+				final String contents  = text.getText()+e.text;
+				boolean allStringMatch = pattern.matcher(contents).matches();
 				boolean changeMatch    = pattern.matcher(e.text).matches();
 				
 				if (!"".equals(e.text) && !allStringMatch && !changeMatch) {
