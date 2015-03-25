@@ -96,10 +96,7 @@ public class ToolPageSite implements IPageSite, INestable {
 		this.serviceLocator = (ServiceLocator) slc.createServiceLocator(
 				parentViewSite, null, new IDisposable(){
 					public void dispose() {
-						final Control control = ((PartSite)parentViewSite).getPane().getControl();
-						if (control != null && !control.isDisposed()) {
-							((PartSite)parentViewSite).getPane().doHide();
-						}
+                        // Not called.
 					}
 				});
 		initializeDefaultServices();
