@@ -68,5 +68,5 @@ public interface IFunctionDescriptor extends IAdaptable {
 	 * @return
 	 */
 	@Override
-	Object getAdapter(@SuppressWarnings("rawtypes") Class clazz);
+	public <T> T getAdapter(Class<T> adapter);
 }
