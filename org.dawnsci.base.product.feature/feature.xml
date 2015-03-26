@@ -30,7 +30,7 @@
          version="0.0.0"/>
 
    <includes
-         id="org.eclipse.rcp"
+         id="org.eclipse.e4.rcp"
          version="0.0.0"/>
 
    <includes
@@ -99,6 +99,14 @@
 
    <includes
          id="org.dawnsci.isosurface.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.emf.ecore"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.emf.common"
          version="0.0.0"/>
 
    <plugin
