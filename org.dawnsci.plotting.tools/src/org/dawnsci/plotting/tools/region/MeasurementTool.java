@@ -553,7 +553,6 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 		IRegion region = evt.getRegion();
 		if (region != null && region.getROI() != null) {
 			region.addROIListener(this);
-			region.getROI().setPlot(true);
 			// set the Region isActive flag
 			region.setActive(true);
 		}
