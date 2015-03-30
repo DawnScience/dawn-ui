@@ -19,10 +19,11 @@ public class FileDecorator extends RegexDecorator {
 	
 	public FileDecorator(Text text, String regex) {
 		super(text, regex);
+		setAllowInvalidValues(true);
 	}
 
 	private static String createRegex(boolean isWin) {
-		return isWin ? "([a-zA-Z]?\\:?)\\?[a-zA-Z_0-9\\\\]+" : "/*?([a-zA-Z_0-9\\/]+)/*?";
+		return isWin ? "([a-zA-Z]\\:)\\\\[a-zA-Z_0-9\\\\\\-]+" : "\\/[a-zA-Z_0-9\\/-]+";
 	}
 
 	static private boolean isWindowsOS() {
