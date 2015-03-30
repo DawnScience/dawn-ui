@@ -634,8 +634,12 @@ public abstract class NumberBox extends ButtonComposite implements BoundsProvide
 		if (matcher.matches()) {
 			String group = matcher.group(1);
 			if (!group.trim().isEmpty()) {
-				Double parsedDouble = Double.parseDouble(group);
-				return Double.valueOf(String.format("%." + decimalPlaces + "f", parsedDouble));
+				try {
+					Double parsedDouble = Double.parseDouble(group);
+					return Double.valueOf(String.format("%." + decimalPlaces + "f", parsedDouble));
+				} catch (java.lang.NumberFormatException ne) {
+					return Double.NaN;
+				}
 			}
 		}
 		return Double.NaN;
