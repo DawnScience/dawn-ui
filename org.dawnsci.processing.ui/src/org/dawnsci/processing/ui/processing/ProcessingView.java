@@ -241,6 +241,12 @@ public class ProcessingView extends ViewPart {
 	
 	private IOperation[] getOperations() {
 		final List<ISeriesItemDescriptor> desi = seriesTable.getSeriesItems();
+		
+		if (desi != null) {
+			Iterator<ISeriesItemDescriptor> it = desi.iterator();
+			while (it.hasNext()) if ((!(it.next() instanceof OperationDescriptor))) it.remove();
+		}
+		
 		if (desi==null || desi.isEmpty()) return null;
 		final IOperation<? extends IOperationModel, ? extends OperationData>[] pipeline = new IOperation[desi.size()];
 		for (int i = 0; i < desi.size(); i++) {
