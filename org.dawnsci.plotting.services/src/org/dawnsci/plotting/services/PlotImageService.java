@@ -24,10 +24,6 @@ import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.filechooser.FileSystemView;
 
-import org.dawb.common.services.IFileIconService;
-import org.dawb.common.services.IPlotImageService;
-import org.dawb.common.services.PlotImageData;
-import org.dawb.common.services.PlotImageData.PlotImageType;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.util.io.FileUtils;
 import org.dawnsci.io.h5.H5Loader;
@@ -50,6 +46,10 @@ import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.eclipse.dawnsci.plotting.api.histogram.functions.AbstractMapFunction;
 import org.eclipse.dawnsci.plotting.api.histogram.functions.GlobalColourMaps;
+import org.eclipse.dawnsci.plotting.api.image.IFileIconService;
+import org.eclipse.dawnsci.plotting.api.image.IPlotImageService;
+import org.eclipse.dawnsci.plotting.api.image.PlotImageData;
+import org.eclipse.dawnsci.plotting.api.image.PlotImageData.PlotImageType;
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
@@ -85,13 +85,11 @@ import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
  */
 public class PlotImageService extends AbstractServiceFactory implements IPlotImageService {
 	
+	static {
+		System.out.println("Starting PlotImageService");
+	}
 	public PlotImageService() {
 		
-	}
-	static {
-		// We just use file extensions
-		LoaderFactory.setLoaderSearching(false); 
-		// This now applies for the whole workbench
 	}
 	
 	private static float minimumThreshold = 0.98f;

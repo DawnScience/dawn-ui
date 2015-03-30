@@ -80,12 +80,6 @@ import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
  */
 public class ImageService extends AbstractServiceFactory implements IImageService {
 	
-	
-	static {
-		// We just use file extensions
-		LoaderFactory.setLoaderSearching(false); 
-		// This now applies for the whole workbench
-	}
 
 	static {
 		System.out.println("Starting image service");

@@ -2,6 +2,6 @@
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="false" name="Plot Image Service">
    <implementation class="org.dawnsci.plotting.services.PlotImageService"/>
    <service>
-      <provide interface="org.dawb.common.services.IPlotImageService"/>
+      <provide interface="org.eclipse.dawnsci.plotting.api.image.IPlotImageService"/>
    </service>
 </scr:component>

@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.dawb.common.services.IFileIconService;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.services.conversion.IConversionContext;
 import org.dawb.common.services.conversion.IConversionContext.ConversionScheme;
@@ -54,6 +53,7 @@ import org.eclipse.dawnsci.analysis.dataset.slicer.Slicer;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
 import org.eclipse.dawnsci.hdf5.operation.HierarchicalFileExecutionVisitor;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.image.IFileIconService;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
