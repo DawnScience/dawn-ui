@@ -35,7 +35,6 @@ public class BoundsDecorator extends RegexDecorator {
     private Object       minimum;
     private NumberFormat numberFormat;
 	private boolean      isError=false;
-	private boolean      allowInvalidValues= true; // Invalid colors red
 
 	public BoundsDecorator(Text text, String stringPattern, NumberFormat numFormat) {
 		super(text, stringPattern);
@@ -315,19 +314,4 @@ public class BoundsDecorator extends RegexDecorator {
 	public boolean isError() {
 		return isError;
 	}
-
-
-	public boolean isAllowInvalidValues() {
-		return allowInvalidValues;
-	}
-
-	/**
-	 * You can set the bounds checker not to accept invalid values or
-	 * to accept them and color them red. Coloring red is the default.
-	 * @param allowInvalidValues
-	 */
-	public void setAllowInvalidValues(boolean allowInvalidValues) {
-		this.allowInvalidValues = allowInvalidValues;
-	}
-
 }

@@ -37,21 +37,6 @@ public class FileDecorator extends RegexDecorator {
 		return true;
 	}
 
-	private boolean allowInvalidValues = false;
-	
-	public boolean isAllowInvalidValues() {
-		return allowInvalidValues;
-	}
-
-	/**
-	 * You can set the bounds checker not to accept invalid values or
-	 * to accept them and color them red. Coloring red is the default.
-	 * @param allowInvalidValues
-	 */
-	public void setAllowInvalidValues(boolean allowInvalidValues) {
-		this.allowInvalidValues = allowInvalidValues;
-	}
-
 	public boolean isError() {
         if (allowInvalidValues) return false;
         return super.isError();

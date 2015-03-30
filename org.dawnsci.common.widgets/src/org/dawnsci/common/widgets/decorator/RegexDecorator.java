@@ -22,11 +22,12 @@ import org.eclipse.swt.widgets.Text;
  * 
  * By simply changing the pattern it can become another decorator (e.g. a DateDecorator).
  */
-public class RegexDecorator {
+public class RegexDecorator implements VerifyListener {
 
 	protected Text    text;
 	protected Pattern pattern;
-	private   VerifyListener verifyListener;
+	protected boolean allowInvalidValues = false;
+
 	/**
 	 * 
 	 * @param text
@@ -38,30 +39,29 @@ public class RegexDecorator {
 		attachListeners();
 	}
 
-	private void attachListeners() {
-		verifyListener = new VerifyListener() {			
-			@Override
-			public void verifyText(VerifyEvent e) {
-				
-				final String contents  = text.getText()+e.text;
-				boolean allStringMatch = pattern.matcher(contents).matches();
-				boolean changeMatch    = pattern.matcher(e.text).matches();
-				
-				if (!"".equals(e.text) && !allStringMatch && !changeMatch) {
-					e.doit = false;
-					return;
-				}
-				
-				final String oldS = text.getText();
-	            String newS = oldS.substring(0, e.start) + e.text + oldS.substring(e.end);
+	private void attachListeners() {	
+		text.addVerifyListener(this);
+	}
+	
+	@Override
+	public void verifyText(VerifyEvent e) {
+		
+		final String contents  = text.getText()+e.text;
+		boolean allStringMatch = pattern.matcher(contents).matches();
+		boolean changeMatch    = pattern.matcher(e.text).matches();
+		
+		if (!"".equals(e.text) && !allStringMatch && !changeMatch && !allowInvalidValues) {
+			e.doit = false;
+			return;
+		}
+		
+		final String oldS = text.getText();
+        String newS = oldS.substring(0, e.start) + e.text + oldS.substring(e.end);
 
-				if (!check(newS, e.text)) {
-					e.doit = false;
-					return;
-				}
-			}
-		};
-		text.addVerifyListener(verifyListener);
+		if (!check(newS, e.text)) {
+			e.doit = false;
+			return;
+		}
 	}
 	
 	/**
@@ -73,7 +73,7 @@ public class RegexDecorator {
 	}
 
 	public void dispose() {
-		text.removeVerifyListener(verifyListener);
+		text.removeVerifyListener(this);
 	}
 
 	/**
@@ -87,5 +87,18 @@ public class RegexDecorator {
     	if (matcher.matches()) return false;
     	return true;
     }
+	
+	public boolean isAllowInvalidValues() {
+		return allowInvalidValues;
+	}
+
+	/**
+	 * You can set the bounds checker not to accept invalid values or
+	 * to accept them and color them red. Coloring red is the default.
+	 * @param allowInvalidValues
+	 */
+	public void setAllowInvalidValues(boolean allowInvalidValues) {
+		this.allowInvalidValues = allowInvalidValues;
+	}
 
 }
