@@ -1,5 +1,6 @@
 package org.dawnsci.common.richbeans.examples.example1;
 
+import org.dawnsci.common.richbeans.beans.BeanController;
 import org.dawnsci.common.richbeans.beans.BeanUI;
 import org.dawnsci.common.richbeans.event.ValueAdapter;
 import org.dawnsci.common.richbeans.event.ValueEvent;
@@ -45,15 +46,14 @@ public class ExampleRunner {
 		bean.setX(10.0);
 		bean.setY(5);
 		
-		BeanUI.beanToUI(bean, ui);
-		BeanUI.switchState(ui, true);
-		BeanUI.addValueListener(bean, ui, new ValueAdapter("Example listener") {			
+		final BeanController controller = new BeanController(ui, bean);
+		controller.setValueListener(new ValueAdapter("Example listener") {			
 			@Override
 			public void valueChangePerformed(ValueEvent e) {
 				
 				try {
 					// Save the values
-					BeanUI.uiToBean(ui, bean);
+					controller.uiToBean();
 					
 					// We spit out the bean in JSON since
 					// rich bean does not care if bean in XML or
@@ -68,6 +68,8 @@ public class ExampleRunner {
 				}
 			}
 		});
+		controller.start();
+		
 		SWTUtils.showCenteredShell(shell);
 
     }
