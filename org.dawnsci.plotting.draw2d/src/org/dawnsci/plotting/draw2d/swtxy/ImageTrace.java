@@ -657,12 +657,19 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		int iheight = realBounds.height;
 
 		int max = 1024;
+		int ret = -1;
 		for (int i = 2 ; i <= max; i *= 2) {
 			if (iwidth>(rwidth/i) || iheight>(rheight/i)) {
-				return i/2;
+				ret = i/2;
+				break;
 			}
 		}
-		return max*2;
+		// We make sure that the bin is no smaller than 1/64 of the shape
+		int dataSide  = Math.max(image.getShape()[0], image.getShape()[1]);
+		double sixtyF = dataSide/64;
+		if (ret>sixtyF) ret = (int)sixtyF; // No need to round, int portion accurate enough
+		if (ret<1)      ret = 1;
+		return ret;
 	}
 
 	private double getSpan(Axis axis) {
