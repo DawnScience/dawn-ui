@@ -135,7 +135,7 @@ public class BeanController {
 	 * Get the IFieldWidget associated with a single field name
 	 */
 	public IFieldWidget getFieldWidget(String fieldName) throws Exception {
-		return BeanUI.getFieldWiget(fieldName, ui);
+		return BeanUI.getFieldWidget(fieldName, ui);
 	}
 
 	/**

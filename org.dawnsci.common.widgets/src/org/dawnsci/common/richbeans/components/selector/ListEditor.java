@@ -127,7 +127,7 @@ public abstract class ListEditor extends FieldBeanComposite {
 	}
 
 	public void setField(String fieldName, Object value) throws Exception {
-		final IFieldWidget box = BeanUI.getFieldWiget(fieldName, this.editorUI);
+		final IFieldWidget box = BeanUI.getFieldWidget(fieldName, this.editorUI);
 		box.setValue(value);
 		box.fireValueListeners();
 	}

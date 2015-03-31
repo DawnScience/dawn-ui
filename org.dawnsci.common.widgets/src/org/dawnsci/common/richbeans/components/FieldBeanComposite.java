@@ -415,7 +415,7 @@ public class FieldBeanComposite extends FieldComposite implements IFieldCollecti
 
 	@Override
 	public IFieldWidget getField(String fieldName) throws Exception {
-		return BeanUI.getFieldWiget(fieldName, editorUI);
+		return BeanUI.getFieldWidget(fieldName, editorUI);
 	}
 
 	@Override
