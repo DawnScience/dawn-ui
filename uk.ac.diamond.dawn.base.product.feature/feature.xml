@@ -66,10 +66,6 @@
          version="0.0.0"/>
 
    <includes
-         id="org.dawnsci.usagedata.feature"
-         version="0.0.0"/>
-
-   <includes
          id="org.dawnsci.hpc.client.feature"
          version="0.0.0"/>
 
