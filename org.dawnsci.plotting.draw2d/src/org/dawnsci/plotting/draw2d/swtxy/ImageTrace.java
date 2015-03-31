@@ -20,7 +20,10 @@ import java.util.Map;
 import org.dawb.common.ui.macro.TraceMacroEvent;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.analysis.api.dataset.DataEvent;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataListener;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.IDynamicDataset;
 import org.eclipse.dawnsci.analysis.api.roi.IPolylineROI;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.BooleanDataset;
@@ -80,7 +83,7 @@ import uk.ac.diamond.scisoft.analysis.dataset.function.DownsampleMode;
  * @author Matthew Gerring
  *
  */
-public class ImageTrace extends Figure implements IImageTrace, IAxisListener, ITraceContainer {
+public class ImageTrace extends Figure implements IImageTrace, IAxisListener, ITraceContainer, IDataListener {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ImageTrace.class);
 	
@@ -755,6 +758,12 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		this.imageServiceBean = null;
 		this.service          = null;
 		this.intensityScale   = null;
+		
+		if (image instanceof IDynamicDataset) {
+			IDynamicDataset dset = (IDynamicDataset)image;
+			dset.removeDataListener(this);
+		}
+		
 		this.image            = null;
 		this.rgbDataset       = null;
 		this.fullMask         = null;
@@ -951,6 +960,30 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	@SuppressWarnings({ "unchecked" })
 	@Override
 	public boolean setData(IDataset im, List<? extends IDataset> axes, boolean performAuto) {
+		
+		if (im instanceof IDynamicDataset) {
+			IDynamicDataset dset = (IDynamicDataset)im;
+			dset.addDataListener(this);
+		}
+		return setDataInternal(im, axes, performAuto);
+	}
+	
+	public void dataChangePerformed(final DataEvent evt) {
+		if (Display.getDefault().getThread()==Thread.currentThread()) {
+		    setDataInternal(evt.getSource(), axes, true);
+		    repaint();
+		} else {
+			Display.getDefault().syncExec(new Runnable() {
+				public void run() {
+					setDataInternal(evt.getSource(), axes, true);
+				    repaint();
+				}
+			});
+		}
+	}
+	
+	private boolean setDataInternal(IDataset im, List<? extends IDataset> axes, boolean performAuto) {
+
 		// We are just assigning the data before the image is live.
 		if (getParent()==null && !performAuto) {
 			this.image = (Dataset)im;
