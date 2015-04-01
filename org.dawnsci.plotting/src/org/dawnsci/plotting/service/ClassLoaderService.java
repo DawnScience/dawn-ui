@@ -33,7 +33,7 @@ public class ClassLoaderService extends AbstractServiceFactory implements IClass
 	private ClassLoader originalLoader;
 	
 	static {
-		System.out.println("Starting analsysis class loader service");
+		System.out.println("Starting analysis class loader service");
 	}
 	
 	public ClassLoaderService() {
