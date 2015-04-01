@@ -13,8 +13,8 @@ import java.security.PrivilegedAction;
 
 import javax.vecmath.Vector3d;
 
-import org.dawb.common.services.IClassLoaderService;
 import org.dawb.workbench.jmx.UserPlotBean;
+import org.eclipse.dawnsci.analysis.api.IClassLoaderService;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.ui.services.AbstractServiceFactory;
 import org.eclipse.ui.services.IServiceLocator;
@@ -33,7 +33,7 @@ public class ClassLoaderService extends AbstractServiceFactory implements IClass
 	private ClassLoader originalLoader;
 	
 	static {
-		System.out.println("Starting plotting class loader service");
+		System.out.println("Starting analsysis class loader service");
 	}
 	
 	public ClassLoaderService() {

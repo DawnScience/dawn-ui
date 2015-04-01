@@ -60,7 +60,7 @@
       <serviceFactory
             factoryClass="org.dawnsci.plotting.service.ClassLoaderService">
          <service
-               serviceClass="org.dawb.common.services.IClassLoaderService">
+               serviceClass="org.eclipse.dawnsci.analysis.api.IClassLoaderService">
          </service>
       </serviceFactory>
       <serviceFactory
