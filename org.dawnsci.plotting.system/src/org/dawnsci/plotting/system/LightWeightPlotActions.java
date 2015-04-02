@@ -575,7 +575,7 @@ class LightWeightPlotActions {
 					return zoomType.getIconImage().getImageData();
 				}
 			};
-			final Action zoomAction = new Action(zoomType.getDescription(), IAction.AS_CHECK_BOX) {
+			final Action zoomAction = new Action(zoomType.getDescription(), IAction.AS_PUSH_BUTTON) {
 				public void run() {
 					xyGraph.setZoomType(zoomType);
 					zoomMenu.setSelectedAction(this);
