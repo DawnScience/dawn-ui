@@ -599,7 +599,19 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		};
 		savePeak.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit-savePeak.png"));
 		getSite().getActionBars().getToolBarManager().add(savePeak);
-		
+
+		final Action export = new Action("Export peak(s)", IAction.AS_PUSH_BUTTON) {
+			public void run() {
+				try {
+					EclipseUtils.openWizard(FittedPeaksExportWizard.ID, true);
+				} catch (Exception e) {
+					logger.error("Cannot open wizard "+FittedPeaksExportWizard.ID, e);
+				}
+			}
+		};
+		export.setImageDescriptor(Activator.getImageDescriptor("icons/mask-export-wiz.png"));
+		getSite().getActionBars().getToolBarManager().add(export);
+
 		final Separator sep3 = new Separator(getClass().getName()+".separator3");	
 		getSite().getActionBars().getToolBarManager().add(sep3);
 
@@ -727,17 +739,6 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 
 		getSite().getActionBars().getMenuManager().add(preferences);
 		
-		final Action export = new Action("Export...", IAction.AS_PUSH_BUTTON) {
-			public void run() {
-				try {
-					EclipseUtils.openWizard(FittedPeaksExportWizard.ID, true);
-				} catch (Exception e) {
-					logger.error("Cannot open wizard "+FittedPeaksExportWizard.ID, e);
-				}
-			}
-		};
-
-
 	    final MenuManager menuManager = new MenuManager();
 	    menuManager.add(clear);
 	    menuManager.add(delete);
