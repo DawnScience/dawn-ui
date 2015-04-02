@@ -562,9 +562,42 @@ class LightWeightPlotActions {
         actionBarManager.registerAction(ToolbarConfigurationConstants.ZOOM.getId(), autoScale, ActionType.XYANDIMAGE);
         
         final CheckableActionGroup zoomG = new CheckableActionGroup();
-        Action none = null;
-		for(final ZoomType zoomType : ZoomType.values()){
+        final MenuAction zoomMenu = new MenuAction("Zoom Types");
+ 		
+        Action rubberBand = null;
+        for(final ZoomType zoomType : ZoomType.values()){
 		    if (! zoomType.useWithFlags(flags)) continue;
+		    if (!zoomType.isZoom()) continue;
+		 		
+			final ImageDescriptor icon = new ImageDescriptor() {				
+				@Override
+				public ImageData getImageData() {
+					return zoomType.getIconImage().getImageData();
+				}
+			};
+			final Action zoomAction = new Action(zoomType.getDescription(), IAction.AS_CHECK_BOX) {
+				public void run() {
+					xyGraph.setZoomType(zoomType);
+					zoomMenu.setSelectedAction(this);
+					zoomMenu.setId(zoomType.getId());
+				}
+			};
+			zoomAction.setImageDescriptor(icon);
+			zoomAction.setId(zoomType.getId());
+			zoomG.add(zoomAction);
+			zoomMenu.add(zoomAction);
+			if (zoomType==ZoomType.RUBBERBAND_ZOOM) rubberBand = zoomAction;
+		}
+		if (rubberBand!=null) {
+			zoomMenu.setSelectedAction(rubberBand);
+			zoomMenu.setId(rubberBand.getId());
+		}
+        actionBarManager.registerAction(ToolbarConfigurationConstants.ZOOM.getId(), zoomMenu, ActionType.XYANDIMAGE);
+		
+        Action none = null;
+        for(final ZoomType zoomType : ZoomType.values()){
+		    if (! zoomType.useWithFlags(flags)) continue;
+		    if (zoomType.isZoom()) continue;
 		 		
 			final ImageDescriptor icon = new ImageDescriptor() {				
 				@Override
@@ -586,7 +619,6 @@ class LightWeightPlotActions {
 	        actionBarManager.registerAction(ToolbarConfigurationConstants.ZOOM.getId(), zoomAction, ActionType.XYANDIMAGE);
 		}
 		none.setChecked(true);
-		
 	       
         // Add more actions
         // Rescale		
