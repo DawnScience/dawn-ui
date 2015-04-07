@@ -97,6 +97,19 @@ public abstract class SelectorWidget {
 	}
 
 	/**
+	 * Creates a File selector given the filetypes and extensions
+	 * @param parent
+	 *           parent composite
+	 * @param fileTypes
+	 *           Array of Strings defining possible file types
+	 * @param extensions
+	 *           Array of Strings defining possible file extensions and names if isFolderSelector is False
+	 */
+	public SelectorWidget(Composite parent, String[] fileTypes, String[] extensions) {
+		this(parent, false, true, fileTypes, extensions);
+	}
+
+	/**
 	 * 
 	 * @param parent
 	 *           parent composite
