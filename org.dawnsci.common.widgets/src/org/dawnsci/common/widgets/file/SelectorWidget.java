@@ -408,11 +408,13 @@ public abstract class SelectorWidget {
 			if (filePath!=null) {
 				final File file = new File(filePath);
 				if (file.exists()) {
+					if (fileTypes != null && fileExtensions != null) {
+						dialog.setFilterNames(fileTypes);
+						dialog.setFilterExtensions(fileExtensions);
+					}
 					if (file.isDirectory()) {
 						dialog.setFilterPath(file.getAbsolutePath());
 					} else {
-						dialog.setFilterNames(fileTypes);
-						dialog.setFilterExtensions(fileExtensions);
 						dialog.setFilterPath(file.getParent());
 						dialog.setFileName(file.getName());
 					}
