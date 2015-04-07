@@ -970,12 +970,12 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	
 	public void dataChangePerformed(final DataEvent evt) {
 		if (Display.getDefault().getThread()==Thread.currentThread()) {
-		    setDataInternal(evt.getSource(), axes, true);
+		    setDataInternal(evt.getSource(), axes, plottingSystem.isRescale());
 		    repaint();
 		} else {
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
-					setDataInternal(evt.getSource(), axes, true);
+					setDataInternal(evt.getSource(), axes, plottingSystem.isRescale());
 				    repaint();
 				}
 			});
