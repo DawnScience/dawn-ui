@@ -778,7 +778,10 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		
 		File file = new File(path);
 		if (!file.getName().toLowerCase().endsWith(".dat")) file = new File(path+".dat");
-		if (file.exists()) file.delete();
+		if (file.exists())
+			file.delete();
+		else
+			file.createNewFile();
 		
 		final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
 		try {
@@ -788,7 +791,6 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 				writer.write(peak.getTabString());
 				writer.newLine();
 			}
-			
 		} finally {
 			writer.close();
 		}

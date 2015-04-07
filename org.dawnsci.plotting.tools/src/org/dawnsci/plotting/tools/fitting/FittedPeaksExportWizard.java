@@ -11,24 +11,22 @@ package org.dawnsci.plotting.tools.fitting;
 import java.io.File;
 
 import org.dawb.common.ui.util.EclipseUtils;
+import org.dawnsci.common.widgets.file.SelectorWidget;
 import org.eclipse.dawnsci.plotting.api.tool.IToolContainer;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.TypedEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewReference;
@@ -105,10 +103,10 @@ public class FittedPeaksExportWizard extends Wizard implements IExportWizard {
 	
 	private final class ExportPage extends WizardPage {
 
-		private Text    txtPath;
 		private boolean overwrite = false;
 		private boolean open      = true;
 		private String  path;
+		private SelectorWidget select;
 
 		protected ExportPage(String pageName) {
 			super(pageName);
@@ -123,28 +121,35 @@ public class FittedPeaksExportWizard extends Wizard implements IExportWizard {
 			layout.numColumns = 3;
 			layout.verticalSpacing = 9;
 
-			Label label = new Label(container, SWT.NULL);
-			label.setText("&File  ");
-			txtPath = new Text(container, SWT.BORDER);
-			txtPath.setEditable(true);
-			txtPath.setEnabled(true);
-			GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-			txtPath.setLayoutData(gd);
-			txtPath.addModifyListener(new ModifyListener() {			
+			select = new SelectorWidget(container, new String[] {"CSV Files", "Dat Files"}, new String[] {"*.csv", "*.dat"} ) {
 				@Override
-				public void modifyText(ModifyEvent e) {
-					pathChanged();
+				public void pathChanged(String path, TypedEvent event) {
+					ExportPage.this.pathChanged();
 				}
-			});
+			};
 
-			Button button = new Button(container, SWT.PUSH);
-			button.setText("...");
-			button.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					handleBrowse();
-				}
-			});
+//			Label label = new Label(container, SWT.NULL);
+//			label.setText("&File  ");
+//			txtPath = new Text(container, SWT.BORDER);
+//			txtPath.setEditable(true);
+//			txtPath.setEnabled(true);
+//			GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
+//			txtPath.setLayoutData(gd);
+//			txtPath.addModifyListener(new ModifyListener() {			
+//				@Override
+//				public void modifyText(ModifyEvent e) {
+//					pathChanged();
+//				}
+//			});
+//
+//			Button button = new Button(container, SWT.PUSH);
+//			button.setText("...");
+//			button.addSelectionListener(new SelectionAdapter() {
+//				@Override
+//				public void widgetSelected(SelectionEvent e) {
+//					handleBrowse();
+//				}
+//			});
 			
 			final Button over = new Button(container, SWT.CHECK);
 			over.setText("Overwrite file if it exists.");
@@ -182,7 +187,7 @@ public class FittedPeaksExportWizard extends Wizard implements IExportWizard {
 		/**
 		 * Uses the standard container selection dialog to choose the new value for the container field.
 		 */
-
+		@SuppressWarnings("unused")
 		private void handleBrowse() {
 			FileDialog dirDialog = new FileDialog(getShell(), SWT.SAVE);
 			dirDialog.setText("Export file (CSV)");
@@ -196,7 +201,7 @@ public class FittedPeaksExportWizard extends Wizard implements IExportWizard {
 			dirDialog.setFilterExtensions(new String[]{"*.dat"});
 			final String filepath = dirDialog.open();
 			if (filepath != null) {
-				txtPath.setText(filepath);
+				select.setText(filepath);
 				pathChanged();
 			}
 		}
@@ -207,7 +212,7 @@ public class FittedPeaksExportWizard extends Wizard implements IExportWizard {
 
 		private void pathChanged() {
 
-            final String p = txtPath.getText();
+            final String p = select.getText();
 			if (p==null || p.length() == 0) {
 				updateStatus("Please select a file to export to.");
 				return;
