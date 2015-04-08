@@ -550,6 +550,19 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 		};
 		manager.add(configure);	
 
+		final Action delAnnotation = new Action("Remove Annotation...", PlottingSystemActivator.getImageDescriptor("icons/Del_Annotation.png")) {
+			public void run() {
+				RemoveAnnotationDialog dialog = new RemoveAnnotationDialog(Display.getCurrent().getActiveShell(), xyGraph);
+				if(dialog.open() == Window.OK && dialog.getAnnotation() != null){
+					xyGraph.removeAnnotation(dialog.getAnnotation());
+					xyGraph.getOperationsManager().addCommand(
+							new RemoveAnnotationCommand(xyGraph, dialog.getAnnotation()));					
+				}
+				
+			}
+		};
+		manager.add(delAnnotation);	
+
 		manager.add(new Separator("org.dawb.workbench.plotting.system.configure.group"));
 	}
 	
@@ -643,19 +656,6 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 				}
 			};
 			manager.add(addAnnotation);
-
-			final Action delAnnotation = new Action("Remove Annotation...", PlottingSystemActivator.getImageDescriptor("icons/Del_Annotation.png")) {
-				public void run() {
-					RemoveAnnotationDialog dialog = new RemoveAnnotationDialog(Display.getCurrent().getActiveShell(), xyGraph);
-					if(dialog.open() == Window.OK && dialog.getAnnotation() != null){
-						xyGraph.removeAnnotation(dialog.getAnnotation());
-						xyGraph.getOperationsManager().addCommand(
-								new RemoveAnnotationCommand(xyGraph, dialog.getAnnotation()));
-					}
-					
-				}
-			};
-			manager.add(delAnnotation);
 		}
 		
 		if (trace instanceof ILineTrace) {
