@@ -104,6 +104,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.window.Window;
 import org.eclipse.nebula.visualization.widgets.datadefinition.IManualValueChangeListener;
 import org.eclipse.nebula.visualization.widgets.figureparts.ColorMapRamp;
 import org.eclipse.nebula.visualization.widgets.figures.ScaledSliderFigure;
@@ -111,6 +112,7 @@ import org.eclipse.nebula.visualization.xygraph.figures.Annotation;
 import org.eclipse.nebula.visualization.xygraph.figures.Axis;
 import org.eclipse.nebula.visualization.xygraph.figures.XYGraph;
 import org.eclipse.nebula.visualization.xygraph.linearscale.AbstractScale.LabelSide;
+import org.eclipse.nebula.visualization.xygraph.toolbar.RemoveAnnotationDialog;
 import org.eclipse.nebula.visualization.xygraph.undo.AddAnnotationCommand;
 import org.eclipse.nebula.visualization.xygraph.undo.RemoveAnnotationCommand;
 import org.eclipse.nebula.visualization.xygraph.undo.ZoomType;
@@ -641,6 +643,19 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 				}
 			};
 			manager.add(addAnnotation);
+
+			final Action delAnnotation = new Action("Remove Annotation...", PlottingSystemActivator.getImageDescriptor("icons/Del_Annotation.png")) {
+				public void run() {
+					RemoveAnnotationDialog dialog = new RemoveAnnotationDialog(Display.getCurrent().getActiveShell(), xyGraph);
+					if(dialog.open() == Window.OK && dialog.getAnnotation() != null){
+						xyGraph.removeAnnotation(dialog.getAnnotation());
+						xyGraph.getOperationsManager().addCommand(
+								new RemoveAnnotationCommand(xyGraph, dialog.getAnnotation()));
+					}
+					
+				}
+			};
+			manager.add(delAnnotation);
 		}
 		
 		if (trace instanceof ILineTrace) {
