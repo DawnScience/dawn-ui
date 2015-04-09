@@ -80,6 +80,7 @@ public class ZoomTool extends ProfileTool {
 					            boolean      isDrag,
 					            IProgressMonitor monitor) {
 
+		if (!(region.getROI() instanceof RectangularROI)) return null;
 		final RectangularROI bounds = (RectangularROI) (rbs==null ? region.getROI() : rbs);
 		if (bounds==null) return null;
 		if (!region.isVisible()) return null;
