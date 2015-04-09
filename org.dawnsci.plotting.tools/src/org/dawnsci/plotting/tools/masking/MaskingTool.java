@@ -27,6 +27,7 @@ import org.dawb.common.ui.wizard.persistence.PersistenceImportWizard;
 import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.plotting.AbstractPlottingViewer;
 import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.utils.ToolUtils;
 import org.dawnsci.plotting.util.ColorUtility;
 import org.eclipse.core.commands.operations.IOperationHistoryListener;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
@@ -113,7 +114,7 @@ import org.eclipse.ui.IViewPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MaskingTool extends AbstractToolPage implements MouseListener{
+public class MaskingTool extends AbstractToolPage implements MouseListener {
 
 
 	private static final Logger logger = LoggerFactory.getLogger(MaskingTool.class);
@@ -157,7 +158,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				}
 			}
 		};
-				
+
 		this.paletteListener = new IPaletteListener.Stub() {
 			
 			@Override
@@ -181,6 +182,9 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
  			}
 			@Override
 			public void regionAdded(final RegionEvent evt) {
+				if (evt.getRegion()!=null && evt.getRegion().isUserRegion()) { 
+					updateCenterSectorMenu();
+				};
                 if (MaskMarker.MASK_REGION == evt.getRegion().getUserObject()) {
                     int wid = Activator.getPlottingPreferenceStore().getInt(PlottingConstants.FREE_DRAW_WIDTH);
                 	evt.getRegion().setLineWidth(wid);
@@ -204,17 +208,21 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 						}
 					});
 				}
-			}			
+			}
 			@Override
 			public void regionRemoved(RegionEvent evt) {
 				evt.getRegion().removeROIListener(regionBoundsListener);
 				processMask(true, false, null);
 				regionTable.refresh();
-			}			
+				if (evt.getRegion()!=null && evt.getRegion().isUserRegion()) { 
+					updateCenterSectorMenu();
+				}
+			}
 			@Override
 			public void regionsRemoved(RegionEvent evt) {
 				processMask(true, false, null);
 				regionTable.refresh();
+				updateCenterSectorMenu();
 			}
 		};
 		
@@ -228,7 +236,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		maskJob.setPriority(Job.INTERACTIVE);
 		maskJob.setUser(false);
 	}
-	
+
 	private void updateMask(TraceEvent evt) {
 		try {
 			setEnabled(getImageTrace()!=null);
@@ -368,14 +376,12 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 			}
 		});
 	
-		
 		final Button maxEnabled =  new Button(minMaxComp, SWT.CHECK);
 		maxEnabled.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1,1));
 		maxEnabled.setText("Enable upper mask    ");
 		maxEnabled.setToolTipText("Enable the upper bound mask, removing pixels with higher intensity.");
 		enableControls.add(maxEnabled);
 	
-		
 		minEnabled.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				minimum.setEnabled(minEnabled.getSelection());
@@ -772,7 +778,6 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 						viewer.setSelectedCursor(CursorUtils.getPenCursor(pensize, penShape));
 					}
 				}
-
 			};
 			
 			action.setImageDescriptor(IconUtils.createPenDescriptor(pensize));
@@ -782,7 +787,6 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 				currentSize = action;
 			}
 			action.setToolTipText("Set pen size to "+pensize);
-			
 		}
 		
 		if (currentSize!=null) {
@@ -912,6 +916,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 	private static MaskingTool    currentMaskingTool=null;
 	private static final String   AUTO_SAVE_PROP="org.dawb.workbench.plotting.tools.auto.save.mask";
 	private IAction loadMask;
+	private MenuAction center;
 
 	private static IAction autoApplyMask, alwaysSave;
 	
@@ -1063,8 +1068,6 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		};
 		actionBars.getToolBarManager().add(autoApplyMask);
 
-		
-		actionBars.getToolBarManager().add(new Separator());
 		if (alwaysSave==null) { // Needs to be static else you have to go back to all editors and
 			                       // uncheck each one.
 			alwaysSave  = new Action("Auto-save the mask to the buffer when it changes", IAction.AS_CHECK_BOX) {
@@ -1082,8 +1085,26 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		};
 		actionBars.getToolBarManager().add(alwaysSave);
 
+		actionBars.getToolBarManager().add(new Separator());
+
+		// We will add an action here for centring the sector.
+		center = new MenuAction("Centre selection");
+		center.setImageDescriptor(Activator.getImageDescriptor("icons/sector-center-menu.png"));
+
+		actionBars.getToolBarManager().add(center);
+		actionBars.getMenuManager().add(center);
+		updateCenterSectorMenu();
+
+		actionBars.getToolBarManager().add(new Separator());
+
         final IPlottingSystem system = getPlottingSystem();
         system.getPlotActionSystem().fillTraceActions(actionBars.getToolBarManager(), getImageTrace(), system);	
+	}
+
+	private void updateCenterSectorMenu() {
+		ToolUtils.updateSectorsMenu(getPlottingSystem(), getImageTrace(), center, getPart());
+		getSite().getActionBars().getToolBarManager().update(true);
+		getSite().getActionBars().getMenuManager().update(true);
 	}
 
 	protected void saveMaskBuffer() {
@@ -1641,4 +1662,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener{
 		}
 	}
 
+	protected boolean isRegionTypeSupported(RegionType type) {
+		return type==RegionType.SECTOR || type==RegionType.RING;
+	}
 }

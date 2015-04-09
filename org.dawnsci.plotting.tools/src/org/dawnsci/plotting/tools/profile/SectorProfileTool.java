@@ -16,10 +16,9 @@ import java.util.List;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.utils.ToolUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
-import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.SectorROI;
@@ -43,7 +42,7 @@ import org.eclipse.swt.widgets.Display;
 public abstract class SectorProfileTool extends ProfileTool {
 
 
-	private   MenuAction      center;
+	protected MenuAction      center;
 	protected Action          combineSymmetry;
 	private   IRegionListener sectorRegionListener;
 
@@ -69,27 +68,26 @@ public abstract class SectorProfileTool extends ProfileTool {
 		
 		getSite().getActionBars().getToolBarManager().add(center);
 		getSite().getActionBars().getMenuManager().add(center);
-		updateSectors();
-		
+		updateCenterSectorMenu();
+
 		this.sectorRegionListener  = new IRegionListener.Stub() {
 			
 			@Override
 			public void regionsRemoved(RegionEvent evt) {
-				updateSectors();
+				updateCenterSectorMenu();
 			}
 			
 			@Override
 			public void regionRemoved(RegionEvent evt) {
 				if (evt.getRegion()!=null && evt.getRegion().isUserRegion()) { 
-					updateSectors();
+					updateCenterSectorMenu();
 				};
 			}
 			@Override
 			public void regionAdded(RegionEvent evt) {
 				if (evt.getRegion()!=null && evt.getRegion().isUserRegion()) { 
-					updateSectors();
+					updateCenterSectorMenu();
 				}
-					
 				if (evt.getRegion()!=null && evt.getRegion().getRegionType()==RegionType.SECTOR) {
 					SectorROI sroi = (SectorROI) evt.getRegion().getROI().copy();
 					sroi.setSymmetry(preferredSymmetry);
@@ -107,7 +105,13 @@ public abstract class SectorProfileTool extends ProfileTool {
 		addSymmetryActions(symmetry);
 		
 	}
-	
+
+	private void updateCenterSectorMenu() {
+		ToolUtils.updateSectorsMenu(getPlottingSystem(), getImageTrace(), center, getPart());
+		getSite().getActionBars().getToolBarManager().update(true);
+		getSite().getActionBars().getMenuManager().update(true);
+	}
+
 	private int lastSymmetry = 0;
 	@Override
 	public void roiChanged(ROIEvent evt) {
@@ -230,67 +234,9 @@ public abstract class SectorProfileTool extends ProfileTool {
 			getPlottingSystem().removeRegionListener(sectorRegionListener);
 		}
 	}
-	
-	protected void updateSectors() {
-		
-		if (getPlottingSystem()==null) return;
-		
-		center.clear();
-		
-		final Collection<IRegion> regions = getPlottingSystem().getRegions();
-		if (regions!=null) for (final IRegion region : regions) {
-			if (isRegionTypeSupported(region.getRegionType())) {
-				
-				final Action centerRegion = new Action("Center sector '"+region.getName()+"'") {
-					public void run() {
-						center.setSelectedAction(this);
-						final double[] cen = getBeamCenter();
-						if (cen!=null) {
-							final SectorROI sroi = (SectorROI)region.getROI();
-							sroi.setPoint(cen);
-							region.setROI(sroi);
-							
-							center.setSelectedAction(this);
-						}
-					}
-				};
-				centerRegion.setImageDescriptor(Activator.getImageDescriptor("icons/sector-center-action.png"));
-			
-				center.add(centerRegion);
-			}
-		}
-		
-		if (center.size()>0) center.setSelectedAction(0);
-			
-		// TODO likely to cause flicker
-		getSite().getActionBars().getToolBarManager().update(true);
-		getSite().getActionBars().getMenuManager().update(true);
-	}
-
-	protected double[] getBeamCenter() {
-		
-        IMetadata meta = getMetaData();
-        if (meta==null || !(meta instanceof IDiffractionMetadata)) {
-        	return getImageCenter();
-        }
-        
-        IDiffractionMetadata dm = (IDiffractionMetadata)meta;
-        
-        if (dm.getDetector2DProperties()==null) return getImageCenter();
-        try {
-        	return dm.getDetector2DProperties().getBeamCentreCoords();
-        } catch (NullPointerException npe) {
-        	return getImageCenter();
-        }
- 	}
-
-	private double[] getImageCenter() {
-    	final Dataset image = (Dataset)getImageTrace().getData();
-    	return new double[]{image.getShape()[1]/2d, image.getShape()[0]/2d};
-	}
 
 	protected abstract Dataset[] getXAxis(final SectorROI sroi, final Dataset[] integrals);
-	
+
 	/**
 	 * Please name the integral the same as the name you would like to plot.
 	 * 
@@ -322,8 +268,10 @@ public abstract class SectorProfileTool extends ProfileTool {
 		
 		if (!isRegionTypeSupported(region.getRegionType())) return null;
 
-		final SectorROI sroi = (SectorROI) (rbs==null ? region.getROI() : rbs);
-		if (sroi==null) return null;
+		IROI roi = (rbs==null ? region.getROI() : rbs);
+		if (roi == null || !(roi instanceof SectorROI))
+			return null;
+		final SectorROI sroi = (SectorROI)roi;
 		if (!region.isVisible()) return null;
 
 		if (monitor.isCanceled()) return null;
