@@ -15,15 +15,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
-import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
@@ -50,13 +47,10 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public abstract class ProfileTool extends AbstractToolPage  implements IROIListener, IDataReductionToolPage {
 
@@ -104,7 +98,6 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 				protected void update(TraceEvent evt) {
 					ProfileTool.this.update(null, null, false);
 				}
-
 			};
 			
 			this.regionListener = new IRegionListener.Stub() {			
@@ -564,33 +557,6 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		}
 	}
 
-	/**
-	 * Tries to get the meta from the editor part or uses the one in AbtractDataset of the image
-	 * @return IMetadata, may be null
-	 */
-	protected IMetadata getMetaData() {
-		//Changed to try and get the metadata from the image first
-		//This works around issues that were arrising when the loader factory
-		// and image traces were returning different metadata
-		IMetadata metaData = null;
-		if (getImageTrace()!= null && getImageTrace().getData() != null)
-			metaData = ((Dataset)getImageTrace().getData()).getMetadata();
-		
-		if (metaData != null) return metaData;
-		
-		if (getPart() instanceof IEditorPart) {
-			IEditorPart editor = (IEditorPart)getPart();
-	    	try {
-	    		metaData = LoaderFactory.getMetadata(EclipseUtils.getFilePath(editor.getEditorInput()), null);
-	    		return metaData;
-			} catch (Exception e) {
-				logger.error("Cannot get meta data for "+EclipseUtils.getFilePath(editor.getEditorInput()), e);
-			}
-		}
-		
-		return metaData;
-	}
-	
 	/**
 	 * Used to tell if tool can be used with multiple slice 'Data Reduction' tool.
 	 */

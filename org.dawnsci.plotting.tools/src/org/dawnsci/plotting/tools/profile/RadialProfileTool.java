@@ -40,6 +40,7 @@ import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.ui.PlatformUI;
 import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.utils.ToolUtils;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
@@ -267,14 +268,13 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 		unregisterMetadataListeners();
 	}
 	
-	@Override
 	protected void updateSectors() {
 		
 		if(metaLock.isChecked()) {
 			metaLock.run();
 		}
-		
-		super.updateSectors();
+		ToolUtils.updateSectorsMenu(getPlottingSystem(), getImageTrace(), center, getPart());
+		getSite().getActionBars().getToolBarManager().update(true);
 	}
 
 	@Override
@@ -330,9 +330,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 		return false;
 	}
 	
-	@Override
 	protected IMetadata getMetaData() {
-		
 		ILoaderService service = (ILoaderService)PlatformUI.getWorkbench().getService(ILoaderService.class);
 		
 		IDiffractionMetadata meta = service.getLockedDiffractionMetaData();
@@ -340,10 +338,9 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 		if (meta!= null)
 			return meta;
 		else
-			return super.getMetaData();
-		
+			return ToolUtils.getMetaData(getImageTrace(), getPart());
 	}
-	
+
 	private void setMessage(boolean isMessage) {
 		if (isMessage) {
 			getSite().getActionBars().getStatusLineManager().setErrorMessage("WARNING: Locking profile to meta data for non-zero detector pitch/roll/yaw is an experimental feature");
@@ -559,7 +556,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 			shape[1] = temp;
 		}
 		
-		double[] beamCenter = getBeamCenter();
+		double[] beamCenter = ToolUtils.getBeamCenter(getImageTrace(), getPart());
 		double[] farCorner = new double[]{0,0};
 		if (beamCenter[0] < shape[0]/2.0) farCorner[0] = shape[0];
 		if (beamCenter[1] < shape[1]/2.0) farCorner[1] = shape[1];
@@ -567,5 +564,4 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 		SectorROI sector = new SectorROI(beamCenter[0], beamCenter[1], 0, maxDistance, 0, 2*Math.PI);
 		return sector;
 	}
-	
 }

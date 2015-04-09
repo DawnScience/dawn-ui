@@ -8,13 +8,30 @@
  */
 package org.dawnsci.plotting.tools.utils;
 
+import java.util.Collection;
+
+import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.roi.data.LinearROIData;
+import org.dawb.common.ui.util.EclipseUtils;
+import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
+import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.RingROI;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.jface.action.Action;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 /**
  * Utility class for tools
@@ -166,5 +183,95 @@ public class ToolUtils {
 			increment = (double) increment / 10;
 		}
 		return increment;
+	}
+
+	/**
+	 * Tries to get the meta from the editor part or uses the one in AbtractDataset of the image
+	 * @return IMetadata, may be null
+	 */
+	public static IMetadata getMetaData(IImageTrace trace, IWorkbenchPart part) {
+		//Changed to try and get the metadata from the image first
+		//This works around issues that were arrising when the loader factory
+		// and image traces were returning different metadata
+		IMetadata metaData = null;
+		if (trace.getData() != null)
+			metaData = ((IDataset)trace.getData()).getMetadata();
+		
+		if (metaData != null) return metaData;
+		if (part instanceof IEditorPart) {
+			IEditorPart editor = (IEditorPart) part;
+			try {
+				metaData = LoaderFactory
+						.getMetadata(EclipseUtils.getFilePath(editor
+								.getEditorInput()), null);
+				return metaData;
+			} catch (Exception e) {
+				logger.error(
+						"Cannot get meta data for "
+								+ EclipseUtils.getFilePath(editor
+										.getEditorInput()), e);
+			}
+		}
+		return metaData;
+	}
+
+	/**
+	 * Used for Masking tool and Sector Profile tool
+	 * 
+	 * @return beam centre
+	 */
+	public static double[] getBeamCenter(IImageTrace trace,
+			IWorkbenchPart editor) {
+		IMetadata meta = getMetaData(trace, editor);
+		if (meta == null || !(meta instanceof IDiffractionMetadata)) {
+			return getImageCenter(trace);
+		}
+		IDiffractionMetadata dm = (IDiffractionMetadata) meta;
+
+		if (dm.getDetector2DProperties() == null)
+			return getImageCenter(trace);
+		try {
+			return dm.getDetector2DProperties().getBeamCentreCoords();
+		} catch (NullPointerException npe) {
+			return getImageCenter(trace);
+		}
+	}
+
+	public static double[] getImageCenter(IImageTrace trace) {
+		final IDataset image = (IDataset) trace.getData();
+		return new double[] { image.getShape()[1] / 2d,
+				image.getShape()[0] / 2d };
+	}
+
+	public static void updateSectorsMenu(IPlottingSystem system, final IImageTrace image, final MenuAction menu, final IWorkbenchPart part) {
+		if (system == null)
+			return;
+		menu.clear();
+
+		final Collection<IRegion> regions = system.getRegions();
+		if (regions!=null) for (final IRegion region : regions) {
+			if (isRegionFindCentreSupported(region.getRegionType())) {
+				final Action centerRegion = new Action("Center region '"+region.getName()+"'") {
+					public void run() {
+						menu.setSelectedAction(this);
+						final double[] cen = ToolUtils.getBeamCenter(image, part);
+						if (cen!=null) {
+							final RingROI roi = (RingROI)region.getROI();
+							roi.setPoint(cen);
+							region.setROI(roi);
+							menu.setSelectedAction(this);
+						}
+					}
+				};
+				centerRegion.setImageDescriptor(Activator.getImageDescriptor("icons/sector-center-action.png"));
+				menu.add(centerRegion);
+			}
+		}
+		
+		if (menu.size()>0) menu.setSelectedAction(0);
+	}
+
+	private static boolean isRegionFindCentreSupported(RegionType type) {
+		return type==RegionType.SECTOR || type==RegionType.RING;
 	}
 }
