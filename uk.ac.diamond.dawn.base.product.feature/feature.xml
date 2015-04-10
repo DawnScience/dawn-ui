@@ -81,6 +81,7 @@
          version="0.0.0"
          unpack="false"/>
 
+<!-- remove properties from mx pipeline
    <plugin
          id="uk.ac.diamond.scisoft.mxv1.rcp"
          os="linux"
@@ -88,7 +89,7 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-
+-->
    <plugin
          id="uk.ac.diamond.scisoft.processing.singlecrystal"
          os="linux"
