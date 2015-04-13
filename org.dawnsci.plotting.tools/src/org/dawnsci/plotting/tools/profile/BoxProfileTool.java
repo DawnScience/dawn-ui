@@ -19,6 +19,7 @@ import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.hdf5.IHierarchicalDataFile;
 import org.eclipse.dawnsci.hdf5.Nexus;
@@ -123,7 +124,9 @@ public class BoxProfileTool extends ProfileTool {
 
 		if (monitor.isCanceled()) return null;
 		
-		Dataset[] box = ROIProfile.box((Dataset)image.getData(), (Dataset)image.getMask(), bounds, true);
+		Dataset data = (Dataset)image.getData();
+		if (data instanceof RGBDataset) data = ((RGBDataset)data).getRedView();
+		Dataset[] box = ROIProfile.box(data, (Dataset)image.getMask(), bounds, true);
         if (box==null) return null;
         
         Dataset xi = null;
