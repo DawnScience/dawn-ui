@@ -107,6 +107,14 @@ public class DiffractionDetectorPreferenceInitializer extends AbstractPreference
 		dd9.setNumberOfPixelsX(4008);
 		dd9.setNumberOfPixelsY(2663);
 		dds.addDiffractionDetector(dd9);
+		
+		DiffractionDetector dd10 = new DiffractionDetector();
+		dd10.setDetectorName("PLS CMOS");
+		dd10.setxPixelSize(Amount.valueOf(25.3, SI.MICRO(SI.METRE)));
+		dd10.setyPixelSize(Amount.valueOf(25.3, SI.MICRO(SI.METRE)));
+		dd10.setNumberOfPixelsX(4150);
+		dd10.setNumberOfPixelsY(2083);
+		dds.addDiffractionDetector(dd10);
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		XMLEncoder xmlEncoder = new XMLEncoder(baos);
