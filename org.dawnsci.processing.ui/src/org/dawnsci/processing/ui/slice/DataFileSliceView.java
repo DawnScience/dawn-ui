@@ -661,11 +661,11 @@ public class DataFileSliceView extends ViewPart {
 				Map<Integer, String> axesNames = context.getAxesNames();
 				
 				if (axesNames != null) {
-
-					AxesMetadata axMeta = SlicedDataUtils.createAxisMetadata(path, lazyDataset, axesNames);
-					if (axMeta != null) lazyDataset.setMetadata(axMeta);
-					else lazyDataset.clearMetadata(AxesMetadata.class);
-
+					AxesMetadata am = lservice.getAxesMetadata(lazyDataset, path, axesNames);
+					lazyDataset.setMetadata(am);
+//					AxesMetadata axMeta = SlicedDataUtils.createAxisMetadata(path, lazyDataset, axesNames);
+//					if (axMeta != null) lazyDataset.setMetadata(axMeta);
+//					else lazyDataset.clearMetadata(AxesMetadata.class);
 				}
 				
 				

@@ -33,67 +33,6 @@ public class SlicedDataUtils {
 	public static void setLoaderService(ILoaderService s) {
 		lservice = s;
 	}
-
-	public static AxesMetadata createAxisMetadata(String path, ILazyDataset ds, Map<Integer, String> axesNames) throws Exception {
-		
-		int rank = ds.getRank();
-		int[] shape = ds.getShape();
-		
-		AxesMetadataImpl axMeta = new AxesMetadataImpl(rank);
-		for (Integer key : axesNames.keySet()) {
-			String axesName = axesNames.get(key);
-			IDataHolder dataHolder = lservice.getData(path, new IMonitor.Stub());
-			ILazyDataset lazyAx = dataHolder.getLazyDataset(axesName);
-			if (ds == lazyAx) throw new IllegalArgumentException("Axes metadata should not contain original dataset!");
-			
-			if (lazyAx != null) {
-				int axRank = lazyAx.getRank();
-				if (axRank == rank || axRank == 1)	{
-					axMeta.setAxis(key-1, lazyAx);
-				} else {
-					
-					int[] axShape = lazyAx.getShape();
-					int[] newShape = new int[rank];
-					Arrays.fill(newShape, 1);
-					
-					int[] idx = new int[axRank];
-					int max = rank;
-					
-					for (int i = axRank-1; i >= 0; i--) {
-						
-						int id = axShape[i];
-						boolean found = false;
-						
-						for (int j = max -1 ; i >= 0; i--) {
-							
-							if (id == shape[j]) {
-								found = true;
-								idx[i] = j;
-								max = j;
-								break;
-							}
-							
-						}
-						
-						if (!found) {
-							throw new IllegalArgumentException("Axes shape not compatible!");
-						}
-					}
-					
-					for (int i = 0; i < axRank; i++) {
-						newShape[idx[i]] = axShape[i];
-					}
-					
-					lazyAx = lazyAx.getSliceView();
-					lazyAx.setShape(newShape);
-				}
-				axMeta.setAxis(key-1, lazyAx);
-			}
-			else axMeta.setAxis(key-1, new ILazyDataset[1]);
-		}
-		
-		return axMeta;
-	}
 	
 	public static void plotDataWithMetadata(IDataset data, final IPlottingSystem system, int[] dataDims) throws Exception {
 		
