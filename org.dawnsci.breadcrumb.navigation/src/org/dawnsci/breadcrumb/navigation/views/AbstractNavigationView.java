@@ -139,7 +139,7 @@ public abstract class AbstractNavigationView extends ViewPart implements ISelect
 	protected abstract String getPreferencePageId();
 	
 	@Override
-	public void createPartControl(Composite ancestor) {
+	public final void createPartControl(Composite ancestor) {
 		createUI(ancestor);
 		createActions();
 		connectionManager.connect();
@@ -490,7 +490,7 @@ public abstract class AbstractNavigationView extends ViewPart implements ISelect
 	}
 
 
-	private List<TreeNode> getNodes(SelectionChangedEvent event) {
+	protected List<TreeNode> getNodes(SelectionChangedEvent event) {
 		
 		final Object sel     = event!=null
 				             ? ((StructuredSelection)event.getSelection()).getFirstElement()
@@ -590,6 +590,9 @@ public abstract class AbstractNavigationView extends ViewPart implements ISelect
 
 	public List<StyledTreeBreadcrumbViewer> getViewers() {
 		return new ArrayList<StyledTreeBreadcrumbViewer>(bviewers);
+	}
+	public StyledTreeBreadcrumbViewer getPrimaryViewer() {
+		return bviewers.get(0);
 	}
 
 	/**
