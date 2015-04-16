@@ -141,7 +141,7 @@ public class BeanUI {
 		if (fieldName == null)
 			throw new Exception("Null fieldName passed to uiToBean. Please set the field name.");
 
-		final IFieldWidget box = BeanUI.getFieldWiget(fieldName, uiObject);
+		final IFieldWidget box = BeanUI.getFieldWidget(fieldName, uiObject);
 		if (box == null)
 			return; // Not all properties have to be in the UI.
 
@@ -308,6 +308,7 @@ public class BeanUI {
 	 * @param fieldName
 	 * @return IFieldWidget
 	 */
+	@SafeVarargs // Safe because we only use the names of the bean classes
 	public static IFieldWidget getBeanField(String fieldName, final Class<? extends Object>... beanClasses) {
 
 		fieldName = fieldName.substring(0, 1).toLowerCase(Locale.US) + fieldName.substring(1);
@@ -404,7 +405,7 @@ public class BeanUI {
 			final String fieldName = it.next();
 			if (names.contains(fieldName)) {					
 				if (fieldName.equals("class")) continue;
-				final IFieldWidget box = BeanUI.getFieldWiget(fieldName, uiObject);
+				final IFieldWidget box = BeanUI.getFieldWidget(fieldName, uiObject);
 				// NOTE non-IFieldWidget fields will be ignored.
 				if (box != null) {
 					final Object val = worker.requireValue() ? getValue(bean, fieldName) : null;
@@ -457,7 +458,7 @@ public class BeanUI {
 				final Method[] methods = bean.getClass().getMethods();
 				for (Method m : methods) {
 					if (m.getName().equals(setter) && m.getParameterTypes().length==1) {
-						Class type = m.getParameterTypes()[0];
+						Class<?> type = m.getParameterTypes()[0];
 						if (!type.isAssignableFrom(clazz)) {
 							continue;
 						}
@@ -492,7 +493,7 @@ public class BeanUI {
 	 * @throws IllegalAccessException
 	 * @throws IllegalArgumentException
 	 */
-	public static IFieldWidget getFieldWiget(final String fieldName, final Object uiObject) throws Exception {
+	public static IFieldWidget getFieldWidget(final String fieldName, final Object uiObject) throws Exception {
 		final String methodName = BeansFactory.getGetterName(fieldName);
 		final Method getter = uiObject.getClass().getMethod(methodName);
 		final Object box = getter.invoke(uiObject);
@@ -500,6 +501,16 @@ public class BeanUI {
 			return (IFieldWidget) box;
 		}
 		return null;
+	}
+
+	/**
+	 * Method name spelling was corrected to getFieldWidget(). This method with
+	 * the old name exists only to avoid breaking existing code and should be
+	 * removed once all references to the mis-spelled name have been corrected
+	 */
+	@Deprecated
+	public static IFieldWidget getFieldWiget(final String fieldName, final Object uiObject) throws Exception {
+		return getFieldWidget(fieldName, uiObject);
 	}
 
 	/**
@@ -524,7 +535,6 @@ public class BeanUI {
 	 * @return list of fields
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unchecked")
 	public static List<String> getEditingFields(Object editorBean, Object editorUI) throws Exception {
 
 		final Collection<String> fields = BeanUtils.describe(editorBean).keySet();
@@ -534,7 +544,7 @@ public class BeanUI {
 		for (Iterator<String> it = expressionFields.iterator(); it.hasNext();) {
 			String field = it.next();
 			try {
-				final IFieldWidget wid = BeanUI.getFieldWiget(field, editorUI);
+				final IFieldWidget wid = BeanUI.getFieldWidget(field, editorUI);
 				if (wid == null)
 					it.remove();
 			} catch (Exception ne) {
