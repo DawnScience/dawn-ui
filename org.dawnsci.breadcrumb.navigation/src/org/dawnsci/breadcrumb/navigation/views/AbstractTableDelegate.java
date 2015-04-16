@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -431,9 +432,10 @@ public abstract class AbstractTableDelegate implements INavigationDelegate {
 	}
 
 	public void saveSearch(final String searchString) {
-		final List<String> searches = getPreviousSearches();
-		final List<String> save     = new ArrayList<String>(searches);
-		save.add(0, searchString);
+		final Collection<String> searches = getPreviousSearches();
+		final Collection<String> save     = new LinkedHashSet<String>();
+		save.add(searchString);
+		save.addAll(searches);
 		while(save.size()>20) save.remove(save.size()-1);
 		StringBuilder buf = new StringBuilder();
 		for (String search : save) {
@@ -453,10 +455,12 @@ public abstract class AbstractTableDelegate implements INavigationDelegate {
 		});
 	}
 
-	private List<String> getPreviousSearches() {
+	private Collection<String> getPreviousSearches() {
 		final String searchP = Activator.getDefault().getPreferenceStore().getString(NavigationConstants.QUERY_HISTORY);
 		if (searchP==null) return null;
-		return Arrays.asList(searchP.split("#SEP#"));
+		final LinkedHashSet<String> ret = new LinkedHashSet<String>();
+		ret.addAll(Arrays.asList(searchP.split("#SEP#")));
+		return ret;
 	}
 	
 	public void dispose() {
@@ -541,7 +545,7 @@ public abstract class AbstractTableDelegate implements INavigationDelegate {
 				GridUtils.setVisible(executeButton, true);
 				contents.layout();
 				
-				List<String> searches = getPreviousSearches();
+				Collection<String> searches = getPreviousSearches();
 				searchText.setItems(searches.toArray(new String[searches.size()]));
 			}
 		};
