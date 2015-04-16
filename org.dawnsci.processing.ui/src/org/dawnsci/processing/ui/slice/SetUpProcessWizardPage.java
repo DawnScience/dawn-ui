@@ -22,9 +22,7 @@ import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
-import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
-import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
 import org.eclipse.dawnsci.analysis.dataset.slicer.Slicer;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -322,8 +320,8 @@ public class SetUpProcessWizardPage extends WizardPage {
 				}
 			}
 			
-			AxesMetadata amd = SlicedDataUtils.createAxisMetadata(path, lazyDataset, sliceComponent.getAxesNames());
-			lazyDataset.setMetadata(amd);
+			AxesMetadata ax = lservice.getAxesMetadata(lazyDataset, path, sliceComponent.getAxesNames());
+			lazyDataset.setMetadata(ax);
 			IDataset firstSlice = Slicer.getFirstSlice(lazyDataset, sliceDims);
 			
 			SlicedDataUtils.plotDataWithMetadata(firstSlice, system, Slicer.getDataDimensions(lazyDataset.getShape(), sliceDims));

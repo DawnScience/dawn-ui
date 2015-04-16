@@ -58,6 +58,10 @@ public class EscapableSliceVisitor implements SliceVisitor {
 		OperationData  data = new OperationData(slice);
 		SliceFromSeriesMetadata ssm = slice.getMetadata(SliceFromSeriesMetadata.class).get(0);
 		
+		try {
+			
+		for (IOperation op : series) op.init();
+		
 		for (IOperation<? extends IOperationModel, ? extends OperationData> i : series) {
 
 			if (i instanceof IExportOperation) {
@@ -79,6 +83,11 @@ public class EscapableSliceVisitor implements SliceVisitor {
 
 
 		visitor.executed(data, null); // Send result.
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		} finally {
+			for (IOperation op : series) op.dispose();
+		}
 
 	}
 	
