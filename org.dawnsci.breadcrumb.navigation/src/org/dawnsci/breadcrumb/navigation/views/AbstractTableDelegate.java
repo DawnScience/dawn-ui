@@ -433,10 +433,14 @@ public abstract class AbstractTableDelegate implements INavigationDelegate {
 
 	public void saveSearch(final String searchString) {
 		final Collection<String> searches = getPreviousSearches();
-		final Collection<String> save     = new LinkedHashSet<String>();
-		save.add(searchString);
-		save.addAll(searches);
+		final Collection<String> unique   = new LinkedHashSet<String>();
+		unique.add(searchString);
+		unique.addAll(searches);
+		
+		final List<String> save = new ArrayList<String>(unique.size());
+		save.addAll(unique);
 		while(save.size()>20) save.remove(save.size()-1);
+		
 		StringBuilder buf = new StringBuilder();
 		for (String search : save) {
 			buf.append(search);
