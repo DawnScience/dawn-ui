@@ -471,7 +471,7 @@ public final class VerticalListEditor extends ListEditor {
 
 			@Override
 			public String getToolTipText(Object element) {
-				return additionalFields != null ? "Right click to choose compare mode." : "";
+				return additionalFields != null ? "Right click to choose compare mode." : null;
 			}
 		});
 
@@ -482,10 +482,16 @@ public final class VerticalListEditor extends ListEditor {
 
 				final TableViewerColumn col = new TableViewerColumn(listViewer, SWT.NONE, i + 1);
 				extraColumns.add(col);
-				col.getColumn().setText(additionalField);
+
+				String columnTitle = additionalField;
+				if (columnNames != null && columnNames.length > i + 1) {
+					columnTitle = columnNames[i + 1];
+				}
+				col.getColumn().setText(columnTitle);
+
 				int width = 300;
-				if (columnWidths!= null && columnWidths.length > i + 1){
-					width = columnWidths[i+1];
+				if (columnWidths != null && columnWidths.length > i + 1) {
+					width = columnWidths[i + 1];
 				}
 				col.getColumn().setWidth(width);
 
