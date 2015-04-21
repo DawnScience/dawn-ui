@@ -15,15 +15,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.dawb.common.services.ServiceManager;
-import org.dawb.common.services.expressions.IExpressionEngine;
-import org.dawb.common.services.expressions.IExpressionService;
 import org.dawnsci.breadcrumb.navigation.Activator;
+import org.dawnsci.breadcrumb.navigation.ExpressionServiceHolder;
 import org.dawnsci.breadcrumb.navigation.preference.NavigationConstants;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.analysis.api.expressions.IExpressionEngine;
+import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -59,7 +59,7 @@ public abstract class AbstractLazyContentProvider implements ISortableLazyConten
 		this.wildJob = new WildJob();
 		this.sortJob = new SortJob();
 		try {
-			this.expressionService = (IExpressionService)ServiceManager.getService(IExpressionService.class);
+			this.expressionService = ExpressionServiceHolder.getExpressionService();
 		} catch (Exception e) {
 			logger.error("Cannot get expression service - required for queary search in ISPyB client!", e);
 		}

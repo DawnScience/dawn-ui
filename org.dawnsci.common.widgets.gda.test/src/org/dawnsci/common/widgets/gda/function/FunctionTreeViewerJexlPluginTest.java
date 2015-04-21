@@ -12,9 +12,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.dawb.common.services.ServiceManager;
-import org.dawb.common.services.expressions.IExpressionService;
 import org.dawnsci.common.widgets.gda.function.descriptors.CustomFunctionDescriptorProvider;
 import org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunction;
+import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.swt.widgets.Composite;
 import org.junit.Before;

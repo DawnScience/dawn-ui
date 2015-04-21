@@ -8,10 +8,10 @@
  */
 package org.dawnsci.common.widgets.gda.function.jexl;
 
-import org.dawb.common.services.expressions.IExpressionEngine;
 import org.dawnsci.common.widgets.gda.function.descriptors.FunctionInstantiationFailedException;
 import org.dawnsci.common.widgets.gda.function.descriptors.IFunctionDescriptor;
 import org.eclipse.core.runtime.PlatformObject;
+import org.eclipse.dawnsci.analysis.api.expressions.IExpressionEngine;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 
 public class JexlExpressionFunctionDescriptor extends PlatformObject implements IFunctionDescriptor {

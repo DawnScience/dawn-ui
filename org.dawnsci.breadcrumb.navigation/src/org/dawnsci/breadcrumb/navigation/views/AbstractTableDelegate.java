@@ -19,18 +19,18 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.dawb.common.services.ServiceManager;
-import org.dawb.common.services.expressions.IExpressionEngine;
-import org.dawb.common.services.expressions.IExpressionService;
 import org.dawb.common.ui.actions.ExportTableAction;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.breadcrumb.navigation.Activator;
+import org.dawnsci.breadcrumb.navigation.ExpressionServiceHolder;
 import org.dawnsci.breadcrumb.navigation.preference.NavigationConstants;
 import org.dawnsci.breadcrumb.navigation.table.AbstractLazyContentProvider;
 import org.dawnsci.breadcrumb.navigation.table.AbstractLazyLabelProvider;
 import org.dawnsci.breadcrumb.navigation.table.DirectionalIndexedColumnEnum;
 import org.dawnsci.breadcrumb.navigation.table.ISortableLazyContentProvider;
+import org.eclipse.dawnsci.analysis.api.expressions.IExpressionEngine;
+import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
@@ -112,7 +112,7 @@ public abstract class AbstractTableDelegate implements INavigationDelegate {
 		
 		this.updateJob = createUpdateJob();
 		try {
-			this.expressionService = (IExpressionService)ServiceManager.getService(IExpressionService.class);
+			this.expressionService = ExpressionServiceHolder.getExpressionService();
 		} catch (Exception e) {
 			logger.error("Cannot get IExpressionService - ISPyB must have an IExpressionService in order to function!", e);
 		}

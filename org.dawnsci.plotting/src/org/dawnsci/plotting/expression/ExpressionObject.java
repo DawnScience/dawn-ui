@@ -19,9 +19,9 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.dawb.common.services.ServiceManager;
-import org.dawb.common.services.expressions.IExpressionEngine;
-import org.dawb.common.services.expressions.IExpressionService;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.dawnsci.analysis.api.expressions.IExpressionEngine;
+import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
 import org.eclipse.dawnsci.analysis.api.io.ILazyLoader;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
