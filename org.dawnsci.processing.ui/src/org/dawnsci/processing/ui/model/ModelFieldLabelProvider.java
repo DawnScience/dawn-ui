@@ -5,9 +5,14 @@ import org.dawnsci.processing.ui.Activator;
 import org.eclipse.dawnsci.analysis.api.processing.model.ModelField;
 import org.eclipse.dawnsci.analysis.api.processing.model.OperationModelField;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 
-class ModelFieldLabelProvider extends ColumnLabelProvider {
+class ModelFieldLabelProvider extends EnableIfColumnLabelProvider {
 
 	private Image ticked;
 	private Image unticked;
@@ -61,6 +66,7 @@ class ModelFieldLabelProvider extends ColumnLabelProvider {
 	public void dispose() {
 		if (ticked!=null)   ticked.dispose();
 		if (unticked!=null) unticked.dispose();
+		super.dispose();
 	}
 
 }

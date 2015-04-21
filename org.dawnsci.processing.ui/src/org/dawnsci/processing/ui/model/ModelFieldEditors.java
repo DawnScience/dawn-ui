@@ -2,22 +2,29 @@ package org.dawnsci.processing.ui.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
-import org.dawnsci.common.widgets.celleditor.NumberCellEditor;
 import org.dawnsci.common.widgets.celleditor.FileDialogCellEditor;
+import org.dawnsci.common.widgets.celleditor.NumberCellEditor;
 import org.dawnsci.common.widgets.celleditor.TextCellEditorWithContentProposal;
 import org.dawnsci.plotting.roi.RegionCellEditor;
+import org.dawnsci.processing.ui.ServiceHolder;
 import org.dawnsci.processing.ui.slice.SlicedDataUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.analysis.api.expressions.IExpressionEngine;
+import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
 import org.eclipse.dawnsci.analysis.api.processing.model.FileType;
+import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.ModelField;
+import org.eclipse.dawnsci.analysis.api.processing.model.ModelUtils;
 import org.eclipse.dawnsci.analysis.api.processing.model.OperationModelField;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.jface.fieldassist.ContentProposal;
@@ -36,8 +43,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ModelFieldEditors {
+	
+	private static final Logger logger = LoggerFactory.getLogger(ModelFieldEditors.class);
 
 	private static ISelectionListener selectionListener;
 	private static ToolTip            currentHint;
@@ -70,9 +81,11 @@ public class ModelFieldEditors {
 			
 		}
         
+  
 		CellEditor ed = null;
     	final OperationModelField anot = field.getAnnotation();
-    	
+    	if (!isEnabled(field.getModel(), anot)) return null;
+   	
         if (clazz == Boolean.class) {
         	ed = new CheckboxCellEditor(parent, SWT.NONE);
         	
@@ -114,7 +127,42 @@ public class ModelFieldEditors {
         return ed;
 
 	}
-	
+
+	public static boolean isEnabled(ModelField field) {
+    	final OperationModelField anot  = field.getAnnotation();
+    	final IOperationModel     model = field.getModel();
+    	return isEnabled(model, anot);
+	}
+
+	private static boolean isEnabled(IOperationModel model, OperationModelField anot) {
+
+		if (!anot.editable()) return false;
+    	
+	   	String enableIf = anot.enableif();
+	   	if (enableIf!=null && !"".equals(enableIf)) {
+	   		
+	   		try {
+		   		final IExpressionService service = ServiceHolder.getExpressionService();
+		   		final IExpressionEngine  engine  = service.getExpressionEngine();
+		   		engine.createExpression(enableIf);
+		   		
+		   		final Map<String, Object>    values = new HashMap<>();
+		   		final Collection<ModelField> fields = ModelUtils.getModelFields(model);
+		   		for (ModelField field : fields) {
+		   			Object value = field.get();
+		   			if (value instanceof Enum) value = ((Enum)value).name();
+		   			values.put(field.getName(), value);
+				}
+		   		engine.setLoadedVariables(values);
+		   		return (Boolean)engine.evaluate();
+		   		
+	   		} catch (Exception ne) {
+	   			logger.error("Cannot evaluate expression "+enableIf, ne);
+	   		}
+	   	}
+	   	
+	    return true;
+	}
 
 	private static void showHint(final String hint, final Composite parent) {
 		

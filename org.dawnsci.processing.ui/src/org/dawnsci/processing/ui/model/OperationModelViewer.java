@@ -41,6 +41,7 @@ import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -207,7 +208,7 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
         TableViewerColumn var   = new TableViewerColumn(viewer, SWT.LEFT, 0);
 		var.getColumn().setText("Name");
 		var.getColumn().setWidth(200);
-		var.setLabelProvider(new ColumnLabelProvider() {
+		var.setLabelProvider(new EnableIfColumnLabelProvider() {
 			public String getText(Object element) {
 				return ((ModelField)element).getDisplayName();
 			}
@@ -326,7 +327,7 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 			try {
 				ModelField field = (ModelField)element;
 				field.set(value); // Changes model value, getModel() will now return a model with the value changed.
-				viewer.refresh(field);
+				viewer.refresh();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
