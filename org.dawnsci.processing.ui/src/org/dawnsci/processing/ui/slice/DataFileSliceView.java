@@ -25,6 +25,7 @@ import org.dawb.common.services.conversion.ProcessingOutputType;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.processing.ui.Activator;
+import org.dawnsci.processing.ui.preference.ProcessingConstants;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -40,6 +41,7 @@ import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
+import org.eclipse.dawnsci.analysis.api.processing.ExecutionType;
 import org.eclipse.dawnsci.analysis.api.processing.IExecutionVisitor;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationContext;
@@ -63,6 +65,7 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
@@ -337,6 +340,19 @@ public class DataFileSliceView extends ViewPart {
 				IOperation<? extends IOperationModel, ? extends OperationData>[] ops = getOperations();
 
 				if (ops != null) {
+					
+					ExecutionType et = ExecutionType.SERIES;
+					
+					try {
+						IPreferenceStore ps = Activator.getDefault().getPreferenceStore();
+						String string = ps.getString(ProcessingConstants.EXECUTION_TYPE);
+						et = ExecutionType.valueOf(string);
+					} catch (Exception e) {
+						logger.error("Could not load execution type from preference!: "+ e.getMessage());
+					}
+					
+					
+					final ExecutionType etype = et;
 
 					final IOperation<? extends IOperationModel, ? extends OperationData>[] fop = ops;
 
@@ -355,6 +371,11 @@ public class DataFileSliceView extends ViewPart {
 						@Override
 						public ProcessingOutputType getProcessingOutputType() {
 							return processingOutputType;
+						}
+
+						@Override
+						public ExecutionType getExecutionType() {
+							return etype;
 						}
 
 					});

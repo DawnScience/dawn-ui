@@ -151,5 +151,20 @@
             content="intro/introContribution.xml">
       </configExtension>
    </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="org.dawnsci.processing.ui.preference.ProcessingPreferenceInitializer">
+      </initializer>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="org.dawnsci.preferences.root"
+            class="org.dawnsci.processing.ui.preference.ProcessingPreferencePage"
+            id="org.dawnsci.processing.ui.preference.ProcessingPreferencePage"
+            name="Processing Preferences">
+      </page>
+   </extension>
 
 </plugin>
