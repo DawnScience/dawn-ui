@@ -11,6 +11,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.slf4j.Logger;
@@ -22,6 +23,7 @@ public class ProcessingPreferencePage extends PreferencePage implements
 	private static final Logger logger = LoggerFactory.getLogger(ProcessingPreferencePage.class);
 	
 	Combo combo;
+	Spinner spinner;
 
 	@Override
 	protected Control createContents(Composite parent) {
@@ -39,6 +41,17 @@ public class ProcessingPreferencePage extends PreferencePage implements
 		
 		String string = getPreferenceStore().getString(ProcessingConstants.EXECUTION_TYPE);
 		for (int i = 0; i<items.length; i++) if (items[i].equals(string)) combo.select(i);
+		
+		label = new Label(main, SWT.NONE);
+		label.setText("Set Graph Pool Size");
+		
+		spinner = new Spinner(main, SWT.NONE);
+		spinner.setMaximum(16);
+		spinner.setMinimum(1);
+		
+		int val = getPreferenceStore().getInt(ProcessingConstants.POOL_SIZE);
+		//minus 1, from min of 1 to zero indexing
+		spinner.setSelection(val);
 		
 		return main;
 	}
@@ -59,6 +72,8 @@ public class ProcessingPreferencePage extends PreferencePage implements
 			logger.error("Could not change runner: " + e.getMessage());
 		}
 		
+		getPreferenceStore().setValue(ProcessingConstants.POOL_SIZE, spinner.getSelection());
+		
 		return super.performOk();
 	}
 	
@@ -67,6 +82,10 @@ public class ProcessingPreferencePage extends PreferencePage implements
 		getPreferenceStore().setValue(
 				ProcessingConstants.EXECUTION_TYPE, getPreferenceStore().getDefaultString(
 						ProcessingConstants.EXECUTION_TYPE));
+		
+		getPreferenceStore().setValue(
+				ProcessingConstants.POOL_SIZE, getPreferenceStore().getDefaultInt(
+						ProcessingConstants.POOL_SIZE));
 	}
 
 }

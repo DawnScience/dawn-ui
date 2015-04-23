@@ -13,5 +13,6 @@ public class ProcessingConstants {
 	public static final String LOCK_PIPELINE = "org.dawnsci.processing.ui.preference.lockPipeline";
 	public static final String OPERATION_IDS = "org.dawnsci.processing.ui.preference.operationIds";
 	public static final String EXECUTION_TYPE = "org.dawnsci.processing.ui.preference.executionType";
+	public static final String POOL_SIZE = "org.dawnsci.processing.ui.preference.poolsize";
 
 }

@@ -342,17 +342,22 @@ public class DataFileSliceView extends ViewPart {
 				if (ops != null) {
 					
 					ExecutionType et = ExecutionType.SERIES;
+					int pool = 1;
 					
 					try {
 						IPreferenceStore ps = Activator.getDefault().getPreferenceStore();
+						
+						pool = ps.getInt(ProcessingConstants.POOL_SIZE);
+						
 						String string = ps.getString(ProcessingConstants.EXECUTION_TYPE);
 						et = ExecutionType.valueOf(string);
 					} catch (Exception e) {
 						logger.error("Could not load execution type from preference!: "+ e.getMessage());
 					}
 					
-					
 					final ExecutionType etype = et;
+					
+					final int poolsize = pool;
 
 					final IOperation<? extends IOperationModel, ? extends OperationData>[] fop = ops;
 
@@ -376,6 +381,11 @@ public class DataFileSliceView extends ViewPart {
 						@Override
 						public ExecutionType getExecutionType() {
 							return etype;
+						}
+
+						@Override
+						public int getPoolSize() {
+							return poolsize;
 						}
 
 					});
