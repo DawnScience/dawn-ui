@@ -83,8 +83,6 @@ public class EscapableSliceVisitor implements SliceVisitor {
 
 
 		visitor.executed(data, null); // Send result.
-		} catch (Exception e) {
-			logger.error(e.getMessage());
 		} finally {
 			for (IOperation op : series) op.dispose();
 		}
