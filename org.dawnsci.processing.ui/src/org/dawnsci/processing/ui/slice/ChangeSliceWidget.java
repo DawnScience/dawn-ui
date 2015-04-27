@@ -158,7 +158,7 @@ public class ChangeSliceWidget {
 	
 	public SliceInformation getCurrentSliceInformation() {
 		
-		return new SliceInformation(input.get(current), output.get(current), subsampling,shape, dataDims, max, current);
+		return new SliceInformation(input.get(current), output.get(current), subsampling, dataDims, max, current);
 		
 	}
 	
