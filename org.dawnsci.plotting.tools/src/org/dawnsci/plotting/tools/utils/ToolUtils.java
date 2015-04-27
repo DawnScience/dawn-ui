@@ -137,8 +137,12 @@ public class ToolUtils {
 	public static double getRectangleMaxIntensity(IDataset rectangleSlice) {
 		if (rectangleSlice == null)
 			return Double.NaN;
-		int[] maxPos = rectangleSlice.maxPos();
-		return rectangleSlice.getDouble(maxPos[0], maxPos[1]);
+		int[] shape = rectangleSlice.getShape();
+		if (shape[0] > 0 && shape[1] > 0) {
+			int[] maxPos = rectangleSlice.maxPos();
+			return rectangleSlice.getDouble(maxPos[0], maxPos[1]);
+		}
+		return 0;
 	}
 
 	/**
