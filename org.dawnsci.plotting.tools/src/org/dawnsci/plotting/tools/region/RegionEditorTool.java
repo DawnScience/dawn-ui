@@ -40,6 +40,7 @@ import org.dawnsci.plotting.tools.utils.ToolUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
@@ -98,7 +99,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
-import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -129,7 +129,7 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 	 * of the selection until the user lets go.
 	 */
 	private Map<String,IROI> dragBounds;
-	private RegionBoundsUIJob updateJob;
+	private RegionBoundsJob updateJob;
 
 	private Action visibleToggleAction;
 	private Action activeToggleAction;
@@ -270,8 +270,7 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 						return;
 					// set the Region isActive flag
 					region.setActive(true);
-
-					double[] intensitySum = getIntensityAndSum(region);
+					double[] intensitySum = getIntensityAndSum(roi);
 					model.addRegion(region, intensitySum[0], intensitySum[1]);
 
 					if (model.getRoot().getChildren() != null) viewer.setInput(model.getRoot());
@@ -333,7 +332,8 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 				model.setRegionDragged(true);
 				viewer.cancelEditing();
 				if (!isActive()) return;
-				updateRegion(evt);
+//				IRegion region = (IRegion) evt.getSource();
+				updateRegionNode(evt.getROI(), true);
 			}
 
 			@Override
@@ -341,7 +341,7 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 				model.setRegionDragged(false);
 				if (!model.isTreeModified()) {
 					if (!isActive()) return;
-					updateRegion(evt);
+					updateRegionNode(evt.getROI(), false);
 					IRegion region = (IRegion)evt.getSource();
 					if(region == null) return;
 					updateColorSelection(region);
@@ -354,10 +354,29 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 							break;
 						}
 					}
-					updateRegion(evt);
+					updateRegionNode(evt.getROI(), false);
 				}
 			}
 		};
+	}
+
+	/**
+	 * Uses cancellable UIJob
+	 * 
+	 * @param evt
+	 * @param isDragged
+	 */
+	private void updateRegionNode(final IROI roi, boolean isDragged) {
+		if(viewer == null) return;
+		if(viewer.isCellEditorActive()) return; 
+		if (updateJob==null) {
+			updateJob = new RegionBoundsJob();
+			updateJob.setPriority(Job.INTERACTIVE);
+		}
+		updateJob.setROI(roi);
+		updateJob.setIsDragged(isDragged);
+		updateJob.cancel();
+		updateJob.schedule();
 	}
 
 	private ITraceListener createTraceListener() {
@@ -852,7 +871,7 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 				for (IRegion iRegion : regions) {
 					iRegion.addROIListener(roiListener);
 					if (model != null) {
-						double[] intensitySum = getIntensityAndSum(iRegion);
+						double[] intensitySum = getIntensityAndSum(iRegion.getROI());
 						model.addRegion(iRegion, intensitySum[0], intensitySum[1]);
 					}
 				}
@@ -918,75 +937,61 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 		}
 	}
 
-	/**
-	 * Uses cancellable UIJob
-	 * 
-	 * @param evt
-	 */
-	private void updateRegion(final ROIEvent evt) {
-		if(viewer == null) return;
-		if(viewer.isCellEditorActive()) return; 
-		if (updateJob==null) {
-			updateJob = new RegionBoundsUIJob();
-			updateJob.setPriority(UIJob.INTERACTIVE);
-			//updateJob.setUser(false);
-		}
-		updateJob.setEvent(evt);
-		updateJob.cancel();
-		updateJob.schedule();
-	}
+	private final class RegionBoundsJob extends Job {
 
-	private final class RegionBoundsUIJob extends UIJob {
+		private IROI roi;
+		private double[] intensitySum = new double[] {0,0};
+		private boolean isDragged = false;
 
-		private ROIEvent evt;
-
-		RegionBoundsUIJob() {
+		RegionBoundsJob() {
 			super("Region update");
 		}
 
 		@Override
-		public IStatus runInUIThread(IProgressMonitor monitor) {
+		public IStatus run(IProgressMonitor monitor) {
 			if (viewer != null) {
 				if (monitor.isCanceled())
 					return Status.CANCEL_STATUS;
 
-				IRegion region = (IRegion) evt.getSource();
-				IROI rb = evt.getROI();
 				if (model == null)
 					return Status.CANCEL_STATUS;
+				if (!isDragged )
+					intensitySum = getIntensityAndSum(roi);
 
-				double[] intensitySum = getIntensityAndSum(region);
-				model.updateRegion(region, intensitySum[0], intensitySum[1]);
-
-				if (monitor.isCanceled())
+				if (model == null)
 					return Status.CANCEL_STATUS;
-				dragBounds.put(region.getName(), rb);
-
-				if (monitor.isCanceled())
-					return Status.CANCEL_STATUS;
-				viewer.refresh(true);
+				model.updateRegion(roi, intensitySum[0], intensitySum[1]);
+				dragBounds.put(roi.getName(), roi);
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						viewer.refresh(true);
+					}
+				});
 			}
 			return Status.OK_STATUS;
 		}
-		
-		void setEvent(ROIEvent evt) {
-			this.evt = evt;
+
+		public void setROI(IROI roi) {
+			this.roi = roi;
+		}
+
+		public void setIsDragged(boolean isDragged) {
+			this.isDragged = isDragged;
 		}
 	};
 
 	/**
 	 * Returns the Intensity and the Sum of the region for Rectangle, lines and Point
-	 * @param region
+	 * @param roi
 	 * @return
 	 */
-	private double[] getIntensityAndSum(IRegion region) {
+	private double[] getIntensityAndSum(IROI roi) {
 		try {
 			double[] intensityAndSum = new double[] {0, 0};
 			Collection<ITrace> traces = getPlottingSystem().getTraces();
 			if (traces != null && traces.size() == 1
 					&& traces.iterator().next() instanceof IImageTrace) {
 				final IImageTrace trace = (IImageTrace) traces.iterator().next();
-				IROI roi = region.getROI();
 				if (roi instanceof RectangularROI) {
 					RectangularROI rroi = (RectangularROI) roi;
 						Dataset dataRegion = (Dataset) ToolUtils

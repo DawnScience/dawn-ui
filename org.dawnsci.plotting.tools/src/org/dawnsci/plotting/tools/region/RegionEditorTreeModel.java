@@ -305,7 +305,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		super.dispose();
 	}
 
-	public void updateRegion(IRegion region, double maxIntensity, double sum) {
+	public void updateRegion(IROI roi, double maxIntensity, double sum) {
 		List<TreeNode> nodes = root.getChildren();
 		if (nodes == null)
 			return;
@@ -313,9 +313,10 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 			if (node instanceof RegionEditorNode) {
 				RegionEditorNode regionNode = (RegionEditorNode) node;
 				String label = regionNode.getLabel();
-				if (label.equals(region.getName())) {
+				if (label.equals(roi.getName())) {
 					List<TreeNode> children = regionNode.getChildren();
-					IROI roi = region.getROI();
+					if (children == null)
+						return;
 					Map<String, Object> roiInfos = RegionEditorNodeFactory.getRegionNodeInfos(roi);
 					Set<Entry<String,Object>> set = roiInfos.entrySet();
 					int i = 0;
