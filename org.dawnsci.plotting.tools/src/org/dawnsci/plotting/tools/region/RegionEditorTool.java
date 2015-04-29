@@ -960,10 +960,11 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 
 				if (model == null)
 					return Status.CANCEL_STATUS;
-				model.updateRegion(roi, intensitySum[0], intensitySum[1]);
-				dragBounds.put(roi.getName(), roi);
 				Display.getDefault().syncExec(new Runnable() {
+					@Override
 					public void run() {
+						model.updateRegion(roi, intensitySum[0], intensitySum[1]);
+						dragBounds.put(roi.getName(), roi);
 						viewer.refresh(true);
 					}
 				});
