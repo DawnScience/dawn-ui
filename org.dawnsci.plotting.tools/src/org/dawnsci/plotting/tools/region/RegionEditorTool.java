@@ -58,7 +58,6 @@ import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
-import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
@@ -109,7 +108,7 @@ import org.slf4j.LoggerFactory;
  * @author wqk87977
  *
  */
-public class RegionEditorTool extends AbstractToolPage implements IRegionListener, IROIListener, IResettableExpansion {
+public class RegionEditorTool extends AbstractToolPage implements IResettableExpansion {
 
 	private static final Logger logger = LoggerFactory.getLogger(RegionEditorTool.class);
 
@@ -119,9 +118,11 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 	private RegionEditorTreeModel model;
 	private ClearableFilteredTree filteredTree;
 
-	private RegionEditorColorListener viewUpdateListener;
+	private RegionColorListener viewUpdateListener;
 	private ITraceListener traceListener;
 	private IPropertyChangeListener propertyListener;
+	private IRegionListener regionListener;
+	private IROIListener roiListener;
 
 	/**
 	 * A map to store dragBounds which are not the official bounds
@@ -137,9 +138,11 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 	public RegionEditorTool() {
 		super();
 		dragBounds = new HashMap<String,IROI>(7);
-		propertyListener = new FormatChangeListener();
+		propertyListener = createPropertyChangeListener();
 		Activator.getPlottingPreferenceStore().addPropertyChangeListener(propertyListener);
-		traceListener = new TraceListener();
+		traceListener = createTraceListener();
+		regionListener = createRegionListener();
+		roiListener = createROIListener();
 	}
 
 	@Override
@@ -169,7 +172,7 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 							RegionEditorNode regionNode = (RegionEditorNode) object;
 							IRegion region = getPlottingSystem().getRegion(regionNode.getRegion().getName());
 							model.removeRegion(regionNode);
-							region.removeROIListener(RegionEditorTool.this);
+							region.removeROIListener(roiListener);
 							getPlottingSystem().removeRegion(region);
 						}
 					}
@@ -195,7 +198,7 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 
 		getSite().setSelectionProvider(viewer);
 
-		this.viewUpdateListener = new RegionEditorColorListener();
+		this.viewUpdateListener = createRegionColorListener();
 
 		activate();
 	}
@@ -222,119 +225,236 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 	}
 
 	// Listeners
-	class TraceListener implements ITraceListener {
-		@Override
-		public void traceUpdated(TraceEvent evt) {
-			if (viewer != null && viewer.getControl().isDisposed())
-				return;
-			viewer.refresh();
-		}
-		
-		@Override
-		public void traceRemoved(TraceEvent evt) {
-			if (viewer != null && viewer.getControl().isDisposed())
-				return;
-			viewer.refresh();
-		}
-		
-		@Override
-		public void traceCreated(TraceEvent evt) {
-			if (viewer != null && viewer.getControl().isDisposed())
-				return;
-			viewer.refresh();
-		}
-		
-		@Override
-		public void traceAdded(TraceEvent evt) {
-			if (viewer != null && viewer.getControl().isDisposed())
-				return;
-			viewer.refresh();
-		}
+	private IRegionListener createRegionListener() {
+		return new IRegionListener.Stub() {
+			@Override
+			public void regionCreated(RegionEvent evt) {
+				IRegion region = evt.getRegion();
+				region.setAlpha(51); // 20%
+			}
 
-		@Override
-		public void tracesUpdated(TraceEvent evt) {
-		}
-
-		@Override
-		public void tracesRemoved(TraceEvent evet) {
-		}
-
-		@Override
-		public void tracesAdded(TraceEvent evt) {
-		}
-
-		@Override
-		public void traceWillPlot(TraceWillPlotEvent evt) {
-		}
-	};
-
-	class FormatChangeListener implements IPropertyChangeListener {
-		@Override
-		public void propertyChange(PropertyChangeEvent event) {
-//			if (isActive()) {
-				if(isInterestedProperty(event)) {
-					updateFormat();
-				}
-//			}
-		}
-
-		private boolean isInterestedProperty(PropertyChangeEvent event) {
-			final String propName = event.getProperty();
-			return RegionEditorConstants.POINT_FORMAT.equals(propName) ||
-					RegionEditorConstants.ANGLE_FORMAT.equals(propName) ||
-					RegionEditorConstants.INTENSITY_FORMAT.equals(propName) ||
-					RegionEditorConstants.SUM_FORMAT.equals(propName);
-		}
-
-		private void updateFormat() {
-			IPreferenceStore store = Activator.getPlottingPreferenceStore();
-			String pointFormat = store.getString(RegionEditorConstants.POINT_FORMAT);
-			String angleFormat = store.getString(RegionEditorConstants.ANGLE_FORMAT);
-			String maxIntensityFormat = store.getString(RegionEditorConstants.INTENSITY_FORMAT);
-			String sumFormat = store.getString(RegionEditorConstants.SUM_FORMAT);
-			if(model == null)
-				return;
-			LabelNode root = model.getRoot();
-			List<TreeNode> nodes = root.getChildren();
-			for (TreeNode node : nodes) {
-				RegionEditorNode regionNode = (RegionEditorNode) node;
-				List<TreeNode> regionChildren = regionNode.getChildren();
-				for (TreeNode child : regionChildren) {
-					if (child instanceof NumericNode<?>) {
-						NumericNode<?> numNode = (NumericNode<?>) child;
-						Unit<?> unit = numNode.getUnit();
-						if (unit.equals(Dimensionless.UNIT)) {
-							if (numNode.getLabel().contains(RegionEditorNodeFactory.INTENSITY))
-								numNode.setFormat(maxIntensityFormat);
-							else if (numNode.getLabel().contains(RegionEditorNodeFactory.SUM))
-								numNode.setFormat(sumFormat);
-						} else if (unit.equals(NonSI.DEGREE_ANGLE)
-								|| unit.equals(SI.RADIAN)) {
-							numNode.setIncrement(ToolUtils.getDecimal(angleFormat));
-							numNode.setFormat(angleFormat);
-						} else if (unit.equals(NonSI.PIXEL)) {
-							numNode.setIncrement(ToolUtils.getDecimal(pointFormat));
-							numNode.setFormat(pointFormat);
+			@Override
+			public void regionNameChanged(RegionEvent evt, String oldName) {
+				if (!isActive())
+					return;
+				IRegion region = evt.getRegion();
+				if (region == null)
+					return;
+				LabelNode root = model.getRoot();
+				if (root == null)
+					return;
+				List<TreeNode> nodes = root.getChildren();
+				if (nodes == null)
+					return;
+				for (TreeNode node : nodes) {
+					if (node instanceof RegionEditorNode) {
+						RegionEditorNode regionNode = (RegionEditorNode) node;
+						if (regionNode.getLabel().equals(oldName)) {
+							regionNode.setLabel(region.getName());
+							if (viewer!=null)
+								viewer.refresh();
+							break;
 						}
 					}
 				}
 			}
-			viewer.refresh();
-		}
-	};
 
-	class RegionEditorColorListener extends RegionColorListener {
-		@Override
-		public void selectionChanged(SelectionChangedEvent event) {
-			final IStructuredSelection sel = (IStructuredSelection) event.getSelection();
-			if (!(sel.getFirstElement() instanceof RegionEditorNode))
-				return;
-			final RegionEditorNode regionNode = (RegionEditorNode) sel.getFirstElement();
-			IRegion region = getPlottingSystem().getRegion(regionNode.getLabel());
-			if (region == null)
-				return;
-			updateColorSelection(region);
-		}
+			@Override
+			public void regionAdded(RegionEvent evt) {
+				if (!isActive()) return;
+				IRegion region = evt.getRegion();
+				if (region != null) {
+					region.addROIListener(roiListener);
+					IROI roi = region.getROI();
+					if (roi == null)
+						return;
+					// set the Region isActive flag
+					region.setActive(true);
+
+					double[] intensitySum = getIntensityAndSum(region);
+					model.addRegion(region, intensitySum[0], intensitySum[1]);
+
+					if (model.getRoot().getChildren() != null) viewer.setInput(model.getRoot());
+					if (viewer!=null) viewer.refresh();
+					boolean isMobile = Activator.getPlottingPreferenceStore().getBoolean(RegionEditorConstants.MOBILE_REGION_SETTING);
+					region.setMobile(isMobile);
+				}
+			}
+
+			@Override
+			public void regionRemoved(RegionEvent evt) {
+				if (!isActive())
+					return;
+				IRegion region = evt.getRegion();
+				if (region != null) {
+					if (model ==  null)
+						return;
+					LabelNode root = model.getRoot();
+					if (root == null)
+						return;
+					List<TreeNode> nodes = root.getChildren();
+					if (nodes == null)
+						return;
+					for (TreeNode node : nodes) {
+						if (node instanceof RegionEditorNode) {
+							RegionEditorNode regionNode = (RegionEditorNode) node;
+							if (regionNode.getLabel().equals(region.getName())) {
+								model.removeRegion(regionNode);
+								region.removeROIListener(roiListener);
+								getPlottingSystem().removeRegion(region);
+								break;
+							}
+						}
+					}
+				}
+			}
+
+			@Override
+			public void regionsRemoved(RegionEvent evt) {
+				if (!isActive())
+					return;
+				Collection<IRegion> regions = evt.getRegions();
+				for (IRegion region : regions) {
+					RegionEditorNode regionNode = (RegionEditorNode) model.getNode("/" + region.getName());
+					if (regionNode == null)
+						return;
+					model.removeRegion(regionNode);
+					region.removeROIListener(roiListener);
+					getPlottingSystem().removeRegion(region);
+				}
+			}
+		};
+	}
+
+	private IROIListener createROIListener() {
+		return new IROIListener.Stub() {
+			@Override
+			public void roiDragged(ROIEvent evt) {
+				model.setRegionDragged(true);
+				viewer.cancelEditing();
+				if (!isActive()) return;
+				updateRegion(evt);
+			}
+
+			@Override
+			public void roiChanged(ROIEvent evt) {
+				model.setRegionDragged(false);
+				if (!model.isTreeModified()) {
+					if (!isActive()) return;
+					updateRegion(evt);
+					IRegion region = (IRegion)evt.getSource();
+					if(region == null) return;
+					updateColorSelection(region);
+					TreeItem[] treeItems = viewer.getTree().getItems();
+					for (int i = 0; i < treeItems.length; i++) {
+						RegionEditorNode node = (RegionEditorNode)treeItems[i].getData();
+						String name = node.getLabel();
+						if(region.getName().equals(name)){
+							viewer.getTree().setSelection(treeItems[i]);
+							break;
+						}
+					}
+					updateRegion(evt);
+				}
+			}
+		};
+	}
+
+	private ITraceListener createTraceListener() {
+		return new ITraceListener.Stub() {
+			private void refreshViewer() {
+				if (viewer != null && viewer.getControl().isDisposed())
+					return;
+				viewer.refresh();
+			}
+			@Override
+			public void traceUpdated(TraceEvent evt) {
+				refreshViewer();
+			}
+			@Override
+			public void traceRemoved(TraceEvent evt) {
+				refreshViewer();
+			}
+			@Override
+			public void traceCreated(TraceEvent evt) {
+				refreshViewer();
+			}
+			@Override
+			public void traceAdded(TraceEvent evt) {
+				refreshViewer();
+			}
+		};
+	}
+
+	private IPropertyChangeListener createPropertyChangeListener() {
+		return new IPropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent event) {
+				if (isInterestedProperty(event)) {
+					updateFormat();
+				}
+			}
+
+			private boolean isInterestedProperty(PropertyChangeEvent event) {
+				final String propName = event.getProperty();
+				return RegionEditorConstants.POINT_FORMAT.equals(propName) ||
+						RegionEditorConstants.ANGLE_FORMAT.equals(propName) ||
+						RegionEditorConstants.INTENSITY_FORMAT.equals(propName) ||
+						RegionEditorConstants.SUM_FORMAT.equals(propName);
+			}
+
+			private void updateFormat() {
+				IPreferenceStore store = Activator.getPlottingPreferenceStore();
+				String pointFormat = store.getString(RegionEditorConstants.POINT_FORMAT);
+				String angleFormat = store.getString(RegionEditorConstants.ANGLE_FORMAT);
+				String maxIntensityFormat = store.getString(RegionEditorConstants.INTENSITY_FORMAT);
+				String sumFormat = store.getString(RegionEditorConstants.SUM_FORMAT);
+				if(model == null)
+					return;
+				LabelNode root = model.getRoot();
+				List<TreeNode> nodes = root.getChildren();
+				for (TreeNode node : nodes) {
+					RegionEditorNode regionNode = (RegionEditorNode) node;
+					List<TreeNode> regionChildren = regionNode.getChildren();
+					for (TreeNode child : regionChildren) {
+						if (child instanceof NumericNode<?>) {
+							NumericNode<?> numNode = (NumericNode<?>) child;
+							Unit<?> unit = numNode.getUnit();
+							if (unit.equals(Dimensionless.UNIT)) {
+								if (numNode.getLabel().contains(RegionEditorNodeFactory.INTENSITY))
+									numNode.setFormat(maxIntensityFormat);
+								else if (numNode.getLabel().contains(RegionEditorNodeFactory.SUM))
+									numNode.setFormat(sumFormat);
+							} else if (unit.equals(NonSI.DEGREE_ANGLE)
+									|| unit.equals(SI.RADIAN)) {
+								numNode.setIncrement(ToolUtils.getDecimal(angleFormat));
+								numNode.setFormat(angleFormat);
+							} else if (unit.equals(NonSI.PIXEL)) {
+								numNode.setIncrement(ToolUtils.getDecimal(pointFormat));
+								numNode.setFormat(pointFormat);
+							}
+						}
+					}
+				}
+				viewer.refresh();
+			}
+		};
+	}
+
+	private RegionColorListener createRegionColorListener() {
+		return new RegionColorListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				final IStructuredSelection sel = (IStructuredSelection) event.getSelection();
+				if (!(sel.getFirstElement() instanceof RegionEditorNode))
+					return;
+				final RegionEditorNode regionNode = (RegionEditorNode) sel.getFirstElement();
+				IRegion region = getPlottingSystem().getRegion(regionNode.getLabel());
+				if (region == null)
+					return;
+				updateColorSelection(region);
+			}
+		};
 	}
 
 	private void createNewRegion(boolean force) {
@@ -718,7 +838,7 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 			viewer.addSelectionChangedListener(viewUpdateListener);
 		try {
 			try {
-				getPlottingSystem().addRegionListener(this);
+				getPlottingSystem().addRegionListener(regionListener);
 				final Collection<IRegion> regions = getPlottingSystem().getRegions();
 				// Clean the model if there is no region
 				if (viewer != null) {
@@ -730,7 +850,7 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 					}
 				}
 				for (IRegion iRegion : regions) {
-					iRegion.addROIListener(this);
+					iRegion.addROIListener(roiListener);
 					if (model != null) {
 						double[] intensitySum = getIntensityAndSum(iRegion);
 						model.addRegion(iRegion, intensitySum[0], intensitySum[1]);
@@ -761,9 +881,9 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 		if (dragBounds!=null) dragBounds.clear();
 		if (getPlottingSystem()!=null) try {
 			getPlottingSystem().removeTraceListener(traceListener);
-			getPlottingSystem().removeRegionListener(this);
+			getPlottingSystem().removeRegionListener(regionListener);
 			final Collection<IRegion> regions = getPlottingSystem().getRegions();
-			for (IRegion iRegion : regions) iRegion.removeROIListener(this);
+			for (IRegion iRegion : regions) iRegion.removeROIListener(roiListener);
 		} catch (Exception e) {
 			logger.error("Cannot remove region listeners!", e);
 		}
@@ -782,142 +902,6 @@ public class RegionEditorTool extends AbstractToolPage implements IRegionListene
 	@Override
 	public Control getControl() {
 		return control;
-	}
-
-	@Override
-	public void regionCreated(RegionEvent evt) {
-		IRegion region = evt.getRegion();
-		region.setAlpha(51); // 20%
-	}
-
-	@Override
-	public void regionCancelled(RegionEvent evt) {
-	}
-
-	@Override
-	public void regionNameChanged(RegionEvent evt, String oldName) {
-		if (!isActive())
-			return;
-		IRegion region = evt.getRegion();
-		if (region == null)
-			return;
-		LabelNode root = model.getRoot();
-		if (root == null)
-			return;
-		List<TreeNode> nodes = root.getChildren();
-		if (nodes == null)
-			return;
-		for (TreeNode node : nodes) {
-			if (node instanceof RegionEditorNode) {
-				RegionEditorNode regionNode = (RegionEditorNode) node;
-				if (regionNode.getLabel().equals(oldName)) {
-					regionNode.setLabel(region.getName());
-					if (viewer!=null)
-						viewer.refresh();
-					break;
-				}
-			}
-		}
-	}
-
-	@Override
-	public void regionAdded(RegionEvent evt) {
-		if (!isActive()) return;
-		IRegion region = evt.getRegion();
-		if (region != null) {
-			region.addROIListener(this);
-			IROI roi = region.getROI();
-			if (roi == null)
-				return;
-			// set the Region isActive flag
-			region.setActive(true);
-
-			double[] intensitySum = getIntensityAndSum(region);
-			model.addRegion(region, intensitySum[0], intensitySum[1]);
-
-			if (model.getRoot().getChildren() != null) viewer.setInput(model.getRoot());
-			if (viewer!=null) viewer.refresh();
-			boolean isMobile = Activator.getPlottingPreferenceStore().getBoolean(RegionEditorConstants.MOBILE_REGION_SETTING);
-			region.setMobile(isMobile);
-		}
-	}
-
-	@Override
-	public void regionRemoved(RegionEvent evt) {
-		if (!isActive())
-			return;
-		IRegion region = evt.getRegion();
-		if (region != null) {
-			if (model ==  null)
-				return;
-			LabelNode root = model.getRoot();
-			if (root == null)
-				return;
-			List<TreeNode> nodes = root.getChildren();
-			if (nodes == null)
-				return;
-			for (TreeNode node : nodes) {
-				if (node instanceof RegionEditorNode) {
-					RegionEditorNode regionNode = (RegionEditorNode) node;
-					if (regionNode.getLabel().equals(region.getName())) {
-						model.removeRegion(regionNode);
-						region.removeROIListener(this);
-						getPlottingSystem().removeRegion(region);
-						break;
-					}
-				}
-			}
-		}
-	}
-
-	@Override
-	public void regionsRemoved(RegionEvent evt) {
-		if (!isActive())
-			return;
-		Collection<IRegion> regions = evt.getRegions();
-		for (IRegion region : regions) {
-			RegionEditorNode regionNode = (RegionEditorNode) model.getNode("/" + region.getName());
-			if (regionNode == null)
-				return;
-			model.removeRegion(regionNode);
-			region.removeROIListener(this);
-			getPlottingSystem().removeRegion(region);
-		}
-	}
-
-	@Override
-	public void roiDragged(ROIEvent evt) {
-		model.setRegionDragged(true);
-		viewer.cancelEditing();
-		if (!isActive()) return;
-		updateRegion(evt);
-	}
-
-	@Override
-	public void roiChanged(ROIEvent evt) {
-		model.setRegionDragged(false);
-		if (!model.isTreeModified()) {
-			if (!isActive()) return;
-			updateRegion(evt);
-			IRegion region = (IRegion)evt.getSource();
-			if(region == null) return;
-			updateColorSelection(region);
-			TreeItem[] treeItems = viewer.getTree().getItems();
-			for (int i = 0; i < treeItems.length; i++) {
-				RegionEditorNode node = (RegionEditorNode)treeItems[i].getData();
-				String name = node.getLabel();
-				if(region.getName().equals(name)){
-					viewer.getTree().setSelection(treeItems[i]);
-					break;
-				}
-			}
-			updateRegion(evt);
-		}
-	}
-
-	@Override
-	public void roiSelected(ROIEvent evt) {
-
 	}
 
 	private void updateColorSelection(IRegion region){
