@@ -182,6 +182,9 @@ class LightWeightDataProvider implements IDataProvider {
 	    ya[ya.length-1] = yValue.doubleValue();
 	    this.y = new DoubleDataset(ya, ya.length);
 	    
+		this.cachedXRange = null;
+		this.cachedYRange = null;
+	    
 	    fireDataProviderListeners();
 	}
 
