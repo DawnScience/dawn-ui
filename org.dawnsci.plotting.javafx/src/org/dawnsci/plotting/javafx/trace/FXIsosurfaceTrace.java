@@ -43,7 +43,7 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace 
 	private SurfaceDisplayer   scene;
 	private CullFace cullFace = CullFace.NONE;
 	private int[] rgb;
-	private double opacity=1.0;
+	private double opacity=0.5;
 	
 	public FXIsosurfaceTrace(IPlottingSystemViewer viewer, 	FXCanvas canvas, String traceName) {
 		super(viewer, traceName);
@@ -113,14 +113,17 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace 
 		Group    root   = new Group();
 		MeshView result = new MeshView(createTrangleMesh());
 		result.setCursor(Cursor.CROSSHAIR);
+		result.setOpacity(opacity); // Does not work!
 
 		Material material;
 		if (rgb == null) {
-			material = new PhongMaterial(Color.GOLDENROD);
+			Color color = new Color(Color.GOLDENROD.getRed(), Color.GOLDENROD.getGreen(), Color.GOLDENROD.getBlue(), opacity);
+			material = new PhongMaterial(color);
 		} else {
 			Color color = Color.rgb(rgb[0], rgb[1], rgb[2], opacity);
 			material = new PhongMaterial(color); 
 		}
+		
 
 		scene = new SurfaceDisplayer(root, result, material, toJavaFX());
 
