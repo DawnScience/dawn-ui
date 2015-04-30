@@ -313,9 +313,9 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 				}
 			}
 		}
-		public void setMotile(boolean motile) {
-			mover.setActive(motile);
-			if (!motile) {
+		public void setMobile(boolean mobile) {
+			mover.setActive(mobile);
+			if (!mobile) {
 				setCursor(null);
 			} else {
 				if (regionType==RegionType.XAXIS|| regionType==RegionType.XAXIS_LINE) {
@@ -328,13 +328,13 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 	}
 
 	@Override
-	public void setMobile(boolean motile) {
+	public void setMobile(boolean mobile) {
 		if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS) {
-			super.setMobile(motile);
+			super.setMobile(mobile);
 			return;
 		}
 		
-		if (line1!=null) line1.setMotile(motile);
+		if (line1!=null) line1.setMobile(mobile);
 	}
 	
 	protected FigureListener createFigureListener() {
@@ -457,7 +457,7 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 	        	line1.getParent().setCursor(Cursors.CROSS);
 	        	line1.setCursor(null);
 	        	if (connection!=null) connection.setCursor(null);
-	        	line1.setMotile(false); // Not moved by the user, moved by the mouse position.
+	        	line1.setMobile(false); // Not moved by the user, moved by the mouse position.
 	        } else {
 				regionArea.setRequirePositionWithCursor(true);
 	        	line1.getParent().removeMouseMotionListener(mouseTrackListener);
@@ -472,7 +472,7 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 				} else {
 					line1.setCursor(Cursors.SIZENS);
 				}
-	        	line1.setMotile(true);
+	        	line1.setMobile(true);
 	        }
 		}
 	}
