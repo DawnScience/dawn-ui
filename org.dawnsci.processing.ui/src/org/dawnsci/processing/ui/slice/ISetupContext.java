@@ -1,6 +1,6 @@
 package org.dawnsci.processing.ui.slice;
 
-import org.dawb.common.services.conversion.IConversionContext;
+import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext;
 
 public interface ISetupContext {
 
