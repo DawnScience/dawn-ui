@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="false" name="Palette Service">
+   <implementation class="org.dawnsci.plotting.histogram.service.PaletteService"/>
+   <service>
+      <provide interface="org.eclipse.dawnsci.plotting.api.histogram.IPaletteService"/>
+   </service>
+</scr:component>
