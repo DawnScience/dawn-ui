@@ -25,12 +25,10 @@ import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
-import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
-import org.eclipse.dawnsci.plotting.api.region.MouseListener;
-import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
+import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
@@ -55,14 +53,13 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.MapTo2DUtils;
 
-public class ImageRotateTool extends AbstractToolPage implements IROIListener, MouseListener {
+public class ImageRotateTool extends AbstractToolPage {
 
 	private Logger logger = LoggerFactory.getLogger(ImageRotateTool.class);
 	private Spinner angleSpinner;
 	private static IImageTransform transformer;
 	private IDataset image;
 	private Composite container;
-	private double angle;
 	private IPlottingSystem rotatedSystem;
 	private ITraceListener traceListener;
 	private RotateJob rotationJob;
@@ -271,7 +268,7 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 	}
 
 	private void rotate() {
-		angle = getSpinnerAngle();
+		Double angle = getSpinnerAngle();
 		if (rotationJob == null) {
 			rotationJob = new RotateJob();
 			rotationJob.setPriority(Job.INTERACTIVE);
@@ -361,8 +358,6 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 
 	@Override
 	public void setFocus() {
-		// TODO Auto-generated method stub
-
 	}
 
 	/**
@@ -384,13 +379,10 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 		}
 		createRegions();
 		if (xHair!=null) {
-			if (!isActive()) xHair.addMouseListener(this);
 			xHair.setVisible(true);
-			xHair.addROIListener(this);
 		}
 		if (yHair!=null) {
 			yHair.setVisible(true);
-			yHair.addROIListener(this);
 		}
 	}
 
@@ -403,6 +395,23 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 		super.deactivate();
 		if (getPlottingSystem() != null) {
 			getPlottingSystem().removeTraceListener(traceListener);
+		}
+	}
+
+	@Override
+	public void dispose() {
+		if (rotatedSystem != null && !rotatedSystem.isDisposed())
+			rotatedSystem.dispose();
+		rotatedSystem = null;
+		super.dispose();
+	}
+
+	@Override
+	public Object getAdapter(@SuppressWarnings("rawtypes") Class clazz) {
+		if (clazz == IToolPageSystem.class) {
+			return rotatedSystem;
+		} else {
+			return super.getAdapter(clazz);
 		}
 	}
 
@@ -430,44 +439,6 @@ public class ImageRotateTool extends AbstractToolPage implements IROIListener, M
 			}
 			return Status.OK_STATUS;
 		}
-
-	}
-
-	@Override
-	public void roiDragged(ROIEvent evt) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void roiChanged(ROIEvent evt) {
-		System.out.println();
-	}
-
-	@Override
-	public void roiSelected(ROIEvent evt) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mousePressed(
-			org.eclipse.dawnsci.plotting.api.region.MouseEvent me) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mouseReleased(
-			org.eclipse.dawnsci.plotting.api.region.MouseEvent me) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mouseDoubleClicked(
-			org.eclipse.dawnsci.plotting.api.region.MouseEvent me) {
-		// TODO Auto-generated method stub
 
 	}
 }
