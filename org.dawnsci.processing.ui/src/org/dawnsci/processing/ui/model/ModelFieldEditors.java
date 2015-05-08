@@ -136,6 +136,7 @@ public class ModelFieldEditors {
 
 	private static boolean isEnabled(IOperationModel model, OperationModelField anot) {
 
+		if (anot == null) return true;
 		if (!anot.editable()) return false;
     	
 	   	String enableIf = anot.enableif();
