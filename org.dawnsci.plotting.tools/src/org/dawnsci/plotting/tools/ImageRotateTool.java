@@ -28,7 +28,6 @@ import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
-import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
@@ -192,7 +191,7 @@ public class ImageRotateTool extends AbstractToolPage {
 		IActionBars actionBars = (site != null) ? site.getActionBars() : null;
 
 		rotatedSystem.createPlotPart(container, getTitle(), actionBars,
-				PlotType.IMAGE, null);
+				PlotType.IMAGE, getViewPart());
 		rotatedSystem.getPlotComposite().setLayoutData(
 				new GridData(SWT.FILL, SWT.FILL, true, true));
 		IImageTrace image = getImageTrace();
@@ -358,6 +357,7 @@ public class ImageRotateTool extends AbstractToolPage {
 
 	@Override
 	public void setFocus() {
+		rotatedSystem.setFocus();
 	}
 
 	/**
@@ -408,11 +408,15 @@ public class ImageRotateTool extends AbstractToolPage {
 
 	@Override
 	public Object getAdapter(@SuppressWarnings("rawtypes") Class clazz) {
-		if (clazz == IToolPageSystem.class) {
-			return rotatedSystem;
-		} else {
-			return super.getAdapter(clazz);
+		if (rotatedSystem.getAdapter(clazz) != null) {
+			return rotatedSystem.getAdapter(clazz);
 		}
+		return super.getAdapter(clazz);
+	}
+
+	@Override
+	public IPlottingSystem getToolPlottingSystem() {
+		return rotatedSystem;
 	}
 
 	class RotateJob extends Job {
