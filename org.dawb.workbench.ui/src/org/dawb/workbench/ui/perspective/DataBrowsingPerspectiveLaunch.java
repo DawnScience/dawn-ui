@@ -8,6 +8,8 @@
  */ 
 package org.dawb.workbench.ui.perspective;
 
+import org.dawb.workbench.ui.AnalyticsTrackerServiceLoader;
+import org.eclipse.dawnsci.analysis.api.IAnalyticsTracker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -27,7 +29,13 @@ public class DataBrowsingPerspectiveLaunch implements IWorkbenchWindowActionDele
 	public void run(IAction action) {
 		try {
 			PlatformUI.getWorkbench().showPerspective(DataBrowsingPerspective.ID,PlatformUI.getWorkbench().getActiveWorkbenchWindow());
+			
+			IAnalyticsTracker tracker = AnalyticsTrackerServiceLoader.getService();
+			if (tracker != null)
+				tracker.track("Data_Browsing_perspective_launch", true);
 		} catch (WorkbenchException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
