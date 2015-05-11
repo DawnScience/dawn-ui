@@ -15,6 +15,8 @@ import org.eclipse.ui.IViewLayout;
 
 public class ProcessingPerspective implements IPerspectiveFactory {
 
+	public static final String ID = "org.dawnsci.processing.ui.ProcessingPerspective";
+
 	@Override
 	public void createInitialLayout(IPageLayout layout) {
 		

@@ -8,15 +8,14 @@
  */
 package org.dawnsci.processing.ui.slice;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 
 import org.dawnsci.processing.ui.Activator;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
+import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
-import org.eclipse.dawnsci.analysis.dataset.slicer.SliceNDGenerator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -30,39 +29,46 @@ public class ChangeSliceWidget {
 //	private PositionIterator iterator;
 	private int current = 0;
 	private int max = 0;
+	private int skip = 1;
 	private int[] dataDims;
 	private Button startBtn;
 	private Button stepbackBtn;
+	private Button skipBackBtn;
 	private Button stepforwardBtn;
+	private Button skipForwardBtn;
 	private Button endBtn;
-	private List<SliceND> input;
-	private List<SliceND> output;
 	private SliceND subsampling;
-	private int[] shape;
 	
 	private HashSet<ISliceChangeListener> listeners;
 	
 	public ChangeSliceWidget(Composite parent) {
-		input = new ArrayList<SliceND>();
+//		input = new ArrayList<SliceND>();
 		max = 0;
 		current = 0;
 		listeners = new HashSet<ISliceChangeListener>();
 		
 		Composite baseComposite = new Composite(parent, SWT.NONE);
-		baseComposite.setLayout(new GridLayout(4, true));
+		baseComposite.setLayout(new GridLayout(6, true));
 		
 		startBtn = new Button(baseComposite, SWT.NONE);
 		startBtn.setLayoutData(new GridData());
 		startBtn.setImage(Activator.getImageDescriptor("icons/control-stop-180.png").createImage());
 		
+		skipBackBtn = new Button(baseComposite, SWT.NONE);
+		skipBackBtn.setLayoutData(new GridData());
+		skipBackBtn.setImage(Activator.getImageDescriptor("icons/control-double-180.png").createImage());
+		
 		stepbackBtn = new Button(baseComposite, SWT.NONE);
 		stepbackBtn.setLayoutData(new GridData());
 		stepbackBtn.setImage(Activator.getImageDescriptor("icons/control-180.png").createImage());
 		
-		
 		stepforwardBtn = new Button(baseComposite, SWT.NONE);
 		stepforwardBtn.setLayoutData(new GridData());
 		stepforwardBtn.setImage(Activator.getImageDescriptor("icons/control.png").createImage());
+		
+		skipForwardBtn = new Button(baseComposite, SWT.NONE);
+		skipForwardBtn.setLayoutData(new GridData());
+		skipForwardBtn.setImage(Activator.getImageDescriptor("icons/control-double.png").createImage());
 		
 		endBtn = new Button(baseComposite, SWT.NONE);
 		endBtn.setLayoutData(new GridData());
@@ -72,8 +78,6 @@ public class ChangeSliceWidget {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-//				iterator.reset();
-//				iterator.hasNext();
 				current = 0;
 				updateButtons();
 				fireListeners();
@@ -86,12 +90,7 @@ public class ChangeSliceWidget {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				current--;
-				
 				updateButtons();
-				//Todo add step back to iterator
-//				iterator.reset();
-//				iterator.hasNext();
-//				for (int i = 0; i < current; i++) iterator.hasNext();
 				fireListeners();
 			}
 
@@ -101,8 +100,6 @@ public class ChangeSliceWidget {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				
-//				iterator.hasNext();
 				current++;
 				updateButtons();
 				fireListeners();
@@ -115,24 +112,40 @@ public class ChangeSliceWidget {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				current = max - 1;
-				
 				updateButtons();
-				
 				fireListeners();
 			}
 
 		});
+		
+		skipBackBtn.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				current = current - skip;
+				current = Math.max(current, 0);
+				updateButtons();
+				fireListeners();
+			}
+		});
+		
+		skipForwardBtn.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				current = current + skip;
+				current = Math.min(current, max - 1);
+				updateButtons();
+				fireListeners();
+			}
+		});
 	}
 	
 	public void setDatasetShapeInformation(int[] shape, int[] dataDims, Slice[] slices) {
-		this.shape = shape;
 		this.dataDims = dataDims;
 		subsampling = new SliceND(shape, slices);
-		SliceNDGenerator gen = new SliceNDGenerator(shape, dataDims, new SliceND(shape, slices));
-		output = new ArrayList<SliceND>();
-		input = gen.generateDataSlices(output);
-		max = input.size();
+		max = calculateTotal(subsampling, dataDims);
 		current = 0;
+		skip = (int)(max*0.05);
+		skip = Math.max(1, skip);
 
 		updateButtons();
 	}
@@ -152,14 +165,43 @@ public class ChangeSliceWidget {
 	}
 	
 	public Slice[] getCurrentSlice() {
-		if (input.isEmpty()) return null;
-		return input.get(current).convertToSlice();
+		
+		return getInputOutputPosition()[0].convertToSlice();
 	}
 	
 	public SliceInformation getCurrentSliceInformation() {
 		
-		return new SliceInformation(input.get(current), output.get(current), subsampling, dataDims, max, current);
+		SliceND[] slices = getInputOutputPosition();
 		
+		return new SliceInformation(slices[0], slices[1], subsampling, dataDims, max, current);
+	}
+	
+	private SliceND[] getInputOutputPosition() {
+		//calculate position in output
+		int[] shape = subsampling.getShape().clone();
+		int[] scanShape = shape.clone();
+		for (int i = 0; i< dataDims.length; i++) scanShape[dataDims[i]] = 1;
+		int[] start = AbstractDataset.getNDPositionFromShape(current, scanShape);
+		int[] stop = start.clone();
+		for (int i = 0; i< stop.length; i++) stop[i]++;
+		for (int i = 0; i< dataDims.length; i++) stop[dataDims[i]] = shape[dataDims[i]];
+		int[] step = new int[stop.length];
+		Arrays.fill(step, 1);
+
+		SliceND output = new SliceND(shape,start,stop,step);
+
+		int[] inStart = start.clone();
+
+
+		int[] subStep = subsampling.getStep();
+		for (int i = 0 ; i < start.length; i++) inStart[i] *= subStep[i];
+		for (int i = 0; i < start.length; i++) inStart[i] += subsampling.getStart()[i];
+		int[] subStop = inStart.clone();
+		for (int i = 0; i< subStop.length; i++) subStop[i]++;
+		for (int i = 0; i< dataDims.length; i++) subStop[dataDims[i]] = shape[dataDims[i]];
+
+		SliceND input = new SliceND(subsampling.getSourceShape(),inStart,subStop,step);
+		return new SliceND[]{input,output};
 	}
 	
 	private void updateButtons() {
@@ -168,22 +210,28 @@ public class ChangeSliceWidget {
 		stepbackBtn.setEnabled(true);
 		endBtn.setEnabled(true);
 		stepforwardBtn.setEnabled(true);
+		skipForwardBtn.setEnabled(true);
+		skipBackBtn.setEnabled(true);
 		
 		if (current == 0 && max == 0) {
 			startBtn.setEnabled(false);
 			stepbackBtn.setEnabled(false);
 			endBtn.setEnabled(false);
 			stepforwardBtn.setEnabled(false);
+			skipBackBtn.setEnabled(false);
+			skipForwardBtn.setEnabled(false);
 		}
 		
 		if (current == 0) {
 			startBtn.setEnabled(false);
+			skipBackBtn.setEnabled(false);
 			stepbackBtn.setEnabled(false);
 		}
 		
 		if (current == max-1) {
 			endBtn.setEnabled(false);
 			stepforwardBtn.setEnabled(false);
+			skipForwardBtn.setEnabled(false);
 		}
 	}
 	
@@ -192,6 +240,25 @@ public class ChangeSliceWidget {
 		stepbackBtn.setEnabled(false);
 		endBtn.setEnabled(false);
 		stepforwardBtn.setEnabled(false);
+		skipForwardBtn.setEnabled(false);
+		skipBackBtn.setEnabled(false);
+	}
+	
+	private int calculateTotal(SliceND slice, int[] axes) {
+		int[] nShape = slice.getShape();
+
+		int[] dd = axes.clone();
+		Arrays.sort(dd);
+		
+		 int n = 1;
+		 for (int i = 0; i < nShape.length; i++) {
+			 if (Arrays.binarySearch(dd, i) < 0) n *= nShape[i];
+		 }
+		return n;
+	}
+	
+	public void dispose(){
+		if (startBtn != null && startBtn.getImage()!= null) startBtn.getImage().dispose();
 	}
 
 }
