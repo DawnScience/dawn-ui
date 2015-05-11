@@ -12,6 +12,8 @@ import org.dawb.workbench.ui.EventTrackerServiceLoader;
 import org.eclipse.dawnsci.analysis.api.EventTracker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.ui.IPerspectiveDescriptor;
+import org.eclipse.ui.IPerspectiveRegistry;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
@@ -29,10 +31,16 @@ public class DataBrowsingPerspectiveLaunch implements IWorkbenchWindowActionDele
 	public void run(IAction action) {
 		try {
 			PlatformUI.getWorkbench().showPerspective(DataBrowsingPerspective.ID,PlatformUI.getWorkbench().getActiveWorkbenchWindow());
-			
+
+			// track perspective launch with perspective name
+			IPerspectiveRegistry reg = PlatformUI.getWorkbench().getPerspectiveRegistry();
+			IPerspectiveDescriptor per = reg.findPerspectiveWithId(DataBrowsingPerspective.ID);
+			String perspectiveName = "NA";
+			if (per!= null)
+				perspectiveName = per.getLabel();
 			EventTracker tracker = EventTrackerServiceLoader.getService();
 			if (tracker != null)
-				tracker.track("Data_Browsing_perspective_launch");
+				tracker.track(perspectiveName);
 		} catch (WorkbenchException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
