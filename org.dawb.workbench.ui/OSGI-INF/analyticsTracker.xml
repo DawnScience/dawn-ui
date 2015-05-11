@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true" name="Analytics Tracker Service">
-   <implementation class="org.dawb.workbench.ui.AnalyticsTrackerServiceLoader"/>
-   <reference bind="setService" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.IAnalyticsTracker" name="IAnalyticsTracker" policy="static"/>
-</scr:component>

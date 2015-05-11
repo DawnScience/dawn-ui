@@ -1,6 +1,6 @@
 package org.dawb.workbench.ui;
 
-import org.eclipse.dawnsci.analysis.api.IAnalyticsTracker;
+import org.eclipse.dawnsci.analysis.api.EventTracker;
 
 /**
  * This class is used to inject the analytics service using OSGI and retrieve in ConvertWizard
@@ -9,7 +9,7 @@ import org.eclipse.dawnsci.analysis.api.IAnalyticsTracker;
  */
 public class AnalyticsTrackerServiceLoader {
 
-	private static IAnalyticsTracker service;
+	private static EventTracker service;
 
 	/**
 	 * Used for OSGI injection
@@ -22,11 +22,11 @@ public class AnalyticsTrackerServiceLoader {
 	 * Injected by OSGI
 	 * @param at
 	 */
-	public static void setService(IAnalyticsTracker at) {
-		service = at;
+	public static void setService(EventTracker et) {
+		service = et;
 	}
 
-	public static IAnalyticsTracker getService() {
+	public static EventTracker getService() {
 		return service;
 	}
 
