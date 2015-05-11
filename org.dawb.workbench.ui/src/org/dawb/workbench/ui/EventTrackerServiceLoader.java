@@ -7,14 +7,14 @@ import org.eclipse.dawnsci.analysis.api.EventTracker;
  * @author wqk87977
  *
  */
-public class AnalyticsTrackerServiceLoader {
+public class EventTrackerServiceLoader {
 
 	private static EventTracker service;
 
 	/**
 	 * Used for OSGI injection
 	 */
-	public AnalyticsTrackerServiceLoader() {
+	public EventTrackerServiceLoader() {
 		
 	}
 
