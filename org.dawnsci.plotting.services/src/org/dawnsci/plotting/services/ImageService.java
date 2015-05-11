@@ -16,6 +16,7 @@ import java.awt.image.WritableRaster;
 
 import org.dawb.common.services.ServiceManager;
 import org.dawnsci.plotting.services.util.SWTImageUtils;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.analysis.dataset.impl.BooleanDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
@@ -42,8 +43,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.eclipse.ui.services.AbstractServiceFactory;
 import org.eclipse.ui.services.IServiceLocator;
-
-import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 /**
  * 
@@ -622,40 +621,88 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 	@Override
 	public ImageServiceBean createBeanFromPreferences() {
 		
-		IPreferenceStore store            = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
 		ImageServiceBean imageServiceBean = new ImageServiceBean();
-		imageServiceBean.setOrigin(ImageOrigin.forLabel(store.getString(BasePlottingConstants.ORIGIN_PREF)));
-		imageServiceBean.setHistogramType(HistoType.forLabel(store.getString(BasePlottingConstants.HISTO_PREF)));
-		imageServiceBean.setMinimumCutBound(HistogramBound.fromString(store.getString(BasePlottingConstants.MIN_CUT)));
-		imageServiceBean.setMaximumCutBound(HistogramBound.fromString(store.getString(BasePlottingConstants.MAX_CUT)));
-		imageServiceBean.setNanBound(HistogramBound.fromString(store.getString(BasePlottingConstants.NAN_CUT)));
-		imageServiceBean.setLo(store.getDouble(BasePlottingConstants.HISTO_LO));
-		imageServiceBean.setHi(store.getDouble(BasePlottingConstants.HISTO_HI));		
 		
-		try {
-			IPaletteService pservice = (IPaletteService)ServiceManager.getService(IPaletteService.class);
-			if (pservice !=null) {
-				final String scheme = store.getString(BasePlottingConstants.COLOUR_SCHEME);
-					
-				if (store.getBoolean(BasePlottingConstants.USE_PALETTE_FUNCTIONS)) {
-					FunctionContainer container = pservice.getFunctionContainer(scheme);
-					if (container!=null) {
-						imageServiceBean.setFunctionObject(container);
+		if (Platform.getPreferencesService() != null) { // Normally
+			IPreferenceStore store            = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
+			imageServiceBean.setOrigin(ImageOrigin.forLabel(store.getString(BasePlottingConstants.ORIGIN_PREF)));
+			imageServiceBean.setHistogramType(HistoType.forLabel(store.getString(BasePlottingConstants.HISTO_PREF)));
+			imageServiceBean.setMinimumCutBound(HistogramBound.fromString(store.getString(BasePlottingConstants.MIN_CUT)));
+			imageServiceBean.setMaximumCutBound(HistogramBound.fromString(store.getString(BasePlottingConstants.MAX_CUT)));
+			imageServiceBean.setNanBound(HistogramBound.fromString(store.getString(BasePlottingConstants.NAN_CUT)));
+			imageServiceBean.setLo(store.getDouble(BasePlottingConstants.HISTO_LO));
+			imageServiceBean.setHi(store.getDouble(BasePlottingConstants.HISTO_HI));		
+			
+			try {
+				IPaletteService pservice = (IPaletteService)ServiceManager.getService(IPaletteService.class);
+				if (pservice !=null) {
+					final String scheme = store.getString(BasePlottingConstants.COLOUR_SCHEME);
+						
+					if (store.getBoolean(BasePlottingConstants.USE_PALETTE_FUNCTIONS)) {
+						FunctionContainer container = pservice.getFunctionContainer(scheme);
+						if (container!=null) {
+							imageServiceBean.setFunctionObject(container);
+						} else {
+							imageServiceBean.setPalette(pservice.getDirectPaletteData(scheme));
+						}
 					} else {
+						
+						// if 8-bit, set direct palette, otherwise set palette functions.
 						imageServiceBean.setPalette(pservice.getDirectPaletteData(scheme));
 					}
-				} else {
-					
-					// if 8-bit, set direct palette, otherwise set palette functions.
-					imageServiceBean.setPalette(pservice.getDirectPaletteData(scheme));
+	
 				}
-
+			} catch (Exception e) {
+				// Ignored
 			}
-		} catch (Exception e) {
-			// Ignored
+			
+		} else { // Hard code something
+			
+			imageServiceBean.setOrigin(ImageOrigin.TOP_LEFT);
+			imageServiceBean.setHistogramType(HistoType.OUTLIER_VALUES);
+			imageServiceBean.setMinimumCutBound(HistogramBound.DEFAULT_MINIMUM);
+			imageServiceBean.setMaximumCutBound(HistogramBound.DEFAULT_MAXIMUM);
+			imageServiceBean.setNanBound(HistogramBound.DEFAULT_NAN);
+			imageServiceBean.setLo(00.01);
+			imageServiceBean.setHi(99.99);		
+			imageServiceBean.setPalette(makeJetPalette());
 		}
 	
 		return imageServiceBean;
 	}
+
+	
+	private static PaletteData makeJetPalette() {
+		RGB jet[] = new RGB[256];
+		
+		int nb = 256;
+
+		for (int i = 0; i < nb; i++) {
+			
+			double value = (double)i/(double)255;
+
+			double outBlue = 0;
+			if (value <= 0.1) {outBlue  =  5*value + 0.5;}
+			if (value > 0.1 && value <= 1.0/3.0 ) {outBlue  =  1;}
+			if (value >1.0/3.0 && value <= 1.0/2.0) {outBlue  =  -6*value +3;}
+			
+			double outGreen = 0;
+			if (value > 1.0/3.0 && value < 2.0/3.0  ) {outGreen = 1;}
+			if (value <= 1.0/3.0 && value >= 1.0/8.0) {outGreen = 24.0/5*value - 0.6;}
+			if (value >= 2.0/3.0 && value <= 7.0/8.0) {outGreen = -24.0/5*value + 4.2;}
+			
+			double outRed = 0;
+			if (value >= 0.9) {outRed = -5*value +5.5;}
+			if (value > 2.0/3.0 && value <= 0.9 ) {outRed = 1;}
+			if (value >=1.0/2.0 && value <= 2.0/3.0 ) {outRed = 6*value -3;}
+			
+			jet[i] = new RGB((int)(outRed*255),
+					(int)(outGreen*255),
+					(int)(outBlue*255));
+
+		}
+		return new PaletteData(jet);
+	}
+	
 
 }
