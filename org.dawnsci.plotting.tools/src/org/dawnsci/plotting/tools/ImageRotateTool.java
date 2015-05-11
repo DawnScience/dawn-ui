@@ -367,7 +367,6 @@ public class ImageRotateTool extends AbstractToolPage {
 	public void activate() {
 		deactivate();
 
-		logger.debug("ImageRotateTool: activate ", this.hashCode());
 		super.activate();
 
 		if (getPlottingSystem() != null) {
@@ -391,7 +390,6 @@ public class ImageRotateTool extends AbstractToolPage {
 	 */
 	@Override
 	public void deactivate() {
-		logger.trace("ImageRotateTool: deactivate ", this.hashCode());
 		super.deactivate();
 		if (getPlottingSystem() != null) {
 			getPlottingSystem().removeTraceListener(traceListener);
