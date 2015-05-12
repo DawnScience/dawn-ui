@@ -968,14 +968,17 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		return setDataInternal(im, axes, performAuto);
 	}
 	
+	/**
+	 * Called when the internal data of image has changed.
+	 */
 	public void dataChangePerformed(final DataEvent evt) {
 		if (Display.getDefault().getThread()==Thread.currentThread()) {
-		    setDataInternal(evt.getSource(), axes, plottingSystem.isRescale());
+		    setDataInternal(image, axes, plottingSystem.isRescale());
 		    repaint();
 		} else {
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
-					setDataInternal(evt.getSource(), axes, plottingSystem.isRescale());
+					setDataInternal(image, axes, plottingSystem.isRescale());
 				    repaint();
 				}
 			});
