@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.dawnsci.plotting.tools.EventTrackerServiceLoader;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
@@ -21,6 +22,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.dawnsci.analysis.api.EventTracker;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
@@ -107,6 +109,15 @@ public class ExpressionTool extends AbstractToolPage {
 		}
 		viewer.setInput(variables);
 		console.setFunctions(functions);
+
+		// track Tool launch with tool name
+		EventTracker tracker = EventTrackerServiceLoader.getService();
+		try {
+			if (tracker != null)
+				tracker.track(getTitle());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override

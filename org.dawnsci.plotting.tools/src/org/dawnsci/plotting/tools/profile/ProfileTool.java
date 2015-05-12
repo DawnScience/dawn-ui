@@ -16,10 +16,16 @@ import java.util.Map;
 
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.EventTrackerServiceLoader;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.analysis.api.EventTracker;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -47,8 +53,12 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IPerspectiveDescriptor;
+import org.eclipse.ui.IPerspectiveRegistry;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.progress.UIJob;
+import org.eclipse.ui.views.IViewRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -249,6 +259,14 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 			actionbars.getToolBarManager().add(new Separator("org.dawb.workbench.plotting.tools.profile.clearRegionsGroupAfter"));
 		}
 
+		// track Tool launch with tool name
+		EventTracker tracker = EventTrackerServiceLoader.getService();
+		try {
+			if (tracker != null)
+				tracker.track(getTitle());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override

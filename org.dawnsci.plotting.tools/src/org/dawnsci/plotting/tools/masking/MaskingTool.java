@@ -27,6 +27,7 @@ import org.dawb.common.ui.wizard.persistence.PersistenceImportWizard;
 import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.plotting.AbstractPlottingViewer;
 import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.EventTrackerServiceLoader;
 import org.dawnsci.plotting.tools.utils.ToolUtils;
 import org.dawnsci.plotting.util.ColorUtility;
 import org.eclipse.core.commands.operations.IOperationHistoryListener;
@@ -36,6 +37,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.analysis.api.EventTracker;
 import org.eclipse.dawnsci.analysis.dataset.impl.BooleanDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -731,6 +733,15 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		    enableControls.add(((ToolBarManager)getViewPart().getViewSite().getActionBars().getToolBarManager()).getControl());
 		} catch (Throwable ignored) {
 			
+		}
+
+		// track Tool launch with tool name
+		EventTracker tracker = EventTrackerServiceLoader.getService();
+		try {
+			if (tracker != null)
+				tracker.track(getTitle());
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 	
