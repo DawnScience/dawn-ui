@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2012, 2015 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,41 +8,16 @@
  */
 package org.dawnsci.spectrum.ui;
 
-import org.eclipse.dawnsci.analysis.api.EventTracker;
+import org.dawb.common.ui.perspective.AbstractPerspectiveLaunch;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.ui.IPerspectiveDescriptor;
-import org.eclipse.ui.IPerspectiveRegistry;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.IWorkbenchWindowActionDelegate;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.WorkbenchException;
 
-import uk.ac.diamond.scisoft.analysis.rcp.EventTrackerServiceLoader;
-
-public class SpectrumPerspectiveLaunch implements
-		IWorkbenchWindowActionDelegate {
+public class SpectrumPerspectiveLaunch extends AbstractPerspectiveLaunch {
 
 	@Override
-	public void run(IAction action) {
-		try {
-			PlatformUI.getWorkbench().showPerspective(SpectrumPerspective.ID,PlatformUI.getWorkbench().getActiveWorkbenchWindow());
-
-			// track perspective launch with perspective name
-			IPerspectiveRegistry reg = PlatformUI.getWorkbench().getPerspectiveRegistry();
-			IPerspectiveDescriptor per = reg.findPerspectiveWithId(SpectrumPerspective.ID);
-			String perspectiveName = "NA";
-			if (per!= null)
-				perspectiveName = per.getLabel();
-			EventTracker tracker = EventTrackerServiceLoader.getService();
-			if (tracker != null)
-				tracker.track(perspectiveName);
-		} catch (WorkbenchException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
+	public String getID() {
+		return SpectrumPerspective.ID;
 	}
 
 	@Override
@@ -62,5 +37,4 @@ public class SpectrumPerspectiveLaunch implements
 		// TODO Auto-generated method stub
 
 	}
-
 }
