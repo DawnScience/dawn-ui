@@ -9,6 +9,9 @@
 package org.dawnsci.common.widgets.file;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.dawnsci.common.widgets.Activator;
 import org.dawnsci.common.widgets.content.FileContentProposalProvider;
@@ -21,6 +24,8 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.ui.dialogs.WorkspaceResourceDialog;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
@@ -207,7 +212,7 @@ public abstract class SelectorWidget {
 			resourceButton.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					handleResourceBrowse(e);
+					handleResourceBrowse(e, fileExtensions);
 				}
 			});
 		}
@@ -335,8 +340,25 @@ public abstract class SelectorWidget {
 			inputLocation.setEditable(isEditable);
 	}
 
-	private void handleResourceBrowse(TypedEvent event) {
+	private void handleResourceBrowse(TypedEvent event, final String[] fileExtensions) {
 		IResource[] res = null;
+		ViewerFilter vf = new ViewerFilter() {
+			
+			@Override
+			public boolean select(Viewer viewer, Object parentElement, Object element) {
+				if (!(element instanceof IFile)) {
+					return true;
+				}
+				for (String extension : fileExtensions) {
+					if (extension.equals(((IFile)element).getFileExtension())) {
+						return true;
+					}
+				}
+				return false;
+			}
+		};
+		List<ViewerFilter> lvf = new ArrayList<ViewerFilter>();
+		lvf.add(vf);
 		if (isFolderSelector) {
 			res = WorkspaceResourceDialog.openFolderSelection(PlatformUI
 					.getWorkbench().getDisplay().getActiveShell(),
@@ -355,7 +377,7 @@ public abstract class SelectorWidget {
 				res = WorkspaceResourceDialog.openFileSelection(PlatformUI
 						.getWorkbench().getDisplay().getActiveShell(),
 						"File location", "Please choose a location.", false,
-						new Object[] { getIResource() }, null);
+						new Object[] { getIResource() }, lvf);
 			}
 		}
 

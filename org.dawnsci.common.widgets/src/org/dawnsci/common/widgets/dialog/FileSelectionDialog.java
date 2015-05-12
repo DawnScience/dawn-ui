@@ -36,7 +36,7 @@ public class FileSelectionDialog extends Dialog {
 	@Override
 	  protected Control createDialogArea(Composite parent) {
 		
-	    final SelectorWidget sw = new SelectorWidget(parent, isFolderSelector, hasResourceButton, files, extensions){
+	    final SelectorWidget sw = new SelectorWidget(parent, isFolderSelector, hasResourceButton, files, getExtensions()){
 			
 			@Override
 			public void pathChanged(String path, TypedEvent event) {
@@ -97,5 +97,21 @@ public class FileSelectionDialog extends Dialog {
 	  protected Point getInitialSize() {
 	    return new Point(500, 180);
 	  }
+
+	public String[] getExtensions() {
+		return extensions;
+	}
+
+	public String[] getFiles() {
+		return files;
+	}
+
+	public void setFiles(String[] files) {
+		this.files = files;
+	}
+
+	public void setExtensions(String[] extensions) {
+		this.extensions = extensions;
+	}
 
 }

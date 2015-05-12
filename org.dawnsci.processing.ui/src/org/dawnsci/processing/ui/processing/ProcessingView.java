@@ -311,6 +311,7 @@ public class ProcessingView extends ViewPart {
 				if (op == null) return;
 				FileSelectionDialog dialog = new FileSelectionDialog(ProcessingView.this.getSite().getShell());
 				if (lastPath != null) dialog.setPath(lastPath);
+				dialog.setExtensions(new String[]{"nxs"});
 				dialog.setNewFile(true);
 				dialog.setFolderSelector(false);
 				
@@ -326,6 +327,8 @@ public class ProcessingView extends ViewPart {
 			public void run() {
 				
 				FileSelectionDialog dialog = new FileSelectionDialog(ProcessingView.this.getSite().getShell());
+				dialog.setExtensions(new String[]{"nxs"});
+				dialog.setFiles(new String[]{"Nexus files"});
 				dialog.setNewFile(false);
 				dialog.setFolderSelector(false);
 				if (lastPath != null) dialog.setPath(lastPath);
