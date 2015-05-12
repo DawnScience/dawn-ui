@@ -12,9 +12,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.EventTrackerServiceLoader;
 import org.dawnsci.slicing.tools.hyper.HyperComponent;
 import org.dawnsci.slicing.tools.hyper.IDatasetROIReducer;
 import org.dawnsci.slicing.tools.hyper.IProvideReducerActions;
+import org.eclipse.dawnsci.analysis.api.EventTracker;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
@@ -73,7 +75,15 @@ public class Hyper2DTool extends AbstractToolPage {
 		IImageTrace im = getImageTrace();
 		
 		update(im);
-		
+
+		// track Tool launch with tool name
+		EventTracker tracker = EventTrackerServiceLoader.getService();
+		try {
+			if (tracker != null)
+				tracker.track(getTitle());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private void update(IImageTrace im) {

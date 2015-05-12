@@ -82,4 +82,3 @@ Export-Package: org.dawb.workbench.ui,
    org.eclipse.swt.widgets,
    org.dawb.workbench.ui.editors"
 Bundle-Vendor: Diamond Light Source
-Service-Component: OSGI-INF/*.xml 

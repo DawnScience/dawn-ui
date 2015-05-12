@@ -1,4 +1,4 @@
-package org.dawb.workbench.ui;
+package org.dawnsci.plotting.tools;
 
 import org.eclipse.dawnsci.analysis.api.EventTracker;
 

@@ -35,6 +35,7 @@ import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.common.widgets.tree.UnitEditingSupport;
 import org.dawnsci.common.widgets.tree.ValueEditingSupport;
 import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.EventTrackerServiceLoader;
 import org.dawnsci.plotting.tools.preference.DiffractionDefaultsPreferencePage;
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetectorPreferencePage;
 import org.dawnsci.plotting.tools.preference.diffraction.DiffractionPreferencePage;
@@ -42,6 +43,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.analysis.api.EventTracker;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorPropertyEvent;
@@ -225,6 +227,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		if (!hide)
 			createToolPageActions();
 
+		
 	}
 	
 	public void activate() {

@@ -16,10 +16,12 @@ import java.util.List;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawb.workbench.jmx.UserPlotBean;
+import org.dawnsci.plotting.tools.EventTrackerServiceLoader;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.analysis.api.EventTracker;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.XAxisBoxROI;
@@ -214,6 +216,15 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 
 		originalData = getPlottingSystem().getTraces().iterator().next().getData().clone();
 		originalAxes = ((IImageTrace)getPlottingSystem().getTraces().iterator().next()).getAxes();
+
+		// track Tool launch with tool name
+		EventTracker tracker = EventTrackerServiceLoader.getService();
+		try {
+			if (tracker != null)
+				tracker.track(getTitle());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
