@@ -118,7 +118,7 @@ public class Hyper2DTool extends AbstractToolPage {
 
 	@Override
 	public Control getControl() {
-		return component.getControl();
+		return component != null ? component.getControl() : null;
 	}
 
 	@Override
