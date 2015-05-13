@@ -320,6 +320,10 @@ public class ProcessingView extends ViewPart {
 				dialog.create();
 				if (dialog.open() == Dialog.CANCEL) return;
 				String path = dialog.getPath();
+				if (!path.endsWith(extensions[0])) { //pipeline should always be saved to .nxs
+					path = path.concat("." + extensions[0]);
+					logger.info("Extension added to path, file will be saved as " + path);
+				}
 				saveOperationsToFile(path, op);
 				lastPath = path;
 			}
