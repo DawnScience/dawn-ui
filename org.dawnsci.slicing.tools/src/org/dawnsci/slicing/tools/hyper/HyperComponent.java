@@ -91,6 +91,9 @@ public class HyperComponent {
 	private static final String HYPERIMAGE = "HyperImage";
 	private static final String HYPERTRACE = "HyperTrace";
 	
+	public static final String LEFT_REGION_NAME = "Left Region";
+	public static final String RIGHT_REGION_NAME = "Right Region";
+	
 	
 	public HyperComponent(IWorkbenchPart part) {
 		this.part = part;
@@ -123,8 +126,8 @@ public class HyperComponent {
 		externalRegionListenerLeft = regionLeft;
 		externalRegionListenerRight = regionRight;
 		
-		if (regionLeft != null) sideSystem.addRegionListener(regionLeft);
-		if (regionRight != null) mainSystem.addRegionListener(regionRight);
+		if (regionLeft != null) mainSystem.addRegionListener(regionLeft);
+		if (regionRight != null) sideSystem.addRegionListener(regionRight);
 		
 		externalROIListenerLeft = roiLeft;
 		externalROIListenerRight = roiRight;
@@ -199,24 +202,23 @@ public class HyperComponent {
 		}
 		
 		try {
-			IRegion region = mainSystem.createRegion("Image Region 1", mainReducer.getSupportedRegionType().get(0));
-			
+			IRegion region = mainSystem.createRegion(LEFT_REGION_NAME, mainReducer.getSupportedRegionType().get(0));
+			region.setROI(rroi);
 			mainSystem.addRegion(region);
 			
-			region.setROI(rroi);
+			
 			region.setUserRegion(false);
 			region.addROIListener(this.roiListenerLeft);
-			if (externalROIListenerLeft != null) region.addROIListener(externalROIListenerLeft);
 			sideSystem.clear();
 			updateRight(region, rroi);
 			
-			IRegion windowRegion = sideSystem.createRegion("Trace Region 1", sideReducer.getSupportedRegionType().get(0));
+			IRegion windowRegion = sideSystem.createRegion(RIGHT_REGION_NAME, sideReducer.getSupportedRegionType().get(0));
 			
 			windowRegion.setROI(broi);
-			windowRegion.setUserRegion(false);
+			
 			windowRegion.addROIListener(this.roiListenerRight);
-			if (externalROIListenerRight != null) region.addROIListener(externalROIListenerRight);
 			sideSystem.addRegion(windowRegion);
+			windowRegion.setUserRegion(false);
 			updateLeft(windowRegion,broi);
 			
 		} catch (Exception e) {
@@ -489,6 +491,10 @@ public class HyperComponent {
 						trace.setUserObject(region);
 						if (trace instanceof ILineTrace){
 							region.setRegionColor(((ILineTrace)trace).getTraceColor());
+							//use name listener to update color
+							String name = region.getName();
+							plot.renameRegion(region, name + " Color");
+							plot.renameRegion(region, name);
 						}
 					}
 				}
