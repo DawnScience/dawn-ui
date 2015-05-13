@@ -30,6 +30,7 @@ import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.expressions.IVariableManager;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ColorOption;
+import org.eclipse.dawnsci.slicing.api.data.ITransferableDataManager;
 import org.eclipse.dawnsci.slicing.api.system.ISliceSystem;
 import org.eclipse.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.jface.viewers.IContentProvider;
@@ -238,6 +239,9 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
 		} else if (clazz == ISliceSystem.class) {
 			if (dataSetEditor==null) return null;
 			return dataSetEditor.getSliceComponent();
+		} else if (clazz == ITransferableDataManager.class) {
+			if (dataSetEditor==null) return null;
+			return (ITransferableDataManager)dataSetEditor.getDataSetComponent();
 		}
 		
 		return super.getAdapter(clazz);

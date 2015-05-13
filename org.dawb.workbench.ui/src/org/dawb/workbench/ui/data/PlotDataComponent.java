@@ -77,6 +77,7 @@ import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.tool.ToolChangeEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
+import org.eclipse.dawnsci.slicing.api.data.ITransferableDataManager;
 import org.eclipse.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.eclipse.dawnsci.slicing.api.data.ITransferableDataService;
 import org.eclipse.dawnsci.slicing.api.system.DimsData;
@@ -157,7 +158,7 @@ import uk.ac.diamond.scisoft.analysis.utils.OSUtils;
  * This view can view and plot any file. It is most efficient if the Loader that LoaderFactory
  * uses for this file type is an IMetaLoader. 
  */
-public class PlotDataComponent implements IVariableManager, MouseListener, KeyListener, IPlottingSystemSelection, IAdaptable {
+public class PlotDataComponent implements IVariableManager, MouseListener, KeyListener, IPlottingSystemSelection, IAdaptable, ITransferableDataManager {
 		
 	private static final Logger logger = LoggerFactory.getLogger(PlotDataComponent.class);
 
@@ -659,13 +660,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			public void run() {
 				ITransferableDataObject checkedObject = getCheckedObject(transferableService.getBuffer());
 				if (checkedObject==null) return;
-				data.add(checkedObject);
-				checkedObject.setChecked(!checkedObject.isChecked());
-				selectionChanged(checkedObject, true);
-				dataViewer.refresh();
-				
-				final ISliceSystem system = (ISliceSystem)editor.getAdapter(ISliceSystem.class);
-				if (system!=null) system.refresh();
+				addData(checkedObject);
 			}
 		};
 		bars.getToolBarManager().add(paste);
@@ -878,6 +873,35 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 
 		
 	}
+
+	@Override
+	public void addData(final ITransferableDataObject checkedObject) {
+		Display.getDefault().syncExec(new Runnable() {
+			public void run() {
+				data.add(checkedObject);
+				checkedObject.setChecked(!checkedObject.isChecked());
+				selectionChanged(checkedObject, true);
+				dataViewer.refresh();
+				
+				final ISliceSystem system = (ISliceSystem)editor.getAdapter(ISliceSystem.class);
+				if (system!=null) system.refresh();
+			}
+		});
+	}
+
+	@Override
+	public void removeData(final ITransferableDataObject checkedObject) {
+		Display.getDefault().syncExec(new Runnable() {
+			public void run() {
+				data.remove(checkedObject);
+				selections.remove(checkedObject);
+				dataViewer.refresh();
+				final ISliceSystem system = (ISliceSystem)editor.getAdapter(ISliceSystem.class);
+				if (system!=null) system.refresh();
+			}
+		});
+	}
+
 
 	private PlotDataFilterProvider filterProvider;
 	/**

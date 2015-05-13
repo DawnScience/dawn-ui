@@ -155,6 +155,7 @@ class AxisEditingSupport extends EditingSupport {
 	protected void updateAxesChoices() {
 		dimensionNames.clear();
 		final DimsDataList ddl = system.getDimsDataList();
+		if (ddl==null) return;
 		for (int idim =1; idim<=ddl.size(); ++idim) {
 			updateAxis(idim);
 		}

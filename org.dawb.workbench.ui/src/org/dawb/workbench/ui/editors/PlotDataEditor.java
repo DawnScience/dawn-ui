@@ -45,6 +45,7 @@ import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.expressions.IVariableManager;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.dawnsci.slicing.api.data.ITransferableDataManager;
 import org.eclipse.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.eclipse.dawnsci.slicing.api.editor.ISelectedPlotting;
 import org.eclipse.dawnsci.slicing.api.editor.ISlicablePlottingPart;
@@ -672,6 +673,8 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 			return getSliceComponent();
 		}else if (clazz == IVariableManager.class) {
 			return getDataSetComponent();
+		}else if (clazz == ITransferableDataManager.class) {
+			return (ITransferableDataManager)getDataSetComponent();
 		}
 		
 		return super.getAdapter(clazz);
