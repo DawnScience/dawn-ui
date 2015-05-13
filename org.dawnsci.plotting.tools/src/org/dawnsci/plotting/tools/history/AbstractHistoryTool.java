@@ -18,10 +18,8 @@ import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
 import org.dawnsci.plotting.tools.Activator;
-import org.dawnsci.plotting.tools.EventTrackerServiceLoader;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.dawnsci.analysis.api.EventTracker;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
@@ -224,14 +222,7 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 			}
 		});
 
-		// track Tool launch with tool name
-		EventTracker tracker = EventTrackerServiceLoader.getService();
-		try {
-			if (tracker != null)
-				tracker.track(getTitle());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		super.createControl(parent);
 	}
 	
 	private class VariableNameEditingSupport extends EditingSupport {

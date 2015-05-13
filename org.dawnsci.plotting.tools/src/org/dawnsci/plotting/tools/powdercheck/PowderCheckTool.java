@@ -30,7 +30,6 @@ import org.dawb.common.ui.image.IconUtils;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawnsci.plotting.tools.Activator;
-import org.dawnsci.plotting.tools.EventTrackerServiceLoader;
 import org.dawnsci.plotting.tools.fitting.FittedFunction;
 import org.dawnsci.plotting.tools.fitting.FittedFunctions;
 import org.dawnsci.plotting.tools.fitting.NullFunction;
@@ -211,14 +210,7 @@ public class PowderCheckTool extends AbstractToolPage {
 		sashForm.setMaximizedControl(system.getPlotComposite());
 		update();
 
-		// track Tool launch with tool name
-		EventTracker tracker = EventTrackerServiceLoader.getService();
-		try {
-			if (tracker != null)
-				tracker.track(getTitle());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		super.createControl(parent);
 	}
 	
 	

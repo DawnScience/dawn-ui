@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.dawnsci.analysis.api.EventTracker;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
@@ -160,14 +159,7 @@ public class DerivativeToolExternalPlot extends AbstractToolPage {
 				PlotType.XY,
 				this.getViewPart());
 
-		// track Tool launch with tool name
-		EventTracker tracker = EventTrackerServiceLoader.getService();
-		try {
-			if (tracker != null)
-				tracker.track(getTitle());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		super.createControl(parent);
 	}
 	
 	private void update() {

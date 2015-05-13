@@ -28,7 +28,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.dawnsci.analysis.api.EventTracker;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.EllipticalFitROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.EllipticalROI;
@@ -247,14 +246,7 @@ public class EllipseFittingTool extends AbstractToolPage {
 		});
 		parent.layout();
 
-		// track Tool launch with tool name
-		EventTracker tracker = EventTrackerServiceLoader.getService();
-		try {
-			if (tracker != null)
-				tracker.track(getTitle());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		super.createControl(parent);
 	}
 
 	private void createColumns(final TableViewer viewer) {

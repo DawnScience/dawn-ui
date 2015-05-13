@@ -19,7 +19,6 @@ import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.util.list.SortNatural;
-import org.dawnsci.plotting.tools.EventTrackerServiceLoader;
 import org.dawnsci.plotting.tools.preference.FittingPreferencePage;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -243,14 +242,7 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 		});
 		activate();
 
-		// track Tool launch with tool name
-		EventTracker tracker = EventTrackerServiceLoader.getService();
-		try {
-			if (tracker != null)
-				tracker.track(getTitle());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		super.createControl(parent);
 	}
 	
 	protected SelectionListener getTableColumnSortListener(final FittingViewerComparator vc, final int index) {
