@@ -84,6 +84,8 @@ public class ProcessingView extends ViewPart {
 	private IAction clear;
 	private String lastPath = null;
 	
+	private final static String[] extensions = new String[]{"nxs"};
+	private final static String[] files = new String[]{"Nexus files"};
 	
 	private final static Logger logger = LoggerFactory.getLogger(ProcessingView.class);
 
@@ -311,7 +313,7 @@ public class ProcessingView extends ViewPart {
 				if (op == null) return;
 				FileSelectionDialog dialog = new FileSelectionDialog(ProcessingView.this.getSite().getShell());
 				if (lastPath != null) dialog.setPath(lastPath);
-				dialog.setExtensions(new String[]{"nxs"});
+				dialog.setExtensions(extensions);
 				dialog.setNewFile(true);
 				dialog.setFolderSelector(false);
 				
@@ -327,8 +329,8 @@ public class ProcessingView extends ViewPart {
 			public void run() {
 				
 				FileSelectionDialog dialog = new FileSelectionDialog(ProcessingView.this.getSite().getShell());
-				dialog.setExtensions(new String[]{"nxs"});
-				dialog.setFiles(new String[]{"Nexus files"});
+				dialog.setExtensions(extensions);
+				dialog.setFiles(files);
 				dialog.setNewFile(false);
 				dialog.setFolderSelector(false);
 				if (lastPath != null) dialog.setPath(lastPath);
