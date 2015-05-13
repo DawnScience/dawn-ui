@@ -23,8 +23,10 @@ import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.ROISliceUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.XAxisBoxROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
+import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
@@ -116,6 +118,77 @@ public class Hyper2DTool extends AbstractToolPage {
 	public void setFocus() {
 		component.setFocus();
 
+	}
+	
+	private IROIListener getLeftROIListener() {
+		return new IROIListener.Stub() {
+			
+			@Override
+			public void roiDragged(ROIEvent evt) {
+				evt.toString();
+			}
+			
+			@Override
+			public void roiChanged(ROIEvent evt) {
+				evt.toString();
+			}
+		};
+	}
+	
+	private IROIListener getRightROIListener() {
+		return new IROIListener.Stub() {
+			
+			@Override
+			public void roiDragged(ROIEvent evt) {
+				evt.toString();
+			}
+			
+			@Override
+			public void roiChanged(ROIEvent evt) {
+				evt.toString();
+			}
+		};
+	}
+	
+	private IRegionListener getLeftRegionListener() {
+		return new IRegionListener.Stub() {
+			
+			@Override
+			public void regionsRemoved(RegionEvent evt) {
+				evt.toString();
+			}
+			
+			@Override
+			public void regionRemoved(RegionEvent evt) {
+				evt.toString();
+			}
+			
+			@Override
+			public void regionAdded(RegionEvent evt) {
+				evt.toString();
+			}
+		};
+	}
+	
+	private IRegionListener getRightRegionListener() {
+		return new IRegionListener.Stub() {
+			
+			@Override
+			public void regionsRemoved(RegionEvent evt) {
+				
+				evt.toString();
+			}
+			
+			@Override
+			public void regionRemoved(RegionEvent evt) {
+				evt.toString();
+			}
+			
+			@Override
+			public void regionAdded(RegionEvent evt) {
+				evt.toString();
+			}
+		};
 	}
 
 	private class MainReducer implements IDatasetROIReducer, IProvideReducerActions {

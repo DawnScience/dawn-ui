@@ -70,8 +70,12 @@ public class HyperComponent {
 	private IPlottingSystem sideSystem;
 	private IRegionListener regionListenerLeft;
 	private IRegionListener regionListenerRight;
+	private IRegionListener externalRegionListenerLeft;
+	private IRegionListener externalRegionListenerRight;
 	private IROIListener roiListenerLeft;
 	private IROIListener roiListenerRight;
+	private IROIListener externalROIListenerLeft;
+	private IROIListener externalROIListenerRight;
 	private HyperDelegateJob leftJob;
 	private HyperDelegateJob rightJob;
 	private Composite mainComposite;
@@ -110,6 +114,21 @@ public class HyperComponent {
 	
 	public void setData(ILazyDataset lazy, List<IDataset> daxes, Slice[] slices, int[] order) {
 		this.setData(lazy, daxes, slices, order, new TraceReducer(), new ImageTrapeziumBaselineReducer());
+	}
+	
+	public void setExternalListeners(IROIListener roiLeft, IROIListener roiRight, IRegionListener regionLeft, IRegionListener regionRight) {
+		if (externalRegionListenerLeft != null) sideSystem.removeRegionListener(externalRegionListenerLeft);
+		if (externalRegionListenerRight != null) mainSystem.removeRegionListener(externalRegionListenerRight);
+		
+		externalRegionListenerLeft = regionLeft;
+		externalRegionListenerRight = regionRight;
+		
+		if (regionLeft != null) sideSystem.addRegionListener(regionLeft);
+		if (regionRight != null) mainSystem.addRegionListener(regionRight);
+		
+		externalROIListenerLeft = roiLeft;
+		externalROIListenerRight = roiRight;
+		
 	}
 	
 	public void setData(ILazyDataset lazy, List<IDataset> daxes, Slice[] slices, int[] order,
@@ -185,7 +204,9 @@ public class HyperComponent {
 			mainSystem.addRegion(region);
 			
 			region.setROI(rroi);
+			region.setUserRegion(false);
 			region.addROIListener(this.roiListenerLeft);
+			if (externalROIListenerLeft != null) region.addROIListener(externalROIListenerLeft);
 			sideSystem.clear();
 			updateRight(region, rroi);
 			
@@ -194,6 +215,7 @@ public class HyperComponent {
 			windowRegion.setROI(broi);
 			windowRegion.setUserRegion(false);
 			windowRegion.addROIListener(this.roiListenerRight);
+			if (externalROIListenerRight != null) region.addROIListener(externalROIListenerRight);
 			sideSystem.addRegion(windowRegion);
 			updateLeft(windowRegion,broi);
 			
@@ -356,6 +378,7 @@ public class HyperComponent {
 				if (evt.getRegion() != null) {
 					evt.getRegion().setUserRegion(true);
 					evt.getRegion().addROIListener(roiListenerLeft);
+					if (externalROIListenerLeft != null) evt.getRegion().addROIListener(externalROIListenerLeft);
 					updateRight((IRegion)evt.getSource(),((IRegion)evt.getSource()).getROI());
 				}
 				
@@ -393,6 +416,7 @@ public class HyperComponent {
 				if (evt.getRegion() != null) {
 					evt.getRegion().setUserRegion(true);
 					evt.getRegion().addROIListener(roiListenerRight);
+					if (externalROIListenerRight != null) evt.getRegion().addROIListener(externalROIListenerRight);
 					updateLeft((IRegion)evt.getSource(),((IRegion)evt.getSource()).getROI());
 				}
 				

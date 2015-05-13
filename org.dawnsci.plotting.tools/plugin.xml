@@ -384,8 +384,8 @@
             class="org.dawnsci.plotting.tools.hyper2d.Hyper2DTool"
             icon="icons/cutter_line.png"
             id="org.dawnsci.plotting.tools.plotting_tool_hyper2d"
-            label="Hyper2d"
-            visible="false">
+            label=" X and Y Axis Profile(Hyper2d)"
+            visible="true">
       </plotting_tool_page>
       <plotting_tool_page
             class="org.dawnsci.plotting.tools.ImageRotateTool"
