@@ -143,7 +143,7 @@ public abstract class AbstractRegion<T extends IROI> extends Figure implements I
 		isActive = roi.isPlot(); // set the region isActive flag
 		if (this.roi == roi) {
 			// return; // do not fire event
-			logger.warn("Setting ROI same");
+			logger.debug("Setting ROI same");
 		}
 
 		try {
