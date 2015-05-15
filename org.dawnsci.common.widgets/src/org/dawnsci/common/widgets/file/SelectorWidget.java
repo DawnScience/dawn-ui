@@ -10,7 +10,6 @@ package org.dawnsci.common.widgets.file;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.dawnsci.common.widgets.Activator;
@@ -223,7 +222,7 @@ public abstract class SelectorWidget {
 		fileButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				handleFileBrowse(e);
+				handleFileBrowse(e, fileTypes, fileExtensions);
 			}
 		});
 	}
@@ -403,7 +402,7 @@ public abstract class SelectorWidget {
 		return res;
 	}
 
-	private void handleFileBrowse(TypedEvent event) {
+	private void handleFileBrowse(TypedEvent event, final String[] fileTypes, final String[] fileExtensions) {
 		String path = null;
 		if (isFolderSelector) {
 			final DirectoryDialog dialog = new DirectoryDialog(Display.getDefault().getActiveShell(), SWT.OPEN);
@@ -432,7 +431,9 @@ public abstract class SelectorWidget {
 				if (file.exists()) {
 					if (fileTypes != null && fileExtensions != null) {
 						dialog.setFilterNames(fileTypes);
-						dialog.setFilterExtensions(fileExtensions);
+						//FileDialog expects extensions with *.<extension> so convert ours to this format
+						String[] fileExtensionsWithPatternCharacters = getExtensionsWithPatternCharacters(fileExtensions);
+						dialog.setFilterExtensions(fileExtensionsWithPatternCharacters);
 					}
 					if (file.isDirectory()) {
 						dialog.setFilterPath(file.getAbsolutePath());
@@ -448,6 +449,18 @@ public abstract class SelectorWidget {
 			setText(path);
 			pathChanged(path, event);
 		}
+	}
+
+	private String[] getExtensionsWithPatternCharacters(String[] fileExtensions2) {
+		String[] newExtensions = new String[fileExtensions2.length];
+		int i=0;
+		for (String extension : fileExtensions2) {
+			if (!extension.startsWith("*.")) {
+				extension = "*." + extension;
+			}
+			newExtensions[i++] = extension;
+		}
+		return newExtensions;
 	}
 
 	public String getAbsoluteFilePath() {
