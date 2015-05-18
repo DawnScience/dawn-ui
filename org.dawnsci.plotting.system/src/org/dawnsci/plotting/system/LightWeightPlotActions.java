@@ -38,8 +38,10 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.ActionType;
 import org.eclipse.dawnsci.plotting.api.ManagerType;
 import org.eclipse.dawnsci.plotting.api.PlotType;
+import org.eclipse.dawnsci.plotting.api.axis.AxisEvent;
 import org.eclipse.dawnsci.plotting.api.axis.AxisUtils;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
+import org.eclipse.dawnsci.plotting.api.axis.IAxisListener;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
@@ -363,6 +365,36 @@ class LightWeightPlotActions {
 				}
 			}
 		};
+		
+		viewer.getSystem().getAxis(xAxis.getTitle()).addAxisListener(new IAxisListener() {
+			
+			@Override
+			public void revalidated(AxisEvent evt) {
+				if (logX.isChecked() != xAxis.isLog10()) {
+					logX.setChecked(xAxis.isLog10());
+				}
+			}
+			
+			@Override
+			public void rangeChanged(AxisEvent evt) {
+				// not required
+			}
+		});
+		
+		viewer.getSystem().getAxis(yAxis.getTitle()).addAxisListener(new IAxisListener() {
+			
+			@Override
+			public void revalidated(AxisEvent evt) {
+				if (logY.isChecked() != yAxis.isLog10()) {
+					logY.setChecked(yAxis.isLog10());
+				}
+			}
+			
+			@Override
+			public void rangeChanged(AxisEvent evt) {
+				// not required
+			}
+		});
 		
 		actionBarManager.addXYAction(deleteAxis);
 		actionBarManager.addXYSeparator();
