@@ -30,7 +30,7 @@ Require-Bundle: org.eclipse.core.runtime,
  com.fasterxml.jackson.core.jackson-core;bundle-version="2.2.0",
  com.fasterxml.jackson.core.jackson-databind;bundle-version="2.2.0",
  uk.ac.diamond.org.nfunk.jep
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Eclipse-BuddyPolicy: registered
 Import-Package: javax.measure.quantity;version="4.3.1",
