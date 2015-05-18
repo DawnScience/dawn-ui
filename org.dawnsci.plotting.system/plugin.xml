@@ -104,7 +104,7 @@
          point="org.eclipse.ui.commands">
       <command
             defaultHandler="org.dawnsci.plotting.system.commands.LogXHandler"
-            id="org.dawnsci.plotting.system.LogXToggle"
+            id="org.dawnsci.plotting.system.logXToggle"
             name="Toggle logX in current plot">
       </command>
       <command

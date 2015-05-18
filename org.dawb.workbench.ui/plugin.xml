@@ -346,7 +346,7 @@
    <extension
          point="org.eclipse.ui.bindings">
       <key
-            commandId="org.dawnsci.plotting.system.LogXToggle"
+            commandId="org.dawnsci.plotting.system.logXToggle"
             contextId="org.eclipse.ui.contexts.window"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="X">

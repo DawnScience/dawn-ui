@@ -334,7 +334,7 @@ class LightWeightPlotActions {
 		final Action logY = new Action("Log Y", IAction.AS_CHECK_BOX) {
 			public void run() {
 				final ICommandService service = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
-				final Command command = service.getCommand("org.dawnsci.plotting.system.LogYToggle");
+				final Command command = service.getCommand("org.dawnsci.plotting.system.logYToggle");
 				final ExecutionEvent event = new ExecutionEvent(command, Collections.EMPTY_MAP, this, actionBarManager.getSystem());
 				try {
 					boolean success = (Boolean) command.executeWithChecks(event);
@@ -351,7 +351,7 @@ class LightWeightPlotActions {
 		final Action logX = new Action("Log X", IAction.AS_CHECK_BOX) {
 			public void run() {
 				final ICommandService service = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
-				final Command command = service.getCommand("org.dawnsci.plotting.system.LogXToggle");
+				final Command command = service.getCommand("org.dawnsci.plotting.system.logXToggle");
 				final ExecutionEvent event = new ExecutionEvent(command, Collections.EMPTY_MAP, this, actionBarManager.getSystem());
 				try {
 					boolean success = (Boolean) command.executeWithChecks(event);
