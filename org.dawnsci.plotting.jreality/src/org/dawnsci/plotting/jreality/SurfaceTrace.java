@@ -27,9 +27,9 @@ import org.eclipse.ui.PlatformUI;
 
 /**
  * A class for holding surface trace data.
- * 
+ *
  * We may need to abstract some parts to a general 3D trace as more options are supported.
- * 
+ *
  * @author Matthew Gerring
  *
  */
@@ -78,21 +78,20 @@ public class SurfaceTrace extends Image3DTrace implements ISurfaceTrace{
 //	private int[] normalize(int[] point, int maxX, int maxY) {
 //		if (point[0]<0) point[0]=0;
 //		if (point[0]>=maxX) point[0]=maxX-1;
-//		
+//
 //		if (point[1]<0) point[1]=0;
 //		if (point[1]>=maxY) point[1]=maxY-1;
 //		return point;
 //	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public void setData(final IDataset data, List<? extends IDataset> axes) {
+	public boolean setData(final IDataset data, List<IDataset> axes) {
 		if (window == null)
 			window = SurfaceTrace.createSurfacePlotROI(data);
 
 		if (imageServiceBean==null) imageServiceBean = new ImageServiceBean();
 		imageServiceBean.setImage(data);
-		
+
 		if (service==null) service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
 		if (rescaleHistogram) {
 			final double[] fa = service.getFastStatistics(imageServiceBean);
@@ -103,16 +102,18 @@ public class SurfaceTrace extends Image3DTrace implements ISurfaceTrace{
 		if (axes!=null && axes.size()==2) {
 			axes = Arrays.asList(axes.get(0), axes.get(1), null);
 		}
-		
+
 		this.data = (Dataset)data;
 		this.axes = (List<IDataset>) axes;
 		if (isActive()) {
 			plotter.updatePlot(createAxisValues(), plotter.getWindow(getWindow()), plotType, this.data);
-			
+
 			if (plottingSystem!=null) {
 				plottingSystem.fireTraceUpdated(new TraceEvent(this));
 			}
 		}
+
+		return true;
 	}
 
 	/**
@@ -126,7 +127,7 @@ public class SurfaceTrace extends Image3DTrace implements ISurfaceTrace{
 		binShape = PlottingUtils.getBinShape(width, height, false);
 		if (binShape != 1) {
 			// DownsampleMode.MEAN = 2
-			samplingMode = 2; 
+			samplingMode = 2;
 		}
 		SurfacePlotROI window = new SurfacePlotROI(0, 0, width, height, samplingMode, samplingMode, 0, 0);
 		window.setLengths(new double[]{Double.valueOf(width), Double.valueOf(height)});

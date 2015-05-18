@@ -94,18 +94,18 @@ import org.slf4j.LoggerFactory;
 
 /**
  * An implementation of IPlottingSystem, not designed to be public.
- * 
+ *
  * THIS CLASS SHOULD NOT BE USED OUTSIDE THIS PLUGIN!
- * 
+ *
  * THIS CLASS IS plugin private, do not export org.dawb.workbench.plotting.system from this plugin.
- * 
+ *
  * @author gerring
  *
  */
 public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	private Logger logger = LoggerFactory.getLogger(PlottingSystemImpl.class);
-	
+
 	private static IMacroService mservice;
 	public void setMacroService(IMacroService s) {
 		mservice = s;
@@ -115,7 +115,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	private StackLayout    stackLayout;
 
 	private PlotActionsManagerImpl       actionBarManager;
-	
+
 	private List<IPlottingSystemViewer>  viewers;
 	private IPlottingSystemViewer        activeViewer;
 
@@ -125,14 +125,14 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	private boolean showValueLabels = true;
 
 	public PlottingSystemImpl() {
-		
+
 		super();
 		PlottingSystemActivator.getPlottingPreferenceStore().setDefault("org.dawnsci.plotting.showValueLabels", true);
 		showValueLabels = PlottingSystemActivator.getPlottingPreferenceStore().getBoolean("org.dawnsci.plotting.showValueLabels");
 
 		this.actionBarManager     = (PlotActionsManagerImpl)super.actionBarManager;
 		viewers = createViewerList();
-		
+
 		for (IPlottingSystemViewer v : viewers) {
 			if (v instanceof LightWeightPlotViewer) {
 				activeViewer      = v;
@@ -151,10 +151,10 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	}
 
 	private List<IPlottingSystemViewer> createViewerList() {
-		
+
 		IConfigurationElement[] es = Platform.getExtensionRegistry().getConfigurationElementsFor("org.eclipse.dawnsci.plotting.api.plottingViewer");
         if (es == null || es.length <1) throw new RuntimeException("There are no plot viewers defined!");
-        
+
         List<IPlottingSystemViewer>  viewers = new ArrayList<IPlottingSystemViewer>(es.length);
         for (IConfigurationElement ie : es) {
         	try {
@@ -162,7 +162,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			} catch (CoreException e) {
 				throw new RuntimeException("Fatal Plotting Error! Cannot create "+ie.getAttribute("class"));
 			}
-		}  
+		}
 		return viewers;
 	}
 
@@ -178,7 +178,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 							   final IActionBars    bars,
 							   final PlotType       hint,
 							   final IWorkbenchPart part) {
-		
+
 		super.createPlotPart(container, plotName, bars, hint, part);
 
 		if (container.getLayout() instanceof GridLayout) {
@@ -198,14 +198,14 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			parent.setBackground(getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		}
 
-		// We make the viewerless plotting system before the viewer so that 
+		// We make the viewerless plotting system before the viewer so that
 		// any macro listener can import numpy.
 		try {
 			RMIServerProvider.getInstance().exportAndRegisterObject(IPlottingSystem.RMI_PREFIX+plotName, new RemotePlottingSystem(this));
 		} catch (Exception e) {
 			logger.error("Unable to register plotting system "+plotName, e);
 		}
-		
+
 		if (mservice!=null) {
 			mservice.publish(new MacroEventObject(this));
 		}
@@ -213,27 +213,27 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		// We ignore hint, we create a light weight plot as default because
 		// it looks nice. We swap this for a 3D one if required.
 		IPlottingSystemViewer lightWeightViewer = createViewer(PlotType.XY);
-		
+
 		if (lightWeightViewer!=null && parent.getLayout() instanceof StackLayout) {
 			final StackLayout layout = (StackLayout)parent.getLayout();
 			layout.topControl = lightWeightViewer.getControl();
 			container.layout();
 		}
-		
+
 		getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				PlottingFactory.notityPlottingSystemCreated(plotName, PlottingSystemImpl.this);
 			}
 		});
 	}
-	
+
 	@Override
 	public Control setControl(Control alternative, boolean showPlotToolbar) {
-		
+
 		if (stackLayout==null) throw new IllegalArgumentException("The plotting system is not in StackLayout mode and cannot show alternative controls!");
 		Control previous = stackLayout.topControl;
 		stackLayout.topControl = alternative;
-        
+
 		Control toolBar = ((ToolBarManager)getActionBars().getToolBarManager()).getControl();
 		if (toolBar.getLayoutData() instanceof GridData) { // It is our toolbar
 			Control toolbarControl = toolBar.getParent();
@@ -242,12 +242,12 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 				toolbarControl.getParent().layout(new Control[]{toolbarControl});
 			}
 		}
-		
+
 		parent.layout();
-		
+
 		return previous;
 	}
-	
+
 
 	@Override
 	protected PlottingActionBarManager createActionBarManager() {
@@ -266,7 +266,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 * @param type
 	 */
 	private IPlottingSystemViewer createViewer(PlotType type) {
-		
+
 		IPlottingSystemViewer viewer = getViewer(type);
 		if (viewer == null) {
 			logger.error("Cannot find a plot viewer for plot type "+type);
@@ -329,22 +329,22 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	}
 
 
-	public List<ITrace> updatePlot1D(IDataset             x, 
+	public List<ITrace> updatePlot1D(IDataset             x,
 						             final List<? extends IDataset> ys,
 						             final IProgressMonitor      monitor) {
-		
+
 		return updatePlot1D(x, ys, null, null, monitor);
 	}
-	
-	public List<ITrace> updatePlot1D(IDataset                      x, 
+
+	public List<ITrace> updatePlot1D(IDataset                      x,
 									 final List<? extends IDataset> ys,
 									 final List<String>             dataNames,
 									 final IProgressMonitor         monitor) {
-		
+
         return updatePlot1D(x, ys, dataNames, null, monitor);
 	}
-	
-	public List<ITrace> updatePlot1D(IDataset                       x, 
+
+	public List<ITrace> updatePlot1D(IDataset                       x,
 									 final List<? extends IDataset> ys,
 									 final String                   plotTitle,
 									 final IProgressMonitor         monitor) {
@@ -352,25 +352,25 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		return updatePlot1D(x, ys, null, plotTitle, monitor);
 	}
 
-	private List<ITrace> updatePlot1D(IDataset                      x, 
+	private List<ITrace> updatePlot1D(IDataset                      x,
 									 final List<? extends IDataset> ys,
 									 final List<String>             dataNames,
 									 final String                   plotTitle,
 									 final IProgressMonitor         monitor) {
 
-		
+
 		final List<ITrace> updatedAndCreated = new ArrayList<ITrace>(3);
 		final List<IDataset> unfoundYs    = new ArrayList<IDataset>(ys.size());
 		final List<String>   unfoundNames = new ArrayList<String>(ys.size());
-		
+
 		for (int i = 0; i < ys.size(); i++) {
-			
+
 			final IDataset y        = ys.get(i);
 			final String   dataName = dataNames!=null ? dataNames.get(i) : null;
-			
+
 			final ITrace trace = getTrace(y.getName());
 			if (trace!=null && trace instanceof ILineTrace) {
-				
+
 				if (x == null) x = IntegerDataset.createRange(y.getSize());
 				final IDataset finalX = x;
 				final ILineTrace lineTrace = (ILineTrace) trace;
@@ -403,12 +403,12 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		}
 		return updatedAndCreated;
 	}
-	
+
 	@Override
-	public List<ITrace> createPlot1D(final IDataset       xIn, 
+	public List<ITrace> createPlot1D(final IDataset       xIn,
 					                 final List<? extends IDataset> ysIn,
 					                 final IProgressMonitor      monitor) {
-		
+
         return createPlot1D(xIn, ysIn, null, monitor);
 	}
 
@@ -416,15 +416,15 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 * Does not have to be called in UI thread.
 	 */
 	@Override
-	public List<ITrace> createPlot1D(final IDataset       xIn, 
+	public List<ITrace> createPlot1D(final IDataset       xIn,
 					                 final List<? extends IDataset> ysIn,
 					                 final String                title,
 					                 final IProgressMonitor      monitor) {
-		
+
 		return createPlot1D(xIn, ysIn, null, title, monitor);
 	}
 	@Override
-	public List<ITrace> createPlot1D(final IDataset             xIn, 
+	public List<ITrace> createPlot1D(final IDataset             xIn,
 									final List<? extends IDataset> ysIn,
 									final List<String>          dataNames,
 									final String                title,
@@ -468,11 +468,11 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	}
 
 	@Override
-	public void append( final String           name, 
+	public void append( final String           name,
 			            final Number           xValue,
 					    final Number           yValue,
-					    final IProgressMonitor monitor) throws Exception  {       
-		
+					    final IProgressMonitor monitor) throws Exception  {
+
 		if (!this.plottingMode.is1D())
 			throw new Exception("Can only add in 1D mode!");
 		if (name == null || "".equals(name))
@@ -506,13 +506,13 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	}
 
 	@Override
-	public ITrace updatePlot2D(final IDataset       data, 
+	public ITrace updatePlot2D(final IDataset       data,
 							   final List<? extends IDataset> axes,
 							   final IProgressMonitor      monitor) {
 		return updatePlot2D(data, axes, null, monitor);
 	}
 	@Override
-	public ITrace updatePlot2D(final IDataset              data, 
+	public ITrace updatePlot2D(final IDataset              data,
 			 				   final List<? extends IDataset> axes,
 			 				   final String                dataName,
 				               final IProgressMonitor      monitor) {
@@ -528,7 +528,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 				});
 			}
 		}
-		final Collection<ITrace> traces = plottingMode.is3D() 
+		final Collection<ITrace> traces = plottingMode.is3D()
 				                        ? getTraces(ISurfaceTrace.class)
 				                        : getTraces(IImageTrace.class);
 
@@ -565,20 +565,21 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private ITrace updatePlot2DInternal(final ITrace image,
-			                          final IDataset       data, 
+			                          final IDataset       data,
 								      final List<? extends IDataset> axes,
 								      final String dataName,
 								      final IProgressMonitor      monitor) {
-		
+
 		if (data.getName()!=null) if (activeViewer!=null) activeViewer.setTitle(data.getName());
-		
+
 		if (monitor!=null&&monitor.isCanceled()) return null;
 		try {
 			if (image instanceof IImageTrace) {
 			    ((IImageTrace)image).setData(data, axes, false);
 			} else if (image instanceof ISurfaceTrace) {
-			    ((ISurfaceTrace)image).setData(data, axes);
+			    ((ISurfaceTrace)image).setData(data, (List<IDataset>)axes);
 			}
 			return image;
 		} catch (Throwable ne) { // We create a new one then
@@ -590,19 +591,19 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	/**
 	 * Must be called in UI thread. Creates and updates image.
 	 * NOTE removes previous traces if any plotted.
-	 * 
+	 *
 	 * @param data
 	 * @param axes, x first.
 	 * @param monitor
 	 */
 	@Override
-	public ITrace createPlot2D(final IDataset       data, 
+	public ITrace createPlot2D(final IDataset       data,
 							   final List<? extends IDataset> axes,
 							   final IProgressMonitor      monitor) {
 		return createPlot2D(data, axes, null, monitor);
 	}
 	@Override
-	public ITrace createPlot2D(final IDataset       data, 
+	public ITrace createPlot2D(final IDataset       data,
 								final List<? extends IDataset> axes,
 								final String        dataName,
 								final IProgressMonitor      monitor) {
@@ -623,11 +624,12 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 				}
 			});
 		}
-		
+
 		return traces.size()>0 ? traces.get(0) : null;
 	}
 
-	protected ITrace createPlot2DInternal(final IDataset            data, 
+	@SuppressWarnings("unchecked")
+	protected ITrace createPlot2DInternal(final IDataset            data,
 										List<? extends IDataset>    axes,
 										String                      dataName,
 										final IProgressMonitor      monitor) {
@@ -638,40 +640,40 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			clearPlotViewer(); // Only one image at a time!
 			if (traceMap==null) traceMap = new LinkedHashMap<String, ITrace>(31);
 			traceMap.clear();
-			
+
 			String traceName = data.getName();
 			if (part!=null&&(traceName==null||"".equals(traceName))) {
 				traceName = part.getTitle();
 			}
 			if (monitor!=null&&monitor.isCanceled()) return null;
-			
+
 			ITrace trace=null;
 			if (plottingMode.is3D()) {
 				trace = createSurfaceTrace(traceName);
 				trace.setDataName(dataName);
-				((ISurfaceTrace)trace).setData(data, axes);
+				((ISurfaceTrace)trace).setData(data, (List<IDataset>)axes);
 				addTrace(trace);
-				
+
 			} else {
 				final IPlottingSystemViewer viewer = getViewer(IImageTrace.class);
 				IImageTrace imageTrace = createImageTrace(traceName);
 				imageTrace.setData(data, axes, false);
 				trace = imageTrace;
-				
+
 				viewer.clearTraces();
 				imageTrace.setDataName(dataName);
 
 				addTrace(trace);
 				if (data.getName()!=null) viewer.setTitle(data.getName());
 			}
-			
+
 			if (mservice!=null) {
 				mservice.publish(new MacroEventObject(data));
 				if (axes!=null && !axes.isEmpty()) mservice.publish(new MacroEventObject(axes));
 			}
 
 			return trace;
-			
+
 		} catch (Throwable e) {
 			logger.error("Cannot load file "+data.getName(), e);
 			return null;
@@ -702,26 +704,26 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	/**
 	 * A map for recording traces to be used in the update method.
-	 * 
+	 *
 	 * Uses a map of abstract data set name to Trace to retrieve Trace on the
 	 * update.
 	 */
 	private Map<String, ITrace> traceMap; // Warning can be mem leak
 
-	private List<ITrace> createPlot1DInternal(final IDataset              xIn, 
+	private List<ITrace> createPlot1DInternal(final IDataset              xIn,
 										      final List<? extends IDataset> ysIn,
 										      final List<String>   dataNames,
 										      final String                title,
 										      final IProgressMonitor      monitor) {
-		
+
 		// Switch off error bars if very many plots.
 		IPreferenceStore store = getPreferenceStore();
-		
+
 		boolean errorBarEnabled = store.getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS);
 		Collection<ITrace> existing = getTraces(ILineTrace.class);
 		int traceCount = ysIn.size() + (existing!=null ? existing.size() : 0);
 		if (errorBarEnabled && traceCount >= store.getInt(PlottingConstants.AUTO_HIDE_ERROR_SIZE)) errorBarEnabled = false;
-		
+
 		if (errorBarEnabled) {
 			// No error dataset there then false again
 			boolean foundErrors = false;
@@ -753,16 +755,16 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			}
 		}
 		if (traceMap==null) traceMap = new LinkedHashMap<String, ITrace>(31);
-	
+
 		final IPlottingSystemViewer viewer = getViewer(plottingMode);
 		List<ITrace> traces=null;
-		
+
 		if (plottingMode.is1D()) {
-			if (viewer.getControl()==null) return null;	
+			if (viewer.getControl()==null) return null;
 			List<ILineTrace> lines = viewer.createLineTraces(title, xIn, ysIn, dataNames, traceMap, colorMap, monitor);
 			traces = new ArrayList<ITrace>(lines.size());
 			traces.addAll(lines);
-			
+
 		} else if (plottingMode.isScatter3D()) {
 			traceMap.clear();
 			IScatter3DTrace trace = (IScatter3DTrace)viewer.createTrace(title, IScatter3DTrace.class);
@@ -774,10 +776,10 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			viewer.addTrace(trace);
 			traceMap.put(trace.getName(), trace);
 			traces = Arrays.asList((ITrace)trace);
-			
+
 		} else if (plottingMode.isStacked3D()) {
 			traceMap.clear();
-			
+
 			ILineStackTrace trace = (ILineStackTrace)viewer.createTrace(title, ILineStackTrace.class);
 			final IDataset x = xIn;
 			final Dataset y = DatasetFactory.createRange(getMaxSize(ysIn), Dataset.INT32);
@@ -788,7 +790,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			traceMap.put(trace.getName(), trace);
 			traces = Arrays.asList((ITrace)trace);
 		}
-		
+
 		Collection<ITrace> lineTraces = getTraces(ILineTrace.class);
 		if (lineTraces!=null) for (ITrace iTrace : lineTraces) {
 			((ILineTrace)iTrace).setErrorBarEnabled(errorBarEnabled);
@@ -836,7 +838,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		ISurfaceTrace trace = (ISurfaceTrace)getViewer(ISurfaceTrace.class).createTrace(traceName, ISurfaceTrace.class);
 		return (ISurfaceTrace) setPaletteData(trace);
 	}
-	
+
 	@Override
 	public IIsosurfaceTrace createIsosurfaceTrace(String traceName) {
 		IIsosurfaceTrace trace = (IIsosurfaceTrace)getViewer(IIsosurfaceTrace.class).createTrace(traceName, IIsosurfaceTrace.class);
@@ -853,7 +855,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	private IImage3DTrace setPaletteData(IImage3DTrace trace) {
 		PaletteData palette = null;
 		if (trace.getPaletteData()==null) {
-			final String schemeName = PlottingSystemActivator.getPlottingPreferenceStore().getString(PlottingConstants.COLOUR_SCHEME);	
+			final String schemeName = PlottingSystemActivator.getPlottingPreferenceStore().getString(PlottingConstants.COLOUR_SCHEME);
 
 			final Collection<ITrace> col = getTraces(IImageTrace.class);
 			if (col!=null && col.size()>0) {
@@ -891,10 +893,10 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		actionBarManager.switchActions(plottingMode);
 
 		Control top = null;
-		
+
 		IPlottingSystemViewer viewer = createViewer(type);
 		if (viewer == null) return;
-		
+
 		activeViewer = viewer;
 		top          = viewer.getControl();
 		viewer.updatePlottingRole(type);
@@ -904,7 +906,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			layout.topControl = top;
 			parent.layout();
 		}
-		
+
 		if (isAutoHideRegions() && previous!=plottingMode) {
 			// We auto-hide regions that are different plot type.
 			final Collection<IRegion> regions = getRegions();
@@ -921,7 +923,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 * @return
 	 */
 	public void addTrace(ITrace trace) {
-		
+
 		IPlottingSystemViewer viewer = getViewer(trace.getClass());
 		boolean ok = viewer.addTrace(trace);
 		if (!ok) return; // it has not added.
@@ -939,7 +941,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 */
 	public void removeTrace(ITrace trace) {
 		if (traceMap!=null) traceMap.remove(trace.getName());
-		
+
 		IPlottingSystemViewer viewer = getViewer(trace.getClass());
 		viewer.removeTrace(trace);
 		fireTraceRemoved(new TraceEvent(trace));
@@ -954,7 +956,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	}
 	@Override
 	public void moveTrace(final String oldName, String name) {
-		
+
 		if (name!=null && name.equals(oldName)) return;
 		if (traceMap!=null) {
 			ITrace trace = traceMap.remove(oldName);
@@ -973,7 +975,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		return traceMap.get(name);
 	}
 
-	private void appendInternal(final String           name, 
+	private void appendInternal(final String           name,
 					                  Number           xValue,
 							    final Number           yValue,
 							    final IProgressMonitor monitor) {
@@ -993,23 +995,23 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 */
 	public void setTitle(final String title) {
 		super.setTitle(title);
-		activeViewer.setTitle(title);		
+		activeViewer.setTitle(title);
 	}
 	/**
 	 * Call to set the plot title color.
 	 * @param title
 	 */
 	public void setTitleColor(final Color color) {
-		activeViewer.setTitleColor(color);		
+		activeViewer.setTitleColor(color);
 	}
 	@Override
 	public void setBackgroundColor(final Color color) {
-		activeViewer.setBackgroundColor(color);		
+		activeViewer.setBackgroundColor(color);
 	}
 
 	public String getTitle() {
 		return activeViewer.getTitle();
-	}	
+	}
 
 	@Override
 	public void setShowLegend(boolean b) {
@@ -1053,7 +1055,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			if (set != null)
 			    max = Math.max(max, set.getSize());
 		}
-		
+
 		return max;
 	}
 
@@ -1102,7 +1104,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			} catch (Throwable e) {
 				logger.error("Cannot remove traces!", e);
 			}
-		}	
+		}
 	}
 
 	@Override
@@ -1137,7 +1139,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			});
 		}
 	}
-	
+
 	private void removeAllTraces() {
 		final Collection<ITrace> traces = getTraces();
 		for (ITrace iTrace : traces) {
@@ -1146,10 +1148,10 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	private void clearPlotViewer() {
-		
+
 		for (IPlottingSystemViewer v : viewers) {
 		  if (v.getControl()!=null)  v.clearTraces();
 		}
@@ -1177,7 +1179,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	/**
 	 * Use this method to create axes other than the default y and x axes.
-	 * 
+	 *
 	 * @param title
 	 * @param isYAxis, normally it is.
 	 * @param side - either SWT.LEFT, SWT.RIGHT, SWT.TOP, SWT.BOTTOM
@@ -1185,21 +1187,21 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 */
 	@Override
 	public IAxis createAxis(final String title, final boolean isYAxis, int side) {
-					
+
 		return activeViewer.createAxis(title, isYAxis, side);
 	}
 
 	@Override
-	public IAxis removeAxis(final IAxis axis) {		
+	public IAxis removeAxis(final IAxis axis) {
 		return activeViewer.removeAxis(axis);
 	}
 
 	@Override
 	public List<IAxis> getAxes() {
-					
+
 		return activeViewer.getAxes();
 	}
-	
+
 	@Override
 	public IAxis getAxis(String name) {
 		return activeViewer.getAxis(name);
@@ -1235,7 +1237,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 	/**
 	 * Throws exception if region exists already.
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public IRegion createRegion(final String name, final RegionType regionType) throws Exception  {
 		return activeViewer.createRegion(name, regionType);
@@ -1301,7 +1303,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	public Collection<IRegion> getRegions() {
 		return activeViewer.getRegions();
 	}
-	
+
 	@Override
 	public Collection<IRegion> getRegions(final RegionType type) {
        return activeViewer.getRegions(type);
@@ -1326,7 +1328,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	public void renameAnnotation(final IAnnotation annotation, String name) {
 		activeViewer.renameAnnotation(annotation, name);
 	}
-	
+
 	@Override
 	public void clearAnnotations(){
 		activeViewer.clearAnnotations();
@@ -1392,14 +1394,14 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	}
 
 	/**
-	 * NOTE This listener is *not* notified once for each configuration setting made on 
+	 * NOTE This listener is *not* notified once for each configuration setting made on
 	 * the configuration but once whenever the form is applied by the user (and many things
-	 * are changed) 
-	 * 
+	 * are changed)
+	 *
 	 * You then have to read the property you require from the object (for instance the axis
 	 * format) in case it has changed. This is not ideal, later there may be more events fired and
 	 * it will be possible to check property name, for now it is always set to "Graph Configuration".
-	 * 
+	 *
 	 * @param listener
 	 */
 	@Override
@@ -1413,7 +1415,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		super.removePropertyChangeListener(listener);
 		activeViewer.removePropertyChangeListener(listener);
 	}
-	
+
 	public void setActionBars(IActionBars bars) {
 		this.bars = bars;
 	}
@@ -1432,7 +1434,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	public void removePositionListener(IPositionListener l) {
 		activeViewer.removePositionListener(l);
 	}
-	
+
 	@Override
 	public void addClickListener(IClickListener l) {
 		activeViewer.addClickListener(l);
@@ -1446,11 +1448,11 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	public void setKeepAspect(boolean checked){
 		activeViewer.setKeepAspect(checked);
 	}
-	
+
 	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
-		
+
 		if (adapter.isAssignableFrom(getClass())) return this;
-		
+
 		for (IPlottingSystemViewer v : viewers) {
 			if (v.getClass() == adapter) return v;
 			if (adapter.isAssignableFrom(v.getClass())) return v;

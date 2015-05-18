@@ -26,7 +26,7 @@ import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 
 public class Scatter3DTrace extends PlotterTrace implements IScatter3DTrace {
 
-	
+
 	private Dataset scatter;
 
 	public Scatter3DTrace(JRealityPlotViewer plotter2, String name2) {
@@ -38,22 +38,23 @@ public class Scatter3DTrace extends PlotterTrace implements IScatter3DTrace {
 		return scatter;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public void setData(IDataset data, List<? extends IDataset> axes) {
+	public boolean setData(IDataset data, List<IDataset> axes) {
 		if (axes!=null && axes.size()==2) {
 			axes = Arrays.asList(axes.get(0), axes.get(1), null);
 		}
 		this.scatter = (Dataset) data;
-		this.axes  = (List<IDataset>) axes;
-		
+		this.axes  = axes;
+
 		if (isActive()) {
 			plotter.updatePlot(createAxisValues(), null, PlottingMode.SCATTER3D, scatter);
-			
+
 			if (plottingSystem!=null) {
 				plottingSystem.fireTraceUpdated(new TraceEvent(this));
 			}
 		}
+
+		return true;
 	}
 
 	@Override

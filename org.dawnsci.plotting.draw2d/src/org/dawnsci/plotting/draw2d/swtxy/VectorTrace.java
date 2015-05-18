@@ -29,11 +29,11 @@ import org.eclipse.swt.widgets.Display;
 
 /**
  * An implementation of VectorTrace based on the draw2d Figure
- * 
+ *
  * TODO Not curently implemented for rotated images.
- * 
+ *
  * TODO No downsampling currently implemented.
- * 
+ *
  * @author Matthew Gerring
  *
  */
@@ -62,14 +62,14 @@ public class VectorTrace extends Figure implements IVectorTrace {
 	private Axis yAxis;
 	private PolygonDecoration polyline;
     private Map<RGB, Color> colorMap;
-	
+
 	public VectorTrace(String traceName, Axis xAxis, Axis yAxis) {
 		setName(traceName);
 		this.xAxis = xAxis;
 		this.yAxis = yAxis;
 
 		this.polyline = new PolygonDecoration();
-		
+
         PointList pl = new PointList();
 
         pl.addPoint(0, 0);
@@ -78,7 +78,7 @@ public class VectorTrace extends Figure implements IVectorTrace {
         polyline.setTemplate(pl);
 
 		add(polyline);
-		
+
 		colorMap = new HashMap<RGB, Color>(3);
 	}
 
@@ -90,10 +90,10 @@ public class VectorTrace extends Figure implements IVectorTrace {
 		}
 		colorMap.clear();
 	}
-	
+
 	/**
 	 * This figure simply paints the vectors.
-	 * 
+	 *
 	 * TODO Downsampling!
 	 */
 	public void paint(Graphics graphics) {
@@ -111,7 +111,7 @@ public class VectorTrace extends Figure implements IVectorTrace {
 	}
 
 	private Color getArrowSWTColor(final int x, final int y) {
-		
+
 		RGB key = new RGB(arrowColor[0], arrowColor[1], arrowColor[2]);
 		if (arrowPalette!=null) {
 			int pos = -1;
@@ -123,20 +123,20 @@ public class VectorTrace extends Figure implements IVectorTrace {
 			if (pos>-1) {
 				key = arrowPalette.getRGB(pos);
 			}
-		} 
-		
+		}
+
 		Color cached = colorMap.get(key);
 		if (cached!=null) return cached;
-		
+
 		cached = new Color(Display.getDefault(), key);
 		colorMap.put(key,  cached);
 		return cached;
 	}
-	
+
 	private Color getCircleSWTColor() {
-		
+
 		RGB key = new RGB(circleColor[0], circleColor[1], circleColor[2]);
-		
+
 		Color cached = colorMap.get(key);
 		if (cached!=null) return cached;
 
@@ -146,7 +146,7 @@ public class VectorTrace extends Figure implements IVectorTrace {
 	}
 
 	private void paintArrows(Graphics graphics) {
-		
+
 		final int[] shape = vectors.getShape();
 		for (int x = 0; x < shape[0]; x++) {
 			for (int y = 0; y < shape[1]; y++) {
@@ -161,28 +161,28 @@ public class VectorTrace extends Figure implements IVectorTrace {
 				paintArrow(graphics, xloc, yloc, mag, angle);
 			}
 		}
-		
+
 	}
 
 	/**
-	 *             
+	 *
 	 * @param xloc  - location of center of arrow
 	 * @param yloc  - location of center of arrow
 	 * @param length  - size of arrow, normalized from magnitude of vector.
 	 * @param theta - anti-clockwise angle from 12 O'clock in radians.
 	 */
 	private void paintArrow(Graphics graphics, double xloc, double yloc, double length, double theta) {
-		
+
 		if (!xAxis.getRange().inRange(xloc) && !yAxis.getRange().inRange(yloc)) {
 			return; // Nothing to draw
 		}
 		final int x    = xAxis.getValuePosition(xloc, false);
 		final int y    = yAxis.getValuePosition(yloc, false);
 		final double l = length/2d;
-		
+
 		final Point one;
 		final Point two;
-		
+
 		if (arrowPosition==ArrowConfiguration.THROUGH_CENTER) {
 			final int xD = (int)Math.round(l*Math.sin(theta));
 			final int yD = (int)Math.round(l*Math.cos(theta));
@@ -193,7 +193,7 @@ public class VectorTrace extends Figure implements IVectorTrace {
 			final int yD = (int)Math.round(length*Math.cos(theta));
 			one = new Point(x,y);
 		    two = new Point(x+xD, y+yD);
-		    
+
 		    if (arrowPosition==ArrowConfiguration.TO_CENTER_WITH_CIRCLE) {
 		    	graphics.pushState();
 				graphics.setForegroundColor(getCircleSWTColor());
@@ -202,12 +202,12 @@ public class VectorTrace extends Figure implements IVectorTrace {
 		    	graphics.popState();
 		    }
 		}
-		
+
 		graphics.drawLine(one, two);
 		polyline.setLocation(one);
 		polyline.setReferencePoint(two);
 		polyline.setScale(l/3d, l/3d);
-		
+
 		polyline.paintFigure(graphics);
 	}
 
@@ -224,43 +224,43 @@ public class VectorTrace extends Figure implements IVectorTrace {
 	 * Normalizes the arrow length to the pixel value defined in maximumArrowSize
 	 */
 	private void normalize() {
-		
+
 		int[] shape = vectors.getShape();
         normalizedMagnitude = DatasetFactory.zeros(new int[]{shape[0], shape[1]}, Dataset.FLOAT);
         normalizedAngle     = DatasetFactory.zeros(new int[]{shape[0], shape[1]}, Dataset.FLOAT);
-        
+
         double maxMag  = -Double.MAX_VALUE;
         double maxAng  = -Double.MAX_VALUE;
 		for (int x = 0; x < shape[0]; x++) {
 			for (int y = 0; y < shape[1]; y++) {
 				double mag = vectors.getDouble(x,y,0);
 				maxMag = Math.max(mag, maxMag);
-				
+
 				double ang = vectors.getDouble(x,y,1);
 				maxAng = Math.max(ang, maxAng);
 			}
 		}
-		
+
 		for (int x = 0; x < shape[0]; x++) {
 			for (int y = 0; y < shape[1]; y++) {
-				
+
 				double mag   = vectors.getDouble(x,y,0);
 				try {
 			        double ratio = getVectorNormalization()==VectorNormalization.LOGARITHMIC
 			        		     ? Math.log(mag) / Math.log(maxMag)
 				                 : mag / maxMag;
-			        
+
 			        normalizedMagnitude.set(ratio, x, y);
 				} catch (Throwable ne) {
 					normalizedMagnitude.set(0, x, y);
 				}
-				
+
 				double ang   = vectors.getDouble(x,y,1);
 				try {
 			        double ratio = getVectorNormalization()==VectorNormalization.LOGARITHMIC
 			        		     ? Math.log(ang) / Math.log(maxAng)
 				                 : ang / maxAng;
-			        
+
 			        normalizedAngle.set(ratio, x, y);
 				} catch (Throwable ne) {
 					normalizedAngle.set(0, x, y);
@@ -359,7 +359,7 @@ public class VectorTrace extends Figure implements IVectorTrace {
 		this.maximumArrowSize = maximumArrowSize;
 		repaint();
 	}
-    
+
     public ArrowConfiguration getArrowConfiguration() {
 		return arrowPosition;
 	}
@@ -368,7 +368,7 @@ public class VectorTrace extends Figure implements IVectorTrace {
 		this.arrowPosition = arrowPosition;
 		repaint();
 	}
-    
+
     public int[] getCircleColor() {
 		return circleColor;
 	}
