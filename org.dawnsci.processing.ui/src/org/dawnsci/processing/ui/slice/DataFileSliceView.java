@@ -343,6 +343,7 @@ public class DataFileSliceView extends ViewPart {
 					
 					ExecutionType et = ExecutionType.SERIES;
 					int pool = 1;
+					boolean tryParallel = false;
 					
 					try {
 						IPreferenceStore ps = Activator.getDefault().getPreferenceStore();
@@ -351,13 +352,14 @@ public class DataFileSliceView extends ViewPart {
 						
 						String string = ps.getString(ProcessingConstants.EXECUTION_TYPE);
 						et = ExecutionType.valueOf(string);
+						tryParallel = ps.getBoolean(ProcessingConstants.USE_PARRALLEL);
 					} catch (Exception e) {
 						logger.error("Could not load execution type from preference!: "+ e.getMessage());
 					}
 					
 					final ExecutionType etype = et;
-					
 					final int poolsize = pool;
+					final boolean par = tryParallel;
 
 					final IOperation<? extends IOperationModel, ? extends OperationData>[] fop = ops;
 
@@ -386,6 +388,11 @@ public class DataFileSliceView extends ViewPart {
 						@Override
 						public int getPoolSize() {
 							return poolsize;
+						}
+
+						@Override
+						public boolean isTryParallel() {
+							return par;
 						}
 
 					});

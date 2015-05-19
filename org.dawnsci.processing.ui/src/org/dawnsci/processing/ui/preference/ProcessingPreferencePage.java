@@ -104,6 +104,7 @@ public class ProcessingPreferencePage extends PreferencePage implements
 		}
 		
 		getPreferenceStore().setValue(ProcessingConstants.POOL_SIZE, spinner.getSelection());
+		getPreferenceStore().setValue(ProcessingConstants.USE_PARRALLEL, button.getSelection());
 		
 		return super.performOk();
 	}
