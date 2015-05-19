@@ -105,7 +105,7 @@ final class OperationLabelProvider extends SeriesItemLabelProvider implements IS
 			}
 			
 
-		} catch (InstantiationException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
