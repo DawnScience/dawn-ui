@@ -454,6 +454,38 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 						previousTool = null;
 					}
 		        }
+		        if (e.character == 'x') {
+		        	final Runnable logXRunner = new Runnable() {
+						public void run() {
+							try {
+								final ICommandService service = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
+								final Command         export = service.getCommand("org.dawnsci.plotting.system.logXToggle");
+								final ExecutionEvent  event = new ExecutionEvent(export, Collections.EMPTY_MAP, null, null);
+								export.executeWithChecks(event);
+								
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					};
+					logXRunner.run();
+		        }
+		        if (e.character == 'y') {
+		        	final Runnable logYRunner = new Runnable() {
+						public void run() {
+							try {
+								final ICommandService service = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
+								final Command         export = service.getCommand("org.dawnsci.plotting.system.logYToggle");
+								final ExecutionEvent  event = new ExecutionEvent(export, Collections.EMPTY_MAP, null, null);
+								export.executeWithChecks(event);
+								
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					};
+					logYRunner.run();
+		        }
 		        xyGraph.getRegionArea().setKeyEvent(null);
 			}
 		};
