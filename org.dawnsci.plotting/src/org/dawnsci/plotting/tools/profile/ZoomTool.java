@@ -92,8 +92,10 @@ public class ZoomTool extends ProfileTool {
 			// Calculate axes to have real values not size
 			AbstractDataset yLabels = null;
 			AbstractDataset xLabels = null;
-			if (image.getAxes()!=null) {
-				AbstractDataset xl = image.getAxes().get(0);
+
+			if (image.getAxes()!=null && image.getAxes().size() > 0) {
+				AbstractDataset xl = (AbstractDataset)image.getAxes().get(0);
+
 				if (xl!=null) xLabels = getLabelsFromLabels(xl, bounds, 0);
 				AbstractDataset yl = image.getAxes().get(1);
 				if (yl!=null) yLabels = getLabelsFromLabels(yl, bounds, 1);

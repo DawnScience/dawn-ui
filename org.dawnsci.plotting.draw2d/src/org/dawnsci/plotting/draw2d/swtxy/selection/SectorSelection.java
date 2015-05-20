@@ -208,6 +208,8 @@ public class SectorSelection extends AbstractSelectionRegion {
 		sroi.setSymmetry(symmetry);
 		sroi.setCombineSymmetry(combine);
 		if (roi!=null) sroi.setPlot(roi.isPlot());
+		// set the Region isActive flag
+		this.setActive(this.isActive());
 		
 		if (recordResult) {
 			roi = sroi;

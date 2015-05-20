@@ -195,6 +195,8 @@ public class GridSelection extends BoxSelection {
 	protected RectangularROI createROI(double ptx, double pty, double width, double height, double angle) {
 		GridROI groi = new GridROI(ptx, pty, width, height, angle);
 		if (roi!=null) groi.setPlot(roi.isPlot());
+		// set the Region isActive flag
+		this.setActive(this.isActive());
 		return groi;
 	}
 

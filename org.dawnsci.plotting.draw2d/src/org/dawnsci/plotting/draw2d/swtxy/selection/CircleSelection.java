@@ -152,7 +152,8 @@ public class CircleSelection extends AbstractSelectionRegion {
 		croi.setRadius(v[0] - croi.getPointX()); // NB do not use y as aspect ratio can change(!)
 		croi.setName(getName());
 		if (roi!=null) croi.setPlot(roi.isPlot());
-//		System.err.println("To roi, " + croi.toString());
+		// set the Region isActive flag
+		this.setActive(this.isActive());
 		if (recordResult) {
 			roi = croi;
 		}

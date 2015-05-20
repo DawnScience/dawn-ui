@@ -205,7 +205,8 @@ public class RegionEditTool extends AbstractRegionTableTool {
 			case 6: //sum
 				return null;
 			case 7: //isPlot
-				return roi.isPlot();
+				return region.isActive();
+//				return roi.isPlot();
 			default:
 				return null;
 			}
@@ -279,11 +280,7 @@ public class RegionEditTool extends AbstractRegionTableTool {
 				break;
 			case 7: //isPlot
 				myRoi.setPlot((Boolean)value);
-//				if(isActive){
-//					if (region!=null) region.setRegionColor(ColorConstants.green);
-//				} else {
-//					if (region!=null) region.setRegionColor(ColorConstants.gray);
-//				}
+				region.setActive((Boolean)value);
 				break;
 			default:
 				break;
@@ -299,9 +296,6 @@ public class RegionEditTool extends AbstractRegionTableTool {
 				myregion.setROI(myRoi);
 			
 		}
-
-		
 	}
-
-	
 }
+
