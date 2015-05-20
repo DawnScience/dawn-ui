@@ -343,19 +343,4 @@
          </hiddenMenuItem>
       </perspectiveExtension>
    </extension>
-   <extension
-         point="org.eclipse.ui.bindings">
-      <key
-            commandId="org.dawnsci.plotting.system.logXToggle"
-            contextId="org.eclipse.ui.contexts.window"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="X">
-      </key>
-      <key
-            commandId="org.dawnsci.plotting.system.logYToggle"
-            contextId="org.eclipse.ui.contexts.window"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="Y">
-      </key>
-   </extension>
 </plugin>
