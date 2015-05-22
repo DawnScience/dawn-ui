@@ -461,7 +461,9 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 								final ICommandService service = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
 								final Command         export = service.getCommand("org.dawnsci.plotting.system.logXToggle");
 								final ExecutionEvent  event = new ExecutionEvent(export, Collections.EMPTY_MAP, null, null);
-								export.executeWithChecks(event);
+								if (!system.is2D()) {
+									export.executeWithChecks(event);
+								}
 								
 							} catch (Exception e) {
 								e.printStackTrace();
@@ -477,7 +479,9 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 								final ICommandService service = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
 								final Command         export = service.getCommand("org.dawnsci.plotting.system.logYToggle");
 								final ExecutionEvent  event = new ExecutionEvent(export, Collections.EMPTY_MAP, null, null);
-								export.executeWithChecks(event);
+								if (!system.is2D()) {
+									export.executeWithChecks(event);
+								}
 								
 							} catch (Exception e) {
 								e.printStackTrace();
