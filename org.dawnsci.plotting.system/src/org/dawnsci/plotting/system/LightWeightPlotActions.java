@@ -1098,7 +1098,6 @@ class LightWeightPlotActions {
 		for (IAxis axis : axisList) {
 			if (axis.isYAxis() && yAxis == null) {
 				yAxis = axis;
-				System.out.println("yaxis: " + axis);
 			}
 		}
 		return yAxis;
@@ -1110,8 +1109,6 @@ class LightWeightPlotActions {
 		for (IAxis axis : axisList) {
 			if (!axis.isYAxis() && xAxis == null) {
 				xAxis = axis;
-				System.out.println("xaxis: " + axis);
-
 			}
 		}
 		return xAxis;
