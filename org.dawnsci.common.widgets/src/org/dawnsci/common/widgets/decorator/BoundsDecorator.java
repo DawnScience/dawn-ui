@@ -39,6 +39,7 @@ public class BoundsDecorator extends RegexDecorator {
 	public BoundsDecorator(Text text, String stringPattern, NumberFormat numFormat) {
 		super(text, stringPattern);
 		numberFormat = numFormat;
+		setAllowInvalidValues(true);
 	}
 	
 	@Override
