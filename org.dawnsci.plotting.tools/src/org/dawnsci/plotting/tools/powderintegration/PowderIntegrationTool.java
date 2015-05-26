@@ -509,23 +509,22 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		
 		
 		fullImageJob.schedule();
-		System.err.println("Tool Scheduled");
 	}
 	
 	private IDiffractionMetadata getUpdatedMetadata(IDataset ds, String[] statusString) {
 		
 		//check class metadata ok
-		if (metadata != null) {
-			DetectorProperties d = metadata.getDetector2DProperties();
-			if(d.getPx() != ds.getShape()[1] || d.getPy() != ds.getShape()[0])  {
-				metadata = null;
-				statusMessage.setText("Data shape not compatible with current metadata");
-				statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
-			} else {
-				statusMessage.setText("Metadata OK");
-				statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
-			}
-		}
+//		if (metadata != null) {
+//			DetectorProperties d = metadata.getDetector2DProperties();
+//			if((d.getPx() != ds.getShape()[1] || d.getPy() != ds.getShape()[0]) || (d.getPx() != ds.getShape()[0] || d.getPy() != ds.getShape()[1]))  {
+//				metadata = null;
+//				statusMessage.setText("Data shape not compatible with current metadata");
+//				statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
+//			} else {
+//				statusMessage.setText("Metadata OK");
+//				statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
+//			}
+//		}
 		
 		//look in data set
 		IDiffractionMetadata m = null;

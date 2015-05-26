@@ -16,9 +16,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironment;
 import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
-import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
@@ -27,7 +25,6 @@ import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.AbstractPixelIntegration;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.AbstractPixelIntegration1D;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.AbstractPixelIntegration2D;
@@ -37,7 +34,6 @@ import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelIntegrationUtils;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelIntegrationUtils.IntegrationMode;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelSplittingIntegration;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelSplittingIntegration2D;
-import uk.ac.diamond.scisoft.analysis.io.DiffractionMetadata;
 
 public class PowderIntegrationJob extends Job {
 
@@ -85,7 +81,8 @@ public class PowderIntegrationJob extends Job {
 		
 		if (matchedIntegrator == null) {
 			AbstractPixelIntegration i = createIntegrator(modell, diffractionMetadata, nBinsl);
-			matchedIntegrator = new MatchedIntegrator(modell, i);
+			PowderIntegrationJob.this.matchedIntegrator = new MatchedIntegrator(modell, i);
+			updateIntegratorFromModel(i, modell);
 		}
 		
 		if (!matchedIntegrator.getModel().equals(modell)) {
