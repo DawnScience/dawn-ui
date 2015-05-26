@@ -50,7 +50,7 @@ import org.eclipse.swt.widgets.Menu;
  * 
  * @author Matthew Gerring
  */
-public final class VerticalListEditor extends ListEditor {
+public class VerticalListEditor extends ListEditor {
 
 	protected TableViewer listViewer;
 	protected final Button add, delete, up, down;

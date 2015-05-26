@@ -235,6 +235,8 @@ public class ModelFieldEditors {
 	    } else {
 	    	textEd = new NumberCellEditor(parent, clazz, SWT.NONE);
 	    }
+	    
+	    ((NumberCellEditor)textEd).setAllowInvalidValues(true);
 
     	return textEd;
 	}

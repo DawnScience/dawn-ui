@@ -8,6 +8,8 @@
  */
 package org.dawnsci.plotting.tools.powderintegration;
 
+import java.util.Arrays;
+
 import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelIntegrationUtils.IntegrationMode;
@@ -65,5 +67,58 @@ public class PowderIntegrationModel extends AbstractOperationModel {
 	}
 	public void setAzimuthalRange(double[] azimuthalRange) {
 		firePropertyChange("azimuthalRange", this.azimuthalRange, this.azimuthalRange = azimuthalRange);
+	}
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((axisType == null) ? 0 : axisType.hashCode());
+		result = prime * result + Arrays.hashCode(azimuthalRange);
+		result = prime * result
+				+ ((integrationMode == null) ? 0 : integrationMode.hashCode());
+		result = prime * result + (isAzimuthal ? 1231 : 1237);
+		result = prime * result + numberOfPrimaryBins;
+		result = prime * result + numberOfSecondaryBins;
+		result = prime * result + Arrays.hashCode(radialRange);
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		PowderIntegrationModel other = (PowderIntegrationModel) obj;
+		if (axisType != other.axisType)
+			return false;
+		if (!Arrays.equals(azimuthalRange, other.azimuthalRange))
+			return false;
+		if (integrationMode != other.integrationMode)
+			return false;
+		if (isAzimuthal != other.isAzimuthal)
+			return false;
+		if (numberOfPrimaryBins != other.numberOfPrimaryBins)
+			return false;
+		if (numberOfSecondaryBins != other.numberOfSecondaryBins)
+			return false;
+		if (!Arrays.equals(radialRange, other.radialRange))
+			return false;
+		return true;
+	}
+	
+	@Override
+	public PowderIntegrationModel clone(){
+		PowderIntegrationModel cloned = new PowderIntegrationModel();
+		cloned.isAzimuthal = this.isAzimuthal;
+		cloned.numberOfPrimaryBins = this.numberOfPrimaryBins;
+		cloned.numberOfSecondaryBins = this.numberOfSecondaryBins;
+		cloned.radialRange = this.radialRange;
+		cloned.azimuthalRange = this.azimuthalRange;
+		cloned.integrationMode = this.integrationMode;
+		cloned.axisType = this.axisType;
+		return cloned;
 	}
 }

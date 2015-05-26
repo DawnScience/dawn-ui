@@ -13,6 +13,7 @@ public class ProcessingPreferenceInitializer extends
 		IPreferenceStore ps = Activator.getDefault().getPreferenceStore();
 		ps.setDefault(ProcessingConstants.EXECUTION_TYPE, ExecutionType.SERIES.toString());
 		ps.setDefault(ProcessingConstants.POOL_SIZE, 1);
+		ps.setDefault(ProcessingConstants.USE_PARRALLEL, false);
 		
 	}
 

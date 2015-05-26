@@ -5,8 +5,11 @@ import org.dawnsci.processing.ui.Activator;
 import org.eclipse.dawnsci.analysis.api.processing.ExecutionType;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -24,6 +27,7 @@ public class ProcessingPreferencePage extends PreferencePage implements
 	
 	Combo combo;
 	Spinner spinner;
+	Button button;
 
 	@Override
 	protected Control createContents(Composite parent) {
@@ -36,11 +40,6 @@ public class ProcessingPreferencePage extends PreferencePage implements
 		label.setText("Select runner");
 		
 		combo = new Combo(main, SWT.READ_ONLY);
-		String[] items = {ExecutionType.SERIES.toString(), ExecutionType.GRAPH.toString()};
-		combo.setItems(items);
-		
-		String string = getPreferenceStore().getString(ProcessingConstants.EXECUTION_TYPE);
-		for (int i = 0; i<items.length; i++) if (items[i].equals(string)) combo.select(i);
 		
 		label = new Label(main, SWT.NONE);
 		label.setText("Set Graph Pool Size");
@@ -49,11 +48,43 @@ public class ProcessingPreferencePage extends PreferencePage implements
 		spinner.setMaximum(16);
 		spinner.setMinimum(1);
 		
-		int val = getPreferenceStore().getInt(ProcessingConstants.POOL_SIZE);
-		//minus 1, from min of 1 to zero indexing
-		spinner.setSelection(val);
+		label = new Label(main, SWT.NONE);
+		label.setText("Parallelise if possible");
+		
+		button = new Button(main, SWT.CHECK);
+		
+		setUpFromPreferences();
+		
+		combo.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				e.toString();
+				String text = ((Combo)e.getSource()).getText();
+				
+				if (text.equals(ExecutionType.SERIES.toString())) {
+					spinner.setEnabled(false);
+					button.setEnabled(true);
+				} else {
+					spinner.setEnabled(true);
+					button.setEnabled(false);
+				}
+			}
+
+		});
 		
 		return main;
+	}
+	
+	private void setUpFromPreferences(){
+		String[] items = {ExecutionType.SERIES.toString(), ExecutionType.GRAPH.toString()};
+		combo.setItems(items);
+		String string = getPreferenceStore().getString(ProcessingConstants.EXECUTION_TYPE);
+		for (int i = 0; i<items.length; i++) if (items[i].equals(string)) combo.select(i);
+		
+		int val = getPreferenceStore().getInt(ProcessingConstants.POOL_SIZE);
+
+		spinner.setSelection(val);
+		button.setSelection(getPreferenceStore().getBoolean(ProcessingConstants.USE_PARRALLEL));
 	}
 
 	@Override
@@ -73,6 +104,7 @@ public class ProcessingPreferencePage extends PreferencePage implements
 		}
 		
 		getPreferenceStore().setValue(ProcessingConstants.POOL_SIZE, spinner.getSelection());
+		getPreferenceStore().setValue(ProcessingConstants.USE_PARRALLEL, button.getSelection());
 		
 		return super.performOk();
 	}
@@ -86,6 +118,12 @@ public class ProcessingPreferencePage extends PreferencePage implements
 		getPreferenceStore().setValue(
 				ProcessingConstants.POOL_SIZE, getPreferenceStore().getDefaultInt(
 						ProcessingConstants.POOL_SIZE));
+		
+		getPreferenceStore().setValue(
+				ProcessingConstants.USE_PARRALLEL, getPreferenceStore().getDefaultBoolean(
+						ProcessingConstants.USE_PARRALLEL));
+		
+		setUpFromPreferences();
 	}
 
 }

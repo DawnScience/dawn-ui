@@ -73,7 +73,7 @@ public class EscapableSliceVisitor implements SliceVisitor {
 				if (i == endOperation) inputData = new OperationInputDataImpl(data.getData(),i); 
 				
 				OperationData tmp = i.execute(data.getData(), null);
-				tmp.getData().setMetadata(ssm);
+				if (tmp != null) tmp.getData().setMetadata(ssm);
 				visitor.notify(i, tmp); // Optionally send intermediate result
 				data = i.isPassUnmodifiedData() ? data : tmp;
 			}
@@ -138,6 +138,7 @@ public class EscapableSliceVisitor implements SliceVisitor {
 		}
 		
 		private void displayData(OperationData result, int[] dataDims) throws Exception {
+			if (result == null) output.clear();
 			IDataset out = result.getData();
 			
 			SlicedDataUtils.plotDataWithMetadata(out, output, dataDims);

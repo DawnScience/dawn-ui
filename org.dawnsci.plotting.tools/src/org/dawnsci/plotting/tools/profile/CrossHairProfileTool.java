@@ -120,6 +120,8 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 
 		createActions();
 		activate();
+
+		super.createControl(parent);
 	}
 	
 	private static String UPDATE_STATIC = "org.dawnsci.plotting.tools.profile.crosshair.updatestatic";

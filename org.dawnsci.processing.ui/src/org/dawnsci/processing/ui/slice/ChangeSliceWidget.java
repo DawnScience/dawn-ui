@@ -26,7 +26,6 @@ import org.eclipse.swt.widgets.Composite;
 
 public class ChangeSliceWidget {
 	
-//	private PositionIterator iterator;
 	private int current = 0;
 	private int max = 0;
 	private int skip = 1;
@@ -42,7 +41,6 @@ public class ChangeSliceWidget {
 	private HashSet<ISliceChangeListener> listeners;
 	
 	public ChangeSliceWidget(Composite parent) {
-//		input = new ArrayList<SliceND>();
 		max = 0;
 		current = 0;
 		listeners = new HashSet<ISliceChangeListener>();
@@ -177,7 +175,6 @@ public class ChangeSliceWidget {
 	}
 	
 	private SliceND[] getInputOutputPosition() {
-		//calculate position in output
 		int[] shape = subsampling.getShape().clone();
 		int[] scanShape = shape.clone();
 		for (int i = 0; i< dataDims.length; i++) scanShape[dataDims[i]] = 1;
@@ -259,6 +256,11 @@ public class ChangeSliceWidget {
 	
 	public void dispose(){
 		if (startBtn != null && startBtn.getImage()!= null) startBtn.getImage().dispose();
+		if (skipBackBtn != null && skipBackBtn.getImage()!= null) skipBackBtn.getImage().dispose();
+		if (stepbackBtn != null && stepbackBtn.getImage()!= null) stepbackBtn.getImage().dispose();
+		if (stepforwardBtn != null && stepforwardBtn.getImage()!= null) stepforwardBtn.getImage().dispose();
+		if (skipForwardBtn != null && skipForwardBtn.getImage()!= null) skipForwardBtn.getImage().dispose();
+		if (endBtn != null && endBtn.getImage()!= null) endBtn.getImage().dispose();
 	}
 
 }

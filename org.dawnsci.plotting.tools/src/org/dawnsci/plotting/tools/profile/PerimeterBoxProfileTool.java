@@ -358,6 +358,8 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 		} catch (Exception e) {
 			logger.error("Cannot locate any Abstract plotting System!", e);
 		}
+
+		super.createControl(parent);
 	}
 
 	private void createActions(IPageSite site) {

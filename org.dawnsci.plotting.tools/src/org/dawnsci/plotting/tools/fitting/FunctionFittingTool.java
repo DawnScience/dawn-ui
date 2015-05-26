@@ -238,6 +238,8 @@ public class FunctionFittingTool extends AbstractToolPage implements
 			connectPlotSystemListeners();
 			compFunctionModified();
 		}
+		//track tool usage
+		super.createControl(parent);
 	}
 
 	@Override

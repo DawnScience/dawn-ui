@@ -28,21 +28,27 @@ import org.dawnsci.plotting.system.dialog.RemoveRegionDialog;
 import org.dawnsci.plotting.system.dialog.XYRegionConfigDialog;
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.NotEnabledException;
+import org.eclipse.core.commands.NotHandledException;
+import org.eclipse.core.commands.common.NotDefinedException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.ActionType;
 import org.eclipse.dawnsci.plotting.api.ManagerType;
 import org.eclipse.dawnsci.plotting.api.PlotType;
+import org.eclipse.dawnsci.plotting.api.axis.AxisEvent;
 import org.eclipse.dawnsci.plotting.api.axis.AxisUtils;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
+import org.eclipse.dawnsci.plotting.api.axis.IAxisListener;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.preferences.ToolbarConfigurationConstants;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionAction;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
-import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
@@ -325,7 +331,75 @@ class LightWeightPlotActions {
 				
 			}
 		};
+		
+		final IAxis yAxis = getCurrentYAxis();
+		final Action logY = new Action("Log Y", IAction.AS_CHECK_BOX) {
+			public void run() {
+				final ICommandService service = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
+				final Command command = service.getCommand("org.dawnsci.plotting.system.logYToggle");
+				final ExecutionEvent event = new ExecutionEvent(command, Collections.EMPTY_MAP, this, actionBarManager.getSystem());
+				try {
+					boolean success = (Boolean) command.executeWithChecks(event);
+					if (success) {
+						this.setChecked(yAxis.isLog10());
+					}
+				} catch (ExecutionException|NotDefinedException|NotEnabledException|NotHandledException e) {
+					logger.error("Exception while attempting to toggle log on Y axis", e);
+				}
+			}
+		};
+		
+		final IAxis xAxis = getCurrentXAxis();
+		final Action logX = new Action("Log X", IAction.AS_CHECK_BOX) {
+			public void run() {
+				final ICommandService service = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
+				final Command command = service.getCommand("org.dawnsci.plotting.system.logXToggle");
+				final ExecutionEvent event = new ExecutionEvent(command, Collections.EMPTY_MAP, this, actionBarManager.getSystem());
+				try {
+					boolean success = (Boolean) command.executeWithChecks(event);
+					if (success) {
+						this.setChecked(xAxis.isLog10());
+					}
+				} catch (ExecutionException|NotDefinedException|NotEnabledException|NotHandledException e) {
+					logger.error("Exception while attempting to toggle log on X axis", e);
+				}
+			}
+		};
+		
+		viewer.getSystem().getAxis(xAxis.getTitle()).addAxisListener(new IAxisListener() {
+			
+			@Override
+			public void revalidated(AxisEvent evt) {
+				if (logX.isChecked() != xAxis.isLog10()) {
+					logX.setChecked(xAxis.isLog10());
+				}
+			}
+			
+			@Override
+			public void rangeChanged(AxisEvent evt) {
+				// not required
+			}
+		});
+		
+		viewer.getSystem().getAxis(yAxis.getTitle()).addAxisListener(new IAxisListener() {
+			
+			@Override
+			public void revalidated(AxisEvent evt) {
+				if (logY.isChecked() != yAxis.isLog10()) {
+					logY.setChecked(yAxis.isLog10());
+				}
+			}
+			
+			@Override
+			public void rangeChanged(AxisEvent evt) {
+				// not required
+			}
+		});
+		
 		actionBarManager.addXYAction(deleteAxis);
+		actionBarManager.addXYSeparator();
+		actionBarManager.addXYAction(logX);
+		actionBarManager.addXYAction(logY);
 		actionBarManager.addXYSeparator();
 	}
 
@@ -1016,5 +1090,27 @@ class LightWeightPlotActions {
 		IAction action = actionBarManager.findAction(BasePlottingConstants.RESCALE);
 		if (action==null) return; // they are allowed to remove it.
 		action.setChecked(rescale);
+	}
+
+	private IAxis getCurrentYAxis() {
+		IAxis yAxis = null;
+		List<IAxis> axisList = viewer.getSystem().getAxes();
+		for (IAxis axis : axisList) {
+			if (axis.isYAxis() && yAxis == null) {
+				yAxis = axis;
+			}
+		}
+		return yAxis;
+	}
+
+	private IAxis getCurrentXAxis() {
+		IAxis xAxis = null;
+		List<IAxis> axisList = viewer.getSystem().getAxes();
+		for (IAxis axis : axisList) {
+			if (!axis.isYAxis() && xAxis == null) {
+				xAxis = axis;
+			}
+		}
+		return xAxis;
 	}
 }

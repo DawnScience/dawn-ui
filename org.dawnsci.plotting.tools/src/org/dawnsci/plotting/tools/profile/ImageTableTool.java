@@ -153,6 +153,7 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 		gridLayout.horizontalSpacing = 0;
 		main.setLayout(gridLayout);
 
+		super.createControl(parent);
 	}
 
 	

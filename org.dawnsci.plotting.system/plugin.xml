@@ -100,6 +100,19 @@
          </activeWhen>
       </handler>
    </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="org.dawnsci.plotting.system.commands.LogXHandler"
+            id="org.dawnsci.plotting.system.logXToggle"
+            name="Toggle logX in current plot">
+      </command>
+      <command
+            defaultHandler="org.dawnsci.plotting.system.commands.LogYHandler"
+            id="org.dawnsci.plotting.system.logYToggle"
+            name="Toggle logY in current plot">
+      </command>
+   </extension>
    
    <!-- Example of how to add a custom action to the plotting toolbar.
    
