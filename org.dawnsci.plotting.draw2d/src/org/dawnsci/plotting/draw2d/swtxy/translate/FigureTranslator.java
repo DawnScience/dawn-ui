@@ -66,6 +66,7 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 		
 		if (!isActive()) return;
 		
+		Point originalLocation = location;
 		try {
 			if (location == null) return;
 			Point newLocation = event.getLocation();
@@ -93,7 +94,7 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 			location = newLocation;
 			
 		} finally {
-			fireAfterTranslation(new TranslationEvent(this, location, event.getLocation()));
+			fireAfterTranslation(new TranslationEvent(this, originalLocation, event.getLocation()));
 			event.consume();
 		}
 	}
