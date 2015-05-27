@@ -128,7 +128,9 @@ public class PowderIntegrationJob extends Job {
 		
 		if (modell.getIntegrationMode() == IntegrationMode.NONSPLITTING || modell.getIntegrationMode() ==IntegrationMode.SPLITTING) {
 			if (system.is2D()) system.reset();
-			out.get(1).setName("Intensity");
+			String pre = "";
+			if (dl.getName() != null) pre = dl.getName();
+			out.get(1).setName(pre + "Intensity");
 
 			system.updatePlot1D(out.get(0), Arrays.asList(new IDataset[]{out.get(1)}), null);
 			Display.getDefault().syncExec(new Runnable() {
@@ -142,7 +144,9 @@ public class PowderIntegrationJob extends Job {
 				}
 			});
 		} else {
-			out.get(1).setName("Intensity");
+			String pre = "";
+			if (dl.getName() != null) pre = dl.getName();
+			out.get(1).setName(pre + "Intensity");
 			system.createPlot2D(out.remove(1), out, null);
 		}
 		
