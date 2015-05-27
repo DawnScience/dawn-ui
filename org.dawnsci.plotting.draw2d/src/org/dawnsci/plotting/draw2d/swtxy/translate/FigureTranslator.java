@@ -93,7 +93,7 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 			location = newLocation;
 			
 		} finally {
-			fireAfterTranslation(new TranslationEvent(this));
+			fireAfterTranslation(new TranslationEvent(this, location, event.getLocation()));
 			event.consume();
 		}
 	}
@@ -160,7 +160,7 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 		if (!isActive()) return;
 
 		if (location == null) return;
-		fireCompletedTranslation(new TranslationEvent(this));
+		fireCompletedTranslation(new TranslationEvent(this, location, event.getLocation()));
 		xyGraph.getOperationsManager().addCommand(new TranslateCommand(redrawFigure, cumulativeOffset, translations, this));
 		location = null;
 		
