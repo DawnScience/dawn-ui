@@ -462,7 +462,9 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 			IRegion region = input.getRegion(evt.getPropertyName());
 
 			Object object = data.getCurrentOperation().getModel().get(evt.getPropertyName());
-
+			
+			
+			
 			if (object instanceof IROI) region.setROI((IROI)object);
 			else {
 				OperationModelField an = ModelUtils.getAnnotation(model, evt.getPropertyName());
@@ -474,7 +476,10 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 
 						if (!Arrays.equals((double[])evt.getNewValue(), (double[])evt.getOldValue())) {
 							RectangularROI roi = getRoiFromAnnotation(an, evt.getPropertyName());
-							region.setROI(roi);
+							
+							
+							
+							if (valuesChanged(region,roi)) region.setROI(roi);
 							return;
 						}
 					
@@ -491,6 +496,37 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 
 		
 		update();
+	}
+	
+	private boolean valuesChanged(IRegion region, RectangularROI roi) {
+		
+		boolean changed = true;
+		
+		if (region.getRegionType() ==  RegionType.XAXIS) {
+			double roiX = roi.getPointX();
+			double roiW = roi.getLength(0);
+			RectangularROI r = (RectangularROI)region.getROI();
+			double regionX = r.getPointX();
+			double regionW = r.getLength(0);
+			
+			if (roiX == regionX && roiW == regionW) return false;
+			else return true;
+			
+		}
+		
+		if (region.getRegionType() ==  RegionType.YAXIS) {
+			double roiY = roi.getPointY();
+			double roiH = roi.getLength(1);
+			RectangularROI r = (RectangularROI)region.getROI();
+			double regionY = r.getPointY();
+			double regionH = r.getLength(1);
+			
+			if (roiY == regionY && roiH == regionH) return false;
+			else return true;
+			
+		}
+		
+		return changed;
 	}
 	
 	private RectangularROI getRoiFromAnnotation(OperationModelField an, String name) {
