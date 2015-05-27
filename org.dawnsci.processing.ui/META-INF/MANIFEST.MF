@@ -25,6 +25,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui;bundle-version="3.8.2"
 Bundle-ActivationPolicy: lazy
 Import-Package: org.apache.commons.beanutils;version="1.9.1",
+ org.apache.commons.io,
  org.dawb.common.services,
  org.dawnsci.plotting.services.util,
  org.eclipse.core.resources,
