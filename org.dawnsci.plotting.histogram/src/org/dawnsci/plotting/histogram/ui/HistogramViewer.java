@@ -55,6 +55,9 @@ import org.slf4j.LoggerFactory;
  */
 public class HistogramViewer extends ContentViewer {
 
+	// Used to stop recursion.
+	private boolean updatingROI = false;
+
 	private static final Logger logger = LoggerFactory
 			.getLogger(HistogramViewer.class);
 
@@ -72,18 +75,25 @@ public class HistogramViewer extends ContentViewer {
 	private boolean firstUpdateTraces = true;
 
 	private IROIListener histogramRegionListener = new IROIListener.Stub() {
+		
 		@Override
 		public void roiDragged(ROIEvent evt) {
 			// Do nothing
 		}
 
 		public void update(ROIEvent evt) {
-			IROI roi = evt.getROI();
-			if (roi instanceof RectangularROI) {
-				RectangularROI rroi = (RectangularROI) roi;
-				getHistogramProvider().setMin(rroi.getPoint()[0]);
-				double max = rroi.getEndPoint()[0];
-				getHistogramProvider().setMax(max);
+			if (updatingROI) return;
+			try {
+				updatingROI = true;
+				IROI roi = evt.getROI();
+				if (roi instanceof RectangularROI) {
+					RectangularROI rroi = (RectangularROI) roi;
+					getHistogramProvider().setMin(rroi.getPoint()[0]);
+					double max = rroi.getEndPoint()[0];
+					getHistogramProvider().setMax(max);
+				}
+			} finally {
+				updatingROI = false;
 			}
 		};
 	};
@@ -426,6 +436,7 @@ public class HistogramViewer extends ContentViewer {
 
 	@Override
 	public void refresh() {
+		if (updatingROI) return;
 		double min = getHistogramProvider().getMin();
 		double max = getHistogramProvider().getMax();
 		updateRegion(min, max);
