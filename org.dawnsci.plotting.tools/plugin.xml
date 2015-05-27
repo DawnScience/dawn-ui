@@ -320,7 +320,7 @@
       <plotting_tool_page
             category="org.dawnsci.plotting.tools.plotting_tool_category.fitting"
             class="org.dawnsci.plotting.tools.fitting.FunctionFittingTool"
-            icon="icons/plot-tool-line-fit.png"
+            icon="icons/plot-tool-function-fit.png"
             id="org.dawb.workbench.plotting.function_fitting_tool"
             label="Function Fitting"
             tooltip="Tool for fitting a generic function to some data">
