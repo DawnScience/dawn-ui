@@ -430,8 +430,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		getPlottingSystem().addTraceListener(traceListener);
 	}
 
-	private void updateFittedPlot(boolean force, final Dataset x,
-			final Dataset y) {
+	private void updateFittedPlot(boolean force, final Dataset x, final Dataset y) {
 
 		if (force || autoRefit) {
 
@@ -568,8 +567,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 					System.out.println("Plotting");
 					System.out.println(resultFunction);
-					DoubleDataset resultData = resultFunction
-							.calculateValues(x);
+					DoubleDataset resultData = resultFunction.calculateValues(x);
 					fitTrace.setData(x, resultData);
 					fitTrace.setVisible(true);
 
@@ -637,7 +635,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 			}
 		}
 
-		PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 			@Override
 			public void run() {
 				functionWidget.setInput(compFunction);
