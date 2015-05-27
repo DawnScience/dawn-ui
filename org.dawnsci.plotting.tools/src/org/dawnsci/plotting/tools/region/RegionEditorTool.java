@@ -331,7 +331,6 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 		return new IROIListener.Stub() {
 			@Override
 			public void roiDragged(ROIEvent evt) {
-				model.setRegionDragged(true);
 				viewer.cancelEditing();
 				if (!isActive()) return;
 //				IRegion region = (IRegion) evt.getSource();
@@ -340,7 +339,6 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 
 			@Override
 			public void roiChanged(ROIEvent evt) {
-				model.setRegionDragged(false);
 				if (!model.isTreeModified()) {
 					if (!isActive()) return;
 					updateRegionNode(evt.getROI(), false);
@@ -359,6 +357,13 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 					updateRegionNode(evt.getROI(), false);
 				}
 			}
+			
+			@Override
+			public void roiSelected(ROIEvent evt) {
+				IRegion region = (IRegion)evt.getSource();
+				if(region == null) return;
+				updateColorSelection(region);
+			}
 		};
 	}
 
@@ -376,8 +381,6 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 			updateJob.setPriority(Job.INTERACTIVE);
 		}
 		updateJob.setROI(roi);
-		updateJob.setIsDragged(isDragged);
-		updateJob.cancel();
 		updateJob.schedule();
 	}
 
@@ -943,7 +946,6 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 
 		private IROI roi;
 		private double[] intensitySum = new double[] {0,0};
-		private boolean isDragged = false;
 
 		RegionBoundsJob() {
 			super("Region update");
@@ -957,8 +959,7 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 
 				if (model == null)
 					return Status.CANCEL_STATUS;
-				if (!isDragged )
-					intensitySum = getIntensityAndSum(roi);
+				intensitySum = getIntensityAndSum(roi);
 
 				if (model == null)
 					return Status.CANCEL_STATUS;
@@ -976,10 +977,6 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 
 		public void setROI(IROI roi) {
 			this.roi = roi;
-		}
-
-		public void setIsDragged(boolean isDragged) {
-			this.isDragged = isDragged;
 		}
 	};
 
