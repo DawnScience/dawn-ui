@@ -853,6 +853,7 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 	@Override
 	public void activate() {
 		super.activate();
+		updateRegionsColour();
 		if (viewer != null && viewer.getControl().isDisposed())
 			return;
 
@@ -897,6 +898,7 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 	@Override
 	public void deactivate() {
 		super.deactivate();
+		resetRegionsColour();
 
 		if (viewer != null && !viewer.getControl().isDisposed() && viewUpdateListener!=null) {
 			viewer.removeSelectionChangedListener(viewUpdateListener);
@@ -939,6 +941,23 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 				else if (!iRegion.isActive())
 					iRegion.setRegionColor(ColorConstants.gray);
 			}
+		}
+	}
+
+	private void updateRegionsColour() {
+		Collection<IRegion> regions = getPlottingSystem().getRegions();
+		for (IRegion region : regions) {
+			if (region.isActive())
+				region.setRegionColor(ColorConstants.green);
+			else if (!region.isActive())
+				region.setRegionColor(ColorConstants.gray);
+		}
+	}
+
+	private void resetRegionsColour() {
+		Collection<IRegion> regions = getPlottingSystem().getRegions();
+		for (IRegion region : regions) {
+			region.setRegionColor(ColorConstants.green);
 		}
 	}
 
