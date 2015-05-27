@@ -733,7 +733,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			public void selectionChanged(SelectionChangedEvent event) {
 				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
 				final ITransferableDataObject ob  = (ITransferableDataObject)sel;
-				updateActions(copy, paste, delete, createFilter, clearFilter, export, ob, bars);
+				updateActions(copy, paste, delete, createFilter, clearFilter, export, dataReduction, ob, bars);
 			}
 		});
 		
@@ -785,7 +785,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				if (createFilter!=null) menuManager.add(createFilter);
 				if (clearFilter!=null)  menuManager.add(clearFilter);
 				
-				updateActions(copy, paste, delete, createFilter, clearFilter, export, ob, null);
+				updateActions(copy, paste, delete, createFilter, clearFilter, export, dataReduction, ob, null);
 
 				menuManager.add(new Separator(getClass().getName()+".export"));
 				menuManager.add(export);
@@ -969,12 +969,13 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	}
 
 
-	protected void updateActions(Action copy, 
-					             Action paste, 
-					             Action delete, 
-					             Action createFilter, 
-					             Action deleteFilter, 
-					             Action export,
+	protected void updateActions(IAction copy, 
+								IAction paste, 
+								IAction delete, 
+								IAction createFilter, 
+								IAction deleteFilter, 
+								IAction export,
+								IAction dataReduction,
 			                     ITransferableDataObject ob,
 			                     IActionBars bars) {
 		
@@ -1022,6 +1023,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				deleteFilter.setEnabled(false);
 			}
 		}
+		
+		dataReduction.setEnabled(isDataReductionToolActive());
 
 		if (bars!=null) {
 			bars.getToolBarManager().update(true);
@@ -1224,11 +1227,11 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	 * if the table selection is reducible
 	 */
 	private boolean isSelectionReducible() {
-		final Object sel = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
-		final ITransferableDataObject ob  = (ITransferableDataObject)sel;
-		if (ob==null) return false;
-		ILazyDataset lazy = ob.getLazyData(null);
-		if (lazy!=null && lazy.getRank() >= 3) return true;
+		for(ITransferableDataObject ob : selections) {
+			if (ob==null) continue;
+			ILazyDataset lazy = ob.getLazyData(null);
+			if (lazy!=null && lazy.getRank() >= 3) return true;
+		}
 		return false;
 	}
 	
