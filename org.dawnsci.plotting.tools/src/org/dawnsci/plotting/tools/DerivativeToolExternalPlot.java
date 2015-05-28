@@ -60,42 +60,27 @@ public class DerivativeToolExternalPlot extends AbstractToolPage {
 		
 		this.traceListener = new ITraceListener.Stub() {
 			
+			@Override
 			public void traceAdded(TraceEvent evt) {
-				
-				//First, if the event source is not a list or ITrace ignore event
-				if (!(evt.getSource() instanceof List<?>) && !(evt.getSource() instanceof ITrace)) {
-					return;
-				}
-				
-				List<ITrace> eventSource = new ArrayList<ITrace>();
-				if (evt.getSource() instanceof List<?>)
-					eventSource = (List<ITrace>)evt.getSource();
-				if (evt.getSource() instanceof ITrace) {
-					eventSource.clear();
-					eventSource.add((ITrace)evt.getSource());
-				}
-				
-				for (ITrace t : eventSource) if (t.getUserObject() instanceof ITrace) return;
-				
+				if (!checkEvent(evt)) return;
 				DerivativeToolExternalPlot.this.update();
 			}
 			
 			@Override
 			public void tracesAdded(TraceEvent evt) {
-				//First, if the event source is not a list or ITrace ignore event
-				if (!(evt.getSource() instanceof List<?>) && !(evt.getSource() instanceof ITrace)) {
-					return;
-				}
-				List<ITrace> eventSource = new ArrayList<ITrace>();
-				if (evt.getSource() instanceof List<?>)
-					eventSource = (List<ITrace>)evt.getSource();
-				if (evt.getSource() instanceof ITrace) {
-					eventSource.clear();
-					eventSource.add((ITrace)evt.getSource());
-				}
-				
-				for (ITrace t : eventSource) if (t.getUserObject() instanceof ITrace) return;
-				
+				if (!checkEvent(evt)) return;
+				DerivativeToolExternalPlot.this.update();
+			}
+			
+			@Override
+			public void traceUpdated(TraceEvent evt) {
+				if (!checkEvent(evt)) return;
+				DerivativeToolExternalPlot.this.update();
+			}
+			
+			@Override
+			public void tracesUpdated(TraceEvent evt) {
+				if (!checkEvent(evt)) return;
 				DerivativeToolExternalPlot.this.update();
 			}
 			
@@ -141,6 +126,26 @@ public class DerivativeToolExternalPlot extends AbstractToolPage {
 		model = new boolean[]{false,true,false};
 	}
 	
+	protected boolean checkEvent(TraceEvent evt) {
+		
+		//First, if the event source is not a list or ITrace ignore event
+		if (!(evt.getSource() instanceof List<?>) && !(evt.getSource() instanceof ITrace)) {
+			return false;
+		}
+		List<ITrace> eventSource = new ArrayList<ITrace>();
+		if (evt.getSource() instanceof List<?>)
+			eventSource = (List<ITrace>)evt.getSource();
+		if (evt.getSource() instanceof ITrace) {
+			eventSource.clear();
+			eventSource.add((ITrace)evt.getSource());
+		}
+		
+		for (ITrace t : eventSource) if (t.getUserObject() instanceof ITrace) return false;
+		
+		return true;
+		
+	}
+
 	@Override
 	public ToolPageRole getToolPageRole() {
 		return ToolPageRole.ROLE_1D;
