@@ -168,16 +168,19 @@ public class BoxProfileTool extends ProfileTool {
 		final Dataset x_intensity = box[0];
 		x_intensity.setName("X "+region.getName());
 		if (xi == null || !Arrays.equals(xi.getShape(), x_intensity.getShape())){
-			xi = IntegerDataset.createRange(x_intensity.getSize());
+			double xStart = bounds.getPointX();
+			double xEnd = bounds.getPointX() + bounds.getLength(0);
+			xi = IntegerDataset.createRange(xStart, xEnd, 1);
 			xi.setName("X Pixel");
 		}
 		final Dataset x_indices = xi; // Maths.add(xi, bounds.getX()); // Real position
 		
-		
 		final Dataset y_intensity = box[1];
 		y_intensity.setName("Y "+region.getName());
 		if (yi == null || !Arrays.equals(yi.getShape(), y_intensity.getShape())) {
-			yi = IntegerDataset.createRange(y_intensity.getSize());
+			double yStart = bounds.getPointY();
+			double yEnd = bounds.getPointY() + bounds.getLength(1);
+			yi = IntegerDataset.createRange(yStart, yEnd, 1);
 			yi.setName("Y Pixel");
 		}
 		final Dataset y_indices = yi; // Maths.add(yi, bounds.getY()); // Real position
