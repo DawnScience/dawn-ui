@@ -12,11 +12,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.dawnsci.plotting.util.ColorUtility;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
@@ -43,6 +41,8 @@ public class DerivativeToolExternalPlot extends AbstractToolPage {
 	IPlottingSystem system;
 	private ITraceListener traceListener;
 	private boolean[] model;
+	private DerivativeJob2 job2;
+	
 	
 	//Derivative type
 	private enum Derivative {
@@ -86,44 +86,31 @@ public class DerivativeToolExternalPlot extends AbstractToolPage {
 			
 			@Override
 			public void traceRemoved(TraceEvent evt) {
-				IJobManager jobMan = Job.getJobManager();
-				Job[] found = jobMan.find(DerivativeToolExternalPlot.this);
+				Collection<ITrace> traces = getPlottingSystem().getTraces(ILineTrace.class);
 				
-				for (Job j : found) {
-					if (j instanceof DerivativeJob) {
-						if (((DerivativeJob)j).isThisTrace(evt.getSource())) {
-							j.cancel();
-						}
-					}
+				if (traces == null || traces.isEmpty()) {
+					system.clear();
+					return;
 				}
 				
-				for (ITrace t : system.getTraces(ILineTrace.class)) {
-					if (t.getUserObject().equals(evt.getSource())) {
-						system.removeTrace(t);
-						// autoscale when we remove the trace in case the range of the left over traces is different
-						system.autoscaleAxes();
-					}
-				}
+				DerivativeToolExternalPlot.this.update();
 				
 			}
 			
 			@Override
 			public void tracesRemoved(TraceEvent evt) {
-				IJobManager jobMan = Job.getJobManager();
-				Job[] found = jobMan.find(DerivativeToolExternalPlot.this);
-				
-				for (Job j : found) {
-					if (j instanceof DerivativeJob) {
-						j.cancel();
-					}
+				Collection<ITrace> traces = getPlottingSystem().getTraces(ILineTrace.class);
+				if (traces == null || traces.isEmpty()) {
+					system.clear();
+					return;
 				}
-				
-				system.clear();
+				DerivativeToolExternalPlot.this.update();
 			}
 			
 		};
 		
 		model = new boolean[]{false,true,false};
+		job2 = new DerivativeJob2(system);
 	}
 	
 	protected boolean checkEvent(TraceEvent evt) {
@@ -169,16 +156,15 @@ public class DerivativeToolExternalPlot extends AbstractToolPage {
 	
 	private void update() {
 		IPlottingSystem oSys = getPlottingSystem();
-		system.clear();
 		Collection<ITrace> traces = oSys.getTraces(ILineTrace.class);
 		
-		if (traces == null || traces.isEmpty()) return;
-		
-		if (model[0]) new DerivativeJob(traces, system, Derivative.NONE).schedule();
-		
-		if (model[1]) new DerivativeJob(traces, system, Derivative.FIRST).schedule();
-		
-		if (model[2]) new DerivativeJob(traces, system, Derivative.SECOND).schedule();
+		if (traces == null || traces.isEmpty())  {
+			system.clear();
+			return;
+		}
+//		job2.cancel();
+		job2.updateData(traces, model);
+		job2.schedule();
 		
 	}
 	
@@ -234,10 +220,6 @@ public class DerivativeToolExternalPlot extends AbstractToolPage {
 		first.setChecked(model[1]);
 		second.setChecked(model[2]);
 		
-//		modeSelect.add(original);
-//		modeSelect.add(first);
-//		modeSelect.add(second);
-		
 		getSite().getActionBars().getToolBarManager().add(original);
 		getSite().getActionBars().getToolBarManager().add(first);
 		getSite().getActionBars().getToolBarManager().add(second);
@@ -268,72 +250,74 @@ public class DerivativeToolExternalPlot extends AbstractToolPage {
 		if (system != null) system.setFocus();
 	}
 	
-	private class DerivativeJob extends Job {
-		
-		IPlottingSystem system;
-		Collection<ITrace> traces;
-		Derivative type;
+	
+	private class DerivativeJob2 extends Job {
 
-		public DerivativeJob(Collection<ITrace> traces, IPlottingSystem system, Derivative type) {
+		private boolean[] model;
+		Collection<ITrace> traces;
+		
+		public DerivativeJob2(IPlottingSystem system) {
 			super("Derivative Update");
-			this.system = system;
+		}
+		
+		public void updateData(Collection<ITrace> traces, boolean[] model) {
 			this.traces = traces;
-			this.type = type;
+			this.model = model;
 		}
 
+		private ITrace createTrace(Dataset x, Dataset y, ILineTrace trace, int der) {
+			system.clear();
+			Dataset yout = y.clone();
+
+			for (int i = 0; i < der; i++) {
+				yout = Maths.derivative(x, yout, 1);
+			}
+			
+			ILineTrace lt = system.createLineTrace(yout.getName());
+			lt.setUserObject(trace);
+			lt.setData(x, yout);
+			lt.setTraceColor(trace.getTraceColor());
+			
+			return lt;
+		}
+		
+		
 		@Override
-		protected IStatus run(IProgressMonitor monitor) {
+		protected IStatus run(final IProgressMonitor monitor) {
+			system.clear();
+			final List<ITrace> ot = new ArrayList<ITrace>();
 			
 			for (ITrace trace : traces) {
 				if (trace instanceof ILineTrace) {
+					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 					final ILineTrace t = (ILineTrace)trace;
 					Dataset x = DatasetUtils.convertToDataset(t.getXData());
 					Dataset y = DatasetUtils.convertToDataset(t.getYData());
 					
 					if (x == null || y == null) return Status.CANCEL_STATUS;
+					if (x.getSize() != y.getSize()) return Status.CANCEL_STATUS;
 					
-					switch (type) {
-					case FIRST:
-						y = Maths.derivative(x, y, 1);
-						break;
-					case SECOND:
-						y = Maths.derivative(x,Maths.derivative(x, y, 1), 1);
-					default:
-						break;
-					}
-					
-					final Dataset yf = y;
-					final Dataset xf = x;
-					
-					Display.getDefault().syncExec(new Runnable() {
-						
-						@Override
-						public void run() {
-							ILineTrace lt = system.createLineTrace(yf.getName());
-							lt.setUserObject(t);
-							lt.setData(xf, yf);
-							lt.setTraceColor(ColorUtility.getSwtColour(system.getTraces().size()));
-							system.addTrace(lt);
-							
-							// For some data the XYGraph autoscale
-							// alg needs to be done twice. TODO Fix that...
-							system.autoscaleAxes();
-							system.autoscaleAxes();
-						}
-					});
+					if (model[0]) ot.add(createTrace(x, y, t, 0));
+					if (model[1]) ot.add(createTrace(x, y, t, 1));
+					if (model[2]) ot.add(createTrace(x, y, t, 2));
 				}
 			}
 			
+			Display.getDefault().syncExec(new Runnable() {
+				
+				@Override
+				public void run() {
+
+					for (ITrace t : ot) {
+						if (monitor.isCanceled()) return;
+						system.addTrace(t);
+					}
+					
+					system.repaint();						
+				}
+			});
+			
 			return Status.OK_STATUS;
-		}
-		
-		public boolean isThisTrace(Object trace) {
-			return this.traces.equals(trace);
-		}
-		
-		@Override
-		public boolean belongsTo(Object family) {
-			return DerivativeToolExternalPlot.this.equals(family);
 		}
 		
 	}
