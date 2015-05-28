@@ -125,6 +125,11 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 	private IROIListener roiListener;
 
 	/**
+	 * Map to hold all original colours before the region tool is opened 
+	 */
+	private HashMap<String, Color> regionColoursMap = new HashMap<String, Color>();
+
+	/**
 	 * A map to store dragBounds which are not the official bounds
 	 * of the selection until the user lets go.
 	 */
@@ -320,6 +325,7 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 					if (regionNode == null)
 						return;
 					model.removeRegion(regionNode);
+					regionColoursMap.remove(region.getName());
 					region.removeROIListener(roiListener);
 					getPlottingSystem().removeRegion(region);
 				}
@@ -922,6 +928,7 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 	}
 
 	public void dispose() {
+		resetRegionsColour();
 		super.dispose();
 	}
 
@@ -946,19 +953,26 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 
 	private void updateRegionsColour() {
 		Collection<IRegion> regions = getPlottingSystem().getRegions();
-		for (IRegion region : regions) {
-			if (region.isActive())
-				region.setRegionColor(ColorConstants.green);
-			else if (!region.isActive())
-				region.setRegionColor(ColorConstants.gray);
+		if (regionColoursMap.isEmpty()) {
+			for (IRegion region : regions) {
+				// put the original region color in a hashmap
+				regionColoursMap.put(region.getName(), region.getRegionColor());
+				if (region.isActive())
+					region.setRegionColor(ColorConstants.green);
+				else if (!region.isActive())
+					region.setRegionColor(ColorConstants.gray);
+			}
 		}
 	}
 
 	private void resetRegionsColour() {
 		Collection<IRegion> regions = getPlottingSystem().getRegions();
 		for (IRegion region : regions) {
-			region.setRegionColor(ColorConstants.green);
+			Color color = regionColoursMap.get(region.getName());
+			if (color != null)
+				region.setRegionColor(color);
 		}
+		regionColoursMap.clear();
 	}
 
 	private final class RegionBoundsJob extends Job {
