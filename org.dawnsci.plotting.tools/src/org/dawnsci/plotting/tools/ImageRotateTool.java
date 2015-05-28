@@ -8,6 +8,9 @@
  */
 package org.dawnsci.plotting.tools;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryUsage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -70,6 +73,10 @@ public class ImageRotateTool extends AbstractToolPage {
 	private String xName;
 	private String yName;
 	private Job remapJob;
+
+	// used to monitor memory consumption
+	private MemoryMXBean memoryBean;
+
 	private final static String X_PREFIX = "X Profile";
 	private final static String Y_PREFIX = "Y Profile";
 
@@ -103,6 +110,7 @@ public class ImageRotateTool extends AbstractToolPage {
 		rotationJob = new RotateJob();
 		rotationJob.setPriority(Job.INTERACTIVE);
 
+		memoryBean = ManagementFactory.getMemoryMXBean();
 	}
 
 	/**
@@ -238,9 +246,16 @@ public class ImageRotateTool extends AbstractToolPage {
 								DatasetUtils.convertToDataset(yAxis),
 								DatasetUtils.convertToDataset(xAxis));
 
-						image = MapTo2DUtils.remap2Dto2DSplitting(trace.getData(),
-								meshAxes.get(0), meshAxes.get(1), yRange, yNumber, xRange,
+						if (isImageTooBig(xNumber * yNumber)) {
+							logger.debug("Data allocated for resulting image with mapped axes is larger than available memory.");
+							return Status.CANCEL_STATUS;
+						}
+
+						image = MapTo2DUtils.remap2Dto2DSplitting(
+								trace.getData(), meshAxes.get(0),
+								meshAxes.get(1), yRange, yNumber, xRange,
 								xNumber);
+
 						image = DatasetUtils.transpose(image);
 						ImageRotateTool.this.axes = new ArrayList<IDataset>();
 						ImageRotateTool.this.axes.add(DoubleDataset.createRange(xRange[0], xRange[1], newStep));//  meshAxes.get(0));
@@ -266,6 +281,20 @@ public class ImageRotateTool extends AbstractToolPage {
 			image.setName(getImageTrace().getDataName());
 			rotate();
 		}
+	}
+
+	private boolean isImageTooBig(long dataSize) {
+		String osArch = System.getProperty("sun.arch.data.model");
+		int iArch = Integer.valueOf(osArch);
+		if (iArch == 64)
+			dataSize *= 8; //size of occupied memory for a float array on a 64 bits machine
+		else
+			dataSize *= 4;
+		MemoryUsage heapUsage = memoryBean.getHeapMemoryUsage();
+		long maxMemory = heapUsage.getMax();
+		long usedMemory = heapUsage.getUsed();
+		long leftMemory = maxMemory - usedMemory;
+		return dataSize > leftMemory;
 	}
 
 	private void rotate() {
