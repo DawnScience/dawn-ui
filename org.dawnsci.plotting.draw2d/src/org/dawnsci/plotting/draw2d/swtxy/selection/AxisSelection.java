@@ -60,6 +60,8 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 
 	private org.eclipse.draw2d.MouseMotionListener mouseTrackListener;
 
+	private FigureTranslator mover;
+
 	
 	AxisSelection(String name, ICoordinateSystem coords, RegionType regionType) {
 		super(name, coords);
@@ -114,7 +116,7 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 				
 
      	if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS) {
-    		FigureTranslator mover = new FigureTranslator(getXyGraph(), parent, connection, Arrays.asList(new IFigure[]{line1, line2}));
+    		this.mover = new FigureTranslator(getXyGraph(), parent, connection, Arrays.asList(new IFigure[]{line1, line2}));
     		
     		if (regionType==RegionType.XAXIS || regionType==RegionType.XAXIS_LINE) {
     			mover.setLockedDirection(FigureTranslator.LockType.X);
@@ -329,6 +331,17 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 
 	@Override
 	public void setMobile(boolean mobile) {
+		if (connection!=null) {
+			connection.setCursor(mobile?Draw2DUtils.getRoiMoveCursor():null);
+			connection.setOpaque(mobile);
+			connection.setEnabled(mobile);
+			regionArea.setRequirePositionWithCursor(!mobile);
+			if (mobile) {
+				connection.addMouseListener(mover);
+			} else {
+				connection.removeMouseListener(mover);
+			}
+		}
 		if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS) {
 			super.setMobile(mobile);
 			return;
