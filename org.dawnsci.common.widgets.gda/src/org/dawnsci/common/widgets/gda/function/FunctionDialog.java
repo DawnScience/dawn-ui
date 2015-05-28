@@ -98,7 +98,7 @@ public class FunctionDialog extends Dialog {
 		labelDegree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		labelDegree.setVisible(false);
 
-		polynomialDegree = new Spinner(top, SWT.NONE);
+		polynomialDegree = new Spinner(top, SWT.BORDER);
 		polynomialDegree.setToolTipText("Polynomial degree");
 		polynomialDegree.setMinimum(1);
 		polynomialDegree.setMaximum(100);

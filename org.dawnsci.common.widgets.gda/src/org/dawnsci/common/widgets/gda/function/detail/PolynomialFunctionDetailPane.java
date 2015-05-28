@@ -38,7 +38,7 @@ public class PolynomialFunctionDetailPane implements IFunctionDetailPane {
 		labelDegree = new Label(composite, SWT.NONE);
 		labelDegree.setText("Polynomial degree ");
 
-		polynomialDegree = new Spinner(composite, SWT.NONE);
+		polynomialDegree = new Spinner(composite, SWT.BORDER);
 		polynomialDegree.setToolTipText("Polynomial degree");
 		polynomialDegree.setMinimum(0);
 		polynomialDegree.setMaximum(100);
