@@ -38,17 +38,11 @@ import org.eclipse.ui.part.IPageSite;
 
 public class DerivativeToolExternalPlot extends AbstractToolPage {
 
-	IPlottingSystem system;
+	private IPlottingSystem system;
 	private ITraceListener traceListener;
 	private boolean[] model;
 	private DerivativeJob2 job2;
-	
-	
-	//Derivative type
-	private enum Derivative {
-		NONE,FIRST,SECOND
-	}
-	
+		
 	public DerivativeToolExternalPlot() {
 
 		try {
@@ -239,6 +233,8 @@ public class DerivativeToolExternalPlot extends AbstractToolPage {
 	@Override
 	public Object getAdapter(@SuppressWarnings("rawtypes") Class clazz) {
 		if (clazz == IToolPageSystem.class) {
+			return system.getAdapter(IToolPageSystem.class);
+		} else if (clazz == IPlottingSystem.class) {
 			return system;
 		} else {
 			return super.getAdapter(clazz);
