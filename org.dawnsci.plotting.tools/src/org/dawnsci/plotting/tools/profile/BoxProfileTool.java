@@ -69,8 +69,8 @@ public class BoxProfileTool extends ProfileTool {
 		final Dataset y_intensity = profile[3];
 		
 		//if (monitor.isCanceled()) return null;
-		final ILineTrace y_trace = (ILineTrace)profilePlottingSystem.getTrace("X "+region.getName());
-		final ILineTrace x_trace = (ILineTrace)profilePlottingSystem.getTrace("Y "+region.getName());
+		final ILineTrace x_trace = (ILineTrace)profilePlottingSystem.getTrace("X "+region.getName());
+		final ILineTrace y_trace = (ILineTrace)profilePlottingSystem.getTrace("Y "+region.getName());
 		
 		if (tryUpdate && x_trace!=null && y_trace!=null) {
 			getControl().getDisplay().syncExec(new Runnable() {
