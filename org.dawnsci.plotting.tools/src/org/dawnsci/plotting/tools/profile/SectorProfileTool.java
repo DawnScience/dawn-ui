@@ -19,6 +19,14 @@ import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.utils.ToolUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
+import org.eclipse.dawnsci.analysis.api.diffraction.DetectorPropertyEvent;
+import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironmentEvent;
+import org.eclipse.dawnsci.analysis.api.diffraction.IDetectorPropertyListener;
+import org.eclipse.dawnsci.analysis.api.diffraction.IDiffractionCrystalEnvironmentListener;
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
+import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
+import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.SectorROI;
@@ -26,20 +34,23 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.region.ILockableRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
-import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 
-public abstract class SectorProfileTool extends ProfileTool {
+public abstract class SectorProfileTool extends ProfileTool implements IDetectorPropertyListener, IDiffractionCrystalEnvironmentListener {
 
 
 	protected MenuAction      center;
@@ -325,4 +336,177 @@ public abstract class SectorProfileTool extends ProfileTool {
 		return RegionType.SECTOR;
 	}
 
+	
+	protected void registerMetadataListeners() {
+		IMetadata meta = getMetaData();
+		if (meta!=null && (meta instanceof IDiffractionMetadata)) {
+			IDiffractionMetadata dm = (IDiffractionMetadata)meta;
+			dm.getDetector2DProperties().addDetectorPropertyListener(this);
+			dm.getDiffractionCrystalEnvironment().addDiffractionCrystalEnvironmentListener(this);
+		}
+	}
+	
+	protected void unregisterMetadataListeners() {
+		IMetadata meta = getMetaData();
+		if (meta!=null && (meta instanceof IDiffractionMetadata)) {
+			IDiffractionMetadata dm = (IDiffractionMetadata)meta;
+			dm.getDetector2DProperties().removeDetectorPropertyListener(this);
+			dm.getDiffractionCrystalEnvironment().removeDiffractionCrystalEnvironmentListener(this);
+		}
+	}
+	
+	protected IMetadata getMetaData() {
+		ILoaderService service = (ILoaderService)PlatformUI.getWorkbench().getService(ILoaderService.class);
+		
+		IDiffractionMetadata meta = service.getLockedDiffractionMetaData();
+		
+		if (meta!= null)
+			return meta;
+		else
+			return ToolUtils.getMetaData(getImageTrace(), getPart());
+	}
+	
+
+
+	@Override
+	public void detectorPropertiesChanged(DetectorPropertyEvent evt) {
+		
+		if (evt.getSource() instanceof DetectorProperties) {
+			if(evt.hasBeamCentreChanged()) {
+				updateSectorCenters(((DetectorProperties)evt.getSource()).getBeamCentreCoords());
+			} else {
+				update(null, null, false);
+			}
+		}
+	}
+
+
+	@Override
+	public void diffractionCrystalEnvironmentChanged(
+			DiffractionCrystalEnvironmentEvent evt) {
+		update(null, null, false);
+		
+	}
+	
+	protected void updateSectorCenters(double[] point) {
+		
+		if (getPlottingSystem()==null) return;
+		
+		final Collection<IRegion> regions = getPlottingSystem().getRegions();
+		if (regions!=null) for (final IRegion region : regions) {
+			if (isRegionTypeSupported(region.getRegionType())) {
+				final SectorROI sroi = (SectorROI)region.getROI();
+				sroi.setPoint(point);
+				region.setROI(sroi);
+			}
+		}
+		
+		update(null, null, false);
+	}
+
+	
+	protected IAction createMetaLock(final MenuAction profileAxis) {
+		
+		IAction metaLock = new Action("Lock To Metadata", IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				if (isChecked()) {
+					IMetadata meta = getMetaData();
+					if (profileAxis!=null) profileAxis.setEnabled(true);
+
+					if (isValidMetadata(meta)) {
+						updateSectorCenters(((IDiffractionMetadata)meta).getDetector2DProperties().getBeamCentreCoords());
+						registerMetadataListeners();
+						setMessage(true);
+					}
+
+					if (getPlottingSystem()==null) return;
+					
+					IContributionItem item = profilePlottingSystem.getActionBars().getToolBarManager().find("org.dawb.workbench.plotting.tools.profile.lockSectorCenters");
+					
+					if (item != null && item instanceof ActionContributionItem) {
+						((ActionContributionItem)item).getAction().setChecked(true);
+						((ActionContributionItem)item).getAction().run();
+					}
+					
+					if (profileAxis!=null) {
+						for (int i = 0; i < profileAxis.size(); ++i) {
+							IAction action = profileAxis.getAction(i);
+							if (action.isChecked()) {
+								profileAxis.setSelectedAction(i);
+								profileAxis.run();
+							}
+						}
+					}
+
+				} else {
+
+					unregisterMetadataListeners();
+					if (profileAxis!=null) {
+						IAction pixelAction = profileAxis.findAction("org.dawb.workbench.plotting.tools.profile.pixelAxisAction");
+						profileAxis.setEnabled(false);
+						pixelAction.run();
+					}
+					setMessage(false);
+					
+					IContributionItem item = profilePlottingSystem.getActionBars().getToolBarManager().find("org.dawb.workbench.plotting.tools.profile.lockSectorCenters");
+					
+					if (item != null && item instanceof ActionContributionItem) {
+						((ActionContributionItem)item).getAction().setChecked(false);
+						((ActionContributionItem)item).getAction().run();
+					}
+				}
+			}
+		};
+		metaLock.setImageDescriptor(Activator.getImageDescriptor("icons/radial-tool-lock.png"));
+		
+		return metaLock;
+	}
+	
+	protected boolean isValidMetadata(IMetadata meta) {
+		if (meta != null && (meta instanceof IDiffractionMetadata)) {
+			IDiffractionMetadata idm = (IDiffractionMetadata) meta;
+			if (idm.getDiffractionCrystalEnvironment() == null)
+				return false;
+			if (idm.getDetector2DProperties() == null || idm.getDetector2DProperties().getHPxSize() == 0 || idm.getDetector2DProperties().getVPxSize() == 0)
+				return false;
+			return true;
+		}
+		
+		return false;
+	}
+
+
+	private void setMessage(boolean isMessage) {
+		if (isMessage) {
+			getSite().getActionBars().getStatusLineManager().setErrorMessage("WARNING: Locking profile to meta data for non-zero detector pitch/roll/yaw is an experimental feature");
+		} else {
+			getSite().getActionBars().getStatusLineManager().setErrorMessage(null);
+		}
+		
+	}
+
+	protected void checkMetaLock(IAction metaLock) {
+		if (metaLock == null) return;
+		IMetadata meta = getMetaData();
+		if (meta==null) return;
+		
+		if (metaLock.isChecked()) {
+			if (isValidMetadata(meta)) {
+				updateSectorCenters(((IDiffractionMetadata)meta).getDetector2DProperties().getBeamCentreCoords());
+				registerMetadataListeners();
+			} else {
+				
+				metaLock.setChecked(false);
+				metaLock.run();
+				metaLock.setEnabled(false);
+			}
+		} else {
+			if (isValidMetadata(meta)) {
+				metaLock.setEnabled(true);
+			} else {
+				metaLock.setEnabled(false);
+			}
+		}
+	}
 }

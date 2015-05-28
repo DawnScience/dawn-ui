@@ -14,13 +14,45 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.SectorROI;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.Separator;
 
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 
 public class AzimuthalProfileTool extends SectorProfileTool {
 	
+	
+	private IAction metaLock;
+
+	@Override
+	protected void configurePlottingSystem(IPlottingSystem plotter) {
+		
+		this.metaLock = createMetaLock(null);
+		
+		metaLock.setEnabled(isValidMetadata(getMetaData()));
+
+		getSite().getActionBars().getToolBarManager().add(metaLock);
+		getSite().getActionBars().getToolBarManager().add(new Separator());
+		getSite().getActionBars().getMenuManager().add(metaLock);
+		getSite().getActionBars().getToolBarManager().add(new Separator());
+
+        super.configurePlottingSystem(plotter);
+	}
+	
+	public void activate () {
+		super.activate();
+		//setup the lock action to work for valid metadata
+		checkMetaLock(metaLock);
+	}
+	
+	public void deactivate() {
+		super.deactivate();
+		unregisterMetadataListeners();
+	}
+
 	@Override
 	protected Dataset[] getXAxis(final SectorROI sroi, Dataset[] integral) {
 		
