@@ -180,12 +180,12 @@ class SliceJob extends Job {
 			final int[]         shape = slice.getShape();
 			
 			IDataset xAxis = null;
+			
 			int xd = currentSlice.getX();
-			int yd = currentSlice.getY();
 			if (type==PlotType.XY_STACKED) {
+				int yd = currentSlice.getY();
 				// We look for the dimension with the same size as x
 				int ySize = currentSlice.getySize();
-				xd    = 0;
 				for (int i = 0; i < shape.length; i++) {
 				    if (shape[i] == ySize) {
 				    	xd = i; // 0 or 1
@@ -193,8 +193,7 @@ class SliceJob extends Job {
 				    }
 				}
 				yd    = xd==0 ? 1 : 0;
-				
-				xAxis = SliceUtils.getAxis(currentSlice, sliceSource.getVariableManager(), shape[yd], xd+1, true, monitor);
+				xAxis = SliceUtils.getAxis(currentSlice, sliceSource.getVariableManager(), shape[yd], currentSlice.getX()+1, true, monitor);
 				
 			} else {
 				
