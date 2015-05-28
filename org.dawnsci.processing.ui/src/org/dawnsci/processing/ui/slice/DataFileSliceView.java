@@ -271,6 +271,16 @@ public class DataFileSliceView extends ViewPart {
 					if (!success[i]) failedPaths.add(paths[i]);
 				}
 				
+				String dsName = "";
+				
+				try {
+					dsName = " ("+fileManager.getContext().getDatasetNames().get(0)+")";
+				} catch (Exception e) {
+					//ignore
+				}
+				
+				final String dsn = dsName;
+				
 				final int f = first;
 				
 				Display.getDefault().syncExec(new Runnable() {
@@ -278,7 +288,7 @@ public class DataFileSliceView extends ViewPart {
 					@Override
 					public void run() {
 						if (f < 0) {
-							MessageDialog.openError(getSite().getShell(), "Error loading files", "None of the selected files contained suitable datasets!");
+							MessageDialog.openError(getSite().getShell(), "Error loading files", "None of the selected files contained suitable datasets" + dsn+ "!");
 							return;
 						}
 						
@@ -287,6 +297,8 @@ public class DataFileSliceView extends ViewPart {
 							sb.append("Failed to load: ");
 							for (String p : failedPaths) sb.append(p +", ");
 							sb.append("did not contain suitable datasets");
+							sb.append(dsn);
+							
 							MessageDialog.openError(getSite().getShell(), "Error loading some files", sb.toString());
 						}
 						
