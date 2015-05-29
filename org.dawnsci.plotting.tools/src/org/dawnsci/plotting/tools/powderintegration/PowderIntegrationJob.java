@@ -72,6 +72,9 @@ public class PowderIntegrationJob extends Job {
 		PowderIntegrationModel modell = model;
 		PowderCorrectionModel corModell = correctionModel;
 		int nBinsl = nBins;
+		String name = dl.getName();
+		if (name == null) name = "";
+		else name = name + " ";
 		
 		if (matchedIntegrator != null && !matchedIntegrator.getModel().equals(modell) &&
 				!isCompatibleIntegrator(matchedIntegrator.getIntegrator(), modell.getIntegrationMode())) {
@@ -128,9 +131,7 @@ public class PowderIntegrationJob extends Job {
 		
 		if (modell.getIntegrationMode() == IntegrationMode.NONSPLITTING || modell.getIntegrationMode() ==IntegrationMode.SPLITTING) {
 			if (system.is2D()) system.reset();
-			String pre = "";
-			if (dl.getName() != null) pre = dl.getName();
-			out.get(1).setName(pre + "Intensity");
+			out.get(1).setName(name + "Intensity");
 
 			system.updatePlot1D(out.get(0), Arrays.asList(new IDataset[]{out.get(1)}), null);
 			Display.getDefault().syncExec(new Runnable() {
@@ -145,7 +146,6 @@ public class PowderIntegrationJob extends Job {
 			});
 		} else {
 			String pre = "";
-			if (dl.getName() != null) pre = dl.getName();
 			out.get(1).setName(pre + "Intensity");
 			system.createPlot2D(out.remove(1), out, null);
 		}
