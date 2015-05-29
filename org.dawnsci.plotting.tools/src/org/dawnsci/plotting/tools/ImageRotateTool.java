@@ -35,6 +35,7 @@ import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -246,9 +247,26 @@ public class ImageRotateTool extends AbstractToolPage {
 								DatasetUtils.convertToDataset(yAxis),
 								DatasetUtils.convertToDataset(xAxis));
 
-						if (isImageTooBig(xNumber * yNumber)) {
-							logger.debug("Data allocated for resulting image with mapped axes is larger than available memory.");
+						// Check for ratio between X and Y axes
+						if ((xNumber > yNumber && ((xNumber/yNumber) > 10)) 
+								|| (yNumber > xNumber && ((yNumber/xNumber) > 10))) {
+							final String message = "The ratio between the X and Y Axis of the dataset is too big to apply an axes remapping.";
+							logger.debug(message);
+							Display.getDefault().asyncExec(new Runnable() {
+								@Override
+								public void run() {
+									MessageDialog
+											.openWarning(Display.getDefault().getActiveShell(),
+													"Warning", message);
+								}
+							});
 							return Status.CANCEL_STATUS;
+						}
+						// Check for image resulting size and increase the step if too big
+						while(isImageTooBig(xNumber * yNumber)) {
+							newStep *= 2;
+							xNumber = (int) (xRangeValue / newStep);
+							yNumber = (int) (yRangeValue / newStep);
 						}
 
 						image = MapTo2DUtils.remap2Dto2DSplitting(
@@ -284,17 +302,17 @@ public class ImageRotateTool extends AbstractToolPage {
 	}
 
 	private boolean isImageTooBig(long dataSize) {
-		String osArch = System.getProperty("sun.arch.data.model");
-		int iArch = Integer.valueOf(osArch);
-		if (iArch == 64)
-			dataSize *= 8; //size of occupied memory for a float array on a 64 bits machine
-		else
-			dataSize *= 4;
+		dataSize *= 8 + 4; // evaluate the potential size of resulting dataset by multiplying
+							// the datasize by 8 (8bytes for each item of the
+							// dataset are used for doubles, floats on 64bit
+							// machines) + 4 to count for the header of the
+							// array, and put some restriction on the image size
+							// not to consume of memory of the heap
 		MemoryUsage heapUsage = memoryBean.getHeapMemoryUsage();
 		long maxMemory = heapUsage.getMax();
 		long usedMemory = heapUsage.getUsed();
 		long leftMemory = maxMemory - usedMemory;
-		return dataSize > leftMemory;
+		return dataSize >= leftMemory;
 	}
 
 	private void rotate() {
