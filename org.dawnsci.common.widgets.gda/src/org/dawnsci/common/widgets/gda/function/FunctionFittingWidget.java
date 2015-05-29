@@ -192,8 +192,8 @@ public class FunctionFittingWidget extends Composite implements IFunctionViewer 
 
 		sashForm.setBackground(ColorConstants.white);
 		
-		//Formerly {6, 10}, but having more space for functions seemed more important
-		sashForm.setWeights(new int[] { 9, 1 });
+		//XXX Formerly {6, 10}, but having more space for functions seemed more important
+		sashForm.setWeights(new int[] { 7, 3 });
 
 		if (site != null) {
 			IHandlerService serv = (IHandlerService) site
