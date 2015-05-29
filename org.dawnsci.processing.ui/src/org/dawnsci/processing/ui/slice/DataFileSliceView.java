@@ -642,6 +642,14 @@ public class DataFileSliceView extends ViewPart {
 			try {
 				IMetadata metadata = lservice.getMetadata(path, null);
 				int[] s = metadata.getDataShapes().get(name);
+				if (s == null) {
+					try {
+						s = lservice.getData(path, null).getLazyDataset(name).getShape();
+					} catch (Exception e) {
+						logger.warn("Can't get shape to calculate work from");
+					}
+					
+				}
 				
 				Slice[] slices = Slicer.getSliceArrayFromSliceDimensions(sliceDimensions, s);
 				SliceND slice = new SliceND(s, slices);
