@@ -77,9 +77,11 @@ public class FileContentProposalProvider implements IContentProposalProvider {
 		for (int i = 0; i < fa.length; i++) {
 			final File file = fa[i];
 			try {
-				final String path  = file.getCanonicalPath();
-				final int    index = path.indexOf(existing);
-				if (index!=0) continue;
+				final String   path  = file.getCanonicalPath();
+				final int      index = path.indexOf(existing);
+				final String absPath = file.getAbsolutePath();
+				final int     index2 = absPath.indexOf(existing);
+				if (index!=0 && index2!=0) continue;
 			} catch (IOException e) {
 				continue;
 			}
