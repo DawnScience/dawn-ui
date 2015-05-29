@@ -87,6 +87,8 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 	private Control control;
 	private boolean autoRefit;
+	
+	private boolean firstRun = true;
 
 	protected IROIListener roiListener = new FunctionFittingROIListener();
 	protected IRegion region = null;
@@ -290,7 +292,14 @@ public class FunctionFittingTool extends AbstractToolPage implements
 				region.setVisible(true);
 			}
 			region.addROIListener(roiListener);
-			updateFunctionPlot(false);
+			
+			//Without this, updateFunctionPlot gets called twice at start up for no reason
+			if (firstRun) {
+				firstRun = false;
+				return;
+			} else {
+				updateFunctionPlot(false);
+			}
 
 		} catch (Exception e) {
 			logger.error("Failed to activate function fitting tool", e);
