@@ -330,7 +330,15 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 	    	foundSomeActions = true;
 	    	
 	    	// Check if tool should not have action
-	    	if ("false".equals(e.getAttribute("visible"))) continue;
+	    	VISIBLE_TEST: if ("false".equals(e.getAttribute("visible"))) {
+	    		final String id = e.getAttribute("id");    		
+	    		if (id.equals("org.dawnsci.plotting.histogram.histogram_tool_page")) {
+	    			if (Boolean.getBoolean("org.dawnsci.histogram.v1.x.colourMapping")) {
+	    				break VISIBLE_TEST;
+	    			}
+	    		}
+	    		continue;
+	    	}
 
 	    	final IToolPage tool = createToolPage(e, role);
 	    	if (tool==null) continue;
