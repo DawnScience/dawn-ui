@@ -436,12 +436,13 @@ public class HistogramViewer extends ContentViewer {
 
 	@Override
 	public void refresh() {
-		if (updatingROI) return;
 		double min = getHistogramProvider().getMin();
 		double max = getHistogramProvider().getMax();
-		updateRegion(min, max);
-		updateMin(min);
-		updateMax(max);
+		if (!updatingROI) {
+			updateRegion(min, max);
+			updateMin(min);
+			updateMax(max);
+		}
 		updateTraces();
 	}
 
