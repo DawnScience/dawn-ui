@@ -440,9 +440,9 @@ public class HistogramViewer extends ContentViewer {
 		double max = getHistogramProvider().getMax();
 		if (!updatingROI) {
 			updateRegion(min, max);
-			updateMin(min);
-			updateMax(max);
 		}
+		updateMin(min);
+		updateMax(max);
 		updateTraces();
 	}
 
