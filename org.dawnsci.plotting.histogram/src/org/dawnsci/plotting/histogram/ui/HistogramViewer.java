@@ -551,5 +551,9 @@ public class HistogramViewer extends ContentViewer {
 		return minText;
 	}
 
+	public void setFocus() {
+		histogramPlottingSystem.setFocus();
+	}
+
 
 }

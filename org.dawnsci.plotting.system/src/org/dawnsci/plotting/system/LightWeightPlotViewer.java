@@ -455,40 +455,20 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 					}
 		        }
 		        if (e.character == 'x') {
-		        	final Runnable logXRunner = new Runnable() {
-						public void run() {
-							try {
-								final ICommandService service = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
-								final Command         export = service.getCommand("org.dawnsci.plotting.system.logXToggle");
-								final ExecutionEvent  event = new ExecutionEvent(export, Collections.EMPTY_MAP, null, null);
-								if (!system.is2D()) {
-									export.executeWithChecks(event);
-								}
-								
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						}
-					};
-					logXRunner.run();
+		        	if (system.getPlotType().is1D()) {
+		        		IAxis xAxis = system.getSelectedXAxis();
+		        		if (xAxis != null) {
+		        			xAxis.setLog10(!xAxis.isLog10());
+		        		}
+		        	}
 		        }
 		        if (e.character == 'y') {
-		        	final Runnable logYRunner = new Runnable() {
-						public void run() {
-							try {
-								final ICommandService service = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
-								final Command         export = service.getCommand("org.dawnsci.plotting.system.logYToggle");
-								final ExecutionEvent  event = new ExecutionEvent(export, Collections.EMPTY_MAP, null, null);
-								if (!system.is2D()) {
-									export.executeWithChecks(event);
-								}
-								
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
+		        	if (system.getPlotType().is1D()) {
+		        		IAxis yAxis = system.getSelectedYAxis();
+						if (yAxis != null) {
+							yAxis.setLog10(!yAxis.isLog10());
 						}
-					};
-					logYRunner.run();
+		        	}
 		        }
 		        xyGraph.getRegionArea().setKeyEvent(null);
 			}
