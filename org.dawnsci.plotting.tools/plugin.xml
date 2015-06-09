@@ -523,5 +523,25 @@
             content="intro/tutorials.xml">
       </configExtension>
    </extension>
+   <extension
+         point="org.eclipse.dawnsci.plotting.api.plottingFilter">
+      <plottingFilter
+            filter="org.dawnsci.plotting.tools.filter.FanoFilter"
+            id="org.dawnsci.plotting.tools.fanoFilter"
+            label="Fano Factor"
+            ui="org.dawnsci.plotting.tools.filter.FanoConfiguration">
+      </plottingFilter>
+   </extension>
+   <extension
+         point="org.eclipse.dawnsci.plotting.api.toolPage">
+      <plotting_tool_page
+            category="org.dawnsci.plotting.tools.category.Science"
+            class="org.dawnsci.plotting.tools.filter.FilterTool"
+            icon="icons/filter.png"
+            id="org.dawnsci.plotting.tools.filter.filterTool"
+            label="Image Filter"
+            tooltip="Use to filter images with different algorithms, for instance Fano factor">
+      </plotting_tool_page>
+   </extension>
 
 </plugin>
