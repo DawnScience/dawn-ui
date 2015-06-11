@@ -494,4 +494,8 @@ public abstract class SelectorWidget {
 		if (fileButton != null && !fileButton.isDisposed())
 			fileButton.setVisible(isVisible);
 	}
+
+	public void setLayoutData(Object data) {
+		container.setLayoutData(data);
+	}
 }
