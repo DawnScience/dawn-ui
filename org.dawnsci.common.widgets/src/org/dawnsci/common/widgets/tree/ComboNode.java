@@ -32,7 +32,10 @@ public class ComboNode extends ObjectNode {
 	}
 	
 	public String getStringValue() {
-		return values[(Integer)getValue()];
+		Object val = getValue();
+		int index  = val instanceof Number ? ((Number)val).intValue() : -1;
+		if (index<0) index = Integer.parseInt(val.toString());
+		return values[index];
 	}
 	
 	public void setStringValues(String[] values) {

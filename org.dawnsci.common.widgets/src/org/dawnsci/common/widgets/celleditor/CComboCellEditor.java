@@ -233,7 +233,7 @@ public class CComboCellEditor extends AppliableCellEditor {
 	 */
 	@Override
 	protected void doSetValue(Object value) {
-		Assert.isTrue(comboBox != null && (value instanceof Integer));
+		if (!(value instanceof Integer)) return;
 		selection = ((Integer) value).intValue();
 		comboBox.select(selection);
 	}
