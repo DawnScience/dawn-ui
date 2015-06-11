@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="DAWN Science" uid="uk.ac.diamond.dawn.base.product" id="org.dawnsci.product.plugin.DAWN" application="org.eclipse.ui.ide.workbench" version="1.9.0.qualifier" useFeatures="true" includeLaunchers="true">
+<product name="DAWN Science" uid="uk.ac.diamond.dawn.base.product" id="org.dawnsci.product.plugin.DAWN" application="org.eclipse.ui.ide.workbench" version="2.0.0.qualifier" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="/org.dawnsci.product.plugin/icons/Temp-3Col-Splash.png"/>
@@ -11,7 +11,8 @@
    </configIni>
 
    <launcherArgs>
-      <programArgs>-showLocation</programArgs>
+      <programArgs>-showLocation
+      </programArgs>
       <vmArgs>-Xms256m
 -Xmx1024m
 -XX:PermSize=128m
@@ -20,11 +21,15 @@
 -Dorg.eclipse.swt.internal.gtk.useCairo=false
 -Dcom.isencia.require.file.source=true
 -Dorg.dawb.editor.h5.use.default=true
--Dosgi.locking=none</vmArgs>
-      <vmArgsLin>-Xmx2048m</vmArgsLin>
+-Dosgi.locking=none
+      </vmArgs>
+      <vmArgsLin>-Xmx2048m
+      </vmArgsLin>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
--Xmx2048m</vmArgsMac>
-      <vmArgsSol>-Xmx2048m</vmArgsSol>
+-Xmx2048m
+      </vmArgsMac>
+      <vmArgsSol>-Xmx2048m
+      </vmArgsSol>
    </launcherArgs>
 
    <windowImages i16="/org.dawnsci.product.plugin/icons/Temp-16x16-icon.png" i48="/org.dawnsci.product.plugin/icons/Temp-48x48-icon.png"/>
