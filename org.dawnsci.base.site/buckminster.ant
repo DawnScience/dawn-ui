@@ -219,7 +219,7 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
                 <equals arg1="${jre.os}" arg2="mac" />
             </or>
         </condition>
-        <condition property="jre.archive.type" value="zip">
+        <condition property="jre.archive.type" value="tar.gz">
             <equals arg1="${jre.os}" arg2="windows" />
         </condition>
 
@@ -288,10 +288,10 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
     <target name="jre-copy.windows" depends="_jre-copy.check.available" if="jre.copy.windows">
         <echo message="JRE include: Extracting JRE from ${jre.include.loc} to ${destination}/jre" />
         <mkdir dir="${destination}/jre" />
-        <unzip src="${jre.include.loc}" dest="${destination}/jre" failOnEmptyArchive="true">
+        <untar src="${jre.include.loc}" dest="${destination}/jre" compression="gzip" failOnEmptyArchive="true">
             <regexpmapper from="^[^/]+/(.+)" to="\1"/>
             <!-- Required to remove the top-level directory in the .tar file -->
-        </unzip>
+        </untar>
     </target>
 
     <target name="jre-copy" depends="jre-copy.linux, jre-copy.windows" if="jre.copy.requested" unless="jre.to.copy.available">
