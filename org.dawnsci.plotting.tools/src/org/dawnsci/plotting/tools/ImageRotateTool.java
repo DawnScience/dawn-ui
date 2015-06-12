@@ -35,15 +35,13 @@ import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -77,6 +75,8 @@ public class ImageRotateTool extends AbstractToolPage {
 
 	// used to monitor memory consumption
 	private MemoryMXBean memoryBean;
+	private Action resizeBBox;
+	private Action remapAxes;
 
 	private final static String X_PREFIX = "X Profile";
 	private final static String Y_PREFIX = "Y Profile";
@@ -133,9 +133,25 @@ public class ImageRotateTool extends AbstractToolPage {
 		container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(1, false));
 
-		Composite angleComp = new Composite(container, SWT.NONE | SWT.TOP);
-		angleComp.setLayout(new GridLayout(5, false));
+		createActions();
 
+		final IPageSite site = getSite();
+		IActionBars actionBars = (site != null) ? site.getActionBars() : null;
+
+		rotatedSystem.createPlotPart(container, getTitle(), actionBars,
+				PlotType.IMAGE, getViewPart());
+		rotatedSystem.getPlotComposite().setLayoutData(
+				new GridData(SWT.FILL, SWT.FILL, true, true));
+		IImageTrace image = getImageTrace();
+		IDataset data = image != null ? image.getData() : null;
+		if (data != null) {
+			this.image = data;
+			axes = getImageTrace().getAxes();
+			rotatedSystem.updatePlot2D(data, axes, null);
+		}
+
+		Composite angleComp = new Composite(container, SWT.NONE | SWT.TOP);
+		angleComp.setLayout(new GridLayout(2, false));
 		Label labelAngle = new Label(angleComp, SWT.NONE);
 		labelAngle.setText("Rotation angle");
 		labelAngle.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
@@ -156,12 +172,33 @@ public class ImageRotateTool extends AbstractToolPage {
 			}
 		});
 
-		Button centreROIButton = new Button(angleComp, SWT.PUSH);
-		centreROIButton.setText("Reset");
-		centreROIButton.setToolTipText("Reset the Vertical and Horizontal ROIs positions to the center of the image");
-		centreROIButton.addSelectionListener(new SelectionAdapter() {
+		super.createControl(parent);
+	}
+
+	private void createActions() {
+		resizeBBox = new Action("Resize Bounding Box", SWT.TOGGLE) {
 			@Override
-			public void widgetSelected(SelectionEvent event) {
+			public void run() {
+				hasSameShape = !resizeBBox.isChecked();
+				rotate();
+			}
+		};
+		resizeBBox.setToolTipText("Resize the Bounding Box and do not crop the resulting rotated image");
+		resizeBBox.setImageDescriptor(Activator.getImageDescriptor("icons/resize_bounding_box.png"));
+
+		remapAxes = new Action("Remap Axes", SWT.TOGGLE) {
+			@Override
+			public void run() {
+				hasAxesRemapped = remapAxes.isChecked();
+				remapAxes(hasAxesRemapped);
+			}
+		};
+		remapAxes.setToolTipText("Axes remapping is done so that the X and Y step size are the same");
+		remapAxes.setImageDescriptor(Activator.getImageDescriptor("icons/axis_remapping.png"));
+
+		Action resetCrossHair = new Action("Centre Cross Region") {
+			@Override
+			public void run() {
 				if (rotatedSystem == null || rotatedSystem.getTraces().isEmpty())
 					return;
 				RectangularROI[] rois = getXYCenteredROIs();
@@ -170,48 +207,18 @@ public class ImageRotateTool extends AbstractToolPage {
 				if (rois[1] != null)
 					yHair.setROI(rois[1]);
 			}
-		});
+		};
+		resetCrossHair.setToolTipText("Reset the Vertical and Horizontal ROIs positions to the center of the image");
+		resetCrossHair.setImageDescriptor(Activator.getImageDescriptor("icons/reset_crosshair_center.png"));
 
-		final Button resizeBBoxButton = new Button(angleComp, SWT.CHECK);
-		resizeBBoxButton.setText("Resize Bounding Box");
-		resizeBBoxButton.setToolTipText("Resize the Bounding Box and do not crop the resulting rotated image");
-		resizeBBoxButton.setSelection(false);
-		resizeBBoxButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent event) {
-				hasSameShape = !resizeBBoxButton.getSelection();
-				rotate();
-			}
-		});
+		getSite().getActionBars().getToolBarManager().add(resizeBBox);
+		getSite().getActionBars().getToolBarManager().add(remapAxes);
+		getSite().getActionBars().getToolBarManager().add(resetCrossHair);
 
-		final Button remapAxes = new Button(angleComp, SWT.CHECK);
-		remapAxes.setText("Remap Axes");
-		remapAxes.setToolTipText("Axes remapping is done so that the X and Y step size are the same");
-		remapAxes.setSelection(false);
-		remapAxes.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent event) {
-				hasAxesRemapped = remapAxes.getSelection();
-				remapAxes(hasAxesRemapped);
-			}
-		});
+		getSite().getActionBars().getMenuManager().add(resizeBBox);
+		getSite().getActionBars().getMenuManager().add(remapAxes);
+		getSite().getActionBars().getMenuManager().add(resetCrossHair);
 
-		final IPageSite site = getSite();
-		IActionBars actionBars = (site != null) ? site.getActionBars() : null;
-
-		rotatedSystem.createPlotPart(container, getTitle(), actionBars,
-				PlotType.IMAGE, getViewPart());
-		rotatedSystem.getPlotComposite().setLayoutData(
-				new GridData(SWT.FILL, SWT.FILL, true, true));
-		IImageTrace image = getImageTrace();
-		IDataset data = image != null ? image.getData() : null;
-		if (data != null) {
-			this.image = data;
-			axes = getImageTrace().getAxes();
-			rotatedSystem.updatePlot2D(data, axes, null);
-		}
-
-		super.createControl(parent);
 	}
 
 	protected void remapAxes(boolean hasAxesRemapped) {
