@@ -8,6 +8,8 @@
  */
 package org.dawnsci.algorithm.ui.views.runner;
 
+import java.util.Properties;
+
 import org.dawb.passerelle.common.remote.RemoteWorkbenchImpl;
 import org.dawb.workbench.jmx.IRemoteServiceProvider;
 import org.dawb.workbench.jmx.IRemoteWorkbench;
@@ -70,6 +72,11 @@ public class AlgorithmServiceProvider implements IRemoteServiceProvider {
 	@Override
 	public boolean getTangoSpecMockMode() {
 		return false;
+	}
+
+	@Override
+	public Properties getProperties() {
+		return null;
 	}
 
 }
