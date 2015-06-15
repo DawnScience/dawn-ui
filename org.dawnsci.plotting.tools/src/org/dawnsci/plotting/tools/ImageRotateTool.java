@@ -40,6 +40,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -81,6 +82,8 @@ public class ImageRotateTool extends AbstractToolPage {
 
 	private final static String X_PREFIX = "X Profile";
 	private final static String Y_PREFIX = "Y Profile";
+
+	private Color white;
 
 	public ImageRotateTool() {
 		super();
@@ -131,8 +134,10 @@ public class ImageRotateTool extends AbstractToolPage {
 
 	@Override
 	public void createControl(Composite parent) {
+		white = new Color(Display.getDefault(), 255, 255, 255);
 		container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(1, false));
+		container.setBackground(white);
 
 		createActions();
 
@@ -152,8 +157,10 @@ public class ImageRotateTool extends AbstractToolPage {
 
 		Composite angleComp = new Composite(container, SWT.NONE);
 		angleComp.setLayout(new GridLayout(2, false));
+		angleComp.setBackground(white);
 		Label labelAngle = new Label(angleComp, SWT.NONE);
 		labelAngle.setText("Rotation angle");
+		labelAngle.setBackground(white);
 		labelAngle.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		angleSpinner = new Spinner(angleComp, SWT.BORDER);
 		angleSpinner.setDigits(1);
@@ -457,6 +464,8 @@ public class ImageRotateTool extends AbstractToolPage {
 		if (rotatedSystem != null && !rotatedSystem.isDisposed())
 			rotatedSystem.dispose();
 		rotatedSystem = null;
+		if (white != null)
+			white.dispose();
 		super.dispose();
 	}
 
