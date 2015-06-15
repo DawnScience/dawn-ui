@@ -77,6 +77,7 @@ public class ImageRotateTool extends AbstractToolPage {
 	private MemoryMXBean memoryBean;
 	private Action resizeBBox;
 	private Action remapAxes;
+	private Action resetCrossHair;
 
 	private final static String X_PREFIX = "X Profile";
 	private final static String Y_PREFIX = "Y Profile";
@@ -137,7 +138,6 @@ public class ImageRotateTool extends AbstractToolPage {
 
 		final IPageSite site = getSite();
 		IActionBars actionBars = (site != null) ? site.getActionBars() : null;
-
 		rotatedSystem.createPlotPart(container, getTitle(), actionBars,
 				PlotType.IMAGE, getViewPart());
 		rotatedSystem.getPlotComposite().setLayoutData(
@@ -150,7 +150,7 @@ public class ImageRotateTool extends AbstractToolPage {
 			rotatedSystem.updatePlot2D(data, axes, null);
 		}
 
-		Composite angleComp = new Composite(container, SWT.NONE | SWT.TOP);
+		Composite angleComp = new Composite(container, SWT.NONE);
 		angleComp.setLayout(new GridLayout(2, false));
 		Label labelAngle = new Label(angleComp, SWT.NONE);
 		labelAngle.setText("Rotation angle");
@@ -196,7 +196,7 @@ public class ImageRotateTool extends AbstractToolPage {
 		remapAxes.setToolTipText("Axes remapping is done so that the X and Y step size are the same");
 		remapAxes.setImageDescriptor(Activator.getImageDescriptor("icons/axis_remapping.png"));
 
-		Action resetCrossHair = new Action("Centre Cross Region") {
+		resetCrossHair = new Action("Centre Cross Region") {
 			@Override
 			public void run() {
 				if (rotatedSystem == null || rotatedSystem.getTraces().isEmpty())
@@ -212,13 +212,13 @@ public class ImageRotateTool extends AbstractToolPage {
 		resetCrossHair.setImageDescriptor(Activator.getImageDescriptor("icons/reset_crosshair_center.png"));
 
 		getSite().getActionBars().getToolBarManager().add(resizeBBox);
+		getSite().getActionBars().getToolBarManager().add(resizeBBox);
 		getSite().getActionBars().getToolBarManager().add(remapAxes);
 		getSite().getActionBars().getToolBarManager().add(resetCrossHair);
 
 		getSite().getActionBars().getMenuManager().add(resizeBBox);
 		getSite().getActionBars().getMenuManager().add(remapAxes);
 		getSite().getActionBars().getMenuManager().add(resetCrossHair);
-
 	}
 
 	protected void remapAxes(boolean hasAxesRemapped) {
