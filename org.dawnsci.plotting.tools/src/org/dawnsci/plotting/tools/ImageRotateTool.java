@@ -36,6 +36,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -223,6 +224,7 @@ public class ImageRotateTool extends AbstractToolPage {
 		getSite().getActionBars().getToolBarManager().add(remapAxes);
 		getSite().getActionBars().getToolBarManager().add(resetCrossHair);
 
+		getSite().getActionBars().getMenuManager().add(new Separator());
 		getSite().getActionBars().getMenuManager().add(resizeBBox);
 		getSite().getActionBars().getMenuManager().add(remapAxes);
 		getSite().getActionBars().getMenuManager().add(resetCrossHair);
