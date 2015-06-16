@@ -543,6 +543,12 @@
             label="Mean"
             ui="org.dawnsci.plotting.tools.filter.MeanConfiguration">
       </plottingFilter>
+      <plottingFilter
+            filter="org.dawnsci.plotting.tools.filter.GaussianBlurFilter"
+            id="org.dawnsci.plotting.tools.gaussianBlurFilter"
+            label="Gaussian Blur"
+            ui="org.dawnsci.plotting.tools.filter.GaussianBlurConfiguration">
+      </plottingFilter>
    </extension>
    <extension
          point="org.eclipse.dawnsci.plotting.api.toolPage">

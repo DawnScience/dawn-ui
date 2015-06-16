@@ -30,9 +30,9 @@ public abstract class BoxFilterConfiguration implements FilterConfiguration {
 		BOX_OPTIONS = new String[] { "3x3", "5x5", "7x7", "9x9" };
 	}
 
-	private AbstractPlottingFilter filter;
-	private FloatDecorator udeco;
+	protected AbstractPlottingFilter filter;
 	private FloatDecorator ldeco;
+	private FloatDecorator udeco;
 
 	@Override
 	public void init(final IPlottingSystem system, IPlottingFilter filter) {
@@ -46,9 +46,12 @@ public abstract class BoxFilterConfiguration implements FilterConfiguration {
 						.getTraces(IImageTrace.class).iterator().next();
 				if (trace != null) {
 					trace.setImageUpdateActive(false);
-					trace.setMin(ldeco.getValue());
-					trace.setMax(udeco.getValue());
+					if (hasHistoBounds()) {
+						trace.setMin(ldeco.getValue());
+						trace.setMax(udeco.getValue());
+					}
 					trace.setHistoType(trace.getHistoType());
+					
 					trace.setImageUpdateActive(true);
 				}
 			}
@@ -93,41 +96,40 @@ public abstract class BoxFilterConfiguration implements FilterConfiguration {
 		boxOptions.select(0);
 		setBoxString(boxOptions.getItem(0));
 
-		label = new Label(content, SWT.HORIZONTAL);
-		label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		if (hasHistoBounds()) {
+			label = new Label(content, SWT.HORIZONTAL);
+			label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,
+					2, 1));
 
-		label = new Label(content, SWT.NONE);
-		label.setText("Histogram bounds");
-		label.setToolTipText(getHistoToolTip());
-		label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+			label = new Label(content, SWT.NONE);
+			label.setText("Histogram bounds");
+			label.setToolTipText(getHistoToolTip());
+			label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,
+					2, 1));
 
-		label = new Label(content, SWT.NONE);
-		label.setText("Lower");
-		label.setToolTipText("The lower value for the histogram");
+			label = new Label(content, SWT.NONE);
+			label.setText("Lower");
+			label.setToolTipText("The lower value for the histogram");
 
-		final Text lower = new Text(content, SWT.BORDER);
-		lower.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		lower.setText("0");
+			final Text lower = new Text(content, SWT.BORDER);
+			lower.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			lower.setText("0");
 
-		label = new Label(content, SWT.NONE);
-		label.setText("Upper");
-		label.setToolTipText("The upper value for the histogram");
+			label = new Label(content, SWT.NONE);
+			label.setText("Upper");
+			label.setToolTipText("The upper value for the histogram");
 
-		final Text upper = new Text(content, SWT.BORDER);
-		upper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		upper.setText("25");
+			final Text upper = new Text(content, SWT.BORDER);
+			upper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			upper.setText("25");
 
-		this.ldeco = new FloatDecorator(lower);
-		this.udeco = new FloatDecorator(upper);
-		ldeco.setMinimum(-10d);
-		ldeco.setMaximum(udeco);
-		udeco.setMinimum(ldeco);
-		ldeco.setMaximum(50);
-
-		Label info = new Label(content, SWT.WRAP);
-		info.setImage(Activator.getImage("icons/info.png"));
-		info.setText(getDescription());
-		info.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, true, 2, 1));
+			ldeco = new FloatDecorator(lower);
+			udeco = new FloatDecorator(upper);
+			ldeco.setMinimum(-10d);
+			ldeco.setMaximum(udeco);
+			udeco.setMinimum(ldeco);
+			ldeco.setMaximum(50);
+		}
 
 		return content;
 	}
@@ -149,14 +151,21 @@ public abstract class BoxFilterConfiguration implements FilterConfiguration {
 	 * @return
 	 */
 	abstract protected String getBoxToolTip();
+
 	/**
 	 * 
 	 * @return
 	 */
-	abstract protected String getHistoToolTip();
+	private String getHistoToolTip() {
+		return "The bounds will be reset after the filter is removed."
+				+ "\nSpecific bounds allow the features the fano factor bring out to be visible.";
+	}
+
 	/**
+	 * If Returns True, then the Box configuration will also show and use the
+	 * Hostogram lower and upper limits UI
 	 * 
-	 * @return
+	 * @return hasHisto
 	 */
-	abstract protected String getDescription();
+	abstract protected boolean hasHistoBounds();
 }
