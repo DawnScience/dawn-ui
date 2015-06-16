@@ -531,6 +531,18 @@
             label="Fano Factor"
             ui="org.dawnsci.plotting.tools.filter.FanoConfiguration">
       </plottingFilter>
+      <plottingFilter
+            filter="org.dawnsci.plotting.tools.filter.MedianFilter"
+            id="org.dawnsci.plotting.tools.medianFilter"
+            label="Median"
+            ui="org.dawnsci.plotting.tools.filter.MedianConfiguration">
+      </plottingFilter>
+      <plottingFilter
+            filter="org.dawnsci.plotting.tools.filter.MeanFilter"
+            id="org.dawnsci.plotting.tools.meanFilter"
+            label="Mean"
+            ui="org.dawnsci.plotting.tools.filter.MeanConfiguration">
+      </plottingFilter>
    </extension>
    <extension
          point="org.eclipse.dawnsci.plotting.api.toolPage">
