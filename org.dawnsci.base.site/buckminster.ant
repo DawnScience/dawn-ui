@@ -5,13 +5,16 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
     </description>
     <import file="${buckminster.pdetasks}"/>
 
-    <tstamp>
-        <format property="action.datetime" pattern="yyyyMMdd-HHmm" />
-    </tstamp>
-    <pathconvert property="action.date" setonempty="internal_error_with_action.date">
-        <regexpmapper from="([0-9]{8})\-.*$$" to="\1"/>
-        <path path="${action.datetime}" />
-    </pathconvert>
+    <target name="set.action.datetime" unless="action.datetime">
+        <tstamp>
+            <format property="action.datetime" pattern="yyyyMMdd-HHmm" />
+        </tstamp>
+        <pathconvert property="action.date" setonempty="internal_error_with_action.date">
+            <regexpmapper from="([0-9]{8})\-.*$$" to="\1"/>
+            <path path="${action.datetime}" />
+        </pathconvert>
+        <echo message="Set action.datetime=${action.datetime}" />
+    </target>
 
     <macrodef name="property.expand">
         <attribute name="property"/>
@@ -210,17 +213,8 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
         <condition property="jre.os" value="windows">
             <equals arg1="${product.os}" arg2="win32" />
         </condition>
-        <condition property="jre.os" value="mac">
+        <condition property="jre.os" value="macosx">
             <equals arg1="${product.os}" arg2="macosx" />
-        </condition>
-        <condition property="jre.archive.type" value="tar.gz">
-            <or>
-                <equals arg1="${jre.os}" arg2="linux" />
-                <equals arg1="${jre.os}" arg2="mac" />
-            </or>
-        </condition>
-        <condition property="jre.archive.type" value="tar.gz">
-            <equals arg1="${jre.os}" arg2="windows" />
         </condition>
 
         <!-- translate the architecture description -->
@@ -244,33 +238,60 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
     </target>
 
     <target name="_jre-copy.check.available" depends="_jre-copy.set.environment" if="jre.copy.requested">
-        <!-- find the JRE (.tar or .zip) to expand into the product -->
+        <!-- find the JRE (.tar.gz) to expand into the product -->
         <property.expand property="jre.archive.loc" definition="${jre.include.parent.loc}/${jre.include.release}"/>
-        <property name="jre.archive.pattern" value="jre-*-${jre.os}-${jre.arch}.${jre.archive.type}" />
+        <property name="jre.archive.pattern" value="jre-*-${jre.os}-${jre.arch}.tar.gz" />
         <path id="jre.include.loc.id">
             <fileset dir="${jre.archive.loc}" includes="${jre.archive.pattern}" />
         </path>
         <condition property="jre.to.copy.available" value="true">
             <resourcecount refid="jre.include.loc.id" when="eq" count="1" />
         </condition>
-        <property name="jre.include.loc" refid="jre.include.loc.id" />
-        <!-- turn the path into a property -->
-        <condition property="jre.copy.linux" value="true">
+        <property name="jre.include.loc" refid="jre.include.loc.id" />  <!-- turn the path into a property -->
+        <condition property="useNativeTar" value="true">
             <and>
+                <os family="unix" />
+                <istrue value="${jre.to.copy.available}" />
+            </and>
+        </condition>
+        <condition property="useAntTar.linux" value="true">
+            <and>
+                <isfalse value="${useNativeTar}" />
                 <istrue value="${jre.to.copy.available}" />
                 <equals arg1="${jre.os}" arg2="linux" />
             </and>
         </condition>
-        <condition property="jre.copy.windows" value="true">
+        <condition property="useAntTar.windows" value="true">
             <and>
+                <isfalse value="${useNativeTar}" />
                 <istrue value="${jre.to.copy.available}" />
                 <equals arg1="${jre.os}" arg2="windows" />
             </and>
         </condition>
+        <condition property="useAntTar.macosx" value="true">
+            <and>
+                <isfalse value="${useNativeTar}" />
+                <istrue value="${jre.to.copy.available}" />
+                <equals arg1="${jre.os}" arg2="macosx" />
+            </and>
+        </condition>
     </target>
 
-    <target name="jre-copy.linux" depends="_jre-copy.check.available" if="jre.copy.linux">
-        <echo message="JRE include: Extracting JRE from ${jre.include.loc} to ${destination}/jre" />
+    <target name="_jre-copy.UseNativeTar" if="useNativeTar" unless="jreUntarDone">
+        <echo message="JRE include: Extracting JRE from ${jre.include.loc} to ${destination}/jre using platform tar command" />
+        <mkdir dir="${destination}/jre" />
+        <exec executable="tar" osfamily="unix" dir="${destination}/jre" failonerror="true">
+            <arg value="--strip-components=1" />  <!-- Required to remove the top-level directory in the .tar file -->
+            <arg value="-zxf" />
+            <arg value="${jre.include.loc}" />
+            <arg value="-C" />
+            <arg value="${destination}/jre" />
+        </exec>
+        <property name="jreUntarDone" value="true" />
+    </target>
+
+    <target name="_jre-copy.UseAntTar.linux" if="useAntTar.linux" unless="jreUntarDone">
+        <echo message="JRE include: Extracting JRE from ${jre.include.loc} to ${destination}/jre using ANT untar task" />
         <mkdir dir="${destination}/jre" />
         <untar src="${jre.include.loc}" dest="${destination}/jre" compression="gzip" failOnEmptyArchive="true">
             <regexpmapper from="^[^/]+/(.+)" to="\1"/>
@@ -283,18 +304,30 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
                 <include name="bin/*"/>
             </fileset>
         </chmod>
+        <property name="jreUntarDone" value="true" />
     </target>
 
-    <target name="jre-copy.windows" depends="_jre-copy.check.available" if="jre.copy.windows">
-        <echo message="JRE include: Extracting JRE from ${jre.include.loc} to ${destination}/jre" />
+    <target name="_jre-copy.UseAntTar.windows" if="useAntTar.windows" unless="jreUntarDone">
+        <echo message="JRE include: Extracting JRE from ${jre.include.loc} to ${destination}/jre using ANT untar task" />
         <mkdir dir="${destination}/jre" />
         <untar src="${jre.include.loc}" dest="${destination}/jre" compression="gzip" failOnEmptyArchive="true">
             <regexpmapper from="^[^/]+/(.+)" to="\1"/>
             <!-- Required to remove the top-level directory in the .tar file -->
         </untar>
+        <property name="jreUntarDone" value="true" />
     </target>
 
-    <target name="jre-copy" depends="jre-copy.linux, jre-copy.windows" if="jre.copy.requested" unless="jre.to.copy.available">
+    <target name="_jre-copy.UseAntTar.macosx" if="useAntTar.macosx" unless="jreUntarDone">
+        <echo message="JRE include: Extracting JRE from ${jre.include.loc} to ${destination}/jre using ANT untar task" />
+        <mkdir dir="${destination}/jre" />
+        <untar src="${jre.include.loc}" dest="${destination}/jre" compression="gzip" failOnEmptyArchive="true">
+            <regexpmapper from="^[^/]+/(.+)" to="\1"/>
+            <!-- Required to remove the top-level directory in the .tar file -->
+        </untar>
+        <property name="jreUntarDone" value="true" />
+    </target>
+
+    <target name="jre-copy" depends="_jre-copy.check.available, _jre-copy.UseNativeTar, _jre-copy.UseAntTar.linux, _jre-copy.UseAntTar.windows, _jre-copy.UseAntTar.macosx" if="jre.copy.requested" unless="jreUntarDone">
         <echo message="JRE include: Could not find JRE to copy in ${jre.archive.loc}/ matching &quot;${jre.archive.pattern}&quot;" />
         <fail>
             <condition>
@@ -335,32 +368,26 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
         </antcall>
     </target>
 
-    <target name="create.product" depends="install-product, lib-copy, jre-copy">
+    <target name="create.product" depends="set.action.datetime, install-product, lib-copy, jre-copy">
         <echo>
 == Product has been built in ${destination} ==
         </echo>
     </target>
 
-    <target name="check_product_symlink_exists" depends="create.product">
-        <property name="destination.symlink" location="${destination.parent}/client"/>
-        <echo message="Checking if previous symlink to product exists at : ${destination.symlink}" />
-        <condition property="product_symlink_exists">
-            <available file="${destination.symlink}" type="dir"/>
-        </condition>
+    <target name="_symlink.check.params">
+        <fail message="create.product-with.symlink called, but symlink.to.product.location not set" unless="symlink.to.product.location" />
+        <fail message="create.product-with.symlink called, but symlink.to.product.value not set" unless="symlink.to.product.value" />
+        <property.expand property="symlink.to.product.target" definition="${symlink.to.product.value}"/>
     </target>
 
-    <target name="previous_product_symlink_yes" depends="check_product_symlink_exists" if="product_symlink_exists">
-        <symlink action="delete" link="${destination.symlink}"/>
-    </target>
-    <target name="previous_product_symlink_no" depends="check_product_symlink_exists" unless="product_symlink_exists">
-        <echo message="No previous symlink to product exists at : ${destination.symlink}" />
+    <target name="remove_previous_product_symlink" depends="create.product, _symlink.check.params">
+        <symlink action="delete" link="${symlink.to.product.location}"/>
     </target>
 
-    <target name="create.product-with.symlink" depends="previous_product_symlink_yes, previous_product_symlink_no">
-        <symlink link="${destination.symlink}" resource="./${destination.directory}"/>
+    <target name="create.product-with.symlink" depends="remove_previous_product_symlink">
+        <symlink link="${symlink.to.product.location}" resource="${symlink.to.product.target}"/>
         <echo>
-== Product has been built in ${destination} ==
-== Symlink to product created (or changed) at ${destination.symlink} ==
+== Symlink to product created (or changed) at ${symlink.to.product.location} --> ${symlink.to.product.target} ==
         </echo>
     </target>
 
@@ -462,7 +489,7 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
     <target name="_create.product.zip.IncludeParentDirectory.UseAntZip" depends="get-product-description" if="useAntZipIncludeParentDirectory" unless="zipDone">
         <!-- Note the ANT zip does not preserve file permissions, so can't be used when zipping for Linux or Mac -->
         <property.expand property="destination.zipfile" definition="${zip.file.name}.zip"/>
-        <echo>Zipping ${destination} (including the directory) into ${destination.parent}/${destination.zipfile} using ANT zip command</echo>
+        <echo>Zipping ${destination} (including the directory) into ${destination.parent}/${destination.zipfile} using ANT zip task</echo>
         <zip destfile="${destination.parent}/${destination.zipfile}.zip"
             keepcompression="true" defaultexcludes="no" whenempty="fail" duplicate="fail" level="6">
             <zipfileset dir="${destination.parent}/${destination.directory}" prefix="${destination.directory}" />
@@ -473,7 +500,7 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
     <target name="_create.product.zip.ExcludeParentDirectory.UseAntZip" depends="get-product-description" if="useAntZipExcludeParentDirectory" unless="zipDone">
         <!-- Note the ANT zip does not preserve file permissions, so can't be used when zipping for Linux or Mac -->
         <property.expand property="destination.zipfile" definition="${zip.file.name}"/>
-        <echo>Zipping ${destination} (excluding the directory) into ${destination.parent}/${destination.zipfile} using ANT zip command</echo>
+        <echo>Zipping ${destination} (excluding the directory) into ${destination.parent}/${destination.zipfile} using ANT zip task</echo>
         <zip destfile="${destination.parent}/${destination.zipfile}.zip" basedir="${destination}"
             keepcompression="true" defaultexcludes="no" whenempty="fail" duplicate="fail" level="6" />
         <property name="zipDone" value="true" />
