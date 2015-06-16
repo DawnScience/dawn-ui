@@ -20,7 +20,7 @@ public class GaussianBlurConfiguration extends BoxFilterConfiguration {
 
 		Label label = new Label(content, SWT.NONE);
 		label.setText("Sigma");
-		label.setToolTipText("Gaussian distribution's sigma. If <= 0 then will be selected based on radius or using"
+		label.setToolTipText("Gaussian distribution's sigma. If <= 0 then will be selected based on radius or using "
 				+ "radius of the Gaussian blur function. If <= 0 then radius will be determined by sigma");
 
 		final Text sigma = new Text(content, SWT.BORDER);
