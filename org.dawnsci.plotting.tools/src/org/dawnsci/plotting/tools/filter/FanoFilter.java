@@ -26,9 +26,8 @@ public class FanoFilter extends AbstractDelayedFilter {
 		return 2;
 	}
 
+	@Override
 	protected Object[] filter(IDataset data, List<IDataset> axes) throws Exception {
-		
-		// TODO Should run in some kind of Job?
 		int[]           box   = (int[])getConfiguration().get("box");
 		if (box == null) {
 			box = new int[]{3,3};

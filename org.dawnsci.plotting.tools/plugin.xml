@@ -549,6 +549,12 @@
             label="Gaussian Blur"
             ui="org.dawnsci.plotting.tools.filter.GaussianBlurConfiguration">
       </plottingFilter>
+      <plottingFilter
+            filter="org.dawnsci.plotting.tools.filter.ErodeFilter"
+            id="org.dawnsci.plotting.tools.erodeFilter"
+            label="Erode"
+            ui="org.dawnsci.plotting.tools.filter.ErodeConfiguration">
+      </plottingFilter>
    </extension>
    <extension
          point="org.eclipse.dawnsci.plotting.api.toolPage">
