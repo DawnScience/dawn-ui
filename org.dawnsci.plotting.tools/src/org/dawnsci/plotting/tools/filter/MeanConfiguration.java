@@ -26,9 +26,4 @@ public class MeanConfiguration extends BoxFilterConfiguration {
 	private String getDescription() {
 		return "Moves a box over the image and set each pixel value to the mean for the box.";
 	}
-
-	@Override
-	protected boolean hasHistoBounds() {
-		return false;
-	}
 }

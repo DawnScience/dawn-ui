@@ -229,6 +229,8 @@ public class FilterTool extends AbstractToolPage {
 		IImageTrace image = getImageTrace();
 		if (image != null) {
 			try {
+				if (currentFilter == null)
+					return;
 				currentFilter.filter(getPlottingSystem(),
 						new TraceWillPlotEvent(image, image.getData(), image.getAxes()));
 			} catch (Exception e) {

@@ -55,9 +55,4 @@ public class GaussianBlurConfiguration extends BoxFilterConfiguration {
 		return "Filter using the Gaussian distribution's sigma. If <= 0 then will be selected based on radius or using"
 				+ "Radius of the Gaussian blur function. If <= 0 then radius will be determined by sigma.";
 	}
-
-	@Override
-	protected boolean hasHistoBounds() {
-		return false;
-	}
 }

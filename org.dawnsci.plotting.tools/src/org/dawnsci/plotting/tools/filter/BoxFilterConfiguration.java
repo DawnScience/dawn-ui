@@ -4,7 +4,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.dawnsci.common.widgets.decorator.FloatDecorator;
-import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.filter.AbstractPlottingFilter;
 import org.eclipse.dawnsci.plotting.api.filter.FilterConfiguration;
@@ -167,5 +166,7 @@ public abstract class BoxFilterConfiguration implements FilterConfiguration {
 	 * 
 	 * @return hasHisto
 	 */
-	abstract protected boolean hasHistoBounds();
+	protected boolean hasHistoBounds() {
+		return false;
+	}
 }
