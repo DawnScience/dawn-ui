@@ -6,7 +6,6 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.SummedAreaTable;
 import org.eclipse.dawnsci.plotting.api.filter.AbstractDelayedFilter;
-import org.eclipse.dawnsci.plotting.api.filter.AbstractPlottingFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +19,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class FanoFilter extends AbstractDelayedFilter {
-	
+
 	private static Logger logger = LoggerFactory.getLogger(FanoFilter.class);
 	@Override
 	public int getRank() {

@@ -9,13 +9,15 @@ import java.util.TreeMap;
 import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.dawnsci.plotting.api.PlottingFactory;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.filter.AbstractDelayedFilter;
 import org.eclipse.dawnsci.plotting.api.filter.FilterConfiguration;
-import org.eclipse.dawnsci.plotting.api.filter.IFilterDecorator;
 import org.eclipse.dawnsci.plotting.api.filter.IPlottingFilter;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
+import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
+import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
@@ -43,7 +45,6 @@ import org.eclipse.swt.widgets.Label;
  */
 public class FilterTool extends AbstractToolPage {
 
-	
 	/* Map id to filter */
 	private Map<String, IPlottingFilter> filters;
 	
@@ -55,12 +56,28 @@ public class FilterTool extends AbstractToolPage {
 	
 	/* Current active filter */
 	private IPlottingFilter  currentFilter;
-	
+	/* original data */
+	private IDataset originalData;
+	private List<IDataset> originalAxes;	
 	/* UI */
 	private Combo            filterChoice;
 	private Composite        control;
-	private IFilterDecorator deco;
 	private StackLayout      slayout;
+	private boolean isResetting = false;
+
+	private ITraceListener traceListener;
+
+	public FilterTool() {
+		super();
+		this.traceListener = new ITraceListener.Stub() {
+			@Override
+			public void traceUpdated(TraceEvent evt) {
+				boolean isOn = ((AbstractDelayedFilter)currentFilter).isFilterOn();
+				if (isOn && !isResetting)
+					applyFilter();
+			}
+		};
+ 	}
 
 	@Override
 	public ToolPageRole getToolPageRole() {
@@ -69,11 +86,6 @@ public class FilterTool extends AbstractToolPage {
 	
 	@Override
 	public void createControl(Composite parent) {
-		
-		super.createControl(parent);
-		
-		this.deco = PlottingFactory.createFilterDecorator(getPlottingSystem());
-		
 		// Create the UI for the filters
 		this.control = new Composite(parent, SWT.NONE);
 		control.setLayout(new GridLayout(2, false));	
@@ -121,11 +133,10 @@ public class FilterTool extends AbstractToolPage {
 		} catch (Exception ne) {
 			logger.error("Cannot read extension points for filters!", ne);
 		}
-		
-		
+
 		filterChoice.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				final String label = filterChoice.getItem(filterChoice.getSelectionIndex());				
+				final String label = filterChoice.getItem(filterChoice.getSelectionIndex());
 				setUISelected(label);
 			}
 		});
@@ -148,7 +159,6 @@ public class FilterTool extends AbstractToolPage {
 		apply.setText("Apply");
 		apply.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				resetFilter();
 				applyFilter();
 			}
 		});
@@ -162,15 +172,23 @@ public class FilterTool extends AbstractToolPage {
 				reset();
 			}
 		});
-
 		createActions();
+		getPlottingSystem().addTraceListener(traceListener);
+		super.createControl(parent);
 	}
 
 	private void reset() {
-		filterChoice.select(0);
-		resetFilter();
-		setUISelected("<None>");
-		getPlottingSystem().repaint();
+		try {
+			isResetting = true;
+			filterChoice.select(0);
+			if (originalData != null)
+				getPlottingSystem().updatePlot2D(originalData, originalAxes,
+						null);
+			setUISelected("<None>");
+			getPlottingSystem().repaint();
+		} finally {
+			isResetting = false;
+		}
 	}
 
 	private void createActions() {
@@ -183,36 +201,41 @@ public class FilterTool extends AbstractToolPage {
 		man.add(reset);
 	}
 
-	protected void resetFilter() {
-		deco.reset();
-		try {
-			if (currentFilter!=null) deco.removeFilter(currentFilter);
-		} catch (Exception ne) {
-			logger.debug("Error removing filter, might be because tool was deactivated.");
-		}
-	}
-
 	private void setUISelected(String label) {
-		
-		final String id    = labels.get(label);
+		final String id = labels.get(label);
 		slayout.topControl = components.get(id);
-		
-		for (Control c : control.getChildren()) if (c instanceof Composite) ((Composite)c).layout();
+		for (Control c : control.getChildren())
+			if (c instanceof Composite)
+				((Composite) c).layout();
 
 		currentFilter = filters.get(id);
 	}
-	
+
 	private void applyFilter() {
-		
-		if (currentFilter!=null) {
-			deco.addFilter(currentFilter);
-		} else {
-			reset();
-			return;
+		// Save original data & axes
+		if (originalData == null)
+			originalData = getImageTrace().getData().clone();
+		if (originalAxes == null) {
+			List<IDataset> axes = getImageTrace().getAxes();
+			if (axes != null) {
+				IDataset xAxis = axes.get(0);
+				IDataset yAxis = axes.get(1);
+				originalAxes = new ArrayList<IDataset>();
+				originalAxes.add(xAxis.clone());
+				originalAxes.add(yAxis.clone());
+			}
 		}
-		
+		// Apply the filter to the current image trace
 		IImageTrace image = getImageTrace();
-		if (image!=null) image.setData(image.getData(), image.getAxes(), false);
+		if (image != null) {
+			try {
+				currentFilter.filter(getPlottingSystem(),
+						new TraceWillPlotEvent(image, image.getData(), image.getAxes()));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			image.setData(image.getData(), image.getAxes(), false);
+		}
 	}
 
 	@Override
@@ -227,14 +250,24 @@ public class FilterTool extends AbstractToolPage {
 
 	public void activate() {
 		super.activate();
-		if (deco!=null && currentFilter!=null) {
-			deco.addFilter(currentFilter);
-		}
+		if (getPlottingSystem()!=null)
+			getPlottingSystem().addTraceListener(traceListener);
+		if(currentFilter != null)
+			applyFilter();
 	}
 
-	public void deactivate() {
-        super.deactivate();
-        resetFilter();
+	@Override
+	public void dispose() {
+		if (getPlottingSystem() != null)
+			getPlottingSystem().removeTraceListener(traceListener);
+	}
+
+ 	public void deactivate() {
+		super.deactivate();
+		if (originalData != null)
+			getPlottingSystem().updatePlot2D(originalData, originalAxes, null);
 		setUISelected("<None>");
+		if (getPlottingSystem()!=null)
+			getPlottingSystem().removeTraceListener(traceListener);
 	}
 }
