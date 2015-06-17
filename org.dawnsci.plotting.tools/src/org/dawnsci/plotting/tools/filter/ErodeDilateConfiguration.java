@@ -6,7 +6,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-public class ErodeConfiguration extends BinaryFilterConfiguration {
+public class ErodeDilateConfiguration extends BinaryFilterConfiguration {
 
 	@Override
 	public Composite createControl(Composite parent) {
@@ -19,6 +19,9 @@ public class ErodeConfiguration extends BinaryFilterConfiguration {
 	}
 
 	private String getDescription() {
-		return "Erodes an image according to a 8-neighborhood. Unless a pixel is connected to all its neighbors its value is set to zero or False";
+		return "Erodes an image according to a 8-neighborhood. Unless a pixel is connected to "
+				+ "all its neighbors its value is set to zero or False. Then dilates the "
+				+ "image according to a 8-neighborhood: if a pixel is connected to any other "
+				+ "pixel then its output value will be one.";
 	}
 }

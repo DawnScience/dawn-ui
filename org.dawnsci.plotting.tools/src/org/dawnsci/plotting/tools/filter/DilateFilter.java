@@ -8,10 +8,10 @@ import org.eclipse.dawnsci.analysis.api.image.IImageFilterService;
 import org.eclipse.dawnsci.plotting.api.filter.AbstractDelayedFilter;
 
 /**
- * The erode filter.
+ * The dilate filter.
  * 
  */
-public class ErodeFilter extends AbstractDelayedFilter {
+public class DilateFilter extends AbstractDelayedFilter {
 
 	@Override
 	public int getRank() {
@@ -23,8 +23,8 @@ public class ErodeFilter extends AbstractDelayedFilter {
 			throws Exception {
 		boolean isBinary = (boolean)getConfiguration().get("binary");
 		IImageFilterService service = ImageFilterServiceLoader.getFilter();
-		final IDataset eroded = service.filterErode(data, isBinary);
-		return new Object[] { eroded, axes };
+		final IDataset dilated = service.filterDilate(data, isBinary);
+		return new Object[] { dilated, axes };
 	}
 
 }

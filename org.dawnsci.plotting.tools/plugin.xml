@@ -555,6 +555,18 @@
             label="Erode"
             ui="org.dawnsci.plotting.tools.filter.ErodeConfiguration">
       </plottingFilter>
+      <plottingFilter
+            filter="org.dawnsci.plotting.tools.filter.ErodeDilateFilter"
+            id="org.dawnsci.plotting.tools.erodeDilateFilter"
+            label="Erode and Dilate"
+            ui="org.dawnsci.plotting.tools.filter.ErodeDilateConfiguration">
+      </plottingFilter>
+      <plottingFilter
+            filter="org.dawnsci.plotting.tools.filter.DilateFilter"
+            id="org.dawnsci.plotting.tools.dilateFilter"
+            label="Dilate"
+            ui="org.dawnsci.plotting.tools.filter.DilateConfiguration">
+      </plottingFilter>
    </extension>
    <extension
          point="org.eclipse.dawnsci.plotting.api.toolPage">
