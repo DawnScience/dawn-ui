@@ -51,7 +51,7 @@ public abstract class BinaryFilterConfiguration implements FilterConfiguration {
 		Label label = new Label(content, SWT.NONE);
 		label.setText("Convert to binary");
 		label.setToolTipText("");
-		final Combo binaryCombo = new Combo(content, SWT.NONE);
+		final Combo binaryCombo = new Combo(content, SWT.READ_ONLY);
 		binaryCombo.setItems(new String[] {"Yes", "No"});
 		binaryCombo.select(1);
 		filter.putConfiguration("binary", false);
