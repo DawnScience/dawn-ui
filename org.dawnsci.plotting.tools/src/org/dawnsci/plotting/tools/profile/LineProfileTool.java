@@ -91,11 +91,19 @@ public class LineProfileTool extends ProfileTool {
 			
 		} else {
 			if (monitor.isCanceled()) return null;
-			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(indices, Arrays.asList(new IDataset[]{intensity}), "Cross Profile", monitor);
+			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(indices, Arrays.asList(new IDataset[]{intensity}), getProfileTitle(), monitor);
 			registerTraces(name, plotted);
 			traces.add(plotted.iterator().next());
 		}
 		return traces;
+	}
+
+	/**
+	 * 
+	 * @return the title of the profile plot
+	 */
+	protected String getProfileTitle() {
+		return "Line Profile";
 	}
 
 	@Override
