@@ -520,7 +520,7 @@ public class MaskObject {
 				return; // unbounded region
 
 			final double[] beg = bounds.getPoint();
-			if (roi!=null && roi instanceof PointROI) {
+			if (roi!=null && roi.getClass() == PointROI.class) {
 				int x = Math.max(0, (int) Math.round(beg[0]));
 				int y = Math.max(0, (int) Math.round(beg[1]));
 				op.addVertex(!isMasking, y, x);
