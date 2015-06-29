@@ -881,7 +881,8 @@ public class HistogramToolPage extends AbstractToolPage {
 		// Activate this so the initial screen has content
 		activate();
 
-
+		// call on super to track tool usage
+		super.createControl(parent);
 	}
 
 	private boolean updatingColorSchemeInternally = false;

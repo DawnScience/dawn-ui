@@ -619,4 +619,14 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 		call(getMethodName(Thread.currentThread().getStackTrace()));
 	}
 
+	@Override
+	public boolean isShowValueLabels() {
+		return (Boolean) call(getMethodName(Thread.currentThread().getStackTrace()));
+	}
+
+	@Override
+	public void setShowValueLabels(boolean b) {
+		call(getMethodName(Thread.currentThread().getStackTrace()), b);
+	}
+
 }

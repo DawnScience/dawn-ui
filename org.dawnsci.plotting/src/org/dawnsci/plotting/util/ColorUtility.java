@@ -22,14 +22,28 @@ import org.eclipse.swt.widgets.Display;
  */
 public class ColorUtility {
 	
-	// NOTE Color choice used to be 9, however 16 is a better choice for scan plots as there
+	// NOTE Color choice used to be 9, however 17 is a better choice for scan plots as there
 	// are regularly more than nine plots in a single scan.
-	public static final Color[] GRAPH_DEFAULT_COLORS = { new Color(0, 0, 255),new Color(255, 0, 0),
-		new Color(204, 0, 204), new Color(204, 0, 0), new Color(0, 153, 51), new Color(102, 0, 102),
-		new Color(255, 102, 255), new Color(255, 155, 0), new Color(204, 255, 0), new Color(51, 255, 51),
-		new Color(102, 255, 255), new Color(102, 102, 255), new Color(153, 153, 0),
-		new Color(204, 204, 205), new Color(255, 204, 204)};
-
+	// See http://www.gnuplotting.org/tag/palette/
+	public static final Color[] GRAPH_DEFAULT_COLORS = { 
+		Color.blue,
+		new Color(191, 91, 23),
+		new Color(240,2,127),
+		new Color(204, 0, 204),
+		new Color(56, 108, 176),
+		new Color(0, 153, 51),
+		new Color(102, 0, 102),
+		new Color(255, 102, 255),
+		new Color(255, 155, 0),
+		new Color(204, 255, 0),
+		new Color(51, 255, 51),
+		new Color(102, 255, 255),
+		new Color(102, 102, 255),
+		new Color(153, 153, 0),
+		new Color(204, 204, 205), 
+		new Color(255, 204, 204),
+		new Color(77, 175, 74)
+	};
 	
 	public static final Collection<org.eclipse.swt.graphics.Color> DEFAULT_SWT_COLORS;
 	static {
@@ -40,7 +54,6 @@ public class ColorUtility {
 	}
 	
 	private static final  int[]           GRAPH_DEFAULT_LINEWIDTHS;
-	
 	static {
 		GRAPH_DEFAULT_LINEWIDTHS = new  int [GRAPH_DEFAULT_COLORS.length];
 		for (int i = 0; i < GRAPH_DEFAULT_COLORS.length; i++) {

@@ -22,6 +22,24 @@ public class PowderCorrectionModel extends AbstractOperationModel {
 	public boolean isApplySolidAngleCorrection() {
 		return isApplySolidAngleCorrection;
 	}
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (isApplyPolarisationCorrection ? 1231 : 1237);
+		result = prime * result + (isApplySolidAngleCorrection ? 1231 : 1237);
+		result = prime * result
+				+ (isAppyDetectorTransmissionCorrection ? 1231 : 1237);
+		long temp;
+		temp = Double.doubleToLongBits(polarisationAngularOffset);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(polarisationFactor);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(transmittedFraction);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		return result;
+	}
+
 	public boolean isApplyPolarisationCorrection() {
 		return isApplyPolarisationCorrection;
 	}
@@ -56,5 +74,46 @@ public class PowderCorrectionModel extends AbstractOperationModel {
 	}
 	public void setTransmittedFraction(double transmittedFraction) {
 		firePropertyChange("transmittedFraction", this.transmittedFraction, this.transmittedFraction = transmittedFraction);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		PowderCorrectionModel other = (PowderCorrectionModel) obj;
+		if (isApplyPolarisationCorrection != other.isApplyPolarisationCorrection)
+			return false;
+		if (isApplySolidAngleCorrection != other.isApplySolidAngleCorrection)
+			return false;
+		if (isAppyDetectorTransmissionCorrection != other.isAppyDetectorTransmissionCorrection)
+			return false;
+		if (Double.doubleToLongBits(polarisationAngularOffset) != Double
+				.doubleToLongBits(other.polarisationAngularOffset))
+			return false;
+		if (Double.doubleToLongBits(polarisationFactor) != Double
+				.doubleToLongBits(other.polarisationFactor))
+			return false;
+		if (Double.doubleToLongBits(transmittedFraction) != Double
+				.doubleToLongBits(other.transmittedFraction))
+			return false;
+		return true;
+	}
+	
+	@Override
+	public PowderCorrectionModel clone(){
+		
+		PowderCorrectionModel cloned = new PowderCorrectionModel();
+		cloned.isApplySolidAngleCorrection = this.isApplySolidAngleCorrection;
+		cloned.isApplyPolarisationCorrection = this.isApplyPolarisationCorrection;
+		cloned.isAppyDetectorTransmissionCorrection = this.isAppyDetectorTransmissionCorrection;
+		cloned.polarisationFactor = this.polarisationFactor;
+		cloned.polarisationAngularOffset = this.polarisationAngularOffset;
+		cloned.transmittedFraction = this.transmittedFraction;
+		
+		return cloned;
 	}
 }

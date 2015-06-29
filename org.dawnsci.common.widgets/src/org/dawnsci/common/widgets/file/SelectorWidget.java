@@ -138,11 +138,11 @@ public abstract class SelectorWidget {
 	 * @param extensions
 	 *           Array of Strings defining possible file extensions and names if isFolderSelector is False
 	 */
-	public SelectorWidget(Composite parent, boolean isFolderSelector, boolean hasResourceButton, String[]... extensions) {
+	public SelectorWidget(Composite parent, boolean isFolderSelector, boolean hasResourceButton, String[] types, String[] extensions) {
 		this.isFolderSelector = isFolderSelector;
-		if (extensions != null && extensions.length == 2) {
-			this.fileTypes = extensions[0];
-			this.fileExtensions = extensions[1];
+		if (types != null && extensions!=null) {
+			this.fileTypes      = types;
+			this.fileExtensions = extensions;
 		} else {
 			this.fileTypes = new String[] {"All Files"};
 			this.fileExtensions = new String[] {"*.*"};
@@ -493,5 +493,9 @@ public abstract class SelectorWidget {
 			resourceButton.setVisible(isVisible);
 		if (fileButton != null && !fileButton.isDisposed())
 			fileButton.setVisible(isVisible);
+	}
+
+	public void setLayoutData(Object data) {
+		container.setLayoutData(data);
 	}
 }

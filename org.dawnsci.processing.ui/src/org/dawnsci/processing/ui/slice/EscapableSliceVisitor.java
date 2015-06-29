@@ -1,5 +1,8 @@
 package org.dawnsci.processing.ui.slice;
 
+import java.io.File;
+
+import org.apache.commons.io.FilenameUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
@@ -73,7 +76,7 @@ public class EscapableSliceVisitor implements SliceVisitor {
 				if (i == endOperation) inputData = new OperationInputDataImpl(data.getData(),i); 
 				
 				OperationData tmp = i.execute(data.getData(), null);
-				tmp.getData().setMetadata(ssm);
+				if (tmp != null) tmp.getData().setMetadata(ssm);
 				visitor.notify(i, tmp); // Optionally send intermediate result
 				data = i.isPassUnmodifiedData() ? data : tmp;
 			}
@@ -138,7 +141,20 @@ public class EscapableSliceVisitor implements SliceVisitor {
 		}
 		
 		private void displayData(OperationData result, int[] dataDims) throws Exception {
+			if (result == null) output.clear();
 			IDataset out = result.getData();
+			//TODO change name
+			try {
+				SliceFromSeriesMetadata ssm = out.getMetadata(SliceFromSeriesMetadata.class).get(0);
+				Slice[] s = ssm.getSliceFromInput();
+				String n = ssm.getFilePath();
+				File f = new File(n);
+				String b = FilenameUtils.getBaseName(f.getAbsolutePath());
+				String name = b + "_" + Slice.createString(s);
+				out.setName(name);
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
 			
 			SlicedDataUtils.plotDataWithMetadata(out, output, dataDims);
 

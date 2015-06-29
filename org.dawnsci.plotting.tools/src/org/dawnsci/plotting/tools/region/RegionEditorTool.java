@@ -125,6 +125,11 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 	private IROIListener roiListener;
 
 	/**
+	 * Map to hold all original colours before the region tool is opened 
+	 */
+	private HashMap<String, Color> regionColoursMap = new HashMap<String, Color>();
+
+	/**
 	 * A map to store dragBounds which are not the official bounds
 	 * of the selection until the user lets go.
 	 */
@@ -320,6 +325,7 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 					if (regionNode == null)
 						return;
 					model.removeRegion(regionNode);
+					regionColoursMap.remove(region.getName());
 					region.removeROIListener(roiListener);
 					getPlottingSystem().removeRegion(region);
 				}
@@ -331,7 +337,6 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 		return new IROIListener.Stub() {
 			@Override
 			public void roiDragged(ROIEvent evt) {
-				model.setRegionDragged(true);
 				viewer.cancelEditing();
 				if (!isActive()) return;
 //				IRegion region = (IRegion) evt.getSource();
@@ -340,7 +345,6 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 
 			@Override
 			public void roiChanged(ROIEvent evt) {
-				model.setRegionDragged(false);
 				if (!model.isTreeModified()) {
 					if (!isActive()) return;
 					updateRegionNode(evt.getROI(), false);
@@ -359,6 +363,13 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 					updateRegionNode(evt.getROI(), false);
 				}
 			}
+			
+			@Override
+			public void roiSelected(ROIEvent evt) {
+				IRegion region = (IRegion)evt.getSource();
+				if(region == null) return;
+				updateColorSelection(region);
+			}
 		};
 	}
 
@@ -376,8 +387,6 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 			updateJob.setPriority(Job.INTERACTIVE);
 		}
 		updateJob.setROI(roi);
-		updateJob.setIsDragged(isDragged);
-		updateJob.cancel();
 		updateJob.schedule();
 	}
 
@@ -850,6 +859,7 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 	@Override
 	public void activate() {
 		super.activate();
+		updateRegionsColour();
 		if (viewer != null && viewer.getControl().isDisposed())
 			return;
 
@@ -894,6 +904,7 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 	@Override
 	public void deactivate() {
 		super.deactivate();
+		resetRegionsColour();
 
 		if (viewer != null && !viewer.getControl().isDisposed() && viewUpdateListener!=null) {
 			viewer.removeSelectionChangedListener(viewUpdateListener);
@@ -917,6 +928,7 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 	}
 
 	public void dispose() {
+		resetRegionsColour();
 		super.dispose();
 	}
 
@@ -939,11 +951,34 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 		}
 	}
 
+	private void updateRegionsColour() {
+		Collection<IRegion> regions = getPlottingSystem().getRegions();
+		if (regionColoursMap.isEmpty()) {
+			for (IRegion region : regions) {
+				// put the original region color in a hashmap
+				regionColoursMap.put(region.getName(), region.getRegionColor());
+				if (region.isActive())
+					region.setRegionColor(ColorConstants.green);
+				else if (!region.isActive())
+					region.setRegionColor(ColorConstants.gray);
+			}
+		}
+	}
+
+	private void resetRegionsColour() {
+		Collection<IRegion> regions = getPlottingSystem().getRegions();
+		for (IRegion region : regions) {
+			Color color = regionColoursMap.get(region.getName());
+			if (color != null)
+				region.setRegionColor(color);
+		}
+		regionColoursMap.clear();
+	}
+
 	private final class RegionBoundsJob extends Job {
 
 		private IROI roi;
 		private double[] intensitySum = new double[] {0,0};
-		private boolean isDragged = false;
 
 		RegionBoundsJob() {
 			super("Region update");
@@ -957,8 +992,7 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 
 				if (model == null)
 					return Status.CANCEL_STATUS;
-				if (!isDragged )
-					intensitySum = getIntensityAndSum(roi);
+				intensitySum = getIntensityAndSum(roi);
 
 				if (model == null)
 					return Status.CANCEL_STATUS;
@@ -976,10 +1010,6 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 
 		public void setROI(IROI roi) {
 			this.roi = roi;
-		}
-
-		public void setIsDragged(boolean isDragged) {
-			this.isDragged = isDragged;
 		}
 	};
 

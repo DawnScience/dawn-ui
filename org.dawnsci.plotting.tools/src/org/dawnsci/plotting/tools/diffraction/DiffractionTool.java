@@ -312,7 +312,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			model= null;
 		}
 		if (viewer==null)           return;
-
+		statusString[0] = null;
 		IDiffractionMetadata data = null;
 		try {
 			data = getDiffractionMetaData();

@@ -94,6 +94,7 @@ Export-Package: org.dawnsci.plotting.tools;
    org.eclipse.swt.widgets,
    org.eclipse.dawnsci.plotting.api.tool,
    org.dawb.common.services.expressions",
+ org.dawnsci.plotting.tools.filter,
  org.dawnsci.plotting.tools.fitting;
   uses:="org.eclipse.jface.wizard,
    org.eclipse.core.runtime,

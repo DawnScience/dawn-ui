@@ -460,12 +460,17 @@ public abstract class AbstractSelectionRegion<T extends IROI> extends AbstractRe
 
 			@Override
 			public void translationAfter(TranslationEvent evt) {
+				if (evt.mouseStationary()) return;
 				updateBounds();
 				fireROIDragged(createROI(false), ROIEvent.DRAG_TYPE.RESIZE);
 			}
 
 			@Override
 			public void translationCompleted(TranslationEvent evt) {
+				if (evt.mouseStationary()) {
+					fireROISelection();
+					return;
+				}
 				fireROIChanged(createROI(true));
 				fireROISelection();
 			}

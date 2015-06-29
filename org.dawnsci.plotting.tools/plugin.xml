@@ -320,7 +320,7 @@
       <plotting_tool_page
             category="org.dawnsci.plotting.tools.plotting_tool_category.fitting"
             class="org.dawnsci.plotting.tools.fitting.FunctionFittingTool"
-            icon="icons/plot-tool-line-fit.png"
+            icon="icons/plot-tool-function-fit.png"
             id="org.dawb.workbench.plotting.function_fitting_tool"
             label="Function Fitting"
             tooltip="Tool for fitting a generic function to some data">
@@ -522,6 +522,62 @@
             configId="org.dawnsci.intro.universalConfig"
             content="intro/tutorials.xml">
       </configExtension>
+   </extension>
+   <extension
+         point="org.eclipse.dawnsci.plotting.api.plottingFilter">
+      <plottingFilter
+            filter="org.dawnsci.plotting.tools.filter.FanoFilter"
+            id="org.dawnsci.plotting.tools.fanoFilter"
+            label="Fano Factor"
+            ui="org.dawnsci.plotting.tools.filter.FanoConfiguration">
+      </plottingFilter>
+      <plottingFilter
+            filter="org.dawnsci.plotting.tools.filter.MedianFilter"
+            id="org.dawnsci.plotting.tools.medianFilter"
+            label="Median"
+            ui="org.dawnsci.plotting.tools.filter.MedianConfiguration">
+      </plottingFilter>
+      <plottingFilter
+            filter="org.dawnsci.plotting.tools.filter.MeanFilter"
+            id="org.dawnsci.plotting.tools.meanFilter"
+            label="Mean"
+            ui="org.dawnsci.plotting.tools.filter.MeanConfiguration">
+      </plottingFilter>
+      <plottingFilter
+            filter="org.dawnsci.plotting.tools.filter.GaussianBlurFilter"
+            id="org.dawnsci.plotting.tools.gaussianBlurFilter"
+            label="Gaussian Blur"
+            ui="org.dawnsci.plotting.tools.filter.GaussianBlurConfiguration">
+      </plottingFilter>
+      <plottingFilter
+            filter="org.dawnsci.plotting.tools.filter.ErodeFilter"
+            id="org.dawnsci.plotting.tools.erodeFilter"
+            label="Erode"
+            ui="org.dawnsci.plotting.tools.filter.ErodeConfiguration">
+      </plottingFilter>
+      <plottingFilter
+            filter="org.dawnsci.plotting.tools.filter.ErodeDilateFilter"
+            id="org.dawnsci.plotting.tools.erodeDilateFilter"
+            label="Erode and Dilate"
+            ui="org.dawnsci.plotting.tools.filter.ErodeDilateConfiguration">
+      </plottingFilter>
+      <plottingFilter
+            filter="org.dawnsci.plotting.tools.filter.DilateFilter"
+            id="org.dawnsci.plotting.tools.dilateFilter"
+            label="Dilate"
+            ui="org.dawnsci.plotting.tools.filter.DilateConfiguration">
+      </plottingFilter>
+   </extension>
+   <extension
+         point="org.eclipse.dawnsci.plotting.api.toolPage">
+      <plotting_tool_page
+            category="org.dawnsci.plotting.tools.category.Science"
+            class="org.dawnsci.plotting.tools.filter.FilterTool"
+            icon="icons/filter.png"
+            id="org.dawnsci.plotting.tools.filter.filterTool"
+            label="Image Filter"
+            tooltip="Use to filter images with different algorithms, for instance Fano factor">
+      </plotting_tool_page>
    </extension>
 
 </plugin>

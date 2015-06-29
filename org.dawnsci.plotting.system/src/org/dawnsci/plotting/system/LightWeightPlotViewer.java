@@ -454,6 +454,22 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 						previousTool = null;
 					}
 		        }
+		        if (e.character == 'x') {
+		        	if (system.getPlotType().is1D()) {
+		        		IAxis xAxis = system.getSelectedXAxis();
+		        		if (xAxis != null) {
+		        			xAxis.setLog10(!xAxis.isLog10());
+		        		}
+		        	}
+		        }
+		        if (e.character == 'y') {
+		        	if (system.getPlotType().is1D()) {
+		        		IAxis yAxis = system.getSelectedYAxis();
+						if (yAxis != null) {
+							yAxis.setLog10(!yAxis.isLog10());
+						}
+		        	}
+		        }
 		        xyGraph.getRegionArea().setKeyEvent(null);
 			}
 		};

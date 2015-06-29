@@ -10,15 +10,34 @@ package org.dawnsci.plotting.draw2d.swtxy.translate;
 
 import java.util.EventObject;
 
+import org.eclipse.draw2d.geometry.Point;
+
 public class TranslationEvent extends EventObject {
 
-	public TranslationEvent(Object source) {
-		super(source);
-	}
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 8052227785122947448L;
+	
+	private Point start;
+	private Point end;
 
+	public TranslationEvent(Object source) {
+		super(source);
+	}
+	public TranslationEvent(Object source, Point start, Point end) {
+		super(source);
+		this.start = start;
+		this.end   = end;
+	}
+
+	/**
+	 * 
+	 * @return true if the mouse was stationary during the translate, false otherwise.
+	 */
+	public boolean mouseStationary() {
+		if (start==null || end==null) return false;
+		return start.equals(end);
+	}
 }

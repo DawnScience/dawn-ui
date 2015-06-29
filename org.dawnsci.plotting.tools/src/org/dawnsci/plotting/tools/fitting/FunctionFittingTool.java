@@ -87,6 +87,8 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 	private Control control;
 	private boolean autoRefit;
+	
+	private boolean firstRun = true;
 
 	protected IROIListener roiListener = new FunctionFittingROIListener();
 	protected IRegion region = null;
@@ -238,6 +240,8 @@ public class FunctionFittingTool extends AbstractToolPage implements
 			connectPlotSystemListeners();
 			compFunctionModified();
 		}
+		//track tool usage
+		super.createControl(parent);
 	}
 
 	@Override
@@ -288,7 +292,14 @@ public class FunctionFittingTool extends AbstractToolPage implements
 				region.setVisible(true);
 			}
 			region.addROIListener(roiListener);
-			updateFunctionPlot(false);
+			
+			//Without this, updateFunctionPlot gets called twice at start up for no reason
+			if (firstRun) {
+				firstRun = false;
+				return;
+			} else {
+				updateFunctionPlot(false);
+			}
 
 		} catch (Exception e) {
 			logger.error("Failed to activate function fitting tool", e);
@@ -428,8 +439,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		getPlottingSystem().addTraceListener(traceListener);
 	}
 
-	private void updateFittedPlot(boolean force, final Dataset x,
-			final Dataset y) {
+	private void updateFittedPlot(boolean force, final Dataset x, final Dataset y) {
 
 		if (force || autoRefit) {
 
@@ -566,8 +576,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 					System.out.println("Plotting");
 					System.out.println(resultFunction);
-					DoubleDataset resultData = resultFunction
-							.calculateValues(x);
+					DoubleDataset resultData = resultFunction.calculateValues(x);
 					fitTrace.setData(x, resultData);
 					fitTrace.setVisible(true);
 
@@ -635,7 +644,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 			}
 		}
 
-		PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 			@Override
 			public void run() {
 				functionWidget.setInput(compFunction);

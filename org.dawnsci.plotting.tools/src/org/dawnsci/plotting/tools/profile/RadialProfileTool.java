@@ -15,14 +15,11 @@ import javax.vecmath.Vector3d;
 
 import org.dawb.common.ui.image.IconUtils;
 import org.dawb.common.ui.menu.MenuAction;
+import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.utils.ToolUtils;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
-import org.eclipse.dawnsci.analysis.api.diffraction.DetectorPropertyEvent;
 import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironment;
-import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironmentEvent;
-import org.eclipse.dawnsci.analysis.api.diffraction.IDetectorPropertyListener;
-import org.eclipse.dawnsci.analysis.api.diffraction.IDiffractionCrystalEnvironmentListener;
-import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
@@ -30,27 +27,22 @@ import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.SectorROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
-import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.ui.PlatformUI;
-import org.dawnsci.plotting.tools.Activator;
-import org.dawnsci.plotting.tools.utils.ToolUtils;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 import uk.ac.diamond.scisoft.analysis.roi.XAxis;
 
-public class RadialProfileTool extends SectorProfileTool implements IDetectorPropertyListener, IDiffractionCrystalEnvironmentListener{
+public class RadialProfileTool extends SectorProfileTool {
 	
 	private XAxis axis = XAxis.PIXEL;
     private MenuAction profileAxis;
-    private Action metaLock;
+	private IAction metaLock;
 	
 	@Override
 	protected void configurePlottingSystem(IPlottingSystem plotter) {
@@ -127,53 +119,6 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 			}
 		};
 		
-		metaLock = new Action("Lock To Metadata", IAction.AS_CHECK_BOX) {
-			@Override
-			public void run() {
-				if (isChecked()) {
-					IMetadata meta = getMetaData();
-					profileAxis.setEnabled(true);
-
-					if (isValidMetadata(meta)) {
-						updateSectorCenters(((IDiffractionMetadata)meta).getDetector2DProperties().getBeamCentreCoords());
-						registerMetadataListeners();
-						setMessage(true);
-					}
-
-					if (getPlottingSystem()==null) return;
-					
-					IContributionItem item = profilePlottingSystem.getActionBars().getToolBarManager().find("org.dawb.workbench.plotting.tools.profile.lockSectorCenters");
-					
-					if (item != null && item instanceof ActionContributionItem) {
-						((ActionContributionItem)item).getAction().setChecked(true);
-						((ActionContributionItem)item).getAction().run();
-					}
-					
-					for (int i = 0; i < profileAxis.size(); ++i) {
-						IAction action = profileAxis.getAction(i);
-						if (action.isChecked()) {
-							profileAxis.setSelectedAction(i);
-							profileAxis.run();
-						}
-					}
-
-				} else {
-
-					unregisterMetadataListeners();
-					IAction pixelAction = profileAxis.findAction("org.dawb.workbench.plotting.tools.profile.pixelAxisAction");
-					profileAxis.setEnabled(false);
-					setMessage(false);
-					pixelAction.run();
-					
-					IContributionItem item = profilePlottingSystem.getActionBars().getToolBarManager().find("org.dawb.workbench.plotting.tools.profile.lockSectorCenters");
-					
-					if (item != null && item instanceof ActionContributionItem) {
-						((ActionContributionItem)item).getAction().setChecked(false);
-						((ActionContributionItem)item).getAction().run();
-					}
-				}
-			}
-		};
 		
 		final String fullImageSector = "Full_Image_Sector";
 		
@@ -208,8 +153,9 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 			}
 		};
 		
-		metaLock.setImageDescriptor(Activator.getImageDescriptor("icons/radial-tool-lock.png"));
 		addFullSector.setImageDescriptor(Activator.getImageDescriptor("icons/sector-full.png"));
+		
+		this.metaLock = createMetaLock(profileAxis);
 		
 		getSite().getActionBars().getToolBarManager().add(addFullSector);
 		getSite().getActionBars().getToolBarManager().add(profileAxis);
@@ -225,56 +171,23 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 		profileAxis.add(resolutionAxis);
 		profileAxis.add(angleAxis);
 		profileAxis.add(qAxis);
-		
-		setActionsEnabled(false);
+
 		profileAxis.setEnabled(false);
-		
-		//plotter.get
-		setActionsEnabled(isValidMetadata(getMetaData()));
+		metaLock.setEnabled(isValidMetadata(getMetaData()));
 		
 		super.configurePlottingSystem(plotter);
 
 	}
 	
 	public void activate () {
-		super.activate();
-		
+		super.activate();	
 		//setup the lock action to work for valid metadata
-		if (metaLock == null) return;
-		IMetadata meta = getMetaData();
-		if (meta==null) return;
-		
-		if (metaLock.isChecked()) {
-			if (isValidMetadata(meta)) {
-				updateSectorCenters(((IDiffractionMetadata)meta).getDetector2DProperties().getBeamCentreCoords());
-				registerMetadataListeners();
-			} else {
-				
-				metaLock.setChecked(false);
-				metaLock.run();
-				metaLock.setEnabled(false);
-			}
-		} else {
-			if (isValidMetadata(meta)) {
-				metaLock.setEnabled(true);
-			} else {
-				metaLock.setEnabled(false);
-			}
-		}
+		checkMetaLock(metaLock);
 	}
 	
 	public void deactivate() {
 		super.deactivate();
 		unregisterMetadataListeners();
-	}
-	
-	protected void updateSectors() {
-		
-		if(metaLock.isChecked()) {
-			metaLock.run();
-		}
-		ToolUtils.updateSectorsMenu(getPlottingSystem(), getImageTrace(), center, getPart());
-		getSite().getActionBars().getToolBarManager().update(true);
 	}
 
 	@Override
@@ -292,7 +205,7 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 		if (!sroi.hasSeparateRegions())  {
 			
 			if (isValidMetadata(meta)) {
-				setActionsEnabled(true);
+				metaLock.setEnabled(true);
 				return new Dataset[]{pixelToValue(xi,(IDiffractionMetadata)meta)};
 			}
 			
@@ -304,68 +217,13 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 			xii.setName("Radius (pixel)");
 			
 			if (isValidMetadata(meta)) {
-				setActionsEnabled(true);
+				metaLock.setEnabled(true);
 				return new Dataset[]{pixelToValue(xi,(IDiffractionMetadata)meta),pixelToValue(xii,(IDiffractionMetadata)meta)};
 			}
 
 			return new Dataset[]{xi, xii};
 		}
 		
-	}
-	
-	private void setActionsEnabled(boolean enable) {
-		metaLock.setEnabled(enable);
-	}
-	
-	private boolean isValidMetadata(IMetadata meta) {
-		if (meta != null && (meta instanceof IDiffractionMetadata)) {
-			IDiffractionMetadata idm = (IDiffractionMetadata) meta;
-			if (idm.getDiffractionCrystalEnvironment() == null)
-				return false;
-			if (idm.getDetector2DProperties() == null || idm.getDetector2DProperties().getHPxSize() == 0 || idm.getDetector2DProperties().getVPxSize() == 0)
-				return false;
-			return true;
-		}
-		
-		return false;
-	}
-	
-	protected IMetadata getMetaData() {
-		ILoaderService service = (ILoaderService)PlatformUI.getWorkbench().getService(ILoaderService.class);
-		
-		IDiffractionMetadata meta = service.getLockedDiffractionMetaData();
-		
-		if (meta!= null)
-			return meta;
-		else
-			return ToolUtils.getMetaData(getImageTrace(), getPart());
-	}
-
-	private void setMessage(boolean isMessage) {
-		if (isMessage) {
-			getSite().getActionBars().getStatusLineManager().setErrorMessage("WARNING: Locking profile to meta data for non-zero detector pitch/roll/yaw is an experimental feature");
-		} else {
-			getSite().getActionBars().getStatusLineManager().setErrorMessage(null);
-		}
-		
-	}
-	
-	private void registerMetadataListeners() {
-		IMetadata meta = getMetaData();
-		if (meta!=null && (meta instanceof IDiffractionMetadata)) {
-			IDiffractionMetadata dm = (IDiffractionMetadata)meta;
-			dm.getDetector2DProperties().addDetectorPropertyListener(this);
-			dm.getDiffractionCrystalEnvironment().addDiffractionCrystalEnvironmentListener(this);
-		}
-	}
-	
-	private void unregisterMetadataListeners() {
-		IMetadata meta = getMetaData();
-		if (meta!=null && (meta instanceof IDiffractionMetadata)) {
-			IDiffractionMetadata dm = (IDiffractionMetadata)meta;
-			dm.getDetector2DProperties().removeDetectorPropertyListener(this);
-			dm.getDiffractionCrystalEnvironment().removeDiffractionCrystalEnvironmentListener(this);
-		}
 	}
 	
 	
@@ -502,43 +360,6 @@ public class RadialProfileTool extends SectorProfileTool implements IDetectorPro
 		    }
 		}
 		return new DataReductionInfo(Status.OK_STATUS);
-	}
-
-
-	@Override
-	public void diffractionCrystalEnvironmentChanged(
-			DiffractionCrystalEnvironmentEvent evt) {
-		update(null, null, false);
-		
-	}
-
-
-	@Override
-	public void detectorPropertiesChanged(DetectorPropertyEvent evt) {
-		
-		if (evt.getSource() instanceof DetectorProperties) {
-			if(evt.hasBeamCentreChanged()) {
-				updateSectorCenters(((DetectorProperties)evt.getSource()).getBeamCentreCoords());
-			} else {
-				update(null, null, false);
-			}
-		}
-	}
-	
-	private void updateSectorCenters(double[] point) {
-		
-		if (getPlottingSystem()==null) return;
-		
-		final Collection<IRegion> regions = getPlottingSystem().getRegions();
-		if (regions!=null) for (final IRegion region : regions) {
-			if (isRegionTypeSupported(region.getRegionType())) {
-				final SectorROI sroi = (SectorROI)region.getROI();
-				sroi.setPoint(point);
-				region.setROI(sroi);
-			}
-		}
-		
-		update(null, null, false);
 	}
 	
 	private SectorROI getFullSector() {

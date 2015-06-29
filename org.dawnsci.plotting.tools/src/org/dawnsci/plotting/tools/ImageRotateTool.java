@@ -8,6 +8,9 @@
  */
 package org.dawnsci.plotting.tools;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryUsage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -32,14 +35,15 @@ import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -70,8 +74,17 @@ public class ImageRotateTool extends AbstractToolPage {
 	private String xName;
 	private String yName;
 	private Job remapJob;
+
+	// used to monitor memory consumption
+	private MemoryMXBean memoryBean;
+	private Action resizeBBox;
+	private Action remapAxes;
+	private Action resetCrossHair;
+
 	private final static String X_PREFIX = "X Profile";
 	private final static String Y_PREFIX = "Y Profile";
+
+	private Color white;
 
 	public ImageRotateTool() {
 		super();
@@ -103,6 +116,7 @@ public class ImageRotateTool extends AbstractToolPage {
 		rotationJob = new RotateJob();
 		rotationJob.setPriority(Job.INTERACTIVE);
 
+		memoryBean = ManagementFactory.getMemoryMXBean();
 	}
 
 	/**
@@ -121,14 +135,33 @@ public class ImageRotateTool extends AbstractToolPage {
 
 	@Override
 	public void createControl(Composite parent) {
+		white = new Color(Display.getDefault(), 255, 255, 255);
 		container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(1, false));
+		container.setBackground(white);
 
-		Composite angleComp = new Composite(container, SWT.NONE | SWT.TOP);
-		angleComp.setLayout(new GridLayout(5, false));
+		createActions();
 
+		final IPageSite site = getSite();
+		IActionBars actionBars = (site != null) ? site.getActionBars() : null;
+		rotatedSystem.createPlotPart(container, getTitle(), actionBars,
+				PlotType.IMAGE, getViewPart());
+		rotatedSystem.getPlotComposite().setLayoutData(
+				new GridData(SWT.FILL, SWT.FILL, true, true));
+		IImageTrace image = getImageTrace();
+		IDataset data = image != null ? image.getData() : null;
+		if (data != null) {
+			this.image = data;
+			axes = getImageTrace().getAxes();
+			rotatedSystem.updatePlot2D(data, axes, null);
+		}
+
+		Composite angleComp = new Composite(container, SWT.NONE);
+		angleComp.setLayout(new GridLayout(2, false));
+		angleComp.setBackground(white);
 		Label labelAngle = new Label(angleComp, SWT.NONE);
 		labelAngle.setText("Rotation angle");
+		labelAngle.setBackground(white);
 		labelAngle.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		angleSpinner = new Spinner(angleComp, SWT.BORDER);
 		angleSpinner.setDigits(1);
@@ -147,12 +180,33 @@ public class ImageRotateTool extends AbstractToolPage {
 			}
 		});
 
-		Button centreROIButton = new Button(angleComp, SWT.PUSH);
-		centreROIButton.setText("Reset");
-		centreROIButton.setToolTipText("Reset the Vertical and Horizontal ROIs positions to the center of the image");
-		centreROIButton.addSelectionListener(new SelectionAdapter() {
+		super.createControl(parent);
+	}
+
+	private void createActions() {
+		resizeBBox = new Action("Resize Bounding Box", SWT.TOGGLE) {
 			@Override
-			public void widgetSelected(SelectionEvent event) {
+			public void run() {
+				hasSameShape = !resizeBBox.isChecked();
+				rotate();
+			}
+		};
+		resizeBBox.setToolTipText("Resize the Bounding Box and do not crop the resulting rotated image");
+		resizeBBox.setImageDescriptor(Activator.getImageDescriptor("icons/resize_bounding_box.png"));
+
+		remapAxes = new Action("Remap Axes", SWT.TOGGLE) {
+			@Override
+			public void run() {
+				hasAxesRemapped = remapAxes.isChecked();
+				remapAxes(hasAxesRemapped);
+			}
+		};
+		remapAxes.setToolTipText("Axes remapping is done so that the X and Y step size are the same");
+		remapAxes.setImageDescriptor(Activator.getImageDescriptor("icons/axis_remapping.png"));
+
+		resetCrossHair = new Action("Centre Cross Region") {
+			@Override
+			public void run() {
 				if (rotatedSystem == null || rotatedSystem.getTraces().isEmpty())
 					return;
 				RectangularROI[] rois = getXYCenteredROIs();
@@ -161,48 +215,19 @@ public class ImageRotateTool extends AbstractToolPage {
 				if (rois[1] != null)
 					yHair.setROI(rois[1]);
 			}
-		});
+		};
+		resetCrossHair.setToolTipText("Reset the Vertical and Horizontal ROIs positions to the center of the image");
+		resetCrossHair.setImageDescriptor(Activator.getImageDescriptor("icons/reset_crosshair_center.png"));
 
-		final Button resizeBBoxButton = new Button(angleComp, SWT.CHECK);
-		resizeBBoxButton.setText("Resize Bounding Box");
-		resizeBBoxButton.setToolTipText("Resize the Bounding Box and do not crop the resulting rotated image");
-		resizeBBoxButton.setSelection(false);
-		resizeBBoxButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent event) {
-				hasSameShape = !resizeBBoxButton.getSelection();
-				rotate();
-			}
-		});
+		getSite().getActionBars().getToolBarManager().add(resizeBBox);
+		getSite().getActionBars().getToolBarManager().add(resizeBBox);
+		getSite().getActionBars().getToolBarManager().add(remapAxes);
+		getSite().getActionBars().getToolBarManager().add(resetCrossHair);
 
-		final Button remapAxes = new Button(angleComp, SWT.CHECK);
-		remapAxes.setText("Remap Axes");
-		remapAxes.setToolTipText("Axes remapping is done so that the X and Y step size are the same");
-		remapAxes.setSelection(false);
-		remapAxes.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent event) {
-				hasAxesRemapped = remapAxes.getSelection();
-				remapAxes(hasAxesRemapped);
-			}
-		});
-
-		final IPageSite site = getSite();
-		IActionBars actionBars = (site != null) ? site.getActionBars() : null;
-
-		rotatedSystem.createPlotPart(container, getTitle(), actionBars,
-				PlotType.IMAGE, getViewPart());
-		rotatedSystem.getPlotComposite().setLayoutData(
-				new GridData(SWT.FILL, SWT.FILL, true, true));
-		IImageTrace image = getImageTrace();
-		IDataset data = image != null ? image.getData() : null;
-		if (data != null) {
-			this.image = data;
-			axes = getImageTrace().getAxes();
-			rotatedSystem.updatePlot2D(data, axes, null);
-		}
-
-		super.createControl(parent);
+		getSite().getActionBars().getMenuManager().add(new Separator());
+		getSite().getActionBars().getMenuManager().add(resizeBBox);
+		getSite().getActionBars().getMenuManager().add(remapAxes);
+		getSite().getActionBars().getMenuManager().add(resetCrossHair);
 	}
 
 	protected void remapAxes(boolean hasAxesRemapped) {
@@ -238,9 +263,33 @@ public class ImageRotateTool extends AbstractToolPage {
 								DatasetUtils.convertToDataset(yAxis),
 								DatasetUtils.convertToDataset(xAxis));
 
-						image = MapTo2DUtils.remap2Dto2DSplitting(trace.getData(),
-								meshAxes.get(0), meshAxes.get(1), yRange, yNumber, xRange,
+						// Check for ratio between X and Y axes
+						if ((xNumber > yNumber && ((xNumber/yNumber) > 10)) 
+								|| (yNumber > xNumber && ((yNumber/xNumber) > 10))) {
+							final String message = "The ratio between the X and Y Axis of the dataset is too big to apply an axes remapping.";
+							logger.debug(message);
+							Display.getDefault().asyncExec(new Runnable() {
+								@Override
+								public void run() {
+									MessageDialog
+											.openWarning(Display.getDefault().getActiveShell(),
+													"Warning", message);
+								}
+							});
+							return Status.CANCEL_STATUS;
+						}
+						// Check for image resulting size and increase the step if too big
+						while(isImageTooBig(xNumber * yNumber)) {
+							newStep *= 2;
+							xNumber = (int) (xRangeValue / newStep);
+							yNumber = (int) (yRangeValue / newStep);
+						}
+
+						image = MapTo2DUtils.remap2Dto2DSplitting(
+								trace.getData(), meshAxes.get(0),
+								meshAxes.get(1), yRange, yNumber, xRange,
 								xNumber);
+
 						image = DatasetUtils.transpose(image);
 						ImageRotateTool.this.axes = new ArrayList<IDataset>();
 						ImageRotateTool.this.axes.add(DoubleDataset.createRange(xRange[0], xRange[1], newStep));//  meshAxes.get(0));
@@ -266,6 +315,20 @@ public class ImageRotateTool extends AbstractToolPage {
 			image.setName(getImageTrace().getDataName());
 			rotate();
 		}
+	}
+
+	private boolean isImageTooBig(long dataSize) {
+		dataSize *= 8 + 4; // evaluate the potential size of resulting dataset by multiplying
+							// the datasize by 8 (8bytes for each item of the
+							// dataset are used for doubles, floats on 64bit
+							// machines) + 4 to count for the header of the
+							// array, and put some restriction on the image size
+							// not to consume of memory of the heap
+		MemoryUsage heapUsage = memoryBean.getHeapMemoryUsage();
+		long maxMemory = heapUsage.getMax();
+		long usedMemory = heapUsage.getUsed();
+		long leftMemory = maxMemory - usedMemory;
+		return dataSize >= leftMemory;
 	}
 
 	private void rotate() {
@@ -403,6 +466,8 @@ public class ImageRotateTool extends AbstractToolPage {
 		if (rotatedSystem != null && !rotatedSystem.isDisposed())
 			rotatedSystem.dispose();
 		rotatedSystem = null;
+		if (white != null)
+			white.dispose();
 		super.dispose();
 	}
 

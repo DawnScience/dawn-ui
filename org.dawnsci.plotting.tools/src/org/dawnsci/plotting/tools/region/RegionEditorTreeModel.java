@@ -54,8 +54,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
  */
 public class RegionEditorTreeModel extends AbstractNodeModel {
 
-	private boolean isRegionDragged = false;
-
+	private boolean roiSettingAllowed = true;
 	private boolean isTreeModified = false;
 	private IPlottingSystem plottingSystem;
 
@@ -140,8 +139,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 				public void valueChanged(ValueEvent evt) {
 					try {
 						isTreeModified = true;
-						if(!isRegionDragged)
-							setValue(regionNode);
+						setValue(regionNode);
 					} finally {
 						isTreeModified = false;
 					}
@@ -168,8 +166,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 				public void amountChanged(AmountEvent<Angle> evt) {
 					try {
 						isTreeModified = true;
-						if(!isRegionDragged)
-							setValue(regionNode);
+						setValue(regionNode);
 					} finally {
 						isTreeModified = false;
 					}
@@ -207,8 +204,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 					public void amountChanged(AmountEvent<Length> evt) {
 						try {
 							isTreeModified = true;
-							if(!isRegionDragged)
-								setValue(regionNode);
+							setValue(regionNode);
 						} finally {
 							isTreeModified = false;
 						}
@@ -229,6 +225,9 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 	 * @param regionNode
 	 */
 	protected void setValue(RegionEditorNode regionNode) {
+		
+		if (!roiSettingAllowed) return;
+		
 		IRegion region = null;
 		Collection<IRegion> regions = plottingSystem.getRegions();
 		for (IRegion iRegion : regions) {
@@ -305,45 +304,58 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		super.dispose();
 	}
 
-	public void updateRegion(IROI roi, double maxIntensity, double sum) {
-		List<TreeNode> nodes = root.getChildren();
-		if (nodes == null)
-			return;
-		for (TreeNode node : nodes) {
-			if (node instanceof RegionEditorNode) {
-				RegionEditorNode regionNode = (RegionEditorNode) node;
-				String label = regionNode.getLabel();
-				if (label.equals(roi.getName())) {
-					List<TreeNode> children = regionNode.getChildren();
-					if (children == null)
-						return;
-					Map<String, Object> roiInfos = RegionEditorNodeFactory.getRegionNodeInfos(roi);
-					Set<Entry<String,Object>> set = roiInfos.entrySet();
-					int i = 0;
-					for (Entry<String, Object> entry : set) {
-						if (children.get(i) instanceof NumericNode<?>) {
-							NumericNode<?> aChild = (NumericNode<?>) children.get(i);
-							String key = entry.getKey();
-							if (key.contains("Intensity"))
-								aChild.setDoubleValue(maxIntensity);
-							else if (key.contains("Sum"))
-								aChild.setDoubleValue(sum);
-							else if (key.contains("Angle") && regionNode.isAngleInRadian())
-								aChild.setDoubleValue(Math.toRadians((Double)entry.getValue()));
-							else
-								aChild.setDoubleValue((Double)entry.getValue());
-							i++;
-						}
-						else if (children.get(i) instanceof ComboNode) {
-							ComboNode aChild = (ComboNode) children.get(i);
-							String key = entry.getKey();
-							if (key.contains("Symmetry"))
-								aChild.setValue(entry.getValue());
-							i++;
+	/**
+	 * Called to set the region in the model.
+	 * @param roi
+	 * @param maxIntensity
+	 * @param sum
+	 */
+	void updateRegion(IROI roi, double maxIntensity, double sum) {
+		
+		try {
+			roiSettingAllowed = false;
+			
+			List<TreeNode> nodes = root.getChildren();
+			if (nodes == null)
+				return;
+			for (TreeNode node : nodes) {
+				if (node instanceof RegionEditorNode) {
+					RegionEditorNode regionNode = (RegionEditorNode) node;
+					String label = regionNode.getLabel();
+					if (label.equals(roi.getName())) {
+						List<TreeNode> children = regionNode.getChildren();
+						if (children == null)
+							return;
+						Map<String, Object> roiInfos = RegionEditorNodeFactory.getRegionNodeInfos(roi);
+						Set<Entry<String,Object>> set = roiInfos.entrySet();
+						int i = 0;
+						for (Entry<String, Object> entry : set) {
+							if (children.get(i) instanceof NumericNode<?>) {
+								NumericNode<?> aChild = (NumericNode<?>) children.get(i);
+								String key = entry.getKey();
+								if (key.contains("Intensity"))
+									aChild.setDoubleValue(maxIntensity);
+								else if (key.contains("Sum"))
+									aChild.setDoubleValue(sum);
+								else if (key.contains("Angle") && regionNode.isAngleInRadian())
+									aChild.setDoubleValue(Math.toRadians((Double)entry.getValue()));
+								else
+									aChild.setDoubleValue((Double)entry.getValue());
+								i++;
+							}
+							else if (children.get(i) instanceof ComboNode) {
+								ComboNode aChild = (ComboNode) children.get(i);
+								String key = entry.getKey();
+								if (key.contains("Symmetry"))
+									aChild.setValue(entry.getValue());
+								i++;
+							}
 						}
 					}
 				}
 			}
+		} finally {
+			roiSettingAllowed = true;
 		}
 	}
 
@@ -355,14 +367,6 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 			viewer.remove(root);
 		}
 		viewer.refresh();
-	}
-
-	public boolean isRegionDragged() {
-		return isRegionDragged;
-	}
-
-	public void setRegionDragged(boolean isRegionDragged) {
-		this.isRegionDragged = isRegionDragged;
 	}
 
 	public boolean isTreeModified() {

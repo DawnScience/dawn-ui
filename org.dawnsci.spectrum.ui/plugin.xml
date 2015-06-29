@@ -43,6 +43,12 @@
             name="Datasets"
             restorable="true">
       </view>
+      <view
+            class="org.dawnsci.spectrum.ui.views.MonitorXYView"
+            id="org.dawnsci.spectrum.ui.views.MonitorXYView"
+            name="Monitor XY"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.navigator.navigatorContent">

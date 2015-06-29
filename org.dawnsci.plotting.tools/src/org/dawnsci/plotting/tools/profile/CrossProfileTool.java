@@ -289,4 +289,8 @@ public class CrossProfileTool extends LineProfileTool {
 		}
 	}
 
+	@Override
+	protected String getProfileTitle() {
+		return "Cross Profile";
+	}
 }

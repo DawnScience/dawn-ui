@@ -222,7 +222,6 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			public void propertyChange(PropertyChangeEvent evt) {
 				if (fullImageJob !=  null) {
 					fullImageJob.cancel();
-					fullImageJob.clearCorrectionArray();
 				}
 				update(null);
 			}
@@ -476,7 +475,6 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			}
 			if (fullImageJob == null) {
 				fullImageJob = new PowderIntegrationJob(importedMeta, system);
-				fullImageJob.setModels(model, corModel);
 			}
 		} else {
 			
@@ -487,13 +485,11 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			if (metadata == null) {
 				metadata = m;
 				fullImageJob = new PowderIntegrationJob(metadata, system);
-				fullImageJob.setModels(model, corModel);
 			} else {
 				if (m != null && (!metadata.getDetector2DProperties().equals(m.getDetector2DProperties()) ||
 						!metadata.getDiffractionCrystalEnvironment().equals(m.getDiffractionCrystalEnvironment()))) {
 					metadata = m;
 					fullImageJob = new PowderIntegrationJob(metadata, system);
-					fullImageJob.setModels(model, corModel);
 					statusMessage.setText("Meta data updated");
 					statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
 				}
@@ -501,7 +497,6 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			
 			if (fullImageJob == null) {
 				fullImageJob = new PowderIntegrationJob(metadata, system);
-				fullImageJob.setModels(model, corModel);
 			}
 		}
 		
@@ -510,14 +505,8 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		if (im != null) mask = DatasetUtils.convertToDataset(im.getMask());
 		
 		fullImageJob.setData(DatasetUtils.convertToDataset(ds),
-				mask, null);
+				mask,model, corModel);
 		
-//		fullImageJob.setAxisType(xAxis);
-//		fullImageJob.setIntegrationMode(mode);
-		
-//		if (model != null) {
-//			fullImageJob.setModels(model, corModel);
-//		}
 		
 		fullImageJob.schedule();
 	}
@@ -525,17 +514,17 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	private IDiffractionMetadata getUpdatedMetadata(IDataset ds, String[] statusString) {
 		
 		//check class metadata ok
-		if (metadata != null) {
-			DetectorProperties d = metadata.getDetector2DProperties();
-			if(d.getPx() != ds.getShape()[1] || d.getPy() != ds.getShape()[0])  {
-				metadata = null;
-				statusMessage.setText("Data shape not compatible with current metadata");
-				statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
-			} else {
-				statusMessage.setText("Metadata OK");
-				statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
-			}
-		}
+//		if (metadata != null) {
+//			DetectorProperties d = metadata.getDetector2DProperties();
+//			if((d.getPx() != ds.getShape()[1] || d.getPy() != ds.getShape()[0]) || (d.getPx() != ds.getShape()[0] || d.getPy() != ds.getShape()[1]))  {
+//				metadata = null;
+//				statusMessage.setText("Data shape not compatible with current metadata");
+//				statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
+//			} else {
+//				statusMessage.setText("Metadata OK");
+//				statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
+//			}
+//		}
 		
 		//look in data set
 		IDiffractionMetadata m = null;

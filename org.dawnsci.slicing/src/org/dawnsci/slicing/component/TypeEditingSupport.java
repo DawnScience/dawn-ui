@@ -171,12 +171,23 @@ class TypeEditingSupport extends EditingSupport {
 			}
 			if (axis==data.getPlotAxis()) return;
 			
+			// If we have an image, set the other dim as the other type.
+			// This just helps the default the type where we know that one is
+			// X and one is Y ie more helpful.
+			if (sliceType==PlotType.IMAGE && system.getData().getLazySet().getRank()==2) {
+				int      otherDim  = data.getDimension()==0 ? 1 : 0;
+				AxisType otheraxis = axis==AxisType.X ? AxisType.Y : AxisType.X;
+				system.getDimsDataList().getDimsData(otherDim).setPlotAxis(otheraxis);
+			}
+
 			data.setPlotAxis(axis);
 			if (axis.isAdvanced()) system.setAdvancedColumnsVisible(true);
 			if (system.getRangeMode() != RangeMode.MULTI_RANGE) system.getDimsDataList().removeLargeStacks(system, 100);
 			system.updateAxesChoices();
 			system.update(data, false);
 			system.fireDimensionalListeners();
+			
+			
 		} finally {
 			valueChangeAllowed = false;
 		}
