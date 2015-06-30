@@ -19,6 +19,7 @@
 package org.dawnsci.common.richbeans.components.scalebox;
 
 import java.text.NumberFormat;
+import java.util.Collection;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -27,14 +28,14 @@ import org.dawnsci.common.richbeans.beans.IFieldWidget;
 import org.dawnsci.common.richbeans.event.ValueAdapter;
 import org.dawnsci.common.richbeans.event.ValueEvent;
 import org.dawnsci.common.richbeans.internal.GridUtils;
+import org.dawnsci.common.widgets.Activator;
+import org.eclipse.dawnsci.analysis.api.expressions.IExpressionEngine;
+import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.nfunk.jep.JEP;
-import org.nfunk.jep.ParseException;
-import org.nfunk.jep.SymbolTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,8 +59,6 @@ public class ScaleBoxAndFixedExpression extends ScaleBox{
 	private static Logger logger = LoggerFactory.getLogger(ScaleBoxAndFixedExpression.class);
 	
 	private Label       fixedExpressionLabel;
-	private JEP         jepParser;
-	private SymbolTable symbolTable;
 	private Object      dataProvider;
 	private String      expression;
 	private String      thisVariable;
@@ -69,6 +68,8 @@ public class ScaleBoxAndFixedExpression extends ScaleBox{
 	private ExpressionProvider provider;
 
 	private NumberFormat labelNumberFormat;
+
+	private IExpressionEngine engine;
 
     
 	/**
@@ -112,7 +113,7 @@ public class ScaleBoxAndFixedExpression extends ScaleBox{
 			                     final int       style, 
 			                     final String    thisVariable, 
 			                     final String    expression, 
-			                     final Object    dataProvider) throws ParseException {
+			                     final Object    dataProvider) throws Exception {
 		
 		super(parent, style);
 
@@ -120,7 +121,7 @@ public class ScaleBoxAndFixedExpression extends ScaleBox{
 	    
 	    this.thisVariable = thisVariable;
 	    this.expression   = expression;
-	    this.symbolTable  = getSymbolTable(expression);
+	    this.engine  = createEngine(expression);
 	    this.dataProvider = dataProvider;
 	}
 	
@@ -189,25 +190,20 @@ public class ScaleBoxAndFixedExpression extends ScaleBox{
 	private void updateLabel(final double value) {
 		
 		try {
-			if (provider==null&&jepParser==null)  return;
+			if (provider==null&&engine==null)  return;
 			double labelVal = Double.NaN;
 			if (provider!=null) {
 				labelVal = provider.getValue(value);
 			} else {
-				final SymbolTable vars   = symbolTable;
-				@SuppressWarnings("unchecked")
-				final Set<Entry<?, ?>> entries = vars.entrySet();
-			    for (Entry<?, ?> entry : entries) {
-			    	if (entry.getValue()==null && !entry.getKey().equals(thisVariable)) {
-			    		final double val = (Double) BeansFactory.getBeanValue(dataProvider, entry.getKey().toString());
-			    		jepParser.addVariable(entry.getKey().toString(), val);
-			    	}
+				Collection<String> vars = engine.getLazyVariableNamesFromExpression();
+				for (String name : vars) {
+		    		final Double val = (Double) BeansFactory.getBeanValue(dataProvider, name);
+		    		engine.addLoadedVariable(name, val);
 				}
 			    
-			    jepParser.addVariable(thisVariable, value);
+				engine.addLoadedVariable(thisVariable, value);
 			    
-			    jepParser.parseExpression(expression);
-			    labelVal = jepParser.getValue();
+			    labelVal = ((Double)engine.evaluate()).doubleValue();
 			}
 		    
             setFixedExpressionValue(labelVal);
@@ -247,15 +243,11 @@ public class ScaleBoxAndFixedExpression extends ScaleBox{
 		labelNumberFormat.setMaximumFractionDigits(decimalPlaces);
 	}
 	
-	private SymbolTable getSymbolTable(final String expression) throws ParseException {
-		jepParser = new JEP();
-		jepParser.addStandardFunctions();
-		jepParser.addStandardConstants();
-		jepParser.setAllowUndeclared(true);
-		jepParser.setImplicitMul(true);
-		
-	    jepParser.parse(expression);
-	    return jepParser.getSymbolTable();
+	private IExpressionEngine createEngine(final String expression) throws Exception {
+		IExpressionService service = (IExpressionService)Activator.getService(IExpressionService.class);
+		IExpressionEngine  engine  = service.getExpressionEngine();
+		engine.createExpression(expression);
+		return engine;
 	}
 
 	/**

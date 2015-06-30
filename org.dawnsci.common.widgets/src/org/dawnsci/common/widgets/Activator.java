@@ -12,6 +12,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -65,4 +66,9 @@ public class Activator extends AbstractUIPlugin {
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
 	}
 
+	public static Object getService(Class<?> serviceClass) {
+		BundleContext context = plugin.getBundle().getBundleContext();
+		ServiceReference<?> ref = context.getServiceReference(serviceClass);
+		return context.getService(ref);
+	}
 }
