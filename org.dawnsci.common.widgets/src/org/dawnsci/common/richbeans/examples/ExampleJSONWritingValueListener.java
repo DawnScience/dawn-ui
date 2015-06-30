@@ -48,7 +48,7 @@ public class ExampleJSONWritingValueListener extends ValueAdapter {
 			Method m = value.getClass().getMethod("setText", String.class);
 			m.invoke(value, json);
 			
-			value.getParent().layout(new Control[]{value});
+			value.getParent().layout();
 			
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
