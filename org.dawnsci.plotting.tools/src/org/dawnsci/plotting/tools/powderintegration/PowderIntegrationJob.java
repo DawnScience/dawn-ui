@@ -132,7 +132,7 @@ public class PowderIntegrationJob extends Job {
 		if (modell.getIntegrationMode() == IntegrationMode.NONSPLITTING || modell.getIntegrationMode() ==IntegrationMode.SPLITTING) {
 			if (system.is2D()) system.reset();
 			out.get(1).setName(name + "Intensity");
-
+			system.clear();
 			system.updatePlot1D(out.get(0), Arrays.asList(new IDataset[]{out.get(1)}), null);
 			Display.getDefault().syncExec(new Runnable() {
 
