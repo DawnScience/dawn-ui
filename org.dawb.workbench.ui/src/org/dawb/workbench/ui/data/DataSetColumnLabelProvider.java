@@ -114,9 +114,6 @@ class DataSetColumnLabelProvider extends ColumnLabelProvider implements IStyledL
 		
 		final ITransferableDataObject element = (ITransferableDataObject)ob;
 		
-		// Get shape (should be fast as does not evaluate expressions).
-		final int[] shape  = element.getShape(false);
-		
 		switch (columnIndex) {
 		case 0:
 			return null;
@@ -126,25 +123,33 @@ class DataSetColumnLabelProvider extends ColumnLabelProvider implements IStyledL
 			final IPlottingSystem system = component.getPlottingSystem();
 			return element.getAxis(component.getSelections(), system.is2D(), ((AbstractPlottingSystem)system).isXFirst());
 
-		case 3:
+		case 3: {
+			// Get shape (should be fast as does not evaluate expressions).
+			final int[] shape  = element.getShape(false);
 			if (shape!=null) {
 				int size = 1;
 				for (int i : shape) size*=i;
 				return size+"";
 			}
 		    return "";
+		}
 
-		case 4:
+		case 4: {
+			// Get shape (should be fast as does not evaluate expressions).
+			final int[] shape  = element.getShape(false);
 			if (shape!=null) {
 				return shape.length+"";
 			}
 		    return "";
+		}
 		
-		case 5:
+		case 5: {    // Get shape (should be fast as does not evaluate expressions).
+			final int[] shape  = element.getShape(false);
 			if (shape!=null) {
 				return Arrays.toString(shape);
 			}
 		    return "";
+		}
 
 		case 6:
 			return element.getVariable();

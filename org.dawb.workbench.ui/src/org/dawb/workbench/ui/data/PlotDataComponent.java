@@ -57,6 +57,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.dawnsci.analysis.api.dataset.DataEvent;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataListener;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.IErrorDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
@@ -83,6 +85,7 @@ import org.eclipse.dawnsci.slicing.api.data.ITransferableDataService;
 import org.eclipse.dawnsci.slicing.api.system.DimsData;
 import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.dawnsci.slicing.api.system.ISliceSystem;
+import org.eclipse.dawnsci.slicing.api.system.SliceSource;
 import org.eclipse.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -191,6 +194,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 
 	private ITransferableDataService transferableService;
 	private IExpressionObjectService expressionService;
+	
+	private IDataListener            dataListener;
 
 	
 	public PlotDataComponent(final IWorkbenchPart editor) throws Exception {
@@ -200,6 +205,20 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		
 		this.expressionService  = (IExpressionObjectService)ServiceManager.getService(IExpressionObjectService.class);
 		this.transferableService= (ITransferableDataService)ServiceManager.getService(ITransferableDataService.class);
+		
+		this.dataListener = new IDataListener() {		
+			@Override
+			public void dataChangePerformed(DataEvent evt) {
+				Display.getDefault().asyncExec(new Runnable() {					
+					@Override
+					public void run() {
+						refresh();
+						final ISliceSystem system = (ISliceSystem)editor.getAdapter(ISliceSystem.class);
+						if (system!=null) system.refresh();
+					}
+				});
+			}
+		};
 		
 		this.propListener = new IPropertyChangeListener() {
 			@Override
@@ -570,7 +589,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 						} else {
 							o = transferableService.createExpression(dataHolder, metaData);
 							o.createExpression(this, mementoKey, props.getProperty(mementoKey));
-							data.add(o);
+							add(o);
 						}
 					}
 				}
@@ -678,37 +697,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			}
 		};
 		bars.getToolBarManager().add(delete);
-		delete.setEnabled(false);
-
-		// Fix to http://jira.diamond.ac.uk/browse/SCI-1558
-		// remove feature.
-		final Action createFilter = null; 
-		final Action clearFilter  = null; 
-		
-// Used to have ability to choose a python script to filter datasets:
-//		bars.getToolBarManager().add(new Separator());
-//		final Action createFilter = new Action("Create Filter", Activator.getImageDescriptor("icons/filter.png")) {
-//			public void run() {
-//				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
-//				final ITransferableDataObject ob  = (ITransferableDataObject)sel;
-//				if (ob==null) return;
-//				chooseFilterFile(ob);
-//			}
-//		};
-//		bars.getToolBarManager().add(createFilter);
-//		createFilter.setEnabled(false);
-//		
-//		final Action clearFilter = new Action("Clear filter", Activator.getImageDescriptor("icons/delete_filter.png")) {
-//			public void run() {
-//				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
-//				final ITransferableDataObject ob  = (ITransferableDataObject)sel;
-//				if (ob==null) return;
-//				clearFilterFile(ob);
-//			}
-//		};
-//		bars.getToolBarManager().add(clearFilter);
-//		clearFilter.setEnabled(false);
-		
+		delete.setEnabled(false);		
 		
 		final Action export = new Action("Export...", Activator.getImageDescriptor("icons/export_wiz.gif")) {
 			public void run() {
@@ -733,7 +722,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			public void selectionChanged(SelectionChangedEvent event) {
 				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
 				final ITransferableDataObject ob  = (ITransferableDataObject)sel;
-				updateActions(copy, paste, delete, createFilter, clearFilter, export, dataReduction, ob, bars);
+				updateActions(copy, paste, delete, export, dataReduction, ob, bars);
 			}
 		});
 		
@@ -782,10 +771,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				menuManager.add(paste);
 				menuManager.add(delete);
 				menuManager.add(new Separator(getClass().getName()+".filter"));
-				if (createFilter!=null) menuManager.add(createFilter);
-				if (clearFilter!=null)  menuManager.add(clearFilter);
 				
-				updateActions(copy, paste, delete, createFilter, clearFilter, export, dataReduction, ob, null);
+				updateActions(copy, paste, delete, export, dataReduction, ob, null);
 
 				menuManager.add(new Separator(getClass().getName()+".export"));
 				menuManager.add(export);
@@ -878,7 +865,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	public void addData(final ITransferableDataObject checkedObject) {
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
-				data.add(checkedObject);
+				add(checkedObject);
 				checkedObject.setChecked(!checkedObject.isChecked());
 				selectionChanged(checkedObject, true);
 				dataViewer.refresh();
@@ -972,8 +959,6 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	protected void updateActions(IAction copy, 
 								IAction paste, 
 								IAction delete, 
-								IAction createFilter, 
-								IAction deleteFilter, 
 								IAction export,
 								IAction dataReduction,
 			                     ITransferableDataObject ob,
@@ -1005,25 +990,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			delete.setText("Delete");
 			delete.setEnabled(false);
 		}
-		
-		if (createFilter!=null) {
-			if (ob!=null) {
-				createFilter.setText("Filter plot of '"+ob.getName()+"' using python");
-				createFilter.setEnabled(true);
-			} else {
-				createFilter.setEnabled(false);
-			}
-		}
-		
-		if (deleteFilter!=null) {
-			if (ob!=null && ob.getFilterPath()!=null) {
-				deleteFilter.setText("Clear filter of '"+ob.getName()+"'");
-				deleteFilter.setEnabled(true);
-			} else {
-				deleteFilter.setEnabled(false);
-			}
-		}
-		
+				
 		dataReduction.setEnabled(isDataReductionToolActive());
 
 		if (bars!=null) {
@@ -1871,7 +1838,10 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		
 		if (listeners!=null) listeners.clear();
 		if (data != null){
-			for (ITransferableDataObject ob : data) ob.dispose();
+			for (ITransferableDataObject ob : data) {
+				ob.removeDataListener(dataListener);
+				ob.dispose();
+			}
 			this.data.clear();
 		}
 		if (plotModeListeners!=null) plotModeListeners.clear();
@@ -1902,7 +1872,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		    Activator.getDefault().getPreferenceStore().setValue(EditorConstants.SHOW_VARNAME, true);
 		} 
 		final ITransferableDataObject newItem = transferableService.createExpression(dataHolder, metaData, expressionService.createExpressionObject(this, null, null));
-		data.add(newItem);
+		add(newItem);
 		dataViewer.refresh();
 		try {
 			expressionEditor.setExpressionActive(true);
@@ -1913,7 +1883,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	}
 
 	protected void addExpression(IExpressionObject expressionObject) {
-		data.add(transferableService.createExpression(dataHolder, metaData, expressionObject));
+		add(transferableService.createExpression(dataHolder, metaData, expressionObject));
 		dataViewer.refresh();
 	}
 
@@ -1985,7 +1955,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		if (metaData==null) metaData = dataHolder.getMetadata();
 		
 		final Collection<String> names = SliceUtils.getSlicableNames(dataHolder);
-		for (String name : names) this.data.add(transferableService.createData(dataHolder, metaData, name));
+		for (String name : names) this.add(transferableService.createData(dataHolder, metaData, name));
 		
 		// Search names to see if they all have a common root, we do not show this.
 		this.rootName = DatasetTitleUtils.getRootName(names);
@@ -1999,6 +1969,16 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			logger.error("Cannot read expressions for file.", ne);
 		}
 		
+	}
+	
+	/**
+	 * Adds an object to the table of rendered datasets. If
+	 * the dataset is dynamic, listens to shape changing.
+	 * @param ob
+	 */
+	private final void add(ITransferableDataObject ob) {
+		data.add(ob);
+		if (ob.isDynamic()) ob.addDataListener(dataListener);
 	}
 
     /**

@@ -28,18 +28,13 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
-public class TransferableDataObject extends AbstractTransferableDataObject implements H5Path, ITransferableDataObject{
+public class TransferableDataObject extends AbstractTransferableDataObject implements H5Path {
 	
 	private static final Logger logger = LoggerFactory.getLogger(TransferableDataObject.class);
 
 	private IDataHolder       holder;
 	private IMetadata         metaData;
 
-	/**
-	 * If it is a transient data set it will have been copied from 
-	 * one data view to another and the user may want to delete it.
-	 */
-	private boolean           transientData=false;
 	private static int expressionCount=0;
 	
 	/**
@@ -94,6 +89,7 @@ public class TransferableDataObject extends AbstractTransferableDataObject imple
 		IDataset set = null;
 		if (!isExpression()) {
 			try {
+				if (holder==null) return null;
 				set = holder.getDataset(getName());
 			} catch(IllegalArgumentException ie) {
 				try {
@@ -125,6 +121,7 @@ public class TransferableDataObject extends AbstractTransferableDataObject imple
 	public ILazyDataset getLazyData(IMonitor monitor) {
 		ILazyDataset set = null;
 		if (!isExpression()) {
+			if (holder==null) return null;
 			set = holder.getLazyDataset(getName());
 		} else {
 			try {
@@ -240,14 +237,6 @@ public class TransferableDataObject extends AbstractTransferableDataObject imple
 		if (holder==null) return null;
 		if (holder.getFilePath()==null) return null;
 		return holder.getFilePath();
-	}
-
-	public boolean isTransientData() {
-		return transientData;
-	}
-
-	public void setTransientData(boolean transientData) {
-		this.transientData = transientData;
 	}
 	
 	/**

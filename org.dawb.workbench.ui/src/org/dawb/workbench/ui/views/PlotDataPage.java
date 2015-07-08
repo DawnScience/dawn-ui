@@ -132,7 +132,7 @@ public class PlotDataPage extends Page implements IAdaptable {
 					
 					@SuppressWarnings("unchecked")
 					final List<TransferableDataObject> sels = ((StructuredSelection)event.getSelection()).toList();
-					if (sels!=null) editor.updatePlot(sels.toArray(new TransferableDataObject[sels.size()]), getSliceComponent(), true);
+					if (sels!=null) editor.updatePlot(sels.toArray(new ITransferableDataObject[sels.size()]), getSliceComponent(), true);
 
 				}
 			});
