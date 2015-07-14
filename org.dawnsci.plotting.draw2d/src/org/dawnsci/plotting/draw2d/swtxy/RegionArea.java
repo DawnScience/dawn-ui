@@ -74,6 +74,7 @@ public class RegionArea extends PlotArea {
 	private Map<String,AbstractSelectionRegion<?>>    regions;
 	private Map<String,ImageTrace>                    imageTraces;
 	private Map<String,VectorTrace>                   vectorTraces;
+	private Map<String,CompositeTrace>                compositeTraces;
 	
 	private Collection<IRegionListener>     regionListeners;
 	private Collection<ITraceListener>      imageTraceListeners;
@@ -357,7 +358,15 @@ public class RegionArea extends PlotArea {
 		
 		return trace;
 	}
-	
+
+	public CompositeTrace createCompositeTrace(String traceName, Axis xAxis, Axis yAxis) {
+
+        final CompositeTrace trace = new CompositeTrace(traceName, xAxis, yAxis);
+		fireImageTraceCreated(new TraceEvent(trace));
+		
+		return trace;
+	}
+
 
 	public ImageStackTrace createImageStackTrace(String name, Axis xAxis, Axis yAxis, ColorMapRamp intensity) {
 		
@@ -437,6 +446,35 @@ public class RegionArea extends PlotArea {
 		}
 	}
 
+	/**Add a trace to the plot area.
+	 * @param trace the trace to be added.
+	 */
+	public void addCompositeTrace(final CompositeTrace trace){
+		
+		if (compositeTraces==null) compositeTraces = new LinkedHashMap<String, CompositeTrace>();
+		compositeTraces.put(trace.getName(), trace);
+		add(trace);
+		
+        toFront();		
+		revalidate();
+		
+		fireImageTraceAdded(new TraceEvent(trace));
+	}
+
+	/**Add a trace to the plot area.
+	 * @param trace the trace to be added.
+	 */
+	public void removeCompositeTrace(final CompositeTrace trace){
+		
+	    final CompositeTrace gone = compositeTraces.remove(trace.getName());
+		if (gone!=null){
+			remove(trace);
+			
+	 		revalidate();
+			
+			fireImageTraceRemoved(new TraceEvent(trace));
+		}
+	}
 
 	public void clearImageTraces() {
 		if (imageTraces==null) return;
@@ -453,6 +491,7 @@ public class RegionArea extends PlotArea {
 	protected void layout() {
 		setFigureBounds(imageTraces);		
 		setFigureBounds(vectorTraces);		
+		setFigureBounds(compositeTraces);		
         super.layout();
 	}
 		

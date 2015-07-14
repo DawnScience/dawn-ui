@@ -292,6 +292,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 			imageData = new ImageData(shape[0], shape[1], 8, palette, 1, scaledImageAsByte);
 		}
 
+		imageData.alpha = bean.getAlpha();
 		return imageData;
 	}
 
