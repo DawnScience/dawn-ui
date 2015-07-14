@@ -303,6 +303,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		final XYRegionGraph graph  = (XYRegionGraph)getXAxis().getParent();
 		final Rectangle     bounds = graph.getRegionArea().getBounds();
 		if (bounds.width<1 || bounds.height<1) return false;
+		scaledData.setX(bounds.x);
+		scaledData.setY(bounds.y);
+		scaledData.setXoffset(0);
+		scaledData.setYoffset(0);			
 
 		if (!imageCreationAllowed) return false;
 		if (monitor!=null && monitor.isCanceled()) return false;
@@ -322,7 +326,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			isLabelZoom   = false;
 			
 			if (scaledData != null) scaledData.disposeImage();
-
+			
 			ImageData imageData = scaledData.getDownsampledImageData();
 			if (imageData!=null && imageData.width==bounds.width && imageData.height==bounds.height) { 
 				// No slice, faster
@@ -342,25 +346,24 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				ImageData data = imageData;
 				ImageOrigin origin = getImageOrigin();
 	
+				// Size of data
 				double[] da = getImageCoords(currentDownSampleBin, false);
 				double minX = da[0];
 				double minY = da[1];
 				double maxX = da[2];
 				double maxY = da[3];
 	
-				// Data width
-				double xSpread = maxX - minX;
-				double ySpread = maxY - minY;
-				
 				// Deliberately get the over-sized dimensions so that the edge pixels can be smoothly panned through.
 				int fxSpread = (int) (Math.ceil(maxX)-Math.floor(minX));
 				int fySpread = (int) (Math.ceil(maxY)-Math.floor(minY));
 	
-				
+				// Size of screen pixels based on axes
 				da = getImageCoords(1, true); // No downsampling
-
-				double xScale = (da[2]-da[0]) / xSpread;   // Ratio of screen pixels to downsampled data
-				double yScale = (da[3]-da[1]) / ySpread;   // Ratio of screen pixels to downsampled data
+				scaledData.setX(da[0]);
+				scaledData.setY(da[1]);
+				
+				double xScale = (da[2]-da[0]) / (maxX - minX);   // Ratio of screen pixels to downsampled data coords
+				double yScale = (da[3]-da[1]) / (maxY - minY);   // Ratio of screen pixels to downsampled data coords
 	
 	
 				// Force a minimum size on the system
@@ -417,12 +420,12 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					break;
 				}
 				
-				if (xPix < 0 || yPix < 0) {
-					return false; // prevent IAE in calling getPixel
-				}
+				int width  = xPix+fxSpread > xSize  ? Math.min(xSize, fxSpread) : fxSpread;
+				int height = yPix+fySpread > ySize  ? Math.min(ySize, fySpread) : fySpread;
 				
-				int width  = xPix+fxSpread  > xSize  ? xSize  : fxSpread;
-				int height = yPix+fySpread > ySize  ? ySize : fySpread;
+				if (width<1 || height<1) {
+					return false;
+				}
 			
 				// Slice the data.
 				// Pixel slice on downsampled data = fast!
@@ -430,19 +433,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					// NOTE Assumes 8-bit images
 					final int size   = width*height;
 					final byte[] pixels = new byte[size];
-System.out.println("downsample="+currentDownSampleBin);
-System.out.println("width="+width);
-System.out.println("height="+height);
-System.out.println("xPix="+xPix);
-System.out.println("yPix="+yPix);
-System.out.println("maxX="+maxX);
-System.out.println("maxY="+maxY);
-System.out.println("minX="+minX);
-System.out.println("minY="+minY);
-System.out.println("height="+height);
-System.out.println("imageData w="+imageData.width);
-System.out.println("imageData h="+imageData.height);
-					for (int y = 0; y < height; y++) {
+					for (int y = 0; y < height && (yPix+y)<ySize ; y++) {
 						imageData.getPixels(xPix, yPix+y, width, pixels, width*y);
 					}
 					data = new ImageData(width, height, data.depth, getPaletteData(), 1, pixels);
@@ -513,7 +504,7 @@ System.out.println("imageData h="+imageData.height);
 	 * @param bin  - if the datacoordinates are downsampled, optionally set the bin.
 	 * @return x1,y1,x2,y2  where x2>x1 and y2>y1
 	 */
-	private double[] getImageCoords(int bin, boolean pixels) {
+	private final double[] getImageCoords(int bin, boolean pixels) {
 		
 		Range xRange = xAxis.getRange();
 		Range yRange = yAxis.getRange();
@@ -523,7 +514,7 @@ System.out.println("imageData h="+imageData.height);
 		double maxX = xRange.getUpper()/bin;
 		double maxY = yRange.getUpper()/bin;
 
-		// check as getLower and getUpper don't work as expected
+		// Make sure we have the min and max right
 		if(maxX < minX){
 			double temp = maxX;
 			maxX = minX;
@@ -534,6 +525,24 @@ System.out.println("imageData h="+imageData.height);
 			maxY = minY;
 			minY = temp;
 		}
+				
+		// Bind the extent of the images to the actual data
+		IDataset x = getAxes()!=null ? getAxes().get(0) : null;
+		
+		double minXData = (x!=null ? x.getDouble(0) : 0d)/bin;
+		minX = Math.max(minXData, minX);
+		
+		double maxXData = (x!=null ? x.getDouble(x.getSize()-1) : image.getShape()[1])/bin;
+		maxX = Math.min(maxXData, maxX);
+		
+		IDataset y = getAxes()!=null ? getAxes().get(1) : null;
+		
+		double minYData = (y!=null ? y.getDouble(0) : 0d)/bin;
+		minY = Math.max(minYData, minY);
+
+		double maxYData = (y!=null ? y.getDouble(y.getSize()-1) : image.getShape()[0])/bin;
+		maxY = Math.min(maxYData, maxY);
+	
 		if (pixels) {
 			int x1 = xAxis.getValuePosition(minX, false);
 			int y1 = yAxis.getValuePosition(minY, false);
@@ -552,18 +561,18 @@ System.out.println("imageData h="+imageData.height);
 	 * @param upper
 	 * @return
 	 */
-	private double getImageMin(Axis axis, Range range) {
+	private final double getDataUpper(Axis axis, Range range) {
 		
 		// Upper value of the axis
-		double upper = range.getUpper();
+		double upper = Math.max(0, range.getUpper());
 
 		IDataset set = getAxes()!=null ? getAxes().get(axis.isYAxis()?1:0) : null;
-        double aupper = set!=null ? set.getDouble(set.getSize()-1) : getImage().getShape()[axis.isYAxis()?1:0];
+        double aupper = set!=null ? set.getDouble(set.getSize()-1) : (getImage().getShape()[axis.isYAxis()?1:0]);
 		
 		return Math.min(upper,  aupper);
 	}
 
-	private double getImageMax(Axis axis, Range range) {
+	private final double getDataLower(Axis axis, Range range) {
 		
 		// Lower value of the axis
 		double lower = range.getLower();
@@ -571,7 +580,7 @@ System.out.println("imageData h="+imageData.height);
 		IDataset set = getAxes()!=null ? getAxes().get(axis.isYAxis()?1:0) : null;
         double alower = set!=null ? set.getDouble(0) : 0;
 		
-		return Math.min(lower,  alower);	
+		return Math.max(lower,  alower);	
 	}
 
 	private boolean createDownsampledImageData(ImageScaleType rescaleType, IProgressMonitor monitor) {
@@ -810,12 +819,10 @@ System.out.println("imageData h="+imageData.height);
 		}
 
 		graphics.pushState();	
-		final XYRegionGraph graph  = (XYRegionGraph)xAxis.getParent();
-		final Point         loc    = graph.getRegionArea().getLocation();
 		
 		// Offsets and scaled image are calculated in the createScaledImage method.
 		if (scaledData.getScaledImage()!=null) {
-			graphics.drawImage(scaledData.getScaledImage(), loc.x-((int)scaledData.getXoffset()), loc.y-((int)scaledData.getYoffset()));
+			graphics.drawImage(scaledData.getScaledImage(), scaledData.getXPosition(), scaledData.getYPosition());
 		}
 		
 		if (isLabelZoom && scaledData!=null) {

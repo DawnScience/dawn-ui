@@ -14,8 +14,8 @@ class ScaledImageData {
 	private Image scaledImage;
 	private double xoffset;
 	private double yoffset;
-	private int    x;
-	private int    y;
+	private double x;
+	private double y;
 	
 	/**
 	 * Must call this prior to setting more images such that widget can be cleared up.
@@ -53,11 +53,13 @@ class ScaledImageData {
 						.hashCode());
 		result = prime * result
 				+ ((scaledImage == null) ? 0 : scaledImage.hashCode());
-		result = prime * result + x;
 		long temp;
+		temp = Double.doubleToLongBits(x);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
 		temp = Double.doubleToLongBits(xoffset);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
-		result = prime * result + y;
+		temp = Double.doubleToLongBits(y);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
 		temp = Double.doubleToLongBits(yoffset);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		return result;
@@ -81,29 +83,17 @@ class ScaledImageData {
 				return false;
 		} else if (!scaledImage.equals(other.scaledImage))
 			return false;
-		if (x != other.x)
+		if (Double.doubleToLongBits(x) != Double.doubleToLongBits(other.x))
 			return false;
 		if (Double.doubleToLongBits(xoffset) != Double
 				.doubleToLongBits(other.xoffset))
 			return false;
-		if (y != other.y)
+		if (Double.doubleToLongBits(y) != Double.doubleToLongBits(other.y))
 			return false;
 		if (Double.doubleToLongBits(yoffset) != Double
 				.doubleToLongBits(other.yoffset))
 			return false;
 		return true;
-	}
-	public int getX() {
-		return x;
-	}
-	public void setX(int x) {
-		this.x = x;
-	}
-	public int getY() {
-		return y;
-	}
-	public void setY(int y) {
-		this.y = y;
 	}
 
 	public ImageData getDownsampledImageData() {
@@ -112,5 +102,29 @@ class ScaledImageData {
 
 	public void setDownsampledImageData(ImageData downsampledImageData) {
 		this.downsampledImageData = downsampledImageData;
+	}
+
+	public int getXPosition() {
+		return (int)getX()-(int)getXoffset();
+	}
+	
+	public int getYPosition() {
+		return (int)getY()-(int)getYoffset();
+	}
+
+	public double getX() {
+		return x;
+	}
+
+	public void setX(double x) {
+		this.x = x;
+	}
+
+	public double getY() {
+		return y;
+	}
+
+	public void setY(double y) {
+		this.y = y;
 	}
 }
