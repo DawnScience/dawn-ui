@@ -301,8 +301,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
         }
 
 		final XYRegionGraph graph  = (XYRegionGraph)getXAxis().getParent();
-		final Rectangle     rbounds = graph.getRegionArea().getBounds();
-		if (rbounds.width<1 || rbounds.height<1) return false;
+		final Rectangle     bounds = graph.getRegionArea().getBounds();
+		if (bounds.width<1 || bounds.height<1) return false;
 
 		if (!imageCreationAllowed) return false;
 		if (monitor!=null && monitor.isCanceled()) return false;
@@ -342,54 +342,42 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				ImageData data = imageData;
 				ImageOrigin origin = getImageOrigin();
 	
-				Range xRange = xAxis.getRange();
-				Range yRange = yAxis.getRange();
+				double[] da = getImageCoords(currentDownSampleBin, false);
+				double minX = da[0];
+				double minY = da[1];
+				double maxX = da[2];
+				double maxY = da[3];
 	
-				double minX = xRange.getLower()/currentDownSampleBin;
-				double minY = yRange.getLower()/currentDownSampleBin;
-				double maxX = xRange.getUpper()/currentDownSampleBin;
-				double maxY = yRange.getUpper()/currentDownSampleBin;
-				final int xSize = imageData.width;
-				final int ySize = imageData.height;
-	
-				// check as getLower and getUpper don't work as expected
-				if(maxX < minX){
-					double temp = maxX;
-					maxX = minX;
-					minX = temp;
-				}
-				if(maxY < minY){
-					double temp = maxY;
-					maxY = minY;
-					minY = temp;
-				}
-	
+				// Data width
 				double xSpread = maxX - minX;
 				double ySpread = maxY - minY;
-	
-				double xScale = rbounds.width / xSpread;
-				double yScale = rbounds.height / ySpread;
-				//				System.err.println("Area is " + rbounds + " with scale (x,y) " + xScale + ", " + yScale);
-	
+				
 				// Deliberately get the over-sized dimensions so that the edge pixels can be smoothly panned through.
-				int fullWidth  = (int) (Math.ceil(maxX)-Math.floor(minX));
-				int fullHeight = (int) (Math.ceil(maxY)-Math.floor(minY));
+				int fxSpread = (int) (Math.ceil(maxX)-Math.floor(minX));
+				int fySpread = (int) (Math.ceil(maxY)-Math.floor(minY));
+	
+				
+				da = getImageCoords(1, true); // No downsampling
+
+				double xScale = (da[2]-da[0]) / xSpread;   // Ratio of screen pixels to downsampled data
+				double yScale = (da[3]-da[1]) / ySpread;   // Ratio of screen pixels to downsampled data
+	
 	
 				// Force a minimum size on the system
-				if (fullWidth <= MINIMUM_ZOOM_SIZE) {
-					if (fullWidth > imageData.width) fullWidth = MINIMUM_ZOOM_SIZE;
+				if (fxSpread <= MINIMUM_ZOOM_SIZE) {
+					if (fxSpread > imageData.width) fxSpread = MINIMUM_ZOOM_SIZE;
 					isMaximumZoom = true;
 				}
-				if (fullHeight <= MINIMUM_ZOOM_SIZE) {
-					if (fullHeight > imageData.height) fullHeight = MINIMUM_ZOOM_SIZE;
+				if (fySpread <= MINIMUM_ZOOM_SIZE) {
+					if (fySpread > imageData.height) fySpread = MINIMUM_ZOOM_SIZE;
 					isMaximumZoom = true;
 				}
-				if (fullWidth <= MINIMUM_LABEL_SIZE && fullHeight <= MINIMUM_LABEL_SIZE) {
+				if (fxSpread <= MINIMUM_LABEL_SIZE && fySpread <= MINIMUM_LABEL_SIZE) {
 					isLabelZoom = true;
 				}
 	
-				int scaleWidth  = (int) (fullWidth*xScale);
-				int scaleHeight = (int) (fullHeight*yScale);
+				int scaleWidth  = (int) (fxSpread*xScale);
+				int scaleHeight = (int) (fySpread*yScale);
 				
 				int xPix = (int)minX;
 				int yPix = (int)minY;
@@ -400,6 +388,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				// These offsets are used when the scaled images is drawn to the screen.
 				double xOffset = (minX - Math.floor(minX))*xScale;
 				double yOffset = (minY - Math.floor(minY))*yScale;
+
+				// Size of image data in index
+				final int xSize = imageData.width;
+				final int ySize = imageData.height;
 
 				// Deal with the origin orientations correctly.
 				switch (origin) {
@@ -429,8 +421,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					return false; // prevent IAE in calling getPixel
 				}
 				
-				int width  = xPix+fullWidth  > xSize  ? xSize  : fullWidth;
-				int height = yPix+fullHeight > ySize  ? ySize : fullHeight;
+				int width  = xPix+fxSpread  > xSize  ? xSize  : fxSpread;
+				int height = yPix+fySpread > ySize  ? ySize : fySpread;
 			
 				// Slice the data.
 				// Pixel slice on downsampled data = fast!
@@ -438,14 +430,17 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					// NOTE Assumes 8-bit images
 					final int size   = width*height;
 					final byte[] pixels = new byte[size];
+System.out.println("downsample="+currentDownSampleBin);
 System.out.println("width="+width);
 System.out.println("height="+height);
 System.out.println("xPix="+xPix);
 System.out.println("yPix="+yPix);
 System.out.println("maxX="+maxX);
 System.out.println("maxY="+maxY);
-	System.out.println("height="+height);
-	System.out.println("imageData w="+imageData.width);
+System.out.println("minX="+minX);
+System.out.println("minY="+minY);
+System.out.println("height="+height);
+System.out.println("imageData w="+imageData.width);
 System.out.println("imageData h="+imageData.height);
 					for (int y = 0; y < height; y++) {
 						imageData.getPixels(xPix, yPix+y, width, pixels, width*y);
@@ -454,7 +449,7 @@ System.out.println("imageData h="+imageData.height);
 					data.alpha = imageServiceBean.getAlpha();
 				} else {
 					// NOTE Assumes 24 Bit Images
-					final int[] pixels = new int[fullWidth];
+					final int[] pixels = new int[fxSpread];
 	
 					data = new ImageData(width, height, 24, new PaletteData(0xff0000, 0x00ff00, 0x0000ff));
 					data.alpha = imageServiceBean.getAlpha();
@@ -508,6 +503,75 @@ System.out.println("imageData h="+imageData.height);
 			logger.error("Image scale error!", ne);
 			return false;
 		}
+	}
+
+	/**
+	 * Get the image in data coordinates  or 
+	 * pixel coordinates.
+	 * 
+	 * 
+	 * @param bin  - if the datacoordinates are downsampled, optionally set the bin.
+	 * @return x1,y1,x2,y2  where x2>x1 and y2>y1
+	 */
+	private double[] getImageCoords(int bin, boolean pixels) {
+		
+		Range xRange = xAxis.getRange();
+		Range yRange = yAxis.getRange();
+
+		double minX = xRange.getLower()/bin;
+		double minY = yRange.getLower()/bin;
+		double maxX = xRange.getUpper()/bin;
+		double maxY = yRange.getUpper()/bin;
+
+		// check as getLower and getUpper don't work as expected
+		if(maxX < minX){
+			double temp = maxX;
+			maxX = minX;
+			minX = temp;
+		}
+		if(maxY < minY){
+			double temp = maxY;
+			maxY = minY;
+			minY = temp;
+		}
+		if (pixels) {
+			int x1 = xAxis.getValuePosition(minX, false);
+			int y1 = yAxis.getValuePosition(minY, false);
+			int x2 = xAxis.getValuePosition(maxX, false);
+			int y2 = yAxis.getValuePosition(maxY, false);
+			return new double[]{x1, y1, x2, y2};
+			
+		} else {
+		    return new double[]{minX, minY, maxX, maxY};
+		}
+	}
+
+	/**
+	 * The min of this value and the end of the current image.
+	 * @param xAxis2
+	 * @param upper
+	 * @return
+	 */
+	private double getImageMin(Axis axis, Range range) {
+		
+		// Upper value of the axis
+		double upper = range.getUpper();
+
+		IDataset set = getAxes()!=null ? getAxes().get(axis.isYAxis()?1:0) : null;
+        double aupper = set!=null ? set.getDouble(set.getSize()-1) : getImage().getShape()[axis.isYAxis()?1:0];
+		
+		return Math.min(upper,  aupper);
+	}
+
+	private double getImageMax(Axis axis, Range range) {
+		
+		// Lower value of the axis
+		double lower = range.getLower();
+		
+		IDataset set = getAxes()!=null ? getAxes().get(axis.isYAxis()?1:0) : null;
+        double alower = set!=null ? set.getDouble(0) : 0;
+		
+		return Math.min(lower,  alower);	
 	}
 
 	private boolean createDownsampledImageData(ImageScaleType rescaleType, IProgressMonitor monitor) {
