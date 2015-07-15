@@ -6,13 +6,11 @@ import java.util.List;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ICompositeTrace;
-import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.nebula.visualization.xygraph.figures.Axis;
-import org.eclipse.swt.graphics.ImageData;
 
 public class CompositeTrace extends Figure implements ICompositeTrace {
 
@@ -63,35 +61,6 @@ public class CompositeTrace extends Figure implements ICompositeTrace {
 		for (Figure child : children) {
 			if (child instanceof ITrace) child.setBounds(clientArea);
 		}
-	}
-	
-	public void layout() {
-		super.layout();
-		
-		for (ImageTrace imageTrace : traces) {
-			double minX = xAxis.getRange().getLower();
-			double maxY = yAxis.getRange().getUpper();
-
-			final Rectangle bounds = new Rectangle(xAxis.getValuePosition(minX, false),
-					                               yAxis.getValuePosition(maxY, false),
-					                               imageTrace.getBounds().width,
-					                               imageTrace.getBounds().height);
-			imageTrace.setBounds(bounds);
-		}
-
-		
-	}
-
-	@Override
-	protected void paintFigure(Graphics graphics) {
-		
-		super.paintFigure(graphics);
-
-//		for (ImageTrace trace : traces) {
-//		
-//			ScaledImageData data = trace.getScaledImageData();
-//			graphics.drawImage(data.getScaledImage(), data.getX(), data.getY());
-//		}
 	}
 
 	@Override

@@ -127,4 +127,10 @@ class ScaledImageData {
 	public void setY(double y) {
 		this.y = y;
 	}
+
+	@Override
+	public String toString() {
+		return "ScaledImageData [xoffset=" + xoffset + ", yoffset=" + yoffset
+				+ ", x=" + x + ", y=" + y + "]";
+	}
 }

@@ -379,10 +379,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					isLabelZoom = true;
 				}
 	
-				int scaleWidth  = (int) (fxSpread*xScale);
-				int scaleHeight = (int) (fySpread*yScale);
-				
-				int xPix = (int)minX;
+				int scaleWidth  = Math.max(1, (int) (fxSpread*xScale));
+				int scaleHeight = Math.max(1, (int) (fySpread*yScale));
+
+                int xPix = (int)minX;
 				int yPix = (int)minY;
 	
 				double xPixD = 0;
@@ -426,58 +426,73 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				if (width<1 || height<1) {
 					return false;
 				}
-			
-				// Slice the data.
-				// Pixel slice on downsampled data = fast!
-				if (imageData.depth <= 8) {
-					// NOTE Assumes 8-bit images
-					final int size   = width*height;
-					final byte[] pixels = new byte[size];
-					for (int y = 0; y < height && (yPix+y)<ySize ; y++) {
-						imageData.getPixels(xPix, yPix+y, width, pixels, width*y);
-					}
-					data = new ImageData(width, height, data.depth, getPaletteData(), 1, pixels);
-					data.alpha = imageServiceBean.getAlpha();
-				} else {
-					// NOTE Assumes 24 Bit Images
-					final int[] pixels = new int[fxSpread];
-	
-					data = new ImageData(width, height, 24, new PaletteData(0xff0000, 0x00ff00, 0x0000ff));
-					data.alpha = imageServiceBean.getAlpha();
-					for (int y = 0; y < height; y++) {					
-						imageData.getPixels(xPix, yPix+y, width, pixels, 0);
-						data.setPixels(0, y, width, pixels, 0);
-					}
-				}
-				// create the scaled image
-				// We are suspicious if the algorithm wants to create an image
-				// bigger than the screen size and in that case do not scale
-				// Fix to http://jira.diamond.ac.uk/browse/SCI-926
-				boolean proceedWithScale = true;
+
 				try {
-					if (screenRectangle == null) {
-						screenRectangle = Display.getCurrent().getPrimaryMonitor().getClientArea();
+					// Slice the data.
+					// Pixel slice on downsampled data = fast!
+					if (imageData.depth <= 8) {
+						// NOTE Assumes 8-bit images
+						final int size   = width*height;
+						final byte[] pixels = new byte[size];
+						for (int y = 0; y < height && (yPix+y)<ySize ; y++) {
+							imageData.getPixels(xPix, yPix+y, width, pixels, width*y);
+						}
+						data = new ImageData(width, height, data.depth, getPaletteData(), 1, pixels);
+					} else {
+						// NOTE Assumes 24 Bit Images
+						final int[] pixels = new int[width];
+						data = new ImageData(width, height, imageData.depth, new PaletteData(0xff0000, 0x00ff00, 0x0000ff));
+						for (int y = 0; y < height; y++) {					
+							imageData.getPixels(xPix, y+yPix, width, pixels, 0);
+							data.setPixels(0, y, width, pixels, 0);
+						}
 					}
-					if (scaleWidth>screenRectangle.width*2 ||  scaleHeight>screenRectangle.height*2) {
-						logger.error("Image scaling algorithm has malfunctioned and asked for an image bigger than the screen!");
-						logger.debug("scaleWidth="+scaleWidth);
-						logger.debug("scaleHeight="+scaleHeight);
-						proceedWithScale = false;
-					}
-				} catch (Throwable ne) {
-					proceedWithScale = true;
-				}
+					data.alpha = imageServiceBean.getAlpha();
 	
-				Image scaledImage = null;
-				if (proceedWithScale) {
-					data = data!=null ? data.scaledTo(scaleWidth, scaleHeight) : null;
-					scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
-				} else if (scaledImage==null) {
-					scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
-				}	
-				scaledData.setXoffset(xOffset);
-				scaledData.setYoffset(yOffset);
-				scaledData.setScaledImage(scaledImage);
+					// create the scaled image
+					// We are suspicious if the algorithm wants to create an image
+					// bigger than the screen size and in that case do not scale
+					// Fix to http://jira.diamond.ac.uk/browse/SCI-926
+					boolean proceedWithScale = true;
+					try {
+						if (screenRectangle == null) {
+							screenRectangle = Display.getCurrent().getPrimaryMonitor().getClientArea();
+						}
+						if (scaleWidth>screenRectangle.width*2 ||  scaleHeight>screenRectangle.height*2) {
+							logger.error("Image scaling algorithm has malfunctioned and asked for an image bigger than the screen!");
+							logger.debug("scaleWidth="+scaleWidth);
+							logger.debug("scaleHeight="+scaleHeight);
+							proceedWithScale = false;
+						}
+					} catch (Throwable ne) {
+						proceedWithScale = true;
+					}
+	
+					Image scaledImage = null;
+					if (proceedWithScale) {
+						data = data!=null ? data.scaledTo(scaleWidth, scaleHeight) : null;
+						scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
+					} else if (scaledImage==null) {
+						scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
+					}	
+					scaledData.setXoffset(xOffset);
+					scaledData.setYoffset(yOffset);
+					scaledData.setScaledImage(scaledImage);
+					
+				} catch (IllegalArgumentException ne) {
+					
+					logger.error("Image scaling has malfunctioned");
+					logger.debug("Trace name = "+getName());
+					logger.debug("scaleWidth = "+scaleWidth);
+					logger.debug("scaleHeight = "+scaleHeight);
+					logger.debug("width = "+width);
+					logger.debug("height = "+height);
+					logger.debug("xPix = "+xPix);
+					logger.debug("yPix = "+yPix);
+					
+					throw ne;
+				}
+
 			}
 
 			return true;
@@ -553,34 +568,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		} else {
 		    return new double[]{minX, minY, maxX, maxY};
 		}
-	}
-
-	/**
-	 * The min of this value and the end of the current image.
-	 * @param xAxis2
-	 * @param upper
-	 * @return
-	 */
-	private final double getDataUpper(Axis axis, Range range) {
-		
-		// Upper value of the axis
-		double upper = Math.max(0, range.getUpper());
-
-		IDataset set = getAxes()!=null ? getAxes().get(axis.isYAxis()?1:0) : null;
-        double aupper = set!=null ? set.getDouble(set.getSize()-1) : (getImage().getShape()[axis.isYAxis()?1:0]);
-		
-		return Math.min(upper,  aupper);
-	}
-
-	private final double getDataLower(Axis axis, Range range) {
-		
-		// Lower value of the axis
-		double lower = range.getLower();
-		
-		IDataset set = getAxes()!=null ? getAxes().get(axis.isYAxis()?1:0) : null;
-        double alower = set!=null ? set.getDouble(0) : 0;
-		
-		return Math.max(lower,  alower);	
 	}
 
 	private boolean createDownsampledImageData(ImageScaleType rescaleType, IProgressMonitor monitor) {
