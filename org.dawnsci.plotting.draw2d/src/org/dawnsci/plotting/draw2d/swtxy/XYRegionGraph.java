@@ -188,8 +188,12 @@ public class XYRegionGraph extends XYGraph {
 				trace.performAutoscale();
 			}
 			
+		} else if (getRegionArea().getCompositeTrace() != null){
+			
+			getRegionArea().getCompositeTrace().performAutoscale();
 			
 		} else {
+			
 			super.performAutoScale();
 		}
 		

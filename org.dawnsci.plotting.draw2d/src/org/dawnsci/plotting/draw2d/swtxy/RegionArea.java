@@ -831,6 +831,11 @@ public class RegionArea extends PlotArea {
 		if (imageTraces!=null && imageTraces.size()>0) return imageTraces.values().iterator().next();
 		return null;
 	}
+	
+	public CompositeTrace getCompositeTrace() {
+		if (compositeTraces!=null && compositeTraces.size()>0) return compositeTraces.values().iterator().next();
+		return null;
+	}
 
 	public void removeNotify() {
        super.removeNotify();

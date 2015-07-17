@@ -31,6 +31,8 @@ import org.eclipse.dawnsci.analysis.dataset.impl.BooleanDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.IndexIterator;
+import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
 import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
@@ -125,6 +127,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private IImageService service;
 
 	private boolean xTicksAtEnd, yTicksAtEnd;
+	
+	private double[] globalXRange;
+	private double[] globalYRange;
 		
 	public ImageTrace(final String name, 
 			          final Axis xAxis, 
@@ -266,6 +271,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * and the downsampled image data which it used.
 	 */
 	private ScaledImageData scaledData = new ScaledImageData();
+	private Image            scaledImage;
 
 	/**
 	 * number of entries in intensity scale
@@ -335,6 +341,12 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				scaledData.setScaledImage(scaledImage);
 				 
 			} else {
+				
+				if (globalXRange != null) {
+					return buildImageRelativeToAxes(imageData);
+					
+				}
+				
 				// slice data to get current zoom area
 				/**     
 				 *      x1,y1--------------x2,y2
@@ -343,59 +355,74 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				 *        |                  |
 				 *      x3,y3--------------x4,y4
 				 */
+				
 				ImageData data = imageData;
 				ImageOrigin origin = getImageOrigin();
-	
-				// Size of data
-				double[] da = getImageCoords(currentDownSampleBin, false);
-				double minX = da[0];
-				double minY = da[1];
-				double maxX = da[2];
-				double maxY = da[3];
-	
-				// Deliberately get the over-sized dimensions so that the edge pixels can be smoothly panned through.
-				int fxSpread = (int) (Math.ceil(maxX)-Math.floor(minX));
-				int fySpread = (int) (Math.ceil(maxY)-Math.floor(minY));
-	
-				// Size of screen pixels based on axes
-				da = getImageCoords(1, true); // No downsampling
-				scaledData.setX(da[0]);
-				scaledData.setY(da[1]);
 				
-				double xScale = (da[2]-da[0]) / (maxX - minX);   // Ratio of screen pixels to downsampled data coords
-				double yScale = (da[3]-da[1]) / (maxY - minY);   // Ratio of screen pixels to downsampled data coords
-	
-	
+				Range xRange = xAxis.getRange();
+				Range yRange = yAxis.getRange();
+				
+				double minX = xRange.getLower()/currentDownSampleBin;
+				double minY = yRange.getLower()/currentDownSampleBin;
+				double maxX = xRange.getUpper()/currentDownSampleBin;
+				double maxY = yRange.getUpper()/currentDownSampleBin;
+				int xSize = imageData.width;
+				int ySize = imageData.height;
+				
+				// check as getLower and getUpper don't work as expected
+				if(maxX < minX){
+					double temp = maxX;
+					maxX = minX;
+					minX = temp;
+				}
+				if(maxY < minY){
+					double temp = maxY;
+					maxY = minY;
+					minY = temp;
+				}
+				
+				double xSpread = maxX - minX;
+				double ySpread = maxY - minY;
+				
+				double xScale = bounds.width / xSpread;
+				double yScale = bounds.height / ySpread;
+//				System.err.println("Area is " + rbounds + " with scale (x,y) " + xScale + ", " + yScale);
+				
+				// Deliberately get the over-sized dimensions so that the edge pixels can be smoothly panned through.
+				int minXI = (int) Math.floor(minX);
+				int minYI = (int) Math.floor(minY);
+				
+				int maxXI = (int) Math.ceil(maxX);
+				int maxYI = (int) Math.ceil(maxY);
+				
+				int fullWidth = (int) (maxXI-minXI);
+				int fullHeight = (int) (maxYI-minYI);
+				
 				// Force a minimum size on the system
-				if (fxSpread <= MINIMUM_ZOOM_SIZE) {
-					if (fxSpread > imageData.width) fxSpread = MINIMUM_ZOOM_SIZE;
+				if (fullWidth <= MINIMUM_ZOOM_SIZE) {
+					if (fullWidth > imageData.width) fullWidth = MINIMUM_ZOOM_SIZE;
 					isMaximumZoom = true;
 				}
-				if (fySpread <= MINIMUM_ZOOM_SIZE) {
-					if (fySpread > imageData.height) fySpread = MINIMUM_ZOOM_SIZE;
+				if (fullHeight <= MINIMUM_ZOOM_SIZE) {
+					if (fullHeight > imageData.height) fullHeight = MINIMUM_ZOOM_SIZE;
 					isMaximumZoom = true;
 				}
-				if (fxSpread <= MINIMUM_LABEL_SIZE && fySpread <= MINIMUM_LABEL_SIZE) {
+				if (fullWidth <= MINIMUM_LABEL_SIZE && fullHeight <= MINIMUM_LABEL_SIZE) {
 					isLabelZoom = true;
 				}
-	
-				int scaleWidth  = Math.max(1, (int) (fxSpread*xScale));
-				int scaleHeight = Math.max(1, (int) (fySpread*yScale));
-
-                int xPix = (int)minX;
+				
+				int scaleWidth = (int) (fullWidth*xScale);
+				int scaleHeight = (int) (fullHeight*yScale);
+//				System.err.println("Scaling to " + scaleWidth + "x" + scaleHeight);
+				int xPix = (int)minX;
 				int yPix = (int)minY;
-	
+				
 				double xPixD = 0;
 				double yPixD = 0;
-	
+				
 				// These offsets are used when the scaled images is drawn to the screen.
 				double xOffset = (minX - Math.floor(minX))*xScale;
 				double yOffset = (minY - Math.floor(minY))*yScale;
-
-				// Size of image data in index
-				final int xSize = imageData.width;
-				final int ySize = imageData.height;
-
 				// Deal with the origin orientations correctly.
 				switch (origin) {
 				case TOP_LEFT:
@@ -419,84 +446,66 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					yOffset = (yPixD - yPix)*yScale;
 					break;
 				}
-				
-				int width  = xPix+fxSpread > xSize  ? Math.min(xSize, fxSpread) : fxSpread;
-				int height = yPix+fySpread > ySize  ? Math.min(ySize, fySpread) : fySpread;
-				
-				if (width<1 || height<1) {
-					return false;
+				if (xPix < 0 || yPix < 0 || xPix+fullWidth > xSize || yPix+fullHeight > ySize) {
+					return false; // prevent IAE in calling getPixel
 				}
-
+				// Slice the data.
+				// Pixel slice on downsampled data = fast!
+				if (imageData.depth <= 8) {
+					// NOTE Assumes 8-bit images
+					final int size   = fullWidth*fullHeight;
+					final byte[] pixels = new byte[size];
+					for (int y = 0; y < fullHeight; y++) {
+						imageData.getPixels(xPix, yPix+y, fullWidth, pixels, fullWidth*y);
+					}
+					data = new ImageData(fullWidth, fullHeight, data.depth, getPaletteData(), 1, pixels);
+				} else {
+					// NOTE Assumes 24 Bit Images
+					final int[] pixels = new int[fullWidth];
+					
+					data = new ImageData(fullWidth, fullHeight, 24, new PaletteData(0xff0000, 0x00ff00, 0x0000ff));
+					for (int y = 0; y < fullHeight; y++) {					
+						imageData.getPixels(xPix, yPix+y, fullWidth, pixels, 0);
+						data.setPixels(0, y, fullWidth, pixels, 0);
+					}
+				}
+//				data.alpha = imageServiceBean.getAlpha();
+				
+				// create the scaled image
+				// We are suspicious if the algorithm wants to create an image
+				// bigger than the screen size and in that case do not scale
+				// Fix to http://jira.diamond.ac.uk/browse/SCI-926
+				boolean proceedWithScale = true;
 				try {
-					// Slice the data.
-					// Pixel slice on downsampled data = fast!
-					if (imageData.depth <= 8) {
-						// NOTE Assumes 8-bit images
-						final int size   = width*height;
-						final byte[] pixels = new byte[size];
-						for (int y = 0; y < height && (yPix+y)<ySize ; y++) {
-							imageData.getPixels(xPix, yPix+y, width, pixels, width*y);
-						}
-						data = new ImageData(width, height, data.depth, getPaletteData(), 1, pixels);
-					} else {
-						// NOTE Assumes 24 Bit Images
-						final int[] pixels = new int[width];
-						data = new ImageData(width, height, imageData.depth, new PaletteData(0xff0000, 0x00ff00, 0x0000ff));
-						for (int y = 0; y < height; y++) {					
-							imageData.getPixels(xPix, y+yPix, width, pixels, 0);
-							data.setPixels(0, y, width, pixels, 0);
-						}
+					if (screenRectangle == null) {
+						screenRectangle = Display.getCurrent().getPrimaryMonitor().getClientArea();
 					}
-					data.alpha = imageServiceBean.getAlpha();
-	
-					// create the scaled image
-					// We are suspicious if the algorithm wants to create an image
-					// bigger than the screen size and in that case do not scale
-					// Fix to http://jira.diamond.ac.uk/browse/SCI-926
-					boolean proceedWithScale = true;
-					try {
-						if (screenRectangle == null) {
-							screenRectangle = Display.getCurrent().getPrimaryMonitor().getClientArea();
-						}
-						if (scaleWidth>screenRectangle.width*2 ||  scaleHeight>screenRectangle.height*2) {
-							logger.error("Image scaling algorithm has malfunctioned and asked for an image bigger than the screen!");
-							logger.debug("scaleWidth="+scaleWidth);
-							logger.debug("scaleHeight="+scaleHeight);
-							proceedWithScale = false;
-						}
-					} catch (Throwable ne) {
-						proceedWithScale = true;
+					if (scaleWidth>screenRectangle.width*2      || 
+						scaleHeight>screenRectangle.height*2) {
+						
+						logger.error("Image scaling algorithm has malfunctioned and asked for an image bigger than the screen!");
+						logger.debug("scaleWidth="+scaleWidth);
+						logger.debug("scaleHeight="+scaleHeight);
+						proceedWithScale = false;
 					}
-	
-					Image scaledImage = null;
-					if (proceedWithScale) {
-						data = data!=null ? data.scaledTo(scaleWidth, scaleHeight) : null;
-						scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
-					} else if (scaledImage==null) {
-						scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
-					}	
-					scaledData.setXoffset(xOffset);
-					scaledData.setYoffset(yOffset);
-					scaledData.setScaledImage(scaledImage);
-					
-				} catch (IllegalArgumentException ne) {
-					
-					logger.error("Image scaling has malfunctioned");
-					logger.debug("Trace name = "+getName());
-					logger.debug("scaleWidth = "+scaleWidth);
-					logger.debug("scaleHeight = "+scaleHeight);
-					logger.debug("width = "+width);
-					logger.debug("height = "+height);
-					logger.debug("xPix = "+xPix);
-					logger.debug("yPix = "+yPix);
-					
-					throw ne;
+				} catch (Throwable ne) {
+					proceedWithScale = true;
 				}
-
+				
+				Image scaledImage = null;
+				if (proceedWithScale) {
+					data = data!=null ? data.scaledTo(scaleWidth, scaleHeight) : null;
+					scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
+				} else if (scaledImage==null) {
+					scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
+				}	
+				scaledData.setXoffset(xOffset);
+				scaledData.setYoffset(yOffset);
+				scaledData.setScaledImage(scaledImage);
+				
 			}
 
 			return true;
-			
 		} catch (IllegalArgumentException ie) {
 			logger.error(ie.toString());
 			return false;
@@ -509,6 +518,203 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			logger.error("Image scale error!", ne);
 			return false;
 		}
+	}
+	
+	private boolean buildImageRelativeToAxes(ImageData imageData) {
+		
+		// slice data to get current zoom area
+		/**     
+		 *      x1,y1--------------x2,y2
+		 *        |                  |
+		 *        |                  |
+		 *        |                  |
+		 *      x3,y3--------------x4,y4
+		 */
+		
+		ImageData data = imageData;
+		
+		//Get the axes coodinates visible on screen
+		double[] da = getImageCoords(1, false);
+		double minX = da[0];
+		double minY = da[1];
+		double maxX = da[2];
+		double maxY = da[3];
+		
+		//Get the data points per axis step
+		double xAxValPerPoint =  getAxisValuePerDataPoint(minX,maxX,getAxes().get(0));
+		double yAxValPerPoint =  getAxisValuePerDataPoint(minY,maxY,getAxes().get(0));
+		
+		//get x and y start position in data array (floored)
+		int xPix = getPositionInAxis(minX,(Dataset)getAxes().get(0),true)/currentDownSampleBin;
+		int yPix = getPositionInAxis(minY,(Dataset)getAxes().get(1),true)/currentDownSampleBin;
+		
+		//determine sub pixel offset in data frame
+		double xdiff = (getAxes().get(0).getDouble(xPix)-minX);
+		double ydiff = (getAxes().get(1).getDouble(yPix)-minY);
+		
+		//Determine the corresponding number of data points in x and y (floor min, ceil max)
+		int xDataPoints = getNumberOfDataPoints(minX,maxX,getAxes().get(0));
+		int yDataPoints = getNumberOfDataPoints(minY,maxY,getAxes().get(1));
+		
+		int xDataPointsDS = xDataPoints/currentDownSampleBin;
+		int yDataPointsDS = yDataPoints/currentDownSampleBin;
+		
+		//Get matching screen co-ordinates in pixels
+		double[] screenCoords = getImageCoords(1, true);
+		
+		//calculate full number of data points
+		double realx = (maxX-minX)/xAxValPerPoint;
+		double realy = (maxY-minY)/yAxValPerPoint;
+		
+		// Ratio of screen pixels to full number of data points
+		double xScale = (screenCoords[2]-screenCoords[0]) / (realx);
+		double yScale = (screenCoords[3]-screenCoords[1]) / (realy);
+		
+		//FIXME Handle minimum cases
+		
+		// Size of image data in index
+		final int xSize = imageData.width;
+		final int ySize = imageData.height;
+		
+		double xOffset = (-xdiff/xAxValPerPoint)*xScale;
+		double yOffset = (-ydiff/xAxValPerPoint)*yScale;
+		
+
+		//FIXME origins
+		
+		int width  = xPix+xDataPointsDS > xSize  ? Math.min(xSize, xDataPointsDS) : xDataPointsDS;
+		int height = yPix+yDataPointsDS > ySize  ? Math.min(ySize, yDataPointsDS) : yDataPointsDS;
+		
+		int scaleWidth  = Math.max(1, (int) (xDataPoints*xScale));
+		int scaleHeight = Math.max(1, (int) (yDataPoints*yScale));
+		
+		
+		
+		try {
+			// Slice the data.
+			// Pixel slice on downsampled data = fast!
+			if (imageData.depth <= 8) {
+				// NOTE Assumes 8-bit images
+				final int size   = width*height;
+				final byte[] pixels = new byte[size];
+				for (int y = 0; y < height && (yPix+y)<ySize ; y++) {
+					imageData.getPixels(xPix, yPix+y, width, pixels, width*y);
+				}
+				data = new ImageData(width, height, data.depth, getPaletteData(), 1, pixels);
+			} else {
+				// NOTE Assumes 24 Bit Images
+				final int[] pixels = new int[width];
+				data = new ImageData(width, height, imageData.depth, new PaletteData(0xff0000, 0x00ff00, 0x0000ff));
+				for (int y = 0; y < height; y++) {					
+					imageData.getPixels(xPix, y+yPix, width, pixels, 0);
+					data.setPixels(0, y, width, pixels, 0);
+				}
+			}
+			data.alpha = imageServiceBean.getAlpha();
+
+			// create the scaled image
+			// We are suspicious if the algorithm wants to create an image
+			// bigger than the screen size and in that case do not scale
+			// Fix to http://jira.diamond.ac.uk/browse/SCI-926
+			boolean proceedWithScale = true;
+			try {
+				if (screenRectangle == null) {
+					screenRectangle = Display.getCurrent().getPrimaryMonitor().getClientArea();
+				}
+				if (scaleWidth>screenRectangle.width*2 ||  scaleHeight>screenRectangle.height*2) {
+					logger.error("Image scaling algorithm has malfunctioned and asked for an image bigger than the screen!");
+					logger.debug("scaleWidth="+scaleWidth);
+					logger.debug("scaleHeight="+scaleHeight);
+					proceedWithScale = false;
+				}
+			} catch (Throwable ne) {
+				proceedWithScale = true;
+			}
+
+			Image scaledImage = null;
+			if (proceedWithScale) {
+				data = data!=null ? data.scaledTo(scaleWidth, scaleHeight) : null;
+				scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
+			} else if (scaledImage==null) {
+				scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
+			}
+			
+			scaledData.setX(screenCoords[0]);
+			scaledData.setY(screenCoords[1]);
+			scaledData.setXoffset(xOffset);
+			scaledData.setYoffset(yOffset);
+			scaledData.setScaledImage(scaledImage);
+			
+		} catch (IllegalArgumentException ne) {
+			
+			logger.error("Image scaling has malfunctioned");
+			logger.debug("Trace name = "+getName());
+			logger.debug("scaleWidth = "+scaleWidth);
+			logger.debug("scaleHeight = "+scaleHeight);
+			logger.debug("width = "+width);
+			logger.debug("height = "+height);
+			logger.debug("xPix = "+xPix);
+			logger.debug("yPix = "+yPix);
+			
+			throw ne;
+		}
+		
+		
+		return true;
+		
+	}
+	
+	public void setGlobalRanges(double[] globalX, double[] globalY) {
+		this.globalXRange = globalX;
+		this.globalYRange = globalY;
+	}
+	
+	private final int getNumberOfDataPoints(double min, double max, IDataset axes) {
+		
+		int minp = getPositionInAxis(min,axes,true);
+		int maxp = getPositionInAxis(max,axes,false);
+		
+		return maxp-minp+1;
+	}
+	
+	
+	private final double getAxisValuePerDataPoint(double min, double max, IDataset axes) {
+		
+		int minp = getPositionInAxis(min,axes);
+		int maxp = getPositionInAxis(max,axes);
+		
+		return (axes.getDouble(maxp)-axes.getDouble(minp))/(maxp-minp);
+	}
+	
+	private final int getPositionInAxis(double val, IDataset axis) {
+		Dataset a = DatasetUtils.convertToDataset(axis.clone());
+		return Maths.abs(a.isubtract(val)).minPos()[0];
+	}
+	
+	private final int getPositionInAxis(double val, IDataset axis, boolean floor) {
+		int pos = 0;
+		double dif = 0;
+		double test = Double.MAX_VALUE;
+		Dataset a = DatasetUtils.convertToDataset(axis.clone());
+		IndexIterator it = a.getIterator();
+		while (it.hasNext()) {
+			double d = a.getDouble(it.index);
+			double ad = Math.abs(d-val);
+			if (ad < test) {
+				test = ad;
+				pos = it.index;
+				dif = d-val;
+			}
+		}
+		
+		if (floor) {
+			if (dif > 0) pos--;
+		} else {
+			if (dif < 0) pos++;
+		}
+		
+		return pos;
+		
 	}
 
 	/**

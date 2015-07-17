@@ -21,6 +21,8 @@ public class CompositeTrace extends Figure implements ICompositeTrace {
 	private IPlottingSystem plottingSystem;
 	private Axis    xAxis;
 	private Axis    yAxis;
+	private double[] xRange;
+	private double[] yRange;
 	
 	private List<ImageTrace> traces;
 
@@ -42,18 +44,54 @@ public class CompositeTrace extends Figure implements ICompositeTrace {
 
 		if (!(trace instanceof ImageTrace)) throw new IllegalArgumentException(trace.getClass()+ " are not supported currently!");
 		if (trace.getData() == null) throw new IllegalArgumentException("Please ensure that "+trace.getName() + " trace has data! ");
-
+		if (((ImageTrace)trace).getAxes() == null) throw new IllegalArgumentException("Image traces must have axes in composites");
+		
+		IDataset x = ((ImageTrace)trace).getAxes().get(0);
+		IDataset y = ((ImageTrace)trace).getAxes().get(1);
+		double xmin = x.min().doubleValue();
+		double xmax = x.max().doubleValue();
+		double ymin = y.min().doubleValue();
+		double ymax = y.max().doubleValue();
+		
+		if (xRange == null) {
+			xRange = new double[]{xmin,xmax};
+			yRange = new double[]{ymin,ymax};
+		} else {
+			if (xmin < xRange[0]) xRange[0] = xmin;
+			if (ymin < yRange[0]) yRange[0] = ymin;
+			if (xmax > xRange[1]) xRange[1] = xmax;
+			if (ymax > yRange[1]) yRange[1] = ymax;
+		}
+		
 		ImageTrace image = (ImageTrace) trace;
+		image.setGlobalRanges(xRange, yRange);
 		if (index>-1) {
 		    traces.add(index, image);
 		} else {
 			traces.add(image);
 		}
+		
+		
+		
+//		for (ImageTrace t : traces) t.setGlobalRanges(xRange, yRange);
+		
 		add(image);
 		
-		if (traces.size()==1) image.performAutoscale();
+		if (traces.size()==1) {
+			image.getXAxis().setRange(xRange[0], xRange[1]);;
+			image.getYAxis().setRange(yRange[1], yRange[0]);;
+		}
 	}
 
+	public void performAutoscale() {
+		if (traces == null || traces.isEmpty())  return;
+		
+		ImageTrace image = traces.get(0);
+			image.getXAxis().setRange(xRange[0], xRange[1]);;
+			image.getYAxis().setRange(yRange[1], yRange[0]);;
+		
+	}
+	
 	public void setBounds(final Rectangle clientArea) {
 		super.setBounds(clientArea);
 
