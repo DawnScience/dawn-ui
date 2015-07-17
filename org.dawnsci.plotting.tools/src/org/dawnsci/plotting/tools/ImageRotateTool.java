@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.image.IImageTransform;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
@@ -60,7 +59,6 @@ public class ImageRotateTool extends AbstractToolPage {
 
 	private Logger logger = LoggerFactory.getLogger(ImageRotateTool.class);
 	private Spinner angleSpinner;
-	private static IImageTransform transformer;
 	private IDataset image;
 	private Composite container;
 	private IPlottingSystem rotatedSystem;
@@ -117,15 +115,6 @@ public class ImageRotateTool extends AbstractToolPage {
 		rotationJob.setPriority(Job.INTERACTIVE);
 
 		memoryBean = ManagementFactory.getMemoryMXBean();
-	}
-
-	/**
-	 * Injected by OSGI
-	 * 
-	 * @param it
-	 */
-	public static void setImageTransform(IImageTransform it) {
-		transformer = it;
 	}
 
 	@Override
@@ -499,7 +488,7 @@ public class ImageRotateTool extends AbstractToolPage {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			try {
-				IDataset rotated = transformer.rotate(image, angle, hasSameShape);
+				IDataset rotated = ServiceLoader.getTransformer().rotate(image, angle, hasSameShape);
 				rotated.setName("rotated-" + image.getName());
 				rotatedSystem.updatePlot2D(rotated, axes, monitor);
 			} catch (Exception e1) {

@@ -2,7 +2,7 @@ package org.dawnsci.plotting.tools.filter;
 
 import java.util.List;
 
-import org.dawnsci.plotting.tools.ImageFilterServiceLoader;
+import org.dawnsci.plotting.tools.ServiceLoader;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.image.IImageFilterService;
 import org.eclipse.dawnsci.plotting.api.filter.AbstractDelayedFilter;
@@ -31,7 +31,7 @@ public class MedianFilter extends AbstractDelayedFilter {
 			logger.warn("Unexpected lack of box configuration parameter in "
 					+ getClass().getName());
 		}
-		IImageFilterService service = ImageFilterServiceLoader.getFilter();
+		IImageFilterService service = ServiceLoader.getFilter();
 		final IDataset median = service.filterMedian(data, box[0]);
 		return new Object[] { median, axes };
 	}
