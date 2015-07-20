@@ -43,7 +43,7 @@
       </view>
       <view
             allowMultiple="true"
-            class="org.dawnsci.processing.ui.view.VanillaPlottingSystemView"
+            class="org.eclipse.dawnsci.plotting.api.VanillaPlottingSystemView"
             id="org.dawnsci.processing.ui.view.vanillaPlottingSystemView"
             name="Plotting System View"
             restorable="false">
