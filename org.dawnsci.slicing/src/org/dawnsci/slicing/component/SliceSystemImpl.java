@@ -205,7 +205,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 			this.traceListener = new ITraceListener.Stub() {
 				protected void update(TraceEvent evt) {
 					if( imageOrientation.isDisposed()) return;
-					GridUtils.setVisible(imageOrientation, plottingSystem.is2D());
+					GridUtils.setVisible(imageOrientation, plottingSystem.is2D()&&plottingSystem.getPlotType()!=null&&plottingSystem.getPlotType().is2D());
 					setImageOrientationText(imageOrientation);
 					area.layout();
 					addImageOrientationListener(imageOrientation);
