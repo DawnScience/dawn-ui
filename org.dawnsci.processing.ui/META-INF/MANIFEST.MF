@@ -4,7 +4,7 @@ Bundle-Name: Processing UI
 Bundle-SymbolicName: org.dawnsci.processing.ui;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.dawnsci.processing.ui.Activator
-Bundle-Vendor: DLS
+Bundle-Vendor: Diamond Light Source
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui.ide;bundle-version="3.8.2",
  org.eclipse.ui.navigator;bundle-version="3.5.200",
