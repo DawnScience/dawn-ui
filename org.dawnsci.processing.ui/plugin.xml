@@ -28,14 +28,14 @@
             restorable="true">
       </view>
       <view
-            class="org.dawnsci.processing.ui.view.VanillaPlottingSystemView"
+            class="org.eclipse.dawnsci.plotting.api.VanillaPlottingSystemView"
             icon="icons/input.png"
             id="org.dawnsci.processing.ui.input"
             name="Input"
             restorable="true">
       </view>
       <view
-            class="org.dawnsci.processing.ui.view.VanillaPlottingSystemView"
+            class="org.eclipse.dawnsci.plotting.api.VanillaPlottingSystemView"
             icon="icons/output.png"
             id="org.dawnsci.processing.ui.output"
             name="Output"
