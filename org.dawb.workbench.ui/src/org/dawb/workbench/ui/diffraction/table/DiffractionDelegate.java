@@ -10,13 +10,12 @@ package org.dawb.workbench.ui.diffraction.table;
 
 import java.util.List;
 
+import org.dawb.common.ui.selection.SelectedTreeItemInfo;
+import org.dawb.common.ui.selection.SelectionUtils;
 import org.dawb.workbench.ui.Activator;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorPropertyEvent;
 import org.eclipse.dawnsci.analysis.api.diffraction.IDetectorPropertyListener;
-import org.eclipse.dawnsci.analysis.api.tree.NodeLink;
-import org.eclipse.dawnsci.analysis.api.tree.TreeFile;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -25,10 +24,10 @@ import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
-import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.dnd.DND;
@@ -153,19 +152,10 @@ public class DiffractionDelegate implements IRefreshable {
 					for (int i = 0; i < res.length; i++) {
 						manager.loadData(res[i].getRawLocation().toOSString(), null);
 					}
-				} else if (dropData instanceof TreeSelection) {
-					TreeSelection selectedNode = (TreeSelection) dropData;
-					Object obj[] = selectedNode.toArray();
-					for (int i = 0; i < obj.length; i++) {
-						if (obj[i] instanceof NodeLink) {
-							NodeLink node = (NodeLink) obj[i];
-							if (node == null || !(node.getTree() instanceof TreeFile))
-								return;
-							manager.loadData(((TreeFile) node.getTree()).getFilename(), node.getFullName());
-						} else if (obj[i] instanceof IFile) {
-							IFile file = (IFile) obj[i];
-							manager.loadData(file.getLocation().toOSString(), null);
-						}
+				} else if (dropData instanceof ITreeSelection) {
+					SelectedTreeItemInfo[] results = SelectionUtils.parseAsTreeSelection((ITreeSelection) dropData);
+					for (SelectedTreeItemInfo i : results) {
+						manager.loadData(i.getFile(), i.getNode());
 					}
 				} else if (dropData instanceof String[]) {
 					String[] selectedData = (String[]) dropData;

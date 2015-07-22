@@ -9,8 +9,11 @@
 
 package org.dawnsci.plotting.util;
 
+import java.io.File;
 import java.util.Map;
 
+import org.dawb.common.ui.selection.SelectedTreeItemInfo;
+import org.dawb.common.ui.selection.SelectionUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -18,16 +21,13 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
-import org.eclipse.dawnsci.analysis.api.tree.NodeLink;
-import org.eclipse.dawnsci.analysis.api.tree.Tree;
-import org.eclipse.dawnsci.analysis.api.tree.TreeFile;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeSelection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,13 +83,10 @@ public class PlottingUtils {
 						"/entry1/instrument/analyser/data");
 		}
 		// if the selection is an hdf5 tree item
-		else if (item instanceof NodeLink) {
-			NodeLink link = (NodeLink)item;
-
-			Tree tree = link.getTree();
-			if (tree instanceof TreeFile) {
-				return loadData(((TreeFile) tree).getFilename(),
-							link.getFullName());
+		else if (selection instanceof ITreeSelection) {
+			SelectedTreeItemInfo[] results = SelectionUtils.parseAsTreeSelection((ITreeSelection) selection);
+			if (results.length > 0 && results[0].getFile() != null) {
+				return loadData(results[0].getFile(), results[0].getNode());
 			}
 		}
 		return null;
@@ -106,15 +103,11 @@ public class PlottingUtils {
 			return ((IFile) item).getName();
 		}
 		// if the selection is an hdf5 tree item
-		else if (item instanceof NodeLink) {
-			NodeLink link = (NodeLink)item;
-			Tree tree = link.getTree();
-			if (tree instanceof TreeFile) {
-				String fullName = ((TreeFile) tree).getFilename();
-				int index = fullName.lastIndexOf(System.getProperty("file.separator"));
-				if (index != -1)
-					return fullName.substring(index+1);
-				return fullName;
+		else if (selection instanceof ITreeSelection) {
+			SelectedTreeItemInfo[] results = SelectionUtils.parseAsTreeSelection((ITreeSelection) selection);
+			if (results.length > 0 && results[0].getFile() != null) {
+				File f = new File(results[0].getFile());
+				return f.getName();
 			}
 		}
 		return null;
@@ -131,12 +124,10 @@ public class PlottingUtils {
 			return ((IFile) item).getRawLocation().toOSString();
 		}
 		// if the selection is an hdf5 tree item
-		else if (item instanceof NodeLink) {
-			NodeLink link = (NodeLink)item;
-			Tree tree = link.getTree();
-			if (tree instanceof TreeFile) {
-					String fullName = ((TreeFile) tree).getFilename();
-				return fullName;
+		else if (selection instanceof ITreeSelection) {
+			SelectedTreeItemInfo[] results = SelectionUtils.parseAsTreeSelection((ITreeSelection) selection);
+			if (results.length > 0 && results[0].getFile() != null) {
+				return results[0].getFile();
 			}
 		}
 		return null;
@@ -162,7 +153,7 @@ public class PlottingUtils {
 			ILazyDataset value = tmpvalue.squeezeEnds();
 			if(value.getShape().length == 2) {
 				if (value instanceof IDataset) {
-					dataset = DatasetUtils.convertToDataset(value.getSliceView());
+					dataset = DatasetUtils.convertToDataset((IDataset) value.getSliceView());
 				} else {
 					dataset = DatasetUtils.convertToDataset(value.getSlice());
 				}
