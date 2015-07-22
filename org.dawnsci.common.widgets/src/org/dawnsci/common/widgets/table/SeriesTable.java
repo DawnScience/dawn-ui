@@ -22,6 +22,7 @@ import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.FocusCellOwnerDrawHighlighter;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -303,5 +304,13 @@ public class SeriesTable {
 			checkValid(getSeriesItems());
 		}
 		
+	}
+	
+	public void addSelectionListener(ISelectionChangedListener listener){
+		tableViewer.addSelectionChangedListener(listener);
+	}
+	
+	public void removeSelectionListener(ISelectionChangedListener listener){
+		tableViewer.removeSelectionChangedListener(listener);
 	}
 }
