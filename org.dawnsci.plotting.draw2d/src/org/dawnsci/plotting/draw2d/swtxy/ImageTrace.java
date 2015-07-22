@@ -542,7 +542,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		
 		//Get the data points per axis step
 		double xAxValPerPoint =  getAxisValuePerDataPoint(minX,maxX,getAxes().get(0));
-		double yAxValPerPoint =  getAxisValuePerDataPoint(minY,maxY,getAxes().get(0));
+		double yAxValPerPoint =  getAxisValuePerDataPoint(minY,maxY,getAxes().get(1));
 		
 		//get x and y start position in data array (floored)
 		int xPix = getPositionInAxis(minX,(Dataset)getAxes().get(0),true)/currentDownSampleBin;
