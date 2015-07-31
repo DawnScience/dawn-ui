@@ -2,6 +2,7 @@ package org.dawnsci.mapping.ui;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
@@ -27,14 +28,19 @@ import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.part.ViewPart;
@@ -199,7 +205,7 @@ public class MappedDataView extends ViewPart {
 				}
 			}
 		});
-		
+
 		viewer = new TreeViewer(parent);
 		viewer.setContentProvider(new MapFileTreeContentProvider());
 		viewer.setLabelProvider(new MapFileCellLabelProvider());
@@ -214,6 +220,42 @@ public class MappedDataView extends ViewPart {
 			}
 		});
 
+		// Add menu and action to treeviewer
+		MenuManager menuMgr = new MenuManager();
+		Menu menu = menuMgr.createContextMenu(viewer.getControl());
+		menuMgr.addMenuListener(new IMenuListener() {
+			@Override
+			public void menuAboutToShow(IMenuManager manager) {
+				if (viewer.getSelection().isEmpty())
+					return;
+				if (viewer.getSelection() instanceof IStructuredSelection) {
+					IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+					Iterator<?> it = selection.iterator();
+					List<MappedData> maps = new ArrayList<MappedData>();
+					while(it != null && it.hasNext()) {
+						Object obj = it.next();
+						if (obj instanceof MappedData) {
+							maps.add((MappedData)obj);
+						}
+					}
+					manager.add(openRGBDialog(maps));
+				}
+			}
+		});
+		menuMgr.setRemoveAllWhenShown(true);
+		viewer.getControl().setMenu(menu);
+		viewer.getControl().setMenu(menu);
+
+	}
+
+	private IAction openRGBDialog(final List<MappedData> maps) {
+		IAction action = new Action("Open RGB Mixer") {
+			@Override
+			public void run() {
+				System.out.println(maps.size());
+			}
+		};
+		return action;
 	}
 
 	@Override
