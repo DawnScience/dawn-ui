@@ -19,8 +19,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RGBMixerDialog extends Dialog {
+
+	private static Logger logger = LoggerFactory.getLogger(RGBMixerDialog.class);
 
 	private List<IDataset> data;
 	private IPlottingSystem system;
@@ -31,8 +35,7 @@ public class RGBMixerDialog extends Dialog {
 		try {
 			system = PlottingFactory.createPlottingSystem();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Error creating RGB plotting system:", e);
 		}
 	}
 
@@ -66,6 +69,7 @@ public class RGBMixerDialog extends Dialog {
 				} else {
 					system.updatePlot2D(data.get(idx), null, null);
 				}
+				//TODO plot converted RGB data from dataset
 			}
 		});
 
@@ -77,7 +81,7 @@ public class RGBMixerDialog extends Dialog {
 		greenCombo.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent evt) {
-				
+				//TODO plot converted RGB data from dataset
 			}
 		});
 
@@ -89,7 +93,7 @@ public class RGBMixerDialog extends Dialog {
 		blueCombo.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent evt) {
-				
+				//TODO plot converted RGB data from dataset
 			}
 		});
 
@@ -112,8 +116,6 @@ public class RGBMixerDialog extends Dialog {
 		return container;
 	}
 
-	// overriding this methods allows you to set the
-	// title of the custom dialog
 	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
