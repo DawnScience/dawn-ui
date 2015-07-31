@@ -7,6 +7,7 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.CompoundDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
+import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -36,6 +37,7 @@ public class RGBMixerDialog extends Dialog {
 	private IPlottingSystem system;
 
 	private int idxR = -1, idxG = -1, idxB = -1;
+	private Dataset zeros;
 
 	public RGBMixerDialog(Shell parentShell, List<IDataset> data) {
 		super(parentShell);
@@ -52,7 +54,6 @@ public class RGBMixerDialog extends Dialog {
 			this.data.add(da);
 			
 		}
-		
 		try {
 			system = PlottingFactory.createPlottingSystem();
 		} catch (Exception e) {
@@ -136,26 +137,30 @@ public class RGBMixerDialog extends Dialog {
 	}
 
 	private void updatePlot() {
+		zeros = new IntegerDataset(data.get(0).getSize());
+		zeros.setShape(data.get(0).getShape());
+		
 		if (idxR >= 0 && idxG >= 0 && idxB >= 0) {
+			
 			compData = new RGBDataset(data.get(idxR), data.get(idxG), data.get(idxB));
 			system.updatePlot2D(compData, null, null);
 		} else if (idxR >= 0 && idxG < 0 && idxB < 0) {
-			compData = new RGBDataset(data.get(idxR), data.get(idxR), data.get(idxR));
+			compData = new RGBDataset(data.get(idxR), zeros, zeros);
 			system.updatePlot2D(compData, null, null);
 		} else if (idxR < 0 && idxG >= 0 && idxB <0) {
-			compData = new RGBDataset(data.get(idxG), data.get(idxG), data.get(idxG));
+			compData = new RGBDataset(zeros, data.get(idxG), zeros);
 			system.updatePlot2D(compData, null, null);
 		} else if (idxR < 0 && idxG < 0 && idxB >= 0) {
-			compData = new RGBDataset(data.get(idxB), data.get(idxB), data.get(idxB));
+			compData = new RGBDataset(zeros, zeros, data.get(idxB));
 			system.updatePlot2D(compData, null, null);
 		} else if (idxR >= 0 && idxG >= 0 && idxB < 0) {
-			compData = new RGBDataset(data.get(idxR), data.get(idxG), data.get(idxG));
+			compData = new RGBDataset(data.get(idxR), data.get(idxG), zeros);
 			system.updatePlot2D(compData, null, null);
 		} else if (idxR >= 0 && idxG < 0 && idxB >= 0) {
-			compData = new RGBDataset(data.get(idxR), data.get(idxR), data.get(idxB));
+			compData = new RGBDataset(data.get(idxR), zeros, data.get(idxB));
 			system.updatePlot2D(compData, null, null);
 		} else if (idxR < 0 && idxG >= 0 && idxB >= 0) {
-			compData = new RGBDataset(data.get(idxG), data.get(idxG), data.get(idxB));
+			compData = new RGBDataset(zeros, data.get(idxG), data.get(idxB));
 			system.updatePlot2D(compData, null, null);
 		} else if (idxR < 0 && idxG < 0 && idxB < 0) {
 			system.clear();
