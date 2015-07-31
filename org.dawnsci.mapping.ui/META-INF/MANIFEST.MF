@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Ui
+Bundle-SymbolicName: org.dawnsci.mapping.ui;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.dawnsci.mapping.ui.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.dawnsci.plotting.api;bundle-version="1.2.0",
+ org.eclipse.dawnsci.analysis.api,
+ org.eclipse.jface,
+ org.eclipse.dawnsci.analysis.dataset
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
+Service-Component: OSGI-INF/localServiceManager.xml

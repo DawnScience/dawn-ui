@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            class="org.eclipse.dawnsci.plotting.api.VanillaPlottingSystemView"
+            id="org.dawnsci.mapping.ui.mapview"
+            name="Map"
+            restorable="true">
+      </view>
+      <view
+            class="org.eclipse.dawnsci.plotting.api.VanillaPlottingSystemView"
+            id="org.dawnsci.mapping.ui.spectrumview"
+            name="Spectrum"
+            restorable="true">
+      </view>
+      <view
+            class="org.dawnsci.mapping.ui.MappedDataView"
+            id="org.dawnsci.mapping.ui.mappeddataview"
+            name="Mapped Data"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="org.dawnsci.mapping.ui.MappingPerspective"
+            id="org.dawnsci.mapping.ui.mappingperspective"
+            name="Mapping">
+      </perspective>
+   </extension>
+
+</plugin>

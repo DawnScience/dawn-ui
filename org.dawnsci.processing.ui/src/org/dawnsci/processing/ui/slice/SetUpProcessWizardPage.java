@@ -354,7 +354,6 @@ public class SetUpProcessWizardPage extends WizardPage {
 		final Map<String, int[]>     names = SlicedDataUtils.getDatasetInfo(context.getFilePaths().get(0), scheme);
 
         rootName = DatasetTitleUtils.getRootName(names.keySet());
-		lservice.clearSoftReferenceCache();
         return names;
 	}
 	
