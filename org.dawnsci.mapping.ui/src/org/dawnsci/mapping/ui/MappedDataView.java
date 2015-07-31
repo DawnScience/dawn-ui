@@ -243,6 +243,8 @@ public class MappedDataView extends ViewPart {
 	private IAction openRGBDialog(final List<MappedData> maps) {
 		final List<IDataset> dataList = new ArrayList<IDataset>(maps.size());
 		for (MappedData map : maps) {
+			IDataset data = map.getMap();
+			data.setName(map.toString());
 			dataList.add(map.getMap());
 		}
 		IAction action = new Action("Open RGB Mixer") {
