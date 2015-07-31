@@ -31,6 +31,7 @@ import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.preferences.ToolbarConfigurationConstants;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
+import org.eclipse.dawnsci.plotting.api.trace.ICompositeTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
@@ -254,6 +255,8 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 			if (trace instanceof IPaletteTrace) {
 				final IPaletteTrace paletteTrace = (IPaletteTrace) trace;
 				paletteTrace.setPalette(paletteName);
+			} else if (trace instanceof ICompositeTrace) {
+				((ICompositeTrace)trace).setPalette(paletteName);
 			}
 		}
 	}

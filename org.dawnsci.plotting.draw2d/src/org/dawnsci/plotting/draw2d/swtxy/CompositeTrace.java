@@ -6,6 +6,7 @@ import java.util.List;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ICompositeTrace;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
@@ -35,8 +36,8 @@ public class CompositeTrace extends Figure implements ICompositeTrace {
 
 	@Override
 	public IDataset getData() {
-		// TODO Auto-generated method stub
-		return null;
+		if (traces == null || traces.isEmpty()) return null;
+		return traces.get(traces.size()-1).getData();
 	}
 
 	@Override
@@ -83,6 +84,10 @@ public class CompositeTrace extends Figure implements ICompositeTrace {
 		}
 	}
 
+	public void setPalette(String paletteName) {
+		for (IImageTrace t : traces) t.setPalette(paletteName);
+	}
+	
 	public void performAutoscale() {
 		if (traces == null || traces.isEmpty())  return;
 		
