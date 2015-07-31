@@ -10,7 +10,6 @@ import org.dawnsci.mapping.ui.datamodel.MapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedData;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
-import org.dawnsci.mapping.ui.datamodel.MappedDataDescriptionBean;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.MappedFileDescription;
 import org.dawnsci.mapping.ui.datamodel.MappedFileFactory;
