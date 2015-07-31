@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.dawnsci.mapping.ui.datamodel.MapObject;
@@ -14,18 +13,13 @@ import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.MappedFileDescription;
 import org.dawnsci.mapping.ui.datamodel.MappedFileFactory;
+import org.dawnsci.mapping.ui.dialog.RGBMixerDialog;
 import org.dawnsci.mapping.ui.wizards.ImportMappedDataWizard;
-import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext.ConversionScheme;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
-import org.eclipse.dawnsci.analysis.api.metadata.MaskMetadata;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
 import org.eclipse.dawnsci.plotting.api.trace.ICompositeTrace;
-import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
-import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
@@ -53,7 +47,6 @@ public class MappedDataView extends ViewPart {
 	private MappedDataArea area;
 	private List<MapObject> layers;
 	
-	
 	@Override
 	public void createPartControl(Composite parent) {
 		
@@ -65,7 +58,6 @@ public class MappedDataView extends ViewPart {
 				final WizardDialog wd = new WizardDialog(getSite().getShell(),wiz);
 				wd.setPageSize(new Point(900, 500));
 				wd.create();
-		
 		
 				wd.open();
 			}
@@ -249,10 +241,15 @@ public class MappedDataView extends ViewPart {
 	}
 
 	private IAction openRGBDialog(final List<MappedData> maps) {
+		final List<IDataset> dataList = new ArrayList<IDataset>(maps.size());
+		for (MappedData map : maps) {
+			dataList.add(map.getMap());
+		}
 		IAction action = new Action("Open RGB Mixer") {
 			@Override
 			public void run() {
-				System.out.println(maps.size());
+				RGBMixerDialog dialog = new RGBMixerDialog(Display.getDefault().getActiveShell(), dataList);
+				dialog.open();
 			}
 		};
 		return action;
