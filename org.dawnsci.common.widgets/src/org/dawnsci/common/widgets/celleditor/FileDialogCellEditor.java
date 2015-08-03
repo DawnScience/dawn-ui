@@ -12,9 +12,9 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.dawnsci.common.richbeans.internal.GridUtils;
 import org.dawnsci.common.widgets.Activator;
 import org.dawnsci.common.widgets.content.FileContentProposalProvider;
+import org.dawnsci.common.widgets.utils.GridUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;

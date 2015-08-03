@@ -12,13 +12,13 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dawnsci.common.richbeans.internal.GridUtils;
-import org.dawnsci.common.richbeans.internal.StringUtils;
 import org.dawnsci.common.widgets.decorator.BoundsDecorator;
 import org.dawnsci.common.widgets.decorator.FloatArrayDecorator;
 import org.dawnsci.common.widgets.decorator.FloatDecorator;
 import org.dawnsci.common.widgets.decorator.IntegerArrayDecorator;
 import org.dawnsci.common.widgets.decorator.IntegerDecorator;
+import org.dawnsci.common.widgets.utils.GridUtils;
+import org.dawnsci.common.widgets.utils.StringUtils;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;

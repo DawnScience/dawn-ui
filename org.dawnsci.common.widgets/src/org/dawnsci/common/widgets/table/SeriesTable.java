@@ -12,8 +12,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.dawnsci.common.richbeans.internal.GridUtils;
 import org.dawnsci.common.widgets.Activator;
+import org.dawnsci.common.widgets.utils.GridUtils;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.bindings.keys.IKeyLookup;
 import org.eclipse.jface.bindings.keys.KeyLookupFactory;

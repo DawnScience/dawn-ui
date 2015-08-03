@@ -8,9 +8,9 @@
  */
 package org.dawnsci.common.widgets.celleditor;
 
-import org.dawnsci.common.richbeans.internal.GridUtils;
 import org.dawnsci.common.widgets.Activator;
 import org.dawnsci.common.widgets.decorator.IntegerDecorator;
+import org.dawnsci.common.widgets.utils.GridUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
