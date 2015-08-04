@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
+import org.dawnsci.mapping.ui.Activator;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.CompoundDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
@@ -40,25 +41,32 @@ public class RGBMixerDialog extends Dialog {
 	private int idxR = -1, idxG = -1, idxB = -1;
 	private Dataset zeros;
 
-	public RGBMixerDialog(Shell parentShell, List<IDataset> data) {
+	public RGBMixerDialog(Shell parentShell, List<IDataset> data) throws Exception {
 		super(parentShell);
+		if (data.isEmpty())
+			throw new Exception("No data is available to visualize in the RGB Mixer dialog.");
 		setShellStyle(getShellStyle() | SWT.RESIZE);
+		setDefaultImage(Activator.getImageDescriptor("icons/rgb.png").createImage());
 		this.data = new ArrayList<Dataset>();
-		// TODO check that all data has the same shape
+		int width = data.get(0).getShape()[0];
+		int height = data.get(0).getShape()[1];
 		for (IDataset d : data) {
-			
+			if (width != d.getShape()[0] || height != d.getShape()[1]) {
+				throw new Exception("Data has not the same size");
+			}
 			double max = d.max().doubleValue();
 			double min = d.min().doubleValue();
 			
 			Dataset da = DatasetUtils.convertToDataset(d.clone());
 			da.isubtract(min).idivide(max-min).imultiply(255);
 			this.data.add(da);
-			
 		}
 		try {
 			system = PlottingFactory.createPlottingSystem();
 		} catch (Exception e) {
+			String error = "Error creating RGB plotting system:" + e.getMessage();
 			logger.error("Error creating RGB plotting system:", e);
+			throw new Exception(error);
 		}
 	}
 
@@ -76,7 +84,7 @@ public class RGBMixerDialog extends Dialog {
 		system.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		Composite bottomPane = new Composite(container, SWT.NONE);
-		bottomPane.setLayout(new GridLayout(2, false));
+		bottomPane.setLayout(new GridLayout(6, false));
 		bottomPane.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
 		//generate combos
@@ -95,7 +103,6 @@ public class RGBMixerDialog extends Dialog {
 			public void widgetSelected(SelectionEvent evt) {
 				idxR = redCombo.getSelectionIndex() - 1 ;
 				updatePlot();
-				//TODO plot converted RGB data from dataset
 			}
 		});
 
@@ -139,6 +146,8 @@ public class RGBMixerDialog extends Dialog {
 	}
 
 	private void updatePlot() {
+		if (data.isEmpty())
+			return;
 		zeros = new IntegerDataset(data.get(0).getSize());
 		zeros.setShape(data.get(0).getShape());
 		

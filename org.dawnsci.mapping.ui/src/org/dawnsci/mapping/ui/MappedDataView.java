@@ -25,6 +25,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -250,10 +251,19 @@ public class MappedDataView extends ViewPart {
 		IAction action = new Action("Open RGB Mixer") {
 			@Override
 			public void run() {
-				RGBMixerDialog dialog = new RGBMixerDialog(Display.getDefault().getActiveShell(), dataList);
-				dialog.open();
+				RGBMixerDialog dialog;
+				try {
+					dialog = new RGBMixerDialog(Display.getDefault().getActiveShell(), dataList);
+					dialog.open();
+				} catch (Exception e) {
+					MessageDialog.openError(Display.getDefault()
+							.getActiveShell(), "Error opening RGB Mixer",
+							"The following error occured while opening the RGB Mixer dialog: " + e);
+				}
+				
 			}
 		};
+		action.setImageDescriptor(Activator.getImageDescriptor("icons/rgb.png"));
 		return action;
 	}
 
