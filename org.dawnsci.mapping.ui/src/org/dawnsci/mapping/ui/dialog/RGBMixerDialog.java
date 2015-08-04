@@ -3,6 +3,7 @@ package org.dawnsci.mapping.ui.dialog;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.CompoundDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
@@ -41,9 +42,9 @@ public class RGBMixerDialog extends Dialog {
 
 	public RGBMixerDialog(Shell parentShell, List<IDataset> data) {
 		super(parentShell);
-		
+		setShellStyle(getShellStyle() | SWT.RESIZE);
 		this.data = new ArrayList<Dataset>();
-		
+		// TODO check that all data has the same shape
 		for (IDataset d : data) {
 			
 			double max = d.max().doubleValue();
@@ -64,12 +65,19 @@ public class RGBMixerDialog extends Dialog {
 	@Override
 	public Control createContents(Composite parent) {
 		Composite container = (Composite) super.createDialogArea(parent);
-		container.setLayout(new GridLayout(2, false));
+		container.setLayout(new GridLayout(1, false));
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		Composite leftPane = new Composite(container, SWT.NONE);
-		leftPane.setLayout(new GridLayout(2, false));
-		leftPane.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+		Composite topPane = new Composite(container, SWT.NONE);
+		topPane.setLayout(new GridLayout(1, false));
+		topPane.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		ActionBarWrapper actionBarWrapper = ActionBarWrapper.createActionBars(topPane, null);
+		system.createPlotPart(topPane, "RGB Plot", actionBarWrapper, PlotType.IMAGE, null);
+		system.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		Composite bottomPane = new Composite(container, SWT.NONE);
+		bottomPane.setLayout(new GridLayout(2, false));
+		bottomPane.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
 		//generate combos
 		String[] dataNames = new String[data.size() + 1];
@@ -77,9 +85,9 @@ public class RGBMixerDialog extends Dialog {
 		for (int i = 0; i < data.size(); i ++) {
 			dataNames[i + 1] = data.get(i).getName();
 		}
-		Label redLabel = new Label(leftPane, SWT.RIGHT);
+		Label redLabel = new Label(bottomPane, SWT.RIGHT);
 		redLabel.setText("Red:");
-		final Combo redCombo = new Combo(leftPane, SWT.NONE);
+		final Combo redCombo = new Combo(bottomPane, SWT.NONE);
 		redCombo.setItems(dataNames);
 		redCombo.select(0);
 		redCombo.addSelectionListener(new SelectionAdapter() {
@@ -91,9 +99,9 @@ public class RGBMixerDialog extends Dialog {
 			}
 		});
 
-		Label greenLabel = new Label(leftPane, SWT.RIGHT);
+		Label greenLabel = new Label(bottomPane, SWT.RIGHT);
 		greenLabel.setText("Green:");
-		final Combo greenCombo = new Combo(leftPane, SWT.NONE);
+		final Combo greenCombo = new Combo(bottomPane, SWT.NONE);
 		greenCombo.setItems(dataNames);
 		greenCombo.select(0);
 		greenCombo.addSelectionListener(new SelectionAdapter() {
@@ -104,9 +112,9 @@ public class RGBMixerDialog extends Dialog {
 			}
 		});
 
-		Label blueLabel = new Label(leftPane, SWT.RIGHT);
+		Label blueLabel = new Label(bottomPane, SWT.RIGHT);
 		blueLabel.setText("Blue:");
-		final Combo blueCombo = new Combo(leftPane, SWT.NONE);
+		final Combo blueCombo = new Combo(bottomPane, SWT.NONE);
 		blueCombo.setItems(dataNames);
 		blueCombo.select(0);
 		blueCombo.addSelectionListener(new SelectionAdapter() {
@@ -116,12 +124,6 @@ public class RGBMixerDialog extends Dialog {
 				updatePlot();
 			}
 		});
-
-		Composite plotContainer = new Composite(container, SWT.NONE);
-		plotContainer.setLayout(new GridLayout(1, false));
-		plotContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		system.createPlotPart(plotContainer, "RGB Plot", null, PlotType.IMAGE, null);
-		system.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		Button closeButton = new Button(container, SWT.NONE);
 		closeButton.setText("Close");
