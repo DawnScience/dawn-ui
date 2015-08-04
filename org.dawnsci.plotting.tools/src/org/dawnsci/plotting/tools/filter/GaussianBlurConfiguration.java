@@ -1,7 +1,7 @@
 package org.dawnsci.plotting.tools.filter;
 
-import org.dawnsci.common.widgets.decorator.FloatDecorator;
 import org.dawnsci.plotting.tools.Activator;
+import org.eclipse.richbeans.widgets.decorator.FloatDecorator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;

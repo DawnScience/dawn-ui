@@ -3,7 +3,6 @@ package org.dawnsci.plotting.tools.filter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.dawnsci.common.widgets.decorator.FloatDecorator;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.filter.AbstractPlottingFilter;
 import org.eclipse.dawnsci.plotting.api.filter.FilterConfiguration;
@@ -11,6 +10,7 @@ import org.eclipse.dawnsci.plotting.api.filter.FilterEvent;
 import org.eclipse.dawnsci.plotting.api.filter.IFilterListener;
 import org.eclipse.dawnsci.plotting.api.filter.IPlottingFilter;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.richbeans.widgets.decorator.FloatDecorator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.ModifyEvent;

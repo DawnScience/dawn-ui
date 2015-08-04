@@ -18,6 +18,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 public class Activator extends AbstractUIPlugin {
 
@@ -55,4 +56,11 @@ public class Activator extends AbstractUIPlugin {
 	public static IPreferenceStore getLocalPreferenceStore() {
 		return staticActivator.getPreferenceStore();
 	}
+	
+
+	public static Object getService(Class<?> serviceClass) {
+		ServiceReference<?> ref = staticActivator.getBundle().getBundleContext().getServiceReference(serviceClass);
+		return staticActivator.getBundle().getBundleContext().getService(ref);
+	}
+
 }

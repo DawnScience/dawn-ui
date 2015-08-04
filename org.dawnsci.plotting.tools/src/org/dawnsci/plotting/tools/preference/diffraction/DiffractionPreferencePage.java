@@ -13,13 +13,14 @@ import java.util.List;
 
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.util.GridUtils;
-import org.dawnsci.common.richbeans.beans.BeanUI;
-import org.dawnsci.common.richbeans.components.selector.VerticalListEditor;
 import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.richbeans.api.reflection.IBeanController;
+import org.eclipse.richbeans.api.reflection.IBeanService;
+import org.eclipse.richbeans.widgets.selector.VerticalListEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -202,7 +203,9 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 		try {			
 			
 			CalibrantSpacing spacing = calibrationStandards.getCalibrationPeakMap(calibrantChoice.getItem(calibrantChoice.getSelectionIndex()));
-			BeanUI.uiToBean(this, spacing);
+			IBeanService service = (IBeanService)Activator.getService(IBeanService.class);
+			IBeanController controller = service.createController(this, spacing);
+			controller.uiToBean();
 			calibrationStandards.save();
 		} catch (Exception e) {
 			logger.error("Cannot save standards!", e);
@@ -262,16 +265,20 @@ public class DiffractionPreferencePage extends PreferencePage implements IWorkbe
 		CalibrantSpacing spacing = calibrationStandards.getCalibrationPeakMap(name);
 		setBean(spacing);
 	}
-
-	public void setBean(Object bean) {
+	
+	private void setBean(Object bean) {
 		try {
-			BeanUI.beanToUI(bean, this);
-			BeanUI.switchState(bean, this, true);
-			BeanUI.fireValueListeners(bean, this);
+			IBeanService service = (IBeanService)Activator.getService(IBeanService.class);
+			IBeanController controller = service.createController(this, bean);
+			controller.beanToUI();
+			controller.switchState(true);
+			controller.fireValueListeners();
+			
 		} catch (Exception e) {
-			logger.error("Cannot send "+bean+" to dialog!", e);
-		}		
+			logger.warn("Cannot send "+bean+" to dialog!", e);
+		}
 	}
+
 	@Override
 	public void calibrantSelectionChanged(CalibrantSelectionEvent evt) {
 		final int index = calibrantChoice.getSelectionIndex();

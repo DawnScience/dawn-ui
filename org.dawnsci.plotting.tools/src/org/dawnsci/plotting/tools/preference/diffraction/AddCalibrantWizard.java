@@ -8,11 +8,11 @@
  */
 package org.dawnsci.plotting.tools.preference.diffraction;
 
-import org.dawnsci.common.widgets.decorator.FloatDecorator;
 import org.dawnsci.plotting.tools.preference.diffraction.AddCalibrantWizard.NewCalibrantModel.NewMode;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.richbeans.widgets.decorator.FloatDecorator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;

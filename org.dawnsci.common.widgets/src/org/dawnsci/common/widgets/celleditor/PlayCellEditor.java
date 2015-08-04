@@ -9,13 +9,13 @@
 package org.dawnsci.common.widgets.celleditor;
 
 import org.dawnsci.common.widgets.Activator;
-import org.dawnsci.common.widgets.decorator.IntegerDecorator;
 import org.dawnsci.common.widgets.utils.GridUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.richbeans.widgets.decorator.IntegerDecorator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;

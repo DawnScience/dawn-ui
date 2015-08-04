@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawb.common.util.io.IOUtils;
-import org.dawnsci.common.widgets.content.FileContentProposalProvider;
 import org.dawnsci.common.widgets.radio.RadioGroupWidget;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -32,6 +31,7 @@ import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
+import org.eclipse.richbeans.widgets.content.FileContentProposalProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;

@@ -11,7 +11,6 @@ package org.dawnsci.common.widgets.file;
 import java.io.File;
 
 import org.dawnsci.common.widgets.Activator;
-import org.dawnsci.common.widgets.content.FileContentProposalProvider;
 import org.eclipse.emf.common.ui.dialogs.WorkspaceResourceDialog;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -21,6 +20,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
+import org.eclipse.richbeans.widgets.content.FileContentProposalProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;

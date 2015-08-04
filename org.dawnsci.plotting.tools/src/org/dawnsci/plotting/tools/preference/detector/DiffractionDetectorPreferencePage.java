@@ -14,10 +14,11 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
 import org.dawb.common.ui.util.GridUtils;
-import org.dawnsci.common.richbeans.beans.BeanUI;
-import org.dawnsci.common.richbeans.components.selector.VerticalListEditor;
 import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.richbeans.api.reflection.IBeanController;
+import org.eclipse.richbeans.api.reflection.IBeanService;
+import org.eclipse.richbeans.widgets.selector.VerticalListEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -25,8 +26,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DiffractionDetectorPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
+	
+	private static Logger logger = LoggerFactory.getLogger(DiffractionDetectorPreferencePage.class);
 	
 	private DiffractionDetectors detectors;
 	private VerticalListEditor detectorEditor;
@@ -83,12 +88,13 @@ public class DiffractionDetectorPreferencePage extends PreferencePage implements
 	@Override
 	public boolean performOk() {
 		try {			
-			
-			
-			BeanUI.uiToBean(this, detectors);
+			IBeanService service = (IBeanService)Activator.getService(IBeanService.class);
+			IBeanController controller = service.createController(this, detectors);
+			controller.uiToBean();
 			setDetectorsToPreference();
 			
 		} catch (Exception e) {
+			logger.warn("Internal error, could not merge bean and ui!", e);
 		}
 		return super.performOk();
 	}
@@ -128,14 +134,16 @@ public class DiffractionDetectorPreferencePage extends PreferencePage implements
 
 	}
 	
-	public void setBean(Object bean) {
+	private void setBean(Object bean) {
 		try {
-			BeanUI.beanToUI(bean, this);
-			BeanUI.switchState(bean, this, true);
-			BeanUI.fireValueListeners(bean, this);
+			IBeanService service = (IBeanService)Activator.getService(IBeanService.class);
+			IBeanController controller = service.createController(this, bean);
+			controller.beanToUI();
+			controller.switchState(true);
+			controller.fireValueListeners();
+			
 		} catch (Exception e) {
-			//logger.error("Cannot send "+bean+" to dialog!", e);
-			e.printStackTrace();
+			logger.warn("Cannot send "+bean+" to dialog!", e);
 		}
 	}
 }

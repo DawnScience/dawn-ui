@@ -12,8 +12,6 @@ import java.util.Arrays;
 import java.util.EventObject;
 import java.util.List;
 
-import org.dawnsci.common.widgets.decorator.BoundsDecorator;
-import org.dawnsci.common.widgets.decorator.FloatDecorator;
 import org.dawnsci.plotting.histogram.functions.ColourSchemeContribution;
 import org.dawnsci.plotting.histogram.functions.TransferFunctionContribution;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -49,6 +47,8 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.richbeans.widgets.decorator.BoundsDecorator;
+import org.eclipse.richbeans.widgets.decorator.FloatDecorator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.CLabel;

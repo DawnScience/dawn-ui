@@ -8,7 +8,7 @@
  */
 package org.dawnsci.plotting.tools.powderintegration;
 
-import org.dawnsci.common.widgets.decorator.FloatDecorator;
+import org.eclipse.richbeans.widgets.decorator.FloatDecorator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;

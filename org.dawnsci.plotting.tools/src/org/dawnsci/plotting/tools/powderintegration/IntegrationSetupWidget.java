@@ -13,8 +13,8 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dawnsci.common.widgets.decorator.FloatDecorator;
-import org.dawnsci.common.widgets.decorator.IntegerDecorator;
+import org.eclipse.richbeans.widgets.decorator.FloatDecorator;
+import org.eclipse.richbeans.widgets.decorator.IntegerDecorator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;

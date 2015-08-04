@@ -18,9 +18,6 @@
 
 package org.dawnsci.common.widgets.celleditor;
 
-import org.dawnsci.common.richbeans.components.scalebox.RangeBox;
-import org.dawnsci.common.richbeans.components.wrappers.SpinnerWrapper;
-import org.dawnsci.common.richbeans.event.ValueListener;
 import org.dawnsci.common.widgets.Activator;
 import org.dawnsci.common.widgets.utils.GridUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -28,6 +25,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.richbeans.api.event.ValueListener;
+import org.eclipse.richbeans.widgets.scalebox.RangeBox;
+import org.eclipse.richbeans.widgets.wrappers.SpinnerWrapper;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
