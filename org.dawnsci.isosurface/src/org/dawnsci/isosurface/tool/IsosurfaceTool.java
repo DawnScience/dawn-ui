@@ -9,7 +9,6 @@
 package org.dawnsci.isosurface.tool;
 
 import org.dawb.common.ui.util.GridUtils;
-import org.dawnsci.common.widgets.decorator.FloatDecorator;
 import org.dawnsci.isosurface.Activator;
 import org.dawnsci.isosurface.alg.MarchingCubesModel;
 import org.dawnsci.isosurface.alg.Surface;
@@ -25,6 +24,7 @@ import org.eclipse.dawnsci.slicing.api.system.DimensionalListener;
 import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.dawnsci.slicing.api.system.SliceSource;
 import org.eclipse.dawnsci.slicing.api.tool.AbstractSlicingTool;
+import org.eclipse.richbeans.widgets.decorator.FloatDecorator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
