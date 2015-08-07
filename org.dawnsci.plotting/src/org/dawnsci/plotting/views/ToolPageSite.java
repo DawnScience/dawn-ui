@@ -210,7 +210,7 @@ public class ToolPageSite implements IPageSite, INestable {
 			menuExtenders = new ArrayList(1);
 		}
 		PartSite.registerContextMenu(menuID, menuMgr, selProvider, false,
-				parentSite.getPart(), menuExtenders);
+				parentSite.getPart(), null, menuExtenders);
 	}
 
 	/*
