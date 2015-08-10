@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.mihalis.opal.rangeSlider.RangeSlider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +41,12 @@ public class RGBMixerDialog extends Dialog {
 
 	private int idxR = -1, idxG = -1, idxB = -1;
 	private Dataset zeros;
+
+	private RangeSlider redRangeSlider;
+
+	private RangeSlider greenRangeSlider;
+
+	private RangeSlider blueRangeSlider;
 
 	public RGBMixerDialog(Shell parentShell, List<IDataset> data) throws Exception {
 		super(parentShell);
@@ -84,7 +91,7 @@ public class RGBMixerDialog extends Dialog {
 		system.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		Composite bottomPane = new Composite(container, SWT.NONE);
-		bottomPane.setLayout(new GridLayout(6, false));
+		bottomPane.setLayout(new GridLayout(3, false));
 		bottomPane.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
 		//generate combos
@@ -93,9 +100,13 @@ public class RGBMixerDialog extends Dialog {
 		for (int i = 0; i < data.size(); i ++) {
 			dataNames[i + 1] = data.get(i).getName();
 		}
-		Label redLabel = new Label(bottomPane, SWT.RIGHT);
+
+		Composite redComp = new Composite(bottomPane, SWT.NONE);
+		redComp.setLayout(new GridLayout(2, false));
+		Label redLabel = new Label(redComp, SWT.RIGHT);
 		redLabel.setText("Red:");
-		final Combo redCombo = new Combo(bottomPane, SWT.NONE);
+		final Combo redCombo = new Combo(redComp, SWT.CENTER);
+		redCombo.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
 		redCombo.setItems(dataNames);
 		redCombo.select(0);
 		redCombo.addSelectionListener(new SelectionAdapter() {
@@ -105,10 +116,21 @@ public class RGBMixerDialog extends Dialog {
 				updatePlot();
 			}
 		});
+		redRangeSlider = new RangeSlider(redComp, SWT.HORIZONTAL);
+		redRangeSlider.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		redRangeSlider.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent evt) {
+				System.out.println("moving");
+			}
+		});
 
-		Label greenLabel = new Label(bottomPane, SWT.RIGHT);
+		Composite greenComp = new Composite(bottomPane, SWT.NONE);
+		greenComp.setLayout(new GridLayout(2, false));
+		Label greenLabel = new Label(greenComp, SWT.RIGHT);
 		greenLabel.setText("Green:");
-		final Combo greenCombo = new Combo(bottomPane, SWT.NONE);
+		final Combo greenCombo = new Combo(greenComp, SWT.CENTER);
+		greenCombo.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
 		greenCombo.setItems(dataNames);
 		greenCombo.select(0);
 		greenCombo.addSelectionListener(new SelectionAdapter() {
@@ -118,10 +140,22 @@ public class RGBMixerDialog extends Dialog {
 				updatePlot();
 			}
 		});
+		greenRangeSlider = new RangeSlider(greenComp, SWT.HORIZONTAL);
+		greenRangeSlider.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		greenRangeSlider.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent evt) {
+				System.out.println("moving");
 
-		Label blueLabel = new Label(bottomPane, SWT.RIGHT);
+			}
+		});
+
+		Composite blueComp = new Composite(bottomPane, SWT.NONE);
+		blueComp.setLayout(new GridLayout(2, false));
+		Label blueLabel = new Label(blueComp, SWT.RIGHT);
 		blueLabel.setText("Blue:");
-		final Combo blueCombo = new Combo(bottomPane, SWT.NONE);
+		final Combo blueCombo = new Combo(blueComp, SWT.CENTER);
+		blueCombo.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
 		blueCombo.setItems(dataNames);
 		blueCombo.select(0);
 		blueCombo.addSelectionListener(new SelectionAdapter() {
@@ -129,6 +163,15 @@ public class RGBMixerDialog extends Dialog {
 			public void widgetSelected(SelectionEvent evt) {
 				idxB = blueCombo.getSelectionIndex() - 1 ;
 				updatePlot();
+			}
+		});
+		blueRangeSlider = new RangeSlider(blueComp, SWT.HORIZONTAL);
+		blueRangeSlider.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		blueRangeSlider.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent evt) {
+				System.out.println("moving");
+
 			}
 		});
 
