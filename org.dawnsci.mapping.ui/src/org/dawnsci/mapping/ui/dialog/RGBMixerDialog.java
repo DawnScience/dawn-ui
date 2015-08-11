@@ -16,6 +16,8 @@ import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
@@ -124,6 +126,15 @@ public class RGBMixerDialog extends Dialog {
 				System.out.println("moving");
 			}
 		});
+		final Button redLogButton = new Button(redComp, SWT.CHECK);
+		redLogButton.setText("Apply Log on red channel");
+		redLogButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		redLogButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent evt) {
+				System.out.println("log red");
+			}
+		});
 
 		Composite greenComp = new Composite(bottomPane, SWT.NONE);
 		greenComp.setLayout(new GridLayout(2, false));
@@ -149,6 +160,15 @@ public class RGBMixerDialog extends Dialog {
 
 			}
 		});
+		final Button greenLogButton = new Button(greenComp, SWT.CHECK);
+		greenLogButton.setText("Apply Log on blue channel");
+		greenLogButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		greenLogButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent evt) {
+				System.out.println("log green");
+			}
+		});
 
 		Composite blueComp = new Composite(bottomPane, SWT.NONE);
 		blueComp.setLayout(new GridLayout(2, false));
@@ -171,7 +191,21 @@ public class RGBMixerDialog extends Dialog {
 			@Override
 			public void widgetSelected(SelectionEvent evt) {
 				System.out.println("moving");
-
+			}
+		});
+		blueRangeSlider.addMouseWheelListener(new MouseWheelListener() {
+			@Override
+			public void mouseScrolled(MouseEvent e) {
+			System.out.println("mouse wheel");	
+			}
+		});
+		final Button blueLogButton = new Button(blueComp, SWT.CHECK);
+		blueLogButton.setText("Apply Log on blue channel");
+		blueLogButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		blueLogButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent evt) {
+				System.out.println("log blue");
 			}
 		});
 
