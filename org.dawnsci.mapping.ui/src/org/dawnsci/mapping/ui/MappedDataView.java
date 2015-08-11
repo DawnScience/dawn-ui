@@ -13,6 +13,7 @@ import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.MappedFileDescription;
 import org.dawnsci.mapping.ui.datamodel.MappedFileFactory;
+import org.dawnsci.mapping.ui.dialog.ImageGridDialog;
 import org.dawnsci.mapping.ui.dialog.RGBMixerDialog;
 import org.dawnsci.mapping.ui.wizards.ImportMappedDataWizard;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
@@ -232,6 +233,7 @@ public class MappedDataView extends ViewPart {
 						}
 					}
 					manager.add(openRGBDialog(maps));
+					manager.add(openComparisonDialog(maps));
 				}
 			}
 		});
@@ -264,6 +266,32 @@ public class MappedDataView extends ViewPart {
 			}
 		};
 		action.setImageDescriptor(Activator.getImageDescriptor("icons/rgb.png"));
+		return action;
+	}
+
+	private IAction openComparisonDialog(final List<MappedData> maps) {
+		final List<IDataset> dataList = new ArrayList<IDataset>(maps.size());
+		for (MappedData map : maps) {
+			IDataset data = map.getMap();
+			data.setName(map.toString());
+			dataList.add(map.getMap());
+		}
+		IAction action = new Action("Open Comparison Viewer") {
+			@Override
+			public void run() {
+				ImageGridDialog dialog;
+				try {
+					dialog = new ImageGridDialog(Display.getDefault().getActiveShell(), dataList);
+					dialog.open();
+				} catch (Exception e) {
+					MessageDialog.openError(Display.getDefault()
+							.getActiveShell(), "Error Comparison Viewer",
+							"The following error occured while opening the Comparison Viewer dialog: " + e);
+				}
+				
+			}
+		};
+		action.setImageDescriptor(Activator.getImageDescriptor("icons/images-stack.png"));
 		return action;
 	}
 
