@@ -18,6 +18,7 @@ import org.dawnsci.mapping.ui.dialog.RGBMixerDialog;
 import org.dawnsci.mapping.ui.wizards.ImportMappedDataWizard;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
@@ -27,12 +28,15 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -243,7 +247,16 @@ public class MappedDataView extends ViewPart {
 							maps.add((MappedData)obj);
 						}
 					}
-					manager.add(openRGBDialog(maps));
+					
+					if (selection instanceof ITreeSelection) {
+						Object ob = ((ITreeSelection)selection).getPaths()[0].getParentPath().getFirstSegment();
+						if (ob instanceof MappedDataFile) {
+							MappedDataFile df = (MappedDataFile)ob;
+							manager.add(openRGBDialog(maps, df));
+						}
+						
+					}
+					
 					manager.add(openComparisonDialog(maps));
 				}
 			}
@@ -298,7 +311,7 @@ public class MappedDataView extends ViewPart {
 		plotMapData();
 	}
 
-	private IAction openRGBDialog(final List<MappedData> maps) {
+	private IAction openRGBDialog(final List<MappedData> maps, final MappedDataFile mdf) {
 		final List<IDataset> dataList = new ArrayList<IDataset>(maps.size());
 		for (MappedData map : maps) {
 			IDataset data = map.getMap();
@@ -311,7 +324,13 @@ public class MappedDataView extends ViewPart {
 				RGBMixerDialog dialog;
 				try {
 					dialog = new RGBMixerDialog(Display.getDefault().getActiveShell(), dataList);
-					dialog.open();
+					if (dialog.open() == IDialogConstants.CANCEL_ID) return;
+					IDataset rgb = dialog.getRGBDataset();
+					if (rgb == null) return;
+					rgb.addMetadata(maps.get(0).getMap().getMetadata(AxesMetadata.class).get(0));
+					MappedData m = maps.get(0).makeNewMapWithParent("RGB", rgb);
+					mdf.addMapObject("RGB", m);
+					viewer.refresh();
 				} catch (Exception e) {
 					MessageDialog.openError(Display.getDefault()
 							.getActiveShell(), "Error opening RGB Mixer",

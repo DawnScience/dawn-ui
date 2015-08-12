@@ -8,8 +8,11 @@ import org.dawnsci.mapping.ui.Activator;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.CompoundDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
+import org.eclipse.dawnsci.analysis.dataset.impl.IndexIterator;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
 import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -42,6 +45,9 @@ public class RGBMixerDialog extends Dialog {
 	private IPlottingSystem system;
 
 	private int idxR = -1, idxG = -1, idxB = -1;
+	private boolean rDirty = true, bDirty = true, gDirty = true;
+	private boolean rLog= false, bLog= false, gLog = false;
+	private Dataset red, blue, green;
 	private Dataset zeros;
 
 	private RangeSlider redRangeSlider;
@@ -66,8 +72,8 @@ public class RGBMixerDialog extends Dialog {
 			double max = d.max().doubleValue();
 			double min = d.min().doubleValue();
 			
-			Dataset da = DatasetUtils.convertToDataset(d.clone());
-			da.isubtract(min).idivide(max-min).imultiply(255);
+			Dataset da = DatasetUtils.convertToDataset(d);
+//			da.isubtract(min).idivide(max-min).imultiply(255);
 			this.data.add(da);
 		}
 		try {
@@ -80,7 +86,7 @@ public class RGBMixerDialog extends Dialog {
 	}
 
 	@Override
-	public Control createContents(Composite parent) {
+	public Control createDialogArea(Composite parent) {
 		Composite container = (Composite) super.createDialogArea(parent);
 		container.setLayout(new GridLayout(1, false));
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -114,6 +120,7 @@ public class RGBMixerDialog extends Dialog {
 		redCombo.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent evt) {
+				rDirty = true;
 				idxR = redCombo.getSelectionIndex() - 1 ;
 				updatePlot();
 			}
@@ -123,6 +130,8 @@ public class RGBMixerDialog extends Dialog {
 		redRangeSlider.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent evt) {
+				rDirty = true;
+				updatePlot();
 				System.out.println("moving");
 			}
 		});
@@ -132,6 +141,9 @@ public class RGBMixerDialog extends Dialog {
 		redLogButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent evt) {
+				rDirty = true;
+				rLog = redLogButton.getSelection();
+				updatePlot();
 				System.out.println("log red");
 			}
 		});
@@ -147,6 +159,7 @@ public class RGBMixerDialog extends Dialog {
 		greenCombo.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent evt) {
+				gDirty = true;
 				idxG = greenCombo.getSelectionIndex() - 1 ;
 				updatePlot();
 			}
@@ -156,6 +169,8 @@ public class RGBMixerDialog extends Dialog {
 		greenRangeSlider.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent evt) {
+				gDirty = true;
+				updatePlot();
 				System.out.println("moving");
 
 			}
@@ -166,6 +181,9 @@ public class RGBMixerDialog extends Dialog {
 		greenLogButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent evt) {
+				gDirty = true;
+				gLog = greenLogButton.getSelection();
+				updatePlot();
 				System.out.println("log green");
 			}
 		});
@@ -181,6 +199,7 @@ public class RGBMixerDialog extends Dialog {
 		blueCombo.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent evt) {
+				bDirty = true;
 				idxB = blueCombo.getSelectionIndex() - 1 ;
 				updatePlot();
 			}
@@ -190,12 +209,16 @@ public class RGBMixerDialog extends Dialog {
 		blueRangeSlider.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent evt) {
+				bDirty = true;
+				updatePlot();
 				System.out.println("moving");
 			}
 		});
 		blueRangeSlider.addMouseWheelListener(new MouseWheelListener() {
 			@Override
 			public void mouseScrolled(MouseEvent e) {
+				bDirty = true;
+				updatePlot();
 			System.out.println("mouse wheel");	
 			}
 		});
@@ -205,54 +228,139 @@ public class RGBMixerDialog extends Dialog {
 		blueLogButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent evt) {
-				System.out.println("log blue");
-			}
-		});
-
-		Button closeButton = new Button(container, SWT.NONE);
-		closeButton.setText("Close");
-		closeButton.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false, 2, 1));
-		closeButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent evt) {
-				RGBMixerDialog.this.close();
+				bDirty = true;
+				bLog = blueLogButton.getSelection();
+				updatePlot();
 			}
 		});
 
 		return container;
 	}
+	
+	public IDataset getRGBDataset() {
+		return compData;
+	}
 
 	private void updatePlot() {
 		if (data.isEmpty())
 			return;
-		zeros = new IntegerDataset(data.get(0).getSize());
-		zeros.setShape(data.get(0).getShape());
 		
-		if (idxR >= 0 && idxG >= 0 && idxB >= 0) {
-			
-			compData = new RGBDataset(data.get(idxR), data.get(idxG), data.get(idxB));
-			system.updatePlot2D(compData, null, null);
-		} else if (idxR >= 0 && idxG < 0 && idxB < 0) {
-			compData = new RGBDataset(data.get(idxR), zeros, zeros);
-			system.updatePlot2D(compData, null, null);
-		} else if (idxR < 0 && idxG >= 0 && idxB <0) {
-			compData = new RGBDataset(zeros, data.get(idxG), zeros);
-			system.updatePlot2D(compData, null, null);
-		} else if (idxR < 0 && idxG < 0 && idxB >= 0) {
-			compData = new RGBDataset(zeros, zeros, data.get(idxB));
-			system.updatePlot2D(compData, null, null);
-		} else if (idxR >= 0 && idxG >= 0 && idxB < 0) {
-			compData = new RGBDataset(data.get(idxR), data.get(idxG), zeros);
-			system.updatePlot2D(compData, null, null);
-		} else if (idxR >= 0 && idxG < 0 && idxB >= 0) {
-			compData = new RGBDataset(data.get(idxR), zeros, data.get(idxB));
-			system.updatePlot2D(compData, null, null);
-		} else if (idxR < 0 && idxG >= 0 && idxB >= 0) {
-			compData = new RGBDataset(zeros, data.get(idxG), data.get(idxB));
-			system.updatePlot2D(compData, null, null);
-		} else if (idxR < 0 && idxG < 0 && idxB < 0) {
-			system.clear();
+		if (zeros == null) {
+			zeros = new IntegerDataset(data.get(0).getSize());
+			zeros.setShape(data.get(0).getShape());
 		}
+		
+		Dataset r = red;
+		Dataset b = blue;
+		Dataset g = green;
+		
+		if (idxR >= 0) {
+			if (rDirty) {
+				red = r = update(data.get(idxR),redRangeSlider.getLowerValue(),redRangeSlider.getUpperValue(),rLog);
+				rDirty = false;
+			};
+		} else {
+			r = zeros;
+		}
+		
+		if (idxG >= 0) {
+			if (gDirty) {
+				green = g = update(data.get(idxG),greenRangeSlider.getLowerValue(),greenRangeSlider.getUpperValue(),gLog);
+				gDirty = false;
+			};
+		} else {
+			g = zeros;
+		}
+		if (idxB >= 0) {
+			if (bDirty) {
+				blue = b = update(data.get(idxB),blueRangeSlider.getLowerValue(),blueRangeSlider.getUpperValue(),bLog);
+				bDirty = false;
+			};
+		} else {
+			b = zeros;
+		}
+		
+
+		
+		if (idxR < 0 && idxG < 0 && idxB < 0) {
+			system.clear();
+		} else {
+			compData = new RGBDataset(r,g,b);
+			system.updatePlot2D(compData, null, null);	
+		}
+		
+//		if (idxR >= 0 && idxG >= 0 && idxB >= 0) {
+//			compData = new RGBDataset(data.get(idxR), data.get(idxG), data.get(idxB));
+//			system.updatePlot2D(compData, null, null);
+//		} else if (idxR >= 0 && idxG < 0 && idxB < 0) {
+//			compData = new RGBDataset(data.get(idxR), zeros, zeros);
+//			system.updatePlot2D(compData, null, null);
+//		} else if (idxR < 0 && idxG >= 0 && idxB <0) {
+//			compData = new RGBDataset(zeros, data.get(idxG), zeros);
+//			system.updatePlot2D(compData, null, null);
+//		} else if (idxR < 0 && idxG < 0 && idxB >= 0) {
+//			compData = new RGBDataset(zeros, zeros, data.get(idxB));
+//			system.updatePlot2D(compData, null, null);
+//		} else if (idxR >= 0 && idxG >= 0 && idxB < 0) {
+//			compData = new RGBDataset(data.get(idxR), data.get(idxG), zeros);
+//			system.updatePlot2D(compData, null, null);
+//		} else if (idxR >= 0 && idxG < 0 && idxB >= 0) {
+//			compData = new RGBDataset(data.get(idxR), zeros, data.get(idxB));
+//			system.updatePlot2D(compData, null, null);
+//		} else if (idxR < 0 && idxG >= 0 && idxB >= 0) {
+//			compData = new RGBDataset(zeros, data.get(idxG), data.get(idxB));
+//			system.updatePlot2D(compData, null, null);
+//		} else if (idxR < 0 && idxG < 0 && idxB < 0) {
+
+	}
+	
+	private Dataset update(Dataset ds, int lower, int upper, boolean log) {
+		double dMin = ds.min().doubleValue();
+		double dMax = ds.max().doubleValue();
+		
+//		if (log) {
+//			dMin = Math.log10(dMin);
+//			dMax = Math.log10(dMax);
+//		}
+		
+		double dRange = dMax - dMin;
+		int min = lower;
+		int max = upper;
+
+		double mi = dRange*((double)min/100)+dMin;
+		double ma = dMax - dRange*(100-max)/100;
+		
+//		if (log) {
+//			mi = Math.pow(10, mi);
+//			ma = Math.pow(10, ma);
+//		}
+		
+		return updateDataset(ds, mi, ma, log);
+	}
+	
+	private Dataset updateDataset(Dataset ds, double min, double max, boolean log) {
+		Dataset out = ds.getSlice();
+		
+		if (log) {
+			out = Maths.log10(out);
+			min = Math.log10(min);
+			max = Math.log10(max);
+		}
+		
+		out.isubtract(min).idivide(max-min).imultiply(255);
+		IndexIterator it = out.getIterator();
+		while (it.hasNext()) {
+			double val = out.getElementDoubleAbs(it.index);
+			if (val < 0) out.setObjectAbs(it.index, 0);
+			if (val > 255) out.setObjectAbs(it.index, 255);
+			if (Double.isNaN(val)) out.setObjectAbs(it.index, 0);
+		}
+		
+		double mi = out.min().doubleValue();
+		double ma = out.max().doubleValue();
+		System.err.println(mi);
+		System.err.println(ma);
+		return out;
 	}
 
 	@Override

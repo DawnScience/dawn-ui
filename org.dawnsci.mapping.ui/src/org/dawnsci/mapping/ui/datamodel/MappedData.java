@@ -38,6 +38,10 @@ public class MappedData implements MapObject{
 		return parent.getSpectrum(indices[0], indices[1]);
 	}
 	
+	public MappedData makeNewMapWithParent(String name, IDataset ds) {
+		return new MappedData(name, ds, parent);
+	}
+	
 	@Override
 	public String toString() {
 		return name;
