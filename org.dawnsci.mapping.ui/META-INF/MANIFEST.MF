@@ -10,9 +10,12 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.dawnsci.analysis.api,
  org.eclipse.jface,
  org.eclipse.dawnsci.analysis.dataset,
- org.dawb.common.ui
+ org.dawb.common.ui,
+ org.eclipse.ui.workbench
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/localServiceManager.xml
-Import-Package: org.mihalis.opal.rangeSlider;version="0.9.5.2",
+Import-Package: org.eclipse.core.resources,
+ org.eclipse.ui.part,
+ org.mihalis.opal.rangeSlider;version="0.9.5.2",
  org.slf4j

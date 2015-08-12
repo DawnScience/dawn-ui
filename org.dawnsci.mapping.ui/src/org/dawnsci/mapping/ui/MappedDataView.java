@@ -16,6 +16,7 @@ import org.dawnsci.mapping.ui.datamodel.MappedFileFactory;
 import org.dawnsci.mapping.ui.dialog.ImageGridDialog;
 import org.dawnsci.mapping.ui.dialog.RGBMixerDialog;
 import org.dawnsci.mapping.ui.wizards.ImportMappedDataWizard;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
@@ -27,18 +28,28 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.dnd.DropTargetAdapter;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.FileTransfer;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 
 public class MappedDataView extends ViewPart {
@@ -240,7 +251,51 @@ public class MappedDataView extends ViewPart {
 		menuMgr.setRemoveAllWhenShown(true);
 		viewer.getControl().setMenu(menu);
 		viewer.getControl().setMenu(menu);
+		DropTarget dt = new DropTarget(viewer.getControl(), DND.DROP_MOVE | DND.DROP_DEFAULT | DND.DROP_COPY);
+		dt.setTransfer(new Transfer[] { TextTransfer.getInstance(),
+				FileTransfer.getInstance(), ResourceTransfer.getInstance(),
+				LocalSelectionTransfer.getTransfer() });
+		dt.addDropListener(new DropTargetAdapter() {
+			
+			@Override
+			public void drop(DropTargetEvent event) {
+				Object dropData = event.data;
+				if (dropData instanceof TreeSelection) {
+					TreeSelection selectedNode = (TreeSelection) dropData;
+					Object obj[] = selectedNode.toArray();
+					for (int i = 0; i < obj.length; i++) {
+						if (obj[i] instanceof IFile) {
+							IFile file = (IFile) obj[i];
+							openImportWizard(file.getLocation().toOSString());
+							return;
+						}
+					}
+				} else if (dropData instanceof String[]) {
+					openImportWizard(((String[])dropData)[0]);
 
+				}
+				
+			}
+		});
+
+	}
+	
+	private void openImportWizard(String path) {
+		ImportMappedDataWizard wiz = new ImportMappedDataWizard(path);
+		wiz.setNeedsProgressMonitor(true);
+		final WizardDialog wd = new WizardDialog(getSite().getShell(),wiz);
+		wd.setPageSize(new Point(900, 500));
+		wd.create();
+
+		if (wd.open() == WizardDialog.CANCEL) return;
+		
+		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(path, wiz.getMappedFileDescription());
+		area = new MappedDataArea();
+		area.addMappedDataFile(mdf);
+		map.clear();
+		spectrum.clear();
+		viewer.setInput(area);
+		plotMapData();
 	}
 
 	private IAction openRGBDialog(final List<MappedData> maps) {
