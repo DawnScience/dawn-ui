@@ -20,6 +20,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -76,15 +77,9 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 			}
 		});
 		
-		combo.addSelectionListener(new SelectionListener() {
-			
+		combo.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
 				Object element = ((StructuredSelection)cviewer.getSelection()).getFirstElement();
 				if (!cviewer.getChecked(element)) {
 					combo.setEnabled(false);
@@ -95,6 +90,7 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 				mapToParent.put(key, combo.getSelectionIndex());
 			}
 		});
+		
 		
 		final IWizardContainer container = this.getContainer();
 		if (container instanceof IPageChangeProvider) {
@@ -126,11 +122,12 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 	@Override
 	public void setDatasetMaps(Map<String, int[]> datasetNames,
 			Map<String, int[]> nexusDatasetNames) {
-		if (nexusDatasetNames.isEmpty()) {
-			cviewer.setInput(datasetNames);
-		} else {
-			cviewer.setInput(nexusDatasetNames);
-		}
+		cviewer.setInput(datasetNames);
+//		if (nexusDatasetNames.isEmpty()) {
+//			cviewer.setInput(datasetNames);
+//		} else {
+//			cviewer.setInput(nexusDatasetNames);
+//		}
 		
 	}
 
