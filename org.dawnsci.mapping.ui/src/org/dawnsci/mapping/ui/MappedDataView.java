@@ -15,10 +15,12 @@ import org.dawnsci.mapping.ui.datamodel.MappedFileDescription;
 import org.dawnsci.mapping.ui.datamodel.MappedFileFactory;
 import org.dawnsci.mapping.ui.dialog.ImageGridDialog;
 import org.dawnsci.mapping.ui.dialog.RGBMixerDialog;
+import org.dawnsci.mapping.ui.dialog.RegistrationDialog;
 import org.dawnsci.mapping.ui.wizards.ImportMappedDataWizard;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
+import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
@@ -299,6 +301,22 @@ public class MappedDataView extends ViewPart {
 		final WizardDialog wd = new WizardDialog(getSite().getShell(),wiz);
 		wd.setPageSize(new Point(900, 500));
 		wd.create();
+		
+		if (wiz.isImageImport()) {
+			IDataset im;
+			try {
+				im = LocalServiceManager.getLoaderService().getDataset(path, null);
+				RegistrationDialog dialog = new RegistrationDialog(Display.getDefault().getActiveShell(), ((MappedData)layers.get(layers.size()-1)).getMap(),im);
+				if (dialog.open() != IDialogConstants.OK_ID) return;
+				AssociatedImage asIm = new AssociatedImage("Registered", (RGBDataset)dialog.getRegisteredImage());
+				area.getDataFile(0).addMapObject("Registered", asIm);
+				viewer.refresh();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return;
+		}
 
 		if (wd.open() == WizardDialog.CANCEL) return;
 		
@@ -342,7 +360,7 @@ public class MappedDataView extends ViewPart {
 		action.setImageDescriptor(Activator.getImageDescriptor("icons/rgb.png"));
 		return action;
 	}
-
+	
 	private IAction openComparisonDialog(final List<MappedData> maps) {
 		final List<IDataset> dataList = new ArrayList<IDataset>(maps.size());
 		for (MappedData map : maps) {

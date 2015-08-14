@@ -11,8 +11,10 @@ import org.dawnsci.mapping.ui.datamodel.MappedFileDescription;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
@@ -22,6 +24,7 @@ public class ImportMappedDataWizard extends Wizard {
 	private Map<String,int[]> datasetNames;
 	private Map<String,int[]> nexusDatasetNames = new LinkedHashMap<String, int[]>();
 	private MappedFileDescription description = new MappedFileDescription();
+	private boolean imageImport = false;
 	
 	public ImportMappedDataWizard(String filePath) {
 		this.filePath = filePath;
@@ -43,6 +46,9 @@ public class ImportMappedDataWizard extends Wizard {
 
 					try {
 						datasetNames = MappingUtils.getDatasetInfo(filePath, null);
+						if (datasetNames.size() == 1 && datasetNames.containsKey("image-01")) {
+							imageImport = true;
+						}
 						
 						try {
 							IMetadata meta = LocalServiceManager.getLoaderService().getMetadata(filePath, null);
@@ -56,6 +62,7 @@ public class ImportMappedDataWizard extends Wizard {
 							
 							@Override
 							public void run() {
+								
 								IWizardPage[] pa = getPages();
 								
 								for (IWizardPage p : pa) {
@@ -79,7 +86,6 @@ public class ImportMappedDataWizard extends Wizard {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
 	}
 	
 	private void populateNexusMaps(IMetadata meta) throws Exception {
@@ -110,6 +116,10 @@ public class ImportMappedDataWizard extends Wizard {
 			((ImportMapWizardPage)page).pushChanges();
 		}
 		return true;
+	}
+
+	public boolean isImageImport() {
+		return imageImport;
 	}
 
 }

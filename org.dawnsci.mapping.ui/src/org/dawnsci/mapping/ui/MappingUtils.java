@@ -26,6 +26,11 @@ import org.eclipse.swt.widgets.Display;
 public class MappingUtils {
 
 	public static IImageTrace buildTrace(IDataset data, IPlottingSystem system) {
+		return buildTrace(data, system,-1);
+	
+	}
+	
+	public static IImageTrace buildTrace(IDataset data, IPlottingSystem system, int alpha) {
 		IDataset x = null;
 		IDataset y = null;
 		
@@ -36,6 +41,7 @@ public class MappingUtils {
 		x = axes == null ? null : axes[0];
 		y = axes == null ? null : axes[1];
 		IImageTrace it = system.createImageTrace(data.getName());
+		it.setAlpha(alpha);
 		it.setData(data, Arrays.asList(new IDataset[]{y,x}), false);
 		
 		return it;
