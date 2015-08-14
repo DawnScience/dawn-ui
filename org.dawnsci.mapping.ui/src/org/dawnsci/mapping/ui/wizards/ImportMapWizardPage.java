@@ -25,6 +25,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 
@@ -33,6 +34,8 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 	protected MappedFileDescription description;
 	private CheckboxTableViewer cviewer;
 	private Map<String, Integer> mapToParent;
+	private Map<String,int[]> datasetNames;
+	private Map<String,int[]> nexusDatasetNames;
 	
 	private String[] options;
 	
@@ -54,6 +57,22 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 		cviewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
 		final Combo combo = new Combo(main, SWT.NONE);
 		combo.setEnabled(false);
+		
+		final Button onlyNexusTagged = new Button(main, SWT.CHECK);
+		onlyNexusTagged.setText("Only signal tagged datasets");
+		onlyNexusTagged.setSelection(true);
+		onlyNexusTagged.setLayoutData(new GridData());
+		onlyNexusTagged.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (onlyNexusTagged.getSelection()) {
+					cviewer.setInput(nexusDatasetNames);
+				} else {
+					cviewer.setInput(datasetNames);
+				}
+			}
+		});
+		
 		mapToParent = new HashMap<String, Integer>();
 		cviewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			
@@ -122,12 +141,13 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 	@Override
 	public void setDatasetMaps(Map<String, int[]> datasetNames,
 			Map<String, int[]> nexusDatasetNames) {
-		cviewer.setInput(datasetNames);
-//		if (nexusDatasetNames.isEmpty()) {
-//			cviewer.setInput(datasetNames);
-//		} else {
-//			cviewer.setInput(nexusDatasetNames);
-//		}
+		this.datasetNames = datasetNames;
+		this.nexusDatasetNames = nexusDatasetNames;
+		if (nexusDatasetNames.isEmpty()) {
+			cviewer.setInput(datasetNames);
+		} else {
+			cviewer.setInput(nexusDatasetNames);
+		}
 		
 	}
 

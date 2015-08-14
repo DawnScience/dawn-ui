@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import javax.swing.text.View;
+
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -23,6 +25,7 @@ public class DatasetAndAxesWidget {
 
 	private CheckboxTableViewer cviewer;
 	private Map<String,int[]> datasetNames;
+	private Map<String,int[]> nexusDatasetNames;
 	private Map<String, Dimension[]> nameToDimensions;
 	private DataConfigurationTable dataTable;
 	private static final String[] OPTIONS = new String[]{"map Y", "map X",""};
@@ -30,6 +33,7 @@ public class DatasetAndAxesWidget {
 	public void createControl(Composite parent) {
 		Composite main = new Composite(parent, SWT.None);
 		main.setLayout(new GridLayout(2,false));
+		main.setLayoutData(new GridData(GridData.FILL_BOTH));
 //		CCombo cc = new CCombo(main, SWT.READ_ONLY);
 		cviewer = CheckboxTableViewer.newCheckList(main, SWT.BORDER);
 		cviewer.setContentProvider(new BasicContentProvider());
@@ -44,6 +48,8 @@ public class DatasetAndAxesWidget {
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
+				
+				if (((StructuredSelection)event.getSelection()).isEmpty()) return;
 				
 				Object element = ((StructuredSelection)event.getSelection()).getFirstElement();
 				Entry<String,int[]> entry = (Entry<String,int[]>)element;
@@ -95,11 +101,17 @@ public class DatasetAndAxesWidget {
 	
 	public void setDatasetMaps(Map<String,int[]> datasetNames, Map<String,int[]> nexusDatasetNames) {
 		this.datasetNames = datasetNames;
+		this.nexusDatasetNames = nexusDatasetNames;
 		if (nexusDatasetNames.isEmpty()) {
 			cviewer.setInput(datasetNames);
 		} else {
 			cviewer.setInput(nexusDatasetNames);
 		}
+	}
+	
+	public void onlySignalTagged(boolean onlySignal) {
+		if (onlySignal) cviewer.setInput(nexusDatasetNames);
+		else cviewer.setInput(datasetNames);
 	}
 	
 	public Control getControl() {

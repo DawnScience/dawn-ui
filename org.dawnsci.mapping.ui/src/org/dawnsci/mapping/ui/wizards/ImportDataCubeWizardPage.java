@@ -10,6 +10,12 @@ import org.eclipse.jface.dialogs.IPageChangedListener;
 import org.eclipse.jface.dialogs.PageChangedEvent;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
 
@@ -27,10 +33,21 @@ public class ImportDataCubeWizardPage extends WizardPage implements IDatasetWiza
 
 	@Override
 	public void createControl(Composite parent) {
-		
+		Composite main = new Composite(parent, SWT.None);
+		main.setLayout(new GridLayout(1,false));
 		widget = new DatasetAndAxesWidget();
-		widget.createControl(parent);
-		setControl(widget.getControl());
+		widget.createControl(main);
+		setControl(main);
+		final Button onlyNexusTagged = new Button(main, SWT.CHECK);
+		onlyNexusTagged.setText("Only signal tagged datasets");
+		onlyNexusTagged.setSelection(true);
+		onlyNexusTagged.setLayoutData(new GridData());
+		onlyNexusTagged.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				widget.onlySignalTagged(onlyNexusTagged.getSelection());
+			}
+		});
 		
 		final IWizardContainer container = this.getContainer();
 		if (container instanceof IPageChangeProvider) {
