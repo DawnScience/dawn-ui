@@ -40,5 +40,13 @@ public class MappedDataBlock implements MapObject {
 		
 		return dataset.getSlice(slice);
 	}
+	
+	public IDataset getSpectrum(int index) {
+		
+		SliceND slice = new SliceND(dataset.getShape());
+		slice.setSlice(0,index,index+1,1);
+		
+		return dataset.getSlice(slice);
+	}
 
 }

@@ -7,8 +7,8 @@ import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
 public class MappedData implements MapObject{
 
 	private String name;
-	private IDataset map;
-	private MappedDataBlock parent;
+	protected IDataset map;
+	protected MappedDataBlock parent;
 	
 	public MappedData(String name, IDataset map, MappedDataBlock parent) {
 		this.name = name;
@@ -20,7 +20,7 @@ public class MappedData implements MapObject{
 		return map;
 	}
 	
-	public int[] getIndices(double x, double y) {
+	private int[] getIndices(double x, double y) {
 		
 		IDataset[] ax = MappingUtils.getAxesFromMetadata(map);
 		

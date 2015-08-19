@@ -83,6 +83,10 @@ public class CompositeTrace extends Figure implements ICompositeTrace {
 			image.getYAxis().setRange(yRange[1], yRange[0]);;
 		}
 	}
+	
+	public void removeImageTraces(){
+		for (ImageTrace t : traces) t.remove();
+	}
 
 	public void setPalette(String paletteName) {
 		for (IImageTrace t : traces) t.setPalette(paletteName);

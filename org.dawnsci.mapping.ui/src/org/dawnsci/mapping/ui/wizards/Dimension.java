@@ -6,6 +6,7 @@ public class Dimension {
 	private String description;
 	private String[] axisOptions;
 	private String axis;
+	private String secondaryAxis; //used for data that needs to be remapped
 	private int size = -1;
 	
 	
@@ -54,6 +55,16 @@ public class Dimension {
 
 	public void setAxisOptions(String[] axisOptions) {
 		this.axisOptions = axisOptions;
+	}
+
+
+	public String getSecondaryAxis() {
+		return secondaryAxis;
+	}
+
+
+	public void setSecondaryAxis(String secondaryAxis) {
+		this.secondaryAxis = secondaryAxis;
 	}
 	
 }

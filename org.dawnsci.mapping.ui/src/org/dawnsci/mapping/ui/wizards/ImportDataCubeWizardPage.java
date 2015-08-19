@@ -16,6 +16,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 
 
@@ -60,7 +61,6 @@ public class ImportDataCubeWizardPage extends WizardPage implements IDatasetWiza
 				}
 			});
 		}
-		
 	}
 	
 	protected void updateOnPageChange() {
@@ -71,6 +71,14 @@ public class ImportDataCubeWizardPage extends WizardPage implements IDatasetWiza
 		String[] names = widget.getMapXAndYAxesNames();
 		description.setxAxisName(names[0]);
 		description.setyAxisName(names[1]);
+		
+		String xMap = widget.getXAxisForRemapping();
+		
+		if (xMap != null) {
+			description.setRemappingRequired(true);
+			description.setxAxisName(xMap);
+		}
+		
 	}
 	
 	@Override

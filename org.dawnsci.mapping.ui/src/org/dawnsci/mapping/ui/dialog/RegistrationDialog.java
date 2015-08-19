@@ -1,12 +1,14 @@
 package org.dawnsci.mapping.ui.dialog;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.mapping.ui.MappingUtils;
 import org.dawnsci.mapping.ui.datamodel.MapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
 import org.dawnsci.plotting.AbstractPlottingSystem;
+import org.dawnsci.plotting.draw2d.swtxy.CompositeTrace;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
@@ -15,6 +17,7 @@ import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.LinearAlgebra;
 import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.function.MapToRotatedCartesian;
 import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -40,6 +43,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import uk.ac.diamond.scisoft.analysis.optimize.LeastSquares;
+
 public class RegistrationDialog extends Dialog {
 
 	private IDataset image;
@@ -49,8 +54,8 @@ public class RegistrationDialog extends Dialog {
 	private IPlottingSystem systemImage;
 	private IPlottingSystem systemMap;
 	private IPlottingSystem systemComposite;
-	private IRegion[] mapPoints = new IRegion[3];
-	private IRegion[] imagePoints = new IRegion[3];
+	private IRegion[] mapPoints = new IRegion[4];
+	private IRegion[] imagePoints = new IRegion[4];
 	int count = 0;
 	
 	public RegistrationDialog(Shell parentShell, IDataset map, IDataset image) {
@@ -127,20 +132,21 @@ public class RegistrationDialog extends Dialog {
 		double imX = image.getShape()[1];
 		double imY =  image.getShape()[0];
 		
-		double[] xValsMap = new double[]{mapX/3., mapX/2., mapX-mapX/3};
-		double[] yValsMap = new double[]{mapY/3., mapY-mapY/3,mapY/3.};
-		double[] xValsImage = new double[]{imX/3., imX/2., imX-imX/3};
-		double[] yValsImage = new double[]{imY/3., imY-imY/3,imY/3.};
+		double[] xValsMap = new double[]{mapX/3., mapX/2., mapX-mapX/3,0};
+		double[] yValsMap = new double[]{mapY/3., mapY-mapY/3,mapY/3.,0};
+		double[] xValsImage = new double[]{imX/3., imX/2., imX-imX/3,0};
+		double[] yValsImage = new double[]{imY/3., imY-imY/3,imY/3.,0};
 		
 		
 		
 		try {
 			
-			for (int i = 0; i < 3; i++) {
+			for (int i = 0; i < 4; i++) {
 				
 				Color c = Display.getDefault().getSystemColor(SWT.COLOR_RED);
 				if (i == 1) c = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
 				if (i == 2) c = Display.getDefault().getSystemColor(SWT.COLOR_GREEN);
+				if (i == 3) c = Display.getDefault().getSystemColor(SWT.COLOR_CYAN);
 				
 				final IRegion point1 = systemMap.createRegion("Point" +i, RegionType.POINT);
 				point1.setRegionColor(c);
@@ -168,10 +174,11 @@ public class RegistrationDialog extends Dialog {
 				systemMap.addRegion(point1);
 			}
 			
-			for (int i = 0; i < 3; i++) {
+			for (int i = 0; i < 4; i++) {
 				Color c = Display.getDefault().getSystemColor(SWT.COLOR_RED);
 				if (i == 1) c = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
 				if (i == 2) c = Display.getDefault().getSystemColor(SWT.COLOR_GREEN);
+				if (i == 3) c = Display.getDefault().getSystemColor(SWT.COLOR_CYAN);
 				
 				final IRegion point1 = systemImage.createRegion("Point" +i, RegionType.POINT);
 				point1.setRegionColor(c);
@@ -218,7 +225,8 @@ public class RegistrationDialog extends Dialog {
 	private void update() {
 		Dataset v = buildDataset(mapPoints);
 		Dataset x = buildDataset(imagePoints);
-		Dataset trans = LinearAlgebra.solve(x, v);
+		if (x == null || v == null) return;
+		Dataset trans = LinearAlgebra.solveSVD(x, v);
 
 		double tX = trans.getDouble(2,0);
 		double tY = trans.getDouble(2,1);
@@ -239,20 +247,39 @@ public class RegistrationDialog extends Dialog {
 		yR.imultiply(sY);
 		yR.iadd(tY);
 		
-		IDataset im = ((RGBDataset)image).getSliceView();
-		registered = image.getSliceView();
+		MapToRotatedCartesian mrc = new MapToRotatedCartesian(0, 0, shape[1], shape[0], r*-1);
+		
+		IDataset im;
+		
+		if (image instanceof RGBDataset) {
+			
+			RGBDataset rgb = (RGBDataset)image;
+			im = new RGBDataset(mrc.value(rgb.getRedView()).get(0),
+								mrc.value(rgb.getGreenView()).get(0),
+								mrc.value(rgb.getBlueView()).get(0));
+			
+			
+		} else {
+			List<Dataset> value = mrc.value(image);
+			im = value.get(0);
+		}
+		
+		List<Dataset> value = mrc.value(image);
+		
+		System.out.format("XOffset: %f, YOffset: %f, XScale %f, YScale %f,",tX,tY,sX,sY);
+		System.out.println("Done");
+		
+
+		registered = im;
 		AxesMetadataImpl ax = new AxesMetadataImpl(2);
 		ax.addAxis(0, yR);
 		ax.addAxis(1, xR);
 		im.addMetadata(ax);
 		registered.addMetadata(ax);
-		systemComposite.reset();
-
-		ICompositeTrace comp = this.systemComposite.createCompositeTrace("composite1"+count++);
+		systemComposite.clear();
+		ICompositeTrace comp = this.systemComposite.createCompositeTrace("composite1");
 
 		comp.add(MappingUtils.buildTrace(im, systemComposite),0);
-		IImageTrace buildTrace = MappingUtils.buildTrace(map, systemComposite);
-		buildTrace.setAlpha(90);
 		comp.add(MappingUtils.buildTrace(map, systemComposite,120),1);
 		systemComposite.addTrace(comp);
 		
@@ -262,14 +289,16 @@ public class RegistrationDialog extends Dialog {
 
 
 		try {
-			Dataset mat = DatasetFactory.ones(new int[]{3, 3},Dataset.FLOAT64);
+			Dataset mat = DatasetFactory.ones(new int[]{4, 3},Dataset.FLOAT64);
 			int[] pos = new int[2];
 
-			for (int i = 0; i < 3 ; i++) {
+			for (int i = 0; i < 4 ; i++) {
 				pos[0] = i;
 				pos[1] = 0;
 				double[] val;
 				val = regions[i].getCoordinateSystem().getValueAxisLocation(regions[i].getROI().getPoint());
+				System.out.println(val[0]);
+				System.out.println(val[1]);
 				mat.set(val[0], pos);
 				pos[1] = 1;
 				mat.set(val[1], pos);

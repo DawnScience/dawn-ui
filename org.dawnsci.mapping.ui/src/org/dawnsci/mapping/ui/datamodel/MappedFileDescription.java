@@ -12,6 +12,7 @@ public class MappedFileDescription {
 	private Map<String,List<String>> blockToAxes = new HashMap<String, List<String>>();
 	private String xAxisName;
 	private String yAxisName;
+	private boolean remappingRequired = false;
 	
 	
 	public void addDataBlock(String blockName, List<String> axes) {
@@ -47,6 +48,14 @@ public class MappedFileDescription {
 	}
 	public void setyAxisName(String yAxisName) {
 		this.yAxisName = yAxisName;
+	}
+
+	public boolean isRemappingRequired() {
+		return remappingRequired;
+	}
+
+	public void setRemappingRequired(boolean remappingRequired) {
+		this.remappingRequired = remappingRequired;
 	}
 	
 	

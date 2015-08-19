@@ -468,6 +468,7 @@ public class RegionArea extends PlotArea {
 		
 	    final CompositeTrace gone = compositeTraces.remove(trace.getName());
 		if (gone!=null){
+			gone.removeImageTraces();
 			remove(trace);
 			
 	 		revalidate();
@@ -789,6 +790,20 @@ public class RegionArea extends PlotArea {
 				final ImageTrace gone = imageTraces.remove(trace.getName());
 				if (gone!=null){
 					trace.remove();
+					fireImageTraceRemoved(new TraceEvent(trace));
+				}
+			}
+
+			imageTraces.clear();
+
+		}
+		
+		if (compositeTraces!=null) {
+			final Collection<CompositeTrace> its = new HashSet<CompositeTrace>(compositeTraces.values());
+			for (CompositeTrace trace : its) {
+				final CompositeTrace gone = compositeTraces.remove(trace.getName());
+				if (gone!=null){
+					trace.removeImageTraces();
 					fireImageTraceRemoved(new TraceEvent(trace));
 				}
 			}

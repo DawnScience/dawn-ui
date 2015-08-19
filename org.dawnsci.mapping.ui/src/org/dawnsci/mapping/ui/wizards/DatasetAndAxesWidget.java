@@ -12,12 +12,17 @@ import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -29,6 +34,7 @@ public class DatasetAndAxesWidget {
 	private Map<String, Dimension[]> nameToDimensions;
 	private DataConfigurationTable dataTable;
 	private static final String[] OPTIONS = new String[]{"map Y", "map X",""};
+	private boolean reMap = false;
 	
 	public void createControl(Composite parent) {
 		Composite main = new Composite(parent, SWT.None);
@@ -69,6 +75,83 @@ public class DatasetAndAxesWidget {
 				
 			}
 		});
+		
+		
+		final Button remappable = new Button(main, SWT.CHECK);
+		remappable.setText("Data needs remapping (Select x axis)");
+		remappable.setSelection(true);
+		remappable.setLayoutData(new GridData());
+		remappable.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		remappable.setSelection(false);
+		
+		
+		final Combo remapXAxis = new Combo(main, SWT.READ_ONLY);
+		remapXAxis.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		remapXAxis.setEnabled(false);
+		remapXAxis.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Dimension d = getSelectedYDimension();
+				if (d == null) showRemappableError();
+				
+				d.setSecondaryAxis(remapXAxis.getText());
+			}
+		});
+		
+		remappable.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				reMap = remappable.getSelection();
+				remapXAxis.setEnabled(reMap);
+				String[] axes = getAxisOptionsOfSelectedYAxis();
+				
+				if (axes == null) return;
+				
+				remapXAxis.setItems(axes);
+			}
+		});
+		
+	}
+	
+	private String[] getAxisOptionsOfSelectedYAxis(){
+		
+		Dimension dim = getSelectedYDimension();
+		
+		if (dim == null) return null;
+		
+		
+		return dim.getAxisOptions();
+		
+	}
+	
+	private Dimension getSelectedYDimension(){
+		
+		StructuredSelection current = (StructuredSelection)cviewer.getSelection();
+		if (current.isEmpty()) return null;
+		
+		Object element = current.getFirstElement();
+		
+		if (!cviewer.getChecked(element)) return null;
+		
+		Entry<String,int[]> entry = (Entry<String,int[]>)element;
+		
+		Dimension[] dims = nameToDimensions.get(entry.getKey());
+		
+		if (dims == null) return null;
+		
+		for (Dimension d : dims) {
+			if (OPTIONS[0].equals(d.getDescription())){
+				return d;
+			}
+		}
+		
+		return null;
+	}
+	
+	private void showRemappableError(){
+		
 	}
 	
 	public Map<String,String[]> getAxesMaps() {
@@ -97,6 +180,16 @@ public class DatasetAndAxesWidget {
 		
 		return out;
 		
+	}
+	
+	public String getXAxisForRemapping() {
+		if (nameToDimensions.isEmpty()) return null;
+		Entry<String, Dimension[]> next = nameToDimensions.entrySet().iterator().next();
+		for (Dimension d : next.getValue()) {
+			if (d.getSecondaryAxis() != null) return d.getSecondaryAxis();
+		}
+		
+		return null;
 	}
 	
 	public void setDatasetMaps(Map<String,int[]> datasetNames, Map<String,int[]> nexusDatasetNames) {

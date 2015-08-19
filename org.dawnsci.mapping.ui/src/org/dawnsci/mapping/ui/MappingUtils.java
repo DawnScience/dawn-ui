@@ -93,6 +93,33 @@ public class MappingUtils {
 		
 	}
 	
+	public static IDataset[] getAxesForDimension(IDataset data, int dim) {
+		
+		List<AxesMetadata> amd = null;
+		
+		data = data.getSliceView().squeeze();
+		
+		try {
+			amd = data.getMetadata(AxesMetadata.class);
+		} catch (Exception e) {
+			return new IDataset[0];
+		}
+		
+		
+		if (amd != null && !amd.isEmpty()) {
+			AxesMetadata am = amd.get(0);
+			ILazyDataset[] axis = am.getAxis(dim);
+			IDataset[] out = new IDataset[axis.length];
+			for (int i = 0; i < out.length; i++) {
+				out[i] = axis[i] == null ? null : axis[i].getSlice();
+			}
+			
+			return out;
+		}
+		return null;
+
+	}
+	
 	public static IDataset[] getAxesFromMetadata(IDataset data) {
 		IDataset x = null;
 		IDataset y = null;
