@@ -66,9 +66,9 @@ public class Activator extends AbstractUIPlugin {
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
 	}
 
-	public static Object getService(Class<?> serviceClass) {
+	public static <T> T getService(Class<T> serviceClass) {
 		BundleContext context = plugin.getBundle().getBundleContext();
-		ServiceReference<?> ref = context.getServiceReference(serviceClass);
+		ServiceReference<T> ref = context.getServiceReference(serviceClass);
 		return context.getService(ref);
 	}
 }

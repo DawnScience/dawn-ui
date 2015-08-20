@@ -10,8 +10,6 @@ package org.dawnsci.plotting.tools;
 
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
@@ -58,8 +56,8 @@ public class Activator extends AbstractUIPlugin {
 	}
 	
 
-	public static Object getService(Class<?> serviceClass) {
-		ServiceReference<?> ref = staticActivator.getBundle().getBundleContext().getServiceReference(serviceClass);
+	public static <T> T getService(Class<T> serviceClass) {
+		ServiceReference<T> ref = staticActivator.getBundle().getBundleContext().getServiceReference(serviceClass);
 		return staticActivator.getBundle().getBundleContext().getService(ref);
 	}
 

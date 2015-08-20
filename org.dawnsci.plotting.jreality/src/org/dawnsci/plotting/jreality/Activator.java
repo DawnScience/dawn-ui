@@ -83,9 +83,9 @@ public class Activator extends AbstractUIPlugin {
 	 * @param clazz
 	 * @return
 	 */
-	public static Object getService(Class<?> clazz) {
+	public static <T> T getService(Class<T> clazz) {
 		if (context==null) return null;
-		ServiceReference<?> ref = context.getServiceReference(clazz);
+		ServiceReference<T> ref = context.getServiceReference(clazz);
 		if (ref==null) return null;
 		return context.getService(ref);
 	}
