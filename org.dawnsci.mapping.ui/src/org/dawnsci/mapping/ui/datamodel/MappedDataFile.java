@@ -2,6 +2,7 @@ package org.dawnsci.mapping.ui.datamodel;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +47,9 @@ public class MappedDataFile implements MapObject{
 		return block;
 	}
 	
+	public Map<String,MappedDataBlock> getDataBlockMap() {
+		return fullDataMap;
+	}
 	
 	public void addMapObject(String name, MapObject object) {
 		

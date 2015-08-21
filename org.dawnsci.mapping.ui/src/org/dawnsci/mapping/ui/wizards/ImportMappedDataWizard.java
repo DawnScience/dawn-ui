@@ -8,9 +8,12 @@ import java.util.Map;
 import org.dawnsci.mapping.ui.LocalServiceManager;
 import org.dawnsci.mapping.ui.MappingUtils;
 import org.dawnsci.mapping.ui.datamodel.MappedFileDescription;
+import org.dawnsci.mapping.ui.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
+import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
@@ -53,6 +56,27 @@ public class ImportMappedDataWizard extends Wizard {
 						try {
 							IMetadata meta = LocalServiceManager.getLoaderService().getMetadata(filePath, null);
 							populateNexusMaps(meta);
+							
+							IPreferenceStore ps = Activator.getDefault().getPreferenceStore();
+							String jsonArray = ps.getString("TestDescriptionList");
+							if (jsonArray != null) {
+								IPersistenceService p = LocalServiceManager.getPersistenceService();
+								try {
+									MappedFileDescription[] ds = p.unmarshal(jsonArray,MappedFileDescription[].class);
+									for (MappedFileDescription d : ds) {
+										if (datasetNames.containsKey(d.getBlockNames().get(0))){
+											description = d;
+											break;
+										}
+									}
+
+									
+								} catch (Exception e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+							}
+							
 							
 						} catch (Exception e) {
 							
@@ -115,6 +139,18 @@ public class ImportMappedDataWizard extends Wizard {
 		if (page instanceof ImportMapWizardPage) {
 			((ImportMapWizardPage)page).pushChanges();
 		}
+		
+		IPersistenceService ps = LocalServiceManager.getPersistenceService();
+		try {
+			IPreferenceStore p = Activator.getDefault().getPreferenceStore();
+			String json = ps.marshal(new MappedFileDescription[]{description});
+			p.setValue("TestDescriptionList", json);
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		return true;
 	}
 

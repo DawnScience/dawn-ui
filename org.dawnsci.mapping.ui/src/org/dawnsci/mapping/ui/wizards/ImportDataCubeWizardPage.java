@@ -66,7 +66,7 @@ public class ImportDataCubeWizardPage extends WizardPage implements IDatasetWiza
 	protected void updateOnPageChange() {
 		Map<String, String[]> axesMaps = widget.getAxesMaps();
 		for (Entry<String, String[]> entry : axesMaps.entrySet()) {
-			description.addDataBlock(entry.getKey(), Arrays.asList(entry.getValue()));
+			if (!description.getBlockNames().contains(entry.getKey())) description.addDataBlock(entry.getKey(), Arrays.asList(entry.getValue()));
 		}
 		String[] names = widget.getMapXAndYAxesNames();
 		description.setxAxisName(names[0]);
@@ -89,6 +89,7 @@ public class ImportDataCubeWizardPage extends WizardPage implements IDatasetWiza
 	@Override
 	public void setMappedDataDescription(MappedFileDescription description) {
 		this.description = description;
+		widget.initialiseValues(description.getDataBlockToAxesMapping(), description.getxAxisName(), description.getyAxisName());
 	}
 	
 }

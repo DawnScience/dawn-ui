@@ -2,6 +2,7 @@ package org.dawnsci.mapping.ui.wizards;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
@@ -151,6 +152,47 @@ public class DatasetAndAxesWidget {
 	}
 	
 	private void showRemappableError(){
+		
+	}
+	
+	public void initialiseValues(Map<String,List<String>> dataBlockToAxesMapping, String xAxis, String yAxis) {
+		
+		if (!datasetNames.containsKey(xAxis) || !datasetNames.containsKey(yAxis)) return;
+		
+		for (Entry<String, List<String>> e : dataBlockToAxesMapping.entrySet()) {
+			
+			if (datasetNames.containsKey(e.getKey())) {
+				boolean canAdd = true;
+				
+				for (String a : e.getValue()) {
+					if (a != null && !datasetNames.containsKey(a)) {
+						canAdd = false;
+						break;
+					}
+				}
+				
+				if (canAdd) {
+					Dimension[] dims;
+					if (nameToDimensions.containsKey(e.getKey())) dims = nameToDimensions.get(e.getKey());
+					else dims = new Dimension[datasetNames.get(e.getKey()).length];
+					
+					for (int i = 0; i < dims.length; i++) {
+						if (dims[i]==null) dims[i] = new Dimension(i);
+						dims[i].setAxis(e.getValue().get(i));
+						if (xAxis.equals(e.getValue().get(i))) dims[i].setDescription(OPTIONS[1]);
+						if (yAxis.equals(e.getValue().get(i))) dims[i].setDescription(OPTIONS[0]);
+					}
+					
+					nameToDimensions.put(e.getKey(), dims);
+					for (Entry<String, int[]> ent : datasetNames.entrySet()) if (ent.getKey().equals(e.getKey()))cviewer.setChecked(ent, true);
+				
+				}
+				
+			}
+			
+			cviewer.refresh();
+			
+		}
 		
 	}
 	

@@ -14,6 +14,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -29,8 +30,9 @@ public class ImageGridDialog extends Dialog {
 
 	private static Logger logger = LoggerFactory.getLogger(ImageGridDialog.class);
 
-	List<IDataset> data;
+	private List<IDataset> data;
 	private List<IPlottingSystem> systems = new ArrayList<IPlottingSystem>();
+	private Image image;
 
 	public ImageGridDialog(Shell parentShell, List<IDataset> data) throws Exception {
 		super(parentShell);
@@ -38,7 +40,7 @@ public class ImageGridDialog extends Dialog {
 			throw new Exception("No data is available to visualize in the Comparison Image Viewer dialog.");
 		this.data = data;
 		setShellStyle(getShellStyle() | SWT.RESIZE);
-		setDefaultImage(Activator.getImageDescriptor("icons/images-stack.png").createImage());
+		setDefaultImage(image = Activator.getImageDescriptor("icons/images-stack.png").createImage());
 		try {
 			for (int i = 0; i < data.size(); i++) {
 				systems.add(PlottingFactory.createPlottingSystem());
@@ -96,5 +98,11 @@ public class ImageGridDialog extends Dialog {
 	@Override
 	protected Point getInitialSize() {
 		return new Point(800, 600);
+	}
+	
+	@Override
+	public boolean close() {
+		image.dispose();
+		return super.close();
 	}
 }

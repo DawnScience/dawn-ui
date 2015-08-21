@@ -42,6 +42,7 @@ import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetAdapter;
@@ -50,11 +51,14 @@ import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.internal.presentations.UpdatingActionContributionItem;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 
@@ -64,7 +68,8 @@ public class MappedDataView extends ViewPart {
 	private IPlottingSystem map;
 	private IPlottingSystem spectrum;
 	private MappedDataArea area;
-	private List<MapObject> layers;
+	private MapPlotManager plotManager; 
+	
 	
 	@Override
 	public void createPartControl(Composite parent) {
@@ -76,6 +81,8 @@ public class MappedDataView extends ViewPart {
 		view = page.findView("org.dawnsci.mapping.ui.spectrumview");
 		spectrum = (IPlottingSystem)view.getAdapter(IPlottingSystem.class);
 		
+		plotManager = new MapPlotManager(map, spectrum, area);
+		
 		map.addClickListener(new IClickListener() {
 			
 			@Override
@@ -86,26 +93,12 @@ public class MappedDataView extends ViewPart {
 			
 			@Override
 			public void clickPerformed(ClickEvent evt) {
-				
-				for (int i = layers.size()-1; i >=0 ; i--) {
-					MapObject l = layers.get(i);
-					if (l instanceof MappedData) {
-						try {
-							
-							IDataset s = ((MappedData)l).getSpectrum(evt.getxValue(), evt.getyValue());
-							
-							if (s != null) MappingUtils.plotDataWithMetadata(s, spectrum, new int[]{0});
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-
-					}
-				}
+				plotManager.plotData(evt.getxValue(), evt.getyValue());
 			}
 		});
 
 		viewer = new TreeViewer(parent);
+		viewer.getTree().setLayoutData(new GridData(GridData.FILL_BOTH));
 		viewer.setContentProvider(new MapFileTreeContentProvider());
 		viewer.setLabelProvider(new MapFileCellLabelProvider());
 		viewer.setInput(area);
@@ -114,7 +107,7 @@ public class MappedDataView extends ViewPart {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				Object e = ((StructuredSelection)event.getSelection()).getFirstElement();
-				if (e instanceof MappedData) plotMapData((MappedData)e);
+				if (e instanceof MappedData) plotManager.plotMap((MappedData)e);
 				
 			}
 		});
@@ -142,17 +135,19 @@ public class MappedDataView extends ViewPart {
 						Object ob = ((ITreeSelection)selection).getPaths()[0].getParentPath().getFirstSegment();
 						if (ob instanceof MappedDataFile) {
 							MappedDataFile df = (MappedDataFile)ob;
-							manager.add(openRGBDialog(maps, df));
+							if (!maps.isEmpty())manager.add(MapActionUtils.getRGBDialog(maps, df,viewer));
 						}
 						
 					}
 					
-					manager.add(openComparisonDialog(maps));
+					if (!maps.isEmpty())manager.add(MapActionUtils.getComparisonDialog(maps));
+					if (maps.size() == 1) {
+						manager.add(MapActionUtils.getMapPropertiesAction(maps.get(0),plotManager, area.getDataFile(0)));
+					}
 				}
 			}
 		});
 		menuMgr.setRemoveAllWhenShown(true);
-		viewer.getControl().setMenu(menu);
 		viewer.getControl().setMenu(menu);
 		DropTarget dt = new DropTarget(viewer.getControl(), DND.DROP_MOVE | DND.DROP_DEFAULT | DND.DROP_COPY);
 		dt.setTransfer(new Transfer[] { TextTransfer.getInstance(),
@@ -180,7 +175,6 @@ public class MappedDataView extends ViewPart {
 				
 			}
 		});
-
 	}
 	
 	private void openImportWizard(String path) {
@@ -194,7 +188,7 @@ public class MappedDataView extends ViewPart {
 			IDataset im;
 			try {
 				im = LocalServiceManager.getLoaderService().getDataset(path, null);
-				RegistrationDialog dialog = new RegistrationDialog(Display.getDefault().getActiveShell(), ((MappedData)layers.get(layers.size()-1)).getMap(),im);
+				RegistrationDialog dialog = new RegistrationDialog(Display.getDefault().getActiveShell(), plotManager.getTopMap().getMap(),im);
 				if (dialog.open() != IDialogConstants.OK_ID) return;
 				AssociatedImage asIm = new AssociatedImage("Registered", (RGBDataset)dialog.getRegisteredImage());
 				area.getDataFile(0).addMapObject("Registered", asIm);
@@ -209,121 +203,15 @@ public class MappedDataView extends ViewPart {
 		if (wd.open() == WizardDialog.CANCEL) return;
 		
 		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(path, wiz.getMappedFileDescription());
-		area = new MappedDataArea();
 		area.addMappedDataFile(mdf);
-		map.clear();
-		spectrum.clear();
 		viewer.setInput(area);
-		plotMapData();
-	}
-
-	private IAction openRGBDialog(final List<MappedData> maps, final MappedDataFile mdf) {
-		final List<IDataset> dataList = new ArrayList<IDataset>(maps.size());
-		for (MappedData map : maps) {
-			IDataset data = map.getMap();
-			data.setName(map.toString());
-			dataList.add(map.getMap());
-		}
-		IAction action = new Action("Open RGB Mixer") {
-			@Override
-			public void run() {
-				RGBMixerDialog dialog;
-				try {
-					dialog = new RGBMixerDialog(Display.getDefault().getActiveShell(), dataList);
-					if (dialog.open() == IDialogConstants.CANCEL_ID) return;
-					IDataset rgb = dialog.getRGBDataset();
-					if (rgb == null) return;
-					rgb.addMetadata(maps.get(0).getMap().getMetadata(AxesMetadata.class).get(0));
-					MappedData m = maps.get(0).makeNewMapWithParent("RGB", rgb);
-					mdf.addMapObject("RGB", m);
-					viewer.refresh();
-				} catch (Exception e) {
-					MessageDialog.openError(Display.getDefault()
-							.getActiveShell(), "Error opening RGB Mixer",
-							"The following error occured while opening the RGB Mixer dialog: " + e);
-				}
-				
-			}
-		};
-		action.setImageDescriptor(Activator.getImageDescriptor("icons/rgb.png"));
-		return action;
-	}
-	
-	private IAction openComparisonDialog(final List<MappedData> maps) {
-		final List<IDataset> dataList = new ArrayList<IDataset>(maps.size());
-		for (MappedData map : maps) {
-			IDataset data = map.getMap();
-			data.setName(map.toString());
-			dataList.add(map.getMap());
-		}
-		IAction action = new Action("Open Comparison Viewer") {
-			@Override
-			public void run() {
-				ImageGridDialog dialog;
-				try {
-					dialog = new ImageGridDialog(Display.getDefault().getActiveShell(), dataList);
-					dialog.open();
-				} catch (Exception e) {
-					MessageDialog.openError(Display.getDefault()
-							.getActiveShell(), "Error Comparison Viewer",
-							"The following error occured while opening the Comparison Viewer dialog: " + e);
-				}
-				
-			}
-		};
-		action.setImageDescriptor(Activator.getImageDescriptor("icons/images-stack.png"));
-		return action;
+		plotManager.clearAll();
+		plotManager.plotMap(null);
 	}
 
 	@Override
 	public void setFocus() {
 		if (viewer != null && !viewer.getTree().isDisposed()) viewer.getTree().setFocus(); 
 
-	}
-	
-	private void plotMapData(){
-		map.clear();
-		MappedDataFile dataFile = area.getDataFile(0);
-		MappedData map = dataFile.getMap();
-		AssociatedImage image = dataFile.getAssociatedImage();
-		int count = 0;
-		try {
-			ICompositeTrace comp = this.map.createCompositeTrace("composite1");
-			layers = new ArrayList<MapObject>();
-			if (image != null) {
-				layers.add(image);
-				comp.add(MappingUtils.buildTrace(image.getImage(), this.map),count++);
-			}
-			layers.add(map);
-			comp.add(MappingUtils.buildTrace(map.getMap(), this.map,90),0);
-			this.map.addTrace(comp);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
-	
-	private void plotMapData(MappedData mapdata){
-		map.clear();
-		MappedDataFile dataFile = area.getDataFile(0);
-		AssociatedImage image = dataFile.getAssociatedImage();
-		int count = 0;
-		try {
-			ICompositeTrace comp = this.map.createCompositeTrace("composite1");
-			layers = new ArrayList<MapObject>();
-			if (image != null) {
-				layers.add(image);
-				comp.add(MappingUtils.buildTrace(image.getImage(), this.map),count++);
-			}
-
-			layers.add(mapdata);
-			comp.add(MappingUtils.buildTrace(mapdata.getMap(), this.map,90),count++);
-			this.map.addTrace(comp);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
 	}
 }

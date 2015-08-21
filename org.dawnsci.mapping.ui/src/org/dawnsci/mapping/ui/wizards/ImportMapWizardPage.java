@@ -2,6 +2,7 @@ package org.dawnsci.mapping.ui.wizards;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
@@ -127,6 +128,32 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 	protected void updateOnPageChange() {
 		if (description != null && description.getBlockNames() != null){
 			options = description.getBlockNames().toArray(new String[description.getBlockNames().size()]);
+
+			if (description.getDataBlockToMapMapping() != null) {
+				for (Entry<String, List<String>> e : description.getDataBlockToMapMapping().entrySet()) {
+					if (datasetNames.containsKey(e.getKey())) {
+						boolean canAdd = true;
+
+						for (String a : e.getValue()) {
+							if (a != null && datasetNames.containsKey(a)) {
+								int i = 0;
+								for (;i< options.length; i++) if (e.getKey().equals(options[i])) break;
+								mapToParent.put(a, i);
+								for (Entry<String, int[]> ent : datasetNames.entrySet()) if (ent.getKey().equals(a)) cviewer.setChecked(ent, true);
+							}
+						}
+
+//						if (canAdd) {
+//							int i = 0;
+//							for (;i< options.length; i++) if (e.getKey().equals(options[i])) break;
+//							mapToParent.put(e.getKey(), i);
+//							for (Entry<String, int[]> ent : datasetNames.entrySet()) if (ent.getKey().equals(e.getKey()))cviewer.setChecked(ent, true);
+//
+//						}
+					}
+				}
+			}
+
 		}
 	}
 	

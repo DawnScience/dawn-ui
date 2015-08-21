@@ -8,12 +8,14 @@ public class MappedData implements MapObject{
 
 	private String name;
 	protected IDataset map;
+	protected MappedDataBlock oParent;
 	protected MappedDataBlock parent;
+	private int transparency = -1;
 	
 	public MappedData(String name, IDataset map, MappedDataBlock parent) {
 		this.name = name;
 		this.map = map;
-		this.parent = parent;
+		this.oParent = this.parent = parent;
 	}
 	
 	public IDataset getMap(){
@@ -57,7 +59,25 @@ public class MappedData implements MapObject{
 		return null;
 	}
 
-	
+	public int getTransparency() {
+		return transparency;
+	}
+
+	public void setTransparency(int transparency) {
+		this.transparency = transparency;
+	}
+
+	public MappedDataBlock getParent() {
+		return parent;
+	}
+
+	public void setParent(MappedDataBlock parent) {
+		this.parent = parent;
+	}
+
+	public void resetParent() {
+		parent = oParent;
+	}
 	
 	
 }

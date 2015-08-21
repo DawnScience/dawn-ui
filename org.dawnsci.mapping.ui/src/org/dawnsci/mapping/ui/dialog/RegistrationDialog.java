@@ -132,10 +132,10 @@ public class RegistrationDialog extends Dialog {
 		double imX = image.getShape()[1];
 		double imY =  image.getShape()[0];
 		
-		double[] xValsMap = new double[]{mapX/3., mapX/2., mapX-mapX/3,0};
-		double[] yValsMap = new double[]{mapY/3., mapY-mapY/3,mapY/3.,0};
-		double[] xValsImage = new double[]{imX/3., imX/2., imX-imX/3,0};
-		double[] yValsImage = new double[]{imY/3., imY-imY/3,imY/3.,0};
+		double[] xValsMap = new double[]{mapX/3., mapX/2., mapX-mapX/3,mapX/2};
+		double[] yValsMap = new double[]{mapY/3., mapY-mapY/3,mapY/3.,mapY/2};
+		double[] xValsImage = new double[]{imX/3., imX/2., imX-imX/3,imX/2};
+		double[] yValsImage = new double[]{imY/3., imY-imY/3,imY/3.,imY/2};
 		
 		
 		

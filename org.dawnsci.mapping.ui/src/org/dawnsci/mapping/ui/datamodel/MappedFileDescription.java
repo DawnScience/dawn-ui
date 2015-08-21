@@ -8,33 +8,33 @@ import java.util.Map;
 
 public class MappedFileDescription {
 
-	private Map<String,List<String>> blockToMap = new HashMap<String, List<String>>();
-	private Map<String,List<String>> blockToAxes = new HashMap<String, List<String>>();
+	private Map<String,List<String>> dataBlockToMapMapping = new HashMap<String, List<String>>();
+	private Map<String,List<String>> dataBlockToAxesMapping = new HashMap<String, List<String>>();
 	private String xAxisName;
 	private String yAxisName;
 	private boolean remappingRequired = false;
 	
 	
 	public void addDataBlock(String blockName, List<String> axes) {
-		blockToMap.put(blockName, new ArrayList<String>());
-		blockToAxes.put(blockName, axes);
+		dataBlockToMapMapping.put(blockName, new ArrayList<String>());
+		dataBlockToAxesMapping.put(blockName, axes);
 	}
 	
 	public void addMap(String parentBlock, String mapName) {
-		if (!blockToMap.containsKey(parentBlock)) blockToMap.put(parentBlock,Arrays.asList(new String[]{mapName}));
-		else blockToMap.get(parentBlock).add(mapName);
+		if (!dataBlockToMapMapping.containsKey(parentBlock)) dataBlockToMapMapping.put(parentBlock,Arrays.asList(new String[]{mapName}));
+		else dataBlockToMapMapping.get(parentBlock).add(mapName);
 	}
 	
 	public List<String> getBlockNames() {
-		return new ArrayList<String>(blockToMap.keySet());
+		return new ArrayList<String>(dataBlockToMapMapping.keySet());
 	}
 	
 	public List<String> getBlockAxes(String parentBlock) {
-		return blockToAxes.get(parentBlock);
+		return dataBlockToAxesMapping.get(parentBlock);
 	}
 	
 	public List<String> getMapNames(String parentBlock) {
-		return blockToMap.get(parentBlock);
+		return dataBlockToMapMapping.get(parentBlock);
 	}
 	
 	public String getxAxisName() {
@@ -56,6 +56,24 @@ public class MappedFileDescription {
 
 	public void setRemappingRequired(boolean remappingRequired) {
 		this.remappingRequired = remappingRequired;
+	}
+
+	public Map<String, List<String>> getDataBlockToMapMapping() {
+		return dataBlockToMapMapping;
+	}
+
+	public void setDataBlockToMapMapping(
+			Map<String, List<String>> dataBlockToMapMapping) {
+		this.dataBlockToMapMapping = dataBlockToMapMapping;
+	}
+
+	public Map<String, List<String>> getDataBlockToAxesMapping() {
+		return dataBlockToAxesMapping;
+	}
+
+	public void setDataBlockToAxesMapping(
+			Map<String, List<String>> dataBlockToAxesMapping) {
+		this.dataBlockToAxesMapping = dataBlockToAxesMapping;
 	}
 	
 	

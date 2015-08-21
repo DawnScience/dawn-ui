@@ -23,6 +23,7 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -43,6 +44,7 @@ public class RGBMixerDialog extends Dialog {
 	private List<Dataset> data;
 	private CompoundDataset compData;
 	private IPlottingSystem system;
+	private Image image;
 
 	private int idxR = -1, idxG = -1, idxB = -1;
 	private boolean rDirty = true, bDirty = true, gDirty = true;
@@ -61,7 +63,7 @@ public class RGBMixerDialog extends Dialog {
 		if (data.isEmpty())
 			throw new Exception("No data is available to visualize in the RGB Mixer dialog.");
 		setShellStyle(getShellStyle() | SWT.RESIZE);
-		setDefaultImage(Activator.getImageDescriptor("icons/rgb.png").createImage());
+		setDefaultImage(image = Activator.getImageDescriptor("icons/rgb.png").createImage());
 		this.data = new ArrayList<Dataset>();
 		int width = data.get(0).getShape()[0];
 		int height = data.get(0).getShape()[1];
@@ -372,5 +374,11 @@ public class RGBMixerDialog extends Dialog {
 	@Override
 	protected Point getInitialSize() {
 		return new Point(800, 600);
+	}
+	
+	@Override
+	public boolean close() {
+		image.dispose();
+		return super.close();
 	}
 }

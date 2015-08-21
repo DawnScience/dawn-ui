@@ -49,7 +49,7 @@ public class MappingUtils {
 	}
 	
 	//FIXME NASTY NASTY COPY PASTED SLACKER!!!!!!!!!!!!
-	public static void plotDataWithMetadata(IDataset data, final IPlottingSystem system, int[] dataDims) throws Exception {
+	public static void plotDataWithMetadata(IDataset data, final IPlottingSystem system, int[] dataDims){
 		
 		IDataset x = null;
 		IDataset y = null;
@@ -59,7 +59,12 @@ public class MappingUtils {
 		
 		IDataset[] axes = getAxesFromMetadata(data);
 		
-		List<MaskMetadata> mmd = data.getMetadata(MaskMetadata.class);
+		List<MaskMetadata> mmd = null;
+		try {
+			mmd = data.getMetadata(MaskMetadata.class);
+		} catch (Exception e) {
+			//FIXME logger
+		}
 		
 		if (mmd != null && !mmd.isEmpty()) {
 			mask = mmd.get(0).getMask().getSlice().squeeze();

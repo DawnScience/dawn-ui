@@ -8,6 +8,7 @@ public class MappedDataArea implements MapObject {
 	private List<MappedDataFile> files = new ArrayList<MappedDataFile>();
 	
 	public void addMappedDataFile(MappedDataFile file) {
+		files.clear();
 		files.add(file);
 	}
 
