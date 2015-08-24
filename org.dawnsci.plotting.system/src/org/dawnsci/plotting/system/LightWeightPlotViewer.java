@@ -1459,7 +1459,7 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 				boolean yes = MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "Confirm Overwrite", "The file '"+file.getName()+"' exists.\n\nWould you like to overwrite it?");
 			    if (!yes) return filename;
 			}
-			PlotExportPrintUtil.saveGraph(filename, PlotExportPrintUtil.FILE_TYPES[dialog.getFilterIndex()], xyGraph.getImage(), plotContents);
+			PlotExportPrintUtil.saveGraph(filename, PlotExportPrintUtil.FILE_TYPES[dialog.getFilterIndex()], plotContents.getParent());
 			//logger.debug("Plot saved");
 		} catch (Exception e) {
 			throw e;
@@ -1472,7 +1472,7 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 		if (filename == null)
 			return;
 		try {
-			PlotExportPrintUtil.saveGraph(filename, filetype, xyGraph.getImage(), xyGraph.getParent());
+			PlotExportPrintUtil.saveGraph(filename, filetype, xyGraph.getParent());
 			logger.debug("Plotting saved");
 		} catch (Exception e) {
 			throw e;
