@@ -1,13 +1,14 @@
 package org.dawnsci.mapping.ui.dialog;
 
-import java.sql.DatabaseMetaData;
-import java.util.Collection;
 import java.util.Map;
+
+import javax.xml.xpath.XPath;
 
 import org.dawnsci.mapping.ui.MapPlotManager;
 import org.dawnsci.mapping.ui.datamodel.MappedData;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
+import org.dawnsci.mapping.ui.datamodel.ReMappedData;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -21,6 +22,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Scale;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Spinner;
 
 public class MapPropertiesDialog extends Dialog {
 	
@@ -80,6 +82,42 @@ public class MapPropertiesDialog extends Dialog {
 				map.setParent(dataBlocks.get(combo.getText()));
 			}
 		});
+		
+		
+		if (map instanceof ReMappedData) {
+			final ReMappedData rm = (ReMappedData)map;
+			final int[] shape = rm.getShape();
+			Label xLabel = new Label(container, SWT.NONE);
+			xLabel.setText("X shape");
+			final Spinner xspin = new Spinner(container, SWT.NONE);
+			xspin.setMinimum(1);
+			xspin.setMaximum(Integer.MAX_VALUE);
+			xspin.setSelection(shape[0]);
+			xspin.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					shape[0] = xspin.getSelection();
+					rm.setShape(shape);
+					manager.plotMap(rm);
+				}
+			});
+
+			Label yLabel = new Label(container, SWT.NONE);
+			yLabel.setText("Y shape");
+			final Spinner yspin = new Spinner(container, SWT.NONE);
+			yspin.setMinimum(1);
+			yspin.setMaximum(Integer.MAX_VALUE);
+			yspin.setSelection(shape[1]);
+			yspin.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					shape[1] = yspin.getSelection();
+					rm.setShape(shape);
+					manager.plotMap(rm);
+				}
+			});
+			
+		}
 		
 		return container;
 	}

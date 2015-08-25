@@ -14,6 +14,7 @@ import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.graphics.Point;
@@ -69,16 +70,19 @@ public class MappedFileManager {
 						InterruptedException {
 					IMonitor m = new ProgressMonitorWrapper(monitor);
 					monitor.beginTask("Loading data...", wiz.getMappedFileDescription().getBlockNames().size());
-					MappedDataFile mdf = MappedFileFactory.getMappedDataFile(path, wiz.getMappedFileDescription(),m);
+					final MappedDataFile mdf = MappedFileFactory.getMappedDataFile(path, wiz.getMappedFileDescription(),m);
 					if (m.isCancelled()) return;
 					mappedDataArea.addMappedDataFile(mdf);
 					Display.getDefault().syncExec(new Runnable() {
 						
 						@Override
 						public void run() {
-							viewer.refresh();
 							plotManager.clearAll();
 							plotManager.plotMap(null);
+							viewer.refresh();
+							if (viewer instanceof TreeViewer) {
+								((TreeViewer)viewer).expandToLevel(mdf, 1);
+							}
 						}
 					});
 					

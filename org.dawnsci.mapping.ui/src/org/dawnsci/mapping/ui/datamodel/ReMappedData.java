@@ -17,6 +17,7 @@ public class ReMappedData extends MappedData {
 
 	private IDataset reMapped;
 	private IDataset lookup;
+	private int[] shape;
 	
 	public ReMappedData(String name, IDataset map, MappedDataBlock parent) {
 		super(name, map, parent);
@@ -25,7 +26,7 @@ public class ReMappedData extends MappedData {
 	
 	public IDataset getMap(){
 		
-		updateRemappedData(null);
+		if (reMapped == null) updateRemappedData(null);
 		
 		return reMapped;
 	}
@@ -46,10 +47,10 @@ public class ReMappedData extends MappedData {
 			double yStepMed = (double)Stats.median(Maths.abs(Maths.derivative(DatasetFactory.createRange(y.getSize(),Dataset.INT32),(Dataset)y,1)));
 			double xStepMed = (double)Stats.median(Maths.abs(Maths.derivative(DatasetFactory.createRange(x.getSize(),Dataset.INT32),(Dataset)x,1)));
 			
-			int nBinsY = (int)(((yMax-yMin)/yStepMed)*0.5);
-			int nBinsX = (int)(((xMax-xMin)/xStepMed)*0.5);
+			int nBinsY = (int)(((yMax-yMin)/yStepMed));
+			int nBinsX = (int)(((xMax-xMin)/xStepMed));
 			
-			shape = new int[]{nBinsX, nBinsY};
+			this.shape = shape = new int[]{nBinsX, nBinsY};
 		}
 		
 		
@@ -66,17 +67,25 @@ public class ReMappedData extends MappedData {
 		
 	}
 	
+	public int[] getShape() {
+		return shape;
+	}
 	
-private int[] getIndices(double x, double y) {
-		
+	public void setShape(int[] shape){
+		this.shape = shape;
+		updateRemappedData(shape);
+	}
+	
+	private int[] getIndices(double x, double y) {
+
 		IDataset[] ax = MappingUtils.getAxesFromMetadata(reMapped);
-		
+
 		IDataset xx = ax[0];
 		IDataset yy = ax[1];
-		
+
 		int xi = Maths.abs(Maths.subtract(xx, x)).argMin();
 		int yi = Maths.abs(Maths.subtract(yy, y)).argMin();
-		
+
 		return new int[]{xi,yi};
 	}
 	

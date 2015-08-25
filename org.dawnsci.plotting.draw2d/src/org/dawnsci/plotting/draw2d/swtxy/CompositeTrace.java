@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.eclipse.dawnsci.plotting.api.trace.ICompositeTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
@@ -79,7 +80,8 @@ public class CompositeTrace extends Figure implements ICompositeTrace {
 //		for (ImageTrace t : traces) t.setGlobalRanges(xRange, yRange);
 		
 		add(image);
-		
+//		image.setAxes(((ImageTrace)trace).getAxes(), true);
+//		image.setImageOrigin(ImageOrigin.TOP_LEFT);
 		if (traces.size()==1) {
 			image.getXAxis().setRange(xRange[0], xRange[1]);;
 			image.getYAxis().setRange(yRange[1], yRange[0]);;
