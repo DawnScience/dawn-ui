@@ -19,18 +19,18 @@ public class MappingPerspective implements IPerspectiveFactory {
 		navigatorFolder.addView("org.eclipse.ui.navigator.ProjectExplorer");
 		navigatorFolder.addView("uk.ac.diamond.sda.navigator.views.FileView");
 		
-		IFolderLayout left = layout.createFolder("mappeddata", IPageLayout.LEFT, 0.8f, editorArea);
+		IFolderLayout left = layout.createFolder("mappeddata", IPageLayout.RIGHT, 0.2f, editorArea);
 		left.addView("org.dawnsci.mapping.ui.mappeddataview");
 		IViewLayout vLayout = layout.getViewLayout("org.dawnsci.mapping.ui.mappeddataview");
 		vLayout.setCloseable(false);
 		
-		IFolderLayout dataLayout = layout.createFolder("map", IPageLayout.RIGHT, 0.5f, "mappeddata");
+		IFolderLayout dataLayout = layout.createFolder("map", IPageLayout.RIGHT, 0.2f, "mappeddata");
 		dataLayout.addView("org.dawnsci.mapping.ui.mapview");
 		vLayout = layout.getViewLayout("org.dawnsci.mapping.ui.mapview");
 		vLayout.setCloseable(false);
 		
 		
-		IFolderLayout dataoutLayout = layout.createFolder("spectrum", IPageLayout.RIGHT, 0.5f, "map");
+		IFolderLayout dataoutLayout = layout.createFolder("spectrum", IPageLayout.BOTTOM, 0.5f, "map");
 		dataoutLayout.addView("org.dawnsci.mapping.ui.spectrumview");
 		vLayout = layout.getViewLayout("org.dawnsci.mapping.ui.spectrumview");
 		vLayout.setCloseable(false);

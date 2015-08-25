@@ -9,25 +9,35 @@ import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
+import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
 
 public class MappedFileFactory {
 
 	
-	public static MappedDataFile getMappedDataFile(String path, MappedFileDescription description) {
+	public static MappedDataFile getMappedDataFile(String path, MappedFileDescription description, IMonitor monitor) {
 		
 		List<String> blockNames = description.getBlockNames();
 		MappedDataFile file = new MappedDataFile(path);
 		
 		for (String name : blockNames) {
+			if (monitor != null) {
+				if (monitor.isCancelled()) return null;
+				monitor.subTask(name);
+			}
 			MappedDataBlock block = setUpBlock(path, name, description);
 			file.addMapObject(name, block);
 			List<String> maps = description.getMapNames(name);
 			for (String map : maps){
+				if (monitor != null) {
+					if (monitor.isCancelled()) return null;
+					monitor.subTask(map);
+				}
 				MappedData m = setUpMap(path, map,block, description);
 				file.addMapObject(map, m);
 			}
+			if (monitor != null) monitor.worked(1);
 		}
 		
 		return file;
@@ -114,6 +124,7 @@ public class MappedFileFactory {
 					IDataset s1 = lz.getSlice();
 					slice.setSlice(i, 0, ss[i], 1);
 					ILazyDataset s = lz.getSlice(slice).squeeze();
+					s.setName(lz.getName());
 					axm.addAxis(i, s);
 				}
 				

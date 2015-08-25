@@ -42,7 +42,7 @@ public class MappingUtils {
 		y = axes == null ? null : axes[1];
 		IImageTrace it = system.createImageTrace(data.getName());
 		it.setAlpha(alpha);
-		it.setData(data, Arrays.asList(new IDataset[]{y,x}), false);
+		it.setData(data, Arrays.asList(new IDataset[]{y,x}), true);
 		
 		return it;
 	

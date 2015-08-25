@@ -76,4 +76,8 @@ public class MapPlotManager {
 			e.printStackTrace();
 		}
 	}
+	
+	public boolean isPlotted(MapObject object) {
+		return layers.contains(object);
+	}
 }

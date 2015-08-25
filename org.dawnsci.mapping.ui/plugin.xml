@@ -5,18 +5,21 @@
          point="org.eclipse.ui.views">
       <view
             class="org.eclipse.dawnsci.plotting.api.VanillaPlottingSystemView"
+            icon="icons/map.png"
             id="org.dawnsci.mapping.ui.mapview"
             name="Map"
             restorable="true">
       </view>
       <view
             class="org.eclipse.dawnsci.plotting.api.VanillaPlottingSystemView"
+            icon="icons/layers-stack.png"
             id="org.dawnsci.mapping.ui.spectrumview"
             name="Spectrum"
             restorable="true">
       </view>
       <view
             class="org.dawnsci.mapping.ui.MappedDataView"
+            icon="icons/mapfolder.png"
             id="org.dawnsci.mapping.ui.mappeddataview"
             name="Mapped Data"
             restorable="true">
@@ -26,9 +29,76 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             class="org.dawnsci.mapping.ui.MappingPerspective"
+            icon="icons/map.png"
             id="org.dawnsci.mapping.ui.mappingperspective"
             name="Mapping">
       </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.ui.navigator.navigatorContent">
+      <actionProvider
+            class="org.dawnsci.mapping.ui.actions.MappingActionProvider"
+            id="org.dawnsci.mapping.ui.actions.MappingActionProvider"
+            overrides="org.eclipse.ui.navigator.resources.actions.EditActions"
+            priority="highest">
+         <enablement>
+            <with
+                  variable="activeWorkbenchWindow.activePerspective">
+               <equals
+                     value="org.dawnsci.mapping.ui.mappingperspective">
+               </equals>
+            </with>
+         </enablement>
+      </actionProvider>
+      <actionProvider
+            class="org.dawnsci.mapping.ui.actions.MappingActionProvider"
+            id="org.dawnsci.mapping.ui.actions.MappingActionProvider2"
+            overrides="org.eclipse.ui.navigator.resources.OpenActions"
+            priority="highest">
+         <enablement>
+            <with
+                  variable="activeWorkbenchWindow.activePerspective">
+               <equals
+                     value="org.dawnsci.mapping.ui.mappingperspective">
+               </equals>
+            </with>
+         </enablement>
+      </actionProvider>
+   </extension>
+   <extension
+         point="org.eclipse.ui.navigator.viewer">
+      <viewer
+            viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+      </viewer>
+      <viewerActionBinding
+            viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+         <includes>
+            <actionExtension
+                  pattern="org.dawnsci.mapping.ui.actions.*">
+            </actionExtension>
+         </includes>
+      </viewerActionBinding>
+   </extension>
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            id="org.dawnsci.mapping.ui.fileOpenActionSet"
+            label="Open File...">
+         <action
+               class="org.dawnsci.mapping.ui.actions.OpenLocalFileAction"
+               id="org.dawnsci.mapping.ui.action1"
+               label="Open Map File..."
+               menubarPath="file/new">
+         </action>
+      </actionSet>
+   </extension>
+   <extension
+         point="uk.ac.diamond.sda.navigator.openFile">
+      <fileOpen
+            class="org.dawnsci.mapping.ui.actions.NavigatorOpenAction"
+            id="org.dawnsci.mapping.ui.fileOpenNavigator"
+            perspective="org.dawnsci.mapping.ui.mappingperspective">
+      </fileOpen>
    </extension>
 
 </plugin>

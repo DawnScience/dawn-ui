@@ -13,6 +13,7 @@ import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.MappedFileDescription;
 import org.dawnsci.mapping.ui.datamodel.MappedFileFactory;
+import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
 import org.dawnsci.mapping.ui.dialog.ImageGridDialog;
 import org.dawnsci.mapping.ui.dialog.RGBMixerDialog;
 import org.dawnsci.mapping.ui.dialog.RegistrationDialog;
@@ -24,6 +25,7 @@ import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
+import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ICompositeTrace;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -65,10 +67,9 @@ import org.eclipse.ui.part.ViewPart;
 public class MappedDataView extends ViewPart {
 
 	private TreeViewer viewer;
-	private IPlottingSystem map;
-	private IPlottingSystem spectrum;
 	private MappedDataArea area;
 	private MapPlotManager plotManager; 
+	private MappedFileManager fileManager;
 	
 	
 	@Override
@@ -77,9 +78,9 @@ public class MappedDataView extends ViewPart {
 		
 		IWorkbenchPage page = getSite().getPage();
 		IViewPart view = page.findView("org.dawnsci.mapping.ui.mapview");
-		map = (IPlottingSystem)view.getAdapter(IPlottingSystem.class);
+		IPlottingSystem map = (IPlottingSystem)view.getAdapter(IPlottingSystem.class);
 		view = page.findView("org.dawnsci.mapping.ui.spectrumview");
-		spectrum = (IPlottingSystem)view.getAdapter(IPlottingSystem.class);
+		IPlottingSystem spectrum = (IPlottingSystem)view.getAdapter(IPlottingSystem.class);
 		
 		plotManager = new MapPlotManager(map, spectrum, area);
 		
@@ -100,7 +101,7 @@ public class MappedDataView extends ViewPart {
 		viewer = new TreeViewer(parent);
 		viewer.getTree().setLayoutData(new GridData(GridData.FILL_BOTH));
 		viewer.setContentProvider(new MapFileTreeContentProvider());
-		viewer.setLabelProvider(new MapFileCellLabelProvider());
+		viewer.setLabelProvider(new MapFileCellLabelProvider(plotManager));
 		viewer.setInput(area);
 		viewer.addDoubleClickListener(new IDoubleClickListener() {
 			
@@ -108,9 +109,11 @@ public class MappedDataView extends ViewPart {
 			public void doubleClick(DoubleClickEvent event) {
 				Object e = ((StructuredSelection)event.getSelection()).getFirstElement();
 				if (e instanceof MappedData) plotManager.plotMap((MappedData)e);
-				
+				viewer.refresh();
 			}
 		});
+		
+		fileManager = new MappedFileManager(plotManager, area, viewer);
 
 		// Add menu and action to treeviewer
 		MenuManager menuMgr = new MenuManager();
@@ -178,40 +181,50 @@ public class MappedDataView extends ViewPart {
 	}
 	
 	private void openImportWizard(String path) {
-		ImportMappedDataWizard wiz = new ImportMappedDataWizard(path);
-		wiz.setNeedsProgressMonitor(true);
-		final WizardDialog wd = new WizardDialog(getSite().getShell(),wiz);
-		wd.setPageSize(new Point(900, 500));
-		wd.create();
 		
-		if (wiz.isImageImport()) {
-			IDataset im;
-			try {
-				im = LocalServiceManager.getLoaderService().getDataset(path, null);
-				RegistrationDialog dialog = new RegistrationDialog(Display.getDefault().getActiveShell(), plotManager.getTopMap().getMap(),im);
-				if (dialog.open() != IDialogConstants.OK_ID) return;
-				AssociatedImage asIm = new AssociatedImage("Registered", (RGBDataset)dialog.getRegisteredImage());
-				area.getDataFile(0).addMapObject("Registered", asIm);
-				viewer.refresh();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return;
-		}
-
-		if (wd.open() == WizardDialog.CANCEL) return;
+		fileManager.importFile(path);
 		
-		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(path, wiz.getMappedFileDescription());
-		area.addMappedDataFile(mdf);
-		viewer.setInput(area);
-		plotManager.clearAll();
-		plotManager.plotMap(null);
+//		ImportMappedDataWizard wiz = new ImportMappedDataWizard(path);
+//		wiz.setNeedsProgressMonitor(true);
+//		final WizardDialog wd = new WizardDialog(getSite().getShell(),wiz);
+//		wd.setPageSize(new Point(900, 500));
+//		wd.create();
+//		
+//		if (wiz.isImageImport()) {
+//			IDataset im;
+//			try {
+//				im = LocalServiceManager.getLoaderService().getDataset(path, null);
+//				RegistrationDialog dialog = new RegistrationDialog(Display.getDefault().getActiveShell(), plotManager.getTopMap().getMap(),im);
+//				if (dialog.open() != IDialogConstants.OK_ID) return;
+//				AssociatedImage asIm = new AssociatedImage("Registered", (RGBDataset)dialog.getRegisteredImage());
+//				area.getDataFile(0).addMapObject("Registered", asIm);
+//				viewer.refresh();
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			return;
+//		}
+//
+//		if (wd.open() == WizardDialog.CANCEL) return;
+//		
+//		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(path, wiz.getMappedFileDescription());
+//		area.addMappedDataFile(mdf);
+//		viewer.setInput(area);
+//		plotManager.clearAll();
+//		plotManager.plotMap(null);
 	}
 
 	@Override
 	public void setFocus() {
 		if (viewer != null && !viewer.getTree().isDisposed()) viewer.getTree().setFocus(); 
 
+	}
+	
+	@Override
+	public Object getAdapter(Class adapter) {
+		if (MappedFileManager.class == adapter) return fileManager;
+
+		return super.getAdapter(adapter);
 	}
 }

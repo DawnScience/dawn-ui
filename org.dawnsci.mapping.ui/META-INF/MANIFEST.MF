@@ -20,6 +20,9 @@ Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/localServiceManager.xml
 Import-Package: com.lowagie.text,
  org.eclipse.core.resources,
+ org.eclipse.ui.navigator,
  org.eclipse.ui.part,
  org.mihalis.opal.rangeSlider;version="0.9.5.2",
- org.slf4j
+ org.slf4j,
+ uk.ac.diamond.sda.navigator.actions,
+ uk.ac.diamond.sda.navigator.views

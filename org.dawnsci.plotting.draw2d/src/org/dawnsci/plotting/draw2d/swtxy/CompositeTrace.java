@@ -42,7 +42,9 @@ public class CompositeTrace extends Figure implements ICompositeTrace {
 
 	@Override
 	public void add(ITrace trace, int index) throws IllegalArgumentException {
-
+		yAxis.setTicksIndexBased(false);
+		xAxis.setTicksIndexBased(false);
+		
 		if (!(trace instanceof ImageTrace)) throw new IllegalArgumentException(trace.getClass()+ " are not supported currently!");
 		if (trace.getData() == null) throw new IllegalArgumentException("Please ensure that "+trace.getName() + " trace has data! ");
 		if (((ImageTrace)trace).getAxes() == null) throw new IllegalArgumentException("Image traces must have axes in composites");
