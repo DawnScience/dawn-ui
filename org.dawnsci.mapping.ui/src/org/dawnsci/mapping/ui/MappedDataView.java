@@ -1,50 +1,28 @@
 package org.dawnsci.mapping.ui;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
-import org.dawnsci.mapping.ui.datamodel.MapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedData;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
-import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
-import org.dawnsci.mapping.ui.datamodel.MappedFileDescription;
-import org.dawnsci.mapping.ui.datamodel.MappedFileFactory;
 import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
-import org.dawnsci.mapping.ui.dialog.ImageGridDialog;
-import org.dawnsci.mapping.ui.dialog.RGBMixerDialog;
-import org.dawnsci.mapping.ui.dialog.RegistrationDialog;
-import org.dawnsci.mapping.ui.wizards.ImportMappedDataWizard;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
-import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
-import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
-import org.eclipse.dawnsci.plotting.api.trace.ICompositeTrace;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetAdapter;
@@ -52,15 +30,11 @@ import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.internal.presentations.UpdatingActionContributionItem;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 
@@ -70,7 +44,6 @@ public class MappedDataView extends ViewPart {
 	private MappedDataArea area;
 	private MapPlotManager plotManager; 
 	private MappedFileManager fileManager;
-	
 	
 	@Override
 	public void createPartControl(Composite parent) {
@@ -88,8 +61,7 @@ public class MappedDataView extends ViewPart {
 			
 			@Override
 			public void doubleClickPerformed(ClickEvent evt) {
-				// TODO Auto-generated method stub
-				
+				//No double click action
 			}
 			
 			@Override
@@ -185,37 +157,8 @@ public class MappedDataView extends ViewPart {
 		
 		fileManager.importFile(path);
 		
-//		ImportMappedDataWizard wiz = new ImportMappedDataWizard(path);
-//		wiz.setNeedsProgressMonitor(true);
-//		final WizardDialog wd = new WizardDialog(getSite().getShell(),wiz);
-//		wd.setPageSize(new Point(900, 500));
-//		wd.create();
-//		
-//		if (wiz.isImageImport()) {
-//			IDataset im;
-//			try {
-//				im = LocalServiceManager.getLoaderService().getDataset(path, null);
-//				RegistrationDialog dialog = new RegistrationDialog(Display.getDefault().getActiveShell(), plotManager.getTopMap().getMap(),im);
-//				if (dialog.open() != IDialogConstants.OK_ID) return;
-//				AssociatedImage asIm = new AssociatedImage("Registered", (RGBDataset)dialog.getRegisteredImage());
-//				area.getDataFile(0).addMapObject("Registered", asIm);
-//				viewer.refresh();
-//			} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//			return;
-//		}
-//
-//		if (wd.open() == WizardDialog.CANCEL) return;
-//		
-//		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(path, wiz.getMappedFileDescription());
-//		area.addMappedDataFile(mdf);
-//		viewer.setInput(area);
-//		plotManager.clearAll();
-//		plotManager.plotMap(null);
 	}
-
+	
 	@Override
 	public void setFocus() {
 		if (viewer != null && !viewer.getTree().isDisposed()) viewer.getTree().setFocus(); 
@@ -223,9 +166,8 @@ public class MappedDataView extends ViewPart {
 	}
 	
 	@Override
-	public Object getAdapter(Class adapter) {
+	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
 		if (MappedFileManager.class == adapter) return fileManager;
-
 		return super.getAdapter(adapter);
 	}
 }

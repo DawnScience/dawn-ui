@@ -2,9 +2,7 @@ package org.dawnsci.mapping.ui.datamodel;
 
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
-import org.eclipse.ui.internal.handlers.ReuseEditorTester;
 
 public class MappedDataBlock implements MapObject {
 
@@ -28,7 +26,6 @@ public class MappedDataBlock implements MapObject {
 
 	@Override
 	public Object[] getChildren() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	

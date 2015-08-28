@@ -25,6 +25,8 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ICompositeTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.swt.widgets.Display;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MapPlotManager {
 	
@@ -35,6 +37,8 @@ public class MapPlotManager {
 	private PlotJob job;
 	private volatile Dataset merge;
 	private AtomicInteger atomicPosition;
+	
+	private final static Logger logger = LoggerFactory.getLogger(MapPlotManager.class);
 	
 	public MapPlotManager(IPlottingSystem map, IPlottingSystem data, MappedDataArea area) {
 		this.map = map;
@@ -86,7 +90,6 @@ public class MapPlotManager {
 						Dataset mergedDataset = getMergedDataset(s);
 						int pos = atomicPosition.getAndIncrement() % 4;
 						System.err.println(pos);
-						Dataset sub = null;
 						int[] mShape = mergedDataset.getShape();
 						SliceND slice = new SliceND(mShape);
 						if (pos == 0){
@@ -169,14 +172,6 @@ public class MapPlotManager {
 		data.clear();
 	}
 	
-//	private int[] makeIndexArray() {
-//		int[] out = new int[255];
-//		
-//		
-//		
-//		
-//	}
-	
 	private void plotMapData(MappedData mapdata){
 		map.clear();
 		MappedDataFile dataFile = area.getDataFile(0);
@@ -195,8 +190,7 @@ public class MapPlotManager {
 			comp.add(MappingUtils.buildTrace(mapdata.getMap(), this.map,mapdata.getTransparency()),count++);
 			this.map.addTrace(comp);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Error plotting mapped data", e);
 		}
 	}
 	

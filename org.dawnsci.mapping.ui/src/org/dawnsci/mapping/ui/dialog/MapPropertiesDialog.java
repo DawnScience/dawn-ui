@@ -2,8 +2,6 @@ package org.dawnsci.mapping.ui.dialog;
 
 import java.util.Map;
 
-import javax.xml.xpath.XPath;
-
 import org.dawnsci.mapping.ui.MapPlotManager;
 import org.dawnsci.mapping.ui.datamodel.MappedData;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;

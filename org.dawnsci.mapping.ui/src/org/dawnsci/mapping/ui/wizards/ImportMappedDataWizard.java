@@ -15,12 +15,12 @@ import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ImportMappedDataWizard extends Wizard {
 
@@ -30,6 +30,8 @@ public class ImportMappedDataWizard extends Wizard {
 	private MappedFileDescription description = new MappedFileDescription();
 	private boolean imageImport = false;
 	private MappedFileDescription[] persistedList;
+	
+	private final static Logger logger = LoggerFactory.getLogger(ImportMappedDataWizard.class);
 	
 	public ImportMappedDataWizard(String filePath) {
 		this.filePath = filePath;
@@ -150,8 +152,7 @@ public class ImportMappedDataWizard extends Wizard {
 			p.setValue("TestDescriptionList", json);
 			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Could not set persisted file description list", e);
 		}
 		
 		return true;

@@ -115,13 +115,12 @@ public class MappedFileFactory {
 					if (second != null) axm.addAxis(i, lService.getData(path, null).getLazyDataset(second));
 					
 				} else {
-					//approximate 2D with 1D
+					//approximate 2D with 1D, should be done int the map/mapobjects
 					int[] start = new int[ss.length];
 					int[] stop = start.clone();
 					Arrays.fill(stop, 1);
 					int[] step = stop.clone();
 					SliceND slice = new SliceND(ss,start,stop,step);
-					IDataset s1 = lz.getSlice();
 					slice.setSlice(i, 0, ss[i], 1);
 					ILazyDataset s = lz.getSlice(slice).squeeze();
 					s.setName(lz.getName());

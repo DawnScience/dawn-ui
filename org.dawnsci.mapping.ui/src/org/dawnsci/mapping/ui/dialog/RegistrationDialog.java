@@ -1,18 +1,12 @@
 package org.dawnsci.mapping.ui.dialog;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.mapping.ui.MappingUtils;
-import org.dawnsci.mapping.ui.datamodel.MapObject;
-import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
-import org.dawnsci.plotting.AbstractPlottingSystem;
-import org.dawnsci.plotting.draw2d.swtxy.CompositeTrace;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
-import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.LinearAlgebra;
@@ -23,15 +17,11 @@ import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
-import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
-import org.eclipse.dawnsci.plotting.api.trace.ColorOption;
 import org.eclipse.dawnsci.plotting.api.trace.ICompositeTrace;
-import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
-import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -42,21 +32,22 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-
-import uk.ac.diamond.scisoft.analysis.optimize.LeastSquares;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RegistrationDialog extends Dialog {
 
 	private IDataset image;
 	private IDataset map;
 	private IDataset registered;
-	private MappedDataArea area;
 	private IPlottingSystem systemImage;
 	private IPlottingSystem systemMap;
 	private IPlottingSystem systemComposite;
 	private IRegion[] mapPoints = new IRegion[4];
 	private IRegion[] imagePoints = new IRegion[4];
 	int count = 0;
+	
+	private final static Logger logger = LoggerFactory.getLogger(RegistrationDialog.class);
 	
 	public RegistrationDialog(Shell parentShell, IDataset map, IDataset image) {
 		super(parentShell);
@@ -70,7 +61,7 @@ public class RegistrationDialog extends Dialog {
 			systemImage = PlottingFactory.createPlottingSystem();
 			systemComposite = PlottingFactory.createPlottingSystem();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Could not create plotting systems!", e);
 		}
 	}
 	
@@ -106,15 +97,10 @@ public class RegistrationDialog extends Dialog {
 		systemComposite.createPlotPart(main, "Composite Plot", actionBarComposite, PlotType.IMAGE, null);
 		systemComposite.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		try {
-			MappingUtils.plotDataWithMetadata(map, systemMap, null);
-//			((IPaletteTrace)systemMap.getTraces(IImageTrace.class).iterator().next()).setPalette("Gray Scale");
-			image.setName("Image");
-			MappingUtils.plotDataWithMetadata(image, systemImage, null);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
+		MappingUtils.plotDataWithMetadata(map, systemMap, null);
+		image.setName("Image");
+		MappingUtils.plotDataWithMetadata(image, systemImage, null);
 		
 		doInitialMapping();
 		
@@ -137,81 +123,55 @@ public class RegistrationDialog extends Dialog {
 		double[] xValsImage = new double[]{imX/3., imX/2., imX-imX/3,imX/2};
 		double[] yValsImage = new double[]{imY/3., imY-imY/3,imY/3.,imY/2};
 		
-		
-		
 		try {
-			
 			for (int i = 0; i < 4; i++) {
-				
+
 				Color c = Display.getDefault().getSystemColor(SWT.COLOR_RED);
 				if (i == 1) c = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
 				if (i == 2) c = Display.getDefault().getSystemColor(SWT.COLOR_GREEN);
 				if (i == 3) c = Display.getDefault().getSystemColor(SWT.COLOR_CYAN);
-				
+
 				final IRegion point1 = systemMap.createRegion("Point" +i, RegionType.POINT);
 				point1.setRegionColor(c);
 				mapPoints[i] = point1;
 				point1.setROI(new PointROI(xValsMap[i],yValsMap[i]));
-				point1.addROIListener(new IROIListener() {
-					
-					@Override
-					public void roiSelected(ROIEvent evt) {
-						// TODO Auto-generated method stub
-						
-					}
-					
-					@Override
-					public void roiDragged(ROIEvent evt) {
-						// TODO Auto-generated method stub
-						
-					}
-					
+				point1.addROIListener(new IROIListener.Stub() {
+
+
 					@Override
 					public void roiChanged(ROIEvent evt) {
-						update();
+						RegistrationDialog.this.update();
 					}
 				});
 				systemMap.addRegion(point1);
 			}
-			
+
 			for (int i = 0; i < 4; i++) {
 				Color c = Display.getDefault().getSystemColor(SWT.COLOR_RED);
 				if (i == 1) c = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
 				if (i == 2) c = Display.getDefault().getSystemColor(SWT.COLOR_GREEN);
 				if (i == 3) c = Display.getDefault().getSystemColor(SWT.COLOR_CYAN);
-				
+
 				final IRegion point1 = systemImage.createRegion("Point" +i, RegionType.POINT);
 				point1.setRegionColor(c);
 				imagePoints[i] = point1;
 				point1.setROI(new PointROI(xValsImage[i],yValsImage[i]));
-				point1.addROIListener(new IROIListener() {
-					
-					@Override
-					public void roiSelected(ROIEvent evt) {
-						// TODO Auto-generated method stub
-						
-					}
-					
-					@Override
-					public void roiDragged(ROIEvent evt) {
-						// TODO Auto-generated method stub
-						
-					}
-					
+				point1.addROIListener(new IROIListener.Stub() {
+
+
 					@Override
 					public void roiChanged(ROIEvent evt) {
-						update();
+						RegistrationDialog.this.update();
 					}
 				});
 				systemImage.addRegion(point1);
 			}
-			
-
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Could not create Regions",e);
 		}
-		
+
+
+
 		update();
 		
 		
@@ -264,8 +224,6 @@ public class RegistrationDialog extends Dialog {
 			im = value.get(0);
 		}
 		
-		List<Dataset> value = mrc.value(image);
-		
 		System.out.format("XOffset: %f, YOffset: %f, XScale %f, YScale %f,",tX,tY,sX,sY);
 		System.out.println("Done");
 		
@@ -305,8 +263,7 @@ public class RegistrationDialog extends Dialog {
 			}
 			return mat;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Could not get axis location",e);
 		}
 
 

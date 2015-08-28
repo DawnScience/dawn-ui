@@ -1,7 +1,5 @@
 package org.dawnsci.mapping.ui.wizards;
 
-import java.util.Map;
-
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;

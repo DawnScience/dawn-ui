@@ -8,7 +8,6 @@ import org.dawnsci.mapping.ui.Activator;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.CompoundDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.IndexIterator;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
@@ -71,11 +70,8 @@ public class RGBMixerDialog extends Dialog {
 			if (width != d.getShape()[0] || height != d.getShape()[1]) {
 				throw new Exception("Data has not the same size");
 			}
-			double max = d.max().doubleValue();
-			double min = d.min().doubleValue();
 			
 			Dataset da = DatasetUtils.convertToDataset(d);
-//			da.isubtract(min).idivide(max-min).imultiply(255);
 			this.data.add(da);
 		}
 		try {

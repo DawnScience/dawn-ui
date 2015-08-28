@@ -8,12 +8,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.dawnsci.mapping.ui.LocalServiceManager;
+import org.dawnsci.mapping.ui.MapPlotManager;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MappedDataFile implements MapObject{
 
@@ -23,6 +26,8 @@ public class MappedDataFile implements MapObject{
 	private Map<String,AssociatedImage> microscopeDataMap;
 	private int mapXDim;
 	private int mapYDim;
+	
+	private final static Logger logger = LoggerFactory.getLogger(MappedDataFile.class);
 	
 	public MappedDataFile(String path) {
 		this.path = path;
@@ -34,14 +39,15 @@ public class MappedDataFile implements MapObject{
 	public MappedDataBlock addFullDataBlock(String datasetName, int xdim, int ydim) {
 		mapXDim = xdim;
 		mapYDim = ydim;
+		
+		//TODO make use of the x and y dimensions
 		MappedDataBlock block = null;
 		try {
 			ILazyDataset lz = LocalServiceManager.getLoaderService().getData(path, null).getLazyDataset(datasetName);
 			block = new MappedDataBlock(datasetName, lz);
 			fullDataMap.put(datasetName, block);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Error loading mapped data block!", e);
 		}
 		
 		return block;
@@ -64,8 +70,7 @@ public class MappedDataFile implements MapObject{
 			ILazyDataset lz = LocalServiceManager.getLoaderService().getData(path, null).getLazyDataset(mapName);
 			mapDataMap.put(mapName, new MappedData(mapName, lz.getSlice(), parent));
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Error loading mapped data!", e);
 		}
 	}
 	
@@ -87,8 +92,7 @@ public class MappedDataFile implements MapObject{
 			microrgb.setMetadata(test.getMetadata(AxesMetadata.class).get(0));
 			microscopeDataMap.put(imageName, new AssociatedImage(imageName, microrgb));
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Error non map image!", e);
 		}
 	}
 
