@@ -32,13 +32,13 @@ public class MappedDataBlock implements MapObject {
 		return null;
 	}
 	
-	public IDataset getSpectrum(int x, int y) {
+	public ILazyDataset getSpectrum(int x, int y) {
 		
 		SliceND slice = new SliceND(dataset.getShape());
 		slice.setSlice(0,y,y+1,1);
 		slice.setSlice(1,x,x+1,1);
 		
-		return dataset.getSlice(slice);
+		return dataset.getSliceView(slice);
 	}
 	
 	public IDataset getSpectrum(int index) {

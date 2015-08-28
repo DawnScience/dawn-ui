@@ -94,7 +94,8 @@ public class MappedDataView extends ViewPart {
 			
 			@Override
 			public void clickPerformed(ClickEvent evt) {
-				plotManager.plotData(evt.getxValue(), evt.getyValue());
+				if (evt.isShiftDown()) plotManager.plotDataWithHold(evt.getxValue(), evt.getyValue());
+				else plotManager.plotData(evt.getxValue(), evt.getyValue());
 			}
 		});
 

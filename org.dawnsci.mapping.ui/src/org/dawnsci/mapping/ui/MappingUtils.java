@@ -20,6 +20,7 @@ import org.eclipse.dawnsci.analysis.api.metadata.MaskMetadata;
 import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.swt.widgets.Display;
 
@@ -47,6 +48,25 @@ public class MappingUtils {
 		return it;
 	
 	}
+	
+	public static ILineTrace buildLineTrace(IDataset data, IPlottingSystem system) {
+		IDataset x = null;
+
+		
+		data = data.getSliceView().squeeze();
+		
+		IDataset[] axes = getAxesFromMetadata(data);
+		
+		x = axes == null ? null : axes[0];
+
+		ILineTrace it = system.createLineTrace(data.getName());
+		it.setData(x, data);
+		
+		return it;
+	
+	}
+	
+	
 	
 	//FIXME NASTY NASTY COPY PASTED SLACKER!!!!!!!!!!!!
 	public static void plotDataWithMetadata(IDataset data, final IPlottingSystem system, int[] dataDims){

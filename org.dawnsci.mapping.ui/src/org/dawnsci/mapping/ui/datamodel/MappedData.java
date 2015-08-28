@@ -2,6 +2,7 @@ package org.dawnsci.mapping.ui.datamodel;
 
 import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
 
 public class MappedData implements MapObject{
@@ -35,7 +36,7 @@ public class MappedData implements MapObject{
 		return new int[]{xi,yi};
 	}
 	
-	public IDataset getSpectrum(double x, double y) {
+	public ILazyDataset getSpectrum(double x, double y) {
 		int[] indices = getIndices(x, y);
 		return parent.getSpectrum(indices[0], indices[1]);
 	}

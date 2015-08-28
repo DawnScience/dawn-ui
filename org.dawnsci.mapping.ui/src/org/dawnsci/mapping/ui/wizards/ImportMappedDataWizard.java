@@ -3,6 +3,7 @@ package org.dawnsci.mapping.ui.wizards;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import org.dawnsci.mapping.ui.LocalServiceManager;
@@ -28,6 +29,7 @@ public class ImportMappedDataWizard extends Wizard {
 	private Map<String,int[]> nexusDatasetNames = new LinkedHashMap<String, int[]>();
 	private MappedFileDescription description = new MappedFileDescription();
 	private boolean imageImport = false;
+	private MappedFileDescription[] persistedList;
 	
 	public ImportMappedDataWizard(String filePath) {
 		this.filePath = filePath;
@@ -57,25 +59,25 @@ public class ImportMappedDataWizard extends Wizard {
 							IMetadata meta = LocalServiceManager.getLoaderService().getMetadata(filePath, null);
 							populateNexusMaps(meta);
 							
-							IPreferenceStore ps = Activator.getDefault().getPreferenceStore();
-							String jsonArray = ps.getString("TestDescriptionList");
-							if (jsonArray != null) {
-								IPersistenceService p = LocalServiceManager.getPersistenceService();
-								try {
-									MappedFileDescription[] ds = p.unmarshal(jsonArray,MappedFileDescription[].class);
-									for (MappedFileDescription d : ds) {
-										if (datasetNames.containsKey(d.getBlockNames().get(0))){
-											description = d;
-											break;
-										}
-									}
-
-									
-								} catch (Exception e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-							}
+//							IPreferenceStore ps = Activator.getDefault().getPreferenceStore();
+//							String jsonArray = ps.getString("TestDescriptionList");
+//							if (jsonArray != null) {
+//								IPersistenceService p = LocalServiceManager.getPersistenceService();
+//								try {
+//									persistedList = p.unmarshal(jsonArray,MappedFileDescription[].class);
+//									for (MappedFileDescription d : persistedList) {
+//										if (datasetNames.containsKey(d.getBlockNames().get(0))){
+//											description = d;
+//											break;
+//										}
+//									}
+//
+//									
+//								} catch (Exception e) {
+//									// TODO Auto-generated catch block
+//									e.printStackTrace();
+//								}
+//							}
 							
 							
 						} catch (Exception e) {
@@ -143,7 +145,8 @@ public class ImportMappedDataWizard extends Wizard {
 		IPersistenceService ps = LocalServiceManager.getPersistenceService();
 		try {
 			IPreferenceStore p = Activator.getDefault().getPreferenceStore();
-			String json = ps.marshal(new MappedFileDescription[]{description});
+			updatePersistanceList();
+			String json = ps.marshal(persistedList);
 			p.setValue("TestDescriptionList", json);
 			
 		} catch (Exception e) {
@@ -152,6 +155,32 @@ public class ImportMappedDataWizard extends Wizard {
 		}
 		
 		return true;
+	}
+
+	private void updatePersistanceList() {
+		
+		if (persistedList == null || persistedList.length == 0) {
+			persistedList = new MappedFileDescription[]{description};
+			return;
+		}
+		
+		LinkedList<MappedFileDescription> ll = new LinkedList<MappedFileDescription>();
+		for (MappedFileDescription d : persistedList) {
+			ll.add(d);
+		}
+		
+		if (ll.contains(description)) ll.remove(description);
+		
+		ll.push(description);
+
+		if (ll.size() > 10) ll.removeLast();
+		
+		persistedList = new MappedFileDescription[ll.size()];
+		
+		for (int i = 0; i < ll.size(); i++) {
+			persistedList[i] = ll.removeFirst();
+		}
+		
 	}
 
 	public boolean isImageImport() {
