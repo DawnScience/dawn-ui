@@ -134,7 +134,7 @@ public class RGBMixerDialog extends Dialog {
 			}
 		});
 		final Button redLogButton = new Button(redComp, SWT.CHECK);
-		redLogButton.setText("Apply Log on red channel");
+		redLogButton.setText("Log");
 		redLogButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		redLogButton.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -174,7 +174,7 @@ public class RGBMixerDialog extends Dialog {
 			}
 		});
 		final Button greenLogButton = new Button(greenComp, SWT.CHECK);
-		greenLogButton.setText("Apply Log on blue channel");
+		greenLogButton.setText("Log");
 		greenLogButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		greenLogButton.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -221,7 +221,7 @@ public class RGBMixerDialog extends Dialog {
 			}
 		});
 		final Button blueLogButton = new Button(blueComp, SWT.CHECK);
-		blueLogButton.setText("Apply Log on blue channel");
+		blueLogButton.setText("Log");
 		blueLogButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		blueLogButton.addSelectionListener(new SelectionAdapter() {
 			@Override
