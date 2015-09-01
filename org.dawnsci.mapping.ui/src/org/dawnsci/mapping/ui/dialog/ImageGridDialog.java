@@ -9,13 +9,11 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -26,21 +24,22 @@ import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ImageGridDialog extends Dialog {
+public class ImageGridDialog {
 
 	private static Logger logger = LoggerFactory.getLogger(ImageGridDialog.class);
 
 	private List<IDataset> data;
 	private List<IPlottingSystem> systems = new ArrayList<IPlottingSystem>();
 	private Image image;
+	private Shell shell;
 
-	public ImageGridDialog(Shell parentShell, List<IDataset> data) throws Exception {
-		super(parentShell);
+	public ImageGridDialog(List<IDataset> data) throws Exception {
+		shell = new Shell(Display.getDefault());
+		shell.setText("Comparison Viewer");
+		shell.setImage(image = Activator.getImageDescriptor("icons/images-stack.png").createImage());
 		if (data == null || data.isEmpty())
 			throw new Exception("No data is available to visualize in the Comparison Image Viewer dialog.");
 		this.data = data;
-		setShellStyle(getShellStyle() | SWT.RESIZE);
-		setDefaultImage(image = Activator.getImageDescriptor("icons/images-stack.png").createImage());
 		try {
 			for (int i = 0; i < data.size(); i++) {
 				systems.add(PlottingFactory.createPlottingSystem());
@@ -52,10 +51,16 @@ public class ImageGridDialog extends Dialog {
 		}
 	}
 
-	@Override
-	public Control createContents(Composite parent) {
+	/**
+	 * Create the content of the Shell dialog
+	 * 
+	 * @return
+	 */
+	public Control createContents() {
 		Color white = new Color(Display.getDefault(), 255, 255, 255);
-		Composite container = (Composite) super.createDialogArea(parent);
+		Composite container = new Composite(shell, SWT.NONE);
+		shell.setLayout(new GridLayout());
+		shell.setLocation(800, 600);
 		container.setLayout(new GridLayout(1, false));
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		container.setBackground(white);
@@ -89,20 +94,20 @@ public class ImageGridDialog extends Dialog {
 		return container;
 	}
 
-	@Override
-	protected void configureShell(Shell newShell) {
-		super.configureShell(newShell);
-		newShell.setText("Comparison Viewer");
+	public void close() {
+		image.dispose();
+		if (shell != null)
+			shell.dispose();
 	}
 
-	@Override
-	protected Point getInitialSize() {
-		return new Point(800, 600);
-	}
-	
-	@Override
-	public boolean close() {
-		image.dispose();
-		return super.close();
+	/**
+	 *open the shell dialog
+	 */
+	public void open() {
+		shell.open();
+		while (!shell.isDisposed()) {
+			if (!shell.getDisplay().readAndDispatch())
+				shell.getDisplay().sleep();
+		}
 	}
 }
