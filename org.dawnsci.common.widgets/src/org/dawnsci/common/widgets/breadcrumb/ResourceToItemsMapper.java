@@ -13,12 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Widget;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.internal.ui.viewsupport.ResourceToItemsMapper.IContentViewerAccessor;
 
 /**
  * Helper class for updating error markers and other decorators that work on resources.
@@ -161,18 +158,7 @@ public class ResourceToItemsMapper {
 	 * @return Returns the corresponding resource or null
 	 */
 	private static IResource getCorrespondingResource(Object element) {
-		if (element instanceof IJavaElement) {
-			IJavaElement elem= (IJavaElement) element;
-			IResource res= elem.getResource();
-			if (res == null) {
-				ICompilationUnit cu= (ICompilationUnit) elem.getAncestor(IJavaElement.COMPILATION_UNIT);
-				if (cu != null) {
-					// elements in compilation units are mapped to the underlying resource of the original cu
-					res= cu.getResource();
-				}
-			}
-			return res;
-		} else if (element instanceof IResource) {
+		if (element instanceof IResource) {
 			return (IResource) element;
 		}
 		return null;

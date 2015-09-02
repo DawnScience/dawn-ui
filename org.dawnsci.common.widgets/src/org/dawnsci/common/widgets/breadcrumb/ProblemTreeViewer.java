@@ -12,21 +12,16 @@ package org.dawnsci.common.widgets.breadcrumb;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dawnsci.common.widgets.breadcrumb.ResourceToItemsMapper.IContentViewerAccessor;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Item;
-import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.Widget;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaViewerFilter;
-import org.eclipse.jdt.ui.IWorkingCopyProvider;
-import org.eclipse.jdt.ui.ProblemsLabelDecorator.ProblemsLabelChangedEvent;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Item;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.Widget;
 
 
 /**
@@ -113,9 +108,6 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	 */
 	@Override
 	public void addFilter(ViewerFilter filter) {
-		if (filter instanceof JavaViewerFilter) {
-			((JavaViewerFilter) filter).filteringStart();
-		}
 		super.addFilter(filter);
 	}
 
@@ -125,9 +117,6 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	@Override
 	public void removeFilter(ViewerFilter filter) {
 		super.removeFilter(filter);
-		if (filter instanceof JavaViewerFilter) {
-			((JavaViewerFilter) filter).filteringEnd();
-		}
 	}
 
 	/* (non-Javadoc)
@@ -136,12 +125,6 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	@Override
 	public void setFilters(ViewerFilter[] filters) {
 		ViewerFilter[] oldFilters= getFilters();
-		for (int i= 0; i < filters.length; i++) {
-			ViewerFilter curr= filters[i];
-			if (curr instanceof JavaViewerFilter && !findAndRemove(oldFilters, curr)) {
-				((JavaViewerFilter) curr).filteringStart();
-			}
-		}
     	endFilterSessions(oldFilters);
 		super.setFilters(filters);
 	}
@@ -168,9 +151,6 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	private void endFilterSessions(ViewerFilter[] filters) {
 		for (int i= 0; i < filters.length; i++) {
 			ViewerFilter curr= filters[i];
-			if (curr instanceof JavaViewerFilter) {
-				((JavaViewerFilter) curr).filteringEnd();
-			}
 		}
 	}
 
@@ -189,12 +169,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	 */
 	@Override
 	protected void handleLabelProviderChanged(LabelProviderChangedEvent event) {
-		if (event instanceof ProblemsLabelChangedEvent) {
-			ProblemsLabelChangedEvent e= (ProblemsLabelChangedEvent) event;
-			if (!e.isMarkerChange() && canIgnoreChangesFromAnnotionModel()) {
-				return;
-			}
-		}
+
 		Object[] changed= addAditionalProblemParents(event.getElements());
 
 		if (changed != null && !fResourceToItemsMapper.isEmpty()) {
@@ -219,16 +194,6 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		super.handleLabelProviderChanged(event);
 	}
 
-	/**
-	 * Answers whether this viewer can ignore label provider changes resulting from
-	 * marker changes in annotation models
-	 * @return return <code>true</code> if annotation model marker changes can be ignored
-	 */
-	private boolean canIgnoreChangesFromAnnotionModel() {
-		Object contentProvider= getContentProvider();
-		return contentProvider instanceof IWorkingCopyProvider && !((IWorkingCopyProvider)contentProvider).providesWorkingCopies();
-	}
-
 
 	/**
 	 * Decides if {@link #isExpandable(Object)} should also test filters. The default behaviour is to
@@ -237,7 +202,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	 * @return returns if if {@link #isExpandable(Object)} should also test filters for the given element.
 	 */
 	protected boolean evaluateExpandableWithFilters(Object parent) {
-		return parent instanceof IMember;
+		return false;
 	}
 
 	/* (non-Javadoc)

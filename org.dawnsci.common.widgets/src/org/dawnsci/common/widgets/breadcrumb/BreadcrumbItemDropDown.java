@@ -8,6 +8,24 @@
  */
 package org.dawnsci.common.widgets.breadcrumb;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.resource.CompositeImageDescriptor;
+import org.eclipse.jface.util.Geometry;
+import org.eclipse.jface.util.OpenStrategy;
+import org.eclipse.jface.viewers.IOpenListener;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeViewerListener;
+import org.eclipse.jface.viewers.OpenEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreeExpansionEvent;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.accessibility.ACC;
 import org.eclipse.swt.accessibility.AccessibleAdapter;
@@ -46,29 +64,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swt.widgets.Widget;
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.ToolBarManager;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.resource.CompositeImageDescriptor;
-import org.eclipse.jface.util.Geometry;
-import org.eclipse.jface.util.OpenStrategy;
-import org.eclipse.jface.viewers.IOpenListener;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeViewerListener;
-import org.eclipse.jface.viewers.OpenEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TreeExpansionEvent;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.forms.FormColors;
-import org.eclipse.jdt.core.IJarEntryResource;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 
 /**
@@ -355,11 +351,10 @@ class BreadcrumbItemDropDown {
 			 */
 			@Override
 			public void controlResized(ControlEvent e) {
-				if (isResizingProgrammatically)
-					return;
+				if (isResizingProgrammatically) return;
 				
-				Point size= fShell.getSize();
-				getDialogSettings().put(DIALOG_HEIGHT, size.y);
+//				Point size= fShell.getSize();
+//				getDialogSettings().put(DIALOG_HEIGHT, size.y);
 			}
 		});
 
@@ -415,16 +410,17 @@ class BreadcrumbItemDropDown {
 						boolean showHandPointer= false;
 						if (o instanceof TreeItem) {
 							Object itemData= ((TreeItem)o).getData();
-							if (itemData instanceof IJavaElement) {
-								int elementType= ((IJavaElement)itemData).getElementType();
-								if (elementType != IJavaElement.JAVA_PROJECT && elementType != IJavaElement.PACKAGE_FRAGMENT && elementType != IJavaElement.PACKAGE_FRAGMENT_ROOT) {
-									showHandPointer= true;
-								}
-							} else if (itemData instanceof IFile) {
-								showHandPointer= true;
-							} else if (itemData instanceof IJarEntryResource) {
-								showHandPointer= ((IJarEntryResource)itemData).isFile();
-							}
+							// Does not work with JDT
+//							if (itemData instanceof IJavaElement) {
+//								int elementType= ((IJavaElement)itemData).getElementType();
+//								if (elementType != IJavaElement.JAVA_PROJECT && elementType != IJavaElement.PACKAGE_FRAGMENT && elementType != IJavaElement.PACKAGE_FRAGMENT_ROOT) {
+//									showHandPointer= true;
+//								}
+//							} else if (itemData instanceof IFile) {
+//								showHandPointer= true;
+//							} else if (itemData instanceof IJarEntryResource) {
+//								showHandPointer= ((IJarEntryResource)itemData).isFile();
+//							}
 						}
 						tree.setCursor(showHandPointer ? tree.getDisplay().getSystemCursor(SWT.CURSOR_HAND) : null);
 					}
@@ -669,21 +665,9 @@ class BreadcrumbItemDropDown {
 			}
 		});
 	}
-
-	private IDialogSettings getDialogSettings() {
-		IDialogSettings javaSettings= JavaPlugin.getDefault().getDialogSettings();
-		IDialogSettings settings= javaSettings.getSection(DIALOG_SETTINGS);
-		if (settings == null)
-			settings= javaSettings.addNewSection(DIALOG_SETTINGS);
-		return settings;
-	}
 	
 	private int getMaxHeight() {
-		try {
-			return getDialogSettings().getInt(DIALOG_HEIGHT);
-		} catch (NumberFormatException e) {
-			return DROP_DOWN_DEFAULT_MAX_HEIGHT;
-		}
+		return DROP_DOWN_DEFAULT_MAX_HEIGHT;
 	}
 	
 	/**
