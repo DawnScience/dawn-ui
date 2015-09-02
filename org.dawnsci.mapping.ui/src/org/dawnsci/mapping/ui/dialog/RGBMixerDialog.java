@@ -16,29 +16,42 @@ import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.mihalis.opal.rangeSlider.RangeSlider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RGBMixerDialog extends Dialog {
+public class RGBMixerDialog {
 
 	private static Logger logger = LoggerFactory.getLogger(RGBMixerDialog.class);
+
+	private int result;
+
+	/**
+	 * Button id for an "Ok" button (value 0).
+	 */
+	public static int OK_ID = 0;
+
+	/**
+	 * Button id for a "Cancel" button (value 1).
+	 */
+	public static int CANCEL_ID = 1;
 
 	private List<Dataset> data;
 	private CompoundDataset compData;
@@ -57,12 +70,21 @@ public class RGBMixerDialog extends Dialog {
 
 	private RangeSlider blueRangeSlider;
 
-	public RGBMixerDialog(Shell parentShell, List<IDataset> data) throws Exception {
-		super(parentShell);
+	private Shell shell;
+
+	public RGBMixerDialog(List<IDataset> data) throws Exception {
+		shell = new Shell(Display.getDefault());
+		shell.setText("RGB Mixer");
+		shell.setImage(image = Activator.getImageDescriptor("icons/rgb.png").createImage());
+		shell.addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				result = CANCEL_ID;
+			}
+		});
+
 		if (data.isEmpty())
 			throw new Exception("No data is available to visualize in the RGB Mixer dialog.");
-		setShellStyle(getShellStyle() | SWT.RESIZE);
-		setDefaultImage(image = Activator.getImageDescriptor("icons/rgb.png").createImage());
 		this.data = new ArrayList<Dataset>();
 		int width = data.get(0).getShape()[0];
 		int height = data.get(0).getShape()[1];
@@ -83,9 +105,15 @@ public class RGBMixerDialog extends Dialog {
 		}
 	}
 
-	@Override
-	public Control createDialogArea(Composite parent) {
-		Composite container = (Composite) super.createDialogArea(parent);
+	/**
+	 * Create the content of the Shell dialog
+	 * 
+	 * @return
+	 */
+	public Control createContents() {
+		Composite container = new Composite(shell, SWT.NONE);
+		shell.setLayout(new GridLayout());
+		shell.setLocation(800, 600);
 		container.setLayout(new GridLayout(1, false));
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
@@ -134,7 +162,7 @@ public class RGBMixerDialog extends Dialog {
 			}
 		});
 		final Button redLogButton = new Button(redComp, SWT.CHECK);
-		redLogButton.setText("Log");
+		redLogButton.setText("Apply Log on red channel");
 		redLogButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		redLogButton.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -174,7 +202,7 @@ public class RGBMixerDialog extends Dialog {
 			}
 		});
 		final Button greenLogButton = new Button(greenComp, SWT.CHECK);
-		greenLogButton.setText("Log");
+		greenLogButton.setText("Apply Log on blue channel");
 		greenLogButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		greenLogButton.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -221,7 +249,7 @@ public class RGBMixerDialog extends Dialog {
 			}
 		});
 		final Button blueLogButton = new Button(blueComp, SWT.CHECK);
-		blueLogButton.setText("Log");
+		blueLogButton.setText("Apply Log on blue channel");
 		blueLogButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		blueLogButton.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -232,6 +260,33 @@ public class RGBMixerDialog extends Dialog {
 			}
 		});
 
+		Composite buttonComp = new Composite(container, SWT.NONE);
+		buttonComp.setLayout(new GridLayout(2, false));
+		buttonComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+		Button cancelButton = new Button(buttonComp, SWT.NONE);
+		cancelButton.setText("Cancel");
+		cancelButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
+		cancelButton.setSize(100, 50);
+		cancelButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent evt) {
+				result = CANCEL_ID;
+				RGBMixerDialog.this.close();
+			}
+		});
+
+		Button okButton = new Button(buttonComp, SWT.NONE);
+		okButton.setText("OK");
+		okButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		okButton.setSize(100, 50);
+		okButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent evt) {
+				result = OK_ID;
+				RGBMixerDialog.this.close();
+			}
+		});
 		return container;
 	}
 	
@@ -361,20 +416,21 @@ public class RGBMixerDialog extends Dialog {
 		return out;
 	}
 
-	@Override
-	protected void configureShell(Shell newShell) {
-		super.configureShell(newShell);
-		newShell.setText("RGB Mixer");
+	public void close() {
+		image.dispose();
+		if (shell != null)
+			shell.dispose();
 	}
 
-	@Override
-	protected Point getInitialSize() {
-		return new Point(800, 600);
-	}
-	
-	@Override
-	public boolean close() {
-		image.dispose();
-		return super.close();
+	/**
+	 *open the shell dialog
+	 */
+	public int open() {
+		shell.open();
+		while (!shell.isDisposed()) {
+			if (!shell.getDisplay().readAndDispatch())
+				shell.getDisplay().sleep();
+		}
+		return result;
 	}
 }

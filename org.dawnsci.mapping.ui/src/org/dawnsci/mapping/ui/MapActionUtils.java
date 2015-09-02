@@ -12,7 +12,6 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Display;
@@ -31,8 +30,10 @@ public class MapActionUtils {
 			public void run() {
 				RGBMixerDialog dialog;
 				try {
-					dialog = new RGBMixerDialog(Display.getDefault().getActiveShell(), dataList);
-					if (dialog.open() == IDialogConstants.CANCEL_ID) return;
+					dialog = new RGBMixerDialog(dataList);
+					dialog.createContents();
+					if (dialog.open() == RGBMixerDialog.CANCEL_ID)
+						return;
 					IDataset rgb = dialog.getRGBDataset();
 					if (rgb == null) return;
 					rgb.addMetadata(maps.get(0).getMap().getMetadata(AxesMetadata.class).get(0));
@@ -63,7 +64,8 @@ public class MapActionUtils {
 			public void run() {
 				ImageGridDialog dialog;
 				try {
-					dialog = new ImageGridDialog(Display.getDefault().getActiveShell(), dataList);
+					dialog = new ImageGridDialog(dataList);
+					dialog.createContents();
 					dialog.open();
 				} catch (Exception e) {
 					MessageDialog.openError(Display.getDefault()
