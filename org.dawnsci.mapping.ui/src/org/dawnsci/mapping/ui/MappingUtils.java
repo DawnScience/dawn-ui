@@ -22,6 +22,7 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.swt.widgets.Display;
 
 public class MappingUtils {
 
@@ -98,7 +99,7 @@ public class MappingUtils {
 				
 			final IDataset m = mask;
 
-			system.getPlotComposite().getShell().getDisplay().syncExec(new Runnable() {
+			Display.getDefault().syncExec(new Runnable() {
 
 				@Override
 				public void run() {
