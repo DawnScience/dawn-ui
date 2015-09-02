@@ -17,6 +17,8 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -74,6 +76,12 @@ public class RGBMixerDialog {
 		shell = new Shell(Display.getDefault());
 		shell.setText("RGB Mixer");
 		shell.setImage(image = Activator.getImageDescriptor("icons/rgb.png").createImage());
+		shell.addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				result = CANCEL_ID;
+			}
+		});
 
 		if (data.isEmpty())
 			throw new Exception("No data is available to visualize in the RGB Mixer dialog.");
