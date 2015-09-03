@@ -17,8 +17,6 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -32,7 +30,9 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
 import org.mihalis.opal.rangeSlider.RangeSlider;
@@ -78,9 +78,8 @@ public class RGBMixerDialog {
 		shell = new Shell(Display.getDefault());
 		shell.setText("RGB Mixer");
 		shell.setImage(image = Activator.getImageDescriptor("icons/rgb.png").createImage());
-		shell.addDisposeListener(new DisposeListener() {
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
+		shell.addListener(SWT.Close, new Listener() {
+			public void handleEvent(Event event) {
 				result = CANCEL_ID;
 				RGBMixerDialog.this.close();
 			}
