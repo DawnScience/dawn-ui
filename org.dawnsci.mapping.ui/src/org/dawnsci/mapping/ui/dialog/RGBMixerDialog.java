@@ -67,9 +67,7 @@ public class RGBMixerDialog {
 	private Dataset zeros;
 
 	private RangeSlider redRangeSlider;
-
 	private RangeSlider greenRangeSlider;
-
 	private RangeSlider blueRangeSlider;
 
 	private Shell shell;
@@ -168,9 +166,16 @@ public class RGBMixerDialog {
 			public void widgetSelected(SelectionEvent evt) {
 				rDirty = true;
 				updatePlot();
-				System.out.println("moving");
 			}
 		});
+		redRangeSlider.addMouseWheelListener(new MouseWheelListener() {
+			@Override
+			public void mouseScrolled(MouseEvent e) {
+				rDirty = true;
+				updatePlot();
+			}
+		});
+
 		final Button redLogButton = new Button(redComp, SWT.CHECK);
 		redLogButton.setText("Apply Log on red channel");
 		redLogButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -180,7 +185,6 @@ public class RGBMixerDialog {
 				rDirty = true;
 				rLog = redLogButton.getSelection();
 				updatePlot();
-				System.out.println("log red");
 			}
 		});
 
@@ -204,13 +208,19 @@ public class RGBMixerDialog {
 		greenRangeSlider.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		greenRangeSlider.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent evt) {
+			public void widgetSelected(SelectionEvent event) {
 				gDirty = true;
 				updatePlot();
-				System.out.println("moving");
-
 			}
 		});
+		greenRangeSlider.addMouseWheelListener(new MouseWheelListener() {
+			@Override
+			public void mouseScrolled(MouseEvent e) {
+				gDirty = true;
+				updatePlot();
+			}
+		});
+
 		final Button greenLogButton = new Button(greenComp, SWT.CHECK);
 		greenLogButton.setText("Apply Log on blue channel");
 		greenLogButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -220,7 +230,6 @@ public class RGBMixerDialog {
 				gDirty = true;
 				gLog = greenLogButton.getSelection();
 				updatePlot();
-				System.out.println("log green");
 			}
 		});
 
@@ -255,7 +264,6 @@ public class RGBMixerDialog {
 			public void mouseScrolled(MouseEvent e) {
 				bDirty = true;
 				updatePlot();
-			System.out.println("mouse wheel");	
 			}
 		});
 		final Button blueLogButton = new Button(blueComp, SWT.CHECK);
