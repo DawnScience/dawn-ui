@@ -10,16 +10,20 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +41,13 @@ public class ImageGridDialog {
 		shell = new Shell(Display.getDefault());
 		shell.setText("Comparison Viewer");
 		shell.setImage(image = Activator.getImageDescriptor("icons/images-stack.png").createImage());
+		shell.addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				ImageGridDialog.this.close();
+			}
+		});
+
 		if (data == null || data.isEmpty())
 			throw new Exception("No data is available to visualize in the Comparison Image Viewer dialog.");
 		this.data = data;
@@ -57,10 +68,19 @@ public class ImageGridDialog {
 	 * @return
 	 */
 	public Control createContents() {
-		Color white = new Color(Display.getDefault(), 255, 255, 255);
-		Composite container = new Composite(shell, SWT.NONE);
+		Display display = Display.getDefault();
+		Color white = new Color(display, 255, 255, 255);
+		// Shell setting
 		shell.setLayout(new GridLayout());
-		shell.setLocation(800, 600);
+		shell.setSize(800, 600);
+		Monitor primary = display.getPrimaryMonitor();
+		Rectangle bounds = primary.getBounds();
+		Rectangle rect = shell.getBounds();
+		int x = bounds.x + (bounds.width - rect.width) / 2;
+		int y = bounds.y + (bounds.height - rect.height) / 2;
+		shell.setLocation(x, y);
+		
+		Composite container = new Composite(shell, SWT.NONE);
 		container.setLayout(new GridLayout(1, false));
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		container.setBackground(white);

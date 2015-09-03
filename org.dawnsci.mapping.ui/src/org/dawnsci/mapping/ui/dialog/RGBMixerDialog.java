@@ -24,6 +24,7 @@ import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -32,6 +33,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
 import org.mihalis.opal.rangeSlider.RangeSlider;
 import org.slf4j.Logger;
@@ -80,6 +82,7 @@ public class RGBMixerDialog {
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				result = CANCEL_ID;
+				RGBMixerDialog.this.close();
 			}
 		});
 
@@ -111,9 +114,17 @@ public class RGBMixerDialog {
 	 * @return
 	 */
 	public Control createContents() {
-		Composite container = new Composite(shell, SWT.NONE);
+		// Shell setting
 		shell.setLayout(new GridLayout());
-		shell.setLocation(800, 600);
+		shell.setSize(800, 600);
+		Monitor primary = Display.getDefault().getPrimaryMonitor();
+		Rectangle bounds = primary.getBounds();
+		Rectangle rect = shell.getBounds();
+		int x = bounds.x + (bounds.width - rect.width) / 2;
+		int y = bounds.y + (bounds.height - rect.height) / 2;
+		shell.setLocation(x, y);
+
+		Composite container = new Composite(shell, SWT.NONE);
 		container.setLayout(new GridLayout(1, false));
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
