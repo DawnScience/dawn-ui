@@ -567,6 +567,12 @@
             label="Dilate"
             ui="org.dawnsci.plotting.tools.filter.DilateConfiguration">
       </plottingFilter>
+      <plottingFilter
+            filter="org.dawnsci.plotting.tools.filter.PseudoFlatFieldFilter"
+            id="org.dawnsci.plotting.tools.pseudoFlatFieldFilter"
+            label="Pseudo-Flat field correction"
+            ui="org.dawnsci.plotting.tools.filter.PseudoFlatFieldConfiguration">
+      </plottingFilter>
    </extension>
    <extension
          point="org.eclipse.dawnsci.plotting.api.toolPage">
