@@ -50,7 +50,6 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 		Composite main = new Composite(parent, SWT.None);
 		setControl(main);
 		main.setLayout(new GridLayout(2,false));
-		//	CCombo cc = new CCombo(main, SWT.READ_ONLY);
 		cviewer = CheckboxTableViewer.newCheckList(main, SWT.BORDER);
 		cviewer.setContentProvider(new BasicContentProvider());
 		cviewer.setLabelProvider(new ViewLabelProvider());
@@ -131,7 +130,6 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 			if (description.getDataBlockToMapMapping() != null) {
 				for (Entry<String, List<String>> e : description.getDataBlockToMapMapping().entrySet()) {
 					if (datasetNames.containsKey(e.getKey())) {
-						boolean canAdd = true;
 
 						for (String a : e.getValue()) {
 							if (a != null && datasetNames.containsKey(a)) {
@@ -142,13 +140,6 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 							}
 						}
 
-//						if (canAdd) {
-//							int i = 0;
-//							for (;i< options.length; i++) if (e.getKey().equals(options[i])) break;
-//							mapToParent.put(e.getKey(), i);
-//							for (Entry<String, int[]> ent : datasetNames.entrySet()) if (ent.getKey().equals(e.getKey()))cviewer.setChecked(ent, true);
-//
-//						}
 					}
 				}
 			}

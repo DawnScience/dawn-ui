@@ -427,10 +427,6 @@ public class RGBMixerDialog {
 			if (Double.isNaN(val)) out.setObjectAbs(it.index, 0);
 		}
 		
-		double mi = out.min().doubleValue();
-		double ma = out.max().doubleValue();
-		System.err.println(mi);
-		System.err.println(ma);
 		return out;
 	}
 
