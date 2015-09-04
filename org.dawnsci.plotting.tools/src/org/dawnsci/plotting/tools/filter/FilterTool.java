@@ -202,6 +202,8 @@ public class FilterTool extends AbstractToolPage {
 	}
 
 	private void setUISelected(String label) {
+		if (labels == null)
+			return;
 		final String id = labels.get(label);
 		slayout.topControl = components.get(id);
 		for (Control c : control.getChildren())
