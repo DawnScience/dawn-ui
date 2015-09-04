@@ -26,7 +26,7 @@ import org.eclipse.swt.widgets.Text;
 public abstract class BoxFilterConfiguration implements FilterConfiguration {
 	private final static String[] BOX_OPTIONS;
 	static {
-		BOX_OPTIONS = new String[] { "3x3", "5x5", "7x7", "9x9" };
+		BOX_OPTIONS = new String[] { "3x3", "5x5", "7x7", "9x9", "20x20", "50x50" };
 	}
 
 	protected AbstractPlottingFilter filter;
