@@ -3,7 +3,9 @@ package org.dawnsci.plotting.tools.filter;
 import java.util.List;
 
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.CompoundDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.SummedAreaTable;
 import org.eclipse.dawnsci.plotting.api.filter.AbstractDelayedFilter;
 import org.slf4j.Logger;
@@ -33,10 +35,24 @@ public class FanoFilter extends AbstractDelayedFilter {
 			box = new int[]{3,3};
 			logger.warn("Unexpected lack of box configuration parameter in "+getClass().getName());
 		}
-		
-        final SummedAreaTable table = new SummedAreaTable((Dataset)data, true);
-        final IDataset        fano  = table.getFanoImage(box);
-        return new Object[]{fano, axes};
+		if (data instanceof CompoundDataset && ((CompoundDataset)data).getElementsPerItem() == 3) {
+			CompoundDataset cpd = (CompoundDataset) data;
+			Dataset rData = cpd.getElements(0);
+			Dataset gData = cpd.getElements(1);
+			Dataset bData = cpd.getElements(2);
+			SummedAreaTable rTable = new SummedAreaTable(rData, true);
+			Dataset rFano = rTable.getFanoImage(box);
+			SummedAreaTable gTable = new SummedAreaTable(gData, true);
+			Dataset gFano = gTable.getFanoImage(box);
+			SummedAreaTable bTable = new SummedAreaTable(bData, true);
+			Dataset bFano = bTable.getFanoImage(box);
+			RGBDataset fanoRgb = new RGBDataset(rFano, gFano, bFano);
+			return new Object[] { fanoRgb, axes };
+		} else {
+			SummedAreaTable table = new SummedAreaTable((Dataset) data, true);
+			IDataset fano = table.getFanoImage(box);
+			return new Object[] { fano, axes };
+		}
 	}
 
 }
