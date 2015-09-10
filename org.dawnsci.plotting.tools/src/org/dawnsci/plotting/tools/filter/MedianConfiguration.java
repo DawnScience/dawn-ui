@@ -6,21 +6,22 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-public class MedianConfiguration extends BoxFilterConfiguration {
+public class MedianConfiguration extends RadiusFilterConfiguration {
 
 	@Override
 	public Composite createControl(Composite parent) {
 		Composite content = super.createControl(parent);
+
 		Label info = new Label(content, SWT.WRAP);
 		info.setImage(Activator.getImage("icons/info.png"));
 		info.setText(getDescription());
-		info.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, true, 2, 1));
+		info.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, true, 3, 1));
 		return content;
 	}
 
 	@Override
-	protected String getBoxToolTip() {
-		return "The box size must be in the form: XxY where X=Y";
+	protected String getRadiusToolTip() {
+		return "Radius of the median blur function.";
 	}
 
 	private String getDescription() {

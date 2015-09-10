@@ -23,10 +23,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-public abstract class BoxFilterConfiguration implements FilterConfiguration {
+public class BoxFilterConfiguration implements FilterConfiguration {
 	private final static String[] BOX_OPTIONS;
 	static {
-		BOX_OPTIONS = new String[] { "3x3", "5x5", "7x7", "9x9", "20x20", "50x50" };
+		BOX_OPTIONS = new String[] { "3x3", "5x5", "7x7", "9x9", "15x15", "29x29" };
 	}
 
 	protected AbstractPlottingFilter filter;
@@ -76,7 +76,9 @@ public abstract class BoxFilterConfiguration implements FilterConfiguration {
 
 		final CCombo boxOptions = new CCombo(content, SWT.BORDER);
 		boxOptions.setItems(BOX_OPTIONS);
-		boxOptions.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		GridData gridData = new GridData(SWT.LEFT, SWT.FILL, false, false);
+		gridData.widthHint = 100;
+		boxOptions.setLayoutData(gridData);
 
 		boxOptions.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -96,22 +98,23 @@ public abstract class BoxFilterConfiguration implements FilterConfiguration {
 		setBoxString(boxOptions.getItem(0));
 
 		if (hasHistoBounds()) {
-			label = new Label(content, SWT.HORIZONTAL);
-			label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,
-					2, 1));
+			label = new Label(content, SWT.NONE);
+			gridData = new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1);
+			label.setLayoutData(gridData);
 
 			label = new Label(content, SWT.NONE);
 			label.setText("Histogram bounds");
 			label.setToolTipText(getHistoToolTip());
-			label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,
-					2, 1));
+			label.setLayoutData(gridData);
 
 			label = new Label(content, SWT.NONE);
 			label.setText("Lower");
 			label.setToolTipText("The lower value for the histogram");
 
 			final Text lower = new Text(content, SWT.BORDER);
-			lower.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			gridData = new GridData(SWT.LEFT, SWT.FILL, false, false);
+			gridData.widthHint = 100;
+			lower.setLayoutData(gridData);
 			lower.setText("0");
 
 			label = new Label(content, SWT.NONE);
@@ -119,7 +122,7 @@ public abstract class BoxFilterConfiguration implements FilterConfiguration {
 			label.setToolTipText("The upper value for the histogram");
 
 			final Text upper = new Text(content, SWT.BORDER);
-			upper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			upper.setLayoutData(gridData);
 			upper.setText("25");
 
 			ldeco = new FloatDecorator(lower);
@@ -146,10 +149,13 @@ public abstract class BoxFilterConfiguration implements FilterConfiguration {
 	}
 
 	/**
+	 * To be overidden to decide what the tooltip will be
 	 * 
 	 * @return
 	 */
-	abstract protected String getBoxToolTip();
+	protected String getBoxToolTip() {
+		return "";
+	}
 
 	/**
 	 * 
