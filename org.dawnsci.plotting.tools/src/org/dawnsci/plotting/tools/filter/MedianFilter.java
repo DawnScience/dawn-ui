@@ -6,16 +6,12 @@ import org.dawnsci.plotting.tools.ServiceLoader;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.image.IImageFilterService;
 import org.eclipse.dawnsci.plotting.api.filter.AbstractDelayedFilter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The median factor filter.
  * 
  */
 public class MedianFilter extends AbstractDelayedFilter {
-
-	private static Logger logger = LoggerFactory.getLogger(MedianFilter.class);
 
 	@Override
 	public int getRank() {
@@ -25,14 +21,9 @@ public class MedianFilter extends AbstractDelayedFilter {
 	@Override
 	protected Object[] filter(IDataset data, List<IDataset> axes)
 			throws Exception {
-		int[] box = (int[]) getConfiguration().get("box");
-		if (box == null) {
-			box = new int[] { 3, 3 };
-			logger.warn("Unexpected lack of box configuration parameter in "
-					+ getClass().getName());
-		}
+		int radius = (int) getConfiguration().get("radius");
 		IImageFilterService service = ServiceLoader.getFilter();
-		final IDataset median = service.filterMedian(data, box[0]);
+		final IDataset median = service.filterMedian(data, radius);
 		return new Object[] { median, axes };
 	}
 
