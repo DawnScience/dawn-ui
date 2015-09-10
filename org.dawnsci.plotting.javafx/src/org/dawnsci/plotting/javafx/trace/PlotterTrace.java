@@ -18,14 +18,15 @@ import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 
 class PlotterTrace {
 	
-	protected String                 name;
-	protected String                 dataName;
-	protected List<IDataset> axes;
-	protected List<String>           axesNames;
-	protected IPlottingSystemViewer  plotter;
-	protected boolean                active;
-	protected IPlottingSystem plottingSystem;
-	protected IROI                   window;
+	
+	protected String                name;
+	protected String                dataName;
+	protected List<IDataset> 		axes;
+	protected List<String>          axesNames;
+	protected IPlottingSystemViewer plotter;
+	protected boolean               active;
+	protected IPlottingSystem 		plottingSystem;
+	protected IROI                  window;
 
 	public void dispose() {
 		if (axes!=null) axes.clear();

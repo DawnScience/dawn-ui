@@ -11,16 +11,17 @@ package org.dawnsci.plotting.javafx.trace;
 import java.util.List;
 
 import javafx.application.Platform;
-import javafx.embed.swt.FXCanvas;
 import javafx.scene.Cursor;
+import javafx.scene.DepthTest;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.DrawMode;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 
+import org.dawnsci.plotting.javafx.SurfaceDisplayer;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
@@ -34,43 +35,56 @@ import org.eclipse.swt.widgets.Display;
  *
  * @Internal
  */
-public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace {
-
-	private FXCanvas           canvas;
-	private Dataset            points;
-	private Dataset            textCoords;
-	private Dataset            faces;
-	private SurfaceDisplayer   scene;
+public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
+{
+	private MeshView isosurface;
+	private Dataset points;
+	private Dataset textCoords;
+	private Dataset faces;
+	
+	// !! circular dependency
+	private SurfaceDisplayer scene;
+	
 	private CullFace cullFace = CullFace.NONE;
 	private int[] rgb;
-	private double opacity=0.5;
+	private double opacity = 0.5;
 	
-	public FXIsosurfaceTrace(IPlottingSystemViewer viewer, 	FXCanvas canvas, String traceName) {
+	public FXIsosurfaceTrace(IPlottingSystemViewer viewer, SurfaceDisplayer newScene , String traceName)
+	{
 		super(viewer, traceName);
-		this.canvas = canvas;
+		this.scene = newScene;
 	}
 	
 	@Override
-	public IDataset getData() {
+	public IDataset getData()
+	{
 		return points;
 	}
-
+	
 	@Override
-	public void setData(IDataset points, IDataset textCoords, IDataset faces, List<? extends IDataset> axes) {
-		
-		this.points     = (Dataset)points;
-		this.textCoords = (Dataset)textCoords;
-		this.faces      = (Dataset)faces;
-		this.axes       = (List<IDataset>)axes;
-		
-		if (Platform.isFxApplicationThread()) {
+	public void setData(IDataset points, IDataset textCoords, IDataset faces, List<? extends IDataset> axes)
+	{
+		this.points = (Dataset) points;
+		this.textCoords = (Dataset) textCoords;
+		this.faces = (Dataset) faces;
+		this.axes = (List<IDataset>) axes; // !! add stuff
+				
+		if (Platform.isFxApplicationThread())
+		{
 			update();
-		} else {
-			Platform.runLater(new Runnable() {			
-				public void run() {			
-					try {
+		}
+		else
+		{
+			Platform.runLater(new Runnable()
+			{
+				public void run()
+				{
+					try
+					{
 						update();
-					} catch (OutOfMemoryError e){
+					}
+					catch (OutOfMemoryError e)
+					{
 						e.printStackTrace();
 						showErrorMessage("Out of memory Error", "There is not enough memory to render the surface. Please increase the box size.");
 					}
@@ -78,28 +92,40 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace 
 			});
 		}
 	}
-
-	private void showErrorMessage(final String title, final String message) {
-		Display.getDefault().syncExec(new Runnable(){
+	
+	private void showErrorMessage(final String title, final String message)
+	{
+		Display.getDefault().syncExec(new Runnable()
+		{
 			@Override
-			public void run() {
+			public void run()
+			{
 				MessageDialog.openError(Display.getDefault().getActiveShell(), title, message);
 			}
 		});
 	}
-
+	
 	/**
 	 * Internal use only.
 	 */
-	public void create() {
-		if (Platform.isFxApplicationThread()) {
+	public void create()
+	{
+		if (Platform.isFxApplicationThread())
+		{
 			createInternal();
-		} else {
-			Platform.runLater(new Runnable() {			
-				public void run() {			
-					try {
+		}
+		else
+		{
+			Platform.runLater(new Runnable()
+			{
+				public void run()
+				{
+					try
+					{
 						createInternal();
-					} catch (OutOfMemoryError e){
+					}
+					catch (OutOfMemoryError e)
+					{
 						e.printStackTrace();
 						showErrorMessage("Out of memory Error", "There is not enough memory to render the surface. Please increase the box size.");
 					}
@@ -108,95 +134,140 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace 
 		}
 	}
 	
-	private void createInternal() {
-		
-		Group    root   = new Group();
+	private void createInternal()
+	{
 		MeshView result = new MeshView(createTrangleMesh());
 		result.setCursor(Cursor.CROSSHAIR);
-		result.setOpacity(opacity); // Does not work!
-
-		Material material;
-		if (rgb == null) {
+		result.setOpacity(opacity);
+		
+		result.setCullFace(javafx.scene.shape.CullFace.BACK);
+		result.setDrawMode(DrawMode.FILL);
+		
+		
+		PhongMaterial material;
+		if (rgb == null)
+		{
 			Color color = new Color(Color.GOLDENROD.getRed(), Color.GOLDENROD.getGreen(), Color.GOLDENROD.getBlue(), opacity);
 			material = new PhongMaterial(color);
-		} else {
+		}
+		else
+		{
 			Color color = Color.rgb(rgb[0], rgb[1], rgb[2], opacity);
-			material = new PhongMaterial(color); 
+			material = new PhongMaterial(color);
+		}
+		
+		// check if it's needed to remove the depth test
+		// 0.99 is arbitrary and will require more testing to determine a better value
+		// used to determine whether the object is transparent and :. will need depthTest disabled
+		if (opacity > 0.99)
+		{
+			result.setDepthTest(DepthTest.ENABLE);
+		}
+		else
+		{
+			result.setDepthTest(DepthTest.DISABLE);
 		}
 		
 
-		scene = new SurfaceDisplayer(root, result, material, toJavaFX());
-
-		canvas.setScene(scene);
+		result.setMaterial(material);
+		this.isosurface = result;
 	}
-
-	private javafx.scene.shape.CullFace toJavaFX() {
-		switch(cullFace) {
-		case NONE:
-			return  javafx.scene.shape.CullFace.NONE;
-		case BACK:
-			return  javafx.scene.shape.CullFace.BACK;
-		case FRONT:
-			return  javafx.scene.shape.CullFace.FRONT;
-		default:
-			return javafx.scene.shape.CullFace.NONE;
+	
+//	private javafx.scene.shape.CullFace toJavaFX()
+//	{
+//		switch (cullFace)
+//		{
+//			case NONE:
+//				return javafx.scene.shape.CullFace.NONE;
+//			case BACK:
+//				return javafx.scene.shape.CullFace.BACK;
+//			case FRONT:
+//				return javafx.scene.shape.CullFace.FRONT;
+//			default:
+//				return javafx.scene.shape.CullFace.NONE;
+//		}
+//	}
+	
+	private void update()
+	{
+		PhongMaterial material;
+		if (rgb == null)
+		{
+			Color color = new Color(Color.GOLDENROD.getRed(), Color.GOLDENROD.getGreen(), Color.GOLDENROD.getBlue(), opacity);
+			material = new PhongMaterial(color);
 		}
+		else
+		{
+			Color color = Color.rgb(rgb[0], rgb[1], rgb[2], opacity);
+			material = new PhongMaterial(color);
+		}
+		
+		isosurface.setMaterial(material);
+		TriangleMesh mesh = (TriangleMesh) isosurface.getMesh();
+		marry(mesh);
+		
+		scene.updateTransforms();
 	}
-
-	private void update() {
-		if (scene==null) {
-			return;
-		} else {
-			scene.updateTransforms();
-			TriangleMesh mesh = (TriangleMesh)scene.getIsosurface().getMesh();
-			marry(mesh);
-			
-			canvas.redraw();
-		}			
-	}
-
-	private Mesh createTrangleMesh() {
+	
+	private Mesh createTrangleMesh()
+	{
 		final TriangleMesh mesh = new TriangleMesh();
 		marry(mesh);
+		
 		return mesh;
 	}
-
-	private void marry(TriangleMesh mesh) {
-		mesh.getPoints().setAll((float[])points.getBuffer());
-		mesh.getTexCoords().setAll((float[])textCoords.getBuffer());
-		mesh.getFaces().setAll((int[])faces.getBuffer());
+	
+	private void marry(TriangleMesh mesh)
+	{
+		mesh.getPoints().setAll((float[]) points.getBuffer());
+		mesh.getTexCoords().setAll((float[]) textCoords.getBuffer());
+		mesh.getFaces().setAll((int[]) faces.getBuffer());
+			
+		
 	}
-
+	
 	@Override
-	public CullFace getCullFace() {
+	public CullFace getCullFace()
+	{
 		return cullFace;
 	}
-
+	
 	@Override
-	public void setCullFace(CullFace culling) {
-        this.cullFace = culling;
+	public void setCullFace(CullFace culling)
+	{
+		this.cullFace = culling;
 	}
-
+	
 	@Override
-	public int[] getMaterialRBG() {
+	public int[] getMaterialRBG()
+	{
 		return rgb;
 	}
-
+	
 	@Override
-	public double getMaterialOpacity() {
+	public double getMaterialOpacity()
+	{
 		return opacity;
 	}
-
+	
 	@Override
-	public void setMaterial(int red, int green, int blue, double opacity) {
-		if (scene!=null) throw new RuntimeException("Changing the material after the surface is created is not implemented yet!");
-		this.rgb     = new int[]{red, green, blue};
+	public void setMaterial(int red, int green, int blue, double opacity)
+	{
+		this.rgb = new int[] { red, green, blue };
 		this.opacity = opacity;
 	}
-
+	
 	@Override
-	public void setPalette(String paletteName) {
+	public void setPalette(String paletteName)
+	{
 		// TODO Auto-generated method stub
 	}
 
+	public MeshView getIsoSurface()
+	{
+		return this.isosurface; 
+	}
+		
 }
+
+

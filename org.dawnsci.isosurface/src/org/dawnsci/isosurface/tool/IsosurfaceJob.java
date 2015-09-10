@@ -8,6 +8,9 @@
  */
 package org.dawnsci.isosurface.tool;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawnsci.isosurface.alg.MarchingCubesModel;
 import org.dawnsci.isosurface.alg.Surface;
@@ -35,17 +38,19 @@ public class IsosurfaceJob extends Job {
 
 	private static final Logger logger = LoggerFactory.getLogger(IsosurfaceJob.class);
 	
-	private       IIsosurfaceTrace    trace;
-	private       IsosurfaceTool      tool;
- 	private       ILazyDataset        lazyData;
-
-	public IsosurfaceJob(String name, IsosurfaceTool  tool) {
+	private IIsosurfaceTrace		trace = null;
+//	private IsosurfaceTool     		tool;
+ 	private IOperation<MarchingCubesModel, Surface> generator;
+ 	final private IPlottingSystem system;
+	public IsosurfaceJob(String name, IsosurfaceTool  tool, IOperation<MarchingCubesModel, Surface> generator, IPlottingSystem system) {
 		
 		super(name);
 		setUser(false);
 		setPriority(Job.INTERACTIVE);
 		
-		this.tool = tool; 
+//		this.tool = tool; 
+		this.generator = generator;
+		this.system = system;
 	}
 
 	/**
@@ -62,65 +67,58 @@ public class IsosurfaceJob extends Job {
 	 * 
 	 * @param slice
 	 */
+	// i might have made this redundant
 	public void compute(ILazyDataset slice) {
-		
-		this.lazyData = slice;
 		cancel();
 		schedule();
 	}
 
 	@Override
-	protected IStatus run(IProgressMonitor monitor) {
+	protected IStatus run(IProgressMonitor monitor) 
+	{
 		
-
-		final IPlottingSystem system = tool.getSlicingSystem().getPlottingSystem();
-		try {
+//		final IPlottingSystem system = tool.getSlicingSystem().getPlottingSystem(); // does this change dynamically?
+		
+		try 
+		{
 			system.setDefaultCursor(IPlottingSystem.WAIT_CURSOR);
-	
-			final IOperation<MarchingCubesModel, Surface> generator = tool.getGenerator();
-			if (lazyData!=null) {
-				
-				final MarchingCubesModel model = generator.getModel();
-				model.setLazyData(lazyData); // We want to do this task from the thread
-			                                 // because it can take a while too
-	
-			    Display.getDefault().syncExec(new Runnable() {
-			    	public void run() {
-			    		// We set the estimated values for the slicing which will
-			    		// have changed if the lazyData has.
-	                    tool.updateUI();
-			    	}
-			    });
-			}
 			
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 			
-			try {
+			try
+			{
 				Surface surface    = generator.execute(null, new ProgressMonitorWrapper(monitor));
 				
-				IDataset points     = new FloatDataset(surface.getPoints(), surface.getPoints().length);
-				IDataset textCoords = new FloatDataset(surface.getTexCoords(), surface.getTexCoords().length);
-				IDataset faces      = new IntegerDataset(surface.getFaces(), surface.getFaces().length);
+				final IDataset points     = new FloatDataset(surface.getPoints(), surface.getPoints().length);
+				final IDataset textCoords = new FloatDataset(surface.getTexCoords(), surface.getTexCoords().length);
+				final IDataset faces      = new IntegerDataset(surface.getFaces(), surface.getFaces().length);
+				final int[] colour = surface.getColour();
 				
-				if (trace == null) {
+				if (trace == null)
+				{
 					trace = system.createIsosurfaceTrace("isosurface");
 					trace.setData(points, textCoords, faces, null);
+					trace.setMaterial(colour[0], colour[1] , colour[2], 0.4);
+					
 				    Display.getDefault().syncExec(new Runnable() {
 				    	public void run() {
 							system.addTrace(trace); // doing this is not thread safe!
 				    	}
 				    });
-				} else {
-					trace.setData(points, textCoords, faces, null);
 				}
-                
+				else
+				{
+					trace.setMaterial(colour[0], colour[1] , colour[2], 0.4);
+					trace.setData(points, textCoords, faces, null);
+					
+				}
 			} catch (UnsupportedOperationException e){
 				e.printStackTrace();
-				showErrorMessage("The number of vertices has exceeded "+generator.getModel().getVertexLimit(), "The surface cannot be rendered. Please increase the box size.");
+				showErrorMessage("The number of vertices has exceeded "+ generator.getModel().getVertexLimit(), "The surface cannot be rendered. Please increase the box size.");
 				return Status.CANCEL_STATUS;
 				
 			} catch (Exception e) {
-				logger.error("Cannot run algorithm "+generator.getClass().getSimpleName(), e);
+				logger.error("Cannot run algorithm "+ generator.getClass().getSimpleName(), e);
 				return Status.CANCEL_STATUS;
 				
 			} catch (OutOfMemoryError e){
@@ -129,12 +127,11 @@ public class IsosurfaceJob extends Job {
 				return Status.CANCEL_STATUS;
 			}
 					
-			
-			return Status.OK_STATUS;
-			
-		} finally {
+		}
+		finally {
 			system.setDefaultCursor(IPlottingSystem.NORMAL_CURSOR);
 		}
+		return Status.OK_STATUS;
 	}
 
 	private void showErrorMessage(final String title, final String message) {
@@ -145,6 +142,11 @@ public class IsosurfaceJob extends Job {
 			}
 		});
 	}
-
+	
+	
+	public IOperation<MarchingCubesModel, Surface> getGenerator()
+	{
+		return this.generator;
+	}
 
 }

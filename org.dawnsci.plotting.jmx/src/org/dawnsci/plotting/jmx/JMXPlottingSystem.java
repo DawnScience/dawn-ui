@@ -26,6 +26,7 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.trace.ColorOption;
+import org.eclipse.dawnsci.plotting.api.trace.ICompositeTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageStackTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IIsosurfaceTrace;
@@ -62,6 +63,7 @@ import org.eclipse.ui.IWorkbenchPart;
  * @author Matthew Gerring
  *
  */
+
 @SuppressWarnings("unchecked")
 public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSystem {
 
@@ -627,6 +629,12 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	@Override
 	public void setShowValueLabels(boolean b) {
 		call(getMethodName(Thread.currentThread().getStackTrace()), b);
+	}
+
+	@Override
+	public ICompositeTrace createCompositeTrace(String traceName) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

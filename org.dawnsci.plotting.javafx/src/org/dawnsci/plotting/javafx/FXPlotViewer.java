@@ -11,8 +11,7 @@ package org.dawnsci.plotting.javafx;
 import javafx.application.Platform;
 import javafx.embed.swt.FXCanvas;
 import javafx.scene.Cursor;
-import javafx.scene.ParallelCamera;
-import javafx.scene.PerspectiveCamera;
+import javafx.scene.Group;
 
 import org.dawnsci.plotting.javafx.trace.FXIsosurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -29,132 +28,202 @@ import org.eclipse.swt.widgets.Composite;
  * @author fcp94556
  *
  */
-public class FXPlotViewer extends IPlottingSystemViewer.Stub {
 
-	private FXCanvas      canvas;
-	private ITrace        currentTrace;
+/**
+ * @author uij85458
+ *  // added comments
+ * viewer
+ * 		include the scene
+ * 		holds a trace list
+ * 		draws trace list within scene root
+ * 
+ */
+public class FXPlotViewer extends IPlottingSystemViewer.Stub
+{
+	// the scene class -> uses an inherited class to hold the camera translation data
+	private SurfaceDisplayer scene;
+	// root node
+	private Group root;
+	// node to hold the isosurface data -> a pointer is declared within the scene (surfacedisplayer)
+	// this pointer is edited within the scene via listeners
+	private Group isoSurfaceGroup;
+	
+	// the canvas for drawing -> not sure if this is needed but will keep it for now
+	private FXCanvas canvas;
+	// not sure what this does currently
 	private FXPlotActions plotActions;
 	
 	/**
 	 * Must have no-argument constructor.
 	 */
-	public FXPlotViewer() {
+	public FXPlotViewer()
+	{
 		
 	}
 	
 	/**
 	 * Call to create plotting
+	 * 
 	 * @param parent
-	 * @param initialMode may be null
+	 * @param initialMode
+	 *            may be null
 	 */
-	public void createControl(final Composite parent) {
-        
+	public void createControl(final Composite parent)
+	{
+		// declare the canvas in memory
 		this.canvas = new FXCanvas(parent, SWT.NONE);
-        
-		plotActions = new FXPlotActions(this, system);
-		plotActions.createActions();
-		system.getActionBars().getToolBarManager().update(true);
-		system.getActionBars().updateActionBars();
-	} 
-
-	public Composite getControl() {
-		return canvas;
+		
+		// create the root node
+		this.root = new Group();
+		// create the group for the isosurfaces
+		this.isoSurfaceGroup = new Group();
+		
+		// create the scene -> most of the changes will be done within here
+		this.scene = new SurfaceDisplayer(root, isoSurfaceGroup);
+		
+		// set the scene to the canvas
+		this.canvas.setScene(scene);
+		
+		
+		this.plotActions = new FXPlotActions(this, system);
+		this.plotActions.createActions();
+		this.system.getActionBars().getToolBarManager().update(true);
+		this.system.getActionBars().updateActionBars();
+		
 	}
-
 	
-	public void updatePlottingRole(PlotType type) {
+	// does this have a purpose??
+	//	public void updatePlottingRole(PlotType type)
+	//	{
+	//	
+	//	}
+	
+	
+	// change the cursor -> does isFxApplicationThread make it thread safe??
+	// potentially redundant but makes the code easier to read which is nice!!
+	public void setDefaultCursor(final int cursorFlag)
+	{
 		
-	}
-
-	/**
-	 * Thread safe
-	 */
-	public void setDefaultCursor(final int cursorFlag) {
-		
-		if (Platform.isFxApplicationThread()) {
+		if (Platform.isFxApplicationThread())
+		{
 			setCursor(cursorFlag);
-		} else {
-			Platform.runLater(new Runnable() {
+		}
+		else
+		{
+			Platform.runLater(new Runnable()
+			{
 				@Override
-				public void run() {
+				public void run()
+				{
 					setCursor(cursorFlag);
 				}
 			});
 		}
 	}
 	
-	private void setCursor(int cursorFlag) {
-		if (canvas.getScene()==null) return;
+	// declare the cursor depending on the flag
+	private void setCursor(int cursorFlag)
+	{
+		if (canvas.getScene() == null)
+			return;
 		
 		Cursor cursor = Cursor.DEFAULT;
-		if (cursorFlag==IPlottingSystem.CROSS_CURSOR) cursor = Cursor.CROSSHAIR;
-		if (cursorFlag==IPlottingSystem.WAIT_CURSOR)  cursor = Cursor.WAIT;
+		if (cursorFlag == IPlottingSystem.CROSS_CURSOR)
+			cursor = Cursor.CROSSHAIR;
+		if (cursorFlag == IPlottingSystem.WAIT_CURSOR)
+			cursor = Cursor.WAIT;
 		canvas.getScene().setCursor(cursor);
 	}
-
-	public ITrace createTrace(String name, Class<? extends ITrace> clazz) {
-		if (IIsosurfaceTrace.class.isAssignableFrom(clazz)) {
-			if (name==null || "".equals(name)) throw new RuntimeException("Cannot create trace with no name!");
-			return new FXIsosurfaceTrace(this, canvas, name);
-		} else {
-		    throw new RuntimeException("Trace type not supported "+clazz.getSimpleName());
-		}
-
-	}
 	
-	public boolean addTrace(ITrace trace) {
-		
-		currentTrace = trace;
-		if (trace instanceof IIsosurfaceTrace) {
-			FXIsosurfaceTrace itrace = (FXIsosurfaceTrace)trace;
-			if (itrace.getData()==null) throw new RuntimeException("Trace has no data "+trace.getName());
+	// create the isoTrace 
+	// !!look into later!!
+	public ITrace createTrace(String name, Class<? extends ITrace> clazz)
+	{
+		if (IIsosurfaceTrace.class.isAssignableFrom(clazz))
+		{
+			if (name == null || "".equals(name))
+				throw new RuntimeException("Cannot create trace with no name!");
+			return new FXIsosurfaceTrace(this, scene, name);
+		}
+		else
+		{
+			throw new RuntimeException("Trace type not supported " + clazz.getSimpleName());
+		}
+	}
+
+	// add the trace, ie create a new isosurface
+	// !!look into later!!
+	public boolean addTrace(ITrace trace)
+	{
+		if (trace instanceof IIsosurfaceTrace)
+		{
+			// declare the trace from the parameter trace
+			FXIsosurfaceTrace itrace = (FXIsosurfaceTrace) trace;
+			if (itrace.getData() == null)
+				throw new RuntimeException("Trace has no data " + trace.getName());
+			// create the trace
 			itrace.create();
 			
-		} else {
-		    throw new RuntimeException("Trace type not supported "+trace.getClass().getSimpleName());
+			// add the trace into the list of current traces
+			isoSurfaceGroup.getChildren().add(itrace.getIsoSurface());
+			scene.updateTransforms();
+		}
+		else
+		{
+			throw new RuntimeException("Trace type not supported " + trace.getClass().getSimpleName());
 		}
 		return true;
-
+		
 	}
+	
+	// i dont like this
+	// these act as intermediates between the action and the scene
+	// feels horrible
+	public void addRemoveAxes()
+	{
+		scene.addRemoveAxes();
+	}
+	
+	public void removeAxisGrid()
+	{
 
+		scene.removeAxisGrid();
+	}
+	
+	
 	/**
 	 * 
 	 * @param type
 	 * @return true if this viewer deals with this plot type.
 	 */
-	public boolean isPlotTypeSupported(PlotType type){
-		switch(type) {
-		case ISOSURFACE:
-		    return true;
-		default:
-			return false;
+	public boolean isPlotTypeSupported(PlotType type)
+	{
+		switch (type)
+		{
+			case ISOSURFACE:
+				return true;
+			default:
+				return false;
 		}
 	}
-	public boolean isTraceTypeSupported(Class<? extends ITrace> trace) {
-		if (IIsosurfaceTrace.class.isAssignableFrom(trace)) {
+	
+	// simple checks is the trace is supported
+	public boolean isTraceTypeSupported(Class<? extends ITrace> trace)
+	{
+		if (IIsosurfaceTrace.class.isAssignableFrom(trace))
+		{
 			return true;
 		}
 		return false;
 	}
-
-	public void setParallelCamera(final boolean isParallel) {
-		if (Platform.isFxApplicationThread()) {
-			setParallelCameraInternal(isParallel);
-		} else {
-			Platform.runLater(new Runnable() {
-				@Override
-				public void run() {
-					setParallelCameraInternal(isParallel);
-				}
-			});
-		}
+	
+	// get the composite being used within the class
+	public Composite getControl()
+	{
+		return canvas;
 	}
 
-	private void setParallelCameraInternal(boolean isParallel) {
-		if (isParallel) {
-		    canvas.getScene().setCamera(new ParallelCamera());
-		} else {
-		    canvas.getScene().setCamera(new PerspectiveCamera());
-		}
-	}
+	
+	
+	
 }

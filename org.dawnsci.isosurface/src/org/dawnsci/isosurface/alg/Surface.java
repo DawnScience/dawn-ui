@@ -8,6 +8,7 @@
  */
 package org.dawnsci.isosurface.alg;
 
+import java.awt.Color;
 import java.io.Serializable;
 
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
@@ -30,41 +31,42 @@ public class Surface extends OperationData implements Serializable {
 	private float[] points;
 	private float[] texCoords;
 	private int[] faces;
+	private int[] colour;
 	
-	public Surface(float[] points, float[] texCoords, int[] faces){
+	
+	public Surface(float[] points, float[] texCoords, int[] faces, int[] colour){
 		super();
 		this.points = points;
 		this.texCoords = texCoords;
 		this.faces = faces;
-		
+		this.colour = colour;
 	}
 
 	
 	public void setPoints(float[] points) {
 		this.points = points;
 	}
-
 	public void setTexCoords(float[] texCoords) {
 		this.texCoords = texCoords;
 	}
-
 	public void setFaces(int[] faces) {
 		this.faces = faces;
 	}
-
-
 	public float[] getPoints() {
 		return points;
 	}
-
-
 	public float[] getTexCoords() {
 		return texCoords;
 	}
-
-
 	public int[] getFaces() {
 		return faces;
 	}
+	public void setColour(int r, int g, int b){
+		this.colour = new int[]{r%256, g%256, b%256};
+	}	
+	public int[] getColour(){
+		return this.colour;
+	}
+	
 
 }

@@ -32,27 +32,33 @@ class FXPlotActions {
 		String gridLineGroupNameAction = "javafx.plotting.grid.line.actions";
 		actionMan.registerGroup(gridLineGroupNameAction, ManagerType.TOOLBAR);
 
-		Action orthographicProjAction = new Action ("Toggle orthographic projection", IAction.AS_CHECK_BOX) {
-			@Override
-			public void run() {
-				viewer.setParallelCamera(isChecked());
-			}
-		};
-		orthographicProjAction.setChecked(false);
-		orthographicProjAction.setImageDescriptor(Activator.getImageDescriptor("icons/orthographic.png"));
-		actionMan.registerAction(gridLineGroupNameAction, orthographicProjAction, ActionType.FX3D, ManagerType.TOOLBAR);
 		
 		
-		Action reset = new Action("Reset orientation and zoom",IAction.AS_PUSH_BUTTON) {
+		
+		Action axisGridToggle = new Action ("Toggle Axis Grid", IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
-				viewer.reset(true);
+				viewer.removeAxisGrid();
 			}
 		};
-
-		reset.setImageDescriptor(Activator.getImageDescriptor("icons/axis.png"));
-		actionMan.registerAction(gridLineGroupNameAction, reset, ActionType.FX3D, ManagerType.TOOLBAR);
-
+		axisGridToggle.setChecked(true);
+		axisGridToggle.setImageDescriptor(Activator.getImageDescriptor("icons/orthographic.png"));
+		actionMan.registerAction(gridLineGroupNameAction, axisGridToggle, ActionType.FX3D, ManagerType.TOOLBAR);
+		
+		
+		
+		
+		
+		
+		Action axisToggle = new Action("Toggle Axes",IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				viewer.addRemoveAxes();
+			}
+		};
+		axisToggle.setChecked(true);
+		axisToggle.setImageDescriptor(Activator.getImageDescriptor("icons/axis.png"));
+		actionMan.registerAction(gridLineGroupNameAction, axisToggle, ActionType.FX3D, ManagerType.TOOLBAR);
+				
 	}
-
 }

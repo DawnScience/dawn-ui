@@ -39,7 +39,7 @@ public class MarchingCubes extends AbstractOperation<MarchingCubesModel, Surface
 	public String getId() {
 		return "org.dawnsci.isosurface.marchingCubes";
 	}
-
+	
 	@Override
 	public Surface execute(IDataset slice, IMonitor monitor) throws OperationException {
 		
@@ -72,7 +72,7 @@ public class MarchingCubes extends AbstractOperation<MarchingCubesModel, Surface
 
 		if (points==null || points.length<1) throw new OperationException(this, "No isosurface found!");
 
-		return new Surface(points, texCoords, faces);
+		return new Surface(points, texCoords, faces, model.getColour());
 	}
 
 	@Override
@@ -397,8 +397,9 @@ public class MarchingCubes extends AbstractOperation<MarchingCubesModel, Surface
 
 
 	@SuppressWarnings("unchecked")
-	private Object[] parseVertices() throws OperationException {	
-		
+	
+	private Object[] parseVertices() throws OperationException 
+	{	
 		final ILazyDataset lazyData = model.getLazyData();
 		final int[] boxSize         = model.getBoxSize();
 		final double isovalue       = model.getIsovalue();
@@ -406,16 +407,14 @@ public class MarchingCubes extends AbstractOperation<MarchingCubesModel, Surface
 		int xLimit = lazyData.getShape()[2];
 		int yLimit = lazyData.getShape()[1];
 		int zLimit = lazyData.getShape()[0];
-
+		
         if(xLimit % boxSize[0] != 0){
 			xLimit = xLimit - xLimit % boxSize[0];
 		}
 		
-
 		if(yLimit % boxSize[1] != 0){
 			yLimit = yLimit - yLimit % boxSize[1];
 		}
-		
 		
 		if(zLimit % boxSize[2] != 0){
 			zLimit = zLimit - zLimit % boxSize[2];
@@ -424,10 +423,35 @@ public class MarchingCubes extends AbstractOperation<MarchingCubesModel, Surface
 		final Set<Triangle>      triangles  = new HashSet<Triangle>(89);
 		final Map<Point, Integer> vertices  = new LinkedHashMap<Point, Integer>(89);
 		
+		// declare the variables external to the loop
+		// should make things slightly faster
+		int[] start = new int[3];
+		int[] stop = new int[3];
+		int[] step = new int[3];
+		Point[] cellCoords = new Point[8];
+		double[] cellValues = new double[8];
 		
 		for(int k=0; k < zLimit-2*boxSize[2]; k+=boxSize[2]){
 			
-			IDataset slicedImage = lazyData.getSlice(new int[] {k,0,0}, new int[] {k+2*boxSize[2], yLimit, xLimit}, new int[] {boxSize[2], boxSize[1], boxSize[0]});
+			start[0] = k;
+			start[1] = 0;
+			start[2] = 0;
+			
+			stop[0] = k+2*boxSize[2];
+			stop[1] = yLimit;
+			stop[2] = xLimit;
+			
+			step[0] =boxSize[2];
+			step[1] =boxSize[1];
+			step[2] =boxSize[0];
+			
+			// old getslice call -> changed it to not create a new int array each loop
+//			IDataset slicedImage = lazyData.getSlice(
+//					new int[] {k,0,0}, 
+//					new int[] {k+2*boxSize[2], yLimit, xLimit}, 
+//					new int[] {boxSize[2], boxSize[1], boxSize[0]});
+			
+			IDataset slicedImage = lazyData.getSlice(start, stop, step);
 			
 			Object[] slice = slicedData(slicedImage, k, boxSize, xLimit, yLimit);
 			
@@ -438,10 +462,8 @@ public class MarchingCubes extends AbstractOperation<MarchingCubesModel, Surface
 			int i = 0; // index that goes through the front "face" of the slice 
 			int y = 0; // index that keeps track of the points on a column of the face
 			
+			
 			while(i < points.length - 2 * yLimit/boxSize[1] - 2){
-				
-				Point[] cellCoords = new Point[8];
-				double[] cellValues = new double[8];
 				
 				cellCoords[0] = points[i+3];
 				cellValues[0] = (double) values.get(cellCoords[0]).doubleValue();
@@ -466,8 +488,6 @@ public class MarchingCubes extends AbstractOperation<MarchingCubesModel, Surface
 				
 				cellCoords[7] = points[i];
 				cellValues[7] = (double) values.get(cellCoords[7]).doubleValue();
-				
-
 				
 				GridCell currentCell = new GridCell(cellCoords, cellValues);
 				int cubeIndex = getCubeIndex(currentCell, isovalue);
@@ -594,16 +614,14 @@ public class MarchingCubes extends AbstractOperation<MarchingCubesModel, Surface
 					cell.getCellCoords()[2], cell.getCellCoords()[6],
 					cell.getCellValues()[2], cell.getCellValues()[6]);
 		}
-
+		
 		if ((edgeTable[cubeIndex] & 2048) != 0) {
 			cell.getVertexList()[11] = vertexInterpolation(isovalue,
 					cell.getCellCoords()[3], cell.getCellCoords()[7],
 					cell.getCellValues()[3], cell.getCellValues()[7]);
 		}
 	}
-
 	
-
 	/**
 	 * This method creates and returns a Collection of Triangle objects that the
 	 * marching cubes algorithm generates in one GridCell
@@ -704,7 +722,7 @@ public class MarchingCubes extends AbstractOperation<MarchingCubesModel, Surface
 		}
 		return points;
 	}
-
+	
 	/**
 	 * Method that gets the points for each slice
 	 * @param slicedImage
@@ -714,6 +732,7 @@ public class MarchingCubes extends AbstractOperation<MarchingCubesModel, Surface
 	 * @param yLimit
 	 * @return
 	 */
+	
 	public Object[] slicedData(IDataset slicedImage, int k, int[] boxSize, int xLimit, int yLimit){
 		
 		Map<Point, Number> values = new HashMap<Point, Number>();

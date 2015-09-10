@@ -8,6 +8,7 @@
  */
 package org.dawnsci.isosurface.alg;
 
+import java.awt.Color;
 import java.util.Arrays;
 
 import org.dawnsci.isosurface.Activator;
@@ -25,6 +26,7 @@ public class MarchingCubesModel extends AbstractOperationModel {
 	private ILazyDataset lazyData;
 	private double isovalue;
 	private int[] boxSize;
+	private int[] colour = {0,0,0};
 	private double isovalueMin = Integer.MAX_VALUE;
 	private double isovalueMax = Integer.MIN_VALUE;
 	private int    vertexLimit = 1000000;
@@ -134,6 +136,13 @@ public class MarchingCubesModel extends AbstractOperationModel {
 	public void setIsovalueMax(double isovalueMax) {
 		this.isovalueMax = isovalueMax;
 	}
+	public void setColour(int r, int g, int b){
+		this.colour = new int[]{r%256, g%256, b%256};
+	}	
+	public int[] getColour(){
+		return this.colour;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -186,5 +195,7 @@ public class MarchingCubesModel extends AbstractOperationModel {
 	public void setVertexLimit(int vertexLimit) {
 		this.vertexLimit = vertexLimit;
 	}
+	
+
 
 }
