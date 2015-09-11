@@ -26,7 +26,7 @@ public class PseudoFlatFieldFilter extends AbstractDelayedFilter {
 		int radius = (int) getConfiguration().get("radius");
 		int dtype = AbstractDataset.getDType(data);
 		Dataset d = DatasetUtils.cast(data, dtype);
-		final IDataset pseudoFlatFieldCorrected = Image.backgroundFilter(d, radius);
+		final IDataset pseudoFlatFieldCorrected = Image.pseudoFlatFieldFilter(d, radius);
 		return new Object[] { pseudoFlatFieldCorrected, axes };
 	}
 
