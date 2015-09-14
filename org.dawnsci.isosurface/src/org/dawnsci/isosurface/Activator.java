@@ -29,7 +29,7 @@ public class Activator extends AbstractUIPlugin {
 	    super.start(bundleContext);
 		Activator.plugin = this;
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)

@@ -87,7 +87,7 @@ public class Vector3DUtil
 		
 		return returnDouble;
 	}
-	
+		
 	public static Point3D exclusiveTransforms(ObservableList<Transform> tranformsList, Point3D point, Class<?> tranformClassType)
 	{
 		

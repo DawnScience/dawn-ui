@@ -98,7 +98,7 @@ public class IsosurfaceJob extends Job {
 				{
 					trace = system.createIsosurfaceTrace("isosurface");
 					trace.setData(points, textCoords, faces, null);
-					trace.setMaterial(colour[0], colour[1] , colour[2], 0.4);
+					trace.setMaterial(colour[0], colour[1] , colour[2], 0.5);
 					
 				    Display.getDefault().syncExec(new Runnable() {
 				    	public void run() {
@@ -108,7 +108,7 @@ public class IsosurfaceJob extends Job {
 				}
 				else
 				{
-					trace.setMaterial(colour[0], colour[1] , colour[2], 0.4);
+					trace.setMaterial(colour[0], colour[1] , colour[2], 0.5);
 					trace.setData(points, textCoords, faces, null);
 					
 				}

@@ -155,7 +155,7 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 			Color color = Color.rgb(rgb[0], rgb[1], rgb[2], opacity);
 			material = new PhongMaterial(color);
 		}
-		
+				
 		// check if it's needed to remove the depth test
 		// 0.99 is arbitrary and will require more testing to determine a better value
 		// used to determine whether the object is transparent and :. will need depthTest disabled

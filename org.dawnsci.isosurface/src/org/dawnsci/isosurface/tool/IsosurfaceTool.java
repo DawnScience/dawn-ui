@@ -15,6 +15,10 @@ import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.isosurface.Activator;
 import org.dawnsci.isosurface.alg.MarchingCubesModel;
 import org.dawnsci.isosurface.alg.Surface;
+import org.dawnsci.isosurface.testingBeans.testComposite;
+import org.dawnsci.isosurface.testingBeans.testItem;
+import org.dawnsci.isosurface.testingBeans.testingBean;
+import org.eclipse.core.internal.registry.osgi.OSGIUtils;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
@@ -27,6 +31,9 @@ import org.eclipse.dawnsci.slicing.api.system.DimensionalListener;
 import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.dawnsci.slicing.api.system.SliceSource;
 import org.eclipse.dawnsci.slicing.api.tool.AbstractSlicingTool;
+import org.eclipse.richbeans.api.reflection.IBeanController;
+import org.eclipse.richbeans.examples.ExampleJSONWritingValueListener;
+import org.eclipse.richbeans.reflection.BeanService;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -34,14 +41,13 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ExpandBar;
 import org.eclipse.swt.widgets.ExpandItem;
-import org.eclipse.swt.widgets.Scale;
-import org.eclipse.swt.widgets.Spinner;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Label;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.sun.xml.internal.bind.CycleRecoverable.Context;
 
 /**
  * 
@@ -63,9 +69,7 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 	private ExpandBar exBar;
 	private List<IsoSurfaceTab> tabList;
 	private Composite controls;
-	private Scale     isovalue;
-	private Text      isoText;
-	private Spinner   xDim, yDim, zDim;
+	
 	
 	@SuppressWarnings("unchecked")
 	public IsosurfaceTool() {
@@ -100,6 +104,43 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 		controls.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		tabList = new ArrayList<IsoSurfaceTab>();
+		
+		/*
+		 * 
+		 */
+//		
+//		testComposite ui = new testComposite(parent, SWT.FILL);
+////		ui.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+//		ui.setVisible(true);
+//		
+//		final Label value = new Label(parent, SWT.WRAP);
+//		value.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+//		
+//		testingBean bean = new testingBean();
+//		testItem item1 = new testItem();
+//		
+//		testItem item2 = new testItem("this is also an item 2");
+//		
+//		bean.addItem(item1);
+//		bean.addItem(item2);
+//		
+//		// Connect the UI and bean
+//		final IBeanController controller = BeanService.getInstance().createController(ui, bean);
+//		
+//		try 
+//		{
+//			controller.addValueListener(new ExampleJSONWritingValueListener(controller, value));
+//			controller.beanToUI();
+//			controller.switchState(true);
+//		} 
+//		catch (Exception e1) 
+//		{
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+		/*
+		 * 
+		 */
 		
 		exBar = new ExpandBar(controls, SWT.V_SCROLL);
 		
