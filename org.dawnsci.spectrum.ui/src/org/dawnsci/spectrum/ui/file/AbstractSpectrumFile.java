@@ -90,7 +90,8 @@ public abstract class AbstractSpectrumFile implements ISpectrumFile {
 		ITrace trace = traceMap.get(name);
 		if (trace != null) system.removeTrace(trace);
 		traceMap.remove(name);
-		system.autoscaleAxes();
+		if (system.isRescale())
+			system.autoscaleAxes();
 	}
 
 	public boolean isUsingAxis() {
@@ -121,7 +122,8 @@ public abstract class AbstractSpectrumFile implements ISpectrumFile {
 			if (trace != null) system.removeTrace(trace);
 			traceMap.remove(dataset);
 		}
-		system.autoscaleAxes();
+		if (system.isRescale())
+			system.autoscaleAxes();
 	}
 	
 	protected IDataset reduceTo1D(IDataset axis, IDataset data) {

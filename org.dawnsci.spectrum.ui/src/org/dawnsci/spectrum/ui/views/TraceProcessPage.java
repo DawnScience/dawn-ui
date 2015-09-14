@@ -785,7 +785,8 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 		//final Collection<ITrace> traces = system.getTraces(ILineTrace.class);
 //		for (ITrace trace: traces) system.removeTrace(trace);
 //		for (ITrace trace: traces) system.addTrace(trace);
-		system.autoscaleAxes();
+		if (system.isRescale())
+			system.autoscaleAxes();
 	}
 	
 	class ViewContentProvider implements IStructuredContentProvider {
