@@ -9,6 +9,10 @@
 package org.dawnsci.spectrum.ui.actions;
 
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
 import org.dawnsci.spectrum.ui.file.SpectrumFileManager;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.Action;
@@ -78,7 +82,7 @@ public class OpenSpectrumAction extends Action {
 				
 				final SpectrumFileManager manager = (SpectrumFileManager)view.getAdapter(SpectrumFileManager.class);
 				if (manager != null) {
-					manager.addFile(loc);
+					manager.addFiles(Arrays.asList(new String[] {loc}));
 				}
 				
 			}

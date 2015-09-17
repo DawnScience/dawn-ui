@@ -10,9 +10,10 @@ package org.dawnsci.spectrum.ui.file;
 
 import java.util.EventListener;
 
-
 public interface ISpectrumFileListener extends EventListener {
 	
-	public void fileLoaded(SpectrumFileOpenedEvent event);
+	public void fileLoaded(SpectrumFileEvent event);
+
+	public void fileRemoved(SpectrumFileEvent event);
 
 }

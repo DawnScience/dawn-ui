@@ -9,6 +9,7 @@
 package org.dawnsci.spectrum.ui.actions;
 
 import java.io.File;
+import java.util.Arrays;
 
 import org.dawnsci.spectrum.ui.file.SpectrumFileManager;
 import org.eclipse.jface.action.Action;
@@ -50,7 +51,7 @@ public class OpenLocalFileAction extends Action implements IWorkbenchWindowActio
 			final SpectrumFileManager manager = (SpectrumFileManager)view.getAdapter(SpectrumFileManager.class);
 			if (manager != null) {
 				for (String name : names) {
-					manager.addFile(dialog.getFilterPath() + File.separator + name);
+					manager.addFiles(Arrays.asList(new String[] {dialog.getFilterPath() + File.separator + name}));
 				}
 			}
 		}

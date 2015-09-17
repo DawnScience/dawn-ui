@@ -27,8 +27,8 @@ import org.dawnsci.spectrum.ui.file.IContain1DData;
 import org.dawnsci.spectrum.ui.file.ISpectrumFile;
 import org.dawnsci.spectrum.ui.file.ISpectrumFileListener;
 import org.dawnsci.spectrum.ui.file.SpectrumFile;
+import org.dawnsci.spectrum.ui.file.SpectrumFileEvent;
 import org.dawnsci.spectrum.ui.file.SpectrumFileManager;
-import org.dawnsci.spectrum.ui.file.SpectrumFileOpenedEvent;
 import org.dawnsci.spectrum.ui.file.SpectrumInMemory;
 import org.dawnsci.spectrum.ui.processing.SaveProcess;
 import org.dawnsci.spectrum.ui.processing.SaveTextProcess;
@@ -154,18 +154,21 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 		
 		viewer.setInput(manager);
 		
-		manager.addFileListener( new ISpectrumFileListener() {
-
+		manager.addFileListener(new ISpectrumFileListener() {
 			@Override
-			public void fileLoaded(final SpectrumFileOpenedEvent event) {
+			public void fileLoaded(final SpectrumFileEvent event) {
 				Display.getDefault().syncExec(new Runnable() {
 					@Override
 					public void run() {
-						viewer.refresh();
-						viewer.setSelection(new StructuredSelection(event.getFile()),true);
-						viewer.setChecked(event.getFile(), true);
+						ISpectrumFile file = updateSelection(event);
+						file.setShowPlot(true);
 					}
 				});
+			}
+
+			@Override
+			public void fileRemoved(SpectrumFileEvent event) {
+				updateSelection(event);
 			}
 		});
 		
@@ -178,20 +181,22 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 			@Override
 			public void drop(DropTargetEvent event) {
 				Object dropData = event.data;
+				List<String> paths = new ArrayList<String>();
 				if (dropData instanceof TreeSelection) {
 					TreeSelection selectedNode = (TreeSelection) dropData;
 					Object obj[] = selectedNode.toArray();
 					for (int i = 0; i < obj.length; i++) {
 						if (obj[i] instanceof IFile) {
 							IFile file = (IFile) obj[i];
-							manager.addFile(file.getRawLocation().toOSString());
+							paths.add(file.getRawLocation().toOSString());
 						}
 					}
 				} else if (dropData instanceof String[]) {
 					for (String path : (String[])dropData){
-						manager.addFile(path);
+						paths.add(path);
 					}
 				}
+				manager.addFiles(paths);
 			}
 		};
 		
@@ -225,10 +230,8 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 
 		//Highlight trace on selection
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
-
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-
 				List<ISpectrumFile> list = SpectrumUtils.getSpectrumFilesList((IStructuredSelection)event.getSelection());
 				for (ISpectrumFile file : manager.getFiles()) {
 					if (list.contains(file)) {
@@ -241,22 +244,20 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 		});
 		
 		viewer.addCheckStateListener(new ICheckStateListener() {
-			
 			@Override
 			public void checkStateChanged(CheckStateChangedEvent event) {
-				// TODO Auto-generated method stub
 				Object ob = event.getElement();
-				
+
 				if (ob instanceof ISpectrumFile) {
 					if (event.getChecked()) {
-						((ISpectrumFile)ob).setShowPlot(true);
+						((ISpectrumFile) ob).setShowPlot(true);
 					} else {
-						((ISpectrumFile)ob).setShowPlot(false);
+						((ISpectrumFile) ob).setShowPlot(false);
 					}
 				}
 			}
 		});
-		
+
 		//set axis as tight
 		List<IAxis> axes = system.getAxes();
 		for (IAxis axis : axes) axis.setAxisAutoscaleTight(true);
@@ -269,8 +270,15 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 
 		return viewer.getTable();
 	}
-	
-	
+
+	private ISpectrumFile updateSelection(SpectrumFileEvent event) {
+		viewer.refresh();
+		viewer.setSelection(new StructuredSelection(event.getFile()), true);
+		ISpectrumFile file = event.getFile();
+		viewer.setChecked(file, true);
+		return file;
+	}
+
 	@Override
 	public boolean showRunButtons() {
 		return false;
@@ -353,39 +361,41 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 
 	private void fillLocalPullDown(IMenuManager menuManager) {
 		menuManager.add(removeAction);
-		
-		menuManager.add(new Separator());
-		
-		Action orderColors = new Action("Jet Color Plotted Traces", Activator.getImageDescriptor("icons/color.png")) {
-			public void run(){
 
+		menuManager.add(new Separator());
+
+		Action orderColors = new Action("Jet Color Plotted Traces", Activator.getImageDescriptor("icons/color.png")) {
+			@Override
+			public void run() {
 				if (orderedColors == null) {
-					final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
+					final IPaletteService pservice = (IPaletteService) PlatformUI.getWorkbench()
+							.getService(IPaletteService.class);
 					PaletteData paletteData = pservice.getDirectPaletteData("Jet (Blue-Cyan-Green-Yellow-Red)");
 					RGB[] rgbs = paletteData.getRGBs();
 					orderedColors = new ArrayList<Color>(256);
 					Display display = Display.getDefault();
-					for(int i = 0; i < 256 ; i++) {
+					for (int i = 0; i < 256; i++) {
 						orderedColors.add(new Color(display, rgbs[i]));
 					}
 				}
 
 				Collection<ITrace> traces = system.getTraces(ILineTrace.class);
 				double count = 0;
-				for (ITrace trace : traces) if (trace.isUserTrace()) count++;
-				
-				double val = 255/(count-1);
+				for (ITrace trace : traces)
+					if (trace.isUserTrace())
+						count++;
+
+				double val = 255 / (count - 1);
 				int i = 0;
 				for (ITrace trace : traces) {
 					if (trace.isUserTrace()) {
-						((ILineTrace)trace).setTraceColor(orderedColors.get((int)val*i));
+						((ILineTrace) trace).setTraceColor(orderedColors.get((int) val * i));
 						i++;
 					}
-					
+
 				}
 			}
 		};
-		
 		menuManager.add(orderColors);
 		menuManager.add(new Separator());
 		menuManager.add(configDefaults);
@@ -413,7 +423,6 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 						wd.open();
 					}
 				});
-				
 				menuManager.add(new Action("Save text...") {
 					public void run() {
 						SpectrumWizard sw = new SpectrumWizard();
@@ -425,11 +434,9 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 						wd.open();
 					}
 				});
-				
 				menuManager.add(new Separator());
 			}
 		}
-		
 		menuManager.add(removeAction);
 
 		// Other plug-ins can contribute there actions here
@@ -493,80 +500,6 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 		});
 		menuManager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
-	
-//	private void configureCacheActions(MenuManager manager) {
-//		
-//		MenuManager cacheMenu = new MenuManager("Cache");
-//		
-//		if (cachedFile != null) {
-//			cacheMenu.add(new Action(cachedFile.getName()) {
-//				@Override
-//				public void run() {
-//					//does nothing
-//				}
-//			});
-//		}
-//		
-//		cacheMenu.add(new Action("Set as cached") {
-//			@Override
-//			public void run() {
-//				ISelection selection = viewer.getSelection();
-//				List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
-//				cachedFile = list.get(0);
-//			}
-//		});
-//		
-//		cacheMenu.add(new Action("Clear cached") {
-//			@Override
-//			public void run() {
-//				cachedFile = null;
-//			}
-//		});
-//		cacheMenu.setEnabled(false);
-//		manager.add(cacheMenu);
-//		
-//	}
-	
-//	private void configureCacheArithmeticMenu(MenuManager menuManager) {
-//		
-//		MenuManager menu = new MenuManager("Arithmetic");
-//		
-//		AbstractProcess process = new SubtractionProcess(manager.getCachedFile());
-//		addProcessAction(process, menu, "Subtract cached",true);
-//		
-//		process = new DivisionProcess(manager.getCachedFile());
-//		addProcessAction(process, menu, "Divied by cached",true);
-//		
-//		menuManager.add(menu);
-//
-//		
-//	}
-	
-	
-//	private void addProcessAction(final AbstractProcess process, MenuManager manager, String name, boolean enabled) {
-//		//manager
-//		Action action = new Action(name) {
-//			public void run() {
-//				ISelection selection = viewer.getSelection();
-//				List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
-//				List<IContain1DData> out = process.process(list);
-//				
-//				if (out == null) {
-//					showMessage("Could not process dataset, operation not supported for this data!");
-//					return;
-//				}
-//				
-//				for(IContain1DData data : out) {
-//					SpectrumInMemory mem = new SpectrumInMemory(data.getLongName(), data.getName(), data.getxDataset(), data.getyDatasets(), system);
-//					TraceProcessPage.this.manager.addFile(mem);
-//				}
-//			}
-//		};
-//		
-//		action.setEnabled(enabled);
-//		manager.add(action);
-//		
-//	}
 	
 	private void fillLocalToolBar(IToolBarManager manager) {
 		
