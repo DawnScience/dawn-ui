@@ -8,8 +8,6 @@
  */
 package org.dawnsci.spectrum.ui.views;
 
-
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,8 +16,6 @@ import java.util.Map;
 
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawnsci.algorithm.ui.views.runner.AbstractAlgorithmProcessPage;
-import org.dawnsci.algorithm.ui.views.runner.IAlgorithmProcessContext;
 import org.dawnsci.python.rpc.action.InjectPyDevConsole;
 import org.dawnsci.python.rpc.action.InjectPyDevConsoleAction;
 import org.dawnsci.spectrum.ui.Activator;
@@ -36,10 +32,6 @@ import org.dawnsci.spectrum.ui.utils.SpectrumUtils;
 import org.dawnsci.spectrum.ui.wizard.SaveFileWizardPage;
 import org.dawnsci.spectrum.ui.wizard.SpectrumWizard;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
@@ -100,7 +92,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.ISourceProvider;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
@@ -108,6 +99,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.part.ResourceTransfer;
+import org.eclipse.ui.part.ViewPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,10 +109,10 @@ import org.slf4j.LoggerFactory;
 * <p>
 * Hold the SpectrumFileManager which takes care of loading and plotting files
 */
-public class TraceProcessPage extends AbstractAlgorithmProcessPage {
+public class SpectrumTracesView extends ViewPart {
 	
 	// Jake start using this more please :)
-	private Logger logger = LoggerFactory.getLogger(TraceProcessPage.class);
+	private Logger logger = LoggerFactory.getLogger(SpectrumTracesView.class);
 
 	private SpectrumFileManager manager;
 	private IPlottingSystem     system;
@@ -131,7 +123,8 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 	private Action removeAction;
 	private Action configDefaults;
 
-	public Composite createPartControl(Composite parent) {
+	@Override
+	public void createPartControl(Composite parent) {
 		
 		//Create table
 		viewer = CheckboxTableViewer.newCheckList(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
@@ -147,7 +140,7 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 		ColumnViewerToolTipSupport.enableFor(viewer);
 		
 		//Get plotting system from PlotView, use it to create file manager
-		IWorkbenchPage page = getView().getSite().getPage();
+		IWorkbenchPage page = getSite().getPage();
 		IViewPart view = page.findView("org.dawnsci.spectrum.ui.views.SpectrumPlot");
 		system = (IPlottingSystem)view.getAdapter(IPlottingSystem.class);
 		manager = new SpectrumFileManager(system);
@@ -174,7 +167,7 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 		
 		processMenuManager = new ProcessMenuManager(viewer, manager, system);
 
-		getView().getSite().setSelectionProvider(viewer);
+		getSite().setSelectionProvider(viewer);
 		
 		//Set up drag-drop
 		DropTargetAdapter dropListener = new DropTargetAdapter() {
@@ -262,13 +255,8 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 		List<IAxis> axes = system.getAxes();
 		for (IAxis axis : axes) axis.setAxisAutoscaleTight(true);
 		system.setColorOption(ColorOption.BY_NAME);
-		
-		// Currently we do not want the run actions visible
-		final IToolBarManager man = getView().getViewSite().getActionBars().getToolBarManager();
-		if (man.find(IAlgorithmProcessContext.RUN_ID_STUB)!=null) man.find(IAlgorithmProcessContext.RUN_ID_STUB).setVisible(false);
-		if (man.find(IAlgorithmProcessContext.STOP_ID_STUB)!=null) man.find(IAlgorithmProcessContext.STOP_ID_STUB).setVisible(false);
 
-		return viewer.getTable();
+		logger.debug("Controls created");
 	}
 
 	private ISpectrumFile updateSelection(SpectrumFileEvent event) {
@@ -280,60 +268,11 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 	}
 
 	@Override
-	public boolean showRunButtons() {
-		return false;
-	}
-
-	@Override
 	public String getTitle() {
 		return "Traces";
 	}
 
-	@Override
-	public void run(final IAlgorithmProcessContext context) throws Exception {
-		
-		if (manager.isEmpty()) {
-			MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Empty File List", "There are currently no files to process.\n\nPlease double click to add files from the 'Trace Project' view.");
-		    return;
-		}
-		
-		// We save the manager to file. This then is read by the file
-		// reader source and each file is processed.
-		final File exportFile = File.createTempFile("SpectrumFiles", ".csv");
-		manager.export(exportFile); // saves out file list with data sets so that pipeline can process.
-		
-		System.setProperty("import.file.path", exportFile.getAbsolutePath());
-		
-		final Job process = new Job(context.getTitle()) {
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					final IFile moml = SpectrumWorkflowCreator.createWorkflowFileIfRequired("trace", 
-							                                                                "trace_workflow.moml", 
-							                                                                context.getFullPath(), 
-							                                                                monitor);
-					context.execute(moml.getLocation().toOSString(), false, monitor);
-					
-					return Status.OK_STATUS;
-				
-				} catch (Exception e) {
-					logger.error("Cannot process '"+context.getTitle()+"'", e);
-					return Status.CANCEL_STATUS;
-				}
-			}
-			
-		};
-		process.setPriority(Job.SHORT);
-		process.schedule(2);
-	}
-
-	@Override
-	public ISourceProvider[] getSourceProviders() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
+	@SuppressWarnings("rawtypes")
 	@Override
 	public Object getAdapter(final Class clazz) {
 		if (clazz == SpectrumFileManager.class) return manager;
@@ -345,16 +284,16 @@ public class TraceProcessPage extends AbstractAlgorithmProcessPage {
 		menuMgr.setRemoveAllWhenShown(true);
 		menuMgr.addMenuListener(new IMenuListener() {
 			public void menuAboutToShow(IMenuManager manager) {
-				TraceProcessPage.this.fillContextMenu(manager);
+				SpectrumTracesView.this.fillContextMenu(manager);
 			}
 		});
 		Menu menu = menuMgr.createContextMenu(viewer.getControl());
 		viewer.getControl().setMenu(menu);
-		getView().getSite().registerContextMenu(menuMgr, viewer);
+		getSite().registerContextMenu(menuMgr, viewer);
 	}
 
 	private void contributeToActionBars() {
-		IActionBars bars = getView().getViewSite().getActionBars();
+		IActionBars bars = getViewSite().getActionBars();
 		fillLocalPullDown(bars.getMenuManager());
 		fillLocalToolBar(bars.getToolBarManager());
 	}
