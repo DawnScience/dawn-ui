@@ -72,7 +72,7 @@ public class MarchingCubes extends AbstractOperation<MarchingCubesModel, Surface
 
 		if (points==null || points.length<1) throw new OperationException(this, "No isosurface found!");
 
-		return new Surface(points, texCoords, faces, model.getColour());
+		return new Surface(points, texCoords, faces, model.getColour(),  model.getOpacity());
 	}
 
 	@Override
@@ -398,6 +398,7 @@ public class MarchingCubes extends AbstractOperation<MarchingCubesModel, Surface
 
 	@SuppressWarnings("unchecked")
 	
+	// !! hot spot 
 	private Object[] parseVertices() throws OperationException 
 	{	
 		final ILazyDataset lazyData = model.getLazyData();
@@ -630,6 +631,9 @@ public class MarchingCubes extends AbstractOperation<MarchingCubesModel, Surface
 	 * @param cubeIndex
 	 * @return
 	 */
+	
+	// !! hot spot createTriangles(...)
+	// !! contains key
 	public Collection<Triangle> createTriangles(Map<Point, Integer> vertices, GridCell cell, int cubeIndex) {
 
 		Collection<Triangle> cellTriangles = new HashSet<Triangle>();
@@ -673,6 +677,8 @@ public class MarchingCubes extends AbstractOperation<MarchingCubesModel, Surface
 	 * @param v2
 	 * @return the point of intersection
 	 */
+	
+	//!! hotspot
 	public Point vertexInterpolation(double isovalue, Point p1, Point p2,
 			double v1, double v2) {
 		double mu;

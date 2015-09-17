@@ -27,6 +27,7 @@ public class MarchingCubesModel extends AbstractOperationModel {
 	private double isovalue;
 	private int[] boxSize;
 	private int[] colour = {0,0,0};
+	private double opacity = 1.0;
 	private double isovalueMin = Integer.MAX_VALUE;
 	private double isovalueMax = Integer.MIN_VALUE;
 	private int    vertexLimit = 1000000;
@@ -142,6 +143,13 @@ public class MarchingCubesModel extends AbstractOperationModel {
 	public int[] getColour(){
 		return this.colour;
 	}
+	public void setOpacity(double newOpacity){
+		this.opacity = newOpacity;
+	}
+	public double getOpacity(){
+		return this.opacity;
+	}
+	
 	
 	@Override
 	public int hashCode() {

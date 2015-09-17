@@ -38,28 +38,28 @@ public class IsosurfaceJob extends Job {
 
 	private static final Logger logger = LoggerFactory.getLogger(IsosurfaceJob.class);
 	
-	private IIsosurfaceTrace		trace = null;
-//	private IsosurfaceTool     		tool;
+	private IIsosurfaceTrace trace = null;
  	private IOperation<MarchingCubesModel, Surface> generator;
  	final private IPlottingSystem system;
-	public IsosurfaceJob(String name, IsosurfaceTool  tool, IOperation<MarchingCubesModel, Surface> generator, IPlottingSystem system) {
-		
+ 	
+ 	private ILazyDataset slice;
+ 	
+	public IsosurfaceJob(String name, IPlottingSystem system,  ILazyDataset slice)
+	{
 		super(name);
 		setUser(false);
 		setPriority(Job.INTERACTIVE);
-		
-//		this.tool = tool; 
-		this.generator = generator;
 		this.system = system;
+		this.slice = slice;
 	}
 
 	/**
 	 * Call to update when updating the isovalue or
 	 * box size.
 	 */
-	public void compute() {
-		compute(null);
-	}
+//	public void compute(IOperation<MarchingCubesModel, Surface>  generator) {
+//		compute(null, generator);
+//	}
 	
 	/**
 	 * Call to update if lazy data changed.
@@ -67,14 +67,16 @@ public class IsosurfaceJob extends Job {
 	 * 
 	 * @param slice
 	 */
-	// i might have made this redundant
-	public void compute(ILazyDataset slice) {
+	
+	public void compute(IOperation<MarchingCubesModel, Surface>  generator)
+	{
+		this.generator = generator;
 		cancel();
 		schedule();
 	}
-
+	
 	@Override
-	protected IStatus run(IProgressMonitor monitor) 
+	protected IStatus run(IProgressMonitor monitor)
 	{
 		
 //		final IPlottingSystem system = tool.getSlicingSystem().getPlottingSystem(); // does this change dynamically?
@@ -83,45 +85,61 @@ public class IsosurfaceJob extends Job {
 		{
 			system.setDefaultCursor(IPlottingSystem.WAIT_CURSOR);
 			
-			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+			if (monitor.isCanceled())
+				return Status.CANCEL_STATUS;
 			
 			try
 			{
+				if (generator.getModel().getLazyData() != slice) // !! is this a pointer check or a data check???
+				{
+					generator.getModel().setLazyData(slice);
+				}
+				
 				Surface surface    = generator.execute(null, new ProgressMonitorWrapper(monitor));
 				
 				final IDataset points     = new FloatDataset(surface.getPoints(), surface.getPoints().length);
 				final IDataset textCoords = new FloatDataset(surface.getTexCoords(), surface.getTexCoords().length);
 				final IDataset faces      = new IntegerDataset(surface.getFaces(), surface.getFaces().length);
 				final int[] colour = surface.getColour();
+				final double opacity = surface.getOpacity();
+				
+				// if new slice given re-calculate
 				
 				if (trace == null)
 				{
 					trace = system.createIsosurfaceTrace("isosurface");
-					trace.setData(points, textCoords, faces, null);
-					trace.setMaterial(colour[0], colour[1] , colour[2], 0.5);
 					
-				    Display.getDefault().syncExec(new Runnable() {
-				    	public void run() {
-							system.addTrace(trace); // doing this is not thread safe!
+					trace.setData(points, textCoords, faces, null);
+					trace.setMaterial(colour[0], colour[1] , colour[2], opacity);
+					
+					Display.getDefault().syncExec(new Runnable() {
+						public void run() {
+							system.addTrace(trace);
 				    	}
 				    });
 				}
 				else
 				{
-					trace.setMaterial(colour[0], colour[1] , colour[2], 0.5);
 					trace.setData(points, textCoords, faces, null);
-					
+					trace.setMaterial(colour[0], colour[1] , colour[2], opacity);
 				}
-			} catch (UnsupportedOperationException e){
+				
+			} 
+			catch (UnsupportedOperationException e)
+			{
 				e.printStackTrace();
 				showErrorMessage("The number of vertices has exceeded "+ generator.getModel().getVertexLimit(), "The surface cannot be rendered. Please increase the box size.");
 				return Status.CANCEL_STATUS;
 				
-			} catch (Exception e) {
+			} 
+			catch (Exception e) 
+			{
 				logger.error("Cannot run algorithm "+ generator.getClass().getSimpleName(), e);
 				return Status.CANCEL_STATUS;
 				
-			} catch (OutOfMemoryError e){
+			} 
+			catch (OutOfMemoryError e)
+			{
 				e.printStackTrace();
 				showErrorMessage("Out of memory Error", "There is not enough memory to render the surface. Please increase the box size.");
 				return Status.CANCEL_STATUS;

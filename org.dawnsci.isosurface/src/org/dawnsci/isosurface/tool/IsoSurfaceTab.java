@@ -88,7 +88,7 @@ public class IsoSurfaceTab extends Composite
 				MarchingCubesModel model = job.getGenerator().getModel();
 				int[] boxSize = new int[] { xDim.getSelection(), yDim.getSelection(), zDim.getSelection() };
 				model.setBoxSize(boxSize);
-				job.compute();
+//				job.compute();
 			}
 		});
 		
@@ -107,7 +107,7 @@ public class IsoSurfaceTab extends Composite
 				MarchingCubesModel model = job.getGenerator().getModel();
 				int[] boxSize = new int[] { xDim.getSelection(), yDim.getSelection(), zDim.getSelection() };
 				model.setBoxSize(boxSize);
-				job.compute();
+//				job.compute();
 			}
 		});
 		
@@ -123,7 +123,7 @@ public class IsoSurfaceTab extends Composite
 				double isoVal = ((model.getIsovalueMax() - model.getIsovalueMin()) / 1000.0) * currentValue + model.getIsovalueMin();
 				isoText.setText(String.valueOf(isoVal));
 				model.setIsovalue(isoVal);
-				job.compute();
+//				job.compute();
 			}
 			
 		});
@@ -141,7 +141,7 @@ public class IsoSurfaceTab extends Composite
 				MarchingCubesModel model = job.getGenerator().getModel();
 				isovalue.setSelection((int) ((currentValue - model.getIsovalueMin()) * 1000.0 / (model.getIsovalueMax() - model.getIsovalueMin())));
 				model.setIsovalue(currentValue);
-				job.compute();
+//				job.compute();
 			}
 		});
 		
@@ -157,12 +157,12 @@ public class IsoSurfaceTab extends Composite
 					int[] boxSize = new int[] { xSize, model.getBoxSize()[1], model.getBoxSize()[2] };
 					model.setBoxSize(boxSize);
 				}
-				job.compute();
+//				job.compute();
 			}
 			
 			public void widgetDefaultSelected(SelectionEvent e)
 			{
-				job.compute();
+//				job.compute();
 			}
 		});
 		
@@ -178,12 +178,12 @@ public class IsoSurfaceTab extends Composite
 					int[] boxSize = new int[] { model.getBoxSize()[0], ySize, model.getBoxSize()[2] };
 					model.setBoxSize(boxSize);
 				}
-				job.compute();
+//				job.compute();
 			}
 			
 			public void widgetDefaultSelected(SelectionEvent e)
 			{
-				job.compute();
+//				job.compute();
 			}
 		});
 		
@@ -200,12 +200,12 @@ public class IsoSurfaceTab extends Composite
 					int[] boxSize = new int[] { model.getBoxSize()[0], model.getBoxSize()[1], zSize };
 					model.setBoxSize(boxSize);
 				}
-				job.compute();
+//				job.compute();
 			}
 			
 			public void widgetDefaultSelected(SelectionEvent e)
 			{
-				job.compute();
+//				job.compute();
 			}
 		});
 		
@@ -248,7 +248,7 @@ public class IsoSurfaceTab extends Composite
 					
 					MarchingCubesModel model = job.getGenerator().getModel();
 					model.setColour(color.getRed(), color.getGreen(), color.getBlue());
-					job.compute();
+//					job.compute();
 					
 					
 				}
