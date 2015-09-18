@@ -44,10 +44,15 @@ public class MapFileCellLabelProvider extends StyledCellLabelProvider {
 
       cell.setText(text.toString());
       if (italicFont == null) {
-    	initialFont = cell.getFont();  
-    	final FontData shellFd = Display.getDefault().getActiveShell().getFont().getFontData()[0];
-  		FontData fd      = new FontData(shellFd.getName(), shellFd.getHeight(), SWT.ITALIC | SWT.BOLD);
-  		italicFont = new Font(null, fd);
+    	  try {
+    		  initialFont = cell.getFont();  
+    		  final FontData shellFd = Display.getDefault().getActiveShell().getFont().getFontData()[0];
+    		  FontData fd      = new FontData(shellFd.getName(), shellFd.getHeight(), SWT.ITALIC | SWT.BOLD);
+    		  italicFont = new Font(null, fd);
+    	  } catch (Exception e) {
+    		  //TODO log
+    	  }
+    	
       }
       
       

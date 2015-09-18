@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.dawnsci.mapping.ui.LocalServiceManager;
 import org.dawnsci.mapping.ui.MappingUtils;
+import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
 import org.dawnsci.mapping.ui.datamodel.MappedFileDescription;
 import org.dawnsci.mapping.ui.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -28,6 +29,7 @@ public class ImportMappedDataWizard extends Wizard {
 	private Map<String,int[]> datasetNames;
 	private Map<String,int[]> nexusDatasetNames = new LinkedHashMap<String, int[]>();
 	private MappedFileDescription description = new MappedFileDescription();
+	private MappedDataFileBean mdfbean = new MappedDataFileBean();
 	private boolean imageImport = false;
 	private MappedFileDescription[] persistedList;
 	
@@ -43,7 +45,18 @@ public class ImportMappedDataWizard extends Wizard {
 		return description;
 	}
 	
+	public MappedDataFileBean getMappedDataFileBean() {
+		return mdfbean;
+	}
+	
 	public void createPageControls(Composite pageContainer) {
+		IWizardPage[] pa = getPages();
+		
+		for (IWizardPage p : pa) {
+			IDatasetWizard pd = (IDatasetWizard) p;
+			pd.setMapBean(mdfbean);
+		}
+		
 		super.createPageControls(pageContainer);
 		
 		try {
@@ -98,6 +111,7 @@ public class ImportMappedDataWizard extends Wizard {
 										IDatasetWizard pd = (IDatasetWizard) p;
 										pd.setDatasetMaps(datasetNames, nexusDatasetNames);
 										pd.setMappedDataDescription(description);
+										
 										
 									}
 								}

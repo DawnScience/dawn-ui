@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import org.dawnsci.mapping.ui.datamodel.MapBean;
+import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
 import org.dawnsci.mapping.ui.datamodel.MappedFileDescription;
 import org.eclipse.jface.dialogs.IPageChangeProvider;
 import org.eclipse.jface.dialogs.IPageChangedListener;
@@ -36,13 +38,14 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 	private Map<String, Integer> mapToParent;
 	private Map<String,int[]> datasetNames;
 	private Map<String,int[]> nexusDatasetNames;
+	private MappedDataFileBean mdfbean;
 	
 	private String[] options;
 	
 	protected ImportMapWizardPage(String name) {
 		super(name);
 		this.setTitle("Import Maps");
-		this.setDescription("Select all maps, their axes, and which dimensions correspond to the map X and Y directions");
+		this.setDescription("Select all maps and their parent data blocks");
 	}
 
 	@Override
@@ -75,6 +78,7 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 		mapToParent = new HashMap<String, Integer>();
 		cviewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			
+			@SuppressWarnings("unchecked")
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				Object element = ((StructuredSelection)event.getSelection()).getFirstElement();
@@ -83,6 +87,7 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 				if (!cviewer.getChecked(element)) {
 					combo.setEnabled(false);
 					if (mapToParent.containsKey(key)) mapToParent.remove(key);
+					updateBeans();
 					return;
 				}
 				combo.setItems(options);
@@ -92,10 +97,12 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 				if (mapToParent.containsKey(key)) index = mapToParent.get(key);
 				else mapToParent.put(key, index);
 				combo.select(index);
+				updateBeans();
 			}
 		});
 		
 		combo.addSelectionListener(new SelectionAdapter() {
+			@SuppressWarnings("unchecked")
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Object element = ((StructuredSelection)cviewer.getSelection()).getFirstElement();
@@ -106,6 +113,7 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 				Entry<String,int[]> entry = (Entry<String,int[]>)element;
 				String key = entry.getKey();
 				mapToParent.put(key, combo.getSelectionIndex());
+				updateBeans();
 			}
 		});
 		
@@ -121,6 +129,22 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 				}
 			});
 		}
+	}
+	
+	private void updateBeans() {
+		List<MapBean> maps = mdfbean.getMaps();
+		maps.clear();
+		for (Entry<String, Integer> entry : mapToParent.entrySet()) {
+			maps.add(updateBean(entry.getKey(), options[entry.getValue()]));
+		}
+		
+	}
+	
+	private MapBean updateBean(String name, String parent) {
+		MapBean bean = new MapBean();
+		bean.setName(name);
+		bean.setParent(parent);
+		return bean;
 	}
 	
 	protected void updateOnPageChange() {
@@ -174,9 +198,15 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 		
 	}
 	
+	@Override
+	public void setMapBean(MappedDataFileBean bean) {
+		this.mdfbean = bean;
+	}
+	
 	private class BasicContentProvider implements IStructuredContentProvider {
 
 		@Override
+		@SuppressWarnings("unchecked")
 		public Object[] getElements(Object inputElement) {
 			Map<String, int[]> vals = (Map<String, int[]>)inputElement;
 			Set<Entry<String, int[]>> entrySet = vals.entrySet();
@@ -195,6 +225,7 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 	
 	private class ViewLabelProvider extends ColumnLabelProvider {
 	
+		@SuppressWarnings("unchecked")
 		@Override
 		public String getText(Object obj) {
 			Entry<String, int[]> ent = (Entry<String, int[]>)obj;

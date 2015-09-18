@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+
 import org.dawnsci.mapping.ui.datamodel.MappedData;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
@@ -47,6 +48,78 @@ public class MappedDataView extends ViewPart {
 	
 	@Override
 	public void createPartControl(Composite parent) {
+
+//		IAction ncd = new Action("Live") {
+//			public void run() {
+//				
+//				remote = MappingMockSWMRRemote.getRemote();
+//				LiveMappedDataBlock lb = new LiveMappedDataBlock("Live", remote,1,0);
+//				plotManager.monitorData(lb);
+//				
+////				final String path = "/scratch/SSD/live/live_25.h5";
+////				final String id = "/entry/instrument/NDAttributes/NDArrayUniqueId";
+////				final String data = "/entry/data/data";
+////				final ILoaderService ls = LocalServiceManager.getLoaderService();
+////				ls.clearSoftReferenceCache();
+////				try {
+////					final IDataHolder dh = ls.getData(path, true, null);
+////					if (dh.contains("/entry/instrument/NDAttributes/NDArrayUniqueId")){
+////						int[] idshape = dh.getMetadata().getDataShapes().get(id);
+////						int[] dshape = dh.getMetadata().getDataShapes().get(data);
+////						ILazyDataset lzId = dh.getLazyDataset(id);
+////						ILazyDataset ds = dh.getLazyDataset(data);
+////					
+////						final IDynamicDataset key = LazyDynamicDataset.createDynamicDataset((LazyDataset)lzId);
+////						final IDynamicDataset dd = LazyDynamicDataset.createDynamicDataset((LazyDataset)ds);
+////						key.startUpdateChecker(500, new IDatasetChangeChecker() {
+////							
+////							@Override
+////							public void setDataset(ILazyDataset dataset) {
+////							}
+////							
+////							@Override
+////							public boolean check() {
+////								try {
+////									ls.clearSoftReferenceCache();
+////									IDataHolder dh = ls.getData(path, true, null);
+////									key.resize(dh.getMetadata().getDataShapes().get(id));
+////									dd.resize(dh.getMetadata().getDataShapes().get(data));
+////									
+////								} catch (Exception e) {
+////									e.printStackTrace();
+////								}
+////								
+////								return true;
+////							}
+////						});
+////						LiveMappedDataBlock lb = new LiveMappedDataBlock(data, dd, key);
+////						plotManager.monitorData(lb);
+////					}
+////					IMetadata metadata = dh.getMetadata();
+////					metadata.toString();
+////				} catch (Exception e) {
+////					// TODO Auto-generated catch block
+////					e.printStackTrace();
+////				}
+//////				plotManager.monitorData(null);
+//			}
+//		};
+//		IAction ncd1 = new Action("Stpp") {
+//			public void run() {
+//				if (remote != null)
+//					try {
+//						remote.disconnect();
+//					} catch (Exception e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//			}
+//		};
+//		
+//		
+//		getViewSite().getActionBars().getToolBarManager().add(ncd);
+//		getViewSite().getActionBars().getToolBarManager().add(ncd1);
+		
 		area = new MappedDataArea();
 		
 		IWorkbenchPage page = getSite().getPage();

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
 import org.dawnsci.mapping.ui.datamodel.MappedFileDescription;
 import org.eclipse.jface.dialogs.IPageChangeProvider;
 import org.eclipse.jface.dialogs.IPageChangedListener;
@@ -23,19 +24,19 @@ public class ImportDataCubeWizardPage extends WizardPage implements IDatasetWiza
 	
 	protected MappedFileDescription description;
 	protected DatasetAndAxesWidget widget;
+	private MappedDataFileBean mdfbean;
 	
 	protected ImportDataCubeWizardPage(String name) {
 		super(name);
 		this.setTitle("Import Data Blocks");
 		this.setDescription("Select all the full data blocks, their axes, and which dimensions correspond to the map X and Y directions");
-
 	}
 
 	@Override
 	public void createControl(Composite parent) {
 		Composite main = new Composite(parent, SWT.None);
 		main.setLayout(new GridLayout(1,false));
-		widget = new DatasetAndAxesWidget();
+		widget = new DatasetAndAxesWidget(mdfbean.getBlocks());
 		widget.createControl(main);
 		setControl(main);
 		final Button onlyNexusTagged = new Button(main, SWT.CHECK);
@@ -89,6 +90,11 @@ public class ImportDataCubeWizardPage extends WizardPage implements IDatasetWiza
 	public void setMappedDataDescription(MappedFileDescription description) {
 		this.description = description;
 		widget.initialiseValues(description.getDataBlockToAxesMapping(), description.getxAxisName(), description.getyAxisName());
+	}
+
+	@Override
+	public void setMapBean(MappedDataFileBean bean) {
+		this.mdfbean = bean;
 	}
 	
 }

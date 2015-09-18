@@ -70,7 +70,7 @@ public class MappedFileManager {
 						InterruptedException {
 					IMonitor m = new ProgressMonitorWrapper(monitor);
 					monitor.beginTask("Loading data...", wiz.getMappedFileDescription().getBlockNames().size());
-					final MappedDataFile mdf = MappedFileFactory.getMappedDataFile(path, wiz.getMappedFileDescription(),m);
+					final MappedDataFile mdf = MappedFileFactory.getMappedDataFile(path, wiz.getMappedDataFileBean(),m);
 					if (m.isCancelled()) return;
 					mappedDataArea.addMappedDataFile(mdf);
 					Display.getDefault().syncExec(new Runnable() {

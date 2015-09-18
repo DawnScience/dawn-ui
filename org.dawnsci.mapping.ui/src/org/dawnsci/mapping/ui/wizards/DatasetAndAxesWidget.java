@@ -1,12 +1,16 @@
 package org.dawnsci.mapping.ui.wizards;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import org.dawnsci.mapping.ui.datamodel.MappedBlockBean;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -30,9 +34,25 @@ public class DatasetAndAxesWidget {
 	private Map<String,int[]> datasetNames;
 	private Map<String,int[]> nexusDatasetNames;
 	private Map<String, Dimension[]> nameToDimensions;
+	private List<MappedBlockBean> beans;
 	private DataConfigurationTable dataTable;
 	private static final String[] OPTIONS = new String[]{"map Y", "map X",""};
 	private boolean reMap = false;
+	private PropertyChangeListener listener;
+	
+	public DatasetAndAxesWidget(List<MappedBlockBean> beans) {
+		this.beans = beans;
+		listener = new PropertyChangeListener() {
+			
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				System.err.println(evt.toString());
+				updateBeans();
+				
+			}
+
+		};
+	}
 	
 	public void createControl(Composite parent) {
 		Composite main = new Composite(parent, SWT.None);
@@ -50,6 +70,7 @@ public class DatasetAndAxesWidget {
 		
 		cviewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			
+			@SuppressWarnings("unchecked")
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				
@@ -60,16 +81,38 @@ public class DatasetAndAxesWidget {
 				String key = entry.getKey();
 				if (!cviewer.getChecked(element)) {
 					if (nameToDimensions.containsKey(key)) nameToDimensions.remove(key);
+					Iterator<MappedBlockBean> it = beans.iterator();
+					while (it.hasNext()) {
+						if (it.next().getName().equals(key)) it.remove();
+					}
 					dataTable.clearAll();
+					updateBeans();
 					return;
 				}
 
 				int[] shape = datasetNames.get(key);
+				
+				String[][] axes = getAxesNameOptions(shape,key);
+				
+				
 				Dimension[] dims;
 				if (nameToDimensions.containsKey(key)) dims = nameToDimensions.get(key);
-				else dims = new Dimension[shape.length];
+				else {
+					dims = new Dimension[shape.length];
+					for (int i = 0; i < dims.length ; i++) {
+						if (dims[i] != null) continue;
+						dims[i] = new Dimension(i);
+						dims[i].setSize(shape[i]);
+						dims[i].setAxisOptions(axes[i]);
+						dims[i].addPropertyChangeListener(listener);
+						if (i < OPTIONS.length) dims[i].setDescription(OPTIONS[i]);
+					}
+				}
 				nameToDimensions.put(key, dims);
-				dataTable.setInput(shape, OPTIONS, getAxesNameOptions(shape,key),dims);
+				dataTable.setInput(OPTIONS,dims);
+				
+				MappedBlockBean bean = new MappedBlockBean();
+				bean.setName(key);
 				
 			}
 		});
@@ -94,6 +137,7 @@ public class DatasetAndAxesWidget {
 				if (d == null) showRemappableError();
 				
 				d.setSecondaryAxis(remapXAxis.getText());
+				updateBeans();
 			}
 		});
 		
@@ -113,17 +157,60 @@ public class DatasetAndAxesWidget {
 		
 	}
 	
+	private void updateBeans() {
+		
+		beans.clear();
+		
+		for (Entry<String, Dimension[]> entry : nameToDimensions.entrySet()) {
+			beans.add(updateBean(entry.getKey(), entry.getValue()));
+		}
+		
+		beans.toString();
+	}
+	
+	private MappedBlockBean updateBean(String name, Dimension[] dims) {
+		
+		MappedBlockBean bean = new MappedBlockBean();
+		bean.setName(name);
+		bean.setRank(dims.length);
+		String[] axes = new String[dims.length];
+
+		for (int i = 0; i < dims.length; i++) {
+			Dimension d = dims[i];
+			axes[i] = d.getAxis();
+			if (OPTIONS[0].equals(d.getDescription())) {
+				bean.setyDim(i);
+			} else if (OPTIONS[1].equals(d.getDescription())) {
+				bean.setxDim(i);
+			}
+		}
+
+		for (int i = 0; i < dims.length; i++) {
+
+			Dimension d = dims[i];
+
+			if (d.getSecondaryAxis() != null) {
+				bean.setxDim(i);
+				bean.setxAxisForRemapping(d.getSecondaryAxis());
+			}
+		}
+		
+		bean.setAxes(axes);
+		
+		return bean;
+	}
+	
 	private String[] getAxisOptionsOfSelectedYAxis(){
 		
 		Dimension dim = getSelectedYDimension();
 		
 		if (dim == null) return null;
 		
-		
 		return dim.getAxisOptions();
 		
 	}
 	
+	@SuppressWarnings("unchecked")
 	private Dimension getSelectedYDimension(){
 		
 		StructuredSelection current = (StructuredSelection)cviewer.getSelection();
@@ -275,6 +362,7 @@ public class DatasetAndAxesWidget {
 	
 	private class BasicContentProvider implements IStructuredContentProvider {
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public Object[] getElements(Object inputElement) {
 			Map<String, int[]> vals = (Map<String, int[]>)inputElement;
@@ -294,6 +382,7 @@ public class DatasetAndAxesWidget {
 	
 	private class ViewLabelProvider extends ColumnLabelProvider {
 	
+		@SuppressWarnings("unchecked")
 		@Override
 		public String getText(Object obj) {
 			Entry<String, int[]> ent = (Entry<String, int[]>)obj;
