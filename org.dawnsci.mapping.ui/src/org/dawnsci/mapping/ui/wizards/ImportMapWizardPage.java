@@ -8,8 +8,8 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import org.dawnsci.mapping.ui.datamodel.MapBean;
+import org.dawnsci.mapping.ui.datamodel.MappedBlockBean;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
-import org.dawnsci.mapping.ui.datamodel.MappedFileDescription;
 import org.eclipse.jface.dialogs.IPageChangeProvider;
 import org.eclipse.jface.dialogs.IPageChangedListener;
 import org.eclipse.jface.dialogs.PageChangedEvent;
@@ -33,7 +33,6 @@ import org.eclipse.swt.widgets.Composite;
 
 public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 
-	protected MappedFileDescription description;
 	private CheckboxTableViewer cviewer;
 	private Map<String, Integer> mapToParent;
 	private Map<String,int[]> datasetNames;
@@ -148,35 +147,32 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 	}
 	
 	protected void updateOnPageChange() {
-		if (description != null && description.getBlockNames() != null){
-			options = description.getBlockNames().toArray(new String[description.getBlockNames().size()]);
+		List<MappedBlockBean> blocks = mdfbean.getBlocks();
+		if (blocks.isEmpty()) return;
+		options = new String[blocks.size()];
+		for (int i = 0; i < blocks.size(); i++) options[i] = blocks.get(i).getName();
+		
+//		if (description != null && description.getBlockNames() != null){
+//			options = description.getBlockNames().toArray(new String[description.getBlockNames().size()]);
+//
+//			if (description.getDataBlockToMapMapping() != null) {
+//				for (Entry<String, List<String>> e : description.getDataBlockToMapMapping().entrySet()) {
+//					if (datasetNames.containsKey(e.getKey())) {
+//
+//						for (String a : e.getValue()) {
+//							if (a != null && datasetNames.containsKey(a)) {
+//								int i = 0;
+//								for (;i< options.length; i++) if (e.getKey().equals(options[i])) break;
+//								mapToParent.put(a, i);
+//								for (Entry<String, int[]> ent : datasetNames.entrySet()) if (ent.getKey().equals(a)) cviewer.setChecked(ent, true);
+//							}
+//						}
+//
+//					}
+//				}
+//			}
 
-			if (description.getDataBlockToMapMapping() != null) {
-				for (Entry<String, List<String>> e : description.getDataBlockToMapMapping().entrySet()) {
-					if (datasetNames.containsKey(e.getKey())) {
-
-						for (String a : e.getValue()) {
-							if (a != null && datasetNames.containsKey(a)) {
-								int i = 0;
-								for (;i< options.length; i++) if (e.getKey().equals(options[i])) break;
-								mapToParent.put(a, i);
-								for (Entry<String, int[]> ent : datasetNames.entrySet()) if (ent.getKey().equals(a)) cviewer.setChecked(ent, true);
-							}
-						}
-
-					}
-				}
-			}
-
-		}
-	}
-	
-	public void pushChanges(){
-		if (mapToParent != null && !mapToParent.isEmpty()) {
-			for (Entry<String, Integer> entry : mapToParent.entrySet()) {
-				description.addMap(options[entry.getValue()], entry.getKey());
-			}
-		}
+//		}
 	}
 
 	@Override
@@ -189,12 +185,6 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 		} else {
 			cviewer.setInput(nexusDatasetNames);
 		}
-		
-	}
-
-	@Override
-	public void setMappedDataDescription(MappedFileDescription description) {
-		this.description = description;
 		
 	}
 	
