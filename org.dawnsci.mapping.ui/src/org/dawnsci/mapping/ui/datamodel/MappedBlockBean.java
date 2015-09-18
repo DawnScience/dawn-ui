@@ -47,5 +47,15 @@ public class MappedBlockBean {
 		this.xAxisForRemapping = xAxisForRemapping;
 	}
 	
+	public boolean checkValid() {
+		if (name == null) return false;
+		if (axes == null) return false;
+		if (axes[xDim] == null) return false;
+		if (axes[yDim] == null) return false; 
+		if (yDim == xDim && xAxisForRemapping == null) return false;
+		
+		return true;
+	}
+	
 	
 }

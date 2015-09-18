@@ -29,6 +29,13 @@ public class ImportDataCubeWizardPage extends WizardPage implements IDatasetWiza
 		Composite main = new Composite(parent, SWT.None);
 		main.setLayout(new GridLayout(1,false));
 		widget = new DatasetAndAxesWidget(mdfbean.getBlocks());
+		widget.addCompleteListener(new IDataWidgetCompleteListener() {
+			
+			@Override
+			public void dataComplete(boolean complete) {
+				setPageComplete(complete);
+			}
+		});
 		widget.createControl(main);
 		setControl(main);
 		final Button onlyNexusTagged = new Button(main, SWT.CHECK);
@@ -53,6 +60,7 @@ public class ImportDataCubeWizardPage extends WizardPage implements IDatasetWiza
 	@Override
 	public void setMapBean(MappedDataFileBean bean) {
 		this.mdfbean = bean;
+		setPageComplete(bean.checkValid());
 	}
 	
 }

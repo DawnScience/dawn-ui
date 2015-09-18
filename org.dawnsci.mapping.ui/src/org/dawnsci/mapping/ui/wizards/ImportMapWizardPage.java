@@ -137,6 +137,19 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 			maps.add(updateBean(entry.getKey(), options[entry.getValue()]));
 		}
 		
+		boolean complete = true;
+		if (maps.isEmpty())  {
+			setPageComplete(false);
+			return;
+		}
+		for (MapBean m : maps) {
+			if (!m.checkValid()) {
+				setPageComplete(false);
+				return;
+			}
+		}
+		
+		setPageComplete(true);
 	}
 	
 	private MapBean updateBean(String name, String parent) {

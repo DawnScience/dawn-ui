@@ -18,5 +18,10 @@ public class MapBean {
 		this.parent = parent;
 	}
 	
+	public boolean checkValid() {
+		if (name == null) return false;
+		if (parent == null) return false;
+		return true;
+	}
 	
 }

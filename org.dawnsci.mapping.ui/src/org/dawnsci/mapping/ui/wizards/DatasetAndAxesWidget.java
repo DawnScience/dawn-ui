@@ -4,6 +4,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -39,9 +40,11 @@ public class DatasetAndAxesWidget {
 	private static final String[] OPTIONS = new String[]{"map Y", "map X",""};
 	private boolean reMap = false;
 	private PropertyChangeListener listener;
+	private HashSet<IDataWidgetCompleteListener> listeners;
 	
 	public DatasetAndAxesWidget(List<MappedBlockBean> beans) {
 		this.beans = beans;
+		this.listeners = new HashSet<IDataWidgetCompleteListener>();
 		listener = new PropertyChangeListener() {
 			
 			@Override
@@ -52,6 +55,18 @@ public class DatasetAndAxesWidget {
 			}
 
 		};
+	}
+	
+	public void addCompleteListener(IDataWidgetCompleteListener listener) {
+		listeners.add(listener);
+	}
+
+	public void removeCompleteListener(IDataWidgetCompleteListener listener) {
+		listeners.remove(listener);
+	}
+	
+	public void fireCompleteListeners(boolean complete) {
+		for(IDataWidgetCompleteListener l : listeners) l.dataComplete(complete);
 	}
 	
 	public void createControl(Composite parent) {
@@ -165,8 +180,19 @@ public class DatasetAndAxesWidget {
 			beans.add(updateBean(entry.getKey(), entry.getValue()));
 		}
 		
-		beans.toString();
+		boolean complete = !beans.isEmpty();
+		
+		for (MappedBlockBean b: beans) {
+			if (!b.checkValid()) {
+				complete = false;
+				break;
+			}
+		}
+		
+		fireCompleteListeners(complete);
 	}
+	
+	
 	
 	private MappedBlockBean updateBean(String name, Dimension[] dims) {
 		

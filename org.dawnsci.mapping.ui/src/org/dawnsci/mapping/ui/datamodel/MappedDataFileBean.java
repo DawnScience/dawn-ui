@@ -24,16 +24,20 @@ public class MappedDataFileBean {
 		return maps;
 	}
 	
-//	public List<String> getBlockNames() {
-//		List<String> names = new ArrayList<String>();
-//		for (MappedBlockBean b : blocks) names.add(b.getName());
-//		return names;
-//	}
-//	
-//	public List<String> getMapNames() {
-//		List<String> names = new ArrayList<String>();
-//		for (MapBean m : maps) names.add(m.getName());
-//		return names;
-//	}
+	public boolean checkValid() {
+		
+		if (blocks.isEmpty()) return false;
+		if (maps.isEmpty()) return false;
+		
+		for (MappedBlockBean b : blocks) {
+			if (!b.checkValid()) return false;
+		}
+		
+		for (MapBean b : maps) {
+			if (!b.checkValid()) return false;
+		}
+		
+		return true;
+	}
 	
 }
