@@ -292,13 +292,17 @@ public class ProcessMenuManager {
 		menu.add(cropWizard);
 		menuManager.add(menu);
 	}
-	
-	
-	private void showMessage(String message) {
-		MessageDialog.openInformation(
-			viewer.getControl().getShell(),
-			"Sample View",
-			message);
+
+	private void showMessage(final String message) {
+		Display.getDefault().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				MessageDialog.openInformation(
+						viewer.getControl().getShell(),
+						"Sample View",
+						message);
+			}
+		});
 	}
 
 }
