@@ -9,7 +9,9 @@
 package org.dawnsci.spectrum.ui.actions;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.dawnsci.spectrum.ui.file.SpectrumFileManager;
 import org.eclipse.jface.action.Action;
@@ -27,6 +29,7 @@ public class OpenLocalFileAction extends Action implements IWorkbenchWindowActio
 
 	private IWorkbenchWindow window;
 	private String filterPath;
+	protected boolean wildcard;
 
 	@Override
 	public void run(IAction action) {
@@ -44,15 +47,20 @@ public class OpenLocalFileAction extends Action implements IWorkbenchWindowActio
 		if (names != null) {
 			filterPath =  dialog.getFilterPath();
 
+			if (wildcard) names = matchNames(names, filterPath);
+			
 			IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 			IViewPart view = page.findView("org.dawnsci.spectrum.ui.views.SpectrumView");
 			if (view==null) return;
 
 			final SpectrumFileManager manager = (SpectrumFileManager)view.getAdapter(SpectrumFileManager.class);
 			if (manager != null) {
+				List<String> fullName = new ArrayList<String>();
 				for (String name : names) {
-					manager.addFiles(Arrays.asList(new String[] {dialog.getFilterPath() + File.separator + name}));
+					fullName.add(dialog.getFilterPath() + File.separator + name);
 				}
+				
+				manager.addFiles(fullName);
 			}
 		}
 	}
@@ -73,6 +81,10 @@ public class OpenLocalFileAction extends Action implements IWorkbenchWindowActio
 	public void init(IWorkbenchWindow window) {
 		this.window =  window;
 		filterPath =  System.getProperty("user.home");
+	}
+	
+	protected String[] matchNames(String[] names, String filterPath) {
+		return names;
 	}
 
 }
