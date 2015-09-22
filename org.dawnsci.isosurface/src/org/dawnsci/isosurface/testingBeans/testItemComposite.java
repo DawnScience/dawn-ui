@@ -1,7 +1,8 @@
 package org.dawnsci.isosurface.testingBeans;
 
-import org.eclipse.jface.preference.ColorSelector;
+import org.eclipse.richbeans.api.event.ValueListener;
 import org.eclipse.richbeans.api.widget.IFieldWidget;
+import org.eclipse.richbeans.widgets.BoundsProvider;
 import org.eclipse.richbeans.widgets.scalebox.ScaleBox;
 import org.eclipse.richbeans.widgets.wrappers.ColorSelectorWrapper;
 import org.eclipse.richbeans.widgets.wrappers.ScaleWrapper;
@@ -11,8 +12,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
 public class testItemComposite extends Composite
@@ -23,12 +24,16 @@ public class testItemComposite extends Composite
 	private ScaleWrapper opacity;
 	private SpinnerWrapper x, y, z;
 	private ColorSelectorWrapper colour;
-		
+	
+	private double max = 100 ,min = 0;
+	
 	public testItemComposite(final Composite parent, int style) 
-	{	
+	{
+		
 		super(parent, style);
 		
 		createUI();
+		
 	}
 	
 	private void createUI()
@@ -91,6 +96,9 @@ public class testItemComposite extends Composite
 		GridData gd_scale_1 = new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1);
 		gd_scale_1.widthHint = 152;
 		opacity.setLayoutData(gd_scale_1);
+		opacity.setMaximumScale(1000);
+		opacity.setMaximumValue(1);
+		opacity.setMinimumValue(0);
 		
 //		Button btnOn = new Button(this, SWT.RADIO);
 //		btnOn.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
@@ -105,11 +113,13 @@ public class testItemComposite extends Composite
 	
 	public IFieldWidget getValue()
 	{
+//		isoSurfaceScaleValue.setValue(value.getValue()); 
 		return this.value;
 	}
 	
 	public IFieldWidget getIsoSurfaceScaleValue()
-	{
+	{	
+		value.setValue(isoSurfaceScaleValue.getValue()); //!! this is the problem
 		return this.isoSurfaceScaleValue;
 	}
 	
@@ -132,28 +142,60 @@ public class testItemComposite extends Composite
 	public IFieldWidget getColour()
 	{
 		return this.colour;
-	}
-	
-	
-	
-	
-//	public IFieldWidget getColour()
-//	{
-//		return this.colour;
-//	}
-//	
-//	public 
-//	
-//	private double opacity;
-//	private int[] cubeSize;
-//	private RGB colour;
-		
-	
+	}	
 	
 
 	public void updateVisibility() {
 		
 	}
+
+	public void setMinMaxIsoValue(final double min, final double max)
+	{
+		this.max = max;
+		this.min = min;
 		
+		isoSurfaceScaleValue.setIncrement(1);
+		isoSurfaceScaleValue.setMaximumScale(1000);
+		
+		isoSurfaceScaleValue.setMaximumValue(max);
+		isoSurfaceScaleValue.setMinimumValue(min);
+		
+		value.setMaximum(new BoundsProvider()
+		{
+			
+			@Override
+			public double getBoundValue()
+			{
+				return max;
+			}
+			
+			@Override
+			public void addValueListener(ValueListener l)
+			{
+				int x = 0;
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		value.setMinimum(new BoundsProvider()
+		{
+			
+			@Override
+			public double getBoundValue()
+			{
+				return min;
+			}
+			
+			@Override
+			public void addValueListener(ValueListener l)
+			{
+				int x = 0;
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
+		
+	}	
 	
 }

@@ -22,7 +22,7 @@ public class testItem
 	
 	private IsosurfaceJob job;
 	private IOperation<MarchingCubesModel, Surface> generator;
-	
+		
 	public testItem()
 	{
 		this("testName");
@@ -43,16 +43,23 @@ public class testItem
 		{
 			e.printStackTrace();
 		}
+	
 	}
 	
 	public void update()
-	{
+	{	
 		
 		MarchingCubesModel model = this.generator.getModel();
 		int[] boxSize = new int[] {x, y, z};
 		model.setBoxSize(boxSize);
 		job.compute(generator);
 		
+	}
+	
+	public void destroy()
+	{
+		int x = 0;
+		System.out.println("destroyed");
 	}
 	
 	public void setJob(IsosurfaceJob job)
@@ -86,12 +93,14 @@ public class testItem
 	
 	public void setValue(double newValue)
 	{
-		
-		MarchingCubesModel model = this.generator.getModel();
-		model.setIsovalue(newValue);
-		
-		this.value = newValue;
-		update();
+		if (this.value != newValue)
+		{
+			MarchingCubesModel model = this.generator.getModel();
+			model.setIsovalue(newValue);
+			
+			this.value = newValue;
+			update();
+		}
 	}
 	
 	
@@ -149,22 +158,23 @@ public class testItem
 		this.value = newValue;
 		update();
 	}
-	public int getIsoSurfaceScaleValue()
+	public double getIsoSurfaceScaleValue()
 	{
-		return (int) this.value;
+		return this.value;
 	}
 	
-	public void setOpacity(int newValue)
+	public void setOpacity(double newValue)
 	{
 		MarchingCubesModel model = this.generator.getModel();
-		model.setOpacity((double)newValue/100);
+		model.setOpacity(newValue);
 		
 		this.opacity = newValue;
 		update();
 	}
-	public int getOpacity()
+	public double getOpacity()
 	{
-		return (int)this.opacity;
+		return this.opacity;
 	}
+
 	
 }

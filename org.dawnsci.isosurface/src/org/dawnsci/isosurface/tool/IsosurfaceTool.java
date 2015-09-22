@@ -8,22 +8,17 @@
  */
 package org.dawnsci.isosurface.tool;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.isosurface.Activator;
-import org.dawnsci.isosurface.alg.MarchingCubesModel;
-import org.dawnsci.isosurface.alg.Surface;
 import org.dawnsci.isosurface.testingBeans.TestValueListener;
 import org.dawnsci.isosurface.testingBeans.testComposite;
-import org.dawnsci.isosurface.testingBeans.testItem;
 import org.dawnsci.isosurface.testingBeans.testingBean;
-import org.eclipse.core.internal.registry.osgi.OSGIUtils;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.analysis.api.processing.IOperation;
-import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
+import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.plotting.api.PlotType;
+import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
+import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
+import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
 import org.eclipse.dawnsci.slicing.api.system.AxisChoiceEvent;
 import org.eclipse.dawnsci.slicing.api.system.AxisChoiceListener;
 import org.eclipse.dawnsci.slicing.api.system.AxisType;
@@ -33,22 +28,13 @@ import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.dawnsci.slicing.api.system.SliceSource;
 import org.eclipse.dawnsci.slicing.api.tool.AbstractSlicingTool;
 import org.eclipse.richbeans.api.reflection.IBeanController;
-import org.eclipse.richbeans.examples.ExampleJSONWritingValueListener;
 import org.eclipse.richbeans.reflection.BeanService;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.ExpandBar;
-import org.eclipse.swt.widgets.ExpandItem;
-import org.eclipse.swt.widgets.Label;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.sun.xml.internal.bind.CycleRecoverable.Context;
 
 /**
  * 
@@ -106,65 +92,14 @@ public class IsosurfaceTool extends AbstractSlicingTool
 	 */
 	public void createToolComponent(Composite parent)
 	{
-		
-		// controls = new Composite(parent, SWT.NONE);
-		// controls.setLayout(new FillLayout());
-		// controls.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		//
-		// tabList = new ArrayList<IsoSurfaceTab>();
-		
-		/*
-		 * 
-		 */
-		
+				
 		this.ui = new testComposite(parent, SWT.FILL);
 		ui.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		ui.setVisible(true);
-		
-		bean = new testingBean();
-		
-		try
-		{
-			// Connect the UI and bean
-			final IBeanController controller = BeanService.getInstance()
-					.createController(ui, bean);
-			controller.addValueListener(new TestValueListener(controller));
-			// controller.addValueListener(new
-			// ExampleJSONWritingValueListener(controller, null)); // !! look
-			// into removing
-			controller.beanToUI();
-			controller.switchState(true);
-			
-		}
-		catch (Exception e1)
-		{
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		
-		ui.setVisible(false);
-		
-		/*
-		 * 
-		 */
-		
-		// exBar = new ExpandBar(controls, SWT.V_SCROLL);
-		
-		// final Button decrease = new Button(parent, SWT.PUSH);
-		// decrease.setToolTipText("Nudge whole box 10% smaller");
-		// decrease.setImage(Activator.getImage("icons/down.png").createImage());
-		// decrease.setLayoutData(new GridData(SWT.RIGHT, SWT.NONE, false,
-		// false));
-		// decrease.addSelectionListener(new SelectionAdapter()
-		// {
-		// public void widgetSelected(SelectionEvent e)
-		// {
-		// addTab(exBar, "new tab");
-		// }
-		// });
-		
 		setControlsVisible(false);
 		
+		bean = new testingBean();
+				
 	}
 	
 	// private void addTab(ExpandBar parent, String name)
@@ -216,7 +151,6 @@ public class IsosurfaceTool extends AbstractSlicingTool
 		
 		getSlicingSystem().setSliceType(getSliceType());
 		
-		setControlsVisible(true);
 		
 		final DimsDataList dimsDataList = getSlicingSystem().getDimsDataList();
 		if (dimsDataList != null)
@@ -254,42 +188,102 @@ public class IsosurfaceTool extends AbstractSlicingTool
 		
 		final ILazyDataset finalSlice = slice;
 		
-		// IsosurfaceJob job = new IsosurfaceJob("Computing isosurface",
-		// getSlicingSystem().getPlottingSystem(), finalSlice);
+		double min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
+		double[] minMax = estimateMinMaxFromDataSet(finalSlice);
+		
+		min = minMax[0];
+		max = minMax[1];
+		
+		//!! find some way to find the min max value of a slice
+		ui.setminMaxIsoValue(min,max);
+			
+		
+		try
+		{
+			// Connect the UI and bean
+			final IBeanController controller = BeanService.getInstance()
+					.createController(ui, bean);
+			controller.addValueListener(new TestValueListener(controller));
+			// controller.addValueListener(new
+			// ExampleJSONWritingValueListener(controller, null)); // !! look
+			// into removing
+			controller.beanToUI();
+			controller.switchState(true);
+			
+		}
+		catch (Exception e1)
+		{
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
 		bean.setJob(finalSlice, getSlicingSystem().getPlottingSystem());
 		
-		// for (final IsoSurfaceTab tab: tabList)
-		// {
-		// try {
-		// final SliceSource data = getSlicingSystem().getData();
-		//
-		// MarchingCubesModel model = tab.getJob().getGenerator().getModel();
-		// if (data.getLazySet()==model.getLazyData())
-		// return;
-		//
-		// // look into
-		// ILazyDataset slice = data.getLazySet().getSliceView(getSlices());
-		// slice = slice.squeezeEnds();
-		// slice.setName("Sliced "+data.getLazySet().getName());
-		// if (slice.getRank()!=3) throw new
-		// RuntimeException("Invalid slice for isosurface tool!");
-		// if (slice==model.getLazyData())
-		// return; // Unlikely, will be new instances
-		// //
-		//
-		// final ILazyDataset finalSlice = slice;
-		//
-		// tab.getJob().getGenerator().getModel().setLazyData(finalSlice); //
-		// this is a very quick fix, try and find a better way
-		//
-		// tab.getJob().compute(finalSlice);
-		// tab.updateUI();
-		//
-		//
-		// } catch (Exception e) {
-		// logger.error("Cannot compute iso-surface!", e);
-		// }
-		// }
+		ui.setVisible(false);
+		setControlsVisible(true);
+		
+	}
+	
+	private double[] estimateMinMaxFromDataSet(ILazyDataset lz)
+	{
+		double min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
+		
+		// test first third
+		IDataset slice = lz.getSlice(
+				new int[] { lz.getShape()[0]/3, 0,0}, 
+				new int[] {1+lz.getShape()[0]/3, lz.getShape()[1], lz.getShape()[2]},
+				new int[] {1,1,1});
+		
+		double[] minMaxStats = getStatsFromSlice(slice);
+		if (min >= minMaxStats[0])
+		{
+			min = minMaxStats[0];
+		}
+		if (max <= minMaxStats[1])
+		{
+			max = minMaxStats[1];
+		}
+		
+		// test center
+		slice = lz.getSlice(
+				new int[] { lz.getShape()[0]/2, 0,0}, 
+				new int[] {1+lz.getShape()[0]/2, lz.getShape()[1], lz.getShape()[2]},
+				new int[] {1,1,1});
+		
+		minMaxStats = getStatsFromSlice(slice);
+		if (min >= minMaxStats[0])
+		{
+			min = minMaxStats[0];
+		}
+		if (max <= minMaxStats[1])
+		{
+			max = minMaxStats[1];
+		}
+		
+		// test second third
+		slice = lz.getSlice(
+				new int[] {2 * lz.getShape()[0]/3, 0,0}, 
+				new int[] {1+lz.getShape()[0]/3, lz.getShape()[1], lz.getShape()[2]},
+				new int[] {1,1,1});
+		
+		minMaxStats = getStatsFromSlice(slice);
+		if (min >= minMaxStats[0])
+		{
+			min = minMaxStats[0];
+		}
+		if (max <= minMaxStats[1])
+		{
+			max = minMaxStats[1];
+		}
+		
+		
+		return new double[] {min, max};
+	}
+	
+	private double[] getStatsFromSlice(IDataset slice)
+	{
+		final IImageService service = (IImageService)Activator.getService(IImageService.class);
+		return service.getFastStatistics(new ImageServiceBean((Dataset)slice, HistoType.MEAN));
 	}
 	
 	/**

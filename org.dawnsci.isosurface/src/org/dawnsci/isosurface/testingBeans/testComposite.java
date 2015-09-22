@@ -12,6 +12,8 @@ public class testComposite extends Composite
 {
 	
 	private VerticalListEditor items;
+	private double max, min;
+	private testItemComposite itemComp;
 	
 	public testComposite(Composite parent, int style)
 	{
@@ -45,10 +47,9 @@ public class testComposite extends Composite
 		
 		items.setBackground(items.getDisplay().getSystemColor(SWT.COLOR_BLUE));
 		
-		final testItemComposite itemComp = new testItemComposite(this, SWT.NONE);
+		itemComp = new testItemComposite(this, SWT.NONE);
 		
-		itemComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2,
-				1));
+		itemComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		
 		items.setEditorUI(itemComp);
 		
@@ -61,6 +62,13 @@ public class testComposite extends Composite
 			}
 		});
 		
+	}
+	
+	public void setminMaxIsoValue(double min, double max)
+	{
+		this.max = max;
+		this.min = min;
+		itemComp.setMinMaxIsoValue(min, max);
 	}
 	
 	public VerticalListEditor getItems()

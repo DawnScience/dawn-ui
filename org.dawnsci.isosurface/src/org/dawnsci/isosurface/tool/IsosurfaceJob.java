@@ -53,6 +53,7 @@ public class IsosurfaceJob extends Job {
 		this.slice = slice;
 	}
 
+	
 	/**
 	 * Call to update when updating the isovalue or
 	 * box size.
@@ -74,6 +75,7 @@ public class IsosurfaceJob extends Job {
 		cancel();
 		schedule();
 	}
+
 	
 	@Override
 	protected IStatus run(IProgressMonitor monitor)

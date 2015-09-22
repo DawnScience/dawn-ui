@@ -26,8 +26,8 @@ public class Activator extends AbstractUIPlugin {
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(BundleContext bundleContext) throws Exception {
-	    super.start(bundleContext);
 		Activator.plugin = this;
+	    super.start(bundleContext);
 	}
 	
 	/*
@@ -35,8 +35,8 @@ public class Activator extends AbstractUIPlugin {
 	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext bundleContext) throws Exception {
-	    super.stop(bundleContext);
 		Activator.plugin = null;
+	    super.stop(bundleContext);
 	}
 
 

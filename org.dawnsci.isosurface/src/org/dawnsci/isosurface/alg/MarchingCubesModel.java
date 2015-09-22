@@ -63,12 +63,15 @@ public class MarchingCubesModel extends AbstractOperationModel {
 	 */
 	private double getEstimatedIsovalue(ILazyDataset lz) {
 		// TODO Auto-generated method stub
-		IDataset slicedImage;
+//		IDataset slicedImage;
 		
+		int[] shape = { lz.getShape()[0]/3, 0,0};
+		int[] stop =  {1+lz.getShape()[0]/3, lz.getShape()[1], lz.getShape()[2]};
 		
-		slicedImage = lz.getSlice(new int[] { lz.getShape()[0]/3, 0,0}, 
-				                              new int[] {1+lz.getShape()[0]/3, lz.getShape()[1], lz.getShape()[2]},
-				                              new int[] {1,1,1});
+		IDataset slicedImage = lz.getSlice(
+				new int[] { lz.getShape()[0]/3, 0,0}, 
+				new int[] {1+lz.getShape()[0]/3, lz.getShape()[1], lz.getShape()[2]},
+				new int[] {1,1,1});
 		
 		final IImageService service = (IImageService)Activator.getService(IImageService.class);
 		double[] stats = service.getFastStatistics(new ImageServiceBean((Dataset)slicedImage, HistoType.MEAN));
@@ -81,11 +84,12 @@ public class MarchingCubesModel extends AbstractOperationModel {
 			isovalueMax = stats[1];
 		}
 		
-		slicedImage = lz.getSlice(new int[] { lz.getShape()[0]/2, 0,0}, 
+		IDataset slicedImage1 = lz.getSlice(
+				new int[] { lz.getShape()[0]/2, 0,0}, 
                 new int[] {1+ lz.getShape()[0]/2, lz.getShape()[1], lz.getShape()[2]},
                 new int[] {1,1,1});
 		
-        stats = service.getFastStatistics(new ImageServiceBean((Dataset)slicedImage, HistoType.MEAN));
+        stats = service.getFastStatistics(new ImageServiceBean((Dataset)slicedImage1, HistoType.MEAN));
 		
 		if(stats[0]<isovalueMin){
 			isovalueMin = stats[0];
@@ -95,11 +99,12 @@ public class MarchingCubesModel extends AbstractOperationModel {
 			isovalueMax = stats[1];
 		}
 		
-		slicedImage = lz.getSlice(new int[] { 2*lz.getShape()[0]/3, 0,0}, 
+		IDataset slicedImage2 = lz.getSlice(
+				new int[] { 2*lz.getShape()[0]/3, 0,0}, 
                 new int[] {1 + 2*lz.getShape()[0]/3, lz.getShape()[1], lz.getShape()[2]},
                 new int[] {1,1,1});
 		
-		stats = service.getFastStatistics(new ImageServiceBean((Dataset)slicedImage, HistoType.MEAN));
+		stats = service.getFastStatistics(new ImageServiceBean((Dataset)slicedImage2, HistoType.MEAN));
 		
 		if(stats[0]<isovalueMin){
 			isovalueMin = stats[0];

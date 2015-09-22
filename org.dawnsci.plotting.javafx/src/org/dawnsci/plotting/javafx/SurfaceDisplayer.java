@@ -131,7 +131,7 @@ public class SurfaceDisplayer extends Scene
 				
 		initialiseCamera();
 		createSceneGraph(root);
-		createAxisGroup();
+		//createAxisGroup();
 		setDepthBuffers();
 		initialiseTransforms();
 		addLights();
@@ -237,14 +237,14 @@ public class SurfaceDisplayer extends Scene
 		// create lights for the axes
 		AmbientLight ambientAxisLight = new AmbientLight(Color.WHITE);
 		ambientAxisLight.getScope().add(this.axisGroup);
-		this.axisGroup.getChildren().addAll(ambientAxisLight);
+		// !! this.axisGroup.getChildren().addAll(ambientAxisLight);
 		
 	}
 	
 	// add the listeners
 	// !! re-organise
 	private void addListeners()
-	{		
+	{
 		
 		/*
 		 * scene mouse listeners
@@ -505,7 +505,7 @@ public class SurfaceDisplayer extends Scene
 		isoGroupOffset.setZ(offsetInverse.getZ());
 		
 		//!! this should be moved -> it is only included for when the model is added
-		updateAxisSize();
+		// updateAxisSize();
 		
 	}
 	

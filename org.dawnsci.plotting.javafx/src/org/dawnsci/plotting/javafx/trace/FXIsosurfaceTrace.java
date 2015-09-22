@@ -61,6 +61,13 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 		return points;
 	}
 	
+	public void dispose() {
+        super.dispose();
+        System.out.println("dispose!!!");
+        
+        // remove from scene
+	}
+	
 	@Override
 	public void setData(IDataset points, IDataset textCoords, IDataset faces, List<? extends IDataset> axes)
 	{
@@ -222,7 +229,6 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 		mesh.getPoints().setAll((float[]) points.getBuffer());
 		mesh.getTexCoords().setAll((float[]) textCoords.getBuffer());
 		mesh.getFaces().setAll((int[]) faces.getBuffer());
-			
 		
 	}
 	

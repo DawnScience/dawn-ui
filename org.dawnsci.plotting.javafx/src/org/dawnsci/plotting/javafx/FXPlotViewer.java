@@ -85,10 +85,10 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub
 		this.canvas.setScene(scene);
 		
 		
-		this.plotActions = new FXPlotActions(this, system);
-		this.plotActions.createActions();
-		this.system.getActionBars().getToolBarManager().update(true);
-		this.system.getActionBars().updateActionBars();
+//		this.plotActions = new FXPlotActions(this, system);
+//		this.plotActions.createActions();
+//		this.system.getActionBars().getToolBarManager().update(true);
+//		this.system.getActionBars().updateActionBars();
 		
 	}
 	
