@@ -54,7 +54,6 @@ public class IsosurfaceTool extends AbstractSlicingTool
 	private IsoComposite isoComp;
 	private IsoBean isoBean;
 	
-	@SuppressWarnings("unchecked")
 	public IsosurfaceTool()
 	{
 		
@@ -132,8 +131,6 @@ public class IsosurfaceTool extends AbstractSlicingTool
 	private void setControlsVisible(boolean vis)
 	{
 		isoComp.setVisible(vis);
-		// GridUtils.setVisible(controls, vis);
-		// controls.getParent().layout();
 	}
 	
 	/**
@@ -153,7 +150,7 @@ public class IsosurfaceTool extends AbstractSlicingTool
 		final ILazyDataset finalSlice = slice;
 		
 		
-		// estimate the min/max values for the isosurface
+		// estimate the Min/max values for the isosurface
 		double min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
 		double[] minMax = estimateMinMaxFromDataSet(finalSlice);
 		min = minMax[0];
@@ -283,12 +280,4 @@ public class IsosurfaceTool extends AbstractSlicingTool
 		return false;
 	}
 	
-	protected void updateUI()
-	{
-		// update all the UI -> not good !!
-		// for (IsoSurfaceTab tab: tabList)
-		// {
-		// tab.updateUI();
-		// }
-	}
 }

@@ -22,11 +22,8 @@ public class IsoComposite extends Composite
 	public IsoComposite(Composite parent, int style, IPlottingSystem system, ILazyDataset slice)
 	{
 		super(parent, style);
-		parent.setBackground(parent.getDisplay()
-				.getSystemColor(SWT.COLOR_GREEN));
 		
 		this.slice = slice;
-//		this.job = job;		
 		this.system = system;
 		setLayout(new GridLayout(2, false));
 		
@@ -73,9 +70,7 @@ public class IsoComposite extends Composite
 				"z", "colour" });
 		this.items.setColumnWidths(new int[] { 50, 50, 50, 50, 50, 50 });
 		this.items.setShowAdditionalFields(true);
-		
-		this.items.setBackground(this.items.getDisplay().getSystemColor(SWT.COLOR_BLUE));
-		
+				
 		itemComp = new IsoItemComposite(this, SWT.NONE);
 		
 		itemComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
