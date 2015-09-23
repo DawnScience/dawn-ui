@@ -1,4 +1,4 @@
-package org.dawnsci.isosurface.testingBeans;
+package org.dawnsci.isosurface.IsoGUI;
 
 import org.eclipse.richbeans.api.event.ValueListener;
 import org.eclipse.richbeans.api.widget.IFieldWidget;
@@ -16,7 +16,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
-public class testItemComposite extends Composite
+public class IsoItemComposite extends Composite
 {
 	private TextWrapper name;
 	private ScaleBox value;
@@ -25,19 +25,15 @@ public class testItemComposite extends Composite
 	private SpinnerWrapper x, y, z;
 	private ColorSelectorWrapper colour;
 	
-	private double max = 100 ,min = 0;
-	
-	public testItemComposite(final Composite parent, int style) 
+	public IsoItemComposite(final Composite parent, int style) 
 	{
-		
 		super(parent, style);
-		
 		createUI();
-		
 	}
 	
 	private void createUI()
 	{
+		// generate the GUI
 		
 		setLayout(new GridLayout(5, false));
 		
@@ -100,10 +96,6 @@ public class testItemComposite extends Composite
 		opacity.setMaximumValue(1);
 		opacity.setMinimumValue(0);
 		
-//		Button btnOn = new Button(this, SWT.RADIO);
-//		btnOn.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-//		btnOn.setText("On");
-		
 	}
 		
 	public IFieldWidget getName()
@@ -114,6 +106,9 @@ public class testItemComposite extends Composite
 	public IFieldWidget getValue()
 	{
 //		isoSurfaceScaleValue.setValue(value.getValue()); 
+			// !! try and implement something like this
+			// currently breaks the gui by setting the new bean to the current bean upon selection
+			// most likely due to the update order
 		return this.value;
 	}
 	
@@ -143,17 +138,10 @@ public class testItemComposite extends Composite
 	{
 		return this.colour;
 	}	
-	
-
-	public void updateVisibility() {
 		
-	}
-
+	// !! look into
 	public void setMinMaxIsoValue(final double min, final double max)
 	{
-		this.max = max;
-		this.min = min;
-		
 		isoSurfaceScaleValue.setIncrement(1);
 		isoSurfaceScaleValue.setMaximumScale(1000);
 		
@@ -162,7 +150,6 @@ public class testItemComposite extends Composite
 		
 		value.setMaximum(new BoundsProvider()
 		{
-			
 			@Override
 			public double getBoundValue()
 			{
@@ -172,14 +159,12 @@ public class testItemComposite extends Composite
 			@Override
 			public void addValueListener(ValueListener l)
 			{
-				int x = 0;
-				// TODO Auto-generated method stub
-				
+				// do nothing
 			}
 		});
+		
 		value.setMinimum(new BoundsProvider()
 		{
-			
 			@Override
 			public double getBoundValue()
 			{
@@ -189,13 +174,19 @@ public class testItemComposite extends Composite
 			@Override
 			public void addValueListener(ValueListener l)
 			{
-				int x = 0;
-				// TODO Auto-generated method stub
-				
+				// do nothing
 			}
 		});
-		
-		
 	}	
 	
+	
+	
+	
+	
+	
 }
+
+
+
+
+

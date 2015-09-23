@@ -9,9 +9,9 @@
 package org.dawnsci.isosurface.tool;
 
 import org.dawnsci.isosurface.Activator;
-import org.dawnsci.isosurface.testingBeans.TestValueListener;
-import org.dawnsci.isosurface.testingBeans.testComposite;
-import org.dawnsci.isosurface.testingBeans.testingBean;
+import org.dawnsci.isosurface.IsoGUI.IsoBean;
+import org.dawnsci.isosurface.IsoGUI.IsoComposite;
+import org.dawnsci.isosurface.IsoGUI.IsoValueListener;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
@@ -51,12 +51,8 @@ public class IsosurfaceTool extends AbstractSlicingTool
 	private AxisChoiceListener axisChoiceListener;
 	
 	// UI Stuff
-	private ExpandBar exBar;
-	// private List<IsoSurfaceTab> tabList;
-	private Composite controls;
-	
-	private testComposite ui;
-	private testingBean bean;
+	private IsoComposite isoComp;
+	private IsoBean isoBean;
 	
 	@SuppressWarnings("unchecked")
 	public IsosurfaceTool()
@@ -92,50 +88,19 @@ public class IsosurfaceTool extends AbstractSlicingTool
 	 */
 	public void createToolComponent(Composite parent)
 	{
-				
-		this.ui = new testComposite(parent, SWT.FILL);
-		ui.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		ui.setVisible(true);
+		this.isoComp = new IsoComposite(
+						parent, 
+						SWT.FILL,
+						getSlicingSystem().getPlottingSystem(),
+						null);
+		
+		isoComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		isoComp.setVisible(true);
 		setControlsVisible(false);
 		
-		bean = new testingBean();
+		isoBean = new IsoBean();
 				
 	}
-	
-	// private void addTab(ExpandBar parent, String name)
-	// {
-	//
-	// try
-	// {
-	//
-	// final IOperationService service =
-	// (IOperationService)Activator.getService(IOperationService.class);
-	// final IOperation<MarchingCubesModel, Surface> generator;
-	//
-	// generator = (IOperation<MarchingCubesModel, Surface>)
-	// service.create("org.dawnsci.isosurface.marchingCubes");
-	//
-	// IsoSurfaceTab newTab = new IsoSurfaceTab(parent, SWT.NONE, new
-	// IsosurfaceJob("Computing isosurface", this, generator,
-	// getSlicingSystem().getPlottingSystem()));
-	//
-	// ExpandItem exItem = new ExpandItem(exBar, SWT.NONE, 0);
-	// exItem.setText(name);
-	// exItem.setHeight(newTab.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
-	// exItem.setControl(newTab);
-	//
-	// // tabList.add(newTab);
-	//
-	// update();
-	//
-	// }
-	// catch (Exception e)
-	// {
-	// System.out.println("Can not add new tab");
-	// e.printStackTrace();
-	// }
-	//
-	// }
 	
 	/**
 	 * Method that shows the display of the isosurface while the corresponding
@@ -166,7 +131,7 @@ public class IsosurfaceTool extends AbstractSlicingTool
 	
 	private void setControlsVisible(boolean vis)
 	{
-		ui.setVisible(vis);
+		isoComp.setVisible(vis);
 		// GridUtils.setVisible(controls, vis);
 		// controls.getParent().layout();
 	}
@@ -185,41 +150,34 @@ public class IsosurfaceTool extends AbstractSlicingTool
 		slice.setName("Sliced " + data.getLazySet().getName());
 		if (slice.getRank() != 3)
 			throw new RuntimeException("Invalid slice for isosurface tool!");
-		
 		final ILazyDataset finalSlice = slice;
 		
+		
+		// estimate the min/max values for the isosurface
 		double min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
 		double[] minMax = estimateMinMaxFromDataSet(finalSlice);
-		
 		min = minMax[0];
 		max = minMax[1];
+		isoComp.setminMaxIsoValue(min,max);
 		
-		//!! find some way to find the min max value of a slice
-		ui.setminMaxIsoValue(min,max);
-			
-		
+		isoComp.setSlice(finalSlice);
+		// Connect the UI and bean
 		try
 		{
-			// Connect the UI and bean
+			
 			final IBeanController controller = BeanService.getInstance()
-					.createController(ui, bean);
-			controller.addValueListener(new TestValueListener(controller));
-			// controller.addValueListener(new
-			// ExampleJSONWritingValueListener(controller, null)); // !! look
-			// into removing
+					.createController(isoComp, isoBean);
+			controller.addValueListener(new IsoValueListener(controller));
 			controller.beanToUI();
 			controller.switchState(true);
 			
 		}
 		catch (Exception e1)
 		{
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-
-		bean.setJob(finalSlice, getSlicingSystem().getPlottingSystem());
 		
-		ui.setVisible(false);
+		isoComp.setVisible(true);
 		setControlsVisible(true);
 		
 	}

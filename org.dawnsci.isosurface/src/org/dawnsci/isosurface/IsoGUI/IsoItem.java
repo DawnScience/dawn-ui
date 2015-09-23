@@ -1,4 +1,4 @@
-package org.dawnsci.isosurface.testingBeans;
+package org.dawnsci.isosurface.IsoGUI;
 
 import org.dawnsci.isosurface.Activator;
 import org.dawnsci.isosurface.alg.MarchingCubesModel;
@@ -10,8 +10,9 @@ import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IIsosurfaceTrace;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Display;
 
-public class testItem
+public class IsoItem
 {
 	
 	private String name;
@@ -23,12 +24,12 @@ public class testItem
 	private IsosurfaceJob job;
 	private IOperation<MarchingCubesModel, Surface> generator;
 		
-	public testItem()
+	public IsoItem()
 	{
 		this("testName");
 	}
 	
-	public testItem(String name)
+	public IsoItem(String name)
 	{
 		this.name = name;
 		
@@ -43,7 +44,7 @@ public class testItem
 		{
 			e.printStackTrace();
 		}
-	
+		
 	}
 	
 	public void update()
@@ -52,19 +53,20 @@ public class testItem
 		MarchingCubesModel model = this.generator.getModel();
 		int[] boxSize = new int[] {x, y, z};
 		model.setBoxSize(boxSize);
-		job.compute(generator);
+		job.compute(generator); // !! look into making void
 		
 	}
 	
 	public void destroy()
 	{
-		int x = 0;
-		System.out.println("destroyed");
+		// removes the trace and the isosurface from the javafx class
+		job.destroy();
 	}
 	
-	public void setJob(IsosurfaceJob job)
+	public void setInfo(IsosurfaceJob job, final IPlottingSystem system)
 	{
 		this.job = job;
+		// create and add trace
 	}
 	
 	public IsosurfaceJob getJob()
@@ -111,8 +113,11 @@ public class testItem
 	
 	public void setX(int newSize)
 	{
-		this.x = newSize;
-		update();
+		if (newSize != this.x)
+		{
+			this.x = newSize;
+			update();
+		}
 	}
 	
 	public int getY()
@@ -122,8 +127,11 @@ public class testItem
 	
 	public void setY(int newSize)
 	{
-		this.y = newSize;
-		update();
+		if (newSize != this.y)
+		{
+			this.y = newSize;
+			update();
+		}
 	}
 	
 	public int getZ()
@@ -133,8 +141,11 @@ public class testItem
 	
 	public void setZ(int newSize)
 	{
-		this.z = newSize;
-		update();
+		if (newSize != this.z)
+		{
+			this.z = newSize;
+			update();
+		}
 	}
 	
 	public RGB getColour()
@@ -144,19 +155,24 @@ public class testItem
 	
 	public void setColour(RGB newColour)
 	{
-		MarchingCubesModel model = this.generator.getModel();
-		model.setColour(newColour.red, newColour.green, newColour.blue);
-		this.colour = newColour;
-		update();
+		if (newColour != this.colour)
+		{
+			MarchingCubesModel model = this.generator.getModel();
+			model.setColour(newColour.red, newColour.green, newColour.blue);
+			this.colour = newColour;
+			update();
+		}
 	}
 	
 	public void setIsoSurfaceScaleValue(int newValue)
 	{
-		MarchingCubesModel model = this.generator.getModel();
-		model.setIsovalue(newValue);
-		
-		this.value = newValue;
-		update();
+		if (newValue != this.value)
+		{
+			MarchingCubesModel model = this.generator.getModel();
+			model.setIsovalue(newValue);
+			this.value = newValue;
+			update();
+		}
 	}
 	public double getIsoSurfaceScaleValue()
 	{
@@ -165,11 +181,13 @@ public class testItem
 	
 	public void setOpacity(double newValue)
 	{
-		MarchingCubesModel model = this.generator.getModel();
-		model.setOpacity(newValue);
-		
-		this.opacity = newValue;
-		update();
+		if (newValue != opacity)
+		{
+			MarchingCubesModel model = this.generator.getModel();
+			model.setOpacity(newValue);
+			this.opacity = newValue;
+			update();
+		}
 	}
 	public double getOpacity()
 	{

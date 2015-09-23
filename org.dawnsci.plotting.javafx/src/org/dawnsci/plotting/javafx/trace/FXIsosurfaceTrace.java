@@ -14,6 +14,7 @@ import javafx.application.Platform;
 import javafx.scene.Cursor;
 import javafx.scene.DepthTest;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.DrawMode;
@@ -62,9 +63,8 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 	}
 	
 	public void dispose() {
+        scene.removeSurface(isosurface);
         super.dispose();
-        System.out.println("dispose!!!");
-        
         // remove from scene
 	}
 	

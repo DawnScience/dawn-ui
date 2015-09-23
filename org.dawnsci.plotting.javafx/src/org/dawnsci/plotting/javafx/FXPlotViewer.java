@@ -175,7 +175,7 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub
 		return true;
 		
 	}
-	
+		
 	// i dont like this
 	// these act as intermediates between the action and the scene
 	// feels horrible

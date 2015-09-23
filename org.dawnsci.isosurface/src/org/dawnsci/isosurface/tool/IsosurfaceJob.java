@@ -8,9 +8,6 @@
  */
 package org.dawnsci.isosurface.tool;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawnsci.isosurface.alg.MarchingCubesModel;
 import org.dawnsci.isosurface.alg.Surface;
@@ -38,20 +35,23 @@ public class IsosurfaceJob extends Job {
 
 	private static final Logger logger = LoggerFactory.getLogger(IsosurfaceJob.class);
 	
-	private IIsosurfaceTrace trace = null;
+	private IIsosurfaceTrace trace;
  	private IOperation<MarchingCubesModel, Surface> generator;
  	final private IPlottingSystem system;
- 	
+ 	 	
  	private ILazyDataset slice;
  	
 	public IsosurfaceJob(String name, IPlottingSystem system,  ILazyDataset slice)
 	{
+		
 		super(name);
 		setUser(false);
 		setPriority(Job.INTERACTIVE);
 		this.system = system;
 		this.slice = slice;
+		
 	}
+	
 
 	
 	/**
@@ -69,18 +69,19 @@ public class IsosurfaceJob extends Job {
 	 * @param slice
 	 */
 	
-	public void compute(IOperation<MarchingCubesModel, Surface>  generator)
+	public IIsosurfaceTrace compute(IOperation<MarchingCubesModel, Surface>  generator)
 	{
 		this.generator = generator;
+				
 		cancel();
 		schedule();
+		return this.trace;
 	}
 
 	
 	@Override
 	protected IStatus run(IProgressMonitor monitor)
-	{
-		
+	{		
 //		final IPlottingSystem system = tool.getSlicingSystem().getPlottingSystem(); // does this change dynamically?
 		
 		try 
@@ -110,15 +111,17 @@ public class IsosurfaceJob extends Job {
 				if (trace == null)
 				{
 					trace = system.createIsosurfaceTrace("isosurface");
-					
+				
 					trace.setData(points, textCoords, faces, null);
 					trace.setMaterial(colour[0], colour[1] , colour[2], opacity);
 					
+					System.out.println("addtrace");
 					Display.getDefault().syncExec(new Runnable() {
 						public void run() {
 							system.addTrace(trace);
 				    	}
 				    });
+					
 				}
 				else
 				{
@@ -153,7 +156,12 @@ public class IsosurfaceJob extends Job {
 		}
 		return Status.OK_STATUS;
 	}
-
+	
+	public void destroy()
+	{
+		trace.dispose();
+	}
+	
 	private void showErrorMessage(final String title, final String message) {
 		Display.getDefault().syncExec(new Runnable(){
 			@Override

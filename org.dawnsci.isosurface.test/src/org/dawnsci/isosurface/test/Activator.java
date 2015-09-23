@@ -8,15 +8,16 @@
  */
 package org.dawnsci.isosurface.test;
 
-import org.osgi.framework.BundleActivator;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
-public class Activator implements BundleActivator {
+public class Activator extends AbstractUIPlugin {
 
-	private static BundleContext context;
+	private static AbstractUIPlugin plugin;
 
 	static BundleContext getContext() {
-		return context;
+		return plugin.getBundle().getBundleContext();
 	}
 
 	/*
@@ -24,15 +25,32 @@ public class Activator implements BundleActivator {
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(BundleContext bundleContext) throws Exception {
-		Activator.context = bundleContext;
+	    super.start(bundleContext);
+		Activator.plugin = this;
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext bundleContext) throws Exception {
-		Activator.context = null;
+	    super.stop(bundleContext);
+		Activator.plugin = null;
+	}
+
+
+	/**
+	 * Looks for OSGI service, used by ServiceManager
+	 * 
+	 * @param clazz
+	 * @return
+	 */
+	public static Object getService(Class<?> clazz) {
+		BundleContext context = plugin.getBundle().getBundleContext();
+		if (context==null) return null;
+		ServiceReference<?> ref = context.getServiceReference(clazz);
+		if (ref==null) return null;
+		return context.getService(ref);
 	}
 
 }

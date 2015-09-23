@@ -10,6 +10,7 @@ package org.dawnsci.plotting.javafx;
 
 import org.dawnsci.plotting.javafx.axis.objects.AxisGroup;
 import org.dawnsci.plotting.javafx.axis.objects.Vector3DUtil;
+import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -20,6 +21,7 @@ import javafx.geometry.Point3D;
 import javafx.scene.AmbientLight;
 import javafx.scene.DepthTest;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.PointLight;
 import javafx.scene.Scene;
@@ -482,6 +484,11 @@ public class SurfaceDisplayer extends Scene
 	public Group getIsosurfaceGroup()
 	{
 		return isosurfaceGroup;
+	}
+	
+	public void removeSurface(Node removeNode)
+	{
+		isosurfaceGroup.getChildren().remove(removeNode);
 	}
 	
 	// !!
