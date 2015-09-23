@@ -26,15 +26,6 @@
       </view>
    </extension>
    <extension
-         point="org.eclipse.ui.perspectives">
-      <perspective
-            class="org.dawnsci.mapping.ui.MappingPerspective"
-            icon="icons/map.png"
-            id="org.dawnsci.mapping.ui.mappingperspective"
-            name="Mapping">
-      </perspective>
-   </extension>
-   <extension
          point="org.eclipse.ui.navigator.navigatorContent">
       <actionProvider
             class="org.dawnsci.mapping.ui.actions.MappingActionProvider"

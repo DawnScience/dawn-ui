@@ -15,10 +15,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.dawnsci.spectrum.ui.utils.DatasetManager;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
@@ -110,78 +106,60 @@ public class SpectrumFile extends AbstractSpectrumFile implements ISpectrumFile 
 		
 		return sets;
 	}
-	
+
 	public void plotAll() {
-		if (!showPlot) return;
-		
-		Job job = new Job("Plot all") {
-			
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				
-				IDataset x = null;
-				
-				if (useAxisDataset) x = getxDataset();
-				
-				List<IDataset> list = getyDatasets();
-				for (IDataset ds : list) {
-					
-					if (ds.getRank() != 1) {
-						ds = reduceTo1D(x, ds);
-					}
-					ds.setName(getTraceName(ds.getName()));
-				}
-				
-				List<ITrace> traces = system.updatePlot1D(x, list, null);
-				
-				for (int i = 0; i < traces.size();i++) {
-					traceMap.put(yDatasetNames.get(i), traces.get(i));
-				}
-				
-				return Status.OK_STATUS;
+		if (!showPlot)
+			return;
+		IDataset x = null;
+
+		if (useAxisDataset)
+			x = getxDataset();
+
+		List<IDataset> list = getyDatasets();
+		for (IDataset ds : list) {
+
+			if (ds.getRank() != 1) {
+				ds = reduceTo1D(x, ds);
 			}
-		};
-		job.setRule(mutex);
-		job.schedule();
+			ds.setName(getTraceName(ds.getName()));
+		}
+
+		List<ITrace> traces = system.updatePlot1D(x, list, null);
+
+		for (int i = 0; i < traces.size(); i++) {
+			traceMap.put(yDatasetNames.get(i), traces.get(i));
+		}
 	}
-	
-	protected void addToPlot(final String name) {
+
+	@Override
+	public void addToPlot(final String name) {
 		
-		if (traceMap.containsKey(name)) return;
-		
-		Job job = new Job("Add to plot") {
-			
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				IDataset set = null;
-				
-				IDataset x = null;
-				if (useAxisDataset) x = getxDataset();
-				
-				try {
-					set = LoaderFactory.getDataSet(path, name, null);
-					if (set != null) {
-						set.squeeze();
-						if (set.getRank() != 1) set = reduceTo1D(x, set);
-						set.setName(getTraceName(name));
-					}
-				} catch (Exception e) {
-					logger.error(e.getMessage());
-					return Status.CANCEL_STATUS;
-				}
-				
-				
-				
-				if (set != null) {
-					List<ITrace> traces = system.updatePlot1D(x, Arrays.asList(new IDataset[] {set}), null);
-					traceMap.put(name, traces.get(0));
-				}
-				return Status.OK_STATUS;
+		if (traceMap.containsKey(name))
+			return;
+
+		IDataset set = null;
+
+		IDataset x = null;
+		if (useAxisDataset)
+			x = getxDataset();
+
+		try {
+			set = LoaderFactory.getDataSet(path, name, null);
+			if (set != null) {
+				set.squeeze();
+				if (set.getRank() != 1)
+					set = reduceTo1D(x, set);
+				set.setName(getTraceName(name));
 			}
-		};
-		job.setRule(mutex);
-		job.schedule();
-		
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			return;
+		}
+
+		if (set != null) {
+			List<ITrace> traces = system.updatePlot1D(x, Arrays.asList(new IDataset[] { set }), null);
+			traceMap.put(name, traces.get(0));
+		}
 	}
 
 	@Override
@@ -204,7 +182,4 @@ public class SpectrumFile extends AbstractSpectrumFile implements ISpectrumFile 
 	public boolean canBeSaved() {
 		return false;
 	}
-	
-	
 }
-

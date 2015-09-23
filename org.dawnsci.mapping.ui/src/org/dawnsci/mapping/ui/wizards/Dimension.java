@@ -1,7 +1,12 @@
 package org.dawnsci.mapping.ui.wizards;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+
 public class Dimension {
 
+	private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+	
 	private int dimension;
 	private String description;
 	private String[] axisOptions;
@@ -21,7 +26,7 @@ public class Dimension {
 
 
 	public void setDescription(String description) {
-		this.description = description;
+		firePropertyChange("description", this.description, this.description = description);
 	}
 	
 	public String getDimensionWithSize() {
@@ -30,7 +35,7 @@ public class Dimension {
 	}
 	
 	public void setSize(int size) {
-		this.size = size;
+		firePropertyChange("size", this.size, this.size = size);
 	}
 
 
@@ -44,7 +49,7 @@ public class Dimension {
 
 
 	public void setAxis(String axis) {
-		this.axis = axis;
+		firePropertyChange("axis", this.axis, this.axis = axis);
 	}
 
 
@@ -54,6 +59,7 @@ public class Dimension {
 
 
 	public void setAxisOptions(String[] axisOptions) {
+		
 		this.axisOptions = axisOptions;
 	}
 
@@ -65,6 +71,31 @@ public class Dimension {
 
 	public void setSecondaryAxis(String secondaryAxis) {
 		this.secondaryAxis = secondaryAxis;
+	}
+	
+	public void addPropertyChangeListener(PropertyChangeListener listener) {
+		propertyChangeSupport.addPropertyChangeListener(listener);
+	}
+
+	public void addPropertyChangeListener(String propertyName,
+			PropertyChangeListener listener) {
+		propertyChangeSupport.addPropertyChangeListener(propertyName, listener);
+	}
+
+	public void removePropertyChangeListener(PropertyChangeListener listener) {
+		propertyChangeSupport.removePropertyChangeListener(listener);
+	}
+
+	public void removePropertyChangeListener(String propertyName,
+			PropertyChangeListener listener) {
+		propertyChangeSupport.removePropertyChangeListener(propertyName,
+				listener);
+	}
+
+	protected void firePropertyChange(String propertyName, Object oldValue,
+			Object newValue) {
+		propertyChangeSupport.firePropertyChange(propertyName, oldValue,
+				newValue);
 	}
 	
 }

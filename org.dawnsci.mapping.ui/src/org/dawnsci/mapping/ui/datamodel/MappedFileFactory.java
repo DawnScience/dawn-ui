@@ -16,45 +16,54 @@ import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
 public class MappedFileFactory {
 
 	
-	public static MappedDataFile getMappedDataFile(String path, MappedFileDescription description, IMonitor monitor) {
+	public static MappedDataFile getMappedDataFile(String path, MappedDataFileBean bean, IMonitor monitor) {
 		
-		List<String> blockNames = description.getBlockNames();
 		MappedDataFile file = new MappedDataFile(path);
 		
-		for (String name : blockNames) {
+		for (MappedBlockBean b : bean.getBlocks()) {
+			String name = b.getName();
 			if (monitor != null) {
 				if (monitor.isCancelled()) return null;
 				monitor.subTask(name);
 			}
-			MappedDataBlock block = setUpBlock(path, name, description);
+			MappedDataBlock block = setUpBlock(path, name, b);
 			file.addMapObject(name, block);
-			List<String> maps = description.getMapNames(name);
-			for (String map : maps){
-				if (monitor != null) {
-					if (monitor.isCancelled()) return null;
-					monitor.subTask(map);
-				}
-				MappedData m = setUpMap(path, map,block, description);
-				file.addMapObject(map, m);
-			}
+
 			if (monitor != null) monitor.worked(1);
 		}
+		
+		for (MapBean b : bean.getMaps()) {
+			if (monitor != null) {
+				if (monitor.isCancelled()) return null;
+				monitor.subTask(b.getName());
+				MappedDataBlock block = file.getDataBlockMap().get(b.getParent());
+				MappedData m = setUpMap(path, b.getName(),block);
+				file.addMapObject(b.getName(), m);
+			}
+		}
+		
+//		for (String map : maps){
+//			
+//			MappedData m = setUpMap(path, map,block, description);
+//			file.addMapObject(map, m);
+//		}
 		
 		return file;
 	}
 	
-	private static MappedDataBlock setUpBlock(String path, String blockName, MappedFileDescription description) {
+	
+	private static MappedDataBlock setUpBlock(String path, String blockName, MappedBlockBean bean) {
 		
 		ILoaderService lService = LocalServiceManager.getLoaderService();
 		MappedDataBlock block = null;
 		
-		List<String> axesNames = description.getBlockAxes(blockName);
+		List<String> axesNames = Arrays.asList(bean.getAxes());
 		
 		try {
 			ILazyDataset lz = lService.getData(path, null).getLazyDataset(blockName);
-			AxesMetadata axm = checkAndBuildAxesMetadata(axesNames, path, description);
+			AxesMetadata axm = checkAndBuildAxesMetadata(axesNames, path, bean);
 			lz.setMetadata(axm);
-			block = new MappedDataBlock(blockName, lz);
+			block = new MappedDataBlock(blockName, lz, bean.getxDim(), bean.getyDim());
 		} catch (Exception e) {
 			
 		}
@@ -62,13 +71,9 @@ public class MappedFileFactory {
 		return block;
 	}
 	
-	private static MappedData setUpMap(String path, String mapName, MappedDataBlock block, MappedFileDescription description) {
 		
-		String xAxis = description.getxAxisName();
-		String yAxis = description.getyAxisName();
-		
+	private static MappedData setUpMap(String path, String mapName, MappedDataBlock block) {
 		ILoaderService lService = LocalServiceManager.getLoaderService();
-		MappedData map = null;
 		
 		try {
 			ILazyDataset lz = lService.getData(path, null).getLazyDataset(mapName);
@@ -76,26 +81,41 @@ public class MappedFileFactory {
 			while (d.getRank() > 2) {
 				d = ((Dataset)d).sum(d.getRank()-1);
 			}
+
+			ILazyDataset[] xAxis = block.getXAxis();
+			ILazyDataset[] yAxis = block.getYAxis();
 			
-			List<String> names = null;
+			ILazyDataset[] yView = new ILazyDataset[yAxis.length];
+			ILazyDataset[] xView = new ILazyDataset[xAxis.length];
 			
-			if (description.isRemappingRequired()) {
-				names = Arrays.asList(new String[]{yAxis});
-			} else {
-				names =  Arrays.asList(new String[]{yAxis,xAxis});
+			for (int i = 0; i < xAxis.length; i++) xView[i] = xAxis[i] == null ? null : xAxis[i].getSliceView().squeezeEnds();
+			for (int i = 0; i < yAxis.length; i++) yView[i] = yAxis[i] == null ? null : yAxis[i].getSliceView().squeezeEnds();
+
+			if (block.isRemappingRequired() && d.getRank() == 1) {
+				AxesMetadataImpl ax = new AxesMetadataImpl(1);
+				ax.setAxis(0, xView);
+
+				d.setMetadata(ax);
+				return new ReMappedData(mapName, d, block);
 			}
-			
-			AxesMetadata axm = checkAndBuildAxesMetadata(names, path, description);
-			d.setMetadata(axm);
-			if (description.isRemappingRequired()) map = new ReMappedData(mapName, d, block);
-			else map = new MappedData(mapName, d, block);
-		} catch (Exception e) {
-			
+
+			AxesMetadataImpl ax = new AxesMetadataImpl(2);
+			ax.setAxis(0,yView);
+			ax.setAxis(1, xView);
+
+
+			d.setMetadata(ax);
+
+			return new MappedData(mapName,d,block);
 		}
-		return map;
+		catch (Exception e) {
+			//FIXME log
+		}
+		return null;
+
 	}
 	
-	private static AxesMetadata checkAndBuildAxesMetadata(List<String> axes, String path, MappedFileDescription description) {
+	private static AxesMetadata checkAndBuildAxesMetadata(List<String> axes, String path, MappedBlockBean bean) {
 		
 		AxesMetadataImpl axm = null; 
 		ILoaderService lService = LocalServiceManager.getLoaderService();
@@ -111,7 +131,8 @@ public class MappedFileFactory {
 				if (ss.length == 1) {
 					axm.addAxis(i, lz);
 					
-					String second = getSecondaryIfRequired(axes.get(i), description);
+					String second = null;
+					if (bean.getxDim() == i && bean.getxAxisForRemapping() != null) second = bean.getxAxisForRemapping();
 					if (second != null) axm.addAxis(i, lService.getData(path, null).getLazyDataset(second));
 					
 				} else {
@@ -138,10 +159,5 @@ public class MappedFileFactory {
 		
 	}
 	
-	private static String getSecondaryIfRequired(String name, MappedFileDescription description) {
-		if (!description.isRemappingRequired()) return null;
-		if (!name.equals(description.getyAxisName())) return null;
-		return description.getxAxisName();
-	}
 	
 }

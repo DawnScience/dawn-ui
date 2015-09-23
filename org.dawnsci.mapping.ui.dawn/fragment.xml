@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<fragment>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="org.dawnsci.mapping.ui.MappingPerspective"
+            icon="icons/map.png"
+            id="org.dawnsci.mapping.ui.dawn.mappingperspective"
+            name="Mapping">
+      </perspective>
+   </extension>
+
+</fragment>

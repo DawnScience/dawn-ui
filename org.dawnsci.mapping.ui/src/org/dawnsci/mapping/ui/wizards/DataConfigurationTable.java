@@ -61,14 +61,8 @@ public class DataConfigurationTable {
 		tableViewer.getTable().setLayoutData(layoutData);
 	}
 	
-	public void setInput(int[] shape, String[] options, String[][] axes, Dimension[] dims) {
-		for (int i = 0; i < dims.length ; i++) {
-			if (dims[i] != null) continue;
-			dims[i] = new Dimension(i);
-			dims[i].setSize(shape[i]);
-			dims[i].setAxisOptions(axes[i]);
-			if (i < options.length) dims[i].setDescription(options[i]);
-		}
+	public void setInput(String[] options,Dimension[] dims) {
+		
 		map.setEditingSupport(new DimensionEditSupport(tableViewer,options,dims));
 		tableViewer.setInput(dims);
 		tableViewer.getTable().getParent().layout();

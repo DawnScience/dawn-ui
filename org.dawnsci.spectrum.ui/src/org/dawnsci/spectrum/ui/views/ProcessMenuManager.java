@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawnsci.spectrum.ui.Activator;
+import org.dawnsci.spectrum.ui.dialogs.CombineDialog;
 import org.dawnsci.spectrum.ui.file.IContain1DData;
 import org.dawnsci.spectrum.ui.file.SpectrumFileManager;
 import org.dawnsci.spectrum.ui.file.SpectrumInMemory;
@@ -35,6 +36,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -172,17 +174,44 @@ public class ProcessMenuManager {
 					
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
-						List<IContain1DData> out = process.process(list);
+						final List<IContain1DData> out = process.process(list);
 						
 						if (out == null) {
 							showMessage("Could not process dataset, operation not supported for this data!");
 							return Status.CANCEL_STATUS;
 						}
 						
-						for(IContain1DData data : out) {
-							SpectrumInMemory mem = new SpectrumInMemory(data.getLongName(), data.getName(), data.getxDataset(), data.getyDatasets(), system);
-							ProcessMenuManager.this.manager.addFile(mem);
-						}
+						Display.getDefault().syncExec(new Runnable() {
+							@Override
+							public void run() {
+								
+								boolean bresult = false;
+
+								final IDataset d = out.get(0).getyDatasets().get(0);
+								CombineDialog dialog;
+								try {
+									dialog = new CombineDialog(out.get(0).getxDataset(),d);
+									dialog.createContents();
+									if (dialog.open() == CombineDialog.CANCEL_ID)
+										bresult = false;
+									else
+										bresult = true;
+								} catch (Exception e) {
+									MessageDialog.openError(Display.getDefault().getActiveShell(), "Error opening Combine Dialog",
+											"The following error occured while opening the Combiner dialog: " + e);
+									bresult = false;
+								}
+								
+								if (!bresult) return;;
+								
+								for(IContain1DData data : out) {
+									SpectrumInMemory mem = new SpectrumInMemory(data.getLongName(), data.getName(), data.getxDataset(), data.getyDatasets(), system);
+									ProcessMenuManager.this.manager.addFile(mem);
+								}
+								return;
+							}
+						});
+						
 						return Status.OK_STATUS;
 					}
 				};
@@ -292,13 +321,17 @@ public class ProcessMenuManager {
 		menu.add(cropWizard);
 		menuManager.add(menu);
 	}
-	
-	
-	private void showMessage(String message) {
-		MessageDialog.openInformation(
-			viewer.getControl().getShell(),
-			"Sample View",
-			message);
+
+	private void showMessage(final String message) {
+		Display.getDefault().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				MessageDialog.openInformation(
+						viewer.getControl().getShell(),
+						"Sample View",
+						message);
+			}
+		});
 	}
 
 }

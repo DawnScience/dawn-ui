@@ -69,8 +69,8 @@ public class MappedFileManager {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 					IMonitor m = new ProgressMonitorWrapper(monitor);
-					monitor.beginTask("Loading data...", wiz.getMappedFileDescription().getBlockNames().size());
-					final MappedDataFile mdf = MappedFileFactory.getMappedDataFile(path, wiz.getMappedFileDescription(),m);
+					monitor.beginTask("Loading data...", -1);
+					final MappedDataFile mdf = MappedFileFactory.getMappedDataFile(path, wiz.getMappedDataFileBean(),m);
 					if (m.isCancelled()) return;
 					mappedDataArea.addMappedDataFile(mdf);
 					Display.getDefault().syncExec(new Runnable() {

@@ -8,7 +8,7 @@ import java.util.Map;
 
 import org.dawnsci.mapping.ui.LocalServiceManager;
 import org.dawnsci.mapping.ui.MappingUtils;
-import org.dawnsci.mapping.ui.datamodel.MappedFileDescription;
+import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
 import org.dawnsci.mapping.ui.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
@@ -27,9 +27,8 @@ public class ImportMappedDataWizard extends Wizard {
 	private String filePath;
 	private Map<String,int[]> datasetNames;
 	private Map<String,int[]> nexusDatasetNames = new LinkedHashMap<String, int[]>();
-	private MappedFileDescription description = new MappedFileDescription();
+	private MappedDataFileBean mdfbean = new MappedDataFileBean();
 	private boolean imageImport = false;
-	private MappedFileDescription[] persistedList;
 	
 	private final static Logger logger = LoggerFactory.getLogger(ImportMappedDataWizard.class);
 	
@@ -39,11 +38,18 @@ public class ImportMappedDataWizard extends Wizard {
 		addPage(new ImportMapWizardPage("Import Maps"));
 	}
 	
-	public MappedFileDescription getMappedFileDescription() {
-		return description;
+	public MappedDataFileBean getMappedDataFileBean() {
+		return mdfbean;
 	}
 	
 	public void createPageControls(Composite pageContainer) {
+		IWizardPage[] pa = getPages();
+		
+		for (IWizardPage p : pa) {
+			IDatasetWizard pd = (IDatasetWizard) p;
+			pd.setMapBean(mdfbean);
+		}
+		
 		super.createPageControls(pageContainer);
 		
 		try {
@@ -97,8 +103,6 @@ public class ImportMappedDataWizard extends Wizard {
 									if (p instanceof IDatasetWizard) {
 										IDatasetWizard pd = (IDatasetWizard) p;
 										pd.setDatasetMaps(datasetNames, nexusDatasetNames);
-										pd.setMappedDataDescription(description);
-										
 									}
 								}
 								
@@ -139,48 +143,43 @@ public class ImportMappedDataWizard extends Wizard {
 	
 	@Override
 	public boolean performFinish() {
-		IWizardPage page = getPage("Import Maps");
-		if (page instanceof ImportMapWizardPage) {
-			((ImportMapWizardPage)page).pushChanges();
-		}
-		
 		IPersistenceService ps = LocalServiceManager.getPersistenceService();
-		try {
-			IPreferenceStore p = Activator.getDefault().getPreferenceStore();
-			updatePersistanceList();
-			String json = ps.marshal(persistedList);
-			p.setValue("TestDescriptionList", json);
-			
-		} catch (Exception e) {
-			logger.error("Could not set persisted file description list", e);
-		}
+//		try {
+//			IPreferenceStore p = Activator.getDefault().getPreferenceStore();
+//			updatePersistanceList();
+//			String json = ps.marshal(persistedList);
+//			p.setValue("TestDescriptionList", json);
+//			
+//		} catch (Exception e) {
+//			logger.error("Could not set persisted file description list", e);
+//		}
 		
 		return true;
 	}
 
 	private void updatePersistanceList() {
 		
-		if (persistedList == null || persistedList.length == 0) {
-			persistedList = new MappedFileDescription[]{description};
-			return;
-		}
-		
-		LinkedList<MappedFileDescription> ll = new LinkedList<MappedFileDescription>();
-		for (MappedFileDescription d : persistedList) {
-			ll.add(d);
-		}
-		
-		if (ll.contains(description)) ll.remove(description);
-		
-		ll.push(description);
-
-		if (ll.size() > 10) ll.removeLast();
-		
-		persistedList = new MappedFileDescription[ll.size()];
-		
-		for (int i = 0; i < ll.size(); i++) {
-			persistedList[i] = ll.removeFirst();
-		}
+//		if (persistedList == null || persistedList.length == 0) {
+//			persistedList = new MappedFileDescription[]{description};
+//			return;
+//		}
+//		
+//		LinkedList<MappedFileDescription> ll = new LinkedList<MappedFileDescription>();
+//		for (MappedFileDescription d : persistedList) {
+//			ll.add(d);
+//		}
+//		
+//		if (ll.contains(description)) ll.remove(description);
+//		
+//		ll.push(description);
+//
+//		if (ll.size() > 10) ll.removeLast();
+//		
+//		persistedList = new MappedFileDescription[ll.size()];
+//		
+//		for (int i = 0; i < ll.size(); i++) {
+//			persistedList[i] = ll.removeFirst();
+//		}
 		
 	}
 

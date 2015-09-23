@@ -14,7 +14,7 @@
          point="org.eclipse.ui.views">
       <view
             category="org.dawb.workbench.ui.beta.views.category"
-            class="org.dawnsci.algorithm.ui.views.runner.AlgorithmView"
+            class="org.dawnsci.spectrum.ui.views.SpectrumTracesView"
             icon="icons/spectrum.png"
             id="org.dawnsci.spectrum.ui.views.SpectrumView"
             name="Traces">
@@ -123,6 +123,20 @@
                      </equals>
                   </not>
                </or>
+               <or>
+                  <not>
+                     <equals
+                           value="uk.ac.diamond.scisoft.peema.rcp.perspective">
+                     </equals>
+                  </not>
+               </or>
+               <or>
+                  <not>
+                     <equals
+                           value="org.dawnsci.mapping.ui.dawn.mappingperspective">
+                     </equals>
+                  </not>
+               </or>
             </with>
          </enabledWhen>
       </activity>
@@ -169,26 +183,20 @@
             label="Open Spectrum File..."
             visible="false">
          <action
+               class="org.dawnsci.spectrum.ui.actions.OpenLocalFileWildcardAction"
+               id="org.dawnsci.spectrum.ui.wildcardopen"
+               label="Open File (Wildcard)..."
+               menubarPath="file/new"
+               style="push">
+         </action>
+         <action
                class="org.dawnsci.spectrum.ui.actions.OpenLocalFileAction"
                id="org.dawnsci.spectrum.ui.action1"
-               label="Open Spectrum File..."
+               label="Open File..."
                menubarPath="file/new"
                style="push">
          </action>
       </actionSet>
-   </extension>
-   <extension
-         point="org.dawnsci.algorithm.ui.processPage">
-      <processPage
-            class="org.dawnsci.spectrum.ui.views.TraceProcessPage"
-            viewId="org.dawnsci.spectrum.ui.views.SpectrumView">
-         <connection
-               algorithmFile="spectrum_process.moml"
-               runIcon="icons/run_workflow.gif"
-               stopIcon="icons/stop_workflow.gif"
-               title="spectrum pipline">
-         </connection>
-      </processPage>
    </extension>
    <extension
          point="org.eclipse.ui.navigator.viewer">
