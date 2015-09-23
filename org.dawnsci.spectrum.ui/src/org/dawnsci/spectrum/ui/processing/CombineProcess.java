@@ -23,9 +23,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 
 public class CombineProcess extends AbstractProcess {
-
-	private boolean bresult = false;
-
+	
 	@Override
 	public List<IContain1DData> process(List<IContain1DData> list) {
 
@@ -62,32 +60,9 @@ public class CombineProcess extends AbstractProcess {
 		conc.setName("Combination");
 		sets.add(conc);
 		String shortName = "Combine: " + list.get(0).getName() + " to " + list.get(list.size()-1).getName();
-		final List<IContain1DData> result = Arrays.asList(new IContain1DData[] {
+		return Arrays.asList(new IContain1DData[] {
 				new Contain1DDataImpl(x0, sets, shortName, sb.toString() + "[" + sets.hashCode() + "]") });
-		// Display dialog with combined image
-		Display.getDefault().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				final IDataset data = result.get(0).getyDatasets().get(0);
-				CombineDialog dialog;
-				try {
-					dialog = new CombineDialog(data);
-					dialog.createContents();
-					if (dialog.open() == CombineDialog.CANCEL_ID)
-						bresult = false;
-					else
-						bresult = true;
-				} catch (Exception e) {
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Error opening Combine Dialog",
-							"The following error occured while opening the Combiner dialog: " + e);
-					bresult = false;
-				}
-			}
-		});
-		if (bresult)
-			return result;
-		else
-			return null;
+
 	}
 	
 	@Override

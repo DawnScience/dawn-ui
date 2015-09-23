@@ -1,5 +1,8 @@
 package org.dawnsci.spectrum.ui.dialogs;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.spectrum.ui.Activator;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
@@ -41,13 +44,13 @@ public class CombineDialog {
 	public static int CANCEL_ID = 1;
 
 	private IDataset data;
-	private IDataset combDataset;
+	private List<IDataset> axes;
 	private IPlottingSystem system;
 	private Image image;
 
 	private Shell shell;
 
-	public CombineDialog(IDataset data) throws Exception {
+	public CombineDialog(IDataset x, IDataset data) throws Exception {
 		shell = new Shell(Display.getDefault());
 		shell.setText("Combine Dialog");
 		shell.setImage(image = Activator.getImageDescriptor("icons/spectrum.png").createImage());
@@ -59,6 +62,7 @@ public class CombineDialog {
 		});
 
 		this.data = data;
+		this.axes = Arrays.asList(new IDataset[]{x,null});;
 		try {
 			system = PlottingFactory.createPlottingSystem();
 		} catch (Exception e) {
@@ -94,7 +98,7 @@ public class CombineDialog {
 		ActionBarWrapper actionBarWrapper = ActionBarWrapper.createActionBars(topPane, null);
 		system.createPlotPart(topPane, "Combine Plot", actionBarWrapper, PlotType.IMAGE, null);
 		system.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		system.updatePlot2D(data, null, null);
+		system.updatePlot2D(data, axes, null);
 		system.setKeepAspect(false);
 		Composite buttonComp = new Composite(container, SWT.NONE);
 		buttonComp.setLayout(new GridLayout(2, false));
@@ -124,10 +128,6 @@ public class CombineDialog {
 			}
 		});
 		return container;
-	}
-	
-	public IDataset getCombinedDataset() {
-		return combDataset;
 	}
 
 	public void close() {
