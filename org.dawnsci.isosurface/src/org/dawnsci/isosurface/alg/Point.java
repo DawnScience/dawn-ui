@@ -24,7 +24,8 @@ public class Point extends Object{
 		this.zCoord = z;
 	}
 	
-	public Point(){
+	public Point()
+	{
 		
 	}
 	
