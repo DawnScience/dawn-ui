@@ -61,7 +61,6 @@ import org.eclipse.dawnsci.plotting.api.trace.TraceUtils;
 import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
-import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.nebula.visualization.widgets.figureparts.ColorMapRamp;
@@ -104,6 +103,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private int              alpha = -1;
 	private List<IDataset>   axes;
 	private ImageServiceBean imageServiceBean;
+	private ImageScaleType dirty = null;
 	/**
 	 * Used to define if the zoom is at its maximum possible extend
 	 */
@@ -1011,8 +1011,16 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			}
 			lastAspectRatio = isKeepAspectRatio();
 		}
+		
+		if (dirty != null) {
+			boolean imageReady = createScaledImage(dirty, null);
+			dirty = null;
+			if (!imageReady) {
+				return;
+			}
+		}
 
-		graphics.pushState();	
+		graphics.pushState();
 		
 		// Offsets and scaled image are calculated in the createScaledImage method.
 		if (scaledData.getScaledImage()!=null) {
@@ -1148,7 +1156,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	@Override
 	public void axisRangeChanged(Axis axis, Range old_range, Range new_range) {
-		createScaledImage(ImageScaleType.REIMAGE_ALLOWED, null);
+//		createScaledImage(ImageScaleType.REIMAGE_ALLOWED, null);
+		updateImageDirty(ImageScaleType.REIMAGE_ALLOWED);
 	}
 
 	/**
@@ -1162,10 +1171,20 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	
 	private void updateAxisRange(Axis axis) {
 		if (!axisRedrawActive) return;				
-		createScaledImage(ImageScaleType.REIMAGE_ALLOWED, null);
+		updateImageDirty(ImageScaleType.REIMAGE_ALLOWED);
+//		createScaledImage(ImageScaleType.REIMAGE_ALLOWED, null);
 	}
 
 
+	private void updateImageDirty(ImageScaleType type) {
+		
+		if (dirty == null) dirty = type;
+		
+		if (dirty.ordinal() < type.ordinal()) {
+			dirty = type;
+		}
+		
+	}
 	
 	private void setAxisRedrawActive(boolean b) {
 		this.axisRedrawActive = b;
@@ -1384,7 +1403,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				setAxisRedrawActive(true);
 			}
 		} else {
-			createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
+//			createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
+			updateImageDirty(ImageScaleType.FORCE_REIMAGE);
 			repaint();
 		}
 	}
@@ -1526,7 +1546,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (this.mipMap!=null)  mipMap.clear();
 		if (this.maskMap!=null) maskMap.clear();
 		this.downsampleType = type;
-		createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
+//		createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
+		updateImageDirty(ImageScaleType.FORCE_REIMAGE);
 		getPreferenceStore().setValue(BasePlottingConstants.DOWNSAMPLE_PREF, type.getLabel());
 		repaint();
 		
@@ -1598,7 +1619,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		HistoType orig = imageServiceBean.getHistogramType();
 		imageServiceBean.setHistogramType(type);
 		getPreferenceStore().setValue(BasePlottingConstants.HISTO_PREF, type.getLabel());
-		boolean histoOk = createScaledImage(ImageScaleType.REHISTOGRAM, null);
+//		boolean histoOk = createScaledImage(ImageScaleType.REHISTOGRAM, null);
+		updateImageDirty(ImageScaleType.REHISTOGRAM);
 		repaint();
 		
 		
@@ -1607,7 +1629,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			ServiceHolder.getMacroService().publish(evt);
 		}
 
-		return histoOk;
+		return true;
 	}
 
 	@Override
