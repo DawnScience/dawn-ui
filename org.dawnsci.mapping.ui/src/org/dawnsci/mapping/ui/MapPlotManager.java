@@ -69,7 +69,14 @@ public class MapPlotManager {
 			
 			@Override
 			public void run() {
-				IDataset s = topMap.getSpectrum(x,y).getSlice();
+				ILazyDataset l = topMap.getSpectrum(x,y);
+				if (l == null) {
+					data.clear();
+					return;
+				}
+				
+				IDataset s = l.getSlice();
+				
 				if (s != null) MappingUtils.plotDataWithMetadata(s, data, new int[]{0});
 				
 				Display.getDefault().asyncExec(new Runnable() {

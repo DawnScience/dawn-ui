@@ -80,19 +80,23 @@ public class ReMappedData extends MappedData {
 
 		IDataset[] ax = MappingUtils.getAxesFromMetadata(reMapped);
 
-		IDataset xx = ax[0];
-		IDataset yy = ax[1];
+		IDataset yy = ax[0];
+		IDataset xx = ax[1];
 
-		int xi = Maths.abs(Maths.subtract(xx, x)).argMin();
-		int yi = Maths.abs(Maths.subtract(yy, y)).argMin();
+		Dataset xd = Maths.subtract(xx, x);
+		Dataset yd = Maths.subtract(yy, y);
+		
+		int xi = Maths.abs(xd).argMin();
+		int yi = Maths.abs(yd).argMin();
 
-		return new int[]{xi,yi};
+		return new int[]{yi,xi};
 	}
 	
 	@Override
 	public IDataset getSpectrum(double x, double y) {
 		int[] indices = getIndices(x, y);
 		int index = lookup.getInt(indices);
+		if (index == -1) return null;
 		return parent.getSpectrum(index);
 	}
 
