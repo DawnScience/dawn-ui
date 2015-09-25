@@ -544,6 +544,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		double xAxValPerPoint =  getAxisValuePerDataPoint(minX,maxX,getAxes().get(0));
 		double yAxValPerPoint =  getAxisValuePerDataPoint(minY,maxY,getAxes().get(1));
 		
+		if (Double.isNaN(xAxValPerPoint)|| Double.isNaN(yAxValPerPoint)) {
+			return false;
+		}
+		
 		//get x and y start position in data array (floored)
 		int xPix = getPositionInAxis(minX,(Dataset)getAxes().get(0),true)/currentDownSampleBin;
 		int yPix = getPositionInAxis(minY,(Dataset)getAxes().get(1),true)/currentDownSampleBin;
@@ -588,6 +592,15 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		int scaleWidth  = Math.max(1, (int) (xDataPoints*xScale));
 		int scaleHeight = Math.max(1, (int) (yDataPoints*yScale));
 		
+//		 Force a minimum size on the system
+		if (width <= MINIMUM_ZOOM_SIZE) {
+			if (width > imageData.width) width = MINIMUM_ZOOM_SIZE;
+			isMaximumZoom = true;
+		}
+		if (height <= MINIMUM_ZOOM_SIZE) {
+			if (height > imageData.height) height = MINIMUM_ZOOM_SIZE;
+			isMaximumZoom = true;
+		}
 		
 		
 		try {
