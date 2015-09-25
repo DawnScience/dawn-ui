@@ -185,6 +185,21 @@
             id="org.dawnsci.plotting.histogram.lowJet"
             name="Low Jet">
       </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.TerrainRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.terrain_red"
+            name="Terrain Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.TerrainGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.terrain_green"
+            name="Terrain Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.TerrainBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.terrain_blue"
+            name="Terrain Blue">
+      </transfer_function>
    </extension>
    <extension
          point="org.dawnsci.plotting.histogram.colourScheme">
@@ -355,6 +370,18 @@
             name="Jet (Blue-Cyan-Green-Yellow-Red)"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.highJet">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.terrain_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.terrain_green"
+            id="org.dawnsci.plotting.histogram.terrain"
+            name="Terrain"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.terrain_red">
       </colour_scheme>
    </extension>
    <extension
