@@ -5,12 +5,10 @@ import java.util.List;
 
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.eclipse.dawnsci.plotting.api.trace.ICompositeTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.draw2d.Figure;
-import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.nebula.visualization.xygraph.figures.Axis;
 
@@ -75,7 +73,8 @@ public class CompositeTrace extends Figure implements ICompositeTrace {
 			traces.add(image);
 		}
 		
-		
+		if (xAxis instanceof AspectAxis)((AspectAxis)xAxis).setMaximumRange(xRange[0], xRange[1]);
+		if (yAxis instanceof AspectAxis)((AspectAxis)yAxis).setMaximumRange(yRange[0], yRange[1]);
 		
 //		for (ImageTrace t : traces) t.setGlobalRanges(xRange, yRange);
 		
@@ -90,6 +89,10 @@ public class CompositeTrace extends Figure implements ICompositeTrace {
 	
 	public void removeImageTraces(){
 		for (ImageTrace t : traces) t.remove();
+	}
+	
+	public ImageTrace getTopImageTrace() {
+		return traces.get(traces.size()-1);
 	}
 
 	public void setPalette(String paletteName) {
