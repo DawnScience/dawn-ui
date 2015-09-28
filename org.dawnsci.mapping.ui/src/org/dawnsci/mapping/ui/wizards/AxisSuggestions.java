@@ -20,7 +20,14 @@ public class AxisSuggestions {
 	
 	public String[] getSuggestions(int dim) {
 		List<String> s = suggestions.get(dim);
-		return s.toArray(new String[s.size()]);
+		String[] withEmpty = new String[s.size()+1];
+		
+		for (int i = 0; i < s.size(); i++) {
+			withEmpty[i] = s.get(i);
+		}
+		withEmpty[s.size()] = "";
+		
+		return withEmpty;
 	}
 	
 }

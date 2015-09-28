@@ -2,6 +2,7 @@ package org.dawnsci.mapping.ui.wizards;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,6 +46,7 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 		super(name);
 		this.setTitle("Import Maps");
 		this.setDescription("Select all maps and their parent data blocks");
+		setPageComplete(false);
 	}
 
 	@Override
@@ -137,7 +139,11 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 			maps.add(updateBean(entry.getKey(), options[entry.getValue()]));
 		}
 		
-		boolean complete = true;
+		validatePage();
+	}
+	
+	private void validatePage() {
+		List<MapBean> maps = mdfbean.getMaps();
 		if (maps.isEmpty())  {
 			setPageComplete(false);
 			return;
@@ -164,6 +170,34 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 		if (blocks.isEmpty()) return;
 		options = new String[blocks.size()];
 		for (int i = 0; i < blocks.size(); i++) options[i] = blocks.get(i).getName();
+		
+		if (!mdfbean.getMaps().isEmpty()) {
+			
+			Iterator<MapBean> it = mdfbean.getMaps().iterator();
+			
+			List<String> l = Arrays.asList(options);
+			
+			while (it.hasNext()) {
+				MapBean b = it.next();
+				
+				if (!datasetNames.containsKey(b.getName()) || !l.contains(b.getParent())) {
+					it.remove();
+					continue;
+				}
+				
+				mapToParent.put(b.getName(), l.lastIndexOf(b.getParent()));
+			
+				for (Entry<String,int[]> entry : datasetNames.entrySet()) {
+					if (entry.getKey().equals(b.getName())) {
+						cviewer.setChecked(entry, true);
+					}
+				}
+
+			}
+			
+		}
+		
+		validatePage();
 		
 //		if (description != null && description.getBlockNames() != null){
 //			options = description.getBlockNames().toArray(new String[description.getBlockNames().size()]);

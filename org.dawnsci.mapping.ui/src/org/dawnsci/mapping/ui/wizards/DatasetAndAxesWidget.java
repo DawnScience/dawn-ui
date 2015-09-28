@@ -42,8 +42,7 @@ public class DatasetAndAxesWidget {
 	private PropertyChangeListener listener;
 	private HashSet<IDataWidgetCompleteListener> listeners;
 	
-	public DatasetAndAxesWidget(List<MappedBlockBean> beans) {
-		this.beans = beans;
+	public DatasetAndAxesWidget() {
 		this.listeners = new HashSet<IDataWidgetCompleteListener>();
 		listener = new PropertyChangeListener() {
 			
@@ -60,6 +59,11 @@ public class DatasetAndAxesWidget {
 	public void addCompleteListener(IDataWidgetCompleteListener listener) {
 		listeners.add(listener);
 	}
+	
+	public void setBeanList(List<MappedBlockBean> beans) {
+		this.beans = beans;
+		updateUIFromBeans();
+	}
 
 	public void removeCompleteListener(IDataWidgetCompleteListener listener) {
 		listeners.remove(listener);
@@ -73,7 +77,6 @@ public class DatasetAndAxesWidget {
 		Composite main = new Composite(parent, SWT.None);
 		main.setLayout(new GridLayout(2,false));
 		main.setLayoutData(new GridData(GridData.FILL_BOTH));
-//		CCombo cc = new CCombo(main, SWT.READ_ONLY);
 		cviewer = CheckboxTableViewer.newCheckList(main, SWT.BORDER);
 		cviewer.setContentProvider(new BasicContentProvider());
 		cviewer.setLabelProvider(new ViewLabelProvider());
@@ -81,7 +84,7 @@ public class DatasetAndAxesWidget {
 		dataTable = new DataConfigurationTable();
 		dataTable.createControl(main);
 		dataTable.setLayout(new GridData(GridData.FILL_BOTH));
-		nameToDimensions = new HashMap<String, Dimension[]>();
+		
 		
 		cviewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			
@@ -149,9 +152,8 @@ public class DatasetAndAxesWidget {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Dimension d = getSelectedYDimension();
-				if (d == null) showRemappableError();
+				if (d != null) d.setSecondaryAxis(remapXAxis.getText());
 				
-				d.setSecondaryAxis(remapXAxis.getText());
 				updateBeans();
 			}
 		});
@@ -192,7 +194,84 @@ public class DatasetAndAxesWidget {
 		fireCompleteListeners(complete);
 	}
 	
+	private void updateUIFromBeans(){
+		nameToDimensions = new HashMap<String, Dimension[]>();
+		nameToDimensions.clear();
+		
+		Iterator<MappedBlockBean> iterator = beans.iterator();
+		
+		while (iterator.hasNext()) {
+			if (!updateUIFromBean(iterator.next())) iterator.remove();
+		}
+		
+		for (MappedBlockBean bean : beans) {
+			updateUIFromBean(bean);
+		}
+	}
 	
+	private boolean updateUIFromBean(MappedBlockBean bean) {
+		
+		if (!datasetNames.containsKey(bean.getName())) {
+			return false;
+		}
+		
+		String[] axes = bean.getAxes();
+		
+		for (String a :axes) {
+			if (a != null && !datasetNames.containsKey(a)) {
+				return false;
+			}
+		}
+		
+		String rm = bean.getxAxisForRemapping();
+		
+		if (bean.getxDim() ==  bean.getyDim() && rm == null) return false;
+		
+		if (rm != null && !datasetNames.containsKey(rm)) {
+			return false;
+		}
+		
+		int[] shape = datasetNames.get(bean.getName());
+		
+		if (bean.getxDim() > shape.length || bean.getyDim() > shape.length) {
+			return false;
+		}
+		
+		createAndDimension(bean);
+		return true;
+	}
+	
+	private void createAndDimension(MappedBlockBean bean){
+		int[] shape = datasetNames.get(bean.getName());
+		String[][] axes = getAxesNameOptions(shape,bean.getName());
+		Dimension[] dims = new Dimension[shape.length];
+		for (int i = 0; i < dims.length ; i++) {
+			dims[i] = new Dimension(i);
+			dims[i].setSize(shape[i]);
+			dims[i].setAxisOptions(axes[i]);
+			if (i == bean.getxDim()) {
+				dims[i].setDescription(OPTIONS[1]);
+				dims[i].setAxis(bean.getAxes()[i]);
+			}
+			if (i == bean.getyDim()) {
+				dims[i].setDescription(OPTIONS[0]);
+				dims[i].setAxis(bean.getAxes()[i]);
+			}
+			
+			if (bean.getyDim() == i && bean.getxDim() == bean.getyDim()) {
+				dims[i].setSecondaryAxis(bean.getxAxisForRemapping());
+			}
+ 			dims[i].addPropertyChangeListener(listener);
+		}
+		
+		for (Entry<String,int[]> entry : datasetNames.entrySet()) {
+			if (entry.getKey().equals(bean.getName())) {
+				cviewer.setChecked(entry, true);
+			}
+		}
+		
+		nameToDimensions.put(bean.getName(), dims);
+	}
 	
 	private MappedBlockBean updateBean(String name, Dimension[] dims) {
 		
@@ -225,6 +304,7 @@ public class DatasetAndAxesWidget {
 		
 		return bean;
 	}
+	
 	
 	private String[] getAxisOptionsOfSelectedYAxis(){
 		
@@ -261,88 +341,6 @@ public class DatasetAndAxesWidget {
 		return null;
 	}
 	
-	private void showRemappableError(){
-		
-	}
-	
-	public void initialiseValues(Map<String,List<String>> dataBlockToAxesMapping, String xAxis, String yAxis) {
-		
-		if (!datasetNames.containsKey(xAxis) || !datasetNames.containsKey(yAxis)) return;
-		
-		for (Entry<String, List<String>> e : dataBlockToAxesMapping.entrySet()) {
-			
-			if (datasetNames.containsKey(e.getKey())) {
-				boolean canAdd = true;
-				
-				for (String a : e.getValue()) {
-					if (a != null && !datasetNames.containsKey(a)) {
-						canAdd = false;
-						break;
-					}
-				}
-				
-				if (canAdd) {
-					Dimension[] dims;
-					if (nameToDimensions.containsKey(e.getKey())) dims = nameToDimensions.get(e.getKey());
-					else dims = new Dimension[datasetNames.get(e.getKey()).length];
-					
-					for (int i = 0; i < dims.length; i++) {
-						if (dims[i]==null) dims[i] = new Dimension(i);
-						dims[i].setAxis(e.getValue().get(i));
-						if (xAxis.equals(e.getValue().get(i))) dims[i].setDescription(OPTIONS[1]);
-						if (yAxis.equals(e.getValue().get(i))) dims[i].setDescription(OPTIONS[0]);
-					}
-					
-					nameToDimensions.put(e.getKey(), dims);
-					for (Entry<String, int[]> ent : datasetNames.entrySet()) if (ent.getKey().equals(e.getKey()))cviewer.setChecked(ent, true);
-				
-				}
-				
-			}
-			
-			cviewer.refresh();
-			
-		}
-		
-	}
-	
-	public Map<String,String[]> getAxesMaps() {
-		Map<String,String[]> out = new HashMap<String, String[]>();
-		for (Entry<String, Dimension[]> entry : nameToDimensions.entrySet()) {
-			Dimension[] dim = entry.getValue();
-			String[] axes = new String[dim.length];
-			for (int i = 0; i < dim.length ; i++) {
-				axes[i] = dim[i].getAxis();
-			}
-			out.put(entry.getKey(), axes);
-			
-		}
-		
-		return out;
-	}
-	
-	public String[] getMapXAndYAxesNames() {
-		String[] out = new String[2];
-		if (nameToDimensions.isEmpty()) return out;
-		Entry<String, Dimension[]> next = nameToDimensions.entrySet().iterator().next();
-		for (Dimension d : next.getValue()) {
-			if (OPTIONS[0].equals(d.getDescription())) out[1] = d.getAxis();
-			if (OPTIONS[1].equals(d.getDescription())) out[0] = d.getAxis();
-		}
-		
-		return out;
-		
-	}
-	
-	public String getXAxisForRemapping() {
-		if (nameToDimensions.isEmpty()) return null;
-		Entry<String, Dimension[]> next = nameToDimensions.entrySet().iterator().next();
-		for (Dimension d : next.getValue()) {
-			if (d.getSecondaryAxis() != null) return d.getSecondaryAxis();
-		}
-		
-		return null;
-	}
 	
 	public void setDatasetMaps(Map<String,int[]> datasetNames, Map<String,int[]> nexusDatasetNames) {
 		this.datasetNames = datasetNames;
