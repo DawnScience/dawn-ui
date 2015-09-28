@@ -15,7 +15,7 @@ public class TerrainGreenTransferFunction extends AbstractTransferFunction {
 		double y = 1;
 		// 0 <= X <= 37
 		if (value <= 0.14509804)
-			y = ((6.375 * value) + 0.2);
+			y = ((4.13514 * value) + 0.2);
 		// 37 < X < 38
 		if (value > 0.14509804 && value <= 0.14901961)
 			y = 0.8;
