@@ -1,4 +1,4 @@
-package org.dawnsci.isosurface.IsoGUI;
+package org.dawnsci.isosurface.isogui;
 
 import org.eclipse.richbeans.api.event.ValueListener;
 import org.eclipse.richbeans.api.widget.IFieldWidget;
@@ -13,7 +13,6 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
 public class IsoItemComposite extends Composite

@@ -38,19 +38,19 @@ public class IsosurfaceJob extends Job {
 	private IIsosurfaceTrace trace;
  	private IOperation<MarchingCubesModel, Surface> generator;
  	final private IPlottingSystem system;
- 	 	
+ 	private String name;
+ 	
  	private ILazyDataset slice;
  	
 	public IsosurfaceJob(String name, IPlottingSystem system,  ILazyDataset slice)
 	{
 		
 		super(name);
+		this.name = name;
 		setUser(false);
 		setPriority(Job.INTERACTIVE);
 		this.system = system;
 		this.slice = slice;
-		
-		
 		
 	}
 	
@@ -71,13 +71,14 @@ public class IsosurfaceJob extends Job {
 	 * @param slice
 	 */
 	
-	public IIsosurfaceTrace compute(IOperation<MarchingCubesModel, Surface>  generator)
+	public void compute(IOperation<MarchingCubesModel, Surface>  generator)
 	{
 		this.generator = generator;
-				
+		
 		cancel();
 		schedule();
-		return this.trace;
+		
+		
 	}
 
 	
@@ -85,6 +86,12 @@ public class IsosurfaceJob extends Job {
 	protected IStatus run(IProgressMonitor monitor)
 	{		
 //		final IPlottingSystem system = tool.getSlicingSystem().getPlottingSystem(); // does this change dynamically?
+		
+		if (Thread.currentThread() != null)
+		{
+			Thread tempThread = Thread.currentThread();
+			Thread.currentThread().setName(this.name);
+		}
 		
 		try 
 		{
@@ -117,7 +124,6 @@ public class IsosurfaceJob extends Job {
 					trace.setData(points, textCoords, faces, null);
 					trace.setMaterial(colour[0], colour[1] , colour[2], opacity);
 					
-					System.out.println("addtrace");
 					Display.getDefault().syncExec(new Runnable() {
 						public void run() {
 							system.addTrace(trace);

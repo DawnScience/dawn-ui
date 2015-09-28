@@ -8,7 +8,6 @@
  */
 package org.dawnsci.isosurface.alg;
 
-import java.awt.Color;
 import java.util.Arrays;
 
 import org.dawnsci.isosurface.Activator;

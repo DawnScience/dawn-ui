@@ -53,7 +53,7 @@ public class MarchingCubes extends AbstractOperation<MarchingCubesModel, Surface
 		
 		float[] points = getCoordinates(vertices);
 
-		float[] texCoords = { 0, 0, (float) 0.5, (float) 0.5, 1, 1 };
+		float[] texCoords = {0,0,0,1,1,1}; //{ 0, 0, (float) 0.5, (float) 0.5, 1, 1 };
 
 		int[] faces = new int[6 * triangles.size()];
 

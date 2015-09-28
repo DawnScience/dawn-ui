@@ -1,16 +1,12 @@
-package org.dawnsci.isosurface.IsoGUI;
+package org.dawnsci.isosurface.isogui;
 
 import org.dawnsci.isosurface.Activator;
 import org.dawnsci.isosurface.alg.MarchingCubesModel;
 import org.dawnsci.isosurface.alg.Surface;
 import org.dawnsci.isosurface.tool.IsosurfaceJob;
-import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
-import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.plotting.api.trace.IIsosurfaceTrace;
 import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.widgets.Display;
 
 public class IsoItem
 {
@@ -56,7 +52,7 @@ public class IsoItem
 		model.setOpacity(opacity);
 		model.setIsovalue(value);
 		
-		job.compute(generator); // !! look into making void
+		job.compute(generator);
 		
 	}
 	

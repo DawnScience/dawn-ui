@@ -1,4 +1,4 @@
-package org.dawnsci.isosurface.IsoGUI;
+package org.dawnsci.isosurface.isogui;
 
 import org.dawnsci.isosurface.tool.IsosurfaceJob;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;

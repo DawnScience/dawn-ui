@@ -9,9 +9,9 @@
 package org.dawnsci.isosurface.tool;
 
 import org.dawnsci.isosurface.Activator;
-import org.dawnsci.isosurface.IsoGUI.IsoBean;
-import org.dawnsci.isosurface.IsoGUI.IsoComposite;
-import org.dawnsci.isosurface.IsoGUI.IsoValueListener;
+import org.dawnsci.isosurface.isogui.IsoBean;
+import org.dawnsci.isosurface.isogui.IsoComposite;
+import org.dawnsci.isosurface.isogui.IsoValueListener;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
@@ -32,7 +32,6 @@ import org.eclipse.richbeans.reflection.BeanService;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.ExpandBar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

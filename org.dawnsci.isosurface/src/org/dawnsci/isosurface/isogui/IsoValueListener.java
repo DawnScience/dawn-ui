@@ -1,4 +1,4 @@
-package org.dawnsci.isosurface.IsoGUI;
+package org.dawnsci.isosurface.isogui;
 
 import org.eclipse.richbeans.api.event.ValueAdapter;
 import org.eclipse.richbeans.api.event.ValueEvent;

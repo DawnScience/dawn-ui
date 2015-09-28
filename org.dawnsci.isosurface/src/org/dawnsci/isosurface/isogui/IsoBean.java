@@ -1,4 +1,4 @@
-package org.dawnsci.isosurface.IsoGUI;
+package org.dawnsci.isosurface.isogui;
 
 import java.util.ArrayList;
 import java.util.List;

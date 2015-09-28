@@ -8,7 +8,6 @@
  */
 package org.dawnsci.isosurface.alg;
 
-import java.awt.Color;
 import java.io.Serializable;
 
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;

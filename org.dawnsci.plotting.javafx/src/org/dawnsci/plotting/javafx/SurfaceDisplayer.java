@@ -8,10 +8,6 @@
  */
 package org.dawnsci.plotting.javafx;
 
-import org.dawnsci.plotting.javafx.axis.objects.AxisGroup;
-import org.dawnsci.plotting.javafx.axis.objects.Vector3DUtil;
-import org.eclipse.dawnsci.plotting.api.trace.ITrace;
-
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.event.EventHandler;
@@ -35,6 +31,9 @@ import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.TransformChangedEvent;
 import javafx.scene.transform.Translate;
+
+import org.dawnsci.plotting.javafx.axis.objects.AxisGroup;
+import org.dawnsci.plotting.javafx.axis.objects.Vector3DUtil;
 
 /**
  * 

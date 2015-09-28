@@ -13,8 +13,6 @@ import java.util.List;
 import javafx.application.Platform;
 import javafx.scene.Cursor;
 import javafx.scene.DepthTest;
-import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.DrawMode;
@@ -23,7 +21,7 @@ import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 
 import org.dawnsci.plotting.javafx.SurfaceDisplayer;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;	
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
 import org.eclipse.dawnsci.plotting.api.trace.IIsosurfaceTrace;
@@ -174,7 +172,11 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 		{
 			result.setDepthTest(DepthTest.DISABLE);
 		}
-				
+		
+//		Image whiteImage = new Image(getClass().getResourceAsStream("org.dawnsci.plotting.javafx/icons/white.png"));
+//		
+//		material.setDiffuseMap(whiteImage);
+		
 		result.setDepthTest(DepthTest.ENABLE);
 		
 		result.setMaterial(material);
