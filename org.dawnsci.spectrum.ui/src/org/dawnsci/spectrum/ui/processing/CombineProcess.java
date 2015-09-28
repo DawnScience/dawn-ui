@@ -46,7 +46,8 @@ public class CombineProcess extends AbstractProcess {
 			for (IDataset ds : file.getyDatasets()) {
 				
 				sb.append(ds.getName() +":");
-				ds.setShape(new int[]{1,ds.getShape()[0]});
+				IDataset ds1 = ds.getSliceView().squeeze();
+				ds1.setShape(new int[]{1,ds1.getShape()[0]});
 				all[count++] = ds;
 			}
 			sb.deleteCharAt(sb.length()-1);

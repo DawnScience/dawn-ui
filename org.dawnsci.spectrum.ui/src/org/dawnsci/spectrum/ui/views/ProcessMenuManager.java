@@ -174,44 +174,17 @@ public class ProcessMenuManager {
 					
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
-						final List<IContain1DData> out = process.process(list);
+						List<IContain1DData> out = process.process(list);
 						
 						if (out == null) {
 							showMessage("Could not process dataset, operation not supported for this data!");
 							return Status.CANCEL_STATUS;
 						}
 						
-						Display.getDefault().syncExec(new Runnable() {
-							@Override
-							public void run() {
-								
-								boolean bresult = false;
-
-								final IDataset d = out.get(0).getyDatasets().get(0);
-								CombineDialog dialog;
-								try {
-									dialog = new CombineDialog(out.get(0).getxDataset(),d);
-									dialog.createContents();
-									if (dialog.open() == CombineDialog.CANCEL_ID)
-										bresult = false;
-									else
-										bresult = true;
-								} catch (Exception e) {
-									MessageDialog.openError(Display.getDefault().getActiveShell(), "Error opening Combine Dialog",
-											"The following error occured while opening the Combiner dialog: " + e);
-									bresult = false;
-								}
-								
-								if (!bresult) return;;
-								
-								for(IContain1DData data : out) {
-									SpectrumInMemory mem = new SpectrumInMemory(data.getLongName(), data.getName(), data.getxDataset(), data.getyDatasets(), system);
-									ProcessMenuManager.this.manager.addFile(mem);
-								}
-								return;
-							}
-						});
-						
+						for(IContain1DData data : out) {
+							SpectrumInMemory mem = new SpectrumInMemory(data.getLongName(), data.getName(), data.getxDataset(), data.getyDatasets(), system);
+							ProcessMenuManager.this.manager.addFile(mem);
+						}
 						return Status.OK_STATUS;
 					}
 				};
@@ -313,12 +286,68 @@ public class ProcessMenuManager {
 			}
 		};
 		
+		IAction combineWizard = new Action("Combine wizard...") {
+			public void run() {
+				ISelection selection = viewer.getSelection();
+				final List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
+				final CombineProcess process = new CombineProcess();
+				Job processJob = new Job("process") {
+
+					@Override
+					protected IStatus run(IProgressMonitor monitor) {
+						final List<IContain1DData> out = process.process(list);
+
+						if (out == null) {
+							showMessage("Could not process dataset, operation not supported for this data!");
+							return Status.CANCEL_STATUS;
+						}
+
+						Display.getDefault().syncExec(new Runnable() {
+							@Override
+							public void run() {
+
+								boolean bresult = false;
+
+								final IDataset d = out.get(0).getyDatasets().get(0);
+								CombineDialog dialog;
+								try {
+									dialog = new CombineDialog(out.get(0).getxDataset(),d);
+									dialog.createContents();
+									if (dialog.open() == CombineDialog.CANCEL_ID)
+										bresult = false;
+									else
+										bresult = true;
+								} catch (Exception e) {
+									MessageDialog.openError(Display.getDefault().getActiveShell(), "Error opening Combine Dialog",
+											"The following error occured while opening the Combiner dialog: " + e);
+									bresult = false;
+								}
+
+								if (!bresult) return;;
+
+								for(IContain1DData data : out) {
+									SpectrumInMemory mem = new SpectrumInMemory(data.getLongName(), data.getName(), data.getxDataset(), data.getyDatasets(), system);
+									ProcessMenuManager.this.manager.addFile(mem);
+								}
+								return;
+							}
+						});
+
+						return Status.OK_STATUS;
+					}
+				};
+				
+				processJob.schedule();
+			}
+		};
+		
 		subtractionWizard.setEnabled(enabled);
 		rollingBaseline.setEnabled(((IStructuredSelection)viewer.getSelection()).size() >= 1);
 
 		menu.add(subtractionWizard);
 		menu.add(rollingBaseline);
 		menu.add(cropWizard);
+		menu.add(combineWizard);
 		menuManager.add(menu);
 	}
 
