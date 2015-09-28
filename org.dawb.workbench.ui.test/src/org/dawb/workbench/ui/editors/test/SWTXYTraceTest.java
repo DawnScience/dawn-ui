@@ -149,7 +149,7 @@ public class SWTXYTraceTest {
 		
 		sys.repaint();
 		
-		EclipseUtils.delay(200000);
+		EclipseUtils.delay(2000);
 		System.out.println("Passed");
 	}
 
