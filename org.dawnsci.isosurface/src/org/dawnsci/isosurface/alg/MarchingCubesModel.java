@@ -36,7 +36,7 @@ public class MarchingCubesModel extends AbstractOperationModel {
 		return lazyData;
 	}
 	public void setLazyData(ILazyDataset lz) {
-		if (lazyData!=lz) computeExtents(lz);
+		// if (lazyData!=lz) computeExtents(lz);
 		this.lazyData = lz;
 	}
 	
@@ -61,7 +61,7 @@ public class MarchingCubesModel extends AbstractOperationModel {
 	/**
 	 * Method for computing the default isovalue 
 	 */
-	private double getEstimatedIsovalue(ILazyDataset lz) {
+	public double getEstimatedIsovalue(ILazyDataset lz) {
 		// TODO Auto-generated method stub
 //		IDataset slicedImage;
 		

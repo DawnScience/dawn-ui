@@ -166,7 +166,7 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 		// check if it's needed to remove the depth test
 		// 0.99 is arbitrary and will require more testing to determine a better value
 		// used to determine whether the object is transparent and :. will need depthTest disabled
-		if (opacity > 0.99)
+		if (opacity > 0.95)
 		{
 			result.setDepthTest(DepthTest.ENABLE);
 		}
@@ -174,8 +174,9 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 		{
 			result.setDepthTest(DepthTest.DISABLE);
 		}
+				
+		result.setDepthTest(DepthTest.ENABLE);
 		
-
 		result.setMaterial(material);
 		this.isosurface = result;
 	}
@@ -209,8 +210,22 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 			material = new PhongMaterial(color);
 		}
 		
+		
+		
 		isosurface.setMaterial(material);
 		TriangleMesh mesh = (TriangleMesh) isosurface.getMesh();
+		
+		if (opacity > 0.95)
+		{
+			isosurface.setDepthTest(DepthTest.ENABLE);
+		}
+		else
+		{
+			isosurface.setDepthTest(DepthTest.DISABLE);
+		}
+		
+		isosurface.setDepthTest(DepthTest.ENABLE);
+		
 		marry(mesh);
 		
 		scene.updateTransforms();

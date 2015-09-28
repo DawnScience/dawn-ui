@@ -16,8 +16,8 @@ public class IsoItem
 {
 	
 	private String name;
-	private double value;
-	private double opacity;
+	private double value = 0;
+	private double opacity = 0.5;
 	private int x = 20, y = 20, z = 1;
 	private RGB colour = new RGB(0,0,0);
 	
@@ -26,7 +26,7 @@ public class IsoItem
 		
 	public IsoItem()
 	{
-		this("testName");
+		this("New Surface");
 	}
 	
 	public IsoItem(String name)
@@ -47,12 +47,15 @@ public class IsoItem
 		
 	}
 	
-	public void update()
+	private void update()
 	{	
 		
 		MarchingCubesModel model = this.generator.getModel();
 		int[] boxSize = new int[] {x, y, z};
 		model.setBoxSize(boxSize);
+		model.setOpacity(opacity);
+		model.setIsovalue(value);
+		
 		job.compute(generator); // !! look into making void
 		
 	}
@@ -63,10 +66,14 @@ public class IsoItem
 		job.destroy();
 	}
 	
-	public void setInfo(IsosurfaceJob job, final IPlottingSystem system)
+	public void setInfo(IsosurfaceJob job, double startingValue, int[] startingBoxSize, double startingOpacity)
 	{
 		this.job = job;
-		// create and add trace
+		this.value = startingValue;
+		this.x = startingBoxSize[0];
+		this.y = startingBoxSize[1];
+		this.z = startingBoxSize[2];
+		this.opacity = startingOpacity;
 	}
 	
 	public IsosurfaceJob getJob()

@@ -51,7 +51,17 @@ public class IsoComposite extends Composite
 			@Override
 			protected void beanAdd(Object bean) 
 			{
-				((IsoItem)bean).setInfo(new IsosurfaceJob("isosurface job - " + JOB_COUNT, system, slice), system);
+				int[] defaultBoxSize= new int[] {
+						(int) Math.max(1, Math.ceil(slice.getShape()[2]/20.0)),
+                        (int) Math.max(1, Math.ceil(slice.getShape()[1]/20.0)),
+                        (int) Math.max(1, Math.ceil(slice.getShape()[0]/20.0))};
+				
+				
+				((IsoItem)bean).setInfo(
+						new IsosurfaceJob("isosurface job - #" + JOB_COUNT++, system, slice), 
+						0,
+						defaultBoxSize,
+						0.5f);
 			}
 			
 		};
@@ -83,11 +93,13 @@ public class IsoComposite extends Composite
 	{
 		itemComp.setMinMaxIsoValue(min, max);
 	}
+		
 	
 	public VerticalListEditor getItems()
 	{
 		return this.items;
 	}
+
 	
 	
 }

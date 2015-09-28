@@ -50,6 +50,8 @@ public class IsosurfaceJob extends Job {
 		this.system = system;
 		this.slice = slice;
 		
+		
+		
 	}
 	
 

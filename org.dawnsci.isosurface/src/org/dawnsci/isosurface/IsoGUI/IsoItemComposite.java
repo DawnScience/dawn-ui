@@ -111,6 +111,12 @@ public class IsoItemComposite extends Composite
 			// most likely due to the update order
 		return this.value;
 	}
+
+	public void setValue(double d)
+	{
+		value.setValue(d);
+	}	
+	
 	
 	public IFieldWidget getIsoSurfaceScaleValue()
 	{	
@@ -177,8 +183,8 @@ public class IsoItemComposite extends Composite
 				// do nothing
 			}
 		});
-	}	
-	
+	}
+
 	
 	
 	
