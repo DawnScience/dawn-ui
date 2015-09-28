@@ -23,11 +23,13 @@ public class TerrainBlueTransferFunction extends AbstractTransferFunction {
 		if (value > 0.09803922 && value <= 0.14509804)
 			y = 2.29164441 - (13.17477302 * value);
 		// 37 < X <38
-		if (value > 0.14509804 && value <= 0.14901961)
-			y = 0.38001068;
+//		if (value > 0.14509804 && value <= 0.14901961)
+//			y = 0.38001068;
 		// 38 < X < 101
-		if (value > 0.14901961 && value <= 0.39607843)
-			y = ((0.890466926 * value) + 0.24728770885);
+		if (value > 0.14509804 //0.14901961 
+				&& value <= 0.39607843)
+			y = ((0.8764591439 * value) + 0.252838178);
+//			y = ((0.890466926 * value) + 0.24728770885);
 		// 101 < X <102
 		if (value > 0.39607843 && value <= 0.4)
 			y = 0.59998474;
