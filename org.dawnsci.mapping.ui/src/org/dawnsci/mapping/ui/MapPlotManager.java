@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -12,7 +11,6 @@ import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.dawnsci.mapping.ui.datamodel.MapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedData;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
-import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -20,8 +18,10 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
+import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.FloatDataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -42,7 +42,7 @@ public class MapPlotManager {
 	private IPlottingSystem map;
 	private IPlottingSystem data;
 	private MappedDataArea area;
-	private List<MapObject> layers;
+	private LinkedList<MapObject> layers;
 	private PlotJob job;
 	private volatile Dataset merge;
 	private AtomicInteger atomicPosition;
@@ -61,7 +61,7 @@ public class MapPlotManager {
 	}
 	
 	public void plotData(final double x, final double y) {
-		final MappedData topMap = getTopMap();
+		final MappedData topMap = getTopMap(x,y);
 		if (topMap == null) return;
 		merge = null;
 		atomicPosition.set(0);
@@ -105,7 +105,7 @@ public class MapPlotManager {
 	}
 	
 	public void plotDataWithHold(final double x, final double y) {
-		final MappedData topMap = getTopMap();
+		final MappedData topMap = getTopMap(x,y);
 		if (topMap == null) return;
 		final ILazyDataset lz = topMap.getSpectrum(x,y);
 		
@@ -214,12 +214,29 @@ public class MapPlotManager {
 	
 	
 	public void plotMap(MappedData map) {
-		plotMapData(map);
+		if (map == null) map = area.getDataFile(0).getMap();
+		addMap(map);
+		plotLayers();
+	}
+	
+	public void addImage(AssociatedImage image) {
+		layers.addLast(image);
+		plotLayers();
+	}
+	
+	public MappedData getTopMap(double x, double y){
+		
+		for (int i = 0; i < layers.size() ; i++) {
+			MapObject l = layers.get(i);
+			if (l instanceof MappedData && ((MappedData)l).getSpectrum(x, y) != null) return (MappedData)l;
+		}
+		
+		return null;
 	}
 	
 	public MappedData getTopMap(){
 		
-		for (int i = layers.size()-1; i >=0 ; i--) {
+		for (int i = 0; i < layers.size() ; i++) {
 			MapObject l = layers.get(i);
 			if (l instanceof MappedData) return (MappedData)l;
 		}
@@ -230,29 +247,126 @@ public class MapPlotManager {
 	public void clearAll(){
 		map.clear();
 		data.clear();
+		layers.clear();
 	}
 	
-	private void plotMapData(MappedData mapdata){
-		map.clear();
-		MappedDataFile dataFile = area.getDataFile(0);
-		AssociatedImage image = dataFile.getAssociatedImage();
-		if (mapdata == null) mapdata = dataFile.getMap();
-		int count = 0;
-		layers.clear();
-		try {
-			ICompositeTrace comp = this.map.createCompositeTrace("composite1");
-			if (image != null) {
-				layers.add(image);
-				comp.add(MappingUtils.buildTrace(image.getImage(), this.map),count++);
+//	private void plotMapData(MappedData mapdata){
+//		map.clear();
+//		MappedDataFile dataFile = area.getDataFile(0);
+//		AssociatedImage image = dataFile.getAssociatedImage();
+//		if (mapdata == null) mapdata = dataFile.getMap();
+//		int count = 0;
+//		layers.clear();
+//		try {
+//			ICompositeTrace comp = this.map.createCompositeTrace("composite1");
+//			if (image != null) {
+//				layers.add(image);
+//				comp.add(MappingUtils.buildTrace(image.getImage(), this.map),count++);
+//			}
+//
+//			layers.add(mapdata);
+//			comp.add(MappingUtils.buildTrace(mapdata.getMap(), this.map,mapdata.getTransparency()),count++);
+//			this.map.addTrace(comp);
+//		} catch (Exception e) {
+//			logger.error("Error plotting mapped data", e);
+//		}
+//	}
+	
+	private void addMap(MappedData map) {
+		
+		int position = -1;
+		
+		for (int i = 0; i < layers.size() ;i++) {
+			MapObject layer = layers.get(i);
+			if (layer instanceof MappedData && isTheSameMap((MappedData)layer, map)) {
+				position = i;
+				break;
 			}
+		}
+		
+		if (position >= 0) {
+			layers.set(position, map);
+		} else {
+			layers.push(map);
+		}
+		
+	}
+	
+	private void plotLayers(){
+		map.clear();
 
-			layers.add(mapdata);
-			comp.add(MappingUtils.buildTrace(mapdata.getMap(), this.map,mapdata.getTransparency()),count++);
+		int count = 0;
+		
+		try {
+			
+			Iterator<MapObject> it = layers.descendingIterator();
+			
+			ICompositeTrace comp = this.map.createCompositeTrace("composite1");
+			
+			while (it.hasNext()) {
+				MapObject o = it.next();
+				if (o instanceof MappedData) {
+					comp.add(MappingUtils.buildTrace(((MappedData)o).getMap(), this.map),count++);
+				}
+				
+				if (o instanceof AssociatedImage) {
+					comp.add(MappingUtils.buildTrace(((AssociatedImage)o).getImage(), this.map),count++);
+				}
+				
+			}
 			this.map.addTrace(comp);
 		} catch (Exception e) {
 			logger.error("Error plotting mapped data", e);
 		}
 	}
+	
+	private boolean isTheSameMap(MappedData omap, MappedData map) {
+		
+		if (!Arrays.equals(omap.getMap().getShape(), map.getMap().getShape())) return false;
+		
+		AxesMetadata oax = omap.getMap().getFirstMetadata(AxesMetadata.class);
+		AxesMetadata ax = map.getMap().getFirstMetadata(AxesMetadata.class);
+		
+		if (oax == null || ax == null) return false; // should never be the case
+		
+		ILazyDataset[] oaxes = oax.getAxes();
+		ILazyDataset[] axes = ax.getAxes();
+		
+		if (oaxes.length != axes.length) return false;
+		
+		for (int i = 0 ; i < oaxes.length; i++) {
+			if (oaxes[i] == null) return false;
+			if (axes[i] == null) return false;
+			
+			IDataset oa = DatasetUtils.convertToDataset(oaxes[i]);
+			IDataset a = DatasetUtils.convertToDataset(axes[i]);
+			if (!oa.equals(a)) return false;
+		}
+		
+		return true;
+		
+	}
+	
+//	private void plotMapData(){
+//		map.clear();
+//		MappedDataFile dataFile = area.getDataFile(0);
+//		AssociatedImage image = dataFile.getAssociatedImage();
+//		if (mapdata == null) mapdata = dataFile.getMap();
+//		int count = 0;
+//		try {
+//			ICompositeTrace comp = this.map.createCompositeTrace("composite1");
+//			if (image != null) {
+//				layers.add(image);
+//				comp.add(MappingUtils.buildTrace(image.getImage(), this.map),count++);
+//			}
+//
+//			layers.add(mapdata);
+//			comp.add(MappingUtils.buildTrace(mapdata.getMap(), this.map,mapdata.getTransparency()),count++);
+//			this.map.addTrace(comp);
+//		} catch (Exception e) {
+//			logger.error("Error plotting mapped data", e);
+//		}
+//	}
 	
 	public boolean isPlotted(MapObject object) {
 		return layers.contains(object);

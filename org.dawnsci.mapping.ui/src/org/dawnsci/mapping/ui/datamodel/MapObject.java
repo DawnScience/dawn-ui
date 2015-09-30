@@ -6,4 +6,6 @@ public interface MapObject {
 	
 	public Object[] getChildren();
 	
+	public double[] getRange();
+	
 }

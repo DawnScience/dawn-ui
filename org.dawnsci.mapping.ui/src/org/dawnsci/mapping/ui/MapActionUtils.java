@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawnsci.mapping.ui.datamodel.MappedData;
+import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
+import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
 import org.dawnsci.mapping.ui.dialog.ImageGridDialog;
 import org.dawnsci.mapping.ui.dialog.MapPropertiesDialog;
 import org.dawnsci.mapping.ui.dialog.RGBMixerDialog;
@@ -94,6 +96,18 @@ public class MapActionUtils {
 							"The following error occured while opening the Properties Viewer dialog: " + e);
 				}
 				
+			}
+		};
+		
+		return trans;
+		
+	}
+	
+	public static IAction getFileRemoveAction(final MappedFileManager manager, final MappedDataFile file) {
+		IAction trans = new Action("Clear") {
+			@Override
+			public void run() {
+				manager.removeFile(file);
 			}
 		};
 		

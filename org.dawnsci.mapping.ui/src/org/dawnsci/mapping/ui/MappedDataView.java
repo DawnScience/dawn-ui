@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-
+import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.dawnsci.mapping.ui.datamodel.MappedData;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
@@ -159,6 +159,7 @@ public class MappedDataView extends ViewPart {
 			public void doubleClick(DoubleClickEvent event) {
 				Object e = ((StructuredSelection)event.getSelection()).getFirstElement();
 				if (e instanceof MappedData) plotManager.plotMap((MappedData)e);
+				if (e instanceof AssociatedImage) plotManager.addImage((AssociatedImage)e);
 				viewer.refresh();
 			}
 		});
@@ -179,6 +180,10 @@ public class MappedDataView extends ViewPart {
 					List<MappedData> maps = new ArrayList<MappedData>();
 					while(it != null && it.hasNext()) {
 						Object obj = it.next();
+						if (obj instanceof MappedDataFile) {
+							manager.add(MapActionUtils.getFileRemoveAction(fileManager, (MappedDataFile)obj));
+						}
+						
 						if (obj instanceof MappedData) {
 							maps.add((MappedData)obj);
 						}
