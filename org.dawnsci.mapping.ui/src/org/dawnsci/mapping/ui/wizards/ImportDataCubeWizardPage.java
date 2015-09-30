@@ -21,6 +21,7 @@ public class ImportDataCubeWizardPage extends WizardPage implements IDatasetWiza
 	protected ImportDataCubeWizardPage(String name) {
 		super(name);
 		this.setTitle("Import Data Blocks");
+		setPageComplete(false);
 		this.setDescription("Select all the full data blocks, their axes, and which dimensions correspond to the map X and Y directions");
 	}
 
@@ -28,7 +29,7 @@ public class ImportDataCubeWizardPage extends WizardPage implements IDatasetWiza
 	public void createControl(Composite parent) {
 		Composite main = new Composite(parent, SWT.None);
 		main.setLayout(new GridLayout(1,false));
-		widget = new DatasetAndAxesWidget(mdfbean.getBlocks());
+		widget = new DatasetAndAxesWidget();
 		widget.addCompleteListener(new IDataWidgetCompleteListener() {
 			
 			@Override
@@ -60,6 +61,7 @@ public class ImportDataCubeWizardPage extends WizardPage implements IDatasetWiza
 	@Override
 	public void setMapBean(MappedDataFileBean bean) {
 		this.mdfbean = bean;
+		widget.setBeanList(mdfbean.getBlocks());
 		setPageComplete(bean.checkValid());
 	}
 	

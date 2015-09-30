@@ -50,6 +50,8 @@ public class CompositeTrace extends Figure implements ICompositeTrace {
 		
 		IDataset x = ((ImageTrace)trace).getAxes().get(0);
 		IDataset y = ((ImageTrace)trace).getAxes().get(1);
+		yAxis.setTitle(y.getName());
+		xAxis.setTitle(x.getName());
 		double xmin = x.min().doubleValue();
 		double xmax = x.max().doubleValue();
 		double ymin = y.min().doubleValue();

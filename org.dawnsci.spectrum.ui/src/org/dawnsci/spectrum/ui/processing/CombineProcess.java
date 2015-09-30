@@ -48,7 +48,7 @@ public class CombineProcess extends AbstractProcess {
 				sb.append(ds.getName() +":");
 				IDataset ds1 = ds.getSliceView().squeeze();
 				ds1.setShape(new int[]{1,ds1.getShape()[0]});
-				all[count++] = ds;
+				all[count++] = ds1;
 			}
 			sb.deleteCharAt(sb.length()-1);
 			sb.deleteCharAt(sb.length()-1);

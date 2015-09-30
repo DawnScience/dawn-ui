@@ -49,6 +49,7 @@ public class Dimension {
 
 
 	public void setAxis(String axis) {
+		if (axis != null && axis.isEmpty()) axis = null;
 		firePropertyChange("axis", this.axis, this.axis = axis);
 	}
 

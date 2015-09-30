@@ -29,6 +29,7 @@ public class ImportMappedDataWizard extends Wizard {
 	private Map<String,int[]> nexusDatasetNames = new LinkedHashMap<String, int[]>();
 	private MappedDataFileBean mdfbean = new MappedDataFileBean();
 	private boolean imageImport = false;
+	private MappedDataFileBean[] persistedList;
 	
 	private final static Logger logger = LoggerFactory.getLogger(ImportMappedDataWizard.class);
 	
@@ -43,12 +44,8 @@ public class ImportMappedDataWizard extends Wizard {
 	}
 	
 	public void createPageControls(Composite pageContainer) {
-		IWizardPage[] pa = getPages();
 		
-		for (IWizardPage p : pa) {
-			IDatasetWizard pd = (IDatasetWizard) p;
-			pd.setMapBean(mdfbean);
-		}
+		IWizardPage[] pa = getPages();
 		
 		super.createPageControls(pageContainer);
 		
@@ -67,25 +64,25 @@ public class ImportMappedDataWizard extends Wizard {
 							IMetadata meta = LocalServiceManager.getLoaderService().getMetadata(filePath, null);
 							populateNexusMaps(meta);
 							
-//							IPreferenceStore ps = Activator.getDefault().getPreferenceStore();
-//							String jsonArray = ps.getString("TestDescriptionList");
-//							if (jsonArray != null) {
-//								IPersistenceService p = LocalServiceManager.getPersistenceService();
-//								try {
-//									persistedList = p.unmarshal(jsonArray,MappedFileDescription[].class);
-//									for (MappedFileDescription d : persistedList) {
-//										if (datasetNames.containsKey(d.getBlockNames().get(0))){
-//											description = d;
-//											break;
-//										}
-//									}
-//
-//									
-//								} catch (Exception e) {
-//									// TODO Auto-generated catch block
-//									e.printStackTrace();
-//								}
-//							}
+							IPreferenceStore ps = Activator.getDefault().getPreferenceStore();
+							String jsonArray = ps.getString("TestDescriptionList");
+							if (jsonArray != null) {
+								IPersistenceService p = LocalServiceManager.getPersistenceService();
+								try {
+									persistedList = p.unmarshal(jsonArray,MappedDataFileBean[].class);
+									for (MappedDataFileBean d : persistedList) {
+										if (d != null && datasetNames.containsKey(d.getBlocks().get(0).getName())){
+											mdfbean = d;
+											break;
+										}
+									}
+
+									
+								} catch (Exception e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+							}
 							
 							
 						} catch (Exception e) {
@@ -103,6 +100,7 @@ public class ImportMappedDataWizard extends Wizard {
 									if (p instanceof IDatasetWizard) {
 										IDatasetWizard pd = (IDatasetWizard) p;
 										pd.setDatasetMaps(datasetNames, nexusDatasetNames);
+											pd.setMapBean(mdfbean);
 									}
 								}
 								
@@ -118,6 +116,7 @@ public class ImportMappedDataWizard extends Wizard {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
 	}
 	
 	private void populateNexusMaps(IMetadata meta) throws Exception {
@@ -144,42 +143,42 @@ public class ImportMappedDataWizard extends Wizard {
 	@Override
 	public boolean performFinish() {
 		IPersistenceService ps = LocalServiceManager.getPersistenceService();
-//		try {
-//			IPreferenceStore p = Activator.getDefault().getPreferenceStore();
-//			updatePersistanceList();
-//			String json = ps.marshal(persistedList);
-//			p.setValue("TestDescriptionList", json);
-//			
-//		} catch (Exception e) {
-//			logger.error("Could not set persisted file description list", e);
-//		}
+		try {
+			IPreferenceStore p = Activator.getDefault().getPreferenceStore();
+			updatePersistanceList();
+			String json = ps.marshal(persistedList);
+			p.setValue("TestDescriptionList", json);
+			
+		} catch (Exception e) {
+			logger.error("Could not set persisted file description list", e);
+		}
 		
 		return true;
 	}
 
 	private void updatePersistanceList() {
 		
-//		if (persistedList == null || persistedList.length == 0) {
-//			persistedList = new MappedFileDescription[]{description};
-//			return;
-//		}
-//		
-//		LinkedList<MappedFileDescription> ll = new LinkedList<MappedFileDescription>();
-//		for (MappedFileDescription d : persistedList) {
-//			ll.add(d);
-//		}
-//		
-//		if (ll.contains(description)) ll.remove(description);
-//		
-//		ll.push(description);
-//
-//		if (ll.size() > 10) ll.removeLast();
-//		
-//		persistedList = new MappedFileDescription[ll.size()];
-//		
-//		for (int i = 0; i < ll.size(); i++) {
-//			persistedList[i] = ll.removeFirst();
-//		}
+		if (persistedList == null || persistedList.length == 0) {
+			persistedList = new MappedDataFileBean[]{mdfbean};
+			return;
+		}
+		
+		LinkedList<MappedDataFileBean> ll = new LinkedList<MappedDataFileBean>();
+		for (MappedDataFileBean d : persistedList) {
+			ll.add(d);
+		}
+		
+		if (ll.contains(mdfbean)) ll.remove(mdfbean);
+		
+		ll.push(mdfbean);
+
+		if (ll.size() > 10) ll.removeLast();
+		
+		persistedList = new MappedDataFileBean[ll.size()];
+		
+		for (int i = 0; i < ll.size(); i++) {
+			persistedList[i] = ll.removeFirst();
+		}
 		
 	}
 
