@@ -3,5 +3,5 @@
    <implementation class="org.dawnsci.mapping.ui.LocalServiceManager"/>
    <reference bind="setLoaderService" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.io.ILoaderService" name="ILoaderService" policy="static"/>
    <reference bind="setPersistenceService" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService" name="IPersistenceService" policy="static"/>
-   <reference bind="setRemoteDatasetService" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.io.IRemoteDatasetService" name="IRemoteDatasetService" policy="static"/>
+   <reference bind="setRemoteDatasetService" cardinality="0..1" interface="org.eclipse.dawnsci.analysis.api.io.IRemoteDatasetService" name="IRemoteDatasetService" policy="static"/>
 </scr:component>
