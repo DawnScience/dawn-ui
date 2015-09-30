@@ -10,14 +10,8 @@ package org.dawnsci.isosurface.alg;
 
 import java.util.Arrays;
 
-import org.dawnsci.isosurface.Activator;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
-import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
-import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
 
 public class MarchingCubesModel extends AbstractOperationModel {
 
@@ -35,88 +29,8 @@ public class MarchingCubesModel extends AbstractOperationModel {
 		return lazyData;
 	}
 	public void setLazyData(ILazyDataset lz) {
-		// if (lazyData!=lz) computeExtents(lz);
 		this.lazyData = lz;
 	}
-	
-	private void computeExtents(ILazyDataset lz) {
-		// If we have just set new data, reset the values for box size and isovalue
-		this.boxSize  = getEstimatedBoxSize(lz);
-		this.isovalue = getEstimatedIsovalue(lz); // Also estimates max and min slider range
-	}
-
-	/**
-	 * Method for computing the default box size
-	 */
-    private static int[] getEstimatedBoxSize(ILazyDataset lz) {
-		int[] defaultBoxSize= new int[] {(int) Math.max(1, Math.ceil(lz.getShape()[2]/20.0)),
-	                                     (int) Math.max(1, Math.ceil(lz.getShape()[1]/20.0)),
-	                                     (int) Math.max(1, Math.ceil(lz.getShape()[0]/20.0))};
-		
-		return defaultBoxSize;
-	}
-
-
-	/**
-	 * Method for computing the default isovalue 
-	 */
-	public double getEstimatedIsovalue(ILazyDataset lz) {
-		// TODO Auto-generated method stub
-//		IDataset slicedImage;
-		
-		int[] shape = { lz.getShape()[0]/3, 0,0};
-		int[] stop =  {1+lz.getShape()[0]/3, lz.getShape()[1], lz.getShape()[2]};
-		
-		IDataset slicedImage = lz.getSlice(
-				new int[] { lz.getShape()[0]/3, 0,0}, 
-				new int[] {1+lz.getShape()[0]/3, lz.getShape()[1], lz.getShape()[2]},
-				new int[] {1,1,1});
-		
-		final IImageService service = (IImageService)Activator.getService(IImageService.class);
-		double[] stats = service.getFastStatistics(new ImageServiceBean((Dataset)slicedImage, HistoType.MEAN));
-		
-		if(stats[0]<isovalueMin){
-			isovalueMin = stats[0];
-		}
-		
-		if(stats[1]>isovalueMax){
-			isovalueMax = stats[1];
-		}
-		
-		IDataset slicedImage1 = lz.getSlice(
-				new int[] { lz.getShape()[0]/2, 0,0}, 
-                new int[] {1+ lz.getShape()[0]/2, lz.getShape()[1], lz.getShape()[2]},
-                new int[] {1,1,1});
-		
-        stats = service.getFastStatistics(new ImageServiceBean((Dataset)slicedImage1, HistoType.MEAN));
-		
-		if(stats[0]<isovalueMin){
-			isovalueMin = stats[0];
-		}
-		
-		if(stats[1]>isovalueMax){
-			isovalueMax = stats[1];
-		}
-		
-		IDataset slicedImage2 = lz.getSlice(
-				new int[] { 2*lz.getShape()[0]/3, 0,0}, 
-                new int[] {1 + 2*lz.getShape()[0]/3, lz.getShape()[1], lz.getShape()[2]},
-                new int[] {1,1,1});
-		
-		stats = service.getFastStatistics(new ImageServiceBean((Dataset)slicedImage2, HistoType.MEAN));
-		
-		if(stats[0]<isovalueMin){
-			isovalueMin = stats[0];
-		}
-		
-		if(stats[1]>isovalueMax){
-			isovalueMax = stats[1];
-		}
-		
-		return (isovalueMin + isovalueMax)/2d;
-		
-	}
-
 	public double getIsovalue() {
 		return isovalue;
 	}

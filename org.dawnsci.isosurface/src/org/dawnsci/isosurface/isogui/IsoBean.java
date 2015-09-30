@@ -37,28 +37,13 @@ public class IsoBean
 	
 	public void setItems(List<IsoItem> newItems)
 	{
-//		// !! this is a hack and bad
-//		for (IsoItem I : newItems)
-//		{
-//			if (I.getJob() == null)
-//				I.setJob(new IsosurfaceJob("Computing isosurface", system,
-//						slice));
-//		}
 		this.items = newItems;
 	}
 	
 	public void addItem(IsoItem newItem)
 	{
-//		newItem.setJob(new IsosurfaceJob("Computing isosurface", system, slice));
 		items.add(newItem);
 	}
 	
-	
-	// !! try and remove system
-	public void setJob(ILazyDataset slice, IPlottingSystem system)
-	{
-//		this.slice = slice;
-//		this.system = system;
-	}
 	
 }

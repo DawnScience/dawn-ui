@@ -1,5 +1,7 @@
 package org.dawnsci.isosurface.isogui;
 
+import java.awt.Color;
+
 import org.dawnsci.isosurface.Activator;
 import org.dawnsci.isosurface.alg.MarchingCubesModel;
 import org.dawnsci.isosurface.alg.Surface;
@@ -15,7 +17,7 @@ public class IsoItem
 	private double value = 0;
 	private double opacity = 0.5;
 	private int x = 20, y = 20, z = 1;
-	private RGB colour = new RGB(0,0,0);
+	private RGB colour = new RGB(255,215,0);
 	
 	private IsosurfaceJob job;
 	private IOperation<MarchingCubesModel, Surface> generator;
@@ -28,7 +30,7 @@ public class IsoItem
 	public IsoItem(String name)
 	{
 		this.name = name;
-		
+				
 		final IOperationService service = (IOperationService) Activator
 				.getService(IOperationService.class);
 		try
@@ -51,6 +53,7 @@ public class IsoItem
 		model.setBoxSize(boxSize);
 		model.setOpacity(opacity);
 		model.setIsovalue(value);
+		model.setColour(colour.red, colour.green, colour.blue);
 		
 		job.compute(generator);
 		
@@ -62,20 +65,23 @@ public class IsoItem
 		job.destroy();
 	}
 	
-	public void setInfo(IsosurfaceJob job, double startingValue, int[] startingBoxSize, double startingOpacity)
+	public void setInfo(IsosurfaceJob job, double startingValue, int[] startingBoxSize, double startingOpacity, Color startingColour)
 	{
-		this.job = job;
-		this.value = startingValue;
+		
+		this.job = job;				
+		this.value = startingValue; 
 		this.x = startingBoxSize[0];
 		this.y = startingBoxSize[1];
 		this.z = startingBoxSize[2];
 		this.opacity = startingOpacity;
+		this.colour = new RGB(startingColour.getRed(),startingColour.getGreen(), startingColour.getBlue());
 	}
 	
 	public IsosurfaceJob getJob()
 	{
 		return this.job;
 	}
+	
 	
 	/*
 	 * get - sets

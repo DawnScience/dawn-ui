@@ -15,8 +15,10 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.richbeans.widgets;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
 Export-Package: org.dawnsci.isosurface,
+ org.dawnsci.isosurface.alg,
  org.dawnsci.isosurface.tool
-Import-Package: org.eclipse.richbeans.reflection,
+Import-Package: org.dawnsci.plotting.util,
+ org.eclipse.richbeans.reflection,
  org.slf4j;version="1.7.6"
 Bundle-ClassPath: jars/jfxswt.jar,
  jars/jfxrt.jar,

@@ -84,10 +84,10 @@ public class IsosurfaceJob extends Job {
 	
 	@Override
 	protected IStatus run(IProgressMonitor monitor)
-	{		
-//		final IPlottingSystem system = tool.getSlicingSystem().getPlottingSystem(); // does this change dynamically?
+	{
 		
-		if (Thread.currentThread() != null)
+		
+		if (Thread.currentThread() != null) // !! look into removing
 		{
 			Thread tempThread = Thread.currentThread();
 			Thread.currentThread().setName(this.name);
@@ -129,7 +129,6 @@ public class IsosurfaceJob extends Job {
 							system.addTrace(trace);
 				    	}
 				    });
-					
 				}
 				else
 				{
@@ -159,7 +158,9 @@ public class IsosurfaceJob extends Job {
 			}
 					
 		}
-		finally {
+		finally 
+		{
+            monitor.done();
 			system.setDefaultCursor(IPlottingSystem.NORMAL_CURSOR);
 		}
 		return Status.OK_STATUS;

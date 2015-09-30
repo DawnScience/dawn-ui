@@ -91,7 +91,7 @@ public class IsosurfaceTool extends AbstractSlicingTool
 						SWT.FILL,
 						getSlicingSystem().getPlottingSystem(),
 						null);
-		
+				
 		isoComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		isoComp.setVisible(true);
 		setControlsVisible(false);

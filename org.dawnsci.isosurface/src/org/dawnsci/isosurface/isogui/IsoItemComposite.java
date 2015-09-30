@@ -9,6 +9,7 @@ import org.eclipse.richbeans.widgets.wrappers.ScaleWrapper;
 import org.eclipse.richbeans.widgets.wrappers.SpinnerWrapper;
 import org.eclipse.richbeans.widgets.wrappers.TextWrapper;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -24,18 +25,22 @@ public class IsoItemComposite extends Composite
 	private SpinnerWrapper x, y, z;
 	private ColorSelectorWrapper colour;
 	
-	public IsoItemComposite(final Composite parent, int style) 
+	public IsoItemComposite(Composite parent, int style) 
 	{
-		super(parent, style);
+		super(parent, SWT.FILL);
 		createUI();
 	}
 	
 	private void createUI()
 	{
 		// generate the GUI
-		
-		setLayout(new GridLayout(5, false));
-		
+		GridLayout gridLayout = new GridLayout(5, false);
+		gridLayout.verticalSpacing = 0;
+		gridLayout.horizontalSpacing = 0;
+		gridLayout.marginWidth = 0;
+		gridLayout.marginHeight = 0;
+		setLayout(gridLayout);
+				
 		Label nameLabel = new Label(this, SWT.NONE);
 		nameLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		nameLabel.setText("Name:");
@@ -148,7 +153,7 @@ public class IsoItemComposite extends Composite
 	public void setMinMaxIsoValue(final double min, final double max)
 	{
 		isoSurfaceScaleValue.setIncrement(1);
-		isoSurfaceScaleValue.setMaximumScale(1000);
+		isoSurfaceScaleValue.setMaximumScale(100);
 		
 		isoSurfaceScaleValue.setMaximumValue(max);
 		isoSurfaceScaleValue.setMinimumValue(min);
