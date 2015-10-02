@@ -1,5 +1,6 @@
 package org.dawnsci.mapping.ui.datamodel;
 
+import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
@@ -11,12 +12,14 @@ public class MappedDataBlock implements MapObject {
 	ILazyDataset dataset;
 	int yDim = 0;
 	int xDim = 1;
+	private double[] range;
 	
 	public MappedDataBlock(String name, ILazyDataset dataset, int xDim, int yDim) {
 		this.name = name;
 		this.dataset = dataset;
 		this.xDim = xDim;
 		this.yDim = yDim;
+		this.range = calculateRange(dataset);
 	}
 	
 	@Override
@@ -65,6 +68,21 @@ public class MappedDataBlock implements MapObject {
 	
 	public boolean isRemappingRequired(){
 		return xDim == yDim;
+	}
+
+	@Override
+	public double[] getRange() {
+		return range.clone();
+	}
+	
+	private double[] calculateRange(ILazyDataset block){
+		IDataset[] ax = MappingUtils.getAxesFromMetadata(block);
+		double[] r = new double[4];
+		r[0] = ax[xDim].min().doubleValue();
+		r[1] = ax[xDim].max().doubleValue();
+		r[2] = ax[yDim].min().doubleValue();
+		r[3] = ax[yDim].max().doubleValue();
+		return r;
 	}
 
 }

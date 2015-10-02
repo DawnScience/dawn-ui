@@ -24,6 +24,17 @@ public class ReMappedData extends MappedData {
 		
 	}
 	
+	@Override
+	protected double[] calculateRange(IDataset map){
+		IDataset[] ax = MappingUtils.getAxesForDimension(map,0);
+		double[] r = new double[4];
+		r[0] = ax[0].min().doubleValue();
+		r[1] = ax[0].max().doubleValue();
+		r[2] = ax[1].min().doubleValue();
+		r[3] = ax[1].max().doubleValue();
+		return r;
+	}
+	
 	public IDataset getMap(){
 		
 		if (reMapped == null) updateRemappedData(null);

@@ -16,6 +16,15 @@ import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
 public class MappedFileFactory {
 
 	
+	public static MappedDataFile getMappedDataFile(String path, AssociatedImage image) {
+		
+		MappedDataFile file = new MappedDataFile(path);
+		file.addMapObject(image.toString(), image);
+		
+		return file;
+		
+	}
+	
 	public static MappedDataFile getMappedDataFile(String path, MappedDataFileBean bean, IMonitor monitor) {
 		
 		MappedDataFile file = new MappedDataFile(path);

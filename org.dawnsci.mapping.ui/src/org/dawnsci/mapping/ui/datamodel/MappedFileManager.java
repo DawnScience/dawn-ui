@@ -12,6 +12,7 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -33,9 +34,18 @@ public class MappedFileManager {
 		this.viewer = viewer;
 	}
 	
+	public void removeFile(MappedDataFile file) {
+		mappedDataArea.removeFile(file);
+		plotManager.clearAll();
+		viewer.refresh();
+	}
+	
+	public boolean contains(String path) {
+		return mappedDataArea.contains(path);
+	}
 	
 	public void importFile(final String path) {
-		
+		if (contains(path)) return;
 		final ImportMappedDataWizard wiz = new ImportMappedDataWizard(path);
 		wiz.setNeedsProgressMonitor(true);
 		final WizardDialog wd = new WizardDialog(Display.getDefault().getActiveShell(),wiz);
@@ -49,7 +59,7 @@ public class MappedFileManager {
 				RegistrationDialog dialog = new RegistrationDialog(Display.getDefault().getActiveShell(), plotManager.getTopMap().getMap(),im);
 				if (dialog.open() != IDialogConstants.OK_ID) return;
 				AssociatedImage asIm = new AssociatedImage("Registered", (RGBDataset)dialog.getRegisteredImage());
-				mappedDataArea.getDataFile(0).addMapObject("Registered", asIm);
+				mappedDataArea.addMappedDataFile(MappedFileFactory.getMappedDataFile(path, asIm));
 				viewer.refresh();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -72,11 +82,18 @@ public class MappedFileManager {
 					monitor.beginTask("Loading data...", -1);
 					final MappedDataFile mdf = MappedFileFactory.getMappedDataFile(path, wiz.getMappedDataFileBean(),m);
 					if (m.isCancelled()) return;
-					mappedDataArea.addMappedDataFile(mdf);
+					
+					
 					Display.getDefault().syncExec(new Runnable() {
 						
 						@Override
 						public void run() {
+							boolean load = true;
+							if (!mappedDataArea.isInRange(mdf)) {
+								load = MessageDialog.openConfirm(viewer.getControl().getShell(), "No overlap!", "Are you sure you want to load this data?");
+							} 
+							
+							if (load)mappedDataArea.addMappedDataFile(mdf);
 							plotManager.clearAll();
 							plotManager.plotMap(null);
 							viewer.refresh();

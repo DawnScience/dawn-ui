@@ -146,10 +146,15 @@ public class MappingUtils {
 	}
 	
 	public static IDataset[] getAxesFromMetadata(IDataset data) {
+		data = data.getSliceView().squeeze();
+		return getAxesFromMetadata((ILazyDataset)data);
+	}
+	
+	public static IDataset[] getAxesFromMetadata(ILazyDataset data) {
 		IDataset x = null;
 		IDataset y = null;
 		
-		data = data.getSliceView().squeeze();
+		data = data.getSliceView();
 		
 		List<AxesMetadata> amd = null;
 		try {

@@ -24,6 +24,7 @@ public class MappedDataFile implements MapObject{
 	private Map<String,AssociatedImage> microscopeDataMap;
 	private int mapXDim;
 	private int mapYDim;
+	private double[] range;
 	
 	private final static Logger logger = LoggerFactory.getLogger(MappedDataFile.class);
 	
@@ -32,6 +33,10 @@ public class MappedDataFile implements MapObject{
 		fullDataMap = new HashMap<String,MappedDataBlock>();
 		mapDataMap = new HashMap<String,MappedData>();
 		microscopeDataMap = new HashMap<String,AssociatedImage>();
+	}
+	
+	public String getPath() {
+		return path;
 	}
 	
 	public MappedDataBlock addFullDataBlock(String datasetName, int xdim, int ydim) {
@@ -57,9 +62,29 @@ public class MappedDataFile implements MapObject{
 	
 	public void addMapObject(String name, MapObject object) {
 		
-		if (object instanceof MappedDataBlock) fullDataMap.put(name, (MappedDataBlock)object);
-		else if (object instanceof MappedData) mapDataMap.put(name, (MappedData)object);
-		else if (object instanceof AssociatedImage) microscopeDataMap.put(name, (AssociatedImage)object);
+		if (object instanceof MappedDataBlock) {
+			fullDataMap.put(name, (MappedDataBlock)object);
+		}else if (object instanceof MappedData) {
+			mapDataMap.put(name, (MappedData)object);
+		}else if (object instanceof AssociatedImage) {
+			microscopeDataMap.put(name, (AssociatedImage)object);
+		}
+		
+		updateRange(object);
+		
+	}
+	
+	private void updateRange(MapObject object) {
+		double[] r = object.getRange();
+		if (range == null) {
+			range = r;
+			return;
+		}
+		
+		range[0]  = r[0] < range[0] ? r[0] : range[0];
+		range[1]  = r[1] > range[1] ? r[1] : range[1];
+		range[2]  = r[2] < range[2] ? r[2] : range[2];
+		range[3]  = r[3] > range[3] ? r[3] : range[3];
 		
 	}
 	
@@ -78,6 +103,10 @@ public class MappedDataFile implements MapObject{
 	
 	public AssociatedImage getAssociatedImage() {
 		return microscopeDataMap.size() > 0 ? microscopeDataMap.values().iterator().next() : null;
+	}
+	
+	public double[] getRange(){
+		return range.clone(); 
 	}
 	
 	public void addNonMapImage(String imageName) {
