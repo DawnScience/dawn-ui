@@ -129,7 +129,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private boolean xTicksAtEnd, yTicksAtEnd;
 	
 	private double[] globalXRange;
-	private double[] globalYRange;
+	private double[] globalYRange;   // !! NOT USED
 		
 	public ImageTrace(final String name, 
 			          final Axis xAxis, 
@@ -271,7 +271,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * and the downsampled image data which it used.
 	 */
 	private ScaledImageData scaledData = new ScaledImageData();
-	private Image            scaledImage;
 
 	/**
 	 * number of entries in intensity scale
@@ -291,7 +290,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	protected boolean createScaledImage(ImageScaleType rescaleType, final IProgressMonitor monitor) {
 			
 		if (!imageCreationAllowed) return false;
-
+		
 		boolean requireImageGeneration = scaledData==null || 
 				                         scaledData.getDownsampledImageData() == null ||
 				                         rescaleType==ImageScaleType.FORCE_REIMAGE || 
@@ -1312,12 +1311,14 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public void dataChangePerformed(final DataEvent evt) {
 		if (Display.getDefault().getThread()==Thread.currentThread()) {
 		    setDataInternal(image, axes, plottingSystem.isRescale());
+		    updateImageDirty(ImageScaleType.FORCE_REIMAGE);
 		    repaint();
 		} else {
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
 					setDataInternal(image, axes, plottingSystem.isRescale());
-				    repaint();
+					updateImageDirty(ImageScaleType.FORCE_REIMAGE);
+					repaint();
 				}
 			});
 		}
@@ -1357,6 +1358,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		// We do not currently reflect it as it takes too long. Instead in the slice
 		// method, we allow for the fact that the dataset is in a different orientation to 
 		// what is plotted.
+		if (image==null) return false;
 		this.image = (Dataset)im;
 		if (this.mipMap!=null)  mipMap.clear();
 		if (scaledData!=null) scaledData.disposeImage();
@@ -1381,14 +1383,18 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			// We allow things to proceed without a warning.
 		}
 		
-		final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting.system");
-		if (store.getBoolean(PlottingConstants.SHOW_INTENSITY)) {
-			boolean isRGB = im instanceof RGBDataset;
-			if (isRGB && getPlottingSystem().isShowIntensity()) {
-				getPlottingSystem().setShowIntensity(false);
-			} else if (!isRGB && !getPlottingSystem().isShowIntensity()) {
-				getPlottingSystem().setShowIntensity(true);
+		try {
+			final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting.system");
+			if (store.getBoolean(PlottingConstants.SHOW_INTENSITY)) {
+				boolean isRGB = im instanceof RGBDataset;
+				if (isRGB && getPlottingSystem().isShowIntensity()) {
+					getPlottingSystem().setShowIntensity(false);
+				} else if (!isRGB && !getPlottingSystem().isShowIntensity()) {
+					getPlottingSystem().setShowIntensity(true);
+				}
 			}
+		} catch (Exception ne) { // Not the end of the world if this fails!
+			logger.error("Could not get scoped preference store org.dawnsci.plotting.system!", ne);
 		}
 
 		return true;
