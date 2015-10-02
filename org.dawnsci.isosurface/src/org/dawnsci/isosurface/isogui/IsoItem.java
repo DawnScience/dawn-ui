@@ -12,7 +12,7 @@ import org.eclipse.swt.graphics.RGB;
 
 public class IsoItem
 {
-	
+	// the values used within the GUI
 	private String name;
 	private double value = 0;
 	private double opacity = 0.5;
@@ -33,6 +33,7 @@ public class IsoItem
 				
 		final IOperationService service = (IOperationService) Activator
 				.getService(IOperationService.class);
+		
 		try
 		{
 			this.generator = (IOperation<MarchingCubesModel, Surface>) service
@@ -45,6 +46,11 @@ public class IsoItem
 		
 	}
 	
+	/**
+	 * Update the isosurfaces. 
+	 * Redeclares the surface data (cube size, value, etc.) and redraws the surface
+	 * 
+	 */
 	private void update()
 	{	
 		
@@ -59,12 +65,23 @@ public class IsoItem
 		
 	}
 	
+	/**
+	 * Destroy the item. Removes the trace and the surface from javafx.
+	 */
 	public void destroy()
 	{
 		// removes the trace and the isosurface from the javafx class
 		job.destroy();
 	}
 	
+	/**
+	 * Declare the information required for the item.
+	 * @param job - The job used to compute the surface.
+	 * @param startingValue - The starting IsoValue
+	 * @param startingBoxSize - The starting Box Size. int[3]
+	 * @param startingOpacity - The starting opacity (transparency).
+	 * @param startingColour - The starting colour.
+	 */
 	public void setInfo(IsosurfaceJob job, double startingValue, int[] startingBoxSize, double startingOpacity, Color startingColour)
 	{
 		
@@ -77,6 +94,10 @@ public class IsoItem
 		this.colour = new RGB(startingColour.getRed(),startingColour.getGreen(), startingColour.getBlue());
 	}
 	
+	/**
+	 * Get the job
+	 * @return IsosurfaceJob - The job
+	 */
 	public IsosurfaceJob getJob()
 	{
 		return this.job;

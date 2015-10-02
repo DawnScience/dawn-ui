@@ -31,6 +31,10 @@ public class IsoItemComposite extends Composite
 		createUI();
 	}
 	
+	/**
+	 * Generate the UI to edit the Item
+	 * 
+	 */
 	private void createUI()
 	{
 		// generate the GUI

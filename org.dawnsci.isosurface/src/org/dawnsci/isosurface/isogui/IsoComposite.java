@@ -22,7 +22,7 @@ public class IsoComposite extends Composite
 	private ILazyDataset slice;
 	private double min, max; // !! try and remove these, seem unnecessary
 		
-	private static int ISO_COUNT = 0; // !! i don't like this
+	private static int ISO_COUNT = 0; // keeps count the number of items created
 		
 	public IsoComposite(Composite parent, int style, IPlottingSystem system, ILazyDataset slice)
 	{
@@ -36,11 +36,18 @@ public class IsoComposite extends Composite
 		createContent();
 	}
 	
+	/**
+	 * Set the data sliced to be used by the job
+	 * @param slice - The slice
+	 */
 	public void setSlice(ILazyDataset slice)
 	{
 		this.slice = slice;
 	}
 	
+	/**
+	 * create the gui content
+	 */
 	private void createContent()
 	{
 		this.items = new VerticalListEditor(this, SWT.NONE)
@@ -87,7 +94,7 @@ public class IsoComposite extends Composite
 		this.items.setListHeight(80);
 		this.items.setRequireSelectionPack(false);
 		
-		this.items.setAdditionalFields(new String[] {"value"});
+		this.items.setAdditionalFields(new String[] {"value", "opacity"});
 		this.items.setColumnWidths(new int[] { 50, 50, 50, 50, 50, 50 });
 		this.items.setShowAdditionalFields(true);
 		
@@ -106,14 +113,23 @@ public class IsoComposite extends Composite
 		sc.setMinSize(itemComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
 	}
-	public void setminMaxIsoValue(double min, double max)
+	
+	/**
+	 * set the min and max iso value to be used
+	 * @param min - The new minimum
+	 * @param max - The new maximum
+	 */
+	public void setminMaxIsoValue(double min, double max) // !! look into changing
 	{
 		this.min = min;
 		this.max = max;
 		itemComp.setMinMaxIsoValue(min, max);
 	}
 		
-	
+	/**
+	 * Get the list of items
+	 * @return the item list
+	 */
 	public VerticalListEditor getItems()
 	{
 		return this.items;

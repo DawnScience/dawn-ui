@@ -55,7 +55,6 @@ public class IsosurfaceTool extends AbstractSlicingTool
 	
 	public IsosurfaceTool()
 	{
-		
 		this.dimensionalListener = new DimensionalListener()
 		{
 			@Override
