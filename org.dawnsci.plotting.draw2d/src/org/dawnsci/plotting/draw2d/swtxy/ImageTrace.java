@@ -1018,7 +1018,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		 */
 		if (scaledData.getScaledImage()==null || !isKeepAspectRatio() || lastAspectRatio!=isKeepAspectRatio()) {
 			boolean imageReady = createScaledImage(ImageScaleType.NO_REIMAGE, null);
-			if (!imageReady) {
+			if (!imageReady && dirty == null) {
 				return;
 			}
 			lastAspectRatio = isKeepAspectRatio();
@@ -1309,6 +1309,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * Called when the internal data of image has changed.
 	 */
 	public void dataChangePerformed(final DataEvent evt) {
+		
 		if (Display.getDefault().getThread()==Thread.currentThread()) {
 		    setDataInternal(image, axes, plottingSystem.isRescale());
 		    updateImageDirty(ImageScaleType.FORCE_REIMAGE);
