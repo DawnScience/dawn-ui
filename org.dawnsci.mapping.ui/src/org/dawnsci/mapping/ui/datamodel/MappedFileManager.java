@@ -44,32 +44,7 @@ public class MappedFileManager {
 		return mappedDataArea.contains(path);
 	}
 	
-	public void importFile(final String path) {
-		if (contains(path)) return;
-		final ImportMappedDataWizard wiz = new ImportMappedDataWizard(path);
-		wiz.setNeedsProgressMonitor(true);
-		final WizardDialog wd = new WizardDialog(Display.getDefault().getActiveShell(),wiz);
-		wd.setPageSize(new Point(900, 500));
-		wd.create();
-		
-		if (wiz.isImageImport()) {
-			IDataset im;
-			try {
-				im = LocalServiceManager.getLoaderService().getDataset(path, null);
-				RegistrationDialog dialog = new RegistrationDialog(Display.getDefault().getActiveShell(), plotManager.getTopMap().getMap(),im);
-				if (dialog.open() != IDialogConstants.OK_ID) return;
-				AssociatedImage asIm = new AssociatedImage("Registered", (RGBDataset)dialog.getRegisteredImage());
-				mappedDataArea.addMappedDataFile(MappedFileFactory.getMappedDataFile(path, asIm));
-				viewer.refresh();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return;
-		}
-
-		if (wd.open() == WizardDialog.CANCEL) return;
-		
+	public void importFile(final String path, final MappedDataFileBean bean) {
 		ProgressMonitorDialog pm = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
 		
 		try {
@@ -80,7 +55,7 @@ public class MappedFileManager {
 						InterruptedException {
 					IMonitor m = new ProgressMonitorWrapper(monitor);
 					monitor.beginTask("Loading data...", -1);
-					final MappedDataFile mdf = MappedFileFactory.getMappedDataFile(path, wiz.getMappedDataFileBean(),m);
+					final MappedDataFile mdf = MappedFileFactory.getMappedDataFile(path, bean, m);
 					if (m.isCancelled()) return;
 					
 					
@@ -113,6 +88,37 @@ public class MappedFileManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		
+	}
+	
+	public void importFile(final String path) {
+		if (contains(path)) return;
+		final ImportMappedDataWizard wiz = new ImportMappedDataWizard(path);
+		wiz.setNeedsProgressMonitor(true);
+		final WizardDialog wd = new WizardDialog(Display.getDefault().getActiveShell(),wiz);
+		wd.setPageSize(new Point(900, 500));
+		wd.create();
+		
+		if (wiz.isImageImport()) {
+			IDataset im;
+			try {
+				im = LocalServiceManager.getLoaderService().getDataset(path, null);
+				RegistrationDialog dialog = new RegistrationDialog(Display.getDefault().getActiveShell(), plotManager.getTopMap().getMap(),im);
+				if (dialog.open() != IDialogConstants.OK_ID) return;
+				AssociatedImage asIm = new AssociatedImage("Registered", (RGBDataset)dialog.getRegisteredImage());
+				mappedDataArea.addMappedDataFile(MappedFileFactory.getMappedDataFile(path, asIm));
+				viewer.refresh();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return;
+		}
+
+		if (wd.open() == WizardDialog.CANCEL) return;
+		
+		importFile(path, wiz.getMappedDataFileBean());
 		
 	}
 	
