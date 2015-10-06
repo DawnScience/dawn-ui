@@ -14,13 +14,13 @@ import java.util.Set;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.plotting.services.util.DatasetTitleUtils;
+import org.dawnsci.processing.ui.ServiceHolder;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext.ConversionScheme;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
-import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.dataset.slicer.Slicer;
@@ -67,11 +67,7 @@ import org.slf4j.LoggerFactory;
 
 public class SetUpProcessWizardPage extends WizardPage {
 
-	private static ILoaderService lservice;
-	public static void setLoaderService(ILoaderService s) {
-		lservice = s;
-	}
-	public SetUpProcessWizardPage() {// Used by OSGI only.
+	public SetUpProcessWizardPage() {
 		super("Set up input data");
 	}
 
@@ -241,7 +237,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 						// TODO Changed this to leave loading image stacks
 						// out of this because we are looking for dsName
 						// which should be there - is this right?
-						final IDataHolder dh  = lservice.getData(context.getFilePaths().get(0), null);
+						final IDataHolder dh  = ServiceHolder.getLoaderService().getData(context.getFilePaths().get(0), null);
 						ILazyDataset lzGlobal = dh.getLazyDataset(dsName);
 						//local copy since we are messing with metadata
 						final ILazyDataset lz = lzGlobal.getSliceView();
@@ -304,7 +300,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 		String path = context.getFilePaths().get(0);
 		IDataHolder dh;
 		try {
-			dh = lservice.getData(path, new IMonitor.Stub());
+			dh = ServiceHolder.getLoaderService().getData(path, new IMonitor.Stub());
 			ILazyDataset lazyDataset = dh.getLazyDataset(selection.getKey());
 			//local copy so not to change data holder copies metadata
 			lazyDataset = lazyDataset.getSliceView();
@@ -320,7 +316,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 				}
 			}
 			
-			AxesMetadata ax = lservice.getAxesMetadata(lazyDataset, path, sliceComponent.getAxesNames());
+			AxesMetadata ax = ServiceHolder.getLoaderService().getAxesMetadata(lazyDataset, path, sliceComponent.getAxesNames());
 			lazyDataset.setMetadata(ax);
 			IDataset firstSlice = Slicer.getFirstSlice(lazyDataset, sliceDims);
 			
@@ -334,7 +330,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 	private void updateDataset(String name) {
 		IDataHolder dh;
 		try {
-			dh = lservice.getData(context.getFilePaths().get(0), null);
+			dh = ServiceHolder.getLoaderService().getData(context.getFilePaths().get(0), null);
 			ILazyDataset lz  = dh.getLazyDataset(name);
 			//take local copy!
 			lz = lz.getSliceView();

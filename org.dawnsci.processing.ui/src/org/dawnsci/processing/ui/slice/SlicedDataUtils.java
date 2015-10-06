@@ -10,18 +10,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.dawnsci.processing.ui.ServiceHolder;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext.ConversionScheme;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
-import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.api.metadata.MaskMetadata;
-import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.AggregateDataset;
-import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
@@ -29,11 +26,6 @@ import org.eclipse.swt.widgets.Display;
 
 public class SlicedDataUtils {
 
-	private static ILoaderService lservice;
-	public static void setLoaderService(ILoaderService s) {
-		lservice = s;
-	}
-	
 	public static void plotDataWithMetadata(IDataset data, final IPlottingSystem system, int[] dataDims) throws Exception {
 		
 		IDataset x = null;
@@ -81,7 +73,6 @@ public class SlicedDataUtils {
 	public static IDataset[] getAxesFromMetadata(IDataset data) {
 		IDataset x = null;
 		IDataset y = null;
-		IDataset mask = null;
 		
 		data = data.getSliceView().squeeze();
 		
@@ -126,7 +117,7 @@ public class SlicedDataUtils {
 		IMetadata meta;
 		final Map<String, int[]>     names  = new HashMap<String, int[]>();
 		try {
-			meta = lservice.getMetadata(path, null);
+			meta = ServiceHolder.getLoaderService().getMetadata(path, null);
 		} catch (Exception e) {
 			return names;
 		}
@@ -151,7 +142,7 @@ public class SlicedDataUtils {
         if (names.isEmpty()) {
         	IDataHolder dataHolder;
 			try {
-				dataHolder = lservice.getData(path, null);
+				dataHolder = ServiceHolder.getLoaderService().getData(path, null);
 			} catch (Exception e) {
 				return names;
 			}
