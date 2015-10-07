@@ -57,6 +57,17 @@ public class CompositeTrace extends Figure implements ICompositeTrace {
 		double ymin = y.min().doubleValue();
 		double ymax = y.max().doubleValue();
 		
+		double xLen = x.getSize();
+		double yLen = y.getSize();
+		
+		double xPix = ((xmax-xmin)/(xLen-1))/2;
+		double yPix = ((ymax-ymin)/(yLen-1))/2;
+		
+		xmin -= xPix;
+		ymin -= yPix;
+		xmax += xPix;
+		ymax += yPix;
+		
 		if (xRange == null) {
 			xRange = new double[]{xmin,xmax};
 			yRange = new double[]{ymin,ymax};

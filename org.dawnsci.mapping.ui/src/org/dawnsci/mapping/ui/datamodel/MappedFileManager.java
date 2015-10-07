@@ -46,7 +46,7 @@ public class MappedFileManager {
 	}
 	
 	public void importFile(final String path, final MappedDataFileBean bean) {
-		
+		if (contains(path)) return;
 		IProgressService service = (IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class);
 		try {
 			service.busyCursorWhile(new IRunnableWithProgress() {
