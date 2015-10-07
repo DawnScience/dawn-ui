@@ -40,7 +40,7 @@ public class ColorUtility {
 		new Color(102, 255, 255),
 		new Color(102, 102, 255),
 		new Color(153, 153, 0),
-		new Color(204, 204, 205), 
+		new Color(150, 150, 150), 
 		new Color(255, 204, 204),
 		new Color(77, 175, 74)
 	};
