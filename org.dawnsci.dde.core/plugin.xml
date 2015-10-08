@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+      point="org.eclipse.core.resources.natures"
+      id="DAWNExtensionNature"
+      name="DAWN Extension">
+      <runtime>
+         <run class="org.dawnsci.dde.core.DAWNExtensionNature">
+         </run>
+      </runtime>
+   <requires-nature id="org.eclipse.pde.PluginNature"/>
+   </extension>
+</plugin>
