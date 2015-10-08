@@ -1,0 +1,109 @@
+/*-
+ *******************************************************************************
+ * Copyright (c) 2015 Diamond Light Source Ltd.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    Torkild U. Resheim - initial API and implementation
+ *******************************************************************************/
+package org.dawnsci.dde.templates;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.pde.core.plugin.IPluginBase;
+import org.eclipse.pde.core.plugin.IPluginElement;
+import org.eclipse.pde.core.plugin.IPluginExtension;
+import org.eclipse.pde.core.plugin.IPluginModelFactory;
+import org.eclipse.pde.core.plugin.IPluginReference;
+import org.eclipse.pde.ui.templates.PluginReference;
+
+/**
+ * This type is used to set parameters for the "Operation" extension point. A
+ * wizard page will be generated for the user to set values. Obtained values are
+ * inserted into "plugin.xml" when this template's wizard is executing and also
+ * used when code and other files are generated.
+ */
+public class OperationTemplate extends DAWNTemplateSection {
+
+	private static final String EXTENSION_POINT = "org.eclipse.dawnsci.analysis.api.operation";
+	private static final String KEY_DESCRIPTION = "description";
+	private static final String KEY_OPERATION_NAME = "operationName";
+	private static final String KEY_OPERATION_ID = "operationId";
+	
+	public OperationTemplate(){
+		setPageCount(1);
+		// add all the options we need and set default values
+		addOption(KEY_PACKAGE_NAME, "Java package name", (String)null, 0);
+		addOption(KEY_CLASS_NAME, "Java class name", (String)null, 0);
+		addOption(KEY_DESCRIPTION, "Operation description", (String)null, 0);
+		addOption(KEY_OPERATION_NAME, "Operation name", (String)null, 0);
+		addOption(KEY_OPERATION_ID, "Operation identifier", (String)null, 0);
+	}
+		
+	@Override
+	public void addPages(Wizard wizard) {
+		// create one wizard page for the options
+		WizardPage p1 = createPage(0);
+		p1.setTitle("Operation");
+		p1.setDescription("Operation options");
+		wizard.addPage(p1);
+		markPagesAdded();
+	}
+
+	public IPluginReference[] getDependencies(String schemaVersion) {
+		// add _all_ required dependencies, no particular version 
+		return new IPluginReference[] {
+				new PluginReference("org.eclipse.dawnsci.analysis.api", null, 0),
+				new PluginReference("org.eclipse.dawnsci.analysis.dataset", null, 0),
+				new PluginReference("uk.ac.diamond.scisoft.analysis.processing", null, 0),
+				new PluginReference("uk.ac.diamond.scisoft.analysis", null, 0),
+				new PluginReference("org.eclipse.core.runtime", null, 0),
+				new PluginReference("org.eclipse.core.resources", null, 0),
+				};
+	}
+
+	@Override
+	public String getUsedExtensionPoint() {
+		return EXTENSION_POINT;
+	}
+
+	@Override
+	public String[] getNewFiles() {
+		return new String[0];
+	}
+
+	@Override
+	public String getSectionId() {
+		return "operation";
+	}
+
+	@Override
+	protected void updateModel(IProgressMonitor monitor) throws CoreException {
+		IPluginBase plugin = model.getPluginBase();
+		IPluginExtension extension = createExtension(EXTENSION_POINT, true);
+		IPluginModelFactory factory = model.getPluginFactory();
+
+		IPluginElement setElement = factory.createElement(extension);
+		setElement.setName("operation");
+		setElement.setAttribute("class", getStringOption(KEY_PACKAGE_NAME) + "." + getStringOption(KEY_CLASS_NAME));
+		setElement.setAttribute(KEY_DESCRIPTION, getStringOption(KEY_DESCRIPTION));
+		setElement.setAttribute("id", getStringOption(KEY_OPERATION_ID));
+		setElement.setAttribute("name", getStringOption(KEY_OPERATION_NAME));
+		setElement.setAttribute("visible", "true");
+
+		extension.add(setElement);
+		if (!extension.isInTheModel())
+			plugin.add(extension);
+	}
+
+	@Override
+	protected String getClassName() {
+		return "Operation";
+	}
+
+}

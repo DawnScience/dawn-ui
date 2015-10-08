@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+	<extension 
+        point="org.eclipse.ui.ide.projectNatureImages"> 
+		<image 
+            id="org.dawnsci.dde.ui.DAWNExtensionImage" 
+            natureId="org.dawnsci.dde.core.DAWNExtensionNature" 
+            icon="icons/full/misc16/nature.gif"> 
+        </image> 
+   </extension>
+ <extension
+       point="org.eclipse.ui.newWizards">
+    <wizard
+          canFinishEarly="false"
+          category="org.dawnsci.dde.ui.category"
+          class="org.dawnsci.dde.ui.NewDAWNExtensionProjectWizard"
+          finalPerspective="org.eclipse.pde.ui.PDEPerspective"
+          hasPages="true"
+          icon="icons/full/obj16/new_dawn_prj_wiz.gif"
+          id="org.dawnsci.dde.ui.wizards.NewDAWNExtensionProject"
+          name="DAWN Plug-in Project"
+          preferredPerspectives="org.eclipse.pde.ui.PDEPerspective"
+          project="true">
+    </wizard>
+    <category
+          id="org.dawnsci.dde.ui.category"
+          name="DAWN Plug-in Development">
+    </category>
+ </extension>
+ <extension
+       point="org.eclipse.ui.perspectiveExtensions">
+    <perspectiveExtension
+          targetID="org.eclipse.pde.ui.PDEPerspective">
+       <newWizardShortcut
+             id="org.dawnsci.dde.ui.wizards.NewDAWNExtensionProject">
+       </newWizardShortcut>
+    </perspectiveExtension>
+ </extension>
+
+</plugin>
