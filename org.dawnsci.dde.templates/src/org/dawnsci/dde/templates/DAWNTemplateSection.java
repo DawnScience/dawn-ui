@@ -16,15 +16,45 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.ui.IFieldData;
 import org.eclipse.pde.ui.templates.OptionTemplateSection;
 import org.osgi.framework.Bundle;
-
+/**
+ * This type is the abstract superclass for the DAWN extension templates. 
+ */
 public abstract class DAWNTemplateSection extends OptionTemplateSection {
 
 	protected static final String BUNDLE_ID = "org.dawnsci.dde.templates";
 	protected static final String KEY_CLASS_NAME = "className";
+	protected static final String KEY_EXTENSION_NAME = "extensionName";
+	protected static final String KEY_EXTENSION_ID = "extensionId";
+
+	public DAWNTemplateSection(){
+		setPageCount(1);
+		setOptions();
+	}
+	@Override
+
+	public void addPages(Wizard wizard) {
+		// create one wizard page for the options
+		WizardPage p1 = createPage(0);
+		p1.setTitle(getPageTitle());
+		p1.setDescription(getPageDescription());
+		wizard.addPage(p1);
+		markPagesAdded();
+	}
+
+	protected abstract String getPageDescription();
+	
+	protected abstract String getPageTitle();
+		
+	/**
+	 * Implement to initially create all options and set their default values.
+	 */
+	protected abstract void setOptions();
 
 	protected ResourceBundle getPluginResourceBundle() {
 		Bundle bundle = Platform.getBundle(BUNDLE_ID);

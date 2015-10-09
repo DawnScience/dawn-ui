@@ -31,7 +31,7 @@
  <extension
        point="org.eclipse.ui.perspectiveExtensions">
     <perspectiveExtension
-          targetID="org.eclipse.pde.ui.PDEPerspective">
+          targetID="*">
        <newWizardShortcut
              id="org.dawnsci.dde.ui.wizards.NewDAWNExtensionProject">
        </newWizardShortcut>
