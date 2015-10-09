@@ -39,13 +39,7 @@ public class AssociatedImage implements MapObject {
 	}
 	
 	protected double[] calculateRange(IDataset map){
-		IDataset[] ax = MappingUtils.getAxesFromMetadata(map);
-		double[] r = new double[4];
-		r[0] = ax[1].min().doubleValue();
-		r[1] = ax[1].max().doubleValue();
-		r[2] = ax[0].min().doubleValue();
-		r[3] = ax[0].max().doubleValue();
-		return r;
+		return MappingUtils.getGlobalRange(map);
 	}
 
 	@Override

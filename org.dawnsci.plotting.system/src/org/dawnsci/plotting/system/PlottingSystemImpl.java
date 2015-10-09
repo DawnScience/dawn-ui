@@ -54,7 +54,6 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.remote.RemotePlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ColorOption;
-import org.eclipse.dawnsci.plotting.api.trace.ICompositeTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImage3DTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageStackTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
@@ -683,13 +682,6 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	@Override
 	public IImageTrace createImageTrace(String traceName) {
 		IImageTrace trace = (IImageTrace)getViewer(IImageTrace.class).createTrace(traceName, IImageTrace.class);
-		fireTraceCreated(new TraceEvent(trace));
-		return trace;
-	}
-	
-	@Override
-	public ICompositeTrace createCompositeTrace(String traceName) {
-		ICompositeTrace trace = (ICompositeTrace)getViewer(ICompositeTrace.class).createTrace(traceName, ICompositeTrace.class);
 		fireTraceCreated(new TraceEvent(trace));
 		return trace;
 	}

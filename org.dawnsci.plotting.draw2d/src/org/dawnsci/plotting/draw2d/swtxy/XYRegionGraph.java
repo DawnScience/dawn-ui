@@ -118,12 +118,6 @@ public class XYRegionGraph extends XYGraph {
 		RegionArea ra = (RegionArea)getPlotArea();
 		return ra.createImageTrace(name, xAxis, yAxis, intensity);
 	}
-	
-
-	public CompositeTrace createCompositeTrace(String traceName, Axis xAxis, Axis yAxis) {
-		RegionArea ra = (RegionArea)getPlotArea();
-		return ra.createCompositeTrace(traceName, xAxis, yAxis);
-	}
 
 	public ImageStackTrace createImageStackTrace(String name, Axis xAxis, Axis yAxis, ColorMapRamp intensity) {
 		RegionArea ra = (RegionArea)getPlotArea();
@@ -141,12 +135,6 @@ public class XYRegionGraph extends XYGraph {
 	}
 	public void removeVectorTrace(final VectorTrace trace) {
 		getRegionArea().removeVectorTrace(trace);
-	}
-	public void addCompositeTrace(final CompositeTrace trace) {
-		getRegionArea().addCompositeTrace(trace);
-	}
-	public void removeCompositeTrace(final CompositeTrace trace) {
-		getRegionArea().removeCompositeTrace(trace);
 	}
 
 	public boolean addRegionListener(IRegionListener l) {
@@ -187,10 +175,6 @@ public class XYRegionGraph extends XYGraph {
 			for (ImageTrace trace : getRegionArea().getImageTraces().values()) {
 				trace.performAutoscale();
 			}
-			
-		} else if (getRegionArea().getCompositeTrace() != null){
-			
-			getRegionArea().getCompositeTrace().performAutoscale();
 			
 		} else {
 			

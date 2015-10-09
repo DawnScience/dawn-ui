@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.mapping.ui.MappingUtils;
+import org.dawnsci.plotting.draw2d.swtxy.ImageTrace;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
@@ -21,7 +22,7 @@ import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
-import org.eclipse.dawnsci.plotting.api.trace.ICompositeTrace;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -235,11 +236,14 @@ public class RegistrationDialog extends Dialog {
 		im.addMetadata(ax);
 		registered.addMetadata(ax);
 		systemComposite.clear();
-		ICompositeTrace comp = this.systemComposite.createCompositeTrace("composite1");
+		double[] range = MappingUtils.getGlobalRange(im,map);
 
-		comp.add(MappingUtils.buildTrace(im, systemComposite),0);
-		comp.add(MappingUtils.buildTrace(map, systemComposite,120),1);
-		systemComposite.addTrace(comp);
+		IImageTrace image = MappingUtils.buildTrace(im, systemComposite);
+		image.setGlobalRange(range);
+		IImageTrace mapim = MappingUtils.buildTrace(map, systemComposite,120);
+		mapim.setGlobalRange(range);
+		systemComposite.addTrace(image);
+		systemComposite.addTrace(mapim);
 		
 	}
 	
