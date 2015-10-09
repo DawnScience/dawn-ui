@@ -307,6 +307,7 @@ public class MapPlotManager {
 					t.setGlobalRange(area.getRange());
 					t.setAlpha(((MappedData)o).getTransparency());
 					this.map.addTrace(t);
+
 				}
 				
 				if (o instanceof AssociatedImage) {
@@ -317,7 +318,7 @@ public class MapPlotManager {
 				}
 				
 			}
-			this.map.autoscaleAxes();
+			this.map.repaint();
 		} catch (Exception e) {
 			logger.error("Error plotting mapped data", e);
 		}

@@ -699,6 +699,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 //		xAxis.setRange(lower, upper);
 		xAxis.setTicksAtEnds(false);
 		yAxis.setTicksAtEnds(false);
+		updateImageDirty(ImageScaleType.FORCE_REIMAGE);
 //		performAutoscale();
 	}
 	
