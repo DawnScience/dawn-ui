@@ -4,9 +4,14 @@
    <extension
          point="org.eclipse.pde.ui.newExtension">
       <wizard
-            id="org.eclipse.dawnsci.analysis.api.templates.OperationWizard"
+            id="org.dawnsci.dde.templates.OperationWizard"
             name="Operation"
-            template="org.dawnsci.analysis.api.templates.OperationTemplate">
+            template="org.dawnsci.dde.templates.OperationTemplate">
+      </wizard>
+      <wizard
+            id="org.dawnsci.dde.templates.LoaderWizard"
+            name="Loader"
+            template="org.dawnsci.dde.templates.LoaderTemplate">
       </wizard>
    </extension>
    <extension
@@ -14,8 +19,14 @@
       <template
             class="org.dawnsci.dde.templates.OperationTemplate"
             contributingId="org.eclipse.dawnsci.analysis.api.operation"
-            id="org.dawnsci.analysis.api.templates.OperationTemplate"
+            id="org.dawnsci.dde.templates.OperationTemplate"
             name="Operation">
+      </template>
+      <template
+            class="org.dawnsci.dde.templates.LoaderTemplate"
+            contributingId="uk.ac.diamond.scisoft.analysis.io.loader"
+            id="org.dawnsci.dde.templates.LoaderTemplate"
+            name="Loader">
       </template>
    </extension>
 </plugin>

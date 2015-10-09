@@ -13,8 +13,6 @@ package org.dawnsci.dde.templates;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.pde.core.plugin.IPluginBase;
 import org.eclipse.pde.core.plugin.IPluginElement;
 import org.eclipse.pde.core.plugin.IPluginExtension;
@@ -30,31 +28,15 @@ import org.eclipse.pde.ui.templates.PluginReference;
  */
 public class OperationTemplate extends DAWNTemplateSection {
 
+	private static final String CLASS_NAME = "Operation";
 	private static final String EXTENSION_POINT = "org.eclipse.dawnsci.analysis.api.operation";
 	private static final String KEY_DESCRIPTION = "description";
-	private static final String KEY_OPERATION_NAME = "operationName";
-	private static final String KEY_OPERATION_ID = "operationId";
 	
-	public OperationTemplate(){
-		setPageCount(1);
-		// add all the options we need and set default values
-		addOption(KEY_PACKAGE_NAME, "Java package name", (String)null, 0);
-		addOption(KEY_CLASS_NAME, "Java class name", (String)null, 0);
-		addOption(KEY_DESCRIPTION, "Operation description", (String)null, 0);
-		addOption(KEY_OPERATION_NAME, "Operation name", (String)null, 0);
-		addOption(KEY_OPERATION_ID, "Operation identifier", (String)null, 0);
+	@Override
+	protected String getClassName() {
+		return CLASS_NAME;
 	}
 		
-	@Override
-	public void addPages(Wizard wizard) {
-		// create one wizard page for the options
-		WizardPage p1 = createPage(0);
-		p1.setTitle("Operation");
-		p1.setDescription("Operation options");
-		wizard.addPage(p1);
-		markPagesAdded();
-	}
-
 	public IPluginReference[] getDependencies(String schemaVersion) {
 		// add _all_ required dependencies, no particular version 
 		return new IPluginReference[] {
@@ -68,18 +50,35 @@ public class OperationTemplate extends DAWNTemplateSection {
 	}
 
 	@Override
-	public String getUsedExtensionPoint() {
-		return EXTENSION_POINT;
-	}
-
-	@Override
 	public String[] getNewFiles() {
 		return new String[0];
+	}
+
+	protected String getPageDescription() {
+		return "Please specify parameters for the new operation extension.";
+	}
+
+	protected String getPageTitle() {
+		return "Operation Extension";
 	}
 
 	@Override
 	public String getSectionId() {
 		return "operation";
+	}
+
+	@Override
+	public String getUsedExtensionPoint() {
+		return EXTENSION_POINT;
+	}
+
+	protected void setOptions() {
+		// add all the options we need and set default values
+		addOption(KEY_PACKAGE_NAME, "Java package name", (String)null, 0);
+		addOption(KEY_CLASS_NAME, "Java class name", (String)null, 0);
+		addOption(KEY_DESCRIPTION, "Operation description", (String)null, 0);
+		addOption(KEY_EXTENSION_NAME, "Operation name", (String)null, 0);
+		addOption(KEY_EXTENSION_ID, "Operation identifier", (String)null, 0);
 	}
 
 	@Override
@@ -92,18 +91,14 @@ public class OperationTemplate extends DAWNTemplateSection {
 		setElement.setName("operation");
 		setElement.setAttribute("class", getStringOption(KEY_PACKAGE_NAME) + "." + getStringOption(KEY_CLASS_NAME));
 		setElement.setAttribute(KEY_DESCRIPTION, getStringOption(KEY_DESCRIPTION));
-		setElement.setAttribute("id", getStringOption(KEY_OPERATION_ID));
-		setElement.setAttribute("name", getStringOption(KEY_OPERATION_NAME));
+		setElement.setAttribute("id", getStringOption(KEY_EXTENSION_ID));
+		setElement.setAttribute("name", getStringOption(KEY_EXTENSION_NAME));
 		setElement.setAttribute("visible", "true");
 
 		extension.add(setElement);
-		if (!extension.isInTheModel())
+		if (!extension.isInTheModel()) {
 			plugin.add(extension);
-	}
-
-	@Override
-	protected String getClassName() {
-		return "Operation";
+		}
 	}
 
 }
