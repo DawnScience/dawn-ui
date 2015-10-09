@@ -12,15 +12,24 @@
 package org.dawnsci.dde.templates;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 
 import org.dawnsci.dde.core.DAWNExtensionNature;
 import org.eclipse.core.resources.ICommand;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
@@ -30,11 +39,13 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
+import org.junit.Test;
 
 public abstract class AbstractTemplateTest {
 	protected static final int RADIUS = 16;
 	protected static SWTWorkbenchBot bot;
 	protected static File screenshotsDir;
+
 	static {
 		screenshotsDir = new File("screenshots");
 		screenshotsDir.mkdirs();
@@ -56,7 +67,55 @@ public abstract class AbstractTemplateTest {
 
 	private int screenshotCount;
 
+	protected void buildProject(final IProject project, IProgressMonitor monitor) throws CoreException {
+		IWorkspaceRunnable build = new IWorkspaceRunnable() {
+			public void run(IProgressMonitor pm) throws CoreException {
+				SubMonitor localmonitor = SubMonitor.convert(pm, "Building", 1);
+				try {
+					if (localmonitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
+					project.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, localmonitor.newChild(1));
+				} finally {
+					localmonitor.done();
+				}
+			}
+		};
+		ResourcesPlugin.getWorkspace().run(build, monitor);
+	}
+
+	protected IMarker getLaunchProblem(IProject proj) throws CoreException {
+		IMarker[] markers = proj.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+		if (markers.length > 0) {
+			for (int i = 0; i < markers.length; i++) {
+				if (isLaunchProblem(markers[i])) {
+					return markers[i];
+				}
+			}
+		}
+		return null;
+	}
+
 	protected abstract String getProjectName();
+
+	protected boolean hasBuilder(String id) throws CoreException {
+		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(getProjectName());
+		IProjectDescription description = project.getDescription();
+		for (ICommand iCommand : description.getBuildSpec()) {
+			if (iCommand.getBuilderName().equals(id)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	protected boolean isLaunchProblem(IMarker problemMarker) throws CoreException {
+		Integer severity = (Integer) problemMarker.getAttribute(IMarker.SEVERITY);
+		if (severity != null) {
+			return severity.intValue() >= IMarker.SEVERITY_ERROR;
+		}
+		return false;
+	}
 
 	/**
 	 * Utility method for capturing a screenshot of a dialog or wizard window
@@ -108,22 +167,27 @@ public abstract class AbstractTemplateTest {
 	 * 
 	 * @throws CoreException
 	 */
+	@Test
 	public void testBuilders() throws CoreException {
 		assertTrue(hasBuilder("org.eclipse.jdt.core.javabuilder"));
 		assertTrue(hasBuilder("org.eclipse.pde.ManifestBuilder"));
 		assertTrue(hasBuilder("org.eclipse.pde.SchemaBuilder"));
 		assertTrue(hasBuilder("org.eclipse.pde.ds.core.builder"));
 	}
-	
-	protected boolean hasBuilder(String id) throws CoreException{
+
+	/**
+	 * Verifies that the project builds without any errors.
+	 * 
+	 * @throws CoreException
+	 */
+	@Test
+	public void testIncrementalBuild() throws CoreException {
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(getProjectName());
-		IProjectDescription description = project.getDescription();
-		for (ICommand iCommand : description.getBuildSpec()) {
-			if (iCommand.getBuilderName().equals(id)) {
-				return true;
-			}
+		buildProject(project, new NullProgressMonitor());
+		IMarker problem = getLaunchProblem(project);
+		if (problem != null) {
+			fail(problem.getAttribute(IMarker.MESSAGE).toString());
 		}
-		return false;
 	}
 
 	/**
@@ -132,6 +196,7 @@ public abstract class AbstractTemplateTest {
 	 * 
 	 * @throws CoreException
 	 */
+	@Test
 	public void testNatures() throws CoreException {
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(getProjectName());
 		assertTrue(project.hasNature(DAWNExtensionNature.IDENTIFIER));

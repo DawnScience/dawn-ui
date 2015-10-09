@@ -109,7 +109,7 @@ public class NewDAWNExtensionProjectWizard extends AbstractNewPluginTemplateWiza
 			"Manifest-Version: 1.0\n" + 
 			"Bundle-ManifestVersion: 2\n" + 
 			"Bundle-Name: @BundleName\n" + 
-			"Bundle-SymbolicName: @SymbolicName\n" + 
+			"Bundle-SymbolicName: @SymbolicName;singleton:=true\n" + 
 			"Bundle-Vendor: @BundleVendor\n" + 
 			"Bundle-Version: @Version\n" + 
 			"Bundle-RequiredExecutionEnvironment: JavaSE-1.7\n";
