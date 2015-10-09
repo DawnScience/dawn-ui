@@ -23,62 +23,70 @@ import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IIsosurfaceTrace;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
  * 
- * @author nnb55016
+ * @author Joel Ogden / nnb55016
  * The Job class for Isovalue visualisation feature
  */
 public class IsosurfaceJob extends Job {
 
 	private static final Logger logger = LoggerFactory.getLogger(IsosurfaceJob.class);
 	
-	private IIsosurfaceTrace trace;
  	private IOperation<MarchingCubesModel, Surface> generator;
  	final private IPlottingSystem system;
  	private String name;
  	
+ 	private double value;
+	private double opacity;
+	private int[] boxSize;
+	private RGB colour;
+ 	private String traceName;
+ 	
  	private ILazyDataset slice;
  	
-	public IsosurfaceJob(String name, IPlottingSystem system,  ILazyDataset slice)
-	{
+	public IsosurfaceJob(String name, IPlottingSystem system,  ILazyDataset slice, IOperation<MarchingCubesModel, Surface> generator)
 		
+	{
 		super(name);
-		this.name = name;
+		
 		setUser(false);
 		setPriority(Job.INTERACTIVE);
+		
+		
+		
+		this.name = name;
 		this.system = system;
 		this.slice = slice;
+		this.generator = generator;
 		
 	}
 	
-
-	
 	/**
-	 * Call to update when updating the isovalue or
-	 * box size.
-	 */
-//	public void compute(IOperation<MarchingCubesModel, Surface>  generator) {
-//		compute(null, generator);
-//	}
-	
-	/**
-	 * Call to update if lazy data changed.
-	 * Regenerates the box size and isoValue.
+	 * Call to calculate and draw the isosurface
 	 * 
-	 * @param slice
+	 * @param boxSize - representing XYZ sizes, Int[3] array
+	 * @param value - The value to be rendered
+	 * @param opacity - The transparency
+	 * @param colour - The colour of the surface
+	 * @param traceName - The name of the surface trace
+	 * 
 	 */
 	
-	public void compute(IOperation<MarchingCubesModel, Surface>  generator)
+	
+	public void compute(int[] boxSize, double value,  double opacity, RGB colour, String traceName)//, IIsosurfaceTrace trace)
 	{
-		this.generator = generator;
+		this.boxSize = boxSize;   
+		this.value = value;     
+		this.opacity = opacity;   
+		this.colour = colour;
+		this.traceName = traceName;
 		
 		cancel();
 		schedule();
-		
-		
 	}
 
 	
@@ -86,6 +94,12 @@ public class IsosurfaceJob extends Job {
 	protected IStatus run(IProgressMonitor monitor)
 	{
 		
+		MarchingCubesModel model = this.generator.getModel();
+		
+		model.setBoxSize(boxSize);
+		model.setOpacity(opacity);
+		model.setIsovalue(value);
+		model.setColour(colour.red, colour.green, colour.blue);
 		
 		if (Thread.currentThread() != null) // !! look into removing
 		{
@@ -102,7 +116,7 @@ public class IsosurfaceJob extends Job {
 			
 			try
 			{
-				if (generator.getModel().getLazyData() != slice) // !! is this a pointer check or a data check???
+				if (generator.getModel().getLazyData() != slice)
 				{
 					generator.getModel().setLazyData(slice);
 				}
@@ -115,11 +129,10 @@ public class IsosurfaceJob extends Job {
 				final int[] colour = surface.getColour();
 				final double opacity = surface.getOpacity();
 				
-				// if new slice given re-calculate
-				
-				if (trace == null)
+				// if trace has not been created -> create trace
+				if ((IIsosurfaceTrace) system.getTrace(traceName) == null)
 				{
-					trace = system.createIsosurfaceTrace("isosurface");
+					final IIsosurfaceTrace trace = system.createIsosurfaceTrace(this.traceName);
 				
 					trace.setData(points, textCoords, faces, null);
 					trace.setMaterial(colour[0], colour[1] , colour[2], opacity);
@@ -132,6 +145,8 @@ public class IsosurfaceJob extends Job {
 				}
 				else
 				{
+					IIsosurfaceTrace trace = (IIsosurfaceTrace) system.getTrace(traceName);
+					
 					trace.setData(points, textCoords, faces, null);
 					trace.setMaterial(colour[0], colour[1] , colour[2], opacity);
 				}
@@ -168,7 +183,7 @@ public class IsosurfaceJob extends Job {
 	
 	public void destroy()
 	{
-		trace.dispose();
+		system.getTrace(traceName).dispose();
 	}
 	
 	private void showErrorMessage(final String title, final String message) {

@@ -1,9 +1,7 @@
 package org.dawnsci.isosurface.isogui;
 
-import org.dawnsci.isosurface.tool.IsosurfaceJob;
 import org.dawnsci.plotting.util.ColorUtility;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.richbeans.widgets.selector.VerticalListEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -17,19 +15,17 @@ public class IsoComposite extends Composite
 {
 	
 	private VerticalListEditor items;
-	private IPlottingSystem system;
 	private IsoItemComposite itemComp;
 	private ILazyDataset slice;
 	private double min, max; // !! try and remove these, seem unnecessary
 		
 	private static int ISO_COUNT = 0; // keeps count the number of items created
 		
-	public IsoComposite(Composite parent, int style, IPlottingSystem system, ILazyDataset slice)
+	public IsoComposite(Composite parent, int style, ILazyDataset slice)
 	{
 		super(parent, style);
 		
 		this.slice = slice;
-		this.system = system;
 		
 		setLayout(new GridLayout(2, false));
 		
@@ -56,7 +52,7 @@ public class IsoComposite extends Composite
 			@Override
 			protected void beanRemove(Object bean)
 			{
-				((IsoItem)bean).destroy();
+				//((IsoItem)bean).destroy();
 			}
 			
 			// set the job of the bean
@@ -70,8 +66,7 @@ public class IsoComposite extends Composite
                         (int) Math.max(1, Math.ceil(slice.getShape()[0]/20.0))};
 				
 				// set the initial data
-				((IsoItem)bean).setInfo(
-						new IsosurfaceJob("isosurface job " +((IsoItem) bean).getName(), system, slice), 
+				((IsoItem)bean).setInfo( 
 						((min + max)/2),
 						defaultBoxSize,
 						0.5d,
@@ -83,6 +78,8 @@ public class IsoComposite extends Composite
 				}
 			}
 		};
+		
+		
 		
 		this.items.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
 		this.items.setMinItems(0);

@@ -33,10 +33,10 @@ public class IsoItemComposite extends Composite
 	
 	/**
 	 * Generate the UI to edit the Item
-	 * 
 	 */
 	private void createUI()
 	{
+		
 		// generate the GUI
 		GridLayout gridLayout = new GridLayout(5, false);
 		gridLayout.verticalSpacing = 0;
@@ -120,12 +120,6 @@ public class IsoItemComposite extends Composite
 		return this.value;
 	}
 
-	public void setValue(double d)
-	{
-		value.setValue(d);
-	}	
-	
-	
 	public IFieldWidget getIsoSurfaceScaleValue()
 	{	
 		value.setValue(isoSurfaceScaleValue.getValue()); //!! this is the problem
@@ -173,7 +167,7 @@ public class IsoItemComposite extends Composite
 			@Override
 			public void addValueListener(ValueListener l)
 			{
-				// do nothing
+				// do not add a value listener
 			}
 		});
 		
@@ -188,7 +182,7 @@ public class IsoItemComposite extends Composite
 			@Override
 			public void addValueListener(ValueListener l)
 			{
-				// do nothing
+				// do not add a value listener
 			}
 		});
 	}

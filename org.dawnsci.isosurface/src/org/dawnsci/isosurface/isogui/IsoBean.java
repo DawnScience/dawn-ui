@@ -15,12 +15,13 @@ import org.eclipse.dawnsci.plotting.api.trace.IIsosurfaceTrace;
 
 public class IsoBean
 {
-	private List<IsoItem> items;
+	private List<IsoItem> items;	
 	
 	public IsoBean()
 	{
 		items = new ArrayList<IsoItem>();
 	}
+	
 	
 	/**
 	 * Clear the list of items
@@ -57,5 +58,9 @@ public class IsoBean
 		items.add(newItem);
 	}
 	
+	public IsoItem getItem(int index)
+	{
+		return this.items.get(index);
+	}
 	
 }

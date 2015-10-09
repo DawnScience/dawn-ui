@@ -201,6 +201,7 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 	private void update()
 	{
 		PhongMaterial material;
+		isosurface.setOpacity(opacity);
 		if (rgb == null)
 		{
 			Color color = new Color(Color.GOLDENROD.getRed(), Color.GOLDENROD.getGreen(), Color.GOLDENROD.getBlue(), opacity);

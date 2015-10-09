@@ -132,7 +132,7 @@ public class SurfaceDisplayer extends Scene
 				
 		initialiseCamera();
 		createSceneGraph(root);
-		//createAxisGroup();
+		createAxisGroup();
 		setDepthBuffers();
 		initialiseTransforms();
 		addLights();

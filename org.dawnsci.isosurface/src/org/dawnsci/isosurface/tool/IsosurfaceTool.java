@@ -9,11 +9,15 @@
 package org.dawnsci.isosurface.tool;
 
 import org.dawnsci.isosurface.Activator;
+import org.dawnsci.isosurface.alg.MarchingCubesModel;
+import org.dawnsci.isosurface.alg.Surface;
 import org.dawnsci.isosurface.isogui.IsoBean;
 import org.dawnsci.isosurface.isogui.IsoComposite;
-import org.dawnsci.isosurface.isogui.IsoValueListener;
+import org.dawnsci.isosurface.isogui.IsoHandler;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.dawnsci.analysis.api.processing.IOperation;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
@@ -27,8 +31,6 @@ import org.eclipse.dawnsci.slicing.api.system.DimensionalListener;
 import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.dawnsci.slicing.api.system.SliceSource;
 import org.eclipse.dawnsci.slicing.api.tool.AbstractSlicingTool;
-import org.eclipse.richbeans.api.reflection.IBeanController;
-import org.eclipse.richbeans.reflection.BeanService;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -55,7 +57,7 @@ public class IsosurfaceTool extends AbstractSlicingTool
 	
 	public IsosurfaceTool()
 	{
-		this.dimensionalListener = new DimensionalListener()
+		this.dimensionalListener = new DimensionalListener() // !! what are these fore
 		{
 			@Override
 			public void dimensionsChanged(DimensionalEvent evt)
@@ -88,7 +90,6 @@ public class IsosurfaceTool extends AbstractSlicingTool
 		this.isoComp = new IsoComposite(
 						parent, 
 						SWT.FILL,
-						getSlicingSystem().getPlottingSystem(),
 						null);
 				
 		isoComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -156,21 +157,45 @@ public class IsosurfaceTool extends AbstractSlicingTool
 		isoComp.setminMaxIsoValue(min,max);
 		
 		isoComp.setSlice(finalSlice);
+		
+		try 
+		{
+			final IOperationService service = (IOperationService) Activator
+					.getService(IOperationService.class);
+			
+			IOperation<MarchingCubesModel, Surface> generator = (IOperation<MarchingCubesModel, Surface>) service
+					.create("org.dawnsci.isosurface.marchingCubes");
+			
+			IsoHandler isoController = new IsoHandler(
+					isoComp, 
+					isoBean, 
+					new IsosurfaceJob(
+							"isoSurfaceJob" , 
+							getSlicingSystem().getPlottingSystem(), 
+							finalSlice, 
+							generator));
+		}
+		catch (Exception e)
+		{
+			System.out.println("IsoController not initilised");
+			e.printStackTrace();
+		}
+		
 		// Connect the UI and bean
-		try
-		{
-			
-			final IBeanController controller = BeanService.getInstance()
-					.createController(isoComp, isoBean);
-			controller.addValueListener(new IsoValueListener(controller));
-			controller.beanToUI();
-			controller.switchState(true);
-			
-		}
-		catch (Exception e1)
-		{
-			e1.printStackTrace();
-		}
+//		try
+//		{
+//			System.out.println("isoBean - " + isoBean);
+//			final IBeanController controller = BeanService.getInstance()
+//					.createController(isoComp, isoBean);
+//			controller.addValueListener(new IsoValueListener(controller));
+//			controller.beanToUI();
+//			controller.switchState(true);
+//			
+//		}
+//		catch (Exception e1)
+//		{
+//			e1.printStackTrace();
+//		}
 		
 		isoComp.setVisible(true);
 		setControlsVisible(true);
