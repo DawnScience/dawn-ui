@@ -128,8 +128,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	private boolean xTicksAtEnd, yTicksAtEnd;
 	
-	private double[] globalXRange;
-	private double[] globalYRange;   // !! NOT USED
+	private double[] globalRange;
 		
 	public ImageTrace(final String name, 
 			          final Axis xAxis, 
@@ -341,7 +340,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				 
 			} else {
 				
-				if (globalXRange != null) {
+				if (globalRange != null) {
 					return buildImageRelativeToAxes(imageData);
 					
 				}
@@ -691,9 +690,16 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		
 	}
 	
-	public void setGlobalRanges(double[] globalX, double[] globalY) {
-		this.globalXRange = globalX;
-		this.globalYRange = globalY;
+	public void setGlobalRange(double[] globalRange) {
+		this.globalRange = globalRange;
+		yAxis.setTicksIndexBased(false);
+		xAxis.setTicksIndexBased(false);
+		if (xAxis instanceof AspectAxis)((AspectAxis)xAxis).setMaximumRange(globalRange[0], globalRange[1]);
+		if (yAxis instanceof AspectAxis)((AspectAxis)yAxis).setMaximumRange(globalRange[2], globalRange[3]);
+//		xAxis.setRange(lower, upper);
+		xAxis.setTicksAtEnds(false);
+		yAxis.setTicksAtEnds(false);
+//		performAutoscale();
 	}
 	
 	private final int getNumberOfDataPoints(double min, double max, IDataset axes) {
@@ -823,7 +829,17 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			
 			if (rescaleType==ImageScaleType.REHISTOGRAM) { // Avoids changing colouring to 
 				                                           // max and min of new selection.
-				Dataset  slice     = slice(getYAxis().getRange(), getXAxis().getRange(), (Dataset)getData());
+				
+				Range xRange = getXAxis().getRange();
+				Range yRange = getYAxis().getRange();
+				
+				if (globalRange != null) {
+					xRange = new Range(getPositionInAxis(xRange.getLower(), getAxes().get(0)), getPositionInAxis(xRange.getUpper(), getAxes().get(0)));
+					yRange = new Range(getPositionInAxis(yRange.getLower(), getAxes().get(1)), getPositionInAxis(yRange.getUpper(), getAxes().get(1)));
+				}
+				
+				
+				Dataset  slice     = slice(yRange, xRange, (Dataset)getData());
 				ImageServiceBean histoBean = imageServiceBean.clone();
 				histoBean.setImage(slice);
 				if (fullMask!=null) histoBean.setMask(slice(getYAxis().getRange(), getXAxis().getRange(), fullMask));
@@ -1219,6 +1235,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 
 	public void performAutoscale() {
+		
+		if (globalRange != null) {
+			xAxis.setRange(globalRange[0], globalRange[1]);
+			yAxis.setRange(globalRange[3], globalRange[2]);
+			return;
+		}
+		
 		final int[] shape = image.getShape();
 		switch(getImageOrigin()) {
 		case TOP_LEFT:
@@ -1274,6 +1297,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * Creates new axis bounds, updates the label data set
 	 */
 	private void createAxisBounds() {
+		
+		if (globalRange != null) {
+			((AspectAxis)getXAxis()).setLabelDataAndTitle(axes.get(0));
+			((AspectAxis)getYAxis()).setLabelDataAndTitle(axes.get(1));
+			return;
+		}
+		
 		final int[] shape = image.getShape();
 		if (getImageOrigin()==ImageOrigin.TOP_LEFT || getImageOrigin()==ImageOrigin.BOTTOM_RIGHT) {
 			setupAxis(getXAxis(), new Range(0,shape[1]), axes!=null&&axes.size()>0 ? axes.get(0) : null);

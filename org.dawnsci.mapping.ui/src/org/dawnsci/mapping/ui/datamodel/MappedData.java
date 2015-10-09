@@ -25,10 +25,10 @@ public class MappedData implements MapObject{
 	protected double[] calculateRange(IDataset map){
 		IDataset[] ax = MappingUtils.getAxesFromMetadata(map);
 		range = new double[4];
-		range[0] = ax[0].min().doubleValue();
-		range[1] = ax[0].max().doubleValue();
-		range[2] = ax[1].min().doubleValue();
-		range[3] = ax[1].max().doubleValue();
+		range[0] = ax[1].min().doubleValue();
+		range[1] = ax[1].max().doubleValue();
+		range[2] = ax[0].min().doubleValue();
+		range[3] = ax[0].max().doubleValue();
 		return range;
 	}
 	

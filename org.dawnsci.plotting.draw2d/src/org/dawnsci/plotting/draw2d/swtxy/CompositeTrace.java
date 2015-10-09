@@ -21,8 +21,8 @@ public class CompositeTrace extends Figure implements ICompositeTrace {
 	private IPlottingSystem plottingSystem;
 	private Axis    xAxis;
 	private Axis    yAxis;
-	private double[] xRange;
-	private double[] yRange;
+	private double[] axisRange;
+//	private double[] yRange;
 	
 	private List<ImageTrace> traces;
 
@@ -41,8 +41,8 @@ public class CompositeTrace extends Figure implements ICompositeTrace {
 
 	@Override
 	public void add(ITrace trace, int index) throws IllegalArgumentException {
-		yAxis.setTicksIndexBased(false);
-		xAxis.setTicksIndexBased(false);
+//		yAxis.setTicksIndexBased(false);
+//		xAxis.setTicksIndexBased(false);
 		
 		if (!(trace instanceof ImageTrace)) throw new IllegalArgumentException(trace.getClass()+ " are not supported currently!");
 		if (trace.getData() == null) throw new IllegalArgumentException("Please ensure that "+trace.getName() + " trace has data! ");
@@ -68,36 +68,46 @@ public class CompositeTrace extends Figure implements ICompositeTrace {
 		xmax += xPix;
 		ymax += yPix;
 		
-		if (xRange == null) {
-			xRange = new double[]{xmin,xmax};
-			yRange = new double[]{ymin,ymax};
+		if (axisRange == null) {
+			axisRange = new double[]{xmin,xmax,ymin,ymax};;
 		} else {
-			if (xmin < xRange[0]) xRange[0] = xmin;
-			if (ymin < yRange[0]) yRange[0] = ymin;
-			if (xmax > xRange[1]) xRange[1] = xmax;
-			if (ymax > yRange[1]) yRange[1] = ymax;
+			if (xmin < axisRange[0]) axisRange[0] = xmin;
+			if (ymin < axisRange[2]) axisRange[2] = ymin;
+			if (xmax > axisRange[1]) axisRange[1] = xmax;
+			if (ymax > axisRange[3]) axisRange[3] = ymax;
 		}
 		
+//		if (xRange == null) {
+//			xRange = new double[]{xmin,xmax};
+//			yRange = new double[]{ymin,ymax};
+//		} else {
+//			if (xmin < xRange[0]) xRange[0] = xmin;
+//			if (ymin < yRange[0]) yRange[0] = ymin;
+//			if (xmax > xRange[1]) xRange[1] = xmax;
+//			if (ymax > yRange[1]) yRange[1] = ymax;
+//		}
+		
 		ImageTrace image = (ImageTrace) trace;
-		image.setGlobalRanges(xRange, yRange);
+		image.setGlobalRange(axisRange);
 		if (index>-1) {
 		    traces.add(index, image);
 		} else {
 			traces.add(image);
 		}
 		
-		if (xAxis instanceof AspectAxis)((AspectAxis)xAxis).setMaximumRange(xRange[0], xRange[1]);
-		if (yAxis instanceof AspectAxis)((AspectAxis)yAxis).setMaximumRange(yRange[0], yRange[1]);
+//		if (xAxis instanceof AspectAxis)((AspectAxis)xAxis).setMaximumRange(axisRange[0], axisRange[1]);
+//		if (yAxis instanceof AspectAxis)((AspectAxis)yAxis).setMaximumRange(axisRange[2], axisRange[3]);
 		
 //		for (ImageTrace t : traces) t.setGlobalRanges(xRange, yRange);
 		
 		add(image);
 //		image.setAxes(((ImageTrace)trace).getAxes(), true);
 //		image.setImageOrigin(ImageOrigin.TOP_LEFT);
-		if (traces.size()==1) {
-			image.getXAxis().setRange(xRange[0], xRange[1]);;
-			image.getYAxis().setRange(yRange[1], yRange[0]);;
-		}
+//		if (traces.size()==1) {
+//			image.getXAxis().setRange(axisRange[0], axisRange[1]);
+//			image.getYAxis().setRange(axisRange[3], axisRange[2]);
+//		}
+		performAutoscale();
 	}
 	
 	public void removeImageTraces(){
@@ -116,8 +126,8 @@ public class CompositeTrace extends Figure implements ICompositeTrace {
 		if (traces == null || traces.isEmpty())  return;
 		
 		ImageTrace image = traces.get(0);
-			image.getXAxis().setRange(xRange[0], xRange[1]);;
-			image.getYAxis().setRange(yRange[1], yRange[0]);;
+			image.getXAxis().setRange(axisRange[0], axisRange[1]);
+			image.getYAxis().setRange(axisRange[3], axisRange[2]);
 		
 	}
 	
