@@ -1,5 +1,7 @@
 package org.dawnsci.dde.templates;
 
+import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
@@ -20,12 +22,13 @@ public class OperationTemplateTest extends AbstractTemplateTest {
 		bot = new SWTWorkbenchBot();
 		bot.viewByTitle("Welcome").close();
 	}
+	
 
 	@AfterClass
 	public static void sleep() {
 		bot.sleep(2000);
 	}
-
+	
 	/**
 	 * This test executes the wizard through the user interface. It is important
 	 * that this is the first test as the result will be used for subsequent
@@ -39,6 +42,7 @@ public class OperationTemplateTest extends AbstractTemplateTest {
 		bot.menu("File").menu("New").menu("DAWN Plug-in Project").click();
 		SWTBotShell shell = bot.shell("New DAWN Plug-in Project");
 		shell.activate();
+		// fill in first page
 		bot.textWithLabel("&Project name:").setText(PROJECT_NAME);
 		bot.textWithLabel("Identifier:").setText(PROJECT_NAME);
 		bot.textWithLabel("Version:").setText("1.0.0");
@@ -47,33 +51,43 @@ public class OperationTemplateTest extends AbstractTemplateTest {
 		bot.comboBoxWithLabel("Extension point identifier:").setSelection(EXTENSION_POINT);
 		takeScreenshot(shell.widget, EXTENSION_POINT);
 		bot.button("Next >").click();
+		// fill in second page
+		bot.textWithLabel("Java package name").setText("org.dawnsci.dde.test");
+		bot.textWithLabel("Java class name").setText("Operation");
+		bot.textWithLabel("Operation description").setText("A test operation");
+		bot.textWithLabel("Operation name").setText("Test Operation");
+		bot.textWithLabel("Operation identifier").setText("org.dawnsci.dde.test.Operation");
 		takeScreenshot(shell.widget, EXTENSION_POINT);
 		bot.button("Finish").click();
-	}
-
-	public void testDependencies() {
-		// TODO: Implement test
-	}
-
-	public void testManifest() {
-		// TODO: Implement test
-	}
-
-	public void testPlugin() {
-		// TODO: Implement test
-	}
-
-	public void testBuildProperties() {
-		// TODO: Implement test
+		// wait until the wizard is done
+		bot.waitUntil(shellCloses(shell));
 	}
 
 	public void testSourceFile() {
-		// TODO: Implement test
+		// TODO: Figure out a decent way of testing this
 	}
 
 	@Override
 	protected String getProjectName() {
 		return PROJECT_NAME;
+	}
+		
+	@Override
+	protected String getPluginContents(){
+		return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + 
+				"<?eclipse version=\"3.4\"?>\n" + 
+				"<plugin>\n" + 
+				"   <extension\n" + 
+				"         point=\"org.eclipse.dawnsci.analysis.api.operation\">\n" + 
+				"      <operation\n" + 
+				"            class=\"org.dawnsci.dde.test.Operation\"\n" + 
+				"            description=\"A test operation\"\n" + 
+				"            id=\"org.dawnsci.dde.test.Operation\"\n" + 
+				"            name=\"Test Operation\"\n" + 
+				"            visible=\"true\">\n" + 
+				"      </operation>\n" + 
+				"   </extension>\n" + 
+				"</plugin>\n";
 	}
 
 }

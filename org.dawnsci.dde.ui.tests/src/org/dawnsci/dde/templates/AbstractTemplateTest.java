@@ -14,10 +14,19 @@ package org.dawnsci.dde.templates;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 
+import org.apache.commons.io.IOUtils;
 import org.dawnsci.dde.core.DAWNExtensionNature;
 import org.eclipse.core.resources.ICommand;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -29,6 +38,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
@@ -42,9 +52,11 @@ import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.junit.Test;
 
 public abstract class AbstractTemplateTest {
-	protected static final int RADIUS = 16;
 	protected static SWTWorkbenchBot bot;
-	protected static File screenshotsDir;
+	
+	private static File screenshotsDir;
+	private static final int RADIUS = 16;
+	private int screenshotCount;
 
 	static {
 		screenshotsDir = new File("screenshots");
@@ -64,8 +76,6 @@ public abstract class AbstractTemplateTest {
 		}
 		gc.setAlpha(0xff);
 	}
-
-	private int screenshotCount;
 
 	protected void buildProject(final IProject project, IProgressMonitor monitor) throws CoreException {
 		IWorkspaceRunnable build = new IWorkspaceRunnable() {
@@ -96,7 +106,19 @@ public abstract class AbstractTemplateTest {
 		return null;
 	}
 
+	/**
+	 * Implement to return the name of the project.
+	 * 
+	 * @return the project name
+	 */
 	protected abstract String getProjectName();
+
+	/**
+	 * Implement to return the expected contents of <i>plugin.xml</i>
+	 * 
+	 * @return the plugin.xml contents
+	 */
+	protected abstract String getPluginContents();
 
 	protected boolean hasBuilder(String id) throws CoreException {
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(getProjectName());
@@ -120,11 +142,6 @@ public abstract class AbstractTemplateTest {
 	/**
 	 * Utility method for capturing a screenshot of a dialog or wizard window
 	 * into a file.
-	 * 
-	 * @param shell
-	 *            the dialog shell
-	 * @param file
-	 *            the file to save the image to
 	 */
 	protected void takeScreenshot(final Shell shell, final String templateName) {
 		shell.getDisplay().asyncExec(new Runnable() {
@@ -204,4 +221,61 @@ public abstract class AbstractTemplateTest {
 		assertTrue(project.hasNature("org.eclipse.jdt.core.javanature"));
 	}
 
+	/**
+	 * Tests the contents of <i>plugin.xml</i>. The test is a simple string
+	 * compare. It may be rewritten to test using internal PDE API.
+	 * @throws CoreException 
+	 * @throws IOException 
+	 */
+	@Test
+	public void testPlugin() throws CoreException, IOException {
+		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(getProjectName());
+		IFile file = project.getFile(new Path("plugin.xml"));
+		InputStream contents = file.getContents(false);
+		InputStream expected = new ByteArrayInputStream(getPluginContents().getBytes());
+		if (!isEqual(expected, contents)){
+			contents = file.getContents();
+			expected = new ByteArrayInputStream(getPluginContents().getBytes());
+			StringWriter sw = new StringWriter();
+			sw.write("Expected: \n");
+			IOUtils.copy(expected, sw);
+			sw.write("Found: \n");
+			IOUtils.copy(contents, sw);
+			fail(sw.toString());
+		}
+	}
+
+	private static boolean isEqual(InputStream i1, InputStream i2)
+	        throws IOException {
+
+	    ReadableByteChannel ch1 = Channels.newChannel(i1);
+	    ReadableByteChannel ch2 = Channels.newChannel(i2);
+
+	    ByteBuffer buf1 = ByteBuffer.allocateDirect(1024);
+	    ByteBuffer buf2 = ByteBuffer.allocateDirect(1024);
+
+	    try {
+	        while (true) {
+
+	            int n1 = ch1.read(buf1);
+	            int n2 = ch2.read(buf2);
+
+	            if (n1 == -1 || n2 == -1) return n1 == n2;
+
+	            buf1.flip();
+	            buf2.flip();
+
+	            for (int i = 0; i < Math.min(n1, n2); i++)
+	                if (buf1.get() != buf2.get())
+	                    return false;
+
+	            buf1.compact();
+	            buf2.compact();
+	        }
+
+	    } finally {
+	        if (i1 != null) i1.close();
+	        if (i2 != null) i2.close();
+	    }
+	}
 }

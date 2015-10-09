@@ -7,5 +7,8 @@ Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Diamond Light Source
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: org.eclipse.swtbot.go,
- org.eclipse.core.resources;bundle-version="3.8.1"
+ org.eclipse.core.resources;bundle-version="3.8.1",
+ org.eclipse.pde.core;bundle-version="3.8.1",
+ org.eclipse.pde.ui;bundle-version="3.7.2",
+ org.apache.commons.io;bundle-version="2.4.0"
 Import-Package: org.dawnsci.dde.core
