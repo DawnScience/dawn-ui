@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.dawnsci.processing.ui.ServiceHolder;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -13,19 +14,12 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext;
 import org.eclipse.dawnsci.analysis.api.conversion.IProcessingConversionInfo;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
-import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class FileManager {
 	
-	private static ILoaderService lservice;
-	public static void setLoaderService(ILoaderService s) {
-		lservice = s;
-	}
-	public FileManager() { // Used by OSGI only.
-		
+	public FileManager() { 
 	}
 	
 	IConversionContext context;
@@ -125,7 +119,7 @@ public class FileManager {
 				
 				boolean goodFile = false;
 				try {
-					IDataHolder holder = lservice.getData(paths[i], null);
+					IDataHolder holder = ServiceHolder.getLoaderService().getData(paths[i], null);
 					goodFile = holder.contains(datasetName);
 					if (goodFile) {
 						if (context.getFilePaths().contains(paths[i])){

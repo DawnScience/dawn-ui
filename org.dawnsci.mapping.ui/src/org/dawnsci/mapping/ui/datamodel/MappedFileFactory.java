@@ -11,6 +11,8 @@ import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
 
 public class MappedFileFactory {
@@ -146,13 +148,18 @@ public class MappedFileFactory {
 					
 				} else {
 					//approximate 2D with 1D, should be done int the map/mapobjects
-					int[] start = new int[ss.length];
-					int[] stop = start.clone();
-					Arrays.fill(stop, 1);
-					int[] step = stop.clone();
-					SliceND slice = new SliceND(ss,start,stop,step);
-					slice.setSlice(i, 0, ss[i], 1);
-					ILazyDataset s = lz.getSlice(slice).squeeze();
+					IDataset ds = lz.getSlice();
+					double min = ds.min().doubleValue();
+					double max = ds.max().doubleValue();
+					ILazyDataset s = DatasetUtils.linSpace(min, max, ss[i], Dataset.FLOAT64);
+					
+//					int[] start = new int[ss.length];
+//					int[] stop = start.clone();
+//					Arrays.fill(stop, 1);
+//					int[] step = stop.clone();
+//					SliceND slice = new SliceND(ss,start,stop,step);
+//					slice.setSlice(i, 0, ss[i], 1);
+//					ILazyDataset s = lz.getSlice(slice).squeeze();
 					s.setName(lz.getName());
 					axm.addAxis(i, s);
 				}

@@ -2,4 +2,9 @@
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true" name="Processing Models Service Holder">
    <implementation class="org.dawnsci.processing.ui.ServiceHolder"/>
    <reference bind="setExpressionService" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.expressions.IExpressionService" name="IExpressionService" policy="static"/>
+   <reference bind="setConversionService" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.conversion.IConversionService" name="IConversionService" policy="static"/>
+   <reference bind="setOperationService" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.processing.IOperationService" name="IOperationService" policy="static"/>
+   <reference bind="setLoaderService" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.io.ILoaderService" name="ILoaderService" policy="static"/>
+   <reference bind="setEventTrackerService" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.EventTracker" name="EventTracker" policy="static"/>
+   <reference bind="setOperationExporter" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.processing.IOperationExporterService" name="IOperationExporterService" policy="static"/>
 </scr:component>

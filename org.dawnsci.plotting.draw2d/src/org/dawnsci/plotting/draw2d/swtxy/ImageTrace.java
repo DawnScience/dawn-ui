@@ -579,8 +579,23 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		final int xSize = imageData.width;
 		final int ySize = imageData.height;
 		
-		double xOffset = (-xdiff/xAxValPerPoint)*xScale;
-		double yOffset = (-ydiff/xAxValPerPoint)*yScale;
+		IDataset xd = getAxes().get(0);
+		IDataset yd = getAxes().get(1);
+		
+		double xmin = xd.min().doubleValue();
+		double xmax = xd.max().doubleValue();
+		double ymin = yd.min().doubleValue();
+		double ymax = yd.max().doubleValue();
+		
+		double xLen = xd.getSize();
+		double yLen = yd.getSize();
+		
+		double xp = ((xmax-xmin)/(xLen-1))/2;
+		double yp = ((ymax-ymin)/(yLen-1))/2;
+		
+		double xOffset = (((-xdiff+xp)/xAxValPerPoint))*xScale;
+		double yOffset = (((-ydiff+yp)/yAxValPerPoint))*yScale;
+//		xOffset = 0;
 		
 
 		//FIXME origins
@@ -592,14 +607,14 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		int scaleHeight = Math.max(1, (int) (yDataPoints*yScale));
 		
 //		 Force a minimum size on the system
-		if (width <= MINIMUM_ZOOM_SIZE) {
-			if (width > imageData.width) width = MINIMUM_ZOOM_SIZE;
-			isMaximumZoom = true;
-		}
-		if (height <= MINIMUM_ZOOM_SIZE) {
-			if (height > imageData.height) height = MINIMUM_ZOOM_SIZE;
-			isMaximumZoom = true;
-		}
+//		if (width <= MINIMUM_ZOOM_SIZE) {
+//			if (width > imageData.width) width = MINIMUM_ZOOM_SIZE;
+//			isMaximumZoom = true;
+//		}
+//		if (height <= MINIMUM_ZOOM_SIZE) {
+//			if (height > imageData.height) height = MINIMUM_ZOOM_SIZE;
+//			isMaximumZoom = true;
+//		}
 		
 		
 		try {

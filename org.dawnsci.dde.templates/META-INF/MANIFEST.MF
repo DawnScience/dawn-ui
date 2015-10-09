@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: DAWN Development Environment Templates
+Bundle-SymbolicName: org.dawnsci.dde.templates;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Vendor: Diamond Light Source
+Require-Bundle: org.eclipse.pde.ui;bundle-version="3.7.2",
+ org.eclipse.core.runtime,
+ org.eclipse.ui;bundle-version="3.8.2",
+ org.eclipse.core.resources;bundle-version="3.8.1",
+ org.eclipse.pde.core

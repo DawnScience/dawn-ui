@@ -49,7 +49,10 @@ public class MappedData implements MapObject{
 		double yMin = yy.min().doubleValue();
 		double yMax = yy.max().doubleValue();
 		
-		if (x > xMax || x < xMin || y > yMax || y < yMin) return null;
+		double xd = ((xMax-xMin)/xx.getSize())/2;
+		double yd = ((yMax-yMin)/yy.getSize())/2;
+		
+		if (x > xMax+xd || x < xMin-xd || y > yMax+yd || y < yMin-yd) return null;
 		
 		int xi = Maths.abs(Maths.subtract(xx, x)).argMin();
 		int yi = Maths.abs(Maths.subtract(yy, y)).argMin();

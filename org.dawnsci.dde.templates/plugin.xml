@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.pde.ui.newExtension">
+      <wizard
+            id="org.eclipse.dawnsci.analysis.api.templates.OperationWizard"
+            name="Operation"
+            template="org.dawnsci.analysis.api.templates.OperationTemplate">
+      </wizard>
+   </extension>
+   <extension
+         point="org.eclipse.pde.ui.templates">
+      <template
+            class="org.dawnsci.dde.templates.OperationTemplate"
+            contributingId="org.eclipse.dawnsci.analysis.api.operation"
+            id="org.dawnsci.analysis.api.templates.OperationTemplate"
+            name="Operation">
+      </template>
+   </extension>
+</plugin>

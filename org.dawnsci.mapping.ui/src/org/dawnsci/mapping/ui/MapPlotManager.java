@@ -91,7 +91,7 @@ public class MapPlotManager {
 								map.removeRegion(r);
 							}
 						}
-						map.repaint();
+						map.repaint(false);
 					}
 					
 				});

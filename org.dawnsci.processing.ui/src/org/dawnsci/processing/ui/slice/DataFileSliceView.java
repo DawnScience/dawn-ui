@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.EventTracker;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext;
-import org.eclipse.dawnsci.analysis.api.conversion.IConversionService;
 import org.eclipse.dawnsci.analysis.api.conversion.IProcessingConversionInfo;
 import org.eclipse.dawnsci.analysis.api.conversion.ProcessingOutputType;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext.ConversionScheme;
@@ -39,7 +38,6 @@ import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
-import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
@@ -47,7 +45,6 @@ import org.eclipse.dawnsci.analysis.api.processing.ExecutionType;
 import org.eclipse.dawnsci.analysis.api.processing.IExecutionVisitor;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationContext;
-import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
@@ -115,21 +112,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DataFileSliceView extends ViewPart {
-	
-	private static IConversionService cservice;
-	public static void setConversionService(IConversionService s) {
-		cservice = s;
-	}
-	private static IOperationService  oservice;
-	public static void setOperationService(IOperationService s) {
-		oservice = s;
-	}
-	private static ILoaderService lservice;
-	public static void setLoaderService(ILoaderService s) {
-		lservice = s;
-	}
 
-	
 	private FileManager fileManager;
 	private OperationEventManager eventManager;
 	private TableViewer viewer;
@@ -146,7 +129,11 @@ public class DataFileSliceView extends ViewPart {
 	String lastPath = null;
 	
 	private final static Logger logger = LoggerFactory.getLogger(DataFileSliceView.class);
-	
+
+	public DataFileSliceView() {
+		eventManager = new OperationEventManager();
+	}
+
 	@Override
 	public void createPartControl(Composite parent) {
 		
@@ -320,7 +307,6 @@ public class DataFileSliceView extends ViewPart {
 			}
 		});
 		
-		eventManager = new OperationEventManager();
 		eventManager.addOperationRunnerListener(new  IOperationGUIRunnerListener.Stub() {
 			@Override
 			public void updateRequested() {
@@ -445,7 +431,7 @@ public class DataFileSliceView extends ViewPart {
 							monitor.beginTask("Processing", getAmountOfWork(fileManager.getContext()));
 							fileManager.getContext().setMonitor(new ProgressMonitorWrapper(monitor));
 							try {
-								cservice.process(fileManager.getContext());
+								ServiceHolder.getConversionService().process(fileManager.getContext());
 							} catch (final Exception e) {
 								Display.getDefault().asyncExec(new Runnable() {
 									public void run() {
@@ -511,7 +497,7 @@ public class DataFileSliceView extends ViewPart {
 		final IAction export = new OperationExportAction("Export to Workflow", Activator.getImageDescriptor("icons/flow.png")) {
 			public IOperationContext createContext() {
 				
-				IOperationContext ocontext  = oservice.createContext();
+				IOperationContext ocontext  = ServiceHolder.getOperationService().createContext();
 				ocontext.setSeries(getOperations());
 
 				final String selectedPath  = (String)((IStructuredSelection)viewer.getSelection()).getFirstElement();
@@ -600,7 +586,7 @@ public class DataFileSliceView extends ViewPart {
 	
 	private void updateSliceWidget(String path) {
 		try {
-			IDataHolder dh = lservice.getData(path, new IMonitor.Stub());
+			IDataHolder dh = ServiceHolder.getLoaderService().getData(path, new IMonitor.Stub());
 			ILazyDataset lazy = dh.getLazyDataset(fileManager.getContext().getDatasetNames().get(0));
 			int[] shape = lazy.getShape();
 			
@@ -640,11 +626,11 @@ public class DataFileSliceView extends ViewPart {
 		
 		for (String path : context.getFilePaths()) {
 			try {
-				IMetadata metadata = lservice.getMetadata(path, null);
+				IMetadata metadata = ServiceHolder.getLoaderService().getMetadata(path, null);
 				int[] s = metadata.getDataShapes().get(name);
 				if (s == null) {
 					try {
-						s = lservice.getData(path, null).getLazyDataset(name).getShape();
+						s = ServiceHolder.getLoaderService().getData(path, null).getLazyDataset(name).getShape();
 					} catch (Exception e) {
 						logger.warn("Can't get shape to calculate work from");
 					}
@@ -714,7 +700,7 @@ public class DataFileSliceView extends ViewPart {
 				
 				if (path == null) path = context.getFilePaths().get(0);
 				
-				final IDataHolder   dh = lservice.getData(path, new IMonitor.Stub());
+				final IDataHolder   dh = ServiceHolder.getLoaderService().getData(path, new IMonitor.Stub());
 				ILazyDataset lazyDataset = dh.getLazyDataset(context.getDatasetNames().get(0));
 				
 				if (lazyDataset == null) {
@@ -727,7 +713,7 @@ public class DataFileSliceView extends ViewPart {
 				Map<Integer, String> axesNames = context.getAxesNames();
 				
 				if (axesNames != null) {
-					AxesMetadata am = lservice.getAxesMetadata(lazyDataset, path, axesNames);
+					AxesMetadata am = ServiceHolder.getLoaderService().getAxesMetadata(lazyDataset, path, axesNames);
 					lazyDataset.setMetadata(am);
 //					AxesMetadata axMeta = SlicedDataUtils.createAxisMetadata(path, lazyDataset, axesNames);
 //					if (axMeta != null) lazyDataset.setMetadata(axMeta);
@@ -908,7 +894,7 @@ public class DataFileSliceView extends ViewPart {
 		@Override
 		public IConversionContext init(String path) {
 			
-			IConversionContext context = cservice.open(path);
+			IConversionContext context = ServiceHolder.getConversionService().open(path);
 			
 			return setupwizard(context);
 		}

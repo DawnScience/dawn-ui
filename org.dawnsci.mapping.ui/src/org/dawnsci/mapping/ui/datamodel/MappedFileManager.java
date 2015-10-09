@@ -13,13 +13,14 @@ import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.progress.IProgressService;
 
 public class MappedFileManager {
 
@@ -45,29 +46,29 @@ public class MappedFileManager {
 	}
 	
 	public void importFile(final String path, final MappedDataFileBean bean) {
-		ProgressMonitorDialog pm = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
-		
+		if (contains(path)) return;
+		IProgressService service = (IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class);
 		try {
-			pm.run(true, true, new IRunnableWithProgress() {
-				
+			service.busyCursorWhile(new IRunnableWithProgress() {
+
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
-						InterruptedException {
+				InterruptedException {
 					IMonitor m = new ProgressMonitorWrapper(monitor);
 					monitor.beginTask("Loading data...", -1);
 					final MappedDataFile mdf = MappedFileFactory.getMappedDataFile(path, bean, m);
 					if (m.isCancelled()) return;
-					
-					
+
+
 					Display.getDefault().syncExec(new Runnable() {
-						
+
 						@Override
 						public void run() {
 							boolean load = true;
 							if (!mappedDataArea.isInRange(mdf)) {
 								load = MessageDialog.openConfirm(viewer.getControl().getShell(), "No overlap!", "Are you sure you want to load this data?");
 							} 
-							
+
 							if (load)mappedDataArea.addMappedDataFile(mdf);
 							plotManager.clearAll();
 							plotManager.plotMap(null);
@@ -77,8 +78,8 @@ public class MappedFileManager {
 							}
 						}
 					});
-					
-					
+
+
 				}
 			});
 		} catch (InvocationTargetException e) {
@@ -88,9 +89,8 @@ public class MappedFileManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
-	}
+	} 
+
 	
 	public void importFile(final String path) {
 		if (contains(path)) return;

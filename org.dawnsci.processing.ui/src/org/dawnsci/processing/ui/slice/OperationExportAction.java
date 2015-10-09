@@ -1,6 +1,7 @@
 package org.dawnsci.processing.ui.slice;
 
 import org.dawb.common.ui.util.EclipseUtils;
+import org.dawnsci.processing.ui.ServiceHolder;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
@@ -25,11 +26,6 @@ import org.eclipse.swt.widgets.Display;
  *
  */
 public class OperationExportAction extends Action{
-	
-	private static IOperationExporterService eservice;
-	public static void setOperationExporter(IOperationExporterService s) {
-		eservice = s;
-	}
 
 	public OperationExportAction() {
 		super();
@@ -59,7 +55,7 @@ public class OperationExportAction extends Action{
 	    }
 	    
 	    try {
-		    final IOperationExporter exp = eservice.getExporter(ExecutionType.GRAPH);
+		    final IOperationExporter exp = ServiceHolder.getOperationExporter().getExporter(ExecutionType.GRAPH);
 		    exp.init(context);
 		    exp.export(newFile.getLocation().toOSString());
 			
