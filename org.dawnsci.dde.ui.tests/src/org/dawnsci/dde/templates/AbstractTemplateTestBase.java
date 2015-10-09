@@ -51,11 +51,13 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.junit.Test;
 
-public abstract class AbstractTemplateTest {
+public abstract class AbstractTemplateTestBase {
 	protected static SWTWorkbenchBot bot;
 	
 	private static File screenshotsDir;
 	private static final int RADIUS = 16;
+
+	protected static final String DIAMOND_LIGHT_SOURCE = "Diamond Light Source";
 	private int screenshotCount;
 
 	static {
