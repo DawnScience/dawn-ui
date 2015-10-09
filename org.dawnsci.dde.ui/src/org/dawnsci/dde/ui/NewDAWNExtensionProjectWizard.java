@@ -53,6 +53,7 @@ import org.eclipse.pde.internal.ui.wizards.WizardElement;
 import org.eclipse.pde.internal.ui.wizards.extension.NewExtensionRegistryReader;
 import org.eclipse.pde.internal.ui.wizards.plugin.PluginFieldData;
 import org.eclipse.pde.internal.ui.wizards.templates.NewExtensionTemplateWizard;
+import org.eclipse.pde.ui.IFieldData;
 import org.eclipse.pde.ui.templates.AbstractNewPluginTemplateWizard;
 import org.eclipse.pde.ui.templates.ITemplateSection;
 import org.eclipse.ui.INewWizard;
@@ -140,17 +141,20 @@ public class NewDAWNExtensionProjectWizard extends AbstractNewPluginTemplateWiza
 	private ITemplateSection fSection;
 	
 	public NewDAWNExtensionProjectWizard() {
-		
+		setDefaultPageImageDescriptor(DAWNDDEPlugin.imageDescriptorFromPlugin("org.dawnsci.dde.ui", "/icons/wizban/project_wiz.gif"));
+		setNeedsProgressMonitor(true);
+		setForcePreviousAndNextButtons(true);
 	}
 
 	@Override
-	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		setWindowTitle("Create a new DAWN Plug-in");
-		setNeedsProgressMonitor(true);
-		setForcePreviousAndNextButtons(true);
-		setDefaultPageImageDescriptor(DAWNDDEPlugin.imageDescriptorFromPlugin("org.dawnsci.dde.ui", "/icons/wizban/project_wiz.gif"));
-		init(new PluginFieldData());
+	public void init(IFieldData data) {
+		super.init(data);
 		loadTemplateCollection();
+		setWindowTitle("New DAWN Plug-in Project");	
+	}
+	@Override
+	public void init(IWorkbench workbench, IStructuredSelection selection) {
+		init(new PluginFieldData());
 	}
 
 	@Override
@@ -449,4 +453,5 @@ public class NewDAWNExtensionProjectWizard extends AbstractNewPluginTemplateWiza
 	public ITemplateSection[] getTemplateSections() {
 		return null;
 	}
+
 }
