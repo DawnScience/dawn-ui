@@ -248,6 +248,12 @@ public class NewDAWNExtensionProjectWizard extends AbstractNewPluginTemplateWiza
 		newNatures[natures.length+2] = "org.eclipse.jdt.core.javanature";
 		description.setNatureIds(newNatures);
 
+		// add relevant project builders
+		addBuilder(description, "org.eclipse.jdt.core.javabuilder");
+		addBuilder(description, "org.eclipse.pde.ManifestBuilder");
+		addBuilder(description, "org.eclipse.pde.SchemaBuilder");
+		addBuilder(description, "org.eclipse.pde.ds.core.builder");
+
 		// create the new project operation
 		WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
 
@@ -279,12 +285,6 @@ public class NewDAWNExtensionProjectWizard extends AbstractNewPluginTemplateWiza
 				// create the source folder
 				createFolder(newProjectHandle,"src",monitor);
 				
-				// add relevant project builders
-				addBuilder(description, "org.eclipse.jdt.core.javabuilder");
-				addBuilder(description, "org.eclipse.pde.ManifestBuilder");
-				addBuilder(description, "org.eclipse.pde.SchemaBuilder");
-				addBuilder(description, "org.eclipse.pde.ds.core.builder");
-
 				// create plugin.xml
 				IFile plugin_xml = newProjectHandle.getFile("plugin.xml");
 				plugin_xml.create(new ByteArrayInputStream(PLUGIN_XML.getBytes(StandardCharsets.UTF_8)), true, monitor);
