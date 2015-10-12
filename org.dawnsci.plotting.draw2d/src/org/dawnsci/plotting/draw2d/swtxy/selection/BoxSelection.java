@@ -75,12 +75,28 @@ class BoxSelection extends ROISelectionRegion<RectangularROI> {
 		return shape != null ? shape.getROI() : super.getROI();
 	}
 
+	@Override
+	protected RectangularROI createROI(boolean recordResult) {
+		// snap to grid
+		if (shape.isGridSnap()) {
+			RectangularROI snappedROI = shape.croi;
+			snappedROI.setPoint((int) snappedROI.getPointX(), (int) snappedROI.getPointY());
+			snappedROI.setEndPoint(new double[] {(int)snappedROI.getEndPoint()[0], (int)snappedROI.getEndPoint()[1]});
+			shape.croi = snappedROI;
+			if (recordResult) {
+				roi = shape.croi;
+			}
+			shape.configureHandles();
+			return shape.croi;
+		}
+		return super.createROI(recordResult);
+	}
+
 	class Box extends ROIShape<RectangularROI> {
 
 		public Box(Figure parent, AbstractSelectionRegion<RectangularROI> region) {
 			super(parent, region);
 		}
-
 
 		@Override
 		protected ROIHandler<RectangularROI> createROIHandler(RectangularROI roi) {
@@ -171,6 +187,22 @@ class BoxSelection extends ROISelectionRegion<RectangularROI> {
 		@Override
 		protected void fillShape(Graphics graphics) {
 			fillRectangle(graphics);
+		}
+
+		@Override
+		public void snapToGrid() {
+			RectangularROI tSnappedROI = troi;
+			RectangularROI cSnappedROI = croi;
+			if (tSnappedROI != null) {
+				tSnappedROI.setPoint((int) tSnappedROI.getPointX(), (int) tSnappedROI.getPointY());
+				tSnappedROI.setEndPoint(new double[] {(int) tSnappedROI.getEndPoint()[0], (int) tSnappedROI.getEndPoint()[1]});
+				troi = tSnappedROI;
+			}
+			if (cSnappedROI != null) {
+				cSnappedROI.setPoint((int) cSnappedROI.getPointX(), (int) cSnappedROI.getPointY());
+				cSnappedROI.setEndPoint(new double[] {(int) cSnappedROI.getEndPoint()[0], (int) cSnappedROI.getEndPoint()[1]});
+				croi = cSnappedROI;
+			}
 		}
 	}
 }

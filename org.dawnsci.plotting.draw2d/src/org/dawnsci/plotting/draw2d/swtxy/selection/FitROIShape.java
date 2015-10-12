@@ -83,7 +83,7 @@ abstract public class FitROIShape<T extends IFitROI> extends ParametricROIShapeB
 	}
 
 	@Override
-	protected void configureHandles() {
+	public void configureHandles() {
 		boolean mobile = region.isMobile();
 		boolean visible = isVisible() && mobile;
 		for (IROI p : proi) {

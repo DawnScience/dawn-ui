@@ -41,6 +41,23 @@ public class EllipseSelection extends LockableSelectionRegion<EllipticalROI> {
 		return "icons/Cursor-ellipse.png";
 	}
 
+	@Override
+	protected EllipticalROI createROI(boolean recordResult) {
+		// snap to grid
+		if (shape.isGridSnap()) {
+			EllipticalROI snappedROI = shape.croi;
+			snappedROI.setPoint((int) snappedROI.getPointX(), (int) snappedROI.getPointY());
+			snappedROI.setSemiaxes(new double[]{(int) snappedROI.getSemiAxes()[0], (int) snappedROI.getSemiAxes()[1]});
+			shape.croi = snappedROI;
+			if (recordResult) {
+				roi = shape.croi;
+			}
+			shape.configureHandles();
+			return shape.croi;
+		}
+		return super.createROI(recordResult);
+	}
+
 	class PRShape extends ParametricROIShape<EllipticalROI> {
 		public PRShape() {
 			super();
@@ -96,6 +113,22 @@ public class EllipseSelection extends LockableSelectionRegion<EllipticalROI> {
 		public String toString() {
 			double rad = cs.getPositionFromValue(getROI().getSemiAxes())[0];
 			return "EllSel: cen=" + getCentre() + ", rad=" + rad;
+		}
+
+		@Override
+		public void snapToGrid() {
+			EllipticalROI tSnappedROI = troi;
+			EllipticalROI cSnappedROI = croi;
+			if (tSnappedROI != null) {
+				tSnappedROI.setPoint((int) tSnappedROI.getPointX(), (int) tSnappedROI.getPointY());
+				tSnappedROI.setSemiaxes(new double[]{(int) tSnappedROI.getSemiAxes()[0], (int) tSnappedROI.getSemiAxes()[1]});
+				troi = tSnappedROI;
+			}
+			if (cSnappedROI != null) {
+				cSnappedROI.setPoint((int) cSnappedROI.getPointX(), (int) cSnappedROI.getPointY());
+				cSnappedROI.setSemiaxes(new double[]{(int) cSnappedROI.getSemiAxes()[0], (int) cSnappedROI.getSemiAxes()[1]});
+				croi = cSnappedROI;
+			}
 		}
 	}
 }

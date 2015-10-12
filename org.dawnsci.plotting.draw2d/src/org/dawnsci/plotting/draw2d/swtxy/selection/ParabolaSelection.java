@@ -95,5 +95,21 @@ public class ParabolaSelection extends LockableSelectionRegion<ParabolicROI> {
 //			return "EllSel: cen=" + getCentre() + ", rad=" + rad;
 			return "";
 		}
+
+		@Override
+		public void snapToGrid() {
+			ParabolicROI tSnappedROI = troi;
+			ParabolicROI cSnappedROI = croi;
+			if (tSnappedROI != null) {
+				tSnappedROI.setPoint((int) tSnappedROI.getPointX(), (int) tSnappedROI.getPointY());
+				tSnappedROI.setFocalParameter((int) tSnappedROI.getFocalParameter());
+				troi = tSnappedROI;
+			}
+			if (cSnappedROI != null) {
+				cSnappedROI.setPoint((int) cSnappedROI.getPointX(), (int) cSnappedROI.getPointY());
+				cSnappedROI.setFocalParameter((int) cSnappedROI.getFocalParameter());
+				croi = cSnappedROI;
+			}
+		}
 	}
 }

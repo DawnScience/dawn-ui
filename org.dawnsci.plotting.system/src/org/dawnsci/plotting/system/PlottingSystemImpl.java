@@ -1463,5 +1463,22 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		return super.getAdapter(adapter);
 	}
 
+	private boolean hasGridSnap;
+
+	@Override
+	public boolean isGridSnap() {
+		return hasGridSnap;
+	}
+
+	@Override
+	public void setGridSnap(boolean hasGridSnap) {
+		this.hasGridSnap = hasGridSnap;
+		if (hasGridSnap) {
+			Collection<IRegion> regions = getRegions();
+			for (IRegion region : regions) {
+				region.snapToGrid();
+			}
+		}
+	}
 }
 

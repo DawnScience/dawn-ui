@@ -60,6 +60,22 @@ public class PointSelection extends ROISelectionRegion<PointROI> {
 	}
 
 	@Override
+	protected PointROI createROI(boolean recordResult) {
+		// snap to grid
+		if (shape.isGridSnap()) {
+			PointROI snappedROI = shape.croi;
+			snappedROI.setPoint(new double[]{(int) snappedROI.getPoint()[0], (int) snappedROI.getPoint()[1]});
+			shape.croi = snappedROI;
+			if (recordResult) {
+				roi = shape.croi;
+			}
+			shape.configureHandles();
+			return shape.croi;
+		}
+		return super.createROI(recordResult);
+	}
+
+	@Override
 	public void setMobile(boolean mobile) {
 		if (mobile == isMobile())
 			return;
@@ -103,7 +119,7 @@ public class PointSelection extends ROISelectionRegion<PointROI> {
 		}
 
 		@Override
-		protected void configureHandles() {
+		public void configureHandles() {
 			boolean mobile = region.isMobile();
 			boolean visible = isVisible() && mobile;
 			double[] pt = cs.getPositionFromValue(croi.getPointRef());
@@ -190,6 +206,20 @@ public class PointSelection extends ROISelectionRegion<PointROI> {
 
 		@Override
 		protected void outlineShape(Graphics graphics) {
+		}
+
+		@Override
+		public void snapToGrid() {
+			PointROI tSnappedROI = troi;
+			PointROI cSnappedROI = croi;
+			if (tSnappedROI != null) {
+				tSnappedROI.setPoint(new double[]{(int) tSnappedROI.getPoint()[0], (int) tSnappedROI.getPoint()[1]});
+				troi = tSnappedROI;
+			}
+			if (cSnappedROI != null) {
+				cSnappedROI.setPoint(new double[]{(int) cSnappedROI.getPoint()[0], (int) cSnappedROI.getPoint()[1]});
+				croi = cSnappedROI;
+			}
 		}
 	}
 }

@@ -122,5 +122,10 @@ public class CircleFitSelection extends FitSelectionRegion<CircularFitROI> {
 			double rad = cs.getPositionFromValue(getROI().getRadius())[0];
 			return "CirSel: cen=" + getCentre() + ", rad=" + rad;
 		}
+
+		@Override
+		public void snapToGrid() {
+			//TODO implement snap to grid here as well as in the overridden createROI
+		}
 	}
 }

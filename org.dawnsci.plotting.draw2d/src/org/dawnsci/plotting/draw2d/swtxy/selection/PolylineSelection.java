@@ -97,5 +97,10 @@ public class PolylineSelection extends ROISelectionRegion<IPolylineROI> {
 				}
 			}
 		}
+
+		@Override
+		public void snapToGrid() {
+			//TODO snap to grid to be implemented for this selection
+		}
 	}
 }

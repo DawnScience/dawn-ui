@@ -555,4 +555,10 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 		regionArea.setRequirePositionWithCursor(true);
 		regionArea = null;
 	}
+
+	@Override
+	public void snapToGrid() {
+		// TODO implement the snap to grid for this selection
+		
+	}
 }
