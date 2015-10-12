@@ -18,6 +18,11 @@
             name="Tool Page"
             template="org.dawnsci.dde.templates.ToolPageTemplate">
       </wizard>
+      <wizard
+            id="org.dawnsci.dde.templates.ToolPageActionWizard"
+            name="Tool Page Action"
+            template="org.dawnsci.dde.templates.ToolPageActionTemplate">
+      </wizard>
    </extension>
    <extension
          point="org.eclipse.pde.ui.templates">
@@ -38,6 +43,12 @@
             contributingId="org.eclipse.dawnsci.plotting.api.toolPage"
             id="org.dawnsci.dde.templates.ToolPageTemplate"
             name="Tool Page">
+      </template>
+      <template
+            class="org.dawnsci.dde.templates.ToolPageActionTemplate"
+            contributingId="org.eclipse.dawnsci.plotting.api.toolPageAction"
+            id="org.dawnsci.dde.templates.ToolPageActionTemplate"
+            name="Tool Page Action">
       </template>
    </extension>
 </plugin>

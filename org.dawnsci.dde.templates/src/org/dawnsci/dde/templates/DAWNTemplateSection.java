@@ -12,9 +12,14 @@
 package org.dawnsci.dde.templates;
 
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
@@ -102,5 +107,35 @@ public abstract class DAWNTemplateSection extends OptionTemplateSection {
 	}
 	
 	protected abstract String getClassName();
+	/**
+	 * Returns an array of key values suitable for use in a template option.
+	 * 
+	 * @param extensionPoint
+	 *            the extension point to look up
+	 * @param name
+	 *            the name of the element within the extension point
+	 * @param id
+	 *            the name of the identifier attribute
+	 * @param label
+	 *            the name of the label attribute
+	 * @return an array of key/values
+	 */
+	protected String[][] getLookupList(String extensionPoint, String name, String id, String label) {
+		IExtensionRegistry registry = Platform.getExtensionRegistry();
+		IExtensionPoint point = registry.getExtensionPoint(extensionPoint);
+		Map<String, String> map = new HashMap<>();
+		IConfigurationElement[] configurationElements = point.getConfigurationElements();
+		for (IConfigurationElement e : configurationElements) {
+			if (e.getName().equals(name)) {
+				map.put(e.getAttribute(label), e.getAttribute(id));
+			}
+		}
+		String[][] options = new String[map.size()][];
+		int i = 0;
+		for (String k : map.keySet()) {
+			options[i++] = new String[] { map.get(k), k };
+		}
+		return options;
+	}
 
 }

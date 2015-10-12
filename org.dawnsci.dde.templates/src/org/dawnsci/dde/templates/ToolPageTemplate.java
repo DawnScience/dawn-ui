@@ -11,15 +11,8 @@
  *******************************************************************************/
 package org.dawnsci.dde.templates;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.pde.core.plugin.IPluginBase;
 import org.eclipse.pde.core.plugin.IPluginElement;
 import org.eclipse.pde.core.plugin.IPluginExtension;
@@ -37,6 +30,8 @@ import org.eclipse.pde.ui.templates.PluginReference;
  * <i>plotting_tool_page</i> only, a category for the page is selected in the
  * wizard and must already exist.
  * </p>
+ * 
+ * @author Torkild U. Resheim
  */
 public class ToolPageTemplate extends DAWNTemplateSection {
 
@@ -93,23 +88,9 @@ public class ToolPageTemplate extends DAWNTemplateSection {
 		addOption(KEY_TOOLTIP, "Tooltip", (String) null, 0);
 		addOption(KEY_LABEL, "Label", (String) null, 0);
 		addOption(KEY_CHEAT_SHEET_ID, "Cheat sheet identifier", (String) null, 0);
-		IExtensionRegistry registry = Platform.getExtensionRegistry();
-		IExtensionPoint point = registry.getExtensionPoint(EXTENSION_POINT);
-
-		Map<String, String> map = new HashMap<>();
-
-		IConfigurationElement[] configurationElements = point.getConfigurationElements();
-		for (IConfigurationElement e : configurationElements) {
-			if (e.getName().equals("plotting_tool_category")) {
-				map.put(e.getAttribute("label"), e.getAttribute("id"));
-			}
-		}
-		String[][] options = new String[map.size()][];
-		int i = 0;
-		for (String k : map.keySet()) {
-			options[i++] = new String[] { map.get(k), k };
-		}
-		addOption(KEY_CATEGORY, "Category", options, (String) null, 0);
+		addOption(KEY_CATEGORY, "Category",
+				getLookupList(EXTENSION_POINT, "plotting_tool_category", "id", "label"), 
+				(String) null, 0);
 	}
 
 	@Override

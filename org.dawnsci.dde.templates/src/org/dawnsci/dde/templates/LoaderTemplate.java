@@ -25,6 +25,11 @@ import org.eclipse.pde.ui.templates.PluginReference;
  * wizard page will be generated for the user to set values. Obtained values are
  * inserted into "plugin.xml" when this template's wizard is executing and also
  * used when code and other files are generated.
+ * 
+ * @author Torkild U. Resheim
+ * 
+ * @see org.eclipse.dawnsci.analysis.api.io.IFileLoader
+ * @see org.eclipse.dawnsci.analysis.api.metadata.IMetaLoader
  */
 public class LoaderTemplate extends DAWNTemplateSection {
 

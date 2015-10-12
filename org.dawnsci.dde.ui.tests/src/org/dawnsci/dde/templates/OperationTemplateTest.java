@@ -1,3 +1,14 @@
+/*-
+ *******************************************************************************
+ * Copyright (c) 2015 Diamond Light Source Ltd.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    Torkild U. Resheim - initial API and implementation
+ *******************************************************************************/
 package org.dawnsci.dde.templates;
 
 import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
@@ -34,6 +45,7 @@ public class OperationTemplateTest extends AbstractTemplateTestBase {
 		bot.menu("File").menu("New").menu("DAWN Plug-in Project").click();
 		SWTBotShell shell = bot.shell("New DAWN Plug-in Project");
 		shell.activate();
+
 		// fill in first page
 		bot.textWithLabel("&Project name:").setText(getProjectName());
 		bot.textWithLabel("Identifier:").setText(getProjectName());
@@ -43,6 +55,7 @@ public class OperationTemplateTest extends AbstractTemplateTestBase {
 		bot.comboBoxWithLabel("Extension point identifier:").setSelection(EXTENSION_POINT);
 		takeScreenshot(shell.widget, EXTENSION_POINT);
 		bot.button("Next >").click();
+
 		// fill in second page
 		bot.textWithLabel("Java package name").setText("org.dawnsci.dde.test");
 		bot.textWithLabel("Java class name").setText("Operation");
@@ -51,6 +64,7 @@ public class OperationTemplateTest extends AbstractTemplateTestBase {
 		bot.textWithLabel("Operation identifier").setText("org.dawnsci.dde.test.Operation");
 		takeScreenshot(shell.widget, EXTENSION_POINT);
 		bot.button("Finish").click();
+		
 		// wait until the wizard is done
 		bot.waitUntil(shellCloses(shell));
 	}

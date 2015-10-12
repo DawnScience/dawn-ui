@@ -22,9 +22,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(SWTBotJunit4ClassRunner.class)
-public class LoaderTemplateTest extends AbstractTemplateTestBase {
+public class ToolPageActionTemplateTest extends AbstractTemplateTestBase {
 
-	private static final String EXTENSION_POINT = "uk.ac.diamond.scisoft.analysis.io.loader";
+	private static final String EXTENSION_POINT = "org.eclipse.dawnsci.plotting.api.toolPageAction";
 
 	@BeforeClass
 	public static void beforeClass() {
@@ -50,26 +50,27 @@ public class LoaderTemplateTest extends AbstractTemplateTestBase {
 		bot.textWithLabel("&Project name:").setText(getProjectName());
 		bot.textWithLabel("Identifier:").setText(getProjectName());
 		bot.textWithLabel("Version:").setText("1.0.0");
-		bot.textWithLabel("Name:").setText("My DAWN Loader");
-		bot.textWithLabel("Institute:").setText(DIAMOND_LIGHT_SOURCE);
+		bot.textWithLabel("Name:").setText("My DAWN Tool Page");
+		bot.textWithLabel("Institute:").setText("Diamond Light Source");
 		bot.comboBoxWithLabel("Extension point identifier:").setSelection(EXTENSION_POINT);
 		takeScreenshot(shell.widget, EXTENSION_POINT);
 		bot.button("Next >").click();
-
+		
 		// fill in second page
-		bot.textWithLabel("Java package name").setText("org.dawnsci.dde.test");
-		bot.textWithLabel("Java class name").setText("Loader");
-		bot.textWithLabel("File extensions").setText(".txt");
+		bot.textWithLabel("Action identifier").setText(getProjectName());
+		bot.comboBoxWithLabel("Tool page identifier").setSelection("Measurement");
+		bot.comboBoxWithLabel("Command identifier").setSelection("Delete Previous");
+		bot.textWithLabel("Label").setText("Action Label");
 		takeScreenshot(shell.widget, EXTENSION_POINT);
 		bot.button("Finish").click();
-
+		
 		// wait until the wizard is done
 		bot.waitUntil(shellCloses(shell));
 	}
 
 	@Override
 	protected String getProjectName() {
-		return "org.dawnsci.dde.test.loader";
+		return "org.dawnsci.dde.test.toolpageaction";
 	}
 		
 	@Override
@@ -78,14 +79,17 @@ public class LoaderTemplateTest extends AbstractTemplateTestBase {
 				"<?eclipse version=\"3.4\"?>\n" + 
 				"<plugin>\n" + 
 				"   <extension\n" + 
-				"         point=\"uk.ac.diamond.scisoft.analysis.io.loader\">\n" + 
-				"      <loader\n" + 
-				"            class=\"org.dawnsci.dde.test.Loader\"\n" + 
-				"            file_extension=\".txt\"\n" + 
-				"            high_priority=\"true\">\n" + 
-				"      </loader>\n" + 
+				"         point=\"org.eclipse.dawnsci.plotting.api.toolPageAction\">\n" + 
+				"      <tool_page_action\n" + 
+				"            action_type=\"TOOLBAR\"\n" + 
+				"            command_id=\"org.eclipse.ui.edit.text.deletePrevious\"\n" + 
+				"            icon=\"icons/default.gif\"\n" + 
+				"            id=\"org.dawnsci.dde.test.toolpageaction\"\n" + 
+				"            label=\"Action Label\"\n" + 
+				"            tool_id=\"org.dawb.workbench.plotting.tools.measure.2d\">\n" + 
+				"      </tool_page_action>\n" + 
 				"   </extension>\n" + 
 				"</plugin>\n";
 	}
-
+	
 }
