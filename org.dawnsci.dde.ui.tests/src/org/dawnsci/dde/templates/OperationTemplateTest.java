@@ -55,10 +55,6 @@ public class OperationTemplateTest extends AbstractTemplateTestBase {
 		bot.waitUntil(shellCloses(shell));
 	}
 
-	public void testSourceFile() {
-		// TODO: Figure out a decent way of testing this. Do we need it?
-	}
-
 	@Override
 	protected String getProjectName() {
 		return "org.dawnsci.dde.test.operation";

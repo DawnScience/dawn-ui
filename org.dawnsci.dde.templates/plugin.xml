@@ -13,6 +13,11 @@
             name="Loader"
             template="org.dawnsci.dde.templates.LoaderTemplate">
       </wizard>
+      <wizard
+            id="org.dawnsci.dde.templates.ToolPageWizard"
+            name="Tool Page"
+            template="org.dawnsci.dde.templates.ToolPageTemplate">
+      </wizard>
    </extension>
    <extension
          point="org.eclipse.pde.ui.templates">
@@ -27,6 +32,12 @@
             contributingId="uk.ac.diamond.scisoft.analysis.io.loader"
             id="org.dawnsci.dde.templates.LoaderTemplate"
             name="Loader">
+      </template>
+      <template
+            class="org.dawnsci.dde.templates.ToolPageTemplate"
+            contributingId="org.eclipse.dawnsci.plotting.api.toolPage"
+            id="org.dawnsci.dde.templates.ToolPageTemplate"
+            name="Tool Page">
       </template>
    </extension>
 </plugin>
