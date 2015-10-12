@@ -10,6 +10,7 @@ import org.eclipse.richbeans.widgets.wrappers.SpinnerWrapper;
 import org.eclipse.richbeans.widgets.wrappers.TextWrapper;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -29,6 +30,7 @@ public class IsoItemComposite extends Composite
 	{
 		super(parent, SWT.FILL);
 		createUI();
+		setBackground(new Color(this.getDisplay(), new RGB(0, 0, 255)));
 	}
 	
 	/**

@@ -16,9 +16,12 @@ public class IsoHandler
 	
 	private ValueAdapter isoValueListener;
 	
-	public IsoHandler(Object ui, Object bean, IsosurfaceJob newJob) // implement job !!
+	
+	
+	public IsoHandler(Object ui, Object bean, IsosurfaceJob newJob)
 	{
 		this.isoComp = (IsoComposite)ui;
+		
 		this.job = newJob;
 		
 		isoValueListener = new ValueAdapter("IsoValueListner")
@@ -26,14 +29,15 @@ public class IsoHandler
 			IsoItem previous;
 			
 			@Override
-			public void valueChangePerformed(ValueEvent e) {
-				
+			public void valueChangePerformed(ValueEvent e) 
+			{
 				try 
 				{
+					
 					// update view
 					
 					controller.uiToBean();
-					
+										
 					IsoItem current = (IsoItem)isoComp.getItems().getBean();
 					
 					if (!(current).equals(previous)) 
@@ -79,6 +83,4 @@ public class IsoHandler
 		
 		
 	}
-	
-
 }

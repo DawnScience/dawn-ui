@@ -181,7 +181,7 @@ public class IsosurfaceJob extends Job {
 		return Status.OK_STATUS;
 	}
 	
-	public void destroy()
+	public void destroy(String traceName)
 	{
 		system.getTrace(traceName).dispose();
 	}

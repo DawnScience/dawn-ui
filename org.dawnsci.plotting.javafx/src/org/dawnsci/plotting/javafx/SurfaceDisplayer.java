@@ -10,6 +10,7 @@ package org.dawnsci.plotting.javafx;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
@@ -77,6 +78,8 @@ public class SurfaceDisplayer extends Scene
 	private int mouseState = MOUSE_CAM_ROTATE; // !!
 	private Point3D scaleDir = new Point3D(1, 1, 1);
 	private Point2D mouseScaleDir = new Point2D(1, 1);
+	
+	private boolean mousePressed = false; // added to stop a bug where onDrag would be called before onPress
 	
 	private EventHandler<MouseEvent> scaleEvent = new EventHandler<MouseEvent>()
 	{
@@ -177,11 +180,6 @@ public class SurfaceDisplayer extends Scene
 	private void createAxisGroup() // no longer returns anything
 	{
 		// find the length of each axis
-//		final Point3D xyzLength = new Point3D(
-//				(this.objectGroup.getBoundsInLocal().getWidth() + this.objectGroup.getBoundsInLocal().getMinX()),    
-//				(this.objectGroup.getBoundsInLocal().getHeight()+ this.objectGroup.getBoundsInLocal().getMinY()),    
-//				(this.objectGroup.getBoundsInLocal().getDepth() + this.objectGroup.getBoundsInLocal().getMinZ()));   
-		
 		final Point3D xyzLength = new Point3D(100, 100, 100);
 		
 		// set the thickness of the axis
@@ -246,17 +244,18 @@ public class SurfaceDisplayer extends Scene
 	// !! re-organise
 	private void addListeners()
 	{
-		
 		/*
-		 * scene mouse listeners
+		 * scene Mouse listeners
 		 */
 		
 		// on click, reset mouse position info - ie reset delta
+		
 		setOnMousePressed(new EventHandler<MouseEvent>()
 		{
 			@Override
 			public void handle(MouseEvent me)
 			{
+				mousePressed = true;
 				
 				oldMousePos[0] = (float) me.getSceneX();
 				oldMousePos[1] = (float) me.getSceneY();
@@ -271,68 +270,68 @@ public class SurfaceDisplayer extends Scene
 			
 			@Override
 			public void handle(MouseEvent me)
-			{
-				
-				// set old values
-				oldMousePos[0] = newMousePos[0];
-				oldMousePos[1] = newMousePos[1];
-				// find new values of mouse pos
-				newMousePos[0] = me.getSceneX();
-				newMousePos[1] = me.getSceneY();
-				
-				// find offset from last tick - ie delta
-				final double[] mouseDelta = {
-						newMousePos[0] - oldMousePos[0], 
-						newMousePos[1] - oldMousePos[1]};
-				
-				final double mouseMovementMod = 0.5f;
-				
-				// check if left button is pressed
-				// rotate if true - ie, rotate on left button drag
-				if (me.isPrimaryButtonDown() && !me.isSecondaryButtonDown())
+			{				
+				// when testing I found the mouseDragged event was sometimes called prior to the mousePressed event.
+				// This will result in the mouse positions not being reset.
+				// Added mousePressed to stop this event unless the mousePos has been reset.
+				if (mousePressed)
 				{
-					// !! remove the switch 
-					switch (mouseState)
+					// set old values
+					oldMousePos[0] = newMousePos[0];
+					oldMousePos[1] = newMousePos[1];
+					// find new values of mouse pos
+					newMousePos[0] = me.getSceneX();
+					newMousePos[1] = me.getSceneY();
+					
+					
+					
+					// find offset from last tick - ie delta
+					final double[] mouseDelta = {
+							newMousePos[0] - oldMousePos[0], 
+							newMousePos[1] - oldMousePos[1]};
+					
+					final double mouseMovementMod = 0.5f;
+					
+					// check if left button is pressed
+					// rotate if true - ie, rotate on left button drag
+					if (me.isPrimaryButtonDown() && !me.isSecondaryButtonDown())
 					{
-						case 0:
+						// !! remove the switch 
+						switch (mouseState)
 						{
-							alignedXRotate.setAngle(alignedXRotate.getAngle() + mouseDelta[1] * mouseMovementMod);
-							alignedYRotate.setAngle(alignedYRotate.getAngle() - mouseDelta[0] * mouseMovementMod);	
-							break;
+							case 0:
+							{
+								alignedXRotate.setAngle(alignedXRotate.getAngle() + mouseDelta[1] * mouseMovementMod);
+								alignedYRotate.setAngle(alignedYRotate.getAngle() - mouseDelta[0] * mouseMovementMod);	
+								break;
+							}
+							case 1:
+							{
+								updateScale(mouseDelta, mouseMovementMod);
+								break;
+							}
 						}
-						case 1:
-						{
-							updateScale(mouseDelta, mouseMovementMod);
-							break;
-						}
-						default: 
-						{
-							// !!cry!!
-							final int x  =0 ;
-							System.out.println("this shouldn't ever be called");
-						}
+					}
+					
+					// zoom
+					if (me.isMiddleButtonDown())
+					{
+						
+						sceneOffset.setX(sceneOffset.getX() + (mouseDelta[0]*mouseMovementMod));
+						sceneOffset.setY(sceneOffset.getY() + (mouseDelta[1]*mouseMovementMod));
+					}
+					
+					// zoom if right button is pressed
+					if (me.isSecondaryButtonDown() && me.isPrimaryButtonDown())
+					{
+						zoom += (-mouseDelta[1] * mouseMovementMod);
 						
 					}
-				}
-				
-				// zoom
-				if (me.isMiddleButtonDown())
-				{
 					
-					sceneOffset.setX(sceneOffset.getX() + (mouseDelta[0]*mouseMovementMod));
-					sceneOffset.setY(sceneOffset.getY() + (mouseDelta[1]*mouseMovementMod));
-				}
-				
-				// zoom if right button is pressed
-				if (me.isSecondaryButtonDown() && me.isPrimaryButtonDown())
-				{
-					zoom += (-mouseDelta[1] * mouseMovementMod);
+					camera.getTransforms().setAll(new Translate(0, 0, -zoom));
+					// camera.getTransforms().clear();
 					
 				}
-				
-				camera.getTransforms().setAll(new Translate(0, 0, -zoom));
-				// camera.getTransforms().clear();
-				
 			}
 		});
 		
@@ -343,6 +342,8 @@ public class SurfaceDisplayer extends Scene
 			@Override
 			public void handle(MouseEvent arg0)
 			{
+				mousePressed = false;
+				
 				mouseState = MOUSE_CAM_ROTATE;
 			}
 		});

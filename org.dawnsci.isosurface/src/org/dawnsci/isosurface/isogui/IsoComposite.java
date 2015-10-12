@@ -48,14 +48,12 @@ public class IsoComposite extends Composite
 	{
 		this.items = new VerticalListEditor(this, SWT.NONE)
 		{
-			// destroy the bean and :. remove the isosurface from javafx
 			@Override
 			protected void beanRemove(Object bean)
 			{
-				//((IsoItem)bean).destroy();
+				
 			}
 			
-			// set the job of the bean
 			@Override
 			protected void beanAdd(Object bean)
 			{
@@ -106,6 +104,7 @@ public class IsoComposite extends Composite
 		itemComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		
 		this.items.setEditorUI(itemComp);
+		
 		sc.setContent(itemComp);
 		sc.setMinSize(itemComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
