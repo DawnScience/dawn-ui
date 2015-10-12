@@ -1300,8 +1300,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private void createAxisBounds() {
 		
 		if (globalRange != null) {
-			((AspectAxis)getXAxis()).setLabelDataAndTitle(axes.get(0));
-			((AspectAxis)getYAxis()).setLabelDataAndTitle(axes.get(1));
+			((AspectAxis)getXAxis()).setTitle(axes.get(0).getName());
+			((AspectAxis)getYAxis()).setTitle(axes.get(1).getName());
 			return;
 		}
 		
