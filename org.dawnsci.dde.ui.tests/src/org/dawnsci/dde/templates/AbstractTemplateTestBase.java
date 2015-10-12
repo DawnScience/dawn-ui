@@ -51,14 +51,27 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.junit.Test;
 
+/**
+ * Base class for testing "New DAWN Plug-in Project" template wizards. Has
+ * shared tests for catching build issues, builder and nature configuration.
+ * 
+ * @author Torkild U. Resheim
+ */
 public abstract class AbstractTemplateTestBase {
+	
 	protected static SWTWorkbenchBot bot;
 	
+	/** Folder for storing screenshots */
 	private static File screenshotsDir;
+	
+	/** Number of screenshots taken */
+	private int screenshotCount;
+
+	/** Screenshot shadow radius */
 	private static final int RADIUS = 16;
 
 	protected static final String DIAMOND_LIGHT_SOURCE = "Diamond Light Source";
-	private int screenshotCount;
+	
 
 	static {
 		screenshotsDir = new File("screenshots");
@@ -226,6 +239,7 @@ public abstract class AbstractTemplateTestBase {
 	/**
 	 * Tests the contents of <i>plugin.xml</i>. The test is a simple string
 	 * compare. It may be rewritten to test using internal PDE API.
+	 * 
 	 * @throws CoreException 
 	 * @throws IOException 
 	 */
