@@ -11,6 +11,7 @@ import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.dawnsci.mapping.ui.datamodel.MapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedData;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
+import org.dawnsci.plotting.draw2d.swtxy.ImageTrace;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -30,7 +31,7 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
-import org.eclipse.dawnsci.plotting.api.trace.ICompositeTrace;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.swt.widgets.Display;
@@ -294,27 +295,30 @@ public class MapPlotManager {
 	
 	private void plotLayers(){
 		map.clear();
-
-		int count = 0;
 		
 		try {
 			
 			Iterator<MapObject> it = layers.descendingIterator();
 			
-			ICompositeTrace comp = this.map.createCompositeTrace("composite1");
-			
 			while (it.hasNext()) {
 				MapObject o = it.next();
 				if (o instanceof MappedData) {
-					comp.add(MappingUtils.buildTrace(((MappedData)o).getMap(), this.map),count++);
+					IImageTrace t = MappingUtils.buildTrace(((MappedData)o).getMap(), this.map);
+					t.setGlobalRange(area.getRange());
+					t.setAlpha(((MappedData)o).getTransparency());
+					this.map.addTrace(t);
+
 				}
 				
 				if (o instanceof AssociatedImage) {
-					comp.add(MappingUtils.buildTrace(((AssociatedImage)o).getImage(), this.map),count++);
+//					comp.add(MappingUtils.buildTrace(((AssociatedImage)o).getImage(), this.map),count++);
+					IImageTrace t = MappingUtils.buildTrace(((AssociatedImage)o).getImage(), this.map);
+					t.setGlobalRange(area.getRange());
+					this.map.addTrace(t);
 				}
 				
 			}
-			this.map.addTrace(comp);
+			this.map.repaint();
 		} catch (Exception e) {
 			logger.error("Error plotting mapped data", e);
 		}

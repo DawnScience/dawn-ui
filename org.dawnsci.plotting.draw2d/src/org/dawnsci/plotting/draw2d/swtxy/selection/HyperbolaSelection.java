@@ -97,5 +97,23 @@ public class HyperbolaSelection extends LockableSelectionRegion<HyperbolicROI> {
 //			return "EllSel: cen=" + getCentre() + ", rad=" + rad;
 			return "";
 		}
+
+		@Override
+		public void snapToGrid() {
+			HyperbolicROI tSnappedROI = troi;
+			HyperbolicROI cSnappedROI = croi;
+			if (tSnappedROI != null) {
+				tSnappedROI.setPoint((int) tSnappedROI.getPointX(), (int) tSnappedROI.getPointY());
+				tSnappedROI.setSemilatusRectum((int) tSnappedROI.getSemilatusRectum());
+				tSnappedROI.setEccentricity((int) tSnappedROI.getEccentricity());
+				troi = tSnappedROI;
+			}
+			if (cSnappedROI != null) {
+				cSnappedROI.setPoint((int) cSnappedROI.getPointX(), (int) cSnappedROI.getPointY());
+				cSnappedROI.setSemilatusRectum((int) cSnappedROI.getSemilatusRectum());
+				cSnappedROI.setEccentricity((int) cSnappedROI.getEccentricity());
+				croi = cSnappedROI;
+			}
+		}
 	}
 }

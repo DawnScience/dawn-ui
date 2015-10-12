@@ -27,7 +27,6 @@ import org.dawb.common.ui.printing.PrintSettings;
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.dawnsci.plotting.AbstractPlottingViewer;
 import org.dawnsci.plotting.draw2d.swtxy.AspectAxis;
-import org.dawnsci.plotting.draw2d.swtxy.CompositeTrace;
 import org.dawnsci.plotting.draw2d.swtxy.ImageStackTrace;
 import org.dawnsci.plotting.draw2d.swtxy.ImageTrace;
 import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
@@ -68,7 +67,6 @@ import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegionSystem;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.trace.ColorOption;
-import org.eclipse.dawnsci.plotting.api.trace.ICompositeTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageStackTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
@@ -760,16 +758,7 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 		return trace;
 	}
 	
-	protected ICompositeTrace createCompositeTrace(String traceName) {
-		final Axis xAxis = (Axis)getSelectedXAxis();
-		final Axis yAxis = (Axis)getSelectedYAxis();
-		xAxis.setLogScale(false);
-		yAxis.setLogScale(false);
-		
-		final CompositeTrace trace = xyGraph.createCompositeTrace(traceName, xAxis, yAxis);
-		trace.setPlottingSystem(system);
-		return trace;
-	}
+
 
 	
 	public boolean isTraceTypeSupported(Class<? extends ITrace> clazz) {
@@ -778,8 +767,6 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 		} else if (IVectorTrace.class.isAssignableFrom(clazz)) {
 			return true;
 		} else if (IImageTrace.class.isAssignableFrom(clazz)) {
-			return true;
-		} else if (ICompositeTrace.class.isAssignableFrom(clazz)) {
 			return true;
 		} else if (IImageStackTrace.class.isAssignableFrom(clazz)) {
 			return true;
@@ -795,8 +782,6 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 			return createVectorTrace(name);
 		} else if (IImageTrace.class.isAssignableFrom(clazz)) {
 			return createImageTrace(name);
-		} else if (ICompositeTrace.class.isAssignableFrom(clazz)) {
-			return createCompositeTrace(name);
 		} else if (IImageStackTrace.class.isAssignableFrom(clazz)) {
 			return createImageStackTrace(name);
 		} else {
@@ -940,8 +925,6 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 		
 		if (trace instanceof IImageTrace) {
 			system.setPlotType(PlotType.IMAGE); // Only one image allowed at a time
-		} else if (trace instanceof ICompositeTrace) {
-			system.setPlotType(PlotType.COMPOSITE_IMAGE); // Only one image allowed at a time
 		} else if (!(trace instanceof IVectorTrace)){
 			system.setPlotType(PlotType.XY);
 		}
@@ -985,12 +968,6 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 			xyGraph.addVectorTrace((VectorTrace)vector);
 			vector.setVisible(true);
 		
-		} else if (trace instanceof ICompositeTrace) {
-			
-			final ICompositeTrace vector = (ICompositeTrace)trace;
-			xyGraph.addCompositeTrace((CompositeTrace)vector);
-			vector.setVisible(true);
-			
 		} else {
 			
 			final AspectAxis xAxis = (AspectAxis)getSelectedXAxis();
@@ -1010,9 +987,8 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 			xyGraph.removeTrace(((LineTraceImpl)trace).getTrace());
 		} else if (trace instanceof ImageTrace) {
 			xyGraph.removeImageTrace((ImageTrace)trace);
-		} else if (trace instanceof CompositeTrace) {
-			xyGraph.removeCompositeTrace((CompositeTrace)trace);
-		}
+		} 
+		
 		xyCanvas.redraw();		
 	}
 
@@ -1663,4 +1639,16 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 	    getXYRegionGraph().getRegionArea().removeAuxilliaryClickListener(mcl);
 	}
 
+	@Override
+	public boolean isGridSnap() {
+		if(system instanceof IRegionSystem)
+			return ((IRegionSystem)system).isGridSnap();
+		return false;
+	}
+
+	@Override
+	public void setGridSnap(boolean isGridSnap) {
+		if(system instanceof IRegionSystem)
+			((IRegionSystem)system).setGridSnap(isGridSnap);
+	}
 }

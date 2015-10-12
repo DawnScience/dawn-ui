@@ -49,6 +49,7 @@ public class MappedFileFactory {
 				monitor.subTask(b.getName());
 				MappedDataBlock block = file.getDataBlockMap().get(b.getParent());
 				MappedData m = setUpMap(path, b.getName(),block);
+				m.getMap().setName(path + " : " + m.toString());
 				file.addMapObject(b.getName(), m);
 			}
 		}
@@ -120,7 +121,7 @@ public class MappedFileFactory {
 			return new MappedData(mapName,d,block);
 		}
 		catch (Exception e) {
-			//FIXME log
+			e.printStackTrace();
 		}
 		return null;
 

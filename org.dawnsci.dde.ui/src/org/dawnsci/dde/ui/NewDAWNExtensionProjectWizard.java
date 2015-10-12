@@ -53,6 +53,7 @@ import org.eclipse.pde.internal.ui.wizards.WizardElement;
 import org.eclipse.pde.internal.ui.wizards.extension.NewExtensionRegistryReader;
 import org.eclipse.pde.internal.ui.wizards.plugin.PluginFieldData;
 import org.eclipse.pde.internal.ui.wizards.templates.NewExtensionTemplateWizard;
+import org.eclipse.pde.ui.IFieldData;
 import org.eclipse.pde.ui.templates.AbstractNewPluginTemplateWizard;
 import org.eclipse.pde.ui.templates.ITemplateSection;
 import org.eclipse.ui.INewWizard;
@@ -108,7 +109,7 @@ public class NewDAWNExtensionProjectWizard extends AbstractNewPluginTemplateWiza
 			"Manifest-Version: 1.0\n" + 
 			"Bundle-ManifestVersion: 2\n" + 
 			"Bundle-Name: @BundleName\n" + 
-			"Bundle-SymbolicName: @SymbolicName\n" + 
+			"Bundle-SymbolicName: @SymbolicName;singleton:=true\n" + 
 			"Bundle-Vendor: @BundleVendor\n" + 
 			"Bundle-Version: @Version\n" + 
 			"Bundle-RequiredExecutionEnvironment: JavaSE-1.7\n";
@@ -140,17 +141,20 @@ public class NewDAWNExtensionProjectWizard extends AbstractNewPluginTemplateWiza
 	private ITemplateSection fSection;
 	
 	public NewDAWNExtensionProjectWizard() {
-		
+		setDefaultPageImageDescriptor(DAWNDDEPlugin.imageDescriptorFromPlugin("org.dawnsci.dde.ui", "/icons/wizban/project_wiz.gif"));
+		setNeedsProgressMonitor(true);
+		setForcePreviousAndNextButtons(true);
 	}
 
 	@Override
-	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		setWindowTitle("Create a new DAWN Plug-in");
-		setNeedsProgressMonitor(true);
-		setForcePreviousAndNextButtons(true);
-		setDefaultPageImageDescriptor(DAWNDDEPlugin.imageDescriptorFromPlugin("org.dawnsci.dde.ui", "/icons/wizban/project_wiz.gif"));
-		init(new PluginFieldData());
+	public void init(IFieldData data) {
+		super.init(data);
 		loadTemplateCollection();
+		setWindowTitle("New DAWN Plug-in Project");	
+	}
+	@Override
+	public void init(IWorkbench workbench, IStructuredSelection selection) {
+		init(new PluginFieldData());
 	}
 
 	@Override
@@ -244,6 +248,12 @@ public class NewDAWNExtensionProjectWizard extends AbstractNewPluginTemplateWiza
 		newNatures[natures.length+2] = "org.eclipse.jdt.core.javanature";
 		description.setNatureIds(newNatures);
 
+		// add relevant project builders
+		addBuilder(description, "org.eclipse.jdt.core.javabuilder");
+		addBuilder(description, "org.eclipse.pde.ManifestBuilder");
+		addBuilder(description, "org.eclipse.pde.SchemaBuilder");
+		addBuilder(description, "org.eclipse.pde.ds.core.builder");
+
 		// create the new project operation
 		WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
 
@@ -275,12 +285,6 @@ public class NewDAWNExtensionProjectWizard extends AbstractNewPluginTemplateWiza
 				// create the source folder
 				createFolder(newProjectHandle,"src",monitor);
 				
-				// add relevant project builders
-				addBuilder(description, "org.eclipse.jdt.core.javabuilder");
-				addBuilder(description, "org.eclipse.pde.ManifestBuilder");
-				addBuilder(description, "org.eclipse.pde.SchemaBuilder");
-				addBuilder(description, "org.eclipse.pde.ds.core.builder");
-
 				// create plugin.xml
 				IFile plugin_xml = newProjectHandle.getFile("plugin.xml");
 				plugin_xml.create(new ByteArrayInputStream(PLUGIN_XML.getBytes(StandardCharsets.UTF_8)), true, monitor);
@@ -449,4 +453,5 @@ public class NewDAWNExtensionProjectWizard extends AbstractNewPluginTemplateWiza
 	public ITemplateSection[] getTemplateSections() {
 		return null;
 	}
+
 }

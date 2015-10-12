@@ -64,7 +64,7 @@ abstract public class PolylineROIShape<T extends IPolylineROI> extends ROIShape<
 	}
 
 	@Override
-	protected void configureHandles() {
+	public void configureHandles() {
 		Rectangle b = null;
 		boolean mobile = region.isMobile();
 		boolean visible = isVisible() && mobile;

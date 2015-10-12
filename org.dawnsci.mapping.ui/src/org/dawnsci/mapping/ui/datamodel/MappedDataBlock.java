@@ -76,13 +76,26 @@ public class MappedDataBlock implements MapObject {
 	}
 	
 	private double[] calculateRange(ILazyDataset block){
+		
 		IDataset[] ax = MappingUtils.getAxesFromMetadata(block);
-		double[] r = new double[4];
-		r[0] = ax[xDim].min().doubleValue();
-		r[1] = ax[xDim].max().doubleValue();
-		r[2] = ax[yDim].min().doubleValue();
-		r[3] = ax[yDim].max().doubleValue();
-		return r;
+		
+		double[] range = new double[4];
+		int xs = ax[xDim].getSize();
+		int ys = ax[yDim].getSize();
+		range[0] = ax[xDim].min().doubleValue();
+		range[1] = ax[xDim].max().doubleValue();
+		double dx = ((range[1]-range[0])/xs)/2;
+		range[0] -= dx;
+		range[1] += dx;
+		
+		
+		range[2] = ax[yDim].min().doubleValue();
+		range[3] = ax[yDim].max().doubleValue();
+		double dy = ((range[3]-range[2])/ys)/2;
+		range[2] -= dy;
+		range[3] += dy;
+		
+		return range;
 	}
 
 }

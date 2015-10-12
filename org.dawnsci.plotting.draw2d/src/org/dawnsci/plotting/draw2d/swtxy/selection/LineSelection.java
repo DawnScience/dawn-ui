@@ -60,6 +60,23 @@ class LineSelection extends ROISelectionRegion<LinearROI> {
 	}
 
 	@Override
+	protected LinearROI createROI(boolean recordResult) {
+		// snap to grid
+		if (shape.isGridSnap()) {
+			LinearROI snappedROI = shape.croi;
+			snappedROI.setPoint((int) snappedROI.getPointX(), (int) snappedROI.getPointY());
+			snappedROI.setEndPoint((int) snappedROI.getEndPoint()[0], (int) snappedROI.getEndPoint()[1]);
+			shape.croi = snappedROI;
+			if (recordResult) {
+				roi = shape.croi;
+			}
+			shape.configureHandles();
+			return shape.croi;
+		}
+		return super.createROI(recordResult);
+	}
+
+	@Override
 	protected String getCursorPath() {
 		return "icons/Cursor-line.png";
 	}
@@ -172,6 +189,22 @@ class LineSelection extends ROISelectionRegion<LinearROI> {
 			bnds.union(pt[0], pt[1]);
 			if (redraw)
 				setBounds(bnds);
+		}
+
+		@Override
+		public void snapToGrid() {
+			LinearROI tSnappedROI = troi;
+			LinearROI cSnappedROI = croi;
+			if (tSnappedROI != null) {
+				tSnappedROI.setPoint((int) tSnappedROI.getPointX(), (int) tSnappedROI.getPointY());
+				tSnappedROI.setEndPoint(new double[]{(int) tSnappedROI.getEndPoint()[0], (int) tSnappedROI.getEndPoint()[1]});
+				troi = tSnappedROI;
+			}
+			if (cSnappedROI != null) {
+				cSnappedROI.setPoint((int) cSnappedROI.getPointX(), (int) cSnappedROI.getPointY());
+				cSnappedROI.setEndPoint(new double[]{(int) cSnappedROI.getEndPoint()[0], (int) cSnappedROI.getEndPoint()[1]});
+				croi = cSnappedROI;
+			}
 		}
 	}
 }

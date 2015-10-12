@@ -31,6 +31,7 @@ public class PlottingPreferenceInitializer extends AbstractPreferenceInitializer
 		store.setDefault(PlottingConstants.COLOUR_SCHEME,   "Gray Scale");
 		store.setDefault(PlottingConstants.ORIGIN_PREF,     ImageOrigin.TOP_LEFT.getLabel());
 		store.setDefault(PlottingConstants.ASPECT,          true);
+		store.setDefault(PlottingConstants.SNAP_TO_GRID,    false);
 		store.setDefault(PlottingConstants.SHOW_AXES,       true);
 		store.setDefault(PlottingConstants.SHOW_INTENSITY,  true);
 		store.setDefault(PlottingConstants.IGNORE_RGB,      false);

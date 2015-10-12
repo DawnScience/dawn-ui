@@ -118,5 +118,10 @@ public class EllipseFitSelection extends FitSelectionRegion<EllipticalFitROI> {
 				graphics.fillString(label, pa.translate(pb).scale(0.5).translate(0, -labeldim.height));
 			}
 		}
+
+		@Override
+		public void snapToGrid() {
+			//TODO implement snap to grid here as well as in the overridden createROI
+		}
 	}
 }

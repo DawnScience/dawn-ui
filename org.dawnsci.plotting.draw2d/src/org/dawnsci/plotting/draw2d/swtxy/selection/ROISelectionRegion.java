@@ -85,4 +85,9 @@ abstract class ROISelectionRegion<T extends IROI> extends AbstractSelectionRegio
 			shape.dispose();
 		}
 	}
+
+	@Override
+	public void snapToGrid() {
+		shape.snapToGrid();
+	}
 }

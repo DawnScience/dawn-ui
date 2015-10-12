@@ -109,5 +109,10 @@ public class PolygonSelection extends ROISelectionRegion<PolygonalROI> {
 			}
 			graphics.popState();
 		}
+
+		@Override
+		public void snapToGrid() {
+			// TODO to be implemented for this selection
+		}
 	}
 }

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.dawnsci.mapping.ui.datamodel.MapObject;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext.ConversionScheme;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
@@ -191,6 +192,40 @@ public class MappingUtils {
 			return out;
 		}
 		return null;
+	}
+	
+	public static double[] getGlobalRange(ILazyDataset... datasets) {
+		
+		IDataset[] ax = getAxesFromMetadata(datasets[0]);
+		double[] range = calculateRangeFromAxes(ax);
+		
+		for (int i = 1; i < datasets.length; i++) {
+			double[] r = calculateRangeFromAxes(getAxesFromMetadata(datasets[i]));
+			range[0]  = r[0] < range[0] ? r[0] : range[0];
+			range[1]  = r[1] > range[1] ? r[1] : range[1];
+			range[2]  = r[2] < range[2] ? r[2] : range[2];
+			range[3]  = r[3] > range[3] ? r[3] : range[3];
+		}
+		
+		return range;
+	}
+	
+	private static double[] calculateRangeFromAxes(IDataset[] axes) {
+		double[] range = new double[4];
+		int xs = axes[1].getSize();
+		int ys = axes[0].getSize();
+		range[0] = axes[1].min().doubleValue();
+		range[1] = axes[1].max().doubleValue();
+		double dx = ((range[1]-range[0])/xs)/2;
+		range[0] -= dx;
+		range[1] += dx;
+		
+		range[2] = axes[0].min().doubleValue();
+		range[3] = axes[0].max().doubleValue();
+		double dy = ((range[3]-range[2])/ys)/2;
+		range[2] -= dy;
+		range[3] += dy;
+		return range;
 	}
 	
 	public static Map<String, int[]> getDatasetInfo(String path, ConversionScheme scheme) {
