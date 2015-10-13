@@ -1340,7 +1340,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	private RGBDataset rgbDataset;
-	@SuppressWarnings({ "unchecked" })
+	
 	@Override
 	public boolean setData(IDataset im, List<? extends IDataset> axes, boolean performAuto) {
 		
@@ -2004,6 +2004,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public void setAlpha(int alpha) {
 		this.alpha = alpha;
 		rehistogram();
+	}
+	
+	@Override
+	public boolean hasTrueAxes(){
+		return globalRange != null;
 	}
 	
 }
