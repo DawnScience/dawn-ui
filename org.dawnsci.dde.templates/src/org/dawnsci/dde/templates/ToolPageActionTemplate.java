@@ -21,34 +21,34 @@ import org.eclipse.pde.core.plugin.IPluginReference;
 import org.eclipse.pde.ui.templates.PluginReference;
 
 /**
- * This type is used to set parameters for the "Operation" extension point. A
+ * This type is used to set parameters for the "ToolPageAction" extension point. A
  * wizard page will be generated for the user to set values. Obtained values are
  * inserted into "plugin.xml" when this template's wizard is executing and also
  * used when code and other files are generated.
  * 
  * @author Torkild U. Resheim
  */
-public class OperationTemplate extends DAWNTemplateSection {
+public class ToolPageActionTemplate extends DAWNTemplateSection {
 
-	private static final String CLASS_NAME = "Operation";
-	private static final String EXTENSION_POINT = "org.eclipse.dawnsci.analysis.api.operation";
-	private static final String KEY_DESCRIPTION = "description";
-	
+	private static final String EXTENSION_POINT = "org.eclipse.dawnsci.plotting.api.toolPageAction";
+	private static final String KEY_IDENTIFIER = "identifier";
+	private static final String KEY_TOOL_IDENTIFIER = "tool_identifier";
+	private static final String KEY_COMMAND_IDENTIFIER = "command_identifier";
+	private static final String KEY_LABEL = "label";
+	private static final String KEY_ACTION_TYPE = "action_type";
+
 	@Override
 	protected String getClassName() {
-		return CLASS_NAME;
+		return null; // not used
 	}
-		
+
 	public IPluginReference[] getDependencies(String schemaVersion) {
-		// add _all_ required dependencies, no particular version 
-		return new IPluginReference[] {
-				new PluginReference("org.eclipse.dawnsci.analysis.api", null, 0),
-				new PluginReference("org.eclipse.dawnsci.analysis.dataset", null, 0),
-				new PluginReference("uk.ac.diamond.scisoft.analysis.processing", null, 0),
-				new PluginReference("uk.ac.diamond.scisoft.analysis", null, 0),
+		// add _all_ required dependencies, no particular version
+		return new IPluginReference[] { 
+				new PluginReference("org.eclipse.dawnsci.plotting.api", null, 0),
+				new PluginReference("org.eclipse.ui", null, 0),
 				new PluginReference("org.eclipse.core.runtime", null, 0),
-				new PluginReference("org.eclipse.core.resources", null, 0),
-				};
+				new PluginReference("org.eclipse.core.resources", null, 0), };
 	}
 
 	@Override
@@ -57,16 +57,16 @@ public class OperationTemplate extends DAWNTemplateSection {
 	}
 
 	protected String getPageDescription() {
-		return "Please specify parameters for the new operation extension.";
+		return "Please specify parameters for the new tool page action extension.";
 	}
 
 	protected String getPageTitle() {
-		return "Operation Extension";
+		return "Tool Page Action Extension";
 	}
 
 	@Override
 	public String getSectionId() {
-		return "operation";
+		return "toolPageAction";
 	}
 
 	@Override
@@ -76,11 +76,17 @@ public class OperationTemplate extends DAWNTemplateSection {
 
 	protected void setOptions() {
 		// add all the options we need and set default values
-		addOption(KEY_PACKAGE_NAME, "Java package name", (String)null, 0);
-		addOption(KEY_CLASS_NAME, "Java class name", (String)null, 0);
-		addOption(KEY_DESCRIPTION, "Operation description", (String)null, 0);
-		addOption(KEY_EXTENSION_NAME, "Operation name", (String)null, 0);
-		addOption(KEY_EXTENSION_ID, "Operation identifier", (String)null, 0);
+		addOption(KEY_IDENTIFIER, "Action identifier", (String) null, 0);
+		addOption(KEY_TOOL_IDENTIFIER, "Tool page identifier",
+				getLookupList("org.eclipse.dawnsci.plotting.api.toolPage", "plotting_tool_page", "id", "label"),
+				(String) null, 0); // lookup
+		addOption(KEY_COMMAND_IDENTIFIER, "Command identifier",
+				getLookupList("org.eclipse.ui.commands", "command", "id", "name"), 
+				(String) null, 0);
+		addOption(KEY_LABEL, "Label", (String) null, 0);
+		addOption(KEY_ACTION_TYPE, "Action type", 
+				new String[][] { { "TOOLBAR", "Toolbar" }, { "MENUBAR", "Menubar" } },
+				"TOOLBAR", 0);
 	}
 
 	@Override
@@ -90,12 +96,13 @@ public class OperationTemplate extends DAWNTemplateSection {
 		IPluginModelFactory factory = model.getPluginFactory();
 
 		IPluginElement setElement = factory.createElement(extension);
-		setElement.setName("operation");
-		setElement.setAttribute("class", getStringOption(KEY_PACKAGE_NAME) + "." + getStringOption(KEY_CLASS_NAME));
-		setElement.setAttribute(KEY_DESCRIPTION, getStringOption(KEY_DESCRIPTION));
-		setElement.setAttribute("id", getStringOption(KEY_EXTENSION_ID));
-		setElement.setAttribute("name", getStringOption(KEY_EXTENSION_NAME));
-		setElement.setAttribute("visible", "true");
+		setElement.setName("tool_page_action");
+		setElement.setAttribute("id", getStringOption(KEY_IDENTIFIER));
+		setElement.setAttribute("tool_id", getStringOption(KEY_TOOL_IDENTIFIER));
+		setElement.setAttribute("command_id", getStringOption(KEY_COMMAND_IDENTIFIER));
+		setElement.setAttribute("icon", "icons/default.gif");
+		setElement.setAttribute("label", getStringOption(KEY_LABEL));
+		setElement.setAttribute("action_type", getStringOption(KEY_ACTION_TYPE));
 
 		extension.add(setElement);
 		if (!extension.isInTheModel()) {

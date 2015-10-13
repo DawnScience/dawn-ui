@@ -21,30 +21,30 @@ import org.eclipse.pde.core.plugin.IPluginReference;
 import org.eclipse.pde.ui.templates.PluginReference;
 
 /**
- * This type is used to set parameters for the "Operation" extension point. A
+ * This type is used to set parameters for the "Loader" extension point. A
  * wizard page will be generated for the user to set values. Obtained values are
  * inserted into "plugin.xml" when this template's wizard is executing and also
  * used when code and other files are generated.
  * 
  * @author Torkild U. Resheim
+ * 
+ * @see org.eclipse.dawnsci.analysis.api.io.IFileLoader
+ * @see org.eclipse.dawnsci.analysis.api.metadata.IMetaLoader
  */
-public class OperationTemplate extends DAWNTemplateSection {
+public class LoaderTemplate extends DAWNTemplateSection {
 
-	private static final String CLASS_NAME = "Operation";
-	private static final String EXTENSION_POINT = "org.eclipse.dawnsci.analysis.api.operation";
-	private static final String KEY_DESCRIPTION = "description";
-	
+	private static final String EXTENSION_POINT = "uk.ac.diamond.scisoft.analysis.io.loader";
+	private static final String KEY_EXTENSIONS = "extensions";
+	private static final String KEY_HIGH_PRIORITY = "highPriority";
+
 	@Override
 	protected String getClassName() {
-		return CLASS_NAME;
+		return "Loader";
 	}
-		
+
 	public IPluginReference[] getDependencies(String schemaVersion) {
 		// add _all_ required dependencies, no particular version 
 		return new IPluginReference[] {
-				new PluginReference("org.eclipse.dawnsci.analysis.api", null, 0),
-				new PluginReference("org.eclipse.dawnsci.analysis.dataset", null, 0),
-				new PluginReference("uk.ac.diamond.scisoft.analysis.processing", null, 0),
 				new PluginReference("uk.ac.diamond.scisoft.analysis", null, 0),
 				new PluginReference("org.eclipse.core.runtime", null, 0),
 				new PluginReference("org.eclipse.core.resources", null, 0),
@@ -53,34 +53,35 @@ public class OperationTemplate extends DAWNTemplateSection {
 
 	@Override
 	public String[] getNewFiles() {
-		return new String[0];
+		return null;
 	}
 
+	@Override
 	protected String getPageDescription() {
-		return "Please specify parameters for the new operation extension.";
+		return "Please specify parameters for the new file loader implementation";
 	}
 
+	@Override
 	protected String getPageTitle() {
-		return "Operation Extension";
+		return "File Loader Extension";
 	}
 
 	@Override
 	public String getSectionId() {
-		return "operation";
+		return "loader";
 	}
-
 	@Override
 	public String getUsedExtensionPoint() {
 		return EXTENSION_POINT;
 	}
 
+	@Override
 	protected void setOptions() {
 		// add all the options we need and set default values
 		addOption(KEY_PACKAGE_NAME, "Java package name", (String)null, 0);
 		addOption(KEY_CLASS_NAME, "Java class name", (String)null, 0);
-		addOption(KEY_DESCRIPTION, "Operation description", (String)null, 0);
-		addOption(KEY_EXTENSION_NAME, "Operation name", (String)null, 0);
-		addOption(KEY_EXTENSION_ID, "Operation identifier", (String)null, 0);
+		addOption(KEY_EXTENSIONS, "File extensions", (String)null, 0);
+		addOption(KEY_HIGH_PRIORITY, "High priority", Boolean.TRUE, 0);
 	}
 
 	@Override
@@ -90,12 +91,10 @@ public class OperationTemplate extends DAWNTemplateSection {
 		IPluginModelFactory factory = model.getPluginFactory();
 
 		IPluginElement setElement = factory.createElement(extension);
-		setElement.setName("operation");
+		setElement.setName("loader");
 		setElement.setAttribute("class", getStringOption(KEY_PACKAGE_NAME) + "." + getStringOption(KEY_CLASS_NAME));
-		setElement.setAttribute(KEY_DESCRIPTION, getStringOption(KEY_DESCRIPTION));
-		setElement.setAttribute("id", getStringOption(KEY_EXTENSION_ID));
-		setElement.setAttribute("name", getStringOption(KEY_EXTENSION_NAME));
-		setElement.setAttribute("visible", "true");
+		setElement.setAttribute("file_extension", getStringOption(KEY_EXTENSIONS));
+		setElement.setAttribute("high_priority", Boolean.toString(getBooleanOption(KEY_HIGH_PRIORITY)));
 
 		extension.add(setElement);
 		if (!extension.isInTheModel()) {
