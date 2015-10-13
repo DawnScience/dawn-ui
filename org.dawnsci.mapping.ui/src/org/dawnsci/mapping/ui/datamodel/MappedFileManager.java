@@ -38,6 +38,7 @@ public class MappedFileManager {
 	public void removeFile(MappedDataFile file) {
 		mappedDataArea.removeFile(file);
 		plotManager.clearAll();
+		plotManager.plotMap(null);
 		viewer.refresh();
 	}
 	

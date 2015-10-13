@@ -39,6 +39,10 @@ public class MappedDataArea implements MapObject {
 	public MappedDataFile getDataFile(int index) {
 		return files.get(index);
 	}
+	
+	public int count() {
+		return files.size();
+	}
 
 	public boolean isInRange(MappedDataFile mdf) {
 		double[] newRange = mdf.getRange();

@@ -11,7 +11,6 @@ import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.dawnsci.mapping.ui.datamodel.MapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedData;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
-import org.dawnsci.plotting.draw2d.swtxy.ImageTrace;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -215,8 +214,16 @@ public class MapPlotManager {
 	
 	
 	public void plotMap(MappedData map) {
-		if (map == null) map = area.getDataFile(0).getMap();
-		addMap(map);
+		if (map == null) {
+			for (int i = 0; i < area.count();i++) {
+				map = area.getDataFile(i).getMap();
+				addMap(map);
+			}
+ 			
+		} else {
+			addMap(map);
+		}
+		
 		plotLayers();
 	}
 	
@@ -250,28 +257,6 @@ public class MapPlotManager {
 		data.clear();
 		layers.clear();
 	}
-	
-//	private void plotMapData(MappedData mapdata){
-//		map.clear();
-//		MappedDataFile dataFile = area.getDataFile(0);
-//		AssociatedImage image = dataFile.getAssociatedImage();
-//		if (mapdata == null) mapdata = dataFile.getMap();
-//		int count = 0;
-//		layers.clear();
-//		try {
-//			ICompositeTrace comp = this.map.createCompositeTrace("composite1");
-//			if (image != null) {
-//				layers.add(image);
-//				comp.add(MappingUtils.buildTrace(image.getImage(), this.map),count++);
-//			}
-//
-//			layers.add(mapdata);
-//			comp.add(MappingUtils.buildTrace(mapdata.getMap(), this.map,mapdata.getTransparency()),count++);
-//			this.map.addTrace(comp);
-//		} catch (Exception e) {
-//			logger.error("Error plotting mapped data", e);
-//		}
-//	}
 	
 	private void addMap(MappedData map) {
 		
