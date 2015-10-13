@@ -1638,17 +1638,4 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 		if (getXYRegionGraph().getRegionArea()==null) return;
 	    getXYRegionGraph().getRegionArea().removeAuxilliaryClickListener(mcl);
 	}
-
-	@Override
-	public boolean isGridSnap() {
-		if(system instanceof IRegionSystem)
-			return ((IRegionSystem)system).isGridSnap();
-		return false;
-	}
-
-	@Override
-	public void setGridSnap(boolean isGridSnap) {
-		if(system instanceof IRegionSystem)
-			((IRegionSystem)system).setGridSnap(isGridSnap);
-	}
 }

@@ -476,4 +476,23 @@ public class XYRegionGraph extends XYGraph {
 		}
 		return super.removeAxis(axis);
 	}
+
+	private boolean isGridSnap;
+
+	/**
+	 * 
+	 * @return true if regions/selections are snapped to grid
+	 */
+	public boolean isGridSnap() {
+		return isGridSnap;
+	}
+
+	/**
+	 * Sets the snap to grid option on regions/selections
+	 * 
+	 * @param isGridSnap
+	 */
+	public void setGridSnap(boolean isGridSnap) {
+		this.isGridSnap = isGridSnap;
+	}
 }

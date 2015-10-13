@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.ActionType;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.ManagerType;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.axis.AxisEvent;
@@ -47,6 +48,7 @@ import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.preferences.ToolbarConfigurationConstants;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegionAction;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
@@ -716,7 +718,14 @@ class LightWeightPlotActions {
 			@Override
 			public void run() {
 				PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.SNAP_TO_GRID, isChecked());
-				viewer.getSystem().setGridSnap(isChecked());
+				((XYRegionGraph)xyGraph).setGridSnap(isChecked());
+				IPlottingSystem system = viewer.getSystem();
+				Collection<IRegion> regions = system.getRegions();
+				for (IRegion region : regions) {
+					if (isChecked())
+						region.snapToGrid();
+				}
+//				viewer.getSystem().setGridSnap(isChecked());
 				viewer.getSystem().repaint(false);
 			}
 		};

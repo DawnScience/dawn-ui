@@ -12,16 +12,15 @@ package org.dawnsci.plotting.draw2d.swtxy.selection;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
-import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.handler.HandleStatus;
 import org.eclipse.dawnsci.analysis.dataset.roi.handler.ROIHandler;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
-import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.region.IRegionContainer;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.draw2d.ColorConstants;
@@ -33,8 +32,6 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 /**
  * Class for a shape based on a ROI and uses a ROIHandler
@@ -372,16 +369,11 @@ abstract public class ROIShape<T extends IROI> extends RegionFillFigure<T> imple
 		}
 	}
 
-	private IPreferenceStore store;
-
-	private IPreferenceStore getPreferenceStore() {
-		if (store != null)
-			return store;
-		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
-		return store;
-	}
-
+	/**
+	 * 
+	 * @return true if the snap to grid option for selections/regions is toggled on
+	 */
 	public boolean isGridSnap() {
-		return getPreferenceStore().getBoolean(BasePlottingConstants.SNAP_TO_GRID);
+		return ((XYRegionGraph)region.getBean().getXyGraph()).isGridSnap();
 	}
 }

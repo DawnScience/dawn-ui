@@ -22,6 +22,7 @@ import java.util.Map;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.dawnsci.plotting.PlottingActionBarManager;
+import org.dawnsci.plotting.draw2d.swtxy.RegionCoordinateSystem;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -1461,24 +1462,6 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			}
 		}
 		return super.getAdapter(adapter);
-	}
-
-	private boolean hasGridSnap;
-
-	@Override
-	public boolean isGridSnap() {
-		return hasGridSnap;
-	}
-
-	@Override
-	public void setGridSnap(boolean hasGridSnap) {
-		this.hasGridSnap = hasGridSnap;
-		if (hasGridSnap) {
-			Collection<IRegion> regions = getRegions();
-			for (IRegion region : regions) {
-				region.snapToGrid();
-			}
-		}
 	}
 }
 
