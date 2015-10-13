@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.dawnsci.plotting.histogram.histogram" xmlns="http://www.w3.org/2001/XMLSchema">
+<schema targetNamespace="org.dawnsci.plotting.histogram" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="org.dawnsci.plotting.histogram.histogram" id="org.dawnsci.plotting.histogram.histogram.colourScheme" name="Colour Scheme"/>
+         <meta.schema plugin="org.dawnsci.plotting.histogram" id="colourScheme" name="Colour Scheme"/>
       </appinfo>
       <documentation>
          This extention point allows the setting of a new colour scheme which will be used on the Histogram tool
@@ -69,7 +69,7 @@
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="identifier" basedOn="org.dawnsci.plotting.histogram.histogram.channelColourScheme/transfer_function/@id"/>
+                  <meta.attribute kind="identifier" basedOn="org.dawnsci.plotting.histogram.channelColourScheme/transfer_function/@id"/>
                </appinfo>
             </annotation>
          </attribute>
@@ -79,7 +79,7 @@
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="identifier" basedOn="org.dawnsci.plotting.histogram.histogram.channelColourScheme/transfer_function/@id"/>
+                  <meta.attribute kind="identifier" basedOn="org.dawnsci.plotting.histogram.channelColourScheme/transfer_function/@id"/>
                </appinfo>
             </annotation>
          </attribute>
@@ -89,7 +89,7 @@
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="identifier" basedOn="org.dawnsci.plotting.histogram.histogram.channelColourScheme/transfer_function/@id"/>
+                  <meta.attribute kind="identifier" basedOn="org.dawnsci.plotting.histogram.channelColourScheme/transfer_function/@id"/>
                </appinfo>
             </annotation>
          </attribute>
@@ -99,7 +99,7 @@
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="identifier" basedOn="org.dawnsci.plotting.histogram.histogram.channelColourScheme/transfer_function/@id"/>
+                  <meta.attribute kind="identifier" basedOn="org.dawnsci.plotting.histogram.channelColourScheme/transfer_function/@id"/>
                </appinfo>
             </annotation>
          </attribute>
@@ -149,35 +149,35 @@
       </appinfo>
       <documentation>
          &lt;extension
-         point=&quot;org.dawnsci.plotting.histogram.histogram.channelColourScheme&quot;&gt;
+         point=&quot;org.dawnsci.plotting.histogram.channelColourScheme&quot;&gt;
       &lt;transfer_function
             array_provider_class=&quot;org.dawnsci.plotting.histogram.functions.classes.LinearTransferFunction&quot;
-            id=&quot;org.dawnsci.plotting.histogram.histogram.linear&quot;
+            id=&quot;org.dawnsci.plotting.histogram.linear&quot;
             name=&quot;Linear (y=x)&quot;&gt;
       &lt;/transfer_function&gt;
       &lt;transfer_function
             array_provider_class=&quot;org.dawnsci.plotting.histogram.functions.classes.SquaredTransferFunction&quot;
-            id=&quot;org.dawnsci.plotting.histogram.histogram.squared&quot;
+            id=&quot;org.dawnsci.plotting.histogram.squared&quot;
             name=&quot;Squared (y = x**2)&quot;&gt;
       &lt;/transfer_function&gt;
    &lt;/extension&gt;
    &lt;extension
-         point=&quot;org.dawnsci.plotting.histogram.histogram.colourScheme&quot;&gt;
+         point=&quot;org.dawnsci.plotting.histogram.colourScheme&quot;&gt;
       &lt;colour_scheme
-            alpha_transfer_function=&quot;org.dawnsci.plotting.histogram.histogram.linear&quot;
-            blue_transfer_function=&quot;org.dawnsci.plotting.histogram.histogram.linear&quot;
-            green_transfer_function=&quot;org.dawnsci.plotting.histogram.histogram.linear&quot;
-            id=&quot;org.dawnsci.plotting.histogram.histogram.greyscale&quot;
+            alpha_transfer_function=&quot;org.dawnsci.plotting.histogram.linear&quot;
+            blue_transfer_function=&quot;org.dawnsci.plotting.histogram.linear&quot;
+            green_transfer_function=&quot;org.dawnsci.plotting.histogram.linear&quot;
+            id=&quot;org.dawnsci.plotting.histogram.greyscale&quot;
             name=&quot;Gray Scale&quot;
-            red_transfer_function=&quot;org.dawnsci.plotting.histogram.histogram.linear&quot;&gt;
+            red_transfer_function=&quot;org.dawnsci.plotting.histogram.linear&quot;&gt;
       &lt;/colour_scheme&gt;
       &lt;colour_scheme
-            alpha_transfer_function=&quot;org.dawnsci.plotting.histogram.histogram.squared&quot;
-            blue_transfer_function=&quot;org.dawnsci.plotting.histogram.histogram.squared&quot;
-            green_transfer_function=&quot;org.dawnsci.plotting.histogram.histogram.squared&quot;
-            id=&quot;org.dawnsci.plotting.histogram.histogram.squared&quot;
+            alpha_transfer_function=&quot;org.dawnsci.plotting.histogram.squared&quot;
+            blue_transfer_function=&quot;org.dawnsci.plotting.histogram.squared&quot;
+            green_transfer_function=&quot;org.dawnsci.plotting.histogram.squared&quot;
+            id=&quot;org.dawnsci.plotting.histogram.squared&quot;
             name=&quot;Squared Scale&quot;
-            red_transfer_function=&quot;org.dawnsci.plotting.histogram.histogram.squared&quot;&gt;
+            red_transfer_function=&quot;org.dawnsci.plotting.histogram.squared&quot;&gt;
       &lt;/colour_scheme&gt;
    &lt;/extension&gt;
       </documentation>

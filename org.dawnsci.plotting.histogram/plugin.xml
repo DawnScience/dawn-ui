@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="org.dawnsci.plotting.histogram.channelColourScheme" name="Single Channel Colour Scheme" schema="schema/channelColourScheme.exsd"/>
-   <extension-point id="org.dawnsci.plotting.histogram.colourScheme" name="Colour Scheme" schema="schema/colourScheme.exsd"/>
+   <extension-point id="channelColourScheme" name="Single Channel Colour Scheme" schema="schema/channelColourScheme.exsd"/>
+   <extension-point id="colourScheme" name="Colour Scheme" schema="schema/colourScheme.exsd"/>
    <extension
          point="org.eclipse.dawnsci.plotting.api.toolPage">
       <plotting_tool_page
