@@ -21,34 +21,40 @@ import org.eclipse.pde.core.plugin.IPluginReference;
 import org.eclipse.pde.ui.templates.PluginReference;
 
 /**
- * This type is used to set parameters for the "Operation" extension point. A
+ * This type is used to set parameters for the "ToolPage" extension point. A
  * wizard page will be generated for the user to set values. Obtained values are
  * inserted into "plugin.xml" when this template's wizard is executing and also
  * used when code and other files are generated.
+ * <p>
+ * This implementations allows the user to create a new
+ * <i>plotting_tool_page</i> only, a category for the page is selected in the
+ * wizard and must already exist.
+ * </p>
  * 
  * @author Torkild U. Resheim
  */
-public class OperationTemplate extends DAWNTemplateSection {
+public class ToolPageTemplate extends DAWNTemplateSection {
 
-	private static final String CLASS_NAME = "Operation";
-	private static final String EXTENSION_POINT = "org.eclipse.dawnsci.analysis.api.operation";
-	private static final String KEY_DESCRIPTION = "description";
-	
+	private static final String CLASS_NAME = "ToolPage";
+	private static final String EXTENSION_POINT = "org.eclipse.dawnsci.plotting.api.toolPage";
+	private static final String KEY_IDENTIFIER = "identifier";
+	private static final String KEY_TOOLTIP = "tooltip";
+	private static final String KEY_LABEL = "label";
+	private static final String KEY_CHEAT_SHEET_ID = "cheat_sheet_id";
+	private static final String KEY_CATEGORY = "category";
+
 	@Override
 	protected String getClassName() {
 		return CLASS_NAME;
 	}
-		
+
 	public IPluginReference[] getDependencies(String schemaVersion) {
-		// add _all_ required dependencies, no particular version 
-		return new IPluginReference[] {
-				new PluginReference("org.eclipse.dawnsci.analysis.api", null, 0),
-				new PluginReference("org.eclipse.dawnsci.analysis.dataset", null, 0),
-				new PluginReference("uk.ac.diamond.scisoft.analysis.processing", null, 0),
-				new PluginReference("uk.ac.diamond.scisoft.analysis", null, 0),
+		// add _all_ required dependencies, no particular version
+		return new IPluginReference[] { 
+				new PluginReference("org.eclipse.dawnsci.plotting.api", null, 0),
+				new PluginReference("org.eclipse.ui", null, 0),
 				new PluginReference("org.eclipse.core.runtime", null, 0),
-				new PluginReference("org.eclipse.core.resources", null, 0),
-				};
+				new PluginReference("org.eclipse.core.resources", null, 0), };
 	}
 
 	@Override
@@ -57,16 +63,16 @@ public class OperationTemplate extends DAWNTemplateSection {
 	}
 
 	protected String getPageDescription() {
-		return "Please specify parameters for the new operation extension.";
+		return "Please specify parameters for the new tool page extension.";
 	}
 
 	protected String getPageTitle() {
-		return "Operation Extension";
+		return "Tool Page Extension";
 	}
 
 	@Override
 	public String getSectionId() {
-		return "operation";
+		return "toolPage";
 	}
 
 	@Override
@@ -76,11 +82,15 @@ public class OperationTemplate extends DAWNTemplateSection {
 
 	protected void setOptions() {
 		// add all the options we need and set default values
-		addOption(KEY_PACKAGE_NAME, "Java package name", (String)null, 0);
-		addOption(KEY_CLASS_NAME, "Java class name", (String)null, 0);
-		addOption(KEY_DESCRIPTION, "Operation description", (String)null, 0);
-		addOption(KEY_EXTENSION_NAME, "Operation name", (String)null, 0);
-		addOption(KEY_EXTENSION_ID, "Operation identifier", (String)null, 0);
+		addOption(KEY_PACKAGE_NAME, "Java package name", (String) null, 0);
+		addOption(KEY_CLASS_NAME, "Java class name", (String) null, 0);
+		addOption(KEY_IDENTIFIER, "Page identifier", (String) null, 0);
+		addOption(KEY_TOOLTIP, "Tooltip", (String) null, 0);
+		addOption(KEY_LABEL, "Label", (String) null, 0);
+		addOption(KEY_CHEAT_SHEET_ID, "Cheat sheet identifier", (String) null, 0);
+		addOption(KEY_CATEGORY, "Category",
+				getLookupList(EXTENSION_POINT, "plotting_tool_category", "id", "label"), 
+				(String) null, 0);
 	}
 
 	@Override
@@ -90,12 +100,15 @@ public class OperationTemplate extends DAWNTemplateSection {
 		IPluginModelFactory factory = model.getPluginFactory();
 
 		IPluginElement setElement = factory.createElement(extension);
-		setElement.setName("operation");
+		setElement.setName("plotting_tool_page");
 		setElement.setAttribute("class", getStringOption(KEY_PACKAGE_NAME) + "." + getStringOption(KEY_CLASS_NAME));
-		setElement.setAttribute(KEY_DESCRIPTION, getStringOption(KEY_DESCRIPTION));
-		setElement.setAttribute("id", getStringOption(KEY_EXTENSION_ID));
-		setElement.setAttribute("name", getStringOption(KEY_EXTENSION_NAME));
+		setElement.setAttribute("id", getStringOption(KEY_IDENTIFIER));
+		setElement.setAttribute("icon", "icons/default.gif");
+		setElement.setAttribute("tooltip", getStringOption(KEY_TOOLTIP));
+		setElement.setAttribute("label", getStringOption(KEY_LABEL));
+		setElement.setAttribute("cheat_sheet_id", getStringOption(KEY_CHEAT_SHEET_ID));
 		setElement.setAttribute("visible", "true");
+		setElement.setAttribute("category", getStringOption(KEY_CATEGORY));
 
 		extension.add(setElement);
 		if (!extension.isInTheModel()) {

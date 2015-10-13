@@ -15,7 +15,6 @@ import java.io.ByteArrayInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 
 import org.dawnsci.dde.core.DAWNExtensionNature;
 import org.eclipse.core.resources.ICommand;
@@ -44,13 +43,8 @@ import org.eclipse.pde.core.plugin.IPluginImport;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.core.plugin.IPluginReference;
 import org.eclipse.pde.core.plugin.ISharedPluginModel;
-import org.eclipse.pde.internal.ui.PDEPlugin;
-import org.eclipse.pde.internal.ui.elements.ElementList;
 import org.eclipse.pde.internal.ui.util.ModelModification;
 import org.eclipse.pde.internal.ui.util.PDEModelUtility;
-import org.eclipse.pde.internal.ui.wizards.WizardCollectionElement;
-import org.eclipse.pde.internal.ui.wizards.WizardElement;
-import org.eclipse.pde.internal.ui.wizards.extension.NewExtensionRegistryReader;
 import org.eclipse.pde.internal.ui.wizards.plugin.PluginFieldData;
 import org.eclipse.pde.internal.ui.wizards.templates.NewExtensionTemplateWizard;
 import org.eclipse.pde.ui.IFieldData;
@@ -74,6 +68,7 @@ import org.eclipse.ui.actions.WorkspaceModifyOperation;
  * populate wizard pages and product content.
  * </p>
  * 
+ * @author Torkild U. Resheim
  * @see NewExtensionTemplateWizard
  */
 @SuppressWarnings("restriction")
@@ -129,14 +124,7 @@ public class NewDAWNExtensionProjectWizard extends AbstractNewPluginTemplateWiza
 			
 	
 	private DAWNExtensionProjectWizardPage p1;
-
-	private WizardCollectionElement fWizardCollection;
 	
-	public static final String PLUGIN_POINT = "newExtension"; //$NON-NLS-1$
-
-	/** A list of all applicable templates */
-	private ArrayList<ITemplateSection> templates;
-
 	/** The selected template section */
 	private ITemplateSection fSection;
 	
@@ -149,7 +137,6 @@ public class NewDAWNExtensionProjectWizard extends AbstractNewPluginTemplateWiza
 	@Override
 	public void init(IFieldData data) {
 		super.init(data);
-		loadTemplateCollection();
 		setWindowTitle("New DAWN Plug-in Project");	
 	}
 	@Override
@@ -162,20 +149,14 @@ public class NewDAWNExtensionProjectWizard extends AbstractNewPluginTemplateWiza
 		IWizardPage nextPage = super.getNextPage(page);
 		if (page.getName().equals("p1")){
 			((PluginFieldData)getData()).setId(p1.getBundleIdentifier());
-			String selectedExtension = p1.getExtensionId();
 			// determine whether or not the selected extension has an associated template.
-			for (ITemplateSection template : templates) {
-				if (template.getUsedExtensionPoint().equals(selectedExtension)){
-					// add the template pages to the wizard
-					if (!template.getPagesAdded()){
-						template.addPages(this);
-					}
-					fSection = template;						
-					return template.getPage(0);		
-				}				
+			ITemplateSection template = p1.getSelectedTemplate();
+			// add the template pages to the wizard
+			if (!template.getPagesAdded()){
+				template.addPages(this);
 			}
-			// no associated template, so no next page
-			return null;
+			fSection = template;						
+			return template.getPage(0);		
 		}
 		return nextPage;
 	}
@@ -375,47 +356,6 @@ public class NewDAWNExtensionProjectWizard extends AbstractNewPluginTemplateWiza
 		PDEModelUtility.modifyModel(modification, monitor);
 	}
 	
-	/**
-	 * Locate all wizards extending "org.eclipse.pde.ui.newExtension" and place
-	 * instances of the associated templates into the templates array.
-	 */
-	private void loadTemplateCollection() {
-		NewExtensionRegistryReader reader = new NewExtensionRegistryReader();
-		fWizardCollection = (WizardCollectionElement) reader.readRegistry(PDEPlugin.getPluginId(), PLUGIN_POINT, false);
-		WizardCollectionElement templateCollection = new WizardCollectionElement("", "", null);
-		collectTemplates(fWizardCollection.getChildren(), templateCollection);
-		templates = new ArrayList<>();
-		ElementList wizards = templateCollection.getWizards();
-		Object[] children = wizards.getChildren();
-		for (Object object : children) {
-			if (object instanceof WizardElement){
-				try {
-					if (DAWNDDEPlugin.isSupportedDAWNExtension(((WizardElement) object).getContributingId())){
-						ITemplateSection extension = (ITemplateSection) ((WizardElement) object).getTemplateElement().createExecutableExtension("class");
-						templates.add(extension);
-					}
-				} catch (CoreException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		
-	}
-
-	private void collectTemplates(Object[] children, WizardCollectionElement list) {
-		for (int i = 0; i < children.length; i++) {
-			if (children[i] instanceof WizardCollectionElement) {
-				WizardCollectionElement element = (WizardCollectionElement) children[i];
-				collectTemplates(element.getChildren(), list);
-				collectTemplates(element.getWizards().getChildren(), list);
-			} else if (children[i] instanceof WizardElement) {
-				WizardElement wizard = (WizardElement) children[i];
-				if (wizard.isTemplate())
-					list.getWizards().add(wizard);
-			}
-		}
-	}
-
 	private void updateDependencies(IPluginModelBase model) throws CoreException {
 		IPluginReference[] refs = fSection.getDependencies(model.getPluginBase().getSchemaVersion());
 		for (int i = 0; i < refs.length; i++) {

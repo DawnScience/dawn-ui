@@ -12,15 +12,21 @@
 package org.dawnsci.dde.ui;
 
 import java.net.URL;
+import java.util.ArrayList;
 
-import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.pde.core.plugin.IPluginExtensionPoint;
 import org.eclipse.pde.internal.core.PDECore;
 import org.eclipse.pde.internal.core.ischema.ISchema;
 import org.eclipse.pde.internal.core.ischema.ISchemaDescriptor;
 import org.eclipse.pde.internal.core.schema.SchemaDescriptor;
 import org.eclipse.pde.internal.core.schema.SchemaRegistry;
+import org.eclipse.pde.internal.ui.PDEPlugin;
+import org.eclipse.pde.internal.ui.elements.ElementList;
+import org.eclipse.pde.internal.ui.wizards.WizardCollectionElement;
+import org.eclipse.pde.internal.ui.wizards.WizardElement;
+import org.eclipse.pde.internal.ui.wizards.extension.NewExtensionRegistryReader;
+import org.eclipse.pde.ui.templates.ITemplateSection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ModifyEvent;
@@ -39,6 +45,8 @@ import org.osgi.framework.Version;
  * This type implements the main page of the <i>New DAWN Plug-in Project</i>
  * wizard. It allows the user to specify some basic information required for all
  * new plug-ins.
+ * 
+ * @author Torkild U. Resheim
  */
 @SuppressWarnings("restriction")
 public class DAWNExtensionProjectWizardPage extends WizardNewProjectCreationPage {
@@ -49,10 +57,18 @@ public class DAWNExtensionProjectWizardPage extends WizardNewProjectCreationPage
 	private String vendor;
 	private String extension;
 
+	/** A list of all applicable templates */
+	private ArrayList<ITemplateSection> templates;
+
+	private WizardCollectionElement fWizardCollection;
+
+	public static final String PLUGIN_POINT = "newExtension"; //$NON-NLS-1$
+
 	public DAWNExtensionProjectWizardPage(String pageName) {
 		super(pageName);
 		setTitle("DAWN Plug-in Project");
 		setDescription("Define the location of the plug-in project");
+		loadTemplateCollection();
 	}
     
 	public void createControl(Composite parent) {
@@ -73,13 +89,11 @@ public class DAWNExtensionProjectWizardPage extends WizardNewProjectCreationPage
 		final Combo extensionCombo = new Combo(g, SWT.BORDER | SWT.READ_ONLY);
 		extensionCombo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
-		// add viable extension points to the list
-		IExtensionPoint[] extensionPoints = Platform.getExtensionRegistry().getExtensionPoints();
-		for (IExtensionPoint iExtensionPoint : extensionPoints) {
-			String id = iExtensionPoint.getContributor().getName();
-			if (DAWNDDEPlugin.isSupportedDAWNExtension(id)) {
-				extensionCombo.add(iExtensionPoint.getUniqueIdentifier());
-			}
+		for (ITemplateSection template : templates) {
+			extensionCombo.add(template.getUsedExtensionPoint());
+			// makes this go faster when the user selects items in the combo box
+			PDECore.getDefault().getExtensionsRegistry()
+					.findExtensionPoint(template.getUsedExtensionPoint());
 		}
 
 		final StyledText st = new StyledText(g, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
@@ -206,6 +220,46 @@ public class DAWNExtensionProjectWizardPage extends WizardNewProjectCreationPage
 		return true;
 	}
 
+	/**
+	 * Locate all wizards extending "org.eclipse.pde.ui.newExtension" and place
+	 * instances of the associated templates into the templates array.
+	 */
+	private void loadTemplateCollection() {
+		NewExtensionRegistryReader reader = new NewExtensionRegistryReader();
+		fWizardCollection = (WizardCollectionElement) reader.readRegistry(PDEPlugin.getPluginId(), PLUGIN_POINT, false);
+		WizardCollectionElement templateCollection = new WizardCollectionElement("", "", null);
+		collectTemplates(fWizardCollection.getChildren(), templateCollection);
+		templates = new ArrayList<>();
+		ElementList wizards = templateCollection.getWizards();
+		Object[] children = wizards.getChildren();
+		for (Object object : children) {
+			if (object instanceof WizardElement){
+				try {
+					if (DAWNDDEPlugin.isSupportedDAWNExtension(((WizardElement) object).getContributingId())){
+						ITemplateSection extension = (ITemplateSection) ((WizardElement) object).getTemplateElement().createExecutableExtension("class");
+						templates.add(extension);
+					}
+				} catch (CoreException e) {
+					e.printStackTrace();
+				}
+			}
+		}		
+	}
+
+	private void collectTemplates(Object[] children, WizardCollectionElement list) {
+		for (int i = 0; i < children.length; i++) {
+			if (children[i] instanceof WizardCollectionElement) {
+				WizardCollectionElement element = (WizardCollectionElement) children[i];
+				collectTemplates(element.getChildren(), list);
+				collectTemplates(element.getWizards().getChildren(), list);
+			} else if (children[i] instanceof WizardElement) {
+				WizardElement wizard = (WizardElement) children[i];
+				if (wizard.isTemplate())
+					list.getWizards().add(wizard);
+			}
+		}
+	}
+	
 	public String getBundleIdentifier() {
 		return identifier;
 	}
@@ -224,6 +278,15 @@ public class DAWNExtensionProjectWizardPage extends WizardNewProjectCreationPage
 	
 	public String getExtensionId() {
 		return extension;
+	}
+	
+	public ITemplateSection getSelectedTemplate(){
+		for (ITemplateSection template : templates) {
+			if (template.getUsedExtensionPoint().equals(extension)){
+				return template;
+			}				
+		}
+		return null;
 	}
 
 }
