@@ -214,6 +214,12 @@ public class MapPlotManager {
 	
 	
 	public void plotMap(MappedData map) {
+		if (layers.contains(map)){
+			layers.remove(map);
+			plotLayers();
+			return;
+		}
+		
 		if (map == null) {
 			for (int i = 0; i < area.count();i++) {
 				map = area.getDataFile(i).getMap();
