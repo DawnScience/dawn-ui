@@ -81,9 +81,6 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	private Label statusMessage;
 	String[] statusString;
 	ILoaderService service;
-	//Composite baseComposite;
-//	XAxis xAxis = XAxis.Q;
-//	IntegrationMode mode = IntegrationMode.NONSPLITTING;
 	boolean correctSolidAngle = false;
 	IDiffractionMetadata importedMeta;
 	SashForm sashForm;
@@ -254,8 +251,6 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			public void run() {
 				model.setIntegrationMode(IntegrationMode.NONSPLITTING);
 				modeSelect.setSelectedAction(this);
-//				if (integratorSetup != null) integratorSetup.enableFor1D(true);
-//				update(null);
 			}
 		};
 		
@@ -266,8 +261,6 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			public void run() {
 				model.setIntegrationMode(IntegrationMode.SPLITTING);
 				modeSelect.setSelectedAction(this);
-//				if (integratorSetup != null) integratorSetup.enableFor1D(true);
-//				update(null);
 			}
 		};
 		
@@ -278,8 +271,6 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			public void run() {
 				model.setIntegrationMode(IntegrationMode.SPLITTING2D);
 				modeSelect.setSelectedAction(this);
-//				if (integratorSetup != null) integratorSetup.enableFor1D(false);
-//				update(null);
 			}
 		};
 		split2DAction.setImageDescriptor(Activator.getImageDescriptor("icons/splitCake.png"));
@@ -289,8 +280,6 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			public void run() {
 				model.setIntegrationMode(IntegrationMode.NONSPLITTING2D);
 				modeSelect.setSelectedAction(this);
-//				if (integratorSetup != null) integratorSetup.enableFor1D(false);
-//				update(null);
 			}
 		};
 		nonSplit2DAction.setImageDescriptor(Activator.getImageDescriptor("icons/cake.png"));
@@ -300,21 +289,16 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		final Action qAction = new Action("Q") {
 			@Override
 			public void run() {
-//				PowderIntegrationTool.this.fullImageJob.setAxisType(XAxis.Q);
 				model.setAxisType(XAxis.Q);
 				axisSelect.setSelectedAction(this);
-//				update(null);
 			}
 		};
 
 		final Action tthAction = new Action("2\u03b8") {
 			@Override
 			public void run() {
-//				PowderIntegrationTool.this.fullImageJob.setAxisType(XAxis.ANGLE);
-//				xAxis = XAxis.ANGLE;
 				model.setAxisType(XAxis.ANGLE);
 				axisSelect.setSelectedAction(this);
-//				update(null);
 			}
 
 		};
@@ -322,11 +306,8 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		final Action dAction = new Action("d") {
 			@Override
 			public void run() {
-//				PowderIntegrationTool.this.fullImageJob.setAxisType(XAxis.RESOLUTION);
-//				xAxis = XAxis.RESOLUTION;
 				model.setAxisType(XAxis.RESOLUTION);
 				axisSelect.setSelectedAction(this);
-//				update(null);
 			}
 
 		};
@@ -334,11 +315,8 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		final Action pixelAction = new Action("pixel") {
 			@Override
 			public void run() {
-//				PowderIntegrationTool.this.fullImageJob.setAxisType(XAxis.PIXEL);
-//				xAxis = XAxis.PIXEL;
 				model.setAxisType(XAxis.PIXEL);
 				axisSelect.setSelectedAction(this);
-//				update(null);
 			}
 
 		};
@@ -363,7 +341,6 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 				try {
 
 					FileSelectionDialog dialog = new FileSelectionDialog(Display.getDefault().getActiveShell());
-//					FileDialog dialog = new FileDialog(Display.getDefault().getActiveShell(), SWT.SAVE);
 					dialog.setNewFile(false);
 					dialog.setFolderSelector(false);
 					if (lastPath != null) {
@@ -409,8 +386,6 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 
 		};
 		
-		//if (importedMeta == null) clearImported.setEnabled(false);
-		
 		loadMetaAction.setImageDescriptor(Activator.getImageDescriptor("icons/mask-import-wiz.png"));
 		clearImported.setImageDescriptor(Activator.getImageDescriptor("icons/delete.gif"));
 		
@@ -445,6 +420,14 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	@Override
 	public Control getControl() {
 		return sashForm;
+	}
+	
+	public void dispose() {
+		//can hold lots of data so get rid of it
+		fullImageJob = null;
+		corModel = null;
+		model = null;
+		super.dispose();
 	}
 
 	@Override
@@ -512,19 +495,6 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	}
 	
 	private IDiffractionMetadata getUpdatedMetadata(IDataset ds, String[] statusString) {
-		
-		//check class metadata ok
-//		if (metadata != null) {
-//			DetectorProperties d = metadata.getDetector2DProperties();
-//			if((d.getPx() != ds.getShape()[1] || d.getPy() != ds.getShape()[0]) || (d.getPx() != ds.getShape()[0] || d.getPy() != ds.getShape()[1]))  {
-//				metadata = null;
-//				statusMessage.setText("Data shape not compatible with current metadata");
-//				statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
-//			} else {
-//				statusMessage.setText("Metadata OK");
-//				statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
-//			}
-//		}
 		
 		//look in data set
 		IDiffractionMetadata m = null;
@@ -597,10 +567,6 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		} catch (Exception e) {
 			//ignore
 		}
-		
-//		Group resultGroup = file.group("integration_result", dataGroup);
-//		file.setNexusAttribute(resultGroup, Nexus.DATA);
-//		slice.setParent(resultGroup);
 		
 		List<Dataset> out = fullImageJob.process(DatasetUtils.convertToDataset(slice.getData()));
 		
