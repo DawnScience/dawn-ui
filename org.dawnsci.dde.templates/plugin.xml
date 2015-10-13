@@ -23,6 +23,11 @@
             name="Tool Page Action"
             template="org.dawnsci.dde.templates.ToolPageActionTemplate">
       </wizard>
+      <wizard
+            id="org.dawnsci.dde.templates.ColourSchemeWizard"
+            name="Colour Scheme"
+            template="org.dawnsci.dde.templates.colourSchemeTemplate">
+      </wizard>
    </extension>
    <extension
          point="org.eclipse.pde.ui.templates">
@@ -49,6 +54,12 @@
             contributingId="org.eclipse.dawnsci.plotting.api.toolPageAction"
             id="org.dawnsci.dde.templates.ToolPageActionTemplate"
             name="Tool Page Action">
+      </template>
+      <template
+            class="org.dawnsci.dde.templates.ColourSchemeTemplate"
+            contributingId="org.dawnsci.plotting.histogram.colourScheme"
+            id="org.dawnsci.dde.templates.colourSchemeTemplate"
+            name="Colour Scheme">
       </template>
    </extension>
 </plugin>

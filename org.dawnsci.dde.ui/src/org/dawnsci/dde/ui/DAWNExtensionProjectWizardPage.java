@@ -105,11 +105,12 @@ public class DAWNExtensionProjectWizardPage extends WizardNewProjectCreationPage
 
 			@Override
 			public void modifyText(ModifyEvent e) {
+				String text = extensionCombo.getText();
 				IPluginExtensionPoint point = PDECore.getDefault().getExtensionsRegistry()
-						.findExtensionPoint(extensionCombo.getText());
+						.findExtensionPoint(text);
 				URL url = null;
 				if (point != null) {
-					extension = extensionCombo.getText();								
+					extension = text;								
 					url = SchemaRegistry.getSchemaURL(point);
 					if (url != null) {
 						ISchemaDescriptor desc = new SchemaDescriptor(extension, url);
@@ -235,7 +236,8 @@ public class DAWNExtensionProjectWizardPage extends WizardNewProjectCreationPage
 		for (Object object : children) {
 			if (object instanceof WizardElement){
 				try {
-					if (DAWNDDEPlugin.isSupportedDAWNExtension(((WizardElement) object).getContributingId())){
+					String contributingId = ((WizardElement) object).getContributingId();
+					if (DAWNDDEPlugin.isSupportedDAWNExtension(contributingId)){
 						ITemplateSection extension = (ITemplateSection) ((WizardElement) object).getTemplateElement().createExecutableExtension("class");
 						templates.add(extension);
 					}
@@ -281,6 +283,7 @@ public class DAWNExtensionProjectWizardPage extends WizardNewProjectCreationPage
 	}
 	
 	public ITemplateSection getSelectedTemplate(){
+		System.out.println(extension);
 		for (ITemplateSection template : templates) {
 			if (template.getUsedExtensionPoint().equals(extension)){
 				return template;
