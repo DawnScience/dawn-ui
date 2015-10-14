@@ -33,6 +33,11 @@
             name="Colour Scheme"
             template="org.dawnsci.dde.templates.singleChannelColourSchemeTemplate">
       </wizard>
+      <wizard
+            id="org.dawnsci.dde.templates.PlottingActionWizard"
+            name="Plotting Action"
+            template="org.dawnsci.dde.templates.plottingActionTemplate">
+      </wizard>
    </extension>
    <extension
          point="org.eclipse.pde.ui.templates">
@@ -71,6 +76,12 @@
             contributingId="org.dawnsci.plotting.histogram.colourScheme"
             id="org.dawnsci.dde.templates.singleChannelColourSchemeTemplate"
             name="Colour Scheme">
+      </template>
+      <template
+            class="org.dawnsci.dde.templates.PlottingActionTemplate"
+            contributingId="org.eclipse.dawnsci.plotting.api.plottingAction"
+            id="org.dawnsci.dde.templates.plottingActionTemplate"
+            name="Plotting Action">
       </template>
    </extension>
 </plugin>
