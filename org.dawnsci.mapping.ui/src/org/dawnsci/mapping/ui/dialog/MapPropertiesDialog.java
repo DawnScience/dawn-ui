@@ -48,7 +48,7 @@ public class MapPropertiesDialog extends Dialog {
 		
 		final Scale transScale = new Scale(container, SWT.NONE);
 		transScale.setMaximum(255);
-		transScale.setMinimum(0);
+		transScale.setMinimum(15);
 		transScale.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		int t = map.getTransparency();
 		if (t == -1) t = 255;

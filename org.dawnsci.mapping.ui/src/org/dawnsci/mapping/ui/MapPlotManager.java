@@ -62,7 +62,10 @@ public class MapPlotManager {
 	
 	public void plotData(final double x, final double y) {
 		final MappedData topMap = getTopMap(x,y);
-		if (topMap == null) return;
+		if (topMap == null)  {
+			data.clear();
+			return;
+		}
 		merge = null;
 		atomicPosition.set(0);
 		Runnable r = new Runnable() {
