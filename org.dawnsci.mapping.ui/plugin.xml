@@ -14,7 +14,7 @@
             class="org.eclipse.dawnsci.plotting.api.VanillaPlottingSystemView"
             icon="icons/layers-stack.png"
             id="org.dawnsci.mapping.ui.spectrumview"
-            name="Spectrum"
+            name="Detector Data"
             restorable="true">
       </view>
       <view

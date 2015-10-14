@@ -50,13 +50,18 @@ public class MapPropertiesDialog extends Dialog {
 		transScale.setMaximum(255);
 		transScale.setMinimum(0);
 		transScale.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		transScale.setSelection(map.getTransparency());
+		int t = map.getTransparency();
+		if (t == -1) t = 255;
+		transScale.setSelection(t);
 		transScale.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				map.setTransparency(transScale.getSelection());
-				manager.plotMap(map);
+				int s = transScale.getSelection();
+				if (s == 255) s = -1;
+				//-1 is no transparency
+				map.setTransparency(s);
+				manager.setTransparency(map);
 			}
 		});
 		

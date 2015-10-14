@@ -342,6 +342,15 @@ public class MapPlotManager {
 		
 	}
 	
+	public void setTransparency(MappedData m) {
+		
+		ITrace trace = map.getTrace(m.getMap().getName());
+		if (trace instanceof IImageTrace) ((IImageTrace)trace).setAlpha(m.getTransparency());
+		map.repaint(false);
+		
+		
+	}
+	
 //	private void plotMapData(){
 //		map.clear();
 //		MappedDataFile dataFile = area.getDataFile(0);
