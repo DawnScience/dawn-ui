@@ -132,7 +132,7 @@ public class DAWNExtensionProjectWizardPage extends WizardNewProjectCreationPage
 		g.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true,
 				false));
 		g.setLayout(new GridLayout(2, false));
-		g.setText("Properties:");
+		g.setText("Plug-in Properties:");
 
 		Label idLabel = new Label(g,SWT.NONE);
         idLabel.setText("Identifier:");
@@ -283,7 +283,6 @@ public class DAWNExtensionProjectWizardPage extends WizardNewProjectCreationPage
 	}
 	
 	public ITemplateSection getSelectedTemplate(){
-		System.out.println(extension);
 		for (ITemplateSection template : templates) {
 			if (template.getUsedExtensionPoint().equals(extension)){
 				return template;

@@ -28,6 +28,11 @@
             name="Colour Scheme"
             template="org.dawnsci.dde.templates.colourSchemeTemplate">
       </wizard>
+      <wizard
+            id="org.dawnsci.dde.templates.SingleChannelColourSchemeWizard"
+            name="Colour Scheme"
+            template="org.dawnsci.dde.templates.singleChannelColourSchemeTemplate">
+      </wizard>
    </extension>
    <extension
          point="org.eclipse.pde.ui.templates">
@@ -59,6 +64,12 @@
             class="org.dawnsci.dde.templates.ColourSchemeTemplate"
             contributingId="org.dawnsci.plotting.histogram.colourScheme"
             id="org.dawnsci.dde.templates.colourSchemeTemplate"
+            name="Colour Scheme">
+      </template>
+      <template
+            class="org.dawnsci.dde.templates.ChannelColourSchemeTemplate"
+            contributingId="org.dawnsci.plotting.histogram.colourScheme"
+            id="org.dawnsci.dde.templates.singleChannelColourSchemeTemplate"
             name="Colour Scheme">
       </template>
    </extension>

@@ -31,15 +31,13 @@ import org.eclipse.pde.ui.templates.PluginReference;
 public class ToolPageActionTemplate extends DAWNTemplateSection {
 
 	private static final String EXTENSION_POINT = "org.eclipse.dawnsci.plotting.api.toolPageAction";
-	private static final String KEY_IDENTIFIER = "identifier";
 	private static final String KEY_TOOL_IDENTIFIER = "tool_identifier";
 	private static final String KEY_COMMAND_IDENTIFIER = "command_identifier";
-	private static final String KEY_LABEL = "label";
 	private static final String KEY_ACTION_TYPE = "action_type";
 
 	@Override
 	protected String getClassName() {
-		return null; // not used
+		return "ToolPageAction";
 	}
 
 	public IPluginReference[] getDependencies(String schemaVersion) {
@@ -76,14 +74,14 @@ public class ToolPageActionTemplate extends DAWNTemplateSection {
 
 	protected void setOptions() {
 		// add all the options we need and set default values
-		addOption(KEY_IDENTIFIER, "Action identifier", (String) null, 0);
+		addOption(KEY_EXTENSION_ID, "Action identifier", (String) null, 0);
 		addOption(KEY_TOOL_IDENTIFIER, "Tool page identifier",
 				getLookupList("org.eclipse.dawnsci.plotting.api.toolPage", "plotting_tool_page", "id", "label"),
 				(String) null, 0); // lookup
 		addOption(KEY_COMMAND_IDENTIFIER, "Command identifier",
 				getLookupList("org.eclipse.ui.commands", "command", "id", "name"), 
 				(String) null, 0);
-		addOption(KEY_LABEL, "Label", (String) null, 0);
+		addOption(KEY_EXTENSION_NAME, "Label", (String) null, 0);
 		addOption(KEY_ACTION_TYPE, "Action type", 
 				new String[][] { { "TOOLBAR", "Toolbar" }, { "MENUBAR", "Menubar" } },
 				"TOOLBAR", 0);
@@ -97,11 +95,11 @@ public class ToolPageActionTemplate extends DAWNTemplateSection {
 
 		IPluginElement setElement = factory.createElement(extension);
 		setElement.setName("tool_page_action");
-		setElement.setAttribute("id", getStringOption(KEY_IDENTIFIER));
+		setElement.setAttribute("id", getStringOption(KEY_EXTENSION_ID));
 		setElement.setAttribute("tool_id", getStringOption(KEY_TOOL_IDENTIFIER));
 		setElement.setAttribute("command_id", getStringOption(KEY_COMMAND_IDENTIFIER));
 		setElement.setAttribute("icon", "icons/default.gif");
-		setElement.setAttribute("label", getStringOption(KEY_LABEL));
+		setElement.setAttribute("label", getStringOption(KEY_EXTENSION_NAME));
 		setElement.setAttribute("action_type", getStringOption(KEY_ACTION_TYPE));
 
 		extension.add(setElement);

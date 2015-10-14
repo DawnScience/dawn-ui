@@ -31,8 +31,6 @@ public class ColourSchemeTemplate extends DAWNTemplateSection {
 
 	private static final String EXTENSION_POINT = "org.dawnsci.plotting.histogram.colourScheme";
 	private static final String TRANSFER_FUNCTION_EXTENSION = "org.dawnsci.plotting.histogram.channelColourScheme";
-	private static final String KEY_IDENTIFIER = "identifier";
-	private static final String KEY_NAME = "name";
 	private static final String KEY_RED_TRANSFER_FUNCTION = "red_transfer_function";
 	private static final String KEY_GREEN_TRANSFER_FUNCTION = "green_transfer_function";
 	private static final String KEY_BLUE_TRANSFER_FUNCTION = "blue_transfer_function";
@@ -44,7 +42,7 @@ public class ColourSchemeTemplate extends DAWNTemplateSection {
 
 	@Override
 	protected String getClassName() {
-		return null; // not used in this extension point
+		return "ColourScheme"; // not used in this extension point
 	}
 
 	public IPluginReference[] getDependencies(String schemaVersion) {
@@ -77,8 +75,8 @@ public class ColourSchemeTemplate extends DAWNTemplateSection {
 
 	protected void setOptions() {
 		// add all the options we need and set default values
-		addOption(KEY_IDENTIFIER, "Identifier", (String) null, 0);
-		addOption(KEY_NAME, "Name", (String) null, 0);
+		addOption(KEY_EXTENSION_ID, "Identifier", (String) null, 0);
+		addOption(KEY_EXTENSION_NAME, "Name", (String) null, 0);
 		addOption(KEY_RED_TRANSFER_FUNCTION, "Red transfer function",
 				getLookupList(TRANSFER_FUNCTION_EXTENSION, "transfer_function", "id", "name"), 
 				(String) null, 0);
@@ -105,8 +103,8 @@ public class ColourSchemeTemplate extends DAWNTemplateSection {
 
 		IPluginElement setElement = factory.createElement(extension);
 		setElement.setName("colour_scheme");
-		setElement.setAttribute("id", getStringOption(KEY_IDENTIFIER));
-		setElement.setAttribute("name", getStringOption(KEY_NAME));
+		setElement.setAttribute("id", getStringOption(KEY_EXTENSION_ID));
+		setElement.setAttribute("name", getStringOption(KEY_EXTENSION_NAME));
 		setElement.setAttribute("red_transfer_function", getStringOption(KEY_RED_TRANSFER_FUNCTION));
 		setElement.setAttribute("green_transfer_function", getStringOption(KEY_GREEN_TRANSFER_FUNCTION));
 		setElement.setAttribute("blue_transfer_function", getStringOption(KEY_BLUE_TRANSFER_FUNCTION));
