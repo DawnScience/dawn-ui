@@ -725,12 +725,13 @@ class LightWeightPlotActions {
 					if (isChecked())
 						region.snapToGrid();
 				}
-//				viewer.getSystem().setGridSnap(isChecked());
 				viewer.getSystem().repaint(false);
 			}
 		};
 		gridSnap.setImageDescriptor(PlottingSystemActivator.getImageDescriptor("icons/grid-snap.png"));
-		gridSnap.setChecked(PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.SNAP_TO_GRID));
+		boolean isSnapped = PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.SNAP_TO_GRID);
+		gridSnap.setChecked(isSnapped);
+		((XYRegionGraph)xyGraph).setGridSnap(isSnapped);
 		gridSnap.setId(PlottingConstants.SNAP_TO_GRID);
 
 		final Action histo = new Action("Rehistogram (F5)", IAction.AS_PUSH_BUTTON) {
