@@ -76,14 +76,12 @@ public class ToolPageActionTemplate extends DAWNTemplateSection {
 		// add all the options we need and set default values
 		addOption(KEY_EXTENSION_ID, "Action identifier", (String) null, 0);
 		addOption(KEY_TOOL_IDENTIFIER, "Tool page identifier",
-				getLookupList("org.eclipse.dawnsci.plotting.api.toolPage", "plotting_tool_page", "id", "label"),
+				getLookupList("org.eclipse.dawnsci.plotting.api.toolPage", "plotting_tool_page", "id", "label", false),
 				(String) null, 0); // lookup
 		addOption(KEY_COMMAND_IDENTIFIER, "Command identifier",
-				getLookupList("org.eclipse.ui.commands", "command", "id", "name"), 
-				(String) null, 0);
+				getLookupList("org.eclipse.ui.commands", "command", "id", "name", false), (String) null, 0);
 		addOption(KEY_EXTENSION_NAME, "Label", (String) null, 0);
-		addOption(KEY_ACTION_TYPE, "Action type", 
-				new String[][] { { "TOOLBAR", "Toolbar" }, { "MENUBAR", "Menubar" } },
+		addOption(KEY_ACTION_TYPE, "Action type", new String[][] { { "TOOLBAR", "Toolbar" }, { "MENUBAR", "Menubar" } },
 				"TOOLBAR", 0);
 	}
 

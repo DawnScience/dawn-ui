@@ -38,6 +38,11 @@
             name="Plotting Action"
             template="org.dawnsci.dde.templates.plottingActionTemplate">
       </wizard>
+      <wizard
+            id="org.dawnsci.dde.templates.FittingFunctionWizard"
+            name="Fitting Function"
+            template="org.dawnsci.dde.templates.fittingFunctionTemplate">
+      </wizard>
    </extension>
    <extension
          point="org.eclipse.pde.ui.templates">
@@ -82,6 +87,12 @@
             contributingId="org.eclipse.dawnsci.plotting.api.plottingAction"
             id="org.dawnsci.dde.templates.plottingActionTemplate"
             name="Plotting Action">
+      </template>
+      <template
+            class="org.dawnsci.dde.templates.FittingFunctionTemplate"
+            contributingId="uk.ac.diamond.scisoft.analysis.fitting.function/usecase/@id"
+            id="org.dawnsci.dde.templates.fittingFunctionTemplate"
+            name="Fitting Function">
       </template>
    </extension>
 </plugin>

@@ -86,7 +86,7 @@ public class ToolPageTemplate extends DAWNTemplateSection {
 		addOption(KEY_EXTENSION_NAME, "Label", (String) null, 0);
 		addOption(KEY_CHEAT_SHEET_ID, "Cheat sheet identifier", (String) null, 0);
 		addOption(KEY_CATEGORY, "Category",
-				getLookupList(EXTENSION_POINT, "plotting_tool_category", "id", "label"), 
+				getLookupList(EXTENSION_POINT, "plotting_tool_category", "id", "label", false), 
 				(String) null, 0);
 	}
 

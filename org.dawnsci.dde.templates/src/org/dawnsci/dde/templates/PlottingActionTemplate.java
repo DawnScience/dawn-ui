@@ -73,7 +73,7 @@ public class PlottingActionTemplate extends DAWNTemplateSection {
 		addOption(KEY_EXTENSION_ID, "Action identifier", (String) null, 0);
 		addOption(KEY_EXTENSION_NAME, "Label", (String) null, 0);
 		addOption(KEY_COMMAND_ID, "Command identifier",
-				getLookupList("org.eclipse.ui.commands", "command", "id", "name"), (String) null, 0);
+				getLookupList("org.eclipse.ui.commands", "command", "id", "name", false), (String) null, 0);
 		addOption(KEY_ACTION_TYPE, "Action type", new String[][] { { "TOOLBAR", "Toolbar" }, { "MENUBAR", "Menubar" } },
 				"TOOLBAR", 0);
 		addOption(KEY_PLOT_TYPE, "Plot type",

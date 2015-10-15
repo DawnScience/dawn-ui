@@ -135,13 +135,18 @@ public abstract class DAWNTemplateSection extends OptionTemplateSection {
 	 * @param id
 	 *            the name of the identifier attribute
 	 * @param label
-	 *            the name of the label attribute
+ 	 *            the name of the label attribute
+	 * @param optional            
+	 *            whether or not selecting a value is optional
 	 * @return an array of key/values
 	 */
-	protected String[][] getLookupList(String extensionPoint, String name, String id, String label) {
+	protected String[][] getLookupList(String extensionPoint, String name, String id, String label, boolean optional) {
 		IExtensionRegistry registry = Platform.getExtensionRegistry();
 		IExtensionPoint point = registry.getExtensionPoint(extensionPoint);
 		Map<String, String> map = new HashMap<>();
+		if (optional){
+			map.put("", null);
+		}
 		IConfigurationElement[] configurationElements = point.getConfigurationElements();
 		for (IConfigurationElement e : configurationElements) {
 			if (e.getName().equals(name)) {

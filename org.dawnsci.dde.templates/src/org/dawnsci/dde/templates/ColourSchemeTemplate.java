@@ -78,16 +78,16 @@ public class ColourSchemeTemplate extends DAWNTemplateSection {
 		addOption(KEY_EXTENSION_ID, "Identifier", (String) null, 0);
 		addOption(KEY_EXTENSION_NAME, "Name", (String) null, 0);
 		addOption(KEY_RED_TRANSFER_FUNCTION, "Red transfer function",
-				getLookupList(TRANSFER_FUNCTION_EXTENSION, "transfer_function", "id", "name"), 
+				getLookupList(TRANSFER_FUNCTION_EXTENSION, "transfer_function", "id", "name", false), 
 				(String) null, 0);
 		addOption(KEY_GREEN_TRANSFER_FUNCTION, "Green transfer function",
-				getLookupList(TRANSFER_FUNCTION_EXTENSION, "transfer_function", "id", "name"), 
+				getLookupList(TRANSFER_FUNCTION_EXTENSION, "transfer_function", "id", "name", false), 
 				(String) null, 0);
 		addOption(KEY_BLUE_TRANSFER_FUNCTION, "Blue transfer function",
-				getLookupList(TRANSFER_FUNCTION_EXTENSION, "transfer_function", "id", "name"), 
+				getLookupList(TRANSFER_FUNCTION_EXTENSION, "transfer_function", "id", "name", false), 
 				(String) null, 0);
 		addOption(KEY_ALPHA_TRANSFER_FUNCTION, "Alpha transfer function",
-				getLookupList(TRANSFER_FUNCTION_EXTENSION, "transfer_function", "id", "name"), 
+				getLookupList(TRANSFER_FUNCTION_EXTENSION, "transfer_function", "id", "name", false), 
 				(String) null, 0);
 		addOption(KEY_RED_INVERTED, "Red inverted", Boolean.FALSE, 0);
 		addOption(KEY_BLUE_INVERTED, "Blue inverted", Boolean.FALSE, 0);
