@@ -105,7 +105,7 @@ public abstract class AbstractRegion<T extends IROI> extends Figure implements I
 			try {
 			    l.roiChanged(evt);
 			} catch (Throwable ne) {
-				logger.error("Unexpected exception in drawning!", ne);
+				logger.error("Unexpected exception in drawing!", ne);
 			}
 		}
 		if (ServiceHolder.getMacroService()!=null) ServiceHolder.getMacroService().publish(new MacroEventObject(this));
@@ -124,7 +124,7 @@ public abstract class AbstractRegion<T extends IROI> extends Figure implements I
 			try {
 			 l.roiSelected(evt);
 			} catch (Throwable ne) {
-				logger.error("Unexpected exception in drawning!", ne);
+				logger.error("Unexpected exception in drawing!", ne);
 			}
 		}
 	}
@@ -222,27 +222,33 @@ public abstract class AbstractRegion<T extends IROI> extends Figure implements I
 		this.userRegion = userRegion;
 	}
 	
+	@Override
 	public IRegion getRegion() {
 		return this;
 	}
 
+	@Override
 	public void setRegion(IRegion region) {
 		// Does nothing
 	}
 
+	@Override
 	public boolean isMaskRegion() {
 		return maskRegion;
 	}
 
+	@Override
 	public void setMaskRegion(boolean maskRegion) {
 		this.maskRegion = maskRegion;
 	}
-	
+
+	@Override
 	public String getLabel() {
 		if (label==null) return getName();
 		return label;
 	}
-	
+
+	@Override
 	public void setLabel(String label) {
 		this.label = label ;
 		this.labeldim = FigureUtilities.getTextExtents(label, labelFont);
@@ -253,6 +259,7 @@ public abstract class AbstractRegion<T extends IROI> extends Figure implements I
 	 * 
 	 * @return last object
 	 */
+	@Override
 	public Object setUserObject(Object object) {
 		Object tmp = userObject;
 		userObject = object;
@@ -277,6 +284,7 @@ public abstract class AbstractRegion<T extends IROI> extends Figure implements I
 	 * 
 	 * @return object
 	 */
+	@Override
 	public Object getUserObject() {
 		return userObject;
 	}
@@ -318,13 +326,12 @@ public abstract class AbstractRegion<T extends IROI> extends Figure implements I
 	 * @param listener
 	 *            The listener to register
 	 */
-	protected MouseListenerAdapter registerMouseListener(
-			final MouseListener listener) {
+	protected MouseListenerAdapter registerMouseListener(final MouseListener listener) {
 		if (mouseListenerRegister == null)
 			mouseListenerRegister = new IdentityHashMap<MouseListener, MouseListenerAdapter>();
 		else if (mouseListenerRegister.containsKey(listener))
 			throw new IllegalStateException(
-					"Registering an existing (equal by reference) MouseListener more times is not allowed!");
+					"Registering an existing (equal by reference) MouseListener more than once is not allowed!");
 		final MouseListenerAdapter ad = new MouseListenerAdapter(listener);
 		mouseListenerRegister.put(listener, ad);
 		return ad;
@@ -353,13 +360,12 @@ public abstract class AbstractRegion<T extends IROI> extends Figure implements I
 	 * @param listener
 	 *            The listener to cache
 	 */
-	protected MouseListenerAdapter unregisterMouseListener(
-			final MouseListener listener) {
+	protected MouseListenerAdapter unregisterMouseListener(final MouseListener listener) {
 		final MouseListenerAdapter ad;
 		if (mouseListenerRegister == null
 				|| (ad = mouseListenerRegister.remove(listener)) == null)
 			throw new IllegalStateException(
-					"Unregistering a not existing MouseListener is not allowed!");
+					"Unregistering an unregistered MouseListener is not allowed!");
 		return ad;
 	}
 
@@ -391,13 +397,12 @@ public abstract class AbstractRegion<T extends IROI> extends Figure implements I
 	 * @param listener
 	 *            The listener to register
 	 */
-	protected MouseMotionAdapter registerMouseMotionListener(
-			final MouseMotionListener listener) {
+	protected MouseMotionAdapter registerMouseMotionListener(final MouseMotionListener listener) {
 		if (mouseMotionListenerRegister == null)
 			mouseMotionListenerRegister = new IdentityHashMap<MouseMotionListener, MouseMotionAdapter>();
 		else if (mouseMotionListenerRegister.containsKey(listener))
 			throw new IllegalStateException(
-					"Registering an existing (equal by reference) MouseMotionListener more times is not allowed!");
+					"Registering an existing (equal by reference) MouseMotionListener more than once is not allowed!");
 		final MouseMotionAdapter ad = new MouseMotionAdapter(listener);
 		mouseMotionListenerRegister.put(listener, ad);
 		return ad;
@@ -427,13 +432,12 @@ public abstract class AbstractRegion<T extends IROI> extends Figure implements I
 	 * @param listener
 	 *            The listener to cache
 	 */
-	protected MouseMotionAdapter unregisterMouseMotionListener(
-			final MouseMotionListener listener) {
+	protected MouseMotionAdapter unregisterMouseMotionListener(final MouseMotionListener listener) {
 		final MouseMotionAdapter ad;
 		if (mouseMotionListenerRegister == null
 				|| (ad = mouseMotionListenerRegister.remove(listener)) == null)
 			throw new IllegalStateException(
-					"Unregistering a not existing MouseMotionListener is not allowed!");
+					"Unregistering an unregistered MouseMotionListener is not allowed!");
 		return ad;
 	}
 
@@ -458,6 +462,7 @@ public abstract class AbstractRegion<T extends IROI> extends Figure implements I
 	 * 
 	 * @return true if the selection region only draws an outline.
 	 */
+	@Override
 	public boolean isOutlineOnly() {
 		return false;
 	}
@@ -467,6 +472,7 @@ public abstract class AbstractRegion<T extends IROI> extends Figure implements I
 	 * outline only is not available for this selection region, this
 	 * method will throw a RuntimeException.
 	 */
+	@Override
 	public void setOutlineOnly(boolean outlineOnly) {
 		throw new RuntimeException("setOutlineOnly is not currently implemented by "+getClass().getSimpleName());
 	}
@@ -476,10 +482,12 @@ public abstract class AbstractRegion<T extends IROI> extends Figure implements I
 	 */
 	private boolean isFromServer = false;
 
+	@Override
 	public boolean fromServer() {
 		return isFromServer;
 	}
 
+	@Override
 	public void setFromServer(boolean isFromServer) {
 		 this.isFromServer = isFromServer;
 	}
