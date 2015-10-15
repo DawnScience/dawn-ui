@@ -43,18 +43,6 @@ public class CircleSelection extends LockableSelectionRegion<CircularROI> {
 
 	@Override
 	protected CircularROI createROI(boolean recordResult) {
-		// snap to grid
-		if (shape.isGridSnap()) {
-			CircularROI snappedROI = shape.croi;
-			snappedROI.setPoint((int) snappedROI.getPointX(), (int) snappedROI.getPointY());
-			snappedROI.setRadius((int)snappedROI.getRadius());
-			shape.croi = snappedROI;
-			if (recordResult) {
-				roi = shape.croi;
-			}
-			shape.configureHandles();
-			return shape.croi;
-		}
 		return super.createROI(recordResult);
 	}
 
@@ -120,16 +108,10 @@ public class CircleSelection extends LockableSelectionRegion<CircularROI> {
 
 		@Override
 		public void snapToGrid() {
-			CircularROI tSnappedROI = troi;
 			CircularROI cSnappedROI = croi;
-			if (tSnappedROI != null) {
-				tSnappedROI.setPoint((int) tSnappedROI.getPointX(), (int) tSnappedROI.getPointY());
-				tSnappedROI.setRadius((int) tSnappedROI.getRadius());
-				troi = tSnappedROI;
-			}
 			if (cSnappedROI != null) {
-				cSnappedROI.setPoint((int) cSnappedROI.getPointX(), (int) cSnappedROI.getPointY());
-				cSnappedROI.setRadius((int) cSnappedROI.getRadius());
+				cSnappedROI.setPoint(Math.round(cSnappedROI.getPointX()), Math.round(cSnappedROI.getPointY()));
+				cSnappedROI.setRadius(Math.round(cSnappedROI.getRadius()));
 				croi = cSnappedROI;
 			}
 		}

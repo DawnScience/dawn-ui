@@ -61,17 +61,6 @@ public class PointSelection extends ROISelectionRegion<PointROI> {
 
 	@Override
 	protected PointROI createROI(boolean recordResult) {
-		// snap to grid
-		if (shape.isGridSnap()) {
-			PointROI snappedROI = shape.croi;
-			snappedROI.setPoint(new double[]{(int) snappedROI.getPoint()[0], (int) snappedROI.getPoint()[1]});
-			shape.croi = snappedROI;
-			if (recordResult) {
-				roi = shape.croi;
-			}
-			shape.configureHandles();
-			return shape.croi;
-		}
 		return super.createROI(recordResult);
 	}
 
@@ -105,10 +94,8 @@ public class PointSelection extends ROISelectionRegion<PointROI> {
 		@Override
 		public void setup(PointList points) {
 			croi = new PointROI();
-
 			final Point p = points.getFirstPoint();
 			croi.setPoint(cs.getValueFromPosition(p.x(), p.y()));
-
 			region.createROI(true);
 			configureHandles();
 		}
@@ -120,6 +107,8 @@ public class PointSelection extends ROISelectionRegion<PointROI> {
 
 		@Override
 		public void configureHandles() {
+			if(shape.isGridSnap())
+				snapToGrid();
 			boolean mobile = region.isMobile();
 			boolean visible = isVisible() && mobile;
 			double[] pt = cs.getPositionFromValue(croi.getPointRef());
@@ -147,6 +136,12 @@ public class PointSelection extends ROISelectionRegion<PointROI> {
 					Point pt = h.getSelectionPoint();
 					double[] p = cs.getValueFromPosition(pt.x(), pt.y());
 					croi.setPoint(p);
+					if(shape.isGridSnap()) {
+						p[0] = Math.round(p[0]);
+						p[1] = Math.round(p[1]);
+						double[] pos = cs.getPositionFromValue(p[0], p[1]);
+						h.setSelectionPoint(new Point((int)pos[0], (int)pos[1]));
+					}
 					if (b == null) {
 						b = new Rectangle(h.getBounds());
 					} else {
@@ -210,14 +205,9 @@ public class PointSelection extends ROISelectionRegion<PointROI> {
 
 		@Override
 		public void snapToGrid() {
-			PointROI tSnappedROI = troi;
 			PointROI cSnappedROI = croi;
-			if (tSnappedROI != null) {
-				tSnappedROI.setPoint(new double[]{(int) tSnappedROI.getPoint()[0], (int) tSnappedROI.getPoint()[1]});
-				troi = tSnappedROI;
-			}
 			if (cSnappedROI != null) {
-				cSnappedROI.setPoint(new double[]{(int) cSnappedROI.getPoint()[0], (int) cSnappedROI.getPoint()[1]});
+				cSnappedROI.setPoint(new double[]{Math.round(cSnappedROI.getPoint()[0]), Math.round(cSnappedROI.getPoint()[1])});
 				croi = cSnappedROI;
 			}
 		}

@@ -216,14 +216,9 @@ public class FreeDrawSelection extends ROISelectionRegion<FreeDrawROI> {
 
 		@Override
 		public void snapToGrid() {
-			FreeDrawROI tSnappedROI = troi;
 			FreeDrawROI cSnappedROI = croi;
-			if (tSnappedROI != null) {
-				tSnappedROI.setPoint((int) tSnappedROI.getPointX(), (int) tSnappedROI.getPointY());
-				troi = tSnappedROI;
-			}
 			if (cSnappedROI != null) {
-				cSnappedROI.setPoint((int) cSnappedROI.getPointX(), (int) cSnappedROI.getPointY());
+				cSnappedROI.setPoint(Math.round(cSnappedROI.getPointX()), Math.round(cSnappedROI.getPointY()));
 				croi = cSnappedROI;
 			}
 		}

@@ -99,8 +99,10 @@ abstract public class ROIShape<T extends IROI> extends RegionFillFigure<T> imple
 				bnds = parent.getBounds();
 			}
 		} else {
-			double[] bp = cs.getPositionFromValue(rroi.getPointRef());
-			double[] ep = cs.getPositionFromValue(rroi.getEndPoint());
+			double[] rpt = rroi.getPointRef();
+			double[] ept = rroi.getEndPoint();
+			double[] bp = cs.getPositionFromValue(rpt);
+			double[] ep = cs.getPositionFromValue(ept);
 			bnds = new Rectangle(new PrecisionPoint(bp[0], bp[1]), new PrecisionPoint(ep[0], ep[1]));
 			bnds.expand(1, 1);
 		}
@@ -125,6 +127,8 @@ abstract public class ROIShape<T extends IROI> extends RegionFillFigure<T> imple
 	}
 
 	public void configureHandles() {
+		if(isGridSnap())
+			snapToGrid();
 		boolean mobile = region.isMobile();
 		boolean visible = isVisible() && mobile;
 		// handles
@@ -211,6 +215,10 @@ abstract public class ROIShape<T extends IROI> extends RegionFillFigure<T> imple
 					final FigureTranslator translator = (FigureTranslator) src;
 					Point start = translator.getStartLocation();
 					spt = cs.getValueFromPosition(start.x(), start.y());
+					if (isGridSnap()) {
+						spt[0] = Math.round(spt[0]);
+						spt[1] = Math.round(spt[1]);
+					}
 					final IFigure handle = translator.getRedrawFigure();
 					final int h = handles.indexOf(handle);
 					HandleStatus status = h == roiHandler.getCentreHandle() ? HandleStatus.RMOVE : HandleStatus.RESIZE;
@@ -231,10 +239,12 @@ abstract public class ROIShape<T extends IROI> extends RegionFillFigure<T> imple
 					
 					if (end==null) return;
 					double[] c = cs.getValueFromPosition(end.x(), end.y());
-					troi = roiHandler.interpretMouseDragging(spt, c);
 					// snap to grid
-					if (isGridSnap())
-						snapToGrid();
+					if (isGridSnap()) {
+						c[0] = Math.round(c[0]);
+						c[1] = Math.round(c[1]);
+					}
+					troi = roiHandler.interpretMouseDragging(spt, c);
 					roiHandler.setROI(troi);
 					intUpdateFromROI(troi);
 					roiHandler.setROI(croi);
@@ -253,6 +263,10 @@ abstract public class ROIShape<T extends IROI> extends RegionFillFigure<T> imple
 					Point end = translator.getEndLocation();
 
 					double[] c = cs.getValueFromPosition(end.x(), end.y());
+					if (isGridSnap()) {
+						c[0] = Math.round(c[0]);
+						c[1] = Math.round(c[1]);
+					}
 					T croi = roiHandler.interpretMouseDragging(spt, c);
 
 					updateFromROI(croi);
