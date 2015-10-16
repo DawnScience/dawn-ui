@@ -31,6 +31,7 @@ abstract class ROISelectionRegion<T extends IROI> extends AbstractSelectionRegio
 	public void createContents(Figure parent) {
 		shape = createShape(parent);
 
+		setFill(shape.isFill());
 		parent.add(shape);
 		sync(getBean());
 		shape.setLineWidth(getLineWidth());

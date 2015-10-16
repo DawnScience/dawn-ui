@@ -100,27 +100,6 @@ abstract public class ParametricROIShape<T extends IParametricROI> extends Param
 		graphics.popState();
 	}
 
-	/**
-	 * Override this to fill
-	 * @param graphics
-	 * @param parentBounds
-	 */
-	@Override
-	protected void fillShape(Graphics graphics, Rectangle parentBounds) {
-//		PointList points = Draw2DUtils.generateCurve(this, croi.getStartParameter(0), croi.getEndParameter(0));
-//		graphics.fillPolygon(points);
-	}
-
-	@Override
-	protected void outlineShape(Graphics graphics) {
-		outlineShape(graphics, bnds);
-	}
-
-	@Override
-	protected void fillShape(Graphics graphics) {
-		fillShape(graphics, bnds);
-	}
-
 	abstract public void setup(PointList corners, boolean withHandles);
 
 	@Override

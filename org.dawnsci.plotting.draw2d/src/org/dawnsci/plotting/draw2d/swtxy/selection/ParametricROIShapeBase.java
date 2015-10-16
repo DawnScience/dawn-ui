@@ -9,6 +9,7 @@
 
 package org.dawnsci.plotting.draw2d.swtxy.selection;
 
+import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
 import org.dawnsci.plotting.draw2d.swtxy.util.PointFunction;
 import org.eclipse.dawnsci.analysis.api.roi.IParametricROI;
 import org.eclipse.draw2d.Figure;
@@ -131,8 +132,8 @@ abstract public class ParametricROIShapeBase<T extends IParametricROI> extends R
 	 * @param parentBounds
 	 */
 	protected void fillShape(Graphics graphics, Rectangle parentBounds) {
-//		PointList points = Draw2DUtils.generateCurve(this, croi.getStartParameter(0), croi.getEndParameter(0));
-//		graphics.fillPolygon(points);
+		PointList points = Draw2DUtils.generateCurve(this, croi.getStartParameter(0), croi.getEndParameter(0));
+		Draw2DUtils.fillClippedPolygon(graphics, points, parentBounds);
 	}
 
 	@Override

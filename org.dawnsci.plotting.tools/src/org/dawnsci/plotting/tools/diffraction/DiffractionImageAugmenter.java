@@ -443,6 +443,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		}
 
 		Color colour = ring.getColour();
+		region.setFill(false);
 		plottingSystem.addRegion(region);
 		region.setROI(roi);
 		region.setRegionColor(colour);
