@@ -1372,12 +1372,16 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	private boolean setDataInternal(IDataset im, List<? extends IDataset> axes, boolean performAuto) {
 
 		// We are just assigning the data before the image is live.
 		if (getParent()==null && !performAuto) {
-			this.image = (Dataset)im;
+			this.image = DatasetUtils.convertToDataset(im);
 			this.axes  = (List<IDataset>)axes;
+			// is this enough?
+			if (imageServiceBean==null) imageServiceBean = new ImageServiceBean();
+			imageServiceBean.setImage(im);
 			return false;
 		}
 
