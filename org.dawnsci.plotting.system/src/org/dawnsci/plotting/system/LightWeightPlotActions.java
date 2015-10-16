@@ -108,7 +108,7 @@ class LightWeightPlotActions {
 	private XYRegionGraph          xyGraph;
 	private LightWeightPlotViewer  viewer;
 	private boolean                datasetChoosingRequired = true;
-	private Action                 plotIndex, plotX;
+	private Action                 plotIndex, plotX, lockHisto;
 	
 	private Shell fullScreenShell;
 	private IPropertyChangeListener propertyListener, switchListener;
@@ -787,16 +787,14 @@ class LightWeightPlotActions {
 		};
 		showPixelValues.setChecked(viewer.getSystem().isShowValueLabels());
 
-		final Action lockHisto = new Action("Lock histogram", IAction.AS_CHECK_BOX) {
-			
-		    public void run() {		    	
-		    	final IImageTrace trace = xyGraph.getRegionArea().getImageTrace();
-		    	if (trace!=null) {
-		    		trace.setRescaleHistogram(!isChecked());
-		    	}
-		    }
+		lockHisto = new Action("Lock histogram", IAction.AS_CHECK_BOX) {
+			public void run() {
+				final IImageTrace trace = xyGraph.getRegionArea().getImageTrace();
+				if (trace != null) {
+					trace.setRescaleHistogram(!isChecked());
+				}
+			}
 		};
-		lockHisto.setChecked(false);
 		
 		final Action zoomWhitespace = new Action("Use whitespace when zooming with mouse wheel", IAction.AS_CHECK_BOX) {
 		    public void run() {
@@ -1127,5 +1125,9 @@ class LightWeightPlotActions {
 			}
 		}
 		return xAxis;
+	}
+
+	public Action getHistoLock() {
+		return lockHisto;
 	}
 }

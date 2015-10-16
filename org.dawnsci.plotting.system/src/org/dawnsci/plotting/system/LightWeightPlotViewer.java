@@ -70,12 +70,15 @@ import org.eclipse.dawnsci.plotting.api.trace.ColorOption;
 import org.eclipse.dawnsci.plotting.api.trace.IImageStackTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
+import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.PointStyle;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.TraceType;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceContainer;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace;
+import org.eclipse.dawnsci.plotting.api.trace.PaletteEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.draw2d.BorderLayout;
 import org.eclipse.draw2d.ColorConstants;
@@ -743,7 +746,12 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 	}
 
 	public void clearTraces() {
-		if (xyGraph!=null) xyGraph.clearTraces();
+		if (xyGraph!=null) {
+			ImageTrace trace = xyGraph.getRegionArea().getImageTrace();
+			if(trace != null)
+				trace.removePaletteListener(paletteListener);
+			xyGraph.clearTraces();
+		}
 	}
 
 
@@ -755,11 +763,17 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 		
 		final ImageTrace trace = xyGraph.createImageTrace(traceName, xAxis, yAxis, intensity);
 		trace.setPlottingSystem(system);
+		trace.addPaletteListener(paletteListener);
 		return trace;
 	}
 	
-
-
+	private IPaletteListener paletteListener = new IPaletteListener.Stub() {
+		@Override
+		public void rescaleHistogramChanged(PaletteEvent evt) {
+			boolean locked = !((IPaletteTrace)evt.getSource()).isRescaleHistogram();
+			plotActionsCreator.getHistoLock().setChecked(locked);
+		}
+	};
 	
 	public boolean isTraceTypeSupported(Class<? extends ITrace> clazz) {
 		if (ILineTrace.class.isAssignableFrom(clazz)) {
@@ -986,9 +1000,9 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 		if (trace instanceof LineTraceImpl) {
 			xyGraph.removeTrace(((LineTraceImpl)trace).getTrace());
 		} else if (trace instanceof ImageTrace) {
+			((ImageTrace)trace).removePaletteListener(paletteListener);
 			xyGraph.removeImageTrace((ImageTrace)trace);
 		} 
-		
 		xyCanvas.redraw();		
 	}
 
