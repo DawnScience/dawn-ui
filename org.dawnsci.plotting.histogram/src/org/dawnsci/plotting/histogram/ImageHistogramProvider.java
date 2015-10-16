@@ -2,7 +2,6 @@ package org.dawnsci.plotting.histogram;
 
 import java.util.List;
 
-import org.dawnsci.plotting.histogram.ui.HistogramViewer;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
@@ -31,19 +30,8 @@ public class ImageHistogramProvider implements IHistogramProvider {
 	private IDataset imageDataset;
 	private ImageServiceBean bean;
 
-	/**
-	 * Calculated histogram, index 0 for Y values, 1 for X values
-	 */
-	private IDataset[] histogramValues;
-
 	public ImageHistogramProvider() {
 
-	}
-
-	private void resetImage(){
-		this.image = null;
-		this.imageDataset = null;
-		this.bean = null;
 	}
 
 	private void setImage(IPaletteTrace image){
