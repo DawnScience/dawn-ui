@@ -151,16 +151,17 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 								break;
 							}
 						}
+						registeredTraces.remove(oldName);
 						if (replace) {
 							String newName = evt.getRegion().getName();
 							for (ITrace t : registered) {
 								String traceName = t.getName();
 								t.setName(traceName.replace(oldName, newName));
 							}
+							registeredTraces.put(newName, registered);
 						} else {
-							for (ITrace t : registered) {
-								profilePlottingSystem.removeTrace(t);
-							}
+							registeredTraces.clear();
+							profilePlottingSystem.clearTraces();
 							update(evt);
 						}
 					}
