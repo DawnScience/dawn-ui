@@ -136,7 +136,36 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 						evt.getRegion().addROIListener(ProfileTool.this);
 					}
 				}
-				
+
+				@Override
+				public void regionNameChanged(RegionEvent evt, String oldName) {
+					if (registeredTraces.containsKey(oldName)) {
+						Collection<ITrace> registered = registeredTraces.get(oldName);
+						boolean replace = true;
+						// only replace if old name appears once in trace names
+						for (ITrace t : registered) {
+							String traceName = t.getName();
+							int i = traceName.indexOf(oldName);
+							if (traceName.indexOf(oldName, i + oldName.length()) > 0) {
+								replace = false;
+								break;
+							}
+						}
+						if (replace) {
+							String newName = evt.getRegion().getName();
+							for (ITrace t : registered) {
+								String traceName = t.getName();
+								t.setName(traceName.replace(oldName, newName));
+							}
+						} else {
+							for (ITrace t : registered) {
+								profilePlottingSystem.removeTrace(t);
+							}
+							update(evt);
+						}
+					}
+				}
+
 				protected void update(RegionEvent evt) {
 					ProfileTool.this.update(null, null, false);
 				}
@@ -524,11 +553,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 					for (IRegion iRegion : regions) {
 						if (!iRegion.isUserRegion()) continue;
 						if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-						if (registeredTraces.containsKey(iRegion.getName())) {
-							createProfile(image, iRegion, iRegion.getROI(), true, isDrag, monitor);
-						} else {
-							createProfile(image, iRegion, iRegion.getROI(), false, isDrag, monitor);
-						}
+						createProfile(image, iRegion, iRegion.getROI(), registeredTraces.containsKey(iRegion.getName()), isDrag, monitor);
 					}
 				} else {
 					registeredTraces.clear();
