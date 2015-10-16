@@ -35,7 +35,7 @@ public class ImageHistogramProvider implements IHistogramProvider {
 	}
 
 	private void setImage(IPaletteTrace image){
-		//TODO: connect and disconect listeners, etc...
+		//TODO: connect and disconnect listeners, etc...
 		this.image = image;
 		this.imageDataset = getImageData(image);
 		this.bean = image.getImageServiceBean();
@@ -51,7 +51,7 @@ public class ImageHistogramProvider implements IHistogramProvider {
 	 */
 	/* protected */IDataset getImageData(IPaletteTrace image) {
 		Dataset im = (Dataset)image.getImageServiceBean().getImage();
-		if (im.isComplex()){
+		if (im.isComplex()) {
 			im = (Dataset)image.getImageServiceBean().getImageValue();
 		}
 		return im;

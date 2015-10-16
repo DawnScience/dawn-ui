@@ -22,7 +22,6 @@ import java.util.Map;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.dawnsci.plotting.PlottingActionBarManager;
-import org.dawnsci.plotting.draw2d.swtxy.RegionCoordinateSystem;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
