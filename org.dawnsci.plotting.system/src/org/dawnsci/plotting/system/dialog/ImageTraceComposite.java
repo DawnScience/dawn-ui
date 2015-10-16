@@ -12,6 +12,7 @@ import java.util.Arrays;
 
 import org.dawb.common.ui.macro.TraceMacroEvent;
 import org.dawb.common.ui.util.GridUtils;
+import org.dawnsci.plotting.draw2d.swtxy.ImageTrace;
 import org.dawnsci.plotting.system.PlottingSystemActivator;
 import org.dawnsci.plotting.util.ColorUtility;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -375,6 +376,19 @@ public class ImageTraceComposite extends Composite {
 		value = new Label(info, SWT.NONE);
 		value.setText(Arrays.toString(imageTrace.getDownsampled().getShape()));
 		value.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+
+		final Button labelZoomEnabledButton = new Button(this, SWT.CHECK);
+		labelZoomEnabledButton.setSelection(getPreferenceStore().getBoolean(BasePlottingConstants.LABEL_ZOOM_ENABLED));
+		labelZoomEnabledButton.setText("Enable display of intensity labels");
+		labelZoomEnabledButton.setToolTipText("If checked, pixel intensities will be displayed at a certain zoom level.");
+		labelZoomEnabledButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
+		labelZoomEnabledButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent evt) {
+				getPreferenceStore().setValue(BasePlottingConstants.LABEL_ZOOM_ENABLED, labelZoomEnabledButton.getSelection());
+				((ImageTrace)ImageTraceComposite.this.imageTrace).setLabelZoomEnabled(labelZoomEnabledButton.getSelection());
+			}
+		});
 
 	}
 	

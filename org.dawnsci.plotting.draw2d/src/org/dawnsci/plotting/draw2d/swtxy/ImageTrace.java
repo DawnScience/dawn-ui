@@ -113,6 +113,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * label grid for the intensity.
 	 */
 	private boolean          isLabelZoom;
+
+	/**
+	 * Used to toggle on/off the label Zoom functionality
+	 */
+	private boolean isLabelZoomEnabled = true;
 	
     /**
      * Controls of the image should be downsampled and the ImageData recreated.
@@ -1071,14 +1076,28 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			graphics.drawImage(scaledData.getScaledImage(), scaledData.getXPosition(), scaledData.getYPosition());
 		}
 		
-		if (isLabelZoom && scaledData!=null) {
+		if (isLabelZoomEnabled && isLabelZoom && scaledData!=null) {
 			if (intensityLabelPainter==null) intensityLabelPainter = new IntensityLabelPainter(plottingSystem, this);
 			intensityLabelPainter.paintIntensityLabels(graphics);
 		}
 
 		graphics.popState();
 	}
-	
+
+	/**
+	 * If set to true, the Label zoom will be displayed at a certain zoom level
+	 * if false, it won't be displayed.
+	 * 
+	 * @param isLabelZoomEnabled
+	 */
+	public void setLabelZoomEnabled(boolean isLabelZoomEnabled) {
+		this.isLabelZoomEnabled = isLabelZoomEnabled;
+	}
+
+	public boolean isLabelZoomEnabled() {
+		return isLabelZoomEnabled;
+	}
+
 	private boolean isKeepAspectRatio() {
 		return getXAxis().isKeepAspect() && getYAxis().isKeepAspect();
 	}
