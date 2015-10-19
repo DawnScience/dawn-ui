@@ -35,17 +35,14 @@ import org.eclipse.pde.ui.templates.PluginReference;
  */
 public class ToolPageTemplate extends DAWNTemplateSection {
 
-	private static final String CLASS_NAME = "ToolPage";
 	private static final String EXTENSION_POINT = "org.eclipse.dawnsci.plotting.api.toolPage";
-	private static final String KEY_IDENTIFIER = "identifier";
 	private static final String KEY_TOOLTIP = "tooltip";
-	private static final String KEY_LABEL = "label";
 	private static final String KEY_CHEAT_SHEET_ID = "cheat_sheet_id";
 	private static final String KEY_CATEGORY = "category";
 
 	@Override
 	protected String getClassName() {
-		return CLASS_NAME;
+		return "ToolPage";
 	}
 
 	public IPluginReference[] getDependencies(String schemaVersion) {
@@ -84,12 +81,12 @@ public class ToolPageTemplate extends DAWNTemplateSection {
 		// add all the options we need and set default values
 		addOption(KEY_PACKAGE_NAME, "Java package name", (String) null, 0);
 		addOption(KEY_CLASS_NAME, "Java class name", (String) null, 0);
-		addOption(KEY_IDENTIFIER, "Page identifier", (String) null, 0);
+		addOption(KEY_EXTENSION_ID, "Page identifier", (String) null, 0);
 		addOption(KEY_TOOLTIP, "Tooltip", (String) null, 0);
-		addOption(KEY_LABEL, "Label", (String) null, 0);
+		addOption(KEY_EXTENSION_NAME, "Label", (String) null, 0);
 		addOption(KEY_CHEAT_SHEET_ID, "Cheat sheet identifier", (String) null, 0);
 		addOption(KEY_CATEGORY, "Category",
-				getLookupList(EXTENSION_POINT, "plotting_tool_category", "id", "label"), 
+				getLookupList(EXTENSION_POINT, "plotting_tool_category", "id", "label", false), 
 				(String) null, 0);
 	}
 
@@ -102,10 +99,10 @@ public class ToolPageTemplate extends DAWNTemplateSection {
 		IPluginElement setElement = factory.createElement(extension);
 		setElement.setName("plotting_tool_page");
 		setElement.setAttribute("class", getStringOption(KEY_PACKAGE_NAME) + "." + getStringOption(KEY_CLASS_NAME));
-		setElement.setAttribute("id", getStringOption(KEY_IDENTIFIER));
+		setElement.setAttribute("id", getStringOption(KEY_EXTENSION_ID));
 		setElement.setAttribute("icon", "icons/default.gif");
 		setElement.setAttribute("tooltip", getStringOption(KEY_TOOLTIP));
-		setElement.setAttribute("label", getStringOption(KEY_LABEL));
+		setElement.setAttribute("label", getStringOption(KEY_EXTENSION_NAME));
 		setElement.setAttribute("cheat_sheet_id", getStringOption(KEY_CHEAT_SHEET_ID));
 		setElement.setAttribute("visible", "true");
 		setElement.setAttribute("category", getStringOption(KEY_CATEGORY));

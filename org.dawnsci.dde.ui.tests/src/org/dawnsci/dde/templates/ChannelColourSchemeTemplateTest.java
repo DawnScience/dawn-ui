@@ -20,10 +20,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(SWTBotJunit4ClassRunner.class)
-public class OperationTemplateTest extends AbstractTemplateTestBase {
+public class ChannelColourSchemeTemplateTest extends AbstractTemplateTestBase {
 
-	private static final String EXTENSION_POINT = "org.eclipse.dawnsci.analysis.api.operation";
-
+	private static final String EXTENSION_POINT = "org.dawnsci.plotting.histogram.channelColourScheme";
+	
 	/**
 	 * This test executes the wizard through the user interface. It is important
 	 * that this is the first test as the result will be used for subsequent
@@ -42,18 +42,17 @@ public class OperationTemplateTest extends AbstractTemplateTestBase {
 		bot.textWithLabel("&Project name:").setText(getProjectName());
 		bot.textWithLabel("Identifier:").setText(getProjectName());
 		bot.textWithLabel("Version:").setText("1.0.0");
-		bot.textWithLabel("Name:").setText("My DAWN Operation");
+		bot.textWithLabel("Name:").setText("My DAWN Tool Page");
 		bot.textWithLabel("Institute:").setText("Diamond Light Source");
 		bot.comboBoxWithLabel("Extension point identifier:").setSelection(EXTENSION_POINT);
 		takeScreenshot(shell.widget, EXTENSION_POINT);
 		bot.button("Next >").click();
-
+		
 		// fill in second page
+		bot.textWithLabel("Identifier").setText(getProjectName());
+		bot.textWithLabel("Name").setText("Channel Colour Scheme");
 		bot.textWithLabel("Java package name").setText("org.dawnsci.dde.test");
-		bot.textWithLabel("Java class name").setText("Operation");
-		bot.textWithLabel("Operation description").setText("A test operation");
-		bot.textWithLabel("Operation name").setText("Test Operation");
-		bot.textWithLabel("Operation identifier").setText("org.dawnsci.dde.test.Operation");
+		bot.textWithLabel("Java class name").setText("ChannelColourScheme");
 		takeScreenshot(shell.widget, EXTENSION_POINT);
 		bot.button("Finish").click();
 		
@@ -63,7 +62,7 @@ public class OperationTemplateTest extends AbstractTemplateTestBase {
 
 	@Override
 	protected String getProjectName() {
-		return "org.dawnsci.dde.test.Operation";
+		return "org.dawnsci.dde.test.channelColourScheme";
 	}
 		
 	@Override
@@ -72,16 +71,14 @@ public class OperationTemplateTest extends AbstractTemplateTestBase {
 				"<?eclipse version=\"3.4\"?>\n" + 
 				"<plugin>\n" + 
 				"   <extension\n" + 
-				"         point=\"org.eclipse.dawnsci.analysis.api.operation\">\n" + 
-				"      <operation\n" + 
-				"            class=\"org.dawnsci.dde.test.Operation\"\n" + 
-				"            description=\"A test operation\"\n" + 
-				"            id=\"org.dawnsci.dde.test.Operation\"\n" + 
-				"            name=\"Test Operation\"\n" + 
-				"            visible=\"true\">\n" + 
-				"      </operation>\n" + 
+				"         point=\"org.dawnsci.plotting.histogram.channelColourScheme\">\n" + 
+				"      <transfer_function\n" + 
+				"            array_provider_class=\"org.dawnsci.dde.test.ChannelColourScheme\"\n" + 
+				"            id=\"org.dawnsci.dde.test.channelColourScheme\"\n" + 
+				"            name=\"Channel Colour Scheme\">\n" + 
+				"      </transfer_function>\n" + 
 				"   </extension>\n" + 
-				"</plugin>\n";
+				"</plugin>";
+	
 	}
-
 }

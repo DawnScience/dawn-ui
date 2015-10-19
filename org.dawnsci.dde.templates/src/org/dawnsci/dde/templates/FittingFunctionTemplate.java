@@ -21,21 +21,27 @@ import org.eclipse.pde.core.plugin.IPluginReference;
 import org.eclipse.pde.ui.templates.PluginReference;
 
 /**
- * This type is used to set parameters for the "Operation" extension point. A
+ * This type is used to set parameters for the "Function" extension point. A
  * wizard page will be generated for the user to set values. Obtained values are
  * inserted into "plugin.xml" when this template's wizard is executing and also
- * used when code and other files are generated.
+ * used when code and other files are generated. 
  * 
  * @author Torkild U. Resheim
+ * @see uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction
+ * @see org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction
  */
-public class OperationTemplate extends DAWNTemplateSection {
+public class FittingFunctionTemplate extends DAWNTemplateSection {
 
-	private static final String EXTENSION_POINT = "org.eclipse.dawnsci.analysis.api.operation";
-	private static final String KEY_DESCRIPTION = "description";
+	private static final String EXTENSION_POINT = "uk.ac.diamond.scisoft.analysis.fitting.function";
+	private static final String KEY_USECASE_1 = "usecase1";
+	private static final String KEY_USECASE_2 = "usecase2";
+	private static final String KEY_USECASE_3 = "usecase3";
+	private static final String KEY_USECASE_4 = "usecase4";
+	private static final String KEY_USECASE_5 = "usecase5";
 	
 	@Override
 	protected String getClassName() {
-		return "Operation";
+		return "FittingFunction";
 	}
 		
 	public IPluginReference[] getDependencies(String schemaVersion) {
@@ -56,16 +62,16 @@ public class OperationTemplate extends DAWNTemplateSection {
 	}
 
 	protected String getPageDescription() {
-		return "Please specify parameters for the new operation extension.";
+		return "Please specify parameters for the new fitting function extension.";
 	}
 
 	protected String getPageTitle() {
-		return "Operation Extension";
+		return "Fitting Function Extension";
 	}
 
 	@Override
 	public String getSectionId() {
-		return "operation";
+		return "fittingFunction";
 	}
 
 	@Override
@@ -75,11 +81,15 @@ public class OperationTemplate extends DAWNTemplateSection {
 
 	protected void setOptions() {
 		// add all the options we need and set default values
-		addOption(KEY_EXTENSION_ID, "Operation identifier", (String)null, 0);
-		addOption(KEY_EXTENSION_NAME, "Operation name", (String)null, 0);
+		addOption(KEY_EXTENSION_ID, "Fitting function identifier", (String)null, 0);
+		addOption(KEY_EXTENSION_NAME, "Fitting function name", (String)null, 0);
 		addOption(KEY_PACKAGE_NAME, "Java package name", (String)null, 0);
 		addOption(KEY_CLASS_NAME, "Java class name", (String)null, 0);
-		addOption(KEY_DESCRIPTION, "Operation description", (String)null, 0);
+		addOption(KEY_USECASE_1, "Usecase 1",getLookupList(EXTENSION_POINT, "usecase", "id", "name", true), (String)null, 0);
+		addOption(KEY_USECASE_2, "Usecase 2",getLookupList(EXTENSION_POINT, "usecase", "id", "name", true), (String)null, 0);
+		addOption(KEY_USECASE_3, "Usecase 3",getLookupList(EXTENSION_POINT, "usecase", "id", "name", true), (String)null, 0);
+		addOption(KEY_USECASE_4, "Usecase 4",getLookupList(EXTENSION_POINT, "usecase", "id", "name", true), (String)null, 0);
+		addOption(KEY_USECASE_5, "Usecase 5",getLookupList(EXTENSION_POINT, "usecase", "id", "name", true), (String)null, 0);
 	}
 
 	@Override
@@ -91,10 +101,23 @@ public class OperationTemplate extends DAWNTemplateSection {
 		IPluginElement setElement = factory.createElement(extension);
 		setElement.setName("operation");
 		setElement.setAttribute("class", getStringOption(KEY_PACKAGE_NAME) + "." + getStringOption(KEY_CLASS_NAME));
-		setElement.setAttribute(KEY_DESCRIPTION, getStringOption(KEY_DESCRIPTION));
 		setElement.setAttribute("id", getStringOption(KEY_EXTENSION_ID));
 		setElement.setAttribute("name", getStringOption(KEY_EXTENSION_NAME));
-		setElement.setAttribute("visible", "true");
+		if (getStringOption(KEY_USECASE_1)!=null){
+			setElement.setAttribute("usecase1", getStringOption(KEY_USECASE_1));
+		}
+		if (getStringOption(KEY_USECASE_2)!=null){
+			setElement.setAttribute("usecase2", getStringOption(KEY_USECASE_2));
+		}
+		if (getStringOption(KEY_USECASE_3)!=null){
+			setElement.setAttribute("usecase3", getStringOption(KEY_USECASE_3));
+		}
+		if (getStringOption(KEY_USECASE_4)!=null){
+			setElement.setAttribute("usecase4", getStringOption(KEY_USECASE_4));
+		}
+		if (getStringOption(KEY_USECASE_5)!=null){
+			setElement.setAttribute("usecase5", getStringOption(KEY_USECASE_5));
+		}
 
 		extension.add(setElement);
 		if (!extension.isInTheModel()) {

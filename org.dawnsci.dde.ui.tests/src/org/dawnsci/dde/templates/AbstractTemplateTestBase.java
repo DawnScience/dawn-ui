@@ -49,6 +49,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -70,6 +71,8 @@ public abstract class AbstractTemplateTestBase {
 	/** Screenshot shadow radius */
 	private static final int RADIUS = 16;
 
+	private static boolean welcomeClosed = false;
+	
 	protected static final String DIAMOND_LIGHT_SOURCE = "Diamond Light Source";
 	
 
@@ -77,6 +80,18 @@ public abstract class AbstractTemplateTestBase {
 		screenshotsDir = new File("screenshots");
 		screenshotsDir.mkdirs();
 	}
+	
+	
+	
+	@BeforeClass
+	public static void beforeClass() {
+		bot = new SWTWorkbenchBot();
+		if (!welcomeClosed){
+			bot.viewByTitle("Welcome").close();
+			welcomeClosed = true;
+		}
+	}
+
 
 	private static void fillRoundRectangleDropShadow(GC gc, Rectangle bounds, int radius) {
 		gc.setAdvanced(true);

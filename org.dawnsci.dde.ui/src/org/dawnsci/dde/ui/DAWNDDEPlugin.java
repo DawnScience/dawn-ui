@@ -51,7 +51,7 @@ public class DAWNDDEPlugin extends AbstractUIPlugin {
 	 * @return <code>true</code> if supported
 	 */
 	public static boolean isSupportedDAWNExtension(@NonNull String id) {
-		if (!id.startsWith("org.eclipse.dawnsci") && !id.startsWith("uk.ac.diamond")) {
+		if (!id.startsWith("org.dawnsci") && !id.startsWith("org.eclipse.dawnsci") && !id.startsWith("uk.ac.diamond")) {
 			return false;
 		}
 		if (id.contains(".analysis.rpc.") || id.contains(".sda.")) {

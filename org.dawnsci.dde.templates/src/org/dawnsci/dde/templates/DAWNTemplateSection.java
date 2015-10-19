@@ -33,8 +33,11 @@ import org.osgi.framework.Bundle;
 public abstract class DAWNTemplateSection extends OptionTemplateSection {
 
 	protected static final String BUNDLE_ID = "org.dawnsci.dde.templates";
+	/** Class name and/or extension name */
 	protected static final String KEY_CLASS_NAME = "className";
+	/** Name or label on the generated extension */
 	protected static final String KEY_EXTENSION_NAME = "extensionName";
+	/** Identifier of the generated extension */
 	protected static final String KEY_EXTENSION_ID = "extensionId";
 
 	public DAWNTemplateSection(){
@@ -93,18 +96,33 @@ public abstract class DAWNTemplateSection extends OptionTemplateSection {
 		String packageName = getFormattedPackageName(id);
 		initializeOption(KEY_PACKAGE_NAME, packageName);
 		initializeOption(KEY_CLASS_NAME, getClassName());
+		initializeOption(KEY_EXTENSION_ID, packageName+"."+getSectionId());
+		initializeOption(KEY_EXTENSION_NAME, splitCamelCase(getClassName()));
 	}
 
 	public void initializeFields(IPluginModelBase model) {
 		String packageName = getFormattedPackageName(model.toString());
 		initializeOption(KEY_PACKAGE_NAME, packageName);
 		initializeOption(KEY_CLASS_NAME, getClassName());
+		initializeOption(KEY_EXTENSION_ID, packageName+"."+getSectionId());
+		initializeOption(KEY_EXTENSION_NAME, splitCamelCase(getClassName()));
 	}
 
 	@Override
 	public boolean isDependentOnParentWizard() {
 		return true;
 	}
+
+	private static String splitCamelCase(String s) {
+		   return s.replaceAll(
+		      String.format("%s|%s|%s",
+		         "(?<=[A-Z])(?=[A-Z][a-z])",
+		         "(?<=[^A-Z])(?=[A-Z])",
+		         "(?<=[A-Za-z])(?=[^A-Za-z])"
+		      ),
+		      " "
+		   );
+		}
 	
 	protected abstract String getClassName();
 	/**
@@ -117,13 +135,18 @@ public abstract class DAWNTemplateSection extends OptionTemplateSection {
 	 * @param id
 	 *            the name of the identifier attribute
 	 * @param label
-	 *            the name of the label attribute
+ 	 *            the name of the label attribute
+	 * @param optional            
+	 *            whether or not selecting a value is optional
 	 * @return an array of key/values
 	 */
-	protected String[][] getLookupList(String extensionPoint, String name, String id, String label) {
+	protected String[][] getLookupList(String extensionPoint, String name, String id, String label, boolean optional) {
 		IExtensionRegistry registry = Platform.getExtensionRegistry();
 		IExtensionPoint point = registry.getExtensionPoint(extensionPoint);
 		Map<String, String> map = new HashMap<>();
+		if (optional){
+			map.put("", null);
+		}
 		IConfigurationElement[] configurationElements = point.getConfigurationElements();
 		for (IConfigurationElement e : configurationElements) {
 			if (e.getName().equals(name)) {

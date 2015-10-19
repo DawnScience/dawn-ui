@@ -20,9 +20,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(SWTBotJunit4ClassRunner.class)
-public class OperationTemplateTest extends AbstractTemplateTestBase {
+public class FittingFunctionTemplateTest extends AbstractTemplateTestBase {
 
-	private static final String EXTENSION_POINT = "org.eclipse.dawnsci.analysis.api.operation";
+	private static final String EXTENSION_POINT = "uk.ac.diamond.scisoft.analysis.fitting.function";
 
 	/**
 	 * This test executes the wizard through the user interface. It is important
@@ -49,11 +49,15 @@ public class OperationTemplateTest extends AbstractTemplateTestBase {
 		bot.button("Next >").click();
 
 		// fill in second page
+		bot.textWithLabel("Fitting function identifier").setText(getProjectName());
+		bot.textWithLabel("Fitting function name").setText("Test Fitting Function");
 		bot.textWithLabel("Java package name").setText("org.dawnsci.dde.test");
-		bot.textWithLabel("Java class name").setText("Operation");
-		bot.textWithLabel("Operation description").setText("A test operation");
-		bot.textWithLabel("Operation name").setText("Test Operation");
-		bot.textWithLabel("Operation identifier").setText("org.dawnsci.dde.test.Operation");
+		bot.textWithLabel("Java class name").setText("FittingFunction");
+		bot.comboBoxWithLabel("Usecase 1").setSelection("NotFunctionFittingTool");
+		bot.comboBoxWithLabel("Usecase 2").setSelection("NotFunctionFittingTool");
+		bot.comboBoxWithLabel("Usecase 3").setSelection("");
+		bot.comboBoxWithLabel("Usecase 4").setSelection("NotFunctionFittingTool");
+		bot.comboBoxWithLabel("Usecase 5").setSelection("NotFunctionFittingTool");
 		takeScreenshot(shell.widget, EXTENSION_POINT);
 		bot.button("Finish").click();
 		
@@ -63,7 +67,7 @@ public class OperationTemplateTest extends AbstractTemplateTestBase {
 
 	@Override
 	protected String getProjectName() {
-		return "org.dawnsci.dde.test.Operation";
+		return "org.dawnsci.dde.test.fittingFunction";
 	}
 		
 	@Override
@@ -72,16 +76,17 @@ public class OperationTemplateTest extends AbstractTemplateTestBase {
 				"<?eclipse version=\"3.4\"?>\n" + 
 				"<plugin>\n" + 
 				"   <extension\n" + 
-				"         point=\"org.eclipse.dawnsci.analysis.api.operation\">\n" + 
+				"         point=\"uk.ac.diamond.scisoft.analysis.fitting.function\">\n" + 
 				"      <operation\n" + 
-				"            class=\"org.dawnsci.dde.test.Operation\"\n" + 
-				"            description=\"A test operation\"\n" + 
-				"            id=\"org.dawnsci.dde.test.Operation\"\n" + 
-				"            name=\"Test Operation\"\n" + 
-				"            visible=\"true\">\n" + 
+				"            class=\"org.dawnsci.dde.test.FittingFunction\"\n" + 
+				"            id=\"org.dawnsci.dde.test.fittingFunction\"\n" + 
+				"            name=\"Test Fitting Function\"\n" + 
+				"            usecase1=\"uk.ac.diamond.scisoft.analysis.fitting.function.usecase.NotFunctionFittingTool\"\n" + 
+				"            usecase2=\"uk.ac.diamond.scisoft.analysis.fitting.function.usecase.NotFunctionFittingTool\"\n" + 
+				"            usecase4=\"uk.ac.diamond.scisoft.analysis.fitting.function.usecase.NotFunctionFittingTool\"\n" + 
+				"            usecase5=\"uk.ac.diamond.scisoft.analysis.fitting.function.usecase.NotFunctionFittingTool\">\n" + 
 				"      </operation>\n" + 
 				"   </extension>\n" + 
-				"</plugin>\n";
+				"</plugin>";
 	}
-
 }

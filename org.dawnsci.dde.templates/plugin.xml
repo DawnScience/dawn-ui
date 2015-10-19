@@ -23,6 +23,26 @@
             name="Tool Page Action"
             template="org.dawnsci.dde.templates.ToolPageActionTemplate">
       </wizard>
+      <wizard
+            id="org.dawnsci.dde.templates.ColourSchemeWizard"
+            name="Colour Scheme"
+            template="org.dawnsci.dde.templates.colourSchemeTemplate">
+      </wizard>
+      <wizard
+            id="org.dawnsci.dde.templates.SingleChannelColourSchemeWizard"
+            name="Colour Scheme"
+            template="org.dawnsci.dde.templates.singleChannelColourSchemeTemplate">
+      </wizard>
+      <wizard
+            id="org.dawnsci.dde.templates.PlottingActionWizard"
+            name="Plotting Action"
+            template="org.dawnsci.dde.templates.plottingActionTemplate">
+      </wizard>
+      <wizard
+            id="org.dawnsci.dde.templates.FittingFunctionWizard"
+            name="Fitting Function"
+            template="org.dawnsci.dde.templates.fittingFunctionTemplate">
+      </wizard>
    </extension>
    <extension
          point="org.eclipse.pde.ui.templates">
@@ -49,6 +69,30 @@
             contributingId="org.eclipse.dawnsci.plotting.api.toolPageAction"
             id="org.dawnsci.dde.templates.ToolPageActionTemplate"
             name="Tool Page Action">
+      </template>
+      <template
+            class="org.dawnsci.dde.templates.ColourSchemeTemplate"
+            contributingId="org.dawnsci.plotting.histogram.colourScheme"
+            id="org.dawnsci.dde.templates.colourSchemeTemplate"
+            name="Colour Scheme">
+      </template>
+      <template
+            class="org.dawnsci.dde.templates.ChannelColourSchemeTemplate"
+            contributingId="org.dawnsci.plotting.histogram.colourScheme"
+            id="org.dawnsci.dde.templates.singleChannelColourSchemeTemplate"
+            name="Colour Scheme">
+      </template>
+      <template
+            class="org.dawnsci.dde.templates.PlottingActionTemplate"
+            contributingId="org.eclipse.dawnsci.plotting.api.plottingAction"
+            id="org.dawnsci.dde.templates.plottingActionTemplate"
+            name="Plotting Action">
+      </template>
+      <template
+            class="org.dawnsci.dde.templates.FittingFunctionTemplate"
+            contributingId="uk.ac.diamond.scisoft.analysis.fitting.function/usecase/@id"
+            id="org.dawnsci.dde.templates.fittingFunctionTemplate"
+            name="Fitting Function">
       </template>
    </extension>
 </plugin>

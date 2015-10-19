@@ -18,36 +18,31 @@ import org.eclipse.pde.core.plugin.IPluginElement;
 import org.eclipse.pde.core.plugin.IPluginExtension;
 import org.eclipse.pde.core.plugin.IPluginModelFactory;
 import org.eclipse.pde.core.plugin.IPluginReference;
-import org.eclipse.pde.ui.templates.PluginReference;
 
 /**
- * This type is used to set parameters for the "Operation" extension point. A
+ * This type is used to set parameters for the "PlottingAction" extension point. A
  * wizard page will be generated for the user to set values. Obtained values are
  * inserted into "plugin.xml" when this template's wizard is executing and also
  * used when code and other files are generated.
  * 
  * @author Torkild U. Resheim
  */
-public class OperationTemplate extends DAWNTemplateSection {
+public class PlottingActionTemplate extends DAWNTemplateSection {
 
-	private static final String EXTENSION_POINT = "org.eclipse.dawnsci.analysis.api.operation";
-	private static final String KEY_DESCRIPTION = "description";
-	
+	private static final String EXTENSION_POINT = "org.eclipse.dawnsci.plotting.api.plottingAction";
+	private static final String KEY_PLOT_NAME = "plot_name";
+	private static final String KEY_COMMAND_ID= "command_id";
+	private static final String KEY_ACTION_TYPE = "action_type";
+	private static final String KEY_PLOT_TYPE = "plot_type";
+
 	@Override
 	protected String getClassName() {
-		return "Operation";
+		return "PlottingAction";
 	}
-		
+
 	public IPluginReference[] getDependencies(String schemaVersion) {
-		// add _all_ required dependencies, no particular version 
-		return new IPluginReference[] {
-				new PluginReference("org.eclipse.dawnsci.analysis.api", null, 0),
-				new PluginReference("org.eclipse.dawnsci.analysis.dataset", null, 0),
-				new PluginReference("uk.ac.diamond.scisoft.analysis.processing", null, 0),
-				new PluginReference("uk.ac.diamond.scisoft.analysis", null, 0),
-				new PluginReference("org.eclipse.core.runtime", null, 0),
-				new PluginReference("org.eclipse.core.resources", null, 0),
-				};
+		// add _all_ required dependencies, no particular version
+		return new IPluginReference[] {};
 	}
 
 	@Override
@@ -56,16 +51,16 @@ public class OperationTemplate extends DAWNTemplateSection {
 	}
 
 	protected String getPageDescription() {
-		return "Please specify parameters for the new operation extension.";
+		return "Please specify parameters for the new plotting action extension.";
 	}
 
 	protected String getPageTitle() {
-		return "Operation Extension";
+		return "Plotting Action Extension";
 	}
 
 	@Override
 	public String getSectionId() {
-		return "operation";
+		return "plottingAction";
 	}
 
 	@Override
@@ -75,11 +70,14 @@ public class OperationTemplate extends DAWNTemplateSection {
 
 	protected void setOptions() {
 		// add all the options we need and set default values
-		addOption(KEY_EXTENSION_ID, "Operation identifier", (String)null, 0);
-		addOption(KEY_EXTENSION_NAME, "Operation name", (String)null, 0);
-		addOption(KEY_PACKAGE_NAME, "Java package name", (String)null, 0);
-		addOption(KEY_CLASS_NAME, "Java class name", (String)null, 0);
-		addOption(KEY_DESCRIPTION, "Operation description", (String)null, 0);
+		addOption(KEY_EXTENSION_ID, "Action identifier", (String) null, 0);
+		addOption(KEY_EXTENSION_NAME, "Label", (String) null, 0);
+		addOption(KEY_COMMAND_ID, "Command identifier",
+				getLookupList("org.eclipse.ui.commands", "command", "id", "name", false), (String) null, 0);
+		addOption(KEY_ACTION_TYPE, "Action type", new String[][] { { "TOOLBAR", "Toolbar" }, { "MENUBAR", "Menubar" } },
+				"TOOLBAR", 0);
+		addOption(KEY_PLOT_TYPE, "Plot type",
+				new String[][] { { "XY", "XY" }, { "IMAGE", "Image" }, { "SURFACE", "Surface" } }, (String) null, 0);
 	}
 
 	@Override
@@ -89,12 +87,14 @@ public class OperationTemplate extends DAWNTemplateSection {
 		IPluginModelFactory factory = model.getPluginFactory();
 
 		IPluginElement setElement = factory.createElement(extension);
-		setElement.setName("operation");
-		setElement.setAttribute("class", getStringOption(KEY_PACKAGE_NAME) + "." + getStringOption(KEY_CLASS_NAME));
-		setElement.setAttribute(KEY_DESCRIPTION, getStringOption(KEY_DESCRIPTION));
+		setElement.setName("plotting_action");
 		setElement.setAttribute("id", getStringOption(KEY_EXTENSION_ID));
-		setElement.setAttribute("name", getStringOption(KEY_EXTENSION_NAME));
-		setElement.setAttribute("visible", "true");
+		setElement.setAttribute("plot_name", getStringOption(KEY_PLOT_NAME));
+		setElement.setAttribute("command_id", getStringOption(KEY_COMMAND_ID));
+		setElement.setAttribute("icon", "icons/default.gif");
+		setElement.setAttribute("label", getStringOption(KEY_EXTENSION_NAME));
+		setElement.setAttribute("action_type", getStringOption(KEY_ACTION_TYPE));
+		setElement.setAttribute("plot_type", getStringOption(KEY_PLOT_TYPE));
 
 		extension.add(setElement);
 		if (!extension.isInTheModel()) {
