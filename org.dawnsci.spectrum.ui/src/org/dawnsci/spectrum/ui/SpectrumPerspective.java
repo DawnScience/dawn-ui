@@ -39,9 +39,7 @@ public class SpectrumPerspective implements IPerspectiveFactory {
 		navigatorFolder.addView("uk.ac.diamond.sda.navigator.views.FileView");
 		
 		IViewLayout vLayout = layout.getViewLayout("org.eclipse.ui.navigator.ProjectExplorer");
-		vLayout.setCloseable(false);
 		vLayout = layout.getViewLayout("uk.ac.diamond.sda.navigator.views.FileView");
-		vLayout.setCloseable(false);
 		
 		{
 			IFolderLayout folderLayout = layout.createFolder("folder", IPageLayout.LEFT, 0.2f, IPageLayout.ID_EDITOR_AREA);
