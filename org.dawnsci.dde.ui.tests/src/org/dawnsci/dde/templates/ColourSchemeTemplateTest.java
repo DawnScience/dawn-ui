@@ -14,10 +14,8 @@ package org.dawnsci.dde.templates;
 import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -25,13 +23,7 @@ import org.junit.runner.RunWith;
 public class ColourSchemeTemplateTest extends AbstractTemplateTestBase {
 
 	private static final String EXTENSION_POINT = "org.dawnsci.plotting.histogram.colourScheme";
-
-	@BeforeClass
-	public static void beforeClass() {
-		bot = new SWTWorkbenchBot();
-		bot.viewByTitle("Welcome").close();
-	}
-		
+	
 	/**
 	 * This test executes the wizard through the user interface. It is important
 	 * that this is the first test as the result will be used for subsequent
@@ -72,7 +64,7 @@ public class ColourSchemeTemplateTest extends AbstractTemplateTestBase {
 
 	@Override
 	protected String getProjectName() {
-		return "org.dawnsci.dde.test.toolpage";
+		return "org.dawnsci.dde.test.colourScheme";
 	}
 		
 	@Override
@@ -89,7 +81,7 @@ public class ColourSchemeTemplateTest extends AbstractTemplateTestBase {
 				"            blue_transfer_function=\"org.dawnsci.plotting.histogram.full\"\n" + 
 				"            green_inverted=\"false\"\n" + 
 				"            green_transfer_function=\"org.dawnsci.plotting.histogram.zero\"\n" + 
-				"            id=\"org.dawnsci.dde.test.toolpage\"\n" + 
+				"            id=\"org.dawnsci.dde.test.colourScheme\"\n" + 
 				"            name=\"Test Colour Scheme\"\n" + 
 				"            red_inverted=\"false\"\n" + 
 				"            red_transfer_function=\"org.dawnsci.plotting.histogram.linear\">\n" + 

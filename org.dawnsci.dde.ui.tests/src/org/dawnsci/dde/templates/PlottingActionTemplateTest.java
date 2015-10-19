@@ -14,10 +14,8 @@ package org.dawnsci.dde.templates;
 import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -26,12 +24,6 @@ public class PlottingActionTemplateTest extends AbstractTemplateTestBase {
 
 	private static final String EXTENSION_POINT = "org.eclipse.dawnsci.plotting.api.plottingAction";
 
-	@BeforeClass
-	public static void beforeClass() {
-		bot = new SWTWorkbenchBot();
-		bot.viewByTitle("Welcome").close();
-	}
-		
 	/**
 	 * This test executes the wizard through the user interface. It is important
 	 * that this is the first test as the result will be used for subsequent
@@ -70,7 +62,7 @@ public class PlottingActionTemplateTest extends AbstractTemplateTestBase {
 
 	@Override
 	protected String getProjectName() {
-		return "org.dawnsci.dde.test.plottingaction";
+		return "org.dawnsci.dde.test.plottingAction";
 	}
 		
 	@Override
@@ -84,7 +76,7 @@ public class PlottingActionTemplateTest extends AbstractTemplateTestBase {
 				"            action_type=\"TOOLBAR\"\n" + 
 				"            command_id=\"org.eclipse.ui.edit.text.deletePrevious\"\n" + 
 				"            icon=\"icons/default.gif\"\n" + 
-				"            id=\"org.dawnsci.dde.test.plottingaction\"\n" + 
+				"            id=\"org.dawnsci.dde.test.plottingAction\"\n" + 
 				"            label=\"Action Label\"\n" + 
 				"            plot_type=\"SURFACE\">\n" + 
 				"      </plotting_action>\n" + 

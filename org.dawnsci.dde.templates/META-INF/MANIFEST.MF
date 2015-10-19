@@ -10,3 +10,4 @@ Require-Bundle: org.eclipse.pde.ui;bundle-version="3.7.2",
  org.eclipse.ui;bundle-version="3.8.2",
  org.eclipse.core.resources;bundle-version="3.8.1",
  org.eclipse.pde.core
+Export-Package: org.dawnsci.dde.templates;x-friends:="org.dawnsci.dde.ui.tests"

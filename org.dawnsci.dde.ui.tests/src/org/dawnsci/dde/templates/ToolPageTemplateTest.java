@@ -14,24 +14,19 @@ package org.dawnsci.dde.templates;
 import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/**
+ * @see ToolPageTemplate
+ */
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class ToolPageTemplateTest extends AbstractTemplateTestBase {
 
 	private static final String EXTENSION_POINT = "org.eclipse.dawnsci.plotting.api.toolPage";
 
-	@BeforeClass
-	public static void beforeClass() {
-		bot = new SWTWorkbenchBot();
-		bot.viewByTitle("Welcome").close();
-	}
-		
 	/**
 	 * This test executes the wizard through the user interface. It is important
 	 * that this is the first test as the result will be used for subsequent
@@ -73,7 +68,7 @@ public class ToolPageTemplateTest extends AbstractTemplateTestBase {
 
 	@Override
 	protected String getProjectName() {
-		return "org.dawnsci.dde.test.toolpage";
+		return "org.dawnsci.dde.test.toolPage";
 	}
 		
 	@Override
@@ -85,10 +80,10 @@ public class ToolPageTemplateTest extends AbstractTemplateTestBase {
 				"         point=\"org.eclipse.dawnsci.plotting.api.toolPage\">\n" + 
 				"      <plotting_tool_page\n" + 
 				"            category=\"org.dawnsci.plotting.tools.category.Profile\"\n" + 
-				"            cheat_sheet_id=\"org.dawnsci.dde.test.toolpage\"\n" + 
+				"            cheat_sheet_id=\"org.dawnsci.dde.test.toolPage\"\n" + 
 				"            class=\"org.dawnsci.dde.test.ToolPage\"\n" + 
 				"            icon=\"icons/default.gif\"\n" + 
-				"            id=\"org.dawnsci.dde.test.toolpage\"\n" + 
+				"            id=\"org.dawnsci.dde.test.toolPage\"\n" + 
 				"            label=\"Test Tool Page\"\n" + 
 				"            tooltip=\"Test Tool Page tooltip\"\n" + 
 				"            visible=\"true\">\n" + 

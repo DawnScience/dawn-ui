@@ -14,10 +14,8 @@ package org.dawnsci.dde.templates;
 import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellCloses;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -26,12 +24,6 @@ public class LoaderTemplateTest extends AbstractTemplateTestBase {
 
 	private static final String EXTENSION_POINT = "uk.ac.diamond.scisoft.analysis.io.loader";
 
-	@BeforeClass
-	public static void beforeClass() {
-		bot = new SWTWorkbenchBot();
-		bot.viewByTitle("Welcome").close();
-	}
-		
 	/**
 	 * This test executes the wizard through the user interface. It is important
 	 * that this is the first test as the result will be used for subsequent
