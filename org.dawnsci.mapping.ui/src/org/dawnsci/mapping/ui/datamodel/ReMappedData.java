@@ -19,8 +19,8 @@ public class ReMappedData extends MappedData {
 	private IDataset lookup;
 	private int[] shape;
 	
-	public ReMappedData(String name, IDataset map, MappedDataBlock parent) {
-		super(name, map, parent);
+	public ReMappedData(String name, IDataset map, MappedDataBlock parent, String path) {
+		super(name, map, parent, path);
 		
 	}
 	

@@ -9,12 +9,13 @@ import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 public class MappedDataBlock implements MapObject {
 
 	private String name;
+	private String path;
 	ILazyDataset dataset;
 	int yDim = 0;
 	int xDim = 1;
 	private double[] range;
 	
-	public MappedDataBlock(String name, ILazyDataset dataset, int xDim, int yDim) {
+	public MappedDataBlock(String name, ILazyDataset dataset, int xDim, int yDim, String path) {
 		this.name = name;
 		this.dataset = dataset;
 		this.xDim = xDim;
@@ -96,6 +97,10 @@ public class MappedDataBlock implements MapObject {
 		range[3] += dy;
 		
 		return range;
+	}
+
+	public String getLongName() {
+		return path + " : " + name;
 	}
 
 }

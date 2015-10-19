@@ -226,6 +226,7 @@ public class MapPlotManager {
 		if (map == null) {
 			for (int i = 0; i < area.count();i++) {
 				map = area.getDataFile(i).getMap();
+				if (map == null) continue;
 				addMap(map);
 			}
  			
@@ -237,6 +238,11 @@ public class MapPlotManager {
 	}
 	
 	public void addImage(AssociatedImage image) {
+		if (layers.contains(image)){
+			layers.remove(image);
+			plotLayers();
+			return;
+		}
 		layers.addLast(image);
 		plotLayers();
 	}
@@ -297,7 +303,8 @@ public class MapPlotManager {
 			while (it.hasNext()) {
 				MapObject o = it.next();
 				if (o instanceof MappedData) {
-					IImageTrace t = MappingUtils.buildTrace(((MappedData)o).getMap(), this.map);
+					MappedData m = (MappedData)o;
+					IImageTrace t = MappingUtils.buildTrace(m.getLongName(),m.getMap(), this.map);
 					t.setGlobalRange(area.getRange());
 					t.setAlpha(((MappedData)o).getTransparency());
 					this.map.addTrace(t);
@@ -306,7 +313,8 @@ public class MapPlotManager {
 				
 				if (o instanceof AssociatedImage) {
 //					comp.add(MappingUtils.buildTrace(((AssociatedImage)o).getImage(), this.map),count++);
-					IImageTrace t = MappingUtils.buildTrace(((AssociatedImage)o).getImage(), this.map);
+					AssociatedImage im = (AssociatedImage)o;
+					IImageTrace t = MappingUtils.buildTrace(im.getLongName(),im.getImage(), this.map);
 					t.setGlobalRange(area.getRange());
 					this.map.addTrace(t);
 				}
@@ -319,6 +327,7 @@ public class MapPlotManager {
 	}
 	
 	private boolean isTheSameMap(MappedData omap, MappedData map) {
+		
 		
 		if (!Arrays.equals(omap.getMap().getShape(), map.getMap().getShape())) return false;
 		
@@ -347,7 +356,7 @@ public class MapPlotManager {
 	
 	public void setTransparency(MappedData m) {
 		
-		ITrace trace = map.getTrace(m.getMap().getName());
+		ITrace trace = map.getTrace(m.getLongName());
 		if (trace instanceof IImageTrace) ((IImageTrace)trace).setAlpha(m.getTransparency());
 		map.repaint(false);
 		

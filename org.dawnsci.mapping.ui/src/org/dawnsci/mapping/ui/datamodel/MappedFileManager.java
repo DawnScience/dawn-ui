@@ -108,8 +108,8 @@ public class MappedFileManager {
 				RegistrationDialog dialog = new RegistrationDialog(Display.getDefault().getActiveShell(), plotManager.getTopMap().getMap(),im);
 				if (dialog.open() != IDialogConstants.OK_ID) return;
 				RGBDataset ds = (RGBDataset)dialog.getRegisteredImage();
-				ds.setName(path + " : Registered");
-				AssociatedImage asIm = new AssociatedImage("Registered", ds);
+				ds.setName("Registered");
+				AssociatedImage asIm = new AssociatedImage("Registered", ds, path);
 				mappedDataArea.addMappedDataFile(MappedFileFactory.getMappedDataFile(path, asIm));
 				viewer.refresh();
 			} catch (Exception e) {

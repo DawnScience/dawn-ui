@@ -258,9 +258,9 @@ public class RegistrationDialog extends Dialog {
 		systemComposite.clear();
 		double[] range = MappingUtils.getGlobalRange(im,map);
 
-		IImageTrace image = MappingUtils.buildTrace(im, systemComposite);
+		IImageTrace image = MappingUtils.buildTrace("image",im, systemComposite);
 		image.setGlobalRange(range);
-		IImageTrace mapim = MappingUtils.buildTrace(map, systemComposite,120);
+		IImageTrace mapim = MappingUtils.buildTrace("map", map, systemComposite,120);
 		mapim.setGlobalRange(range);
 		systemComposite.addTrace(image);
 		systemComposite.addTrace(mapim);
