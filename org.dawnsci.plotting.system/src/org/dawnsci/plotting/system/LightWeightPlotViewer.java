@@ -115,6 +115,7 @@ import org.eclipse.nebula.visualization.xygraph.figures.Annotation;
 import org.eclipse.nebula.visualization.xygraph.figures.Axis;
 import org.eclipse.nebula.visualization.xygraph.figures.XYGraph;
 import org.eclipse.nebula.visualization.xygraph.linearscale.AbstractScale.LabelSide;
+import org.eclipse.nebula.visualization.xygraph.linearscale.LinearScaleTickLabels;
 import org.eclipse.nebula.visualization.xygraph.toolbar.RemoveAnnotationDialog;
 import org.eclipse.nebula.visualization.xygraph.undo.AddAnnotationCommand;
 import org.eclipse.nebula.visualization.xygraph.undo.RemoveAnnotationCommand;
@@ -504,15 +505,18 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 
 					} else {
 						fig = getFigureAtCurrentMousePosition(null);
-					    if (fig instanceof ITraceContainer) {
-							final ITrace trace = ((ITraceContainer)fig).getTrace();
+						if (fig instanceof ITraceContainer) {
+							final ITrace trace = ((ITraceContainer) fig).getTrace();
 							fillTraceActions(manager, trace, system);
-					    }
-					    
-					    if (fig instanceof Label && fig.getParent() instanceof Annotation) {
-					    	
-					    	fillAnnotationConfigure(manager, (Annotation)fig.getParent(), system);
-					    }
+						}
+						if (fig instanceof Label && fig.getParent() instanceof Annotation) {
+							fillAnnotationConfigure(manager, (Annotation) fig.getParent(), system);
+						}
+						if (fig instanceof LinearScaleTickLabels) {
+							LinearScaleTickLabels label = (LinearScaleTickLabels)fig;
+							Axis scale = (Axis)label.getScale();
+							fillAxisConfigure(manager, (AspectAxis)scale);
+						}
 					}
 					system.getPlotActionSystem().fillZoomActions(manager);
 					manager.update();
@@ -582,6 +586,19 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 		};
 		manager.add(delAnnotation);	
 
+		manager.add(new Separator("org.dawb.workbench.plotting.system.configure.group"));
+	}
+
+	private void fillAxisConfigure(IMenuManager manager, final Axis axis) {
+		final Action configure = new Action("Configure '" + (axis.isHorizontal() ? "X-Axis": "Y-Axis") + "'",
+				PlottingSystemActivator.getImageDescriptor("icons/Configure.png")) {
+			public void run() {
+				final XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getDefault().getActiveShell(), xyGraph, getSystem().isRescale());
+				dialog.setSelectedAxis(axis);
+				dialog.open();
+			}
+		};
+		manager.add(configure);
 		manager.add(new Separator("org.dawb.workbench.plotting.system.configure.group"));
 	}
 	

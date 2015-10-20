@@ -21,6 +21,7 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.nebula.visualization.xygraph.figures.Annotation;
+import org.eclipse.nebula.visualization.xygraph.figures.Axis;
 import org.eclipse.nebula.visualization.xygraph.figures.XYGraph;
 import org.eclipse.nebula.visualization.xygraph.toolbar.XYGraphConfigDialog;
 import org.eclipse.swt.SWT;
@@ -206,7 +207,21 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
            	   	}
         	}
         }
-       
+		if (selectedAxis != null) {
+			final int index = xyGraph.getAxisList().indexOf(selectedAxis);
+			final TabItem[] items = tabFolder.getItems();
+			for (int i = 0; i < items.length; i++) {
+				if ("Axes".equalsIgnoreCase(items[i].getText())) {
+					tabFolder.setSelection(i);
+					Composite axisTabComposite = (Composite) items[i].getControl();
+					Composite axisConfigComposite = (Composite) axisTabComposite.getChildren()[1];
+					final StackLayout stackLayout = (StackLayout) axisConfigComposite.getLayout();
+					stackLayout.topControl = axisConfigPageList.get(index).getComposite();
+					axisConfigComposite.layout(true, true);
+					break;
+				}
+			}
+		}
 		return parent_composite;
 	}
 	
@@ -280,5 +295,10 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 	public void setSelectedAnnotation(Annotation annotation) {
 		this.selectedAnnotation = annotation;
 	}
-	
+
+	private Axis selectedAxis;
+
+	public void setSelectedAxis(Axis selectedAxis) {
+		this.selectedAxis = selectedAxis;
+	}
 }
