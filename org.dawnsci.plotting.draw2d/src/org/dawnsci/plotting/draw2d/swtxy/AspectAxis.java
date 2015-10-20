@@ -222,7 +222,7 @@ public class AspectAxis extends Axis implements IAxis {
 		final ImageTrace trace = ((XYRegionGraph)getGraph()).getRegionArea().getImageTrace();
 		
 		// Code to stop pan outside image bounds.
-		if (trace!=null) {
+		if (trace!=null && !trace.hasTrueAxes()) {
 		    
 		    final double d1 = t1-t2;
 		    final double d2 = t2-t1;
