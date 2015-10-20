@@ -37,5 +37,21 @@
        </newWizardShortcut>
     </perspectiveExtension>
  </extension>
+ <extension
+       point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+    <launchConfigurationTypeImage
+          configTypeID="org.dawnsci.dde.core.launchConfigurationType"
+          icon="icons/full/misc16/launch.png"
+          id="org.dawnsci.dde.ui.launchConfigurationTypeImage">
+    </launchConfigurationTypeImage>
+ </extension>
+ <extension
+       point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+    <launchConfigurationTabGroup
+          class="org.dawnsci.dde.ui.AbstractLaunchConfigurationTabGroup"
+          id="org.dawnsci.dde.ui.launchConfigurationTabGroup"
+          type="org.dawnsci.dde.core.launchConfigurationType">
+    </launchConfigurationTabGroup>
+ </extension>
 
 </plugin>
