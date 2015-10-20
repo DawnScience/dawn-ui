@@ -694,8 +694,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		this.globalRange = globalRange;
 		yAxis.setTicksIndexBased(false);
 		xAxis.setTicksIndexBased(false);
-		if (xAxis instanceof AspectAxis)((AspectAxis)xAxis).setMaximumRange(globalRange[0], globalRange[1]);
-		if (yAxis instanceof AspectAxis)((AspectAxis)yAxis).setMaximumRange(globalRange[2], globalRange[3]);
+//		if (xAxis instanceof AspectAxis)((AspectAxis)xAxis).setMaximumRange(globalRange[0], globalRange[1]);
+//		if (yAxis instanceof AspectAxis)((AspectAxis)yAxis).setMaximumRange(globalRange[2], globalRange[3]);
 //		xAxis.setRange(lower, upper);
 		xAxis.setTicksAtEnds(false);
 		yAxis.setTicksAtEnds(false);
