@@ -30,9 +30,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.EventTracker;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext;
+import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext.ConversionScheme;
 import org.eclipse.dawnsci.analysis.api.conversion.IProcessingConversionInfo;
 import org.eclipse.dawnsci.analysis.api.conversion.ProcessingOutputType;
-import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext.ConversionScheme;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
@@ -44,7 +44,6 @@ import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.api.processing.ExecutionType;
 import org.eclipse.dawnsci.analysis.api.processing.IExecutionVisitor;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
-import org.eclipse.dawnsci.analysis.api.processing.IOperationContext;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
@@ -71,7 +70,6 @@ import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
@@ -493,33 +491,7 @@ public class DataFileSliceView extends ViewPart {
 				fileManager.setUpContext();
 			}
 		};
-		
-		final IAction export = new OperationExportAction("Export to Workflow", Activator.getImageDescriptor("icons/flow.png")) {
-			public IOperationContext createContext() {
-				
-				IOperationContext ocontext  = ServiceHolder.getOperationService().createContext();
-				ocontext.setSeries(getOperations());
 
-				final String selectedPath  = (String)((IStructuredSelection)viewer.getSelection()).getFirstElement();
-				if (selectedPath == null) {
-			    	MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Please Choose File", "Please select a file to use with export.\n\nOne file only may be exported to workflows at a time.");
-                    return null;
-				}
-				ocontext.setFilePath(selectedPath);
-				
-				IConversionContext ccontext = fileManager.getContext();
-				if (ccontext == null) {
-			    	MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Please Choose File", "Please ensure that a slice and file have been chosen.");
-                    return null;
-				}
-				ocontext.setSlicing(ccontext.getSliceDimensions());
-				ocontext.setDatasetPath(ccontext.getDatasetNames().get(0));
-				
-                return ocontext;
-			}
-		};
-
-		
 		getViewSite().getActionBars().getToolBarManager().add(clear);
 		getViewSite().getActionBars().getMenuManager().add(clear);
 		rightClick.add(clear);
@@ -535,10 +507,6 @@ public class DataFileSliceView extends ViewPart {
 		getViewSite().getActionBars().getToolBarManager().add(new Separator());
 		getViewSite().getActionBars().getMenuManager().add(new Separator());
 		rightClick.add(new Separator());
-
-		getViewSite().getActionBars().getToolBarManager().add(export);
-		getViewSite().getActionBars().getMenuManager().add(export);
-		rightClick.add(export);
 
 	}
 	
