@@ -110,14 +110,13 @@ public class AxisGrid extends Group
 		return new Rotate(angle, startVectorProjection.crossProduct(endVectorProjection));
 	}
 	
-	private AxisLineGroup createTickBar(Point2D length, double radius, Point3D axisDirection, Point2D offsetXY, String text)
+	private AxisLineGroup createTickBar(Point2D length, Point3D axisDirection, Point2D offsetXY, String text)
 	{
 		
 		AxisLineGroup returnBar = new AxisLineGroup(
-				radius,
 				length.getX(),
 				axisDirection,
-				new Point3D(offsetXY.getX() ,offsetXY.getY(), 0),
+				new Point3D(offsetXY.getX(),offsetXY.getY(), 0),
 				text);
 		
 		return returnBar;
@@ -192,9 +191,9 @@ public class AxisGrid extends Group
 		
 		// check if a new axis line needs to be added
 		
-		// x axis
-		int nCount = yAxis.getChildren().size();
-		int excessXLineCount = (int)(( this.maxLengthXY.getX() - (nCount*this.tickSeperationXY.getX()))/ this.tickSeperationXY.getX());
+		// x axis 
+		int nXCount = yAxis.getChildren().size();
+		int excessXLineCount = (int)(( this.maxLengthXY.getX() - (nXCount*this.tickSeperationXY.getX()))/ this.tickSeperationXY.getX());
 		
 		if (excessXLineCount > 0)
 		{
@@ -202,11 +201,10 @@ public class AxisGrid extends Group
 			for (int i = 0; i < excessXLineCount; i ++)
 			{
 				AxisLineGroup bar = createTickBar(
-						this.maxLengthXY, 
-						this.thickness, 
+						this.maxLengthXY,
 						Y_AXIS_DIRECTION, 
-						new Point2D(tickSeperationXY.getX()*(nCount+i),0),
-						Double.toString(this.tickSeperationXY.getX()*(nCount+i)));
+						new Point2D(tickSeperationXY.getX()*(nXCount+i),0),
+						Double.toString(this.tickSeperationXY.getX()*(nXCount+i)));
 				bar.setMaterial(new PhongMaterial(colour));
 				this.yAxis.getChildren().add(bar);
 			}
@@ -226,8 +224,8 @@ public class AxisGrid extends Group
 		}
 		
 		// y axis
-		nCount = this.xAxis.getChildren().size();
-		int excessYLineCount = (int)(( this.maxLengthXY.getY() - (nCount*this.tickSeperationXY.getY()))/ this.tickSeperationXY.getY());
+		int nYCount = this.xAxis.getChildren().size();
+		int excessYLineCount = (int)(( this.maxLengthXY.getY() - (nYCount*this.tickSeperationXY.getY()))/ this.tickSeperationXY.getY());
 		
 		if ((excessYLineCount) > 0)
 		{
@@ -237,10 +235,9 @@ public class AxisGrid extends Group
 				
 				AxisLineGroup bar = createTickBar(
 						this.maxLengthXY, 
-						this.thickness, 
 						X_AXIS_DIRECTION, 
-						new Point2D(this.tickSeperationXY.getY()*(nCount+i), 0),
-						Double.toString(this.tickSeperationXY.getY()*(nCount+i)));
+						new Point2D(this.tickSeperationXY.getY()*(nYCount+i), 0),
+						Double.toString(this.tickSeperationXY.getY()*(nYCount+i)));
 				bar.setMaterial(new PhongMaterial(colour));
 				this.xAxis.getChildren().add(bar);
 			}
@@ -251,7 +248,7 @@ public class AxisGrid extends Group
 			{
 				try
 				{
-					final int lowerLimit = xAxis.getChildren().size() + excessXLineCount;
+					final int lowerLimit = xAxis.getChildren().size() + excessYLineCount;
 					final int upperLimit = xAxis.getChildren().size();
 					this.xAxis.getChildren().remove(lowerLimit, upperLimit);
 				}

@@ -157,6 +157,7 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub
 	{
 		if (trace instanceof IIsosurfaceTrace)
 		{
+			
 			// declare the trace from the parameter trace
 			FXIsosurfaceTrace itrace = (FXIsosurfaceTrace) trace;
 			if (itrace.getData() == null)

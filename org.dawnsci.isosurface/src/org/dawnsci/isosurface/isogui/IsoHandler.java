@@ -33,11 +33,18 @@ public class IsoHandler
 			{
 				try 
 				{
-					
+					System.out.println("Value change performed");
 					// update view
 					
 					controller.uiToBean();
-										
+					
+					Object test = e.getActingBean();
+					
+					if (test != null)
+					{
+						System.out.println("yay not null!!");
+					}
+					
 					IsoItem current = (IsoItem)isoComp.getItems().getBean();
 					
 					if (!(current).equals(previous)) 

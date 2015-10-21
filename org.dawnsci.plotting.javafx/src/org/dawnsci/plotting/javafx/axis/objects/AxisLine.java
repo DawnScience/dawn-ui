@@ -1,18 +1,38 @@
 package org.dawnsci.plotting.javafx.axis.objects;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javafx.geometry.Point3D;
-import javafx.scene.shape.Cylinder;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.CullFace;
+import javafx.scene.shape.DrawMode;
+import javafx.scene.shape.MeshView;
+import javafx.scene.shape.TriangleMesh;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 
-public class AxisLine extends Cylinder
+public class AxisLine extends MeshView
 {
 	private Translate offset;
 	private Rotate rotate;
+	private TriangleMesh mesh;
+	private double height;
 	
-	AxisLine(double radius, double height, Rotate rotate, Point3D offset)
+	AxisLine(double height, Rotate rotate, Point3D offset)
 	{
-		super(radius, height);
+		super();
+		
+		this.height = height;
+		
+		ArrayList<Point3D> points = new ArrayList<Point3D>();
+		
+		points.add(new Point3D(0, 0, 0));
+		points.add(new Point3D(0, height, 0));
+		
+		createLine(points, Color.BLACK);
+		
 		this.rotate = rotate;
 		this.offset = new Translate(offset.getX(), offset.getY(), offset.getZ());;
 		
@@ -21,17 +41,70 @@ public class AxisLine extends Cylinder
 	}
 	
 	
+	
+	public void createLine(List<Point3D> points, Color colour)
+	{
+		mesh = new TriangleMesh();
+		
+		for (Point3D point: points)
+		{
+			mesh.getPoints().addAll((float)point.getX(), (float)point.getY(), (float)point.getZ());
+			mesh.getPoints().addAll((float)point.getX(), (float)point.getY(), (float)point.getZ() + 0.0001f);
+			
+		}
+		
+		mesh.getTexCoords().addAll(0,0);
+		
+		for (int i = 2; i < points.size()*2; i +=2)
+		{
+			
+			mesh.getFaces().addAll(i   ,0 ,i-2 ,0 ,i+1 ,0 );
+			mesh.getFaces().addAll(i+1 ,0 ,i-2 ,0 ,i+1 ,0 );
+			
+			mesh.getFaces().addAll(i+1 ,0 ,i-2 ,0 ,i   ,0 );
+			mesh.getFaces().addAll(i-1 ,0 ,i-2 ,0 ,i+1 ,0 );
+			
+		}
+		
+		this.setDrawMode(DrawMode.LINE);
+		
+		this.setMesh(mesh);
+		
+		PhongMaterial mat = new PhongMaterial(colour);
+		mat.setDiffuseColor(colour);
+		mat.setSpecularColor(colour);
+		
+		this.setMaterial(mat);
+		this.setCullFace(CullFace.NONE);
+		
+		
+	}
+	
 	public void setRadiusExtended(double newRadius)
 	{
-		this.setRadius(newRadius);
+		// do nothing for now
+		// this.setRadius(newRadius);
 	}
 	
 	public void setHeightExtended(double newHeight)
 	{
-		this.setHeight(newHeight);
+		this.height = newHeight;
+		
+		ArrayList<Point3D> points = new ArrayList<Point3D>();
+		
+		points.add(new Point3D(0, 0, 0));
+		points.add(new Point3D(0, this.height, 0));
+		
+		createLine(points, Color.RED);
+		
+//		this.setHeight(newHeight);
 	}
 	
-	
+	public double getHeight()
+	{
+		return this.height;
+	}
+		
 	public void editRotate(Rotate newRotate)
 	{
 		this.rotate.setAngle(newRotate.getAngle());

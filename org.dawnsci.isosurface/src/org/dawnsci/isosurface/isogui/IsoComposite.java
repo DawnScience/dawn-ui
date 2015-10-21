@@ -48,10 +48,11 @@ public class IsoComposite extends Composite
 	{
 		this.items = new VerticalListEditor(this, SWT.NONE)
 		{
+			
 			@Override
 			protected void beanRemove(Object bean)
 			{
-				
+				System.out.println("BeanRemoved");
 			}
 			
 			@Override

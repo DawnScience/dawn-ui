@@ -26,11 +26,11 @@ public class AxisLineGroup extends Group
 	private Translate offset;
 	private Rotate rotate;
 	
-	public AxisLineGroup(double radius, double length, Point3D direction, Point3D offset, String label)
+	public AxisLineGroup(double length, Point3D direction, Point3D offset, String label)
 	{
 		
-		this.offset = (new Translate(offset.getX(), offset.getY(), offset.getZ()));
-		this.line = new AxisLine(radius, length, new Rotate(), new Point3D(0,length/2,0));
+		this.offset = new Translate(offset.getX(), offset.getY(), offset.getZ());
+		this.line = new AxisLine(length, new Rotate(), new Point3D(0,0,0));
 		
 		
 		this.rotate = new Rotate();		
@@ -87,15 +87,15 @@ public class AxisLineGroup extends Group
 	{
 		this.rotate = newRotate;
 	}
-
+	
 	public void setHeightExtended(double x)
 	{
 		this.line.setHeightExtended(x);
 	}
-
+	
 	public void resetOffset()
 	{
-		this.line.editOffset(new Translate( 0, this.line.getHeight()/2,0));
+		this.line.editOffset(new Translate( 0, 0 ,0));
 	}
 
 	public void setMaterial(PhongMaterial phongMaterial)

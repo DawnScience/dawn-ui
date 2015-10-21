@@ -124,7 +124,7 @@ public class SurfaceDisplayer extends Scene
 	{		
 		
 		// create the scene
-		super(root, 1500, 1500, true, SceneAntialiasing.BALANCED);
+		super(root, 1500, 1500, true);
 		this.isosurfaceGroup = isosurfaceGroup;
 		
 		// set the camera -> the camera will handle some aspects of movement

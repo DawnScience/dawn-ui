@@ -24,7 +24,7 @@ public class AxisGroup extends Group
 	private Point3D origin;
 	private Point3D Max;
 	
-	private Group axisGroup;
+	private Group scaleGroup;
 	
 	private AxisGrid xAxisGrid;
 	private AxisGrid yAxisGrid;
@@ -36,13 +36,13 @@ public class AxisGroup extends Group
 	public AxisGroup(Point3D origin, Point3D maxLength, double axisThickness, Point3D tickSeperationXYZ)
 	{
 		// initialise
-		axisGroup = new Group();
+		scaleGroup = new Group();
 		
 		// create x y and z Axis
-		axisGroup.getChildren().add(createAxis(new Point3D(1,0,0), maxLength.getX(), axisThickness));
-		axisGroup.getChildren().add(createAxis(new Point3D(0,1,0), maxLength.getY(), axisThickness));
-		axisGroup.getChildren().add(createAxis(new Point3D(0,0,1), maxLength.getZ(), axisThickness));
-		this.getChildren().add(axisGroup);
+		scaleGroup.getChildren().add(createAxis(new Point3D(1,0,0), maxLength.getX(), axisThickness));
+		scaleGroup.getChildren().add(createAxis(new Point3D(0,1,0), maxLength.getY(), axisThickness));
+		scaleGroup.getChildren().add(createAxis(new Point3D(0,0,1), maxLength.getZ(), axisThickness));
+		this.getChildren().add(scaleGroup);
 		
 		// create axis grids
 		// yz plane
@@ -146,7 +146,7 @@ public class AxisGroup extends Group
 	}
 	public void setAxisVisible (boolean visible)
 	{
-		axisGroup.setVisible(visible);
+		scaleGroup.setVisible(visible);
 	}
 	public void setGridAllVisible(boolean visible)
 	{
@@ -176,7 +176,7 @@ public class AxisGroup extends Group
 	}
 	public void flipAxisVisible()
 	{
-		axisGroup.setVisible(!axisGroup.isVisible());
+		scaleGroup.setVisible(!scaleGroup.isVisible());
 	}
 	public void flipAll()
 	{
@@ -190,7 +190,7 @@ public class AxisGroup extends Group
 	// the event from scene
 	public void setAxisEventListener(EventHandler<MouseEvent> eventHandler)
 	{
-		for (Node n: axisGroup.getChildren())
+		for (Node n: scaleGroup.getChildren())
 		{
 			if (n instanceof Cylinder)
 			{
