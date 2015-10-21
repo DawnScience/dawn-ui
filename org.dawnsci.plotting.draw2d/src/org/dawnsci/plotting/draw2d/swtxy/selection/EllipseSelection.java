@@ -43,18 +43,6 @@ public class EllipseSelection extends LockableSelectionRegion<EllipticalROI> {
 
 	@Override
 	protected EllipticalROI createROI(boolean recordResult) {
-		// snap to grid
-		if (shape.isGridSnap()) {
-			EllipticalROI snappedROI = shape.croi;
-			snappedROI.setPoint((int) snappedROI.getPointX(), (int) snappedROI.getPointY());
-			snappedROI.setSemiaxes(new double[]{(int) snappedROI.getSemiAxes()[0], (int) snappedROI.getSemiAxes()[1]});
-			shape.croi = snappedROI;
-			if (recordResult) {
-				roi = shape.croi;
-			}
-			shape.configureHandles();
-			return shape.croi;
-		}
 		return super.createROI(recordResult);
 	}
 
@@ -117,16 +105,10 @@ public class EllipseSelection extends LockableSelectionRegion<EllipticalROI> {
 
 		@Override
 		public void snapToGrid() {
-			EllipticalROI tSnappedROI = troi;
 			EllipticalROI cSnappedROI = croi;
-			if (tSnappedROI != null) {
-				tSnappedROI.setPoint((int) tSnappedROI.getPointX(), (int) tSnappedROI.getPointY());
-				tSnappedROI.setSemiaxes(new double[]{(int) tSnappedROI.getSemiAxes()[0], (int) tSnappedROI.getSemiAxes()[1]});
-				troi = tSnappedROI;
-			}
 			if (cSnappedROI != null) {
-				cSnappedROI.setPoint((int) cSnappedROI.getPointX(), (int) cSnappedROI.getPointY());
-				cSnappedROI.setSemiaxes(new double[]{(int) cSnappedROI.getSemiAxes()[0], (int) cSnappedROI.getSemiAxes()[1]});
+				cSnappedROI.setPoint(Math.round(cSnappedROI.getPointX()), Math.round(cSnappedROI.getPointY()));
+				cSnappedROI.setSemiaxes(new double[]{Math.round(cSnappedROI.getSemiAxes()[0]), Math.round(cSnappedROI.getSemiAxes()[1])});
 				croi = cSnappedROI;
 			}
 		}

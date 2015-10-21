@@ -87,19 +87,6 @@ class SectorSelection extends ROISelectionRegion<SectorROI> implements ILockable
 
 	@Override
 	protected SectorROI createROI(boolean recordResult) {
-		// snap to grid
-		if (shape.isGridSnap()) {
-			SectorROI snappedROI = shape.croi;
-			snappedROI.setPoint((int) snappedROI.getPointX(), (int) snappedROI.getPointY());
-			snappedROI.setRadii(new double[] {(int)snappedROI.getRadii()[0], (int)snappedROI.getRadii()[1]});
-			snappedROI.setDpp((int)snappedROI.getDpp());
-			shape.croi = snappedROI;
-			if (recordResult) {
-				roi = shape.croi;
-			}
-			shape.configureHandles();
-			return shape.croi;
-		}
 		return super.createROI(recordResult);
 	}
 
@@ -354,18 +341,11 @@ class SectorSelection extends ROISelectionRegion<SectorROI> implements ILockable
 
 		@Override
 		public void snapToGrid() {
-			SectorROI tSnappedROI = troi;
 			SectorROI cSnappedROI = croi;
-			if (tSnappedROI != null) {
-				tSnappedROI.setPoint((int) tSnappedROI.getPointX(), (int) tSnappedROI.getPointY());
-				tSnappedROI.setRadii(new double[] {(int) tSnappedROI.getRadii()[0], (int) tSnappedROI.getRadii()[1]});
-				tSnappedROI.setDpp((int) tSnappedROI.getDpp());
-				troi = tSnappedROI;
-			}
 			if (cSnappedROI != null) {
-				cSnappedROI.setPoint((int) cSnappedROI.getPointX(), (int) cSnappedROI.getPointY());
-				cSnappedROI.setRadii(new double[] {(int) cSnappedROI.getRadii()[0], (int) cSnappedROI.getRadii()[1]});
-				cSnappedROI.setDpp((int)cSnappedROI.getDpp());
+				cSnappedROI.setPoint(new Float(Math.round(cSnappedROI.getPoint()[0])), new Float(Math.round(cSnappedROI.getPoint()[1])));
+				cSnappedROI.setRadii(new double[] {new Float(Math.round(cSnappedROI.getRadii()[0])), new Float(Math.round(cSnappedROI.getRadii()[1]))});
+				cSnappedROI.setDpp(new Float(Math.round(cSnappedROI.getDpp())));
 				croi = cSnappedROI;
 			}
 		}

@@ -6,12 +6,10 @@ import java.util.List;
 import org.dawnsci.mapping.ui.LocalServiceManager;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
 
@@ -49,7 +47,7 @@ public class MappedFileFactory {
 				monitor.subTask(b.getName());
 				MappedDataBlock block = file.getDataBlockMap().get(b.getParent());
 				MappedData m = setUpMap(path, b.getName(),block);
-				m.getMap().setName(path + " : " + m.toString());
+				m.getMap().setName(m.toString());
 				file.addMapObject(b.getName(), m);
 			}
 		}
@@ -75,7 +73,7 @@ public class MappedFileFactory {
 			ILazyDataset lz = lService.getData(path, null).getLazyDataset(blockName);
 			AxesMetadata axm = checkAndBuildAxesMetadata(axesNames, path, bean);
 			lz.setMetadata(axm);
-			block = new MappedDataBlock(blockName, lz, bean.getxDim(), bean.getyDim());
+			block = new MappedDataBlock(blockName, lz, bean.getxDim(), bean.getyDim(), path);
 		} catch (Exception e) {
 			
 		}
@@ -108,7 +106,7 @@ public class MappedFileFactory {
 				ax.setAxis(0, xView);
 
 				d.setMetadata(ax);
-				return new ReMappedData(mapName, d, block);
+				return new ReMappedData(mapName, d, block, path);
 			}
 
 			AxesMetadataImpl ax = new AxesMetadataImpl(2);
@@ -118,7 +116,7 @@ public class MappedFileFactory {
 
 			d.setMetadata(ax);
 
-			return new MappedData(mapName,d,block);
+			return new MappedData(mapName,d,block,path);
 		}
 		catch (Exception e) {
 			e.printStackTrace();

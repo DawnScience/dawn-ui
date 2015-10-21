@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.dawnsci.plotting.histogram.histogram" xmlns="http://www.w3.org/2001/XMLSchema">
+<schema targetNamespace="org.dawnsci.plotting.histogram" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="org.dawnsci.plotting.histogram.histogram" id="channelColourScheme" name="Single Channel Colour Scheme"/>
+         <meta.schema plugin="org.dawnsci.plotting.histogram" id="channelColourScheme" name="Single Channel Colour Scheme"/>
       </appinfo>
       <documentation>
          This extention point allows for new types of single channel mapping to be provided.
@@ -91,15 +91,15 @@
       </appinfo>
       <documentation>
          &lt;extension
-         point=&quot;org.dawnsci.plotting.histogram.histogram.channelColourScheme&quot;&gt;
+         point=&quot;org.dawnsci.plotting.histogram.channelColourScheme&quot;&gt;
       &lt;transfer_function
             array_provider_class=&quot;org.dawnsci.plotting.histogram.functions.classes.LinearTransferFunction&quot;
-            id=&quot;org.dawnsci.plotting.histogram.histogram.linear&quot;
+            id=&quot;org.dawnsci.plotting.histogram.linear&quot;
             name=&quot;Linear (y=x)&quot;&gt;
       &lt;/transfer_function&gt;
       &lt;transfer_function
             array_provider_class=&quot;org.dawnsci.plotting.histogram.functions.classes.SquaredTransferFunction&quot;
-            id=&quot;org.dawnsci.plotting.histogram.histogram.squared&quot;
+            id=&quot;org.dawnsci.plotting.histogram.squared&quot;
             name=&quot;Squared (y = x**2)&quot;&gt;
       &lt;/transfer_function&gt;
    &lt;/extension&gt;

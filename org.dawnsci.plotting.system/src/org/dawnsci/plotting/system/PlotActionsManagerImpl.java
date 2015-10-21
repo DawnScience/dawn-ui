@@ -47,7 +47,6 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.nebula.visualization.xygraph.undo.ZoomType;
-import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
@@ -278,17 +277,6 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 			final Action action = new Action(paletteName, IAction.AS_CHECK_BOX) {
 				public void run() {
 					try {
-						// If the colour is changed from a PlotView, we change the plot view colour map preference
-						// Temporary: TODO to be changed by a getAdapter() pattern
-						if (getActivePage().getActivePart() != null) {
-							String partClassName = getActivePage().getActivePart().getClass().getName();
-							if (partClassName.equals("uk.ac.diamond.scisoft.analysis.rcp.views.PlotView")) {
-								// set the plotview colour map preference
-								PlottingSystemActivator.getAnalysisRCPPreferenceStore().setValue(PlottingConstants.PLOT_VIEW_PLOT2D_COLOURMAP, paletteName);
-							}
-						}
-						// set the main colour scheme preference used in the colour mapping tool
-						PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.COLOUR_SCHEME, paletteName);
 						selectedPaletteChanged(paletteName);
 					} catch (Exception ne) {
 						logger.error("Cannot create palette data!", ne);

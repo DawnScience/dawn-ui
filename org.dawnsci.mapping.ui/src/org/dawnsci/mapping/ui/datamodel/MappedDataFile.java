@@ -22,8 +22,6 @@ public class MappedDataFile implements MapObject{
 	private Map<String,MappedDataBlock> fullDataMap;
 	private Map<String,MappedData> mapDataMap;
 	private Map<String,AssociatedImage> microscopeDataMap;
-	private int mapXDim;
-	private int mapYDim;
 	private double[] range;
 	
 	private final static Logger logger = LoggerFactory.getLogger(MappedDataFile.class);
@@ -40,14 +38,12 @@ public class MappedDataFile implements MapObject{
 	}
 	
 	public MappedDataBlock addFullDataBlock(String datasetName, int xdim, int ydim) {
-		mapXDim = xdim;
-		mapYDim = ydim;
 		
 		//TODO make use of the x and y dimensions
 		MappedDataBlock block = null;
 		try {
 			ILazyDataset lz = LocalServiceManager.getLoaderService().getData(path, null).getLazyDataset(datasetName);
-			block = new MappedDataBlock(datasetName, lz,xdim,ydim);
+			block = new MappedDataBlock(datasetName, lz,xdim,ydim, path);
 			fullDataMap.put(datasetName, block);
 		} catch (Exception e) {
 			logger.error("Error loading mapped data block!", e);
@@ -91,7 +87,7 @@ public class MappedDataFile implements MapObject{
 	public void addMap(String mapName, MappedDataBlock parent) {
 		try {
 			ILazyDataset lz = LocalServiceManager.getLoaderService().getData(path, null).getLazyDataset(mapName);
-			mapDataMap.put(mapName, new MappedData(mapName, lz.getSlice(), parent));
+			mapDataMap.put(mapName, new MappedData(mapName, lz.getSlice(), parent, path));
 		} catch (Exception e) {
 			logger.error("Error loading mapped data!", e);
 		}
@@ -117,7 +113,7 @@ public class MappedDataFile implements MapObject{
 					 (Dataset)lz.getSlice(new Slice(1,2),null,null).squeeze(),
 					 (Dataset)lz.getSlice(new Slice(2,3),null,null).squeeze());
 			microrgb.setMetadata(test.getMetadata(AxesMetadata.class).get(0));
-			microscopeDataMap.put(imageName, new AssociatedImage(imageName, microrgb));
+			microscopeDataMap.put(imageName, new AssociatedImage(imageName, microrgb,path));
 		} catch (Exception e) {
 			logger.error("Error non map image!", e);
 		}

@@ -25,16 +25,17 @@ import org.eclipse.pde.ui.templates.PluginReference;
  * wizard page will be generated for the user to set values. Obtained values are
  * inserted into "plugin.xml" when this template's wizard is executing and also
  * used when code and other files are generated.
+ * 
+ * @author Torkild U. Resheim
  */
 public class OperationTemplate extends DAWNTemplateSection {
 
-	private static final String CLASS_NAME = "Operation";
 	private static final String EXTENSION_POINT = "org.eclipse.dawnsci.analysis.api.operation";
 	private static final String KEY_DESCRIPTION = "description";
 	
 	@Override
 	protected String getClassName() {
-		return CLASS_NAME;
+		return "Operation";
 	}
 		
 	public IPluginReference[] getDependencies(String schemaVersion) {
@@ -74,11 +75,11 @@ public class OperationTemplate extends DAWNTemplateSection {
 
 	protected void setOptions() {
 		// add all the options we need and set default values
+		addOption(KEY_EXTENSION_ID, "Operation identifier", (String)null, 0);
+		addOption(KEY_EXTENSION_NAME, "Operation name", (String)null, 0);
 		addOption(KEY_PACKAGE_NAME, "Java package name", (String)null, 0);
 		addOption(KEY_CLASS_NAME, "Java class name", (String)null, 0);
 		addOption(KEY_DESCRIPTION, "Operation description", (String)null, 0);
-		addOption(KEY_EXTENSION_NAME, "Operation name", (String)null, 0);
-		addOption(KEY_EXTENSION_ID, "Operation identifier", (String)null, 0);
 	}
 
 	@Override

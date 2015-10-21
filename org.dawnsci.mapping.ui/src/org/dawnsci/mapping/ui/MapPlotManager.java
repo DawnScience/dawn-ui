@@ -11,7 +11,6 @@ import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.dawnsci.mapping.ui.datamodel.MapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedData;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
-import org.dawnsci.plotting.draw2d.swtxy.ImageTrace;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -63,7 +62,10 @@ public class MapPlotManager {
 	
 	public void plotData(final double x, final double y) {
 		final MappedData topMap = getTopMap(x,y);
-		if (topMap == null) return;
+		if (topMap == null)  {
+			data.clear();
+			return;
+		}
 		merge = null;
 		atomicPosition.set(0);
 		Runnable r = new Runnable() {
@@ -215,12 +217,32 @@ public class MapPlotManager {
 	
 	
 	public void plotMap(MappedData map) {
-		if (map == null) map = area.getDataFile(0).getMap();
-		addMap(map);
+		if (layers.contains(map)){
+			layers.remove(map);
+			plotLayers();
+			return;
+		}
+		
+		if (map == null) {
+			for (int i = 0; i < area.count();i++) {
+				map = area.getDataFile(i).getMap();
+				if (map == null) continue;
+				addMap(map);
+			}
+ 			
+		} else {
+			addMap(map);
+		}
+		
 		plotLayers();
 	}
 	
 	public void addImage(AssociatedImage image) {
+		if (layers.contains(image)){
+			layers.remove(image);
+			plotLayers();
+			return;
+		}
 		layers.addLast(image);
 		plotLayers();
 	}
@@ -250,28 +272,6 @@ public class MapPlotManager {
 		data.clear();
 		layers.clear();
 	}
-	
-//	private void plotMapData(MappedData mapdata){
-//		map.clear();
-//		MappedDataFile dataFile = area.getDataFile(0);
-//		AssociatedImage image = dataFile.getAssociatedImage();
-//		if (mapdata == null) mapdata = dataFile.getMap();
-//		int count = 0;
-//		layers.clear();
-//		try {
-//			ICompositeTrace comp = this.map.createCompositeTrace("composite1");
-//			if (image != null) {
-//				layers.add(image);
-//				comp.add(MappingUtils.buildTrace(image.getImage(), this.map),count++);
-//			}
-//
-//			layers.add(mapdata);
-//			comp.add(MappingUtils.buildTrace(mapdata.getMap(), this.map,mapdata.getTransparency()),count++);
-//			this.map.addTrace(comp);
-//		} catch (Exception e) {
-//			logger.error("Error plotting mapped data", e);
-//		}
-//	}
 	
 	private void addMap(MappedData map) {
 		
@@ -303,7 +303,8 @@ public class MapPlotManager {
 			while (it.hasNext()) {
 				MapObject o = it.next();
 				if (o instanceof MappedData) {
-					IImageTrace t = MappingUtils.buildTrace(((MappedData)o).getMap(), this.map);
+					MappedData m = (MappedData)o;
+					IImageTrace t = MappingUtils.buildTrace(m.getLongName(),m.getMap(), this.map);
 					t.setGlobalRange(area.getRange());
 					t.setAlpha(((MappedData)o).getTransparency());
 					this.map.addTrace(t);
@@ -312,7 +313,8 @@ public class MapPlotManager {
 				
 				if (o instanceof AssociatedImage) {
 //					comp.add(MappingUtils.buildTrace(((AssociatedImage)o).getImage(), this.map),count++);
-					IImageTrace t = MappingUtils.buildTrace(((AssociatedImage)o).getImage(), this.map);
+					AssociatedImage im = (AssociatedImage)o;
+					IImageTrace t = MappingUtils.buildTrace(im.getLongName(),im.getImage(), this.map);
 					t.setGlobalRange(area.getRange());
 					this.map.addTrace(t);
 				}
@@ -325,6 +327,7 @@ public class MapPlotManager {
 	}
 	
 	private boolean isTheSameMap(MappedData omap, MappedData map) {
+		
 		
 		if (!Arrays.equals(omap.getMap().getShape(), map.getMap().getShape())) return false;
 		
@@ -348,6 +351,15 @@ public class MapPlotManager {
 		}
 		
 		return true;
+		
+	}
+	
+	public void setTransparency(MappedData m) {
+		
+		ITrace trace = map.getTrace(m.getLongName());
+		if (trace instanceof IImageTrace) ((IImageTrace)trace).setAlpha(m.getTransparency());
+		map.repaint(false);
+		
 		
 	}
 	

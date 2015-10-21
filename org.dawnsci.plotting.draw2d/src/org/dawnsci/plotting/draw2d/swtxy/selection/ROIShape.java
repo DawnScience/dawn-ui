@@ -12,16 +12,15 @@ package org.dawnsci.plotting.draw2d.swtxy.selection;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.draw2d.swtxy.translate.FigureTranslator;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
-import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.handler.HandleStatus;
 import org.eclipse.dawnsci.analysis.dataset.roi.handler.ROIHandler;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
-import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.region.IRegionContainer;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.draw2d.ColorConstants;
@@ -33,8 +32,6 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 /**
  * Class for a shape based on a ROI and uses a ROIHandler
@@ -102,8 +99,10 @@ abstract public class ROIShape<T extends IROI> extends RegionFillFigure<T> imple
 				bnds = parent.getBounds();
 			}
 		} else {
-			double[] bp = cs.getPositionFromValue(rroi.getPointRef());
-			double[] ep = cs.getPositionFromValue(rroi.getEndPoint());
+			double[] rpt = rroi.getPointRef();
+			double[] ept = rroi.getEndPoint();
+			double[] bp = cs.getPositionFromValue(rpt);
+			double[] ep = cs.getPositionFromValue(ept);
 			bnds = new Rectangle(new PrecisionPoint(bp[0], bp[1]), new PrecisionPoint(ep[0], ep[1]));
 			bnds.expand(1, 1);
 		}
@@ -128,6 +127,8 @@ abstract public class ROIShape<T extends IROI> extends RegionFillFigure<T> imple
 	}
 
 	public void configureHandles() {
+		if(isGridSnap())
+			snapToGrid();
 		boolean mobile = region.isMobile();
 		boolean visible = isVisible() && mobile;
 		// handles
@@ -214,6 +215,10 @@ abstract public class ROIShape<T extends IROI> extends RegionFillFigure<T> imple
 					final FigureTranslator translator = (FigureTranslator) src;
 					Point start = translator.getStartLocation();
 					spt = cs.getValueFromPosition(start.x(), start.y());
+					if (isGridSnap()) {
+						spt[0] = Math.round(spt[0]);
+						spt[1] = Math.round(spt[1]);
+					}
 					final IFigure handle = translator.getRedrawFigure();
 					final int h = handles.indexOf(handle);
 					HandleStatus status = h == roiHandler.getCentreHandle() ? HandleStatus.RMOVE : HandleStatus.RESIZE;
@@ -234,10 +239,12 @@ abstract public class ROIShape<T extends IROI> extends RegionFillFigure<T> imple
 					
 					if (end==null) return;
 					double[] c = cs.getValueFromPosition(end.x(), end.y());
-					troi = roiHandler.interpretMouseDragging(spt, c);
 					// snap to grid
-					if (isGridSnap())
-						snapToGrid();
+					if (isGridSnap()) {
+						c[0] = Math.round(c[0]);
+						c[1] = Math.round(c[1]);
+					}
+					troi = roiHandler.interpretMouseDragging(spt, c);
 					roiHandler.setROI(troi);
 					intUpdateFromROI(troi);
 					roiHandler.setROI(croi);
@@ -256,6 +263,10 @@ abstract public class ROIShape<T extends IROI> extends RegionFillFigure<T> imple
 					Point end = translator.getEndLocation();
 
 					double[] c = cs.getValueFromPosition(end.x(), end.y());
+					if (isGridSnap()) {
+						c[0] = Math.round(c[0]);
+						c[1] = Math.round(c[1]);
+					}
 					T croi = roiHandler.interpretMouseDragging(spt, c);
 
 					updateFromROI(croi);
@@ -372,16 +383,11 @@ abstract public class ROIShape<T extends IROI> extends RegionFillFigure<T> imple
 		}
 	}
 
-	private IPreferenceStore store;
-
-	private IPreferenceStore getPreferenceStore() {
-		if (store != null)
-			return store;
-		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
-		return store;
-	}
-
+	/**
+	 * 
+	 * @return true if the snap to grid option for selections/regions is toggled on
+	 */
 	public boolean isGridSnap() {
-		return getPreferenceStore().getBoolean(BasePlottingConstants.SNAP_TO_GRID);
+		return ((XYRegionGraph)region.getBean().getXyGraph()).isGridSnap();
 	}
 }

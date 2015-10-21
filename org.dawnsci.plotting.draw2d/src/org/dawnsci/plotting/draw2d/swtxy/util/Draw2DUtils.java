@@ -472,4 +472,134 @@ public class Draw2DUtils {
 		return true;
 	}
 
+	/**
+	 * Fill a polygon clipped by given bounds
+	 * @param g
+	 * @param points of polygon
+	 * @param bounds
+	 */
+	public static void fillClippedPolygon(Graphics g, PointList points, Rectangle bounds) {
+		final int pts = points.size();
+		if (pts < 2)
+			return;
+
+		double xl = bounds.preciseX();
+		double xh = xl + bounds.preciseWidth();
+		double yl = bounds.preciseY();
+		double yh = yl + bounds.preciseHeight();
+
+		Point p0;
+		PointList corners = new PointList(4); // list of corners in polygon
+		p0 = bounds.getTopLeft();
+		if (points.polygonContainsPoint(p0.x(), p0.y())) {
+			corners.addPoint(p0);
+		}
+		p0 = bounds.getBottomLeft();
+		if (points.polygonContainsPoint(p0.x(), p0.y())) {
+			corners.addPoint(p0);
+		}
+		p0 = bounds.getBottomRight();
+		if (points.polygonContainsPoint(p0.x(), p0.y())) {
+			corners.addPoint(p0);
+		}
+		p0 = bounds.getTopRight();
+		if (points.polygonContainsPoint(p0.x(), p0.y())) {
+			corners.addPoint(p0);
+		}
+
+		Point p1 = points.getPoint(0);
+		PointList list = new PointList();
+		int i = 1;
+		double[] t = new double[2];
+		PointList oobers = new PointList(); // out-of-bound points
+		Point ooba = null;
+
+		boolean first = true;
+		for (; i <= pts; i++) {
+			p0 = p1;
+			p1 = points.getPoint(i % pts);
+
+			t[0] = 0;
+			t[1] = 1;
+			double x0 = p0.preciseX();
+			double y0 = p0.preciseY();
+			double dx = p1.preciseX() - x0;
+			double dy = p1.preciseY() - y0;
+			p1 = new Point((int) Math.round(p1.preciseX()), (int) Math.round(p1.preciseY()));
+			if (dx == 0 && dy == 0)
+				continue; // ignore null segment
+
+			if (first) { // find first segment that is (partly) in bounds
+				if (clip(xl - x0, dx, t) && clip(x0 - xh, -dx, t)
+						&& clip(yl - y0, dy, t) && clip(y0 - yh, -dy, t)) {
+					if (t[0] > 0) {
+						p0 = new Point((int) Math.round(x0 + t[0] * dx), (int) Math.round(y0 + t[0] * dy));
+					} else {
+						p0 = new Point((int) Math.round(x0), (int) Math.round(y0));
+					}
+
+					// add possible corner points
+					if (oobers.size() > 1) {
+						oobers.addPoint(p0);
+						for (int j = 0, jmax = corners.size(); j < jmax; j++) {
+							Point c = corners.getPoint(j);
+							if (oobers.polygonContainsPoint(c.x(), c.y())) {
+								list.addPoint(c);
+							}
+						}
+					}
+					oobers.removeAllPoints();
+					list.addPoint(p0);
+
+					if (t[1] < 1) {
+						Point p = new Point((int) Math.round(x0 + t[1] * dx), (int) Math.round(y0 + t[1] * dy));
+						oobers.addPoint(p);
+						oobers.addPoint(p1);
+						list.addPoint(p);
+					} else {
+						first = false;
+						list.addPoint(p1);
+					}
+				} else {
+					if (list.size() == 0) {
+//						System.err.println("Set " + p1 + " : " + i);
+						ooba = p1;
+					}
+					oobers.addPoint(p1);
+				}
+			} else { // given that p0 is in bounds
+				if (clip2(xl - x0, dx, t) && clip2(x0 - xh, -dx, t) && clip2(yl - y0, dy, t) && clip2(y0 - yh, -dy, t)) {
+					if (t[1] < 1) {
+						first = true;
+						Point p = new Point((int) Math.round(x0 + t[1] * dx), (int) Math.round(y0 + t[1] * dy));
+						list.addPoint(p);
+						oobers.addPoint(p);
+						oobers.addPoint(p1);
+					} else {
+						list.addPoint(p1);
+					}
+				}
+			}
+		}
+
+		if (list.size() > 0) {
+			if (oobers.size() > 1) {
+				if (ooba != null)
+					oobers.addPoint(ooba);
+				oobers.addPoint(list.getPoint(0));
+				for (int j = 0, jmax = corners.size(); j < jmax; j++) {
+					Point c = corners.getPoint(j);
+					if (oobers.polygonContainsPoint(c.x(), c.y())) {
+						list.addPoint(c);
+					}
+				}
+			}
+			// uncross?
+			g.fillPolygon(list);
+		} else { // special case of bounds being entirely within polygon
+			if (corners.size() == 4) {
+				g.fillRectangle(bounds);
+			}
+		}
+	}
 }

@@ -108,7 +108,7 @@ class LightWeightPlotActions {
 	private XYRegionGraph          xyGraph;
 	private LightWeightPlotViewer  viewer;
 	private boolean                datasetChoosingRequired = true;
-	private Action                 plotIndex, plotX;
+	private Action                 plotIndex, plotX, lockHisto;
 	
 	private Shell fullScreenShell;
 	private IPropertyChangeListener propertyListener, switchListener;
@@ -521,21 +521,21 @@ class LightWeightPlotActions {
         final MenuAction regionDropDown = new MenuAction("Selection region");
         regionDropDown.setId(BasePlottingConstants.ADD_REGION); // Id used elsewhere...
  
-		regionDropDown.add(createRegionAction(xyGraph, RegionType.LINE,       regionDropDown, "Add line selection",     PlottingSystemActivator.getImageDescriptor("icons/ProfileLine.png")));
-		regionDropDown.add(createRegionAction(xyGraph, RegionType.POLYLINE,   regionDropDown, "Add polyline selection", PlottingSystemActivator.getImageDescriptor("icons/ProfilePolyline.png")));
-		regionDropDown.add(createRegionAction(xyGraph, RegionType.POLYGON,    regionDropDown, "Add polygon selection",  PlottingSystemActivator.getImageDescriptor("icons/ProfilePolygon.png")));
-		regionDropDown.add(createRegionAction(xyGraph, RegionType.BOX,        regionDropDown, "Add box selection",      PlottingSystemActivator.getImageDescriptor("icons/ProfileBox.png")));
-		regionDropDown.add(createRegionAction(xyGraph, RegionType.PERIMETERBOX,   regionDropDown, "Add perimeter box selection",PlottingSystemActivator.getImageDescriptor("icons/ProfileColorbox.png")));
-		regionDropDown.add(createRegionAction(xyGraph, RegionType.GRID,       regionDropDown, "Add grid selection",     PlottingSystemActivator.getImageDescriptor("icons/ProfileGrid.png")));
-		regionDropDown.add(createRegionAction(xyGraph, RegionType.SECTOR,     regionDropDown, "Add sector selection",   PlottingSystemActivator.getImageDescriptor("icons/ProfileSector.png")));
-		regionDropDown.add(createRegionAction(xyGraph, RegionType.RING,       regionDropDown, "Add ring selection",     PlottingSystemActivator.getImageDescriptor("icons/ProfileCircle.png")));
-		regionDropDown.add(createRegionAction(xyGraph, RegionType.XAXIS,      regionDropDown, "Add X-axis selection",   PlottingSystemActivator.getImageDescriptor("icons/Cursor-horiz.png")));
-		regionDropDown.add(createRegionAction(xyGraph, RegionType.YAXIS,      regionDropDown, "Add Y-axis selection",   PlottingSystemActivator.getImageDescriptor("icons/Cursor-vert.png")));
+		regionDropDown.add(createRegionAction(xyGraph, RegionType.LINE,       regionDropDown, "Line selection",     PlottingSystemActivator.getImageDescriptor("icons/ProfileLine.png")));
+		regionDropDown.add(createRegionAction(xyGraph, RegionType.POLYLINE,   regionDropDown, "Polyline selection", PlottingSystemActivator.getImageDescriptor("icons/ProfilePolyline.png")));
+		regionDropDown.add(createRegionAction(xyGraph, RegionType.POLYGON,    regionDropDown, "Polygon selection",  PlottingSystemActivator.getImageDescriptor("icons/ProfilePolygon.png")));
+		regionDropDown.add(createRegionAction(xyGraph, RegionType.BOX,        regionDropDown, "Box selection",      PlottingSystemActivator.getImageDescriptor("icons/ProfileBox.png")));
+		regionDropDown.add(createRegionAction(xyGraph, RegionType.PERIMETERBOX,   regionDropDown, "Perimeter box selection",PlottingSystemActivator.getImageDescriptor("icons/ProfileColorbox.png")));
+		regionDropDown.add(createRegionAction(xyGraph, RegionType.GRID,       regionDropDown, "Grid selection",     PlottingSystemActivator.getImageDescriptor("icons/ProfileGrid.png")));
+		regionDropDown.add(createRegionAction(xyGraph, RegionType.SECTOR,     regionDropDown, "Sector selection",   PlottingSystemActivator.getImageDescriptor("icons/ProfileSector.png")));
+		regionDropDown.add(createRegionAction(xyGraph, RegionType.RING,       regionDropDown, "Ring selection",     PlottingSystemActivator.getImageDescriptor("icons/ProfileCircle.png")));
+		regionDropDown.add(createRegionAction(xyGraph, RegionType.XAXIS,      regionDropDown, "X-axis selection",   PlottingSystemActivator.getImageDescriptor("icons/Cursor-horiz.png")));
+		regionDropDown.add(createRegionAction(xyGraph, RegionType.YAXIS,      regionDropDown, "Y-axis selection",   PlottingSystemActivator.getImageDescriptor("icons/Cursor-vert.png")));
 		regionDropDown.add(createRegionAction(xyGraph, RegionType.FREE_DRAW,  regionDropDown, "Free drawn selection",   PlottingSystemActivator.getImageDescriptor("icons/ProfileFree.png")));
 		regionDropDown.add(createRegionAction(xyGraph, RegionType.POINT,      regionDropDown, "Single point selection", PlottingSystemActivator.getImageDescriptor("icons/ProfilePoint.png")));
-		regionDropDown.add(createRegionAction(xyGraph, RegionType.CIRCLE,     regionDropDown, "Add circle selection",   PlottingSystemActivator.getImageDescriptor("icons/ProfileCircle.png")));
+		regionDropDown.add(createRegionAction(xyGraph, RegionType.CIRCLE,     regionDropDown, "Circle selection",   PlottingSystemActivator.getImageDescriptor("icons/ProfileCircle.png")));
 		regionDropDown.add(createRegionAction(xyGraph, RegionType.CIRCLEFIT,  regionDropDown, "Circle fit selection",   PlottingSystemActivator.getImageDescriptor("icons/ProfileCircle.png")));
-		//regionDropDown.add(createRegionAction(xyGraph, RegionType.ELLIPSE,    regionDropDown, "Add ellipse selection",  PlottingSystemActivator.getImageDescriptor("icons/ProfileEllipse.png")));
+		regionDropDown.add(createRegionAction(xyGraph, RegionType.ELLIPSE,    regionDropDown, "Ellipse selection",  PlottingSystemActivator.getImageDescriptor("icons/ProfileEllipse.png")));
 		regionDropDown.add(createRegionAction(xyGraph, RegionType.ELLIPSEFIT, regionDropDown, "Ellipse fit selection",  PlottingSystemActivator.getImageDescriptor("icons/ProfileEllipse.png")));
 		
 		actionBarManager.registerAction(regionDropDown, ActionType.XYANDIMAGE, ManagerType.MENUBAR);
@@ -716,12 +716,14 @@ class LightWeightPlotActions {
 			@Override
 			public void run() {
 				PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.SNAP_TO_GRID, isChecked());
-				viewer.getSystem().setGridSnap(isChecked());
+				((XYRegionGraph)xyGraph).setGridSnap(isChecked());
 				viewer.getSystem().repaint(false);
 			}
 		};
 		gridSnap.setImageDescriptor(PlottingSystemActivator.getImageDescriptor("icons/grid-snap.png"));
-		gridSnap.setChecked(PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.SNAP_TO_GRID));
+		boolean isSnapped = PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.SNAP_TO_GRID);
+		gridSnap.setChecked(isSnapped);
+		((XYRegionGraph)xyGraph).setGridSnap(isSnapped);
 		gridSnap.setId(PlottingConstants.SNAP_TO_GRID);
 
 		final Action histo = new Action("Rehistogram (F5)", IAction.AS_PUSH_BUTTON) {
@@ -785,16 +787,14 @@ class LightWeightPlotActions {
 		};
 		showPixelValues.setChecked(viewer.getSystem().isShowValueLabels());
 
-		final Action lockHisto = new Action("Lock histogram", IAction.AS_CHECK_BOX) {
-			
-		    public void run() {		    	
-		    	final IImageTrace trace = xyGraph.getRegionArea().getImageTrace();
-		    	if (trace!=null) {
-		    		trace.setRescaleHistogram(!isChecked());
-		    	}
-		    }
+		lockHisto = new Action("Lock histogram", IAction.AS_CHECK_BOX) {
+			public void run() {
+				final IImageTrace trace = xyGraph.getRegionArea().getImageTrace();
+				if (trace != null) {
+					trace.setRescaleHistogram(!isChecked());
+				}
+			}
 		};
-		lockHisto.setChecked(false);
 		
 		final Action zoomWhitespace = new Action("Use whitespace when zooming with mouse wheel", IAction.AS_CHECK_BOX) {
 		    public void run() {
@@ -1125,5 +1125,9 @@ class LightWeightPlotActions {
 			}
 		}
 		return xAxis;
+	}
+
+	public Action getHistoLock() {
+		return lockHisto;
 	}
 }

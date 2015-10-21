@@ -12,9 +12,14 @@
 package org.dawnsci.dde.templates;
 
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
@@ -28,8 +33,11 @@ import org.osgi.framework.Bundle;
 public abstract class DAWNTemplateSection extends OptionTemplateSection {
 
 	protected static final String BUNDLE_ID = "org.dawnsci.dde.templates";
+	/** Class name and/or extension name */
 	protected static final String KEY_CLASS_NAME = "className";
+	/** Name or label on the generated extension */
 	protected static final String KEY_EXTENSION_NAME = "extensionName";
+	/** Identifier of the generated extension */
 	protected static final String KEY_EXTENSION_ID = "extensionId";
 
 	public DAWNTemplateSection(){
@@ -88,19 +96,69 @@ public abstract class DAWNTemplateSection extends OptionTemplateSection {
 		String packageName = getFormattedPackageName(id);
 		initializeOption(KEY_PACKAGE_NAME, packageName);
 		initializeOption(KEY_CLASS_NAME, getClassName());
+		initializeOption(KEY_EXTENSION_ID, packageName+"."+getSectionId());
+		initializeOption(KEY_EXTENSION_NAME, splitCamelCase(getClassName()));
 	}
 
 	public void initializeFields(IPluginModelBase model) {
 		String packageName = getFormattedPackageName(model.toString());
 		initializeOption(KEY_PACKAGE_NAME, packageName);
 		initializeOption(KEY_CLASS_NAME, getClassName());
+		initializeOption(KEY_EXTENSION_ID, packageName+"."+getSectionId());
+		initializeOption(KEY_EXTENSION_NAME, splitCamelCase(getClassName()));
 	}
 
 	@Override
 	public boolean isDependentOnParentWizard() {
 		return true;
 	}
+
+	private static String splitCamelCase(String s) {
+		   return s.replaceAll(
+		      String.format("%s|%s|%s",
+		         "(?<=[A-Z])(?=[A-Z][a-z])",
+		         "(?<=[^A-Z])(?=[A-Z])",
+		         "(?<=[A-Za-z])(?=[^A-Za-z])"
+		      ),
+		      " "
+		   );
+		}
 	
 	protected abstract String getClassName();
+	/**
+	 * Returns an array of key values suitable for use in a template option.
+	 * 
+	 * @param extensionPoint
+	 *            the extension point to look up
+	 * @param name
+	 *            the name of the element within the extension point
+	 * @param id
+	 *            the name of the identifier attribute
+	 * @param label
+ 	 *            the name of the label attribute
+	 * @param optional            
+	 *            whether or not selecting a value is optional
+	 * @return an array of key/values
+	 */
+	protected String[][] getLookupList(String extensionPoint, String name, String id, String label, boolean optional) {
+		IExtensionRegistry registry = Platform.getExtensionRegistry();
+		IExtensionPoint point = registry.getExtensionPoint(extensionPoint);
+		Map<String, String> map = new HashMap<>();
+		if (optional){
+			map.put("", null);
+		}
+		IConfigurationElement[] configurationElements = point.getConfigurationElements();
+		for (IConfigurationElement e : configurationElements) {
+			if (e.getName().equals(name)) {
+				map.put(e.getAttribute(label), e.getAttribute(id));
+			}
+		}
+		String[][] options = new String[map.size()][];
+		int i = 0;
+		for (String k : map.keySet()) {
+			options[i++] = new String[] { map.get(k), k };
+		}
+		return options;
+	}
 
 }

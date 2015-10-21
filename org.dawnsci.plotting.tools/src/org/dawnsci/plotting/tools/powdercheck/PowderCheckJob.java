@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
@@ -47,11 +48,14 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.NonPixelSplittingIntegration;
+import uk.ac.diamond.scisoft.analysis.diffraction.powder.NonPixelSplittingIntegration2D;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelSplittingIntegration2D;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Gaussian;
+import uk.ac.diamond.scisoft.analysis.optimize.ApacheLevenbergMarquardt;
+import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
 import uk.ac.diamond.scisoft.analysis.roi.XAxis;
 
 public class PowderCheckJob extends Job {
@@ -195,18 +199,33 @@ public class PowderCheckJob extends Job {
 //		traces = system.updatePlot1D(axref2, y, null);
 		//((ILineTrace)traces.get(0)).setTraceColor(ColorConstants.lightGreen);
 		
-		
-		NonPixelSplittingIntegration npsi = new NonPixelSplittingIntegration(md);
+		int nBins = 36;
+		NonPixelSplittingIntegration2D npsi = new NonPixelSplittingIntegration2D(md);
 		npsi.setAxisType(xAxis);
+		npsi.setAzimuthalRange(new double[]{-180,180});
+		npsi.setNumberOfAzimuthalBins(nBins);
+		List<Dataset> out = npsi.integrate(data);
+		List<IDataset> ys = new ArrayList<IDataset>();
 		
-		for (int i = -180; i <= 170; i+=10) {
-			npsi.setAzimuthalRange(new double[]{i, i+10});
-			List<Dataset> out = npsi.integrate(data);
-			out.get(1).setName("Line: " + i +" to " + (i+10));
-			system.updatePlot1D(out.get(0), Arrays.asList(new IDataset[]{out.get(1)}), null);
+		Dataset result = out.get(1);
+		SliceND slice = new SliceND(result.getShape());
+		
+		for (int i = 0; i < 36; i++) {
+			slice.setSlice(0, i, i+1, 1);
+			Dataset sv = result.getSliceView(slice);
+			sv = sv.squeeze();
+			sv.setName("Line: " + i*10 +" to " + (i*10+10));
+			ys.add(sv);
 		}
+		
+//		for (int i = -180; i <= 170; i+=10) {
+//			npsi.setAzimuthalRange(new double[]{i, i+10});
+//			List<Dataset> out = npsi.integrate(data);
+//			out.get(1).setName("Line: " + i +" to " + (i+10));
+//			system.updatePlot1D(out.get(0), Arrays.asList(new IDataset[]{out.get(1)}), null);
+//		}
 
-//		system.updatePlot1D(out.get(0), Arrays.asList(new IDataset[]{out.get(1)}), null);
+		system.updatePlot1D(out.get(0), ys, null);
 		setPlottingSystemAxes();
 		
 		setPlottingSystemAxes();
@@ -303,7 +322,6 @@ public class PowderCheckJob extends Job {
 		Dataset baseline = baselineIn.getSlice(new int[] {minXidx}, new int[] {maxXidx}, null);
 
 		List<APeak> peaks = Generic1DFitter.fitPeaks(x, y, Gaussian.class, count+10);
-
 		
 		List<PowderCheckResult> initResults = new ArrayList<PowderCheckResult>();
 		
@@ -328,37 +346,16 @@ public class PowderCheckJob extends Job {
 			}
 		}
 
-		final Dataset yfit = DatasetFactory.zeros(x, Dataset.FLOAT64);
+		IOptimizer optimizer = new ApacheLevenbergMarquardt();
+		try {
+			optimizer.optimize(new IDataset[]{x}, y, cfFinal);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
-		MultivariateOptimizer opt = new SimplexOptimizer(REL_TOL,ABS_TOL);
-
-		MultivariateFunction fun = new MultivariateFunction() {
-
-			@Override
-			public double value(double[] arg0) {
-
-				int j = 0;
-				for (IFunction func : cfFinal.getFunctions()) {
-
-					double[] p = func.getParameterValues();
-					p[0] = arg0[j++];
-					p[1] = arg0[j++];
-					p[2] = arg0[j++];
-					func.setParameterValues(p);
-				}
-
-				for (int i = 0 ; i < yfit.getSize() ; i++) {
-					yfit.set(cfFinal.val(x.getDouble(i)), i);
-				}
-
-				return y.residual(yfit);
-			}
-		};
-
-		opt.optimize(new InitialGuess(initParam), GoalType.MINIMIZE,
-				new ObjectiveFunction(fun), new MaxEval(MAX_EVAL),
-				new NelderMeadSimplex(initParam.length));	
-
+		Dataset yfit = cfFinal.calculateValues(new IDataset[]{x});
+		
 		Dataset fit = Maths.add(yfit, baseline);
 		fit.setName("Fit");
 		Dataset residual = Maths.subtract(y,yfit);

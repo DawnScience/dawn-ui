@@ -3,21 +3,22 @@ package org.dawnsci.mapping.ui.datamodel;
 import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
 
 public class MappedData implements MapObject{
 
 	private String name;
+	private String path;
 	protected IDataset map;
 	protected MappedDataBlock oParent;
 	protected MappedDataBlock parent;
 	private int transparency = -1;
 	private double[] range;
 	
-	public MappedData(String name, IDataset map, MappedDataBlock parent) {
+	public MappedData(String name, IDataset map, MappedDataBlock parent, String path) {
 		this.name = name;
 		this.map = map;
+		this.path = path;
 		this.oParent = this.parent = parent;
 		range = calculateRange(map);
 	}
@@ -64,7 +65,7 @@ public class MappedData implements MapObject{
 	}
 	
 	public MappedData makeNewMapWithParent(String name, IDataset ds) {
-		return new MappedData(name, ds, parent);
+		return new MappedData(name, ds, parent, path);
 	}
 	
 	@Override
@@ -107,5 +108,8 @@ public class MappedData implements MapObject{
 		return range.clone();
 	}
 	
+	public String getLongName() {
+		return path + " : " + name;
+	}
 	
 }

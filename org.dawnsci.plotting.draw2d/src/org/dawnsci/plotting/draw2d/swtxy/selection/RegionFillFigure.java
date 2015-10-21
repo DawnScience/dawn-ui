@@ -33,9 +33,21 @@ public abstract class RegionFillFigure<T extends IROI> extends Shape implements 
 	
 	protected AbstractSelectionRegion<T> region;
 
+	protected boolean fill = true; // local version is super class has a private one
+
 	public RegionFillFigure(AbstractSelectionRegion<T> region) {
 		this.region = region;
 		setEnabled(false); // Allows mouse events to see through content to report position
+	}
+
+	@Override
+	public void setFill(boolean fill) {
+		this.fill = fill;
+		super.setFill(fill); // keep superclass's flag up-to-date 
+	}
+
+	public boolean isFill() {
+		return fill;
 	}
 
 	public void setMobile(final boolean mobile) {
@@ -90,7 +102,9 @@ public abstract class RegionFillFigure<T extends IROI> extends Shape implements 
 			if (getAlpha() != null) {
 				graphics.setAlpha(getAlpha().intValue());
 			}
-			fillShape(graphics);
+			if (fill) {
+				fillShape(graphics);
+			}
 			outlineShape(graphics);
 		} else {
 			super.paintFigure(graphics);

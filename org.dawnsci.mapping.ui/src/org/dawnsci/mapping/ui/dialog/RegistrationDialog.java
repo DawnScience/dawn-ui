@@ -8,6 +8,7 @@ import org.dawnsci.plotting.draw2d.swtxy.ImageTrace;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.LinearAlgebra;
@@ -141,6 +142,10 @@ public class RegistrationDialog extends Dialog {
 
 					@Override
 					public void roiChanged(ROIEvent evt) {
+						IROI roi = evt.getROI();
+						sanitizeROI(roi, map.getShape());
+						systemMap.repaint(false);
+
 						RegistrationDialog.this.update();
 					}
 				});
@@ -162,6 +167,10 @@ public class RegistrationDialog extends Dialog {
 
 					@Override
 					public void roiChanged(ROIEvent evt) {
+						IROI roi = evt.getROI();
+						sanitizeROI(roi, image.getShape());
+						systemImage.repaint(false);
+						
 						RegistrationDialog.this.update();
 					}
 				});
@@ -181,6 +190,19 @@ public class RegistrationDialog extends Dialog {
 	public IDataset getRegisteredImage(){
 		return registered;
 		
+	}
+	
+	private void sanitizeROI(IROI roi, int[] shape) {
+		
+		double[] point = roi.getPoint();
+		
+		
+		if (point[0] >= shape[1]) point[0] = shape[1]-1;
+		if (point[0] < 0) point[0] = 0;
+		if (point[1] < 0) point[1] = 0;
+		if (point[1] >= shape[0]) point[1] = shape[0]-1;
+		
+		roi.setPoint(point);
 	}
 	
 	private void update() {
@@ -225,10 +247,8 @@ public class RegistrationDialog extends Dialog {
 			im = value.get(0);
 		}
 		
-		System.out.format("XOffset: %f, YOffset: %f, XScale %f, YScale %f,",tX,tY,sX,sY);
-		System.out.println("Done");
+		logger.debug("XOffset: {}, YOffset: {}, XScale {}, YScale {},",tX,tY,sX,sY);
 		
-
 		registered = im;
 		AxesMetadataImpl ax = new AxesMetadataImpl(2);
 		ax.addAxis(0, yR);
@@ -238,9 +258,9 @@ public class RegistrationDialog extends Dialog {
 		systemComposite.clear();
 		double[] range = MappingUtils.getGlobalRange(im,map);
 
-		IImageTrace image = MappingUtils.buildTrace(im, systemComposite);
+		IImageTrace image = MappingUtils.buildTrace("image",im, systemComposite);
 		image.setGlobalRange(range);
-		IImageTrace mapim = MappingUtils.buildTrace(map, systemComposite,120);
+		IImageTrace mapim = MappingUtils.buildTrace("map", map, systemComposite,120);
 		mapim.setGlobalRange(range);
 		systemComposite.addTrace(image);
 		systemComposite.addTrace(mapim);
@@ -259,8 +279,6 @@ public class RegistrationDialog extends Dialog {
 				pos[1] = 0;
 				double[] val;
 				val = regions[i].getCoordinateSystem().getValueAxisLocation(regions[i].getROI().getPoint());
-				System.out.println(val[0]);
-				System.out.println(val[1]);
 				mat.set(val[0], pos);
 				pos[1] = 1;
 				mat.set(val[1], pos);

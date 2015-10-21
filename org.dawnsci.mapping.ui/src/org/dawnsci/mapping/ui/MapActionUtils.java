@@ -23,8 +23,6 @@ public class MapActionUtils {
 	public static IAction getRGBDialog(final List<MappedData> maps, final MappedDataFile mdf, final TreeViewer viewer) {
 		final List<IDataset> dataList = new ArrayList<IDataset>(maps.size());
 		for (MappedData map : maps) {
-			IDataset data = map.getMap();
-			data.setName(map.toString());
 			dataList.add(map.getMap());
 		}
 		IAction action = new Action("RGB Mixer...") {
@@ -57,8 +55,6 @@ public class MapActionUtils {
 	public static IAction getComparisonDialog(final List<MappedData> maps) {
 		final List<IDataset> dataList = new ArrayList<IDataset>(maps.size());
 		for (MappedData map : maps) {
-			IDataset data = map.getMap();
-			data.setName(map.toString());
 			dataList.add(map.getMap());
 		}
 		IAction action = new Action("Comparison Viewer...") {

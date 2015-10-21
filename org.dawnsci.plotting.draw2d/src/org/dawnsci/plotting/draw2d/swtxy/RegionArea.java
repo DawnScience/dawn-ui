@@ -306,7 +306,7 @@ public class RegionArea extends PlotArea {
 		
 		if (regions.containsKey(name)) throw new RuntimeException("The name '"+name+"' already exists for a region!");
 		String oldName = region.getName();
-		// Fix http://jira.diamond.ac.uk/browse/SCI-1056, do not loose order on rename		
+		// Fix http://jira.diamond.ac.uk/browse/SCI-1056, do not lose order on rename		
 		final Map<String, AbstractSelectionRegion<?>> sameOrder = new LinkedHashMap<String, AbstractSelectionRegion<?>>(regions.size());
 
 		final Set<Entry<String,AbstractSelectionRegion<?>>> entries = regions.entrySet();

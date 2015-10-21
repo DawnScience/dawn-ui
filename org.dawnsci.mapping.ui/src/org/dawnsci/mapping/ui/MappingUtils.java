@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.dawnsci.mapping.ui.datamodel.MapObject;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext.ConversionScheme;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
@@ -27,12 +26,17 @@ import org.eclipse.swt.widgets.Display;
 
 public class MappingUtils {
 
-	public static IImageTrace buildTrace(IDataset data, IPlottingSystem system) {
-		return buildTrace(data, system,-1);
+	public static IImageTrace buildTrace(String name, IDataset data, IPlottingSystem system) {
+		return buildTrace(name, data, system,-1);
 	
 	}
 	
-	public static IImageTrace buildTrace(IDataset data, IPlottingSystem system, int alpha) {
+	public static IImageTrace buildTrace(IDataset data, IPlottingSystem system) {
+		return buildTrace(data.getName(), data, system,-1);
+	
+	}
+	
+	public static IImageTrace buildTrace(String name, IDataset data, IPlottingSystem system, int alpha) {
 		IDataset x = null;
 		IDataset y = null;
 		
@@ -42,7 +46,11 @@ public class MappingUtils {
 		
 		x = axes == null ? null : axes[0];
 		y = axes == null ? null : axes[1];
-		IImageTrace it = system.createImageTrace(data.getName());
+		
+		if (x != null) x.setName(removeSquareBrackets(x.getName()));
+		if (y != null) y.setName(removeSquareBrackets(y.getName()));
+		
+		IImageTrace it = system.createImageTrace(name);
 		it.setAlpha(alpha);
 		it.setData(data, Arrays.asList(new IDataset[]{y,x}), false);
 		
@@ -95,6 +103,9 @@ public class MappingUtils {
 			if (!system.is2D()) system.clear();
 			x = axes == null ? null : axes[0];
 			y = axes == null ? null : axes[1];
+			
+			if (x != null) x.setName(removeSquareBrackets(x.getName()));
+			if (y != null) y.setName(removeSquareBrackets(y.getName()));
 			
 			final ITrace t = system.updatePlot2D(data, Arrays.asList(new IDataset[]{y,x}), null);
 				
@@ -299,6 +310,11 @@ public class MappingUtils {
 		
 		return lhm;
 		
+	}
+	
+	public static String removeSquareBrackets(String string) {
+		if (string == null) return null;
+		return string.replaceAll("\\[(.+?)\\]$", "");
 	}
 	
 }

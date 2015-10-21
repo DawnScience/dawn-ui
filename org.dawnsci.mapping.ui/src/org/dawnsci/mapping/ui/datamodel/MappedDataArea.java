@@ -39,6 +39,10 @@ public class MappedDataArea implements MapObject {
 	public MappedDataFile getDataFile(int index) {
 		return files.get(index);
 	}
+	
+	public int count() {
+		return files.size();
+	}
 
 	public boolean isInRange(MappedDataFile mdf) {
 		double[] newRange = mdf.getRange();
@@ -46,13 +50,10 @@ public class MappedDataArea implements MapObject {
 		
 		if (range == null) return true;
 		
-		if (newRange[0] < range[0] && newRange[1] < range[1]) return false;
-		if (newRange[0] > range[0] && newRange[1] > range[1]) return false;
-		
-		if (newRange[2] < range[2] && newRange[3] < range[3]) return false;
-		if (newRange[2] > range[2] && newRange[3] > range[3]) return false;
-		
-		return true;
+		return newRange[0] < range[1] &&
+			   newRange[1] > range[0] &&
+			   newRange[2] < range[3] &&
+			   newRange[3] > range[2];
 	}
 
 	@Override

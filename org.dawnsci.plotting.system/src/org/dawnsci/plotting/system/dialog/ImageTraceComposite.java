@@ -376,6 +376,19 @@ public class ImageTraceComposite extends Composite {
 		value.setText(Arrays.toString(imageTrace.getDownsampled().getShape()));
 		value.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
+		final Button labelZoomEnabledButton = new Button(this, SWT.CHECK);
+		labelZoomEnabledButton.setText("Enable display of intensity labels");
+		labelZoomEnabledButton.setToolTipText("If checked, pixel intensities will be displayed at a certain zoom level.");
+		labelZoomEnabledButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
+		//manage label zoom
+		boolean isLabelZoomEnabled = getPreferenceStore().getBoolean(BasePlottingConstants.LABEL_ZOOM_ENABLED);
+		labelZoomEnabledButton.setSelection(isLabelZoomEnabled);
+		labelZoomEnabledButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent evt) {
+				getPreferenceStore().setValue(BasePlottingConstants.LABEL_ZOOM_ENABLED, labelZoomEnabledButton.getSelection());
+			}
+		});
 	}
 	
 	private IPreferenceStore store;

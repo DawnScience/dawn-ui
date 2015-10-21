@@ -10,13 +10,15 @@ public class AssociatedImage implements MapObject {
 
 	
 	private String name;
+	private String path;
 	private RGBDataset image;
 	private double[] range;
 
-	public AssociatedImage(String name, RGBDataset image) {
+	public AssociatedImage(String name, RGBDataset image, String path) {
 		this.name = name;
 		this.image = image;
 		this.range = calculateRange(image);
+		this.path = path;
 	}
 	
 	public IDataset getImage() {
@@ -47,5 +49,8 @@ public class AssociatedImage implements MapObject {
 		return range;
 	}
 
+	public String getLongName() {
+		return path + " : " + name;
+	}
 	
 }

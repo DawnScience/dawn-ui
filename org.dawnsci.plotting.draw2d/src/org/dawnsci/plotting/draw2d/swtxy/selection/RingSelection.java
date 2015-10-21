@@ -113,18 +113,6 @@ class RingSelection extends ROISelectionRegion<RingROI> implements ILockableRegi
 
 	@Override
 	protected RingROI createROI(boolean recordResult) {
-		// snap to grid
-		if (shape.isGridSnap()) {
-			RingROI snappedROI = shape.croi;
-			snappedROI.setPoint((int) snappedROI.getPointX(), (int) snappedROI.getPointY());
-			snappedROI.setRadii(new double[] {(int)snappedROI.getRadii()[0], (int)snappedROI.getRadii()[1]});
-			shape.croi = snappedROI;
-			if (recordResult) {
-				roi = shape.croi;
-			}
-			shape.configureHandles();
-			return shape.croi;
-		}
 		return super.createROI(recordResult);
 	}
 
@@ -307,16 +295,10 @@ class RingSelection extends ROISelectionRegion<RingROI> implements ILockableRegi
 
 		@Override
 		public void snapToGrid() {
-			RingROI tSnappedROI = troi;
 			RingROI cSnappedROI = croi;
-			if (tSnappedROI != null) {
-				tSnappedROI.setPoint((int) tSnappedROI.getPointX(), (int) tSnappedROI.getPointY());
-				tSnappedROI.setRadii(new double[] {(int) tSnappedROI.getRadii()[0], (int) tSnappedROI.getRadii()[1]});
-				troi = tSnappedROI;
-			}
 			if (cSnappedROI != null) {
-				cSnappedROI.setPoint((int) cSnappedROI.getPointX(), (int) cSnappedROI.getPointY());
-				cSnappedROI.setRadii(new double[] {(int)cSnappedROI.getRadii()[0], (int)cSnappedROI.getRadii()[1]});
+				cSnappedROI.setPoint(Math.round(cSnappedROI.getPointX()), Math.round(cSnappedROI.getPointY()));
+				cSnappedROI.setRadii(new double[] {Math.round(cSnappedROI.getRadii()[0]), Math.round(cSnappedROI.getRadii()[1])});
 				croi = cSnappedROI;
 			}
 		}

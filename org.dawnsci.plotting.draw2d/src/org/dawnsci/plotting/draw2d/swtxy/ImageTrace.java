@@ -113,7 +113,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * label grid for the intensity.
 	 */
 	private boolean          isLabelZoom;
-	
+
     /**
      * Controls of the image should be downsampled and the ImageData recreated.
      */
@@ -694,8 +694,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		this.globalRange = globalRange;
 		yAxis.setTicksIndexBased(false);
 		xAxis.setTicksIndexBased(false);
-		if (xAxis instanceof AspectAxis)((AspectAxis)xAxis).setMaximumRange(globalRange[0], globalRange[1]);
-		if (yAxis instanceof AspectAxis)((AspectAxis)yAxis).setMaximumRange(globalRange[2], globalRange[3]);
+//		if (xAxis instanceof AspectAxis)((AspectAxis)xAxis).setMaximumRange(globalRange[0], globalRange[1]);
+//		if (yAxis instanceof AspectAxis)((AspectAxis)yAxis).setMaximumRange(globalRange[2], globalRange[3]);
 //		xAxis.setRange(lower, upper);
 		xAxis.setTicksAtEnds(false);
 		yAxis.setTicksAtEnds(false);
@@ -1071,14 +1071,15 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			graphics.drawImage(scaledData.getScaledImage(), scaledData.getXPosition(), scaledData.getYPosition());
 		}
 		
-		if (isLabelZoom && scaledData!=null) {
+		boolean isLabelZoomEnabled = getPreferenceStore().getBoolean(BasePlottingConstants.LABEL_ZOOM_ENABLED);
+		if (isLabelZoomEnabled && isLabelZoom && scaledData!=null) {
 			if (intensityLabelPainter==null) intensityLabelPainter = new IntensityLabelPainter(plottingSystem, this);
 			intensityLabelPainter.paintIntensityLabels(graphics);
 		}
 
 		graphics.popState();
 	}
-	
+
 	private boolean isKeepAspectRatio() {
 		return getXAxis().isKeepAspect() && getYAxis().isKeepAspect();
 	}
@@ -1340,7 +1341,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	private RGBDataset rgbDataset;
-	@SuppressWarnings({ "unchecked" })
+	
 	@Override
 	public boolean setData(IDataset im, List<? extends IDataset> axes, boolean performAuto) {
 		
@@ -1371,12 +1372,16 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	private boolean setDataInternal(IDataset im, List<? extends IDataset> axes, boolean performAuto) {
 
 		// We are just assigning the data before the image is live.
 		if (getParent()==null && !performAuto) {
-			this.image = (Dataset)im;
+			this.image = DatasetUtils.convertToDataset(im);
 			this.axes  = (List<IDataset>)axes;
+			// is this enough?
+			if (imageServiceBean==null) imageServiceBean = new ImageServiceBean();
+			imageServiceBean.setImage(im);
 			return false;
 		}
 
@@ -2004,6 +2009,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public void setAlpha(int alpha) {
 		this.alpha = alpha;
 		rehistogram();
+	}
+	
+	@Override
+	public boolean hasTrueAxes(){
+		return globalRange != null;
 	}
 	
 }

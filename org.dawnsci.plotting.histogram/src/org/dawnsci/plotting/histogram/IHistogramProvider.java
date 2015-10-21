@@ -1,6 +1,5 @@
 package org.dawnsci.plotting.histogram;
 
-import org.dawnsci.plotting.histogram.ui.HistogramViewer;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.jface.viewers.IContentProvider;
 
@@ -9,7 +8,7 @@ import org.eclipse.jface.viewers.IContentProvider;
  * for use with a HistogramWidget
  *
  */
-public interface IHistogramProvider extends IContentProvider{
+public interface IHistogramProvider extends IContentProvider {
 
 	/**
 	 * Return the number of bins for this histogram
@@ -98,7 +97,5 @@ public interface IHistogramProvider extends IContentProvider{
 		 * @return dataset of RGBx values
 		 */
 		public IDataset getRGBX();
-
 	}
-
 }
