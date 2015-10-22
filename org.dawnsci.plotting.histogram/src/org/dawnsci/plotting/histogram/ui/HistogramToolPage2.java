@@ -5,7 +5,6 @@ import org.dawnsci.plotting.histogram.ColourMapProvider;
 import org.dawnsci.plotting.histogram.ImageHistogramProvider;
 import org.dawnsci.plotting.histogram.preferences.HistogramPreferencePage;
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
