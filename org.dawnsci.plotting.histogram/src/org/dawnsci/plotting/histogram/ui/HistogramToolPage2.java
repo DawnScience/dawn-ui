@@ -344,7 +344,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			paletteTrace.setPalette((String) ((StructuredSelection) colourMapViewer
 							.getSelection()).getFirstElement());
 //			paletteTrace.getImageServiceBean().setPalette(paletteTrace.getPaletteData());
-			Activator.getPlottingPreferenceStore().setValue(PlottingConstants.COLOUR_SCHEME, paletteTrace.getPaletteName());
+//			Activator.getPlottingPreferenceStore().setValue(PlottingConstants.COLOUR_SCHEME, paletteTrace.getPaletteName());
 		}
 	}
 
