@@ -11,9 +11,12 @@ package org.dawnsci.plotting.histogram;
 import java.util.Hashtable;
 
 import org.dawnsci.plotting.histogram.service.PaletteService;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -26,7 +29,9 @@ public class Activator extends AbstractUIPlugin {
 
 	// The shared instance
 	private static Activator plugin;
-	
+
+	private static IPreferenceStore plottingPreferenceStore;
+
 	/**
 	 * The constructor
 	 */
@@ -67,4 +72,9 @@ public class Activator extends AbstractUIPlugin {
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
 	}
 
+	public static IPreferenceStore getPlottingPreferenceStore() {
+		if (plottingPreferenceStore == null)
+			plottingPreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
+		return plottingPreferenceStore;
+	}
 }

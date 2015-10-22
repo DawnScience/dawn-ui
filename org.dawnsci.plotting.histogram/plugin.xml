@@ -410,5 +410,14 @@
             content="intro/tutorials.xml">
       </configExtension>
    </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="org.dawb.workbench.ui.visualizationPreferences"
+            class="org.dawnsci.plotting.histogram.preferences.HistogramPreferencePage"
+            id="org.dawnsci.plotting.histogram.colourMapPrefences"
+            name="Histogram preferences">
+      </page>
+   </extension>
 
 </plugin>

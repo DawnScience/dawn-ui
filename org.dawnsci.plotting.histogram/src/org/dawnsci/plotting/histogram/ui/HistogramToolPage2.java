@@ -3,7 +3,9 @@ package org.dawnsci.plotting.histogram.ui;
 import org.dawnsci.plotting.histogram.Activator;
 import org.dawnsci.plotting.histogram.ColourMapProvider;
 import org.dawnsci.plotting.histogram.ImageHistogramProvider;
+import org.dawnsci.plotting.histogram.preferences.HistogramPreferencePage;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
@@ -15,9 +17,11 @@ import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
@@ -34,6 +38,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
@@ -43,8 +49,7 @@ import org.slf4j.LoggerFactory;
 
 public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(HistogramToolPage2.class);
+	private static final Logger logger = LoggerFactory.getLogger(HistogramToolPage2.class);
 
 	private FormToolkit toolkit;
 	private ScrolledForm form;
@@ -79,19 +84,33 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 		createHistogramControl(form.getBody());
 
+		createHistoActions();
+
 		// track tool usage
 		super.createControl(parent);
+	}
+
+	private void createHistoActions() {
+		Action histoPref = new Action("Histogram Preferences...") {
+			@Override
+			public void run() {
+				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(
+						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), HistogramPreferencePage.ID,
+						null, null);
+				if (pref != null) pref.open();
+			}
+		};
+		getSite().getActionBars().getMenuManager().add(histoPref);
+		getSite().getActionBars().getMenuManager().add(new Separator());
 	}
 
 	/*
 	 * Create the image settings, i.e. colour scheme section
 	 */
 	private void createImageSettings(Composite comp) {
-		Section section = toolkit.createSection(comp, Section.DESCRIPTION
-				| Section.TITLE_BAR);
+		Section section = toolkit.createSection(comp, Section.DESCRIPTION | Section.TITLE_BAR);
 		section.setLayout(GridLayoutFactory.fillDefaults().create());
-		section.setLayoutData(GridDataFactory.fillDefaults().grab(true, false)
-				.create());
+		section.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
 
 		section.setText("Image Settings");
 		section.setDescription("Colour scheme:");
@@ -119,12 +138,9 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 				// updateHistogramToolElements(event, true, false);
 			}
 		};
+		((Combo) colourMapViewer.getControl()).addSelectionListener(colourSchemeListener);
 
-		((Combo) colourMapViewer.getControl())
-				.addSelectionListener(colourSchemeListener);
-
-		logScaleCheck = toolkit.createButton(colourComposite, "Log Scale",
-				SWT.CHECK);
+		logScaleCheck = toolkit.createButton(colourComposite, "Log Scale", SWT.CHECK);
 		logScaleCheck.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -133,8 +149,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 					// TODO: There should be a method on image to
 					// setLogColorScale so that
 					// it just does the right thing.
-					image.getImageServiceBean().setLogColorScale(
-							logScaleCheck.getSelection());
+					image.getImageServiceBean().setLogColorScale(logScaleCheck.getSelection());
 					if (image.isRescaleHistogram()) {
 						image.rehistogram();
 					} else {
@@ -162,8 +177,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	 * Create the histogram section
 	 */
 	private void createHistogramControl(Composite comp) {
-		Section section = toolkit.createSection(comp, Section.DESCRIPTION
-				| Section.TITLE_BAR);
+		Section section = toolkit.createSection(comp, Section.DESCRIPTION | Section.TITLE_BAR);
 		section.setLayout(GridLayoutFactory.fillDefaults().create());
 		section.setLayoutData(GridDataFactory.fillDefaults().grab(true, true)
 				.create());
@@ -173,15 +187,13 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 		Composite sectionClient = toolkit.createComposite(section);
 		sectionClient.setLayout(GridLayoutFactory.fillDefaults().create());
-		sectionClient.setLayoutData(GridDataFactory.fillDefaults()
-				.grab(true, true).create());
+		sectionClient.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
 
 		final IPageSite site = getSite();
 		IActionBars actionBars = (site != null) ? site.getActionBars() : null;
 
 		try {
-			histogramWidget = new HistogramViewer(sectionClient, getTitle(),
-					null, actionBars);
+			histogramWidget = new HistogramViewer(sectionClient, getTitle(), null, actionBars);
 		} catch (Exception e) {
 			logger.error("Cannot locate any plotting systems!", e);
 		}
@@ -329,9 +341,10 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	private void setPalette() {
 		IPaletteTrace paletteTrace = getPaletteTrace();
 		if (paletteTrace != null) {
-			paletteTrace
-					.setPalette((String) ((StructuredSelection) colourMapViewer
+			paletteTrace.setPalette((String) ((StructuredSelection) colourMapViewer
 							.getSelection()).getFirstElement());
+//			paletteTrace.getImageServiceBean().setPalette(paletteTrace.getPaletteData());
+			Activator.getPlottingPreferenceStore().setValue(PlottingConstants.COLOUR_SCHEME, paletteTrace.getPaletteName());
 		}
 	}
 
