@@ -253,6 +253,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 			if (trace instanceof IPaletteTrace) {
 				final IPaletteTrace paletteTrace = (IPaletteTrace) trace;
 				paletteTrace.setPalette(paletteName);
+				PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.COLOUR_SCHEME, paletteName);
 			}
 		}
 	}
