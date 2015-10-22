@@ -415,7 +415,7 @@
       <page
             category="org.dawb.workbench.ui.visualizationPreferences"
             class="org.dawnsci.plotting.histogram.preferences.HistogramPreferencePage"
-            id="org.dawnsci.plotting.histogram.colourMapPrefences"
+            id="org.dawnsci.plotting.histogram.colourMapPreferences"
             name="Histogram preferences">
       </page>
    </extension>

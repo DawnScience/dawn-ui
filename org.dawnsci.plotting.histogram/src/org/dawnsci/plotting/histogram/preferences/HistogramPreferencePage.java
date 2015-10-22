@@ -30,7 +30,7 @@ import org.eclipse.ui.PlatformUI;
 
 public class HistogramPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	public static final String ID = "org.dawnsci.plotting.histogram.colourMapPrefences";
+	public static final String ID = "org.dawnsci.plotting.histogram.colourMapPreferences";
 
 	private Combo cmbColourMap;
 
