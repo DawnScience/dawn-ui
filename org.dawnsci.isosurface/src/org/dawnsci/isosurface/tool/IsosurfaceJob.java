@@ -79,7 +79,6 @@ public class IsosurfaceJob extends Job {
 	
 	public void compute(int[] boxSize, double value,  double opacity, RGB colour, String traceName)//, IIsosurfaceTrace trace)
 	{
-		System.out.println("compute");
 		this.boxSize = boxSize;   
 		this.value = value;     
 		this.opacity = opacity;   
@@ -93,8 +92,6 @@ public class IsosurfaceJob extends Job {
 	@Override
 	protected IStatus run(IProgressMonitor monitor)
 	{
-
-		System.out.println("run");
 		MarchingCubesModel model = this.generator.getModel();
 		
 		model.setBoxSize(boxSize);
@@ -134,7 +131,7 @@ public class IsosurfaceJob extends Job {
 				if ((IIsosurfaceTrace) system.getTrace(traceName) == null)
 				{
 					final IIsosurfaceTrace trace = system.createIsosurfaceTrace(this.traceName);
-				
+					
 					trace.setData(points, textCoords, faces, null);
 					trace.setMaterial(colour[0], colour[1] , colour[2], opacity);
 					

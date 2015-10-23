@@ -33,19 +33,16 @@ public class IsoHandler
 			{
 				try 
 				{
-					System.out.println("Value change performed");
+					
 					// update view
-					
 					controller.uiToBean();
-					
-					Object test = e.getActingBean();
-					
-					if (test != null)
-					{
-						System.out.println("yay not null!!");
-					}
-					
+															
 					IsoItem current = (IsoItem)isoComp.getItems().getBean();
+					
+					if (current.beanDeleted()) // this is a quick fix remove asap
+					{
+						job.destroy(current.getTraceKey());
+					}
 					
 					if (!(current).equals(previous)) 
 					{
@@ -61,10 +58,13 @@ public class IsoHandler
 						
 						previous = (IsoItem)current.clone();
 					}
+//					if ( previous!= null && previous.beanDeleted()) // this is a quick fix remove asap
+//					{
+//						job.destroy(previous.getTraceKey());
+//					}
 					
 					
-					
-				} 
+				}
 				catch (Exception exc) 
 				{
 					exc.printStackTrace();

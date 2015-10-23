@@ -20,6 +20,8 @@ public class IsoComposite extends Composite
 	private double min, max; // !! try and remove these, seem unnecessary
 		
 	private static int ISO_COUNT = 0; // keeps count the number of items created
+	
+	private boolean beanRemoved = false;
 		
 	public IsoComposite(Composite parent, int style, ILazyDataset slice)
 	{
@@ -50,14 +52,16 @@ public class IsoComposite extends Composite
 		{
 			
 			@Override
-			protected void beanRemove(Object bean)
+			protected void beanRemove(Object bean) // quick fix, makes me cry
 			{
-				System.out.println("BeanRemoved");
+				((IsoItem)bean).deleteBean();
+				notifyValueListeners();
 			}
 			
 			@Override
 			protected void beanAdd(Object bean)
 			{
+				
 				// find default boxsize
 				int[] defaultBoxSize= new int[] {
 						(int) Math.max(1, Math.ceil(slice.getShape()[2]/20.0)),
@@ -132,7 +136,6 @@ public class IsoComposite extends Composite
 		return this.items;
 	}
 
-	
 	
 }
 

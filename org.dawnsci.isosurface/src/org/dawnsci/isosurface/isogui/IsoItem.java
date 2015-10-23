@@ -23,6 +23,9 @@ public class IsoItem implements Cloneable
 	
 	private String traceKey;
 	
+	//remove !!
+	private boolean deleted = false;
+	
 	public IsoItem()
 	{
 		this("New Surface");
@@ -35,6 +38,22 @@ public class IsoItem implements Cloneable
 	}
 	
 	
+	// this is rubbish and should be changed asap -> very much a quick fix
+	public void deleteBean()
+	{
+		deleted = true;
+	}
+	public boolean beanDeleted()
+	{
+		return this.deleted;
+	}
+	public boolean isDeleted() {
+		return deleted;
+	}
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
+	}
+
 	/**
 	 * Declare the information required for the item.
 	 * @param job - The job used to compute the surface.

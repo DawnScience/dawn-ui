@@ -69,6 +69,11 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 	@Override
 	public void setData(IDataset points, IDataset textCoords, IDataset faces, List<? extends IDataset> axes)
 	{
+		if (this.isosurface == null)
+		{
+			create();
+		}
+		
 		this.points = (Dataset) points;
 		this.textCoords = (Dataset) textCoords;
 		this.faces = (Dataset) faces;
@@ -115,6 +120,8 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 	 */
 	public void create()
 	{
+		System.out.println("create()");
+		
 		if (Platform.isFxApplicationThread())
 		{
 			createInternal();
@@ -201,7 +208,7 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 	private void update()
 	{
 		PhongMaterial material;
-		isosurface.setOpacity(opacity);
+		// isosurface.setOpacity(opacity);
 		if (rgb == null)
 		{
 			Color color = new Color(Color.GOLDENROD.getRed(), Color.GOLDENROD.getGreen(), Color.GOLDENROD.getBlue(), opacity);

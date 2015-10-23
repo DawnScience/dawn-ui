@@ -169,7 +169,7 @@ public class SurfaceDisplayer extends Scene
 		
 		// create the scene graph
 		this.lightGroup.getChildren().addAll(this.isosurfaceGroup);
-		this.objectGroup.getChildren().addAll(axisNode, this.lightGroup);
+		this.objectGroup.getChildren().addAll(this.lightGroup, axisNode);
 		this.cameraGroup.getChildren().add(this.objectGroup);
 		
 		// add groups the the root
@@ -255,12 +255,14 @@ public class SurfaceDisplayer extends Scene
 			@Override
 			public void handle(MouseEvent me)
 			{
+				
 				mousePressed = true;
 				
 				oldMousePos[0] = (float) me.getSceneX();
 				oldMousePos[1] = (float) me.getSceneY();
 				newMousePos[0] = (float) me.getSceneX();
 				newMousePos[1] = (float) me.getSceneY();
+				
 			}
 		});
 		
@@ -317,8 +319,25 @@ public class SurfaceDisplayer extends Scene
 					if (me.isMiddleButtonDown())
 					{
 						
-						sceneOffset.setX(sceneOffset.getX() + (mouseDelta[0]*mouseMovementMod));
-						sceneOffset.setY(sceneOffset.getY() + (mouseDelta[1]*mouseMovementMod));
+						
+						Point3D XYTranslationDirection = alignedXRotate.transform(mouseDelta[0]*mouseMovementMod, mouseDelta[1]*mouseMovementMod,0);
+						XYTranslationDirection = alignedYRotate.transform(XYTranslationDirection);
+						
+						System.out.println(XYTranslationDirection);
+						
+						
+						
+						isoGroupOffset.setX(isoGroupOffset.getX() + XYTranslationDirection.getX() );
+						isoGroupOffset.setY(isoGroupOffset.getY() + XYTranslationDirection.getY() );
+						isoGroupOffset.setZ(isoGroupOffset.getZ() - XYTranslationDirection.getZ() );
+						
+//						isoGroupOffset.setX(isoGroupOffset.getX() + (mouseDelta[0]*mouseMovementMod));
+						
+						// y is good
+//						isoGroupOffset.setY(isoGroupOffset.getY() + (mouseDelta[1]*mouseMovementMod));
+						
+//						sceneOffset.setX(sceneOffset.getX() + (mouseDelta[0]*mouseMovementMod));
+//						sceneOffset.setY(sceneOffset.getY() + (mouseDelta[1]*mouseMovementMod));
 					}
 					
 					// zoom if right button is pressed
