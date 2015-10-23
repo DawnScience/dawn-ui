@@ -37,8 +37,7 @@ public class ColourMapProvider implements IStructuredContentProvider{
 			}
 			// Set image and add listener(s) to new input
 			if (newInput instanceof IPaletteTrace){
-				IPaletteTrace image = (IPaletteTrace) newInput;
-				setImage(image);
+				this.image = (IPaletteTrace) newInput;
 				setColourScheme(image);
 				image.addPaletteListener(paletteChangedListener);
 			}
@@ -58,11 +57,6 @@ public class ColourMapProvider implements IStructuredContentProvider{
 			setColourScheme(trace);
 		}
 	};
-
-	private void setImage(IPaletteTrace image){
-		this.image = image;
-
-	}
 
 	private void setColourScheme(IPaletteTrace trace){
 		String name = trace != null ? trace.getPaletteName() : null;
