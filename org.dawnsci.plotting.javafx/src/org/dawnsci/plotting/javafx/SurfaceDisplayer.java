@@ -8,9 +8,10 @@
  */
 package org.dawnsci.plotting.javafx;
 
+import java.util.List;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
@@ -22,7 +23,6 @@ import javafx.scene.Node;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.PointLight;
 import javafx.scene.Scene;
-import javafx.scene.SceneAntialiasing;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
@@ -35,6 +35,7 @@ import javafx.scene.transform.Translate;
 
 import org.dawnsci.plotting.javafx.axis.objects.AxisGroup;
 import org.dawnsci.plotting.javafx.axis.objects.Vector3DUtil;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 
 /**
  * 
@@ -80,6 +81,16 @@ public class SurfaceDisplayer extends Scene
 	private Point2D mouseScaleDir = new Point2D(1, 1);
 	
 	private boolean mousePressed = false; // added to stop a bug where onDrag would be called before onPress
+	
+	/**
+	 * Axes hacking
+	 */
+	
+	private Point3D axesMaxLengths;
+	
+	/**
+	 * 
+	 */
 	
 	private EventHandler<MouseEvent> scaleEvent = new EventHandler<MouseEvent>()
 	{
@@ -419,7 +430,7 @@ public class SurfaceDisplayer extends Scene
 			@Override
 			public void handle(TransformChangedEvent arg0)
 			{
-				updateAxisSize();
+				updateAxisSize(axesMaxLengths);
 			}
 		};
 		
@@ -431,20 +442,17 @@ public class SurfaceDisplayer extends Scene
 	 * non initialisers
 	 */
 	
-	private void updateAxisSize() 
+	private void updateAxisSize(Point3D maxLength) 
 	{
-
-		axisGroup.checkScale(
-				new Point3D(
-					isosurfaceGroup.getBoundsInParent().getWidth() + isosurfaceGroup.getBoundsInParent().getMinX(),    
-					isosurfaceGroup.getBoundsInParent().getHeight()+ isosurfaceGroup.getBoundsInParent().getMinY(),    
-					isosurfaceGroup.getBoundsInParent().getDepth() + isosurfaceGroup.getBoundsInParent().getMinZ()));
+		System.out.println("updateAxisSize");
+		axisGroup.checkScale(this.scale.transform(maxLength));  	
 		
 //		axisGroup.checkScale(
 //				new Point3D(
-//					objectGroup.getBoundsInLocal().getWidth() + objectGroup.getBoundsInLocal().getMinX(),    
-//					objectGroup.getBoundsInLocal().getHeight()+ objectGroup.getBoundsInLocal().getMinY(),    
-//					objectGroup.getBoundsInLocal().getDepth() + objectGroup.getBoundsInLocal().getMinZ()));
+//					isosurfaceGroup.getBoundsInParent().getWidth() + isosurfaceGroup.getBoundsInParent().getMinX(),    
+//					isosurfaceGroup.getBoundsInParent().getHeight()+ isosurfaceGroup.getBoundsInParent().getMinY(),    
+//					isosurfaceGroup.getBoundsInParent().getDepth() + isosurfaceGroup.getBoundsInParent().getMinZ()));
+		
 	}
 	
 	private void updateScale(double[] mouseDelta, double mouseMovementMod)
@@ -537,9 +545,24 @@ public class SurfaceDisplayer extends Scene
 	
 	public void removeAxisGrid()
 	{
-		System.out.println("removeAxisGrid()");
 		axisGroup.flipXGridVisible();
 		axisGroup.flipYGridVisible();
 		axisGroup.flipZGridVisible();
 	}
+	
+	public void setAxesData(List<IDataset> axesData)
+	{
+		this.axesMaxLengths = new Point3D(
+										axesData.get(0).getFloat(0),
+										axesData.get(0).getFloat(1),
+										axesData.get(0).getFloat(2));
+		
+		System.out.println("StexAxesData()");
+		updateAxisSize(this.axesMaxLengths);
+		
+	}
+	
+	
+	
+	
 }

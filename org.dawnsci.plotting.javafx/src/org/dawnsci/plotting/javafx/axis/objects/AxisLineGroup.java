@@ -40,9 +40,9 @@ public class AxisLineGroup extends Group
 		if (label != null)
 		{
 			textLabel = createTextLabel(offset.getX(), offset.getY(), label);
+			textLabel.setDepthTest(DepthTest.DISABLE);
 			textPane.getChildren().add(textLabel);
 			textPane.getTransforms().add(new Scale(0.1,0.1,0.1));
-			textPane.setDepthTest(DepthTest.DISABLE);
 		}
 		
 

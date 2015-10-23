@@ -1,5 +1,9 @@
 package org.dawnsci.plotting.javafx.axis.objects;
 
+import java.util.List;
+
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
@@ -30,7 +34,7 @@ public class AxisGroup extends Group
 	private AxisGrid yAxisGrid;
 	private AxisGrid zAxisGrid;
 	
-	private Point3D axisLimitMin = new Point3D(50, 50, 50);
+	private Point3D axisLimitMin = new Point3D(0, 0, 0);
 	private Point3D axisLimitMax = new Point3D(100, 100, 100);
 	
 	public AxisGroup(Point3D origin, Point3D maxLength, double axisThickness, Point3D tickSeperationXYZ)
@@ -39,9 +43,9 @@ public class AxisGroup extends Group
 		scaleGroup = new Group();
 		
 		// create x y and z Axis
-		scaleGroup.getChildren().add(createAxis(new Point3D(1,0,0), maxLength.getX(), axisThickness));
-		scaleGroup.getChildren().add(createAxis(new Point3D(0,1,0), maxLength.getY(), axisThickness));
-		scaleGroup.getChildren().add(createAxis(new Point3D(0,0,1), maxLength.getZ(), axisThickness));
+		scaleGroup.getChildren().add(createScaleAxis(new Point3D(1,0,0), maxLength.getX(), axisThickness));
+		scaleGroup.getChildren().add(createScaleAxis(new Point3D(0,1,0), maxLength.getY(), axisThickness));
+		scaleGroup.getChildren().add(createScaleAxis(new Point3D(0,0,1), maxLength.getZ(), axisThickness));
 		this.getChildren().add(scaleGroup);
 		
 		// create axis grids
@@ -73,7 +77,7 @@ public class AxisGroup extends Group
 						);
 	}
 
-	private Cylinder createAxis(Point3D direction, double length, double thickness)
+	private Cylinder createScaleAxis(Point3D direction, double length, double thickness)
 	{
 		// generate the cylinder
 		// default position is centered on (0,0,0) in direction (0,1,0)
@@ -99,7 +103,6 @@ public class AxisGroup extends Group
 	private AxisGrid createBasicAxisGrid(Point3D planeVectorXYZ, Point2D tickSeperationXY, Point2D axisLengthXY, double thickness)
 	{
 		AxisGrid tempGrid = new AxisGrid(planeVectorXYZ, tickSeperationXY, axisLengthXY, thickness);
-		
 		return tempGrid;
 	}
 	
@@ -211,6 +214,11 @@ public class AxisGroup extends Group
 	public AxisGrid getZAxisGrid()
 	{
 		return this.zAxisGrid;
+	}
+
+	public void setAxisData(List<IDataset> axesData) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	

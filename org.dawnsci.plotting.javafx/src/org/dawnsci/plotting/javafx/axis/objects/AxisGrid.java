@@ -163,6 +163,8 @@ public class AxisGrid extends Group
 	// !! organise
 	public void updateGrid(Point2D newMaxLengthXY)
 	{
+		System.out.println("updateGrid()");
+		
 		xAxis.setVisible(true);
 		yAxis.setVisible(true);
 		
