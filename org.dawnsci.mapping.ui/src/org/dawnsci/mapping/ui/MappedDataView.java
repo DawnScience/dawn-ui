@@ -158,7 +158,7 @@ public class MappedDataView extends ViewPart {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				Object e = ((StructuredSelection)event.getSelection()).getFirstElement();
-				if (e instanceof MappedData) plotManager.plotMap((MappedData)e);
+				if (e instanceof MappedData) plotManager.updateLayers((MappedData)e);
 				if (e instanceof AssociatedImage) plotManager.addImage((AssociatedImage)e);
 				viewer.refresh();
 			}

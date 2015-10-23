@@ -28,10 +28,10 @@ public class ReMappedData extends MappedData {
 	protected double[] calculateRange(IDataset map){
 		IDataset[] ax = MappingUtils.getAxesForDimension(map,0);
 		double[] r = new double[4];
-		r[0] = ax[0].min().doubleValue();
-		r[1] = ax[0].max().doubleValue();
-		r[2] = ax[1].min().doubleValue();
-		r[3] = ax[1].max().doubleValue();
+		r[0] = ax[1].min().doubleValue();
+		r[1] = ax[1].max().doubleValue();
+		r[2] = ax[0].min().doubleValue();
+		r[3] = ax[0].max().doubleValue();
 		return r;
 	}
 	
@@ -58,12 +58,14 @@ public class ReMappedData extends MappedData {
 			double yStepMed = (double)Stats.median(Maths.abs(Maths.derivative(DatasetFactory.createRange(y.getSize(),Dataset.INT32),(Dataset)y,1)));
 			double xStepMed = (double)Stats.median(Maths.abs(Maths.derivative(DatasetFactory.createRange(x.getSize(),Dataset.INT32),(Dataset)x,1)));
 			
+			yStepMed = yStepMed == 0 ? 1 : yStepMed;
+			xStepMed = xStepMed == 0 ? 1 : xStepMed;
+			
 			int nBinsY = (int)(((yMax-yMin)/yStepMed));
 			int nBinsX = (int)(((xMax-xMin)/xStepMed));
 			
 			this.shape = shape = new int[]{nBinsX, nBinsY};
 		}
-		
 		
 		XYImagePixelCache cache = new XYImagePixelCache((Dataset)x,(Dataset)y,new double[]{xMin,xMax},new double[]{yMin,yMax},shape[0],shape[1]);
 		
