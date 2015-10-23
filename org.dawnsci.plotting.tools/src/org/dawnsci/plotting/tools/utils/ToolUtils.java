@@ -198,15 +198,14 @@ public class ToolUtils {
 		//This works around issues that were arrising when the loader factory
 		// and image traces were returning different metadata
 		IMetadata metaData = null;
-		if (trace.getData() != null)
+		if (trace != null && trace.getData() != null)
 			metaData = ((IDataset)trace.getData()).getMetadata();
 		
 		if (metaData != null) return metaData;
 		if (part instanceof IEditorPart) {
 			IEditorPart editor = (IEditorPart) part;
 			try {
-				metaData = LoaderFactory
-						.getMetadata(EclipseUtils.getFilePath(editor
+				metaData = LoaderFactory.getMetadata(EclipseUtils.getFilePath(editor
 								.getEditorInput()), null);
 				return metaData;
 			} catch (Exception e) {
