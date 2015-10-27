@@ -37,19 +37,7 @@ public class AxisGroup extends Group
 	
 	public AxisGroup(Point3D origin, Point3D maxLength, double axisThickness, Point3D tickSeperationXYZ)
 	{
-<<<<<<< HEAD
 
-=======
-		// initialise
-		scaleGroup = new Group();
-		
-		// create x y and z Axis
-		scaleGroup.getChildren().add(createScaleAxis(new Point3D(1,0,0), maxLength.getX(), axisThickness));
-		scaleGroup.getChildren().add(createScaleAxis(new Point3D(0,1,0), maxLength.getY(), axisThickness));
-		scaleGroup.getChildren().add(createScaleAxis(new Point3D(0,0,1), maxLength.getZ(), axisThickness));
-		this.getChildren().add(scaleGroup);
-		
->>>>>>> refs/remotes/origin/master
 		// create axis grids
 		// yz plane
 		this.getChildren().add(
@@ -77,8 +65,6 @@ public class AxisGroup extends Group
 						new Point2D(maxLength.getX(), maxLength.getY()), 
 						axisThickness/10)				
 						);
-<<<<<<< HEAD
-=======
 	}
 
 	private Cylinder createScaleAxis(Point3D direction, double length, double thickness)
@@ -101,8 +87,6 @@ public class AxisGroup extends Group
 		tempBox.setMaterial(mat);
 		
 		return tempBox;
-		
->>>>>>> refs/remotes/origin/master
 	}
 
 	private AxisGrid createBasicAxisGrid(Point3D planeVectorXYZ, Point2D tickSeperationXY, Point2D axisLengthXY, double thickness)

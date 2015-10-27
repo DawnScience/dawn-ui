@@ -8,12 +8,9 @@
  */
 package org.dawnsci.plotting.javafx;
 
-<<<<<<< HEAD
-import javafx.animation.AnimationTimer;
-=======
 import java.util.List;
 
->>>>>>> refs/remotes/origin/master
+import javafx.animation.AnimationTimer;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.event.EventHandler;
@@ -27,10 +24,7 @@ import javafx.scene.Node;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.PointLight;
 import javafx.scene.Scene;
-<<<<<<< HEAD
 import javafx.scene.control.Label;
-=======
->>>>>>> refs/remotes/origin/master
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
