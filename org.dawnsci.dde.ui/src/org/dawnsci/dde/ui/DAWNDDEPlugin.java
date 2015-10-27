@@ -11,20 +11,31 @@
  *******************************************************************************/
 package org.dawnsci.dde.ui;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationType;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.pde.launching.IPDELauncherConstants;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 public class DAWNDDEPlugin extends AbstractUIPlugin {
 
+	private static final String LAUNCH_CONFIG_NAME = "Default DAWN Application";
+	private static final String DAWN_PRODUCT_ID = "org.dawnsci.product.plugin.DAWN";
 	public static final String WIZARD_BANNER = "WIZARD_BANNER";
+	public static final String LAUNCH_CONFIG_ID = "org.dawnsci.dde.core.launchConfigurationType";
 
 	private static DAWNDDEPlugin plugin;
 
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		createLaunchConfiguration();
 	}
 
 	public void stop(BundleContext context) throws Exception {
@@ -39,7 +50,7 @@ public class DAWNDDEPlugin extends AbstractUIPlugin {
 	@Override
 	protected void initializeImageRegistry(ImageRegistry reg) {
 		super.initializeImageRegistry(reg);
-		reg.put(WIZARD_BANNER, imageDescriptorFromPlugin("org.dawnsci.dde.io", "icons/wizban/project_wiz.gif"));
+		reg.put(WIZARD_BANNER, imageDescriptorFromPlugin("org.dawnsci.dde.ui", "icons/wizban/project_wiz.gif"));
 	}
 
 	/**
@@ -59,5 +70,22 @@ public class DAWNDDEPlugin extends AbstractUIPlugin {
 		}
 		return true;
 	}
-
+	
+	public static void createLaunchConfiguration() throws CoreException {
+		ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
+		ILaunchConfigurationType type = manager.getLaunchConfigurationType(LAUNCH_CONFIG_ID);
+		ILaunchConfiguration[] lcs = manager.getLaunchConfigurations(type);
+		boolean found = false;
+		for (int i = 0; i < lcs.length; ++i) {
+			if (lcs[i].getName().equals(LAUNCH_CONFIG_NAME)) {
+				found = true;
+			}
+		}
+		if (!found){
+			ILaunchConfigurationWorkingCopy newInstance = type.newInstance(null, LAUNCH_CONFIG_NAME);
+			newInstance.setAttribute(IPDELauncherConstants.USE_PRODUCT, true);
+			newInstance.setAttribute(IPDELauncherConstants.PRODUCT, DAWN_PRODUCT_ID);
+			newInstance.doSave();			
+		}
+	}
 }
