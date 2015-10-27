@@ -41,11 +41,19 @@ public class AxisLineGroup extends Group
 		textPane = new Pane();
 		if (label != null)
 		{
+<<<<<<< HEAD
 			final int textSizeMod = 2;
 			textLabel = createTextLabel(offset.getX(), offset.getY(), label, textSizeMod);
+=======
+			textLabel = createTextLabel(offset.getX(), offset.getY(), label);
+>>>>>>> refs/remotes/origin/master
 			textLabel.setDepthTest(DepthTest.DISABLE);
 			textPane.getChildren().add(textLabel);
+<<<<<<< HEAD
 			textPane.getTransforms().add(new Scale((float)1/textSizeMod, (float)1/textSizeMod, (float)1/textSizeMod));
+=======
+			textPane.getTransforms().add(new Scale(0.1,0.1,0.1));
+>>>>>>> refs/remotes/origin/master
 		}
 		
 		

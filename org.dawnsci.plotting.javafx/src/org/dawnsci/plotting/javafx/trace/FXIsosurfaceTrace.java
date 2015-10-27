@@ -298,7 +298,12 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 	{
 		return this.isosurface; 
 	}
-		
+	
+	public List<IDataset> getAxes()
+	{
+		return this.axes;
+	}
+	
 }
 
 

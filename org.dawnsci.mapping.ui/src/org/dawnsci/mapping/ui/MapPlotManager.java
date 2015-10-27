@@ -216,7 +216,7 @@ public class MapPlotManager {
 	}
 	
 	
-	public void plotMap(MappedData map) {
+	public void updateLayers(MappedData map) {
 		if (layers.contains(map)){
 			layers.remove(map);
 			plotLayers();
@@ -234,6 +234,11 @@ public class MapPlotManager {
 			addMap(map);
 		}
 		
+		plotLayers();
+	}
+	
+	public void plotMap(MappedData map) {
+		addMap(map);
 		plotLayers();
 	}
 	
@@ -308,7 +313,6 @@ public class MapPlotManager {
 					t.setGlobalRange(area.getRange());
 					t.setAlpha(((MappedData)o).getTransparency());
 					this.map.addTrace(t);
-
 				}
 				
 				if (o instanceof AssociatedImage) {

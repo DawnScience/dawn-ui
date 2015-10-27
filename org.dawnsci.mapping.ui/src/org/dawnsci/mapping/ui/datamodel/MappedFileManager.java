@@ -38,7 +38,7 @@ public class MappedFileManager {
 	public void removeFile(MappedDataFile file) {
 		mappedDataArea.removeFile(file);
 		plotManager.clearAll();
-		plotManager.plotMap(null);
+		plotManager.updateLayers(null);
 		viewer.refresh();
 	}
 	
@@ -72,7 +72,7 @@ public class MappedFileManager {
 
 							if (load)mappedDataArea.addMappedDataFile(mdf);
 							plotManager.clearAll();
-							plotManager.plotMap(null);
+							plotManager.updateLayers(null);
 							viewer.refresh();
 							if (viewer instanceof TreeViewer) {
 								((TreeViewer)viewer).expandToLevel(mdf, 1);

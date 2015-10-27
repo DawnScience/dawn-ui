@@ -67,7 +67,9 @@ import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
+import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -636,6 +638,8 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			if (plottingMode.is1D()) {
 				switchPlottingType(PlotType.IMAGE);
 			}
+			setAutoAspectRatio(data.getShape());
+
 			clearPlotViewer(); // Only one image at a time!
 			if (traceMap==null) traceMap = new LinkedHashMap<String, ITrace>(31);
 			traceMap.clear();
@@ -677,6 +681,28 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 			logger.error("Cannot load file "+data.getName(), e);
 			return null;
 		}
+	}
+
+	/**
+	 * Sets aspect ratio on/off given if the shape ratios are < 1/100
+	 * See http://jira.diamond.ac.uk/browse/SCI-5379
+	 * 
+	 * @param shape
+	 */
+	public void setAutoAspectRatio(int[] shape) {
+		double limitRatio = (double) 1 / (double) 100;
+		double ratioWidth = (double) shape[0] / (double) shape[1];
+		double ratioHeight = (double) shape[1] / (double) shape[0];
+		boolean isAspectRatio = ratioWidth > limitRatio && ratioHeight > limitRatio;
+		IContributionItem[] items = getActionBars().getToolBarManager().getItems();
+		for (IContributionItem item : items) {
+			if (item.getId().equals(PlottingConstants.ASPECT)) {
+				ActionContributionItem action = (ActionContributionItem) item;
+				action.getAction().setChecked(isAspectRatio);
+				break;
+			}
+		}
+		setKeepAspect(isAspectRatio);
 	}
 
 	@Override

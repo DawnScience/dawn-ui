@@ -129,7 +129,7 @@ public class NewDAWNExtensionProjectWizard extends AbstractNewPluginTemplateWiza
 	private ITemplateSection fSection;
 	
 	public NewDAWNExtensionProjectWizard() {
-		setDefaultPageImageDescriptor(DAWNDDEPlugin.imageDescriptorFromPlugin("org.dawnsci.dde.ui", "/icons/wizban/project_wiz.gif"));
+		setDefaultPageImageDescriptor(DAWNDDEPlugin.getDefault().getImageRegistry().getDescriptor(DAWNDDEPlugin.WIZARD_BANNER));
 		setNeedsProgressMonitor(true);
 		setForcePreviousAndNextButtons(true);
 	}

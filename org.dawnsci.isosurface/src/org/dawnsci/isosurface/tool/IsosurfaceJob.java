@@ -8,6 +8,11 @@
  */
 package org.dawnsci.isosurface.tool;
 
+import java.io.Serializable;
+import java.text.Format;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawnsci.isosurface.alg.MarchingCubesModel;
 import org.dawnsci.isosurface.alg.Surface;
@@ -17,6 +22,11 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.Slice;
+import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
+import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
+import org.eclipse.dawnsci.analysis.api.metadata.MetadataType;
+import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.dataset.impl.FloatDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
@@ -124,6 +134,33 @@ public class IsosurfaceJob extends Job {
 				final IDataset points     = new FloatDataset(surface.getPoints(), surface.getPoints().length);
 				final IDataset textCoords = new FloatDataset(surface.getTexCoords(), surface.getTexCoords().length);
 				final IDataset faces      = new IntegerDataset(surface.getFaces(), surface.getFaces().length);
+				
+				
+				/**
+				 * Temp axes builder
+				 * needs to be properly implemented
+				 */
+				final ArrayList<IDataset> axis = new ArrayList<IDataset>();
+				
+				float[] axisArray = new float[10];
+				for (int i = 0; i < 10; i ++)
+				{
+					axisArray[i] = i*10;
+				}
+				
+				axis.add(new FloatDataset(new float[]{
+												slice.getShape()[1],
+												slice.getShape()[2],
+												slice.getShape()[0]}));
+				axis.add(new FloatDataset(axisArray , null));
+				axis.add(new FloatDataset(axisArray , null));
+				axis.add(new FloatDataset(axisArray , null));
+				
+				/**
+				 * 
+				 */
+				
+				
 				final int[] colour = surface.getColour();
 				final double opacity = surface.getOpacity();
 				
@@ -132,7 +169,7 @@ public class IsosurfaceJob extends Job {
 				{
 					final IIsosurfaceTrace trace = system.createIsosurfaceTrace(this.traceName);
 					
-					trace.setData(points, textCoords, faces, null);
+					trace.setData(points, textCoords, faces, axis);
 					trace.setMaterial(colour[0], colour[1] , colour[2], opacity);
 					
 					Display.getDefault().syncExec(new Runnable() {
@@ -145,7 +182,7 @@ public class IsosurfaceJob extends Job {
 				{
 					IIsosurfaceTrace trace = (IIsosurfaceTrace) system.getTrace(traceName);
 					
-					trace.setData(points, textCoords, faces, null);
+					trace.setData(points, textCoords, faces, axis );
 					trace.setMaterial(colour[0], colour[1] , colour[2], opacity);
 				}
 				
