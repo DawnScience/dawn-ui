@@ -217,7 +217,8 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 					Composite axisConfigComposite = (Composite) axisTabComposite.getChildren()[1];
 					final StackLayout stackLayout = (StackLayout) axisConfigComposite.getLayout();
 					stackLayout.topControl = axisConfigPageList.get(index).getComposite();
-					traceCombo.select(index);
+					if (traceCombo != null)
+						traceCombo.select(index);
 					axisConfigComposite.layout(true, true);
 					break;
 				}
