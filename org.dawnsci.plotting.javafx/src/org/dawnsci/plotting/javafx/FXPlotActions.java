@@ -53,7 +53,7 @@ class FXPlotActions {
 		Action axisToggle = new Action("Toggle Axes",IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
-				viewer.addRemoveAxes();
+				viewer.addRemoveScaleAxes();
 			}
 		};
 		axisToggle.setChecked(true);

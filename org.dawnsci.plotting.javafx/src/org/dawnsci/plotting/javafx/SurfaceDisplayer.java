@@ -8,9 +8,9 @@
  */
 package org.dawnsci.plotting.javafx;
 
+import javafx.animation.AnimationTimer;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
@@ -22,7 +22,7 @@ import javafx.scene.Node;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.PointLight;
 import javafx.scene.Scene;
-import javafx.scene.SceneAntialiasing;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
@@ -34,17 +34,16 @@ import javafx.scene.transform.TransformChangedEvent;
 import javafx.scene.transform.Translate;
 
 import org.dawnsci.plotting.javafx.axis.objects.AxisGroup;
+import org.dawnsci.plotting.javafx.axis.objects.ScaleAxisGroup;
 import org.dawnsci.plotting.javafx.axis.objects.Vector3DUtil;
 
 /**
  * 
  * @author nnb55016 The following class creates the scene where the surface is
  *         visualised It is used when running the application inside DAWN
- */
-
-/**
+ *
  * 
- * @author uij85458 
+ * @author Joel Ogden
  * 
  */
 
@@ -65,6 +64,7 @@ public class SurfaceDisplayer extends Scene
 	private AxisGroup axisGroup;	// hold the axisGroup
 	private Group objectGroup;		// holds the objects for the scene
 	private Group lightGroup;		// holds the lights for the scene
+	private ScaleAxisGroup scaleAxesGroup;
 	
 	// the saved offset/ rotation data
 	private Translate sceneOffset;
@@ -116,6 +116,16 @@ public class SurfaceDisplayer extends Scene
 	private double[] newMousePos = new double[2];
 	private double zoom = 100;
 	
+	/**
+	 * 
+	 * debugging
+	 * 
+	 */
+    private final long[] frameTimes = new long[100];
+    private int frameTimeIndex = 0 ;
+    private boolean arrayFilled = false ;
+	
+	
 	/*
 	 * root - the root node for the scene isosurfaceGroup - the isosurface group
 	 * node within the scene graph
@@ -134,14 +144,44 @@ public class SurfaceDisplayer extends Scene
 		setCamera(camera); 
 				
 		initialiseCamera();
-		createSceneGraph(root);
+		initlialiseGroups();
+		createScaleAxisGroup();
 		createAxisGroup();
+		createSceneGraph(root);
 		setDepthBuffers();
 		initialiseTransforms();
 		addLights();
 		
 		// add the listeners for scene camera movement
 		addListeners();
+		
+		/*
+		 *  debugging
+		 */
+		
+		final Label label = new Label();
+        AnimationTimer frameRateMeter = new AnimationTimer() {
+
+            @Override
+            public void handle(long now) {
+                long oldFrameTime = frameTimes[frameTimeIndex] ;
+                frameTimes[frameTimeIndex] = now ;
+                frameTimeIndex = (frameTimeIndex + 1) % frameTimes.length ;
+                if (frameTimeIndex == 0) {
+                    arrayFilled = true ;
+                }
+                if (arrayFilled) {
+                    long elapsedNanos = now - oldFrameTime ;
+                    long elapsedNanosPerFrame = elapsedNanos / frameTimes.length ;
+                    double frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
+                    label.setText(String.format("Current frame rate: %.3f", frameRate));
+                }
+            }
+        };
+
+        frameRateMeter.start();
+
+		root.getChildren().add(label);
 		
 	}
 	
@@ -158,26 +198,35 @@ public class SurfaceDisplayer extends Scene
 		camera.setFarClip(100000);
 	}
 	
-	// combine the groups into the scene graph root node
-	private void createSceneGraph(Group root)
-	{
-		// initialise/create the groups		
+	private void initlialiseGroups()
+	{	
+		// initialise/create the groups
 		this.cameraGroup = new Group();
 		this.axisNode = new Group();
 		this.objectGroup = new Group();
 		this.lightGroup = new Group();
-		
+	}
+	
+	// combine the groups into the scene graph root node
+	private void createSceneGraph(Group root)
+	{
+	
 		// create the scene graph
 		this.lightGroup.getChildren().addAll(this.isosurfaceGroup);
 		this.objectGroup.getChildren().addAll(this.lightGroup, axisNode);
-		this.cameraGroup.getChildren().add(this.objectGroup);
+		this.cameraGroup.getChildren().addAll(this.objectGroup, scaleAxesGroup);
 		
 		// add groups the the root
 		root.getChildren().addAll(cameraGroup);
 		
 	}
 
-	private void createAxisGroup() // no longer returns anything
+	private void createScaleAxisGroup()
+	{
+		this.scaleAxesGroup = new ScaleAxisGroup(new Point3D(50, 50, 50), 5);
+	}
+	
+	private void createAxisGroup()
 	{
 		// find the length of each axis
 		final Point3D xyzLength = new Point3D(100, 100, 100);
@@ -193,7 +242,7 @@ public class SurfaceDisplayer extends Scene
 				size, 
 				new Point3D(10,10,10));
 		
-		newAxisGroup.setAxisEventListener(scaleEvent); //!! look into re-organising
+		scaleAxesGroup.setAxisEventListener(scaleEvent); //!! look into re-organising
 		
 		this.axisGroup = newAxisGroup;
 		this.axisNode.getChildren().add(this.axisGroup);
@@ -218,6 +267,8 @@ public class SurfaceDisplayer extends Scene
 		this.cameraGroup.getTransforms().addAll(sceneOffset);
 		this.cameraGroup.getTransforms().addAll(alignedXRotate, alignedYRotate);
 
+		this.scaleAxesGroup.getTransforms().addAll();
+		
 		this.objectGroup.getTransforms().addAll(isoGroupOffset);
 		
 		this.isosurfaceGroup.getTransforms().addAll(scale);
@@ -483,9 +534,9 @@ public class SurfaceDisplayer extends Scene
 	 * public 
 	 */
 	
-	public void addRemoveAxes()
+	public void addRemoveScaleAxes()
 	{
-		axisGroup.flipAxisVisible();
+		scaleAxesGroup.flipVisibility();
 	}
 	
 	public void dispose()

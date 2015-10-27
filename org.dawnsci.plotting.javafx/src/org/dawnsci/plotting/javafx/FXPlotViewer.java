@@ -180,9 +180,9 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub
 	// i dont like this
 	// these act as intermediates between the action and the scene
 	// feels horrible
-	public void addRemoveAxes()
+	public void addRemoveScaleAxes()
 	{
-		scene.addRemoveAxes();
+		scene.addRemoveScaleAxes();
 	}
 	
 	public void removeAxisGrid()

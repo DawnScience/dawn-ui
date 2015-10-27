@@ -24,8 +24,6 @@ public class AxisGroup extends Group
 	private Point3D origin;
 	private Point3D Max;
 	
-	private Group scaleGroup;
-	
 	private AxisGrid xAxisGrid;
 	private AxisGrid yAxisGrid;
 	private AxisGrid zAxisGrid;
@@ -35,15 +33,7 @@ public class AxisGroup extends Group
 	
 	public AxisGroup(Point3D origin, Point3D maxLength, double axisThickness, Point3D tickSeperationXYZ)
 	{
-		// initialise
-		scaleGroup = new Group();
-		
-		// create x y and z Axis
-		scaleGroup.getChildren().add(createAxis(new Point3D(1,0,0), maxLength.getX(), axisThickness));
-		scaleGroup.getChildren().add(createAxis(new Point3D(0,1,0), maxLength.getY(), axisThickness));
-		scaleGroup.getChildren().add(createAxis(new Point3D(0,0,1), maxLength.getZ(), axisThickness));
-		this.getChildren().add(scaleGroup);
-		
+
 		// create axis grids
 		// yz plane
 		this.getChildren().add(
@@ -71,29 +61,6 @@ public class AxisGroup extends Group
 						new Point2D(maxLength.getX(), maxLength.getY()), 
 						axisThickness/10)				
 						);
-	}
-
-	private Cylinder createAxis(Point3D direction, double length, double thickness)
-	{
-		// generate the cylinder
-		// default position is centered on (0,0,0) in direction (0,1,0)
-		Cylinder tempBox = new Cylinder(thickness,length * 1.05d);
-		
-		// rotate the axis to face the right direction
-		// in this case the axis
-		tempBox.getTransforms().add(Vector3DUtil.rotateVector(new Point3D(0,1,0), direction));
-		tempBox.getTransforms().add(new Translate(0,(length * 1.05d)/2,0));
-		
-		// create the material to colour the axis
-		PhongMaterial mat = new PhongMaterial();
-		mat.setDiffuseColor (new Color(direction.getX(), direction.getY(), direction.getZ(), 1));
-		mat.setSpecularColor(new Color(direction.getX(), direction.getY(), direction.getZ(), 1));
-		
-		// set the material -> ie colour the axis
-		tempBox.setMaterial(mat);
-		
-		return tempBox;
-		
 	}
 
 	private AxisGrid createBasicAxisGrid(Point3D planeVectorXYZ, Point2D tickSeperationXY, Point2D axisLengthXY, double thickness)
@@ -144,10 +111,6 @@ public class AxisGroup extends Group
 	{
 		zAxisGrid.setVisible(visible);
 	}
-	public void setAxisVisible (boolean visible)
-	{
-		scaleGroup.setVisible(visible);
-	}
 	public void setGridAllVisible(boolean visible)
 	{
 		setGridXVisible(visible);
@@ -159,7 +122,6 @@ public class AxisGroup extends Group
 		setGridXVisible(visible);
 		setGridYVisible(visible);
 		setGridZVisible(visible);
-		setAxisVisible (visible);
 	}
 	
 	public void flipXGridVisible()
@@ -174,30 +136,13 @@ public class AxisGroup extends Group
 	{
 		zAxisGrid.setVisible(!zAxisGrid.isVisible());
 	}
-	public void flipAxisVisible()
-	{
-		scaleGroup.setVisible(!scaleGroup.isVisible());
-	}
+	
 	public void flipAll()
 	{
 		System.out.println("flip all");
 		flipXGridVisible();
 		flipYGridVisible();
 		flipZGridVisible();
-		flipAxisVisible();
-	}
-	
-	// the event from scene
-	public void setAxisEventListener(EventHandler<MouseEvent> eventHandler)
-	{
-		for (Node n: scaleGroup.getChildren())
-		{
-			if (n instanceof Cylinder)
-			{
-				n.setCursor(Cursor.OPEN_HAND);
-				n.setOnMouseEntered(eventHandler); // this is slightly buggy but i'm unable to repeat consistently
-			}
-		}
 	}
 	
 	public AxisGrid getXAxisGrid()

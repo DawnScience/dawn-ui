@@ -3,6 +3,7 @@ package org.dawnsci.plotting.javafx.axis.objects;
 import javafx.geometry.Point3D;
 import javafx.scene.DepthTest;
 import javafx.scene.Group;
+import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.text.Font;
@@ -16,6 +17,7 @@ public class AxisLineGroup extends Group
 	private AxisLine line;
 	private Pane textPane;
 	private Text textLabel;
+//	private Label textLabel;
 	
 	// text rotates
 	private Rotate textZAxisRotate = new Rotate();
@@ -39,30 +41,31 @@ public class AxisLineGroup extends Group
 		textPane = new Pane();
 		if (label != null)
 		{
-			textLabel = createTextLabel(offset.getX(), offset.getY(), label);
+			final int textSizeMod = 2;
+			textLabel = createTextLabel(offset.getX(), offset.getY(), label, textSizeMod);
+			textLabel.setDepthTest(DepthTest.DISABLE);
 			textPane.getChildren().add(textLabel);
-			textPane.getTransforms().add(new Scale(0.1,0.1,0.1));
-			textPane.setDepthTest(DepthTest.DISABLE);
+			textPane.getTransforms().add(new Scale((float)1/textSizeMod, (float)1/textSizeMod, (float)1/textSizeMod));
 		}
 		
-
+		
 		double angle = new Point3D(0, 1, 0).angle(direction);
 		Point3D rotateVector = new Point3D(0, 1, 0).crossProduct(direction);
 		
 		this.rotate = new Rotate(angle, 0, offset.getX(), 0, rotateVector);
 		
-		
 		this.getChildren().addAll(this.line, this.textPane);
 		this.getTransforms().addAll(this.offset, this.rotate);
+		
 	}
 	
 	
 	// create text label for the grid axis
-	private Text createTextLabel(double x, double y, String text) 
+	private Text createTextLabel(double x, double y, String text, int textSizeMod) 
 	{
 		final int textSize = 10;
-		final int textSizeMod = 10;
-				
+//		final int textSizeMod = 10;
+		
 		// create the text to return
 		Text returnText = new Text(text);
 		textZAxisRotate.setAngle(-90);

@@ -3,6 +3,7 @@ package org.dawnsci.plotting.javafx.axis.objects;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.Group;
@@ -110,11 +111,11 @@ public class AxisGrid extends Group
 		return new Rotate(angle, startVectorProjection.crossProduct(endVectorProjection));
 	}
 	
-	private AxisLineGroup createTickBar(Point2D length, Point3D axisDirection, Point2D offsetXY, String text)
+	private AxisLineGroup createTickBar(double length, Point3D axisDirection, Point2D offsetXY, String text)
 	{
 		
 		AxisLineGroup returnBar = new AxisLineGroup(
-				length.getX(),
+				length,
 				axisDirection,
 				new Point3D(offsetXY.getX(),offsetXY.getY(), 0),
 				text);
@@ -160,66 +161,66 @@ public class AxisGrid extends Group
 		}
 	}
 	
+
+	
 	// !! organise
 	public void updateGrid(Point2D newMaxLengthXY)
 	{
+		
 		xAxis.setVisible(true);
 		yAxis.setVisible(true);
 		
 		this.maxLengthXY = newMaxLengthXY;
-
+		
 		// check current axis line lengths
-		// x axis
-		for (Node n : xAxis.getChildren())
-		{
-			if (n instanceof AxisLineGroup)
-			{
-				((AxisLineGroup)n).setHeightExtended(this.maxLengthXY.getX());
-				((AxisLineGroup)n).resetOffset();
-			}
-		}
-		// y axis
-		for (Node n : yAxis.getChildren())
-		{
-			if (n instanceof AxisLineGroup)
-			{
-				((AxisLineGroup)n).setHeightExtended(this.maxLengthXY.getY());
-				((AxisLineGroup)n).resetOffset();
-			}
-			
-		}
+		updateLineLengths(xAxis.getChildren(), this.maxLengthXY.getX());
+		updateLineLengths(yAxis.getChildren(), this.maxLengthXY.getY());
 		
 		// check if a new axis line needs to be added
+		updateLineCount();
 		
+		
+	}
+	
+	private void updateLineLengths(ObservableList<Node> aixsGroup, double length)
+	{
+		for (Node n : aixsGroup)
+		{
+			if (n instanceof AxisLineGroup)
+			{
+				((AxisLineGroup)n).setHeightExtended(length);
+				((AxisLineGroup)n).resetOffset();
+			}
+		}
+	}
+	
+	private void updateLineCount()
+	{
 		// x axis 
 		int nXCount = yAxis.getChildren().size();
 		int excessXLineCount = (int)(( this.maxLengthXY.getX() - (nXCount*this.tickSeperationXY.getX()))/ this.tickSeperationXY.getX());
 		
-		if (excessXLineCount > 0)
+		if (excessXLineCount > 0) 
 		{
 			// add new line to axis grid
 			for (int i = 0; i < excessXLineCount; i ++)
 			{
 				AxisLineGroup bar = createTickBar(
-						this.maxLengthXY,
+						this.maxLengthXY.getY(),
 						Y_AXIS_DIRECTION, 
 						new Point2D(tickSeperationXY.getX()*(nXCount+i),0),
 						Double.toString(this.tickSeperationXY.getX()*(nXCount+i)));
 				bar.setMaterial(new PhongMaterial(colour));
 				this.yAxis.getChildren().add(bar);
 			}
-		}
+		} 
 		else if (excessXLineCount < 0)
 		{
 			if (this.yAxis.getChildren().size() > 0)
 			{
-				try
-				{
-					final int lowerLimit = yAxis.getChildren().size() + excessXLineCount;
-					final int upperLimit = yAxis.getChildren().size();
-					this.yAxis.getChildren().remove(lowerLimit, upperLimit);
-				}
-				finally{}
+				final int lowerLimit = yAxis.getChildren().size() + excessXLineCount;
+				final int upperLimit = yAxis.getChildren().size();
+				this.yAxis.getChildren().remove(lowerLimit, upperLimit);
 			}
 		}
 		
@@ -234,7 +235,7 @@ public class AxisGrid extends Group
 			{	
 				
 				AxisLineGroup bar = createTickBar(
-						this.maxLengthXY, 
+						this.maxLengthXY.getX(), 
 						X_AXIS_DIRECTION, 
 						new Point2D(this.tickSeperationXY.getY()*(nYCount+i), 0),
 						Double.toString(this.tickSeperationXY.getY()*(nYCount+i)));
@@ -246,44 +247,11 @@ public class AxisGrid extends Group
 		{
 			if (this.xAxis.getChildren().size() > 0)
 			{
-				try
-				{
-					final int lowerLimit = xAxis.getChildren().size() + excessYLineCount;
-					final int upperLimit = xAxis.getChildren().size();
-					this.xAxis.getChildren().remove(lowerLimit, upperLimit);
-				}
-				finally{}
+				final int lowerLimit = xAxis.getChildren().size() + excessYLineCount;
+				final int upperLimit = xAxis.getChildren().size();
+				this.xAxis.getChildren().remove(lowerLimit, upperLimit);
 			}
 		}
 	}
-	
-//	private void removeBarsFromAxis(Group axis, int lowerLimit, int upperLimit)
-//	{
-//		List<AxisLineGroup> axisLineList = new ArrayList<AxisLineGroup>();
-//		
-//		for (Node n : axis.getChildren())
-//		{
-//			boolean added = false;
-//			if (n instanceof AxisLineGroup)
-//			{
-//				for (int i = 0; i < axisLineList.size(); i ++)
-//				{
-//					if (axisLineList.get(i).getOffset().)
-//					{
-//						added = true;
-//					}
-//				}	
-//				if (!added)
-//				{
-//					axisLineList.add((AxisLineGroup)n);
-//				}
-//			}
-//		}
-//		
-//		
-//	}
-	
-	
-	
 	
 }
