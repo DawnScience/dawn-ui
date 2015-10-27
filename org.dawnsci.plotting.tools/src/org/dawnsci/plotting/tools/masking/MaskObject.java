@@ -17,7 +17,6 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
 
 import org.dawb.common.ui.image.ShapeType;
-import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.dawnsci.plotting.AbstractPlottingViewer;
 import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.core.commands.ExecutionException;
@@ -412,7 +411,7 @@ public class MaskObject {
 				}
 			} else {
 				// NORMALLY
-				pool.invoke(new MaskRegionsAction(op, shape, regions, monitor));
+				pool.invoke(new MaskRegionsAction(op, shape, validRegions, monitor));
 			}
 
 			try {
