@@ -185,7 +185,17 @@ public class AxisGroup extends Group
 
 	public void setAxisData(List<IDataset> axesData) {
 		// TODO Auto-generated method stub
-		
+		System.out.println("setAxisData()");
+	}
+	
+	public void setAxisLimitMin(Point3D MinLimit)
+	{
+		this.axisLimitMin = MinLimit;
+	}
+	
+	public void setAxisLimitMax(Point3D MaxLimit)
+	{
+		this.axisLimitMax = MaxLimit;
 	}
 	
 	

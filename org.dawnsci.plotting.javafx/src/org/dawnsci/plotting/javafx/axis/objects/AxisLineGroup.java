@@ -3,7 +3,6 @@ package org.dawnsci.plotting.javafx.axis.objects;
 import javafx.geometry.Point3D;
 import javafx.scene.DepthTest;
 import javafx.scene.Group;
-import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.text.Font;

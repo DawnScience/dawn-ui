@@ -227,7 +227,7 @@ public class SurfaceDisplayer extends Scene
 		// create the scene graph
 		this.lightGroup.getChildren().addAll(this.isosurfaceGroup);
 		this.objectGroup.getChildren().addAll(this.lightGroup, axisNode);
-		this.cameraGroup.getChildren().addAll(this.objectGroup, scaleAxesGroup);
+		this.cameraGroup.getChildren().addAll(scaleAxesGroup, this.objectGroup);
 		
 		// add groups the the root
 		root.getChildren().addAll(cameraGroup);
@@ -386,10 +386,7 @@ public class SurfaceDisplayer extends Scene
 						
 						Point3D XYTranslationDirection = alignedXRotate.transform(mouseDelta[0]*mouseMovementMod, mouseDelta[1]*mouseMovementMod,0);
 						XYTranslationDirection = alignedYRotate.transform(XYTranslationDirection);
-						
-						System.out.println(XYTranslationDirection);
-						
-						
+												
 						
 						isoGroupOffset.setX(isoGroupOffset.getX() + XYTranslationDirection.getX() );
 						isoGroupOffset.setY(isoGroupOffset.getY() + XYTranslationDirection.getY() );
@@ -497,14 +494,7 @@ public class SurfaceDisplayer extends Scene
 	
 	private void updateAxisSize(Point3D maxLength) 
 	{
-		System.out.println("updateAxisSize");
 		axisGroup.checkScale(this.scale.transform(maxLength));  	
-		
-//		axisGroup.checkScale(
-//				new Point3D(
-//					isosurfaceGroup.getBoundsInParent().getWidth() + isosurfaceGroup.getBoundsInParent().getMinX(),    
-//					isosurfaceGroup.getBoundsInParent().getHeight()+ isosurfaceGroup.getBoundsInParent().getMinY(),    
-//					isosurfaceGroup.getBoundsInParent().getDepth() + isosurfaceGroup.getBoundsInParent().getMinZ()));
 		
 	}
 	
@@ -518,8 +508,24 @@ public class SurfaceDisplayer extends Scene
 									
 		scaleDir.normalize();
 		scale.setX(scale.getX() + (scalar * (mouseMovementMod * (0.005 * scaleDir.getX()))));
+		if (scale.getX() < 0 )
+		{
+			scale.setX(0);
+		}
+		
 		scale.setY(scale.getY() + (scalar * (mouseMovementMod * (0.005 * scaleDir.getY()))));
+		if (scale.getY() < 0 )
+		{
+			scale.setY(0);
+		}
+		
 		scale.setZ(scale.getZ() + (scalar * (mouseMovementMod * (0.005 * scaleDir.getZ()))));
+		if (scale.getZ() < 0 )
+		{
+			scale.setZ(0);
+		}
+		
+		System.out.println(scale);
 		
 	}
 	
@@ -590,10 +596,7 @@ public class SurfaceDisplayer extends Scene
 		isoGroupOffset.setX(offsetInverse.getX());
 		isoGroupOffset.setY(offsetInverse.getY());
 		isoGroupOffset.setZ(offsetInverse.getZ());
-		
-		//!! this should be moved -> it is only included for when the model is added
-		// updateAxisSize();
-		
+				
 	}
 	
 	public void removeAxisGrid()
@@ -609,8 +612,7 @@ public class SurfaceDisplayer extends Scene
 										axesData.get(0).getFloat(0),
 										axesData.get(0).getFloat(1),
 										axesData.get(0).getFloat(2));
-		
-		System.out.println("StexAxesData()");
+		this.axisGroup.setAxisLimitMax(axesMaxLengths);
 		updateAxisSize(this.axesMaxLengths);
 		
 	}

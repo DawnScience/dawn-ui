@@ -224,7 +224,6 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub
 	{
 		return canvas;
 	}
-
 	
 	
 	

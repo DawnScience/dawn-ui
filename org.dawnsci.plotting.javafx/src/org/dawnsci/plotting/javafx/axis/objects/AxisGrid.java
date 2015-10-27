@@ -71,6 +71,7 @@ public class AxisGrid extends Group
 				planeXYZ.getY() / planeVectorMagnitude,
 				planeXYZ.getZ() / planeVectorMagnitude,
 				1);
+		this.colour = Color.RED;
 		
 		this.getChildren().addAll(xAxis, yAxis);
 		
@@ -194,15 +195,28 @@ public class AxisGrid extends Group
 		}
 	}
 	
-	private void updateLineCount()
+	private void updateLineCount() // !! Refactor
 	{
 		// x axis 
 		int nXCount = yAxis.getChildren().size();
-		int excessXLineCount = (int)(( this.maxLengthXY.getX() - (nXCount*this.tickSeperationXY.getX()))/ this.tickSeperationXY.getX());
+		double seperationXLength = this.tickSeperationXY.getX() * (nXCount-1);
 		
-		if (excessXLineCount > 0) 
+		
+		if (this.maxLengthXY.getX() < seperationXLength)
 		{
-			// add new line to axis grid
+			int excessXLineCount = (int)(( this.maxLengthXY.getX() - ((nXCount)*this.tickSeperationXY.getX()))/ this.tickSeperationXY.getX());
+			
+			if (this.yAxis.getChildren().size() > 0)
+			{
+				final int lowerLimit = yAxis.getChildren().size() + excessXLineCount;
+				final int upperLimit = yAxis.getChildren().size();
+				this.yAxis.getChildren().remove(lowerLimit, upperLimit);
+			}
+		}
+		else if (this.maxLengthXY.getX() > seperationXLength)
+		{
+			int excessXLineCount = (int)(( this.maxLengthXY.getX() - ((nXCount - 1)*this.tickSeperationXY.getX()))/ this.tickSeperationXY.getX());
+			
 			for (int i = 0; i < excessXLineCount; i ++)
 			{
 				AxisLineGroup bar = createTickBar(
@@ -213,24 +227,31 @@ public class AxisGrid extends Group
 				bar.setMaterial(new PhongMaterial(colour));
 				this.yAxis.getChildren().add(bar);
 			}
-		} 
-		else if (excessXLineCount < 0)
-		{
-			if (this.yAxis.getChildren().size() > 0)
-			{
-				final int lowerLimit = yAxis.getChildren().size() + excessXLineCount;
-				final int upperLimit = yAxis.getChildren().size();
-				this.yAxis.getChildren().remove(lowerLimit, upperLimit);
-			}
+						
 		}
 		
-		// y axis
-		int nYCount = this.xAxis.getChildren().size();
-		int excessYLineCount = (int)(( this.maxLengthXY.getY() - (nYCount*this.tickSeperationXY.getY()))/ this.tickSeperationXY.getY());
 		
-		if ((excessYLineCount) > 0)
+		
+		
+		int nYCount = this.xAxis.getChildren().size();
+		double seperationYLength = this.tickSeperationXY.getY() * (nYCount-1);
+		
+		
+		if (this.maxLengthXY.getY() < seperationYLength)
 		{
-			// add new line to axis grid
+			int excessYLineCount = (int)(( this.maxLengthXY.getY() - ((nYCount)*this.tickSeperationXY.getY()))/ this.tickSeperationXY.getY());
+		
+			if (this.xAxis.getChildren().size() > 0)
+			{
+				final int lowerLimit = xAxis.getChildren().size() + excessYLineCount;
+				final int upperLimit = xAxis.getChildren().size();
+				this.xAxis.getChildren().remove(lowerLimit, upperLimit);
+			}
+		}
+		else if (this.maxLengthXY.getY() > seperationYLength)
+		{
+			int excessYLineCount = (int)(( this.maxLengthXY.getY() - ((nYCount - 1)*this.tickSeperationXY.getY()))/ this.tickSeperationXY.getY());
+			
 			for (int i = 0; i < excessYLineCount; i ++)
 			{	
 				
@@ -243,15 +264,7 @@ public class AxisGrid extends Group
 				this.xAxis.getChildren().add(bar);
 			}
 		}
-		else if (excessYLineCount < 0)
-		{
-			if (this.xAxis.getChildren().size() > 0)
-			{
-				final int lowerLimit = xAxis.getChildren().size() + excessYLineCount;
-				final int upperLimit = xAxis.getChildren().size();
-				this.xAxis.getChildren().remove(lowerLimit, upperLimit);
-			}
-		}
+		
 	}
 	
 }
