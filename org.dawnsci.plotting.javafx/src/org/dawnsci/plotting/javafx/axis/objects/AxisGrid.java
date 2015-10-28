@@ -162,9 +162,27 @@ public class AxisGrid extends Group
 		}
 	}
 	
-
+	public void setTickSeperationXY(Point2D newSeperation)
+	{
+		this.tickSeperationXY = newSeperation;
+		
+		refreshGrid();
+		
+	}
 	
 	// !! organise
+	public void refreshGrid()
+	{
+		xAxis.getChildren().clear();
+		yAxis.getChildren().clear();
+		updateGrid();
+	}
+	
+	public void updateGrid()
+	{
+		updateGrid(maxLengthXY);
+	}
+	
 	public void updateGrid(Point2D newMaxLengthXY)
 	{
 		

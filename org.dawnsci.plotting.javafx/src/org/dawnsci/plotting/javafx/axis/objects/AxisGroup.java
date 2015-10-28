@@ -35,9 +35,13 @@ public class AxisGroup extends Group
 	private Point3D axisLimitMin = new Point3D(0, 0, 0);
 	private Point3D axisLimitMax = new Point3D(100, 100, 100);
 	
+	private Point3D tickSeperationXYZ;
+	
 	public AxisGroup(Point3D origin, Point3D maxLength, double axisThickness, Point3D tickSeperationXYZ)
 	{
 
+		this.tickSeperationXYZ = tickSeperationXYZ;
+		
 		// create axis grids
 		// yz plane
 		this.getChildren().add(
@@ -124,6 +128,17 @@ public class AxisGroup extends Group
 		reDeclareLabels();
 	}
 	
+	
+	public void SetTickSeperationXYZ(Point3D newTickSpeperation)
+	{
+		this.tickSeperationXYZ = newTickSpeperation;
+		
+		xAxisGrid.setTickSeperationXY(new Point2D(tickSeperationXYZ.getY(), tickSeperationXYZ.getZ()));
+		
+		yAxisGrid.setTickSeperationXY(new Point2D(tickSeperationXYZ.getZ(), tickSeperationXYZ.getX()));
+		
+		zAxisGrid.setTickSeperationXY(new Point2D(tickSeperationXYZ.getX(), tickSeperationXYZ.getY()));
+	}
 	public void setGridXVisible(boolean visible)
 	{
 		xAxisGrid.setVisible(visible);

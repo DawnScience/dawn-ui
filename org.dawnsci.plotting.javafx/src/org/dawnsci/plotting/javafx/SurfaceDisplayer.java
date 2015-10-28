@@ -89,6 +89,7 @@ public class SurfaceDisplayer extends Scene
 	 */
 	
 	private Point3D axesMaxLengths;
+	private double tickSeperator_REMOVE = 10;
 	
 	/**
 	 * 
@@ -612,12 +613,37 @@ public class SurfaceDisplayer extends Scene
 										axesData.get(0).getFloat(0),
 										axesData.get(0).getFloat(1),
 										axesData.get(0).getFloat(2));
+		
+		setTickSeperator_FORDEMO_REMOVE(axesMaxLengths);
+		
 		this.axisGroup.setAxisLimitMax(axesMaxLengths);
 		updateAxisSize(this.axesMaxLengths);
 		
 	}
 	
-	
+	private void setTickSeperator_FORDEMO_REMOVE(Point3D axesMaxLength)
+	{
+		double maxLength = -999;
+		if (axesMaxLength.getX() > maxLength)
+		{
+			maxLength = axesMaxLength.getX();
+		}
+		if (axesMaxLength.getY() > maxLength)
+		{
+			maxLength = axesMaxLength.getY();
+		}
+		if (axesMaxLength.getZ() > maxLength)
+		{
+			maxLength = axesMaxLength.getZ();
+		}
+		
+		
+		tickSeperator_REMOVE = maxLength/10;
+		
+		axisGroup.SetTickSeperationXYZ(new Point3D(tickSeperator_REMOVE, tickSeperator_REMOVE, tickSeperator_REMOVE));
+		
+		
+	}
 	
 	
 }
