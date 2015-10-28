@@ -696,7 +696,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		boolean isAspectRatio = ratioWidth > limitRatio && ratioHeight > limitRatio;
 		IContributionItem[] items = getActionBars().getToolBarManager().getItems();
 		for (IContributionItem item : items) {
-			if (item.getId().equals(PlottingConstants.ASPECT)) {
+			if (item.getId() != null && item.getId().equals(PlottingConstants.ASPECT)) {
 				ActionContributionItem action = (ActionContributionItem) item;
 				action.getAction().setChecked(isAspectRatio);
 				break;
