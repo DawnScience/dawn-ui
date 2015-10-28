@@ -63,7 +63,6 @@ public class IsoItemComposite extends Composite
 		GridData gd_scale = new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1);
 		gd_scale.widthHint = 151;
 		isoSurfaceScaleValue.setLayoutData(gd_scale);
-		
 		value = new ScaleBox(this, SWT.NONE);
 		GridData gd_text = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
 		gd_text.widthHint = 55;

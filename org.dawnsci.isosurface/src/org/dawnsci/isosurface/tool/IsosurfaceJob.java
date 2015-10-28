@@ -149,8 +149,8 @@ public class IsosurfaceJob extends Job {
 				}
 				
 				axis.add(new FloatDataset(new float[]{
-												slice.getShape()[1],
 												slice.getShape()[2],
+												slice.getShape()[1],
 												slice.getShape()[0]}));
 				axis.add(new FloatDataset(axisArray , null));
 				axis.add(new FloatDataset(axisArray , null));
