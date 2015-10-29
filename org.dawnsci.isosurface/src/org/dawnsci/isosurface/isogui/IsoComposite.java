@@ -100,7 +100,7 @@ public class IsoComposite extends Composite
 		
 		ScrolledComposite sc = new ScrolledComposite(this, SWT.V_SCROLL);
 		
-		sc.setBackground(new Color(this.getDisplay(), new RGB(255, 0, 0)));
+		//sc.setBackground(new Color(this.getDisplay(), new RGB(255, 0, 0)));
 		sc.setExpandHorizontal(true);
 		sc.setExpandVertical(true);
 		

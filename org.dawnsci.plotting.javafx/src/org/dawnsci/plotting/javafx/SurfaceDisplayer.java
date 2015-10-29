@@ -173,29 +173,29 @@ public class SurfaceDisplayer extends Scene
 		 *  debugging
 		 */
 		
-		final Label label = new Label();
-        AnimationTimer frameRateMeter = new AnimationTimer() {
-
-            @Override
-            public void handle(long now) {
-                long oldFrameTime = frameTimes[frameTimeIndex] ;
-                frameTimes[frameTimeIndex] = now ;
-                frameTimeIndex = (frameTimeIndex + 1) % frameTimes.length ;
-                if (frameTimeIndex == 0) {
-                    arrayFilled = true ;
-                }
-                if (arrayFilled) {
-                    long elapsedNanos = now - oldFrameTime ;
-                    long elapsedNanosPerFrame = elapsedNanos / frameTimes.length ;
-                    double frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
-                    label.setText(String.format("Current frame rate: %.3f", frameRate));
-                }
-            }
-        };
-
-        frameRateMeter.start();
-
-		root.getChildren().add(label);
+//		  final Label label = new Label();
+//        AnimationTimer frameRateMeter = new AnimationTimer() {
+//
+//            @Override
+//            public void handle(long now) {
+//                long oldFrameTime = frameTimes[frameTimeIndex] ;
+//                frameTimes[frameTimeIndex] = now ;
+//                frameTimeIndex = (frameTimeIndex + 1) % frameTimes.length ;
+//                if (frameTimeIndex == 0) {
+//                    arrayFilled = true ;
+//                }
+//                if (arrayFilled) {
+//                    long elapsedNanos = now - oldFrameTime ;
+//                    long elapsedNanosPerFrame = elapsedNanos / frameTimes.length ;
+//                    double frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
+//                    label.setText(String.format("Current frame rate: %.3f", frameRate));
+//                }
+//            }
+//        };
+//
+//        frameRateMeter.start();
+//
+//		root.getChildren().add(label);
 		
 	}
 	
@@ -357,8 +357,8 @@ public class SurfaceDisplayer extends Scene
 							newMousePos[0] - oldMousePos[0], 
 							newMousePos[1] - oldMousePos[1]};
 					
-					final double mouseMovementMod = 0.5f;
-					
+					final double mouseMovementMod = ((zoom + 1000) * 0.001f) + 0.1f;
+										
 					// check if left button is pressed
 					// rotate if true - ie, rotate on left button drag
 					if (me.isPrimaryButtonDown() && !me.isSecondaryButtonDown())
@@ -368,8 +368,8 @@ public class SurfaceDisplayer extends Scene
 						{
 							case 0:
 							{
-								alignedXRotate.setAngle(alignedXRotate.getAngle() + mouseDelta[1] * mouseMovementMod);
-								alignedYRotate.setAngle(alignedYRotate.getAngle() - mouseDelta[0] * mouseMovementMod);	
+								alignedXRotate.setAngle(alignedXRotate.getAngle() + mouseDelta[1] * 0.65f);
+								alignedYRotate.setAngle(alignedYRotate.getAngle() - mouseDelta[0] * 0.65f);	
 								break;
 							}
 							case 1:
@@ -408,7 +408,6 @@ public class SurfaceDisplayer extends Scene
 						zoom += (-mouseDelta[1] * mouseMovementMod);
 						
 					}
-					
 					camera.getTransforms().setAll(new Translate(0, 0, -zoom));
 					// camera.getTransforms().clear();
 					
@@ -499,7 +498,7 @@ public class SurfaceDisplayer extends Scene
 		
 	}
 	
-	private void updateScale(double[] mouseDelta, double mouseMovementMod)
+	private void updateScale(double[] mouseDelta, double mouseMovementMod) 
 	{
 		Point3D mouseDelta3D = new Point3D(mouseDelta[0], mouseDelta[1], 0);
 		
@@ -508,25 +507,24 @@ public class SurfaceDisplayer extends Scene
 		double scalar = Vector3DUtil.getScaleAcrossProjectedVector(mouseScalarDir3D, mouseDelta3D);
 									
 		scaleDir.normalize();
-		scale.setX(scale.getX() + (scalar * (mouseMovementMod * (0.005 * scaleDir.getX()))));
+		scale.setX(scale.getX() + (scalar * (0.65f * (0.005 * scaleDir.getX()))));
 		if (scale.getX() < 0 )
 		{
 			scale.setX(0);
 		}
 		
-		scale.setY(scale.getY() + (scalar * (mouseMovementMod * (0.005 * scaleDir.getY()))));
+		scale.setY(scale.getY() + (scalar * (0.65f * (0.005 * scaleDir.getY()))));
 		if (scale.getY() < 0 )
 		{
 			scale.setY(0);
 		}
 		
-		scale.setZ(scale.getZ() + (scalar * (mouseMovementMod * (0.005 * scaleDir.getZ()))));
+		scale.setZ(scale.getZ() + (scalar * (0.65f * (0.005 * scaleDir.getZ()))));
 		if (scale.getZ() < 0 )
 		{
 			scale.setZ(0);
 		}
 		
-		System.out.println(scale);
 		
 	}
 	

@@ -30,7 +30,7 @@ public class IsoItemComposite extends Composite
 	{
 		super(parent, SWT.FILL);
 		createUI();
-		setBackground(new Color(this.getDisplay(), new RGB(0, 0, 255)));
+		// setBackground(new Color(this.getDisplay(), new RGB(0, 0, 255)));
 	}
 	
 	/**

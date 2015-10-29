@@ -95,7 +95,7 @@ public class AxisGroup extends Group
 
 	private AxisGrid createBasicAxisGrid(Point3D planeVectorXYZ, Point2D tickSeperationXY, Point2D axisLengthXY, double thickness)
 	{
-		AxisGrid tempGrid = new AxisGrid(planeVectorXYZ, tickSeperationXY, axisLengthXY, thickness);
+		AxisGrid tempGrid = new AxisGrid(planeVectorXYZ, tickSeperationXY, axisLengthXY, thickness, tickSeperationXYZ.getX());
 		return tempGrid;
 	}
 	

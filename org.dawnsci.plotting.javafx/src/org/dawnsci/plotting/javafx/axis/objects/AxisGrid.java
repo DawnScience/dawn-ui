@@ -33,11 +33,11 @@ public class AxisGrid extends Group
 	private Point2D tickSeperationXY;
 	private double thickness;
 	private Color colour;
+	private double textSize;
 	
-	public AxisGrid(Point3D planeXYZ, Point2D tickSeperationXY, Point2D axisLength, double thickness)
+	public AxisGrid(Point3D planeXYZ, Point2D tickSeperationXY, Point2D axisLength, double thickness, double textSize)
 	{
-		
-		
+		this.textSize = textSize;
 		this.planeVector = planeXYZ;
 		this.tickSeperationXY = tickSeperationXY;
 		this.maxLengthXY = axisLength;
@@ -119,7 +119,8 @@ public class AxisGrid extends Group
 				length,
 				axisDirection,
 				new Point3D(offsetXY.getX(),offsetXY.getY(), 0),
-				text);
+				text,
+				textSize);
 		
 		return returnBar;
 	}
@@ -165,6 +166,8 @@ public class AxisGrid extends Group
 	public void setTickSeperationXY(Point2D newSeperation)
 	{
 		this.tickSeperationXY = newSeperation;
+		
+		this.textSize = tickSeperationXY.getX() / 3;
 		
 		refreshGrid();
 		
@@ -277,7 +280,8 @@ public class AxisGrid extends Group
 						this.maxLengthXY.getX(), 
 						X_AXIS_DIRECTION, 
 						new Point2D(this.tickSeperationXY.getY()*(nYCount+i), 0),
-						Double.toString(this.tickSeperationXY.getY()*(nYCount+i)));
+//						Double.toString(this.tickSeperationXY.getY()*(nYCount+i)));
+						null);
 				bar.setMaterial(new PhongMaterial(colour));
 				this.xAxis.getChildren().add(bar);
 			}

@@ -13,24 +13,31 @@ import javafx.scene.transform.Translate;
 
 public class AxisLineGroup extends Group
 {
+	final double TEXTMOD = 2;
+	
 	private AxisLine line;
 	private Pane textPane;
 	private Text textLabel;
 //	private Label textLabel;
 	
 	// text rotates
-	private Rotate textZAxisRotate = new Rotate();
- 		{textZAxisRotate.setAxis(new Point3D(0, 0, 1));}
+	private Rotate textXAxisRotate = new Rotate();
+		{textXAxisRotate.setAxis(new Point3D(1, 0, 0));}
  	private Rotate textYAxisRotate = new Rotate();
  		{textYAxisRotate.setAxis(new Point3D(0, 1, 0));}
+ 	private Rotate textZAxisRotate = new Rotate();
+ 		{textZAxisRotate.setAxis(new Point3D(0, 0, 1));}
  	
  	// this transforms
 	private Translate offset;
 	private Rotate rotate;
 	
-	public AxisLineGroup(double length, Point3D direction, Point3D offset, String label)
+	private double textSize = 10;
+	
+	public AxisLineGroup(double length, Point3D direction, Point3D offset, String label, double textSize)
 	{
 		
+		this.textSize = textSize;
 		this.offset = new Translate(offset.getX(), offset.getY(), offset.getZ());
 		this.line = new AxisLine(length, new Rotate(), new Point3D(0,0,0));
 		
@@ -40,11 +47,10 @@ public class AxisLineGroup extends Group
 		textPane = new Pane();
 		if (label != null)
 		{
-			final int textSizeMod = 2;
-			textLabel = createTextLabel(offset.getX(), offset.getY(), label, textSizeMod);
+			textLabel = createTextLabel(offset.getX(), offset.getY(), label);
 			textLabel.setDepthTest(DepthTest.DISABLE);
 			textPane.getChildren().add(textLabel);
-			textPane.getTransforms().add(new Scale((float)1/textSizeMod, (float)1/textSizeMod, (float)1/textSizeMod));
+			textPane.getTransforms().add(new Scale((float)1/TEXTMOD, (float)1/TEXTMOD, (float)1/TEXTMOD));
 		}
 		
 		
@@ -60,29 +66,31 @@ public class AxisLineGroup extends Group
 	
 	
 	// create text label for the grid axis
-	private Text createTextLabel(double x, double y, String text, int textSizeMod) 
+	private Text createTextLabel(double x, double y, String text) 
 	{
-		final int textSize = 10;
-//		final int textSizeMod = 10;
 		
 		// create the text to return
 		Text returnText = new Text(text);
 		textZAxisRotate.setAngle(-90);
 		textYAxisRotate.setAngle(0);
+		textXAxisRotate.setAngle(45);
 		
 		// add transforms
 		returnText.getTransforms().addAll(
-				textZAxisRotate, 
+				textXAxisRotate,
 				textYAxisRotate, 
+				textZAxisRotate, 
 				new Translate(
-						(textSize*textSizeMod)/2,
-						(textSize*textSizeMod)/2,
+						(textSize*TEXTMOD)/2,
+						(textSize*TEXTMOD)/2,
 						0));
 		
 		// scale the text by Mod -> this is to allow for greater resolution
 		// javafx handles text funny and it blurs upon zooming
 		// i increase the size then scale down to increase the resolution
-		returnText.setFont(new Font(textSize*textSizeMod));
+		returnText.setFont(new Font(textSize*TEXTMOD));
+		
+		System.out.println("text: " + textSize);
 		
 		return returnText;
 	}
