@@ -91,5 +91,22 @@
             perspective="org.dawnsci.mapping.ui.mappingperspective">
       </fileOpen>
    </extension>
+   <extension
+         point="org.dawnsci.introRegister">
+      <introPageRegister
+            class="org.dawnsci.mapping.ui.MappingPerspectiveLaunch"
+            description="For viewing mapped data collections"
+            icon="intro/graphics/map48.png"
+            id="org.dawnsci.mapping.ui.introPageRegister"
+            name="Mapping">
+      </introPageRegister>
+   </extension>
+   <extension
+         point="org.eclipse.ui.intro.configExtension">
+      <configExtension
+            configId="org.dawnsci.intro.universalConfig"
+            content="intro/introContribution.xml">
+      </configExtension>
+   </extension>
 
 </plugin>
