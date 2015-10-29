@@ -2,7 +2,7 @@
 <introContent>
   	<extensionContent id="mapping-perspective-extension" style="style.css" name="Mapping" path="perspectives/@">
 		<group id="mapping-perspective-group" style-id="content-group">
-       		<link label="Mapping [BETA]" url="http://org.eclipse.ui.intro/runAction?pluginId=org.dawnsci.intro&amp;class=org.dawnsci.intro.actions.OpenPerspectiveAction&amp;name=org.dawnsci.mapping.ui.MappingPerspectiveLaunch" id="mapping" style-id="content-link">
+       		<link label="Mapping" url="http://org.eclipse.ui.intro/runAction?pluginId=org.dawnsci.intro&amp;class=org.dawnsci.intro.actions.OpenPerspectiveAction&amp;name=org.dawnsci.mapping.ui.MappingPerspectiveLaunch" id="mapping" style-id="content-link">
           		<text>Perspective for visualising mapped data collections</text>
        		</link>
        	</group>
