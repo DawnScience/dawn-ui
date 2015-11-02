@@ -84,7 +84,7 @@
       <editor
             class="org.dawb.workbench.ui.editors.H5MultiEditor"
             default="true"
-            extensions="h5, hd5, hdf5, nxs, nexus, hdf, mat"
+            extensions="h5, hd5, hdf5, nxs, nexus, hdf, mat, nc"
             icon="icons/h5_editor.png"
             id="org.dawb.workbench.editor.H5Editor"
             name="Nexus/HDF5 Editor">
