@@ -837,7 +837,12 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			if (rec == defaultPageRec) continue;
 			if (rec == activeRec)      {
 				activeRec.tool.deactivate();
-				continue;
+				if (removeFromMap) {
+					showPageRec(defaultPageRec);
+					activeRec = defaultPageRec;
+				} else {
+				    continue;
+				}
 			}
 			
 			int newCount = ((Integer) mapToolToNumRecs.get(rec.tool)).intValue() - 1;
