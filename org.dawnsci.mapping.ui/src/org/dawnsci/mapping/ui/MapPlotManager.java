@@ -313,6 +313,11 @@ public class MapPlotManager {
 					t.setGlobalRange(area.getRange());
 					t.setAlpha(((MappedData)o).getTransparency());
 					this.map.addTrace(t);
+					
+					IDataset[] ax = MappingUtils.getAxesFromMetadata(m.getMap());
+					ILineTrace lt = map.createLineTrace(m.getLongName()+ "line");
+					lt.setData(ax[1], ax[0]);
+//					map.addTrace(lt);
 				}
 				
 				if (o instanceof AssociatedImage) {

@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.dawnsci.mapping.ui.datamodel.MapBean;
 import org.dawnsci.mapping.ui.datamodel.MappedBlockBean;
@@ -14,8 +14,10 @@ import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
 import org.eclipse.jface.dialogs.IPageChangeProvider;
 import org.eclipse.jface.dialogs.IPageChangedListener;
 import org.eclipse.jface.dialogs.PageChangedEvent;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -77,15 +79,13 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 		});
 		
 		mapToParent = new HashMap<String, Integer>();
-		cviewer.addSelectionChangedListener(new ISelectionChangedListener() {
+		cviewer.addCheckStateListener(new ICheckStateListener() {
 			
-			@SuppressWarnings("unchecked")
 			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				Object element = ((StructuredSelection)event.getSelection()).getFirstElement();
-				Entry<String,int[]> entry = (Entry<String,int[]>)element;
+			public void checkStateChanged(CheckStateChangedEvent event) {
+				Entry<String,int[]> entry = (Entry<String,int[]>)event.getElement();
 				String key = entry.getKey();
-				if (!cviewer.getChecked(element)) {
+				if (!event.getChecked()) {
 					combo.setEnabled(false);
 					if (mapToParent.containsKey(key)) mapToParent.remove(key);
 					updateBeans();
@@ -99,6 +99,30 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 				else mapToParent.put(key, index);
 				combo.select(index);
 				updateBeans();
+				
+			}
+		});
+		
+		cviewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@SuppressWarnings("unchecked")
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				Object element = ((StructuredSelection)event.getSelection()).getFirstElement();
+				Entry<String,int[]> entry = (Entry<String,int[]>)element;
+				String key = entry.getKey();
+				if (!cviewer.getChecked(element)) {
+					combo.setEnabled(false);
+					return;
+
+				}
+				combo.setItems(options);
+				combo.setEnabled(true);
+				
+				int index = 0;
+				if (mapToParent.containsKey(key)) index = mapToParent.get(key);
+				else mapToParent.put(key, index);
+				combo.select(index);
 			}
 		});
 		
