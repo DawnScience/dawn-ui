@@ -8,15 +8,15 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.dawnsci.mapping.ui.datamodel.MappedBlockBean;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
@@ -88,18 +88,14 @@ public class DatasetAndAxesWidget {
 		dataTable.setLayout(new GridData(GridData.FILL_BOTH));
 		
 		
-		cviewer.addSelectionChangedListener(new ISelectionChangedListener() {
+		cviewer.addCheckStateListener(new ICheckStateListener() {
 			
-			@SuppressWarnings("unchecked")
 			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				
-				if (((StructuredSelection)event.getSelection()).isEmpty()) return;
-				
-				Object element = ((StructuredSelection)event.getSelection()).getFirstElement();
-				Entry<String,int[]> entry = (Entry<String,int[]>)element;
+			public void checkStateChanged(CheckStateChangedEvent event) {
+
+				Entry<String,int[]> entry = (Entry<String,int[]>)event.getElement();
 				String key = entry.getKey();
-				if (!cviewer.getChecked(element)) {
+				if (!event.getChecked()) {
 					if (nameToDimensions.containsKey(key)) nameToDimensions.remove(key);
 					Iterator<MappedBlockBean> it = beans.iterator();
 					while (it.hasNext()) {
@@ -136,7 +132,6 @@ public class DatasetAndAxesWidget {
 				
 			}
 		});
-		
 		
 		remappable = new Button(main, SWT.CHECK);
 		remappable.setText("Data needs remapping (Select x axis)");
