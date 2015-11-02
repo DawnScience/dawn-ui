@@ -16,7 +16,9 @@ import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
@@ -129,6 +131,31 @@ public class DatasetAndAxesWidget {
 				
 				MappedBlockBean bean = new MappedBlockBean();
 				bean.setName(key);
+				
+			}
+		});
+		
+		cviewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@SuppressWarnings("unchecked")
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				
+				if (((StructuredSelection)event.getSelection()).isEmpty()) return;
+				
+				Object element = ((StructuredSelection)event.getSelection()).getFirstElement();
+				Entry<String,int[]> entry = (Entry<String,int[]>)element;
+				String key = entry.getKey();
+				if (!cviewer.getChecked(element)) {
+					dataTable.clearAll();
+					return;
+				}
+
+				if (!nameToDimensions.containsKey(key))return;
+				Dimension[] dims = nameToDimensions.get(key);
+
+				dataTable.setInput(OPTIONS,dims);
+
 				
 			}
 		});

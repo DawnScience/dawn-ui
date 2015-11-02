@@ -18,7 +18,9 @@ import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.IWizardContainer;
@@ -98,6 +100,29 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 				combo.select(index);
 				updateBeans();
 				
+			}
+		});
+		
+		cviewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@SuppressWarnings("unchecked")
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				Object element = ((StructuredSelection)event.getSelection()).getFirstElement();
+				Entry<String,int[]> entry = (Entry<String,int[]>)element;
+				String key = entry.getKey();
+				if (!cviewer.getChecked(element)) {
+					combo.setEnabled(false);
+					return;
+
+				}
+				combo.setItems(options);
+				combo.setEnabled(true);
+				
+				int index = 0;
+				if (mapToParent.containsKey(key)) index = mapToParent.get(key);
+				else mapToParent.put(key, index);
+				combo.select(index);
 			}
 		});
 		
