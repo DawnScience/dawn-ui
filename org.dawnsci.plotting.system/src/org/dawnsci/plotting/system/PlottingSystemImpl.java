@@ -693,16 +693,21 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		double limitRatio = (double) 1 / (double) 100;
 		double ratioWidth = (double) shape[0] / (double) shape[1];
 		double ratioHeight = (double) shape[1] / (double) shape[0];
-		boolean isAspectRatio = ratioWidth > limitRatio && ratioHeight > limitRatio;
-		IContributionItem[] items = getActionBars().getToolBarManager().getItems();
-		for (IContributionItem item : items) {
-			if (item.getId() != null && item.getId().equals(PlottingConstants.ASPECT)) {
-				ActionContributionItem action = (ActionContributionItem) item;
-				action.getAction().setChecked(isAspectRatio);
-				break;
+		boolean isAuto = ratioWidth > limitRatio && ratioHeight > limitRatio;
+		boolean isAspectRatio = getPreferenceStore().getBoolean(PlottingConstants.ASPECT);
+		if (!isAuto) {
+			IContributionItem[] items = getActionBars().getToolBarManager().getItems();
+			for (IContributionItem item : items) {
+				if (item.getId() != null && item.getId().equals(PlottingConstants.ASPECT)) {
+					ActionContributionItem action = (ActionContributionItem) item;
+					action.getAction().setChecked(false);
+					break;
+				}
 			}
+			setKeepAspect(false);
+		} else {
+			setKeepAspect(isAspectRatio);
 		}
-		setKeepAspect(isAspectRatio);
 	}
 
 	@Override
