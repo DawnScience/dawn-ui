@@ -660,7 +660,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 				
 				getViewSite().getShell().getDisplay().asyncExec(new Runnable() {
 					public void run() {
-						if (activeRec.tool==null) return;
+						if (activeRec == null || activeRec.tool==null) return;
 						IWorkbenchPage page = getActivePage();
 						if (!page.isPartVisible(ToolPageView.this)) { // We deactivate
 							activeRec.tool.deactivate();
