@@ -12,6 +12,7 @@ import java.lang.ref.SoftReference;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -130,12 +131,12 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	 * Map from pages to view sites Note that view sites were not added to page
 	 * recs to avoid breaking binary compatibility with previous builds
 	 */
-	private Map<IToolPage,IPageSite> mapToolToSite = new HashMap<IToolPage,IPageSite>(7);
+	private Map<IToolPage,IPageSite> mapToolToSite = new IdentityHashMap<IToolPage,IPageSite>(7);
 
 	/**
 	 * Map from pages to the number of pageRecs actively associated with a page.
 	 */
-	private Map<IToolPage,Integer> mapToolToNumRecs = new HashMap<IToolPage,Integer>(7);
+	private Map<IToolPage,Integer> mapToolToNumRecs = new IdentityHashMap<IToolPage,Integer>(7);
 
 	/**
 	 * The page rec which provided the current page or <code>null</code>
@@ -659,7 +660,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 				
 				getViewSite().getShell().getDisplay().asyncExec(new Runnable() {
 					public void run() {
-						if (activeRec.tool==null) return;
+						if (activeRec == null || activeRec.tool==null) return;
 						IWorkbenchPage page = getActivePage();
 						if (!page.isPartVisible(ToolPageView.this)) { // We deactivate
 							activeRec.tool.deactivate();
@@ -836,7 +837,12 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			if (rec == defaultPageRec) continue;
 			if (rec == activeRec)      {
 				activeRec.tool.deactivate();
-				continue;
+				if (removeFromMap) {
+					showPageRec(defaultPageRec);
+					activeRec = defaultPageRec;
+				} else {
+				    continue;
+				}
 			}
 			
 			int newCount = ((Integer) mapToolToNumRecs.get(rec.tool)).intValue() - 1;

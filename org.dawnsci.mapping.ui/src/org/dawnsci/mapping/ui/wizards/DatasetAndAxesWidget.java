@@ -8,12 +8,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.dawnsci.mapping.ui.datamodel.MappedBlockBean;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -37,6 +39,8 @@ public class DatasetAndAxesWidget {
 	private Map<String, Dimension[]> nameToDimensions;
 	private List<MappedBlockBean> beans;
 	private DataConfigurationTable dataTable;
+	private Button remappable;
+	private Combo remapXAxis;
 	private static final String[] OPTIONS = new String[]{"map Y", "map X",""};
 	private boolean reMap = false;
 	private PropertyChangeListener listener;
@@ -86,18 +90,14 @@ public class DatasetAndAxesWidget {
 		dataTable.setLayout(new GridData(GridData.FILL_BOTH));
 		
 		
-		cviewer.addSelectionChangedListener(new ISelectionChangedListener() {
+		cviewer.addCheckStateListener(new ICheckStateListener() {
 			
-			@SuppressWarnings("unchecked")
 			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				
-				if (((StructuredSelection)event.getSelection()).isEmpty()) return;
-				
-				Object element = ((StructuredSelection)event.getSelection()).getFirstElement();
-				Entry<String,int[]> entry = (Entry<String,int[]>)element;
+			public void checkStateChanged(CheckStateChangedEvent event) {
+
+				Entry<String,int[]> entry = (Entry<String,int[]>)event.getElement();
 				String key = entry.getKey();
-				if (!cviewer.getChecked(element)) {
+				if (!event.getChecked()) {
 					if (nameToDimensions.containsKey(key)) nameToDimensions.remove(key);
 					Iterator<MappedBlockBean> it = beans.iterator();
 					while (it.hasNext()) {
@@ -135,8 +135,32 @@ public class DatasetAndAxesWidget {
 			}
 		});
 		
+		cviewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@SuppressWarnings("unchecked")
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				
+				if (((StructuredSelection)event.getSelection()).isEmpty()) return;
+				
+				Object element = ((StructuredSelection)event.getSelection()).getFirstElement();
+				Entry<String,int[]> entry = (Entry<String,int[]>)element;
+				String key = entry.getKey();
+				if (!cviewer.getChecked(element)) {
+					dataTable.clearAll();
+					return;
+				}
+
+				if (!nameToDimensions.containsKey(key))return;
+				Dimension[] dims = nameToDimensions.get(key);
+
+				dataTable.setInput(OPTIONS,dims);
+
+				
+			}
+		});
 		
-		final Button remappable = new Button(main, SWT.CHECK);
+		remappable = new Button(main, SWT.CHECK);
 		remappable.setText("Data needs remapping (Select x axis)");
 		remappable.setSelection(true);
 		remappable.setLayoutData(new GridData());
@@ -144,7 +168,7 @@ public class DatasetAndAxesWidget {
 		remappable.setSelection(false);
 		
 		
-		final Combo remapXAxis = new Combo(main, SWT.READ_ONLY);
+		remapXAxis = new Combo(main, SWT.READ_ONLY);
 		remapXAxis.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		remapXAxis.setEnabled(false);
 		remapXAxis.addSelectionListener(new SelectionAdapter() {
@@ -251,15 +275,22 @@ public class DatasetAndAxesWidget {
 			dims[i].setAxisOptions(axes[i]);
 			if (i == bean.getxDim()) {
 				dims[i].setDescription(OPTIONS[1]);
-				dims[i].setAxis(bean.getAxes()[i]);
 			}
 			if (i == bean.getyDim()) {
 				dims[i].setDescription(OPTIONS[0]);
-				dims[i].setAxis(bean.getAxes()[i]);
 			}
-			
+			dims[i].setAxis(bean.getAxes()[i]);
 			if (bean.getyDim() == i && bean.getxDim() == bean.getyDim()) {
 				dims[i].setSecondaryAxis(bean.getxAxisForRemapping());
+				remappable.setSelection(true);
+				remapXAxis.setItems(axes[i]);
+				for (int j = 0; j < axes[i].length; j++) {
+					if (bean.getxAxisForRemapping().equals(axes[i][j])){
+						remapXAxis.select(j);
+						break;
+					}
+				}
+				remapXAxis.setEnabled(true);
 			}
  			dims[i].addPropertyChangeListener(listener);
 		}
@@ -269,6 +300,7 @@ public class DatasetAndAxesWidget {
 				cviewer.setChecked(entry, true);
 			}
 		}
+
 		
 		nameToDimensions.put(bean.getName(), dims);
 	}
