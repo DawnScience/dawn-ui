@@ -131,12 +131,12 @@ public class AxisGrid extends Group
 	
 	public void reDeclareLabels(Point2D labelMin, Point2D labelMax)
 	{
-		reDeclareLabelsSpecfic(labelMin, labelMax, xAxis);
-		reDeclareLabelsSpecfic(labelMin, labelMax, yAxis);
+		reDeclareLabelsSpecfic(labelMin.getX(), labelMax.getX(), yAxis, this.maxLengthXY.getX(), tickSeperationXY.getX());
+		reDeclareLabelsSpecfic(labelMin.getY(), labelMax.getY(), xAxis, this.maxLengthXY.getY(), tickSeperationXY.getY());
 	}
 	
 	// !! move
-	private void reDeclareLabelsSpecfic(Point2D labelMin, Point2D labelMax, Group axis)
+	private void reDeclareLabelsSpecfic(double labelMin, double labelMax, Group axis, double maxLength, double tickSeperation)
 	{
 		// create a list of only axis lines from the scene graph
 		List<AxisLineGroup> axisLineList = new ArrayList<AxisLineGroup>();
@@ -149,16 +149,14 @@ public class AxisGrid extends Group
 					axisLineList.add((AxisLineGroup)lineNode);
 			}
 		}
-		
-		// calculate each lines label
-		final int n = axisLineList.size();
-		final Point2D minMaxDifference = labelMax.subtract(labelMin);
-		final Point2D minMaxStep = minMaxDifference.multiply((double)1/n);
-		
+				
 		int i = 0;
 		for (AxisLineGroup line: axisLineList)
 		{
-			line.rewriteLabel(Integer.toString((int)(labelMin.getX() + (minMaxStep.getX() * i))));
+			final int a = (int) (maxLength/(tickSeperation * i));
+			
+			final int newValue = (int)(((((tickSeperation * i) / maxLength) * (labelMax - labelMin)) + labelMin) + 1f);
+			line.rewriteLabel(Integer.toString(newValue));
 			i++;
 		}
 	}

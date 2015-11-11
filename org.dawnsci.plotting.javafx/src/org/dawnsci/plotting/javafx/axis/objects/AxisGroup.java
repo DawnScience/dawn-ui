@@ -179,7 +179,6 @@ public class AxisGroup extends Group
 	
 	public void flipAll()
 	{
-		System.out.println("flip all");
 		flipXGridVisible();
 		flipYGridVisible();
 		flipZGridVisible();
@@ -200,7 +199,6 @@ public class AxisGroup extends Group
 
 	public void setAxisData(List<IDataset> axesData) {
 		// TODO Auto-generated method stub
-		System.out.println("setAxisData()");
 	}
 	
 	public void setAxisLimitMin(Point3D MinLimit)

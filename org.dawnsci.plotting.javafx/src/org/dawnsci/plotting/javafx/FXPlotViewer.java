@@ -168,7 +168,6 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub
 			// add the trace into the list of current traces
 			isoSurfaceGroup.getChildren().add(itrace.getIsoSurface());
 			scene.setAxesData(itrace.getAxes());
-			scene.updateTransforms();
 		}
 		else
 		{

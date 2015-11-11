@@ -90,7 +90,6 @@ public class AxisLineGroup extends Group
 		// i increase the size then scale down to increase the resolution
 		returnText.setFont(new Font(textSize*TEXTMOD));
 		
-		System.out.println("text: " + textSize);
 		
 		return returnText;
 	}

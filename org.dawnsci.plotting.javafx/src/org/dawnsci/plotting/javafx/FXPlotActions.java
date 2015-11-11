@@ -31,9 +31,6 @@ class FXPlotActions {
 		
 		String gridLineGroupNameAction = "javafx.plotting.grid.line.actions";
 		actionMan.registerGroup(gridLineGroupNameAction, ManagerType.TOOLBAR);
-
-		
-		
 		
 		Action axisGridToggle = new Action ("Toggle Axis Grid", IAction.AS_CHECK_BOX) {
 			@Override
@@ -45,12 +42,7 @@ class FXPlotActions {
 		axisGridToggle.setImageDescriptor(Activator.getImageDescriptor("icons/orthographic.png"));
 		actionMan.registerAction(gridLineGroupNameAction, axisGridToggle, ActionType.FX3D, ManagerType.TOOLBAR);
 		
-		
-		
-		
-		
-		
-		Action axisToggle = new Action("Toggle Axes",IAction.AS_CHECK_BOX) {
+		Action axisToggle = new Action("Toggle Scalers",IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
 				viewer.addRemoveScaleAxes();

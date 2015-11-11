@@ -53,6 +53,9 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 public class SurfaceDisplayer extends Scene
 {
 	// finals
+	
+	private final boolean DEBUG_MODE = true; // Used to activate the debugging code -> not changed during run time
+	
 	private final int MOUSE_CAM_ROTATE = 0;
 	private final int MOUSE_SCALE = 1;
 	
@@ -145,8 +148,7 @@ public class SurfaceDisplayer extends Scene
 	 * node within the scene graph
 	 */
 	public SurfaceDisplayer(Group root, Group isosurfaceGroup)
-	{		
-		
+	{
 		// create the scene
 		super(root, 1500, 1500, true);
 		this.isosurfaceGroup = isosurfaceGroup;
@@ -173,32 +175,34 @@ public class SurfaceDisplayer extends Scene
 		 *  debugging
 		 */
 		
-//		  final Label label = new Label();
-//        AnimationTimer frameRateMeter = new AnimationTimer() {
-//
-//            @Override
-//            public void handle(long now) {
-//                long oldFrameTime = frameTimes[frameTimeIndex] ;
-//                frameTimes[frameTimeIndex] = now ;
-//                frameTimeIndex = (frameTimeIndex + 1) % frameTimes.length ;
-//                if (frameTimeIndex == 0) {
-//                    arrayFilled = true ;
-//                }
-//                if (arrayFilled) {
-//                    long elapsedNanos = now - oldFrameTime ;
-//                    long elapsedNanosPerFrame = elapsedNanos / frameTimes.length ;
-//                    double frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
-//                    label.setText(String.format("Current frame rate: %.3f", frameRate));
-//                }
-//            }
-//        };
-//
-//        frameRateMeter.start();
-//
-//		root.getChildren().add(label);
-		
-	}
+		if (DEBUG_MODE)
+		{
+			final Label label = new Label();
+	        AnimationTimer frameRateMeter = new AnimationTimer() {
 	
+	            @Override
+	            public void handle(long now) {
+	                long oldFrameTime = frameTimes[frameTimeIndex] ;
+	                frameTimes[frameTimeIndex] = now ;
+	                frameTimeIndex = (frameTimeIndex + 1) % frameTimes.length ;
+	                if (frameTimeIndex == 0) {
+	                    arrayFilled = true ;
+	                }
+	                if (arrayFilled) {
+	                    long elapsedNanos = now - oldFrameTime ;
+	                    long elapsedNanosPerFrame = elapsedNanos / frameTimes.length ;
+	                    double frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
+	                    label.setText(String.format("Current frame rate: %.3f", frameRate));
+	                }
+	            }
+	        };
+	
+	        frameRateMeter.start();
+	
+			root.getChildren().add(label);
+			
+		}
+	}
 	/*
 	 * private
 	 */
@@ -450,7 +454,7 @@ public class SurfaceDisplayer extends Scene
 			@Override
 			public void invalidated(Observable arg0)
 			{
-				updateTransforms();
+				updateSceneTransforms();
 			}
 		});
 		
@@ -576,13 +580,18 @@ public class SurfaceDisplayer extends Scene
 		isosurfaceGroup.getChildren().remove(removeNode);
 	}
 	
+	private void updateSceneTransforms()
+	{
+		this.sceneOffset.setX(this.getWidth() / 2);
+		this.sceneOffset.setY(this.getHeight()/ 2);
+		this.sceneOffset.setZ(0);
+	}
+	
 	// !!
 	public void updateTransforms()
 	{
 		
-		this.sceneOffset.setX(this.getWidth() / 2);
-		this.sceneOffset.setY(this.getHeight()/ 2);
-		this.sceneOffset.setZ(0);
+		updateSceneTransforms();
 		
 		final Bounds isoGroupOffsetBounds = this.objectGroup.getBoundsInLocal();
 		
