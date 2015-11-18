@@ -43,7 +43,7 @@ public class PlottingUtils {
 	 * @param data
 	 *             the data to plot
 	 */
-	public static void plotData(final IPlottingSystem plottingSystem,
+	public static void plotData(final IPlottingSystem<?> plottingSystem,
 								final String plotTitle,
 								final IDataset data){
 		Job plotJob = new Job("Plotting data") {

@@ -10,6 +10,7 @@ package org.dawb.workbench.ui.editors.test;
 
 import java.io.File;
 
+import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.tango.extensions.editors.MultiScanEditor;
 import org.dawb.tango.extensions.editors.MultiScanMultiEditor;
 import org.eclipse.core.filesystem.EFS;
@@ -21,8 +22,6 @@ import org.junit.Test;
 import org.osgi.framework.Bundle;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-
-import org.dawb.common.ui.util.EclipseUtils;
 
 
 public class EditorsTest {

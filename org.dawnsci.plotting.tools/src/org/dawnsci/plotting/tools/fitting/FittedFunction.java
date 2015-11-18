@@ -68,7 +68,7 @@ public class FittedFunction  {
 		return saved;
 	}
 
-	public void setSaved(IPlottingSystem sys, boolean saved, String... usedNames) throws Exception {
+	public void setSaved(IPlottingSystem<?> sys, boolean saved, String... usedNames) throws Exception {
 		this.saved = saved;
 		
 		
@@ -311,7 +311,7 @@ public class FittedFunction  {
 		annotation.setVisible(isVis);
 	}
 
-	public void delete(IPlottingSystem sys) {
+	public void delete(IPlottingSystem<?> sys) {
 		sys.removeRegion(fwhm);
 		sys.removeTrace(trace);
 		sys.removeRegion(center);

@@ -64,11 +64,11 @@ import org.eclipse.dawnsci.analysis.dataset.roi.SectorROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
-import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
@@ -232,7 +232,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		super.activate();
 		createDiffractionModel(true);
 		
-		IPlottingSystem plotting = getPlottingSystem();
+		IPlottingSystem<Composite> plotting = getPlottingSystem();
 		if (plotting != null) {
 			if (regionListener != null)
 				plotting.addRegionListener(regionListener);
@@ -266,7 +266,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		if (!isActive()) {return;}
 		
 		super.deactivate();
-		IPlottingSystem plotting = getPlottingSystem();
+		IPlottingSystem<Composite> plotting = getPlottingSystem();
 		if (plotting != null) {
 			plotting.removeRegionListener(regionListener);
 			if (traceListener != null)
@@ -578,7 +578,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			public void run() {
 				logger.debug("1-click clicked");
 
-				IPlottingSystem plotter = getPlottingSystem();
+				IPlottingSystem<Composite> plotter = getPlottingSystem();
 				if (plotter == null) {
 					logger.debug("No plotting system found");
 					return;
@@ -606,7 +606,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			public void run() {
 				logger.debug("Fit ring clicked");
 
-				IPlottingSystem plotter = getPlottingSystem();
+				IPlottingSystem<Composite> plotter = getPlottingSystem();
 				if (plotter == null) {
 					logger.debug("No plotting system found");
 					return;
@@ -676,7 +676,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 
 			@Override
 			public void run() {
-				final IPlottingSystem plotter = getPlottingSystem();
+				final IPlottingSystem<Composite> plotter = getPlottingSystem();
 				final IImageTrace t = getImageTrace();
 				if (tmpRegion.getRegionType() == RegionType.ELLIPSEFIT || tmpRegion.getRegionType() == RegionType.CIRCLEFIT) {
 					final Display display = control.getDisplay();
@@ -751,7 +751,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				logger.debug("Find outer rings clicked");
 
 				if (tmpRegion.getRegionType() == RegionType.ELLIPSEFIT || tmpRegion.getRegionType() == RegionType.CIRCLEFIT) {
-					final IPlottingSystem plotter = getPlottingSystem();
+					final IPlottingSystem<Composite> plotter = getPlottingSystem();
 					final IImageTrace t = getImageTrace();
 					final Display display = control.getDisplay();
 					if (t != null) {
@@ -803,7 +803,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 					logger.debug("Calibrating against {}", name);
 					final List<HKL> spacings = standards.getCalibrationPeakMap(name).getHKLs();
 
-					final IPlottingSystem plotter = getPlottingSystem();
+					final IPlottingSystem<Composite> plotter = getPlottingSystem();
 					final IImageTrace t = getImageTrace();
 					final Display display = control.getDisplay();
 					if (t != null) {
@@ -953,7 +953,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	}
 
 	private static final String RING_PREFIX = "Ring";
-	private void clearRegions(IPlottingSystem plotter) {
+	private void clearRegions(IPlottingSystem<Composite> plotter) {
 		Collection<IRegion> regions = plotter.getRegions();
 		for (IRegion r : regions) {
 			String n = r.getName();
@@ -966,7 +966,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	private static final double RADIAL_DELTA = 10;
 	private static final int MAX_POINTS = 200;
 
-	public static IROI runEllipseFit(final IProgressMonitor monitor, Display display, final IPlottingSystem plotter, IImageTrace t, IROI roi, final boolean circle, double radialDelta) {
+	public static IROI runEllipseFit(final IProgressMonitor monitor, Display display, final IPlottingSystem<Composite> plotter, IImageTrace t, IROI roi, final boolean circle, double radialDelta) {
 		if (roi == null)
 			return null;
 
@@ -1009,7 +1009,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		return froi;
 	}
 	
-	private IStatus drawRing(final IProgressMonitor monitor, Display display, final IPlottingSystem plotter, final IROI froi, final boolean circle) {
+	private IStatus drawRing(final IProgressMonitor monitor, Display display, final IPlottingSystem<Composite> plotter, final IROI froi, final boolean circle) {
 		final boolean[] status = {true};
 		display.syncExec(new Runnable() {
 
@@ -1038,7 +1038,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		return status[0] ? Status.OK_STATUS : Status.CANCEL_STATUS;
 	}
 
-	private IStatus runFindOuterRings(final IProgressMonitor monitor, Display display, final IPlottingSystem plotter, IImageTrace t, IROI roi) {
+	private IStatus runFindOuterRings(final IProgressMonitor monitor, Display display, final IPlottingSystem<Composite> plotter, IImageTrace t, IROI roi) {
 		final ProgressMonitorWrapper mon = new ProgressMonitorWrapper(monitor);
 		monitor.beginTask("Find elliptical rings", IProgressMonitor.UNKNOWN);
 		monitor.subTask("Find rings");
@@ -1078,7 +1078,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		return status[0] ? Status.OK_STATUS : Status.CANCEL_STATUS;
 	}
 
-	private IStatus runCalibrateDetector(final IProgressMonitor monitor, Display display, final IPlottingSystem plotter, List<HKL> spacings) {
+	private IStatus runCalibrateDetector(final IProgressMonitor monitor, Display display, final IPlottingSystem<Composite> plotter, List<HKL> spacings) {
 		final ProgressMonitorWrapper mon = new ProgressMonitorWrapper(monitor);
 		monitor.beginTask("Calibrate detector from rings", IProgressMonitor.UNKNOWN);
 		monitor.subTask("Find rings");

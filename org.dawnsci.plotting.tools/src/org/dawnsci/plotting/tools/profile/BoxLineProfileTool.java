@@ -76,7 +76,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	}
 
 	@Override
-	protected void configurePlottingSystem(IPlottingSystem plottingSystem) {
+	protected void configurePlottingSystem(IPlottingSystem<?> plottingSystem) {
 		if (xPixelAxis == null) {
 			this.xPixelAxis = plottingSystem.getSelectedXAxis();
 		}
@@ -462,7 +462,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 		});
 	}
 
-	private IRegion createXAxisBoxRegion(final IPlottingSystem plottingSystem, 
+	private IRegion createXAxisBoxRegion(final IPlottingSystem<?> plottingSystem, 
 			final IROI roi, final String roiName){
 		try {
 			if(roi instanceof RectangularROI){

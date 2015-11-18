@@ -10,11 +10,8 @@ package org.dawnsci.plotting.services;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
 import java.awt.image.DirectColorModel;
 import java.awt.image.IndexColorModel;
-import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.util.ArrayList;
@@ -76,7 +73,6 @@ import org.eclipse.ui.services.IDisposable;
 import org.eclipse.ui.services.IServiceLocator;
 
 import uk.ac.diamond.scisoft.analysis.dataset.function.Downsample;
-import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 /**
  * A service to provide SWT Image objects for 2D data.
@@ -265,7 +261,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 			if (pd == null) pd = (PlotDisposable)createPlotDisposable(null);
 			final PlotDisposable plotDisposable = pd;
 			
-			final IPlottingSystem system = pd.getSystem();
+			final IPlottingSystem<?> system = pd.getSystem();
 		
 			
 			final Image[] scaled = new Image[1];
@@ -349,7 +345,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 		
 		// We plot to an offscreen plotting system, then take a screen shot of this.
 		final PlotDisposable ret = new PlotDisposable();
-		IPlottingSystem system = plotName!=null 
+		IPlottingSystem<?> system = plotName!=null 
 		                       ? PlottingFactory.getPlottingSystem(plotName)
 		                       : PlottingFactory.getLightWeightPlottingSystem();
 		                       
@@ -380,7 +376,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 	
 	protected static class PlotDisposable implements IDisposable {
 		
-		private IPlottingSystem system;
+		private IPlottingSystem<?> system;
 		private Shell           shell;
 
 		@Override
@@ -393,11 +389,11 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 			});
 		}
 
-		public IPlottingSystem getSystem() {
-			return system;
+		public <T> IPlottingSystem<T> getSystem() {
+			return (IPlottingSystem<T>)system;
 		}
 
-		public void setSystem(IPlottingSystem system) {
+		public <T> void setSystem(IPlottingSystem<T> system) {
 			this.system = system;
 		}
 

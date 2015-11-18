@@ -37,6 +37,7 @@ import org.eclipse.dawnsci.plotting.api.trace.IImageTrace.DownsampleType;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -88,7 +89,7 @@ public class SWTXYStressTest {
 		
 		final AsciiEditor editor       = (AsciiEditor)part;
 		final PlotDataEditor plotter   = (PlotDataEditor)editor.getActiveEditor();
-		final IPlottingSystem sys = plotter.getPlottingSystem();
+		final IPlottingSystem<Composite> sys = plotter.getPlottingSystem();
 		
 		//if (!(sys instanceof PlottingSystemImpl)) throw new Exception("This test is designed for "+PlottingSystemImpl.class.getName());
 		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);
@@ -156,7 +157,7 @@ public class SWTXYStressTest {
 		
 		final AsciiEditor editor       = (AsciiEditor)part;
 		final PlotDataEditor plotter   = (PlotDataEditor)editor.getActiveEditor();
-		final IPlottingSystem sys = plotter.getPlottingSystem();
+		final IPlottingSystem<Composite> sys = plotter.getPlottingSystem();
 		
     	Dataset data = Random.rand(new int[]{2048});
     	
@@ -265,7 +266,7 @@ public class SWTXYStressTest {
 
 		EclipseUtils.delay(2000);
 		
-		final IPlottingSystem sys = (IPlottingSystem)part.getAdapter(IPlottingSystem.class);
+		final IPlottingSystem<Composite> sys = (IPlottingSystem<Composite>)part.getAdapter(IPlottingSystem.class);
 
 		final Collection<ITrace>   traces= sys.getTraces(IImageTrace.class);
 		final IImageTrace          imt = (IImageTrace)traces.iterator().next();

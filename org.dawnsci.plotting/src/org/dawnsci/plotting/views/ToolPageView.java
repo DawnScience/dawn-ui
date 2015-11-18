@@ -1314,7 +1314,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			
 		} else {
 			// If we are a view, activate that, otherwise activate the editor
-			final IPlottingSystem sys = tp.getPlottingSystem();
+			final IPlottingSystem<Composite> sys = tp.getPlottingSystem();
 			if (sys!=null && sys.getPart()!=null) {
 				partActivated(sys.getPart());
 			} else {
@@ -1429,7 +1429,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
             // leave the existing tool where it is. Likely it is an image tool
             // and sys is a 1D plot in a dedicated view.
             if (!newPartFound && sys instanceof IPlottingSystem && (tool instanceof EmptyTool || tool==null) ) {
-            	final Collection<ITrace> images = ((IPlottingSystem)sys).getTraces(IImageTrace.class);   
+            	final Collection<ITrace> images = ((IPlottingSystem<Composite>)sys).getTraces(IImageTrace.class);   
                 
             	ToolPageRole role = (activeRec!=null && activeRec.tool!=null) 
             			          ? activeRec.tool.getToolPageRole()
@@ -1481,7 +1481,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	private boolean isDimensionalityOk(IToolPage tool, IToolPageSystem sys) {
 		if (tool instanceof AbstractToolPage && sys instanceof IPlottingSystem) {
         	if (((AbstractToolPage)tool).isDedicatedView()) {
-        		IPlottingSystem ps = (IPlottingSystem)sys;
+        		IPlottingSystem<Composite> ps = (IPlottingSystem<Composite>)sys;
         		if (tool.getToolPageRole()==ToolPageRole.ROLE_2D && !ps.is2D()) {
         			return false;
         		} else if (tool.getToolPageRole()==ToolPageRole.ROLE_1D && !ps.getPlotType().is1D()) {
@@ -1535,7 +1535,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 				IToolPageSystem sys = (IToolPageSystem)part.getAdapter(IToolPageSystem.class);
 				staticTool.setToolSystem(sys);
 				if (sys instanceof IPlottingSystem) {
-					staticTool.setPlottingSystem((IPlottingSystem)sys);
+					staticTool.setPlottingSystem((IPlottingSystem<Composite>)sys);
 				}
 				staticTool.setPart(part);
 				if (staticTool.getControl()!=null) {

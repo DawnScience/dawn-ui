@@ -20,6 +20,7 @@ import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ColorOption;
 import org.eclipse.dawnsci.slicing.api.data.ITransferableDataManager;
 import org.eclipse.dawnsci.slicing.api.system.ISliceSystem;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
@@ -145,7 +146,7 @@ public class AsciiEditor extends MultiPageEditorPart implements IPlottingSystemS
 		return super.getActiveEditor();
 	}
 
-	public IPlottingSystem getPlotWindow() {
+	public IPlottingSystem<Composite> getPlotWindow() {
 		return dataSetEditor.getPlotWindow();
 	}
 	public PlotDataEditor getDataSetEditor() {

@@ -246,7 +246,7 @@ public class ToolUtils {
 				image.getShape()[0] / 2d };
 	}
 
-	public static void updateSectorsMenu(IPlottingSystem system, final IImageTrace image, final MenuAction menu, final IWorkbenchPart part) {
+	public static void updateSectorsMenu(IPlottingSystem<?> system, final IImageTrace image, final MenuAction menu, final IWorkbenchPart part) {
 		if (system == null)
 			return;
 		menu.clear();

@@ -30,6 +30,7 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.printing.Printer;
 import org.eclipse.swt.printing.PrinterData;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.slf4j.Logger;
@@ -39,9 +40,9 @@ public class JRealityPlotActions {
 	
 	private static final Logger logger = LoggerFactory.getLogger(JRealityPlotActions.class);
 
-	private JRealityPlotViewer        plotter;
-	private IPlottingSystem           system;
-	private IPlotActionSystem         actionMan;
+	private JRealityPlotViewer           plotter;
+	private IPlottingSystem<?>           system;
+	private IPlotActionSystem                    actionMan;
 
 	private Action useTransparency;
 	private Action renderEdgeOnly;
@@ -50,7 +51,7 @@ public class JRealityPlotActions {
 	private Action orthographicProjAction, boundingBox, xCoordGrid, yCoordGrid, zCoordGrid;
 
 	public JRealityPlotActions(JRealityPlotViewer jRealityPlotViewer,
-			                   IPlottingSystem    system) {
+			                   IPlottingSystem<?>    system) {
 		this.plotter            = jRealityPlotViewer;
 		this.system             = system;
 		this.actionMan          = system.getPlotActionSystem();
@@ -546,7 +547,7 @@ public class JRealityPlotActions {
 		system             = null;
 	}
 
-	public IPlottingSystem getPlottingSystem(){
+	public IPlottingSystem<?> getPlottingSystem(){
 		return system;
 	}
 }

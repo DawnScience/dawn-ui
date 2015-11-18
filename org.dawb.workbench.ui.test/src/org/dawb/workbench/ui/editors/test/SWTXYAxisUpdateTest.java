@@ -26,6 +26,7 @@ import org.eclipse.dawnsci.analysis.dataset.impl.LongDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.ide.FileStoreEditorInput;
@@ -108,7 +109,7 @@ public class SWTXYAxisUpdateTest {
 		
 		final AsciiEditor editor       = (AsciiEditor)part;
 		final PlotDataEditor plotter   = (PlotDataEditor)editor.getActiveEditor();
-		final IPlottingSystem sys = plotter.getPlottingSystem();
+		final IPlottingSystem<Composite> sys = plotter.getPlottingSystem();
 		
 		//if (!(sys instanceof PlottingSystemImpl)) throw new Exception("This test is designed for "+PlottingSystemImpl.class.getName());
 		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);

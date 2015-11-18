@@ -28,10 +28,10 @@ public class RegionEditorNode extends LabelNode {
 	private boolean isMobile;
 	private boolean angleInRadian = false;
 	private IRegion region;
-	private IPlottingSystem plottingSystem;
+	private IPlottingSystem<?> plottingSystem;
 
 	
-	public RegionEditorNode(IPlottingSystem plottingSystem, IRegion region, LabelNode parent) {
+	public RegionEditorNode(IPlottingSystem<?> plottingSystem, IRegion region, LabelNode parent) {
 		this.plottingSystem = plottingSystem;
 		this.region = region;
 		setLabel(region.getName());

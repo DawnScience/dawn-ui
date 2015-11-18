@@ -36,7 +36,7 @@ public class PlotFilterActions {
 	 * @param system - plotting system to decorate
 	 * @return actions
 	 */
-	public static MenuAction getXYFilterActions(IPlottingSystem system) {
+	public static MenuAction getXYFilterActions(IPlottingSystem<?> system) {
 		
 		MenuAction menu = new MenuAction("Filters");
 		menu.setId("org.dawnsci.plotting.system.XY.Filters");

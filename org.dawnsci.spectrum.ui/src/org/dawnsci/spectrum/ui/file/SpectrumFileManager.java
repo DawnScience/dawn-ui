@@ -36,7 +36,7 @@ import uk.ac.diamond.scisoft.analysis.plotclient.dataset.IDataMailListener;
 */
 public class SpectrumFileManager implements IDataMailListener {
 	
-	private IPlottingSystem system;
+	private IPlottingSystem<?> system;
 	private Map<String,ISpectrumFile> spectrumFiles;
 	private HashSet<ISpectrumFileListener> listeners;
 	private final static Logger logger = LoggerFactory.getLogger(SpectrumFileManager.class);
@@ -47,7 +47,7 @@ public class SpectrumFileManager implements IDataMailListener {
 	 * There should be one of these per TraceProcessPage
 	 * @param system
 	 */
-	public SpectrumFileManager(IPlottingSystem system) {
+	public SpectrumFileManager(IPlottingSystem<?> system) {
 		spectrumFiles = new LinkedHashMap<String,ISpectrumFile>();
 		listeners     = new HashSet<ISpectrumFileListener>();
 		this.system   = system;

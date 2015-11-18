@@ -765,7 +765,7 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 	}
 
 	@Override
-	public void fillTraceActions(IContributionManager toolBarManager, ITrace trace, IPlottingSystem system) {
+	public <T> void fillTraceActions(IContributionManager toolBarManager, ITrace trace, IPlottingSystem<T> system) {
 		if (traceActionProvider!=null) traceActionProvider.fillTraceActions(toolBarManager, trace, system);
 	}
 

@@ -115,7 +115,7 @@ public class SpectrumTracesView extends ViewPart {
 	private Logger logger = LoggerFactory.getLogger(SpectrumTracesView.class);
 
 	private SpectrumFileManager manager;
-	private IPlottingSystem     system;
+	private IPlottingSystem<Composite>     system;
 	private CheckboxTableViewer viewer;
 	private List<Color>         orderedColors;
 	private ProcessMenuManager processMenuManager;
@@ -142,7 +142,7 @@ public class SpectrumTracesView extends ViewPart {
 		//Get plotting system from PlotView, use it to create file manager
 		IWorkbenchPage page = getSite().getPage();
 		IViewPart view = page.findView("org.dawnsci.spectrum.ui.views.SpectrumPlot");
-		system = (IPlottingSystem)view.getAdapter(IPlottingSystem.class);
+		system = (IPlottingSystem<Composite>)view.getAdapter(IPlottingSystem.class);
 		manager = new SpectrumFileManager(system);
 		
 		viewer.setInput(manager);
@@ -461,7 +461,7 @@ public class SpectrumTracesView extends ViewPart {
 	}
 
 	
-	protected Map<String, IDataset> createData(IPlottingSystem system) {
+	protected Map<String, IDataset> createData(IPlottingSystem<Composite> system) {
 		
 		final Map<String, IDataset> data = new HashMap<String, IDataset>(3);
 		final Collection<ITrace>  traces = system.getTraces();

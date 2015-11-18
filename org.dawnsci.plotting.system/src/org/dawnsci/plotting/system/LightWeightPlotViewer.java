@@ -587,7 +587,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 
 	protected void fillAnnotationConfigure(IMenuManager manager,
 													final Annotation annotation,
-													final IPlottingSystem system) {
+													final IPlottingSystem<T> system) {
 
 		final Action configure = new Action("Configure '"+annotation.getName()+"'", PlottingSystemActivator.getImageDescriptor("icons/Configure.png")) {
 			public void run() {
@@ -641,7 +641,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
      * @param xyGraph
      */
 	@Override
-	public void fillTraceActions(final IContributionManager manager, final ITrace trace, final IPlottingSystem sys) {
+	public <R> void fillTraceActions(final IContributionManager manager, final ITrace trace, final IPlottingSystem<R> sys) {
 
 		manager.add(new Separator("org.dawb.workbench.plotting.system.trace.start"));
 

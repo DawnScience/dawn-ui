@@ -143,7 +143,7 @@ public class MaskObject {
 	 * @param loc
 	 * @param system
 	 */
-	public void process(final Point finishLocation, final IPlottingSystem system, IProgressMonitor monitor) {
+	public void process(final Point finishLocation, final IPlottingSystem<?> system, IProgressMonitor monitor) {
 				
 		ShapeType penShape = ShapeType.valueOf(Activator.getPlottingPreferenceStore().getString(PlottingConstants.MASK_PEN_SHAPE));
         if (penShape==ShapeType.NONE) return;

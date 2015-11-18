@@ -87,7 +87,7 @@ public class PlotImageEditor extends EditorPart implements IEditorExtension, IRe
 	private static Logger logger = LoggerFactory.getLogger(PlotImageEditor.class);
 	
 	// This view is a composite of two other views.
-	private IPlottingSystem            plottingSystem;	
+	private IPlottingSystem<Composite>            plottingSystem;	
 	private ActionBarWrapper            wrapper;
 	private final IReusableEditor       parent;
     private boolean                     plotUpdateAllowed=true;
@@ -345,7 +345,7 @@ public class PlotImageEditor extends EditorPart implements IEditorExtension, IRe
 		return super.getAdapter(clazz);
 	}
 
-    public IPlottingSystem getPlottingSystem() {
+    public IPlottingSystem<Composite> getPlottingSystem() {
     	return plottingSystem;
     }
 

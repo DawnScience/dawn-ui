@@ -158,7 +158,7 @@ public class DiffractionUtils {
 	}
 
 	public static IROI runConicPeakFit(final IProgressMonitor monitor, Display display,
-			final IPlottingSystem plotter, IImageTrace t, IParametricROI roi, IParametricROI[] innerOuter, int nPoints) {
+			final IPlottingSystem<?> plotter, IImageTrace t, IParametricROI roi, IParametricROI[] innerOuter, int nPoints) {
 	
 		if (roi == null)
 			return null;
@@ -194,7 +194,7 @@ public class DiffractionUtils {
 	
 	
 //	public static IROI runEllipsePeakFit(final IProgressMonitor monitor, Display display,
-//			final IPlottingSystem plotter, IImageTrace t, IROI roi, double innerRadius, double outerRadius, int nPoints) {
+//			final IPlottingSystem<Composite> plotter, IImageTrace t, IROI roi, double innerRadius, double outerRadius, int nPoints) {
 //		
 //		if (roi == null)
 //			return null;

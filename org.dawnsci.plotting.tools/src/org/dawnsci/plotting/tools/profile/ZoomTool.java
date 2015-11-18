@@ -33,7 +33,7 @@ public class ZoomTool extends ProfileTool {
 	private static Logger logger = LoggerFactory.getLogger(ZoomTool.class);
 
 	@Override
-	protected void configurePlottingSystem(IPlottingSystem plotter) {
+	protected void configurePlottingSystem(IPlottingSystem<?> plotter) {
 		// TODO Auto-generated method stub
 		
 	}

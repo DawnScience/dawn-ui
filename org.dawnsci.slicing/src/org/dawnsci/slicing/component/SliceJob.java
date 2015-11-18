@@ -107,7 +107,7 @@ class SliceJob extends Job {
 	private static IDataset plotSlice(final SliceSource       sliceSource,
 				                     final SliceObject       currentSlice,
 				                     final PlotType          type,
-				                     final IPlottingSystem   plottingSystem,
+				                     final IPlottingSystem<?>   plottingSystem,
 				                     final IProgressMonitor  monitor) throws Exception {
 
 		if (plottingSystem==null) return null;

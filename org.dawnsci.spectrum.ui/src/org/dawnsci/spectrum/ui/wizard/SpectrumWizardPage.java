@@ -113,7 +113,7 @@ public class SpectrumWizardPage extends WizardPage {
 		plotComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		plotComposite.setLayout(new FillLayout());
 		
-		IPlottingSystem system;
+		IPlottingSystem<Composite> system;
 		try {
 			system = PlottingFactory.createPlottingSystem();
 		} catch (Exception e) {

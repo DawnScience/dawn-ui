@@ -74,9 +74,9 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 
 	private final static Logger logger = LoggerFactory.getLogger(PerimeterBoxProfileTool.class);
 	
-	private IPlottingSystem zoomProfilePlottingSystem;
-	private IPlottingSystem verticalProfilePlottingSystem;
-	private IPlottingSystem horizontalProfilePlottingSystem;
+	private IPlottingSystem<Composite> zoomProfilePlottingSystem;
+	private IPlottingSystem<Composite> verticalProfilePlottingSystem;
+	private IPlottingSystem<Composite> horizontalProfilePlottingSystem;
 	private IRegionListener        regionListener;
 	private Map<String,Collection<ITrace>> registeredTraces;
 
@@ -602,7 +602,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 	}
 
 	@Override
-	public IPlottingSystem getToolPlottingSystem() {
+	public IPlottingSystem<Composite> getToolPlottingSystem() {
 		return zoomProfilePlottingSystem;
 	}
 

@@ -114,7 +114,7 @@ public class HyperSlicingTool extends AbstractSlicingTool {
 		}
 
 		if (originalPlotControl==null) return;
-        final IPlottingSystem plotSystem = getSlicingSystem().getPlottingSystem();
+        final IPlottingSystem<Composite> plotSystem = getSlicingSystem().getPlottingSystem();
 		plotSystem.setControl(originalPlotControl, true);
 		originalPlotControl = null;
 		

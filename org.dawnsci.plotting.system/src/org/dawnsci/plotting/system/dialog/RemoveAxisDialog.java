@@ -30,9 +30,9 @@ import org.eclipse.swt.widgets.Shell;
 public class RemoveAxisDialog extends Dialog {
 
 	private IAxis           axis;
-	private IPlottingSystem system;
+	private IPlottingSystem<Composite> system;
 
-	public RemoveAxisDialog(Shell parentShell, IPlottingSystem system) {
+	public RemoveAxisDialog(Shell parentShell, IPlottingSystem<Composite> system) {
 		super(parentShell);
 		this.system = system;
 		setShellStyle(getShellStyle() | SWT.RESIZE);

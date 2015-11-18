@@ -8,7 +8,6 @@ import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
-import org.eclipse.dawnsci.analysis.api.metadata.OriginMetadata;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.api.processing.IExecutionVisitor;
 import org.eclipse.dawnsci.analysis.api.processing.IExportOperation;
@@ -16,11 +15,8 @@ import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
-import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceVisitor;
-import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.slicing.api.system.SliceSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,13 +30,13 @@ public class EscapableSliceVisitor implements SliceVisitor {
 	private IOperation<? extends IOperationModel, ? extends OperationData> endOperation;
 	private IProgressMonitor monitor;
 	private IConversionContext context;
-	private IPlottingSystem output;
+	private IPlottingSystem<?> output;
 	private IOperationInputData inputData = null;
 	
 	private final static Logger logger = LoggerFactory.getLogger(EscapableSliceVisitor.class);
 
 	public EscapableSliceVisitor(ILazyDataset lz, int[] dataDims, IOperation<? extends IOperationModel, ? extends OperationData>[] series, 
-			IProgressMonitor monitor, IConversionContext context, IPlottingSystem system) {
+			IProgressMonitor monitor, IConversionContext context, IPlottingSystem<?> system) {
 		this.lz = lz;
 		this.visitor = new UIExecutionVisitor();
 		this.dataDims = dataDims;

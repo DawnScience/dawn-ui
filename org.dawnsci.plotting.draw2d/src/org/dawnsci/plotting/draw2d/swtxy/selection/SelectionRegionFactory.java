@@ -150,7 +150,7 @@ public class SelectionRegionFactory {
 	public static IContributionManager fillActions(final IContributionManager    manager, 
 			                                       final IRegion                 region,
 			                                       final XYRegionGraph           xyGraph,
-			                                       final IPlottingSystem         system) {
+			                                       final IPlottingSystem<?>      system) {
 		
 		manager.add(new Separator("org.dawb.workbench.plotting.system.region.start"));
 

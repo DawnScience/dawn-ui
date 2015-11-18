@@ -70,6 +70,7 @@ import org.eclipse.nebula.visualization.xygraph.linearscale.Range;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
@@ -122,7 +123,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	/**
 	 * The parent plotting system for this image.
 	 */
-	private IPlottingSystem plottingSystem;
+	private IPlottingSystem<?> plottingSystem;
 
 	private IImageService service;
 
@@ -1966,11 +1967,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		return ret;
 	}
 
-	public IPlottingSystem getPlottingSystem() {
+	public IPlottingSystem<?> getPlottingSystem() {
 		return plottingSystem;
 	}
 
-	public void setPlottingSystem(IPlottingSystem plottingSystem) {
+	public void setPlottingSystem(IPlottingSystem<?> plottingSystem) {
 		this.plottingSystem = plottingSystem;
 	}
 	

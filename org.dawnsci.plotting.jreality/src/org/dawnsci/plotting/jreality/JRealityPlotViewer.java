@@ -180,7 +180,7 @@ public class JRealityPlotViewer extends IPlottingSystemViewer.Stub<Composite> im
 
 	private JRealityPlotActions plotActions;
 	
-	public void init(IPlottingSystem system) {
+	public void init(IPlottingSystem<Composite> system) {
 		this.system = system;
 	}
 
@@ -199,7 +199,7 @@ public class JRealityPlotViewer extends IPlottingSystemViewer.Stub<Composite> im
 	}
 
 	public Composite getControl() {
-		return container;
+		return (Composite) container;
 	}
 
 	public ILineStackTrace createStackTrace(final String name) {

@@ -10,6 +10,7 @@ package org.dawb.workbench.ui.editors.test;
 
 import java.io.File;
 
+import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.workbench.ui.editors.ImageEditor;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
@@ -23,7 +24,6 @@ import org.junit.Test;
 import org.osgi.framework.Bundle;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-import org.dawb.common.ui.util.EclipseUtils;
 
 
 /**

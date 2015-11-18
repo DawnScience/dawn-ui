@@ -22,21 +22,22 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
 public class MappingUtils {
 
-	public static IImageTrace buildTrace(String name, IDataset data, IPlottingSystem system) {
+	public static IImageTrace buildTrace(String name, IDataset data, IPlottingSystem<Composite> system) {
 		return buildTrace(name, data, system,-1);
 	
 	}
 	
-	public static IImageTrace buildTrace(IDataset data, IPlottingSystem system) {
+	public static IImageTrace buildTrace(IDataset data, IPlottingSystem<Composite> system) {
 		return buildTrace(data.getName(), data, system,-1);
 	
 	}
 	
-	public static IImageTrace buildTrace(String name, IDataset data, IPlottingSystem system, int alpha) {
+	public static IImageTrace buildTrace(String name, IDataset data, IPlottingSystem<Composite> system, int alpha) {
 		IDataset x = null;
 		IDataset y = null;
 		
@@ -58,7 +59,7 @@ public class MappingUtils {
 	
 	}
 	
-	public static ILineTrace buildLineTrace(IDataset data, IPlottingSystem system) {
+	public static ILineTrace buildLineTrace(IDataset data, IPlottingSystem<Composite> system) {
 		IDataset x = null;
 
 		
@@ -78,7 +79,7 @@ public class MappingUtils {
 	
 	
 	//FIXME NASTY NASTY COPY PASTED SLACKER!!!!!!!!!!!!
-	public static void plotDataWithMetadata(IDataset data, final IPlottingSystem system, int[] dataDims){
+	public static void plotDataWithMetadata(IDataset data, final IPlottingSystem<Composite> system, int[] dataDims){
 		
 		IDataset x = null;
 		IDataset y = null;

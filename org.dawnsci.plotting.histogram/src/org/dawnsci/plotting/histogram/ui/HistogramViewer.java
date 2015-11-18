@@ -134,7 +134,7 @@ public class HistogramViewer extends ContentViewer {
 	 *             plotting system or region of interest
 	 */
 	public HistogramViewer(final Composite parent, String title,
-			IPlottingSystem plot, IActionBars site) throws Exception {
+			IPlottingSystem<Composite> plot, IActionBars site) throws Exception {
 		
 		composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(GridLayoutFactory.fillDefaults().create());
@@ -494,10 +494,10 @@ public class HistogramViewer extends ContentViewer {
 	/**
 	 * Get the plotting system associated with this histogram plot
 	 *
-	 * @return IPlottingSystem the plotting system associated with this
+	 * @return IPlottingSystem<Composite> the plotting system associated with this
 	 *         histogram
 	 */
-	public IPlottingSystem getHistogramPlot() {
+	public IPlottingSystem<Composite> getHistogramPlot() {
 		return histogramPlottingSystem;
 	}
 

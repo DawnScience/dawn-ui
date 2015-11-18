@@ -56,9 +56,9 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 
 	private boolean roiSettingAllowed = true;
 	private boolean isTreeModified = false;
-	private IPlottingSystem plottingSystem;
+	private IPlottingSystem<?> plottingSystem;
 
-	public RegionEditorTreeModel(IPlottingSystem plottingSystem) throws Exception {
+	public RegionEditorTreeModel(IPlottingSystem<?> plottingSystem) throws Exception {
 		this.plottingSystem = plottingSystem;
 	}
 

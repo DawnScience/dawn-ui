@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.mapping.ui.MappingUtils;
-import org.dawnsci.plotting.draw2d.swtxy.ImageTrace;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
@@ -21,8 +20,8 @@ import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
-import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;

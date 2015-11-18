@@ -291,7 +291,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		}
 	}
 
-	protected abstract void configurePlottingSystem(IPlottingSystem plotter);
+	protected abstract void configurePlottingSystem(IPlottingSystem<?> plotter);
 	 
 	
 	@Override
@@ -591,7 +591,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	}
 	
 	@Override
-	public IPlottingSystem getToolPlottingSystem() {
+	public IPlottingSystem<Composite> getToolPlottingSystem() {
 		return profilePlottingSystem;
 	}
 

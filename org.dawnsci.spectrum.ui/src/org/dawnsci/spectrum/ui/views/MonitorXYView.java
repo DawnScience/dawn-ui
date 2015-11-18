@@ -51,12 +51,12 @@ import org.eclipse.ui.part.WorkbenchPart;
 
 public class MonitorXYView extends ViewPart implements IAdaptable {
 
-	private IPlottingSystem     system;
+	private IPlottingSystem<Composite>     system;
 	private ITraceListener listener;
 	private IPartListener partListener;
 	private ComboViewer viewer;
 	private ComboViewer colorViewer;
-	private IPlottingSystem current;
+	private IPlottingSystem<Composite> current;
 	private LinkedList<ILineTrace> queue;
 	private int maxLength = 20;
 	private List<Color> colors;
@@ -165,7 +165,7 @@ public class MonitorXYView extends ViewPart implements IAdaptable {
 		Composite comp = new Composite(parent, SWT.NONE);
 		comp.setLayoutData(new GridData(SWT.CENTER, SWT.LEFT, false, false, 1, 1));
 		comp.setLayout(new GridLayout(3, false));
-		final IPlottingSystem[] ps = PlottingFactory.getPlottingSystems();
+		final IPlottingSystem<Composite>[] ps = PlottingFactory.getPlottingSystems();
 		
 		viewer = new ComboViewer(comp, SWT.READ_ONLY);
 		viewer.setContentProvider(ArrayContentProvider.getInstance());
@@ -173,7 +173,7 @@ public class MonitorXYView extends ViewPart implements IAdaptable {
 			@Override
 			public String getText(Object element) {
 				String val = "";
-				if (element instanceof IPlottingSystem) val = ((IPlottingSystem)element).getPlotName();
+				if (element instanceof IPlottingSystem) val = ((IPlottingSystem<Composite>)element).getPlotName();
 				return val;
 			}
 		});
@@ -196,7 +196,7 @@ public class MonitorXYView extends ViewPart implements IAdaptable {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				IPlottingSystem[] ps = PlottingFactory.getPlottingSystems();
+				IPlottingSystem<Composite>[] ps = PlottingFactory.getPlottingSystems();
 				
 				boolean contained = false;
 				
@@ -205,8 +205,8 @@ public class MonitorXYView extends ViewPart implements IAdaptable {
 				}
 				
 				if (contained) {
-					List<IPlottingSystem> list = Arrays.asList(ps);
-					list = new LinkedList<IPlottingSystem>(list);
+					List<IPlottingSystem<Composite>> list = Arrays.asList(ps);
+					list = new LinkedList<IPlottingSystem<Composite>>(list);
 					list.remove(system);
 					ps = list.toArray(new IPlottingSystem[list.size()]);
 				}
@@ -266,7 +266,7 @@ public class MonitorXYView extends ViewPart implements IAdaptable {
 	
 	private void updateCurrentPlot(ISelection selection) {
 		if (current != null) current.removeTraceListener(listener);
-		current = (IPlottingSystem)((StructuredSelection)selection).getFirstElement();
+		current = (IPlottingSystem<Composite>)((StructuredSelection)selection).getFirstElement();
 		current.addTraceListener(listener);
 	}
 	

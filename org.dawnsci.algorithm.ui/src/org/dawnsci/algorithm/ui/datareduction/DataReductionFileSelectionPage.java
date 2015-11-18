@@ -99,19 +99,19 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 	private final String[] types = new String[] {"Data", "Detector", "Calibration", "Background", "Mask"};
 	private String[] filePaths = new String[5];
 	private boolean[] locks = new boolean[5];
-	private List<IPlottingSystem> plottingSystems = new ArrayList<IPlottingSystem>(); 
+	private List<IPlottingSystem<Composite>> plottingSystems = new ArrayList<IPlottingSystem<Composite>>(); 
 
 	public DataReductionFileSelectionPage() {
 		try {
-			IPlottingSystem dataPlot = PlottingFactory.createPlottingSystem();
+			IPlottingSystem<Composite> dataPlot = PlottingFactory.createPlottingSystem();
 			plottingSystems.add(dataPlot);
-			IPlottingSystem detectorPlot = PlottingFactory.createPlottingSystem();
+			IPlottingSystem<Composite> detectorPlot = PlottingFactory.createPlottingSystem();
 			plottingSystems.add(detectorPlot);
-			IPlottingSystem calibrationPlot = PlottingFactory.createPlottingSystem();
+			IPlottingSystem<Composite> calibrationPlot = PlottingFactory.createPlottingSystem();
 			plottingSystems.add(calibrationPlot);
-			IPlottingSystem backgroundPlot = PlottingFactory.createPlottingSystem();
+			IPlottingSystem<Composite> backgroundPlot = PlottingFactory.createPlottingSystem();
 			plottingSystems.add(backgroundPlot);
-			IPlottingSystem maskPlot = PlottingFactory.createPlottingSystem();
+			IPlottingSystem<Composite> maskPlot = PlottingFactory.createPlottingSystem();
 			plottingSystems.add(maskPlot);
 
 			for (int i = 0; i < keys.length; i++) {
@@ -237,7 +237,7 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 		return mainComposite;
 	}
 
-	private void loadAndPlotData(final IPlottingSystem plottingSystem, 
+	private void loadAndPlotData(final IPlottingSystem<Composite> plottingSystem, 
 								 String filePathKey,
 								 String filePath,
 								 final String fileTitle,

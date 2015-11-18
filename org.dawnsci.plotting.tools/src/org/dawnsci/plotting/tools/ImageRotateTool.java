@@ -469,7 +469,7 @@ public class ImageRotateTool extends AbstractToolPage {
 	}
 
 	@Override
-	public IPlottingSystem getToolPlottingSystem() {
+	public IPlottingSystem<Composite> getToolPlottingSystem() {
 		return rotatedSystem;
 	}
 

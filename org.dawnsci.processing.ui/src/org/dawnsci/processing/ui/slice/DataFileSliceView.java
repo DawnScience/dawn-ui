@@ -119,8 +119,8 @@ public class DataFileSliceView extends ViewPart {
 	private ChangeSliceWidget csw;
 	private String selectedFile = null;
 	private IOperation<? extends IOperationModel, ? extends OperationData> currentOperation = null;
-	private IPlottingSystem input;
-	private IPlottingSystem output;
+	private IPlottingSystem<Composite> input;
+	private IPlottingSystem<Composite> output;
 	private IOperationInputData inputData = null;
 	private ProcessingOutputType processingOutputType = ProcessingOutputType.PROCESSING_ONLY;
 	
@@ -236,10 +236,10 @@ public class DataFileSliceView extends ViewPart {
 		
 		IWorkbenchPage page = getSite().getPage();
 		IViewPart view = page.findView("org.dawnsci.processing.ui.output");
-		output = (IPlottingSystem)view.getAdapter(IPlottingSystem.class);
+		output = (IPlottingSystem<Composite>)view.getAdapter(IPlottingSystem.class);
 		
 		view = page.findView("org.dawnsci.processing.ui.input");
-		input = (IPlottingSystem)view.getAdapter(IPlottingSystem.class);
+		input = (IPlottingSystem<Composite>)view.getAdapter(IPlottingSystem.class);
 		
 		fileManager.addFileListener(new IFilesAddedListener() {
 

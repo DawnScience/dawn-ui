@@ -34,7 +34,7 @@ public class BoxFilterConfiguration implements FilterConfiguration {
 	private FloatDecorator udeco;
 
 	@Override
-	public void init(final IPlottingSystem system, IPlottingFilter filter) {
+	public void init(final IPlottingSystem<?> system, IPlottingFilter filter) {
 
 		this.filter = (AbstractPlottingFilter) filter;
 

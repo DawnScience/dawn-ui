@@ -21,11 +21,11 @@ import org.dawb.common.ui.plot.roi.ResolutionRing;
 import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorPropertyEvent;
+import org.eclipse.dawnsci.analysis.api.diffraction.DetectorPropertyEvent.EventType;
 import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironment;
 import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironmentEvent;
 import org.eclipse.dawnsci.analysis.api.diffraction.IDetectorPropertyListener;
 import org.eclipse.dawnsci.analysis.api.diffraction.IDiffractionCrystalEnvironmentListener;
-import org.eclipse.dawnsci.analysis.api.diffraction.DetectorPropertyEvent.EventType;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
@@ -38,9 +38,9 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.ILockableRegion;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
-import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IContributionManager;
@@ -116,7 +116,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	
 	private static Logger logger = LoggerFactory.getLogger(DiffractionImageAugmenter.class);
 	
-	private IPlottingSystem plottingSystem;
+	private IPlottingSystem<?> plottingSystem;
 	private DetectorProperties detprop;
 	private DiffractionCrystalEnvironment diffenv;
 	private IRegion crosshairs;
@@ -136,7 +136,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	 * Create and tie augmenter to a plotting system
 	 * @param system
 	 */
-	public DiffractionImageAugmenter(IPlottingSystem system) {
+	public DiffractionImageAugmenter(IPlottingSystem<?> system) {
 		plottingSystem = system;
 		if (activeAugmenter==null) activeAugmenter = this;
 		resROIs = new ArrayList<IROI>();

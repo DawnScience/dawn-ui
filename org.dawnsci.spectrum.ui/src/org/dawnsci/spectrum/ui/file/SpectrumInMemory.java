@@ -25,7 +25,7 @@ public class SpectrumInMemory extends AbstractSpectrumFile implements ISpectrumF
 	private String name;
 	private String longName;
 	
-	public SpectrumInMemory(String longName, String name,IDataset xDataset ,Collection<IDataset> yDatasets, IPlottingSystem system) {
+	public SpectrumInMemory(String longName, String name,IDataset xDataset ,Collection<IDataset> yDatasets, IPlottingSystem<?> system) {
 		this.system = system;
 		this.name = name;
 		this.longName = longName;

@@ -66,7 +66,7 @@ public class RegionEditComposite extends Composite {
 
 	private boolean isImplicit;
 
-	private IPlottingSystem plottingSystem;
+	private IPlottingSystem<Composite> plottingSystem;
 
 	/**
 	 * Throws exception if not LightWeightPlottingSystem
@@ -80,7 +80,7 @@ public class RegionEditComposite extends Composite {
 	 * @param defaultRegion
 	 * @param isImplicit
 	 */
-	public RegionEditComposite(final Composite parent, final IPlottingSystem plottingSystem, final int style, final IPlottingSystem sys, final RegionType defaultRegion, final boolean isImplicit) {
+	public RegionEditComposite(final Composite parent, final IPlottingSystem<Composite> plottingSystem, final int style, final IPlottingSystem<Composite> sys, final RegionType defaultRegion, final boolean isImplicit) {
      
 		this(parent, plottingSystem,  style, (XYRegionGraph)sys.getAdapter(XYRegionGraph.class), defaultRegion, isImplicit);
 	}
@@ -94,7 +94,7 @@ public class RegionEditComposite extends Composite {
 	 * @param defaultRegion
 	 * @param isImplicit Flag to tell whether the RegionComposite is used in a specific window with an apply button or part of a view where the changes are implicit
 	 */
-	public RegionEditComposite(final Composite parent, final IPlottingSystem plottingSystem, final int style, final XYRegionGraph xyGraph, final RegionType defaultRegion, final boolean isImplicit) {
+	public RegionEditComposite(final Composite parent, final IPlottingSystem<Composite> plottingSystem, final int style, final XYRegionGraph xyGraph, final RegionType defaultRegion, final boolean isImplicit) {
 		
 		super(parent, SWT.NONE);
 		

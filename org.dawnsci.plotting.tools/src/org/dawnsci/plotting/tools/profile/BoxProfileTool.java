@@ -40,7 +40,7 @@ public class BoxProfileTool extends ProfileTool {
 	private IAxis yPixelAxis;
 
 	@Override
-	protected void configurePlottingSystem(IPlottingSystem plotter) {
+	protected void configurePlottingSystem(IPlottingSystem<?> plotter) {
 		if (xPixelAxis==null) {
 			this.xPixelAxis = plotter.getSelectedXAxis();
 			xPixelAxis.setTitle("X Pixel");

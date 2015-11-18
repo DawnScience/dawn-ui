@@ -23,7 +23,7 @@ public class TestCommand extends AbstractHandler implements IHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		
-        final IPlottingSystem system = (IPlottingSystem)event.getApplicationContext();
+        final IPlottingSystem<?> system = (IPlottingSystem<?>)event.getApplicationContext();
         System.out.println(system.getPlotName());
 		return null;
 	}

@@ -149,7 +149,7 @@ public class DerivativeToolExternalPlot extends AbstractToolPage {
 	}
 	
 	private void update() {
-		IPlottingSystem oSys = getPlottingSystem();
+		IPlottingSystem<Composite> oSys = getPlottingSystem();
 		Collection<ITrace> traces = oSys.getTraces(ILineTrace.class);
 		
 		if (traces == null || traces.isEmpty())  {
@@ -252,7 +252,7 @@ public class DerivativeToolExternalPlot extends AbstractToolPage {
 		private boolean[] model;
 		Collection<ITrace> traces;
 		
-		public DerivativeJob2(IPlottingSystem system) {
+		public DerivativeJob2(IPlottingSystem<Composite> system) {
 			super("Derivative Update");
 		}
 		

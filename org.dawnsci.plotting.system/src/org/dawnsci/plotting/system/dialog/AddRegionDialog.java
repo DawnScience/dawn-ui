@@ -24,9 +24,9 @@ public class AddRegionDialog extends Dialog {
 	private XYRegionGraph xyGraph;
 	private RegionEditComposite regionComposite;
 	private RegionType type;
-	private IPlottingSystem plottingSystem;
+	private IPlottingSystem<Composite> plottingSystem;
 
-	public AddRegionDialog(final IPlottingSystem plottingSystem, final Shell parentShell, final XYRegionGraph xyGraph, RegionType type) {
+	public AddRegionDialog(final IPlottingSystem<Composite> plottingSystem, final Shell parentShell, final XYRegionGraph xyGraph, RegionType type) {
 		super(parentShell);	
 		
         // Allow resize

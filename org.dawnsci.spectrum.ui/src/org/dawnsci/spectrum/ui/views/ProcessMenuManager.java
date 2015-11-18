@@ -54,9 +54,9 @@ public class ProcessMenuManager {
 	
 	StructuredViewer viewer;
 	SpectrumFileManager manager;
-	IPlottingSystem system;
+	IPlottingSystem<?> system;
 	
-	public ProcessMenuManager(StructuredViewer viewer, SpectrumFileManager manager, IPlottingSystem system) {
+	public ProcessMenuManager(StructuredViewer viewer, SpectrumFileManager manager, IPlottingSystem<?> system) {
 		this.viewer = viewer;
 		this.manager = manager;
 		this.system = system;

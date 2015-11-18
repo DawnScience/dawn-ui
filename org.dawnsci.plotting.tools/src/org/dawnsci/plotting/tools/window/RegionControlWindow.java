@@ -61,15 +61,15 @@ public class RegionControlWindow {
 	private Button btnApplyClipping;
 	private Spinner spnLowerClipping;
 	private Spinner spnUpperClipping;
-	private IPlottingSystem windowSystem;
+	private IPlottingSystem<Composite> windowSystem;
 	private SelectionAdapter selectionListener;
-	private IPlottingSystem plottingSystem;
+	private IPlottingSystem<?> plottingSystem;
 	private boolean isOverwriteAspect;
 	private boolean isApplyClipping;
 
 	public RegionControlWindow(Composite parent, 
-			final IPlottingSystem plottingSystem, 
-			final IPlottingSystem windowSystem, 
+			final IPlottingSystem<?> plottingSystem, 
+			final IPlottingSystem<Composite> windowSystem, 
 			final WindowJob windowJob) {
 		this.parent = parent;
 		this.plottingSystem = plottingSystem;

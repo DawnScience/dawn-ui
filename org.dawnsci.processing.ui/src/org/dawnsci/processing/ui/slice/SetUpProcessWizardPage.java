@@ -72,7 +72,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 	}
 
 	private ISliceSystem sliceComponent;
-	private IPlottingSystem system;
+	private IPlottingSystem<Composite> system;
 	private IConversionContext context;
 	private ComboViewer cviewer;
 	private String rootName = null;

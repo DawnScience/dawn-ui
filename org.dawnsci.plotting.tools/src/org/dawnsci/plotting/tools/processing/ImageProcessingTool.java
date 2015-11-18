@@ -64,8 +64,8 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 	
 	private static Logger logger = LoggerFactory.getLogger(ImageProcessingTool.class);
 
-	protected IPlottingSystem selectionPlottingSystem;
-	protected IPlottingSystem reviewPlottingSystem;
+	protected IPlottingSystem<Composite> selectionPlottingSystem;
+	protected IPlottingSystem<Composite> reviewPlottingSystem;
 
 	private IRegionListener regionListener;
 	private Composite profileContentComposite;
@@ -361,7 +361,7 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 	}
 
 	@Override
-	public IPlottingSystem getToolPlottingSystem() {
+	public IPlottingSystem<Composite> getToolPlottingSystem() {
 		return selectionPlottingSystem;
 	}
 	@Override
@@ -424,13 +424,13 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 	 * 
 	 * @param plotter
 	 */
-	protected abstract void configureSelectionPlottingSystem(IPlottingSystem plotter);
+	protected abstract void configureSelectionPlottingSystem(IPlottingSystem<Composite> plotter);
 
 	/**
 	 * 
 	 * @param plotter
 	 */
-	protected abstract void configureReviewPlottingSystem(IPlottingSystem plotter);
+	protected abstract void configureReviewPlottingSystem(IPlottingSystem<Composite> plotter);
 
 	/**
 	 * Creates selection profile

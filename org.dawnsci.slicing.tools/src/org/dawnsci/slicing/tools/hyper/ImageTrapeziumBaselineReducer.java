@@ -97,7 +97,7 @@ public class ImageTrapeziumBaselineReducer implements IDatasetROIReducer, IProvi
 	}
 
 	@Override
-	public List<IAction> getActions(IPlottingSystem system) {
+	public List<IAction> getActions(IPlottingSystem<?> system) {
 		IAction baseline = new Action("Linear baseline", SWT.TOGGLE) {
 			@Override
 			public void run() {

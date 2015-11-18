@@ -26,6 +26,7 @@ import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.expressions.IVariableManager;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.slicing.api.system.ISliceSystem;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
@@ -202,7 +203,7 @@ public class ZipEditor extends MultiPageEditorPart implements  IPlottingSystemSe
 		return super.getActiveEditor();
 	}
 
-	public IPlottingSystem getPlotWindow() {
+	public IPlottingSystem<Composite> getPlotWindow() {
 		return dataSetEditor.getPlotWindow();
 	}
 	public PlotDataEditor getDataSetEditor() {

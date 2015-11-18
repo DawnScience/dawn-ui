@@ -386,7 +386,7 @@ public class Hyper2DTool extends AbstractToolPage {
 		}
 		
 		@Override
-		public List<IAction> getActions(final IPlottingSystem system) {
+		public List<IAction> getActions(final IPlottingSystem<?> system) {
 			
 			return Arrays.asList(new IAction[]{getAction(system,this,"org.dawnsci.slicing.tools.hyper.hyper2dmain.newRegion")});
 			
@@ -445,14 +445,14 @@ public class Hyper2DTool extends AbstractToolPage {
 		}
 		
 		@Override
-		public List<IAction> getActions(final IPlottingSystem system) {
+		public List<IAction> getActions(final IPlottingSystem<?> system) {
 			
 			return Arrays.asList(new IAction[]{getAction(system,this,"org.dawnsci.slicing.tools.hyper.hyper2dside.newRegion")});
 			
 		}
 	}
 	
-	private IAction getAction(final IPlottingSystem system, final IDatasetROIReducer reducer, String id) {
+	private IAction getAction(final IPlottingSystem<?> system, final IDatasetROIReducer reducer, String id) {
 		final IAction newRegion = new Action("Create new profile", SWT.TOGGLE) {
 			@Override
 			public void run() {
@@ -480,7 +480,7 @@ public class Hyper2DTool extends AbstractToolPage {
 		return newRegion;
 	}
 	
-	private final void createNewRegion(final IPlottingSystem system, IDatasetROIReducer reducer) {
+	private final void createNewRegion(final IPlottingSystem<?> system, IDatasetROIReducer reducer) {
 		// Start with a selection of the right type
 		String name = HyperComponent.LEFT_REGION_NAME;
 		if (reducer instanceof SideReducer) name = HyperComponent.RIGHT_REGION_NAME;

@@ -64,7 +64,7 @@ public class AxisPixelROIEditTable {
 	private AxisPixelProfileTableViewModel profileViewModel;
 	private List<AxisPixelRowDataModel> values;
 
-	private IPlottingSystem plottingSystem;
+	private IPlottingSystem<?> plottingSystem;
 
 	private IROI roi;
 
@@ -78,7 +78,7 @@ public class AxisPixelROIEditTable {
 	 * @param parent
 	 * @param plottingSystem
 	 */
-	public AxisPixelROIEditTable(Composite parent, IPlottingSystem plottingSystem) {
+	public AxisPixelROIEditTable(Composite parent, IPlottingSystem<?> plottingSystem) {
 		this.parent = parent;
 		this.plottingSystem = plottingSystem;
 	}

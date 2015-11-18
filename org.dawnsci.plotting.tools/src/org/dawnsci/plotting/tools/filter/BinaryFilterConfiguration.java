@@ -20,7 +20,7 @@ public abstract class BinaryFilterConfiguration implements FilterConfiguration {
 	protected AbstractPlottingFilter filter;
 
 	@Override
-	public void init(final IPlottingSystem system, IPlottingFilter filter) {
+	public void init(final IPlottingSystem<?> system, IPlottingFilter filter) {
 
 		this.filter = (AbstractPlottingFilter) filter;
 

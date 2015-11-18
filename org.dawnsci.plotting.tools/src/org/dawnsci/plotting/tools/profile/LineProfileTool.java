@@ -32,7 +32,7 @@ import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 public class LineProfileTool extends ProfileTool {
 
 	@Override
-	protected void configurePlottingSystem(IPlottingSystem plotter) {
+	protected void configurePlottingSystem(IPlottingSystem<?> plotter) {
 		plotter.getSelectedXAxis().setTitle("Pixel");
 		plotter.getSelectedYAxis().setTitle("Intensity");
 	}

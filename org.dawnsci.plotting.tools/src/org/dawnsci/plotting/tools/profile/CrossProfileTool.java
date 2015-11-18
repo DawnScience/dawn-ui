@@ -68,7 +68,7 @@ public class CrossProfileTool extends LineProfileTool {
 	
 	protected void createLines(IRegion region) throws Exception {
 		
-		IPlottingSystem sys = getPlottingSystem();
+		IPlottingSystem<?> sys = getPlottingSystem();
 		if (sys==null) return; // Unlikely.
 		if (isDisposed()) return;
 		
@@ -219,7 +219,7 @@ public class CrossProfileTool extends LineProfileTool {
 
 	private IAction showZ, zPrefs;
 	@Override
-	protected void configurePlottingSystem(IPlottingSystem plotter) {
+	protected void configurePlottingSystem(IPlottingSystem<?> plotter) {
 
 		super.configurePlottingSystem(plotter);
 		
@@ -253,7 +253,7 @@ public class CrossProfileTool extends LineProfileTool {
 	private static int colourIndex = 0;
 	private final IRegion add(final LinearROI line, String name) throws Exception {
 		
-		IPlottingSystem sys = getPlottingSystem();
+		IPlottingSystem<?> sys = getPlottingSystem();
 		final IRegion   reg = sys.createRegion(RegionUtils.getUniqueName(name, sys), RegionType.LINE);
 		reg.setROI(line);
 		if (sys.getRegions()!=null) {

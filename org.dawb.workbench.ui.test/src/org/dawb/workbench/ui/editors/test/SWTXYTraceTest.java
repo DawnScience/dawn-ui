@@ -47,6 +47,7 @@ import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace.ArrowConfiguration;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace.ArrowHistogram;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.swt.graphics.PaletteData;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -70,7 +71,7 @@ public class SWTXYTraceTest {
 		
 		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{da1}));
 
-		final IPlottingSystem     sys    = (IPlottingSystem)oa[0];
+		final IPlottingSystem<Composite>     sys    = (IPlottingSystem<Composite>)oa[0];
 		
 		Dataset vectors = DatasetFactory.zeros(new int[]{20, 20, 2}, Dataset.FLOAT32);
 		
@@ -205,7 +206,7 @@ public class SWTXYTraceTest {
       
 		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{da1}));
 
-		final IPlottingSystem     sys    = (IPlottingSystem)oa[0];
+		final IPlottingSystem<Composite>     sys    = (IPlottingSystem<Composite>)oa[0];
 		final List<ITrace>        traces = (List<ITrace>)oa[2];
 		
 		final ILineTrace lineTrace = (ILineTrace)traces.get(0);
@@ -225,7 +226,7 @@ public class SWTXYTraceTest {
       
 		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{y}));
 		
-		final IPlottingSystem     sys    = (IPlottingSystem)oa[0];
+		final IPlottingSystem<Composite>     sys    = (IPlottingSystem<Composite>)oa[0];
 		final List<ITrace>        traces = (List<ITrace>)oa[2];
 		
 		// Add a decorator that squares the data.
@@ -262,7 +263,7 @@ public class SWTXYTraceTest {
       
 		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{y}));
 		
-		final IPlottingSystem     sys    = (IPlottingSystem)oa[0];
+		final IPlottingSystem<Composite>     sys    = (IPlottingSystem<Composite>)oa[0];
 		final List<ITrace>        traces = (List<ITrace>)oa[2];
 		((ILineTrace)traces.get(0)).setData(x, y);
 		
@@ -353,7 +354,7 @@ public class SWTXYTraceTest {
 		
 		final AsciiEditor editor       = (AsciiEditor)part;
 		final PlotDataEditor plotter   = (PlotDataEditor)editor.getActiveEditor();
-		final IPlottingSystem sys = plotter.getPlottingSystem();
+		final IPlottingSystem<Composite> sys = plotter.getPlottingSystem();
 
 		final IDataset y = DoubleDataset.createRange(0, 100, 1);
 		final IDataset x = DatasetFactory.createRange(0, y.getSize(), 1, Dataset.INT32);
@@ -386,7 +387,7 @@ public class SWTXYTraceTest {
 		
 		final Object[] oa = testImage(0d);
 		
-		final IPlottingSystem     sys  = (IPlottingSystem)oa[0];
+		final IPlottingSystem<Composite>     sys  = (IPlottingSystem<Composite>)oa[0];
 		final IImageTrace       image  = (IImageTrace)oa[1];
 		
 		final IDataset orginalData = image.getData();
@@ -449,7 +450,7 @@ public class SWTXYTraceTest {
 		
 		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{da1}));
 
-		final IPlottingSystem     sys    = (IPlottingSystem)oa[0];
+		final IPlottingSystem<Composite>     sys    = (IPlottingSystem<Composite>)oa[0];
 		final List<ITrace>        traces = (List<ITrace>)oa[2];
 		
 		final ILineTrace lineTrace = (ILineTrace)traces.get(0);
@@ -471,7 +472,7 @@ public class SWTXYTraceTest {
 		
 		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{da1}));
 
-		final IPlottingSystem     sys    = (IPlottingSystem)oa[0];
+		final IPlottingSystem<Composite>     sys    = (IPlottingSystem<Composite>)oa[0];
 		sys.getSelectedYAxis().setLog10(true);
 		final List<ITrace>        traces = (List<ITrace>)oa[2];
 		
@@ -491,7 +492,7 @@ public class SWTXYTraceTest {
 		final DoubleDataset da1 = DoubleDataset.createRange(0, 100, 1);     
 		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{da1}));
 
-		final IPlottingSystem     sys    = (IPlottingSystem)oa[0];
+		final IPlottingSystem<Composite>     sys    = (IPlottingSystem<Composite>)oa[0];
 		final List<ITrace>        traces = (List<ITrace>)oa[2];
 		
 		final ILineTrace lineTrace = (ILineTrace)traces.get(0);
@@ -634,7 +635,7 @@ public class SWTXYTraceTest {
 		
 		final AsciiEditor editor       = (AsciiEditor)part;
 		final PlotDataEditor plotter   = (PlotDataEditor)editor.getActiveEditor();
-		final IPlottingSystem sys = plotter.getPlottingSystem();
+		final IPlottingSystem<Composite> sys = plotter.getPlottingSystem();
 		
 		//if (!(sys instanceof PlottingSystemImpl)) throw new Exception("This test is designed for "+PlottingSystemImpl.class.getName());
 		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);

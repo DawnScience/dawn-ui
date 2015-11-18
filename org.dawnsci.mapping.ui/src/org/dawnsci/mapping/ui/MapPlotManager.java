@@ -27,20 +27,21 @@ import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
-import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MapPlotManager {
 	
-	private IPlottingSystem map;
-	private IPlottingSystem data;
+	private IPlottingSystem<Composite> map;
+	private IPlottingSystem<Composite> data;
 	private MappedDataArea area;
 	private LinkedList<MapObject> layers;
 	private PlotJob job;
@@ -49,7 +50,7 @@ public class MapPlotManager {
 	
 	private final static Logger logger = LoggerFactory.getLogger(MapPlotManager.class);
 	
-	public MapPlotManager(IPlottingSystem map, IPlottingSystem data, MappedDataArea area) {
+	public MapPlotManager(IPlottingSystem<Composite> map, IPlottingSystem<Composite> data, MappedDataArea area) {
 		this.map = map;
 		this.data = data;
 		this.area = area;

@@ -61,8 +61,8 @@ import org.slf4j.LoggerFactory;
 
 public class ConfigureOperationModelDialog extends Dialog implements PropertyChangeListener{
 	
-	private IPlottingSystem input;
-	private IPlottingSystem output;
+	private IPlottingSystem<Composite> input;
+	private IPlottingSystem<Composite> output;
 	private OperationModelViewer modelViewer;
 	IOperationInputData data;
 	private Job update;
@@ -102,7 +102,7 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 		return parent;
 	}
 	
-	private IPlottingSystem createPlottingSystem(Composite right, String name){
+	private IPlottingSystem<Composite> createPlottingSystem(Composite right, String name){
 		Composite plotComp = new Composite(right, SWT.NONE);
 		plotComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
 		plotComp.setLayout(new GridLayout());
@@ -111,7 +111,7 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 		displayPlotComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		displayPlotComp.setLayout(new FillLayout());
 		
-		IPlottingSystem system = null;
+		IPlottingSystem<Composite> system = null;
 		
 		try {
 			system = PlottingFactory.createPlottingSystem();

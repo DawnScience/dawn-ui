@@ -124,9 +124,9 @@ public class MappedDataView extends ViewPart {
 		
 		IWorkbenchPage page = getSite().getPage();
 		IViewPart view = page.findView("org.dawnsci.mapping.ui.mapview");
-		IPlottingSystem map = (IPlottingSystem)view.getAdapter(IPlottingSystem.class);
+		IPlottingSystem<Composite> map = (IPlottingSystem<Composite>)view.getAdapter(IPlottingSystem.class);
 		view = page.findView("org.dawnsci.mapping.ui.spectrumview");
-		IPlottingSystem spectrum = (IPlottingSystem)view.getAdapter(IPlottingSystem.class);
+		IPlottingSystem<Composite> spectrum = (IPlottingSystem<Composite>)view.getAdapter(IPlottingSystem.class);
 		
 		plotManager = new MapPlotManager(map, spectrum, area);
 		

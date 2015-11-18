@@ -43,8 +43,8 @@ public class SpotTool extends ZoomTool {
 	
 	private static Logger logger = LoggerFactory.getLogger(SpotTool.class);
 
-	private IPlottingSystem topSystem;
-	private IPlottingSystem rightSystem;
+	private IPlottingSystem<Composite> topSystem;
+	private IPlottingSystem<Composite> rightSystem;
 	
 	public SpotTool() {
 		

@@ -25,7 +25,7 @@ public class PlotCopyHandler extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		try {
 			String plotName = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart().getTitle();
-			IPlottingSystem system = PlottingFactory.getPlottingSystem(plotName);
+			IPlottingSystem<?> system = PlottingFactory.getPlottingSystem(plotName);
 			if (system == null)
 				return Boolean.FALSE;
 			system.copyPlotting();

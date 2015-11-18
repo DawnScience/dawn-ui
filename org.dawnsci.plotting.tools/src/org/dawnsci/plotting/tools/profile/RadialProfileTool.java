@@ -45,7 +45,7 @@ public class RadialProfileTool extends SectorProfileTool {
 	private IAction metaLock;
 	
 	@Override
-	protected void configurePlottingSystem(IPlottingSystem plotter) {
+	protected void configurePlottingSystem(IPlottingSystem<?> plotter) {
 		
 		profileAxis = new MenuAction("Select X Axis");
 		profileAxis.setToolTipText("Select x axis values");
@@ -127,7 +127,7 @@ public class RadialProfileTool extends SectorProfileTool {
 			public void run() {
 				
 				if (this.isChecked()) {
-					IPlottingSystem plot = getPlottingSystem();
+					IPlottingSystem<?> plot = getPlottingSystem();
 					String name = RegionUtils.getUniqueName(getRegionName() +" Full Image", plot);
 					try {
 						IRegion region = plot.createRegion(name, RegionType.SECTOR);
@@ -140,7 +140,7 @@ public class RadialProfileTool extends SectorProfileTool {
 						e.printStackTrace();
 					}
 				} else {
-					IPlottingSystem plot = getPlottingSystem();
+					IPlottingSystem<?> plot = getPlottingSystem();
 					Collection<IRegion> regions = plot.getRegions();
 					if (regions != null && !regions.isEmpty()) {
 						Iterator<IRegion> iterator = regions.iterator();

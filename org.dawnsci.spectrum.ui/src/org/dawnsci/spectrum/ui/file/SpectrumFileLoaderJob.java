@@ -23,9 +23,9 @@ public class SpectrumFileLoaderJob implements IRunnableWithProgress {
 	private final List<String> paths;
 	private Map<String,ISpectrumFile> spectrumFiles;
 
-	private IPlottingSystem system;
+	private IPlottingSystem<?> system;
 
-	public SpectrumFileLoaderJob(List<String> paths, IPlottingSystem system, Map<String,ISpectrumFile> spectrumFiles) {
+	public SpectrumFileLoaderJob(List<String> paths, IPlottingSystem<?> system, Map<String,ISpectrumFile> spectrumFiles) {
 		super();
 		this.paths = paths;
 		this.system = system;

@@ -70,14 +70,14 @@ public class PowderCheckJob extends Job {
 	private static final double ABS_TOL = 1e-10;
 	private static final int MAX_EVAL = 100000;
 	
-	IPlottingSystem system;
+	IPlottingSystem<?> system;
 	Dataset dataset;
 	IDiffractionMetadata metadata;
 	List<PowderCheckResult> resultList;
 	XAxis xAxis = XAxis.ANGLE;
 	PowderCheckMode mode = PowderCheckMode.FullImage;
 
-	public PowderCheckJob(IPlottingSystem system) {
+	public PowderCheckJob(IPlottingSystem<?> system) {
 		super("Checking calibration...");
 		this.system = system;
 		resultList = new ArrayList<PowderCheckResult>();

@@ -307,7 +307,7 @@ public class HyperComponent {
 		return null;
 	}
     
-    private void cleanUpActions(IPlottingSystem system, List<IAction> cached) {
+    private void cleanUpActions(IPlottingSystem<Composite> system, List<IAction> cached) {
     	IActionBars actionBars = system.getActionBars();
     	IToolBarManager toolBarManager = actionBars.getToolBarManager();
 		IMenuManager menuManager = actionBars.getMenuManager();
@@ -326,7 +326,7 @@ public class HyperComponent {
 		toolBarManager.update(true);
     }
     
-    private void createActions(IProvideReducerActions provider, IPlottingSystem system, List<IAction> cached, IROIListener listener, String barName) {
+    private void createActions(IProvideReducerActions provider, IPlottingSystem<Composite> system, List<IAction> cached, IROIListener listener, String barName) {
     	
     	IActionBars actionBars = system.getActionBars();
     	IToolBarManager toolBarManager = actionBars.getToolBarManager();
@@ -470,13 +470,13 @@ public class HyperComponent {
 		rightJob.profile(r,rb);
 	}
 	
-	private void updateImage(final IPlottingSystem plot, final IDataset image, final List<IDataset> axes) {
+	private void updateImage(final IPlottingSystem<Composite> plot, final IDataset image, final List<IDataset> axes) {
 		
 		plot.updatePlot2D(image, axes, null);
 		
 	}
 	
-	private void updateTrace(final IPlottingSystem plot, final IDataset axis, final IDataset data, final boolean update, final IRegion region) {
+	private void updateTrace(final IPlottingSystem<Composite> plot, final IDataset axis, final IDataset data, final boolean update, final IRegion region) {
 
 		if (update) {
 			plot.updatePlot1D(axis,Arrays.asList(new IDataset[] {data}), null);
@@ -502,7 +502,7 @@ public class HyperComponent {
 		}
 	}
 	
-	private void updateTrace(final IPlottingSystem plot, final IDataset axis, final IDataset data) {
+	private void updateTrace(final IPlottingSystem<Composite> plot, final IDataset axis, final IDataset data) {
 
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
@@ -567,7 +567,7 @@ public class HyperComponent {
 		
 		private IRegion currentRegion;
 		private IROI currentROI;
-		private IPlottingSystem plot;
+		private IPlottingSystem<Composite> plot;
 		private ILazyDataset data;
 		private List<IDataset> axes;
 		private int[] order;
@@ -576,7 +576,7 @@ public class HyperComponent {
 		
 		
 		public HyperDelegateJob(String name,
-				IPlottingSystem plot,
+				IPlottingSystem<Composite> plot,
 				ILazyDataset data,
 				List<IDataset> axes,
 				Slice[] slices,

@@ -170,7 +170,7 @@ public class EllipseFittingTool extends AbstractToolPage {
 	}
 
 	protected void updateEllipses(boolean removeROIListener) {
-		IPlottingSystem plotter = getPlottingSystem();
+		IPlottingSystem<Composite> plotter = getPlottingSystem();
 		if (plotter == null) return;
 
 		if (removeROIListener) {
@@ -384,7 +384,7 @@ public class EllipseFittingTool extends AbstractToolPage {
 	@Override
 	public void activate() {
 		super.activate();
-		IPlottingSystem plotter = getPlottingSystem();
+		IPlottingSystem<Composite> plotter = getPlottingSystem();
 		if (plotter == null) return;
 
 		if (traceListener != null)
@@ -404,7 +404,7 @@ public class EllipseFittingTool extends AbstractToolPage {
 
 	@Override
 	public void deactivate() {
-		IPlottingSystem plotter = getPlottingSystem();
+		IPlottingSystem<Composite> plotter = getPlottingSystem();
 		if (plotter != null) {
 			plotter.removeTraceListener(traceListener);
 			plotter.removeRegionListener(ellipseRegionListener);

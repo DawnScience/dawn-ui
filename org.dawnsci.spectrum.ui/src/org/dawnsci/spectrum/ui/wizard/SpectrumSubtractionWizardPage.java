@@ -42,7 +42,7 @@ public class SpectrumSubtractionWizardPage extends WizardPage implements ISpectr
 	
 	List<IContain1DData> dataList;
 	IDataset xdata, ydata1, ydata2;
-	IPlottingSystem system;
+	IPlottingSystem<Composite> system;
 	double scale = 1;
 	Job subtractionJob;
 	

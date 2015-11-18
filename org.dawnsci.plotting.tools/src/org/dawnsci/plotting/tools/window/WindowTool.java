@@ -91,7 +91,7 @@ public class WindowTool extends AbstractToolPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(WindowTool.class);
 	
-	private IPlottingSystem        windowSystem;
+	private IPlottingSystem<Composite>        windowSystem;
 	private IRegionListener        regionListener;
 	private IROIListener           roiListener;
 	private ITraceListener         traceListener;
@@ -198,7 +198,7 @@ public class WindowTool extends AbstractToolPage {
 	}
 
 	@Override
-	public IPlottingSystem getToolPlottingSystem() {
+	public IPlottingSystem<Composite> getToolPlottingSystem() {
 		return windowSystem;
 	}
 

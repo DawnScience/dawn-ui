@@ -58,7 +58,7 @@ public class SpectrumUtils {
 		return list;
 	}
 	
-	public static ISpectrumFile averageSpectrumFiles(List<IContain1DData> files, IPlottingSystem system) {
+	public static ISpectrumFile averageSpectrumFiles(List<IContain1DData> files, IPlottingSystem<?> system) {
 		files = getCompatibleDatasets(files);
 		
 		if (files == null) return null;
@@ -119,7 +119,7 @@ public class SpectrumUtils {
 		return new double[] {min, max};
 	}
 	
-	public static ISpectrumFile[] subtractSpectrumFiles(List<IContain1DData> files, IPlottingSystem system) {
+	public static ISpectrumFile[] subtractSpectrumFiles(List<IContain1DData> files, IPlottingSystem<?> system) {
 		
 		//TODO deal with single files
 		

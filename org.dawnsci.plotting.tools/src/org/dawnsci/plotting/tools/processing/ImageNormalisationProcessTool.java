@@ -86,13 +86,13 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 	}
 
 	@Override
-	protected void configureSelectionPlottingSystem(IPlottingSystem plotter) {
+	protected void configureSelectionPlottingSystem(IPlottingSystem<Composite> plotter) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	protected void configureReviewPlottingSystem(IPlottingSystem plotter) {
+	protected void configureReviewPlottingSystem(IPlottingSystem<Composite> plotter) {
 		// TODO Auto-generated method stub
 
 	}

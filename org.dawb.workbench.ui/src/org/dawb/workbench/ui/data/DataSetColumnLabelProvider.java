@@ -23,6 +23,7 @@ import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.PlatformUI;
 
 /**
@@ -120,7 +121,7 @@ class DataSetColumnLabelProvider extends ColumnLabelProvider implements IStyledL
 		case 1:
 			return element.getDisplayName(component.getRootName());
 		case 2:
-			final IPlottingSystem system = component.getPlottingSystem();
+			final IPlottingSystem<Composite> system = component.getPlottingSystem();
 			return element.getAxis(component.getSelections(), system.is2D(), ((AbstractPlottingSystem)system).isXFirst());
 
 		case 3: {

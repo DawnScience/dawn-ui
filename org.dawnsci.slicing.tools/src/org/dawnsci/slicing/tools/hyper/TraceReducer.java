@@ -94,7 +94,7 @@ public class TraceReducer implements IDatasetROIReducer, IProvideReducerActions 
 	}
 
 	@Override
-	public List<IAction> getActions(final IPlottingSystem system) {
+	public List<IAction> getActions(final IPlottingSystem<?> system) {
 		final IAction newRegion = new Action("Create new profile", SWT.TOGGLE) {
 			@Override
 			public void run() {
@@ -122,7 +122,7 @@ public class TraceReducer implements IDatasetROIReducer, IProvideReducerActions 
 		return Arrays.asList(new IAction[]{newRegion});
 	}
 	
-	protected final void createNewRegion(final IPlottingSystem system) {
+	protected final void createNewRegion(final IPlottingSystem<?> system) {
 		// Start with a selection of the right type
 		try {
 			system.createRegion(RegionUtils.getUniqueName("Image Region", system),getSupportedRegionType().get(0));

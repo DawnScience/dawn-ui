@@ -39,7 +39,7 @@ public class PowderIntegrationJob extends Job {
 
 	private final static Logger logger = LoggerFactory.getLogger(PowderIntegrationJob.class);
 	
-	private IPlottingSystem system;
+	private IPlottingSystem<?> system;
 	private IDiffractionMetadata diffractionMetadata;
 	private MatchedIntegrator matchedIntegrator;
 	private Dataset data;
@@ -49,7 +49,7 @@ public class PowderIntegrationJob extends Job {
 	private PowderCorrectionModel correctionModel;
 	private int nBins;
 	
-	public PowderIntegrationJob(IDiffractionMetadata diffractionMetadata, IPlottingSystem system) {
+	public PowderIntegrationJob(IDiffractionMetadata diffractionMetadata, IPlottingSystem<?> system) {
 		super("Integration");
 		this.diffractionMetadata = diffractionMetadata;
 		this.system = system;

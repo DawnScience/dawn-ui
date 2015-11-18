@@ -31,14 +31,14 @@ public class SpectrumFile extends AbstractSpectrumFile implements ISpectrumFile 
 	
 	private static Logger logger = LoggerFactory.getLogger(SpectrumFile.class);
 	
-	private SpectrumFile(String path, DatasetManager dsmanager, IPlottingSystem system) {
+	private SpectrumFile(String path, DatasetManager dsmanager, IPlottingSystem<?> system) {
 		this.path = path;
 		this.dsManager = dsmanager;
 		this.yDatasetNames = new ArrayList<String>();
 		this.system = system;
 	}
 	
-	public static SpectrumFile create(String path, IPlottingSystem system) {
+	public static SpectrumFile create(String path, IPlottingSystem<?> system) {
 		
 		DatasetManager dsManager = DatasetManager.create(path);
 		if (dsManager == null) return null;

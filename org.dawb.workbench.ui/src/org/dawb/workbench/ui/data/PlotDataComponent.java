@@ -85,7 +85,6 @@ import org.eclipse.dawnsci.slicing.api.data.ITransferableDataService;
 import org.eclipse.dawnsci.slicing.api.system.DimsData;
 import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.dawnsci.slicing.api.system.ISliceSystem;
-import org.eclipse.dawnsci.slicing.api.system.SliceSource;
 import org.eclipse.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -2117,9 +2116,9 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	}
 
 
-	public IPlottingSystem getPlottingSystem() {
+	public IPlottingSystem<Composite> getPlottingSystem() {
 		if (editor==null) return null;
-		return (IPlottingSystem)editor.getAdapter(IPlottingSystem.class);
+		return (IPlottingSystem<Composite>)editor.getAdapter(IPlottingSystem.class);
 	}
 
 	/**

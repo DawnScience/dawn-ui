@@ -13,6 +13,7 @@ import java.util.Collection;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
@@ -20,10 +21,10 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 
 class ImageSleepListener implements IPartListener2 {
 
-	private IPlottingSystem system;
+	private IPlottingSystem<Composite> system;
 	private IWorkbenchPart part;
 
-	public ImageSleepListener(IPlottingSystem system,
+	public ImageSleepListener(IPlottingSystem<Composite> system,
 			                   IWorkbenchPart part) {
 		this.system = system;
 		this.part   = part;

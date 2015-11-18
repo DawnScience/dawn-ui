@@ -94,7 +94,7 @@ public class RegionServiceImpl implements IRegionService {
 	 * @param roiName
 	 * @return
 	 */
-	public IRegion createRegion( final IPlottingSystem plottingSystem,
+	public IRegion createRegion( final IPlottingSystem<?> plottingSystem,
 							     final IROI            roi, 
 								 final String          roiName) throws Exception {
 

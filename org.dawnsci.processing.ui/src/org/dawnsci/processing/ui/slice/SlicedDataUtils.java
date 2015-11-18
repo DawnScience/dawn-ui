@@ -26,7 +26,7 @@ import org.eclipse.swt.widgets.Display;
 
 public class SlicedDataUtils {
 
-	public static void plotDataWithMetadata(IDataset data, final IPlottingSystem system, int[] dataDims) throws Exception {
+	public static void plotDataWithMetadata(IDataset data, final IPlottingSystem<?> system, int[] dataDims) throws Exception {
 		
 		IDataset x = null;
 		IDataset y = null;

@@ -63,14 +63,14 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(PlotActionsManagerImpl.class);
 
-	private PlottingSystemImpl        system;
+	private PlottingSystemImpl<?>        system;
 
-	protected PlotActionsManagerImpl(PlottingSystemImpl system) {
+	protected PlotActionsManagerImpl(PlottingSystemImpl<?> system) {
 		super(system);
 		this.system = system;
 	}
 
-	public IPlottingSystem getSystem() {
+	public IPlottingSystem<?> getSystem() {
 		return system;
 	}
 

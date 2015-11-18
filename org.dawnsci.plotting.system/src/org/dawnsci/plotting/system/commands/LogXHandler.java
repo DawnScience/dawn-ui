@@ -27,7 +27,7 @@ public class LogXHandler extends AbstractHandler {
 		IAxis xAxis;
 		try {
 			String plotName = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart().getTitle();
-			IPlottingSystem system = PlottingFactory.getPlottingSystem(plotName);
+			IPlottingSystem<?> system = PlottingFactory.getPlottingSystem(plotName);
 			if (system != null) {
 				xAxis = system.getSelectedXAxis();
 				if (xAxis != null) {

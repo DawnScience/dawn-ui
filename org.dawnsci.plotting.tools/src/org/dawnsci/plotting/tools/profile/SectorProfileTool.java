@@ -58,7 +58,7 @@ public abstract class SectorProfileTool extends ProfileTool implements IDetector
 	private   IRegionListener sectorRegionListener;
 
 	@Override
-	protected void configurePlottingSystem(IPlottingSystem plotter) {
+	protected void configurePlottingSystem(IPlottingSystem<?> plotter) {
 		
 		final Action downsample = new Action("Always downsample (useful for high update rates)", IAction.AS_CHECK_BOX) {
 			public void run() {

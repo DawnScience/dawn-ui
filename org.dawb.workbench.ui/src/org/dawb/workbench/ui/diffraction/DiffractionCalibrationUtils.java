@@ -40,6 +40,7 @@ import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +73,7 @@ public class DiffractionCalibrationUtils {
 	 * @return job that needs to be scheduled
 	 */
 //	public static Job calibrateImages(final Display display,
-//									   final IPlottingSystem plottingSystem,
+//									   final IPlottingSystem<Composite> plottingSystem,
 //									   final List<DiffractionTableData> model,
 //									   final DiffractionTableData currentData,
 //									   final boolean useFixedWavelength,
@@ -172,7 +173,7 @@ public class DiffractionCalibrationUtils {
 	 * 
 	 * @param plottingSystem
 	 */
-	public static void hideFoundRings(IPlottingSystem plottingSystem) {
+	public static void hideFoundRings(IPlottingSystem<Composite> plottingSystem) {
 		for (IRegion r : plottingSystem.getRegions()) {
 			String n = r.getName();
 			if (n.startsWith(REGION_PREFIX)) {
@@ -182,7 +183,7 @@ public class DiffractionCalibrationUtils {
 	}
 
 
-	public static IStatus drawFoundRing(final IProgressMonitor monitor, Display display, final IPlottingSystem plotter, final IROI froi, final boolean circle) {
+	public static IStatus drawFoundRing(final IProgressMonitor monitor, Display display, final IPlottingSystem<?> plotter, final IROI froi, final boolean circle) {
 		final boolean[] status = {true};
 		
 		display.syncExec(new Runnable() {
@@ -373,7 +374,7 @@ public class DiffractionCalibrationUtils {
 	 * @param system
 	 * @return an IImageTrace
 	 */
-	public static IImageTrace getImageTrace(IPlottingSystem system) {
+	public static IImageTrace getImageTrace(IPlottingSystem<Composite> system) {
 		Collection<ITrace> traces = system.getTraces();
 		if (traces != null && traces.size() > 0) {
 			ITrace trace = traces.iterator().next();

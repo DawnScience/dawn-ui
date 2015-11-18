@@ -27,7 +27,7 @@ public class LogYHandler extends AbstractHandler {
 		IAxis yAxis;
 		try {
 			String plotName = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart().getTitle();
-			IPlottingSystem system = PlottingFactory.getPlottingSystem(plotName);
+			IPlottingSystem<?> system = PlottingFactory.getPlottingSystem(plotName);
 			if (system != null) {
 				yAxis = system.getSelectedYAxis();
 				if (yAxis != null) {

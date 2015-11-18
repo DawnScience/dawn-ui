@@ -602,7 +602,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 
 	@Override
 	public void rangeChanged(AxisEvent evt) {
-		IPlottingSystem sys = getPlottingSystem();
+		IPlottingSystem<Composite> sys = getPlottingSystem();
 		x1.setRange(sys.getSelectedXAxis().getLower(), sys.getSelectedXAxis().getUpper());
 		x2.setRange(sys.getSelectedYAxis().getUpper(), sys.getSelectedYAxis().getLower());
 	}

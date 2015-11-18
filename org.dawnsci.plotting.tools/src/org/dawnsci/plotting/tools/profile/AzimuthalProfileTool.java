@@ -28,7 +28,7 @@ public class AzimuthalProfileTool extends SectorProfileTool {
 	private IAction metaLock;
 
 	@Override
-	protected void configurePlottingSystem(IPlottingSystem plotter) {
+	protected void configurePlottingSystem(IPlottingSystem<?> plotter) {
 		
 		this.metaLock = createMetaLock(null);
 		

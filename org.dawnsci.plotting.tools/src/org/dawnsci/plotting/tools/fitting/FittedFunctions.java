@@ -209,7 +209,7 @@ public class FittedFunctions {
 		this.selectedPeak = peak;
 	}
 		
-	public void deleteSelectedFunction(IPlottingSystem sys) {
+	public void deleteSelectedFunction(IPlottingSystem<?> sys) {
 		
 		if (selectedPeak==null) return;
 				
@@ -222,7 +222,7 @@ public class FittedFunctions {
 	 * Remove stored traces from a plotting system.
 	 * @param sys
 	 */
-	public void removeSelections(IPlottingSystem sys, boolean removeSaved) {
+	public void removeSelections(IPlottingSystem<?> sys, boolean removeSaved) {
 		
 		if (fittedPeakList!=null) {
 			Collection<FittedFunction> removed = new HashSet<FittedFunction>(3);
@@ -296,7 +296,7 @@ public class FittedFunctions {
 		return peaks;
 	}
 
-	public void saveSelectedPeak(IPlottingSystem sys) throws Exception {
+	public void saveSelectedPeak(IPlottingSystem<?> sys) throws Exception {
 		if (selectedPeak!=null) {
 			selectedPeak.setSaved(sys, true, getAllNames());
 		}

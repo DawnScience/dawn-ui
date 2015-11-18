@@ -286,11 +286,11 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 		selectedTrace = trace;
 	}
 
-	public IPlottingSystem getPlottingSystem() {
+	public IPlottingSystem<Composite> getPlottingSystem() {
 		return plottingSystem;
 	}
 
-	public void setPlottingSystem(IPlottingSystem plottingSystem) {
+	public void setPlottingSystem(IPlottingSystem<?> plottingSystem) {
 		this.plottingSystem = plottingSystem;
 	}
 

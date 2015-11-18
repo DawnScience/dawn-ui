@@ -15,6 +15,6 @@ import org.eclipse.jface.action.IAction;
 
 public interface IProvideReducerActions {
 
-	public List<IAction> getActions(IPlottingSystem system);
+	public List<IAction> getActions(IPlottingSystem<?> system);
 	
 }

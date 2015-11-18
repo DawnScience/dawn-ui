@@ -37,7 +37,7 @@ public class CropWizardPage extends WizardPage implements ISpectrumWizardPage {
 
 	CropProcess process;
 	List<IContain1DData> dataList;
-	IPlottingSystem system;
+	IPlottingSystem<Composite> system;
 	
 	public CropWizardPage(List<IContain1DData> dataList) {
 		super("Processing Wizard page");

@@ -32,7 +32,7 @@ public class FittedPeaksInfo {
 	private Dataset  y;
 	private IMonitor monitor;
 
-	private IPlottingSystem plottingSystem;
+	private IPlottingSystem<?> plottingSystem;
 	private ILineTrace selectedTrace;
 	private int numPeaks = -1;
 	
@@ -45,7 +45,7 @@ public class FittedPeaksInfo {
 	public FittedPeaksInfo(final Dataset  x, 
 			final Dataset  y,
 			final IMonitor monitor,
-			IPlottingSystem plottingSystem, 
+			IPlottingSystem<?> plottingSystem, 
 			ILineTrace selectedTrace){
 		this(x, y, monitor);
 		this.setPlottingSystem(plottingSystem);
@@ -55,7 +55,7 @@ public class FittedPeaksInfo {
 	public FittedPeaksInfo(final Dataset  x, 
 			final Dataset  y,
 			final IMonitor monitor,
-			IPlottingSystem plottingSystem,
+			IPlottingSystem<?> plottingSystem,
 			ILineTrace selectedTrace,
 			int numPeaks){
 		this(x, y, monitor);
@@ -149,11 +149,11 @@ public class FittedPeaksInfo {
 		this.numPeaks = numPeaks;
 	}
 
-	public IPlottingSystem getPlottingSystem() {
+	public IPlottingSystem<?> getPlottingSystem() {
 		return plottingSystem;
 	}
 
-	public void setPlottingSystem(IPlottingSystem plottingSystem) {
+	public void setPlottingSystem(IPlottingSystem<?> plottingSystem) {
 		this.plottingSystem = plottingSystem;
 	}
 }

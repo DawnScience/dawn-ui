@@ -23,7 +23,7 @@ public abstract class AbstractSpectrumFile implements ISpectrumFile {
 	protected boolean useAxisDataset = false;
 	protected boolean showPlot = false;
 	protected String xDatasetName;
-	protected IPlottingSystem system;
+	protected IPlottingSystem<?> system;
 	protected List<String> yDatasetNames;
 	protected Map<String, ITrace> traceMap;
 

@@ -53,7 +53,7 @@ public class ROIWidget implements IROIListener {
 	private boolean roiChanged;
 	private Composite regionComposite;
 	private IRegionListener regionListener;
-	private IPlottingSystem plottingSystem;
+	private IPlottingSystem<?> plottingSystem;
 
 	private AxisPixelROIEditTable roiViewer;
 
@@ -74,7 +74,7 @@ public class ROIWidget implements IROIListener {
 	 * @param parent
 	 * @param viewName the name of the plottingSystem
 	 */
-	public ROIWidget(Composite parent, IPlottingSystem plottingSystem, String tableTitle) {
+	public ROIWidget(Composite parent, IPlottingSystem<?> plottingSystem, String tableTitle) {
 
 		this.parent = parent;
 		this.plottingSystem = plottingSystem;
@@ -259,7 +259,7 @@ public class ROIWidget implements IROIListener {
 		return regionComposite;
 	}
 
-	private IRegionListener getRegionListener(final IPlottingSystem plottingSystem){
+	private IRegionListener getRegionListener(final IPlottingSystem<?> plottingSystem){
 		return new IRegionListener.Stub() {
 			@Override
 			public void regionRemoved(RegionEvent evt) {
@@ -325,7 +325,7 @@ public class ROIWidget implements IROIListener {
 		};
 	}
 
-	private void clearListeners(IPlottingSystem plotSystem, IRegionListener listener) {
+	private void clearListeners(IPlottingSystem<?> plotSystem, IRegionListener listener) {
 		if (plotSystem==null) return;
 		Collection<IRegion> regions = plotSystem.getRegions();
 		if(regions != null && regions.size() > 0){
@@ -342,7 +342,7 @@ public class ROIWidget implements IROIListener {
 	 * Add a region listener
 	 * @param plotSystem
 	 */
-	public void addRegionListener(IPlottingSystem plotSystem){
+	public void addRegionListener(IPlottingSystem<?> plotSystem){
 		
 		if (plotSystem==null) return;
 		Collection<IRegion> regions = plotSystem.getRegions();

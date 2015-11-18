@@ -682,7 +682,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 
 	private void setAxes(double xRes, double yRes) {
 		try {
-			IPlottingSystem system = PlottingFactory.getPlottingSystem("Microscope View");
+			IPlottingSystem<Composite> system = PlottingFactory.getPlottingSystem("Microscope View");
 			IAxis xAxis = system.getSelectedXAxis();
 			xAxis.setAutoFormat(false);
 			

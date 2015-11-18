@@ -50,7 +50,7 @@ final class PlotDataFilterProvider implements IResourceChangeListener {
 	private Map<String, IPlottingFilter> filters;
 	private Set<IResource>               filterFiles;
 
-	public PlotDataFilterProvider(IPlottingSystem system) {
+	public PlotDataFilterProvider(IPlottingSystem<?> system) {
 		this.decorator = PlottingFactory.createFilterDecorator(system);
 		decorator.setActive(false);
 		filters     = new HashMap<String, IPlottingFilter>();

@@ -25,17 +25,17 @@ public class PlottingServiceImpl implements IPlottingService {
 	}
 
 	@Override
-	public IPlottingSystem createPlottingSystem() throws Exception {
+	public <T> IPlottingSystem<T> createPlottingSystem() throws Exception {
 		return PlottingFactory.createPlottingSystem();
 	}
 
 	@Override
-	public IPlottingSystem getPlottingSystem(String plotName) {
+	public <T> IPlottingSystem<T> getPlottingSystem(String plotName) {
 		return PlottingFactory.getPlottingSystem(plotName);
 	}
 
 	@Override
-	public IPlottingSystem getPlottingSystem(String plotName, boolean threadSafe) {
+	public <T> IPlottingSystem<T> getPlottingSystem(String plotName, boolean threadSafe) {
 		return PlottingFactory.getPlottingSystem(plotName, threadSafe);
 	}
 
@@ -45,17 +45,17 @@ public class PlottingServiceImpl implements IPlottingService {
 	}
 
 	@Override
-	public IPlottingSystem registerPlottingSystem(String plotName, IPlottingSystem system) {
+	public <T> IPlottingSystem<T> registerPlottingSystem(String plotName, IPlottingSystem<T> system) {
 		return PlottingFactory.registerPlottingSystem(plotName, system);
 	}
 
 	@Override
-	public IPlottingSystem removePlottingSystem(String plotName) {
+	public <T> IPlottingSystem<T> removePlottingSystem(String plotName) {
 		return PlottingFactory.removePlottingSystem(plotName);
 	}
 
 	@Override
-	public IFilterDecorator createFilterDecorator(IPlottingSystem system) {
+	public <T> IFilterDecorator createFilterDecorator(IPlottingSystem<T> system) {
 		return PlottingFactory.createFilterDecorator(system);
 	}
 

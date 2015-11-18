@@ -307,7 +307,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		
 	}
 
-	public void setPlottingSystem(IPlottingSystem system) {
+	public <T> void setPlottingSystem(IPlottingSystem<T> system) {
 		super.setPlottingSystem(system);
 		this.maskObject   = new MaskObject(); //TODO maybe make maskCreator by only processing visible regions.
 	}
@@ -1099,7 +1099,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 
 		actionBars.getToolBarManager().add(new Separator());
 
-        final IPlottingSystem system = getPlottingSystem();
+        final IPlottingSystem<Composite> system = getPlottingSystem();
         system.getPlotActionSystem().fillTraceActions(actionBars.getToolBarManager(), getImageTrace(), system);	
 	}
 

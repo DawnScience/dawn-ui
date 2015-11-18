@@ -72,13 +72,13 @@ import org.slf4j.LoggerFactory;
  * 
  * 
  * DO NOT CHANGE THIS CLASS TO IMPLEMENT CUSTOM METHODS PLEASE. Instead use the 
- * IPlottingSystem interface and keep your special methods in your class using the
+ * IPlottingSystem<Composite> interface and keep your special methods in your class using the
  * plotting system.
  * 
  * @author Matthew Gerring
  *
  *
- * @Internal Usage of this class is discouraged in external API. Use IPlottingSystem instead please.
+ * @Internal Usage of this class is discouraged in external API. Use IPlottingSystem<Composite> instead please.
  */
 public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, IToolPageSystem {
 	
@@ -194,7 +194,7 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 		PlottingFactory.removePlottingSystem(plotName);
 		if (part!=null) {
 			@SuppressWarnings("unchecked")
-			final ISystemService<IPlottingSystem> service = (ISystemService<IPlottingSystem>)PlatformUI.getWorkbench().getService(ISystemService.class);
+			final ISystemService<IPlottingSystem<Composite>> service = (ISystemService<IPlottingSystem<Composite>>)PlatformUI.getWorkbench().getService(ISystemService.class);
 			if (service!=null) {
 				service.removeSystem(part.getTitle());
 				logger.debug("Plotting system for '"+part.getTitle()+"' removed.");
@@ -426,7 +426,7 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 		
 		if (part!=null) {
 			@SuppressWarnings("unchecked")
-			final ISystemService<IPlottingSystem> service = (ISystemService<IPlottingSystem>)PlatformUI.getWorkbench().getService(ISystemService.class);
+			final ISystemService<IPlottingSystem<?>> service = (ISystemService<IPlottingSystem<?>>)PlatformUI.getWorkbench().getService(ISystemService.class);
 			if (service!=null) {
 				service.putSystem(part.getTitle(), this);
 				logger.debug("Plotting system for '"+part.getTitle()+"' registered.");

@@ -33,10 +33,10 @@ class IntensityLabelPainter {
 	private static Logger logger = LoggerFactory.getLogger(IntensityLabelPainter.class);
 	
 	private IImageTrace image;
-	private IPlottingSystem system;
+	private IPlottingSystem<?> system;
 	private NumberFormat format;
 
-	IntensityLabelPainter(IPlottingSystem system, IImageTrace image) {
+	IntensityLabelPainter(IPlottingSystem<?> system, IImageTrace image) {
 		this.system = system;
 		this.image  = image;
 		this.format = DecimalFormat.getNumberInstance();

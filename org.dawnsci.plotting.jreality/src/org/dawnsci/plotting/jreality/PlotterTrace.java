@@ -17,6 +17,7 @@ import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
+import org.eclipse.swt.widgets.Composite;
 
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 
@@ -28,7 +29,7 @@ class PlotterTrace {
 	protected List<String>           axesNames;
 	protected JRealityPlotViewer     plotter;
 	protected boolean                active;
-	protected IPlottingSystem plottingSystem;
+	protected IPlottingSystem<Composite> plottingSystem;
 	protected IROI                   window;
 
 	public void dispose() {
@@ -131,11 +132,11 @@ class PlotterTrace {
 		this.name = name;
 	}
 
-	public IPlottingSystem getPlottingSystem() {
+	public IPlottingSystem<Composite> getPlottingSystem() {
 		return plottingSystem;
 	}
 
-	public void setPlottingSystem(IPlottingSystem plottingSystem) {
+	public void setPlottingSystem(IPlottingSystem<Composite> plottingSystem) {
 		this.plottingSystem = plottingSystem;
 	}
 

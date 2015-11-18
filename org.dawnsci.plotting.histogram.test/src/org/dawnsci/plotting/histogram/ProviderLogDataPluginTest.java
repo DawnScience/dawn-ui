@@ -32,7 +32,7 @@ import org.junit.runners.Parameterized.Parameters;
 @RunWith(Parameterized.class)
 public class ProviderLogDataPluginTest extends PluginTestBase {
 
-	private IPlottingSystem system;
+	private IPlottingSystem<Composite> system;
 	private IDataset imageData;
 	private IDataset imageDataPristine;
 	private IImageTrace trace;

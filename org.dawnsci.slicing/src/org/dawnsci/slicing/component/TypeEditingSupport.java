@@ -214,7 +214,7 @@ class TypeEditingSupport extends EditingSupport {
 				ret.add(AxisType.X.getLabel());
 				break;
 			case 2:
-				final IPlottingSystem psystem = system.getPlottingSystem();
+				final IPlottingSystem<?> psystem = system.getPlottingSystem();
 			    if (sliceType==PlotType.XY_STACKED) {
 					ret.add(AxisType.X.getLabel());
 					ret.add(AxisType.Y_MANY.getLabel());

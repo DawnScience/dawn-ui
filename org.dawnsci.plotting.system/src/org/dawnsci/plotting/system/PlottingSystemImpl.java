@@ -95,7 +95,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An implementation of IPlottingSystem, not designed to be public.
+ * An implementation of IPlottingSystem<Composite>, not designed to be public.
  *
  * THIS CLASS SHOULD NOT BE USED OUTSIDE THIS PLUGIN!
  *
