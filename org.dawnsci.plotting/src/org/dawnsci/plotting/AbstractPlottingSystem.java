@@ -41,6 +41,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
+import org.eclipse.draw2d.Figure;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -79,7 +80,7 @@ import org.slf4j.LoggerFactory;
  *
  * @Internal Usage of this class is discouraged in external API. Use IPlottingSystem instead please.
  */
-public abstract class AbstractPlottingSystem implements IPlottingSystem, IToolPageSystem {
+public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, IToolPageSystem {
 	
 	private static final Logger logger = LoggerFactory.getLogger(AbstractPlottingSystem.class);
 	
@@ -407,7 +408,7 @@ public abstract class AbstractPlottingSystem implements IPlottingSystem, IToolPa
 	 * with the PlottingFactory.
 	 */
 	@Override
-	public void createPlotPart(final Composite      parent,
+	public void createPlotPart(final T              parent,
 							   final String         plotName,
 							   final IActionBars    bars,
 							   final PlotType       hint,
@@ -763,12 +764,23 @@ public abstract class AbstractPlottingSystem implements IPlottingSystem, IToolPa
 
 
 	public void setFocus() {
-		if (getPlotComposite()!=null) getPlotComposite().setFocus();
+		if (getPlotComposite()!=null) {
+			if (getPlotComposite() instanceof Composite) {
+				((Composite)getPlotComposite()).setFocus();
+			} else if (getPlotComposite() instanceof Figure) {
+				((Figure)getPlotComposite()).requestFocus();
+			}
+		}
 	}
 
 	@Override
 	public boolean isDisposed() {
-		return getPlotComposite().isDisposed();
+		if (getPlotComposite()!=null) {
+			if (getPlotComposite() instanceof Composite) {
+				return ((Composite)getPlotComposite()).isDisposed();
+			}
+		}
+		return false;
 	}
 
 	public boolean setToolVisible(final String toolId, final ToolPageRole role, final String viewId) throws Exception {

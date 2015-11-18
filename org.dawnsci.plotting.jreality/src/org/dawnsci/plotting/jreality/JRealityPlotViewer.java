@@ -126,7 +126,7 @@ import de.jreality.util.SystemProperties;
  * @author Matthew Gerring
  *
  */
-public class JRealityPlotViewer extends IPlottingSystemViewer.Stub implements IPlottingSystemViewer, SelectionListener, PaintListener, Listener {
+public class JRealityPlotViewer extends IPlottingSystemViewer.Stub<Composite> implements IPlottingSystemViewer<Composite>, SelectionListener, PaintListener, Listener {
 
 	
 	private static Logger logger = LoggerFactory.getLogger(JRealityPlotViewer.class);

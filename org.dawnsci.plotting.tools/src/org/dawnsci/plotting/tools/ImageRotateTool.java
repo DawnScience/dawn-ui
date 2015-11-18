@@ -61,7 +61,7 @@ public class ImageRotateTool extends AbstractToolPage {
 	private Spinner angleSpinner;
 	private IDataset image;
 	private Composite container;
-	private IPlottingSystem rotatedSystem;
+	private IPlottingSystem<Composite> rotatedSystem;
 	private ITraceListener traceListener;
 	private RotateJob rotationJob;
 	private List<IDataset> axes;

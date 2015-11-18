@@ -57,7 +57,7 @@ public class RGBMixerDialog {
 
 	private List<Dataset> data;
 	private CompoundDataset compData;
-	private IPlottingSystem system;
+	private IPlottingSystem<Composite> system;
 	private Image image;
 
 	private int idxR = -1, idxG = -1, idxB = -1;

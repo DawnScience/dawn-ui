@@ -74,7 +74,7 @@ import uk.ac.diamond.scisoft.analysis.roi.XAxis;
 
 public class PowderIntegrationTool extends AbstractToolPage implements IDataReductionToolPage {
 	
-	IPlottingSystem system;
+	private IPlottingSystem<Composite> system;
 	private ITraceListener traceListener;
 	private IDiffractionMetadata metadata;
 	private PowderIntegrationJob fullImageJob;

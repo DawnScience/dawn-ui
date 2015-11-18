@@ -51,7 +51,7 @@ public class MeasurementCalibrationDialog extends Dialog {
 	private Text measurementUnit;
 
 	protected MeasurementCalibrationDialog(MeasurementTool tool) {
-		super(tool.getPlottingSystem().getPlotComposite().getShell());
+		super(tool.getControl().getShell());
 		setShellStyle(SWT.MODELESS | SWT.SHELL_TRIM | SWT.BORDER);
 		this.tool = tool;
 	}

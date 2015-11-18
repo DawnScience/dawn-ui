@@ -62,7 +62,7 @@ public class HistogramViewer extends ContentViewer {
 			.getLogger(HistogramViewer.class);
 
 	private Composite composite;
-	private IPlottingSystem histogramPlottingSystem = null;
+	private IPlottingSystem<Composite> histogramPlottingSystem = null;
 	private IRegion region;
 
 	private FloatSpinner minText;

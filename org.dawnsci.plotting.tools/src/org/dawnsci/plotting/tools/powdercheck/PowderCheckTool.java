@@ -125,7 +125,7 @@ public class PowderCheckTool extends AbstractToolPage {
 	
 	private final static Logger logger = LoggerFactory.getLogger(PowderCheckTool.class);
 	
-	IPlottingSystem system;
+	IPlottingSystem<Composite> system;
 	PowderCheckJob updatePlotJob;
 	SashForm sashForm;
 	TableViewer viewer;

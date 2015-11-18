@@ -67,6 +67,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
+import org.eclipse.draw2d.Figure;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
@@ -103,7 +104,7 @@ import org.slf4j.LoggerFactory;
  * @author gerring
  *
  */
-public class PlottingSystemImpl extends AbstractPlottingSystem {
+public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 	private Logger logger = LoggerFactory.getLogger(PlottingSystemImpl.class);
 
@@ -112,13 +113,13 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		mservice = s;
 	}
 
-	private Composite      parent;
+	private T              parent;
 	private StackLayout    stackLayout;
 
 	private PlotActionsManagerImpl       actionBarManager;
 
-	private List<IPlottingSystemViewer>  viewers;
-	private IPlottingSystemViewer        activeViewer;
+	private List<IPlottingSystemViewer<T>>  viewers;
+	private IPlottingSystemViewer<T>        activeViewer;
 
 	/**
 	 * Boolean to set if the intensity value labels should be shown at high zoom.
@@ -151,15 +152,15 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		PlottingSystemActivator.getPlottingPreferenceStore().setValue("org.dawnsci.plotting.showValueLabels", showValueLabels);
 	}
 
-	private List<IPlottingSystemViewer> createViewerList() {
+	private List<IPlottingSystemViewer<T>> createViewerList() {
 
 		IConfigurationElement[] es = Platform.getExtensionRegistry().getConfigurationElementsFor("org.eclipse.dawnsci.plotting.api.plottingViewer");
         if (es == null || es.length <1) throw new RuntimeException("There are no plot viewers defined!");
 
-        List<IPlottingSystemViewer>  viewers = new ArrayList<IPlottingSystemViewer>(es.length);
+        List<IPlottingSystemViewer<T>>  viewers = new ArrayList<IPlottingSystemViewer<T>>(es.length);
         for (IConfigurationElement ie : es) {
         	try {
-				viewers.add((IPlottingSystemViewer)ie.createExecutableExtension("class"));
+				viewers.add((IPlottingSystemViewer<T>)ie.createExecutableExtension("class"));
 			} catch (CoreException e) {
 				throw new RuntimeException("Fatal Plotting Error! Cannot create "+ie.getAttribute("class"));
 			}
@@ -174,7 +175,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	}
 
 	@Override
-	public void createPlotPart(final Composite      container,
+	public void createPlotPart(final T              container,
 							   final String         plotName,
 							   final IActionBars    bars,
 							   final PlotType       hint,
@@ -182,22 +183,38 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 		super.createPlotPart(container, plotName, bars, hint, part);
 
+		if (container instanceof Composite) {
+			createCompositePlotPart((Composite)container, plotName, bars, hint, part);
+		} else {
+			throw new IllegalArgumentException("Cannot deal with plots of type "+container.getClass());
+		}
+	}
+
+	private void createCompositePlotPart(final Composite container, 
+										 final String plotName,
+										 final IActionBars bars, 
+										 final PlotType hint, 
+										 final IWorkbenchPart part) {
+		
 		if (container.getLayout() instanceof GridLayout) {
 			GridUtils.removeMargins(container);
 		}
 
 		this.plottingMode = hint;
+		
+		Composite cparent;
 		if (container.getLayout() instanceof PageBook.PageBookLayout) {
 			if (hint.is3D()) throw new RuntimeException("Cannot deal with "+PageBook.PageBookLayout.class.getName()+" and 3D at the moment!");
-		    this.parent       = container;
+			cparent       = container;
 		    logger.debug("Cannot deal with "+PageBook.PageBookLayout.class.getName()+" and 3D at the moment!");
 		} else {
 		    this.containerOverride = true;
-			this.parent            = new Composite(container, SWT.NONE);
-			this.stackLayout       = new StackLayout();
-			this.parent.setLayout(stackLayout);
-			parent.setBackground(getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		    cparent            = new Composite(container, SWT.NONE);
+			this.stackLayout   = new StackLayout();
+			cparent.setLayout(stackLayout);
+			cparent.setBackground(getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		}
+		this.parent = (T)cparent;
 
 		// We make the viewerless plotting system before the viewer so that
 		// any macro listener can import numpy.
@@ -213,11 +230,11 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 
 		// We ignore hint, we create a light weight plot as default because
 		// it looks nice. We swap this for a 3D one if required.
-		IPlottingSystemViewer lightWeightViewer = createViewer(PlotType.XY);
+		IPlottingSystemViewer<T> lightWeightViewer = createViewer(PlotType.XY);
 
-		if (lightWeightViewer!=null && parent.getLayout() instanceof StackLayout) {
-			final StackLayout layout = (StackLayout)parent.getLayout();
-			layout.topControl = lightWeightViewer.getControl();
+		if (lightWeightViewer!=null && cparent.getLayout() instanceof StackLayout) {
+			final StackLayout layout = (StackLayout)cparent.getLayout();
+			layout.topControl = (Composite)lightWeightViewer.getControl();
 			container.layout();
 		}
 
@@ -226,11 +243,13 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 				PlottingFactory.notityPlottingSystemCreated(plotName, PlottingSystemImpl.this);
 			}
 		});
+		
 	}
 
 	@Override
 	public Control setControl(Control alternative, boolean showPlotToolbar) {
 
+		if (!(parent instanceof Composite)) throw new IllegalArgumentException("Cannot call setControl on plotting of canvas type "+parent.getClass());
 		if (stackLayout==null) throw new IllegalArgumentException("The plotting system is not in StackLayout mode and cannot show alternative controls!");
 		Control previous = stackLayout.topControl;
 		stackLayout.topControl = alternative;
@@ -243,12 +262,15 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 				toolbarControl.getParent().layout(new Control[]{toolbarControl});
 			}
 		}
-
-		parent.layout();
-
+		layout();
 		return previous;
 	}
 
+
+	private void layout() {
+		if (parent instanceof Composite) ((Composite)parent).layout();
+		if (parent instanceof Figure) ((Figure)parent).revalidate();
+	}
 
 	@Override
 	protected PlottingActionBarManager createActionBarManager() {
@@ -256,9 +278,9 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	}
 
 	@Override
-	public Composite getPlotComposite() {
+	public T getPlotComposite() {
 		if (containerOverride)  return parent;
-		if (activeViewer!=null) return (Composite)activeViewer.getControl();
+		if (activeViewer!=null) return activeViewer.getControl();
 		return null;
 	}
 
@@ -266,9 +288,9 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 	 * Does nothing if the viewer is already created.
 	 * @param type
 	 */
-	private IPlottingSystemViewer createViewer(PlotType type) {
+	private IPlottingSystemViewer<T> createViewer(PlotType type) {
 
-		IPlottingSystemViewer viewer = getViewer(type);
+		IPlottingSystemViewer<T> viewer = getViewer(type);
 		if (viewer == null) {
 			logger.error("Cannot find a plot viewer for plot type "+type);
 			return null;
@@ -278,7 +300,7 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		}
 		viewer.init(this);
 		viewer.createControl(parent);
-		parent.layout();
+		layout();
 		return viewer;
 	}
 
@@ -922,19 +944,22 @@ public class PlottingSystemImpl extends AbstractPlottingSystem {
 		plottingMode = type;
 		actionBarManager.switchActions(plottingMode);
 
-		Control top = null;
+		T top = null;
 
-		IPlottingSystemViewer viewer = createViewer(type);
+		IPlottingSystemViewer<T> viewer = createViewer(type);
 		if (viewer == null) return;
 
 		activeViewer = viewer;
 		top          = viewer.getControl();
 		viewer.updatePlottingRole(type);
 
-		if (parent != null && !parent.isDisposed() && parent.getLayout() instanceof StackLayout) {
-			final StackLayout layout = (StackLayout)parent.getLayout();
-			layout.topControl = top;
-			parent.layout();
+		if (parent instanceof Composite && top instanceof Control) {
+			Composite cparent = (Composite)parent;
+			if (parent != null && !cparent.isDisposed() && cparent.getLayout() instanceof StackLayout) {
+				final StackLayout layout = (StackLayout)cparent.getLayout();
+				layout.topControl = (Control)top;
+				layout();
+			}
 		}
 
 		if (isAutoHideRegions() && previous!=plottingMode) {

@@ -63,7 +63,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 
 	private final static Logger logger = LoggerFactory.getLogger(CrossHairProfileTool.class);
 	
-	protected IPlottingSystem        profilePlotter;
+	protected IPlottingSystem<Composite> profilePlotter;
 	private   ITraceListener         traceListener;
 	private   List<ITraceListener>   staticListeners;
 	private   IRegion                xHair, yHair;

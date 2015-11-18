@@ -42,9 +42,9 @@ public class RegistrationDialog extends Dialog {
 	private IDataset image;
 	private IDataset map;
 	private IDataset registered;
-	private IPlottingSystem systemImage;
-	private IPlottingSystem systemMap;
-	private IPlottingSystem systemComposite;
+	private IPlottingSystem<Composite> systemImage;
+	private IPlottingSystem<Composite> systemMap;
+	private IPlottingSystem<Composite> systemComposite;
 	private IRegion[] mapPoints = new IRegion[4];
 	private IRegion[] imagePoints = new IRegion[4];
 	int count = 0;

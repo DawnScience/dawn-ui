@@ -184,7 +184,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	// HISTOGRAM PLOT
 	private ExpandableComposite histogramExpander;
 	private Composite histogramComposite;
-	private IPlottingSystem histogramPlot;
+	private IPlottingSystem<Composite> histogramPlot;
 
 	private ITraceListener traceListener;
 

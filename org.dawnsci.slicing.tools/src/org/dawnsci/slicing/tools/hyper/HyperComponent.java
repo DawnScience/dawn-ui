@@ -66,8 +66,8 @@ import org.slf4j.LoggerFactory;
  */
 public class HyperComponent { 
 	
-	private IPlottingSystem mainSystem;
-	private IPlottingSystem sideSystem;
+	private IPlottingSystem<Composite> mainSystem;
+	private IPlottingSystem<Composite> sideSystem;
 	private IRegionListener regionListenerLeft;
 	private IRegionListener regionListenerRight;
 	private IRegionListener externalRegionListenerLeft;

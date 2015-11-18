@@ -87,7 +87,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 	private static Logger logger = LoggerFactory.getLogger(PlotDataEditor.class);
 	
 	// This view is a composite of two other views.
-	private IPlottingSystem             plottingSystem;	
+	private IPlottingSystem<Composite>  plottingSystem;	
 	private PlotType                    defaultPlotType;
 	private Map<Integer, IAxis>         axisMap;
 	private PlotJob                     plotJob;
@@ -649,11 +649,11 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 		return ((PlotDataPage)page).getSliceComponent();
 	}
 
-	public IPlottingSystem getPlotWindow() {
+	public IPlottingSystem<Composite> getPlotWindow() {
 		return plottingSystem;
 	}
 
-	public IPlottingSystem getPlottingSystem() {
+	public IPlottingSystem<Composite> getPlottingSystem() {
 		return this.plottingSystem;
 	}
 	

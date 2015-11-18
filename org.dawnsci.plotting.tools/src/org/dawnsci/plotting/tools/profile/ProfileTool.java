@@ -56,7 +56,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 
 	private final static Logger logger = LoggerFactory.getLogger(ProfileTool.class);
 	
-	protected IPlottingSystem        profilePlottingSystem;
+	protected IPlottingSystem<Composite> profilePlottingSystem;
 	private   ITraceListener         traceListener;
 	private   IRegionListener        regionListener;
 	private   IPaletteListener       paletteListener;

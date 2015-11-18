@@ -1,18 +1,14 @@
 package org.dawnsci.processing.ui.tool;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.Iterator;
 import java.util.List;
 
-import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
 import org.dawnsci.common.widgets.table.SeriesTable;
 import org.dawnsci.processing.ui.model.OperationModelViewer;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
 import org.dawnsci.processing.ui.processing.OperationTableUtils;
 import org.dawnsci.processing.ui.slice.EscapableSliceVisitor;
-import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
@@ -27,15 +23,11 @@ import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
-import org.eclipse.dawnsci.plotting.api.trace.ITraceListener.Stub;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
-import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -44,13 +36,12 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.part.IPageSite;
 
 
 public class ProcessingImagesTool extends AbstractToolPage {
 
-	private IPlottingSystem system;
+	private IPlottingSystem<Composite> system;
 	private SashForm sashForm;
 	private Label statusMessage;
 	private SeriesTable  seriesTable;

@@ -33,7 +33,7 @@ public class ImageGridDialog {
 	private static Logger logger = LoggerFactory.getLogger(ImageGridDialog.class);
 
 	private List<IDataset> data;
-	private List<IPlottingSystem> systems = new ArrayList<IPlottingSystem>();
+	private List<IPlottingSystem<Composite>> systems = new ArrayList<IPlottingSystem<Composite>>();
 	private Image image;
 	private Shell shell;
 
@@ -52,7 +52,7 @@ public class ImageGridDialog {
 		this.data = data;
 		try {
 			for (int i = 0; i < data.size(); i++) {
-				systems.add(PlottingFactory.createPlottingSystem());
+				systems.add(PlottingFactory.createPlottingSystem(Composite.class));
 			}
 		} catch (Exception e) {
 			String error = "Error creating Image Grid plotting systems:" + e.getMessage();
@@ -90,7 +90,7 @@ public class ImageGridDialog {
 		plotsComp.setBackground(white);
 		try {
 			int i = 0;
-			for (IPlottingSystem system : systems) {
+			for (IPlottingSystem<Composite> system : systems) {
 				system.createPlotPart(plotsComp, "Plot " + i, null, PlotType.IMAGE, null);
 				system.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 //				system.updatePlot2D(data.get(i), null, null);

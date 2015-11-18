@@ -70,10 +70,10 @@ import org.eclipse.dawnsci.plotting.api.trace.ColorOption;
 import org.eclipse.dawnsci.plotting.api.trace.IImageStackTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
-import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
-import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.PointStyle;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.TraceType;
+import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
+import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceContainer;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
@@ -134,7 +134,6 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.printing.PrintDialog;
 import org.eclipse.swt.printing.Printer;
 import org.eclipse.swt.printing.PrinterData;
-import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
@@ -154,24 +153,27 @@ import org.slf4j.LoggerFactory;
  * @author Matthew Gerring
  *
  */
-public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPlottingSystemViewer, IAnnotationSystem, IRegionSystem, IAxisSystem, IPrintablePlotting, ITraceActionProvider, IAdaptable {
+public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implements IPlottingSystemViewer<T>, IAnnotationSystem, IRegionSystem, IAxisSystem, IPrintablePlotting, ITraceActionProvider, IAdaptable {
 
 	private static final Logger logger = LoggerFactory.getLogger(LightWeightPlotViewer.class);
 	
-	// Controls
-	private Canvas                 xyCanvas;
+    // Canvas used in SWT mode
+    private FigureCanvas           figureCanvas;
+
+    // Controls
 	private XYRegionGraph          xyGraph;
-	private LightweightSystem      lws;
 	
 	// Plotting stuff
-	private PlottingSystemImpl     system;
+	private PlottingSystemImpl<T>  system;
 	private LightWeightPlotActions plotActionsCreator;
 	private Figure                 plotContents;
 	private ColorMapRamp           intensity;
     private ScaledSliderFigure     folderScale;
 
-	public void init(IPlottingSystem system) {
-		this.system = (PlottingSystemImpl)system;
+	private LayeredPane content;
+
+	public void init(IPlottingSystem<T> system) {
+		this.system = (PlottingSystemImpl<T>)system;
 	}
 
 	/**
@@ -179,20 +181,30 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 	 * @param parent
 	 * @param initialMode may be null
 	 */
-	public void createControl(final Composite parent) {
+	public void createControl(final T parent) {
 
-		if (xyCanvas!=null) return;		
+		if (plotContents!=null) return;		
 		
-		this.xyCanvas = new FigureCanvas(parent, SWT.DOUBLE_BUFFERED|SWT.NO_REDRAW_RESIZE|SWT.NO_BACKGROUND);
-		lws = new LightweightSystem(xyCanvas);
+		LightweightSystem lws = null;
+		if (parent instanceof Composite) {
+			FigureCanvas xyCanvas = new FigureCanvas((Composite)parent, SWT.DOUBLE_BUFFERED|SWT.NO_REDRAW_RESIZE|SWT.NO_BACKGROUND);
+			lws = new LightweightSystem(xyCanvas);
+			
+			// Stops a mouse wheel move corrupting the plotting area, but it wobbles a bit.
+			xyCanvas.addMouseWheelListener(getMouseWheelListener());
+			xyCanvas.addKeyListener(getKeyListener());
+			
+			lws.setControl(xyCanvas);
+			xyCanvas.setBackground(xyCanvas.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+			
+	 		final MenuManager popupMenu = new MenuManager();
+			popupMenu.setRemoveAllWhenShown(true); // Remake menu each time
+	        xyCanvas.setMenu(popupMenu.createContextMenu(xyCanvas));
+	        popupMenu.addMenuListener(getIMenuListener());
+	        
+	        this.figureCanvas = xyCanvas;
+		} 
 		
-		// Stops a mouse wheel move corrupting the plotting area, but it wobbles a bit.
-		xyCanvas.addMouseWheelListener(getMouseWheelListener());
-		xyCanvas.addKeyListener(getKeyListener());
-		
-		lws.setControl(xyCanvas);
-		xyCanvas.setBackground(xyCanvas.getDisplay().getSystemColor(SWT.COLOR_WHITE));
-	
 		this.xyGraph = new XYRegionGraph();
 		xyGraph.setSelectionProvider(system.getSelectionProvider());
 		
@@ -214,8 +226,8 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 		 
  		// Create the layers (currently everything apart from the temporary 
  		// region draw layer is on 0)
- 		final LayeredPane layers      = new LayeredPane();
-        new RegionCreationLayer(layers, xyGraph.getRegionArea());  
+ 		this.content      = new LayeredPane();
+        new RegionCreationLayer(content, xyGraph.getRegionArea());  
         Layer graphLayer = new Layer();
         
         graphLayer.setLayoutManager(new BorderLayout());
@@ -248,8 +260,12 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 			}
 		});
 		
-  		layers.add(graphLayer,     0);
-		lws.setContents(layers);
+        content.add(graphLayer,     0);
+		if (lws!=null) {
+			lws.setContents(content);
+		} else {
+			((Figure)parent).add(content);
+		}
 		
 		// Create status contribution for position
 		IWorkbenchPart part = system.getPart();
@@ -284,17 +300,16 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 		if (bars!=null) bars.updateActionBars();
 		if (bars!=null) bars.getToolBarManager().update(true);
            
- 		final MenuManager popupMenu = new MenuManager();
-		popupMenu.setRemoveAllWhenShown(true); // Remake menu each time
-        xyCanvas.setMenu(popupMenu.createContextMenu(xyCanvas));
-        popupMenu.addMenuListener(getIMenuListener());
         
         if (system.getPlotType()!=null) {
         	actionBarManager.switchActions(system.getPlotType());
         }
 
-        parent.layout();
-		
+        if (parent instanceof Composite) {
+        	((Composite)parent).layout();
+        } else {
+        	((Figure)parent).revalidate();
+        }
 		
 	}
 	public boolean isPlotTypeSupported(PlotType type) {
@@ -303,7 +318,7 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 
 	private void setStackIndex(int index) {
 		if (system.getTraces()!=null && !system.getTraces().isEmpty()) {
-			final ITrace trace = system.getTraces().iterator().next();
+			final ITrace trace = (ITrace) system.getTraces().iterator().next();
 			if (trace instanceof IImageStackTrace) {
 				IImageStackTrace stack = (IImageStackTrace)trace;
 				stack.setStackIndex(index); // Updates the plot.
@@ -357,11 +372,17 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 				
 				boolean useWhite = PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.ZOOM_INTO_WHITESPACE);
 				xyGraph.setZoomLevel(e, direction*factor, useWhite);
-				xyCanvas.redraw();
+				redraw();
 			}	
 		};
 		return mouseWheelListener;
 	}
+
+	private void redraw() {
+		if (figureCanvas!=null && !figureCanvas.isDisposed()) figureCanvas.redraw();	
+		if (content!=null) content.revalidate();
+	}
+
 
 	private KeyListener keyListener;
 	private KeyListener getKeyListener() {
@@ -528,7 +549,7 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 	
 	protected IFigure getFigureAtCurrentMousePosition(Class<?> type) {
 		Point   pnt       = Display.getDefault().getCursorLocation();
-		Point   par       = xyCanvas.toDisplay(new Point(0,0));
+		Point   par       = toDisplay(new Point(0,0));
 		final int xOffset = par.x+xyGraph.getLocation().x;
 		final int yOffset = par.y+xyGraph.getLocation().y;
 		
@@ -557,6 +578,11 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
         }
 
         return null;
+	}
+
+	private Point toDisplay(Point point) {
+		if (figureCanvas!=null) return figureCanvas.toDisplay(point);
+		return point; // TODO is this right?s
 	}
 
 	protected void fillAnnotationConfigure(IMenuManager manager,
@@ -733,12 +759,14 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 	}
 
 
-	public Composite getControl() {
-		return xyCanvas;
+	public T getControl() {
+		if (figureCanvas!=null) return (T)figureCanvas;
+		return (T)content;
 	}
 
 	public void setFocus() {
-		if (xyCanvas!=null && !xyCanvas.isDisposed()) xyCanvas.setFocus();
+		if (figureCanvas!=null && !figureCanvas.isDisposed()) figureCanvas.setFocus();
+		if (content!=null) content.requestFocus();
 	}
 
 	public void setTitle(String name) {
@@ -938,7 +966,7 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 			iplot++;
 		}
 		
-		xyCanvas.redraw();
+		redraw();
 		
 		if (system.isRescale()) {
 			Display.getDefault().syncExec(new Runnable() {
@@ -1006,8 +1034,7 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 			xyGraph.addTrace(((LineTraceImpl)trace).getTrace(), xAxis, yAxis, true);
 			intensity.setVisible(false);
 		}
-		if (xyCanvas != null & !xyCanvas.isDisposed())
-			xyCanvas.redraw();
+		redraw();
 	
 		return true;
 	}
@@ -1020,13 +1047,13 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 			((ImageTrace)trace).removePaletteListener(paletteListener);
 			xyGraph.removeImageTrace((ImageTrace)trace);
 		} 
-		xyCanvas.redraw();		
+		redraw();		
 	}
 
 	public void setShowLegend(boolean b) {
 		if (xyGraph!=null) {
 			xyGraph.setShowLegend(b);
-			xyCanvas.redraw();
+			redraw();
 		}
 	}
 
@@ -1347,10 +1374,10 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 			xyGraph.dispose();
 			xyGraph = null;
 		}
-		if (xyCanvas!=null && !xyCanvas.isDisposed()) {
-			xyCanvas.removeMouseWheelListener(getMouseWheelListener());
-			xyCanvas.removeKeyListener(getKeyListener());
-			xyCanvas.dispose();
+		if (figureCanvas!=null && !figureCanvas.isDisposed()) {
+			figureCanvas.removeMouseWheelListener(getMouseWheelListener());
+			figureCanvas.removeKeyListener(getKeyListener());
+			figureCanvas.dispose();
 		}
 	}
 
@@ -1370,12 +1397,14 @@ public class LightWeightPlotViewer extends AbstractPlottingViewer implements IPl
 		}
 	}
 	private void repaintInternal(final boolean autoScale) {
-		if (xyCanvas!=null && xyGraph != null) {
+		if (figureCanvas!=null) {
 			if (autoScale){
 				xyGraph.performAutoScale();
 				xyGraph.performAutoScale();
 			}
-			xyCanvas.layout(xyCanvas.getChildren());
+			figureCanvas.layout(figureCanvas.getChildren());
+		}
+		if (xyGraph != null) {
 			xyGraph.revalidate();
 			xyGraph.repaint();
 		}

@@ -25,7 +25,7 @@ import org.eclipse.swt.graphics.Cursor;
  *
  */
 @Deprecated
-public abstract class AbstractPlottingViewer implements IPlottingSystemViewer {
+public abstract class AbstractPlottingViewer<T> implements IPlottingSystemViewer<T> {
 
 	public abstract void setShiftPoint(org.eclipse.draw2d.geometry.Point location);
 

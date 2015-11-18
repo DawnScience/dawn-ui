@@ -45,7 +45,7 @@ public class CombineDialog {
 
 	private IDataset data;
 	private List<IDataset> axes;
-	private IPlottingSystem system;
+	private IPlottingSystem<Composite> system;
 	private Image image;
 
 	private Shell shell;

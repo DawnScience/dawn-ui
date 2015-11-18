@@ -31,6 +31,7 @@ import org.eclipse.dawnsci.slicing.api.system.SliceSource;
 import org.eclipse.dawnsci.slicing.api.tool.AbstractSlicingTool;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +80,7 @@ public class HyperSlicingTool extends AbstractSlicingTool {
 		getSlicingSystem().setSliceType(getSliceType());
 		getSlicingSystem().setSliceTypeInfo(hyperType.getLabel(), Activator.getImageDescriptor(hyperType.getIconPath()));
 
-		final IPlottingSystem plotSystem = getSlicingSystem().getPlottingSystem();
+		final IPlottingSystem<Composite> plotSystem = getSlicingSystem().getPlottingSystem();
         if (hyperComponent==null) {
         	hyperComponent = new HyperComponent(plotSystem.getPart());
         	hyperComponent.createControl(plotSystem.getPlotComposite());

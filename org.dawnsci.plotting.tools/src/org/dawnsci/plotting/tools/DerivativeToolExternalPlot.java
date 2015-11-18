@@ -38,7 +38,7 @@ import org.eclipse.ui.part.IPageSite;
 
 public class DerivativeToolExternalPlot extends AbstractToolPage {
 
-	private IPlottingSystem system;
+	private IPlottingSystem<Composite> system;
 	private ITraceListener traceListener;
 	private boolean[] model;
 	private DerivativeJob2 job2;

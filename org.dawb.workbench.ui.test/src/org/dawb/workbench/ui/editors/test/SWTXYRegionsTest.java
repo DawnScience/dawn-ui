@@ -43,6 +43,7 @@ import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -322,7 +323,7 @@ public class SWTXYRegionsTest {
 		
 		final AsciiEditor editor       = (AsciiEditor)part;
 		final PlotDataEditor plotter   = (PlotDataEditor)editor.getActiveEditor();
-		final IPlottingSystem sys = plotter.getPlottingSystem();
+		final IPlottingSystem<Composite> sys = plotter.getPlottingSystem();
 		
 		//if (!(sys instanceof PlottingSystemImpl)) throw new Exception("This test is designed for "+PlottingSystemImpl.class.getName());
 		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);
