@@ -68,6 +68,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.draw2d.Figure;
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
@@ -182,68 +183,64 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 							   final IWorkbenchPart part) {
 
 		super.createPlotPart(container, plotName, bars, hint, part);
-
-		if (container instanceof Composite) {
+		this.plottingMode = hint;
+		if (container instanceof IFigure) {
+			this.parent = (T)container;
+			createViewer(PlotType.XY);
+		} else if (container instanceof Composite) {
 			createCompositePlotPart((Composite)container, plotName, bars, hint, part);
 		} else {
 			throw new IllegalArgumentException("Cannot deal with plots of type "+container.getClass());
 		}
+		// We make the viewerless plotting system before the viewer so that
+		// any macro listener can import numpy.
+		try {
+			RMIServerProvider.getInstance().exportAndRegisterObject(
+					IPlottingSystem.RMI_PREFIX + plotName,
+					new RemotePlottingSystem(this));
+		} catch (Exception e) {
+			logger.error("Unable to register plotting system " + plotName, e);
+		}
+
+		if (mservice != null) {
+			mservice.publish(new MacroEventObject(this));
+		}
+		getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				PlottingFactory.notityPlottingSystemCreated(plotName, PlottingSystemImpl.this);
+			}
+		});
 	}
 
-	private void createCompositePlotPart(final Composite container, 
-										 final String plotName,
-										 final IActionBars bars, 
-										 final PlotType hint, 
-										 final IWorkbenchPart part) {
-		
+	private void createCompositePlotPart(final Composite container,
+			final String plotName, final IActionBars bars, final PlotType hint,
+			final IWorkbenchPart part) {
 		if (container.getLayout() instanceof GridLayout) {
 			GridUtils.removeMargins(container);
 		}
-
-		this.plottingMode = hint;
-		
 		Composite cparent;
 		if (container.getLayout() instanceof PageBook.PageBookLayout) {
 			if (hint.is3D()) throw new RuntimeException("Cannot deal with "+PageBook.PageBookLayout.class.getName()+" and 3D at the moment!");
-			cparent       = container;
-		    logger.debug("Cannot deal with "+PageBook.PageBookLayout.class.getName()+" and 3D at the moment!");
+			cparent = container;
+			logger.debug("Cannot deal with " + PageBook.PageBookLayout.class.getName() + " and 3D at the moment!");
 		} else {
-		    this.containerOverride = true;
-		    cparent            = new Composite(container, SWT.NONE);
-			this.stackLayout   = new StackLayout();
+			this.containerOverride = true;
+			cparent = new Composite(container, SWT.NONE);
+			this.stackLayout = new StackLayout();
 			cparent.setLayout(stackLayout);
 			cparent.setBackground(getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		}
 		this.parent = (T)cparent;
 
-		// We make the viewerless plotting system before the viewer so that
-		// any macro listener can import numpy.
-		try {
-			RMIServerProvider.getInstance().exportAndRegisterObject(IPlottingSystem.RMI_PREFIX+plotName, new RemotePlottingSystem(this));
-		} catch (Exception e) {
-			logger.error("Unable to register plotting system "+plotName, e);
-		}
-
-		if (mservice!=null) {
-			mservice.publish(new MacroEventObject(this));
-		}
-
 		// We ignore hint, we create a light weight plot as default because
 		// it looks nice. We swap this for a 3D one if required.
 		IPlottingSystemViewer<T> lightWeightViewer = createViewer(PlotType.XY);
-
 		if (lightWeightViewer!=null && cparent.getLayout() instanceof StackLayout) {
 			final StackLayout layout = (StackLayout)cparent.getLayout();
 			layout.topControl = (Composite)lightWeightViewer.getControl();
 			container.layout();
 		}
 
-		getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				PlottingFactory.notityPlottingSystemCreated(plotName, PlottingSystemImpl.this);
-			}
-		});
-		
 	}
 
 	@Override
