@@ -48,7 +48,6 @@ import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.nebula.visualization.xygraph.undo.ZoomType;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -262,10 +261,8 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 
 	protected void createPaletteActions() {
 
-//		final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
 		final IPaletteService pservice = ServiceLoader.getPaletteService();
 		final Collection<String> names = pservice.getColorSchemes();
-
 
 		String schemeName = PlottingSystemActivator.getPlottingPreferenceStore().getString(PlottingConstants.COLOUR_SCHEME);
 
