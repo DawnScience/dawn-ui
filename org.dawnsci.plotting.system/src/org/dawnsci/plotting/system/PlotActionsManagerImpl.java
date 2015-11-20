@@ -262,7 +262,8 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 
 	protected void createPaletteActions() {
 
-		final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
+//		final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
+		final IPaletteService pservice = ServiceLoader.getPaletteService();
 		final Collection<String> names = pservice.getColorSchemes();
 
 

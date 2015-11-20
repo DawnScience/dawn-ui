@@ -112,6 +112,7 @@ class LightWeightPlotActions {
 	
 	private Shell fullScreenShell;
 	private IPropertyChangeListener propertyListener, switchListener;
+	private ICommandService cmdService;
 
 	public void init(final LightWeightPlotViewer viewer, XYRegionGraph xyGraph, PlotActionsManagerImpl actionBarManager) {
 		this.viewer  = viewer;
@@ -120,7 +121,11 @@ class LightWeightPlotActions {
 	}
 
 	public void createLightWeightActions() {
-		
+		try {
+			cmdService = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
+		} catch (IllegalStateException ie) {
+			logger.error(ie.getMessage());
+		}
 		createActionsByExtensionPoint();
  		createConfigActions(xyGraph);
  		createAnnotationActions(xyGraph);
@@ -167,11 +172,7 @@ class LightWeightPlotActions {
 	 * @param xyGraph2
 	 */
 	private void createSpecialImageActions(XYRegionGraph xyGraph2) {
-		
-		final ICommandService service = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
-
-		final Command command = service.getCommand("org.embl.cca.dviewer.phaCommand");
-   	
+		final Command command = cmdService != null ? cmdService.getCommand("org.embl.cca.dviewer.phaCommand") : null;
 
 		if (command!=null) {
 			final Action action = new Action("Run PHA algorithm to highlight spots.", IAction.AS_CHECK_BOX) {
@@ -204,9 +205,6 @@ class LightWeightPlotActions {
 	 * Reads any extended actions
 	 */
 	private void createActionsByExtensionPoint() {
-		
-		final ICommandService service = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
-
 		final IConfigurationElement[] eles = Platform.getExtensionRegistry().getConfigurationElementsFor("org.eclipse.dawnsci.plotting.api.plottingAction");
 	    if (eles==null) return;
 	    
@@ -216,7 +214,7 @@ class LightWeightPlotActions {
 			if (name!=null && !name.equals(actionBarManager.getSystem().getPlotName())) continue;
 			
 			final String commandId = ie.getAttribute("command_id");
-			final Command command = service.getCommand(commandId);
+			final Command command = cmdService != null ? cmdService.getCommand(commandId) : null;
 			final String action_id = ie.getAttribute("id");
 			if (command==null) {
 				logger.error("Cannot find command '"+commandId+"' in plot action "+action_id);
@@ -335,8 +333,9 @@ class LightWeightPlotActions {
 		final IAxis yAxis = getCurrentYAxis();
 		final Action logY = new Action("Log Y", IAction.AS_CHECK_BOX) {
 			public void run() {
-				final ICommandService service = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
-				final Command command = service.getCommand("org.dawnsci.plotting.system.logYToggle");
+				final Command command = cmdService != null ? cmdService.getCommand("org.dawnsci.plotting.system.logYToggle") : null;
+				if (command == null)
+					return;
 				final ExecutionEvent event = new ExecutionEvent(command, Collections.EMPTY_MAP, this, actionBarManager.getSystem());
 				try {
 					boolean success = (Boolean) command.executeWithChecks(event);
@@ -352,8 +351,9 @@ class LightWeightPlotActions {
 		final IAxis xAxis = getCurrentXAxis();
 		final Action logX = new Action("Log X", IAction.AS_CHECK_BOX) {
 			public void run() {
-				final ICommandService service = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
-				final Command command = service.getCommand("org.dawnsci.plotting.system.logXToggle");
+				final Command command = cmdService != null ? cmdService.getCommand("org.dawnsci.plotting.system.logXToggle") : null;
+				if (command == null)
+					return;
 				final ExecutionEvent event = new ExecutionEvent(command, Collections.EMPTY_MAP, this, actionBarManager.getSystem());
 				try {
 					boolean success = (Boolean) command.executeWithChecks(event);

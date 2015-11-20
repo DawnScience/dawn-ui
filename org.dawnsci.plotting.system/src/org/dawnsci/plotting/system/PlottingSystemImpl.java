@@ -185,8 +185,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 		super.createPlotPart(container, plotName, bars, hint, part);
 		this.plottingMode = hint;
 		if (container instanceof IFigure) {
-			this.parent = (T)container;
-			createViewer(PlotType.XY);
+			createFigurePlotPart((IFigure)container, plotName, bars, hint, part);
 		} else if (container instanceof Composite) {
 			createCompositePlotPart((Composite)container, plotName, bars, hint, part);
 		} else {
@@ -210,6 +209,13 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 				PlottingFactory.notityPlottingSystemCreated(plotName, PlottingSystemImpl.this);
 			}
 		});
+	}
+
+	private void createFigurePlotPart(final IFigure container,
+			final String plotName, final IActionBars bars, final PlotType hint,
+			final IWorkbenchPart part) {
+		this.parent = (T)container;
+		createViewer(PlotType.XY);
 	}
 
 	private void createCompositePlotPart(final Composite container,

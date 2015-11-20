@@ -70,7 +70,6 @@ import org.eclipse.nebula.visualization.xygraph.linearscale.Range;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
@@ -141,7 +140,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		this.yAxis = yAxis;
 		this.intensityScale = intensityScale;
 
-		this.service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
+		this.service = ServiceHolder.getImageService();
 		this.imageServiceBean = service.createBeanFromPreferences();
 		setPaletteName(getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
 		
