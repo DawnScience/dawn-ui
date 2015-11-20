@@ -112,7 +112,6 @@ class LightWeightPlotActions {
 	
 	private Shell fullScreenShell;
 	private IPropertyChangeListener propertyListener, switchListener;
-	private ICommandService cmdService;
 
 	public void init(final LightWeightPlotViewer viewer, XYRegionGraph xyGraph, PlotActionsManagerImpl actionBarManager) {
 		this.viewer  = viewer;
@@ -121,18 +120,19 @@ class LightWeightPlotActions {
 	}
 
 	public void createLightWeightActions() {
+		ICommandService cmdService = null;
 		try {
 			cmdService = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
 		} catch (IllegalStateException ie) {
 			logger.error(ie.getMessage());
 		}
-		createActionsByExtensionPoint();
+		createActionsByExtensionPoint(cmdService);
  		createConfigActions(xyGraph);
  		createAnnotationActions(xyGraph);
  		actionBarManager.createToolDimensionalActions(ToolPageRole.ROLE_1D, "org.dawb.workbench.plotting.views.toolPageView.1D");
  		actionBarManager.createToolDimensionalActions(ToolPageRole.ROLE_2D, "org.dawb.workbench.plotting.views.toolPageView.2D");
  		//actionBarManager.createToolDimensionalActions(ToolPageRole.ROLE_1D_AND_2D, "org.dawb.workbench.plotting.views.toolPageView.1D_and_2D");
-		createAxisActions();
+		createAxisActions(cmdService);
  		createRegionActions(xyGraph);
  		createZoomActions(xyGraph, XYGraphFlags.COMBINED_ZOOM);
  		createUndoRedoActions(xyGraph);
@@ -140,7 +140,7 @@ class LightWeightPlotActions {
  		createAspectHistoAction(xyGraph);
  		actionBarManager.createPaletteActions();
  		createOriginActions(xyGraph);
- 		createSpecialImageActions(xyGraph);
+ 		createSpecialImageActions(xyGraph, cmdService);
  		createAdditionalActions(xyGraph, null);
  		createFullScreenActions(xyGraph);
  		
@@ -171,7 +171,7 @@ class LightWeightPlotActions {
 	 * Create some special image manipulation 
 	 * @param xyGraph2
 	 */
-	private void createSpecialImageActions(XYRegionGraph xyGraph2) {
+	private void createSpecialImageActions(XYRegionGraph xyGraph2, ICommandService cmdService) {
 		final Command command = cmdService != null ? cmdService.getCommand("org.embl.cca.dviewer.phaCommand") : null;
 
 		if (command!=null) {
@@ -204,7 +204,7 @@ class LightWeightPlotActions {
 	/**
 	 * Reads any extended actions
 	 */
-	private void createActionsByExtensionPoint() {
+	private void createActionsByExtensionPoint(ICommandService cmdService) {
 		final IConfigurationElement[] eles = Platform.getExtensionRegistry().getConfigurationElementsFor("org.eclipse.dawnsci.plotting.api.plottingAction");
 	    if (eles==null) return;
 	    
@@ -301,7 +301,7 @@ class LightWeightPlotActions {
 		actionBarManager.updateGroupVisibility(visMap);
 	}
 
-	private void createAxisActions() {
+	private void createAxisActions(final ICommandService cmdService) {
 		
 		final Action createAxis = new Action("Create Axis...") {
 			public void run() {
