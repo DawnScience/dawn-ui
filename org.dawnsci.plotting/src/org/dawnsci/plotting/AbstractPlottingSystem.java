@@ -426,7 +426,7 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 		
 		if (part!=null) {
 			@SuppressWarnings("unchecked")
-			final ISystemService<IPlottingSystem<?>> service = (ISystemService<IPlottingSystem<?>>)PlatformUI.getWorkbench().getService(ISystemService.class);
+			final ISystemService<IPlottingSystem<?>> service = (ISystemService<IPlottingSystem<?>>) ServiceLoader.getSystemService();
 			if (service!=null) {
 				service.putSystem(part.getTitle(), this);
 				logger.debug("Plotting system for '"+part.getTitle()+"' registered.");
