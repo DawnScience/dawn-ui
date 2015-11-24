@@ -23,6 +23,7 @@ import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.util.eclipse.BundleUtils;
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.ServiceLoader;
 import org.dawnsci.plotting.tools.diffraction.DiffractionUtils;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
@@ -64,7 +65,6 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.IPageSite;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.AbstractPixelIntegration;
@@ -112,7 +112,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			
 		};
 		
-		this.service = (ILoaderService)PlatformUI.getWorkbench().getService(ILoaderService.class);
+		this.service = ServiceLoader.getLoaderService();
 		statusString = new String[1];
 	}
 
