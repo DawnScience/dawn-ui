@@ -364,7 +364,7 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 	    			
 	    			// Fix to http://jira.diamond.ac.uk/browse/SCI-600
 	    			if (!Boolean.getBoolean("org.dawnsci.plotting.no.tool.activation")) {
-		    			if (system.getPart()!=null) {
+		    			if (getPage() != null && system.getPart()!=null) {
 		    				getPage().activate(system.getPart());
 		    			}
 	    			}
@@ -829,7 +829,12 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 	 * @return IWorkbenchPage
 	 */
 	public static IWorkbenchPage getActivePage() {
-		final IWorkbench bench = PlatformUI.getWorkbench();
+		IWorkbench bench = null;
+		try {
+			bench = PlatformUI.getWorkbench();
+		} catch (IllegalStateException e) {
+			logger.error(e.getMessage());
+		}
 		if (bench==null) return null;
 		final IWorkbenchWindow window = bench.getActiveWorkbenchWindow();
 		if (window==null) return null;
@@ -841,7 +846,12 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 	 * @return IWorkbenchPage
 	 */
 	public static IWorkbenchPage getDefaultPage() {
-		final IWorkbench bench = PlatformUI.getWorkbench();
+		IWorkbench bench = null;
+		try {
+			bench = PlatformUI.getWorkbench();
+		} catch (IllegalStateException e) {
+			logger.error(e.getMessage());
+		}
 		if (bench==null) return null;
 		final IWorkbenchWindow[] windows = bench.getWorkbenchWindows();
 		if (windows==null) return null;
