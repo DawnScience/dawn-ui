@@ -96,6 +96,7 @@ import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -121,7 +122,6 @@ import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 import uk.ac.diamond.scisoft.analysis.diffraction.PowderRingsUtils;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
-
 
 public class DiffractionTool extends AbstractToolPage implements CalibrantSelectedListener, IResettableExpansion, IROIListener {
 
@@ -208,14 +208,17 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		statusMessage = new Label(status, SWT.LEFT);
 		statusMessage.setLayoutData(new GridData(SWT.FILL, GridData.CENTER, true, false));
 		ColorRegistry colorRegistry = JFaceResources.getColorRegistry();
-		statusMessage.setForeground(new Color(statusMessage.getDisplay(), colorRegistry.getRGB(JFacePreferences.QUALIFIER_COLOR)));
+		RGB rgb = colorRegistry.getRGB(JFacePreferences.QUALIFIER_COLOR);
+		if (rgb == null)
+			rgb = new RGB(128, 128, 128);
+		statusMessage.setForeground(new Color(statusMessage.getDisplay(), rgb));
 		statusMessage.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		if (statusString != null && statusString[0] != null)
 			statusMessage.setText(statusString[0]);
 
 		final Label label = new Label(status, SWT.RIGHT);
 		label.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
-		label.setForeground(new Color(label.getDisplay(), colorRegistry.getRGB(JFacePreferences.QUALIFIER_COLOR)));
+		label.setForeground(new Color(label.getDisplay(), rgb));
 		label.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		label.setText("* Click to change value  ");
 		
@@ -854,28 +857,39 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		};
 		lock.setImageDescriptor(Activator.getImageDescriptor("icons/lock.png"));
 
-	
 		this.calPref = new Action("Configure Calibrants...") {
 			@Override
 			public void run() {
-				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), DiffractionPreferencePage.ID, null, null);
-				if (pref != null) pref.open();
+				try {
+					PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), DiffractionPreferencePage.ID, null, null);
+					if (pref != null) pref.open();
+				} catch (IllegalStateException e) {
+					logger.error(e.getMessage());
+				}
 			}
 		};
 		
 		Action configDetectors = new Action("Configure Detectors...") {
 			@Override
 			public void run() {
-				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), DiffractionDetectorPreferencePage.ID, null, null);
-				if (pref != null) pref.open();
+				try {
+					PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), DiffractionDetectorPreferencePage.ID, null, null);
+					if (pref != null) pref.open();
+				} catch (IllegalStateException e) {
+					logger.error(e.getMessage());
+				}
 			}
 		};
 		
 		Action configDefaultMeta = new Action("Configure Default Metadata...") {
 			@Override
 			public void run() {
-				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), DiffractionDefaultsPreferencePage.ID, null, null);
-				if (pref != null) pref.open();
+				try {
+					PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), DiffractionDefaultsPreferencePage.ID, null, null);
+					if (pref != null) pref.open();
+				} catch (IllegalStateException e) {
+					logger.error(e.getMessage());
+				}
 			}
 		};
 		
@@ -1179,7 +1193,12 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 
 			@Override
 			public void regionsRemoved(RegionEvent evt) {
-				IWorkbenchPage page =  PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+				IWorkbenchPage page = null;
+				try {
+					page =  PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+				} catch (IllegalStateException e) {
+					logger.error(e.getMessage());
+				}
 				if(page != null){
 					Iterator<IRegion> it = getPlottingSystem().getRegions().iterator();
 					while(it.hasNext()){
