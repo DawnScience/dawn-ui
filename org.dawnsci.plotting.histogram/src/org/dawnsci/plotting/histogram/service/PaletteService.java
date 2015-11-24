@@ -24,6 +24,7 @@ import org.eclipse.ui.services.IServiceLocator;
 
 public class PaletteService extends AbstractServiceFactory implements IPaletteService {
 
+	private static IPaletteService pservice;
 	private ExtensionPointManager extensionManager;
 	public PaletteService() {
 		this.extensionManager = ExtensionPointManager.getManager();
@@ -103,4 +104,15 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 		return new FunctionContainer(red, grn, blue, alpha, csc.getRedInverted(), csc.getGreenInverted(), csc.getBlueInverted(), csc.getAlphaInverted());
 	}
 
+	/**
+	 * used by osgi injection
+	 * @param ps
+	 */
+	public static void setPaletteService(IPaletteService ps) {
+		pservice = ps;
+	}
+
+	public static IPaletteService getPaletteService() {
+		return pservice;
+	}
 }

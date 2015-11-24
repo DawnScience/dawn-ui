@@ -2,6 +2,7 @@ package org.dawnsci.plotting.histogram;
 
 import java.util.List;
 
+import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
@@ -10,8 +11,6 @@ import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.ui.PlatformUI;
-
 
 public class ColourMapProvider implements IStructuredContentProvider{
 
@@ -46,7 +45,7 @@ public class ColourMapProvider implements IStructuredContentProvider{
 
 	@Override
 	public Object[] getElements(Object inputElement) {
-		final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
+		final IPaletteService pservice = PaletteService.getPaletteService();
 		return ((List<String>)(pservice.getColorSchemes())).toArray();
 	}
 
