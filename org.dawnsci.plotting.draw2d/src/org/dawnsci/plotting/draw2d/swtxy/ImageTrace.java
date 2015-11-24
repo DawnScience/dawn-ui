@@ -233,7 +233,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public void setPalette(String paletteName) {
 		
 		String orig = this.paletteName;
-		final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
+		final IPaletteService pservice = ServiceHolder.getPaletteService();
 		final PaletteData paletteData = pservice.getDirectPaletteData(paletteName);
         setPaletteName(paletteName);
         setPaletteData(paletteData);
