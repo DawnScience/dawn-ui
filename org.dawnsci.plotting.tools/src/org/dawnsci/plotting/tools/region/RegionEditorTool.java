@@ -90,6 +90,7 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -194,7 +195,10 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 		ColorRegistry colorRegistry = JFaceResources.getColorRegistry();
 		final Label label = new Label(status, SWT.RIGHT);
 		label.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
-		label.setForeground(new Color(label.getDisplay(), colorRegistry.getRGB(JFacePreferences.QUALIFIER_COLOR)));
+		RGB rgb = colorRegistry.getRGB(JFacePreferences.QUALIFIER_COLOR);
+		if (rgb == null)
+			rgb = new RGB(128, 128, 128);
+		label.setForeground(new Color(label.getDisplay(), rgb));
 		label.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		label.setText("* Click to change value  ");
 
