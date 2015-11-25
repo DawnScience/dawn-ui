@@ -189,8 +189,12 @@ class LightWeightPlotActions {
 			
 			final Action prefs = new Action("PHA Preferences...") {
 				public void run() {
-					PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "org.embl.cca.dviewer.rcp.preference.pha", null, null);
-					if (pref != null) pref.open();
+					try {
+						PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "org.embl.cca.dviewer.rcp.preference.pha", null, null);
+						if (pref != null) pref.open();
+					} catch(IllegalStateException e) {
+						logger.error(e.getMessage());
+					}
 				}
 			};
 			prefs.setImageDescriptor(PlottingSystemActivator.getImageDescriptor("icons/pha-preferences.png"));
@@ -282,8 +286,12 @@ class LightWeightPlotActions {
 		actionBarManager.registerMenuBarGroup("org.dawnsci.plotting.system.toolbar.preferences");		
 		final Action openPreferences = new Action("Toolbar Preferences...") {
 			public void run() {
-				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "org.dawnsci.plotting.system.toolbarPreferencePage", null, null);
-				if (pref != null) pref.open();
+				try {
+					PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "org.dawnsci.plotting.system.toolbarPreferencePage", null, null);
+					if (pref != null) pref.open();
+				} catch (IllegalStateException e) {
+					logger.error(e.getMessage());
+				}
 			}
 		};
 		actionBarManager.registerAction("org.dawnsci.plotting.system.toolbar.preferences", openPreferences, ActionType.ALL, ManagerType.MENUBAR);
