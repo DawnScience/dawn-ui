@@ -56,6 +56,7 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
@@ -436,8 +437,14 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 		final Action preferences = new Action("Preferences...") {
 			public void run() {
 				if (!isActive()) return;
-				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), InfoPixelPreferencePage.ID, null, null);
-				if (pref != null) pref.open();
+				try {
+					PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench()
+									.getActiveWorkbenchWindow().getShell(), InfoPixelPreferencePage.ID, null, null);
+					if (pref != null)
+						pref.open();
+				} catch (IllegalStateException e) {
+					logger.error(e.getMessage());
+				}
 			}
 		};
 		
@@ -550,11 +557,10 @@ public abstract class InfoPixelTool extends AbstractToolPage implements IROIList
 						isUpdateRunning = true;
 						//logger.debug("Update Running");
 						if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-						PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+						Display.getDefault().syncExec(new Runnable() {
 							public void run() {
 								//Run the update table viewer on a separate thread than the GUI
 								viewer.refresh(region);
-							
 							}
 
 						});
