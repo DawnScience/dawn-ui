@@ -19,7 +19,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.printing.IPrintImageProvider;
 import org.dawb.common.ui.printing.PlotExportPrintUtil;
 import org.dawb.common.ui.printing.PlotPrintPreviewDialog;
@@ -203,11 +202,9 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	        popupMenu.addMenuListener(getIMenuListener());
 	        
 	        this.figureCanvas = xyCanvas;
-		} 
-		
+		}
 		this.xyGraph = new XYRegionGraph();
 		xyGraph.setSelectionProvider(system.getSelectionProvider());
-		
 		IActionBars bars = system.getActionBars();
  		PlotActionsManagerImpl actionBarManager = (PlotActionsManagerImpl)system.getPlotActionSystem();
 		// We contain the action bars in an internal object
@@ -346,7 +343,6 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		if (xyGraph!=null) ((RegionArea)xyGraph.getPlotArea()).removeImageTraceListener(l);
 	}
 
-
 	private MouseWheelListener mouseWheelListener;
 	private MouseWheelListener getMouseWheelListener() {
 		if (mouseWheelListener == null) mouseWheelListener = new MouseWheelListener() {
@@ -354,7 +350,6 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			public void mouseScrolled(MouseEvent e) {
 				
 				int direction = e.count > 0 ? 1 : -1;
-
 
 				IFigure fig = getFigureAtCurrentMousePosition(null);
 				if (fig!=null && fig.getParent() instanceof Axis) {
@@ -383,7 +378,6 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		if (content!=null) content.revalidate();
 	}
 
-
 	private KeyListener keyListener;
 	private KeyListener getKeyListener() {
 		
@@ -408,7 +402,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 					final ImageTrace trace = xyGraph.getRegionArea().getImageTrace();
 					// Force functional creation of image rather than 8-bit
 					if (trace!=null) try {
-						IPaletteService pservice = (IPaletteService)ServiceManager.getService(IPaletteService.class);
+						IPaletteService pservice = ServiceLoader.getPaletteService();
 						if (pservice !=null) {
 							FunctionContainer container = pservice.getFunctionContainer(trace.getPaletteName());
 							if (container!=null) {
