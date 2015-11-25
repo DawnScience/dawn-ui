@@ -97,6 +97,8 @@ public class ExpressionConsole {
     }
 	
 	public Map<String,Object> getFunctions() {
+		if (engine == null)
+			return null;
 		return engine.getFunctions();
 	}
 	
@@ -124,7 +126,9 @@ public class ExpressionConsole {
             stream.write(msg);
         } catch (IOException e) {
             e.printStackTrace();
-        } 
+        } catch (IllegalStateException e) {
+        	e.printStackTrace();
+        }
     }
 	
 	private void processText(String text) {
