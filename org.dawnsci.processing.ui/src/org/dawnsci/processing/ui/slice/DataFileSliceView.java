@@ -746,7 +746,7 @@ public class DataFileSliceView extends ViewPart {
 				sliceVisitor = getSliceVisitor(ops, lazyDataset, Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions()));
 				sliceVisitor.setEndOperation(end);
 				long start = System.currentTimeMillis();
-				sliceVisitor.visit(firstSlice, null, null);
+				sliceVisitor.visit(firstSlice);
 				inputData = sliceVisitor.getOperationInputData();
 				eventManager.sendInputDataUpdate(inputData);
 				logger.debug("Ran in: " +(System.currentTimeMillis()-start)/1000. + " s");

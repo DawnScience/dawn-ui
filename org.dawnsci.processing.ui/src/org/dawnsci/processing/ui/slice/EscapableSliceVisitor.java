@@ -52,7 +52,7 @@ public class EscapableSliceVisitor implements SliceVisitor {
 	}
 
 	@Override
-	public void visit(IDataset slice, Slice[] slices, int[] shape) throws Exception {
+	public void visit(IDataset slice) throws Exception {
 
 		OperationData  data = new OperationData(slice);
 		SliceFromSeriesMetadata ssm = slice.getMetadata(SliceFromSeriesMetadata.class).get(0);

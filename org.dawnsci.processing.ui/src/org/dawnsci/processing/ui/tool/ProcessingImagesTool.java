@@ -155,7 +155,7 @@ public class ProcessingImagesTool extends AbstractToolPage {
 		vis.setEndOperation(selection);
 		
 		try {
-			vis.visit(ds, null, null);
+			vis.visit(ds);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
