@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.macro.TraceMacroEvent;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -142,14 +141,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		this.intensityScale = intensityScale;
 
 		this.service = ServiceHolder.getImageService();
-		// FIXME remove the following deprecated ServiceManager (used as in GDA, the above service is null)
-		if (service == null) {
-			try {
-				service = (IImageService) ServiceManager.getService(IImageService.class);
-			} catch (Exception e) {
-				logger.error(e.getMessage());
-			}
-		}
 		this.imageServiceBean = service.createBeanFromPreferences();
 		setPaletteName(getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
 		
@@ -243,14 +234,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		
 		String orig = this.paletteName;
 		IPaletteService pservice = ServiceHolder.getPaletteService();
-		// FIXME remove the following deprecated ServiceManager (used as in GDA, the above service is null)
-		if (pservice == null) {
-			try {
-				pservice = (IPaletteService) ServiceManager.getService(IPaletteService.class);
-			} catch (Exception e) {
-				logger.error(e.getMessage());
-			}
-		}
 		final PaletteData paletteData = pservice.getDirectPaletteData(paletteName);
         setPaletteName(paletteName);
         setPaletteData(paletteData);
