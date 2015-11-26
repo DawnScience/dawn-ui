@@ -200,6 +200,66 @@
             id="org.dawnsci.plotting.histogram.terrain_blue"
             name="Terrain Blue">
       </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.MagmaGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.magma_green"
+            name="Magma Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.MagmaBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.magma_blue"
+            name="Magma Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.MagmaRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.magma_red"
+            name="Magma Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.InfernoRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.inferno_red"
+            name="Inferno Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.InfernoBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.inferno_blue"
+            name="Inferno Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.InfernoGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.inferno_green"
+            name="Inferno Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.ViridisGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.viridis_green"
+            name="Viridis Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.ViridisBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.viridis_blue"
+            name="Viridis Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.ViridisRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.viridis_red"
+            name="Viridis Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.PlasmaGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.plasma_green"
+            name="Plasma Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.PlasmaBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.plasma_blue"
+            name="Plasma Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.PlasmaRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.plasma_red"
+            name="Plasma Red">
+      </transfer_function>
    </extension>
    <extension
          point="org.dawnsci.plotting.histogram.colourScheme">
@@ -382,6 +442,54 @@
             name="Terrain"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.terrain_red">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.plasma_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.plasma_green"
+            id="org.dawnsci.plotting.histogram.plasma"
+            name="Plasma"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.plasma_red">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.magma_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.magma_green"
+            id="org.dawnsci.plotting.histogram.magma"
+            name="Magma"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.magma_red">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.inferno_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.inferno_green"
+            id="org.dawnsci.plotting.histogram.inferno"
+            name="Inferno"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.inferno_red">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.viridis_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.viridis_green"
+            id="org.dawnsci.plotting.histogram.viridis"
+            name="Viridis"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.viridis_red">
       </colour_scheme>
    </extension>
    <extension
