@@ -481,7 +481,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.plasma_green"
             id="org.dawnsci.plotting.histogram.plasma"
-            name="Plasma"
+            name="Plasma (blue-red-yellow)"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.plasma_red">
       </colour_scheme>
