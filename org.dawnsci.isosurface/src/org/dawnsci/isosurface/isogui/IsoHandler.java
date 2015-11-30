@@ -1,10 +1,10 @@
 package org.dawnsci.isosurface.isogui;
 
 import org.dawnsci.isosurface.tool.IsosurfaceJob;
+import org.eclipse.richbeans.api.binding.IBeanController;
 import org.eclipse.richbeans.api.event.ValueAdapter;
 import org.eclipse.richbeans.api.event.ValueEvent;
-import org.eclipse.richbeans.api.reflection.IBeanController;
-import org.eclipse.richbeans.reflection.BeanService;
+import org.eclipse.richbeans.binding.BeanService;
 
 public class IsoHandler 
 {

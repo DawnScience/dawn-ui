@@ -18,9 +18,8 @@ Export-Package: org.dawnsci.isosurface,
  org.dawnsci.isosurface.alg,
  org.dawnsci.isosurface.tool
 Import-Package: org.dawnsci.plotting.util,
+ org.eclipse.richbeans.binding,
  org.eclipse.richbeans.reflection,
  org.slf4j;version="1.7.6"
-Bundle-ClassPath: jars/jfxswt.jar,
- jars/jfxrt.jar,
- .,
+Bundle-ClassPath: .,
  swing2swt.jar
