@@ -290,6 +290,36 @@
             id="org.dawnsci.plotting.histogram.crmap_blue"
             name="CRMap Blue">
       </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.FlagGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.flag_green"
+            name="Flag Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.FlagRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.flag_red"
+            name="Flag Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.FlagBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.flag_blue"
+            name="Flag Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.PrismGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.prism_green"
+            name="Prism Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.PrismRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.prism_red"
+            name="Prism Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.PrismBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.prism_blue"
+            name="Prism Blue">
+      </transfer_function>
    </extension>
    <extension
          point="org.dawnsci.plotting.histogram.colourScheme">
@@ -544,6 +574,30 @@
             name="CRMap (black-blue-red-yellow-white)"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.crmap_red">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.flag_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.flag_green"
+            id="org.dawnsci.plotting.histogram.flag"
+            name="Flag (Sine)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.flag_red">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.prism_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.prism_green"
+            id="org.dawnsci.plotting.histogram.prism"
+            name="Prism (Sine)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.prism_red">
       </colour_scheme>
    </extension>
    <extension
