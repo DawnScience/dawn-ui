@@ -114,6 +114,7 @@ public class MonitorXYView extends ViewPart implements IAdaptable {
 		
 		colors = new ArrayList<Color>(maxLength);
 		
+		//comment
 //		Display display = Display.getDefault();
 //		colors.add(new Color(display, 255, 0, 0));
 //		for (int i = 0 ; i < maxLength-1 ; i++) {
