@@ -22,6 +22,113 @@ package org.dawnsci.plotting.histogram.data;
  */
 public class HistogramData {
 
+	/**
+	 * Get interpolated Y coordinate given the following formula
+	 * Y = ( ( X - X1 )( Y2 - Y1) / ( X2 - X1) ) + Y1 Where, X1,Y1 = First
+	 * co-ordinates, X2,Y2 = Second co-ordinates, X = Target X co-ordinate,<br>
+	 * Y = Interpolated Y co-ordinate.<br>
+	 * 
+	 * @param pt1
+	 * @param pt2
+	 * @param x
+	 * @return y
+	 */
+	public static double interpolatedY(double[] pt1, double[] pt2, double x) {
+		double y = (((x - pt1[0]) * (pt2[1] - pt1[1])) / (pt2[0] - pt1[0])) + pt1[1];
+		if (y < 0)
+			y = 0;
+		if (y > 1)
+			y = 1;
+		return y;
+	}
+
+	/**
+	 * Earth red colour map data from Matplotlib where
+	 * {{x0, yR0}, {x1, yR1}, {x2, yR2}...}
+	 */
+	public static double[][] EARTH_RED = new double[][] { { 0.0, 0.0 }, 
+		{ 0.2824, 0.1882 }, 
+		{ 0.4588, 0.2714 },
+		{ 0.5490, 0.4719 },
+		{ 0.6980, 0.7176 },
+		{ 0.7882, 0.7553 },
+		{ 1.0000, 0.9922 } };
+
+	/**
+	 * Earth green colour map data from Matplotlib where {{x0, yG0}, {x1, yG1},
+	 * {x2, yG2}...}
+	 */
+	public static double[][] EARTH_GREEN = new double[][] {{0.0, 0.0},
+		{0.0275, 0.0000},
+		{0.1098, 0.1893},
+		{0.1647, 0.3035},
+		{0.2078, 0.3841},
+		{0.2824, 0.5020},
+		{0.5216, 0.6397},
+		{0.6980, 0.7171},
+		{0.7882, 0.6392},
+		{0.7922, 0.6413},
+		{0.8000, 0.6447},
+		{0.8078, 0.6481},
+		{0.8157, 0.6549},
+		{0.8667, 0.6991},
+		{0.8745, 0.7103},
+		{0.8824, 0.7216},
+		{0.8902, 0.7323},
+		{0.8980, 0.7430},
+		{0.9412, 0.8275},
+		{0.9569, 0.8635},
+		{0.9647, 0.8816},
+		{0.9961, 0.9733},
+		{1.0000, 0.9843}};
+
+	/**
+	 * Earth blue colour map data from Matplotlib where {{x0, yB0}, {x1, yB1},
+	 * {x2, yB2}...}
+	 */
+	public static double[][] EARTH_BLUE = new double[][] {{0.0, 0.0},
+		{0.0039, 0.1684},
+		{0.0078, 0.2212},
+		{0.0275, 0.4329},
+		{0.0314, 0.4549},
+		{0.2824, 0.5004},
+		{0.4667, 0.2748},
+		{0.5451, 0.3205},
+		{0.7843, 0.3961},
+		{0.8941, 0.6651},
+		{1.0000, 0.9843}};
+
+	/**
+	 * Terrain colour map data from Matplotlib where
+	 * {{x0, yR0, yG0, yB0}, {x1, yR1, yG1, yB1}, {x2, yR2, yG2, yB2}...}
+	 */
+	public static double[][] TERRAIN2 = new double[][] {{0.00, 0.2, 0.2, 0.6},
+		{0.15, 0.0, 0.6, 1.0},
+		{0.25, 0.0, 0.8, 0.4},
+		{0.50, 1.0, 1.0, 0.6},
+		{0.75, 0.5, 0.36, 0.33},
+		{1.00, 1.0, 1.0, 1.0}};
+
+	/**
+	 * CRMAP colour map data from Matplotlib where {{x0, yR0, yG0, yB0}, {x1,
+	 * yR1, yG1, yB1}, {x2, yR2, yG2, yB2}...}<br>
+	 * Implementation of Carey Rappaport's CMRmap. See `A Color Map for Effective Black-and-White
+	 * Rendering of Color-Scale # Images' by Carey Rappaport #
+	 * http://www.mathworks.com/matlabcentral/fileexchange/2662-cmrmap-m
+	 */
+	public static double[][] CRMAP = new double[][] {{0.000, 0.00, 0.00, 0.00},
+		{0.125, 0.15, 0.15, 0.50},
+		{0.250, 0.30, 0.15, 0.75},
+		{0.375, 0.60, 0.20, 0.50},
+		{0.500, 1.00, 0.25, 0.15},
+		{0.625, 0.90, 0.50, 0.00},
+		{0.750, 0.90, 0.75, 0.10},
+		{0.875, 0.90, 0.90, 0.50},
+		{1.000, 1.00, 1.00, 1.00}};
+
+	/**
+	 * Terrain colour map data from Igor Pro
+	 */
 	public static double[][] TERRAIN = new double [][]{{13107,13107,39321},
 		{12560,14199,40413},
 		{12014,15291,41505},

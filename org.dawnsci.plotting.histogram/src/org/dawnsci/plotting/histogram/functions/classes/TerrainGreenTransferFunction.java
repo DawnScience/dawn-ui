@@ -8,34 +8,19 @@
  */
 package org.dawnsci.plotting.histogram.functions.classes;
 
+import org.dawnsci.plotting.histogram.data.HistogramData;
+
 public class TerrainGreenTransferFunction extends AbstractTransferFunction {
 
 	@Override
 	public double getPoint(double value) {
-		double y = 1;
-		// 0 <= X <= 37
-		if (value <= 0.14509804)
-			y = ((4.13514 * value) + 0.2);
-		// 37 < X < 38
-		if (value > 0.14509804 && value <= 0.14901961)
-			y = 0.8;
-		// 38 < X < 101
-		if (value > 0.14901961 && value <= 0.39607843)
-			y = ((0.80952381 * value) + 0.67936508);
-		// 101 < X <102
-		if (value > 0.39607843 && value <= 0.4)
-			y = 1;
-		// 102 < X < 152
-		if (value > 0.4 && value <= 0.59607843)
-			y = ((-3.26396887 * value) + 2.30558755);
-		// 152 < X <153
-		if (value > 0.59607843 && value <= 0.6)
-			y = 0.36000610;
-		// 153 < X < 255
-		if (value > 0.6 && value <= 1)
-			y = ((1.59994660 * value) - 0.59996185);
-		y = y > 1 ? 1 : y;
-		y = y < 0 ? 0 : y;
-		return y;
+		for (int i = 0; i < HistogramData.TERRAIN2.length; i++) {
+			if (i > 0 && value <= HistogramData.TERRAIN2[i][0]) {
+				return HistogramData.interpolatedY(
+						new double[] { HistogramData.TERRAIN2[i - 1][0], HistogramData.TERRAIN2[i - 1][2] },
+						new double[] { HistogramData.TERRAIN2[i][0], HistogramData.TERRAIN2[i][2] }, value);
+			}
+		}
+		return 0;
 	}
 }
