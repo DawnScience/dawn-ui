@@ -6,14 +6,14 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * 
- * Copyright of Plasma, Magma, Inferno and Viridis color maps :
+ * MatplotLib license:
  * http://matplotlib.org/users/license.html
  * 
  */
 package org.dawnsci.plotting.histogram.data;
 
 /**
- * The Magma, Plasma, Inferno and Veridis color map data has been found on
+ * Most of the colour map data has been found on
  * https://github.com/matplotlib/matplotlib/blob/0037595096e3be3ec863f3e3008e73c469e2f2b8/lib/matplotlib/_cm_listed.py
  * MatplotLib source code is under BSD licence.
  * 
@@ -125,6 +125,58 @@ public class HistogramData {
 		{0.750, 0.90, 0.75, 0.10},
 		{0.875, 0.90, 0.90, 0.50},
 		{1.000, 1.00, 1.00, 1.00}};
+
+	/**
+	 * NIPY_SPECTRAL colour map data from Matplotlib where {{x0, yR0, yG0, yB0}, {x1,
+	 * yR1, yG1, yB1}, {x2, yR2, yG2, yB2}...}<br>
+	 */
+	public static double[][] NIPY_SPECTRAL = new double[][]{{0.0, 0.0, 0.0, 0.0},
+			{0.05, 0.4667, 0.0, 0.5333},
+			{0.10, 0.5333, 0.0, 0.6000}, 
+			{0.15, 0.0, 0.0, 0.6667},
+			{0.20, 0.0, 0.0, 0.8667}, 
+			{0.25, 0.0, 0.4667, 0.8667},
+			{0.30, 0.0, 0.6000, 0.8667},
+			{0.35, 0.0, 0.6667, 0.6667},
+			{0.40, 0.0, 0.6667, 0.5333}, 
+			{0.45, 0.0, 0.6000, 0.0},
+			{0.50, 0.0, 0.7333, 0.0}, 
+			{0.55, 0.0, 0.8667, 0.0},
+			{0.60, 0.0, 1.0, 0.0}, 
+			{0.65, 0.7333, 1.0, 0.0},
+			{0.70, 0.9333, 0.9333, 0.0}, 
+			{0.75, 1.0, 0.8000, 0.0},
+			{0.80, 1.0, 0.6000, 0.0}, 
+			{0.85, 1.0, 0.0, 0.0},
+			{0.90, 0.8667, 0.0, 0.0}, 
+			{0.95, 0.80, 0.0, 0.0},
+			{1.0, 0.80, 0.80, 0.80}};
+
+	/**
+	 * SPECTRAL colour map data from Matplotlib where {{x0, yR0, yG0, yB0}, {x1,
+	 * yR1, yG1, yB1}, {x2, yR2, yG2, yB2}...}<br>
+	 */
+	public static double[][] SPECTRAL = new double[][] {{0.0, 0.61960786581039429, 0.0039215688593685627, 0.25882354378700256},
+		{0.10000000000000001, 0.83529412746429443, 0.24313725531101227, 0.30980393290519714},
+		{0.20000000000000001, 0.95686274766921997, 0.42745098471641541, 0.26274511218070984},
+		{0.29999999999999999, 0.99215686321258545, 0.68235296010971069, 0.3803921639919281},
+		{0.40000000000000002, 0.99607843160629272, 0.87843137979507446, 0.54509806632995605},
+		{0.5, 1.0, 1.0, 0.74901962280273438},
+		{0.59999999999999998, 0.90196079015731812, 0.96078431606292725, 0.59607845544815063},
+		{0.69999999999999996, 0.67058825492858887, 0.86666667461395264, 0.64313727617263794},
+		{0.80000000000000004, 0.40000000596046448, 0.7607843279838562, 0.64705884456634521},
+		{0.90000000000000002, 0.19607843458652496, 0.53333336114883423, 0.74117648601531982},
+		{1.0, 0.36862745881080627, 0.30980393290519714, 0.63529413938522339}};
+
+	/**
+	 * SEISMIC colour map data from Matplotlib where {{x0, yR0, yG0, yB0}, {x1,
+	 * yR1, yG1, yB1}, {x2, yR2, yG2, yB2}...}<br>
+	 */
+	public static double[][] SEISMIC = new double[][] {{0.0, 0.0, 0.0, 0.3},
+		{0.25, 0.0, 0.0, 1.0},
+		{0.5, 1.0, 1.0, 1.0},
+		{0.75, 1.0, 0.0, 0.0},
+		{1.0, 0.5, 0.0, 0.0}};
 
 	/**
 	 * Terrain colour map data from Igor Pro

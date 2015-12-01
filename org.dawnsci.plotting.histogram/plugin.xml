@@ -320,6 +320,51 @@
             id="org.dawnsci.plotting.histogram.prism_blue"
             name="Prism Blue">
       </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.NipyGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.nipy_green"
+            name="Nipy Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.NipyRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.nipy_red"
+            name="Nipy Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.NipyBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.nipy_blue"
+            name="Nipy Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SpectralGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.spectral_green"
+            name="Spectral Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SpectralRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.spectral_red"
+            name="Spectral Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SpectralBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.spectral_blue"
+            name="Spectral Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SeismicGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.seismic_green"
+            name="Seismic Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SeismicRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.seismic_red"
+            name="Seismic Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SeismicBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.seismic_blue"
+            name="Seismic Blue">
+      </transfer_function>
    </extension>
    <extension
          point="org.dawnsci.plotting.histogram.colourScheme">
@@ -579,6 +624,18 @@
             alpha_inverted="false"
             alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
             blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.seismic_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.seismic_green"
+            id="org.dawnsci.plotting.histogram.seismic"
+            name="Seismic"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.seismic_red">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.flag_blue"
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.flag_green"
@@ -598,6 +655,30 @@
             name="Prism (Sine)"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.prism_red">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.nipy_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.nipy_green"
+            id="org.dawnsci.plotting.histogram.nipy"
+            name="Nipy Spectral "
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.nipy_red">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.spectral_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.spectral_green"
+            id="org.dawnsci.plotting.histogram.spectral"
+            name="Spectral"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.spectral_red">
       </colour_scheme>
    </extension>
    <extension
