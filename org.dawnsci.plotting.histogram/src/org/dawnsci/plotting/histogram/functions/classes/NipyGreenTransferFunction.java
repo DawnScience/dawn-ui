@@ -11,10 +11,10 @@ package org.dawnsci.plotting.histogram.functions.classes;
 import org.dawnsci.plotting.histogram.data.HistogramData;
 import org.dawnsci.plotting.histogram.data.HistogramData.RGBChannel;
 
-public class TerrainBlueTransferFunction extends AbstractTransferFunction {
+public class NipyGreenTransferFunction extends AbstractTransferFunction {
 
 	@Override
 	public double getPoint(double value) {
-		return HistogramData.getPointFromRGBData(value, HistogramData.TERRAIN2, RGBChannel.BLUE);
+		return HistogramData.getPointFromRGBData(value, HistogramData.NIPY_SPECTRAL, RGBChannel.GREEN);
 	}
 }

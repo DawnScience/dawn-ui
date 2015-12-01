@@ -9,7 +9,7 @@ public class MagmaGreenTransferFunction extends AbstractTransferFunction {
 		double div = Double.valueOf(1.0) / 255;
 		double val = value / div;
 		double rounded = Math.round(val);
-		for (int i = 0; i < 256; i ++) {
+		for (int i = 0; i < HistogramData.MAGMA.length; i ++) {
 			if (i == rounded)
 				return HistogramData.MAGMA[i][1];
 		}

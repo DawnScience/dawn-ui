@@ -6,14 +6,14 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * 
- * Copyright of Plasma, Magma, Inferno and Viridis color maps :
+ * MatplotLib license:
  * http://matplotlib.org/users/license.html
  * 
  */
 package org.dawnsci.plotting.histogram.data;
 
 /**
- * The Magma, Plasma, Inferno and Veridis color map data has been found on
+ * Most of the colour map data has been found on
  * https://github.com/matplotlib/matplotlib/blob/0037595096e3be3ec863f3e3008e73c469e2f2b8/lib/matplotlib/_cm_listed.py
  * MatplotLib source code is under BSD licence.
  * 
@@ -22,6 +22,198 @@ package org.dawnsci.plotting.histogram.data;
  */
 public class HistogramData {
 
+	public enum RGBChannel {
+		RED(1), GREEN(2), BLUE(3);
+		private int value;
+
+		private RGBChannel(int value) {
+			this.value = value;
+		}
+	}
+
+	/**
+	 * Get interpolated Y coordinate given the following formula
+	 * Y = ( ( X - X1 )( Y2 - Y1) / ( X2 - X1) ) + Y1 Where, X1,Y1 = First
+	 * co-ordinates, X2,Y2 = Second co-ordinates, X = Target X co-ordinate,<br>
+	 * Y = Interpolated Y co-ordinate.<br>
+	 * 
+	 * @param pt1
+	 * @param pt2
+	 * @param x
+	 * @return y
+	 */
+	public static double interpolatedY(double[] pt1, double[] pt2, double x) {
+		double y = (((x - pt1[0]) * (pt2[1] - pt1[1])) / (pt2[0] - pt1[0])) + pt1[1];
+		if (y < 0)
+			y = 0;
+		if (y > 1)
+			y = 1;
+		return y;
+	}
+
+	/**
+	 * Calculate the Y interpolated coordinate for a value from a colour map
+	 * data for a particular rgb channel
+	 * 
+	 * @param value
+	 *            X value from which interpolate the Y coordinate
+	 * @param data
+	 *            colour map data in the following form: {{x0, yR0, yG0, yB0},
+	 *            {x1, yR1, yG1, yB1}, {x2, yR2, yG2, yB2}...}
+	 * @param channel
+	 *            channel number, can be RED = 1, GREEN=2 or BLUE=3
+	 * @return Y interpolated coordinate
+	 */
+	public static double getPointFromRGBData(double value, double[][] data, RGBChannel channel) {
+		for (int i = 0; i < data.length; i++) {
+			if (i > 0 && value <= data[i][0]) {
+				return HistogramData.interpolatedY(
+						new double[] { data[i - 1][0], data[i - 1][channel.value] },
+						new double[] { data[i][0], data[i][channel.value] }, value);
+			}
+		}
+		return 0;
+	}
+
+	/**
+	 * Earth red colour map data from Matplotlib where
+	 * {{x0, yR0}, {x1, yR1}, {x2, yR2}...}
+	 */
+	public static double[][] EARTH_RED = new double[][] { { 0.0, 0.0 }, 
+		{ 0.2824, 0.1882 }, 
+		{ 0.4588, 0.2714 },
+		{ 0.5490, 0.4719 },
+		{ 0.6980, 0.7176 },
+		{ 0.7882, 0.7553 },
+		{ 1.0000, 0.9922 } };
+
+	/**
+	 * Earth green colour map data from Matplotlib where {{x0, yG0}, {x1, yG1},
+	 * {x2, yG2}...}
+	 */
+	public static double[][] EARTH_GREEN = new double[][] {{0.0, 0.0},
+		{0.0275, 0.0000},
+		{0.1098, 0.1893},
+		{0.1647, 0.3035},
+		{0.2078, 0.3841},
+		{0.2824, 0.5020},
+		{0.5216, 0.6397},
+		{0.6980, 0.7171},
+		{0.7882, 0.6392},
+		{0.7922, 0.6413},
+		{0.8000, 0.6447},
+		{0.8078, 0.6481},
+		{0.8157, 0.6549},
+		{0.8667, 0.6991},
+		{0.8745, 0.7103},
+		{0.8824, 0.7216},
+		{0.8902, 0.7323},
+		{0.8980, 0.7430},
+		{0.9412, 0.8275},
+		{0.9569, 0.8635},
+		{0.9647, 0.8816},
+		{0.9961, 0.9733},
+		{1.0000, 0.9843}};
+
+	/**
+	 * Earth blue colour map data from Matplotlib where {{x0, yB0}, {x1, yB1},
+	 * {x2, yB2}...}
+	 */
+	public static double[][] EARTH_BLUE = new double[][] {{0.0, 0.0},
+		{0.0039, 0.1684},
+		{0.0078, 0.2212},
+		{0.0275, 0.4329},
+		{0.0314, 0.4549},
+		{0.2824, 0.5004},
+		{0.4667, 0.2748},
+		{0.5451, 0.3205},
+		{0.7843, 0.3961},
+		{0.8941, 0.6651},
+		{1.0000, 0.9843}};
+
+	/**
+	 * Terrain colour map data from Matplotlib where
+	 * {{x0, yR0, yG0, yB0}, {x1, yR1, yG1, yB1}, {x2, yR2, yG2, yB2}...}
+	 */
+	public static double[][] TERRAIN2 = new double[][] {{0.00, 0.2, 0.2, 0.6},
+		{0.15, 0.0, 0.6, 1.0},
+		{0.25, 0.0, 0.8, 0.4},
+		{0.50, 1.0, 1.0, 0.6},
+		{0.75, 0.5, 0.36, 0.33},
+		{1.00, 1.0, 1.0, 1.0}};
+
+	/**
+	 * CRMAP colour map data from Matplotlib where {{x0, yR0, yG0, yB0}, {x1,
+	 * yR1, yG1, yB1}, {x2, yR2, yG2, yB2}...}<br>
+	 * Implementation of Carey Rappaport's CMRmap. See `A Color Map for Effective Black-and-White
+	 * Rendering of Color-Scale # Images' by Carey Rappaport #
+	 * http://www.mathworks.com/matlabcentral/fileexchange/2662-cmrmap-m
+	 */
+	public static double[][] CRMAP = new double[][] {{0.000, 0.00, 0.00, 0.00},
+		{0.125, 0.15, 0.15, 0.50},
+		{0.250, 0.30, 0.15, 0.75},
+		{0.375, 0.60, 0.20, 0.50},
+		{0.500, 1.00, 0.25, 0.15},
+		{0.625, 0.90, 0.50, 0.00},
+		{0.750, 0.90, 0.75, 0.10},
+		{0.875, 0.90, 0.90, 0.50},
+		{1.000, 1.00, 1.00, 1.00}};
+
+	/**
+	 * NIPY_SPECTRAL colour map data from Matplotlib where {{x0, yR0, yG0, yB0}, {x1,
+	 * yR1, yG1, yB1}, {x2, yR2, yG2, yB2}...}<br>
+	 */
+	public static double[][] NIPY_SPECTRAL = new double[][]{{0.0, 0.0, 0.0, 0.0},
+			{0.05, 0.4667, 0.0, 0.5333},
+			{0.10, 0.5333, 0.0, 0.6000}, 
+			{0.15, 0.0, 0.0, 0.6667},
+			{0.20, 0.0, 0.0, 0.8667}, 
+			{0.25, 0.0, 0.4667, 0.8667},
+			{0.30, 0.0, 0.6000, 0.8667},
+			{0.35, 0.0, 0.6667, 0.6667},
+			{0.40, 0.0, 0.6667, 0.5333}, 
+			{0.45, 0.0, 0.6000, 0.0},
+			{0.50, 0.0, 0.7333, 0.0}, 
+			{0.55, 0.0, 0.8667, 0.0},
+			{0.60, 0.0, 1.0, 0.0}, 
+			{0.65, 0.7333, 1.0, 0.0},
+			{0.70, 0.9333, 0.9333, 0.0}, 
+			{0.75, 1.0, 0.8000, 0.0},
+			{0.80, 1.0, 0.6000, 0.0}, 
+			{0.85, 1.0, 0.0, 0.0},
+			{0.90, 0.8667, 0.0, 0.0}, 
+			{0.95, 0.80, 0.0, 0.0},
+			{1.0, 0.80, 0.80, 0.80}};
+
+	/**
+	 * SPECTRAL colour map data from Matplotlib where {{x0, yR0, yG0, yB0}, {x1,
+	 * yR1, yG1, yB1}, {x2, yR2, yG2, yB2}...}<br>
+	 */
+	public static double[][] SPECTRAL = new double[][] {{0.0, 0.61960786581039429, 0.0039215688593685627, 0.25882354378700256},
+		{0.10000000000000001, 0.83529412746429443, 0.24313725531101227, 0.30980393290519714},
+		{0.20000000000000001, 0.95686274766921997, 0.42745098471641541, 0.26274511218070984},
+		{0.29999999999999999, 0.99215686321258545, 0.68235296010971069, 0.3803921639919281},
+		{0.40000000000000002, 0.99607843160629272, 0.87843137979507446, 0.54509806632995605},
+		{0.5, 1.0, 1.0, 0.74901962280273438},
+		{0.59999999999999998, 0.90196079015731812, 0.96078431606292725, 0.59607845544815063},
+		{0.69999999999999996, 0.67058825492858887, 0.86666667461395264, 0.64313727617263794},
+		{0.80000000000000004, 0.40000000596046448, 0.7607843279838562, 0.64705884456634521},
+		{0.90000000000000002, 0.19607843458652496, 0.53333336114883423, 0.74117648601531982},
+		{1.0, 0.36862745881080627, 0.30980393290519714, 0.63529413938522339}};
+
+	/**
+	 * SEISMIC colour map data from Matplotlib where {{x0, yR0, yG0, yB0}, {x1,
+	 * yR1, yG1, yB1}, {x2, yR2, yG2, yB2}...}<br>
+	 */
+	public static double[][] SEISMIC = new double[][] {{0.0, 0.0, 0.0, 0.3},
+		{0.25, 0.0, 0.0, 1.0},
+		{0.5, 1.0, 1.0, 1.0},
+		{0.75, 1.0, 0.0, 0.0},
+		{1.0, 0.5, 0.0, 0.0}};
+
+	/**
+	 * Terrain colour map data from Igor Pro
+	 */
 	public static double[][] TERRAIN = new double [][]{{13107,13107,39321},
 		{12560,14199,40413},
 		{12014,15291,41505},

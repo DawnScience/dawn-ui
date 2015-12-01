@@ -8,13 +8,13 @@
  */
 package org.dawnsci.plotting.histogram.functions.classes;
 
-import org.dawnsci.plotting.histogram.data.HistogramData;
-import org.dawnsci.plotting.histogram.data.HistogramData.RGBChannel;
-
-public class TerrainBlueTransferFunction extends AbstractTransferFunction {
+public class PrismBlueTransferFunction extends AbstractTransferFunction {
 
 	@Override
 	public double getPoint(double value) {
-		return HistogramData.getPointFromRGBData(value, HistogramData.TERRAIN2, RGBChannel.BLUE);
+		double y = -1.1 * Math.sin((value * 20.9) * Math.PI);
+		y = y < 0 ? 0 : y;
+		y = y > 1 ? 1 : y;
+		return y;
 	}
 }

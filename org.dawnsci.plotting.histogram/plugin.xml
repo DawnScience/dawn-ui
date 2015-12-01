@@ -177,7 +177,7 @@
       </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.MidJetTransferFunction"
-            id="ororg.dawnsci.plotting.histogram.midJet"
+            id="org.dawnsci.plotting.histogram.midJet"
             name="Mid Jet">
       </transfer_function>
       <transfer_function
@@ -259,6 +259,111 @@
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.PlasmaRedTransferFunction"
             id="org.dawnsci.plotting.histogram.plasma_red"
             name="Plasma Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.EarthGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.earth_green"
+            name="Earth Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.EarthRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.earth_red"
+            name="Earth Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.EarthBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.earth_blue"
+            name="Earth Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.CRMapGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.crmap_green"
+            name="CRMap Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.CRMapRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.crmap_red"
+            name="CRMap Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.CRMapBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.crmap_blue"
+            name="CRMap Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.FlagGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.flag_green"
+            name="Flag Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.FlagRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.flag_red"
+            name="Flag Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.FlagBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.flag_blue"
+            name="Flag Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.PrismGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.prism_green"
+            name="Prism Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.PrismRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.prism_red"
+            name="Prism Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.PrismBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.prism_blue"
+            name="Prism Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.NipyGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.nipy_green"
+            name="Nipy Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.NipyRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.nipy_red"
+            name="Nipy Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.NipyBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.nipy_blue"
+            name="Nipy Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SpectralGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.spectral_green"
+            name="Spectral Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SpectralRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.spectral_red"
+            name="Spectral Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SpectralBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.spectral_blue"
+            name="Spectral Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SeismicGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.seismic_green"
+            name="Seismic Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SeismicRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.seismic_red"
+            name="Seismic Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SeismicBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.seismic_blue"
+            name="Seismic Blue">
       </transfer_function>
    </extension>
    <extension
@@ -425,7 +530,7 @@
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.lowJet"
             green_inverted="false"
-            green_transfer_function="ororg.dawnsci.plotting.histogram.midJet"
+            green_transfer_function="org.dawnsci.plotting.histogram.midJet"
             id="org.dawnsci.plotting.histogram.jet"
             name="Jet (Blue-Cyan-Green-Yellow-Red)"
             red_inverted="false"
@@ -439,7 +544,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.terrain_green"
             id="org.dawnsci.plotting.histogram.terrain"
-            name="Terrain"
+            name="Terrain (blue-green-yellow-brown-white)"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.terrain_red">
       </colour_scheme>
@@ -451,7 +556,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.plasma_green"
             id="org.dawnsci.plotting.histogram.plasma"
-            name="Plasma"
+            name="Plasma (blue-red-yellow)"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.plasma_red">
       </colour_scheme>
@@ -463,7 +568,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.magma_green"
             id="org.dawnsci.plotting.histogram.magma"
-            name="Magma"
+            name="Magma (black-red-white)"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.magma_red">
       </colour_scheme>
@@ -475,7 +580,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.inferno_green"
             id="org.dawnsci.plotting.histogram.inferno"
-            name="Inferno"
+            name="Inferno (black-red-yellow)"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.inferno_red">
       </colour_scheme>
@@ -487,9 +592,93 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.viridis_green"
             id="org.dawnsci.plotting.histogram.viridis"
-            name="Viridis"
+            name="Viridis (blue-green-yellow)"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.viridis_red">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.earth_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.earth_green"
+            id="org.dawnsci.plotting.histogram.earth"
+            name="Earth (dark blue-green-brown-white)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.earth_red">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.crmap_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.crmap_green"
+            id="org.dawnsci.plotting.histogram.crmap"
+            name="CRMap (black-blue-red-yellow-white)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.crmap_red">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.seismic_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.seismic_green"
+            id="org.dawnsci.plotting.histogram.seismic"
+            name="Seismic"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.seismic_red">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.flag_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.flag_green"
+            id="org.dawnsci.plotting.histogram.flag"
+            name="Flag (Sine)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.flag_red">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.prism_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.prism_green"
+            id="org.dawnsci.plotting.histogram.prism"
+            name="Prism (Sine)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.prism_red">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.nipy_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.nipy_green"
+            id="org.dawnsci.plotting.histogram.nipy"
+            name="Nipy Spectral "
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.nipy_red">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.spectral_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.spectral_green"
+            id="org.dawnsci.plotting.histogram.spectral"
+            name="Spectral"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.spectral_red">
       </colour_scheme>
    </extension>
    <extension

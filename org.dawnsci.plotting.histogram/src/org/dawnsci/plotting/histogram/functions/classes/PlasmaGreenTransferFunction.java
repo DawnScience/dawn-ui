@@ -9,7 +9,7 @@ public class PlasmaGreenTransferFunction extends AbstractTransferFunction {
 		double div = Double.valueOf(1.0) / 255;
 		double val = value / div;
 		double rounded = Math.round(val);
-		for (int i = 0; i < 256; i ++) {
+		for (int i = 0; i < HistogramData.PLASMA.length; i ++) {
 			if (i == rounded)
 				return HistogramData.PLASMA[i][1];
 		}

@@ -9,12 +9,18 @@
 package org.dawnsci.plotting.histogram.functions.classes;
 
 import org.dawnsci.plotting.histogram.data.HistogramData;
-import org.dawnsci.plotting.histogram.data.HistogramData.RGBChannel;
 
-public class TerrainBlueTransferFunction extends AbstractTransferFunction {
+public class EarthGreenTransferFunction extends AbstractTransferFunction {
 
 	@Override
 	public double getPoint(double value) {
-		return HistogramData.getPointFromRGBData(value, HistogramData.TERRAIN2, RGBChannel.BLUE);
+		for (int i = 0; i < HistogramData.EARTH_GREEN.length; i++) {
+			if (i > 0 && value <= HistogramData.EARTH_GREEN[i][0]) {
+				return HistogramData.interpolatedY(
+						new double[] { HistogramData.EARTH_GREEN[i - 1][0], HistogramData.EARTH_GREEN[i - 1][1] },
+						new double[] { HistogramData.EARTH_GREEN[i][0], HistogramData.EARTH_GREEN[i][1] }, value);
+			}
+		}
+		return 0;
 	}
 }
