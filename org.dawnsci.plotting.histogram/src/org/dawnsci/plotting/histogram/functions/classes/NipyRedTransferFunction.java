@@ -9,18 +9,12 @@
 package org.dawnsci.plotting.histogram.functions.classes;
 
 import org.dawnsci.plotting.histogram.data.HistogramData;
+import org.dawnsci.plotting.histogram.data.HistogramData.RGBChannel;
 
 public class NipyRedTransferFunction extends AbstractTransferFunction {
 
 	@Override
 	public double getPoint(double value) {
-		for (int i = 0; i < HistogramData.NIPY_SPECTRAL.length; i++) {
-			if (i > 0 && value <= HistogramData.NIPY_SPECTRAL[i][0]) {
-				return HistogramData.interpolatedY(
-						new double[] { HistogramData.NIPY_SPECTRAL[i - 1][0], HistogramData.NIPY_SPECTRAL[i - 1][1] },
-						new double[] { HistogramData.NIPY_SPECTRAL[i][0], HistogramData.NIPY_SPECTRAL[i][1] }, value);
-			}
-		}
-		return 0;
+		return HistogramData.getPointFromRGBData(value, HistogramData.NIPY_SPECTRAL, RGBChannel.RED);
 	}
 }

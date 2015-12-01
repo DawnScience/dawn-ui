@@ -9,18 +9,12 @@
 package org.dawnsci.plotting.histogram.functions.classes;
 
 import org.dawnsci.plotting.histogram.data.HistogramData;
+import org.dawnsci.plotting.histogram.data.HistogramData.RGBChannel;
 
 public class SpectralGreenTransferFunction extends AbstractTransferFunction {
 
 	@Override
 	public double getPoint(double value) {
-		for (int i = 0; i < HistogramData.SPECTRAL.length; i++) {
-			if (i > 0 && value <= HistogramData.SPECTRAL[i][0]) {
-				return HistogramData.interpolatedY(
-						new double[] { HistogramData.SPECTRAL[i - 1][0], HistogramData.SPECTRAL[i - 1][2] },
-						new double[] { HistogramData.SPECTRAL[i][0], HistogramData.SPECTRAL[i][2] }, value);
-			}
-		}
-		return 0;
+		return HistogramData.getPointFromRGBData(value, HistogramData.SPECTRAL, RGBChannel.GREEN);
 	}
 }

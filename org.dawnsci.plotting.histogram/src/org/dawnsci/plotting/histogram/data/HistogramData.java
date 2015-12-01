@@ -22,6 +22,15 @@ package org.dawnsci.plotting.histogram.data;
  */
 public class HistogramData {
 
+	public enum RGBChannel {
+		RED(1), GREEN(2), BLUE(3);
+		private int value;
+
+		private RGBChannel(int value) {
+			this.value = value;
+		}
+	}
+
 	/**
 	 * Get interpolated Y coordinate given the following formula
 	 * Y = ( ( X - X1 )( Y2 - Y1) / ( X2 - X1) ) + Y1 Where, X1,Y1 = First
@@ -40,6 +49,30 @@ public class HistogramData {
 		if (y > 1)
 			y = 1;
 		return y;
+	}
+
+	/**
+	 * Calculate the Y interpolated coordinate for a value from a colour map
+	 * data for a particular rgb channel
+	 * 
+	 * @param value
+	 *            X value from which interpolate the Y coordinate
+	 * @param data
+	 *            colour map data in the following form: {{x0, yR0, yG0, yB0},
+	 *            {x1, yR1, yG1, yB1}, {x2, yR2, yG2, yB2}...}
+	 * @param channel
+	 *            channel number, can be RED = 1, GREEN=2 or BLUE=3
+	 * @return Y interpolated coordinate
+	 */
+	public static double getPointFromRGBData(double value, double[][] data, RGBChannel channel) {
+		for (int i = 0; i < data.length; i++) {
+			if (i > 0 && value <= data[i][0]) {
+				return HistogramData.interpolatedY(
+						new double[] { data[i - 1][0], data[i - 1][channel.value] },
+						new double[] { data[i][0], data[i][channel.value] }, value);
+			}
+		}
+		return 0;
 	}
 
 	/**

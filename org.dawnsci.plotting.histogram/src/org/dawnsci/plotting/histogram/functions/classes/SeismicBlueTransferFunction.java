@@ -9,18 +9,12 @@
 package org.dawnsci.plotting.histogram.functions.classes;
 
 import org.dawnsci.plotting.histogram.data.HistogramData;
+import org.dawnsci.plotting.histogram.data.HistogramData.RGBChannel;
 
 public class SeismicBlueTransferFunction extends AbstractTransferFunction {
 
 	@Override
 	public double getPoint(double value) {
-		for (int i = 0; i < HistogramData.SEISMIC.length; i++) {
-			if (i > 0 && value <= HistogramData.SEISMIC[i][0]) {
-				return HistogramData.interpolatedY(
-						new double[] { HistogramData.SEISMIC[i - 1][0], HistogramData.SEISMIC[i - 1][3] },
-						new double[] { HistogramData.SEISMIC[i][0], HistogramData.SEISMIC[i][3] }, value);
-			}
-		}
-		return 0;
+		return HistogramData.getPointFromRGBData(value, HistogramData.SEISMIC, RGBChannel.BLUE);
 	}
 }
