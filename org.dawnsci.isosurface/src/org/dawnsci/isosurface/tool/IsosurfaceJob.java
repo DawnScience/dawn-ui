@@ -50,7 +50,7 @@ public class IsosurfaceJob extends Job {
  	final private IPlottingSystem system;
  	private String name;
  	
- 	private double value;
+ 	private Double value;
 	private double opacity;
 	private int[] boxSize;
 	private RGB colour;
@@ -59,14 +59,11 @@ public class IsosurfaceJob extends Job {
  	private ILazyDataset slice;
  	
 	public IsosurfaceJob(String name, IPlottingSystem system,  ILazyDataset slice, IOperation<MarchingCubesModel, Surface> generator)
-		
 	{
 		super(name);
 		
 		setUser(false);
 		setPriority(Job.INTERACTIVE);
-		
-		
 		
 		this.name = name;
 		this.system = system;
@@ -86,8 +83,7 @@ public class IsosurfaceJob extends Job {
 	 * 
 	 */
 	
-	
-	public void compute(int[] boxSize, double value,  double opacity, RGB colour, String traceName)//, IIsosurfaceTrace trace)
+	public void compute(int[] boxSize, Double value,  double opacity, RGB colour, String traceName)//, IIsosurfaceTrace trace)
 	{
 		this.boxSize = boxSize;   
 		this.value = value;     
@@ -129,12 +125,18 @@ public class IsosurfaceJob extends Job {
 					generator.getModel().setLazyData(slice);
 				}
 				
-				Surface surface    = generator.execute(null, new ProgressMonitorWrapper(monitor));
+				IDataset points     = null;
+				IDataset textCoords = null;
+				IDataset faces      = null;
 				
-				final IDataset points     = new FloatDataset(surface.getPoints(), surface.getPoints().length);
-				final IDataset textCoords = new FloatDataset(surface.getTexCoords(), surface.getTexCoords().length);
-				final IDataset faces      = new IntegerDataset(surface.getFaces(), surface.getFaces().length);
+				if (value != null)
+				{
+					Surface surface = generator.execute(null, new ProgressMonitorWrapper(monitor));
 				
+					points     = new FloatDataset(surface.getPoints(), surface.getPoints().length);
+					textCoords = new FloatDataset(surface.getTexCoords(), surface.getTexCoords().length);
+					faces      = new IntegerDataset(surface.getFaces(), surface.getFaces().length);
+				}
 				
 				/**
 				 * Temp axes builder
@@ -161,16 +163,16 @@ public class IsosurfaceJob extends Job {
 				 */
 				
 				
-				final int[] colour = surface.getColour();
-				final double opacity = surface.getOpacity();
+				final int[] traceColour = new int[]{colour.red, colour.green, colour.blue};
+				final double traceOpacity = opacity;
 				
 				// if trace has not been created -> create trace
 				if ((IIsosurfaceTrace) system.getTrace(traceName) == null)
 				{
 					final IIsosurfaceTrace trace = system.createIsosurfaceTrace(this.traceName);
-					
+
+					trace.setMaterial(traceColour[0], traceColour[1] , traceColour[2], traceOpacity);
 					trace.setData(points, textCoords, faces, axis);
-					trace.setMaterial(colour[0], colour[1] , colour[2], opacity);
 					
 					Display.getDefault().syncExec(new Runnable() {
 						public void run() {
@@ -181,9 +183,16 @@ public class IsosurfaceJob extends Job {
 				else
 				{
 					IIsosurfaceTrace trace = (IIsosurfaceTrace) system.getTrace(traceName);
-					
-					trace.setData(points, textCoords, faces, axis );
-					trace.setMaterial(colour[0], colour[1] , colour[2], opacity);
+
+					trace.setMaterial(traceColour[0], traceColour[1] , traceColour[2], traceOpacity);
+					if (value != null)
+					{
+						trace.setData(points, textCoords, faces, axis );
+					}
+					else
+					{
+						trace.setData(null, null, null, null);
+					}
 				}
 				
 			} 

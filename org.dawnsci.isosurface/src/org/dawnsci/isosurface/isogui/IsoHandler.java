@@ -1,6 +1,7 @@
 package org.dawnsci.isosurface.isogui;
 
 import org.dawnsci.isosurface.tool.IsosurfaceJob;
+import org.eclipse.dawnsci.plotting.api.jreality.data.ColourImageData;
 import org.eclipse.richbeans.api.binding.IBeanController;
 import org.eclipse.richbeans.api.event.ValueAdapter;
 import org.eclipse.richbeans.api.event.ValueEvent;
@@ -33,29 +34,40 @@ public class IsoHandler
 			{
 				try 
 				{
-					
 					// update view
 					controller.uiToBean();
 															
 					IsoItem current = (IsoItem)isoComp.getItems().getBean();
-					
+															
 					if (current.beanDeleted()) // this is a quick fix remove asap
 					{
 						job.destroy(current.getTraceKey());
 					}
 					
-					if (!(current).equals(previous)) 
+					
+					if (!(current).equals(previous))
 					{
 						// run alg
-						job.compute(
-								new int[] {	current.getX(),
-											current.getY(),
-											current.getZ()},
-								current.getValue(),
-								current.getOpacity(),
-								current.getColour(),
-								current.getTraceKey());
-						
+						if (!e.getFieldName().contains("colour") && !e.getFieldName().contains("opacity"))
+						{
+							job.compute(
+									new int[] {	current.getX(),
+												current.getY(),
+												current.getZ()},
+									current.getValue(),
+									current.getOpacity(),
+									current.getColour(),
+									current.getTraceKey());
+						}
+						else
+						{
+							job.compute(
+									null,
+									null,
+									current.getOpacity(),
+									current.getColour(),
+									current.getTraceKey());
+						}
 						previous = (IsoItem)current.clone();
 					}
 //					if ( previous!= null && previous.beanDeleted()) // this is a quick fix remove asap

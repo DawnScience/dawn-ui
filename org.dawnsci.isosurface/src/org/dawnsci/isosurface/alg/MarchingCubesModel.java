@@ -34,8 +34,9 @@ public class MarchingCubesModel extends AbstractOperationModel {
 	public double getIsovalue() {
 		return isovalue;
 	}
-	public void setIsovalue(double isovalue) {
-		this.isovalue = isovalue;
+	public void setIsovalue(Double isovalue) {
+		if (isovalue != null)
+			this.isovalue = isovalue;
 	}
 	public int[] getBoxSize() {
 		return boxSize;

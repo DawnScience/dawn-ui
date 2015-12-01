@@ -72,7 +72,7 @@ public class MarchingCubes extends AbstractOperation<MarchingCubesModel, Surface
 
 		if (points==null || points.length<1) throw new OperationException(this, "No isosurface found!");
 
-		return new Surface(points, texCoords, faces, model.getColour(),  model.getOpacity());
+		return new Surface(points, texCoords, faces);
 	}
 
 	@Override

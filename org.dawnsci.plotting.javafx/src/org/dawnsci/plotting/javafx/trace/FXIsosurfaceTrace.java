@@ -119,9 +119,7 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 	 * Internal use only.
 	 */
 	public void create()
-	{
-		System.out.println("create()");
-		
+	{		
 		if (Platform.isFxApplicationThread())
 		{
 			createInternal();
@@ -251,9 +249,13 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 	
 	private void marry(TriangleMesh mesh)
 	{
-		mesh.getPoints().setAll((float[]) points.getBuffer());
-		mesh.getTexCoords().setAll((float[]) textCoords.getBuffer());
-		mesh.getFaces().setAll((int[]) faces.getBuffer());
+		if (points != null && textCoords != null && faces != null)
+		{
+			mesh.getPoints().setAll((float[]) points.getBuffer());
+			mesh.getTexCoords().setAll((float[]) textCoords.getBuffer());
+			mesh.getFaces().setAll((int[]) faces.getBuffer());
+		}
+		
 		
 	}
 	

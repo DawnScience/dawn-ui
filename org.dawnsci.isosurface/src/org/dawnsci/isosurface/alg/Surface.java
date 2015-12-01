@@ -30,16 +30,12 @@ public class Surface extends OperationData implements Serializable {
 	private float[] points;
 	private float[] texCoords;
 	private int[] faces;
-	private int[] colour;
-	private double opacity;
 	
-	public Surface(float[] points, float[] texCoords, int[] faces, int[] colour, double opacity){
+	public Surface(float[] points, float[] texCoords, int[] faces){
 		super();
 		this.points = points;
 		this.texCoords = texCoords;
 		this.faces = faces;
-		this.colour = colour;
-		this.opacity = opacity;
 	}
 
 	
@@ -60,20 +56,6 @@ public class Surface extends OperationData implements Serializable {
 	}
 	public int[] getFaces() {
 		return faces;
-	}
-	public void setColour(int r, int g, int b){
-		this.colour = new int[]{r%256, g%256, b%256};
-	}	
-	public int[] getColour(){
-		return this.colour;
-	}
-	public void setOpacity(double newOpacity)
-	{
-		this.opacity = newOpacity;
-	}
-	public double getOpacity()
-	{
-		return this.opacity;
 	}
 	
 

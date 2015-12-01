@@ -38,7 +38,7 @@ import org.eclipse.swt.widgets.Composite;
  * 		draws trace list within scene root
  * 
  */
-public class FXPlotViewer extends IPlottingSystemViewer.Stub
+public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 {
 	// the scene class -> uses an inherited class to hold the camera translation data
 	private SurfaceDisplayer scene;

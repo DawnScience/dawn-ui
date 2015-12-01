@@ -16,6 +16,7 @@ Require-Bundle: org.eclipse.core.runtime,
 Bundle-ActivationPolicy: lazy
 Export-Package: org.dawnsci.isosurface,
  org.dawnsci.isosurface.alg,
+ org.dawnsci.isosurface.isogui,
  org.dawnsci.isosurface.tool
 Import-Package: org.dawnsci.plotting.util,
  org.eclipse.richbeans.binding,
