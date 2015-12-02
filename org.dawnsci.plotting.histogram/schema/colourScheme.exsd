@@ -6,7 +6,7 @@
          <meta.schema plugin="org.dawnsci.plotting.histogram" id="colourScheme" name="Colour Scheme"/>
       </appinfo>
       <documentation>
-         This extention point allows the setting of a new colour scheme which will be used on the Histogram tool
+         This extension point allows the setting of a new colour scheme which will be used on the Histogram tool
       </documentation>
    </annotation>
 
@@ -66,7 +66,7 @@
          <attribute name="red_transfer_function" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  Red channel response defined by a transfer function. Each transfer function should be able to map values [0, 1] to the range [0, 1]
                </documentation>
                <appinfo>
                   <meta.attribute kind="identifier" basedOn="org.dawnsci.plotting.histogram.channelColourScheme/transfer_function/@id"/>
@@ -76,7 +76,7 @@
          <attribute name="green_transfer_function" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  Green channel response defined by a transfer function
                </documentation>
                <appinfo>
                   <meta.attribute kind="identifier" basedOn="org.dawnsci.plotting.histogram.channelColourScheme/transfer_function/@id"/>
@@ -86,48 +86,48 @@
          <attribute name="blue_transfer_function" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  Blue channel response defined by a transfer function
                </documentation>
                <appinfo>
                   <meta.attribute kind="identifier" basedOn="org.dawnsci.plotting.histogram.channelColourScheme/transfer_function/@id"/>
                </appinfo>
             </annotation>
          </attribute>
-         <attribute name="alpha_transfer_function" type="string" use="required">
+         <attribute name="alpha_transfer_function" type="string" use="default" value="org.dawnsci.plotting.histogram.full">
             <annotation>
                <documentation>
-                  
+                  Opacity given by this transfer function and by default is fully opaque
                </documentation>
                <appinfo>
                   <meta.attribute kind="identifier" basedOn="org.dawnsci.plotting.histogram.channelColourScheme/transfer_function/@id"/>
                </appinfo>
             </annotation>
          </attribute>
-         <attribute name="red_inverted" type="boolean" use="required">
+         <attribute name="red_inverted" type="boolean" use="default" value="false">
             <annotation>
                <documentation>
-                  
+                  If true, flip red channel response so zero maps to red
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="blue_inverted" type="boolean" use="required">
+         <attribute name="green_inverted" type="boolean" use="default" value="false">
             <annotation>
                <documentation>
-                  
+                  If true, flip green channel response so zero maps to green
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="green_inverted" type="boolean" use="required">
+         <attribute name="blue_inverted" type="boolean" use="default" value="false">
             <annotation>
                <documentation>
-                  
+                  If true, flip blue channel response so zero maps to blue
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="alpha_inverted" type="boolean" use="required">
+         <attribute name="alpha_inverted" type="boolean" use="default" value="false">
             <annotation>
                <documentation>
-                  
+                  If true, flip alpha channel response so zero maps to fully opaque
                </documentation>
             </annotation>
          </attribute>
@@ -164,7 +164,6 @@
    &lt;extension
          point=&quot;org.dawnsci.plotting.histogram.colourScheme&quot;&gt;
       &lt;colour_scheme
-            alpha_transfer_function=&quot;org.dawnsci.plotting.histogram.linear&quot;
             blue_transfer_function=&quot;org.dawnsci.plotting.histogram.linear&quot;
             green_transfer_function=&quot;org.dawnsci.plotting.histogram.linear&quot;
             id=&quot;org.dawnsci.plotting.histogram.greyscale&quot;
@@ -172,7 +171,6 @@
             red_transfer_function=&quot;org.dawnsci.plotting.histogram.linear&quot;&gt;
       &lt;/colour_scheme&gt;
       &lt;colour_scheme
-            alpha_transfer_function=&quot;org.dawnsci.plotting.histogram.squared&quot;
             blue_transfer_function=&quot;org.dawnsci.plotting.histogram.squared&quot;
             green_transfer_function=&quot;org.dawnsci.plotting.histogram.squared&quot;
             id=&quot;org.dawnsci.plotting.histogram.squared&quot;
