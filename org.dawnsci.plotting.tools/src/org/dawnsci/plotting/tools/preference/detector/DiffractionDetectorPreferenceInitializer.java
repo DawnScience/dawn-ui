@@ -124,6 +124,30 @@ public class DiffractionDetectorPreferenceInitializer extends AbstractPreference
 		dd10.setNumberOfPixelsX(4150);
 		dd10.setNumberOfPixelsY(2083);
 		dds.addDiffractionDetector(dd10);
+		
+		DiffractionDetector dd11 = new DiffractionDetector();
+		dd11.setDetectorName("imXPAD-S70");
+		dd11.setxPixelSize(Amount.valueOf(130, SI.MICRO(SI.METRE)));
+		dd11.setyPixelSize(Amount.valueOf(130, SI.MICRO(SI.METRE)));
+		dd11.setNumberOfPixelsX(1114);
+		dd11.setNumberOfPixelsY(1164);
+		dds.addDiffractionDetector(dd11);
+		
+		DiffractionDetector dd12 = new DiffractionDetector();
+		dd12.setDetectorName("Rayonix LX255-HS");
+		dd12.setxPixelSize(Amount.valueOf(40, SI.MICRO(SI.METRE)));
+		dd12.setyPixelSize(Amount.valueOf(40, SI.MICRO(SI.METRE)));
+		dd12.setNumberOfPixelsX(1920);
+		dd12.setNumberOfPixelsY(5760);
+		dds.addDiffractionDetector(dd12);
+		
+		DiffractionDetector dd13 = new DiffractionDetector();
+		dd13.setDetectorName("ADSC 210r CCD");
+		dd13.setxPixelSize(Amount.valueOf(51, SI.MICRO(SI.METRE)));
+		dd13.setyPixelSize(Amount.valueOf(51, SI.MICRO(SI.METRE)));
+		dd13.setNumberOfPixelsX(4096);
+		dd13.setNumberOfPixelsY(4096);
+		dds.addDiffractionDetector(dd13);
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		XMLEncoder xmlEncoder = new XMLEncoder(baos);
