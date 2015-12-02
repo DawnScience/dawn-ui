@@ -370,7 +370,7 @@
          point="org.dawnsci.plotting.histogram.colourScheme">
       <colour_scheme
       		alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.linear"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.linear"
             green_inverted="false"
@@ -382,7 +382,7 @@
       </colour_scheme>
       <colour_scheme
      		alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.squared"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.squared"
             green_inverted="false"
@@ -394,7 +394,7 @@
       </colour_scheme>
       <colour_scheme
       		alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.sqrt"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.sqrt"
             green_inverted="false"
@@ -406,7 +406,7 @@
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.sqrt"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.sin180"
             green_inverted="false"
@@ -418,7 +418,7 @@
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.ncdblue"
             green_inverted="false"
@@ -430,7 +430,7 @@
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.quad"
             green_inverted="false"
@@ -442,7 +442,7 @@
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.linear"
             green_inverted="false"
@@ -454,7 +454,7 @@
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.threexminus2"
             green_inverted="false"
@@ -466,7 +466,7 @@
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.cos90"
             green_inverted="false"
@@ -478,7 +478,7 @@
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.twoxminus1"
             green_inverted="false"
@@ -490,7 +490,7 @@
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.lowJet"
             green_inverted="false"
@@ -502,7 +502,7 @@
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.terrain_blue"
             green_inverted="false"
@@ -514,7 +514,7 @@
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.plasma_blue"
             green_inverted="false"
@@ -526,7 +526,7 @@
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.magma_blue"
             green_inverted="false"
@@ -538,7 +538,7 @@
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.inferno_blue"
             green_inverted="false"
@@ -550,7 +550,7 @@
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.viridis_blue"
             green_inverted="false"
@@ -562,7 +562,7 @@
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.earth_blue"
             green_inverted="false"
@@ -574,7 +574,7 @@
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.crmap_blue"
             green_inverted="false"
@@ -586,7 +586,7 @@
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.seismic_blue"
             green_inverted="false"
@@ -598,7 +598,7 @@
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.flag_blue"
             green_inverted="false"
@@ -610,7 +610,7 @@
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.prism_blue"
             green_inverted="false"
@@ -622,7 +622,7 @@
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.nipy_blue"
             green_inverted="false"
@@ -634,7 +634,7 @@
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.spectral_blue"
             green_inverted="false"
