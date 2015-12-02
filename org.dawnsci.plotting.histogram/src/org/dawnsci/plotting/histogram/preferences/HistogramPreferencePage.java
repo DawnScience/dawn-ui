@@ -20,6 +20,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -36,6 +37,8 @@ public class HistogramPreferencePage extends PreferencePage implements IWorkbenc
 
 	private IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
 	private String schemeName;
+
+	private Button invertedCheck;
 
 	public HistogramPreferencePage() {
 	}
@@ -72,6 +75,10 @@ public class HistogramPreferencePage extends PreferencePage implements IWorkbenc
 			}
 		});
 
+		invertedCheck = new Button(comp, SWT.CHECK);
+		invertedCheck.setText("Colour map inverted");
+		invertedCheck.setSelection(getColourMapInvertedPreference());
+
 		initializePage();
 
 		return comp;
@@ -105,6 +112,7 @@ public class HistogramPreferencePage extends PreferencePage implements IWorkbenc
 	 */
 	private void loadDefaultPreferences() {
 		cmbColourMap.select(cmbColourMap.indexOf(getDefaultColourMapChoicePreference()));
+		invertedCheck.setSelection(getDefaultColourMapInvertedPreference());
 	}
 
 	private String getColourMapChoicePreference() {
@@ -114,19 +122,26 @@ public class HistogramPreferencePage extends PreferencePage implements IWorkbenc
 		return Activator.getPlottingPreferenceStore().getString(PlottingConstants.COLOUR_SCHEME);
 	}
 
+	private boolean getColourMapInvertedPreference() {
+		if (Activator.getPlottingPreferenceStore().isDefault(PlottingConstants.CM_INVERTED)) {
+			return Activator.getPlottingPreferenceStore().getDefaultBoolean(PlottingConstants.CM_INVERTED);
+		}
+		return Activator.getPlottingPreferenceStore().getBoolean(PlottingConstants.CM_INVERTED);
+	}
+
 	/**
 	 * Store the resolution value
 	 */
 	private void storePreferences() {
-		setColourMapChoicePreference(cmbColourMap.getItem(cmbColourMap.getSelectionIndex()));
+		Activator.getPlottingPreferenceStore().setValue(PlottingConstants.COLOUR_SCHEME, cmbColourMap.getItem(cmbColourMap.getSelectionIndex()));
+		Activator.getPlottingPreferenceStore().setValue(PlottingConstants.CM_INVERTED, invertedCheck.getSelection());
 	}
 
 	private String getDefaultColourMapChoicePreference() {
 		return Activator.getPlottingPreferenceStore().getDefaultString(PlottingConstants.COLOUR_SCHEME);
 	}
 
-	private void setColourMapChoicePreference(String value) {
-		Activator.getPlottingPreferenceStore().setValue(PlottingConstants.COLOUR_SCHEME, value);
+	private boolean getDefaultColourMapInvertedPreference() {
+		return Activator.getPlottingPreferenceStore().getDefaultBoolean(PlottingConstants.CM_INVERTED);
 	}
-
 }

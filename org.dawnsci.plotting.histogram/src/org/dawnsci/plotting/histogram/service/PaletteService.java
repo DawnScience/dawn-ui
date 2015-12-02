@@ -12,11 +12,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.dawnsci.plotting.histogram.Activator;
 import org.dawnsci.plotting.histogram.ExtensionPointManager;
 import org.dawnsci.plotting.histogram.functions.ColourSchemeContribution;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.histogram.ITransferFunction;
 import org.eclipse.dawnsci.plotting.api.histogram.functions.FunctionContainer;
+import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.services.AbstractServiceFactory;
@@ -30,7 +32,11 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 		this.extensionManager = ExtensionPointManager.getManager();
 	}
 	private Collection<String> colourSchemeNames;
-	private boolean isInverted = false;
+
+	/**
+	 * Colour map inverted
+	 */
+	private boolean isInverted = Activator.getPlottingPreferenceStore().getBoolean(PlottingConstants.CM_INVERTED);
 
 	@Override
 	public Collection<String> getColorSchemes() {

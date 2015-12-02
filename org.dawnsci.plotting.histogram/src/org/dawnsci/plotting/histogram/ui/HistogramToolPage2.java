@@ -7,6 +7,7 @@ import org.dawnsci.plotting.histogram.preferences.HistogramPreferencePage;
 import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
+import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
@@ -169,6 +170,8 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		});
 
 		invertedCheck = toolkit.createButton(colourComposite, "Inverted", SWT.CHECK);
+		// get the value from the preference store
+		invertedCheck.setSelection(Activator.getPlottingPreferenceStore().getBoolean(PlottingConstants.CM_INVERTED));
 		invertedCheck.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -178,8 +181,9 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 					pservice.setInverted(invertedCheck.getSelection());
 					setPalette();
 				}
+				// store value in preferences
+				Activator.getPlottingPreferenceStore().setValue(PlottingConstants.CM_INVERTED, invertedCheck.getSelection());
 			}
-
 		});
 	}
 
