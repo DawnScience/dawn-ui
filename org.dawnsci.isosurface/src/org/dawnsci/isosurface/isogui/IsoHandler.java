@@ -1,7 +1,6 @@
 package org.dawnsci.isosurface.isogui;
 
 import org.dawnsci.isosurface.tool.IsosurfaceJob;
-import org.eclipse.dawnsci.plotting.api.jreality.data.ColourImageData;
 import org.eclipse.richbeans.api.binding.IBeanController;
 import org.eclipse.richbeans.api.event.ValueAdapter;
 import org.eclipse.richbeans.api.event.ValueEvent;
@@ -44,11 +43,10 @@ public class IsoHandler
 						job.destroy(current.getTraceKey());
 					}
 					
-					
-					if (!(current).equals(previous))
+					if (!(current).equals(previous) && e.getFieldName() != null)
 					{
 						// run alg
-						if (!e.getFieldName().contains("colour") && !e.getFieldName().contains("opacity"))
+						if ( !e.getFieldName().contains("colour") && !e.getFieldName().contains("opacity"))
 						{
 							job.compute(
 									new int[] {	current.getX(),
@@ -70,12 +68,6 @@ public class IsoHandler
 						}
 						previous = (IsoItem)current.clone();
 					}
-//					if ( previous!= null && previous.beanDeleted()) // this is a quick fix remove asap
-//					{
-//						job.destroy(previous.getTraceKey());
-//					}
-					
-					
 				}
 				catch (Exception exc) 
 				{
@@ -99,7 +91,5 @@ public class IsoHandler
 			System.out.println("\nController not set - Default value is NULL");
 			e1.printStackTrace();
 		}
-		
-		
 	}
 }

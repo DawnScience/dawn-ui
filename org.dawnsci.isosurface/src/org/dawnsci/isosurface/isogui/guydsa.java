@@ -26,21 +26,17 @@ public class guydsa extends Composite
 		// generate the GUI
 		
 				GridLayout gridLayout = new GridLayout(5, false);
-				gridLayout.verticalSpacing = 0;
-				gridLayout.horizontalSpacing = 0;
-				gridLayout.marginWidth = 0;
-				gridLayout.marginHeight = 0;
 				setLayout(gridLayout);
 				
 				Label nameLabel = new Label(this, SWT.NONE);
-				nameLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-				nameLabel.setText("Name:");
+				nameLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false, 1, 1));
+				nameLabel.setText("Name");
 				
 				TextWrapper name = new TextWrapper(this, SWT.BORDER);
 				name.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1));
 				
 				Label lblIsosurfaceValue = new Label(this, SWT.NONE);
-				lblIsosurfaceValue.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+				lblIsosurfaceValue.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false, 1, 1));
 				lblIsosurfaceValue.setText("Isosurface Value");
 				
 				Scale isoSurfaceScaleValue = new Scale(this, SWT.NONE);

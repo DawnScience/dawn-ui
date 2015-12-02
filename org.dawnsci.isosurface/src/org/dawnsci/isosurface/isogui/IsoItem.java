@@ -93,7 +93,6 @@ public class IsoItem implements Cloneable
 	{
 		return this.name;
 	}
-	
 	public void setName(String name)
 	{
 		this.name = name;
@@ -103,69 +102,47 @@ public class IsoItem implements Cloneable
 	{
 		return this.value;
 	}
-	
 	public void setValue(double newValue)
 	{
-			this.value = newValue;
+		this.value = newValue;
 	}
-	
 	
 	public int getX()
 	{
 		return this.x;
 	}
-	
 	public void setX(int newSize)
 	{
-
-			this.x = newSize;
-
+		this.x = newSize;
 	}
 	
 	public int getY()
 	{
 		return this.y;
 	}
-	
 	public void setY(int newSize)
 	{
-
-			this.y = newSize;
-
+		this.y = newSize;
 	}
 	
 	public int getZ()
 	{
 		return this.z;
 	}
-	
 	public void setZ(int newSize)
 	{
-
-			this.z = newSize;
-
+		this.z = newSize;
 	}
 	
 	public RGB getColour()
 	{
 		return this.colour;
 	}
-	
 	public void setColour(RGB newColour)
 	{
 		this.colour = newColour;
-
 	}
-	
-	public void setIsoSurfaceScaleValue(int newValue)
-	{
-		this.value = newValue;
-	}
-	public double getIsoSurfaceScaleValue()
-	{
-		return this.value;
-	}
-	
+		
 	public void setOpacity(double newValue)
 	{
 		this.opacity = newValue;
@@ -180,7 +157,6 @@ public class IsoItem implements Cloneable
 		return this.traceKey;
 	}
 	
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;

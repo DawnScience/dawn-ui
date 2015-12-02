@@ -9,8 +9,6 @@ import org.eclipse.richbeans.widgets.wrappers.ScaleWrapper;
 import org.eclipse.richbeans.widgets.wrappers.SpinnerWrapper;
 import org.eclipse.richbeans.widgets.wrappers.TextWrapper;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -21,7 +19,6 @@ public class IsoItemComposite extends Composite
 {
 	private TextWrapper name;
 	private ScaleBox value;
-	private ScaleWrapper isoSurfaceScaleValue;
 	private ScaleWrapper opacity;
 	private SpinnerWrapper x, y, z;
 	private ColorSelectorWrapper colour;
@@ -41,36 +38,29 @@ public class IsoItemComposite extends Composite
 		
 		// generate the GUI
 		GridLayout gridLayout = new GridLayout(5, false);
-		gridLayout.verticalSpacing = 0;
-		gridLayout.horizontalSpacing = 0;
-		gridLayout.marginWidth = 0;
-		gridLayout.marginHeight = 0;
 		setLayout(gridLayout);
 				
 		Label nameLabel = new Label(this, SWT.NONE);
-		nameLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		nameLabel.setText("Name:");
+		nameLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false, 1, 1));
+		nameLabel.setText("Name ");
 		
 		name = new TextWrapper(this, SWT.BORDER);
 		GridData gridDataText = new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1);
 		name.setLayoutData(gridDataText);
 		
 		Label lblIsosurfaceValue = new Label(this, SWT.NONE);
-		lblIsosurfaceValue.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblIsosurfaceValue.setText("Isosurface Value");
+		lblIsosurfaceValue.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false, 1, 1));
+		lblIsosurfaceValue.setText("Isosurface Value ");
 		
-		isoSurfaceScaleValue = new ScaleWrapper(this, SWT.NONE);
-		GridData gd_scale = new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1);
-		gd_scale.widthHint = 151;
-		isoSurfaceScaleValue.setLayoutData(gd_scale);
 		value = new ScaleBox(this, SWT.NONE);
-		GridData gd_text = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
+		GridData gd_text = new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1);
 		gd_text.widthHint = 55;
 		value.setLayoutData(gd_text);
+		value.setButtonVisible(true);
 		
 		Label lblCubeSize = new Label(this, SWT.NONE);
 		lblCubeSize.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false, 1, 1));
-		lblCubeSize.setText("Cube Size");
+		lblCubeSize.setText("Cube Size ");
 		
 		x = new SpinnerWrapper(this, SWT.BORDER);
 		x.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
@@ -84,7 +74,7 @@ public class IsoItemComposite extends Composite
 		
 		Label lblColour = new Label(this, SWT.NONE);
 		lblColour.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false, 1, 1));
-		lblColour.setText("Colour");
+		lblColour.setText("Colour ");
 		 
 		colour = new ColorSelectorWrapper(this, SWT.NONE);
 		colour.setValue(new RGB(255, 0, 0));
@@ -95,13 +85,13 @@ public class IsoItemComposite extends Composite
 		
 		Label lblOpacity = new Label(this, SWT.NONE);
 		lblOpacity.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false, 1, 1));
-		lblOpacity.setText("Opacity");
+		lblOpacity.setText("Opacity ");
 		
 		opacity = new ScaleWrapper(this, SWT.NONE);
 		GridData gd_scale_1 = new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1);
 		gd_scale_1.widthHint = 152;
 		opacity.setLayoutData(gd_scale_1);
-		opacity.setMaximumScale(1000);
+		opacity.setMaximumScale(100);
 		opacity.setMaximumValue(1);
 		opacity.setMinimumValue(0);
 		
@@ -110,23 +100,11 @@ public class IsoItemComposite extends Composite
 	public IFieldWidget getName()
 	{
 		return this.name;
-	}
-	
+	}	
 	public IFieldWidget getValue()
 	{
-//		isoSurfaceScaleValue.setValue(value.getValue()); 
-			// !! try and implement something like this
-			// currently breaks the gui by setting the new bean to the current bean upon selection
-			// most likely due to the update order
 		return this.value;
-	}
-
-	public IFieldWidget getIsoSurfaceScaleValue()
-	{	
-		value.setValue(isoSurfaceScaleValue.getValue()); //!! this is the problem
-		return this.isoSurfaceScaleValue;
-	}
-	
+	}	
 	public IFieldWidget getX()
 	{
 		return this.x;
@@ -143,20 +121,18 @@ public class IsoItemComposite extends Composite
 	{
 		return this.opacity;
 	}
+	public void setOpacity(Object newValue)
+	{
+		this.opacity = (ScaleWrapper) newValue;
+	}
 	public IFieldWidget getColour()
 	{
 		return this.colour;
-	}	
-		
+	}
+	
 	// !! look into
 	public void setMinMaxIsoValue(final double min, final double max)
-	{
-		isoSurfaceScaleValue.setIncrement(1);
-		isoSurfaceScaleValue.setMaximumScale(100);
-		
-		isoSurfaceScaleValue.setMaximumValue(max);
-		isoSurfaceScaleValue.setMinimumValue(min);
-		
+	{		
 		value.setMaximum(new BoundsProvider()
 		{
 			@Override
