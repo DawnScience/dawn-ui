@@ -18,7 +18,7 @@ public class SquaredTransferFunction extends AbstractTransferFunction {
 
 	@Override
 	public double getPoint(double value) {
-		return Math.pow(value, 2);
+		return value * value;
 	}
 
 }

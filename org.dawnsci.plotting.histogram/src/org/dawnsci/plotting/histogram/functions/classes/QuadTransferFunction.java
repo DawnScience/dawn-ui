@@ -18,7 +18,8 @@ public class QuadTransferFunction extends AbstractTransferFunction {
 
 	@Override
 	public double getPoint(double value) {
-		return Math.pow(value, 4);
+		value *= value;
+		return value * value;
 	}
 
 }

@@ -18,7 +18,7 @@ public class CubedTransferFunction extends AbstractTransferFunction {
 
 	@Override
 	public double getPoint(double value) {
-		return Math.pow(value, 3);
+		return value * value * value;
 	}
 
 }
