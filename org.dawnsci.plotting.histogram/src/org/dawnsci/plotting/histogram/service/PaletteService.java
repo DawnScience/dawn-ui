@@ -30,6 +30,8 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 		this.extensionManager = ExtensionPointManager.getManager();
 	}
 	private Collection<String> colourSchemeNames;
+	private boolean isInverted = false;
+
 	@Override
 	public Collection<String> getColorSchemes() {
 		if (colourSchemeNames!=null) return colourSchemeNames;
@@ -52,14 +54,20 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 		int[] green = extensionManager.getTransferFunctionFromID(csc.getGreenID()).getFunction().getArray();
 		int[] blue  = extensionManager.getTransferFunctionFromID(csc.getBlueID()).getFunction().getArray();
 		
-		if (csc.getRedInverted()) {
+		if (isInverted) {
 			red = invert(red);
-		}
-		if (csc.getGreenInverted()) {
 			green = invert(green);
-		}
-		if (csc.getBlueInverted()) {
 			blue = invert(blue);
+		} else {
+			if (csc.getRedInverted()) {
+				red = invert(red);
+			}
+			if (csc.getGreenInverted()) {
+				green = invert(green);
+			}
+			if (csc.getBlueInverted()) {
+				blue = invert(blue);
+			}
 		}
 
 		RGB[] rgbs = new RGB[256];
@@ -101,7 +109,22 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 		ITransferFunction    grn  = extensionManager.getTransferFunctionFromID(csc.getGreenID()).getFunction();
 		ITransferFunction   alpha = extensionManager.getTransferFunctionFromID(csc.getAlphaID()).getFunction();
 		if (red==null || blue == null || grn == null ) return null;
-		return new FunctionContainer(red, grn, blue, alpha, csc.getRedInverted(), csc.getGreenInverted(), csc.getBlueInverted(), csc.getAlphaInverted());
+		boolean redInverted = csc.getRedInverted();
+		boolean greenInverted = csc.getGreenInverted();
+		boolean blueInverted = csc.getBlueInverted();
+		boolean alphaInverted = csc.getAlphaInverted();
+		if (isInverted) {
+			redInverted = !redInverted;
+			greenInverted = !greenInverted;
+			blueInverted = !blueInverted;
+			alphaInverted = !alphaInverted;
+		}
+		return new FunctionContainer(red, grn, blue, alpha, redInverted, greenInverted, blueInverted, alphaInverted);
+	}
+
+	@Override
+	public void setInverted(boolean inverted) {
+		this.isInverted = inverted;
 	}
 
 	/**
@@ -115,4 +138,5 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 	public static IPaletteService getPaletteService() {
 		return pservice;
 	}
+
 }

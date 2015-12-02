@@ -4,7 +4,9 @@ import org.dawnsci.plotting.histogram.Activator;
 import org.dawnsci.plotting.histogram.ColourMapProvider;
 import org.dawnsci.plotting.histogram.ImageHistogramProvider;
 import org.dawnsci.plotting.histogram.preferences.HistogramPreferencePage;
+import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
@@ -30,6 +32,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -64,6 +67,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	private SelectionAdapter colourSchemeListener;
 
 	private Button logScaleCheck;
+	private Button invertedCheck;
 
 	@Override
 	public ToolPageRole getToolPageRole() {
@@ -115,13 +119,14 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		section.setDescription("Colour scheme:");
 
 		Composite colourComposite = toolkit.createComposite(section);
-		colourComposite.setLayout(GridLayoutFactory.fillDefaults().create());
-
+		colourComposite.setLayout(new GridLayout(2, false));
+		
 		GridData layoutData = GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).create();
 		colourComposite.setLayoutData(layoutData);
 
 		colourMapViewer = new ComboViewer(colourComposite, SWT.READ_ONLY);
+		layoutData.horizontalSpan = 2;
 		colourMapViewer.getControl().setLayoutData(layoutData);
 
 		toolkit.adapt((Composite) colourMapViewer.getControl());
@@ -163,6 +168,19 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 		});
 
+		invertedCheck = toolkit.createButton(colourComposite, "Inverted", SWT.CHECK);
+		invertedCheck.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				IImageTrace image = getImageTrace();
+				if (image != null) {
+					IPaletteService pservice = PaletteService.getPaletteService();
+					pservice.setInverted(invertedCheck.getSelection());
+					setPalette();
+				}
+			}
+
+		});
 	}
 
 	private void setColourScheme(IPaletteTrace trace) {
