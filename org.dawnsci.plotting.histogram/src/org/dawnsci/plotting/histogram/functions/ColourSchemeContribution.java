@@ -91,27 +91,25 @@ public class ColourSchemeContribution {
 		return alphaID;
 	}
 
+	private final static String TRUE = "true";
+
 	public Boolean getRedInverted() {
-		if (redInverted.contains("true")) return true;
-		return false;
+		return TRUE.equalsIgnoreCase(redInverted);
 	}
 
 
 	public Boolean getGreenInverted() {
-		if (greenInverted.contains("true")) return true;
-		return false;
+		return TRUE.equalsIgnoreCase(greenInverted);
 	}
 
 
 	public Boolean getBlueInverted() {
-		if (blueInverted.contains("true")) return true;
-		return false;
+		return TRUE.equalsIgnoreCase(blueInverted);
 	}
 
 
 	public Boolean getAlphaInverted() {
-		if (alphaInverted.contains("true")) return true;
-		return false;
+		return TRUE.equalsIgnoreCase(alphaInverted);
 	}
 	
 	
