@@ -381,18 +381,6 @@
             red_transfer_function="org.dawnsci.plotting.histogram.linear">
       </colour_scheme>
       <colour_scheme
-            alpha_inverted="true"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.linear"
-            blue_inverted="true"
-            blue_transfer_function="org.dawnsci.plotting.histogram.linear"
-            green_inverted="true"
-            green_transfer_function="org.dawnsci.plotting.histogram.linear"
-            id="org.dawnsci.plotting.histogram.filmNegative"
-            name="Film Negative"
-            red_inverted="true"
-            red_transfer_function="org.dawnsci.plotting.histogram.linear">
-      </colour_scheme>
-      <colour_scheme
      		alpha_inverted="false"
             alpha_transfer_function="org.dawnsci.plotting.histogram.squared"
             blue_inverted="false"
@@ -414,30 +402,6 @@
             id="org.dawnsci.plotting.histogram.scale.sqrt"
             name="Sqrt Scale"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.sqrt">
-      </colour_scheme>
-      <colour_scheme
-            alpha_inverted="true"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.zero"
-            blue_inverted="true"
-            blue_transfer_function="org.dawnsci.plotting.histogram.squared"
-            green_inverted="true"
-            green_transfer_function="org.dawnsci.plotting.histogram.squared"
-            id="org.dawnsci.plotting.histogram.squaredfilmnegative"
-            name="Squared Film Negative"
-            red_inverted="true"
-            red_transfer_function="org.dawnsci.plotting.histogram.squared">
-      </colour_scheme>
-      <colour_scheme
-            alpha_inverted="true"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.sqrt"
-            blue_inverted="true"
-            blue_transfer_function="org.dawnsci.plotting.histogram.sqrt"
-            green_inverted="true"
-            green_transfer_function="org.dawnsci.plotting.histogram.sqrt"
-            id="org.dawnsci.plotting.histogram.filmNegativeSqrt"
-            name="Film Negative Sqrt"
-            red_inverted="true"
             red_transfer_function="org.dawnsci.plotting.histogram.sqrt">
       </colour_scheme>
       <colour_scheme
