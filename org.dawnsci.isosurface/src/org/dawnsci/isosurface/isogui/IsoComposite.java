@@ -20,9 +20,7 @@ public class IsoComposite extends Composite
 	private double min, max; // !! try and remove these, seem unnecessary
 		
 	private static int ISO_COUNT = 0; // keeps count the number of items created
-	
-	private boolean beanRemoved = false;
-		
+			
 	public IsoComposite(Composite parent, int style, ILazyDataset slice)
 	{
 		super(parent, style);
@@ -82,8 +80,6 @@ public class IsoComposite extends Composite
 			}
 		};
 		
-		
-		
 		this.items.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
 		this.items.setMinItems(0);
 		this.items.setMaxItems(25);
@@ -97,22 +93,12 @@ public class IsoComposite extends Composite
 		this.items.setAdditionalFields(new String[] {"value", "opacity"});
 		this.items.setColumnWidths(new int[] { 50, 50, 50, 50, 50, 50 });
 		this.items.setShowAdditionalFields(true);
-		
-		ScrolledComposite sc = new ScrolledComposite(this, SWT.V_SCROLL);
-		
-		//sc.setBackground(new Color(this.getDisplay(), new RGB(255, 0, 0)));
-		sc.setExpandHorizontal(true);
-		sc.setExpandVertical(true);
-		
-		itemComp = new IsoItemComposite(sc, SWT.NONE);
+				
+		itemComp = new IsoItemComposite(this, SWT.NONE);
 		
 		itemComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		
-		this.items.setEditorUI(itemComp);
-		
-		sc.setContent(itemComp);
-		sc.setMinSize(itemComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		
+		this.items.setEditorUI(itemComp);		
 	}
 	
 	/**
