@@ -1189,24 +1189,27 @@ public class HistogramToolPage extends AbstractToolPage {
 		// now build the RGB Lines  ( All the -3's here are to avoid the min/max/NAN colours)
 		if (image==null) return;
 		PaletteData paletteData = image.getPaletteData();
-		final DoubleDataset R = new DoubleDataset(paletteData.colors.length-3);
-		final DoubleDataset G = new DoubleDataset(paletteData.colors.length-3);
-		final DoubleDataset B = new DoubleDataset(paletteData.colors.length-3);
-		final DoubleDataset RGBX = new DoubleDataset(paletteData.colors.length-3);
+		final int numColours = paletteData.colors.length;
+		final int numPaletteColours = numColours - 3; // The -3 here is to avoid the min/max/NAN colours
+		final DoubleDataset R = new DoubleDataset(numPaletteColours);
+		final DoubleDataset G = new DoubleDataset(numPaletteColours);
+		final DoubleDataset B = new DoubleDataset(numPaletteColours);
+		final DoubleDataset RGBX = new DoubleDataset(numPaletteColours);
 		R.setName("red");
 		G.setName("green");
 		B.setName("blue");
 		RGBX.setName("Axis");
 		if (histogramY == null) return;
-		double scale = ((histogramY.max(true).doubleValue())/256.0);
-		if(scale <= 0) scale = 1.0/256.0;
+		double scale = histogramY.max(true).doubleValue() / numColours;
+		if (scale <= 0)
+			scale = 1.0 / numColours;
 
 		//palleteData.colors = new RGB[256];
-		for (int i = 0; i < paletteData.colors.length-3; i++) {
-			R.set(paletteData.colors[i].red*scale, i);
-			G.set(paletteData.colors[i].green*scale, i);
-			B.set(paletteData.colors[i].blue*scale, i);
-			RGBX.set(histoMin+(i*((histoMax-histoMin)/paletteData.colors.length)), i);
+		for (int i = 0; i < numPaletteColours; i++) {
+			R.set(paletteData.colors[i].red * scale, i);
+			G.set(paletteData.colors[i].green * scale, i);
+			B.set(paletteData.colors[i].blue * scale, i);
+			RGBX.set(histoMin + (i * (histoMax - histoMin)) / numColours, i);
 		}
 
 		// Now update all the trace data in a thread-safe way
@@ -1232,7 +1235,7 @@ public class HistogramToolPage extends AbstractToolPage {
 					}
 					histogramPlot.getSelectedXAxis().setLog10(btnColourMapLog.getSelection());
 					histogramPlot.getSelectedXAxis().setTitle("Intensity");
-					histogramPlot.getSelectedYAxis().setRange(0, finalScale*256);
+					histogramPlot.getSelectedYAxis().setRange(0, finalScale * numColours);
 					histogramPlot.getSelectedYAxis().setTitle("Log(Frequency)");
 					histogramPlot.repaint();
 				};
@@ -1277,6 +1280,7 @@ public class HistogramToolPage extends AbstractToolPage {
 
 		// Ensures that any listeners added here are killed off too.
         histogramPlot.dispose();
+		histoTrace = null;
 	}
 
 	@Override
@@ -1368,6 +1372,7 @@ public class HistogramToolPage extends AbstractToolPage {
 	public boolean isStaticTool() {
 		return true;
 	}
+
 	@Override
 	public boolean isAlwaysSeparateView() {
 		return true;
@@ -1423,8 +1428,6 @@ public class HistogramToolPage extends AbstractToolPage {
 			return;
 		if (schemeName == null)
 			return;
-		cmbColourMap.select(Arrays.asList(cmbColourMap.getItems()).indexOf(
-				schemeName));
+		cmbColourMap.select(Arrays.asList(cmbColourMap.getItems()).indexOf(schemeName));
 	}
-
 }
