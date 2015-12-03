@@ -42,8 +42,8 @@ public class HistogramData {
 	 * @param x
 	 * @return y
 	 */
-	public static double interpolatedY(double[] pt1, double[] pt2, double x) {
-		double y = (((x - pt1[0]) * (pt2[1] - pt1[1])) / (pt2[0] - pt1[0])) + pt1[1];
+	public static double interpolatedY(double x1, double y1, double x2, double y2, double x) {
+		double y = (((x - x1) * (y2 - y1)) / (x2 - y1)) + y1;
 		if (y < 0)
 			y = 0;
 		if (y > 1)
@@ -67,9 +67,11 @@ public class HistogramData {
 	public static double getPointFromRGBData(double value, double[][] data, RGBChannel channel) {
 		for (int i = 0; i < data.length; i++) {
 			if (i > 0 && value <= data[i][0]) {
-				return HistogramData.interpolatedY(
-						new double[] { data[i - 1][0], data[i - 1][channel.value] },
-						new double[] { data[i][0], data[i][channel.value] }, value);
+				return HistogramData.interpolatedY(data[i - 1][0], 
+						data[i - 1][channel.value],
+						data[i][0],
+						data[i][channel.value],
+						value);
 			}
 		}
 		return 0;

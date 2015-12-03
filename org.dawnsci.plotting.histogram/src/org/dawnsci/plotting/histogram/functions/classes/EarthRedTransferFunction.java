@@ -16,9 +16,10 @@ public class EarthRedTransferFunction extends AbstractTransferFunction {
 	public double getPoint(double value) {
 		for (int i = 0; i < HistogramData.EARTH_RED.length; i++) {
 			if (i > 0 && value <= HistogramData.EARTH_RED[i][0]) {
-				return HistogramData.interpolatedY(
-						new double[] { HistogramData.EARTH_RED[i - 1][0], HistogramData.EARTH_RED[i - 1][1] },
-						new double[] { HistogramData.EARTH_RED[i][0], HistogramData.EARTH_RED[i][1] }, value);
+				return HistogramData.interpolatedY(HistogramData.EARTH_RED[i - 1][0],
+						HistogramData.EARTH_RED[i - 1][1],
+						HistogramData.EARTH_RED[i][0],
+						HistogramData.EARTH_RED[i][1], value);
 			}
 		}
 		return 0;
