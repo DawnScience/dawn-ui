@@ -25,7 +25,6 @@ import org.dawb.common.services.ServiceManager;
 import org.dawb.common.util.io.FileUtils;
 import org.dawnsci.io.h5.H5Loader;
 import org.dawnsci.plotting.AbstractPlottingSystem;
-import org.dawnsci.plotting.services.util.SWTImageUtils;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
@@ -34,7 +33,6 @@ import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.Stats;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
@@ -42,8 +40,6 @@ import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
-import org.eclipse.dawnsci.plotting.api.histogram.functions.AbstractMapFunction;
-import org.eclipse.dawnsci.plotting.api.histogram.functions.GlobalColourMaps;
 import org.eclipse.dawnsci.plotting.api.image.IFileIconService;
 import org.eclipse.dawnsci.plotting.api.image.IPlotImageService;
 import org.eclipse.dawnsci.plotting.api.image.PlotImageData;
@@ -183,48 +179,6 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 		
 		final IImageService service = (IImageService)ServiceManager.getService(IImageService.class);
 		return  service.getImage(bean);
-	}
-	/**
-	 * Modified from GDA
-	 * @param thumbnail
-	 * @return
-	 */
-	public Image createImageDiamond(final Dataset thumbail) {
-		
-		GlobalColourMaps.InitializeColourMaps();
-		
-		final int[] shape = thumbail.getShape();
-		if (shape.length == 2) {
-			double max;
-			if (thumbail instanceof RGBDataset) {
-				double temp;
-				max = Stats.quantile(((RGBDataset) thumbail).createRedDataset(Dataset.INT16),
-						minimumThreshold);
-				temp = Stats.quantile(((RGBDataset) thumbail).createGreenDataset(Dataset.INT16),
-						minimumThreshold);
-				if (max < temp)
-					max = temp;
-				temp = Stats.quantile(((RGBDataset) thumbail).createBlueDataset(Dataset.INT16),
-						minimumThreshold);
-				if (max < temp)
-					max = temp;
-			} else {
-				max = Stats.quantile(thumbail, minimumThreshold);
-			}
-			int redSelect   = GlobalColourMaps.colourSelectList.get(colourMapChoice * 4);
-			int greenSelect = GlobalColourMaps.colourSelectList.get(colourMapChoice * 4 + 1);
-			int blueSelect  = GlobalColourMaps.colourSelectList.get(colourMapChoice * 4 + 2);
-			
-			AbstractMapFunction redFunc = GlobalColourMaps.mappingFunctions.get(Math.abs(redSelect));
-			AbstractMapFunction greenFunc = GlobalColourMaps.mappingFunctions.get(Math.abs(greenSelect));
-			AbstractMapFunction blueFunc = GlobalColourMaps.mappingFunctions.get(Math.abs(blueSelect));
-			ImageData imgD = SWTImageUtils.createImageData(thumbail, max, redFunc, greenFunc, blueFunc,
-					(redSelect < 0), (greenSelect < 0), (blueSelect < 0));
-			
-			return new Image(Display.getDefault(), imgD);
-		}
-		
-		return null;
 	}
 
 	@Override
