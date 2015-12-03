@@ -32,6 +32,7 @@ import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.dawnsci.slicing.api.system.SliceSource;
 import org.eclipse.dawnsci.slicing.api.tool.AbstractSlicingTool;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.slf4j.Logger;
@@ -87,11 +88,18 @@ public class IsosurfaceTool extends AbstractSlicingTool
 	 */
 	public void createToolComponent(Composite parent)
 	{
+		ScrolledComposite sc = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
+		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
 		this.isoComp = new IsoComposite(
-						parent, 
+						sc, 
 						SWT.FILL,
 						null);
-				
+		isoComp.setSize(isoComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		
+		sc.setContent(isoComp);
+//		sc.setMinSize(isoComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		
 		isoComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		isoComp.setVisible(true);
 		setControlsVisible(false);
