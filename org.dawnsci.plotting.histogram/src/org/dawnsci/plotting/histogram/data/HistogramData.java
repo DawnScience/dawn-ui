@@ -22,6 +22,8 @@ package org.dawnsci.plotting.histogram.data;
  */
 public class HistogramData {
 
+	private static final double INDEX_255 = Double.valueOf(1.0) / 255;
+
 	public enum RGBChannel {
 		RED(1), GREEN(2), BLUE(3);
 		private int value;
@@ -43,7 +45,7 @@ public class HistogramData {
 	 * @return y
 	 */
 	public static double interpolatedY(double x1, double y1, double x2, double y2, double x) {
-		double y = (((x - x1) * (y2 - y1)) / (x2 - y1)) + y1;
+		double y = (((x - x1) * (y2 - y1)) / (x2 - x1)) + y1;
 		if (y < 0)
 			y = 0;
 		if (y > 1)
@@ -59,27 +61,46 @@ public class HistogramData {
 	 *            X value from which interpolate the Y coordinate
 	 * @param data
 	 *            colour map data in the following form: {{x0, yR0, yG0, yB0},
-	 *            {x1, yR1, yG1, yB1}, {x2, yR2, yG2, yB2}...}
+	 *            {x1, yR1, yG1, yB1}, {x2, yR2, yG2, yB2}...}<br>
+	 *            or {{x0, y0}, {x1, y1},...} <br>
+	 *            or {{yR0, yG0, yB0}, {yR1, yG1, yB1},...} and each row is a
+	 *            unit between 0 and 1, for 256 points
 	 * @param channel
-	 *            channel number, can be RED = 1, GREEN=2 or BLUE=3
+	 *            channel number, can be RED = 1, GREEN=2 or BLUE=3<br>
+	 *            can be null if data.length == 2
 	 * @return Y interpolated coordinate
 	 */
 	public static double getPointFromRGBData(double value, double[][] data, RGBChannel channel) {
+		int columns = data[0].length;
+		double val = value / INDEX_255;
+		double rounded = Math.round(val);
 		for (int i = 0; i < data.length; i++) {
-			if (i > 0 && value <= data[i][0]) {
-				return HistogramData.interpolatedY(data[i - 1][0], 
-						data[i - 1][channel.value],
-						data[i][0],
-						data[i][channel.value],
-						value);
+			// if data columns are x0, yR0, yG0, yB0
+			if (columns == 4 && i > 0 && value <= data[i][0]) {
+				return HistogramData.interpolatedY(data[i - 1][0], data[i - 1][channel.value], data[i][0],
+						data[i][channel.value], value);
+			}
+			// if data columns are x0, y0
+			if (columns == 2 && i > 0 && value <= data[i][0]) {
+				return interpolatedY(data[i - 1][0], data[i - 1][1], data[i][0], data[i][1], value);
+			}
+			// if data columns are yR1, yG1, yB1 and each row is a point between 0 and 1
+			if (columns == 3 && i == rounded) {
+				return data[i][channel.value - 1];
+			}
+		}
+		if (columns == 2) {
+			for (int i = 0; i < data.length; i++) {
+				if (i > 0 && value <= data[i][0]) {
+				}
 			}
 		}
 		return 0;
 	}
 
 	/**
-	 * Earth red colour map data from Matplotlib where
-	 * {{x0, yR0}, {x1, yR1}, {x2, yR2}...}
+	 * Earth red colour map data from Matplotlib where {{x0, yR0}, {x1, yR1},
+	 * {x2, yR2}...}
 	 */
 	public static double[][] EARTH_RED = new double[][] { { 0.0, 0.0 }, 
 		{ 0.2824, 0.1882 }, 

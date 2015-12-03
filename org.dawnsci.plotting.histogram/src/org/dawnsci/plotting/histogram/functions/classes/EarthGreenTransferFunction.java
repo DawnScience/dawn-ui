@@ -14,14 +14,6 @@ public class EarthGreenTransferFunction extends AbstractTransferFunction {
 
 	@Override
 	public double getPoint(double value) {
-		for (int i = 0; i < HistogramData.EARTH_GREEN.length; i++) {
-			if (i > 0 && value <= HistogramData.EARTH_GREEN[i][0]) {
-				return HistogramData.interpolatedY(HistogramData.EARTH_GREEN[i - 1][0],
-						HistogramData.EARTH_GREEN[i - 1][1],
-						HistogramData.EARTH_GREEN[i][0],
-						HistogramData.EARTH_GREEN[i][1], value);
-			}
-		}
-		return 0;
+		return HistogramData.getPointFromRGBData(value, HistogramData.EARTH_GREEN, null);
 	}
 }
