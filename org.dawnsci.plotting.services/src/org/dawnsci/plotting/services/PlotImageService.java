@@ -44,6 +44,7 @@ import org.eclipse.dawnsci.plotting.api.image.IFileIconService;
 import org.eclipse.dawnsci.plotting.api.image.IPlotImageService;
 import org.eclipse.dawnsci.plotting.api.image.PlotImageData;
 import org.eclipse.dawnsci.plotting.api.image.PlotImageData.PlotImageType;
+import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
@@ -172,8 +173,8 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 		if (bean==null) {
 			bean = new ImageServiceBean();
 			final IPaletteService pservice = (IPaletteService)ServiceManager.getService(IPaletteService.class);
-			bean.setPalette(pservice.getDirectPaletteData(store.getString("org.dawb.plotting.system.colourSchemeName")));	
-			bean.setOrigin(ImageOrigin.forLabel(store.getString("org.dawb.plotting.system.originChoice")));
+			bean.setPalette(pservice.getDirectPaletteData(store.getString(PlottingConstants.COLOUR_SCHEME)));	
+			bean.setOrigin(ImageOrigin.forLabel(store.getString(PlottingConstants.ORIGIN_PREF)));
 		}
 		bean.setImage(thumbnail);
 		

@@ -29,6 +29,7 @@ import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
+import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -631,7 +632,7 @@ public class HistogramToolPage extends AbstractToolPage {
 		}
 
 		final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
-		final String schemeName = store.getString("org.dawb.plotting.system.colourSchemeName");
+		final String schemeName = store.getString(PlottingConstants.COLOUR_SCHEME);
 		cmbColourMap.select(Arrays.asList(cmbColourMap.getItems()).indexOf(schemeName));
 
 		btnColourMapLog = new Button(colourSchemeComposite, SWT.CHECK);
