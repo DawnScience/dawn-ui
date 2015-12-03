@@ -89,12 +89,6 @@ public class HistogramData {
 				return data[i][channel.value - 1];
 			}
 		}
-		if (columns == 2) {
-			for (int i = 0; i < data.length; i++) {
-				if (i > 0 && value <= data[i][0]) {
-				}
-			}
-		}
 		return 0;
 	}
 
