@@ -22,8 +22,6 @@ public abstract class AbstractTransferFunction implements ITransferFunction {
 	 */
 	public abstract double getPoint(double value);
 
-	private final static int CHANNELS = 256; // number of channels
-
 	/**
 	 * @param input
 	 *            original value to map
@@ -31,14 +29,14 @@ public abstract class AbstractTransferFunction implements ITransferFunction {
 	 *         will be mapped to -128..127 in Java we have to use short
 	 */
 	final public short mapToByte(double input) {
-		return (short) ((CHANNELS - 1) * getPoint(input));
+		return (short) ((SIZE - 1) * getPoint(input));
 	}
 
 	@Override
 	public int[] getArray() {
-		int[] result = new int[CHANNELS];
+		int[] result = new int[SIZE];
 		for (int i = 0; i < result.length; i++) {
-			result[i] = (int) (getPoint((double) i / CHANNELS) * (CHANNELS - 1));
+			result[i] = (int) (getPoint((double) i / SIZE) * (SIZE - 1));
 		}
 		return result;
 	}

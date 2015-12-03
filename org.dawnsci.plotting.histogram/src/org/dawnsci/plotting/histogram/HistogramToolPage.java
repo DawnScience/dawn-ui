@@ -28,6 +28,7 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
+import org.eclipse.dawnsci.plotting.api.histogram.ITransferFunction;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
@@ -1319,9 +1320,9 @@ public class HistogramToolPage extends AbstractToolPage {
 		}
 
 		PaletteData data = getPaletteTrace().getPaletteData();
-		data.colors = new RGB[256];
+		data.colors = new RGB[ITransferFunction.SIZE];
 
-		for (int i = 0; i < 256; i++) {
+		for (int i = 0; i < ITransferFunction.SIZE; i++) {
 			data.colors[i] = new RGB(red[i], green[i], blue[i]);
 		}
 		getPaletteTrace().setPaletteData(data);

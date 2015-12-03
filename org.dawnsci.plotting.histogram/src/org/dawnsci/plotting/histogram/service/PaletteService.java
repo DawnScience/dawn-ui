@@ -76,9 +76,9 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 			}
 		}
 
-		RGB[] rgbs = new RGB[256];
+		RGB[] rgbs = new RGB[ITransferFunction.SIZE];
 
-		for (int i = 0; i < 256; i++) {
+		for (int i = 0; i < ITransferFunction.SIZE; i++) {
 			rgbs[i] = new RGB(red[i], green[i], blue[i]);
 		}
 		return new PaletteData(rgbs);
