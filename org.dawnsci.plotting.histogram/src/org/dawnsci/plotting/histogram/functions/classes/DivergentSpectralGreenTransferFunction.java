@@ -11,10 +11,10 @@ package org.dawnsci.plotting.histogram.functions.classes;
 import org.dawnsci.plotting.histogram.data.HistogramData;
 import org.dawnsci.plotting.histogram.data.HistogramData.RGBChannel;
 
-public class SpectralRedTransferFunction extends AbstractTransferFunction {
+public class DivergentSpectralGreenTransferFunction extends AbstractTransferFunction {
 
 	@Override
 	public double getPoint(double value) {
-		return HistogramData.getPointFromRGBData(value, HistogramData.SPECTRAL, RGBChannel.RED);
+		return HistogramData.getPointFromRGBData(value, HistogramData.DIVERGENT_SPECTRAL, RGBChannel.GREEN);
 	}
 }
