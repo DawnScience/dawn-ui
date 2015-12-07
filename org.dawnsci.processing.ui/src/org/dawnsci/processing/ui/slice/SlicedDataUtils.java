@@ -27,6 +27,10 @@ import org.eclipse.swt.widgets.Display;
 public class SlicedDataUtils {
 
 	public static void plotDataWithMetadata(IDataset data, final IPlottingSystem<?> system, int[] dataDims) throws Exception {
+		plotDataWithMetadata(data, system, dataDims, true);
+	}
+	
+	public static void plotDataWithMetadata(IDataset data, final IPlottingSystem<?> system, int[] dataDims, boolean clear) throws Exception {
 		
 		IDataset x = null;
 		IDataset y = null;
@@ -64,7 +68,7 @@ public class SlicedDataUtils {
 			
 		} else if (data.getRank() == 1) {
 			x = axes == null ? null : axes[0];
-			system.clear();
+			if (clear) system.clear();
 			system.updatePlot1D(x,Arrays.asList(new IDataset[]{data}),null);
 		}
 		

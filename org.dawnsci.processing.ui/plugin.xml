@@ -166,5 +166,18 @@
             name="Processing Preferences">
       </page>
    </extension>
+   <extension
+         point="org.eclipse.dawnsci.plotting.api.toolPage">
+      <plotting_tool_page
+            class="org.dawnsci.processing.ui.tool.ProcessingImagesTool"
+            id="org.dawnsci.processing.ui.tool.ProcessingImagesTool"
+            label="Processing">
+      </plotting_tool_page>
+      <plotting_tool_page
+            class="org.dawnsci.processing.ui.tool.ProcessingXYTool"
+            id="org.dawnsci.processing.ui.tool.ProcessingXYTool"
+            label="Processing">
+      </plotting_tool_page>
+   </extension>
 
 </plugin>

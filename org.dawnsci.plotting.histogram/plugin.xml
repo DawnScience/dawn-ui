@@ -336,17 +336,17 @@
             name="Nipy Blue">
       </transfer_function>
       <transfer_function
-            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SpectralGreenTransferFunction"
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentSpectralGreenTransferFunction"
             id="org.dawnsci.plotting.histogram.spectral_green"
             name="Spectral Green">
       </transfer_function>
       <transfer_function
-            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SpectralRedTransferFunction"
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentSpectralRedTransferFunction"
             id="org.dawnsci.plotting.histogram.spectral_red"
             name="Spectral Red">
       </transfer_function>
       <transfer_function
-            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SpectralBlueTransferFunction"
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentSpectralBlueTransferFunction"
             id="org.dawnsci.plotting.histogram.spectral_blue"
             name="Spectral Blue">
       </transfer_function>
@@ -364,6 +364,81 @@
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SeismicBlueTransferFunction"
             id="org.dawnsci.plotting.histogram.seismic_blue"
             name="Seismic Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SequentialBluesGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.blues_green"
+            name="Blues Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SequentialBluesRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.blues_red"
+            name="Blues Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SequentialBluesBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.blues_blue"
+            name="Blues Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SequentialBuGnGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.bugn_green"
+            name="BuGn Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SequentialBuGnRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.bugn_red"
+            name="BuGn Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SequentialBuGnBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.bugn_blue"
+            name="BuGn Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentRYGGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.divergent_ryg_green"
+            name="DivergentRYG Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentRYGRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.divergent_ryg_red"
+            name="DivergentRYG Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentRYGBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.divergent_ryg_blue"
+            name="DivergentRYG Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SequentialRedsGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.reds_green"
+            name="Reds Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SequentialRedsRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.reds_red"
+            name="Reds Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SequentialRedsBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.reds_blue"
+            name="Reds Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentCoolWarmGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.coolwarm_green"
+            name="Cool Warm Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentCoolWarmRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.coolwarm_red"
+            name="Cool Warm Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentCoolWarmBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.coolwarm_blue"
+            name="Cool Warm Blue">
       </transfer_function>
    </extension>
    <extension
@@ -468,18 +543,6 @@
             alpha_inverted="false"
             alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
-            blue_transfer_function="org.dawnsci.plotting.histogram.cos90"
-            green_inverted="false"
-            green_transfer_function="org.dawnsci.plotting.histogram.sin180"
-            id="org.dawnsci.plotting.histogram.rainbow"
-            name="Rainbow (blue-green-yellow-red)"
-            red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.abstwoxminushalf">
-      </colour_scheme>
-      <colour_scheme
-            alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
-            blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.twoxminus1"
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.twoxminushalf"
@@ -487,6 +550,18 @@
             name="AFM hot (black-red-yellow-white)"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.twox">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.cos90"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.sin180"
+            id="org.dawnsci.plotting.histogram.rainbow"
+            name="Rainbow (blue-green-yellow-red)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.abstwoxminushalf">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -511,6 +586,18 @@
             name="Terrain (blue-green-yellow-brown-white)"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.terrain_red">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.earth_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.earth_green"
+            id="org.dawnsci.plotting.histogram.earth"
+            name="Earth (dark blue-green-brown-white)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.earth_red">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -564,13 +651,37 @@
             alpha_inverted="false"
             alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
-            blue_transfer_function="org.dawnsci.plotting.histogram.earth_blue"
+            blue_transfer_function="org.dawnsci.plotting.histogram.blues_blue"
             green_inverted="false"
-            green_transfer_function="org.dawnsci.plotting.histogram.earth_green"
-            id="org.dawnsci.plotting.histogram.earth"
-            name="Earth (dark blue-green-brown-white)"
+            green_transfer_function="org.dawnsci.plotting.histogram.blues_green"
+            id="org.dawnsci.plotting.histogram.blues"
+            name="Blues (Sequential)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.earth_red">
+            red_transfer_function="org.dawnsci.plotting.histogram.blues_red">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.bugn_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.bugn_green"
+            id="org.dawnsci.plotting.histogram.bugn"
+            name="Blue-Green (Sequential)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.bugn_red">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.reds_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.reds_green"
+            id="org.dawnsci.plotting.histogram.reds"
+            name="Reds (Sequential)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.reds_red">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -588,11 +699,59 @@
             alpha_inverted="false"
             alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.nipy_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.nipy_green"
+            id="org.dawnsci.plotting.histogram.nipy"
+            name="Nipy Spectral "
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.nipy_red">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.coolwarm_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.coolwarm_green"
+            id="org.dawnsci.plotting.histogram.coolwarm"
+            name="Coolwarm (Divergent)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.coolwarm_red">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.divergent_ryg_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.divergent_ryg_green"
+            id="org.dawnsci.plotting.histogram.divergent_ryg"
+            name="Red-Yellow-Green (Divergent)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.divergent_ryg_red">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.spectral_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.spectral_green"
+            id="org.dawnsci.plotting.histogram.spectral"
+            name="Spectral (Divergent)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.spectral_red">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
+            blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.seismic_blue"
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.seismic_green"
             id="org.dawnsci.plotting.histogram.seismic"
-            name="Seismic"
+            name="Seismic (Divergent)"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.seismic_red">
       </colour_scheme>
@@ -619,30 +778,6 @@
             name="Prism (Sine)"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.prism_red">
-      </colour_scheme>
-      <colour_scheme
-            alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
-            blue_inverted="false"
-            blue_transfer_function="org.dawnsci.plotting.histogram.nipy_blue"
-            green_inverted="false"
-            green_transfer_function="org.dawnsci.plotting.histogram.nipy_green"
-            id="org.dawnsci.plotting.histogram.nipy"
-            name="Nipy Spectral "
-            red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.nipy_red">
-      </colour_scheme>
-      <colour_scheme
-            alpha_inverted="false"
-            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
-            blue_inverted="false"
-            blue_transfer_function="org.dawnsci.plotting.histogram.spectral_blue"
-            green_inverted="false"
-            green_transfer_function="org.dawnsci.plotting.histogram.spectral_green"
-            id="org.dawnsci.plotting.histogram.spectral"
-            name="Spectral"
-            red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.spectral_red">
       </colour_scheme>
    </extension>
    <extension

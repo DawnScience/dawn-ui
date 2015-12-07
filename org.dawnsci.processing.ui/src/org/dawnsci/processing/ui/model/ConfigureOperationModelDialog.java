@@ -2,6 +2,7 @@ package org.dawnsci.processing.ui.model;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,6 +23,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
+import org.eclipse.dawnsci.analysis.api.processing.Atomic;
+import org.eclipse.dawnsci.analysis.api.processing.OperationData;
+import org.eclipse.dawnsci.analysis.api.processing.PlotAdditionalData;
 import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.ModelUtils;
@@ -382,7 +386,27 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
-						final IDataset out = data.getCurrentOperation().execute(data.getInputData(),new ProgressMonitorWrapper(monitor)).getData();
+						OperationData od = data.getCurrentOperation().execute(data.getInputData(),new ProgressMonitorWrapper(monitor));
+						final IDataset out = od.getData();
+						PlotAdditionalData an = data.getCurrentOperation().getClass().getAnnotation(PlotAdditionalData.class);
+						IDataset aux = null;
+						boolean onIn = false;
+						if (an != null) {
+							String name = an.dataName();
+							onIn = an.onInput();
+							for (Serializable s : od.getAuxData()) {
+								if (s instanceof IDataset) {
+									IDataset d = (IDataset)s;
+									if (name.equals(d.getName())) {
+										aux = d;
+										break;
+									}
+								}
+							}
+						}
+						
+						final IDataset additional = aux;
+						final boolean onInput =onIn;
 
 						Display.getDefault().syncExec(new Runnable() {
 
@@ -390,6 +414,16 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 							public void run() {
 								try {
 									SlicedDataUtils.plotDataWithMetadata(out,output, null);
+									if (additional!=null) {
+										if (onInput) {
+											input.clear();
+											SlicedDataUtils.plotDataWithMetadata(data.getInputData(),input, null);
+											SlicedDataUtils.plotDataWithMetadata(additional, input, null,false);
+										} else {
+											SlicedDataUtils.plotDataWithMetadata(additional, output, null,false);
+										}
+ 
+									}
 									errorLabel.setText("");
 								} catch (Exception e) {
 									logger.warn("Could not plot data: " + e.getMessage());

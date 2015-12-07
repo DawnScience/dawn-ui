@@ -9,6 +9,11 @@ import org.dawnsci.processing.ui.model.OperationModelViewer;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
 import org.dawnsci.processing.ui.processing.OperationTableUtils;
 import org.dawnsci.processing.ui.slice.EscapableSliceVisitor;
+import org.dawnsci.processing.ui.slice.OperationInformerImpl;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
@@ -48,6 +53,7 @@ public class ProcessingImagesTool extends AbstractToolPage {
 
 	private OperationModelViewer modelEditor;
 	private IOperation selection;
+	private ProcessingJob job;
 	
 	public ProcessingImagesTool() {
 		try {
@@ -57,6 +63,7 @@ public class ProcessingImagesTool extends AbstractToolPage {
 			return;
 		}
 		this.seriesTable    = new SeriesTable();
+		job = new ProcessingJob();
 	}
 	
 	
@@ -112,7 +119,7 @@ public class ProcessingImagesTool extends AbstractToolPage {
 				modelEditor.selectionChanged(null, event.getSelection());
 				try {
 					selection = (IOperation)((ISeriesItemDescriptor)((IStructuredSelection)event.getSelection()).getFirstElement()).getSeriesObject();
-					update(getImageTrace().getData());
+					update(getData());
 				} catch (InstantiationException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -134,32 +141,40 @@ public class ProcessingImagesTool extends AbstractToolPage {
 		if (isActive()) return;
 		super.activate();
 //		getPlottingSystem().addTraceListener(traceListener);
-		
-		IImageTrace im = getImageTrace();
-		
-		if (im != null && im.getData() != null) update(im.getData()); 
+		update(getData());
 	}
 	
+	protected IDataset getData(){
+		return getImageTrace().getData();
+	}
 	
-	private void update(IDataset ds) {
+	protected void update(IDataset ds) {
+		if (ds == null) return;
 		IOperation[] operations = getOperations();
+		
+		ProcessingInfo info = new ProcessingInfo();
+		info.data = ds;
+		info.operations = getOperations();
+		
+		job.update(info);
+		job.schedule();
 
-		SliceND slice = new SliceND(ds.getShape());
-		int[] dataDims = new int[]{0, 1};
-		
-		SliceInformation si = new SliceInformation(slice, slice, slice, dataDims, 1, 1);
-		SourceInformation so = new SourceInformation("", "", ds);
-		ds.setMetadata( new SliceFromSeriesMetadata(so, si));
-		
-		EscapableSliceVisitor vis = new EscapableSliceVisitor(null, dataDims,operations,null,null,system);
-		vis.setEndOperation(selection);
-		
-		try {
-			vis.visit(ds);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		SliceND slice = new SliceND(ds.getShape());
+//		int[] dataDims = new int[]{0, 1};
+//		
+//		SliceInformation si = new SliceInformation(slice, slice, slice, dataDims, 1, 1);
+//		SourceInformation so = new SourceInformation("", "", ds);
+//		ds.setMetadata( new SliceFromSeriesMetadata(so, si));
+//		
+//		EscapableSliceVisitor vis = new EscapableSliceVisitor(null, dataDims,operations,null,null,system);
+//		vis.setEndOperation(selection);
+//		
+//		try {
+//			vis.visit(ds);
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 	
 	private IOperation[] getOperations() {
@@ -191,6 +206,53 @@ public class ProcessingImagesTool extends AbstractToolPage {
 	@Override
 	public void setFocus() {
 		if (system != null) system.setFocus();
+	}
+	
+	private class ProcessingInfo {
+		public IDataset data;
+		public IOperation[] operations;
+		
+	}
+	
+	private class ProcessingJob extends Job {
+
+		private ProcessingInfo info;
+		
+		public ProcessingJob() {
+			super("Processing");
+		}
+		
+		public void update(ProcessingInfo info) {
+			this.info = info;
+		}
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			ProcessingInfo local = info;
+			IDataset ds = info.data;
+			IOperation[] operations = info.operations;
+			
+			SliceND slice = new SliceND(ds.getShape());
+			int[] dataDims = new int[]{0, 1};
+			
+			SliceInformation si = new SliceInformation(slice, slice, slice, dataDims, 1, 1);
+			SourceInformation so = new SourceInformation("", "", ds);
+			ds.setMetadata( new SliceFromSeriesMetadata(so, si));
+			
+			EscapableSliceVisitor vis = new EscapableSliceVisitor(null, dataDims,operations,null,null,system);
+			vis.setEndOperation(selection);
+			
+			try {
+				vis.visit(ds);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			return Status.OK_STATUS;
+		}
+		
+		
 	}
 
 }
