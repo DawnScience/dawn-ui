@@ -88,24 +88,23 @@ public class IsosurfaceTool extends AbstractSlicingTool
 	 */
 	public void createToolComponent(Composite parent)
 	{
+		
 		ScrolledComposite sc = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		this.isoComp = new IsoComposite(
 						sc, 
-						SWT.FILL,
-						null);
+						SWT.FILL);
 		isoComp.setSize(isoComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
 		sc.setContent(isoComp);
-//		sc.setMinSize(isoComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
 		isoComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		isoComp.setVisible(true);
+		
 		setControlsVisible(false);
 		
 		isoBean = new IsoBean();
-				
+		
 	}
 	
 	/**
@@ -145,29 +144,38 @@ public class IsosurfaceTool extends AbstractSlicingTool
 	 */
 	private void update()
 	{
-		
+		//get the data from the slicing system
 		final SliceSource data = getSlicingSystem().getData();
 		
-		// look into
-		ILazyDataset slice = data.getLazySet().getSliceView(getSlices());
-		slice = slice.squeezeEnds();
-		slice.setName("Sliced " + data.getLazySet().getName());
-		if (slice.getRank() != 3)
+		// declare the data as a lazydata set (i.e. slices)
+		ILazyDataset dataSlices = data.getLazySet().getSliceView(getSlices());
+		
+		dataSlices = dataSlices.squeezeEnds();
+		// slice.setName("Sliced " + data.getLazySet().getName());
+		
+		// check if the dataslice is compatible
+		if (dataSlices.getRank() != 3)
 			throw new RuntimeException("Invalid slice for isosurface tool!");
-		final ILazyDataset finalSlice = slice;
+		final ILazyDataset finalDataslices = dataSlices;
 		
+		// estimate the min/max values for the isosurface
+		// the estimation is currently quite inaccurate
+		double[] minMax = {Integer.MAX_VALUE, Integer.MIN_VALUE};
+		minMax = IsoSurfaceUtil.estimateMinMaxIsoValueFromDataSet(finalDataslices);
 		
-		// estimate the Min/max values for the isosurface
-		double min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
-		double[] minMax = IsoSurfaceUtil.estimateMinMaxIsoValueFromDataSet(finalSlice);
-		min = minMax[0];
-		max = minMax[1];
-		isoComp.setminMaxIsoValue(min,max);
+		// roughly calculate the default cube size
+		int[] defaultCubeSize= new int[] {
+				(int) Math.max(1, Math.ceil(finalDataslices.getShape()[2]/20.0)),   
+				(int) Math.max(1, Math.ceil(finalDataslices.getShape()[1]/20.0)), 
+				(int) Math.max(1, Math.ceil(finalDataslices.getShape()[0]/20.0))};
 		
-		isoComp.setSlice(finalSlice);
+		// set the min and max isovalues - set the default cube size for new sufaces
+		isoComp.setMinMaxIsoValueAndCubeSize(minMax, defaultCubeSize);
 		
+		// create the isoController
 		try 
 		{
+			
 			final IOperationService service = (IOperationService) Activator
 					.getService(IOperationService.class);
 			
@@ -180,7 +188,7 @@ public class IsosurfaceTool extends AbstractSlicingTool
 					new IsosurfaceJob(
 							"isoSurfaceJob" , 
 							getSlicingSystem().getPlottingSystem(), 
-							finalSlice, 
+							finalDataslices, 
 							generator));
 		}
 		catch (Exception e)
@@ -189,25 +197,7 @@ public class IsosurfaceTool extends AbstractSlicingTool
 			e.printStackTrace();
 		}
 		
-		// Connect the UI and bean
-//		try
-//		{
-//			System.out.println("isoBean - " + isoBean);
-//			final IBeanController controller = BeanService.getInstance()
-//					.createController(isoComp, isoBean);
-//			controller.addValueListener(new IsoValueListener(controller));
-//			controller.beanToUI();
-//			controller.switchState(true);
-//			
-//		}
-//		catch (Exception e1)
-//		{
-//			e1.printStackTrace();
-//		}
-		
-		isoComp.setVisible(true);
 		setControlsVisible(true);
-		
 	}
 	
 	/**
@@ -216,7 +206,6 @@ public class IsosurfaceTool extends AbstractSlicingTool
 	@Override
 	public void demilitarize()
 	{
-		
 		if (dimensionalListener != null)
 		{
 			getSlicingSystem().removeDimensionalListener(dimensionalListener);

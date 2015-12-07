@@ -98,10 +98,16 @@ public class AxisGrid extends Group
 		this.updateGrid(axisLength);
 		
 	}
-	
-	// creates a rotation from the plane vector and end vector
-	// essentially turns the create plane into the right direction
-	// i used this rotation because it allows for a more consistant grid group
+	/**
+	 * Creates a rotation from the plane vector and end vector
+	 * essentially turns the create plane into the right direction
+	 * i used this rotation because it allows for a more consistant grid group
+	 * 
+	 * @param startVector
+	 * @param endVector
+	 * @param rotationVector
+	 * @return
+	 */
 	private Rotate rotateAxisToVector(Point3D startVector, Point3D endVector, Point3D rotationVector)
 	{
 		Point3D startVectorProjection = Vector3DUtil.getVectorPlaneProjection(rotationVector, startVector);

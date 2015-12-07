@@ -16,39 +16,36 @@ public class IsoComposite extends Composite
 	
 	private VerticalListEditor items;
 	private IsoItemComposite itemComp;
-	private ILazyDataset slice;
 	private double min, max; // !! try and remove these, seem unnecessary
+	private int[] defaultCubeSize;
 		
 	private static int ISO_COUNT = 0; // keeps count the number of items created
-			
-	public IsoComposite(Composite parent, int style, ILazyDataset slice)
+	
+	/**
+	 * 
+	 * @param parent - The parent composite
+	 * @param style - The SWT style used
+	 * @param slice - The dataslice used
+	 */
+	public IsoComposite(Composite parent, int style)
 	{
 		super(parent, style);
-		
-		this.slice = slice;
 		
 		setLayout(new GridLayout(2, false));
 		
 		createContent();
 	}
 	
-	/**
-	 * Set the data sliced to be used by the job
-	 * @param slice - The slice
-	 */
-	public void setSlice(ILazyDataset slice)
-	{
-		this.slice = slice;
-	}
 	
 	/**
-	 * create the gui content
+	 * Internal use. Generates the content of the composite.
+	 * 
 	 */
 	private void createContent()
 	{
 		this.items = new VerticalListEditor(this, SWT.NONE)
 		{
-			
+			// overriding the methods to give this class some more flexibility on bean creation and deletion
 			@Override
 			protected void beanRemove(Object bean) // quick fix, makes me cry
 			{
@@ -59,17 +56,11 @@ public class IsoComposite extends Composite
 			@Override
 			protected void beanAdd(Object bean)
 			{
-				
-				// find default boxsize
-				int[] defaultBoxSize= new int[] {
-						(int) Math.max(1, Math.ceil(slice.getShape()[2]/20.0)),
-                        (int) Math.max(1, Math.ceil(slice.getShape()[1]/20.0)),
-                        (int) Math.max(1, Math.ceil(slice.getShape()[0]/20.0))};
-				
+								
 				// set the initial data
 				((IsoItem)bean).setInfo( 
 						((min + max)/2),
-						defaultBoxSize,
+						defaultCubeSize,
 						0.5d,
 						ColorUtility.GRAPH_DEFAULT_COLORS[ISO_COUNT++]);
 				
@@ -102,14 +93,15 @@ public class IsoComposite extends Composite
 	}
 	
 	/**
-	 * set the min and max iso value to be used
-	 * @param min - The new minimum
-	 * @param max - The new maximum
+	 * Set the min and max iso value to be used
+	 * @param minMax - minMax[0] new minimum, minMax[1] new maximum
+	 * @param defaultCubeSize - The new default cube size.
 	 */
-	public void setminMaxIsoValue(double min, double max) // !! look into changing
+	public void setMinMaxIsoValueAndCubeSize(double[] minMax, int[] defaultCubeSize) // !! look into changing
 	{
-		this.min = min;
-		this.max = max;
+		this.min = minMax[0];
+		this.max = minMax[1];
+		this.defaultCubeSize = defaultCubeSize;
 		itemComp.setMinMaxIsoValue(min, max);
 	}
 		

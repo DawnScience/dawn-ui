@@ -177,31 +177,12 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 		{
 			result.setDepthTest(DepthTest.DISABLE);
 		}
-		
-//		Image whiteImage = new Image(getClass().getResourceAsStream("org.dawnsci.plotting.javafx/icons/white.png"));
-//		
-//		material.setDiffuseMap(whiteImage);
-		
+				
 		result.setDepthTest(DepthTest.ENABLE);
 		
 		result.setMaterial(material);
 		this.isosurface = result;
 	}
-	
-//	private javafx.scene.shape.CullFace toJavaFX()
-//	{
-//		switch (cullFace)
-//		{
-//			case NONE:
-//				return javafx.scene.shape.CullFace.NONE;
-//			case BACK:
-//				return javafx.scene.shape.CullFace.BACK;
-//			case FRONT:
-//				return javafx.scene.shape.CullFace.FRONT;
-//			default:
-//				return javafx.scene.shape.CullFace.NONE;
-//		}
-//	}
 	
 	private void update()
 	{
@@ -236,7 +217,8 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 		
 		marry(mesh);
 		
-		scene.updateTransforms();
+//		scene.updateTransforms();
+	
 	}
 	
 	private Mesh createTrangleMesh()

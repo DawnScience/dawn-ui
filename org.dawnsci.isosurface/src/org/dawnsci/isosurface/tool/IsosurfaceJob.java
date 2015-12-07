@@ -8,10 +8,7 @@
  */
 package org.dawnsci.isosurface.tool;
 
-import java.io.Serializable;
-import java.text.Format;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawnsci.isosurface.alg.MarchingCubesModel;
@@ -22,11 +19,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.Slice;
-import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
-import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
-import org.eclipse.dawnsci.analysis.api.metadata.MetadataType;
-import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.dataset.impl.FloatDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
@@ -142,38 +134,23 @@ public class IsosurfaceJob extends Job {
 				 * Temp axes builder
 				 * needs to be properly implemented
 				 */
-				final ArrayList<IDataset> axis = new ArrayList<IDataset>();
 				
-				float[] axisArray = new float[10];
-				for (int i = 0; i < 10; i ++)
-				{
-					axisArray[i] = i*10;
-				}
+				final ArrayList<IDataset> axis = generateDuplicateAxes(10, 10);
 				
-				axis.add(new FloatDataset(new float[]{
-												slice.getShape()[2],
-												slice.getShape()[1],
-												slice.getShape()[0]}));
-				axis.add(new FloatDataset(axisArray , null));
-				axis.add(new FloatDataset(axisArray , null));
-				axis.add(new FloatDataset(axisArray , null));
 				
 				/**
 				 * 
 				 */
 				
-				
 				final int[] traceColour = new int[]{colour.red, colour.green, colour.blue};
 				final double traceOpacity = opacity;
 				
-				// if trace has not been created -> create trace
+				final IIsosurfaceTrace trace;
 				if ((IIsosurfaceTrace) system.getTrace(traceName) == null)
 				{
-					final IIsosurfaceTrace trace = system.createIsosurfaceTrace(this.traceName);
-
+					trace = system.createIsosurfaceTrace(this.traceName);
 					trace.setMaterial(traceColour[0], traceColour[1] , traceColour[2], traceOpacity);
-					trace.setData(points, textCoords, faces, axis);
-					
+					trace.setData(points, textCoords, faces, axis );
 					Display.getDefault().syncExec(new Runnable() {
 						public void run() {
 							system.addTrace(trace);
@@ -182,18 +159,49 @@ public class IsosurfaceJob extends Job {
 				}
 				else
 				{
-					IIsosurfaceTrace trace = (IIsosurfaceTrace) system.getTrace(traceName);
-
+					trace = (IIsosurfaceTrace) system.getTrace(traceName);
 					trace.setMaterial(traceColour[0], traceColour[1] , traceColour[2], traceOpacity);
-					if (value != null)
-					{
-						trace.setData(points, textCoords, faces, axis );
-					}
-					else
-					{
-						trace.setData(null, null, null, null);
-					}
+					trace.setData(points, textCoords, faces, axis );
 				}
+//				
+//				if (value != null)
+//				{
+//					trace.setData(points, textCoords, faces, axis );
+//				}
+//				else
+//				{
+//					trace.setData(null, null, null, null);
+//				}
+				
+				
+//				// if trace has not been created -> create trace
+//				if ((IIsosurfaceTrace) system.getTrace(traceName) == null)
+//				{
+//					final IIsosurfaceTrace trace = system.createIsosurfaceTrace(this.traceName);
+//
+//					trace.setMaterial(traceColour[0], traceColour[1] , traceColour[2], traceOpacity);
+//					trace.setData(points, textCoords, faces, axis);
+//					
+//					Display.getDefault().syncExec(new Runnable() {
+//						public void run() {
+//							system.addTrace(trace);
+//				    	}
+//				    });
+//				}
+//				else
+//				{
+//					IIsosurfaceTrace trace = (IIsosurfaceTrace) system.getTrace(traceName);
+//
+//					trace.setMaterial(traceColour[0], traceColour[1] , traceColour[2], traceOpacity);
+//					if (value != null)
+//					{
+//						trace.setData(points, textCoords, faces, axis );
+//					}
+//					else
+//					{
+//						trace.setData(null, null, null, null);
+//					}
+//				}
 				
 			} 
 			catch (UnsupportedOperationException e)
@@ -225,9 +233,28 @@ public class IsosurfaceJob extends Job {
 		return Status.OK_STATUS;
 	}
 	
-	public void destroy(String traceName)
+	/*
+	 * look into improving !!
+	 */
+	private ArrayList<IDataset> generateDuplicateAxes(int count, int step)
 	{
-		system.getTrace(traceName).dispose();
+		ArrayList<IDataset> axis = new ArrayList<IDataset>();
+		
+		float[] axisArray = new float[10];
+		for (int i = 0; i < count; i ++)
+		{
+			axisArray[i] = i*step;
+		}
+		
+		axis.add(new FloatDataset(new float[]{
+										slice.getShape()[2],
+										slice.getShape()[1],
+										slice.getShape()[0]}));
+		axis.add(new FloatDataset(axisArray , null));
+		axis.add(new FloatDataset(axisArray , null));
+		axis.add(new FloatDataset(axisArray , null));
+	
+		return axis;
 	}
 	
 	private void showErrorMessage(final String title, final String message) {
@@ -239,6 +266,10 @@ public class IsosurfaceJob extends Job {
 		});
 	}
 	
+	public void destroy(String traceName)
+	{
+		system.getTrace(traceName).dispose();
+	}
 	
 	public IOperation<MarchingCubesModel, Surface> getGenerator()
 	{

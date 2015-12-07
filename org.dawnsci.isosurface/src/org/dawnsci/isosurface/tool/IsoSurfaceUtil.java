@@ -8,8 +8,22 @@ import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
 
+
+/**
+ * 
+ * Simple class to hold some broad functions for gathering data on the a isosurface
+ * @author Joel Ogden
+ * 
+ *
+ */
 public final class IsoSurfaceUtil {
 	
+	/**
+	 * 
+	 * @param lz - The lazy dataSet to use
+	 * @return A pretty inaccurate estimation of the min and max isovalue of the histogram
+	 * 
+	 */
 	public static double[] estimateMinMaxIsoValueFromDataSet(ILazyDataset lz)
 	{
 		double min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
@@ -66,6 +80,13 @@ public final class IsoSurfaceUtil {
 		return new double[] {min, max};
 	}
 	
+	/**
+	 * 
+	 * @param slice - The dataSet
+	 * @return The min max stats of the slice
+	 * @see org.eclipse.dawnsci.plotting.api.histogram.IImageService.getFastStatistics(ImageServiceBean bean)
+
+	 */
 	public static double[] getStatsFromSlice(IDataset slice)
 	{
 		final IImageService service = (IImageService)Activator.getService(IImageService.class);
