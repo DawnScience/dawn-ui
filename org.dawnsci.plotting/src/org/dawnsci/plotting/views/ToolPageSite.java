@@ -25,15 +25,16 @@ import java.util.Iterator;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.SubActionBars;
+import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.internal.PartSite;
 import org.eclipse.ui.internal.PopupMenuExtender;
 import org.eclipse.ui.internal.part.IPageSiteHolder;
@@ -45,6 +46,9 @@ import org.eclipse.ui.internal.services.WorkbenchLocationService;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.services.IDisposable;
 import org.eclipse.ui.services.IServiceScopes;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceReference;
 
 /**
  * This implementation of <code>IPageSite</code> provides a site for a page
@@ -209,8 +213,21 @@ public class ToolPageSite implements IPageSite, INestable {
 		if (menuExtenders == null) {
 			menuExtenders = new ArrayList(1);
 		}
+
+		// E4FIXME This might work
+		EPartService partService = getService(EPartService.class, EPartService.class);
 		PartSite.registerContextMenu(menuID, menuMgr, selProvider, false,
-				parentSite.getPart(), null, menuExtenders);
+				parentSite.getPart(), partService.getActivePart().getContext() ,menuExtenders);
+	}
+	
+	
+	private <T> T getService(Class<T> pClass, Class pContextClass) {
+	    BundleContext context = FrameworkUtil.getBundle(pContextClass).getBundleContext();
+	    ServiceReference<T> reference = context.getServiceReference(pClass);
+	    if(reference == null){
+	        return null;}
+	    T service = context.getService(reference);
+	    return service;
 	}
 
 	/*
