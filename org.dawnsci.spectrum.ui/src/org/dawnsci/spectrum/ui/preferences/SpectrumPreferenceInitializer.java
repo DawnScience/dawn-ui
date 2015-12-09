@@ -18,8 +18,8 @@ public class SpectrumPreferenceInitializer extends
 	@Override
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
-		String xdatasetnames = "*energy;*Energy;Column_1;*RatioAbsorbance/x";
-		String ydatasetnames = "*FFI0;*lnI0It;Column_2;*RatioAbsorbance/y;Number_of_Cores";
+		String xdatasetnames = "*energy;*Energy;Column_1;*RatioAbsorbance/x;tth";
+		String ydatasetnames = "*FFI0;*lnI0It;Column_2;*RatioAbsorbance/y;Number_of_Cores;counts";
 		
 		store.setDefault(SpectrumConstants.X_DATASETS, xdatasetnames);
 		store.setDefault(SpectrumConstants.Y_DATASETS, ydatasetnames);
