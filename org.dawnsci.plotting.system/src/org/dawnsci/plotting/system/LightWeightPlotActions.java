@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.ActionType;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.ManagerType;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.axis.AxisEvent;
@@ -84,6 +85,7 @@ import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -98,6 +100,7 @@ import org.slf4j.LoggerFactory;
  * This class creates actions for the lightweight plotting system.
  * 
  * @author Matthew Gerring
+ * @param <T>
  *
  */
 class LightWeightPlotActions {
@@ -106,14 +109,14 @@ class LightWeightPlotActions {
 	
 	private PlotActionsManagerImpl actionBarManager;
 	private XYRegionGraph          xyGraph;
-	private LightWeightPlotViewer  viewer;
+	private LightWeightPlotViewer<?>  viewer;
 	private boolean                datasetChoosingRequired = true;
 	private Action                 plotIndex, plotX, lockHisto;
 	
 	private Shell fullScreenShell;
 	private IPropertyChangeListener propertyListener, switchListener;
 
-	public void init(final LightWeightPlotViewer viewer, XYRegionGraph xyGraph, PlotActionsManagerImpl actionBarManager) {
+	public void init(final LightWeightPlotViewer<?> viewer, XYRegionGraph xyGraph, PlotActionsManagerImpl actionBarManager) {
 		this.viewer  = viewer;
 		this.xyGraph = xyGraph;
 		this.actionBarManager = actionBarManager;

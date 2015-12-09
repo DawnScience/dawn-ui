@@ -44,7 +44,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 	private XYRegionGraph         regionGraph;
 	protected Combo imageTraceCombo;
 	protected List<ImageTraceComposite> imageTraceConfigPageList;
-	protected IPlottingSystem     plottingSystem;
+	protected IPlottingSystem<?>     plottingSystem;
 	private boolean isRescale;
 
 	public XYRegionConfigDialog(Shell parentShell, XYGraph xyGraph, boolean isRescale) {
@@ -286,7 +286,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 		selectedTrace = trace;
 	}
 
-	public IPlottingSystem<Composite> getPlottingSystem() {
+	public IPlottingSystem<?> getPlottingSystem() {
 		return plottingSystem;
 	}
 

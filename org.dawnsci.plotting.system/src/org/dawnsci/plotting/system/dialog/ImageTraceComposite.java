@@ -69,7 +69,7 @@ public class ImageTraceComposite extends Composite {
 	 */
 	public ImageTraceComposite(final Composite       parent,
 			                   final Dialog          dialog, 
-			                   final IPlottingSystem<Composite> plottingSystem, 
+			                   final IPlottingSystem<?> plottingSystem, 
 			                   final IImageTrace     imageTrace) {
 		
 		super(parent, SWT.NONE);

@@ -28,12 +28,12 @@ import org.eclipse.swt.widgets.Text;
 
 public class AddAxisDialog extends Dialog {
 
-	private IPlottingSystem<Composite> system;
+	private IPlottingSystem<?> system;
 	private String          title;
 	private boolean         y;
 	private int             side;
 
-	public AddAxisDialog(Shell parentShell, IPlottingSystem<Composite> system) {
+	public AddAxisDialog(Shell parentShell, IPlottingSystem<?> system) {
 		super(parentShell);
 		this.system = system;
 		setShellStyle(getShellStyle() | SWT.RESIZE);

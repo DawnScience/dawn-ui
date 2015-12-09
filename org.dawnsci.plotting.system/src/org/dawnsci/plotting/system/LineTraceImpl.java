@@ -41,6 +41,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
  * This class only wraps line traces, images have their own IImageTrace implementor.
  * @see ILineTrace
  * @author Matthew Gerring
+ * @param <T>
  *
  */
 public class LineTraceImpl implements ILineTrace, ITraceListener{
@@ -55,10 +56,10 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 
 	private LineTrace          trace;
 	private String             dataName;
-	private AbstractPlottingSystem sys;
+	private AbstractPlottingSystem<?> sys;
 	private boolean errorBarExplicitySet;
 
-	LineTraceImpl(AbstractPlottingSystem sys, final LineTrace trace) {
+	LineTraceImpl(AbstractPlottingSystem<?> sys, final LineTrace trace) {
 		this.sys   = sys;
 		this.trace = trace;
 		if (trace instanceof ITraceContainer) {
@@ -536,7 +537,7 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 			});
 
 			if (mservice!=null) {
-			    mservice.publish(new MethodEventObject(traceName, "setName", this, newName));
+			    mservice.publish(new MethodEventObject<String>(traceName, "setName", this, newName));
 			}
 		}
 	}
