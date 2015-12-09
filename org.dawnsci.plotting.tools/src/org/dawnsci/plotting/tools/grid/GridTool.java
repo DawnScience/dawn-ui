@@ -37,8 +37,6 @@ import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.dataset.roi.GridPreferences;
 import org.eclipse.dawnsci.analysis.dataset.roi.GridROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
-import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -67,6 +65,7 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Region;
 import org.eclipse.swt.layout.GridData;
@@ -214,7 +213,10 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		final Label label = new Label(control, SWT.NONE);
 		label.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 		ColorRegistry colorRegistry = JFaceResources.getColorRegistry();
-		label.setForeground(new Color(label.getDisplay(), colorRegistry.getRGB(JFacePreferences.QUALIFIER_COLOR)));
+		RGB defaultRGB = colorRegistry.getRGB(JFacePreferences.QUALIFIER_COLOR);
+		if(defaultRGB == null)
+			defaultRGB = new RGB(128, 128, 128);
+		label.setForeground(new Color(label.getDisplay(), defaultRGB));
 		label.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		label.setText("* Click to change value  ");
 		
@@ -573,6 +575,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 	public void deactivate() {
 		super.deactivate();
 		if (getPlottingSystem()!=null) {
+			resetAxes();
 			Collection<IRegion> regions = getPlottingSystem().getRegions();
 		    if (regions!=null) for (IRegion region : regions) {
 				if (region!=null && region.getRegionType()==RegionType.GRID) {
@@ -680,10 +683,17 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		return new GridPreferences(xRes, yRes, xbeam, ybeam);
 	}
 
+	private void resetAxes() {
+		IAxis xAxis = getPlottingSystem().getSelectedXAxis();
+		xAxis.setAutoFormat(true);
+		IAxis yAxis = getPlottingSystem().getSelectedYAxis();
+		yAxis.setAutoFormat(true);
+		getPlottingSystem().repaint();
+	}
+
 	private void setAxes(double xRes, double yRes) {
 		try {
-			IPlottingSystem<Composite> system = PlottingFactory.getPlottingSystem("Microscope View");
-			IAxis xAxis = system.getSelectedXAxis();
+			IAxis xAxis = getPlottingSystem().getSelectedXAxis();
 			xAxis.setAutoFormat(false);
 			
 			int xdp;
@@ -695,7 +705,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 			String xFormat = (xdp > 0) ? "######0.".concat(new String(x)) : "######0.#";
 			xAxis.setFormatPattern(xFormat);
 			
-			IAxis yAxis = system.getSelectedYAxis();
+			IAxis yAxis = getPlottingSystem().getSelectedYAxis();
 			yAxis.setAutoFormat(false);
 
 			int ydp;
@@ -708,7 +718,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 			yAxis.setFormatPattern(yFormat);
 		}
 		catch (Exception e) {
-			System.out.println(e);
+			logger.debug("error setting axes:" + e.getMessage());
 		}
 	}
 }
