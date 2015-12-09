@@ -16,6 +16,7 @@ import java.util.List;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.ServiceLoader;
 import org.dawnsci.plotting.tools.utils.ToolUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
@@ -48,7 +49,6 @@ import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
 
 public abstract class SectorProfileTool extends ProfileTool implements IDetectorPropertyListener, IDiffractionCrystalEnvironmentListener {
 
@@ -356,8 +356,7 @@ public abstract class SectorProfileTool extends ProfileTool implements IDetector
 	}
 	
 	protected IMetadata getMetaData() {
-		ILoaderService service = (ILoaderService)PlatformUI.getWorkbench().getService(ILoaderService.class);
-		
+		ILoaderService service = ServiceLoader.getLoaderService();
 		IDiffractionMetadata meta = service.getLockedDiffractionMetaData();
 		
 		if (meta!= null)

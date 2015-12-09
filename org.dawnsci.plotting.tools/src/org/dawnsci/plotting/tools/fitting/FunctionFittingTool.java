@@ -58,10 +58,11 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -456,7 +457,8 @@ public class FunctionFittingTool extends AbstractToolPage implements
 	
 	private void openPeakPrepopulateTool() {
 		getPlottingSystem().removeTraceListener(traceListener);
-		PeakPrepopulateTool peakFindOptions = new PeakPrepopulateTool(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), this, getFirstUserTraceROI());
+		Shell shell = Display.getDefault().getActiveShell();
+		PeakPrepopulateTool peakFindOptions = new PeakPrepopulateTool(shell, this, getFirstUserTraceROI());
 		peakFindOptions.open();
 		getPlottingSystem().addTraceListener(traceListener);
 	}
@@ -464,7 +466,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 	public void setInitialPeaks(Add initPeakCompFunc) {
 		compFunction = initPeakCompFunc;
 		final Dataset[] currRoiLimits = getFirstUserTraceROI(); 
-		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {
 				functionWidget.setInput(compFunction);
@@ -495,7 +497,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+			Display.getDefault().syncExec(new Runnable() {
 				@Override
 				public void run() {
 					if (fitTrace != null)
@@ -567,7 +569,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 			final boolean notConverged = tooManyItterations;
 
-			PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+			Display.getDefault().syncExec(new Runnable() {
 
 				@Override
 				public void run() {
@@ -655,7 +657,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 			}
 		}
 
-		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {
 				functionWidget.setInput(compFunction);

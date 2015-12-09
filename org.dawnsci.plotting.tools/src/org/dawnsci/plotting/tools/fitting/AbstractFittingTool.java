@@ -59,7 +59,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Link;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -232,7 +232,8 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 				
 				if (e.text!=null && e.text.startsWith("configure")) {
 					if (!isActive()) return;
-					PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), FittingPreferencePage.ID, null, null);
+					Shell shell = Display.getDefault().getActiveShell();
+					PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(shell, FittingPreferencePage.ID, null, null);
 					if (pref != null) pref.open();
 				} else {
 					

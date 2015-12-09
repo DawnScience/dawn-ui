@@ -10,7 +10,7 @@ package org.dawnsci.plotting.tools.fitting;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.PreferenceDialog;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 public class OpenFittingToolPreferencesAction extends Action {
@@ -25,9 +25,7 @@ public class OpenFittingToolPreferencesAction extends Action {
 	
 	@Override
 	public void run() {
-		PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench()
-				.getActiveWorkbenchWindow()
-				.getShell(), OpenFittingToolPreferencesAction.ID, new String[] { OpenFittingToolPreferencesAction.ID }, null);
+		PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(Display.getDefault().getActiveShell(), OpenFittingToolPreferencesAction.ID, new String[] { OpenFittingToolPreferencesAction.ID }, null);
 		dialog.open();
 	}
 

@@ -19,6 +19,7 @@ import javax.vecmath.Vector3d;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.roi.ResolutionRing;
 import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.ServiceLoader;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorPropertyEvent;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorPropertyEvent.EventType;
@@ -46,7 +47,6 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -569,7 +569,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	}
 	
 	public void dispose() {
-		ILoaderService service = (ILoaderService)PlatformUI.getWorkbench().getService(ILoaderService.class);
+		ILoaderService service = ServiceLoader.getLoaderService();
 		deactivate(service.getLockedDiffractionMetaData()!=null);
 	}
 
