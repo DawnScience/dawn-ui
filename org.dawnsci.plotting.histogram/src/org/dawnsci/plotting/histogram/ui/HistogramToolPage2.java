@@ -77,7 +77,6 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 	@Override
 	public void createControl(Composite parent) {
-		logger.debug("HistogramToolPage: createControl");
 		toolkit = new FormToolkit(parent.getDisplay());
 		form = toolkit.createScrolledForm(parent);
 		form.reflow(true); // create view with no scrollbars reflowing at this
@@ -138,7 +137,6 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		colourSchemeListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				logger.trace("colourSchemeListener");
 				setPalette();
 				// updateHistogramToolElements(event, true, false);
 			}
@@ -395,8 +393,6 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	private final class TraceListener implements ITraceListener {
 		@Override
 		public void traceWillPlot(TraceWillPlotEvent evt) {
-			logger.debug("HistogramToolPage: traceWillPlotEvent");
-
 			// use this event to modify the trace before we plot it
 			// i.e. set colour palette etc
 			// note the trace may include lots of null settings e.g. min/max
@@ -410,26 +406,20 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 		@Override
 		public void tracesAdded(TraceEvent evt) {
-			logger.debug("HistogramToolPage: tracesAdded");
-
 		}
 
 		@Override
 		public void traceCreated(TraceEvent evt) {
-			logger.debug("HistogramToolPage: traceCreated");
-
 		}
 
 		@Override
 		public void traceUpdated(TraceEvent evt) {
-			logger.debug("HistogramToolPage: traceUpdated");
 			IPaletteTrace it = (IPaletteTrace) evt.getSource();
 			updateHistogramUIElements(it);
 		}
 
 		@Override
 		public void traceAdded(TraceEvent evt) {
-			logger.debug("HistogramToolPage: traceAdded");
 			IPaletteTrace it = (IPaletteTrace) evt.getSource();
 			updateHistogramUIElements(it);
 			it.addPaletteListener(paletteListener);
@@ -437,20 +427,14 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 		@Override
 		public void traceRemoved(TraceEvent evt) {
-			logger.debug("HistogramToolPage: traceRemoved");
-
 		}
 
 		@Override
 		public void tracesUpdated(TraceEvent evt) {
-			logger.debug("HistogramToolPage: tracesUpdated");
-
 		}
 
 		@Override
 		public void tracesRemoved(TraceEvent evet) {
-			logger.debug("HistogramToolPage: tracesRemoved");
-
 		}
 
 	};

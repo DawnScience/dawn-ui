@@ -58,8 +58,7 @@ public class HistogramViewer extends ContentViewer {
 	// Used to stop recursion.
 	private boolean updatingROI = false;
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(HistogramViewer.class);
+	private static final Logger logger = LoggerFactory.getLogger(HistogramViewer.class);
 
 	private Composite composite;
 	private IPlottingSystem<Composite> histogramPlottingSystem = null;
@@ -92,6 +91,8 @@ public class HistogramViewer extends ContentViewer {
 					double max = rroi.getEndPoint()[0];
 					getHistogramProvider().setMax(max);
 				}
+			} catch (Exception e) {
+				logger.error(e.getMessage());
 			} finally {
 				updatingROI = false;
 			}
@@ -215,8 +216,7 @@ public class HistogramViewer extends ContentViewer {
 			}
 		}
 
-		RectangularROI rroi = new RectangularROI(histoMin, 0, histoMax
-				- histoMin, 1, 0);
+		RectangularROI rroi = new RectangularROI(histoMin, 0, histoMax - histoMin, 1, 0);
 		region.removeROIListener(histogramRegionListener);
 		try {
 			region.setROI(rroi);
@@ -324,10 +324,8 @@ public class HistogramViewer extends ContentViewer {
 
 		// Option 2:
 		// Set the increment to be the difference between two x pixels.
-		double val1 = histogramPlottingSystem.getSelectedXAxis()
-				.getPositionValue(1);
-		double val2 = histogramPlottingSystem.getSelectedXAxis()
-				.getPositionValue(2);
+		double val1 = histogramPlottingSystem.getSelectedXAxis().getPositionValue(1);
+		double val2 = histogramPlottingSystem.getSelectedXAxis().getPositionValue(2);
 		double increment = val2 - val1;
 		minText.setIncrement(increment);
 		maxText.setIncrement(increment);
@@ -398,21 +396,11 @@ public class HistogramViewer extends ContentViewer {
 	 */
 	@Override
 	protected void inputChanged(Object input, Object oldInput) {
-		logger.debug("HistogramViewer: inputchanged");
-
-		if (input == null) {
-			logger.debug("HistogramViewer: inputchanged input null");
-		} else {
-			logger.debug("HistogramViewer: inputchanged input " + input);
+		try {
+			refresh();
+		} catch (Exception e) {
+			logger.debug(e.getMessage());
 		}
-
-		if (oldInput == null) {
-			logger.debug("HistogramViewer: inputchanged oldInput null");
-		} else {
-			logger.debug("HistogramViewer: inputchanged oldInput " + oldInput);
-		}
-
-		refresh();
 	};
 
 	/**
