@@ -1,27 +1,35 @@
 package org.dawnsci.isosurface.isogui;
 
+import org.dawnsci.isosurface.Activator;
 import org.eclipse.richbeans.api.event.ValueListener;
 import org.eclipse.richbeans.api.widget.IFieldWidget;
 import org.eclipse.richbeans.widgets.BoundsProvider;
+import org.eclipse.richbeans.widgets.scalebox.NumberBox;
 import org.eclipse.richbeans.widgets.scalebox.ScaleBox;
+import org.eclipse.richbeans.widgets.wrappers.BooleanWrapper;
 import org.eclipse.richbeans.widgets.wrappers.ColorSelectorWrapper;
+import org.eclipse.richbeans.widgets.wrappers.ComboWrapper;
 import org.eclipse.richbeans.widgets.wrappers.ScaleWrapper;
 import org.eclipse.richbeans.widgets.wrappers.SpinnerWrapper;
 import org.eclipse.richbeans.widgets.wrappers.TextWrapper;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 public class IsoItemComposite extends Composite
 {
 	private TextWrapper name;
-	private ScaleBox value;
+	private NumberBox value;
 	private ScaleWrapper opacity;
 	private SpinnerWrapper x, y, z;
 	private ColorSelectorWrapper colour;
+	private ComboWrapper upButton;
 	
 	public IsoItemComposite(Composite parent, int style) 
 	{
@@ -37,7 +45,7 @@ public class IsoItemComposite extends Composite
 	{
 		
 		// generate the GUI
-		GridLayout gridLayout = new GridLayout(5, false);
+		GridLayout gridLayout = new GridLayout(7, false);
 		setLayout(gridLayout);
 				
 		Label nameLabel = new Label(this, SWT.NONE);
@@ -45,18 +53,22 @@ public class IsoItemComposite extends Composite
 		nameLabel.setText("Name ");
 		
 		name = new TextWrapper(this, SWT.BORDER);
-		GridData gridDataText = new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1);
+		GridData gridDataText = new GridData(SWT.FILL, SWT.CENTER, true, false, 5, 1);
 		name.setLayoutData(gridDataText);
+
+		new Label(this, SWT.NONE);
 		
 		Label lblIsosurfaceValue = new Label(this, SWT.NONE);
 		lblIsosurfaceValue.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false, 1, 1));
 		lblIsosurfaceValue.setText("Isosurface Value ");
 		
 		value = new ScaleBox(this, SWT.NONE);
-		GridData gd_text = new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1);
+		GridData gd_text = new GridData(SWT.FILL, SWT.CENTER, true, false, 5, 1);
 		gd_text.widthHint = 55;
 		value.setLayoutData(gd_text);
 		value.setButtonVisible(true);
+		
+		new Label(this, SWT.NONE);
 		
 		Label lblCubeSize = new Label(this, SWT.NONE);
 		lblCubeSize.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false, 1, 1));
@@ -70,6 +82,45 @@ public class IsoItemComposite extends Composite
 		
 		z = new SpinnerWrapper(this, SWT.BORDER);
 		z.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		
+		Button upButton = new Button(this, SWT.NONE);
+		upButton.setImage(Activator.getImage("icons/up.png").createImage());
+		upButton.addSelectionListener(new SelectionListener() {
+			
+			// add one to the cube size if possible
+			@Override
+			public void widgetSelected(SelectionEvent e) 
+			{
+				x.setValue((int)x.getValue() + 1);
+				y.setValue((int)y.getValue() + 1);
+				z.setValue((int)z.getValue() + 1);
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				
+			}
+		});
+		
+		Button downButton = new Button(this, SWT.NONE);
+		downButton.setImage(Activator.getImage("icons/down.png").createImage());
+		downButton.addSelectionListener(new SelectionListener() {
+			
+			// add one to the cube size if possible
+			@Override
+			public void widgetSelected(SelectionEvent e) 
+			{
+				x.setValue(((int)x.getValue() - 1 >= 1) ? (int)x.getValue() - 1 : 1);
+				y.setValue(((int)y.getValue() - 1 >= 1) ? (int)y.getValue() - 1 : 1);
+				z.setValue(((int)z.getValue() - 1 >= 1) ? (int)z.getValue() - 1 : 1);
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				
+			}
+		});
+		
 		new Label(this, SWT.NONE);
 		
 		Label lblColour = new Label(this, SWT.NONE);
@@ -82,13 +133,15 @@ public class IsoItemComposite extends Composite
 		new Label(this, SWT.NONE);
 		new Label(this, SWT.NONE);
 		new Label(this, SWT.NONE);
+		new Label(this, SWT.NONE);
+		new Label(this, SWT.NONE);
 		
 		Label lblOpacity = new Label(this, SWT.NONE);
 		lblOpacity.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false, 1, 1));
 		lblOpacity.setText("Opacity ");
 		
 		opacity = new ScaleWrapper(this, SWT.NONE);
-		GridData gd_scale_1 = new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1);
+		GridData gd_scale_1 = new GridData(SWT.FILL, SWT.CENTER, false, false, 5, 1);
 		gd_scale_1.widthHint = 152;
 		opacity.setLayoutData(gd_scale_1);
 		opacity.setMaximumScale(100);
