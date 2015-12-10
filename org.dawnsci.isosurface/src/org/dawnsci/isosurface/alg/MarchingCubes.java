@@ -21,13 +21,14 @@ import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.OperationRank;
 import org.eclipse.dawnsci.analysis.dataset.operations.AbstractOperation;
+import org.eclipse.dawnsci.analysis.dataset.operations.AbstractOperationBase;
 /**
  * 
  * @author nnb55016
  * The MarchingCubes class holds the algorithm with the same name which provides the triangular
  * mesh for a particular three dimensional dataset
  */
-public class MarchingCubes extends AbstractOperation<MarchingCubesModel, Surface> {
+public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Surface> {
 
 	private int index = 0;
 	
