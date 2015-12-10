@@ -273,15 +273,15 @@ public class ImageTraceComposite extends Composite {
 			label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
 	
 			final Button openHisto = new Button(group, SWT.NONE);
-			openHisto.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 1, 1));
-			openHisto.setImage(PlottingSystemActivator.getImage("icons/brightness_contrast.gif"));
+			openHisto.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
+			openHisto.setImage(PlottingSystemActivator.getImage("icons/color_wheel.png"));
 			openHisto.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					dialog.close();
 					try {
 						final IToolPageSystem system = (IToolPageSystem)plottingSystem.getAdapter(IToolPageSystem.class);
-						system.setToolVisible("org.dawnsci.plotting.histogram.histogram_tool_page", 
+						system.setToolVisible("org.dawnsci.plotting.histogram.histogram_tool_page_2", 
 								              ToolPageRole.ROLE_2D, 
 								              "org.dawb.workbench.plotting.views.toolPageView.2D");
 					} catch (Exception e1) {

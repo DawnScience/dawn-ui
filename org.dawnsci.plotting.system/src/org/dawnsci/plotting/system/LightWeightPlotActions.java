@@ -469,7 +469,8 @@ class LightWeightPlotActions {
 		
 		final Action configButton = new Action(BasePlottingConstants.CONFIG_SETTINGS, PlottingSystemActivator.getImageDescriptor("icons/Configure.png")) {
 			public void run() {
-				XYGraphConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), xyGraph, viewer.getSystem().isRescale());
+				XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), xyGraph, viewer.getSystem().isRescale());
+				dialog.setPlottingSystem(viewer.getSystem());
 				dialog.open();
 			}
 		};
