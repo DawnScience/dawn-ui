@@ -1,12 +1,13 @@
 package org.dawnsci.isosurface.isogui;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import org.dawnsci.isosurface.Activator;
 import org.dawnsci.plotting.util.ColorUtility;
-import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.richbeans.widgets.selector.VerticalListEditor;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -56,7 +57,6 @@ public class IsoComposite extends Composite
 			@Override
 			protected void beanAdd(Object bean)
 			{
-								
 				// set the initial data
 				((IsoItem)bean).setInfo( 
 						((min + max)/2),
@@ -70,6 +70,9 @@ public class IsoComposite extends Composite
 				}
 			}
 		};
+		
+		this.items.setAddButtonImage(Activator.getImage("icons/add.png").createImage()); // currently does not work
+		this.items.setDeleteButtonImage(Activator.getImage("icons/delete.png").createImage()); // currently does not work
 		
 		this.items.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
 		this.items.setMinItems(0);
