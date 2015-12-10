@@ -1513,7 +1513,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		return xyGraph;
 	}
 
-	AbstractPlottingSystem getSystem() {
+	AbstractPlottingSystem<T> getSystem() {
 		return system;
 	}
 

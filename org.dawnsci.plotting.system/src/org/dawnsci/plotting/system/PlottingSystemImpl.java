@@ -136,7 +136,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 		this.actionBarManager     = (PlotActionsManagerImpl)super.actionBarManager;
 		viewers = createViewerList();
 
-		for (IPlottingSystemViewer v : viewers) {
+		for (IPlottingSystemViewer<T> v : viewers) {
 			if (v instanceof LightWeightPlotViewer) {
 				activeViewer      = v;
 				break;
@@ -307,14 +307,14 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 		return viewer;
 	}
 
-	private IPlottingSystemViewer getViewer(PlotType type) {
-        for (IPlottingSystemViewer v : viewers) {
+	private IPlottingSystemViewer<T> getViewer(PlotType type) {
+        for (IPlottingSystemViewer<T> v : viewers) {
         	if (v.isPlotTypeSupported(type)) return v;
 		}
         return null;
 	}
-	private IPlottingSystemViewer getViewer(Class<? extends ITrace> type) {
-        for (IPlottingSystemViewer v : viewers) {
+	private IPlottingSystemViewer<T> getViewer(Class<? extends ITrace> type) {
+        for (IPlottingSystemViewer<T> v : viewers) {
         	if (v.isTraceTypeSupported(type)) return v;
 		}
         return null;
@@ -683,7 +683,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 				addTrace(trace);
 
 			} else {
-				final IPlottingSystemViewer viewer = getViewer(IImageTrace.class);
+				final IPlottingSystemViewer<T> viewer = getViewer(IImageTrace.class);
 				IImageTrace imageTrace = createImageTrace(traceName);
 				imageTrace.setData(data, axes, false);
 				trace = imageTrace;
@@ -811,7 +811,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 		}
 		if (traceMap==null) traceMap = new LinkedHashMap<String, ITrace>(31);
 
-		final IPlottingSystemViewer viewer = getViewer(plottingMode);
+		final IPlottingSystemViewer<T> viewer = getViewer(plottingMode);
 		List<ITrace> traces=null;
 
 		if (plottingMode.is1D()) {
@@ -982,7 +982,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	 */
 	public void addTrace(ITrace trace) {
 
-		IPlottingSystemViewer viewer = getViewer(trace.getClass());
+		IPlottingSystemViewer<T> viewer = getViewer(trace.getClass());
 		boolean ok = viewer.addTrace(trace);
 		if (!ok) return; // it has not added.
 
@@ -1000,7 +1000,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	public void removeTrace(ITrace trace) {
 		if (traceMap!=null) traceMap.remove(trace.getName());
 
-		IPlottingSystemViewer viewer = getViewer(trace.getClass());
+		IPlottingSystemViewer<T> viewer = getViewer(trace.getClass());
 		viewer.removeTrace(trace);
 		fireTraceRemoved(new TraceEvent(trace));
 	}
@@ -1134,7 +1134,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	private void resetInternal() {
 		if (traceMap!=null) traceMap.clear();
 		if (colorMap!=null) colorMap.clear();
-		for (IPlottingSystemViewer v : viewers) {
+		for (IPlottingSystemViewer<T> v : viewers) {
 			if (v.getControl()!=null) v.reset(true);
 		}
 		fireTracesCleared(new TraceEvent(this));
@@ -1174,7 +1174,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			colorMap = null;
 		}
 		clearPlotViewer();
-		for (IPlottingSystemViewer v : viewers) {
+		for (IPlottingSystemViewer<T> v : viewers) {
 			if (v.getControl()!=null) v.dispose();
 		}
 		try {
@@ -1210,7 +1210,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	 */
 	private void clearPlotViewer() {
 
-		for (IPlottingSystemViewer v : viewers) {
+		for (IPlottingSystemViewer<T> v : viewers) {
 		  if (v.getControl()!=null)  v.clearTraces();
 		}
 		if (traceMap!=null) traceMap.clear();
@@ -1511,7 +1511,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 		if (adapter.isAssignableFrom(getClass())) return this;
 
-		for (IPlottingSystemViewer v : viewers) {
+		for (IPlottingSystemViewer<T> v : viewers) {
 			if (v.getClass() == adapter) return v;
 			if (adapter.isAssignableFrom(v.getClass())) return v;
 			if (v instanceof IAdaptable) {

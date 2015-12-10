@@ -98,6 +98,7 @@ import org.slf4j.LoggerFactory;
  * This class creates actions for the lightweight plotting system.
  * 
  * @author Matthew Gerring
+ * @param <T>
  *
  */
 class LightWeightPlotActions {
@@ -106,14 +107,14 @@ class LightWeightPlotActions {
 	
 	private PlotActionsManagerImpl actionBarManager;
 	private XYRegionGraph          xyGraph;
-	private LightWeightPlotViewer  viewer;
+	private LightWeightPlotViewer<?>  viewer;
 	private boolean                datasetChoosingRequired = true;
 	private Action                 plotIndex, plotX, lockHisto;
 	
 	private Shell fullScreenShell;
 	private IPropertyChangeListener propertyListener, switchListener;
 
-	public void init(final LightWeightPlotViewer viewer, XYRegionGraph xyGraph, PlotActionsManagerImpl actionBarManager) {
+	public void init(final LightWeightPlotViewer<?> viewer, XYRegionGraph xyGraph, PlotActionsManagerImpl actionBarManager) {
 		this.viewer  = viewer;
 		this.xyGraph = xyGraph;
 		this.actionBarManager = actionBarManager;
@@ -468,7 +469,8 @@ class LightWeightPlotActions {
 		
 		final Action configButton = new Action(BasePlottingConstants.CONFIG_SETTINGS, PlottingSystemActivator.getImageDescriptor("icons/Configure.png")) {
 			public void run() {
-				XYGraphConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), xyGraph, viewer.getSystem().isRescale());
+				XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), xyGraph, viewer.getSystem().isRescale());
+				dialog.setPlottingSystem(viewer.getSystem());
 				dialog.open();
 			}
 		};
