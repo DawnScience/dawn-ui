@@ -14,6 +14,7 @@ import org.dawnsci.processing.ui.ServiceHolder;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext.ConversionScheme;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
@@ -50,6 +51,14 @@ public class SlicedDataUtils {
 			if (!system.is2D()) system.clear();
 			x = axes == null ? null : axes[0];
 			y = axes == null ? null : axes[1];
+			
+			if (x != null && x.getRank() == 2) {
+				x = x.getSlice((Slice)null,new Slice(0,1)).squeeze();
+			}
+			if (y != null && y.getRank() == 2) {
+				y = y.getSlice(new Slice(0,1),(Slice)null).squeeze();
+			}
+			
 			
 			final ITrace t = system.updatePlot2D(data, Arrays.asList(new IDataset[]{y,x}), null);
 				

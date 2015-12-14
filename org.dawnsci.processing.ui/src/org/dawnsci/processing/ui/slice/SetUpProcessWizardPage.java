@@ -316,7 +316,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 				}
 			}
 			
-			AxesMetadata ax = ServiceHolder.getLoaderService().getAxesMetadata(lazyDataset, path, sliceComponent.getAxesNames());
+			AxesMetadata ax = ServiceHolder.getLoaderService().getAxesMetadata(lazyDataset, path, sanitizeAxesNames(sliceComponent.getAxesNames()));
 			lazyDataset.setMetadata(ax);
 			IDataset firstSlice = Slicer.getFirstSlice(lazyDataset, sliceDims);
 			
@@ -390,7 +390,38 @@ public class SetUpProcessWizardPage extends WizardPage {
 			}
 		}
 		
-		context.setAxesNames(sliceComponent.getAxesNames());
+		context.setAxesNames(sanitizeAxesNames(sliceComponent.getAxesNames()));
+	}
+	
+	private Map<Integer, String> sanitizeAxesNames(Map<Integer, String> axes) {
+		IDataHolder dh = null;
+		try {
+			dh = ServiceHolder.getLoaderService().getData(context.getFilePaths().get(0), null);
+		} catch (Exception e) {
+			logger.error("couldnt get dataholder");
+			return axes;
+		}
+		
+		Map<Integer, String> axesNames = new HashMap<Integer, String>();
+		
+		for (Integer key : axes.keySet()) {
+			String name = axes.get(key);
+			if (dh.contains(name)) {
+				axesNames.put(key, name);
+			} else {
+				int i = name.lastIndexOf(":");
+				if (i > -1) {
+					String n = name.substring(0, i);
+					if (dh.contains(n)) {
+						axesNames.put(key, n);
+					}
+				}
+			}
+			
+			
+		}
+		
+		return axesNames;
 	}
 	
 	private ISlicingTool getLineSliceTool(){
