@@ -44,17 +44,17 @@ openFile
       location="org.dawnsci.product.plugin"
       startupProgressRect="5,240,590,15" />
    <launcher name="dawn">
-      <linux icon="icons/dawn-icon.xpm"/>
+      <linux icon="/uk.ac.diamond.dawn.product.feature/icons/dawn-icon.xpm"/>
       <solaris/>
       <win useIco="false">
          <bmp
-            winSmallHigh="icons/16x16_32.bmp"
-            winSmallLow="icons/16x16_8.bmp"
-            winMediumHigh="icons/32x32_32.bmp"
-            winMediumLow="icons/32x32_8.bmp"
-            winLargeHigh="icons/48x48_32.bmp"
-            winLargeLow="icons/48x48_8.bmp"
-            winExtraLargeHigh="icons/256x256_32.bmp"/>
+            winSmallHigh="/uk.ac.diamond.dawn.product.feature/icons/16x16_32.bmp"
+            winSmallLow="/uk.ac.diamond.dawn.product.feature/icons/16x16_8.bmp"
+            winMediumHigh="/uk.ac.diamond.dawn.product.feature/icons/32x32_32.bmp"
+            winMediumLow="/uk.ac.diamond.dawn.product.feature/icons/32x32_8.bmp"
+            winLargeHigh="/uk.ac.diamond.dawn.product.feature/icons/48x48_32.bmp"
+            winLargeLow="/uk.ac.diamond.dawn.product.feature/icons/48x48_8.bmp"
+            winExtraLargeHigh="/uk.ac.diamond.dawn.product.feature/icons/256x256_32.bmp"/>
       </win>
    </launcher>
 
@@ -62,6 +62,7 @@ openFile
 
    <vm>
    </vm>
+
 
    <plugins>
    </plugins>
@@ -73,5 +74,12 @@ openFile
    <configurations>
       <property name="preferenceCustomization" value="platform:/feature/uk.ac.diamond.dawn.base.product.feature/plugin_customization.ini" />
    </configurations>
+
+   <preferencesInfo>
+      <targetfile overwrite="false"/>
+   </preferencesInfo>
+
+   <cssInfo>
+   </cssInfo>
 
 </product>
