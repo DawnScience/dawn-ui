@@ -46,7 +46,8 @@ openFile
    <launcher name="dawn">
       <linux icon="/uk.ac.diamond.dawn.product.feature/icons/dawn-icon.xpm"/>
       <solaris/>
-      <win useIco="false">
+      <win useIco="true">
+         <ico path="/org.dawnsci.product.plugin/icons/dawn-icon.ico"/>
          <bmp
             winSmallHigh="/uk.ac.diamond.dawn.product.feature/icons/16x16_32.bmp"
             winSmallLow="/uk.ac.diamond.dawn.product.feature/icons/16x16_8.bmp"
@@ -63,7 +64,6 @@ openFile
    <vm>
    </vm>
 
-
    <plugins>
    </plugins>
 
@@ -74,12 +74,5 @@ openFile
    <configurations>
       <property name="preferenceCustomization" value="platform:/feature/uk.ac.diamond.dawn.base.product.feature/plugin_customization.ini" />
    </configurations>
-
-   <preferencesInfo>
-      <targetfile overwrite="false"/>
-   </preferencesInfo>
-
-   <cssInfo>
-   </cssInfo>
 
 </product>
