@@ -44,17 +44,17 @@ openFile
       location="org.dawnsci.product.plugin"
       startupProgressRect="5,240,590,15" />
    <launcher name="dawn">
-      <linux icon="/org.dawnsci.product.plugin/icons/dawn-icon.xpm"/>
+      <linux icon="icons/dawn-icon.xpm"/>
       <solaris/>
       <win useIco="false">
          <bmp
-            winSmallHigh="/org.dawnsci.product.plugin/icons/16x16_32.bmp"
-            winSmallLow="/org.dawnsci.product.plugin/icons/16x16_8.bmp"
-            winMediumHigh="/org.dawnsci.product.plugin/icons/32x32_32.bmp"
-            winMediumLow="/org.dawnsci.product.plugin/icons/32x32_8.bmp"
-            winLargeHigh="/org.dawnsci.product.plugin/icons/48x48_32.bmp"
-            winLargeLow="/org.dawnsci.product.plugin/icons/48x48_8.bmp"
-            winExtraLargeHigh="/org.dawnsci.product.plugin/icons/256x256_32.bmp"/>
+            winSmallHigh="icons/16x16_32.bmp"
+            winSmallLow="icons/16x16_8.bmp"
+            winMediumHigh="icons/32x32_32.bmp"
+            winMediumLow="icons/32x32_8.bmp"
+            winLargeHigh="icons/48x48_32.bmp"
+            winLargeLow="icons/48x48_8.bmp"
+            winExtraLargeHigh="icons/256x256_32.bmp"/>
       </win>
    </launcher>
 
