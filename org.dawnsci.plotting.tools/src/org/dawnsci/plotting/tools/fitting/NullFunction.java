@@ -13,7 +13,6 @@ import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IOperator;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IParameter;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
-import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 
@@ -69,22 +68,7 @@ public class NullFunction implements IPeak {
 	}
 
 	@Override
-	public double partialDeriv(int Parameter, double... position) {
-		return 0;
-	}
-
-	@Override
 	public double partialDeriv(IParameter param, double... values) {
-		return 0;
-	}
-
-	@Override
-	public DoubleDataset makeDataset(IDataset... values) {
-		return null;
-	}
-
-	@Override
-	public double residual(boolean allValues, IDataset data, IDataset... values) {
 		return 0;
 	}
 
