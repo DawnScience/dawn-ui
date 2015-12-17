@@ -529,7 +529,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 						}
 					}
 					Fitter.ApacheNelderMeadFit(new Dataset[] { x }, y,
-							resultFunction, 1000);
+							resultFunction);
 					break;
 				case GENETIC:
 					IOptimizer fitMethod = new GeneticAlg(accuracy);
