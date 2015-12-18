@@ -14,6 +14,7 @@ import org.eclipse.dawnsci.analysis.api.processing.IExportOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
+import org.eclipse.dawnsci.analysis.dataset.impl.Random;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceVisitor;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -144,14 +145,18 @@ public class EscapableSliceVisitor implements SliceVisitor {
 				SliceFromSeriesMetadata ssm = out.getMetadata(SliceFromSeriesMetadata.class).get(0);
 				Slice[] s = ssm.getSliceFromInput();
 				String n = ssm.getFilePath();
-				File f = new File(n);
-				String b = FilenameUtils.getBaseName(f.getAbsolutePath());
-				String name = b + "_" + Slice.createString(s);
-				out.setName(name);
+				if (n != null && !n.isEmpty()) {
+					File f = new File(n);
+					String b = FilenameUtils.getBaseName(f.getAbsolutePath());
+					String name = b + "_" + Slice.createString(s);
+					out.setName(name);
+				}
+				
 			} catch (Exception e) {
+				e.printStackTrace();
 				// TODO: handle exception
 			}
-			
+//			out = Random.rand(out.getShape());
 			SlicedDataUtils.plotDataWithMetadata(out, output, dataDims);
 
 		}

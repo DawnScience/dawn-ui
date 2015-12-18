@@ -171,12 +171,12 @@
       <plotting_tool_page
             class="org.dawnsci.processing.ui.tool.ProcessingImagesTool"
             id="org.dawnsci.processing.ui.tool.ProcessingImagesTool"
-            label="Processing">
+            label="Processing Image">
       </plotting_tool_page>
       <plotting_tool_page
             class="org.dawnsci.processing.ui.tool.ProcessingXYTool"
             id="org.dawnsci.processing.ui.tool.ProcessingXYTool"
-            label="Processing">
+            label="Processing XY">
       </plotting_tool_page>
    </extension>
 
