@@ -20,7 +20,6 @@ import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.OperationRank;
-import org.eclipse.dawnsci.analysis.dataset.operations.AbstractOperation;
 import org.eclipse.dawnsci.analysis.dataset.operations.AbstractOperationBase;
 /**
  * 
@@ -40,7 +39,7 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 	}
 	
 	@Override
-	public Surface execute(IDataset slice, IMonitor monitor) throws OperationException {
+	public Surface execute(IDataset slice, IMonitor moni1tor) throws OperationException {
 				
 		final Object[]           data      = parseVertices();
 		final Set<Triangle>      triangles = (Set<Triangle>) data[0];
@@ -57,6 +56,8 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 		int k = 0;
 
 		for (Triangle t: triangles) {
+			
+			Point[] test = {t.getA(), t.getB(), t.getC()};
 			
 			faces[k] = v.get(t.getC());
 			faces[k + 1] = 0;
@@ -395,7 +396,6 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 
 	@SuppressWarnings("unchecked")
 	
-	// !! hot spot 
 	private Object[] parseVertices() throws OperationException 
 	{	
 		final ILazyDataset lazyData = model.getLazyData();
@@ -458,7 +458,7 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 //					lazyData);
 //			
 //			triangles.addAll((Collection<? extends Triangle>) TriVertList[0]);
-//			vertices.
+//			vertices.putAll((Map<? extends Point, ? extends Integer>) TriVertList[1]);
 			
 						
 			IDataset slicedImage = lazyData.getSlice(sliceStart,sliceStop, sliceStep);
@@ -507,7 +507,7 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 					surfaceGridCellIntesection(currentCell, cubeIndex, isovalue);
 					currentCell.setTrianglesList(createTriangles(vertices, currentCell, cubeIndex));
 					if(vertices.size()>=model.getVertexLimit()){
-						throw new UnsupportedOperationException("The number of verices has exceeded "+model.getVertexLimit()+". The surface cannot be rendered.");
+						throw new UnsupportedOperationException("The number of verices has exceeded " + model.getVertexLimit()+". The surface cannot be rendered.");
 					}
 					triangles.addAll(currentCell.getTrianglesList());
 				}
@@ -519,10 +519,7 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 						i += 2;
 						y = 0;
 					}
-				}				
-				
-				
-				
+				}	
 			}
 		}
 		return new Object[]{triangles, vertices};
@@ -608,6 +605,16 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 		}
 		return new Object[]{returnTriangles, returnVertices};		
 	}
+	
+//	private Map<Point, Integer> createVertexMap(Point[] pointsToMap)
+//	{
+//		Map<Point, Integer> returningMap = new LinkedHashMap<Point, Integer>(89);
+//		
+//		for (Point p : pointsToMap)
+//		{
+//			
+//		}
+//	}
 	
 	public int getCubeIndex(GridCell cell, double isovalue){
 		int cubeIndex = 0;
