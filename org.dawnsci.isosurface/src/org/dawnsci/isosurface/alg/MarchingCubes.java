@@ -427,72 +427,71 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 		
 		// declare the variables external to the loop
 		// should make things slightly faster
-		int[] start = new int[3];
-		int[] stop = new int[3];
-		int[] step = new int[3];
+		int[] sliceStart = new int[3];
+		int[] sliceStop = new int[3];
+		int[] sliceStep = new int[3];
 		Point[] cellCoords = new Point[8];
 		double[] cellValues = new double[8];
 		
-		for(int k=0; k < zLimit-2*boxSize[2]; k+=boxSize[2]){
+		// scan through the Z coord of the data
+		// iterating steps determined by the XYZ boxsize
+		for(int k = 0; k < zLimit - 2 * boxSize[2]; k += boxSize[2])
+		{
 			
-			start[0] = k;
-			start[1] = 0;
-			start[2] = 0;
+			sliceStart[0] = k;
+			sliceStart[1] = 0;
+			sliceStart[2] = 0;
 			
-			stop[0] = k+2*boxSize[2];
-			stop[1] = yLimit;
-			stop[2] = xLimit;
+			sliceStop[0] = k + 2 * boxSize[2];
+			sliceStop[1] = yLimit;
+			sliceStop[2] = xLimit;
 			
-			step[0] =boxSize[2];
-			step[1] =boxSize[1];
-			step[2] =boxSize[0];
+			sliceStep[0] = boxSize[2];
+			sliceStep[1] = boxSize[1];
+			sliceStep[2] = boxSize[0];
+						
+			IDataset slicedImage = lazyData.getSlice(sliceStart,sliceStop, sliceStep);
 			
-			// old getslice call -> changed it to not create a new int array each loop
-//			IDataset slicedImage = lazyData.getSlice(
-//					new int[] {k,0,0}, 
-//					new int[] {k+2*boxSize[2], yLimit, xLimit}, 
-//					new int[] {boxSize[2], boxSize[1], boxSize[0]});
-			
-			IDataset slicedImage = lazyData.getSlice(start, stop, step);
-			
-			Object[] slice = slicedData(slicedImage, k, boxSize, xLimit, yLimit);
+			Object[] currentSlice = slicedData(slicedImage, k, boxSize, xLimit, yLimit);
 			
 			// a map and an array containing only the data from the slices
-			Map<Point, Number> values = (Map<Point, Number>) slice[0]; 
-			Point[] points = (Point[]) slice[1];
+			Map<Point, Number> sliceValues = (Map<Point, Number>) currentSlice[0]; 
+			Point[] slicePoints = (Point[]) currentSlice[1];
 
 			int i = 0; // index that goes through the front "face" of the slice 
 			int y = 0; // index that keeps track of the points on a column of the face
 			
 			
-			while(i < points.length - 2 * yLimit/boxSize[1] - 2){
+			while(i < slicePoints.length - 2 * yLimit/boxSize[1] - 2)
+			{
 				
-				cellCoords[0] = points[i+3];
-				cellValues[0] = (double) values.get(cellCoords[0]).doubleValue();
+				cellCoords[0] = slicePoints[i+3];
+				cellValues[0] = (double) sliceValues.get(cellCoords[0]).doubleValue();
 				
-				cellCoords[1] = points[i+3+2*yLimit/boxSize[1]];
-				cellValues[1] = (double) values.get(cellCoords[1]).doubleValue();
+				cellCoords[1] = slicePoints[i+3+2*yLimit/boxSize[1]];
+				cellValues[1] = (double) sliceValues.get(cellCoords[1]).doubleValue();
 				
-				cellCoords[2] = points[i+2+2*yLimit/boxSize[1]];
-				cellValues[2] = (double) values.get(cellCoords[2]).doubleValue();
+				cellCoords[2] = slicePoints[i+2+2*yLimit/boxSize[1]];
+				cellValues[2] = (double) sliceValues.get(cellCoords[2]).doubleValue();
 				
-				cellCoords[3] = points[i+2];
-				cellValues[3] = (double) values.get(cellCoords[3]).doubleValue();
+				cellCoords[3] = slicePoints[i+2];
+				cellValues[3] = (double) sliceValues.get(cellCoords[3]).doubleValue();
 				
-				cellCoords[4] = points[i+1];
-				cellValues[4] = (double) values.get(cellCoords[4]).doubleValue();
+				cellCoords[4] = slicePoints[i+1];
+				cellValues[4] = (double) sliceValues.get(cellCoords[4]).doubleValue();
 				
-				cellCoords[5] = points[i+1+2*yLimit/boxSize[1]];
-				cellValues[5] = (double) values.get(cellCoords[5]).doubleValue();
+				cellCoords[5] = slicePoints[i+1+2*yLimit/boxSize[1]];
+				cellValues[5] = (double) sliceValues.get(cellCoords[5]).doubleValue();
 				
-				cellCoords[6] = points[i+2*yLimit/boxSize[1]];
-				cellValues[6] = (double) values.get(cellCoords[6]).doubleValue();
+				cellCoords[6] = slicePoints[i+2*yLimit/boxSize[1]];
+				cellValues[6] = (double) sliceValues.get(cellCoords[6]).doubleValue();
 				
-				cellCoords[7] = points[i];
-				cellValues[7] = (double) values.get(cellCoords[7]).doubleValue();
+				cellCoords[7] = slicePoints[i];
+				cellValues[7] = (double) sliceValues.get(cellCoords[7]).doubleValue();
 				
 				GridCell currentCell = new GridCell(cellCoords, cellValues);
 				int cubeIndex = getCubeIndex(currentCell, isovalue);
+								
 				if (cubeIndex != 0 && cubeIndex != 255) {
 					surfaceGridCellIntesection(currentCell, cubeIndex, isovalue);
 					currentCell.setTrianglesList(createTriangles(vertices, currentCell, cubeIndex));
@@ -509,13 +508,95 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 						i += 2;
 						y = 0;
 					}
-				}
-
+				}				
+				
+				
+				
 			}
 		}
 		return new Object[]{triangles, vertices};
 	}
+	
+	
+	private Object[] generateTrianglesAndVertices(
+			double isovalue,
+			int[] sliceStart,
+			int[] sliceStop, 
+			int[] sliceStep,
+			int[] boxSize,
+			int[] XYZLimits,
+			int k,
+			final ILazyDataset lazyData,
+			Point[] cellCoords, 
+			double[] cellValues)
+	{
+		
+		final Set<Triangle>       returnTriangles = new HashSet<Triangle>(89);               
+		final Map<Point, Integer> returnVertices = new LinkedHashMap<Point, Integer>(89);   
+		
+		
+		IDataset slicedImage = lazyData.getSlice(sliceStart,sliceStop, sliceStep);
+		
+		Object[] currentSlice = slicedData(slicedImage, k, boxSize, XYZLimits[0], XYZLimits[1]);
+		
+		// a map and an array containing only the data from the slices
+		Map<Point, Number> sliceValues = (Map<Point, Number>) currentSlice[0]; 
+		Point[] slicePoints = (Point[]) currentSlice[1];
 
+		int i = 0; // index that goes through the front "face" of the slice 
+		int y = 0; // index that keeps track of the points on a column of the face
+		
+		
+		while(i < slicePoints.length - 2 * XYZLimits[1]/boxSize[1] - 2)
+		{
+			
+			cellCoords[0] = slicePoints[i+3];
+			cellValues[0] = (double) sliceValues.get(cellCoords[0]).doubleValue();
+			
+			cellCoords[1] = slicePoints[i+3+2*XYZLimits[1]/boxSize[1]];
+			cellValues[1] = (double) sliceValues.get(cellCoords[1]).doubleValue();
+			
+			cellCoords[2] = slicePoints[i+2+2*XYZLimits[1]/boxSize[1]];
+			cellValues[2] = (double) sliceValues.get(cellCoords[2]).doubleValue();
+			
+			cellCoords[3] = slicePoints[i+2];
+			cellValues[3] = (double) sliceValues.get(cellCoords[3]).doubleValue();
+			
+			cellCoords[4] = slicePoints[i+1];
+			cellValues[4] = (double) sliceValues.get(cellCoords[4]).doubleValue();
+			
+			cellCoords[5] = slicePoints[i+1+2*XYZLimits[1]/boxSize[1]];
+			cellValues[5] = (double) sliceValues.get(cellCoords[5]).doubleValue();
+			
+			cellCoords[6] = slicePoints[i+2*XYZLimits[1]/boxSize[1]];
+			cellValues[6] = (double) sliceValues.get(cellCoords[6]).doubleValue();
+			
+			cellCoords[7] = slicePoints[i];
+			cellValues[7] = (double) sliceValues.get(cellCoords[7]).doubleValue();
+			
+			GridCell currentCell = new GridCell(cellCoords, cellValues);
+			int cubeIndex = getCubeIndex(currentCell, isovalue);
+							
+			if (cubeIndex != 0 && cubeIndex != 255) {
+				surfaceGridCellIntesection(currentCell, cubeIndex, isovalue);
+				currentCell.setTrianglesList(createTriangles(returnVertices, currentCell, cubeIndex));
+				if(returnVertices.size()>=model.getVertexLimit()){
+					throw new UnsupportedOperationException("The number of verices has exceeded "+model.getVertexLimit()+". The surface cannot be rendered.");
+				}
+				returnTriangles.addAll(currentCell.getTrianglesList());
+			}
+			
+			if(y < 2*XYZLimits[1]/boxSize[1]-2){
+				i += 2;
+				y += 2;
+				if(y == 2*XYZLimits[1]/boxSize[1]-2){
+					i += 2;
+					y = 0;
+				}
+			}				
+		}
+		return new Object[]{returnTriangles, returnVertices};		
+	}
 	
 	public int getCubeIndex(GridCell cell, double isovalue){
 		int cubeIndex = 0;
@@ -738,6 +819,7 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 	 * @param xLimit
 	 * @param yLimit
 	 * @return
+	 * new Object[2]{values, points}
 	 */
 	
 	public Object[] slicedData(IDataset slicedImage, int k, int[] boxSize, int xLimit, int yLimit){
