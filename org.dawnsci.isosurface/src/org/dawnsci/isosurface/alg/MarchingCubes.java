@@ -30,8 +30,6 @@ import org.eclipse.dawnsci.analysis.dataset.operations.AbstractOperationBase;
  */
 public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Surface> {
 
-	private int index = 0;
-	
 	public MarchingCubes() {
 		setModel(new MarchingCubesModel()); // We must always have a model for this maths.
 	}
@@ -43,9 +41,7 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 	
 	@Override
 	public Surface execute(IDataset slice, IMonitor monitor) throws OperationException {
-		
-		this.index = 0;
-		
+				
 		final Object[]           data      = parseVertices();
 		final Set<Triangle>      triangles = (Set<Triangle>) data[0];
 		final Map<Point,Integer> v         = (Map<Point, Integer>) data[1];
@@ -430,6 +426,7 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 		int[] sliceStart = new int[3];
 		int[] sliceStop = new int[3];
 		int[] sliceStep = new int[3];
+		
 		Point[] cellCoords = new Point[8];
 		double[] cellValues = new double[8];
 		
@@ -437,7 +434,6 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 		// iterating steps determined by the XYZ boxsize
 		for(int k = 0; k < zLimit - 2 * boxSize[2]; k += boxSize[2])
 		{
-			
 			sliceStart[0] = k;
 			sliceStart[1] = 0;
 			sliceStart[2] = 0;
@@ -449,6 +445,21 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 			sliceStep[0] = boxSize[2];
 			sliceStep[1] = boxSize[1];
 			sliceStep[2] = boxSize[0];
+			
+			
+//			Object[] TriVertList = generateTrianglesAndVertices(
+//					isovalue,
+//					sliceStart,
+//					sliceStop, 
+//					sliceStep,
+//					boxSize,
+//					new int[]{xLimit, yLimit, zLimit},
+//					k,
+//					lazyData);
+//			
+//			triangles.addAll((Collection<? extends Triangle>) TriVertList[0]);
+//			vertices.
+			
 						
 			IDataset slicedImage = lazyData.getSlice(sliceStart,sliceStop, sliceStep);
 			
@@ -517,7 +528,7 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 		return new Object[]{triangles, vertices};
 	}
 	
-	
+	// extremely large parameter list - trim if possible
 	private Object[] generateTrianglesAndVertices(
 			double isovalue,
 			int[] sliceStart,
@@ -526,14 +537,14 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 			int[] boxSize,
 			int[] XYZLimits,
 			int k,
-			final ILazyDataset lazyData,
-			Point[] cellCoords, 
-			double[] cellValues)
+			final ILazyDataset lazyData)
 	{
 		
 		final Set<Triangle>       returnTriangles = new HashSet<Triangle>(89);               
 		final Map<Point, Integer> returnVertices = new LinkedHashMap<Point, Integer>(89);   
 		
+		Point[] cellCoords = new Point[8];
+		double[] cellValues = new double[8];
 		
 		IDataset slicedImage = lazyData.getSlice(sliceStart,sliceStop, sliceStep);
 		
@@ -722,19 +733,18 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 
 		for (int i = 0; triTable[cubeIndex][i] != -1; i += 3) {
 			Point a = cell.getVertexList()[triTable[cubeIndex][i]];
+			
+			
 			if(!vertices.containsKey(a)){
-				vertices.put(a, index);
-				index++;
+				vertices.put(a, vertices.size());
 			}
 			Point b = cell.getVertexList()[triTable[cubeIndex][i + 1]];
 			if(!vertices.containsKey(b)){
-				vertices.put(b, index);
-				index++;
+				vertices.put(b, vertices.size());
 			}
 			Point c = cell.getVertexList()[triTable[cubeIndex][i + 2]];
 			if(!vertices.containsKey(c)){
-				vertices.put(c, index);
-				index++;
+				vertices.put(c, vertices.size());
 			}
 
 			Triangle currentTriangle = new Triangle(a, b, c);
