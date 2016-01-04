@@ -20,6 +20,7 @@ import java.util.Map;
 import org.dawnsci.plotting.actions.ActionBarWrapper;
 import org.dawnsci.plotting.actions.EmptyActionBars;
 import org.dawnsci.plotting.views.EmptyTool;
+import org.dawnsci.plotting.views.ToolPageView;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dawnsci.plotting.api.ActionType;
@@ -77,13 +78,13 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 	
 	// Extrac actions for 1D and image viewing
 	protected Map<String, IToolPage> toolPages;
-	protected AbstractPlottingSystem system;
+	protected AbstractPlottingSystem<?> system;
 	protected Map<ActionType, List<ActionContainer>> actionMap;
 	protected MenuAction                imageMenu;
 	protected MenuAction                xyMenu;
 	protected ITraceActionProvider      traceActionProvider;
 	
-	public PlottingActionBarManager(AbstractPlottingSystem system) {
+	public PlottingActionBarManager(AbstractPlottingSystem<?> system) {
 		this.system = system;
 		this.actionMap = new HashMap<ActionType, List<ActionContainer>>(ActionType.values().length);
 	}
@@ -488,7 +489,7 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 		// If we have a dedicated tool for this tool, we do not open another
 		String toolId  = registeredTool.getToolId();
 		if (toolId!=null) {
-			IViewReference ref = getPage().findViewReference("org.dawb.workbench.plotting.views.toolPageView.fixed", toolId);
+			IViewReference ref = getPage().findViewReference(ToolPageView.FIXED_VIEW_ID, toolId);
 		    if (ref!=null) {
 		    	final IViewPart view = ref.getView(true);
 		    	getPage().activate(view);
@@ -497,7 +498,7 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 		    
 		    if (registeredTool.isAlwaysSeparateView()) {
 				try {
-					final IViewPart view = getPage().showView("org.dawb.workbench.plotting.views.toolPageView.fixed",
+					final IViewPart view = getPage().showView(ToolPageView.FIXED_VIEW_ID,
 							                                                toolId,
 																			IWorkbenchPage.VIEW_ACTIVATE);
 			    	getPage().activate(view);

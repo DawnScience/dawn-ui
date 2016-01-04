@@ -12,6 +12,7 @@ import java.io.File;
 
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.common.widgets.file.SelectorWidget;
+import org.dawnsci.plotting.views.ToolPageView;
 import org.eclipse.dawnsci.plotting.api.tool.IToolContainer;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -57,7 +58,7 @@ public class FittedPeaksExportWizard extends Wizard implements IExportWizard {
 		if (!(view instanceof IToolContainer))
 			return false;
 		final IToolContainer container = (IToolContainer)view;
-		final IViewReference viewFixed = (IViewReference)EclipseUtils.getPage().findViewReference("org.dawb.workbench.plotting.views.toolPageView.fixed", "org.dawb.workbench.plotting.tools.fittingTool");
+		final IViewReference viewFixed = (IViewReference)EclipseUtils.getPage().findViewReference(ToolPageView.FIXED_VIEW_ID, "org.dawb.workbench.plotting.tools.fittingTool");
 		if (viewFixed != null && !(viewFixed.getView(false) instanceof IToolContainer))
 			return false;
 		final IToolContainer containerFixed = viewFixed != null ? (IToolContainer)viewFixed.getView(false) : null;
