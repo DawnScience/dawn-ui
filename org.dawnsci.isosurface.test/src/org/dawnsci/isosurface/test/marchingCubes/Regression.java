@@ -86,7 +86,7 @@ public class Regression {
 				+ "result: " + testResult.getTexCoords().length + "\n" 
 				+ "Should be " + knownTexLength,
 			testResult.getTexCoords().length != knownTexLength);
-				
+						
 		// check data is the same
 		Path pointsFile = Paths.get("pointsResults");
 		float [] readPointsFile = (float[]) deserialize(Files.readAllBytes(pointsFile));
@@ -126,7 +126,7 @@ public class Regression {
 	/**
 	 * call if you want to test a new seed
 	 */
-	private void writeNewFiles(Surface Result) throws Exception
+	public void writeNewFiles(Surface Result) throws Exception
 	{
 		byte facesData[] = serialize(Result.getFaces());
 		Path facesFile = Paths.get("facesResults");

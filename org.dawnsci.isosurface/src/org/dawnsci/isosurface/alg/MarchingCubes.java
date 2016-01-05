@@ -461,9 +461,7 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 		
 		// index the triangles
 		vertices = mapTriangleList(triangles);
-		
-		
-		
+			
 		return new Object[]{triangles, vertices};
 	}
 	

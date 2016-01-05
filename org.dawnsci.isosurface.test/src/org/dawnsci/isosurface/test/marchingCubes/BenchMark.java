@@ -105,22 +105,22 @@ public class BenchMark
 		System.out.println(resultPrint);
 
 	}
-
 	
-//	public void varrying_BoxSize_RandomNoiseBenchMarkTest() throws Exception {
-//		this.dataSize = new int[] { 100, 100, 100 };
-//		for (int i = 20; i > 0; i--) {
-//			this.boxSize = new int[] { i, i, i };
-//			RandomNoiseBenchMarkTest();
-//		}
-//	}
-//
-//	
-//	public void varrying_DataSize_RandomNoiseBenchMarkTest() throws Exception {
-//		this.boxSize = new int[] { 4, 4, 4 };
-//		for (int i = 50; i < 300; i += 25) {
-//			this.dataSize = new int[] { i, i, i };
-//			RandomNoiseBenchMarkTest();
-//		}
-//	}
+	@Test
+	public void varrying_BoxSize_RandomNoiseBenchMarkTest() throws Exception {
+		this.dataSize = new int[] { 100, 100, 100 };
+		for (int i = 20; i > 0; i--) {
+			this.boxSize = new int[] { i, i, i };
+			RandomNoiseBenchMarkTest();
+		}
+	}
+
+	@Test
+	public void varrying_DataSize_RandomNoiseBenchMarkTest() throws Exception {
+		this.boxSize = new int[] { 4, 4, 4 };
+		for (int i = 50; i < 300; i += 25) {
+			this.dataSize = new int[] { i, i, i };
+			RandomNoiseBenchMarkTest();
+		}
+	}
 }
