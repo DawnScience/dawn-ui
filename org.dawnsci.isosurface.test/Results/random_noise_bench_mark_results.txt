@@ -18,3 +18,12 @@
 26.76	[100, 100, 100]	[4, 4, 4]	ws168.diamond.ac.uk	04/01/16 15:44:26
 87.1	[100, 100, 100]	[3, 3, 3]	ws168.diamond.ac.uk	04/01/16 15:44:35
 426.36	[100, 100, 100]	[2, 2, 2]	ws168.diamond.ac.uk	04/01/16 15:45:18
+improved code with the mistake
+68.13	[100, 100, 100]	[4, 4, 4]	ws168.diamond.ac.uk	05/01/16 11:38:05	BAD CODE SEE PICTURE 1
+3773.38	[250, 250, 250]	[4, 4, 4]	ws168.diamond.ac.uk	05/01/16 11:45:11	BAD CODE SEE PICTURE 1
+68.15	[100, 100, 100]	[4, 4, 4]	ws168.diamond.ac.uk	05/01/16 13:00:48	BAD CODE SEE PICTURE 1
+65.38	[100, 100, 100]	[4, 4, 4]	ws168.diamond.ac.uk	05/01/16 13:02:10	BAD CODE SEE PICTURE 1
+3833.09	[250, 250, 250]	[4, 4, 4]	ws168.diamond.ac.uk	05/01/16 13:08:59	BAD CODE SEE PICTURE 1
+Improved code without the mistake
+963.23	[250, 250, 250]	[4, 4, 4]	ws168.diamond.ac.uk	05/01/16 12:56:22	SINGLE CORE ATTEMPT TO MAKE THREAD SAFE
+983.19	[250, 250, 250]	[4, 4, 4]	ws168.diamond.ac.uk	05/01/16 13:13:23
