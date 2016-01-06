@@ -62,7 +62,7 @@ import org.eclipse.ui.IWorkbenchPart;
  * 
  * You can also call setOperation(...) to programmatically set the editing operation.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class OperationModelViewer implements ISelectionListener, ISelectionChangedListener, ISelectionProvider {

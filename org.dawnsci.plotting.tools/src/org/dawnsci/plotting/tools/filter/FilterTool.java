@@ -40,7 +40,7 @@ import org.eclipse.swt.widgets.Label;
  * For instance this tool can be used to apply the PHA algorithm 
  * and the fano factor.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class FilterTool extends AbstractToolPage {

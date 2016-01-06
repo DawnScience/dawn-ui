@@ -41,7 +41,7 @@ import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 /**
  * A Line profile which is created by drawing a rectangle and it creates two lines
  * in the x and y 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class CrossProfileTool extends LineProfileTool {

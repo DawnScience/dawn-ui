@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * 
  * Therefore it may be required to run the filter asynchronously.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class FanoFilter extends AbstractDelayedFilter {
