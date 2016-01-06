@@ -8,10 +8,12 @@
  */
 package org.dawnsci.isosurface.alg;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -20,7 +22,6 @@ import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.OperationRank;
-import org.eclipse.dawnsci.analysis.dataset.operations.AbstractOperation;
 import org.eclipse.dawnsci.analysis.dataset.operations.AbstractOperationBase;
 /**
  * 
@@ -30,8 +31,6 @@ import org.eclipse.dawnsci.analysis.dataset.operations.AbstractOperationBase;
  */
 public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Surface> {
 
-	private int index = 0;
-	
 	public MarchingCubes() {
 		setModel(new MarchingCubesModel()); // We must always have a model for this maths.
 	}
@@ -42,12 +41,10 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 	}
 	
 	@Override
-	public Surface execute(IDataset slice, IMonitor monitor) throws OperationException {
-		
-		this.index = 0;
-		
+	public Surface execute(IDataset slice, IMonitor moni1tor) throws OperationException {
+				
 		final Object[]           data      = parseVertices();
-		final Set<Triangle>      triangles = (Set<Triangle>) data[0];
+		final Set<Triangle>      triangles = (HashSet<Triangle>) data[0];
 		final Map<Point,Integer> v         = (Map<Point, Integer>) data[1];
 
 		Point[] vertices = v.keySet().toArray(new Point[v.size()]);
@@ -399,7 +396,6 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 
 	@SuppressWarnings("unchecked")
 	
-	// !! hot spot 
 	private Object[] parseVertices() throws OperationException 
 	{	
 		final ILazyDataset lazyData = model.getLazyData();
@@ -422,22 +418,21 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 			zLimit = zLimit - zLimit % boxSize[2];
 		}
 		
-		final Set<Triangle>      triangles  = new HashSet<Triangle>(89);
-		final Map<Point, Integer> vertices  = new LinkedHashMap<Point, Integer>(89);
+		Map<Point, Integer> vertices  = new LinkedHashMap<Point, Integer>(89);
 		
 		// declare the variables external to the loop
 		// should make things slightly faster
 		int[] sliceStart = new int[3];
 		int[] sliceStop = new int[3];
 		int[] sliceStep = new int[3];
-		Point[] cellCoords = new Point[8];
-		double[] cellValues = new double[8];
-		
+				
 		// scan through the Z coord of the data
 		// iterating steps determined by the XYZ boxsize
+
+		final Set<Triangle> triangles  = new HashSet<Triangle>(89);
+		
 		for(int k = 0; k < zLimit - 2 * boxSize[2]; k += boxSize[2])
 		{
-			
 			sliceStart[0] = k;
 			sliceStart[1] = 0;
 			sliceStart[2] = 0;
@@ -449,76 +444,49 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 			sliceStep[0] = boxSize[2];
 			sliceStep[1] = boxSize[1];
 			sliceStep[2] = boxSize[0];
-						
-			IDataset slicedImage = lazyData.getSlice(sliceStart,sliceStop, sliceStep);
-			
-			Object[] currentSlice = slicedData(slicedImage, k, boxSize, xLimit, yLimit);
-			
-			// a map and an array containing only the data from the slices
-			Map<Point, Number> sliceValues = (Map<Point, Number>) currentSlice[0]; 
-			Point[] slicePoints = (Point[]) currentSlice[1];
-
-			int i = 0; // index that goes through the front "face" of the slice 
-			int y = 0; // index that keeps track of the points on a column of the face
 			
 			
-			while(i < slicePoints.length - 2 * yLimit/boxSize[1] - 2)
-			{
-				
-				cellCoords[0] = slicePoints[i+3];
-				cellValues[0] = (double) sliceValues.get(cellCoords[0]).doubleValue();
-				
-				cellCoords[1] = slicePoints[i+3+2*yLimit/boxSize[1]];
-				cellValues[1] = (double) sliceValues.get(cellCoords[1]).doubleValue();
-				
-				cellCoords[2] = slicePoints[i+2+2*yLimit/boxSize[1]];
-				cellValues[2] = (double) sliceValues.get(cellCoords[2]).doubleValue();
-				
-				cellCoords[3] = slicePoints[i+2];
-				cellValues[3] = (double) sliceValues.get(cellCoords[3]).doubleValue();
-				
-				cellCoords[4] = slicePoints[i+1];
-				cellValues[4] = (double) sliceValues.get(cellCoords[4]).doubleValue();
-				
-				cellCoords[5] = slicePoints[i+1+2*yLimit/boxSize[1]];
-				cellValues[5] = (double) sliceValues.get(cellCoords[5]).doubleValue();
-				
-				cellCoords[6] = slicePoints[i+2*yLimit/boxSize[1]];
-				cellValues[6] = (double) sliceValues.get(cellCoords[6]).doubleValue();
-				
-				cellCoords[7] = slicePoints[i];
-				cellValues[7] = (double) sliceValues.get(cellCoords[7]).doubleValue();
-				
-				GridCell currentCell = new GridCell(cellCoords, cellValues);
-				int cubeIndex = getCubeIndex(currentCell, isovalue);
-								
-				if (cubeIndex != 0 && cubeIndex != 255) {
-					surfaceGridCellIntesection(currentCell, cubeIndex, isovalue);
-					currentCell.setTrianglesList(createTriangles(vertices, currentCell, cubeIndex));
-					if(vertices.size()>=model.getVertexLimit()){
-						throw new UnsupportedOperationException("The number of verices has exceeded "+model.getVertexLimit()+". The surface cannot be rendered.");
-					}
-					triangles.addAll(currentCell.getTrianglesList());
-				}
-				
-				if(y < 2*yLimit/boxSize[1]-2){
-					i += 2;
-					y += 2;
-					if(y == 2*yLimit/boxSize[1]-2){
-						i += 2;
-						y = 0;
-					}
-				}				
-				
-				
-				
-			}
+			triangles.addAll(generateTriangles(
+					isovalue,
+					sliceStart,
+					sliceStop, 
+					sliceStep,
+					boxSize,
+					new int[]{xLimit, yLimit, zLimit},
+					k,
+					lazyData));
+			
+			
 		}
+		
+		// index the triangles
+		vertices = mapTriangleList(triangles);
+			
 		return new Object[]{triangles, vertices};
 	}
 	
-	
-	private Object[] generateTrianglesAndVertices(
+	private Map<Point, Integer> mapTriangleList(Set<Triangle> listToIndex)
+	{
+		Map<Point, Integer> vertices  = new LinkedHashMap<Point, Integer>(89);
+		for (Triangle tri : listToIndex)
+		{
+			if(!vertices.containsKey(tri.getA())){
+				vertices.put(tri.getA(), vertices.size());
+			}
+			if(!vertices.containsKey(tri.getB())){
+				vertices.put(tri.getB(), vertices.size());
+			}
+			if(!vertices.containsKey(tri.getC())){
+				vertices.put(tri.getC(), vertices.size());
+			}
+		}
+		
+		
+		return vertices;
+	}
+		
+	// extremely large parameter list - trim if possible
+	private Set<Triangle> generateTriangles(
 			double isovalue,
 			int[] sliceStart,
 			int[] sliceStop, 
@@ -526,14 +494,13 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 			int[] boxSize,
 			int[] XYZLimits,
 			int k,
-			final ILazyDataset lazyData,
-			Point[] cellCoords, 
-			double[] cellValues)
+			final ILazyDataset lazyData)
 	{
 		
-		final Set<Triangle>       returnTriangles = new HashSet<Triangle>(89);               
-		final Map<Point, Integer> returnVertices = new LinkedHashMap<Point, Integer>(89);   
+		final Set<Triangle> returnTriangles = new HashSet<Triangle>();
 		
+		Point[] cellCoords = new Point[8];
+		double[] cellValues = new double[8];
 		
 		IDataset slicedImage = lazyData.getSlice(sliceStart,sliceStop, sliceStep);
 		
@@ -576,13 +543,13 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 			
 			GridCell currentCell = new GridCell(cellCoords, cellValues);
 			int cubeIndex = getCubeIndex(currentCell, isovalue);
-							
-			if (cubeIndex != 0 && cubeIndex != 255) {
+					
+			if (cubeIndex != 0 && cubeIndex != 255) 
+			{
 				surfaceGridCellIntesection(currentCell, cubeIndex, isovalue);
-				currentCell.setTrianglesList(createTriangles(returnVertices, currentCell, cubeIndex));
-				if(returnVertices.size()>=model.getVertexLimit()){
-					throw new UnsupportedOperationException("The number of verices has exceeded "+model.getVertexLimit()+". The surface cannot be rendered.");
-				}
+				
+				returnTriangles.addAll(createTriangle(currentCell, cubeIndex));
+				currentCell.setTrianglesList(createTriangle(currentCell, cubeIndex));
 				returnTriangles.addAll(currentCell.getTrianglesList());
 			}
 			
@@ -593,10 +560,12 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 					i += 2;
 					y = 0;
 				}
-			}				
+			}
 		}
-		return new Object[]{returnTriangles, returnVertices};		
+		return returnTriangles;		
 	}
+	
+
 	
 	public int getCubeIndex(GridCell cell, double isovalue){
 		int cubeIndex = 0;
@@ -716,33 +685,23 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 	
 	// !! hot spot createTriangles(...)
 	// !! contains key
-	public Collection<Triangle> createTriangles(Map<Point, Integer> vertices, GridCell cell, int cubeIndex) {
+	public List<Triangle> createTriangle(GridCell cell, int cubeIndex) {
 
-		Collection<Triangle> cellTriangles = new HashSet<Triangle>();
+		List<Triangle> triangleList = new ArrayList<Triangle>();
 
 		for (int i = 0; triTable[cubeIndex][i] != -1; i += 3) {
 			Point a = cell.getVertexList()[triTable[cubeIndex][i]];
-			if(!vertices.containsKey(a)){
-				vertices.put(a, index);
-				index++;
-			}
+			
 			Point b = cell.getVertexList()[triTable[cubeIndex][i + 1]];
-			if(!vertices.containsKey(b)){
-				vertices.put(b, index);
-				index++;
-			}
+			
 			Point c = cell.getVertexList()[triTable[cubeIndex][i + 2]];
-			if(!vertices.containsKey(c)){
-				vertices.put(c, index);
-				index++;
-			}
+			
 
 			Triangle currentTriangle = new Triangle(a, b, c);
-			cellTriangles.add(currentTriangle);
+			triangleList.add(currentTriangle);
 		}
 
-		return cellTriangles;
-
+		return triangleList;
 		
 	}
 

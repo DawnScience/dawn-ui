@@ -9,6 +9,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
+import org.dawnsci.plotting.views.ToolPageView;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -25,7 +26,6 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.intro.IIntroPart;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -54,7 +54,7 @@ public class HistogramPluginTests extends PluginTestBase {
 				.getAdapter(IToolPageSystem.class);
 
 		page.showView(
-				"org.dawb.workbench.plotting.views.toolPageView.fixed",
+				ToolPageView.FIXED_VIEW_ID,
 				"org.dawnsci.plotting.histogram.histogram_tool_page_2",
 				IWorkbenchPage.VIEW_ACTIVATE);
 		IToolPage tool = sys

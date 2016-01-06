@@ -2,6 +2,7 @@ package org.dawnsci.plotting.histogram.ui;
 
 import static org.junit.Assert.*;
 
+import org.dawnsci.plotting.views.ToolPageView;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -39,7 +40,7 @@ public class HistogramLifecyclePluginTests extends PluginTestBase {
 		final IToolPageSystem sys = (IToolPageSystem) activePart
 				.getAdapter(IToolPageSystem.class);
 
-		page.showView("org.dawb.workbench.plotting.views.toolPageView.fixed",
+		page.showView(ToolPageView.FIXED_VIEW_ID,
 				"org.dawnsci.plotting.histogram.histogram_tool_page_2",
 				IWorkbenchPage.VIEW_ACTIVATE);
 		IToolPage tool = sys
