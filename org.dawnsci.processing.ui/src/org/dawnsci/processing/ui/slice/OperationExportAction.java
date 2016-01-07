@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Display;
 
 /**
  * Class to use for exporting any pipeline to a moml file.
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 public class OperationExportAction extends Action{

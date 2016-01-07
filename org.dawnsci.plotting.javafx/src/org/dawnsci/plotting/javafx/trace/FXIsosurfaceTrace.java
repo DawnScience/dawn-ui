@@ -30,7 +30,7 @@ import org.eclipse.swt.widgets.Display;
 
 /**
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  * @Internal
  */

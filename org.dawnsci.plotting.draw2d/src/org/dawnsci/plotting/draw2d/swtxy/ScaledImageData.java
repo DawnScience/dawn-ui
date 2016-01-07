@@ -6,7 +6,7 @@ import org.eclipse.swt.graphics.ImageData;
 /**
  * Class to hold data and dispose of images.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  */
 class ScaledImageData {
 

@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.Composite;
 /**
  * TODO The implementation of this plotter viewer is not complete.
  * 
- * @author fcp94556
+ * @author Matthew Gerring
  *
  */
 
