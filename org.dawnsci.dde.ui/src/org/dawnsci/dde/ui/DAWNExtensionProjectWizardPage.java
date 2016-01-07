@@ -15,6 +15,10 @@ import java.net.URL;
 import java.util.ArrayList;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.pde.core.plugin.IPluginExtensionPoint;
 import org.eclipse.pde.internal.core.PDECore;
 import org.eclipse.pde.internal.core.ischema.ISchema;
@@ -39,6 +43,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
+import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.framework.Version;
 
 /**
@@ -68,9 +73,11 @@ public class DAWNExtensionProjectWizardPage extends WizardNewProjectCreationPage
 		super(pageName);
 		setTitle("DAWN Plug-in Project");
 		setDescription("Define the location of the plug-in project");
-		loadTemplateCollection();
+		if (!loadTemplateCollection()){
+			MessageDialog.open(WARNING, this.getShell(), "Could not load all templates", "Some templates were not loaded. This could be related to bundle loading issues. See the error log for details.", SWT.NONE);
+		}
 	}
-    
+
 	public void createControl(Composite parent) {
     	super.createControl(parent);
         Composite composite = (Composite) getControl();
@@ -225,7 +232,8 @@ public class DAWNExtensionProjectWizardPage extends WizardNewProjectCreationPage
 	 * Locate all wizards extending "org.eclipse.pde.ui.newExtension" and place
 	 * instances of the associated templates into the templates array.
 	 */
-	private void loadTemplateCollection() {
+	private boolean loadTemplateCollection() {
+		boolean ok = true;
 		NewExtensionRegistryReader reader = new NewExtensionRegistryReader();
 		fWizardCollection = (WizardCollectionElement) reader.readRegistry(PDEPlugin.getPluginId(), PLUGIN_POINT, false);
 		WizardCollectionElement templateCollection = new WizardCollectionElement("", "", null);
@@ -234,18 +242,22 @@ public class DAWNExtensionProjectWizardPage extends WizardNewProjectCreationPage
 		ElementList wizards = templateCollection.getWizards();
 		Object[] children = wizards.getChildren();
 		for (Object object : children) {
-			if (object instanceof WizardElement){
+			if (object instanceof WizardElement) {
+				String contributingId = ((WizardElement) object).getContributingId();
 				try {
-					String contributingId = ((WizardElement) object).getContributingId();
-					if (DAWNDDEPlugin.isSupportedDAWNExtension(contributingId)){
-						ITemplateSection extension = (ITemplateSection) ((WizardElement) object).getTemplateElement().createExecutableExtension("class");
+					if (DAWNDDEPlugin.isSupportedDAWNExtension(contributingId)) {
+						ITemplateSection extension = (ITemplateSection) ((WizardElement) object).getTemplateElement()
+								.createExecutableExtension("class");
 						templates.add(extension);
 					}
 				} catch (CoreException e) {
-					e.printStackTrace();
+					StatusManager.getManager().handle(new Status(IStatus.ERROR, "org.eclipse.dde.ui",
+							"Could not instantiate template " + contributingId, e), StatusManager.LOG);
+					ok = false;
 				}
 			}
 		}		
+		return ok;
 	}
 
 	private void collectTemplates(Object[] children, WizardCollectionElement list) {
