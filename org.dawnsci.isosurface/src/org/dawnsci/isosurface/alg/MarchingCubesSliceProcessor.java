@@ -1,7 +1,9 @@
 package org.dawnsci.isosurface.alg;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,7 +57,7 @@ public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 	 * 
 	 * The size of the edge table is 256.
 	 */
-	private final static int[] edgeTable = { 0x0, 0x109, 0x203, 0x30a, 0x406, 0x50f,
+	private final int[] edgeTable = { 0x0, 0x109, 0x203, 0x30a, 0x406, 0x50f,
 			0x605, 0x70c, 0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09,
 			0xf00, 0x190, 0x99, 0x393, 0x29a, 0x596, 0x49f, 0x795, 0x69c,
 			0x99c, 0x895, 0xb9f, 0xa96, 0xd9a, 0xc93, 0xf99, 0xe90, 0x230,
@@ -96,7 +98,7 @@ public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 	 * 
 	 * The size of the triangle table is 256 x 16
 	 */
-	private final static int[][] triTable = {
+	private final int[][] triTable = {
 			{ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
 			{ 0, 8, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
 			{ 0, 1, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
@@ -353,12 +355,13 @@ public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 			{ 0, 9, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
 			{ 0, 3, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
 			{ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 } };
-	
+
+	@SuppressWarnings("unchecked")
 	private Set<Triangle> generateTriangles()
 	{
 		// System.out.println(this.i);
 		
-		final Set<Triangle> returnTriangles = new HashSet<Triangle>();
+		Set<Triangle> returnTriangles = new HashSet<Triangle>();
 		
 		Point[] cellCoords = new Point[8];
 		double[] cellValues = new double[8];
@@ -373,9 +376,6 @@ public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 		
 		while(i < slicePoints.length - 2 * yLimit/boxSize[1] - 2)
 		{
-			
-			
-			
 			cellCoords[0] = slicePoints[i+3];
 			cellValues[0] = (double) sliceValues.get(cellCoords[0]).doubleValue();
 			
@@ -400,14 +400,18 @@ public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 			cellCoords[7] = slicePoints[i];
 			cellValues[7] = (double) sliceValues.get(cellCoords[7]).doubleValue();
 			
-			GridCell currentCell = new GridCell(cellCoords, cellValues);
+			final GridCell currentCell = new GridCell(cellCoords, cellValues);
 			int cubeIndex = getCubeIndex(currentCell, isovalue);
-					
-			if (cubeIndex != 0 && cubeIndex != 255) 
+			
+			if (cubeIndex != 0 && cubeIndex != 255)
 			{
 				surfaceGridCellIntesection(currentCell, cubeIndex, isovalue);
 				
-				createTriangle(returnTriangles, currentCell, cubeIndex);
+				Set<Triangle> newTriList = createTriangle(currentCell, cubeIndex);
+				
+				currentCell.setTrianglesList(newTriList);
+				
+				returnTriangles.addAll(currentCell.getTrianglesList());
 				
 			}
 			
@@ -537,9 +541,9 @@ public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 	 * @param cubeIndex
 	 * @return
 	 */
-	private void createTriangle(Set<Triangle> triList, GridCell cell, int cubeIndex) {
-
-		//List<Triangle> triangleList = new ArrayList<Triangle>();
+	private Set<Triangle> createTriangle(GridCell cell, int cubeIndex) 
+	{
+		Set<Triangle> triangleList = new HashSet<Triangle>();
 
 		for (int i = 0; triTable[cubeIndex][i] != -1; i += 3) {
 			Point a = cell.getVertexList()[triTable[cubeIndex][i]];
@@ -548,11 +552,10 @@ public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 			
 			Point c = cell.getVertexList()[triTable[cubeIndex][i + 2]];
 			
-
 			Triangle currentTriangle = new Triangle(a, b, c);
-			triList.add(currentTriangle);
+			triangleList.add(currentTriangle);
 		}
-		
+		return triangleList;
 	}
 	
 	/**

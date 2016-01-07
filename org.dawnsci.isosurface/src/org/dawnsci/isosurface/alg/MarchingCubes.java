@@ -11,9 +11,11 @@ package org.dawnsci.isosurface.alg;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -50,9 +52,7 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 		final Set<Triangle>      triangles = (HashSet<Triangle>) data[0];
 		final Map<Point,Integer> v         = (Map<Point, Integer>) data[1];
 
-		Point[] vertices = v.keySet().toArray(new Point[v.size()]);
-		
-		float[] points = getCoordinates(vertices);
+		float[] points = convertMapToPointsArray(v);
 
 		float[] texCoords = {0,0,0,1,1,1}; //{ 0, 0, (float) 0.5, (float) 0.5, 1, 1 };
 
@@ -61,7 +61,7 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 		int k = 0;
 
 		for (Triangle t: triangles) {
-			
+						
 			faces[k] = v.get(t.getC());
 			faces[k + 1] = 0;
 			faces[k + 2] = v.get(t.getB());
@@ -88,7 +88,6 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 	
 	
 	@SuppressWarnings("unchecked")
-	
 	private Object[] parseVertices() throws OperationException 
 	{	
 		final ILazyDataset lazyData = model.getLazyData();
@@ -122,14 +121,13 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 		// scan through the Z coord of the data
 		// iterating steps determined by the XYZ boxsize
 
-		final Set<Triangle> triangles  = new HashSet<Triangle>(89);
+		Set<Triangle> triangles  = new HashSet<Triangle>(89);
 		
 		/*
 		 * create the list of threads - For parallel running of the algorithm
 		 */
 		
 		List<MarchingCubesSliceProcessor> MCAThreadList = new ArrayList<MarchingCubesSliceProcessor>();
-		
 		
 		// fill the list
 		// give each callable the required data
@@ -232,16 +230,21 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 	 * @param pointsWithoutRepetition
 	 * @return
 	 */
-	public float[] getCoordinates(Point[] pointsWithoutRepetition) {
-		float[] points = new float[3 * pointsWithoutRepetition.length];
-		int j = 0;
-		for (int i = 0; i < pointsWithoutRepetition.length; i++) {
-			points[j] = (float) pointsWithoutRepetition[i].getxCoord();
-			points[j + 1] = (float) pointsWithoutRepetition[i].getyCoord();
-			points[j + 2] = (float) pointsWithoutRepetition[i].getzCoord();
-			j += 3;
-		}
-		return points;
+	private float[] convertMapToPointsArray(Map<Point, Integer> map)
+	{
+		float[] returnArray = new float[map.size()*3];
+		
+		Iterator<Entry<Point, Integer>> iterator = map.entrySet().iterator();
+	    while (iterator.hasNext()) 
+	    {
+	        Map.Entry current = (Map.Entry)iterator.next();
+	        
+	        returnArray[((int) current.getValue()*3)]   = (float)((Point)current.getKey()).getxCoord();
+	        returnArray[((int) current.getValue()*3)+1] = (float)((Point)current.getKey()).getyCoord();
+	        returnArray[((int) current.getValue()*3)+2] = (float)((Point)current.getKey()).getzCoord();
+	    }
+	    
+	    return returnArray;
 	}
 	
 	/**
