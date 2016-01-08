@@ -186,6 +186,23 @@ public class DiffractionUtils {
 			EllipticalFitROI efroi = PowderRingsUtils.fitAndTrimOutliers(mon, points, 5, false);
 			logger.debug("Found {}...", efroi);
 			monitor.subTask("");
+			
+			EllipticalFitROI cfroi = PowderRingsUtils.fitAndTrimOutliers(null, points, 2, true);
+			
+			
+			double dma = efroi.getSemiAxis(0)-cfroi.getSemiAxis(0);
+			double dmi = efroi.getSemiAxis(1)-cfroi.getSemiAxis(0);
+			
+			double crms = Math.sqrt((dma*dma + dmi*dmi)/2);
+			System.err.println("Diff ax: " + (crms));
+			double rms = efroi.getRMS();
+			System.err.println("DRMS: " + (efroi.getRMS()));
+			
+			if (crms < rms) {
+				efroi = cfroi;
+				logger.warn("SWITCHING TO CIRCLE - RMS SEMIAX-RADIUS {} < FIT RMS {}",crms,rms);
+			}
+			
 			return efroi;
 		}
 		
