@@ -194,9 +194,7 @@ public class DiffractionUtils {
 			double dmi = efroi.getSemiAxis(1)-cfroi.getSemiAxis(0);
 			
 			double crms = Math.sqrt((dma*dma + dmi*dmi)/2);
-			System.err.println("Diff ax: " + (crms));
 			double rms = efroi.getRMS();
-			System.err.println("DRMS: " + (efroi.getRMS()));
 			
 			if (crms < rms) {
 				efroi = cfroi;
