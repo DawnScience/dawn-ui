@@ -33,6 +33,8 @@ public class ColourSchemeTemplateTest extends AbstractTemplateTestBase {
 	 */
 	@Test
 	public void testWizard() throws CoreException {
+		// the PDE perspective must be active in order to locate the wizard
+		bot.perspectiveById("org.eclipse.pde.ui.PDEPerspective").activate();
 		// execute the wizard through the user interface
 		bot.menu("File").menu("New").menu("DAWN Plug-in Project").click();
 		SWTBotShell shell = bot.shell("New DAWN Plug-in Project");

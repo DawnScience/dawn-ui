@@ -36,6 +36,8 @@ public class ToolPageTemplateTest extends AbstractTemplateTestBase {
 	 */
 	@Test
 	public void testWizard() throws CoreException {
+		// the PDE perspective must be active in order to locate the wizard
+		bot.perspectiveById("org.eclipse.pde.ui.PDEPerspective").activate();
 		// execute the wizard through the user interface
 		bot.menu("File").menu("New").menu("DAWN Plug-in Project").click();
 		SWTBotShell shell = bot.shell("New DAWN Plug-in Project");
@@ -79,7 +81,7 @@ public class ToolPageTemplateTest extends AbstractTemplateTestBase {
 				"   <extension\n" + 
 				"         point=\"org.eclipse.dawnsci.plotting.api.toolPage\">\n" + 
 				"      <plotting_tool_page\n" + 
-				"            category=\"org.dawnsci.plotting.tools.category.Profile\"\n" + 
+				"            category=\"org.dawnsci.plotting.tools.category.Science\"\n" + 
 				"            cheat_sheet_id=\"org.dawnsci.dde.test.toolPage\"\n" + 
 				"            class=\"org.dawnsci.dde.test.ToolPage\"\n" + 
 				"            icon=\"icons/default.gif\"\n" + 
