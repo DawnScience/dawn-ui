@@ -170,11 +170,13 @@
          point="org.eclipse.dawnsci.plotting.api.toolPage">
       <plotting_tool_page
             class="org.dawnsci.processing.ui.tool.ProcessingImagesTool"
+            icon="icons/image-sharpen.png"
             id="org.dawnsci.processing.ui.tool.ProcessingImagesTool"
             label="Processing Image">
       </plotting_tool_page>
       <plotting_tool_page
             class="org.dawnsci.processing.ui.tool.ProcessingXYTool"
+            icon="icons/image-sharpen.png"
             id="org.dawnsci.processing.ui.tool.ProcessingXYTool"
             label="Processing XY">
       </plotting_tool_page>
