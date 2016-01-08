@@ -9,6 +9,7 @@ import org.dawnsci.processing.ui.model.OperationModelViewer;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
 import org.dawnsci.processing.ui.processing.OperationTableUtils;
 import org.dawnsci.processing.ui.slice.EscapableSliceVisitor;
+import org.dawnsci.processing.ui.slice.IOperationErrorInformer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -53,6 +54,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 	private IOperation selection;
 	private ProcessingJob job;
 	private ITraceListener listener;
+	private IOperationErrorInformer informer;
 	
 	public AbstractProcessingTool() {
 		try {
@@ -101,7 +103,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		statusMessage.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		Composite lower = new Composite(sashForm, SWT.FILL);
 		lower.setLayout(new GridLayout(2, false));
-		OperationTableUtils.initialiseOperationTable(seriesTable, lower);
+		informer = OperationTableUtils.initialiseOperationTable(seriesTable, lower);
 		
 		modelEditor = new OperationModelViewer(true);
 		modelEditor.createPartControl(lower);
@@ -134,6 +136,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		if (isActive()) return;
 		super.activate();
 		getPlottingSystem().addTraceListener(listener);
+		if (informer != null) informer.setTestData(getData());
 		updateData();
 	}
 	
