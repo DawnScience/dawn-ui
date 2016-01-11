@@ -63,13 +63,18 @@ public class Regression {
 	@Test
 	public void regressionTest() throws Exception
 	{
-		start(new int[]{100,100,100},new int[] {3,3,3});
+		start(new int[]{90,100,110},new int[] {2,3,4});
 		
 		// check the algorithm gave the same results as before
-
-		int knownFaceLength = 606870;       // hard coded if seed changes these will also need to be changed
-		int knownPointLength = 245754;      // hard coded if seed changes these will also need to be changed
+		
+		int knownPointLength = 266784;      // hard coded if seed changes these will also need to be changed
+		int knownFaceLength = 661170;       // hard coded if seed changes these will also need to be changed
 		int knownTexLength = 6;             // hard coded if seed changes these will also need to be changed
+		
+		
+//		int knownPointLength = 245754;      // hard coded if seed changes these will also need to be changed
+//		int knownFaceLength = 606870;       // hard coded if seed changes these will also need to be changed
+//		int knownTexLength = 6;             // hard coded if seed changes these will also need to be changed
 		
 		// check lengths first
 		assertFalse("Points length wrong.\n" 

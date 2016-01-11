@@ -1,34 +1,38 @@
 package org.dawnsci.isosurface.alg;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 {		
-	Object[] 	currentSlice;
-	int 		yLimit;
-	double 		isovalue;
-	int[] 		boxSize;
-	int i;
+	Object[] 			currentSlice;
+	int 				xLimit;
+	double 				isovalue;
+	int[] 				boxsize;
+	AtomicInteger 		sharedMapIndex;
+	Map<Point, Integer> sharedMap;
 	
 	public MarchingCubesSliceProcessor(
 			Object[] currentSlice,
 			int yLimit,
 			double isovalue,
 			int[] boxSize,
-			int i)
+			AtomicInteger sharedMapIndex,
+			Map<Point, Integer> sharedMap)
 	{
+		Thread.currentThread().setName("Isosurface processor thread");
 		this.currentSlice  = currentSlice;
-		this.yLimit         = yLimit;       
+		this.xLimit         = yLimit;       
 		this.isovalue      = isovalue;    
-		this.boxSize       = boxSize;     
-		this.i = i;
+		this.boxsize      = boxSize;
+		this.sharedMapIndex = sharedMapIndex;
+		this.sharedMap = sharedMap;
+		
 	
 	}
 	
@@ -38,7 +42,6 @@ public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 		return generateTriangles();
 	}
 	
-
 	// ***********************************************
 	// ***********************************************
 	// *************** PROCESSING CODE ***************
@@ -358,46 +361,45 @@ public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 
 	@SuppressWarnings("unchecked")
 	private Set<Triangle> generateTriangles()
-	{
-		// System.out.println(this.i);
-		
+	{		
 		Set<Triangle> returnTriangles = new HashSet<Triangle>();
 		
 		Point[] cellCoords = new Point[8];
 		double[] cellValues = new double[8];
 				
 		// a map and an array containing only the data from the slices
-		Map<Point, Number> sliceValues = (Map<Point, Number>) currentSlice[0]; 
-		Point[] slicePoints = (Point[]) currentSlice[1];
+		Map<Point, Number> sliceValues = (Map<Point, Number>) currentSlice[0]; // values
+		Point[] slicePoints = (Point[]) currentSlice[1]; // points
 
 		int i = 0; // index that goes through the front "face" of the slice 
-		int y = 0; // index that keeps track of the points on a column of the face
+		int x = 0; // index that keeps track of the points on a column of the face
 		
-		
-		while(i < slicePoints.length - 2 * yLimit/boxSize[1] - 2)
+		while(i < slicePoints.length - (2*xLimit) - 2)
+//		while(i < slicePoints.length - 2 * yLimit/boxsize[1] - 2)
 		{
-			cellCoords[0] = slicePoints[i+3];
+		
+			cellCoords[0] = slicePoints[i+3]; //(1,0,1)
 			cellValues[0] = (double) sliceValues.get(cellCoords[0]).doubleValue();
 			
-			cellCoords[1] = slicePoints[i+3+2*yLimit/boxSize[1]];
+			cellCoords[1] = slicePoints[i+3+2*xLimit]; // (1,1,1)
 			cellValues[1] = (double) sliceValues.get(cellCoords[1]).doubleValue();
 			
-			cellCoords[2] = slicePoints[i+2+2*yLimit/boxSize[1]];
+			cellCoords[2] = slicePoints[i+2+2*xLimit]; //(1,1,0)
 			cellValues[2] = (double) sliceValues.get(cellCoords[2]).doubleValue();
 			
-			cellCoords[3] = slicePoints[i+2];
+			cellCoords[3] = slicePoints[i+2]; // (1,0,0)
 			cellValues[3] = (double) sliceValues.get(cellCoords[3]).doubleValue();
 			
-			cellCoords[4] = slicePoints[i+1];
+			cellCoords[4] = slicePoints[i+1]; //(0,0,1)
 			cellValues[4] = (double) sliceValues.get(cellCoords[4]).doubleValue();
 			
-			cellCoords[5] = slicePoints[i+1+2*yLimit/boxSize[1]];
+			cellCoords[5] = slicePoints[i+1+2*xLimit]; // (0,1,1)
 			cellValues[5] = (double) sliceValues.get(cellCoords[5]).doubleValue();
 			
-			cellCoords[6] = slicePoints[i+2*yLimit/boxSize[1]];
+			cellCoords[6] = slicePoints[i+2*xLimit]; //(0,1,0)
 			cellValues[6] = (double) sliceValues.get(cellCoords[6]).doubleValue();
 			
-			cellCoords[7] = slicePoints[i];
+			cellCoords[7] = slicePoints[i]; //(0,0,0)
 			cellValues[7] = (double) sliceValues.get(cellCoords[7]).doubleValue();
 			
 			final GridCell currentCell = new GridCell(cellCoords, cellValues);
@@ -413,18 +415,49 @@ public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 				
 				returnTriangles.addAll(currentCell.getTrianglesList());
 				
+				mapTriangleSet(currentCell.getTrianglesList());
+				
+			} 
+			
+			i += 2;
+			x += 1;
+			if(x >= 2*xLimit-2){
+				x = 0;
 			}
 			
-			if(y < 2*yLimit/boxSize[1]-2){
-				i += 2;
-				y += 2;
-				if(y == 2*yLimit/boxSize[1]-2){
-					i += 2;
-					y = 0;
-				}
-			}
 		}
 		return returnTriangles;		
+	}
+	
+	private void mapTriangleSet(Collection<Triangle> triCollection)
+	{
+		for (Triangle t : triCollection)
+		{
+			if (!sharedMap.containsKey(t.getA()))
+			{
+				int test = sharedMapIndex.getAndIncrement();
+				
+				sharedMap.put(t.getA(), test);
+			}
+			
+			if (!sharedMap.containsKey(t.getB()))
+			{
+				int test = sharedMapIndex.getAndIncrement();
+				
+				sharedMap.put(t.getB(), test);
+			}
+			
+			if (!sharedMap.containsKey(t.getC()))
+			{
+				int test = sharedMapIndex.getAndIncrement();
+				
+				sharedMap.put(t.getC(), test);
+			}
+						
+//			sharedMap.putIfAbsent(t.getA(), sharedMapIndex.getAndIncrement());
+//			sharedMap.putIfAbsent(t.getB(), sharedMapIndex.getAndIncrement());
+//			sharedMap.putIfAbsent(t.getC(), sharedMapIndex.getAndIncrement());
+		}
 	}
 	
 	private int getCubeIndex(GridCell cell, double isovalue){

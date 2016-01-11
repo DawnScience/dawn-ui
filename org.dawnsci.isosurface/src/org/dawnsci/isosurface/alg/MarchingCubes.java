@@ -9,6 +9,8 @@
 package org.dawnsci.isosurface.alg;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -17,10 +19,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
@@ -36,6 +40,8 @@ import org.eclipse.dawnsci.analysis.dataset.operations.AbstractOperationBase;
  */
 public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Surface> {
 
+	final AtomicInteger mapIndex = new AtomicInteger(0);
+	
 	public MarchingCubes() {
 		setModel(new MarchingCubesModel()); // We must always have a model for this maths.
 	}
@@ -51,8 +57,8 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 		final Object[]           data      = parseVertices();
 		final Set<Triangle>      triangles = (HashSet<Triangle>) data[0];
 		final Map<Point,Integer> v         = (Map<Point, Integer>) data[1];
-
-		float[] points = convertMapToPointsArray(v);
+		
+		float[] points = convertMapToPointsArray(v); 
 
 		float[] texCoords = {0,0,0,1,1,1}; //{ 0, 0, (float) 0.5, (float) 0.5, 1, 1 };
 
@@ -62,11 +68,11 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 
 		for (Triangle t: triangles) {
 						
-			faces[k] = v.get(t.getC());
+			faces[k] = v.get(t.getA());
 			faces[k + 1] = 0;
 			faces[k + 2] = v.get(t.getB());
 			faces[k + 3] = 1;
-			faces[k + 4] = v.get(t.getA());
+			faces[k + 4] = v.get(t.getC());
 			faces[k + 5] = 2;
 			k += 6;
 		}
@@ -89,28 +95,29 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 	
 	@SuppressWarnings("unchecked")
 	private Object[] parseVertices() throws OperationException 
-	{	
+	{
 		final ILazyDataset lazyData = model.getLazyData();
 		final int[] boxSize         = model.getBoxSize();
 		final double isovalue       = model.getIsovalue();
 		
-		int xLimit = lazyData.getShape()[2];
-		int yLimit = lazyData.getShape()[1];
-		int zLimit = lazyData.getShape()[0];
-		
-        if(xLimit % boxSize[0] != 0){
-			xLimit = xLimit - xLimit % boxSize[0];
+		int[] xyzLimit = {
+				lazyData.getShape()[0],
+				lazyData.getShape()[1],
+				lazyData.getShape()[2]};
+
+		if(xyzLimit[0] % boxSize[0] != 0){
+        	xyzLimit[0] = xyzLimit[0] - xyzLimit[0] % boxSize[0];
 		}
 		
-		if(yLimit % boxSize[1] != 0){
-			yLimit = yLimit - yLimit % boxSize[1];
+		if(xyzLimit[1] % boxSize[1] != 0){
+			xyzLimit[1] = xyzLimit[1] - xyzLimit[1] % boxSize[1];
 		}
 		
-		if(zLimit % boxSize[2] != 0){
-			zLimit = zLimit - zLimit % boxSize[2];
+		if(xyzLimit[2] % boxSize[2] != 0){
+			xyzLimit[2] = xyzLimit[2] - xyzLimit[2] % boxSize[2];
 		}
 		
-		Map<Point, Integer> vertices  = new LinkedHashMap<Point, Integer>(89);
+		Map<Point, Integer> vertices  = new LinkedHashMap<Point, Integer>(128);
 		
 		// declare the variables external to the loop
 		// should make things slightly faster
@@ -121,45 +128,109 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 		// scan through the Z coord of the data
 		// iterating steps determined by the XYZ boxsize
 
-		Set<Triangle> triangles  = new HashSet<Triangle>(89);
+		Set<Triangle> triangles  = new HashSet<Triangle>(128);
+		final ConcurrentHashMap<Point, Integer> sharedMap = new ConcurrentHashMap<Point, Integer>(128);
 		
 		/*
 		 * create the list of threads - For parallel running of the algorithm
 		 */
-		
 		List<MarchingCubesSliceProcessor> MCAThreadList = new ArrayList<MarchingCubesSliceProcessor>();
 		
-		// fill the list
-		// give each callable the required data
-		for(int k = 0; k < zLimit - 2 * boxSize[2]; k += boxSize[2])
+		int[] start = {0,0,0};
+		
+		ILazyDataset culledData = lazyData.getSliceView(start, xyzLimit, boxSize); // cull the data top remove all data between boxes
+		
+		int[] dataShape = {
+				culledData.getShape()[0],
+				culledData.getShape()[1],
+				culledData.getShape()[2]};
+		
+		int[] segmentCount = {2, 2, 3};
+				
+//		int[] segmentSize = {
+//				(int)(((float)dataShape[0] / segmentCount[0]) + 0.99f),
+//				(int)(((float)dataShape[1] / segmentCount[1]) + 0.99f),
+//				(int)(((float)dataShape[2] / segmentCount[2]) + 0.99f)};
+		
+		int[] segmentSize = {
+				(int)(((float)dataShape[0] / segmentCount[0])),      
+				(int)(((float)dataShape[1] / segmentCount[1])),      
+				(int)(((float)dataShape[2] / segmentCount[2]))};     
+		
+		int[] end = {0,0,0};
+		
+		for (int x = 0; x < segmentCount[0]; x ++)
 		{
-			sliceStart[0] = k;
-			sliceStart[1] = 0;
-			sliceStart[2] = 0;
-			
-			sliceStop[0] = k + 2 * boxSize[2];
-			sliceStop[1] = yLimit;
-			sliceStop[2] = xLimit;
-			
-			sliceStep[0] = boxSize[2];
-			sliceStep[1] = boxSize[1];
-			sliceStep[2] = boxSize[0];
-			
-			IDataset slicedImage = lazyData.getSlice(sliceStart,sliceStop, sliceStep);	
-			Object[] currentSlice = slicedData(slicedImage, k, boxSize, xLimit, yLimit);
-			
-			MCAThreadList.add(
-					new MarchingCubesSliceProcessor(
-							currentSlice,
-							yLimit,
-							isovalue,
+			for (int y = 0; y <  segmentCount[1]; y ++)
+			{
+				for (int z = 0; z <  segmentCount[2]; z ++)	
+				{
+							
+					start = new int[]{
+							(int)(x * segmentSize[0]),
+							(int)(y * segmentSize[1]),
+							(int)(z * segmentSize[2])};
+					
+					end = new int[]{ 
+							(int)(start[0] + segmentSize[0] + 1),
+							(int)(start[1] + segmentSize[1] + 1),
+							(int)(start[2] + segmentSize[2] + 1)};
+					
+					if (end[0] >= 	dataShape[0])
+						end[0] =  	dataShape[0] + 1;
+					if (end[1] >= 	dataShape[1])
+						end[1] = 	dataShape[1] + 1;
+					if (end[2] >= 	dataShape[2])
+						end[2] = 	dataShape[2] + 1;
+										
+					MCAThreadList.addAll(runOnChunk(
 							boxSize,
-							k));
-			
+							sliceStart,
+							sliceStop,
+							sliceStep,
+							new int[]{(start[0]+ 10)*2, (start[1]+ 2)*2, (start[2]+ 10)*2},
+							culledData.getSliceView(start, end, new int[]{1,1,1}),
+							isovalue,
+							sharedMap));
+
+					System.out.println(Arrays.toString(start) + " - " + Arrays.toString(end));
+					
+				}
+			}
 		}
 		
+		// fill the list
+		// give each callable the required data		
+//		for(int k = 0; k < zLimit - 2 * boxSize[2]; k += boxSize[2])
+//		{
+//			sliceStart[0] = k;
+//			sliceStart[1] = 0;
+//			sliceStart[2] = 0;
+//			
+//			sliceStop[0] = k + 2 * boxSize[2];
+//			sliceStop[1] = yLimit;
+//			sliceStop[2] = xLimit;
+//			
+//			sliceStep[0] = boxSize[2];
+//			sliceStep[1] = boxSize[1];
+//			sliceStep[2] = boxSize[0];
+//			
+//			IDataset slicedImage = lazyData.getSlice(sliceStart,sliceStop, sliceStep);	
+//			Object[] currentSlice = slicedData(slicedImage, k, boxSize, xLimit, yLimit);
+//			
+//			MCAThreadList.add(
+//					new MarchingCubesSliceProcessor(
+//							currentSlice,
+//							yLimit,
+//							isovalue,
+//							boxSize,
+//							mapIndex,
+//							sharedMap));
+//			
+//		}
+		
 		// generate the results list
-		ExecutorService executor = Executors.newCachedThreadPool();
+		ExecutorService executor = Executors.newCachedThreadPool();		
 		
 		List<Future<Set<Triangle>>> result = null;
 		
@@ -194,10 +265,53 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 		}
 		
 		// index the triangles
-		vertices = mapTriangleList(triangles);
+		// vertices = mapTriangleList(triangles);
 			
-		return new Object[]{triangles, vertices};
+		return new Object[]{triangles, sharedMap};
 	}
+	
+	private List<MarchingCubesSliceProcessor> runOnChunk(
+			int[] boxSize,
+			int[] sliceStart,
+			int[] sliceStop,
+			int[] sliceStep,
+			int[] offset,
+			ILazyDataset lazyData,
+			double isovalue,
+			Map<Point, Integer> sharedMap)
+	{
+		List<MarchingCubesSliceProcessor> MCAThreadList = new ArrayList<MarchingCubesSliceProcessor>();
+		int[] xyzLimit = lazyData.getShape();
+		
+		for(int i = 0; i < xyzLimit[2] - 1; i ++)  
+		{
+			
+			sliceStart[0] = 0;                                                                      
+			sliceStart[1] = 0;                                                                      
+			sliceStart[2] = i;                                                                      
+			                                                                                        
+			sliceStop[0] = xyzLimit[0];                                                      
+			sliceStop[1] = xyzLimit[1];                                                                  
+			sliceStop[2] = i + 2;                                                          
+			
+			IDataset slicedImage = lazyData.getSlice(sliceStart,sliceStop, new int[]{1,1,1});	            
+			Object[] currentSlice = slicedData(slicedImage, i, offset, boxSize, xyzLimit[0], xyzLimit[1]);            
+			                                                                                        
+			MCAThreadList.add(                                                                      
+					new MarchingCubesSliceProcessor(                                                
+							currentSlice,                                                           
+							xyzLimit[0],                                                                 
+							isovalue,                                                               
+							boxSize,                                                                
+							mapIndex,                                                               
+							sharedMap));
+			
+			
+		}   
+		System.out.println(MCAThreadList.size());
+		return MCAThreadList;
+	}
+	
 	
 	private Map<Point, Integer> mapTriangleList(Set<Triangle> listToIndex)
 	{
@@ -223,22 +337,20 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 	
 
 	/**
-	 * This method creates the array of coordinates that is needed for the
-	 * TriangleMesh class of JavaFX It uses the array of distinct points and
-	 * gets the x,y,z coordinates
 	 * 
-	 * @param pointsWithoutRepetition
+	 * 
+	 * @param 
 	 * @return
 	 */
 	private float[] convertMapToPointsArray(Map<Point, Integer> map)
 	{
-		float[] returnArray = new float[map.size()*3];
+		float[] returnArray = new float[mapIndex.get()*3];
 		
 		Iterator<Entry<Point, Integer>> iterator = map.entrySet().iterator();
+		
 	    while (iterator.hasNext()) 
 	    {
 	        Map.Entry current = (Map.Entry)iterator.next();
-	        
 	        returnArray[((int) current.getValue()*3)]   = (float)((Point)current.getKey()).getxCoord();
 	        returnArray[((int) current.getValue()*3)+1] = (float)((Point)current.getKey()).getyCoord();
 	        returnArray[((int) current.getValue()*3)+2] = (float)((Point)current.getKey()).getzCoord();
@@ -252,27 +364,32 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 	 * @param slicedImage
 	 * @param k
 	 * @param boxSize
-	 * @param xLimit
 	 * @param yLimit
+	 * @param xLimit
 	 * @return
 	 * new Object[2]{values, points}
 	 */
-	
-	public Object[] slicedData(IDataset slicedImage, int k, int[] boxSize, int xLimit, int yLimit){
+
+	public Object[] slicedData(IDataset slicedImage, int k, int[]offset, int[] boxSize, int xLimit, int yLimit)
+	{
+		Point[] points = new Point[2 * xLimit * yLimit];
+		Map<Point, Number> values = new HashMap<Point, Number>();		
 		
-		Map<Point, Number> values = new HashMap<Point, Number>();
-		Point[] points = new Point[2 * (xLimit/boxSize[0]) * (yLimit/boxSize[1])];
-		
-		
+		int[] newOffset = new int[]{
+			offset[0]*boxSize[0],
+			offset[1]*boxSize[1],
+			offset[2]*boxSize[2]};		
+				
 		int a = 0; // index in the array of points
 
-		for(int i=0; i<xLimit; i+=boxSize[0]){
-			for(int j=0; j<yLimit; j+=boxSize[1]){
-								
-				points[a] = new Point(i,j,k);
-				points[a+1] = new Point(i,j,k+boxSize[2]);
-				values.put(points[a], slicedImage.getDouble(0,j/boxSize[1],i/boxSize[0]));
-				values.put(points[a+1], slicedImage.getDouble(1,j/boxSize[1],i/boxSize[0]));
+		for(int iy=0; iy<yLimit; iy++){
+			for(int ix=0; ix<xLimit; ix++){
+				
+				points[a]   = 	new Point(newOffset[0] + (ix*boxSize[0]) ,newOffset[1] + (iy*boxSize[1]), newOffset[2] + (k*boxSize[2]));
+				points[a+1] = 	new Point(newOffset[0] + (ix*boxSize[0]) ,newOffset[1] + (iy*boxSize[1]), newOffset[2] + ((k+1)*boxSize[2]));
+			
+				values.put(points[a]	, slicedImage.getDouble(ix,iy,0));
+				values.put(points[a+1]	, slicedImage.getDouble(ix,iy,1));
 				
 				a+=2;
 			}
