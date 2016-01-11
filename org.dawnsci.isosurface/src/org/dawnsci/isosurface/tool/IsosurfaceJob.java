@@ -202,7 +202,7 @@ public class IsosurfaceJob extends Job {
 //						trace.setData(null, null, null, null);
 //					}
 //				}
-				
+			
 			} 
 			catch (UnsupportedOperationException e)
 			{
@@ -223,9 +223,9 @@ public class IsosurfaceJob extends Job {
 				showErrorMessage("Out of memory Error", "There is not enough memory to render the surface. Please increase the box size.");
 				return Status.CANCEL_STATUS;
 			}
-					
+			
 		}
-		finally 
+		finally
 		{
             monitor.done();
 			system.setDefaultCursor(IPlottingSystem.NORMAL_CURSOR);
@@ -247,9 +247,9 @@ public class IsosurfaceJob extends Job {
 		}
 		
 		axis.add(new FloatDataset(new float[]{
-										slice.getShape()[2],
+										slice.getShape()[0],
 										slice.getShape()[1],
-										slice.getShape()[0]}));
+										slice.getShape()[2]}));
 		axis.add(new FloatDataset(axisArray , null));
 		axis.add(new FloatDataset(axisArray , null));
 		axis.add(new FloatDataset(axisArray , null));
