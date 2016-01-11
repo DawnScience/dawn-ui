@@ -417,11 +417,11 @@ public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 				
 				mapTriangleSet(currentCell.getTrianglesList());
 				
-			} 
-			
+			}
 			i += 2;
 			x += 1;
-			if(x >= 2*xLimit-2){
+			if(x >= xLimit-1){
+				i += 2;
 				x = 0;
 			}
 			

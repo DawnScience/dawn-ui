@@ -10,7 +10,6 @@ package org.dawnsci.isosurface.alg;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -188,19 +187,19 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 							sliceStart,
 							sliceStop,
 							sliceStep,
-							new int[]{(start[0]+ 10)*2, (start[1]+ 2)*2, (start[2]+ 10)*2},
+							start,
 							culledData.getSliceView(start, end, new int[]{1,1,1}),
 							isovalue,
 							sharedMap));
 
-					System.out.println(Arrays.toString(start) + " - " + Arrays.toString(end));
 					
 				}
 			}
 		}
 		
 		// fill the list
-		// give each callable the required data		
+		// give each callable the required data
+		
 //		for(int k = 0; k < zLimit - 2 * boxSize[2]; k += boxSize[2])
 //		{
 //			sliceStart[0] = k;
