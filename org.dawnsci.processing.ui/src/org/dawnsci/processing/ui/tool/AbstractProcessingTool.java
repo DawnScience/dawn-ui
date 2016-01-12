@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
 import org.dawnsci.common.widgets.table.SeriesTable;
+import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.model.OperationModelViewer;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
 import org.dawnsci.processing.ui.processing.OperationTableUtils;
@@ -18,6 +19,7 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
+import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
@@ -29,6 +31,7 @@ import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -80,6 +83,24 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		
 		
 		sashForm = new SashForm(parent, SWT.VERTICAL);
+		
+		
+		final Action showOptions = new Action("Maximise Plot", Action.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				if (isChecked()) {
+					sashForm.setWeights(new int[]{100,0});
+				} else {
+					sashForm.setWeights(new int[]{50,50});
+				}
+			}
+		};
+		
+		showOptions.setImageDescriptor(Activator.getImageDescriptor("icons/maximize.png"));
+		
+		getSite().getActionBars().getToolBarManager().add(showOptions);
+		getSite().getActionBars().getMenuManager().add(showOptions);
+		
 		Composite base = new Composite(sashForm, SWT.NONE);
 		base.setLayout(new GridLayout(1,true));
 
@@ -113,18 +134,19 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 			public void selectionChanged(SelectionChangedEvent event) {
 				modelEditor.selectionChanged(null, event.getSelection());
 				try {
-					selection = (IOperation)((ISeriesItemDescriptor)((IStructuredSelection)event.getSelection()).getFirstElement()).getSeriesObject();
+					IStructuredSelection ss = (IStructuredSelection)event.getSelection();
+					if (ss.isEmpty()) return;
+					selection = (IOperation)((ISeriesItemDescriptor)ss.getFirstElement()).getSeriesObject();
 					updateData();
-				} catch (InstantiationException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				} catch (Exception e) {
+					logger.error(e.getMessage());
 				}
 				
 			}
 		});
 		
 		sashForm.setWeights(new int[]{50,50});
-
+		
 		super.createControl(parent);
 		
 		
@@ -245,8 +267,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 			try {
 				vis.visit(ds);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+//				if (e instanceof OperationException) informer.setInErrorState((OperationException)e);
 			}
 			
 			return Status.OK_STATUS;
