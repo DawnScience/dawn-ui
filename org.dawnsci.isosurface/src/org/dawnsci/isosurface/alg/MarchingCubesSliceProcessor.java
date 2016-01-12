@@ -375,7 +375,6 @@ public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 		int x = 0; // index that keeps track of the points on a column of the face
 		
 		while(i < slicePoints.length - (2*xLimit) - 2)
-//		while(i < slicePoints.length - 2 * yLimit/boxsize[1] - 2)
 		{
 		
 			cellCoords[0] = slicePoints[i+3]; //(1,0,1)
@@ -453,10 +452,6 @@ public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 				
 				sharedMap.put(t.getC(), test);
 			}
-						
-//			sharedMap.putIfAbsent(t.getA(), sharedMapIndex.getAndIncrement());
-//			sharedMap.putIfAbsent(t.getB(), sharedMapIndex.getAndIncrement());
-//			sharedMap.putIfAbsent(t.getC(), sharedMapIndex.getAndIncrement());
 		}
 	}
 	

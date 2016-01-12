@@ -99,6 +99,9 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 		final int[] boxSize         = model.getBoxSize();
 		final double isovalue       = model.getIsovalue();
 		
+		Set<Triangle> triangles  = new HashSet<Triangle>(128);
+		final ConcurrentHashMap<Point, Integer> sharedMap = new ConcurrentHashMap<Point, Integer>(128);
+		
 		int[] xyzLimit = {
 				lazyData.getShape()[0],
 				lazyData.getShape()[1],
@@ -116,79 +119,63 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 			xyzLimit[2] = xyzLimit[2] - xyzLimit[2] % boxSize[2];
 		}
 		
-		Map<Point, Integer> vertices  = new LinkedHashMap<Point, Integer>(128);
-		
-		// declare the variables external to the loop
-		// should make things slightly faster
-		int[] sliceStart = new int[3];
-		int[] sliceStop = new int[3];
-		int[] sliceStep = new int[3];
-				
-		// scan through the Z coord of the data
-		// iterating steps determined by the XYZ boxsize
-
-		Set<Triangle> triangles  = new HashSet<Triangle>(128);
-		final ConcurrentHashMap<Point, Integer> sharedMap = new ConcurrentHashMap<Point, Integer>(128);
-		
 		/*
 		 * create the list of threads - For parallel running of the algorithm
 		 */
 		List<MarchingCubesSliceProcessor> MCAThreadList = new ArrayList<MarchingCubesSliceProcessor>();
 		
 		int[] start = {0,0,0};
+		int[] end = {0,0,0};
+		int[] segmentCount = {2, 2, 2}; // this is for debugging, make dynamic in the future
 		
-		ILazyDataset culledData = lazyData.getSliceView(start, xyzLimit, boxSize); // cull the data top remove all data between boxes
 		
 		int[] dataShape = {
-				culledData.getShape()[0],
-				culledData.getShape()[1],
-				culledData.getShape()[2]};
-		
-		int[] segmentCount = {2, 2, 3};
-				
-//		int[] segmentSize = {
-//				(int)(((float)dataShape[0] / segmentCount[0]) + 0.99f),
-//				(int)(((float)dataShape[1] / segmentCount[1]) + 0.99f),
-//				(int)(((float)dataShape[2] / segmentCount[2]) + 0.99f)};
+				lazyData.getShape()[0] ,
+				lazyData.getShape()[1] ,
+				lazyData.getShape()[2] };
 		
 		int[] segmentSize = {
-				(int)(((float)dataShape[0] / segmentCount[0])),      
-				(int)(((float)dataShape[1] / segmentCount[1])),      
-				(int)(((float)dataShape[2] / segmentCount[2]))};     
+				(int)( ((int)((float)dataShape[0] / 2))),
+				(int)( ((int)((float)dataShape[1] / 2))),
+				(int)( ((int)((float)dataShape[2] / 2)))};
 		
-		int[] end = {0,0,0};
+		segmentSize[0] -= segmentSize[0] % boxSize[0]; 
+		segmentSize[1] -= segmentSize[1] % boxSize[1]; 
+		segmentSize[2] -= segmentSize[2] % boxSize[2]; 
+		
+		segmentSize[0] += boxSize[0]; 
+		segmentSize[1] += boxSize[1]; 
+		segmentSize[2] += boxSize[2]; 
+		
 		
 		for (int x = 0; x < segmentCount[0]; x ++)
-		{
+		{                                                                                                   
 			for (int y = 0; y <  segmentCount[1]; y ++)
-			{
-				for (int z = 0; z <  segmentCount[2]; z ++)	
+			{                                                                             
+				for (int z = 0; z <  segmentCount[2]; z ++)	                              
 				{
-							
-					start = new int[]{
-							(int)(x * segmentSize[0]),
-							(int)(y * segmentSize[1]),
-							(int)(z * segmentSize[2])};
 					
+					start = new int[]{                                                    
+							(int)(((x * segmentSize[0]))),                                
+							(int)(((y * segmentSize[1]))),                                                  
+							(int)(((z * segmentSize[2])))};                                                 
+					                                                                                        
 					end = new int[]{ 
-							(int)(start[0] + segmentSize[0] + 1),
-							(int)(start[1] + segmentSize[1] + 1),
-							(int)(start[2] + segmentSize[2] + 1)};
+							(int)((start[0] + segmentSize[0]) + boxSize[0]),
+							(int)((start[1] + segmentSize[1]) + boxSize[1]),
+							(int)((start[2] + segmentSize[2]) + boxSize[2])};
 					
-					if (end[0] >= 	dataShape[0])
-						end[0] =  	dataShape[0] + 1;
-					if (end[1] >= 	dataShape[1])
-						end[1] = 	dataShape[1] + 1;
-					if (end[2] >= 	dataShape[2])
-						end[2] = 	dataShape[2] + 1;
-										
+					int[] offset = new int[]{
+							start[0] / boxSize[0],
+							start[1] / boxSize[1],
+							start[2] / boxSize[2]};
+					
+					ILazyDataset lazyDataSlice = lazyData.getSliceView(start, end, boxSize);
+					
 					MCAThreadList.addAll(runOnChunk(
 							boxSize,
-							sliceStart,
-							sliceStop,
-							sliceStep,
-							start,
-							culledData.getSliceView(start, end, new int[]{1,1,1}),
+							offset,
+							lazyDataSlice, // was culledsliced b4 - 
 							isovalue,
 							sharedMap));
 
@@ -196,38 +183,7 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 				}
 			}
 		}
-		
-		// fill the list
-		// give each callable the required data
-		
-//		for(int k = 0; k < zLimit - 2 * boxSize[2]; k += boxSize[2])
-//		{
-//			sliceStart[0] = k;
-//			sliceStart[1] = 0;
-//			sliceStart[2] = 0;
-//			
-//			sliceStop[0] = k + 2 * boxSize[2];
-//			sliceStop[1] = yLimit;
-//			sliceStop[2] = xLimit;
-//			
-//			sliceStep[0] = boxSize[2];
-//			sliceStep[1] = boxSize[1];
-//			sliceStep[2] = boxSize[0];
-//			
-//			IDataset slicedImage = lazyData.getSlice(sliceStart,sliceStop, sliceStep);	
-//			Object[] currentSlice = slicedData(slicedImage, k, boxSize, xLimit, yLimit);
-//			
-//			MCAThreadList.add(
-//					new MarchingCubesSliceProcessor(
-//							currentSlice,
-//							yLimit,
-//							isovalue,
-//							boxSize,
-//							mapIndex,
-//							sharedMap));
-//			
-//		}
-		
+				
 		// generate the results list
 		ExecutorService executor = Executors.newCachedThreadPool();		
 		
@@ -262,18 +218,16 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 				}
 			}
 		}
-		
-		// index the triangles
-		// vertices = mapTriangleList(triangles);
-			
+					
 		return new Object[]{triangles, sharedMap};
 	}
 	
+	
+	
+	
+	
 	private List<MarchingCubesSliceProcessor> runOnChunk(
 			int[] boxSize,
-			int[] sliceStart,
-			int[] sliceStop,
-			int[] sliceStep,
 			int[] offset,
 			ILazyDataset lazyData,
 			double isovalue,
@@ -281,18 +235,20 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 	{
 		List<MarchingCubesSliceProcessor> MCAThreadList = new ArrayList<MarchingCubesSliceProcessor>();
 		int[] xyzLimit = lazyData.getShape();
+		int[] sliceStart = new int[3];
+		int[] sliceStop = new int[3];
 		
 		for(int i = 0; i < xyzLimit[2] - 1; i ++)  
 		{
 			
-			sliceStart[0] = 0;                                                                      
-			sliceStart[1] = 0;                                                                      
-			sliceStart[2] = i;                                                                      
-			                                                                                        
-			sliceStop[0] = xyzLimit[0];                                                      
-			sliceStop[1] = xyzLimit[1];                                                                  
-			sliceStop[2] = i + 2;                                                          
+			sliceStart[0] = 0;
+			sliceStart[1] = 0;
+			sliceStart[2] = i;
 			
+			sliceStop[0] = xyzLimit[0];
+			sliceStop[1] = xyzLimit[1];
+			sliceStop[2] = i + 2;
+
 			IDataset slicedImage = lazyData.getSlice(sliceStart,sliceStop, new int[]{1,1,1});	            
 			Object[] currentSlice = slicedData(slicedImage, i, offset, boxSize, xyzLimit[0], xyzLimit[1]);            
 			                                                                                        
@@ -305,33 +261,8 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 							mapIndex,                                                               
 							sharedMap));
 			
-			
-		}   
-		System.out.println(MCAThreadList.size());
+		} 
 		return MCAThreadList;
-	}
-	
-	
-	private Map<Point, Integer> mapTriangleList(Set<Triangle> listToIndex)
-	{
-		
-		Map<Point, Integer> vertices  = new HashMap<Point, Integer>();
-		
-		for (Triangle tri : listToIndex)
-		{
-			
-			if(!vertices.containsKey(tri.getA())){
-				vertices.put(tri.getA(), vertices.size());
-			}
-			if(!vertices.containsKey(tri.getB())){
-				vertices.put(tri.getB(), vertices.size());
-			}
-			if(!vertices.containsKey(tri.getC())){
-				vertices.put(tri.getC(), vertices.size());
-			}
-			
-		}
-		return vertices;
 	}
 	
 
