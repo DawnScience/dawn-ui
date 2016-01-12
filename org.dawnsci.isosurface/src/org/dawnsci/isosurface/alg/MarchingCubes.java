@@ -61,6 +61,15 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 
 		float[] texCoords = {0,0,0,1,1,1}; //{ 0, 0, (float) 0.5, (float) 0.5, 1, 1 };
 
+		int[] faces = createFaces(triangles, v);
+
+		if (points==null || points.length<1) throw new OperationException(this, "No isosurface found!");
+
+		return new Surface(points, texCoords, faces);
+	}
+	
+	private int[] createFaces(Set<Triangle> triangles, Map<Point,Integer> v)
+	{
 		int[] faces = new int[6 * triangles.size()];
 
 		int k = 0;
@@ -75,10 +84,8 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 			faces[k + 5] = 2;
 			k += 6;
 		}
-
-		if (points==null || points.length<1) throw new OperationException(this, "No isosurface found!");
-
-		return new Surface(points, texCoords, faces);
+		
+		return faces;
 	}
 
 	@Override
@@ -126,7 +133,7 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 		
 		int[] start = {0,0,0};
 		int[] end = {0,0,0};
-		int[] segmentCount = {2, 2, 2}; // this is for debugging, make dynamic in the future
+		int[] segmentCount = {4, 2, 2}; // this is for debugging, make dynamic in the future
 		
 		
 		int[] dataShape = {
@@ -172,13 +179,13 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 					
 					ILazyDataset lazyDataSlice = lazyData.getSliceView(start, end, boxSize);
 					
-					MCAThreadList.addAll(runOnChunk(
-							boxSize,
-							offset,
-							lazyDataSlice, // was culledsliced b4 - 
-							isovalue,
-							sharedMap));
-
+					MCAThreadList.add(new MarchingCubesSliceProcessor(
+												lazyDataSlice, 
+												offset, 
+												isovalue, 
+												boxSize,
+												this.mapIndex, 
+												sharedMap));
 					
 				}
 			}
@@ -222,50 +229,6 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 		return new Object[]{triangles, sharedMap};
 	}
 	
-	
-	
-	
-	
-	private List<MarchingCubesSliceProcessor> runOnChunk(
-			int[] boxSize,
-			int[] offset,
-			ILazyDataset lazyData,
-			double isovalue,
-			Map<Point, Integer> sharedMap)
-	{
-		List<MarchingCubesSliceProcessor> MCAThreadList = new ArrayList<MarchingCubesSliceProcessor>();
-		int[] xyzLimit = lazyData.getShape();
-		int[] sliceStart = new int[3];
-		int[] sliceStop = new int[3];
-		
-		for(int i = 0; i < xyzLimit[2] - 1; i ++)  
-		{
-			
-			sliceStart[0] = 0;
-			sliceStart[1] = 0;
-			sliceStart[2] = i;
-			
-			sliceStop[0] = xyzLimit[0];
-			sliceStop[1] = xyzLimit[1];
-			sliceStop[2] = i + 2;
-
-			IDataset slicedImage = lazyData.getSlice(sliceStart,sliceStop, new int[]{1,1,1});	            
-			Object[] currentSlice = slicedData(slicedImage, i, offset, boxSize, xyzLimit[0], xyzLimit[1]);            
-			                                                                                        
-			MCAThreadList.add(                                                                      
-					new MarchingCubesSliceProcessor(                                                
-							currentSlice,                                                           
-							xyzLimit[0],                                                                 
-							isovalue,                                                               
-							boxSize,                                                                
-							mapIndex,                                                               
-							sharedMap));
-			
-		} 
-		return MCAThreadList;
-	}
-	
-
 	/**
 	 * 
 	 * 
@@ -300,31 +263,6 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 	 * new Object[2]{values, points}
 	 */
 
-	public Object[] slicedData(IDataset slicedImage, int k, int[]offset, int[] boxSize, int xLimit, int yLimit)
-	{
-		Point[] points = new Point[2 * xLimit * yLimit];
-		Map<Point, Number> values = new HashMap<Point, Number>();		
-		
-		int[] newOffset = new int[]{
-			offset[0]*boxSize[0],
-			offset[1]*boxSize[1],
-			offset[2]*boxSize[2]};		
-				
-		int a = 0; // index in the array of points
-
-		for(int iy=0; iy<yLimit; iy++){
-			for(int ix=0; ix<xLimit; ix++){
-				
-				points[a]   = 	new Point(newOffset[0] + (ix*boxSize[0]) ,newOffset[1] + (iy*boxSize[1]), newOffset[2] + (k*boxSize[2]));
-				points[a+1] = 	new Point(newOffset[0] + (ix*boxSize[0]) ,newOffset[1] + (iy*boxSize[1]), newOffset[2] + ((k+1)*boxSize[2]));
-			
-				values.put(points[a]	, slicedImage.getDouble(ix,iy,0));
-				values.put(points[a+1]	, slicedImage.getDouble(ix,iy,1));
-				
-				a+=2;
-			}
-		}
-		return new Object[]{values, points};
-	}
+	
 	
 }

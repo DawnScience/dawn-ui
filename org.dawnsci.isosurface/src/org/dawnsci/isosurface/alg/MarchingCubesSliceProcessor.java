@@ -1,52 +1,393 @@
 package org.dawnsci.isosurface.alg;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+
 public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
-{		
-	Object[] 			currentSlice;
-	int 				xLimit;
+{	
+	ILazyDataset 		dataSet;
 	double 				isovalue;
-	int[] 				boxsize;
+	int[] 				boxsize, offset;
 	AtomicInteger 		sharedMapIndex;
 	Map<Point, Integer> sharedMap;
+	Set<Triangle> 		triangleSet;
+	
 	
 	public MarchingCubesSliceProcessor(
-			Object[] currentSlice,
-			int yLimit,
+			ILazyDataset dataSetToReder,
+			int[] offset,
 			double isovalue,
 			int[] boxSize,
 			AtomicInteger sharedMapIndex,
 			Map<Point, Integer> sharedMap)
 	{
-		Thread.currentThread().setName("Isosurface processor thread");
-		this.currentSlice  = currentSlice;
-		this.xLimit         = yLimit;       
-		this.isovalue      = isovalue;    
-		this.boxsize      = boxSize;
+		this.dataSet		= dataSetToReder;
+		this.isovalue		= isovalue;    
+		this.boxsize		= boxSize;
 		this.sharedMapIndex = sharedMapIndex;
 		this.sharedMap = sharedMap;
-		
-	
+		this.offset = offset;
+			
 	}
 	
 	@Override
 	public Set<Triangle> call() throws Exception {
-		// TODO Auto-generated method stub
-		return generateTriangles();
+		
+		Thread.currentThread().setName("Isosurface processor thread");
+		
+		triangleSet = new HashSet<Triangle>();
+		
+		run(this.dataSet, this.offset, this.boxsize, this.isovalue);
+		
+		return triangleSet;
 	}
+	
+	private void run(ILazyDataset lazyData, int[] offset, int[] boxSize, double isovalue)
+	{
+		int[] xyzLimit = lazyData.getShape();
+		int[] sliceStart = new int[3];
+		int[] sliceStop = new int[3];
+		
+		for(int i = 0; i < xyzLimit[2] - 1; i ++)  
+		{
+			sliceStart[0] = 0;
+			sliceStart[1] = 0;
+			sliceStart[2] = i;
+			
+			sliceStop[0] = xyzLimit[0];
+			sliceStop[1] = xyzLimit[1];
+			sliceStop[2] = i + 2;
+
+			IDataset slicedImage = lazyData.getSlice(sliceStart,sliceStop, new int[]{1,1,1});	            
+			Object[] currentSlice = slicedData(slicedImage, i, offset, boxSize, xyzLimit[0], xyzLimit[1]);            
+			     
+			triangleSet.addAll(generateAndMapTriangles(
+										xyzLimit[0],
+										currentSlice,
+										isovalue));			
+		} 
+	}
+	
+	
+	
 	
 	// ***********************************************
 	// ***********************************************
 	// *************** PROCESSING CODE ***************
 	// ***********************************************
 	// ***********************************************
+	
+	
+	@SuppressWarnings("unchecked")
+	private Set<Triangle> generateAndMapTriangles(
+			int xLimit,
+			Object[] currentSlice,
+			double isoValue)
+	{		
+		Set<Triangle> returnTriangles = new HashSet<Triangle>();
+		
+		Point[] cellCoords = new Point[8];
+		double[] cellValues = new double[8];
+				
+		// a map and an array containing only the data from the slices
+		Map<Point, Number> sliceValues = (Map<Point, Number>) currentSlice[0]; // values
+		Point[] slicePoints = (Point[]) currentSlice[1]; // points
+
+		int i = 0; // index that goes through the front "face" of the slice 
+		int x = 0; // index that keeps track of the points on a column of the face
+		
+		while(i < slicePoints.length - (2*xLimit) - 2)
+		{
+		
+			cellCoords[0] = slicePoints[i+3]; //(1,0,1)
+			cellValues[0] = (double) sliceValues.get(cellCoords[0]).doubleValue();
+			
+			cellCoords[1] = slicePoints[i+3+2*xLimit]; // (1,1,1)
+			cellValues[1] = (double) sliceValues.get(cellCoords[1]).doubleValue();
+			
+			cellCoords[2] = slicePoints[i+2+2*xLimit]; //(1,1,0)
+			cellValues[2] = (double) sliceValues.get(cellCoords[2]).doubleValue();
+			
+			cellCoords[3] = slicePoints[i+2]; // (1,0,0)
+			cellValues[3] = (double) sliceValues.get(cellCoords[3]).doubleValue();
+			
+			cellCoords[4] = slicePoints[i+1]; //(0,0,1)
+			cellValues[4] = (double) sliceValues.get(cellCoords[4]).doubleValue();
+			
+			cellCoords[5] = slicePoints[i+1+2*xLimit]; // (0,1,1)
+			cellValues[5] = (double) sliceValues.get(cellCoords[5]).doubleValue();
+			
+			cellCoords[6] = slicePoints[i+2*xLimit]; //(0,1,0)
+			cellValues[6] = (double) sliceValues.get(cellCoords[6]).doubleValue();
+			
+			cellCoords[7] = slicePoints[i]; //(0,0,0)
+			cellValues[7] = (double) sliceValues.get(cellCoords[7]).doubleValue();
+			
+			final GridCell currentCell = new GridCell(cellCoords, cellValues);
+			int cubeIndex = getCubeIndex(currentCell, isovalue);
+			
+			if (cubeIndex != 0 && cubeIndex != 255)
+			{
+				surfaceGridCellIntesection(currentCell, cubeIndex, isovalue);
+				
+				Set<Triangle> newTriList = createTriangle(currentCell, cubeIndex);
+				
+				currentCell.setTrianglesList(newTriList);
+				
+				returnTriangles.addAll(currentCell.getTrianglesList());
+				
+				mapTriangleSet(currentCell.getTrianglesList());
+				
+			}
+			i += 2;
+			x += 1;
+			if(x >= xLimit-1){
+				i += 2;
+				x = 0;
+			}
+			
+		}
+		return returnTriangles;		
+	}
+	
+	private void mapTriangleSet(Collection<Triangle> triCollection)
+	{
+		for (Triangle t : triCollection)
+		{
+			if (!sharedMap.containsKey(t.getA()))
+			{
+				int test = sharedMapIndex.getAndIncrement();
+				
+				sharedMap.put(t.getA(), test);
+			}
+			
+			if (!sharedMap.containsKey(t.getB()))
+			{
+				int test = sharedMapIndex.getAndIncrement();
+				
+				sharedMap.put(t.getB(), test);
+			}
+			
+			if (!sharedMap.containsKey(t.getC()))
+			{
+				int test = sharedMapIndex.getAndIncrement();
+				
+				sharedMap.put(t.getC(), test);
+			}
+		}
+	}
+	
+	private Object[] slicedData(IDataset slicedImage, int k, int[]offset, int[] boxSize, int xLimit, int yLimit)
+	{
+		Point[] points = new Point[2 * xLimit * yLimit];
+		Map<Point, Number> values = new HashMap<Point, Number>();		
+		
+		int[] newOffset = new int[]{
+			offset[0]*boxSize[0],
+			offset[1]*boxSize[1],
+			offset[2]*boxSize[2]};		
+				
+		int a = 0; // index in the array of points
+
+		for(int iy=0; iy<yLimit; iy++){
+			for(int ix=0; ix<xLimit; ix++){
+				
+				points[a]   = 	new Point(newOffset[0] + (ix*boxSize[0]) ,newOffset[1] + (iy*boxSize[1]), newOffset[2] + (k*boxSize[2]));
+				points[a+1] = 	new Point(newOffset[0] + (ix*boxSize[0]) ,newOffset[1] + (iy*boxSize[1]), newOffset[2] + ((k+1)*boxSize[2]));
+				
+				values.put(points[a]	, slicedImage.getDouble(ix,iy,0));
+				values.put(points[a+1]	, slicedImage.getDouble(ix,iy,1));
+				
+				a+=2;
+			}
+		}
+		return new Object[]{values, points};
+	}
+	
+	private int getCubeIndex(GridCell cell, double isovalue){
+		int cubeIndex = 0;
+		
+		if (cell.getCellValues()[0] < isovalue)
+			cubeIndex |= 1;
+		if (cell.getCellValues()[1] < isovalue)
+			cubeIndex |= 2;
+		if (cell.getCellValues()[2] < isovalue)
+			cubeIndex |= 4;
+		if (cell.getCellValues()[3] < isovalue)
+			cubeIndex |= 8;
+		if (cell.getCellValues()[4] < isovalue)
+			cubeIndex |= 16;
+		if (cell.getCellValues()[5] < isovalue)
+			cubeIndex |= 32;
+		if (cell.getCellValues()[6] < isovalue)
+			cubeIndex |= 64;
+		if (cell.getCellValues()[7] < isovalue)
+			cubeIndex |= 128;
+
+		return cubeIndex;
+	}
+	
+	/**
+	 * The following method finds for one particular grid cell which are the
+	 * vertices where the isosurface intersects the cell
+	 * 
+	 * @param cell
+	 * @param cubeIndex
+	 * @param isovalue
+	 */
+	private void surfaceGridCellIntesection(GridCell cell, int cubeIndex,
+			double isovalue) {
+		if ((edgeTable[cubeIndex] & 1) != 0) {
+			cell.getVertexList()[0] = vertexInterpolation(isovalue,
+					cell.getCellCoords()[0], cell.getCellCoords()[1],
+					cell.getCellValues()[0], cell.getCellValues()[1]);
+		}
+
+		if ((edgeTable[cubeIndex] & 2) != 0) {
+			cell.getVertexList()[1] = vertexInterpolation(isovalue,
+					cell.getCellCoords()[1], cell.getCellCoords()[2],
+					cell.getCellValues()[1], cell.getCellValues()[2]);
+		}
+
+		if ((edgeTable[cubeIndex] & 4) != 0) {
+			cell.getVertexList()[2] = vertexInterpolation(isovalue,
+					cell.getCellCoords()[2], cell.getCellCoords()[3],
+					cell.getCellValues()[2], cell.getCellValues()[3]);
+		}
+
+		if ((edgeTable[cubeIndex] & 8) != 0) {
+			cell.getVertexList()[3] = vertexInterpolation(isovalue,
+					cell.getCellCoords()[3], cell.getCellCoords()[0],
+					cell.getCellValues()[3], cell.getCellValues()[0]);
+		}
+
+		if ((edgeTable[cubeIndex] & 16) != 0) {
+			cell.getVertexList()[4] = vertexInterpolation(isovalue,
+					cell.getCellCoords()[4], cell.getCellCoords()[5],
+					cell.getCellValues()[4], cell.getCellValues()[5]);
+		}
+
+		if ((edgeTable[cubeIndex] & 32) != 0) {
+			cell.getVertexList()[5] = vertexInterpolation(isovalue,
+					cell.getCellCoords()[5], cell.getCellCoords()[6],
+					cell.getCellValues()[5], cell.getCellValues()[6]);
+		}
+
+		if ((edgeTable[cubeIndex] & 64) != 0) {
+			cell.getVertexList()[6] = vertexInterpolation(isovalue,
+					cell.getCellCoords()[6], cell.getCellCoords()[7],
+					cell.getCellValues()[6], cell.getCellValues()[7]);
+		}
+
+		if ((edgeTable[cubeIndex] & 128) != 0) {
+			cell.getVertexList()[7] = vertexInterpolation(isovalue,
+					cell.getCellCoords()[7], cell.getCellCoords()[4],
+					cell.getCellValues()[7], cell.getCellValues()[4]);
+		}
+
+		if ((edgeTable[cubeIndex] & 256) != 0) {
+			cell.getVertexList()[8] = vertexInterpolation(isovalue,
+					cell.getCellCoords()[0], cell.getCellCoords()[4],
+					cell.getCellValues()[0], cell.getCellValues()[4]);
+		}
+
+		if ((edgeTable[cubeIndex] & 512) != 0) {
+			cell.getVertexList()[9] = vertexInterpolation(isovalue,
+					cell.getCellCoords()[1], cell.getCellCoords()[5],
+					cell.getCellValues()[1], cell.getCellValues()[5]);
+		}
+
+		if ((edgeTable[cubeIndex] & 1024) != 0) {
+			cell.getVertexList()[10] = vertexInterpolation(isovalue,
+					cell.getCellCoords()[2], cell.getCellCoords()[6],
+					cell.getCellValues()[2], cell.getCellValues()[6]);
+		}
+		
+		if ((edgeTable[cubeIndex] & 2048) != 0) {
+			cell.getVertexList()[11] = vertexInterpolation(isovalue,
+					cell.getCellCoords()[3], cell.getCellCoords()[7],
+					cell.getCellValues()[3], cell.getCellValues()[7]);
+		}
+	}
+	
+	/**
+	 * This method creates and returns a Collection of Triangle objects that the
+	 * marching cubes algorithm generates in one GridCell
+	 * 
+	 * @param cell
+	 * @param cubeIndex
+	 * @return
+	 */
+	private Set<Triangle> createTriangle(GridCell cell, int cubeIndex) 
+	{
+		Set<Triangle> triangleList = new HashSet<Triangle>();
+
+		for (int i = 0; triTable[cubeIndex][i] != -1; i += 3) {
+			Point a = cell.getVertexList()[triTable[cubeIndex][i]];
+			
+			Point b = cell.getVertexList()[triTable[cubeIndex][i + 1]];
+			
+			Point c = cell.getVertexList()[triTable[cubeIndex][i + 2]];
+			
+			Triangle currentTriangle = new Triangle(a, b, c);
+			triangleList.add(currentTriangle);
+		}
+		return triangleList;
+	}
+	
+	/**
+	 * Method to linearly interpolate the position where the isosurface cuts an
+	 * edge between two vertices each with their own value.
+	 * 
+	 * @param isovalue
+	 * @param p1
+	 * @param p2
+	 * @param v1
+	 * @param v2
+	 * @return the point of intersection
+	 */
+	private Point vertexInterpolation(double isovalue, Point p1, Point p2,
+			double v1, double v2) {
+		double mu;
+	
+		if (Math.abs(isovalue - v1) < 0.00001) {
+			return p1;
+		} else if (Math.abs(isovalue - v2) < 0.00001) {
+			return p2;
+		}
+
+		else if (Math.abs(v2 - v1) < 0.00001) {
+			return p1;
+		}
+
+		else {
+			Point p = new Point(); // the point that is going to be interpolated; 
+			mu = (isovalue - v1) / (v2 - v1);
+			double x = p1.getxCoord() + mu * (p2.getxCoord() - p1.getxCoord());
+			double y = p1.getyCoord() + mu * (p2.getyCoord() - p1.getyCoord());
+			double z = p1.getzCoord() + mu * (p2.getzCoord() - p1.getzCoord());
+			
+			p.setxCoord((long) (x * 1000 + 0.5) / 1000.0);
+			p.setyCoord((long) (y * 1000 + 0.5) / 1000.0);
+			p.setzCoord((long) (z * 1000 + 0.5) / 1000.0);
+			return p;
+		}
+	}
+	
+	// ***********************************************
+	// ***********************************************
+	// **************** VARIOUS TABLES ***************
+	// ***********************************************
+	// ***********************************************
+	
 	
 	/**
 	 * The edge table maps the vertices under the isosurface to the intersecting
@@ -359,269 +700,5 @@ public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 			{ 0, 3, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
 			{ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 } };
 
-	@SuppressWarnings("unchecked")
-	private Set<Triangle> generateTriangles()
-	{		
-		Set<Triangle> returnTriangles = new HashSet<Triangle>();
-		
-		Point[] cellCoords = new Point[8];
-		double[] cellValues = new double[8];
-				
-		// a map and an array containing only the data from the slices
-		Map<Point, Number> sliceValues = (Map<Point, Number>) currentSlice[0]; // values
-		Point[] slicePoints = (Point[]) currentSlice[1]; // points
-
-		int i = 0; // index that goes through the front "face" of the slice 
-		int x = 0; // index that keeps track of the points on a column of the face
-		
-		while(i < slicePoints.length - (2*xLimit) - 2)
-		{
-		
-			cellCoords[0] = slicePoints[i+3]; //(1,0,1)
-			cellValues[0] = (double) sliceValues.get(cellCoords[0]).doubleValue();
-			
-			cellCoords[1] = slicePoints[i+3+2*xLimit]; // (1,1,1)
-			cellValues[1] = (double) sliceValues.get(cellCoords[1]).doubleValue();
-			
-			cellCoords[2] = slicePoints[i+2+2*xLimit]; //(1,1,0)
-			cellValues[2] = (double) sliceValues.get(cellCoords[2]).doubleValue();
-			
-			cellCoords[3] = slicePoints[i+2]; // (1,0,0)
-			cellValues[3] = (double) sliceValues.get(cellCoords[3]).doubleValue();
-			
-			cellCoords[4] = slicePoints[i+1]; //(0,0,1)
-			cellValues[4] = (double) sliceValues.get(cellCoords[4]).doubleValue();
-			
-			cellCoords[5] = slicePoints[i+1+2*xLimit]; // (0,1,1)
-			cellValues[5] = (double) sliceValues.get(cellCoords[5]).doubleValue();
-			
-			cellCoords[6] = slicePoints[i+2*xLimit]; //(0,1,0)
-			cellValues[6] = (double) sliceValues.get(cellCoords[6]).doubleValue();
-			
-			cellCoords[7] = slicePoints[i]; //(0,0,0)
-			cellValues[7] = (double) sliceValues.get(cellCoords[7]).doubleValue();
-			
-			final GridCell currentCell = new GridCell(cellCoords, cellValues);
-			int cubeIndex = getCubeIndex(currentCell, isovalue);
-			
-			if (cubeIndex != 0 && cubeIndex != 255)
-			{
-				surfaceGridCellIntesection(currentCell, cubeIndex, isovalue);
-				
-				Set<Triangle> newTriList = createTriangle(currentCell, cubeIndex);
-				
-				currentCell.setTrianglesList(newTriList);
-				
-				returnTriangles.addAll(currentCell.getTrianglesList());
-				
-				mapTriangleSet(currentCell.getTrianglesList());
-				
-			}
-			i += 2;
-			x += 1;
-			if(x >= xLimit-1){
-				i += 2;
-				x = 0;
-			}
-			
-		}
-		return returnTriangles;		
-	}
 	
-	private void mapTriangleSet(Collection<Triangle> triCollection)
-	{
-		for (Triangle t : triCollection)
-		{
-			if (!sharedMap.containsKey(t.getA()))
-			{
-				int test = sharedMapIndex.getAndIncrement();
-				
-				sharedMap.put(t.getA(), test);
-			}
-			
-			if (!sharedMap.containsKey(t.getB()))
-			{
-				int test = sharedMapIndex.getAndIncrement();
-				
-				sharedMap.put(t.getB(), test);
-			}
-			
-			if (!sharedMap.containsKey(t.getC()))
-			{
-				int test = sharedMapIndex.getAndIncrement();
-				
-				sharedMap.put(t.getC(), test);
-			}
-		}
-	}
-	
-	private int getCubeIndex(GridCell cell, double isovalue){
-		int cubeIndex = 0;
-		
-		if (cell.getCellValues()[0] < isovalue)
-			cubeIndex |= 1;
-		if (cell.getCellValues()[1] < isovalue)
-			cubeIndex |= 2;
-		if (cell.getCellValues()[2] < isovalue)
-			cubeIndex |= 4;
-		if (cell.getCellValues()[3] < isovalue)
-			cubeIndex |= 8;
-		if (cell.getCellValues()[4] < isovalue)
-			cubeIndex |= 16;
-		if (cell.getCellValues()[5] < isovalue)
-			cubeIndex |= 32;
-		if (cell.getCellValues()[6] < isovalue)
-			cubeIndex |= 64;
-		if (cell.getCellValues()[7] < isovalue)
-			cubeIndex |= 128;
-
-		return cubeIndex;
-	}
-	
-	/**
-	 * The following method finds for one particular grid cell which are the
-	 * vertices where the isosurface intersects the cell
-	 * 
-	 * @param cell
-	 * @param cubeIndex
-	 * @param isovalue
-	 */
-	private void surfaceGridCellIntesection(GridCell cell, int cubeIndex,
-			double isovalue) {
-		if ((edgeTable[cubeIndex] & 1) != 0) {
-			cell.getVertexList()[0] = vertexInterpolation(isovalue,
-					cell.getCellCoords()[0], cell.getCellCoords()[1],
-					cell.getCellValues()[0], cell.getCellValues()[1]);
-		}
-
-		if ((edgeTable[cubeIndex] & 2) != 0) {
-			cell.getVertexList()[1] = vertexInterpolation(isovalue,
-					cell.getCellCoords()[1], cell.getCellCoords()[2],
-					cell.getCellValues()[1], cell.getCellValues()[2]);
-		}
-
-		if ((edgeTable[cubeIndex] & 4) != 0) {
-			cell.getVertexList()[2] = vertexInterpolation(isovalue,
-					cell.getCellCoords()[2], cell.getCellCoords()[3],
-					cell.getCellValues()[2], cell.getCellValues()[3]);
-		}
-
-		if ((edgeTable[cubeIndex] & 8) != 0) {
-			cell.getVertexList()[3] = vertexInterpolation(isovalue,
-					cell.getCellCoords()[3], cell.getCellCoords()[0],
-					cell.getCellValues()[3], cell.getCellValues()[0]);
-		}
-
-		if ((edgeTable[cubeIndex] & 16) != 0) {
-			cell.getVertexList()[4] = vertexInterpolation(isovalue,
-					cell.getCellCoords()[4], cell.getCellCoords()[5],
-					cell.getCellValues()[4], cell.getCellValues()[5]);
-		}
-
-		if ((edgeTable[cubeIndex] & 32) != 0) {
-			cell.getVertexList()[5] = vertexInterpolation(isovalue,
-					cell.getCellCoords()[5], cell.getCellCoords()[6],
-					cell.getCellValues()[5], cell.getCellValues()[6]);
-		}
-
-		if ((edgeTable[cubeIndex] & 64) != 0) {
-			cell.getVertexList()[6] = vertexInterpolation(isovalue,
-					cell.getCellCoords()[6], cell.getCellCoords()[7],
-					cell.getCellValues()[6], cell.getCellValues()[7]);
-		}
-
-		if ((edgeTable[cubeIndex] & 128) != 0) {
-			cell.getVertexList()[7] = vertexInterpolation(isovalue,
-					cell.getCellCoords()[7], cell.getCellCoords()[4],
-					cell.getCellValues()[7], cell.getCellValues()[4]);
-		}
-
-		if ((edgeTable[cubeIndex] & 256) != 0) {
-			cell.getVertexList()[8] = vertexInterpolation(isovalue,
-					cell.getCellCoords()[0], cell.getCellCoords()[4],
-					cell.getCellValues()[0], cell.getCellValues()[4]);
-		}
-
-		if ((edgeTable[cubeIndex] & 512) != 0) {
-			cell.getVertexList()[9] = vertexInterpolation(isovalue,
-					cell.getCellCoords()[1], cell.getCellCoords()[5],
-					cell.getCellValues()[1], cell.getCellValues()[5]);
-		}
-
-		if ((edgeTable[cubeIndex] & 1024) != 0) {
-			cell.getVertexList()[10] = vertexInterpolation(isovalue,
-					cell.getCellCoords()[2], cell.getCellCoords()[6],
-					cell.getCellValues()[2], cell.getCellValues()[6]);
-		}
-		
-		if ((edgeTable[cubeIndex] & 2048) != 0) {
-			cell.getVertexList()[11] = vertexInterpolation(isovalue,
-					cell.getCellCoords()[3], cell.getCellCoords()[7],
-					cell.getCellValues()[3], cell.getCellValues()[7]);
-		}
-	}
-	
-	/**
-	 * This method creates and returns a Collection of Triangle objects that the
-	 * marching cubes algorithm generates in one GridCell
-	 * 
-	 * @param cell
-	 * @param cubeIndex
-	 * @return
-	 */
-	private Set<Triangle> createTriangle(GridCell cell, int cubeIndex) 
-	{
-		Set<Triangle> triangleList = new HashSet<Triangle>();
-
-		for (int i = 0; triTable[cubeIndex][i] != -1; i += 3) {
-			Point a = cell.getVertexList()[triTable[cubeIndex][i]];
-			
-			Point b = cell.getVertexList()[triTable[cubeIndex][i + 1]];
-			
-			Point c = cell.getVertexList()[triTable[cubeIndex][i + 2]];
-			
-			Triangle currentTriangle = new Triangle(a, b, c);
-			triangleList.add(currentTriangle);
-		}
-		return triangleList;
-	}
-	
-	/**
-	 * Method to linearly interpolate the position where the isosurface cuts an
-	 * edge between two vertices each with their own value.
-	 * 
-	 * @param isovalue
-	 * @param p1
-	 * @param p2
-	 * @param v1
-	 * @param v2
-	 * @return the point of intersection
-	 */
-	private Point vertexInterpolation(double isovalue, Point p1, Point p2,
-			double v1, double v2) {
-		double mu;
-	
-		if (Math.abs(isovalue - v1) < 0.00001) {
-			return p1;
-		} else if (Math.abs(isovalue - v2) < 0.00001) {
-			return p2;
-		}
-
-		else if (Math.abs(v2 - v1) < 0.00001) {
-			return p1;
-		}
-
-		else {
-			Point p = new Point(); // the point that is going to be interpolated; 
-			mu = (isovalue - v1) / (v2 - v1);
-			double x = p1.getxCoord() + mu * (p2.getxCoord() - p1.getxCoord());
-			double y = p1.getyCoord() + mu * (p2.getyCoord() - p1.getyCoord());
-			double z = p1.getzCoord() + mu * (p2.getzCoord() - p1.getzCoord());
-			
-			p.setxCoord((long) (x * 1000 + 0.5) / 1000.0);
-			p.setyCoord((long) (y * 1000 + 0.5) / 1000.0);
-			p.setzCoord((long) (z * 1000 + 0.5) / 1000.0);
-			return p;
-		}
-	}
 }
