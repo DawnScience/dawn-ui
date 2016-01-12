@@ -16,7 +16,6 @@ import java.util.ArrayList;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.pde.core.plugin.IPluginExtensionPoint;
@@ -166,6 +165,8 @@ public class DAWNExtensionProjectWizardPage extends WizardNewProjectCreationPage
 				setPageComplete(valid);
 			}
 		});
+		
+		versionText.setText("1.0.0.qualifier");
 
         Label nameLabel = new Label(g,SWT.NONE);
         nameLabel.setText("Name:");
