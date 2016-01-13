@@ -77,7 +77,7 @@ public class ToolPageActionTemplateTest extends AbstractTemplateTestBase {
 				"      <tool_page_action\n" + 
 				"            action_type=\"TOOLBAR\"\n" + 
 				"            command_id=\"org.eclipse.ui.edit.text.deletePrevious\"\n" + 
-				"            icon=\"icons/default.gif\"\n" + 
+				"            icon=\"icons/icon.png\"\n" + 
 				"            id=\"org.dawnsci.dde.test.toolPageAction\"\n" + 
 				"            label=\"Action Label\"\n" + 
 				"            tool_id=\"org.dawb.workbench.plotting.tools.measure.2d\">\n" + 
