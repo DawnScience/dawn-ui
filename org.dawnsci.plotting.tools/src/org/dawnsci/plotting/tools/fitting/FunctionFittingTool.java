@@ -72,7 +72,6 @@ import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants.FIT_ALGORITHMS;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
-import uk.ac.diamond.scisoft.analysis.optimize.ApacheLevenbergMarquardt;
 import uk.ac.diamond.scisoft.analysis.optimize.ApacheOptimizer;
 import uk.ac.diamond.scisoft.analysis.optimize.ApacheOptimizer.Optimizer;
 import uk.ac.diamond.scisoft.analysis.optimize.GeneticAlg;
@@ -542,7 +541,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 					resultFunction = Fitter
 							.fit(x, y, opt, functionCopies);
 				case APACHELEVENBERGMAQUARDT:
-					IOptimizer op = new ApacheLevenbergMarquardt();
+					IOptimizer op = new ApacheOptimizer(Optimizer.LEVENBERG_MARQUARDT);
 					resultFunction = Fitter
 							.fit(x, y, op, functionCopies); 
 				
