@@ -22,6 +22,9 @@ import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
+import com.sun.javafx.tk.Toolkit;
+import com.sun.prism.GraphicsPipeline;
+
 /**
  * TODO The implementation of this plotter viewer is not complete.
  * 
@@ -70,34 +73,28 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 	 */
 	public void createControl(final Composite parent)
 	{
+		Platform.setImplicitExit(false);
+		
 		// declare the canvas in memory
 		this.canvas = new FXCanvas(parent, SWT.NONE);
-		
+				
 		// create the root node
 		this.root = new Group();
 		// create the group for the isosurfaces
 		this.isoSurfaceGroup = new Group();
-		
+				
 		// create the scene -> most of the changes will be done within here
-		this.scene = new SurfaceDisplayer(root, isoSurfaceGroup);
+		scene = new SurfaceDisplayer(root, isoSurfaceGroup);
 		
 		// set the scene to the canvas
 		this.canvas.setScene(scene);
-		
 		
 		this.plotActions = new FXPlotActions(this, system);
 		this.plotActions.createActions();
 		this.system.getActionBars().getToolBarManager().update(true);
 		this.system.getActionBars().updateActionBars();
 		
-	}
-	
-	// does this have a purpose??
-	//	public void updatePlottingRole(PlotType type)
-	//	{
-	//	
-	//	}
-	
+	}	
 	
 	// change the cursor -> does isFxApplicationThread make it thread safe??
 	// potentially redundant but makes the code easier to read which is nice!!
@@ -223,7 +220,6 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 	{
 		return canvas;
 	}
-	
 	
 	
 }
