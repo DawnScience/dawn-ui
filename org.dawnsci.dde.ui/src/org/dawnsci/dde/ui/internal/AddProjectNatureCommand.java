@@ -46,7 +46,7 @@ public class AddProjectNatureCommand extends AbstractHandler implements IHandler
 		if (currentSelection instanceof StructuredSelection) {
 			IResource resource = getResource(currentSelection);
 			if (resource != null) {
-				IProject project = resource.getProject();
+				final IProject project = resource.getProject();
 				final WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
 					protected void execute(IProgressMonitor monitor) throws CoreException {
 						final IProjectDescription description = project.getDescription();

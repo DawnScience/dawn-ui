@@ -100,7 +100,7 @@ public class ToolPageTemplate extends DAWNTemplateSection {
 		setElement.setName("plotting_tool_page");
 		setElement.setAttribute("class", getStringOption(KEY_PACKAGE_NAME) + "." + getStringOption(KEY_CLASS_NAME));
 		setElement.setAttribute("id", getStringOption(KEY_EXTENSION_ID));
-		setElement.setAttribute("icon", "icons/default.gif");
+		setElement.setAttribute("icon", "icons/icon.png");
 		setElement.setAttribute("tooltip", getStringOption(KEY_TOOLTIP));
 		setElement.setAttribute("label", getStringOption(KEY_EXTENSION_NAME));
 		setElement.setAttribute("cheat_sheet_id", getStringOption(KEY_CHEAT_SHEET_ID));

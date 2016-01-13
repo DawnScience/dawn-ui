@@ -97,6 +97,7 @@ public class NewDAWNExtensionProjectWizard extends AbstractNewPluginTemplateWiza
 			"output.. = bin/\n" + 
 			"bin.includes = META-INF/,\\\n" + 
 			"               .,\\\n" + 
+			"               icons/,\\\n" + 
 			"               plugin.xml\n";
 	
 	/** Initial content of the MANIFEST.MF file */
