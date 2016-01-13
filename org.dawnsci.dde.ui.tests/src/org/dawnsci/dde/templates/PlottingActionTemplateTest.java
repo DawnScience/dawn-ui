@@ -77,7 +77,7 @@ public class PlottingActionTemplateTest extends AbstractTemplateTestBase {
 				"      <plotting_action\n" + 
 				"            action_type=\"TOOLBAR\"\n" + 
 				"            command_id=\"org.eclipse.ui.edit.text.deletePrevious\"\n" + 
-				"            icon=\"icons/default.gif\"\n" + 
+				"            icon=\"icons/icon.png\"\n" + 
 				"            id=\"org.dawnsci.dde.test.plottingAction\"\n" + 
 				"            label=\"Action Label\"\n" + 
 				"            plot_type=\"SURFACE\">\n" + 

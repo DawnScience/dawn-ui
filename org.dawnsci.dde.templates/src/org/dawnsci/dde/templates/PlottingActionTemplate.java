@@ -91,7 +91,7 @@ public class PlottingActionTemplate extends DAWNTemplateSection {
 		setElement.setAttribute("id", getStringOption(KEY_EXTENSION_ID));
 		setElement.setAttribute("plot_name", getStringOption(KEY_PLOT_NAME));
 		setElement.setAttribute("command_id", getStringOption(KEY_COMMAND_ID));
-		setElement.setAttribute("icon", "icons/default.gif");
+		setElement.setAttribute("icon", "icons/icon.png");
 		setElement.setAttribute("label", getStringOption(KEY_EXTENSION_NAME));
 		setElement.setAttribute("action_type", getStringOption(KEY_ACTION_TYPE));
 		setElement.setAttribute("plot_type", getStringOption(KEY_PLOT_TYPE));

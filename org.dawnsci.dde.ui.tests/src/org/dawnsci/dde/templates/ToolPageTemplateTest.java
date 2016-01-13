@@ -84,7 +84,7 @@ public class ToolPageTemplateTest extends AbstractTemplateTestBase {
 				"            category=\"org.dawnsci.plotting.tools.category.Science\"\n" + 
 				"            cheat_sheet_id=\"org.dawnsci.dde.test.toolPage\"\n" + 
 				"            class=\"org.dawnsci.dde.test.ToolPage\"\n" + 
-				"            icon=\"icons/default.gif\"\n" + 
+				"            icon=\"icons/icon.png\"\n" + 
 				"            id=\"org.dawnsci.dde.test.toolPage\"\n" + 
 				"            label=\"Test Tool Page\"\n" + 
 				"            tooltip=\"Test Tool Page tooltip\"\n" + 
