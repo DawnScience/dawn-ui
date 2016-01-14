@@ -47,7 +47,7 @@ public class CComboCellEditor extends AppliableCellEditor {
 	/**
 	 * Default ComboBoxCellEditor style
 	 */
-	private static final int defaultStyle = SWT.NONE;
+	protected static final int defaultStyle = SWT.NONE;
 
 	/**
 	 * Creates a new cell editor with no control and no st of choices.
@@ -126,6 +126,7 @@ public class CComboCellEditor extends AppliableCellEditor {
 
 		comboBox = new CCombo(parent, getStyle());
 		comboBox.setFont(parent.getFont());
+		comboBox.setEditable(false);
 
 		populateComboBoxItems();
 
@@ -241,7 +242,7 @@ public class CComboCellEditor extends AppliableCellEditor {
 	/**
 	 * Updates the list of choices for the combo box for the current control.
 	 */
-	private void populateComboBoxItems() {
+	protected void populateComboBoxItems() {
 		if (comboBox != null && items != null) {
 			comboBox.removeAll();
 			for (int i = 0; i < items.length; i++) {
