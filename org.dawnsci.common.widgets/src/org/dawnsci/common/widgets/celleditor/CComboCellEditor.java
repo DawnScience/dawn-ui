@@ -126,6 +126,7 @@ public class CComboCellEditor extends AppliableCellEditor {
 
 		comboBox = new CCombo(parent, getStyle());
 		comboBox.setFont(parent.getFont());
+		comboBox.setEditable(false);
 
 		populateComboBoxItems();
 
