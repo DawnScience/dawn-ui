@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
+import org.dawnsci.common.widgets.celleditor.CComboWithEntryCellEditor;
 import org.dawnsci.common.widgets.celleditor.FileDialogCellEditor;
 import org.dawnsci.common.widgets.celleditor.NumberCellEditor;
 import org.dawnsci.common.widgets.celleditor.TextCellEditorWithContentProposal;
@@ -97,6 +98,9 @@ public class ModelFieldEditors {
         	
         } else if (Enum.class.isAssignableFrom(clazz)) {
         	ed = getChoiceEditor((Class<? extends Enum>)clazz, parent);
+        	
+        } else if (CComboWithEntryCellEditorData.class.isAssignableFrom(clazz)) {
+        	ed = getChoiceWithEntryEditor((CComboWithEntryCellEditorData) value, parent);
         	
         } else if (FileDialogCellEditor.isEditorFor(clazz) || (anot!=null && anot.file()!=FileType.NONE)) {
         	FileDialogCellEditor fe = new FileDialogCellEditor(parent);
@@ -221,6 +225,22 @@ public class ModelFieldEditors {
 		return cellEd;
 	}
 
+	private static CellEditor getChoiceWithEntryEditor(final CComboWithEntryCellEditorData data, Composite parent) {
+		
+	    final String[] items  = data.items;
+		
+		CComboWithEntryCellEditor cellEd = new CComboWithEntryCellEditor(parent, items) {
+    	    protected void doSetValue(Object value) {
+                super.doSetValue(((CComboWithEntryCellEditorData)value).active_item);
+    	    }
+    		protected Object doGetValue() {
+    			return new CComboWithEntryCellEditorData(data, (String)super.doGetValue());
+    		}
+		};
+		
+		return cellEd;
+	}
+	
 	private static CellEditor getNumberEditor(ModelField field, final Class<? extends Object> clazz, Composite parent) {
     	
 		OperationModelField anot = field.getAnnotation();
