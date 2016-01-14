@@ -29,13 +29,14 @@ public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 			AtomicInteger sharedMapIndex,
 			Map<Point, Integer> sharedMap)
 	{
+		
 		this.dataSet		= dataSetToReder;
 		this.isovalue		= isovalue;    
 		this.boxsize		= boxSize;
 		this.sharedMapIndex = sharedMapIndex;
 		this.sharedMap = sharedMap;
 		this.offset = offset;
-			
+		
 	}
 	
 	@Override

@@ -54,7 +54,7 @@ public class SurfaceDisplayer extends Scene
 {
 	// finals
 	
-	private final boolean DEBUG_MODE = true; // Used to activate the debugging code -> not changed during run time
+	private boolean DEBUG_MODE = false; // Used to activate the debugging code -> not changed during run time
 	
 	private final int MOUSE_CAM_ROTATE = 0;
 	private final int MOUSE_SCALE = 1;
@@ -492,6 +492,7 @@ public class SurfaceDisplayer extends Scene
 		
 	}
 	
+	
 	/*
 	 * non initialisers
 	 */
@@ -531,24 +532,7 @@ public class SurfaceDisplayer extends Scene
 		
 		
 	}
-	
-	
-	// private VBox generateControls()
-	// {
-	//
-	// VBox controls = new VBox();
-	// controls.setAlignment(Pos.BOTTOM_RIGHT);
-	//
-	// positionLabel = new Label("");
-	// positionLabel.setAlignment(Pos.BOTTOM_RIGHT);
-	// positionLabel.setContentDisplay(ContentDisplay.RIGHT);
-	//
-	// controls.getChildren().add(positionLabel);
-	//
-	// return controls;
-	// }
-	
-	
+		
 	/*
 	 * public 
 	 */
@@ -650,6 +634,11 @@ public class SurfaceDisplayer extends Scene
 		axisGroup.SetTickSeperationXYZ(new Point3D(tickSeperator_REMOVE, tickSeperator_REMOVE, tickSeperator_REMOVE));
 		
 		
+	}
+	
+	public void setDebugState(boolean state)
+	{
+		DEBUG_MODE = state;
 	}
 	
 	

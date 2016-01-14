@@ -91,6 +91,7 @@ public class IsosurfaceJob extends Job {
 	@Override
 	protected IStatus run(IProgressMonitor monitor)
 	{
+		Thread.currentThread().setName("IsoSurface - " + name);
 		final IIsosurfaceTrace trace;
 		boolean createTrace = false; // this is going to need some reorganising
 		
@@ -106,19 +107,13 @@ public class IsosurfaceJob extends Job {
 			trace = (IIsosurfaceTrace) system.getTrace(traceName);
 		}
 		
-		
 		MarchingCubesModel model = this.generator.getModel();
 		
 		model.setBoxSize(boxSize);
 		model.setOpacity(opacity);
 		model.setIsovalue(value);
 		model.setColour(colour.red, colour.green, colour.blue);
-		
-		if (Thread.currentThread() != null) // !! look into removing
-		{
-			Thread.currentThread().setName("IsoSurface - " + name);
-		}
-		
+				
 		try 
 		{
 			system.setDefaultCursor(IPlottingSystem.WAIT_CURSOR);
@@ -228,7 +223,10 @@ public class IsosurfaceJob extends Job {
 		
 	public void destroy(String traceName)
 	{
-		system.getTrace(traceName).dispose();
+		if (system.getTrace(traceName) != null)
+		{ 
+			system.getTrace(traceName).dispose();
+		}
 	}
 	
 	public IOperation<MarchingCubesModel, Surface> getGenerator()

@@ -71,8 +71,8 @@ public class IsoComposite extends Composite
 			}
 		};
 		
-		this.items.setAddButtonImage(Activator.getImage("icons/add.png").createImage()); // currently does not work
-		this.items.setDeleteButtonImage(Activator.getImage("icons/delete.png").createImage()); // currently does not work
+		this.items.setAddButtonImage(IsoGUIUtil.getImageDescriptor("add.png").createImage());
+		this.items.setDeleteButtonImage(IsoGUIUtil.getImageDescriptor("delete.png").createImage());
 		
 		this.items.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
 		this.items.setMinItems(0);
@@ -85,7 +85,7 @@ public class IsoComposite extends Composite
 		this.items.setRequireSelectionPack(false);
 		
 		this.items.setAdditionalFields(new String[] {"value", "opacity"});
-		this.items.setColumnWidths(new int[] { 50, 50, 50, 50, 50, 50 });
+		this.items.setColumnWidths(new int[] {125, 125, 125});
 		this.items.setShowAdditionalFields(true);
 				
 		itemComp = new IsoItemComposite(this, SWT.NONE);
@@ -93,8 +93,8 @@ public class IsoComposite extends Composite
 		itemComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		
 		this.items.setEditorUI(itemComp);		
-	}
-	
+		}
+		
 	/**
 	 * Set the min and max iso value to be used
 	 * @param minMax - minMax[0] new minimum, minMax[1] new maximum
@@ -115,6 +115,12 @@ public class IsoComposite extends Composite
 	public VerticalListEditor getItems()
 	{
 		return this.items;
+	}
+	
+	// pretty much only used to create the inital surface bean
+	public void addNewSurface()
+	{
+		items.addBean();
 	}
 
 	

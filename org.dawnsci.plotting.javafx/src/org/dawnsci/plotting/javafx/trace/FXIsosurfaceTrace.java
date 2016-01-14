@@ -61,9 +61,9 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 	}
 	
 	public void dispose() {
+        // remove from scene
         scene.removeSurface(isosurface);
         super.dispose();
-        // remove from scene
 	}
 	
 	@Override

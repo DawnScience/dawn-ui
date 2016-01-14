@@ -84,7 +84,7 @@ public class IsoItemComposite extends Composite
 		z.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		
 		Button upButton = new Button(this, SWT.NONE);
-		upButton.setImage(Activator.getImage("icons/up.png").createImage());
+		upButton.setImage(IsoGUIUtil.getImageDescriptor("up.png").createImage());
 		upButton.addSelectionListener(new SelectionListener() {
 			
 			// add one to the cube size if possible
@@ -103,7 +103,7 @@ public class IsoItemComposite extends Composite
 		});
 		
 		Button downButton = new Button(this, SWT.NONE);
-		downButton.setImage(Activator.getImage("icons/down.png").createImage());
+		downButton.setImage(IsoGUIUtil.getImageDescriptor("down.png").createImage());
 		downButton.addSelectionListener(new SelectionListener() {
 			
 			// add one to the cube size if possible

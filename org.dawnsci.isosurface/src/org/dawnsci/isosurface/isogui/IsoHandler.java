@@ -24,6 +24,46 @@ public class IsoHandler
 		
 		this.job = newJob;
 		
+		// only create a relevant listener if the job is available for use -> this is mainly the case in unit tests
+		if (newJob != null)
+		{
+			createValueListener();
+		}
+		else
+		{
+			isoValueListener = new ValueAdapter("IsoValueListner") {
+				
+				@Override
+				public void valueChangePerformed(ValueEvent e) {
+					// do nothing as there is no job					
+				}
+			};
+		}
+		
+		controller = null;
+		try
+		{
+			controller = BeanService.getInstance()
+					.createController(ui, bean);
+			controller.addValueListener(isoValueListener);
+			controller.beanToUI();
+			controller.switchState(true);
+		}
+		catch (Exception e1)
+		{
+			
+			System.out.println("\nController not set - Default value is NULL");
+			e1.printStackTrace();
+		}
+		
+		// create the initial surface
+		isoComp.addNewSurface();
+	}
+
+
+
+	private void createValueListener() 
+	{
 		isoValueListener = new ValueAdapter("IsoValueListner")
 		{
 			IsoItem previous;
@@ -38,7 +78,7 @@ public class IsoHandler
 					
 					IsoItem current = null;
 					
-					if (isoComp.getItems().getListSize() > 0)
+					if (isoComp.getItems().getListSize() > 0 && isoComp.getItems().getSelectedIndex() < isoComp.getItems().getListSize())
 					{
 						current = (IsoItem)isoComp.getItems().getBean();
 					}
@@ -53,7 +93,9 @@ public class IsoHandler
 						if (current != null && !(current).equals(previous) && e.getFieldName() != null)
 						{
 							// run alg
-							if ( !e.getFieldName().contains("colour") && !e.getFieldName().contains("opacity"))
+							if ( !e.getFieldName().contains("colour") 
+									&& !e.getFieldName().contains("opacity")
+									&& !e.getFieldName().contains("name"))
 							{
 								job.compute(
 										new int[] {	current.getX(),
@@ -85,21 +127,5 @@ public class IsoHandler
 				}
 			}
 		};
-		
-		controller = null;
-		try
-		{
-			controller = BeanService.getInstance()
-					.createController(ui, bean);
-			controller.addValueListener(isoValueListener);
-			controller.beanToUI();
-			controller.switchState(true);
-		}
-		catch (Exception e1)
-		{
-			
-			System.out.println("\nController not set - Default value is NULL");
-			e1.printStackTrace();
-		}
 	}
 }
