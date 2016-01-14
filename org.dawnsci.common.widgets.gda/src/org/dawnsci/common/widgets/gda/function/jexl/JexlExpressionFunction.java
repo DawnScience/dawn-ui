@@ -189,6 +189,11 @@ public class JexlExpressionFunction extends AFunction {
 		}
 	}
 
+	@Override
+	protected void setNames() {
+		setNames(NAME, DESC);
+	}
+
 	/**
 	 * Returns the current error state. See {@link JexlExpressionFunctionError}
 	 * for details
