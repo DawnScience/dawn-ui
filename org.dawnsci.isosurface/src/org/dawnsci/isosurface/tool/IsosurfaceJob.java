@@ -75,8 +75,14 @@ public class IsosurfaceJob extends Job {
 	 * 
 	 */
 	
-	public void compute(int[] boxSize, Double value,  double opacity, RGB colour, String traceName, String beanName)//, IIsosurfaceTrace trace)
-	{
+	public void compute(
+			int[] boxSize, 
+			Double value,  
+			double opacity, 
+			RGB colour, 
+			String traceName,
+			String beanName)
+	{		
 		this.boxSize = boxSize;   
 		this.value = value;     
 		this.opacity = opacity;   
@@ -86,6 +92,25 @@ public class IsosurfaceJob extends Job {
 		
 		cancel();
 		schedule();
+	}
+	
+	// made to seperate computing the isosurface and simply updating the values like colour
+	public void update (
+			int[] boxSize, 
+			Double value,  
+			double opacity, 
+			RGB colour, 
+			String traceName, 
+			String beanName)
+	{		
+		if ((IIsosurfaceTrace) system.getTrace(traceName) != null && system.getTrace(traceName).getData() != null)
+		{
+			compute(null, null, opacity, colour, traceName, beanName);
+		}
+		else
+		{
+			compute(boxSize, value, opacity, colour, traceName, beanName);
+		}
 	}
 	
 	@Override
@@ -132,10 +157,11 @@ public class IsosurfaceJob extends Job {
 				IDataset textCoords = null;
 				IDataset faces      = null;
 				
-				if (value != null)
+				if (value != null || trace.getData() == null)
 				{
 					Surface surface = generator.execute(null, new ProgressMonitorWrapper(monitor));
-				
+					
+					
 					points     = new FloatDataset(surface.getPoints(), surface.getPoints().length);
 					textCoords = new FloatDataset(surface.getTexCoords(), surface.getTexCoords().length);
 					faces      = new IntegerDataset(surface.getFaces(), surface.getFaces().length);

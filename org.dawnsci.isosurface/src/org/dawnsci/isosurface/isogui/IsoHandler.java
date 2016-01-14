@@ -16,8 +16,6 @@ public class IsoHandler
 	
 	private ValueAdapter isoValueListener;
 	
-	
-	
 	public IsoHandler(Object ui, Object bean, IsosurfaceJob newJob)
 	{
 		this.isoComp = (IsoComposite)ui;
@@ -59,9 +57,7 @@ public class IsoHandler
 		// create the initial surface
 		isoComp.addNewSurface();
 	}
-
-
-
+	
 	private void createValueListener() 
 	{
 		isoValueListener = new ValueAdapter("IsoValueListner")
@@ -93,9 +89,10 @@ public class IsoHandler
 						if (current != null && !(current).equals(previous) && e.getFieldName() != null)
 						{
 							// run alg
-							if ( !e.getFieldName().contains("colour") 
-									&& !e.getFieldName().contains("opacity")
-									&& !e.getFieldName().contains("name"))
+							if ( 	e.getFieldName().contains("x") || 
+									e.getFieldName().contains("y") || 
+									e.getFieldName().contains("z") || 
+									e.getFieldName().contains("value"))
 							{
 								job.compute(
 										new int[] {	current.getX(),
@@ -109,9 +106,11 @@ public class IsoHandler
 							}
 							else
 							{
-								job.compute(
-										null,
-										null,
+								job.update(
+										new int[] {	current.getX(),
+													current.getY(),
+													current.getZ()},
+										current.getValue(),
 										current.getOpacity(),
 										current.getColour(),
 										current.getTraceKey(),
