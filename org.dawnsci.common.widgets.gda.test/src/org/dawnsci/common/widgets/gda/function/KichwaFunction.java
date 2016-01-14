@@ -17,6 +17,7 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CoordinatesIterator;
 
 public class KichwaFunction extends AFunction implements IFunction {
+	private static final long serialVersionUID = -7994832162791014175L;
 	private static final double[] params = new double[]{};
 
 	/**
@@ -39,14 +40,15 @@ public class KichwaFunction extends AFunction implements IFunction {
 	}
 
 	@Override
+	protected void setNames() {
+		setNames("Kichwa Test Function", "Blah");
+	}
+
+	@Override
 	public double val(double... values) {
 		return 0;
 	}
 	
-	@Override
-	public String getName() {
-		return "Kichwa Test Function";
-	}
 
 	@Override
 	public void fillWithValues(DoubleDataset data, CoordinatesIterator it) {
