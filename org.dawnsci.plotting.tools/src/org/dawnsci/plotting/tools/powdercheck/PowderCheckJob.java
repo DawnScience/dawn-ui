@@ -13,14 +13,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.math3.analysis.MultivariateFunction;
-import org.apache.commons.math3.optim.InitialGuess;
-import org.apache.commons.math3.optim.MaxEval;
-import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
-import org.apache.commons.math3.optim.nonlinear.scalar.MultivariateOptimizer;
-import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
-import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.NelderMeadSimplex;
-import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.SimplexOptimizer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -54,7 +46,8 @@ import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Gaussian;
-import uk.ac.diamond.scisoft.analysis.optimize.ApacheLevenbergMarquardt;
+import uk.ac.diamond.scisoft.analysis.optimize.ApacheOptimizer;
+import uk.ac.diamond.scisoft.analysis.optimize.ApacheOptimizer.Optimizer;
 import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
 import uk.ac.diamond.scisoft.analysis.roi.XAxis;
 
@@ -66,9 +59,6 @@ public class PowderCheckJob extends Job {
 	}
 	
 	private final static Logger logger = LoggerFactory.getLogger(PowderCheckJob.class);
-	private static final double REL_TOL = 1e-10;
-	private static final double ABS_TOL = 1e-10;
-	private static final int MAX_EVAL = 100000;
 	
 	IPlottingSystem<?> system;
 	Dataset dataset;
@@ -346,7 +336,7 @@ public class PowderCheckJob extends Job {
 			}
 		}
 
-		IOptimizer optimizer = new ApacheLevenbergMarquardt();
+		IOptimizer optimizer = new ApacheOptimizer(Optimizer.LEVENBERG_MARQUARDT);
 		try {
 			optimizer.optimize(new IDataset[]{x}, y, cfFinal);
 		} catch (Exception e) {
