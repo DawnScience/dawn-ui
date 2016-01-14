@@ -22,9 +22,6 @@ import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
-import com.sun.javafx.tk.Toolkit;
-import com.sun.prism.GraphicsPipeline;
-
 /**
  * TODO The implementation of this plotter viewer is not complete.
  * 

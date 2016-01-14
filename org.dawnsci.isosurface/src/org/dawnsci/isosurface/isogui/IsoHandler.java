@@ -35,38 +35,48 @@ public class IsoHandler
 				{
 					// update view
 					controller.uiToBean();
-															
-					IsoItem current = (IsoItem)isoComp.getItems().getBean();
-															
-					if (current.beanDeleted()) // this is a quick fix remove asap
-					{
-						job.destroy(current.getTraceKey());
-					}
 					
-					if (!(current).equals(previous) && e.getFieldName() != null)
+					IsoItem current = null;
+					
+					if (isoComp.getItems().getListSize() > 0)
 					{
-						// run alg
-						if ( !e.getFieldName().contains("colour") && !e.getFieldName().contains("opacity"))
+						current = (IsoItem)isoComp.getItems().getBean();
+					}
+						
+					if (current != null)
+					{
+						if (current.beanDeleted()) // this is a quick fix remove asap
 						{
-							job.compute(
-									new int[] {	current.getX(),
-												current.getY(),
-												current.getZ()},
-									current.getValue(),
-									current.getOpacity(),
-									current.getColour(),
-									current.getTraceKey());
+							job.destroy(current.getTraceKey());
 						}
-						else
+						
+						if (current != null && !(current).equals(previous) && e.getFieldName() != null)
 						{
-							job.compute(
-									null,
-									null,
-									current.getOpacity(),
-									current.getColour(),
-									current.getTraceKey());
+							// run alg
+							if ( !e.getFieldName().contains("colour") && !e.getFieldName().contains("opacity"))
+							{
+								job.compute(
+										new int[] {	current.getX(),
+													current.getY(),
+													current.getZ()},
+										current.getValue(),
+										current.getOpacity(),
+										current.getColour(),
+										current.getTraceKey(),
+										current.getName());
+							}
+							else
+							{
+								job.compute(
+										null,
+										null,
+										current.getOpacity(),
+										current.getColour(),
+										current.getTraceKey(),
+										current.getName());
+							}
+							previous = (IsoItem)current.clone();
 						}
-						previous = (IsoItem)current.clone();
 					}
 				}
 				catch (Exception exc) 

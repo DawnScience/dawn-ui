@@ -75,13 +75,14 @@ public class IsosurfaceJob extends Job {
 	 * 
 	 */
 	
-	public void compute(int[] boxSize, Double value,  double opacity, RGB colour, String traceName)//, IIsosurfaceTrace trace)
+	public void compute(int[] boxSize, Double value,  double opacity, RGB colour, String traceName, String beanName)//, IIsosurfaceTrace trace)
 	{
 		this.boxSize = boxSize;   
 		this.value = value;     
 		this.opacity = opacity;   
 		this.colour = colour;
 		this.traceName = traceName;
+		this.name = beanName;
 		
 		cancel();
 		schedule();
@@ -90,6 +91,22 @@ public class IsosurfaceJob extends Job {
 	@Override
 	protected IStatus run(IProgressMonitor monitor)
 	{
+		final IIsosurfaceTrace trace;
+		boolean createTrace = false; // this is going to need some reorganising
+		
+		// create the trace if required, if not get the trace
+		if ((IIsosurfaceTrace) system.getTrace(traceName) == null)
+		{
+			trace = system.createIsosurfaceTrace(this.traceName);
+			trace.setName(this.traceName);
+			createTrace = true;
+		}
+		else
+		{
+			trace = (IIsosurfaceTrace) system.getTrace(traceName);
+		}
+		
+		
 		MarchingCubesModel model = this.generator.getModel();
 		
 		model.setBoxSize(boxSize);
@@ -99,8 +116,7 @@ public class IsosurfaceJob extends Job {
 		
 		if (Thread.currentThread() != null) // !! look into removing
 		{
-			Thread tempThread = Thread.currentThread();
-			Thread.currentThread().setName(this.name);
+			Thread.currentThread().setName("IsoSurface - " + name);
 		}
 		
 		try 
@@ -130,79 +146,23 @@ public class IsosurfaceJob extends Job {
 					faces      = new IntegerDataset(surface.getFaces(), surface.getFaces().length);
 				}
 				
-				/**
-				 * Temp axes builder
-				 * needs to be properly implemented
-				 */
-				
-				final ArrayList<IDataset> axis = generateDuplicateAxes(10, 10);
-				
-				
-				/**
-				 * 
-				 */
+				final ArrayList<IDataset> axis = generateDuplicateAxes(10, 10); // this is for debugging the javafx axes				
 				
 				final int[] traceColour = new int[]{colour.red, colour.green, colour.blue};
 				final double traceOpacity = opacity;
 				
-				final IIsosurfaceTrace trace;
-				if ((IIsosurfaceTrace) system.getTrace(traceName) == null)
+				trace.setMaterial(traceColour[0], traceColour[1] , traceColour[2], traceOpacity);
+				trace.setData(points, textCoords, faces, axis );
+			
+				if (createTrace)
 				{
-					trace = system.createIsosurfaceTrace(this.traceName);
-					trace.setMaterial(traceColour[0], traceColour[1] , traceColour[2], traceOpacity);
-					trace.setData(points, textCoords, faces, axis );
 					Display.getDefault().syncExec(new Runnable() {
 						public void run() {
 							system.addTrace(trace);
 				    	}
 				    });
 				}
-				else
-				{
-					trace = (IIsosurfaceTrace) system.getTrace(traceName);
-					trace.setMaterial(traceColour[0], traceColour[1] , traceColour[2], traceOpacity);
-					trace.setData(points, textCoords, faces, axis );
-				}
-//				
-//				if (value != null)
-//				{
-//					trace.setData(points, textCoords, faces, axis );
-//				}
-//				else
-//				{
-//					trace.setData(null, null, null, null);
-//				}
 				
-				
-//				// if trace has not been created -> create trace
-//				if ((IIsosurfaceTrace) system.getTrace(traceName) == null)
-//				{
-//					final IIsosurfaceTrace trace = system.createIsosurfaceTrace(this.traceName);
-//
-//					trace.setMaterial(traceColour[0], traceColour[1] , traceColour[2], traceOpacity);
-//					trace.setData(points, textCoords, faces, axis);
-//					
-//					Display.getDefault().syncExec(new Runnable() {
-//						public void run() {
-//							system.addTrace(trace);
-//				    	}
-//				    });
-//				}
-//				else
-//				{
-//					IIsosurfaceTrace trace = (IIsosurfaceTrace) system.getTrace(traceName);
-//
-//					trace.setMaterial(traceColour[0], traceColour[1] , traceColour[2], traceOpacity);
-//					if (value != null)
-//					{
-//						trace.setData(points, textCoords, faces, axis );
-//					}
-//					else
-//					{
-//						trace.setData(null, null, null, null);
-//					}
-//				}
-			
 			} 
 			catch (UnsupportedOperationException e)
 			{
@@ -232,7 +192,7 @@ public class IsosurfaceJob extends Job {
 		}
 		return Status.OK_STATUS;
 	}
-	
+		
 	/*
 	 * look into improving !!
 	 */
@@ -265,7 +225,7 @@ public class IsosurfaceJob extends Job {
 			}
 		});
 	}
-	
+		
 	public void destroy(String traceName)
 	{
 		system.getTrace(traceName).dispose();
