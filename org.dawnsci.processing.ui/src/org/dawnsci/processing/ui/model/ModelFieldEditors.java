@@ -10,6 +10,7 @@ import java.util.Map;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
 import org.dawnsci.common.widgets.celleditor.CComboWithEntryCellEditor;
+import org.dawnsci.common.widgets.celleditor.CComboWithEntryCellEditorData;
 import org.dawnsci.common.widgets.celleditor.FileDialogCellEditor;
 import org.dawnsci.common.widgets.celleditor.NumberCellEditor;
 import org.dawnsci.common.widgets.celleditor.TextCellEditorWithContentProposal;
@@ -227,11 +228,11 @@ public class ModelFieldEditors {
 
 	private static CellEditor getChoiceWithEntryEditor(final CComboWithEntryCellEditorData data, Composite parent) {
 		
-	    final String[] items  = data.items;
+	    final String[] items  = data.getItems();
 		
 		CComboWithEntryCellEditor cellEd = new CComboWithEntryCellEditor(parent, items) {
     	    protected void doSetValue(Object value) {
-                super.doSetValue(((CComboWithEntryCellEditorData)value).active_item);
+                super.doSetValue(((CComboWithEntryCellEditorData)value).getActiveItem());
     	    }
     		protected Object doGetValue() {
     			return new CComboWithEntryCellEditorData(data, (String)super.doGetValue());
