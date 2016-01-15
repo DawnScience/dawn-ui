@@ -161,9 +161,9 @@ public class IsosurfaceTool extends AbstractSlicingTool
 		
 		// roughly calculate the default cube size
 		int[] defaultCubeSize= new int[] {
-				(int) Math.max(1, Math.ceil(finalDataslices.getShape()[2]/20.0)),   
+				(int) Math.max(1, Math.ceil(finalDataslices.getShape()[0]/20.0)),   
 				(int) Math.max(1, Math.ceil(finalDataslices.getShape()[1]/20.0)), 
-				(int) Math.max(1, Math.ceil(finalDataslices.getShape()[0]/20.0))};
+				(int) Math.max(1, Math.ceil(finalDataslices.getShape()[2]/20.0))};
 		
 		// set the min and max isovalues - set the default cube size for new sufaces
 		isoComp.setMinMaxIsoValueAndCubeSize(minMax, defaultCubeSize);

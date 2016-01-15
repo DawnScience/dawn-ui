@@ -271,7 +271,7 @@ public class SurfaceDisplayer extends Scene
 	{
 		// disable the depth buffer for the isosurfaces -> depth buffer doesn't behave with transparency
 		// enable for the axis node group
-		this.isosurfaceGroup.setDepthTest(DepthTest.ENABLE);
+		this.isosurfaceGroup.setDepthTest(DepthTest.DISABLE);
 		this.axisNode.setDepthTest(DepthTest.ENABLE);
 	}
 	

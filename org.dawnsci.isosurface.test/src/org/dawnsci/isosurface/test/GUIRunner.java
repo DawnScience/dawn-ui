@@ -1,5 +1,6 @@
 package org.dawnsci.isosurface.test;
 
+import org.dawnsci.isosurface.Activator;
 import org.dawnsci.isosurface.isogui.IsoBean;
 import org.dawnsci.isosurface.isogui.IsoComposite;
 import org.dawnsci.isosurface.isogui.IsoHandler;
@@ -11,16 +12,17 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.junit.Test;
 
 public class GUIRunner 
 {
 	
-	public static void main(String[] args) throws Exception {
-
+	@Test
+	public void createShell() throws Exception {
+		
 		Display display = new Display();
 		Shell shell = new Shell(display);
 		shell.setLayout(new GridLayout(1, false));
-		shell.setText("Change a value to see bean as JSON");
 		
 		ScrolledComposite sc = new ScrolledComposite(shell, SWT.H_SCROLL | SWT.V_SCROLL);
 		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -28,6 +30,7 @@ public class GUIRunner
 		IsoComposite ui = new IsoComposite(
 						sc, 
 						SWT.FILL);
+		
 		ui.setSize(ui.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
 		sc.setContent(ui);
@@ -44,11 +47,7 @@ public class GUIRunner
 			IsoHandler isoController = new IsoHandler(
 					ui, 
 					isoBean, 
-					new IsosurfaceJob(
-							"isoSurfaceJob" , 
-							null, 
-							null, 
-							null));
+					null);
 			
 		}
 		catch (Exception e)

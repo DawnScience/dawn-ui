@@ -63,7 +63,7 @@ public class Regression {
 	@Test
 	public void regressionTest() throws Exception
 	{
-		start(new int[]{90,100,110},new int[] {2,3,4});
+		start(new int[]{100,100,100},new int[] {3,3,3});
 		
 		// check the algorithm gave the same results as before
 		
