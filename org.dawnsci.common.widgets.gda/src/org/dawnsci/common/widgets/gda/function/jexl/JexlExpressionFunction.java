@@ -36,7 +36,7 @@ public class JexlExpressionFunction extends AFunction {
 	 */
 	private static final String X = "x";
 	private static final String NAME = "JexlExpressionFunction";
-	private static final String DESC = "y(x) = a jexl expression";
+	private static final String DESC = "A function defined by a Jexl expression.";
 
 	/**
 	 * Type of errors that {@link JexlExpressionFunction#setExpression(String)}

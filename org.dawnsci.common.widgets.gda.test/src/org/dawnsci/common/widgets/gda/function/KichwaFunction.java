@@ -41,7 +41,7 @@ public class KichwaFunction extends AFunction implements IFunction {
 
 	@Override
 	protected void setNames() {
-		setNames("Kichwa Test Function", "Blah");
+		setNames("Kichwa Test Function", "Does not do anything but returns zeros");
 	}
 
 	@Override
@@ -52,6 +52,6 @@ public class KichwaFunction extends AFunction implements IFunction {
 
 	@Override
 	public void fillWithValues(DoubleDataset data, CoordinatesIterator it) {
+		data.fill(0);
 	}
-
 }
