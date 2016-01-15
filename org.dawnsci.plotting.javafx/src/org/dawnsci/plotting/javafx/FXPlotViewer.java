@@ -60,13 +60,6 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 	public FXPlotViewer()
 	{		
 		
-		// create the root node
-		this.root = new Group();
-		// create the group for the isosurfaces
-		this.isoSurfaceGroup = new Group();
-				
-		// create the scene -> most of the changes will be done within here
-		scene = new SurfaceDisplayer(root, isoSurfaceGroup);
 		
 	}
 	
@@ -79,11 +72,19 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 	 */
 	public void createControl(final Composite parent)
 	{
+		
 		Platform.setImplicitExit(false);
 		
 		// declare the canvas in memory
 		this.canvas = new FXCanvas(parent, SWT.NONE);
 		
+		// create the root node
+		this.root = new Group();
+		// create the group for the isosurfaces
+		this.isoSurfaceGroup = new Group();
+		
+		// create the scene -> most of the changes will be done within here
+		scene = new SurfaceDisplayer(root, isoSurfaceGroup);
 		
 		// set the scene to the canvas
 		this.canvas.setScene(scene);

@@ -120,7 +120,7 @@ public class IsoComposite extends Composite
 	// pretty much only used to create the inital surface bean
 	public void addNewSurface()
 	{
-		items.addBean();
+		// items.addBean();
 	}
 
 	
