@@ -150,7 +150,7 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 		result.setCursor(Cursor.CROSSHAIR);
 		result.setOpacity(opacity);
 		
-		result.setCullFace(javafx.scene.shape.CullFace.BACK);
+		result.setCullFace(javafx.scene.shape.CullFace.NONE);
 		result.setDrawMode(DrawMode.FILL);
 		
 		
