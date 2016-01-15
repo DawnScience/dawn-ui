@@ -9,14 +9,13 @@
 
 package org.dawnsci.common.widgets.gda.function;
 
-import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IParameter;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CoordinatesIterator;
 
-public class KichwaFunction extends AFunction implements IFunction {
+public class KichwaFunction extends AFunction {
 	private static final long serialVersionUID = -7994832162791014175L;
 	private static final double[] params = new double[]{};
 
