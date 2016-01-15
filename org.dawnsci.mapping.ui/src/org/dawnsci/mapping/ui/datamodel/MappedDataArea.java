@@ -2,10 +2,15 @@ package org.dawnsci.mapping.ui.datamodel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MappedDataArea implements MapObject {
 
 	private List<MappedDataFile> files = new ArrayList<MappedDataFile>();
+	private static final Logger logger = LoggerFactory.getLogger(MappedDataArea.class);
 	
 	public void addMappedDataFile(MappedDataFile file) {
 //		files.clear();
@@ -34,6 +39,17 @@ public class MappedDataArea implements MapObject {
 	
 	public void removeFile(MappedDataFile file) {
 		files.remove(file);
+		
+		Object[] children = file.getChildren();
+		for (Object child : children) {
+			if (child instanceof ILiveData) {
+				try {
+					((ILiveData)child).disconnect();
+				} catch (Exception e) {
+					logger.error("Could not disconnect remote dataset",e);
+				}
+			}
+		}
 	}
 	
 	public MappedDataFile getDataFile(int index) {
@@ -49,7 +65,7 @@ public class MappedDataArea implements MapObject {
 		double[] range = getRange();
 		
 		if (range == null) return true;
-		
+		if (newRange == null) return true;
 		return newRange[0] < range[1] &&
 			   newRange[1] > range[0] &&
 			   newRange[2] < range[3] &&

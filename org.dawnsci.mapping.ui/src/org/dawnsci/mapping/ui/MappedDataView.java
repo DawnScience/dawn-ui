@@ -1,21 +1,52 @@
 package org.dawnsci.mapping.ui;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.lang.ProcessBuilder.Redirect;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
+import org.dawnsci.mapping.ui.datamodel.LiveDataBean;
+import org.dawnsci.mapping.ui.datamodel.MapBean;
+import org.dawnsci.mapping.ui.datamodel.MappedBlockBean;
 import org.dawnsci.mapping.ui.datamodel.MappedData;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
+import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
+import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
 import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.IRemoteDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
+import org.eclipse.dawnsci.analysis.api.io.IRemoteDatasetService;
+import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
+import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
+import org.eclipse.dawnsci.analysis.api.processing.IOperation;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationContext;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
+import org.eclipse.dawnsci.analysis.api.processing.OperationData;
+import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
+import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -31,8 +62,11 @@ import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.HelpListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -48,77 +82,6 @@ public class MappedDataView extends ViewPart {
 	
 	@Override
 	public void createPartControl(Composite parent) {
-
-//		IAction ncd = new Action("Live") {
-//			public void run() {
-//				
-//				remote = MappingMockSWMRRemote.getRemote();
-//				LiveMappedDataBlock lb = new LiveMappedDataBlock("Live", remote,1,0);
-//				plotManager.monitorData(lb);
-//				
-////				final String path = "/scratch/SSD/live/live_25.h5";
-////				final String id = "/entry/instrument/NDAttributes/NDArrayUniqueId";
-////				final String data = "/entry/data/data";
-////				final ILoaderService ls = LocalServiceManager.getLoaderService();
-////				ls.clearSoftReferenceCache();
-////				try {
-////					final IDataHolder dh = ls.getData(path, true, null);
-////					if (dh.contains("/entry/instrument/NDAttributes/NDArrayUniqueId")){
-////						int[] idshape = dh.getMetadata().getDataShapes().get(id);
-////						int[] dshape = dh.getMetadata().getDataShapes().get(data);
-////						ILazyDataset lzId = dh.getLazyDataset(id);
-////						ILazyDataset ds = dh.getLazyDataset(data);
-////					
-////						final IDynamicDataset key = LazyDynamicDataset.createDynamicDataset((LazyDataset)lzId);
-////						final IDynamicDataset dd = LazyDynamicDataset.createDynamicDataset((LazyDataset)ds);
-////						key.startUpdateChecker(500, new IDatasetChangeChecker() {
-////							
-////							@Override
-////							public void setDataset(ILazyDataset dataset) {
-////							}
-////							
-////							@Override
-////							public boolean check() {
-////								try {
-////									ls.clearSoftReferenceCache();
-////									IDataHolder dh = ls.getData(path, true, null);
-////									key.resize(dh.getMetadata().getDataShapes().get(id));
-////									dd.resize(dh.getMetadata().getDataShapes().get(data));
-////									
-////								} catch (Exception e) {
-////									e.printStackTrace();
-////								}
-////								
-////								return true;
-////							}
-////						});
-////						LiveMappedDataBlock lb = new LiveMappedDataBlock(data, dd, key);
-////						plotManager.monitorData(lb);
-////					}
-////					IMetadata metadata = dh.getMetadata();
-////					metadata.toString();
-////				} catch (Exception e) {
-////					// TODO Auto-generated catch block
-////					e.printStackTrace();
-////				}
-//////				plotManager.monitorData(null);
-//			}
-//		};
-//		IAction ncd1 = new Action("Stpp") {
-//			public void run() {
-//				if (remote != null)
-//					try {
-//						remote.disconnect();
-//					} catch (Exception e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//			}
-//		};
-//		
-//		
-//		getViewSite().getActionBars().getToolBarManager().add(ncd);
-//		getViewSite().getActionBars().getToolBarManager().add(ncd1);
 		
 		area = new MappedDataArea();
 		
@@ -195,7 +158,6 @@ public class MappedDataView extends ViewPart {
 							MappedDataFile df = (MappedDataFile)ob;
 							if (!maps.isEmpty())manager.add(MapActionUtils.getRGBDialog(maps, df,viewer));
 						}
-						
 					}
 					
 					if (!maps.isEmpty())manager.add(MapActionUtils.getComparisonDialog(maps));
@@ -252,4 +214,5 @@ public class MappedDataView extends ViewPart {
 		if (MappedFileManager.class == adapter) return fileManager;
 		return super.getAdapter(adapter);
 	}
+	
 }

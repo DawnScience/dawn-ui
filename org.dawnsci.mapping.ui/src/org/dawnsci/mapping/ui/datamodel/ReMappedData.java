@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
@@ -13,7 +14,7 @@ import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelIntegration;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.XYImagePixelCache;
 
-public class ReMappedData extends MappedData {
+public class ReMappedData extends AbstractMapData {
 
 	private IDataset reMapped;
 	private IDataset lookup;
@@ -21,11 +22,14 @@ public class ReMappedData extends MappedData {
 	
 	public ReMappedData(String name, IDataset map, MappedDataBlock parent, String path) {
 		super(name, map, parent, path);
-		
+	}
+	
+	public ReMappedData(String name, ILazyDataset map, MappedDataBlock parent, String path) {
+		super(name, map, parent, path);
 	}
 	
 	@Override
-	protected double[] calculateRange(IDataset map){
+	protected double[] calculateRange(ILazyDataset map){
 		IDataset[] ax = MappingUtils.getAxesForDimension(map,0);
 		double[] r = new double[4];
 		r[0] = ax[1].min().doubleValue();

@@ -131,11 +131,11 @@ public class MappingUtils {
 		
 	}
 	
-	public static IDataset[] getAxesForDimension(IDataset data, int dim) {
+	public static IDataset[] getAxesForDimension(ILazyDataset data, int dim) {
 		
 		List<AxesMetadata> amd = null;
 		
-		data = data.getSliceView().squeeze();
+		data = data.getSliceView().squeezeEnds();
 		
 		try {
 			amd = data.getMetadata(AxesMetadata.class);

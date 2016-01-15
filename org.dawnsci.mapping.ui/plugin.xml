@@ -24,6 +24,12 @@
             name="Mapped Data"
             restorable="true">
       </view>
+      <view
+            class="org.dawnsci.mapping.ui.DebugRemoteMapView"
+            id="org.dawnsci.mapping.ui.debugremotemap"
+            name="Debug Remote Map"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.navigator.navigatorContent">

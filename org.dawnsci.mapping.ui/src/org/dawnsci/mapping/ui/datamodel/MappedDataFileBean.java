@@ -7,6 +7,7 @@ public class MappedDataFileBean {
 
 	private List<MappedBlockBean> blocks = new ArrayList<MappedBlockBean>();
 	private List<MapBean> maps = new ArrayList<MapBean>();
+	private LiveDataBean liveBean = null;
 	
 	public void addBlock(MappedBlockBean bean) {
 		blocks.add(bean);
@@ -38,6 +39,14 @@ public class MappedDataFileBean {
 		}
 		
 		return true;
+	}
+
+	public LiveDataBean getLiveBean() {
+		return liveBean;
+	}
+
+	public void setLiveBean(LiveDataBean live) {
+		this.liveBean = live;
 	}
 	
 }

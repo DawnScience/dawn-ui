@@ -5,33 +5,22 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
 
-public class MappedData implements MapObject{
+public class MappedData extends AbstractMapData{
 
-	private String name;
-	private String path;
-	protected IDataset map;
-	protected MappedDataBlock oParent;
-	protected MappedDataBlock parent;
-	private int transparency = -1;
-	private double[] range;
 	
 	public MappedData(String name, IDataset map, MappedDataBlock parent, String path) {
-		this.name = name;
-		this.map = map;
-		this.path = path;
-		this.oParent = this.parent = parent;
-		range = calculateRange(map);
+		super(name, map, parent, path);
 	}
 	
-	protected double[] calculateRange(IDataset map){
-
-		range = MappingUtils.getGlobalRange(map);
+	public MappedData(String name, ILazyDataset map, MappedDataBlock parent, String path) {
+		super(name,map, parent, path);
+	}
+	
+	protected double[] calculateRange(ILazyDataset map){
+		
+		double[] range = MappingUtils.getGlobalRange(map);
 		
 		return range;
-	}
-	
-	public IDataset getMap(){
-		return map;
 	}
 	
 	private int[] getIndices(double x, double y) {
@@ -67,49 +56,11 @@ public class MappedData implements MapObject{
 	public MappedData makeNewMapWithParent(String name, IDataset ds) {
 		return new MappedData(name, ds, parent, path);
 	}
+
+
+
+
 	
-	@Override
-	public String toString() {
-		return name;
-	}
 
-	@Override
-	public boolean hasChildren() {
-		return false;
-	}
-
-	@Override
-	public Object[] getChildren() {
-		return null;
-	}
-
-	public int getTransparency() {
-		return transparency;
-	}
-
-	public void setTransparency(int transparency) {
-		this.transparency = transparency;
-	}
-
-	public MappedDataBlock getParent() {
-		return parent;
-	}
-
-	public void setParent(MappedDataBlock parent) {
-		this.parent = parent;
-	}
-
-	public void resetParent() {
-		parent = oParent;
-	}
-
-	@Override
-	public double[] getRange() {
-		return range.clone();
-	}
-	
-	public String getLongName() {
-		return path + " : " + name;
-	}
 	
 }
