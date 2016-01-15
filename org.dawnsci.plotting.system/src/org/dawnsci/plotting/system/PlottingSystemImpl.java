@@ -163,7 +163,9 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
         	try {
 				viewers.add((IPlottingSystemViewer<T>)ie.createExecutableExtension("class"));
 			} catch (CoreException e) {
-				throw new RuntimeException("Fatal Plotting Error! Cannot create "+ie.getAttribute("class"));
+				// It is possible for DAWN to work without all these extension points.
+				logger.error("Cannot make class "+ie.getAttribute("class")+" It will not be available to DAWN", e);
+				continue;
 			}
 		}
 		return viewers;
