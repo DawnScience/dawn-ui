@@ -1,4 +1,4 @@
-package org.dawnsci.processing.ui.model;
+package org.dawnsci.common.widgets.celleditor;
 
 public class CComboWithEntryCellEditorData {
 	
@@ -41,6 +41,10 @@ public class CComboWithEntryCellEditorData {
 	
 	public String getActiveItem() {
 		return active_item;
+	}
+	
+	public String[] getItems() {
+		return items;
 	}
 	
 	@Override
