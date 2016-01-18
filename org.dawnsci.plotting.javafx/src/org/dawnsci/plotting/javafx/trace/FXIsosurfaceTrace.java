@@ -178,7 +178,7 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 			result.setDepthTest(DepthTest.DISABLE);
 		}
 				
-		result.setDepthTest(DepthTest.ENABLE);
+		//result.setDepthTest(DepthTest.ENABLE);
 		
 		result.setMaterial(material);
 		this.isosurface = result;

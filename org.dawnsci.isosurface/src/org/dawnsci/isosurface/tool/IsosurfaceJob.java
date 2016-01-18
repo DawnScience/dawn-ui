@@ -9,6 +9,7 @@
 package org.dawnsci.isosurface.tool;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawnsci.isosurface.alg.MarchingCubesModel;
@@ -25,6 +26,9 @@ import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IIsosurfaceTrace;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.nebula.visualization.xygraph.linearscale.Tick;
+import org.eclipse.nebula.visualization.xygraph.linearscale.TickFactory;
+import org.eclipse.nebula.visualization.xygraph.linearscale.TickFactory.TickFormatting;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
@@ -166,9 +170,19 @@ public class IsosurfaceJob extends Job {
 					textCoords = new FloatDataset(surface.getTexCoords(), surface.getTexCoords().length);
 					faces      = new IntegerDataset(surface.getFaces(), surface.getFaces().length);
 				}
+												
+				final ArrayList<IDataset> axis = new ArrayList<IDataset>();
 				
-				final ArrayList<IDataset> axis = generateDuplicateAxes(10, 10); // this is for debugging the javafx axes				
+				TickFactory tickGenerator = new TickFactory(TickFormatting.autoMode, null);
 				
+				
+				// set the data set size
+				axis.add(new IntegerDataset(this.slice.getShape(), null));
+				
+				axis.add(convertTodatasetAxis(tickGenerator.generateTicks(0, slice.getShape()[0], 15, false, false)));
+				axis.add(convertTodatasetAxis(tickGenerator.generateTicks(0, slice.getShape()[1], 15, false, false)));
+				axis.add(convertTodatasetAxis(tickGenerator.generateTicks(0, slice.getShape()[2], 15, false, false)));
+								
 				final int[] traceColour = new int[]{colour.red, colour.green, colour.blue};
 				final double traceOpacity = opacity;
 				
@@ -213,7 +227,23 @@ public class IsosurfaceJob extends Job {
 		}
 		return Status.OK_STATUS;
 	}
+	
+	private FloatDataset convertTodatasetAxis(List<Tick> tickList) {
 		
+				
+		float[] ticks = new float[tickList.size()];
+		
+		int i = 0;
+		for (Tick t: tickList)
+		{
+			System.out.println(t.getValue());
+			ticks[i] = (float) t.getValue();
+			i++;
+		}		
+		
+		return new FloatDataset(ticks, null);
+	}
+
 	/*
 	 * look into improving !!
 	 */

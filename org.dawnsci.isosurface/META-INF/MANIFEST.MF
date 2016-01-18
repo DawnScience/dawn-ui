@@ -19,6 +19,7 @@ Export-Package: org.dawnsci.isosurface,
  org.dawnsci.isosurface.isogui,
  org.dawnsci.isosurface.tool
 Import-Package: org.dawnsci.plotting.util,
+ org.eclipse.nebula.visualization.xygraph.linearscale,
  org.eclipse.richbeans.binding,
  org.eclipse.richbeans.reflection,
  org.slf4j;version="1.7.6"
