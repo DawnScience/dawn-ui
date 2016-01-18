@@ -1491,22 +1491,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			    if (!yes) return filename;
 			}
 			
-			Figure f = new Figure() {
-				public void paint(Graphics graphics) {
-					xyGraph.paintScaled(10, graphics);
-				}
-				
-				public org.eclipse.draw2d.geometry.Rectangle getBounds() {
-					org.eclipse.draw2d.geometry.Rectangle bounds2 = xyGraph.getBounds();
-					org.eclipse.draw2d.geometry.Rectangle b = new org.eclipse.draw2d.geometry.Rectangle(bounds2);
-					b.width *= 10;
-					b.height *= 10;
-					
-					return b;
-				}
-			};
-			
-			PlotExportPrintUtil.saveGraph(filename, PlotExportPrintUtil.FILE_TYPES[dialog.getFilterIndex()], f);
+				PlotExportPrintUtil.saveGraph(filename, PlotExportPrintUtil.FILE_TYPES[dialog.getFilterIndex()], plotContents.getParent());
 			//logger.debug("Plot saved");
 		} catch (Exception e) {
 			throw e;
