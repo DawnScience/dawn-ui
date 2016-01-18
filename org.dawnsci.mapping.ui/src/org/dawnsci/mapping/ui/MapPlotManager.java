@@ -7,7 +7,9 @@ import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
+import org.dawnsci.mapping.ui.datamodel.ILiveData;
 import org.dawnsci.mapping.ui.datamodel.MapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedData;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
@@ -35,6 +37,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +48,7 @@ public class MapPlotManager {
 	private MappedDataArea area;
 	private LinkedList<MapObject> layers;
 	private PlotJob job;
+	private RepeatingJob rJob;
 	private volatile Dataset merge;
 	private AtomicInteger atomicPosition;
 	
@@ -58,11 +62,18 @@ public class MapPlotManager {
 		layers = new LinkedList<MapObject>();
 		job = new PlotJob();
 		job.setPriority(Job.INTERACTIVE);
+		rJob = new RepeatingJob(500, new Runnable() {
+			
+			@Override
+			public void run() {
+				plotLayers();
+			}
+		});
 		
 	}
 	
 	public void plotData(final double x, final double y) {
-		final MappedData topMap = getTopMap(x,y);
+		final AbstractMapData topMap = getTopMap(x,y);
 		if (topMap == null)  {
 			data.clear();
 			return;
@@ -109,7 +120,7 @@ public class MapPlotManager {
 	}
 	
 	public void plotDataWithHold(final double x, final double y) {
-		final MappedData topMap = getTopMap(x,y);
+		final AbstractMapData topMap = getTopMap(x,y);
 		if (topMap == null) return;
 		final ILazyDataset lz = topMap.getSpectrum(x,y);
 		
@@ -217,9 +228,10 @@ public class MapPlotManager {
 	}
 	
 	
-	public void updateLayers(MappedData map) {
+	public void updateLayers(AbstractMapData map) {
 		if (layers.contains(map)){
 			layers.remove(map);
+			triggerForLive();
 			plotLayers();
 			return;
 		}
@@ -238,7 +250,7 @@ public class MapPlotManager {
 		plotLayers();
 	}
 	
-	public void plotMap(MappedData map) {
+	public void plotMap(AbstractMapData map) {
 		addMap(map);
 		plotLayers();
 	}
@@ -253,11 +265,11 @@ public class MapPlotManager {
 		plotLayers();
 	}
 	
-	public MappedData getTopMap(double x, double y){
+	public AbstractMapData getTopMap(double x, double y){
 		
 		for (int i = 0; i < layers.size() ; i++) {
 			MapObject l = layers.get(i);
-			if (l instanceof MappedData && ((MappedData)l).getSpectrum(x, y) != null) return (MappedData)l;
+			if (l instanceof AbstractMapData && ((AbstractMapData)l).getSpectrum(x, y) != null) return (AbstractMapData)l;
 		}
 		
 		return null;
@@ -279,13 +291,13 @@ public class MapPlotManager {
 		layers.clear();
 	}
 	
-	private void addMap(MappedData map) {
-		
+	private void addMap(AbstractMapData map) {
+
 		int position = -1;
 		
 		for (int i = 0; i < layers.size() ;i++) {
 			MapObject layer = layers.get(i);
-			if (layer instanceof MappedData && isTheSameMap((MappedData)layer, map)) {
+			if (layer instanceof MappedData && isTheSameMap((AbstractMapData)layer, map)) {
 				position = i;
 				break;
 			}
@@ -296,10 +308,29 @@ public class MapPlotManager {
 		} else {
 			layers.push(map);
 		}
+	
+		triggerForLive();
+	}
+	
+	private void triggerForLive(){
+		boolean found = false;
 		
+		for (int i = 0; i < layers.size() ;i++) {
+			if (layers.get(i) instanceof ILiveData) {
+				found = true;
+				break;
+			}
+		}
+		
+		if (found){
+			rJob.start();
+			rJob.schedule();
+		}
+		else rJob.stop();
 	}
 	
 	private void plotLayers(){
+
 		map.clear();
 		
 		try {
@@ -315,9 +346,9 @@ public class MapPlotManager {
 					t.setAlpha(((MappedData)o).getTransparency());
 					this.map.addTrace(t);
 					
-					IDataset[] ax = MappingUtils.getAxesFromMetadata(m.getMap());
-					ILineTrace lt = map.createLineTrace(m.getLongName()+ "line");
-					lt.setData(ax[1], ax[0]);
+//					IDataset[] ax = MappingUtils.getAxesFromMetadata(m.getMap());
+//					ILineTrace lt = map.createLineTrace(m.getLongName()+ "line");
+//					lt.setData(ax[1], ax[0]);
 //					map.addTrace(lt);
 				}
 				
@@ -336,8 +367,9 @@ public class MapPlotManager {
 		}
 	}
 	
-	private boolean isTheSameMap(MappedData omap, MappedData map) {
+	private boolean isTheSameMap(AbstractMapData omap, AbstractMapData map) {
 		
+		if (omap.getLongName().equals(map.getLongName())) return true;
 		
 		if (!Arrays.equals(omap.getMap().getShape(), map.getMap().getShape())) return false;
 		
@@ -364,7 +396,7 @@ public class MapPlotManager {
 		
 	}
 	
-	public void setTransparency(MappedData m) {
+	public void setTransparency(AbstractMapData m) {
 		
 		ITrace trace = map.getTrace(m.getLongName());
 		if (trace instanceof IImageTrace) ((IImageTrace)trace).setAlpha(m.getTransparency());
@@ -462,5 +494,39 @@ public class MapPlotManager {
 			return Status.OK_STATUS;
 		}
 		
+	}
+	
+	public void test_method_remove(IDataset m) {
+		
+		map.updatePlot2D(m, null, null);
+		
+		
+	}
+	
+	private class RepeatingJob extends UIJob{
+		private boolean running = true;
+		private long repeatDelay = 0;
+		private Runnable runnable;
+		public RepeatingJob(long repeatPeriod, Runnable runnable){ 
+			super("Repeat plot update");
+			repeatDelay = repeatPeriod;
+			this.runnable = runnable;
+		}
+		public IStatus runInUIThread(IProgressMonitor monitor) {
+			runnable.run();
+			schedule(repeatDelay);
+			return Status.OK_STATUS;
+		}
+
+		public boolean shouldSchedule() {
+			return running;
+		}
+		public void stop() {
+			running = false;
+		}
+		public void start() {
+			running = true;
+		}
+
 	}
 }

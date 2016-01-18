@@ -21,6 +21,7 @@ public class MappedDataBlock implements MapObject {
 		this.xDim = xDim;
 		this.yDim = yDim;
 		this.range = calculateRange(dataset);
+		this.path = path;
 	}
 	
 	@Override
@@ -55,6 +56,26 @@ public class MappedDataBlock implements MapObject {
 		return dataset.getSlice(slice);
 	}
 	
+	public int[] getDataDimensions() {
+		int nDims = 0;
+		
+		int[] shape = dataset.getShape();
+		for (int i = 0; i < shape.length; i++) {
+			if (i!= xDim && i != yDim) nDims++;
+		}
+		
+		int[] dd = new int[nDims];
+		int count = 0;
+		for (int i = 0; i < shape.length; i++) {
+			if (i!= xDim && i != yDim) {
+				dd[count] = i;
+				count++;
+			}
+		}
+		
+		return dd;
+	}
+	
 	public ILazyDataset[] getXAxis() {
 		AxesMetadata md = dataset.getFirstMetadata(AxesMetadata.class);
 		if (md == null) return null;
@@ -73,10 +94,10 @@ public class MappedDataBlock implements MapObject {
 
 	@Override
 	public double[] getRange() {
-		return range.clone();
+		return range == null ? null : range.clone();
 	}
 	
-	private double[] calculateRange(ILazyDataset block){
+	protected double[] calculateRange(ILazyDataset block){
 		
 		IDataset[] ax = MappingUtils.getAxesFromMetadata(block);
 		
@@ -99,6 +120,14 @@ public class MappedDataBlock implements MapObject {
 		return range;
 	}
 
+	public String getPath(){
+		return path;
+	}
+	
+	public ILazyDataset getLazy() {
+		return dataset;
+	}
+	
 	public String getLongName() {
 		return path + " : " + name;
 	}

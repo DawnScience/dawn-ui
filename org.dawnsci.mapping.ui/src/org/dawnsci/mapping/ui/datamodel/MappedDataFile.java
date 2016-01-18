@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.dawnsci.mapping.ui.LocalServiceManager;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
@@ -20,7 +21,7 @@ public class MappedDataFile implements MapObject{
 
 	private String path;
 	private Map<String,MappedDataBlock> fullDataMap;
-	private Map<String,MappedData> mapDataMap;
+	private Map<String,AbstractMapData> mapDataMap;
 	private Map<String,AssociatedImage> microscopeDataMap;
 	private double[] range;
 	
@@ -29,7 +30,7 @@ public class MappedDataFile implements MapObject{
 	public MappedDataFile(String path) {
 		this.path = path;
 		fullDataMap = new HashMap<String,MappedDataBlock>();
-		mapDataMap = new HashMap<String,MappedData>();
+		mapDataMap = new HashMap<String,AbstractMapData>();
 		microscopeDataMap = new HashMap<String,AssociatedImage>();
 	}
 	
@@ -37,20 +38,20 @@ public class MappedDataFile implements MapObject{
 		return path;
 	}
 	
-	public MappedDataBlock addFullDataBlock(String datasetName, int xdim, int ydim) {
-		
-		//TODO make use of the x and y dimensions
-		MappedDataBlock block = null;
-		try {
-			ILazyDataset lz = LocalServiceManager.getLoaderService().getData(path, null).getLazyDataset(datasetName);
-			block = new MappedDataBlock(datasetName, lz,xdim,ydim, path);
-			fullDataMap.put(datasetName, block);
-		} catch (Exception e) {
-			logger.error("Error loading mapped data block!", e);
-		}
-		
-		return block;
-	}
+//	public MappedDataBlock addFullDataBlock(String datasetName, int xdim, int ydim) {
+//		
+//		//TODO make use of the x and y dimensions
+//		MappedDataBlock block = null;
+//		try {
+//			ILazyDataset lz = LocalServiceManager.getLoaderService().getData(path, null).getLazyDataset(datasetName);
+//			block = new MappedDataBlock(datasetName, lz,xdim,ydim, path);
+//			fullDataMap.put(datasetName, block);
+//		} catch (Exception e) {
+//			logger.error("Error loading mapped data block!", e);
+//		}
+//		
+//		return block;
+//	}
 	
 	public Map<String,MappedDataBlock> getDataBlockMap() {
 		return fullDataMap;
@@ -60,8 +61,8 @@ public class MappedDataFile implements MapObject{
 		
 		if (object instanceof MappedDataBlock) {
 			fullDataMap.put(name, (MappedDataBlock)object);
-		}else if (object instanceof MappedData) {
-			mapDataMap.put(name, (MappedData)object);
+		}else if (object instanceof AbstractMapData) {
+			mapDataMap.put(name, (AbstractMapData)object);
 		}else if (object instanceof AssociatedImage) {
 			microscopeDataMap.put(name, (AssociatedImage)object);
 		}
@@ -72,6 +73,7 @@ public class MappedDataFile implements MapObject{
 	
 	private void updateRange(MapObject object) {
 		double[] r = object.getRange();
+		if (r == null) return;
 		if (range == null) {
 			range = r;
 			return;
@@ -84,16 +86,16 @@ public class MappedDataFile implements MapObject{
 		
 	}
 	
-	public void addMap(String mapName, MappedDataBlock parent) {
-		try {
-			ILazyDataset lz = LocalServiceManager.getLoaderService().getData(path, null).getLazyDataset(mapName);
-			mapDataMap.put(mapName, new MappedData(mapName, lz.getSlice(), parent, path));
-		} catch (Exception e) {
-			logger.error("Error loading mapped data!", e);
-		}
-	}
+//	public void addMap(String mapName, MappedDataBlock parent) {
+//		try {
+//			ILazyDataset lz = LocalServiceManager.getLoaderService().getData(path, null).getLazyDataset(mapName);
+//			mapDataMap.put(mapName, new MappedData(mapName, lz.getSlice(), parent, path));
+//		} catch (Exception e) {
+//			logger.error("Error loading mapped data!", e);
+//		}
+//	}
 	
-	public MappedData getMap() {
+	public AbstractMapData getMap() {
 		return mapDataMap.size() > 0 ? mapDataMap.values().iterator().next() : null;
 	}
 	
@@ -102,22 +104,28 @@ public class MappedDataFile implements MapObject{
 	}
 	
 	public double[] getRange(){
-		return range.clone(); 
+//		if (range == null) {
+			for (AbstractMapData map : mapDataMap.values()) {
+				updateRange(map);
+			}
+//		}
+		
+		return range == null ? null : range.clone(); 
 	}
 	
-	public void addNonMapImage(String imageName) {
-		try {
-			ILazyDataset lz = LocalServiceManager.getLoaderService().getData(path, null).getLazyDataset(imageName);
-			IDataset test = lz.getSlice(new Slice(0,1),null,null).squeeze();
-			RGBDataset microrgb = new RGBDataset((Dataset)lz.getSlice(new Slice(0,1),null,null).squeeze(),
-					 (Dataset)lz.getSlice(new Slice(1,2),null,null).squeeze(),
-					 (Dataset)lz.getSlice(new Slice(2,3),null,null).squeeze());
-			microrgb.setMetadata(test.getMetadata(AxesMetadata.class).get(0));
-			microscopeDataMap.put(imageName, new AssociatedImage(imageName, microrgb,path));
-		} catch (Exception e) {
-			logger.error("Error non map image!", e);
-		}
-	}
+//	public void addNonMapImage(String imageName) {
+//		try {
+//			ILazyDataset lz = LocalServiceManager.getLoaderService().getData(path, null).getLazyDataset(imageName);
+//			IDataset test = lz.getSlice(new Slice(0,1),null,null).squeeze();
+//			RGBDataset microrgb = new RGBDataset((Dataset)lz.getSlice(new Slice(0,1),null,null).squeeze(),
+//					 (Dataset)lz.getSlice(new Slice(1,2),null,null).squeeze(),
+//					 (Dataset)lz.getSlice(new Slice(2,3),null,null).squeeze());
+//			microrgb.setMetadata(test.getMetadata(AxesMetadata.class).get(0));
+//			microscopeDataMap.put(imageName, new AssociatedImage(imageName, microrgb,path));
+//		} catch (Exception e) {
+//			logger.error("Error non map image!", e);
+//		}
+//	}
 
 	@Override
 	public String toString() {

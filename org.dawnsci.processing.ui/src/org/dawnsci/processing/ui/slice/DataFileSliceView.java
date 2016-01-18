@@ -109,6 +109,8 @@ import org.eclipse.ui.part.ViewPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.processing.visitor.NexusFileExecutionVisitor;
+
 public class DataFileSliceView extends ViewPart {
 
 	private FileManager fileManager;

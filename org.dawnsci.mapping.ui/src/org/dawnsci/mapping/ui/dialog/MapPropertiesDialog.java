@@ -3,6 +3,7 @@ package org.dawnsci.mapping.ui.dialog;
 import java.util.Map;
 
 import org.dawnsci.mapping.ui.MapPlotManager;
+import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.MappedData;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
@@ -24,11 +25,11 @@ import org.eclipse.swt.widgets.Spinner;
 
 public class MapPropertiesDialog extends Dialog {
 	
-	private MappedData map;
+	private AbstractMapData map;
 	private MappedDataFile file;
 	private MapPlotManager manager;
 
-	public MapPropertiesDialog(Shell parentShell, MappedData map, MappedDataFile file, MapPlotManager manager) {
+	public MapPropertiesDialog(Shell parentShell, AbstractMapData map, MappedDataFile file, MapPlotManager manager) {
 		super(parentShell);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 		
