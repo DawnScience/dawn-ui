@@ -29,6 +29,8 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IDataBasedFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunctionService;
+import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
+import org.eclipse.dawnsci.analysis.api.monitor.UserCancelException;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
@@ -42,6 +44,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
+import org.eclipse.dawnsci.slicing.api.util.ProgressMonitorWrapper;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
@@ -497,6 +500,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
+			final IMonitor aMonitor = new ProgressMonitorWrapper(monitor);
 			Display.getDefault().syncExec(new Runnable() {
 				@Override
 				public void run() {
@@ -516,6 +520,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 				// We need to run the fit on a copy of the compFunction
 				// otherwise the fit will affect the input values.
 				Add compFunctionCopy = (Add) compFunction.copy();
+				compFunctionCopy.setMonitor(aMonitor);
 				IFunction[] functionCopies = compFunctionCopy.getFunctions();
 				switch (algorithm) {
 				default:
@@ -528,25 +533,22 @@ public class FunctionFittingTool extends AbstractToolPage implements
 							dataBasedFunction.setData(x, y);
 						}
 					}
-					Fitter.ApacheNelderMeadFit(new Dataset[] { x }, y,
-							resultFunction);
+					Fitter.ApacheNelderMeadFit(new Dataset[] { x }, y, resultFunction);
 					break;
 				case GENETIC:
 					IOptimizer fitMethod = new GeneticAlg(accuracy);
-					resultFunction = Fitter
-							.fit(x, y, fitMethod, functionCopies);
+					resultFunction = Fitter.fit(x, y, fitMethod, functionCopies);
 					break;
 				case APACHECONJUGATEGRADIENT:
 					IOptimizer opt = new ApacheOptimizer(Optimizer.CONJUGATE_GRADIENT);
-					resultFunction = Fitter
-							.fit(x, y, opt, functionCopies);
+					resultFunction = Fitter.fit(x, y, opt, functionCopies);
 				case APACHELEVENBERGMAQUARDT:
 					IOptimizer op = new ApacheOptimizer(Optimizer.LEVENBERG_MARQUARDT);
-					resultFunction = Fitter
-							.fit(x, y, op, functionCopies); 
+					resultFunction = Fitter.fit(x, y, op, functionCopies); 
 				
 				}
-
+				// set the monitor
+				resultFunction.setMonitor(aMonitor);
 				// TODO (review race condition) this copy of compFunction
 				// appears to happen "late" if the job is not scheduled for a
 				// "while" then the compFunction can change (by GUI interaction)
@@ -562,7 +564,8 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 			} catch (TooManyEvaluationsException me) {
 				tooManyItterations = true;
-
+			} catch (UserCancelException uc) {
+				return Status.CANCEL_STATUS;
 			} catch (Exception e) {
 				return Status.CANCEL_STATUS;
 			}
