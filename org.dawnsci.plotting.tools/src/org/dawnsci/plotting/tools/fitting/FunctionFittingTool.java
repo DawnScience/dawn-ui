@@ -30,7 +30,6 @@ import org.eclipse.dawnsci.analysis.api.fitting.functions.IDataBasedFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunctionService;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
-import org.eclipse.dawnsci.analysis.api.monitor.UserCancelException;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
@@ -564,8 +563,6 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 			} catch (TooManyEvaluationsException me) {
 				tooManyItterations = true;
-			} catch (UserCancelException uc) {
-				return Status.CANCEL_STATUS;
 			} catch (Exception e) {
 				return Status.CANCEL_STATUS;
 			}
