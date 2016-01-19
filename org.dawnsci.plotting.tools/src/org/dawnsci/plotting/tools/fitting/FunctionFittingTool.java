@@ -68,7 +68,6 @@ import org.eclipse.ui.IActionBars;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
 import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants.FIT_ALGORITHMS;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
@@ -518,36 +517,33 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 				// We need to run the fit on a copy of the compFunction
 				// otherwise the fit will affect the input values.
-				Add compFunctionCopy = (Add) compFunction.copy();
-				compFunctionCopy.setMonitor(aMonitor);
-				IFunction[] functionCopies = compFunctionCopy.getFunctions();
+				resultFunction = (Add) compFunction.copy();
+				resultFunction.setMonitor(aMonitor);
+				IFunction[] functionCopies = resultFunction.getFunctions();
+				for (IFunction function : functionCopies) {
+					if (function instanceof IDataBasedFunction) {
+						IDataBasedFunction dataBasedFunction = (IDataBasedFunction) function;
+						dataBasedFunction.setData(x, y);
+					}
+				}
+				IOptimizer optimizer = null;
 				switch (algorithm) {
 				default:
 				case APACHENELDERMEAD:
-					resultFunction = new Add();
-					for (IFunction function : functionCopies) {
-						resultFunction.addFunction(function);
-						if (function instanceof IDataBasedFunction) {
-							IDataBasedFunction dataBasedFunction = (IDataBasedFunction) function;
-							dataBasedFunction.setData(x, y);
-						}
-					}
-					Fitter.ApacheNelderMeadFit(new Dataset[] { x }, y, resultFunction);
+					optimizer = new ApacheOptimizer(Optimizer.SIMPLEX_NM);
 					break;
 				case GENETIC:
-					IOptimizer fitMethod = new GeneticAlg(accuracy);
-					resultFunction = Fitter.fit(x, y, fitMethod, functionCopies);
+					optimizer = new GeneticAlg(accuracy);
 					break;
 				case APACHECONJUGATEGRADIENT:
-					IOptimizer opt = new ApacheOptimizer(Optimizer.CONJUGATE_GRADIENT);
-					resultFunction = Fitter.fit(x, y, opt, functionCopies);
+					optimizer = new ApacheOptimizer(Optimizer.CONJUGATE_GRADIENT);
+					break;
 				case APACHELEVENBERGMAQUARDT:
-					IOptimizer op = new ApacheOptimizer(Optimizer.LEVENBERG_MARQUARDT);
-					resultFunction = Fitter.fit(x, y, op, functionCopies); 
-				
+					optimizer = new ApacheOptimizer(Optimizer.LEVENBERG_MARQUARDT);
+					break;
 				}
-				// set the monitor
-				resultFunction.setMonitor(aMonitor);
+				optimizer.optimize(new IDataset[] {x}, y, resultFunction);
+
 				// TODO (review race condition) this copy of compFunction
 				// appears to happen "late" if the job is not scheduled for a
 				// "while" then the compFunction can change (by GUI interaction)
