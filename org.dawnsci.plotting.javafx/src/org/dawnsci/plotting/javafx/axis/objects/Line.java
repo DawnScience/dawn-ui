@@ -13,14 +13,14 @@ import javafx.scene.shape.TriangleMesh;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 
-public class AxisLine extends MeshView
+public class Line extends MeshView
 {
 	private Translate offset;
 	private Rotate rotate;
 	private TriangleMesh mesh;
 	private double height;
 	
-	AxisLine(double height, Rotate rotate, Point3D offset)
+	Line(double height, Rotate rotate, Point3D offset)
 	{
 		super();
 		
@@ -39,10 +39,8 @@ public class AxisLine extends MeshView
 		this.getTransforms().addAll(this.rotate, this.offset);
 		
 	}
-	
-	
-	
-	public void createLine(List<Point3D> points, Color colour)
+		
+	private void createLine(List<Point3D> points, Color colour)
 	{
 		mesh = new TriangleMesh();
 		

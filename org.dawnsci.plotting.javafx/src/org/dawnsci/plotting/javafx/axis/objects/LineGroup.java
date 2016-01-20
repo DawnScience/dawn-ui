@@ -1,21 +1,24 @@
 package org.dawnsci.plotting.javafx.axis.objects;
 
 import javafx.geometry.Point3D;
+import javafx.scene.CacheHint;
 import javafx.scene.DepthTest;
 import javafx.scene.Group;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
+import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
 
-public class AxisLineGroup extends Group
+public class LineGroup extends Group
 {
 	final double TEXTMOD = 2;
 	
-	private AxisLine line;
+	private Line line;
 	private Pane textPane;
 	private Text textLabel;
 //	private Label textLabel;
@@ -27,6 +30,11 @@ public class AxisLineGroup extends Group
  		{textYAxisRotate.setAxis(new Point3D(0, 1, 0));}
  	private Rotate textZAxisRotate = new Rotate();
  		{textZAxisRotate.setAxis(new Point3D(0, 0, 1));}
+ 		
+ 	private Rotate invertedSceneXRotate;
+ 	private Rotate invertedSceneYRotate;
+ 		
+ 		
  	
  	// this transforms
 	private Translate offset;
@@ -34,23 +42,38 @@ public class AxisLineGroup extends Group
 	
 	private double textSize = 10;
 	
-	public AxisLineGroup(double length, Point3D direction, Point3D offset, String label, double textSize)
-	{
-		
+	public LineGroup(double length, Point3D direction, Point3D offset, String label, double textSize, Rotate invertXRot, Rotate invertYRot, Rotate gridRotate)
+	{		
 		this.textSize = textSize;
 		this.offset = new Translate(offset.getX(), offset.getY(), offset.getZ());
-		this.line = new AxisLine(length, new Rotate(), new Point3D(0,0,0));
+		this.line = new Line(length, new Rotate(), new Point3D(0,0,0));
 		
+		this.invertedSceneXRotate = invertXRot;
+		this.invertedSceneYRotate = invertYRot;
 		
-		this.rotate = new Rotate();		
-		
+		this.rotate = new Rotate();
 		textPane = new Pane();
+		
+		Transform inverseGridRotate = null;
+		try 
+		{
+			inverseGridRotate = gridRotate.createInverse();
+		} 
+		catch (NonInvertibleTransformException e) 
+		{
+			e.printStackTrace();
+		}
+		
+		
 		if (label != null)
 		{
 			textLabel = createTextLabel(offset.getX(), offset.getY(), label);
 			textLabel.setDepthTest(DepthTest.DISABLE);
 			textPane.getChildren().add(textLabel);
+			textPane.setCacheHint(CacheHint.SCALE_AND_ROTATE);
+			textPane.setCache(true);
 			textPane.getTransforms().add(new Scale((float)1/TEXTMOD, (float)1/TEXTMOD, (float)1/TEXTMOD));
+			textPane.getTransforms().addAll(inverseGridRotate, this.invertedSceneYRotate, this.invertedSceneXRotate);
 		}
 		
 		
@@ -62,8 +85,8 @@ public class AxisLineGroup extends Group
 		this.getChildren().addAll(this.line, this.textPane);
 		this.getTransforms().addAll(this.offset, this.rotate);
 		
+		
 	}
-	
 	
 	// create text label for the grid axis
 	private Text createTextLabel(double x, double y, String text) 
@@ -71,9 +94,6 @@ public class AxisLineGroup extends Group
 		
 		// create the text to return
 		Text returnText = new Text(text);
-		textZAxisRotate.setAngle(-90);
-		textYAxisRotate.setAngle(0);
-		textXAxisRotate.setAngle(45);
 		
 		// add transforms
 		returnText.getTransforms().addAll(
@@ -93,7 +113,7 @@ public class AxisLineGroup extends Group
 		
 		return returnText;
 	}
-	
+		
 	public void setRotate(Rotate newRotate)
 	{
 		this.rotate = newRotate;

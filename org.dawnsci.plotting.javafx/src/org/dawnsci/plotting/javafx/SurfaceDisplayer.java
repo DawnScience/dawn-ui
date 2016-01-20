@@ -8,6 +8,7 @@
  */
 package org.dawnsci.plotting.javafx;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javafx.animation.AnimationTimer;
@@ -27,8 +28,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Cylinder;
+import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
@@ -78,6 +81,11 @@ public class SurfaceDisplayer extends Scene
 	private Rotate alignedYRotate = new Rotate();
 	{alignedYRotate.setAxis(new Point3D(0,1,0));};
 	
+	private Rotate alignedXRotateInverse = new Rotate();
+	{alignedXRotateInverse.setAxis(new Point3D(1,0,0));};
+	private Rotate alignedYRotateInverse = new Rotate();
+	{alignedYRotateInverse.setAxis(new Point3D(0,1,0));};
+	
 	private Point3D scaleDir = new Point3D(1, 1, 1);
 	private Point2D mouseScaleDir = new Point2D(1, 1);
 	
@@ -88,7 +96,6 @@ public class SurfaceDisplayer extends Scene
 	 */
 	
 	private Point3D axesMaxLengths;
-	private double tickSeperator_REMOVE = 10;
 	
 	/**
 	 * 
@@ -180,6 +187,7 @@ public class SurfaceDisplayer extends Scene
 		setDepthBuffers();
 		initialiseTransforms();
 		addLights();
+//		disableTextRotation(root);
 		
 		// add the listeners for scene camera movement
 		addListeners();
@@ -226,7 +234,7 @@ public class SurfaceDisplayer extends Scene
 		// add the initial transforms
 		camera.getTransforms().addAll(new Translate(0, 0, -zoom));
 		camera.setNearClip(0.00001f);
-		camera.setFarClip(100000);
+		camera.setFarClip(100_000);
 	}
 	
 	private void initlialiseGroups()
@@ -241,11 +249,12 @@ public class SurfaceDisplayer extends Scene
 	// combine the groups into the scene graph root node
 	private void createSceneGraph(Group root)
 	{
-	
+		
 		// create the scene graph
 		this.lightGroup.getChildren().addAll(this.isosurfaceGroup);
 		this.objectGroup.getChildren().addAll(this.lightGroup, axisNode);
 		this.cameraGroup.getChildren().addAll(scaleAxesGroup, this.objectGroup);
+//		this.cameraGroup.getChildren().addAll(this.objectGroup);
 		
 		// add groups the the root
 		root.getChildren().addAll(cameraGroup);
@@ -271,7 +280,9 @@ public class SurfaceDisplayer extends Scene
 				new Point3D(0,0,0), 
 				xyzLength, 
 				size, 
-				new Point3D(10,10,10));
+				new Point3D(10,10,10),
+				alignedXRotateInverse,
+				alignedYRotateInverse);
 		
 		scaleAxesGroup.setAxisEventListener(scaleEvent); //!! look into re-organising
 		
@@ -322,6 +333,20 @@ public class SurfaceDisplayer extends Scene
 		
 	}
 	
+	private void disableTextRotation(Group current)
+	{
+		for (Node g : current.getChildren())
+		{
+			if (g instanceof Pane)
+			{
+				g.getTransforms().addAll(alignedYRotateInverse, alignedXRotateInverse);
+
+			}
+			if (g instanceof Group)
+				disableTextRotation((Group)g);
+		}
+	}
+	
 	// add the listeners
 	// !! re-organise
 	private void addListeners()
@@ -337,24 +362,22 @@ public class SurfaceDisplayer extends Scene
 			@Override
 			public void handle(MouseEvent me)
 			{
-				
 				mousePressed = true;
 				
 				oldMousePos[0] = (float) me.getSceneX();
 				oldMousePos[1] = (float) me.getSceneY();
+				
 				newMousePos[0] = (float) me.getSceneX();
 				newMousePos[1] = (float) me.getSceneY();
-				
 			}
 		});
 		
 		// on mouse drag change the camera state
 		setOnMouseDragged(new EventHandler<MouseEvent>()
 		{
-			
 			@Override
 			public void handle(MouseEvent me)
-			{				
+			{
 				// when testing I found the mouseDragged event was sometimes called prior to the mousePressed event.
 				// This will result in the mouse positions not being reset.
 				// Added mousePressed to stop this event unless the mousePos has been reset.
@@ -375,13 +398,16 @@ public class SurfaceDisplayer extends Scene
 							newMousePos[1] - oldMousePos[1]};
 					
 					final double mouseMovementMod = ((zoom + 1000) * 0.001f) + 0.1f;
-										
+					
 					// check if left button is pressed
 					// rotate if true - ie, rotate on left button drag
 					if (me.isPrimaryButtonDown() && !me.isSecondaryButtonDown())
 					{
 						alignedXRotate.setAngle(alignedXRotate.getAngle() + mouseDelta[1] * 0.65f);
 						alignedYRotate.setAngle(alignedYRotate.getAngle() - mouseDelta[0] * 0.65f);	
+						
+						alignedXRotateInverse.setAngle((alignedXRotate.getAngle() - mouseDelta[1] * 0.65f) * - 1);
+						alignedYRotateInverse.setAngle((alignedYRotate.getAngle() + mouseDelta[1] * 0.65f) * - 1);
 					}
 					
 					// zoom
@@ -408,7 +434,7 @@ public class SurfaceDisplayer extends Scene
 				}
 			}
 		});
-				
+		
 		// on mouse scroll zoom the camera
 		setOnScroll(new EventHandler<ScrollEvent>()
 		{
@@ -476,8 +502,7 @@ public class SurfaceDisplayer extends Scene
 	
 	private void updateAxisSize(Point3D maxLength) 
 	{
-		axisGroup.checkScale(this.scale.transform(maxLength));  	
-		
+		axisGroup.checkScale(this.scale.transform(maxLength));
 	}
 	
 	private void updateScale(double[] mouseDelta, double mouseMovementMod) 

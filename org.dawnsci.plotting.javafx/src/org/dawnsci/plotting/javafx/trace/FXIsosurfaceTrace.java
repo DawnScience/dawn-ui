@@ -147,7 +147,6 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 	private void createInternal()
 	{
 		MeshView result = new MeshView(createTrangleMesh());
-		result.setCursor(Cursor.CROSSHAIR);
 		result.setOpacity(opacity);
 		
 		result.setCullFace(javafx.scene.shape.CullFace.NONE);
@@ -177,8 +176,6 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 		{
 			result.setDepthTest(DepthTest.DISABLE);
 		}
-				
-		//result.setDepthTest(DepthTest.ENABLE);
 		
 		result.setMaterial(material);
 		this.isosurface = result;
@@ -237,8 +234,6 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 			mesh.getTexCoords().setAll((float[]) textCoords.getBuffer());
 			mesh.getFaces().setAll((int[]) faces.getBuffer());
 		}
-		
-		
 	}
 	
 	@Override

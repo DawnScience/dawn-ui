@@ -14,6 +14,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Cylinder;
+import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 
 
@@ -28,16 +29,16 @@ public class AxisGroup extends Group
 	private Point3D origin;
 	private Point3D Max;
 	
-	private AxisGrid xAxisGrid;
-	private AxisGrid yAxisGrid;
-	private AxisGrid zAxisGrid;
+	private Grid xAxisGrid;
+	private Grid yAxisGrid;
+	private Grid zAxisGrid;
 	
 	private Point3D axisLimitMin = new Point3D(0, 0, 0);
 	private Point3D axisLimitMax = new Point3D(100, 100, 100);
 	
 	private Point3D tickSeperationXYZ;
 	
-	public AxisGroup(Point3D origin, Point3D maxLength, double axisThickness, Point3D tickSeperationXYZ)
+	public AxisGroup(Point3D origin, Point3D maxLength, double axisThickness, Point3D tickSeperationXYZ, Rotate xInvert, Rotate yInvert)
 	{
 
 		this.tickSeperationXYZ = tickSeperationXYZ;
@@ -49,8 +50,9 @@ public class AxisGroup extends Group
 						new Point3D(1,0,0), 
 						new Point2D(tickSeperationXYZ.getY(), tickSeperationXYZ.getZ()),  
 						new Point2D(maxLength.getY(), maxLength.getZ()), 
-						axisThickness/10)
-						);
+						axisThickness/10,
+						xInvert,
+						yInvert));
 		
 		// zx plane
 		this.getChildren().add(
@@ -58,8 +60,9 @@ public class AxisGroup extends Group
 						new Point3D(0,1,0), 
 						new Point2D(tickSeperationXYZ.getZ(), tickSeperationXYZ.getX()),
 						new Point2D(maxLength.getZ(),maxLength.getX()), 
-						axisThickness/10)
-						);
+						axisThickness/10,
+						xInvert,
+						yInvert));
 
 		// xy plane
 		this.getChildren().add(
@@ -67,35 +70,14 @@ public class AxisGroup extends Group
 						new Point3D(0,0,1),
 						new Point2D(tickSeperationXYZ.getX(), tickSeperationXYZ.getY()), 
 						new Point2D(maxLength.getX(), maxLength.getY()), 
-						axisThickness/10)				
-						);
+						axisThickness/10,	
+						xInvert,
+						yInvert));
 	}
 
-	private Cylinder createScaleAxis(Point3D direction, double length, double thickness)
+	private Grid createBasicAxisGrid(Point3D planeVectorXYZ, Point2D tickSeperationXY, Point2D axisLengthXY, double thickness, Rotate xInvert, Rotate yInvert)
 	{
-		// generate the cylinder
-		// default position is centered on (0,0,0) in direction (0,1,0)
-		Cylinder tempBox = new Cylinder(thickness,length * 1.05d);
-		
-		// rotate the axis to face the right direction
-		// in this case the axis
-		tempBox.getTransforms().add(Vector3DUtil.rotateVector(new Point3D(0,1,0), direction));
-		tempBox.getTransforms().add(new Translate(0,(length * 1.05d)/2,0));
-		
-		// create the material to colour the axis
-		PhongMaterial mat = new PhongMaterial();
-		mat.setDiffuseColor (new Color(direction.getX(), direction.getY(), direction.getZ(), 1));
-		mat.setSpecularColor(new Color(direction.getX(), direction.getY(), direction.getZ(), 1));
-		
-		// set the material -> ie colour the axis
-		tempBox.setMaterial(mat);
-		
-		return tempBox;
-	}
-
-	private AxisGrid createBasicAxisGrid(Point3D planeVectorXYZ, Point2D tickSeperationXY, Point2D axisLengthXY, double thickness)
-	{
-		AxisGrid tempGrid = new AxisGrid(planeVectorXYZ, tickSeperationXY, axisLengthXY, thickness, tickSeperationXYZ.getX());
+		Grid tempGrid = new Grid(planeVectorXYZ, tickSeperationXY, axisLengthXY, thickness, tickSeperationXYZ.getX(), xInvert, yInvert);
 		return tempGrid;
 	}
 	
@@ -184,15 +166,15 @@ public class AxisGroup extends Group
 		flipZGridVisible();
 	}
 	
-	public AxisGrid getXAxisGrid()
+	public Grid getXAxisGrid()
 	{
 		return this.xAxisGrid;
 	}
-	public AxisGrid getYAxisGrid()
+	public Grid getYAxisGrid()
 	{
 		return this.yAxisGrid;
 	}
-	public AxisGrid getZAxisGrid()
+	public Grid getZAxisGrid()
 	{
 		return this.zAxisGrid;
 	}
@@ -209,6 +191,11 @@ public class AxisGroup extends Group
 	public void setAxisLimitMax(Point3D MaxLimit)
 	{
 		this.axisLimitMax = MaxLimit;
+	}
+	
+	public void setTickSeperation(Point3D newTickSeperator)
+	{
+		this.tickSeperationXYZ = newTickSeperator;
 	}
 	
 	

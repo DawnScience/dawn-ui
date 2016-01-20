@@ -13,8 +13,9 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 
-public class AxisGrid extends Group
+public class Grid extends Group
 {
+	
 	private Group xAxis;
 	private Group yAxis;
 	
@@ -22,29 +23,33 @@ public class AxisGrid extends Group
 	final Point3D X_AXIS_DIRECTION = new Point3D(1, 0, 0);
 	final Point3D Y_AXIS_DIRECTION = new Point3D(0, 1, 0);
 	
+	
+	
 	// transformations
 	private Translate offset;
 	private Rotate rotate;
-		
+	private Rotate invertedSceneXRotate;
+ 	private Rotate invertedSceneYRotate;
+	
 	// saved details
 	private Point3D planeVector;
-	private double offsetW;
 	private Point2D maxLengthXY;
 	private Point2D tickSeperationXY;
 	private double thickness;
 	private Color colour;
 	private double textSize;
 	
-	public AxisGrid(Point3D planeXYZ, Point2D tickSeperationXY, Point2D axisLength, double thickness, double textSize)
+	public Grid(Point3D planeXYZ, Point2D tickSeperationXY, Point2D axisLength, double thickness, double textSize, Rotate invertXRot, Rotate invertYRot)
 	{
 		this.textSize = textSize;
 		this.planeVector = planeXYZ;
 		this.tickSeperationXY = tickSeperationXY;
 		this.maxLengthXY = axisLength;
 		this.thickness = thickness;
+		this.invertedSceneXRotate = invertXRot;
+		this.invertedSceneYRotate = invertYRot;
 		
 		axisPlane(this.planeVector, this.tickSeperationXY, this.maxLengthXY , this.thickness);		
-		
 		
 	}
 	
@@ -118,15 +123,18 @@ public class AxisGrid extends Group
 		return new Rotate(angle, startVectorProjection.crossProduct(endVectorProjection));
 	}
 	
-	private AxisLineGroup createTickBar(double length, Point3D axisDirection, Point2D offsetXY, String text)
+	private LineGroup createTickBar(double length, Point3D axisDirection, Point2D offsetXY, String text)
 	{
 		
-		AxisLineGroup returnBar = new AxisLineGroup(
+		LineGroup returnBar = new LineGroup(
 				length,
 				axisDirection,
 				new Point3D(offsetXY.getX(),offsetXY.getY(), 0),
 				text,
-				textSize);
+				this.textSize,
+				this.invertedSceneXRotate,
+				this.invertedSceneYRotate,
+				this.rotate);
 		
 		return returnBar;
 	}
@@ -145,19 +153,19 @@ public class AxisGrid extends Group
 	private void reDeclareLabelsSpecfic(double labelMin, double labelMax, Group axis, double maxLength, double tickSeperation)
 	{
 		// create a list of only axis lines from the scene graph
-		List<AxisLineGroup> axisLineList = new ArrayList<AxisLineGroup>();
+		List<LineGroup> axisLineList = new ArrayList<LineGroup>();
 		
 		for (Node lineNode: axis.getChildren())
 		{
-			if (lineNode instanceof AxisLineGroup)
+			if (lineNode instanceof LineGroup)
 			{
-				if (((AxisLineGroup)lineNode).getTextState())
-					axisLineList.add((AxisLineGroup)lineNode);
+				if (((LineGroup)lineNode).getTextState())
+					axisLineList.add((LineGroup)lineNode);
 			}
 		}
 				
 		int i = 0;
-		for (AxisLineGroup line: axisLineList)
+		for (LineGroup line: axisLineList)
 		{
 			final int a = (int) (maxLength/(tickSeperation * i));
 			
@@ -212,10 +220,10 @@ public class AxisGrid extends Group
 	{
 		for (Node n : aixsGroup)
 		{
-			if (n instanceof AxisLineGroup)
+			if (n instanceof LineGroup)
 			{
-				((AxisLineGroup)n).setHeightExtended(length);
-				((AxisLineGroup)n).resetOffset();
+				((LineGroup)n).setHeightExtended(length);
+				((LineGroup)n).resetOffset();
 			}
 		}
 	}
@@ -244,7 +252,7 @@ public class AxisGrid extends Group
 			
 			for (int i = 0; i < excessXLineCount; i ++)
 			{
-				AxisLineGroup bar = createTickBar(
+				LineGroup bar = createTickBar(
 						this.maxLengthXY.getY(),
 						Y_AXIS_DIRECTION, 
 						new Point2D(tickSeperationXY.getX()*(nXCount+i),0),
@@ -280,7 +288,7 @@ public class AxisGrid extends Group
 			for (int i = 0; i < excessYLineCount; i ++)
 			{	
 				
-				AxisLineGroup bar = createTickBar(
+				LineGroup bar = createTickBar(
 						this.maxLengthXY.getX(), 
 						X_AXIS_DIRECTION, 
 						new Point2D(this.tickSeperationXY.getY()*(nYCount+i), 0),
