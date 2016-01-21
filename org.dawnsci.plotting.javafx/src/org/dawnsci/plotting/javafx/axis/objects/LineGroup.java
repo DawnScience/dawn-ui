@@ -10,6 +10,7 @@ import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
 
@@ -18,7 +19,7 @@ public class LineGroup extends Group
 	final double TEXTMOD = 2;
 	
 	private Line line;
-	private Pane textPane;
+	private Group textPane;
 	private Text textLabel;
 //	private Label textLabel;
 	
@@ -46,7 +47,7 @@ public class LineGroup extends Group
 		this.line = new Line(length, new Rotate(), new Point3D(0,0,0));
 		
 		this.rotate = new Rotate();
-		textPane = new Pane();
+		textPane = new Group();
 		
 		Transform inverseGridRotate = null;
 		try
@@ -61,22 +62,43 @@ public class LineGroup extends Group
 		
 		if (label != null)
 		{
-			textLabel = createTextLabel(offset.getX(), offset.getY(), label);
+			textLabel = createTextLabel(offset.getX()/4, offset.getY(), label);
 			textLabel.setDepthTest(DepthTest.DISABLE);
+			
+			
+			textLabel.setFontSmoothingType(FontSmoothingType.LCD);
+			textPane.getChildren().add(textLabel);
+			
+			double width = textPane.getBoundsInLocal().getWidth();
+			double depth = textPane.getBoundsInLocal().getDepth();
+			double height= textPane.getBoundsInLocal().getHeight();
+			
+			textXAxisRotate.setPivotX(width/2);
+			textXAxisRotate.setPivotY(-height/4);
+			
+
+			textYAxisRotate.setPivotX(width/2);
+			textYAxisRotate.setPivotY(-height/4);
+			
+			textZAxisRotate.setPivotX(width/2);
+			textZAxisRotate.setPivotY(-height/4);
+			
+			Rotate rotate = new Rotate(-90,new Point3D(0, 0, 1));
+			rotate.setPivotX(width);
+			rotate.setPivotY(-height/4);
+			
+			
+			
 			textLabel.getTransforms().addAll(
 								textXAxisRotate,
 								textYAxisRotate, 
 								textZAxisRotate);
-//								inverseGridRotate);
-			textLabel.setFontSmoothingType(FontSmoothingType.LCD);
-			textPane.getChildren().add(textLabel);
-//			textPane.setCacheHint(CacheHint.SCALE_AND_ROTATE);
-//			textPane.setCache(true);
-//			textPane.getTransforms().add(new Scale((float)1/TEXTMOD, (float)1/TEXTMOD, (float)1/TEXTMOD));
-			textPane.getTransforms().addAll(inverseGridRotate);
 			
-			
-			
+			Translate offsetText = new Translate(0,length + (width/2) ,0);
+			Translate translateTextPane = new Translate(-width/2, height/4, 0);
+			textPane.getTransforms().addAll(translateTextPane, offsetText); // inverseGridRotate
+		
+		
 		}
 		
 		
@@ -120,18 +142,11 @@ public class LineGroup extends Group
 		
 		// create the text to return
 		Text returnText = new Text(text);
-				
-		// add transforms
-//		returnText.getTransforms().addAll(
-//				new Translate(
-//						-(textSize*TEXTMOD)/2,
-//						(textSize*TEXTMOD)/2,
-//						0));
 		
 		// scale the text by Mod -> this is to allow for greater resolution
 		// javafx handles text funny and it blurs upon zooming
 		// i increase the size then scale down to increase the resolution
-		returnText.setFont(new Font(textSize*TEXTMOD));
+		returnText.setFont(new Font(textSize));
 		
 		
 		return returnText;

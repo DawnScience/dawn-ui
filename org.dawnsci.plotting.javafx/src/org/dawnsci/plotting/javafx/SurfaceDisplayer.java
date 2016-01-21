@@ -38,7 +38,7 @@ import javafx.scene.transform.Transform;
 import javafx.scene.transform.TransformChangedEvent;
 import javafx.scene.transform.Translate;
 
-import org.dawnsci.plotting.javafx.axis.objects.AxisGroup;
+import org.dawnsci.plotting.javafx.axis.objects.CombinedAxisGroup;
 import org.dawnsci.plotting.javafx.axis.objects.ScaleAxisGroup;
 import org.dawnsci.plotting.javafx.axis.objects.Vector3DUtil;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
@@ -67,7 +67,7 @@ public class SurfaceDisplayer extends Scene
 	private Group cameraGroup; 		// holds the camera translation data
 	
 	private Group axisNode; 		// holds the axisGroup -> allows the axisGroup to be null without an exception
-	private AxisGroup axisGroup;	// hold the axisGroup
+	private CombinedAxisGroup axisGroup;	// hold the axisGroup
 	private Group objectGroup;		// holds the objects for the scene
 	private Group lightGroup;		// holds the lights for the scene
 	private ScaleAxisGroup scaleAxesGroup;
@@ -148,15 +148,6 @@ public class SurfaceDisplayer extends Scene
 	private double[] newMousePos = new double[2];
 	private double zoom = 100;
 	
-	/**
-	 * 
-	 * debugging
-	 * 
-	 */
-    private final long[] frameTimes = new long[100];
-    private int frameTimeIndex = 0 ;
-    private boolean arrayFilled = false ;
-	
 	
 	/*
 	 * root - the root node for the scene isosurfaceGroup - the isosurface group
@@ -215,9 +206,8 @@ public class SurfaceDisplayer extends Scene
 		
 		// create the scene graph
 		this.lightGroup.getChildren().addAll(this.isosurfaceGroup);
-		this.objectGroup.getChildren().addAll(this.lightGroup, axisNode);
-		this.cameraGroup.getChildren().addAll(scaleAxesGroup, this.objectGroup);
-//		this.cameraGroup.getChildren().addAll(this.objectGroup);
+		this.objectGroup.getChildren().addAll(this.lightGroup, axisNode);//, scaleAxesGroup);
+		this.cameraGroup.getChildren().addAll(this.objectGroup);
 		
 		// add groups the the root
 		root.getChildren().addAll(cameraGroup);
@@ -239,11 +229,12 @@ public class SurfaceDisplayer extends Scene
 		final double size = 3;
 				
 		// create and return the new axis
-		AxisGroup newAxisGroup =  new AxisGroup(
+		CombinedAxisGroup newAxisGroup =  new CombinedAxisGroup(
 				new Point3D(0,0,0), 
 				xyzLength, 
 				size, 
-				new Point3D(10,10,10));
+				new Point3D(10,10,10),
+				scaleEvent);
 		
 		scaleAxesGroup.setAxisEventListener(scaleEvent); //!! look into re-organising
 		
@@ -258,6 +249,7 @@ public class SurfaceDisplayer extends Scene
 		// enable for the axis node group
 		this.isosurfaceGroup.setDepthTest(DepthTest.DISABLE);
 		this.axisNode.setDepthTest(DepthTest.ENABLE);
+	
 	}
 	
 	private void initialiseTransforms()
@@ -551,7 +543,7 @@ public class SurfaceDisplayer extends Scene
 										axesData.get(0).getFloat(1),
 										axesData.get(0).getFloat(2));
 		
-		axisGroup.SetTickSeperationXYZ(new Point3D(
+		axisGroup.SetTickSeparationXYZ(new Point3D(
 										calculateTickSeperation(axesData.get(1)), 
 										calculateTickSeperation(axesData.get(2)), 
 										calculateTickSeperation(axesData.get(3))));

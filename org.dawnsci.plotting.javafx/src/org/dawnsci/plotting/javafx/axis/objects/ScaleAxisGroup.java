@@ -55,7 +55,7 @@ public class ScaleAxisGroup extends Group
 			if (n instanceof Cylinder)
 			{
 				n.setCursor(Cursor.OPEN_HAND);
-				n.setOnMouseDragged(eventHandler); // this is slightly buggy but i'm unable to repeat consistently
+				n.setOnMouseDragged(eventHandler);
 			}
 		}
 	}
