@@ -1,11 +1,6 @@
 package org.dawnsci.isosurface.isogui;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import org.dawnsci.isosurface.Activator;
 import org.dawnsci.plotting.util.ColorUtility;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.richbeans.widgets.selector.VerticalListEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;

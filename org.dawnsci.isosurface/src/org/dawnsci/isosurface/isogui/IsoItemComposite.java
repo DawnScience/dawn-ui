@@ -1,14 +1,11 @@
 package org.dawnsci.isosurface.isogui;
 
-import org.dawnsci.isosurface.Activator;
 import org.eclipse.richbeans.api.event.ValueListener;
 import org.eclipse.richbeans.api.widget.IFieldWidget;
 import org.eclipse.richbeans.widgets.BoundsProvider;
 import org.eclipse.richbeans.widgets.scalebox.NumberBox;
 import org.eclipse.richbeans.widgets.scalebox.ScaleBox;
-import org.eclipse.richbeans.widgets.wrappers.BooleanWrapper;
 import org.eclipse.richbeans.widgets.wrappers.ColorSelectorWrapper;
-import org.eclipse.richbeans.widgets.wrappers.ComboWrapper;
 import org.eclipse.richbeans.widgets.wrappers.ScaleWrapper;
 import org.eclipse.richbeans.widgets.wrappers.SpinnerWrapper;
 import org.eclipse.richbeans.widgets.wrappers.TextWrapper;
@@ -29,13 +26,11 @@ public class IsoItemComposite extends Composite
 	private ScaleWrapper opacity;
 	private SpinnerWrapper x, y, z;
 	private ColorSelectorWrapper colour;
-	private ComboWrapper upButton;
 	
-	public IsoItemComposite(Composite parent, int style) 
+	public IsoItemComposite(Composite parent, int style)
 	{
 		super(parent, SWT.FILL);
 		createUI();
-		// setBackground(new Color(this.getDisplay(), new RGB(0, 0, 255)));
 	}
 	
 	/**

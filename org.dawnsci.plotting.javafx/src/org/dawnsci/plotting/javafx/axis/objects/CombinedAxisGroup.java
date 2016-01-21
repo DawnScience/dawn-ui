@@ -1,21 +1,10 @@
 package org.dawnsci.plotting.javafx.axis.objects;
 
-import java.util.List;
-
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
-import javafx.scene.Cursor;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.PhongMaterial;
-import javafx.scene.shape.Cylinder;
-import javafx.scene.transform.Rotate;
-import javafx.scene.transform.Translate;
 
 
 /** 

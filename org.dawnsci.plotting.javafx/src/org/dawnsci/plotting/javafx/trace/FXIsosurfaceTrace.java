@@ -11,7 +11,6 @@ package org.dawnsci.plotting.javafx.trace;
 import java.util.List;
 
 import javafx.application.Platform;
-import javafx.scene.Cursor;
 import javafx.scene.DepthTest;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
@@ -21,7 +20,7 @@ import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 
 import org.dawnsci.plotting.javafx.SurfaceDisplayer;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;	
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
 import org.eclipse.dawnsci.plotting.api.trace.IIsosurfaceTrace;

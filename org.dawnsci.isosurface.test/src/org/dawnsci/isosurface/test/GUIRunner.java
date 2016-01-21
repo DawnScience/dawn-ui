@@ -1,10 +1,8 @@
 package org.dawnsci.isosurface.test;
 
-import org.dawnsci.isosurface.Activator;
 import org.dawnsci.isosurface.isogui.IsoBean;
 import org.dawnsci.isosurface.isogui.IsoComposite;
 import org.dawnsci.isosurface.isogui.IsoHandler;
-import org.dawnsci.isosurface.tool.IsosurfaceJob;
 import org.eclipse.richbeans.widgets.util.SWTUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -18,7 +16,7 @@ public class GUIRunner
 {
 	
 	@Test
-	public void createShell() throws Exception {
+	public void TestIsoSurfaceGUI() throws Exception {
 		
 		Display display = new Display();
 		Shell shell = new Shell(display);
@@ -38,7 +36,7 @@ public class GUIRunner
 		ui.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 				
 		IsoBean isoBean = new IsoBean();
-		
+			
 		ui.setMinMaxIsoValueAndCubeSize(new double[]{0,100}, new int[]{5,5,5});
 		
 		try 

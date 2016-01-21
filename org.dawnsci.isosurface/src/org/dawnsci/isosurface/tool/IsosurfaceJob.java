@@ -8,6 +8,11 @@
  */
 package org.dawnsci.isosurface.tool;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
  * 
- * @author Joel Ogden / nnb55016
+ * @author nnb55016 / Joel Ogden
  * The Job class for Isovalue visualisation feature
  */
 public class IsosurfaceJob extends Job {
@@ -96,6 +101,21 @@ public class IsosurfaceJob extends Job {
 		
 		cancel();
 		schedule();
+		
+		
+		
+	}
+	
+	private static Object deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
+        ByteArrayInputStream b = new ByteArrayInputStream(bytes);
+        ObjectInputStream o = new ObjectInputStream(b);
+        return o.readObject();
+    }
+	private static byte[] serialize(Object obj) throws IOException {
+        ByteArrayOutputStream b = new ByteArrayOutputStream();
+        ObjectOutputStream o = new ObjectOutputStream(b);
+        o.writeObject(obj);
+        return b.toByteArray();
 	}
 	
 	// made to seperate computing the isosurface and simply updating the values like colour
@@ -165,7 +185,6 @@ public class IsosurfaceJob extends Job {
 				{
 					Surface surface = generator.execute(null, new ProgressMonitorWrapper(monitor));
 					
-					
 					points     = new FloatDataset(surface.getPoints(), surface.getPoints().length);
 					textCoords = new FloatDataset(surface.getTexCoords(), surface.getTexCoords().length);
 					faces      = new IntegerDataset(surface.getFaces(), surface.getFaces().length);
@@ -227,6 +246,7 @@ public class IsosurfaceJob extends Job {
 		}
 		return Status.OK_STATUS;
 	}
+	
 	
 	private FloatDataset convertTodatasetAxis(List<Tick> tickList) {
 		

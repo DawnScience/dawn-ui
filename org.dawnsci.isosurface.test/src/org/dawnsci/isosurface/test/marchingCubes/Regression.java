@@ -20,7 +20,6 @@ import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Random;
 import org.junit.Test;
 
-
 public class Regression {
 
 	
