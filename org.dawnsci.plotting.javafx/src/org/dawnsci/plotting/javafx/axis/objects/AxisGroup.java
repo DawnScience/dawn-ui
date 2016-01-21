@@ -38,7 +38,7 @@ public class AxisGroup extends Group
 	
 	private Point3D tickSeperationXYZ;
 	
-	public AxisGroup(Point3D origin, Point3D maxLength, double axisThickness, Point3D tickSeperationXYZ, Rotate xInvert, Rotate yInvert)
+	public AxisGroup(Point3D origin, Point3D maxLength, double axisThickness, Point3D tickSeperationXYZ)
 	{
 
 		this.tickSeperationXYZ = tickSeperationXYZ;
@@ -50,9 +50,7 @@ public class AxisGroup extends Group
 						new Point3D(1,0,0), 
 						new Point2D(tickSeperationXYZ.getY(), tickSeperationXYZ.getZ()),  
 						new Point2D(maxLength.getY(), maxLength.getZ()), 
-						axisThickness/10,
-						xInvert,
-						yInvert));
+						axisThickness/10));
 		
 		// zx plane
 		this.getChildren().add(
@@ -60,24 +58,20 @@ public class AxisGroup extends Group
 						new Point3D(0,1,0), 
 						new Point2D(tickSeperationXYZ.getZ(), tickSeperationXYZ.getX()),
 						new Point2D(maxLength.getZ(),maxLength.getX()), 
-						axisThickness/10,
-						xInvert,
-						yInvert));
-
+						axisThickness/10));
+	
 		// xy plane
 		this.getChildren().add(
 				zAxisGrid = createBasicAxisGrid(
 						new Point3D(0,0,1),
 						new Point2D(tickSeperationXYZ.getX(), tickSeperationXYZ.getY()), 
 						new Point2D(maxLength.getX(), maxLength.getY()), 
-						axisThickness/10,	
-						xInvert,
-						yInvert));
+						axisThickness/10));
 	}
 
-	private Grid createBasicAxisGrid(Point3D planeVectorXYZ, Point2D tickSeperationXY, Point2D axisLengthXY, double thickness, Rotate xInvert, Rotate yInvert)
+	private Grid createBasicAxisGrid(Point3D planeVectorXYZ, Point2D tickSeperationXY, Point2D axisLengthXY, double thickness)
 	{
-		Grid tempGrid = new Grid(planeVectorXYZ, tickSeperationXY, axisLengthXY, thickness, tickSeperationXYZ.getX(), xInvert, yInvert);
+		Grid tempGrid = new Grid(planeVectorXYZ, tickSeperationXY, axisLengthXY, thickness, tickSeperationXYZ.getX());
 		return tempGrid;
 	}
 	

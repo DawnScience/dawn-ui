@@ -28,8 +28,6 @@ public class Grid extends Group
 	// transformations
 	private Translate offset;
 	private Rotate rotate;
-	private Rotate invertedSceneXRotate;
- 	private Rotate invertedSceneYRotate;
 	
 	// saved details
 	private Point3D planeVector;
@@ -39,15 +37,13 @@ public class Grid extends Group
 	private Color colour;
 	private double textSize;
 	
-	public Grid(Point3D planeXYZ, Point2D tickSeperationXY, Point2D axisLength, double thickness, double textSize, Rotate invertXRot, Rotate invertYRot)
+	public Grid(Point3D planeXYZ, Point2D tickSeperationXY, Point2D axisLength, double thickness, double textSize)
 	{
 		this.textSize = textSize;
 		this.planeVector = planeXYZ;
 		this.tickSeperationXY = tickSeperationXY;
 		this.maxLengthXY = axisLength;
 		this.thickness = thickness;
-		this.invertedSceneXRotate = invertXRot;
-		this.invertedSceneYRotate = invertYRot;
 		
 		axisPlane(this.planeVector, this.tickSeperationXY, this.maxLengthXY , this.thickness);		
 		
@@ -132,8 +128,6 @@ public class Grid extends Group
 				new Point3D(offsetXY.getX(),offsetXY.getY(), 0),
 				text,
 				this.textSize,
-				this.invertedSceneXRotate,
-				this.invertedSceneYRotate,
 				this.rotate);
 		
 		return returnBar;

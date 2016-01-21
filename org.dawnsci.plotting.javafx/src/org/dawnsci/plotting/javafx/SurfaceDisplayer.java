@@ -81,11 +81,6 @@ public class SurfaceDisplayer extends Scene
 	private Rotate alignedYRotate = new Rotate();
 	{alignedYRotate.setAxis(new Point3D(0,1,0));};
 	
-	private Rotate alignedXRotateInverse = new Rotate();
-	{alignedXRotateInverse.setAxis(new Point3D(1,0,0));};
-	private Rotate alignedYRotateInverse = new Rotate();
-	{alignedYRotateInverse.setAxis(new Point3D(0,1,0));};
-	
 	private Point3D scaleDir = new Point3D(1, 1, 1);
 	private Point2D mouseScaleDir = new Point2D(1, 1);
 	
@@ -187,42 +182,10 @@ public class SurfaceDisplayer extends Scene
 		setDepthBuffers();
 		initialiseTransforms();
 		addLights();
-//		disableTextRotation(root);
 		
 		// add the listeners for scene camera movement
 		addListeners();
 		
-		/*
-		 *  debugging
-		 */
-		
-		if (DEBUG_MODE)
-		{
-			final Label label = new Label();
-	        AnimationTimer frameRateMeter = new AnimationTimer() {
-	
-	            @Override
-	            public void handle(long now) {
-	                long oldFrameTime = frameTimes[frameTimeIndex] ;
-	                frameTimes[frameTimeIndex] = now ;
-	                frameTimeIndex = (frameTimeIndex + 1) % frameTimes.length ;
-	                if (frameTimeIndex == 0) {
-	                    arrayFilled = true ;
-	                }
-	                if (arrayFilled) {
-	                    long elapsedNanos = now - oldFrameTime ;
-	                    long elapsedNanosPerFrame = elapsedNanos / frameTimes.length ;
-	                    double frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
-	                    label.setText(String.format("Current frame rate: %.3f", frameRate));
-	                }
-	            }
-	        };
-	
-	        frameRateMeter.start();
-	
-			root.getChildren().add(label);
-			
-		}
 	}
 	/*
 	 * private
@@ -280,9 +243,7 @@ public class SurfaceDisplayer extends Scene
 				new Point3D(0,0,0), 
 				xyzLength, 
 				size, 
-				new Point3D(10,10,10),
-				alignedXRotateInverse,
-				alignedYRotateInverse);
+				new Point3D(10,10,10));
 		
 		scaleAxesGroup.setAxisEventListener(scaleEvent); //!! look into re-organising
 		
@@ -331,20 +292,6 @@ public class SurfaceDisplayer extends Scene
 		ambientAxisLight.getScope().add(this.axisGroup);
 		// !! this.axisGroup.getChildren().addAll(ambientAxisLight);
 		
-	}
-	
-	private void disableTextRotation(Group current)
-	{
-		for (Node g : current.getChildren())
-		{
-			if (g instanceof Pane)
-			{
-				g.getTransforms().addAll(alignedYRotateInverse, alignedXRotateInverse);
-
-			}
-			if (g instanceof Group)
-				disableTextRotation((Group)g);
-		}
 	}
 	
 	// add the listeners
@@ -404,10 +351,7 @@ public class SurfaceDisplayer extends Scene
 					if (me.isPrimaryButtonDown() && !me.isSecondaryButtonDown())
 					{
 						alignedXRotate.setAngle(alignedXRotate.getAngle() + mouseDelta[1] * 0.65f);
-						alignedYRotate.setAngle(alignedYRotate.getAngle() - mouseDelta[0] * 0.65f);	
-						
-						alignedXRotateInverse.setAngle((alignedXRotate.getAngle() - mouseDelta[1] * 0.65f) * - 1);
-						alignedYRotateInverse.setAngle((alignedYRotate.getAngle() + mouseDelta[1] * 0.65f) * - 1);
+						alignedYRotate.setAngle(alignedYRotate.getAngle() - mouseDelta[0] * 0.65f);
 					}
 					
 					// zoom
