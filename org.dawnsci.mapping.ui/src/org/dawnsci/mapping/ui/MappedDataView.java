@@ -80,6 +80,12 @@ public class MappedDataView extends ViewPart {
 	private MapPlotManager plotManager; 
 	private MappedFileManager fileManager;
 	
+	public MappedDataView() {
+		
+		fileManager = new MappedFileManager();
+	}
+	
+	
 	@Override
 	public void createPartControl(Composite parent) {
 		
@@ -127,7 +133,7 @@ public class MappedDataView extends ViewPart {
 			}
 		});
 		
-		fileManager = new MappedFileManager(plotManager, area, viewer);
+		fileManager.init(plotManager, area, viewer);
 
 		// Add menu and action to treeviewer
 		MenuManager menuMgr = new MenuManager();

@@ -28,8 +28,8 @@ public class MappedFileManager {
 	private MappedDataArea mappedDataArea;
 	private Viewer viewer;
 
-
-	public MappedFileManager(MapPlotManager plotManager, MappedDataArea mappedDataArea, Viewer viewer) {
+	
+	public void init(MapPlotManager plotManager, MappedDataArea mappedDataArea, Viewer viewer){
 		this.plotManager = plotManager;
 		this.mappedDataArea = mappedDataArea;
 		this.viewer = viewer;
