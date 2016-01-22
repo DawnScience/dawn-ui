@@ -1,4 +1,4 @@
-RELEASE NOTES FOR DAWN 1.11.0
+RELEASE NOTES FOR DAWN 2.0.0 "BOTO"
 
 
 1. Use the '-data' switch to specify a different workspace if the disk access at your facility
@@ -12,6 +12,12 @@ RELEASE NOTES FOR DAWN 1.11.0
 3. To reliably find the Dawn version you are using go to:
    * Help->About Dawn.
 
+New features:
+---------------
+DAWN 2.0.0 has migrated to the Eclipse E4 application model.
+
+Bug fixes:
+---------------
 
 Workflows:
 ---------------
