@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IPeak;
 import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
@@ -43,7 +44,6 @@ import uk.ac.diamond.scisoft.analysis.diffraction.powder.NonPixelSplittingIntegr
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.NonPixelSplittingIntegration2D;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelSplittingIntegration2D;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Gaussian;
 import uk.ac.diamond.scisoft.analysis.optimize.ApacheOptimizer;
@@ -311,13 +311,13 @@ public class PowderCheckJob extends Job {
 		y.setName("Fit");
 		Dataset baseline = baselineIn.getSlice(new int[] {minXidx}, new int[] {maxXidx}, null);
 
-		List<APeak> peaks = Generic1DFitter.fitPeaks(x, y, Gaussian.class, count+10);
+		List<IPeak> peaks = Generic1DFitter.fitPeaks(x, y, Gaussian.class, count+10);
 		
 		List<PowderCheckResult> initResults = new ArrayList<PowderCheckResult>();
 		
 		CompositeFunction cf = new CompositeFunction();
 
-		for (APeak peak : peaks) cf.addFunction(peak);
+		for (IPeak peak : peaks) cf.addFunction(peak);
 		
 		double limit = findMatchLimit(qList, cf);
 		
