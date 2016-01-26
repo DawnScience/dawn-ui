@@ -27,6 +27,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Cylinder;
+import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
@@ -36,6 +37,7 @@ import javafx.scene.transform.Translate;
 import org.dawnsci.plotting.javafx.axis.objects.CombinedAxisGroup;
 import org.dawnsci.plotting.javafx.axis.objects.ScaleAxisGroup;
 import org.dawnsci.plotting.javafx.axis.objects.Vector3DUtil;
+import org.dawnsci.plotting.javafx.trace.FXIsosurfaceTrace;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 
 /**
@@ -49,11 +51,7 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
  */
 
 public class SurfaceDisplayer extends Scene
-{
-	// finals
-	
-	private boolean DEBUG_MODE = false; // Used to activate the debugging code -> not changed during run time
-		
+{		
 	// camera for the scene
 	private PerspectiveCamera camera;
 	
@@ -67,7 +65,7 @@ public class SurfaceDisplayer extends Scene
 	private Group lightGroup;		// holds the lights for the scene
 	private ScaleAxisGroup scaleAxesGroup;
 	
-	// the saved offset/ rotation data
+	// Scene and camera variables
 	private Translate sceneOffset;
 	private Translate isoGroupOffset;
 	private Scale scale = new Scale();
@@ -75,22 +73,15 @@ public class SurfaceDisplayer extends Scene
 	{alignedXRotate.setAxis(new Point3D(1,0,0));};
 	private Rotate alignedYRotate = new Rotate();
 	{alignedYRotate.setAxis(new Point3D(0,1,0));};
+	private double zoom = 100;
 	
-	private Point3D scaleDir = new Point3D(1, 1, 1);
-	private Point2D mouseScaleDir = new Point2D(1, 1);
+	// mouse variables
+	private boolean mousePositionSet = false;
+	private double[] oldMousePos = new double[2];
+	private double[] newMousePos = new double[2];
 	
-	private boolean mousePressed = false; // added to stop a bug where onDrag would be called before onPress
-	
-	/**
-	 * Axes hacking
-	 */
-	
-	private Point3D axesMaxLengths;
-	
-	/**
-	 * 
-	 */
-	
+	// Axis variables
+	private Point3D axesMaxLengths;	
 	private EventHandler<MouseEvent> scaleEvent = new EventHandler<MouseEvent>()
 	{
 		@Override
@@ -98,12 +89,10 @@ public class SurfaceDisplayer extends Scene
 		{
 			
 			Object obj = me.getSource();
-			final Point3D dir = Vector3DUtil.exclusiveTransforms(
+			final Point3D scaleDir = Vector3DUtil.exclusiveTransforms(
 								((Cylinder)obj).getTransforms(),
 								new Point3D(0, -1, 0),
 								Rotate.class);
-			
-			scaleDir = dir;
 			
 			final Point3D actualDir = new Point3D(0, 1, 0);
 						
@@ -124,7 +113,7 @@ public class SurfaceDisplayer extends Scene
 			newMousePos[1] = me.getSceneY();
 			
 			
-			mouseScaleDir = new Point2D(sceneMouseOffset.getX(), sceneMouseOffset.getY());
+			Point2D  mouseScaleDir = new Point2D(sceneMouseOffset.getX(), sceneMouseOffset.getY());
 
 			final double[] mouseDelta = {
 					newMousePos[0] - oldMousePos[0], 
@@ -132,21 +121,16 @@ public class SurfaceDisplayer extends Scene
 			
 			final double mouseMovementMod = ((zoom + 1000) * 0.001f) + 0.1f;
 
-			updateScale(mouseDelta, mouseMovementMod);
-			
+			updateScale(mouseDelta, mouseMovementMod, mouseScaleDir, scaleDir);
 			
 		}
 		
 	};
 		
-	private double[] oldMousePos = new double[2];
-	private double[] newMousePos = new double[2];
-	private double zoom = 100;
-	
-	
-	/*
-	 * root - the root node for the scene isosurfaceGroup - the isosurface group
-	 * node within the scene graph
+	/**
+	 * 
+	 * @param root - the root node for the scene isosurfaceGroup
+	 * @param isosurfaceGroup - the node holding the surface objects
 	 */
 	public SurfaceDisplayer(Group root, Group isosurfaceGroup)
 	{
@@ -201,7 +185,7 @@ public class SurfaceDisplayer extends Scene
 		
 		// create the scene graph
 		this.lightGroup.getChildren().addAll(this.isosurfaceGroup);
-		this.objectGroup.getChildren().addAll(this.lightGroup, axisNode);//, scaleAxesGroup);
+		this.objectGroup.getChildren().addAll(this.lightGroup, axisNode);
 		this.cameraGroup.getChildren().addAll(this.objectGroup);
 		
 		// add groups the the root
@@ -273,12 +257,6 @@ public class SurfaceDisplayer extends Scene
 		AmbientLight ambientSurfaceLight = new AmbientLight(new Color(0.3, 0.3, 0.3, 1));
 		PointLight pointLight = new PointLight(new Color(1, 1, 1, 1));		
 		this.lightGroup.getChildren().addAll(ambientSurfaceLight, pointLight);
-		
-		// create lights for the axes
-		AmbientLight ambientAxisLight = new AmbientLight(Color.WHITE);
-		ambientAxisLight.getScope().add(this.axisGroup);
-		// !! this.axisGroup.getChildren().addAll(ambientAxisLight);
-		
 	}
 	
 	// add the listeners
@@ -290,19 +268,32 @@ public class SurfaceDisplayer extends Scene
 		 */
 		
 		// on click, reset mouse position info - ie reset delta
-		
 		setOnMousePressed(new EventHandler<MouseEvent>()
 		{
 			@Override
 			public void handle(MouseEvent me)
 			{
-				mousePressed = true;
-				
 				oldMousePos[0] = (float) me.getSceneX();
 				oldMousePos[1] = (float) me.getSceneY();
 				
 				newMousePos[0] = (float) me.getSceneX();
 				newMousePos[1] = (float) me.getSceneY();
+				
+				// linux doesn't always call the events in the expected order
+				mousePositionSet = true;
+			}
+		});
+		
+		setOnMouseReleased(new EventHandler<MouseEvent>()
+		{
+			@Override
+			public void handle(MouseEvent me)
+			{
+				
+				oldMousePos[0] = newMousePos[0];
+				oldMousePos[1] = newMousePos[1];
+				
+				mousePositionSet = false;
 			}
 		});
 		
@@ -312,10 +303,7 @@ public class SurfaceDisplayer extends Scene
 			@Override
 			public void handle(MouseEvent me)
 			{
-				// when testing I found the mouseDragged event was sometimes called prior to the mousePressed event.
-				// This will result in the mouse positions not being reset.
-				// Added mousePressed to stop this event unless the mousePos has been reset.
-				if (mousePressed)
+				if (mousePositionSet)
 				{
 					// set old values
 					oldMousePos[0] = newMousePos[0];
@@ -323,8 +311,6 @@ public class SurfaceDisplayer extends Scene
 					// find new values of mouse pos
 					newMousePos[0] = me.getSceneX();
 					newMousePos[1] = me.getSceneY();
-					
-					
 					
 					// find offset from last tick - ie delta
 					final double[] mouseDelta = {
@@ -361,7 +347,6 @@ public class SurfaceDisplayer extends Scene
 					}
 					camera.getTransforms().setAll(new Translate(0, 0, -zoom));
 					// camera.getTransforms().clear();
-					
 				}
 			}
 		});
@@ -436,7 +421,7 @@ public class SurfaceDisplayer extends Scene
 		axisGroup.checkScale(this.scale.transform(maxLength));
 	}
 	
-	private void updateScale(double[] mouseDelta, double mouseMovementMod) 
+	private void updateScale(double[] mouseDelta, double mouseMovementMod, Point2D mouseScaleDir, Point3D scaleDir) 
 	{
 		Point3D mouseDelta3D = new Point3D(mouseDelta[0], mouseDelta[1], 0);
 		
@@ -462,10 +447,26 @@ public class SurfaceDisplayer extends Scene
 		{
 			scale.setZ(0);
 		}
-		
-		
 	}
-		
+	
+	private double calculateTickSeperation(IDataset dataSet)
+	{
+		double offset = dataSet.getDouble(0);
+		if (dataSet.getSize() > 0)
+		{
+			offset = dataSet.getDouble(1) - dataSet.getDouble(0);
+			for (int i = 1; i < dataSet.getSize(); i++)
+			{
+				if ((dataSet.getDouble(i) - dataSet.getDouble(i-1)) != offset)
+				{
+					offset = (dataSet.getDouble(i) - dataSet.getDouble(i-1));
+					System.err.println("Axis Ticks inconsistant");
+				}
+			}
+		}
+		return offset;
+	}
+	
 	/*
 	 * public 
 	 */
@@ -490,6 +491,11 @@ public class SurfaceDisplayer extends Scene
 	public Group getIsosurfaceGroup()
 	{
 		return isosurfaceGroup;
+	}
+	
+	public void addTrace(FXIsosurfaceTrace trace)
+	{
+		this.isosurfaceGroup.getChildren().add(trace.getIsoSurface());
 	}
 	
 	public void removeSurface(Node removeNode)
@@ -538,38 +544,22 @@ public class SurfaceDisplayer extends Scene
 										axesData.get(0).getFloat(1),
 										axesData.get(0).getFloat(2));
 		
-		axisGroup.SetTickSeparationXYZ(new Point3D(
-										calculateTickSeperation(axesData.get(1)), 
-										calculateTickSeperation(axesData.get(2)), 
-										calculateTickSeperation(axesData.get(3))));
+		Point3D seperationValue = new Point3D(
+				calculateTickSeperation(axesData.get(1)), 
+				calculateTickSeperation(axesData.get(2)), 
+				calculateTickSeperation(axesData.get(3)));
+		
+		double maxSeperation = Vector3DUtil.getMaximumValue(seperationValue);
+		
+		axisGroup.SetTickSeparationXYZ(new Point3D(maxSeperation, maxSeperation, maxSeperation));		
 		
 		this.axisGroup.setAxisLimitMax(axesMaxLengths);
 		updateAxisSize(this.axesMaxLengths);
 		
 	}
 	
-	private double calculateTickSeperation(IDataset dataSet)
-	{
-		double offset = dataSet.getDouble(0);
-		if (dataSet.getSize() > 0)
-		{
-			offset = dataSet.getDouble(1) - dataSet.getDouble(0);
-			for (int i = 1; i < dataSet.getSize(); i++)
-			{
-				if ((dataSet.getDouble(i) - dataSet.getDouble(i-1)) != offset)
-				{
-					offset = (dataSet.getDouble(i) - dataSet.getDouble(i-1));
-					System.err.println("Axis Ticks inconsistant");
-				}
-			}
-		}
-		return offset;
-	}
-		
-	public void setDebugState(boolean state)
-	{
-		DEBUG_MODE = state;
-	}
+	
+	
 	
 	
 }

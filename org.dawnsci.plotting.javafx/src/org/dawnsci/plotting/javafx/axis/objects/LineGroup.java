@@ -14,12 +14,10 @@ import javafx.scene.transform.Translate;
 
 public class LineGroup extends Group
 {
-	final double TEXTMOD = 2;
 	
 	private Line line;
 	private Group textPane;
 	private Text textLabel;
-//	private Label textLabel;
 	
 	// text rotates
 	private Rotate textXAxisRotate = new Rotate();
@@ -28,10 +26,7 @@ public class LineGroup extends Group
  		{textYAxisRotate.setAxis(new Point3D(0, 1, 0));}
  	private Rotate textZAxisRotate = new Rotate();
  		{textZAxisRotate.setAxis(new Point3D(0, 0, 1));}
- 	
- 		
- 		
- 	
+ 	 	
  	// this transforms
 	private Translate offset;
 	private Rotate rotate;
@@ -46,17 +41,6 @@ public class LineGroup extends Group
 		
 		this.rotate = new Rotate();
 		textPane = new Group();
-		
-		Transform inverseGridRotate = null;
-		try
-		{
-			inverseGridRotate = gridRotate.createInverse();
-		}
-		catch (NonInvertibleTransformException e)
-		{
-			e.printStackTrace();
-		}
-		
 		
 		if (label != null)
 		{
@@ -74,7 +58,6 @@ public class LineGroup extends Group
 			textXAxisRotate.setPivotX(width/2);
 			textXAxisRotate.setPivotY(-height/4);
 			
-
 			textYAxisRotate.setPivotX(width/2);
 			textYAxisRotate.setPivotY(-height/4);
 			
@@ -84,17 +67,14 @@ public class LineGroup extends Group
 			Rotate rotate = new Rotate(-90,new Point3D(0, 0, 1));
 			rotate.setPivotX(width);
 			rotate.setPivotY(-height/4);
-			
-			
-			
+						
 			textLabel.getTransforms().addAll(
 								textXAxisRotate,
 								textYAxisRotate, 
 								textZAxisRotate);
 			
-			Translate offsetText = new Translate(0,length + (width/2) ,0);
 			Translate translateTextPane = new Translate(-width/2, height/4, 0);
-			textPane.getTransforms().addAll(translateTextPane, offsetText); // inverseGridRotate
+			textPane.getTransforms().addAll(translateTextPane); // offsetText);
 		
 		
 		}
@@ -130,9 +110,9 @@ public class LineGroup extends Group
             textYAxisRotate.setAngle(-yRot);
             textZAxisRotate.setAngle(-zRot);
             
-        });
-		
+        });		
 	}
+	
 	
 	// create text label for the grid axis
 	private Text createTextLabel(double x, double y, String text) 
@@ -140,12 +120,7 @@ public class LineGroup extends Group
 		
 		// create the text to return
 		Text returnText = new Text(text);
-		
-		// scale the text by Mod -> this is to allow for greater resolution
-		// javafx handles text funny and it blurs upon zooming
-		// i increase the size then scale down to increase the resolution
 		returnText.setFont(new Font(textSize));
-		
 		
 		return returnText;
 	}

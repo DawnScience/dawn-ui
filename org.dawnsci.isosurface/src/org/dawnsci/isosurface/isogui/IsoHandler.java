@@ -50,7 +50,7 @@ public class IsoHandler
 		catch (Exception e1)
 		{
 			
-			System.out.println("\nController not set - Default value is NULL");
+			System.err.println("\nController not set - Default value is NULL");
 			e1.printStackTrace();
 		}
 		

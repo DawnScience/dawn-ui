@@ -93,9 +93,7 @@ public class Line extends MeshView
 		points.add(new Point3D(0, 0, 0));
 		points.add(new Point3D(0, this.height, 0));
 		
-		createLine(points, Color.RED);
-		
-//		this.setHeight(newHeight);
+		createLine(points, Color.BLACK);
 	}
 	
 	public double getHeight()

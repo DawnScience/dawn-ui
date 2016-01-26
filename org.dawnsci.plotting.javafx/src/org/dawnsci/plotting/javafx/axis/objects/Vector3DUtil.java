@@ -3,18 +3,41 @@ package org.dawnsci.plotting.javafx.axis.objects;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point3D;
 import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
 
 
 // class to hold basic vector calculations that I need throughout the project
 public class Vector3DUtil
 {
-		
+	
 	
 	/*
 	 * static functions
 	 * 
 	 */
+	
+	public static double  getMaximumValue (Point3D v)
+	{
+		double value = Double.MIN_VALUE;
+		if (v.getX() > value)
+			value = v.getX();
+		if (v.getY() > value)
+			value = v.getY();
+		if (v.getZ() > value)
+			value = v.getZ();
+		
+		return value;
+	}
+	
+	public static Point3D getScaleFromTransform(Transform transform)
+	{
+		double sx = new Point3D(transform.getMxx(), transform.getMyx(), transform.getMzx()).magnitude();
+		double sy = new Point3D(transform.getMxy(), transform.getMyy(), transform.getMzy()).magnitude();
+		double sz = new Point3D(transform.getMxz(), transform.getMyz(), transform.getMzz()).magnitude();
+		
+		return new Point3D(sx, sy, sz);
+	}
 	
 	public static Rotate rotateVector(Point3D u , Point3D v)
 	{
@@ -33,7 +56,7 @@ public class Vector3DUtil
 			
 	}
 		
-	/*
+	/**
 	 * take 4 vectors - 2 groups - 2 u, 2 v 
 	 * will find the rotation to align u with v in a clock wise direction
 	 */

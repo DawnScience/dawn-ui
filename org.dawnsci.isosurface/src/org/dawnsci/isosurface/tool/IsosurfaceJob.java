@@ -8,11 +8,6 @@
  */
 package org.dawnsci.isosurface.tool;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -100,22 +95,7 @@ public class IsosurfaceJob extends Job {
 		this.name = beanName;
 		
 		cancel();
-		schedule();
-		
-		
-		
-	}
-	
-	private static Object deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
-        ByteArrayInputStream b = new ByteArrayInputStream(bytes);
-        ObjectInputStream o = new ObjectInputStream(b);
-        return o.readObject();
-    }
-	private static byte[] serialize(Object obj) throws IOException {
-        ByteArrayOutputStream b = new ByteArrayOutputStream();
-        ObjectOutputStream o = new ObjectOutputStream(b);
-        o.writeObject(obj);
-        return b.toByteArray();
+		schedule();		
 	}
 	
 	// made to seperate computing the isosurface and simply updating the values like colour
@@ -256,7 +236,6 @@ public class IsosurfaceJob extends Job {
 		int i = 0;
 		for (Tick t: tickList)
 		{
-			System.out.println(t.getValue());
 			ticks[i] = (float) t.getValue();
 			i++;
 		}		

@@ -26,6 +26,7 @@ public class IsoBean
 	 * @return ItemList
 	 */
 	public List<IsoItem> getItems()
+	
 	{
 		return this.items;
 	}

@@ -41,7 +41,8 @@ public class Grid extends Group
 	{
 		this.textSize = textSize;
 		this.planeVector = planeXYZ;
-		this.tickSeperationXY = tickSeperationXY;
+		this.tickSeperationXY = new Point2D(500,500);
+//		this.tickSeperationXY = tickSeperationXY;
 		this.maxLengthXY = axisLength;
 		this.thickness = thickness;
 		
@@ -79,6 +80,7 @@ public class Grid extends Group
 		// default vector - normal to the axis plane
 		// axis plane always going to be XY plane
 		final Point3D defaultVector = new Point3D(0,0,1);
+		
 		// separate plane vector from W translation
 		final Point3D planeVector = new Point3D(
 				planeXYZ.getX(),
@@ -160,9 +162,7 @@ public class Grid extends Group
 				
 		int i = 0;
 		for (LineGroup line: axisLineList)
-		{
-			final int a = (int) (maxLength/(tickSeperation * i));
-			
+		{			
 			final int newValue = (int)(((((tickSeperation * i) / maxLength) * (labelMax - labelMin)) + labelMin) + 1f);
 			line.rewriteLabel(Integer.toString(newValue));
 			i++;
@@ -172,11 +172,13 @@ public class Grid extends Group
 	public void setTickSeperationXY(Point2D newSeperation)
 	{
 		this.tickSeperationXY = newSeperation;
-		
-		this.textSize = tickSeperationXY.getX() / 3;
-		
+				
 		refreshGrid();
-		
+	}
+	
+	public void setTextSize(double newTextSize)
+	{
+		this.textSize = newTextSize;
 	}
 	
 	// !! organise
@@ -205,8 +207,7 @@ public class Grid extends Group
 		updateLineLengths(yAxis.getChildren(), this.maxLengthXY.getY());
 		
 		// check if a new axis line needs to be added
-		updateLineCount();
-		
+		updateLineCount();		
 		
 	}
 	
@@ -286,13 +287,18 @@ public class Grid extends Group
 						this.maxLengthXY.getX(), 
 						X_AXIS_DIRECTION, 
 						new Point2D(this.tickSeperationXY.getY()*(nYCount+i), 0),
-//						Double.toString(this.tickSeperationXY.getY()*(nYCount+i)));
 						null);
 				bar.setMaterial(new PhongMaterial(colour));
 				this.xAxis.getChildren().add(bar);
 			}
 		}
 		
+	}
+
+	public void resetTicks() {
+		xAxis.getChildren().clear();
+		yAxis.getChildren().clear();
+		updateLineCount();
 	}
 	
 }

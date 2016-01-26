@@ -17,8 +17,7 @@ public class AxesGroup extends Group{
 	private Cylinder ScaleAxis;
 
 	private Point2D axisLimitMin = new Point2D(0, 0);
-	private Point2D axisLimitMax = new Point2D(100, 100);
-	private Point2D tickSeparation;
+	private Point2D axisLimitMax = new Point2D(200,200);
 	
 	public AxesGroup(
 			Point3D planeNormal,
@@ -29,7 +28,9 @@ public class AxesGroup extends Group{
 			EventHandler<MouseEvent> scaleEventHandler)
 	{
 		
-		axisGrid = new Grid(planeNormal, tickSeparationXY, axisLength, majorAxisThickness, tickSeparationXY.getX());
+		double textSize = (tickSeparationXY.getX() / 50) * 15;
+		
+		axisGrid = new Grid(planeNormal, tickSeparationXY, axisLength, majorAxisThickness, textSize);
 		
 		ScaleAxis = createScaleBar(planeNormal, maxLength, majorAxisThickness);
 		ScaleAxis.setCursor(Cursor.OPEN_HAND);
@@ -79,7 +80,12 @@ public class AxesGroup extends Group{
 	
 	public void setTickSeperation(Point2D newSeparation)
 	{
+		double textSize = (newSeparation.getX() / 50) * 15;
+		axisGrid.setTextSize(textSize);
 		
+		axisGrid.setTickSeperationXY(newSeparation);
+		
+		axisGrid.resetTicks();
 	}
 	
 	
