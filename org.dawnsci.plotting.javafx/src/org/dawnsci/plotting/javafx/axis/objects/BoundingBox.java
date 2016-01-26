@@ -12,14 +12,6 @@ public class BoundingBox extends Group
 		super();
 		
 		addLines(size);
-		
-		for (Node line : this.getChildren())
-		{
-			if (line instanceof Line)
-			{
-				((Line)line).setColour(Color.RED);
-			}
-		}
 	}
 	
 	/**
@@ -54,6 +46,17 @@ public class BoundingBox extends Group
 		this.getChildren().add(new Line(new Point3D(size.getX(), 0, size.getZ()), new Point3D(size.getX(), size.getY(), size.getZ())));
 		// 011 - 111
 		this.getChildren().add(new Line(new Point3D(0, size.getY(), size.getZ()), new Point3D(size.getX(), size.getY(), size.getZ())));
+	}
+
+	public void setColour(Color colour)
+	{
+		for (Node line : this.getChildren())
+		{
+			if (line instanceof Line)
+			{
+				((Line)line).setColour(colour);
+			}
+		}
 	}
 	
 }

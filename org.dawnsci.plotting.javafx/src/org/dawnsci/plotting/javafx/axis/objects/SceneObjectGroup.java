@@ -81,10 +81,12 @@ public class SceneObjectGroup extends Group
 	{
 		boundingBox = new BoundingBox(size);
 		
-		AmbientLight ambientAxisLight = new AmbientLight(DefaultObjectProperties.LINE_COLOUR);
+		AmbientLight ambientAxisLight = new AmbientLight(Color.WHITE);
 		ambientAxisLight.getTransforms().add(new Translate(100,100,100));
 		ambientAxisLight.getScope().add(boundingBox);
 		boundingBox.getChildren().add(ambientAxisLight);
+		
+		boundingBox.setColour(Color.ORANGE);
 		
 		this.getChildren().add(boundingBox);
 	}
@@ -101,7 +103,8 @@ public class SceneObjectGroup extends Group
 	}
 	
 	/**
-	 * The default tick separation with no zooming effect.
+	 * The 
+ tick separation with no zooming effect.
 	 * @param newTickSpeperation
 	 */
 	public void SetTickSeparationXYZ(Point3D newTickSpeperation)
