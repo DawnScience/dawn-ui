@@ -459,14 +459,17 @@ public class SurfaceDisplayer extends Scene
 		return offset;
 	}
 	
+	private void updateSceneTransforms()
+	{
+		this.sceneOffset.setX(this.getWidth() / 2);
+		this.sceneOffset.setY(this.getHeight()/ 2);
+		this.sceneOffset.setZ(0);
+	}
+	
+	
 	/*
 	 * public 
 	 */
-	
-	public void addRemoveScaleAxes()
-	{
-		scaleAxesGroup.flipVisibility();
-	}
 	
 	public void dispose()
 	{
@@ -522,12 +525,6 @@ public class SurfaceDisplayer extends Scene
 		isosurfaceGroup.getChildren().remove(removeNode);
 	}
 	
-	private void updateSceneTransforms()
-	{
-		this.sceneOffset.setX(this.getWidth() / 2);
-		this.sceneOffset.setY(this.getHeight()/ 2);
-		this.sceneOffset.setZ(0);
-	}
 	
 	public void updateTransforms()
 	{
@@ -547,12 +544,7 @@ public class SurfaceDisplayer extends Scene
 		
 	}
 	
-	public void removeAxisGrid()
-	{
-		axisObjectGroup.flipXGridVisible();
-		axisObjectGroup.flipYGridVisible();
-		axisObjectGroup.flipZGridVisible();
-	}
+	
 	
 	public void setAxesData(List<IDataset> axesData)
 	{
@@ -575,6 +567,24 @@ public class SurfaceDisplayer extends Scene
 		updateAxisSize(this.axesMaxLengths);
 		
 	}
+
+	public void flipAxisGridVisibility()
+	{
+		axisObjectGroup.flipXGridVisible();
+		axisObjectGroup.flipYGridVisible();
+		axisObjectGroup.flipZGridVisible();
+	}
+
+	public void flipBoundingBoxVisibility() 
+	{
+		axisObjectGroup.flipBoundingBoxVisibility();
+	}
+	
+	public void flipScaleAxesVisibility()
+	{
+		scaleAxesGroup.flipVisibility();
+	}
+	
 	
 	
 	

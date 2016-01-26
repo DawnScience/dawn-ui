@@ -177,16 +177,20 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 	// i dont like this
 	// these act as intermediates between the action and the scene
 	// feels horrible
-	public void addRemoveScaleAxes()
+	public void flipScaleAxesVisibility()
 	{
-		scene.addRemoveScaleAxes();
+		scene.flipScaleAxesVisibility();
 	}
 	
-	public void removeAxisGrid()
+	public void flipAxisGridVisibility()
 	{
-		scene.removeAxisGrid();
+		scene.flipAxisGridVisibility();
 	}
 	
+	public void flipBoundingBoxVisibility()
+	{
+		scene.flipBoundingBoxVisibility();
+	}
 	
 	/**
 	 * 

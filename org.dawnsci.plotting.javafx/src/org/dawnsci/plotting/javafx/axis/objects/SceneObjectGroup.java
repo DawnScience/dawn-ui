@@ -160,6 +160,11 @@ public class SceneObjectGroup extends Group
 		flipYGridVisible();
 		flipZGridVisible();
 	}
+	
+	public void flipBoundingBoxVisibility()
+	{
+		this.boundingBox.setVisible(!this.boundingBox.isVisible());
+	}
 		
 	public void setAxisLimitMin(Point3D MinLimit)
 	{		
