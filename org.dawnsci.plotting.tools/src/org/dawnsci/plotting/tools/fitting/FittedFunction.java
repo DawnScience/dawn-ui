@@ -15,6 +15,7 @@ import java.util.List;
 import javax.vecmath.Vector3d;
 
 import org.dawnsci.plotting.tools.Activator;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IPeak;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
@@ -29,7 +30,6 @@ import org.eclipse.dawnsci.plotting.api.trace.TraceUtils;
 
 import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 
 public class FittedFunction  {
 

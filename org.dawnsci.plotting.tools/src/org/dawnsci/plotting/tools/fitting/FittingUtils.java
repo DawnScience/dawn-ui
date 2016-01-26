@@ -25,6 +25,7 @@ import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironment;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IOperator;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IPeak;
 import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
@@ -41,11 +42,9 @@ import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionFactory;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IPeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Offset;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Polynomial;
@@ -72,9 +71,6 @@ public class FittingUtils {
 		if (peakFunction == null) {
 				peakFunction = getPeakClass();
 		}
-		//TODO FIXME Update Generic1DFitter to use IPeak
-		@SuppressWarnings("unchecked")
-		Class<? extends APeak> myPeakFunction = (Class<? extends APeak>)peakFunction;
 	
 		//We need to find things that look like peaks in the data
 		List<IdentifiedPeak> foundPeaks = Generic1DFitter.parseDataDerivative(xDataSet, yDataSet, smoothing);
@@ -91,8 +87,7 @@ public class FittingUtils {
 			}
 		}
 		//Fit the peaks we found
-		//TODO FIXME Change myPeakFunction to peakFunction
-		fittedPeaksAndBkgs = Generic1DFitter.fitPeakFunctions(foundPeaks, xDataSet, yDataSet, myPeakFunction, optimizer, smoothing, nrPeaks,  0.0, false, false, null, true);
+		fittedPeaksAndBkgs = Generic1DFitter.fitPeakFunctions(foundPeaks, xDataSet, yDataSet, peakFunction, optimizer, smoothing, nrPeaks,  0.0, false, false, null, true);
 		
 		
 		//Pick out the peak functions of the correct class & package into new composite function
@@ -165,9 +160,7 @@ public class FittingUtils {
 			if (info.getIdentifiedPeaks()==null) {
 				info.setIdentifiedPeaks(Generic1DFitter.parseDataDerivative(info.getX(), info.getY(), getSmoothing()));
 			}
-			//TODO FIXME Update Generic1DFitter to use IPeak
-			@SuppressWarnings("unchecked")
-			Class<? extends APeak> myPeak = (Class<? extends APeak>)getPeakClass();
+			Class<? extends IPeak> myPeak = getPeakClass();
 			composites =  Generic1DFitter.fitPeakFunctions(info.getIdentifiedPeaks(), info.getX(), info.getY(), myPeak, optimizer, getSmoothing(), info.getNumPeaks(), 0.0, false, false,
 					info.getMonitor());
 		}
