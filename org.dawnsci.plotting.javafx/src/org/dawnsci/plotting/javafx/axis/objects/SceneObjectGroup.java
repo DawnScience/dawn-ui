@@ -3,8 +3,14 @@ package org.dawnsci.plotting.javafx.axis.objects;
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
+import javafx.scene.AmbientLight;
 import javafx.scene.Group;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Box;
+import javafx.scene.shape.CullFace;
+import javafx.scene.shape.DrawMode;
+import javafx.scene.transform.Translate;
 
 
 /** 
@@ -13,79 +19,78 @@ import javafx.scene.input.MouseEvent;
  * A predefined function to give a basic XYZ axis grid
  * 
  */
-public class CombinedAxisGroup extends Group
+public class SceneObjectGroup extends Group
 { 
-	private Point3D origin;
-	private Point3D Max;
 	
 	private AxesGroup yzAxisGroup;
 	private AxesGroup zxAxisGroup;
 	private AxesGroup xyAxisGroup;
-			
 	
-	public CombinedAxisGroup(
-			Point3D origin, 
-			Point3D maxLength, 
-			double axisThickness, 
-			Point3D tickSeperationXYZ, 
-			EventHandler<MouseEvent> scaleEventHandler)
+	private BoundingBox boundingBox;
+	
+	private EventHandler<MouseEvent> scaleEventHandler;
+	
+	public SceneObjectGroup(EventHandler<MouseEvent> scaleEventHandler)
 	{
-		
-				
-		yzAxisGroup = new AxesGroup(
-							new Point3D(1, 0, 0), 
-							new Point2D(tickSeperationXYZ.getY(), tickSeperationXYZ.getZ()),  
-							new Point2D(maxLength.getY(), maxLength.getZ()),
-							maxLength.getX(),
-							axisThickness,
-							scaleEventHandler);
-		zxAxisGroup = new AxesGroup(
-							new Point3D(0, 1, 0), 
-							new Point2D(tickSeperationXYZ.getZ(), tickSeperationXYZ.getX()),  
-							new Point2D(maxLength.getZ(), maxLength.getX()),
-							maxLength.getY(),
-							axisThickness,
-							scaleEventHandler);
-		xyAxisGroup = new AxesGroup(
-							new Point3D(0, 0, 1), 
-							new Point2D(tickSeperationXYZ.getX(), tickSeperationXYZ.getY()),  
-							new Point2D(maxLength.getX(), maxLength.getY()),
-							maxLength.getZ(),
-							axisThickness,
-							scaleEventHandler);
-			
-		this.getChildren().addAll(yzAxisGroup, zxAxisGroup, xyAxisGroup);
-		
-		// create axis grids
-		// yz plane
-//		this.getChildren().add(
-//				yzAxisGrid = createBasicAxisGrid(
-//						new Point3D(1,0,0), 
-//						new Point2D(tickSeperationXYZ.getY(), tickSeperationXYZ.getZ()),  
-//						new Point2D(maxLength.getY(), maxLength.getZ()), 
-//						axisThickness/10));
-//		
-//		// zx plane
-//		this.getChildren().add(
-//				zxAxisGrid = createBasicAxisGrid(
-//						new Point3D(0,1,0), 
-//						new Point2D(tickSeperationXYZ.getZ(), tickSeperationXYZ.getX()),
-//						new Point2D(maxLength.getZ(),maxLength.getX()), 
-//						axisThickness/10));
-//	
-//		// xy plane
-//		this.getChildren().add(
-//				xyAxisGrid = createBasicAxisGrid(
-//						new Point3D(0,0,1),
-//						new Point2D(tickSeperationXYZ.getX(), tickSeperationXYZ.getY()), 
-//						new Point2D(maxLength.getX(), maxLength.getY()), 
-//						axisThickness/10));
+		super();
+		this.scaleEventHandler = scaleEventHandler;
 	}
 	/*
 	 * public functions
 	 */
 	
-	public void checkScale(Point3D newMaxLengthXYZ)
+	/**
+	 * Create the XYZ axes.
+	 * Not declared upon initialisation as DAWN initialises Javafx prior to the plug in being used.
+	 * 
+	 * @param maxLength
+	 * @param axisThickness
+	 * @param tickSeperationXYZ
+	 */
+	public void createAxes(
+			Point3D maxLength, 
+			double axisThickness, 
+			Point3D tickSeperationXYZ)
+	{
+		yzAxisGroup = new AxesGroup(
+				new Point3D(1, 0, 0), 
+				new Point2D(tickSeperationXYZ.getY(), tickSeperationXYZ.getZ()),  
+				new Point2D(maxLength.getY(), maxLength.getZ()),
+				maxLength.getX(),
+				axisThickness,
+				scaleEventHandler);
+		zxAxisGroup = new AxesGroup(
+				new Point3D(0, 1, 0), 
+				new Point2D(tickSeperationXYZ.getZ(), tickSeperationXYZ.getX()),  
+				new Point2D(maxLength.getZ(), maxLength.getX()),
+				maxLength.getY(),
+				axisThickness,
+				scaleEventHandler);
+		xyAxisGroup = new AxesGroup(
+				new Point3D(0, 0, 1), 
+				new Point2D(tickSeperationXYZ.getX(), tickSeperationXYZ.getY()),  
+				new Point2D(maxLength.getX(), maxLength.getY()),
+				maxLength.getZ(),
+				axisThickness,
+				scaleEventHandler);
+
+		this.getChildren().addAll(yzAxisGroup, zxAxisGroup, xyAxisGroup);
+	}
+	
+	public void createBoundingBox(Point3D size)
+	{
+		boundingBox = new BoundingBox(size);
+		
+		AmbientLight ambientAxisLight = new AmbientLight(DefaultObjectProperties.LINE_COLOUR);
+		ambientAxisLight.getTransforms().add(new Translate(100,100,100));
+		ambientAxisLight.getScope().add(boundingBox);
+		boundingBox.getChildren().add(ambientAxisLight);
+		
+		this.getChildren().add(boundingBox);
+	}
+	
+	
+	public void checkScale(Point3D newMaxLengthXYZ, double zoom)
 	{
 		// yz
 		yzAxisGroup.updateScale(new Point2D(newMaxLengthXYZ.getY(), newMaxLengthXYZ.getZ()));
@@ -95,14 +100,21 @@ public class CombinedAxisGroup extends Group
 		xyAxisGroup.updateScale(new Point2D(newMaxLengthXYZ.getX(), newMaxLengthXYZ.getY()));
 	}
 	
+	/**
+	 * The default tick separation with no zooming effect.
+	 * @param newTickSpeperation
+	 */
 	public void SetTickSeparationXYZ(Point3D newTickSpeperation)
 	{
 		yzAxisGroup.setTickSeperation(new Point2D(newTickSpeperation.getY(), newTickSpeperation.getZ()));
-		       
+		     
 		zxAxisGroup.setTickSeperation(new Point2D(newTickSpeperation.getZ(), newTickSpeperation.getX()));
 		       
 		xyAxisGroup.setTickSeperation(new Point2D(newTickSpeperation.getX(), newTickSpeperation.getY()));
 	}
+	
+	
+	
 	
 	public void setGridXVisible(boolean visible)
 	{
@@ -161,7 +173,11 @@ public class CombinedAxisGroup extends Group
 		yzAxisGroup.setAxisMinLimit(new Point2D(MaxLimit.getY(), MaxLimit.getZ()));
 		zxAxisGroup.setAxisMinLimit(new Point2D(MaxLimit.getZ(), MaxLimit.getX()));
 		xyAxisGroup.setAxisMinLimit(new Point2D(MaxLimit.getX(), MaxLimit.getY()));
-	}	
+	}
+	
+	
+	
+	
 }	
 
 

@@ -3,6 +3,7 @@ package org.dawnsci.plotting.javafx.axis.objects;
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
+import javafx.scene.AmbientLight;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.input.MouseEvent;
@@ -35,8 +36,13 @@ public class AxesGroup extends Group{
 		ScaleAxis = createScaleBar(planeNormal, maxLength, majorAxisThickness);
 		ScaleAxis.setCursor(Cursor.OPEN_HAND);
 		ScaleAxis.setOnMouseDragged(scaleEventHandler);
-	
-		this.getChildren().addAll(axisGrid, ScaleAxis);
+		
+		AmbientLight ambientAxisLight = new AmbientLight(DefaultObjectProperties.LINE_COLOUR);
+		ambientAxisLight.getScope().add(axisGrid);
+		axisGrid.getChildren().add(ambientAxisLight);
+		
+		
+		this.getChildren().addAll(axisGrid); //, ScaleAxis);
 	}
 	
 	private Cylinder createScaleBar(Point3D direction, double length, double thickness)

@@ -72,7 +72,6 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 	 */
 	public void createControl(final Composite parent)
 	{
-		
 		Platform.setImplicitExit(false);
 		
 		// declare the canvas in memory
@@ -163,7 +162,8 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 			itrace.create();
 			
 			// add the trace into the list of current traces
-			isoSurfaceGroup.getChildren().add(itrace.getIsoSurface());
+			scene.addTrace(itrace);
+			// isoSurfaceGroup.getChildren().add(itrace.getIsoSurface());
 			scene.setAxesData(itrace.getAxes());
 		}
 		else
@@ -184,7 +184,6 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 	
 	public void removeAxisGrid()
 	{
-
 		scene.removeAxisGrid();
 	}
 	

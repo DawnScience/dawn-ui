@@ -19,35 +19,42 @@ public class Line extends MeshView
 	private Rotate rotate;
 	private TriangleMesh mesh;
 	private double height;
+	private PhongMaterial mat;
 	
 	Line(double height, Rotate rotate, Point3D offset)
 	{
 		super();
 		
 		this.height = height;
+		this.rotate = rotate;
+		this.offset = new Translate(offset.getX(), offset.getY(), offset.getZ());;
 		
 		ArrayList<Point3D> points = new ArrayList<Point3D>();
 		
 		points.add(new Point3D(0, 0, 0));
 		points.add(new Point3D(0, height, 0));
 		
-		createLine(points, Color.BLACK);
-		
-		this.rotate = rotate;
-		this.offset = new Translate(offset.getX(), offset.getY(), offset.getZ());;
+		createLine(points);
 		
 		this.getTransforms().addAll(this.rotate, this.offset);
 		
 	}
-		
-	private void createLine(List<Point3D> points, Color colour)
+	public Line(Point3D start, Point3D end)
+	{
+		List<Point3D> pointList = new ArrayList<Point3D>();
+		pointList.add(start);
+		pointList.add(end);
+		createLine(pointList);
+	}
+			
+	private void createLine(List<Point3D> points)
 	{
 		mesh = new TriangleMesh();
 		
 		for (Point3D point: points)
 		{
 			mesh.getPoints().addAll((float)point.getX(), (float)point.getY(), (float)point.getZ());
-			mesh.getPoints().addAll((float)point.getX(), (float)point.getY(), (float)point.getZ() + 0.0001f);
+			mesh.getPoints().addAll((float)point.getX(), (float)point.getY(), (float)point.getZ() + 0.00001f);
 			
 		}
 		
@@ -55,7 +62,6 @@ public class Line extends MeshView
 		
 		for (int i = 2; i < points.size()*2; i +=2)
 		{
-			
 			mesh.getFaces().addAll(i   ,0 ,i-2 ,0 ,i+1 ,0 );
 			mesh.getFaces().addAll(i+1 ,0 ,i-2 ,0 ,i+1 ,0 );
 			
@@ -67,21 +73,15 @@ public class Line extends MeshView
 		this.setDrawMode(DrawMode.LINE);
 		
 		this.setMesh(mesh);
-		
-		PhongMaterial mat = new PhongMaterial(colour);
-		mat.setDiffuseColor(colour);
-		mat.setSpecularColor(colour);
+		this.mat = new PhongMaterial(DefaultObjectProperties.LINE_COLOUR);
 		
 		this.setMaterial(mat);
 		this.setCullFace(CullFace.NONE);
-		
-		
 	}
-	
-	public void setRadiusExtended(double newRadius)
+		
+	public void setColour(Color colour)
 	{
-		// do nothing for now
-		// this.setRadius(newRadius);
+		this.mat.setDiffuseColor(colour);
 	}
 	
 	public void setHeightExtended(double newHeight)
@@ -93,7 +93,7 @@ public class Line extends MeshView
 		points.add(new Point3D(0, 0, 0));
 		points.add(new Point3D(0, this.height, 0));
 		
-		createLine(points, Color.BLACK);
+		createLine(points);
 	}
 	
 	public double getHeight()

@@ -40,7 +40,7 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 	private Dataset textCoords;
 	private Dataset faces;
 	
-	// !! circular dependency
+	// !! I want to remove this, but am not sure how.
 	private SurfaceDisplayer scene;
 	
 	private CullFace cullFace = CullFace.NONE;

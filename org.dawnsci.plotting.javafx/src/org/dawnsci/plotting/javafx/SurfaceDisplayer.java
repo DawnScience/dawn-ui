@@ -27,15 +27,15 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Cylinder;
-import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.TransformChangedEvent;
 import javafx.scene.transform.Translate;
 
-import org.dawnsci.plotting.javafx.axis.objects.CombinedAxisGroup;
+import org.dawnsci.plotting.javafx.axis.objects.BoundingBox;
 import org.dawnsci.plotting.javafx.axis.objects.ScaleAxisGroup;
+import org.dawnsci.plotting.javafx.axis.objects.SceneObjectGroup;
 import org.dawnsci.plotting.javafx.axis.objects.Vector3DUtil;
 import org.dawnsci.plotting.javafx.trace.FXIsosurfaceTrace;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
@@ -60,7 +60,7 @@ public class SurfaceDisplayer extends Scene
 	private Group cameraGroup; 		// holds the camera translation data
 	
 	private Group axisNode; 		// holds the axisGroup -> allows the axisGroup to be null without an exception
-	private CombinedAxisGroup axisGroup;	// hold the axisGroup
+	private SceneObjectGroup axisObjectGroup;	// hold the axisGroup
 	private Group objectGroup;		// holds the objects for the scene
 	private Group lightGroup;		// holds the lights for the scene
 	private ScaleAxisGroup scaleAxesGroup;
@@ -168,6 +168,7 @@ public class SurfaceDisplayer extends Scene
 		camera.getTransforms().addAll(new Translate(0, 0, -zoom));
 		camera.setNearClip(0.00001f);
 		camera.setFarClip(100_000);
+		
 	}
 	
 	private void initlialiseGroups()
@@ -199,26 +200,14 @@ public class SurfaceDisplayer extends Scene
 	}
 	
 	private void createAxisGroup()
-	{
-		// find the length of each axis
-		final Point3D xyzLength = new Point3D(100, 100, 100);
-		
-		// set the thickness of the axis
-		// this is arbitrary
-		final double size = 3;
-				
+	{		
 		// create and return the new axis
-		CombinedAxisGroup newAxisGroup =  new CombinedAxisGroup(
-				new Point3D(0,0,0), 
-				xyzLength, 
-				size, 
-				new Point3D(10,10,10),
-				scaleEvent);
+		SceneObjectGroup newAxisObjectGroup =  new SceneObjectGroup(scaleEvent);
 		
 		scaleAxesGroup.setAxisEventListener(scaleEvent); //!! look into re-organising
 		
-		this.axisGroup = newAxisGroup;
-		this.axisNode.getChildren().add(this.axisGroup);
+		this.axisObjectGroup = newAxisObjectGroup;
+		this.axisNode.getChildren().add(this.axisObjectGroup);
 		
 	}
 	
@@ -255,7 +244,11 @@ public class SurfaceDisplayer extends Scene
 	{
 		// create lights for the iso surface
 		AmbientLight ambientSurfaceLight = new AmbientLight(new Color(0.3, 0.3, 0.3, 1));
-		PointLight pointLight = new PointLight(new Color(1, 1, 1, 1));		
+//		ambientSurfaceLight.getScope().add(lightGroup);
+		
+		PointLight pointLight = new PointLight(new Color(1, 1, 1, 1));	
+		pointLight.getScope().add(lightGroup);
+		
 		this.lightGroup.getChildren().addAll(ambientSurfaceLight, pointLight);
 	}
 	
@@ -411,14 +404,13 @@ public class SurfaceDisplayer extends Scene
 		
 	}
 	
-	
 	/*
 	 * non initialisers
 	 */
 	
 	private void updateAxisSize(Point3D maxLength) 
 	{
-		axisGroup.checkScale(this.scale.transform(maxLength));
+		axisObjectGroup.checkScale(this.scale.transform(maxLength), this.zoom);
 	}
 	
 	private void updateScale(double[] mouseDelta, double mouseMovementMod, Point2D mouseScaleDir, Point3D scaleDir) 
@@ -495,6 +487,33 @@ public class SurfaceDisplayer extends Scene
 	
 	public void addTrace(FXIsosurfaceTrace trace)
 	{
+		// if the first trace create the axes using the trace.axes data
+		// all of this data is irrelevant as it get reset when a surface is added
+		// this is extremely inefficient but works well enough I don't plan to fix yet
+		if (axisObjectGroup.getChildren().size() <= 0)
+		{
+			Point3D maxLengths = new Point3D(
+					trace.getAxes().get(0).getFloat(0),
+					trace.getAxes().get(0).getFloat(1),
+					trace.getAxes().get(0).getFloat(2));
+			
+			Point3D seperationValue = new Point3D(
+											calculateTickSeperation(trace.getAxes().get(1)), 
+											calculateTickSeperation(trace.getAxes().get(2)), 
+											calculateTickSeperation(trace.getAxes().get(3)));
+						
+			double maxSeperation = Vector3DUtil.getMaximumValue(seperationValue);
+			Point3D tickSeperationXYZ = new Point3D(maxSeperation, maxSeperation, maxSeperation);
+			
+			axisObjectGroup.createAxes(
+					maxLengths,
+					maxSeperation*0.08f, 
+					tickSeperationXYZ);
+			
+			this.axisObjectGroup.createBoundingBox(maxLengths);
+		}
+		
+		// add the mesh the the scene graph
 		this.isosurfaceGroup.getChildren().add(trace.getIsoSurface());
 	}
 	
@@ -512,7 +531,6 @@ public class SurfaceDisplayer extends Scene
 	
 	public void updateTransforms()
 	{
-		
 		updateSceneTransforms();
 		
 		final Bounds isoGroupOffsetBounds = this.objectGroup.getBoundsInLocal();
@@ -531,29 +549,29 @@ public class SurfaceDisplayer extends Scene
 	
 	public void removeAxisGrid()
 	{
-		axisGroup.flipXGridVisible();
-		axisGroup.flipYGridVisible();
-		axisGroup.flipZGridVisible();
+		axisObjectGroup.flipXGridVisible();
+		axisObjectGroup.flipYGridVisible();
+		axisObjectGroup.flipZGridVisible();
 	}
 	
 	public void setAxesData(List<IDataset> axesData)
 	{
 		// set the initial data size
 		this.axesMaxLengths = new Point3D(
-										axesData.get(0).getFloat(0),
-										axesData.get(0).getFloat(1),
-										axesData.get(0).getFloat(2));
+									axesData.get(0).getFloat(0),
+									axesData.get(0).getFloat(1),
+									axesData.get(0).getFloat(2));
 		
 		Point3D seperationValue = new Point3D(
-				calculateTickSeperation(axesData.get(1)), 
-				calculateTickSeperation(axesData.get(2)), 
-				calculateTickSeperation(axesData.get(3)));
+										calculateTickSeperation(axesData.get(1)), 
+										calculateTickSeperation(axesData.get(2)), 
+										calculateTickSeperation(axesData.get(3)));
 		
 		double maxSeperation = Vector3DUtil.getMaximumValue(seperationValue);
 		
-		axisGroup.SetTickSeparationXYZ(new Point3D(maxSeperation, maxSeperation, maxSeperation));		
+		axisObjectGroup.SetTickSeparationXYZ(new Point3D(maxSeperation, maxSeperation, maxSeperation));		
 		
-		this.axisGroup.setAxisLimitMax(axesMaxLengths);
+		this.axisObjectGroup.setAxisLimitMax(axesMaxLengths);
 		updateAxisSize(this.axesMaxLengths);
 		
 	}

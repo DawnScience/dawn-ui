@@ -247,13 +247,12 @@ public class Grid extends Group
 			
 			for (int i = 0; i < excessXLineCount; i ++)
 			{
-				LineGroup bar = createTickBar(
+				LineGroup tickLine = createTickBar(
 						this.maxLengthXY.getY(),
 						Y_AXIS_DIRECTION, 
 						new Point2D(tickSeperationXY.getX()*(nXCount+i),0),
 						Double.toString(this.tickSeperationXY.getX()*(nXCount+i)));
-				bar.setMaterial(new PhongMaterial(colour));
-				this.yAxis.getChildren().add(bar);
+				this.yAxis.getChildren().add(tickLine);
 			}
 						
 		}
@@ -283,13 +282,12 @@ public class Grid extends Group
 			for (int i = 0; i < excessYLineCount; i ++)
 			{	
 				
-				LineGroup bar = createTickBar(
+				LineGroup tickLine = createTickBar(
 						this.maxLengthXY.getX(), 
 						X_AXIS_DIRECTION, 
 						new Point2D(this.tickSeperationXY.getY()*(nYCount+i), 0),
 						null);
-				bar.setMaterial(new PhongMaterial(colour));
-				this.xAxis.getChildren().add(bar);
+				this.xAxis.getChildren().add(tickLine);
 			}
 		}
 		
