@@ -44,8 +44,6 @@ public class LineGroup extends Group
 		this.rotate = new Rotate();
 		textPane = new Group();
 		
-		System.out.println(" ~ " + label);
-		
 		if (label != null)
 		{
 			textLabel = createTextLabel(label);
@@ -74,14 +72,10 @@ public class LineGroup extends Group
 								textXAxisRotate,
 								textYAxisRotate, 
 								textZAxisRotate);
-			
-			System.out.println(" * * * " + textLabel.getText());
-			
+						
 			Translate translateTextPane = new Translate(-width/2, height/4, 0);
 			textOffset = new Translate();
 			
-
-			System.out.println(" - - - " + textLabel.getText());
 			
 			textPane.getTransforms().addAll(translateTextPane, textOffset);
 			
@@ -111,7 +105,6 @@ public class LineGroup extends Group
 	// create text label for the grid axis
 	private Text createTextLabel(String text) 
 	{
-		System.out.println("= " + text);
 		// create the text to return
 		Text returnText = new Text(text);
 		returnText.setText(text);

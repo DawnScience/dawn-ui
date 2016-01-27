@@ -183,7 +183,6 @@ public class Grid extends Group
 				text,
 				this.textSize,
 				this.rotate);
-		System.out.println(" + " + text);
 		return returnBar;
 	}
 	
@@ -306,7 +305,6 @@ public class Grid extends Group
 			}		
 		}
 		
-		System.out.println(nXCount);
 		
 		
 		
