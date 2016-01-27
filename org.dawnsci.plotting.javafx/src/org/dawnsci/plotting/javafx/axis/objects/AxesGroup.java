@@ -40,7 +40,6 @@ public class AxesGroup extends Group{
 		ambientAxisLight.getScope().add(axisGrid);
 		axisGrid.getChildren().add(ambientAxisLight);
 		
-		
 		this.getChildren().addAll(axisGrid); //, ScaleAxis);
 	}
 	

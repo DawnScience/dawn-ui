@@ -1,16 +1,12 @@
 package org.dawnsci.plotting.javafx.axis.objects;
 
 import javafx.geometry.Point3D;
-import javafx.scene.DepthTest;
 import javafx.scene.Group;
-import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
-import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Rotate;
-import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
 
 public class LineGroup extends Group
@@ -31,6 +27,7 @@ public class LineGroup extends Group
  	// this transforms
 	private Translate offset;
 	private Translate textOffset;
+	private Translate translateTextPane;
 	private Rotate rotate;
 	
 	private double textSize = 10;
@@ -51,33 +48,18 @@ public class LineGroup extends Group
 			textLabel.setFontSmoothingType(FontSmoothingType.LCD);
 			textPane.getChildren().add(textLabel);
 			
-			double width = textPane.getBoundsInLocal().getWidth();
-			double depth = textPane.getBoundsInLocal().getDepth();
-			double height= textPane.getBoundsInLocal().getHeight();
-			
-			textXAxisRotate.setPivotX(width/2);
-			textXAxisRotate.setPivotY(-height/4);
-			
-			textYAxisRotate.setPivotX(width/2);
-			textYAxisRotate.setPivotY(-height/4);
-			
-			textZAxisRotate.setPivotX(width/2);
-			textZAxisRotate.setPivotY(-height/4);	
-			
-			Rotate rotate = new Rotate(-90,new Point3D(0, 0, 1));
-			rotate.setPivotX(width);
-			rotate.setPivotY(-height/4);
-			
+			setTextTransforms();
+
+			textLabel.getTransforms().addAll(translateTextPane);
 			textLabel.getTransforms().addAll(
-								textXAxisRotate,
-								textYAxisRotate, 
-								textZAxisRotate);
-						
-			Translate translateTextPane = new Translate(-width/2, height/4, 0);
+					new Translate(0,-10,0),
+					textXAxisRotate,
+					textYAxisRotate, 
+					textZAxisRotate);
+			
 			textOffset = new Translate();
 			
-			
-			textPane.getTransforms().addAll(translateTextPane, textOffset);
+			textPane.getTransforms().addAll(textOffset);
 			
 		}
 		
@@ -101,6 +83,33 @@ public class LineGroup extends Group
         });		
 	}
 	
+	
+	private void setTextTransforms()
+	{
+		
+		double width = textLabel.getBoundsInLocal().getWidth();
+		double height= textLabel.getBoundsInLocal().getHeight();	
+		double depth = textLabel.getBoundsInLocal().getDepth();	
+		
+		// Don't even ask why this is the mid point of the text... I don't understand myself.
+		Point3D midPoint = new Point3D(-(width/(2.5f))+4, height/4, 0);
+		
+		textXAxisRotate.setPivotX(-midPoint.getX());
+		textXAxisRotate.setPivotY(-midPoint.getY());
+		
+		textYAxisRotate.setPivotX(-midPoint.getX());
+		textYAxisRotate.setPivotY(-midPoint.getY());
+		
+		textZAxisRotate.setPivotX(-midPoint.getX());
+		textZAxisRotate.setPivotY(-midPoint.getY());	
+		
+		Rotate rotate = new Rotate(-90,new Point3D(0, 0, 1));
+		rotate.setPivotX(width);
+		rotate.setPivotY(-height/4);
+
+//		translateTextPane = new Translate(0,0,0);
+		translateTextPane = new Translate(midPoint.getX(), midPoint.getY(), midPoint.getZ());
+	}
 	
 	// create text label for the grid axis
 	private Text createTextLabel(String text) 
@@ -146,6 +155,7 @@ public class LineGroup extends Group
 	public void rewriteLabel(String newLabel)
 	{
 		this.textLabel.setText(newLabel);
+		setTextTransforms();
 	}
 	
 	public boolean getTextState()
