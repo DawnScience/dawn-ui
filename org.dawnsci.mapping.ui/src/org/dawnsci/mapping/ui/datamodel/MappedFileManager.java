@@ -42,6 +42,13 @@ public class MappedFileManager {
 		viewer.refresh();
 	}
 	
+	public void removeFile(String path) {
+		mappedDataArea.removeFile(path);
+		plotManager.clearAll();
+		plotManager.updateLayers(null);
+		viewer.refresh();
+	}
+	
 	public boolean contains(String path) {
 		return mappedDataArea.contains(path);
 	}
