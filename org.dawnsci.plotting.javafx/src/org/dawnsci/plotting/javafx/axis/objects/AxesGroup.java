@@ -23,8 +23,7 @@ public class AxesGroup extends Group{
 	public AxesGroup(
 			Point3D planeNormal,
 			Point2D tickSeparationXY, 
-			Point2D axisLength,
-			double maxLength, 
+			Point3D axisLength,
 			double majorAxisThickness,
 			EventHandler<MouseEvent> scaleEventHandler)
 	{
@@ -33,7 +32,7 @@ public class AxesGroup extends Group{
 		
 		axisGrid = new Grid(planeNormal, tickSeparationXY, axisLength, majorAxisThickness, textSize);
 		
-		ScaleAxis = createScaleBar(planeNormal, maxLength, majorAxisThickness);
+		ScaleAxis = createScaleBar(planeNormal, axisLength.getZ(), majorAxisThickness);
 		ScaleAxis.setCursor(Cursor.OPEN_HAND);
 		ScaleAxis.setOnMouseDragged(scaleEventHandler);
 		
@@ -68,9 +67,9 @@ public class AxesGroup extends Group{
 		
 	}
 	
-	public void updateScale(Point2D newMax)
+	public void updateScale(Point3D newMax)
 	{
-		axisGrid.updateGrid(newMax);
+		axisGrid.updateGridMaxLength(newMax);
 		axisGrid.reDeclareLabels(axisLimitMin, axisLimitMax);
 	}
 	
@@ -91,7 +90,7 @@ public class AxesGroup extends Group{
 		
 		axisGrid.setTickSeperationXY(newSeparation);
 		
-		axisGrid.resetTicks();
+		axisGrid.refreshGrid();
 	}
 	
 	

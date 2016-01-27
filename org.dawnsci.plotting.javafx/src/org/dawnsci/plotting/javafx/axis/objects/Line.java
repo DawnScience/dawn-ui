@@ -46,6 +46,12 @@ public class Line extends MeshView
 		pointList.add(end);
 		createLine(pointList);
 	}
+	
+	public Line(Point3D start, Point3D end, Color colour)
+	{
+		this(start, end);
+		this.setColour(colour);
+	}
 			
 	private void createLine(List<Point3D> points)
 	{

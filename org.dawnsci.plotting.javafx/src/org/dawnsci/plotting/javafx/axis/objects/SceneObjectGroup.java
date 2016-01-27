@@ -55,26 +55,26 @@ public class SceneObjectGroup extends Group
 		yzAxisGroup = new AxesGroup(
 				new Point3D(1, 0, 0), 
 				new Point2D(tickSeperationXYZ.getY(), tickSeperationXYZ.getZ()),  
-				new Point2D(maxLength.getY(), maxLength.getZ()),
-				maxLength.getX(),
+				new Point3D(maxLength.getY(), maxLength.getZ(), maxLength.getX()),
 				axisThickness,
 				scaleEventHandler);
+		this.getChildren().add(yzAxisGroup);
+		
 		zxAxisGroup = new AxesGroup(
 				new Point3D(0, 1, 0), 
 				new Point2D(tickSeperationXYZ.getZ(), tickSeperationXYZ.getX()),  
-				new Point2D(maxLength.getZ(), maxLength.getX()),
-				maxLength.getY(),
+				new Point3D(maxLength.getZ(), maxLength.getX(), maxLength.getY()),
 				axisThickness,
 				scaleEventHandler);
+		this.getChildren().add(zxAxisGroup);
+			
 		xyAxisGroup = new AxesGroup(
 				new Point3D(0, 0, 1), 
 				new Point2D(tickSeperationXYZ.getX(), tickSeperationXYZ.getY()),  
-				new Point2D(maxLength.getX(), maxLength.getY()),
-				maxLength.getZ(),
+				new Point3D(maxLength.getX(), maxLength.getY(), maxLength.getZ()),
 				axisThickness,
 				scaleEventHandler);
-
-		this.getChildren().addAll(yzAxisGroup, zxAxisGroup, xyAxisGroup);
+		this.getChildren().add(xyAxisGroup);
 	}
 	
 	public void createBoundingBox(Point3D size)
@@ -95,11 +95,11 @@ public class SceneObjectGroup extends Group
 	public void checkScale(Point3D newMaxLengthXYZ, double zoom)
 	{
 		// yz
-		yzAxisGroup.updateScale(new Point2D(newMaxLengthXYZ.getY(), newMaxLengthXYZ.getZ()));
-		// zx
-		zxAxisGroup.updateScale(new Point2D(newMaxLengthXYZ.getZ(), newMaxLengthXYZ.getX()));
+		yzAxisGroup.updateScale(new Point3D(newMaxLengthXYZ.getY(), newMaxLengthXYZ.getZ(), newMaxLengthXYZ.getX()));
+//		// zx
+		zxAxisGroup.updateScale(new Point3D(newMaxLengthXYZ.getZ(), newMaxLengthXYZ.getX(), newMaxLengthXYZ.getY()));
 		// xy
-		xyAxisGroup.updateScale(new Point2D(newMaxLengthXYZ.getX(), newMaxLengthXYZ.getY()));
+		xyAxisGroup.updateScale(new Point3D(newMaxLengthXYZ.getX(), newMaxLengthXYZ.getY(), newMaxLengthXYZ.getZ()));
 	}
 	
 	/**
@@ -110,7 +110,7 @@ public class SceneObjectGroup extends Group
 	public void SetTickSeparationXYZ(Point3D newTickSpeperation)
 	{
 		yzAxisGroup.setTickSeperation(new Point2D(newTickSpeperation.getY(), newTickSpeperation.getZ()));
-		     
+//		     
 		zxAxisGroup.setTickSeperation(new Point2D(newTickSpeperation.getZ(), newTickSpeperation.getX()));
 		       
 		xyAxisGroup.setTickSeperation(new Point2D(newTickSpeperation.getX(), newTickSpeperation.getY()));
@@ -178,23 +178,13 @@ public class SceneObjectGroup extends Group
 	
 	public void setAxisLimitMax(Point3D MaxLimit)
 	{
-		yzAxisGroup.setAxisMinLimit(new Point2D(MaxLimit.getY(), MaxLimit.getZ()));
-		zxAxisGroup.setAxisMinLimit(new Point2D(MaxLimit.getZ(), MaxLimit.getX()));
-		xyAxisGroup.setAxisMinLimit(new Point2D(MaxLimit.getX(), MaxLimit.getY()));
+		yzAxisGroup.setAxisMaxLimit(new Point2D(MaxLimit.getY(), MaxLimit.getZ()));
+		zxAxisGroup.setAxisMaxLimit(new Point2D(MaxLimit.getZ(), MaxLimit.getX()));
+		xyAxisGroup.setAxisMaxLimit(new Point2D(MaxLimit.getX(), MaxLimit.getY()));
 	}
 	
 	
 	
 	
 }	
-
-
-
-
-
-
-
-
-
-
 

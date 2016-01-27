@@ -30,6 +30,7 @@ public class LineGroup extends Group
  	 	
  	// this transforms
 	private Translate offset;
+	private Translate textOffset;
 	private Rotate rotate;
 	
 	private double textSize = 10;
@@ -45,9 +46,7 @@ public class LineGroup extends Group
 		
 		if (label != null)
 		{
-			textLabel = createTextLabel(offset.getX()/4, offset.getY(), label);
-			textLabel.setDepthTest(DepthTest.DISABLE);
-			
+			textLabel = createTextLabel(label);
 			
 			textLabel.setFontSmoothingType(FontSmoothingType.LCD);
 			textPane.getChildren().add(textLabel);
@@ -63,21 +62,23 @@ public class LineGroup extends Group
 			textYAxisRotate.setPivotY(-height/4);
 			
 			textZAxisRotate.setPivotX(width/2);
-			textZAxisRotate.setPivotY(-height/4);
+			textZAxisRotate.setPivotY(-height/4);	
 			
 			Rotate rotate = new Rotate(-90,new Point3D(0, 0, 1));
 			rotate.setPivotX(width);
 			rotate.setPivotY(-height/4);
-						
+			
 			textLabel.getTransforms().addAll(
 								textXAxisRotate,
 								textYAxisRotate, 
 								textZAxisRotate);
-			
+						
 			Translate translateTextPane = new Translate(-width/2, height/4, 0);
-			textPane.getTransforms().addAll(translateTextPane); // offsetText);
-		
-		
+			textOffset = new Translate();
+			
+			
+			textPane.getTransforms().addAll(translateTextPane, textOffset);
+			
 		}
 		
 		
@@ -91,36 +92,22 @@ public class LineGroup extends Group
 				
 		textPane.localToSceneTransformProperty().addListener((obs, oldT, newT) -> {
 			
-            // figure overall rotation angle of applied           
-            double x = Math.toDegrees( Math.atan2(newT.getMzy(), newT.getMzz()));
-            double xRot =  Double.isNaN(x) ? 0 : x;
-            if (xRot < 0)
-            	xRot += 360;
-            
-            double y = Math.toDegrees(-Math.asin(newT.getMzx()));
-            double yRot =  Double.isNaN(y) ? 0 : y;
-            if (yRot < 0)
-            	yRot += 360;
-            
-            double z = Math.toDegrees( Math.atan2((newT.getMyx()/xRot), (newT.getMxx()/xRot)));
-            double zRot =  Double.isNaN(z) ? 0 : z;
-            if (zRot < 0)
-            	zRot += 360;
+			Point3D angles = Vector3DUtil.extractEulerAnglersFromMatrix(newT);
                         
-            textXAxisRotate.setAngle(-xRot);
-            textYAxisRotate.setAngle(-yRot);
-            textZAxisRotate.setAngle(-zRot);
+            textXAxisRotate.setAngle(-angles.getX());
+            textYAxisRotate.setAngle(-angles.getY());
+            textZAxisRotate.setAngle(-angles.getZ());
             
         });		
 	}
 	
 	
 	// create text label for the grid axis
-	private Text createTextLabel(double x, double y, String text) 
+	private Text createTextLabel(String text) 
 	{
-		
 		// create the text to return
 		Text returnText = new Text(text);
+		returnText.setText(text);
 		returnText.setFont(new Font(textSize));
 		
 		return returnText;
@@ -129,6 +116,16 @@ public class LineGroup extends Group
 	public void setRotate(Rotate newRotate)
 	{
 		this.rotate = newRotate;
+	}
+	
+	public void setTextOffset(Point3D translate)
+	{
+		if (this.textOffset != null)
+		{
+			this.textOffset.setX(translate.getX());
+			this.textOffset.setY(translate.getY());
+			this.textOffset.setZ(translate.getZ());
+		}
 	}
 	
 	public void setHeightExtended(double x)
