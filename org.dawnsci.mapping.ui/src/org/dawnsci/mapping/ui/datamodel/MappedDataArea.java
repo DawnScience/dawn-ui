@@ -52,6 +52,22 @@ public class MappedDataArea implements MapObject {
 		}
 	}
 	
+	public void removeFile(String filename) {
+		
+		MappedDataFile file = null;
+		
+		for (MappedDataFile f : files) {
+			if (f.getPath().equals(filename)) {
+				file = f;
+				break;
+			}
+		}
+		
+		if (file == null) return;
+		
+		removeFile(file);
+	}
+	
 	public MappedDataFile getDataFile(int index) {
 		return files.get(index);
 	}

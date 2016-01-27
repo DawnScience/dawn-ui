@@ -3,6 +3,7 @@ package org.dawnsci.mapping.ui.datamodel;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.IRemoteDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
 import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
 import org.slf4j.Logger;
@@ -64,8 +65,26 @@ public class LiveMappedData extends MappedData implements ILiveData {
 		}
 
 		final IDataset ma = baseMap.getSlice();
+		
+		// TODO This check is probably not required
+		if (baseMap.getSize() == 1) return null;
+		
 		IDataset y = parent.getYAxis()[0].getSlice();
 		IDataset x = parent.getXAxis()[0].getSlice();
+		
+		if (y.getRank() == 2) {
+			SliceND s = new SliceND(y.getShape());
+			s.setSlice(1, 0, 1, 1);
+			y = y.getSlice(s);
+			y.squeeze();
+		}
+		
+		if (x.getRank() == 2) {
+			SliceND s = new SliceND(x.getShape());
+			s.setSlice(0, 0, 1, 1);
+			x = x.getSlice(s);
+			x.squeeze();
+		}
 		
 		AxesMetadataImpl axm = new AxesMetadataImpl(2);
 		axm.addAxis(0, y);
