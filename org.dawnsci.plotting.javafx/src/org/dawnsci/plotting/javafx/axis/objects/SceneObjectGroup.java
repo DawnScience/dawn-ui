@@ -121,11 +121,11 @@ public class SceneObjectGroup extends Group
 	
 	public void setGridXVisible(boolean visible)
 	{
-//		yzAxisGroup.setVisible(visible);
+		yzAxisGroup.setVisible(visible);
 	}
 	public void setGridYVisible(boolean visible)
 	{
-//		zxAxisGroup.setVisible(visible);
+		zxAxisGroup.setVisible(visible);
 	}
 	public void setGridZVisible(boolean visible)
 	{
@@ -146,11 +146,11 @@ public class SceneObjectGroup extends Group
 	
 	public void flipXGridVisible()
 	{
-//		yzAxisGroup.setVisible(!yzAxisGroup.isVisible());
+		yzAxisGroup.setVisible(!yzAxisGroup.isVisible());
 	}
 	public void flipYGridVisible()
 	{
-//		zxAxisGroup.setVisible(!zxAxisGroup.isVisible());
+		zxAxisGroup.setVisible(!zxAxisGroup.isVisible());
 	}
 	public void flipZGridVisible()
 	{
@@ -171,15 +171,15 @@ public class SceneObjectGroup extends Group
 		
 	public void setAxisLimitMin(Point3D MinLimit)
 	{		
-//		yzAxisGroup.setAxisMinLimit(new Point2D(MinLimit.getY(), MinLimit.getZ()));
-//		zxAxisGroup.setAxisMinLimit(new Point2D(MinLimit.getZ(), MinLimit.getX()));
+		yzAxisGroup.setAxisMinLimit(new Point2D(MinLimit.getY(), MinLimit.getZ()));
+		zxAxisGroup.setAxisMinLimit(new Point2D(MinLimit.getZ(), MinLimit.getX()));
 		xyAxisGroup.setAxisMinLimit(new Point2D(MinLimit.getX(), MinLimit.getY()));
 	}
 	
 	public void setAxisLimitMax(Point3D MaxLimit)
 	{
-//		yzAxisGroup.setAxisMinLimit(new Point2D(MaxLimit.getY(), MaxLimit.getZ()));
-//		zxAxisGroup.setAxisMinLimit(new Point2D(MaxLimit.getZ(), MaxLimit.getX()));
+		yzAxisGroup.setAxisMinLimit(new Point2D(MaxLimit.getY(), MaxLimit.getZ()));
+		zxAxisGroup.setAxisMinLimit(new Point2D(MaxLimit.getZ(), MaxLimit.getX()));
 		xyAxisGroup.setAxisMinLimit(new Point2D(MaxLimit.getX(), MaxLimit.getY()));
 	}
 	
@@ -187,14 +187,4 @@ public class SceneObjectGroup extends Group
 	
 	
 }	
-
-
-
-
-
-
-
-
-
-
 

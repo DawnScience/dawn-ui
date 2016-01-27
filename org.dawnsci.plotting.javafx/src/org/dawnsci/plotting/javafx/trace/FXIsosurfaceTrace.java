@@ -208,8 +208,6 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 			isosurface.setDepthTest(DepthTest.DISABLE);
 		}
 		
-		isosurface.setDepthTest(DepthTest.ENABLE);
-		
 		marry(mesh);
 	
 	}
