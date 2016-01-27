@@ -17,6 +17,27 @@ public class Vector3DUtil
 	 * 
 	 */
 	
+	public static Point3D extractEulerAnglersFromMatrix(Transform matrix)
+	{
+		// figure overall rotation angle of applied           
+        double x = Math.toDegrees( Math.atan2(matrix.getMzy(), matrix.getMzz()));
+        double xRot =  Double.isNaN(x) ? 0 : x;
+        if (xRot < 0)
+        	xRot += 360;
+        
+        double y = Math.toDegrees(-Math.asin(matrix.getMzx()));
+        double yRot =  Double.isNaN(y) ? 0 : y;
+        if (yRot < 0)
+        	yRot += 360;
+        
+        double z = Math.toDegrees( Math.atan2((matrix.getMyx()/xRot), (matrix.getMxx()/xRot)));
+        double zRot =  Double.isNaN(z) ? 0 : z;
+        if (zRot < 0)
+        	zRot += 360;
+        
+        return new Point3D(xRot, yRot, zRot);
+	}
+	
 	public static double  getMaximumValue (Point3D v)
 	{
 		double value = Double.MIN_VALUE;

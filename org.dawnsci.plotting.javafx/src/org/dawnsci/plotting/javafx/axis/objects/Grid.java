@@ -31,28 +31,80 @@ public class Grid extends Group
 	
 	// saved details
 	private Point3D planeVector;
-	private Point2D maxLengthXY;
+	private Point3D maxLengthXYZ;
 	private Point2D tickSeperationXY;
 	private double thickness;
 	private Color colour;
 	private double textSize;
 	
-	public Grid(Point3D planeXYZ, Point2D tickSeperationXY, Point2D axisLength, double thickness, double textSize)
+	
+	public Grid(Point3D planeXYZ, Point2D tickSeperationXY, Point3D axisLength, double thickness, double textSize)
 	{
 		this.textSize = textSize;
 		this.planeVector = planeXYZ;
 		this.tickSeperationXY = new Point2D(500,500);
-//		this.tickSeperationXY = tickSeperationXY;
-		this.maxLengthXY = axisLength;
+		this.maxLengthXYZ = axisLength;
 		this.thickness = thickness;
 		
-		axisPlane(this.planeVector, this.tickSeperationXY, this.maxLengthXY , this.thickness);		
+		Point2D maxLengthXY = new Point2D(axisLength.getX(), axisLength.getY());
+		
+		axisPlane(this.planeVector, this.tickSeperationXY, maxLengthXY , this.thickness);
+		
+		this.localToSceneTransformProperty().addListener((obs, oldT, newT) -> {
+			
+			Point3D angles = Vector3DUtil.extractEulerAnglersFromMatrix(newT);
+			
+			if (angles.getX() > 180)
+			{
+				offsetLabels(new Point3D(0, axisLength.getY(), 0), yAxis);
+			}
+			else
+			{
+				offsetLabels(new Point3D(0, 0, 0), yAxis);
+			}
+			
+			
+			angles = angles.subtract(new Point3D(180, 180, 180));
+			if (angles.getX() > -90 && angles.getX() < 90)
+			{
+				offsetGrid(new Point3D(0, 0, 0));
+			}
+			else
+			{
+				offsetGrid(new Point3D(0, 0, axisLength.getZ()));
+			}
+        });	
 		
 	}
 	
 	/*
 	 * private
 	 */
+
+	
+	private void offsetGrid(Point3D offset)
+	{
+		this.offset.setX(offset.getX());
+		this.offset.setY(offset.getY());
+		this.offset.setZ(offset.getZ());
+	}
+	
+	/**
+	 * Sets the translate property of any lineGroup objects within the groups children to the newOffset
+	 * @param newOffset
+	 * @param axis
+	 */
+	private void offsetLabels(Point3D newOffset, Group axis)
+	{
+		for (Node n : axis.getChildren())
+		{
+			if (n instanceof LineGroup)
+			{
+				LineGroup lg = (LineGroup)n;
+				lg.setTextOffset(newOffset);
+			}
+		}
+	}
 	
 	// !! make this look nicer
 	private void axisPlane(Point3D planeXYZ, Point2D tickSeperationXY, Point2D axisLength, double thickness)
@@ -98,7 +150,7 @@ public class Grid extends Group
 		
 		// finally - once all initialised
 		// update the grid -> create the grid
-		this.updateGrid(axisLength);
+		this.updateGridMaxLength(this.maxLengthXYZ);
 		
 	}
 	/**
@@ -141,8 +193,8 @@ public class Grid extends Group
 	
 	public void reDeclareLabels(Point2D labelMin, Point2D labelMax)
 	{
-		reDeclareLabelsSpecfic(labelMin.getX(), labelMax.getX(), yAxis, this.maxLengthXY.getX(), tickSeperationXY.getX());
-		reDeclareLabelsSpecfic(labelMin.getY(), labelMax.getY(), xAxis, this.maxLengthXY.getY(), tickSeperationXY.getY());
+		reDeclareLabelsSpecfic(labelMin.getX(), labelMax.getX(), yAxis, this.maxLengthXYZ.getX(), tickSeperationXY.getX());
+		reDeclareLabelsSpecfic(labelMin.getY(), labelMax.getY(), xAxis, this.maxLengthXYZ.getY(), tickSeperationXY.getY());
 	}
 	
 	// !! move
@@ -191,20 +243,20 @@ public class Grid extends Group
 	
 	public void updateGrid()
 	{
-		updateGrid(maxLengthXY);
+		updateGridMaxLength(maxLengthXYZ);
 	}
 	
-	public void updateGrid(Point2D newMaxLengthXY)
+	public void updateGridMaxLength(Point3D newMaxLengthXYZ)
 	{
 		
 		xAxis.setVisible(true);
 		yAxis.setVisible(true);
 		
-		this.maxLengthXY = newMaxLengthXY;
+		this.maxLengthXYZ = newMaxLengthXYZ;
 		
 		// check current axis line lengths
-		updateLineLengths(xAxis.getChildren(), this.maxLengthXY.getX());
-		updateLineLengths(yAxis.getChildren(), this.maxLengthXY.getY());
+		updateLineLengths(xAxis.getChildren(), this.maxLengthXYZ.getX());
+		updateLineLengths(yAxis.getChildren(), this.maxLengthXYZ.getY());
 		
 		// check if a new axis line needs to be added
 		updateLineCount();		
@@ -230,9 +282,9 @@ public class Grid extends Group
 		double seperationXLength = this.tickSeperationXY.getX() * (nXCount-1);
 		
 		
-		if (this.maxLengthXY.getX() < seperationXLength)
+		if (this.maxLengthXYZ.getX() < seperationXLength)
 		{
-			int excessXLineCount = (int)(( this.maxLengthXY.getX() - ((nXCount)*this.tickSeperationXY.getX()))/ this.tickSeperationXY.getX());
+			int excessXLineCount = (int)(( this.maxLengthXYZ.getX() - ((nXCount)*this.tickSeperationXY.getX()))/ this.tickSeperationXY.getX());
 			
 			if (this.yAxis.getChildren().size() > 0)
 			{
@@ -241,14 +293,14 @@ public class Grid extends Group
 				this.yAxis.getChildren().remove(lowerLimit, upperLimit);
 			}
 		}
-		else if (this.maxLengthXY.getX() > seperationXLength)
+		else if (this.maxLengthXYZ.getX() > seperationXLength)
 		{
-			int excessXLineCount = (int)(( this.maxLengthXY.getX() - ((nXCount - 1)*this.tickSeperationXY.getX()))/ this.tickSeperationXY.getX());
+			int excessXLineCount = (int)(( this.maxLengthXYZ.getX() - ((nXCount - 1)*this.tickSeperationXY.getX()))/ this.tickSeperationXY.getX());
 			
 			for (int i = 0; i < excessXLineCount; i ++)
 			{
 				LineGroup tickLine = createTickBar(
-						this.maxLengthXY.getY(),
+						this.maxLengthXYZ.getY(),
 						Y_AXIS_DIRECTION, 
 						new Point2D(tickSeperationXY.getX()*(nXCount+i),0),
 						Double.toString(this.tickSeperationXY.getX()*(nXCount+i)));
@@ -264,9 +316,9 @@ public class Grid extends Group
 		double seperationYLength = this.tickSeperationXY.getY() * (nYCount-1);
 		
 		
-		if (this.maxLengthXY.getY() < seperationYLength)
+		if (this.maxLengthXYZ.getY() < seperationYLength)
 		{
-			int excessYLineCount = (int)(( this.maxLengthXY.getY() - ((nYCount)*this.tickSeperationXY.getY()))/ this.tickSeperationXY.getY());
+			int excessYLineCount = (int)(( this.maxLengthXYZ.getY() - ((nYCount)*this.tickSeperationXY.getY()))/ this.tickSeperationXY.getY());
 		
 			if (this.xAxis.getChildren().size() > 0)
 			{
@@ -275,15 +327,15 @@ public class Grid extends Group
 				this.xAxis.getChildren().remove(lowerLimit, upperLimit);
 			}
 		}
-		else if (this.maxLengthXY.getY() > seperationYLength)
+		else if (this.maxLengthXYZ.getY() > seperationYLength)
 		{
-			int excessYLineCount = (int)(( this.maxLengthXY.getY() - ((nYCount - 1)*this.tickSeperationXY.getY()))/ this.tickSeperationXY.getY());
+			int excessYLineCount = (int)(( this.maxLengthXYZ.getY() - ((nYCount - 1)*this.tickSeperationXY.getY()))/ this.tickSeperationXY.getY());
 			
 			for (int i = 0; i < excessYLineCount; i ++)
 			{	
 				
 				LineGroup tickLine = createTickBar(
-						this.maxLengthXY.getX(), 
+						this.maxLengthXYZ.getX(), 
 						X_AXIS_DIRECTION, 
 						new Point2D(this.tickSeperationXY.getY()*(nYCount+i), 0),
 						null);
