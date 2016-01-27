@@ -183,7 +183,7 @@ public class Grid extends Group
 				text,
 				this.textSize,
 				this.rotate);
-		
+		System.out.println(" + " + text);
 		return returnBar;
 	}
 	
@@ -215,7 +215,7 @@ public class Grid extends Group
 		int i = 0;
 		for (LineGroup line: axisLineList)
 		{			
-			final int newValue = (int)(((((tickSeperation * i) / maxLength) * (labelMax - labelMin)) + labelMin) + 1f);
+			final int newValue = (int)(((((tickSeperation * i) / maxLength) * (labelMax - labelMin)) + labelMin) + 0.5f);
 			line.rewriteLabel(Integer.toString(newValue));
 			i++;
 		}
@@ -233,7 +233,6 @@ public class Grid extends Group
 		this.textSize = newTextSize;
 	}
 	
-	// !! organise
 	public void refreshGrid()
 	{
 		xAxis.getChildren().clear();
@@ -259,8 +258,7 @@ public class Grid extends Group
 		updateLineLengths(yAxis.getChildren(), this.maxLengthXYZ.getY());
 		
 		// check if a new axis line needs to be added
-		updateLineCount();		
-		
+		updateLineCount();
 	}
 	
 	private void updateLineLengths(ObservableList<Node> aixsGroup, double length)
@@ -305,10 +303,10 @@ public class Grid extends Group
 						new Point2D(tickSeperationXY.getX()*(nXCount+i),0),
 						Double.toString(this.tickSeperationXY.getX()*(nXCount+i)));
 				this.yAxis.getChildren().add(tickLine);
-			}
-						
+			}		
 		}
 		
+		System.out.println(nXCount);
 		
 		
 		
@@ -343,12 +341,6 @@ public class Grid extends Group
 			}
 		}
 		
-	}
-
-	public void resetTicks() {
-		xAxis.getChildren().clear();
-		yAxis.getChildren().clear();
-		updateLineCount();
 	}
 	
 }

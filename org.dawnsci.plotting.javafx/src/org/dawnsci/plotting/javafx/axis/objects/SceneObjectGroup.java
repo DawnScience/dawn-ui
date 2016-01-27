@@ -178,9 +178,9 @@ public class SceneObjectGroup extends Group
 	
 	public void setAxisLimitMax(Point3D MaxLimit)
 	{
-		yzAxisGroup.setAxisMinLimit(new Point2D(MaxLimit.getY(), MaxLimit.getZ()));
-		zxAxisGroup.setAxisMinLimit(new Point2D(MaxLimit.getZ(), MaxLimit.getX()));
-		xyAxisGroup.setAxisMinLimit(new Point2D(MaxLimit.getX(), MaxLimit.getY()));
+		yzAxisGroup.setAxisMaxLimit(new Point2D(MaxLimit.getY(), MaxLimit.getZ()));
+		zxAxisGroup.setAxisMaxLimit(new Point2D(MaxLimit.getZ(), MaxLimit.getX()));
+		xyAxisGroup.setAxisMaxLimit(new Point2D(MaxLimit.getX(), MaxLimit.getY()));
 	}
 	
 	

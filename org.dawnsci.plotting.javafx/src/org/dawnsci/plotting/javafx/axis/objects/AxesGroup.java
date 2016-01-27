@@ -90,7 +90,7 @@ public class AxesGroup extends Group{
 		
 		axisGrid.setTickSeperationXY(newSeparation);
 		
-		axisGrid.resetTicks();
+		axisGrid.refreshGrid();
 	}
 	
 	

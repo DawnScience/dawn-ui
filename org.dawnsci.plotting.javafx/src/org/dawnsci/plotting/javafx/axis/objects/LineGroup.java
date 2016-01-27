@@ -44,9 +44,11 @@ public class LineGroup extends Group
 		this.rotate = new Rotate();
 		textPane = new Group();
 		
+		System.out.println(" ~ " + label);
+		
 		if (label != null)
 		{
-			textLabel = createTextLabel(offset.getX()/4, offset.getY(), label);
+			textLabel = createTextLabel(label);
 			
 			textLabel.setFontSmoothingType(FontSmoothingType.LCD);
 			textPane.getChildren().add(textLabel);
@@ -62,7 +64,7 @@ public class LineGroup extends Group
 			textYAxisRotate.setPivotY(-height/4);
 			
 			textZAxisRotate.setPivotX(width/2);
-			textZAxisRotate.setPivotY(-height/4);
+			textZAxisRotate.setPivotY(-height/4);	
 			
 			Rotate rotate = new Rotate(-90,new Point3D(0, 0, 1));
 			rotate.setPivotX(width);
@@ -73,8 +75,13 @@ public class LineGroup extends Group
 								textYAxisRotate, 
 								textZAxisRotate);
 			
+			System.out.println(" * * * " + textLabel.getText());
+			
 			Translate translateTextPane = new Translate(-width/2, height/4, 0);
 			textOffset = new Translate();
+			
+
+			System.out.println(" - - - " + textLabel.getText());
 			
 			textPane.getTransforms().addAll(translateTextPane, textOffset);
 			
@@ -102,11 +109,12 @@ public class LineGroup extends Group
 	
 	
 	// create text label for the grid axis
-	private Text createTextLabel(double x, double y, String text) 
+	private Text createTextLabel(String text) 
 	{
-		
+		System.out.println("= " + text);
 		// create the text to return
 		Text returnText = new Text(text);
+		returnText.setText(text);
 		returnText.setFont(new Font(textSize));
 		
 		return returnText;
