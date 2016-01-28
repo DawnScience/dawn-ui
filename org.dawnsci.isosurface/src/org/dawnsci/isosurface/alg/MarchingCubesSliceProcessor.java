@@ -72,8 +72,7 @@ public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 			     
 			triangleSet.addAll(generateAndMapTriangles(
 										xyzLimit[0],
-										currentSlice,
-										isovalue));			
+										currentSlice));			
 		} 
 	}
 	
@@ -90,8 +89,7 @@ public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 	@SuppressWarnings("unchecked")
 	private Set<Triangle> generateAndMapTriangles(
 			int xLimit,
-			Object[] currentSlice,
-			double isoValue)
+			Object[] currentSlice)
 	{		
 		Set<Triangle> returnTriangles = new HashSet<Triangle>();
 		
@@ -216,6 +214,7 @@ public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 	private int getCubeIndex(GridCell cell, double isovalue){
 		int cubeIndex = 0;
 		
+		//!! was previously if (x < y)
 		if (cell.getCellValues()[0] < isovalue)
 			cubeIndex |= 1;
 		if (cell.getCellValues()[1] < isovalue)

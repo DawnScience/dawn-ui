@@ -86,7 +86,7 @@ public class SceneObjectGroup extends Group
 		ambientAxisLight.getScope().add(boundingBox);
 		boundingBox.getChildren().add(ambientAxisLight);
 		
-		boundingBox.setColour(Color.ORANGE);
+		boundingBox.setColour(Color.BLACK);
 		
 		this.getChildren().add(boundingBox);
 	}

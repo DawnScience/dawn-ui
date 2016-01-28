@@ -4,6 +4,6 @@ import javafx.scene.paint.Color;
 
 public class DefaultObjectProperties 
 {
-	public final static Color LINE_COLOUR = Color.GRAY;
+	public final static Color LINE_COLOUR = Color.LIGHTGRAY;
 		
 }

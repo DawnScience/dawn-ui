@@ -114,17 +114,16 @@ public class SurfaceDisplayer extends Scene
 			
 			
 			Point2D  mouseScaleDir = new Point2D(sceneMouseOffset.getX(), sceneMouseOffset.getY());
-
+			
 			final double[] mouseDelta = {
 					newMousePos[0] - oldMousePos[0], 
 					newMousePos[1] - oldMousePos[1]};
 			
 			final double mouseMovementMod = ((zoom + 1000) * 0.001f) + 0.1f;
-
+			
 			updateScale(mouseDelta, mouseMovementMod, mouseScaleDir, scaleDir);
 			
 		}
-		
 	};
 		
 	/**
@@ -186,7 +185,7 @@ public class SurfaceDisplayer extends Scene
 		
 		// create the scene graph
 		this.lightGroup.getChildren().addAll(this.isosurfaceGroup);
-		this.objectGroup.getChildren().addAll(this.lightGroup, axisNode);
+		this.objectGroup.getChildren().addAll(axisNode, this.lightGroup);
 		this.cameraGroup.getChildren().addAll(this.objectGroup);
 		
 		// add groups the the root
