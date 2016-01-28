@@ -4,6 +4,7 @@ import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
+import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 
 public class MappedData extends AbstractMapData{
 
@@ -25,7 +26,7 @@ public class MappedData extends AbstractMapData{
 	
 	private int[] getIndices(double x, double y) {
 		
-		IDataset[] ax = MappingUtils.getAxesFromMetadata(map);
+		IDataset[] ax = MetadataPlotUtils.getAxesFromMetadata(map);
 		
 		IDataset xx = ax[1];
 		IDataset yy = ax[0];

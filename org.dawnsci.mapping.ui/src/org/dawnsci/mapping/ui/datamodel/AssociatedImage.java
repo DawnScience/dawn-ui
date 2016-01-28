@@ -6,7 +6,7 @@ import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 
 
 
-public class AssociatedImage implements MapObject {
+public class AssociatedImage implements PlottableMapObject {
 
 	
 	private String name;
@@ -21,7 +21,7 @@ public class AssociatedImage implements MapObject {
 		this.path = path;
 	}
 	
-	public IDataset getImage() {
+	public IDataset getData() {
 		return image;
 	}
 	

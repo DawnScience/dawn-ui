@@ -5,6 +5,7 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
+import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 
 public class MappedDataBlock implements MapObject {
 
@@ -99,7 +100,7 @@ public class MappedDataBlock implements MapObject {
 	
 	protected double[] calculateRange(ILazyDataset block){
 		
-		IDataset[] ax = MappingUtils.getAxesFromMetadata(block);
+		IDataset[] ax = MetadataPlotUtils.getAxesFromMetadata(block);
 		
 		double[] range = new double[4];
 		int xs = ax[xDim].getSize();

@@ -112,7 +112,7 @@ public class MappedFileManager {
 			IDataset im;
 			try {
 				im = LocalServiceManager.getLoaderService().getDataset(path, null);
-				RegistrationDialog dialog = new RegistrationDialog(Display.getDefault().getActiveShell(), plotManager.getTopMap().getMap(),im);
+				RegistrationDialog dialog = new RegistrationDialog(Display.getDefault().getActiveShell(), plotManager.getTopMap().getData(),im);
 				if (dialog.open() != IDialogConstants.OK_ID) return;
 				RGBDataset ds = (RGBDataset)dialog.getRegisteredImage();
 				ds.setName("Registered");

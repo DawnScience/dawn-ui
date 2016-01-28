@@ -23,6 +23,7 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -99,9 +100,9 @@ public class RegistrationDialog extends Dialog {
 		systemComposite.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 
-		MappingUtils.plotDataWithMetadata(map, systemMap, null);
+		MetadataPlotUtils.plotDataWithMetadata(map, systemMap);
 		image.setName("Image");
-		MappingUtils.plotDataWithMetadata(image, systemImage, null);
+		MetadataPlotUtils.plotDataWithMetadata(image, systemImage);
 		
 		doInitialMapping();
 		
@@ -110,7 +111,7 @@ public class RegistrationDialog extends Dialog {
 	
 	private void doInitialMapping(){
 		
-		IDataset[] ax = MappingUtils.getAxesFromMetadata(map);
+		IDataset[] ax = MetadataPlotUtils.getAxesFromMetadata(map);
 		
 		Assert.isNotNull(ax);
 		double mapX = map.getShape()[1];
@@ -257,9 +258,9 @@ public class RegistrationDialog extends Dialog {
 		systemComposite.clear();
 		double[] range = MappingUtils.getGlobalRange(im,map);
 
-		IImageTrace image = MappingUtils.buildTrace("image",im, systemComposite);
+		IImageTrace image = MetadataPlotUtils.buildTrace("image",im, systemComposite);
 		image.setGlobalRange(range);
-		IImageTrace mapim = MappingUtils.buildTrace("map", map, systemComposite,120);
+		IImageTrace mapim = MetadataPlotUtils.buildTrace("map", map, systemComposite,120);
 		mapim.setGlobalRange(range);
 		systemComposite.addTrace(image);
 		systemComposite.addTrace(mapim);
