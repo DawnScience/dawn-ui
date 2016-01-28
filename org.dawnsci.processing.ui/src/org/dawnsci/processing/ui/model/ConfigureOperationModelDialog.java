@@ -16,7 +16,6 @@ import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.processing.ui.slice.IOperationInputData;
-import org.dawnsci.processing.ui.slice.SlicedDataUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -47,6 +46,7 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionService;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
+import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
@@ -145,14 +145,14 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 		}
 		
 		try {
-			SlicedDataUtils.plotDataWithMetadata(data.getInputData(),input, null);
+			MetadataPlotUtils.plotDataWithMetadata(data.getInputData(),input);
 		} catch (Exception e) {
 			logger.warn("Could not plot data: " + e.getMessage());
 		}
 		
 		update();
 		
-		axes = SlicedDataUtils.getAxesFromMetadata(data.getInputData());
+		axes = MetadataPlotUtils.getAxesFromMetadata(data.getInputData());
 		
 		if (input.is2D()) {
 			minMax[0] = 0;
@@ -273,7 +273,7 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 		allFields.addAll(Arrays.asList(model.getClass().getSuperclass().getDeclaredFields()));
 
 		Map<String,ROIStruct> rois = new HashMap<String,ROIStruct>();
-		IDataset[] axes = SlicedDataUtils.getAxesFromMetadata(data);
+		IDataset[] axes = MetadataPlotUtils.getAxesFromMetadata(data);
 		
 		for (Field field : allFields) {
 			Class<?> class1 = field.getType();
@@ -413,14 +413,14 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 							@Override
 							public void run() {
 								try {
-									SlicedDataUtils.plotDataWithMetadata(out,output, null);
+									MetadataPlotUtils.plotDataWithMetadata(out,output);
 									if (additional!=null) {
 										if (onInput) {
 											input.clear();
-											SlicedDataUtils.plotDataWithMetadata(data.getInputData(),input, null);
-											SlicedDataUtils.plotDataWithMetadata(additional, input, null,false);
+											MetadataPlotUtils.plotDataWithMetadata(data.getInputData(),input);
+											MetadataPlotUtils.plotDataWithMetadata(additional, input, false);
 										} else {
-											SlicedDataUtils.plotDataWithMetadata(additional, output, null,false);
+											MetadataPlotUtils.plotDataWithMetadata(additional, output, false);
 										}
  
 									}
