@@ -302,26 +302,19 @@ public class ProcessMenuManager {
 							return Status.CANCEL_STATUS;
 						}
 
-						Display.getDefault().syncExec(new Runnable() {
+						Display.getDefault().asyncExec(new Runnable() {
 							@Override
 							public void run() {
 
 								boolean bresult = false;
 
 								final IDataset d = out.get(0).getyDatasets().get(0);
-								CombineDialog dialog;
-								try {
-									dialog = new CombineDialog(out.get(0).getxDataset(),d);
-									dialog.createContents();
-									if (dialog.open() == CombineDialog.CANCEL_ID)
-										bresult = false;
-									else
-										bresult = true;
-								} catch (Exception e) {
-									MessageDialog.openError(Display.getDefault().getActiveShell(), "Error opening Combine Dialog",
-											"The following error occured while opening the Combiner dialog: " + e);
+								CombineDialog dialog = new CombineDialog(Display.getDefault().getActiveShell(),out.get(0).getxDataset(),d);
+								if (dialog.open() == Dialog.CANCEL)
 									bresult = false;
-								}
+								else
+									bresult = true;
+
 
 								if (!bresult) return;;
 

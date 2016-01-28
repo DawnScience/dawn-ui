@@ -21,6 +21,7 @@ Require-Bundle: org.eclipse.ui,
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: org.apache.commons.io.filefilter;version="1.4.0",
+ org.dawnsci.common.widgets.dialog,
  org.eclipse.core.databinding.beans,
  org.eclipse.core.databinding.observable.list,
  org.eclipse.core.resources,
