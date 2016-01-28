@@ -367,8 +367,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 	@Override
 	public boolean isAlwaysSeparateView() {
-		// TODO fix when set to true: does not work for e4
-		return false;
+		return true;
 	}
 
 	@Override
