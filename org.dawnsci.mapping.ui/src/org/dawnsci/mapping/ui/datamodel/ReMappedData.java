@@ -10,6 +10,7 @@ import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
 import org.eclipse.dawnsci.analysis.dataset.impl.Stats;
 import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
+import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelIntegration;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.XYImagePixelCache;
@@ -30,7 +31,7 @@ public class ReMappedData extends AbstractMapData {
 	
 	@Override
 	protected double[] calculateRange(ILazyDataset map){
-		IDataset[] ax = MappingUtils.getAxesForDimension(map,0);
+		IDataset[] ax = MetadataPlotUtils.getAxesForDimension(map,0);
 		double[] r = new double[4];
 		r[0] = ax[1].min().doubleValue();
 		r[1] = ax[1].max().doubleValue();
@@ -48,7 +49,7 @@ public class ReMappedData extends AbstractMapData {
 	
 	private void updateRemappedData(int[] shape) {
 		
-		IDataset[] axes = MappingUtils.getAxesForDimension(map, 0);
+		IDataset[] axes = MetadataPlotUtils.getAxesForDimension(map, 0);
 		IDataset y = axes[0];
 		IDataset x = axes[1];
 		
@@ -95,7 +96,7 @@ public class ReMappedData extends AbstractMapData {
 	
 	private int[] getIndices(double x, double y) {
 
-		IDataset[] ax = MappingUtils.getAxesFromMetadata(reMapped);
+		IDataset[] ax = MetadataPlotUtils.getAxesFromMetadata(reMapped);
 
 		IDataset yy = ax[0];
 		IDataset xx = ax[1];

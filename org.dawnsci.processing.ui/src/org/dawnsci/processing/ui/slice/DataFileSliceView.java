@@ -54,6 +54,7 @@ import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
 import org.eclipse.dawnsci.hdf5.operation.HierarchicalFileExecutionVisitor;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.image.IFileIconService;
+import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
@@ -701,7 +702,7 @@ public class DataFileSliceView extends ViewPart {
 					firstSlice = lazyDataset.getSlice(s);
 				}
 				eventManager.sendInitialDataUpdate(firstSlice.getSliceView().squeeze());
-				SlicedDataUtils.plotDataWithMetadata(firstSlice, input, dataDims);
+				MetadataPlotUtils.plotDataWithMetadata(firstSlice, input);
 				
 				
 				IOperation<? extends IOperationModel, ? extends OperationData>[] ops = getOperations();

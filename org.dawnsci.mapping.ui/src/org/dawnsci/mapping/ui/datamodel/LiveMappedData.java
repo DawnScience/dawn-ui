@@ -54,7 +54,7 @@ public class LiveMappedData extends MappedData implements ILiveData {
 	}
 	
 	@Override
-	public IDataset getMap(){
+	public IDataset getData(){
 		
 		if (!connected) {			
 			try {

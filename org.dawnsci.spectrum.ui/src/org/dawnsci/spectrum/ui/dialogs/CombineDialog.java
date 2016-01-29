@@ -1,94 +1,94 @@
 package org.dawnsci.spectrum.ui.dialogs;
 
-import java.util.Arrays;
-import java.util.List;
+
+import java.io.File;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
+import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.spectrum.ui.Activator;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
+import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
+import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Monitor;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CombineDialog {
+import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
+
+public class CombineDialog extends Dialog implements IAdaptable{
 
 	private static Logger logger = LoggerFactory.getLogger(CombineDialog.class);
 
-	private int result;
-
-	/**
-	 * Button id for an "Ok" button (value 0).
-	 */
-	public static int OK_ID = 0;
-
-	/**
-	 * Button id for a "Cancel" button (value 1).
-	 */
-	public static int CANCEL_ID = 1;
 
 	private IDataset data;
-	private List<IDataset> axes;
 	private IPlottingSystem<Composite> system;
 	private Image image;
+	private double[] globalRange;
+	private String lastPath;
 
-	private Shell shell;
-
-	public CombineDialog(IDataset x, IDataset data) throws Exception {
-		shell = new Shell(Display.getDefault());
-		shell.setText("Combine Dialog");
-		shell.setImage(image = Activator.getImageDescriptor("icons/spectrum.png").createImage());
-		shell.addListener(SWT.Close, new Listener() {
-			public void handleEvent(Event event) {
-				result = CANCEL_ID;
-				CombineDialog.this.close();
-			}
-		});
-
+	public CombineDialog(Shell shell, IDataset x, IDataset data){
+		super(shell);
 		this.data = data;
-		this.axes = Arrays.asList(new IDataset[]{x,null});;
+		AxesMetadataImpl ax = new AxesMetadataImpl(2);
+		ax.setAxis(1, x);
+		Dataset range = DatasetFactory.createRange(data.getShape()[0], Dataset.INT32);
+		range.setName("Range");
+		
+		globalRange = new double[]{x.min().doubleValue(),x.max().doubleValue(),range.min().doubleValue(),range.max().doubleValue(), 
+				};
+		
+		ax.setAxis(0, range);
+		
+		data.setMetadata(ax);
+		
 		try {
 			system = PlottingFactory.createPlottingSystem();
 		} catch (Exception e) {
-			String error = "Error creating Combine plotting system:" + e.getMessage();
 			logger.error("Error creating Combine plotting system:", e);
-			throw new Exception(error);
 		}
 	}
 
+	@Override
+	  protected void configureShell(Shell newShell) {
+	    super.configureShell(newShell);
+	    newShell.setText("Combine Dialog");
+	    newShell.setImage(image = Activator.getImageDescriptor("icons/spectrum.png").createImage());
+	  }
+	
 	/**
 	 * Create the content of the Shell dialog
 	 * 
 	 * @return
 	 */
-	public Control createContents() {
-		// Shell setting
-		shell.setLayout(new GridLayout());
-		shell.setSize(800, 600);
-		Monitor primary = Display.getDefault().getPrimaryMonitor();
-		Rectangle bounds = primary.getBounds();
-		Rectangle rect = shell.getBounds();
-		int x = bounds.x + (bounds.width - rect.width) / 2;
-		int y = bounds.y + (bounds.height - rect.height) / 2;
-		shell.setLocation(x, y);
-
-		Composite container = new Composite(shell, SWT.NONE);
+	protected Control createDialogArea(Composite parent) {
+		Composite container = (Composite) super.createDialogArea(parent);
 		container.setLayout(new GridLayout(1, false));
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
@@ -98,53 +98,110 @@ public class CombineDialog {
 		ActionBarWrapper actionBarWrapper = ActionBarWrapper.createActionBars(topPane, null);
 		system.createPlotPart(topPane, "Combine Plot", actionBarWrapper, PlotType.IMAGE, null);
 		system.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		system.updatePlot2D(data, axes, null);
+		
+		try {
+			IImageTrace t = MetadataPlotUtils.buildTrace(data, system);
+			t.setGlobalRange(globalRange);
+			system.addTrace(t);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		system.setKeepAspect(false);
-		Composite buttonComp = new Composite(container, SWT.NONE);
-		buttonComp.setLayout(new GridLayout(2, false));
-		buttonComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-		Button cancelButton = new Button(buttonComp, SWT.NONE);
-		cancelButton.setText("Cancel");
-		cancelButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
-		cancelButton.setSize(100, 50);
-		cancelButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent evt) {
-				result = CANCEL_ID;
-				CombineDialog.this.close();
-			}
-		});
-
-		Button okButton = new Button(buttonComp, SWT.NONE);
-		okButton.setText("OK");
-		okButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		okButton.setSize(100, 50);
-		okButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent evt) {
-				result = OK_ID;
-				CombineDialog.this.close();
-			}
-		});
+		
+//		Button loadButton = createButton(container, IDialogConstants.CLIENT_ID+1, "Load Y Axis...", false);
+		
 		return container;
 	}
+	
+	
+	protected void createButtonsForButtonBar(Composite parent)
+	{
+	  // Change parent layout data to fill the whole bar
+	  parent.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-	public void close() {
-		image.dispose();
-		if (shell != null)
-			shell.dispose();
-	}
-
-	/**
-	 *open the shell dialog
-	 */
-	public int open() {
-		shell.open();
-		while (!shell.isDisposed()) {
-			if (!shell.getDisplay().readAndDispatch())
-				shell.getDisplay().sleep();
+	  Button axisButton = createButton(parent, IDialogConstants.NO_ID, "Load Y-Axis...", false);
+	  axisButton.addSelectionListener(new SelectionAdapter() {
+		
+		@Override
+		public void widgetSelected(SelectionEvent e) {
+			FileSelectionDialog dialog = new FileSelectionDialog(Display.getDefault().getActiveShell());
+			dialog.setNewFile(false);
+			dialog.setFolderSelector(false);
+			if (lastPath != null) {
+				File f = new File(lastPath);
+				if (!f.isDirectory()) {
+					lastPath = f.getParent();
+				}
+				dialog.setPath(lastPath);
+			} else {
+				dialog.setPath(System.getProperty("user.home"));
+			}
+			
+			dialog.create();
+			if (dialog.open() == Dialog.CANCEL ) return;
+			lastPath = dialog.getPath();
+			
+			try {
+				IDataHolder dh = LoaderFactory.getData(lastPath);
+				IDataset dataset = dh.getDataset(0);
+				dataset = dataset.getSliceView().squeeze();
+				if (dataset.getSize() != data.getShape()[0]) {
+					throw new IllegalArgumentException("Dataset sizes not compatible :" + data.getShape()[0] + " and "  + dataset.getSize());
+				}
+				AxesMetadata ax = data.getFirstMetadata(AxesMetadata.class);
+				ax.setAxis(0, dataset);
+				globalRange[2] = dataset.min().doubleValue();
+				globalRange[3] = dataset.max().doubleValue();
+				system.clear();
+				IImageTrace t = MetadataPlotUtils.buildTrace(data, system);
+				t.setGlobalRange(globalRange);
+				system.addTrace(t);
+				
+				
+			} catch (Exception e1) {
+				MessageDialog.openError(getShell(), "Error", "Error importing y-axis :" + e1.getMessage());
+			}
+			
 		}
-		return result;
+		
+	});
+
+	  // Create a spacer label
+	  Label spacer = new Label(parent, SWT.NONE);
+	  spacer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+
+	  // Update layout of the parent composite to count the spacer
+	  GridLayout layout = (GridLayout)parent.getLayout();
+	  layout.numColumns++;
+	  layout.makeColumnsEqualWidth = false;
+
+	  createButton(parent, IDialogConstants.OK_ID,"OK", false);
+	  createButton(parent, IDialogConstants.CANCEL_ID,"Cancel", true);
 	}
+	
+	@Override
+	  protected Point getInitialSize() {
+	    return new Point(1000, 800);
+	  }
+	
+	@Override
+	public boolean close() {
+		if (image != null) image.dispose();
+		return super.close();
+		
+	}
+	
+	@Override
+	  protected boolean isResizable() {
+	    return true;
+	  }
+
+	@Override
+	public Object getAdapter(Class adapter) {
+			if (IPlottingSystem.class == adapter) return system;
+		return null;
+	}
+
 }

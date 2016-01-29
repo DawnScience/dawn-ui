@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.dawb.common.ui.util.DatasetNameUtils;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
 import org.dawnsci.common.widgets.celleditor.CComboWithEntryCellEditor;
@@ -16,7 +17,6 @@ import org.dawnsci.common.widgets.celleditor.NumberCellEditor;
 import org.dawnsci.common.widgets.celleditor.TextCellEditorWithContentProposal;
 import org.dawnsci.plotting.roi.RegionCellEditor;
 import org.dawnsci.processing.ui.ServiceHolder;
-import org.dawnsci.processing.ui.slice.SlicedDataUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -279,7 +279,7 @@ public class ModelFieldEditors {
 				}
 				
 				if (object == null) return Status.CANCEL_STATUS;
-				final Map<String, int[]> datasetInfo = SlicedDataUtils.getDatasetInfo(object.toString(), null);
+				final Map<String, int[]> datasetInfo = DatasetNameUtils.getDatasetInfo(object.toString(), null);
 				datasetInfo.toString();
 				
 				final IContentProposalProvider cpp = new IContentProposalProvider() {

@@ -31,7 +31,7 @@ public class MapPropertiesDialog extends Dialog {
 
 	public MapPropertiesDialog(Shell parentShell, AbstractMapData map, MappedDataFile file, MapPlotManager manager) {
 		super(parentShell);
-		setShellStyle(getShellStyle() | SWT.RESIZE);
+//		setShellStyle(getShellStyle() | SWT.RESIZE);
 		
 		this.map = map;
 		this.file = file;
@@ -136,4 +136,9 @@ public class MapPropertiesDialog extends Dialog {
 	protected Point getInitialSize() {
 		return new Point(400, 300);
 	}
+	
+	@Override
+	  protected boolean isResizable() {
+	    return true;
+	  }
 }

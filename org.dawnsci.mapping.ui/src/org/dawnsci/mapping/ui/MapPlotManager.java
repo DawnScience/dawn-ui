@@ -13,6 +13,7 @@ import org.dawnsci.mapping.ui.datamodel.ILiveData;
 import org.dawnsci.mapping.ui.datamodel.MapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedData;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
+import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -35,6 +36,7 @@ import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.progress.UIJob;
@@ -46,7 +48,7 @@ public class MapPlotManager {
 	private IPlottingSystem<Composite> map;
 	private IPlottingSystem<Composite> data;
 	private MappedDataArea area;
-	private LinkedList<MapObject> layers;
+	private LinkedList<MapTrace> layers;
 	private PlotJob job;
 	private RepeatingJob rJob;
 	private volatile Dataset merge;
@@ -59,13 +61,18 @@ public class MapPlotManager {
 		this.data = data;
 		this.area = area;
 		atomicPosition = new AtomicInteger(0);
-		layers = new LinkedList<MapObject>();
+		layers = new LinkedList<MapTrace>();
 		job = new PlotJob();
 		job.setPriority(Job.INTERACTIVE);
 		rJob = new RepeatingJob(500, new Runnable() {
 			
 			@Override
 			public void run() {
+				for (MapTrace t : layers) {
+					if (t.getMap() instanceof ILiveData) {
+						t.switchMap(t.getMap());
+					}
+				}
 				plotLayers();
 			}
 		});
@@ -92,7 +99,7 @@ public class MapPlotManager {
 				
 				IDataset s = l.getSlice();
 				
-				if (s != null) MappingUtils.plotDataWithMetadata(s, data, new int[]{0});
+				if (s != null) MetadataPlotUtils.plotDataWithMetadata(s, data);
 				
 				Display.getDefault().asyncExec(new Runnable() {
 
@@ -163,7 +170,7 @@ public class MapPlotManager {
 						mergedDataset.setSlice(s,slice);
 
 					}
-						MappingUtils.plotDataWithMetadata(mergedDataset, data, null);
+						MetadataPlotUtils.plotDataWithMetadata(mergedDataset, data);
 								
 						
 					}
@@ -179,7 +186,7 @@ public class MapPlotManager {
 				public void run() {
 					IDataset s = lz.getSlice();
 					if (s != null) {
-						final ILineTrace l = MappingUtils.buildLineTrace(s, data);
+						final ILineTrace l = MetadataPlotUtils.buildLineTrace(s, data);
 						
 						Display.getDefault().syncExec(new Runnable() {
 							
@@ -229,12 +236,31 @@ public class MapPlotManager {
 	
 	
 	public void updateLayers(AbstractMapData map) {
-		if (layers.contains(map)){
-			layers.remove(map);
-			triggerForLive();
-			plotLayers();
-			return;
+		
+		Iterator<MapTrace> it = layers.iterator();
+		
+		while (it.hasNext()) {
+			MapTrace m = it.next();
+			if (m.getMap() == map) {
+				it.remove();
+				triggerForLive();
+				plotLayers();
+				return;
+			}
 		}
+		
+//		for (MapTrace m : layers) {
+//			if (m.getMap() == map)) {
+//				layers.remove(m)
+//			}
+//		}
+//		
+//		if (layers.contains(map)){
+//			layers.remove(map);
+//			triggerForLive();
+//			plotLayers();
+//			return;
+//		}
 		
 		if (map == null) {
 			for (int i = 0; i < area.count();i++) {
@@ -261,14 +287,16 @@ public class MapPlotManager {
 			plotLayers();
 			return;
 		}
-		layers.addLast(image);
+		IImageTrace t = createImageTrace(image);
+		layers.addLast(new MapTrace(image, t));
+		map.clear();
 		plotLayers();
 	}
 	
 	public AbstractMapData getTopMap(double x, double y){
 		
 		for (int i = 0; i < layers.size() ; i++) {
-			MapObject l = layers.get(i);
+			MapObject l = layers.get(i).getMap();
 			if (l instanceof AbstractMapData && ((AbstractMapData)l).getSpectrum(x, y) != null) return (AbstractMapData)l;
 		}
 		
@@ -278,8 +306,8 @@ public class MapPlotManager {
 	public MappedData getTopMap(){
 		
 		for (int i = 0; i < layers.size() ; i++) {
-			MapObject l = layers.get(i);
-			if (l instanceof MappedData) return (MappedData)l;
+			MapObject l = layers.get(i).getMap();
+			if (l instanceof AbstractMapData) return (MappedData)l;
 		}
 		
 		return null;
@@ -296,17 +324,22 @@ public class MapPlotManager {
 		int position = -1;
 		
 		for (int i = 0; i < layers.size() ;i++) {
-			MapObject layer = layers.get(i);
-			if (layer instanceof MappedData && isTheSameMap((AbstractMapData)layer, map)) {
+			MapObject layer = layers.get(i).getMap();
+			if (layer instanceof AbstractMapData && isTheSameMap((AbstractMapData)layer, map)) {
 				position = i;
 				break;
 			}
 		}
 		
 		if (position >= 0) {
-			layers.set(position, map);
+			MapTrace mapTrace = layers.get(position);
+			mapTrace.switchMap(map);
+			
+//			layers.set(position, map);
 		} else {
-			layers.push(map);
+			IImageTrace t = createImageTrace(map);
+			
+			layers.push(new MapTrace(map, t));
 		}
 	
 		triggerForLive();
@@ -316,7 +349,7 @@ public class MapPlotManager {
 		boolean found = false;
 		
 		for (int i = 0; i < layers.size() ;i++) {
-			if (layers.get(i) instanceof ILiveData) {
+			if (layers.get(i).getMap() instanceof ILiveData) {
 				found = true;
 				break;
 			}
@@ -329,36 +362,68 @@ public class MapPlotManager {
 		else rJob.stop();
 	}
 	
+	private IImageTrace createImageTrace(MapObject ob) {
+		
+		String longName = "";
+		IDataset map = null;
+		
+		if (ob instanceof PlottableMapObject) {
+			AbstractMapData amd = (AbstractMapData)ob;
+			longName = amd.getLongName();
+			map = amd.getData();
+		}
+		
+		if (map == null) return null;
+		
+		IImageTrace t = MetadataPlotUtils.buildTrace(longName, map, this.map);
+		t.setGlobalRange(area.getRange());
+		if (ob instanceof AbstractMapData)  t.setAlpha(((AbstractMapData)ob).getTransparency());
+		
+		return t;
+	}
+	
+
+	
 	private void plotLayers(){
 
-		map.clear();
+//		map.clear();
 		
 		try {
 			
-			Iterator<MapObject> it = layers.descendingIterator();
+			if (layers.isEmpty()) {
+				map.clear();
+				return;
+			}
+			
+			Iterator<MapTrace> it = layers.descendingIterator();
+			
+			Collection<ITrace> traces = map.getTraces(IImageTrace.class);
 			
 			while (it.hasNext()) {
-				MapObject o = it.next();
-				if (o instanceof MappedData) {
-					MappedData m = (MappedData)o;
-					IImageTrace t = MappingUtils.buildTrace(m.getLongName(),m.getMap(), this.map);
-					t.setGlobalRange(area.getRange());
-					t.setAlpha(((MappedData)o).getTransparency());
-					this.map.addTrace(t);
-					
-//					IDataset[] ax = MappingUtils.getAxesFromMetadata(m.getMap());
-//					ILineTrace lt = map.createLineTrace(m.getLongName()+ "line");
-//					lt.setData(ax[1], ax[0]);
-//					map.addTrace(lt);
+				MapTrace m = it.next();
+				if (!traces.contains(m.getTrace())) {
+					map.addTrace(m.getTrace());
 				}
-				
-				if (o instanceof AssociatedImage) {
-//					comp.add(MappingUtils.buildTrace(((AssociatedImage)o).getImage(), this.map),count++);
-					AssociatedImage im = (AssociatedImage)o;
-					IImageTrace t = MappingUtils.buildTrace(im.getLongName(),im.getImage(), this.map);
-					t.setGlobalRange(area.getRange());
-					this.map.addTrace(t);
-				}
+//				MapObject o = it.next();
+//				IImageTrace trace = createImageTrace(o);
+//				if (trace != null)map.addTrace(trace);
+//				if (o instanceof AbstractMapData) {
+//					IImageTrace trace = createImageTrace((AbstractMapData)o);
+//					map.addTrace(trace);
+//					
+////					IDataset[] ax = MappingUtils.getAxesFromMetadata(m.getMap());
+////					ILineTrace lt = map.createLineTrace(m.getLongName()+ "line");
+////					lt.setData(ax[1], ax[0]);
+////					map.addTrace(lt);
+//				}
+//				
+//				if (o instanceof AssociatedImage) {
+////					comp.add(MappingUtils.buildTrace(((AssociatedImage)o).getImage(), this.map),count++);
+//					AssociatedImage im = (AssociatedImage)o;
+//					IImageTrace t = MappingUtils.buildTrace(im.getLongName(),im.getImage(), this.map);
+//					t.setGlobalRange(area.getRange());
+//					this.map.addTrace(t);
+//				}
 				
 			}
 			this.map.repaint();
@@ -371,10 +436,10 @@ public class MapPlotManager {
 		
 		if (omap.getLongName().equals(map.getLongName())) return true;
 		
-		if (!Arrays.equals(omap.getMap().getShape(), map.getMap().getShape())) return false;
+		if (!Arrays.equals(omap.getData().getShape(), map.getData().getShape())) return false;
 		
-		AxesMetadata oax = omap.getMap().getFirstMetadata(AxesMetadata.class);
-		AxesMetadata ax = map.getMap().getFirstMetadata(AxesMetadata.class);
+		AxesMetadata oax = omap.getData().getFirstMetadata(AxesMetadata.class);
+		AxesMetadata ax = map.getData().getFirstMetadata(AxesMetadata.class);
 		
 		if (oax == null || ax == null) return false; // should never be the case
 		
@@ -528,5 +593,37 @@ public class MapPlotManager {
 			running = true;
 		}
 
+	}
+	
+	private class MapTrace {
+		
+		private PlottableMapObject map;
+		private IImageTrace trace;
+
+		public MapTrace(PlottableMapObject map, IImageTrace trace) {
+			this.map = map;
+			this.trace = trace;
+		}
+
+		public PlottableMapObject getMap() {
+			return map;
+		}
+
+		public IImageTrace getTrace() {
+			return trace;
+		}
+		
+		public void switchMap(PlottableMapObject ob) {
+			try {
+				MetadataPlotUtils.switchData(ob.getLongName(), ob.getData(), trace);
+				trace.setGlobalRange(area.getRange());
+			} catch (Exception e) {
+				logger.error("Error updating live!",e);
+			}
+			
+		}
+		
+		
+		
 	}
 }

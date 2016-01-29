@@ -3,7 +3,7 @@ package org.dawnsci.mapping.ui.datamodel;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 
-public abstract class AbstractMapData implements MapObject{
+public abstract class AbstractMapData implements PlottableMapObject{
 
 	private String name;
 	protected String path;
@@ -36,7 +36,7 @@ public abstract class AbstractMapData implements MapObject{
 		return new MappedData(name, ds, parent, path);
 	}
 	
-	public IDataset getMap(){
+	public IDataset getData(){
 		
 		if (baseMap != null) {
 			return baseMap.getSlice();

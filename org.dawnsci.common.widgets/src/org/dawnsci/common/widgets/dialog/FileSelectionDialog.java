@@ -17,7 +17,7 @@ public class FileSelectionDialog extends Dialog {
 	private boolean isFolderSelector = true;
 	private boolean hasResourceButton = true;
 	private String[] files = new String[] {"All Files"};
-	private String[] extensions = new String[]{"*.*"};
+	private String[] extensions = null;
 	
 	public FileSelectionDialog(Shell parentShell) {
 		this(parentShell, System.getProperty("user.home"));

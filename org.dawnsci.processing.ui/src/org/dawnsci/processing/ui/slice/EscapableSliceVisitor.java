@@ -18,6 +18,7 @@ import org.eclipse.dawnsci.analysis.dataset.impl.Random;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceVisitor;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -157,7 +158,7 @@ public class EscapableSliceVisitor implements SliceVisitor {
 				// TODO: handle exception
 			}
 //			out = Random.rand(out.getShape());
-			SlicedDataUtils.plotDataWithMetadata(out, output, dataDims);
+			MetadataPlotUtils.plotDataWithMetadata(out, output);
 
 		}
 

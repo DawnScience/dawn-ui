@@ -9,6 +9,7 @@ import java.util.Map;
 import org.dawnsci.mapping.ui.LocalServiceManager;
 import org.dawnsci.mapping.ui.MappingUtils;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
+import org.dawb.common.ui.util.DatasetNameUtils;
 import org.dawnsci.mapping.ui.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
@@ -55,7 +56,7 @@ public class ImportMappedDataWizard extends Wizard {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 
 					try {
-						datasetNames = MappingUtils.getDatasetInfo(filePath, null);
+						datasetNames = DatasetNameUtils.getDatasetInfo(filePath, null);
 						if (datasetNames.size() == 1 && datasetNames.containsKey("image-01")) {
 							imageImport = true;
 						}

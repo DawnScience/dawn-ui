@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.dawb.common.ui.util.DatasetNameUtils;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.plotting.services.util.DatasetTitleUtils;
 import org.dawnsci.processing.ui.ServiceHolder;
@@ -27,6 +28,7 @@ import org.eclipse.dawnsci.analysis.dataset.slicer.Slicer;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
+import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.dawnsci.slicing.api.SlicingFactory;
 import org.eclipse.dawnsci.slicing.api.system.AxisChoiceEvent;
 import org.eclipse.dawnsci.slicing.api.system.AxisChoiceListener;
@@ -320,7 +322,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 			lazyDataset.setMetadata(ax);
 			IDataset firstSlice = Slicer.getFirstSlice(lazyDataset, sliceDims);
 			
-			SlicedDataUtils.plotDataWithMetadata(firstSlice, system, Slicer.getDataDimensions(lazyDataset.getShape(), sliceDims));
+			MetadataPlotUtils.plotDataWithMetadata(firstSlice, system);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -347,7 +349,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 	private Map<String, int[]> getDatasetInfo() throws Exception{
 		
 		final ConversionScheme scheme = context.getConversionScheme();
-		final Map<String, int[]>     names = SlicedDataUtils.getDatasetInfo(context.getFilePaths().get(0), scheme);
+		final Map<String, int[]>     names = DatasetNameUtils.getDatasetInfo(context.getFilePaths().get(0), scheme);
 
         rootName = DatasetTitleUtils.getRootName(names.keySet());
         return names;

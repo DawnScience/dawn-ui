@@ -349,6 +349,9 @@ public abstract class SelectorWidget {
 					return true;
 				}
 				for (String extension : fileExtensions) {
+					
+					if (extension.equals("*.*")) return true;
+					
 					if (extension.equals(((IFile)element).getFileExtension())) {
 						return true;
 					}

@@ -9,6 +9,7 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
+import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -94,7 +95,7 @@ public class ImageGridDialog {
 				system.createPlotPart(plotsComp, "Plot " + i, null, PlotType.IMAGE, null);
 				system.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 //				system.updatePlot2D(data.get(i), null, null);
-				MappingUtils.plotDataWithMetadata(data.get(i), system, null);
+				MetadataPlotUtils.plotDataWithMetadata(data.get(i), system);
 				i++;
 			}
 		} catch (Exception e) {
