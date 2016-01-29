@@ -338,7 +338,7 @@ public class MapPlotManager {
 //			layers.set(position, map);
 		} else {
 			IImageTrace t = createImageTrace(map);
-			
+			if (t == null) return;
 			layers.push(new MapTrace(map, t));
 		}
 	
@@ -368,7 +368,7 @@ public class MapPlotManager {
 		IDataset map = null;
 		
 		if (ob instanceof PlottableMapObject) {
-			AbstractMapData amd = (AbstractMapData)ob;
+			PlottableMapObject amd = (PlottableMapObject)ob;
 			longName = amd.getLongName();
 			map = amd.getData();
 		}
@@ -492,7 +492,12 @@ public class MapPlotManager {
 //	}
 	
 	public boolean isPlotted(MapObject object) {
-		return layers.contains(object);
+		
+		for (MapTrace t : layers) {
+			if (t.getMap().equals(object)) return true;
+		}
+		
+		return false;
 	}
 	
 	private Dataset getMergedDataset(IDataset input) {

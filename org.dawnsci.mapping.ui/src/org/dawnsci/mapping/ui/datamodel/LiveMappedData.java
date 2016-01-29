@@ -69,8 +69,11 @@ public class LiveMappedData extends MappedData implements ILiveData {
 		// TODO This check is probably not required
 		if (baseMap.getSize() == 1) return null;
 		
-		IDataset y = parent.getYAxis()[0].getSlice();
-		IDataset x = parent.getXAxis()[0].getSlice();
+		ILazyDataset ly = parent.getYAxis()[0];
+		ILazyDataset lx = parent.getXAxis()[0];
+		
+		IDataset y = ly.getSlice();
+		IDataset x = lx.getSlice();
 		
 		if (y.getRank() == 2) {
 			SliceND s = new SliceND(y.getShape());

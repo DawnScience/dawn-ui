@@ -78,8 +78,8 @@ public class MappedFileManager {
 							} 
 
 							if (load)mappedDataArea.addMappedDataFile(mdf);
-							plotManager.clearAll();
-							plotManager.updateLayers(null);
+//							plotManager.clearAll();
+//							plotManager.updateLayers(null);
 							viewer.refresh();
 							if (viewer instanceof TreeViewer) {
 								((TreeViewer)viewer).expandToLevel(mdf, 1);
