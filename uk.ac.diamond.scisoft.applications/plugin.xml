@@ -9,7 +9,7 @@
             thread="main"
             visible="true">
          <run
-               class="uk.ac.diamond.scisoft.applications.MillerSpaceMapperMain">
+               class="uk.ac.diamond.scisoft.applications.MillerSpaceMapperApplication">
          </run>
       </application>
    </extension>
