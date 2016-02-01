@@ -72,7 +72,7 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 		if (regionType!=RegionType.XAXIS && regionType!=RegionType.YAXIS && regionType!=RegionType.XAXIS_LINE && regionType!=RegionType.YAXIS_LINE) {
 			throw new RuntimeException("The AxisSelection can only be XAXIS or YAXIS region type!");
 		}
-		setRegionColor(ColorConstants.blue);	
+		setRegionColor(ColorConstants.darkGreen);	
 		setAlpha(80);
 		setLineWidth(1);
 		this.regionType = regionType;
