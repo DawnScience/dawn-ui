@@ -10,6 +10,7 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.paint.PhongMaterial;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
@@ -27,7 +28,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.junit.Test;
 
-import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class VolumeRenderingShellTester {
 	
@@ -40,7 +40,7 @@ public class VolumeRenderingShellTester {
 	Group xygroup = new Group();
 	Group zygroup = new Group();
 	Group xzgroup = new Group();
-
+	
 	private Rotate textXAxisRotate = new Rotate();
 	{textXAxisRotate.setAxis(new Point3D(1, 0, 0));}
 	private Rotate textYAxisRotate = new Rotate();
@@ -51,21 +51,21 @@ public class VolumeRenderingShellTester {
 	private void loadDataset() throws Exception
 	{
 		
-		IDataHolder dh = LoaderFactory.getData("files/brain.h5");
-		dataset = dh.getLazyDataset("/entry/edf/data");
-		
-		algorithm = new MarchingCubes();
-				
-		model = new MarchingCubesModel();
-		model.setLazyData(dataset);
-		model.setBoxSize(new int[]{3,3,3});
-		model.setIsovalue(1800d);
-		model.setVertexLimit(Integer.MAX_VALUE);
-		
-		algorithm.setModel(model);
-		
-		// execute the algorithmA	
-		testResult = algorithm.execute(null, null);
+//		IDataHolder dh = LoaderFactory.getData("files/brain.h5");
+//		dataset = dh.getLazyDataset("/entry/edf/data");
+//		
+//		algorithm = new MarchingCubes();
+//				
+//		model = new MarchingCubesModel();
+//		model.setLazyData(dataset);
+//		model.setBoxSize(new int[]{3,3,3});
+//		model.setIsovalue(1800d);
+//		model.setVertexLimit(Integer.MAX_VALUE);
+//		
+//		algorithm.setModel(model);
+//		
+//		// execute the algorithmA	
+//		testResult = algorithm.execute(null, null);
 	}
 	
 	private int[][][] createDataset(Image newImage, int xlength, int ylength, int zlength)
@@ -172,39 +172,24 @@ public class VolumeRenderingShellTester {
 			
 	private void generateRotateEvent(Node node) {
 		
-		
-
 		node.localToSceneTransformProperty().addListener((obs, oldT, newT) -> {
-			
-			System.out.println("------------");
-			Point3D defaultAngle = new Point3D(0, 0, 1);
+
+			Point3D xAngle = new Point3D(1, 0, 0);
 
 			Point3D angles = Vector3DUtil.extractEulerAnglersFromMatrix(newT);
-			
-			textXAxisRotate.setAngle(angles.getX());
-			textXAxisRotate.setAngle(angles.getY());
-			textXAxisRotate.setAngle(angles.getZ());
-			
-			defaultAngle = textXAxisRotate.transform(defaultAngle);
-			defaultAngle = textYAxisRotate.transform(defaultAngle);
-			defaultAngle = textZAxisRotate.transform(defaultAngle);
-	        System.out.println("defaultAngle: " + defaultAngle.toString());
-			
-			//defaultAngle = newT.transform(defaultAngle);
 					
+			textXAxisRotate.setAngle(-angles.getX());
+			textYAxisRotate.setAngle(-angles.getY());
+			textZAxisRotate.setAngle(-angles.getZ());
 			
+			xAngle = textXAxisRotate.transform(xAngle);
+			xAngle = textYAxisRotate.transform(xAngle);
+			xAngle = textZAxisRotate.transform(xAngle);
 			
-			
-			System.out.println("angle: " + angles);
-			
-	        Point3D opacity = new Point3D(
-	        		(new Point3D(1, 0, 0).angle(defaultAngle)% 90), // xy
-	        		(new Point3D(0, 1, 0).angle(defaultAngle)% 90), // yz
-	        		(new Point3D(0, 0, 1).angle(defaultAngle)% 90));// zx
+			xygroup.setOpacity(Math.abs(xAngle.getX()));
+	        zygroup.setOpacity(Math.abs(xAngle.getZ()));
+	        xzgroup.setOpacity(Math.abs(xAngle.getZ()));
 	        
-	        System.out.println("opacity: " + opacity.toString());
-	        System.out.println("opacity " );
-		
 		});
 	}
 

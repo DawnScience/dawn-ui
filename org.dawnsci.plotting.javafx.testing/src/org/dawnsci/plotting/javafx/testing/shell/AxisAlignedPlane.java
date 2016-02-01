@@ -13,6 +13,8 @@ import javafx.scene.shape.TriangleMesh;
 
 public class AxisAlignedPlane extends MeshView{
 	
+	PhongMaterial mat;
+	
 	public AxisAlignedPlane(
 			Point2D start, 
 			Point2D end,
@@ -30,12 +32,12 @@ public class AxisAlignedPlane extends MeshView{
 		
 		mesh.getTexCoords().addAll(0,0,1,0,0,1,1,1);
 		
-		mesh.getFaces().addAll(0,0,1,1,3,3);
+		mesh.getFaces().addAll(3,3,1,1,0,0);
 		mesh.getFaces().addAll(0,0,2,2,3,3);
 				
 		this.setMesh(mesh);
 		
-		PhongMaterial mat = new PhongMaterial(new Color(1, 1, 1, 0.5));
+		mat = new PhongMaterial(new Color(1, 1, 1, 0.5));
 		mat.setDiffuseMap(image);
 		mat.setSpecularColor(new Color(1, 1, 1, 0.5));
 		mat.setDiffuseColor(new Color(1, 1, 1, 0.5));
@@ -44,4 +46,5 @@ public class AxisAlignedPlane extends MeshView{
 		
 		this.setCullFace(CullFace.NONE);		
 	}
+	
 }
