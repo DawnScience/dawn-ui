@@ -13,7 +13,7 @@ import javafx.scene.shape.TriangleMesh;
 
 public class AxisAlignedPlane extends MeshView{
 	
-	PhongMaterial mat;
+	private PhongMaterial mat;
 	
 	public AxisAlignedPlane(
 			Point2D start, 
@@ -45,6 +45,11 @@ public class AxisAlignedPlane extends MeshView{
 		this.setMaterial(mat);
 		
 		this.setCullFace(CullFace.NONE);		
+	}
+	
+	public void setMaterialOpacity(double opacity)
+	{
+		mat.setDiffuseColor(new Color(1, 1, 1, opacity));
 	}
 	
 }

@@ -9,6 +9,7 @@ import javafx.geometry.Point3D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.effect.BlendMode;
 import javafx.scene.image.Image;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.transform.Rotate;
@@ -186,9 +187,21 @@ public class VolumeRenderingShellTester {
 			xAngle = textYAxisRotate.transform(xAngle);
 			xAngle = textZAxisRotate.transform(xAngle);
 			
-			xygroup.setOpacity(Math.abs(xAngle.getX()));
-	        zygroup.setOpacity(Math.abs(xAngle.getZ()));
-	        xzgroup.setOpacity(Math.abs(xAngle.getZ()));
+//			xygroup.setOpacity(Math.abs(xAngle.getX()));
+//	        zygroup.setOpacity(Math.abs(xAngle.getZ()));
+//	        xzgroup.setOpacity(Math.abs(xAngle.getY()));
+	        
+	        for (Node n : xygroup.getChildren())
+	        	if (n instanceof AxisAlignedPlane)
+	        		((AxisAlignedPlane)n).setMaterialOpacity(Math.abs(xAngle.getX()));
+	        
+	        for (Node n : zygroup.getChildren())
+	        	if (n instanceof AxisAlignedPlane)
+	        		((AxisAlignedPlane)n).setMaterialOpacity(Math.abs(xAngle.getZ()));
+	        
+	        for (Node n : zygroup.getChildren())
+	        	if (n instanceof AxisAlignedPlane)
+	        		((AxisAlignedPlane)n).setMaterialOpacity(Math.abs(xAngle.getY()));
 	        
 		});
 	}
@@ -209,7 +222,7 @@ public class VolumeRenderingShellTester {
         Group isoSurfaceGroup = new Group();
         
         Scene scene = new SurfaceDisplayer(root, isoSurfaceGroup);
-        
+                
         isoSurfaceGroup.getChildren().add(Node);
         
         canvas.setScene(scene);
