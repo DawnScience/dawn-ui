@@ -27,10 +27,11 @@ import uk.ac.diamond.scisoft.analysis.diffraction.MillerSpaceMapper.MillerSpaceM
 /**
  * Used to execute the Miller Space mapper
  * 
- * Example command line to run the application from a DAWN install
- * which should work on the cluster:
- *    module load dawn/nightly ; $DAWN_RELEASE_DIRECTORY/dawn -consoleLog -noSplash -application uk.ac.diamond.scisoft.applications.msmapper -data @none -bean JSONbean >> someLogFile.txt
- *
+ * Command line to run the application from a DAWN install
+ * <pre>
+ *    module load dawn/nightly; $DAWN_RELEASE_DIRECTORY/dawn -consoleLog -noSplash -application uk.ac.diamond.scisoft.applications.msmapper -data @none -bean JSONbean >> someLogFile.txt
+ * </pre>
+ * where JSONbean is a file containing the JSON representation of a {@link MillerSpaceMapperBean} 
  */
 public class MillerSpaceMapperApplication implements IApplication {
 
