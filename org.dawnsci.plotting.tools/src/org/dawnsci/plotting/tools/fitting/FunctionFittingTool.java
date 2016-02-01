@@ -44,6 +44,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.dawnsci.slicing.api.util.ProgressMonitorWrapper;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
@@ -283,9 +284,8 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 			region = getPlottingSystem().getRegion("fit_region");
 			if (region == null) {
-				region = getPlottingSystem().createRegion("fit_region",
-						RegionType.XAXIS);
-
+				region = getPlottingSystem().createRegion("fit_region", RegionType.XAXIS);
+				region.setRegionColor(ColorConstants.blue);
 				region.setROI(new RectangularROI(getPlottingSystem()
 						.getSelectedXAxis().getLower(), 0, getPlottingSystem()
 						.getSelectedXAxis().getUpper()

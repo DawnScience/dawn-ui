@@ -39,6 +39,7 @@ import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -267,7 +268,7 @@ public class Hyper2DTool extends AbstractToolPage {
 					double x = source.getROI().getPointX();
 					
 					updateROI(roi,x,false,r);
-						
+					r.setRegionColor(ColorConstants.blue);
 					r.setName(source.getName());
 					r.setMobile(false);
 					getPlottingSystem().addRegion(r);
@@ -311,7 +312,7 @@ public class Hyper2DTool extends AbstractToolPage {
 					double x = source.getROI().getPointX();
 					
 					updateROI(roi,x,true,r);
-
+					r.setRegionColor(ColorConstants.blue);
 					r.setName(source.getName());
 					getPlottingSystem().addRegion(r);
 					r.setMobile(false);

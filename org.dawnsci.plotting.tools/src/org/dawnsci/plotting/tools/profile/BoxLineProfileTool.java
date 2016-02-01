@@ -475,6 +475,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 					return region;
 				}else {
 					IRegion newRegion = plottingSystem.createRegion(roiName, RegionType.XAXIS);
+					newRegion.setRegionColor(ColorConstants.blue);
 					newRegion.setROI(rroi);
 					newRegion.setVisible(isXAxisROIVisible);
 					plottingSystem.addRegion(newRegion);
