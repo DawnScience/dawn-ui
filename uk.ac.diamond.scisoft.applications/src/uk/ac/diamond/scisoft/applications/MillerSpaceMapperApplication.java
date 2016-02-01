@@ -65,7 +65,7 @@ public class MillerSpaceMapperApplication implements IApplication {
 				}
 			}
 			if (path == null) {
-				throw new IllegalArgumentException("There must be a path argument in the command line arguments");
+				throw new IllegalArgumentException("There must be a bean argument in the command line arguments");
 			}
 			ObjectMapper mapper = new ObjectMapper();
 			MillerSpaceMapperBean bean = mapper.readValue(new File(path), MillerSpaceMapperBean.class);
