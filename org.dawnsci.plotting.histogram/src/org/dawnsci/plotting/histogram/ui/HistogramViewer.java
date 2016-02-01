@@ -18,6 +18,7 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.TraceType;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -193,8 +194,8 @@ public class HistogramViewer extends ContentViewer {
 	 * Create the region of interest for the histogram
 	 */
 	private void createRegion() throws Exception {
-		region = histogramPlottingSystem.createRegion("Histogram Region",
-				RegionType.XAXIS);
+		region = histogramPlottingSystem.createRegion("Histogram Region", RegionType.XAXIS);
+		region.setRegionColor(ColorConstants.blue);
 		histogramPlottingSystem.addRegion(region);
 		region.addROIListener(histogramRegionListener);
 	}
