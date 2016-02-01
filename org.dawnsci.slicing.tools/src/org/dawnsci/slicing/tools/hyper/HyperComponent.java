@@ -41,6 +41,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.TraceUtils;
 import org.eclipse.dawnsci.slicing.api.util.ProgressMonitorWrapper;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IMenuManager;
@@ -213,7 +214,7 @@ public class HyperComponent {
 			updateRight(region, rroi);
 			
 			IRegion windowRegion = sideSystem.createRegion(RIGHT_REGION_NAME, sideReducer.getSupportedRegionType().get(0));
-			
+			windowRegion.setRegionColor(ColorConstants.blue);
 			windowRegion.setROI(broi);
 			
 			windowRegion.addROIListener(this.roiListenerRight);
