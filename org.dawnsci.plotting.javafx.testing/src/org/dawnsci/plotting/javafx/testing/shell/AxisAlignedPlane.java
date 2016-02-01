@@ -1,6 +1,9 @@
 package org.dawnsci.plotting.javafx.testing.shell;
 
+import org.dawnsci.plotting.javafx.axis.objects.Vector3DUtil;
+
 import javafx.geometry.Point2D;
+import javafx.geometry.Point3D;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
@@ -10,7 +13,11 @@ import javafx.scene.shape.TriangleMesh;
 
 public class AxisAlignedPlane extends MeshView{
 	
-	public AxisAlignedPlane(Point2D start, Point2D end, Image image)
+	public AxisAlignedPlane(
+			Point2D start, 
+			Point2D end,
+			Image image,
+			Point3D endVector)   
 	{
 		super();
 		
@@ -35,8 +42,6 @@ public class AxisAlignedPlane extends MeshView{
 		this.setOpacity(0.5);
 		this.setMaterial(mat);
 		
-		this.setCullFace(CullFace.NONE);
-		
+		this.setCullFace(CullFace.NONE);		
 	}
-		
 }
