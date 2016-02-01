@@ -15,4 +15,5 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Export-Package: org.dawnsci.slicing.tools.hyper
-Import-Package: org.slf4j;version="[1.7.6,1.7.7)"
+Import-Package: org.eclipse.draw2d,
+ org.slf4j;version="[1.7.6,1.7.7)"
