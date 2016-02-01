@@ -29,7 +29,7 @@ import uk.ac.diamond.scisoft.analysis.diffraction.MillerSpaceMapper.MillerSpaceM
  * 
  * Example command line to run the application from a DAWN install
  * which should work on the cluster:
- *    module load dawn/nightly ; $DAWN_RELEASE_DIRECTORY/dawn -consolelog -nosplash -application uk.ac.diamond.scisoft.applications.msmapper -data @none -path JSONbean >> someLogFile.txt
+ *    module load dawn/nightly ; $DAWN_RELEASE_DIRECTORY/dawn -consoleLog -noSplash -application uk.ac.diamond.scisoft.applications.msmapper -data @none -bean JSONbean >> someLogFile.txt
  *
  */
 public class MillerSpaceMapperApplication implements IApplication {
@@ -48,7 +48,7 @@ public class MillerSpaceMapperApplication implements IApplication {
 		// do nothing
 	}
 
-	private static final String PATH = "-path";
+	private static final String BEAN_PATH = "-bean";
 
 	private Integer main(String[] args) {
 
@@ -58,7 +58,7 @@ public class MillerSpaceMapperApplication implements IApplication {
 			String path = null;
 			for (; i < n; i++) {
 				String a = args[i];
-				if (a.equals(PATH)) {
+				if (a.equals(BEAN_PATH)) {
 					path  = args[i+1];
 					break;
 				}
@@ -71,6 +71,7 @@ public class MillerSpaceMapperApplication implements IApplication {
 
 			MillerSpaceMapper msm = new MillerSpaceMapper(bean);
 			msm.mapToVolumeFile();
+			return IApplication.EXIT_OK;
 		} catch (JsonParseException e) {
 			e.printStackTrace();
 			throw new IllegalArgumentException("Could not parse JSON file", e);
@@ -84,6 +85,5 @@ public class MillerSpaceMapperApplication implements IApplication {
 			e.printStackTrace();
 			throw new IllegalArgumentException("Could not process volume", e);
 		}
-		return IApplication.EXIT_OK;
 	}
 }
