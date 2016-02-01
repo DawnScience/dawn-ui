@@ -10,6 +10,7 @@ import org.junit.rules.TemporaryFolder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import uk.ac.diamond.scisoft.analysis.diffraction.MillerSpaceMapper;
 import uk.ac.diamond.scisoft.analysis.diffraction.MillerSpaceMapper.MillerSpaceMapperBean;
 
 public class MillerSpaceMapperBeanTest {
@@ -43,7 +44,7 @@ public class MillerSpaceMapperBeanTest {
 
 	@Test
 	public void createTestJSON() {
-		MillerSpaceMapperBean orig = new MillerSpaceMapperBean();
+		MillerSpaceMapperBean orig = MillerSpaceMapper.createI16MapperBean();
 		orig.setInputs("/scratch/images/i16/562926.nxs", "/scratch/images/i16/562927.nxs", "/scratch/images/i16/562928.nxs");
 		orig.setOutput("/scratch/tmp/562926.h5");
 		orig.setSplitterName("inverse");
