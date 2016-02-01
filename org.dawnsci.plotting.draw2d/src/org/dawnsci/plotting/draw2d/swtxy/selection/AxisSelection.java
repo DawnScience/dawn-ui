@@ -19,6 +19,10 @@ import org.dawnsci.plotting.draw2d.swtxy.util.Draw2DUtils;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.XAxisBoxROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.XAxisLineBoxROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.YAxisBoxROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.YAxisLineBoxROI;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegionContainer;
 import org.eclipse.dawnsci.plotting.api.region.MouseListener;
@@ -381,7 +385,29 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 		}
 		return super.getROI();
 	}
-	
+
+	@Override
+	protected RectangularROI createROI(double ptx, double pty, double width, double height, double angle) {
+		RectangularROI rroi = null;
+		switch (regionType) {
+		case XAXIS:
+			rroi = new XAxisBoxROI(ptx, pty, width, height, angle);
+			break;
+		case YAXIS:
+			rroi = new YAxisBoxROI(ptx, pty, width, height, angle);
+			break;
+		case XAXIS_LINE:
+			rroi = new XAxisLineBoxROI(ptx, pty, width, height, angle);
+			break;
+		case YAXIS_LINE:
+			rroi = new YAxisLineBoxROI(ptx, pty, width, height, angle);
+			break;
+		default:
+			rroi = getRoiFromRectangle(new Rectangle((int)ptx, (int)pty, (int)width, (int)height));
+		}
+		return rroi;
+	}
+
 	protected void updateRegion() {
 		
 		if (line1 == null || roi == null) return;
