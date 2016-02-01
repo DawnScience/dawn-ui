@@ -56,28 +56,37 @@ public class VolumeRenderingShellTester {
 		testResult = algorithm.execute(null, null);
 	}
 	
+	
+	
 	private Node generateNode()
 	{		
+		Group group = new Group();
 		IDataset data = dataset.getSlice();
 		
-		BufferedImage bi = new BufferedImage(dataset.getShape()[0], dataset.getShape()[1],BufferedImage.TYPE_INT_ARGB);
-		for (int y = 0; y < dataset.getShape()[1]; y++)
+		for (int z = 0; z < 100; z++)
 		{
-			for (int x = 0; x < dataset.getShape()[0]; x++)
+			BufferedImage bi = new BufferedImage(dataset.getShape()[0], dataset.getShape()[1],BufferedImage.TYPE_INT_ARGB);
+			for (int y = 0; y < dataset.getShape()[1]; y++)
 			{
-				System.out.println(data.getInt(x,y));
-				int argb = 255;
-				argb = (argb << 8) + 0;
-				argb = (argb << 8) + 255;
-				argb = (argb << 8) + 0;
-				bi.setRGB(x, y, argb);
+				for (int x = 0; x < dataset.getShape()[0]; x++)
+				{
+					int argb = 255;
+					argb = (argb << 8) + 0;
+					argb = (argb << 8) + 255;
+					argb = (argb << 8) + 0;
+					bi.setRGB(x, y, argb);
+				}
 			}
+			AxisAlignedPlane newPlane = new AxisAlignedPlane(
+					new Point2D(0, 0), 
+					new Point2D(100, 100), 
+					new Image(getClass().getResourceAsStream("unnamed.png")));
+			newPlane.setTranslateZ(z);
+			group.getChildren().add(newPlane);
 		}
 		
-		return new AxisAlignedPlane(
-				new Point2D(0, 0), 
-				new Point2D(100, 100), 
-				new Image(getClass().getResourceAsStream("unnamed.png")));
+		
+		return group;
 	}
 		
 	// simply creates a shell to check javafx fxcanvas still functions
@@ -87,7 +96,6 @@ public class VolumeRenderingShellTester {
 		
 		loadDataset();
 		Node Node = generateNode();
-		MeshView test = (MeshView)Node;
 		Display display = new Display();
         Shell shell = new Shell(display);
         shell.setLayout(new FillLayout());
