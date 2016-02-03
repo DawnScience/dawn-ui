@@ -440,6 +440,36 @@
             id="org.dawnsci.plotting.histogram.coolwarm_blue"
             name="Cool Warm Blue">
       </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.QualitativeAccentGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.accent_green"
+            name="Accent Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.QualitativeAccentRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.accent_red"
+            name="Accent Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.QualitativeAccentBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.accent_blue"
+            name="Accent Blue">
+      </transfer_function>
+       <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.QualitativeDark2GreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.dark2_green"
+            name="Dark2 Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.QualitativeDark2RedTransferFunction"
+            id="org.dawnsci.plotting.histogram.dark2_red"
+            name="Dark2 Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.QualitativeDark2BlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.dark2_blue"
+            name="Dark2 Blue">
+      </transfer_function>
    </extension>
    <extension
          point="org.dawnsci.plotting.histogram.colourScheme">
@@ -780,6 +810,32 @@
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.seismic_red"
             type="org.dawnsci.plotting.histogram.functions.DivergentHistoType">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.accent_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.accent_green"
+            id="org.dawnsci.plotting.histogram.accent"
+            name="Accent (Qualitative)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.accent_red"
+            type="org.dawnsci.plotting.histogram.functions.QualitativeHistoType">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.dark2_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.dark2_green"
+            id="org.dawnsci.plotting.histogram.dark2"
+            name="Dark2 (Qualitative)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.dark2_red"
+            type="org.dawnsci.plotting.histogram.functions.QualitativeHistoType">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
