@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2012-2016 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,7 +14,10 @@ import java.util.List;
 
 import org.dawnsci.plotting.histogram.Activator;
 import org.dawnsci.plotting.histogram.ExtensionPointManager;
+import org.dawnsci.plotting.histogram.functions.AbstractHistogramType;
 import org.dawnsci.plotting.histogram.functions.ColourSchemeContribution;
+import org.eclipse.dawnsci.plotting.api.histogram.IHistogramType;
+import org.eclipse.dawnsci.plotting.api.histogram.IHistogramType.HistoType;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.histogram.ITransferFunction;
 import org.eclipse.dawnsci.plotting.api.histogram.functions.FunctionContainer;
@@ -145,4 +148,40 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 		return pservice;
 	}
 
+	@Override
+	public List<String> getColoursByType(String sType) {
+		List<String> colours = new ArrayList<String>();
+		List<ColourSchemeContribution> contributions = extensionManager.getColourSchemeContributions();
+		for (ColourSchemeContribution contrib : contributions) {
+			String histTypeClass = contrib.getType();
+			AbstractHistogramType histoType = instantiate(histTypeClass, AbstractHistogramType.class);
+			HistoType type = histoType.getType();
+			if (sType.equals(type.name())) {
+				colours.add(contrib.getName());
+			} else if (sType.equals(IHistogramType.HistoType.ALL.name())) {
+				colours.add(contrib.getName());
+			}
+		}
+		return colours;
+	}
+
+	@Override
+	public String getColourType(String colour) {
+		String histTypeClass = extensionManager.getColourSchemeContribution(colour).getType();
+		AbstractHistogramType histoType = instantiate(histTypeClass, AbstractHistogramType.class);
+		return histoType.getType().name();
+	}
+
+	private <T> T instantiate(final String className, final Class<T> type) {
+		try {
+			return type.cast(Class.forName(className).newInstance());
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 }

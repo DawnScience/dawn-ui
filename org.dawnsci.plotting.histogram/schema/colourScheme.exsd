@@ -131,6 +131,16 @@
                </documentation>
             </annotation>
          </attribute>
+         <attribute name="type" type="string" use="required">
+            <annotation>
+               <documentation>
+                  Type of histogram
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn="org.dawnsci.plotting.histogram.functions.AbstractHistogramType:"/>
+               </appinfo>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 

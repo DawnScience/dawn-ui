@@ -13,6 +13,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 /**
  * This class wrappers a Colour Scheme extention point so that it can be easily accessed
  * @author ssg37927
+ * @author Baha El-Kassaby
  *
  */
 public class ColourSchemeContribution {
@@ -27,6 +28,7 @@ public class ColourSchemeContribution {
 	private static final String ATT_GREEN_INV = "green_inverted";
 	private static final String ATT_BLUE_INV = "blue_inverted";
 	private static final String ATT_ALPHA_INV = "alpha_inverted";
+	private static final String ATT_TYPE = "type";
 	
 	private String name; 
 	private String id;
@@ -38,6 +40,7 @@ public class ColourSchemeContribution {
 	private String greenInverted;
 	private String blueInverted;
 	private String alphaInverted;
+	private String type;
 
 	public static ColourSchemeContribution getColourSchemeContribution(
 			IConfigurationElement config) {
@@ -54,6 +57,7 @@ public class ColourSchemeContribution {
 			colourSchemeContribution.greenInverted = config.getAttribute(ATT_GREEN_INV);
 			colourSchemeContribution.blueInverted  = config.getAttribute(ATT_BLUE_INV);
 			colourSchemeContribution.alphaInverted = config.getAttribute(ATT_ALPHA_INV);
+			colourSchemeContribution.type          = config.getAttribute(ATT_TYPE);
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Cannot create TransferFunctionContribution contribution due to the following error",e);
 		}
@@ -112,5 +116,7 @@ public class ColourSchemeContribution {
 		return TRUE.equalsIgnoreCase(alphaInverted);
 	}
 	
-	
+	public String getType() {
+		return type;
+	}
 }

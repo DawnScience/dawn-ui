@@ -444,7 +444,7 @@
    <extension
          point="org.dawnsci.plotting.histogram.colourScheme">
       <colour_scheme
-      		alpha_inverted="false"
+            alpha_inverted="false"
             alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.linear"
@@ -453,10 +453,11 @@
             id="org.dawnsci.plotting.histogram.greyscale"
             name="Gray Scale"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.linear">
+            red_transfer_function="org.dawnsci.plotting.histogram.linear"
+            type="org.dawnsci.plotting.histogram.functions.Sequential1HistoType">
       </colour_scheme>
       <colour_scheme
-     		alpha_inverted="false"
+            alpha_inverted="false"
             alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.squared"
@@ -465,10 +466,11 @@
             id="org.dawnsci.plotting.histogram.squared"
             name="Squared Scale"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.squared">
+            red_transfer_function="org.dawnsci.plotting.histogram.squared"
+            type="org.dawnsci.plotting.histogram.functions.Sequential1HistoType">
       </colour_scheme>
       <colour_scheme
-      		alpha_inverted="false"
+            alpha_inverted="false"
             alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
             blue_transfer_function="org.dawnsci.plotting.histogram.sqrt"
@@ -477,7 +479,8 @@
             id="org.dawnsci.plotting.histogram.scale.sqrt"
             name="Sqrt Scale"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.sqrt">
+            red_transfer_function="org.dawnsci.plotting.histogram.sqrt"
+            type="org.dawnsci.plotting.histogram.functions.Sequential1HistoType">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -489,7 +492,8 @@
             id="org.dawnsci.plotting.histogram.pm3d"
             name="Traditional pm3d (black-blue-red-yellow)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.sqrt">
+            red_transfer_function="org.dawnsci.plotting.histogram.sqrt"
+            type="org.dawnsci.plotting.histogram.functions.MiscHistoType">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -501,7 +505,8 @@
             id="org.dawnsci.plotting.histogram.ncd"
             name="NCD"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.ncdred">
+            red_transfer_function="org.dawnsci.plotting.histogram.ncdred"
+            type="org.dawnsci.plotting.histogram.functions.MiscHistoType">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -513,7 +518,8 @@
             id="org.dawnsci.plotting.histogram.ncd"
             name="Green-red-violet"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.linear">
+            red_transfer_function="org.dawnsci.plotting.histogram.linear"
+            type="org.dawnsci.plotting.histogram.functions.MiscHistoType">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -525,7 +531,8 @@
             id="org.dawnsci.plotting.histogram.ocean"
             name="Ocean (green-blue-white)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.threexminus2">
+            red_transfer_function="org.dawnsci.plotting.histogram.threexminus2"
+            type="org.dawnsci.plotting.histogram.functions.MiscHistoType">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -537,7 +544,8 @@
             id="org.dawnsci.plotting.histogram.hot"
             name="Hot (black-red-yellow-white)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.threex">
+            red_transfer_function="org.dawnsci.plotting.histogram.threex"
+            type="org.dawnsci.plotting.histogram.functions.Sequential2HistoType">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -549,7 +557,8 @@
             id="org.dawnsci.plotting.histogram.afmhot"
             name="AFM hot (black-red-yellow-white)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.twox">
+            red_transfer_function="org.dawnsci.plotting.histogram.twox"
+            type="org.dawnsci.plotting.histogram.functions.Sequential2HistoType">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -561,7 +570,8 @@
             id="org.dawnsci.plotting.histogram.rainbow"
             name="Rainbow (blue-green-yellow-red)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.abstwoxminushalf">
+            red_transfer_function="org.dawnsci.plotting.histogram.abstwoxminushalf"
+            type="org.dawnsci.plotting.histogram.functions.MiscHistoType">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -573,7 +583,8 @@
             id="org.dawnsci.plotting.histogram.jet"
             name="Jet (Blue-Cyan-Green-Yellow-Red)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.highJet">
+            red_transfer_function="org.dawnsci.plotting.histogram.highJet"
+            type="org.dawnsci.plotting.histogram.functions.MiscHistoType">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -585,7 +596,8 @@
             id="org.dawnsci.plotting.histogram.terrain"
             name="Terrain (blue-green-yellow-brown-white)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.terrain_red">
+            red_transfer_function="org.dawnsci.plotting.histogram.terrain_red"
+            type="org.dawnsci.plotting.histogram.functions.MiscHistoType">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -597,7 +609,8 @@
             id="org.dawnsci.plotting.histogram.earth"
             name="Earth (dark blue-green-brown-white)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.earth_red">
+            red_transfer_function="org.dawnsci.plotting.histogram.earth_red"
+            type="org.dawnsci.plotting.histogram.functions.MiscHistoType">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -609,7 +622,8 @@
             id="org.dawnsci.plotting.histogram.plasma"
             name="Plasma (blue-red-yellow)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.plasma_red">
+            red_transfer_function="org.dawnsci.plotting.histogram.plasma_red"
+            type="org.dawnsci.plotting.histogram.functions.UniformSequentialHistoType">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -621,7 +635,8 @@
             id="org.dawnsci.plotting.histogram.magma"
             name="Magma (black-red-white)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.magma_red">
+            red_transfer_function="org.dawnsci.plotting.histogram.magma_red"
+            type="org.dawnsci.plotting.histogram.functions.UniformSequentialHistoType">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -633,7 +648,8 @@
             id="org.dawnsci.plotting.histogram.inferno"
             name="Inferno (black-red-yellow)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.inferno_red">
+            red_transfer_function="org.dawnsci.plotting.histogram.inferno_red"
+            type="org.dawnsci.plotting.histogram.functions.UniformSequentialHistoType">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -645,7 +661,8 @@
             id="org.dawnsci.plotting.histogram.viridis"
             name="Viridis (blue-green-yellow)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.viridis_red">
+            red_transfer_function="org.dawnsci.plotting.histogram.viridis_red"
+            type="org.dawnsci.plotting.histogram.functions.UniformSequentialHistoType">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -657,7 +674,8 @@
             id="org.dawnsci.plotting.histogram.blues"
             name="Blues (Sequential)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.blues_red">
+            red_transfer_function="org.dawnsci.plotting.histogram.blues_red"
+            type="org.dawnsci.plotting.histogram.functions.Sequential1HistoType">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -669,7 +687,8 @@
             id="org.dawnsci.plotting.histogram.bugn"
             name="Blue-Green (Sequential)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.bugn_red">
+            red_transfer_function="org.dawnsci.plotting.histogram.bugn_red"
+            type="org.dawnsci.plotting.histogram.functions.Sequential1HistoType">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -681,7 +700,8 @@
             id="org.dawnsci.plotting.histogram.reds"
             name="Reds (Sequential)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.reds_red">
+            red_transfer_function="org.dawnsci.plotting.histogram.reds_red"
+            type="org.dawnsci.plotting.histogram.functions.Sequential1HistoType">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -693,7 +713,8 @@
             id="org.dawnsci.plotting.histogram.crmap"
             name="CRMap (black-blue-red-yellow-white)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.crmap_red">
+            red_transfer_function="org.dawnsci.plotting.histogram.crmap_red"
+            type="org.dawnsci.plotting.histogram.functions.MiscHistoType">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -705,7 +726,8 @@
             id="org.dawnsci.plotting.histogram.nipy"
             name="Nipy Spectral "
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.nipy_red">
+            red_transfer_function="org.dawnsci.plotting.histogram.nipy_red"
+            type="org.dawnsci.plotting.histogram.functions.MiscHistoType">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -717,7 +739,8 @@
             id="org.dawnsci.plotting.histogram.coolwarm"
             name="Coolwarm (Divergent)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.coolwarm_red">
+            red_transfer_function="org.dawnsci.plotting.histogram.coolwarm_red"
+            type="org.dawnsci.plotting.histogram.functions.DivergentHistoType">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -729,7 +752,8 @@
             id="org.dawnsci.plotting.histogram.divergent_ryg"
             name="Red-Yellow-Green (Divergent)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.divergent_ryg_red">
+            red_transfer_function="org.dawnsci.plotting.histogram.divergent_ryg_red"
+            type="org.dawnsci.plotting.histogram.functions.DivergentHistoType">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -741,7 +765,8 @@
             id="org.dawnsci.plotting.histogram.spectral"
             name="Spectral (Divergent)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.spectral_red">
+            red_transfer_function="org.dawnsci.plotting.histogram.spectral_red"
+            type="org.dawnsci.plotting.histogram.functions.DivergentHistoType">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -753,7 +778,8 @@
             id="org.dawnsci.plotting.histogram.seismic"
             name="Seismic (Divergent)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.seismic_red">
+            red_transfer_function="org.dawnsci.plotting.histogram.seismic_red"
+            type="org.dawnsci.plotting.histogram.functions.DivergentHistoType">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -765,7 +791,8 @@
             id="org.dawnsci.plotting.histogram.flag"
             name="Flag (Sine)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.flag_red">
+            red_transfer_function="org.dawnsci.plotting.histogram.flag_red"
+            type="org.dawnsci.plotting.histogram.functions.MiscHistoType">
       </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
@@ -777,7 +804,8 @@
             id="org.dawnsci.plotting.histogram.prism"
             name="Prism (Sine)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.prism_red">
+            red_transfer_function="org.dawnsci.plotting.histogram.prism_red"
+            type="org.dawnsci.plotting.histogram.functions.MiscHistoType">
       </colour_scheme>
    </extension>
    <extension
