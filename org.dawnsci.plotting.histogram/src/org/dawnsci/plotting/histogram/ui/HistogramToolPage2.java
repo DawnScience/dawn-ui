@@ -477,6 +477,10 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 		@Override
 		public void paletteChanged(PaletteEvent event) {
+			// do not call if All type is selected
+			String typeSelected = typeViewer.getElementAt(typeViewer.getCombo().getSelectionIndex()).toString();
+			if (typeSelected.equals(IHistogramType.HistoType.ALL.name()))
+				return;
 			IPaletteTrace trace = event.getTrace();
 			setColourScheme(trace);
 		}
