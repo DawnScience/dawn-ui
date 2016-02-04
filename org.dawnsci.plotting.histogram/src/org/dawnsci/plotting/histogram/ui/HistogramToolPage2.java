@@ -370,6 +370,8 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			return;
 		String type = getPaletteService().getColourType(schemeName);
 		typeViewer.setSelection(new StructuredSelection(type), true);
+		typeViewer.getCombo().setToolTipText(IHistogramType.HistoType.getType(type).getDescription());
+
 		List<String> colours = getPaletteService().getColoursByType(type);
 		colourMapViewer.setInput(colours.toArray());
 		colourMapViewer.setSelection(new StructuredSelection(schemeName), true);
