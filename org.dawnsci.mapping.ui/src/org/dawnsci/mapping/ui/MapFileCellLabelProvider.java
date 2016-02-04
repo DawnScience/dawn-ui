@@ -1,5 +1,6 @@
 package org.dawnsci.mapping.ui;
 
+import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.dawnsci.mapping.ui.datamodel.MapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedData;
@@ -36,7 +37,7 @@ public class MapFileCellLabelProvider extends StyledCellLabelProvider {
       
       if (element instanceof MappedDataBlock) {
     	  cell.setImage(block);
-      } else if (element instanceof MappedData) {
+      } else if (element instanceof AbstractMapData) {
     	  cell.setImage(map);
       } else if (element instanceof AssociatedImage) {
     	  cell.setImage(image);
