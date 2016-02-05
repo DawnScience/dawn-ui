@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+/*-
+ * Copyright (c) 2014 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,8 +23,13 @@ import org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunction.JexlE
 import org.dawnsci.jexl.internal.ExpressionServiceImpl;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionEngine;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
+import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
+import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
 import org.junit.Test;
 
+import uk.ac.diamond.scisoft.analysis.TestUtils;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Gaussian;
 
@@ -385,8 +390,12 @@ public class JexlExpressionFunctionTest {
 	@Test
 	public void testFillWithValues() {
 		JexlExpressionFunction f = new JexlExpressionFunction(new ExpressionServiceImpl(),"a+x");
-		fail("TODO: fillWithValues unreviewed");
-		// f.fillWithValues(null, null);
+		double a = 12.3;
+		f.getParameter(0).setValue(a);
+		Dataset x = DatasetFactory.createRange(10, Dataset.FLOAT64);
+		DoubleDataset values = f.calculateValues(x);
+		Dataset y = Maths.add(x, a);
+		TestUtils.assertDatasetEquals(y, values, 1e-15, 1e-15);
 	}
 
 	@Test
