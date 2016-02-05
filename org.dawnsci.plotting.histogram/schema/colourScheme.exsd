@@ -131,13 +131,13 @@
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="type" type="string" use="required">
+         <attribute name="category" type="string" use="required">
             <annotation>
                <documentation>
                   Type of histogram
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn="org.dawnsci.plotting.histogram.functions.AbstractHistogramType:"/>
+                  <meta.attribute kind="java" basedOn="org.dawnsci.plotting.histogram.functions.AbstractHistogramCategory:"/>
                </appinfo>
             </annotation>
          </attribute>

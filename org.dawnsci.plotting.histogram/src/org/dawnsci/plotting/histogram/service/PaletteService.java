@@ -148,16 +148,16 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 	}
 
 	@Override
-	public List<String> getColoursByCategory(String sType) {
+	public List<String> getColoursByCategory(String sCategory) {
 		List<String> colours = new ArrayList<String>();
 		List<ColourSchemeContribution> contributions = extensionManager.getColourSchemeContributions();
 		for (ColourSchemeContribution contrib : contributions) {
-			String histTypeClass = contrib.getType();
+			String histTypeClass = contrib.getCategory();
 			AbstractHistogramCategory histoCategory = instantiate(histTypeClass, AbstractHistogramCategory.class);
-			HistoCategory type = histoCategory.getCategory();
-			if (sType.equals(type.name())) {
+			HistoCategory category = histoCategory.getCategory();
+			if (sCategory.equals(category.getName())) {
 				colours.add(contrib.getName());
-			} else if (sType.equals(HistoCategory.ALL.name())) {
+			} else if (sCategory.equals(HistoCategory.ALL.getName())) {
 				colours.add(contrib.getName());
 			}
 		}
@@ -166,9 +166,9 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 
 	@Override
 	public String getColourCategory(String colour) {
-		String histTypeClass = extensionManager.getColourSchemeContribution(colour).getType();
-		AbstractHistogramCategory histoType = instantiate(histTypeClass, AbstractHistogramCategory.class);
-		return histoType.getCategory().name();
+		String histoCategoryClass = extensionManager.getColourSchemeContribution(colour).getCategory();
+		AbstractHistogramCategory histoCategory = instantiate(histoCategoryClass, AbstractHistogramCategory.class);
+		return histoCategory.getCategory().getName();
 	}
 
 	private <T> T instantiate(final String className, final Class<T> type) {

@@ -481,7 +481,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		public void paletteChanged(PaletteEvent event) {
 			// do not call if All category is selected
 			String categorySelected = categoryViewer.getElementAt(categoryViewer.getCombo().getSelectionIndex()).toString();
-			if (categorySelected.equals(HistoCategory.ALL.name()))
+			if (categorySelected.equals(HistoCategory.ALL.getName()))
 				return;
 			IPaletteTrace trace = event.getTrace();
 			setColourScheme(trace);
