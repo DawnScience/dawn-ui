@@ -371,7 +371,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 					Dataset[] traceROI = new Dataset[]{(Dataset) trace.getXData(), (Dataset) trace.getYData()};
 
 					try {
-						traceROI = Generic1DFitter.xintersection(traceROI[0], traceROI[1],
+						traceROI = Generic1DFitter.selectInRange(traceROI[0], traceROI[1],
 								p1[0], p2[0]);
 					} catch (Throwable npe) {
 						//Do nothing
