@@ -9,10 +9,9 @@
 
 package org.dawnsci.plotting.histogram.functions;
 
-public class QualitativeHistoType extends AbstractHistogramType {
+import org.eclipse.dawnsci.plotting.api.histogram.HistoCategory;
 
-	@Override
-	public HistoType getType() {
-		return HistoType.QUALITATIVE;
-	}
+public abstract class AbstractHistogramCategory {
+
+	public abstract HistoCategory getCategory();
 }

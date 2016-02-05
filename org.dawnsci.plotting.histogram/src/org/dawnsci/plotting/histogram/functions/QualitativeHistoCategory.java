@@ -9,10 +9,12 @@
 
 package org.dawnsci.plotting.histogram.functions;
 
-public class DivergentHistoType extends AbstractHistogramType {
+import org.eclipse.dawnsci.plotting.api.histogram.HistoCategory;
+
+public class QualitativeHistoCategory extends AbstractHistogramCategory {
 
 	@Override
-	public HistoType getType() {
-		return HistoType.DIVERGENT;
+	public HistoCategory getCategory() {
+		return HistoCategory.QUALITATIVE;
 	}
 }

@@ -8,17 +8,17 @@
  */
 package org.dawnsci.plotting.histogram;
 
-import org.eclipse.dawnsci.plotting.api.histogram.IHistogramType;
+import org.eclipse.dawnsci.plotting.api.histogram.HistoCategory;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
 /**
- * Content Provider class for the type of colour map combo box
+ * Content Provider class for the category of colour map combo box
  * 
  * @author Baha El Kassaby
  *
  */
-public class HistoTypeProvider implements IStructuredContentProvider{
+public class HistoCategoryProvider implements IStructuredContentProvider{
 
 	@Override
 	public void dispose() {
@@ -31,6 +31,6 @@ public class HistoTypeProvider implements IStructuredContentProvider{
 
 	@Override
 	public Object[] getElements(Object inputElement) {
-		return IHistogramType.HistoType.names();
+		return HistoCategory.names();
 	}
 }

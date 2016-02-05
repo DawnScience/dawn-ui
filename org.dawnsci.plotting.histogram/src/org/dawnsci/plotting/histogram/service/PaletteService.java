@@ -14,10 +14,9 @@ import java.util.List;
 
 import org.dawnsci.plotting.histogram.Activator;
 import org.dawnsci.plotting.histogram.ExtensionPointManager;
-import org.dawnsci.plotting.histogram.functions.AbstractHistogramType;
+import org.dawnsci.plotting.histogram.functions.AbstractHistogramCategory;
 import org.dawnsci.plotting.histogram.functions.ColourSchemeContribution;
-import org.eclipse.dawnsci.plotting.api.histogram.IHistogramType;
-import org.eclipse.dawnsci.plotting.api.histogram.IHistogramType.HistoType;
+import org.eclipse.dawnsci.plotting.api.histogram.HistoCategory;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.histogram.ITransferFunction;
 import org.eclipse.dawnsci.plotting.api.histogram.functions.FunctionContainer;
@@ -149,16 +148,16 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 	}
 
 	@Override
-	public List<String> getColoursByType(String sType) {
+	public List<String> getColoursByCategory(String sType) {
 		List<String> colours = new ArrayList<String>();
 		List<ColourSchemeContribution> contributions = extensionManager.getColourSchemeContributions();
 		for (ColourSchemeContribution contrib : contributions) {
 			String histTypeClass = contrib.getType();
-			AbstractHistogramType histoType = instantiate(histTypeClass, AbstractHistogramType.class);
-			HistoType type = histoType.getType();
+			AbstractHistogramCategory histoCategory = instantiate(histTypeClass, AbstractHistogramCategory.class);
+			HistoCategory type = histoCategory.getCategory();
 			if (sType.equals(type.name())) {
 				colours.add(contrib.getName());
-			} else if (sType.equals(IHistogramType.HistoType.ALL.name())) {
+			} else if (sType.equals(HistoCategory.ALL.name())) {
 				colours.add(contrib.getName());
 			}
 		}
@@ -166,10 +165,10 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 	}
 
 	@Override
-	public String getColourType(String colour) {
+	public String getColourCategory(String colour) {
 		String histTypeClass = extensionManager.getColourSchemeContribution(colour).getType();
-		AbstractHistogramType histoType = instantiate(histTypeClass, AbstractHistogramType.class);
-		return histoType.getType().name();
+		AbstractHistogramCategory histoType = instantiate(histTypeClass, AbstractHistogramCategory.class);
+		return histoType.getCategory().name();
 	}
 
 	private <T> T instantiate(final String className, final Class<T> type) {

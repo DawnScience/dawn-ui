@@ -9,10 +9,12 @@
 
 package org.dawnsci.plotting.histogram.functions;
 
-public class MiscHistoType extends AbstractHistogramType {
+import org.eclipse.dawnsci.plotting.api.histogram.HistoCategory;
+
+public class MiscHistoCategory extends AbstractHistogramCategory {
 
 	@Override
-	public HistoType getType() {
-		return HistoType.MISCELLANEOUS;
+	public HistoCategory getCategory() {
+		return HistoCategory.MISCELLANEOUS;
 	}
 }

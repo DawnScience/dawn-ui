@@ -9,10 +9,12 @@
 
 package org.dawnsci.plotting.histogram.functions;
 
-public class Sequential1HistoType extends AbstractHistogramType {
+import org.eclipse.dawnsci.plotting.api.histogram.HistoCategory;
+
+public class Sequential2HistoCategory extends AbstractHistogramCategory {
 
 	@Override
-	public HistoType getType() {
-		return HistoType.SEQUENTIAL1;
+	public HistoCategory getCategory() {
+		return HistoCategory.SEQUENTIAL2;
 	}
 }
