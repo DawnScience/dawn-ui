@@ -27,7 +27,7 @@ Export-Package: org.dawnsci.plotting,
  org.dawnsci.plotting.roi,
  org.dawnsci.plotting.util,
  org.dawnsci.plotting.views
-Import-Package: com.thoughtworks.xstream.core.util,
+Import-Package: com.thoughtworks.xstream.core.util;version="[0.0.0,1.3.0)",
  org.dawb.workbench.jmx,
  org.eclipse.core.resources,
  org.eclipse.ui,
