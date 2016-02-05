@@ -125,6 +125,9 @@ public class DAWNExtensionProjectWizardPage extends WizardNewProjectCreationPage
 					} else {
 						st.setText("Error: Cannot find extension point schema.");
 					}
+				} else {
+					setErrorMessage("Cannot find extension point. Is the bundle declaring it missing?");
+					return;
 				}
 	            boolean valid = validatePage();
 	            setPageComplete(valid);
