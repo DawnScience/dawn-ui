@@ -146,10 +146,16 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 				List<String> colours = getPaletteService().getColoursByCategory(category);
 				colourMapViewer.setInput(colours.toArray());
 				colourMapViewer.setSelection(new StructuredSelection(colours.get(0)), true);
+				for(HistoCategory categ : HistoCategory.values()) {
+					if (category.equals(categ.getName())) {
+						categoryViewer.getControl().setToolTipText(categ.getDescription());
+					}
+				}
 				setPalette();
 			}
 		};
 		((Combo) categoryViewer.getControl()).addSelectionListener(colourCategoryListener);
+		categoryViewer.setInput(HistoCategory.names());
 
 		Label colourLabel = new Label(colourComposite, SWT.RIGHT);
 		colourLabel.setText("Colormap:");
@@ -370,7 +376,6 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			return;
 		String category = getPaletteService().getColourCategory(schemeName);
 		categoryViewer.setSelection(new StructuredSelection(category), true);
-		categoryViewer.getCombo().setToolTipText(HistoCategory.getCategory(category).getDescription());
 
 		List<String> colours = getPaletteService().getColoursByCategory(category);
 		colourMapViewer.setInput(colours.toArray());
@@ -409,8 +414,8 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	 * there is a new trace or trace has been modified.
 	 */
 	private void updateHistogramUIElements(IPaletteTrace it) {
-		histogramWidget.setInput(it);
-		categoryViewer.setInput(HistoCategory.names());
+		if (histogramWidget != null)
+			histogramWidget.setInput(it);
 		int categoryIdx  = categoryViewer.getCombo().getSelectionIndex();
 		if (categoryIdx < 0)
 			categoryIdx = 0;
