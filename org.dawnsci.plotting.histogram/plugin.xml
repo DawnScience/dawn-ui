@@ -620,22 +620,6 @@
             id="org.dawnsci.plotting.histogram.ylorrd_blue"
             name="YlOrRd Blue">
       </transfer_function>
-      
-      <transfer_function
-            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentRYGGreenTransferFunction"
-            id="org.dawnsci.plotting.histogram.divergent_ryg_green"
-            name="DivergentRYG Green">
-      </transfer_function>
-      <transfer_function
-            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentRYGRedTransferFunction"
-            id="org.dawnsci.plotting.histogram.divergent_ryg_red"
-            name="DivergentRYG Red">
-      </transfer_function>
-      <transfer_function
-            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentRYGBlueTransferFunction"
-            id="org.dawnsci.plotting.histogram.divergent_ryg_blue"
-            name="DivergentRYG Blue">
-      </transfer_function>
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.SequentialRedsGreenTransferFunction"
             id="org.dawnsci.plotting.histogram.reds_green"
@@ -666,6 +650,142 @@
             id="org.dawnsci.plotting.histogram.coolwarm_blue"
             name="Cool Warm Blue">
       </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentBrBGGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.brbg_green"
+            name="BrBG Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentBrBGRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.brbg_red"
+            name="BrBG Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentBrBGBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.brbg_blue"
+            name="BrBG Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentBWRGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.bwr_green"
+            name="BWR Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentBWRRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.bwr_red"
+            name="BWR Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentBWRBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.bwr_blue"
+            name="BWR Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentPiYGGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.piyg_green"
+            name="PiYG Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentPiYGRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.piyg_red"
+            name="PiYG Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentPiYGBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.piyg_blue"
+            name="PiYG Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentPRGnGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.prgn_green"
+            name="PRGn Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentPRGnRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.prgn_red"
+            name="PRGn Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentPRGnBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.prgn_blue"
+            name="PRGn Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentPuOrGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.puor_green"
+            name="PuOr Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentPuOrRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.puor_red"
+            name="PuOr Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentPuOrBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.puor_blue"
+            name="PuOr Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentRdBuGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.rdbu_green"
+            name="RdBu Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentRdBuRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.rdbu_red"
+            name="RdBu Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentRdBuBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.rdbu_blue"
+            name="RdBu Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentRdGyGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.rdgy_green"
+            name="RdGy Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentRdGyRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.rdgy_red"
+            name="RdGy Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentRdGyBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.rdgy_blue"
+            name="RdGy Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentRdYlBuGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.rdylbu_green"
+            name="RdYlBu Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentRdYlBuRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.rdylbu_red"
+            name="RdYlBu Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentRdYlBuBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.rdylbu_blue"
+            name="RdYlBu Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentRdYlGnGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.rdylgn_green"
+            name="RdYlGn Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentRdYlGnRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.rdylgn_red"
+            name="RdYlGn Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.DivergentRdYlGnBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.rdylgn_blue"
+            name="RdYlGn Blue">
+      </transfer_function>
+      
       <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.QualitativeAccentGreenTransferFunction"
             id="org.dawnsci.plotting.histogram.accent_green"
@@ -1292,6 +1412,33 @@
             red_transfer_function="org.dawnsci.plotting.histogram.nipy_red"
             category="org.dawnsci.plotting.histogram.functions.MiscHistoCategory">
       </colour_scheme>
+      
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.brbg_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.brbg_green"
+            id="org.dawnsci.plotting.histogram.brbg"
+            name="Brown-Blue-Green (Divergent)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.brbg_red"
+            category="org.dawnsci.plotting.histogram.functions.DivergentHistoCategory">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.bwr_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.bwr_green"
+            id="org.dawnsci.plotting.histogram.bwr"
+            name="Blue-White-Red (Divergent)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.bwr_red"
+            category="org.dawnsci.plotting.histogram.functions.DivergentHistoCategory">
+      </colour_scheme>
       <colour_scheme
             alpha_inverted="false"
             alpha_transfer_function="org.dawnsci.plotting.histogram.full"
@@ -1309,13 +1456,91 @@
             alpha_inverted="false"
             alpha_transfer_function="org.dawnsci.plotting.histogram.full"
             blue_inverted="false"
-            blue_transfer_function="org.dawnsci.plotting.histogram.divergent_ryg_blue"
+            blue_transfer_function="org.dawnsci.plotting.histogram.piyg_blue"
             green_inverted="false"
-            green_transfer_function="org.dawnsci.plotting.histogram.divergent_ryg_green"
-            id="org.dawnsci.plotting.histogram.divergent_ryg"
+            green_transfer_function="org.dawnsci.plotting.histogram.piyg_green"
+            id="org.dawnsci.plotting.histogram.piyg"
+            name="Pink-Yellow-Green (Divergent)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.piyg_red"
+            category="org.dawnsci.plotting.histogram.functions.DivergentHistoCategory">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.prgn_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.prgn_green"
+            id="org.dawnsci.plotting.histogram.prgn"
+            name="Purple-Green (Divergent)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.prgn_red"
+            category="org.dawnsci.plotting.histogram.functions.DivergentHistoCategory">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.puor_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.puor_green"
+            id="org.dawnsci.plotting.histogram.puor"
+            name="Purple-Orange (Divergent)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.puor_red"
+            category="org.dawnsci.plotting.histogram.functions.DivergentHistoCategory">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.rdbu_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.rdbu_green"
+            id="org.dawnsci.plotting.histogram.rdbu"
+            name="Red-Blue (Divergent)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.rdbu_red"
+            category="org.dawnsci.plotting.histogram.functions.DivergentHistoCategory">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.rdgy_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.rdgy_green"
+            id="org.dawnsci.plotting.histogram.rdgy"
+            name="Red-Grey (Divergent)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.rdgy_red"
+            category="org.dawnsci.plotting.histogram.functions.DivergentHistoCategory">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.rdylbu_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.rdylbu_green"
+            id="org.dawnsci.plotting.histogram.rdylbu"
+            name="Red-Yellow-Blue (Divergent)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.rdylbu_red"
+            category="org.dawnsci.plotting.histogram.functions.DivergentHistoCategory">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.rdylgn_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.rdylgn_green"
+            id="org.dawnsci.plotting.histogram.rdylgn"
             name="Red-Yellow-Green (Divergent)"
             red_inverted="false"
-            red_transfer_function="org.dawnsci.plotting.histogram.divergent_ryg_red"
+            red_transfer_function="org.dawnsci.plotting.histogram.rdylgn_red"
             category="org.dawnsci.plotting.histogram.functions.DivergentHistoCategory">
       </colour_scheme>
       <colour_scheme
