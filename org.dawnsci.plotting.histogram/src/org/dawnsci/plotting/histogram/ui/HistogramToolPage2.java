@@ -1,5 +1,6 @@
 package org.dawnsci.plotting.histogram.ui;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.dawnsci.plotting.histogram.Activator;
@@ -25,6 +26,8 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.fieldassist.AutoCompleteField;
+import org.eclipse.jface.fieldassist.ComboContentAdapter;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.PreferenceDialog;
@@ -33,6 +36,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Cursor;
@@ -159,12 +164,12 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 		Label colourLabel = new Label(colourComposite, SWT.RIGHT);
 		colourLabel.setText("Colormap:");
-		colourMapViewer = new ComboViewer(colourComposite, SWT.READ_ONLY);
+		colourMapViewer = new ComboViewer(colourComposite, SWT.NONE);
 		colourMapViewer.getControl().setLayoutData(layoutData);
 		toolkit.adapt((Composite) colourMapViewer.getControl());
 		section.setClient(colourComposite);
 		colourMapViewer.setContentProvider(new ColourMapProvider());
-
+		colourMapViewer.getControl().setToolTipText("Type a colormap name and the list will auto-complete with available colormaps, press 'ENTER' to select");
 		colourSchemeListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
@@ -172,6 +177,20 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			}
 		};
 		((Combo) colourMapViewer.getControl()).addSelectionListener(colourSchemeListener);
+		List<String> colours = new ArrayList<String>(getPaletteService().getColorSchemes());
+		// Add content proposal to combo and a key listener
+		String[] proposals = new String[colours.size()];
+		for (int i = 0; i < proposals.length; i++) {
+			proposals[i] = colours.get(i);
+		}
+		new AutoCompleteField(colourMapViewer.getCombo(), new ComboContentAdapter(), proposals);
+		colourMapViewer.getCombo().addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.keyCode == SWT.CR || e.keyCode == SWT.KEYPAD_CR)
+					setPalette();
+			}
+		});
 
 		logScaleCheck = toolkit.createButton(colourComposite, "Log Scale", SWT.CHECK);
 		logScaleCheck.addSelectionListener(new SelectionAdapter() {
@@ -389,7 +408,8 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	private void setPalette() {
 		IPaletteTrace paletteTrace = getPaletteTrace();
 		if (paletteTrace != null) {
-			paletteTrace.setPalette((String) ((StructuredSelection) colourMapViewer.getSelection()).getFirstElement());
+			String selectedColormap = colourMapViewer.getCombo().getText();
+			paletteTrace.setPalette(selectedColormap);
 		}
 	}
 
