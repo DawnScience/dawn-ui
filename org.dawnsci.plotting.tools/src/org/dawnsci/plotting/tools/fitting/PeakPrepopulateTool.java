@@ -1,8 +1,6 @@
 package org.dawnsci.plotting.tools.fitting;
 
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -56,9 +54,6 @@ public class PeakPrepopulateTool extends Dialog {
 	
 	private Integer nrPeaks = null;
 	private Dataset[] roiLimits;
-	private Map<String, Class <? extends IPeak>> peakFnMap = new TreeMap<String, Class <? extends IPeak>>();
-	private String[] availPeakTypes;
-	private String[] availBkgTypes;
 	
 	private FunctionFittingTool parentFittingTool;
 	
@@ -70,7 +65,7 @@ public class PeakPrepopulateTool extends Dialog {
 	private Add compFunction = null;
 	
 	public PeakPrepopulateTool(Shell parentShell, FunctionFittingTool parentFittingTool, Dataset[] roiLimits) {
-		//Setup the dialog and get the parent fittingtool as well as the ROI limits we're interested in.
+		//Setup the dialog and get the parent fitting tool as well as the ROI limits we're interested in.
 		super(parentShell);
 		this.parentFittingTool = parentFittingTool;
 		this.roiLimits = roiLimits;
@@ -218,9 +213,7 @@ public class PeakPrepopulateTool extends Dialog {
 	 * and populates combo box with them
 	 */
 	private void setAvailPeakFunctions() {
-		peakFnMap = FunctionFactory.getPeakFns();
-		availPeakTypes = FunctionFactory.getPeakFnNameArray();
-		peakTypeCombo.setItems(availPeakTypes);
+		populateCombo(peakTypeCombo, FunctionFactory.getPeakFunctionNames());
 	}
 	
 	/**
@@ -228,10 +221,9 @@ public class PeakPrepopulateTool extends Dialog {
 	 */
 	private void setDefaultPeakFunction() {
 		//TODO FIXME This should use the preferences in DAWN, maybe through FittingUtils?
-		List<String> peakNames = FunctionFactory.getPeakFnNameList();
-		int defaultPeakFnIndex = peakNames.indexOf("Pseudo-Voigt");
-		if (defaultPeakFnIndex != -1) {
-			peakTypeCombo.select(defaultPeakFnIndex);
+		int i = peakTypeCombo.indexOf("Pseudo-Voigt");
+		if (i >= 0) {
+			peakTypeCombo.select(i);
 		}
 	}
 	
@@ -241,18 +233,25 @@ public class PeakPrepopulateTool extends Dialog {
 	 */
 	private Class<? extends IPeak> getProfileFunction(){
 		String selectedProfileName = peakTypeCombo.getText();
-		Class<? extends IPeak> selectedProfile = peakFnMap.get(selectedProfileName);
+		
+		Class<? extends IPeak> selectedProfile = FunctionFactory.getPeakFunctionClass(selectedProfileName);
 		
 		return selectedProfile;
 	}
-	
+
+	private static void populateCombo(Combo combo, Set<String> items) {
+		combo.removeAll();
+		for (String s : items) {
+			combo.add(s);
+		}
+	}
+
 	/**
 	 * Gets the list of available function names and their classes from FunctionFactory
 	 * and populates combo box with them
 	 */
 	private void setAvailBkgFunctions() {
-		availBkgTypes = FunctionFactory.getFunctionNameArray();
-		bkgTypeCombo.setItems(availBkgTypes);
+		populateCombo(bkgTypeCombo, FunctionFactory.getFunctionNames());
 	}
 	
 	/**
@@ -260,10 +259,9 @@ public class PeakPrepopulateTool extends Dialog {
 	 */
 	private void setDefaultBkgFunction() {
 		//TODO FIXME This should use the preferences in DAWN, maybe through FittingUtils?
-		List<String> functionNames = FunctionFactory.getFunctionNameList();
-		int defaultBkgFnIndex = functionNames.indexOf("Linear");
-		if (defaultBkgFnIndex != -1) {
-			bkgTypeCombo.select(defaultBkgFnIndex);
+		int i = bkgTypeCombo.indexOf("Linear");
+		if (i >= 0) {
+			bkgTypeCombo.select(i);
 		}
 	}
 	
@@ -336,25 +334,25 @@ public class PeakPrepopulateTool extends Dialog {
 	}
 	
 	private void fitBackground() {
-	if (fitBackgroundJob == null) {
-		fitBackgroundJob = new FitBackgroundJob("Fit Background");
-	}
-	
-	fitBackgroundJob.setData(roiLimits);
-	fitBackgroundJob.setPeakCompoundFunction(pkCompFunction);
-	fitBackgroundJob.setBkgFunction(getBackgroundFunction());
-	
-	fitBackgroundJob.schedule();
-	
-	fitBackgroundJob.addJobChangeListener(new JobChangeAdapter(){
-		@Override
-		public void done(IJobChangeEvent event) {
-			updateCompFunction(null, bkgFunction);
-			// TODO this wants updating to use something more generic
-			parentFittingTool.setInitialPeaks(compFunction);
+		if (fitBackgroundJob == null) {
+			fitBackgroundJob = new FitBackgroundJob("Fit Background");
 		}
-	});
-}
+
+		fitBackgroundJob.setData(roiLimits);
+		fitBackgroundJob.setPeakCompoundFunction(pkCompFunction);
+		fitBackgroundJob.setBkgFunction(getBackgroundFunction());
+
+		fitBackgroundJob.schedule();
+
+		fitBackgroundJob.addJobChangeListener(new JobChangeAdapter() {
+			@Override
+			public void done(IJobChangeEvent event) {
+				updateCompFunction(null, bkgFunction);
+				// TODO this wants updating to use something more generic
+				parentFittingTool.setInitialPeaks(compFunction);
+			}
+		});
+	}
 	
 	//**********************************
 	

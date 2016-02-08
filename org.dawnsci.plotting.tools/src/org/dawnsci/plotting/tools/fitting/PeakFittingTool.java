@@ -622,8 +622,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		CheckableActionGroup group = new CheckableActionGroup();
 		
 		Action selectedPeakAction = null;
-		final Map<String, Class<? extends IPeak>> peakFunctions = FunctionFactory.getPeakFns();
-		for (final String peakName : peakFunctions.keySet() ) {
+		for (final String peakName : FunctionFactory.getPeakFunctionNames()) {
 			final Action action = new Action(peakName, IAction.AS_CHECK_BOX) {
 				public void run() {
 					Activator.getPlottingPreferenceStore().setValue(FittingConstants.PEAK_TYPE, peakName);

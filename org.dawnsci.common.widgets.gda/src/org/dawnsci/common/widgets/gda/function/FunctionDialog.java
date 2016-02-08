@@ -9,6 +9,8 @@
 
 package org.dawnsci.common.widgets.gda.function;
 
+import java.util.Set;
+
 //import org.dawb.common.ui.plot.function.FunctionType;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.jface.dialogs.Dialog;
@@ -43,7 +45,7 @@ public class FunctionDialog extends Dialog {
 	private Spinner polynomialDegree;
 	private Label labelDegree;
 
-	String[] fittingFunctionNames;
+	Set<String> fittingFunctionNames;
 
 	public FunctionDialog(Shell parentShell) {
 		super(parentShell);
@@ -70,8 +72,10 @@ public class FunctionDialog extends Dialog {
 
 		functionType = new CCombo(top, SWT.READ_ONLY|SWT.BORDER);
 
-		fittingFunctionNames = FunctionFactory.getFunctionNameArray();
-		functionType.setItems(fittingFunctionNames);
+		fittingFunctionNames = FunctionFactory.getFunctionNames();
+		for (String f : fittingFunctionNames) {
+			functionType.add(f);
+		}
 		functionType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		functionType.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -125,15 +129,15 @@ public class FunctionDialog extends Dialog {
 
 	public void setFunction(IFunction function) {
 		String name = function.getName();
-		int index = -1;
-		for (int i = 0; i < fittingFunctionNames.length; i++) {
-			String fName = fittingFunctionNames[i];
-			if (name.equals(fName)){
-				index = i;
+		int index = 0;
+		for (String f : fittingFunctionNames) {
+			if (name.equals(f)) {
+				functionType.select(index);
+				functionEditor.setFunction(function, null);
+				break;
 			}
+			index++;
 		}
-		functionType.select(index);
-		functionEditor.setFunction(function, null);
 	}
 
 	public IFunction getFunction() {
