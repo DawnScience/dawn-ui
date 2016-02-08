@@ -817,6 +817,51 @@
             name="Dark2 Blue">
       </transfer_function>
       <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.QualitativePairedGreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.paired_green"
+            name="Paired Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.QualitativePairedRedTransferFunction"
+            id="org.dawnsci.plotting.histogram.paired_red"
+            name="Paired Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.QualitativePairedBlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.paired_blue"
+            name="Paired Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.QualitativePastel1GreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.pastel1_green"
+            name="Pastel1 Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.QualitativePastel1RedTransferFunction"
+            id="org.dawnsci.plotting.histogram.pastel1_red"
+            name="Pastel1 Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.QualitativePastel1BlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.pastel1_blue"
+            name="Pastel1 Blue">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.QualitativePastel2GreenTransferFunction"
+            id="org.dawnsci.plotting.histogram.pastel2_green"
+            name="Pastel2 Green">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.QualitativePastel2RedTransferFunction"
+            id="org.dawnsci.plotting.histogram.pastel2_red"
+            name="Pastel2 Red">
+      </transfer_function>
+      <transfer_function
+            array_provider_class="org.dawnsci.plotting.histogram.functions.classes.QualitativePastel2BlueTransferFunction"
+            id="org.dawnsci.plotting.histogram.pastel2_blue"
+            name="Pastel2 Blue">
+      </transfer_function>
+      <transfer_function
             array_provider_class="org.dawnsci.plotting.histogram.functions.classes.AutumnGreenTransferFunction"
             id="org.dawnsci.plotting.histogram.autumn_green"
             name="Autumn Green">
@@ -1593,6 +1638,45 @@
             name="Dark2 (Qualitative)"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.dark2_red"
+            category="org.dawnsci.plotting.histogram.functions.QualitativeHistoCategory">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.paired_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.paired_green"
+            id="org.dawnsci.plotting.histogram.paired"
+            name="Paired (Qualitative)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.paired_red"
+            category="org.dawnsci.plotting.histogram.functions.QualitativeHistoCategory">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.pastel1_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.pastel1_green"
+            id="org.dawnsci.plotting.histogram.pastel1"
+            name="Pastel1 (Qualitative)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.pastel1_red"
+            category="org.dawnsci.plotting.histogram.functions.QualitativeHistoCategory">
+      </colour_scheme>
+      <colour_scheme
+            alpha_inverted="false"
+            alpha_transfer_function="org.dawnsci.plotting.histogram.full"
+            blue_inverted="false"
+            blue_transfer_function="org.dawnsci.plotting.histogram.pastel2_blue"
+            green_inverted="false"
+            green_transfer_function="org.dawnsci.plotting.histogram.pastel2_green"
+            id="org.dawnsci.plotting.histogram.pastel2"
+            name="Pastel2 (Qualitative)"
+            red_inverted="false"
+            red_transfer_function="org.dawnsci.plotting.histogram.pastel2_red"
             category="org.dawnsci.plotting.histogram.functions.QualitativeHistoCategory">
       </colour_scheme>
       <colour_scheme
