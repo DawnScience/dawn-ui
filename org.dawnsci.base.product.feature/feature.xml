@@ -10,7 +10,7 @@
    </description>
 
    <copyright url="http://www.example.com/copyright">
-      Copyright (c) 2012 Diamond Light Source Ltd.
+      Copyright (c) 2016 Diamond Light Source Ltd.
    </copyright>
 
    <license url="http://www.eclipse.org/legal/epl-v10.html">
@@ -107,6 +107,10 @@
 
    <includes
          id="org.eclipse.emf.common"
+         version="0.0.0"/>
+
+   <includes
+         id="org.dawnsci.dde.feature"
          version="0.0.0"/>
 
    <plugin
