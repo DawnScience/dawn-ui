@@ -38,6 +38,9 @@ public class PeakLabelProvider extends ColumnLabelProvider {
 	private int           column;
 	private ColumnViewer  viewer;
 	private Image         savedIcon;
+	private DecimalFormat format;
+	private double lower;
+	private DecimalFormat eformat;
 
 	public PeakLabelProvider(int i) {
 		this.column = i;
@@ -63,7 +66,7 @@ public class PeakLabelProvider extends ColumnLabelProvider {
 		final FittedFunctions bean = (FittedFunctions)viewer.getInput();
 		
 		IPreferenceStore store = Activator.getPlottingPreferenceStore();
-		DecimalFormat format   = new DecimalFormat(store.getString(FittingConstants.REAL_FORMAT));
+		prepareFormat(store.getString(FittingConstants.REAL_FORMAT));
 
 		switch(column) {
 		case 0:
@@ -71,15 +74,15 @@ public class PeakLabelProvider extends ColumnLabelProvider {
 		case 1:
 			return peak.getPeakName();
 		case 2:
-			return format.format(peak.getPosition());
+			return format(peak.getPosition());
 		case 3:
-			return format.format(peak.getDataValue());
+			return format(peak.getDataValue());
 		case 4:
-			return format.format(peak.getPeakValue());
+			return format(peak.getPeakValue());
 		case 5:
-			return format.format(peak.getFWHM());
+			return format(peak.getFWHM());
 		case 6:
-			return format.format(peak.getArea());
+			return format(peak.getArea());
 		case 7:
 			return peak.getPeakType();
 		case 8:
@@ -88,7 +91,25 @@ public class PeakLabelProvider extends ColumnLabelProvider {
 			return "Not found";
 		}
 	}
-	
+
+	private void prepareFormat(String pattern) {
+		format = new DecimalFormat(pattern);
+		if (!pattern.contains("E")) {
+			lower = Math.pow(10, -format.getMaximumFractionDigits());
+			eformat = new DecimalFormat(pattern + "E0");
+		} else {
+			lower = Double.MIN_NORMAL;
+		}
+	}
+
+	private String format(double x) {
+		double ax = Math.abs(x);
+		if (ax < lower) {
+			return eformat.format(x);
+		}
+		return format.format(x);
+	}
+
 	/**
 	 * foreground
 	 * @param element
