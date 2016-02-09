@@ -293,8 +293,8 @@ public class JexlExpressionFunction extends AFunction {
 		int noOfParameters = getNoOfParameters();
 		HashMap<String, Object> jexlLoadedValues = new HashMap<String, Object>(noOfParameters + 1);
 		for (int i = 0; i < noOfParameters; i++) {
-			jexlLoadedValues.put(getParameter(i).getName(),
-					getParameterValue(i));
+			IParameter p = getParameter(i);
+			jexlLoadedValues.put(p.getName(), p.getValue());
 		}
 		engine.addLoadedVariables(jexlLoadedValues);
 
@@ -303,12 +303,6 @@ public class JexlExpressionFunction extends AFunction {
 
 	@Override
 	public double val(double... values) {
-		// TODO this isn't actually implemented fully, just
-		// done as an example based on ExpressionFittingExample that
-		// Jacob wrote. One of the question is do we need a different
-		// Jexl expression handler for processing datasets rather than
-		// values
-
 		if (expressionError != JexlExpressionFunctionError.NO_ERROR) {
 			logger.error("There is a problem with the Jexl expression");
 			throw new IllegalStateException("There is a problem with the Jexl expression");
@@ -318,34 +312,51 @@ public class JexlExpressionFunction extends AFunction {
 			calcCachedParameters();
 		}
 
+		// TODO handle multivariate functions (i.e. those that have more than one coordinates)
+		if (values.length == 0) {
+			logger.error("No coordinates given to evaluate in expression");
+			throw new IllegalStateException("No coordinates given to evaluate in expression");
+		} else if (values.length > 1) {
+			logger.warn("More than one dimension in coordinates given but ignored");
+		}
 		engine.addLoadedVariable(X, values[0]);
 
 		Object ob;
 		try {
 			ob = engine.evaluate();
 		} catch (Exception e) {
-			// where to record this error?
-			return 0;
+			logger.error("Could not evaluate expression");
+			throw new IllegalStateException("Could not evaluate expression");
 		}
 		try {
 			return (double) ob;
 		} catch (ClassCastException cce) {
-			// where to record this error?
-			return 0;
+			logger.error("Object returned from expression was not a double");
+			throw new IllegalStateException("Object returned from expression was not a double");
 		}
 	}
 
-	private DoubleDataset evaluate(Object value) {
-		engine.addLoadedVariable(X, value);
+	private DoubleDataset evaluate(IDataset[] values) {
+		// TODO handle multivariate functions (i.e. those that have more than one coordinate dataset)
+		if (values.length == 0) {
+			logger.error("No coordinates given to evaluate in expression");
+			throw new IllegalStateException("No coordinates given to evaluate in expression");
+		} else if (values.length > 1) {
+			logger.warn("More than one dimension in coordinates given but ignored");
+		}
+		engine.addLoadedVariable(X, values[0]);
 		Object ob;
 		try {
 			ob = engine.evaluate();
 			if (ob instanceof IDataset) {
 				return (DoubleDataset) DatasetUtils.cast((IDataset) ob, Dataset.FLOAT64);
 			}
+			logger.error("Object returned from expression was not a dataset");
+			throw new IllegalStateException("Object returned from expression was not a dataset");
 		} catch (Exception e) {
+			logger.error("Could not evaluate expression");
+			throw new IllegalStateException("Could not evaluate expression");
 		}
-		return null;
 	}
 
 	@Override
@@ -359,7 +370,7 @@ public class JexlExpressionFunction extends AFunction {
 			calcCachedParameters();
 		}
 
-		DoubleDataset ob = evaluate(it.getValues()[0]);
+		DoubleDataset ob = evaluate(it.getValues());
 		if (ob!= null) {
 			data.setSlice(ob);
 		}
