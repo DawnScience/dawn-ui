@@ -7,12 +7,14 @@ import org.dawnsci.mapping.ui.LocalServiceManager;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.IRemoteDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.io.IRemoteDatasetService;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
+import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +57,11 @@ public class MappedFileFactory {
 //				m.getMap().setName(m.toString());
 				file.addMapObject(b.getName(), m);
 			}
+		}
+		
+		for (AssociatedImageBean b : bean.getImages()) {
+			AssociatedImage im = getAssociatedImage(path,b);
+			file.addMapObject(im.getLongName(), im);
 		}
 		
 //		for (String map : maps){
@@ -144,6 +151,33 @@ public class MappedFileFactory {
 		}
 		return null;
 
+	}
+	
+	private static AssociatedImage getAssociatedImage(String path, AssociatedImageBean b) {
+		try {
+			Dataset d = DatasetUtils.convertToDataset(getLazyDataset(path, b.getName()).getSlice());
+			AxesMetadataImpl ax = new AxesMetadataImpl(2);
+			ax.addAxis(getLazyDataset(path, b.getAxes()[0]), 0);
+			ax.addAxis(getLazyDataset(path, b.getAxes()[1]), 1);
+			
+			if (d.getRank() == 3) {
+				
+				RGBDataset ds = new RGBDataset(d.getSlice(new Slice(0,1,1),null,null).squeeze(), d.getSlice(new Slice(1,2,1),null,null).squeeze(), d.getSlice(new Slice(2,3,1),null,null).squeeze());
+				ds.addMetadata(ax);
+				return new AssociatedImage(b.getName(), ds, path);
+			} else if (d.getRank() == 2) {
+				
+				RGBDataset ds = new RGBDataset(d, d, d);
+				ds.addMetadata(ax);
+				return new AssociatedImage(b.getName(), ds, path);
+				
+			}
+			
+		} catch (Exception e) {
+			logger.error("Error loading image",e);
+		}
+		return null;
+		
 	}
 	
 	private static LiveRemoteAxes getRemoteAxes(List<String> axes, String path, MappedBlockBean bean, LiveDataBean live) {

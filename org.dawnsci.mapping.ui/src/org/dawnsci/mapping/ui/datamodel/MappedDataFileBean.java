@@ -7,6 +7,7 @@ public class MappedDataFileBean {
 
 	private List<MappedBlockBean> blocks = new ArrayList<MappedBlockBean>();
 	private List<MapBean> maps = new ArrayList<MapBean>();
+	private List<AssociatedImageBean> images = new ArrayList<AssociatedImageBean>();
 	private LiveDataBean liveBean = null;
 	
 	public void addBlock(MappedBlockBean bean) {
@@ -16,6 +17,10 @@ public class MappedDataFileBean {
 	public void addMap(MapBean bean) {
 		maps.add(bean);
 	}
+	
+	public void addImage(AssociatedImageBean bean) {
+		images.add(bean);
+	}
 
 	public List<MappedBlockBean> getBlocks() {
 		return blocks;
@@ -23,6 +28,10 @@ public class MappedDataFileBean {
 
 	public List<MapBean> getMaps() {
 		return maps;
+	}
+	
+	public List<AssociatedImageBean> getImages() {
+		return images;
 	}
 	
 	public boolean checkValid() {
@@ -35,6 +44,10 @@ public class MappedDataFileBean {
 		}
 		
 		for (MapBean b : maps) {
+			if (!b.checkValid()) return false;
+		}
+		
+		for (AssociatedImageBean b : images) {
 			if (!b.checkValid()) return false;
 		}
 		
