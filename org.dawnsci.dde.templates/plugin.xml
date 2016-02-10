@@ -34,11 +34,6 @@
             template="org.dawnsci.dde.templates.singleChannelColourSchemeTemplate">
       </wizard>
       <wizard
-            id="org.dawnsci.dde.templates.ColourCategoryWizard"
-            name="Colour Scheme"
-            template="org.dawnsci.dde.templates.colourCategoryTemplate">
-      </wizard>
-      <wizard
             id="org.dawnsci.dde.templates.PlottingActionWizard"
             name="Plotting Action"
             template="org.dawnsci.dde.templates.plottingActionTemplate">
@@ -85,12 +80,6 @@
             class="org.dawnsci.dde.templates.ChannelColourSchemeTemplate"
             contributingId="org.dawnsci.plotting.histogram.colourScheme"
             id="org.dawnsci.dde.templates.singleChannelColourSchemeTemplate"
-            name="Colour Scheme">
-      </template>
-      <template
-            class="org.dawnsci.dde.templates.ColourCategoryTemplate"
-            contributingId="org.dawnsci.plotting.histogram.colourScheme"
-            id="org.dawnsci.dde.templates.colourCategoryTemplate"
             name="Colour Scheme">
       </template>
       <template
