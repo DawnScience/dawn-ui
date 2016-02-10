@@ -14,10 +14,10 @@ import java.util.List;
 
 import org.dawnsci.plotting.histogram.Activator;
 import org.dawnsci.plotting.histogram.ExtensionPointManager;
-import org.dawnsci.plotting.histogram.functions.AbstractHistogramCategory;
 import org.dawnsci.plotting.histogram.functions.ColourCategoryContribution;
 import org.dawnsci.plotting.histogram.functions.ColourSchemeContribution;
 import org.eclipse.dawnsci.plotting.api.histogram.HistoCategory;
+import org.eclipse.dawnsci.plotting.api.histogram.IHistogramCategory;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.histogram.ITransferFunction;
 import org.eclipse.dawnsci.plotting.api.histogram.functions.FunctionContainer;
@@ -154,7 +154,7 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 		List<ColourSchemeContribution> contributions = extensionManager.getColourSchemeContributions();
 		for (ColourSchemeContribution contrib : contributions) {
 			ColourCategoryContribution categoryContrib = extensionManager.getColourCategoryFromID(contrib.getCategory());
-			AbstractHistogramCategory histoCategory = categoryContrib.getCategory();
+			IHistogramCategory histoCategory = categoryContrib.getCategory();
 			HistoCategory category = histoCategory.getCategory();
 			if (sCategory.equals(category.getName())) {
 				colours.add(contrib.getName());
@@ -169,7 +169,7 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 	public String getColourCategory(String colour) {
 		ColourSchemeContribution colourSchemeContrib = extensionManager.getColourSchemeContribution(colour);
 		ColourCategoryContribution categoryContrib = extensionManager.getColourCategoryFromID(colourSchemeContrib.getCategory());
-		AbstractHistogramCategory histoCategory = categoryContrib.getCategory();
+		IHistogramCategory histoCategory = categoryContrib.getCategory();
 		return histoCategory.getCategory().getName();
 	}
 }

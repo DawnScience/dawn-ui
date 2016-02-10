@@ -69,7 +69,7 @@
                   The class provided here must give the actual array associated with this colour category.
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn="org.dawnsci.plotting.histogram.functions.AbstractHistogramCategory:"/>
+                  <meta.attribute kind="java" basedOn=":org.eclipse.dawnsci.plotting.api.histogram.IHistogramCategory"/>
                </appinfo>
             </annotation>
          </attribute>

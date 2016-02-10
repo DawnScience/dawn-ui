@@ -10,8 +10,9 @@
 package org.dawnsci.plotting.histogram.functions;
 
 import org.eclipse.dawnsci.plotting.api.histogram.HistoCategory;
+import org.eclipse.dawnsci.plotting.api.histogram.IHistogramCategory;
 
-public class DivergentHistoCategory extends AbstractHistogramCategory {
+public class DivergentHistoCategory implements IHistogramCategory {
 
 	@Override
 	public HistoCategory getCategory() {

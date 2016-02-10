@@ -9,6 +9,7 @@
 package org.dawnsci.plotting.histogram.functions;
 
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.dawnsci.plotting.api.histogram.IHistogramCategory;
 
 /**
  * This class wrappers a colour category extension point so that it can be
@@ -25,7 +26,7 @@ public class ColourCategoryContribution {
 
 	private String name;
 	private String id;
-	private AbstractHistogramCategory category;
+	private IHistogramCategory category;
 
 	public static ColourCategoryContribution getColourCategoryContribution(IConfigurationElement config) {
 		ColourCategoryContribution colourCategoryContribution = new ColourCategoryContribution();
@@ -33,7 +34,7 @@ public class ColourCategoryContribution {
 		try {
 			colourCategoryContribution.name = config.getAttribute(ATT_NAME);
 			colourCategoryContribution.id = config.getAttribute(ATT_ID);
-			colourCategoryContribution.category = (AbstractHistogramCategory) config
+			colourCategoryContribution.category = (IHistogramCategory) config
 					.createExecutableExtension(ATT_CLASS);
 		} catch (Exception e) {
 			throw new IllegalArgumentException(
@@ -51,7 +52,7 @@ public class ColourCategoryContribution {
 		return id;
 	}
 
-	public AbstractHistogramCategory getCategory() {
+	public IHistogramCategory getCategory() {
 		return category;
 	}
 
