@@ -9,7 +9,6 @@
 package org.dawnsci.plotting.histogram.functions;
 
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.dawnsci.plotting.api.histogram.IHistogramCategory;
 
 /**
  * This class wrappers a colour category extension point so that it can be
@@ -22,20 +21,19 @@ public class ColourCategoryContribution {
 
 	private static final String ATT_ID = "id";
 	private static final String ATT_NAME = "name";
-	private static final String ATT_CLASS = "array_provider_class";
+	private static final String ATT_DESCRIPTION = "description";
 
 	private String name;
+	private String description;
 	private String id;
-	private IHistogramCategory category;
 
 	public static ColourCategoryContribution getColourCategoryContribution(IConfigurationElement config) {
 		ColourCategoryContribution colourCategoryContribution = new ColourCategoryContribution();
 		// try to get things out of the config which are required
 		try {
 			colourCategoryContribution.name = config.getAttribute(ATT_NAME);
+			colourCategoryContribution.description = config.getAttribute(ATT_DESCRIPTION);
 			colourCategoryContribution.id = config.getAttribute(ATT_ID);
-			colourCategoryContribution.category = (IHistogramCategory) config
-					.createExecutableExtension(ATT_CLASS);
 		} catch (Exception e) {
 			throw new IllegalArgumentException(
 					"Cannot create ColourCategoryContribution contribution due to the following error", e);
@@ -52,8 +50,7 @@ public class ColourCategoryContribution {
 		return id;
 	}
 
-	public IHistogramCategory getCategory() {
-		return category;
+	public String getDescription() {
+		return description;
 	}
-
 }

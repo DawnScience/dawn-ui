@@ -63,14 +63,11 @@
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="array_provider_class" type="string">
+         <attribute name="description" type="string">
             <annotation>
                <documentation>
-                  The class provided here must give the actual array associated with this colour category.
+                  
                </documentation>
-               <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.eclipse.dawnsci.plotting.api.histogram.IHistogramCategory"/>
-               </appinfo>
             </annotation>
          </attribute>
       </complexType>

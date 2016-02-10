@@ -927,34 +927,39 @@
    <extension
          point="org.dawnsci.plotting.histogram.colourCategory">
       <colour_category
-            array_provider_class="org.dawnsci.plotting.histogram.functions.Sequential1HistoCategory"
+            id="org.dawnsci.plotting.histogram.all_category"
+            name="All"
+            description="List of all colormaps">
+      </colour_category>
+      <colour_category
             id="org.dawnsci.plotting.histogram.sequential1_category"
-            name="Sequential 1">
+            name="Sequential 1 (approximately monochromatic with variation between two colours)"
+            description="Approximately monochromatic colormaps varying smoothly between two color tones---usually from low saturation (e.g. white) to high saturation (e.g. a bright blue)">
       </colour_category>
       <colour_category
-            array_provider_class="org.dawnsci.plotting.histogram.functions.Sequential2HistoCategory"
             id="org.dawnsci.plotting.histogram.sequential2_category"
-            name="Sequential 2">
+            name="Sequential 2 (variation between two or more colours)"
+            description="Approximately monochromatic colormaps varying smoothly between two-three color tones">
       </colour_category>
       <colour_category
-            array_provider_class="org.dawnsci.plotting.histogram.functions.UniformSequentialHistoCategory"
             id="org.dawnsci.plotting.histogram.uniform_category"
-            name="Uniform">
+            name="Uniform (perceptually uniform sequential)"
+            description="Perceptually Uniform sequential colormaps">
       </colour_category>
       <colour_category
-            array_provider_class="org.dawnsci.plotting.histogram.functions.DivergentHistoCategory"
             id="org.dawnsci.plotting.histogram.divergent_category"
-            name="Divergent">
+            name="Divergent (with median value)"
+            description="Colour maps with median value (usually light in color) and which vary smoothly to two different color tones at high and low values">
       </colour_category>
       <colour_category
-            array_provider_class="org.dawnsci.plotting.histogram.functions.QualitativeHistoCategory"
             id="org.dawnsci.plotting.histogram.qualitative_category"
-            name="Qualitative">
+            name="Qualitative (rapid variation in colours)"
+            description="Colormaps which vary rapidly in color; useful for choosing a set of discrete colors">
       </colour_category>
       <colour_category
-            array_provider_class="org.dawnsci.plotting.histogram.functions.MiscHistoCategory"
             id="org.dawnsci.plotting.histogram.misc_category"
-            name="Miscellaneous">
+            name="Miscellaneous"
+            description="Colormaps that don't fit into other categories">
       </colour_category>
    </extension>
    

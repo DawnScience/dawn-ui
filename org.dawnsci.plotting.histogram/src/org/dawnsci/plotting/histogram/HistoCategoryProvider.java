@@ -8,7 +8,9 @@
  */
 package org.dawnsci.plotting.histogram;
 
-import org.eclipse.dawnsci.plotting.api.histogram.HistoCategory;
+import java.util.List;
+
+import org.dawnsci.plotting.histogram.functions.ColourCategoryContribution;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
@@ -31,6 +33,12 @@ public class HistoCategoryProvider implements IStructuredContentProvider{
 
 	@Override
 	public Object[] getElements(Object inputElement) {
-		return HistoCategory.names();
+		ExtensionPointManager manager = ExtensionPointManager.getManager();
+		List<ColourCategoryContribution> cContrib = manager.getColourCategoryContributions();
+		String[] names = new String[cContrib.size()];
+		for (int i = 0; i < names.length; i++) {
+			names[i] = cContrib.get(i).getName();
+		}
+		return names;
 	}
 }

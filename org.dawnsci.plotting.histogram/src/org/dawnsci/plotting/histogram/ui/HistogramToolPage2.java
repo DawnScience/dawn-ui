@@ -5,12 +5,13 @@ import java.util.List;
 
 import org.dawnsci.plotting.histogram.Activator;
 import org.dawnsci.plotting.histogram.ColourMapProvider;
+import org.dawnsci.plotting.histogram.ExtensionPointManager;
 import org.dawnsci.plotting.histogram.HistoCategoryProvider;
 import org.dawnsci.plotting.histogram.ImageHistogramProvider;
+import org.dawnsci.plotting.histogram.functions.ColourCategoryContribution;
 import org.dawnsci.plotting.histogram.preferences.HistogramPreferencePage;
 import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.dawnsci.plotting.api.histogram.HistoCategory;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
@@ -151,16 +152,17 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 				List<String> colours = getPaletteService().getColoursByCategory(category);
 				colourMapViewer.setInput(colours.toArray());
 				colourMapViewer.setSelection(new StructuredSelection(colours.get(0)), true);
-				for(HistoCategory categ : HistoCategory.values()) {
-					if (category.equals(categ.getName())) {
-						categoryViewer.getControl().setToolTipText(categ.getDescription());
+				for(String desc : getCategoryDescriptions()) {
+					if (category.equals(desc)) {
+						categoryViewer.getControl().setToolTipText(desc);
 					}
 				}
 				setPalette();
 			}
 		};
 		((Combo) categoryViewer.getControl()).addSelectionListener(colourCategoryListener);
-		categoryViewer.setInput(HistoCategory.names());
+		
+		categoryViewer.setInput(getCategories());
 
 		Label colourLabel = new Label(colourComposite, SWT.RIGHT);
 		colourLabel.setText("Colormap:");
@@ -231,6 +233,26 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 				Activator.getPlottingPreferenceStore().setValue(PlottingConstants.CM_INVERTED, invertedCheck.getSelection());
 			}
 		});
+	}
+
+	private String[] getCategories() {
+		ExtensionPointManager manager = ExtensionPointManager.getManager();
+		List<ColourCategoryContribution> cContrib = manager.getColourCategoryContributions();
+		String[] names = new String[cContrib.size()];
+		for (int i = 0; i < names.length; i++) {
+			names[i] = cContrib.get(i).getName();
+		}
+		return names;
+	}
+
+	private String[] getCategoryDescriptions() {
+		ExtensionPointManager manager = ExtensionPointManager.getManager();
+		List<ColourCategoryContribution> cContrib = manager.getColourCategoryContributions();
+		String[] names = new String[cContrib.size()];
+		for (int i = 0; i < names.length; i++) {
+			names[i] = cContrib.get(i).getDescription();
+		}
+		return names;
 	}
 
 	private void setColourScheme(IPaletteTrace trace) {
@@ -506,7 +528,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		public void paletteChanged(PaletteEvent event) {
 			// do not call if All category is selected
 			String categorySelected = categoryViewer.getElementAt(categoryViewer.getCombo().getSelectionIndex()).toString();
-			if (categorySelected.equals(HistoCategory.ALL.getName()))
+			if (categorySelected.equals("All"))
 				return;
 			IPaletteTrace trace = event.getTrace();
 			setColourScheme(trace);
