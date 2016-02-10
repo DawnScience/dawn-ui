@@ -26,11 +26,13 @@ import org.eclipse.pde.core.plugin.IPluginReference;
  * used when code and other files are generated.
  * 
  * @author Torkild U. Resheim
+ * @author Baha El Kassaby
  */
 public class ColourSchemeTemplate extends DAWNTemplateSection {
 
 	private static final String EXTENSION_POINT = "org.dawnsci.plotting.histogram.colourScheme";
 	private static final String TRANSFER_FUNCTION_EXTENSION = "org.dawnsci.plotting.histogram.channelColourScheme";
+	private static final String COLOUR_CATEGORY_EXTENSION = "org.dawnsci.plotting.histogram.colourCategory";
 	private static final String KEY_RED_TRANSFER_FUNCTION = "red_transfer_function";
 	private static final String KEY_GREEN_TRANSFER_FUNCTION = "green_transfer_function";
 	private static final String KEY_BLUE_TRANSFER_FUNCTION = "blue_transfer_function";
@@ -39,6 +41,7 @@ public class ColourSchemeTemplate extends DAWNTemplateSection {
 	private static final String KEY_BLUE_INVERTED = "blue_inverted";
 	private static final String KEY_GREEN_INVERTED = "green_inverted";
 	private static final String KEY_ALPHA_INVERTED = "alpha_inverted";
+	private static final String KEY_CATEGORY = "colour_category";
 
 	@Override
 	protected String getClassName() {
@@ -89,6 +92,8 @@ public class ColourSchemeTemplate extends DAWNTemplateSection {
 		addOption(KEY_ALPHA_TRANSFER_FUNCTION, "Alpha transfer function",
 				getLookupList(TRANSFER_FUNCTION_EXTENSION, "transfer_function", "id", "name", false), 
 				(String) null, 0);
+		addOption(KEY_CATEGORY, "Colormap category",
+				getLookupList(COLOUR_CATEGORY_EXTENSION, "colour_category", "id", "name", false), (String) null, 0);
 		addOption(KEY_RED_INVERTED, "Red inverted", Boolean.FALSE, 0);
 		addOption(KEY_BLUE_INVERTED, "Blue inverted", Boolean.FALSE, 0);
 		addOption(KEY_GREEN_INVERTED, "Green inverted", Boolean.FALSE, 0);
@@ -109,6 +114,7 @@ public class ColourSchemeTemplate extends DAWNTemplateSection {
 		setElement.setAttribute("green_transfer_function", getStringOption(KEY_GREEN_TRANSFER_FUNCTION));
 		setElement.setAttribute("blue_transfer_function", getStringOption(KEY_BLUE_TRANSFER_FUNCTION));
 		setElement.setAttribute("alpha_transfer_function", getStringOption(KEY_ALPHA_TRANSFER_FUNCTION));
+		setElement.setAttribute(KEY_CATEGORY, getStringOption(KEY_CATEGORY));
 		setElement.setAttribute(KEY_RED_INVERTED, Boolean.toString(getBooleanOption(KEY_RED_INVERTED)));
 		setElement.setAttribute(KEY_GREEN_INVERTED, Boolean.toString(getBooleanOption(KEY_GREEN_INVERTED)));
 		setElement.setAttribute(KEY_BLUE_INVERTED, Boolean.toString(getBooleanOption(KEY_GREEN_INVERTED)));
