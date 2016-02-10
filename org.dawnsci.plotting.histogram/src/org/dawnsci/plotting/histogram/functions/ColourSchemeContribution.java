@@ -28,7 +28,7 @@ public class ColourSchemeContribution {
 	private static final String ATT_GREEN_INV = "green_inverted";
 	private static final String ATT_BLUE_INV = "blue_inverted";
 	private static final String ATT_ALPHA_INV = "alpha_inverted";
-	private static final String ATT_CATEGORY = "category";
+	private static final String ATT_CATEGORY = "colour_category";
 	
 	private String name; 
 	private String id;

@@ -15,6 +15,7 @@ import java.util.List;
 import org.dawnsci.plotting.histogram.Activator;
 import org.dawnsci.plotting.histogram.ExtensionPointManager;
 import org.dawnsci.plotting.histogram.functions.AbstractHistogramCategory;
+import org.dawnsci.plotting.histogram.functions.ColourCategoryContribution;
 import org.dawnsci.plotting.histogram.functions.ColourSchemeContribution;
 import org.eclipse.dawnsci.plotting.api.histogram.HistoCategory;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
@@ -152,8 +153,8 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 		List<String> colours = new ArrayList<String>();
 		List<ColourSchemeContribution> contributions = extensionManager.getColourSchemeContributions();
 		for (ColourSchemeContribution contrib : contributions) {
-			String histTypeClass = contrib.getCategory();
-			AbstractHistogramCategory histoCategory = instantiate(histTypeClass, AbstractHistogramCategory.class);
+			ColourCategoryContribution categoryContrib = extensionManager.getColourCategoryFromID(contrib.getCategory());
+			AbstractHistogramCategory histoCategory = categoryContrib.getCategory();
 			HistoCategory category = histoCategory.getCategory();
 			if (sCategory.equals(category.getName())) {
 				colours.add(contrib.getName());
@@ -166,21 +167,9 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 
 	@Override
 	public String getColourCategory(String colour) {
-		String histoCategoryClass = extensionManager.getColourSchemeContribution(colour).getCategory();
-		AbstractHistogramCategory histoCategory = instantiate(histoCategoryClass, AbstractHistogramCategory.class);
+		ColourSchemeContribution colourSchemeContrib = extensionManager.getColourSchemeContribution(colour);
+		ColourCategoryContribution categoryContrib = extensionManager.getColourCategoryFromID(colourSchemeContrib.getCategory());
+		AbstractHistogramCategory histoCategory = categoryContrib.getCategory();
 		return histoCategory.getCategory().getName();
-	}
-
-	private <T> T instantiate(final String className, final Class<T> type) {
-		try {
-			return type.cast(Class.forName(className).newInstance());
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-		return null;
 	}
 }

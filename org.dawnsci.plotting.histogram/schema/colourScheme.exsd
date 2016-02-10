@@ -131,13 +131,13 @@
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="category" type="string" use="required">
+         <attribute name="colour_category" type="string" use="default" value="misc_colour_category">
             <annotation>
                <documentation>
-                  Type of histogram
+                  Colour category
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn="org.dawnsci.plotting.histogram.functions.AbstractHistogramCategory:"/>
+                  <meta.attribute kind="identifier" basedOn="org.dawnsci.plotting.histogram.colourCategory/colour_category/@id"/>
                </appinfo>
             </annotation>
          </attribute>
