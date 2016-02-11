@@ -52,6 +52,7 @@ public class MapBeanBuilder {
 		for (Entry<String, NodeLink> entry : nodes.entrySet()) {
 			NodeLink value = entry.getValue();
 			Node n = value.getDestination();
+			if (!(n instanceof GroupNode)) return null;
 			String att = n.getAttribute("signal").getFirstElement();
 			DataNode dataNode = ((GroupNode)n).getDataNode(att);
 			if (dataNode.containsAttribute("interpretation") && dataNode.getAttribute("interpretation").getFirstElement().equals("rgba-image")){
