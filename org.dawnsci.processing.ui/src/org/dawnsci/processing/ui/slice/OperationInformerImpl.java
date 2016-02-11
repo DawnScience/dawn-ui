@@ -1,8 +1,8 @@
 package org.dawnsci.processing.ui.slice;
 
-import org.dawnsci.common.widgets.table.SeriesTable;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
+import org.eclipse.richbeans.widgets.table.SeriesTable;
 import org.eclipse.swt.widgets.Display;
 
 public class OperationInformerImpl implements IOperationErrorInformer {

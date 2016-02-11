@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
@@ -25,6 +24,7 @@ import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.ModelField;
 import org.eclipse.dawnsci.analysis.api.processing.model.ModelUtils;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.richbeans.widgets.table.ISeriesItemDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.osgi.framework.Bundle;
 

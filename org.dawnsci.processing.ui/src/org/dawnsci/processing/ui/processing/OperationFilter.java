@@ -13,14 +13,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
-import org.dawnsci.common.widgets.table.ISeriesItemFilter;
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.slice.IOperationErrorInformer;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
+import org.eclipse.richbeans.widgets.table.ISeriesItemDescriptor;
+import org.eclipse.richbeans.widgets.table.ISeriesItemFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
