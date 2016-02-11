@@ -113,6 +113,18 @@
          id="org.dawnsci.dde.feature"
          version="0.0.0"/>
 
+   <includes
+         id="org.eclipse.epp.mpc"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.equinox.p2.discovery.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.ecf.filetransfer.feature"
+         version="0.0.0"/>
+
    <plugin
          id="uk.ac.diamond.scisoft.analysis.rcp.contributions"
          download-size="0"
@@ -251,6 +263,20 @@
 
    <plugin
          id="org.eclipse.dawnsci.nexus"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.identity"
          download-size="0"
          install-size="0"
          version="0.0.0"
