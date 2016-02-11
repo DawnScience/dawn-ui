@@ -55,7 +55,7 @@ final class OperationValidator implements ISeriesValidator {
 		return null;
 	}
 
-	private IOperation[] getOperations(List<ISeriesItemDescriptor> series) throws InstantiationException {
+	private IOperation[] getOperations(List<ISeriesItemDescriptor> series) throws Exception {
 		final IOperation[] ret = new IOperation[series.size()];
 		int i = 0;
 		for (ISeriesItemDescriptor item : series) {

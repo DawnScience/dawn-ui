@@ -239,7 +239,7 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 			if (ob instanceof ISeriesItemDescriptor) {
 				try {
 					setOperation((IOperation)((ISeriesItemDescriptor)ob).getSeriesObject());
-				} catch (InstantiationException e) {
+				} catch (Exception e) {
 					setOperation(null);
 				}
 			}

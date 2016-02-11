@@ -210,7 +210,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		for (int i = 0; i < desi.size(); i++) {
 			try {
 				pipeline[i] = (IOperation<? extends IOperationModel, ? extends OperationData>)desi.get(i).getSeriesObject();
-			} catch (InstantiationException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 				return null;
 			}
