@@ -3,7 +3,13 @@ package org.dawnsci.mapping.ui.datamodel;
 import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
+import org.eclipse.dawnsci.analysis.api.metadata.Metadata;
+import org.eclipse.dawnsci.analysis.api.metadata.MetadataType;
 import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 
 public class MappedData extends AbstractMapData{
@@ -48,14 +54,24 @@ public class MappedData extends AbstractMapData{
 		return new int[]{xi,yi};
 	}
 	
-	public ILazyDataset getSpectrum(double x, double y) {
+	public IDataset getSpectrum(double x, double y) {
 		int[] indices = getIndices(x, y);
 		if (indices == null) return null;
-		return parent.getSpectrum(indices[0], indices[1]);
+		ILazyDataset spectrum = parent.getSpectrum(indices[0], indices[1]);
+		if (spectrum == null) return null;
+		IDataset s = spectrum.getSlice();
+		s.addMetadata(generateSliceMetadata());
+		return s;
 	}
 	
 	public MappedData makeNewMapWithParent(String name, IDataset ds) {
 		return new MappedData(name, ds, parent, path);
+	}
+	
+	private MetadataType generateSliceMetadata(){
+		SourceInformation si = new SourceInformation(parent.getPath(), parent.toString(), parent.getLazy());
+		SliceInformation sl = new SliceInformation(new SliceND(new int[]{1}), new SliceND(new int[]{1}), new SliceND(new int[]{1}), parent.getDataDimensions(), 1, 1);
+		return new SliceFromSeriesMetadata(si,sl);
 	}
 
 
