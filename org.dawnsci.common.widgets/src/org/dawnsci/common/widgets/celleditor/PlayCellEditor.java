@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.richbeans.widgets.cell.AppliableCellEditor;
 import org.eclipse.richbeans.widgets.decorator.IntegerDecorator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
