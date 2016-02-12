@@ -10,10 +10,10 @@ package org.dawnsci.common.widgets.tree;
 
 import javax.measure.quantity.Quantity;
 
-import org.dawnsci.common.widgets.celleditor.CComboCellEditor;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.richbeans.widgets.cell.CComboCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;

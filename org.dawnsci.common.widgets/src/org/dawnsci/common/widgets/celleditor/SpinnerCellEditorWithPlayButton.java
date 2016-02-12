@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.richbeans.api.event.ValueListener;
+import org.eclipse.richbeans.widgets.cell.AppliableCellEditor;
 import org.eclipse.richbeans.widgets.scalebox.RangeBox;
 import org.eclipse.richbeans.widgets.wrappers.SpinnerWrapper;
 import org.eclipse.swt.SWT;
