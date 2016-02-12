@@ -78,14 +78,14 @@ public class VolumeRenderingShellTester {
 		System.out.println("max = " + max );
 		
 		// execute the algorithmA	
-		// testResult = algorithm.execute(null, null);
+		testResult = algorithm.execute(null, null);
 	}
 		
-	private Node generateNode(IDataset dataset)
+	private Group generateNode(IDataset dataset)
 	{		
 		Group results = new Group();
 		
-		for (int z = 0; z < dataset.getShape()[2]; z++)
+		for (int z = 0; z < dataset.getShape()[2]; z+=2)
 		{
 			BufferedImage bi = new BufferedImage(dataset.getShape()[0], dataset.getShape()[1],BufferedImage.TYPE_INT_ARGB);
 			for (int y = 0; y < dataset.getShape()[1]; y++)
@@ -119,7 +119,7 @@ public class VolumeRenderingShellTester {
 			xygroup.getChildren().add(newPlane);
 		}
 		
-		for (int z = 0; z < dataset.getShape()[0]; z++)
+		for (int z = 0; z < dataset.getShape()[0]; z+=2)
 		{
 			BufferedImage bi = new BufferedImage(dataset.getShape()[2], dataset.getShape()[1],BufferedImage.TYPE_INT_ARGB);
 			for (int y = 0; y < dataset.getShape()[1]; y++)
@@ -156,7 +156,7 @@ public class VolumeRenderingShellTester {
 				new Rotate(90, new Point3D(0, 1, 0)));
 		
 		
-		for (int z = 0; z < dataset.getShape()[1]; z++)
+		for (int z = 0; z < dataset.getShape()[1]; z+=2)
 		{
 			BufferedImage bi = new BufferedImage(dataset.getShape()[0], dataset.getShape()[2],BufferedImage.TYPE_INT_ARGB);
 			for (int y = 0; y < dataset.getShape()[2]; y++)
@@ -172,7 +172,6 @@ public class VolumeRenderingShellTester {
 						rgb = (rgb << 8) + 255;
 						rgb = (rgb << 8) + 0;
 						rgb = (rgb << 8) + 0;
-						
 						argb = rgb;
 					}
 					else
@@ -289,7 +288,7 @@ public class VolumeRenderingShellTester {
 	{
 		
 		loadDataset();
-		Node Node = generateNode(dataset);
+		Group group = generateNode(dataset);
 		Display display = new Display();
         Shell shell = new Shell(display);
         shell.setLayout(new FillLayout());
@@ -298,17 +297,19 @@ public class VolumeRenderingShellTester {
         Group root = new Group();
         Group isoSurfaceGroup = new Group();
         
-        Scene scene = new SurfaceDisplayer(root, isoSurfaceGroup);
+        SurfaceDisplayer scene = new SurfaceDisplayer(root, isoSurfaceGroup);
         
-		//MeshView isosurface = generateMesh();
-		//PhongMaterial mat = new PhongMaterial(new Color(1 ,0 ,0 ,0.5 ));
-		//isosurface.setMaterial(mat);
+		MeshView isosurface = generateMesh();
+		PhongMaterial mat = new PhongMaterial(new Color(1 ,0 ,0 ,0.5 ));
+		isosurface.setMaterial(mat);
         
-        AmbientLight al = new AmbientLight(new Color(1, 1, 1, 1));
-        al.getScope().add(Node);
+//        AmbientLight al = new AmbientLight(new Color(0,0,1,1));
+//        al.getScope().addAll(xygroup, zygroup, xzgroup);
+//        group.getChildren().add(al);
         
+        isoSurfaceGroup.getChildren().addAll(isosurface);
         
-        isoSurfaceGroup.getChildren().addAll(Node, al);//, isosurface);
+        scene.addVolumeTrace(group);
         
         canvas.setScene(scene);
         shell.open();
