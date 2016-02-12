@@ -1,8 +1,14 @@
 package org.dawnsci.plotting.histogram.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.dawnsci.plotting.histogram.Activator;
 import org.dawnsci.plotting.histogram.ColourMapProvider;
+import org.dawnsci.plotting.histogram.ExtensionPointManager;
+import org.dawnsci.plotting.histogram.HistoCategoryProvider;
 import org.dawnsci.plotting.histogram.ImageHistogramProvider;
+import org.dawnsci.plotting.histogram.functions.ColourCategoryContribution;
 import org.dawnsci.plotting.histogram.preferences.HistogramPreferencePage;
 import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.eclipse.core.runtime.Assert;
@@ -21,6 +27,8 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.fieldassist.AutoCompleteField;
+import org.eclipse.jface.fieldassist.ComboContentAdapter;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.PreferenceDialog;
@@ -29,6 +37,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Cursor;
@@ -39,6 +49,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.PlatformUI;
@@ -57,6 +68,11 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	private FormToolkit toolkit;
 	private ScrolledForm form;
 	private ComboViewer colourMapViewer;
+	private ComboViewer categoryViewer;
+	private Button logScaleCheck;
+	private Button invertedCheck;
+	private SelectionAdapter colourCategoryListener;
+
 	private IAction lockAction;
 
 	private HistogramViewer histogramWidget;
@@ -67,8 +83,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 	private SelectionAdapter colourSchemeListener;
 
-	private Button logScaleCheck;
-	private Button invertedCheck;
+	private IPaletteService pservice;
 
 	@Override
 	public ToolPageRole getToolPageRole() {
@@ -114,34 +129,70 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		Section section = toolkit.createSection(comp, Section.DESCRIPTION | Section.TITLE_BAR);
 		section.setLayout(GridLayoutFactory.fillDefaults().create());
 		section.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
-
 		section.setText("Image Settings");
 		section.setDescription("Colour scheme:");
 
 		Composite colourComposite = toolkit.createComposite(section);
 		colourComposite.setLayout(new GridLayout(2, false));
 		
-		GridData layoutData = GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).create();
+		GridData layoutData = GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).create();
 		colourComposite.setLayoutData(layoutData);
 
-		colourMapViewer = new ComboViewer(colourComposite, SWT.READ_ONLY);
-		layoutData.horizontalSpan = 2;
-		colourMapViewer.getControl().setLayoutData(layoutData);
+		Label categoryLabel = new Label(colourComposite, SWT.RIGHT);
+		categoryLabel.setText("Category:");
+		categoryViewer = new ComboViewer(colourComposite, SWT.READ_ONLY);
+		categoryViewer.getControl().setLayoutData(layoutData);
+		toolkit.adapt((Composite) categoryViewer.getControl());
+		section.setClient(colourComposite);
+		categoryViewer.setContentProvider(new HistoCategoryProvider());
+		colourCategoryListener = new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				String category = categoryViewer.getElementAt(categoryViewer.getCombo().getSelectionIndex()).toString();
+				List<String> colours = getPaletteService().getColoursByCategory(category);
+				colourMapViewer.setInput(colours.toArray());
+				colourMapViewer.setSelection(new StructuredSelection(colours.get(0)), true);
+				for(String desc : getCategoryDescriptions()) {
+					if (category.equals(desc)) {
+						categoryViewer.getControl().setToolTipText(desc);
+					}
+				}
+				setPalette();
+			}
+		};
+		((Combo) categoryViewer.getControl()).addSelectionListener(colourCategoryListener);
+		
+		categoryViewer.setInput(getCategories());
 
+		Label colourLabel = new Label(colourComposite, SWT.RIGHT);
+		colourLabel.setText("Colormap:");
+		colourMapViewer = new ComboViewer(colourComposite, SWT.NONE);
+		colourMapViewer.getControl().setLayoutData(layoutData);
 		toolkit.adapt((Composite) colourMapViewer.getControl());
 		section.setClient(colourComposite);
-
 		colourMapViewer.setContentProvider(new ColourMapProvider());
-
+		colourMapViewer.getControl().setToolTipText("Type a colormap name and the list will auto-complete with available colormaps, press 'ENTER' to select");
 		colourSchemeListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				setPalette();
-				// updateHistogramToolElements(event, true, false);
 			}
 		};
 		((Combo) colourMapViewer.getControl()).addSelectionListener(colourSchemeListener);
+		List<String> colours = new ArrayList<String>(getPaletteService().getColorSchemes());
+		// Add content proposal to combo and a key listener
+		String[] proposals = new String[colours.size()];
+		for (int i = 0; i < proposals.length; i++) {
+			proposals[i] = colours.get(i);
+		}
+		new AutoCompleteField(colourMapViewer.getCombo(), new ComboContentAdapter(), proposals);
+		colourMapViewer.getCombo().addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.keyCode == SWT.CR || e.keyCode == SWT.KEYPAD_CR)
+					setPalette();
+			}
+		});
 
 		logScaleCheck = toolkit.createButton(colourComposite, "Log Scale", SWT.CHECK);
 		logScaleCheck.addSelectionListener(new SelectionAdapter() {
@@ -175,14 +226,33 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			public void widgetSelected(SelectionEvent e) {
 				IImageTrace image = getImageTrace();
 				if (image != null) {
-					IPaletteService pservice = PaletteService.getPaletteService();
-					pservice.setInverted(invertedCheck.getSelection());
+					getPaletteService().setInverted(invertedCheck.getSelection());
 					setPalette();
 				}
 				// store value in preferences
 				Activator.getPlottingPreferenceStore().setValue(PlottingConstants.CM_INVERTED, invertedCheck.getSelection());
 			}
 		});
+	}
+
+	private String[] getCategories() {
+		ExtensionPointManager manager = ExtensionPointManager.getManager();
+		List<ColourCategoryContribution> cContrib = manager.getColourCategoryContributions();
+		String[] names = new String[cContrib.size()];
+		for (int i = 0; i < names.length; i++) {
+			names[i] = cContrib.get(i).getName();
+		}
+		return names;
+	}
+
+	private String[] getCategoryDescriptions() {
+		ExtensionPointManager manager = ExtensionPointManager.getManager();
+		List<ColourCategoryContribution> cContrib = manager.getColourCategoryContributions();
+		String[] names = new String[cContrib.size()];
+		for (int i = 0; i < names.length; i++) {
+			names[i] = cContrib.get(i).getDescription();
+		}
+		return names;
 	}
 
 	private void setColourScheme(IPaletteTrace trace) {
@@ -198,8 +268,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	private void createHistogramControl(Composite comp) {
 		Section section = toolkit.createSection(comp, Section.DESCRIPTION | Section.TITLE_BAR);
 		section.setLayout(GridLayoutFactory.fillDefaults().create());
-		section.setLayoutData(GridDataFactory.fillDefaults().grab(true, true)
-				.create());
+		section.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
 
 		section.setText("Histogram Plot");
 		section.setDescription("Histogram information for active plot view");
@@ -219,8 +288,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 		createSectionToolbar(section);
 
-		GridData create = GridDataFactory.fillDefaults().hint(0, 200)
-				.grab(true, true).create();
+		GridData create = GridDataFactory.fillDefaults().hint(0, 200).grab(true, true).create();
 		histogramWidget.getControl().setLayoutData(create);
 
 		histogramWidget.setContentProvider(new ImageHistogramProvider());
@@ -283,8 +351,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	public void activate() {
 		super.activate();
 
-		Assert.isTrue(getPlottingSystem() != null,
-				"Plotting system must not be null");
+		Assert.isTrue(getPlottingSystem() != null, "Plotting system must not be null");
 
 		logger.debug("HistogramToolPage: activate. Plotting System "
 				+ getPlottingSystem().hashCode());
@@ -293,8 +360,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		IPaletteTrace paletteTrace = getPaletteTrace();
 		if (paletteTrace != null) {
 			paletteTrace.addPaletteListener(paletteListener);
-			logger.debug("HistogramToolPage: activate - palette trace "
-					+ paletteTrace.hashCode());
+			logger.debug("HistogramToolPage: activate - palette trace " + paletteTrace.hashCode());
 			updateHistogramUIElements(paletteTrace);
 		} else {
 			logger.debug("HistogramToolPage: activate - palette trace is null.");
@@ -307,8 +373,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		super.deactivate();
 
 		if (getPlottingSystem() != null){
-			logger.debug("HistogramToolPage: deactivate. Plotting System "
-					+ getPlottingSystem().hashCode());	
+			logger.debug("HistogramToolPage: deactivate. Plotting System " + getPlottingSystem().hashCode());
 			getPlottingSystem().removeTraceListener(traceListener);
 		}
 
@@ -350,6 +415,11 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			return;
 		if (schemeName == null)
 			return;
+		String category = getPaletteService().getColourCategory(schemeName);
+		categoryViewer.setSelection(new StructuredSelection(category), true);
+
+		List<String> colours = getPaletteService().getColoursByCategory(category);
+		colourMapViewer.setInput(colours.toArray());
 		colourMapViewer.setSelection(new StructuredSelection(schemeName), true);
 	}
 
@@ -360,8 +430,8 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	private void setPalette() {
 		IPaletteTrace paletteTrace = getPaletteTrace();
 		if (paletteTrace != null) {
-			paletteTrace.setPalette((String) ((StructuredSelection) colourMapViewer
-							.getSelection()).getFirstElement());
+			String selectedColormap = colourMapViewer.getCombo().getText();
+			paletteTrace.setPalette(selectedColormap);
 		}
 	}
 
@@ -386,8 +456,15 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	 * there is a new trace or trace has been modified.
 	 */
 	private void updateHistogramUIElements(IPaletteTrace it) {
-		histogramWidget.setInput(it);
-		colourMapViewer.setInput(it);
+		if (histogramWidget != null)
+			histogramWidget.setInput(it);
+		int categoryIdx  = categoryViewer.getCombo().getSelectionIndex();
+		if (categoryIdx < 0)
+			categoryIdx = 0;
+		String category = categoryViewer.getCombo().getItem(categoryIdx);
+
+		List<String> colours = getPaletteService().getColoursByCategory(category);
+		colourMapViewer.setInput(colours.toArray());
 		setColourScheme(it);
 	}
 
@@ -446,6 +523,21 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			boolean locked = !((IPaletteTrace)evt.getSource()).isRescaleHistogram();
 			lockAction.setChecked(locked);
 		}
+
+		@Override
+		public void paletteChanged(PaletteEvent event) {
+			// do not call if All category is selected
+			String categorySelected = categoryViewer.getElementAt(categoryViewer.getCombo().getSelectionIndex()).toString();
+			if (categorySelected.equals("All"))
+				return;
+			IPaletteTrace trace = event.getTrace();
+			setColourScheme(trace);
+		}
 	}
 
+	private IPaletteService getPaletteService() {
+		if (pservice == null)
+			return pservice = (IPaletteService) PaletteService.getPaletteService();
+		return pservice;
+	}
 }

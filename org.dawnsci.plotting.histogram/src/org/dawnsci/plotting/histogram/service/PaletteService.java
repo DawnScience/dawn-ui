@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2012-2016 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.dawnsci.plotting.histogram.Activator;
 import org.dawnsci.plotting.histogram.ExtensionPointManager;
+import org.dawnsci.plotting.histogram.functions.ColourCategoryContribution;
 import org.dawnsci.plotting.histogram.functions.ColourSchemeContribution;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.histogram.ITransferFunction;
@@ -145,4 +146,26 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 		return pservice;
 	}
 
+	@Override
+	public List<String> getColoursByCategory(String sCategory) {
+		List<String> colours = new ArrayList<String>();
+		List<ColourSchemeContribution> contributions = extensionManager.getColourSchemeContributions();
+		for (ColourSchemeContribution contrib : contributions) {
+			ColourCategoryContribution categoryContrib = extensionManager.getColourCategoryFromID(contrib.getCategory());
+			String name = categoryContrib.getName();
+			if (sCategory.equals(name)) {
+				colours.add(contrib.getName());
+			} else if (sCategory.equals("All")) {
+				colours.add(contrib.getName());
+			}
+		}
+		return colours;
+	}
+
+	@Override
+	public String getColourCategory(String colour) {
+		ColourSchemeContribution colourSchemeContrib = extensionManager.getColourSchemeContribution(colour);
+		ColourCategoryContribution categoryContrib = extensionManager.getColourCategoryFromID(colourSchemeContrib.getCategory());
+		return categoryContrib.getName();
+	}
 }

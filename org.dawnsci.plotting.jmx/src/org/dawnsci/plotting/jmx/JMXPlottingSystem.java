@@ -26,7 +26,6 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.trace.ColorOption;
-import org.eclipse.dawnsci.plotting.api.trace.ICompositeTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageStackTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IIsosurfaceTrace;
@@ -42,7 +41,6 @@ import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchPart;
@@ -65,7 +63,7 @@ import org.eclipse.ui.IWorkbenchPart;
  */
 
 @SuppressWarnings("unchecked")
-public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSystem {
+public class JMXPlottingSystem<T> extends JMXSystemObject implements IPlottingSystem<T> {
 
 	
 	/**
@@ -333,7 +331,7 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	}
 
 	@Override
-	public void createPlotPart(Composite parent, 
+	public void createPlotPart(T parent, 
 			                   String plotName,
 			                   IActionBars bars, 
 			                   PlotType hint, 
@@ -422,7 +420,7 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	}
 
 	@Override
-	public Composite getPlotComposite() {
+	public T getPlotComposite() {
 		throw new RuntimeException("Composite is not serializable!");
 	}
 
@@ -630,11 +628,4 @@ public class JMXPlottingSystem extends JMXSystemObject implements IPlottingSyste
 	public void setShowValueLabels(boolean b) {
 		call(getMethodName(Thread.currentThread().getStackTrace()), b);
 	}
-
-	@Override
-	public ICompositeTrace createCompositeTrace(String traceName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

@@ -24,8 +24,7 @@ public final class PluginFunctionDescriptor extends FunctionDescriptor {
 
 	public static FunctionDescriptor[] getDescriptors() {
 		List<FunctionDescriptor> descList = new ArrayList<>();
-		String[] fittingFunctionNames = FunctionFactory.getFunctionNameArray();
-		for (final String name : fittingFunctionNames) {
+		for (final String name : FunctionFactory.getFunctionNames()) {
 			try {
 				IFunction myFunction = FunctionFactory.getFunction(name);
 				descList.add(new PluginFunctionDescriptor(myFunction, name));

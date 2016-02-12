@@ -9,8 +9,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.dawnsci.analysis.dataset;bundle-version="1.0.0",
  org.dawnsci.isosurface
 Bundle-ActivationPolicy: lazy
-Import-Package: junit.framework;version="4.10.0",
- org.dawb.common.ui.monitor,
+Import-Package: org.dawb.common.ui.monitor,
  org.dawnsci.isosurface,
  org.dawnsci.isosurface.alg,
  org.dawnsci.isosurface.tool,

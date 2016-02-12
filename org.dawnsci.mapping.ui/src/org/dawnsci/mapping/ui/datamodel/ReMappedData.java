@@ -40,8 +40,9 @@ public class ReMappedData extends AbstractMapData {
 		return r;
 	}
 	
-	public IDataset getMap(){
-		
+	@Override
+	public IDataset getData(){
+		reMapped = null;
 		if (reMapped == null) updateRemappedData(null);
 		
 		return reMapped;
@@ -59,6 +60,8 @@ public class ReMappedData extends AbstractMapData {
 		double xMax = x.max().doubleValue();
 		double xMin = x.min().doubleValue();
 		
+		double test = yMax - yMin;
+		
 		if (shape == null) {
 			double yStepMed = (double)Stats.median(Maths.abs(Maths.derivative(DatasetFactory.createRange(y.getSize(),Dataset.INT32),(Dataset)y,1)));
 			double xStepMed = (double)Stats.median(Maths.abs(Maths.derivative(DatasetFactory.createRange(x.getSize(),Dataset.INT32),(Dataset)x,1)));
@@ -68,6 +71,9 @@ public class ReMappedData extends AbstractMapData {
 			
 			int nBinsY = (int)(((yMax-yMin)/yStepMed));
 			int nBinsX = (int)(((xMax-xMin)/xStepMed));
+			
+			nBinsX = 10;
+			nBinsY = 10;
 			
 			this.shape = shape = new int[]{nBinsX, nBinsY};
 		}

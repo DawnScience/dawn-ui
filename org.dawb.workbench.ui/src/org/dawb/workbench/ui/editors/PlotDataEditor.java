@@ -169,8 +169,8 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 		final Composite plot  = new Composite(main, SWT.NONE);
 		plot.setLayout(new FillLayout());
 		plot.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        plottingSystem.createPlotPart(plot, plotName, wrapper, defaultPlotType, this);
-        ((AbstractPlottingSystem)plottingSystem).addPropertyChangeListener(new IPropertyChangeListener() {				
+		plottingSystem.createPlotPart(plot, plotName, wrapper, defaultPlotType, this);
+		((AbstractPlottingSystem<?>)plottingSystem).addPropertyChangeListener(new IPropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				if (IPlottingSystem.RESCALE_ID.equals(event.getProperty())) {
@@ -565,7 +565,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 					 		if (dataSetComponent==null) return;
 						    dataSetComponent.setData(dataHolder, meta, true);
 							dataSetComponent.refresh();
-							((AbstractPlottingSystem)getPlottingSystem()).setRootName(dataSetComponent.getRootName());
+							((AbstractPlottingSystem<?>)getPlottingSystem()).setRootName(dataSetComponent.getRootName());
 						} catch (Throwable ignored) {
 							// Editor might not be valid but still open.
 						}

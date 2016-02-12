@@ -3,8 +3,6 @@ package org.dawnsci.processing.ui.tool;
 import java.util.Iterator;
 import java.util.List;
 
-import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
-import org.dawnsci.common.widgets.table.SeriesTable;
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.model.OperationModelViewer;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
@@ -19,7 +17,6 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
-import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
@@ -28,13 +25,14 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
-import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.richbeans.widgets.table.ISeriesItemDescriptor;
+import org.eclipse.richbeans.widgets.table.SeriesTable;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
@@ -212,7 +210,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		for (int i = 0; i < desi.size(); i++) {
 			try {
 				pipeline[i] = (IOperation<? extends IOperationModel, ? extends OperationData>)desi.get(i).getSeriesObject();
-			} catch (InstantiationException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 				return null;
 			}

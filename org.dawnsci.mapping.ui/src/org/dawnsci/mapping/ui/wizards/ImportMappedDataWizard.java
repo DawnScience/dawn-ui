@@ -1,41 +1,39 @@
 package org.dawnsci.mapping.ui.wizards;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
 import org.dawnsci.mapping.ui.LocalServiceManager;
-import org.dawnsci.mapping.ui.MappingUtils;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
-import org.dawb.common.ui.util.DatasetNameUtils;
 import org.dawnsci.mapping.ui.Activator;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ImportMappedDataWizard extends Wizard {
 
-	private String filePath;
 	private Map<String,int[]> datasetNames;
 	private Map<String,int[]> nexusDatasetNames = new LinkedHashMap<String, int[]>();
 	private MappedDataFileBean mdfbean = new MappedDataFileBean();
-	private boolean imageImport = false;
 	private MappedDataFileBean[] persistedList;
 	
 	private final static Logger logger = LoggerFactory.getLogger(ImportMappedDataWizard.class);
 	
-	public ImportMappedDataWizard(String filePath) {
-		this.filePath = filePath;
+	public ImportMappedDataWizard(String filePath, Map<String,int[]> datasetNames, IMetadata meta) {
+		this.datasetNames = datasetNames;
+		try {
+			populateNexusMaps(meta);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		addPage(new ImportDataCubeWizardPage("Import Full Data Blocks"));
 		addPage(new ImportMapWizardPage("Import Maps"));
 	}
@@ -45,79 +43,41 @@ public class ImportMappedDataWizard extends Wizard {
 	}
 	
 	public void createPageControls(Composite pageContainer) {
-		
+
 		IWizardPage[] pa = getPages();
-		
+
 		super.createPageControls(pageContainer);
-		
-		try {
-			getContainer().run(true, true, new IRunnableWithProgress() {
 
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-
-					try {
-						datasetNames = DatasetNameUtils.getDatasetInfo(filePath, null);
-						if (datasetNames.size() == 1 && datasetNames.containsKey("image-01")) {
-							imageImport = true;
-						}
-						
-						try {
-							IMetadata meta = LocalServiceManager.getLoaderService().getMetadata(filePath, null);
-							populateNexusMaps(meta);
-							
-							IPreferenceStore ps = Activator.getDefault().getPreferenceStore();
-							String jsonArray = ps.getString("TestDescriptionList");
-							if (jsonArray != null) {
-								IPersistenceService p = LocalServiceManager.getPersistenceService();
-								try {
-									persistedList = p.unmarshal(jsonArray,MappedDataFileBean[].class);
-									for (MappedDataFileBean d : persistedList) {
-										if (d != null && datasetNames.containsKey(d.getBlocks().get(0).getName())){
-											mdfbean = d;
-											break;
-										}
-									}
-
-									
-								} catch (Exception e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-							}
-							
-							
-						} catch (Exception e) {
-							
-						}
-						
-						Display.getDefault().asyncExec(new Runnable() {
-							
-							@Override
-							public void run() {
-								
-								IWizardPage[] pa = getPages();
-								
-								for (IWizardPage p : pa) {
-									if (p instanceof IDatasetWizard) {
-										IDatasetWizard pd = (IDatasetWizard) p;
-										pd.setDatasetMaps(datasetNames, nexusDatasetNames);
-											pd.setMapBean(mdfbean);
-									}
-								}
-								
-							}
-						});
-						
-					} catch (Exception e) {
-						e.printStackTrace();
+		IPreferenceStore ps = Activator.getDefault().getPreferenceStore();
+		String jsonArray = ps.getString("TestDescriptionList");
+		if (jsonArray != null) {
+			IPersistenceService p = LocalServiceManager.getPersistenceService();
+			try {
+				persistedList = p.unmarshal(jsonArray,MappedDataFileBean[].class);
+				for (MappedDataFileBean d : persistedList) {
+					if (d != null && datasetNames.containsKey(d.getBlocks().get(0).getName())){
+						mdfbean = d;
+						break;
 					}
 				}
-			});
 
-		} catch (Exception e) {
-			e.printStackTrace();
+
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
-		
+
+		for (IWizardPage p : pa) {
+			if (p instanceof IDatasetWizard) {
+				IDatasetWizard pd = (IDatasetWizard) p;
+				pd.setDatasetMaps(datasetNames, nexusDatasetNames);
+				pd.setMapBean(mdfbean);
+			}
+		}
+
+
+
 	}
 	
 	private void populateNexusMaps(IMetadata meta) throws Exception {
@@ -182,9 +142,4 @@ public class ImportMappedDataWizard extends Wizard {
 		}
 		
 	}
-
-	public boolean isImageImport() {
-		return imageImport;
-	}
-
 }

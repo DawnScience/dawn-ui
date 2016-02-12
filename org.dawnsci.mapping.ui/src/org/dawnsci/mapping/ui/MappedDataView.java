@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.dawnsci.mapping.ui.datamodel.LiveDataBean;
 import org.dawnsci.mapping.ui.datamodel.MapBean;
@@ -127,7 +128,7 @@ public class MappedDataView extends ViewPart {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				Object e = ((StructuredSelection)event.getSelection()).getFirstElement();
-				if (e instanceof MappedData) plotManager.updateLayers((MappedData)e);
+				if (e instanceof AbstractMapData) plotManager.updateLayers((AbstractMapData)e);
 				if (e instanceof AssociatedImage) plotManager.addImage((AssociatedImage)e);
 				viewer.refresh();
 			}

@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import javax.vecmath.Vector3d;
 
@@ -322,24 +321,19 @@ public class FittingUtils {
 		String peakClassName = Activator.getPlottingPreferenceStore().getString(FittingConstants.PEAK_TYPE);
 		Class<? extends IPeak> peakClass = null;
 		try {
-			peakClass = FunctionFactory.getClassForPeakFn(peakClassName);
+			peakClass = FunctionFactory.getPeakFunctionClass(peakClassName);
 		} catch (Exception ne) {
 			peakClassName = "Gaussian";
 			Activator.getPlottingPreferenceStore().setValue(FittingConstants.PEAK_TYPE, peakClassName);
 			try {
-				peakClass = FunctionFactory.getClassForPeakFn(peakClassName);
+				peakClass = FunctionFactory.getPeakFunctionClass(peakClassName);
 			} catch (Exception ne2){
 				logger.error("Fallback Gaussian peak type was not found by FunctionFactory.");
 			}
 		}
 		return peakClass;
 	}	
-	
-	@Deprecated
-	public static Map<String, Class <? extends IPeak>> getPeakOptions() {
-		return FunctionFactory.getPeakFns();
-	}
-	
+
 	public static int getPolynomialOrderRequired() {
 		return Activator.getPlottingPreferenceStore().getInt(FittingConstants.POLY_ORDER);
 	}

@@ -356,7 +356,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 				           ? (Dataset)slice.getAxes().get(0)
 				           : IntegerDataset.createRange(slice.getData().getSize());
 
-		Dataset[] a= Generic1DFitter.xintersection(x,(Dataset)slice.getData(),p1[0],p2[0]);
+		Dataset[] a= Generic1DFitter.selectInRange(x,(Dataset)slice.getData(),p1[0],p2[0]);
 		x = a[0]; Dataset y=a[1];
 		
 		// If the IdentifiedPeaks are null, we make them.
@@ -622,8 +622,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		CheckableActionGroup group = new CheckableActionGroup();
 		
 		Action selectedPeakAction = null;
-		final Map<String, Class<? extends IPeak>> peakFunctions = FunctionFactory.getPeakFns();
-		for (final String peakName : peakFunctions.keySet() ) {
+		for (final String peakName : FunctionFactory.getPeakFunctionNames()) {
 			final Action action = new Action(peakName, IAction.AS_CHECK_BOX) {
 				public void run() {
 					Activator.getPlottingPreferenceStore().setValue(FittingConstants.PEAK_TYPE, peakName);

@@ -10,14 +10,14 @@ package org.dawnsci.processing.ui.processing;
 
 import java.util.List;
 
-import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
-import org.dawnsci.common.widgets.table.ISeriesValidator;
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.slice.IOperationErrorInformer;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
+import org.eclipse.richbeans.widgets.table.ISeriesItemDescriptor;
+import org.eclipse.richbeans.widgets.table.ISeriesValidator;
 
 final class OperationValidator implements ISeriesValidator {
 
@@ -55,7 +55,7 @@ final class OperationValidator implements ISeriesValidator {
 		return null;
 	}
 
-	private IOperation[] getOperations(List<ISeriesItemDescriptor> series) throws InstantiationException {
+	private IOperation[] getOperations(List<ISeriesItemDescriptor> series) throws Exception {
 		final IOperation[] ret = new IOperation[series.size()];
 		int i = 0;
 		for (ISeriesItemDescriptor item : series) {

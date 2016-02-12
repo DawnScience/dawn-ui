@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+/*-
+ * Copyright (c) 2014 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,6 +23,8 @@ import org.eclipse.dawnsci.analysis.api.fitting.functions.IParameter;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CoordinatesIterator;
@@ -31,6 +33,7 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.Parameter;
 // no serial to be consistent with rest of AFunction hierarchy
 @SuppressWarnings("serial")
 public class JexlExpressionFunction extends AFunction {
+	private static Logger logger = LoggerFactory.getLogger(JexlExpressionFunction.class);
 	/**
 	 * The name of the required variable (the x in y(x)=...)
 	 */
@@ -173,8 +176,7 @@ public class JexlExpressionFunction extends AFunction {
 
 		try {
 			if (service == null) {
-				service = (IExpressionService) ServiceManager.getService(
-						IExpressionService.class, true);
+				service = (IExpressionService) ServiceManager.getService(IExpressionService.class, true);
 			}
 			this.service = service;
 			this.engine = service.getExpressionEngine();
@@ -291,8 +293,8 @@ public class JexlExpressionFunction extends AFunction {
 		int noOfParameters = getNoOfParameters();
 		HashMap<String, Object> jexlLoadedValues = new HashMap<String, Object>(noOfParameters + 1);
 		for (int i = 0; i < noOfParameters; i++) {
-			jexlLoadedValues.put(getParameter(i).getName(),
-					getParameterValue(i));
+			IParameter p = getParameter(i);
+			jexlLoadedValues.put(p.getName(), p.getValue());
 		}
 		engine.addLoadedVariables(jexlLoadedValues);
 
@@ -301,79 +303,77 @@ public class JexlExpressionFunction extends AFunction {
 
 	@Override
 	public double val(double... values) {
-		// TODO this isn't actually implemented fully, just
-		// done as an example based on ExpressionFittingExample that
-		// Jacob wrote. One of the question is do we need a different
-		// Jexl expression handler for processing datasets rather than
-		// values
+		if (expressionError != JexlExpressionFunctionError.NO_ERROR) {
+			logger.error("There is a problem with the Jexl expression");
+			throw new IllegalStateException("There is a problem with the Jexl expression");
+		}
 
-		if (expressionError != JexlExpressionFunctionError.NO_ERROR)
-			// where to record this error?
-			return 0;
-
-		if (isDirty())
+		if (isDirty()) {
 			calcCachedParameters();
+		}
 
+		// TODO handle multivariate functions (i.e. those that have more than one coordinates)
+		if (values.length == 0) {
+			logger.error("No coordinates given to evaluate in expression");
+			throw new IllegalStateException("No coordinates given to evaluate in expression");
+		} else if (values.length > 1) {
+			logger.warn("More than one dimension in coordinates given but ignored");
+		}
 		engine.addLoadedVariable(X, values[0]);
 
 		Object ob;
 		try {
 			ob = engine.evaluate();
 		} catch (Exception e) {
-			// where to record this error?
-			return 0;
+			logger.error("Could not evaluate expression");
+			throw new IllegalStateException("Could not evaluate expression");
 		}
 		try {
 			return (double) ob;
 		} catch (ClassCastException cce) {
-			// where to record this error?
-			return 0;
+			logger.error("Object returned from expression was not a double");
+			throw new IllegalStateException("Object returned from expression was not a double");
 		}
 	}
 
-	@Override
-	public DoubleDataset calculateValues(IDataset... coords) {
-		if (expressionError != JexlExpressionFunctionError.NO_ERROR)
-			// where to record this error?
-			return null;
-
-		if (isDirty())
-			calcCachedParameters();
-
-		DoubleDataset ob = evaluate(coords);
-		if (ob == null) { // array of datasets failed so attempt with just first coordinate dataset
-			ob = evaluate(coords[0]);
+	private DoubleDataset evaluate(IDataset[] values) {
+		// TODO handle multivariate functions (i.e. those that have more than one coordinate dataset)
+		if (values.length == 0) {
+			logger.error("No coordinates given to evaluate in expression");
+			throw new IllegalStateException("No coordinates given to evaluate in expression");
+		} else if (values.length > 1) {
+			logger.warn("More than one dimension in coordinates given but ignored");
 		}
-		return ob;
-	}
-
-	private DoubleDataset evaluate(Object value) {
-		engine.addLoadedVariable(X, value);
+		engine.addLoadedVariable(X, values[0]);
 		Object ob;
 		try {
 			ob = engine.evaluate();
-			if (ob instanceof Dataset) {
-				if (!(ob instanceof DoubleDataset)) {
-					ob = ((Dataset) ob).cast(Dataset.FLOAT64);
-				}
-				return (DoubleDataset) ob;
-			} else if (ob instanceof IDataset) {
-				ob = DatasetUtils.convertToDataset((IDataset) ob);
-				if (!(ob instanceof DoubleDataset)) {
-					ob = ((Dataset) ob).cast(Dataset.FLOAT64);
-				}
-				return (DoubleDataset) ob;
+			if (ob instanceof IDataset) {
+				return (DoubleDataset) DatasetUtils.cast((IDataset) ob, Dataset.FLOAT64);
 			}
+			logger.error("Object returned from expression was not a dataset");
+			throw new IllegalStateException("Object returned from expression was not a dataset");
 		} catch (Exception e) {
+			logger.error("Could not evaluate expression");
+			throw new IllegalStateException("Could not evaluate expression");
 		}
-		return null;
 	}
 
 	@Override
 	public void fillWithValues(DoubleDataset data, CoordinatesIterator it) {
-		DoubleDataset values = calculateValues(it.getValues());
-		if (values != null)
-			data.setSlice(values);
+		if (expressionError != JexlExpressionFunctionError.NO_ERROR) {
+			logger.error("There is a problem with the Jexl expression");
+			throw new IllegalStateException("There is a problem with the Jexl expression");
+		}
+
+		if (isDirty()) {
+			calcCachedParameters();
+		}
+
+		DoubleDataset ob = evaluate(it.getValues());
+		if (ob!= null) {
+			data.setSlice(ob);
+		}
 	}
 
 	@Override
@@ -396,8 +396,7 @@ public class JexlExpressionFunction extends AFunction {
 	@Override
 	public JexlExpressionFunction copy() {
 		IParameter[] localParameters = getParameters();
-		JexlExpressionFunction function = new JexlExpressionFunction(service,
-				jexlExpression);
+		JexlExpressionFunction function = new JexlExpressionFunction(service, jexlExpression);
 
 		for (int i = 0; i < localParameters.length; i++) {
 			IParameter p = localParameters[i];

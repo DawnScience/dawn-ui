@@ -8,12 +8,12 @@
  */
 package org.dawnsci.processing.ui.processing;
 
-import org.dawnsci.common.widgets.table.SeriesItemLabelProvider;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.richbeans.widgets.table.SeriesItemLabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;

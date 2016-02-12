@@ -3,7 +3,6 @@ package org.dawnsci.processing.ui.model;
 import java.util.Collection;
 
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawnsci.common.widgets.table.ISeriesItemDescriptor;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
@@ -12,7 +11,6 @@ import org.eclipse.dawnsci.analysis.api.processing.model.ModelUtils;
 import org.eclipse.jface.bindings.keys.IKeyLookup;
 import org.eclipse.jface.bindings.keys.KeyLookupFactory;
 import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
@@ -31,6 +29,7 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.richbeans.widgets.table.ISeriesItemDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
@@ -41,7 +40,6 @@ import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -241,7 +239,7 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 			if (ob instanceof ISeriesItemDescriptor) {
 				try {
 					setOperation((IOperation)((ISeriesItemDescriptor)ob).getSeriesObject());
-				} catch (InstantiationException e) {
+				} catch (Exception e) {
 					setOperation(null);
 				}
 			}

@@ -495,7 +495,7 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 				if (monitor.isCanceled()) break;
 	
 				try {
-					Dataset[] a= Generic1DFitter.xintersection(x,y,p1[0],p2[0]);
+					Dataset[] a= Generic1DFitter.selectInRange(x,y,p1[0],p2[0]);
 					x = a[0]; y=a[1];
 				} catch (Throwable npe) {
 					logger.debug("Cannot fit!", npe);
