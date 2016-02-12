@@ -1,5 +1,7 @@
 package org.dawnsci.processing.ui.tool;
 
+import java.util.Iterator;
+
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
@@ -14,7 +16,9 @@ public class ProcessingXYTool extends AbstractProcessingTool {
 	
 	@Override
 	protected IDataset getData(){
-		ITrace next = getPlottingSystem().getTraces(ILineTrace.class).iterator().next();
+		Iterator<ITrace> it = getPlottingSystem().getTraces(ILineTrace.class).iterator();
+		if (!it.hasNext()) return null;
+		ITrace next = it.next();
 		IDataset d = next.getData();
 		IDataset ax = ((ILineTrace)next).getXData();
 		AxesMetadataImpl am = new AxesMetadataImpl(1);
