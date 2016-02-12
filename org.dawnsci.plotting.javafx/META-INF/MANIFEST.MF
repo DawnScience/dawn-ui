@@ -12,9 +12,9 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.dawnsci.analysis.dataset;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: jars/jfxswt.jar,
- jars/jfxrt.jar.
+ jars/jfxrt.jar,
+ .
 Import-Package: org.slf4j;version="1.7.6"
 Export-Package: javafx.embed.swt,
  org.dawnsci.plotting.javafx,
  org.dawnsci.plotting.javafx.axis.objects
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
