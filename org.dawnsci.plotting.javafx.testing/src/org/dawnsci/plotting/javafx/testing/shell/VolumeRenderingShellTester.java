@@ -4,13 +4,14 @@ import java.awt.image.BufferedImage;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.embed.swt.FXCanvas;
+import javafx.geometry.NodeOrientation;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
+import javafx.scene.AmbientLight;
 import javafx.scene.DepthTest;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Mesh;
@@ -25,7 +26,6 @@ import org.dawnsci.isosurface.alg.Surface;
 import org.dawnsci.plotting.javafx.SurfaceDisplayer;
 import org.dawnsci.plotting.javafx.axis.objects.Vector3DUtil;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
@@ -78,14 +78,14 @@ public class VolumeRenderingShellTester {
 		System.out.println("max = " + max );
 		
 		// execute the algorithmA	
-		testResult = algorithm.execute(null, null);
+		// testResult = algorithm.execute(null, null);
 	}
 		
 	private Node generateNode(IDataset dataset)
 	{		
 		Group results = new Group();
 		
-		for (int z = 0; z < dataset.getShape()[2]; z+=50)
+		for (int z = 0; z < dataset.getShape()[2]; z++)
 		{
 			BufferedImage bi = new BufferedImage(dataset.getShape()[0], dataset.getShape()[1],BufferedImage.TYPE_INT_ARGB);
 			for (int y = 0; y < dataset.getShape()[1]; y++)
@@ -96,9 +96,9 @@ public class VolumeRenderingShellTester {
 					
 					if (dataset.getInt(x,y,z) > 1800)
 					{
-						int rgb = 255;
+						int rgb = 7;
 						rgb = (rgb << 8) + 255;
-						rgb = (rgb << 8) + 255;
+						rgb = (rgb << 8) + 0;
 						rgb = (rgb << 8) + 0;
 						
 						argb = rgb;
@@ -115,7 +115,7 @@ public class VolumeRenderingShellTester {
 					new Point2D(dataset.getShape()[0], dataset.getShape()[1]),
 					SwingFXUtils.toFXImage(bi, null),
 					new Point3D(0, 0, 1));
-			newPlane.setTranslateZ(z);
+			newPlane.setTranslateZ(-z);
 			xygroup.getChildren().add(newPlane);
 		}
 		
@@ -128,10 +128,11 @@ public class VolumeRenderingShellTester {
 				{
 					int argb = dataset.getInt(z,y,x);
 					
-					if (dataset.getInt(z,y,x) < 1800)
+					if (dataset.getInt(z,y,x) > 1800)
 					{
-						int rgb = 255;
+						int rgb = 7;
 						rgb = (rgb << 8) + 255;
+						rgb = (rgb << 8) + 0;
 						rgb = (rgb << 8) + 0;
 						
 						argb = rgb;
@@ -145,15 +146,14 @@ public class VolumeRenderingShellTester {
 			
 			AxisAlignedPlane newPlane = new AxisAlignedPlane(
 					new Point2D(0, 0),
-					new Point2D(100, 100),
+					new Point2D(dataset.getShape()[2], dataset.getShape()[1]),
 					SwingFXUtils.toFXImage(bi, null),
 					new Point3D(0, 0, 1));
 			newPlane.setTranslateZ(z);
 			zygroup.getChildren().add(newPlane);
 		}
 		zygroup.getTransforms().addAll(
-				new Rotate(90, new Point3D(0, 1, 0)),
-				new Translate(-100,0,0));
+				new Rotate(90, new Point3D(0, 1, 0)));
 		
 		
 		for (int z = 0; z < dataset.getShape()[1]; z++)
@@ -166,10 +166,11 @@ public class VolumeRenderingShellTester {
 					int argb = dataset.getInt(x,z,y);
 //					int argb = dataset[x][z][y];
 					
-					if (dataset.getInt(x,z,y) < 1800)
+					if (dataset.getInt(x,z,y) > 1800)
 					{
-						int rgb = 255;
+						int rgb = 7;
 						rgb = (rgb << 8) + 255;
+						rgb = (rgb << 8) + 0;
 						rgb = (rgb << 8) + 0;
 						
 						argb = rgb;
@@ -184,7 +185,7 @@ public class VolumeRenderingShellTester {
 			
 			AxisAlignedPlane newPlane = new AxisAlignedPlane(
 					new Point2D(0, 0),
-					new Point2D(100, 100),
+					new Point2D(dataset.getShape()[0], dataset.getShape()[2]),
 					SwingFXUtils.toFXImage(bi, null),
 					new Point3D(0, 0, 1));
 			newPlane.setTranslateZ(z);
@@ -192,12 +193,12 @@ public class VolumeRenderingShellTester {
 		}
 		xzgroup.getTransforms().addAll(
 				new Rotate(-90, new Point3D(1, 0, 0)),
-				new Translate(0,-100,0));
+				new Translate(0,0,0));
 		
-		results.getChildren().addAll(xygroup/*, zygroup, xzgroup*/);
+		results.getChildren().addAll(xygroup, zygroup, xzgroup);
 		
 		generateRotateEvent(results);
-				
+		
 		return results;
 	}
 	
@@ -244,6 +245,10 @@ public class VolumeRenderingShellTester {
 	
 	private void generateRotateEvent(Node node) {
 		
+		xygroup.setDepthTest(DepthTest.DISABLE);
+		zygroup.setDepthTest(DepthTest.DISABLE);
+		xzgroup.setDepthTest(DepthTest.DISABLE);
+		
 		node.localToSceneTransformProperty().addListener((obs, oldT, newT) -> {
 
 			Point3D xAngle = new Point3D(1, 0, 0);
@@ -261,19 +266,20 @@ public class VolumeRenderingShellTester {
 //			xygroup.setOpacity(Math.abs(xAngle.getX()));
 //	        zygroup.setOpacity(Math.abs(xAngle.getZ()));
 //	        xzgroup.setOpacity(Math.abs(xAngle.getY()));
-	        
-	        for (Node n : xygroup.getChildren())
-	        	if (n instanceof AxisAlignedPlane)
-	        		((AxisAlignedPlane)n).setMaterialOpacity(Math.abs(xAngle.getX()));
-	        
-	        for (Node n : zygroup.getChildren())
-	        	if (n instanceof AxisAlignedPlane)
-	        		((AxisAlignedPlane)n).setMaterialOpacity(Math.abs(xAngle.getZ()));
-	        
-	        for (Node n : zygroup.getChildren())
-	        	if (n instanceof AxisAlignedPlane)
-	        		((AxisAlignedPlane)n).setMaterialOpacity(Math.abs(xAngle.getY()));
-	        
+	      
+			
+//	        for (Node n : xygroup.getChildren())
+//	        	if (n instanceof AxisAlignedPlane)
+//	        		((AxisAlignedPlane)n).setMaterialOpacity(Math.abs(xAngle.getX()));
+//	        
+//	        for (Node n : zygroup.getChildren())
+//	        	if (n instanceof AxisAlignedPlane)
+//	        		((AxisAlignedPlane)n).setMaterialOpacity(Math.abs(xAngle.getZ()));
+//	        
+//	        for (Node n : zygroup.getChildren())
+//	        	if (n instanceof AxisAlignedPlane)
+//	        		((AxisAlignedPlane)n).setMaterialOpacity(Math.abs(xAngle.getY()));
+//	        
 		});
 	}
 
@@ -294,11 +300,15 @@ public class VolumeRenderingShellTester {
         
         Scene scene = new SurfaceDisplayer(root, isoSurfaceGroup);
         
-		MeshView isosurface = generateMesh();
-		PhongMaterial mat = new PhongMaterial(new Color(1 ,0 ,0 ,0.5 ));
-		isosurface.setMaterial(mat);
+		//MeshView isosurface = generateMesh();
+		//PhongMaterial mat = new PhongMaterial(new Color(1 ,0 ,0 ,0.5 ));
+		//isosurface.setMaterial(mat);
         
-        isoSurfaceGroup.getChildren().addAll(Node);//, isosurface);
+        AmbientLight al = new AmbientLight(new Color(1, 1, 1, 1));
+        al.getScope().add(Node);
+        
+        
+        isoSurfaceGroup.getChildren().addAll(Node, al);//, isosurface);
         
         canvas.setScene(scene);
         shell.open();
