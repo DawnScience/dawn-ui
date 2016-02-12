@@ -63,7 +63,7 @@
    </features>
 
    <configurations>
-      <property name="uk.ac.diamond.scisoft.analysis.rcp/plotView.plottingsystem" value="1" />
+      <property name="preferenceCustomization" value="plugin_customization.ini" />
    </configurations>
 
 </product>

@@ -29,6 +29,7 @@ openFile
 -Dorg.dawb.editor.h5.use.default=false
 -Dosgi.locking=none
 -Dorg.dawnsci.passerelle.do.not.break.osgi=true
+-Drun.in.eclipse=true
       </vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
       </vmArgsMac>
@@ -68,7 +69,7 @@ openFile
    </features>
 
    <configurations>
-      <property name="preferenceCustomization" value="platform:/base/features/uk.ac.diamond.dawn.base.product.feature/plugin_customization.ini" />
+      <property name="preferenceCustomization" value="plugin_customization.ini" />
    </configurations>
 
 </product>
