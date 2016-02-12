@@ -371,8 +371,6 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 			IOperationService service = ServiceHolder.getOperationService();
 			IOperationContext cc = service.createContext();
 			ILazyDataset local = meta.getParent().getSliceView();
-			AxesMetadata ax = local.getFirstMetadata(AxesMetadata.class);
-			((AxesMetadataImpl)ax).loadAllAxes();
 			SliceFromSeriesMetadata ssm = new SliceFromSeriesMetadata(meta.getSourceInfo());
 			local.setMetadata(ssm);
 			cc.setData(local);
