@@ -24,7 +24,6 @@ import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.FloatDataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -53,6 +52,7 @@ public class MapPlotManager {
 	private RepeatingJob rJob;
 	private volatile Dataset merge;
 	private AtomicInteger atomicPosition;
+	private int layerCounter = 0;
 	
 	private final static Logger logger = LoggerFactory.getLogger(MapPlotManager.class);
 	
@@ -91,13 +91,13 @@ public class MapPlotManager {
 			
 			@Override
 			public void run() {
-				ILazyDataset l = topMap.getSpectrum(x,y);
-				if (l == null) {
+				IDataset s = topMap.getSpectrum(x,y);
+				if (s == null) {
 					data.clear();
 					return;
 				}
 				
-				IDataset s = l.getSlice();
+//				IDataset s = l.getSlice();
 				
 				if (s != null) MetadataPlotUtils.plotDataWithMetadata(s, data);
 				
@@ -243,27 +243,21 @@ public class MapPlotManager {
 			MapTrace m = it.next();
 			if (m.getMap() == map) {
 				it.remove();
+				this.map.removeTrace(m.getTrace());
 				triggerForLive();
 				plotLayers();
 				return;
 			}
 		}
 		
-//		for (MapTrace m : layers) {
-//			if (m.getMap() == map)) {
-//				layers.remove(m)
-//			}
-//		}
-//		
-//		if (layers.contains(map)){
-//			layers.remove(map);
-//			triggerForLive();
-//			plotLayers();
-//			return;
-//		}
-		
 		if (map == null) {
 			for (int i = 0; i < area.count();i++) {
+				
+				AssociatedImage associatedImage = area.getDataFile(i).getAssociatedImage();
+				if (associatedImage != null) {
+					addImage(associatedImage);
+				}
+				
 				map = area.getDataFile(i).getMap();
 				if (map == null) continue;
 				addMap(map);
@@ -282,14 +276,22 @@ public class MapPlotManager {
 	}
 	
 	public void addImage(AssociatedImage image) {
-		if (layers.contains(image)){
-			layers.remove(image);
-			plotLayers();
-			return;
-		}
-		IImageTrace t = createImageTrace(image);
-		layers.addLast(new MapTrace(image, t));
+		Iterator<MapTrace> it = layers.iterator();
+		
+		while (it.hasNext()) {
+			MapTrace m = it.next();
+			if (m.getMap() == image) {
+				it.remove();
+				this.map.removeTrace(m.getTrace());
+				plotLayers();
+				return;
+			}
+		}	
+
+		layers.addLast(new MapTrace(image, null));
 		map.clear();
+		for (MapTrace l : layers) l.rebuildTrace();
+		
 		plotLayers();
 	}
 	
@@ -364,12 +366,12 @@ public class MapPlotManager {
 	
 	private IImageTrace createImageTrace(MapObject ob) {
 		
-		String longName = "";
+		String longName = "Layer " + layerCounter++;
 		IDataset map = null;
 		
 		if (ob instanceof PlottableMapObject) {
 			PlottableMapObject amd = (PlottableMapObject)ob;
-			longName = amd.getLongName();
+//			longName = amd.getLongName();
 			map = amd.getData();
 		}
 		
@@ -387,12 +389,14 @@ public class MapPlotManager {
 	private void plotLayers(){
 
 //		map.clear();
-		
 		try {
 			
 			if (layers.isEmpty()) {
 				map.clear();
+				layerCounter = 0;
 				return;
+			} else {
+				
 			}
 			
 			Iterator<MapTrace> it = layers.descendingIterator();
@@ -451,9 +455,9 @@ public class MapPlotManager {
 		for (int i = 0 ; i < oaxes.length; i++) {
 			if (oaxes[i] == null) return false;
 			if (axes[i] == null) return false;
-			
-			IDataset oa = DatasetUtils.convertToDataset(oaxes[i]);
-			IDataset a = DatasetUtils.convertToDataset(axes[i]);
+		
+			IDataset oa = oaxes[i].getSlice();
+			IDataset a = axes[i].getSlice();
 			if (!oa.equals(a)) return false;
 		}
 		
@@ -622,12 +626,16 @@ public class MapPlotManager {
 			try {
 				MetadataPlotUtils.switchData(ob.getLongName(), ob.getData(), trace);
 				trace.setGlobalRange(area.getRange());
+				map = ob;
 			} catch (Exception e) {
 				logger.error("Error updating live!",e);
 			}
 			
 		}
 		
+		public void rebuildTrace(){
+			trace = createImageTrace(map);
+		}
 		
 		
 	}

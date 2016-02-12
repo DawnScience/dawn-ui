@@ -30,7 +30,7 @@ public abstract class AbstractMapData implements PlottableMapObject{
 		range = calculateRange(map);
 	}
 	
-	public abstract ILazyDataset getSpectrum(double x, double y);
+	public abstract IDataset getSpectrum(double x, double y);
 	
 	public MappedData makeNewMapWithParent(String name, IDataset ds) {
 		return new MappedData(name, ds, parent, path);
