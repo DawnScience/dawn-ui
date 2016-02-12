@@ -6,14 +6,17 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.embed.swt.FXCanvas;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
+import javafx.scene.DepthTest;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.effect.BlendMode;
 import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.Mesh;
+import javafx.scene.shape.MeshView;
+import javafx.scene.shape.TriangleMesh;
 import javafx.scene.transform.Rotate;
-import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
 
 import org.dawnsci.isosurface.alg.MarchingCubes;
@@ -21,6 +24,7 @@ import org.dawnsci.isosurface.alg.MarchingCubesModel;
 import org.dawnsci.isosurface.alg.Surface;
 import org.dawnsci.plotting.javafx.SurfaceDisplayer;
 import org.dawnsci.plotting.javafx.axis.objects.Vector3DUtil;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.swt.SWT;
@@ -29,14 +33,18 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.junit.Test;
 
+import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
+
 
 public class VolumeRenderingShellTester {
 	
 	MarchingCubes algorithm;
 	
-	ILazyDataset dataset;
+	IDataset dataset;
 	MarchingCubesModel model;
 	Surface testResult;
+	
+	double max, min;
 	
 	Group xygroup = new Group();
 	Group zygroup = new Group();
@@ -52,77 +60,85 @@ public class VolumeRenderingShellTester {
 	private void loadDataset() throws Exception
 	{
 		
-//		IDataHolder dh = LoaderFactory.getData("files/brain.h5");
-//		dataset = dh.getLazyDataset("/entry/edf/data");
-//		
-//		algorithm = new MarchingCubes();
-//				
-//		model = new MarchingCubesModel();
-//		model.setLazyData(dataset);
-//		model.setBoxSize(new int[]{3,3,3});
-//		model.setIsovalue(1800d);
-//		model.setVertexLimit(Integer.MAX_VALUE);
-//		
-//		algorithm.setModel(model);
-//		
-//		// execute the algorithmA	
-//		testResult = algorithm.execute(null, null);
-	}
-	
-	private int[][][] createDataset(Image newImage, int xlength, int ylength, int zlength)
-	{
-		BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB);
-		SwingFXUtils.fromFXImage(newImage,image);
-	    
-		int[][][] dataset = new int[xlength][ylength][zlength];
-		for (int z = 0; z < zlength; z++)
-		{
-			for (int y = 0; y < ylength; y ++)
-			{
-				for (int x= 0; x < xlength; x++)
-				{
-					dataset[x][y][z] = image.getRGB(x, y);
-				}
-			}
-		}
+		IDataHolder dh = LoaderFactory.getData("files/brain.h5");
+		dataset = dh.getLazyDataset("/entry/edf/data").getSlice();
 		
-		return dataset;
+		algorithm = new MarchingCubes();
+				
+		model = new MarchingCubesModel();
+		model.setLazyData(dataset);
+		model.setBoxSize(new int[]{3,3,3});
+		model.setIsovalue(1800d);
+		model.setVertexLimit(Integer.MAX_VALUE);
+		
+		algorithm.setModel(model);
+		
+		max = dataset.max(true,true).doubleValue();
+		
+		System.out.println("max = " + max );
+		
+		// execute the algorithmA	
+		testResult = algorithm.execute(null, null);
 	}
-	
-	
-	private Node generateNode(int[][][] dataset)
+		
+	private Node generateNode(IDataset dataset)
 	{		
 		Group results = new Group();
 		
-		for (int z = 0; z < 100; z++)
+		for (int z = 0; z < dataset.getShape()[2]; z+=50)
 		{
-			BufferedImage bi = new BufferedImage(100, 100,BufferedImage.TYPE_INT_ARGB);
-			for (int y = 0; y < 100; y++)
+			BufferedImage bi = new BufferedImage(dataset.getShape()[0], dataset.getShape()[1],BufferedImage.TYPE_INT_ARGB);
+			for (int y = 0; y < dataset.getShape()[1]; y++)
 			{
-				for (int x = 0; x < 100; x++)
+				for (int x = 0; x < dataset.getShape()[0]; x++)
 				{
-					int argb = dataset[x][y][z];
+					int argb = dataset.getInt(x,y,z);					
+					
+					if (dataset.getInt(x,y,z) > 1800)
+					{
+						int rgb = 255;
+						rgb = (rgb << 8) + 255;
+						rgb = (rgb << 8) + 255;
+						rgb = (rgb << 8) + 0;
+						
+						argb = rgb;
+					}
+					else
+						argb = 0;
+					
 					bi.setRGB(x, y, argb);
 				}
 			}
 			
 			AxisAlignedPlane newPlane = new AxisAlignedPlane(
 					new Point2D(0, 0),
-					new Point2D(100, 100),
+					new Point2D(dataset.getShape()[0], dataset.getShape()[1]),
 					SwingFXUtils.toFXImage(bi, null),
 					new Point3D(0, 0, 1));
 			newPlane.setTranslateZ(z);
 			xygroup.getChildren().add(newPlane);
 		}
 		
-		for (int z = 0; z < 100; z++)
+		for (int z = 0; z < dataset.getShape()[0]; z++)
 		{
-			BufferedImage bi = new BufferedImage(100, 100,BufferedImage.TYPE_INT_ARGB);
-			for (int y = 0; y < 100; y++)
+			BufferedImage bi = new BufferedImage(dataset.getShape()[2], dataset.getShape()[1],BufferedImage.TYPE_INT_ARGB);
+			for (int y = 0; y < dataset.getShape()[1]; y++)
 			{
-				for (int x = 0; x < 100; x++)
+				for (int x = 0; x < dataset.getShape()[2]; x++)
 				{
-					int argb = dataset[z][y][x];
+					int argb = dataset.getInt(z,y,x);
+					
+					if (dataset.getInt(z,y,x) < 1800)
+					{
+						int rgb = 255;
+						rgb = (rgb << 8) + 255;
+						rgb = (rgb << 8) + 0;
+						
+						argb = rgb;
+					}
+					else
+						argb = 0;
+					
 					bi.setRGB(x, y, argb);
 				}
 			}
@@ -140,15 +156,29 @@ public class VolumeRenderingShellTester {
 				new Translate(-100,0,0));
 		
 		
-		for (int z = 0; z < 100; z++)
+		for (int z = 0; z < dataset.getShape()[1]; z++)
 		{
-			BufferedImage bi = new BufferedImage(100, 100,BufferedImage.TYPE_INT_ARGB);
-			for (int y = 0; y < 100; y++)
+			BufferedImage bi = new BufferedImage(dataset.getShape()[0], dataset.getShape()[2],BufferedImage.TYPE_INT_ARGB);
+			for (int y = 0; y < dataset.getShape()[2]; y++)
 			{
-				for (int x = 0; x < 100; x++)
+				for (int x = 0; x < dataset.getShape()[0]; x++)
 				{
-					int argb = dataset[x][z][y];
+					int argb = dataset.getInt(x,z,y);
+//					int argb = dataset[x][z][y];
+					
+					if (dataset.getInt(x,z,y) < 1800)
+					{
+						int rgb = 255;
+						rgb = (rgb << 8) + 255;
+						rgb = (rgb << 8) + 0;
+						
+						argb = rgb;
+					}
+					else
+						argb = 0;
+					
 					bi.setRGB(x, y, argb);
+					
 				}
 			}
 			
@@ -164,13 +194,54 @@ public class VolumeRenderingShellTester {
 				new Rotate(-90, new Point3D(1, 0, 0)),
 				new Translate(0,-100,0));
 		
-		results.getChildren().addAll(xygroup, zygroup, xzgroup);
+		results.getChildren().addAll(xygroup/*, zygroup, xzgroup*/);
 		
 		generateRotateEvent(results);
 				
 		return results;
 	}
-			
+	
+	private MeshView generateMesh()
+	{
+		
+		MeshView result = new MeshView(createTrangleMesh(
+												testResult.getPoints(),
+												testResult.getTexCoords(),
+												testResult.getFaces()));
+		
+		PhongMaterial material;
+		Color color = new Color(Color.GOLDENROD.getRed(), Color.GOLDENROD.getGreen(), Color.GOLDENROD.getBlue(), 0.1);
+		material = new PhongMaterial(color);
+		
+		result.setMaterial(material);
+		
+		result.setOpacity(0.1d);
+		
+		result.setDepthTest(DepthTest.ENABLE);
+		
+		return result;
+		
+	}
+	
+	private Mesh createTrangleMesh(
+						float[] points,
+						float[] textCoords,
+						int[] faces)
+	{
+		
+		final TriangleMesh mesh = new TriangleMesh();
+		
+		if (points != null && textCoords != null && faces != null)
+		{
+			mesh.getPoints().setAll(points);
+			mesh.getTexCoords().setAll(textCoords);
+			mesh.getFaces().setAll(faces);
+		}
+		
+		return mesh;
+	}
+	
+	
 	private void generateRotateEvent(Node node) {
 		
 		node.localToSceneTransformProperty().addListener((obs, oldT, newT) -> {
@@ -212,7 +283,7 @@ public class VolumeRenderingShellTester {
 	{
 		
 		loadDataset();
-		Node Node = generateNode(createDataset(new Image(getClass().getResourceAsStream("unnamed.png")),100,100,100));
+		Node Node = generateNode(dataset);
 		Display display = new Display();
         Shell shell = new Shell(display);
         shell.setLayout(new FillLayout());
@@ -222,8 +293,12 @@ public class VolumeRenderingShellTester {
         Group isoSurfaceGroup = new Group();
         
         Scene scene = new SurfaceDisplayer(root, isoSurfaceGroup);
-                
-        isoSurfaceGroup.getChildren().add(Node);
+        
+		MeshView isosurface = generateMesh();
+		PhongMaterial mat = new PhongMaterial(new Color(1 ,0 ,0 ,0.5 ));
+		isosurface.setMaterial(mat);
+        
+        isoSurfaceGroup.getChildren().addAll(Node);//, isosurface);
         
         canvas.setScene(scene);
         shell.open();
