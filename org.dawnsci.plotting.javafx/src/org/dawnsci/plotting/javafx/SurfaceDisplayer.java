@@ -57,6 +57,7 @@ public class SurfaceDisplayer extends Scene
 	
 	// the groups for the scene
 	private Group isosurfaceGroup;	// holds the isosurfaces
+	private Group volumeGroup;		// holds the volume renderings
 	private Group cameraGroup; 		// holds the camera translation data
 	
 	private Group axisNode; 		// holds the axisGroup -> allows the axisGroup to be null without an exception
@@ -136,6 +137,7 @@ public class SurfaceDisplayer extends Scene
 		// create the scene
 		super(root, 1500, 1500, true);
 		this.isosurfaceGroup = isosurfaceGroup;
+		this.volumeGroup = new Group();
 		
 		// set the camera -> the camera will handle some aspects of movement
 		// other are within the group -> this is done to simplify rotation
@@ -185,7 +187,7 @@ public class SurfaceDisplayer extends Scene
 		
 		// create the scene graph
 		this.lightGroup.getChildren().addAll(this.isosurfaceGroup);
-		this.objectGroup.getChildren().addAll(axisNode, this.lightGroup);
+		this.objectGroup.getChildren().addAll(axisNode, this.lightGroup, volumeGroup);
 		this.cameraGroup.getChildren().addAll(this.objectGroup);
 		
 		// add groups the the root
@@ -487,7 +489,7 @@ public class SurfaceDisplayer extends Scene
 		return isosurfaceGroup;
 	}
 	
-	public void addTrace(FXIsosurfaceTrace trace)
+	public void addSurfaceTrace(FXIsosurfaceTrace trace)
 	{
 		// if the first trace create the axes using the trace.axes data
 		// all of this data is irrelevant as it get reset when a surface is added
@@ -517,6 +519,12 @@ public class SurfaceDisplayer extends Scene
 		
 		// add the mesh the the scene graph
 		this.isosurfaceGroup.getChildren().add(trace.getIsoSurface());
+	}
+	
+	
+	public void addVolumeTrace(Group trace) // no trace currently implemented
+	{
+		this.volumeGroup.getChildren().add(trace);
 	}
 	
 	public void removeSurface(Node removeNode)
