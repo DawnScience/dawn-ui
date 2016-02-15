@@ -14,11 +14,13 @@ RELEASE NOTES FOR DAWN 2.0.0 "BOTO"
 
 New features:
 ---------------
-DAWN 2.0.0 has migrated to the Eclipse E4 application model.
-Isosurface plot mode with Java 8 support and Java FX.
-DAWN4DAWN functionality enabling developers to develop their plugin inside of DAWN and then run them against a new or the current instance of DAWN.
-Colour category for histogram tool with an extended list of colormaps available.
-Eclipse market place client available. A custom DAWN market place server is being developed and under way.
+-DAWN 2.0.0 has migrated to the Eclipse E4 application model.
+-A new Isosurface plot mode with Java 8 support and Java FX has been implemented for three dimensional dataset.
+-Developers can use the DAWN4DAWN functionality to develop their own plugin inside of DAWN 
+and then have those run in a new and/or the current instance of DAWN.
+-New colour maps and colour categories are available in the histogram tool.
+-The Eclipse Market Place client is now available. A custom DAWN market place server is being developed 
+and will be available soon.
 
 Bug fixes:
 ---------------
