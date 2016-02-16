@@ -125,6 +125,10 @@
          id="org.eclipse.ecf.filetransfer.feature"
          version="0.0.0"/>
 
+   <includes
+         id="org.dawnsci.fileviewer.feature"
+         version="0.0.0"/>
+
    <plugin
          id="uk.ac.diamond.scisoft.analysis.rcp.contributions"
          download-size="0"
