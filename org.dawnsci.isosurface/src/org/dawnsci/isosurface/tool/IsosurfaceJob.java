@@ -10,8 +10,10 @@ package org.dawnsci.isosurface.tool;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
+import org.dawnsci.isosurface.alg.MarchingCubes;
 import org.dawnsci.isosurface.alg.MarchingCubesModel;
 import org.dawnsci.isosurface.alg.Surface;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -19,8 +21,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.dataset.impl.FloatDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -29,7 +29,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.nebula.visualization.xygraph.linearscale.Tick;
 import org.eclipse.nebula.visualization.xygraph.linearscale.TickFactory;
 import org.eclipse.nebula.visualization.xygraph.linearscale.TickFactory.TickFormatting;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,19 +41,13 @@ public class IsosurfaceJob extends Job {
 
 	private static final Logger logger = LoggerFactory.getLogger(IsosurfaceJob.class);
 	
- 	private IOperation<MarchingCubesModel, Surface> generator;
+ 	// private IOperation<MarchingCubesModel, Surface> generator;
  	final private IPlottingSystem system;
  	private String name;
  	
- 	private Double value;
-	private double opacity;
-	private int[] boxSize;
-	private RGB colour;
- 	private String traceName;
+ 	AtomicReference<MarchingCubesModel> modelRef;
  	
- 	private ILazyDataset slice;
- 	
-	public IsosurfaceJob(String name, IPlottingSystem system,  ILazyDataset slice, IOperation<MarchingCubesModel, Surface> generator)
+	public IsosurfaceJob(String name, IPlottingSystem system)
 	{
 		super(name);
 		
@@ -63,9 +56,7 @@ public class IsosurfaceJob extends Job {
 		
 		this.name = name;
 		this.system = system;
-		this.slice = slice;
-		this.generator = generator;
-		
+		this.modelRef = new AtomicReference<MarchingCubesModel>();
 	}
 	
 	/**
@@ -78,71 +69,34 @@ public class IsosurfaceJob extends Job {
 	 * @param traceName - The name of the surface trace
 	 * 
 	 */
-	
-	public void compute(
-			int[] boxSize, 
-			Double value,  
-			double opacity, 
-			RGB colour, 
-			String traceName,
-			String beanName)
-	{		
-		this.boxSize = boxSize;   
-		this.value = value;     
-		this.opacity = opacity;   
-		this.colour = colour;
-		this.traceName = traceName;
-		this.name = beanName;
+	public void compute(MarchingCubesModel model)
+	{
+		this.modelRef.set(model);
 		
 		cancel();
-		schedule();		
+		schedule();
 	}
 	
-	// made to seperate computing the isosurface and simply updating the values like colour
-	public void update (
-			int[] boxSize, 
-			Double value,  
-			double opacity, 
-			RGB colour, 
-			String traceName, 
-			String beanName)
-	{		
-		if ((IIsosurfaceTrace) system.getTrace(traceName) != null && system.getTrace(traceName).getData() != null)
-		{
-			compute(null, null, opacity, colour, traceName, beanName);
-		}
-		else
-		{
-			compute(boxSize, value, opacity, colour, traceName, beanName);
-		}
-	}
 	
 	@Override
 	protected IStatus run(IProgressMonitor monitor)
 	{
-		Thread.currentThread().setName("IsoSurface - " + name);
+		MarchingCubesModel model = this.modelRef.get();
+		Thread.currentThread().setName("IsoSurface - " + model.getName());
 		final IIsosurfaceTrace trace;
-		boolean createTrace = false; // this is going to need some reorganising
 		
+		this.setName(model.getName());
 		// create the trace if required, if not get the trace
-		if ((IIsosurfaceTrace) system.getTrace(traceName) == null)
+		if ((IIsosurfaceTrace) system.getTrace(model.getTraceID()) == null)
 		{
-			trace = system.createIsosurfaceTrace(this.traceName);
-			trace.setName(this.traceName);
-			createTrace = true;
+			trace = system.createIsosurfaceTrace(model.getTraceID());
+			trace.setName(model.getTraceID());
 		}
 		else
 		{
-			trace = (IIsosurfaceTrace) system.getTrace(traceName);
+			trace = (IIsosurfaceTrace) system.getTrace(model.getTraceID());
 		}
 		
-		MarchingCubesModel model = this.generator.getModel();
-		
-		model.setBoxSize(boxSize);
-		model.setOpacity(opacity);
-		model.setIsovalue(value);
-		model.setColour(colour.red, colour.green, colour.blue);
-				
 		try 
 		{
 			system.setDefaultCursor(IPlottingSystem.WAIT_CURSOR);
@@ -150,72 +104,40 @@ public class IsosurfaceJob extends Job {
 			if (monitor.isCanceled())
 				return Status.CANCEL_STATUS;
 			
-			try
-			{
-				if (generator.getModel().getLazyData() != slice)
-				{
-					generator.getModel().setLazyData(slice);
-				}
-				
-				IDataset points     = null;
-				IDataset textCoords = null;
-				IDataset faces      = null;
-				
-				if (value != null || trace.getData() == null)
-				{
-					Surface surface = generator.execute(null, new ProgressMonitorWrapper(monitor));
-					
-					points     = new FloatDataset(surface.getPoints(), surface.getPoints().length);
-					textCoords = new FloatDataset(surface.getTexCoords(), surface.getTexCoords().length);
-					faces      = new IntegerDataset(surface.getFaces(), surface.getFaces().length);
-				}
-												
-				final ArrayList<IDataset> axis = new ArrayList<IDataset>();
-				
-				TickFactory tickGenerator = new TickFactory(TickFormatting.autoMode, null);
-				
-				
-				// set the data set size
-				axis.add(new IntegerDataset(this.slice.getShape(), null));
-				
-				axis.add(convertTodatasetAxis(tickGenerator.generateTicks(0, slice.getShape()[0], 15, false, false)));
-				axis.add(convertTodatasetAxis(tickGenerator.generateTicks(0, slice.getShape()[1], 15, false, false)));
-				axis.add(convertTodatasetAxis(tickGenerator.generateTicks(0, slice.getShape()[2], 15, false, false)));
-								
-				final int[] traceColour = new int[]{colour.red, colour.green, colour.blue};
-				final double traceOpacity = opacity;
-				
-				trace.setMaterial(traceColour[0], traceColour[1] , traceColour[2], traceOpacity);
-				trace.setData(points, textCoords, faces, axis );
+			MarchingCubes alg = new MarchingCubes(model);
+			Surface surface =  alg.execute(null, monitor);
+						
+			if (monitor.isCanceled())
+				return Status.CANCEL_STATUS;
 			
-				if (createTrace)
-				{
-					Display.getDefault().syncExec(new Runnable() {
-						public void run() {
-							system.addTrace(trace);
-				    	}
-				    });
-				}
-				
-			} 
-			catch (UnsupportedOperationException e)
+			IDataset points     = new FloatDataset(surface.getPoints(), surface.getPoints().length);         
+			IDataset textCoords = new FloatDataset(surface.getTexCoords(), surface.getTexCoords().length);   
+			IDataset faces      = new IntegerDataset(surface.getFaces(), surface.getFaces().length);         
+			
+			final ArrayList<IDataset> axis = new ArrayList<IDataset>();
+			
+			TickFactory tickGenerator = new TickFactory(TickFormatting.autoMode, null);
+			
+			// set the data set size
+			axis.add(new IntegerDataset(model.getLazyData().getShape(), null));
+			
+			axis.add(convertTodatasetAxis(tickGenerator.generateTicks(0, model.getLazyData().getShape()[0], 15, false, false)));
+			axis.add(convertTodatasetAxis(tickGenerator.generateTicks(0, model.getLazyData().getShape()[1], 15, false, false)));
+			axis.add(convertTodatasetAxis(tickGenerator.generateTicks(0, model.getLazyData().getShape()[2], 15, false, false)));
+							
+			final int[] traceColour =	model.getColour();
+			final double traceOpacity = model.getOpacity();
+						
+			trace.setMaterial(traceColour[0], traceColour[1] , traceColour[2], traceOpacity);
+			trace.setData(points, textCoords, faces, axis );
+			
+			if ((IIsosurfaceTrace) system.getTrace(model.getTraceID()) == null)
 			{
-				e.printStackTrace();
-				showErrorMessage("The number of vertices has exceeded "+ generator.getModel().getVertexLimit(), "The surface cannot be rendered. Please increase the box size.");
-				return Status.CANCEL_STATUS;
-				
-			} 
-			catch (Exception e) 
-			{
-				logger.error("Cannot run algorithm "+ generator.getClass().getSimpleName(), e);
-				return Status.CANCEL_STATUS;
-				
-			} 
-			catch (OutOfMemoryError e)
-			{
-				e.printStackTrace();
-				showErrorMessage("Out of memory Error", "There is not enough memory to render the surface. Please increase the box size.");
-				return Status.CANCEL_STATUS;
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						system.addTrace(trace);
+			    	}
+			    });
 			}
 			
 		}
@@ -246,7 +168,7 @@ public class IsosurfaceJob extends Job {
 	/*
 	 * look into improving !!
 	 */
-	private ArrayList<IDataset> generateDuplicateAxes(int count, int step)
+	private ArrayList<IDataset> generateDuplicateAxes(int count, int step, int[] shape)
 	{
 		ArrayList<IDataset> axis = new ArrayList<IDataset>();
 		
@@ -257,9 +179,9 @@ public class IsosurfaceJob extends Job {
 		}
 		
 		axis.add(new FloatDataset(new float[]{
-										slice.getShape()[0],
-										slice.getShape()[1],
-										slice.getShape()[2]}));
+										shape[0],
+										shape[1],
+										shape[2]}));
 		axis.add(new FloatDataset(axisArray , null));
 		axis.add(new FloatDataset(axisArray , null));
 		axis.add(new FloatDataset(axisArray , null));
@@ -282,11 +204,6 @@ public class IsosurfaceJob extends Job {
 		{ 
 			system.getTrace(traceName).dispose();
 		}
-	}
-	
-	public IOperation<MarchingCubesModel, Surface> getGenerator()
-	{
-		return this.generator;
 	}
 
 }

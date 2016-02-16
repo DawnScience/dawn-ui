@@ -1,6 +1,10 @@
 package org.dawnsci.isosurface.isogui;
 
+import org.dawnsci.isosurface.alg.MarchingCubesModel;
 import org.dawnsci.isosurface.tool.IsosurfaceJob;
+import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.trace.IIsosurfaceTrace;
 import org.eclipse.richbeans.api.binding.IBeanController;
 import org.eclipse.richbeans.api.event.ValueAdapter;
 import org.eclipse.richbeans.api.event.ValueEvent;
@@ -16,11 +20,19 @@ public class IsoHandler
 	
 	private ValueAdapter isoValueListener;
 	
-	public IsoHandler(Object ui, Object bean, IsosurfaceJob newJob)
+	private ILazyDataset lazyDataset;
+	
+	private IPlottingSystem system;
+	
+	public IsoHandler(Object ui, Object bean, IsosurfaceJob newJob, ILazyDataset lazyDataset, IPlottingSystem system)
 	{
 		this.isoComp = (IsoComposite)ui;
 		
 		this.job = newJob;
+		
+		this.lazyDataset = lazyDataset;
+		
+		this.system = system;
 		
 		// only create a relevant listener if the job is available for use -> this is mainly the case in unit tests
 		if (newJob != null)
@@ -89,32 +101,39 @@ public class IsoHandler
 						if (current != null && !(current).equals(previous) && e.getFieldName() != null)
 						{
 							// run alg
-							if ( 	e.getFieldName().contains("x") || 
-									e.getFieldName().contains("y") || 
-									e.getFieldName().contains("z") || 
-									e.getFieldName().contains("value"))
+							if ( 	e.getFieldName().contains("colour") ||
+									e.getFieldName().contains("opacity") || 
+									e.getFieldName().contains("name"))
 							{
-								job.compute(
-										new int[] {	current.getX(),
-													current.getY(),
-													current.getZ()},
-										current.getValue(),
-										current.getOpacity(),
-										current.getColour(),
-										current.getTraceKey(),
-										current.getName());
+								if (system.getTrace(current.getTraceKey()) != null)
+								{
+									((IIsosurfaceTrace)system.getTrace(current.getTraceKey())).setMaterial(
+													current.getColour().red,
+													current.getColour().green,
+													current.getColour().blue,
+													current.getOpacity());
+									((IIsosurfaceTrace)system.getTrace(current.getTraceKey())).setData(null, null, null, null);
+								}									
 							}
 							else
 							{
-								job.update(
-										new int[] {	current.getX(),
+								
+								job.compute(
+										new MarchingCubesModel(
+												lazyDataset,
+												current.getValue(),
+												new int[] {
+													current.getX(),
 													current.getY(),
 													current.getZ()},
-										current.getValue(),
-										current.getOpacity(),
-										current.getColour(),
-										current.getTraceKey(),
-										current.getName());
+												new int[]{
+													current.getColour().red,
+													current.getColour().green,
+													current.getColour().blue},
+												current.getOpacity(),
+												current.getTraceKey(),
+												current.getName()));
+								
 							}
 							previous = (IsoItem)current.clone();
 						}

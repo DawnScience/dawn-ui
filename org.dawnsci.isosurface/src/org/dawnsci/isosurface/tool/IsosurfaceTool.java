@@ -147,55 +147,39 @@ public class IsosurfaceTool extends AbstractSlicingTool
 		final SliceSource data = getSlicingSystem().getData();
 		
 		// declare the data as a lazydata set (i.e. slices)
-		ILazyDataset dataSlices = data.getLazySet().getSliceView(getSlices());
+		ILazyDataset dataSlice = data.getLazySet().getSliceView(getSlices());
 		
-		dataSlices = dataSlices.squeezeEnds();
+		dataSlice = dataSlice.squeezeEnds();
 		// slice.setName("Sliced " + data.getLazySet().getName());
 		
 		// check if the dataslice is compatible
-		if (dataSlices.getRank() != 3)
+		if (dataSlice.getRank() != 3)
 			throw new RuntimeException("Invalid slice for isosurface tool!");
-		final ILazyDataset finalDataslices = dataSlices;
+		final ILazyDataset finalDataslice = dataSlice;
 		
 		// estimate the min/max values for the isosurface
 		// the estimation is currently quite inaccurate
 		double[] minMax = {Integer.MAX_VALUE, Integer.MIN_VALUE};
-		minMax = IsoSurfaceUtil.estimateMinMaxIsoValueFromDataSet(finalDataslices);
+		minMax = IsoSurfaceUtil.estimateMinMaxIsoValueFromDataSet(finalDataslice);
 		
 		// roughly calculate the default cube size
 		int[] defaultCubeSize= new int[] {
-				(int) Math.max(1, Math.ceil(finalDataslices.getShape()[0]/20.0)),   
-				(int) Math.max(1, Math.ceil(finalDataslices.getShape()[1]/20.0)), 
-				(int) Math.max(1, Math.ceil(finalDataslices.getShape()[2]/20.0))};
+				(int) Math.max(1, Math.ceil(finalDataslice.getShape()[0]/20.0)),   
+				(int) Math.max(1, Math.ceil(finalDataslice.getShape()[1]/20.0)), 
+				(int) Math.max(1, Math.ceil(finalDataslice.getShape()[2]/20.0))};
 		
 		// set the min and max isovalues - set the default cube size for new sufaces
 		isoComp.setMinMaxIsoValueAndCubeSize(minMax, defaultCubeSize);
-		
+
 		// create the isoController
-		try 
-		{
-			
-			final IOperationService service = (IOperationService) Activator
-					.getService(IOperationService.class);
-			
-			IOperation<MarchingCubesModel, Surface> generator = (IOperation<MarchingCubesModel, Surface>) service
-					.create("org.dawnsci.isosurface.marchingCubes");
-			
-			IsoHandler isoController = new IsoHandler(
-					isoComp, 
-					isoBean, 
-					new IsosurfaceJob(
-							"isoSurfaceJob" , 
-							getSlicingSystem().getPlottingSystem(), 
-							finalDataslices, 
-							generator));
-			
-		}
-		catch (Exception e)
-		{
-			System.out.println("IsoController not initilised");
-			e.printStackTrace();
-		}
+		IsoHandler isoController = new IsoHandler(
+				isoComp, 
+				isoBean, 
+				new IsosurfaceJob(
+						"isoSurfaceJob" , 
+						getSlicingSystem().getPlottingSystem()),
+				finalDataslice,
+				getSlicingSystem().getPlottingSystem());
 		
 		setControlsVisible(true);
 	}

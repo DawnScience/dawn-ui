@@ -22,6 +22,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
@@ -34,35 +35,36 @@ import org.eclipse.dawnsci.analysis.dataset.operations.AbstractOperationBase;
  * The MarchingCubes class holds the algorithm with the same name which provides the triangular
  * mesh for a particular three dimensional dataset
  */
-public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Surface> {
+public class MarchingCubes {
 
 	final AtomicInteger mapIndex = new AtomicInteger(0);
+	IProgressMonitor monitor;
+	MarchingCubesModel model;
 	
-	public MarchingCubes() {
-		setModel(new MarchingCubesModel()); // We must always have a model for this maths.
+	public MarchingCubes(MarchingCubesModel model) {
+		this.model = model;
 	}
 	
-	@Override
-	public String getId() {
-		return "org.dawnsci.isosurface.marchingCubes";
-	}
-	
-	@Override
-	public Surface execute(IDataset slice, IMonitor moni1tor) throws OperationException {
-				
-		final Object[]           data      = parseVertices();
-		final Set<Triangle>      triangles = (HashSet<Triangle>) data[0];
-		final Map<Point,Integer> v         = (Map<Point, Integer>) data[1];
+	public Surface execute(IDataset slice, IProgressMonitor monitor) throws OperationException {
+
+		this.monitor = monitor;
+		final Object[] data = parseVertices();
 		
-		float[] points = convertMapToPointsArray(v); 
-
-		float[] texCoords = {0,0,0,1,1,1}; //{ 0, 0, (float) 0.5, (float) 0.5, 1, 1 };
-
-		int[] faces = createFaces(triangles, v);
-
-		if (points==null || points.length<1) throw new OperationException(this, "No isosurface found!");
-
-		return new Surface(points, texCoords, faces);
+		if (data != null)
+		{
+			final Set<Triangle>      triangles = (HashSet<Triangle>) data[0];
+			final Map<Point,Integer> v         = (Map<Point, Integer>) data[1];
+			
+			float[] points = convertMapToPointsArray(v); 
+	
+			float[] texCoords = {0,0,0,1,1,1}; //{ 0, 0, (float) 0.5, (float) 0.5, 1, 1 };
+	
+			int[] faces = createFaces(triangles, v);
+			
+			return new Surface(points, texCoords, faces);
+		}
+		
+		return null;
 	}
 	
 	private int[] createFaces(Set<Triangle> triangles, Map<Point,Integer> v)
@@ -84,25 +86,17 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 		
 		return faces;
 	}
-
-	@Override
-	public OperationRank getInputRank() {
-		return OperationRank.THREE;
-	}
-
-	@Override
-	public OperationRank getOutputRank() {
-		return OperationRank.NONE;
-	}
-	
 	
 	@SuppressWarnings("unchecked")
 	private Object[] parseVertices() throws OperationException 
 	{
+		
 		final ILazyDataset lazyData = model.getLazyData();
 		final int[] boxSize         = model.getBoxSize();
 		final double isovalue       = model.getIsovalue();
 		
+		monitor.beginTask("Calulating Isosurface", lazyData.getShape()[2] * 8);
+				
 		Set<Triangle> triangles  = new HashSet<Triangle>(128);
 		final ConcurrentHashMap<Point, Integer> sharedMap = new ConcurrentHashMap<Point, Integer>(128);
 		
@@ -130,7 +124,7 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 		
 		int[] start = {0,0,0};
 		int[] end = {0,0,0};
-		int[] segmentCount = {4, 2, 2}; // this is for debugging, make dynamic in the future
+		int[] segmentCount = {2, 2, 2}; // this is for debugging, make dynamic in the future
 		
 		
 		int[] dataShape = {
@@ -182,48 +176,53 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 												isovalue, 
 												boxSize,
 												this.mapIndex, 
-												sharedMap));
+												sharedMap,
+												this.monitor));
 					
 				}
 			}
 		}
 				
 		// generate the results list
-		ExecutorService executor = Executors.newCachedThreadPool();		
-		
-		List<Future<Set<Triangle>>> result = null;
-		
-		try 
+		if (!monitor.isCanceled())	
 		{
-			result = executor.invokeAll(MCAThreadList);
-		} 
-		catch (InterruptedException e) 
-		{
-			e.printStackTrace();
-		}
-		
-		executor.shutdown();
-		
-		if (result != null)
-		{
-			for (Future<Set<Triangle>> currentSet : result)
+			ExecutorService executor = Executors.newCachedThreadPool();		
+			
+			List<Future<Set<Triangle>>> result = null;
+			
+			try 
 			{
-				try 
+				result = executor.invokeAll(MCAThreadList);
+			}
+			catch (InterruptedException e) 
+			{
+				e.printStackTrace();
+			}
+			
+			executor.shutdown();
+			
+			if (result != null)
+			{
+				for (Future<Set<Triangle>> currentSet : result)
 				{
-					triangles.addAll(currentSet.get());
-				} 
-				catch (InterruptedException e) 
-				{
-					e.printStackTrace();
-				}
-				catch (ExecutionException e) 
-				{
-					e.printStackTrace();
+					try 
+					{
+						triangles.addAll(currentSet.get());
+					}
+					catch (InterruptedException e)
+					{
+						e.printStackTrace();
+					}
+					catch (ExecutionException e) 
+					{
+						e.printStackTrace();
+					}
 				}
 			}
+			return new Object[]{triangles, sharedMap};
 		}
-					
-		return new Object[]{triangles, sharedMap};
+		
+		return null;
 	}
 	
 	/**
@@ -237,9 +236,11 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 		float[] returnArray = new float[mapIndex.get()*3];
 		
 		Iterator<Entry<Point, Integer>> iterator = map.entrySet().iterator();
+		int x = 0;
 		
-	    while (iterator.hasNext()) 
+	    while (iterator.hasNext() && !this.monitor.isCanceled()) 
 	    {
+	    	x ++;
 	        Map.Entry current = (Map.Entry)iterator.next();
 	        returnArray[((int) current.getValue()*3)]   = (float)((Point)current.getKey()).getxCoord();
 	        returnArray[((int) current.getValue()*3)+1] = (float)((Point)current.getKey()).getyCoord();
@@ -248,18 +249,5 @@ public class MarchingCubes extends AbstractOperationBase<MarchingCubesModel, Sur
 	    
 	    return returnArray;
 	}
-	
-	/**
-	 * Method that gets the points for each slice
-	 * @param slicedImage
-	 * @param k
-	 * @param boxSize
-	 * @param yLimit
-	 * @param xLimit
-	 * @return
-	 * new Object[2]{values, points}
-	 */
-
-	
 	
 }

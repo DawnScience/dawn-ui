@@ -8,18 +8,20 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 
 public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 {	
-	ILazyDataset 		dataSet;
-	double 				isovalue;
-	int[] 				boxsize, offset;
-	AtomicInteger 		sharedMapIndex;
-	Map<Point, Integer> sharedMap;
-	Set<Triangle> 		triangleSet;
-	
+	private ILazyDataset 		dataSet;
+	private double 				isovalue;
+	private int[] 				boxsize, offset;
+	private AtomicInteger 		sharedMapIndex;
+	private Map<Point, Integer> sharedMap;
+	private Set<Triangle> 		triangleSet;
+	private IProgressMonitor monitor;
 	
 	public MarchingCubesSliceProcessor(
 			ILazyDataset dataSetToReder,
@@ -27,15 +29,17 @@ public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 			double isovalue,
 			int[] boxSize,
 			AtomicInteger sharedMapIndex,
-			Map<Point, Integer> sharedMap)
+			Map<Point, Integer> sharedMap,
+			IProgressMonitor monitor)
 	{
-		
-		this.dataSet		= dataSetToReder;
-		this.isovalue		= isovalue;    
-		this.boxsize		= boxSize;
+
+		this.dataSet = dataSetToReder;
+		this.offset = offset;
+		this.isovalue = isovalue;    
+		this.boxsize = boxSize;
 		this.sharedMapIndex = sharedMapIndex;
 		this.sharedMap = sharedMap;
-		this.offset = offset;
+		this.monitor = monitor;
 		
 	}
 	
@@ -57,7 +61,7 @@ public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 		int[] sliceStart = new int[3];
 		int[] sliceStop = new int[3];
 		
-		for(int i = 0; i < xyzLimit[2] - 1; i ++)  
+		for(int i = 0; i < xyzLimit[2] - 1 && !this.monitor.isCanceled(); i ++)  
 		{
 			sliceStart[0] = 0;
 			sliceStart[1] = 0;
@@ -67,15 +71,16 @@ public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 			sliceStop[1] = xyzLimit[1];
 			sliceStop[2] = i + 2;
 
-			IDataset slicedImage = lazyData.getSlice(sliceStart,sliceStop, new int[]{1,1,1});	            
+			IDataset slicedImage = lazyData.getSlice(sliceStart,sliceStop, new int[]{1,1,1});        
 			Object[] currentSlice = slicedData(slicedImage, i, offset, boxSize, xyzLimit[0], xyzLimit[1]);            
-			     
+			
 			triangleSet.addAll(generateAndMapTriangles(
 										xyzLimit[0],
-										currentSlice));			
-		} 
+										currentSlice));	
+			
+			monitor.worked(2);
+		}
 	}
-	
 	
 	
 	
@@ -105,7 +110,6 @@ public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 		
 		while(i < slicePoints.length - (2*xLimit) - 2)
 		{
-		
 			cellCoords[0] = slicePoints[i+3]; //(1,0,1)
 			cellValues[0] = (double) sliceValues.get(cellCoords[0]).doubleValue();
 			
@@ -154,6 +158,7 @@ public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 			}
 			
 		}
+		
 		return returnTriangles;		
 	}
 	
