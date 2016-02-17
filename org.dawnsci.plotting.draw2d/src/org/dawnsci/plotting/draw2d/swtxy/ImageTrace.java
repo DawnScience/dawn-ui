@@ -537,8 +537,15 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		
 		if (xAxis == null || yAxis == null) return false;
 		
-		boolean xIncreasing = xAxis.getDouble(0) < xAxis.getDouble(xAxis.getSize()-1);
-		boolean yIncreasing = yAxis.getDouble(0) < yAxis.getDouble(yAxis.getSize()-1);
+		boolean xDataInc = xAxis.getDouble(0) < xAxis.getDouble(xAxis.getSize()-1);
+		boolean yDataInc = yAxis.getDouble(0) < yAxis.getDouble(yAxis.getSize()-1);
+		
+		Range xRange = this.xAxis.getRange();
+		Range yRange = this.yAxis.getRange();
+		
+		boolean xAxisInc = xRange.getLower() < xRange.getUpper();
+		boolean yAxisInc = yRange.getLower() < yRange.getUpper();
+		
 		
 		
 		//Get the axes coodinates visible on screen
@@ -549,26 +556,24 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		double maxY = da[3];
 		
 		//Get the data points per axis step
-		double xAxValPerPoint =  getAxisValuePerDataPoint(minX,maxX,xAxis);
-		double yAxValPerPoint =  getAxisValuePerDataPoint(minY,maxY,yAxis);
+		double xAxValPerPoint =  Math.abs(getAxisValuePerDataPoint(minX,maxX,xAxis));
+		double yAxValPerPoint =  Math.abs(getAxisValuePerDataPoint(minY,maxY,yAxis));
 		
 		if (Double.isNaN(xAxValPerPoint)|| Double.isNaN(yAxValPerPoint)) {
 			return false;
 		}
 		
-		
-		
 		//get x and y start position in data array (floored)
-		int xPix = getPositionInAxis(xIncreasing ? minX : maxX,(Dataset)getAxes().get(0),true)/currentDownSampleBin;
-		int yPix = getPositionInAxis(yIncreasing ? minY : maxY,(Dataset)getAxes().get(1),true)/currentDownSampleBin;
+		int xPix = getPositionInAxis(xDataInc ? minX : maxX,xAxis,true)/currentDownSampleBin;
+		int yPix = getPositionInAxis(yDataInc ? minY : maxY,yAxis,true)/currentDownSampleBin;
 		
 		//determine sub pixel offset in data frame
-		double xdiff = (getAxes().get(0).getDouble(xPix)-(xIncreasing ? minX : maxX));
-		double ydiff = (getAxes().get(1).getDouble(yPix)-(yIncreasing ? minY : maxY));
+		double xdiff = (xAxis.getDouble(xPix)-(xDataInc ? minX : maxX));
+		double ydiff = (yAxis.getDouble(yPix)-(yDataInc ? minY : maxY));
 		
 		//Determine the corresponding number of data points in x and y (floor min, ceil max)
-		int xDataPoints = getNumberOfDataPoints(minX,maxX,getAxes().get(0), xIncreasing);
-		int yDataPoints = getNumberOfDataPoints(minY,maxY,getAxes().get(1), yIncreasing);
+		int xDataPoints = getNumberOfDataPoints(minX,maxX,getAxes().get(0), xDataInc);
+		int yDataPoints = getNumberOfDataPoints(minY,maxY,getAxes().get(1), yDataInc);
 		
 		int xDataPointsDS = xDataPoints/currentDownSampleBin;
 		int yDataPointsDS = yDataPoints/currentDownSampleBin;
@@ -581,8 +586,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		double realy = (maxY-minY)/yAxValPerPoint;
 		
 		// Ratio of screen pixels to full number of data points
-		double xScale = (screenCoords[2]-screenCoords[0]) / (realx);
-		double yScale = (screenCoords[3]-screenCoords[1]) / (realy);
+		double xScale = Math.abs((screenCoords[2]-screenCoords[0]) / (realx));
+		double yScale = Math.abs((screenCoords[3]-screenCoords[1]) / (realy));
 		
 		//FIXME Handle minimum cases
 		
@@ -668,8 +673,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				proceedWithScale = true;
 			}
 
-			if (!xIncreasing) scaleWidth*=-1;
-			if (!yIncreasing) scaleHeight*=-1;
+			if (!xDataInc) scaleWidth*=-1;
+			if (!yDataInc) scaleHeight*=-1;
 			
 			
 			Image scaledImage = null;
@@ -728,8 +733,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	
 	
 	private final double getAxisValuePerDataPoint(double min, double max, IDataset axes) {
+		int minp = getPositionInAxis(min,axes);
+		int maxp = getPositionInAxis(max,axes);
 		
-		return (max-min)/axes.getSize();
+		return (axes.getDouble(maxp)-axes.getDouble(minp))/(maxp-minp);
 		
 	}
 	
