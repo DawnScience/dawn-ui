@@ -63,125 +63,12 @@ public class VolumeRenderingShellTester {
 		IDataHolder dh = LoaderFactory.getData("files/brain.h5");
 		dataset = dh.getLazyDataset("/entry/edf/data").getSlice();
 	}
-		
+	
+	
+	
 	private Group generateNode(IDataset dataset)
 	{		
-		Group results = new Group();
-		
-		for (int z = 0; z < dataset.getShape()[2]; z+=2)
-		{
-			BufferedImage bi = new BufferedImage(dataset.getShape()[0], dataset.getShape()[1],BufferedImage.TYPE_INT_ARGB);
-			for (int y = 0; y < dataset.getShape()[1]; y++)
-			{
-				for (int x = 0; x < dataset.getShape()[0]; x++)
-				{
-					int argb = dataset.getInt(x,y,z);					
-					
-					if (dataset.getInt(x,y,z) > 1800)
-					{
-						int rgb = 7;
-						rgb = (rgb << 8) + 255;
-						rgb = (rgb << 8) + 0;
-						rgb = (rgb << 8) + 0;
-						
-						argb = rgb;
-					}
-					else
-						argb = 0;
-					
-					bi.setRGB(x, y, argb);
-				}
-			}
-			
-			AxisAlignedPlane newPlane = new AxisAlignedPlane(
-					new Point2D(0, 0),
-					new Point2D(dataset.getShape()[0], dataset.getShape()[1]),
-					SwingFXUtils.toFXImage(bi, null),
-					new Point3D(0, 0, 1));
-			newPlane.setTranslateZ(-z);
-			xygroup.getChildren().add(newPlane);
-		}
-		
-		for (int z = 0; z < dataset.getShape()[0]; z+=2)
-		{
-			BufferedImage bi = new BufferedImage(dataset.getShape()[2], dataset.getShape()[1],BufferedImage.TYPE_INT_ARGB);
-			for (int y = 0; y < dataset.getShape()[1]; y++)
-			{
-				for (int x = 0; x < dataset.getShape()[2]; x++)
-				{
-					int argb = dataset.getInt(z,y,x);
-					
-					if (dataset.getInt(z,y,x) > 1800)
-					{
-						int rgb = 7;
-						rgb = (rgb << 8) + 255;
-						rgb = (rgb << 8) + 0;
-						rgb = (rgb << 8) + 0;
-						
-						argb = rgb;
-					}
-					else
-						argb = 0;
-					
-					bi.setRGB(x, y, argb);
-				}
-			}
-			
-			AxisAlignedPlane newPlane = new AxisAlignedPlane(
-					new Point2D(0, 0),
-					new Point2D(dataset.getShape()[2], dataset.getShape()[1]),
-					SwingFXUtils.toFXImage(bi, null),
-					new Point3D(0, 0, 1));
-			newPlane.setTranslateZ(z);
-			zygroup.getChildren().add(newPlane);
-		}
-		zygroup.getTransforms().addAll(
-				new Rotate(90, new Point3D(0, 1, 0)));
-		
-		
-		for (int z = 0; z < dataset.getShape()[1]; z+=2)
-		{
-			BufferedImage bi = new BufferedImage(dataset.getShape()[0], dataset.getShape()[2],BufferedImage.TYPE_INT_ARGB);
-			for (int y = 0; y < dataset.getShape()[2]; y++)
-			{
-				for (int x = 0; x < dataset.getShape()[0]; x++)
-				{
-					int argb = dataset.getInt(x,z,y);
-//					int argb = dataset[x][z][y];
-					
-					if (dataset.getInt(x,z,y) > 1800)
-					{
-						int rgb = 7;
-						rgb = (rgb << 8) + 255;
-						rgb = (rgb << 8) + 0;
-						rgb = (rgb << 8) + 0;
-						argb = rgb;
-					}
-					else
-						argb = 0;
-					
-					bi.setRGB(x, y, argb);
-					
-				}
-			}
-			
-			AxisAlignedPlane newPlane = new AxisAlignedPlane(
-					new Point2D(0, 0),
-					new Point2D(dataset.getShape()[0], dataset.getShape()[2]),
-					SwingFXUtils.toFXImage(bi, null),
-					new Point3D(0, 0, 1));
-			newPlane.setTranslateZ(z);
-			xzgroup.getChildren().add(newPlane);
-		}
-		xzgroup.getTransforms().addAll(
-				new Rotate(-90, new Point3D(1, 0, 0)),
-				new Translate(0,0,0));
-		
-		results.getChildren().addAll(xygroup, zygroup, xzgroup);
-		
-		generateRotateEvent(results);
-		
-		return results;
+		return new VolumeRender(dataset.getShape(), dataset);
 	}
 	
 	private void generateRotateEvent(Node node) {
@@ -204,23 +91,7 @@ public class VolumeRenderingShellTester {
 			xAngle = textYAxisRotate.transform(xAngle);
 			xAngle = textZAxisRotate.transform(xAngle);
 			
-//			xygroup.setOpacity(Math.abs(xAngle.getX()));
-//	        zygroup.setOpacity(Math.abs(xAngle.getZ()));
-//	        xzgroup.setOpacity(Math.abs(xAngle.getY()));
-	      
 			
-//	        for (Node n : xygroup.getChildren())
-//	        	if (n instanceof AxisAlignedPlane)
-//	        		((AxisAlignedPlane)n).setMaterialOpacity(Math.abs(xAngle.getX()));
-//	        
-//	        for (Node n : zygroup.getChildren())
-//	        	if (n instanceof AxisAlignedPlane)
-//	        		((AxisAlignedPlane)n).setMaterialOpacity(Math.abs(xAngle.getZ()));
-//	        
-//	        for (Node n : zygroup.getChildren())
-//	        	if (n instanceof AxisAlignedPlane)
-//	        		((AxisAlignedPlane)n).setMaterialOpacity(Math.abs(xAngle.getY()));
-//	        
 		});
 	}
 
