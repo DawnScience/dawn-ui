@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
+import javafx.scene.DepthTest;
 import javafx.scene.Group;
 
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
@@ -36,8 +37,12 @@ public class VolumeRender extends Group
 		lazySlice = dataset.getSliceView(new int []{0, 0, 0}, dataset.getShape(), step);
 		
 		xygroup = createPlanes(lazySlice, 1800);
-		zygroup = createPlanes(lazySlice.getTransposedView(2,1,0).getSlice(), 1800);
+		zygroup = createPlanes(lazySlice.getTransposedView(1,2,0).getSlice(), 1800);
 		xzgroup = createPlanes(lazySlice.getTransposedView(0,2,1).getSlice(), 1800);
+		
+		xygroup.setDepthTest(DepthTest.DISABLE);
+		zygroup.setDepthTest(DepthTest.DISABLE);
+		xzgroup.setDepthTest(DepthTest.DISABLE);
 		
 		this.getChildren().addAll(xygroup, zygroup, xzgroup);
 		
@@ -46,7 +51,7 @@ public class VolumeRender extends Group
 
 	private Group createPlanes(ILazyDataset lazySlice, double isoValue) {
 		Group group = new Group();
-				
+		
 		for (int z = 0; z < lazySlice.getShape()[2]; z ++)
 		{
 			IDataset slice = lazySlice.getSlice(
@@ -84,7 +89,7 @@ public class VolumeRender extends Group
 			
 			AxisAlignedPlane newPlane = new AxisAlignedPlane(
 					new Point2D(0, 0),
-					new Point2D(shape[0], shape[1]),
+					new Point2D(slice.getShape()[0], slice.getShape()[1]),
 					SwingFXUtils.toFXImage(bi, null),
 					new Point3D(0, 0, 1));
 			newPlane.setTranslateZ(z);
