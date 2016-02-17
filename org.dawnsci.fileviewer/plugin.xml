@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <e4view
+            allowMultiple="false"
+            class="org.dawnsci.fileviewer.parts.FileViewerE4Part"
+            icon="icons/generic_example.gif"
+            id="org.dawnsci.fileviewer.e4view"
+            name="File Viewer"
+            restorable="true">
+      </e4view>
+   </extension>
+
+</plugin>

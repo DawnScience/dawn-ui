@@ -530,6 +530,24 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		
 		ImageData data = imageData;
 		
+		if (getAxes() == null) return false;
+		
+		IDataset xAxis = getAxes().get(0);
+		IDataset yAxis = getAxes().get(1);
+		
+		if (xAxis == null || yAxis == null) return false;
+		
+		boolean xDataInc = xAxis.getDouble(0) < xAxis.getDouble(xAxis.getSize()-1);
+		boolean yDataInc = yAxis.getDouble(0) < yAxis.getDouble(yAxis.getSize()-1);
+		
+		Range xRange = this.xAxis.getRange();
+		Range yRange = this.yAxis.getRange();
+		
+		boolean xAxisInc = xRange.getLower() < xRange.getUpper();
+		boolean yAxisInc = yRange.getLower() < yRange.getUpper();
+		
+		
+		
 		//Get the axes coodinates visible on screen
 		double[] da = getImageCoords(1, false);
 		double minX = da[0];
@@ -538,24 +556,24 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		double maxY = da[3];
 		
 		//Get the data points per axis step
-		double xAxValPerPoint =  getAxisValuePerDataPoint(minX,maxX,getAxes().get(0));
-		double yAxValPerPoint =  getAxisValuePerDataPoint(minY,maxY,getAxes().get(1));
+		double xAxValPerPoint =  Math.abs(getAxisValuePerDataPoint(minX,maxX,xAxis));
+		double yAxValPerPoint =  Math.abs(getAxisValuePerDataPoint(minY,maxY,yAxis));
 		
 		if (Double.isNaN(xAxValPerPoint)|| Double.isNaN(yAxValPerPoint)) {
 			return false;
 		}
 		
 		//get x and y start position in data array (floored)
-		int xPix = getPositionInAxis(minX,(Dataset)getAxes().get(0),true)/currentDownSampleBin;
-		int yPix = getPositionInAxis(minY,(Dataset)getAxes().get(1),true)/currentDownSampleBin;
+		int xPix = getPositionInAxis(xDataInc ? minX : maxX,xAxis,true)/currentDownSampleBin;
+		int yPix = getPositionInAxis(yDataInc ? minY : maxY,yAxis,true)/currentDownSampleBin;
 		
 		//determine sub pixel offset in data frame
-		double xdiff = (getAxes().get(0).getDouble(xPix)-minX);
-		double ydiff = (getAxes().get(1).getDouble(yPix)-minY);
+		double xdiff = (xAxis.getDouble(xPix)-(xDataInc ? minX : maxX));
+		double ydiff = (yAxis.getDouble(yPix)-(yDataInc ? minY : maxY));
 		
 		//Determine the corresponding number of data points in x and y (floor min, ceil max)
-		int xDataPoints = getNumberOfDataPoints(minX,maxX,getAxes().get(0));
-		int yDataPoints = getNumberOfDataPoints(minY,maxY,getAxes().get(1));
+		int xDataPoints = getNumberOfDataPoints(minX,maxX,getAxes().get(0), xDataInc);
+		int yDataPoints = getNumberOfDataPoints(minY,maxY,getAxes().get(1), yDataInc);
 		
 		int xDataPointsDS = xDataPoints/currentDownSampleBin;
 		int yDataPointsDS = yDataPoints/currentDownSampleBin;
@@ -568,8 +586,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		double realy = (maxY-minY)/yAxValPerPoint;
 		
 		// Ratio of screen pixels to full number of data points
-		double xScale = (screenCoords[2]-screenCoords[0]) / (realx);
-		double yScale = (screenCoords[3]-screenCoords[1]) / (realy);
+		double xScale = Math.abs((screenCoords[2]-screenCoords[0]) / (realx));
+		double yScale = Math.abs((screenCoords[3]-screenCoords[1]) / (realy));
 		
 		//FIXME Handle minimum cases
 		
@@ -577,16 +595,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		final int xSize = imageData.width;
 		final int ySize = imageData.height;
 		
-		IDataset xd = getAxes().get(0);
-		IDataset yd = getAxes().get(1);
+		double xmin = xAxis.min().doubleValue();
+		double xmax = xAxis.max().doubleValue();
+		double ymin = yAxis.min().doubleValue();
+		double ymax = yAxis.max().doubleValue();
 		
-		double xmin = xd.min().doubleValue();
-		double xmax = xd.max().doubleValue();
-		double ymin = yd.min().doubleValue();
-		double ymax = yd.max().doubleValue();
-		
-		double xLen = xd.getSize();
-		double yLen = yd.getSize();
+		double xLen = xAxis.getSize();
+		double yLen = yAxis.getSize();
 		
 		double xp = ((xmax-xmin)/(xLen-1))/2;
 		double yp = ((ymax-ymin)/(yLen-1))/2;
@@ -614,6 +629,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 //			isMaximumZoom = true;
 //		}
 		
+		logger.debug("scaleWidth="+scaleWidth);
+		logger.debug("scaleHeight="+scaleHeight);
 		
 		try {
 			// Slice the data.
@@ -656,6 +673,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				proceedWithScale = true;
 			}
 
+			if (!xDataInc) scaleWidth*=-1;
+			if (!yDataInc) scaleHeight*=-1;
+			
+			
 			Image scaledImage = null;
 			if (proceedWithScale) {
 				data = data!=null ? data.scaledTo(scaleWidth, scaleHeight) : null;
@@ -702,21 +723,21 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 //		performAutoscale();
 	}
 	
-	private final int getNumberOfDataPoints(double min, double max, IDataset axes) {
+	private final int getNumberOfDataPoints(double min, double max, IDataset axes, boolean increasing) {
 		
 		int minp = getPositionInAxis(min,axes,true);
 		int maxp = getPositionInAxis(max,axes,false);
 		
-		return maxp-minp+1;
+		return increasing ? maxp-minp+1 : minp-maxp+1;
 	}
 	
 	
 	private final double getAxisValuePerDataPoint(double min, double max, IDataset axes) {
-		
 		int minp = getPositionInAxis(min,axes);
 		int maxp = getPositionInAxis(max,axes);
 		
 		return (axes.getDouble(maxp)-axes.getDouble(minp))/(maxp-minp);
+		
 	}
 	
 	private final int getPositionInAxis(double val, IDataset axis) {
@@ -781,20 +802,20 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		}
 				
 		// Bind the extent of the images to the actual data
-		IDataset x = getAxes()!=null ? getAxes().get(0) : null;
+		IDataset x = getAxes().get(0);
 		
-		double minXData = (x!=null ? x.getDouble(0) : 0d)/bin;
+		double minXData = x.min().doubleValue()/bin;
 		minX = Math.max(minXData, minX);
 		
-		double maxXData = (x!=null ? x.getDouble(x.getSize()-1) : image.getShape()[1])/bin;
+		double maxXData = x.max().doubleValue()/bin;
 		maxX = Math.min(maxXData, maxX);
 		
-		IDataset y = getAxes()!=null ? getAxes().get(1) : null;
+		IDataset y = getAxes().get(1);
 		
-		double minYData = (y!=null ? y.getDouble(0) : 0d)/bin;
+		double minYData = y.min().doubleValue()/bin;
 		minY = Math.max(minYData, minY);
 
-		double maxYData = (y!=null ? y.getDouble(y.getSize()-1) : image.getShape()[0])/bin;
+		double maxYData = y.max().doubleValue()/bin;
 		maxY = Math.min(maxYData, maxY);
 	
 		if (pixels) {
