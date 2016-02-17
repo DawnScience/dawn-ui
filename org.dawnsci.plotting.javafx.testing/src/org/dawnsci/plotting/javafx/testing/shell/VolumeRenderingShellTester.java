@@ -62,23 +62,6 @@ public class VolumeRenderingShellTester {
 		
 		IDataHolder dh = LoaderFactory.getData("files/brain.h5");
 		dataset = dh.getLazyDataset("/entry/edf/data").getSlice();
-		
-		algorithm = new MarchingCubes();
-				
-		model = new MarchingCubesModel();
-		model.setLazyData(dataset);
-		model.setBoxSize(new int[]{3,3,3});
-		model.setIsovalue(1800d);
-		model.setVertexLimit(Integer.MAX_VALUE);
-		
-		algorithm.setModel(model);
-		
-		max = dataset.max(true,true).doubleValue();
-		
-		System.out.println("max = " + max );
-		
-		// execute the algorithmA	
-		testResult = algorithm.execute(null, null);
 	}
 		
 	private Group generateNode(IDataset dataset)
@@ -201,47 +184,6 @@ public class VolumeRenderingShellTester {
 		return results;
 	}
 	
-	private MeshView generateMesh()
-	{
-		
-		MeshView result = new MeshView(createTrangleMesh(
-												testResult.getPoints(),
-												testResult.getTexCoords(),
-												testResult.getFaces()));
-		
-		PhongMaterial material;
-		Color color = new Color(Color.GOLDENROD.getRed(), Color.GOLDENROD.getGreen(), Color.GOLDENROD.getBlue(), 0.1);
-		material = new PhongMaterial(color);
-		
-		result.setMaterial(material);
-		
-		result.setOpacity(0.1d);
-		
-		result.setDepthTest(DepthTest.ENABLE);
-		
-		return result;
-		
-	}
-	
-	private Mesh createTrangleMesh(
-						float[] points,
-						float[] textCoords,
-						int[] faces)
-	{
-		
-		final TriangleMesh mesh = new TriangleMesh();
-		
-		if (points != null && textCoords != null && faces != null)
-		{
-			mesh.getPoints().setAll(points);
-			mesh.getTexCoords().setAll(textCoords);
-			mesh.getFaces().setAll(faces);
-		}
-		
-		return mesh;
-	}
-	
-	
 	private void generateRotateEvent(Node node) {
 		
 		xygroup.setDepthTest(DepthTest.DISABLE);
@@ -298,17 +240,7 @@ public class VolumeRenderingShellTester {
         Group isoSurfaceGroup = new Group();
         
         SurfaceDisplayer scene = new SurfaceDisplayer(root, isoSurfaceGroup);
-        
-		MeshView isosurface = generateMesh();
-		PhongMaterial mat = new PhongMaterial(new Color(1 ,0 ,0 ,0.5 ));
-		isosurface.setMaterial(mat);
-        
-//        AmbientLight al = new AmbientLight(new Color(0,0,1,1));
-//        al.getScope().addAll(xygroup, zygroup, xzgroup);
-//        group.getChildren().add(al);
-        
-        isoSurfaceGroup.getChildren().addAll(isosurface);
-        
+                
         scene.addVolumeTrace(group);
         
         canvas.setScene(scene);
