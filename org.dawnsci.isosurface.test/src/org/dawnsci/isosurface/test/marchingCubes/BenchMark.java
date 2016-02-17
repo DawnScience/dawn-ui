@@ -12,6 +12,7 @@ import java.util.Date;
 import org.dawnsci.isosurface.alg.MarchingCubes;
 import org.dawnsci.isosurface.alg.MarchingCubesModel;
 import org.dawnsci.isosurface.alg.Surface;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Random;
 import org.junit.Test;
@@ -28,24 +29,73 @@ public class BenchMark
 	ILazyDataset lz;
 	MarchingCubesModel model;
 	Surface testResult;
+	IProgressMonitor monitor;
 
 	private void start(int[] dataSetSizeXYZ, int[] boxSizeXYZ) {
-		algorithm = new MarchingCubes();
-
-		lz = Random.lazyRand(dataSetSizeXYZ);
+		
 
 		Random.seed(123456789);
 
-		model = new MarchingCubesModel();
-		model.setLazyData(lz);
-		model.setBoxSize(boxSizeXYZ);
-		model.setIsovalue(0.5);
-		model.setVertexLimit(Integer.MAX_VALUE);
+		lz = Random.lazyRand(dataSetSizeXYZ);
 
-		algorithm.setModel(model);
+		model = new MarchingCubesModel(lz,0.5,boxSizeXYZ,new int[]{1,1,1}, 1,"traceID","name");
+		algorithm = new MarchingCubes(model);	
+		
+		monitor = new IProgressMonitor() {
 
+			@Override
+			public void beginTask(String name, int totalWork) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void done() {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void internalWorked(double work) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public boolean isCanceled() {
+				// TODO Auto-generated method stub
+				return false;
+			}
+
+			@Override
+			public void setCanceled(boolean value) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void setTaskName(String name) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void subTask(String name) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void worked(int work) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			
+		};
+		
 		// execute the algorithmA
-		testResult = algorithm.execute(null, null);
+		testResult = algorithm.execute(null, monitor);
 	}
 
 	@Test
@@ -69,7 +119,7 @@ public class BenchMark
 				System.out.print("\n");
 			}
 			double startTime = System.currentTimeMillis();
-			testResult = algorithm.execute(null, null);
+			testResult = algorithm.execute(null, monitor);
 			double completionTime = System.currentTimeMillis() - startTime;
 			average += completionTime;
 			System.out.print(completionTime + ",\t");

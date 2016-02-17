@@ -16,12 +16,12 @@ import java.util.Arrays;
 import org.dawnsci.isosurface.alg.MarchingCubes;
 import org.dawnsci.isosurface.alg.MarchingCubesModel;
 import org.dawnsci.isosurface.alg.Surface;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Random;
 import org.junit.Test;
 
 public class Regression {
-
 	
 	static int SEED = 123456789;
 	
@@ -34,6 +34,8 @@ public class Regression {
 	ILazyDataset lz;
 	MarchingCubesModel model;
 	Surface testResult;
+	IProgressMonitor monitor;
+
 	
 	/**
 	 * used to initialise the required information
@@ -41,22 +43,68 @@ public class Regression {
 	 */
 	private void start(int[] dataSetSizeXYZ, int[] boxSizeXYZ)
 	{
-		algorithm = new MarchingCubes();
 		
 		lz = Random.lazyRand(dataSetSizeXYZ);
 		
 		Random.seed(SEED);
+
+		model = new MarchingCubesModel(lz,0.5,boxSizeXYZ,new int[]{1,1,1}, 1,"traceID","name");
+		algorithm = new MarchingCubes(model);	
 		
-		model = new MarchingCubesModel();
-		model.setLazyData(lz);
-		model.setBoxSize(boxSizeXYZ);
-		model.setIsovalue(0.5);
-		model.setVertexLimit(Integer.MAX_VALUE);
-		
-		algorithm.setModel(model);
+		monitor = new IProgressMonitor() {
+			
+			@Override
+			public void worked(int work) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void subTask(String name) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void setTaskName(String name) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void setCanceled(boolean value) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public boolean isCanceled() {
+				// TODO Auto-generated method stub
+				return false;
+			}
+			
+			@Override
+			public void internalWorked(double work) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void done() {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void beginTask(String name, int totalWork) {
+				// TODO Auto-generated method stub
+				
+			}
+		};
 		
 		// execute the algorithmA
-		testResult = algorithm.execute(null, null);
+		testResult = algorithm.execute(null, monitor);
+		
 	}
 	
 	@Test
@@ -69,12 +117,7 @@ public class Regression {
 		int knownPointLength = 266784;      // hard coded if seed changes these will also need to be changed
 		int knownFaceLength = 661170;       // hard coded if seed changes these will also need to be changed
 		int knownTexLength = 6;             // hard coded if seed changes these will also need to be changed
-		
-		
-//		int knownPointLength = 245754;      // hard coded if seed changes these will also need to be changed
-//		int knownFaceLength = 606870;       // hard coded if seed changes these will also need to be changed
-//		int knownTexLength = 6;             // hard coded if seed changes these will also need to be changed
-		
+				
 		// check lengths first
 		assertFalse("Points length wrong.\n" 
 					+ "result: " + testResult.getPoints().length + "\n" 

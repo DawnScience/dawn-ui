@@ -39,22 +39,13 @@ public class GUIRunner
 			
 		ui.setMinMaxIsoValueAndCubeSize(new double[]{0,100}, new int[]{5,5,5});
 		
-		try 
-		{
+		IsoHandler isoController = new IsoHandler(
+				ui,
+				isoBean,
+				null,
+				null,
+				null);
 			
-			IsoHandler isoController = new IsoHandler(
-					ui, 
-					isoBean, 
-					null);
-			
-		}
-		catch (Exception e)
-		{
-			
-			System.out.println("IsoController not initilised");
-			e.printStackTrace();
-			
-		}
 		
 		SWTUtils.showCenteredShell(shell);
 	}
