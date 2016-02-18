@@ -8,5 +8,6 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="ncsa.hdf/lib/linux-x86_64"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="jars/jfxswt.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

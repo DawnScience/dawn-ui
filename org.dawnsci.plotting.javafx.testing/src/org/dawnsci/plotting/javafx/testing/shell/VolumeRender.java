@@ -7,6 +7,8 @@ import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.DepthTest;
 import javafx.scene.Group;
+import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Translate;
 
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
@@ -16,23 +18,28 @@ public class VolumeRender extends Group
 	private Number max;
 	private Number min;
 	private ILazyDataset lazySlice;
-	private int[] shape;
+//	private int[] shape;
 	
 	private Group xygroup = new Group();
 	private Group zygroup = new Group();
 	private Group xzgroup = new Group();
 	
-	public VolumeRender(int[] shape, ILazyDataset dataset)
+	public VolumeRender(double resolutionRatio, ILazyDataset dataset)
 	{
 		super();
-		this.shape = shape;
 		this.max = dataset.getSlice().max(true, true);
 		this.min = dataset.getSlice().min(true, true);
 		
+		if (resolutionRatio > 1)
+		{
+			resolutionRatio = 1;
+		}
+		
+		
 		int[] step = new int[]{
-				dataset.getShape()[0]/shape[0],
-				dataset.getShape()[1]/shape[1],
-				dataset.getShape()[2]/shape[2]};
+				(int)((dataset.getShape()[0] * resolutionRatio) + 0.5f),
+				(int)((dataset.getShape()[1] * resolutionRatio) + 0.5f),
+				(int)((dataset.getShape()[2] * resolutionRatio) + 0.5f)};
 		
 		lazySlice = dataset.getSliceView(new int []{0, 0, 0}, dataset.getShape(), step);
 		
@@ -41,8 +48,19 @@ public class VolumeRender extends Group
 		xzgroup = createPlanes(lazySlice.getTransposedView(0,2,1).getSlice(), 1800);
 		
 		xygroup.setDepthTest(DepthTest.DISABLE);
+		
+		
 		zygroup.setDepthTest(DepthTest.DISABLE);
+		zygroup.getTransforms().addAll(
+				new Rotate(90, new Point3D(0, 1, 0)));
+		
+		
 		xzgroup.setDepthTest(DepthTest.DISABLE);
+		xzgroup.getTransforms().addAll(
+				new Rotate(90, new Point3D(1, 0, 0)),
+				new Translate(0,0,0));
+		
+		
 		
 		this.getChildren().addAll(xygroup, zygroup, xzgroup);
 		
