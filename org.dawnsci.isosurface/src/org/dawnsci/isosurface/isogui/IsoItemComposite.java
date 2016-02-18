@@ -70,13 +70,19 @@ public class IsoItemComposite extends Composite
 		lblCubeSize.setText("Cube Size ");
 		
 		x = new SpinnerWrapper(this, SWT.BORDER);
-		x.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		GridData xgd = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
+		xgd.widthHint = 60;
+		x.setLayoutData(xgd);
 		
 		y = new SpinnerWrapper(this, SWT.BORDER);
-		y.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		GridData ygd = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
+		ygd.widthHint = 60;
+		y.setLayoutData(ygd);
 		
 		z = new SpinnerWrapper(this, SWT.BORDER);
-		z.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		GridData zgd = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
+		zgd.widthHint = 60;
+		z.setLayoutData(zgd);
 		
 		Button upButton = new Button(this, SWT.NONE);
 		upButton.setImage(IsoGUIUtil.getImageDescriptor("up.png").createImage());
