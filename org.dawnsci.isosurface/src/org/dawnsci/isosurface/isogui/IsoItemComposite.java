@@ -74,21 +74,18 @@ public class IsoItemComposite extends Composite
 		xgd.widthHint = 60;
 		x.setLayoutData(xgd);
 		x.setMaximum(999);
-		x.setMinimum(1);
 		
 		y = new SpinnerWrapper(this, SWT.BORDER);
 		GridData ygd = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
 		ygd.widthHint = 60;
 		y.setLayoutData(ygd);
 		y.setMaximum(999);
-		y.setMinimum(1);
 		
 		z = new SpinnerWrapper(this, SWT.BORDER);
 		GridData zgd = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
 		zgd.widthHint = 60;
 		z.setLayoutData(zgd);
 		z.setMaximum(999);
-		z.setMinimum(1);
 		
 		Button upButton = new Button(this, SWT.NONE);
 		upButton.setImage(IsoGUIUtil.getImageDescriptor("up.png").createImage());
