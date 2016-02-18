@@ -17,9 +17,11 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.AmbientLight;
+import javafx.scene.Camera;
 import javafx.scene.DepthTest;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.ParallelCamera;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.PointLight;
 import javafx.scene.Scene;
@@ -33,7 +35,6 @@ import javafx.scene.transform.Transform;
 import javafx.scene.transform.TransformChangedEvent;
 import javafx.scene.transform.Translate;
 
-import org.dawnsci.plotting.javafx.axis.objects.BoundingBox;
 import org.dawnsci.plotting.javafx.axis.objects.ScaleAxisGroup;
 import org.dawnsci.plotting.javafx.axis.objects.SceneObjectGroup;
 import org.dawnsci.plotting.javafx.axis.objects.Vector3DUtil;
@@ -45,7 +46,6 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
  * @author nnb55016 The following class creates the scene where the surface is
  *         visualised It is used when running the application inside DAWN
  *
- * 
  * @author Joel Ogden
  * 
  */
@@ -53,7 +53,9 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 public class SurfaceDisplayer extends Scene
 {		
 	// camera for the scene
-	private PerspectiveCamera camera;
+	private PerspectiveCamera perspectiveCamera;
+	private ParallelCamera parallelCamera;
+	private Camera currentCamera;
 	
 	// the groups for the scene
 	private Group isosurfaceGroup;	// holds the isosurfaces
@@ -142,8 +144,12 @@ public class SurfaceDisplayer extends Scene
 		// set the camera -> the camera will handle some aspects of movement
 		// other are within the group -> this is done to simplify rotation
 		// calculations
-		this.camera = new PerspectiveCamera();
-		setCamera(camera); 
+		this.perspectiveCamera = new PerspectiveCamera();
+		this.parallelCamera = new ParallelCamera();
+		
+		currentCamera = perspectiveCamera;
+		
+		setCamera(perspectiveCamera); 
 				
 		initialiseCamera();
 		initlialiseGroups();
@@ -166,9 +172,9 @@ public class SurfaceDisplayer extends Scene
 	private void initialiseCamera()
 	{
 		// add the initial transforms
-		camera.getTransforms().addAll(new Translate(0, 0, -zoom));
-		camera.setNearClip(0.00001f);
-		camera.setFarClip(100_000);
+		currentCamera.getTransforms().addAll(new Translate(0, 0, -zoom));
+		currentCamera.setNearClip(0.00001f);
+		currentCamera.setFarClip(100_000);
 		
 	}
 	
@@ -326,7 +332,7 @@ public class SurfaceDisplayer extends Scene
 					{
 						Point3D XYTranslationDirection = alignedXRotate.transform(mouseDelta[0]*mouseMovementMod, mouseDelta[1]*mouseMovementMod,0);
 						XYTranslationDirection = alignedYRotate.transform(XYTranslationDirection);
-												
+						
 						
 						isoGroupOffset.setX(isoGroupOffset.getX() + XYTranslationDirection.getX() );
 						isoGroupOffset.setY(isoGroupOffset.getY() + XYTranslationDirection.getY() );
@@ -336,11 +342,11 @@ public class SurfaceDisplayer extends Scene
 					// zoom if right button is pressed
 					if (me.isSecondaryButtonDown() && me.isPrimaryButtonDown())
 					{
-						zoom += (-mouseDelta[1] * mouseMovementMod);
+						zoom += -(-mouseDelta[1] * mouseMovementMod * 2);
 						
 					}
-					camera.getTransforms().setAll(new Translate(0, 0, -zoom));
-					// camera.getTransforms().clear();
+					
+					currentCamera.getTransforms().setAll(new Translate(0, 0, -zoom));
 				}
 			}
 		});
@@ -351,9 +357,9 @@ public class SurfaceDisplayer extends Scene
 			@Override
 			public void handle(ScrollEvent event)
 			{
-				
-				zoom += event.getDeltaY() * 0.2f;
-				camera.getTransforms().setAll(new Translate(0, 0, -zoom));
+				final double mouseMovementMod = ((zoom + 1000) * 0.001f) + 0.1f;
+				zoom += -event.getDeltaY() * mouseMovementMod;
+				currentCamera.getTransforms().setAll(new Translate(0, 0, -zoom));
 			}
 		});
 		
