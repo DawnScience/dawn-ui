@@ -154,6 +154,7 @@ public class MappedFileManager {
 						}
 						
 						MappedDataFileBean b = MapBeanBuilder.buildBean(dh.getTree());
+						if (b == null) b = MapBeanBuilder.buildBeani18in2015(dh.getTree());
 						if (b != null) {
 							IMonitor m = new ProgressMonitorWrapper(monitor);
 							monitor.beginTask("Loading data...", -1);
