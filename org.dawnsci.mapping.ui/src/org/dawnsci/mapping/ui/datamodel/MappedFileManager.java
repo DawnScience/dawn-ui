@@ -153,8 +153,21 @@ public class MappedFileManager {
 							return;
 						}
 						
-						MappedDataFileBean b = MapBeanBuilder.buildBean(dh.getTree());
-						if (b == null) b = MapBeanBuilder.buildBeani18in2015(dh.getTree());
+						MappedDataFileBean b = null;
+						try {
+							b = MapBeanBuilder.buildBean(dh.getTree());
+						} catch (Exception e) {
+							//ignore
+						}
+
+
+						if (b == null) {
+							try {
+							b = MapBeanBuilder.buildBeani18in2015(dh.getTree());
+							} catch (Exception e) {
+								//ignore
+							}
+						}
 						if (b != null) {
 							IMonitor m = new ProgressMonitorWrapper(monitor);
 							monitor.beginTask("Loading data...", -1);
