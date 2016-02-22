@@ -145,7 +145,7 @@ public class MappedDataView extends ViewPart {
 						Object obj = it.next();
 						if (obj instanceof MappedDataFile) {
 							manager.add(MapActionUtils.getFileRemoveAction(FileManagerSingleton.getFileManager(), (MappedDataFile)obj));
-							manager.add(MapActionUtils.getThumbnailAction());
+//							manager.add(MapActionUtils.getThumbnailAction());
 						}
 						
 						if (obj instanceof MappedData) {
