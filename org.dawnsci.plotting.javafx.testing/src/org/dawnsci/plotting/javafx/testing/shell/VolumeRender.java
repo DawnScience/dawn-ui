@@ -7,6 +7,8 @@ import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.DepthTest;
 import javafx.scene.Group;
+import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Translate;
 
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
@@ -20,7 +22,7 @@ public class VolumeRender extends Group
 	
 	private Group xygroup = new Group();
 	private Group zygroup = new Group();
-	private Group xzgroup = new Group();
+	private Group zxgroup = new Group();
 	
 	public VolumeRender(int[] shape, ILazyDataset dataset)
 	{
@@ -38,13 +40,19 @@ public class VolumeRender extends Group
 		
 		xygroup = createPlanes(lazySlice, 1800);
 		zygroup = createPlanes(lazySlice.getTransposedView(1,2,0).getSlice(), 1800);
-		xzgroup = createPlanes(lazySlice.getTransposedView(0,2,1).getSlice(), 1800);
+		zxgroup = createPlanes(lazySlice.getTransposedView(2,0,1).getSlice(), 1800);
+		
+		zygroup.getTransforms().addAll(
+				new Rotate(120, new Point3D(1, 1, 1)));
+		
+		zxgroup.getTransforms().addAll(
+				new Rotate(-120, new Point3D(1, 1, 1)));
 		
 		xygroup.setDepthTest(DepthTest.DISABLE);
 		zygroup.setDepthTest(DepthTest.DISABLE);
-		xzgroup.setDepthTest(DepthTest.DISABLE);
+		zxgroup.setDepthTest(DepthTest.DISABLE);
 		
-		this.getChildren().addAll(xygroup, zygroup, xzgroup);
+		this.getChildren().addAll(xygroup, zygroup, zxgroup);
 		
 		
 	}
