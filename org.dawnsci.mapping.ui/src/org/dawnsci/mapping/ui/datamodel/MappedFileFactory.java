@@ -120,6 +120,12 @@ public class MappedFileFactory {
 
 			}
 			
+			if (block.isTransposed()) {
+				Dataset ds = DatasetUtils.convertToDataset(d);
+				d = ds.transpose();
+				
+			}
+			
 			ILazyDataset[] xAxis = block.getXAxis();
 			ILazyDataset[] yAxis = block.getYAxis();
 			
