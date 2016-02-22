@@ -1,8 +1,11 @@
 package org.dawnsci.processing.ui.tool;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.spi.LocaleServiceProvider;
 
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
@@ -66,6 +69,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.part.IPageSite;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 
 import uk.ac.diamond.scisoft.analysis.processing.visitor.NexusFileExecutionVisitor;
 
@@ -188,6 +193,8 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 	public void activate() {
 		
 		if (isActive()) return;
+		EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
+		
 		super.activate();
 		getPlottingSystem().addTraceListener(listener);
 		if (informer != null) informer.setTestData(getData());
@@ -350,6 +357,11 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 					IMonitor mon = new ProgressMonitorWrapper(monitor);
 					try {
 						runProcessing(parentMeta, path, mon);
+						Map<String,String> props = new HashMap<>();
+						props.put("path", path);
+						EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
+						eventAdmin.postEvent(new Event("org/dawnsci/events/FILEOPEN", props));
+						parentMeta.toString();
 					} catch (final Exception e) {
 						
 						logger.error(e.getMessage(), e);
