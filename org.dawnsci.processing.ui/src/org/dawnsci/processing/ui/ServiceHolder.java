@@ -6,6 +6,7 @@ import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationExporterService;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
+import org.osgi.service.event.EventAdmin;
 
 public class ServiceHolder {
 
@@ -15,6 +16,7 @@ public class ServiceHolder {
 	private static IOperationService operationService;
 	private static ILoaderService loaderService;
 	private static IOperationExporterService exporterService;
+	private static EventAdmin eventAdmin;
 
 	public static IExpressionService getExpressionService() {
 		return expressionService;
@@ -62,5 +64,13 @@ public class ServiceHolder {
 
 	public static IOperationExporterService getOperationExporter() {
 		return exporterService;
+	}
+
+	public static EventAdmin getEventAdmin() {
+		return eventAdmin;
+	}
+
+	public static void setEventAdmin(EventAdmin eventAdmin) {
+		ServiceHolder.eventAdmin = eventAdmin;
 	}
 }

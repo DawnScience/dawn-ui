@@ -26,6 +26,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressService;
+import org.osgi.service.event.EventAdmin;
 
 public class MappedFileManager {
 
@@ -33,7 +34,6 @@ public class MappedFileManager {
 	private MappedDataArea mappedDataArea;
 	private Viewer viewer;
 
-	
 	public void init(MapPlotManager plotManager, MappedDataArea mappedDataArea, Viewer viewer){
 		this.plotManager = plotManager;
 		this.mappedDataArea = mappedDataArea;
@@ -120,6 +120,17 @@ public class MappedFileManager {
 	
 	public void importFile(final String path) {
 		if (contains(path)) return;
+		if (Display.getCurrent() == null) {
+			PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+
+				@Override
+				public void run() {
+					importFile(path);
+				}
+			});
+			
+			return;
+		}
 		
 		
 		IProgressService service = (IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class);
