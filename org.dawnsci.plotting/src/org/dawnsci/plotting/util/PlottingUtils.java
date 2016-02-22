@@ -152,12 +152,7 @@ public class PlottingUtils {
 
 			ILazyDataset value = tmpvalue.squeezeEnds();
 			if(value.getShape().length == 2) {
-				if (value instanceof IDataset) {
-					dataset = DatasetUtils.convertToDataset((IDataset) value.getSliceView());
-				} else {
-					dataset = DatasetUtils.convertToDataset(value.getSlice());
-				}
-
+				dataset = DatasetUtils.sliceAndConvertLazyDataset(value.getSliceView());
 				dataset.setMetadata(md);
 				return dataset;
 			}
