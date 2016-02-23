@@ -23,6 +23,7 @@ import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironmen
 import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.SectorROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -197,7 +198,7 @@ public class RadialProfileTool extends SectorProfileTool {
 			return new Dataset[]{integrals[2], integrals[3]};
 		}
 		
-		final Dataset xi = DatasetUtils.linSpace(sroi.getRadius(0), sroi.getRadius(1), integrals[0].getSize(), Dataset.FLOAT64);
+		final Dataset xi = DatasetFactory.createLinearSpace(sroi.getRadius(0), sroi.getRadius(1), integrals[0].getSize(), Dataset.FLOAT64);
 		xi.setName("Radius (pixel)");
 		
 		IMetadata meta = getMetaData();
@@ -213,7 +214,7 @@ public class RadialProfileTool extends SectorProfileTool {
 			
 		} else {
 
-			final Dataset xii = DatasetUtils.linSpace(sroi.getRadius(0), sroi.getRadius(1), integrals[1].getSize(), Dataset.FLOAT64);
+			final Dataset xii = DatasetFactory.createLinearSpace(sroi.getRadius(0), sroi.getRadius(1), integrals[1].getSize(), Dataset.FLOAT64);
 			xii.setName("Radius (pixel)");
 			
 			if (isValidMetadata(meta)) {

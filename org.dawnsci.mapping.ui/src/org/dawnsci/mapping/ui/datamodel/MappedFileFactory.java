@@ -13,6 +13,7 @@ import org.eclipse.dawnsci.analysis.api.io.IRemoteDatasetService;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
@@ -230,7 +231,7 @@ public class MappedFileFactory {
 					IDataset ds = lz.getSlice();
 					double min = ds.min().doubleValue();
 					double max = ds.max().doubleValue();
-					ILazyDataset s = DatasetUtils.linSpace(min, max, ss[i], Dataset.FLOAT64);
+					ILazyDataset s = DatasetFactory.createLinearSpace(min, max, ss[i], Dataset.FLOAT64);
 					
 //					int[] start = new int[ss.length];
 //					int[] stop = start.clone();

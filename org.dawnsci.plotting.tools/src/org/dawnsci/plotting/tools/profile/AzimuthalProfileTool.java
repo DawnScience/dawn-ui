@@ -12,6 +12,7 @@ import java.util.Collection;
 
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.SectorROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -59,14 +60,14 @@ public class AzimuthalProfileTool extends SectorProfileTool {
 		final Dataset xi;
 		
 		if (sroi.getSymmetry() != SectorROI.FULL)
-			xi = DatasetUtils.linSpace(sroi.getAngleDegrees(0), sroi.getAngleDegrees(1),integral[0].getSize(), Dataset.FLOAT64);
+			xi = DatasetFactory.createLinearSpace(sroi.getAngleDegrees(0), sroi.getAngleDegrees(1),integral[0].getSize(), Dataset.FLOAT64);
 		else
-			xi = DatasetUtils.linSpace(sroi.getAngleDegrees(0), sroi.getAngleDegrees(0) + 360., integral[0].getSize(), Dataset.FLOAT64);
+			xi = DatasetFactory.createLinearSpace(sroi.getAngleDegrees(0), sroi.getAngleDegrees(0) + 360., integral[0].getSize(), Dataset.FLOAT64);
 		xi.setName("Angle (\u00b0)");
 		
 		if (!sroi.hasSeparateRegions())  return new Dataset[]{xi};
 		
-		Dataset xii = DatasetUtils.linSpace(sroi.getAngleDegrees(0), sroi.getAngleDegrees(1), integral[1].getSize(), Dataset.FLOAT64);
+		Dataset xii = DatasetFactory.createLinearSpace(sroi.getAngleDegrees(0), sroi.getAngleDegrees(1), integral[1].getSize(), Dataset.FLOAT64);
 		xii.setName("Angle (\u00b0)");
 	
 		return new Dataset[]{xi, xii};

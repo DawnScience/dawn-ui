@@ -6,6 +6,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
@@ -200,8 +201,7 @@ public class ImageHistogramProvider implements IHistogramProvider {
 							i);
 		}
 
-		final Dataset RGBX = DatasetUtils.linSpace(histoMin, histoMax,
-				paletteData.colors.length - 3, Dataset.FLOAT64);
+		final Dataset RGBX = DatasetFactory.createLinearSpace(histoMin, histoMax, paletteData.colors.length - 3, Dataset.FLOAT64);
 		RGBX.setName("Axis");
 
 		return new IHistogramDatasets() {
