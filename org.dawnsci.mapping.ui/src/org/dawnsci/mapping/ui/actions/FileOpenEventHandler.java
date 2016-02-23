@@ -16,6 +16,11 @@ public class FileOpenEventHandler implements EventHandler {
 		
 		String path = (String)event.getProperty("path");
 
+		if (event.getTopic().endsWith("CLOSE")) {
+			fm.removeFile(path);
+			return;
+		}
+		
 		if (event.containsProperty("map_bean")) {
 			Object p = event.getProperty("map_bean");
 			if (p instanceof MappedDataFileBean) fm.importFile(path, (MappedDataFileBean)p);

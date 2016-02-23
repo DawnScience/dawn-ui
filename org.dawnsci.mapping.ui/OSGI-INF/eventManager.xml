@@ -4,5 +4,5 @@
    <service>
       <provide interface="org.osgi.service.event.EventHandler"/>
    </service>
-   <property name="event.topics" type="String" value="org/dawnsci/events/FILEOPEN"/>
+   <property name="event.topics" type="String" value="org/dawnsci/events/file/*"/>
 </scr:component>

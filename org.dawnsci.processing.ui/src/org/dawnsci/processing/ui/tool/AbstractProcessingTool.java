@@ -193,8 +193,6 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 	public void activate() {
 		
 		if (isActive()) return;
-		EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
-		
 		super.activate();
 		getPlottingSystem().addTraceListener(listener);
 		if (informer != null) informer.setTestData(getData());
@@ -360,7 +358,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 						Map<String,String> props = new HashMap<>();
 						props.put("path", path);
 						EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
-						eventAdmin.postEvent(new Event("org/dawnsci/events/FILEOPEN", props));
+						eventAdmin.postEvent(new Event("org/dawnsci/events/file/OPEN", props));
 						parentMeta.toString();
 					} catch (final Exception e) {
 						
