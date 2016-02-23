@@ -3,6 +3,7 @@ package org.dawnsci.mapping.ui.actions;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.dawnsci.mapping.ui.FileManagerSingleton;
 import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -23,11 +24,7 @@ public class NavigatorOpenAction implements IOpenFileAction {
 		if (file==null) return;
 		
 		if (!Files.isDirectory(file)) {
-			IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-			IViewPart view = page.findView("org.dawnsci.mapping.ui.mappeddataview");
-			if (view==null) return;
-			
-			final MappedFileManager manager = (MappedFileManager)view.getAdapter(MappedFileManager.class);
+			MappedFileManager manager = FileManagerSingleton.getFileManager();
 			if (manager != null) {
 				manager.importFile(file.toAbsolutePath().toString());
 			} else {

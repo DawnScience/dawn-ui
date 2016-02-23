@@ -26,6 +26,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressService;
+import org.osgi.service.event.EventAdmin;
 
 public class MappedFileManager {
 
@@ -33,7 +34,6 @@ public class MappedFileManager {
 	private MappedDataArea mappedDataArea;
 	private Viewer viewer;
 
-	
 	public void init(MapPlotManager plotManager, MappedDataArea mappedDataArea, Viewer viewer){
 		this.plotManager = plotManager;
 		this.mappedDataArea = mappedDataArea;
@@ -60,6 +60,19 @@ public class MappedFileManager {
 	
 	public void importFile(final String path, final MappedDataFileBean bean) {
 		if (contains(path)) return;
+		
+		if (Display.getCurrent() == null) {
+			PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+				
+				@Override
+				public void run() {
+					importFile(path, bean);
+					
+				}
+			});
+			return;
+		}
+		
 		IProgressService service = (IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class);
 		try {
 			service.busyCursorWhile(new IRunnableWithProgress() {
@@ -120,6 +133,17 @@ public class MappedFileManager {
 	
 	public void importFile(final String path) {
 		if (contains(path)) return;
+		if (Display.getCurrent() == null) {
+			PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+
+				@Override
+				public void run() {
+					importFile(path);
+				}
+			});
+			
+			return;
+		}
 		
 		
 		IProgressService service = (IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class);
@@ -153,8 +177,21 @@ public class MappedFileManager {
 							return;
 						}
 						
-						MappedDataFileBean b = MapBeanBuilder.buildBean(dh.getTree());
-						if (b == null) b = MapBeanBuilder.buildBeani18in2015(dh.getTree());
+						MappedDataFileBean b = null;
+						try {
+							b = MapBeanBuilder.buildBean(dh.getTree());
+						} catch (Exception e) {
+							//ignore
+						}
+
+
+						if (b == null) {
+							try {
+							b = MapBeanBuilder.buildBeani18in2015(dh.getTree());
+							} catch (Exception e) {
+								//ignore
+							}
+						}
 						if (b != null) {
 							IMonitor m = new ProgressMonitorWrapper(monitor);
 							monitor.beginTask("Loading data...", -1);

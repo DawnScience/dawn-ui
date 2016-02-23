@@ -120,6 +120,12 @@ public class MappedFileFactory {
 
 			}
 			
+			if (block.isTransposed()) {
+				Dataset ds = DatasetUtils.convertToDataset(d);
+				d = ds.transpose();
+				
+			}
+			
 			ILazyDataset[] xAxis = block.getXAxis();
 			ILazyDataset[] yAxis = block.getYAxis();
 			
@@ -155,7 +161,7 @@ public class MappedFileFactory {
 	
 	private static AssociatedImage getAssociatedImage(String path, AssociatedImageBean b) {
 		try {
-			Dataset d = DatasetUtils.convertToDataset(getLazyDataset(path, b.getName()).getSlice());
+			Dataset d = DatasetUtils.sliceAndConvertLazyDataset(getLazyDataset(path, b.getName()));
 			AxesMetadataImpl ax = new AxesMetadataImpl(2);
 			ax.addAxis(getLazyDataset(path, b.getAxes()[0]), 0);
 			ax.addAxis(getLazyDataset(path, b.getAxes()[1]), 1);
