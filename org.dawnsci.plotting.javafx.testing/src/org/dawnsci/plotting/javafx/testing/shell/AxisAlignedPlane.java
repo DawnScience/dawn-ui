@@ -1,7 +1,5 @@
 package org.dawnsci.plotting.javafx.testing.shell;
 
-import org.dawnsci.plotting.javafx.axis.objects.Vector3DUtil;
-
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.image.Image;
