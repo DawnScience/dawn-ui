@@ -11,8 +11,6 @@ package org.dawnsci.plotting.tools.reduction;
 import java.util.ArrayList;
 import java.util.List;
 
-import ncsa.hdf.hdf5lib.exceptions.HDF5FunctionArgumentException;
-
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage.DataReductionInfo;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage.DataReductionSlice;
@@ -22,10 +20,13 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.hdf5.HierarchicalDataFactory;
 import org.eclipse.dawnsci.hdf5.IHierarchicalDataFile;
 import org.eclipse.dawnsci.hdf5.Nexus;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
+
+import ncsa.hdf.hdf5lib.exceptions.HDF5FunctionArgumentException;
 
 /**
  * A conversion visitor that delegates to a tool.
@@ -104,7 +105,7 @@ class ToolConversionVisitor implements IConversionVisitor {
 		// This sucks, sorry.
 		for (int index = 0; index < nexusAxes.size(); index++) {
 			
-			IDataset i = nexusAxes.get(index);
+			Dataset i = DatasetUtils.convertToDataset(nexusAxes.get(index));
 			if (i.getRank()>1) {
 				
 			    // FIXME Yuckiness warning: we have the full path to the 
@@ -122,18 +123,18 @@ class ToolConversionVisitor implements IConversionVisitor {
 							// This is horrible
 							String frag = name+"[0,:]";
 							if (axis.getName().indexOf(frag)>-1) {
-								i = axis.getSlice();
+								i = DatasetUtils.convertToDataset(axis.getSlice());
 								break AXIS_LOOP;
 							}
 						}
 					}
 					
 				} catch (Exception ne) {
-					i = ((Dataset)i).mean(0);
+					i = i.mean(0);
 				}
 			}
 			if (i.getRank()==2) {
-                i = ((Dataset)i).mean(0);	
+                i = i.mean(0);	
 			}
 			
 			ret.add(i);

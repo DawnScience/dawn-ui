@@ -79,13 +79,6 @@ public class MappedDataView extends ViewPart {
 	private TreeViewer viewer;
 	private MappedDataArea area;
 	private MapPlotManager plotManager; 
-	private MappedFileManager fileManager;
-	
-	public MappedDataView() {
-		
-		fileManager = new MappedFileManager();
-	}
-	
 	
 	@Override
 	public void createPartControl(Composite parent) {
@@ -134,7 +127,7 @@ public class MappedDataView extends ViewPart {
 			}
 		});
 		
-		fileManager.init(plotManager, area, viewer);
+		FileManagerSingleton.initialiseManager(plotManager, area, viewer);
 
 		// Add menu and action to treeviewer
 		MenuManager menuMgr = new MenuManager();
@@ -151,7 +144,8 @@ public class MappedDataView extends ViewPart {
 					while(it != null && it.hasNext()) {
 						Object obj = it.next();
 						if (obj instanceof MappedDataFile) {
-							manager.add(MapActionUtils.getFileRemoveAction(fileManager, (MappedDataFile)obj));
+							manager.add(MapActionUtils.getFileRemoveAction(FileManagerSingleton.getFileManager(), (MappedDataFile)obj));
+//							manager.add(MapActionUtils.getThumbnailAction());
 						}
 						
 						if (obj instanceof MappedData) {
@@ -206,7 +200,7 @@ public class MappedDataView extends ViewPart {
 	
 	private void openImportWizard(String path) {
 		
-		fileManager.importFile(path);
+		FileManagerSingleton.getFileManager().importFile(path);
 		
 	}
 	
@@ -218,7 +212,7 @@ public class MappedDataView extends ViewPart {
 	
 	@Override
 	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
-		if (MappedFileManager.class == adapter) return fileManager;
+		if (MappedFileManager.class == adapter) return FileManagerSingleton.getFileManager();
 		return super.getAdapter(adapter);
 	}
 	

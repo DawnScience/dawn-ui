@@ -65,19 +65,20 @@ public class FunctionWidget {
 		functionType.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				final int index = functionType.getSelectionIndex();
 				try {
-					IFunction myFunction = FunctionType.createNew(functionType.getSelectionIndex());
+					IFunction myFunction = FunctionType.createNew(index);
 					functionEditor.setFunction(myFunction, null);
-					if(FunctionType.getType(functionType.getSelectionIndex())==FunctionType.POLYNOMIAL){
+					if (FunctionType.getType(index) == FunctionType.POLYNOMIAL) {
 						labelDegree.setVisible(true);
 						polynomialDegree.setVisible(true);
-					}else{
+					} else {
 						labelDegree.setVisible(false);
 						polynomialDegree.setVisible(false);
 					}
 					FunctionWidget.this.functionModified();
 				} catch (Exception e1) {
-					logger.error("Cannot create function "+FunctionType.getType(functionType.getSelectionIndex()).getName(), e1);
+					logger.error("Cannot create function "+FunctionType.getType(index).getName(), e1);
 				}
 			}
 		});

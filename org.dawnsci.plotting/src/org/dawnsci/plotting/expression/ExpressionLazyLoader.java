@@ -21,7 +21,6 @@ import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
 import org.eclipse.dawnsci.analysis.api.io.ILazyLoader;
 import org.eclipse.dawnsci.analysis.api.io.ScanFileHolderException;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.plotting.api.expressions.IVariableManager;
 
 class ExpressionLazyLoader implements ILazyLoader {
@@ -60,7 +59,7 @@ class ExpressionLazyLoader implements ILazyLoader {
 	}
 
 	@Override
-	public Dataset getDataset(IMonitor mon, SliceND slice) throws ScanFileHolderException {
+	public IDataset getDataset(IMonitor mon, SliceND slice) throws ScanFileHolderException {
 		
 		try {
 			engine.createExpression(expressionString);
@@ -100,8 +99,8 @@ class ExpressionLazyLoader implements ILazyLoader {
 		} catch (Exception e) {
 			return null;
 		}
-	    if (!(output instanceof Dataset))return null;
-		Dataset value = (Dataset)output;
+	    if (!(output instanceof IDataset))return null;
+		IDataset value = (IDataset)output;
 		value.setName("Slice of "+variableName);
 		
 		return value;

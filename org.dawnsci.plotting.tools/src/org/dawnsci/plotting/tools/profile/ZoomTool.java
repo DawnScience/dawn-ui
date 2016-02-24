@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -90,16 +91,16 @@ public class ZoomTool extends ProfileTool {
 		final int yInc = bounds.getPoint()[1]<bounds.getEndPoint()[1] ? 1 : -1;
 		final int xInc = bounds.getPoint()[0]<bounds.getEndPoint()[0] ? 1 : -1;
 
-		Dataset im    = (Dataset)image.getData();
-		Dataset slice = (Dataset) ToolUtils.getClippedSlice(im, bounds);
+		Dataset im    = DatasetUtils.convertToDataset(image.getData());
+		Dataset slice = DatasetUtils.convertToDataset(ToolUtils.getClippedSlice(im, bounds));
 		slice.setName(region.getName());
 		// Calculate axes to have real values not size
 		Dataset yLabels = null;
 		Dataset xLabels = null;
 		if (image.getAxes()!=null && image.getAxes().size() > 0) {
-			Dataset xl = (Dataset)image.getAxes().get(0);
+			Dataset xl = DatasetUtils.convertToDataset(image.getAxes().get(0));
 			if (xl!=null) xLabels = ZoomTool.getLabelsFromLabels(xl, bounds, 0);
-			Dataset yl = (Dataset)image.getAxes().get(1);
+			Dataset yl = DatasetUtils.convertToDataset(image.getAxes().get(1));
 			if (yl!=null) yLabels = ZoomTool.getLabelsFromLabels(yl, bounds, 1);
 		}
 
@@ -146,9 +147,9 @@ public class ZoomTool extends ProfileTool {
 			final int yInc = bounds.getPoint()[1]<bounds.getEndPoint()[1] ? 1 : -1;
 			final int xInc = bounds.getPoint()[0]<bounds.getEndPoint()[0] ? 1 : -1;
 			
-			final Dataset slice = ((Dataset)drslice.getData()).getSlice(new int[] { (int) bounds.getPoint()[1],   (int) bounds.getPoint()[0]    },
+			final Dataset slice = DatasetUtils.convertToDataset(drslice.getData().getSlice(new int[] { (int) bounds.getPoint()[1],   (int) bounds.getPoint()[0]    },
 											                       new int[] { (int) bounds.getEndPoint()[1],(int) bounds.getEndPoint()[0] },
-											                       new int[] {yInc, xInc});
+											                       new int[] {yInc, xInc}));
 			slice.setName(region.getName().replace(' ','_'));
 			
 			drslice.appendData(slice);

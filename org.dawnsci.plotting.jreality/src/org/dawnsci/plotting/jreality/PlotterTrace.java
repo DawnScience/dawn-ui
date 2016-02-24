@@ -72,9 +72,9 @@ class PlotterTrace {
 	}
 	protected List<AxisValues> createAxisValues() {
 		
-		final AxisValues xAxis = new AxisValues(getLabel(0), axes!=null?(Dataset)axes.get(0):null);
-		final AxisValues yAxis = new AxisValues(getLabel(1), axes!=null?(Dataset)axes.get(1):null);
-		final AxisValues zAxis = new AxisValues(getLabel(2), axes!=null?(Dataset)axes.get(2):null);
+		final AxisValues xAxis = new AxisValues(getLabel(0), axes!=null?axes.get(0):null);
+		final AxisValues yAxis = new AxisValues(getLabel(1), axes!=null?axes.get(1):null);
+		final AxisValues zAxis = new AxisValues(getLabel(2), axes!=null?axes.get(2):null);
 		return Arrays.asList(xAxis, yAxis, zAxis);
 	}
 

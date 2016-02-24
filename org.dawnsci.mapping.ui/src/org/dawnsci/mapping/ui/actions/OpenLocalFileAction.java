@@ -2,6 +2,7 @@ package org.dawnsci.mapping.ui.actions;
 
 import java.io.File;
 
+import org.dawnsci.mapping.ui.FileManagerSingleton;
 import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -36,14 +37,10 @@ public class OpenLocalFileAction extends Action implements IWorkbenchWindowActio
 		if (names != null) {
 			filterPath =  dialog.getFilterPath();
 			
-			IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-			IViewPart view = page.findView("org.dawnsci.mapping.ui.mappeddataview");
-			if (view==null) return;
-
-			final MappedFileManager manager = (MappedFileManager)view.getAdapter(MappedFileManager.class);
+			MappedFileManager manager = FileManagerSingleton.getFileManager();
 			if (manager != null) {
 				for (String name : names) {
-					manager.importFile((dialog.getFilterPath() + File.separator + name));
+					manager.importFile(dialog.getFilterPath() + File.separator + name);
 				}
 			}
 		}

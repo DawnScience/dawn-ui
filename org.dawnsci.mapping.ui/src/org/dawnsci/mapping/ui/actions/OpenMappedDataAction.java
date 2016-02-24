@@ -1,5 +1,6 @@
 package org.dawnsci.mapping.ui.actions;
 
+import org.dawnsci.mapping.ui.FileManagerSingleton;
 import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.Action;
@@ -61,15 +62,12 @@ private static final Logger logger = LoggerFactory.getLogger(OpenMappedDataActio
 
 				IFile file = (IFile)sSelection.getFirstElement();
 				String loc = file.getRawLocation().toOSString();
-				logger.debug(loc);
 				
-				IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-				IViewPart view = page.findView("org.dawnsci.mapping.ui.mappeddataview");
-				if (view==null) return;
-				
-				final MappedFileManager manager = (MappedFileManager)view.getAdapter(MappedFileManager.class);
+				MappedFileManager manager = FileManagerSingleton.getFileManager();
 				if (manager != null) {
 					manager.importFile(loc);
+				} else {
+					logger.error("Could not get file manager");
 				}
 				
 			}

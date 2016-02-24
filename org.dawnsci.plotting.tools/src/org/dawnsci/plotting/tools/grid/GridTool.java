@@ -390,7 +390,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		}
 		
 		double[] ret = new double[2];
-		final List<IDataset> axes = getImageTrace().getAxes();
+		final List<? extends IDataset> axes = getImageTrace().getAxes();
 		if (axes!=null) {
 			ret[0] = axes.get(0).getDouble((axes.get(0).getSize() / 2));
 			ret[1] = axes.get(1).getDouble((axes.get(1).getSize() / 2));
@@ -405,7 +405,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 	
 	@SuppressWarnings("unused")
 	private double getMaxX() {
-		final List<IDataset> axes = getImageTrace().getAxes();
+		final List<? extends IDataset> axes = getImageTrace().getAxes();
 		if (axes!=null) return axes.get(0).max().doubleValue();
 		return getImageTrace().getData().getShape()[1];
 	}

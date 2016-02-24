@@ -16,11 +16,11 @@ import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.workbench.ui.views.PlotDataPage;
 import org.dawnsci.common.widgets.editor.ITitledEditor;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.IFileLoader;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.hdf5.editor.H5Editor;
 import org.eclipse.dawnsci.hdf5.editor.H5ValuePage;
 import org.eclipse.dawnsci.hdf5.editor.IH5Editor;
@@ -44,7 +44,6 @@ import org.eclipse.ui.part.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.rcp.editors.HDF5Input;
 import uk.ac.diamond.scisoft.analysis.rcp.editors.HDF5TreeEditor;
@@ -249,10 +248,10 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
     
 
 	@Override
-	public Dataset setDatasetSelected(String name, boolean clearOthers) {
+	public IDataset setDatasetSelected(String name, boolean clearOthers) {
 		IVariableManager man = (IVariableManager)getAdapter(IVariableManager.class);
 		if (man==null) return null;
-		return (Dataset)((IPlottingSystemSelection)man).setDatasetSelected(name, clearOthers);
+		return ((IPlottingSystemSelection)man).setDatasetSelected(name, clearOthers);
 	}
 
 	@Override

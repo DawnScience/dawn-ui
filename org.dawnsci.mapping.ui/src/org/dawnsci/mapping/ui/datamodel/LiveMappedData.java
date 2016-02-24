@@ -5,6 +5,7 @@ import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.IRemoteDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +65,8 @@ public class LiveMappedData extends MappedData implements ILiveData {
 			}
 		}
 
-		final IDataset ma = baseMap.getSlice();
+		IDataset ma = baseMap.getSlice();
+		if (parent.isTransposed()) ma = DatasetUtils.convertToDataset(ma).transpose();
 		
 		// TODO This check is probably not required
 		if (baseMap.getSize() == 1) return null;

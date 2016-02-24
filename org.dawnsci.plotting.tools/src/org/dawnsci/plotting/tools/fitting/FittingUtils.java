@@ -29,6 +29,7 @@ import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -184,8 +185,8 @@ public class FittingUtils {
 		bean.setOptimizer(optimizer);
 		if (bean != null && info.getSelectedTrace()!=null)
 			for (FittedFunction p : bean.getFunctionList()) {
-				p.setX((Dataset)info.getSelectedTrace().getXData());
-				p.setY((Dataset)info.getSelectedTrace().getYData());
+				p.setX(DatasetUtils.convertToDataset(info.getSelectedTrace().getXData()));
+				p.setY(DatasetUtils.convertToDataset(info.getSelectedTrace().getYData()));
 				p.setDataTrace(info.getSelectedTrace());
 				p.setQ(getQ(info, p));
 			}
@@ -207,7 +208,7 @@ public class FittingUtils {
 		final IImageTrace trace = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next() : null;
 		if (trace!=null) {
 			set = trace.getData();
-			final IMetadata      meta = ((Dataset)set).getMetadata();
+			final IMetadata      meta = set.getMetadata();
 			if (meta instanceof IDiffractionMetadata) {
 
 				dmeta = (IDiffractionMetadata)meta;

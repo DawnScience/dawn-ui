@@ -80,7 +80,7 @@ public class SpectrumUtils {
 				DoubleDataset dd;
 				if (ds instanceof DoubleDataset) dd = (DoubleDataset)ds;
 				else {
-					dd = (DoubleDataset)DatasetUtils.cast((Dataset)ds, Dataset.FLOAT64);
+					dd = (DoubleDataset)DatasetUtils.cast(ds, Dataset.FLOAT64);
 				}
 				double[] raw = dd.getData();
 				ms.addValue(raw);

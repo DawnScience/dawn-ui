@@ -19,6 +19,7 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObject;
 import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObjectService;
 import org.eclipse.dawnsci.plotting.api.expressions.IVariableManager;
@@ -122,7 +123,7 @@ class HistoryBean {
 	public Dataset getData() {
 		if (expression!=null)
 			try {
-				return (Dataset)expression.getDataSet(null, new IMonitor.Stub());
+				return DatasetUtils.convertToDataset(expression.getDataSet(null, new IMonitor.Stub()));
 			} catch (Exception e) {
 				// Allowed
 			}

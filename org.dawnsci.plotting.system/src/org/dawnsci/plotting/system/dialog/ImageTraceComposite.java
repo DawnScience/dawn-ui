@@ -15,6 +15,7 @@ import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.plotting.system.PlottingSystemActivator;
 import org.dawnsci.plotting.util.ColorUtility;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.macro.api.IMacroService;
@@ -97,7 +98,7 @@ public class ImageTraceComposite extends Composite {
 		group.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
 		group.setLayout(new GridLayout(2, false));
 		
-		final int dType = ((Dataset)imageTrace.getData()).getDtype();
+		final int dType = AbstractDataset.getDType(imageTrace.getData());
 		boolean isInt = dType==Dataset.INT16 ||
 				        dType==Dataset.INT32 ||
 				        dType==Dataset.INT64;

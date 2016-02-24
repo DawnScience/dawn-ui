@@ -88,10 +88,9 @@ public class TransferableDataObject extends AbstractTransferableDataObject imple
 		
 		IDataset set = null;
 		if (!isExpression()) {
-			try {
-				if (holder==null) return null;
-				set = holder.getDataset(getName());
-			} catch(IllegalArgumentException ie) {
+			if (holder==null) return null;
+			set = holder.getDataset(getName());
+			if (set == null) {
 				try {
 					ILazyDataset lz = holder.getLazyDataset(name);
 					IDataset all = lz.getSlice();

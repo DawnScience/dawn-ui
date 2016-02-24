@@ -27,6 +27,7 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.IErrorDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.LongDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
@@ -181,7 +182,7 @@ public class SWTXYTraceTest {
 		IDataset                   data   = imt.getData();
 		
 		// Create a short line of invalid values...
-		data = ((Dataset)data).cast(Dataset.FLOAT64);
+		data = DatasetUtils.cast(data, Dataset.FLOAT64);
 		for (int i = 0; i <20; i++) {
 			data.set(value, i*10,i*10);
 		}
@@ -237,7 +238,7 @@ public class SWTXYTraceTest {
 				return 1;
 			}
 			protected IDataset[] filter(IDataset x,    IDataset y) {
-				return new IDataset[]{null, Maths.square((Dataset)y)};
+				return new IDataset[]{null, Maths.square(y)};
 			}
 		};
 		dec.addFilter(filter);
@@ -275,7 +276,7 @@ public class SWTXYTraceTest {
 				return 1;
 			}
 			protected IDataset[] filter(IDataset x,    IDataset y) {
-				y = Maths.square((Dataset)y);
+				y = Maths.square(y);
 				y.setName("Test Data");
 
 				return new IDataset[]{null, y};
@@ -288,7 +289,7 @@ public class SWTXYTraceTest {
 				return 1;
 			}
 			protected IDataset[] filter(IDataset x,    IDataset y) {
-				y = Maths.sqrt((Dataset)y);
+				y = Maths.sqrt(y);
 				y.setName("Test Data");
 				return new IDataset[]{null, y};
 			}
@@ -300,7 +301,7 @@ public class SWTXYTraceTest {
 				return 1;
 			}
 			protected IDataset[] filter(IDataset x,    IDataset y) {
-				y = Maths.add((Dataset)y, 10);
+				y = Maths.add(y, 10);
 				y.setName("Test Data");
 				return new IDataset[]{null, y};
 			}
@@ -367,7 +368,7 @@ public class SWTXYTraceTest {
 				return 1;
 			}
 			protected IDataset[] filter(IDataset x,    IDataset y) {
-				return new IDataset[]{null, Maths.square((Dataset)y)};
+				return new IDataset[]{null, Maths.square(y)};
 			}
 		};
 		dec.addFilter(filter);
@@ -403,7 +404,7 @@ public class SWTXYTraceTest {
 				System.out.println("Processing image filter...");
 				// Lets make it really noisy
 				for (int i = 0; i < 10; i++) {
-					data = Maths.multiply((Dataset)data, Random.rand(0, 100, data.getShape()));
+					data = Maths.multiply(data, Random.rand(0, 100, data.getShape()));
 				}
 				return new Object[]{data, axes};
 			}

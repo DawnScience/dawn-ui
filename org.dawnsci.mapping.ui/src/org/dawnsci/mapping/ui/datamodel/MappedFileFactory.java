@@ -13,6 +13,7 @@ import org.eclipse.dawnsci.analysis.api.io.IRemoteDatasetService;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
@@ -109,15 +110,21 @@ public class MappedFileFactory {
 		try {
 			ILazyDataset lz = getLazyDataset(path,mapName);
 			
-			IDataset d = null;
+			Dataset d = null;
 			if (live == null) {
-				d = lz.getSlice();
+				d = DatasetUtils.sliceAndConvertLazyDataset(lz);
 				
 				while (d.getRank() > 2) {
-					d = ((Dataset)d).sum(d.getRank()-1);
+					d = d.sum(d.getRank()-1);
 					logger.warn("Summing " + mapName);
 				}
 
+			}
+			
+			if (block.isTransposed()) {
+				Dataset ds = DatasetUtils.convertToDataset(d);
+				d = ds.transpose();
+				
 			}
 			
 			ILazyDataset[] xAxis = block.getXAxis();
@@ -155,7 +162,7 @@ public class MappedFileFactory {
 	
 	private static AssociatedImage getAssociatedImage(String path, AssociatedImageBean b) {
 		try {
-			Dataset d = DatasetUtils.convertToDataset(getLazyDataset(path, b.getName()).getSlice());
+			Dataset d = DatasetUtils.sliceAndConvertLazyDataset(getLazyDataset(path, b.getName()));
 			AxesMetadataImpl ax = new AxesMetadataImpl(2);
 			ax.addAxis(getLazyDataset(path, b.getAxes()[0]), 0);
 			ax.addAxis(getLazyDataset(path, b.getAxes()[1]), 1);
@@ -224,7 +231,7 @@ public class MappedFileFactory {
 					IDataset ds = lz.getSlice();
 					double min = ds.min().doubleValue();
 					double max = ds.max().doubleValue();
-					ILazyDataset s = DatasetUtils.linSpace(min, max, ss[i], Dataset.FLOAT64);
+					ILazyDataset s = DatasetFactory.createLinearSpace(min, max, ss[i], Dataset.FLOAT64);
 					
 //					int[] start = new int[ss.length];
 //					int[] stop = start.clone();

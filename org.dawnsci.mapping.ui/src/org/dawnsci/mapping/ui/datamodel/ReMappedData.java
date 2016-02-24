@@ -2,11 +2,11 @@ package org.dawnsci.mapping.ui.datamodel;
 
 import java.util.List;
 
-import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
 import org.eclipse.dawnsci.analysis.dataset.impl.Stats;
 import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
@@ -51,8 +51,8 @@ public class ReMappedData extends AbstractMapData {
 	private void updateRemappedData(int[] shape) {
 		
 		IDataset[] axes = MetadataPlotUtils.getAxesForDimension(map, 0);
-		IDataset y = axes[0];
-		IDataset x = axes[1];
+		Dataset y = DatasetUtils.convertToDataset(axes[0]);
+		Dataset x = DatasetUtils.convertToDataset(axes[1]);
 		
 		double yMax = y.max().doubleValue();
 		double yMin = y.min().doubleValue();
@@ -63,8 +63,8 @@ public class ReMappedData extends AbstractMapData {
 		double test = yMax - yMin;
 		
 		if (shape == null) {
-			double yStepMed = (double)Stats.median(Maths.abs(Maths.derivative(DatasetFactory.createRange(y.getSize(),Dataset.INT32),(Dataset)y,1)));
-			double xStepMed = (double)Stats.median(Maths.abs(Maths.derivative(DatasetFactory.createRange(x.getSize(),Dataset.INT32),(Dataset)x,1)));
+			double yStepMed = (double)Stats.median(Maths.abs(Maths.derivative(DatasetFactory.createRange(y.getSize(),Dataset.INT32),y,1)));
+			double xStepMed = (double)Stats.median(Maths.abs(Maths.derivative(DatasetFactory.createRange(x.getSize(),Dataset.INT32),x,1)));
 			
 			yStepMed = yStepMed == 0 ? 1 : yStepMed;
 			xStepMed = xStepMed == 0 ? 1 : xStepMed;
@@ -78,7 +78,7 @@ public class ReMappedData extends AbstractMapData {
 			this.shape = shape = new int[]{nBinsX, nBinsY};
 		}
 		
-		XYImagePixelCache cache = new XYImagePixelCache((Dataset)x,(Dataset)y,new double[]{xMin,xMax},new double[]{yMin,yMax},shape[0],shape[1]);
+		XYImagePixelCache cache = new XYImagePixelCache(x,y,new double[]{xMin,xMax},new double[]{yMin,yMax},shape[0],shape[1]);
 		
 		List<Dataset> data = PixelIntegration.integrate(map, null, cache);
 		

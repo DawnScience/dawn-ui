@@ -132,5 +132,9 @@ public class MappedDataBlock implements MapObject {
 	public String getLongName() {
 		return path + " : " + name;
 	}
+	
+	public boolean isTransposed(){
+		return yDim > xDim;
+	}
 
 }

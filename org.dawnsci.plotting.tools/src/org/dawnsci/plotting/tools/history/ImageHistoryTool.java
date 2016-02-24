@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObject;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
@@ -148,7 +149,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 				if (updatingPlotsAlready)      return;
 				if (evt.getImageTrace()==null) return;
 				if (evt.getImageTrace().getUserObject()==ImageHistoryMarker.MARKER) return;
-				originalData = (Dataset)evt.getImage();
+				originalData = DatasetUtils.convertToDataset(evt.getImage());
 				if (getImageTrace()==null) return;
 				if (!isActiveSelections()) return;
 		
@@ -176,7 +177,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
         	
         	final IImageTrace imageTrace = getImageTrace();
         	if (imageTrace!=null && imageTrace.getUserObject()!=ImageHistoryMarker.MARKER)  {
-        	    this.originalData = imageTrace!=null ? (Dataset)imageTrace.getData() : null;
+        	    this.originalData = imageTrace!=null ? DatasetUtils.convertToDataset(imageTrace.getData()) : null;
         	}
 		}
 		super.activate();
@@ -210,7 +211,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 					if (plotName==null || "".equals(plotName)) {
 						plotName = imageTrace.getName();
 					}
-					addImageToHistory((Dataset)imageTrace.getData(),plotName);
+					addImageToHistory(DatasetUtils.convertToDataset(imageTrace.getData()),plotName);
 				}
 				refresh();
 			}

@@ -3,7 +3,6 @@ package org.dawnsci.isosurface.tool;
 import org.dawnsci.isosurface.Activator;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
@@ -90,7 +89,7 @@ public final class IsoSurfaceUtil {
 	public static double[] getStatsFromSlice(IDataset slice)
 	{
 		final IImageService service = (IImageService)Activator.getService(IImageService.class);
-		return service.getFastStatistics(new ImageServiceBean((Dataset)slice, HistoType.MEAN));
+		return service.getFastStatistics(new ImageServiceBean(slice, HistoType.MEAN));
 	}
 	
 	

@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
@@ -1025,9 +1026,9 @@ public class HistogramToolPage extends AbstractToolPage {
 	 * @return actual 2-D data of the image or abs values if we have a complex dataset
 	 */
 	private Dataset getImageData(IPaletteTrace image) {		
-		Dataset im = (Dataset)image.getImageServiceBean().getImage();
+		Dataset im = DatasetUtils.convertToDataset(image.getImageServiceBean().getImage());
 		if (im!= null && im.isComplex()){
-			im = (Dataset)image.getImageServiceBean().getImageValue();
+			im = DatasetUtils.convertToDataset(image.getImageServiceBean().getImageValue());
 		} 
  		return im;
 	}
