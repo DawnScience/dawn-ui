@@ -115,7 +115,7 @@ public class SWTXYAxisUpdateTest {
 		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);
 			
 		
-		if (((Dataset)ys.get(0)).getBuffer()==null || ys.get(0).getSize()<1) {
+		if (ys.get(0)==null || ys.get(0).getSize()<1) {
 		    sys.createPlot1D(new IntegerDataset(), ys, null);
 		} else {
 		    sys.createPlot1D(DatasetFactory.createRange(0, ys.get(0).getSize(), 1, Dataset.INT32), ys, null);
@@ -132,7 +132,7 @@ public class SWTXYAxisUpdateTest {
 				
 				final IDataset y = ys.get(i);
 				
-				final int index =  (((Dataset)ys.get(0)).getBuffer()==null || ys.get(0).getSize()<1) 
+				final int index =  (ys.get(0)==null || ys.get(0).getSize()<1) 
 						        ? total+1
 						        : y.getSize()+total+1;
 				

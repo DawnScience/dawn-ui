@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -489,8 +490,8 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 	
 				// We peak fit only the first of the data sets plotted for now.
 				if (selectedTrace==null || selectedTrace.getXData()==null || selectedTrace.getYAxis()==null) continue;
-				Dataset x  = (Dataset)selectedTrace.getXData().squeeze();
-				Dataset y  = (Dataset)selectedTrace.getYData().squeeze();
+				Dataset x  = DatasetUtils.convertToDataset(selectedTrace.getXData().squeeze());
+				Dataset y  = DatasetUtils.convertToDataset(selectedTrace.getYData().squeeze());
 				
 				if (monitor.isCanceled()) break;
 	
@@ -505,8 +506,8 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 				try {
 					final FittedFunctions bean = getFittedFunctions(new FittedPeaksInfo(x, y, new ProgressMonitorWrapper(monitor), getPlottingSystem(), selectedTrace));
 					if (bean!=null) for (FittedFunction p : bean.getFunctionList()) {
-		    			p.setX((Dataset)selectedTrace.getXData());
-		    			p.setY((Dataset)selectedTrace.getYData());
+		    			p.setX(DatasetUtils.convertToDataset(selectedTrace.getXData()));
+		    			p.setY(DatasetUtils.convertToDataset(selectedTrace.getYData()));
 		    			p.setDataTrace(selectedTrace);
 					}
 					// Add saved peaks if any.

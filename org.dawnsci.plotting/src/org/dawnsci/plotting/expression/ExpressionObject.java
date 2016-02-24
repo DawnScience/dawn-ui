@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.dawb.common.services.ServiceManager;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionEngine;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
@@ -43,7 +44,7 @@ class ExpressionObject implements IExpressionObject {
 	private IVariableManager provider;
 	private IExpressionEngine engine;
 	private Reference<ILazyDataset>    lazySet;
-	private Reference<Dataset> dataSet;
+	private Reference<IDataset> dataSet;
 	
 	public ExpressionObject(final IVariableManager provider, String expressionName, String expression) {
 		this.provider         = provider;
@@ -250,7 +251,7 @@ class ExpressionObject implements IExpressionObject {
 		return function.matcher(expr).matches();
 	}
 
-	public Dataset getDataSet(String suggestedName, IMonitor mon) throws Exception {
+	public IDataset getDataSet(String suggestedName, IMonitor mon) throws Exception {
 		
 		if (dataSet!=null&&dataSet.get()!=null) return dataSet.get();
 		
@@ -264,8 +265,8 @@ class ExpressionObject implements IExpressionObject {
         
 		//Dataset ads = (Dataset)ex.evaluate(context);
 		
-		if (!(output instanceof Dataset))return null;
-		Dataset ads = (Dataset)output;
+		if (!(output instanceof IDataset))return null;
+		IDataset ads = (IDataset)output;
 		
 		if (suggestedName==null) {
 			ads.setName(getExpressionString());
@@ -276,7 +277,7 @@ class ExpressionObject implements IExpressionObject {
 		if (lazySet!=null && lazySet.get() instanceof ExpressionLazyDataset) {
 			((ExpressionLazyDataset)lazySet.get()).setShapeSilently(ads.getShape());
 		}
-		if (ads!=null) dataSet = new SoftReference<Dataset>(ads);
+		if (ads!=null) dataSet = new SoftReference<IDataset>(ads);
 		return ads;
 	}
 

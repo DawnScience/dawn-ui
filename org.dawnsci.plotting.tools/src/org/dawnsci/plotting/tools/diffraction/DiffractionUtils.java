@@ -18,6 +18,7 @@ import org.eclipse.dawnsci.analysis.api.roi.IParametricROI;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.BooleanDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.EllipticalFitROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.EllipticalROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.PolylineROI;
@@ -165,7 +166,7 @@ public class DiffractionUtils {
 
 		final ProgressMonitorWrapper mon = new ProgressMonitorWrapper(monitor);
 		monitor.subTask("Find POIs near initial ellipse");
-		Dataset image = (Dataset) t.getData();
+		Dataset image = DatasetUtils.convertToDataset(t.getData());
 		BooleanDataset mask = (BooleanDataset) t.getMask();
 		PolylineROI points;
 		monitor.subTask("Fit POIs");

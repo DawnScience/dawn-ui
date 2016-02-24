@@ -285,7 +285,7 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 
 	@Override
 	protected void createSelectionProfile(IImageTrace image, IROI roi, IProgressMonitor monitor) {
-		Dataset data = (Dataset)image.getData();
+		Dataset data = DatasetUtils.convertToDataset(image.getData());
 		Dataset ds = data.clone();
 
 		if(type.equals(NormaliseType.NONE)) {
@@ -301,7 +301,7 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 				if(!selectionData.equals(originalData))
 					selectionPlottingSystem.updatePlot2D(originalData, originalAxes, monitor);
 			}
-			profile = (Dataset) DatasetFactory.ones(DatasetUtils.convertToDataset(originalAxes.get(1)));
+			profile = DatasetFactory.ones(DatasetUtils.convertToDataset(originalAxes.get(1)));
 		} else if (type.equals(NormaliseType.ROI) || type.equals(NormaliseType.AUX)){
 			if(roi == null) return;
 	
@@ -322,7 +322,7 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 		
 		if(smoothLevel > 1){
 			try {
-				tmpProfile = ApachePolynomial.getPolynomialSmoothed((Dataset)originalAxes.get(1), profile, smoothLevel, 3);
+				tmpProfile = ApachePolynomial.getPolynomialSmoothed(DatasetUtils.convertToDataset(originalAxes.get(1)), profile, smoothLevel, 3);
 				BooleanDataset comp = Comparisons.lessThanOrEqualTo(tmpProfile, 1);
 				tmpProfile.setByBoolean(1, comp);
 			} catch (Exception e) {
@@ -339,7 +339,7 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 
 		Dataset tile = tmpProfile.reshape(tmpProfile.getShapeRef()[0],1);
 
-		Dataset ds = (Dataset) originalData.clone();
+		Dataset ds = DatasetUtils.convertToDataset(originalData.clone());
 
 		Dataset correctionDataset = DatasetUtils.tile(tile, ds.getShapeRef()[1]);
 		ds.idivide(correctionDataset);

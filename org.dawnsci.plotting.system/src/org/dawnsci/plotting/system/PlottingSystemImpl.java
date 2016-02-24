@@ -33,6 +33,7 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.IErrorDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.macro.api.IMacroService;
 import org.eclipse.dawnsci.macro.api.MacroEventObject;
@@ -605,7 +606,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 		if (monitor!=null&&monitor.isCanceled()) return null;
 		try {
 			if (image instanceof IImageTrace) {
-			    ((IImageTrace)image).setData(data, axes, false);
+			    ((IImageTrace)image).setData(data, (List<IDataset>) axes, false);
 			} else if (image instanceof ISurfaceTrace) {
 			    ((ISurfaceTrace)image).setData(data, (List<IDataset>)axes);
 			}
@@ -687,7 +688,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			} else {
 				final IPlottingSystemViewer<T> viewer = getViewer(IImageTrace.class);
 				IImageTrace imageTrace = createImageTrace(traceName);
-				imageTrace.setData(data, axes, false);
+				imageTrace.setData(data, (List<IDataset>) axes, false);
 				trace = imageTrace;
 
 				viewer.clearTraces();
@@ -785,7 +786,8 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			// No error dataset there then false again
 			boolean foundErrors = false;
 			for (IDataset ids : ysIn) {
-				if (((Dataset)ids).hasErrors()) {
+				if ((ids instanceof IErrorDataset && ((IErrorDataset) ids).hasErrors()) ||
+						ids.getError() != null) {
 					foundErrors = true;
 					break;
 				}
@@ -826,8 +828,8 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			traceMap.clear();
 			IScatter3DTrace trace = (IScatter3DTrace)viewer.createTrace(title, IScatter3DTrace.class);
 			final IDataset x = xIn;
-			final Dataset y = (Dataset) ysIn.get(1);
-			final Dataset z = (Dataset) ysIn.get(2);
+			final Dataset y = DatasetUtils.convertToDataset(ysIn.get(1));
+			final Dataset z = DatasetUtils.convertToDataset(ysIn.get(2));
 			if (dataNames!=null) trace.setDataName(dataNames.get(0));
 			trace.setData(x, Arrays.asList(x,y,z));
 			viewer.addTrace(trace);

@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
@@ -458,11 +459,11 @@ public class DerivativeTool extends AbstractToolPage  {
 		// Calculate the derivative from the data in trace,
 		// return as an abstract dataset since we dont want to interact with the plot here
 		// to generate the traces
-		final Dataset traceData =  (Dataset)trace.getData();
+		final Dataset traceData =  DatasetUtils.convertToDataset(trace.getData());
 		
 		//Get x data if present or if not generate index range
 		final Dataset x = (trace instanceof ILineTrace) 
-				? (Dataset)((ILineTrace)trace).getXData() 
+				? DatasetUtils.convertToDataset(((ILineTrace)trace).getXData()) 
 			    : DatasetFactory.createRange(0, traceData.getSize(), 1, Dataset.INT32);
 
 		Dataset derv = null;

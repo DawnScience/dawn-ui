@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObject;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
@@ -106,8 +107,8 @@ public class HistoryTool extends AbstractHistoryTool implements MouseListener {
 			if (!iTrace.isUserTrace()) continue;
 			final ILineTrace lineTrace = (ILineTrace)iTrace;
 			final HistoryBean bean = new HistoryBean(this);
-			bean.setXdata((Dataset)lineTrace.getXData());
-			bean.setYdata((Dataset)lineTrace.getYData());
+			bean.setXdata(DatasetUtils.convertToDataset(lineTrace.getXData()));
+			bean.setYdata(DatasetUtils.convertToDataset(lineTrace.getYData()));
 			bean.setTraceName(iTrace.getName());
 			if (lineTrace.getTraceColor()!=null) {
 				bean.setPlotColour(lineTrace.getTraceColor().getRGB());

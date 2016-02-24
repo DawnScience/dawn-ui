@@ -32,8 +32,8 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.LazyDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -182,10 +182,10 @@ public class PlotImageEditor extends EditorPart implements IEditorExtension, IRe
 				final boolean isStackAllowed = store.getBoolean("org.dawb.workbench.plotting.preference.loadImageStacks");
 				
 				if (!isStackAllowed) {
-					Dataset set;
+					IDataset set;
 					try {
 						final ILoaderService service = (ILoaderService)ServiceManager.getService(ILoaderService.class);
-						set = (Dataset)service.getDataset(filePath, null);
+						set = service.getDataset(filePath, null);
 					} catch (Throwable e) {
 						logger.error("Cannot load file "+filePath, e);
 						return Status.CANCEL_STATUS;

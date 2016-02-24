@@ -15,6 +15,7 @@ import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
@@ -30,9 +31,10 @@ public class PolynomialInterpolator1D {
 		DoubleDataset dy = (DoubleDataset)DatasetUtils.cast(oldy,Dataset.FLOAT64);
 		
 		boolean sorted = true;
-		double maxtest = oldx.getDouble(0);
-		for (int i = 1; i < ((Dataset)oldx).count(); i++) {
-			if (maxtest > oldx.getDouble(i))  {
+		double maxtest = dx.getDouble(0);
+		int count = dx.getSize();
+		for (int i = 1; i < count; i++) {
+			if (maxtest > dx.getDouble(i))  {
 				sorted = false;
 				break;
 			}
@@ -59,10 +61,11 @@ public class PolynomialInterpolator1D {
 		SplineInterpolator si = new SplineInterpolator();
 		PolynomialSplineFunction poly = si.interpolate(sortedx,sortedy);
 		
-		IDataset newy = newx.clone();
+		Dataset newy = DatasetFactory.zeros(newx.getShape(), Dataset.FLOAT64);
+		count = newy.getSize();
 		newy.setName(oldy.getName()+"_interpolated");
 		
-		for (int i = 0; i < ((Dataset)newx).count(); i++) {
+		for (int i = 0; i < count; i++) {
 			newy.set(poly.value(newx.getDouble(i)),i);
 		}
 		

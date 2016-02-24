@@ -23,6 +23,7 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
@@ -181,8 +182,10 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	private  Collection<ILineTrace> updatePerimeterAndAverageProfile( final IImageTrace image, final RectangularROI bounds,
 													IRegion region, boolean tryUpdate,
 													IProgressMonitor monitor) {
-		Dataset[] boxLine = ROIProfile.boxLine((Dataset)image.getData(), (Dataset)image.getMask(), bounds, true, isVertical);
-		Dataset[] boxMean = ROIProfile.boxMean((Dataset)image.getData(), (Dataset)image.getMask(), bounds, true);
+		Dataset id = DatasetUtils.convertToDataset(image.getData());
+		Dataset md = DatasetUtils.convertToDataset(image.getMask());
+		Dataset[] boxLine = ROIProfile.boxLine(id, md, bounds, true, isVertical);
+		Dataset[] boxMean = ROIProfile.boxMean(id, md, bounds, true);
 
 		if (boxLine == null) return null;
 		if (boxMean == null) return null;
@@ -246,7 +249,9 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	private Collection<ILineTrace> updatePerimeterProfile(  final IImageTrace image, final RectangularROI bounds,
 														IRegion region, boolean tryUpdate,
 														IProgressMonitor monitor) {
-		Dataset[] boxLine = ROIProfile.boxLine((Dataset)image.getData(), (Dataset)image.getMask(), bounds, true, isVertical);
+		Dataset id = DatasetUtils.convertToDataset(image.getData());
+		Dataset md = DatasetUtils.convertToDataset(image.getMask());
+		Dataset[] boxLine = ROIProfile.boxLine(id, md, bounds, true, isVertical);
 		if (boxLine == null) return null;
 
 		setTraceNames();
@@ -299,7 +304,9 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 			final IImageTrace image, final RectangularROI bounds,
 			IRegion region, boolean tryUpdate,
 			IProgressMonitor monitor) {
-		Dataset[] boxMean = ROIProfile.boxMean((Dataset)image.getData(), (Dataset)image.getMask(), bounds, true);
+		Dataset id = DatasetUtils.convertToDataset(image.getData());
+		Dataset md = DatasetUtils.convertToDataset(image.getMask());
+		Dataset[] boxMean = ROIProfile.boxMean(id, md, bounds, true);
 
 		if (boxMean==null) return null;
 
@@ -351,9 +358,9 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 				List<IDataset> axes = image.getAxes();
 				if (axes != null && axes.size() > 0) {
 					if (isVertical) {
-						updateAxes(traces, lines, (Dataset)axes.get(1), bounds.getPointY());
+						updateAxes(traces, lines, DatasetUtils.convertToDataset(axes.get(1)), bounds.getPointY());
 					} else {
-						updateAxes(traces, lines, (Dataset)axes.get(0), bounds.getPointX());
+						updateAxes(traces, lines, DatasetUtils.convertToDataset(axes.get(0)), bounds.getPointX());
 					}
 				} else { // if no axes we set them manually according to
 							// the data shape

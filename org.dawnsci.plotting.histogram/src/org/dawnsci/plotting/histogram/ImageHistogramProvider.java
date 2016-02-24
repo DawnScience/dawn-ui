@@ -28,7 +28,7 @@ public class ImageHistogramProvider implements IHistogramProvider {
 
 	protected Viewer viewer;
 
-	private IDataset imageDataset;
+	private Dataset imageDataset;
 	private ImageServiceBean bean;
 
 	public ImageHistogramProvider() {
@@ -50,17 +50,17 @@ public class ImageHistogramProvider implements IHistogramProvider {
 	 *            IPaletteTrace image
 	 * @return actual 2-D data of the image or abs values if we have a complex dataset
 	 */
-	/* protected */IDataset getImageData(IPaletteTrace image) {
-		Dataset im = (Dataset)image.getImageServiceBean().getImage();
+	/* protected */Dataset getImageData(IPaletteTrace image) {
+		Dataset im = DatasetUtils.convertToDataset(image.getImageServiceBean().getImage());
 		if (im.isComplex()) {
-			im = (Dataset)image.getImageServiceBean().getImageValue();
+			im = DatasetUtils.convertToDataset(image.getImageServiceBean().getImageValue());
 		}
 		return im;
 	}
 
 	@Override
 	public int getNumberOfBins() {
-		if (((Dataset) imageDataset).hasFloatingPointElements()) {
+		if (imageDataset.hasFloatingPointElements()) {
 			return MAX_BINS;
 		} else {
 			// set the number of points to the range

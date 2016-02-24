@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.plotting.api.trace.IImageStackTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IStackPositionListener;
 import org.eclipse.dawnsci.plotting.api.trace.StackPositionEvent;
@@ -64,8 +63,8 @@ public class ImageStackTrace extends ImageTrace implements IImageStackTrace {
 			IDataset set = stack.getSlice(new int[]{index,0,0}, 
 										  new int[]{index+1,stack.getShape()[1], stack.getShape()[2]},
 										  new int[]{1,1,1});
-			set = (IDataset)set.squeeze();
-			setData((Dataset)set, getAxes(), false);
+			set = set.squeeze();
+			setData(set, getAxes(), false);
 			
 		}
 	}
@@ -94,8 +93,8 @@ public class ImageStackTrace extends ImageTrace implements IImageStackTrace {
 				IDataset set = stack.getSlice(new int[]{index,0,0}, 
 											  new int[]{index+1,stack.getShape()[1], stack.getShape()[2]},
 											  new int[]{1,1,1});
-				set = (IDataset)set.squeeze();
-				final Dataset absData = (Dataset)set;
+				set = set.squeeze();
+				final IDataset absData = set;
 				
 				Display.getDefault().syncExec(new Runnable() {
 					public void run() {

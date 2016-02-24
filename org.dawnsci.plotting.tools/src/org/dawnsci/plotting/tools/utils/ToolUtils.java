@@ -18,6 +18,7 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RingROI;
@@ -152,7 +153,7 @@ public class ToolUtils {
 	 * @return the line intensity of the linearROI given an image dataset
 	 */
 	public static double getLineIntensity(IDataset im, LinearROI lroi) {
-		LinearROIData lrd = new LinearROIData(lroi, (Dataset) im, 1d);
+		LinearROIData lrd = new LinearROIData(lroi, DatasetUtils.convertToDataset(im), 1d);
 		try {
 			double max2 = lrd.getProfileData().length > 1
 					&& lrd.getProfileData()[1] != null
@@ -172,7 +173,7 @@ public class ToolUtils {
 	public static double getRectangleSum(IDataset rectangleSlice) {
 		if (rectangleSlice == null)
 			return Double.NaN;
-		return (Double)((Dataset)rectangleSlice).sum(true);
+		return (double) DatasetUtils.convertToDataset(rectangleSlice).sum(true);
 	}
 
 	/**

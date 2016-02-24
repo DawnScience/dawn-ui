@@ -13,6 +13,7 @@ import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.api.metadata.OriginMetadata;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -176,7 +177,7 @@ public class CrossProfileTool extends LineProfileTool {
 
 					// TODO Not sure if this is generic enough.
 					LinearROI zline     = new LinearROI(new double[]{cen[1], 0}, new double[]{cen[1], zimage.getShape()[0]});
-					Dataset[] zprofiles = ROIProfile.line((Dataset)zimage, zline, 1d);
+					Dataset[] zprofiles = ROIProfile.line(DatasetUtils.convertToDataset(zimage), zline, 1d);
 					if (zprofiles!=null && zprofiles.length>0) {
 						IDataset zprofile = zprofiles[0];
 						zprofile.setName(region.getName()+"(Z)");

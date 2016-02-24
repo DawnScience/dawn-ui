@@ -258,8 +258,8 @@ public abstract class SectorProfileTool extends ProfileTool implements IDetector
 	 * @param isDrag
 	 * @return either array size 1 or 2. If 2, 2 plots are created on the profile
 	 */
-	protected abstract Dataset[] getIntegral( final Dataset data,
-										              final Dataset mask, 
+	protected abstract Dataset[] getIntegral( final IDataset data,
+										              final IDataset mask, 
 										              final SectorROI       sroi, 
 						                              final IRegion         region,
 										              final boolean         isDrag,
@@ -286,8 +286,8 @@ public abstract class SectorProfileTool extends ProfileTool implements IDetector
 		if (!region.isVisible()) return null;
 
 		if (monitor.isCanceled()) return null;
-		final Dataset data = isDrag ? (Dataset)image.getDownsampled()     : (Dataset)image.getData();
-		final Dataset mask = isDrag ? (Dataset)image.getDownsampledMask() : (Dataset)image.getMask();
+		final IDataset data = isDrag ? image.getDownsampled()     : image.getData();
+		final IDataset mask = isDrag ? image.getDownsampledMask() : image.getMask();
 		
 		SectorROI downsroi = null;
 		if (isDrag) {

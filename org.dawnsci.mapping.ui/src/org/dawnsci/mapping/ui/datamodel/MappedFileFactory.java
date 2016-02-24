@@ -110,12 +110,12 @@ public class MappedFileFactory {
 		try {
 			ILazyDataset lz = getLazyDataset(path,mapName);
 			
-			IDataset d = null;
+			Dataset d = null;
 			if (live == null) {
-				d = lz.getSlice();
+				d = DatasetUtils.sliceAndConvertLazyDataset(lz);
 				
 				while (d.getRank() > 2) {
-					d = ((Dataset)d).sum(d.getRank()-1);
+					d = d.sum(d.getRank()-1);
 					logger.warn("Summing " + mapName);
 				}
 

@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.dataset.impl.BooleanDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
 import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
@@ -1119,7 +1120,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		if (getImageTrace()!=null) {
 			if (savedMask==null) return;
 			if (maskObject.getImageDataset()==null){
-				maskObject.setImageDataset((Dataset)getImageTrace().getData());
+				maskObject.setImageDataset(DatasetUtils.convertToDataset(getImageTrace().getData()));
 			}
 			maskObject.process(savedMask);
 			getImageTrace().setMask(maskObject.getMaskDataset());
@@ -1525,13 +1526,13 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 				if (maskObject.getMaskDataset()==null) {
 					// The mask must be maintained as a BooleanDataset so that there is the option
 					// of applying the same mask to many images.
-					final Dataset unmasked = (Dataset)image.getData();
+					final Dataset unmasked = DatasetUtils.convertToDataset(image.getData());
 					maskObject.setMaskDataset(new BooleanDataset(unmasked.getShape()), true);
 					maskObject.setImageDataset(unmasked);
 				}
 				
 				if (maskObject.getImageDataset()==null) {
-					final Dataset unmasked = (Dataset)image.getData();
+					final Dataset unmasked = DatasetUtils.convertToDataset(image.getData());
 					maskObject.setImageDataset(unmasked);
 				}
 				

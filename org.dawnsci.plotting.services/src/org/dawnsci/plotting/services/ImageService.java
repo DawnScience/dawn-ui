@@ -110,7 +110,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 	 * This method should be thread safe.
 	 */
 	public ImageData getImageData(ImageServiceBean bean) {
-		Dataset oImage    = (Dataset)bean.getImage();
+		Dataset oImage    = DatasetUtils.convertToDataset(bean.getImage());
 		Dataset image    = oImage;
 		ImageOrigin     origin   = bean.getOrigin();
 		if (origin==null) origin = ImageOrigin.TOP_LEFT;
@@ -211,7 +211,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		if (bean.isCancelled()) return null;
 		
 		BooleanDataset mask = bean.getMask()!=null
-							? (BooleanDataset)DatasetUtils.cast((Dataset)bean.getMask(), Dataset.BOOL)
+							? (BooleanDataset)DatasetUtils.cast(bean.getMask(), Dataset.BOOL)
 							: null;
 
 		ImageData imageData = null;
@@ -421,7 +421,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 	 * Package private for testing
 	 */
 	/* package */ Dataset getImageLoggedData(ImageServiceBean bean) {
-		Dataset ret = (Dataset) bean.getImageValue();
+		Dataset ret = DatasetUtils.convertToDataset(bean.getImageValue());
 		if (ret == null) {
 			ret = getImageLoggedDataCalc(bean);
 			bean.setImageValue(ret);
@@ -436,7 +436,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 	 * Package private for testing
 	 */
 	/* package */ Dataset getImageLoggedDataCalc(ImageServiceBean bean) {
-		Dataset ret = (Dataset) bean.getImage();
+		Dataset ret = DatasetUtils.convertToDataset(bean.getImage());
 
 		if (ret.isComplex()) {
 			ret = Maths.abs(ret);

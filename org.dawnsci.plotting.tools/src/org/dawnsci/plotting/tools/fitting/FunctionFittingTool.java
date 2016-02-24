@@ -31,6 +31,7 @@ import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunctionService;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
@@ -368,7 +369,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 					// We peak fit only the first of the data sets plotted
 					// for now.
-					Dataset[] traceROI = new Dataset[]{(Dataset) trace.getXData(), (Dataset) trace.getYData()};
+					Dataset[] traceROI = new Dataset[]{DatasetUtils.convertToDataset(trace.getXData()), DatasetUtils.convertToDataset(trace.getYData())};
 
 					try {
 						traceROI = Generic1DFitter.selectInRange(traceROI[0], traceROI[1],

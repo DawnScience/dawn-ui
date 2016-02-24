@@ -11,6 +11,7 @@ package org.dawnsci.plotting.tools.profile;
 import java.util.Collection;
 
 import org.eclipse.core.runtime.Status;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
@@ -74,15 +75,15 @@ public class AzimuthalProfileTool extends SectorProfileTool {
 	}
 
 	@Override
-	protected Dataset[] getIntegral(Dataset data,
-			                              Dataset mask, 
+	protected Dataset[] getIntegral(IDataset data,
+			                              IDataset mask, 
 			                              SectorROI       sroi, 
 			                              IRegion         region,
 			                              boolean         isDrag,
 			                              int             downsample) {
 
 
-		final Dataset[] profile = ROIProfile.sector(data, mask, sroi, false, true, false);
+		final Dataset[] profile = ROIProfile.sector(DatasetUtils.convertToDataset(data), DatasetUtils.convertToDataset(mask), sroi, false, true, false);
 		if (profile==null) return null;
 		
 		Dataset integral = profile[1];
@@ -114,7 +115,7 @@ public class AzimuthalProfileTool extends SectorProfileTool {
 			if (!region.isUserRegion()) continue;
 			
 			final SectorROI sroi = (SectorROI)region.getROI();
-			final Dataset[] profile = ROIProfile.sector((Dataset)slice.getData(), (Dataset)image.getMask(), sroi, false, true, false);
+			final Dataset[] profile = ROIProfile.sector(DatasetUtils.convertToDataset(slice.getData()), DatasetUtils.convertToDataset(image.getMask()), sroi, false, true, false);
 		
 			Dataset integral = profile[1];
 			integral.setName("azimuthal_"+region.getName().replace(' ', '_'));     

@@ -11,7 +11,8 @@ package org.dawnsci.plotting.tools.region;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
@@ -20,9 +21,9 @@ import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
-import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -233,8 +234,11 @@ public class MeasurementCalibrationDialog extends Dialog {
 			Dataset x = DatasetFactory.createRange(shape[1], Dataset.FLOAT64);
 			x.imultiply(ratio);
 			x.setName(measurementUnit.getText());
-		
-			image.setAxes(Arrays.asList(x,y), true);
+
+			List<IDataset> axes = new ArrayList<IDataset>();
+			axes.add(x);
+			axes.add(y);
+			image.setAxes(axes, true);
 			tool.setCalibratedAxes(unit, ratio, ratio);
 			tool.getPlottingSystem().repaint();
 		}

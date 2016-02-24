@@ -218,7 +218,7 @@ public class FilterTool extends AbstractToolPage {
 		if (originalData == null)
 			originalData = getImageTrace().getData().clone();
 		if (originalAxes == null) {
-			List<IDataset> axes = getImageTrace().getAxes();
+			List<? extends IDataset> axes = getImageTrace().getAxes();
 			if (axes != null) {
 				IDataset xAxis = axes.get(0);
 				IDataset yAxis = axes.get(1);
