@@ -200,7 +200,7 @@ public class HyperSlicingTool extends AbstractSlicingTool {
 					id = DatasetFactory.createRange(dataShape[i], Dataset.INT);
 					id.setName("indices");
 				}
-				ret[axis] = ((Dataset)id);
+				ret[axis] = id;
 			}
 			
 		}

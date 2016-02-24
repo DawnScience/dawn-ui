@@ -18,6 +18,7 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
@@ -124,9 +125,9 @@ public class BoxProfileTool extends ProfileTool {
 
 		if (monitor.isCanceled()) return null;
 		
-		Dataset data = (Dataset)image.getData();
+		Dataset data = DatasetUtils.convertToDataset(image.getData());
 		if (data instanceof RGBDataset) data = ((RGBDataset)data).getRedView();
-		Dataset[] box = ROIProfile.box(data, (Dataset)image.getMask(), bounds, true);
+		Dataset[] box = ROIProfile.box(data, DatasetUtils.convertToDataset(image.getMask()), bounds, true);
         if (box==null) return null;
         
         Dataset xi = null;
@@ -147,7 +148,7 @@ public class BoxProfileTool extends ProfileTool {
 			
 			try {
 				IDataset xFull = axes.get(0);
-			    xi = (Dataset)xFull.getSlice(new int[]{ystart}, new int[]{yend},new int[]{1});
+			    xi = DatasetUtils.convertToDataset(xFull.getSlice(new int[]{ystart}, new int[]{yend},new int[]{1}));
 			    xi.setName(xFull.getName());
 			} catch (Exception ne) {
 				//ignore
@@ -155,7 +156,7 @@ public class BoxProfileTool extends ProfileTool {
 			
 			try {
 				IDataset yFull = axes.get(1);
-			    yi = (Dataset)yFull.getSlice(new int[]{xstart}, new int[]{xend},new int[]{1});
+			    yi = DatasetUtils.convertToDataset(yFull.getSlice(new int[]{xstart}, new int[]{xend},new int[]{1}));
 			    yi.setName(yFull.getName());
 			} catch (Exception ne) {
 				//ignore
@@ -235,7 +236,8 @@ public class BoxProfileTool extends ProfileTool {
 			file.setNexusAttribute(profileGroup, Nexus.DATA);
 			slice.setParent(profileGroup);
 
-			Dataset[] box = ROIProfile.box((Dataset)slice.getData(), (Dataset)image.getMask(), (RectangularROI)region.getROI(), false);
+			Dataset[] box = ROIProfile.box(DatasetUtils.convertToDataset(slice.getData()), DatasetUtils.convertToDataset(image.getMask()),
+					(RectangularROI)region.getROI(), false);
 
 			final Dataset x_intensity = box[0];
 			x_intensity.setName("X_Profile");
@@ -249,10 +251,10 @@ public class BoxProfileTool extends ProfileTool {
 			int xInc = bounds.getPoint()[0]<bounds.getEndPoint()[0] ? 1 : -1;
 			int yInc = bounds.getPoint()[1]<bounds.getEndPoint()[1] ? 1 : -1;
 
-			Dataset dataRegion = ((Dataset)slice.getData()).getSlice(
+			Dataset dataRegion = DatasetUtils.convertToDataset(slice.getData().getSlice(
 					new int[] { (int) bounds.getPoint()[1], (int) bounds.getPoint()[0] },
 					new int[] { (int) bounds.getEndPoint()[1],(int) bounds.getEndPoint()[0] },
-					new int[] {yInc, xInc});
+					new int[] {yInc, xInc}));
 			//mean
 			Object mean = dataRegion.mean();
 			Dataset meands = DatasetFactory.createFromObject(mean);

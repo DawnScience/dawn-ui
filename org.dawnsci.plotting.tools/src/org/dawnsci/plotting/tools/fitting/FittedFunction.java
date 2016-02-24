@@ -49,7 +49,7 @@ public class FittedFunction  {
 	private Vector3d q;
 
 	public Dataset getX() {
-		return (Dataset) x;
+		return x;
 	}
 
 	public void setX(Dataset x) {
@@ -118,7 +118,7 @@ public class FittedFunction  {
 	}
 
 	public Dataset getY() {
-		return (Dataset) y;
+		return y;
 	}
 
 	public void setY(Dataset y) {

@@ -228,7 +228,7 @@ public class PowderCheckTool extends AbstractToolPage {
 			return;
 		}
 		
-		final Dataset ds = (Dataset)im.getData();
+		final Dataset ds = DatasetUtils.convertToDataset(im.getData());
 		if (ds==null) return;
 			
 		final IMetadata       m  = ds.getMetadata();

@@ -33,7 +33,6 @@ import org.dawnsci.spectrum.ui.wizard.SaveFileWizardPage;
 import org.dawnsci.spectrum.ui.wizard.SpectrumWizard;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -563,7 +562,7 @@ public class SpectrumTracesView extends ViewPart {
 
 			protected IDataset[] filter(IDataset x, IDataset y) {
 				Collection<ITrace>  traces = system.getTraces(ILineTrace.class);
-				IDataset newY = Maths.add(DatasetUtils.norm((Dataset)y),(traces.size()*0.2));
+				IDataset newY = Maths.add(DatasetUtils.norm(DatasetUtils.convertToDataset(y)),(traces.size()*0.2));
 				newY.setName(y.getName());
 
 				return new IDataset[]{x, newY};
@@ -578,7 +577,7 @@ public class SpectrumTracesView extends ViewPart {
 			}
 
 			protected IDataset[] filter(IDataset x, IDataset y) {
-				IDataset newY = DatasetUtils.norm((Dataset)y);
+				IDataset newY = DatasetUtils.norm(DatasetUtils.convertToDataset(y));
 				return new IDataset[]{x, newY};
 			}
 		};
@@ -592,7 +591,7 @@ public class SpectrumTracesView extends ViewPart {
 
 			protected IDataset[] filter(IDataset x, IDataset y) {
 				Collection<ITrace>  traces = system.getTraces(ILineTrace.class);
-				IDataset newY = Maths.add(DatasetUtils.norm((Dataset)y),(traces.size()*1));
+				IDataset newY = Maths.add(DatasetUtils.norm(DatasetUtils.convertToDataset(y)),(traces.size()*1));
 				newY.setName(y.getName());
 
 				return new IDataset[]{x, newY};

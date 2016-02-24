@@ -33,6 +33,7 @@ import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.dataset.function.Downsample;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -135,7 +136,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 		
 	    if (H5Loader.isH5(f.getAbsolutePath())) return null; // Cannot risk loading large datasets!
 		final ILoaderService loader = (ILoaderService)ServiceManager.getService(ILoaderService.class);
-		final Dataset set   = (Dataset)loader.getDataset(f.getAbsolutePath(), null);
+		final Dataset set   = DatasetUtils.convertToDataset(loader.getDataset(f.getAbsolutePath(), null));
 		final Dataset thumb = getThumbnail(set, wdith, height);
 		return thumb;
 	}
@@ -150,7 +151,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 			stepping[1] = Math.max(1, width / w);
 			stepping[0] = Math.max(1, height / h);
 			Downsample down = new Downsample(DownsampleMode.POINT, stepping);
-			Dataset ds_downsampled = (Dataset)down.value(ds).get(0);
+			Dataset ds_downsampled = DatasetUtils.convertToDataset(down.value(ds).get(0));
 			ds_downsampled.setName(ds.getName());
 			return ds_downsampled;
 		}
@@ -239,7 +240,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 						final ISurfaceTrace trace = (ISurfaceTrace)system.getTraces(ISurfaceTrace.class).iterator().next();
 						
 						// Keep z constant
-						List<IDataset> oaxes = trace.getAxes();
+						List<? extends IDataset> oaxes = trace.getAxes();
 						List<IDataset> axes  = new ArrayList<IDataset>(3);
 						if (oaxes==null) {
 							axes.add(DatasetFactory.createRange(set.getShape()[1], Dataset.INT));

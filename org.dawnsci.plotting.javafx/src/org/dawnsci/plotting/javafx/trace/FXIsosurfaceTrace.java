@@ -22,6 +22,7 @@ import javafx.scene.shape.TriangleMesh;
 import org.dawnsci.plotting.javafx.SurfaceDisplayer;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
 import org.eclipse.dawnsci.plotting.api.trace.IIsosurfaceTrace;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -73,9 +74,9 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 			create();
 		}
 		
-		this.points = (Dataset) points;
-		this.textCoords = (Dataset) textCoords;
-		this.faces = (Dataset) faces;
+		this.points = DatasetUtils.convertToDataset(points);
+		this.textCoords = DatasetUtils.convertToDataset(textCoords);
+		this.faces = DatasetUtils.convertToDataset(faces);
 		this.axes = (List<IDataset>) axes;
 				
 		if (Platform.isFxApplicationThread())

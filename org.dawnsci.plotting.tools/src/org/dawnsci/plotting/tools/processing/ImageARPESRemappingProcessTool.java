@@ -316,16 +316,16 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 		
 		logger.debug("Calling the energy remapping update");
 		
-		correctedData = (Dataset) originalData.clone();
+		correctedData = DatasetUtils.convertToDataset(originalData.clone());
 		correctedAxes = originalAxes;
 		
 		if (auxiliaryData != null) {
 			
-			Dataset tmpProfile = (Dataset) auxiliaryData.clone();
+			Dataset tmpProfile = DatasetUtils.convertToDataset(auxiliaryData.clone());
 			
 			if(smoothLevel > 1){
 				try {
-					tmpProfile = ApachePolynomial.getPolynomialSmoothed((Dataset)originalAxes.get(1), tmpProfile, smoothLevel, 3);
+					tmpProfile = ApachePolynomial.getPolynomialSmoothed(DatasetUtils.convertToDataset(originalAxes.get(1)), tmpProfile, smoothLevel, 3);
 				} catch (Exception e) {
 					logger.error("Could not smooth the plot", e);
 				}
@@ -412,19 +412,19 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 		}
 		
 		// modify the axes of the main plot if offset
-		ArrayList<IDataset> updatedAxes = new ArrayList<IDataset>();
-		updatedAxes.add(Maths.add((Dataset)correctedAxes.get(0),energyOffset));
-		updatedAxes.add(Maths.add((Dataset)correctedAxes.get(1),angleOffset));
+		ArrayList<Dataset> updatedAxes = new ArrayList<Dataset>();
+		updatedAxes.add(Maths.add(correctedAxes.get(0),energyOffset));
+		updatedAxes.add(Maths.add(correctedAxes.get(1),angleOffset));
 
 		
 		selectionPlottingSystem.updatePlot2D(correctedData, updatedAxes, monitor);
 		// Now create the full size maps
-		energyMap = (Dataset) updatedAxes.get(0);
+		energyMap = updatedAxes.get(0);
 		energyMap = energyMap.reshape(1,energyMap.getSize());
 		energyMap = DatasetUtils.tile(energyMap, correctedData.getShapeRef()[0], 1);
 		
 		// need to calculate angleRegion here
-		angleMap = (Dataset) updatedAxes.get(1);
+		angleMap = updatedAxes.get(1);
 		angleMap = angleMap.reshape(angleMap.getShapeRef()[0],1);
 		angleMap = DatasetUtils.tile(angleMap, correctedData.getShapeRef()[1]);
 		

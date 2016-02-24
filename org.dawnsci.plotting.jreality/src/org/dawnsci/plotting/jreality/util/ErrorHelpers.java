@@ -13,6 +13,7 @@ import java.awt.Color;
 
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 
 import de.jreality.geometry.IndexedLineSetFactory;
 import de.jreality.scene.Appearance;
@@ -216,7 +217,7 @@ public class ErrorHelpers {
 		}
 		double[] data = new double[dataset.getShape()[0]];
 
-		Dataset ds = (Dataset) dataset; 
+		Dataset ds = DatasetUtils.convertToDataset(dataset); 
 		
 		for(int i = 0; i < data.length; i++) {
 			data[i] = ds.getError(i) * (worldmax/(graphmax - graphmin));

@@ -30,6 +30,7 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IPeak;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
@@ -353,10 +354,10 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		final double[] p2 = roi.getEndPoint();
 
 		Dataset x  = slice.getAxes()!=null && !slice.getAxes().isEmpty()
-				           ? (Dataset)slice.getAxes().get(0)
+				           ? DatasetUtils.convertToDataset(slice.getAxes().get(0))
 				           : IntegerDataset.createRange(slice.getData().getSize());
 
-		Dataset[] a= Generic1DFitter.selectInRange(x,(Dataset)slice.getData(),p1[0],p2[0]);
+		Dataset[] a= Generic1DFitter.selectInRange(x,DatasetUtils.convertToDataset(slice.getData()),p1[0],p2[0]);
 		x = a[0]; Dataset y=a[1];
 		
 		// If the IdentifiedPeaks are null, we make them.
@@ -481,7 +482,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 			
 			final List<IDataset> fs = functions.get(i);
 			for (IDataset iDataset : fs) {
-				Dataset ds = (Dataset)iDataset.squeeze();
+				Dataset ds = DatasetUtils.convertToDataset(iDataset.squeeze());
 				ds.setName(peakName+"_functions");
 				
 				

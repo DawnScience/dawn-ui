@@ -6,6 +6,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
@@ -27,7 +28,7 @@ public class ImageHistogramProvider implements IHistogramProvider {
 
 	protected Viewer viewer;
 
-	private IDataset imageDataset;
+	private Dataset imageDataset;
 	private ImageServiceBean bean;
 
 	public ImageHistogramProvider() {
@@ -49,17 +50,17 @@ public class ImageHistogramProvider implements IHistogramProvider {
 	 *            IPaletteTrace image
 	 * @return actual 2-D data of the image or abs values if we have a complex dataset
 	 */
-	/* protected */IDataset getImageData(IPaletteTrace image) {
-		Dataset im = (Dataset)image.getImageServiceBean().getImage();
+	/* protected */Dataset getImageData(IPaletteTrace image) {
+		Dataset im = DatasetUtils.convertToDataset(image.getImageServiceBean().getImage());
 		if (im.isComplex()) {
-			im = (Dataset)image.getImageServiceBean().getImageValue();
+			im = DatasetUtils.convertToDataset(image.getImageServiceBean().getImageValue());
 		}
 		return im;
 	}
 
 	@Override
 	public int getNumberOfBins() {
-		if (((Dataset) imageDataset).hasFloatingPointElements()) {
+		if (imageDataset.hasFloatingPointElements()) {
 			return MAX_BINS;
 		} else {
 			// set the number of points to the range
@@ -200,8 +201,7 @@ public class ImageHistogramProvider implements IHistogramProvider {
 							i);
 		}
 
-		final Dataset RGBX = DatasetUtils.linSpace(histoMin, histoMax,
-				paletteData.colors.length - 3, Dataset.FLOAT64);
+		final Dataset RGBX = DatasetFactory.createLinearSpace(histoMin, histoMax, paletteData.colors.length - 3, Dataset.FLOAT64);
 		RGBX.setName("Axis");
 
 		return new IHistogramDatasets() {

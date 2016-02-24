@@ -27,11 +27,11 @@ package org.dawnsci.plotting.tools;
 import java.text.DecimalFormat;
 
 import org.dawnsci.plotting.tools.preference.InfoPixelConstants;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironment;
 import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -126,9 +126,9 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 				}
 			}
 
-			Dataset set = null;
+			IDataset set = null;
 			if (trace!=null)
-				set = (Dataset)trace.getData();
+				set = trace.getData();
 			return getText(xIndex, yIndex, xLabel, yLabel, set, regionName);
 		} catch (Throwable ne) { 
 			// Must not throw anything from this method - user sees millions of messages!
@@ -137,7 +137,7 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 		}
 	}
 
-	public String getText(final double xIndex, final double yIndex, double xLabel, double yLabel, final Dataset set, final String regionName) {
+	public String getText(final double xIndex, final double yIndex, double xLabel, double yLabel, final IDataset set, final String regionName) {
 		if (Double.isNaN(xLabel)) xLabel = xIndex;
 		if (Double.isNaN(yLabel)) yLabel = yIndex;
 

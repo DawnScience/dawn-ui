@@ -18,6 +18,7 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.plotting.api.trace.IScatter3DTrace;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
@@ -43,7 +44,7 @@ public class Scatter3DTrace extends PlotterTrace implements IScatter3DTrace {
 		if (axes!=null && axes.size()==2) {
 			axes = Arrays.asList(axes.get(0), axes.get(1), null);
 		}
-		this.scatter = (Dataset) data;
+		this.scatter = DatasetUtils.convertToDataset(data);
 		this.axes  = axes;
 
 		if (isActive()) {
@@ -59,8 +60,8 @@ public class Scatter3DTrace extends PlotterTrace implements IScatter3DTrace {
 
 	@Override
 	protected List<AxisValues> createAxisValues() {
-		final AxisValues xAxis = new AxisValues(getLabel(0), axes!=null?(Dataset)axes.get(0):null);
-		final AxisValues yAxis = new AxisValues(getLabel(1), axes!=null?(Dataset)axes.get(1):null);
+		final AxisValues xAxis = new AxisValues(getLabel(0), axes!=null?axes.get(0):null);
+		final AxisValues yAxis = new AxisValues(getLabel(1), axes!=null?axes.get(1):null);
 		final AxisValues zAxis;
 		if (window instanceof LinearROI) {
 			final int x1 = window.getIntPoint()[0];
@@ -68,7 +69,7 @@ public class Scatter3DTrace extends PlotterTrace implements IScatter3DTrace {
 			final int len = x2-x1;
 			zAxis = new AxisValues(getLabel(2), DatasetFactory.createRange(len, Dataset.INT32));
 		} else {
-			zAxis = new AxisValues(getLabel(2), axes!=null?(Dataset)axes.get(2):null);
+			zAxis = new AxisValues(getLabel(2), axes!=null?axes.get(2):null);
 		}
 		return Arrays.asList(xAxis, yAxis, zAxis);
 	}

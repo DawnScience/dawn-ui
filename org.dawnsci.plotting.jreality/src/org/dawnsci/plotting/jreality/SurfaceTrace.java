@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceTrace;
@@ -103,8 +104,8 @@ public class SurfaceTrace extends Image3DTrace implements ISurfaceTrace{
 			axes = Arrays.asList(axes.get(0), axes.get(1), null);
 		}
 
-		this.data = (Dataset)data;
-		this.axes = (List<IDataset>) axes;
+		this.data = DatasetUtils.convertToDataset(data);
+		this.axes = axes;
 		if (isActive()) {
 			plotter.updatePlot(createAxisValues(), plotter.getWindow(getWindow()), plotType, this.data);
 

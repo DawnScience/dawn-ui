@@ -57,6 +57,7 @@ import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.BooleanDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.CircularFitROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.CircularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.EllipticalFitROI;
@@ -709,8 +710,8 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 						throw new IllegalStateException();
 					}
 					SectorROI sroi = (SectorROI) regions.iterator().next().getROI();
-					Dataset dataset = (Dataset)t.getData();
-					Dataset mask    = (Dataset)t.getMask();
+					Dataset dataset = DatasetUtils.convertToDataset(t.getData());
+					Dataset mask    = DatasetUtils.convertToDataset(t.getMask());
 					final BeamCenterRefinement beamOffset = new BeamCenterRefinement(dataset, mask, sroi);
 					List<IPeak> peaks = loadPeaks();
 					if (peaks==null) throw new Exception("Cannot find peaks!");
@@ -989,7 +990,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		final ProgressMonitorWrapper mon = new ProgressMonitorWrapper(monitor);
 		monitor.beginTask("Refine " + shape + " fit", IProgressMonitor.UNKNOWN);
 		monitor.subTask("Find POIs near initial " + shape);
-		Dataset image = (Dataset) t.getData();
+		Dataset image = DatasetUtils.convertToDataset(t.getData());
 		BooleanDataset mask = (BooleanDataset) t.getMask();
 		PolylineROI points;
 		EllipticalFitROI efroi;
@@ -1060,7 +1061,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		if (roi instanceof CircularFitROI) {
 			roi = new EllipticalFitROI(((CircularFitROI) roi).getPoints(), true);
 		}
-		final List<EllipticalROI> ells = PowderRingsUtils.findOtherEllipses(mon, (Dataset)t.getData(), (BooleanDataset) t.getMask(), (EllipticalROI) roi);
+		final List<EllipticalROI> ells = PowderRingsUtils.findOtherEllipses(mon, DatasetUtils.convertToDataset(t.getData()), (BooleanDataset) t.getMask(), (EllipticalROI) roi);
 		final boolean[] status = {true};
 		display.syncExec(new Runnable() {
 

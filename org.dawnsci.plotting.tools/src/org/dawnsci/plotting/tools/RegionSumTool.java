@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -462,7 +463,7 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 		int yInc = bounds.getPoint()[1]<bounds.getEndPoint()[1] ? 1 : -1;
 
 		if(image == null) return;
-		Dataset dataRegion = (Dataset)image.getData();
+		Dataset dataRegion = DatasetUtils.convertToDataset(image.getData());
 
 		if(dataRegion == null) return;
 		try {

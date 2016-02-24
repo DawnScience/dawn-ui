@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -275,9 +276,9 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 		final int xInc = bounds.getPoint()[0]<bounds.getEndPoint()[0] ? 1 : -1;
 		
 		try {
-			final Dataset slice = ((Dataset)image.getData()).getSlice(new int[] { (int) bounds.getPoint()[1],    (int) bounds.getPoint()[0] },
+			final Dataset slice = DatasetUtils.convertToDataset(image.getData().getSlice(new int[] { (int) bounds.getPoint()[1],    (int) bounds.getPoint()[0] },
 					                                               new int[] { (int) bounds.getEndPoint()[1], (int) bounds.getEndPoint()[0] },
-					                                               new int[] {yInc, xInc});
+					                                               new int[] {yInc, xInc}));
 		
 			removeTable();
 			Display.getDefault().syncExec(new Runnable() {
@@ -489,6 +490,6 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 			}
 		}
 		
-		return ((Dataset)getImageTrace().getData()).getMetadata();
+		return getImageTrace().getData().getMetadata();
 	}
 }

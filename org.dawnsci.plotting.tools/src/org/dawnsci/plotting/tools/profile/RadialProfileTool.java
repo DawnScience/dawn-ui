@@ -18,11 +18,13 @@ import org.dawb.common.ui.menu.MenuAction;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.utils.ToolUtils;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironment;
 import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.SectorROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -197,7 +199,7 @@ public class RadialProfileTool extends SectorProfileTool {
 			return new Dataset[]{integrals[2], integrals[3]};
 		}
 		
-		final Dataset xi = DatasetUtils.linSpace(sroi.getRadius(0), sroi.getRadius(1), integrals[0].getSize(), Dataset.FLOAT64);
+		final Dataset xi = DatasetFactory.createLinearSpace(sroi.getRadius(0), sroi.getRadius(1), integrals[0].getSize(), Dataset.FLOAT64);
 		xi.setName("Radius (pixel)");
 		
 		IMetadata meta = getMetaData();
@@ -213,7 +215,7 @@ public class RadialProfileTool extends SectorProfileTool {
 			
 		} else {
 
-			final Dataset xii = DatasetUtils.linSpace(sroi.getRadius(0), sroi.getRadius(1), integrals[1].getSize(), Dataset.FLOAT64);
+			final Dataset xii = DatasetFactory.createLinearSpace(sroi.getRadius(0), sroi.getRadius(1), integrals[1].getSize(), Dataset.FLOAT64);
 			xii.setName("Radius (pixel)");
 			
 			if (isValidMetadata(meta)) {
@@ -275,8 +277,8 @@ public class RadialProfileTool extends SectorProfileTool {
 	}
 
 	@Override
-	protected Dataset[] getIntegral(Dataset data,
-			                              Dataset mask, 
+	protected Dataset[] getIntegral(IDataset data,
+			                              IDataset mask, 
 			                              SectorROI       sroi, 
 			                              IRegion         region,
 			                              boolean         isDrag,
@@ -311,7 +313,7 @@ public class RadialProfileTool extends SectorProfileTool {
 			// continue as normal
 		}
 
-		Dataset[] profile = ROIProfile.sector(data, mask, sroi, true, false, false, qSpace, axis, false);
+		Dataset[] profile = ROIProfile.sector(DatasetUtils.convertToDataset(data), DatasetUtils.convertToDataset(mask), sroi, true, false, false, qSpace, axis, false);
 		
         if (profile == null) {
         	return null;
@@ -347,7 +349,7 @@ public class RadialProfileTool extends SectorProfileTool {
 			if (!region.isUserRegion()) continue;
 			
 			final SectorROI sroi = (SectorROI)region.getROI();
-			Dataset[] profile = ROIProfile.sector((Dataset)slice.getData(), (Dataset)image.getMask(), sroi, true, false, false);
+			Dataset[] profile = ROIProfile.sector(DatasetUtils.convertToDataset(slice.getData()), DatasetUtils.convertToDataset(image.getMask()), sroi, true, false, false);
 		
 			Dataset integral = profile[0];
 			integral.setName("radial_"+region.getName().replace(' ', '_'));     

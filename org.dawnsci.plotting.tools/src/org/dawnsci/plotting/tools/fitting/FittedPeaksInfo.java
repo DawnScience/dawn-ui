@@ -71,13 +71,13 @@ public class FittedPeaksInfo {
 		this.identifiedPeaks = ideedPeaks;
 	}
 	public Dataset getX() {
-		return (Dataset) x;
+		return x;
 	}
 	public void setX(Dataset x) {
 		this.x = x;
 	}
 	public Dataset getY() {
-		return (Dataset) y;
+		return y;
 	}
 	public void setY(Dataset y) {
 		this.y = y;

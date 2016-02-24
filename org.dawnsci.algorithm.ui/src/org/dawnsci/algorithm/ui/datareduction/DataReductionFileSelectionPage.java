@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -250,12 +251,12 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 				// if data is locked
 				if(((SelectedData)viewer.getElementAt(0)).isLocked()){
 					IDataset dataImage = ((SelectedData)viewer.getElementAt(0)).getImage();
-					final Dataset aDataImage = (Dataset)dataImage;
+					final Dataset aDataImage = DatasetUtils.convertToDataset(dataImage);
 					Job divide = new Job("Running Divide process") {
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
-							Dataset divideResult = Maths.divide(aDataImage, (Dataset)image);
-							PlottingUtils.plotData(plottingSystem, fileTitle, (IDataset)divideResult);
+							Dataset divideResult = Maths.divide(aDataImage, image);
+							PlottingUtils.plotData(plottingSystem, fileTitle, divideResult);
 							return Status.OK_STATUS;
 						}
 					};
@@ -267,12 +268,12 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 				// if data is locked
 				if(((SelectedData)viewer.getElementAt(0)).isLocked()){
 					IDataset dataImage = ((SelectedData)viewer.getElementAt(0)).getImage();
-					final Dataset aDataImage = (Dataset)dataImage;
+					final Dataset aDataImage = DatasetUtils.convertToDataset(dataImage);
 					Job subtract = new Job("Running Subtract process") {
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
-							Dataset subtractResult = Maths.subtract(aDataImage, (Dataset)image);
-							PlottingUtils.plotData(plottingSystem, fileTitle, (IDataset)subtractResult);
+							Dataset subtractResult = Maths.subtract(aDataImage, image);
+							PlottingUtils.plotData(plottingSystem, fileTitle, subtractResult);
 							return Status.OK_STATUS;
 						}
 					};

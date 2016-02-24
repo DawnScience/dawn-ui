@@ -43,6 +43,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
@@ -1031,8 +1032,8 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 				final IImageTrace trace = (IImageTrace) traces.iterator().next();
 				if (roi instanceof RectangularROI) {
 					RectangularROI rroi = (RectangularROI) roi;
-						Dataset dataRegion = (Dataset) ToolUtils
-								.getClippedSlice(trace.getData(), rroi);
+						Dataset dataRegion = DatasetUtils.convertToDataset(ToolUtils
+								.getClippedSlice(trace.getData(), rroi));
 						intensityAndSum[0] = ToolUtils.getRectangleMaxIntensity(dataRegion);
 						intensityAndSum[1] = ToolUtils.getRectangleSum(dataRegion);
 				} else if (roi instanceof LinearROI) {
@@ -1040,7 +1041,7 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 					intensityAndSum[0] = ToolUtils.getLineIntensity(trace.getData(), lroi);
 				} else if (roi instanceof PointROI) {
 					PointROI proi = (PointROI) roi;
-					intensityAndSum[0] = ((Dataset) trace.getData()).getDouble((int)proi.getPointY(), (int)proi.getPointX());
+					intensityAndSum[0] = trace.getData().getDouble((int)proi.getPointY(), (int)proi.getPointX());
 				}
 			}
 			return intensityAndSum;

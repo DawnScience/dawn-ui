@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
@@ -525,8 +526,8 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 				return false;
 			}
 
-			final Dataset data = (Dataset)image.getData();
-			Dataset slice=null, sliceIndex=null;
+			final IDataset data = image.getData();
+			IDataset slice=null, sliceIndex=null;
 			if (monitor.isCanceled())return  false;
 			try {
 				int[] shape = data.getShape();
@@ -543,9 +544,9 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 			}
 			
 			if (monitor.isCanceled()) return  false;
-			slice = slice.flatten();
-			if (monitor.isCanceled()) return  false;
 			final int size = slice.getSize();
+			slice.setShape(size);
+			if (monitor.isCanceled()) return  false;
 			sliceIndex = DatasetFactory.createRange(size, Dataset.INT);
 			if (trace==null) return false;
 			slice.setName(trace.getName());

@@ -14,6 +14,7 @@ import java.util.Map;
 
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
@@ -131,9 +132,9 @@ public abstract class AbstractSpectrumFile implements ISpectrumFile {
 
 		int matchingDim = getMatchingDim(axis, data);
 
+		Dataset mean = DatasetUtils.convertToDataset(data);
+		Dataset std = mean;
 		if (axis == null || matchingDim == -1) {
-			Dataset mean = (Dataset) data;
-			Dataset std = (Dataset) data;
 			for (int i = 0; i < data.getRank() - 1; i++) {
 				mean = mean.mean(0);
 				std = std.stdDeviation(0);
@@ -142,8 +143,6 @@ public abstract class AbstractSpectrumFile implements ISpectrumFile {
 		} else {
 
 			int i = data.getRank() - 1;
-			Dataset mean = (Dataset) data;
-			Dataset std = (Dataset) data;
 			for (; i >= 0; i--) {
 				if (i == matchingDim) {
 					continue;
