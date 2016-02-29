@@ -51,10 +51,7 @@ public class VolumeRenderingShellTester {
 	private VolumeTrace generateTrace(ILazyDataset dataset)
 	{
 		VolumeTrace outputTrace = new VolumeTrace(null, "volume");
-		
-		volumePlaneGenerator volumeGenerator = new volumePlaneGenerator(5/255, dataset);
-		volumeGenerator.createImagePlanes();
-		
+				
 		outputTrace.setData(dataset.getSlice());
 		
 		return new VolumeTrace(null, "volume");
