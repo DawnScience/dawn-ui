@@ -1,4 +1,4 @@
-package org.dawnsci.plotting.javafx.testing.shell;
+package org.dawnsci.plotting.javafx.testing.volume;
 
 import javafx.embed.swt.FXCanvas;
 import javafx.geometry.Point3D;
@@ -9,8 +9,8 @@ import org.dawnsci.isosurface.alg.MarchingCubes;
 import org.dawnsci.isosurface.alg.MarchingCubesModel;
 import org.dawnsci.isosurface.alg.Surface;
 import org.dawnsci.plotting.javafx.SurfaceDisplayer;
-import org.dawnsci.plotting.javafx.axis.volume.VolumeRender;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.dawnsci.plotting.javafx.trace.VolumeTrace;
+import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
@@ -25,7 +25,7 @@ public class VolumeRenderingShellTester {
 	
 	MarchingCubes algorithm;
 	
-	IDataset dataset;
+	ILazyDataset dataset;
 	MarchingCubesModel model;
 	Surface testResult;
 	
@@ -48,9 +48,16 @@ public class VolumeRenderingShellTester {
 		dataset = dh.getLazyDataset("/entry/edf/data").getSlice();
 	}
 	
-	private Group generateNode(IDataset dataset)
-	{		
-		return new VolumeRender(dataset.getShape(), dataset);
+	private VolumeTrace generateTrace(ILazyDataset dataset)
+	{
+		VolumeTrace outputTrace = new VolumeTrace(null, "volume");
+		
+		volumePlaneGenerator volumeGenerator = new volumePlaneGenerator(5/255, dataset);
+		volumeGenerator.createImagePlanes();
+		
+		outputTrace.setData(dataset.getSlice());
+		
+		return new VolumeTrace(null, "volume");
 	}
 		
 	// simply creates a shell to check javafx fxcanvas still functions
@@ -58,7 +65,6 @@ public class VolumeRenderingShellTester {
 	public void shellButtonTest() throws Exception
 	{
 		loadDataset();
-		Group group = generateNode(dataset);
 		Display display = new Display();
         Shell shell = new Shell(display);
         shell.setLayout(new FillLayout());
@@ -69,7 +75,7 @@ public class VolumeRenderingShellTester {
         
         SurfaceDisplayer scene = new SurfaceDisplayer(root, isoSurfaceGroup);
                 
-        scene.addVolumeGroup(group);
+        scene.addVolumeTrace(generateTrace(dataset));
         
         canvas.setScene(scene);
         shell.open();
