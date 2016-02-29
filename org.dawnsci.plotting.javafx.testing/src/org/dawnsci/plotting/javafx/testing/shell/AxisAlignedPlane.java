@@ -1,4 +1,4 @@
-package org.dawnsci.plotting.javafx.axis.volume;
+package org.dawnsci.plotting.javafx.testing.shell;
 
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
@@ -35,10 +35,10 @@ public class AxisAlignedPlane extends MeshView{
 				
 		this.setMesh(mesh);
 		
-		mat = new PhongMaterial(new Color(1, 1, 1, 1));
+		mat = new PhongMaterial(new Color(1, 1, 1, 0.5));
 		mat.setDiffuseMap(image);
-		mat.setSpecularColor(new Color(1, 1, 1, 1));
-		mat.setDiffuseColor(new Color(1, 1, 1, 1));
+		mat.setSpecularColor(new Color(1, 1, 1, 0.5));
+		mat.setDiffuseColor(new Color(1, 1, 1, 0.5));
 		this.setOpacity(0.5);
 		this.setMaterial(mat);
 		

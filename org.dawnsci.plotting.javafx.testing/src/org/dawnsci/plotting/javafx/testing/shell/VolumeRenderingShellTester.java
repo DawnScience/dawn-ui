@@ -9,7 +9,6 @@ import org.dawnsci.isosurface.alg.MarchingCubes;
 import org.dawnsci.isosurface.alg.MarchingCubesModel;
 import org.dawnsci.isosurface.alg.Surface;
 import org.dawnsci.plotting.javafx.SurfaceDisplayer;
-import org.dawnsci.plotting.javafx.axis.volume.VolumeRender;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.swt.SWT;
@@ -52,7 +51,7 @@ public class VolumeRenderingShellTester {
 	{		
 		return new VolumeRender(dataset.getShape(), dataset);
 	}
-		
+	
 	// simply creates a shell to check javafx fxcanvas still functions
 	@Test
 	public void shellButtonTest() throws Exception
@@ -69,7 +68,7 @@ public class VolumeRenderingShellTester {
         
         SurfaceDisplayer scene = new SurfaceDisplayer(root, isoSurfaceGroup);
                 
-        scene.addVolumeGroup(group);
+        scene.addVolumeTrace(group);
         
         canvas.setScene(scene);
         shell.open();

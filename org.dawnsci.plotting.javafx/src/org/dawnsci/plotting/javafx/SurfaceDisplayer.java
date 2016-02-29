@@ -39,7 +39,6 @@ import org.dawnsci.plotting.javafx.axis.objects.ScaleAxisGroup;
 import org.dawnsci.plotting.javafx.axis.objects.SceneObjectGroup;
 import org.dawnsci.plotting.javafx.axis.objects.Vector3DUtil;
 import org.dawnsci.plotting.javafx.trace.FXIsosurfaceTrace;
-import org.dawnsci.plotting.javafx.trace.VolumeTrace;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 
 /**
@@ -496,28 +495,7 @@ public class SurfaceDisplayer extends Scene
 		return isosurfaceGroup;
 	}
 	
-	public void addSurfaceGroup(Group isoGroup)
-	{
-		this.isosurfaceGroup.getChildren().add(isoGroup);
-	}
-	
 	public void addSurfaceTrace(FXIsosurfaceTrace trace)
-	{
-		createAxes(trace.getAxes());
-		// add the mesh the the scene graph
-		this.isosurfaceGroup.getChildren().add(trace.getIsoSurface());
-	}
-	
-	public void addVolumeGroup(Group Group) // no trace currently implemented
-	{
-		this.volumeGroup.getChildren().add(Group);
-	}
-	public void addVolumeTrace(VolumeTrace trace) // no trace currently implemented
-	{
-		this.volumeGroup.getChildren().add(trace.getVolume());
-	}
-	
-	private void createAxes(List<IDataset> axes)
 	{
 		// if the first trace create the axes using the trace.axes data
 		// all of this data is irrelevant as it get reset when a surface is added
@@ -525,14 +503,14 @@ public class SurfaceDisplayer extends Scene
 		if (axisObjectGroup.getChildren().size() <= 0)
 		{
 			Point3D maxLengths = new Point3D(
-					axes.get(0).getFloat(0),
-					axes.get(0).getFloat(1),
-					axes.get(0).getFloat(2));
+					trace.getAxes().get(0).getFloat(0),
+					trace.getAxes().get(0).getFloat(1),
+					trace.getAxes().get(0).getFloat(2));
 			
 			Point3D seperationValue = new Point3D(
-											calculateTickSeperation(axes.get(1)), 
-											calculateTickSeperation(axes.get(2)), 
-											calculateTickSeperation(axes.get(3)));
+											calculateTickSeperation(trace.getAxes().get(1)), 
+											calculateTickSeperation(trace.getAxes().get(2)), 
+											calculateTickSeperation(trace.getAxes().get(3)));
 						
 			double maxSeperation = Vector3DUtil.getMaximumValue(seperationValue);
 			Point3D tickSeperationXYZ = new Point3D(maxSeperation, maxSeperation, maxSeperation);
@@ -544,8 +522,16 @@ public class SurfaceDisplayer extends Scene
 			
 			this.axisObjectGroup.createBoundingBox(maxLengths);
 		}
-}
+		
+		// add the mesh the the scene graph
+		this.isosurfaceGroup.getChildren().add(trace.getIsoSurface());
+	}
 	
+	
+	public void addVolumeTrace(Group trace) // no trace currently implemented
+	{
+		this.volumeGroup.getChildren().add(trace);
+	}
 	
 	public void removeSurface(Node removeNode)
 	{
