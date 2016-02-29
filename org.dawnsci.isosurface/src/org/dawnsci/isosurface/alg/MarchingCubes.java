@@ -37,15 +37,16 @@ import org.eclipse.dawnsci.analysis.dataset.operations.AbstractOperationBase;
  */
 public class MarchingCubes {
 
-	final AtomicInteger mapIndex = new AtomicInteger(0);
-	IProgressMonitor monitor;
-	MarchingCubesModel model;
+	final private AtomicInteger mapIndex = new AtomicInteger(0);
+	private IProgressMonitor monitor;
+	private MarchingCubesModel model;
 	
-	public MarchingCubes(MarchingCubesModel model) {
+	public MarchingCubes(MarchingCubesModel model) 
+	{
 		this.model = model;
 	}
 	
-	public Surface execute(IDataset slice, IProgressMonitor monitor) throws OperationException {
+	public Surface execute(IProgressMonitor monitor){
 
 		this.monitor = monitor;
 		final Object[] data = parseVertices();
@@ -70,9 +71,8 @@ public class MarchingCubes {
 	private int[] createFaces(Set<Triangle> triangles, Map<Point,Integer> v)
 	{
 		int[] faces = new int[6 * triangles.size()];
-
 		int k = 0;
-
+		
 		for (Triangle t: triangles) {
 						
 			faces[k] = v.get(t.getA());
@@ -83,7 +83,6 @@ public class MarchingCubes {
 			faces[k + 5] = 2;
 			k += 6;
 		}
-		
 		return faces;
 	}
 	

@@ -95,7 +95,7 @@ public class BenchMark
 		};
 		
 		// execute the algorithmA
-		testResult = algorithm.execute(null, monitor);
+		testResult = algorithm.execute(monitor);
 	}
 
 	@Test
@@ -119,7 +119,7 @@ public class BenchMark
 				System.out.print("\n");
 			}
 			double startTime = System.currentTimeMillis();
-			testResult = algorithm.execute(null, monitor);
+			testResult = algorithm.execute(monitor);
 			double completionTime = System.currentTimeMillis() - startTime;
 			average += completionTime;
 			System.out.print(completionTime + ",\t");

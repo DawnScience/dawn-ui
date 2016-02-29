@@ -16,15 +16,15 @@ import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
 public class MarchingCubesModel extends AbstractOperationModel {
 	
 	private ILazyDataset lazyData;
-	private double isovalue;
-	private int[] boxSize;
-	private int[] colour = {0,0,0};
-	private double opacity = 1.0;
-	private double isovalueMin = Integer.MAX_VALUE;
-	private double isovalueMax = Integer.MIN_VALUE;
-	private int    vertexLimit = 1000000;
-	private String traceID; 
-	private String name;
+	private double 	isovalue;
+	private int[] 	boxSize;
+	private int[] 	colour = {0,0,0};
+	private double 	opacity = 1.0;
+	private double 	isovalueMin = Integer.MAX_VALUE;
+	private double 	isovalueMax = Integer.MIN_VALUE;
+	private int    	vertexLimit = 1000000;
+	private String 	traceID; 
+	private String 	name;
 	
 
 	public MarchingCubesModel( 
@@ -36,13 +36,13 @@ public class MarchingCubesModel extends AbstractOperationModel {
 						String traceID,
 						String name)
 	{
-		this.lazyData      = lazyData   ;
-		this.isovalue      = isovalue   ;
-		this.boxSize       = boxSize    ;
-		this.colour        = colour     ;
-		this.opacity       = opacity    ;
-		this.traceID       = traceID    ;
-		this.name		   = name		;
+		this.lazyData   = lazyData   ;
+		this.isovalue   = isovalue   ;
+		this.boxSize    = boxSize    ;
+		this.colour     = colour     ;
+		this.opacity    = opacity    ;
+		this.traceID    = traceID    ;
+		this.name		= name		 ;
 	}
 	
 

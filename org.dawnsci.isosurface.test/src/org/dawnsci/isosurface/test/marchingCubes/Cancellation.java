@@ -48,7 +48,7 @@ public class Cancellation
 			algorithm = new MarchingCubes(model);	
 			
 			// execute the algorithmA
-			testResult = algorithm.execute(null, monitor);
+			testResult = algorithm.execute(monitor);
 			
 		}
 		

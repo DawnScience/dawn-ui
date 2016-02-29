@@ -105,7 +105,7 @@ public class IsosurfaceJob extends Job {
 				return Status.CANCEL_STATUS;
 			
 			MarchingCubes alg = new MarchingCubes(model);
-			Surface surface =  alg.execute(null, monitor);
+			Surface surface =  alg.execute(monitor);
 						
 			if (monitor.isCanceled())
 				return Status.CANCEL_STATUS;

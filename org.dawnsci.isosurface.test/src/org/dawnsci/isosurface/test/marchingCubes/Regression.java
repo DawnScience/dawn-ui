@@ -35,7 +35,6 @@ public class Regression {
 	MarchingCubesModel model;
 	Surface testResult;
 	IProgressMonitor monitor;
-
 	
 	/**
 	 * used to initialise the required information
@@ -43,7 +42,6 @@ public class Regression {
 	 */
 	private void start(int[] dataSetSizeXYZ, int[] boxSizeXYZ)
 	{
-		
 		lz = Random.lazyRand(dataSetSizeXYZ);
 		
 		Random.seed(SEED);
@@ -102,9 +100,8 @@ public class Regression {
 			}
 		};
 		
-		// execute the algorithmA
-		testResult = algorithm.execute(null, monitor);
-		
+		// execute the algorithm
+		testResult = algorithm.execute(monitor);
 	}
 	
 	@Test
@@ -156,13 +153,13 @@ public class Regression {
 		
 		
 	}
-
+	
     private static Object deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
         ByteArrayInputStream b = new ByteArrayInputStream(bytes);
         ObjectInputStream o = new ObjectInputStream(b);
         return o.readObject();
     }
-		
+	
 	private static byte[] serialize(Object obj) throws IOException {
         ByteArrayOutputStream b = new ByteArrayOutputStream();
         ObjectOutputStream o = new ObjectOutputStream(b);
@@ -193,9 +190,5 @@ public class Regression {
 		Files.write(texFile, texData);
 		
 	}
-    
-    
-    
-    
     
 }
