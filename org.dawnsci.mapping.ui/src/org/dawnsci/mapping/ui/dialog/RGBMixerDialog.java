@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.mapping.ui.Activator;
+import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
+import org.dawnsci.mapping.ui.datamodel.RGBMapData;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.CompoundDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
@@ -16,12 +18,14 @@ import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseWheelListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -35,67 +39,47 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.mihalis.opal.rangeSlider.RangeSlider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RGBMixerDialog {
+public class RGBMixerDialog extends Dialog  {
 
 	private static Logger logger = LoggerFactory.getLogger(RGBMixerDialog.class);
 
-	private int result;
-
-	/**
-	 * Button id for an "Ok" button (value 0).
-	 */
-	public static int OK_ID = 0;
-
-	/**
-	 * Button id for a "Cancel" button (value 1).
-	 */
-	public static int CANCEL_ID = 1;
-
+	
+	private List<AbstractMapData> maps;
+	private RGBMapData rgbMap;
+	
 	private List<Dataset> data;
-	private CompoundDataset compData;
 	private IPlottingSystem<Composite> system;
-	private Image image;
 
 	private int idxR = -1, idxG = -1, idxB = -1;
 	private boolean rDirty = true, bDirty = true, gDirty = true;
 	private boolean rLog= false, bLog= false, gLog = false;
-	private Dataset red, blue, green;
-	private Dataset zeros;
 
 	private RangeSlider redRangeSlider;
 	private RangeSlider greenRangeSlider;
 	private RangeSlider blueRangeSlider;
 
-	private Shell shell;
 
-	public RGBMixerDialog(List<IDataset> data) throws Exception {
-		shell = new Shell(Display.getDefault());
-		shell.setText("RGB Mixer");
-		shell.setImage(image = Activator.getImageDescriptor("icons/rgb.png").createImage());
-		shell.addListener(SWT.Close, new Listener() {
-			public void handleEvent(Event event) {
-				result = CANCEL_ID;
-				RGBMixerDialog.this.close();
-			}
-		});
-
+	public RGBMixerDialog(Shell parent, List<AbstractMapData> data) throws Exception {
+		super(parent);
 		if (data.isEmpty())
 			throw new Exception("No data is available to visualize in the RGB Mixer dialog.");
 		this.data = new ArrayList<Dataset>();
-		int width = data.get(0).getShape()[0];
-		int height = data.get(0).getShape()[1];
-		for (IDataset d : data) {
-			if (width != d.getShape()[0] || height != d.getShape()[1]) {
+		int width = data.get(0).getData().getShape()[0];
+		int height = data.get(0).getData().getShape()[1];
+		for (AbstractMapData d : data) {
+			if (width != d.getData().getShape()[0] || height != d.getData().getShape()[1]) {
 				throw new Exception("Data has not the same size");
 			}
 			
-			Dataset da = DatasetUtils.convertToDataset(d);
+			Dataset da = DatasetUtils.convertToDataset(d.getData());
 			this.data.add(da);
 		}
+		this.maps = data;
 		try {
 			system = PlottingFactory.createPlottingSystem();
 		} catch (Exception e) {
@@ -110,18 +94,9 @@ public class RGBMixerDialog {
 	 * 
 	 * @return
 	 */
-	public Control createContents() {
-		// Shell setting
-		shell.setLayout(new GridLayout());
-		shell.setSize(800, 600);
-		Monitor primary = Display.getDefault().getPrimaryMonitor();
-		Rectangle bounds = primary.getBounds();
-		Rectangle rect = shell.getBounds();
-		int x = bounds.x + (bounds.width - rect.width) / 2;
-		int y = bounds.y + (bounds.height - rect.height) / 2;
-		shell.setLocation(x, y);
-
-		Composite container = new Composite(shell, SWT.NONE);
+	@Override
+	public Control createDialogArea(Composite parent)  {
+		Composite container = (Composite) super.createDialogArea(parent);
 		container.setLayout(new GridLayout(1, false));
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
@@ -137,10 +112,10 @@ public class RGBMixerDialog {
 		bottomPane.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
 		//generate combos
-		String[] dataNames = new String[data.size() + 1];
+		String[] dataNames = new String[maps.size() + 1];
 		dataNames[0] = "None";
-		for (int i = 0; i < data.size(); i ++) {
-			dataNames[i + 1] = data.get(i).getName();
+		for (int i = 0; i < maps.size(); i ++) {
+			dataNames[i + 1] = maps.get(i).toString();
 		}
 
 		Composite redComp = new Composite(bottomPane, SWT.NONE);
@@ -282,73 +257,47 @@ public class RGBMixerDialog {
 		buttonComp.setLayout(new GridLayout(2, false));
 		buttonComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-		Button cancelButton = new Button(buttonComp, SWT.NONE);
-		cancelButton.setText("Cancel");
-		cancelButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
-		cancelButton.setSize(100, 50);
-		cancelButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent evt) {
-				result = CANCEL_ID;
-				RGBMixerDialog.this.close();
-			}
-		});
-
-		Button okButton = new Button(buttonComp, SWT.NONE);
-		okButton.setText("OK");
-		okButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		okButton.setSize(100, 50);
-		okButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent evt) {
-				result = OK_ID;
-				RGBMixerDialog.this.close();
-			}
-		});
 		return container;
 	}
 	
-	public IDataset getRGBDataset() {
-		return compData;
+	public RGBMapData getRGBMap() {
+		return rgbMap;
 	}
 
 	private void updatePlot() {
 		if (data.isEmpty())
 			return;
-		
-		if (zeros == null) {
-			zeros = new IntegerDataset(data.get(0).getSize());
-			zeros.setShape(data.get(0).getShape());
-		}
-		
-		Dataset r = red;
-		Dataset b = blue;
-		Dataset g = green;
-		
+
 		if (idxR >= 0) {
 			if (rDirty) {
-				red = r = update(data.get(idxR),redRangeSlider.getLowerValue(),redRangeSlider.getUpperValue(),rLog);
+				AbstractMapData amd = maps.get(idxR);
+				if (rgbMap == null) rgbMap = new RGBMapData(amd.toString(), amd,amd.getParent().getPath());
+				rgbMap.switchRed(amd, new int[]{redRangeSlider.getLowerValue(),redRangeSlider.getUpperValue()}, rLog);
 				rDirty = false;
 			};
 		} else {
-			r = zeros;
+			rgbMap.clearRed();
 		}
 		
 		if (idxG >= 0) {
 			if (gDirty) {
-				green = g = update(data.get(idxG),greenRangeSlider.getLowerValue(),greenRangeSlider.getUpperValue(),gLog);
+				AbstractMapData amd = maps.get(idxG);
+				if (rgbMap == null) rgbMap = new RGBMapData(amd.toString(), amd,amd.getParent().getPath());
+				rgbMap.switchGreen(amd, new int[]{greenRangeSlider.getLowerValue(),greenRangeSlider.getUpperValue()}, gLog);
 				gDirty = false;
 			};
 		} else {
-			g = zeros;
+			rgbMap.clearGreen();
 		}
 		if (idxB >= 0) {
 			if (bDirty) {
-				blue = b = update(data.get(idxB),blueRangeSlider.getLowerValue(),blueRangeSlider.getUpperValue(),bLog);
+				AbstractMapData amd = maps.get(idxB);
+				if (rgbMap == null) rgbMap = new RGBMapData(amd.toString(), amd,amd.getParent().getPath());
+				rgbMap.switchBlue(amd, new int[]{blueRangeSlider.getLowerValue(),blueRangeSlider.getUpperValue()}, bLog);
 				bDirty = false;
 			};
 		} else {
-			b = zeros;
+			rgbMap.clearBlue();
 		}
 		
 
@@ -356,95 +305,20 @@ public class RGBMixerDialog {
 		if (idxR < 0 && idxG < 0 && idxB < 0) {
 			system.clear();
 		} else {
-			compData = new RGBDataset(r,g,b);
-			system.updatePlot2D(compData, null, null);	
+			system.updatePlot2D(rgbMap.getData(), null, null);	
 		}
 		
-//		if (idxR >= 0 && idxG >= 0 && idxB >= 0) {
-//			compData = new RGBDataset(data.get(idxR), data.get(idxG), data.get(idxB));
-//			system.updatePlot2D(compData, null, null);
-//		} else if (idxR >= 0 && idxG < 0 && idxB < 0) {
-//			compData = new RGBDataset(data.get(idxR), zeros, zeros);
-//			system.updatePlot2D(compData, null, null);
-//		} else if (idxR < 0 && idxG >= 0 && idxB <0) {
-//			compData = new RGBDataset(zeros, data.get(idxG), zeros);
-//			system.updatePlot2D(compData, null, null);
-//		} else if (idxR < 0 && idxG < 0 && idxB >= 0) {
-//			compData = new RGBDataset(zeros, zeros, data.get(idxB));
-//			system.updatePlot2D(compData, null, null);
-//		} else if (idxR >= 0 && idxG >= 0 && idxB < 0) {
-//			compData = new RGBDataset(data.get(idxR), data.get(idxG), zeros);
-//			system.updatePlot2D(compData, null, null);
-//		} else if (idxR >= 0 && idxG < 0 && idxB >= 0) {
-//			compData = new RGBDataset(data.get(idxR), zeros, data.get(idxB));
-//			system.updatePlot2D(compData, null, null);
-//		} else if (idxR < 0 && idxG >= 0 && idxB >= 0) {
-//			compData = new RGBDataset(zeros, data.get(idxG), data.get(idxB));
-//			system.updatePlot2D(compData, null, null);
-//		} else if (idxR < 0 && idxG < 0 && idxB < 0) {
 
 	}
 	
-	private Dataset update(Dataset ds, int lower, int upper, boolean log) {
-		double dMin = ds.min().doubleValue();
-		double dMax = ds.max().doubleValue();
-		
-//		if (log) {
-//			dMin = Math.log10(dMin);
-//			dMax = Math.log10(dMax);
-//		}
-		
-		double dRange = dMax - dMin;
-		int min = lower;
-		int max = upper;
-
-		double mi = dRange*((double)min/100)+dMin;
-		double ma = dMax - dRange*(100-max)/100;
-		
-//		if (log) {
-//			mi = Math.pow(10, mi);
-//			ma = Math.pow(10, ma);
-//		}
-		
-		return updateDataset(ds, mi, ma, log);
+	@Override
+	protected Point getInitialSize() {
+		Rectangle bounds = PlatformUI.getWorkbench().getWorkbenchWindows()[0].getShell().getBounds();
+		return new Point((int)(bounds.width*0.8),(int)(bounds.height*0.8));
 	}
 	
-	private Dataset updateDataset(Dataset ds, double min, double max, boolean log) {
-		Dataset out = ds.getSlice();
-		
-		if (log) {
-			out = Maths.log10(out);
-			min = Math.log10(min);
-			max = Math.log10(max);
-		}
-		
-		out.isubtract(min).idivide(max-min).imultiply(255);
-		IndexIterator it = out.getIterator();
-		while (it.hasNext()) {
-			double val = out.getElementDoubleAbs(it.index);
-			if (val < 0) out.setObjectAbs(it.index, 0);
-			if (val > 255) out.setObjectAbs(it.index, 255);
-			if (Double.isNaN(val)) out.setObjectAbs(it.index, 0);
-		}
-		
-		return out;
-	}
-
-	public void close() {
-		image.dispose();
-		if (shell != null)
-			shell.dispose();
-	}
-
-	/**
-	 *open the shell dialog
-	 */
-	public int open() {
-		shell.open();
-		while (!shell.isDisposed()) {
-			if (!shell.getDisplay().readAndDispatch())
-				shell.getDisplay().sleep();
-		}
-		return result;
-	}
+	@Override
+	  protected boolean isResizable() {
+	    return true;
+	  }
 }
