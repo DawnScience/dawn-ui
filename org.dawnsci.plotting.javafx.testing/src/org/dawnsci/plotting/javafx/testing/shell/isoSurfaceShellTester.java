@@ -97,7 +97,7 @@ public class isoSurfaceShellTester {
 		};
 		
 		// execute the algorithmA
-		testResult = algorithm.execute(null, monitor);
+		testResult = algorithm.execute(monitor);
 	}
 	
 	private MeshView generateMesh()
