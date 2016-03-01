@@ -141,12 +141,17 @@ public class MappedDataView extends ViewPart {
 					IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
 					Iterator<?> it = selection.iterator();
 					List<MappedData> maps = new ArrayList<MappedData>();
+					
+					if (selection.size() == 1 && selection.getFirstElement() instanceof MappedDataFile) {
+
+						manager.add(MapActionUtils.getFileRemoveAction(FileManagerSingleton.getFileManager(), (MappedDataFile)selection.getFirstElement()));
+
+					}
+					List<MappedDataFile> mdfs = new ArrayList<MappedDataFile>();
 					while(it != null && it.hasNext()) {
 						Object obj = it.next();
-						if (obj instanceof MappedDataFile) {
-							manager.add(MapActionUtils.getFileRemoveAction(FileManagerSingleton.getFileManager(), (MappedDataFile)obj));
-//							manager.add(MapActionUtils.getThumbnailAction());
-						}
+						
+						if (obj instanceof MappedDataFile) mdfs.add((MappedDataFile)obj);
 						
 						if (obj instanceof MappedData) {
 							maps.add((MappedData)obj);
@@ -165,6 +170,8 @@ public class MappedDataView extends ViewPart {
 					if (maps.size() == 1) {
 						manager.add(MapActionUtils.getMapPropertiesAction(maps.get(0),plotManager, area.getDataFile(0)));
 					}
+					
+					if (mdfs.size() > 1) manager.add(MapActionUtils.getFilesRemoveAction(FileManagerSingleton.getFileManager(),mdfs));
 				}
 			}
 		});

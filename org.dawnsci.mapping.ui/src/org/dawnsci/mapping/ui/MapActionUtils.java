@@ -110,4 +110,26 @@ public class MapActionUtils {
 		return trans;
 		
 	}
+	
+	public static IAction getFilesRemoveAction(final MappedFileManager manager, final List<MappedDataFile> files) {
+		IAction trans = new Action("Clear files") {
+			@Override
+			public void run() {
+				for (MappedDataFile file :files) manager.removeFile(file);
+			}
+		};
+		
+		return trans;
+	}
+	
+	public static IAction getFilesRemoveAction(final MappedFileManager manager) {
+		IAction trans = new Action("Clear all") {
+			@Override
+			public void run() {
+				manager.clearAll();
+			}
+		};
+		
+		return trans;
+	}
 }

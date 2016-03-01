@@ -54,6 +54,12 @@ public class MappedFileManager {
 		viewer.refresh();
 	}
 	
+	public void clearAll() {
+		mappedDataArea.clearAll();
+		plotManager.clearAll();
+		viewer.refresh();
+	}
+	
 	public boolean contains(String path) {
 		return mappedDataArea.contains(path);
 	}

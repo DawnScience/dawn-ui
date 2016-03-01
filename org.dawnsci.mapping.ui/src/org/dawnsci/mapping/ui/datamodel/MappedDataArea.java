@@ -1,6 +1,7 @@
 package org.dawnsci.mapping.ui.datamodel;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -74,6 +75,26 @@ public class MappedDataArea implements MapObject {
 	
 	public int count() {
 		return files.size();
+	}
+	
+	public void clearAll() {
+		Iterator<MappedDataFile> iterator = files.iterator();
+		
+		while (iterator.hasNext()) {
+			MappedDataFile file = iterator.next();
+			
+			Object[] children = file.getChildren();
+			for (Object child : children) {
+				if (child instanceof ILiveData) {
+					try {
+						((ILiveData)child).disconnect();
+					} catch (Exception e) {
+						logger.error("Could not disconnect remote dataset",e);
+					}
+				}
+			}
+			iterator.remove();
+		}
 	}
 
 	public boolean isInRange(MappedDataFile mdf) {
