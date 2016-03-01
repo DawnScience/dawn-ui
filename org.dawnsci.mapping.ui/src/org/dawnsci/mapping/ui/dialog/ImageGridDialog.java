@@ -3,18 +3,17 @@ package org.dawnsci.mapping.ui.dialog;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dawnsci.mapping.ui.Activator;
-import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -22,65 +21,39 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ImageGridDialog {
-
-	private static Logger logger = LoggerFactory.getLogger(ImageGridDialog.class);
-
+public class ImageGridDialog extends Dialog{
+	
 	private List<IDataset> data;
 	private List<IPlottingSystem<Composite>> systems = new ArrayList<IPlottingSystem<Composite>>();
-	private Image image;
-	private Shell shell;
+	
+	private static Logger logger = LoggerFactory.getLogger(ImageGridDialog.class);
 
-	public ImageGridDialog(List<IDataset> data) throws Exception {
-		shell = new Shell(Display.getDefault());
-		shell.setText("Comparison Viewer");
-		shell.setImage(image = Activator.getImageDescriptor("icons/images-stack.png").createImage());
-		shell.addListener(SWT.Close, new Listener() {
-			public void handleEvent(Event event) {
-				ImageGridDialog.this.close();
-			}
-		});
-
-		if (data == null || data.isEmpty())
-			throw new Exception("No data is available to visualize in the Comparison Image Viewer dialog.");
+	public ImageGridDialog(Shell parentShell, List<IDataset> data) {
+		super(parentShell);
+		if (data == null || data.isEmpty()) return;
 		this.data = data;
 		try {
 			for (int i = 0; i < data.size(); i++) {
 				systems.add(PlottingFactory.createPlottingSystem(Composite.class));
 			}
 		} catch (Exception e) {
-			String error = "Error creating Image Grid plotting systems:" + e.getMessage();
 			logger.error("Error creating Image Grid plotting systems:", e);
-			throw new Exception(error);
 		}
 	}
 
-	/**
-	 * Create the content of the Shell dialog
-	 * 
-	 * @return
-	 */
-	public Control createContents() {
+	
+	
+
+	@Override
+	public Control createDialogArea(Composite parent)  {
+		Composite container = (Composite) super.createDialogArea(parent);
 		Display display = Display.getDefault();
 		Color white = new Color(display, 255, 255, 255);
-		// Shell setting
-		shell.setLayout(new GridLayout());
-		shell.setSize(800, 600);
-		Monitor primary = display.getPrimaryMonitor();
-		Rectangle bounds = primary.getBounds();
-		Rectangle rect = shell.getBounds();
-		int x = bounds.x + (bounds.width - rect.width) / 2;
-		int y = bounds.y + (bounds.height - rect.height) / 2;
-		shell.setLocation(x, y);
-		
-		Composite container = new Composite(shell, SWT.NONE);
 		container.setLayout(new GridLayout(1, false));
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		container.setBackground(white);
@@ -113,21 +86,15 @@ public class ImageGridDialog {
 		});
 		return container;
 	}
-
-	public void close() {
-		image.dispose();
-		if (shell != null)
-			shell.dispose();
-	}
-
-	/**
-	 *open the shell dialog
-	 */
-	public void open() {
-		shell.open();
-		while (!shell.isDisposed()) {
-			if (!shell.getDisplay().readAndDispatch())
-				shell.getDisplay().sleep();
-		}
+	
+	@Override
+	  protected boolean isResizable() {
+	    return true;
+	  }
+	
+	@Override
+	protected Point getInitialSize() {
+		Rectangle bounds = PlatformUI.getWorkbench().getWorkbenchWindows()[0].getShell().getBounds();
+		return new Point((int)(bounds.width*0.8),(int)(bounds.height*0.8));
 	}
 }

@@ -63,8 +63,7 @@ public class MapActionUtils {
 			public void run() {
 				ImageGridDialog dialog;
 				try {
-					dialog = new ImageGridDialog(dataList);
-					dialog.createContents();
+					dialog = new ImageGridDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),dataList);
 					dialog.open();
 				} catch (Exception e) {
 					MessageDialog.openError(Display.getDefault()
