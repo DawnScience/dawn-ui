@@ -102,55 +102,7 @@ public class MapBeanBuilder {
 		return null;
 	}
 	
-	public static MappedDataFileBean buildBeani18in2015(Tree tree) {
-		
-		MappedDataFileBean fb = null;
-		String xpress = "/entry1/xspress3";
-		String allSum = "AllElementSum";
-		String y = "sc_MicroFocusSampleY";
-		String x = "traj1ContiniousX";
-		String mcas = "MCAs";
-		String pos = "traj1PositionReader";
-		
-		NodeLink nl = tree.findNodeLink(xpress);
-		Node n = nl.getDestination();
-		if (n instanceof GroupNode) {
-			GroupNode gn = (GroupNode)n;
-			if (!gn.containsDataNode(allSum)) return null;
-			if (!gn.containsDataNode(y)) return null;
-			if (!gn.containsDataNode(x)) return null;
-			
-			fb = new MappedDataFileBean();
-			MappedBlockBean bb = new MappedBlockBean();
-			bb.setName(xpress + Node.SEPARATOR + allSum);
-			String[] ax = new String[3];
-			ax[0] = xpress + Node.SEPARATOR + y;
-			ax[1] = xpress + Node.SEPARATOR + x;
-			bb.setAxes(ax);
-			bb.setRank(3);
-			bb.setxDim(1);
-			bb.setyDim(0);
-			fb.addBlock(bb);
-			
-			for (String name : gn.getNames()){
-				if (name.equals(allSum)) continue;
-				if (name.equals(y)) continue;
-				if (name.equals(x)) continue;
-				if (name.equals(mcas)) continue;
-				if (name.equals(pos)) continue;
-				
-				MapBean mb = new MapBean();
-				mb.setName(xpress + Node.SEPARATOR + name);
-				mb.setParent(xpress + Node.SEPARATOR + allSum);
-				fb.addMap(mb);
-				
-			}
-			
-		}
-		
-		if (fb!= null && !fb.checkValid()) fb = null;
-		return fb;
-	}
+
 	
 	
 	

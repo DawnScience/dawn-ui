@@ -9,9 +9,11 @@ import org.dawnsci.mapping.ui.LocalServiceManager;
 import org.dawnsci.mapping.ui.MapPlotManager;
 import org.dawnsci.mapping.ui.dialog.RegistrationDialog;
 import org.dawnsci.mapping.ui.wizards.ImportMappedDataWizard;
+import org.dawnsci.mapping.ui.wizards.LegacyMapBeanBuilder;
 import org.dawnsci.mapping.ui.wizards.MapBeanBuilder;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
@@ -190,14 +192,22 @@ public class MappedFileManager {
 							//ignore
 						}
 
-
-						if (b == null) {
+						if (b == null && dh.getLazyDataset(LegacyMapBeanBuilder.I18CHECK) != null) {
 							try {
-							b = MapBeanBuilder.buildBeani18in2015(dh.getTree());
+							b = LegacyMapBeanBuilder.buildBeani18in2015(dh.getTree());
 							} catch (Exception e) {
 								//ignore
 							}
 						}
+						
+						if (b == null && dh.getLazyDataset(LegacyMapBeanBuilder.I05CHECK) != null) {
+							try {
+							b = LegacyMapBeanBuilder.buildBeani05in2015(dh.getTree());
+							} catch (Exception e) {
+								//ignore
+							}
+						}
+						
 						if (b != null) {
 							IMonitor m = new ProgressMonitorWrapper(monitor);
 							monitor.beginTask("Loading data...", -1);
