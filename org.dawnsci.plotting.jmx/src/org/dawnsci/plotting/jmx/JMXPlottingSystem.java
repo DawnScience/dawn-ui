@@ -37,6 +37,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace;
+import org.eclipse.dawnsci.plotting.api.trace.IVolumeRenderTrace;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -127,6 +128,11 @@ public class JMXPlottingSystem<T> extends JMXSystemObject implements IPlottingSy
 	@Override
 	public IImageStackTrace createImageStackTrace(String traceName) {
 		return (IImageStackTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName);
+	}
+
+	@Override
+	public IVolumeRenderTrace createVolumeRenderTrace(String traceName) {
+		return (IVolumeRenderTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName);
 	}
 
 	@Override
