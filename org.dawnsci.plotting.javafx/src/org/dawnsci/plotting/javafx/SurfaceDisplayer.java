@@ -39,7 +39,9 @@ import org.dawnsci.plotting.javafx.axis.objects.ScaleAxisGroup;
 import org.dawnsci.plotting.javafx.axis.objects.SceneObjectGroup;
 import org.dawnsci.plotting.javafx.axis.objects.Vector3DUtil;
 import org.dawnsci.plotting.javafx.trace.FXIsosurfaceTrace;
+import org.dawnsci.plotting.javafx.trace.VolumeTrace;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.plotting.api.trace.IVolumeRenderTrace;
 
 /**
  * 
@@ -528,9 +530,9 @@ public class SurfaceDisplayer extends Scene
 	}
 	
 	
-	public void addVolumeTrace(Group trace) // no trace currently implemented
+	public void addVolumeTrace(VolumeTrace trace) // no trace currently implemented
 	{
-		this.volumeGroup.getChildren().add(trace);
+		this.volumeGroup.getChildren().add(trace.getVolume());
 	}
 	
 	public void removeSurface(Node removeNode)
