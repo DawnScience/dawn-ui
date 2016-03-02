@@ -11,12 +11,14 @@ import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.ServiceHolder;
+import org.dawnsci.processing.ui.model.ConfigureOperationModelDialog;
 import org.dawnsci.processing.ui.model.OperationModelViewer;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
 import org.dawnsci.processing.ui.processing.OperationTableUtils;
 import org.dawnsci.processing.ui.slice.DataFileSliceView;
 import org.dawnsci.processing.ui.slice.EscapableSliceVisitor;
 import org.dawnsci.processing.ui.slice.IOperationErrorInformer;
+import org.dawnsci.processing.ui.slice.IOperationInputData;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -51,6 +53,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -87,7 +90,9 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 	private ITraceListener listener;
 	private IOperationErrorInformer informer;
 	private Action run;
+	private Action configure;
 	private SliceFromSeriesMetadata parentMeta;
+	private IOperationInputData inputData;
 	
 	public AbstractProcessingTool() {
 		try {
@@ -133,10 +138,29 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 			}
 		};
 		
+		configure = new Action("Live setup", Activator.getImageDescriptor("icons/application-dialog.png")) {
+			public void run() {
+				IOperationModel model = modelEditor.getModel();
+				if (inputData == null) return;
+				if (!inputData.getCurrentOperation().getModel().equals(model)) return;
+				
+				ConfigureOperationModelDialog dialog = new ConfigureOperationModelDialog(getSite().getShell());
+				dialog.create();
+				dialog.setOperationInputData(inputData);
+				if (dialog.open() == Dialog.OK) {
+					modelEditor.refresh();
+					updateData();
+				}
+				
+			}
+		};
+		configure.setEnabled(false);
+		
 		showOptions.setImageDescriptor(Activator.getImageDescriptor("icons/maximize.png"));
 		getSite().getActionBars().getToolBarManager().add(run);
 		getSite().getActionBars().getToolBarManager().add(showOptions);
 		getSite().getActionBars().getMenuManager().add(showOptions);
+		getSite().getActionBars().getToolBarManager().add(configure);
 		
 		Composite base = new Composite(sashForm, SWT.NONE);
 		base.setLayout(new GridLayout(1,true));
@@ -207,6 +231,8 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 	protected abstract IDataset getData();
 	
 	protected void updateData() {
+		inputData =null;
+		configure.setEnabled(false);
 		IDataset ds = getData();
 		if (ds == null) return;
 		IOperation[] operations = getOperations();
@@ -315,7 +341,8 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 			} catch (Exception e) {
 //				if (e instanceof OperationException) informer.setInErrorState((OperationException)e);
 			}
-			
+			inputData = vis.getOperationInputData();
+			if (inputData != null) configure.setEnabled(true);
 			return Status.OK_STATUS;
 		}
 		
