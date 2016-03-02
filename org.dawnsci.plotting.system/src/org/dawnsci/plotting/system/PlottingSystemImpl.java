@@ -67,6 +67,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace;
+import org.eclipse.dawnsci.plotting.api.trace.IVolumeRenderTrace;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
@@ -902,6 +903,12 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	public IIsosurfaceTrace createIsosurfaceTrace(String traceName) {
 		IIsosurfaceTrace trace = (IIsosurfaceTrace)getViewer(IIsosurfaceTrace.class).createTrace(traceName, IIsosurfaceTrace.class);
 		return (IIsosurfaceTrace) setPaletteData(trace);
+	}
+	
+	@Override
+	public IVolumeRenderTrace createVolumeRenderTrace(String traceName) {
+		IVolumeRenderTrace trace = (IVolumeRenderTrace)getViewer(IVolumeRenderTrace.class).createTrace(traceName, IVolumeRenderTrace.class);
+		return (IVolumeRenderTrace) setPaletteData(trace);
 	}
 
 

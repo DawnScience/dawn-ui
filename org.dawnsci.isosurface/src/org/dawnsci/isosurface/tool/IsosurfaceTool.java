@@ -8,16 +8,10 @@
  */
 package org.dawnsci.isosurface.tool;
 
-import org.dawnsci.isosurface.Activator;
-import org.dawnsci.isosurface.alg.MarchingCubesModel;
-import org.dawnsci.isosurface.alg.Surface;
 import org.dawnsci.isosurface.isogui.IsoBean;
 import org.dawnsci.isosurface.isogui.IsoComposite;
 import org.dawnsci.isosurface.isogui.IsoHandler;
-import org.dawnsci.isosurface.isogui.IsoItem;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.analysis.api.processing.IOperation;
-import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.slicing.api.system.AxisChoiceEvent;
 import org.eclipse.dawnsci.slicing.api.system.AxisChoiceListener;

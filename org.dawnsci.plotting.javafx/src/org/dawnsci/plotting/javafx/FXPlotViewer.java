@@ -14,11 +14,13 @@ import javafx.scene.Cursor;
 import javafx.scene.Group;
 
 import org.dawnsci.plotting.javafx.trace.FXIsosurfaceTrace;
+import org.dawnsci.plotting.javafx.trace.VolumeTrace;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.trace.IIsosurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.dawnsci.plotting.api.trace.IVolumeRenderTrace;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
@@ -141,6 +143,12 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 				throw new RuntimeException("Cannot create trace with no name!");
 			return new FXIsosurfaceTrace(this, scene, name);
 		}
+		else if (IVolumeRenderTrace.class.isAssignableFrom(clazz))
+		{
+			if (name == null || "".equals(name))
+				throw new RuntimeException("Cannot create trace with no name!");
+			return new VolumeTrace(this, scene, name);
+		}			
 		else
 		{
 			throw new RuntimeException("Trace type not supported " + clazz.getSimpleName());
@@ -163,9 +171,22 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 			
 			// add the trace into the list of current traces
 			scene.addSurfaceTrace(itrace);
-			// isoSurfaceGroup.getChildren().add(itrace.getIsoSurface());
 			scene.setAxesData(itrace.getAxes());
 		}
+		else if (trace instanceof IVolumeRenderTrace)
+		{
+			
+			// declare the trace from the parameter trace
+			VolumeTrace itrace = (VolumeTrace) trace;
+			if (itrace.getData() == null)
+				throw new RuntimeException("Trace has no data " + trace.getName());
+			
+			// add the trace into the list of current traces
+			scene.addVolumeTrace(itrace);
+//			// isoSurfaceGroup.getChildren().add(itrace.getIsoSurface());
+//			scene.setAxesData(itrace.getAxes());
+		}
+		
 		else
 		{
 			throw new RuntimeException("Trace type not supported " + trace.getClass().getSimpleName());
@@ -203,6 +224,8 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 		{
 			case ISOSURFACE:
 				return true;
+			case VOLUME:
+				return true;
 			default:
 				return false;
 		}
@@ -215,6 +238,11 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 		{
 			return true;
 		}
+		else if (IVolumeRenderTrace.class.isAssignableFrom(trace))
+		{
+			return true;
+		}
+			
 		return false;
 	}
 	

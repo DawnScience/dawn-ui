@@ -1,4 +1,4 @@
-package org.dawnsci.plotting.javafx.testing.shell;
+package org.dawnsci.plotting.javafx.axis.volume;
 
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
