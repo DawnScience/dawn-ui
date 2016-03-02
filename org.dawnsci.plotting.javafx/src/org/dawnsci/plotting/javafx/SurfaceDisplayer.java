@@ -537,6 +537,10 @@ public class SurfaceDisplayer extends Scene
 	{
 		isosurfaceGroup.getChildren().remove(removeNode);
 	}
+	public void removeVolume(Node removeNode)
+	{
+		volumeGroup.getChildren().remove(removeNode);
+	}
 	
 	
 	public void updateTransforms()

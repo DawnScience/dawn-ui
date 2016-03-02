@@ -49,7 +49,7 @@ public class VolumeRenderingShellTester {
 	
 	private Group generateNode(IDataset dataset)
 	{		
-		return new VolumeRender(dataset.getShape(), dataset);
+		return new VolumeRender(dataset.getShape(), dataset, 0.3);
 	}
 	
 	// simply creates a shell to check javafx fxcanvas still functions
