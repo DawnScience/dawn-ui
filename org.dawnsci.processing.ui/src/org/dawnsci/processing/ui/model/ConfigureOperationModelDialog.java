@@ -77,7 +77,7 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 	
 	private final static Logger logger = LoggerFactory.getLogger(ConfigureOperationModelDialog.class);
 
-	protected ConfigureOperationModelDialog(Shell parentShell) {
+	public ConfigureOperationModelDialog(Shell parentShell) {
 		super(parentShell);
 		setShellStyle(SWT.RESIZE|SWT.DIALOG_TRIM);
 	}
