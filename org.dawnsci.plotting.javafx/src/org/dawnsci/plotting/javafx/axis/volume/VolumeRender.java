@@ -38,8 +38,8 @@ public class VolumeRender extends Group
 		
 		// estimate the opacity needed
 		
-		int maxDepth = Collections.max((Arrays.asList(ArrayUtils.toObject(dataset.getShape())))); // very strange way to find the max
-		double opacity = (maxDepth / 15) * opacityValue;
+		int maxDepth = Collections.min((Arrays.asList(ArrayUtils.toObject(dataset.getShape())))); // very strange way to find the max
+		double opacity = ((255 / maxDepth) * 25) * opacityValue;
 		
 		// generate the planes
 		xygroup = createPlanesFromDataSlice(opacity, new int[]{size[0], size[1], size[2]}, dataset);
@@ -89,17 +89,15 @@ public class VolumeRender extends Group
 										lazySlice.getShape()[1],
 										z+1},
 								new int[]{1,1,1});
-
-			BufferedImage bi = new BufferedImage(slice.getShape()[0], slice.getShape()[1],BufferedImage.TYPE_INT_ARGB);
 			
+			BufferedImage bi = new BufferedImage(slice.getShape()[0], slice.getShape()[1],BufferedImage.TYPE_INT_ARGB);
 			
 			for (int y = 0; y < slice.getShape()[1]; y++)
 			{
 				for (int x = 0; x < slice.getShape()[0]; x++)
 				{
-					
-					int value = (int)(((slice.getInt(x,y,0)/max) * 5) + 0.5f);
-					
+					int value = (int)(((slice.getInt(x,y,0)/max) * opacity) + 0.5f);
+						
 					int argb = value;
 					argb = (argb << 8) + 255;
 					argb = (argb << 8) + 0;
@@ -108,21 +106,18 @@ public class VolumeRender extends Group
 					bi.setRGB(x, y, argb);
 				}
 			}
-			
-			double x = XYZSize[2]/ lazySlice.getShape()[2];
-			
+				
 			AxisAlignedPlane newPlane = new AxisAlignedPlane(
 					new Point2D(0, 0),
 					new Point2D(XYZSize[0], XYZSize[1]),
 					SwingFXUtils.toFXImage(bi, null),
 					new Point3D(0, 0, 1));
-			newPlane.setTranslateZ(z * (XYZSize[2]/ lazySlice.getShape()[2]));
+			newPlane.setTranslateZ(z * ((double)XYZSize[2]/ lazySlice.getShape()[2]));
 			
 			outputGroup.getChildren().add(newPlane);
 			
 		}
 		return outputGroup;
-		
 	}
 	
 	private Group createPlanesFromImageSlice(final BufferedImage[] imagePlanes, final int[] size)
@@ -140,7 +135,6 @@ public class VolumeRender extends Group
 					new Point3D(0, 0, 1));
 			
 			newPlane.setTranslateZ(i * zOffset);
-			
 		}
 		
 		return outputGroup;
