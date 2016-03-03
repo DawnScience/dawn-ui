@@ -270,24 +270,50 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 		lutCombo.setId(getClass().getName()+lutCombo.getText());
 		lutCombo.setImageDescriptor(PlottingSystemActivator.getImageDescriptor("icons/color_wheel.png"));
 
-		final Map<String, IAction> paletteActions = new HashMap<String, IAction>(11);
+		final Map<String, IAction> paletteActions = new HashMap<String, IAction>(names.size());
 		CheckableActionGroup group      = new CheckableActionGroup();
-		for (final String paletteName : names) {
-			final Action action = new Action(paletteName, IAction.AS_CHECK_BOX) {
-				public void run() {
-					try {
-						selectedPaletteChanged(paletteName);
-					} catch (Exception ne) {
-						logger.error("Cannot create palette data!", ne);
-					}
+		
+		Collection<String> categoryNames = pservice.getColorCategories();
+		for (String c : categoryNames) {
+			// do not add a submenu for all
+			if (!c.equals("All")) {
+				MenuAction subMenu = new MenuAction(c);
+				Collection<String> colours = pservice.getColoursByCategory(c);
+				for (final String colour : colours) {
+					final Action action = new Action(colour, IAction.AS_CHECK_BOX) {
+						public void run() {
+							try {
+								selectedPaletteChanged(colour);
+							} catch (Exception ne) {
+								logger.error("Cannot create palette data!", ne);
+							}
+						}
+					};
+					action.setId(colour);
+					subMenu.add(action);
+					group.add(action);
+					action.setChecked(colour.equals(schemeName));
+					paletteActions.put(colour, action);
 				}
-			};
-			action.setId(paletteName);
-			group.add(action);
-			lutCombo.add(action);
-			action.setChecked(paletteName.equals(schemeName));
-			paletteActions.put(paletteName, action);
+				lutCombo.add(subMenu);
+			}
 		}
+//		for (final String paletteName : names) {
+//			final Action action = new Action(paletteName, IAction.AS_CHECK_BOX) {
+//				public void run() {
+//					try {
+//						selectedPaletteChanged(paletteName);
+//					} catch (Exception ne) {
+//						logger.error("Cannot create palette data!", ne);
+//					}
+//				}
+//			};
+//			action.setId(paletteName);
+//			group.add(action);
+//			lutCombo.add(action);
+//			action.setChecked(paletteName.equals(schemeName));
+//			paletteActions.put(paletteName, action);
+//		}
 		lutCombo.setToolTipText("Histogram");
 
 		registerMenuBarGroup(lutCombo.getId()+".group");
