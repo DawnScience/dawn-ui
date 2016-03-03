@@ -298,22 +298,6 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 				lutCombo.add(subMenu);
 			}
 		}
-//		for (final String paletteName : names) {
-//			final Action action = new Action(paletteName, IAction.AS_CHECK_BOX) {
-//				public void run() {
-//					try {
-//						selectedPaletteChanged(paletteName);
-//					} catch (Exception ne) {
-//						logger.error("Cannot create palette data!", ne);
-//					}
-//				}
-//			};
-//			action.setId(paletteName);
-//			group.add(action);
-//			lutCombo.add(action);
-//			action.setChecked(paletteName.equals(schemeName));
-//			paletteActions.put(paletteName, action);
-//		}
 		lutCombo.setToolTipText("Histogram");
 
 		registerMenuBarGroup(lutCombo.getId()+".group");
