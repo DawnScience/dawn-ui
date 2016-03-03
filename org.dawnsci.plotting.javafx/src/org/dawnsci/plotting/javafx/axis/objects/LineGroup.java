@@ -1,5 +1,7 @@
 package org.dawnsci.plotting.javafx.axis.objects;
 
+import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
+
 import javafx.geometry.Point3D;
 import javafx.scene.Group;
 import javafx.scene.paint.PhongMaterial;

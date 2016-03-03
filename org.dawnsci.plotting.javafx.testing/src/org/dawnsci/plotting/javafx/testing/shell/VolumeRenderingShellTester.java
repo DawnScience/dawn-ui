@@ -47,11 +47,6 @@ public class VolumeRenderingShellTester {
 		dataset = dh.getLazyDataset("/entry/edf/data").getSlice();
 	}
 	
-//	private Group generateNode(IDataset dataset)
-//	{		
-//		return new VolumeRender(dataset.getShape(), dataset, 0.3);
-//	}
-	
 	// simply creates a shell to check javafx fxcanvas still functions
 	@Test
 	public void shellButtonTest() throws Exception

@@ -1,12 +1,17 @@
-package org.dawnsci.plotting.javafx.axis.objects;
+package org.dawnsci.plotting.javafx.tools;
 
 import javafx.collections.ObservableList;
 import javafx.geometry.Point3D;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Transform;
 
-
-// class to hold basic vector calculations that I need throughout the project
+ 
+/**
+ * class to hold basic vector calculations used throughout the plugin
+ * 
+ * @author Joel Ogden
+ *
+ */
 public class Vector3DUtil
 {
 	
@@ -37,7 +42,7 @@ public class Vector3DUtil
         return new Point3D(xRot, yRot, zRot);
 	}
 	
-	public static double  getMaximumValue (Point3D v)
+	public static double getMaximumValue (Point3D v)
 	{
 		double value = Double.MIN_VALUE;
 		if (v.getX() > value)
@@ -50,6 +55,11 @@ public class Vector3DUtil
 		return value;
 	}
 	
+	/**
+	 * gets the scale from the transform matrix
+	 * @param transform
+	 * @return
+	 */
 	public static Point3D getScaleFromTransform(Transform transform)
 	{
 		double sx = new Point3D(transform.getMxx(), transform.getMyx(), transform.getMzx()).magnitude();
@@ -59,13 +69,19 @@ public class Vector3DUtil
 		return new Point3D(sx, sy, sz);
 	}
 	
-	public static Rotate rotateVector(Point3D u , Point3D v)
+	
+	/**
+	 * Calculates the Rotate object to aligned u with v
+	 * @param vectorToAlign - vector to be aligned
+	 * @param endResult - result of alignment
+	 * @return the new rotation
+	 */
+	public static Rotate alignVector(Point3D vectorToAlign, Point3D endResult)
 	{
-		
-		double angle = u.angle(v);
+		double angle = vectorToAlign.angle(endResult);
 		
 		// find the normal of the vectors
-		Point3D normal = u.crossProduct(v);
+		Point3D normal = vectorToAlign.crossProduct(endResult);
 		
 		// create the rotation via the normal and angle
 		Rotate returnRotate = new Rotate();
@@ -76,12 +92,16 @@ public class Vector3DUtil
 			
 	}
 		
-	/**
-	 * take 4 vectors - 2 groups - 2 u, 2 v 
-	 * will find the rotation to align u with v in a clock wise direction
-	 */
 	
-	public static Rotate alignClockWiseRotation( Point3D startingVector1, Point3D startingVector2, Point3D finalVector1, Point3D finalVector2)
+	/**
+	 * Aligns plane1 to plane2 by rotating plane1 in a clockwise direction.
+	 * @param startingVector1
+	 * @param startingVector2
+	 * @param finalVector1
+	 * @param finalVector2
+	 * @return the new rotation
+	 */
+	public static Rotate alignPlaneUsingClockWiseRotation( Point3D startingVector1, Point3D startingVector2, Point3D finalVector1, Point3D finalVector2)
 	{
 		// this should be renamed
 		// find the normals of each vector in sequence 1-1 -> 1-2 -> 2-2
@@ -95,12 +115,17 @@ public class Vector3DUtil
 		Point3D projectedstartingfinalVector1 = getVectorPlaneProjection(averageNormal, finalVector1);
 		double angleOfRotation = projectedstartingVector1.angle(projectedstartingfinalVector1);
 		
-		
 		Rotate clockWiseRotation = new Rotate(angleOfRotation, averageNormal);
 				
 		return clockWiseRotation;
 	}
 	
+	/**
+	 * Finds the projection of a vector onto a plane.
+	 * @param planeNormal - The planes normal
+	 * @param vector - the vector to project
+	 * @return the projected vector
+	 */
 	public static Point3D getVectorPlaneProjection(Point3D planeNormal, Point3D vector)
 	{
 		double dot = vector.dotProduct(planeNormal);
@@ -112,6 +137,7 @@ public class Vector3DUtil
 				
 		return projectedVector;
 	}
+	
 	
 	public static double getScaleAcrossProjectedVector(Point3D vector, Point3D vectorToScale)
 	{
@@ -127,18 +153,25 @@ public class Vector3DUtil
 		
 		return returnDouble;
 	}
-		
-	public static Point3D exclusiveTransforms(ObservableList<Transform> tranformsList, Point3D point, Class<?> tranformClassType)
+	
+	/**
+	 * Applies only a single type of transform to a vector from a list of transforms... (e.g. only applies rotations)
+	 * @param tranformsList - the list of transforms
+	 * @param vector - the vector to be transformed
+	 * @param transformClassType - the type of transform (eg. Rotate)
+	 * @return - the new transformed vector
+	 */
+	public static Point3D exclusiveTransforms(ObservableList<Transform> tranformsList, Point3D vector, Class<?> transformClassType)
 	{
 		
-		Point3D direction = point;
+		Point3D direction = vector;
 		for (Transform currentTransform : tranformsList)
 		{
-			if (tranformClassType.isInstance(currentTransform))
+			if (transformClassType.isInstance(currentTransform))
 			{
 				direction = currentTransform.transform(direction);
 			}
-			else if (tranformClassType == Transform.class)
+			else if (transformClassType == Transform.class)
 			{
 				direction = currentTransform.transform(direction);
 			}

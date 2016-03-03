@@ -16,7 +16,7 @@ public class VolumeRenderJob extends Job
  	private ILazyDataset dataset;
 
  	private double resolution;
- 	private double opacity;
+ 	private double intensityValue;
  	
 	public VolumeRenderJob(String name, IPlottingSystem system) 
 	{
@@ -25,14 +25,14 @@ public class VolumeRenderJob extends Job
 		this.system = system;
 	}
 	
-	public void compute(String traceID, double resolution, double opacity, ILazyDataset dataset) // add values
+	public void compute(String traceID, double resolution, double intensityValue, ILazyDataset dataset) // add values
 	{	
 		this.traceID = traceID;
 		this.resolution = resolution / 100;
-		this.opacity = opacity / 100;
+		this.intensityValue = intensityValue / 100;
 		this.dataset = dataset;
 		
-		destroy(traceID);
+		// destroy(traceID);
 		
 		cancel();
 		schedule();
@@ -44,6 +44,22 @@ public class VolumeRenderJob extends Job
 		{ 
 			system.getTrace(traceID).dispose();
 			system.removeTrace(system.getTrace(traceID));
+		}
+	}
+	
+	public void setColour(int red, int green, int blue)
+	{
+		if (system.getTrace(traceID) != null)
+		{ 
+			((IVolumeRenderTrace)system.getTrace(traceID)).setColour(red, green, blue);
+		}
+	}
+	
+	public void setOpacity(double opacity)
+	{
+		if (system.getTrace(traceID) != null)
+		{ 
+			((IVolumeRenderTrace)system.getTrace(traceID)).setOpacity(opacity);
 		}
 	}
 	
@@ -69,11 +85,11 @@ public class VolumeRenderJob extends Job
 				(int)((dataset.getShape()[1] / (dataset.getShape()[1] * resolution) + 0.5f)),
 				(int)((dataset.getShape()[2] / (dataset.getShape()[2] * resolution) + 0.5f))};
 		
-		
 		trace.setData(
 				dataset.getShape(), 
 				dataset.getSlice(new int[]{0,0,0}, dataset.getShape(), step),
-				opacity);
+				intensityValue);
+		
 		
 		if ((IVolumeRenderTrace) system.getTrace(traceID) == null)
 		{
