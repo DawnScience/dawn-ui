@@ -85,7 +85,6 @@ import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Cursors;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureCanvas;
-import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.GridData;
 import org.eclipse.draw2d.GridLayout;
 import org.eclipse.draw2d.IFigure;
@@ -237,7 +236,8 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
         graphLayer.add(plotContents, BorderLayout.CENTER);
         
 		this.intensity = new ColorMapRamp();
- 		intensity.setBorder(new LineBorder(ColorConstants.white, 5));
+		Color bgdColor = parent instanceof Composite? ((Composite)parent).getBackground():null;
+ 		intensity.setBorder(new LineBorder(bgdColor != null ? bgdColor : ColorConstants.white, 5));
         graphLayer.add(intensity, BorderLayout.RIGHT);
         intensity.setVisible(false);
       

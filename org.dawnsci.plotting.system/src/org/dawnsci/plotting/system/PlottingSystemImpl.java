@@ -238,7 +238,8 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			cparent = new Composite(container, SWT.NONE);
 			this.stackLayout = new StackLayout();
 			cparent.setLayout(stackLayout);
-			cparent.setBackground(getDisplay().getSystemColor(SWT.COLOR_WHITE));
+			Color colorBgd = container.getBackground();
+			cparent.setBackground(colorBgd != null? colorBgd : getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		}
 		this.parent = (T)cparent;
 
