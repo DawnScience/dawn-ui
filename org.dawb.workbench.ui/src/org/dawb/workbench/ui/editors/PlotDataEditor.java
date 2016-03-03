@@ -55,6 +55,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -152,8 +153,11 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 
 	@Override
 	public void createPartControl(final Composite parent) {
-		
+
 		final Composite  main       = new Composite(parent, SWT.NONE);
+		Color bgdColour = parent.getBackground();
+		main.setBackground(bgdColour!=null? bgdColour:new Color(Display.getDefault(), 255, 255, 255));
+
 		final GridLayout gridLayout = new GridLayout(1, false);
 		main.setLayout(gridLayout);
 		GridUtils.removeMargins(main);
