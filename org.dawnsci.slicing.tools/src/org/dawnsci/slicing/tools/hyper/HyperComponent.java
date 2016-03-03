@@ -104,7 +104,7 @@ public class HyperComponent {
 
 		this.sashForm = new SashForm(parent, SWT.HORIZONTAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,2,1));
-		sashForm.setBackground(new Color(parent.getDisplay(), 192, 192, 192));
+		sashForm.setBackground(new Color(parent.getDisplay(), 255, 255, 255));
 		
 		createPlottingSystems(sashForm);
 		
