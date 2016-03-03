@@ -69,7 +69,6 @@ import org.eclipse.nebula.visualization.xygraph.figures.Axis;
 import org.eclipse.nebula.visualization.xygraph.figures.XYGraphFlags;
 import org.eclipse.nebula.visualization.xygraph.toolbar.AddAnnotationDialog;
 import org.eclipse.nebula.visualization.xygraph.toolbar.RemoveAnnotationDialog;
-import org.eclipse.nebula.visualization.xygraph.toolbar.XYGraphConfigDialog;
 import org.eclipse.nebula.visualization.xygraph.undo.AddAnnotationCommand;
 import org.eclipse.nebula.visualization.xygraph.undo.IOperationsManagerListener;
 import org.eclipse.nebula.visualization.xygraph.undo.OperationsManager;
