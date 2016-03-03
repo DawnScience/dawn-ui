@@ -61,7 +61,6 @@ public class VolumeRenderTool extends AbstractSlicingTool
 			}
 		};
 		
-		System.out.println("created volume render tool");
 	}
 	
 	public void createToolComponent(Composite parent)
@@ -124,12 +123,10 @@ public class VolumeRenderTool extends AbstractSlicingTool
 		      {
 		          if (e.type == SWT.Selection) 
 		          {
-		        	  System.out.println(transparencySlider.getSelection());
-		        	  System.out.println(resolutionSlider.getSelection());
 		        	  job.compute(
 		        			  TRACE_ID,
-		        			  transparencySlider.getSelection(), 
 		        			  resolutionSlider.getSelection(),
+		        			  transparencySlider.getSelection(),
 		        			  getSlicingSystem().getData().getLazySet());
 		          }
 		        }
