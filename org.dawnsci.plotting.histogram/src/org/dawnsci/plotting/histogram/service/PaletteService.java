@@ -33,6 +33,7 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 		this.extensionManager = ExtensionPointManager.getManager();
 	}
 	private Collection<String> colourSchemeNames;
+	private Collection<String> colourCategoryNames;
 
 	/**
 	 * Colour map inverted
@@ -167,5 +168,17 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 		ColourSchemeContribution colourSchemeContrib = extensionManager.getColourSchemeContribution(colour);
 		ColourCategoryContribution categoryContrib = extensionManager.getColourCategoryFromID(colourSchemeContrib.getCategory());
 		return categoryContrib.getName();
+	}
+
+	@Override
+	public Collection<String> getColorCategories() {
+		if (colourCategoryNames != null)
+			return colourCategoryNames;
+		colourCategoryNames = new ArrayList<String>(7);
+		final List<ColourCategoryContribution> cc = extensionManager.getColourCategoryContributions();
+		for (ColourCategoryContribution ccc : cc) {
+			colourCategoryNames.add(ccc.getName());
+		}
+		return colourCategoryNames;
 	}
 }
