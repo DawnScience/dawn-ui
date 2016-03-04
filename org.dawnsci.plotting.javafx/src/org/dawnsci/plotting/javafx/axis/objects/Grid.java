@@ -3,6 +3,8 @@ package org.dawnsci.plotting.javafx.axis.objects;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
+
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;

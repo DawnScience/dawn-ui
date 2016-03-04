@@ -18,4 +18,5 @@ Import-Package: org.apache.commons.lang;version="2.6.0",
  org.slf4j;version="1.7.6"
 Export-Package: javafx.embed.swt,
  org.dawnsci.plotting.javafx,
- org.dawnsci.plotting.javafx.axis.objects
+ org.dawnsci.plotting.javafx.axis.objects,
+ org.dawnsci.plotting.javafx.volume

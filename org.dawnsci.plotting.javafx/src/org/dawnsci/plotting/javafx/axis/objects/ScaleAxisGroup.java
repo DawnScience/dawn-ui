@@ -1,5 +1,7 @@
 package org.dawnsci.plotting.javafx.axis.objects;
 
+import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
+
 import javafx.event.EventHandler;
 import javafx.geometry.Point3D;
 import javafx.scene.Cursor;
@@ -32,7 +34,7 @@ public class ScaleAxisGroup extends Group
 		
 		// rotate the axis to face the right direction
 		// in this case the axis
-		tempBox.getTransforms().add(Vector3DUtil.rotateVector(new Point3D(0,1,0), direction));
+		tempBox.getTransforms().add(Vector3DUtil.alignVector(new Point3D(0,1,0), direction));
 		tempBox.getTransforms().add(new Translate(0,(length * 1.05d)/2,0));
 		
 		// create the material to colour the axis

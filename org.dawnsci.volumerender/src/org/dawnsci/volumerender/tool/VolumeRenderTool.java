@@ -8,7 +8,11 @@ import org.eclipse.dawnsci.slicing.api.system.DimensionalEvent;
 import org.eclipse.dawnsci.slicing.api.system.DimensionalListener;
 import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.dawnsci.slicing.api.tool.AbstractSlicingTool;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.richbeans.widgets.wrappers.ColorSelectorWrapper;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -31,6 +35,7 @@ public class VolumeRenderTool extends AbstractSlicingTool
 	private Button deleteButton;
 	private Slider resolutionSlider;
 	private Slider transparencySlider;
+	private ColorSelectorWrapper colourSelector;
 	
 	private DimensionalListener dimensionalListener;
 	private AxisChoiceListener axisChoiceListener;
@@ -78,14 +83,13 @@ public class VolumeRenderTool extends AbstractSlicingTool
 		resolutionSlider.setMinimum(0);
 		
 		Label transparencyLabel = new Label(comp, SWT.NONE);
-		transparencyLabel.setText("Transparency");
+		transparencyLabel.setText("Intensity");
 		new Label(comp, SWT.NONE);
 		
 		transparencySlider = new Slider(comp, SWT.NONE);
 		transparencySlider.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
 		transparencySlider.setMaximum(100);
 		transparencySlider.setMinimum(0);
-		
 		
 		generateButton = new Button(comp, SWT.NONE);
 		generateButton.setText("Generate");
@@ -95,6 +99,11 @@ public class VolumeRenderTool extends AbstractSlicingTool
 		deleteButton.setText("Delete");
 		deleteButton.setVisible(true);
 		
+		Label colourLabel = new Label(comp, SWT.NONE);
+		colourLabel.setText("Colour");
+		
+		colourSelector = new ColorSelectorWrapper(comp, SWT.NONE);
+		colourSelector.setValue(new RGB(255, 0, 0));
 		
 		comp.setVisible(false);
 	}
@@ -140,6 +149,16 @@ public class VolumeRenderTool extends AbstractSlicingTool
 		        	  job.destroy(TRACE_ID);;
 		          }
 		        }
+		});
+		
+		colourSelector.addListener(new IPropertyChangeListener() {
+			
+			@Override
+			public void propertyChange(PropertyChangeEvent event) {
+				RGB rgb = (RGB) event.getNewValue();
+				job.setColour(rgb.red, rgb.green, rgb.blue);
+				
+			}
 		});
 		
 		comp.setVisible(true);
