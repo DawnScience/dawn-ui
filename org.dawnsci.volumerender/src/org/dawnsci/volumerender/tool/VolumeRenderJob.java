@@ -18,6 +18,9 @@ public class VolumeRenderJob extends Job
  	private double resolution;
  	private double intensityValue;
  	
+ 	private int red,green,blue;
+ 	private double opacity;
+ 	
 	public VolumeRenderJob(String name, IPlottingSystem system) 
 	{
 		super(name);
@@ -31,9 +34,7 @@ public class VolumeRenderJob extends Job
 		this.resolution = resolution / 100;
 		this.intensityValue = intensityValue / 100;
 		this.dataset = dataset;
-		
-		// destroy(traceID);
-		
+				
 		cancel();
 		schedule();
 	}
@@ -49,6 +50,10 @@ public class VolumeRenderJob extends Job
 	
 	public void setColour(int red, int green, int blue)
 	{
+		this.red = red;
+		this.green = green;
+		this.blue = blue;
+		
 		if (system.getTrace(traceID) != null)
 		{ 
 			((IVolumeRenderTrace)system.getTrace(traceID)).setColour(red, green, blue);
@@ -57,6 +62,8 @@ public class VolumeRenderJob extends Job
 	
 	public void setOpacity(double opacity)
 	{
+		this.opacity = opacity;
+		
 		if (system.getTrace(traceID) != null)
 		{ 
 			((IVolumeRenderTrace)system.getTrace(traceID)).setOpacity(opacity);
@@ -84,6 +91,8 @@ public class VolumeRenderJob extends Job
 				(int)((dataset.getShape()[0] / (dataset.getShape()[0] * resolution) + 0.5f)),
 				(int)((dataset.getShape()[1] / (dataset.getShape()[1] * resolution) + 0.5f)),
 				(int)((dataset.getShape()[2] / (dataset.getShape()[2] * resolution) + 0.5f))};
+		
+		trace.setColour(red, green, blue);
 		
 		trace.setData(
 				dataset.getShape(), 
