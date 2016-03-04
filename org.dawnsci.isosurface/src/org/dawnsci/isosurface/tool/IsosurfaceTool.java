@@ -49,7 +49,7 @@ public class IsosurfaceTool extends AbstractSlicingTool
 	
 	public IsosurfaceTool()
 	{
-		this.dimensionalListener = new DimensionalListener() // !! what are these fore
+		this.dimensionalListener = new DimensionalListener() // !! what are these for
 		{
 			@Override
 			public void dimensionsChanged(DimensionalEvent evt)
@@ -82,7 +82,7 @@ public class IsosurfaceTool extends AbstractSlicingTool
 		
 		sc = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+				
 		this.isoComp = new IsoComposite(
 						sc, 
 						SWT.FILL);
@@ -97,6 +97,8 @@ public class IsosurfaceTool extends AbstractSlicingTool
 		
 		isoBean = new IsoBean();
 		
+		((GridData)sc.getLayoutData()).exclude = true;
+		
 	}
 	
 	/**
@@ -106,8 +108,11 @@ public class IsosurfaceTool extends AbstractSlicingTool
 	@Override
 	public void militarize(boolean newData)
 	{
-
+		
+		((GridData)sc.getLayoutData()).exclude = false;
 		sc.setVisible(true);
+		sc.getParent().pack();
+		
 		boolean alreadyIso = getSlicingSystem().getSliceType() == getSliceType();
 		if (!newData && alreadyIso)
 			return;
@@ -185,6 +190,8 @@ public class IsosurfaceTool extends AbstractSlicingTool
 	public void demilitarize()
 	{
 		sc.setVisible(false);
+		((GridData)sc.getLayoutData()).exclude = true;
+		
 		if (dimensionalListener != null)
 		{
 			getSlicingSystem().removeDimensionalListener(dimensionalListener);
