@@ -36,6 +36,10 @@ public class VolumeRender extends Group
 	public VolumeRender()
 	{
 		super();
+		
+		xygroup = new Group();
+		zygroup = new Group();
+		zxgroup = new Group();
 	}
 	
 	/**
@@ -90,11 +94,6 @@ public class VolumeRender extends Group
 								new int[]{1,1,1});
 			
 			BufferedImage bi = new BufferedImage(slice.getShape()[0], slice.getShape()[1],BufferedImage.TYPE_INT_ARGB);
-			
-//			System.out.println("---");
-//			System.out.println(((slice.getInt(1,1,0)/max) * valueIntensity));
-//			System.out.println((int)(((slice.getInt(1,1,0)/max) * valueIntensity) + 0.5f));
-//			System.out.println(((slice.getInt(1,1,0)/max) * valueIntensity) + 0.5f);
 			
 			for (int y = 0; y < slice.getShape()[1]; y++)
 			{
@@ -186,12 +185,11 @@ public class VolumeRender extends Group
 	{
 		this.max = dataset.getSlice().max(true, true).doubleValue();
 		
-		xygroup = new Group();
-		zygroup = new Group();
-		zxgroup = new Group();
+		xygroup.getChildren().clear(); 
+		zygroup.getChildren().clear(); 
+		zxgroup.getChildren().clear(); 
 		
 		// estimate the opacity needed
-		
 		int maxDepth = Collections.min((Arrays.asList(ArrayUtils.toObject(dataset.getShape())))); // very strange way to find the max
 		double valueIntensity = ((255 / maxDepth) * 25) * intensityValue;
 		
@@ -202,7 +200,6 @@ public class VolumeRender extends Group
 		
 		initialise();
 	}
-	
 	
 	/**
 	 * sets the colour of the volume. IGNORES THE OPACITY.

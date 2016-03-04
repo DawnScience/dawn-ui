@@ -12,6 +12,7 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.richbeans.widgets.wrappers.ColorSelectorWrapper;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -73,6 +74,10 @@ public class VolumeRenderTool extends AbstractSlicingTool
 		comp = new Composite(parent, SWT.NONE);
 		comp.setLayout(new GridLayout(2, false));
 		
+		GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
+		comp.setLayoutData(data);
+		data.exclude = true;
+		
 		Label resolutionLabel = new Label(comp, SWT.NONE);
 		resolutionLabel.setText("Resolution");
 		new Label(comp, SWT.NONE);
@@ -119,9 +124,6 @@ public class VolumeRenderTool extends AbstractSlicingTool
 		if (dimsDataList != null)
 			dimsDataList.setThreeAxesOnly(AxisType.X, AxisType.Y, AxisType.Z);
 		
-		
-		
-		
 		job = new VolumeRenderJob(
 				"volume render job", 
 				getSlicingSystem().getPlottingSystem());
@@ -162,6 +164,10 @@ public class VolumeRenderTool extends AbstractSlicingTool
 		});
 		
 		comp.setVisible(true);
+		((GridData) comp.getLayoutData()).exclude = false;
+		comp.getParent().pack();
+		comp.getParent().update();
+		
 		
 		getSlicingSystem().update(false);
 		getSlicingSystem().addDimensionalListener(dimensionalListener);
@@ -173,6 +179,11 @@ public class VolumeRenderTool extends AbstractSlicingTool
 	public void demilitarize()
 	{
 		comp.setVisible(false);
+		((GridData) comp.getLayoutData()).exclude = true;
+		comp.getParent().pack();
+		comp.getParent().update();
+		
+		
 	}
 	
 	
