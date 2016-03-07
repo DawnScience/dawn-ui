@@ -75,15 +75,6 @@ public class ImageGridDialog extends Dialog{
 			logger.error("Error plotting data:", e);
 			e.printStackTrace();
 		}
-		Button closeButton = new Button(container, SWT.NONE);
-		closeButton.setText("Close");
-		closeButton.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
-		closeButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent evt) {
-				ImageGridDialog.this.close();
-			}
-		});
 		return container;
 	}
 	

@@ -1,6 +1,5 @@
 package org.dawnsci.mapping.ui.datamodel;
 
-import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
@@ -8,6 +7,14 @@ import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 
 public class MappedDataBlock implements MapObject {
+
+	public int getyDim() {
+		return yDim;
+	}
+
+	public int getxDim() {
+		return xDim;
+	}
 
 	private String name;
 	private String path;
