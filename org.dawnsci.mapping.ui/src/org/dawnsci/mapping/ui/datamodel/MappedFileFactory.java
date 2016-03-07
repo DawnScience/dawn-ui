@@ -229,8 +229,8 @@ public class MappedFileFactory {
 				} else {
 					//approximate 2D with 1D, should be done int the map/mapobjects
 					IDataset ds = lz.getSlice();
-					double min = ds.min().doubleValue();
-					double max = ds.max().doubleValue();
+					double min = ds.min(true).doubleValue();
+					double max = ds.max(true).doubleValue();
 					ILazyDataset s = DatasetFactory.createLinearSpace(min, max, ss[i], Dataset.FLOAT64);
 					
 //					int[] start = new int[ss.length];
