@@ -32,7 +32,7 @@ public class AxesGroup extends Group{
 		
 		double textSize = (tickSeparationXY.getX() / 50) * 15;
 		
-		axisGrid = new Grid(planeNormal, tickSeparationXY, axisLength, majorAxisThickness, textSize);
+		axisGrid = new Grid(planeNormal, tickSeparationXY, axisLength, textSize);
 		
 		ScaleAxis = createScaleBar(planeNormal, axisLength.getZ(), majorAxisThickness);
 		ScaleAxis.setCursor(Cursor.OPEN_HAND);

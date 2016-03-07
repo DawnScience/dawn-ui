@@ -56,6 +56,31 @@ public class Vector3DUtil
 	}
 	
 	/**
+	 * Aligns the startVector projection to the endVector projection (projected across rotationVectorDirection).
+	 * 
+	 * @param startVector - The start vector to be rotated
+	 * @param endVector - The end vector
+	 * @param rotationVectorDirection - The rotation direction, ie. the projected plane
+	 * @return The rotation
+	 * 
+	 * 
+	 */
+	public static Rotate alignVectorOnPlane(Point3D startVector, Point3D endVector, Point3D rotationVectorDirection)
+	{
+		Point3D startVectorProjection = Vector3DUtil.getVectorPlaneProjection(rotationVectorDirection, startVector);
+		Point3D endVectorProjection = Vector3DUtil.getVectorPlaneProjection(rotationVectorDirection, endVector);
+		
+		double angle = startVectorProjection.angle(endVectorProjection);
+		
+		if (Double.isInfinite(angle) || Double.isNaN(angle))
+		{
+			angle = 0;
+		}
+		
+		return new Rotate(angle, startVectorProjection.crossProduct(endVectorProjection));
+	}
+	
+	/**
 	 * gets the scale from the transform matrix
 	 * @param transform
 	 * @return

@@ -25,8 +25,6 @@ public class Grid extends Group
 	final Point3D X_AXIS_DIRECTION = new Point3D(1, 0, 0);
 	final Point3D Y_AXIS_DIRECTION = new Point3D(0, 1, 0);
 	
-	
-	
 	// transformations
 	private Translate offset;
 	private Rotate rotate;
@@ -35,22 +33,29 @@ public class Grid extends Group
 	private Point3D planeVector;
 	private Point3D maxLengthXYZ;
 	private Point2D tickSeperationXY;
-	private double thickness;
 	private Color colour;
 	private double textSize;
 	
-	
-	public Grid(Point3D planeXYZ, Point2D tickSeperationXY, Point3D axisLength, double thickness, double textSize)
+	/**
+	 * Initialise an axis grid. Generates a new axis plane along the "planeXYZ" plane. Using the below parameters
+	 * @param planeXYZ - The axis plane
+	 * @param tickSeperationXY - the separation of each tick.
+	 * @param axisLength - the bounding box size of the axes [t].
+	 * @param textSize - the text size.
+	 *  <p>
+	 * [t]: The XY are used to determine tick length, the Z is used to determine the offset of the plane during camera movement.
+ 	 * </p>
+	 */
+	public Grid(Point3D planeXYZ, Point2D tickSeperationXY, Point3D axisLength, double textSize)
 	{
 		this.textSize = textSize;
 		this.planeVector = planeXYZ;
-		this.tickSeperationXY = new Point2D(500,500);
+		this.tickSeperationXY = tickSeperationXY;
 		this.maxLengthXYZ = axisLength;
-		this.thickness = thickness;
 		
 		Point2D maxLengthXY = new Point2D(axisLength.getX(), axisLength.getY());
 		
-		axisPlane(this.planeVector, this.tickSeperationXY, maxLengthXY , this.thickness);
+		axisPlane(this.planeVector, this.tickSeperationXY, maxLengthXY);
 		
 		this.localToSceneTransformProperty().addListener((obs, oldT, newT) -> {
 			
@@ -70,10 +75,12 @@ public class Grid extends Group
 			if (angles.getX() > -90 && angles.getX() < 90)
 			{
 				offsetGrid(new Point3D(0, 0, 0));
+				offsetAfterGrid(new Point3D(0, 0, 0), yAxis);
 			}
 			else
 			{
 				offsetGrid(new Point3D(0, 0, axisLength.getZ()));
+				offsetAfterGrid(new Point3D(0,0, axisLength.getY()), yAxis);
 			}
         });	
 		
@@ -82,7 +89,6 @@ public class Grid extends Group
 	/*
 	 * private
 	 */
-
 	
 	private void offsetGrid(Point3D offset)
 	{
@@ -108,8 +114,20 @@ public class Grid extends Group
 		}
 	}
 	
-	// !! make this look nicer
-	private void axisPlane(Point3D planeXYZ, Point2D tickSeperationXY, Point2D axisLength, double thickness)
+	// !! temp !!
+	private void offsetAfterGrid(Point3D newOffset, Group axis)
+	{
+		for (Node n : axis.getChildren())
+		{
+			if (n instanceof LineGroup)
+			{
+				LineGroup lg = (LineGroup)n;
+				lg.gridMoved(newOffset);
+			}
+		}
+	}
+	
+	private void axisPlane(Point3D planeXYZ, Point2D tickSeperationXY, Point2D axisLength)
 	{
 		
 		this.xAxis = new Group();		
@@ -141,9 +159,12 @@ public class Grid extends Group
 				planeXYZ.getY(),
 				planeXYZ.getZ());
 		this.rotate = new Rotate();
-		this.rotate = (rotateAxisToVector(defaultVector, planeVector, new Point3D(-1, -1, -1) ));
-		this.getTransforms().add(this.rotate);
 		
+		// align the axis to its new position
+		// [-1,-1,-1] is the rotation vector by combining all three axis aligned axes.
+		// they are aligned this way to keep the X and Y ticks correctly orientated
+		this.rotate = (Vector3DUtil.alignVectorOnPlane(defaultVector, planeVector, new Point3D(-1,-1,-1)));
+		this.getTransforms().add(this.rotate);
 		
 		// set up the offset transformation -> will be used later
 		this.offset = new Translate();
@@ -153,39 +174,18 @@ public class Grid extends Group
 		// finally - once all initialised
 		// update the grid -> create the grid
 		this.updateGridMaxLength(this.maxLengthXYZ);
-		
-	}
-	/**
-	 * Creates a rotation from the plane vector and end vector
-	 * essentially turns the create plane into the right direction
-	 * i used this rotation because it allows for a more consistant grid group
-	 * 
-	 * @param startVector
-	 * @param endVector
-	 * @param rotationVector
-	 * @return
-	 */
-	private Rotate rotateAxisToVector(Point3D startVector, Point3D endVector, Point3D rotationVector)
-	{
-		Point3D startVectorProjection = Vector3DUtil.getVectorPlaneProjection(rotationVector, startVector);
-		Point3D endVectorProjection = Vector3DUtil.getVectorPlaneProjection(rotationVector, endVector);
-		
-		double angle = startVectorProjection.angle(endVectorProjection);
-		
-		return new Rotate(angle, startVectorProjection.crossProduct(endVectorProjection));
 	}
 	
-	private LineGroup createTickBar(double length, Point3D axisDirection, Point2D offsetXY, String text)
+	private LineGroup createTick(double length, Point3D axisDirection, Point2D offsetXY, String text)
 	{
-		
-		LineGroup returnBar = new LineGroup(
+		LineGroup returnTick = new LineGroup(
 				length,
 				axisDirection,
 				new Point3D(offsetXY.getX(),offsetXY.getY(), 0),
 				text,
 				this.textSize,
 				this.rotate);
-		return returnBar;
+		return returnTick;
 	}
 	
 	/*
@@ -298,7 +298,7 @@ public class Grid extends Group
 			
 			for (int i = 0; i < excessXLineCount; i ++)
 			{
-				LineGroup tickLine = createTickBar(
+				LineGroup tickLine = createTick(
 						this.maxLengthXYZ.getY(),
 						Y_AXIS_DIRECTION, 
 						new Point2D(tickSeperationXY.getX()*(nXCount+i),0),
@@ -306,10 +306,7 @@ public class Grid extends Group
 				this.yAxis.getChildren().add(tickLine);
 			}		
 		}
-		
-		
-		
-		
+				
 		int nYCount = this.xAxis.getChildren().size();
 		double seperationYLength = this.tickSeperationXY.getY() * (nYCount-1);
 		
@@ -332,7 +329,7 @@ public class Grid extends Group
 			for (int i = 0; i < excessYLineCount; i ++)
 			{	
 				
-				LineGroup tickLine = createTickBar(
+				LineGroup tickLine = createTick(
 						this.maxLengthXYZ.getX(), 
 						X_AXIS_DIRECTION, 
 						new Point2D(this.tickSeperationXY.getY()*(nYCount+i), 0),
