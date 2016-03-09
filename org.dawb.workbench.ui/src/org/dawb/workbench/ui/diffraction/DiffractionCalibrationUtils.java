@@ -30,9 +30,13 @@ import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironment;
 import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
 import org.eclipse.dawnsci.analysis.api.persistence.IPersistentFile;
+import org.eclipse.dawnsci.analysis.api.persistence.IPersistentNodeFactory;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
+import org.eclipse.dawnsci.hdf5.nexus.NexusFileHDF5;
+import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -472,24 +476,22 @@ public class DiffractionCalibrationUtils {
 	public static void saveToNexusFile(DiffractionDataManager manager, String filepath) throws Exception {
 		
 		DiffractionTableData cd = manager.getCurrentData();
-		
+		NexusFile nexusFile = NexusFileHDF5.createNexusFile(filepath, false);
 		IPersistenceService service = (IPersistenceService)ServiceManager.getService(IPersistenceService.class);
-		IPersistentFile file = service.createPersistentFile(filepath);
-		try {
-			if (cd.getCalibrationInfo()!= null) {
-				file.setPowderCalibrationInformation(cd.getImage(), cd.getMetaData(), cd.getCalibrationInfo());
-			} else {
-				file.setData(cd.getImage());
-				file.setDiffractionMetadata(cd.getMetaData());
-			}
-			
+//		IPersistentFile file = service.createPersistentFile(filepath);
+		try {	
+			IPersistentNodeFactory pnf = service.getPersistentNodeFactory();
+			GroupNode n = pnf.writePowderCalibrationToFile(cd.getMetaData(),cd.getImage(), cd.getCalibrationInfo());
+			nexusFile.addNode("/entry1", n);
 			
 		} catch(Exception e) {
 			logger.error(e.getMessage());
 		} finally {
-			file.close();
+//			file.close();
+			nexusFile.close();
 		}
 	}
+	
 
 	/**
 	 * Returns the wavelength/energy given the energy/wavelength
