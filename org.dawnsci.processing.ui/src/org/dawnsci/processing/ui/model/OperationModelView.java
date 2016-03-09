@@ -1,5 +1,8 @@
 package org.dawnsci.processing.ui.model;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
@@ -17,6 +20,11 @@ import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.ViewPart;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 
 public class OperationModelView extends ViewPart implements ISelectionListener {
 
@@ -56,11 +64,13 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 		
 		getViewSite().getActionBars().getToolBarManager().add(configure);
 		
-		
-		man.addOperationRunnerListener(new IOperationGUIRunnerListener.Stub() {
+		BundleContext ctx = FrameworkUtil.getBundle(OperationModelView.class).getBundleContext();
+		EventHandler handler = new EventHandler() {
 			
 			@Override
-			public void inputDataAvaliable(IOperationInputData data) {
+			public void handleEvent(Event event) {
+				IOperationInputData data = (IOperationInputData)event.getProperty("data");
+				
 				if (data == null || data.getCurrentOperation().getModel() != modelEditor.getModel()) {
 					inputData = null;
 					configure.setEnabled(false);
@@ -68,9 +78,13 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 				}
 				inputData = data;
 				configure.setEnabled(true);
+				
 			}
-
-		});
+		};
+		
+		Dictionary<String, String> props = new Hashtable<>();
+		props.put(EventConstants.EVENT_TOPIC, "org/dawnsci/events/processing/DATAUPDATE");
+		ctx.registerService(EventHandler.class, handler, props);
 	}
 
 	@Override
@@ -97,5 +111,6 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 			}
 		}		
 	}
+
 
 }
