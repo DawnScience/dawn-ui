@@ -13,6 +13,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -107,6 +108,8 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -152,7 +155,10 @@ public class DataFileSliceView extends ViewPart {
 			public void selectionChanged(SelectionChangedEvent event) {
 				if (event.getSelection() instanceof StructuredSelection) {
 					inputData = null;
-					eventManager.sendInputDataUpdate(null);
+					EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
+					Map<String,IOperationInputData> props = new HashMap<>();
+					props.put("data", inputData);
+					eventAdmin.postEvent(new Event("org/dawnsci/events/processing/DATAUPDATE", props));
 					selectedFile = (String)((StructuredSelection)event.getSelection()).getFirstElement();
 					update(currentOperation);
 				}
@@ -198,7 +204,10 @@ public class DataFileSliceView extends ViewPart {
 			@Override
 			public void sliceChanged(SliceChangeEvent event) {
 				inputData = null;
-				eventManager.sendInputDataUpdate(null);
+				EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
+				Map<String,IOperationInputData> props = new HashMap<>();
+				props.put("data", inputData);
+				eventAdmin.postEvent(new Event("org/dawnsci/events/processing/DATAUPDATE", props));
 				String ss = Slice.createString(csw.getCurrentSlice());
 				currentSliceLabel.setText("Current slice of data: [" +ss + "]");
 				currentSliceLabel.getParent().layout(true);
@@ -610,24 +619,35 @@ public class DataFileSliceView extends ViewPart {
 				
 				Slice[] slices = Slicer.getSliceArrayFromSliceDimensions(sliceDimensions, s);
 				SliceND slice = new SliceND(s, slices);
-				int[] nShape = slice.getShape();
 
 				if (dd == null) {
 					dd = Slicer.getDataDimensions(s, context.getSliceDimensions());
 					Arrays.sort(dd);
 				}
-				 int n = 1;
-				 for (int i = 0; i < nShape.length; i++) {
-					 if (Arrays.binarySearch(dd, i) < 0) n *= nShape[i];
-				 }
-				
-				c += n;
+				c += getWork(slice,dd);
 				
 			} catch (Exception e) {
 				logger.warn("cannot load metadata for {}, assuming one frame", path);
 				c++;
 			}
 		}
+		return c;
+	}
+	
+	public static int getWork(SliceND slice, int[] dataDims) {
+		int c = 0;
+		int[] dd = dataDims.clone();
+		Arrays.sort(dd);
+		
+		int[] nShape = slice.getShape();
+
+		 int n = 1;
+		 for (int i = 0; i < nShape.length; i++) {
+			 if (Arrays.binarySearch(dd, i) < 0) n *= nShape[i];
+		 }
+		
+		c += n;
+		
 		return c;
 	}
 	
@@ -751,7 +771,10 @@ public class DataFileSliceView extends ViewPart {
 				long start = System.currentTimeMillis();
 				sliceVisitor.visit(firstSlice);
 				inputData = sliceVisitor.getOperationInputData();
-				eventManager.sendInputDataUpdate(inputData);
+				EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
+				Map<String,IOperationInputData> props = new HashMap<>();
+				props.put("data", inputData);
+				eventAdmin.postEvent(new Event("org/dawnsci/events/processing/DATAUPDATE", props));
 				logger.debug("Ran in: " +(System.currentTimeMillis()-start)/1000. + " s");
 				eventManager.sendErrorUpdate(null);
 
@@ -889,6 +912,7 @@ public class DataFileSliceView extends ViewPart {
 		}
 		
 		private IConversionContext setupwizard(IConversionContext context) {
+//			final SetupDimensionsWizardPage convertPage = new SetupDimensionsWizardPage(context);
 			final SetUpProcessWizardPage convertPage = new SetUpProcessWizardPage(context);
 			
 			Wizard wiz = new Wizard() {
