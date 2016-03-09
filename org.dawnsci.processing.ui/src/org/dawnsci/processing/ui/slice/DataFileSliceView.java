@@ -13,7 +13,9 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +24,7 @@ import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.ServiceHolder;
+import org.dawnsci.processing.ui.model.OperationModelView;
 import org.dawnsci.processing.ui.preference.ProcessingConstants;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
 import org.eclipse.core.resources.IFile;
@@ -108,8 +111,12 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,7 +125,6 @@ import uk.ac.diamond.scisoft.analysis.processing.visitor.NexusFileExecutionVisit
 public class DataFileSliceView extends ViewPart {
 
 	private FileManager fileManager;
-	private OperationEventManager eventManager;
 	private TableViewer viewer;
 	private UpdateJob job;
 	private Label currentSliceLabel;
@@ -133,10 +139,6 @@ public class DataFileSliceView extends ViewPart {
 	String lastPath = null;
 	
 	private final static Logger logger = LoggerFactory.getLogger(DataFileSliceView.class);
-
-	public DataFileSliceView() {
-		eventManager = new OperationEventManager();
-	}
 
 	@Override
 	public void createPartControl(Composite parent) {
@@ -317,12 +319,19 @@ public class DataFileSliceView extends ViewPart {
 			}
 		});
 		
-		eventManager.addOperationRunnerListener(new  IOperationGUIRunnerListener.Stub() {
+		BundleContext ctx = FrameworkUtil.getBundle(DataFileSliceView.class).getBundleContext();
+		EventHandler handler = new EventHandler() {
+			
 			@Override
-			public void updateRequested() {
+			public void handleEvent(Event event) {
 				update(currentOperation);
+				
 			}
-		});
+		};
+		
+		Dictionary<String, String> props = new Hashtable<>();
+		props.put(EventConstants.EVENT_TOPIC, "org/dawnsci/events/processing/PROCESSUPDATE");
+		ctx.registerService(EventHandler.class, handler, props);
 		
 		//hook up delete key to remove from list
 		viewer.getTable().addKeyListener(new KeyListener() {
@@ -483,7 +492,12 @@ public class DataFileSliceView extends ViewPart {
 
 				fileManager.clear();
 				csw.disable();
-				eventManager.sendInitialDataUpdate(null);
+				
+				EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
+				Map<String,IDataset> props = new HashMap<>();
+				props.put("data", null);
+				eventAdmin.postEvent(new Event("org/dawnsci/events/processing/INITIALUPDATE", props));
+				
 				job = null;
 				currentSliceLabel.setText("Current slice of data: [ - - - - -]");
 				try {
@@ -529,7 +543,10 @@ public class DataFileSliceView extends ViewPart {
 			fileManager.clear();
 			csw.disable();
 			currentSliceLabel.setText("Current slice of data: [ - - - - -]");
-			eventManager.sendInitialDataUpdate(null);
+			EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
+			Map<String,IDataset> props = new HashMap<>();
+			props.put("data", null);
+			eventAdmin.postEvent(new Event("org/dawnsci/events/processing/INITIALUPDATE", props));
 		} else {
 			viewer.setSelection(new StructuredSelection(fileManager.getFilePaths().get(0)),true);
 		}
@@ -721,7 +738,10 @@ public class DataFileSliceView extends ViewPart {
 				} else {
 					firstSlice = lazyDataset.getSlice(s);
 				}
-				eventManager.sendInitialDataUpdate(firstSlice.getSliceView().squeeze());
+				EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
+				Map<String,IDataset> props = new HashMap<>();
+				props.put("data", firstSlice.getSliceView().squeeze());
+				eventAdmin.postEvent(new Event("org/dawnsci/events/processing/INITIALUPDATE", props));
 				MetadataPlotUtils.plotDataWithMetadata(firstSlice, input);
 				
 				
@@ -771,30 +791,40 @@ public class DataFileSliceView extends ViewPart {
 				long start = System.currentTimeMillis();
 				sliceVisitor.visit(firstSlice);
 				inputData = sliceVisitor.getOperationInputData();
-				EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
-				Map<String,IOperationInputData> props = new HashMap<>();
-				props.put("data", inputData);
-				eventAdmin.postEvent(new Event("org/dawnsci/events/processing/DATAUPDATE", props));
+				Map<String,IOperationInputData> propsOID = new HashMap<>();
+				propsOID.put("data", inputData);
+				eventAdmin.postEvent(new Event("org/dawnsci/events/processing/DATAUPDATE", propsOID));
 				logger.debug("Ran in: " +(System.currentTimeMillis()-start)/1000. + " s");
-				eventManager.sendErrorUpdate(null);
+				Map<String,OperationException> propsE = new HashMap<>();
+				propsE.put("error", null);
+				eventAdmin.postEvent(new Event("org/dawnsci/events/processing/ERROR", propsE));
 
 				
 				
 				} catch (OperationException e) {
 					logger.error(e.getMessage(), e);
-					eventManager.sendErrorUpdate(e);
+					EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
+					Map<String,OperationException> props = new HashMap<>();
+					props.put("error", e);
+					eventAdmin.postEvent(new Event("org/dawnsci/events/processing/ERROR", props));
 					return Status.CANCEL_STATUS;
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
-
 					String message = e.getMessage();
 					if (message == null) message = "Unexpected error!";
-					eventManager.sendErrorUpdate(new OperationException(null, message));
+					EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
+					Map<String,OperationException> props = new HashMap<>();
+					props.put("error", new OperationException(null, message));
+					eventAdmin.postEvent(new Event("org/dawnsci/events/processing/ERROR", props));
 					return Status.CANCEL_STATUS;
 				} finally {
 					if (sliceVisitor != null) {
+						EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
 						inputData = sliceVisitor.getOperationInputData();
-						eventManager.sendInputDataUpdate(inputData);
+						Map<String,IOperationInputData> propsOID = new HashMap<>();
+						propsOID.put("data", inputData);
+						eventAdmin.postEvent(new Event("org/dawnsci/events/processing/DATAUPDATE", propsOID));
+
 					}
 					output.setEnabled(true);
 				}
@@ -812,7 +842,6 @@ public class DataFileSliceView extends ViewPart {
 	@Override
 	public Object getAdapter(final Class clazz) {
 		if (clazz == FileManager.class) return fileManager;
-		if (clazz == OperationEventManager.class) return eventManager;
 		return super.getAdapter(clazz);
 	}
 	

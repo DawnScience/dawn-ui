@@ -11,6 +11,8 @@ package org.dawnsci.processing.ui.processing;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
@@ -19,10 +21,10 @@ import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.util.list.ListUtils;
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.processing.ui.Activator;
+import org.dawnsci.processing.ui.model.OperationModelView;
 import org.dawnsci.processing.ui.preference.ProcessingConstants;
 import org.dawnsci.processing.ui.slice.IOperationGUIRunnerListener;
 import org.dawnsci.processing.ui.slice.IOperationInputData;
-import org.dawnsci.processing.ui.slice.OperationEventManager;
 import org.dawnsci.processing.ui.slice.OperationInformerImpl;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
@@ -61,6 +63,11 @@ import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -168,32 +175,33 @@ public class ProcessingView extends ViewPart {
 			}
 		});
 		
-		IViewPart view = getSite().getPage().findView("org.dawnsci.processing.ui.DataFileSliceView");
-		OperationEventManager man = (OperationEventManager)view.getAdapter(OperationEventManager.class);
-		man.addOperationRunnerListener(new IOperationGUIRunnerListener() {
+		BundleContext ctx = FrameworkUtil.getBundle(ProcessingView.class).getBundleContext();
+		EventHandler ErrorHandler = new EventHandler() {
 			
 			@Override
-			public void inputDataAvaliable(IOperationInputData data) {
+			public void handleEvent(Event event) {
+				OperationException e = (OperationException)event.getProperty("error");
+				informer.setInErrorState(e);
 			}
+		};
+		
+		Dictionary<String, String> props = new Hashtable<>();
+		props.put(EventConstants.EVENT_TOPIC, "org/dawnsci/events/processing/ERROR");
+		ctx.registerService(EventHandler.class, ErrorHandler, props);
+		
+		
+		EventHandler initialHandler = new EventHandler() {
 			
 			@Override
-			public void initialDataAvaliable(IDataset data) {
+			public void handleEvent(Event event) {
+				IDataset data = (IDataset)event.getProperty("data");
 				informer.setTestData(data);
 			}
-			
-			@Override
-			public void inErrorState(OperationException e) {
-				informer.setInErrorState(e);
-				
-			}
-
-			@Override
-			public void updateRequested() {
-				// TODO Auto-generated method stub
-				
-			}
-		});
-
+		};
+		
+		props = new Hashtable<>();
+		props.put(EventConstants.EVENT_TOPIC, "org/dawnsci/events/processing/INITIALUPDATE");
+		ctx.registerService(EventHandler.class, initialHandler, props);
 	}
 	
 	private void readOperationsFromFile(String filename) {
