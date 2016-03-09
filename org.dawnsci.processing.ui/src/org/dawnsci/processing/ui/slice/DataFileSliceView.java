@@ -389,7 +389,7 @@ public class DataFileSliceView extends ViewPart {
 
 						@Override
 						public IExecutionVisitor getExecutionVisitor(String fileName) {
-							return new HierarchicalFileExecutionVisitor(fileName);
+							return new NexusFileExecutionVisitor(fileName);
 						}
 
 						@Override
