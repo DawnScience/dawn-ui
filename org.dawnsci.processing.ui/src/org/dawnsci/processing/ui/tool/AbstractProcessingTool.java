@@ -379,9 +379,8 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 				InterruptedException {
 					
-					IMonitor mon = new ProgressMonitorWrapper(monitor);
 					try {
-						runProcessing(parentMeta, path, mon);
+						runProcessing(parentMeta, path, monitor);
 						Map<String,String> props = new HashMap<>();
 						props.put("path", path);
 						EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
@@ -402,9 +401,10 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		
 	}
 	
-	private void runProcessing(SliceFromSeriesMetadata meta, String outputFile, IMonitor monitor){
+	private void runProcessing(SliceFromSeriesMetadata meta, String outputFile, IProgressMonitor monitor){
 		
 		try {
+			IMonitor mon = new ProgressMonitorWrapper(monitor);
 			IOperationService service = ServiceHolder.getOperationService();
 			IOperationContext cc = service.createContext();
 			ILazyDataset local = meta.getParent().getSliceView();
@@ -414,7 +414,9 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 			cc.setVisitor(new NexusFileExecutionVisitor(outputFile));
 			cc.setDataDimensions(meta.getDataDimensions());
 			cc.setSeries(getOperations());
-			cc.setMonitor(monitor);
+			cc.setMonitor(mon);
+			
+			monitor.beginTask("Processing", DataFileSliceView.getWork(new SliceND(local.getShape()), meta.getDataDimensions()));
 			
 			boolean parallel = true;
 			IOperation[] operationSeries = getOperations();

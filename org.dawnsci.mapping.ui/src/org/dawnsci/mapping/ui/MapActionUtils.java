@@ -5,9 +5,11 @@ import java.util.List;
 
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.MappedData;
+import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
 import org.dawnsci.mapping.ui.datamodel.RGBMapData;
+import org.dawnsci.mapping.ui.dialog.DynamicDialog;
 import org.dawnsci.mapping.ui.dialog.ImageGridDialog;
 import org.dawnsci.mapping.ui.dialog.MapPropertiesDialog;
 import org.dawnsci.mapping.ui.dialog.RGBMixerDialog;
@@ -131,5 +133,27 @@ public class MapActionUtils {
 		};
 		
 		return trans;
+	}
+	
+	public static IAction getDynamicViewerAction(final MappedDataBlock block) {
+		IAction trans = new Action("Dynamic Viewer...") {
+			@Override
+			public void run() {
+				
+				DynamicDialog dialog;
+				try {
+					dialog = new DynamicDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), block);
+					dialog.open();
+				} catch (Exception e) {
+					MessageDialog.openError(Display.getDefault()
+							.getActiveShell(), "Error Properties Viewer",
+							"The following error occured while opening the Properties Viewer dialog: " + e);
+				}
+				
+			}
+		};
+		
+		return trans;
+		
 	}
 }

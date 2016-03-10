@@ -147,6 +147,13 @@ public class MappedDataView extends ViewPart {
 						manager.add(MapActionUtils.getFileRemoveAction(FileManagerSingleton.getFileManager(), (MappedDataFile)selection.getFirstElement()));
 
 					}
+					
+					if (selection.size() == 1 && selection.getFirstElement() instanceof MappedDataBlock && ((MappedDataBlock)selection.getFirstElement()).getLazy().getRank() == 3) {
+
+						manager.add(MapActionUtils.getDynamicViewerAction((MappedDataBlock)selection.getFirstElement()));
+
+					}
+					
 					List<MappedDataFile> mdfs = new ArrayList<MappedDataFile>();
 					while(it != null && it.hasNext()) {
 						Object obj = it.next();

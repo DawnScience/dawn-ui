@@ -32,6 +32,13 @@
                type="org.dawnsci.common.widgets.gda.function.detail.IFunctionDetailPane">
          </adapter>
       </factory>
+      <factory
+            adaptableType="org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunction"
+            class="org.dawnsci.common.widgets.gda.function.detail.DetailsPaneFactory">
+         <adapter
+               type="org.dawnsci.common.widgets.gda.function.detail.IFunctionDetailPane">
+         </adapter>
+      </factory>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
