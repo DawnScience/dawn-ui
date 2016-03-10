@@ -1,5 +1,6 @@
 package org.dawnsci.processing.ui.tool;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -358,12 +359,15 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		
 		if (parentMeta == null) return;
 	
+		String p = getPathNoExtension(parentMeta.getFilePath());
+		
 		
 		FileSelectionDialog fsd = new FileSelectionDialog(this.getViewPart().getSite().getShell());
 		fsd.setNewFile(true);
 		fsd.setFolderSelector(false);
 		fsd.setHasResourceButton(true);
 		fsd.setBlockOnOpen(true);
+		fsd.setPath(p +"_processed.nxs");
 		
 		if (fsd.open() == FileSelectionDialog.CANCEL) return;
 		
@@ -439,4 +443,9 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		}
 	}
 
+	private String getPathNoExtension(String path) {
+		int posExt = path.lastIndexOf(".");
+		// No File Extension
+		return posExt == -1 ? path : path.substring(0, posExt);
+	}
 }
