@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Javafx Jars X86_64
+Bundle-Name: Javafx Linux Jars X86_64
 Bundle-SymbolicName: org.dawnsci.plotting.javafx.linux.x86_64
 Bundle-Version: 1.0.0.qualifier
 Fragment-Host: org.dawnsci.plotting.javafx;bundle-version="1.0.0"
