@@ -92,7 +92,6 @@ public class LineGroup extends Group
         });
 	}
 	
-	
 	private void setTextTransforms()
 	{
 		double width = textLabel.getBoundsInLocal().getWidth();
@@ -126,16 +125,6 @@ public class LineGroup extends Group
 		
 	}
 	
-	// !! CHANGE ME !!
-	private void modifyYTextPaneTranslate(int mod)
-	{
-		this.translate_TextPane.setY(Math.abs(this.translate_TextPane.getY())* mod);
-	}
-	private void modifyZTextPaneTranslate(int mod)
-	{
-		this.translate_TextPane.setZ(Math.abs(this.translate_TextPane.getZ())* mod);
-	}
-	
 	// create text label for the grid axis
 	private Text createTextLabel(String text) 
 	{
@@ -162,11 +151,11 @@ public class LineGroup extends Group
 			
 			if (translate.getY() > 0)
 			{
-				 modifyYTextPaneTranslate(1);
+				this.translate_TextPane.setY(Math.abs(this.translate_TextPane.getY()) *  1);
 			}
 			else
 			{
-				 modifyYTextPaneTranslate(-1);
+				this.translate_TextPane.setY(Math.abs(this.translate_TextPane.getY()) * -1);;
 			}
 		}
 	}
@@ -176,11 +165,11 @@ public class LineGroup extends Group
 	{
 		if (translate.getZ() > 0)
 		{
-			 modifyZTextPaneTranslate(1);
+			this.translate_TextPane.setZ(Math.abs(this.translate_TextPane.getZ()) *  1);
 		}
 		else
 		{
-			 modifyZTextPaneTranslate(-1);
+			this.translate_TextPane.setZ(Math.abs(this.translate_TextPane.getZ()) * -1);
 		}
 	}
 	
