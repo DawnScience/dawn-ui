@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="jars/jfxrt.jar"/>
-	<classpathentry exported="true" kind="lib" path="jars/jfxswt.jar"/>
+	<classpathentry kind="lib" path="jars/jfxrt.jar"/>
+	<classpathentry kind="lib" path="jars/jfxswt.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
