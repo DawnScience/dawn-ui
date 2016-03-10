@@ -7,5 +7,5 @@ Fragment-Host: org.dawnsci.plotting.javafx;bundle-version="1.0.0"
 Bundle-ClassPath: jars/jfxrt.jar,
  jars/jfxswt.jar
 Export-Package: javafx.embed.swt
-Eclipse-PlatformFilter: (& (osgi.os=macosx) (osgi.arch=x86))
+Eclipse-PlatformFilter: (& (osgi.os=macosx) (osgi.arch=x86_64))
 Bundle-Vendor: Diamond Light Source
