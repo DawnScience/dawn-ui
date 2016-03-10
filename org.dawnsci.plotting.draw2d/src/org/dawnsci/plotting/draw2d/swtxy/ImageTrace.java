@@ -629,9 +629,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 //			isMaximumZoom = true;
 //		}
 		
-		logger.debug("scaleWidth="+scaleWidth);
-		logger.debug("scaleHeight="+scaleHeight);
-		
 		try {
 			// Slice the data.
 			// Pixel slice on downsampled data = fast!
