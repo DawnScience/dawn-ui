@@ -386,19 +386,6 @@ public class SurfaceDisplayer extends Scene
 		 * misc listeners -> transform changes etc.
 		 */
 		
-		// on transform change
-		EventHandler<TransformChangedEvent> tranformChange = new EventHandler<TransformChangedEvent>()
-		{
-			@Override
-			public void handle(TransformChangedEvent arg0)
-			{
-				// !! do nothing for now -> might be used to orientate text
-			}
-		};
-		
-		alignedXRotate.setOnTransformChanged(tranformChange);
-		alignedYRotate.setOnTransformChanged(tranformChange);
-		
 		// on scale change
 		EventHandler<TransformChangedEvent> scaleChanged = new EventHandler<TransformChangedEvent>()
 		{
@@ -517,12 +504,11 @@ public class SurfaceDisplayer extends Scene
 			double maxSeperation = Vector3DUtil.getMaximumValue(seperationValue);
 			Point3D tickSeperationXYZ = new Point3D(maxSeperation, maxSeperation, maxSeperation);
 			
-			axisObjectGroup.createAxes(
+			axisObjectGroup.addAxes(
 					maxLengths,
-					maxSeperation*0.08f, 
 					tickSeperationXYZ);
 			
-			this.axisObjectGroup.createBoundingBox(maxLengths);
+			this.axisObjectGroup.addBoundingBox(maxLengths);
 		}
 		
 		// add the mesh the the scene graph

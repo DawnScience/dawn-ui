@@ -19,30 +19,28 @@ public class AxesGroup extends Group{
 	private Grid axisGrid;
 	private Cylinder ScaleAxis;
 
-	private Point2D axisLimitMin = new Point2D(0, 0);
-	private Point2D axisLimitMax = new Point2D(200,200);
+	private Point2D axisLimitMin;
+	private Point2D axisLimitMax;
 	
 	public AxesGroup(
 			Point3D planeNormal,
 			Point2D tickSeparationXY, 
 			Point3D axisLength,
-			double majorAxisThickness,
-			EventHandler<MouseEvent> scaleEventHandler)
+			Point2D minimumXYTickValues,
+			Point2D maximumXYTickValues)
 	{
-		
 		double textSize = (tickSeparationXY.getX() / 50) * 15;
 		
-		axisGrid = new Grid(planeNormal, tickSeparationXY, axisLength, majorAxisThickness, textSize);
+		axisLimitMin = minimumXYTickValues;
+		axisLimitMax = maximumXYTickValues;
 		
-		ScaleAxis = createScaleBar(planeNormal, axisLength.getZ(), majorAxisThickness);
-		ScaleAxis.setCursor(Cursor.OPEN_HAND);
-		ScaleAxis.setOnMouseDragged(scaleEventHandler);
-		
+		axisGrid = new Grid(planeNormal, tickSeparationXY, axisLength, textSize);
+				
 		AmbientLight ambientAxisLight = new AmbientLight(DefaultObjectProperties.LINE_COLOUR);
 		ambientAxisLight.getScope().add(axisGrid);
 		axisGrid.getChildren().add(ambientAxisLight);
 		
-		this.getChildren().addAll(axisGrid); //, ScaleAxis);
+		this.getChildren().addAll(axisGrid);
 	}
 	
 	private Cylinder createScaleBar(Point3D direction, double length, double thickness)
@@ -65,7 +63,15 @@ public class AxesGroup extends Group{
 		tempBox.setMaterial(mat);
 		
 		return tempBox;
+	}
+	
+	public void addScaler(Point3D planeNormal, Point3D axisLength, double thickness, EventHandler<MouseEvent> scaleEventHandler)
+	{ 
+		ScaleAxis = createScaleBar(planeNormal, axisLength.getZ(), thickness);
+		ScaleAxis.setCursor(Cursor.OPEN_HAND);
+		ScaleAxis.setOnMouseDragged(scaleEventHandler);
 		
+		this.getChildren().addAll(axisGrid);
 	}
 	
 	public void updateScale(Point3D newMax)
@@ -93,7 +99,4 @@ public class AxesGroup extends Group{
 		
 		axisGrid.refreshGrid();
 	}
-	
-	
-	
 }
