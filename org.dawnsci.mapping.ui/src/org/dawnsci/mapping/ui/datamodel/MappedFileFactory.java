@@ -220,11 +220,11 @@ public class MappedFileFactory {
 				int[] ss = lz.getShape();
 				
 				if (ss.length == 1) {
-					axm.addAxis(i, lz);
+					axm.addAxis(i, lz.getSlice());
 					
 					String second = null;
 					if (bean.getxDim() == i && bean.getxAxisForRemapping() != null) second = bean.getxAxisForRemapping();
-					if (second != null) axm.addAxis(i, getLazyDataset(path, second));
+					if (second != null) axm.addAxis(i, getLazyDataset(path, second).getSlice());
 					
 				} else {
 					//approximate 2D with 1D, should be done int the map/mapobjects

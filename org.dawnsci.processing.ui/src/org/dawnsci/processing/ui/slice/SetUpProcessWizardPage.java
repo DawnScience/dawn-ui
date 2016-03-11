@@ -318,7 +318,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 				}
 			}
 			
-			AxesMetadata ax = ServiceHolder.getLoaderService().getAxesMetadata(lazyDataset, path, sanitizeAxesNames(sliceComponent.getAxesNames()));
+			AxesMetadata ax = ServiceHolder.getLoaderService().getAxesMetadata(lazyDataset, path, sanitizeAxesNames(sliceComponent.getAxesNames()),true);
 			lazyDataset.setMetadata(ax);
 			IDataset firstSlice = Slicer.getFirstSlice(lazyDataset, sliceDims);
 			
