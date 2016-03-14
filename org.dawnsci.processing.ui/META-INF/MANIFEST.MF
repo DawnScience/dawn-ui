@@ -34,7 +34,7 @@ Import-Package: org.apache.commons.beanutils;version="1.9.1",
  org.eclipse.core.resources,
  org.eclipse.dawnsci.analysis.api.conversion,
  org.eclipse.emf.common.ui.dialogs,
- org.slf4j;version="1.7.6",
+ org.slf4j;version="[1.7.2,2.0.0)",
  uk.ac.diamond.scisoft.analysis.processing.visitor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Service-Component: OSGI-INF/*.xml

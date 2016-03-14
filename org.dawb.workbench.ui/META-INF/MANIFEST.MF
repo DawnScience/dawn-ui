@@ -37,7 +37,7 @@ Import-Package: org.dawb.common.services,
  org.eclipse.core.filesystem,
  org.eclipse.draw2d,
  org.eclipse.ui.ide,
- org.slf4j;version="[1.7.6,1.7.7)",
+ org.slf4j;version="[1.7.2,2.0.0)",
  uk.ac.diamond.scisoft.analysis.rcp.editors
 Bundle-ClassPath: .
 Export-Package: org.dawb.workbench.ui,

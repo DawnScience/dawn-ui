@@ -22,6 +22,6 @@ Import-Package: org.dawnsci.plotting.util,
  org.eclipse.nebula.visualization.xygraph.linearscale,
  org.eclipse.richbeans.binding,
  org.eclipse.richbeans.reflection,
- org.slf4j;version="1.7.6"
+ org.slf4j;version="[1.7.2,2.0.0)"
 Bundle-ClassPath: .,
  swing2swt.jar
