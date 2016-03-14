@@ -42,7 +42,7 @@
             <with
                   variable="activeWorkbenchWindow.activePerspective">
                <equals
-                     value="org.dawnsci.mapping.ui.mappingperspective">
+                     value="org.dawnsci.mapping.ui.dawn.mappingperspective">
                </equals>
             </with>
          </enablement>
@@ -56,7 +56,7 @@
             <with
                   variable="activeWorkbenchWindow.activePerspective">
                <equals
-                     value="org.dawnsci.mapping.ui.mappingperspective">
+                     value="org.dawnsci.mapping.ui.dawn.mappingperspective">
                </equals>
             </with>
          </enablement>
@@ -80,12 +80,14 @@
          point="org.eclipse.ui.actionSets">
       <actionSet
             id="org.dawnsci.mapping.ui.fileOpenActionSet"
-            label="Open File...">
+            label="Open File..."
+            visible="true">
          <action
                class="org.dawnsci.mapping.ui.actions.OpenLocalFileAction"
                id="org.dawnsci.mapping.ui.action1"
                label="Open Map File..."
-               menubarPath="file/new">
+               menubarPath="file/new"
+               state="true">
          </action>
       </actionSet>
    </extension>
@@ -94,7 +96,7 @@
       <fileOpen
             class="org.dawnsci.mapping.ui.actions.NavigatorOpenAction"
             id="org.dawnsci.mapping.ui.fileOpenNavigator"
-            perspective="org.dawnsci.mapping.ui.mappingperspective">
+            perspective="org.dawnsci.mapping.ui.dawn.mappingperspective">
       </fileOpen>
    </extension>
 
