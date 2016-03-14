@@ -1,24 +1,32 @@
 package $packageName$;
 
+import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.Random;
 import org.eclipse.dawnsci.analysis.dataset.operations.AbstractOperation;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.OperationRank;
-import uk.ac.diamond.scisoft.analysis.processing.operations.EmptyModel;
 
-public class $className$ extends AbstractOperation<EmptyModel, OperationData> {
+public class $className$ extends AbstractOperation<$className$Model, OperationData> {
 
 	@Override
 	protected OperationData process(IDataset input, IMonitor monitor) throws OperationException {
 
-		return new OperationData(input);
+		DoubleDataset rand = Random.rand(input.getShape());
+		rand.imultiply(model.getMyVar());
+		rand.iadd(input);
+		rand.setName("NoisyData");
+		
+		copyMetadata(input, rand);
+		
+		return new OperationData(rand);
 	}
 
 	@Override
 	public String getId() {
-		return "$operationId$";
+		return "$extensionId$";
 	}
 
 	@Override
