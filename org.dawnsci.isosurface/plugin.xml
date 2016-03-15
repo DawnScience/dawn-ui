@@ -10,14 +10,5 @@
             tooltip="Slice data using an iso-surface.">
       </slicing_tool>
    </extension>
-   <extension
-         point="org.eclipse.dawnsci.analysis.api.operation">
-      <operation
-            class="org.dawnsci.isosurface.alg.MarchingCubes"
-            icon="icons/TraceSurface.png"
-            id="org.dawnsci.isosurface.marchingCubes"
-            name="Marching Cubes">
-      </operation>
-   </extension>
 
 </plugin>

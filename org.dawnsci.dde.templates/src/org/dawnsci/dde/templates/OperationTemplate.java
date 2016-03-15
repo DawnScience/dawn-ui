@@ -94,6 +94,7 @@ public class OperationTemplate extends DAWNTemplateSection {
 		setElement.setAttribute(KEY_DESCRIPTION, getStringOption(KEY_DESCRIPTION));
 		setElement.setAttribute("id", getStringOption(KEY_EXTENSION_ID));
 		setElement.setAttribute("name", getStringOption(KEY_EXTENSION_NAME));
+		setElement.setAttribute("model", "uk.ac.diamond.scisoft.analysis.processing.operations.EmptyModel");
 		setElement.setAttribute("visible", "true");
 
 		extension.add(setElement);
