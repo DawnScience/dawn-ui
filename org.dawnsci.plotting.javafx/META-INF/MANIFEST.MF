@@ -4,7 +4,7 @@ Bundle-Name: Javafx
 Bundle-SymbolicName: org.dawnsci.plotting.javafx;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.dawnsci.plotting.javafx.Activator
-Bundle-Vendor: DLS
+Bundle-Vendor: Diamond Light Source
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui;bundle-version="3.8.2",
  org.eclipse.dawnsci.plotting.api;bundle-version="1.2.0",
