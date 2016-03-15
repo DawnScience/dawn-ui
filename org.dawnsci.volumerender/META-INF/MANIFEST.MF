@@ -24,3 +24,4 @@ Export-Package: org.dawnsci.volumerender;uses:="org.osgi.framework,org.eclipse.u
    org.eclipse.dawnsci.plotting.api,
    org.eclipse.dawnsci.analysis.api.dataset,
    org.eclipse.dawnsci.slicing.api.tool"
+Bundle-Vendor: Diamond Light Source
