@@ -269,7 +269,7 @@ public class FunctionTreeViewer implements IFunctionViewer {
 		}
 	}
 
-	private void createParameterValueColumn(String columnTitle, COLUMN column,
+	private void createParameterValueColumn(String columnTitle, final COLUMN column,
 			boolean hideValueOnFixed,
 			final IGetSetValueOnParameterModel getSetParameterModel) {
 		TreeViewerColumn valueColumn = new TreeViewerColumn(treeViewer,
@@ -290,6 +290,18 @@ public class FunctionTreeViewer implements IFunctionViewer {
 
 			@Override
 			public void setValue(ParameterModel param, String value) {
+				if (value.isEmpty()) {
+					switch (column) {
+					case UPPERLIMIT:
+						value = "Max Double";
+						break;
+					case LOWERLIMIT: 
+						value = "Min Double";
+						break;
+					default:
+						value = "0.0";	
+					}
+				}
 				getSetParameterModel.setValue(param, value);
 			}
 
