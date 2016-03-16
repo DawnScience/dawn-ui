@@ -78,6 +78,16 @@ public class VolumeRenderTool extends AbstractSlicingTool
 		comp.setLayoutData(data);
 		data.exclude = true;
 		
+		Label disclaimer1 = new Label(comp, SWT.NONE);
+		disclaimer1.setText("Volume renderer pre-Alpha snapshot:");
+		disclaimer1.setForeground(new Color(parent.getDisplay(), new RGB(255,0,0)));
+		disclaimer1.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+				
+		Label disclaimer2 = new Label(comp, SWT.NONE);
+		disclaimer2.setText("- Please use nightly build if possible");
+		disclaimer2.setForeground(new Color(parent.getDisplay(), new RGB(255,0,0)));
+		disclaimer2.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+						
 		Label resolutionLabel = new Label(comp, SWT.NONE);
 		resolutionLabel.setText("Resolution");
 		new Label(comp, SWT.NONE);
