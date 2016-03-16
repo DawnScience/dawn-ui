@@ -90,9 +90,10 @@ public class MarchingCubes {
 	private Object[] parseVertices() throws OperationException 
 	{
 		
-		final ILazyDataset lazyData = model.getLazyData();
+		final ILazyDataset lazyData = model.getLazyData().getSliceView();
 		final int[] boxSize         = model.getBoxSize();
 		final double isovalue       = model.getIsovalue();
+		lazyData.clearMetadata(null);
 		
 		monitor.beginTask("Calulating Isosurface", lazyData.getShape()[2] * 8);
 				

@@ -32,25 +32,38 @@ class FXPlotActions {
 		String gridLineGroupNameAction = "javafx.plotting.grid.line.actions";
 		actionMan.registerGroup(gridLineGroupNameAction, ManagerType.TOOLBAR);
 		
-		Action axisGridToggle = new Action ("Toggle Bounding Box", IAction.AS_CHECK_BOX) {
+		Action boundingBoxToggle = new Action ("Toggle Bounding Box", IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
 				viewer.flipBoundingBoxVisibility();
 			}
 		};
-		axisGridToggle.setChecked(true);
-		axisGridToggle.setImageDescriptor(Activator.getImageDescriptor("icons/orthographic.png"));
-		actionMan.registerAction(gridLineGroupNameAction, axisGridToggle, ActionType.FX3D, ManagerType.TOOLBAR);
+		boundingBoxToggle.setChecked(true);
+		boundingBoxToggle.setImageDescriptor(Activator.getImageDescriptor("icons/box.png"));
+		actionMan.registerAction(gridLineGroupNameAction, boundingBoxToggle, ActionType.FX3D, ManagerType.TOOLBAR);
 		
-		Action axisToggle = new Action("Toggle Axis",IAction.AS_CHECK_BOX) {
+		
+		Action axisToggle = new Action("Toggle Axis Grid",IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
 				viewer.flipAxisGridVisibility();
 			}
 		};
 		axisToggle.setChecked(true);
-		axisToggle.setImageDescriptor(Activator.getImageDescriptor("icons/axis.png"));
+		axisToggle.setImageDescriptor(Activator.getImageDescriptor("icons/axisgrid.png"));
 		actionMan.registerAction(gridLineGroupNameAction, axisToggle, ActionType.FX3D, ManagerType.TOOLBAR);
+		
+		
+		Action orthographicToggle = new Action("Toggle Orthographic Camera",IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
 				
+			}
+		};
+		orthographicToggle.setChecked(false);
+		orthographicToggle.setImageDescriptor(Activator.getImageDescriptor("icons/orthographic.png"));
+		actionMan.registerAction(gridLineGroupNameAction, orthographicToggle, ActionType.FX3D, ManagerType.TOOLBAR);
+			
+		
 	}
 }
