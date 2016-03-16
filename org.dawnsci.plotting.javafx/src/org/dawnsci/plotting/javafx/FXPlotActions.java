@@ -57,7 +57,7 @@ class FXPlotActions {
 		Action orthographicToggle = new Action("Toggle Orthographic Camera",IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
-				
+				viewer.flipCameraType();
 			}
 		};
 		orthographicToggle.setChecked(false);

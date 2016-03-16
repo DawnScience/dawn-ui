@@ -79,6 +79,7 @@ public class SurfaceDisplayer extends Scene
 	private Rotate alignedYRotate = new Rotate();
 	{alignedYRotate.setAxis(new Point3D(0,1,0));};
 	private double zoom = 100;
+	private Scale scaleZoom;
 	
 	// mouse variables
 	private boolean mousePositionSet = false;
@@ -142,6 +143,8 @@ public class SurfaceDisplayer extends Scene
 		super(root, 1500, 1500, true);
 		this.isosurfaceGroup = isosurfaceGroup;
 		this.volumeGroup = new Group();
+
+		scaleZoom = new Scale();
 		
 		// set the camera -> the camera will handle some aspects of movement
 		// other are within the group -> this is done to simplify rotation
@@ -151,8 +154,6 @@ public class SurfaceDisplayer extends Scene
 		
 		currentCamera = perspectiveCamera;
 		
-		setCamera(perspectiveCamera); 
-				
 		initialiseCamera();
 		initlialiseGroups();
 		createScaleAxisGroup();
@@ -161,6 +162,8 @@ public class SurfaceDisplayer extends Scene
 		setDepthBuffers();
 		initialiseTransforms();
 		addLights();
+		
+		this.objectGroup.getTransforms().add(scaleZoom);
 		
 		// add the listeners for scene camera movement
 		addListeners();
@@ -173,8 +176,7 @@ public class SurfaceDisplayer extends Scene
 	// could be potentially redundant
 	private void initialiseCamera()
 	{
-		// add the initial transforms
-		currentCamera.getTransforms().addAll(new Translate(0, 0, -zoom));
+		setCamera(currentCamera); 
 		currentCamera.setNearClip(0.00001f);
 		currentCamera.setFarClip(100_000);
 		
@@ -344,11 +346,8 @@ public class SurfaceDisplayer extends Scene
 					// zoom if right button is pressed
 					if (me.isSecondaryButtonDown() && me.isPrimaryButtonDown())
 					{
-						zoom += -(-mouseDelta[1] * mouseMovementMod * 2);
-						
+						zoom(mouseDelta[1]);
 					}
-					
-					currentCamera.getTransforms().setAll(new Translate(0, 0, -zoom));
 				}
 			}
 		});
@@ -359,9 +358,7 @@ public class SurfaceDisplayer extends Scene
 			@Override
 			public void handle(ScrollEvent event)
 			{
-				final double mouseMovementMod = ((zoom + 1000) * 0.001f) + 0.1f;
-				zoom += -event.getDeltaY() * mouseMovementMod;
-				currentCamera.getTransforms().setAll(new Translate(0, 0, -zoom));
+				zoom(event.getDeltaY());
 			}
 		});
 		
@@ -403,6 +400,35 @@ public class SurfaceDisplayer extends Scene
 	/*
 	 * non initialisers
 	 */
+	
+	private void zoom(double amount)
+	{
+		Point3D pivot = findMidPointOfBounds(this.objectGroup.getBoundsInLocal());
+		
+		scaleZoom.setPivotX(-pivot.getX());
+		scaleZoom.setPivotY(-pivot.getY());
+		scaleZoom.setPivotZ(-pivot.getZ());
+		
+		final double mouseMovementMod = ((zoom + 1000) * 0.001f) + 0.1f;
+		double delta = ((((amount * mouseMovementMod)/10))*0.05);
+		
+		scaleZoom.setX(scaleZoom.getX() * (1 +delta));
+		scaleZoom.setY(scaleZoom.getY() * (1 +delta));
+		scaleZoom.setZ(scaleZoom.getZ() * (1 +delta));
+	}
+	
+	private Point3D findMidPointOfBounds(Bounds bounds)
+	{		
+		final Translate offsetInverse = new Translate(
+							bounds.getMinX() + (bounds.getWidth() / 2),                     
+							bounds.getMinY() + (bounds.getHeight()/ 2), 
+							bounds.getMinZ() + (bounds.getDepth() / 2)
+							).createInverse(); 
+		return new Point3D(
+				offsetInverse.getX(),
+				offsetInverse.getY(),
+				offsetInverse.getZ());
+	}
 	
 	private void updateAxisSize(Point3D maxLength) 
 	{
@@ -539,7 +565,7 @@ public class SurfaceDisplayer extends Scene
 		
 		final Translate offsetInverse = new Translate(
 							isoGroupOffsetBounds.getMinX() + (isoGroupOffsetBounds.getWidth() / 2),                     
-							isoGroupOffsetBounds.getMinY() + (isoGroupOffsetBounds.getHeight() / 2), 
+							isoGroupOffsetBounds.getMinY() + (isoGroupOffsetBounds.getHeight()/ 2), 
 							isoGroupOffsetBounds.getMinZ() + (isoGroupOffsetBounds.getDepth() / 2)
 							).createInverse(); 
 		
@@ -590,6 +616,19 @@ public class SurfaceDisplayer extends Scene
 		scaleAxesGroup.flipVisibility();
 	}
 	
+	public void flipCameraType()
+	{
+		if (this.currentCamera instanceof PerspectiveCamera)
+		{
+			this.currentCamera = this.parallelCamera;
+		}
+		else
+		{
+			this.currentCamera = this.perspectiveCamera;
+		}
+		
+		initialiseCamera();
+	}
 	
 	
 	

@@ -161,7 +161,6 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 	{
 		if (trace instanceof IIsosurfaceTrace)
 		{
-			
 			// declare the trace from the parameter trace
 			FXIsosurfaceTrace itrace = (FXIsosurfaceTrace) trace;
 			if (itrace.getData() == null)
@@ -175,7 +174,6 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 		}
 		else if (trace instanceof IVolumeRenderTrace)
 		{
-			
 			// declare the trace from the parameter trace
 			VolumeTrace itrace = (VolumeTrace) trace;
 			if (itrace.getData() == null)
@@ -183,8 +181,6 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 			
 			// add the trace into the list of current traces
 			scene.addVolumeTrace(itrace);
-//			// isoSurfaceGroup.getChildren().add(itrace.getIsoSurface());
-//			scene.setAxesData(itrace.getAxes());
 		}
 		
 		else
@@ -211,6 +207,11 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 	public void flipBoundingBoxVisibility()
 	{
 		scene.flipBoundingBoxVisibility();
+	}
+	
+	public void flipCameraType()
+	{
+		scene.flipCameraType();
 	}
 	
 	/**
