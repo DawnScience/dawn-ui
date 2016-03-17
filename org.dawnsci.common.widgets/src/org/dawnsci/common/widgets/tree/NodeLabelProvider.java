@@ -11,7 +11,6 @@ package org.dawnsci.common.widgets.tree;
 import java.text.DecimalFormat;
 
 import javax.measure.quantity.Quantity;
-import javax.measure.unit.Unit;
 
 import org.dawnsci.common.widgets.Activator;
 import org.dawnsci.common.widgets.tree.LabelNode;
@@ -30,7 +29,6 @@ public class NodeLabelProvider extends ColumnLabelProvider implements IStyledLab
 	public NodeLabelProvider(int icolumn) {
 		this.icolumn = icolumn;
 	}
-
 
 	@Override
 	public StyledString getStyledText(Object element) {
@@ -178,12 +176,12 @@ public class NodeLabelProvider extends ColumnLabelProvider implements IStyledLab
 
 	private Image ticked, unticked;
 	public Image getImage(Object element) {
-		if (element instanceof BooleanNode  && (icolumn==1 || icolumn==2)) { // Value
-			if (ticked==null)   ticked   = Activator.getImage("icons/ticked.png");
-			if (unticked==null) unticked = Activator.getImage("icons/unticked.gif");
-			return ((BooleanNode)element).isValue() 
-				   ? ticked
-				   : unticked;
+		if (element instanceof BooleanNode && (icolumn == 1 || icolumn == 2)) { // Value
+			if (ticked == null)
+				ticked = Activator.getImage("icons/ticked.png");
+			if (unticked == null)
+				unticked = Activator.getImage("icons/unticked.gif");
+			return ((BooleanNode) element).isValue() ? ticked : unticked;
 		}
 		return null;
 	}
