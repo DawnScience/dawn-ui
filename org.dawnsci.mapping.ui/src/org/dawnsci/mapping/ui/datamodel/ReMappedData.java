@@ -60,7 +60,7 @@ public class ReMappedData extends AbstractMapData {
 		double xMax = x.max().doubleValue();
 		double xMin = x.min().doubleValue();
 		
-		double test = yMax - yMin;
+//		double test = yMax - yMin;
 		
 		if (shape == null) {
 			double yStepMed = (double)Stats.median(Maths.abs(Maths.derivative(DatasetFactory.createRange(y.getSize(),Dataset.INT32),y,1)));

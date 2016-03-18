@@ -46,7 +46,7 @@ public class ValueEditingSupport extends EditingSupport {
 		if (element instanceof ComboNode) {
 			return createComboEditor((ComboNode) element);
 		}
-		if (element instanceof LabelNode) {
+		if (element instanceof LabelNode && !(element instanceof BooleanNode)) {
 			return new TextCellEditor((Composite)viewer.getControl(), SWT.NONE);
 		}
 		return null;
@@ -190,9 +190,14 @@ public class ValueEditingSupport extends EditingSupport {
 			node.setValue((Integer) value);
 		}
 		
-		if (element instanceof ObjectNode) {
+		if (element instanceof ObjectNode && !(element instanceof BooleanNode) && !(element instanceof ColorNode)) {
 			ObjectNode node = (ObjectNode)element;
 			node.setValue(value.toString());
+		}
+		if (element instanceof BooleanNode) {
+			BooleanNode node = (BooleanNode)element;
+			if (node.value instanceof Boolean)
+				node.setValue(node.value);
 		}
 
 		viewer.refresh(element);

@@ -4,7 +4,6 @@ import java.util.Map;
 
 import org.dawnsci.mapping.ui.MapPlotManager;
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
-import org.dawnsci.mapping.ui.datamodel.MappedData;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.ReMappedData;

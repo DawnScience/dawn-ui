@@ -5,9 +5,6 @@ import java.nio.file.Path;
 
 import org.dawnsci.mapping.ui.FileManagerSingleton;
 import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

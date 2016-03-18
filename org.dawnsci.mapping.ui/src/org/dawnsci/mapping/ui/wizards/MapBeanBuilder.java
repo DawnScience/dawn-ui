@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImageBean;
 import org.dawnsci.mapping.ui.datamodel.MapBean;
 import org.dawnsci.mapping.ui.datamodel.MappedBlockBean;
-import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.tree.Attribute;
@@ -44,8 +43,8 @@ public class MapBeanBuilder {
 		Map<String,NodeLink> nodes = TreeUtils.treeBreadthFirstSearch(groupNode, finder, false, null);
 
 		List<String> images= new ArrayList<String>();
-		String highestRanking = null;
-		int highestRank = 0;
+//		String highestRanking = null;
+//		int highestRank = 0;
 		List<DataInfo> datasets = new ArrayList<DataInfo>();
 
 		MappedDataFileBean bean = new MappedDataFileBean();
@@ -61,8 +60,8 @@ public class MapBeanBuilder {
 				continue;
 			}
 			
-			Attribute a = n.getAttribute("axes");
-			IDataset axes = a.getValue();
+//			Attribute a = n.getAttribute("axes");
+//			IDataset axes = a.getValue();
 			
 			int rank = dataNode.getRank();
 			String[] axNames = new String[rank];

@@ -1,11 +1,9 @@
 package org.dawnsci.mapping.ui.dialog;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
-import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.slicing.tools.hyper.HyperComponent;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
