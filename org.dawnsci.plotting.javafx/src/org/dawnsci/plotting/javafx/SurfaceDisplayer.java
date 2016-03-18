@@ -474,21 +474,21 @@ public class SurfaceDisplayer extends Scene
 				-rotationAxis.getZ());
 		
 		rotationAxis = Vector3DUtil.applyEclusiveRotation(
-				cameraGroup.getTransforms(), 
+				objectGroup.getTransforms(), 
 				rotationAxis, 
 				true);
 		
 		
-		currentCamera.setTranslateX(0);
-		currentCamera.setTranslateY(0);
-		currentCamera.setTranslateZ(0);
+		objectGroup.setTranslateX(0);
+		objectGroup.setTranslateY(0);
+		objectGroup.setTranslateZ(0);
 		
 		Rotate rotate = new Rotate();
 		rotate.setAxis(rotationAxis);
 		rotate.setAngle(angle);
 		
 		
-		cameraGroup.getTransforms().add(rotate);
+		objectGroup.getTransforms().add(rotate);
 
 		updateCameraSceneTransforms();
 	}
