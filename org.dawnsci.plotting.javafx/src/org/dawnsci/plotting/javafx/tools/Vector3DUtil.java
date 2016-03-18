@@ -2,9 +2,9 @@ package org.dawnsci.plotting.javafx.tools;
 
 import javafx.collections.ObservableList;
 import javafx.geometry.Point3D;
+import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Transform;
-
  
 /**
  * class to hold basic vector calculations used throughout the plugin
@@ -18,12 +18,17 @@ public class Vector3DUtil
 	
 	/*
 	 * static functions
-	 * 
 	 */
 	
+	/**
+	 * THIS DOESN'T WORK BUT FIXING IT BREAKS A LOT OF STUFF
+	 * @param matrix
+	 * @return
+	 */
 	public static Point3D extractEulerAnglersFromMatrix(Transform matrix)
 	{
-		// figure overall rotation angle of applied           
+//		
+		 //figure overall rotation angle of applied           
         double x = Math.toDegrees( Math.atan2(matrix.getMzy(), matrix.getMzz()));
         double xRot =  Double.isNaN(x) ? 0 : x;
         if (xRot < 0)
@@ -38,7 +43,7 @@ public class Vector3DUtil
         double zRot =  Double.isNaN(z) ? 0 : z;
         if (zRot < 0)
         	zRot += 360;
-        
+        		
         return new Point3D(xRot, yRot, zRot);
 	}
 	
@@ -181,24 +186,42 @@ public class Vector3DUtil
 	
 	/**
 	 * Applies only a single type of transform to a vector from a list of transforms... (e.g. only applies rotations)
-	 * @param tranformsList - the list of transforms
+	 * @param transformList - the list of transforms
 	 * @param vector - the vector to be transformed
-	 * @param transformClassType - the type of transform (eg. Rotate)
+	 * @param transformClassType - the type of transform (eg. Rotate<b>.class</b>)
 	 * @return - the new transformed vector
 	 */
-	public static Point3D exclusiveTransforms(ObservableList<Transform> tranformsList, Point3D vector, Class<?> transformClassType)
+	public static Point3D applyExclusiveTransforms(ObservableList<Transform> transformList, Point3D vector, Class<?> transformClassType)
 	{
-		
 		Point3D direction = vector;
-		for (Transform currentTransform : tranformsList)
+		for (Transform currentTransform : transformList)
 		{
 			if (transformClassType.isInstance(currentTransform))
 			{
 				direction = currentTransform.transform(direction);
 			}
-			else if (transformClassType == Transform.class)
+		}
+		return direction;
+	}
+	
+	public static Point3D applyEclusiveRotation(ObservableList<Transform> transformList, Point3D vector, boolean invertRotation) {
+		
+		Point3D direction = vector;
+		for (Transform currentTransform : transformList)
+		{
+			if (currentTransform instanceof Rotate)
 			{
-				direction = currentTransform.transform(direction);
+				try 
+				{
+					if (invertRotation)
+						direction = ((Rotate)currentTransform).createInverse().transform(direction);
+					else
+						direction = ((Rotate)currentTransform).transform(direction);
+				} 
+				catch (NonInvertibleTransformException e) 
+				{
+						e.printStackTrace();
+				}
 			}
 		}
 		return direction;

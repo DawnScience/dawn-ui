@@ -41,7 +41,6 @@ import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
 import org.dawnsci.plotting.javafx.trace.FXIsosurfaceTrace;
 import org.dawnsci.plotting.javafx.trace.VolumeTrace;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.plotting.api.trace.IVolumeRenderTrace;
 
 /**
  * 
@@ -64,6 +63,7 @@ public class SurfaceDisplayer extends Scene
 	private Group volumeGroup;		// holds the volume renderings
 	private Group cameraGroup; 		// holds the camera translation data
 	
+	private Group root;				// root of the scene graph
 	private Group axisNode; 		// holds the axisGroup -> allows the axisGroup to be null without an exception
 	private SceneObjectGroup axisObjectGroup;	// hold the axisGroup
 	private Group objectGroup;		// holds the objects for the scene
@@ -71,13 +71,8 @@ public class SurfaceDisplayer extends Scene
 	private ScaleAxisGroup scaleAxesGroup;
 	
 	// Scene and camera variables
-	private Translate sceneOffset;
 	private Translate isoGroupOffset;
 	private Scale scale = new Scale();
-	private Rotate alignedXRotate = new Rotate();
-	{alignedXRotate.setAxis(new Point3D(1,0,0));};
-	private Rotate alignedYRotate = new Rotate();
-	{alignedYRotate.setAxis(new Point3D(0,1,0));};
 	private double zoom = 100;
 	private Scale scaleZoom;
 	
@@ -95,7 +90,7 @@ public class SurfaceDisplayer extends Scene
 		{
 			
 			Object obj = me.getSource();
-			final Point3D scaleDir = Vector3DUtil.exclusiveTransforms(
+			final Point3D scaleDir = Vector3DUtil.applyExclusiveTransforms(
 								((Cylinder)obj).getTransforms(),
 								new Point3D(0, -1, 0),
 								Rotate.class);
@@ -141,6 +136,8 @@ public class SurfaceDisplayer extends Scene
 	{
 		// create the scene
 		super(root, 1500, 1500, true);
+		
+		this.root = root;
 		this.isosurfaceGroup = isosurfaceGroup;
 		this.volumeGroup = new Group();
 
@@ -158,15 +155,16 @@ public class SurfaceDisplayer extends Scene
 		initlialiseGroups();
 		createScaleAxisGroup();
 		createAxisGroup();
-		createSceneGraph(root);
+		createSceneGraph();
 		setDepthBuffers();
 		initialiseTransforms();
 		addLights();
 		
 		this.objectGroup.getTransforms().add(scaleZoom);
-		
+				
 		// add the listeners for scene camera movement
 		addListeners();
+		
 		
 	}
 	/*
@@ -176,9 +174,12 @@ public class SurfaceDisplayer extends Scene
 	// could be potentially redundant
 	private void initialiseCamera()
 	{
-		setCamera(currentCamera); 
-		currentCamera.setNearClip(0.00001f);
-		currentCamera.setFarClip(100_000);
+		setCamera(currentCamera);
+		
+		currentCamera.setNearClip(0.00000001f);
+		currentCamera.setFarClip(100_000_000);
+		
+		updateCameraSceneTransforms();
 		
 	}
 	
@@ -192,7 +193,7 @@ public class SurfaceDisplayer extends Scene
 	}
 	
 	// combine the groups into the scene graph root node
-	private void createSceneGraph(Group root)
+	private void createSceneGraph()
 	{
 		
 		// create the scene graph
@@ -201,7 +202,7 @@ public class SurfaceDisplayer extends Scene
 		this.cameraGroup.getChildren().addAll(this.objectGroup);
 		
 		// add groups the the root
-		root.getChildren().addAll(cameraGroup);
+		this.root.getChildren().addAll(cameraGroup);
 		
 	}
 
@@ -234,21 +235,14 @@ public class SurfaceDisplayer extends Scene
 	private void initialiseTransforms()
 	{
 		// initialise
-		this.sceneOffset = new Translate();
 		this.isoGroupOffset = new Translate();
-
-		// add to groups
-		this.cameraGroup.getTransforms().addAll(sceneOffset);
-		this.cameraGroup.getTransforms().addAll(alignedXRotate, alignedYRotate);
-
+		
 		this.scaleAxesGroup.getTransforms().addAll();
 		
 		this.objectGroup.getTransforms().addAll(isoGroupOffset);
 		
 		this.isosurfaceGroup.getTransforms().addAll(scale);
 		
-		// update transforms
-		updateTransforms();
 	}
 	
 	private void addLights()
@@ -318,7 +312,7 @@ public class SurfaceDisplayer extends Scene
 					
 					// find offset from last tick - ie delta
 					final double[] mouseDelta = {
-							newMousePos[0] - oldMousePos[0], 
+							newMousePos[0] - oldMousePos[0],
 							newMousePos[1] - oldMousePos[1]};
 					
 					final double mouseMovementMod = ((zoom + 1000) * 0.001f) + 0.1f;
@@ -327,20 +321,55 @@ public class SurfaceDisplayer extends Scene
 					// rotate if true - ie, rotate on left button drag
 					if (me.isPrimaryButtonDown() && !me.isSecondaryButtonDown())
 					{
-						alignedXRotate.setAngle(alignedXRotate.getAngle() + mouseDelta[1] * 0.65f);
-						alignedYRotate.setAngle(alignedYRotate.getAngle() - mouseDelta[0] * 0.65f);
+//						oldMousePos[0] = 0;
+//						oldMousePos[1] = 0;
+						System.out.println("wh = " + getWidth() + " - " +getHeight() );
+						System.out.println(oldMousePos[0]);
+						System.out.println(oldMousePos[0]-(getWidth()/2));
+						
+						Point3D arcOldBallMousePositon = findArcballMousePosition(
+								oldMousePos[0]-(getWidth()/2),
+								oldMousePos[1]-(getHeight()/2));
+						
+						Point3D arcNewBallMousePositon = findArcballMousePosition(
+																newMousePos[0]-(getWidth()/2),
+																newMousePos[1]-(getHeight()/2));
+						
+						
+						
+						System.out.println(arcOldBallMousePositon);
+						if (arcNewBallMousePositon.getZ() < 0 || arcOldBallMousePositon.getZ() < 0)
+						{
+							System.out.println("sudsuydgsy");
+						}
+						
+						Point3D rotationAxis = arcNewBallMousePositon.crossProduct(arcOldBallMousePositon);
+						
+						double rotationAngle = arcOldBallMousePositon.angle(arcNewBallMousePositon);
+						
+						panCameraArcball(rotationAxis, rotationAngle);
+						
+//						Point2D newPoint = new Point2D(
+//								newMousePos[0] - (getWidth() / 2),
+//								newMousePos[1] - (getHeight()/ 2));
+//						
+//						Point2D oldPoint = new Point2D(
+//								oldMousePos[0] - (getWidth() / 2),
+//								oldMousePos[1] - (getHeight()/ 2));
+//						
+//						double omega = newPoint.angle(oldPoint);
+//						
+//						if (newPoint.crossProduct(oldPoint).getZ() > 1)
+//							omega *= -1;
+//						
+//						panCamera(mouseDelta[1] * 0.65f, mouseDelta[0] * 0.65f, omega);
+						
 					}
 					
 					// zoom
 					if (me.isMiddleButtonDown())
 					{
-						Point3D XYTranslationDirection = alignedXRotate.transform(mouseDelta[0]*mouseMovementMod, mouseDelta[1]*mouseMovementMod,0);
-						XYTranslationDirection = alignedYRotate.transform(XYTranslationDirection);
-						
-						
-						isoGroupOffset.setX(isoGroupOffset.getX() + XYTranslationDirection.getX() );
-						isoGroupOffset.setY(isoGroupOffset.getY() + XYTranslationDirection.getY() );
-						isoGroupOffset.setZ(isoGroupOffset.getZ() - XYTranslationDirection.getZ() );
+						moveObjects(mouseDelta[0]*mouseMovementMod, mouseDelta[1]*mouseMovementMod);
 					}
 					
 					// zoom if right button is pressed
@@ -372,7 +401,7 @@ public class SurfaceDisplayer extends Scene
 			@Override
 			public void invalidated(Observable arg0)
 			{
-				updateSceneTransforms();
+				updateCameraSceneTransforms();
 			}
 		});
 		
@@ -400,6 +429,109 @@ public class SurfaceDisplayer extends Scene
 	/*
 	 * non initialisers
 	 */
+	
+	private void moveObjects(double deltaX, double deltaY)
+	{
+		Point3D dir = Vector3DUtil.applyEclusiveRotation(
+				cameraGroup.getTransforms(), 
+				new Point3D(deltaX, deltaY,0), 
+				true);
+								
+		isoGroupOffset.setX(isoGroupOffset.getX() + dir.getX() );
+		isoGroupOffset.setY(isoGroupOffset.getY() + dir.getY() );
+		isoGroupOffset.setZ(isoGroupOffset.getZ() + dir.getZ() );
+	}
+	
+	/**
+	 * find the position of the mouse on the arcball
+	 * @param x
+	 * @param y
+	 * @return the x,y,z positions of the arc ball
+	 */
+	private Point3D findArcballMousePosition(double x, double y)
+	{
+		// equation:
+		// a = sqrt(r^2 - (b-pb)^2 - (c-pc)^2) + pa
+		// pa, pb, pc = 0
+		// :. a = sqrt((r^2) - (b^2) - (c^2) )
+		// where a,b,c can equal x,y,z interchangeably
+		
+		double r_Squared = Math.pow((getWidth()/2),2) + Math.pow((getHeight()/2),2); // r = (width/2)^2 + (height/2)^2
+		
+		double r = Math.sqrt(r_Squared);
+				
+		double z = Math.sqrt(r_Squared - Math.pow(x, 2) - Math.pow(y, 2));
+		
+		return new Point3D(x, y, z);
+		
+	}
+	
+	private void panCameraArcball(Point3D rotationAxis, double angle)
+	{
+		rotationAxis = new Point3D(
+				rotationAxis.getX(), 
+				rotationAxis.getY(), 
+				-rotationAxis.getZ());
+		
+		rotationAxis = Vector3DUtil.applyEclusiveRotation(
+				cameraGroup.getTransforms(), 
+				rotationAxis, 
+				true);
+		
+		
+		currentCamera.setTranslateX(0);
+		currentCamera.setTranslateY(0);
+		currentCamera.setTranslateZ(0);
+		
+		Rotate rotate = new Rotate();
+		rotate.setAxis(rotationAxis);
+		rotate.setAngle(angle);
+		
+		
+		cameraGroup.getTransforms().add(rotate);
+
+		updateCameraSceneTransforms();
+	}
+	
+	private void panCamera(double deltaX, double deltaY, double deltaZ)
+	{
+		currentCamera.setTranslateX(0);
+		currentCamera.setTranslateY(0);
+		currentCamera.setTranslateZ(0);
+		
+		Rotate xRotate = new Rotate();
+		Rotate yRotate = new Rotate();
+		Rotate zRotate = new Rotate();
+		
+		Point3D xDir = Vector3DUtil.applyEclusiveRotation(
+				cameraGroup.getTransforms(), 
+				new Point3D(1, 0, 0), 
+				true);
+		Point3D yDir = Vector3DUtil.applyEclusiveRotation(
+				cameraGroup.getTransforms(), 
+				new Point3D(0, -1, 0), 
+				true);
+		Point3D zDir = Vector3DUtil.applyEclusiveRotation(
+				cameraGroup.getTransforms(), 
+				new Point3D(0, 0, 1), 
+				true);
+	
+		
+		xRotate.setAxis(xDir);
+		xRotate.setAngle(deltaX);
+		cameraGroup.getTransforms().add(xRotate);
+								
+		yRotate.setAxis(yDir);
+		yRotate.setAngle(deltaY);
+		cameraGroup.getTransforms().add(yRotate);
+		
+		zRotate.setAxis(zDir);
+		zRotate.setAngle(deltaZ);
+		cameraGroup.getTransforms().add(zRotate);
+		
+		
+		updateCameraSceneTransforms();
+	}
 	
 	private void zoom(double amount)
 	{
@@ -481,11 +613,11 @@ public class SurfaceDisplayer extends Scene
 		return offset;
 	}
 	
-	private void updateSceneTransforms()
+	private void updateCameraSceneTransforms()
 	{
-		this.sceneOffset.setX(this.getWidth() / 2);
-		this.sceneOffset.setY(this.getHeight()/ 2);
-		this.sceneOffset.setZ(0);
+		this.currentCamera.setTranslateX(-this.getWidth() / 2);           
+		this.currentCamera.setTranslateY(-this.getHeight()/ 2);           
+		this.currentCamera.setTranslateZ(-0);
 	}
 	
 	
@@ -554,28 +686,7 @@ public class SurfaceDisplayer extends Scene
 	public void removeVolume(Node removeNode)
 	{
 		volumeGroup.getChildren().remove(removeNode);
-	}
-	
-	
-	public void updateTransforms()
-	{
-		updateSceneTransforms();
-		
-		final Bounds isoGroupOffsetBounds = this.objectGroup.getBoundsInLocal();
-		
-		final Translate offsetInverse = new Translate(
-							isoGroupOffsetBounds.getMinX() + (isoGroupOffsetBounds.getWidth() / 2),                     
-							isoGroupOffsetBounds.getMinY() + (isoGroupOffsetBounds.getHeight()/ 2), 
-							isoGroupOffsetBounds.getMinZ() + (isoGroupOffsetBounds.getDepth() / 2)
-							).createInverse(); 
-		
-		isoGroupOffset.setX(offsetInverse.getX());
-		isoGroupOffset.setY(offsetInverse.getY());
-		isoGroupOffset.setZ(offsetInverse.getZ());
-		
-	}
-	
-	
+	}	
 	
 	public void setAxesData(List<IDataset> axesData)
 	{
