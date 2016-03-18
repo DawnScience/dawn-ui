@@ -110,19 +110,15 @@
          version="0.0.0"/>
 
    <includes
-         id="org.eclipse.epp.mpc"
-         version="0.0.0"/>
-
-   <includes
-         id="org.eclipse.equinox.p2.discovery.feature"
-         version="0.0.0"/>
-
-   <includes
          id="org.eclipse.ecf.filetransfer.feature"
          version="0.0.0"/>
 
    <includes
          id="org.dawnsci.fileviewer.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="org.dawnsci.marketplaceclient.feature"
          version="0.0.0"/>
 
    <plugin
@@ -277,13 +273,6 @@
 
    <plugin
          id="org.eclipse.ecf.identity"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.equinox.p2.touchpoint.natives"
          download-size="0"
          install-size="0"
          version="0.0.0"
