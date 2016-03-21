@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.dawb.common.ui.util.EclipseUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.dnd.DND;
@@ -64,11 +65,16 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.ui.PartInitException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * File Viewer example
  */
 public class FileViewer {
+
+	private static final Logger logger = LoggerFactory.getLogger(FileViewer.class);
 	private static ResourceBundle resourceBundle = ResourceBundle.getBundle("file_viewer");
 
 	private final static String DRIVE_A = "a:" + File.separator;
@@ -361,49 +367,49 @@ public class FileViewer {
 				doRefresh();
 			}
 		});
-		SelectionAdapter unimplementedListener = new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				MessageBox box = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_INFORMATION | SWT.OK);
-				box.setText(getResourceString("dialog.NotImplemented.title"));
-				box.setMessage(getResourceString("dialog.ActionNotImplemented.description"));
-				box.open();
-			}
-		};
-
-		item = new ToolItem(toolBar, SWT.SEPARATOR);
-		item = new ToolItem(toolBar, SWT.PUSH);
-		item.setImage(getIconCache().stockImages[getIconCache().cmdCut]);
-		item.setToolTipText(getResourceString("tool.Cut.tiptext"));
-		item.addSelectionListener(unimplementedListener);
-		item = new ToolItem(toolBar, SWT.PUSH);
-		item.setImage(getIconCache().stockImages[getIconCache().cmdCopy]);
-		item.setToolTipText(getResourceString("tool.Copy.tiptext"));
-		item.addSelectionListener(unimplementedListener);
-		item = new ToolItem(toolBar, SWT.PUSH);
-		item.setImage(getIconCache().stockImages[getIconCache().cmdPaste]);
-		item.setToolTipText(getResourceString("tool.Paste.tiptext"));
-		item.addSelectionListener(unimplementedListener);
-
-		item = new ToolItem(toolBar, SWT.SEPARATOR);
-		item = new ToolItem(toolBar, SWT.PUSH);
-		item.setImage(getIconCache().stockImages[getIconCache().cmdDelete]);
-		item.setToolTipText(getResourceString("tool.Delete.tiptext"));
-		item.addSelectionListener(unimplementedListener);
-		item = new ToolItem(toolBar, SWT.PUSH);
-		item.setImage(getIconCache().stockImages[getIconCache().cmdRename]);
-		item.setToolTipText(getResourceString("tool.Rename.tiptext"));
-		item.addSelectionListener(unimplementedListener);
-
-		item = new ToolItem(toolBar, SWT.SEPARATOR);
-		item = new ToolItem(toolBar, SWT.PUSH);
-		item.setImage(getIconCache().stockImages[getIconCache().cmdSearch]);
-		item.setToolTipText(getResourceString("tool.Search.tiptext"));
-		item.addSelectionListener(unimplementedListener);
-		item = new ToolItem(toolBar, SWT.PUSH);
-		item.setImage(getIconCache().stockImages[getIconCache().cmdPrint]);
-		item.setToolTipText(getResourceString("tool.Print.tiptext"));
-		item.addSelectionListener(unimplementedListener);
+//		SelectionAdapter unimplementedListener = new SelectionAdapter() {
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				MessageBox box = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_INFORMATION | SWT.OK);
+//				box.setText(getResourceString("dialog.NotImplemented.title"));
+//				box.setMessage(getResourceString("dialog.ActionNotImplemented.description"));
+//				box.open();
+//			}
+//		};
+//
+//		item = new ToolItem(toolBar, SWT.SEPARATOR);
+//		item = new ToolItem(toolBar, SWT.PUSH);
+//		item.setImage(getIconCache().stockImages[getIconCache().cmdCut]);
+//		item.setToolTipText(getResourceString("tool.Cut.tiptext"));
+//		item.addSelectionListener(unimplementedListener);
+//		item = new ToolItem(toolBar, SWT.PUSH);
+//		item.setImage(getIconCache().stockImages[getIconCache().cmdCopy]);
+//		item.setToolTipText(getResourceString("tool.Copy.tiptext"));
+//		item.addSelectionListener(unimplementedListener);
+//		item = new ToolItem(toolBar, SWT.PUSH);
+//		item.setImage(getIconCache().stockImages[getIconCache().cmdPaste]);
+//		item.setToolTipText(getResourceString("tool.Paste.tiptext"));
+//		item.addSelectionListener(unimplementedListener);
+//
+//		item = new ToolItem(toolBar, SWT.SEPARATOR);
+//		item = new ToolItem(toolBar, SWT.PUSH);
+//		item.setImage(getIconCache().stockImages[getIconCache().cmdDelete]);
+//		item.setToolTipText(getResourceString("tool.Delete.tiptext"));
+//		item.addSelectionListener(unimplementedListener);
+//		item = new ToolItem(toolBar, SWT.PUSH);
+//		item.setImage(getIconCache().stockImages[getIconCache().cmdRename]);
+//		item.setToolTipText(getResourceString("tool.Rename.tiptext"));
+//		item.addSelectionListener(unimplementedListener);
+//
+//		item = new ToolItem(toolBar, SWT.SEPARATOR);
+//		item = new ToolItem(toolBar, SWT.PUSH);
+//		item.setImage(getIconCache().stockImages[getIconCache().cmdSearch]);
+//		item.setToolTipText(getResourceString("tool.Search.tiptext"));
+//		item.addSelectionListener(unimplementedListener);
+//		item = new ToolItem(toolBar, SWT.PUSH);
+//		item.setImage(getIconCache().stockImages[getIconCache().cmdPrint]);
+//		item.setToolTipText(getResourceString("tool.Print.tiptext"));
+//		item.addSelectionListener(unimplementedListener);
 	}
 
 	/**
@@ -850,7 +856,7 @@ public class FileViewer {
 		createTableDragSource(table);
 		createTableDropTarget(table);
 	}
-
+	
 	/**
 	 * Creates the Drag & Drop DragSource for items being dragged from the
 	 * table.
@@ -1194,12 +1200,17 @@ public class FileViewer {
 			notifySelectedDirectory(file);
 		} else {
 			final String fileName = file.getAbsolutePath();
-			if (!Program.launch(fileName)) {
-				MessageBox dialog = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_ERROR | SWT.OK);
-				dialog.setMessage(getResourceString("error.FailedLaunch.message", new Object[] { fileName }));
-				dialog.setText(Display.getDefault().getActiveShell().getText());
-				dialog.open();
+			try {
+				EclipseUtils.openExternalEditor(fileName);
+			} catch (PartInitException e) {
+				logger.error("Cannot open file " + file, e);
 			}
+//			if (!Program.launch(fileName)) {
+//				MessageBox dialog = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_ERROR | SWT.OK);
+//				dialog.setMessage(getResourceString("error.FailedLaunch.message", new Object[] { fileName }));
+//				dialog.setText(Display.getDefault().getActiveShell().getText());
+//				dialog.open();
+//			}
 		}
 	}
 
@@ -1951,5 +1962,14 @@ public class FileViewer {
 			progressBar = null;
 			cancelButton = null;
 		}
+	}
+
+	public void setCurrentDirectory(String savedDirectory) {
+		currentDirectory = new File(savedDirectory);
+		doRefresh();
+	}
+
+	public String getSavedDirectory() {
+		return currentDirectory.getAbsolutePath();
 	}
 }
