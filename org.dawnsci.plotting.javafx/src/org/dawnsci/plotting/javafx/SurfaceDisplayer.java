@@ -365,19 +365,7 @@ public class SurfaceDisplayer extends Scene
 			}
 						
 		});
-		
-		setOnKeyPressed(new EventHandler<KeyEvent>() {
-
-			@Override
-			public void handle(KeyEvent arg0) {
 				
-				if (arg0.getCode() == KeyCode.P)
-				{
-					 saveScreenShotOfSceneToFile();
-				}
-			}
-		});
-		
 		// on mouse scroll zoom the camera
 		setOnScroll(new EventHandler<ScrollEvent>()
 		{
@@ -426,32 +414,7 @@ public class SurfaceDisplayer extends Scene
 	/*
 	 * non initialisers
 	 */
-	
-	private void saveScreenShotOfSceneToFile()
-	{
-		String fileURL = null;
 		
-		FileDialog dialog = new FileDialog (Display.getDefault().getActiveShell(), SWT.SAVE);
-
-		String [] filterExtensions = new String [] {".png"};
-		
-		dialog.setFilterPath(File.listRoots()[0].getAbsolutePath());
-		dialog.setFilterNames(new String[]{".png"});
-		dialog.setFilterExtensions (filterExtensions);
-		fileURL = dialog.open();
-		
-		WritableImage wi = snapshot(null);
-		BufferedImage rawImage;
-		rawImage = SwingFXUtils.fromFXImage(wi, null);
-		
-		try {
-			ImageIO.write(rawImage, "png", new File(fileURL));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
 	private void moveObjects(double deltaX, double deltaY)
 	{
 		Point3D dir = Vector3DUtil.applyEclusiveRotation(

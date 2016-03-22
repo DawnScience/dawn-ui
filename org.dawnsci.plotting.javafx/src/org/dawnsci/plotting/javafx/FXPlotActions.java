@@ -32,6 +32,8 @@ class FXPlotActions {
 		String gridLineGroupNameAction = "javafx.plotting.grid.line.actions";
 		actionMan.registerGroup(gridLineGroupNameAction, ManagerType.TOOLBAR);
 		
+		
+		
 		Action boundingBoxToggle = new Action ("Toggle Bounding Box", IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
@@ -63,7 +65,15 @@ class FXPlotActions {
 		orthographicToggle.setChecked(false);
 		orthographicToggle.setImageDescriptor(Activator.getImageDescriptor("icons/orthographic.png"));
 		actionMan.registerAction(gridLineGroupNameAction, orthographicToggle, ActionType.FX3D, ManagerType.TOOLBAR);
-			
+		
+		Action saveSceneToPng = new Action ("Toggle Bounding Box", IAction.AS_PUSH_BUTTON) {
+			@Override
+			public void run() {
+				viewer.saveScreenShotOfSceneToFile();
+			}
+		};
+		saveSceneToPng.setImageDescriptor(Activator.getImageDescriptor("icons/save.png"));
+		actionMan.registerAction(gridLineGroupNameAction, saveSceneToPng, ActionType.FX3D, ManagerType.TOOLBAR);
 		
 	}
 }
