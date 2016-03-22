@@ -31,15 +31,15 @@ public class IconCache {
 		iconFile = 3,
 		iconOpenDrive = 4,
 		iconOpenFolder = 5,
-		cmdCopy = 6,
-		cmdCut = 7,
-		cmdDelete = 8,
-		cmdParent = 9,
-		cmdPaste = 10,
-		cmdPrint = 11,
-		cmdRefresh = 12,
-		cmdRename = 13,
-		cmdSearch = 14;
+//		cmdCopy = 6,
+//		cmdCut = 7,
+//		cmdDelete = 8,
+		cmdParent = 6,
+//		cmdPaste = 10,
+//		cmdPrint = 11,
+		cmdRefresh = 7;
+//		cmdRename = 13,
+//		cmdSearch = 14;
 	public final String[] stockImageLocations = {
 		"generic_example.gif",
 		"icon_ClosedDrive.gif",
@@ -47,15 +47,15 @@ public class IconCache {
 		"icon_File.gif",
 		"icon_OpenDrive.gif",
 		"icon_OpenFolder.gif",
-		"cmd_Copy.gif",
-		"cmd_Cut.gif",
-		"cmd_Delete.gif",
+//		"cmd_Copy.gif",
+//		"cmd_Cut.gif",
+//		"cmd_Delete.gif",
 		"cmd_Parent.gif",
-		"cmd_Paste.gif",
-		"cmd_Print.gif",
-		"cmd_Refresh.gif",
-		"cmd_Rename.gif",
-		"cmd_Search.gif"
+//		"cmd_Paste.gif",
+//		"cmd_Print.gif",
+		"cmd_Refresh.gif"
+//		"cmd_Rename.gif",
+//		"cmd_Search.gif"
 	};
 	public Image stockImages[];
 	
