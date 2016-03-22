@@ -9,10 +9,8 @@
 package org.dawnsci.plotting.javafx;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorConvertOp;
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.List;
 
 import javafx.beans.InvalidationListener;
@@ -52,6 +50,9 @@ import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
 import org.dawnsci.plotting.javafx.trace.FXIsosurfaceTrace;
 import org.dawnsci.plotting.javafx.trace.VolumeTrace;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 
 /**
  * 
@@ -149,9 +150,7 @@ public class SurfaceDisplayer extends Scene
 		
 		// create the scene
 		super(root, 1500, 1500, true);
-		
-		WritableImage testWI = this.snapshot(null);
-		
+				
 		this.root = root;
 		this.isosurfaceGroup = isosurfaceGroup;
 		this.volumeGroup = new Group();
@@ -367,6 +366,18 @@ public class SurfaceDisplayer extends Scene
 						
 		});
 		
+		setOnKeyPressed(new EventHandler<KeyEvent>() {
+
+			@Override
+			public void handle(KeyEvent arg0) {
+				
+				if (arg0.getCode() == KeyCode.P)
+				{
+					 saveScreenShotOfSceneToFile();
+				}
+			}
+		});
+		
 		// on mouse scroll zoom the camera
 		setOnScroll(new EventHandler<ScrollEvent>()
 		{
@@ -380,80 +391,7 @@ public class SurfaceDisplayer extends Scene
 		/*
 		 * scene resize listeners
 		 */
-		
-		setOnKeyPressed(new EventHandler<KeyEvent>() {
-
-			@Override
-			public void handle(KeyEvent arg0) {
-				System.out.println(arg0.getCode());
-				if (arg0.getCode() == KeyCode.P)
-				{
-					
-					WritableImage wi = snapshot(null);
-					BufferedImage rawImage;
-					rawImage = SwingFXUtils.fromFXImage(wi, null);
-					
-					System.out.println(rawImage.getType());
-					System.out.println(BufferedImage.TYPE_INT_RGB);
-					
-					BufferedImage image = new BufferedImage(
-							rawImage.getWidth(),
-							rawImage.getHeight(),
-							BufferedImage.TYPE_INT_ARGB);
-					ColorConvertOp xformOp = new ColorConvertOp(null);
-					xformOp.filter(rawImage, image);
-					
-					
-					
-					
-					for (int x = 0; x < rawImage.getWidth(); x++)
-					{
-						for (int y  = 0; y < rawImage.getHeight(); y++)
-						{
-							int argb = rawImage.getRGB(x, y);
-							ByteBuffer b = ByteBuffer.allocate(4);
-							
-							b.putInt(argb);
-							
-//							System.out.println(
-//									b.get(0) + ", " +
-//									b.get(1) + ", " +
-//									b.get(2) + ", " +
-//									b.get(3) + " = " +
-//									argb);
-							
-							if (b.get(0) < 255)
-							{
-								System.out.println(b.get(0));
-							}
-							
-							if (b.get(0) > 0 && b.get(0) < 255)
-							{
-								double intensity = b.get(3)/255;
-								
-								int newARGB = 255;
-								newARGB = (int)((((newARGB << 8) + ((int)(b.get(1) * intensity))) + 255) /2);
-								newARGB = (int)((((newARGB << 8) + ((int)(b.get(2) * intensity))) + 255) /2);
-								newARGB = (int)((((newARGB << 8) + ((int)(b.get(3) * intensity))) + 255) /2);
-								
-								rawImage.setRGB(x, y, newARGB);
-								
-							}
-							
-						}
-					}
-					
-					
-					try {
-						ImageIO.write(rawImage, "png", new File("/home/uij85458/image.png"));
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}
-		});
-		
+				
 		// on resize reset the camera scene offsets
 		InvalidationListener listener = (new InvalidationListener()
 		{
@@ -488,6 +426,31 @@ public class SurfaceDisplayer extends Scene
 	/*
 	 * non initialisers
 	 */
+	
+	private void saveScreenShotOfSceneToFile()
+	{
+		String fileURL = null;
+		
+		FileDialog dialog = new FileDialog (Display.getDefault().getActiveShell(), SWT.SAVE);
+
+		String [] filterExtensions = new String [] {".png"};
+		
+		dialog.setFilterPath(File.listRoots()[0].getAbsolutePath());
+		dialog.setFilterNames(new String[]{".png"});
+		dialog.setFilterExtensions (filterExtensions);
+		fileURL = dialog.open();
+		
+		WritableImage wi = snapshot(null);
+		BufferedImage rawImage;
+		rawImage = SwingFXUtils.fromFXImage(wi, null);
+		
+		try {
+			ImageIO.write(rawImage, "png", new File(fileURL));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	private void moveObjects(double deltaX, double deltaY)
 	{
@@ -548,46 +511,6 @@ public class SurfaceDisplayer extends Scene
 		
 		cameraGroup.getTransforms().add(rotate);
 
-		updateCameraSceneTransforms();
-	}
-	
-	private void panCamera(double deltaX, double deltaY, double deltaZ)
-	{
-		currentCamera.setTranslateX(0);
-		currentCamera.setTranslateY(0);
-		currentCamera.setTranslateZ(0);
-		
-		Rotate xRotate = new Rotate();
-		Rotate yRotate = new Rotate();
-		Rotate zRotate = new Rotate();
-		
-		Point3D xDir = Vector3DUtil.applyEclusiveRotation(
-				cameraGroup.getTransforms(), 
-				new Point3D(1, 0, 0), 
-				true);
-		Point3D yDir = Vector3DUtil.applyEclusiveRotation(
-				cameraGroup.getTransforms(), 
-				new Point3D(0, -1, 0), 
-				true);
-		Point3D zDir = Vector3DUtil.applyEclusiveRotation(
-				cameraGroup.getTransforms(), 
-				new Point3D(0, 0, 1), 
-				true);
-	
-		
-		xRotate.setAxis(xDir);
-		xRotate.setAngle(deltaX);
-		cameraGroup.getTransforms().add(xRotate);
-								
-		yRotate.setAxis(yDir);
-		yRotate.setAngle(deltaY);
-		cameraGroup.getTransforms().add(yRotate);
-		
-		zRotate.setAxis(zDir);
-		zRotate.setAngle(deltaZ);
-		cameraGroup.getTransforms().add(zRotate);
-		
-		
 		updateCameraSceneTransforms();
 	}
 	
