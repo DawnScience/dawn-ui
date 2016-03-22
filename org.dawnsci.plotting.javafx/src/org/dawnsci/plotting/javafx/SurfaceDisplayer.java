@@ -8,10 +8,16 @@
  */
 package org.dawnsci.plotting.javafx;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorConvertOp;
+import java.io.File;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
@@ -25,6 +31,9 @@ import javafx.scene.ParallelCamera;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.PointLight;
 import javafx.scene.Scene;
+import javafx.scene.image.WritableImage;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
@@ -34,6 +43,8 @@ import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.TransformChangedEvent;
 import javafx.scene.transform.Translate;
+
+import javax.imageio.ImageIO;
 
 import org.dawnsci.plotting.javafx.axis.objects.ScaleAxisGroup;
 import org.dawnsci.plotting.javafx.axis.objects.SceneObjectGroup;
@@ -134,15 +145,19 @@ public class SurfaceDisplayer extends Scene
 	 */
 	public SurfaceDisplayer(Group root, Group isosurfaceGroup)
 	{
+		
+		
 		// create the scene
 		super(root, 1500, 1500, true);
+		
+		WritableImage testWI = this.snapshot(null);
 		
 		this.root = root;
 		this.isosurfaceGroup = isosurfaceGroup;
 		this.volumeGroup = new Group();
 
 		scaleZoom = new Scale();
-		
+				
 		// set the camera -> the camera will handle some aspects of movement
 		// other are within the group -> this is done to simplify rotation
 		// calculations
@@ -320,13 +335,7 @@ public class SurfaceDisplayer extends Scene
 					// check if left button is pressed
 					// rotate if true - ie, rotate on left button drag
 					if (me.isPrimaryButtonDown() && !me.isSecondaryButtonDown())
-					{
-//						oldMousePos[0] = 0;
-//						oldMousePos[1] = 0;
-						System.out.println("wh = " + getWidth() + " - " +getHeight() );
-						System.out.println(oldMousePos[0]);
-						System.out.println(oldMousePos[0]-(getWidth()/2));
-						
+					{						
 						Point3D arcOldBallMousePositon = findArcballMousePosition(
 								oldMousePos[0]-(getWidth()/2),
 								oldMousePos[1]-(getHeight()/2));
@@ -334,36 +343,12 @@ public class SurfaceDisplayer extends Scene
 						Point3D arcNewBallMousePositon = findArcballMousePosition(
 																newMousePos[0]-(getWidth()/2),
 																newMousePos[1]-(getHeight()/2));
-						
-						
-						
-						System.out.println(arcOldBallMousePositon);
-						if (arcNewBallMousePositon.getZ() < 0 || arcOldBallMousePositon.getZ() < 0)
-						{
-							System.out.println("sudsuydgsy");
-						}
-						
+												
 						Point3D rotationAxis = arcNewBallMousePositon.crossProduct(arcOldBallMousePositon);
 						
 						double rotationAngle = arcOldBallMousePositon.angle(arcNewBallMousePositon);
 						
 						panCameraArcball(rotationAxis, rotationAngle);
-						
-//						Point2D newPoint = new Point2D(
-//								newMousePos[0] - (getWidth() / 2),
-//								newMousePos[1] - (getHeight()/ 2));
-//						
-//						Point2D oldPoint = new Point2D(
-//								oldMousePos[0] - (getWidth() / 2),
-//								oldMousePos[1] - (getHeight()/ 2));
-//						
-//						double omega = newPoint.angle(oldPoint);
-//						
-//						if (newPoint.crossProduct(oldPoint).getZ() > 1)
-//							omega *= -1;
-//						
-//						panCamera(mouseDelta[1] * 0.65f, mouseDelta[0] * 0.65f, omega);
-						
 					}
 					
 					// zoom
@@ -379,6 +364,7 @@ public class SurfaceDisplayer extends Scene
 					}
 				}
 			}
+						
 		});
 		
 		// on mouse scroll zoom the camera
@@ -394,6 +380,79 @@ public class SurfaceDisplayer extends Scene
 		/*
 		 * scene resize listeners
 		 */
+		
+		setOnKeyPressed(new EventHandler<KeyEvent>() {
+
+			@Override
+			public void handle(KeyEvent arg0) {
+				System.out.println(arg0.getCode());
+				if (arg0.getCode() == KeyCode.P)
+				{
+					
+					WritableImage wi = snapshot(null);
+					BufferedImage rawImage;
+					rawImage = SwingFXUtils.fromFXImage(wi, null);
+					
+					System.out.println(rawImage.getType());
+					System.out.println(BufferedImage.TYPE_INT_RGB);
+					
+					BufferedImage image = new BufferedImage(
+							rawImage.getWidth(),
+							rawImage.getHeight(),
+							BufferedImage.TYPE_INT_ARGB);
+					ColorConvertOp xformOp = new ColorConvertOp(null);
+					xformOp.filter(rawImage, image);
+					
+					
+					
+					
+					for (int x = 0; x < rawImage.getWidth(); x++)
+					{
+						for (int y  = 0; y < rawImage.getHeight(); y++)
+						{
+							int argb = rawImage.getRGB(x, y);
+							ByteBuffer b = ByteBuffer.allocate(4);
+							
+							b.putInt(argb);
+							
+//							System.out.println(
+//									b.get(0) + ", " +
+//									b.get(1) + ", " +
+//									b.get(2) + ", " +
+//									b.get(3) + " = " +
+//									argb);
+							
+							if (b.get(0) < 255)
+							{
+								System.out.println(b.get(0));
+							}
+							
+							if (b.get(0) > 0 && b.get(0) < 255)
+							{
+								double intensity = b.get(3)/255;
+								
+								int newARGB = 255;
+								newARGB = (int)((((newARGB << 8) + ((int)(b.get(1) * intensity))) + 255) /2);
+								newARGB = (int)((((newARGB << 8) + ((int)(b.get(2) * intensity))) + 255) /2);
+								newARGB = (int)((((newARGB << 8) + ((int)(b.get(3) * intensity))) + 255) /2);
+								
+								rawImage.setRGB(x, y, newARGB);
+								
+							}
+							
+						}
+					}
+					
+					
+					try {
+						ImageIO.write(rawImage, "png", new File("/home/uij85458/image.png"));
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		});
 		
 		// on resize reset the camera scene offsets
 		InvalidationListener listener = (new InvalidationListener()
@@ -458,9 +517,10 @@ public class SurfaceDisplayer extends Scene
 		
 		double r_Squared = Math.pow((getWidth()/2),2) + Math.pow((getHeight()/2),2); // r = (width/2)^2 + (height/2)^2
 		
-		double r = Math.sqrt(r_Squared);
-				
 		double z = Math.sqrt(r_Squared - Math.pow(x, 2) - Math.pow(y, 2));
+		
+		if (Math.abs(- Math.pow(x, 2) - Math.pow(y, 2)) > r_Squared)
+			z = 0;
 		
 		return new Point3D(x, y, z);
 		
@@ -474,21 +534,19 @@ public class SurfaceDisplayer extends Scene
 				-rotationAxis.getZ());
 		
 		rotationAxis = Vector3DUtil.applyEclusiveRotation(
-				objectGroup.getTransforms(), 
+				cameraGroup.getTransforms(), 
 				rotationAxis, 
 				true);
 		
-		
-		objectGroup.setTranslateX(0);
-		objectGroup.setTranslateY(0);
-		objectGroup.setTranslateZ(0);
+		currentCamera.setTranslateX(0);
+		currentCamera.setTranslateY(0);
+		currentCamera.setTranslateZ(0);
 		
 		Rotate rotate = new Rotate();
 		rotate.setAxis(rotationAxis);
 		rotate.setAngle(angle);
 		
-		
-		objectGroup.getTransforms().add(rotate);
+		cameraGroup.getTransforms().add(rotate);
 
 		updateCameraSceneTransforms();
 	}
