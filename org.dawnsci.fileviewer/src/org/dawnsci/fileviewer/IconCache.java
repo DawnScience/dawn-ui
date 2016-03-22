@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Diamond Light Source - custom modifications for Diamond's needs
  *******************************************************************************/
 package org.dawnsci.fileviewer;
 
