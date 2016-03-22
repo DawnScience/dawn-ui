@@ -21,9 +21,9 @@ import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
-import org.eclipse.dawnsci.hdf5.HierarchicalDataFactory;
-import org.eclipse.dawnsci.hdf5.IHierarchicalDataFile;
-import org.eclipse.dawnsci.hdf5.Nexus;
+import org.eclipse.dawnsci.hdf.object.HierarchicalDataFactory;
+import org.eclipse.dawnsci.hdf.object.IHierarchicalDataFile;
+import org.eclipse.dawnsci.hdf.object.Nexus;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
 
 import ncsa.hdf.hdf5lib.exceptions.HDF5FunctionArgumentException;

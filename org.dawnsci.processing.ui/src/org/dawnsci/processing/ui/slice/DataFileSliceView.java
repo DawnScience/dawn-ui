@@ -55,7 +55,7 @@ import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
 import org.eclipse.dawnsci.analysis.dataset.slicer.Slicer;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
-import org.eclipse.dawnsci.hdf5.operation.HierarchicalFileExecutionVisitor;
+import org.eclipse.dawnsci.hdf.object.operation.HierarchicalFileExecutionVisitor;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.image.IFileIconService;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
