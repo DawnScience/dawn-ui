@@ -136,15 +136,6 @@ public class FileViewer {
 	private static final String TABLEDATA_DIR = "Table.dir";
 	// File: Currently visible directory
 	private static final int[] tableWidths = new int[] { 150, 60, 75, 150 };
-	
-	//orientations
-	public static final int VIEW_ORIENTATION_VERTICAL = 0;
-	public static final int VIEW_ORIENTATION_HORIZONTAL = 1;
-	/**
-	 * The current orientation; either <code>VIEW_ORIENTATION_HORIZONTAL</code>
-	 * <code>VIEW_ORIENTATION_VERTICAL</code>.
-	 */
-	private int fCurrentOrientation = VIEW_ORIENTATION_HORIZONTAL;
 
 	private final String[] tableTitles = new String[] { FileViewer.getResourceString("table.Name.title"),
 			FileViewer.getResourceString("table.Size.title"), FileViewer.getResourceString("table.Type.title"),
@@ -264,7 +255,7 @@ public class FileViewer {
 		createToolBar(parent, gridData);
 
 		sashForm = new SashForm(parent, SWT.NONE);
-		sashForm.setOrientation(SWT.HORIZONTAL);
+		sashForm.setOrientation(SWT.VERTICAL);
 		gridData = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
 		gridData.horizontalSpan = 4;
 		sashForm.setLayoutData(gridData);
@@ -381,17 +372,10 @@ public class FileViewer {
 		item.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				int orientation = fCurrentOrientation == VIEW_ORIENTATION_VERTICAL ? VIEW_ORIENTATION_HORIZONTAL : VIEW_ORIENTATION_VERTICAL;
 				if ((sashForm == null) || sashForm.isDisposed())
 					return;
-				boolean horizontal = orientation == VIEW_ORIENTATION_HORIZONTAL;
-				sashForm.setOrientation(horizontal ? SWT.HORIZONTAL : SWT.VERTICAL);
-				
-//				GridData gridData = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
-//				gridData.horizontalSpan = orientation == VIEW_ORIENTATION_HORIZONTAL? 3 : 4;
-//				sashForm.setLayoutData(gridData);
-				
-				fCurrentOrientation = orientation;
+				int orientation = sashForm.getOrientation();
+				sashForm.setOrientation(orientation == SWT.HORIZONTAL ? SWT.VERTICAL : SWT.HORIZONTAL);
 				parent.layout();
 			}
 		});
