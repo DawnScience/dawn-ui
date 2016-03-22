@@ -25,6 +25,9 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.dawb.common.ui.util.EclipseUtils;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.dnd.DND;
@@ -69,6 +72,8 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.PartInitException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import uk.ac.diamond.sda.navigator.views.IOpenFileAction;
 
 /**
  * File Viewer example
@@ -1213,21 +1218,39 @@ public class FileViewer {
 		if (file.isDirectory()) {
 			notifySelectedDirectory(file);
 		} else {
+			final IOpenFileAction action = getFirstPertinentAction();
+			if (action!=null) {
+				action.openFile(file.toPath());
+				return;
+			}
 			final String fileName = file.getAbsolutePath();
 			try {
 				EclipseUtils.openExternalEditor(fileName);
 			} catch (PartInitException e) {
 				logger.error("Cannot open file " + file, e);
 			}
-//			if (!Program.launch(fileName)) {
-//				MessageBox dialog = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_ERROR | SWT.OK);
-//				dialog.setMessage(getResourceString("error.FailedLaunch.message", new Object[] { fileName }));
-//				dialog.setText(Display.getDefault().getActiveShell().getText());
-//				dialog.open();
-//			}
 		}
 	}
 
+	private IOpenFileAction getFirstPertinentAction() {
+
+		try {
+			IConfigurationElement[] eles = Platform.getExtensionRegistry()
+					.getConfigurationElementsFor("uk.ac.diamond.sda.navigator.openFile");
+			final String perspectiveId = EclipseUtils.getPage().getPerspective().getId();
+
+			for (IConfigurationElement e : eles) {
+				final String perspective = e.getAttribute("perspective");
+				if (perspectiveId.equals(perspective) || perspective == null) {
+					return (IOpenFileAction) e.createExecutableExtension("class");
+				}
+			}
+			return null;
+		} catch (CoreException coreEx) {
+			coreEx.printStackTrace();
+			return null;
+		}
+	}
 	/**
 	 * Navigates to the parent directory
 	 */
