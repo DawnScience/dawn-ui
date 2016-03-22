@@ -7,7 +7,7 @@
             allowMultiple="false"
             class="org.dawnsci.fileviewer.parts.FileViewerE4Part"
             icon="icons/generic_example.gif"
-            id="org.dawnsci.fileviewer.e4view"
+            id="org.dawnsci.fileviewer.FileViewer"
             name="File Viewer"
             restorable="true">
       </e4view>
