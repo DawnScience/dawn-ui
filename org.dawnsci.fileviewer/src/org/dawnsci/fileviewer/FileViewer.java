@@ -87,8 +87,6 @@ public class FileViewer {
 	private final static String DRIVE_B = "b:" + File.separator;
 
 	/* UI elements */
-//	private Display display;
-//	private Shell shell;
 	private ToolBar toolBar;
 
 	private Label numObjectsLabel;
@@ -173,6 +171,11 @@ public class FileViewer {
 
 	private Composite parent;
 	private SashForm sashForm;
+
+	/**
+	 * Extension point used for opening files with special actions
+	 */
+	private static final String OPEN_FILE_EXTENSION_POINT = "uk.ac.diamond.sda.navigator.openFile";
 
 	/**
 	 * Runs main program.
@@ -1233,10 +1236,9 @@ public class FileViewer {
 	}
 
 	private IOpenFileAction getFirstPertinentAction() {
-
 		try {
 			IConfigurationElement[] eles = Platform.getExtensionRegistry()
-					.getConfigurationElementsFor("uk.ac.diamond.sda.navigator.openFile");
+					.getConfigurationElementsFor(OPEN_FILE_EXTENSION_POINT);
 			final String perspectiveId = EclipseUtils.getPage().getPerspective().getId();
 
 			for (IConfigurationElement e : eles) {
@@ -1251,6 +1253,7 @@ public class FileViewer {
 			return null;
 		}
 	}
+
 	/**
 	 * Navigates to the parent directory
 	 */
