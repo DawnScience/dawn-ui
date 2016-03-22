@@ -135,6 +135,16 @@ public class FileViewer {
 	private static final String TABLEDATA_DIR = "Table.dir";
 	// File: Currently visible directory
 	private static final int[] tableWidths = new int[] { 150, 60, 75, 150 };
+	
+	//orientations
+	public static final int VIEW_ORIENTATION_VERTICAL = 0;
+	public static final int VIEW_ORIENTATION_HORIZONTAL = 1;
+	/**
+	 * The current orientation; either <code>VIEW_ORIENTATION_HORIZONTAL</code>
+	 * <code>VIEW_ORIENTATION_VERTICAL</code>.
+	 */
+	private int fCurrentOrientation = VIEW_ORIENTATION_HORIZONTAL;
+
 	private final String[] tableTitles = new String[] { FileViewer.getResourceString("table.Name.title"),
 			FileViewer.getResourceString("table.Size.title"), FileViewer.getResourceString("table.Type.title"),
 			FileViewer.getResourceString("table.Modified.title") };
@@ -165,6 +175,7 @@ public class FileViewer {
 	private boolean simulateOnly = true;
 
 	private Composite parent;
+	private SashForm sashForm;
 
 	/**
 	 * Runs main program.
@@ -238,33 +249,27 @@ public class FileViewer {
 	 */
 	public void createCompositeContents(Composite parent) {
 		this.parent = parent;
-//		parent.setText(getResourceString("Title", new Object[] { "" }));
-//		parent.setImage(getIconCache().stockImages[getIconCache().shellIcon]);
-//		Menu bar = new Menu(parent, SWT.BAR);
-//		parent.setMenuBar(bar);
-//		createFileMenu(bar);
-//		createHelpMenu(bar);
 
 		GridLayout gridLayout = new GridLayout();
-		gridLayout.numColumns = 3;
+		gridLayout.numColumns = 4;
 		gridLayout.marginHeight = gridLayout.marginWidth = 0;
 		parent.setLayout(gridLayout);
 
 		GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gridData.widthHint = 185;
+		gridData.widthHint = 200;
 		createComboView(parent, gridData);
 		gridData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gridData.horizontalSpan = 2;
+		gridData.horizontalSpan = 1;
 		createToolBar(parent, gridData);
 
-		SashForm sashForm = new SashForm(parent, SWT.NONE);
+		sashForm = new SashForm(parent, SWT.NONE);
 		sashForm.setOrientation(SWT.HORIZONTAL);
 		gridData = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
-		gridData.horizontalSpan = 3;
+		gridData.horizontalSpan = 4;
 		sashForm.setLayoutData(gridData);
 		createTreeView(sashForm);
 		createTableView(sashForm);
-		sashForm.setWeights(new int[] { 2, 5 });
+		sashForm.setWeights(new int[] { 5, 2 });
 
 		numObjectsLabel = new Label(parent, SWT.BORDER);
 		gridData = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL);
@@ -273,7 +278,7 @@ public class FileViewer {
 
 		diskSpaceLabel = new Label(parent, SWT.BORDER);
 		gridData = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL);
-		gridData.horizontalSpan = 2;
+//		gridData.horizontalSpan = 1;
 		diskSpaceLabel.setLayoutData(gridData);
 	}
 
@@ -348,6 +353,7 @@ public class FileViewer {
 	private void createToolBar(final Composite comp, Object layoutData) {
 		toolBar = new ToolBar(comp, SWT.NONE);
 		toolBar.setLayoutData(layoutData);
+		toolBar.setBackground(comp.getBackground());
 		ToolItem item = new ToolItem(toolBar, SWT.SEPARATOR);
 		item = new ToolItem(toolBar, SWT.PUSH);
 		item.setImage(getIconCache().stockImages[getIconCache().cmdParent]);
@@ -367,16 +373,28 @@ public class FileViewer {
 				doRefresh();
 			}
 		});
-//		SelectionAdapter unimplementedListener = new SelectionAdapter() {
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				MessageBox box = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_INFORMATION | SWT.OK);
-//				box.setText(getResourceString("dialog.NotImplemented.title"));
-//				box.setMessage(getResourceString("dialog.ActionNotImplemented.description"));
-//				box.open();
-//			}
-//		};
-//
+
+		item = new ToolItem(toolBar, SWT.PUSH);
+		item.setImage(getIconCache().stockImages[getIconCache().cmdLayoutEdit]);
+		item.setToolTipText(getResourceString("tool.LayoutEdit.tiptext"));
+		item.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				int orientation = fCurrentOrientation == VIEW_ORIENTATION_VERTICAL ? VIEW_ORIENTATION_HORIZONTAL : VIEW_ORIENTATION_VERTICAL;
+				if ((sashForm == null) || sashForm.isDisposed())
+					return;
+				boolean horizontal = orientation == VIEW_ORIENTATION_HORIZONTAL;
+				sashForm.setOrientation(horizontal ? SWT.HORIZONTAL : SWT.VERTICAL);
+				
+//				GridData gridData = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
+//				gridData.horizontalSpan = orientation == VIEW_ORIENTATION_HORIZONTAL? 3 : 4;
+//				sashForm.setLayoutData(gridData);
+				
+				fCurrentOrientation = orientation;
+				parent.layout();
+			}
+		});
+
 //		item = new ToolItem(toolBar, SWT.SEPARATOR);
 //		item = new ToolItem(toolBar, SWT.PUSH);
 //		item.setImage(getIconCache().stockImages[getIconCache().cmdCut]);
@@ -442,7 +460,18 @@ public class FileViewer {
 				if (lastText != null && lastText.equals(text))
 					return;
 				combo.setData(COMBODATA_LASTTEXT, text);
-				notifySelectedDirectory(new File(text));
+				File file = new File(text);
+				if(!file.exists())
+					return;
+				if(file.isDirectory()) {
+					notifySelectedDirectory(file);
+				} else {
+					String directory = text.substring(0, text.lastIndexOf(File.separator));
+					// open file in editor
+					doDefaultFileAction(new File[] {new File(text)});
+					// open directory
+					notifySelectedDirectory(new File(directory));
+				}
 			}
 		});
 	}
@@ -475,7 +504,6 @@ public class FileViewer {
 				if (selection != null && selection.length != 0) {
 					TreeItem item = selection[0];
 					File file = (File) item.getData(TREEITEMDATA_FILE);
-
 					notifySelectedDirectory(file);
 				}
 			}
@@ -1115,7 +1143,8 @@ public class FileViewer {
 		deferredRefreshRequested = false;
 		File[] files = deferredRefreshFiles;
 		deferredRefreshFiles = null;
-
+		if (parent == null)
+			return;
 		parent.setCursor(getIconCache().stockCursors[getIconCache().cursorWait]);
 
 		/*

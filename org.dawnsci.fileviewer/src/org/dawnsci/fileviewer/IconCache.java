@@ -37,9 +37,10 @@ public class IconCache {
 		cmdParent = 6,
 //		cmdPaste = 10,
 //		cmdPrint = 11,
-		cmdRefresh = 7;
+		cmdRefresh = 7,
 //		cmdRename = 13,
 //		cmdSearch = 14;
+		cmdLayoutEdit = 8;
 	public final String[] stockImageLocations = {
 		"generic_example.gif",
 		"icon_ClosedDrive.gif",
@@ -53,9 +54,10 @@ public class IconCache {
 		"cmd_Parent.gif",
 //		"cmd_Paste.gif",
 //		"cmd_Print.gif",
-		"cmd_Refresh.gif"
+		"cmd_Refresh.gif",
 //		"cmd_Rename.gif",
 //		"cmd_Search.gif"
+		"layout_edit.png"
 	};
 	public Image stockImages[];
 	
