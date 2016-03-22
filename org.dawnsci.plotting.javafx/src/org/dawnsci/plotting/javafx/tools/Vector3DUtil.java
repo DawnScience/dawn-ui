@@ -27,7 +27,53 @@ public class Vector3DUtil
 	 */
 	public static Point3D extractEulerAnglersFromMatrix(Transform matrix)
 	{
-//		
+		double y1 = 0;
+		double x1 = 0;
+		double z1 = 0;
+		double xRot1 = 0;
+		double yRot1 = 0;
+		double zRot1 = 0;
+		
+		if (Math.abs(matrix.getMzx()) != 1)
+		{
+	        y1 = -Math.asin(matrix.getMzx());
+	        x1 =  Math.atan2(matrix.getMzy() , matrix.getMzz());
+	        z1 =  Math.atan2((matrix.getMyx()/x1), (matrix.getMxx()/x1));
+	        
+	        y1 = Math.toDegrees(y1);
+	        x1 = Math.toDegrees(x1);
+	        z1 = Math.toDegrees(z1);
+	        
+		}
+		else
+		{
+			z1 = 0;
+			if (matrix.getMzx() == -1)
+			{
+				y1 = Math.toDegrees(Math.PI/2);
+				x1 = Math.toDegrees(z1 + Math.atan2(matrix.getMxy(), matrix.getMxz()));
+			}
+			else
+			{
+				y1 = Math.toDegrees(-Math.PI/2);
+				x1 = Math.toDegrees(-z1 + Math.atan2(-matrix.getMxy(), -matrix.getMxz()));
+			}
+		}
+		
+		xRot1 =  Double.isNaN(x1) ? 0 : x1;
+		yRot1 =  Double.isNaN(y1) ? 0 : y1;
+		zRot1 =  Double.isNaN(z1) ? 0 : z1;
+		
+//		xRot1 -= 180;
+//		zRot1 -= 180;
+		
+		if (xRot1 < 0)
+        	xRot1 += 360;
+		if (yRot1 < 0)
+	        yRot1 += 360;
+		if (zRot1 < 0)
+        	zRot1 += 360;
+		
 		 //figure overall rotation angle of applied           
         double x = Math.toDegrees( Math.atan2(matrix.getMzy(), matrix.getMzz()));
         double xRot =  Double.isNaN(x) ? 0 : x;
@@ -44,6 +90,14 @@ public class Vector3DUtil
         if (zRot < 0)
         	zRot += 360;
         		
+		System.out.println("1: " + new Point3D(xRot, yRot, zRot));
+		System.out.println("2: " + new Point3D(xRot1, yRot1, zRot1));
+		
+		if (new Point3D(xRot, yRot, zRot).equals(new Point3D(xRot1, yRot1, zRot1)))
+		{
+//			System.out.println("hsiudsaudhsaiudh/n/n/n/n/");
+		}
+		
         return new Point3D(xRot, yRot, zRot);
 	}
 	
