@@ -55,7 +55,7 @@ public class SurfaceDisplayer extends Scene
 {		
 	// camera for the scene
 	private PerspectiveCamera perspectiveCamera;
-	private ParallelCamera parallelCamera;
+	private PerspectiveCamera parallelCamera;
 	private Camera currentCamera;
 	
 	// the groups for the scene
@@ -148,10 +148,13 @@ public class SurfaceDisplayer extends Scene
 		// set the camera -> the camera will handle some aspects of movement
 		// other are within the group -> this is done to simplify rotation
 		// calculations
-		this.perspectiveCamera = new PerspectiveCamera();		
-		this.parallelCamera = new ParallelCamera();
+		this.perspectiveCamera = new PerspectiveCamera();	
+		
+		this.parallelCamera = new PerspectiveCamera();
+		this.parallelCamera.setFieldOfView(0.000000001);	
 		
 		this.currentCamera = perspectiveCamera;
+		
 		
 		initialiseCamera();
 		initlialiseGroups();
