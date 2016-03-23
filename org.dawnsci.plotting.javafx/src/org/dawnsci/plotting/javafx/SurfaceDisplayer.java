@@ -149,11 +149,10 @@ public class SurfaceDisplayer extends Scene
 		// calculations
 		this.perspectiveCamera = new PerspectiveCamera();	
 		this.parallelCamera = new PerspectiveCamera();
-		this.parallelCamera.setFieldOfView(0.000000001);
+		this.parallelCamera.setFieldOfView(0.01);
 				
 		this.currentCamera = perspectiveCamera;
-		
-		
+				
 		initialiseCamera();
 		initlialiseGroups();
 		createScaleAxisGroup();
@@ -175,8 +174,8 @@ public class SurfaceDisplayer extends Scene
 	{
 		setCamera(currentCamera);
 		
-		currentCamera.setNearClip(0.00001f);
-		currentCamera.setFarClip(100_000);
+		currentCamera.setNearClip(0.1f);
+		currentCamera.setFarClip(100_000_000);
 		
 		updateCameraSceneTransforms();
 		
