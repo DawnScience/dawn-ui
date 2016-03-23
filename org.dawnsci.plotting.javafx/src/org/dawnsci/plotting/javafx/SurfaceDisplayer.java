@@ -8,14 +8,10 @@
  */
 package org.dawnsci.plotting.javafx;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
@@ -29,9 +25,6 @@ import javafx.scene.ParallelCamera;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.PointLight;
 import javafx.scene.Scene;
-import javafx.scene.image.WritableImage;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
@@ -42,17 +35,12 @@ import javafx.scene.transform.Transform;
 import javafx.scene.transform.TransformChangedEvent;
 import javafx.scene.transform.Translate;
 
-import javax.imageio.ImageIO;
-
 import org.dawnsci.plotting.javafx.axis.objects.ScaleAxisGroup;
 import org.dawnsci.plotting.javafx.axis.objects.SceneObjectGroup;
 import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
 import org.dawnsci.plotting.javafx.trace.FXIsosurfaceTrace;
 import org.dawnsci.plotting.javafx.trace.VolumeTrace;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.FileDialog;
 
 /**
  * 
@@ -160,10 +148,10 @@ public class SurfaceDisplayer extends Scene
 		// set the camera -> the camera will handle some aspects of movement
 		// other are within the group -> this is done to simplify rotation
 		// calculations
-		this.perspectiveCamera = new PerspectiveCamera();
+		this.perspectiveCamera = new PerspectiveCamera();		
 		this.parallelCamera = new ParallelCamera();
 		
-		currentCamera = perspectiveCamera;
+		this.currentCamera = perspectiveCamera;
 		
 		initialiseCamera();
 		initlialiseGroups();
@@ -190,8 +178,10 @@ public class SurfaceDisplayer extends Scene
 	{
 		setCamera(currentCamera);
 		
-		currentCamera.setNearClip(0.00000001f);
-		currentCamera.setFarClip(100_000_000);
+		currentCamera.setNearClip(0.00001f);
+		currentCamera.setFarClip(100_000);
+		
+//		System.out.println(currentCamera.getDepthTest());
 		
 		updateCameraSceneTransforms();
 		
@@ -263,7 +253,7 @@ public class SurfaceDisplayer extends Scene
 	{
 		// create lights for the iso surface
 		AmbientLight ambientSurfaceLight = new AmbientLight(new Color(0.3, 0.3, 0.3, 1));
-//		ambientSurfaceLight.getScope().add(lightGroup);
+		ambientSurfaceLight.getScope().add(lightGroup);
 		
 		PointLight pointLight = new PointLight(new Color(1, 1, 1, 1));	
 		pointLight.getScope().add(lightGroup);
@@ -486,11 +476,14 @@ public class SurfaceDisplayer extends Scene
 		scaleZoom.setPivotZ(-pivot.getZ());
 		
 		final double mouseMovementMod = ((zoom + 1000) * 0.001f) + 0.1f;
-		double delta = ((((amount * mouseMovementMod)/10))*0.05);
+		double delta = ((((amount * mouseMovementMod)/10)) * 0.05);
 		
-		scaleZoom.setX(scaleZoom.getX() * (1 +delta));
-		scaleZoom.setY(scaleZoom.getY() * (1 +delta));
-		scaleZoom.setZ(scaleZoom.getZ() * (1 +delta));
+		scaleZoom.setX(Math.abs(scaleZoom.getX() * (1 + delta)));
+		scaleZoom.setY(Math.abs(scaleZoom.getY() * (1 + delta)));
+		scaleZoom.setZ(Math.abs(scaleZoom.getZ() * (1 + delta)));
+		
+//		System.out.println(scaleZoom.toString());
+		
 	}
 	
 	private Point3D findMidPointOfBounds(Bounds bounds)
