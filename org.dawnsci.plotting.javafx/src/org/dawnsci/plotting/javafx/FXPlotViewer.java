@@ -247,6 +247,11 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 		scene.flipCameraType();
 	}
 	
+	public void resetSceneTransforms() 
+	{
+		scene.resetSceneTransforms();
+	}
+	
 	/**
 	 * 
 	 * @param type
@@ -285,6 +290,8 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 	{
 		return canvas;
 	}
+
+	
 	
 	
 }

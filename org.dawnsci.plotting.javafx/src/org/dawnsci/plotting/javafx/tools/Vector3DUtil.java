@@ -90,8 +90,8 @@ public class Vector3DUtil
         if (zRot < 0)
         	zRot += 360;
         		
-		System.out.println("1: " + new Point3D(xRot, yRot, zRot));
-		System.out.println("2: " + new Point3D(xRot1, yRot1, zRot1));
+//		System.out.println("1: " + new Point3D(xRot, yRot, zRot));
+//		System.out.println("2: " + new Point3D(xRot1, yRot1, zRot1));
 		
 		if (new Point3D(xRot, yRot, zRot).equals(new Point3D(xRot1, yRot1, zRot1)))
 		{

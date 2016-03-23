@@ -25,6 +25,8 @@ import javafx.scene.ParallelCamera;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.PointLight;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
@@ -151,8 +153,8 @@ public class SurfaceDisplayer extends Scene
 		this.perspectiveCamera = new PerspectiveCamera();	
 		
 		this.parallelCamera = new PerspectiveCamera();
-		this.parallelCamera.setFieldOfView(0.000000001);	
-		
+		this.parallelCamera.setFieldOfView(0.000000001);
+				
 		this.currentCamera = perspectiveCamera;
 		
 		
@@ -356,7 +358,6 @@ public class SurfaceDisplayer extends Scene
 					}
 				}
 			}
-						
 		});
 				
 		// on mouse scroll zoom the camera
@@ -368,7 +369,7 @@ public class SurfaceDisplayer extends Scene
 				zoom(event.getDeltaY());
 			}
 		});
-		
+				
 		/*
 		 * scene resize listeners
 		 */
@@ -483,10 +484,22 @@ public class SurfaceDisplayer extends Scene
 		
 		scaleZoom.setX(Math.abs(scaleZoom.getX() * (1 + delta)));
 		scaleZoom.setY(Math.abs(scaleZoom.getY() * (1 + delta)));
-		scaleZoom.setZ(Math.abs(scaleZoom.getZ() * (1 + delta)));
+		scaleZoom.setZ(Math.abs(scaleZoom.getZ() * (1 + delta)));		
+	}
+	
+	public void resetSceneTransforms()
+	{
+		scaleZoom.setX(1);
+		scaleZoom.setY(1);
+		scaleZoom.setZ(1);
 		
-//		System.out.println(scaleZoom.toString());
+		isoGroupOffset.setX(0);
+		isoGroupOffset.setY(0);
+		isoGroupOffset.setZ(0);
 		
+		cameraGroup.getTransforms().clear();
+				
+		updateCameraSceneTransforms();		
 	}
 	
 	private Point3D findMidPointOfBounds(Bounds bounds)
