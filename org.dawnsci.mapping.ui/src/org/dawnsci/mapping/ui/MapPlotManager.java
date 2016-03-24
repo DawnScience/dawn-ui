@@ -472,11 +472,12 @@ public class MapPlotManager {
 	
 	public void setTransparency(AbstractMapData m) {
 		
-		ITrace trace = map.getTrace(m.getLongName());
-		if (trace instanceof IImageTrace) ((IImageTrace)trace).setAlpha(m.getTransparency());
+		for (int i = 0; i < layers.size() ;i++) {
+			MapTrace layer = layers.get(i);
+			if (layer.getMap() == m) layer.getTrace().setAlpha(m.getTransparency());
+		}
+		
 		map.repaint(false);
-		
-		
 	}
 	
 //	private void plotMapData(){
