@@ -1,11 +1,10 @@
 package org.dawnsci.plotting.javafx.testing.tools;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import javafx.collections.ObservableList;
 import javafx.geometry.Point3D;
 import javafx.scene.shape.Box;
 import javafx.scene.transform.Rotate;
-import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
 
 import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
@@ -13,17 +12,19 @@ import org.junit.Test;
 
 public class ToolTester 
 {
+	
+	
 	@Test
-	public void extractEulerAnglersFromMatrix()
-	{
+	public void matrixToEulerXYZ()
+	{ 
 		// check X
 		Rotate Rotate_X_90 = new Rotate();
 		Rotate_X_90.setAxis(new Point3D(1, 0, 0));
 		Rotate_X_90.setAngle(90);
 		
-		Point3D result_X_90 = Vector3DUtil.extractEulerAnglersFromMatrix(Rotate_X_90);
+		Point3D result_X_90 = Vector3DUtil.matrixToEulerXYZ(Rotate_X_90);
 		 
-		assertTrue("X value was incorrect",
+		assertTrue("X value was incorrect - x = " + result_X_90.getX(),
 				result_X_90.getX() == 90 &&
 				result_X_90.getY() == 0  &&
 				result_X_90.getZ() == 0 	);
@@ -34,9 +35,9 @@ public class ToolTester
 		Rotate_Y_90.setAxis(new Point3D(0, 1, 0));
 		Rotate_Y_90.setAngle(90);
 		
-		Point3D result_Y_90 = Vector3DUtil.extractEulerAnglersFromMatrix(Rotate_Y_90);
+		Point3D result_Y_90 = Vector3DUtil.matrixToEulerXYZ(Rotate_Y_90);
 		 
-		assertTrue("Y value was incorrect",
+		assertTrue("Y value was incorrect - y = " + result_X_90.getY(),
 				result_Y_90.getX() == 00 &&
 				result_Y_90.getY() == 90 &&
 				result_Y_90.getZ() == 00   );
@@ -47,9 +48,9 @@ public class ToolTester
 		Rotate_Z_90.setAxis(new Point3D(0, 0, 1));
 		Rotate_Z_90.setAngle(90);
 		
-		Point3D result_Z_90 = Vector3DUtil.extractEulerAnglersFromMatrix(Rotate_Z_90);
+		Point3D result_Z_90 = Vector3DUtil.matrixToEulerXYZ(Rotate_Z_90);
 		 
-		assertTrue("Z value was incorrect",
+		assertTrue("Z value was incorrect - Z = " + result_X_90.getZ(),
 				result_Z_90.getX() == 00 &&
 				result_Z_90.getY() == 00 &&
 				result_Z_90.getZ() == 90 	);
@@ -121,6 +122,27 @@ public class ToolTester
 		
 		assertTrue(allRotates.equals(resultVector_Rotate));
 		assertTrue(allTranslates.equals(resultVector_Translate));
+	}
+	
+	@Test
+	public void matrixToRotate()
+	{
+		Rotate r = new Rotate();
+		r.setAngle(41);
+		r.setAxis(new Point3D(1,0,0).normalize());
+		
+		Point3D v = new Point3D(1, 1, 1);
+		
+		Point3D vr = r.transform(v);
+		
+		Rotate newR = Vector3DUtil.matrixToRotate(r);
+		
+		Point3D newVR = newR.transform(v);
+		
+		assertEquals(vr.getX(), newVR.getX(), 0.001d);
+		assertEquals(vr.getY(), newVR.getY(), 0.001d);
+		assertEquals(vr.getZ(), newVR.getZ(), 0.001d);
+		
 	}
 	
 	

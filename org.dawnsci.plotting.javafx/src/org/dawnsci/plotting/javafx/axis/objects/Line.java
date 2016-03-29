@@ -73,7 +73,6 @@ public class Line extends MeshView
 			
 			mesh.getFaces().addAll(i+1 ,0 ,i-2 ,0 ,i   ,0 );
 			mesh.getFaces().addAll(i-1 ,0 ,i-2 ,0 ,i+1 ,0 );
-			
 		}
 		
 		this.setDrawMode(DrawMode.LINE);
