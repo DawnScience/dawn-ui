@@ -35,7 +35,7 @@ public class Grid extends Group
 	private Point2D tickSeperationXY;
 	private Color colour;
 	private double textSize;
-	
+		
 	/**
 	 * Initialise an axis grid. Generates a new axis plane along the "planeXYZ" plane. Using the below parameters
 	 * @param planeXYZ - The axis plane
@@ -59,9 +59,23 @@ public class Grid extends Group
 		
 		this.localToSceneTransformProperty().addListener((obs, oldT, newT) -> {
 			
-			Point3D angles = Vector3DUtil.extractEulerAnglersFromMatrix(newT);
+			Rotate worldRotate = Vector3DUtil.matrixToRotate(newT);
 			
-			if (angles.getX() > 180)
+			Point3D zVector = new Point3D(0, 0, 1);
+			try 
+			{
+				zVector = worldRotate.createInverse().transform(zVector);
+			} 
+			catch (Exception e) 
+			{
+				e.printStackTrace();
+			}
+						
+			double zAngle = zVector.angle( new Point3D(0, 0, 1));
+			double xCross = zVector.crossProduct(new Point3D(0, 0, 1)).getX();
+			
+			
+			if (xCross < 0)
 			{
 				offsetLabels(new Point3D(0, axisLength.getY(), 0), yAxis);
 			}
@@ -71,8 +85,8 @@ public class Grid extends Group
 			}
 			
 			
-			angles = angles.subtract(new Point3D(180, 180, 180));
-			if (angles.getX() > -90 && angles.getX() < 90)
+			zAngle = zAngle - 180;
+			if (zAngle > -90 && zAngle < 90)
 			{
 				offsetGrid(new Point3D(0, 0, 0));
 				offsetAfterGrid(new Point3D(0, 0, 0), yAxis);
