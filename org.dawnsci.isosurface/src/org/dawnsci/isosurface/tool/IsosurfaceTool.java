@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 public class IsosurfaceTool extends AbstractSlicingTool
 {
 	
+	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory
 			.getLogger(IsosurfaceTool.class);
 	
@@ -139,6 +140,7 @@ public class IsosurfaceTool extends AbstractSlicingTool
 	/**
 	 * Called to update when lazy data changed.
 	 */
+	@SuppressWarnings("unused")
 	private void update()
 	{
 		//get the data from the slicing system
@@ -204,7 +206,7 @@ public class IsosurfaceTool extends AbstractSlicingTool
 		
 	}
 	
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public Enum getSliceType()
 	{

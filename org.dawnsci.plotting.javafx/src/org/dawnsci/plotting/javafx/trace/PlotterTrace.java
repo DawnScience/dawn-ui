@@ -23,9 +23,9 @@ class PlotterTrace {
 	protected String                dataName;
 	protected List<IDataset> 		axes;
 	protected List<String>          axesNames;
-	protected IPlottingSystemViewer plotter;
+	protected IPlottingSystemViewer<?> plotter;
 	protected boolean               active;
-	protected IPlottingSystem 		plottingSystem;
+	protected IPlottingSystem<?> 		plottingSystem;
 	protected IROI                  window;
 
 	public void dispose() {
@@ -38,7 +38,7 @@ class PlotterTrace {
 		window=null;
 	}
 	
-	public PlotterTrace(IPlottingSystemViewer plotter2, String name2) {
+	public PlotterTrace(IPlottingSystemViewer<?> plotter2, String name2) {
 		this.plotter = plotter2;
 		this.name    = name2;
 	}
@@ -115,11 +115,11 @@ class PlotterTrace {
 		this.name = name;
 	}
 
-	public IPlottingSystem getPlottingSystem() {
+	public IPlottingSystem<?> getPlottingSystem() {
 		return plottingSystem;
 	}
 
-	public void setPlottingSystem(IPlottingSystem plottingSystem) {
+	public void setPlottingSystem(IPlottingSystem<?> plottingSystem) {
 		this.plottingSystem = plottingSystem;
 	}
 

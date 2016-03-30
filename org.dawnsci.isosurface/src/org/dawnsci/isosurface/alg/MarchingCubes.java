@@ -23,12 +23,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
-import org.eclipse.dawnsci.analysis.api.processing.OperationRank;
-import org.eclipse.dawnsci.analysis.dataset.operations.AbstractOperationBase;
+
 /**
  * 
  * @author nnb55016
@@ -46,6 +43,7 @@ public class MarchingCubes {
 		this.model = model;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public Surface execute(IProgressMonitor monitor){
 
 		this.monitor = monitor;
@@ -86,7 +84,6 @@ public class MarchingCubes {
 		return faces;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private Object[] parseVertices() throws OperationException 
 	{
 		
@@ -231,6 +228,7 @@ public class MarchingCubes {
 	 * @param 
 	 * @return
 	 */
+	@SuppressWarnings({ "unused", "rawtypes" })
 	private float[] convertMapToPointsArray(Map<Point, Integer> map)
 	{
 		float[] returnArray = new float[mapIndex.get()*3];
@@ -241,7 +239,7 @@ public class MarchingCubes {
 	    while (iterator.hasNext() && !this.monitor.isCanceled()) 
 	    {
 	    	x ++;
-	        Map.Entry current = (Map.Entry)iterator.next();
+			Map.Entry current = (Map.Entry)iterator.next();
 	        returnArray[((int) current.getValue()*3)]   = (float)((Point)current.getKey()).getxCoord();
 	        returnArray[((int) current.getValue()*3)+1] = (float)((Point)current.getKey()).getyCoord();
 	        returnArray[((int) current.getValue()*3)+2] = (float)((Point)current.getKey()).getzCoord();
