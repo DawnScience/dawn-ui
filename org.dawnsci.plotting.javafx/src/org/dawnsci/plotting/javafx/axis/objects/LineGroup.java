@@ -20,13 +20,7 @@ public class LineGroup extends Group
 	private Group textPane;
 	private Text textLabel;
 		
-	// text rotates
-	private Rotate textXAxisRotate = new Rotate();
-		{textXAxisRotate.setAxis(new Point3D(1, 0, 0));}
- 	private Rotate textYAxisRotate = new Rotate();
- 		{textYAxisRotate.setAxis(new Point3D(0, 1, 0));}
- 	private Rotate textZAxisRotate = new Rotate();
- 		{textZAxisRotate.setAxis(new Point3D(0, 0, 1));}
+	private Rotate labelCorrectionRotate;
  	 	
  	// this transforms
 	private Translate offset;
@@ -50,8 +44,11 @@ public class LineGroup extends Group
 		this.translate_TextPane = new Translate(0,0,0);
 		this.textOffset = new Translate(0,0,0);
 		
+		labelCorrectionRotate  = new Rotate();
+		
 		if (label != null)
 		{
+			
 			textLabel = createTextLabel(label);
 			
 			textLabel.setFontSmoothingType(FontSmoothingType.LCD);
@@ -61,11 +58,9 @@ public class LineGroup extends Group
 			
 			textPane.getTransforms().addAll(
 					textOffset,
-					pivotPoint_TextPane, 
+					pivotPoint_TextPane,
 					translate_TextPane,
-					textXAxisRotate,
-					textYAxisRotate, 
-					textZAxisRotate);
+					labelCorrectionRotate);
 			
 			
 			textPane.getTransforms().addAll();
@@ -82,12 +77,17 @@ public class LineGroup extends Group
 		this.getTransforms().addAll(this.offset, this.rotate);
 				
 		this.localToSceneTransformProperty().addListener((obs, oldT, newT) -> {
+						
+			Rotate axisAngleRotate = Vector3DUtil.matrixToRotate(newT);
 			
-			Point3D angles = Vector3DUtil.extractEulerAnglersFromMatrix(newT);
+			try {
+				axisAngleRotate = (Rotate) axisAngleRotate.createInverse();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			
-            textXAxisRotate.setAngle(-angles.getX());
-            textYAxisRotate.setAngle(-angles.getY());
-            textZAxisRotate.setAngle(-angles.getZ());
+            labelCorrectionRotate.setAxis(axisAngleRotate.getAxis());
+            labelCorrectionRotate.setAngle(axisAngleRotate.getAngle());
             
         });
 	}
@@ -100,15 +100,10 @@ public class LineGroup extends Group
 		
 		// Don't even ask why this is the mid point of the text... I don't understand myself.
 		Point3D midPoint = new Point3D((width/2), -(height*0.65)/2, depth/2);
-				
-		textXAxisRotate.setPivotX(midPoint.getX());
-		textXAxisRotate.setPivotY(midPoint.getY());
 		
-		textYAxisRotate.setPivotX(midPoint.getX());
-		textYAxisRotate.setPivotY(midPoint.getY());
-		
-		textZAxisRotate.setPivotX(midPoint.getX());
-		textZAxisRotate.setPivotY(midPoint.getY());	
+		labelCorrectionRotate.setPivotX(midPoint.getX());
+		labelCorrectionRotate.setPivotY(midPoint.getY());
+		labelCorrectionRotate.setPivotZ(midPoint.getZ());
 		
 		Rotate rotate = new Rotate(-90,new Point3D(0, 0, 1));
 		rotate.setPivotX(width);
