@@ -8,8 +8,6 @@
  */
 package org.dawnsci.plotting.javafx.trace;
 
-import java.awt.image.BufferedImage;
-
 import javafx.scene.paint.Color;
 
 import org.dawnsci.plotting.javafx.SurfaceDisplayer;
@@ -17,7 +15,6 @@ import org.dawnsci.plotting.javafx.volume.VolumeRender;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
-import org.eclipse.dawnsci.plotting.api.jreality.data.ColourImageData;
 import org.eclipse.dawnsci.plotting.api.trace.IVolumeRenderTrace;
 import org.eclipse.swt.widgets.Display;
 
@@ -32,11 +29,12 @@ public class VolumeTrace  extends Image3DTrace implements IVolumeRenderTrace
 	
 	private VolumeRender volume; 
 	private SurfaceDisplayer scene;
+	@SuppressWarnings("unused")
 	private double opacity;
 	private Color colour;
 	
 	
-	public VolumeTrace(IPlottingSystemViewer plotter, SurfaceDisplayer newScene, String name) {
+	public VolumeTrace(IPlottingSystemViewer<?> plotter, SurfaceDisplayer newScene, String name) {
 		super(plotter, name);
 		this.scene = newScene;
 		

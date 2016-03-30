@@ -22,9 +22,9 @@ public class IsoHandler
 	
 	private ILazyDataset lazyDataset;
 	
-	private IPlottingSystem system;
+	private IPlottingSystem<?> system;
 	
-	public IsoHandler(Object ui, Object bean, IsosurfaceJob newJob, ILazyDataset lazyDataset, IPlottingSystem system)
+	public IsoHandler(Object ui, Object bean, IsosurfaceJob newJob, ILazyDataset lazyDataset, IPlottingSystem<?> system)
 	{
 		this.isoComp = (IsoComposite)ui;
 		

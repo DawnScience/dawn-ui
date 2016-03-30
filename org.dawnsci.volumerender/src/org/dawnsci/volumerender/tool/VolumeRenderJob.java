@@ -11,7 +11,7 @@ import org.eclipse.swt.widgets.Display;
 
 public class VolumeRenderJob extends Job
 {
- 	final private IPlottingSystem system;
+ 	final private IPlottingSystem<?> system;
  	private String traceID;
  	private ILazyDataset dataset;
 
@@ -19,9 +19,10 @@ public class VolumeRenderJob extends Job
  	private double intensityValue;
  	
  	private int red,green,blue;
- 	private double opacity;
+ 	@SuppressWarnings("unused")
+	private double opacity;
  	
-	public VolumeRenderJob(String name, IPlottingSystem system) 
+	public VolumeRenderJob(String name, IPlottingSystem<?> system) 
 	{
 		super(name);
 		
@@ -73,7 +74,7 @@ public class VolumeRenderJob extends Job
 	@Override
 	protected IStatus run(IProgressMonitor monitor) 
 	{
-		Thread.currentThread().setName("generating volume render");
+		Thread.currentThread().setName("generating volume renderer");
 		
 		final IVolumeRenderTrace trace;
 		
