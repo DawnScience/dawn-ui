@@ -26,7 +26,7 @@ import org.eclipse.dawnsci.hdf.object.IHierarchicalDataFile;
 import org.eclipse.dawnsci.hdf.object.Nexus;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
 
-import ncsa.hdf.hdf5lib.exceptions.HDF5FunctionArgumentException;
+import hdf.hdf5lib.exceptions.HDF5FunctionArgumentException;
 
 /**
  * A conversion visitor that delegates to a tool.
