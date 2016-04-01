@@ -94,8 +94,14 @@ public class HyperComponent {
 	
 	public static final String LEFT_REGION_NAME = "Left Region";
 	public static final String RIGHT_REGION_NAME = "Right Region";
-	
-	
+
+	// use to override the default value of left roi
+	private IROI myRoi;
+
+	// default constructor
+	public HyperComponent() {
+	}
+
 	public HyperComponent(IWorkbenchPart part) {
 		this.part = part;
 	}
@@ -160,8 +166,8 @@ public class HyperComponent {
 		if (leftJob.getReducer() instanceof IProvideReducerActions) {
 			createActions((IProvideReducerActions)leftJob.getReducer(), mainSystem, leftActions,roiListenerLeft,HYPERIMAGE);
 		}
-		
-		IROI rroi = mainReducer.getInitialROI(daxes,order);
+
+		IROI rroi = myRoi != null ? myRoi : mainReducer.getInitialROI(daxes,order);
 		IROI broi = sideReducer.getInitialROI(daxes,order);
 		
 		mainSystem.clear();
@@ -225,6 +231,10 @@ public class HyperComponent {
 		} catch (Exception e) {
 			logger.error("Error adding regions to hyperview: " + e.getMessage());
 		}
+	}
+
+	public void setMyRoi(IROI myRoi) {
+		this.myRoi = myRoi;
 	}
 
 	public void setFocus() {
@@ -434,33 +444,46 @@ public class HyperComponent {
 			@Override
 			public void roiDragged(ROIEvent evt) {
 				updateRight((IRegion)evt.getSource(), evt.getROI());
-				
+				updateOnLeftRegionChange(evt.getROI());
 			}
 			
 			@Override
 			public void roiChanged(ROIEvent evt) {
 				updateRight((IRegion)evt.getSource(), evt.getROI());
+				updateOnLeftRegionChange(evt.getROI());
 			}
 		};
 	}
-	
+
+	/**
+	 * Method to override if something needs to be updated on a left region change
+	 */
+	public void updateOnLeftRegionChange(IROI roi) {
+	}
+
 	private IROIListener getROIListenerLeft() {
 		return new IROIListener.Stub() {
 			
 			@Override
 			public void roiDragged(ROIEvent evt) {
 				updateLeft((IRegion)evt.getSource(),evt.getROI());
-				
+				updateOnRightRegionChange(evt.getROI());
 			}
 			
 			@Override
 			public void roiChanged(ROIEvent evt) {
 				updateLeft((IRegion)evt.getSource(),evt.getROI());
-				
+				updateOnRightRegionChange(evt.getROI());
 			}
 		};
 	}
-	
+
+	/**
+	 * Method to override if something needs to be updated on a right region change
+	 */
+	public void updateOnRightRegionChange(IROI roi) {
+	}
+
 	protected void updateRight(IRegion r, IROI rb) {
 		
 		leftJob.profile(r, rb);
