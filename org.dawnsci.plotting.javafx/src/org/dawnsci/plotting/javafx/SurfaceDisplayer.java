@@ -36,6 +36,7 @@ import javafx.scene.transform.Translate;
 
 import javax.vecmath.Matrix3d;
 
+import org.dawnsci.plotting.javafx.axis.objects.JavaFXProperties;
 import org.dawnsci.plotting.javafx.axis.objects.ScaleAxisGroup;
 import org.dawnsci.plotting.javafx.axis.objects.SceneObjectGroup;
 import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
@@ -684,15 +685,20 @@ public class SurfaceDisplayer extends Scene
 		// do nothing at the moment
 	}
 	
-	public void setCameraType(boolean visibility)
+	public void setCameraType(int cameraType)
 	{
-		if (this.currentCamera.equals(this.perspectiveCamera))
+		switch (cameraType)
 		{
-			this.currentCamera = this.parallelCamera;
-		}
-		else
-		{
-			this.currentCamera = this.perspectiveCamera;
+			case (JavaFXProperties.CameraProperties.PERSPECTIVE_CAMERA):
+			{
+				this.currentCamera = this.perspectiveCamera;
+				break;
+			}
+			case (JavaFXProperties.CameraProperties.PARALLEL_CAMERA):
+			{
+				this.currentCamera = this.parallelCamera;
+				break;
+			}
 		}
 		
 		initialiseCamera();

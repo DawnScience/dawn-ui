@@ -36,7 +36,7 @@ public class AxesGroup extends Group{
 		
 		axisGrid = new Grid(planeNormal, tickSeparationXY, axisLength, textSize);
 				
-		AmbientLight ambientAxisLight = new AmbientLight(DefaultObjectProperties.LINE_COLOUR);
+		AmbientLight ambientAxisLight = new AmbientLight(JavaFXProperties.ColourProperties.LINE_COLOUR);
 		ambientAxisLight.getScope().add(axisGrid);
 		axisGrid.getChildren().add(ambientAxisLight);
 		

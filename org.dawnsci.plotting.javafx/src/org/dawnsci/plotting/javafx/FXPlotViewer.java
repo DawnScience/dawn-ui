@@ -21,6 +21,7 @@ import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.image.WritableImage;
 
+import org.dawnsci.plotting.javafx.axis.objects.JavaFXProperties;
 import org.dawnsci.plotting.javafx.trace.FXIsosurfaceTrace;
 import org.dawnsci.plotting.javafx.trace.VolumeTrace;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -238,9 +239,20 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 		scene.setBoundingBoxVisibility(visibility);
 	}
 	
-	public void setCameraType(boolean visibility)
+	/**
+	 * true = parallel <br>
+	 * false = perspective
+	 */
+	public void toggleParallelCamera(boolean Parallel)
 	{
-		scene.setCameraType(visibility);
+		if (Parallel)
+		{
+			scene.setCameraType(JavaFXProperties.CameraProperties.PARALLEL_CAMERA);
+		}
+		else
+		{
+			scene.setCameraType(JavaFXProperties.CameraProperties.PERSPECTIVE_CAMERA);
+		}
 	}
 	
 	public void resetSceneTransforms() 
