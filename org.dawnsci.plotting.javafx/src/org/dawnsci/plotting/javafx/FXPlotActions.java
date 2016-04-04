@@ -20,11 +20,14 @@ class FXPlotActions {
 	private FXPlotViewer      viewer;
 	private IPlotActionSystem actionMan;
 
-	public FXPlotActions(FXPlotViewer viewer, IPlottingSystem system) {
+	public FXPlotActions(FXPlotViewer viewer, IPlottingSystem system) 
+	{
 		this.viewer = viewer;
 		this.actionMan = system.getPlotActionSystem();
 	}
-	protected void createActions() {
+	
+	protected void createActions() 
+	{
 		
 		String gridLineGroupNameAction = "javafx.plotting.grid.line.actions";
 		actionMan.registerGroup(gridLineGroupNameAction, ManagerType.TOOLBAR);

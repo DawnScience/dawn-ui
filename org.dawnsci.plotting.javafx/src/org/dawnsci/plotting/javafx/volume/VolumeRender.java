@@ -14,8 +14,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.transform.Rotate;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
+import org.eclipse.dawnsci.plotting.api.histogram.functions.FunctionContainer;
 
 public class VolumeRender extends Group
 {
@@ -23,6 +26,7 @@ public class VolumeRender extends Group
 	private ILazyDataset lazySlice;
 	
 	private double max;
+	private double min;
 	
 	private Group xygroup;
 	private Group zygroup;
@@ -80,10 +84,14 @@ public class VolumeRender extends Group
 		this.getChildren().addAll(xygroup, zygroup, zxgroup);
 	}
 	
-	private Group createPlanesFromDataSlice(final double valueIntensity, final int[]XYZSize, final ILazyDataset lazySlice) 
+	private Group createPlanesFromDataSlice(final double valueIntensity, final int[]XYZSize, final PaletteService paletteService, final ILazyDataset lazySlice) 
 	{
 		Group outputGroup = new Group();
 		
+		PaletteService ps = paletteService;
+		
+		FunctionContainer functionContainer = ps.getFunctionContainer("Red-Purple");
+				
 		for (int z = 0; z < lazySlice.getShape()[2]; z ++)
 		{
 			IDataset slice = lazySlice.getSlice(
@@ -100,21 +108,22 @@ public class VolumeRender extends Group
 			{
 				for (int x = 0; x < slice.getShape()[0]; x++)
 				{
-					int value = (int)(((slice.getInt(x,y,0)/max) * valueIntensity) + 0.5f);
+					double value = ((slice.getDouble(x,y,0)-min)/(max-min));
 					
-					// anything with a value of 1 or less gets culled
-					// javafx makes it become grey
-					if (value < 2)
-					{
-						value = 0;
-					}
+//					int argb = 255;
+//					argb = (argb << 8) + functionContainer.getRedFunc().mapToByte(value);
+//					argb = (argb << 8) + functionContainer.getGreenFunc().mapToByte(value);
+//					argb = (argb << 8) + functionContainer.getBlueFunc().mapToByte(value);
 					
-					int argb = value;
+					
+					int argb = 255;
 					argb = (argb << 8) + 255;
-					argb = (argb << 8) + 255;
-					argb = (argb << 8) + 255;
+					argb = (argb << 8) + 0; 
+					argb = (argb << 8) + 0; 
 					
 					bi.setRGB(x, y, argb);
+					
+					
 				}
 			}
 				
@@ -124,6 +133,10 @@ public class VolumeRender extends Group
 					SwingFXUtils.toFXImage(bi, null),
 					new Point3D(0, 0, 1));
 			newPlane.setTranslateZ(z * ((double)XYZSize[2]/ lazySlice.getShape()[2]));
+			
+			newPlane.setOpacity_Material(0.002d);
+			
+			newPlane.setColour(Color.WHITE);
 			
 			outputGroup.getChildren().add(newPlane);
 			
@@ -153,7 +166,6 @@ public class VolumeRender extends Group
 	
 	private void setGroupColour(Color colour, Group group)
 	{
-		
 		for (Node n : group.getChildren())
 		{
 			if (n instanceof TexturedPlane)
@@ -176,15 +188,15 @@ public class VolumeRender extends Group
 		
 	}
 	
-	
 	/* 
 	 * publics
 	 * 
 	 */
-
-	public void compute(final int[] size, final ILazyDataset dataset, final double intensityValue)
+	
+	public void compute(final int[] size, final ILazyDataset dataset, final double intensityValue, final PaletteService paletteService)
 	{
 		this.max = dataset.getSlice().max(true, true).doubleValue();
+		this.min = dataset.getSlice().min(true, true).doubleValue();
 		
 		xygroup.getChildren().clear(); 
 		zygroup.getChildren().clear(); 
@@ -195,9 +207,9 @@ public class VolumeRender extends Group
 		double valueIntensity = ((255 / maxDepth) * 25) * intensityValue;
 		
 		// generate the planes
-		xygroup = createPlanesFromDataSlice(valueIntensity, new int[]{size[0], size[1], size[2]}, dataset);
-		zygroup = createPlanesFromDataSlice(valueIntensity, new int[]{size[1], size[2], size[0]}, dataset.getTransposedView(1,2,0).getSlice());
-		zxgroup = createPlanesFromDataSlice(valueIntensity, new int[]{size[2], size[0], size[1]}, dataset.getTransposedView(2,0,1).getSlice());
+		xygroup = createPlanesFromDataSlice(valueIntensity, new int[]{size[0], size[1], size[2]}, paletteService, dataset);
+		zygroup = createPlanesFromDataSlice(valueIntensity, new int[]{size[1], size[2], size[0]}, paletteService, dataset.getTransposedView(1,2,0).getSlice());
+		zxgroup = createPlanesFromDataSlice(valueIntensity, new int[]{size[2], size[0], size[1]}, paletteService, dataset.getTransposedView(2,0,1).getSlice());
 		
 		initialise();
 	}

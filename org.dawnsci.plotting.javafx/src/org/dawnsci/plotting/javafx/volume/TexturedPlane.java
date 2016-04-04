@@ -68,7 +68,11 @@ public class TexturedPlane extends MeshView{
 	 */
 	public void setOpacity_Material(double opacity)
 	{
-		mat.setDiffuseColor(new Color(1, 1, 1, opacity));
+		mat.setDiffuseColor(new Color(
+				mat.getDiffuseColor().getRed(),
+				mat.getDiffuseColor().getGreen(),
+				mat.getDiffuseColor().getBlue(),
+				opacity));
 	}
 	
 	/**
