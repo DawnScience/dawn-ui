@@ -4,7 +4,6 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Point3D;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Rotate;
-import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
 
 import javax.vecmath.Matrix3d;

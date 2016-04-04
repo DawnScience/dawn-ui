@@ -1,17 +1,15 @@
 package org.dawnsci.plotting.javafx.axis.objects;
 
-import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
-
 import javafx.geometry.Point3D;
 import javafx.scene.Group;
-import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
-import javafx.scene.shape.Cylinder;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
+
+import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
 
 public class LineGroup extends Group
 {

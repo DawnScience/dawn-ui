@@ -10,9 +10,6 @@ package org.dawnsci.plotting.javafx;
 
 import java.util.List;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.event.EventHandler;
@@ -31,12 +28,13 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Cylinder;
-import javafx.scene.transform.MatrixType;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.TransformChangedEvent;
 import javafx.scene.transform.Translate;
+
+import javax.vecmath.Matrix3d;
 
 import org.dawnsci.plotting.javafx.axis.objects.ScaleAxisGroup;
 import org.dawnsci.plotting.javafx.axis.objects.SceneObjectGroup;
