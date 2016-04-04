@@ -381,10 +381,15 @@ public class MapPlotManager {
 		}
 		
 		if (map == null) return null;
+		IImageTrace t = null;
+		try {
+			t = MetadataPlotUtils.buildTrace(longName, map, this.map);
+			t.setGlobalRange(area.getRange());
+			if (ob instanceof AbstractMapData)  t.setAlpha(((AbstractMapData)ob).getTransparency());
+		} catch (Exception e) {
+			//TODO
+		}
 		
-		IImageTrace t = MetadataPlotUtils.buildTrace(longName, map, this.map);
-		t.setGlobalRange(area.getRange());
-		if (ob instanceof AbstractMapData)  t.setAlpha(((AbstractMapData)ob).getTransparency());
 		
 		return t;
 	}
