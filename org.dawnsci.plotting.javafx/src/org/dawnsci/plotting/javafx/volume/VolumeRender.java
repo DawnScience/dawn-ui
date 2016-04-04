@@ -134,7 +134,7 @@ public class VolumeRender extends Group
 					new Point3D(0, 0, 1));
 			newPlane.setTranslateZ(z * ((double)XYZSize[2]/ lazySlice.getShape()[2]));
 			
-			newPlane.setOpacity_Material(0.002d);
+			newPlane.setOpacity_Material(0.01d);
 			
 			newPlane.setColour(Color.WHITE);
 			
