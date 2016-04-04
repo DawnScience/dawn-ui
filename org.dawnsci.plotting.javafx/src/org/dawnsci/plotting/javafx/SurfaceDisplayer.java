@@ -670,24 +670,23 @@ public class SurfaceDisplayer extends Scene
 		
 	}
 
-	public void flipAxisGridVisibility()
+	public void setAxisGridVisibility(boolean visibility)
 	{
-		axisObjectGroup.flipXGridVisible();
-		axisObjectGroup.flipYGridVisible();
-		axisObjectGroup.flipZGridVisible();
+		axisObjectGroup.setAllVisible(visibility);
 	}
 
-	public void flipBoundingBoxVisibility() 
+	public void setBoundingBoxVisibility(boolean visibility) 
 	{
-		axisObjectGroup.flipBoundingBoxVisibility();
+		
+		axisObjectGroup.setBoundingBoxVisibility(visibility);
 	}
 	
-	public void flipScaleAxesVisibility()
+	public void setScaleAxesVisibility(boolean visibility)
 	{
-		scaleAxesGroup.flipVisibility();
+		// do nothing at the moment
 	}
 	
-	public void flipCameraType()
+	public void setCameraType(boolean visibility)
 	{
 		if (this.currentCamera.equals(this.perspectiveCamera))
 		{

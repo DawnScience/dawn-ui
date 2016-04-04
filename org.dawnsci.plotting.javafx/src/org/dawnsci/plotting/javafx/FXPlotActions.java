@@ -43,7 +43,7 @@ class FXPlotActions {
 		Action boundingBoxToggle = new Action ("Toggle Bounding Box", IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
-				viewer.flipBoundingBoxVisibility();
+				viewer.setBoundingBoxVisibility(isChecked());
 			}
 		};
 		boundingBoxToggle.setChecked(true);
@@ -54,7 +54,7 @@ class FXPlotActions {
 		Action axisToggle = new Action("Toggle Axis Grid",IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
-				viewer.flipAxisGridVisibility();
+				viewer.setAxisGridVisibility(isChecked());
 			}
 		};
 		axisToggle.setChecked(true);
@@ -65,7 +65,7 @@ class FXPlotActions {
 		Action orthographicToggle = new Action("Toggle Orthographic Camera",IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
-				viewer.flipCameraType();
+				viewer.setCameraType(isChecked());
 			}
 		};
 		orthographicToggle.setChecked(false);

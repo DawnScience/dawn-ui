@@ -160,30 +160,10 @@ public class SceneObjectGroup extends Group
 		setGridYVisible(visible);
 		setGridZVisible(visible);
 	}
-	
-	public void flipXGridVisible()
+		
+	public void setBoundingBoxVisibility(boolean visible)
 	{
-		yzAxisGroup.setVisible(!yzAxisGroup.isVisible());
-	}
-	public void flipYGridVisible()
-	{
-		zxAxisGroup.setVisible(!zxAxisGroup.isVisible());
-	}
-	public void flipZGridVisible()
-	{
-		xyAxisGroup.setVisible(!xyAxisGroup.isVisible());
-	}
-	
-	public void flipAll()
-	{
-		flipXGridVisible();
-		flipYGridVisible();
-		flipZGridVisible();
-	}
-	
-	public void flipBoundingBoxVisibility()
-	{
-		this.boundingBox.setVisible(!this.boundingBox.isVisible());
+		this.boundingBox.setVisible(visible);
 	}
 		
 	public void setAxisLimitMin(Point3D MinLimit)

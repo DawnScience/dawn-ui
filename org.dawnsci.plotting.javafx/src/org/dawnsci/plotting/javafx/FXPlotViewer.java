@@ -188,8 +188,7 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 		}
 	}
 
-	// add the trace, ie create a new isosurface
-	// !!look into later!!
+	
 	public boolean addTrace(ITrace trace)
 	{
 		if (trace instanceof IIsosurfaceTrace)
@@ -223,28 +222,25 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 		return true;
 		
 	}
-		
-	// i dont like this
-	// these act as intermediates between the action and the scene
-	// feels horrible
-	public void flipScaleAxesVisibility()
+	
+	public void setScaleAxesVisibility(boolean visibility)
 	{
-		scene.flipScaleAxesVisibility();
+		scene.setScaleAxesVisibility(visibility);
 	}
 	
-	public void flipAxisGridVisibility()
+	public void setAxisGridVisibility(boolean visibility)
 	{
-		scene.flipAxisGridVisibility();
+		scene.setAxisGridVisibility(visibility);
 	}
 	
-	public void flipBoundingBoxVisibility()
+	public void setBoundingBoxVisibility(boolean visibility)
 	{
-		scene.flipBoundingBoxVisibility();
+		scene.setBoundingBoxVisibility(visibility);
 	}
 	
-	public void flipCameraType()
+	public void setCameraType(boolean visibility)
 	{
-		scene.flipCameraType();
+		scene.setCameraType(visibility);
 	}
 	
 	public void resetSceneTransforms() 
