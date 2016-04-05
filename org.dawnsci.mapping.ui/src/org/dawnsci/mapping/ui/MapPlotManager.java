@@ -450,6 +450,8 @@ public class MapPlotManager {
 		
 		if (omap.getLongName().equals(map.getLongName())) return true;
 		
+		if (omap.getData() == null ||  map.getData() == null) return false;
+		
 		if (!Arrays.equals(omap.getData().getShape(), map.getData().getShape())) return false;
 		
 		AxesMetadata oax = omap.getData().getFirstMetadata(AxesMetadata.class);
