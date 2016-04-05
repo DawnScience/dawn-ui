@@ -64,7 +64,16 @@ public class LiveMappedData extends MappedData implements ILiveData {
 			}
 		}
 
-		IDataset ma = baseMap.getSlice();
+		IDataset ma = null;
+		
+		try{
+			ma = baseMap.getSlice();
+		} catch (Exception e) {
+			//TODO log?
+		}
+		
+		if (ma == null) return null;
+		
 		if (parent.isTransposed()) ma = DatasetUtils.convertToDataset(ma).transpose();
 		
 		// TODO This check is probably not required
