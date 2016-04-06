@@ -130,7 +130,7 @@ public class VolumeRender extends Group
 		}
 		
 		
-		TexturedPlane newPlane = new TexturedPlane(
+		LayeredPlaneMesh newPlane = new LayeredPlaneMesh(
 				new Point3D(XYZSize[0], XYZSize[1], XYZSize[2]),
 				new Point2D(lazySlice.getShape()[0], lazySlice.getShape()[1]),
 				SwingFXUtils.toFXImage(bi, null),
@@ -154,9 +154,9 @@ public class VolumeRender extends Group
 	{
 		for (Node n : group.getChildren())
 		{
-			if (n instanceof TexturedPlane)
+			if (n instanceof LayeredPlaneMesh)
 			{
-				((TexturedPlane)n).setColour(colour);
+				((LayeredPlaneMesh)n).setColour(colour);
 			}
 		}
 		
@@ -166,9 +166,9 @@ public class VolumeRender extends Group
 		
 		for (Node n : group.getChildren())
 		{
-			if (n instanceof TexturedPlane)
+			if (n instanceof LayeredPlaneMesh)
 			{
-				((TexturedPlane)n).setOpacity_Material(opacity);
+				((LayeredPlaneMesh)n).setOpacity_Material(opacity);
 			}
 		}
 	}

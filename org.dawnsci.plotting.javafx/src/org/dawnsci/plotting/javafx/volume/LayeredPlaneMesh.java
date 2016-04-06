@@ -12,7 +12,7 @@ import javafx.scene.transform.Rotate;
 
 import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
 
-public class TexturedPlane extends MeshView{
+public class LayeredPlaneMesh extends MeshView{
 	
 	private PhongMaterial mat;
 	
@@ -23,7 +23,7 @@ public class TexturedPlane extends MeshView{
 	 * @param image1 - texture of the plane
 	 * @param facingDirection - aligns the mesh, not the node, to this direction.
 	 */
-	public TexturedPlane(
+	public LayeredPlaneMesh(
 			Point3D volumeSize,
 			Point2D imagePlaneSize,
 			Image image,
