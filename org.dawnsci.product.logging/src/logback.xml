@@ -76,7 +76,7 @@
 
 	<logger name="org.apache.commons" level="ERROR"/>
 	
-	<logger name="ncsa.hdf" level="ERROR"/>
+	<logger name="hdf.hdf5lib" level="ERROR"/>
 	
 	<root>
 		<level value="ALL" />
