@@ -230,6 +230,7 @@ public class SurfaceDisplayer extends Scene
 		// enable for the axis node group
 		this.isosurfaceGroup.setDepthTest(DepthTest.ENABLE);
 		this.axisNode.setDepthTest(DepthTest.ENABLE);
+//		this.volumeGroup.setDepthTest(DepthTest.DISABLE);
 	
 	}
 	
@@ -254,13 +255,21 @@ public class SurfaceDisplayer extends Scene
 	private void addLights()
 	{
 		// create lights for the iso surface
-		AmbientLight ambientSurfaceLight = new AmbientLight(new Color(0.3, 0.3, 0.3, 1));
-		ambientSurfaceLight.getScope().add(lightGroup);
+		AmbientLight ambientSurfaceLight = new AmbientLight(new Color(0.3,0.3,0.3,1));
+		ambientSurfaceLight.getScope().add(objectGroup);
+
+		this.objectGroup.getChildren().addAll(ambientSurfaceLight);
+		
+		AmbientLight ambientVolumeLight = new AmbientLight(new Color(1,1,1,1));
+		ambientVolumeLight.getScope().add(volumeGroup);
+		
+		this.volumeGroup.getChildren().addAll(ambientVolumeLight);
 		
 		PointLight pointLight = new PointLight(new Color(1, 1, 1, 1));	
 		pointLight.getScope().add(lightGroup);
 		
-		this.lightGroup.getChildren().addAll(ambientSurfaceLight, pointLight);
+		this.lightGroup.getChildren().addAll(pointLight);
+		
 		
 	}
 	

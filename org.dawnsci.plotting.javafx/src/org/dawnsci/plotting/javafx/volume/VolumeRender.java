@@ -17,7 +17,6 @@ import org.apache.commons.lang.ArrayUtils;
 import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.histogram.functions.FunctionContainer;
 
 public class VolumeRender extends Group
@@ -25,8 +24,11 @@ public class VolumeRender extends Group
 	@SuppressWarnings("unused")
 	private ILazyDataset lazySlice;
 	
-	private double max;
-	private double min;
+	private double maxValue;
+	private double minValue;
+
+	private double maxCulling;
+	private double minCulling;
 	
 	private Group xygroup;
 	private Group zygroup;
@@ -82,6 +84,8 @@ public class VolumeRender extends Group
 		zxgroup.setDepthTest(DepthTest.DISABLE);
 		
 		this.getChildren().addAll(xygroup, zygroup, zxgroup);
+		
+//		this.getChildren().addAll(xygroup);
 	}
 	
 	private Group createPlanesFromDataSlice(final double valueIntensity, final int[]XYZSize, final PaletteService paletteService, final ILazyDataset lazySlice) 
@@ -90,57 +94,66 @@ public class VolumeRender extends Group
 		
 		PaletteService ps = paletteService;
 		
-		FunctionContainer functionContainer = ps.getFunctionContainer("Red-Purple");
-				
+		FunctionContainer functionContainer = ps.getFunctionContainer("AFM hot (black-red-yellow-white)");
+
+//		functionContainer.setInverseRed(true);
+//		functionContainer.setInverseGreen(true);
+//		functionContainer.setInverseBlue(true);
+		
+		BufferedImage bi = new BufferedImage(lazySlice.getShape()[0]*lazySlice.getShape()[2], lazySlice.getShape()[1],BufferedImage.TYPE_INT_ARGB);
+		
 		for (int z = 0; z < lazySlice.getShape()[2]; z ++)
 		{
 			IDataset slice = lazySlice.getSlice(
-								new int[]{0,0,z}, 
+								new int[]{0,0,z},
 								new int[]{
 										lazySlice.getShape()[0],
 										lazySlice.getShape()[1],
 										z+1},
 								new int[]{1,1,1});
 			
-			BufferedImage bi = new BufferedImage(slice.getShape()[0], slice.getShape()[1],BufferedImage.TYPE_INT_ARGB);
-			
 			for (int y = 0; y < slice.getShape()[1]; y++)
 			{
 				for (int x = 0; x < slice.getShape()[0]; x++)
 				{
-					double value = ((slice.getDouble(x,y,0)-min)/(max-min));
+					double value = ((slice.getDouble(x,y,0)-minValue)/(maxValue-minValue));
 					
-//					int argb = 255;
-//					argb = (argb << 8) + functionContainer.getRedFunc().mapToByte(value);
-//					argb = (argb << 8) + functionContainer.getGreenFunc().mapToByte(value);
-//					argb = (argb << 8) + functionContainer.getBlueFunc().mapToByte(value);
-					
+					if (value < 0)
+						value = 0;
+					if (value > 1)
+						value = 1;
+									
 					
 					int argb = 255;
-					argb = (argb << 8) + 255;
-					argb = (argb << 8) + 0; 
-					argb = (argb << 8) + 0; 
 					
-					bi.setRGB(x, y, argb);
+					argb = (argb << 8) + functionContainer.getRedFunc().mapToByte(value);
+					argb = (argb << 8) + functionContainer.getGreenFunc().mapToByte(value);
+					argb = (argb << 8) + functionContainer.getBlueFunc().mapToByte(value);
 					
+//					argb = (argb << 8) + x;
+//					argb = (argb << 8) + y;
+//					argb = (argb << 8) + z;
+					
+					bi.setRGB(x + (z*slice.getShape()[0]), y, argb);
 					
 				}
 			}
-				
-			TexturedPlane newPlane = new TexturedPlane(
-					new Point2D(0, 0),
-					new Point2D(XYZSize[0], XYZSize[1]),
-					SwingFXUtils.toFXImage(bi, null),
-					new Point3D(0, 0, 1));
-			newPlane.setTranslateZ(z * ((double)XYZSize[2]/ lazySlice.getShape()[2]));
-			
-			newPlane.setOpacity_Material(0.01d);
-			
-			newPlane.setColour(Color.WHITE);
-			
-			outputGroup.getChildren().add(newPlane);
 			
 		}
+		
+		TexturedPlane newPlane = new TexturedPlane(
+				new Point3D(XYZSize[0], XYZSize[1], XYZSize[2]),
+				new Point2D(lazySlice.getShape()[0], lazySlice.getShape()[1]),
+				SwingFXUtils.toFXImage(bi, null),
+				new Point3D(0, 0, 1));
+//		newPlane.setTranslateZ(z * ((double)XYZSize[2]/ lazySlice.getShape()[2]));
+		
+		newPlane.setOpacity_Material(0.02);
+		
+//		newPlane.setOpacity_Material{1);
+		
+		outputGroup.getChildren().add(newPlane);
+				
 		return outputGroup;
 	}
 	
@@ -150,16 +163,16 @@ public class VolumeRender extends Group
 		
 		double zOffset = size[2] / imagePlanes.length;
 		
-		for (int i = 0; i < imagePlanes.length; i ++)
-		{
-			TexturedPlane newPlane = new TexturedPlane(
-					new Point2D(0, 0),
-					new Point2D(size[0], size[1]),
-					SwingFXUtils.toFXImage(imagePlanes[i], null),
-					new Point3D(0, 0, 1));
-			
-			newPlane.setTranslateZ(i * zOffset);
-		}
+//		for (int i = 0; i < imagePlanes.length; i ++)
+//		{
+//			TexturedPlane newPlane = new TexturedPlane(
+//					new Point2D(0, 0),
+//					new Point2D(size[0], size[1]),
+//					SwingFXUtils.toFXImage(imagePlanes[i], null),
+//					new Point3D(0, 0, 1));
+//			
+//			newPlane.setTranslateZ(i * zOffset);
+//		}
 		
 		return outputGroup;
 	}
@@ -185,7 +198,6 @@ public class VolumeRender extends Group
 				((TexturedPlane)n).setOpacity_Material(opacity);
 			}
 		}
-		
 	}
 	
 	/* 
@@ -195,9 +207,15 @@ public class VolumeRender extends Group
 	
 	public void compute(final int[] size, final ILazyDataset dataset, final double intensityValue, final PaletteService paletteService)
 	{
-		this.max = dataset.getSlice().max(true, true).doubleValue();
-		this.min = dataset.getSlice().min(true, true).doubleValue();
+		this.maxValue = dataset.getSlice().max(true, true).doubleValue();
+		this.minValue = dataset.getSlice().min(true, true).doubleValue();
 		
+		this.maxValue = dataset.getSlice().max(true, true).doubleValue();
+		this.minValue = 2000;
+		
+//		this.maxCulling   
+//		this.minCulling   
+				
 		xygroup.getChildren().clear(); 
 		zygroup.getChildren().clear(); 
 		zxgroup.getChildren().clear(); 

@@ -73,7 +73,6 @@ public class VolumeTrace  extends Image3DTrace implements IVolumeRenderTrace
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
 				volume.compute(size, dataset, intensityValue, pservice);
-				volume.setColour(colour);
 	    	}
 	    });
 		

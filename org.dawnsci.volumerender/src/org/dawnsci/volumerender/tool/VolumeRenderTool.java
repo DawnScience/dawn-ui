@@ -9,6 +9,8 @@ import org.eclipse.dawnsci.slicing.api.system.DimensionalListener;
 import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.dawnsci.slicing.api.tool.AbstractSlicingTool;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
@@ -95,7 +97,7 @@ public class VolumeRenderTool extends AbstractSlicingTool
 		resolutionSlider.setMinimum(0);
 		
 		Label transparencyLabel = new Label(comp, SWT.NONE);
-		transparencyLabel.setText("Intensity");
+		transparencyLabel.setText("Opacity");
 		new Label(comp, SWT.NONE);
 		
 		transparencySlider = new Slider(comp, SWT.NONE);
@@ -116,7 +118,7 @@ public class VolumeRenderTool extends AbstractSlicingTool
 //		
 //		colourSelector = new ColorSelectorWrapper(comp, SWT.NONE);
 //		colourSelector.setValue(new RGB(255, 0, 0));
-		
+				
 		comp.setVisible(false);
 	}
 	
@@ -135,6 +137,31 @@ public class VolumeRenderTool extends AbstractSlicingTool
 				"Volume renderer job", 
 				getSlicingSystem().getPlottingSystem());
 
+		transparencySlider.addSelectionListener(new SelectionListener() {
+		      public void handleEvent(Event e) 
+		      {
+		          if (e.type == SWT.Selection) 
+		          {
+		        	  job.compute(
+		        			  TRACE_ID,
+		        			  resolutionSlider.getSelection(),
+		        			  transparencySlider.getSelection(),
+		        			  getSlicingSystem().getData().getLazySet());
+		          }
+		        }
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 		
 		generateButton.addListener(SWT.Selection, new Listener() {
 		      public void handleEvent(Event e) 

@@ -92,9 +92,7 @@ public class VolumeRenderJob extends Job
 				(int)((dataset.getShape()[0] / (dataset.getShape()[0] * resolution) + 0.5f)),
 				(int)((dataset.getShape()[1] / (dataset.getShape()[1] * resolution) + 0.5f)),
 				(int)((dataset.getShape()[2] / (dataset.getShape()[2] * resolution) + 0.5f))};
-		
-		trace.setColour(red, green, blue);
-		
+				
 		trace.setData(
 				dataset.getShape(), 
 				dataset.getSlice(new int[]{0,0,0}, dataset.getShape(), step),

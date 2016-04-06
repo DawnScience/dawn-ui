@@ -20,29 +20,48 @@ public class TexturedPlane extends MeshView{
 	 * Generate an textured plane. Able to accept an image as a texture.
 	 * @param start - Starting point of the plane
 	 * @param end - the end point of the plane: (end - start) = size
-	 * @param image - texture of the plane
+	 * @param image1 - texture of the plane
 	 * @param facingDirection - aligns the mesh, not the node, to this direction.
 	 */
 	public TexturedPlane(
-			Point2D start, 
-			Point2D end,
+			Point3D volumeSize,
+			Point2D imagePlaneSize,
 			Image image,
 			Point3D facingDirection)   
 	{
 		super();
+
+		System.out.println(image.getHeight() + ", " + image.getWidth());
+		System.out.println(image.getHeight() * image.getWidth());
+		
 		TriangleMesh mesh = new TriangleMesh();
 		
-		// generate the plane points		
-		mesh.getPoints().addAll((float)start.getX(), (float)start.getY(), 	(float)0);
-		mesh.getPoints().addAll((float)end.getX(), 	 (float)start.getY(), 	(float)0);
-		mesh.getPoints().addAll((float)start.getX(), (float)end.getY(), 	(float)0);
-		mesh.getPoints().addAll((float)end.getX(), 	 (float)end.getY(), 	(float)0);
+		double offset = image.getWidth() / imagePlaneSize.getX();
 		
-		// declare the indices
-		mesh.getTexCoords().addAll(0,0,1,0,0,1,1,1);
-		mesh.getFaces().addAll(3,3,1,1,0,0);
-		mesh.getFaces().addAll(0,0,2,2,3,3);
+		int layerCount = (int) offset;
 		
+		double x = (double)1/layerCount;
+		
+//		double textureOffset = (double)1/layerCount;
+		
+		double textureOffset = 1/offset;
+		
+		double zOffset = volumeSize.getZ()/layerCount;
+		
+		for (int z = 0; z < layerCount; z++)
+		{
+		
+			// generate the plane points		
+			mesh.getPoints().addAll((float)0, 					(float)0, 					(float)(z*zOffset));
+			mesh.getPoints().addAll((float)volumeSize.getX(),	(float)0, 					(float)(z*zOffset));
+			mesh.getPoints().addAll((float)0, 					(float)volumeSize.getY(), 	(float)(z*zOffset));
+			mesh.getPoints().addAll((float)volumeSize.getX(), 	(float)volumeSize.getY(), 	(float)(z*zOffset));
+			
+			// declare the indices
+			mesh.getTexCoords().addAll(generateTextureCoords( (float)textureOffset*z, (float)textureOffset) );
+			mesh.getFaces().addAll(generateFaces(z*4));
+			
+		}
 		this.setMesh(mesh);
 		
 		// set the material - ie texture, colour, opacity
@@ -58,9 +77,24 @@ public class TexturedPlane extends MeshView{
 		// rotate the plane to the perpendicular vector
 		Rotate rotation = Vector3DUtil.alignVector(facingDirection, new Point3D(0, 0, 1));
 		this.getTransforms().add(rotation);
-		
+				
 	}
 	
+	private float[] generateTextureCoords(float start, float offset)
+	{
+		return new float[]{
+				(start),		0,
+				(start+offset),	0,
+				(start),		1,
+				(start+offset),	1};
+	}
+	
+	private int[] generateFaces(int indexOffset)
+	{
+		return new int[]{
+				indexOffset+3, indexOffset+3, indexOffset+1, indexOffset+1, indexOffset+0, indexOffset+0,
+				indexOffset+0, indexOffset+0, indexOffset+2, indexOffset+2, indexOffset+3, indexOffset+3};
+	}
 	
 	/**
 	 * Set the opacity of the plane
@@ -73,6 +107,11 @@ public class TexturedPlane extends MeshView{
 				mat.getDiffuseColor().getGreen(),
 				mat.getDiffuseColor().getBlue(),
 				opacity));
+		mat.setSpecularColor(new Color(
+				mat.getSpecularColor().getRed(),
+				mat.getSpecularColor().getGreen(),
+				mat.getSpecularColor().getBlue(),
+				opacity));
 	}
 	
 	/**
@@ -81,7 +120,8 @@ public class TexturedPlane extends MeshView{
 	 */
 	public void setColour(Color colour)
 	{
-		mat.setDiffuseColor(new Color(colour.getRed(), colour.getGreen(), colour.getBlue(), mat.getDiffuseColor().getOpacity()));
+		mat.setSpecularColor(new Color(colour.getRed(), colour.getGreen(), colour.getBlue(), mat.getDiffuseColor().getOpacity()));
+		mat.setDiffuseColor(new Color(colour.getRed(), colour.getGreen(), colour.getBlue(), mat.getSpecularColor().getOpacity()));
 	}
 	
 }
