@@ -62,10 +62,4 @@ public class ScaleAxisGroup extends Group
 		}
 	}
 	
-	public void flipVisibility()
-	{
-		this.setVisible(!this.isVisible());
-	}
-	
-	
 }

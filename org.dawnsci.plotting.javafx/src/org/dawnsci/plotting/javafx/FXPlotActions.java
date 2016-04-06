@@ -20,11 +20,14 @@ class FXPlotActions {
 	private FXPlotViewer      viewer;
 	private IPlotActionSystem actionMan;
 
-	public FXPlotActions(FXPlotViewer viewer, IPlottingSystem system) {
+	public FXPlotActions(FXPlotViewer viewer, IPlottingSystem system) 
+	{
 		this.viewer = viewer;
 		this.actionMan = system.getPlotActionSystem();
 	}
-	protected void createActions() {
+	
+	protected void createActions() 
+	{
 		
 		String gridLineGroupNameAction = "javafx.plotting.grid.line.actions";
 		actionMan.registerGroup(gridLineGroupNameAction, ManagerType.TOOLBAR);
@@ -43,7 +46,7 @@ class FXPlotActions {
 		Action boundingBoxToggle = new Action ("Toggle Bounding Box", IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
-				viewer.flipBoundingBoxVisibility();
+				viewer.setBoundingBoxVisibility(isChecked());
 			}
 		};
 		boundingBoxToggle.setChecked(true);
@@ -54,7 +57,7 @@ class FXPlotActions {
 		Action axisToggle = new Action("Toggle Axis Grid",IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
-				viewer.flipAxisGridVisibility();
+				viewer.setAxisGridVisibility(isChecked());
 			}
 		};
 		axisToggle.setChecked(true);
@@ -62,17 +65,17 @@ class FXPlotActions {
 		actionMan.registerAction(gridLineGroupNameAction, axisToggle, ActionType.FX3D, ManagerType.TOOLBAR);
 		
 		
-		Action orthographicToggle = new Action("Toggle Orthographic Camera",IAction.AS_CHECK_BOX) {
+		Action orthographicToggle = new Action("Toggletesw Orthographic Camera",IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
-				viewer.flipCameraType();
+				viewer.toggleParallelCamera(isChecked());
 			}
 		};
 		orthographicToggle.setChecked(false);
 		orthographicToggle.setImageDescriptor(Activator.getImageDescriptor("icons/orthographic.png"));
 		actionMan.registerAction(gridLineGroupNameAction, orthographicToggle, ActionType.FX3D, ManagerType.TOOLBAR);
 		
-		Action saveSceneToPng = new Action ("Toggle Bounding Box", IAction.AS_PUSH_BUTTON) {
+		Action saveSceneToPng = new Action ("Save view to file", IAction.AS_PUSH_BUTTON) {
 			@Override
 			public void run() {
 				viewer.saveScreenShotOfSceneToFile();

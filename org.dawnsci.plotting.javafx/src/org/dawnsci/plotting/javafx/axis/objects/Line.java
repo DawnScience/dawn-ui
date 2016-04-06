@@ -78,7 +78,7 @@ public class Line extends MeshView
 		this.setDrawMode(DrawMode.LINE);
 		
 		this.setMesh(mesh);
-		this.mat = new PhongMaterial(DefaultObjectProperties.LINE_COLOUR);
+		this.mat = new PhongMaterial(JavaFXProperties.ColourProperties.LINE_COLOUR);
 		
 		this.setMaterial(mat);
 		this.setCullFace(CullFace.NONE);

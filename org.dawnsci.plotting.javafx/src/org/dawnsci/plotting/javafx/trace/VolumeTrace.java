@@ -10,6 +10,8 @@ package org.dawnsci.plotting.javafx.trace;
 
 import javafx.scene.paint.Color;
 
+import org.dawnsci.plotting.histogram.service.PaletteService;
+import org.dawnsci.plotting.javafx.ServiceLoader;
 import org.dawnsci.plotting.javafx.SurfaceDisplayer;
 import org.dawnsci.plotting.javafx.volume.VolumeRender;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
@@ -60,16 +62,30 @@ public class VolumeTrace  extends Image3DTrace implements IVolumeRenderTrace
 	}
 
 	@Override
-	public void setData(final int[] size, final IDataset dataset, final double intensityValue)
+	public void setData(
+			final int[] size, 
+			final IDataset dataset, 
+			final double intensityValue, 
+			final double opacityValue,
+			final double[] maxMinValue,
+			final double[] maxMinCulling)
 	{
 		if (volume == null)
 			volume = new VolumeRender();
 		
+		final PaletteService pservice = (PaletteService) ServiceLoader.getPaletteService();
+		
 		// needs to run in javafx thread
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
-				volume.compute(size, dataset, intensityValue);
-				volume.setColour(colour);
+				volume.compute(
+						size, 
+						dataset, 
+						intensityValue, 
+						opacityValue, 
+						pservice,
+						maxMinValue,
+						maxMinCulling);
 	    	}
 	    });
 		

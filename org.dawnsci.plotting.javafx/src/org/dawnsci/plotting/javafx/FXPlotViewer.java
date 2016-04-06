@@ -21,6 +21,7 @@ import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.image.WritableImage;
 
+import org.dawnsci.plotting.javafx.axis.objects.JavaFXProperties;
 import org.dawnsci.plotting.javafx.trace.FXIsosurfaceTrace;
 import org.dawnsci.plotting.javafx.trace.VolumeTrace;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -188,8 +189,7 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 		}
 	}
 
-	// add the trace, ie create a new isosurface
-	// !!look into later!!
+	
 	public boolean addTrace(ITrace trace)
 	{
 		if (trace instanceof IIsosurfaceTrace)
@@ -223,28 +223,36 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 		return true;
 		
 	}
-		
-	// i dont like this
-	// these act as intermediates between the action and the scene
-	// feels horrible
-	public void flipScaleAxesVisibility()
+	
+	public void setScaleAxesVisibility(boolean visibility)
 	{
-		scene.flipScaleAxesVisibility();
+		scene.setScaleAxesVisibility(visibility);
 	}
 	
-	public void flipAxisGridVisibility()
+	public void setAxisGridVisibility(boolean visibility)
 	{
-		scene.flipAxisGridVisibility();
+		scene.setAxisGridVisibility(visibility);
 	}
 	
-	public void flipBoundingBoxVisibility()
+	public void setBoundingBoxVisibility(boolean visibility)
 	{
-		scene.flipBoundingBoxVisibility();
+		scene.setBoundingBoxVisibility(visibility);
 	}
 	
-	public void flipCameraType()
+	/**
+	 * true = parallel <br>
+	 * false = perspective
+	 */
+	public void toggleParallelCamera(boolean Parallel)
 	{
-		scene.flipCameraType();
+		if (Parallel)
+		{
+			scene.setCameraType(JavaFXProperties.CameraProperties.PARALLEL_CAMERA);
+		}
+		else
+		{
+			scene.setCameraType(JavaFXProperties.CameraProperties.PERSPECTIVE_CAMERA);
+		}
 	}
 	
 	public void resetSceneTransforms() 

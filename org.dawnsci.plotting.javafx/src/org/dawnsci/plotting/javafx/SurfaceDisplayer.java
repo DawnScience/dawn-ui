@@ -10,9 +10,6 @@ package org.dawnsci.plotting.javafx;
 
 import java.util.List;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.event.EventHandler;
@@ -31,13 +28,15 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Cylinder;
-import javafx.scene.transform.MatrixType;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.TransformChangedEvent;
 import javafx.scene.transform.Translate;
 
+import javax.vecmath.Matrix3d;
+
+import org.dawnsci.plotting.javafx.axis.objects.JavaFXProperties;
 import org.dawnsci.plotting.javafx.axis.objects.ScaleAxisGroup;
 import org.dawnsci.plotting.javafx.axis.objects.SceneObjectGroup;
 import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
@@ -231,6 +230,7 @@ public class SurfaceDisplayer extends Scene
 		// enable for the axis node group
 		this.isosurfaceGroup.setDepthTest(DepthTest.ENABLE);
 		this.axisNode.setDepthTest(DepthTest.ENABLE);
+//		this.volumeGroup.setDepthTest(DepthTest.DISABLE);
 	
 	}
 	
@@ -255,13 +255,21 @@ public class SurfaceDisplayer extends Scene
 	private void addLights()
 	{
 		// create lights for the iso surface
-		AmbientLight ambientSurfaceLight = new AmbientLight(new Color(0.3, 0.3, 0.3, 1));
-		ambientSurfaceLight.getScope().add(lightGroup);
+		AmbientLight ambientSurfaceLight = new AmbientLight(new Color(0.3,0.3,0.3,1));
+		ambientSurfaceLight.getScope().add(objectGroup);
+
+		this.objectGroup.getChildren().addAll(ambientSurfaceLight);
+		
+		AmbientLight ambientVolumeLight = new AmbientLight(new Color(1,1,1,1));
+		ambientVolumeLight.getScope().add(volumeGroup);
+		
+		this.volumeGroup.getChildren().addAll(ambientVolumeLight);
 		
 		PointLight pointLight = new PointLight(new Color(1, 1, 1, 1));	
 		pointLight.getScope().add(lightGroup);
 		
-		this.lightGroup.getChildren().addAll(ambientSurfaceLight, pointLight);
+		this.lightGroup.getChildren().addAll(pointLight);
+		
 		
 	}
 	
@@ -670,32 +678,36 @@ public class SurfaceDisplayer extends Scene
 		
 	}
 
-	public void flipAxisGridVisibility()
+	public void setAxisGridVisibility(boolean visibility)
 	{
-		axisObjectGroup.flipXGridVisible();
-		axisObjectGroup.flipYGridVisible();
-		axisObjectGroup.flipZGridVisible();
+		axisObjectGroup.setAllVisible(visibility);
 	}
 
-	public void flipBoundingBoxVisibility() 
+	public void setBoundingBoxVisibility(boolean visibility) 
 	{
-		axisObjectGroup.flipBoundingBoxVisibility();
+		
+		axisObjectGroup.setBoundingBoxVisibility(visibility);
 	}
 	
-	public void flipScaleAxesVisibility()
+	public void setScaleAxesVisibility(boolean visibility)
 	{
-		scaleAxesGroup.flipVisibility();
+		// do nothing at the moment
 	}
 	
-	public void flipCameraType()
+	public void setCameraType(int cameraType)
 	{
-		if (this.currentCamera.equals(this.perspectiveCamera))
+		switch (cameraType)
 		{
-			this.currentCamera = this.parallelCamera;
-		}
-		else
-		{
-			this.currentCamera = this.perspectiveCamera;
+			case (JavaFXProperties.CameraProperties.PERSPECTIVE_CAMERA):
+			{
+				this.currentCamera = this.perspectiveCamera;
+				break;
+			}
+			case (JavaFXProperties.CameraProperties.PARALLEL_CAMERA):
+			{
+				this.currentCamera = this.parallelCamera;
+				break;
+			}
 		}
 		
 		initialiseCamera();
