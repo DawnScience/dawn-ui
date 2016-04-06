@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Slider;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -34,8 +35,15 @@ public class VolumeRenderTool extends AbstractSlicingTool
 	private Button generateButton;
 	private Button deleteButton;
 	private Slider resolutionSlider;
-	private Slider transparencySlider;
+	private Slider intensitySlider;
+	private Slider opacitySlider;
 //	private ColorSelectorWrapper colourSelector;
+	
+	private Text histogramMaxText;
+	private Text histogramMinText;
+	
+	private Text cullingMaxText;
+	private Text cullingMinText;
 	
 	private DimensionalListener dimensionalListener;
 	private AxisChoiceListener axisChoiceListener;
@@ -71,7 +79,7 @@ public class VolumeRenderTool extends AbstractSlicingTool
 	public void createToolComponent(Composite parent)
 	{
 		comp = new Composite(parent, SWT.NONE);
-		comp.setLayout(new GridLayout(2, false));
+		comp.setLayout(new GridLayout(6, false));
 		
 		GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
 		comp.setLayoutData(data);
@@ -80,31 +88,86 @@ public class VolumeRenderTool extends AbstractSlicingTool
 		Label disclaimer1 = new Label(comp, SWT.NONE);
 		disclaimer1.setText("Volume renderer pre-Alpha snapshot:");
 		disclaimer1.setForeground(new Color(parent.getDisplay(), new RGB(255,0,0)));
-		disclaimer1.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+		disclaimer1.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 6, 1));
 				
 		Label disclaimer2 = new Label(comp, SWT.NONE);
 		disclaimer2.setText("- Please use nightly build if possible");
 		disclaimer2.setForeground(new Color(parent.getDisplay(), new RGB(255,0,0)));
-		disclaimer2.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-						
+		disclaimer2.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 6, 1));
+		
+		
+		/////////////////////////
+		/////////// GUI /////////
+		/////////////////////////
+		
 		Label resolutionLabel = new Label(comp, SWT.NONE);
 		resolutionLabel.setText("Resolution");
-		new Label(comp, SWT.NONE);
 		
 		resolutionSlider = new Slider(comp, SWT.NONE);
 		resolutionSlider.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
 		resolutionSlider.setMaximum(100);
 		resolutionSlider.setMinimum(0);
-		
-		Label transparencyLabel = new Label(comp, SWT.NONE);
-		transparencyLabel.setText("Opacity");
+		new Label(comp, SWT.NONE);
+		new Label(comp, SWT.NONE);
 		new Label(comp, SWT.NONE);
 		
-		transparencySlider = new Slider(comp, SWT.NONE);
-		transparencySlider.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-		transparencySlider.setMaximum(100);
-		transparencySlider.setMinimum(0);
+		Label intensityLabel = new Label(comp, SWT.NONE);
+		intensityLabel.setText("Intensity");
 		
+		intensitySlider = new Slider(comp, SWT.NONE);
+		intensitySlider.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+		intensitySlider.setMaximum(100);
+		intensitySlider.setMinimum(0);
+		
+		Label opacityLabel = new Label(comp, SWT.NONE);
+		opacityLabel.setText("Opacity");
+		
+		opacitySlider = new Slider(comp, SWT.NONE);
+		opacitySlider.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
+		opacitySlider.setMaximum(100);
+		opacitySlider.setMinimum(0);
+		
+		
+		// HISTOGRAM
+		Label histogramLabel = new Label(comp, SWT.NONE);
+		histogramLabel.setText("Histogram Range:");
+		
+		Label histogramMinLabel = new Label(comp, SWT.NONE);
+		histogramMinLabel.setText("Min");
+
+		histogramMinText = new Text(comp, SWT.BORDER | SWT.FILL);
+		histogramMinText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		
+		Label histogramMaxLabel = new Label(comp, SWT.NONE);
+		histogramMaxLabel.setText("Max");
+
+		histogramMaxText = new Text(comp, SWT.BORDER | SWT.FILL);
+		histogramMaxText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		new Label(comp, SWT.NONE);
+		
+		// CULLING
+		Label cullingLabel = new Label(comp, SWT.NONE);
+		cullingLabel.setText("Culling Range:");
+		
+		Label cullingMinLabel = new Label(comp, SWT.NONE);
+		cullingMinLabel.setText("Min");
+
+		cullingMinText = new Text(comp, SWT.BORDER | SWT.FILL);
+		cullingMinText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		
+		Label cullingMaxLabel = new Label(comp, SWT.NONE);
+		cullingMaxLabel.setText("Max");
+
+		cullingMaxText = new Text(comp, SWT.BORDER | SWT.FILL);
+		cullingMaxText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		new Label(comp, SWT.NONE);
+		
+		
+		
+		
+		
+		
+		// COMPUTE BUTTONS
 		generateButton = new Button(comp, SWT.NONE);
 		generateButton.setText("Generate");
 		generateButton.setVisible(true);
@@ -136,43 +199,32 @@ public class VolumeRenderTool extends AbstractSlicingTool
 		job = new VolumeRenderJob(
 				"Volume renderer job", 
 				getSlicingSystem().getPlottingSystem());
-
-		transparencySlider.addSelectionListener(new SelectionListener() {
-		      public void handleEvent(Event e) 
-		      {
-		          if (e.type == SWT.Selection) 
-		          {
-		        	  job.compute(
-		        			  TRACE_ID,
-		        			  resolutionSlider.getSelection(),
-		        			  transparencySlider.getSelection(),
-		        			  getSlicingSystem().getData().getLazySet());
-		          }
-		        }
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
+		
 		
 		generateButton.addListener(SWT.Selection, new Listener() {
 		      public void handleEvent(Event e) 
 		      {
 		          if (e.type == SWT.Selection) 
 		          {
+		        	  
+		        	  double[] minMaxValue = {
+		        			  Double.parseDouble(histogramMinText.getText()),
+		        			  Double.parseDouble(histogramMaxText.getText()),
+		        	  };
+		        	  
+		        	  double[] minMaxCulling = {
+		        			  Double.parseDouble(cullingMinText.getText()),
+		        			  Double.parseDouble(cullingMaxText.getText()),
+		        	  };
+		        	  
 		        	  job.compute(
 		        			  TRACE_ID,
 		        			  resolutionSlider.getSelection(),
-		        			  transparencySlider.getSelection(),
-		        			  getSlicingSystem().getData().getLazySet());
+		        			  intensitySlider.getSelection(),
+		        			  opacitySlider.getSelection(),
+		        			  getSlicingSystem().getData().getLazySet(),
+		        			  minMaxValue,
+		        			  minMaxCulling);
 		          }
 		        }
 		});
@@ -187,15 +239,6 @@ public class VolumeRenderTool extends AbstractSlicingTool
 		        }
 		});
 		
-//		colourSelector.addListener(new IPropertyChangeListener() {
-//			
-//			@Override
-//			public void propertyChange(PropertyChangeEvent event) {
-//				RGB rgb = (RGB) event.getNewValue();
-//				job.setColour(rgb.red, rgb.green, rgb.blue);
-//				
-//			}
-//		});
 		
 		comp.setVisible(true);
 		((GridData) comp.getLayoutData()).exclude = false;

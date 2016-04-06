@@ -17,6 +17,9 @@ public class VolumeRenderJob extends Job
 
  	private double resolution;
  	private double intensityValue;
+ 	private double opacityValue;
+ 	private double[] minMaxValue;
+ 	private double[] minMaxCulling;
  	
  	private int red,green,blue;
  	@SuppressWarnings("unused")
@@ -29,12 +32,22 @@ public class VolumeRenderJob extends Job
 		this.system = system;
 	}
 	
-	public void compute(String traceID, double resolution, double intensityValue, ILazyDataset dataset) // add values
+	public void compute(
+			final String traceID, 
+			final double resolution, 
+			final double intensity, 
+			final double opacity, 
+			final ILazyDataset dataset,
+			final double[] minMaxValue,
+			final double[] minMaxCulling)
 	{	
 		this.traceID = traceID;
 		this.resolution = resolution / 100;
-		this.intensityValue = intensityValue / 100;
+		this.intensityValue = intensity / 100;
+		this.opacityValue = opacity / 100;
 		this.dataset = dataset;
+		this.minMaxValue = minMaxValue;
+		this.minMaxCulling = minMaxCulling;
 				
 		cancel();
 		schedule();
@@ -92,11 +105,14 @@ public class VolumeRenderJob extends Job
 				(int)((dataset.getShape()[0] / (dataset.getShape()[0] * resolution) + 0.5f)),
 				(int)((dataset.getShape()[1] / (dataset.getShape()[1] * resolution) + 0.5f)),
 				(int)((dataset.getShape()[2] / (dataset.getShape()[2] * resolution) + 0.5f))};
-				
+					
 		trace.setData(
 				dataset.getShape(), 
 				dataset.getSlice(new int[]{0,0,0}, dataset.getShape(), step),
-				intensityValue);
+				intensityValue,
+				opacityValue,
+				minMaxValue,
+				minMaxCulling);
 		
 		
 		if ((IVolumeRenderTrace) system.getTrace(traceID) == null)

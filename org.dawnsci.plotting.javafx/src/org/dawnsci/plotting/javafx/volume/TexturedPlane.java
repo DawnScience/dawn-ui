@@ -30,9 +30,6 @@ public class TexturedPlane extends MeshView{
 			Point3D facingDirection)   
 	{
 		super();
-
-		System.out.println(image.getHeight() + ", " + image.getWidth());
-		System.out.println(image.getHeight() * image.getWidth());
 		
 		TriangleMesh mesh = new TriangleMesh();
 		

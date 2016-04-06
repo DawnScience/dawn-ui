@@ -62,7 +62,13 @@ public class VolumeTrace  extends Image3DTrace implements IVolumeRenderTrace
 	}
 
 	@Override
-	public void setData(final int[] size, final IDataset dataset, final double intensityValue)
+	public void setData(
+			final int[] size, 
+			final IDataset dataset, 
+			final double intensityValue, 
+			final double opacityValue,
+			final double[] maxMinValue,
+			final double[] maxMinCulling)
 	{
 		if (volume == null)
 			volume = new VolumeRender();
@@ -72,7 +78,14 @@ public class VolumeTrace  extends Image3DTrace implements IVolumeRenderTrace
 		// needs to run in javafx thread
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
-				volume.compute(size, dataset, intensityValue, pservice);
+				volume.compute(
+						size, 
+						dataset, 
+						intensityValue, 
+						opacityValue, 
+						pservice,
+						maxMinValue,
+						maxMinCulling);
 	    	}
 	    });
 		
