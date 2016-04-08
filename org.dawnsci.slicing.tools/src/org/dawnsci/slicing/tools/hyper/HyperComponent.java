@@ -307,7 +307,11 @@ public class HyperComponent {
 			logger.error("Error creating hyperview plotting systems: " + e.getMessage());
 		}
 	}
-	
+
+	public IPlottingSystem<?> getSideSystem() {
+		return sideSystem;
+	}
+
     public Object getAdapter(@SuppressWarnings("rawtypes") final Class clazz) {
 		
 		if (clazz == Page.class) {
