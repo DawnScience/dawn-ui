@@ -15,6 +15,8 @@ import javafx.scene.transform.Rotate;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.dawnsci.plotting.histogram.service.PaletteService;
+import org.dawnsci.plotting.javafx.plane.ImagePlane;
+import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.plotting.api.histogram.functions.FunctionContainer;
@@ -77,7 +79,7 @@ public class VolumeRender extends Group
 		
 		this.getChildren().addAll(xygroup, zygroup, zxgroup);
 		
-//		this.getChildren().addAll(xygroup);
+		
 	}
 	
 	private Group createPlanesFromDataSlice(
@@ -86,67 +88,70 @@ public class VolumeRender extends Group
 			final ILazyDataset lazySlice) 
 	{
 		Group outputGroup = new Group();
-		
-		PaletteService ps = paletteService;
-		
-		FunctionContainer functionContainer = ps.getFunctionContainer("Viridis (blue-green-yellow)");
 				
-		BufferedImage bi = new BufferedImage(lazySlice.getShape()[0]*lazySlice.getShape()[2], lazySlice.getShape()[1],BufferedImage.TYPE_INT_ARGB);
+//		FunctionContainer functionContainer = paletteService.getFunctionContainer("Viridis (blue-green-yellow)");
+		FunctionContainer functionContainer = paletteService.getFunctionContainer("Gray Scale");
 		
-		for (int z = 0; z < lazySlice.getShape()[2]; z ++)
-		{
-			IDataset slice = lazySlice.getSlice(
-								new int[]{0,0,z},
-								new int[]{
-										lazySlice.getShape()[0],
-										lazySlice.getShape()[1],
-										z+1},
-								new int[]{1,1,1});
-			
-			for (int y = 0; y < slice.getShape()[1]; y++)
-			{
-				for (int x = 0; x < slice.getShape()[0]; x++)
-				{
-					double drawValue = ((slice.getDouble(x,y,0)-minValue)/(maxValue-minValue));					
-					
-					if (drawValue < 0)
-						drawValue = 0;
-					if (drawValue > 1)
-						drawValue = 1;
-
-					int argb = 255;
-					if (slice.getDouble(x,y,0) < minCulling || slice.getDouble(x,y,0) > maxCulling)
-						 argb = 0;
-					
-					argb = (argb << 8) + (int)(functionContainer.getRedFunc().mapToByte(drawValue)	* intensity);
-					argb = (argb << 8) + (int)(functionContainer.getGreenFunc().mapToByte(drawValue)	* intensity);
-					argb = (argb << 8) + (int)(functionContainer.getBlueFunc().mapToByte(drawValue)	* intensity);
-										
-					bi.setRGB(x + (z*slice.getShape()[0]), y, argb);
-					
-				}
-			}
-			
-		}
+		functionContainer.setInverseRed(true);
+		functionContainer.setInverseGreen(true);
+		functionContainer.setInverseBlue(true);
 		
+		LayeredImageTexture textureData = new LayeredImageTexture(
+				lazySlice,
+				maxValue,
+				minValue,
+				maxCulling,
+				minCulling,
+				intensity,
+				functionContainer);
 		
 		LayeredPlaneMesh newPlane = new LayeredPlaneMesh(
 				new Point3D(XYZSize[0], XYZSize[1], XYZSize[2]),
 				new Point2D(lazySlice.getShape()[0], lazySlice.getShape()[1]),
-				SwingFXUtils.toFXImage(bi, null),
+				textureData,
 				new Point3D(0, 0, 1));
 		
-		
-		double xOffset = (double)(XYZSize[0] / lazySlice.getShape()[0]) / 2 ;
-		double yOffset = (double)(XYZSize[1] / lazySlice.getShape()[1]) / 2 ;
+		double xOffset = (double)((XYZSize[0] / (double)lazySlice.getShape()[0]) / 2);
+		double yOffset = (double)((XYZSize[1] / (double)lazySlice.getShape()[1]) / 2);
 				
 		newPlane.setTranslateX(-xOffset);
 		newPlane.setTranslateY(-yOffset);
 		
-		newPlane.setOpacity_Material(opacity);
+		newPlane.setMaxOpacity(opacity);
+		newPlane.setOpacity_Material(1);
 		
 		outputGroup.getChildren().add(newPlane);
+		
+		outputGroup.localToSceneTransformProperty().addListener((obs, oldT, newT) -> {
+			
+			Rotate worldRotate = Vector3DUtil.matrixToRotate(newT);
+			
+			Point3D zVector = new Point3D(0, 0, 1);
+			try 
+			{
+				zVector = worldRotate.createInverse().transform(zVector);
+			} 
+			catch (Exception e) 
+			{
+				e.printStackTrace();
+			}
+			
+			double zAngle = zVector.angle( new Point3D(0, 0, 1));
+						
+			double opacity = Math.abs(Math.cos(Math.toRadians(zAngle)));
+			
+			if (opacity < 0.3)
+			{
+				opacity *= (opacity*2);
+				if (opacity < 0.05)
+					opacity = 0;
+			}
 				
+			newPlane.setOpacity_Material(Math.abs(opacity));
+			newPlane.setColour(new Color(opacity, opacity, opacity, 1));
+			
+        });
+		
 		return outputGroup;
 	}
 		
@@ -159,8 +164,8 @@ public class VolumeRender extends Group
 				((LayeredPlaneMesh)n).setColour(colour);
 			}
 		}
-		
 	}
+	
 	private void setGroupOpacity(double opacity, Group group)
 	{
 		
@@ -203,7 +208,9 @@ public class VolumeRender extends Group
 				
 		this.intensity = intensity;
 		this.opacity =  Math.pow(opacity, 3);
-				
+			
+		System.out.println(this.opacity);
+		
 		xygroup.getChildren().clear(); 
 		zygroup.getChildren().clear(); 
 		zxgroup.getChildren().clear(); 
@@ -213,7 +220,12 @@ public class VolumeRender extends Group
 		zygroup = createPlanesFromDataSlice(new int[]{size[1], size[2], size[0]}, paletteService, dataset.getTransposedView(1,2,0).getSlice());
 		zxgroup = createPlanesFromDataSlice(new int[]{size[2], size[0], size[1]}, paletteService, dataset.getTransposedView(2,0,1).getSlice());
 		
+		this.setTranslateX((size[0] / dataset.getShape()[0])/2);
+		this.setTranslateY((size[1] / dataset.getShape()[1])/2);
+		this.setTranslateZ((size[2] / dataset.getShape()[2])/2);
+				
 		initialise();
+				
 	}
 	
 	/**

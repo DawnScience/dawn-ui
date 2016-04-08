@@ -2,7 +2,6 @@ package org.dawnsci.plotting.javafx.volume;
 
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
-import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.CullFace;
@@ -15,6 +14,7 @@ import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
 public class LayeredPlaneMesh extends MeshView{
 	
 	private PhongMaterial mat;
+	private double maxOpacity;
 	
 	/**
 	 * Generate an textured plane. Able to accept an image as a texture.
@@ -26,36 +26,31 @@ public class LayeredPlaneMesh extends MeshView{
 	public LayeredPlaneMesh(
 			Point3D volumeSize,
 			Point2D imagePlaneSize,
-			Image image,
+			LayeredImageTexture textureData,
 			Point3D facingDirection)   
 	{
 		super();
-		
 		TriangleMesh mesh = new TriangleMesh();
 		
-		double offset = image.getWidth() / imagePlaneSize.getX();
 		
-		int layerCount = (int) offset;
+		double zOffset = volumeSize.getZ()/textureData.getStampCount();
 		
-		double x = (double)1/layerCount;
-		
-//		double textureOffset = (double)1/layerCount;
-		
-		double textureOffset = 1/offset;
-		
-		double zOffset = volumeSize.getZ()/layerCount;
-		
-		for (int z = 0; z < layerCount; z++)
+		for (int z = 0; z < textureData.getStampCount(); z++)
 		{
-		
 			// generate the plane points		
 			mesh.getPoints().addAll((float)0, 					(float)0, 					(float)(z*zOffset));
 			mesh.getPoints().addAll((float)volumeSize.getX(),	(float)0, 					(float)(z*zOffset));
 			mesh.getPoints().addAll((float)0, 					(float)volumeSize.getY(), 	(float)(z*zOffset));
 			mesh.getPoints().addAll((float)volumeSize.getX(), 	(float)volumeSize.getY(), 	(float)(z*zOffset));
 			
-			// declare the indices
-			mesh.getTexCoords().addAll(generateTextureCoords( (float)textureOffset*z, (float)textureOffset) );
+			// declare the texture stamp positions
+			int xStampPos = z % textureData.getWidthStampCount();
+			int yStampPos = (z - xStampPos) / textureData.getHeightStampCount();
+			
+			// declare the texture points and faces indices
+			mesh.getTexCoords().addAll(generateTextureCoords(
+					(float)(xStampPos * textureData.getStampWidthWeight()), (float)textureData.getStampWidthWeight(),
+					(float)(yStampPos * textureData.getStampHeightWeight()), (float)textureData.getStampHeightWeight()));
 			mesh.getFaces().addAll(generateFaces(z*4));
 			
 		}
@@ -63,7 +58,7 @@ public class LayeredPlaneMesh extends MeshView{
 		
 		// set the material - ie texture, colour, opacity
 		mat = new PhongMaterial(new Color(1,1,1,1));
-		mat.setDiffuseMap(image);
+		mat.setDiffuseMap(textureData.getTexture());
 		mat.setSpecularColor(new Color(1,1,1,1));
 		mat.setDiffuseColor( new Color(1,1,1,1));
 		this.setMaterial(mat);
@@ -77,13 +72,16 @@ public class LayeredPlaneMesh extends MeshView{
 				
 	}
 	
-	private float[] generateTextureCoords(float start, float offset)
+	private float[] generateTextureCoords(
+			float xStart, float xOffset,
+			float yStart, float yOffset)
 	{
+		
 		return new float[]{
-				(start),		0,
-				(start+offset),	0,
-				(start),		1,
-				(start+offset),	1};
+				(xStart),			(yStart),			
+				(xStart+xOffset),	(yStart),
+				(xStart),			(yStart+yOffset),			
+				(xStart+xOffset),	(yStart+yOffset),};
 	}
 	
 	private int[] generateFaces(int indexOffset)
@@ -99,16 +97,23 @@ public class LayeredPlaneMesh extends MeshView{
 	 */
 	public void setOpacity_Material(double opacity)
 	{
+		double newOpacity = maxOpacity * opacity;
+		
 		mat.setDiffuseColor(new Color(
 				mat.getDiffuseColor().getRed(),
 				mat.getDiffuseColor().getGreen(),
 				mat.getDiffuseColor().getBlue(),
-				opacity));
+				newOpacity));
 		mat.setSpecularColor(new Color(
 				mat.getSpecularColor().getRed(),
 				mat.getSpecularColor().getGreen(),
 				mat.getSpecularColor().getBlue(),
-				opacity));
+				newOpacity));
+	}
+	
+	public void setMaxOpacity(double opacity)
+	{
+		maxOpacity = opacity;
 	}
 	
 	/**
