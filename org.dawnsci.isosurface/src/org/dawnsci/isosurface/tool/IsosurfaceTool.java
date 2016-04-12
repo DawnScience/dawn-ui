@@ -177,7 +177,7 @@ public class IsosurfaceTool extends AbstractSlicingTool
 				isoBean, 
 				new IsosurfaceJob(
 						"isoSurfaceJob" , 
-						getSlicingSystem().getPlottingSystem()),
+						getSlicingSystem()),
 				finalDataslice,
 				getSlicingSystem().getPlottingSystem());
 		

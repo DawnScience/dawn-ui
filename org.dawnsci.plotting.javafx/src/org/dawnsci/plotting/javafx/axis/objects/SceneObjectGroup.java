@@ -24,13 +24,10 @@ public class SceneObjectGroup extends Group
 	private AxesGroup xyAxisGroup;
 	
 	private BoundingBox boundingBox;
-	
-	private EventHandler<MouseEvent> scaleEventHandler;
-	
-	public SceneObjectGroup(EventHandler<MouseEvent> scaleEventHandler)
+		
+	public SceneObjectGroup()
 	{
 		super();
-		this.scaleEventHandler = scaleEventHandler;
 	}
 	/*
 	 * public functions

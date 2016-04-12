@@ -117,7 +117,6 @@ public class IsoHandler
 							}
 							else
 							{
-								
 								job.compute(
 										new MarchingCubesModel(
 												lazyDataset,
