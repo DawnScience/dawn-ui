@@ -19,6 +19,7 @@ import org.dawnsci.isosurface.alg.Surface;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Random;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class Regression {
@@ -104,6 +105,7 @@ public class Regression {
 		testResult = algorithm.execute(monitor);
 	}
 	
+	@Ignore
 	@Test
 	public void regressionTest() throws Exception
 	{
