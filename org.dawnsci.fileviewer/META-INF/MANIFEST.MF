@@ -7,7 +7,10 @@ Bundle-Activator: org.dawnsci.fileviewer.Activator
 Bundle-Vendor: Diamond Light Source
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.eclipse.e4.ui.di
+ org.eclipse.e4.ui.di,
+ org.eclipse.e4.core.di.annotations,
+ org.eclipse.e4.core.contexts,
+ org.eclipse.e4.ui.model.workbench
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: javax.annotation;version="1.0.0";resolution:=optional,
  javax.inject;version="1.0.0",

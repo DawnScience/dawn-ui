@@ -16,7 +16,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -56,8 +55,6 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.ToolBar;
-import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.PartInitException;
@@ -73,12 +70,7 @@ public class FileViewer {
 
 	private static final Logger logger = LoggerFactory.getLogger(FileViewer.class);
 
-	private final static String DRIVE_A = "a:" + File.separator;
-	private final static String DRIVE_B = "b:" + File.separator;
-
 	/* UI elements */
-	private ToolBar toolBar;
-
 	private Label numObjectsLabel;
 	private Label diskSpaceLabel;
 
@@ -101,35 +93,16 @@ public class FileViewer {
 													// operations
 
 	/* Combo view */
-	private static final String COMBODATA_ROOTS = "Combo.roots";
-	// File[]: Array of files whose paths are currently displayed in the combo
-	private static final String COMBODATA_LASTTEXT = "Combo.lastText";
-	// String: Previous selection text string
-
 	private Combo combo;
 
 	/* Tree view */
 	private IconCache iconCache = new IconCache();
-	private static final String TREEITEMDATA_FILE = "TreeItem.file";
-	// File: File associated with tree item
-	private static final String TREEITEMDATA_IMAGEEXPANDED = "TreeItem.imageExpanded";
-	// Image: shown when item is expanded
-	private static final String TREEITEMDATA_IMAGECOLLAPSED = "TreeItem.imageCollapsed";
-	// Image: shown when item is collapsed
-	private static final String TREEITEMDATA_STUB = "TreeItem.stub";
-	// Object: if not present or null then the item has not been populated
+	
 
 	private Tree tree;
 	private Label treeScopeLabel;
 
 	/* Table view */
-	private static final DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
-	private static final String TABLEITEMDATA_FILE = "TableItem.file";
-	// File: File associated with table row
-	private static final String TABLEDATA_DIR = "Table.dir";
-	// File: Currently visible directory
-	private static final int[] tableWidths = new int[] { 150, 60, 75, 150 };
-
 	private final String[] tableTitles = new String[] { Utils.getResourceString("table.Name.title"),
 			Utils.getResourceString("table.Size.title"), Utils.getResourceString("table.Type.title"),
 			Utils.getResourceString("table.Modified.title") };
@@ -163,11 +136,6 @@ public class FileViewer {
 	private SashForm sashForm;
 
 	/**
-	 * Extension point used for opening files with special actions
-	 */
-	private static final String OPEN_FILE_EXTENSION_POINT = "uk.ac.diamond.sda.navigator.openFile";
-
-	/**
 	 * Closes the main program.
 	 */
 	public void close() {
@@ -190,11 +158,10 @@ public class FileViewer {
 		parent.setLayout(gridLayout);
 
 		GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gridData.widthHint = 200;
+//		gridData.widthHint = 200;
 		createComboView(parent, gridData);
 		gridData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gridData.horizontalSpan = 1;
-		createToolBar(parent, gridData);
 
 		sashForm = new SashForm(parent, SWT.NONE);
 		sashForm.setOrientation(SWT.VERTICAL);
@@ -276,87 +243,6 @@ public class FileViewer {
 	}
 
 	/**
-	 * Creates the toolbar
-	 * 
-	 * @param shell
-	 *            the shell on which to attach the toolbar
-	 * @param layoutData
-	 *            the layout data
-	 */
-	private void createToolBar(final Composite comp, Object layoutData) {
-		toolBar = new ToolBar(comp, SWT.NONE);
-		toolBar.setLayoutData(layoutData);
-		toolBar.setBackground(comp.getBackground());
-		ToolItem item = new ToolItem(toolBar, SWT.SEPARATOR);
-		item = new ToolItem(toolBar, SWT.PUSH);
-		item.setImage(getIconCache().stockImages[getIconCache().cmdParent]);
-		item.setToolTipText(Utils.getResourceString("tool.Parent.tiptext"));
-		item.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				doParent();
-			}
-		});
-		item = new ToolItem(toolBar, SWT.PUSH);
-		item.setImage(getIconCache().stockImages[getIconCache().cmdRefresh]);
-		item.setToolTipText(Utils.getResourceString("tool.Refresh.tiptext"));
-		item.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				doRefresh();
-			}
-		});
-
-		item = new ToolItem(toolBar, SWT.PUSH);
-		item.setImage(getIconCache().stockImages[getIconCache().cmdLayoutEdit]);
-		item.setToolTipText(Utils.getResourceString("tool.LayoutEdit.tiptext"));
-		item.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent event) {
-				if ((sashForm == null) || sashForm.isDisposed())
-					return;
-				int orientation = sashForm.getOrientation();
-				sashForm.setOrientation(orientation == SWT.HORIZONTAL ? SWT.VERTICAL : SWT.HORIZONTAL);
-				parent.layout();
-			}
-		});
-
-//		item = new ToolItem(toolBar, SWT.SEPARATOR);
-//		item = new ToolItem(toolBar, SWT.PUSH);
-//		item.setImage(getIconCache().stockImages[getIconCache().cmdCut]);
-//		item.setToolTipText(getResourceString("tool.Cut.tiptext"));
-//		item.addSelectionListener(unimplementedListener);
-//		item = new ToolItem(toolBar, SWT.PUSH);
-//		item.setImage(getIconCache().stockImages[getIconCache().cmdCopy]);
-//		item.setToolTipText(getResourceString("tool.Copy.tiptext"));
-//		item.addSelectionListener(unimplementedListener);
-//		item = new ToolItem(toolBar, SWT.PUSH);
-//		item.setImage(getIconCache().stockImages[getIconCache().cmdPaste]);
-//		item.setToolTipText(getResourceString("tool.Paste.tiptext"));
-//		item.addSelectionListener(unimplementedListener);
-//
-//		item = new ToolItem(toolBar, SWT.SEPARATOR);
-//		item = new ToolItem(toolBar, SWT.PUSH);
-//		item.setImage(getIconCache().stockImages[getIconCache().cmdDelete]);
-//		item.setToolTipText(getResourceString("tool.Delete.tiptext"));
-//		item.addSelectionListener(unimplementedListener);
-//		item = new ToolItem(toolBar, SWT.PUSH);
-//		item.setImage(getIconCache().stockImages[getIconCache().cmdRename]);
-//		item.setToolTipText(getResourceString("tool.Rename.tiptext"));
-//		item.addSelectionListener(unimplementedListener);
-//
-//		item = new ToolItem(toolBar, SWT.SEPARATOR);
-//		item = new ToolItem(toolBar, SWT.PUSH);
-//		item.setImage(getIconCache().stockImages[getIconCache().cmdSearch]);
-//		item.setToolTipText(getResourceString("tool.Search.tiptext"));
-//		item.addSelectionListener(unimplementedListener);
-//		item = new ToolItem(toolBar, SWT.PUSH);
-//		item.setImage(getIconCache().stockImages[getIconCache().cmdPrint]);
-//		item.setToolTipText(getResourceString("tool.Print.tiptext"));
-//		item.addSelectionListener(unimplementedListener);
-	}
-
-	/**
 	 * Creates the combo box view.
 	 * 
 	 * @param parent
@@ -368,7 +254,7 @@ public class FileViewer {
 		combo.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				final File[] roots = (File[]) combo.getData(COMBODATA_ROOTS);
+				final File[] roots = (File[]) combo.getData(FileViewerConstants.COMBODATA_ROOTS);
 				if (roots == null)
 					return;
 				int selection = combo.getSelectionIndex();
@@ -379,13 +265,13 @@ public class FileViewer {
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				final String lastText = (String) combo.getData(COMBODATA_LASTTEXT);
+				final String lastText = (String) combo.getData(FileViewerConstants.COMBODATA_LASTTEXT);
 				String text = combo.getText();
 				if (text == null)
 					return;
 				if (lastText != null && lastText.equals(text))
 					return;
-				combo.setData(COMBODATA_LASTTEXT, text);
+				combo.setData(FileViewerConstants.COMBODATA_LASTTEXT, text);
 				File file = new File(text);
 				if(!file.exists())
 					return;
@@ -429,7 +315,7 @@ public class FileViewer {
 				final TreeItem[] selection = tree.getSelection();
 				if (selection != null && selection.length != 0) {
 					TreeItem item = selection[0];
-					File file = (File) item.getData(TREEITEMDATA_FILE);
+					File file = (File) item.getData(FileViewerConstants.TREEITEMDATA_FILE);
 					notifySelectedDirectory(file);
 				}
 			}
@@ -448,7 +334,7 @@ public class FileViewer {
 			@Override
 			public void treeExpanded(TreeEvent event) {
 				final TreeItem item = (TreeItem) event.item;
-				final Image image = (Image) item.getData(TREEITEMDATA_IMAGEEXPANDED);
+				final Image image = (Image) item.getData(FileViewerConstants.TREEITEMDATA_IMAGEEXPANDED);
 				if (image != null)
 					item.setImage(image);
 				treeExpandItem(item);
@@ -457,7 +343,7 @@ public class FileViewer {
 			@Override
 			public void treeCollapsed(TreeEvent event) {
 				final TreeItem item = (TreeItem) event.item;
-				final Image image = (Image) item.getData(TREEITEMDATA_IMAGECOLLAPSED);
+				final Image image = (Image) item.getData(FileViewerConstants.TREEITEMDATA_IMAGECOLLAPSED);
 				if (image != null)
 					item.setImage(image);
 			}
@@ -506,7 +392,7 @@ public class FileViewer {
 
 				sourceNames = new String[dndSelection.length];
 				for (int i = 0; i < dndSelection.length; i++) {
-					File file = (File) dndSelection[i].getData(TREEITEMDATA_FILE);
+					File file = (File) dndSelection[i].getData(FileViewerConstants.TREEITEMDATA_FILE);
 					sourceNames[i] = file.getAbsolutePath();
 				}
 				event.data = sourceNames;
@@ -555,7 +441,7 @@ public class FileViewer {
 				if (item != null) {
 					// We are over a particular item in the tree, use the item's
 					// file
-					targetFile = (File) item.getData(TREEITEMDATA_FILE);
+					targetFile = (File) item.getData(FileViewerConstants.TREEITEMDATA_FILE);
 				}
 				return targetFile;
 			}
@@ -571,7 +457,7 @@ public class FileViewer {
 	 */
 	private void treeExpandItem(TreeItem item) {
 		parent.setCursor(getIconCache().stockCursors[getIconCache().cursorWait]);
-		final Object stub = item.getData(TREEITEMDATA_STUB);
+		final Object stub = item.getData(FileViewerConstants.TREEITEMDATA_STUB);
 		if (stub == null)
 			treeRefreshItem(item, true);
 		parent.setCursor(getIconCache().stockCursors[getIconCache().cursorDefault]);
@@ -589,7 +475,7 @@ public class FileViewer {
 		int itemIndex = 0;
 		for (int i = 0; i < items.length; ++i) {
 			final TreeItem item = items[i];
-			final File itemFile = (File) item.getData(TREEITEMDATA_FILE);
+			final File itemFile = (File) item.getData(FileViewerConstants.TREEITEMDATA_FILE);
 			if ((itemFile == null) || (masterIndex == masterFiles.length)) {
 				// remove bad item or placeholder
 				item.dispose();
@@ -634,20 +520,20 @@ public class FileViewer {
 	 *            true iff we should populate non-expanded items as well
 	 */
 	private void treeRefreshItem(TreeItem dirItem, boolean forcePopulate) {
-		final File dir = (File) dirItem.getData(TREEITEMDATA_FILE);
+		final File dir = (File) dirItem.getData(FileViewerConstants.TREEITEMDATA_FILE);
 
 		if (!forcePopulate && !dirItem.getExpanded()) {
 			// Refresh non-expanded item
-			if (dirItem.getData(TREEITEMDATA_STUB) != null) {
+			if (dirItem.getData(FileViewerConstants.TREEITEMDATA_STUB) != null) {
 				treeItemRemoveAll(dirItem);
 				new TreeItem(dirItem, SWT.NONE); // placeholder child item to
 													// get "expand" button
-				dirItem.setData(TREEITEMDATA_STUB, null);
+				dirItem.setData(FileViewerConstants.TREEITEMDATA_STUB, null);
 			}
 			return;
 		}
 		// Refresh expanded item
-		dirItem.setData(TREEITEMDATA_STUB, this); // clear stub flag
+		dirItem.setData(FileViewerConstants.TREEITEMDATA_STUB, this); // clear stub flag
 
 		/* Get directory listing */
 		File[] subFiles = (dir != null) ? Utils.getDirectoryList(dir) : null;
@@ -672,7 +558,7 @@ public class FileViewer {
 			}
 
 			final TreeItem item = items[i];
-			final File itemFile = (File) item.getData(TREEITEMDATA_FILE);
+			final File itemFile = (File) item.getData(FileViewerConstants.TREEITEMDATA_FILE);
 			if ((itemFile == null) || (masterFile == null)) {
 				// remove bad item or placeholder
 				item.dispose();
@@ -739,9 +625,9 @@ public class FileViewer {
 	private void treeInitFolder(TreeItem item, File folder) {
 		item.setText(folder.getName());
 		item.setImage(getIconCache().stockImages[getIconCache().iconClosedFolder]);
-		item.setData(TREEITEMDATA_FILE, folder);
-		item.setData(TREEITEMDATA_IMAGEEXPANDED, getIconCache().stockImages[getIconCache().iconOpenFolder]);
-		item.setData(TREEITEMDATA_IMAGECOLLAPSED, getIconCache().stockImages[getIconCache().iconClosedFolder]);
+		item.setData(FileViewerConstants.TREEITEMDATA_FILE, folder);
+		item.setData(FileViewerConstants.TREEITEMDATA_IMAGEEXPANDED, getIconCache().stockImages[getIconCache().iconOpenFolder]);
+		item.setData(FileViewerConstants.TREEITEMDATA_IMAGECOLLAPSED, getIconCache().stockImages[getIconCache().iconClosedFolder]);
 	}
 
 	/**
@@ -755,9 +641,9 @@ public class FileViewer {
 	private void treeInitVolume(TreeItem item, File volume) {
 		item.setText(volume.getPath());
 		item.setImage(getIconCache().stockImages[getIconCache().iconClosedDrive]);
-		item.setData(TREEITEMDATA_FILE, volume);
-		item.setData(TREEITEMDATA_IMAGEEXPANDED, getIconCache().stockImages[getIconCache().iconOpenDrive]);
-		item.setData(TREEITEMDATA_IMAGECOLLAPSED, getIconCache().stockImages[getIconCache().iconClosedDrive]);
+		item.setData(FileViewerConstants.TREEITEMDATA_FILE, volume);
+		item.setData(FileViewerConstants.TREEITEMDATA_IMAGEEXPANDED, getIconCache().stockImages[getIconCache().iconOpenDrive]);
+		item.setData(FileViewerConstants.TREEITEMDATA_IMAGECOLLAPSED, getIconCache().stockImages[getIconCache().iconClosedDrive]);
 	}
 
 	/**
@@ -782,7 +668,7 @@ public class FileViewer {
 		for (int i = 0; i < tableTitles.length; ++i) {
 			TableColumn column = new TableColumn(table, SWT.NONE);
 			column.setText(tableTitles[i]);
-			column.setWidth(tableWidths[i]);
+			column.setWidth(FileViewerConstants.tableWidths[i]);
 		}
 		table.setHeaderVisible(true);
 		table.addSelectionListener(new SelectionAdapter() {
@@ -801,7 +687,7 @@ public class FileViewer {
 				final File[] files = new File[items.length];
 
 				for (int i = 0; i < items.length; ++i) {
-					files[i] = (File) items[i].getData(TABLEITEMDATA_FILE);
+					files[i] = (File) items[i].getData(FileViewerConstants.TABLEITEMDATA_FILE);
 				}
 				return files;
 			}
@@ -850,7 +736,7 @@ public class FileViewer {
 
 				sourceNames = new String[dndSelection.length];
 				for (int i = 0; i < dndSelection.length; i++) {
-					File file = (File) dndSelection[i].getData(TABLEITEMDATA_FILE);
+					File file = (File) dndSelection[i].getData(FileViewerConstants.TABLEITEMDATA_FILE);
 					sourceNames[i] = file.getAbsolutePath();
 				}
 				event.data = sourceNames;
@@ -901,12 +787,12 @@ public class FileViewer {
 					// We are over an unoccupied area of the table.
 					// If it is a COPY, we can use the table's root file.
 					if (event.detail == DND.DROP_COPY) {
-						targetFile = (File) table.getData(TABLEDATA_DIR);
+						targetFile = (File) table.getData(FileViewerConstants.TABLEDATA_DIR);
 					}
 				} else {
 					// We are over a particular item in the table, use the
 					// item's file
-					targetFile = (File) item.getData(TABLEITEMDATA_FILE);
+					targetFile = (File) item.getData(FileViewerConstants.TABLEITEMDATA_FILE);
 				}
 				return targetFile;
 			}
@@ -942,7 +828,7 @@ public class FileViewer {
 		/*
 		 * Combo view: Sets the combo box to point to the selected directory.
 		 */
-		final File[] comboRoots = (File[]) combo.getData(COMBODATA_ROOTS);
+		final File[] comboRoots = (File[]) combo.getData(FileViewerConstants.COMBODATA_ROOTS);
 		int comboEntry = -1;
 		if (comboRoots != null) {
 			for (int i = 0; i < comboRoots.length; ++i) {
@@ -983,7 +869,7 @@ public class FileViewer {
 				item = items[k];
 				if (item.isDisposed())
 					continue;
-				final File itemFile = (File) item.getData(TREEITEMDATA_FILE);
+				final File itemFile = (File) item.getData(FileViewerConstants.TREEITEMDATA_FILE);
 				if (itemFile != null && itemFile.equals(pathElement))
 					break;
 			}
@@ -1103,7 +989,7 @@ public class FileViewer {
 
 		if (files == null) {
 			boolean refreshCombo = false;
-			final File[] comboRoots = (File[]) combo.getData(COMBODATA_ROOTS);
+			final File[] comboRoots = (File[]) combo.getData(FileViewerConstants.COMBODATA_ROOTS);
 
 			if ((comboRoots != null) && (comboRoots.length == roots.length)) {
 				for (int i = 0; i < roots.length; ++i) {
@@ -1117,7 +1003,7 @@ public class FileViewer {
 
 			if (refreshCombo) {
 				combo.removeAll();
-				combo.setData(COMBODATA_ROOTS, roots);
+				combo.setData(FileViewerConstants.COMBODATA_ROOTS, roots);
 				for (int i = 0; i < roots.length; ++i) {
 					final File file = roots[i];
 					combo.add(file.getPath());
@@ -1171,7 +1057,7 @@ public class FileViewer {
 	private IOpenFileAction getFirstPertinentAction() {
 		try {
 			IConfigurationElement[] eles = Platform.getExtensionRegistry()
-					.getConfigurationElementsFor(OPEN_FILE_EXTENSION_POINT);
+					.getConfigurationElementsFor(FileViewerConstants.OPEN_FILE_EXTENSION_POINT);
 			final String perspectiveId = EclipseUtils.getPage().getPerspective().getId();
 
 			for (IConfigurationElement e : eles) {
@@ -1190,7 +1076,7 @@ public class FileViewer {
 	/**
 	 * Navigates to the parent directory
 	 */
-	void doParent() {
+	public void doParent() {
 		if (currentDirectory == null)
 			return;
 		File parentDirectory = currentDirectory.getParentFile();
@@ -1200,8 +1086,19 @@ public class FileViewer {
 	/**
 	 * Performs a refresh
 	 */
-	void doRefresh() {
+	public void doRefresh() {
 		notifyRefreshFiles(null);
+	}
+
+	/**
+	 * Change the viewer layout
+	 */
+	public void doLayout() {
+		if ((sashForm == null) || sashForm.isDisposed())
+			return;
+		int orientation = sashForm.getOrientation();
+		sashForm.setOrientation(orientation == SWT.HORIZONTAL ? SWT.VERTICAL : SWT.HORIZONTAL);
+		parent.layout();
 	}
 
 	/**
@@ -1397,8 +1294,8 @@ public class FileViewer {
 		 */
 		if (System.getProperty("os.name").indexOf("Windows") != -1) {
 			List<File> list = new ArrayList<File>();
-			list.add(new File(DRIVE_A));
-			list.add(new File(DRIVE_B));
+			list.add(new File(FileViewerConstants.DRIVE_A));
+			list.add(new File(FileViewerConstants.DRIVE_B));
 			for (char i = 'c'; i <= 'z'; ++i) {
 				File drive = new File(i + ":" + File.separator);
 				if (drive.isDirectory() && drive.exists()) {
@@ -1644,7 +1541,7 @@ public class FileViewer {
 				tableContentsOfLabel.setText(Utils.getResourceString("details.ContentsOf.text",
 						new Object[] { workerStateDir.getPath() }));
 				table.removeAll();
-				table.setData(TABLEDATA_DIR, workerStateDir);
+				table.setData(FileViewerConstants.TABLEDATA_DIR, workerStateDir);
 			}
 		});
 		dirList = Utils.getDirectoryList(workerStateDir);
@@ -1660,7 +1557,7 @@ public class FileViewer {
 	 */
 	private void workerAddFileDetails(final File file) {
 		final String nameString = file.getName();
-		final String dateString = dateFormat.format(new Date(file.lastModified()));
+		final String dateString = FileViewerConstants.dateFormat.format(new Date(file.lastModified()));
 		final String sizeString;
 		final String typeString;
 		final Image iconImage;
@@ -1699,7 +1596,7 @@ public class FileViewer {
 				TableItem tableItem = new TableItem(table, 0);
 				tableItem.setText(strings);
 				tableItem.setImage(iconImage);
-				tableItem.setData(TABLEITEMDATA_FILE, file);
+				tableItem.setData(FileViewerConstants.TABLEITEMDATA_FILE, file);
 			}
 		});
 	}

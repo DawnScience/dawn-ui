@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?eclipse version="3.4"?>
 <plugin>
+
    <extension
          point="org.eclipse.ui.views">
       <e4view
             allowMultiple="false"
-            class="org.dawnsci.fileviewer.parts.FileViewerE4Part"
-            icon="icons/application_side_tree.png"
-            id="org.dawnsci.fileviewer.FileViewer"
             name="File Viewer"
-            restorable="true">
+            icon="icons/application_side_tree.png"
+            class="org.dawnsci.fileviewer.parts.FileViewerE4Part"
+            restorable="true"
+            id="org.dawnsci.fileviewer.FileViewer">
       </e4view>
    </extension>
 
