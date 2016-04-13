@@ -83,7 +83,7 @@ public class IsoComposite extends Composite
 		this.items.setColumnWidths(new int[] {125, 125, 125});
 		this.items.setShowAdditionalFields(true);
 				
-		itemComp = new IsoItemComposite(this, SWT.NONE);
+		itemComp = new IsoItemComposite(this);
 		
 		itemComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		

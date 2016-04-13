@@ -43,22 +43,22 @@ public class IconCache {
 //		cmdSearch = 14;
 		cmdLayoutEdit = 8;
 	public final String[] stockImageLocations = {
-		"generic_example.gif",
-		"icon_ClosedDrive.gif",
-		"icon_ClosedFolder.gif",
-		"icon_File.gif",
-		"icon_OpenDrive.gif",
-		"icon_OpenFolder.gif",
+		"application_side_tree.png",
+		"drive-off.png",
+		"blue-folder-horizontal.png",
+		"document-text.png",
+		"drive.png",
+		"blue-folder-horizontal-open.png",
 //		"cmd_Copy.gif",
 //		"cmd_Cut.gif",
 //		"cmd_Delete.gif",
-		"cmd_Parent.gif",
+		"arrow-090.png",
 //		"cmd_Paste.gif",
 //		"cmd_Print.gif",
-		"cmd_Refresh.gif",
+		"arrow-circle-double-135.png",
 //		"cmd_Rename.gif",
 //		"cmd_Search.gif"
-		"layout_edit.png"
+		"layout-design.png"
 	};
 	public Image stockImages[];
 	
@@ -86,7 +86,7 @@ public class IconCache {
 				if (image == null) {
 					freeResources();
 					throw new IllegalStateException(
-						FileViewer.getResourceString("error.CouldNotLoadResources"));
+						Utils.getResourceString("error.CouldNotLoadResources"));
 				}
 				stockImages[i] = image;
 			}

@@ -1,5 +1,7 @@
 package org.dawnsci.isosurface.isogui;
 
+import java.util.Arrays;
+
 import org.dawnsci.isosurface.alg.MarchingCubesModel;
 import org.dawnsci.isosurface.tool.IsosurfaceJob;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
@@ -113,11 +115,10 @@ public class IsoHandler
 													current.getColour().blue,
 													current.getOpacity());
 									((IIsosurfaceTrace)system.getTrace(current.getTraceKey())).setData(null, null, null, null);
-								}									
+								}
 							}
 							else
 							{
-								
 								job.compute(
 										new MarchingCubesModel(
 												lazyDataset,

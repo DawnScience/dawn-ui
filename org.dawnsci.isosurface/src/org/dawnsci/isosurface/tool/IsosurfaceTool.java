@@ -143,14 +143,24 @@ public class IsosurfaceTool extends AbstractSlicingTool
 	@SuppressWarnings("unused")
 	private void update()
 	{
+		
+		int xIndex = getSlicingSystem().getDimsDataList().getDimsData(0).getPlotAxis().getIndex();
+		int yIndex = getSlicingSystem().getDimsDataList().getDimsData(1).getPlotAxis().getIndex();
+		int zIndex = getSlicingSystem().getDimsDataList().getDimsData(2).getPlotAxis().getIndex();
+		
 		//get the data from the slicing system
 		final SliceSource data = getSlicingSystem().getData();
 		
 		// declare the data as a lazydata set (i.e. slices)
-		ILazyDataset dataSlice = data.getLazySet().getSliceView(getSlices());
+		ILazyDataset dataSlice = data.getLazySet().getSliceView(getSlices()).getTransposedView(xIndex, yIndex, zIndex);
 		
 		dataSlice = dataSlice.squeezeEnds();
-		// slice.setName("Sliced " + data.getLazySet().getName());
+		
+		// roughly calculate the default cube size
+		int[] defaultCubeSize= new int[] {
+				(int) Math.max(1, Math.ceil(data.getLazySet().getShape()[xIndex]/20.0)),
+				(int) Math.max(1, Math.ceil(data.getLazySet().getShape()[yIndex]/20.0)),
+				(int) Math.max(1, Math.ceil(data.getLazySet().getShape()[zIndex]/20.0))};
 		
 		// check if the dataslice is compatible
 		if (dataSlice.getRank() != 3)
@@ -161,13 +171,7 @@ public class IsosurfaceTool extends AbstractSlicingTool
 		// the estimation is currently quite inaccurate
 		double[] minMax = {Integer.MAX_VALUE, Integer.MIN_VALUE};
 		minMax = IsoSurfaceUtil.estimateMinMaxIsoValueFromDataSet(finalDataslice);
-		
-		// roughly calculate the default cube size
-		int[] defaultCubeSize= new int[] {
-				(int) Math.max(1, Math.ceil(finalDataslice.getShape()[0]/20.0)),
-				(int) Math.max(1, Math.ceil(finalDataslice.getShape()[1]/20.0)),
-				(int) Math.max(1, Math.ceil(finalDataslice.getShape()[2]/20.0))};
-		
+				
 		// set the min and max isovalues - set the default cube size for new sufaces
 		isoComp.setMinMaxIsoValueAndCubeSize(minMax, defaultCubeSize);
 		
@@ -177,7 +181,7 @@ public class IsosurfaceTool extends AbstractSlicingTool
 				isoBean, 
 				new IsosurfaceJob(
 						"isoSurfaceJob" , 
-						getSlicingSystem().getPlottingSystem()),
+						getSlicingSystem()),
 				finalDataslice,
 				getSlicingSystem().getPlottingSystem());
 		
