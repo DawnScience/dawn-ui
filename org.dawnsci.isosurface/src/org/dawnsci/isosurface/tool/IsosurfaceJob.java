@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.FloatDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -85,6 +86,14 @@ public class IsosurfaceJob extends Job {
 	protected IStatus run(IProgressMonitor monitor)
 	{
 		MarchingCubesModel model = this.modelRef.get();
+		
+		// transpose the dataset as it does not happen where itis meant to
+		// !! very much a hack !!
+		int x = system.getDimsDataList().getDimsData(0).getPlotAxis().getIndex();
+		int y = system.getDimsDataList().getDimsData(1).getPlotAxis().getIndex();
+		int z = system.getDimsDataList().getDimsData(2).getPlotAxis().getIndex();
+		//model.setLazyData(model.getLazyData().getTransposedView(x,y,z));
+		
 		Thread.currentThread().setName("IsoSurface - " + model.getName());
 		final IIsosurfaceTrace trace;
 		
@@ -108,7 +117,7 @@ public class IsosurfaceJob extends Job {
 			
 			if (monitor.isCanceled())
 				return Status.CANCEL_STATUS;
-			
+						
 			final MarchingCubes alg = new MarchingCubes(model);
 			final Surface surface =  alg.execute(monitor);
 						
@@ -149,15 +158,16 @@ public class IsosurfaceJob extends Job {
 		return Status.OK_STATUS;
 	}
 	
-	private List<IDataset> acquireAxes(IProgressMonitor monitor) {
+	private List<IDataset> acquireAxes(IProgressMonitor monitor) 
+	{
 		
 		IDataset xAxis = null, yAxis = null, zAxis = null;
+		
+		int xIndex = system.getDimsDataList().getDimsData(0).getPlotAxis().getIndex();
+		int yIndex = system.getDimsDataList().getDimsData(1).getPlotAxis().getIndex();
+		int zIndex = system.getDimsDataList().getDimsData(2).getPlotAxis().getIndex();
+		
 		try {
-			
-			int xIndex = system.getDimsDataList().getDimsData(0).getPlotAxis().getIndex();
-			int yIndex = system.getDimsDataList().getDimsData(1).getPlotAxis().getIndex();
-			int zIndex = system.getDimsDataList().getDimsData(2).getPlotAxis().getIndex();
-			
 			xAxis = SliceUtils.getAxis(
 				system.getCurrentSlice(),
 				system.getData().getVariableManager(), 
@@ -177,7 +187,28 @@ public class IsosurfaceJob extends Job {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		// as the trace has no access to the dataset it is best to generate the axis look
+		// table even if it is only indices.
+		if (xAxis == null)
+			xAxis = generateIndexAxis(this.modelRef.get().getLazyData().getShape()[0]);
+		if (yAxis == null)
+			yAxis = generateIndexAxis(this.modelRef.get().getLazyData().getShape()[1]);
+		if (zAxis == null)
+			zAxis = generateIndexAxis(this.modelRef.get().getLazyData().getShape()[2]);
+		
 		return new ArrayList<IDataset>( Arrays.asList(xAxis, yAxis, zAxis));
+	}
+	
+	private IDataset generateIndexAxis(int max)
+	{
+		double[] axis = new double[max];
+		for (int i = 0; i < max; i++)
+		{
+			axis[i] = i;
+		}
+		
+		return new DoubleDataset(axis, max);
 	}
 
 	@SuppressWarnings("unused")

@@ -454,25 +454,7 @@ public class SurfaceDisplayer extends Scene
 				offsetInverse.getY(),
 				offsetInverse.getZ());
 	}
-	
-	private double calculateTickSeperation(IDataset dataSet)
-	{
-		double offset = dataSet.getDouble(0);
-		if (dataSet.getSize() > 0)
-		{
-			offset = dataSet.getDouble(1) - dataSet.getDouble(0);
-			for (int i = 1; i < dataSet.getSize(); i++)
-			{
-				if ((dataSet.getDouble(i) - dataSet.getDouble(i-1)) != offset)
-				{
-					offset = (dataSet.getDouble(i) - dataSet.getDouble(i-1));
-					System.err.println("Axis Ticks inconsistant");
-				}
-			}
-		}
-		return offset;
-	}
-	
+		
 	private void updateCameraSceneTransforms()
 	{
 		this.currentCamera.setTranslateX(-this.getWidth() / 2);           
@@ -514,29 +496,6 @@ public class SurfaceDisplayer extends Scene
 		// if the first trace create the axes using the trace.axes data
 		// all of this data is irrelevant as it get reset when a surface is added
 		// this is extremely inefficient but works well enough I don't plan to fix yet
-
-		if (axisObjectGroup.getChildren().size() <= 0)
-		{
-			Point3D maxLengths = new Point3D(
-					trace.getAxes().get(0).getFloat(0),
-					trace.getAxes().get(0).getFloat(1),
-					trace.getAxes().get(0).getFloat(2));
-			
-			Point3D seperationValue = new Point3D(
-											calculateTickSeperation(trace.getAxes().get(1)), 
-											calculateTickSeperation(trace.getAxes().get(2)), 
-											calculateTickSeperation(trace.getAxes().get(3)));
-						
-			double maxSeperation = Vector3DUtil.getMaximumValue(seperationValue);
-			Point3D tickSeperationXYZ = new Point3D(maxSeperation, maxSeperation, maxSeperation);
-			
-			axisObjectGroup.addAxes(
-					maxLengths,
-					tickSeperationXYZ);
-			
-			this.axisObjectGroup.addBoundingBox(maxLengths);
-			centraliseObjectGroup();
-		}
 		
 		// add the mesh the the scene graph
 		this.isosurfaceGroup.getChildren().add(trace.getIsoSurface());
@@ -559,23 +518,14 @@ public class SurfaceDisplayer extends Scene
 	
 	public void setAxesData(List<IDataset> axesData)
 	{
-		// set the initial data size
-		this.axesMaxLengths = new Point3D(
-									axesData.get(0).getFloat(0),
-									axesData.get(0).getFloat(1),
-									axesData.get(0).getFloat(2));
+		Point3D axisLength = new Point3D(
+				axesData.get(0).getSize(), 
+				axesData.get(1).getSize(),
+				axesData.get(2).getSize());
 		
-		Point3D seperationValue = new Point3D(
-										calculateTickSeperation(axesData.get(1)), 
-										calculateTickSeperation(axesData.get(2)), 
-										calculateTickSeperation(axesData.get(3)));
+		this.axisObjectGroup.setAxes(axisLength, axesData);
 		
-		double maxSeperation = Vector3DUtil.getMaximumValue(seperationValue);
-		
-		axisObjectGroup.SetTickSeparationXYZ(new Point3D(maxSeperation, maxSeperation, maxSeperation));		
-		
-		this.axisObjectGroup.setAxisLimitMax(axesMaxLengths);
-		
+		centraliseObjectGroup();
 	}
 
 	public void setAxisGridVisibility(boolean visibility)

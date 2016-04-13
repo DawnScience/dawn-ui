@@ -27,7 +27,7 @@ public class LineGroup extends Group
 	private Translate translate_TextPane;
 	private Rotate rotate;
 	
-	private double textSize = 10;
+	private double textSize;
 	
 	public LineGroup(double length, Point3D direction, Point3D offset, String label, double textSize, Rotate gridRotate)
 	{		

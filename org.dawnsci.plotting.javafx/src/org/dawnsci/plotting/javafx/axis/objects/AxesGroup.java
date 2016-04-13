@@ -1,6 +1,7 @@
 package org.dawnsci.plotting.javafx.axis.objects;
 
 import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
@@ -14,28 +15,45 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Cylinder;
 import javafx.scene.transform.Translate;
 
+/**
+ * Class used to hold potentially link objects related to the Axis
+ * e.g. if each axis was to have a scale bar or an offset "arrow" 
+ * @author uij85458
+ *
+ */
 public class AxesGroup extends Group{
 	
 	private Grid axisGrid;
 	private Cylinder ScaleAxis;
-
-	private Point2D axisLimitMin;
-	private Point2D axisLimitMax;
+	private IDataset axisTickLookUpTable;
+	private Point3D axisSize;
+	private double textSize;
+	
+	private Point3D planeNormal;
 	
 	public AxesGroup(
 			Point3D planeNormal,
-			Point2D tickSeparationXY, 
-			Point3D axisLength,
-			Point2D minimumXYTickValues,
-			Point2D maximumXYTickValues)
+			IDataset axisTickLookUpTable, 
+			Point3D axisLengths)
 	{
-		double textSize = (tickSeparationXY.getX() / 50) * 15;
+		// estimate a textSize
+		double a = Math.sqrt(axisLengths.getX() * axisLengths.getY() * axisLengths.getZ());
+		textSize = a * 0.0025f;
 		
-		axisLimitMin = minimumXYTickValues;
-		axisLimitMax = maximumXYTickValues;
+		this.axisTickLookUpTable = axisTickLookUpTable;
+		this.axisSize = axisLengths;
+		this.planeNormal = planeNormal;
 		
-		axisGrid = new Grid(planeNormal, tickSeparationXY, axisLength, textSize);
-				
+		generateAxisGrid();
+	}
+	
+	private void generateAxisGrid()
+	{
+		if (axisGrid != null)
+			axisGrid.getChildren().clear();
+		
+		axisGrid = new Grid(planeNormal, this.axisTickLookUpTable, this.axisSize, this.textSize);
+		
 		AmbientLight ambientAxisLight = new AmbientLight(JavaFXProperties.ColourProperties.LINE_COLOUR);
 		ambientAxisLight.getScope().add(axisGrid);
 		axisGrid.getChildren().add(ambientAxisLight);
@@ -74,29 +92,10 @@ public class AxesGroup extends Group{
 		this.getChildren().addAll(axisGrid);
 	}
 	
-	public void updateScale(Point3D newMax)
+	public void setTextSize(double textSize)
 	{
-		axisGrid.updateGridMaxLength(newMax);
-		axisGrid.reDeclareLabels(axisLimitMin, axisLimitMax);
+		this.textSize = textSize;
+		generateAxisGrid();
 	}
 	
-	public void setAxisMaxLimit(Point2D newMax)
-	{
-		this.axisLimitMax = newMax;
-	}
-	
-	public void setAxisMinLimit(Point2D newMin)
-	{
-		this.axisLimitMin = newMin;
-	}
-	
-	public void setTickSeperation(Point2D newSeparation)
-	{
-		double textSize = (newSeparation.getX() / 50) * 15;
-		axisGrid.setTextSize(textSize);
-		
-		axisGrid.setTickSeperationXY(newSeparation);
-		
-		axisGrid.refreshGrid();
-	}
 }
