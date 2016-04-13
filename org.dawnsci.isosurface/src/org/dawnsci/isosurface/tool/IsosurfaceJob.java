@@ -11,7 +11,11 @@ package org.dawnsci.isosurface.tool;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.dawnsci.isosurface.alg.MarchingCubes;
 import org.dawnsci.isosurface.alg.MarchingCubesModel;
@@ -26,6 +30,7 @@ import org.eclipse.dawnsci.analysis.dataset.impl.FloatDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IIsosurfaceTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.slicing.api.system.ISliceSystem;
 import org.eclipse.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -220,16 +225,18 @@ public class IsosurfaceJob extends Job {
 			}
 		});
 	}
-	
-	
-	
-	public void destroy(String traceName)
-	{
-		cancel();
-		if (system.getPlottingSystem().getTrace(traceName) != null)
-		{ 
-			system.getPlottingSystem().getTrace(traceName).dispose();
-		}
+
+	public void destroyOthers(Stream<String> toKeep) {
+		cancel();		
+		
+		IPlottingSystem<Object> plottingSystem = system.getPlottingSystem();
+		Set<String> traceNames = plottingSystem.getTraces().stream().map(trace -> trace.getName()).collect(Collectors.toSet());
+		traceNames.removeAll(toKeep.collect(Collectors.toSet()));
+		
+		traceNames.stream()
+			.map(name -> plottingSystem.getTrace(name))
+			.map(Optional::ofNullable)
+			.forEach(trace -> trace.ifPresent(ITrace::dispose));
 	}
 
 }
