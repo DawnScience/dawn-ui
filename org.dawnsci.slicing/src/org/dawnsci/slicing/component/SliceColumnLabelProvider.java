@@ -147,7 +147,7 @@ class SliceColumnLabelProvider extends ColumnLabelProvider implements IStyledLab
         if (PlotType.class!=sliceType.getClass()) {
         	return axis.getLabel();
         }
-		if (sliceType==PlotType.ISOSURFACE) {
+		if (sliceType==PlotType.ISOSURFACE || sliceType == PlotType.VOLUME) {
             return axis.getLabel();
 		}
 		
