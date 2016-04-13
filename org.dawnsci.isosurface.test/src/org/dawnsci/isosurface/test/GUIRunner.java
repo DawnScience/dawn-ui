@@ -10,11 +10,13 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class GUIRunner 
 {
-	
+
+	@Ignore
 	@Test
 	public void TestIsoSurfaceGUI() throws Exception {
 		

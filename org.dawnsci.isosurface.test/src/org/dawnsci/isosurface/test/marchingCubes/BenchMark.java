@@ -15,6 +15,7 @@ import org.dawnsci.isosurface.alg.Surface;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Random;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class BenchMark 
@@ -98,6 +99,7 @@ public class BenchMark
 		testResult = algorithm.execute(monitor);
 	}
 
+	@Ignore
 	@Test
 	public void RandomNoiseBenchMarkTest() throws Exception {
 		int BENCHMARK_TEST_COUNT = 100;
@@ -155,7 +157,8 @@ public class BenchMark
 		System.out.println(resultPrint);
 
 	}
-	
+
+	@Ignore
 	@Test
 	public void varrying_BoxSize_RandomNoiseBenchMarkTest() throws Exception {
 		this.dataSize = new int[] { 100, 100, 100 };
@@ -165,6 +168,7 @@ public class BenchMark
 		}
 	}
 
+	@Ignore
 	@Test
 	public void varrying_DataSize_RandomNoiseBenchMarkTest() throws Exception {
 		this.boxSize = new int[] { 4, 4, 4 };
