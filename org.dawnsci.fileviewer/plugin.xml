@@ -6,7 +6,7 @@
       <e4view
             allowMultiple="false"
             class="org.dawnsci.fileviewer.parts.FileViewerE4Part"
-            icon="icons/generic_example.gif"
+            icon="icons/application_side_tree.png"
             id="org.dawnsci.fileviewer.FileViewer"
             name="File Viewer"
             restorable="true">

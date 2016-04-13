@@ -17,12 +17,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
 
 import org.dawb.common.ui.util.EclipseUtils;
 import org.eclipse.core.runtime.CoreException;
@@ -42,17 +39,13 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.events.ShellAdapter;
-import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.events.TreeAdapter;
 import org.eclipse.swt.events.TreeEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.program.Program;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -60,8 +53,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.ProgressBar;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
@@ -76,12 +67,11 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.sda.navigator.views.IOpenFileAction;
 
 /**
- * File Viewer example
+ * File Viewer based on the SWT FileViewer example
  */
 public class FileViewer {
 
 	private static final Logger logger = LoggerFactory.getLogger(FileViewer.class);
-	private static ResourceBundle resourceBundle = ResourceBundle.getBundle("file_viewer");
 
 	private final static String DRIVE_A = "a:" + File.separator;
 	private final static String DRIVE_B = "b:" + File.separator;
@@ -140,9 +130,9 @@ public class FileViewer {
 	// File: Currently visible directory
 	private static final int[] tableWidths = new int[] { 150, 60, 75, 150 };
 
-	private final String[] tableTitles = new String[] { FileViewer.getResourceString("table.Name.title"),
-			FileViewer.getResourceString("table.Size.title"), FileViewer.getResourceString("table.Type.title"),
-			FileViewer.getResourceString("table.Modified.title") };
+	private final String[] tableTitles = new String[] { Utils.getResourceString("table.Name.title"),
+			Utils.getResourceString("table.Size.title"), Utils.getResourceString("table.Type.title"),
+			Utils.getResourceString("table.Modified.title") };
 	private Table table;
 	private Label tableContentsOfLabel;
 
@@ -178,67 +168,11 @@ public class FileViewer {
 	private static final String OPEN_FILE_EXTENSION_POINT = "uk.ac.diamond.sda.navigator.openFile";
 
 	/**
-	 * Runs main program.
-	 */
-	public static void main(String[] args) {
-		Display display = new Display();
-		FileViewer application = new FileViewer();
-		Shell shell = application.open(display);
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch())
-				display.sleep();
-		}
-		application.close();
-		display.dispose();
-	}
-
-	/**
-	 * Opens the main program.
-	 */
-	public Shell open(Display display) {
-		// Create the window
-		getIconCache().initResources(display);
-		Shell shell = new Shell();
-		createCompositeContents(new Composite(shell, SWT.NONE));
-		notifyRefreshFiles(null);
-		shell.open();
-		return shell;
-	}
-
-	/**
 	 * Closes the main program.
 	 */
 	public void close() {
 		workerStop();
 		getIconCache().freeResources();
-	}
-
-	/**
-	 * Returns a string from the resource bundle. We don't want to crash because
-	 * of a missing String. Returns the key if not found.
-	 */
-	static String getResourceString(String key) {
-		try {
-			return resourceBundle.getString(key);
-		} catch (MissingResourceException e) {
-			return key;
-		} catch (NullPointerException e) {
-			return "!" + key + "!";
-		}
-	}
-
-	/**
-	 * Returns a string from the resource bundle and binds it with the given
-	 * arguments. If the key is not found, return the key.
-	 */
-	static String getResourceString(String key, Object[] args) {
-		try {
-			return MessageFormat.format(getResourceString(key), args);
-		} catch (MissingResourceException e) {
-			return key;
-		} catch (NullPointerException e) {
-			return "!" + key + "!";
-		}
 	}
 
 	/**
@@ -292,11 +226,11 @@ public class FileViewer {
 	private void createFileMenu(Menu parent) {
 		Menu menu = new Menu(parent);
 		MenuItem header = new MenuItem(parent, SWT.CASCADE);
-		header.setText(getResourceString("menu.File.text"));
+		header.setText(Utils.getResourceString("menu.File.text"));
 		header.setMenu(menu);
 
 		final MenuItem simulateItem = new MenuItem(menu, SWT.CHECK);
-		simulateItem.setText(getResourceString("menu.File.SimulateOnly.text"));
+		simulateItem.setText(Utils.getResourceString("menu.File.SimulateOnly.text"));
 		simulateItem.setSelection(simulateOnly);
 		simulateItem.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -306,7 +240,7 @@ public class FileViewer {
 		});
 
 		MenuItem item = new MenuItem(menu, SWT.PUSH);
-		item.setText(getResourceString("menu.File.Close.text"));
+		item.setText(Utils.getResourceString("menu.File.Close.text"));
 		item.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -325,18 +259,17 @@ public class FileViewer {
 	private void createHelpMenu(Menu parent) {
 		Menu menu = new Menu(parent);
 		MenuItem header = new MenuItem(parent, SWT.CASCADE);
-		header.setText(getResourceString("menu.Help.text"));
+		header.setText(Utils.getResourceString("menu.Help.text"));
 		header.setMenu(menu);
 
 		MenuItem item = new MenuItem(menu, SWT.PUSH);
-		item.setText(getResourceString("menu.Help.About.text"));
+		item.setText(Utils.getResourceString("menu.Help.About.text"));
 		item.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				MessageBox box = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_INFORMATION | SWT.OK);
-				box.setText(getResourceString("dialog.About.title"));
-				box.setMessage(
-						getResourceString("dialog.About.description", new Object[] { System.getProperty("os.name") }));
+				box.setText(Utils.getResourceString("dialog.About.title"));
+				box.setMessage(Utils.getResourceString("dialog.About.description", new Object[] { System.getProperty("os.name") }));
 				box.open();
 			}
 		});
@@ -357,7 +290,7 @@ public class FileViewer {
 		ToolItem item = new ToolItem(toolBar, SWT.SEPARATOR);
 		item = new ToolItem(toolBar, SWT.PUSH);
 		item.setImage(getIconCache().stockImages[getIconCache().cmdParent]);
-		item.setToolTipText(getResourceString("tool.Parent.tiptext"));
+		item.setToolTipText(Utils.getResourceString("tool.Parent.tiptext"));
 		item.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -366,7 +299,7 @@ public class FileViewer {
 		});
 		item = new ToolItem(toolBar, SWT.PUSH);
 		item.setImage(getIconCache().stockImages[getIconCache().cmdRefresh]);
-		item.setToolTipText(getResourceString("tool.Refresh.tiptext"));
+		item.setToolTipText(Utils.getResourceString("tool.Refresh.tiptext"));
 		item.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -376,7 +309,7 @@ public class FileViewer {
 
 		item = new ToolItem(toolBar, SWT.PUSH);
 		item.setImage(getIconCache().stockImages[getIconCache().cmdLayoutEdit]);
-		item.setToolTipText(getResourceString("tool.LayoutEdit.tiptext"));
+		item.setToolTipText(Utils.getResourceString("tool.LayoutEdit.tiptext"));
 		item.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
@@ -484,7 +417,7 @@ public class FileViewer {
 		composite.setLayout(gridLayout);
 
 		treeScopeLabel = new Label(composite, SWT.BORDER);
-		treeScopeLabel.setText(FileViewer.getResourceString("details.AllFolders.text"));
+		treeScopeLabel.setText(Utils.getResourceString("details.AllFolders.text"));
 		treeScopeLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL));
 
 		tree = new Tree(composite, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.SINGLE);
@@ -663,7 +596,7 @@ public class FileViewer {
 				continue;
 			}
 			final File masterFile = masterFiles[masterIndex];
-			int compare = compareFiles(masterFile, itemFile);
+			int compare = Utils.compareFiles(masterFile, itemFile);
 			if (compare == 0) {
 				// same file, update it
 				treeRefreshItem(item, false);
@@ -717,7 +650,7 @@ public class FileViewer {
 		dirItem.setData(TREEITEMDATA_STUB, this); // clear stub flag
 
 		/* Get directory listing */
-		File[] subFiles = (dir != null) ? FileViewer.getDirectoryList(dir) : null;
+		File[] subFiles = (dir != null) ? Utils.getDirectoryList(dir) : null;
 		if (subFiles == null || subFiles.length == 0) {
 			/* Error or no contents */
 			treeItemRemoveAll(dirItem);
@@ -745,7 +678,7 @@ public class FileViewer {
 				item.dispose();
 				continue;
 			}
-			int compare = compareFiles(masterFile, itemFile);
+			int compare = Utils.compareFiles(masterFile, itemFile);
 			if (compare == 0) {
 				// same file, update it
 				treeRefreshItem(item, false);
@@ -1078,19 +1011,19 @@ public class FileViewer {
 		 * Details: Update the details that are visible on screen.
 		 */
 		if ((files != null) && (files.length != 0)) {
-			numObjectsLabel.setText(getResourceString("details.NumberOfSelectedFiles.text",
+			numObjectsLabel.setText(Utils.getResourceString("details.NumberOfSelectedFiles.text",
 					new Object[] { new Integer(files.length) }));
 			long fileSize = 0L;
 			for (int i = 0; i < files.length; ++i) {
 				fileSize += files[i].length();
 			}
-			diskSpaceLabel.setText(getResourceString("details.FileSize.text", new Object[] { new Long(fileSize) }));
+			diskSpaceLabel.setText(Utils.getResourceString("details.FileSize.text", new Object[] { new Long(fileSize) }));
 		} else {
 			// No files selected
 			diskSpaceLabel.setText("");
 			if (currentDirectory != null) {
-				int numObjects = getDirectoryList(currentDirectory).length;
-				numObjectsLabel.setText(
+				int numObjects = Utils.getDirectoryList(currentDirectory).length;
+				numObjectsLabel.setText(Utils.
 						getResourceString("details.DirNumberOfObjects.text", new Object[] { new Integer(numObjects) }));
 			} else {
 				numObjectsLabel.setText("");
@@ -1350,8 +1283,8 @@ public class FileViewer {
 						// bits that
 						// may not have been transferred successfully.
 						MessageBox box = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_ERROR | SWT.RETRY | SWT.CANCEL);
-						box.setText(getResourceString("dialog.FailedCopy.title"));
-						box.setMessage(
+						box.setText(Utils.getResourceString("dialog.FailedCopy.title"));
+						box.setMessage(Utils.
 								getResourceString("dialog.FailedCopy.description", new Object[] { source, dest }));
 						int button = box.open();
 						if (button == SWT.CANCEL) {
@@ -1365,8 +1298,8 @@ public class FileViewer {
 						// to this application since it will look at
 						// processedDropFiles.
 						MessageBox box = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_ERROR | SWT.ABORT | SWT.RETRY | SWT.IGNORE);
-						box.setText(getResourceString("dialog.FailedCopy.title"));
-						box.setMessage(
+						box.setText(Utils.getResourceString("dialog.FailedCopy.title"));
+						box.setMessage(Utils.
 								getResourceString("dialog.FailedCopy.description", new Object[] { source, dest }));
 						int button = box.open();
 						if (button == SWT.ABORT)
@@ -1431,8 +1364,8 @@ public class FileViewer {
 					break;
 				} else if (!progressDialog.isCancelled()) {
 					MessageBox box = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_ERROR | SWT.ABORT | SWT.RETRY | SWT.IGNORE);
-					box.setText(getResourceString("dialog.FailedDelete.title"));
-					box.setMessage(getResourceString("dialog.FailedDelete.description", new Object[] { source }));
+					box.setText(Utils.getResourceString("dialog.FailedDelete.title"));
+					box.setMessage(Utils.getResourceString("dialog.FailedDelete.description", new Object[] { source }));
 					int button = box.open();
 					if (button == SWT.ABORT)
 						i = sourceNames.length;
@@ -1477,7 +1410,7 @@ public class FileViewer {
 				}
 			}
 			File[] roots = list.toArray(new File[list.size()]);
-			sortFiles(roots);
+			Utils.sortFiles(roots);
 			return roots;
 		}
 		File root = new File(File.separator);
@@ -1486,22 +1419,6 @@ public class FileViewer {
 			initial = false;
 		}
 		return new File[] { root };
-	}
-
-	/**
-	 * Gets a directory listing
-	 * 
-	 * @param file
-	 *            the directory to be listed
-	 * @return an array of files this directory contains, may be empty but not
-	 *         null
-	 */
-	static File[] getDirectoryList(File file) {
-		File[] list = file.listFiles();
-		if (list == null)
-			return new File[0];
-		sortFiles(list);
-		return list;
 	}
 
 	/**
@@ -1634,60 +1551,6 @@ public class FileViewer {
 		return oldFile.delete();
 	}
 
-	/**
-	 * Sorts files lexicographically by name.
-	 * 
-	 * @param files
-	 *            the array of Files to be sorted
-	 */
-	static void sortFiles(File[] files) {
-		/* Very lazy merge sort algorithm */
-		sortBlock(files, 0, files.length - 1, new File[files.length]);
-	}
-
-	private static void sortBlock(File[] files, int start, int end, File[] mergeTemp) {
-		final int length = end - start + 1;
-		if (length < 8) {
-			for (int i = end; i > start; --i) {
-				for (int j = end; j > start; --j) {
-					if (compareFiles(files[j - 1], files[j]) > 0) {
-						final File temp = files[j];
-						files[j] = files[j - 1];
-						files[j - 1] = temp;
-					}
-				}
-			}
-			return;
-		}
-		final int mid = (start + end) / 2;
-		sortBlock(files, start, mid, mergeTemp);
-		sortBlock(files, mid + 1, end, mergeTemp);
-		int x = start;
-		int y = mid + 1;
-		for (int i = 0; i < length; ++i) {
-			if ((x > mid) || ((y <= end) && compareFiles(files[x], files[y]) > 0)) {
-				mergeTemp[i] = files[y++];
-			} else {
-				mergeTemp[i] = files[x++];
-			}
-		}
-		for (int i = 0; i < length; ++i)
-			files[i + start] = mergeTemp[i];
-	}
-
-	private static int compareFiles(File a, File b) {
-		// boolean aIsDir = a.isDirectory();
-		// boolean bIsDir = b.isDirectory();
-		// if (aIsDir && ! bIsDir) return -1;
-		// if (bIsDir && ! aIsDir) return 1;
-
-		// sort case-sensitive files in a case-insensitive manner
-		int compare = a.getName().compareToIgnoreCase(b.getName());
-		if (compare == 0)
-			compare = a.getName().compareTo(b.getName());
-		return compare;
-	}
-
 	/*
 	 * This worker updates the table with file information in the background.
 	 * <p> Implementation notes: <ul> <li> It is designed such that it can be
@@ -1778,13 +1641,13 @@ public class FileViewer {
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {
-				tableContentsOfLabel.setText(FileViewer.getResourceString("details.ContentsOf.text",
+				tableContentsOfLabel.setText(Utils.getResourceString("details.ContentsOf.text",
 						new Object[] { workerStateDir.getPath() }));
 				table.removeAll();
 				table.setData(TABLEDATA_DIR, workerStateDir);
 			}
 		});
-		dirList = getDirectoryList(workerStateDir);
+		dirList = Utils.getDirectoryList(workerStateDir);
 
 		for (int i = 0; (!workerCancelled) && (i < dirList.length); i++) {
 			workerAddFileDetails(dirList[i]);
@@ -1803,11 +1666,11 @@ public class FileViewer {
 		final Image iconImage;
 
 		if (file.isDirectory()) {
-			typeString = getResourceString("filetype.Folder");
+			typeString = Utils.getResourceString("filetype.Folder");
 			sizeString = "";
 			iconImage = getIconCache().stockImages[getIconCache().iconClosedFolder];
 		} else {
-			sizeString = getResourceString("filesize.KB", new Object[] { new Long((file.length() + 512) / 1024) });
+			sizeString = Utils.getResourceString("filesize.KB", new Object[] { new Long((file.length() + 512) / 1024) });
 
 			int dot = nameString.lastIndexOf('.');
 			if (dot != -1) {
@@ -1817,11 +1680,11 @@ public class FileViewer {
 					typeString = program.getName();
 					iconImage = getIconCache().getIconFromProgram(program);
 				} else {
-					typeString = getResourceString("filetype.Unknown", new Object[] { extension.toUpperCase() });
+					typeString = Utils.getResourceString("filetype.Unknown", new Object[] { extension.toUpperCase() });
 					iconImage = getIconCache().stockImages[getIconCache().iconFile];
 				}
 			} else {
-				typeString = getResourceString("filetype.None");
+				typeString = Utils.getResourceString("filetype.None");
 				iconImage = getIconCache().stockImages[getIconCache().iconFile];
 			}
 		}
@@ -1847,161 +1710,6 @@ public class FileViewer {
 
 	public void setIconCache(IconCache iconCache) {
 		this.iconCache = iconCache;
-	}
-
-	/**
-	 * Instances of this class manage a progress dialog for file operations.
-	 */
-	class ProgressDialog {
-		public final static int COPY = 0;
-		public final static int DELETE = 1;
-		public final static int MOVE = 2;
-
-		Shell shell;
-		Label messageLabel, detailLabel;
-		ProgressBar progressBar;
-		Button cancelButton;
-		boolean isCancelled = false;
-
-		final String operationKeyName[] = { "Copy", "Delete", "Move" };
-
-		/**
-		 * Creates a progress dialog but does not open it immediately.
-		 * 
-		 * @param parent
-		 *            the parent Shell
-		 * @param style
-		 *            one of COPY, MOVE
-		 */
-		public ProgressDialog(Shell parent, int style) {
-			shell = new Shell(parent, SWT.BORDER | SWT.TITLE | SWT.APPLICATION_MODAL);
-			GridLayout gridLayout = new GridLayout();
-			shell.setLayout(gridLayout);
-			shell.setText(getResourceString("progressDialog." + operationKeyName[style] + ".title"));
-			shell.addShellListener(new ShellAdapter() {
-				@Override
-				public void shellClosed(ShellEvent e) {
-					isCancelled = true;
-				}
-			});
-
-			messageLabel = new Label(shell, SWT.HORIZONTAL);
-			messageLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL));
-			messageLabel.setText(getResourceString("progressDialog." + operationKeyName[style] + ".description"));
-
-			progressBar = new ProgressBar(shell, SWT.HORIZONTAL | SWT.WRAP);
-			progressBar.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL));
-			progressBar.setMinimum(0);
-			progressBar.setMaximum(0);
-
-			detailLabel = new Label(shell, SWT.HORIZONTAL);
-			GridData gridData = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
-			gridData.widthHint = 400;
-			detailLabel.setLayoutData(gridData);
-
-			cancelButton = new Button(shell, SWT.PUSH);
-			cancelButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.VERTICAL_ALIGN_FILL));
-			cancelButton.setText(getResourceString("progressDialog.cancelButton.text"));
-			cancelButton.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					isCancelled = true;
-					cancelButton.setEnabled(false);
-				}
-			});
-		}
-
-		/**
-		 * Sets the detail text to show the filename along with a string
-		 * representing the operation being performed on that file.
-		 * 
-		 * @param file
-		 *            the file to be detailed
-		 * @param operation
-		 *            one of COPY, DELETE
-		 */
-		public void setDetailFile(File file, int operation) {
-			detailLabel.setText(getResourceString("progressDialog." + operationKeyName[operation] + ".operation",
-					new Object[] { file }));
-		}
-
-		/**
-		 * Returns true if the Cancel button was been clicked.
-		 * 
-		 * @return true if the Cancel button was clicked.
-		 */
-		public boolean isCancelled() {
-			return isCancelled;
-		}
-
-		/**
-		 * Sets the total number of work units to be performed.
-		 * 
-		 * @param work
-		 *            the total number of work units
-		 */
-		public void setTotalWorkUnits(int work) {
-			progressBar.setMaximum(work);
-		}
-
-		/**
-		 * Adds to the total number of work units to be performed.
-		 * 
-		 * @param work
-		 *            the number of work units to add
-		 */
-		public void addWorkUnits(int work) {
-			setTotalWorkUnits(progressBar.getMaximum() + work);
-		}
-
-		/**
-		 * Sets the progress of completion of the total work units.
-		 * 
-		 * @param work
-		 *            the total number of work units completed
-		 */
-		public void setProgress(int work) {
-			progressBar.setSelection(work);
-			while (Display.getDefault().readAndDispatch()) {
-			} // enable event processing
-		}
-
-		/**
-		 * Adds to the progress of completion of the total work units.
-		 * 
-		 * @param work
-		 *            the number of work units completed to add
-		 */
-		public void addProgress(int work) {
-			setProgress(progressBar.getSelection() + work);
-		}
-
-		/**
-		 * Opens the dialog.
-		 */
-		public void open() {
-			shell.pack();
-			final Shell parentShell = (Shell) shell.getParent();
-			Rectangle rect = parentShell.getBounds();
-			Rectangle bounds = shell.getBounds();
-			bounds.x = rect.x + (rect.width - bounds.width) / 2;
-			bounds.y = rect.y + (rect.height - bounds.height) / 2;
-			shell.setBounds(bounds);
-			shell.open();
-		}
-
-		/**
-		 * Closes the dialog and disposes its resources.
-		 */
-		public void close() {
-			shell.close();
-			shell.dispose();
-			shell = null;
-			messageLabel = null;
-			detailLabel = null;
-			progressBar = null;
-			cancelButton = null;
-		}
 	}
 
 	public void setCurrentDirectory(String savedDirectory) {
