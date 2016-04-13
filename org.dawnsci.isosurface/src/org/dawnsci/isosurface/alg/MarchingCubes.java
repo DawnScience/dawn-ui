@@ -218,7 +218,6 @@ public class MarchingCubes {
 			}
 			return new Object[]{triangles, sharedMap};
 		}
-		
 		return null;
 	}
 	

@@ -68,7 +68,7 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public void setData(IDataset points, IDataset textCoords, IDataset faces, List<? extends IDataset> axes)
+	public void setData(IDataset points, IDataset textCoords, IDataset faces, List<? extends IDataset> axisDataset)
 	{
 		if (this.isosurface == null)
 		{
@@ -78,8 +78,19 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 		this.points = DatasetUtils.convertToDataset(points);
 		this.textCoords = DatasetUtils.convertToDataset(textCoords);
 		this.faces = DatasetUtils.convertToDataset(faces);
-		this.axes = (List<IDataset>) axes;
-				
+		this.axes = (List<IDataset>) axisDataset;
+
+		Display.getDefault().syncExec(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				if (axes != null)
+					scene.setAxesData(axes); 
+			}
+		});
+		
+		
 		if (Platform.isFxApplicationThread())
 		{
 			update();

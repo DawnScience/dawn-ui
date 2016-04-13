@@ -36,9 +36,7 @@ public class PlaneTrace extends Image3DTrace implements IJavafxPlaneTrace
 	@Override
 	public void setData(final int[] size, final IDataset data, final double[] offsets, final double[] planeNormal) 
 	{
-
 		final PaletteService pservice = (PaletteService) ServiceLoader.getPaletteService();
-		
 		
 		imagePlane = new ImagePlane(
 				new Point2D(size[0], size[1]), 
@@ -46,7 +44,6 @@ public class PlaneTrace extends Image3DTrace implements IJavafxPlaneTrace
 				new Point3D(offsets[0], offsets[1], offsets[2]), 
 				new Point3D(planeNormal[0],planeNormal[1],planeNormal[2]),
 				pservice);
-		
 		
 	}
 	
@@ -60,5 +57,6 @@ public class PlaneTrace extends Image3DTrace implements IJavafxPlaneTrace
 		// TODO Auto-generated method stub
 		
 	}
+	
 
 }
