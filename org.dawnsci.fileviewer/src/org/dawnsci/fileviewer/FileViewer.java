@@ -12,10 +12,6 @@
 package org.dawnsci.fileviewer;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -560,7 +556,7 @@ public class FileViewer {
 	 * @param dir
 	 *            the directory that was selected, null is ignored
 	 */
-	void notifySelectedDirectory(File dir) {
+	private void notifySelectedDirectory(File dir) {
 		if (dir == null)
 			return;
 		if (currentDirectory != null && dir.equals(currentDirectory))
@@ -645,7 +641,7 @@ public class FileViewer {
 	 *            the files that were selected, null or empty array indicates no
 	 *            active selection
 	 */
-	void notifySelectedFiles(File[] files) {
+	private void notifySelectedFiles(File[] files) {
 		/*
 		 * Details: Update the details that are visible on screen.
 		 */
@@ -697,7 +693,7 @@ public class FileViewer {
 	/**
 	 * Handles deferred Refresh notifications (due to Drag & Drop)
 	 */
-	void handleDeferredRefresh() {
+	public void handleDeferredRefresh() {
 		if (isDragging || isDropping || !deferredRefreshRequested)
 			return;
 		if (progressDialog != null) {
@@ -899,7 +895,7 @@ public class FileViewer {
 
 			progressDialog.setDetailFile(source, ProgressDialog.COPY);
 			while (!progressDialog.isCancelled()) {
-				if (copyFileStructure(source, dest)) {
+				if (FileUtils.copyFileStructure(source, dest, simulateOnly, progressDialog)) {
 					processedFiles.add(source);
 					break;
 				} else if (!progressDialog.isCancelled()) {
@@ -991,7 +987,7 @@ public class FileViewer {
 			final File source = sourceFiles[i];
 			progressDialog.setDetailFile(source, ProgressDialog.DELETE);
 			while (!progressDialog.isCancelled()) {
-				if (deleteFileStructure(source)) {
+				if (FileUtils.deleteFileStructure(source, simulateOnly, progressDialog)) {
 					break;
 				} else if (!progressDialog.isCancelled()) {
 					MessageBox box = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_ERROR | SWT.ABORT | SWT.RETRY | SWT.IGNORE);
@@ -1050,136 +1046,6 @@ public class FileViewer {
 			initial = false;
 		}
 		return new File[] { root };
-	}
-
-	/**
-	 * Copies a file or entire directory structure.
-	 * 
-	 * @param oldFile
-	 *            the location of the old file or directory
-	 * @param newFile
-	 *            the location of the new file or directory
-	 * @return true iff the operation succeeds without errors
-	 */
-	private boolean copyFileStructure(File oldFile, File newFile) {
-		if (oldFile == null || newFile == null)
-			return false;
-
-		// ensure that newFile is not a child of oldFile or a dupe
-		File searchFile = newFile;
-		do {
-			if (oldFile.equals(searchFile))
-				return false;
-			searchFile = searchFile.getParentFile();
-		} while (searchFile != null);
-
-		if (oldFile.isDirectory()) {
-			/*
-			 * Copy a directory
-			 */
-			if (progressDialog != null) {
-				progressDialog.setDetailFile(oldFile, ProgressDialog.COPY);
-			}
-			if (simulateOnly) {
-				// System.out.println(getResourceString("simulate.DirectoriesCreated.text",
-				// new Object[] { newFile.getPath() }));
-			} else {
-				if (!newFile.mkdirs())
-					return false;
-			}
-			File[] subFiles = oldFile.listFiles();
-			if (subFiles != null) {
-				if (progressDialog != null) {
-					progressDialog.addWorkUnits(subFiles.length);
-				}
-				for (int i = 0; i < subFiles.length; i++) {
-					File oldSubFile = subFiles[i];
-					File newSubFile = new File(newFile, oldSubFile.getName());
-					if (!copyFileStructure(oldSubFile, newSubFile))
-						return false;
-					if (progressDialog != null) {
-						progressDialog.addProgress(1);
-						if (progressDialog.isCancelled())
-							return false;
-					}
-				}
-			}
-		} else {
-			/*
-			 * Copy a file
-			 */
-			if (simulateOnly) {
-				// System.out.println(getResourceString("simulate.CopyFromTo.text",
-				// new Object[] { oldFile.getPath(), newFile.getPath() }));
-			} else {
-				FileReader in = null;
-				FileWriter out = null;
-				try {
-					in = new FileReader(oldFile);
-					out = new FileWriter(newFile);
-
-					int count;
-					while ((count = in.read()) != -1)
-						out.write(count);
-				} catch (FileNotFoundException e) {
-					return false;
-				} catch (IOException e) {
-					return false;
-				} finally {
-					try {
-						if (in != null)
-							in.close();
-						if (out != null)
-							out.close();
-					} catch (IOException e) {
-						return false;
-					}
-				}
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * Deletes a file or entire directory structure.
-	 * 
-	 * @param oldFile
-	 *            the location of the old file or directory
-	 * @return true iff the operation succeeds without errors
-	 */
-	private boolean deleteFileStructure(File oldFile) {
-		if (oldFile == null)
-			return false;
-		if (oldFile.isDirectory()) {
-			/*
-			 * Delete a directory
-			 */
-			if (progressDialog != null) {
-				progressDialog.setDetailFile(oldFile, ProgressDialog.DELETE);
-			}
-			File[] subFiles = oldFile.listFiles();
-			if (subFiles != null) {
-				if (progressDialog != null) {
-					progressDialog.addWorkUnits(subFiles.length);
-				}
-				for (int i = 0; i < subFiles.length; i++) {
-					File oldSubFile = subFiles[i];
-					if (!deleteFileStructure(oldSubFile))
-						return false;
-					if (progressDialog != null) {
-						progressDialog.addProgress(1);
-						if (progressDialog.isCancelled())
-							return false;
-					}
-				}
-			}
-		}
-		if (simulateOnly) {
-			// System.out.println(getResourceString("simulate.Delete.text",
-			// new Object[] { oldFile.getPath(), oldFile.getPath() }));
-			return true;
-		}
-		return oldFile.delete();
 	}
 
 	/*
