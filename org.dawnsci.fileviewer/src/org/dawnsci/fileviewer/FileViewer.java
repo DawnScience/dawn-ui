@@ -21,9 +21,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.dawb.common.ui.util.EclipseUtils;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.dnd.DND;
@@ -49,8 +46,6 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -181,65 +176,6 @@ public class FileViewer {
 		gridData = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL);
 //		gridData.horizontalSpan = 1;
 		diskSpaceLabel.setLayoutData(gridData);
-	}
-
-	/**
-	 * Creates the File Menu.
-	 * 
-	 * @param parent
-	 *            the parent menu
-	 */
-	@SuppressWarnings("unused")
-	private void createFileMenu(Menu parent) {
-		Menu menu = new Menu(parent);
-		MenuItem header = new MenuItem(parent, SWT.CASCADE);
-		header.setText(Utils.getResourceString("menu.File.text"));
-		header.setMenu(menu);
-
-		final MenuItem simulateItem = new MenuItem(menu, SWT.CHECK);
-		simulateItem.setText(Utils.getResourceString("menu.File.SimulateOnly.text"));
-		simulateItem.setSelection(simulateOnly);
-		simulateItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				simulateOnly = simulateItem.getSelection();
-			}
-		});
-
-		MenuItem item = new MenuItem(menu, SWT.PUSH);
-		item.setText(Utils.getResourceString("menu.File.Close.text"));
-		item.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-//				parent.close();
-			}
-		});
-	}
-
-	/**
-	 * Creates the Help Menu.
-	 * 
-	 * @param parent
-	 *            the parent menu
-	 */
-	@SuppressWarnings("unused")
-	private void createHelpMenu(Menu parent) {
-		Menu menu = new Menu(parent);
-		MenuItem header = new MenuItem(parent, SWT.CASCADE);
-		header.setText(Utils.getResourceString("menu.Help.text"));
-		header.setMenu(menu);
-
-		MenuItem item = new MenuItem(menu, SWT.PUSH);
-		item.setText(Utils.getResourceString("menu.Help.About.text"));
-		item.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				MessageBox box = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_INFORMATION | SWT.OK);
-				box.setText(Utils.getResourceString("dialog.About.title"));
-				box.setMessage(Utils.getResourceString("dialog.About.description", new Object[] { System.getProperty("os.name") }));
-				box.open();
-			}
-		});
 	}
 
 	/**
@@ -459,191 +395,8 @@ public class FileViewer {
 		parent.setCursor(getIconCache().stockCursors[getIconCache().cursorWait]);
 		final Object stub = item.getData(FileViewerConstants.TREEITEMDATA_STUB);
 		if (stub == null)
-			treeRefreshItem(item, true);
+			TreeUtils.treeRefreshItem(this, item, true, getIconCache());
 		parent.setCursor(getIconCache().stockCursors[getIconCache().cursorDefault]);
-	}
-
-	/**
-	 * Traverse the entire tree and update only what has changed.
-	 * 
-	 * @param roots
-	 *            the root directory listing
-	 */
-	private void treeRefresh(File[] masterFiles) {
-		TreeItem[] items = tree.getItems();
-		int masterIndex = 0;
-		int itemIndex = 0;
-		for (int i = 0; i < items.length; ++i) {
-			final TreeItem item = items[i];
-			final File itemFile = (File) item.getData(FileViewerConstants.TREEITEMDATA_FILE);
-			if ((itemFile == null) || (masterIndex == masterFiles.length)) {
-				// remove bad item or placeholder
-				item.dispose();
-				continue;
-			}
-			final File masterFile = masterFiles[masterIndex];
-			int compare = Utils.compareFiles(masterFile, itemFile);
-			if (compare == 0) {
-				// same file, update it
-				treeRefreshItem(item, false);
-				++itemIndex;
-				++masterIndex;
-			} else if (compare < 0) {
-				// should appear before file, insert it
-				TreeItem newItem = new TreeItem(tree, SWT.NONE, itemIndex);
-				treeInitVolume(newItem, masterFile);
-				new TreeItem(newItem, SWT.NONE); // placeholder child item to
-													// get "expand" button
-				++itemIndex;
-				++masterIndex;
-				--i;
-			} else {
-				// should appear after file, delete stale item
-				item.dispose();
-			}
-		}
-		for (; masterIndex < masterFiles.length; ++masterIndex) {
-			final File masterFile = masterFiles[masterIndex];
-			TreeItem newItem = new TreeItem(tree, SWT.NONE);
-			treeInitVolume(newItem, masterFile);
-			new TreeItem(newItem, SWT.NONE); // placeholder child item to get
-												// "expand" button
-		}
-	}
-
-	/**
-	 * Traverse an item in the tree and update only what has changed.
-	 * 
-	 * @param dirItem
-	 *            the tree item of the directory
-	 * @param forcePopulate
-	 *            true iff we should populate non-expanded items as well
-	 */
-	private void treeRefreshItem(TreeItem dirItem, boolean forcePopulate) {
-		final File dir = (File) dirItem.getData(FileViewerConstants.TREEITEMDATA_FILE);
-
-		if (!forcePopulate && !dirItem.getExpanded()) {
-			// Refresh non-expanded item
-			if (dirItem.getData(FileViewerConstants.TREEITEMDATA_STUB) != null) {
-				treeItemRemoveAll(dirItem);
-				new TreeItem(dirItem, SWT.NONE); // placeholder child item to
-													// get "expand" button
-				dirItem.setData(FileViewerConstants.TREEITEMDATA_STUB, null);
-			}
-			return;
-		}
-		// Refresh expanded item
-		dirItem.setData(FileViewerConstants.TREEITEMDATA_STUB, this); // clear stub flag
-
-		/* Get directory listing */
-		File[] subFiles = (dir != null) ? Utils.getDirectoryList(dir) : null;
-		if (subFiles == null || subFiles.length == 0) {
-			/* Error or no contents */
-			treeItemRemoveAll(dirItem);
-			dirItem.setExpanded(false);
-			return;
-		}
-
-		/* Refresh sub-items */
-		TreeItem[] items = dirItem.getItems();
-		final File[] masterFiles = subFiles;
-		int masterIndex = 0;
-		int itemIndex = 0;
-		File masterFile = null;
-		for (int i = 0; i < items.length; ++i) {
-			while ((masterFile == null) && (masterIndex < masterFiles.length)) {
-				masterFile = masterFiles[masterIndex++];
-				if (!masterFile.isDirectory())
-					masterFile = null;
-			}
-
-			final TreeItem item = items[i];
-			final File itemFile = (File) item.getData(FileViewerConstants.TREEITEMDATA_FILE);
-			if ((itemFile == null) || (masterFile == null)) {
-				// remove bad item or placeholder
-				item.dispose();
-				continue;
-			}
-			int compare = Utils.compareFiles(masterFile, itemFile);
-			if (compare == 0) {
-				// same file, update it
-				treeRefreshItem(item, false);
-				masterFile = null;
-				++itemIndex;
-			} else if (compare < 0) {
-				// should appear before file, insert it
-				TreeItem newItem = new TreeItem(dirItem, SWT.NONE, itemIndex);
-				treeInitFolder(newItem, masterFile);
-				new TreeItem(newItem, SWT.NONE); // add a placeholder child item
-													// so we get the "expand"
-													// button
-				masterFile = null;
-				++itemIndex;
-				--i;
-			} else {
-				// should appear after file, delete stale item
-				item.dispose();
-			}
-		}
-		while ((masterFile != null) || (masterIndex < masterFiles.length)) {
-			if (masterFile != null) {
-				TreeItem newItem = new TreeItem(dirItem, SWT.NONE);
-				treeInitFolder(newItem, masterFile);
-				new TreeItem(newItem, SWT.NONE); // add a placeholder child item
-													// so we get the "expand"
-													// button
-				if (masterIndex == masterFiles.length)
-					break;
-			}
-			masterFile = masterFiles[masterIndex++];
-			if (!masterFile.isDirectory())
-				masterFile = null;
-		}
-	}
-
-	/**
-	 * Foreign method: removes all children of a TreeItem.
-	 * 
-	 * @param treeItem
-	 *            the TreeItem
-	 */
-	private static void treeItemRemoveAll(TreeItem treeItem) {
-		final TreeItem[] children = treeItem.getItems();
-		for (TreeItem child : children) {
-			child.dispose();
-		}
-	}
-
-	/**
-	 * Initializes a folder item.
-	 * 
-	 * @param item
-	 *            the TreeItem to initialize
-	 * @param folder
-	 *            the File associated with this TreeItem
-	 */
-	private void treeInitFolder(TreeItem item, File folder) {
-		item.setText(folder.getName());
-		item.setImage(getIconCache().stockImages[getIconCache().iconClosedFolder]);
-		item.setData(FileViewerConstants.TREEITEMDATA_FILE, folder);
-		item.setData(FileViewerConstants.TREEITEMDATA_IMAGEEXPANDED, getIconCache().stockImages[getIconCache().iconOpenFolder]);
-		item.setData(FileViewerConstants.TREEITEMDATA_IMAGECOLLAPSED, getIconCache().stockImages[getIconCache().iconClosedFolder]);
-	}
-
-	/**
-	 * Initializes a volume item.
-	 * 
-	 * @param item
-	 *            the TreeItem to initialize
-	 * @param volume
-	 *            the File associated with this TreeItem
-	 */
-	private void treeInitVolume(TreeItem item, File volume) {
-		item.setText(volume.getPath());
-		item.setImage(getIconCache().stockImages[getIconCache().iconClosedDrive]);
-		item.setData(FileViewerConstants.TREEITEMDATA_FILE, volume);
-		item.setData(FileViewerConstants.TREEITEMDATA_IMAGEEXPANDED, getIconCache().stockImages[getIconCache().iconOpenDrive]);
-		item.setData(FileViewerConstants.TREEITEMDATA_IMAGECOLLAPSED, getIconCache().stockImages[getIconCache().iconClosedDrive]);
 	}
 
 	/**
@@ -1015,7 +768,7 @@ public class FileViewer {
 		 * Tree view: Refreshes information about any files in the list and
 		 * their children.
 		 */
-		treeRefresh(roots);
+		TreeUtils.treeRefresh(roots, tree, this, getIconCache());
 
 		// Remind everyone where we are in the filesystem
 		final File dir = currentDirectory;
@@ -1031,7 +784,7 @@ public class FileViewer {
 	 * @param files
 	 *            the array of files to process
 	 */
-	void doDefaultFileAction(File[] files) {
+	private void doDefaultFileAction(File[] files) {
 		// only uses the 1st file (for now)
 		if (files.length == 0)
 			return;
@@ -1040,7 +793,7 @@ public class FileViewer {
 		if (file.isDirectory()) {
 			notifySelectedDirectory(file);
 		} else {
-			final IOpenFileAction action = getFirstPertinentAction();
+			final IOpenFileAction action = Utils.getFirstPertinentAction();
 			if (action!=null) {
 				action.openFile(file.toPath());
 				return;
@@ -1051,25 +804,6 @@ public class FileViewer {
 			} catch (PartInitException e) {
 				logger.error("Cannot open file " + file, e);
 			}
-		}
-	}
-
-	private IOpenFileAction getFirstPertinentAction() {
-		try {
-			IConfigurationElement[] eles = Platform.getExtensionRegistry()
-					.getConfigurationElementsFor(FileViewerConstants.OPEN_FILE_EXTENSION_POINT);
-			final String perspectiveId = EclipseUtils.getPage().getPerspective().getId();
-
-			for (IConfigurationElement e : eles) {
-				final String perspective = e.getAttribute("perspective");
-				if (perspectiveId.equals(perspective) || perspective == null) {
-					return (IOpenFileAction) e.createExecutableExtension("class");
-				}
-			}
-			return null;
-		} catch (CoreException coreEx) {
-			coreEx.printStackTrace();
-			return null;
 		}
 	}
 
@@ -1283,7 +1017,7 @@ public class FileViewer {
 	 * @return an array of Files corresponding to the root directories on the
 	 *         platform, may be empty but not null
 	 */
-	File[] getRoots() {
+	private File[] getRoots() {
 		/*
 		 * On JDK 1.22 only...
 		 */
@@ -1327,7 +1061,7 @@ public class FileViewer {
 	 *            the location of the new file or directory
 	 * @return true iff the operation succeeds without errors
 	 */
-	boolean copyFileStructure(File oldFile, File newFile) {
+	private boolean copyFileStructure(File oldFile, File newFile) {
 		if (oldFile == null || newFile == null)
 			return false;
 
@@ -1413,7 +1147,7 @@ public class FileViewer {
 	 *            the location of the old file or directory
 	 * @return true iff the operation succeeds without errors
 	 */
-	boolean deleteFileStructure(File oldFile) {
+	private boolean deleteFileStructure(File oldFile) {
 		if (oldFile == null)
 			return false;
 		if (oldFile.isDirectory()) {
@@ -1460,7 +1194,7 @@ public class FileViewer {
 	/**
 	 * Stops the worker and waits for it to terminate.
 	 */
-	void workerStop() {
+	private void workerStop() {
 		if (workerThread == null)
 			return;
 		synchronized (workerLock) {
@@ -1483,7 +1217,7 @@ public class FileViewer {
 	 * @param force
 	 *            if true causes a refresh even if the data is the same
 	 */
-	void workerUpdate(File dir, boolean force) {
+	private void workerUpdate(File dir, boolean force) {
 		if (dir == null)
 			return;
 		if ((!force) && (workerNextDir != null) && (workerNextDir.equals(dir)))

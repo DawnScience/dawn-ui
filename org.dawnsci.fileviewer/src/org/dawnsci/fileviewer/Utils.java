@@ -16,6 +16,13 @@ import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.dawb.common.ui.util.EclipseUtils;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
+
+import uk.ac.diamond.sda.navigator.views.IOpenFileAction;
+
 public class Utils {
 
 	private static ResourceBundle resourceBundle = ResourceBundle.getBundle("file_viewer");
@@ -59,7 +66,7 @@ public class Utils {
 		sortBlock(files, 0, files.length - 1, new File[files.length]);
 	}
 
-	public static void sortBlock(File[] files, int start, int end, File[] mergeTemp) {
+	private static void sortBlock(File[] files, int start, int end, File[] mergeTemp) {
 		final int length = end - start + 1;
 		if (length < 8) {
 			for (int i = end; i > start; --i) {
@@ -116,5 +123,28 @@ public class Utils {
 			return new File[0];
 		sortFiles(list);
 		return list;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public static IOpenFileAction getFirstPertinentAction() {
+		try {
+			IConfigurationElement[] eles = Platform.getExtensionRegistry()
+					.getConfigurationElementsFor(FileViewerConstants.OPEN_FILE_EXTENSION_POINT);
+			final String perspectiveId = EclipseUtils.getPage().getPerspective().getId();
+
+			for (IConfigurationElement e : eles) {
+				final String perspective = e.getAttribute("perspective");
+				if (perspectiveId.equals(perspective) || perspective == null) {
+					return (IOpenFileAction) e.createExecutableExtension("class");
+				}
+			}
+			return null;
+		} catch (CoreException coreEx) {
+			coreEx.printStackTrace();
+			return null;
+		}
 	}
 }
