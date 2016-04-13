@@ -14,7 +14,6 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
-import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.AmbientLight;
 import javafx.scene.Camera;
@@ -27,11 +26,8 @@ import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Cylinder;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
-import javafx.scene.transform.Transform;
-import javafx.scene.transform.TransformChangedEvent;
 import javafx.scene.transform.Translate;
 
 import javax.vecmath.Matrix3d;
@@ -98,7 +94,7 @@ public class SurfaceDisplayer extends Scene
 		
 		// create the scene
 		super(root, 1500, 1500, true);
-				
+		
 		this.root = root;
 		this.isosurfaceGroup = isosurfaceGroup;
 				
@@ -110,7 +106,7 @@ public class SurfaceDisplayer extends Scene
 		this.parallelCamera.setFieldOfView(0.01);
 				
 		this.currentCamera = perspectiveCamera;
-				
+		
 		initialiseCamera();
 		initlialiseGroups();
 		createScaleAxisGroup();
@@ -196,8 +192,8 @@ public class SurfaceDisplayer extends Scene
 		this.rotate = new Rotate();
 		
 		this.scaleAxesGroup.getTransforms().addAll();
-		
-		this.objectGroup.getTransforms().addAll(isoGroupOffset, scaleZoom);
+				
+		this.objectGroup.getTransforms().addAll(scaleZoom, isoGroupOffset);
 				
 		this.cameraGroup.getTransforms().addAll(rotate);
 		
@@ -412,12 +408,6 @@ public class SurfaceDisplayer extends Scene
 	
 	private void zoom(double amount)
 	{
-		Point3D pivot = findMidPointOfBounds(this.objectGroup.getBoundsInLocal());
-		
-		scaleZoom.setPivotX(-pivot.getX());
-		scaleZoom.setPivotY(-pivot.getY());
-		scaleZoom.setPivotZ(-pivot.getZ());
-		
 		double delta = ((((amount * MOUSE_MOVEMENT_MOD)/10)) * 0.05);
 		
 		scaleZoom.setX(Math.abs(scaleZoom.getX() * (1 + delta)));
