@@ -1,17 +1,15 @@
 package org.dawnsci.isosurface.isogui;
 
-import org.eclipse.richbeans.api.event.ValueListener;
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.richbeans.api.widget.IFieldWidget;
-import org.eclipse.richbeans.widgets.BoundsProvider;
 import org.eclipse.richbeans.widgets.scalebox.NumberBox;
 import org.eclipse.richbeans.widgets.scalebox.ScaleBox;
 import org.eclipse.richbeans.widgets.wrappers.ColorSelectorWrapper;
 import org.eclipse.richbeans.widgets.wrappers.ScaleWrapper;
 import org.eclipse.richbeans.widgets.wrappers.SpinnerWrapper;
-import org.eclipse.richbeans.widgets.wrappers.TextWrapper;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -21,13 +19,12 @@ import org.eclipse.swt.widgets.Label;
 
 public class IsoItemComposite extends Composite
 {
-	private TextWrapper name;
 	private NumberBox value;
 	private ScaleWrapper opacity;
 	private SpinnerWrapper x, y, z;
 	private ColorSelectorWrapper colour;
 	
-	public IsoItemComposite(Composite parent, int style)
+	public IsoItemComposite(Composite parent)
 	{
 		super(parent, SWT.FILL);
 		createUI();
@@ -38,21 +35,8 @@ public class IsoItemComposite extends Composite
 	 */
 	private void createUI()
 	{
-		
-		// generate the GUI
-		GridLayout gridLayout = new GridLayout(7, false);
-		setLayout(gridLayout);
-				
-		Label nameLabel = new Label(this, SWT.NONE);
-		nameLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false, 1, 1));
-		nameLabel.setText("Name ");
-		
-		name = new TextWrapper(this, SWT.BORDER);
-		GridData gridDataText = new GridData(SWT.FILL, SWT.CENTER, true, false, 5, 1);
-		name.setLayoutData(gridDataText);
-
-		new Label(this, SWT.NONE);
-		
+		setLayout(new GridLayout(7, false));
+						
 		Label lblIsosurfaceValue = new Label(this, SWT.NONE);
 		lblIsosurfaceValue.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false, 1, 1));
 		lblIsosurfaceValue.setText("Isosurface Value ");
@@ -69,61 +53,19 @@ public class IsoItemComposite extends Composite
 		lblCubeSize.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false, 1, 1));
 		lblCubeSize.setText("Cuboid Size ");
 		
-		x = new SpinnerWrapper(this, SWT.BORDER);
-		GridData xgd = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
-		xgd.widthHint = 60;
-		x.setLayoutData(xgd);
-		x.setMaximum(999);
-		
-		y = new SpinnerWrapper(this, SWT.BORDER);
-		GridData ygd = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
-		ygd.widthHint = 60;
-		y.setLayoutData(ygd);
-		y.setMaximum(999);
-		
-		z = new SpinnerWrapper(this, SWT.BORDER);
-		GridData zgd = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
-		zgd.widthHint = 60;
-		z.setLayoutData(zgd);
-		z.setMaximum(999);
+		x = createSpinner();
+		y = createSpinner();
+		z = createSpinner();
+
+		List<IFieldWidget> cubeSizeWidgets = Arrays.asList(x,y,z);
 		
 		Button upButton = new Button(this, SWT.NONE);
 		upButton.setImage(IsoGUIUtil.getImageDescriptor("up.png").createImage());
-		upButton.addSelectionListener(new SelectionListener() {
-			
-			// add one to the cube size if possible
-			@Override
-			public void widgetSelected(SelectionEvent e) 
-			{
-				x.setValue((int)x.getValue() + 1);
-				y.setValue((int)y.getValue() + 1);
-				z.setValue((int)z.getValue() + 1);
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				
-			}
-		});
+		upButton.addSelectionListener(new IncrementGroupSelectionListener(cubeSizeWidgets, 1));
 		
 		Button downButton = new Button(this, SWT.NONE);
 		downButton.setImage(IsoGUIUtil.getImageDescriptor("down.png").createImage());
-		downButton.addSelectionListener(new SelectionListener() {
-			
-			// add one to the cube size if possible
-			@Override
-			public void widgetSelected(SelectionEvent e) 
-			{
-				x.setValue(((int)x.getValue() - 1 >= 1) ? (int)x.getValue() - 1 : 1);
-				y.setValue(((int)y.getValue() - 1 >= 1) ? (int)y.getValue() - 1 : 1);
-				z.setValue(((int)z.getValue() - 1 >= 1) ? (int)z.getValue() - 1 : 1);
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				
-			}
-		});
+		downButton.addSelectionListener(new IncrementGroupSelectionListener(cubeSizeWidgets, -1));
 		
 		new Label(this, SWT.NONE);
 		
@@ -151,13 +93,18 @@ public class IsoItemComposite extends Composite
 		opacity.setMaximumScale(100);
 		opacity.setMaximumValue(1);
 		opacity.setMinimumValue(0);
-		
+	}
+
+	private SpinnerWrapper createSpinner() {
+		SpinnerWrapper widget = new SpinnerWrapper(this, SWT.BORDER);
+		GridData gridData = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
+		gridData.widthHint = 60;
+		widget.setLayoutData(gridData);
+		widget.setMinimum(1);
+		widget.setMaximum(999);
+		return widget;
 	}
 		
-	public IFieldWidget getName()
-	{
-		return this.name;
-	}	
 	public IFieldWidget getValue()
 	{
 		return this.value;
@@ -187,45 +134,11 @@ public class IsoItemComposite extends Composite
 		return this.colour;
 	}
 	
-	// !! look into
 	public void setMinMaxIsoValue(final double min, final double max)
 	{		
-		value.setMaximum(new BoundsProvider()
-		{
-			@Override
-			public double getBoundValue()
-			{
-				return max;
-			}
-			
-			@Override
-			public void addValueListener(ValueListener l)
-			{
-				// do not add a value listener
-			}
-		});
-		
-		value.setMinimum(new BoundsProvider()
-		{
-			@Override
-			public double getBoundValue()
-			{
-				return min;
-			}
-			
-			@Override
-			public void addValueListener(ValueListener l)
-			{
-				// do not add a value listener
-			}
-		});
+		value.setMinimum(min);
+		value.setMaximum(max);
 	}
-
-	
-	
-	
-	
-	
 }
 
 
