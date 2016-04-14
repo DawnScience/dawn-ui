@@ -13,10 +13,8 @@ import org.dawnsci.isosurface.isogui.IsoComposite;
 import org.dawnsci.isosurface.isogui.IsoHandler;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.plotting.api.PlotType;
-import org.eclipse.dawnsci.slicing.api.system.AxisChoiceEvent;
 import org.eclipse.dawnsci.slicing.api.system.AxisChoiceListener;
 import org.eclipse.dawnsci.slicing.api.system.AxisType;
-import org.eclipse.dawnsci.slicing.api.system.DimensionalEvent;
 import org.eclipse.dawnsci.slicing.api.system.DimensionalListener;
 import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.dawnsci.slicing.api.system.SliceSource;
@@ -36,45 +34,17 @@ public class IsosurfaceTool extends AbstractSlicingTool
 {
 	
 	@SuppressWarnings("unused")
-	private static final Logger logger = LoggerFactory
-			.getLogger(IsosurfaceTool.class);
+	private static final Logger logger = LoggerFactory.getLogger(IsosurfaceTool.class);
 	
 	// Listeners
-	private DimensionalListener dimensionalListener;
-	private AxisChoiceListener axisChoiceListener;
+	private DimensionalListener dimensionalListener = (event) -> update();
+	private AxisChoiceListener axisChoiceListener = (event) -> update();
 	
 	// UI Stuff
 	private IsoComposite isoComp;
 	private IsoBean isoBean;
 	private ScrolledComposite sc;
-	
-	public IsosurfaceTool()
-	{
-		this.dimensionalListener = new DimensionalListener() // !! what are these for
-		{
-			@Override
-			public void dimensionsChanged(DimensionalEvent evt)
-			{
-				update();
-			}
-		};
 		
-		this.axisChoiceListener = new AxisChoiceListener()
-		{
-			@Override
-			public void axisChoicePerformed(AxisChoiceEvent evt)
-			{
-				update();
-			}
-		};
-	}
-	
-	@Override
-	public void dispose()
-	{
-		super.dispose();
-	}
-	
 	/**
 	 * Create controls for the surface in the user interface
 	 */
