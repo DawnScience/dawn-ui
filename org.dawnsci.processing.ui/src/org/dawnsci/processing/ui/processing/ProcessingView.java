@@ -146,34 +146,8 @@ public class ProcessingView extends ViewPart {
 		// Here's the data, lets show it!
 		seriesTable.setMenuManager(rightClick);
 		seriesTable.setInput(saved, operationFiler);
-		DropTarget dt = seriesTable.getDropTarget();
-		dt.setTransfer(new Transfer[] { TextTransfer.getInstance(),
-				FileTransfer.getInstance(), ResourceTransfer.getInstance(),
-				LocalSelectionTransfer.getTransfer() });
-		dt.addDropListener(new DropTargetAdapter() {
-			
-			@Override
-			public void drop(DropTargetEvent event) {
-				Object dropData = event.data;
-				if (dropData instanceof TreeSelection) {
-					TreeSelection selectedNode = (TreeSelection) dropData;
-					Object obj[] = selectedNode.toArray();
-					for (int i = 0; i < obj.length; i++) {
-						if (obj[i] instanceof IFile) {
-							IFile file = (IFile) obj[i];
-							readOperationsFromFile(file.getLocation().toOSString());
-							return;
-						}
-					}
-				} else if (dropData instanceof String[]) {
-					for (String path : (String[])dropData){
-						readOperationsFromFile(path);
-						return;
-					}
-				}
-				
-			}
-		});
+
+		OperationTableUtils.setupPipelinePaneDropTarget(seriesTable, operationFiler, logger, getSite().getShell());
 		
 		BundleContext ctx = FrameworkUtil.getBundle(ProcessingView.class).getBundleContext();
 		EventHandler ErrorHandler = new EventHandler() {
@@ -202,24 +176,6 @@ public class ProcessingView extends ViewPart {
 		props = new Hashtable<>();
 		props.put(EventConstants.EVENT_TOPIC, "org/dawnsci/events/processing/INITIALUPDATE");
 		ctx.registerService(EventHandler.class, initialHandler, props);
-	}
-	
-	private void readOperationsFromFile(String filename) {
-		try {
-			IPersistenceService service = (IPersistenceService)ServiceManager.getService(IPersistenceService.class);
-			IOperationService os = (IOperationService)ServiceManager.getService(IOperationService.class);
-			IPersistentFile pf = service.getPersistentFile(filename);
-			IOperation<? extends IOperationModel, ? extends OperationData>[] operations = pf.getOperations();
-			if (operations == null) return;
-			List<OperationDescriptor> list = new ArrayList<OperationDescriptor>(operations.length);
-			for (IOperation<? extends IOperationModel, ? extends OperationData> op : operations) list.add(new OperationDescriptor(op, os));
-			
-			if (operations != null) seriesTable.setInput(list, operationFiler);
-		} catch (Exception e) {
-			logger.error("Could not read operations from file", e);
-			MessageDialog.openInformation(getSite().getShell(), "Exception while reading operations from file", "An exception occurred while reading operations from a file.\n" + e.getMessage());
-		}
-		
 	}
 	
 	private void saveOperationsToFile(String filename, IOperation[] op) {
@@ -350,7 +306,7 @@ public class ProcessingView extends ViewPart {
 				dialog.create();
 				if (dialog.open() == Dialog.CANCEL) return;
 				String path = dialog.getPath();
-				readOperationsFromFile(path);
+				OperationTableUtils.readOperationsFromFile(path, seriesTable, operationFiler, logger, getSite().getShell());
 				lastPath = path;
 			}
 		};
