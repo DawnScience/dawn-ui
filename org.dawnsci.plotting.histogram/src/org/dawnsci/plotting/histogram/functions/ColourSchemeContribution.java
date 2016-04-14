@@ -119,4 +119,9 @@ public class ColourSchemeContribution {
 	public String getCategory() {
 		return category;
 	}
+
+	@Override
+	public String toString() {
+		return name;
+	}
 }
