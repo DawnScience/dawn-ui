@@ -514,6 +514,7 @@ public class SurfaceDisplayer extends Scene
 				axesData.get(2).getSize());
 		
 		this.axisObjectGroup.setAxes(axisLength, axesData);
+		this.axisObjectGroup.setBoundingBox(axisLength);
 		
 		centraliseObjectGroup();
 	}

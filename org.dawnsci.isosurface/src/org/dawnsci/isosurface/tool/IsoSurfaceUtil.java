@@ -30,7 +30,7 @@ public final class IsoSurfaceUtil {
 		// test first third
 		IDataset slice = lz.getSlice(
 				new int[] { lz.getShape()[0]/3, 0,0}, 
-				new int[] {1+lz.getShape()[0]/3, lz.getShape()[1], lz.getShape()[2]},
+				new int[] {1+(lz.getShape()[0]/3), lz.getShape()[1], lz.getShape()[2]},
 				new int[] {1,1,1});
 		
 		double[] minMaxStats = getStatsFromSlice(slice);
@@ -46,7 +46,7 @@ public final class IsoSurfaceUtil {
 		// test center
 		slice = lz.getSlice(
 				new int[] { lz.getShape()[0]/2, 0,0}, 
-				new int[] {1+lz.getShape()[0]/2, lz.getShape()[1], lz.getShape()[2]},
+				new int[] {1+(lz.getShape()[0]/2), lz.getShape()[1], lz.getShape()[2]},
 				new int[] {1,1,1});
 		
 		minMaxStats = getStatsFromSlice(slice);
@@ -62,7 +62,7 @@ public final class IsoSurfaceUtil {
 		// test second third
 		slice = lz.getSlice(
 				new int[] {2 * lz.getShape()[0]/3, 0,0}, 
-				new int[] {1+lz.getShape()[0]/3, lz.getShape()[1], lz.getShape()[2]},
+				new int[] {1+(2 * lz.getShape()[0]/3), lz.getShape()[1], lz.getShape()[2]},
 				new int[] {1,1,1});
 		
 		minMaxStats = getStatsFromSlice(slice);

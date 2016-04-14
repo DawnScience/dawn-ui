@@ -128,9 +128,9 @@ public class IsosurfaceTool extends AbstractSlicingTool
 		
 		// roughly calculate the default cube size
 		int[] defaultCubeSize= new int[] {
-				(int) Math.max(1, Math.ceil(data.getLazySet().getShape()[xIndex]/20.0)),
-				(int) Math.max(1, Math.ceil(data.getLazySet().getShape()[yIndex]/20.0)),
-				(int) Math.max(1, Math.ceil(data.getLazySet().getShape()[zIndex]/20.0))};
+				(int) Math.max(1, Math.ceil(dataSlice.getShape()[0]/20.0)),
+				(int) Math.max(1, Math.ceil(dataSlice.getShape()[1]/20.0)),
+				(int) Math.max(1, Math.ceil(dataSlice.getShape()[2]/20.0))};
 		
 		// check if the dataslice is compatible
 		if (dataSlice.getRank() != 3)
