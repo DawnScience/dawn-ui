@@ -61,7 +61,7 @@ public class VolumeRenderTool extends AbstractSlicingTool
 			@Override
 			public void dimensionsChanged(DimensionalEvent evt)
 			{
-				//update();
+				update();
 			}
 		};
 		
@@ -70,7 +70,7 @@ public class VolumeRenderTool extends AbstractSlicingTool
 			@Override
 			public void axisChoicePerformed(AxisChoiceEvent evt)
 			{
-				//update();
+				update();
 			}
 		};
 		
@@ -162,11 +162,6 @@ public class VolumeRenderTool extends AbstractSlicingTool
 		cullingMaxText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		new Label(comp, SWT.NONE);
 		
-		
-		
-		
-		
-		
 		// COMPUTE BUTTONS
 		generateButton = new Button(comp, SWT.NONE);
 		generateButton.setText("Generate");
@@ -188,9 +183,7 @@ public class VolumeRenderTool extends AbstractSlicingTool
 	@Override
 	public void militarize(boolean newSlice) 
 	{
-		
 		getSlicingSystem().setSliceType(getSliceType());
-
 		
 		final DimsDataList dimsDataList = getSlicingSystem().getDimsDataList();
 		if (dimsDataList != null)
@@ -200,31 +193,12 @@ public class VolumeRenderTool extends AbstractSlicingTool
 				"Volume renderer job", 
 				getSlicingSystem().getPlottingSystem());
 		
-		
 		generateButton.addListener(SWT.Selection, new Listener() {
 		      public void handleEvent(Event e) 
 		      {
 		          if (e.type == SWT.Selection) 
 		          {
-		        	  
-		        	  double[] minMaxValue = {
-		        			  Double.parseDouble(histogramMinText.getText()),
-		        			  Double.parseDouble(histogramMaxText.getText()),
-		        	  };
-		        	  
-		        	  double[] minMaxCulling = {
-		        			  Double.parseDouble(cullingMinText.getText()),
-		        			  Double.parseDouble(cullingMaxText.getText()),
-		        	  };
-		        	  
-		        	  job.compute(
-		        			  TRACE_ID,
-		        			  resolutionSlider.getSelection(),
-		        			  intensitySlider.getSelection(),
-		        			  opacitySlider.getSelection(),
-		        			  getSlicingSystem().getData().getLazySet(),
-		        			  minMaxValue,
-		        			  minMaxCulling);
+		        	  compute();
 		          }
 		        }
 		});
@@ -239,7 +213,6 @@ public class VolumeRenderTool extends AbstractSlicingTool
 		        }
 		});
 		
-		
 		comp.setVisible(true);
 		((GridData) comp.getLayoutData()).exclude = false;
 		comp.getParent().pack();
@@ -250,6 +223,40 @@ public class VolumeRenderTool extends AbstractSlicingTool
 		getSlicingSystem().addDimensionalListener(dimensionalListener);
 		getSlicingSystem().addAxisChoiceListener(axisChoiceListener);
 		
+	}
+	
+	public void update()
+	{
+		
+		
+		
+		compute();
+	}
+	
+	private void compute()
+	{
+		int xIndex = getSlicingSystem().getDimsDataList().getDimsData(0).getPlotAxis().getIndex();
+		int yIndex = getSlicingSystem().getDimsDataList().getDimsData(1).getPlotAxis().getIndex();
+		int zIndex = getSlicingSystem().getDimsDataList().getDimsData(2).getPlotAxis().getIndex();
+		
+		double[] minMaxValue = {
+	   			  Double.parseDouble(histogramMinText.getText()),
+	   			  Double.parseDouble(histogramMaxText.getText()),
+	   	};
+	   	  
+		double[] minMaxCulling = {
+	   			  Double.parseDouble(cullingMinText.getText()),
+	   			  Double.parseDouble(cullingMaxText.getText()),
+		};
+			
+		job.compute(
+	  			  TRACE_ID,
+	  			  resolutionSlider.getSelection(),
+	  			  intensitySlider.getSelection(),
+	  			  opacitySlider.getSelection(),
+	  			  getSlicingSystem().getData().getLazySet().getTransposedView(xIndex, yIndex, zIndex),
+	  			  minMaxValue,
+	  			  minMaxCulling);
 	}
 	
 	@Override
@@ -266,7 +273,6 @@ public class VolumeRenderTool extends AbstractSlicingTool
 	
 	@Override
 	public Enum<?> getSliceType() {
-		// TODO Auto-generated method stub
 		return PlotType.VOLUME;
 	}
 	
