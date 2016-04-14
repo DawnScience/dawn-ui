@@ -28,6 +28,7 @@ import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.FloatDataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -384,7 +385,7 @@ public class MapPlotManager {
 		IImageTrace t = null;
 		try {
 			t = MetadataPlotUtils.buildTrace(longName, map, this.map);
-			t.setGlobalRange(area.getRange());
+			t.setGlobalRange(sanizeRange(area.getRange(), map.getShape()));
 			if (ob instanceof AbstractMapData)  t.setAlpha(((AbstractMapData)ob).getTransparency());
 		} catch (Exception e) {
 			//TODO
@@ -397,7 +398,7 @@ public class MapPlotManager {
 
 	
 	private void plotLayers(){
-
+		if (!map.is2D()) map.setPlotType(PlotType.IMAGE);
 //		map.clear();
 		try {
 			
@@ -590,6 +591,23 @@ public class MapPlotManager {
 		
 	}
 	
+	private double[] sanizeRange(double[] range, int[] shape) {
+		if(range[0] == range[1] && range[2] == range[3]) return range;
+		
+		double[] r = range.clone();
+		
+		if (range[0] == range[1]) {
+			r[1] = range[0] + (range[3] - range[2])/shape[1];
+			return r;
+		}
+		
+		if (range[2] == range[3]) {
+			r[3] = range[2] + (range[1] - range[0])/shape[0];
+		}
+		return r;
+		
+	}
+	
 	private class RepeatingJob extends UIJob{
 		private boolean running = true;
 		private long repeatDelay = 0;
@@ -637,8 +655,9 @@ public class MapPlotManager {
 		
 		public void switchMap(PlottableMapObject ob) {
 			try {
-				MetadataPlotUtils.switchData(ob.getLongName(), ob.getData(), trace);
-				trace.setGlobalRange(area.getRange());
+				IDataset d = ob.getData();
+				MetadataPlotUtils.switchData(ob.getLongName(),d, trace);
+				trace.setGlobalRange(sanizeRange(area.getRange(),d.getShape()));
 				map = ob;
 			} catch (Exception e) {
 				logger.error("Error updating live!",e);
@@ -649,7 +668,6 @@ public class MapPlotManager {
 		public void rebuildTrace(){
 			trace = createImageTrace(map);
 		}
-		
 		
 	}
 }
