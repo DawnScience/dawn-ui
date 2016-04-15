@@ -51,6 +51,6 @@ public class VolumeRenderToolTest {
 		volumeRenderTool.militarize(true);
 		volumeRenderTool.update();
 		
-		verify(volumeRenderJob).compute(eq("iuhdiamd8oa"), eq(0.0), eq(0.0), eq(0.0), any(), eq(new double[]{0.0,0.0}), eq(new double[]{0.0,0.0}));
+		verify(volumeRenderJob).compute(eq("123456789"), eq(0.0), eq(0.0), eq(0.0), any(), eq(new double[]{0.0,0.0}), eq(new double[]{0.0,0.0}));
 	}
 }
