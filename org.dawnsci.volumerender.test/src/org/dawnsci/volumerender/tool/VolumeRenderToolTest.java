@@ -1,10 +1,14 @@
 package org.dawnsci.volumerender.tool;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.expressions.IVariableManager;
 import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.dawnsci.slicing.api.system.ISliceSystem;
@@ -42,6 +46,7 @@ public class VolumeRenderToolTest {
 		when(slicingSystem.getDimsDataList()).thenReturn(new DimsDataList(new int[]{10,10,10}));
 		when(slicingSystem.<Shell>getPlottingSystem()).thenReturn(plottingSystem);
 		when(slicingSystem.getData()).thenReturn(new SliceSource((IVariableManager)null, new DoubleDataset(new int[]{10,10,10}), null, null, false));
+		when(slicingSystem.getSliceType()).thenReturn(PlotType.VOLUME);
 		VolumeRenderJob volumeRenderJob = mock(VolumeRenderJob.class);
 		when(jobFactory.build("Volume renderer job", plottingSystem)).thenReturn(volumeRenderJob);
 		
