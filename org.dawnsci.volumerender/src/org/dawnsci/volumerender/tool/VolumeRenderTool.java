@@ -48,7 +48,7 @@ public class VolumeRenderTool extends AbstractSlicingTool
 	private DimensionalListener dimensionalListener;
 	private AxisChoiceListener axisChoiceListener;
 	
-	private final String TRACE_ID = "iuhdiamd8oa"; // mash the key board
+	private final String TRACE_ID = "123456789";
 	
 	static BundleContext getContext() {
 		return plugin.getBundle().getBundleContext();
@@ -56,7 +56,7 @@ public class VolumeRenderTool extends AbstractSlicingTool
 	
 	public VolumeRenderTool(){
 		
-		this.dimensionalListener = new DimensionalListener() // !! what are these fore
+		this.dimensionalListener = new DimensionalListener() 
 		{
 			@Override
 			public void dimensionsChanged(DimensionalEvent evt)
@@ -227,10 +227,8 @@ public class VolumeRenderTool extends AbstractSlicingTool
 	
 	public void update()
 	{
-		
-		
-		
-		compute();
+		if (getSlicingSystem().getSliceType() == getSliceType())
+			compute();
 	}
 	
 	private void compute()

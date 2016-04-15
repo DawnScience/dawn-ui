@@ -370,9 +370,9 @@ public class SurfaceDisplayer extends Scene
 		
 	}
 	
-	private void rotateCameraArcball(Point3D rotationAxis, double angle)
+	private void rotateCameraArcball(Point3D rotationAxis, double newAngle)
 	{
-		Rotate appliedRotate = new Rotate(angle, new Point3D(rotationAxis.getX(), rotationAxis.getY(), -rotationAxis.getZ()));
+		Rotate appliedRotate = new Rotate(newAngle, new Point3D(rotationAxis.getX(), rotationAxis.getY(), -rotationAxis.getZ()));
 				
 		Matrix3d appliedMatrix = new Matrix3d(
 				appliedRotate.getMxx(), appliedRotate.getMxy(), appliedRotate.getMxz(),
@@ -526,7 +526,6 @@ public class SurfaceDisplayer extends Scene
 
 	public void setBoundingBoxVisibility(boolean visibility) 
 	{
-		
 		axisObjectGroup.setBoundingBoxVisibility(visibility);
 	}
 	

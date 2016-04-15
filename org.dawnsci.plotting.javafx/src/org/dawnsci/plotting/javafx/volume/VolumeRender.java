@@ -1,10 +1,5 @@
 package org.dawnsci.plotting.javafx.volume;
 
-import java.awt.image.BufferedImage;
-import java.util.Arrays;
-import java.util.Collections;
-
-import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.DepthTest;
@@ -13,11 +8,8 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Rotate;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.dawnsci.plotting.histogram.service.PaletteService;
-import org.dawnsci.plotting.javafx.plane.ImagePlane;
 import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.plotting.api.histogram.functions.FunctionContainer;
 
@@ -90,7 +82,8 @@ public class VolumeRender extends Group
 		Group outputGroup = new Group();
 				
 //		FunctionContainer functionContainer = paletteService.getFunctionContainer("Viridis (blue-green-yellow)");
-		FunctionContainer functionContainer = paletteService.getFunctionContainer("Gray Scale");
+		FunctionContainer functionContainer = paletteService.getFunctionContainer("Plasma (blue-red-yellow)");
+//		FunctionContainer functionContainer = paletteService.getFunctionContainer("Gray Scale");
 		
 		functionContainer.setInverseRed(true);
 		functionContainer.setInverseGreen(true);
