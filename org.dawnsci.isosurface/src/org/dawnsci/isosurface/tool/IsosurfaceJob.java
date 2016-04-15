@@ -171,7 +171,8 @@ public class IsosurfaceJob extends Job {
 		
 		traceNames.stream()
 			.map(name -> plottingSystem.getTrace(name))
-			.map(Optional::ofNullable)
+			.map(Optional::ofNullable) // 123456789
+			.filter(option -> !option.map(trace -> trace.getName().equals("123456789")).orElse(false))
 			.forEach(trace -> { 
 				try{
 					trace.ifPresent(ITrace::dispose);
@@ -179,7 +180,7 @@ public class IsosurfaceJob extends Job {
 					logger.info("dispose of trace sometimes doesn't work", ex);
 				}
 			});
-			
+		
 	}
 
 }

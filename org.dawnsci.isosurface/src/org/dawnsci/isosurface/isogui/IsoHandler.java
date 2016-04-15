@@ -62,7 +62,7 @@ public class IsoHandler extends ValueAdapter {
 			IsoItem current = (IsoItem) isoComp.getItems().getBean();
 
 			boolean justRerender = Arrays.asList("colour", "opacity", "name").contains(e.getFieldName());
-
+			
 			// run alg
 			if (justRerender) {
 				IIsosurfaceTrace trace = (IIsosurfaceTrace) system.getTrace(current.getTraceKey());
