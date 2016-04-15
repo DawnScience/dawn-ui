@@ -21,7 +21,6 @@ public class VolumeRenderJob extends Job
  	private double[] minMaxValue;
  	private double[] minMaxCulling;
  	
- 	private int red,green,blue;
  	@SuppressWarnings("unused")
 	private double opacity;
  	
@@ -64,10 +63,6 @@ public class VolumeRenderJob extends Job
 	
 	public void setColour(int red, int green, int blue)
 	{
-		this.red = red;
-		this.green = green;
-		this.blue = blue;
-		
 		if (system.getTrace(traceID) != null)
 		{ 
 			((IVolumeRenderTrace)system.getTrace(traceID)).setColour(red, green, blue);

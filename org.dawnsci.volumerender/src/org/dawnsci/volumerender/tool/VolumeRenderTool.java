@@ -9,8 +9,6 @@ import org.eclipse.dawnsci.slicing.api.system.DimensionalListener;
 import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.dawnsci.slicing.api.tool.AbstractSlicingTool;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
@@ -25,7 +23,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-public class VolumeRenderTool extends AbstractSlicingTool
+public class VolumeRenderTool<T> extends AbstractSlicingTool
 {
 	private static AbstractUIPlugin plugin;
 	
@@ -37,7 +35,6 @@ public class VolumeRenderTool extends AbstractSlicingTool
 	private Slider resolutionSlider;
 	private Slider intensitySlider;
 	private Slider opacitySlider;
-//	private ColorSelectorWrapper colourSelector;
 	
 	private Text histogramMaxText;
 	private Text histogramMinText;
@@ -45,8 +42,9 @@ public class VolumeRenderTool extends AbstractSlicingTool
 	private Text cullingMaxText;
 	private Text cullingMinText;
 	
-	private DimensionalListener dimensionalListener;
-	private AxisChoiceListener axisChoiceListener;
+	private final DimensionalListener dimensionalListener;
+	private final AxisChoiceListener axisChoiceListener;
+	private final VolumeRenderJobFactory<T> volumeRenderJobFactory;
 	
 	private final String TRACE_ID = "123456789";
 	
@@ -55,8 +53,12 @@ public class VolumeRenderTool extends AbstractSlicingTool
 	}
 	
 	public VolumeRenderTool(){
-		
-		this.dimensionalListener = new DimensionalListener() 
+		this(new VolumeRenderJobFactory<T>());
+	}
+	
+	public VolumeRenderTool(VolumeRenderJobFactory<T> volumeRenderJobFactory){
+		this.volumeRenderJobFactory = volumeRenderJobFactory;
+		this.dimensionalListener = new DimensionalListener() // !! what are these fore
 		{
 			@Override
 			public void dimensionsChanged(DimensionalEvent evt)
@@ -189,9 +191,7 @@ public class VolumeRenderTool extends AbstractSlicingTool
 		if (dimsDataList != null)
 			dimsDataList.setThreeAxesOnly(AxisType.X, AxisType.Y, AxisType.Z);
 		
-		job = new VolumeRenderJob(
-				"Volume renderer job", 
-				getSlicingSystem().getPlottingSystem());
+		job = volumeRenderJobFactory.build("Volume renderer job", getSlicingSystem().getPlottingSystem());
 		
 		generateButton.addListener(SWT.Selection, new Listener() {
 		      public void handleEvent(Event e) 
@@ -238,13 +238,13 @@ public class VolumeRenderTool extends AbstractSlicingTool
 		int zIndex = getSlicingSystem().getDimsDataList().getDimsData(2).getPlotAxis().getIndex();
 		
 		double[] minMaxValue = {
-	   			  Double.parseDouble(histogramMinText.getText()),
-	   			  Double.parseDouble(histogramMaxText.getText()),
+					safeParseDouble(histogramMinText.getText()),
+					safeParseDouble(histogramMaxText.getText()),
 	   	};
 	   	  
 		double[] minMaxCulling = {
-	   			  Double.parseDouble(cullingMinText.getText()),
-	   			  Double.parseDouble(cullingMaxText.getText()),
+					safeParseDouble(cullingMinText.getText()),
+					safeParseDouble(cullingMaxText.getText()),
 		};
 			
 		job.compute(
@@ -255,6 +255,10 @@ public class VolumeRenderTool extends AbstractSlicingTool
 	  			  getSlicingSystem().getData().getLazySet().getTransposedView(xIndex, yIndex, zIndex),
 	  			  minMaxValue,
 	  			  minMaxCulling);
+	}
+	
+	public double safeParseDouble(String string){
+		return Double.parseDouble(string.isEmpty() ? "0" : string);
 	}
 	
 	@Override
