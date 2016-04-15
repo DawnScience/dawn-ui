@@ -8,6 +8,7 @@ import org.dawnsci.isosurface.alg.Surface;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Random;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class Cancellation 
@@ -51,7 +52,8 @@ public class Cancellation
 			testResult = algorithm.execute(monitor);
 			
 		}
-		
+
+		@Ignore
 		@Test
 		public void cancellation_Significance_Test()
 		{

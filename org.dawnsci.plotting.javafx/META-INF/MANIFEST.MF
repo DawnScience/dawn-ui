@@ -16,6 +16,7 @@ Bundle-ClassPath: .
 Import-Package: javax.vecmath,
  org.apache.commons.lang;version="2.6.0",
  org.dawnsci.plotting.jreality.print,
+ org.eclipse.nebula.visualization.xygraph.linearscale,
  org.slf4j;version="[1.7.2,2.0.0)"
 Export-Package: org.dawnsci.plotting.javafx,
  org.dawnsci.plotting.javafx.axis.objects,

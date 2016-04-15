@@ -13,10 +13,8 @@ import org.dawnsci.isosurface.isogui.IsoComposite;
 import org.dawnsci.isosurface.isogui.IsoHandler;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.plotting.api.PlotType;
-import org.eclipse.dawnsci.slicing.api.system.AxisChoiceEvent;
 import org.eclipse.dawnsci.slicing.api.system.AxisChoiceListener;
 import org.eclipse.dawnsci.slicing.api.system.AxisType;
-import org.eclipse.dawnsci.slicing.api.system.DimensionalEvent;
 import org.eclipse.dawnsci.slicing.api.system.DimensionalListener;
 import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.dawnsci.slicing.api.system.SliceSource;
@@ -36,45 +34,17 @@ public class IsosurfaceTool extends AbstractSlicingTool
 {
 	
 	@SuppressWarnings("unused")
-	private static final Logger logger = LoggerFactory
-			.getLogger(IsosurfaceTool.class);
+	private static final Logger logger = LoggerFactory.getLogger(IsosurfaceTool.class);
 	
 	// Listeners
-	private DimensionalListener dimensionalListener;
-	private AxisChoiceListener axisChoiceListener;
+	private DimensionalListener dimensionalListener = (event) -> update();
+	private AxisChoiceListener axisChoiceListener = (event) -> update();
 	
 	// UI Stuff
 	private IsoComposite isoComp;
 	private IsoBean isoBean;
 	private ScrolledComposite sc;
-	
-	public IsosurfaceTool()
-	{
-		this.dimensionalListener = new DimensionalListener() // !! what are these for
-		{
-			@Override
-			public void dimensionsChanged(DimensionalEvent evt)
-			{
-				update();
-			}
-		};
 		
-		this.axisChoiceListener = new AxisChoiceListener()
-		{
-			@Override
-			public void axisChoicePerformed(AxisChoiceEvent evt)
-			{
-				update();
-			}
-		};
-	}
-	
-	@Override
-	public void dispose()
-	{
-		super.dispose();
-	}
-	
 	/**
 	 * Create controls for the surface in the user interface
 	 */
@@ -143,14 +113,24 @@ public class IsosurfaceTool extends AbstractSlicingTool
 	@SuppressWarnings("unused")
 	private void update()
 	{
+		
+		int xIndex = getSlicingSystem().getDimsDataList().getDimsData(0).getPlotAxis().getIndex();
+		int yIndex = getSlicingSystem().getDimsDataList().getDimsData(1).getPlotAxis().getIndex();
+		int zIndex = getSlicingSystem().getDimsDataList().getDimsData(2).getPlotAxis().getIndex();
+		
 		//get the data from the slicing system
 		final SliceSource data = getSlicingSystem().getData();
 		
 		// declare the data as a lazydata set (i.e. slices)
-		ILazyDataset dataSlice = data.getLazySet().getSliceView(getSlices());
+		ILazyDataset dataSlice = data.getLazySet().getSliceView(getSlices()).getTransposedView(xIndex, yIndex, zIndex);
 		
 		dataSlice = dataSlice.squeezeEnds();
-		// slice.setName("Sliced " + data.getLazySet().getName());
+		
+		// roughly calculate the default cube size
+		int[] defaultCubeSize= new int[] {
+				(int) Math.max(1, Math.ceil(dataSlice.getShape()[0]/20.0)),
+				(int) Math.max(1, Math.ceil(dataSlice.getShape()[1]/20.0)),
+				(int) Math.max(1, Math.ceil(dataSlice.getShape()[2]/20.0))};
 		
 		// check if the dataslice is compatible
 		if (dataSlice.getRank() != 3)
@@ -161,13 +141,7 @@ public class IsosurfaceTool extends AbstractSlicingTool
 		// the estimation is currently quite inaccurate
 		double[] minMax = {Integer.MAX_VALUE, Integer.MIN_VALUE};
 		minMax = IsoSurfaceUtil.estimateMinMaxIsoValueFromDataSet(finalDataslice);
-		
-		// roughly calculate the default cube size
-		int[] defaultCubeSize= new int[] {
-				(int) Math.max(1, Math.ceil(finalDataslice.getShape()[0]/20.0)),
-				(int) Math.max(1, Math.ceil(finalDataslice.getShape()[1]/20.0)),
-				(int) Math.max(1, Math.ceil(finalDataslice.getShape()[2]/20.0))};
-		
+				
 		// set the min and max isovalues - set the default cube size for new sufaces
 		isoComp.setMinMaxIsoValueAndCubeSize(minMax, defaultCubeSize);
 		
@@ -177,7 +151,7 @@ public class IsosurfaceTool extends AbstractSlicingTool
 				isoBean, 
 				new IsosurfaceJob(
 						"isoSurfaceJob" , 
-						getSlicingSystem().getPlottingSystem()),
+						getSlicingSystem()),
 				finalDataslice,
 				getSlicingSystem().getPlottingSystem());
 		

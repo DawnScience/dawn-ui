@@ -40,15 +40,7 @@ public class IsoComposite extends Composite
 	private void createContent()
 	{
 		this.items = new VerticalListEditor(this, SWT.NONE)
-		{
-			// overriding the methods to give this class some more flexibility on bean creation and deletion
-			@Override
-			protected void beanRemove(Object bean) // quick fix, makes me cry
-			{
-				((IsoItem)bean).deleteBean();
-				notifyValueListeners();
-			}
-			
+		{			
 			@Override
 			protected void beanAdd(Object bean)
 			{
@@ -57,12 +49,7 @@ public class IsoComposite extends Composite
 						((min + max)/2),
 						defaultCubeSize,
 						0.5d,
-						ColorUtility.GRAPH_DEFAULT_COLORS[ISO_COUNT++]);
-				
-				if (ISO_COUNT >= ColorUtility.GRAPH_DEFAULT_COLORS.length)
-				{
-					ISO_COUNT = 0;
-				}
+						ColorUtility.GRAPH_DEFAULT_COLORS[ISO_COUNT++ % ColorUtility.GRAPH_DEFAULT_COLORS.length]);
 			}
 		};
 		
@@ -83,11 +70,12 @@ public class IsoComposite extends Composite
 		this.items.setColumnWidths(new int[] {125, 125, 125});
 		this.items.setShowAdditionalFields(true);
 				
-		itemComp = new IsoItemComposite(this, SWT.NONE);
+		itemComp = new IsoItemComposite(this);
 		
 		itemComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		
-		this.items.setEditorUI(itemComp);		
+		this.items.setEditorUI(itemComp);
+		
 		}
 		
 	/**
@@ -111,14 +99,6 @@ public class IsoComposite extends Composite
 	{
 		return this.items;
 	}
-	
-	// pretty much only used to create the inital surface bean
-	public void addNewSurface()
-	{
-		// items.addBean();
-	}
-
-	
 }
 
 

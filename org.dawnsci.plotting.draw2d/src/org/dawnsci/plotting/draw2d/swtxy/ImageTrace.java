@@ -30,6 +30,7 @@ import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.function.Downsample;
 import org.eclipse.dawnsci.analysis.dataset.impl.BooleanDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.IndexIterator;
@@ -537,19 +538,27 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		
 		if (xAxis == null || yAxis == null) return false;
 		
+		if (xAxis.getSize() == 1 && yAxis.getSize() == 1) return false;
+		
+		if (xAxis.getSize() == 1) {
+			double step = Math.abs(yAxis.getDouble(0)-yAxis.getDouble(1));
+			double d = xAxis.getDouble();
+			xAxis = DatasetFactory.createFromObject(new double[]{ d, d + step});
+		}
+		
+		if (yAxis.getSize() == 1) {
+			double step = Math.abs(xAxis.getDouble(0)-xAxis.getDouble(1));
+			double d = yAxis.getDouble();
+			yAxis = DatasetFactory.createFromObject(new double[]{ d, d + step});
+		}
+		
+		
 		boolean xDataInc = xAxis.getDouble(0) < xAxis.getDouble(xAxis.getSize()-1);
 		boolean yDataInc = yAxis.getDouble(0) < yAxis.getDouble(yAxis.getSize()-1);
 		
-		Range xRange = this.xAxis.getRange();
-		Range yRange = this.yAxis.getRange();
-		
-		boolean xAxisInc = xRange.getLower() < xRange.getUpper();
-		boolean yAxisInc = yRange.getLower() < yRange.getUpper();
-		
-		
 		
 		//Get the axes coodinates visible on screen
-		double[] da = getImageCoords(1, false);
+		double[] da = getImageCoords(1, false, xAxis, yAxis);
 		double minX = da[0];
 		double minY = da[1];
 		double maxX = da[2];
@@ -579,7 +588,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		int yDataPointsDS = yDataPoints/currentDownSampleBin;
 		
 		//Get matching screen co-ordinates in pixels
-		double[] screenCoords = getImageCoords(1, true);
+		double[] screenCoords = getImageCoords(1, true, xAxis, yAxis);
 		
 		//calculate full number of data points
 		double realx = (maxX-minX)/xAxValPerPoint;
@@ -738,11 +747,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 	
 	private final int getPositionInAxis(double val, IDataset axis) {
+		if (axis.getSize() == 1) return 0;
 		Dataset a = DatasetUtils.convertToDataset(axis.clone());
 		return Maths.abs(a.isubtract(val)).minPos()[0];
 	}
 	
 	private final int getPositionInAxis(double val, IDataset axis, boolean floor) {
+		if (axis.getSize() == 1) return 0;
 		int pos = 0;
 		double dif = 0;
 		double test = Double.MAX_VALUE;
@@ -776,7 +787,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * @param bin  - if the datacoordinates are downsampled, optionally set the bin.
 	 * @return x1,y1,x2,y2  where x2>x1 and y2>y1
 	 */
-	private final double[] getImageCoords(int bin, boolean pixels) {
+	private final double[] getImageCoords(int bin, boolean pixels, IDataset x, IDataset y) {
 		
 		Range xRange = xAxis.getRange();
 		Range yRange = yAxis.getRange();
@@ -799,15 +810,12 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		}
 				
 		// Bind the extent of the images to the actual data
-		IDataset x = getAxes().get(0);
 		
 		double minXData = x.min().doubleValue()/bin;
 		minX = Math.max(minXData, minX);
 		
 		double maxXData = x.max().doubleValue()/bin;
 		maxX = Math.min(maxXData, maxX);
-		
-		IDataset y = getAxes().get(1);
 		
 		double minYData = y.min().doubleValue()/bin;
 		minY = Math.max(minYData, minY);

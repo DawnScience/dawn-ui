@@ -14,7 +14,6 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
-import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.AmbientLight;
 import javafx.scene.Camera;
@@ -27,11 +26,8 @@ import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Cylinder;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
-import javafx.scene.transform.Transform;
-import javafx.scene.transform.TransformChangedEvent;
 import javafx.scene.transform.Translate;
 
 import javax.vecmath.Matrix3d;
@@ -55,6 +51,8 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 
 public class SurfaceDisplayer extends Scene
 {		
+	final double MOUSE_MOVEMENT_MOD = 1.2;
+	
 	// camera for the scene
 	private PerspectiveCamera perspectiveCamera;
 	private PerspectiveCamera parallelCamera;
@@ -74,8 +72,6 @@ public class SurfaceDisplayer extends Scene
 	
 	// Scene and camera variables
 	private Translate isoGroupOffset;
-	private Scale scale;
-	private double zoom = 100;
 	private Scale scaleZoom;
 	private Rotate rotate;
 	
@@ -86,50 +82,7 @@ public class SurfaceDisplayer extends Scene
 	
 	// Axis variables
 	private Point3D axesMaxLengths;	
-	private EventHandler<MouseEvent> scaleEvent = new EventHandler<MouseEvent>()
-	{
-		@Override
-		public void handle(MouseEvent me)
-		{
 			
-			Object obj = me.getSource();
-			final Point3D scaleDir = Vector3DUtil.applyExclusiveTransforms(
-								((Cylinder)obj).getTransforms(),
-								new Point3D(0, -1, 0),
-								Rotate.class);
-			
-			final Point3D actualDir = new Point3D(0, 1, 0);
-						
-			Transform localToSceneTransforms = ((Cylinder)obj).getLocalToSceneTransform();
-			Point3D screenPoint = localToSceneTransforms.transform(actualDir);			
-			Point3D screenPoint2 = localToSceneTransforms.transform(actualDir.multiply(2));
-			
-			Point3D sceneMouseOffset = screenPoint.subtract(screenPoint2);
-			// sceneMouseOffset = new Point3D(sceneMouseOffset.getX(), -sceneMouseOffset.getY(), sceneMouseOffset.getZ());
-						
-			// mouseState = MOUSE_SCALE;
-			
-			// set old values
-			oldMousePos[0] = newMousePos[0];
-			oldMousePos[1] = newMousePos[1];
-			// find new values of mouse pos
-			newMousePos[0] = me.getSceneX();
-			newMousePos[1] = me.getSceneY();
-			
-			
-			Point2D  mouseScaleDir = new Point2D(sceneMouseOffset.getX(), sceneMouseOffset.getY());
-			
-			final double[] mouseDelta = {
-					newMousePos[0] - oldMousePos[0], 
-					newMousePos[1] - oldMousePos[1]};
-			
-			final double mouseMovementMod = ((zoom + 1000) * 0.001f) + 0.1f;
-			
-			updateScale(mouseDelta, mouseMovementMod, mouseScaleDir, scaleDir);
-			
-		}
-	};
-		
 	/**
 	 * 
 	 * @param root - the root node for the scene isosurfaceGroup
@@ -141,7 +94,7 @@ public class SurfaceDisplayer extends Scene
 		
 		// create the scene
 		super(root, 1500, 1500, true);
-				
+		
 		this.root = root;
 		this.isosurfaceGroup = isosurfaceGroup;
 				
@@ -153,7 +106,7 @@ public class SurfaceDisplayer extends Scene
 		this.parallelCamera.setFieldOfView(0.01);
 				
 		this.currentCamera = perspectiveCamera;
-				
+		
 		initialiseCamera();
 		initlialiseGroups();
 		createScaleAxisGroup();
@@ -215,13 +168,10 @@ public class SurfaceDisplayer extends Scene
 	private void createAxisGroup()
 	{		
 		// create and return the new axis
-		SceneObjectGroup newAxisObjectGroup =  new SceneObjectGroup(scaleEvent);
-		
-		scaleAxesGroup.setAxisEventListener(scaleEvent); //!! look into re-organising
+		SceneObjectGroup newAxisObjectGroup =  new SceneObjectGroup();
 		
 		this.axisObjectGroup = newAxisObjectGroup;
 		this.axisNode.getChildren().add(this.axisObjectGroup);
-		
 	}
 	
 	private void setDepthBuffers()
@@ -238,16 +188,13 @@ public class SurfaceDisplayer extends Scene
 	{
 		// initialise
 		this.isoGroupOffset = new Translate();
-		this.scale = new Scale();
 		this.scaleZoom = new Scale();
 		this.rotate = new Rotate();
 		
 		this.scaleAxesGroup.getTransforms().addAll();
-		
-		this.objectGroup.getTransforms().addAll(isoGroupOffset, scaleZoom);
-		
-		this.isosurfaceGroup.getTransforms().addAll(scale);
-		
+				
+		this.objectGroup.getTransforms().addAll(scaleZoom, isoGroupOffset);
+				
 		this.cameraGroup.getTransforms().addAll(rotate);
 		
 	}
@@ -330,13 +277,11 @@ public class SurfaceDisplayer extends Scene
 					final double[] mouseDelta = {
 							newMousePos[0] - oldMousePos[0],
 							newMousePos[1] - oldMousePos[1]};
-					
-					final double mouseMovementMod = ((zoom + 1000) * 0.001f) + 0.1f;
-					
+										
 					// check if left button is pressed
 					// rotate if true - ie, rotate on left button drag
 					if (me.isPrimaryButtonDown() && !me.isSecondaryButtonDown())
-					{						
+					{
 						Point3D arcOldBallMousePositon = findArcballMousePosition(
 								oldMousePos[0]-(getWidth()/2),
 								oldMousePos[1]-(getHeight()/2));
@@ -354,7 +299,7 @@ public class SurfaceDisplayer extends Scene
 					
 					if (me.isMiddleButtonDown())
 					{
-						moveObjects(mouseDelta[0]*mouseMovementMod, mouseDelta[1]*mouseMovementMod);
+						moveObjects(mouseDelta[0]*MOUSE_MOVEMENT_MOD, mouseDelta[1]*MOUSE_MOVEMENT_MOD);
 					}
 					
 					// zoom if right button is pressed
@@ -393,28 +338,12 @@ public class SurfaceDisplayer extends Scene
 		this.widthProperty().addListener(listener);
 		this.heightProperty().addListener(listener);
 		
-		/*
-		 * misc listeners -> transform changes etc.
-		 */
-		
-		// on scale change
-		EventHandler<TransformChangedEvent> scaleChanged = new EventHandler<TransformChangedEvent>()
-		{
-			@Override
-			public void handle(TransformChangedEvent arg0)
-			{
-				updateAxisSize(axesMaxLengths);
-			}
-		};
-		
-		scale.setOnTransformChanged(scaleChanged);
-		
 	}
 	
 	/*
 	 * non initialisers
 	 */
-			
+	
 	/**
 	 * Find the position of the mouse on the arcball
 	 * @param x
@@ -429,7 +358,8 @@ public class SurfaceDisplayer extends Scene
 		// :. a = sqrt((r^2) - (b^2) - (c^2) )
 		// where a,b,c can equal x,y,z interchangeably
 		
-		double r_Squared = Math.pow((getWidth()/2),2) + Math.pow((getHeight()/2),2); // r = (width/2)^2 + (height/2)^2
+		// r = (width/2)^2 + (height/2)^2
+		double r_Squared = Math.pow((getWidth()/2),2) + Math.pow((getHeight()/2),2); 
 		
 		double z = Math.sqrt(r_Squared - Math.pow(x, 2) - Math.pow(y, 2));
 		
@@ -456,7 +386,6 @@ public class SurfaceDisplayer extends Scene
 		
 		appliedMatrix.mul(currentRotationMatrix);
 		
-		
 		Rotate newRotate= Vector3DUtil.matrixToRotate(appliedMatrix);
 		
 		rotate.setAxis(newRotate.getAxis());
@@ -479,14 +408,7 @@ public class SurfaceDisplayer extends Scene
 	
 	private void zoom(double amount)
 	{
-		Point3D pivot = findMidPointOfBounds(this.objectGroup.getBoundsInLocal());
-		
-		scaleZoom.setPivotX(-pivot.getX());
-		scaleZoom.setPivotY(-pivot.getY());
-		scaleZoom.setPivotZ(-pivot.getZ());
-		
-		final double mouseMovementMod = ((zoom + 1000) * 0.001f) + 0.1f;
-		double delta = ((((amount * mouseMovementMod)/10)) * 0.05);
+		double delta = ((((amount * MOUSE_MOVEMENT_MOD)/10)) * 0.05);
 		
 		scaleZoom.setX(Math.abs(scaleZoom.getX() * (1 + delta)));
 		scaleZoom.setY(Math.abs(scaleZoom.getY() * (1 + delta)));
@@ -509,39 +431,6 @@ public class SurfaceDisplayer extends Scene
 		centraliseObjectGroup();
 	}
 		
-	private void updateAxisSize(Point3D maxLength) 
-	{
-		axisObjectGroup.checkScale(this.scale.transform(maxLength), this.zoom);
-	}
-	
-	private void updateScale(double[] mouseDelta, double mouseMovementMod, Point2D mouseScaleDir, Point3D scaleDir) 
-	{
-		Point3D mouseDelta3D = new Point3D(mouseDelta[0], mouseDelta[1], 0);
-		
-		Point3D mouseScalarDir3D = new Point3D(mouseScaleDir.getX(), mouseScaleDir.getY(), 0);
-		
-		double scalar = Vector3DUtil.getScaleAcrossProjectedVector(mouseScalarDir3D, mouseDelta3D);
-									
-		scaleDir.normalize();
-		scale.setX(scale.getX() + (scalar * (0.65f * (0.005 * scaleDir.getX()))));
-		if (scale.getX() < 0 )
-		{
-			scale.setX(0);
-		}
-		
-		scale.setY(scale.getY() + (scalar * (0.65f * (0.005 * scaleDir.getY()))));
-		if (scale.getY() < 0 )
-		{
-			scale.setY(0);
-		}
-		
-		scale.setZ(scale.getZ() + (scalar * (0.65f * (0.005 * scaleDir.getZ()))));
-		if (scale.getZ() < 0 )
-		{
-			scale.setZ(0);
-		}
-	}
-	
 	private Point3D findMidPointOfBounds(Bounds bounds)
 	{		
 		final Translate offsetInverse = new Translate(
@@ -555,25 +444,7 @@ public class SurfaceDisplayer extends Scene
 				offsetInverse.getY(),
 				offsetInverse.getZ());
 	}
-	
-	private double calculateTickSeperation(IDataset dataSet)
-	{
-		double offset = dataSet.getDouble(0);
-		if (dataSet.getSize() > 0)
-		{
-			offset = dataSet.getDouble(1) - dataSet.getDouble(0);
-			for (int i = 1; i < dataSet.getSize(); i++)
-			{
-				if ((dataSet.getDouble(i) - dataSet.getDouble(i-1)) != offset)
-				{
-					offset = (dataSet.getDouble(i) - dataSet.getDouble(i-1));
-					System.err.println("Axis Ticks inconsistant");
-				}
-			}
-		}
-		return offset;
-	}
-	
+		
 	private void updateCameraSceneTransforms()
 	{
 		this.currentCamera.setTranslateX(-this.getWidth() / 2);           
@@ -615,27 +486,6 @@ public class SurfaceDisplayer extends Scene
 		// if the first trace create the axes using the trace.axes data
 		// all of this data is irrelevant as it get reset when a surface is added
 		// this is extremely inefficient but works well enough I don't plan to fix yet
-		if (axisObjectGroup.getChildren().size() <= 0)
-		{
-			Point3D maxLengths = new Point3D(
-					trace.getAxes().get(0).getFloat(0),
-					trace.getAxes().get(0).getFloat(1),
-					trace.getAxes().get(0).getFloat(2));
-			
-			Point3D seperationValue = new Point3D(
-											calculateTickSeperation(trace.getAxes().get(1)), 
-											calculateTickSeperation(trace.getAxes().get(2)), 
-											calculateTickSeperation(trace.getAxes().get(3)));
-						
-			double maxSeperation = Vector3DUtil.getMaximumValue(seperationValue);
-			Point3D tickSeperationXYZ = new Point3D(maxSeperation, maxSeperation, maxSeperation);
-			
-			axisObjectGroup.addAxes(
-					maxLengths,
-					tickSeperationXYZ);
-			
-			this.axisObjectGroup.addBoundingBox(maxLengths);
-		}
 		
 		// add the mesh the the scene graph
 		this.isosurfaceGroup.getChildren().add(trace.getIsoSurface());
@@ -658,24 +508,15 @@ public class SurfaceDisplayer extends Scene
 	
 	public void setAxesData(List<IDataset> axesData)
 	{
-		// set the initial data size
-		this.axesMaxLengths = new Point3D(
-									axesData.get(0).getFloat(0),
-									axesData.get(0).getFloat(1),
-									axesData.get(0).getFloat(2));
+		Point3D axisLength = new Point3D(
+				axesData.get(0).getSize(), 
+				axesData.get(1).getSize(),
+				axesData.get(2).getSize());
 		
-		Point3D seperationValue = new Point3D(
-										calculateTickSeperation(axesData.get(1)), 
-										calculateTickSeperation(axesData.get(2)), 
-										calculateTickSeperation(axesData.get(3)));
+		this.axisObjectGroup.setAxes(axisLength, axesData);
+		this.axisObjectGroup.setBoundingBox(axisLength);
 		
-		double maxSeperation = Vector3DUtil.getMaximumValue(seperationValue);
-		
-		axisObjectGroup.SetTickSeparationXYZ(new Point3D(maxSeperation, maxSeperation, maxSeperation));		
-		
-		this.axisObjectGroup.setAxisLimitMax(axesMaxLengths);
-		updateAxisSize(this.axesMaxLengths);
-		
+		centraliseObjectGroup();
 	}
 
 	public void setAxisGridVisibility(boolean visibility)
