@@ -40,21 +40,25 @@ public class VolumeRenderToolTest {
 	@Test
 	public void testCanCreateGuiAndFireJob() throws Exception{
 		VolumeRenderJobFactory<Shell> jobFactory = mock(VolumeRenderJobFactory.class);
-		VolumeRenderTool<Shell> volumeRenderTool = new VolumeRenderTool<>(jobFactory);
-		ISliceSystem slicingSystem = mock(ISliceSystem.class);
+		VolumeRenderJob volumeRenderJob = mock(VolumeRenderJob.class);
+
 		IPlottingSystem<Shell> plottingSystem = mock(IPlottingSystem.class);
+		when(jobFactory.build(plottingSystem)).thenReturn(volumeRenderJob);
+		
+		ISliceSystem slicingSystem = mock(ISliceSystem.class);
 		when(slicingSystem.getDimsDataList()).thenReturn(new DimsDataList(new int[]{10,10,10}));
 		when(slicingSystem.<Shell>getPlottingSystem()).thenReturn(plottingSystem);
 		when(slicingSystem.getData()).thenReturn(new SliceSource((IVariableManager)null, new DoubleDataset(new int[]{10,10,10}), null, null, false));
 		when(slicingSystem.getSliceType()).thenReturn(PlotType.VOLUME);
-		VolumeRenderJob volumeRenderJob = mock(VolumeRenderJob.class);
-		when(jobFactory.build("Volume renderer job", plottingSystem)).thenReturn(volumeRenderJob);
 		
+		
+		VolumeRenderTool<Shell> volumeRenderTool = new VolumeRenderTool<>(jobFactory);
 		volumeRenderTool.setSlicingSystem(slicingSystem);
 		volumeRenderTool.createToolComponent(shell);		
 		volumeRenderTool.militarize(false);
 		volumeRenderTool.militarize(true);
 		volumeRenderTool.update();
+		
 		
 		verify(volumeRenderJob).compute(eq("123456789"), eq(0.0), eq(0.0), eq(0.0), any(), eq(new double[]{0.0,0.0}), eq(new double[]{0.0,0.0}));
 	}

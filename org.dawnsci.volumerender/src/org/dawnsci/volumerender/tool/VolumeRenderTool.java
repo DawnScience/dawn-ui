@@ -172,13 +172,7 @@ public class VolumeRenderTool<T> extends AbstractSlicingTool
 		deleteButton = new Button(comp, SWT.NONE);
 		deleteButton.setText("Delete");
 		deleteButton.setVisible(true);
-		
-//		Label colourLabel = new Label(comp, SWT.NONE);
-//		colourLabel.setText("Colour");
-//		
-//		colourSelector = new ColorSelectorWrapper(comp, SWT.NONE);
-//		colourSelector.setValue(new RGB(255, 0, 0));
-				
+						
 		comp.setVisible(false);
 	}
 	
@@ -191,7 +185,7 @@ public class VolumeRenderTool<T> extends AbstractSlicingTool
 		if (dimsDataList != null)
 			dimsDataList.setThreeAxesOnly(AxisType.X, AxisType.Y, AxisType.Z);
 		
-		job = volumeRenderJobFactory.build("Volume renderer job", getSlicingSystem().getPlottingSystem());
+		job = volumeRenderJobFactory.build(getSlicingSystem().getPlottingSystem());
 		
 		generateButton.addListener(SWT.Selection, new Listener() {
 		      public void handleEvent(Event e) 
@@ -272,16 +266,8 @@ public class VolumeRenderTool<T> extends AbstractSlicingTool
 		
 	}
 	
-	
 	@Override
 	public Enum<?> getSliceType() {
 		return PlotType.VOLUME;
-	}
-	
-	@Override
-	public void dispose()
-	{
-		super.dispose();
-	}
-	
+	}	
 }
