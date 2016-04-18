@@ -1,5 +1,6 @@
 package org.dawnsci.volumerender.tool;
 
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.slicing.api.system.AxisChoiceListener;
 import org.eclipse.dawnsci.slicing.api.system.AxisType;
@@ -174,7 +175,7 @@ public class VolumeRenderTool<T> extends AbstractSlicingTool
 		      {
 		          if (e.type == SWT.Selection) 
 		          {
-		        	  job.destroy(TRACE_ID);
+		        	  destroy(TRACE_ID);
 		          }
 		        }
 		});
@@ -214,13 +215,15 @@ public class VolumeRenderTool<T> extends AbstractSlicingTool
 		};
 			
 		job.compute(
+				new VolumeRenderer(
+				  slicingSystem.getPlottingSystem(),
 	  			  TRACE_ID,
 	  			  resolutionSlider.getSelection(),
 	  			  intensitySlider.getSelection(),
 	  			  opacitySlider.getSelection(),
 	  			  getSlicingSystem().getData().getLazySet().getTransposedView(xIndex, yIndex, zIndex),
 	  			  minMaxValue,
-	  			  minMaxCulling);
+	  			  minMaxCulling));
 	}
 	
 	public double safeParseDouble(String string){
@@ -240,4 +243,15 @@ public class VolumeRenderTool<T> extends AbstractSlicingTool
 	public Enum<?> getSliceType() {
 		return PlotType.VOLUME;
 	}	
+	
+	public void destroy(String traceID)
+	{
+		IPlottingSystem<?> plottingSystem = getSlicingSystem().getPlottingSystem();
+		if (plottingSystem.getTrace(traceID) != null)
+		{ 
+			plottingSystem.getTrace(traceID).dispose();
+			plottingSystem.removeTrace(plottingSystem.getTrace(traceID));
+		}
+	}
+
 }

@@ -1,7 +1,6 @@
 package org.dawnsci.volumerender.tool;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -60,6 +59,6 @@ public class VolumeRenderToolTest {
 		volumeRenderTool.update();
 		
 		
-		verify(volumeRenderJob).compute(eq("123456789"), eq(0.0), eq(0.0), eq(0.0), any(), eq(new double[]{0.0,0.0}), eq(new double[]{0.0,0.0}));
+		verify(volumeRenderJob).compute(any(VolumeRenderer.class));
 	}
 }
