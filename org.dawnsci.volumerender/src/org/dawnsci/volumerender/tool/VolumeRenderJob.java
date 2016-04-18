@@ -61,24 +61,6 @@ public class VolumeRenderJob extends Job
 		}
 	}
 	
-	public void setColour(int red, int green, int blue)
-	{
-		if (system.getTrace(traceID) != null)
-		{ 
-			((IVolumeRenderTrace)system.getTrace(traceID)).setColour(red, green, blue);
-		}
-	}
-	
-	public void setOpacity(double opacity)
-	{
-		this.opacity = opacity;
-		
-		if (system.getTrace(traceID) != null)
-		{ 
-			((IVolumeRenderTrace)system.getTrace(traceID)).setOpacity(opacity);
-		}
-	}
-	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) 
 	{
@@ -121,7 +103,4 @@ public class VolumeRenderJob extends Job
 		
 		return Status.OK_STATUS;
 	}
-
-	
-	
 }
