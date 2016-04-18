@@ -1,10 +1,8 @@
 package org.dawnsci.volumerender.tool;
 
 import org.eclipse.dawnsci.plotting.api.PlotType;
-import org.eclipse.dawnsci.slicing.api.system.AxisChoiceEvent;
 import org.eclipse.dawnsci.slicing.api.system.AxisChoiceListener;
 import org.eclipse.dawnsci.slicing.api.system.AxisType;
-import org.eclipse.dawnsci.slicing.api.system.DimensionalEvent;
 import org.eclipse.dawnsci.slicing.api.system.DimensionalListener;
 import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.dawnsci.slicing.api.tool.AbstractSlicingTool;
@@ -20,13 +18,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.osgi.framework.BundleContext;
 
 public class VolumeRenderTool<T> extends AbstractSlicingTool
-{
-	private static AbstractUIPlugin plugin;
-	
+{	
 	private VolumeRenderJob job;
 	
 	private Composite comp;
@@ -42,40 +36,18 @@ public class VolumeRenderTool<T> extends AbstractSlicingTool
 	private Text cullingMaxText;
 	private Text cullingMinText;
 	
-	private final DimensionalListener dimensionalListener;
-	private final AxisChoiceListener axisChoiceListener;
+	private final DimensionalListener dimensionalListener = (event) -> update();
+	private final AxisChoiceListener axisChoiceListener = (event) -> update();
 	private final VolumeRenderJobFactory<T> volumeRenderJobFactory;
 	
 	private final String TRACE_ID = "123456789";
-	
-	static BundleContext getContext() {
-		return plugin.getBundle().getBundleContext();
-	}
-	
+		
 	public VolumeRenderTool(){
 		this(new VolumeRenderJobFactory<T>());
 	}
 	
 	public VolumeRenderTool(VolumeRenderJobFactory<T> volumeRenderJobFactory){
 		this.volumeRenderJobFactory = volumeRenderJobFactory;
-		this.dimensionalListener = new DimensionalListener() // !! what are these fore
-		{
-			@Override
-			public void dimensionsChanged(DimensionalEvent evt)
-			{
-				update();
-			}
-		};
-		
-		this.axisChoiceListener = new AxisChoiceListener()
-		{
-			@Override
-			public void axisChoicePerformed(AxisChoiceEvent evt)
-			{
-				update();
-			}
-		};
-		
 	}
 	
 	public void createToolComponent(Composite parent)
@@ -192,7 +164,7 @@ public class VolumeRenderTool<T> extends AbstractSlicingTool
 		      {
 		          if (e.type == SWT.Selection) 
 		          {
-		        	  compute();
+		        	  update();
 		          }
 		        }
 		});
@@ -202,7 +174,7 @@ public class VolumeRenderTool<T> extends AbstractSlicingTool
 		      {
 		          if (e.type == SWT.Selection) 
 		          {
-		        	  job.destroy(TRACE_ID);;
+		        	  job.destroy(TRACE_ID);
 		          }
 		        }
 		});
@@ -262,8 +234,6 @@ public class VolumeRenderTool<T> extends AbstractSlicingTool
 		((GridData) comp.getLayoutData()).exclude = true;
 		comp.getParent().pack();
 		comp.getParent().update();
-		
-		
 	}
 	
 	@Override
