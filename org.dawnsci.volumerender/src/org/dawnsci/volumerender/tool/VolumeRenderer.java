@@ -1,11 +1,13 @@
 package org.dawnsci.volumerender.tool;
 
+import java.util.stream.IntStream;
+
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IVolumeRenderTrace;
 import org.eclipse.swt.widgets.Display;
 
-public class VolumeRenderer implements Runnable{
+public class VolumeRenderer {
 
 	private final IPlottingSystem<?> plottingSystem;
 	private final String traceID;
@@ -28,14 +30,10 @@ public class VolumeRenderer implements Runnable{
 				this.minMaxCull = minMaxCull;
 	}
 
-	@Override
 	public void run() {
 		final IVolumeRenderTrace trace = createOrLookupTrace();
 		
-		int[] step = {
-				(int)((dataset.getShape()[0] / (dataset.getShape()[0] * resolution) + 0.5f)),
-				(int)((dataset.getShape()[1] / (dataset.getShape()[1] * resolution) + 0.5f)),
-				(int)((dataset.getShape()[2] / (dataset.getShape()[2] * resolution) + 0.5f))};
+		int[] step = IntStream.rangeClosed(0, 2).map(i -> calculateStepSize(dataset,i)).toArray();
 					
 		trace.setData(
 				dataset.getShape(), 
@@ -44,8 +42,7 @@ public class VolumeRenderer implements Runnable{
 				opacity,
 				minMaxValue,
 				minMaxCull);
-		
-		
+				
 		if ((IVolumeRenderTrace) plottingSystem.getTrace(traceID) == null)
 		{
 			Display.getDefault().syncExec(new Runnable() {
@@ -64,5 +61,9 @@ public class VolumeRenderer implements Runnable{
 		} else{
 			return (IVolumeRenderTrace) plottingSystem.getTrace(traceID);
 		}
+	}
+	
+	private int calculateStepSize(ILazyDataset dataset, int dimention){
+		return (int)((dataset.getShape()[dimention] / (dataset.getShape()[dimention] * resolution) + 0.5f));
 	}
 }
