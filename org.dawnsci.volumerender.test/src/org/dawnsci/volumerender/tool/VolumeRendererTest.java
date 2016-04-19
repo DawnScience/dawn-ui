@@ -17,9 +17,13 @@ public class VolumeRendererTest {
 	private final double resolution = .1;
 	private final double intensity = .2;
 	private final double opacity = .3;
-	private final IDataset data = DoubleDataset.zeros(new int[]{100, 100,100}, 0);
-	private final IDataset afterSlicing = DoubleDataset.zeros(new int[]{10, 10,10}, 0);
-	private final double[] minMax = new double[]{1.0,1.0};
+	private final IDataset data = DoubleDataset.createRange(10, 8010, 1).reshape(20, 20, 20);
+	private final IDataset afterSlicing = DoubleDataset
+			.createFromObject(new double[]{10, 20, 210, 220, 4010, 4020, 4210, 4220})
+			.reshape(2,2,2);
+	private final double min = 0.2;
+	private final double max = 0.8;
+	private final double[] resultingRange = new double[]{852,3378};
 
 	@SuppressWarnings("unchecked")
 	@Test
@@ -34,13 +38,15 @@ public class VolumeRendererTest {
 				resolution, 
 				intensity, 
 				opacity, 
-				data, 
-				minMax, 
-				minMax
+				min, 
+				max,
+				min, 
+				max,
+				data
 			);
 		volumeRenderer.run(mock(IMonitor.class));
 		
-		verify(trace).setData(new int[]{100,100,100}, afterSlicing, intensity, opacity, minMax, minMax);
+		verify(trace).setData(new int[]{20,20,20}, afterSlicing, intensity, opacity, resultingRange, resultingRange);
 		verify(plottingSystem).addTrace(trace);		
 	}
 }

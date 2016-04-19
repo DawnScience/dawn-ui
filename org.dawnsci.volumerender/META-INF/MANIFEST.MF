@@ -9,7 +9,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.dawnsci.analysis.api,
  org.eclipse.dawnsci.plotting.api,
  org.eclipse.dawnsci.slicing.api,
- uk.ac.diamond.org.mihalis.opal
+ uk.ac.diamond.org.mihalis.opal,
+ org.eclipse.dawnsci.analysis.dataset
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.dawnsci.volumerender;uses:="org.osgi.framework,org.eclipse.ui.plugin",

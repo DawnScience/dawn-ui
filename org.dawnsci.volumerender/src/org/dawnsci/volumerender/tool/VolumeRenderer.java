@@ -16,31 +16,41 @@ public class VolumeRenderer {
 	private final double resolution;
 	private final double intensity;
 	private final double opacity;
+	private final double minValue;
+	private final double maxValue;
+	private final double minCull;
+	private final double maxCull;
+	
 	private final ILazyDataset dataset;
-	private final double[] minMaxValue;
-	private final double[] minMaxCull;
 
 	public VolumeRenderer(IPlottingSystem<?> plottingSystem, String traceID, double resolution, double intensity,
-			double opacity, ILazyDataset dataset, double[] minMaxValue, double[] minMaxCull) {
+			double opacity, double minValue, double maxValue, double minCull, double maxCull, ILazyDataset dataset) {
 				this.plottingSystem = plottingSystem;
 				this.traceID = traceID;
 				this.resolution = resolution;
 				this.intensity = intensity;
 				this.opacity = opacity;
+				this.minValue = minValue;
+				this.maxValue = maxValue;
+				this.minCull = minCull;
+				this.maxCull = maxCull;
 				this.dataset = dataset;
-				this.minMaxValue = minMaxValue;
-				this.minMaxCull = minMaxCull;
 	}
 
 	public void run(IMonitor monitor) throws Exception{
-		final IVolumeRenderTrace trace = createOrLookupTrace();
 		
 		int[] step = IntStream.rangeClosed(0, 2).map(i -> calculateStepSize(dataset,i)).toArray();
 			
 		IDataset slice = dataset.getSlice(monitor, new int[]{0,0,0}, dataset.getShape(), step);
 		
-		trace.setData(dataset.getShape(), slice, intensity, opacity, minMaxValue, minMaxCull);
-
+		double sliceMin = slice.min().doubleValue();
+		double sliceMax = slice.max().doubleValue();
+		
+		double[] scaledMinMaxValue = scaledMinAndMax(minValue, maxValue, sliceMin, sliceMax);
+		double[] scaledMinMaxCull = scaledMinAndMax(minCull, maxCull, sliceMin, sliceMax);
+		
+		final IVolumeRenderTrace trace = createOrLookupTrace();
+		trace.setData(dataset.getShape(), slice, intensity, opacity, scaledMinMaxValue, scaledMinMaxCull);
 		if ((IVolumeRenderTrace) plottingSystem.getTrace(traceID) == null)
 		{
 			Display.getDefault().syncExec(new Runnable() {
@@ -49,6 +59,11 @@ public class VolumeRenderer {
 		    	}
 		    });
 		}
+	}
+
+	private double[] scaledMinAndMax(double proportionMin, double proportionMax, double sliceMin, double sliceMax) {
+		double difference = sliceMax - sliceMin;
+		return new double[]{sliceMin + (difference * proportionMin), sliceMin + (difference * proportionMax)};
 	}
 
 	private IVolumeRenderTrace createOrLookupTrace() {

@@ -1,5 +1,6 @@
 package org.dawnsci.volumerender.tool;
 
+import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.slicing.api.system.AxisChoiceListener;
@@ -172,9 +173,8 @@ public class VolumeRenderTool<T> extends AbstractSlicingTool
 		int yIndex = getSlicingSystem().getDimsDataList().getDimsData(1).getPlotAxis().getIndex();
 		int zIndex = getSlicingSystem().getDimsDataList().getDimsData(2).getPlotAxis().getIndex();
 		
-		double[] minMaxValue = {histogramMinMax.getLowerValue(), histogramMinMax.getUpperValue()};
-		double[] minMaxCulling = {cullingMinMax.getLowerValue(), cullingMinMax.getUpperValue()};
-			
+		ILazyDataset view = getSlicingSystem().getData().getLazySet().getTransposedView(xIndex, yIndex, zIndex);
+		
 		job.compute(
 				new VolumeRenderer(
 				  slicingSystem.getPlottingSystem(),
@@ -182,9 +182,13 @@ public class VolumeRenderTool<T> extends AbstractSlicingTool
 	  			  resolutionSlider.getSelection()/100.0,
 	  			  intensitySlider.getSelection()/100.0,
 	  			  opacitySlider.getSelection()/100.0,
-	  			  getSlicingSystem().getData().getLazySet().getTransposedView(xIndex, yIndex, zIndex),
-	  			  minMaxValue,
-	  			  minMaxCulling));
+	  			  histogramMinMax.getLowerValue()/100.0,
+	  			  histogramMinMax.getUpperValue()/100.0,
+	  			  cullingMinMax.getLowerValue()/100.0,
+	  			  cullingMinMax.getUpperValue()/100.0,
+	  			  view
+	  			)
+			);
 	}
 	
 	public double safeParseDouble(String string){
