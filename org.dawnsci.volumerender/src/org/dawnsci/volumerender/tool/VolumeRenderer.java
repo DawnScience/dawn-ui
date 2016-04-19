@@ -2,7 +2,9 @@ package org.dawnsci.volumerender.tool;
 
 import java.util.stream.IntStream;
 
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IVolumeRenderTrace;
 import org.eclipse.swt.widgets.Display;
@@ -30,19 +32,15 @@ public class VolumeRenderer {
 				this.minMaxCull = minMaxCull;
 	}
 
-	public void run() {
+	public void run(IMonitor monitor) throws Exception{
 		final IVolumeRenderTrace trace = createOrLookupTrace();
 		
 		int[] step = IntStream.rangeClosed(0, 2).map(i -> calculateStepSize(dataset,i)).toArray();
-					
-		trace.setData(
-				dataset.getShape(), 
-				dataset.getSlice(new int[]{0,0,0}, dataset.getShape(), step),
-				intensity,
-				opacity,
-				minMaxValue,
-				minMaxCull);
-				
+			
+		IDataset slice = dataset.getSlice(monitor, new int[]{0,0,0}, dataset.getShape(), step);
+		
+		trace.setData(dataset.getShape(), slice, intensity, opacity, minMaxValue, minMaxCull);
+
 		if ((IVolumeRenderTrace) plottingSystem.getTrace(traceID) == null)
 		{
 			Display.getDefault().syncExec(new Runnable() {
