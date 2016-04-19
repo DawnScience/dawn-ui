@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * 
  *
  */
-abstract class Image3DTrace extends PlotterTrace implements IImage3DTrace{
+public abstract class Image3DTrace extends PlotterTrace implements IImage3DTrace{
 
 	private static Logger logger = LoggerFactory.getLogger(Image3DTrace.class);
 
