@@ -5,17 +5,12 @@ Bundle-SymbolicName: org.dawnsci.volumerender;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.dawnsci.volumerender.Activator
 Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime
+ org.eclipse.core.runtime,
+ org.eclipse.dawnsci.analysis.api,
+ org.eclipse.dawnsci.plotting.api,
+ org.eclipse.dawnsci.slicing.api
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Import-Package: org.eclipse.dawnsci.analysis.api,
- org.eclipse.dawnsci.analysis.api.dataset,
- org.eclipse.dawnsci.plotting.api,
- org.eclipse.dawnsci.plotting.api.trace,
- org.eclipse.dawnsci.slicing.api.system,
- org.eclipse.dawnsci.slicing.api.tool,
- org.eclipse.richbeans.widgets,
- org.eclipse.richbeans.widgets.wrappers
 Export-Package: org.dawnsci.volumerender;uses:="org.osgi.framework,org.eclipse.ui.plugin",
  org.dawnsci.volumerender.tool;
   uses:="org.eclipse.core.runtime.jobs,

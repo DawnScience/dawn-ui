@@ -9,9 +9,10 @@ import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 
+import org.dawnsci.plotting.javafx.objects.Line;
 import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
 
-public class LineGroup extends Group
+public class TickGroup extends Group
 {
 	
 	private Line line;
@@ -29,7 +30,7 @@ public class LineGroup extends Group
 	
 	private double textSize;
 	
-	public LineGroup(double length, Point3D direction, Point3D offset, String label, double textSize, Rotate gridRotate)
+	public TickGroup(double length, Point3D direction, Point3D offset, String label, double textSize, Rotate gridRotate)
 	{		
 		super();
 		this.textSize = textSize;

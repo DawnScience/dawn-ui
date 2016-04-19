@@ -1,9 +1,11 @@
 package org.dawnsci.volumerender.tool;
 
+import org.dawnsci.volumerender.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.slicing.api.util.ProgressMonitorWrapper;
 
 public class VolumeRenderJob extends Job {	
 	private VolumeRenderer volumeRenderer;
@@ -21,7 +23,11 @@ public class VolumeRenderJob extends Job {
 	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		volumeRenderer.run();
+		try {
+			volumeRenderer.run(new ProgressMonitorWrapper(monitor));
+		} catch (Exception e) {
+			return new Status(Status.ERROR, Activator.PLUGIN_ID, "Failed to render volume", e);
+		}
 		return Status.OK_STATUS;
 	}
 }

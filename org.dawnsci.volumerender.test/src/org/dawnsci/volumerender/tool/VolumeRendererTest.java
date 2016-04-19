@@ -5,6 +5,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IVolumeRenderTrace;
@@ -22,7 +23,7 @@ public class VolumeRendererTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testRenderingVolume(){
+	public void testRenderingVolume() throws Exception{
 		IPlottingSystem<Composite> plottingSystem = mock(IPlottingSystem.class);
 		IVolumeRenderTrace trace = mock(IVolumeRenderTrace.class);
 		when(plottingSystem.createVolumeRenderTrace(traceID)).thenReturn(trace);
@@ -37,7 +38,7 @@ public class VolumeRendererTest {
 				minMax, 
 				minMax
 			);
-		volumeRenderer.run();
+		volumeRenderer.run(mock(IMonitor.class));
 		
 		verify(trace).setData(new int[]{100,100,100}, afterSlicing, intensity, opacity, minMax, minMax);
 		verify(plottingSystem).addTrace(trace);		

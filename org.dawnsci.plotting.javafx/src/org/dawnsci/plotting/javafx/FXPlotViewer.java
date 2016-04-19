@@ -22,8 +22,8 @@ import javafx.scene.Group;
 import javafx.scene.image.WritableImage;
 
 import org.dawnsci.plotting.javafx.axis.objects.JavaFXProperties;
-import org.dawnsci.plotting.javafx.trace.FXIsosurfaceTrace;
-import org.dawnsci.plotting.javafx.trace.VolumeTrace;
+import org.dawnsci.plotting.javafx.trace.isosurface.FXIsosurfaceTrace;
+import org.dawnsci.plotting.javafx.trace.volume.VolumeTrace;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
 import org.eclipse.dawnsci.plotting.api.PlotType;

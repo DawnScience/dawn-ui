@@ -1,5 +1,7 @@
 package org.dawnsci.plotting.javafx.axis.objects;
 
+import org.dawnsci.plotting.javafx.objects.Line;
+
 import javafx.geometry.Point3D;
 import javafx.scene.Group;
 import javafx.scene.Node;

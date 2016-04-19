@@ -1,7 +1,10 @@
-package org.dawnsci.plotting.javafx.axis.objects;
+package org.dawnsci.plotting.javafx.objects;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.dawnsci.plotting.javafx.axis.objects.JavaFXProperties;
+import org.dawnsci.plotting.javafx.axis.objects.JavaFXProperties.ColourProperties;
 
 import javafx.geometry.Point3D;
 import javafx.scene.paint.Color;
@@ -21,7 +24,7 @@ public class Line extends MeshView
 	private double height;
 	private PhongMaterial mat;
 	
-	Line(double height, Rotate rotate, Point3D offset)
+	public Line(double height, Rotate rotate, Point3D offset)
 	{
 		super();
 		
