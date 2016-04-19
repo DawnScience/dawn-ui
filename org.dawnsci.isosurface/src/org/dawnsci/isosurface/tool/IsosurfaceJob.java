@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawnsci.isosurface.alg.MarchingCubes;
 import org.dawnsci.isosurface.alg.MarchingCubesModel;
 import org.dawnsci.isosurface.alg.Surface;
@@ -39,15 +38,17 @@ import org.slf4j.LoggerFactory;
  */
 public class IsosurfaceJob extends Job {
 
+	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(IsosurfaceJob.class);
 	
  	// private IOperation<MarchingCubesModel, Surface> generator;
- 	final private IPlottingSystem system;
- 	private String name;
+ 	final private IPlottingSystem<?> system;
+ 	@SuppressWarnings("unused")
+	private String name;
  	
  	AtomicReference<MarchingCubesModel> modelRef;
  	
-	public IsosurfaceJob(String name, IPlottingSystem system)
+	public IsosurfaceJob(String name, IPlottingSystem<?> system)
 	{
 		super(name);
 		
@@ -168,6 +169,7 @@ public class IsosurfaceJob extends Job {
 	/*
 	 * look into improving !!
 	 */
+	@SuppressWarnings("unused")
 	private ArrayList<IDataset> generateDuplicateAxes(int count, int step, int[] shape)
 	{
 		ArrayList<IDataset> axis = new ArrayList<IDataset>();
@@ -189,6 +191,7 @@ public class IsosurfaceJob extends Job {
 		return axis;
 	}
 	
+	@SuppressWarnings("unused")
 	private void showErrorMessage(final String title, final String message) {
 		Display.getDefault().syncExec(new Runnable(){
 			@Override

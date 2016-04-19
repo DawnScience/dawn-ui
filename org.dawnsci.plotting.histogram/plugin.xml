@@ -1246,7 +1246,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.blues_green"
             id="org.dawnsci.plotting.histogram.blues"
-            name="Blues (Sequential)"
+            name="Blues"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.blues_red"
             colour_category="org.dawnsci.plotting.histogram.sequential1_category">
@@ -1259,7 +1259,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.bugn_green"
             id="org.dawnsci.plotting.histogram.bugn"
-            name="Blue-Green (Sequential)"
+            name="Blue-Green"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.bugn_red"
             colour_category="org.dawnsci.plotting.histogram.sequential1_category">
@@ -1272,7 +1272,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.bupu_green"
             id="org.dawnsci.plotting.histogram.bupu"
-            name="Blue-Purple (Sequential)"
+            name="Blue-Purple"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.bupu_red"
             colour_category="org.dawnsci.plotting.histogram.sequential1_category">
@@ -1285,7 +1285,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.gnbu_green"
             id="org.dawnsci.plotting.histogram.gnbu"
-            name="Green-Blue (Sequential)"
+            name="Green-Blue"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.gnbu_red"
             colour_category="org.dawnsci.plotting.histogram.sequential1_category">
@@ -1298,7 +1298,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.greens_green"
             id="org.dawnsci.plotting.histogram.greens"
-            name="Greens (Sequential)"
+            name="Greens"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.greens_red"
             colour_category="org.dawnsci.plotting.histogram.sequential1_category">
@@ -1311,7 +1311,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.greys_green"
             id="org.dawnsci.plotting.histogram.greys"
-            name="Greys (Sequential)"
+            name="Greys"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.greys_red"
             colour_category="org.dawnsci.plotting.histogram.sequential1_category">
@@ -1324,7 +1324,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.oranges_green"
             id="org.dawnsci.plotting.histogram.oranges"
-            name="Oranges (Sequential)"
+            name="Oranges"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.oranges_red"
             colour_category="org.dawnsci.plotting.histogram.sequential1_category">
@@ -1337,7 +1337,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.orrd_green"
             id="org.dawnsci.plotting.histogram.orrd"
-            name="Orange-Red (Sequential)"
+            name="Orange-Red"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.orrd_red"
             colour_category="org.dawnsci.plotting.histogram.sequential1_category">
@@ -1350,7 +1350,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.pubu_green"
             id="org.dawnsci.plotting.histogram.pubu"
-            name="Purple-Blue (Sequential)"
+            name="Purple-Blue"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.pubu_red"
             colour_category="org.dawnsci.plotting.histogram.sequential1_category">
@@ -1363,7 +1363,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.pubugn_green"
             id="org.dawnsci.plotting.histogram.pubugn"
-            name="Purple-Blue-Green (Sequential)"
+            name="Purple-Blue-Green"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.pubugn_red"
             colour_category="org.dawnsci.plotting.histogram.sequential1_category">
@@ -1376,7 +1376,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.purd_green"
             id="org.dawnsci.plotting.histogram.purd"
-            name="Purple-Red (Sequential)"
+            name="Purple-Red"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.purd_red"
             colour_category="org.dawnsci.plotting.histogram.sequential1_category">
@@ -1389,7 +1389,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.purples_green"
             id="org.dawnsci.plotting.histogram.purples"
-            name="Purples (Sequential)"
+            name="Purples"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.purples_red"
             colour_category="org.dawnsci.plotting.histogram.sequential1_category">
@@ -1402,7 +1402,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.rdpu_green"
             id="org.dawnsci.plotting.histogram.rdpu"
-            name="Red-Purple (Sequential)"
+            name="Red-Purple"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.rdpu_red"
             colour_category="org.dawnsci.plotting.histogram.sequential1_category">
@@ -1415,7 +1415,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.reds_green"
             id="org.dawnsci.plotting.histogram.reds"
-            name="Reds (Sequential)"
+            name="Reds"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.reds_red"
             colour_category="org.dawnsci.plotting.histogram.sequential1_category">
@@ -1428,7 +1428,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.ylgn_green"
             id="org.dawnsci.plotting.histogram.ylgn"
-            name="Yellow-Green (Sequential)"
+            name="Yellow-Green"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.ylgn_red"
             colour_category="org.dawnsci.plotting.histogram.sequential1_category">
@@ -1441,7 +1441,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.ylgnbu_green"
             id="org.dawnsci.plotting.histogram.ylgnbu"
-            name="Yellow-Green-Blue (Sequential)"
+            name="Yellow-Green-Blue"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.ylgnbu_red"
             colour_category="org.dawnsci.plotting.histogram.sequential1_category">
@@ -1454,7 +1454,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.ylorbr_green"
             id="org.dawnsci.plotting.histogram.ylorbr"
-            name="Yellow-Orange-Brown (Sequential)"
+            name="Yellow-Orange-Brown"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.ylorbr_red"
             colour_category="org.dawnsci.plotting.histogram.sequential1_category">
@@ -1467,7 +1467,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.ylorrd_green"
             id="org.dawnsci.plotting.histogram.ylorrd"
-            name="Yellow-Orange-Red (Sequential)"
+            name="Yellow-Orange-Red"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.ylorrd_red"
             colour_category="org.dawnsci.plotting.histogram.sequential1_category">
@@ -1507,7 +1507,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.brbg_green"
             id="org.dawnsci.plotting.histogram.brbg"
-            name="Brown-Blue-Green (Divergent)"
+            name="Brown-Blue-Green"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.brbg_red"
             colour_category="org.dawnsci.plotting.histogram.divergent_category">
@@ -1520,7 +1520,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.bwr_green"
             id="org.dawnsci.plotting.histogram.bwr"
-            name="Blue-White-Red (Divergent)"
+            name="Blue-White-Red"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.bwr_red"
             colour_category="org.dawnsci.plotting.histogram.divergent_category">
@@ -1533,7 +1533,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.coolwarm_green"
             id="org.dawnsci.plotting.histogram.coolwarm"
-            name="Coolwarm (Divergent)"
+            name="Coolwarm"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.coolwarm_red"
             colour_category="org.dawnsci.plotting.histogram.divergent_category">
@@ -1546,7 +1546,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.piyg_green"
             id="org.dawnsci.plotting.histogram.piyg"
-            name="Pink-Yellow-Green (Divergent)"
+            name="Pink-Yellow-Green"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.piyg_red"
             colour_category="org.dawnsci.plotting.histogram.divergent_category">
@@ -1559,7 +1559,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.prgn_green"
             id="org.dawnsci.plotting.histogram.prgn"
-            name="Purple-Green (Divergent)"
+            name="Purple-Green"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.prgn_red"
             colour_category="org.dawnsci.plotting.histogram.divergent_category">
@@ -1572,7 +1572,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.puor_green"
             id="org.dawnsci.plotting.histogram.puor"
-            name="Purple-Orange (Divergent)"
+            name="Purple-Orange"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.puor_red"
             colour_category="org.dawnsci.plotting.histogram.divergent_category">
@@ -1585,7 +1585,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.rdbu_green"
             id="org.dawnsci.plotting.histogram.rdbu"
-            name="Red-Blue (Divergent)"
+            name="Red-Blue"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.rdbu_red"
             colour_category="org.dawnsci.plotting.histogram.divergent_category">
@@ -1598,7 +1598,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.rdgy_green"
             id="org.dawnsci.plotting.histogram.rdgy"
-            name="Red-Grey (Divergent)"
+            name="Red-Grey"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.rdgy_red"
             colour_category="org.dawnsci.plotting.histogram.divergent_category">
@@ -1611,7 +1611,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.rdylbu_green"
             id="org.dawnsci.plotting.histogram.rdylbu"
-            name="Red-Yellow-Blue (Divergent)"
+            name="Red-Yellow-Blue"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.rdylbu_red"
             colour_category="org.dawnsci.plotting.histogram.divergent_category">
@@ -1624,7 +1624,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.rdylgn_green"
             id="org.dawnsci.plotting.histogram.rdylgn"
-            name="Red-Yellow-Green (Divergent)"
+            name="Red-Yellow-Green"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.rdylgn_red"
             colour_category="org.dawnsci.plotting.histogram.divergent_category">
@@ -1637,7 +1637,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.spectral_green"
             id="org.dawnsci.plotting.histogram.spectral"
-            name="Spectral (Divergent)"
+            name="Spectral"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.spectral_red"
             colour_category="org.dawnsci.plotting.histogram.divergent_category">
@@ -1650,7 +1650,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.seismic_green"
             id="org.dawnsci.plotting.histogram.seismic"
-            name="Seismic (Divergent)"
+            name="Seismic"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.seismic_red"
             colour_category="org.dawnsci.plotting.histogram.divergent_category">
@@ -1663,7 +1663,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.accent_green"
             id="org.dawnsci.plotting.histogram.accent"
-            name="Accent (Qualitative)"
+            name="Accent"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.accent_red"
             colour_category="org.dawnsci.plotting.histogram.qualitative_category">
@@ -1676,7 +1676,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.dark2_green"
             id="org.dawnsci.plotting.histogram.dark2"
-            name="Dark2 (Qualitative)"
+            name="Dark2"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.dark2_red"
             colour_category="org.dawnsci.plotting.histogram.qualitative_category">
@@ -1689,7 +1689,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.paired_green"
             id="org.dawnsci.plotting.histogram.paired"
-            name="Paired (Qualitative)"
+            name="Paired"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.paired_red"
             colour_category="org.dawnsci.plotting.histogram.qualitative_category">
@@ -1702,7 +1702,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.pastel1_green"
             id="org.dawnsci.plotting.histogram.pastel1"
-            name="Pastel1 (Qualitative)"
+            name="Pastel1"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.pastel1_red"
             colour_category="org.dawnsci.plotting.histogram.qualitative_category">
@@ -1715,7 +1715,7 @@
             green_inverted="false"
             green_transfer_function="org.dawnsci.plotting.histogram.pastel2_green"
             id="org.dawnsci.plotting.histogram.pastel2"
-            name="Pastel2 (Qualitative)"
+            name="Pastel2"
             red_inverted="false"
             red_transfer_function="org.dawnsci.plotting.histogram.pastel2_red"
             colour_category="org.dawnsci.plotting.histogram.qualitative_category">

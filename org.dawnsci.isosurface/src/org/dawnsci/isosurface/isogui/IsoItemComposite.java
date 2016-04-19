@@ -67,7 +67,7 @@ public class IsoItemComposite extends Composite
 		
 		Label lblCubeSize = new Label(this, SWT.NONE);
 		lblCubeSize.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false, 1, 1));
-		lblCubeSize.setText("Cube Size ");
+		lblCubeSize.setText("Cuboid Size ");
 		
 		x = new SpinnerWrapper(this, SWT.BORDER);
 		GridData xgd = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);

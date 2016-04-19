@@ -47,7 +47,7 @@ abstract class Image3DTrace extends PlotterTrace implements IImage3DTrace{
 	private boolean            imageCreationAllowed = true;
 	private String             paletteName;
 
-	public Image3DTrace(IPlottingSystemViewer plotter, String name) {
+	public Image3DTrace(IPlottingSystemViewer<?> plotter, String name) {
 		super(plotter, name);
 		this.imageServiceBean = new ImageServiceBean();
 		try {
@@ -143,6 +143,7 @@ abstract class Image3DTrace extends PlotterTrace implements IImage3DTrace{
 		paletteListeners.remove(pl);
 	}
 
+	@SuppressWarnings("unused")
 	private void firePaletteDataListeners(PaletteData paletteData) {
 		if (paletteListeners==null) return;
 		final PaletteEvent evt = new PaletteEvent(this, getPaletteData()); // Important do not let Mark get at it :)

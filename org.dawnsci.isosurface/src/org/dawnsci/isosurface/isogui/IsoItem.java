@@ -3,12 +3,6 @@ package org.dawnsci.isosurface.isogui;
 import java.awt.Color;
 import java.util.UUID;
 
-import org.dawnsci.isosurface.Activator;
-import org.dawnsci.isosurface.alg.MarchingCubesModel;
-import org.dawnsci.isosurface.alg.Surface;
-import org.dawnsci.isosurface.tool.IsosurfaceJob;
-import org.eclipse.dawnsci.analysis.api.processing.IOperation;
-import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.swt.graphics.RGB;
 
 public class IsoItem implements Cloneable

@@ -19,6 +19,7 @@ import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 
 public class VolumeRender extends Group
 {
+	@SuppressWarnings("unused")
 	private ILazyDataset lazySlice;
 	
 	private double max;

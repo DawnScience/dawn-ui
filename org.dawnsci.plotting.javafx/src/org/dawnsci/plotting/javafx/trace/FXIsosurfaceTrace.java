@@ -48,7 +48,7 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 	private int[] rgb;
 	private double opacity = 0.5;
 	
-	public FXIsosurfaceTrace(IPlottingSystemViewer viewer, SurfaceDisplayer newScene, String traceName)
+	public FXIsosurfaceTrace(IPlottingSystemViewer<?> viewer, SurfaceDisplayer newScene, String traceName)
 	{
 		super(viewer, traceName);
 		this.scene = newScene;
@@ -66,6 +66,7 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
         super.dispose();
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void setData(IDataset points, IDataset textCoords, IDataset faces, List<? extends IDataset> axes)
 	{

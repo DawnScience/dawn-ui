@@ -8,10 +8,18 @@
  */
 package org.dawnsci.plotting.javafx;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+
 import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.embed.swt.FXCanvas;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
+import javafx.scene.image.WritableImage;
 
 import org.dawnsci.plotting.javafx.trace.FXIsosurfaceTrace;
 import org.dawnsci.plotting.javafx.trace.VolumeTrace;
@@ -23,6 +31,8 @@ import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.IVolumeRenderTrace;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 
 /**
  * TODO The implementation of this plotter viewer is not complete.
@@ -133,8 +143,31 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 		canvas.getScene().setCursor(cursor);
 	}
 	
-	// create the isoTrace 
-	// !!look into later!!
+
+	public void saveScreenShotOfSceneToFile()
+	{
+		String fileURL = null;
+		
+		FileDialog dialog = new FileDialog (Display.getDefault().getActiveShell(), SWT.SAVE);
+
+		String [] filterExtensions = new String [] {".png"};
+		
+		dialog.setFilterPath(File.listRoots()[0].getAbsolutePath());
+		dialog.setFilterNames(new String[]{".png"});
+		dialog.setFilterExtensions (filterExtensions);
+		fileURL = dialog.open();
+		
+		WritableImage wi = scene.snapshot(null);
+		BufferedImage rawImage;
+		rawImage = SwingFXUtils.fromFXImage(wi, null);
+		
+		try {
+			ImageIO.write(rawImage, "png", new File(fileURL));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public ITrace createTrace(String name, Class<? extends ITrace> clazz)
 	{
 		if (IIsosurfaceTrace.class.isAssignableFrom(clazz))
@@ -214,6 +247,11 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 		scene.flipCameraType();
 	}
 	
+	public void resetSceneTransforms() 
+	{
+		scene.resetSceneTransforms();
+	}
+	
 	/**
 	 * 
 	 * @param type
@@ -252,6 +290,8 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 	{
 		return canvas;
 	}
+
+	
 	
 	
 }

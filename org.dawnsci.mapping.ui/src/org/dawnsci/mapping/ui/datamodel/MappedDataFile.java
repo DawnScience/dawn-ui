@@ -5,17 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import org.dawnsci.mapping.ui.LocalServiceManager;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.Slice;
-import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class MappedDataFile implements MapObject{
 
@@ -25,7 +14,7 @@ public class MappedDataFile implements MapObject{
 	private Map<String,AssociatedImage> microscopeDataMap;
 	private double[] range;
 	
-	private final static Logger logger = LoggerFactory.getLogger(MappedDataFile.class);
+//	private final static Logger logger = LoggerFactory.getLogger(MappedDataFile.class);
 	
 	public MappedDataFile(String path) {
 		this.path = path;
