@@ -141,6 +141,14 @@ public class DiffractionDetectorPreferenceInitializer extends AbstractPreference
 		dd12.setNumberOfPixelsY(5760);
 		dds.addDiffractionDetector(dd12);
 		
+		DiffractionDetector dd14 = new DiffractionDetector();
+		dd14.setDetectorName("Perkin Elmer 1611");
+		dd14.setxPixelSize(Amount.valueOf(100, SI.MICRO(SI.METRE)));
+		dd14.setyPixelSize(Amount.valueOf(100, SI.MICRO(SI.METRE)));
+		dd14.setNumberOfPixelsX(4096);
+		dd14.setNumberOfPixelsY(4096);
+		dds.addDiffractionDetector(dd14);
+		
 		DiffractionDetector dd13 = new DiffractionDetector();
 		dd13.setDetectorName("ADSC 210r CCD");
 		dd13.setxPixelSize(Amount.valueOf(51, SI.MICRO(SI.METRE)));
