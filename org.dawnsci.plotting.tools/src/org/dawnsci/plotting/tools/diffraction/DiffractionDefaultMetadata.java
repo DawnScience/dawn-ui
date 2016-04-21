@@ -198,17 +198,6 @@ public class DiffractionDefaultMetadata {
 			det.setYPixelMM(pixelSizeY);
 		}
 		
-		// Create the detector origin vector based on the above
-		double[] detectorOrigin = { (widthInPixels - widthInPixels/2d) * pixelSizeX, (heightInPixels - heightInPixels/2d) * pixelSizeY, distance };
-		
-		// The rotation of the detector relative to the reference frame - assume no rotation
-		double detectorRotationX = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.DETECTOR_ROTATION_X);
-		double detectorRotationY = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.DETECTOR_ROTATION_Y);
-		double detectorRotationZ = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.DETECTOR_ROTATION_Z);
-		
-		DetectorProperties detprop =new DetectorProperties(new Vector3d(detectorOrigin), heightInPixels, widthInPixels, 
-				pixelSizeX, pixelSizeY, detectorRotationX, detectorRotationY, detectorRotationZ);
-		
 		double x = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.BEAM_CENTRE_X);
 		double y = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.BEAM_CENTRE_Y);
 		
@@ -216,11 +205,8 @@ public class DiffractionDefaultMetadata {
 		double pitch = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.DETECTOR_PITCH);
 		double roll = Activator.getPlottingPreferenceStore().getDouble(DiffractionToolConstants.DETECTOR_ROLL);
 		
-		detprop.setBeamCentreCoords(new double[] {x,y});
-		
+		DetectorProperties detprop = new DetectorProperties(distance, x*pixelSizeX, y*pixelSizeY, heightInPixels, widthInPixels, pixelSizeY, pixelSizeX);
 		detprop.setNormalAnglesInDegrees(yaw, pitch, roll);
-		
-		detprop.setBeamCentreDistance(distance);
 		
 		return new DetectorBean(detprop, det);
 	}
