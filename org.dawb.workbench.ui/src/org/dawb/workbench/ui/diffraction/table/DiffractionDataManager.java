@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.dawb.workbench.ui.Activator;
 import org.dawnsci.plotting.tools.diffraction.DiffractionUtils;
 import org.dawnsci.plotting.util.PlottingUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -32,7 +33,6 @@ import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ListDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +57,7 @@ public class DiffractionDataManager {
 	}
 	public DiffractionDataManager(List<DiffractionTableData> model) {
 		this.model = model;
-		service    = (ILoaderService) PlatformUI.getWorkbench().getService(ILoaderService.class);
+		service    = Activator.getService(ILoaderService.class);
 		listeners  = new HashSet<IDiffractionDataListener>();
 	}
 	

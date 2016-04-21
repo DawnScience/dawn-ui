@@ -16,6 +16,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +32,7 @@ public class Activator extends AbstractUIPlugin {
 
 	// The shared instance
 	private static Activator plugin;
+	private BundleContext context;
 	
 	/**
 	 * The constructor
@@ -45,6 +47,7 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		this.context = context;
 		
 		Hashtable<String, String> props = new Hashtable<String, String>(1);
 		props.put("description", "A service used to encapsulate data in a transferable object which can be used anywhere in the user interface.");
@@ -57,6 +60,7 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
+		this.context = null;
 		super.stop(context);
 	}
 
@@ -84,4 +88,17 @@ public class Activator extends AbstractUIPlugin {
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
 	}
 
+
+	/**
+	 * Looks for OSGI service, used by ServiceManager
+	 * 
+	 * @param clazz
+	 * @return
+	 */
+	public static <T> T getService(Class<T> clazz) {
+		if (plugin.context==null) return null;
+		ServiceReference<T> ref = plugin.context.getServiceReference(clazz);
+		if (ref==null) return null;
+		return plugin.context.getService(ref);
+	}
 }
