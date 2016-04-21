@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionMetadataUtils;
 import uk.ac.diamond.scisoft.analysis.diffraction.PeakFittingEllipseFinder;
 import uk.ac.diamond.scisoft.analysis.diffraction.PowderRingsUtils;
+import uk.ac.diamond.scisoft.analysis.io.NexusDiffractionCalibrationReader;
 
 public class DiffractionUtils {
 	
@@ -108,26 +109,15 @@ public class DiffractionUtils {
 		
 		if (filePath != null) {
 			//see if we can read diffraction info from nexus files
-			NexusDiffractionMetaCreator ndmc = new NexusDiffractionMetaCreator(filePath);
-			IDiffractionMetadata difMet = ndmc.getDiffractionMetadataFromNexus(shape);
+			IDiffractionMetadata difMet = NexusDiffractionCalibrationReader.getDiffractionMetadataFromNexus(filePath, null, image.getName());
+			if (difMet == null) difMet = NexusDiffractionCalibrationReader.getDiffractionMetadataFromNexus(filePath, null, null);
 			if (difMet !=null) {
 				//TODO comment out
 				//image.setMetadata(difMet);
 				if (statusText != null && statusText[0] == null) {
-					if (ndmc.isCompleteRead()){
-						statusText[0] = "Metadata completely loaded from nexus tree";
-						return difMet;
-					}
-					else if (ndmc.isPartialRead()) {
-						statusText[0] = "Required metadata loaded from nexus tree";
-						return difMet;
-					}
-					else if (ndmc.anyValuesRead())
-						statusText[0] = "Incomplete metadata in nexus tree, loading from preferences";
-					else
-						statusText[0] = "No metadata in nexus tree, metadata loaded from preferences";
+					statusText[0] = "Metadata  loaded from nexus tree";
+					return difMet;
 				}
-				
 			}
 		}
 
