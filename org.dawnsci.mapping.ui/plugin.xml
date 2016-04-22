@@ -80,14 +80,13 @@
          point="org.eclipse.ui.actionSets">
       <actionSet
             id="org.dawnsci.mapping.ui.fileOpenActionSet"
-            label="Open File..."
-            visible="true">
+            label="Open File...">
          <action
                class="org.dawnsci.mapping.ui.actions.OpenLocalFileAction"
                id="org.dawnsci.mapping.ui.action1"
                label="Open Map File..."
                menubarPath="file/new"
-               state="true">
+               style="push">
          </action>
       </actionSet>
    </extension>
@@ -98,6 +97,15 @@
             id="org.dawnsci.mapping.ui.fileOpenNavigator"
             perspective="org.dawnsci.mapping.ui.dawn.mappingperspective">
       </fileOpen>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.dawnsci.mapping.ui.dawn.mappingperspective">
+         <actionSet
+               id="org.dawnsci.mapping.ui.fileOpenActionSet">
+         </actionSet>
+      </perspectiveExtension>
    </extension>
 
 </plugin>
