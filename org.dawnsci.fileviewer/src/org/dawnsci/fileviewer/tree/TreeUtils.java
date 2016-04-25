@@ -9,10 +9,14 @@
  *     IBM Corporation - initial API and implementation
  *     Diamond Light Source - Custom modifications for Diamond's needs
  *******************************************************************************/
-package org.dawnsci.fileviewer;
+package org.dawnsci.fileviewer.tree;
 
 import java.io.File;
 
+import org.dawnsci.fileviewer.FileViewer;
+import org.dawnsci.fileviewer.FileViewerConstants;
+import org.dawnsci.fileviewer.IconCache;
+import org.dawnsci.fileviewer.Utils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;

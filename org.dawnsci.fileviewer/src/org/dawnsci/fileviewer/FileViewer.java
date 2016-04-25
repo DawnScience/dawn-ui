@@ -13,40 +13,26 @@ package org.dawnsci.fileviewer;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.dawb.common.ui.util.EclipseUtils;
+import org.dawnsci.fileviewer.table.TableExplorer;
+import org.dawnsci.fileviewer.tree.TreeExplorer;
+import org.dawnsci.fileviewer.tree.TreeUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.dnd.DND;
-import org.eclipse.swt.dnd.DragSource;
 import org.eclipse.swt.dnd.DragSourceEvent;
-import org.eclipse.swt.dnd.DragSourceListener;
-import org.eclipse.swt.dnd.DropTarget;
-import org.eclipse.swt.dnd.DropTargetAdapter;
 import org.eclipse.swt.dnd.DropTargetEvent;
-import org.eclipse.swt.dnd.FileTransfer;
-import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.events.TreeAdapter;
-import org.eclipse.swt.events.TreeEvent;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.PartInitException;
 import org.slf4j.Logger;
@@ -86,37 +72,7 @@ public class FileViewer {
 	/* Combo view */
 	private Combo combo;
 
-	/* Tree view */
 	private IconCache iconCache = new IconCache();
-	
-
-	private Tree tree;
-	private Label treeScopeLabel;
-
-	/* Table view */
-	private final String[] tableTitles = new String[] { Utils.getResourceString("table.Name.title"),
-			Utils.getResourceString("table.Size.title"), Utils.getResourceString("table.Type.title"),
-			Utils.getResourceString("table.Modified.title") };
-	private Table table;
-	private Label tableContentsOfLabel;
-
-	/* Table update worker */
-	// Control data
-	private final Object workerLock = new Object();
-	// Lock for all worker control data and state
-	private volatile Thread workerThread = null;
-	// The worker's thread
-	private volatile boolean workerStopped = false;
-	// True if the worker must exit on completion of the current cycle
-	private volatile boolean workerCancelled = false;
-	// True if the worker must cancel its operations prematurely perhaps due to
-	// a state update
-
-	// Worker state information -- this is what gets synchronized by an update
-	private volatile File workerStateDir = null;
-
-	// State information to use for the next cycle
-	private volatile File workerNextDir = null;
 
 	/* Simulate only flag */
 	// when true, disables actual filesystem manipulations and outputs results
@@ -126,11 +82,15 @@ public class FileViewer {
 	private Composite parent;
 	private SashForm sashForm;
 
+	private TreeExplorer treeExplo;
+
+	private TableExplorer tableExplo;
+
 	/**
 	 * Closes the main program.
 	 */
 	public void close() {
-		workerStop();
+		tableExplo.workerStop();
 		getIconCache().freeResources();
 	}
 
@@ -159,8 +119,15 @@ public class FileViewer {
 		gridData = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
 		gridData.horizontalSpan = 4;
 		sashForm.setLayoutData(gridData);
-		createTreeView(sashForm);
-		createTableView(sashForm);
+		
+		// Tree
+		treeExplo = new TreeExplorer(this);
+		treeExplo.createTreeView(sashForm);
+		
+		// Table
+		tableExplo = new TableExplorer(this);
+		tableExplo.createTableView(sashForm);
+
 		sashForm.setWeights(new int[] { 5, 2 });
 
 		numObjectsLabel = new Label(parent, SWT.BORDER);
@@ -221,342 +188,13 @@ public class FileViewer {
 	}
 
 	/**
-	 * Creates the file tree view.
-	 * 
-	 * @param parent
-	 *            the parent control
-	 */
-	private void createTreeView(Composite parent) {
-		Composite composite = new Composite(parent, SWT.NONE);
-		GridLayout gridLayout = new GridLayout();
-		gridLayout.numColumns = 1;
-		gridLayout.marginHeight = gridLayout.marginWidth = 2;
-		gridLayout.horizontalSpacing = gridLayout.verticalSpacing = 0;
-		composite.setLayout(gridLayout);
-
-		treeScopeLabel = new Label(composite, SWT.BORDER);
-		treeScopeLabel.setText(Utils.getResourceString("details.AllFolders.text"));
-		treeScopeLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL));
-
-		tree = new Tree(composite, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.SINGLE);
-		tree.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
-
-		tree.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetSelected(SelectionEvent event) {
-				final TreeItem[] selection = tree.getSelection();
-				if (selection != null && selection.length != 0) {
-					TreeItem item = selection[0];
-					File file = (File) item.getData(FileViewerConstants.TREEITEMDATA_FILE);
-					notifySelectedDirectory(file);
-				}
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent event) {
-				final TreeItem[] selection = tree.getSelection();
-				if (selection != null && selection.length != 0) {
-					TreeItem item = selection[0];
-					item.setExpanded(true);
-					treeExpandItem(item);
-				}
-			}
-		});
-		tree.addTreeListener(new TreeAdapter() {
-			@Override
-			public void treeExpanded(TreeEvent event) {
-				final TreeItem item = (TreeItem) event.item;
-				final Image image = (Image) item.getData(FileViewerConstants.TREEITEMDATA_IMAGEEXPANDED);
-				if (image != null)
-					item.setImage(image);
-				treeExpandItem(item);
-			}
-
-			@Override
-			public void treeCollapsed(TreeEvent event) {
-				final TreeItem item = (TreeItem) event.item;
-				final Image image = (Image) item.getData(FileViewerConstants.TREEITEMDATA_IMAGECOLLAPSED);
-				if (image != null)
-					item.setImage(image);
-			}
-		});
-		createTreeDragSource(tree);
-		createTreeDropTarget(tree);
-	}
-
-	/**
-	 * Creates the Drag & Drop DragSource for items being dragged from the tree.
-	 * 
-	 * @return the DragSource for the tree
-	 */
-	private DragSource createTreeDragSource(final Tree tree) {
-		DragSource dragSource = new DragSource(tree, DND.DROP_MOVE | DND.DROP_COPY);
-		dragSource.setTransfer(new Transfer[] { FileTransfer.getInstance() });
-		dragSource.addDragListener(new DragSourceListener() {
-			TreeItem[] dndSelection = null;
-			String[] sourceNames = null;
-
-			@Override
-			public void dragStart(DragSourceEvent event) {
-				dndSelection = tree.getSelection();
-				sourceNames = null;
-				event.doit = dndSelection.length > 0;
-				isDragging = true;
-				processedDropFiles = null;
-			}
-
-			@Override
-			public void dragFinished(DragSourceEvent event) {
-				dragSourceHandleDragFinished(event, sourceNames);
-				dndSelection = null;
-				sourceNames = null;
-				isDragging = false;
-				processedDropFiles = null;
-				handleDeferredRefresh();
-			}
-
-			@Override
-			public void dragSetData(DragSourceEvent event) {
-				if (dndSelection == null || dndSelection.length == 0)
-					return;
-				if (!FileTransfer.getInstance().isSupportedType(event.dataType))
-					return;
-
-				sourceNames = new String[dndSelection.length];
-				for (int i = 0; i < dndSelection.length; i++) {
-					File file = (File) dndSelection[i].getData(FileViewerConstants.TREEITEMDATA_FILE);
-					sourceNames[i] = file.getAbsolutePath();
-				}
-				event.data = sourceNames;
-			}
-		});
-		return dragSource;
-	}
-
-	/**
-	 * Creates the Drag & Drop DropTarget for items being dropped onto the tree.
-	 * 
-	 * @return the DropTarget for the tree
-	 */
-	private DropTarget createTreeDropTarget(final Tree tree) {
-		DropTarget dropTarget = new DropTarget(tree, DND.DROP_MOVE | DND.DROP_COPY);
-		dropTarget.setTransfer(new Transfer[] { FileTransfer.getInstance() });
-		dropTarget.addDropListener(new DropTargetAdapter() {
-			@Override
-			public void dragEnter(DropTargetEvent event) {
-				isDropping = true;
-			}
-
-			@Override
-			public void dragLeave(DropTargetEvent event) {
-				isDropping = false;
-				handleDeferredRefresh();
-			}
-
-			@Override
-			public void dragOver(DropTargetEvent event) {
-				dropTargetValidate(event, getTargetFile(event));
-				event.feedback |= DND.FEEDBACK_EXPAND | DND.FEEDBACK_SCROLL;
-			}
-
-			@Override
-			public void drop(DropTargetEvent event) {
-				File targetFile = getTargetFile(event);
-				if (dropTargetValidate(event, targetFile))
-					dropTargetHandleDrop(event, targetFile);
-			}
-
-			private File getTargetFile(DropTargetEvent event) {
-				// Determine the target File for the drop
-				TreeItem item = tree.getItem(tree.toControl(new Point(event.x, event.y)));
-				File targetFile = null;
-				if (item != null) {
-					// We are over a particular item in the tree, use the item's
-					// file
-					targetFile = (File) item.getData(FileViewerConstants.TREEITEMDATA_FILE);
-				}
-				return targetFile;
-			}
-		});
-		return dropTarget;
-	}
-
-	/**
-	 * Handles expand events on a tree item.
-	 * 
-	 * @param item
-	 *            the TreeItem to fill in
-	 */
-	private void treeExpandItem(TreeItem item) {
-		parent.setCursor(getIconCache().stockCursors[getIconCache().cursorWait]);
-		final Object stub = item.getData(FileViewerConstants.TREEITEMDATA_STUB);
-		if (stub == null)
-			TreeUtils.treeRefreshItem(this, item, true, getIconCache());
-		parent.setCursor(getIconCache().stockCursors[getIconCache().cursorDefault]);
-	}
-
-	/**
-	 * Creates the file details table.
-	 * 
-	 * @param parent
-	 *            the parent control
-	 */
-	private void createTableView(Composite parent) {
-		Composite composite = new Composite(parent, SWT.NONE);
-		GridLayout gridLayout = new GridLayout();
-		gridLayout.numColumns = 1;
-		gridLayout.marginHeight = gridLayout.marginWidth = 2;
-		gridLayout.horizontalSpacing = gridLayout.verticalSpacing = 0;
-		composite.setLayout(gridLayout);
-		tableContentsOfLabel = new Label(composite, SWT.BORDER);
-		tableContentsOfLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL));
-
-		table = new Table(composite, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.FULL_SELECTION);
-		table.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
-
-		for (int i = 0; i < tableTitles.length; ++i) {
-			TableColumn column = new TableColumn(table, SWT.NONE);
-			column.setText(tableTitles[i]);
-			column.setWidth(FileViewerConstants.tableWidths[i]);
-		}
-		table.setHeaderVisible(true);
-		table.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent event) {
-				notifySelectedFiles(getSelectedFiles());
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent event) {
-				doDefaultFileAction(getSelectedFiles());
-			}
-
-			private File[] getSelectedFiles() {
-				final TableItem[] items = table.getSelection();
-				final File[] files = new File[items.length];
-
-				for (int i = 0; i < items.length; ++i) {
-					files[i] = (File) items[i].getData(FileViewerConstants.TABLEITEMDATA_FILE);
-				}
-				return files;
-			}
-		});
-
-		createTableDragSource(table);
-		createTableDropTarget(table);
-	}
-	
-	/**
-	 * Creates the Drag & Drop DragSource for items being dragged from the
-	 * table.
-	 * 
-	 * @return the DragSource for the table
-	 */
-	private DragSource createTableDragSource(final Table table) {
-		DragSource dragSource = new DragSource(table, DND.DROP_MOVE | DND.DROP_COPY);
-		dragSource.setTransfer(new Transfer[] { FileTransfer.getInstance() });
-		dragSource.addDragListener(new DragSourceListener() {
-			TableItem[] dndSelection = null;
-			String[] sourceNames = null;
-
-			@Override
-			public void dragStart(DragSourceEvent event) {
-				dndSelection = table.getSelection();
-				sourceNames = null;
-				event.doit = dndSelection.length > 0;
-				isDragging = true;
-			}
-
-			@Override
-			public void dragFinished(DragSourceEvent event) {
-				dragSourceHandleDragFinished(event, sourceNames);
-				dndSelection = null;
-				sourceNames = null;
-				isDragging = false;
-				handleDeferredRefresh();
-			}
-
-			@Override
-			public void dragSetData(DragSourceEvent event) {
-				if (dndSelection == null || dndSelection.length == 0)
-					return;
-				if (!FileTransfer.getInstance().isSupportedType(event.dataType))
-					return;
-
-				sourceNames = new String[dndSelection.length];
-				for (int i = 0; i < dndSelection.length; i++) {
-					File file = (File) dndSelection[i].getData(FileViewerConstants.TABLEITEMDATA_FILE);
-					sourceNames[i] = file.getAbsolutePath();
-				}
-				event.data = sourceNames;
-			}
-		});
-		return dragSource;
-	}
-
-	/**
-	 * Creates the Drag & Drop DropTarget for items being dropped onto the
-	 * table.
-	 * 
-	 * @return the DropTarget for the table
-	 */
-	private DropTarget createTableDropTarget(final Table table) {
-		DropTarget dropTarget = new DropTarget(table, DND.DROP_MOVE | DND.DROP_COPY);
-		dropTarget.setTransfer(new Transfer[] { FileTransfer.getInstance() });
-		dropTarget.addDropListener(new DropTargetAdapter() {
-			@Override
-			public void dragEnter(DropTargetEvent event) {
-				isDropping = true;
-			}
-
-			@Override
-			public void dragLeave(DropTargetEvent event) {
-				isDropping = false;
-				handleDeferredRefresh();
-			}
-
-			@Override
-			public void dragOver(DropTargetEvent event) {
-				dropTargetValidate(event, getTargetFile(event));
-				event.feedback |= DND.FEEDBACK_EXPAND | DND.FEEDBACK_SCROLL;
-			}
-
-			@Override
-			public void drop(DropTargetEvent event) {
-				File targetFile = getTargetFile(event);
-				if (dropTargetValidate(event, targetFile))
-					dropTargetHandleDrop(event, targetFile);
-			}
-
-			private File getTargetFile(DropTargetEvent event) {
-				// Determine the target File for the drop
-				TableItem item = table.getItem(table.toControl(new Point(event.x, event.y)));
-				File targetFile = null;
-				if (item == null) {
-					// We are over an unoccupied area of the table.
-					// If it is a COPY, we can use the table's root file.
-					if (event.detail == DND.DROP_COPY) {
-						targetFile = (File) table.getData(FileViewerConstants.TABLEDATA_DIR);
-					}
-				} else {
-					// We are over a particular item in the table, use the
-					// item's file
-					targetFile = (File) item.getData(FileViewerConstants.TABLEITEMDATA_FILE);
-				}
-				return targetFile;
-			}
-		});
-		return dropTarget;
-	}
-
-	/**
 	 * Notifies the application components that a new current directory has been
 	 * selected
 	 * 
 	 * @param dir
 	 *            the directory that was selected, null is ignored
 	 */
-	private void notifySelectedDirectory(File dir) {
+	public void notifySelectedDirectory(File dir) {
 		if (dir == null)
 			return;
 		if (currentDirectory != null && dir.equals(currentDirectory))
@@ -572,7 +210,7 @@ public class FileViewer {
 		/*
 		 * Table view: Displays the contents of the selected directory.
 		 */
-		workerUpdate(dir, false);
+		tableExplo.workerUpdate(dir, false);
 
 		/*
 		 * Combo view: Sets the combo box to point to the selected directory.
@@ -603,7 +241,7 @@ public class FileViewer {
 			dir = dir.getParentFile();
 		}
 		// Recursively expand the tree to get to the specified directory
-		TreeItem[] items = tree.getItems();
+		TreeItem[] items = treeExplo.getTree().getItems();
 		TreeItem lastItem = null;
 		for (int i = path.size() - 1; i >= 0; --i) {
 			final File pathElement = path.get(i);
@@ -626,12 +264,12 @@ public class FileViewer {
 				break;
 			lastItem = item;
 			if (i != 0 && !item.getExpanded()) {
-				treeExpandItem(item);
+				treeExplo.treeExpandItem(item);
 				item.setExpanded(true);
 			}
 			items = item.getItems();
 		}
-		tree.setSelection((lastItem != null) ? new TreeItem[] { lastItem } : new TreeItem[0]);
+		treeExplo.getTree().setSelection((lastItem != null) ? new TreeItem[] { lastItem } : new TreeItem[0]);
 	}
 
 	/**
@@ -641,7 +279,7 @@ public class FileViewer {
 	 *            the files that were selected, null or empty array indicates no
 	 *            active selection
 	 */
-	private void notifySelectedFiles(File[] files) {
+	public void notifySelectedFiles(File[] files) {
 		/*
 		 * Details: Update the details that are visible on screen.
 		 */
@@ -729,7 +367,7 @@ public class FileViewer {
 		} else
 			refreshTable = true;
 		if (refreshTable)
-			workerUpdate(currentDirectory, true);
+			tableExplo.workerUpdate(currentDirectory, true);
 
 		/*
 		 * Combo view: Refreshes the list of roots
@@ -764,7 +402,7 @@ public class FileViewer {
 		 * Tree view: Refreshes information about any files in the list and
 		 * their children.
 		 */
-		TreeUtils.treeRefresh(roots, tree, this, getIconCache());
+		TreeUtils.treeRefresh(roots, treeExplo.getTree(), this, getIconCache());
 
 		// Remind everyone where we are in the filesystem
 		final File dir = currentDirectory;
@@ -845,7 +483,7 @@ public class FileViewer {
 	 *            the File representing the drop target location under
 	 *            inspection, or null if none
 	 */
-	private boolean dropTargetValidate(DropTargetEvent event, File targetFile) {
+	public boolean dropTargetValidate(DropTargetEvent event, File targetFile) {
 		if (targetFile != null && targetFile.isDirectory()) {
 			if (event.detail != DND.DROP_COPY && event.detail != DND.DROP_MOVE) {
 				event.detail = DND.DROP_MOVE;
@@ -869,7 +507,7 @@ public class FileViewer {
 	 *            the File representing the drop target location under
 	 *            inspection, or null if none
 	 */
-	private void dropTargetHandleDrop(DropTargetEvent event, File targetFile) {
+	public void dropTargetHandleDrop(DropTargetEvent event, File targetFile) {
 		// Get dropped data (an array of filenames)
 		if (!dropTargetValidate(event, targetFile))
 			return;
@@ -961,7 +599,7 @@ public class FileViewer {
 	 *            the names of the files that were dragged (event.data is
 	 *            invalid)
 	 */
-	private void dragSourceHandleDragFinished(DragSourceEvent event, String[] sourceNames) {
+	public void dragSourceHandleDragFinished(DragSourceEvent event, String[] sourceNames) {
 		if (sourceNames == null)
 			return;
 		if (event.detail != DND.DROP_MOVE)
@@ -1048,158 +686,7 @@ public class FileViewer {
 		return new File[] { root };
 	}
 
-	/*
-	 * This worker updates the table with file information in the background.
-	 * <p> Implementation notes: <ul> <li> It is designed such that it can be
-	 * interrupted cleanly. <li> It uses asyncExec() in some places to ensure
-	 * that SWT Widgets are manipulated in the right thread. Exclusive use of
-	 * syncExec() would be inappropriate as it would require a pair of context
-	 * switches between each table update operation. </ul> </p>
-	 */
-
-	/**
-	 * Stops the worker and waits for it to terminate.
-	 */
-	private void workerStop() {
-		if (workerThread == null)
-			return;
-		synchronized (workerLock) {
-			workerCancelled = true;
-			workerStopped = true;
-			workerLock.notifyAll();
-		}
-		while (workerThread != null) {
-			if (!Display.getDefault().readAndDispatch())
-				Display.getDefault().sleep();
-		}
-	}
-
-	/**
-	 * Notifies the worker that it should update itself with new data. Cancels
-	 * any previous operation and begins a new one.
-	 * 
-	 * @param dir
-	 *            the new base directory for the table, null is ignored
-	 * @param force
-	 *            if true causes a refresh even if the data is the same
-	 */
-	private void workerUpdate(File dir, boolean force) {
-		if (dir == null)
-			return;
-		if ((!force) && (workerNextDir != null) && (workerNextDir.equals(dir)))
-			return;
-
-		synchronized (workerLock) {
-			workerNextDir = dir;
-			workerStopped = false;
-			workerCancelled = true;
-			workerLock.notifyAll();
-		}
-		if (workerThread == null) {
-			workerThread = new Thread(workerRunnable);
-			workerThread.start();
-		}
-	}
-
-	/**
-	 * Manages the worker's thread
-	 */
-	private final Runnable workerRunnable = new Runnable() {
-		@Override
-		public void run() {
-			while (!workerStopped) {
-				synchronized (workerLock) {
-					workerCancelled = false;
-					workerStateDir = workerNextDir;
-				}
-				workerExecute();
-				synchronized (workerLock) {
-					try {
-						if ((!workerCancelled) && (workerStateDir == workerNextDir))
-							workerLock.wait();
-					} catch (InterruptedException e) {
-					}
-				}
-			}
-			workerThread = null;
-			// wake up UI thread in case it is in a modal loop awaiting thread
-			// termination
-			// (see workerStop())
-			Display.getDefault().wake();
-		}
-	};
-
-	/**
-	 * Updates the table's contents
-	 */
-	private void workerExecute() {
-		File[] dirList;
-		// Clear existing information
-		Display.getDefault().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				tableContentsOfLabel.setText(Utils.getResourceString("details.ContentsOf.text",
-						new Object[] { workerStateDir.getPath() }));
-				table.removeAll();
-				table.setData(FileViewerConstants.TABLEDATA_DIR, workerStateDir);
-			}
-		});
-		dirList = Utils.getDirectoryList(workerStateDir);
-
-		for (int i = 0; (!workerCancelled) && (i < dirList.length); i++) {
-			workerAddFileDetails(dirList[i]);
-		}
-
-	}
-
-	/**
-	 * Adds a file's detail information to the directory list
-	 */
-	private void workerAddFileDetails(final File file) {
-		final String nameString = file.getName();
-		final String dateString = FileViewerConstants.dateFormat.format(new Date(file.lastModified()));
-		final String sizeString;
-		final String typeString;
-		final Image iconImage;
-
-		if (file.isDirectory()) {
-			typeString = Utils.getResourceString("filetype.Folder");
-			sizeString = "";
-			iconImage = getIconCache().stockImages[getIconCache().iconClosedFolder];
-		} else {
-			sizeString = Utils.getResourceString("filesize.KB", new Object[] { new Long((file.length() + 512) / 1024) });
-
-			int dot = nameString.lastIndexOf('.');
-			if (dot != -1) {
-				String extension = nameString.substring(dot);
-				Program program = Program.findProgram(extension);
-				if (program != null) {
-					typeString = program.getName();
-					iconImage = getIconCache().getIconFromProgram(program);
-				} else {
-					typeString = Utils.getResourceString("filetype.Unknown", new Object[] { extension.toUpperCase() });
-					iconImage = getIconCache().stockImages[getIconCache().iconFile];
-				}
-			} else {
-				typeString = Utils.getResourceString("filetype.None");
-				iconImage = getIconCache().stockImages[getIconCache().iconFile];
-			}
-		}
-		final String[] strings = new String[] { nameString, sizeString, typeString, dateString };
-
-		Display.getDefault().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				// guard against the shell being closed before this runs
-				if (parent.isDisposed())
-					return;
-				TableItem tableItem = new TableItem(table, 0);
-				tableItem.setText(strings);
-				tableItem.setImage(iconImage);
-				tableItem.setData(FileViewerConstants.TABLEITEMDATA_FILE, file);
-			}
-		});
-	}
+	
 
 	public IconCache getIconCache() {
 		return iconCache;
@@ -1216,5 +703,29 @@ public class FileViewer {
 
 	public String getSavedDirectory() {
 		return currentDirectory.getAbsolutePath();
+	}
+
+	public boolean isDragging() {
+		return isDragging;
+	}
+
+	public void setIsDragging(boolean isDragging) {
+		this.isDragging = isDragging;
+	}
+
+	public boolean isDropping() {
+		return isDropping;
+	}
+
+	public void setIsDropping(boolean isDropping) {
+		this.isDropping = isDropping;
+	}
+
+	public File[] getProcessedDropFiles() {
+		return processedDropFiles;
+	}
+
+	public void setProcessedDropFiles(File[] processDropFiles) {
+		this.processedDropFiles = processDropFiles;
 	}
 }
