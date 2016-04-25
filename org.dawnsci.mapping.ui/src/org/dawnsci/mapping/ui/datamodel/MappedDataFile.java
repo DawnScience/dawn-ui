@@ -61,6 +61,7 @@ public class MappedDataFile implements MapObject{
 	}
 	
 	private void updateRange(MapObject object) {
+		if (object == null) return;
 		double[] r = object.getRange();
 		if (r == null) return;
 		if (range == null) {

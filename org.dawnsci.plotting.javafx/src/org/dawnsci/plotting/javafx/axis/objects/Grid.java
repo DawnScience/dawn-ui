@@ -119,9 +119,9 @@ public class Grid extends Group
 	{
 		for (Node n : axis.getChildren())
 		{
-			if (n instanceof LineGroup)
+			if (n instanceof TickGroup)
 			{
-				LineGroup lg = (LineGroup)n;
+				TickGroup lg = (TickGroup)n;
 				lg.setTextOffset(newOffset);
 			}
 		}
@@ -132,9 +132,9 @@ public class Grid extends Group
 	{
 		for (Node n : axis.getChildren())
 		{
-			if (n instanceof LineGroup)
+			if (n instanceof TickGroup)
 			{
-				LineGroup lg = (LineGroup)n;
+				TickGroup lg = (TickGroup)n;
 				lg.gridMoved(newOffset);
 			}
 		}
@@ -214,9 +214,9 @@ public class Grid extends Group
 		this.getTransforms().add(this.rotate);
 	}
 	
-	private LineGroup createTick(double length, Point3D axisDirection, Point2D XYPosition, String label)
+	private TickGroup createTick(double length, Point3D axisDirection, Point2D XYPosition, String label)
 	{
-		LineGroup returnTick = new LineGroup(
+		TickGroup returnTick = new TickGroup(
 				length,
 				axisDirection,
 				new Point3D(XYPosition.getX(),XYPosition.getY(), 0),

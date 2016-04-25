@@ -6,12 +6,12 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.dawnsci.plotting.javafx.trace;
+package org.dawnsci.plotting.javafx.trace.volume;
 
 import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.dawnsci.plotting.javafx.ServiceLoader;
 import org.dawnsci.plotting.javafx.SurfaceDisplayer;
-import org.dawnsci.plotting.javafx.volume.VolumeRender;
+import org.dawnsci.plotting.javafx.trace.Image3DTrace;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;

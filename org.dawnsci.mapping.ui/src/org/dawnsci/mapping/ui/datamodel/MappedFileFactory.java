@@ -89,6 +89,7 @@ public class MappedFileFactory {
 		
 		try {
 			ILazyDataset lz = getLazyDataset(path,blockName);
+			lz.clearMetadata(AxesMetadata.class);
 			AxesMetadata axm = checkAndBuildAxesMetadata(axesNames, path, bean);
 			lz.setMetadata(axm);
 			block = new MappedDataBlock(blockName, lz, bean.getxDim(), bean.getyDim(), path);
@@ -112,6 +113,7 @@ public class MappedFileFactory {
 			
 			Dataset d = null;
 			if (live == null) {
+				lz.clearMetadata(AxesMetadata.class);
 				d = DatasetUtils.sliceAndConvertLazyDataset(lz);
 				
 				while (d.getRank() > 2) {
@@ -258,7 +260,9 @@ public class MappedFileFactory {
 	private static ILazyDataset getLazyDataset(String path, String name, LiveDataBean lb) throws Exception {
 		if (lb == null) {
 			ILoaderService lService = LocalServiceManager.getLoaderService();
-			return lService.getData(path, null).getLazyDataset(name);
+			ILazyDataset lazyDataset = lService.getData(path, null).getLazyDataset(name);
+			lazyDataset.clearMetadata(null);
+			return lazyDataset;
 		} 
 		
 		return getRemoteDataset(path, name, lb);

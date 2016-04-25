@@ -1993,7 +1993,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		// Find the name of the editor, providing we are init then it might give a clue as to what lazy dataset to auto-select.
 		boolean foundData = false;
 		if (isInit && editor!=null) { // We look to see if the name of the part matches a Lazydataset in the data holder.
-			ILoaderService  service = (ILoaderService)PlatformUI.getWorkbench().getService(ILoaderService.class);
+			ILoaderService  service = Activator.getService(ILoaderService.class);
 			final String    name    = editor.getTitle();
 			final Matcher   matcher = service.getStackMatcher(name);
 			if (matcher.matches()) {

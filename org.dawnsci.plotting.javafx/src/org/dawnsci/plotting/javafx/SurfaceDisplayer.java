@@ -36,8 +36,8 @@ import org.dawnsci.plotting.javafx.axis.objects.JavaFXProperties;
 import org.dawnsci.plotting.javafx.axis.objects.ScaleAxisGroup;
 import org.dawnsci.plotting.javafx.axis.objects.SceneObjectGroup;
 import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
-import org.dawnsci.plotting.javafx.trace.FXIsosurfaceTrace;
-import org.dawnsci.plotting.javafx.trace.VolumeTrace;
+import org.dawnsci.plotting.javafx.trace.isosurface.FXIsosurfaceTrace;
+import org.dawnsci.plotting.javafx.trace.volume.VolumeTrace;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 
 /**
@@ -370,9 +370,9 @@ public class SurfaceDisplayer extends Scene
 		
 	}
 	
-	private void rotateCameraArcball(Point3D rotationAxis, double angle)
+	private void rotateCameraArcball(Point3D rotationAxis, double newAngle)
 	{
-		Rotate appliedRotate = new Rotate(angle, new Point3D(rotationAxis.getX(), rotationAxis.getY(), -rotationAxis.getZ()));
+		Rotate appliedRotate = new Rotate(newAngle, new Point3D(rotationAxis.getX(), rotationAxis.getY(), -rotationAxis.getZ()));
 				
 		Matrix3d appliedMatrix = new Matrix3d(
 				appliedRotate.getMxx(), appliedRotate.getMxy(), appliedRotate.getMxz(),
@@ -514,6 +514,7 @@ public class SurfaceDisplayer extends Scene
 				axesData.get(2).getSize());
 		
 		this.axisObjectGroup.setAxes(axisLength, axesData);
+		this.axisObjectGroup.setBoundingBox(axisLength);
 		
 		centraliseObjectGroup();
 	}
@@ -525,7 +526,6 @@ public class SurfaceDisplayer extends Scene
 
 	public void setBoundingBoxVisibility(boolean visibility) 
 	{
-		
 		axisObjectGroup.setBoundingBoxVisibility(visibility);
 	}
 	

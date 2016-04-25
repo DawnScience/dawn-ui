@@ -1,4 +1,4 @@
-package org.dawnsci.plotting.javafx.volume;
+package org.dawnsci.plotting.javafx.trace.volume;
 
 import java.awt.image.BufferedImage;
 

@@ -12,139 +12,80 @@ import org.eclipse.richbeans.api.event.ValueAdapter;
 import org.eclipse.richbeans.api.event.ValueEvent;
 import org.eclipse.richbeans.binding.BeanService;
 
-public class IsoHandler 
-{
-	
+public class IsoHandler extends ValueAdapter {
+
 	final private IsosurfaceJob job;
-	
+
 	private IBeanController controller;
 	private IsoComposite isoComp; // not sure if this is ok
-	
-	private ValueAdapter isoValueListener;
-	
 	private ILazyDataset lazyDataset;
-	
+
 	private IPlottingSystem<?> system;
-	
-	public IsoHandler(Object ui, Object bean, IsosurfaceJob newJob, ILazyDataset lazyDataset, IPlottingSystem<?> system)
-	{
-		this.isoComp = (IsoComposite)ui;
-		
+
+	private IsoBean bean;
+
+	public IsoHandler(IsoComposite ui, IsoBean bean, IsosurfaceJob newJob, ILazyDataset lazyDataset,
+			IPlottingSystem<?> system) {
+		super("IsoValueListner");
+
+		this.bean = bean;
+		this.isoComp = ui;
 		this.job = newJob;
-		
 		this.lazyDataset = lazyDataset;
-		
 		this.system = system;
-		
-		// only create a relevant listener if the job is available for use -> this is mainly the case in unit tests
-		if (newJob != null)
-		{
-			createValueListener();
-		}
-		else
-		{
-			isoValueListener = new ValueAdapter("IsoValueListner") {
-				
-				@Override
-				public void valueChangePerformed(ValueEvent e) {
-					// do nothing as there is no job					
-				}
-			};
-		}
-		
-		controller = null;
-		try
-		{
-			controller = BeanService.getInstance()
-					.createController(ui, bean);
-			controller.addValueListener(isoValueListener);
+
+		try {
+			controller = BeanService.getInstance().createController(ui, bean);
+			controller.addValueListener(this);
 			controller.beanToUI();
 			controller.switchState(true);
-		}
-		catch (Exception e1)
-		{
-			
+		} catch (Exception e1) {
+
 			System.err.println("\nController not set - Default value is NULL");
 			e1.printStackTrace();
 		}
-		
-		// create the initial surface
-		isoComp.addNewSurface();
 	}
-	
-	private void createValueListener() 
-	{
-		isoValueListener = new ValueAdapter("IsoValueListner")
-		{
-			IsoItem previous;
+
+	@Override
+	public void valueChangePerformed(ValueEvent e) {
+		// update view
+		try {
+			controller.uiToBean();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		job.destroyOthers(bean.getItems().stream().map(item -> item.getTraceKey()));
+
+		if (isoComp.getItems().getSelectedIndex() < isoComp.getItems().getListSize()) {
+			IsoItem current = (IsoItem) isoComp.getItems().getBean();
+
+			boolean justRerender = Arrays.asList("colour", "opacity", "name").contains(e.getFieldName());
 			
-			@Override
-			public void valueChangePerformed(ValueEvent e) 
-			{
-				try 
-				{
-					// update view
-					controller.uiToBean();
-					
-					IsoItem current = null;
-					
-					if (isoComp.getItems().getListSize() > 0 && isoComp.getItems().getSelectedIndex() < isoComp.getItems().getListSize())
-					{
-						current = (IsoItem)isoComp.getItems().getBean();
-					}
-						
-					if (current != null)
-					{
-						if (current.beanDeleted()) // this is a quick fix remove asap
-						{
-							job.destroy(current.getTraceKey());
-						}
-						
-						if (current != null && !(current).equals(previous) && e.getFieldName() != null)
-						{
-							// run alg
-							if ( 	e.getFieldName().contains("colour") ||
-									e.getFieldName().contains("opacity") || 
-									e.getFieldName().contains("name"))
-							{
-								if (system.getTrace(current.getTraceKey()) != null)
-								{
-									((IIsosurfaceTrace)system.getTrace(current.getTraceKey())).setMaterial(
-													current.getColour().red,
-													current.getColour().green,
-													current.getColour().blue,
-													current.getOpacity());
-									((IIsosurfaceTrace)system.getTrace(current.getTraceKey())).setData(null, null, null, null);
-								}
-							}
-							else
-							{
-								job.compute(
-										new MarchingCubesModel(
-												lazyDataset,
-												current.getValue(),
-												new int[] {
-													current.getX(),
-													current.getY(),
-													current.getZ()},
-												new int[]{
-													current.getColour().red,
-													current.getColour().green,
-													current.getColour().blue},
-												current.getOpacity(),
-												current.getTraceKey(),
-												current.getName()));
-								
-							}
-							previous = (IsoItem)current.clone();
-						}
-					}
-				}
-				catch (Exception exc) 
-				{
-					exc.printStackTrace();
-				}
+			// run alg
+			if (justRerender) {
+				IIsosurfaceTrace trace = (IIsosurfaceTrace) system.getTrace(current.getTraceKey());
+				trace.setMaterial(
+						current.getColour().red, current.getColour().green, current.getColour().blue, 
+						current.getOpacity()
+					);
+				trace.setData(null, null, null, null);
+
+			} else {
+				job.compute(
+					new MarchingCubesModel(
+						lazyDataset, 
+						current.getValue(),
+						new int[] { current.getX(), current.getY(), current.getZ() },
+						new int[] { current.getColour().red, current.getColour().green, current.getColour().blue },
+						current.getOpacity(), 
+						current.getTraceKey(), 
+						current.getName()
+					)
+				);
 			}
-		};
+		}
+
 	}
 }

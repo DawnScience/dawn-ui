@@ -1,12 +1,22 @@
 package org.dawnsci.mapping.ui.wizards;
 
+import java.util.Collection;
+import java.util.Iterator;
+
 import org.dawnsci.mapping.ui.datamodel.MapBean;
 import org.dawnsci.mapping.ui.datamodel.MappedBlockBean;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
+import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
+import org.eclipse.dawnsci.analysis.api.tree.Attribute;
+import org.eclipse.dawnsci.analysis.api.tree.DataNode;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.api.tree.NodeLink;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
+import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
+
+import uk.ac.diamond.scisoft.analysis.io.NexusTreeUtils;
 
 public class LegacyMapBeanBuilder {
 
@@ -82,15 +92,38 @@ MappedDataFileBean fb = null;
 			if (!gn.containsDataNode(I05DATA)) return null;
 			if (!gn.containsDataNode(I05ANGLES)) return null;
 			if (!gn.containsDataNode(I05ENERGIES)) return null;
-			if (!gn.containsDataNode(I05SAX)) return null;
-			if (!gn.containsDataNode(I05SAZ)) return null;
+			
+			String yAxis = null;
+			String xAxis = null;
+			
+			Collection<String> names = gn.getNames();
+			
+			for (String name : names) {
+				
+				if (gn.containsDataNode(name)) {
+					DataNode dataNode = gn.getDataNode(name);
+					if (dataNode.containsAttribute("axis")){
+						String at = dataNode.getAttribute("axis").getFirstElement();
+						if ("1,2".equals(at)) {
+							if (xAxis == null) xAxis = name;
+							else yAxis = name;
+						}
+						at.toString();
+					}
+				}
+				
+				if (xAxis != null && yAxis != null) break;
+				
+			}
+			
+			if (xAxis == null || yAxis == null) return null;
 
 			fb = new MappedDataFileBean();
 			MappedBlockBean bb = new MappedBlockBean();
 			bb.setName(I05ANALYSER + Node.SEPARATOR + I05DATA);
 			String[] ax = new String[4];
-			ax[0] = I05ANALYSER + Node.SEPARATOR + I05SAZ;
-			ax[1] = I05ANALYSER + Node.SEPARATOR + I05SAX;
+			ax[0] = I05ANALYSER + Node.SEPARATOR + yAxis;
+			ax[1] = I05ANALYSER + Node.SEPARATOR + xAxis;
 			ax[2] = I05ANALYSER + Node.SEPARATOR + I05ANGLES;
 			ax[3] = I05ANALYSER + Node.SEPARATOR + I05ENERGIES;
 			bb.setAxes(ax);

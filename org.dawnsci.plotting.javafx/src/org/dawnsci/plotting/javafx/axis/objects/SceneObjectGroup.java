@@ -86,7 +86,7 @@ public class SceneObjectGroup extends Group
 	 * <br> Any active boundingBoxes will be removed.
 	 * @param size - The size of the bounding box
 	 */
-	public void addBoundingBox(Point3D size)
+	public void setBoundingBox(Point3D size)
 	{
 		if (boundingBox != null && this.getChildren().contains(boundingBox))
 		{
@@ -106,7 +106,7 @@ public class SceneObjectGroup extends Group
 	/**
 	 * currently does nothing - reorganising the code
 	 */
-	public void addScalers()
+	public void setScalers()
 	{
 		
 	}

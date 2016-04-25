@@ -1,11 +1,11 @@
-package org.dawnsci.plotting.javafx.trace;
+package org.dawnsci.plotting.javafx.trace.plane;
 
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 
 import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.dawnsci.plotting.javafx.ServiceLoader;
-import org.dawnsci.plotting.javafx.plane.ImagePlane;
+import org.dawnsci.plotting.javafx.trace.Image3DTrace;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;

@@ -31,7 +31,7 @@ public class MappedData extends AbstractMapData{
 	
 	private int[] getIndices(double x, double y) {
 		
-		IDataset[] ax = MetadataPlotUtils.getAxesFromMetadata(map);
+		IDataset[] ax = MetadataPlotUtils.getAxesFromMetadata(map, false);
 		
 		IDataset xx = ax[1];
 		IDataset yy = ax[0];
@@ -44,6 +44,11 @@ public class MappedData extends AbstractMapData{
 		
 		double xd = ((xMax-xMin)/xx.getSize())/2;
 		double yd = ((yMax-yMin)/yy.getSize())/2;
+		
+		if (xd == 0 && yd == 0) return null;
+		
+		yd = yd == 0 ? xd : yd;
+		xd = xd == 0 ? yd : xd;
 		
 		if (x > xMax+xd || x < xMin-xd || y > yMax+yd || y < yMin-yd) return null;
 		

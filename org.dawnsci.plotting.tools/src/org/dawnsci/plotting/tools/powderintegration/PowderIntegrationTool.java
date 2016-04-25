@@ -31,8 +31,6 @@ import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
-import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
-import org.eclipse.dawnsci.analysis.api.persistence.IPersistentFile;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.hdf.object.IHierarchicalDataFile;
@@ -69,7 +67,7 @@ import org.eclipse.ui.part.IPageSite;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.AbstractPixelIntegration;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelIntegrationUtils.IntegrationMode;
-import uk.ac.diamond.scisoft.analysis.io.NexusDiffractionMetaReader;
+import uk.ac.diamond.scisoft.analysis.io.NexusDiffractionCalibrationReader;
 import uk.ac.diamond.scisoft.analysis.roi.XAxis;
 
 public class PowderIntegrationTool extends AbstractToolPage implements IDataReductionToolPage {
@@ -357,11 +355,9 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 					if (dialog.open() == Dialog.CANCEL ) return;
 					lastPath = dialog.getPath();
 					
-					NexusDiffractionMetaReader nexusDiffReader = new NexusDiffractionMetaReader(dialog.getPath());
-
-					IDiffractionMetadata md = nexusDiffReader.getDiffractionMetadataFromNexus(null);
-
-					if (nexusDiffReader.isPartialRead()) {
+					IDiffractionMetadata md = NexusDiffractionCalibrationReader.getDiffractionMetadataFromNexus(dialog.getPath(), null, null);
+				
+					if (md != null) {
 						importedMeta = md;
 						fullImageJob = null;
 						logger.debug("meta loaded from file");

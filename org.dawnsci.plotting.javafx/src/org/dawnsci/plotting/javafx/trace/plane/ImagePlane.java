@@ -1,4 +1,4 @@
-package org.dawnsci.plotting.javafx.plane;
+package org.dawnsci.plotting.javafx.trace.plane;
 
 import java.awt.image.BufferedImage;
 
