@@ -7,17 +7,27 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Diamond Light Source - Custom modifications for Diamond's needs
+ *     Diamond Light Source - Custom modifications for Diamond's needs, use a JFace TableViewer
  *******************************************************************************/
 package org.dawnsci.fileviewer.table;
 
 import java.io.File;
 import java.util.Date;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.fileviewer.FileViewer;
 import org.dawnsci.fileviewer.FileViewerConstants;
 import org.dawnsci.fileviewer.Utils;
+import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSource;
@@ -39,7 +49,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.PartInitException;
 import org.slf4j.Logger;
@@ -47,17 +56,14 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.sda.navigator.views.IOpenFileAction;
 
-public class TableExplorer {
+public class FileTableExplorer {
 
-	private static final Logger logger = LoggerFactory.getLogger(TableExplorer.class);
-
-	private FileViewer viewer;
+	private static final Logger logger = LoggerFactory.getLogger(FileTableExplorer.class);
 
 	/* Table view */
 	private final String[] tableTitles = new String[] { Utils.getResourceString("table.Name.title"),
 			Utils.getResourceString("table.Size.title"), Utils.getResourceString("table.Type.title"),
 			Utils.getResourceString("table.Modified.title") };
-	private Table table;
 	private Label tableContentsOfLabel;
 
 	/* Table update worker */
@@ -75,21 +81,15 @@ public class TableExplorer {
 	private volatile File workerStateDir = null;
 	// State information to use for the next cycle
 	private volatile File workerNextDir = null;
-
+	private FileViewer viewer;
 	private Composite parent;
 
-	public TableExplorer(FileViewer viewer) {
-		this.viewer = viewer;
-	}
+	private TableViewer tviewer;
 
-	/**
-	 * Creates the file details table.
-	 * 
-	 * @param parent
-	 *            the parent control
-	 */
-	public void createTableView(Composite parent) {
+	public FileTableExplorer(FileViewer viewer, Composite parent, int style) {
 		this.parent = parent;
+		this.viewer = viewer;
+
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout gridLayout = new GridLayout();
 		gridLayout.numColumns = 1;
@@ -99,16 +99,18 @@ public class TableExplorer {
 		tableContentsOfLabel = new Label(composite, SWT.BORDER);
 		tableContentsOfLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL));
 
-		table = new Table(composite, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.FULL_SELECTION);
-		table.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
-
-		for (int i = 0; i < tableTitles.length; ++i) {
-			TableColumn column = new TableColumn(table, SWT.NONE);
-			column.setText(tableTitles[i]);
-			column.setWidth(FileViewerConstants.tableWidths[i]);
-		}
-		table.setHeaderVisible(true);
-		table.addSelectionListener(new SelectionAdapter() {
+		tviewer = new TableViewer(composite, SWT.VIRTUAL | SWT.BORDER|SWT.V_SCROLL|SWT.FULL_SELECTION);
+//		tviewer.setLabelProvider(new FileTableLabelProvider(viewer));
+		tviewer.setContentProvider(new FileTableContentProvider(tviewer));
+		tviewer.setUseHashlookup(true);
+		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		tviewer.getTable().setLayoutData(gridData);
+		createColumns();
+		// make the selection available to other views
+		tviewer.getTable().setHeaderVisible(true);
+		tviewer.getTable().setLinesVisible(true);
+		tviewer.getTable().setHeaderVisible(true);
+		tviewer.getTable().addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				viewer.notifySelectedFiles(getSelectedFiles());
@@ -120,7 +122,7 @@ public class TableExplorer {
 			}
 
 			private File[] getSelectedFiles() {
-				final TableItem[] items = table.getSelection();
+				final TableItem[] items = tviewer.getTable().getSelection();
 				final File[] files = new File[items.length];
 
 				for (int i = 0; i < items.length; ++i) {
@@ -130,8 +132,26 @@ public class TableExplorer {
 			}
 		});
 
-		createTableDragSource(table);
-		createTableDropTarget(table);
+		createTableDragSource(tviewer.getTable());
+		createTableDropTarget(tviewer.getTable());
+	}
+
+	private void createColumns() {
+		for (int i = 0; i < tableTitles.length; ++i) {
+			TableViewerColumn column = createTableViewerColumn(tableTitles[i], FileViewerConstants.tableWidths[i], i);
+			column.setLabelProvider(new FileColumnLabelProvider(viewer, i));
+		}
+
+	}
+
+	private TableViewerColumn createTableViewerColumn(String header, int width, int idx) {
+		TableViewerColumn column = new TableViewerColumn(tviewer, SWT.LEFT, idx);
+		column.getColumn().setText(header);
+		column.getColumn().setWidth(width);
+		column.getColumn().setResizable(true);
+		column.getColumn().setMoveable(true);
+
+		return column;
 	}
 
 	/**
@@ -350,22 +370,27 @@ public class TableExplorer {
 	 * Updates the table's contents
 	 */
 	private void workerExecute() {
-		File[] dirList;
+		final File[] dirList;
 		// Clear existing information
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {
 				tableContentsOfLabel.setText(Utils.getResourceString("details.ContentsOf.text",
 						new Object[] { workerStateDir.getPath() }));
-				table.removeAll();
-				table.setData(FileViewerConstants.TABLEDATA_DIR, workerStateDir);
+//				tviewer.getTable().removeAll();
+//				tviewer.setInput(input);
+//				tviewer.getTable().setData(FileViewerConstants.TABLEDATA_DIR, workerStateDir);
+				File[] dirList = Utils.getDirectoryList(workerStateDir);
+				tviewer.setInput(dirList);
+				tviewer.setItemCount(dirList.length);
 			}
 		});
-		dirList = Utils.getDirectoryList(workerStateDir);
+		
 
-		for (int i = 0; (!workerCancelled) && (i < dirList.length); i++) {
-			workerAddFileDetails(dirList[i]);
-		}
+		
+//		for (int i = 0; (!workerCancelled) && (i < dirList.length); i++) {
+//			workerAddFileDetails(dirList[i]);
+//		}
 
 	}
 
@@ -410,7 +435,7 @@ public class TableExplorer {
 				// guard against the shell being closed before this runs
 				if (parent.isDisposed())
 					return;
-				TableItem tableItem = new TableItem(table, 0);
+				TableItem tableItem = new TableItem(tviewer.getTable(), 0);
 				tableItem.setText(strings);
 				tableItem.setImage(iconImage);
 				tableItem.setData(FileViewerConstants.TABLEITEMDATA_FILE, file);
@@ -418,7 +443,11 @@ public class TableExplorer {
 		});
 	}
 
+	public TableViewer getTableViewer() {
+		return tviewer;
+	}
+
 	public Table getTable() {
-		return table;
+		return tviewer.getTable();
 	}
 }

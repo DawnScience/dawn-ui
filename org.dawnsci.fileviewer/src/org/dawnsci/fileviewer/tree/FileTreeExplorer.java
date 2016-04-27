@@ -39,7 +39,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
-public class TreeExplorer {
+public class FileTreeExplorer {
 
 	private Tree tree;
 	private Label treeScopeLabel;
@@ -47,7 +47,7 @@ public class TreeExplorer {
 	private FileViewer viewer;
 	private Composite parent;
 
-	public TreeExplorer(FileViewer viewer) {
+	public FileTreeExplorer(FileViewer viewer) {
 		this.viewer = viewer;
 	}
 
