@@ -20,6 +20,12 @@ public class LiveMappedDataBlock extends MappedDataBlock implements ILiveData {
 	
 	public ILazyDataset getSpectrum(int x, int y) {
 		
+		((IRemoteDataset)dataset).refreshShape();
+		
+		for (IRemoteDataset a : axes.getAxes()) {
+			if (a != null) a.refreshShape();
+		}
+		
 		SliceND slice = new SliceND(dataset.getShape());
 		slice.setSlice(yDim,y,y+1,1);
 		slice.setSlice(xDim,x,x+1,1);

@@ -1,5 +1,7 @@
 package org.dawnsci.mapping.ui.datamodel;
 
+import org.eclipse.dawnsci.analysis.api.dataset.DataEvent;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataListener;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.IRemoteDataset;
@@ -23,6 +25,14 @@ public class LiveMappedData extends MappedData implements ILiveData {
 		
 		try {
 			((IRemoteDataset)baseMap).connect();
+			((IRemoteDataset)baseMap).addDataListener(new IDataListener() {
+				
+				@Override
+				public void dataChangePerformed(DataEvent evt) {
+					// TODO Auto-generated method stub
+					
+				}
+			});
 		} catch (Exception e) {
 			logger.error("Could not connect to " + toString());
 			return false;
@@ -67,6 +77,7 @@ public class LiveMappedData extends MappedData implements ILiveData {
 		IDataset ma = null;
 		
 		try{
+			((IRemoteDataset)baseMap).refreshShape();
 			ma = baseMap.getSlice();
 		} catch (Exception e) {
 			//TODO log?
@@ -81,6 +92,9 @@ public class LiveMappedData extends MappedData implements ILiveData {
 		
 		ILazyDataset ly = parent.getYAxis()[0];
 		ILazyDataset lx = parent.getXAxis()[0];
+		
+		((IRemoteDataset)ly).refreshShape();
+		((IRemoteDataset)lx).refreshShape();
 		
 		IDataset y = ly.getSlice();
 		IDataset x = lx.getSlice();

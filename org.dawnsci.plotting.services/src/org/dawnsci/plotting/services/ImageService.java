@@ -647,9 +647,16 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 							imageServiceBean.setPalette(pservice.getDirectPaletteData(scheme));
 						}
 					} else {
-						
 						// if 8-bit, set direct palette, otherwise set palette functions.
-						imageServiceBean.setPalette(pservice.getDirectPaletteData(scheme));
+						PaletteData pd;
+						try {
+							pd = pservice.getDirectPaletteData(scheme);
+						} catch(final IllegalArgumentException e) { //scheme does not exist
+							final String defaultScheme = pservice.getColorSchemes().iterator().next();
+							pd = pservice.getDirectPaletteData(defaultScheme);
+							store.setValue(BasePlottingConstants.COLOUR_SCHEME, defaultScheme);
+						}
+						imageServiceBean.setPalette(pd);
 					}
 	
 				}
