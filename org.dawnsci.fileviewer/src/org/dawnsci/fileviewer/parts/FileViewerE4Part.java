@@ -11,6 +11,7 @@ package org.dawnsci.fileviewer.parts;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -26,11 +27,18 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.menu.MDirectToolItem;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuFactory;
 import org.eclipse.e4.ui.model.application.ui.menu.MToolBar;
+import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 public class FileViewerE4Part {
 	private static final String FILEVIEWER_SAVED_DIRECTORY = "org.dawnsci.fileviewer.saved.directory";
 	private FileViewer fileViewer;
 	private ScopedPreferenceStore store;
+
+	@Inject
+	private ESelectionService tableSelectionService;
 
 	public FileViewerE4Part() {
 		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.fileviewer");
@@ -62,6 +70,15 @@ public class FileViewerE4Part {
 		fileViewer.getIconCache().initResources(Display.getDefault());
 		fileViewer.createCompositeContents(parent);
 		fileViewer.notifyRefreshFiles(null);
+		// attach a selection listener to our jface viewer
+		fileViewer.getTableViewer().addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+				// set the selection to the service
+				tableSelectionService.setSelection(selection.size() == 1 ? selection.getFirstElement() : selection.toArray());
+			}
+		});
 	}
 
 	@PostConstruct

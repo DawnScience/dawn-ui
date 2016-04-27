@@ -7,17 +7,19 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Diamond Light Source - Custom modifications for Diamond's needs
+ *     Diamond Light Source - Custom modifications for Diamond's needs, use a JFace TableViewer
  *******************************************************************************/
 package org.dawnsci.fileviewer.table;
 
 import java.io.File;
-import java.util.Date;
 
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.fileviewer.FileViewer;
 import org.dawnsci.fileviewer.FileViewerConstants;
 import org.dawnsci.fileviewer.Utils;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSource;
@@ -30,16 +32,13 @@ import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.PartInitException;
 import org.slf4j.Logger;
@@ -47,17 +46,14 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.sda.navigator.views.IOpenFileAction;
 
-public class TableExplorer {
+public class FileTableExplorer {
 
-	private static final Logger logger = LoggerFactory.getLogger(TableExplorer.class);
-
-	private FileViewer viewer;
+	private static final Logger logger = LoggerFactory.getLogger(FileTableExplorer.class);
 
 	/* Table view */
 	private final String[] tableTitles = new String[] { Utils.getResourceString("table.Name.title"),
 			Utils.getResourceString("table.Size.title"), Utils.getResourceString("table.Type.title"),
 			Utils.getResourceString("table.Modified.title") };
-	private Table table;
 	private Label tableContentsOfLabel;
 
 	/* Table update worker */
@@ -75,21 +71,13 @@ public class TableExplorer {
 	private volatile File workerStateDir = null;
 	// State information to use for the next cycle
 	private volatile File workerNextDir = null;
+	private FileViewer viewer;
 
-	private Composite parent;
+	private TableViewer tviewer;
 
-	public TableExplorer(FileViewer viewer) {
+	public FileTableExplorer(FileViewer viewer, Composite parent, int style) {
 		this.viewer = viewer;
-	}
 
-	/**
-	 * Creates the file details table.
-	 * 
-	 * @param parent
-	 *            the parent control
-	 */
-	public void createTableView(Composite parent) {
-		this.parent = parent;
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout gridLayout = new GridLayout();
 		gridLayout.numColumns = 1;
@@ -99,16 +87,17 @@ public class TableExplorer {
 		tableContentsOfLabel = new Label(composite, SWT.BORDER);
 		tableContentsOfLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL));
 
-		table = new Table(composite, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.FULL_SELECTION);
-		table.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
-
-		for (int i = 0; i < tableTitles.length; ++i) {
-			TableColumn column = new TableColumn(table, SWT.NONE);
-			column.setText(tableTitles[i]);
-			column.setWidth(FileViewerConstants.tableWidths[i]);
-		}
-		table.setHeaderVisible(true);
-		table.addSelectionListener(new SelectionAdapter() {
+		tviewer = new TableViewer(composite, SWT.VIRTUAL | SWT.BORDER|SWT.V_SCROLL|SWT.FULL_SELECTION);
+		tviewer.setContentProvider(new FileTableContentProvider(tviewer));
+		tviewer.setUseHashlookup(true);
+		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		tviewer.getTable().setLayoutData(gridData);
+		createColumns();
+		// make the selection available to other views
+		tviewer.getTable().setHeaderVisible(true);
+		tviewer.getTable().setLinesVisible(true);
+		tviewer.getTable().setHeaderVisible(true);
+		tviewer.getTable().addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				viewer.notifySelectedFiles(getSelectedFiles());
@@ -120,18 +109,26 @@ public class TableExplorer {
 			}
 
 			private File[] getSelectedFiles() {
-				final TableItem[] items = table.getSelection();
-				final File[] files = new File[items.length];
-
-				for (int i = 0; i < items.length; ++i) {
-					files[i] = (File) items[i].getData(FileViewerConstants.TABLEITEMDATA_FILE);
-				}
+				StructuredSelection selection = (StructuredSelection)tviewer.getSelection();
+				Object file = selection.getFirstElement();
+				final File[] files = new File[1];
+				files[0] = (File)file;
 				return files;
 			}
 		});
+		createTableDragSource(tviewer.getTable());
+		createTableDropTarget(tviewer.getTable());
+	}
 
-		createTableDragSource(table);
-		createTableDropTarget(table);
+	private void createColumns() {
+		for (int i = 0; i < tableTitles.length; ++i) {
+			TableViewerColumn column = new TableViewerColumn(tviewer, SWT.LEFT, i);
+			column.getColumn().setText(tableTitles[i]);
+			column.getColumn().setWidth(FileViewerConstants.tableWidths[i]);
+			column.getColumn().setResizable(true);
+			column.getColumn().setMoveable(true);
+			column.setLabelProvider(new FileTableColumnLabelProvider(viewer, i));
+		}
 	}
 
 	/**
@@ -350,75 +347,25 @@ public class TableExplorer {
 	 * Updates the table's contents
 	 */
 	private void workerExecute() {
-		File[] dirList;
 		// Clear existing information
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {
 				tableContentsOfLabel.setText(Utils.getResourceString("details.ContentsOf.text",
 						new Object[] { workerStateDir.getPath() }));
-				table.removeAll();
-				table.setData(FileViewerConstants.TABLEDATA_DIR, workerStateDir);
+				tviewer.getTable().removeAll();
+				File[] dirList = Utils.getDirectoryList(workerStateDir);
+				tviewer.setInput(dirList);
+				tviewer.setItemCount(dirList.length);
 			}
 		});
-		dirList = Utils.getDirectoryList(workerStateDir);
-
-		for (int i = 0; (!workerCancelled) && (i < dirList.length); i++) {
-			workerAddFileDetails(dirList[i]);
-		}
-
 	}
 
-	/**
-	 * Adds a file's detail information to the directory list
-	 */
-	private void workerAddFileDetails(final File file) {
-		final String nameString = file.getName();
-		final String dateString = FileViewerConstants.dateFormat.format(new Date(file.lastModified()));
-		final String sizeString;
-		final String typeString;
-		final Image iconImage;
-
-		if (file.isDirectory()) {
-			typeString = Utils.getResourceString("filetype.Folder");
-			sizeString = "";
-			iconImage = viewer.getIconCache().stockImages[viewer.getIconCache().iconClosedFolder];
-		} else {
-			sizeString = Utils.getResourceString("filesize.KB", new Object[] { new Long((file.length() + 512) / 1024) });
-
-			int dot = nameString.lastIndexOf('.');
-			if (dot != -1) {
-				String extension = nameString.substring(dot);
-				Program program = Program.findProgram(extension);
-				if (program != null) {
-					typeString = program.getName();
-					iconImage = viewer.getIconCache().getIconFromProgram(program);
-				} else {
-					typeString = Utils.getResourceString("filetype.Unknown", new Object[] { extension.toUpperCase() });
-					iconImage = viewer.getIconCache().stockImages[viewer.getIconCache().iconFile];
-				}
-			} else {
-				typeString = Utils.getResourceString("filetype.None");
-				iconImage = viewer.getIconCache().stockImages[viewer.getIconCache().iconFile];
-			}
-		}
-		final String[] strings = new String[] { nameString, sizeString, typeString, dateString };
-
-		Display.getDefault().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				// guard against the shell being closed before this runs
-				if (parent.isDisposed())
-					return;
-				TableItem tableItem = new TableItem(table, 0);
-				tableItem.setText(strings);
-				tableItem.setImage(iconImage);
-				tableItem.setData(FileViewerConstants.TABLEITEMDATA_FILE, file);
-			}
-		});
+	public TableViewer getTableViewer() {
+		return tviewer;
 	}
 
 	public Table getTable() {
-		return table;
+		return tviewer.getTable();
 	}
 }

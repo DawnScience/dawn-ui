@@ -16,9 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawnsci.fileviewer.table.TableExplorer;
-import org.dawnsci.fileviewer.tree.TreeExplorer;
+import org.dawnsci.fileviewer.table.FileTableExplorer;
+import org.dawnsci.fileviewer.tree.FileTreeExplorer;
 import org.dawnsci.fileviewer.tree.TreeUtils;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.dnd.DND;
@@ -82,18 +83,20 @@ public class FileViewer {
 	private Composite parent;
 	private SashForm sashForm;
 
-	private TreeExplorer treeExplo;
+	private FileTreeExplorer treeExplo;
 
-	private TableExplorer tableExplo;
+	private FileTableExplorer tableExplo;
 
 	/**
 	 * Closes the main program.
 	 */
 	public void close() {
-		tableExplo.workerStop();
+		if (tableExplo != null)
+			tableExplo.workerStop();
 		getIconCache().freeResources();
 	}
 
+	
 	/**
 	 * Construct the UI
 	 * 
@@ -121,12 +124,11 @@ public class FileViewer {
 		sashForm.setLayoutData(gridData);
 		
 		// Tree
-		treeExplo = new TreeExplorer(this);
+		treeExplo = new FileTreeExplorer(this);
 		treeExplo.createTreeView(sashForm);
 		
 		// Table
-		tableExplo = new TableExplorer(this);
-		tableExplo.createTableView(sashForm);
+		tableExplo = new FileTableExplorer(this, sashForm, SWT.BORDER|SWT.V_SCROLL|SWT.FULL_SELECTION);
 
 		sashForm.setWeights(new int[] { 5, 2 });
 
@@ -210,7 +212,8 @@ public class FileViewer {
 		/*
 		 * Table view: Displays the contents of the selected directory.
 		 */
-		tableExplo.workerUpdate(dir, false);
+		if (tableExplo != null)
+			tableExplo.workerUpdate(dir, false);
 
 		/*
 		 * Combo view: Sets the combo box to point to the selected directory.
@@ -366,7 +369,7 @@ public class FileViewer {
 			}
 		} else
 			refreshTable = true;
-		if (refreshTable)
+		if (refreshTable && tableExplo != null)
 			tableExplo.workerUpdate(currentDirectory, true);
 
 		/*
@@ -728,4 +731,9 @@ public class FileViewer {
 	public void setProcessedDropFiles(File[] processDropFiles) {
 		this.processedDropFiles = processDropFiles;
 	}
+
+	public TableViewer getTableViewer() {
+		return tableExplo.getTableViewer();
+	}
+
 }
