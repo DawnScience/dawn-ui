@@ -15,18 +15,15 @@ import org.dawnsci.fileviewer.FileViewer;
 import org.dawnsci.fileviewer.FileViewerConstants;
 import org.dawnsci.fileviewer.Utils;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.ILabelProviderListener;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.program.Program;
 
-public class FileColumnLabelProvider extends ColumnLabelProvider {
+public class FileTableColumnLabelProvider extends ColumnLabelProvider {
 
 	private FileViewer viewer;
 	private int columnIndex;
 
-	public FileColumnLabelProvider(FileViewer viewer, int columnIndex) {
+	public FileTableColumnLabelProvider(FileViewer viewer, int columnIndex) {
 		this.viewer = viewer;
 		this.columnIndex = columnIndex;
 	}

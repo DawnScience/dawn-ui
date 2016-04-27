@@ -19,7 +19,6 @@ import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.fileviewer.table.FileTableExplorer;
 import org.dawnsci.fileviewer.tree.FileTreeExplorer;
 import org.dawnsci.fileviewer.tree.TreeUtils;
-import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
