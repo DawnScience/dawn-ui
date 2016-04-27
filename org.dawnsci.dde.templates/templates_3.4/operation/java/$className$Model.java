@@ -3,7 +3,7 @@ package $packageName$;
 import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.OperationModelField;
 
-import uk.ac.diamond.scisoft.analysis.processing.operations.EmptyModel;
+import org.eclipse.dawnsci.analysis.api.processing.model.EmptyModel;
 
 public class $className$Model extends AbstractOperationModel {
 
