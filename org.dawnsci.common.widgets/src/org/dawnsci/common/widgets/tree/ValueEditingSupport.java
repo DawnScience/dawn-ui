@@ -189,8 +189,7 @@ public class ValueEditingSupport extends EditingSupport {
 			ComboNode node = (ComboNode)element;
 			node.setValue((Integer) value);
 		}
-		
-		if (element instanceof ObjectNode && !(element instanceof BooleanNode) && !(element instanceof ColorNode)) {
+		if (element instanceof ObjectNode && !(element instanceof BooleanNode) && !(element instanceof ColorNode) && !(element instanceof ComboNode)) {
 			ObjectNode node = (ObjectNode)element;
 			node.setValue(value.toString());
 		}
@@ -199,7 +198,6 @@ public class ValueEditingSupport extends EditingSupport {
 			if (node.value instanceof Boolean)
 				node.setValue(node.value);
 		}
-
 		viewer.refresh(element);
 	}
 }
