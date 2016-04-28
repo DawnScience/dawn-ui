@@ -37,6 +37,9 @@ public class FileViewerE4Part {
 	private FileViewer fileViewer;
 	private ScopedPreferenceStore store;
 
+	/**
+	 * Used to provide a selection to the selection service
+	 */
 	@Inject
 	private ESelectionService tableSelectionService;
 
@@ -76,7 +79,8 @@ public class FileViewerE4Part {
 			public void selectionChanged(SelectionChangedEvent event) {
 				IStructuredSelection selection = (IStructuredSelection) event.getSelection();
 				// set the selection to the service
-				tableSelectionService.setSelection(selection.size() == 1 ? selection.getFirstElement() : selection.toArray());
+//				Object sel = selection.size() == 1 ? selection.getFirstElement() : selection.toArray();
+				tableSelectionService.setSelection(selection);
 			}
 		});
 	}
