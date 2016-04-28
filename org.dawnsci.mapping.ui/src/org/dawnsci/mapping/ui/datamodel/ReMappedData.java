@@ -43,7 +43,7 @@ public class ReMappedData extends AbstractMapData {
 	@Override
 	public IDataset getData(){
 		reMapped = null;
-		if (reMapped == null) updateRemappedData(null);
+		if (reMapped == null) updateRemappedData(shape);
 		
 		return reMapped;
 	}

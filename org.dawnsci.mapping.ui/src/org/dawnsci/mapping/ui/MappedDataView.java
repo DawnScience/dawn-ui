@@ -107,7 +107,7 @@ public class MappedDataView extends ViewPart {
 				if (viewer.getSelection() instanceof IStructuredSelection) {
 					IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
 					Iterator<?> it = selection.iterator();
-					List<MappedData> maps = new ArrayList<MappedData>();
+					List<AbstractMapData> maps = new ArrayList<AbstractMapData>();
 					
 					if (selection.size() == 1 && selection.getFirstElement() instanceof MappedDataFile) {
 
@@ -127,8 +127,8 @@ public class MappedDataView extends ViewPart {
 						
 						if (obj instanceof MappedDataFile) mdfs.add((MappedDataFile)obj);
 						
-						if (obj instanceof MappedData) {
-							maps.add((MappedData)obj);
+						if (obj instanceof AbstractMapData) {
+							maps.add((AbstractMapData)obj);
 						}
 					}
 					
