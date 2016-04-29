@@ -13,13 +13,15 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.dawnsci.fileviewer.Activator;
 import org.dawnsci.fileviewer.FileViewer;
 import org.dawnsci.fileviewer.Utils;
+import org.dawnsci.fileviewer.handlers.ConvertHandler;
+import org.dawnsci.fileviewer.handlers.OpenHandler;
+import org.eclipse.core.commands.ParameterizedCommand;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.e4.core.commands.ECommandService;
+import org.eclipse.e4.core.commands.EHandlerService;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.PersistState;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
@@ -30,6 +32,18 @@ import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 public class FileViewerE4Part {
 	private static final String FILEVIEWER_SAVED_DIRECTORY = "org.dawnsci.fileviewer.saved.directory";
@@ -41,6 +55,12 @@ public class FileViewerE4Part {
 	 */
 	@Inject
 	private ESelectionService tableSelectionService;
+
+	@Inject
+	private ECommandService commandService;
+
+	@Inject
+	private EHandlerService handlerService;
 
 	public FileViewerE4Part() {
 		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.fileviewer");
@@ -63,7 +83,7 @@ public class FileViewerE4Part {
 	}
 
 	@PostConstruct
-	public void postConstruct(Composite parent) {
+	public void postConstruct(Composite parent, MPart part) {
 		fileViewer.getIconCache().initResources(Display.getDefault());
 		fileViewer.createCompositeContents(parent);
 		fileViewer.notifyRefreshFiles(null);
@@ -73,8 +93,48 @@ public class FileViewerE4Part {
 			public void selectionChanged(SelectionChangedEvent event) {
 				IStructuredSelection selection = (IStructuredSelection) event.getSelection();
 				// set the selection to the service
-//				Object sel = selection.size() == 1 ? selection.getFirstElement() : selection.toArray();
 				tableSelectionService.setSelection(selection);
+			}
+		});
+
+		createPopupMenu(fileViewer.getTableViewer().getTable());
+	}
+
+	private void createPopupMenu(Table table) {
+		// Create popup menu programmatically
+		Menu menuTable = new Menu(table);
+		table.setMenu(menuTable);
+
+		MenuItem openItem = new MenuItem(menuTable, SWT.None);
+		openItem.setText("Open");
+		openItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				ParameterizedCommand myCommand = commandService.createCommand("org.dawnsci.fileviewer.openCommand", null);
+				handlerService.activateHandler("org.dawnsci.fileviewer.openCommand", new OpenHandler(fileViewer));
+				handlerService.executeHandler(myCommand);
+			}
+		});
+
+		MenuItem convertItem = new MenuItem(menuTable, SWT.None);
+		convertItem.setText("Convert...");
+		convertItem.setImage(Activator.getImage("icons/convert.png"));
+		convertItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				ParameterizedCommand myCommand = commandService.createCommand("org.dawnsci.fileviewer.convertCommand", null);
+				handlerService.activateHandler("org.dawnsci.fileviewer.convertCommand", new ConvertHandler(fileViewer));
+				handlerService.executeHandler(myCommand);
+			}
+		});
+
+		table.addListener(SWT.MouseDown, new Listener(){
+			@Override
+			public void handleEvent(Event event) {
+				TableItem[] selection = table.getSelection();
+				if (selection.length != 0 && (event.button == 3)) {
+					menuTable.setVisible(true);
+				}
 			}
 		});
 	}
@@ -85,16 +145,16 @@ public class FileViewerE4Part {
 		MToolBar toolbar = MMenuFactory.INSTANCE.createToolBar();
 		//create the tool item programmatically
 		MDirectToolItem parentItem = MMenuFactory.INSTANCE.createDirectToolItem();
-		parentItem.setElementId("org.dawnsci.fileviewer.parent");
+		parentItem.setElementId(FileViewerConstants.TABLE_PARENT);
 		parentItem.setIconURI("platform:/plugin/org.dawnsci.fileviewer/icons/arrow-090.png");
 		parentItem.setTooltip(Utils.getResourceString("tool.Parent.tiptext"));
-		parentItem.setContributionURI("bundleclass://org.dawnsci.fileviewer/org.dawnsci.fileviewer.handlers.ParentHandler");
+		parentItem.setContributionURI("bundleclass://org.dawnsci.conversion.ui/org.dawnsci.fileviewer.handlers.ParentHandler");
 		parentItem.setVisible(true);
 		parentItem.setEnabled(true);
 		toolbar.getChildren().add(parentItem);
 
 		MDirectToolItem refreshItem = MMenuFactory.INSTANCE.createDirectToolItem();
-		refreshItem.setElementId("org.dawnsci.fileviewer.refresh");
+		refreshItem.setElementId(FileViewerConstants.TABLE_REFRESH);
 		refreshItem.setIconURI("platform:/plugin/org.dawnsci.fileviewer/icons/arrow-circle-double-135.png");
 		refreshItem.setTooltip(Utils.getResourceString("tool.Refresh.tiptext"));
 		refreshItem.setContributionURI("bundleclass://org.dawnsci.fileviewer/org.dawnsci.fileviewer.handlers.RefreshHandler");
@@ -103,7 +163,7 @@ public class FileViewerE4Part {
 		toolbar.getChildren().add(refreshItem);
 
 		MDirectToolItem layoutItem = MMenuFactory.INSTANCE.createDirectToolItem();
-		layoutItem.setElementId("org.dawnsci.fileviewer.layout");
+		layoutItem.setElementId(FileViewerConstants.TABLE_LAYOUT);
 		layoutItem.setIconURI("platform:/plugin/org.dawnsci.fileviewer/icons/layout-design.png");
 		layoutItem.setTooltip(Utils.getResourceString("tool.LayoutEdit.tiptext"));
 		layoutItem.setContributionURI("bundleclass://org.dawnsci.fileviewer/org.dawnsci.fileviewer.handlers.LayoutHandler");

@@ -19,6 +19,8 @@ import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.fileviewer.table.FileTableExplorer;
 import org.dawnsci.fileviewer.tree.FileTreeExplorer;
 import org.dawnsci.fileviewer.tree.TreeUtils;
+import org.eclipse.dawnsci.slicing.api.data.ITransferableDataObject;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -421,7 +423,7 @@ public class FileViewer {
 	 * @param files
 	 *            the array of files to process
 	 */
-	private void doDefaultFileAction(File[] files) {
+	public void doDefaultFileAction(File[] files) {
 		// only uses the 1st file (for now)
 		if (files.length == 0)
 			return;
@@ -455,10 +457,25 @@ public class FileViewer {
 	}
 
 	/**
+	 * Open selected files
+	 */
+	public void doOpen() {
+		if (tableExplo != null)
+			doDefaultFileAction(tableExplo.getSelectedFiles());
+	}
+	/**
 	 * Performs a refresh
 	 */
 	public void doRefresh() {
 		notifyRefreshFiles(null);
+	}
+
+	/**
+	 * Performs a conversion
+	 */
+	public void doConvert() {
+		// TODO Auto-generated method stub
+		
 	}
 
 	/**
@@ -733,7 +750,15 @@ public class FileViewer {
 	}
 
 	public TableViewer getTableViewer() {
-		return tableExplo.getTableViewer();
+		if (tableExplo != null)
+			return tableExplo.getTableViewer();
+		return null;
 	}
 
+	public IStructuredSelection getSelection() {
+		ITransferableDataObject obj;
+		if (tableExplo != null)
+			return tableExplo.getTableViewer().getStructuredSelection();
+		return null;
+	}
 }

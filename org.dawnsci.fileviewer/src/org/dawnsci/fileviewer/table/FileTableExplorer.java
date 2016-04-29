@@ -13,7 +13,6 @@ package org.dawnsci.fileviewer.table;
 
 import java.io.File;
 
-import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.fileviewer.FileViewer;
 import org.dawnsci.fileviewer.FileViewerConstants;
 import org.dawnsci.fileviewer.Utils;
@@ -40,11 +39,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.ui.PartInitException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import uk.ac.diamond.sda.navigator.views.IOpenFileAction;
 
 public class FileTableExplorer {
 
@@ -87,7 +83,7 @@ public class FileTableExplorer {
 		tableContentsOfLabel = new Label(composite, SWT.BORDER);
 		tableContentsOfLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL));
 
-		tviewer = new TableViewer(composite, SWT.VIRTUAL | SWT.BORDER|SWT.V_SCROLL|SWT.FULL_SELECTION);
+		tviewer = new TableViewer(composite, SWT.VIRTUAL | SWT.BORDER | SWT.V_SCROLL | SWT.FULL_SELECTION);
 		tviewer.setContentProvider(new FileTableContentProvider(tviewer));
 		tviewer.setUseHashlookup(true);
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -105,19 +101,25 @@ public class FileTableExplorer {
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent event) {
-				doDefaultFileAction(getSelectedFiles());
+				viewer.doDefaultFileAction(getSelectedFiles());
 			}
 
-			private File[] getSelectedFiles() {
-				StructuredSelection selection = (StructuredSelection)tviewer.getSelection();
-				Object file = selection.getFirstElement();
-				final File[] files = new File[1];
-				files[0] = (File)file;
-				return files;
-			}
 		});
 		createTableDragSource(tviewer.getTable());
 		createTableDropTarget(tviewer.getTable());
+
+	}
+
+	/**
+	 * Returns the selected files in the table
+	 * @return
+	 */
+	public File[] getSelectedFiles() {
+		StructuredSelection selection = (StructuredSelection) tviewer.getSelection();
+		Object file = selection.getFirstElement();
+		final File[] files = new File[1];
+		files[0] = (File) file;
+		return files;
 	}
 
 	private void createColumns() {
@@ -128,35 +130,6 @@ public class FileTableExplorer {
 			column.getColumn().setResizable(true);
 			column.getColumn().setMoveable(true);
 			column.setLabelProvider(new FileTableColumnLabelProvider(viewer, i));
-		}
-	}
-
-	/**
-	 * Performs the default action on a set of files.
-	 * 
-	 * @param files
-	 *            the array of files to process
-	 */
-	private void doDefaultFileAction(File[] files) {
-		// only uses the 1st file (for now)
-		if (files.length == 0)
-			return;
-		final File file = files[0];
-
-		if (file.isDirectory()) {
-			viewer.notifySelectedDirectory(file);
-		} else {
-			final IOpenFileAction action = Utils.getFirstPertinentAction();
-			if (action!=null) {
-				action.openFile(file.toPath());
-				return;
-			}
-			final String fileName = file.getAbsolutePath();
-			try {
-				EclipseUtils.openExternalEditor(fileName);
-			} catch (PartInitException e) {
-				logger.error("Cannot open file " + file, e);
-			}
 		}
 	}
 
@@ -351,8 +324,8 @@ public class FileTableExplorer {
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {
-				tableContentsOfLabel.setText(Utils.getResourceString("details.ContentsOf.text",
-						new Object[] { workerStateDir.getPath() }));
+				tableContentsOfLabel.setText(
+						Utils.getResourceString("details.ContentsOf.text", new Object[] { workerStateDir.getPath() }));
 				tviewer.getTable().removeAll();
 				File[] dirList = Utils.getDirectoryList(workerStateDir);
 				tviewer.setInput(dirList);
@@ -368,4 +341,5 @@ public class FileTableExplorer {
 	public Table getTable() {
 		return tviewer.getTable();
 	}
+
 }
