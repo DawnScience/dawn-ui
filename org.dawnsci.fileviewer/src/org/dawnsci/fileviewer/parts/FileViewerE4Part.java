@@ -15,12 +15,11 @@ import javax.inject.Inject;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
+import org.dawnsci.fileviewer.Activator;
 import org.dawnsci.fileviewer.FileViewer;
 import org.dawnsci.fileviewer.Utils;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.PersistState;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
@@ -47,12 +46,7 @@ public class FileViewerE4Part {
 		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.fileviewer");
 		fileViewer = new FileViewer();
 		// add to Eclipse Context in order to re use with DI
-		getActiveContext().set(FileViewer.class, fileViewer);
-	}
-
-	private static IEclipseContext getActiveContext() {
-		IEclipseContext parentContext = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
-		return parentContext.getActiveLeaf();
+		Activator.getActiveContext().set(FileViewer.class, fileViewer);
 	}
 
 	@PostConstruct
