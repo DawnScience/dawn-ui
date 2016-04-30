@@ -19,7 +19,6 @@ import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.fileviewer.table.FileTableExplorer;
 import org.dawnsci.fileviewer.tree.FileTreeExplorer;
 import org.dawnsci.fileviewer.tree.TreeUtils;
-import org.eclipse.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
@@ -755,10 +754,11 @@ public class FileViewer {
 		return null;
 	}
 
-	public IStructuredSelection getSelection() {
-		ITransferableDataObject obj;
-		if (tableExplo != null)
-			return tableExplo.getTableViewer().getStructuredSelection();
+	public IStructuredSelection getSelections() {
+		if (tableExplo != null) {
+			IStructuredSelection sel = tableExplo.getTableViewer().getStructuredSelection();
+			return sel;
+		}
 		return null;
 	}
 }

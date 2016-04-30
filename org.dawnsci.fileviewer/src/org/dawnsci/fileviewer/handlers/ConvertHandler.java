@@ -20,14 +20,11 @@ public class ConvertHandler {
 		this.fileviewer = viewer;
 	}
 
-	/**
-	 * TODO
-	 * Make the StructuredSelection an ITransferableDataObject
-	 */
+	@SuppressWarnings("unchecked")
 	@Execute
 	public void execute() {
 		ConvertWizard cwizard = new ConvertWizard();
-		IStructuredSelection sel = fileviewer.getSelection();
+		IStructuredSelection sel = fileviewer.getSelections();
 		cwizard.setSelectionOverride(sel.toList());
 		WizardDialog dialog = new WizardDialog(Display.getDefault().getActiveShell(), cwizard);
 		dialog.setPageSize(new Point(400, 450));
