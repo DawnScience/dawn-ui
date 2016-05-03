@@ -36,7 +36,7 @@ import org.dawnsci.plotting.javafx.axis.objects.JavaFXProperties;
 import org.dawnsci.plotting.javafx.axis.objects.ScaleAxisGroup;
 import org.dawnsci.plotting.javafx.axis.objects.SceneObjectGroup;
 import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
-import org.dawnsci.plotting.javafx.trace.isosurface.FXIsosurfaceTrace;
+import org.dawnsci.plotting.javafx.trace.isosurface.IsosurfaceTrace;
 import org.dawnsci.plotting.javafx.trace.volume.VolumeTrace;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 
@@ -481,7 +481,7 @@ public class SurfaceDisplayer extends Scene
 		return isosurfaceGroup;
 	}
 	
-	public void addSurfaceTrace(FXIsosurfaceTrace trace)
+	public void addSurfaceTrace(IsosurfaceTrace trace)
 	{
 		// if the first trace create the axes using the trace.axes data
 		// all of this data is irrelevant as it get reset when a surface is added

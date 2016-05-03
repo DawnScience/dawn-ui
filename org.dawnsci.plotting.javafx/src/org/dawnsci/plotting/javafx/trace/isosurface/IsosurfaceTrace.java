@@ -35,7 +35,7 @@ import org.eclipse.swt.widgets.Display;
  *
  * @Internal
  */
-public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
+public class IsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 {
 	private MeshView isosurface;
 	private Dataset points;
@@ -49,7 +49,7 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 	private int[] rgb;
 	private double opacity = 0.5;
 	
-	public FXIsosurfaceTrace(IPlottingSystemViewer<?> viewer, SurfaceDisplayer newScene, String traceName)
+	public IsosurfaceTrace(IPlottingSystemViewer<?> viewer, SurfaceDisplayer newScene, String traceName)
 	{
 		super(viewer, traceName);
 		this.scene = newScene;
