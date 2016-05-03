@@ -21,7 +21,6 @@ import org.eclipse.e4.core.commands.EHandlerService;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.PersistState;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
-import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
@@ -44,14 +43,14 @@ public class FileViewerE4Part {
 	@Inject
 	private EHandlerService handlerService;
 
-	private ToolBarManager toolBarManager;
-
+	/**
+	 * E4 part
+	 */
 	public FileViewerE4Part() {
 		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.fileviewer");
 		fileViewer = new FileViewer();
 		// add to Eclipse Context in order to re use with DI
 		Activator.getActiveContext().set(FileViewer.class, fileViewer);
-		setToolBarManager(new ToolBarManager());
 	}
 
 	@PostConstruct
@@ -90,13 +89,4 @@ public class FileViewerE4Part {
 		if (fileViewer != null)
 			fileViewer.close();
 	}
-
-	public ToolBarManager getToolBarManager() {
-		return toolBarManager;
-	}
-
-	public void setToolBarManager(ToolBarManager tManager) {
-		this.toolBarManager = tManager;
-	}
-
 }
