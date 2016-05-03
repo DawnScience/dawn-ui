@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 
 public class FileTableExplorer {
 
+	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(FileTableExplorer.class);
 
 	/* Table view */

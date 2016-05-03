@@ -20,7 +20,7 @@ public class LayoutHandler {
 
 	@Inject
 	public LayoutHandler(FileViewer viewer) {
-		fileviewer = viewer;
+		this.fileviewer = viewer;
 	}
 
 	@Execute
