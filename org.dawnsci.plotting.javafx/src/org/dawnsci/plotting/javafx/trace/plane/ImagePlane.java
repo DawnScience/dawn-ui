@@ -16,6 +16,7 @@ import javafx.scene.transform.Rotate;
 import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.plotting.api.histogram.functions.FunctionContainer;
 
 /**
@@ -34,7 +35,8 @@ public class ImagePlane extends MeshView
 	private Point2D size;    
 	private Point3D offsets;
 	private Point3D planeNormal;
-		
+	
+	
 	/**
 	 * create the image plane with a dataset
 	 * @param size
@@ -45,7 +47,7 @@ public class ImagePlane extends MeshView
 	 */
 	public ImagePlane(
 			final Point2D size, 
-			final IDataset dataset, 
+			final ILazyDataset lazyDataset, 
 			final Point3D offsets,
 			final Point3D planeNormal,
 			final PaletteService paletteService)
@@ -56,7 +58,7 @@ public class ImagePlane extends MeshView
 		this.offsets     = offsets;       
 		this.planeNormal = planeNormal;   
 		
-		Image image = createImageFromDataset(dataset, paletteService);
+		Image image = createImageFromDataset(lazyDataset, paletteService);
 		
 		generatePlane(image);
 	}
@@ -105,7 +107,7 @@ public class ImagePlane extends MeshView
 		
 		// set the material - ie texture, colour, opacity
 		mat = new PhongMaterial(new Color(1,1,1,1));
-		mat.setDiffuseMap(image);
+		mat.setDiffuseMap(image);		
 		mat.setSpecularColor(new Color(1,1,1,1));
 		mat.setDiffuseColor( new Color(1,1,1,1));
 		this.setMaterial(mat);
@@ -119,8 +121,10 @@ public class ImagePlane extends MeshView
 	}
 	
 
-	public Image createImageFromDataset(IDataset dataset, PaletteService ps)
+	public Image createImageFromDataset(ILazyDataset lazyDataset, PaletteService ps)
 	{
+		IDataset dataset = lazyDataset.getSlice();
+		
 		double minValue = dataset.min(true, true).doubleValue();
 		double maxValue = dataset.max(true, true).doubleValue();
 		
@@ -139,7 +143,7 @@ public class ImagePlane extends MeshView
 				argb = (argb << 8) + (int)(functionContainer.getRedFunc().mapToByte(drawValue));
 				argb = (argb << 8) + (int)(functionContainer.getGreenFunc().mapToByte(drawValue));
 				argb = (argb << 8) + (int)(functionContainer.getBlueFunc().mapToByte(drawValue));
-									
+								
 				bi.setRGB(x, y, argb);
 			}
 		}
@@ -179,6 +183,5 @@ public class ImagePlane extends MeshView
 				mat.getSpecularColor().getBlue(),
 				opacity));
 	}
-	
-	
+		
 }

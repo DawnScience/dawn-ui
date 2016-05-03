@@ -16,7 +16,7 @@ import javafx.scene.shape.TriangleMesh;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 
-public class Line extends MeshView
+public class Line3D extends MeshView
 {
 	private Translate offset;
 	private Rotate rotate;
@@ -24,7 +24,7 @@ public class Line extends MeshView
 	private double height;
 	private PhongMaterial mat;
 	
-	public Line(double height, Rotate rotate, Point3D offset)
+	public Line3D(double height, Rotate rotate, Point3D offset)
 	{
 		super();
 		
@@ -42,7 +42,7 @@ public class Line extends MeshView
 		this.getTransforms().addAll(this.rotate, this.offset);
 		
 	}
-	public Line(Point3D start, Point3D end)
+	public Line3D(Point3D start, Point3D end)
 	{
 		List<Point3D> pointList = new ArrayList<Point3D>();
 		pointList.add(start);
@@ -50,7 +50,7 @@ public class Line extends MeshView
 		createLine(pointList);
 	}
 	
-	public Line(Point3D start, Point3D end, Color colour)
+	public Line3D(Point3D start, Point3D end, Color colour)
 	{
 		this(start, end);
 		this.setColour(colour);

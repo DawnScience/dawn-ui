@@ -7,9 +7,10 @@ import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.dawnsci.plotting.javafx.ServiceLoader;
 import org.dawnsci.plotting.javafx.trace.Image3DTrace;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
-import org.eclipse.dawnsci.plotting.api.trace.IJavafxPlaneTrace;
+import org.eclipse.dawnsci.plotting.api.trace.IPlane3DTrace;
 
 /**
  * !!!!!!!!!<br>
@@ -20,10 +21,11 @@ import org.eclipse.dawnsci.plotting.api.trace.IJavafxPlaneTrace;
  * @author uij85458
  *
  */
-public class PlaneTrace extends Image3DTrace implements IJavafxPlaneTrace
+public class PlaneTrace extends Image3DTrace implements IPlane3DTrace
 {
 	
-	ImagePlane imagePlane;
+	private ImagePlane imagePlane;
+	private ILazyDataset lazyDataset;
 	
 	public PlaneTrace(IPlottingSystemViewer<?> plotter, String name) {
 		super(plotter, name);
@@ -38,18 +40,22 @@ public class PlaneTrace extends Image3DTrace implements IJavafxPlaneTrace
 
 	@Override
 	public IDataset getData() {
-		return new IntegerDataset(1, 1);
+		if(lazyDataset==null){
+	        throw new IllegalArgumentException("lazyDataset was null");
+	    }	
+		return lazyDataset.getSlice();
 	}
 
 	@Override
-	public void setData(final int[] size, final IDataset data, final double[] offsets, final double[] planeNormal) 
+	public void setData(final int[] size, final IDataset imageData, final double[] offset, final double[] planeNormal) 
 	{
 		final PaletteService pservice = (PaletteService) ServiceLoader.getPaletteService();
 		
+		lazyDataset = imageData;
 		imagePlane = new ImagePlane(
 				new Point2D(size[0], size[1]), 
-				data, 
-				new Point3D(offsets[0], offsets[1], offsets[2]), 
+				lazyDataset, 
+				new Point3D(offset[0], offset[1], offset[2]), 
 				new Point3D(planeNormal[0],planeNormal[1],planeNormal[2]),
 				pservice);
 		
