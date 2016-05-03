@@ -18,6 +18,15 @@ import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.histogram.functions.FunctionContainer;
 
+/**
+ * !!!!!!!!!<br>
+ * THIS CLASS HAS NOT BEEN TESTED AND WAS MADE IN ROUGHLY 1 HOUR<br>
+ * DO NOT USE UNTIL IT IS TESTED<br>
+ * !!!!!!!!!<br>
+ * Remove this message once tested<br>
+ * @author uij85458
+ *
+ */
 public class ImagePlane extends MeshView
 {
 	private PhongMaterial mat;

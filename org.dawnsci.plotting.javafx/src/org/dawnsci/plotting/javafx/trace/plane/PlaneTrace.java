@@ -11,7 +11,15 @@ import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
 import org.eclipse.dawnsci.plotting.api.trace.IJavafxPlaneTrace;
 
-
+/**
+ * !!!!!!!!!<br>
+ * THIS CLASS HAS NOT BEEN TESTED AND WAS MADE IN ROUGHLY 1 HOUR<br>
+ * DO NOT USE UNTIL IT IS TESTED<br>
+ * !!!!!!!!!<br>
+ * Remove this message once tested<br>
+ * @author uij85458
+ *
+ */
 public class PlaneTrace extends Image3DTrace implements IJavafxPlaneTrace
 {
 	
