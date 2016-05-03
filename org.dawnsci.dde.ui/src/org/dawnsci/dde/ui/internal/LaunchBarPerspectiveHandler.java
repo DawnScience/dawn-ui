@@ -77,27 +77,29 @@ public class LaunchBarPerspectiveHandler {
 		List<MWindow> children = application.getChildren();
 		for (MWindow mWindow : children) {
 			MPerspective activePerspective = modelService.getActivePerspective(mWindow);
-			return activePerspective.getElementId();
+			return activePerspective != null ? activePerspective.getElementId() : null;
 		}
 		return null;
 	}
 
 	private void updateLaunchBarState(String id) {
 		MToolControl launchBar = getLaunchBar();
-		if (id.equals("org.eclipse.pde.ui.PDEPerspective")) {
-			if (launchBar == null) {
+		if (id != null) {
+			if (id.equals("org.eclipse.pde.ui.PDEPerspective")) {
+				if (launchBar == null) {
+					MTrimBar topTrimBar = getTopTrimBar();
+					launchBar = MMenuFactory.INSTANCE.createToolControl();
+					launchBar.setElementId(LaunchBarControl.ID);
+					launchBar.setContributionURI(LaunchBarControl.CLASS_URI);
+					topTrimBar.getChildren().add(0, launchBar);
+				}
+			} else if (launchBar != null) {
 				MTrimBar topTrimBar = getTopTrimBar();
-				launchBar = MMenuFactory.INSTANCE.createToolControl();
-				launchBar.setElementId(LaunchBarControl.ID);
-				launchBar.setContributionURI(LaunchBarControl.CLASS_URI);
-				topTrimBar.getChildren().add(0, launchBar);
-			}
-		} else if (launchBar != null) {
-			MTrimBar topTrimBar = getTopTrimBar();
-			topTrimBar.getChildren().remove(launchBar);
-			Widget widget = (Widget) launchBar.getWidget();
-			if (widget!=null){
-				widget.dispose();
+				topTrimBar.getChildren().remove(launchBar);
+				Widget widget = (Widget) launchBar.getWidget();
+				if (widget != null) {
+					widget.dispose();
+				}
 			}
 		}
 	}
