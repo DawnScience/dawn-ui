@@ -1,6 +1,7 @@
 package org.dawnsci.processing.ui.tool;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -241,6 +242,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		ProcessingInfo info = new ProcessingInfo();
 		info.data = ds;
 		info.operations = getOperations();
+		info.parentMetadata = parentMeta;
 		
 		job.update(info);
 		job.schedule();
@@ -297,6 +299,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 	private class ProcessingInfo {
 		public IDataset data;
 		public IOperation[] operations;
+		public SliceFromSeriesMetadata parentMetadata;
 		
 	}
 	
@@ -315,17 +318,31 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			ProcessingInfo local = info;
-			IDataset ds = info.data;
+			IDataset ds = info.data.getSliceView();
 			IOperation[] operations = info.operations;
 			
-			SliceND slice = new SliceND(ds.getShape());
-			int[] dataDims = new int[]{0, 1};
+			SliceFromSeriesMetadata sliceMeta;
 			
-			SliceInformation si = new SliceInformation(slice, slice, slice, dataDims, 1, 1);
-			SourceInformation so = new SourceInformation("", "", ds);
-			ds.setMetadata( new SliceFromSeriesMetadata(so, si));
+			if (info.parentMetadata == null) {
+				SliceND slice = new SliceND(ds.getShape());
+				int[] dataDims = new int[]{0, 1};
+				SliceInformation si = new SliceInformation(slice, slice, slice, dataDims, 1, 1);
+				SourceInformation so = new SourceInformation("", "", ds);
+				sliceMeta = new SliceFromSeriesMetadata(so, si);
+			} else {
+				sliceMeta = info.parentMetadata;
+				int[] shape = info.parentMetadata.getParent().getShape();
+				int[] s = shape.clone();
+				Arrays.fill(s, 1);
+				int[] dd = info.parentMetadata.getDataDimensions();
+				for (int i = 0; i < dd.length; i++) s[i] = shape[dd[i]];
+				ds.setShape(s);
+			}
 			
-			EscapableSliceVisitor vis = new EscapableSliceVisitor(null, dataDims,operations,null,null,system);
+			
+			ds.setMetadata(sliceMeta);
+			
+			EscapableSliceVisitor vis = new EscapableSliceVisitor(null, sliceMeta.getDataDimensions(),operations,null,null,system);
 			vis.setEndOperation(selection);
 			
 			try {

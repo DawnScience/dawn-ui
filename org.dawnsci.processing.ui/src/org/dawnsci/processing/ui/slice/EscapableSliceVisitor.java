@@ -84,7 +84,9 @@ public class EscapableSliceVisitor implements SliceVisitor {
 
 
 		visitor.executed(data, null); // Send result.
-		} finally {
+		} catch (Exception e) {
+			logger.error("Error running processing",e);
+		}finally {
 			for (IOperation op : series) op.dispose();
 		}
 

@@ -64,24 +64,10 @@ public class MappedData extends AbstractMapData{
 		ILazyDataset spectrum = parent.getSpectrum(indices[0], indices[1]);
 		if (spectrum == null) return null;
 		IDataset s = spectrum.getSlice();
-		s.addMetadata(generateSliceMetadata());
 		return s;
 	}
 	
 	public MappedData makeNewMapWithParent(String name, IDataset ds) {
 		return new MappedData(name, ds, parent, path);
 	}
-	
-	private MetadataType generateSliceMetadata(){
-		SourceInformation si = new SourceInformation(parent.getPath(), parent.toString(), parent.getLazy());
-		SliceInformation sl = new SliceInformation(new SliceND(new int[]{1}), new SliceND(new int[]{1}), new SliceND(new int[]{1}), parent.getDataDimensions(), 1, 1);
-		return new SliceFromSeriesMetadata(si,sl);
-	}
-
-
-
-
-	
-
-	
 }
