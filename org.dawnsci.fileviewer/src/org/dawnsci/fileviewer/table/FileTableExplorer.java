@@ -17,6 +17,9 @@ import org.dawnsci.fileviewer.FileViewer;
 import org.dawnsci.fileviewer.FileViewerConstants;
 import org.dawnsci.fileviewer.Utils;
 import org.dawnsci.fileviewer.Utils.SortType;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -74,6 +77,11 @@ public class FileTableExplorer {
 	// Sort direction
 	private volatile int sortDirection = 0;
 
+	/*
+	 * Job used to retrieve the list of file/directory in a folder
+	 */
+	private RetrieveFileListJob retrieveDirJob;
+
 	private FileViewer viewer;
 
 	private TableViewer tviewer;
@@ -114,7 +122,6 @@ public class FileTableExplorer {
 		});
 		createTableDragSource(tviewer.getTable());
 		createTableDropTarget(tviewer.getTable());
-
 	}
 
 	/**
@@ -337,9 +344,26 @@ public class FileTableExplorer {
 				tableContentsOfLabel.setText(
 						Utils.getResourceString("details.ContentsOf.text", new Object[] { workerStateDir.getPath() }));
 				tviewer.getTable().removeAll();
-				File[] dirList = Utils.getDirectoryList(workerStateDir, sortType, direction);
-				tviewer.setInput(dirList);
-				tviewer.setItemCount(dirList.length);
+
+				// Retrieve the new list of files
+				if (retrieveDirJob != null && retrieveDirJob.getState() == Job.RUNNING) {
+					retrieveDirJob.cancel();
+				}
+				retrieveDirJob = new RetrieveFileListJob(workerStateDir, sortType, direction);
+				retrieveDirJob.setThread(workerThread);
+				retrieveDirJob.addJobChangeListener(new JobChangeAdapter() {
+					@Override
+					public void done(IJobChangeEvent event) {
+						File[] dirList = retrieveDirJob.getDirList();
+						Display.getDefault().syncExec(new Runnable() {
+							public void run() {
+								tviewer.setInput(dirList);
+								tviewer.setItemCount(dirList.length);
+							}
+						});
+					}
+				});
+				retrieveDirJob.schedule();
 			}
 		});
 	}

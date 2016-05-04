@@ -24,9 +24,13 @@ import org.dawnsci.fileviewer.handlers.ParentHandler;
 import org.dawnsci.fileviewer.handlers.RefreshHandler;
 import org.dawnsci.fileviewer.table.FileTableExplorer;
 import org.dawnsci.fileviewer.table.FileTableViewerComparator;
+import org.dawnsci.fileviewer.table.RetrieveFileListJob;
 import org.dawnsci.fileviewer.tree.FileTreeExplorer;
 import org.dawnsci.fileviewer.tree.TreeUtils;
 import org.eclipse.core.commands.ParameterizedCommand;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.e4.core.commands.ECommandService;
 import org.eclipse.e4.core.commands.EHandlerService;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
@@ -91,6 +95,8 @@ public class FileViewer {
 	private ProgressDialog progressDialog = null; // progress dialog for
 													// locally-initiated
 													// operations
+
+	private RetrieveFileListJob retrieveDirJob;
 
 	/* Combo view */
 	private Combo combo;
@@ -430,9 +436,25 @@ public class FileViewer {
 			// No files selected
 			diskSpaceLabel.setText("");
 			if (currentDirectory != null) {
-				int numObjects = Utils.getDirectoryList(currentDirectory, tableExplo.getSortType(), tableExplo.getSortDirection()).length;
-				numObjectsLabel.setText(Utils.
-						getResourceString("details.DirNumberOfObjects.text", new Object[] { new Integer(numObjects) }));
+				// Retrieve the new list of files
+				if (retrieveDirJob != null && retrieveDirJob.getState() == Job.RUNNING) {
+					retrieveDirJob.cancel();
+				}
+				retrieveDirJob = new RetrieveFileListJob(currentDirectory, tableExplo.getSortType(), tableExplo.getSortDirection());
+//				retrieveDirJob.setThread(workerThread);
+				retrieveDirJob.addJobChangeListener(new JobChangeAdapter() {
+					@Override
+					public void done(IJobChangeEvent event) {
+						File[] dirList = retrieveDirJob.getDirList();
+						int numObjects = dirList.length;
+						Display.getDefault().syncExec(new Runnable() {
+							public void run() {
+								numObjectsLabel.setText(Utils.getResourceString("details.DirNumberOfObjects.text", new Object[] { new Integer(numObjects) }));
+							}
+						});
+					}
+				});
+				retrieveDirJob.schedule();
 			} else {
 				numObjectsLabel.setText("");
 			}
@@ -598,14 +620,6 @@ public class FileViewer {
 	 */
 	public void doRefresh() {
 		notifyRefreshFiles(null);
-	}
-
-	/**
-	 * Performs a conversion
-	 */
-	public void doConvert() {
-		// TODO Auto-generated method stub
-		
 	}
 
 	/**
