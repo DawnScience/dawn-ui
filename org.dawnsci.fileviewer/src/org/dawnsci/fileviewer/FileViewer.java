@@ -16,12 +16,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawb.common.ui.util.EclipseUtils;
+import org.dawnsci.fileviewer.Utils.SortType;
 import org.dawnsci.fileviewer.handlers.ConvertHandler;
 import org.dawnsci.fileviewer.handlers.LayoutHandler;
 import org.dawnsci.fileviewer.handlers.OpenHandler;
 import org.dawnsci.fileviewer.handlers.ParentHandler;
 import org.dawnsci.fileviewer.handlers.RefreshHandler;
 import org.dawnsci.fileviewer.table.FileTableExplorer;
+import org.dawnsci.fileviewer.table.FileTableViewerComparator;
 import org.dawnsci.fileviewer.tree.FileTreeExplorer;
 import org.dawnsci.fileviewer.tree.TreeUtils;
 import org.eclipse.core.commands.ParameterizedCommand;
@@ -343,7 +345,7 @@ public class FileViewer {
 		 * Table view: Displays the contents of the selected directory.
 		 */
 		if (tableExplo != null)
-			tableExplo.workerUpdate(dir, false);
+			tableExplo.workerUpdate(dir, false, tableExplo.getSortType(), tableExplo.getSortDirection());
 
 		/*
 		 * Combo view: Sets the combo box to point to the selected directory.
@@ -428,7 +430,7 @@ public class FileViewer {
 			// No files selected
 			diskSpaceLabel.setText("");
 			if (currentDirectory != null) {
-				int numObjects = Utils.getDirectoryList(currentDirectory).length;
+				int numObjects = Utils.getDirectoryList(currentDirectory, tableExplo.getSortType(), tableExplo.getSortDirection()).length;
 				numObjectsLabel.setText(Utils.
 						getResourceString("details.DirNumberOfObjects.text", new Object[] { new Integer(numObjects) }));
 			} else {
@@ -500,7 +502,7 @@ public class FileViewer {
 		} else
 			refreshTable = true;
 		if (refreshTable && tableExplo != null)
-			tableExplo.workerUpdate(currentDirectory, true);
+			tableExplo.workerUpdate(currentDirectory, true, tableExplo.getSortType(), tableExplo.getSortDirection());
 
 		/*
 		 * Combo view: Refreshes the list of roots
@@ -823,7 +825,7 @@ public class FileViewer {
 				}
 			}
 			File[] roots = list.toArray(new File[list.size()]);
-			Utils.sortFiles(roots);
+			Utils.sortFiles(roots, SortType.NAME, FileTableViewerComparator.ASC);
 			return roots;
 		}
 		File root = new File(File.separator);
@@ -847,8 +849,16 @@ public class FileViewer {
 		doRefresh();
 	}
 
+	public File getCurrentDirectory() {
+		return currentDirectory;
+	}
+
 	public String getSavedDirectory() {
 		return currentDirectory.getAbsolutePath();
+	}
+
+	public FileTableExplorer getTableExplorer() {
+		return tableExplo;
 	}
 
 	public boolean isDragging() {

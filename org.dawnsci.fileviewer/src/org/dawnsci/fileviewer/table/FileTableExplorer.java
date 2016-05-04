@@ -16,6 +16,7 @@ import java.io.File;
 import org.dawnsci.fileviewer.FileViewer;
 import org.dawnsci.fileviewer.FileViewerConstants;
 import org.dawnsci.fileviewer.Utils;
+import org.dawnsci.fileviewer.Utils.SortType;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -68,6 +69,11 @@ public class FileTableExplorer {
 	private volatile File workerStateDir = null;
 	// State information to use for the next cycle
 	private volatile File workerNextDir = null;
+	// Sort type
+	private volatile SortType sortType = SortType.NAME;
+	// Sort direction
+	private volatile int sortDirection = 0;
+
 	private FileViewer viewer;
 
 	private TableViewer tviewer;
@@ -131,6 +137,7 @@ public class FileTableExplorer {
 			column.getColumn().setResizable(true);
 			column.getColumn().setMoveable(true);
 			column.setLabelProvider(new FileTableColumnLabelProvider(viewer, i));
+			new FileTableViewerComparator(this, viewer, column, i);
 		}
 	}
 
@@ -271,7 +278,7 @@ public class FileTableExplorer {
 	 * @param force
 	 *            if true causes a refresh even if the data is the same
 	 */
-	public void workerUpdate(File dir, boolean force) {
+	public void workerUpdate(File dir, boolean force, SortType type, int direction) {
 		if (dir == null)
 			return;
 		if ((!force) && (workerNextDir != null) && (workerNextDir.equals(dir)))
@@ -279,6 +286,8 @@ public class FileTableExplorer {
 
 		synchronized (workerLock) {
 			workerNextDir = dir;
+			sortType = type;
+			sortDirection = direction;
 			workerStopped = false;
 			workerCancelled = true;
 			workerLock.notifyAll();
@@ -300,7 +309,7 @@ public class FileTableExplorer {
 					workerCancelled = false;
 					workerStateDir = workerNextDir;
 				}
-				workerExecute();
+				workerExecute(sortType, sortDirection);
 				synchronized (workerLock) {
 					try {
 						if ((!workerCancelled) && (workerStateDir == workerNextDir))
@@ -320,7 +329,7 @@ public class FileTableExplorer {
 	/**
 	 * Updates the table's contents
 	 */
-	private void workerExecute() {
+	private void workerExecute(SortType sortType, int direction) {
 		// Clear existing information
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
@@ -328,7 +337,7 @@ public class FileTableExplorer {
 				tableContentsOfLabel.setText(
 						Utils.getResourceString("details.ContentsOf.text", new Object[] { workerStateDir.getPath() }));
 				tviewer.getTable().removeAll();
-				File[] dirList = Utils.getDirectoryList(workerStateDir);
+				File[] dirList = Utils.getDirectoryList(workerStateDir, sortType, direction);
 				tviewer.setInput(dirList);
 				tviewer.setItemCount(dirList.length);
 			}
@@ -341,6 +350,18 @@ public class FileTableExplorer {
 
 	public Table getTable() {
 		return tviewer.getTable();
+	}
+
+	public void setSortType(SortType type) {
+		sortType = type;
+	}
+
+	public SortType getSortType() {
+		return sortType;
+	}
+
+	public int getSortDirection() {
+		return sortDirection;
 	}
 
 }
