@@ -357,8 +357,10 @@ public class FileTableExplorer {
 						File[] dirList = retrieveDirJob.getDirList();
 						Display.getDefault().syncExec(new Runnable() {
 							public void run() {
-								tviewer.setInput(dirList);
-								tviewer.setItemCount(dirList.length);
+								if (tviewer != null) {
+									tviewer.setInput(dirList);
+									tviewer.setItemCount(dirList.length);
+								}
 							}
 						});
 					}
