@@ -22,6 +22,7 @@ import javafx.scene.Group;
 import javafx.scene.image.WritableImage;
 
 import org.dawnsci.plotting.javafx.axis.objects.JavaFXProperties;
+import org.dawnsci.plotting.javafx.trace.JavafxTrace;
 import org.dawnsci.plotting.javafx.trace.isosurface.IsosurfaceTrace;
 import org.dawnsci.plotting.javafx.trace.volume.VolumeTrace;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -192,28 +193,14 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 	
 	public boolean addTrace(ITrace trace)
 	{
-		if (trace instanceof IIsosurfaceTrace)
+		if (trace instanceof JavafxTrace)
 		{
 			// declare the trace from the parameter trace
-			IsosurfaceTrace itrace = (IsosurfaceTrace) trace;
-			if (itrace.getData() == null)
-				throw new RuntimeException("Trace has no data " + trace.getName());
-			// create the trace
-			itrace.create();
+			JavafxTrace javafxTrace = (JavafxTrace) trace;
 			
 			// add the trace into the list of current traces
-			scene.addSurfaceTrace(itrace);
-			scene.setAxesData(itrace.getAxes());
-		}
-		else if (trace instanceof IVolumeRenderTrace)
-		{
-			// declare the trace from the parameter trace
-			VolumeTrace itrace = (VolumeTrace) trace;
-			if (itrace.getData() == null)
-				throw new RuntimeException("Trace has no data " + trace.getName());
-			
-			// add the trace into the list of current traces
-			scene.addVolumeTrace(itrace);
+			scene.addTrace(javafxTrace);
+			scene.setAxesData(javafxTrace.getAxes());
 		}
 		
 		else

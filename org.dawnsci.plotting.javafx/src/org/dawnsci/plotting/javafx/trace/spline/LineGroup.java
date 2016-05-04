@@ -3,11 +3,11 @@ package org.dawnsci.plotting.javafx.trace.spline;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dawnsci.plotting.javafx.objects.Line3D;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-
 import javafx.geometry.Point3D;
 import javafx.scene.Group;
+
+import org.dawnsci.plotting.javafx.objects.Line3D;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 
 
 /**
@@ -21,7 +21,7 @@ import javafx.scene.Group;
  */
 public class LineGroup extends Group
 {
-
+	
 	List<Line3D> LineList;
 	
 	public LineGroup(IDataset points)

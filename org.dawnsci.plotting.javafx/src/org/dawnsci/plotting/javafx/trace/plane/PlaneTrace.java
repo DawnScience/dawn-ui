@@ -1,14 +1,16 @@
 package org.dawnsci.plotting.javafx.trace.plane;
 
+import java.util.List;
+
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
+import javafx.scene.Node;
 
 import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.dawnsci.plotting.javafx.ServiceLoader;
-import org.dawnsci.plotting.javafx.trace.Image3DTrace;
+import org.dawnsci.plotting.javafx.trace.JavafxTrace;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
 import org.eclipse.dawnsci.plotting.api.trace.IPlane3DTrace;
 
@@ -21,7 +23,7 @@ import org.eclipse.dawnsci.plotting.api.trace.IPlane3DTrace;
  * @author uij85458
  *
  */
-public class PlaneTrace extends Image3DTrace implements IPlane3DTrace
+public class PlaneTrace extends JavafxTrace implements IPlane3DTrace
 {
 	
 	private ImagePlane imagePlane;
@@ -61,15 +63,21 @@ public class PlaneTrace extends Image3DTrace implements IPlane3DTrace
 		
 	}
 	
-	public ImagePlane plane()
-	{
-		return imagePlane;
-	}
-
 	@Override
 	public void setOpacity(double opacity) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public Node getNode() {
+		return imagePlane;
+	}
+
+	@Override
+	public List<IDataset> getAxes() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 

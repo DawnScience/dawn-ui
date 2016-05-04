@@ -1,8 +1,12 @@
 package org.dawnsci.plotting.javafx.trace.spline;
 
+import java.util.List;
+
+import javafx.scene.Node;
+
 import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.dawnsci.plotting.javafx.ServiceLoader;
-import org.dawnsci.plotting.javafx.trace.Image3DTrace;
+import org.dawnsci.plotting.javafx.trace.JavafxTrace;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
@@ -17,7 +21,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ILine3DTrace;
  * @author uij85458
  *
  */
-public class LineTrace extends Image3DTrace implements ILine3DTrace
+public class LineTrace extends JavafxTrace implements ILine3DTrace
 {
 	private ILazyDataset lazyDataset;
 	private LineGroup line;
@@ -50,6 +54,17 @@ public class LineTrace extends Image3DTrace implements ILine3DTrace
 	        throw new IllegalArgumentException("lazyDataset was null");
 	    }	
 		return lazyDataset.getSlice();
+	}
+
+	@Override
+	public Node getNode() {
+		return line;
+	}
+
+	@Override
+	public List<IDataset> getAxes() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

@@ -12,6 +12,7 @@ import java.util.List;
 
 import javafx.application.Platform;
 import javafx.scene.DepthTest;
+import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.DrawMode;
@@ -21,6 +22,7 @@ import javafx.scene.shape.TriangleMesh;
 
 import org.dawnsci.plotting.javafx.SurfaceDisplayer;
 import org.dawnsci.plotting.javafx.trace.Image3DTrace;
+import org.dawnsci.plotting.javafx.trace.JavafxTrace;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
@@ -35,7 +37,7 @@ import org.eclipse.swt.widgets.Display;
  *
  * @Internal
  */
-public class IsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
+public class IsosurfaceTrace extends JavafxTrace implements IIsosurfaceTrace
 {
 	private MeshView isosurface;
 	private Dataset points;
@@ -131,7 +133,7 @@ public class IsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 	/**
 	 * Internal use only.
 	 */
-	public void create()
+	private void create()
 	{		
 		if (Platform.isFxApplicationThread())
 		{
@@ -280,15 +282,15 @@ public class IsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 	{
 		// TODO Auto-generated method stub
 	}
-
-	public MeshView getIsoSurface()
-	{
-		return this.isosurface; 
-	}
 	
 	public List<IDataset> getAxes()
 	{
 		return this.axes;
+	}
+
+	@Override
+	public Node getNode() {
+		return this.isosurface; 
 	}
 	
 }

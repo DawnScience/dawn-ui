@@ -8,10 +8,15 @@
  */
 package org.dawnsci.plotting.javafx.trace.volume;
 
+import java.util.List;
+
+import javafx.scene.Node;
+
 import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.dawnsci.plotting.javafx.ServiceLoader;
 import org.dawnsci.plotting.javafx.SurfaceDisplayer;
 import org.dawnsci.plotting.javafx.trace.Image3DTrace;
+import org.dawnsci.plotting.javafx.trace.JavafxTrace;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
@@ -24,7 +29,7 @@ import org.eclipse.swt.widgets.Display;
  *
  * @Internal
  */
-public class VolumeTrace  extends Image3DTrace implements IVolumeRenderTrace
+public class VolumeTrace  extends JavafxTrace implements IVolumeRenderTrace
 {
 	private VolumeRender volume; 
 	private SurfaceDisplayer scene;
@@ -80,12 +85,18 @@ public class VolumeTrace  extends Image3DTrace implements IVolumeRenderTrace
 	    });
 		
 	}
-	
-	public VolumeRender getVolume()
-	{
+
+	@Override
+	public Node getNode() {
 		return volume;
 	}
 
+	@Override
+	public List<IDataset> getAxes() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 	@Override
 	public void setOpacity(double opacity) {
 		
@@ -95,6 +106,7 @@ public class VolumeTrace  extends Image3DTrace implements IVolumeRenderTrace
 	public void setColour(int red, int green, int blue) {
 		
 	}
+
 	
 }
 
