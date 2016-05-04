@@ -9,10 +9,8 @@
 package org.dawnsci.fileviewer.table;
 
 import java.io.File;
-import java.util.Date;
 
 import org.dawnsci.fileviewer.FileViewer;
-import org.dawnsci.fileviewer.FileViewerConstants;
 import org.dawnsci.fileviewer.Utils;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.swt.graphics.Image;
@@ -57,41 +55,18 @@ public class FileTableColumnLabelProvider extends ColumnLabelProvider {
 	@Override
 	public String getText(Object element) {
 		File file = (File) element;
-		String nameString = file.getName(), sizeString, typeString;
-
 		switch (this.columnIndex) {
 		case 0:
-			return nameString;
+			return file.getName();
 		case 1:
-			if (file.isDirectory()) {
-				sizeString = "";
-			} else {
-				sizeString = Utils.getResourceString("filesize.KB", new Object[] { new Long((file.length() + 512) / 1024) });
-			}
-			return sizeString;
+			return Utils.getFileSizeString(file);
 		case 2:
-			if (file.isDirectory()) {
-				typeString = Utils.getResourceString("filetype.Folder");
-			} else {
-				int dot = nameString.lastIndexOf('.');
-				if (dot != -1) {
-					String extension = nameString.substring(dot);
-					Program program = Program.findProgram(extension);
-					if (program != null) {
-						typeString = program.getName();
-					} else {
-						typeString = Utils.getResourceString("filetype.Unknown", new Object[] { extension.toUpperCase() });
-					}
-				} else {
-					typeString = Utils.getResourceString("filetype.None");
-				}
-			}
-			return typeString;
+			return Utils.getFileTypeString(file);
 		case 3:
-			return FileViewerConstants.dateFormat.format(new Date(file.lastModified()));
+			return Utils.getFileDateString(file);
 		default:
 			break;
-		}	
+		}
 		return null;
 	}
 }

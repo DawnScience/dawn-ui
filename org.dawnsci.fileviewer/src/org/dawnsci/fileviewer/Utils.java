@@ -13,6 +13,7 @@ package org.dawnsci.fileviewer;
 
 import java.io.File;
 import java.text.MessageFormat;
+import java.util.Date;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -20,6 +21,7 @@ import org.dawb.common.ui.util.EclipseUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.swt.program.Program;
 
 import uk.ac.diamond.sda.navigator.views.IOpenFileAction;
 
@@ -146,5 +148,59 @@ public class Utils {
 			coreEx.printStackTrace();
 			return null;
 		}
+	}
+
+	/**
+	 * Get the formatted File size as a String
+	 * 
+	 * @param file
+	 * @return size as a string
+	 */
+	public static String getFileSizeString(File file) {
+		String sizeString;
+		if (file.isDirectory()) {
+			sizeString = "";
+		} else {
+			sizeString = Utils.getResourceString("filesize.KB", new Object[] { new Long((file.length() + 512) / 1024) });
+		}
+		return sizeString;
+	}
+
+	/**
+	 * Get the file type as a string
+	 * 
+	 * @param file
+	 * @return type
+	 */
+	public static String getFileTypeString(File file) {
+		String typeString;
+		String nameString = file.getName();
+		if (file.isDirectory()) {
+			typeString = Utils.getResourceString("filetype.Folder");
+		} else {
+			int dot = nameString.lastIndexOf('.');
+			if (dot != -1) {
+				String extension = nameString.substring(dot);
+				Program program = Program.findProgram(extension);
+				if (program != null) {
+					typeString = program.getName();
+				} else {
+					typeString = Utils.getResourceString("filetype.Unknown", new Object[] { extension.toUpperCase() });
+				}
+			} else {
+				typeString = Utils.getResourceString("filetype.None");
+			}
+		}
+		return typeString;
+	}
+
+	/**
+	 * Returns the modified date of the file
+	 * 
+	 * @param file
+	 * @return date
+	 */
+	public static String getFileDateString(File file) {
+		return FileViewerConstants.dateFormat.format(new Date(file.lastModified()));
 	}
 }
