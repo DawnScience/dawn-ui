@@ -11,52 +11,7 @@ import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
 import org.junit.Test;
 
 public class ToolTester 
-{
-	
-	
-	@Test
-	public void matrixToEulerXYZ()
-	{ 
-		// check X
-		Rotate Rotate_X_90 = new Rotate();
-		Rotate_X_90.setAxis(new Point3D(1, 0, 0));
-		Rotate_X_90.setAngle(90);
-		
-		Point3D result_X_90 = Vector3DUtil.matrixToEulerXYZ(Rotate_X_90);
-		 
-		assertTrue("X value was incorrect - x = " + result_X_90.getX(),
-				result_X_90.getX() == 90 &&
-				result_X_90.getY() == 0  &&
-				result_X_90.getZ() == 0 	);
-		
-		
-		// check Y
-		Rotate Rotate_Y_90 = new Rotate();
-		Rotate_Y_90.setAxis(new Point3D(0, 1, 0));
-		Rotate_Y_90.setAngle(90);
-		
-		Point3D result_Y_90 = Vector3DUtil.matrixToEulerXYZ(Rotate_Y_90);
-		 
-		assertTrue("Y value was incorrect - y = " + result_X_90.getY(),
-				result_Y_90.getX() == 00 &&
-				result_Y_90.getY() == 90 &&
-				result_Y_90.getZ() == 00   );
-		
-		
-		// check Z
-		Rotate Rotate_Z_90 = new Rotate();
-		Rotate_Z_90.setAxis(new Point3D(0, 0, 1));
-		Rotate_Z_90.setAngle(90);
-		
-		Point3D result_Z_90 = Vector3DUtil.matrixToEulerXYZ(Rotate_Z_90);
-		 
-		assertTrue("Z value was incorrect - Z = " + result_X_90.getZ(),
-				result_Z_90.getX() == 00 &&
-				result_Z_90.getY() == 00 &&
-				result_Z_90.getZ() == 90 	);
-			
-	}
-	
+{	
 	@Test
 	public void applyEclusiveRotation()
 	{
