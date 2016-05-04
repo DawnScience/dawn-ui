@@ -6,6 +6,7 @@ import javafx.scene.Node;
 
 import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.dawnsci.plotting.javafx.ServiceLoader;
+import org.dawnsci.plotting.javafx.SurfaceDisplayer;
 import org.dawnsci.plotting.javafx.trace.JavafxTrace;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
@@ -26,8 +27,8 @@ public class LineTrace extends JavafxTrace implements ILine3DTrace
 	private ILazyDataset lazyDataset;
 	private LineGroup line;
 	
-	public LineTrace(IPlottingSystemViewer<?> plotter, String name) {
-		super(plotter, name);
+	public LineTrace(IPlottingSystemViewer<?> plotter, SurfaceDisplayer newScene, String name) {
+		super(plotter, name, newScene);
 		// TODO Auto-generated constructor stub
 	}
 

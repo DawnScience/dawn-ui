@@ -44,8 +44,6 @@ public class IsosurfaceTrace extends JavafxTrace implements IIsosurfaceTrace
 	private Dataset textCoords;
 	private Dataset faces;
 	
-	// !! I want to remove this, but am not sure how.
-	private SurfaceDisplayer scene;
 	
 	private CullFace cullFace = CullFace.NONE;
 	private int[] rgb;
@@ -53,8 +51,7 @@ public class IsosurfaceTrace extends JavafxTrace implements IIsosurfaceTrace
 	
 	public IsosurfaceTrace(IPlottingSystemViewer<?> viewer, SurfaceDisplayer newScene, String traceName)
 	{
-		super(viewer, traceName);
-		this.scene = newScene;
+		super(viewer, traceName, newScene);
 	}
 	
 	@Override
@@ -62,13 +59,7 @@ public class IsosurfaceTrace extends JavafxTrace implements IIsosurfaceTrace
 	{
 		return points;
 	}
-	
-	public void dispose() {
-        // remove from scene
-        scene.removeSurface(isosurface);
-        super.dispose();
-	}
-	
+		
 	@SuppressWarnings("unchecked")
 	@Override
 	public void setData(IDataset points, IDataset textCoords, IDataset faces, List<? extends IDataset> axisDataset)
@@ -82,17 +73,6 @@ public class IsosurfaceTrace extends JavafxTrace implements IIsosurfaceTrace
 		this.textCoords = DatasetUtils.convertToDataset(textCoords);
 		this.faces = DatasetUtils.convertToDataset(faces);
 		this.axes = (List<IDataset>) axisDataset;
-
-		Display.getDefault().syncExec(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (axes != null)
-					scene.setAxesData(axes); 
-			}
-		});
-		
 		
 		if (Platform.isFxApplicationThread())
 		{

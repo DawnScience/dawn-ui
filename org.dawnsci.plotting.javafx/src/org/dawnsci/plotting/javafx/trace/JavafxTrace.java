@@ -12,11 +12,12 @@ import java.util.List;
 
 import javafx.scene.Node;
 
+import org.dawnsci.plotting.javafx.SurfaceDisplayer;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
 
 /**
- * 
+ * Class to handle the addition and removal of the traces. 
  * @author Joel Ogden
  *
  *
@@ -24,9 +25,13 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
  */
 public abstract class JavafxTrace extends Image3DTrace
 {	
-	public JavafxTrace(IPlottingSystemViewer<?> plotter, String name) {
+
+	// !! I want to remove this, but am not sure how.
+	private SurfaceDisplayer scene;
+	
+	public JavafxTrace(IPlottingSystemViewer<?> plotter, String name, SurfaceDisplayer scene) {
 		super(plotter, name);
-		// TODO Auto-generated constructor stub
+		this.scene = scene;
 	}
 
 	/**
@@ -38,6 +43,13 @@ public abstract class JavafxTrace extends Image3DTrace
 	public abstract Node getNode();
 	
 	public abstract List<IDataset> getAxes();
+	
+	public void dispose() {
+        // remove node from scene
+		if (getNode() != null)
+			scene.removeNode(getNode());
+        super.dispose();
+	}
 	
 }
 

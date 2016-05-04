@@ -494,18 +494,23 @@ public class SurfaceDisplayer extends Scene
 		
 	}
 	
-	public void removeSurface(Node removeNode)
+	public void removeNode(Node removeNode)
 	{
-		lightingGroup.getChildren().remove(removeNode);
+		if (lightingGroup.getChildren().contains(removeNode))
+		{
+			lightingGroup.getChildren().remove(removeNode);
+		}
+		
+		if (nonLightingGroup.getChildren().contains(removeNode))
+		{
+			nonLightingGroup.getChildren().remove(removeNode);
+		}
 	}
-	
-	public void removeVolume(Node removeNode)
-	{
-		nonLightingGroup.getChildren().remove(removeNode);
-	}	
-	
+		
 	public void setAxesData(List<IDataset> axesData)
 	{
+		
+		
 		Point3D axisLength = new Point3D(
 				axesData.get(0).getSize(), 
 				axesData.get(1).getSize(),

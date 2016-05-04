@@ -32,23 +32,14 @@ import org.eclipse.swt.widgets.Display;
 public class VolumeTrace  extends JavafxTrace implements IVolumeRenderTrace
 {
 	private VolumeRender volume; 
-	private SurfaceDisplayer scene;
 	
 	public VolumeTrace(IPlottingSystemViewer<?> plotter, SurfaceDisplayer newScene, String name) {
-		super(plotter, name);
-		this.scene = newScene;
-		
+		super(plotter, name, newScene);		
 	}
 
 	@Override
 	public void setPalette(String paletteName) {
 		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void dispose() {
-        scene.removeVolume(volume);
-		super.dispose();
 	}
 	
 	@Override
