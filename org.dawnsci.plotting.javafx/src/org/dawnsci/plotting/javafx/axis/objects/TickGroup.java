@@ -1,5 +1,8 @@
 package org.dawnsci.plotting.javafx.axis.objects;
 
+import org.dawnsci.plotting.javafx.objects.Line3D;
+import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
+
 import javafx.geometry.Point3D;
 import javafx.scene.Group;
 import javafx.scene.paint.PhongMaterial;
@@ -9,13 +12,10 @@ import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 
-import org.dawnsci.plotting.javafx.objects.Line;
-import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
-
 public class TickGroup extends Group
 {
 	
-	private Line line;
+	private Line3D line;
 	private Group textPane;
 	private Text textLabel;
 		
@@ -35,7 +35,7 @@ public class TickGroup extends Group
 		super();
 		this.textSize = textSize;
 		this.offset = new Translate(offset.getX(), offset.getY(), offset.getZ());
-		this.line = new Line(length, new Rotate(), new Point3D(0,0,0));
+		this.line = new Line3D(length, new Rotate(), new Point3D(0,0,0));
 		
 		this.rotate = new Rotate();
 		this.textPane = new Group();

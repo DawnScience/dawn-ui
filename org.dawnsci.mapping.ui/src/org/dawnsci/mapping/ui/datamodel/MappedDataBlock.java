@@ -4,6 +4,10 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
+import org.eclipse.dawnsci.analysis.api.metadata.MetadataType;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 
 public class MappedDataBlock implements MapObject {
@@ -48,12 +52,21 @@ public class MappedDataBlock implements MapObject {
 	}
 	
 	public ILazyDataset getSpectrum(int x, int y) {
-		
+		SliceND slice = getMatchingDataSlice(x,y);
+		ILazyDataset sv = dataset.getSliceView(slice);
+		if (sv != null) {
+			sv.setMetadata(generateSliceMetadata(x,y));
+		};
+
+		return sv;
+	}
+	
+	private SliceND getMatchingDataSlice(int x, int y) {
 		SliceND slice = new SliceND(dataset.getShape());
 		slice.setSlice(yDim,y,y+1,1);
 		slice.setSlice(xDim,x,x+1,1);
 		
-		return dataset.getSliceView(slice);
+	return slice;
 	}
 	
 	public IDataset getSpectrum(int index) {
@@ -69,13 +82,13 @@ public class MappedDataBlock implements MapObject {
 		
 		int[] shape = dataset.getShape();
 		for (int i = 0; i < shape.length; i++) {
-			if (i!= xDim && i != yDim) nDims++;
+			if (i!= xDim && i != yDim && shape[i] != 1) nDims++;
 		}
 		
 		int[] dd = new int[nDims];
 		int count = 0;
 		for (int i = 0; i < shape.length; i++) {
-			if (i!= xDim && i != yDim) {
+			if (i!= xDim && i != yDim && shape[i] != 1) {
 				dd[count] = i;
 				count++;
 			}
@@ -144,4 +157,11 @@ public class MappedDataBlock implements MapObject {
 		return yDim > xDim;
 	}
 
+	private MetadataType generateSliceMetadata(int x, int y){
+		SourceInformation si = new SourceInformation(getPath(), toString(), dataset);
+		SliceND slice = getMatchingDataSlice(x, y);
+		SliceInformation sl = new SliceInformation(slice, slice, new SliceND(dataset.getShape()), getDataDimensions(), 1, 1);
+		return new SliceFromSeriesMetadata(si,sl);
+	}
+	
 }

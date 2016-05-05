@@ -2,6 +2,12 @@ package org.dawnsci.plotting.javafx.axis.objects;
 
 import javafx.scene.paint.Color;
 
+/**
+ * Just a simple static class to hold the properties of javafx<br>
+ * 
+ * @author uij85458
+ *
+ */
 public class JavaFXProperties 
 {
 	public static class ColourProperties

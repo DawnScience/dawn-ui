@@ -12,5 +12,28 @@
             id="org.dawnsci.fileviewer.FileViewer">
       </e4view>
    </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            id="org.dawnsci.fileviewer.openCommand"
+            name="Open">
+      </command>
+      <command
+            id="org.dawnsci.fileviewer.convertCommand"
+            name="Convert...">
+      </command>
+      <command
+            id="org.dawnsci.fileviewer.layoutCommand"
+            name="Edit Layout">
+      </command>
+      <command
+            id="org.dawnsci.fileviewer.refreshCommand"
+            name="Refresh Table">
+      </command>
+      <command
+            id="org.dawnsci.fileviewer.parentCommand"
+            name="Parent">
+      </command>
+   </extension>
 
 </plugin>

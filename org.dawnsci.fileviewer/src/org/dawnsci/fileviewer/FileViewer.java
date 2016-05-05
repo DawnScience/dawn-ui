@@ -16,9 +16,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawnsci.fileviewer.table.TableExplorer;
-import org.dawnsci.fileviewer.tree.TreeExplorer;
+import org.dawnsci.fileviewer.Utils.SortType;
+import org.dawnsci.fileviewer.handlers.ConvertHandler;
+import org.dawnsci.fileviewer.handlers.LayoutHandler;
+import org.dawnsci.fileviewer.handlers.OpenHandler;
+import org.dawnsci.fileviewer.handlers.ParentHandler;
+import org.dawnsci.fileviewer.handlers.RefreshHandler;
+import org.dawnsci.fileviewer.table.FileTableExplorer;
+import org.dawnsci.fileviewer.table.FileTableViewerComparator;
+import org.dawnsci.fileviewer.table.RetrieveFileListJob;
+import org.dawnsci.fileviewer.tree.FileTreeExplorer;
 import org.dawnsci.fileviewer.tree.TreeUtils;
+import org.eclipse.core.commands.ParameterizedCommand;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.e4.core.commands.ECommandService;
+import org.eclipse.e4.core.commands.EHandlerService;
+import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.dnd.DND;
@@ -31,8 +49,16 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.PartInitException;
 import org.slf4j.Logger;
@@ -43,6 +69,7 @@ import uk.ac.diamond.sda.navigator.views.IOpenFileAction;
 /**
  * File Viewer based on the SWT FileViewer example
  */
+@SuppressWarnings("restriction")
 public class FileViewer {
 
 	private static final Logger logger = LoggerFactory.getLogger(FileViewer.class);
@@ -69,6 +96,8 @@ public class FileViewer {
 													// locally-initiated
 													// operations
 
+	private RetrieveFileListJob retrieveDirJob;
+
 	/* Combo view */
 	private Combo combo;
 
@@ -82,16 +111,34 @@ public class FileViewer {
 	private Composite parent;
 	private SashForm sashForm;
 
-	private TreeExplorer treeExplo;
+	private FileTreeExplorer treeExplo;
 
-	private TableExplorer tableExplo;
+	private FileTableExplorer tableExplo;
+
+	private ECommandService commandService;
+
+	private EHandlerService handlerService;
+
+	private ESelectionService tableSelectionService;
+
+	private ISelectionChangedListener tableSelectionChangedListener = new ISelectionChangedListener() {
+		@Override
+		public void selectionChanged(SelectionChangedEvent event) {
+			IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+			// set the selection to the service
+			tableSelectionService.setSelection(selection);
+		}
+	};
 
 	/**
 	 * Closes the main program.
 	 */
 	public void close() {
-		tableExplo.workerStop();
+		if (tableExplo != null)
+			tableExplo.workerStop();
 		getIconCache().freeResources();
+		if (tableExplo != null)
+			tableExplo.getTableViewer().removeSelectionChangedListener(tableSelectionChangedListener);
 	}
 
 	/**
@@ -101,18 +148,19 @@ public class FileViewer {
 	 *            the ShellContainer managing the composite we are rendering inside
 	 */
 	public void createCompositeContents(Composite parent) {
-		this.parent = parent;
-
 		GridLayout gridLayout = new GridLayout();
 		gridLayout.numColumns = 4;
 		gridLayout.marginHeight = gridLayout.marginWidth = 0;
 		parent.setLayout(gridLayout);
-
+		this.parent = parent;
+		
 		GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-//		gridData.widthHint = 200;
+		gridData.widthHint = 200;
 		createComboView(parent, gridData);
 		gridData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gridData.horizontalSpan = 1;
+
+		createSWTToolBar(parent);
 
 		sashForm = new SashForm(parent, SWT.NONE);
 		sashForm.setOrientation(SWT.VERTICAL);
@@ -121,13 +169,13 @@ public class FileViewer {
 		sashForm.setLayoutData(gridData);
 		
 		// Tree
-		treeExplo = new TreeExplorer(this);
+		treeExplo = new FileTreeExplorer(this);
 		treeExplo.createTreeView(sashForm);
 		
 		// Table
-		tableExplo = new TableExplorer(this);
-		tableExplo.createTableView(sashForm);
-
+		tableExplo = new FileTableExplorer(this, sashForm, SWT.BORDER|SWT.V_SCROLL|SWT.FULL_SELECTION);
+		createSWTPopupMenu(tableExplo.getTable());
+		tableExplo.getTableViewer().addSelectionChangedListener(tableSelectionChangedListener);
 		sashForm.setWeights(new int[] { 5, 2 });
 
 		numObjectsLabel = new Label(parent, SWT.BORDER);
@@ -139,6 +187,98 @@ public class FileViewer {
 		gridData = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL);
 //		gridData.horizontalSpan = 1;
 		diskSpaceLabel.setLayoutData(gridData);
+	}
+
+	public void setCommandService(ECommandService service) {
+		this.commandService = service;
+	}
+
+	public void setHandlerService(EHandlerService service) {
+		this.handlerService = service;
+	}
+
+	public void setSelectionService(ESelectionService service) {
+		this.tableSelectionService = service;
+	}
+
+	private void createSWTToolBar(Composite parent) {
+		//create the toolbar programmatically
+		ToolBar bar = new ToolBar(parent, SWT.NONE);
+		bar.setBackground(parent.getBackground());
+		ToolItem parentToolItem = new ToolItem(bar, SWT.NONE);
+		parentToolItem.setToolTipText(Utils.getResourceString("tool.Parent.tiptext"));
+		parentToolItem.setImage(Activator.getImage("icons/arrow-090.png"));
+		parentToolItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				ParameterizedCommand myCommand = commandService.createCommand("org.dawnsci.fileviewer.parentCommand", null);
+				handlerService.activateHandler("org.dawnsci.fileviewer.parentCommand", new ParentHandler(FileViewer.this));
+				handlerService.executeHandler(myCommand);
+			}
+		});
+
+		ToolItem refreshToolItem = new ToolItem(bar, SWT.NONE);
+		refreshToolItem.setToolTipText(Utils.getResourceString("tool.Refresh.tiptext"));
+		refreshToolItem.setImage(Activator.getImage("icons/arrow-circle-double-135.png"));
+		refreshToolItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				ParameterizedCommand myCommand = commandService.createCommand("org.dawnsci.fileviewer.refreshCommand", null);
+				handlerService.activateHandler("org.dawnsci.fileviewer.refreshCommand", new RefreshHandler(FileViewer.this));
+				handlerService.executeHandler(myCommand);
+			}
+		});
+
+		ToolItem layoutToolItem = new ToolItem(bar, SWT.NONE);
+		layoutToolItem.setToolTipText(Utils.getResourceString("tool.LayoutEdit.tiptext"));
+		layoutToolItem.setImage(Activator.getImage("icons/layout-design.png"));
+		layoutToolItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				ParameterizedCommand myCommand = commandService.createCommand("org.dawnsci.fileviewer.layoutCommand", null);
+				handlerService.activateHandler("org.dawnsci.fileviewer.layoutCommand", new LayoutHandler(FileViewer.this));
+				handlerService.executeHandler(myCommand);
+			}
+		});
+	}
+
+	private void createSWTPopupMenu(Table table) {
+		// Create popup menu programmatically
+		Menu menuTable = new Menu(table);
+		table.setMenu(menuTable);
+
+		MenuItem openItem = new MenuItem(menuTable, SWT.None);
+		openItem.setText("Open");
+		openItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				ParameterizedCommand myCommand = commandService.createCommand("org.dawnsci.fileviewer.openCommand", null);
+				handlerService.activateHandler("org.dawnsci.fileviewer.openCommand", new OpenHandler(FileViewer.this));
+				handlerService.executeHandler(myCommand);
+			}
+		});
+
+		MenuItem convertItem = new MenuItem(menuTable, SWT.None);
+		convertItem.setText("Convert...");
+		convertItem.setImage(Activator.getImage("icons/convert.png"));
+		convertItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				ParameterizedCommand myCommand = commandService.createCommand("org.dawnsci.fileviewer.convertCommand", null);
+				handlerService.activateHandler("org.dawnsci.fileviewer.convertCommand", new ConvertHandler(FileViewer.this));
+				handlerService.executeHandler(myCommand);
+			}
+		});
+
+		table.addListener(SWT.MouseDown, new Listener(){
+			@Override
+			public void handleEvent(Event event) {
+				TableItem[] selection = table.getSelection();
+				if (selection.length != 0 && (event.button == 3)) {
+					menuTable.setVisible(true);
+				}
+			}
+		});
 	}
 
 	/**
@@ -210,7 +350,8 @@ public class FileViewer {
 		/*
 		 * Table view: Displays the contents of the selected directory.
 		 */
-		tableExplo.workerUpdate(dir, false);
+		if (tableExplo != null)
+			tableExplo.workerUpdate(dir, false, tableExplo.getSortType(), tableExplo.getSortDirection());
 
 		/*
 		 * Combo view: Sets the combo box to point to the selected directory.
@@ -295,9 +436,25 @@ public class FileViewer {
 			// No files selected
 			diskSpaceLabel.setText("");
 			if (currentDirectory != null) {
-				int numObjects = Utils.getDirectoryList(currentDirectory).length;
-				numObjectsLabel.setText(Utils.
-						getResourceString("details.DirNumberOfObjects.text", new Object[] { new Integer(numObjects) }));
+				// Retrieve the new list of files
+				if (retrieveDirJob != null && retrieveDirJob.getState() == Job.RUNNING) {
+					retrieveDirJob.cancel();
+				}
+				retrieveDirJob = new RetrieveFileListJob(currentDirectory, tableExplo.getSortType(), tableExplo.getSortDirection());
+//				retrieveDirJob.setThread(workerThread);
+				retrieveDirJob.addJobChangeListener(new JobChangeAdapter() {
+					@Override
+					public void done(IJobChangeEvent event) {
+						File[] dirList = retrieveDirJob.getDirList();
+						int numObjects = dirList.length;
+						Display.getDefault().syncExec(new Runnable() {
+							public void run() {
+								numObjectsLabel.setText(Utils.getResourceString("details.DirNumberOfObjects.text", new Object[] { new Integer(numObjects) }));
+							}
+						});
+					}
+				});
+				retrieveDirJob.schedule();
 			} else {
 				numObjectsLabel.setText("");
 			}
@@ -366,8 +523,8 @@ public class FileViewer {
 			}
 		} else
 			refreshTable = true;
-		if (refreshTable)
-			tableExplo.workerUpdate(currentDirectory, true);
+		if (refreshTable && tableExplo != null)
+			tableExplo.workerUpdate(currentDirectory, true, tableExplo.getSortType(), tableExplo.getSortDirection());
 
 		/*
 		 * Combo view: Refreshes the list of roots
@@ -418,7 +575,7 @@ public class FileViewer {
 	 * @param files
 	 *            the array of files to process
 	 */
-	private void doDefaultFileAction(File[] files) {
+	public void doDefaultFileAction(File[] files) {
 		// only uses the 1st file (for now)
 		if (files.length == 0)
 			return;
@@ -451,6 +608,13 @@ public class FileViewer {
 		notifySelectedDirectory(parentDirectory);
 	}
 
+	/**
+	 * Open selected files
+	 */
+	public void doOpen() {
+		if (tableExplo != null)
+			doDefaultFileAction(tableExplo.getSelectedFiles());
+	}
 	/**
 	 * Performs a refresh
 	 */
@@ -675,7 +839,7 @@ public class FileViewer {
 				}
 			}
 			File[] roots = list.toArray(new File[list.size()]);
-			Utils.sortFiles(roots);
+			Utils.sortFiles(roots, SortType.NAME, FileTableViewerComparator.ASC);
 			return roots;
 		}
 		File root = new File(File.separator);
@@ -685,8 +849,6 @@ public class FileViewer {
 		}
 		return new File[] { root };
 	}
-
-	
 
 	public IconCache getIconCache() {
 		return iconCache;
@@ -701,8 +863,16 @@ public class FileViewer {
 		doRefresh();
 	}
 
+	public File getCurrentDirectory() {
+		return currentDirectory;
+	}
+
 	public String getSavedDirectory() {
 		return currentDirectory.getAbsolutePath();
+	}
+
+	public FileTableExplorer getTableExplorer() {
+		return tableExplo;
 	}
 
 	public boolean isDragging() {
@@ -727,5 +897,13 @@ public class FileViewer {
 
 	public void setProcessedDropFiles(File[] processDropFiles) {
 		this.processedDropFiles = processDropFiles;
+	}
+
+	public IStructuredSelection getSelections() {
+		if (tableExplo != null) {
+			IStructuredSelection sel = tableExplo.getTableViewer().getStructuredSelection();
+			return sel;
+		}
+		return null;
 	}
 }

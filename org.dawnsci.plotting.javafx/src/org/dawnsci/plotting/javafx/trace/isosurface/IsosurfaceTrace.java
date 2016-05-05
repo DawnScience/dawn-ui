@@ -12,6 +12,7 @@ import java.util.List;
 
 import javafx.application.Platform;
 import javafx.scene.DepthTest;
+import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.DrawMode;
@@ -21,6 +22,7 @@ import javafx.scene.shape.TriangleMesh;
 
 import org.dawnsci.plotting.javafx.SurfaceDisplayer;
 import org.dawnsci.plotting.javafx.trace.Image3DTrace;
+import org.dawnsci.plotting.javafx.trace.JavafxTrace;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
@@ -35,24 +37,21 @@ import org.eclipse.swt.widgets.Display;
  *
  * @Internal
  */
-public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
+public class IsosurfaceTrace extends JavafxTrace implements IIsosurfaceTrace
 {
 	private MeshView isosurface;
 	private Dataset points;
 	private Dataset textCoords;
 	private Dataset faces;
 	
-	// !! I want to remove this, but am not sure how.
-	private SurfaceDisplayer scene;
 	
 	private CullFace cullFace = CullFace.NONE;
 	private int[] rgb;
 	private double opacity = 0.5;
 	
-	public FXIsosurfaceTrace(IPlottingSystemViewer<?> viewer, SurfaceDisplayer newScene, String traceName)
+	public IsosurfaceTrace(IPlottingSystemViewer<?> viewer, SurfaceDisplayer newScene, String traceName)
 	{
-		super(viewer, traceName);
-		this.scene = newScene;
+		super(viewer, traceName, newScene);
 	}
 	
 	@Override
@@ -60,13 +59,7 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 	{
 		return points;
 	}
-	
-	public void dispose() {
-        // remove from scene
-        scene.removeSurface(isosurface);
-        super.dispose();
-	}
-	
+		
 	@SuppressWarnings("unchecked")
 	@Override
 	public void setData(IDataset points, IDataset textCoords, IDataset faces, List<? extends IDataset> axisDataset)
@@ -80,17 +73,6 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 		this.textCoords = DatasetUtils.convertToDataset(textCoords);
 		this.faces = DatasetUtils.convertToDataset(faces);
 		this.axes = (List<IDataset>) axisDataset;
-
-		Display.getDefault().syncExec(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (axes != null)
-					scene.setAxesData(axes); 
-			}
-		});
-		
 		
 		if (Platform.isFxApplicationThread())
 		{
@@ -131,7 +113,7 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 	/**
 	 * Internal use only.
 	 */
-	public void create()
+	private void create()
 	{		
 		if (Platform.isFxApplicationThread())
 		{
@@ -280,15 +262,15 @@ public class FXIsosurfaceTrace extends Image3DTrace implements IIsosurfaceTrace
 	{
 		// TODO Auto-generated method stub
 	}
-
-	public MeshView getIsoSurface()
-	{
-		return this.isosurface; 
-	}
 	
 	public List<IDataset> getAxes()
 	{
 		return this.axes;
+	}
+
+	@Override
+	public Node getNode() {
+		return this.isosurface; 
 	}
 	
 }

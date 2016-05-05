@@ -121,8 +121,8 @@ public class DiffractionDetectorPreferenceInitializer extends AbstractPreference
 		dd10.setDetectorName("PLS CMOS");
 		dd10.setxPixelSize(Amount.valueOf(25.3, SI.MICRO(SI.METRE)));
 		dd10.setyPixelSize(Amount.valueOf(25.3, SI.MICRO(SI.METRE)));
-		dd10.setNumberOfPixelsX(4150);
-		dd10.setNumberOfPixelsY(2083);
+		dd10.setNumberOfPixelsX(4098);
+		dd10.setNumberOfPixelsY(2045);
 		dds.addDiffractionDetector(dd10);
 		
 		DiffractionDetector dd11 = new DiffractionDetector();

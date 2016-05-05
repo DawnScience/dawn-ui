@@ -17,6 +17,8 @@ import org.dawnsci.fileviewer.FileViewer;
 import org.dawnsci.fileviewer.FileViewerConstants;
 import org.dawnsci.fileviewer.IconCache;
 import org.dawnsci.fileviewer.Utils;
+import org.dawnsci.fileviewer.Utils.SortType;
+import org.dawnsci.fileviewer.table.FileTableViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
@@ -42,7 +44,7 @@ public class TreeUtils {
 				continue;
 			}
 			final File masterFile = masterFiles[masterIndex];
-			int compare = Utils.compareFiles(masterFile, itemFile);
+			int compare = Utils.compareFiles(masterFile, itemFile, SortType.NAME, FileTableViewerComparator.ASC);
 			if (compare == 0) {
 				// same file, update it
 				treeRefreshItem(viewer, item, false, iconCache);
@@ -100,7 +102,7 @@ public class TreeUtils {
 		dirItem.setData(FileViewerConstants.TREEITEMDATA_STUB, viewer); // clear stub flag
 
 		/* Get directory listing */
-		File[] subFiles = (dir != null) ? Utils.getDirectoryList(dir) : null;
+		File[] subFiles = (dir != null) ? Utils.getDirectoryList(dir, SortType.NAME, FileTableViewerComparator.ASC) : null;
 		if (subFiles == null || subFiles.length == 0) {
 			/* Error or no contents */
 			treeItemRemoveAll(dirItem);
@@ -128,7 +130,7 @@ public class TreeUtils {
 				item.dispose();
 				continue;
 			}
-			int compare = Utils.compareFiles(masterFile, itemFile);
+			int compare = Utils.compareFiles(masterFile, itemFile, SortType.NAME, FileTableViewerComparator.ASC);
 			if (compare == 0) {
 				// same file, update it
 				treeRefreshItem(viewer, item, false, iconCache);

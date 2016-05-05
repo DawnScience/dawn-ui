@@ -109,7 +109,19 @@ public class SpectrumFileManager implements IDataMailListener {
 			logger.error(e1.getMessage());
 		}
 		spectrumFiles = job.getSpectrumFiles();
-		fireFileLoadedListeners(new SpectrumFileEvent(this, spectrumFiles.values().iterator().next()));
+		
+		ISpectrumFile file = null;
+		
+		for (String path : paths) {
+			if (spectrumFiles.containsKey(path)) {
+				file = spectrumFiles.get(path);
+				break;
+			};
+		}
+		
+		if (file == null) return;
+		
+		fireFileLoadedListeners(new SpectrumFileEvent(this, file));
 	}
 
 	public Set<String> getFileNames() {

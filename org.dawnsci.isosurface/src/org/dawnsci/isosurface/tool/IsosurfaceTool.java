@@ -113,9 +113,9 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 
 		// declare the data as a lazydata set (i.e. slices)
 		ILazyDataset dataSlice = data.getLazySet().getSliceView(getSlices()).getTransposedView(xIndex, yIndex, zIndex);
-
+		
 		dataSlice = dataSlice.squeezeEnds();
-
+		
 		// roughly calculate the default cube size
 		int[] defaultCubeSize= new int[] {
 				(int) Math.max(1, Math.ceil(dataSlice.getShape()[0]/20.0)),
@@ -141,6 +141,7 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 				getSlicingSystem().getPlottingSystem());
 		
 		isoBean.addJob(isoController);
+		gui.setVisible(true);
 	}
 
 	/**

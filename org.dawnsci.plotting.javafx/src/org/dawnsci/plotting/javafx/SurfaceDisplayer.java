@@ -26,6 +26,7 @@ import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
@@ -36,7 +37,9 @@ import org.dawnsci.plotting.javafx.axis.objects.JavaFXProperties;
 import org.dawnsci.plotting.javafx.axis.objects.ScaleAxisGroup;
 import org.dawnsci.plotting.javafx.axis.objects.SceneObjectGroup;
 import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
-import org.dawnsci.plotting.javafx.trace.isosurface.FXIsosurfaceTrace;
+import org.dawnsci.plotting.javafx.trace.JavafxTrace;
+import org.dawnsci.plotting.javafx.trace.isosurface.IsosurfaceTrace;
+import org.dawnsci.plotting.javafx.trace.volume.VolumeRender;
 import org.dawnsci.plotting.javafx.trace.volume.VolumeTrace;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 
@@ -59,8 +62,8 @@ public class SurfaceDisplayer extends Scene
 	private Camera currentCamera;
 	
 	// the groups for the scene
-	private Group isosurfaceGroup;	// holds the isosurfaces
-	private Group volumeGroup;		// holds the volume renderings
+	private Group lightingGroup;	// holds the isosurfaces
+	private Group nonLightingGroup;		// holds the volume renderings
 	private Group cameraGroup; 		// holds the camera translation data
 	
 	private Group root;				// root of the scene graph
@@ -96,7 +99,7 @@ public class SurfaceDisplayer extends Scene
 		super(root, 1500, 1500, true);
 		
 		this.root = root;
-		this.isosurfaceGroup = isosurfaceGroup;
+		this.lightingGroup = isosurfaceGroup;
 				
 		// set the camera -> the camera will handle some aspects of movement
 		// other are within the group -> this is done to simplify rotation
@@ -138,7 +141,7 @@ public class SurfaceDisplayer extends Scene
 	private void initlialiseGroups()
 	{
 		// initialise/create the groups
-		this.volumeGroup = new Group();
+		this.nonLightingGroup = new Group();
 		this.cameraGroup = new Group();
 		this.axisNode = new Group();
 		this.objectGroup = new Group();
@@ -151,8 +154,8 @@ public class SurfaceDisplayer extends Scene
 	{
 		
 		// create the scene graph
-		this.lightGroup.getChildren().addAll(this.isosurfaceGroup);
-		this.objectGroup.getChildren().addAll(axisNode, this.lightGroup, volumeGroup);
+		this.lightGroup.getChildren().addAll(this.lightingGroup);
+		this.objectGroup.getChildren().addAll(axisNode, this.lightGroup, nonLightingGroup);
 		this.cameraGroup.getChildren().addAll(this.objectGroup);
 		
 		// add groups the the root
@@ -178,7 +181,7 @@ public class SurfaceDisplayer extends Scene
 	{
 		// disable the depth buffer for the isosurfaces -> depth buffer doesn't behave with transparency
 		// enable for the axis node group
-		this.isosurfaceGroup.setDepthTest(DepthTest.ENABLE);
+		this.lightingGroup.setDepthTest(DepthTest.ENABLE);
 		this.axisNode.setDepthTest(DepthTest.ENABLE);
 //		this.volumeGroup.setDepthTest(DepthTest.DISABLE);
 	
@@ -208,9 +211,9 @@ public class SurfaceDisplayer extends Scene
 		this.objectGroup.getChildren().addAll(ambientSurfaceLight);
 		
 		AmbientLight ambientVolumeLight = new AmbientLight(new Color(1,1,1,1));
-		ambientVolumeLight.getScope().add(volumeGroup);
+		ambientVolumeLight.getScope().add(nonLightingGroup);
 		
-		this.volumeGroup.getChildren().addAll(ambientVolumeLight);
+		this.nonLightingGroup.getChildren().addAll(ambientVolumeLight);
 		
 		PointLight pointLight = new PointLight(new Color(1, 1, 1, 1));	
 		pointLight.getScope().add(lightGroup);
@@ -472,42 +475,42 @@ public class SurfaceDisplayer extends Scene
 		this.setOnMouseDragged(null);
 		this.setOnScroll(null);
 		
-		if (isosurfaceGroup != null)
-			isosurfaceGroup.setOnMouseMoved(null);
+		if (lightingGroup != null)
+			lightingGroup.setOnMouseMoved(null);
 	}
 	
 	public Group getIsosurfaceGroup()
 	{
-		return isosurfaceGroup;
+		return lightingGroup;
 	}
 	
-	public void addSurfaceTrace(FXIsosurfaceTrace trace)
+	public void addTrace(JavafxTrace trace)
 	{
-		// if the first trace create the axes using the trace.axes data
-		// all of this data is irrelevant as it get reset when a surface is added
-		// this is extremely inefficient but works well enough I don't plan to fix yet
+		// isosurfaces require a specific lighting group
+		if (trace instanceof IsosurfaceTrace)
+			this.lightingGroup.getChildren().add(trace.getNode());
+		else
+			this.nonLightingGroup.getChildren().add(trace.getNode());
 		
-		// add the mesh the the scene graph
-		this.isosurfaceGroup.getChildren().add(trace.getIsoSurface());
 	}
 	
-	
-	public void addVolumeTrace(VolumeTrace trace)
+	public void removeNode(Node removeNode)
 	{
-		this.volumeGroup.getChildren().add(trace.getVolume());
+		if (lightingGroup.getChildren().contains(removeNode))
+		{
+			lightingGroup.getChildren().remove(removeNode);
+		}
+		
+		if (nonLightingGroup.getChildren().contains(removeNode))
+		{
+			nonLightingGroup.getChildren().remove(removeNode);
+		}
 	}
-	
-	public void removeSurface(Node removeNode)
-	{
-		isosurfaceGroup.getChildren().remove(removeNode);
-	}
-	public void removeVolume(Node removeNode)
-	{
-		volumeGroup.getChildren().remove(removeNode);
-	}	
-	
+		
 	public void setAxesData(List<IDataset> axesData)
 	{
+		
+		
 		Point3D axisLength = new Point3D(
 				axesData.get(0).getSize(), 
 				axesData.get(1).getSize(),

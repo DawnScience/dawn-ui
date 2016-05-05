@@ -13,19 +13,29 @@ package org.dawnsci.fileviewer;
 
 import java.io.File;
 import java.text.MessageFormat;
+import java.util.Date;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.dawb.common.ui.util.EclipseUtils;
+import org.dawnsci.fileviewer.table.FileTableViewerComparator;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.swt.program.Program;
 
 import uk.ac.diamond.sda.navigator.views.IOpenFileAction;
 
 public class Utils {
 
 	private static ResourceBundle resourceBundle = ResourceBundle.getBundle("file_viewer");
+
+	public enum SortType {
+		NAME,
+		SIZE,
+		TYPE,
+		DATE;
+	}
 
 	/**
 	 * Returns a string from the resource bundle. We don't want to crash because
@@ -61,17 +71,17 @@ public class Utils {
 	 * @param files
 	 *            the array of Files to be sorted
 	 */
-	static void sortFiles(File[] files) {
+	public static void sortFiles(File[] files, SortType sortType, int direction) {
 		/* Very lazy merge sort algorithm */
-		sortBlock(files, 0, files.length - 1, new File[files.length]);
+		sortBlock(files, 0, files.length - 1, new File[files.length], sortType, direction);
 	}
 
-	private static void sortBlock(File[] files, int start, int end, File[] mergeTemp) {
+	private static void sortBlock(File[] files, int start, int end, File[] mergeTemp, SortType sortType, int direction) {
 		final int length = end - start + 1;
 		if (length < 8) {
 			for (int i = end; i > start; --i) {
 				for (int j = end; j > start; --j) {
-					if (compareFiles(files[j - 1], files[j]) > 0) {
+					if (compareFiles(files[j - 1], files[j], sortType, direction) > 0) {
 						final File temp = files[j];
 						files[j] = files[j - 1];
 						files[j - 1] = temp;
@@ -81,12 +91,12 @@ public class Utils {
 			return;
 		}
 		final int mid = (start + end) / 2;
-		sortBlock(files, start, mid, mergeTemp);
-		sortBlock(files, mid + 1, end, mergeTemp);
+		sortBlock(files, start, mid, mergeTemp, sortType, direction);
+		sortBlock(files, mid + 1, end, mergeTemp, sortType, direction);
 		int x = start;
 		int y = mid + 1;
 		for (int i = 0; i < length; ++i) {
-			if ((x > mid) || ((y <= end) && compareFiles(files[x], files[y]) > 0)) {
+			if ((x > mid) || ((y <= end) && compareFiles(files[x], files[y], sortType, direction) > 0)) {
 				mergeTemp[i] = files[y++];
 			} else {
 				mergeTemp[i] = files[x++];
@@ -96,16 +106,40 @@ public class Utils {
 			files[i + start] = mergeTemp[i];
 	}
 
-	public static int compareFiles(File a, File b) {
+	public static int compareFiles(File a, File b, SortType sortType, int direction) {
 		// boolean aIsDir = a.isDirectory();
 		// boolean bIsDir = b.isDirectory();
 		// if (aIsDir && ! bIsDir) return -1;
 		// if (bIsDir && ! aIsDir) return 1;
 
 		// sort case-sensitive files in a case-insensitive manner
-		int compare = a.getName().compareToIgnoreCase(b.getName());
-		if (compare == 0)
-			compare = a.getName().compareTo(b.getName());
+		int compare = 0;
+		switch (sortType) {
+		case NAME:
+			compare = a.getName().compareToIgnoreCase(b.getName());
+			if (compare == 0)
+				compare = a.getName().compareTo(b.getName());
+			break;
+		case SIZE:
+			long sizea = a.length(), sizeb = b.length();
+			compare = sizea < sizeb ? -1 : 1;
+			break;
+		case TYPE:
+			String typea = getFileTypeString(a), typeb = getFileTypeString(b);
+			compare = typea.compareToIgnoreCase(typeb);
+			if (compare == 0)
+				compare = typea.compareTo(typeb);
+			break;
+		case DATE:
+			Date date1 = new Date(a.lastModified());
+			Date date2 = new Date(b.lastModified());
+			compare = date1.compareTo(date2);
+			break;
+		default:
+			return 0;
+		}
+		if (FileTableViewerComparator.DESC == direction)
+			return (-1 * compare);
 		return compare;
 	}
 
@@ -114,14 +148,16 @@ public class Utils {
 	 * 
 	 * @param file
 	 *            the directory to be listed
+	 * @param sort
+	 *            the sorting type
 	 * @return an array of files this directory contains, may be empty but not
 	 *         null
 	 */
-	public static File[] getDirectoryList(File file) {
+	public static File[] getDirectoryList(File file, SortType sortType, int direction) {
 		File[] list = file.listFiles();
 		if (list == null)
 			return new File[0];
-		sortFiles(list);
+		sortFiles(list, sortType, direction);
 		return list;
 	}
 
@@ -146,5 +182,59 @@ public class Utils {
 			coreEx.printStackTrace();
 			return null;
 		}
+	}
+
+	/**
+	 * Get the formatted File size as a String
+	 * 
+	 * @param file
+	 * @return size as a string
+	 */
+	public static String getFileSizeString(File file) {
+		String sizeString;
+		if (file.isDirectory()) {
+			sizeString = "";
+		} else {
+			sizeString = Utils.getResourceString("filesize.KB", new Object[] { new Long((file.length() + 512) / 1024) });
+		}
+		return sizeString;
+	}
+
+	/**
+	 * Get the file type as a string
+	 * 
+	 * @param file
+	 * @return type
+	 */
+	public static String getFileTypeString(File file) {
+		String typeString;
+		String nameString = file.getName();
+		if (file.isDirectory()) {
+			typeString = Utils.getResourceString("filetype.Folder");
+		} else {
+			int dot = nameString.lastIndexOf('.');
+			if (dot != -1) {
+				String extension = nameString.substring(dot);
+				Program program = Program.findProgram(extension);
+				if (program != null) {
+					typeString = program.getName();
+				} else {
+					typeString = Utils.getResourceString("filetype.Unknown", new Object[] { extension.toUpperCase() });
+				}
+			} else {
+				typeString = Utils.getResourceString("filetype.None");
+			}
+		}
+		return typeString;
+	}
+
+	/**
+	 * Returns the modified date of the file
+	 * 
+	 * @param file
+	 * @return date
+	 */
+	public static String getFileDateString(File file) {
+		return FileViewerConstants.dateFormat.format(new Date(file.lastModified()));
 	}
 }

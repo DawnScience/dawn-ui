@@ -24,7 +24,7 @@ import org.eclipse.ui.PlatformUI;
 
 public class MapActionUtils {
 
-	public static IAction getRGBDialog(final List<MappedData> maps, final MappedDataFile mdf, final TreeViewer viewer) {
+	public static IAction getRGBDialog(final List<AbstractMapData> maps, final MappedDataFile mdf, final TreeViewer viewer) {
 		final List<AbstractMapData> dataList = new ArrayList<AbstractMapData>(maps.size());
 		for (AbstractMapData map : maps) {
 			dataList.add(map);
@@ -55,9 +55,9 @@ public class MapActionUtils {
 		return action;
 	}
 	
-	public static IAction getComparisonDialog(final List<MappedData> maps) {
+	public static IAction getComparisonDialog(final List<AbstractMapData> maps) {
 		final List<IDataset> dataList = new ArrayList<IDataset>(maps.size());
-		for (MappedData map : maps) {
+		for (AbstractMapData map : maps) {
 			dataList.add(map.getData());
 		}
 		IAction action = new Action("Comparison Viewer...") {
@@ -79,7 +79,7 @@ public class MapActionUtils {
 		return action;
 	}
 	
-	public static IAction getMapPropertiesAction(final MappedData map, final MapPlotManager manager, final MappedDataFile file) {
+	public static IAction getMapPropertiesAction(final AbstractMapData map, final MapPlotManager manager, final MappedDataFile file) {
 		IAction trans = new Action("Properties...") {
 			@Override
 			public void run() {

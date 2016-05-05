@@ -19,41 +19,6 @@ public class Vector3DUtil {
 	/*
 	 * static functions
 	 */
-
-	/**
-	 * THIS DOESN'T WORK BUT FIXING IT BREAKS A LOT OF STUFF
-	 * 
-	 * @param matrix
-	 * @return
-	 */
-	public static Point3D matrixToEulerXYZ(Transform matrix) {
-		Matrix3d m = new Matrix3d(
-				matrix.getMxx(), matrix.getMxy(), matrix.getMxz(), 
-				matrix.getMyx(), matrix.getMyy(), matrix.getMyz(),
-				matrix.getMzx(), matrix.getMzy(), matrix.getMzz());
-		return matrixToEuler(m);
-	}
-
-	public static Point3D extractEulerAnglersFromMatrix_Broken(Matrix3d m) {
-		m.normalize();
-		double x, y, z = 0;
-		if (m.m10 > 0.998) { // singularity at north pole
-			x = Math.toDegrees(Math.atan2(m.m02, m.m22));
-			y = Math.toDegrees(Math.PI / 2);
-			z = Math.toDegrees(0);
-			return new Point3D(y, x, z);
-		}
-		if (m.m10 < -0.998) { // singularity at south pole
-			x = Math.toDegrees(Math.atan2(m.m02, m.m22));
-			y = Math.toDegrees(-Math.PI / 2);
-			z = Math.toDegrees(0);
-			return new Point3D(y, x, z);
-		}
-		x = Math.toDegrees(Math.atan2(-m.m20, m.m00));
-		y = Math.toDegrees(Math.atan2(-m.m12, m.m11));
-		z = Math.toDegrees(Math.asin(m.m10));
-		return new Point3D(y, x, z);
-	}
 	
 	public static Point3D matrixToEuler(Matrix3d  m) 
 	{
