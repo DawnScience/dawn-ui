@@ -1,9 +1,11 @@
 package org.dawnsci.processing.ui.processing;
 
+import java.io.ObjectInputStream.GetField;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.dawb.common.services.ServiceManager;
+import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.slice.IOperationErrorInformer;
 import org.dawnsci.processing.ui.slice.OperationInformerImpl;
 import org.eclipse.core.resources.IFile;
@@ -13,9 +15,14 @@ import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.TreeSelection;
+import org.eclipse.richbeans.widgets.table.ISeriesItemDescriptor;
 import org.eclipse.richbeans.widgets.table.SeriesTable;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetAdapter;
@@ -109,6 +116,87 @@ public class OperationTableUtils {
 			if (shell != null)
 				MessageDialog.openInformation(shell, "Exception while writing operations to file", "An exception occurred while writing the operations to a file.\n" + e.getMessage());
 		}
+	}
+	
+	public static void addMenuItems(IMenuManager mm, final SeriesTable seriesTable, Shell shell) {
+		
+		mm.add(getAddAction(seriesTable));
+		mm.add(getDeleteAction(seriesTable));
+		mm.add(getClearAction(seriesTable, shell));
+		mm.add(new Separator());
+		
+		IOperation<? extends IOperationModel, ? extends OperationData> op = null;
+		
+		try {
+			ISeriesItemDescriptor selected = seriesTable.getSelected();
+			if (!(selected instanceof OperationDescriptor)) return;
+			op = ((OperationDescriptor)selected).getSeriesObject();
+		} catch (InstantiationException e1) {
+		}
+		
+		final IAction saveInter = new Action("Save output", IAction.AS_CHECK_BOX) {
+			public void run() {
+				ISeriesItemDescriptor current = seriesTable.getSelected();
+				if (current instanceof OperationDescriptor) {
+					try {
+						((OperationDescriptor)current).getSeriesObject().setStoreOutput(isChecked());
+						seriesTable.refreshTable();
+					} catch (InstantiationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		};
+		
+		if (op != null && op.isStoreOutput()) saveInter.setChecked(true);
+		
+		mm.add(saveInter);
+		
+		final IAction passUnMod = new Action("Pass through", IAction.AS_CHECK_BOX) {
+			public void run() {
+				ISeriesItemDescriptor current = seriesTable.getSelected();
+				if (current instanceof OperationDescriptor) {
+					try {
+						((OperationDescriptor)current).getSeriesObject().setPassUnmodifiedData(isChecked());
+						seriesTable.refreshTable();
+					} catch (InstantiationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		};
+		
+		if (op != null && op.isPassUnmodifiedData()) passUnMod.setChecked(true);
+		mm.add(passUnMod);
+		
+	}
+	
+	public static Action getAddAction(final SeriesTable seriesTable) {
+		return new Action("Insert operation", Activator.getImageDescriptor("icons/clipboard-list.png")) {
+			public void run() {
+				seriesTable.addNew();
+			}
+		};
+	}
+	
+	public static Action getDeleteAction(final SeriesTable seriesTable) {
+		return new Action("Delete selected operation", Activator.getImageDescriptor("icons/clipboard--minus.png")) {
+			public void run() {
+				seriesTable.delete();
+			}
+		};
+	}
+
+	public static Action getClearAction(final SeriesTable seriesTable, final Shell shell) {
+		return new Action("Clear list of operations", Activator.getImageDescriptor("icons/clipboard-empty.png")) {
+			public void run() {
+				boolean ok = MessageDialog.openQuestion(shell, "Confirm Clear Pipeline", "Do you want to clear the pipeline?");
+			    if (!ok) return;
+				seriesTable.clear();
+			}
+		};
 	}
 
 }

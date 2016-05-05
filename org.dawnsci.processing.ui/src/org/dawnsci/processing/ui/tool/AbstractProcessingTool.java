@@ -33,6 +33,7 @@ import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationContext;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
+import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
@@ -44,13 +45,18 @@ import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.richbeans.widgets.internal.GridUtils;
 import org.eclipse.richbeans.widgets.table.ISeriesItemDescriptor;
+import org.eclipse.richbeans.widgets.table.ISeriesValidator;
 import org.eclipse.richbeans.widgets.table.SeriesTable;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -91,7 +97,23 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 			e.printStackTrace();
 			return;
 		}
-		this.seriesTable    = new SeriesTable();
+		this.seriesTable    = new SeriesTable() {
+			protected void checkValid(List<ISeriesItemDescriptor> series) {
+				
+				if (series.contains(ISeriesItemDescriptor.INSERT)) {
+					statusMessage.setText("Please choose an operation to insert");
+					return;
+				}
+				
+				ISeriesValidator validator = getValidator();
+				if (validator==null) return;
+				final String errorMessage = validator.getErrorMessage(series);
+				statusMessage.setText(errorMessage!=null ? errorMessage : "");
+				
+				statusMessage.getParent().layout();
+			}
+		};
+		
 		job = new ProcessingJob();
 		
 		listener = new ITraceListener.Stub() {
@@ -147,6 +169,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		configure.setEnabled(false);
 		
 		showOptions.setImageDescriptor(Activator.getImageDescriptor("icons/maximize.png"));
+		run.setImageDescriptor(Activator.getImageDescriptor("icons/run_workflow.gif"));
 		getSite().getActionBars().getToolBarManager().add(run);
 		getSite().getActionBars().getToolBarManager().add(showOptions);
 		getSite().getActionBars().getMenuManager().add(showOptions);
@@ -195,6 +218,19 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 				
 			}
 		});
+		
+		final MenuManager click = new MenuManager("#PopupMenu");
+		click.setRemoveAllWhenShown(true);
+		//createActions(Click);
+		click.addMenuListener(new IMenuListener() {
+			
+			@Override
+			public void menuAboutToShow(IMenuManager manager) {
+				OperationTableUtils.addMenuItems(manager, seriesTable, getViewPart().getSite().getShell());
+			}
+		});
+		
+		seriesTable.setMenuManager(click);
 		
 		OperationTableUtils.setupPipelinePaneDropTarget(seriesTable, null, logger, null);
 		
@@ -347,8 +383,12 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 			
 			try {
 				vis.visit(ds);
+				informer.setInErrorState(null);
 			} catch (Exception e) {
-//				if (e instanceof OperationException) informer.setInErrorState((OperationException)e);
+				if (e instanceof OperationException) {
+					if (informer.getInErrorState() == null) informer.setInErrorState((OperationException)e);
+					
+				}
 			}
 			inputData = vis.getOperationInputData();
 			if (inputData != null) configure.setEnabled(true);
