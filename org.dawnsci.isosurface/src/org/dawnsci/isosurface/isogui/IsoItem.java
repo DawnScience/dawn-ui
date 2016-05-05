@@ -3,130 +3,81 @@ package org.dawnsci.isosurface.isogui;
 import java.awt.Color;
 import java.util.UUID;
 
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.eclipse.richbeans.api.generator.RichbeansAnnotations.MaximumValue;
+import org.eclipse.richbeans.api.generator.RichbeansAnnotations.MinimumValue;
+import org.eclipse.richbeans.api.generator.RichbeansAnnotations.UiHidden;
 import org.eclipse.swt.graphics.RGB;
 
-public class IsoItem implements Cloneable
+public class IsoItem implements IIsoItem
 {
-
-	// the values used within the GUI
-	private String name;
+	private Type type = Type.ISO_SURFACE;
 	private double value = 0;
-	private double opacity = 0.5;
-	private int x = 20, y = 20, z = 1;
+	private int opacity = 50;
+	private int resolution = 20;
 	private RGB colour = new RGB(255,215,0);
 	
-	private String traceKey;
+	private String traceKey = UUID.randomUUID().toString();
 	
+	public IsoItem(){}
 	
-	public IsoItem()
+	public IsoItem(Type type, double startingValue, int resolution, int startingOpacity, Color startingColour)
 	{
-		this("New Surface");
-		this.traceKey = UUID.randomUUID().toString(); // we will replace this with displayname on iIsosurfaceTrace
-	}
-	
-	public IsoItem(String name)
-	{
-		this.name = name;		
-	}
-	
-	/**
-	 * Declare the information required for the item.
-	 * @param job - The job used to compute the surface.
-	 * @param startingValue - The starting IsoValue
-	 * @param startingBoxSize - The starting Box Size. int[3]
-	 * @param startingOpacity - The starting opacity (transparency).
-	 * @param startingColour - The starting colour.
-	 */
-	public void setInfo(double startingValue, int[] startingBoxSize, double startingOpacity, Color startingColour)
-	{		
+		this.type = type;
 		this.value = startingValue; 
-		this.x = startingBoxSize[0];
-		this.y = startingBoxSize[1];
-		this.z = startingBoxSize[2];
+		this.resolution = resolution;
 		this.opacity = startingOpacity;
 		this.colour = new RGB(startingColour.getRed(),startingColour.getGreen(), startingColour.getBlue());
 	}
 	
-	public Object clone()
-	{
-		try 
-		{
-			return super.clone();
-		} 
-		catch (CloneNotSupportedException e) 
-		{
-			e.printStackTrace();
-			return null;
-		}
+	@Override
+	public Type getType() {
+		return type;
 	}
 	
-	/*
-	 * get - sets
-	 */
-	
-	public String getName()
-	{
-		return this.name;
-	}
-	public void setName(String name)
-	{
-		this.name = name;
-	}
-	
+	@Override
 	public double getValue()
 	{
 		return this.value;
 	}
+	@Override
 	public void setValue(double newValue)
 	{
 		this.value = newValue;
 	}
-	
-	public int getX()
-	{
-		return this.x;
+	@Override
+	public int getResolution() {
+		return resolution;
 	}
-	public void setX(int newSize)
-	{
-		this.x = newSize;
+	@MinimumValue("1")
+	@Override
+	public void setResolution(int resolution) {
+		this.resolution = resolution;
 	}
-	
-	public int getY()
+	@MinimumValue("0")
+	@MaximumValue("1")
+	@Override
+	public void setOpacity(int newValue)
 	{
-		return this.y;
+		this.opacity = newValue;
 	}
-	public void setY(int newSize)
+	@Override
+	public int getOpacity()
 	{
-		this.y = newSize;
+		return this.opacity;
 	}
-	
-	public int getZ()
-	{
-		return this.z;
-	}
-	public void setZ(int newSize)
-	{
-		this.z = newSize;
-	}
-	
+	@Override
 	public RGB getColour()
 	{
 		return this.colour;
 	}
+	@Override
 	public void setColour(RGB newColour)
 	{
 		this.colour = newColour;
 	}
-		
-	public void setOpacity(double newValue)
-	{
-		this.opacity = newValue;
-	}
-	public double getOpacity()
-	{
-		return this.opacity;
-	}
-	
+	@Override
+	@UiHidden
 	public String getTraceKey()
 	{
 		return this.traceKey;
@@ -134,19 +85,7 @@ public class IsoItem implements Cloneable
 	
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((colour == null) ? 0 : colour.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		long temp;
-		temp = Double.doubleToLongBits(opacity);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(value);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		result = prime * result + x;
-		result = prime * result + y;
-		result = prime * result + z;
-		return result;
+		return HashCodeBuilder.reflectionHashCode(this);
 	}
 
 	@Override
@@ -155,30 +94,26 @@ public class IsoItem implements Cloneable
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
+		if (!IIsoItem.class.isAssignableFrom(obj.getClass()))
 			return false;
-		IsoItem other = (IsoItem) obj;
+		IIsoItem other = (IIsoItem) obj;
 		if (colour == null) {
-			if (other.colour != null)
+			if (other.getColour() != null)
 				return false;
-		} else if (!colour.equals(other.colour))
+		} else if (!colour.equals(other.getColour()))
 			return false;
-		if (name == null) {
-			if (other.name != null)
+		if (opacity != other.getOpacity())
+			return false;
+		if (resolution != other.getResolution())
+			return false;
+		if (traceKey == null) {
+			if (other.getTraceKey() != null)
 				return false;
-		} else if (!name.equals(other.name))
+		} else if (!traceKey.equals(other.getTraceKey()))
 			return false;
-		if (Double.doubleToLongBits(opacity) != Double
-				.doubleToLongBits(other.opacity))
+		if (type != other.getType())
 			return false;
-		if (Double.doubleToLongBits(value) != Double
-				.doubleToLongBits(other.value))
-			return false;
-		if (x != other.x)
-			return false;
-		if (y != other.y)
-			return false;
-		if (z != other.z)
+		if (Double.doubleToLongBits(value) != Double.doubleToLongBits(other.getValue()))
 			return false;
 		return true;
 	}

@@ -24,7 +24,6 @@ public class MarchingCubesModel extends AbstractOperationModel {
 	private double 	isovalueMax = Integer.MIN_VALUE;
 	private int    	vertexLimit = 1000000;
 	private String 	traceID; 
-	private String 	name;
 	
 
 	public MarchingCubesModel( 
@@ -33,8 +32,7 @@ public class MarchingCubesModel extends AbstractOperationModel {
 						int[] boxSize,
 						int[] colour,
 						double opacity,
-						String traceID,
-						String name)
+						String traceID)
 	{
 		this.lazyData   = lazyData   ;
 		this.isovalue   = isovalue   ;
@@ -42,16 +40,9 @@ public class MarchingCubesModel extends AbstractOperationModel {
 		this.colour     = colour     ;
 		this.opacity    = opacity    ;
 		this.traceID    = traceID    ;
-		this.name		= name		 ;
 	}
 	
 
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
 	public String getTraceID() {
 		return traceID;
 	}

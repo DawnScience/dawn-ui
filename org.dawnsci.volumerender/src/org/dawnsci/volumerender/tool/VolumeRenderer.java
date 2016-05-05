@@ -20,11 +20,12 @@ public class VolumeRenderer {
 	private final double maxValue;
 	private final double minCull;
 	private final double maxCull;
+	private final int[] rgb;
 	
 	private final ILazyDataset dataset;
 
 	public VolumeRenderer(IPlottingSystem<?> plottingSystem, String traceID, double resolution, double intensity,
-			double opacity, double minValue, double maxValue, double minCull, double maxCull, ILazyDataset dataset) {
+			double opacity, double minValue, double maxValue, double minCull, double maxCull, int[] rgb, ILazyDataset dataset) {
 				this.plottingSystem = plottingSystem;
 				this.traceID = traceID;
 				this.resolution = resolution;
@@ -34,6 +35,7 @@ public class VolumeRenderer {
 				this.maxValue = maxValue;
 				this.minCull = minCull;
 				this.maxCull = maxCull;
+				this.rgb = rgb;
 				this.dataset = dataset;
 	}
 
@@ -51,6 +53,7 @@ public class VolumeRenderer {
 		
 		final IVolumeRenderTrace trace = createOrLookupTrace();
 		trace.setData(dataset.getShape(), slice, intensity, opacity, scaledMinMaxValue, scaledMinMaxCull);
+		trace.setColour(rgb[0], rgb[1], rgb[2]);
 		if ((IVolumeRenderTrace) plottingSystem.getTrace(traceID) == null)
 		{
 			Display.getDefault().syncExec(new Runnable() {

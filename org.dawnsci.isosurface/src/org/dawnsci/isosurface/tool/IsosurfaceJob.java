@@ -92,11 +92,11 @@ public class IsosurfaceJob extends Job {
 		MarchingCubesModel model = this.modelRef.get();
 		
 		
-		Thread.currentThread().setName("IsoSurface - " + model.getName());
+		Thread.currentThread().setName("IsoSurface");
 		final IIsosurfaceTrace trace;
 		plottingSystem.setPlotType(PlotType.ISOSURFACE);
 		
-		this.setName(model.getName());
+		this.setName("IsoSurface");
 		// create the trace if required, if not get the trace
 		if ((IIsosurfaceTrace) plottingSystem.getTrace(model.getTraceID()) == null)
 		{

@@ -1,32 +1,34 @@
 package org.dawnsci.isosurface.isogui;
 
+import java.awt.Color;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IsoBean
-{
-	private List<IsoItem> items;	
-	
-	public IsoBean()
-	{
-		items = new ArrayList<IsoItem>();
-	}
-	
-	
-	/**
-	 * Clear the list of items
-	 */
-	public void clear()
-	{
-		items.clear();
-	}
+import org.dawnsci.isosurface.tool.IsoHandler;
+import org.dawnsci.plotting.util.ColorUtility;
+import org.eclipse.richbeans.api.generator.IListenableProxyFactory;
+import org.eclipse.richbeans.api.generator.IListenableProxyFactory.PropertyChangeInterface;
+import org.eclipse.richbeans.api.generator.RichbeansAnnotations.RowDeleteAction;
+import org.eclipse.richbeans.api.generator.RichbeansAnnotations.UiAction;
+import org.eclipse.richbeans.api.generator.RichbeansAnnotations.UiHidden;
+
+public class IsoBean{
+	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+
+	private IListenableProxyFactory listenableProxyFactory;
+	private List<IIsoItem> items = new ArrayList<>();
+	private int ISO_COUNT = 0;
+
+	private IsoHandler isoHandler;
 	
 	/**
 	 * Get the list of items
 	 * @return ItemList
 	 */
-	public List<IsoItem> getItems()
-	
+	@RowDeleteAction("deleteItem")
+	public List<IIsoItem> getItems()	
 	{
 		return this.items;
 	}
@@ -35,23 +37,72 @@ public class IsoBean
 	 * Set the list of items
 	 * @param newItems - The new list of items
 	 */
-	public void setItems(List<IsoItem> newItems)
+	public void setItems(List<IIsoItem> newItems)
 	{
+		List<IIsoItem> oldItems = items;
+		oldItems.forEach(item -> ((PropertyChangeInterface)item).removePropertyChangeListener(isoHandler));
+		newItems.forEach(item -> ((PropertyChangeInterface)item).addPropertyChangeListener(isoHandler));
 		this.items = newItems;
+		pcs.firePropertyChange("items", oldItems, items);
 	}
 	
-	/**
-	 * Add a new Item to the list
-	 * @param newItem - The new item
-	 */
-	public void addItem(IsoItem newItem)
+	@UiAction
+	public void addIsosurface()
 	{
-		items.add(newItem);
+		addProxyItemFor(Type.ISO_SURFACE);
 	}
 	
-	public IsoItem getItem(int index)
+	@UiAction
+	public void addVolume()
 	{
-		return this.items.get(index);
+		if (!isThereAlreadyAVolume()){
+			addProxyItemFor(Type.VOLUME);
+		}
+	}
+
+	public void deleteItem(IIsoItem isoItem){
+		List<IIsoItem> newItems = new ArrayList<>(getItems());
+		newItems.remove(isoItem);
+		setItems(newItems);		
 	}
 	
+	public void addPropertyChangeListener(PropertyChangeListener listener){
+		pcs.addPropertyChangeListener(listener);
+	}
+	public void removePropertyChangeListener(PropertyChangeListener listener){
+		pcs.removePropertyChangeListener(listener);
+	}
+	public void addJob(IsoHandler isoHandler){
+		addPropertyChangeListener(isoHandler);
+		this.isoHandler = isoHandler;
+	}
+
+	@UiHidden
+	public void setListenableProxyFactory(IListenableProxyFactory listenableProxyFactory) {
+		this.listenableProxyFactory = listenableProxyFactory;
+	}
+	
+	private Color generateNextColour() {
+		return ColorUtility.GRAPH_DEFAULT_COLORS[ISO_COUNT ++ % ColorUtility.GRAPH_DEFAULT_COLORS.length];
+	}
+	
+	private void addProxyItemFor(Type type){
+		IIsoItem newItem = new IsoItem(
+				type,
+				5,
+				20,
+				50,
+				generateNextColour()
+			);
+		
+		IIsoItem listenableItem = listenableProxyFactory.createProxyFor(newItem, IIsoItem.class);
+		
+		List<IIsoItem> newItems = new ArrayList<>(getItems());
+		newItems.add(listenableItem);
+		setItems(newItems);
+	}
+
+	private boolean isThereAlreadyAVolume() {
+		return items.stream().anyMatch(item -> Type.VOLUME == item.getType());
+	}	
 }

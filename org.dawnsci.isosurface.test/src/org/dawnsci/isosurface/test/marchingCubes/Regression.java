@@ -47,7 +47,7 @@ public class Regression {
 		
 		Random.seed(SEED);
 
-		model = new MarchingCubesModel(lz,0.5,boxSizeXYZ,new int[]{1,1,1}, 1,"traceID","name");
+		model = new MarchingCubesModel(lz,0.5,boxSizeXYZ,new int[]{1,1,1}, 1,"traceID");
 		algorithm = new MarchingCubes(model);	
 		
 		monitor = new IProgressMonitor() {

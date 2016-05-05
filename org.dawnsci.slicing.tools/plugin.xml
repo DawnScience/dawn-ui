@@ -52,12 +52,6 @@
             id="org.dawnsci.isosurface.tool.isosurfaceTool"
             tooltip="Slice data using an iso-surface">
       </slicing_tool>
-      <slicing_tool
-            class="org.dawnsci.volumerender.tool.VolumeRenderTool"
-            icon="icons/Volume.png"
-            id="org.dawnsci.volumerender.tool.VolumeRenderTool"
-            tooltip="Slice data using a volume renderer">
-      </slicing_tool>
       
    </extension>
    <extension

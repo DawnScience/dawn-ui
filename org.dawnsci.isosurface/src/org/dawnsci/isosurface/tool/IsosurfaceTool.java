@@ -8,13 +8,14 @@
  */
 package org.dawnsci.isosurface.tool;
 
+import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import org.dawnsci.isosurface.Activator;
 import org.dawnsci.isosurface.isogui.IsoBean;
-import org.dawnsci.isosurface.isogui.IsoComposite;
-import org.dawnsci.isosurface.isogui.IsoHandler;
+import org.dawnsci.volumerender.tool.VolumeRenderJob;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
@@ -23,14 +24,17 @@ import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.slicing.api.system.AxisChoiceListener;
 import org.eclipse.dawnsci.slicing.api.system.AxisType;
 import org.eclipse.dawnsci.slicing.api.system.DimensionalListener;
+import org.eclipse.dawnsci.slicing.api.system.DimsData;
 import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.dawnsci.slicing.api.system.SliceSource;
 import org.eclipse.dawnsci.slicing.api.tool.AbstractSlicingTool;
 import org.eclipse.dawnsci.slicing.api.util.SliceUtils;
+import org.eclipse.richbeans.api.generator.IGuiGeneratorService;
+import org.eclipse.richbeans.api.generator.IListenableProxyFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,32 +50,25 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 	// Listeners
 	private DimensionalListener dimensionalListener = (event) -> update();
 	private AxisChoiceListener axisChoiceListener = (event) -> update();
-
+	private PropertyChangeListener propertyChangeListener = (event) -> update();
+	
 	// UI Stuff
-	private IsoComposite isoComp;
 	private IsoBean isoBean;
-	private ScrolledComposite sc;
-
+	private Control gui;
+	
 	/**
 	 * Create controls for the surface in the user interface
 	 */
-	public void createToolComponent(Composite parent) {
-		sc = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
-		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		this.isoComp = new IsoComposite(sc, SWT.FILL);
-		isoComp.setSize(isoComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-
-		sc.setContent(isoComp);
-		sc.setVisible(false);
-
-		isoComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		setControlsVisible(false);
-
+	public void createToolComponent(Composite parent) {	
+		IListenableProxyFactory listenableProxyFactory = Activator.getService(IListenableProxyFactory.class);
 		isoBean = new IsoBean();
-
-		((GridData) sc.getLayoutData()).exclude = true;
+		isoBean.setListenableProxyFactory(listenableProxyFactory);
+		isoBean.addPropertyChangeListener(propertyChangeListener);
+		
+		IGuiGeneratorService guiGeneratorService = Activator.getService(IGuiGeneratorService.class);
+		gui = guiGeneratorService.generateGui(isoBean, parent);
+		gui.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		gui.setVisible(false);
 	}
 
 	/**
@@ -80,11 +77,10 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 	 */
 	@Override
 	public void militarize(boolean newData) {
-
-		((GridData) sc.getLayoutData()).exclude = false;
-		sc.setVisible(true);
-		sc.getParent().pack();
-
+		((GridData) gui.getLayoutData()).exclude = false;
+		gui.setVisible(true);
+		gui.getParent().getParent().pack();
+		
 		boolean alreadyIso = getSlicingSystem().getSliceType() == getSliceType();
 		if (!newData && alreadyIso)
 			return;
@@ -100,11 +96,6 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 		getSlicingSystem().addAxisChoiceListener(axisChoiceListener);
 
 		update();
-
-	}
-
-	private void setControlsVisible(boolean vis) {
-		isoComp.setVisible(vis);
 	}
 
 	/**
@@ -112,10 +103,10 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 	 */
 	@SuppressWarnings("unused")
 	private void update() {
-
-		int xIndex = getSlicingSystem().getDimsDataList().getDimsData(0).getPlotAxis().getIndex();
-		int yIndex = getSlicingSystem().getDimsDataList().getDimsData(1).getPlotAxis().getIndex();
-		int zIndex = getSlicingSystem().getDimsDataList().getDimsData(2).getPlotAxis().getIndex();
+		List<DimsData> dimData = getSlicingSystem().getDimsDataList().getDimsData();
+		int xIndex = dimData.get(0).getPlotAxis().getIndex();
+		int yIndex = dimData.get(1).getPlotAxis().getIndex();
+		int zIndex = dimData.get(2).getPlotAxis().getIndex();
 
 		// get the data from the slicing system
 		final SliceSource data = getSlicingSystem().getData();
@@ -141,16 +132,15 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 		double[] minMax = { Integer.MAX_VALUE, Integer.MIN_VALUE };
 		minMax = IsoSurfaceUtil.estimateMinMaxIsoValueFromDataSet(finalDataslice);
 
-		// set the min and max isovalues - set the default cube size for new
-		// sufaces
-		isoComp.setMinMaxIsoValueAndCubeSize(minMax, defaultCubeSize);
 
 		// create the isoController
-		IsoHandler isoController = new IsoHandler(isoComp, isoBean,
-				new IsosurfaceJob("isoSurfaceJob", getSlicingSystem().getPlottingSystem(), acquireAxes(finalDataslice, null)), finalDataslice,
+		IsoHandler isoController = new IsoHandler(isoBean,
+				new IsosurfaceJob("isoSurfaceJob", getSlicingSystem().getPlottingSystem(), acquireAxes(finalDataslice, null)), 
+				new VolumeRenderJob("volumeRender"),
+				finalDataslice,
 				getSlicingSystem().getPlottingSystem());
-
-		setControlsVisible(true);
+		
+		isoBean.addJob(isoController);
 	}
 
 	/**
@@ -158,13 +148,12 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 	 */
 	@Override
 	public void demilitarize() {
-		sc.setVisible(false);
-		((GridData) sc.getLayoutData()).exclude = true;
+		gui.setVisible(false);
+		((GridData) gui.getLayoutData()).exclude = true;
 
 		getSlicingSystem().removeDimensionalListener(dimensionalListener);
 		getSlicingSystem().removeAxisChoiceListener(axisChoiceListener);
-
-		setControlsVisible(false);
+		isoBean.removePropertyChangeListener(propertyChangeListener);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })

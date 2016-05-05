@@ -46,12 +46,13 @@ public class Activator extends AbstractUIPlugin {
 	 * @param clazz
 	 * @return
 	 */
-	public static Object getService(Class<?> clazz) {
+	@SuppressWarnings("unchecked")
+	public static <T> T getService(Class<T> clazz) {
 		BundleContext context = plugin.getBundle().getBundleContext();
 		if (context==null) return null;
 		ServiceReference<?> ref = context.getServiceReference(clazz);
 		if (ref==null) return null;
-		return context.getService(ref);
+		return (T) context.getService(ref);
 	}
 
 	public static ImageDescriptor getImage(String path) {
