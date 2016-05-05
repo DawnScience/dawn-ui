@@ -82,6 +82,7 @@ public class SpectrumFile extends AbstractSpectrumFile implements ISpectrumFile 
 		try {
 			IDataset x =  LoaderFactory.getDataSet(path, name, null);
 			if (x == null) return null;
+			x = x.getSliceView().squeeze();
 			x.setName(name);
 			return x;
 		} catch (Exception e) {
@@ -95,6 +96,7 @@ public class SpectrumFile extends AbstractSpectrumFile implements ISpectrumFile 
 		for (String name : yDatasetNames) {
 			try {
 				IDataset set = LoaderFactory.getDataSet(path, name, null);
+				set = set.getSliceView().squeeze();
 				if (set != null) {
 					set.setName(name);
 					sets.add(set);
