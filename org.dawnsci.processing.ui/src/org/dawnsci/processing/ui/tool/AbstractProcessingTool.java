@@ -108,6 +108,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 				ISeriesValidator validator = getValidator();
 				if (validator==null) return;
 				final String errorMessage = validator.getErrorMessage(series);
+				if (errorMessage == null && statusMessage.getText() == null) return;
 				statusMessage.setText(errorMessage!=null ? errorMessage : "");
 				
 				statusMessage.getParent().layout();
@@ -371,7 +372,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 				int[] s = shape.clone();
 				Arrays.fill(s, 1);
 				int[] dd = info.parentMetadata.getDataDimensions();
-				for (int i = 0; i < dd.length; i++) s[i] = shape[dd[i]];
+				for (int i = 0; i < dd.length; i++) s[dd[i]] = shape[dd[i]];
 				ds.setShape(s);
 			}
 			
