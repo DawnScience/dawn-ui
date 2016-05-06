@@ -2,11 +2,15 @@ package org.dawnsci.isosurface.test.marchingCubes;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.dawnsci.isosurface.alg.MarchingCubes;
 import org.dawnsci.isosurface.alg.MarchingCubesModel;
 import org.dawnsci.isosurface.alg.Surface;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Random;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -42,10 +46,13 @@ public class Cancellation
 		{
 			
 			lz = Random.lazyRand(dataSetSizeXYZ).getSlice();
+
+			IntegerDataset axis = IntegerDataset.createRange(dataSetSizeXYZ[0]);
+			List<IntegerDataset> axes = Arrays.asList(axis, axis, axis);
 			
 			Random.seed(SEED);
 			
-			model = new MarchingCubesModel(lz,0.5,boxSizeXYZ,new int[]{1,1,1}, 1,"traceID");
+			model = new MarchingCubesModel(lz,axes,0.5,boxSizeXYZ,new int[]{1,1,1}, 1,"traceID");
 			algorithm = new MarchingCubes(model);	
 			
 			// execute the algorithmA

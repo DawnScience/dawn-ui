@@ -8,7 +8,6 @@
  */
 package org.dawnsci.isosurface.tool;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -30,7 +29,6 @@ import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.trace.IIsosurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,22 +47,19 @@ public class IsosurfaceJob extends Job {
 	private String name;
  	
  	AtomicReference<MarchingCubesModel> modelRef;
- 	
-	private final IPlottingSystem<Composite> plottingSystem;
 
-	private final List<IDataset> axis;
+	private IPlottingSystem<Object> plottingSystem;
  	
-	public IsosurfaceJob(String name, IPlottingSystem<Composite> plottingSystem, List<IDataset> axis)
+	public IsosurfaceJob(String name, IPlottingSystem<Object> plottingSystem)
 	{
 		super(name);
-		this.axis = axis;
+		this.plottingSystem = plottingSystem;
 	
 		setUser(false);
 		setPriority(Job.INTERACTIVE);
 		
 		this.name = name;
 		this.modelRef = new AtomicReference<MarchingCubesModel>();
-		this.plottingSystem = plottingSystem;
 	}
 	
 	/**
@@ -133,7 +128,7 @@ public class IsosurfaceJob extends Job {
 					points, 
 					textCoords, 
 					faces, 
-					axis);
+					model.getAxes());
 			
 			if ((IIsosurfaceTrace) plottingSystem.getTrace(model.getTraceID()) == null)
 			{
@@ -175,9 +170,10 @@ public class IsosurfaceJob extends Job {
 			.filter(option -> !option.map(trace -> trace.getName().equals("123456789")).orElse(false))
 			.forEach(trace -> { 
 				try{
+					logger.info("disposing of trace {}", trace);
 					trace.ifPresent(ITrace::dispose);
 				} catch (Exception ex) {
-					logger.info("dispose of trace sometimes doesn't work", ex);
+					logger.info("dispose of trace failed", ex);
 				}
 			});
 		

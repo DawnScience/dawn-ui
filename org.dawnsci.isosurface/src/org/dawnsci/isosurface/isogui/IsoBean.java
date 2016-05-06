@@ -6,7 +6,7 @@ import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dawnsci.isosurface.tool.IsoHandler;
+import org.dawnsci.isosurface.tool.RenderingPropertyChangeListener;
 import org.dawnsci.plotting.util.ColorUtility;
 import org.eclipse.richbeans.api.generator.IListenableProxyFactory;
 import org.eclipse.richbeans.api.generator.IListenableProxyFactory.PropertyChangeInterface;
@@ -21,7 +21,7 @@ public class IsoBean{
 	private List<IIsoItem> items = new ArrayList<>();
 	private int ISO_COUNT = 0;
 
-	private IsoHandler isoHandler;
+	private RenderingPropertyChangeListener renderingHandler;
 	
 	/**
 	 * Get the list of items
@@ -40,8 +40,8 @@ public class IsoBean{
 	public void setItems(List<IIsoItem> newItems)
 	{
 		List<IIsoItem> oldItems = items;
-		oldItems.forEach(item -> ((PropertyChangeInterface)item).removePropertyChangeListener(isoHandler));
-		newItems.forEach(item -> ((PropertyChangeInterface)item).addPropertyChangeListener(isoHandler));
+		oldItems.forEach(item -> ((PropertyChangeInterface)item).removePropertyChangeListener(renderingHandler));
+		newItems.forEach(item -> ((PropertyChangeInterface)item).addPropertyChangeListener(renderingHandler));
 		this.items = newItems;
 		pcs.firePropertyChange("items", oldItems, items);
 	}
@@ -72,10 +72,6 @@ public class IsoBean{
 	public void removePropertyChangeListener(PropertyChangeListener listener){
 		pcs.removePropertyChangeListener(listener);
 	}
-	public void addJob(IsoHandler isoHandler){
-		addPropertyChangeListener(isoHandler);
-		this.isoHandler = isoHandler;
-	}
 
 	@UiHidden
 	public void setListenableProxyFactory(IListenableProxyFactory listenableProxyFactory) {
@@ -104,5 +100,11 @@ public class IsoBean{
 
 	private boolean isThereAlreadyAVolume() {
 		return items.stream().anyMatch(item -> Type.VOLUME == item.getType());
-	}	
+	}
+
+	@UiHidden
+	public void setRenderingHandler(RenderingPropertyChangeListener renderingHandler) {
+		addPropertyChangeListener(renderingHandler);
+		this.renderingHandler = renderingHandler;
+	}
 }

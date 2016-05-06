@@ -8,10 +8,11 @@
  */
 package org.dawnsci.isosurface.tool;
 
-import java.beans.PropertyChangeListener;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.dawnsci.isosurface.Activator;
 import org.dawnsci.isosurface.isogui.IsoBean;
@@ -26,7 +27,7 @@ import org.eclipse.dawnsci.slicing.api.system.AxisType;
 import org.eclipse.dawnsci.slicing.api.system.DimensionalListener;
 import org.eclipse.dawnsci.slicing.api.system.DimsData;
 import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
-import org.eclipse.dawnsci.slicing.api.system.SliceSource;
+import org.eclipse.dawnsci.slicing.api.system.ISliceSystem;
 import org.eclipse.dawnsci.slicing.api.tool.AbstractSlicingTool;
 import org.eclipse.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.richbeans.api.generator.IGuiGeneratorService;
@@ -50,11 +51,12 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 	// Listeners
 	private DimensionalListener dimensionalListener = (event) -> update();
 	private AxisChoiceListener axisChoiceListener = (event) -> update();
-	private PropertyChangeListener propertyChangeListener = (event) -> update();
 	
 	// UI Stuff
 	private IsoBean isoBean;
 	private Control gui;
+
+	private RenderingPropertyChangeListener isoController;
 	
 	/**
 	 * Create controls for the surface in the user interface
@@ -63,12 +65,17 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 		IListenableProxyFactory listenableProxyFactory = Activator.getService(IListenableProxyFactory.class);
 		isoBean = new IsoBean();
 		isoBean.setListenableProxyFactory(listenableProxyFactory);
-		isoBean.addPropertyChangeListener(propertyChangeListener);
 		
 		IGuiGeneratorService guiGeneratorService = Activator.getService(IGuiGeneratorService.class);
 		gui = guiGeneratorService.generateGui(isoBean, parent);
 		gui.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		gui.setVisible(false);
+		
+		isoController = new RenderingPropertyChangeListener(isoBean,
+				new IsosurfaceJob("isoSurfaceJob", slicingSystem.getPlottingSystem()), 
+				new VolumeRenderJob("volumeRender"),
+				getSlicingSystem().getPlottingSystem());
+		isoBean.setRenderingHandler(isoController);
 	}
 
 	/**
@@ -78,22 +85,20 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 	@Override
 	public void militarize(boolean newData) {
 		((GridData) gui.getLayoutData()).exclude = false;
-		gui.setVisible(true);
+		gui.setVisible(true);	
 		gui.getParent().getParent().pack();
 		
-		boolean alreadyIso = getSlicingSystem().getSliceType() == getSliceType();
-		if (!newData && alreadyIso)
-			return;
-
-		getSlicingSystem().setSliceType(getSliceType());
+		ISliceSystem slicingSystem = getSlicingSystem();
+		slicingSystem.setSliceType(getSliceType());
 
 		final DimsDataList dimsDataList = getSlicingSystem().getDimsDataList();
 		if (dimsDataList != null)
 			dimsDataList.setThreeAxesOnly(AxisType.X, AxisType.Y, AxisType.Z);
 
-		getSlicingSystem().update(false);
-		getSlicingSystem().addDimensionalListener(dimensionalListener);
-		getSlicingSystem().addAxisChoiceListener(axisChoiceListener);
+		slicingSystem.update(false);
+		
+		slicingSystem.addDimensionalListener(dimensionalListener);
+		slicingSystem.addAxisChoiceListener(axisChoiceListener);
 
 		update();
 	}
@@ -101,47 +106,35 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 	/**
 	 * Called to update when lazy data changed.
 	 */
-	@SuppressWarnings("unused")
 	private void update() {
-		List<DimsData> dimData = getSlicingSystem().getDimsDataList().getDimsData();
-		int xIndex = dimData.get(0).getPlotAxis().getIndex();
-		int yIndex = dimData.get(1).getPlotAxis().getIndex();
-		int zIndex = dimData.get(2).getPlotAxis().getIndex();
-
-		// get the data from the slicing system
-		final SliceSource data = getSlicingSystem().getData();
-
-		// declare the data as a lazydata set (i.e. slices)
-		ILazyDataset dataSlice = data.getLazySet().getSliceView(getSlices()).getTransposedView(xIndex, yIndex, zIndex);
-		
-		dataSlice = dataSlice.squeezeEnds();
-		
-		// roughly calculate the default cube size
-		int[] defaultCubeSize= new int[] {
-				(int) Math.max(1, Math.ceil(dataSlice.getShape()[0]/20.0)),
-				(int) Math.max(1, Math.ceil(dataSlice.getShape()[1]/20.0)),
-				(int) Math.max(1, Math.ceil(dataSlice.getShape()[2]/20.0))};
+		ISliceSystem sliceSystem = getSlicingSystem();
+		ILazyDataset dataSlice = createSlice(sliceSystem);
 		
 		// check if the dataslice is compatible
 		if (dataSlice.getRank() != 3)
 			throw new RuntimeException("Invalid slice for isosurface tool!");
-		final ILazyDataset finalDataslice = dataSlice;
 
-		// estimate the min/max values for the isosurface
-		// the estimation is currently quite inaccurate
-		double[] minMax = { Integer.MAX_VALUE, Integer.MIN_VALUE };
-		minMax = IsoSurfaceUtil.estimateMinMaxIsoValueFromDataSet(finalDataslice);
+		isoController.setData(dataSlice, acquireAxes(dataSlice, null));
 
-
-		// create the isoController
-		IsoHandler isoController = new IsoHandler(isoBean,
-				new IsosurfaceJob("isoSurfaceJob", getSlicingSystem().getPlottingSystem(), acquireAxes(finalDataslice, null)), 
-				new VolumeRenderJob("volumeRender"),
-				finalDataslice,
-				getSlicingSystem().getPlottingSystem());
-		
-		isoBean.addJob(isoController);
 		gui.setVisible(true);
+	}
+
+	private ILazyDataset createSlice(ISliceSystem sliceSystem) {
+		List<DimsData> dimData = sliceSystem.getDimsDataList().getDimsData();
+		int xIndex = getIndexForDimension(0, dimData);
+		int yIndex = getIndexForDimension(1, dimData);
+		int zIndex = getIndexForDimension(2, dimData);
+
+		return sliceSystem
+				.getData()
+				.getLazySet()
+				.getSliceView(getSlices())
+				.getTransposedView(xIndex, yIndex, zIndex)
+				.squeezeEnds();
+	}
+
+	private int getIndexForDimension(int i, List<DimsData> dimData) {
+		return dimData.get(i).getPlotAxis().getIndex();
 	}
 
 	/**
@@ -154,7 +147,6 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 
 		getSlicingSystem().removeDimensionalListener(dimensionalListener);
 		getSlicingSystem().removeAxisChoiceListener(axisChoiceListener);
-		isoBean.removePropertyChangeListener(propertyChangeListener);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -174,42 +166,30 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 	}
 
 	private List<IDataset> acquireAxes(ILazyDataset data, IProgressMonitor monitor) {
+		return Stream.of(0,1,2).map(i -> {
+			Optional<IDataset> axis = getAxisFromSlicingSystem(monitor, i);			
+			return axis.orElseGet(()-> generateIndexAxis(data.getShape()[i]));	
+		}).collect(Collectors.toList());
+	}
 
-		IDataset xAxis = null, yAxis = null, zAxis = null;
-
-		int xIndex = slicingSystem.getDimsDataList().getDimsData(0).getPlotAxis().getIndex();
-		int yIndex = slicingSystem.getDimsDataList().getDimsData(1).getPlotAxis().getIndex();
-		int zIndex = slicingSystem.getDimsDataList().getDimsData(2).getPlotAxis().getIndex();
-
-		try {
-			xAxis = SliceUtils.getAxis(slicingSystem.getCurrentSlice(), slicingSystem.getData().getVariableManager(),
-					slicingSystem.getDimsDataList().getDimsData(xIndex), monitor);
-			yAxis = SliceUtils.getAxis(slicingSystem.getCurrentSlice(), slicingSystem.getData().getVariableManager(),
-					slicingSystem.getDimsDataList().getDimsData(yIndex), monitor);
-			zAxis = SliceUtils.getAxis(slicingSystem.getCurrentSlice(), slicingSystem.getData().getVariableManager(),
-					slicingSystem.getDimsDataList().getDimsData(zIndex), monitor);
-		} catch (Throwable e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	private Optional<IDataset> getAxisFromSlicingSystem(IProgressMonitor monitor, Integer i) {
+		ISliceSystem slicingSystem = getSlicingSystem();
+		DimsDataList dimsDataList = slicingSystem.getDimsDataList();
+		int index = dimsDataList.getDimsData(i).getPlotAxis().getIndex();
+		try{
+			return Optional.ofNullable(SliceUtils.getAxis(
+					slicingSystem.getCurrentSlice(), 
+					slicingSystem.getData().getVariableManager(),
+					dimsDataList.getDimsData(index), 
+					monitor
+				));
+		} catch (Throwable e){
+			return Optional.empty();
 		}
-
-		// as the trace has no access to the dataset it is best to generate the
-		// axis look
-		// table even if it is only indices.
-		if (xAxis == null)
-			xAxis = generateIndexAxis(data.getShape()[0]);
-		if (yAxis == null)
-			yAxis = generateIndexAxis(data.getShape()[1]);
-		if (zAxis == null)
-			zAxis = generateIndexAxis(data.getShape()[2]);
-
-		return Arrays.asList(xAxis, yAxis, zAxis);
 	}
 
 	private IDataset generateIndexAxis(int max) {
 		double[] axis = IntStream.range(0, max).mapToDouble(i -> i).toArray();
 		return new DoubleDataset(axis, max);
 	}
-
-
 }

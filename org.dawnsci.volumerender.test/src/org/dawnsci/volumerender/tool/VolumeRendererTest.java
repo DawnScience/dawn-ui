@@ -42,6 +42,7 @@ public class VolumeRendererTest {
 				max,
 				min, 
 				max,
+				new int[]{1,2,3}, 
 				data
 			);
 		volumeRenderer.run(mock(IMonitor.class));

@@ -12,12 +12,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.List;
 
 import org.dawnsci.isosurface.alg.MarchingCubes;
 import org.dawnsci.isosurface.alg.MarchingCubesModel;
 import org.dawnsci.isosurface.alg.Surface;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Random;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -44,10 +46,12 @@ public class Regression {
 	private void start(int[] dataSetSizeXYZ, int[] boxSizeXYZ)
 	{
 		lz = Random.lazyRand(dataSetSizeXYZ);
+		IntegerDataset axis = IntegerDataset.createRange(dataSetSizeXYZ[0]);
+		List<IntegerDataset> axes = Arrays.asList(axis, axis, axis);
 		
 		Random.seed(SEED);
 
-		model = new MarchingCubesModel(lz,0.5,boxSizeXYZ,new int[]{1,1,1}, 1,"traceID");
+		model = new MarchingCubesModel(lz,axes,0.5,boxSizeXYZ,new int[]{1,1,1}, 1,"traceID");
 		algorithm = new MarchingCubes(model);	
 		
 		monitor = new IProgressMonitor() {
