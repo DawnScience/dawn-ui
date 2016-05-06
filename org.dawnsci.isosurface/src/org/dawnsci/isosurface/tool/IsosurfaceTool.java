@@ -8,6 +8,7 @@
  */
 package org.dawnsci.isosurface.tool;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -115,6 +116,7 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 			throw new RuntimeException("Invalid slice for isosurface tool!");
 
 		isoController.setData(dataSlice, acquireAxes(dataSlice, null));
+		isoController.propertyChange(null);
 
 		gui.setVisible(true);
 	}
@@ -166,10 +168,12 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 	}
 
 	private List<IDataset> acquireAxes(ILazyDataset data, IProgressMonitor monitor) {
-		return Stream.of(0,1,2).map(i -> {
+		List<IDataset> axes = Stream.of(0,1,2).map(i -> {
 			Optional<IDataset> axis = getAxisFromSlicingSystem(monitor, i);			
 			return axis.orElseGet(()-> generateIndexAxis(data.getShape()[i]));	
 		}).collect(Collectors.toList());
+		
+		return Collections.unmodifiableList(axes);
 	}
 
 	private Optional<IDataset> getAxisFromSlicingSystem(IProgressMonitor monitor, Integer i) {

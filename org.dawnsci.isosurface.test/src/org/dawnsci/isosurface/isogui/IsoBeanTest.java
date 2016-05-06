@@ -68,11 +68,12 @@ public class IsoBeanTest {
 		assertThat(items.size(), is(1));
 		
 		IIsoItem item = isoBean.getItems().get(0);
-		assertThat(item.getType(), is(type));
+		assertThat(item.getRenderType(), is(type));
 		assertThat(item.getTraceKey(), is(notNullValue()));
 	}
 	
 	private class MockProxyFactory implements IListenableProxyFactory{
+		@SuppressWarnings("unchecked")
 		@Override
 		public <S extends T, T> T createProxyFor(S original, Class<T> interfaceImplemented) {
 			return (T) new WrappedIsoItem((IsoItem)original);				
@@ -87,8 +88,8 @@ public class IsoBeanTest {
 		}
 
 				@Override
-		public Type getType() {
-			return original.getType();
+		public Type getRenderType() {
+			return original.getRenderType();
 		}
 		@Override
 		public String getTraceKey() {

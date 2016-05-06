@@ -42,9 +42,9 @@ public class RenderingPropertyChangeListener implements PropertyChangeListener {
 		deleteAnyDeadTraces();
 	
 		for (IIsoItem current : bean.getItems()) {
-			if (current.getType() == Type.ISO_SURFACE){
+			if (current.getRenderType() == Type.ISO_SURFACE){
 				renderIsoSurface(current);
-			} else if (current.getType() == Type.VOLUME){
+			} else if (current.getRenderType() == Type.VOLUME){
 				renderVolume(current);
 			}
 		}

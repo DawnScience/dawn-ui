@@ -7,7 +7,7 @@ import org.eclipse.richbeans.api.generator.RichbeansAnnotations.UiReadOnly;
 import org.eclipse.swt.graphics.RGB;
 public interface IIsoItem {
 	@UiReadOnly
-	public Type getType();
+	public Type getRenderType();
 	public double getValue();
 	public void setValue(double value);
 	public int getResolution();

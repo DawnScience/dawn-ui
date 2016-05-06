@@ -99,7 +99,7 @@ public class IsoBean{
 	}
 
 	private boolean isThereAlreadyAVolume() {
-		return items.stream().anyMatch(item -> Type.VOLUME == item.getType());
+		return items.stream().anyMatch(item -> Type.VOLUME == item.getRenderType());
 	}
 
 	@UiHidden

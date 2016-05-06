@@ -31,7 +31,7 @@ public class IsoItem implements IIsoItem
 	}
 	
 	@Override
-	public Type getType() {
+	public Type getRenderType() {
 		return type;
 	}
 	
@@ -111,7 +111,7 @@ public class IsoItem implements IIsoItem
 				return false;
 		} else if (!traceKey.equals(other.getTraceKey()))
 			return false;
-		if (type != other.getType())
+		if (type != other.getRenderType())
 			return false;
 		if (Double.doubleToLongBits(value) != Double.doubleToLongBits(other.getValue()))
 			return false;

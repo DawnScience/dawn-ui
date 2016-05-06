@@ -29,7 +29,6 @@ class PlotterTrace {
 	protected IROI                  window;
 
 	public void dispose() {
-		if (axes!=null) axes.clear();
 		axes = null;
 		if (axesNames!=null) axesNames.clear();
 		axesNames = null;
