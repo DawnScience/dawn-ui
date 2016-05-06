@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copy (c) 2012 Diamond Light Source Ltd.
  *
- * All rights reserved. This program and the accompanying materials
+ * All s reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
@@ -115,20 +115,20 @@ public class ProcessingView extends ViewPart {
 		seriesTable.createControl(content, prov);
 		getViewSite().setSelectionProvider(seriesTable.getSelectionProvider());
 		createToobarActions();
-		final MenuManager rightClick = new MenuManager("#PopupMenu");
-		rightClick.setRemoveAllWhenShown(true);
-		//createActions(rightClick);
-		rightClick.addMenuListener(new IMenuListener() {
+		final MenuManager Click = new MenuManager("#PopupMenu");
+		Click.setRemoveAllWhenShown(true);
+		//createActions(Click);
+		Click.addMenuListener(new IMenuListener() {
 			
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
-				setDynamicMenuOptions(manager);
+				OperationTableUtils.addMenuItems(manager, seriesTable, getViewSite().getShell());
 			}
 		});
 		createColumns();
 		
 		// Here's the data, lets show it!
-		seriesTable.setMenuManager(rightClick);
+		seriesTable.setMenuManager(Click);
 		seriesTable.setInput(saved, operationFiler);
 
 		OperationTableUtils.setupPipelinePaneDropTarget(seriesTable, operationFiler, logger, getSite().getShell());
@@ -223,26 +223,11 @@ public class ProcessingView extends ViewPart {
 	}
 
 	private void createToobarActions() {
-		add = new Action("Insert operation", Activator.getImageDescriptor("icons/clipboard-list.png")) {
-			public void run() {
-				seriesTable.addNew();
-			}
-		};
+		add = OperationTableUtils.getAddAction(seriesTable);
 
+		delete = OperationTableUtils.getDeleteAction(seriesTable);
 
-		delete = new Action("Delete selected operation", Activator.getImageDescriptor("icons/clipboard--minus.png")) {
-			public void run() {
-				seriesTable.delete();
-			}
-		};
-
-		clear = new Action("Clear list of operations", Activator.getImageDescriptor("icons/clipboard-empty.png")) {
-			public void run() {
-			    boolean ok = MessageDialog.openQuestion(getViewSite().getShell(), "Confirm Clear Pipeline", "Do you want to clear the pipeline?");
-			    if (!ok) return;
-				seriesTable.clear();
-			}
-		};
+		clear = OperationTableUtils.getClearAction(seriesTable, getViewSite().getShell());
 		
 		getViewSite().getActionBars().getToolBarManager().add(add);
 		getViewSite().getActionBars().getMenuManager().add(add);

@@ -323,6 +323,7 @@ public class MapPlotManager {
 	
 	public void clearAll(){
 		map.clear();
+		map.reset();
 		data.clear();
 		layers.clear();
 	}
