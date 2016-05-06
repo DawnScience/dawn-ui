@@ -327,6 +327,7 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 	private RectangularROI getROIFromRange(double[] range, RangeType type, IDataset[] axes) {
 		
 		if (range == null) range = minMax.clone();
+		range = range.clone();
 		
 		switch (type) {
 		case XRANGE:
@@ -509,6 +510,9 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 							
 							
 							if (valuesChanged(region,roi)) region.setROI(roi);
+							update();
+							return;
+						} else {
 							return;
 						}
 					
