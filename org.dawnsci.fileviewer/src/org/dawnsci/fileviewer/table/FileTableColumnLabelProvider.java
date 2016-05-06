@@ -39,10 +39,14 @@ public class FileTableColumnLabelProvider extends ColumnLabelProvider {
 				if (dot != -1) {
 					String extension = nameString.substring(dot);
 					Program program = Program.findProgram(extension);
-					if (program != null) {
+					// Check for nxs file
+					if (program != null && !extension.equals(".nxs")) {
 						iconImage = viewer.getIconCache().getIconFromProgram(program);
 					} else {
-						iconImage = viewer.getIconCache().stockImages[viewer.getIconCache().iconFile];
+						if(extension.equals(".nxs"))
+							iconImage = viewer.getIconCache().stockImages[viewer.getIconCache().iconNxs];
+						else
+							iconImage = viewer.getIconCache().stockImages[viewer.getIconCache().iconFile];
 					}
 				} else {
 					iconImage = viewer.getIconCache().stockImages[viewer.getIconCache().iconFile];

@@ -41,7 +41,8 @@ public class IconCache {
 		cmdRefresh = 7,
 //		cmdRename = 13,
 //		cmdSearch = 14;
-		cmdLayoutEdit = 8;
+		cmdLayoutEdit = 8,
+		iconNxs = 9;
 	public final String[] stockImageLocations = {
 		"application_side_tree.png",
 		"drive-off.png",
@@ -58,7 +59,8 @@ public class IconCache {
 		"arrow-circle-double-135.png",
 //		"cmd_Rename.gif",
 //		"cmd_Search.gif"
-		"layout-design.png"
+		"layout-design.png",
+		"nexus.png"
 	};
 	public Image stockImages[];
 	
