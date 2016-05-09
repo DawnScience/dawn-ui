@@ -50,14 +50,13 @@ public class MappedFileFactory {
 		}
 		
 		for (MapBean b : bean.getMaps()) {
-			if (monitor != null) {
-				if (monitor.isCancelled()) return null;
-				monitor.subTask(b.getName());
+
+				if (monitor != null && monitor.isCancelled()) return null;
+				if (monitor != null) monitor.subTask(b.getName());
 				MappedDataBlock block = file.getDataBlockMap().get(b.getParent());
 				AbstractMapData m = setUpMap(path, b.getName(),block, bean.getLiveBean());
-//				m.getMap().setName(m.toString());
-				file.addMapObject(b.getName(), m);
-			}
+				m.getData().setName(m.toString());
+ 				file.addMapObject(b.getName(), m);
 		}
 		
 		for (AssociatedImageBean b : bean.getImages()) {

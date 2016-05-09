@@ -43,7 +43,8 @@ public class FileOpenEventHandler implements EventHandler {
 		
 		if (event.containsProperty("live_bean")) {
 			Object p = event.getProperty("live_bean");
-			if (p instanceof MappedDataFileBean) fm.importLiveFile(path, (LiveDataBean)p);
+			if (p instanceof LiveDataBean) fm.importLiveFile(path, (LiveDataBean)p);
+			return;
 		}
 		
 
