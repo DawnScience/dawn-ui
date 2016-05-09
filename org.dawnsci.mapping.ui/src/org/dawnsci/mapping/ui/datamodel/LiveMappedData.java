@@ -85,6 +85,8 @@ public class LiveMappedData extends MappedData implements ILiveData {
 		
 		if (ma == null) return null;
 		
+		ma.setName(this.toString());
+		
 		if (parent.isTransposed()) ma = DatasetUtils.convertToDataset(ma).transpose();
 		
 		// TODO This check is probably not required

@@ -147,7 +147,6 @@ public class MappedFileManager {
 
 	
 	public void importLiveFile(final String path, LiveDataBean bean) {
-		final String p = "/scratch/SSD/workspace/gda_mapping/gda_mapping/gda_data_non_live/2016/0-0/p45-300.nxs";
 		IRemoteDatasetService rds = LocalServiceManager.getRemoteDatasetService();
 		if (rds == null) {
 			logger.error("Could not acquire remote dataset service");
@@ -162,7 +161,7 @@ public class MappedFileManager {
 		}
 		
 		try {
-			rd.setPath(p);
+			rd.setPath(path);
 			Map<String, Object> map = rd.getTree();
 			map.toString();
 			Tree tree = TreeToMapUtils.mapToTree(map, path);

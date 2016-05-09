@@ -55,7 +55,7 @@ public class MappedFileFactory {
 				if (monitor != null) monitor.subTask(b.getName());
 				MappedDataBlock block = file.getDataBlockMap().get(b.getParent());
 				AbstractMapData m = setUpMap(path, b.getName(),block, bean.getLiveBean());
-				m.getData().setName(m.toString());
+				if (bean.getLiveBean() == null) m.getData().setName(m.toString());
  				file.addMapObject(b.getName(), m);
 		}
 		
