@@ -13,10 +13,15 @@ import org.dawnsci.mapping.ui.wizards.LegacyMapBeanBuilder;
 import org.dawnsci.mapping.ui.wizards.MapBeanBuilder;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.IRemoteData;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.analysis.api.io.IRemoteDatasetService;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
+import org.eclipse.dawnsci.analysis.api.tree.Tree;
+import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
+import org.eclipse.dawnsci.analysis.tree.TreeToMapUtils;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -27,9 +32,13 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MappedFileManager {
 
+	private final static Logger logger = LoggerFactory.getLogger(MappedFileManager.class);
+	
 	private MapPlotManager plotManager;
 	private MappedDataArea mappedDataArea;
 	private Viewer viewer;
@@ -136,6 +145,35 @@ public class MappedFileManager {
 		
 	}
 
+	
+	public void importLiveFile(final String path, LiveDataBean bean) {
+		IRemoteDatasetService rds = LocalServiceManager.getRemoteDatasetService();
+		if (rds == null) {
+			logger.error("Could not acquire remote dataset service");
+			return;
+		}
+		
+		IRemoteData rd = rds.createRemoteData(bean.getHost(), bean.getPort());
+		
+		if (rd == null) {
+			logger.error("Could not acquire remote data on :" + bean.getHost() + ":" + bean.getPort());
+			return;
+		}
+		
+		try {
+			Map<String, Object> map = rd.getTree();
+			Tree tree = TreeToMapUtils.mapToTree(map, path);
+			MappedDataFileBean buildBean = MapBeanBuilder.buildBean(tree);
+			
+			if (buildBean != null) importFile(path, buildBean, null);
+			
+		} catch (Exception e) {
+			logger.error("Could not build map bean from " + path, e);
+		}
+		
+		logger.error("Could not build map bean from " + path);
+		
+	}
 	
 	public void importFile(final String path) {
 		if (contains(path)) return;

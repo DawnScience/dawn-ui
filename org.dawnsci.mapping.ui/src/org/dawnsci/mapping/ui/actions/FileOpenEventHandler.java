@@ -1,6 +1,7 @@
 package org.dawnsci.mapping.ui.actions;
 
 import org.dawnsci.mapping.ui.FileManagerSingleton;
+import org.dawnsci.mapping.ui.datamodel.LiveDataBean;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
 import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
 import org.eclipse.swt.widgets.Display;
@@ -38,6 +39,11 @@ public class FileOpenEventHandler implements EventHandler {
 		if (event.containsProperty("map_bean")) {
 			Object p = event.getProperty("map_bean");
 			if (p instanceof MappedDataFileBean) fm.importFile(path, (MappedDataFileBean)p);
+		}
+		
+		if (event.containsProperty("live_bean")) {
+			Object p = event.getProperty("live_bean");
+			if (p instanceof MappedDataFileBean) fm.importLiveFile(path, (LiveDataBean)p);
 		}
 		
 
