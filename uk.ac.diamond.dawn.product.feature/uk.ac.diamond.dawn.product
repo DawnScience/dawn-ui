@@ -24,11 +24,12 @@ openFile
       </programArgs>
       <vmArgs>-Xms256m
 -Xmx1024m
--Dosgi.requiredJavaVersion=1.7.0
+-Dosgi.requiredJavaVersion=1.8.0
 -Dcom.isencia.require.file.source=true
 -Dorg.dawb.editor.h5.use.default=false
 -Dosgi.locking=none
 -Dorg.dawnsci.passerelle.do.not.break.osgi=true
+-Dpydev.funding.hide=true
       </vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
       </vmArgsMac>
