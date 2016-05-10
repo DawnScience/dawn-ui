@@ -71,7 +71,6 @@ public class SurfaceDisplayer extends Scene
 	private SceneObjectGroup axisObjectGroup;	// hold the axisGroup
 	private Group objectGroup;		// holds the objects for the scene
 	private Group lightGroup;		// holds the lights for the scene
-	private ScaleAxisGroup scaleAxesGroup;
 	
 	// Scene and camera variables
 	private Translate isoGroupOffset;
@@ -112,7 +111,6 @@ public class SurfaceDisplayer extends Scene
 		
 		initialiseCamera();
 		initlialiseGroups();
-		createScaleAxisGroup();
 		createAxisGroup();
 		createSceneGraph();
 		setDepthBuffers();
@@ -162,11 +160,6 @@ public class SurfaceDisplayer extends Scene
 		this.root.getChildren().addAll(cameraGroup);
 		
 	}
-
-	private void createScaleAxisGroup()
-	{
-		this.scaleAxesGroup = new ScaleAxisGroup(new Point3D(50, 50, 50), 5);
-	}
 	
 	private void createAxisGroup()
 	{		
@@ -193,9 +186,7 @@ public class SurfaceDisplayer extends Scene
 		this.isoGroupOffset = new Translate();
 		this.scaleZoom = new Scale();
 		this.rotate = new Rotate();
-		
-		this.scaleAxesGroup.getTransforms().addAll();
-				
+						
 		this.objectGroup.getTransforms().addAll(scaleZoom, isoGroupOffset);
 				
 		this.cameraGroup.getTransforms().addAll(rotate);
@@ -506,11 +497,9 @@ public class SurfaceDisplayer extends Scene
 			nonLightingGroup.getChildren().remove(removeNode);
 		}
 	}
-		
+	
 	public void setAxesData(List<IDataset> axesData)
 	{
-		
-		
 		Point3D axisLength = new Point3D(
 				axesData.get(0).getSize(), 
 				axesData.get(1).getSize(),
