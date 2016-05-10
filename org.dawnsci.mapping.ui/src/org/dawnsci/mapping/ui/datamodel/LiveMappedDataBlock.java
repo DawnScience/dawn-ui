@@ -1,9 +1,11 @@
 package org.dawnsci.mapping.ui.datamodel;
 
 
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.IRemoteDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
+import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +32,19 @@ public class LiveMappedDataBlock extends MappedDataBlock implements ILiveData {
 		slice.setSlice(yDim,y,y+1,1);
 		slice.setSlice(xDim,x,x+1,1);
 		
-		return dataset.getSlice(slice);
+		
+		
+		
+		IDataset slice2 = dataset.getSlice(slice);
+		
+		AxesMetadataImpl ax = new AxesMetadataImpl(dataset.getRank());
+		for (int i = 0; i < dataset.getRank(); i++) {
+			if (i == xDim || i == yDim || axes.getAxes()[i] == null) continue;
+			ax.setAxis(i, axes.getAxes()[i].getSlice());
+		}
+		slice2.setMetadata(ax);
+		
+		return slice2;
 	}
 
 	@Override
