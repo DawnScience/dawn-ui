@@ -184,10 +184,9 @@ public class FileTableExplorer {
 					return;
 				if (!FileTransfer.getInstance().isSupportedType(event.dataType))
 					return;
-
 				sourceNames = new String[dndSelection.length];
 				for (int i = 0; i < dndSelection.length; i++) {
-					File file = (File) dndSelection[i].getData(FileViewerConstants.TABLEITEMDATA_FILE);
+					File file = (File) dndSelection[i].getData();
 					sourceNames[i] = file.getAbsolutePath();
 				}
 				event.data = sourceNames;
