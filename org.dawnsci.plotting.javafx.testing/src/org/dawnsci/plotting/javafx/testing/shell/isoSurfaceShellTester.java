@@ -40,8 +40,9 @@ public class isoSurfaceShellTester {
 		IDataHolder dh = LoaderFactory.getData("files/brain.h5");
 		dataset = dh.getLazyDataset("/entry/edf/data");
 				
-		model = new MarchingCubesModel(dataset, 1800, new int[]{3,3,3}, new int[]{1,1,1}, 1, "traceID", "name");
-		model.setVertexLimit(Integer.MAX_VALUE);
+		
+		
+		model = new MarchingCubesModel(dataset, null, 1800, new int[]{3,3,3}, new int[]{1,1,1}, 1, "traceID");
 		
 		algorithm = new MarchingCubes(model);
 				
