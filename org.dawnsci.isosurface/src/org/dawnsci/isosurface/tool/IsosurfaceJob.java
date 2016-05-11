@@ -26,6 +26,7 @@ import org.eclipse.dawnsci.analysis.dataset.impl.FloatDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
+import org.eclipse.dawnsci.plotting.api.trace.IImage3DTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IIsosurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -166,6 +167,7 @@ public class IsosurfaceJob extends Job {
 		
 		traceNames.stream()
 			.map(name -> plottingSystem.getTrace(name))
+			.filter(t -> t instanceof IImage3DTrace)
 			.map(Optional::ofNullable)
 			.forEach(trace -> { 
 				try{
