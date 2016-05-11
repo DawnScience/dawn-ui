@@ -3,7 +3,9 @@ package org.dawnsci.processing.ui.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +14,7 @@ import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.common.widgets.celleditor.TextCellEditorWithContentProposal;
 import org.dawnsci.plotting.roi.RegionCellEditor;
 import org.dawnsci.processing.ui.ServiceHolder;
+import org.dawnsci.processing.ui.slice.IOperationInputData;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -24,6 +27,7 @@ import org.eclipse.dawnsci.analysis.api.processing.model.ModelField;
 import org.eclipse.dawnsci.analysis.api.processing.model.ModelUtils;
 import org.eclipse.dawnsci.analysis.api.processing.model.OperationModelField;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.jface.fieldassist.ContentProposal;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.IContentProposal;
@@ -45,6 +49,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +64,17 @@ public class ModelFieldEditors {
 
 	private static ISelectionListener selectionListener;
 	private static ToolTip            currentHint;
+	private static DataReadyEventHandler handler;
+	private static IOperationInputData recentData;
+	
+	static {
+		BundleContext ctx = FrameworkUtil.getBundle(ModelFieldEditors.class).getBundleContext();
+		handler = new ModelFieldEditors().new DataReadyEventHandler();
+		Dictionary<String, String> props = new Hashtable<>();
+		props.put(EventConstants.EVENT_TOPIC, "org/dawnsci/events/processing/DATAUPDATE");
+		ctx.registerService(EventHandler.class, handler, props);
+	}
+	
 	
 	/**
 	 * Create a new editor for a field.
@@ -266,20 +287,49 @@ public class ModelFieldEditors {
 		
 		final TextCellEditorWithContentProposal ed = new TextCellEditorWithContentProposal(parent, null, null);
 		
+		String fileField = field.getAnnotation().dataset();
+		
+		if (fileField == null || fileField.isEmpty()) return ed;
+		
+		try {
+
+			String path = null;
+
+			if (!field.getModel().isModelField(fileField) && 
+					recentData != null && 
+					recentData.getCurrentOperation() != null && 
+					recentData.getCurrentOperation().getModel() == field.getModel()) {
+				path = recentData.getInputData().getFirstMetadata(SliceFromSeriesMetadata.class).getFilePath();
+
+			}
+
+			if (!field.getModel().isModelField(fileField)) {
+				handler.setCurrentModel(field.getModel(), ed);
+			} else {
+				path = field.getModel().get(fileField).toString();
+			}
+
+			if (path != null) triggerDatasetNameJob(ed,path);
+
+		} catch (Exception e) {
+			logger.error("Could not set up auto-complete", e);
+		}
+		
+		return ed;
+	}
+	
+	private static void triggerDatasetNameJob(final TextCellEditorWithContentProposal ed, final String path){
+		
+		if (ed == null) return;
+		
 		Job job = new Job("dataset name read") {
 			
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				String fileField = field.getAnnotation().dataset();
-				Object object;
-				try {
-					object = field.getModel().get(fileField);
-				} catch (Exception e) {
-					return Status.CANCEL_STATUS;
-				}
+
 				
-				if (object == null) return Status.CANCEL_STATUS;
-				final Map<String, int[]> datasetInfo = DatasetNameUtils.getDatasetInfo(object.toString(), null);
+				if (path == null) return Status.CANCEL_STATUS;
+				final Map<String, int[]> datasetInfo = DatasetNameUtils.getDatasetInfo(path, null);
 				datasetInfo.toString();
 				
 				final IContentProposalProvider cpp = new IContentProposalProvider() {
@@ -315,8 +365,31 @@ public class ModelFieldEditors {
 		};
 		
 		job.schedule();
-			
-		return ed;
 	}
 
+	private class DataReadyEventHandler implements EventHandler {
+		
+		private IOperationModel model;
+		private TextCellEditorWithContentProposal ed;
+		
+		@Override
+		public void handleEvent(Event event) {
+			IOperationInputData data = (IOperationInputData)event.getProperty("data");
+			recentData = data;
+			if (data != null && data.getCurrentOperation().getModel() == model) {
+				SliceFromSeriesMetadata md = data.getInputData().getFirstMetadata(SliceFromSeriesMetadata.class);
+				if (md != null && md.getFilePath() != null) {
+					triggerDatasetNameJob(ed, md.getFilePath());
+				}
+			}
+			
+		}
+		
+		public void setCurrentModel(IOperationModel model, TextCellEditorWithContentProposal ed) {
+			this.model = model;
+			this.ed = ed;
+		}
+		
+	}
+	
 }
