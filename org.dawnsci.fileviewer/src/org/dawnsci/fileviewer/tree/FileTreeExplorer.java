@@ -111,6 +111,20 @@ public class FileTreeExplorer {
 	}
 
 	/**
+	 * Expands the Tree by n level
+	 * @param level
+	 */
+	public void expandRoot() {
+		if (tree != null && tree.getItems().length > 0) {
+			TreeItem root = tree.getItems()[0];
+			final Image image = (Image) root.getData(FileViewerConstants.TREEITEMDATA_IMAGEEXPANDED);
+			if (image != null)
+				root.setImage(image);
+			treeExpandItem(root);
+		}
+	}
+
+	/**
 	 * Creates the Drag & Drop DragSource for items being dragged from the tree.
 	 * 
 	 * @return the DragSource for the tree
@@ -214,6 +228,7 @@ public class FileTreeExplorer {
 	 *            the TreeItem to fill in
 	 */
 	public void treeExpandItem(TreeItem item) {
+		item.setExpanded(true);
 		parent.setCursor(viewer.getIconCache().stockCursors[viewer.getIconCache().cursorWait]);
 		final Object stub = item.getData(FileViewerConstants.TREEITEMDATA_STUB);
 		if (stub == null)

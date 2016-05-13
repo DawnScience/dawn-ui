@@ -77,6 +77,8 @@ public class FileViewerE4Part {
 
 		fileViewer.createCompositeContents(parent);
 		fileViewer.notifyRefreshFiles(null);
+		//Expand root(s)
+		fileViewer.getTreeExplorer().expandRoot();
 	}
 
 	@Focus

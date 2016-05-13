@@ -171,7 +171,7 @@ public class FileViewer {
 		// Tree
 		treeExplo = new FileTreeExplorer(this);
 		treeExplo.createTreeView(sashForm);
-		
+
 		// Table
 		tableExplo = new FileTableExplorer(this, sashForm, SWT.BORDER|SWT.V_SCROLL|SWT.FULL_SELECTION);
 		createSWTPopupMenu(tableExplo.getTable());
@@ -905,5 +905,9 @@ public class FileViewer {
 			return sel;
 		}
 		return null;
+	}
+
+	public FileTreeExplorer getTreeExplorer() {
+		return treeExplo;
 	}
 }
