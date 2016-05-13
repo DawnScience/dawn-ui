@@ -55,7 +55,7 @@ import org.eclipse.swt.widgets.FileDialog;
 public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 {
 	// the scene class -> uses an inherited class to hold the camera translation data
-	private SurfaceDisplayer scene;
+	private SceneDisplayer scene;
 	// root node
 	private Group root;
 	// node to hold the isosurface data -> a pointer is declared within the scene (surfacedisplayer)
@@ -97,7 +97,7 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 		this.isoSurfaceGroup = new Group();
 		
 		// create the scene -> most of the changes will be done within here
-		scene = new SurfaceDisplayer(root, isoSurfaceGroup);
+		scene = new SceneDisplayer(root, isoSurfaceGroup);
 		
 		// set the scene to the canvas
 		this.canvas.setScene(scene);

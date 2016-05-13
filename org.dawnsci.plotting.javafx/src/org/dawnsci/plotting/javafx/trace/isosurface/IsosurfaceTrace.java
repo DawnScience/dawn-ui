@@ -20,7 +20,7 @@ import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 
-import org.dawnsci.plotting.javafx.SurfaceDisplayer;
+import org.dawnsci.plotting.javafx.SceneDisplayer;
 import org.dawnsci.plotting.javafx.trace.Image3DTrace;
 import org.dawnsci.plotting.javafx.trace.JavafxTrace;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
@@ -49,7 +49,7 @@ public class IsosurfaceTrace extends JavafxTrace implements IIsosurfaceTrace
 	private int[] rgb;
 	private double opacity = 0.5;
 	
-	public IsosurfaceTrace(IPlottingSystemViewer<?> viewer, SurfaceDisplayer newScene, String traceName)
+	public IsosurfaceTrace(IPlottingSystemViewer<?> viewer, SceneDisplayer newScene, String traceName)
 	{
 		super(viewer, traceName, newScene);
 	}

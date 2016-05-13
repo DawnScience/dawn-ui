@@ -14,7 +14,7 @@ import javafx.scene.Node;
 
 import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.dawnsci.plotting.javafx.ServiceLoader;
-import org.dawnsci.plotting.javafx.SurfaceDisplayer;
+import org.dawnsci.plotting.javafx.SceneDisplayer;
 import org.dawnsci.plotting.javafx.trace.Image3DTrace;
 import org.dawnsci.plotting.javafx.trace.JavafxTrace;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
@@ -33,7 +33,7 @@ public class VolumeTrace  extends JavafxTrace implements IVolumeRenderTrace
 {
 	private VolumeRender volume; 
 	
-	public VolumeTrace(IPlottingSystemViewer<?> plotter, SurfaceDisplayer newScene, String name) {
+	public VolumeTrace(IPlottingSystemViewer<?> plotter, SceneDisplayer newScene, String name) {
 		super(plotter, name, newScene);		
 	}
 

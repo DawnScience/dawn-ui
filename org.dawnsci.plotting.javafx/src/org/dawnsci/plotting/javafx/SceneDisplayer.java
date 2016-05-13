@@ -37,14 +37,14 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 
 /**
  * 
- * @author nnb55016 The following class creates the scene where the surface is
+ * @author nnb55016 The following class creates the scene where the scene is
  *         visualised It is used when running the application inside DAWN
  *
  * @author Joel Ogden
  * 
  */
 
-public class SurfaceDisplayer extends Scene
+public class SceneDisplayer extends Scene
 {	
 	
 	// camera for the scene
@@ -76,7 +76,7 @@ public class SurfaceDisplayer extends Scene
 	 * @param root - the root node for the scene isosurfaceGroup
 	 * @param isosurfaceGroup - the node holding the surface objects
 	 */
-	public SurfaceDisplayer(Group root, Group isosurfaceGroup)
+	public SceneDisplayer(Group root, Group isosurfaceGroup)
 	{
 		// create the scene
 		super(root, 1500, 1500, true);

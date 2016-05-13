@@ -12,7 +12,7 @@ import java.util.List;
 
 import javafx.scene.Node;
 
-import org.dawnsci.plotting.javafx.SurfaceDisplayer;
+import org.dawnsci.plotting.javafx.SceneDisplayer;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
 
@@ -27,9 +27,9 @@ public abstract class JavafxTrace extends Image3DTrace
 {	
 
 	// !! I want to remove this, but am not sure how.
-	private SurfaceDisplayer scene;
+	private SceneDisplayer scene;
 	
-	public JavafxTrace(IPlottingSystemViewer<?> plotter, String name, SurfaceDisplayer scene) {
+	public JavafxTrace(IPlottingSystemViewer<?> plotter, String name, SceneDisplayer scene) {
 		super(plotter, name);
 		this.scene = scene;
 	}
