@@ -263,11 +263,6 @@ public class IsosurfaceTrace extends JavafxTrace implements IIsosurfaceTrace
 		// TODO Auto-generated method stub
 	}
 	
-	public List<IDataset> getAxes()
-	{
-		return this.axes;
-	}
-
 	@Override
 	public Node getNode() {
 		return this.isosurface; 

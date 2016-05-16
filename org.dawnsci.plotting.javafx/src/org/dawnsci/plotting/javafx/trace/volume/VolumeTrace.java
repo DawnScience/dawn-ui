@@ -54,12 +54,15 @@ public class VolumeTrace  extends JavafxTrace implements IVolumeRenderTrace
 			final double intensityValue, 
 			final double opacityValue,
 			final double[] maxMinValue,
-			final double[] maxMinCulling)
+			final double[] maxMinCulling,
+			final List<? extends IDataset> axes)
 	{
 		if (volume == null)
 			volume = new VolumeRender();
 		
 		final PaletteService pservice = (PaletteService) ServiceLoader.getPaletteService();
+		this.axes = (List<IDataset>) axes;
+		
 		
 		// needs to run in javafx thread
 		Display.getDefault().syncExec(new Runnable() {
@@ -80,12 +83,6 @@ public class VolumeTrace  extends JavafxTrace implements IVolumeRenderTrace
 	@Override
 	public Node getNode() {
 		return volume;
-	}
-
-	@Override
-	public List<IDataset> getAxes() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 	
 	@Override

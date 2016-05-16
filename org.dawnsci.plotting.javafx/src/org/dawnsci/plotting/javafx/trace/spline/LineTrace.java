@@ -61,11 +61,5 @@ public class LineTrace extends JavafxTrace implements ILine3DTrace
 	public Node getNode() {
 		return line;
 	}
-
-	@Override
-	public List<IDataset> getAxes() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 	
 }

@@ -42,7 +42,10 @@ public abstract class JavafxTrace extends Image3DTrace
 	 */
 	public abstract Node getNode();
 	
-	public abstract List<IDataset> getAxes();
+	public List<IDataset> getAxes()
+	{
+		return this.axes;
+	}
 	
 	public void dispose() {
         // remove node from scene
