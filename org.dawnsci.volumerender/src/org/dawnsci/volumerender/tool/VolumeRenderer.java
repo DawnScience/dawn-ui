@@ -52,7 +52,8 @@ public class VolumeRenderer {
 		double[] scaledMinMaxCull = scaledMinAndMax(minCull, maxCull, sliceMin, sliceMax);
 		
 		final IVolumeRenderTrace trace = createOrLookupTrace();
-		trace.setData(dataset.getShape(), slice, intensity, opacity, scaledMinMaxValue, scaledMinMaxCull);
+		//TODO fix last argument
+		trace.setData(dataset.getShape(), slice, intensity, opacity, scaledMinMaxValue, scaledMinMaxCull, null);
 		trace.setColour(rgb[0], rgb[1], rgb[2]);
 		if ((IVolumeRenderTrace) plottingSystem.getTrace(traceID) == null)
 		{
