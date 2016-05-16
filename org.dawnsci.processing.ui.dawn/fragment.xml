@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<fragment>
+   <extension
+         point="org.dawnsci.introRegister">
+      <introPageRegister
+            class="org.dawnsci.processing.ui.ProcessingPerspectiveLaunch"
+            description="For processing data"
+            icon="intro/graphics/Processing48.png"
+            id="org.dawnsci.processing.ui.processingPerspectiveIntro"
+            name="Data Processing">
+      </introPageRegister>
+   </extension>
+   <extension
+         point="org.eclipse.ui.intro.configExtension">
+      <configExtension
+            configId="org.dawnsci.intro.universalConfig"
+            content="intro/introContribution.xml">
+      </configExtension>
+   </extension>
+</fragment>

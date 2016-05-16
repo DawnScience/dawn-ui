@@ -135,23 +135,6 @@
       </fileOpen>
    </extension>
    <extension
-         point="org.dawnsci.introRegister">
-      <introPageRegister
-            class="org.dawnsci.processing.ui.ProcessingPerspectiveLaunch"
-            description="For processing data"
-            icon="intro/graphics/Processing48.png"
-            id="org.dawnsci.processing.ui.processingPerspectiveIntro"
-            name="Data Processing">
-      </introPageRegister>
-   </extension>
-   <extension
-         point="org.eclipse.ui.intro.configExtension">
-      <configExtension
-            configId="org.dawnsci.intro.universalConfig"
-            content="intro/introContribution.xml">
-      </configExtension>
-   </extension>
-   <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
             class="org.dawnsci.processing.ui.preference.ProcessingPreferenceInitializer">
