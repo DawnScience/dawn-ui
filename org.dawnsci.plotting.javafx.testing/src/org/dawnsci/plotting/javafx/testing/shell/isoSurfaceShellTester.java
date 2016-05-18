@@ -13,7 +13,7 @@ import javafx.scene.shape.TriangleMesh;
 import org.dawnsci.isosurface.alg.MarchingCubes;
 import org.dawnsci.isosurface.alg.MarchingCubesModel;
 import org.dawnsci.isosurface.alg.Surface;
-import org.dawnsci.plotting.javafx.SurfaceDisplayer;
+import org.dawnsci.plotting.javafx.SceneDisplayer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
@@ -158,7 +158,7 @@ public class isoSurfaceShellTester {
         Group isoSurfaceGroup = new Group();
         
         
-        Scene scene = new SurfaceDisplayer(root, isoSurfaceGroup);
+        Scene scene = new SceneDisplayer(root, isoSurfaceGroup);
         
         isoSurfaceGroup.getChildren().add(mesh);
         

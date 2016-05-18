@@ -8,7 +8,7 @@ import javafx.scene.transform.Rotate;
 import org.dawnsci.isosurface.alg.MarchingCubes;
 import org.dawnsci.isosurface.alg.MarchingCubesModel;
 import org.dawnsci.isosurface.alg.Surface;
-import org.dawnsci.plotting.javafx.SurfaceDisplayer;
+import org.dawnsci.plotting.javafx.SceneDisplayer;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.swt.SWT;
@@ -61,7 +61,7 @@ public class VolumeRenderingShellTester {
         Group root = new Group();
         Group isoSurfaceGroup = new Group();
         
-        SurfaceDisplayer scene = new SurfaceDisplayer(root, isoSurfaceGroup);
+        SceneDisplayer scene = new SceneDisplayer(root, isoSurfaceGroup);
                 
 //        scene.addVolume/Trace(group);
         
