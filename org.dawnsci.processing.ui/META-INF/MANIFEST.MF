@@ -37,6 +37,5 @@ Import-Package: org.apache.commons.beanutils;version="1.9.1",
  org.slf4j;version="[1.7.2,2.0.0)",
  uk.ac.diamond.scisoft.analysis.processing.visitor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Service-Component: OSGI-INF/*.xml,
- OSGI-INF/eventServiceHolderxml.xml
+Service-Component: OSGI-INF/*.xml
 Export-Package: org.dawnsci.processing.ui.model
