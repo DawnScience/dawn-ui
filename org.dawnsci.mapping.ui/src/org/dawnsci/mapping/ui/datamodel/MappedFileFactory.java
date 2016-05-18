@@ -81,7 +81,7 @@ public class MappedFileFactory {
 		if (live != null) {
 			IRemoteDataset lz = getRemoteDataset(path,blockName,live);
 			LiveRemoteAxes remoteAxes = getRemoteAxes(axesNames, path, bean, live);
-			block = new LiveMappedDataBlock(blockName, lz, bean.getxDim(), bean.getyDim(), path, remoteAxes);
+			block = new LiveMappedDataBlock(blockName, lz, bean.getxDim(), bean.getyDim(), path, remoteAxes, live.getHost(),live.getPort());
 			return block;
 		}
 		

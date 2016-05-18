@@ -4,6 +4,7 @@ import org.eclipse.dawnsci.analysis.api.EventTracker;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionService;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
+import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationExporterService;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.osgi.service.event.EventAdmin;
@@ -17,6 +18,7 @@ public class ServiceHolder {
 	private static ILoaderService loaderService;
 	private static IOperationExporterService exporterService;
 	private static EventAdmin eventAdmin;
+	private static IPersistenceService persistenceService;
 
 	public static IExpressionService getExpressionService() {
 		return expressionService;
@@ -72,5 +74,13 @@ public class ServiceHolder {
 
 	public static void setEventAdmin(EventAdmin eventAdmin) {
 		ServiceHolder.eventAdmin = eventAdmin;
+	}
+
+	public static IPersistenceService getPersistenceService() {
+		return persistenceService;
+	}
+
+	public static void setPersistenceService(IPersistenceService persistenceService) {
+		ServiceHolder.persistenceService = persistenceService;
 	}
 }

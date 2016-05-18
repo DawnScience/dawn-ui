@@ -1,7 +1,12 @@
 package org.dawnsci.processing.ui.tool;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -10,6 +15,7 @@ import java.util.Map;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.processing.ui.Activator;
+import org.dawnsci.processing.ui.EventServiceHolder;
 import org.dawnsci.processing.ui.ServiceHolder;
 import org.dawnsci.processing.ui.model.ConfigureOperationModelDialog;
 import org.dawnsci.processing.ui.model.OperationModelViewer;
@@ -27,17 +33,25 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
+import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
 import org.eclipse.dawnsci.analysis.api.processing.Atomic;
 import org.eclipse.dawnsci.analysis.api.processing.ExecutionType;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationBean;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationContext;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
+import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromLiveSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
+import org.eclipse.dawnsci.hdf5.nexus.NexusFileFactoryHDF5;
+import org.eclipse.dawnsci.hdf5.nexus.NexusFileHDF5;
+import org.eclipse.dawnsci.nexus.NexusException;
+import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
@@ -58,6 +72,9 @@ import org.eclipse.richbeans.widgets.internal.GridUtils;
 import org.eclipse.richbeans.widgets.table.ISeriesItemDescriptor;
 import org.eclipse.richbeans.widgets.table.ISeriesValidator;
 import org.eclipse.richbeans.widgets.table.SeriesTable;
+import org.eclipse.scanning.api.event.EventException;
+import org.eclipse.scanning.api.event.core.ISubmitter;
+import org.eclipse.scanning.api.event.status.StatusBean;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
@@ -97,9 +114,8 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 			e.printStackTrace();
 			return;
 		}
-		this.seriesTable    = new SeriesTable() {
+		this.seriesTable    = new SeriesTable(){
 			protected void checkValid(List<ISeriesItemDescriptor> series) {
-				
 				if (series.contains(ISeriesItemDescriptor.INSERT)) {
 					statusMessage.setText("Please choose an operation to insert");
 					return;
@@ -108,7 +124,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 				ISeriesValidator validator = getValidator();
 				if (validator==null) return;
 				final String errorMessage = validator.getErrorMessage(series);
-				if (errorMessage == null && statusMessage.getText() == null) return;
+				if (errorMessage == null && (statusMessage.getText() == null  || statusMessage.getText().isEmpty())) return;
 				statusMessage.setText(errorMessage!=null ? errorMessage : "");
 				
 				statusMessage.getParent().layout();
@@ -129,13 +145,23 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 	@Override
 	public void createControl(Composite parent) {
 		
-		
 		sashForm = new SashForm(parent, SWT.VERTICAL);
 		
 		run = new Action("Run", Action.AS_PUSH_BUTTON) {
 			@Override
 			public void run() {
-				setUpRun();
+				
+				if (parentMeta instanceof SliceFromLiveSeriesMetadata) {
+					try {
+						setUpLiveRun();
+					} catch (Exception e) {
+						logger.error("Could not set-up live processing", e);
+					}
+				}
+				
+				if (parentMeta instanceof SliceFromSeriesMetadata) {
+					setUpRun();
+				}
 			}
 		};
 		run.setEnabled(false);
@@ -211,8 +237,17 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 				try {
 					IStructuredSelection ss = (IStructuredSelection)event.getSelection();
 					if (ss.isEmpty()) return;
-					selection = (IOperation)((ISeriesItemDescriptor)ss.getFirstElement()).getSeriesObject();
-					updateData();
+					Object ob = ((IStructuredSelection)ss).getFirstElement();
+					if (ob instanceof ISeriesItemDescriptor) {
+						try {
+							selection = ((IOperation)((ISeriesItemDescriptor)ob).getSeriesObject());
+							if (selection == null) return;
+							updateData();
+						} catch (Exception e) {
+//							selection = null;
+						}
+					}
+
 				} catch (Exception e) {
 					logger.error(e.getMessage());
 				}
@@ -422,6 +457,112 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		
 		final String path = fsd.getPath();
 		path.toString();
+		
+		ProgressMonitorDialog dia = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
+
+		try {
+			dia.run(true, true, new IRunnableWithProgress() {
+
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException,
+				InterruptedException {
+					
+					try {
+						runProcessing(parentMeta, path, monitor);
+						Map<String,String> props = new HashMap<>();
+						props.put("path", path);
+						EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
+						eventAdmin.postEvent(new Event("org/dawnsci/events/file/OPEN", props));
+						parentMeta.toString();
+					} catch (final Exception e) {
+						
+						logger.error(e.getMessage(), e);
+					}
+				}
+			});
+		} catch (InvocationTargetException e1) {
+			logger.error(e1.getMessage(), e1);
+		} catch (InterruptedException e1) {
+			logger.error(e1.getMessage(), e1);
+		}
+		
+	}
+	
+	private void setUpLiveRun() throws Exception {
+		
+		if (parentMeta == null) return;
+		
+		if (!(parentMeta instanceof SliceFromLiveSeriesMetadata)) return;
+		//TODO logging!
+		if (EventServiceHolder.getEventService() == null) return;
+		
+		SliceFromLiveSeriesMetadata sslm = (SliceFromLiveSeriesMetadata)parentMeta;
+	
+		String p = getPathNoExtension(sslm.getFilePath());
+		
+		FileSelectionDialog fsd = new FileSelectionDialog(this.getViewPart().getSite().getShell());
+		fsd.setNewFile(true);
+		fsd.setFolderSelector(false);
+		fsd.setHasResourceButton(true);
+		fsd.setBlockOnOpen(true);
+		fsd.setPath(p +"_processed.nxs");
+		
+		
+		if (fsd.open() == FileSelectionDialog.CANCEL) return;
+		
+		final String path = fsd.getPath();
+		int i = path.lastIndexOf(File.separator);
+		String runDirectory = path.substring(0, i+1);
+		
+		Date date = new Date() ;
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyMMdd_HHmmss") ;
+		String timeStamp = "_" +dateFormat.format(date);
+		
+		String chainPath = runDirectory +  "chain" + timeStamp +  ".nxs";
+		
+		IPersistenceService ps = ServiceHolder.getPersistenceService();
+		GroupNode gn = ps.getPersistentNodeFactory().writeOperationsToGroup(getOperations());
+		NexusFile nexusFile = null;
+		try {
+			nexusFile = NexusFileHDF5.createNexusFile(runDirectory + timeStamp +  "chain.nxs", false);
+			nexusFile.addNode("/entry/process", gn);
+		} catch (Exception e){
+			throw e;
+		}finally {
+			nexusFile.close();
+		}
+		
+		IOperationService service = ServiceHolder.getOperationService();
+		IOperationBean b = service.createBean();
+		b.setRunDirectory(runDirectory);
+		b.setDeletePersistenceFile(false);
+		b.setPersistencePath(chainPath);
+		b.setFilePath(sslm.getFilePath());
+		b.setDatasetPath(sslm.getDatasetName());
+		b.setXmx("1024m");
+//		b.setAxesNames(ax);
+		b.setOutputFilePath(path);
+		b.setName("GDA_OPERATION_SUBMISSION");
+
+		b.setDataKey("/entry/solstice_scan");
+		b.setReadable(true);
+
+		URI uri;
+		try {
+			uri = new URI("tcp://sci-serv5.diamond.ac.uk:61616");
+		} catch (URISyntaxException e) {
+			logger.error("Could not create URI", e);
+			return;
+		}
+		
+		ISubmitter<StatusBean> submitter = EventServiceHolder.getEventService().createSubmitter(uri, "scisoft.operation.SUBMISSION_QUEUE");
+		
+		try {
+			if (b instanceof StatusBean) submitter.submit((StatusBean)b);
+		} catch (EventException e) {
+			logger.error("TODO put description of error here", e);
+		}
+		
 		
 		ProgressMonitorDialog dia = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
 

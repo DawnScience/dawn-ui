@@ -61,7 +61,7 @@ public class MappedDataBlock implements MapObject {
 		return sv;
 	}
 	
-	private SliceND getMatchingDataSlice(int x, int y) {
+	protected SliceND getMatchingDataSlice(int x, int y) {
 		SliceND slice = new SliceND(dataset.getShape());
 		slice.setSlice(yDim,y,y+1,1);
 		slice.setSlice(xDim,x,x+1,1);
