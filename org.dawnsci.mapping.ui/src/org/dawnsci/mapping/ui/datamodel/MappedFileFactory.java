@@ -165,8 +165,8 @@ public class MappedFileFactory {
 		try {
 			Dataset d = DatasetUtils.sliceAndConvertLazyDataset(getLazyDataset(path, b.getName()));
 			AxesMetadataImpl ax = new AxesMetadataImpl(2);
-			ax.addAxis(getLazyDataset(path, b.getAxes()[0]), 0);
-			ax.addAxis(getLazyDataset(path, b.getAxes()[1]), 1);
+			ax.addAxis(0,getLazyDataset(path, b.getAxes()[0]));
+			ax.addAxis(1,getLazyDataset(path, b.getAxes()[1]));
 			
 			if (d.getRank() == 3) {
 				
