@@ -279,22 +279,19 @@ public class ImageHistogramProvider implements IHistogramProvider {
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		this.viewer = viewer;
 
-		if (newInput != oldInput){
-			//remove listeners on old input
-			if (oldInput != null){
-				IPaletteTrace oldImage = (IPaletteTrace) oldInput;
-				oldImage.removePaletteListener(imageListener);
-			}
-			// reset cached input
+		// remove listeners on old input
+		if (oldInput != null) {
+			IPaletteTrace oldImage = (IPaletteTrace) oldInput;
+			oldImage.removePaletteListener(imageListener);
+		}
+		// reset cached input
 
-			//setImage
-			if (newInput instanceof IPaletteTrace){
-				IPaletteTrace image = (IPaletteTrace) newInput;
-				setImage(image);
-				image.addPaletteListener(imageListener);
-				// set listeners
-			}
-
+		// setImage
+		if (newInput instanceof IPaletteTrace) {
+			IPaletteTrace image = (IPaletteTrace) newInput;
+			setImage(image);
+			image.addPaletteListener(imageListener);
+			// set listeners
 		}
 	}
 
