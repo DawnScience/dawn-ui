@@ -16,9 +16,9 @@ New features:
 - Pydev update:
 - Iso-Surface / Volume Renderer: Reset transform button added, non indices axes support, screenshot/print enabled. 
 - FileViewer: sorting of files and folders.
-- New operation: Dataset Concatenation. Works for two dimensional datasets and takes into account axes properly.
-- New class: Interpolation2D. Perform bicubic interpolations of datapoints on a two dimensional grid.
-- New tool: XAS Sample Calculation. Get transmission and optical depth profiles as well as quick predictions
+- NCD Processing: calculation of crystallite thickness T parameter.
+- Dataset Concatenation processing operation: works for two dimensional datasets and takes into account axes properly.
+- XAS Sample Calculation tool: get transmission and optical depth profiles as well as quick predictions
 	of X-ray fluorescence experiments, with support for escape peaks and scattering. Export the parameters to an input-file
 	for XMI-MSIM for a full Monte Carlo simulation. Access this tool through the menu (Tools -> XAS Sample Calculation) or
 	as a view (Window -> Show View -> Others -> Data Analysis - XAS -> XAS Sample Calculation).
