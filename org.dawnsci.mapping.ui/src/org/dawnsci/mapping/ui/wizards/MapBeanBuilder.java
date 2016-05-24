@@ -21,6 +21,8 @@ import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 
+import uk.ac.diamond.scisoft.analysis.io.NexusTreeUtils;
+
 public class MapBeanBuilder {
 
 	public static MappedDataFileBean buildBean(Tree tree) {
@@ -32,7 +34,7 @@ public class MapBeanBuilder {
 			@Override
 			public boolean found(NodeLink node) {
 				Node n = node.getDestination();
-				if (n.containsAttribute("signal")) {
+				if (n.containsAttribute("signal") && n.containsAttribute("NX_class") && n.getAttribute("NX_class").getFirstElement().equals(NexusTreeUtils.NX_DATA)) {
 					return true;
 				}
 
@@ -52,7 +54,7 @@ public class MapBeanBuilder {
 		for (Entry<String, NodeLink> entry : nodes.entrySet()) {
 			NodeLink value = entry.getValue();
 			Node n = value.getDestination();
-			if (!(n instanceof GroupNode)) return null;
+			if (!(n instanceof GroupNode)) continue;
 			String att = n.getAttribute("signal").getFirstElement();
 			DataNode dataNode = ((GroupNode)n).getDataNode(att);
 			if (dataNode.containsAttribute("interpretation") && dataNode.getAttribute("interpretation").getFirstElement().equals("rgba-image")){
@@ -64,6 +66,12 @@ public class MapBeanBuilder {
 //			IDataset axes = a.getValue();
 			
 			int rank = dataNode.getRank();
+			int squeezedRank = rank;
+			
+			if (dataNode.getMaxShape() != null) {
+				squeezedRank = getSqueezedRank(dataNode.getMaxShape());
+			}
+			
 			String[] axNames = new String[rank];
 			Attribute at = n.getAttribute("axes");
 			IDataset ad = at.getValue();
@@ -87,7 +95,7 @@ public class MapBeanBuilder {
 				axNames[i] = s;
 			}
 			
-			datasets.add(new DataInfo(Node.SEPARATOR+entry.getKey(), att , axNames));
+			datasets.add(new DataInfo(Node.SEPARATOR+entry.getKey(), att , axNames, squeezedRank));
 		}
 
 		for (String name : images) populateImage(bean, name, nodes.get(name));
@@ -105,6 +113,15 @@ public class MapBeanBuilder {
 	
 	
 	
+	private static int getSqueezedRank(long[] maxShape) {
+		int r = 0;
+		
+		for (long i : maxShape) if (i != 1) r++;
+		
+		return r;
+	}
+
+
 	private static void populateData(MappedDataFileBean bean, List<DataInfo> infoList) {
 		//TODO 1D scans
 		int maxRank = 0;
@@ -113,12 +130,12 @@ public class MapBeanBuilder {
 		DataInfo min = null;
 		
 		for (DataInfo d : infoList) {
-			if (d.axes.length > maxRank) {
-				maxRank = d.axes.length;
+			if (d.rank > maxRank) {
+				maxRank = d.rank;
 				max = d;
 			}
-			if (d.axes.length < minRank) {
-				minRank = d.axes.length;
+			if (d.rank < minRank) {
+				minRank = d.rank;
 				min = d;
 			}
 		}
@@ -137,14 +154,14 @@ public class MapBeanBuilder {
 		
 		while (it.hasNext()) {
 			DataInfo d = it.next();
-			if (d.axes.length == minRank) continue;
+			if (d.rank == minRank) continue;
 			
 			MappedBlockBean b = new MappedBlockBean();
 			b.setName(d.getFullName());
 			b.setAxes(d.getFullAxesNames());
 			b.setxDim(slow ? 1 : d.axes.length -2);
 			b.setyDim(slow ? 0 : d.axes.length -1);
-			b.setRank(d.axes.length);
+			b.setRank(d.rank);
 			it.remove();
 			bean.addBlock(b);
 		}
@@ -203,11 +220,13 @@ public class MapBeanBuilder {
 		String parent;
 		String name;
 		String[] axes;
+		int rank;
 		
-		public DataInfo(String parent, String name, String[] axes) {
+		public DataInfo(String parent, String name, String[] axes, int rank) {
 			this.name = name;
 			this.axes = axes;
 			this.parent = parent;
+			this.rank = rank;
 		}
 		
 		public String getFullName() {
