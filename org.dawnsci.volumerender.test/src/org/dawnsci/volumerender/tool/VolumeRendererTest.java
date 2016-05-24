@@ -47,7 +47,7 @@ public class VolumeRendererTest {
 			);
 		volumeRenderer.run(mock(IMonitor.class));
 		
-		verify(trace).setData(new int[]{20,20,20}, afterSlicing, intensity, opacity, resultingRange, resultingRange);
+		verify(trace).setData(new int[]{20,20,20}, afterSlicing, intensity, opacity, resultingRange, resultingRange, null);
 		verify(plottingSystem).addTrace(trace);		
 	}
 }
