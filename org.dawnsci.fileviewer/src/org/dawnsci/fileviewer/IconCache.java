@@ -16,6 +16,8 @@ import org.eclipse.swt.graphics.*;
 import org.eclipse.swt.program.*;
 import org.eclipse.swt.widgets.*;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -84,7 +86,7 @@ public class IconCache {
 			stockImages = new Image[stockImageLocations.length];
 				
 			for (int i = 0; i < stockImageLocations.length; ++i) {
-				Image image = Activator.getImage("icons/" + stockImageLocations[i]);
+				Image image = createStockImage(Display.getDefault(), "/icons/" + stockImageLocations[i]);
 				if (image == null) {
 					freeResources();
 					throw new IllegalStateException(
@@ -101,6 +103,28 @@ public class IconCache {
 		}
 		iconCache = new Hashtable<Program, Image>();
 	}
+
+	/**
+	 * Creates a stock image
+	 * 
+	 * @param display
+	 *            the display
+	 * @param path
+	 *            the relative path to the icon
+	 */
+	private Image createStockImage(Display display, String path) {
+		InputStream stream = IconCache.class.getResourceAsStream(path);
+		ImageData imageData = new ImageData(stream);
+//		ImageData mask = imageData.getTransparencyMask();
+		Image result = new Image(display, imageData);
+		try {
+			stream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
 	/**
 	 * Frees the resources
 	 */
