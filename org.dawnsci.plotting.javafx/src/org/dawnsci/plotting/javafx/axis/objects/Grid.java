@@ -18,7 +18,6 @@ import org.eclipse.nebula.visualization.xygraph.linearscale.TickFactory.TickForm
 
 public class Grid extends Group
 {
-	
 	private Group xAxis;
 	private Group yAxis;
 	
@@ -35,7 +34,7 @@ public class Grid extends Group
 	private double textSize;
 	private IDataset tickLookUpTable;
 	private Point3D axisLength;
-		
+
 	/**
 	 * Initialise an axis grid. Generates a new axis plane along the "planeXYZ" plane. Using the below parameters
 	 * @param planeXYZ - The axis plane
@@ -48,6 +47,7 @@ public class Grid extends Group
 	 */
 	public Grid(Point3D planeXYZ, IDataset tickLookUpTable, Point3D axisLength, double textSize)
 	{
+		// TODO add axis label
 		this.textSize = textSize;
 		this.planeVector = planeXYZ;
 		this.tickLookUpTable = tickLookUpTable;
@@ -55,7 +55,7 @@ public class Grid extends Group
 		
 		Point2D maxLengthXY = new Point2D(axisLength.getX(), axisLength.getY());
 		
-		generateAxisPlane(this.planeVector, this.tickLookUpTable, maxLengthXY);
+		generateAxisPlane(this.planeVector, maxLengthXY);
 		
 		this.localToSceneTransformProperty().addListener((obs, oldT, newT) -> {
 			
@@ -95,7 +95,7 @@ public class Grid extends Group
 				setGridOffset(new Point3D(0, 0, axisLength.getZ()));
 				offsetGrid(new Point3D(0,0, axisLength.getY()), xAxis);
 			}
-        });	
+		});
 		
 	}
 	
@@ -140,13 +140,13 @@ public class Grid extends Group
 		}
 	}
 	
-	private void generateAxisPlane(Point3D planeVector, IDataset axisLookUpTable, Point2D axisLength)
+	private void generateAxisPlane(Point3D planeVector, Point2D axisLength)
 	{
 		
 		this.xAxis = new Group();
 		this.yAxis = new Group();
 		
-		generateTicks(axisLookUpTable);
+		generateTicks();
 		
 		orientatePlane(planeVector);
 		
@@ -154,7 +154,7 @@ public class Grid extends Group
 		this.getTransforms().add(this.offset);
 	}
 	
-	private void generateTicks(IDataset axisLookUpTable)
+	private void generateTicks()
 	{
 		
 		TickFactory tickGenerator = new TickFactory(TickFormatting.autoMode, null);

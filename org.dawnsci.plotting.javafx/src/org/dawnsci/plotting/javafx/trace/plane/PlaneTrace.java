@@ -4,6 +4,8 @@ import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.Node;
 
+import java.util.List;
+
 import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.dawnsci.plotting.javafx.SceneDisplayer;
 import org.dawnsci.plotting.javafx.ServiceLoader;
@@ -24,13 +26,11 @@ import org.eclipse.dawnsci.plotting.api.trace.IPlane3DTrace;
  */
 public class PlaneTrace extends JavafxTrace implements IPlane3DTrace
 {
-	
 	private ImagePlane imagePlane;
 	private ILazyDataset lazyDataset;
 	
 	public PlaneTrace(IPlottingSystemViewer<?> plotter, SceneDisplayer newScene, String name) {
 		super(plotter, name, newScene);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
@@ -41,14 +41,14 @@ public class PlaneTrace extends JavafxTrace implements IPlane3DTrace
 
 	@Override
 	public IDataset getData() {
-		if(lazyDataset==null){
-	        throw new IllegalArgumentException("lazyDataset was null");
-	    }	
+		if (lazyDataset == null) {
+			throw new IllegalArgumentException("lazyDataset was null");
+		}
 		return lazyDataset.getSlice();
 	}
 
 	@Override
-	public void setData(final int[] size, final IDataset imageData, final double[] offset, final double[] planeNormal) 
+	public void setData(final ILazyDataset imageData, final double[] size, final double[] offset, final double[] planeNormal, final List<? extends IDataset> axes) 
 	{
 		final PaletteService pservice = (PaletteService) ServiceLoader.getPaletteService();
 		
@@ -59,18 +59,16 @@ public class PlaneTrace extends JavafxTrace implements IPlane3DTrace
 				new Point3D(offset[0], offset[1], offset[2]), 
 				new Point3D(planeNormal[0],planeNormal[1],planeNormal[2]),
 				pservice);
-		
+		this.axes = (List<IDataset>) axes;
 	}
-	
+
 	@Override
 	public void setOpacity(double opacity) {
-		// TODO Auto-generated method stub
-		
+		imagePlane.setOpacityMaterial(opacity);
 	}
 
 	@Override
 	public Node getNode() {
 		return imagePlane;
-	}	
-
+	}
 }

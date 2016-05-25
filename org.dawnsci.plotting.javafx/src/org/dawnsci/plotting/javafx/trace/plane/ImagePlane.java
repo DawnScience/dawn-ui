@@ -32,7 +32,7 @@ public class ImagePlane extends MeshView
 {
 	private PhongMaterial mat;
 	
-	private Point2D size;    
+	private Point2D size;
 	private Point3D offsets;
 	private Point3D planeNormal;
 	
@@ -46,17 +46,17 @@ public class ImagePlane extends MeshView
 	 * @param paletteService
 	 */
 	public ImagePlane(
-			final Point2D size, 
-			final ILazyDataset lazyDataset, 
+			final Point2D size,
+			final ILazyDataset lazyDataset,
 			final Point3D offsets,
 			final Point3D planeNormal,
 			final PaletteService paletteService)
 	{
 		super();
 		
-		this.size        = size;          
-		this.offsets     = offsets;       
-		this.planeNormal = planeNormal;   
+		this.size        = size;
+		this.offsets     = offsets;
+		this.planeNormal = planeNormal;
 		
 		Image image = createImageFromDataset(lazyDataset, paletteService);
 		
@@ -79,21 +79,19 @@ public class ImagePlane extends MeshView
 			final PaletteService paletteService)
 	{
 		super();
-		
-		this.size        = size;          
-		this.offsets     = offsets;       
-		this.planeNormal = planeNormal;   
-				
+
+		this.size        = size;
+		this.offsets     = offsets;
+		this.planeNormal = planeNormal;
+
 		generatePlane(image);
 	}
 	
 	public void generatePlane(final Image image)
 	{
-		
-		
 		TriangleMesh mesh = new TriangleMesh();
-		
-		// generate the plane points		
+
+		// generate the plane points
 		mesh.getPoints().addAll((float)0, 			(float)0, 			(float)0);
 		mesh.getPoints().addAll((float)size.getX(),	(float)0, 			(float)0);
 		mesh.getPoints().addAll((float)0, 			(float)size.getY(), (float)0);
@@ -107,19 +105,18 @@ public class ImagePlane extends MeshView
 		
 		// set the material - ie texture, colour, opacity
 		mat = new PhongMaterial(new Color(1,1,1,1));
-		mat.setDiffuseMap(image);		
+		mat.setDiffuseMap(image);
 		mat.setSpecularColor(new Color(1,1,1,1));
 		mat.setDiffuseColor( new Color(1,1,1,1));
 		this.setMaterial(mat);
 		
 		// remove the cull face
-		this.setCullFace(CullFace.NONE);		
+		this.setCullFace(CullFace.NONE);
 		
 		// rotate the plane to the perpendicular vector
 		Rotate rotation = Vector3DUtil.alignVector(planeNormal, new Point3D(0, 0, 1));
 		this.getTransforms().add(rotation);
 	}
-	
 
 	public Image createImageFromDataset(ILazyDataset lazyDataset, PaletteService ps)
 	{
@@ -147,13 +144,10 @@ public class ImagePlane extends MeshView
 				bi.setRGB(x, y, argb);
 			}
 		}
-		
-		
-		return SwingFXUtils.toFXImage(bi, null); 
-		
+
+		return SwingFXUtils.toFXImage(bi, null);
 	}
-	
-	
+
 	private float[] generateTextureCoords(float start, float offset)
 	{
 		return new float[]{
@@ -162,15 +156,15 @@ public class ImagePlane extends MeshView
 				(start),		1,
 				(start+offset),	1};
 	}
-	
+
 	private int[] generateFaces(int indexOffset)
 	{
 		return new int[]{
 				indexOffset+3, indexOffset+3, indexOffset+1, indexOffset+1, indexOffset+0, indexOffset+0,
 				indexOffset+0, indexOffset+0, indexOffset+2, indexOffset+2, indexOffset+3, indexOffset+3};
 	}
-	
-	public void setOpacity_Material(double opacity)
+
+	public void setOpacityMaterial(double opacity)
 	{
 		mat.setDiffuseColor(new Color(
 				mat.getDiffuseColor().getRed(),
@@ -183,5 +177,4 @@ public class ImagePlane extends MeshView
 				mat.getSpecularColor().getBlue(),
 				opacity));
 	}
-		
 }

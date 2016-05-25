@@ -4,7 +4,6 @@ import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 
 import javafx.event.EventHandler;
-import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.AmbientLight;
 import javafx.scene.Cursor;
@@ -24,7 +23,7 @@ import javafx.scene.transform.Translate;
 public class AxesGroup extends Group{
 	
 	private Grid axisGrid;
-	private Cylinder ScaleAxis;
+	private Cylinder scaleAxis;
 	private IDataset axisTickLookUpTable;
 	private Point3D axisSize;
 	private double textSize;
@@ -82,12 +81,12 @@ public class AxesGroup extends Group{
 		
 		return tempBox;
 	}
-	
+
 	public void addScaler(Point3D planeNormal, Point3D axisLength, double thickness, EventHandler<MouseEvent> scaleEventHandler)
 	{ 
-		ScaleAxis = createScaleBar(planeNormal, axisLength.getZ(), thickness);
-		ScaleAxis.setCursor(Cursor.OPEN_HAND);
-		ScaleAxis.setOnMouseDragged(scaleEventHandler);
+		scaleAxis = createScaleBar(planeNormal, axisLength.getZ(), thickness);
+		scaleAxis.setCursor(Cursor.OPEN_HAND);
+		scaleAxis.setOnMouseDragged(scaleEventHandler);
 		
 		this.getChildren().addAll(axisGrid);
 	}

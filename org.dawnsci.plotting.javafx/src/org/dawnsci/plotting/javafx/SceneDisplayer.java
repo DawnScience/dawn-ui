@@ -320,8 +320,8 @@ public class SceneDisplayer extends Scene
 	private Point3D findMidPointOfBounds(Bounds bounds)
 	{		
 		final Translate offsetInverse = new Translate(
-							bounds.getMinX() + (bounds.getWidth() / 2),                     
-							bounds.getMinY() + (bounds.getHeight()/ 2), 
+							bounds.getMinX() + (bounds.getWidth() / 2),
+							bounds.getMinY() + (bounds.getHeight()/ 2),
 							bounds.getMinZ() + (bounds.getDepth() / 2)
 							).createInverse(); 
 		
@@ -333,8 +333,8 @@ public class SceneDisplayer extends Scene
 		
 	private void updateCameraSceneTransforms()
 	{
-		this.currentCamera.setTranslateX(-this.getWidth() / 2);           
-		this.currentCamera.setTranslateY(-this.getHeight()/ 2);           
+		this.currentCamera.setTranslateX(-this.getWidth() / 2);
+		this.currentCamera.setTranslateY(-this.getHeight()/ 2);
 		this.currentCamera.setTranslateZ(-0);
 	}
 	
@@ -364,7 +364,7 @@ public class SceneDisplayer extends Scene
 	{
 		return lightingGroup;
 	}
-	
+
 	public void addTrace(JavafxTrace trace)
 	{
 		// isosurfaces require a specific lighting group
@@ -390,6 +390,10 @@ public class SceneDisplayer extends Scene
 	
 	public void setAxesData(List<IDataset> axesData)
 	{
+		if (axesData == null) {
+			throw new IllegalArgumentException("Must defined axes");
+		}
+
 		Point3D axisLength = new Point3D(
 				axesData.get(0).getSize(), 
 				axesData.get(1).getSize(),
