@@ -1,6 +1,7 @@
 package org.dawnsci.plotting.javafx.trace.plane;
 
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Point2D;
@@ -12,6 +13,7 @@ import javafx.scene.shape.CullFace;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Translate;
 
 import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
@@ -112,8 +114,12 @@ public class ImagePlane extends MeshView
 		
 		// remove the cull face
 		this.setCullFace(CullFace.NONE);
-		
-		// rotate the plane to the perpendicular vector
+
+		// translate to offset
+		Translate translate = new Translate(offsets.getX(), offsets.getY(), offsets.getZ());
+		this.getTransforms().add(translate);
+
+		// lastly rotate the plane to the perpendicular vector
 		Rotate rotation = Vector3DUtil.alignVector(planeNormal, new Point3D(0, 0, 1));
 		this.getTransforms().add(rotation);
 	}
@@ -126,14 +132,42 @@ public class ImagePlane extends MeshView
 		double maxValue = dataset.max(true, true).doubleValue();
 		
 		FunctionContainer functionContainer = ps.getFunctionContainer("Viridis (blue-green-yellow)");
-	
-		BufferedImage bi = new BufferedImage(dataset.getShape()[0], dataset.getShape()[1], BufferedImage.TYPE_INT_ARGB);
-	
-		for (int x = 0; x < dataset.getShape()[0]; x++)
+
+
+		int[] oShape = dataset.getShape();
+		if (oShape.length > 2) {
+			dataset = dataset.squeezeEnds();
+		}
+		int[] shape = dataset.getShape();
+		switch (shape.length) {
+		case 0:
+			shape = new int[] {1,1};
+			break;
+		case 1:
+			if (oShape[0] > 1) {
+				shape = new int[] {shape[0],1};
+			} else {
+				shape = new int[] {1, shape[0]};
+			}
+			break;
+		case 2:
+			break;
+		default:
+			throw new IllegalArgumentException("Dataset must have rank <= 2");
+		}
+		if (!Arrays.equals(oShape, shape)) {
+			dataset.setShape(shape);
+		}
+
+		// TODO refactor to reuse exist stuff for SWT (and also cope with RGB datasets)
+		// see ImageTrace
+		// NB there is a SWTFXUtils.toFXImage() method
+		BufferedImage bi = new BufferedImage(shape[0], shape[1], BufferedImage.TYPE_INT_ARGB);
+		for (int x = 0; x < shape[0]; x++)
 		{
-			for (int y = 0; y < dataset.getShape()[1]; y++)
+			for (int y = 0; y < shape[1]; y++)
 			{
-				double drawValue = ((dataset.getDouble(x,y,0)-minValue)/(maxValue-minValue));		
+				double drawValue = ((dataset.getDouble(x,y)-minValue)/(maxValue-minValue));
 				
 				int argb = 255;
 				
