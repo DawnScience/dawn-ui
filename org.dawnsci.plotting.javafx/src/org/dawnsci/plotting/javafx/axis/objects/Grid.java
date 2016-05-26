@@ -18,7 +18,6 @@ import org.eclipse.nebula.visualization.xygraph.linearscale.TickFactory.TickForm
 
 public class Grid extends Group
 {
-	
 	private Group xAxis;
 	private Group yAxis;
 	
@@ -35,7 +34,7 @@ public class Grid extends Group
 	private double textSize;
 	private IDataset tickLookUpTable;
 	private Point3D axisLength;
-		
+
 	/**
 	 * Initialise an axis grid. Generates a new axis plane along the "planeXYZ" plane. Using the below parameters
 	 * @param planeXYZ - The axis plane
@@ -48,6 +47,7 @@ public class Grid extends Group
 	 */
 	public Grid(Point3D planeXYZ, IDataset tickLookUpTable, Point3D axisLength, double textSize)
 	{
+		// TODO add axis label
 		this.textSize = textSize;
 		this.planeVector = planeXYZ;
 		this.tickLookUpTable = tickLookUpTable;
@@ -55,7 +55,7 @@ public class Grid extends Group
 		
 		Point2D maxLengthXY = new Point2D(axisLength.getX(), axisLength.getY());
 		
-		generateAxisPlane(this.planeVector, this.tickLookUpTable, maxLengthXY);
+		generateAxisPlane(this.planeVector, maxLengthXY);
 		
 		this.localToSceneTransformProperty().addListener((obs, oldT, newT) -> {
 			
@@ -95,7 +95,7 @@ public class Grid extends Group
 				setGridOffset(new Point3D(0, 0, axisLength.getZ()));
 				offsetGrid(new Point3D(0,0, axisLength.getY()), xAxis);
 			}
-        });	
+		});
 		
 	}
 	
@@ -140,13 +140,13 @@ public class Grid extends Group
 		}
 	}
 	
-	private void generateAxisPlane(Point3D planeVector, IDataset axisLookUpTable, Point2D axisLength)
+	private void generateAxisPlane(Point3D planeVector, Point2D axisLength)
 	{
 		
 		this.xAxis = new Group();
 		this.yAxis = new Group();
 		
-		generateTicks(axisLookUpTable);
+		generateTicks();
 		
 		orientatePlane(planeVector);
 		
@@ -154,48 +154,27 @@ public class Grid extends Group
 		this.getTransforms().add(this.offset);
 	}
 	
-	private void generateTicks(IDataset axisLookUpTable)
-	{
-		
-		TickFactory tickGenerator = new TickFactory(TickFormatting.autoMode, null);
-		
-		// set the data set size
-		List<Tick> xTickList = tickGenerator.generateTicks(0, this.axisLength.getX(), 10, false, true);
-		List<Tick> yTickList = tickGenerator.generateTicks(0, this.axisLength.getY(), 10, false, true);
-		
-		for (Tick t : xTickList)
-		{
-			double value;
-			if (axisLookUpTable == null)
-				value = t.getPosition();
-			else
-				value = axisLookUpTable.getDouble((int)t.getValue());
+	private void generateTicks() {
 
-			DecimalFormat df = new DecimalFormat("0.00");
-			df.setMaximumFractionDigits(2);
-			
-			Point2D pos = new Point2D(
-					t.getPosition() * this.axisLength.getX(), 
-					0);
-			
-			xAxis.getChildren().add(createTick(
-					this.axisLength.getY(),
-					new Point3D(0, 1, 0),
-					pos,
-					df.format(value)));
+		TickFactory tickGenerator = new TickFactory(TickFormatting.autoMode, null);
+
+		// set the data set size
+		List<Tick> xTickList = tickGenerator.generateTicks(tickLookUpTable.min().doubleValue(),
+				tickLookUpTable.max().doubleValue(), 10, false, true);
+		List<Tick> yTickList = tickGenerator.generateTicks(0, this.axisLength.getY(), 10, false, true);
+
+		for (Tick t : xTickList) {
+			Point2D pos = new Point2D(t.getPosition() * this.axisLength.getX(), 0);
+
+			xAxis.getChildren().add(createTick(this.axisLength.getY(), new Point3D(0, 1, 0), pos, t.getText()));
 		}
-		
-		for (Tick t : yTickList)
-		{
-			Point2D pos = new Point2D(t.getPosition()*this.axisLength.getY(), 0);
-			
-			yAxis.getChildren().add(createTick(
-					this.axisLength.getX(),
-					new Point3D(1, 0, 0),
-					pos,
-					null));
+
+		for (Tick t : yTickList) {
+			Point2D pos = new Point2D(t.getPosition() * this.axisLength.getY(), 0);
+
+			yAxis.getChildren().add(createTick(this.axisLength.getX(), new Point3D(1, 0, 0), pos, null));
 		}
-		
+
 		this.getChildren().addAll(xAxis, yAxis);
 	}
 	
@@ -214,15 +193,9 @@ public class Grid extends Group
 		this.getTransforms().add(this.rotate);
 	}
 	
-	private TickGroup createTick(double length, Point3D axisDirection, Point2D XYPosition, String label)
-	{
-		TickGroup returnTick = new TickGroup(
-				length,
-				axisDirection,
-				new Point3D(XYPosition.getX(),XYPosition.getY(), 0),
-				label,
-				this.textSize,
-				this.rotate);
+	private TickGroup createTick(double length, Point3D axisDirection, Point2D XYPosition, String label) {
+		TickGroup returnTick = new TickGroup(length, axisDirection,
+				new Point3D(XYPosition.getX(), XYPosition.getY(), 0), label, this.textSize, this.rotate);
 		return returnTick;
 	}
 	
@@ -234,5 +207,4 @@ public class Grid extends Group
 	{
 		this.textSize = newTextSize;
 	}
-
 }

@@ -1,6 +1,7 @@
 package org.dawnsci.plotting.javafx.trace.plane;
 
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Point2D;
@@ -12,6 +13,7 @@ import javafx.scene.shape.CullFace;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Translate;
 
 import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
@@ -32,7 +34,7 @@ public class ImagePlane extends MeshView
 {
 	private PhongMaterial mat;
 	
-	private Point2D size;    
+	private Point2D size;
 	private Point3D offsets;
 	private Point3D planeNormal;
 	
@@ -46,17 +48,17 @@ public class ImagePlane extends MeshView
 	 * @param paletteService
 	 */
 	public ImagePlane(
-			final Point2D size, 
-			final ILazyDataset lazyDataset, 
+			final Point2D size,
+			final ILazyDataset lazyDataset,
 			final Point3D offsets,
 			final Point3D planeNormal,
 			final PaletteService paletteService)
 	{
 		super();
 		
-		this.size        = size;          
-		this.offsets     = offsets;       
-		this.planeNormal = planeNormal;   
+		this.size        = size;
+		this.offsets     = offsets;
+		this.planeNormal = planeNormal;
 		
 		Image image = createImageFromDataset(lazyDataset, paletteService);
 		
@@ -79,21 +81,19 @@ public class ImagePlane extends MeshView
 			final PaletteService paletteService)
 	{
 		super();
-		
-		this.size        = size;          
-		this.offsets     = offsets;       
-		this.planeNormal = planeNormal;   
-				
+
+		this.size        = size;
+		this.offsets     = offsets;
+		this.planeNormal = planeNormal;
+
 		generatePlane(image);
 	}
 	
 	public void generatePlane(final Image image)
 	{
-		
-		
 		TriangleMesh mesh = new TriangleMesh();
-		
-		// generate the plane points		
+
+		// generate the plane points
 		mesh.getPoints().addAll((float)0, 			(float)0, 			(float)0);
 		mesh.getPoints().addAll((float)size.getX(),	(float)0, 			(float)0);
 		mesh.getPoints().addAll((float)0, 			(float)size.getY(), (float)0);
@@ -107,19 +107,22 @@ public class ImagePlane extends MeshView
 		
 		// set the material - ie texture, colour, opacity
 		mat = new PhongMaterial(new Color(1,1,1,1));
-		mat.setDiffuseMap(image);		
+		mat.setDiffuseMap(image);
 		mat.setSpecularColor(new Color(1,1,1,1));
 		mat.setDiffuseColor( new Color(1,1,1,1));
 		this.setMaterial(mat);
 		
 		// remove the cull face
-		this.setCullFace(CullFace.NONE);		
-		
-		// rotate the plane to the perpendicular vector
+		this.setCullFace(CullFace.NONE);
+
+		// translate to offset
+		Translate translate = new Translate(offsets.getX(), offsets.getY(), offsets.getZ());
+		this.getTransforms().add(translate);
+
+		// lastly rotate the plane to the perpendicular vector
 		Rotate rotation = Vector3DUtil.alignVector(planeNormal, new Point3D(0, 0, 1));
 		this.getTransforms().add(rotation);
 	}
-	
 
 	public Image createImageFromDataset(ILazyDataset lazyDataset, PaletteService ps)
 	{
@@ -129,14 +132,42 @@ public class ImagePlane extends MeshView
 		double maxValue = dataset.max(true, true).doubleValue();
 		
 		FunctionContainer functionContainer = ps.getFunctionContainer("Viridis (blue-green-yellow)");
-	
-		BufferedImage bi = new BufferedImage(dataset.getShape()[0], dataset.getShape()[1], BufferedImage.TYPE_INT_ARGB);
-	
-		for (int x = 0; x < dataset.getShape()[0]; x++)
+
+
+		int[] oShape = dataset.getShape();
+		if (oShape.length > 2) {
+			dataset = dataset.squeezeEnds();
+		}
+		int[] shape = dataset.getShape();
+		switch (shape.length) {
+		case 0:
+			shape = new int[] {1,1};
+			break;
+		case 1:
+			if (oShape[0] > 1) {
+				shape = new int[] {shape[0],1};
+			} else {
+				shape = new int[] {1, shape[0]};
+			}
+			break;
+		case 2:
+			break;
+		default:
+			throw new IllegalArgumentException("Dataset must have rank <= 2");
+		}
+		if (!Arrays.equals(oShape, shape)) {
+			dataset.setShape(shape);
+		}
+
+		// TODO refactor to reuse exist stuff for SWT (and also cope with RGB datasets)
+		// see ImageTrace
+		// NB there is a SWTFXUtils.toFXImage() method
+		BufferedImage bi = new BufferedImage(shape[0], shape[1], BufferedImage.TYPE_INT_ARGB);
+		for (int x = 0; x < shape[0]; x++)
 		{
-			for (int y = 0; y < dataset.getShape()[1]; y++)
+			for (int y = 0; y < shape[1]; y++)
 			{
-				double drawValue = ((dataset.getDouble(x,y,0)-minValue)/(maxValue-minValue));		
+				double drawValue = ((dataset.getDouble(x,y)-minValue)/(maxValue-minValue));
 				
 				int argb = 255;
 				
@@ -147,13 +178,10 @@ public class ImagePlane extends MeshView
 				bi.setRGB(x, y, argb);
 			}
 		}
-		
-		
-		return SwingFXUtils.toFXImage(bi, null); 
-		
+
+		return SwingFXUtils.toFXImage(bi, null);
 	}
-	
-	
+
 	private float[] generateTextureCoords(float start, float offset)
 	{
 		return new float[]{
@@ -162,15 +190,15 @@ public class ImagePlane extends MeshView
 				(start),		1,
 				(start+offset),	1};
 	}
-	
+
 	private int[] generateFaces(int indexOffset)
 	{
 		return new int[]{
 				indexOffset+3, indexOffset+3, indexOffset+1, indexOffset+1, indexOffset+0, indexOffset+0,
 				indexOffset+0, indexOffset+0, indexOffset+2, indexOffset+2, indexOffset+3, indexOffset+3};
 	}
-	
-	public void setOpacity_Material(double opacity)
+
+	public void setOpacityMaterial(double opacity)
 	{
 		mat.setDiffuseColor(new Color(
 				mat.getDiffuseColor().getRed(),
@@ -183,5 +211,4 @@ public class ImagePlane extends MeshView
 				mat.getSpecularColor().getBlue(),
 				opacity));
 	}
-		
 }

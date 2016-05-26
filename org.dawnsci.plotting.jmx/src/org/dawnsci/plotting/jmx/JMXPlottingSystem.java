@@ -32,6 +32,7 @@ import org.eclipse.dawnsci.plotting.api.trace.IIsosurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineStackTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IMulti2DTrace;
+import org.eclipse.dawnsci.plotting.api.trace.IPlane3DTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IScatter3DTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
@@ -133,6 +134,11 @@ public class JMXPlottingSystem<T> extends JMXSystemObject implements IPlottingSy
 	@Override
 	public IVolumeRenderTrace createVolumeRenderTrace(String traceName) {
 		return (IVolumeRenderTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName);
+	}
+
+	@Override
+	public IPlane3DTrace createPlane3DTrace(String traceName) {
+		return (IPlane3DTrace)call(getMethodName(Thread.currentThread().getStackTrace()), traceName);
 	}
 
 	@Override
