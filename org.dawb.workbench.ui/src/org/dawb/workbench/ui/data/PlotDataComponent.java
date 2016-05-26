@@ -283,6 +283,10 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		return container;
 	}
 
+	public IWorkbenchPart getEditor() {
+		return editor;
+	}
+
 	protected void setColumnVisible(final int col, final int width, boolean isVis) {
 		if (this.dataViewer==null || this.dataViewer.getControl().isDisposed()) return;
 		dataViewer.getTable().getColumn(col).setWidth(isVis?width:0);

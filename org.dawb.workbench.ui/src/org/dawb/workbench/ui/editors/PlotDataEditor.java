@@ -63,9 +63,11 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IActionBars2;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IReusableEditor;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.IPage;
@@ -592,8 +594,13 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 		
 		final PlotDataComponent pc = (PlotDataComponent)getDataSetComponent();
 		if (pc!=null && (pc.getData()==null || pc.getData().isEmpty())) {
-			initJob.schedule(getEditorInput());
-		}			
+			// Fix for jira.diamond.ac.uk/browse/SCI-5313
+			IWorkbenchPart part = pc.getEditor();
+			if (part instanceof IEditorPart) {
+				IEditorInput input = ((IEditorPart)part).getEditorInput();
+				initJob.schedule(input);
+			}
+		}
 	}
 
 	@Override
