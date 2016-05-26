@@ -65,6 +65,21 @@ public class DebugRemoteMapView extends ViewPart {
 			public void widgetSelected(SelectionEvent e) {
 				IPersistenceService p = LocalServiceManager.getPersistenceService();
 				try {
+					
+					if (tbean.getText() == null || tbean.getText().isEmpty()) {
+						LiveDataBean l = new LiveDataBean();
+						l.setPort(Integer.parseInt(port.getText()));
+						l.setHost(host.getText());
+						IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+						IViewPart view = page.findView("org.dawnsci.mapping.ui.mappeddataview");
+						if (view==null) return;
+
+						final MappedFileManager manager = (MappedFileManager)view.getAdapter(MappedFileManager.class);
+						if (manager != null) {
+							manager.importLiveFile(filename.getText(), l);
+						}
+					}
+					
 					MappedDataFileBean b = p.unmarshal(tbean.getText(),MappedDataFileBean.class);
 					LiveDataBean l = new LiveDataBean();
 					l.setPort(Integer.parseInt(port.getText()));
