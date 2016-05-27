@@ -675,6 +675,11 @@ public class MapPlotManager {
 						
 						@Override
 						public void run() {
+							
+							if (d.getRank() > 2) {
+								d.setShape(new int[]{d.getShape()[0],d.getShape()[1]});
+							}
+							
 							MetadataPlotUtils.switchData(ob.getLongName(),d, trace);
 						}
 					});

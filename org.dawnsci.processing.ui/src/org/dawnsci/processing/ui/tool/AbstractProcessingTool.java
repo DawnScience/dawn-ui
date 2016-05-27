@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -157,6 +158,8 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 					} catch (Exception e) {
 						logger.error("Could not set-up live processing", e);
 					}
+					
+					return;
 				}
 				
 				if (parentMeta instanceof SliceFromSeriesMetadata) {
@@ -524,13 +527,20 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		GroupNode gn = ps.getPersistentNodeFactory().writeOperationsToGroup(getOperations());
 		NexusFile nexusFile = null;
 		try {
-			nexusFile = NexusFileHDF5.createNexusFile(runDirectory + timeStamp +  "chain.nxs", false);
+			nexusFile = NexusFileHDF5.createNexusFile(chainPath, false);
+			GroupNode group = nexusFile.getGroup("/entry", true);
 			nexusFile.addNode("/entry/process", gn);
 		} catch (Exception e){
 			throw e;
 		}finally {
 			nexusFile.close();
 		}
+		
+		List<String>[] axes = new List[sslm.getAxesNames().length];
+		for (int j = 0; j < axes.length; j++) {
+			axes[j] = Arrays.asList(new String[]{sslm.getAxesNames()[j]});
+		}
+		
 		
 		IOperationService service = ServiceHolder.getOperationService();
 		IOperationBean b = service.createBean();
@@ -540,7 +550,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		b.setFilePath(sslm.getFilePath());
 		b.setDatasetPath(sslm.getDatasetName());
 		b.setXmx("1024m");
-//		b.setAxesNames(ax);
+		b.setAxesNames(axes);
 		b.setOutputFilePath(path);
 		b.setName("GDA_OPERATION_SUBMISSION");
 
@@ -563,35 +573,13 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 			logger.error("TODO put description of error here", e);
 		}
 		
-		
-		ProgressMonitorDialog dia = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
-
-		try {
-			dia.run(true, true, new IRunnableWithProgress() {
-
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException,
-				InterruptedException {
-					
-					try {
-						runProcessing(parentMeta, path, monitor);
-						Map<String,String> props = new HashMap<>();
-						props.put("path", path);
-						EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
-						eventAdmin.postEvent(new Event("org/dawnsci/events/file/OPEN", props));
-						parentMeta.toString();
-					} catch (final Exception e) {
-						
-						logger.error(e.getMessage(), e);
-					}
-				}
-			});
-		} catch (InvocationTargetException e1) {
-			logger.error(e1.getMessage(), e1);
-		} catch (InterruptedException e1) {
-			logger.error(e1.getMessage(), e1);
-		}
-		
+		Map<String,String> props = new HashMap<>();
+		props.put("path", path);
+		props.put("host", sslm.getHost());
+		props.put("port", Integer.toString(sslm.getPort()));
+		EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
+		eventAdmin.postEvent(new Event("org/dawnsci/events/file/OPEN", props));
+		parentMeta.toString();
 		
 	}
 	

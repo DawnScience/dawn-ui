@@ -47,6 +47,13 @@ public class FileOpenEventHandler implements EventHandler {
 			return;
 		}
 		
+		if (event.containsProperty("host") && event.containsProperty("port")) {
+			LiveDataBean b = new LiveDataBean();
+			b.setHost(event.getProperty("host").toString());
+			b.setPort(Integer.parseInt(event.getProperty("port").toString()));
+			fm.importLiveFile(path, (LiveDataBean)b);
+			return;
+		}
 
 		fm.importFile(path);
 	}

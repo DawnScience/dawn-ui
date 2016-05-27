@@ -170,11 +170,15 @@ public class MappedFileManager {
 			
 			if (buildBean != null) importFile(path, buildBean, null);
 			
+			return;
+			
 		} catch (Exception e) {
 			logger.error("Could not build map bean from " + path, e);
 		}
 		
 		logger.error("Could not build map bean from " + path);
+		mappedDataArea.addMappedDataFile(new MappedDataFile(path,bean));
+		viewer.refresh();
 		
 	}
 	
