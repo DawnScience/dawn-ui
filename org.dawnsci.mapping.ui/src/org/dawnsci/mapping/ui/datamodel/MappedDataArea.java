@@ -14,6 +14,20 @@ public class MappedDataArea implements MapObject {
 	
 	public void addMappedDataFile(MappedDataFile file) {
 //		files.clear();
+		if (file.getLiveDataBean() != null) {
+		MappedDataFile f = null;
+			Iterator<MappedDataFile> iterator = files.iterator();
+			while (iterator.hasNext()) {
+				MappedDataFile next = iterator.next();
+				if (next.getPath().equals(file.getPath())){
+					f = next;
+					break;
+				}
+			}
+			
+		if (f != null) removeFile(f);
+			
+		}
 		files.add(file);
 	}
 

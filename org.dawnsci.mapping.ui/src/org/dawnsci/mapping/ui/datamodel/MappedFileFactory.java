@@ -26,7 +26,7 @@ public class MappedFileFactory {
 	
 	public static MappedDataFile getMappedDataFile(String path, AssociatedImage image) {
 		
-		MappedDataFile file = new MappedDataFile(path);
+		MappedDataFile file = new MappedDataFile(path, null);
 		file.addMapObject(image.toString(), image);
 		
 		return file;
@@ -35,7 +35,7 @@ public class MappedFileFactory {
 	
 	public static MappedDataFile getMappedDataFile(String path, MappedDataFileBean bean, IMonitor monitor) {
 		
-		MappedDataFile file = new MappedDataFile(path);
+		MappedDataFile file = new MappedDataFile(path, bean.getLiveBean());
 		
 		for (MappedBlockBean b : bean.getBlocks()) {
 			String name = b.getName();
@@ -190,20 +190,25 @@ public class MappedFileFactory {
 	
 	private static LiveRemoteAxes getRemoteAxes(List<String> axes, String path, MappedBlockBean bean, LiveDataBean live) {
 		IRemoteDataset[] r = new IRemoteDataset[axes.size()];
+		String[] axesNames = new String[axes.size()];
 		
 		for (int i = 0; i < axes.size(); i++) {
 			String s = axes.get(i);
+			axesNames[i] = s;
 			if (s != null) {
 					r[i] = getRemoteDataset(path, s, live);
 			}
 
 		}
 		
-		LiveRemoteAxes lra = new LiveRemoteAxes(r);
+		
+		
+		LiveRemoteAxes lra = new LiveRemoteAxes(r, axesNames);
 		
 		String s = bean.getxAxisForRemapping();
 		if (s != null){
 				lra.setxAxisForRemapping(getRemoteDataset(path, s, live));
+				lra.setxAxisForRemappingName(s);
 		}
 		
 		return lra;

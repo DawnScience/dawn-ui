@@ -158,6 +158,6 @@ public class LiveMappedDataBlock extends MappedDataBlock implements ILiveData {
 		SourceInformation si = new SourceInformation(getPath(), toString(), dataset);
 		SliceND slice = getMatchingDataSlice(x, y);
 		SliceInformation sl = new SliceInformation(slice, slice, new SliceND(dataset.getShape()), getDataDimensions(), 1, 1);
-		return new SliceFromLiveSeriesMetadata(si,sl,host,port);
+		return new SliceFromLiveSeriesMetadata(si,sl,host,port,axes.getAxesNames());
 	}
 }
