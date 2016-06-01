@@ -15,6 +15,8 @@ import org.osgi.framework.ServiceReference;
 
 public class Activator extends AbstractUIPlugin {
 
+	public static final String PLUGIN_ID = "org.dawnsci.isosurface";
+	
 	private static AbstractUIPlugin plugin;
 
 	static BundleContext getContext() {
@@ -56,7 +58,7 @@ public class Activator extends AbstractUIPlugin {
 	}
 
 	public static ImageDescriptor getImage(String path) {
-		return imageDescriptorFromPlugin("org.dawnsci.isosurface", path);
+		return imageDescriptorFromPlugin(PLUGIN_ID, path);
 	}
 
 }

@@ -17,7 +17,6 @@ import java.util.stream.Stream;
 
 import org.dawnsci.isosurface.Activator;
 import org.dawnsci.isosurface.isogui.IsoBean;
-import org.dawnsci.volumerender.tool.VolumeRenderJob;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;

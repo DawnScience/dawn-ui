@@ -14,7 +14,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.dawnsci.analysis.dataset;bundle-version="1.0.0",
  org.eclipse.richbeans.widgets;bundle-version="1.0.0",
  org.apache.commons.lang;bundle-version="2.6.0",
- org.dawnsci.volumerender;bundle-version="1.0.0",
  org.eclipse.richbeans.api
 Bundle-ActivationPolicy: lazy
 Export-Package: org.dawnsci.isosurface,

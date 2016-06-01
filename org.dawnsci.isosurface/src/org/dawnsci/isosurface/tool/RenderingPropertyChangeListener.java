@@ -6,11 +6,10 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.dawnsci.isosurface.alg.MarchingCubesModel;
+import org.dawnsci.isosurface.alg.VolumeRenderer;
 import org.dawnsci.isosurface.isogui.IIsoItem;
 import org.dawnsci.isosurface.isogui.IsoBean;
 import org.dawnsci.isosurface.isogui.Type;
-import org.dawnsci.volumerender.tool.VolumeRenderJob;
-import org.dawnsci.volumerender.tool.VolumeRenderer;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
