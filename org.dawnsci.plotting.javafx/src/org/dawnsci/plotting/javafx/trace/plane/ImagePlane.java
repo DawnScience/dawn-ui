@@ -3,6 +3,7 @@ package org.dawnsci.plotting.javafx.trace.plane;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 
+import javafx.collections.ObservableFloatArray;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
@@ -54,15 +55,7 @@ public class ImagePlane extends MeshView
 			final Point3D planeNormal,
 			final PaletteService paletteService)
 	{
-		super();
-		
-		this.size        = size;
-		this.offsets     = offsets;
-		this.planeNormal = planeNormal;
-		
-		Image image = createImageFromDataset(lazyDataset, paletteService);
-		
-		generatePlane(image);
+		this(size, createImageFromDataset(lazyDataset, paletteService), offsets, planeNormal);
 	}
 	
 	/**
@@ -71,14 +64,12 @@ public class ImagePlane extends MeshView
 	 * @param image
 	 * @param offsets
 	 * @param planeNormal
-	 * @param paletteService
 	 */
 	public ImagePlane(
 			final Point2D size, 
 			Image image, 
 			final Point3D offsets,
-			final Point3D planeNormal,
-			final PaletteService paletteService)
+			final Point3D planeNormal)
 	{
 		super();
 
@@ -94,14 +85,11 @@ public class ImagePlane extends MeshView
 		TriangleMesh mesh = new TriangleMesh();
 
 		// generate the plane points
-		mesh.getPoints().addAll((float)0, 			(float)0, 			(float)0);
-		mesh.getPoints().addAll((float)size.getX(),	(float)0, 			(float)0);
-		mesh.getPoints().addAll((float)0, 			(float)size.getY(), (float)0);
-		mesh.getPoints().addAll((float)size.getX(), (float)size.getY(), (float)0);
-		
+		ObservableFloatArray points = mesh.getPoints();
+		points.addAll(generateVertexCoords());
 		// declare the indices
-		mesh.getTexCoords().addAll(generateTextureCoords(0,1));
-		mesh.getFaces().addAll(generateFaces(0));
+		mesh.getTexCoords().addAll(generateTextureCoords());
+		mesh.getFaces().addAll(generateFaces());
 		
 		this.setMesh(mesh);
 		
@@ -124,7 +112,7 @@ public class ImagePlane extends MeshView
 		this.getTransforms().add(rotation);
 	}
 
-	public Image createImageFromDataset(ILazyDataset lazyDataset, PaletteService ps)
+	public static Image createImageFromDataset(ILazyDataset lazyDataset, PaletteService ps)
 	{
 		IDataset dataset = lazyDataset.getSlice();
 		
@@ -162,19 +150,19 @@ public class ImagePlane extends MeshView
 		// TODO refactor to reuse exist stuff for SWT (and also cope with RGB datasets)
 		// see ImageTrace
 		// NB there is a SWTFXUtils.toFXImage() method
-		BufferedImage bi = new BufferedImage(shape[0], shape[1], BufferedImage.TYPE_INT_ARGB);
-		for (int x = 0; x < shape[0]; x++)
+		BufferedImage bi = new BufferedImage(shape[1], shape[0], BufferedImage.TYPE_INT_ARGB);
+		for (int y = 0; y < shape[0]; y++)
 		{
-			for (int y = 0; y < shape[1]; y++)
+			for (int x = 0; x < shape[1]; x++)
 			{
-				double drawValue = ((dataset.getDouble(x,y)-minValue)/(maxValue-minValue));
+				double drawValue = ((dataset.getDouble(y, x)-minValue)/(maxValue-minValue));
 				
 				int argb = 255;
-				
-				argb = (argb << 8) + (int)(functionContainer.getRedFunc().mapToByte(drawValue));
-				argb = (argb << 8) + (int)(functionContainer.getGreenFunc().mapToByte(drawValue));
-				argb = (argb << 8) + (int)(functionContainer.getBlueFunc().mapToByte(drawValue));
-								
+
+				argb = (argb << 8) + (int) (functionContainer.getRedFunc().mapToByte(drawValue));
+				argb = (argb << 8) + (int) (functionContainer.getGreenFunc().mapToByte(drawValue));
+				argb = (argb << 8) + (int) (functionContainer.getBlueFunc().mapToByte(drawValue));
+
 				bi.setRGB(x, y, argb);
 			}
 		}
@@ -182,20 +170,23 @@ public class ImagePlane extends MeshView
 		return SwingFXUtils.toFXImage(bi, null);
 	}
 
-	private float[] generateTextureCoords(float start, float offset)
-	{
-		return new float[]{
-				(start),		0,
-				(start+offset),	0,
-				(start),		1,
-				(start+offset),	1};
+	private float[] generateVertexCoords() {
+		float x = (float) size.getX();
+		float y = (float) size.getY();
+		return new float[] {
+				0, 0, 0,
+				x, 0, 0,
+				0, y, 0,
+				x, y, 0,
+		};
 	}
 
-	private int[] generateFaces(int indexOffset)
-	{
-		return new int[]{
-				indexOffset+3, indexOffset+3, indexOffset+1, indexOffset+1, indexOffset+0, indexOffset+0,
-				indexOffset+0, indexOffset+0, indexOffset+2, indexOffset+2, indexOffset+3, indexOffset+3};
+	private float[] generateTextureCoords() {
+		return new float[] { 0, 0, 1, 0, 0, 1, 1, 1 };
+	}
+
+	private int[] generateFaces() {
+		return new int[] { 0, 0, 2, 2, 3, 3, 3, 3, 1, 1, 0, 0 };
 	}
 
 	public void setOpacityMaterial(double opacity)

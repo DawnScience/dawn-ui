@@ -64,7 +64,8 @@ public class PlaneTrace extends JavafxTrace implements IPlane3DTrace
 
 	@Override
 	public void setOpacity(double opacity) {
-		imagePlane.setOpacityMaterial(opacity);
+//		imagePlane.setOpacityMaterial(opacity); // FIXME does not work 
+//		imagePlane.setOpacity(opacity);
 	}
 
 	@Override
