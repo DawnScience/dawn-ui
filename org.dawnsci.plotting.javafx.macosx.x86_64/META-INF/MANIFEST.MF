@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Javafx Mac Jars x86
-Bundle-SymbolicName: org.dawnsci.plotting.javafx.macosx.x86_64
+Bundle-SymbolicName: org.dawnsci.plotting.javafx.macosx.x86_64;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Fragment-Host: org.dawnsci.plotting.javafx;bundle-version="1.0.0"
 Bundle-ClassPath: jars/jfxrt.jar,
