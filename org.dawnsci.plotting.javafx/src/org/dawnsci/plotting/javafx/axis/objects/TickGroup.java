@@ -84,11 +84,11 @@ public class TickGroup extends Group
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			
-            labelCorrectionRotate.setAxis(axisAngleRotate.getAxis());
-            labelCorrectionRotate.setAngle(axisAngleRotate.getAngle());
-            
-        });
+
+			labelCorrectionRotate.setAxis(axisAngleRotate.getAxis());
+			labelCorrectionRotate.setAngle(axisAngleRotate.getAngle());
+
+		});
 	}
 	
 	private void setTextTransforms()

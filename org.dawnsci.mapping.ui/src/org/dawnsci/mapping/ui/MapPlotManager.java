@@ -41,6 +41,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -399,6 +400,18 @@ public class MapPlotManager {
 
 	
 	private void plotLayers(){
+		
+		if (Display.getCurrent() == null) {
+			PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+				
+				@Override
+				public void run() {
+					plotLayers();
+				}
+			});
+			return;
+		}
+		
 		if (!map.is2D()) map.setPlotType(PlotType.IMAGE);
 //		map.clear();
 		try {
@@ -609,7 +622,7 @@ public class MapPlotManager {
 		
 	}
 	
-	private class RepeatingJob extends UIJob{
+	private class RepeatingJob extends Job{
 		private boolean running = true;
 		private long repeatDelay = 0;
 		private Runnable runnable;
@@ -618,7 +631,7 @@ public class MapPlotManager {
 			repeatDelay = repeatPeriod;
 			this.runnable = runnable;
 		}
-		public IStatus runInUIThread(IProgressMonitor monitor) {
+		public IStatus run(IProgressMonitor monitor) {
 			runnable.run();
 			schedule(repeatDelay);
 			return Status.OK_STATUS;
@@ -654,10 +667,24 @@ public class MapPlotManager {
 			return trace;
 		}
 		
-		public void switchMap(PlottableMapObject ob) {
+		public void switchMap(final PlottableMapObject ob) {
 			try {
-				IDataset d = ob.getData();
-				MetadataPlotUtils.switchData(ob.getLongName(),d, trace);
+				final IDataset d = ob.getData();
+				if (Display.getCurrent() == null) {
+					PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+						
+						@Override
+						public void run() {
+							
+							if (d.getRank() > 2) {
+								d.setShape(new int[]{d.getShape()[0],d.getShape()[1]});
+							}
+							
+							MetadataPlotUtils.switchData(ob.getLongName(),d, trace);
+						}
+					});
+				}
+				
 				trace.setGlobalRange(sanizeRange(area.getRange(),d.getShape()));
 				map = ob;
 			} catch (Exception e) {

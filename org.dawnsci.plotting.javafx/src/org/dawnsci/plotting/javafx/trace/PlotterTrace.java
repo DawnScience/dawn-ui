@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2014 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -37,10 +37,11 @@ class PlotterTrace {
 		window=null;
 	}
 	
-	public PlotterTrace(IPlottingSystemViewer<?> plotter2, String name2) {
-		this.plotter = plotter2;
-		this.name    = name2;
+	public PlotterTrace(IPlottingSystemViewer<?> plotter, String name) {
+		this.plotter = plotter;
+		this.name    = name;
 	}
+
 	public String getName() {
 		return name;
 	}
@@ -122,7 +123,7 @@ class PlotterTrace {
 		this.plottingSystem = plottingSystem;
 	}
 
-    public IROI getWindow() {
+	public IROI getWindow() {
 		return window;
 	}
 

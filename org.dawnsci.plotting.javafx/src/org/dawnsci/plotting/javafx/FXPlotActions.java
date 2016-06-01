@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2014 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -65,7 +65,7 @@ class FXPlotActions {
 		actionMan.registerAction(gridLineGroupNameAction, axisToggle, ActionType.FX3D, ManagerType.TOOLBAR);
 		
 		
-		Action orthographicToggle = new Action("Toggletesw Orthographic Camera",IAction.AS_CHECK_BOX) {
+		Action orthographicToggle = new Action("Toggle Orthographic Camera", IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
 				viewer.toggleParallelCamera(isChecked());

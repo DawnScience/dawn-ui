@@ -62,6 +62,7 @@ import org.eclipse.dawnsci.plotting.api.trace.IIsosurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineStackTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IMulti2DTrace;
+import org.eclipse.dawnsci.plotting.api.trace.IPlane3DTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IScatter3DTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
@@ -313,16 +314,19 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	}
 
 	private IPlottingSystemViewer<T> getViewer(PlotType type) {
-        for (IPlottingSystemViewer<T> v : viewers) {
-        	if (v.isPlotTypeSupported(type)) return v;
+		for (IPlottingSystemViewer<T> v : viewers) {
+			if (v.isPlotTypeSupported(type))
+				return v;
 		}
-        return null;
+		return null;
 	}
+
 	private IPlottingSystemViewer<T> getViewer(Class<? extends ITrace> type) {
-        for (IPlottingSystemViewer<T> v : viewers) {
-        	if (v.isTraceTypeSupported(type)) return v;
+		for (IPlottingSystemViewer<T> v : viewers) {
+			if (v.isTraceTypeSupported(type))
+				return v;
 		}
-        return null;
+		return null;
 	}
 
 	public void setFocus() {
@@ -951,6 +955,12 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	@Override
 	public IScatter3DTrace createScatter3DTrace(String traceName) {
 		IScatter3DTrace trace = (IScatter3DTrace)getViewer(IScatter3DTrace.class).createTrace(traceName, IScatter3DTrace.class);
+		return trace;
+	}
+
+	@Override
+	public IPlane3DTrace createPlane3DTrace(String traceName) {
+		IPlane3DTrace trace = (IPlane3DTrace) getViewer(IPlane3DTrace.class).createTrace(traceName, IPlane3DTrace.class);
 		return trace;
 	}
 

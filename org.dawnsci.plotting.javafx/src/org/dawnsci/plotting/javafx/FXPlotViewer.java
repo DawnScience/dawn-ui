@@ -24,11 +24,13 @@ import javafx.scene.image.WritableImage;
 import org.dawnsci.plotting.javafx.axis.objects.JavaFXProperties;
 import org.dawnsci.plotting.javafx.trace.JavafxTrace;
 import org.dawnsci.plotting.javafx.trace.isosurface.IsosurfaceTrace;
+import org.dawnsci.plotting.javafx.trace.plane.PlaneTrace;
 import org.dawnsci.plotting.javafx.trace.volume.VolumeTrace;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.trace.IIsosurfaceTrace;
+import org.eclipse.dawnsci.plotting.api.trace.IPlane3DTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.IVolumeRenderTrace;
 import org.eclipse.swt.SWT;
@@ -66,17 +68,14 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 	private FXCanvas canvas;
 	// not sure what this does currently
 	private FXPlotActions plotActions;
-	
-	
+
 	/**
 	 * Must have no-argument constructor.
 	 */
-	public FXPlotViewer()
-	{		
-		
-		
+	public FXPlotViewer() {
+
 	}
-	
+
 	/**
 	 * Call to create plotting
 	 * 
@@ -106,14 +105,15 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 		this.plotActions.createActions();
 		this.system.getActionBars().getToolBarManager().update(true);
 		this.system.getActionBars().updateActionBars();
-		
-	}	
-	
-	// change the cursor -> does isFxApplicationThread make it thread safe??
-	// potentially redundant but makes the code easier to read which is nice!!
-	public void setDefaultCursor(final int cursorFlag)
-	{
-		
+
+	}
+
+	/**
+	 * @param cursorFlag
+	 */
+	public void setDefaultCursor(final int cursorFlag)	{
+		// change the cursor -> does isFxApplicationThread make it thread safe??
+		// potentially redundant but makes the code easier to read which is nice!!
 		if (Platform.isFxApplicationThread())
 		{
 			setCursor(cursorFlag);
@@ -130,7 +130,7 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 			});
 		}
 	}
-	
+
 	// declare the cursor depending on the flag
 	private void setCursor(int cursorFlag)
 	{
@@ -144,7 +144,6 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 			cursor = Cursor.WAIT;
 		canvas.getScene().setCursor(cursor);
 	}
-	
 
 	public void saveScreenShotOfSceneToFile()
 	{
@@ -169,28 +168,25 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 			e.printStackTrace();
 		}
 	}
-	
+
+	@Override
 	public ITrace createTrace(String name, Class<? extends ITrace> clazz)
 	{
-		if (IIsosurfaceTrace.class.isAssignableFrom(clazz))
-		{
-			if (name == null || "".equals(name))
-				throw new RuntimeException("Cannot create trace with no name!");
+		if (name == null || "".equals(name))
+			throw new RuntimeException("Cannot create trace with no name!");
+
+		if (IIsosurfaceTrace.class.isAssignableFrom(clazz)) {
 			return new IsosurfaceTrace(this, scene, name);
-		}
-		else if (IVolumeRenderTrace.class.isAssignableFrom(clazz))
-		{
-			if (name == null || "".equals(name))
-				throw new RuntimeException("Cannot create trace with no name!");
+		} else if (IVolumeRenderTrace.class.isAssignableFrom(clazz)) {
 			return new VolumeTrace(this, scene, name);
-		}			
-		else
-		{
+		} else if (IPlane3DTrace.class.isAssignableFrom(clazz)) {
+			return new PlaneTrace(this, scene, name);
+		} else {
 			throw new RuntimeException("Trace type not supported " + clazz.getSimpleName());
 		}
 	}
 
-	
+	@Override
 	public boolean addTrace(ITrace trace)
 	{
 		if (trace instanceof JavafxTrace)
@@ -201,6 +197,7 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 			// add the trace into the list of current traces
 			scene.addTrace(javafxTrace);
 			scene.setAxesData(javafxTrace.getAxes());
+//			scene.extendAxesBounds(javafxTrace.getBoundingBox());
 		}
 		
 		else
@@ -210,83 +207,66 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 		return true;
 		
 	}
-	
-	public void setScaleAxesVisibility(boolean visibility)
-	{
+
+	public void setScaleAxesVisibility(boolean visibility) {
 		scene.setScaleAxesVisibility(visibility);
 	}
-	
-	public void setAxisGridVisibility(boolean visibility)
-	{
+
+	public void setAxisGridVisibility(boolean visibility) {
 		scene.setAxisGridVisibility(visibility);
 	}
-	
-	public void setBoundingBoxVisibility(boolean visibility)
-	{
+
+	public void setBoundingBoxVisibility(boolean visibility) {
 		scene.setBoundingBoxVisibility(visibility);
 	}
-	
+
 	/**
-	 * true = parallel <br>
-	 * false = perspective
+	 * @param parallel if true set camera to parallel otherwise set it to perspective
 	 */
-	public void toggleParallelCamera(boolean Parallel)
+	public void toggleParallelCamera(boolean parallel)
 	{
-		if (Parallel)
-		{
+		if (parallel) {
 			scene.setCameraType(JavaFXProperties.CameraProperties.PARALLEL_CAMERA);
-		}
-		else
-		{
+		} else {
 			scene.setCameraType(JavaFXProperties.CameraProperties.PERSPECTIVE_CAMERA);
 		}
 	}
-	
-	public void resetSceneTransforms() 
-	{
+
+	public void resetSceneTransforms() {
 		scene.resetSceneTransforms();
 	}
-	
-	/**
-	 * 
-	 * @param type
-	 * @return true if this viewer deals with this plot type.
-	 */
+
+	@Override
 	public boolean isPlotTypeSupported(PlotType type)
 	{
-		switch (type)
-		{
-			case ISOSURFACE:
-				return true;
-			case VOLUME:
-				return true;
-			default:
-				return false;
-		}
-	}
-	
-	// simple checks is the trace is supported
-	public boolean isTraceTypeSupported(Class<? extends ITrace> trace)
-	{
-		if (IIsosurfaceTrace.class.isAssignableFrom(trace))
-		{
+		switch (type) {
+		case ISOSURFACE:
 			return true;
-		}
-		else if (IVolumeRenderTrace.class.isAssignableFrom(trace))
-		{
+		case VOLUME:
 			return true;
+		case PLANE3D:
+			return true;
+		default:
+			return false;
 		}
-			
-		return false;
-	}
-	
-	// get the composite being used within the class
-	public Composite getControl()
-	{
-		return canvas;
 	}
 
-	
-	
-	
+	@Override
+	public boolean isTraceTypeSupported(Class<? extends ITrace> trace)
+	{
+		if (IIsosurfaceTrace.class.isAssignableFrom(trace)) {
+			return true;
+		} else if (IVolumeRenderTrace.class.isAssignableFrom(trace)) {
+			return true;
+		} else if (IPlane3DTrace.class.isAssignableFrom(trace)) {
+			return true;
+		}
+
+		return false;
+	}
+
+	@Override
+	public Composite getControl() {
+		return canvas;
+	}
 }

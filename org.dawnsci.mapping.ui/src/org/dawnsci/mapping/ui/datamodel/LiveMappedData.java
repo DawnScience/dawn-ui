@@ -105,14 +105,24 @@ public class LiveMappedData extends MappedData implements ILiveData {
 			SliceND s = new SliceND(y.getShape());
 			s.setSlice(1, 0, 1, 1);
 			y = y.getSlice(s);
-			y.squeeze();
+			if (y.getSize() == 1) {
+				y.setShape(new int[]{1});
+			} else {
+				y.squeeze();
+			}
+			
 		}
 		
 		if (x.getRank() == 2) {
 			SliceND s = new SliceND(x.getShape());
 			s.setSlice(0, 0, 1, 1);
 			x = x.getSlice(s);
-			x.squeeze();
+			if (x.getSize() == 1) {
+				x.setShape(new int[]{1});
+			} else {
+				x.squeeze();
+			}
+			
 		}
 		
 		AxesMetadataImpl axm = new AxesMetadataImpl(2);

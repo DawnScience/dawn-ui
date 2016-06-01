@@ -13,14 +13,16 @@ public class MappedDataFile implements MapObject{
 	private Map<String,AbstractMapData> mapDataMap;
 	private Map<String,AssociatedImage> microscopeDataMap;
 	private double[] range;
+	private LiveDataBean liveBean;
 	
 //	private final static Logger logger = LoggerFactory.getLogger(MappedDataFile.class);
 	
-	public MappedDataFile(String path) {
+	public MappedDataFile(String path, LiveDataBean liveBean) {
 		this.path = path;
 		fullDataMap = new HashMap<String,MappedDataBlock>();
 		mapDataMap = new HashMap<String,AbstractMapData>();
 		microscopeDataMap = new HashMap<String,AssociatedImage>();
+		this.liveBean = liveBean;
 	}
 	
 	public String getPath() {
@@ -116,6 +118,10 @@ public class MappedDataFile implements MapObject{
 //			logger.error("Error non map image!", e);
 //		}
 //	}
+	
+	public LiveDataBean getLiveDataBean() {
+		return this.liveBean;
+	}
 
 	@Override
 	public String toString() {

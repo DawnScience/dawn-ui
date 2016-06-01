@@ -228,8 +228,7 @@ public class Vector3DUtil {
 
 		// create the rotation via the normal and angle
 		Rotate returnRotate = new Rotate();
-		returnRotate.setAxis(new Point3D(normal.getX(), normal.getY(), normal
-				.getZ()));
+		returnRotate.setAxis(normal);
 		returnRotate.setAngle(angle);
 
 		return returnRotate;

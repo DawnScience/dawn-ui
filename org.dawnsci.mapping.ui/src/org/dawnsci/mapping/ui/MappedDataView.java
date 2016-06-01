@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
-import org.dawnsci.mapping.ui.datamodel.MappedData;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
@@ -90,6 +89,10 @@ public class MappedDataView extends ViewPart {
 				Object e = ((StructuredSelection)event.getSelection()).getFirstElement();
 				if (e instanceof AbstractMapData) plotManager.updateLayers((AbstractMapData)e);
 				if (e instanceof AssociatedImage) plotManager.addImage((AssociatedImage)e);
+				if (e instanceof MappedDataFile) {
+					MappedDataFile mdf = (MappedDataFile)e;
+					if (mdf.getLiveDataBean() !=null) FileManagerSingleton.getFileManager().importLiveFile(mdf.getPath(), mdf.getLiveDataBean());
+				}
 				viewer.refresh();
 			}
 		});

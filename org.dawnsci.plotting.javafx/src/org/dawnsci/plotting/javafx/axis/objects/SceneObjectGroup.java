@@ -4,12 +4,9 @@ import java.util.List;
 
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 
-import javafx.event.EventHandler;
-import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.AmbientLight;
 import javafx.scene.Group;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Translate;
 
@@ -33,10 +30,11 @@ public class SceneObjectGroup extends Group
 	{
 		super();
 	}
+
 	/*
 	 * public functions
 	 */
-	
+
 	/**
 	 * Add the default axes to the scene.
 	 * <p>

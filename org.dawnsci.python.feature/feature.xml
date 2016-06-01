@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.dawnsci.volumerender.feature"
+      id="org.dawnsci.python.feature"
       label="Feature"
       version="1.0.0.qualifier">
 
@@ -17,14 +17,11 @@
    </license>
 
    <includes
-         id="org.dawnsci.plotting.javafx.feature"
+         id="org.python.pydev.feature"
          version="0.0.0"/>
 
-   <plugin
-         id="org.dawnsci.volumerender"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+   <includes
+         id="uk.ac.diamond.scisoft.core.feature"
+         version="0.0.0"/>
 
 </feature>

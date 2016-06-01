@@ -23,12 +23,13 @@ import javax.swing.filechooser.FileSystemView;
 
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.util.io.FileUtils;
-import org.dawnsci.io.h5.H5Loader;
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.downsample.DownsampleMode;
+import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.dataset.function.Downsample;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
@@ -133,12 +134,15 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 	}
 	
 	private Dataset getThumbnail(final File f, final int wdith, final int height) throws Throwable {
-		
-	    if (H5Loader.isH5(f.getAbsolutePath())) return null; // Cannot risk loading large datasets!
 		final ILoaderService loader = (ILoaderService)ServiceManager.getService(ILoaderService.class);
-		final Dataset set   = DatasetUtils.convertToDataset(loader.getDataset(f.getAbsolutePath(), null));
-		final Dataset thumb = getThumbnail(set, wdith, height);
-		return thumb;
+		IDataHolder dh = loader.getData(f.getAbsolutePath(),null);
+		ILazyDataset lz = dh.getLazyDataset(0);
+		if (lz.getRank() == 2) {
+			final Dataset set   = DatasetUtils.convertToDataset(lz.getSlice());
+			final Dataset thumb = getThumbnail(set, wdith, height);
+			return thumb;
+		}
+		return null;
 	}
 
 	public Dataset getThumbnail(final IDataset ds,  final int w, final int h) {
