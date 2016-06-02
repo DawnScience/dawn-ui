@@ -19,6 +19,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.dawb.common.ui.util.DisplayUtils;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.dawnsci.plotting.PlottingActionBarManager;
@@ -176,10 +177,6 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 	private boolean containerOverride = false;
 
-	private static Display getDisplay() {
-		return Display.getDefault();
-	}
-
 	@Override
 	public void createPlotPart(final T              container,
 							   final String         plotName,
@@ -209,7 +206,8 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 		if (mservice != null) {
 			mservice.publish(new MacroEventObject(this));
 		}
-		getDisplay().asyncExec(new Runnable() {
+		DisplayUtils.asyncExec(new Runnable() {
+			@Override
 			public void run() {
 				PlottingFactory.notityPlottingSystemCreated(plotName, PlottingSystemImpl.this);
 			}
@@ -240,7 +238,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			this.stackLayout = new StackLayout();
 			cparent.setLayout(stackLayout);
 			Color colorBgd = container.getBackground();
-			cparent.setBackground(colorBgd != null? colorBgd : getDisplay().getSystemColor(SWT.COLOR_WHITE));
+			cparent.setBackground(colorBgd != null? colorBgd : Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		}
 		this.parent = (T)cparent;
 
@@ -346,15 +344,13 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	@Override
 	public void setEnabled(final boolean enabled) {
 		if (activeViewer == null) return;
-		if (getDisplay().getThread() == Thread.currentThread()) {
-			if (activeViewer!=null) activeViewer.setEnabled(enabled);
-		} else {
-			getDisplay().syncExec(new Runnable() {
-				public void run() {
-					if (activeViewer!=null) activeViewer.setEnabled(enabled);
-				}
-			});
-		}
+
+		DisplayUtils.syncExec(new Runnable() {
+			@Override
+			public void run() {
+				if (activeViewer!=null) activeViewer.setEnabled(enabled);
+			}
+		});
 	}
 
 	@Override
@@ -417,15 +413,12 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 					lineTrace.setErrorBarEnabled(true);
 				}
 
-				if (getDisplay().getThread() == Thread.currentThread()) {
-					lineTrace.setData(finalX, y);
-				} else {
-					getDisplay().syncExec(new Runnable() {
-						public void run() {
-							lineTrace.setData(finalX, y);
-						}
-					});
-				}
+				DisplayUtils.syncExec(new Runnable() {
+					@Override
+					public void run() {
+						lineTrace.setData(finalX, y);
+					}
+				});
 				continue;
 			}
 			unfoundYs.add(y);
@@ -485,18 +478,13 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			x = xIn;
 		}
 
-		if (getDisplay().getThread() == Thread.currentThread()) {
-			List<ITrace> ts = createPlot1DInternal(x, ysIn, dataNames, title, monitor);
-			if (ts != null) traces.addAll(ts);
-		} else {
-			getDisplay().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					List<ITrace> ts = createPlot1DInternal(x, ysIn, dataNames, title, monitor);
-					if (ts != null) traces.addAll(ts);
-				}
-			});
-		}
+		DisplayUtils.syncExec(new Runnable() {
+			@Override
+			public void run() {
+				List<ITrace> ts = createPlot1DInternal(x, ysIn, dataNames, title, monitor);
+				if (ts != null) traces.addAll(ts);
+			}
+		});
 
 		if (monitor!=null) monitor.worked(1);
 		return traces;
@@ -513,31 +501,24 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 		if (name == null || "".equals(name))
 			throw new IllegalArgumentException("The dataset name must not be null or empty string!");
 
-		if (getDisplay().getThread() == Thread.currentThread()) {
-			appendInternal(name, xValue, yValue, monitor);
-		} else {
-			getDisplay().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					appendInternal(name, xValue, yValue, monitor);
-				}
-			});
-		}
+		DisplayUtils.syncExec(new Runnable() {
+			@Override
+			public void run() {
+				appendInternal(name, xValue, yValue, monitor);
+			}
+		});
 	}
 
 	/**
      * Do not call before createPlotPart(...)
      */
 	public void setPlotType(final PlotType mode) {
-		if (getDisplay().getThread() == Thread.currentThread()) {
-			switchPlottingType(mode);
-		} else {
-			getDisplay().syncExec(new Runnable() {
-				public void run() {
-					switchPlottingType(mode);
-				}
-			});
-		}
+		DisplayUtils.syncExec(new Runnable() {
+			@Override
+			public void run() {
+				switchPlottingType(mode);
+			}
+		});
 	}
 
 	@Override
@@ -546,6 +527,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 							   final IProgressMonitor      monitor) {
 		return updatePlot2D(data, axes, null, monitor);
 	}
+
 	@Override
 	public ITrace updatePlot2D(final IDataset              data,
 			 				   final List<? extends IDataset> axes,
@@ -553,15 +535,12 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 				               final IProgressMonitor      monitor) {
 
 		if (plottingMode.is1D()) {
-			if (getDisplay().getThread() == Thread.currentThread()) {
-				switchPlottingType(PlotType.IMAGE);
-			} else {
-				getDisplay().syncExec(new Runnable() {
-					public void run() {
-						switchPlottingType(PlotType.IMAGE);
-					}
-				});
-			}
+			DisplayUtils.syncExec(new Runnable() {
+				@Override
+				public void run() {
+					switchPlottingType(PlotType.IMAGE);
+				}
+			});
 		}
 		final Collection<ITrace> traces = plottingMode.is3D()
 				                        ? getTraces(ISurfaceTrace.class)
@@ -575,28 +554,20 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			final int[] shape = image.getData() != null ? image.getData().getShape() : null;
 
 			if (shape != null && Arrays.equals(shape, data.getShape())) {
-				if (getDisplay().getThread() == Thread.currentThread()) {
-					image = updatePlot2DInternal(image, data, axes, dataName, monitor);
-				} else {
-					final List<ITrace> images = Arrays.asList(image);
-					getDisplay().syncExec(new Runnable() {
-						public void run() {
-							// This will keep the previous zoom level if there
-							// was one
-							// and will be faster than createPlot2D(...) which
-							// autoscales.
-							ITrace im = updatePlot2DInternal(images.get(0), data, axes, dataName, monitor);
-							images.set(0, im);
-						}
-					});
-					image = images.get(0);
-				}
-				return image;
+				final List<ITrace> images = Arrays.asList(image);
+				DisplayUtils.syncExec(new Runnable() {
+					@Override
+					public void run() {
+						ITrace im = updatePlot2DInternal(images.get(0), data, axes, dataName, monitor);
+						images.set(0, im);
+					}
+				});
+				return images.get(0);
 			} else {
 				return createPlot2D(data, axes, dataName, monitor);
 			}
 		} else {
-		    return createPlot2D(data, axes, dataName, monitor);
+			return createPlot2D(data, axes, dataName, monitor);
 		}
 	}
 
@@ -645,20 +616,14 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 		final List<ITrace> traces = new ArrayList<ITrace>(7);
 
-		if (getDisplay().getThread() == Thread.currentThread()) {
-			ITrace ts = createPlot2DInternal(data, axes, dataName, monitor);
-			if (ts != null)
-				traces.add(ts);
-		} else {
-			getDisplay().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					ITrace ts = createPlot2DInternal(data, axes, dataName, monitor);
-					if (ts != null)
-						traces.add(ts);
-				}
-			});
-		}
+		DisplayUtils.syncExec(new Runnable() {
+			@Override
+			public void run() {
+				ITrace ts = createPlot2DInternal(data, axes, dataName, monitor);
+				if (ts != null)
+					traces.add(ts);
+			}
+		});
 
 		return traces.size()>0 ? traces.get(0) : null;
 	}
@@ -1141,16 +1106,12 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 	@Override
 	public void reset() {
-		if (getDisplay().getThread() == Thread.currentThread()) {
-			resetInternal();
-		} else {
-			getDisplay().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					resetInternal();
-				}
-			});
-		}
+		DisplayUtils.syncExec(new Runnable() {
+			@Override
+			public void run() {
+				resetInternal();
+			}
+		});
 	}
 
 	private void resetInternal() {
@@ -1164,16 +1125,12 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 	@Override
 	public void clear() {
-		if (getDisplay().getThread() == Thread.currentThread()) {
-			clearInternal();
-		} else {
-			getDisplay().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					clearInternal();
-				}
-			});
-		}
+		DisplayUtils.syncExec(new Runnable() {
+			@Override
+			public void run() {
+				clearInternal();
+			}
+		});
 	}
 
 	private void clearInternal() {
@@ -1208,16 +1165,12 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 	@Override
 	public void clearTraces() {
-		if (getDisplay().getThread() == Thread.currentThread()) {
-			removeAllTraces();
-		} else {
-			getDisplay().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					removeAllTraces();
-				}
-			});
-		}
+		DisplayUtils.syncExec(new Runnable() {
+			@Override
+			public void run() {
+				removeAllTraces();
+			}
+		});
 	}
 
 	private void removeAllTraces() {
@@ -1278,7 +1231,6 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 	@Override
 	public List<IAxis> getAxes() {
-
 		return activeViewer.getAxes();
 	}
 
@@ -1329,16 +1281,13 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 	@Override
 	public void resetAxes() {
-		if (getDisplay().getThread() == Thread.currentThread()) {
-			activeViewer.resetAxes();
-		} else {
-			getDisplay().syncExec(new Runnable() {
-				@Override
-				public void run() {
+		DisplayUtils.syncExec(new Runnable() {
+			@Override
+			public void run() {
+				if (activeViewer != null)
 					activeViewer.resetAxes();
-				}
-			});
-		}
+			}
+		});
 	}
 
 	public void clearRegionTool() {
@@ -1386,12 +1335,12 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 	@Override
 	public Collection<IRegion> getRegions(final RegionType type) {
-       return activeViewer.getRegions(type);
+		return activeViewer.getRegions(type);
 	}
 
 	@Override
 	public IAnnotation createAnnotation(final String name) throws Exception {
-        return activeViewer.createAnnotation(name);
+		return activeViewer.createAnnotation(name);
 	}
 
 	@Override
@@ -1428,7 +1377,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	@Override
 	public void printPlotting(){
 		if (activeViewer instanceof IPrintablePlotting) {
-		    ((IPrintablePlotting)activeViewer).printPlotting();
+			((IPrintablePlotting)activeViewer).printPlotting();
 		}
 	}
 
@@ -1437,29 +1386,47 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	 */
 	public void printScaledPlotting(){
 		if (activeViewer instanceof IPrintablePlotting) {
-		    ((IPrintablePlotting)activeViewer).printScaledPlotting();
+			((IPrintablePlotting)activeViewer).printScaledPlotting();
 		}
 	}
 
 	@Override
 	public void copyPlotting(){
 		if (activeViewer instanceof IPrintablePlotting) {
-		    ((IPrintablePlotting)activeViewer).copyPlotting();
+			((IPrintablePlotting)activeViewer).copyPlotting();
 		}
 	}
 
 	@Override
-	public String savePlotting(String filename) throws Exception{
+	public String savePlotting(final String filename) throws Exception{
 		if (activeViewer instanceof IPrintablePlotting) {
-		    ((IPrintablePlotting)activeViewer).savePlotting(filename);
+			DisplayUtils.asyncExec(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						((IPrintablePlotting) activeViewer).savePlotting(filename);
+					} catch (Throwable t) {
+						throw new RuntimeException(t);
+					}
+				}
+			});
 		}
 		return null;
 	}
 
 	@Override
-	public void savePlotting(String filename, String filetype) throws Exception{
+	public void savePlotting(final String filename, final String filetype) throws Exception{
 		if (activeViewer instanceof IPrintablePlotting) {
-		    ((IPrintablePlotting)activeViewer).savePlotting(filename, filetype);
+			DisplayUtils.asyncExec(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						((IPrintablePlotting) activeViewer).savePlotting(filename, filetype);
+					} catch (Throwable t) {
+						throw new RuntimeException(t);
+					}
+				}
+			});
 		}
 	}
 
