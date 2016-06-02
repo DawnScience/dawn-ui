@@ -76,13 +76,13 @@ public class SceneDisplayer extends Scene
 	 * @param root - the root node for the scene isosurfaceGroup
 	 * @param isosurfaceGroup - the node holding the surface objects
 	 */
-	public SceneDisplayer(Group root, Group isosurfaceGroup)
+	public SceneDisplayer(Group root)
 	{
 		// create the scene
 		super(root, 1500, 1500, true);
 		
 		this.root = root;
-		this.lightingGroup = isosurfaceGroup;
+		this.lightingGroup = new Group();
 				
 		// set the camera -> the camera will handle some aspects of movement
 		// other are within the group -> this is done to simplify rotation
@@ -393,7 +393,7 @@ public class SceneDisplayer extends Scene
 		if (axesData == null) {
 			throw new IllegalArgumentException("Must defined axes");
 		}
-
+		
 		Point3D axisLength = new Point3D(
 				axesData.get(0).getSize(), 
 				axesData.get(1).getSize(),
@@ -407,7 +407,7 @@ public class SceneDisplayer extends Scene
 
 	public void setAxisGridVisibility(boolean visibility)
 	{
-		axisObjectGroup.setAllVisible(visibility);
+		axisObjectGroup.setAxisVisibility(visibility);
 	}
 
 	public void setBoundingBoxVisibility(boolean visibility) 
