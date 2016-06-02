@@ -363,7 +363,7 @@ public class RegionControlWindow {
 								 final int startY, 
 								 final int width, 
 								 final int height) {
-		DisplayUtils.runInDisplayThread(true, parent, new Runnable() {
+		DisplayUtils.asyncExec(parent, new Runnable() {
 			@Override
 			public void run() {
 				spnStartX.setSelection(startX);
