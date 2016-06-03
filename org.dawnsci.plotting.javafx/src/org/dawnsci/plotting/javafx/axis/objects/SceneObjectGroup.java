@@ -84,7 +84,7 @@ public class SceneObjectGroup extends Group
 							new Point3D(1, 0, 0),
 							new Point3D(0, 0, 1));
 		
-		this.getChildren().addAll(xAxisGroup);
+		this.getChildren().addAll(xAxisGroup, yAxisGroup, zAxisGroup);
 	}
 	
 	/**
