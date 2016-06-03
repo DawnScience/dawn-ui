@@ -25,7 +25,7 @@ public abstract class JavafxTrace extends Image3DTrace
 
 	// !! I want to remove this, but am not sure how.
 	private SceneDisplayer scene;
-	
+		
 	public JavafxTrace(IPlottingSystemViewer<?> plotter, String name, SceneDisplayer scene) {
 		super(plotter, name);
 		this.scene = scene;
@@ -38,7 +38,9 @@ public abstract class JavafxTrace extends Image3DTrace
 	 * @return The object to be displayed
 	 */
 	public abstract Node getNode();
-
+	
+	public abstract boolean isLit();
+	
 	public void dispose() {
 		// remove node from scene
 		if (getNode() != null)

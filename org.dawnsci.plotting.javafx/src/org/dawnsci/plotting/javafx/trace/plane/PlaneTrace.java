@@ -61,7 +61,7 @@ public class PlaneTrace extends JavafxTrace implements IPlane3DTrace
 				pservice);
 		this.axes = (List<IDataset>) axes;
 	}
-
+	
 	@Override
 	public void setOpacity(double opacity) {
 //		imagePlane.setOpacityMaterial(opacity); // FIXME does not work 
@@ -72,4 +72,11 @@ public class PlaneTrace extends JavafxTrace implements IPlane3DTrace
 	public Node getNode() {
 		return imagePlane;
 	}
+	
+	@Override
+	public boolean isLit()
+	{
+		return false;
+	}
+	
 }

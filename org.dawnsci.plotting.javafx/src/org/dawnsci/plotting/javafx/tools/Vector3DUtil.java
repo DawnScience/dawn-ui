@@ -1,12 +1,14 @@
 package org.dawnsci.plotting.javafx.tools;
 
+import javax.vecmath.Matrix3d;
+
 import javafx.collections.ObservableList;
 import javafx.geometry.Point3D;
+import javafx.scene.Group;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Transform;
-
-import javax.vecmath.Matrix3d;
+import javafx.scene.transform.Translate;
 
 /**
  * class to hold basic vector calculations used throughout the plugin
@@ -19,31 +21,7 @@ public class Vector3DUtil {
 	/*
 	 * static functions
 	 */
-	
-	public static Point3D matrixToEuler(Matrix3d  m) 
-	{
-		double heading, attitude, bank;
 		
-	    // Assuming the angles are in radians.
-		if (m.m10 > 0.998) { // singularity at north pole
-			heading = Math.atan2(m.m02,m.m22);
-			attitude = Math.PI/2;
-			bank = 0;
-			return new Point3D(Math.toDegrees(heading), Math.toDegrees(attitude), Math.toDegrees(bank));
-		}
-		if (m.m10 < -0.998) { // singularity at south pole
-			heading = Math.atan2(m.m02,m.m22);
-			attitude = -Math.PI/2;
-			bank = 0;
-			return new Point3D(Math.toDegrees(heading), Math.toDegrees(attitude), Math.toDegrees(bank));
-		}
-		heading = Math.atan2(-m.m20,m.m00);
-		bank = Math.atan2(-m.m12,m.m11);
-		attitude = Math.asin(m.m10);
-		return new Point3D(Math.toDegrees(heading), Math.toDegrees(attitude), Math.toDegrees(bank));
-	}
-	
-	
 	public static Rotate matrixToRotate(Transform matrix) {
 		Matrix3d m = new Matrix3d(matrix.getMxx(), matrix.getMxy(),
 				matrix.getMxz(), matrix.getMyx(), matrix.getMyy(),
@@ -149,8 +127,6 @@ public class Vector3DUtil {
 		return new Rotate(Math.toDegrees(angle), new Point3D(x, y, z));
 	}
 	
-	
-	
 	public static double getMaximumValue(Point3D v) {
 		double value = Double.MIN_VALUE;
 		if (v.getX() > value)
@@ -174,7 +150,6 @@ public class Vector3DUtil {
 	 * @param rotationVectorDirection
 	 *            - The rotation direction, ie. the projected plane
 	 * @return The rotation
-	 * 
 	 * 
 	 */
 	public static Rotate alignVectorOnPlane(Point3D startVector,
@@ -225,7 +200,19 @@ public class Vector3DUtil {
 
 		// find the normal of the vectors
 		Point3D normal = vectorToAlign.crossProduct(endResult);
-
+		
+		if (normal.magnitude() == 0)
+		{
+			double radAngle = Math.toRadians(angle);
+			double[] matrix = new double[]{
+				Math.cos(radAngle)	, -Math.sin(radAngle)	, 0,
+				Math.sin(radAngle)	,  Math.cos(radAngle)	, 0,
+				0					, 0						, 0
+				
+			};
+			return matrixToRotate(new Matrix3d(matrix));
+		}
+		
 		// create the rotation via the normal and angle
 		Rotate returnRotate = new Rotate();
 		returnRotate.setAxis(normal);
@@ -233,6 +220,47 @@ public class Vector3DUtil {
 
 		return returnRotate;
 
+	}
+	
+	// this is messy, I don't have time to make it better
+	public static Rotate AlignPlaneToRotationAndDirection(
+			Point3D startPlane, 
+			Point3D startDirection, 
+			Point3D endPlane, 
+			Point3D endDirection)
+	{
+
+		// start by making the planes parallel
+		Rotate planeTransform = Vector3DUtil.alignVector(startPlane, endPlane);
+		
+		// align the direction vectors
+		// find the projection of the end direction vector -> add a use case
+		endDirection = Vector3DUtil.getVectorPlaneProjection(endPlane, endDirection).normalize();
+		Rotate directionTransform = Vector3DUtil.alignVector(startDirection, endDirection);
+		
+		// I use this instead of ->toArray(MatrixType) because .toArray is terrible and doesn't work.
+		double[] planeTransformMatrixArray = new double[]{
+				planeTransform.getMxx(), planeTransform.getMxy(), planeTransform.getMxz(),
+				planeTransform.getMyx(), planeTransform.getMyy(), planeTransform.getMyz(),
+				planeTransform.getMzx(), planeTransform.getMzy(), planeTransform.getMzz(),
+		};
+		Matrix3d PlaneRotationMatrix = new Matrix3d(planeTransformMatrixArray);
+		
+		double[] directionTransformMatrixArray = new double[]{
+				directionTransform.getMxx(), directionTransform.getMxy(), directionTransform.getMxz(),
+				directionTransform.getMyx(), directionTransform.getMyy(), directionTransform.getMyz(),
+				directionTransform.getMzx(), directionTransform.getMzy(), directionTransform.getMzz(),
+		};
+		Matrix3d directionRotationMatrix = new Matrix3d(directionTransformMatrixArray);
+		
+		// combine the matrices
+		PlaneRotationMatrix.mul(directionRotationMatrix);		
+		Matrix3d combinedMatrix = PlaneRotationMatrix;
+		combinedMatrix.normalize();
+		
+//		return planeTransform;
+		return Vector3DUtil.matrixToRotate(combinedMatrix);
+		
 	}
 
 	/**
@@ -278,8 +306,10 @@ public class Vector3DUtil {
 	 *            - the vector to project
 	 * @return the projected vector
 	 */
-	public static Point3D getVectorPlaneProjection(Point3D planeNormal,
-			Point3D vector) {
+	public static Point3D getVectorPlaneProjection(
+			Point3D planeNormal,
+			Point3D vector) 
+	{
 		double dot = vector.dotProduct(planeNormal);
 		double magnitude = planeNormal.magnitude();
 
@@ -309,6 +339,7 @@ public class Vector3DUtil {
 	/**
 	 * Applies only a single type of transform to a vector from a list of
 	 * transforms... (e.g. only applies rotations)
+	 * {@link #applyEclusiveRotation(ObservableList, Point3D, boolean)}
 	 * 
 	 * @param transformList
 	 *            - the list of transforms
@@ -317,6 +348,7 @@ public class Vector3DUtil {
 	 * @param transformClassType
 	 *            - the type of transform (eg. Rotate<b>.class</b>)
 	 * @return - the new transformed vector
+	 * 
 	 */
 	public static Point3D applyExclusiveTransforms(
 			ObservableList<Transform> transformList, Point3D vector,
@@ -327,9 +359,20 @@ public class Vector3DUtil {
 				direction = currentTransform.transform(direction);
 			}
 		}
+		
 		return direction;
+		
 	}
 
+	/**
+	 * same as above but able to invert rotates
+	 * {@link #applyExclusiveTransforms(ObservableList, Point3D, Class)}
+	 * 
+	 * @param transformList
+	 * @param vector
+	 * @param invertRotation
+	 * @return
+	 */
 	public static Point3D applyEclusiveRotation(
 			ObservableList<Transform> transformList, Point3D vector,
 			boolean invertRotation) {
