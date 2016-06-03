@@ -61,7 +61,7 @@ public class VolumeRenderingShellTester {
         Group root = new Group();
         Group isoSurfaceGroup = new Group();
         
-        SceneDisplayer scene = new SceneDisplayer(root, isoSurfaceGroup);
+        SceneDisplayer scene = new SceneDisplayer(root);
                 
 //        scene.addVolume/Trace(group);
         
