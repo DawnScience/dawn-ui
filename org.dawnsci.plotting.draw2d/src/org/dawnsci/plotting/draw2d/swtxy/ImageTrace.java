@@ -1688,14 +1688,17 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		
 		if (imageServiceBean==null) return false;
 		HistoType orig = imageServiceBean.getHistogramType();
+		if (orig == type) { // do nothing (especially if min/max are changed)
+			return true;
+		}
+
 		imageServiceBean.setHistogramType(type);
 		getPreferenceStore().setValue(BasePlottingConstants.HISTO_PREF, type.getLabel());
 //		boolean histoOk = createScaledImage(ImageScaleType.REHISTOGRAM, null);
 		updateImageDirty(ImageScaleType.REHISTOGRAM);
 		repaint();
-		
-		
-		if (type!=orig && ServiceHolder.getMacroService()!=null) {
+
+		if (ServiceHolder.getMacroService()!=null) {
 			TraceMacroEvent evt = new TraceMacroEvent(this, "setHistoType", type.name());
 			ServiceHolder.getMacroService().publish(evt);
 		}
