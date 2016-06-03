@@ -94,6 +94,10 @@ public class VolumeTrace  extends JavafxTrace implements IVolumeRenderTrace
 	public void setColour(int red, int green, int blue) {
 		
 	}
+	@Override
+	public boolean isLit() {
+		return false;
+	}
 
 	
 }

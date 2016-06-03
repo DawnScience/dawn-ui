@@ -66,11 +66,7 @@ public class TickGroup extends Group
 			
 		}
 		
-		
-		double angle = new Point3D(0, 1, 0).angle(direction);
-		Point3D rotateVector = new Point3D(0, 1, 0).crossProduct(direction);
-		
-		this.rotate = new Rotate(angle, 0, offset.getX(), 0, rotateVector);
+		this.rotate = Vector3DUtil.alignVector(new Point3D(0, 1, 0), direction);
 		
 		this.getChildren().addAll(this.line, this.textPane);
 		this.getTransforms().addAll(this.offset, this.rotate);
@@ -201,4 +197,10 @@ public class TickGroup extends Group
 	{
 		return this.offset;
 	}
+	
+	public void setTextVisibility(boolean visibility)
+	{
+		textPane.setVisible(visibility);;
+	}
+	
 }

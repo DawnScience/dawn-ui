@@ -19,10 +19,9 @@ import javafx.scene.transform.Translate;
  */
 public class SceneObjectGroup extends Group
 { 
-
-	private AxesGroup xyAxisGroup;
-	private AxesGroup yzAxisGroup;
-	private AxesGroup zxAxisGroup;
+	private TickLoop xAxisGroup;
+	private TickLoop yAxisGroup;
+	private TickLoop zAxisGroup;
 	
 	private BoundingBox boundingBox;
 		
@@ -50,32 +49,42 @@ public class SceneObjectGroup extends Group
 			Point3D axisLength,
 			List<IDataset> axesData)
 	{
-		if (xyAxisGroup != null)
-			xyAxisGroup.getChildren().clear();
-		if (yzAxisGroup != null)
-			yzAxisGroup.getChildren().clear();
-		if (zxAxisGroup != null)
-			zxAxisGroup.getChildren().clear();
-				
-		xyAxisGroup = new AxesGroup(
-				new Point3D(0, 0, 1),
-				axesData.get(0),
-				new Point3D(axisLength.getX(), axisLength.getY(), axisLength.getZ()));
-		this.getChildren().add(xyAxisGroup);
+		if (xAxisGroup != null)
+			xAxisGroup.getChildren().clear();
+		if (yAxisGroup != null)
+			yAxisGroup.getChildren().clear();
+		if (zAxisGroup != null)
+			zAxisGroup.getChildren().clear();
 		
-		yzAxisGroup = new AxesGroup(
-				new Point3D(1, 0, 0),
-				axesData.get(1),
-				new Point3D(axisLength.getY(), axisLength.getZ(), axisLength.getX()));
-		this.getChildren().add(yzAxisGroup);
+		xAxisGroup = new TickLoop(
+							axesData.get(0), 
+							new Point3D(
+									axisLength.getX(), 
+									axisLength.getY(), 
+									axisLength.getZ()), 
+							10, 
+							new Point3D(1, 0, 0),
+							new Point3D(0, 1, 0));
+		yAxisGroup = new TickLoop(
+							axesData.get(1), 
+							new Point3D(
+									axisLength.getY(), 
+									axisLength.getZ(), 
+									axisLength.getX()),
+							10, 
+							new Point3D(0, 1, 0),
+							new Point3D(0, 0, 1));
+		zAxisGroup = new TickLoop(
+							axesData.get(2), 
+							new Point3D(
+									axisLength.getX(), 
+									axisLength.getZ(), 
+									-axisLength.getY()),
+							10, 
+							new Point3D(1, 0, 0),
+							new Point3D(0, 0, 1));
 		
-		zxAxisGroup = new AxesGroup(
-				new Point3D(0, 1, 0),
-				axesData.get(2),
-				new Point3D(axisLength.getZ(), axisLength.getX(), axisLength.getY()));
-		this.getChildren().add(zxAxisGroup);
-		
-		
+		this.getChildren().addAll(xAxisGroup);
 	}
 	
 	/**
@@ -112,31 +121,12 @@ public class SceneObjectGroup extends Group
 	/*
 	 * visibility stuff
 	 */
-	public void setGridXVisible(boolean visible)
+	public void setAxisVisibility(boolean visible)
 	{
-		yzAxisGroup.setVisible(visible);
+		xAxisGroup.setVisible(visible);
+		yAxisGroup.setVisible(visible);
+		zAxisGroup.setVisible(visible);
 	}
-	public void setGridYVisible(boolean visible)
-	{
-		zxAxisGroup.setVisible(visible);
-	}
-	public void setGridZVisible(boolean visible)
-	{
-		xyAxisGroup.setVisible(visible);
-	}
-	public void setGridAllVisible(boolean visible)
-	{
-		setGridXVisible(visible);
-		setGridYVisible(visible);
-		setGridZVisible(visible);
-	}
-	public void setAllVisible (boolean visible)
-	{
-		setGridXVisible(visible);
-		setGridYVisible(visible);
-		setGridZVisible(visible);
-	}
-		
 	public void setBoundingBoxVisibility(boolean visible)
 	{
 		this.boundingBox.setVisible(visible);

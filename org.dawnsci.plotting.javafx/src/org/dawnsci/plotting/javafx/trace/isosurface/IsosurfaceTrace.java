@@ -267,6 +267,11 @@ public class IsosurfaceTrace extends JavafxTrace implements IIsosurfaceTrace
 	public Node getNode() {
 		return this.isosurface; 
 	}
+
+	@Override
+	public boolean isLit() {
+		return true;
+	}
 	
 }
 

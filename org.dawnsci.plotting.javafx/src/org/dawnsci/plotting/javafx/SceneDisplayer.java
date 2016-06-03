@@ -54,14 +54,14 @@ public class SceneDisplayer extends Scene
 	
 	// the groups for the scene
 	private Group lightingGroup;	// holds the isosurfaces
-	private Group nonLightingGroup;	// holds the volume renderings
+	private Group unlitGroup;	// holds the volume renderings
 	private Group cameraGroup; 		// holds the camera translation data
 	
 	private Group root;				// root of the scene graph
 	private Group axisNode; 		// holds the axisGroup -> allows the axisGroup to be null without an exception
 	private SceneObjectGroup axisObjectGroup;	// hold the axisGroup
 	private Group objectGroup;		// holds the objects for the scene
-	private Group lightGroup;		// holds the lights for the scene
+	private Group litGroup;		// holds the lights for the scene
 	
 	// arcBall
 	private ArcBall arcBall;
@@ -123,21 +123,20 @@ public class SceneDisplayer extends Scene
 	private void initlialiseGroups()
 	{
 		// initialise/create the groups
-		this.nonLightingGroup = new Group();
+		this.unlitGroup = new Group();
 		this.cameraGroup = new Group();
 		this.axisNode = new Group();
 		this.objectGroup = new Group();
-		this.lightGroup = new Group();
+		this.litGroup = new Group();
 		
 	}
 	
 	// combine the groups into the scene graph root node
 	private void createSceneGraph()
 	{
-		
 		// create the scene graph
-		this.lightGroup.getChildren().addAll(this.lightingGroup);
-		this.objectGroup.getChildren().addAll(axisNode, this.lightGroup, nonLightingGroup);
+		this.litGroup.getChildren().addAll(this.lightingGroup);
+		this.objectGroup.getChildren().addAll(axisNode, this.litGroup, this.unlitGroup);
 		this.cameraGroup.getChildren().addAll(this.objectGroup);
 		
 		// add groups the the root
@@ -182,14 +181,14 @@ public class SceneDisplayer extends Scene
 		this.objectGroup.getChildren().addAll(ambientSurfaceLight);
 		
 		AmbientLight ambientVolumeLight = new AmbientLight(new Color(1,1,1,1));
-		ambientVolumeLight.getScope().add(nonLightingGroup);
+		ambientVolumeLight.getScope().add(unlitGroup);
 		
-		this.nonLightingGroup.getChildren().addAll(ambientVolumeLight);
+		this.unlitGroup.getChildren().addAll(ambientVolumeLight);
 		
 		PointLight pointLight = new PointLight(new Color(1, 1, 1, 1));	
-		pointLight.getScope().add(lightGroup);
+		pointLight.getScope().add(litGroup);
 		
-		this.lightGroup.getChildren().addAll(pointLight);
+		this.litGroup.getChildren().addAll(pointLight);
 		
 		
 	}
@@ -368,10 +367,10 @@ public class SceneDisplayer extends Scene
 	public void addTrace(JavafxTrace trace)
 	{
 		// isosurfaces require a specific lighting group
-		if (trace instanceof IsosurfaceTrace)
+		if (trace.isLit())
 			this.lightingGroup.getChildren().add(trace.getNode());
 		else
-			this.nonLightingGroup.getChildren().add(trace.getNode());
+			this.unlitGroup.getChildren().add(trace.getNode());
 		
 	}
 	
@@ -382,9 +381,9 @@ public class SceneDisplayer extends Scene
 			lightingGroup.getChildren().remove(removeNode);
 		}
 		
-		if (nonLightingGroup.getChildren().contains(removeNode))
+		if (unlitGroup.getChildren().contains(removeNode))
 		{
-			nonLightingGroup.getChildren().remove(removeNode);
+			unlitGroup.getChildren().remove(removeNode);
 		}
 	}
 	
