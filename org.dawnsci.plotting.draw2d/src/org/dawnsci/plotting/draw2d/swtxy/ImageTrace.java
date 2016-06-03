@@ -869,9 +869,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				ImageServiceBean histoBean = imageServiceBean.clone();
 				histoBean.setImage(slice);
 				if (fullMask!=null) histoBean.setMask(slice(getYAxis().getRange(), getXAxis().getRange(), fullMask));
-
-				setMin(imageServiceBean.getMin().doubleValue());
-				setMax(imageServiceBean.getMax().doubleValue());
+				double[] fa = service.getFastStatistics(histoBean);
+				setMin(fa[0]);
+				setMax(fa[1]);
 
 			}
 							
