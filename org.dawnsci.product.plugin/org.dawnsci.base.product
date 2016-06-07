@@ -35,7 +35,7 @@ openFile
       </vmArgsMac>
    </launcherArgs>
 
-   <windowImages i16="/org.dawnsci.product.plugin/icons/Temp-16x16-icon.png" i48="/org.dawnsci.product.plugin/icons/Temp-48x48-icon.png"/>
+   <windowImages i16="/org.dawnsci.product.plugin/icons/Temp-16x16-icon.png" i32="/org.dawnsci.product.plugin/icons/Temp-32x32-icon.png" i48="/org.dawnsci.product.plugin/icons/Temp-48x48-icon.png"/>
 
    <splash
       location="org.dawnsci.product.plugin"
@@ -57,6 +57,7 @@ openFile
             winExtraLargeHigh="/org.dawnsci.product.plugin/icons/256x256_32.bmp"/>
       </win>
    </launcher>
+
 
    <vm>
    </vm>
