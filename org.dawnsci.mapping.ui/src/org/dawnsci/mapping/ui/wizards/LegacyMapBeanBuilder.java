@@ -37,8 +37,6 @@ public class LegacyMapBeanBuilder {
 	private static final String I05DATA = "data";
 	private static final String I05ANGLES = "angles";
 	private static final String I05ENERGIES = "energies";
-	private static final String I05SAX = "sax";
-	private static final String I05SAZ = "saz";
 	public static final String I05CHECK = "/entry1/instrument/analyser/cps";
 	
 	
@@ -119,6 +117,9 @@ public class LegacyMapBeanBuilder {
 				
 			}
 			
+			int xDim = 0;
+			int yDim = 1;
+			
 			try {
 				
 				DataNode dataNode = gn.getDataNode(xAxis);
@@ -133,6 +134,8 @@ public class LegacyMapBeanBuilder {
 					String tmp = yAxis;
 					yAxis = xAxis;
 					xAxis = tmp;
+					xDim = 1;
+					yDim = 0;
 				}
 				
 			} catch (Exception e) {
@@ -151,11 +154,9 @@ public class LegacyMapBeanBuilder {
 			ax[3] = I05ANALYSER + Node.SEPARATOR + I05ENERGIES;
 			bb.setAxes(ax);
 			bb.setRank(4);
-			bb.setxDim(0);
-			bb.setyDim(1);
+			bb.setxDim(xDim);
+			bb.setyDim(yDim);
 			fb.addBlock(bb);
-
-
 
 			MapBean mb = new MapBean();
 			mb.setName(I05CHECK);
