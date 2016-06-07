@@ -200,7 +200,6 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 			scene.addTrace(javafxTrace);
 			if (javafxTrace.getAxes() != null && javafxTrace.getAxes().size() == 3)
 			scene.setAxesData(javafxTrace.getAxes());
-//			scene.extendAxesBounds(javafxTrace.getBoundingBox());
 		}
 		
 		else

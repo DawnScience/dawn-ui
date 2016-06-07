@@ -20,6 +20,12 @@ class FXPlotActions {
 	private FXPlotViewer      viewer;
 	private IPlotActionSystem actionMan;
 
+	private Action resetTransforms;
+	private Action boundingBoxToggle;
+	private Action axisToggle;
+	private Action orthographicToggle;
+	private Action saveSceneToPng;
+	
 	public FXPlotActions(FXPlotViewer viewer, IPlottingSystem system) 
 	{
 		this.viewer = viewer;
@@ -32,7 +38,7 @@ class FXPlotActions {
 		String gridLineGroupNameAction = "javafx.plotting.grid.line.actions";
 		actionMan.registerGroup(gridLineGroupNameAction, ManagerType.TOOLBAR);
 		
-		Action resetTransforms = new Action ("Reset the transforms of the scene", IAction.AS_PUSH_BUTTON) {
+		resetTransforms = new Action ("Reset the transforms of the scene", IAction.AS_PUSH_BUTTON) {
 			@Override
 			public void run() {
 				viewer.resetSceneTransforms();
@@ -43,7 +49,7 @@ class FXPlotActions {
 		actionMan.registerAction(gridLineGroupNameAction, resetTransforms, ActionType.FX3D, ManagerType.TOOLBAR);
 		
 		
-		Action boundingBoxToggle = new Action ("Toggle Bounding Box", IAction.AS_CHECK_BOX) {
+		boundingBoxToggle = new Action ("Toggle Bounding Box", IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
 				viewer.setBoundingBoxVisibility(isChecked());
@@ -54,7 +60,7 @@ class FXPlotActions {
 		actionMan.registerAction(gridLineGroupNameAction, boundingBoxToggle, ActionType.FX3D, ManagerType.TOOLBAR);
 		
 		
-		Action axisToggle = new Action("Toggle Axis Grid",IAction.AS_CHECK_BOX) {
+		axisToggle = new Action("Toggle Axis Grid",IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
 				viewer.setAxisGridVisibility(isChecked());
@@ -65,7 +71,7 @@ class FXPlotActions {
 		actionMan.registerAction(gridLineGroupNameAction, axisToggle, ActionType.FX3D, ManagerType.TOOLBAR);
 		
 		
-		Action orthographicToggle = new Action("Toggle Orthographic Camera", IAction.AS_CHECK_BOX) {
+		orthographicToggle = new Action("Toggle Orthographic Camera", IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
 				viewer.toggleParallelCamera(isChecked());
@@ -75,7 +81,7 @@ class FXPlotActions {
 		orthographicToggle.setImageDescriptor(Activator.getImageDescriptor("icons/orthographic.png"));
 		actionMan.registerAction(gridLineGroupNameAction, orthographicToggle, ActionType.FX3D, ManagerType.TOOLBAR);
 		
-		Action saveSceneToPng = new Action ("Save view to file", IAction.AS_PUSH_BUTTON) {
+		saveSceneToPng = new Action ("Save view to file", IAction.AS_PUSH_BUTTON) {
 			@Override
 			public void run() {
 				viewer.saveScreenShotOfSceneToFile();
@@ -84,5 +90,5 @@ class FXPlotActions {
 		saveSceneToPng.setImageDescriptor(Activator.getImageDescriptor("icons/save.png"));
 		actionMan.registerAction(gridLineGroupNameAction, saveSceneToPng, ActionType.FX3D, ManagerType.TOOLBAR);
 		
-	}
+	}	
 }
