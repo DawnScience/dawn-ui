@@ -6,6 +6,7 @@ import java.util.Iterator;
 import org.dawnsci.mapping.ui.datamodel.MapBean;
 import org.dawnsci.mapping.ui.datamodel.MappedBlockBean;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.api.tree.Attribute;
@@ -15,6 +16,9 @@ import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.api.tree.NodeLink;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
+import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
+import org.eclipse.dawnsci.analysis.dataset.impl.Stats;
 
 import uk.ac.diamond.scisoft.analysis.io.NexusTreeUtils;
 
@@ -33,8 +37,6 @@ public class LegacyMapBeanBuilder {
 	private static final String I05DATA = "data";
 	private static final String I05ANGLES = "angles";
 	private static final String I05ENERGIES = "energies";
-	private static final String I05SAX = "sax";
-	private static final String I05SAZ = "saz";
 	public static final String I05CHECK = "/entry1/instrument/analyser/cps";
 	
 	
@@ -83,7 +85,7 @@ public class LegacyMapBeanBuilder {
 	}
 	
 	public static MappedDataFileBean buildBeani05in2015(Tree tree) {
-MappedDataFileBean fb = null;
+		MappedDataFileBean fb = null;
 		
 		NodeLink nl = tree.findNodeLink(I05ANALYSER);
 		Node n = nl.getDestination();
@@ -108,12 +110,36 @@ MappedDataFileBean fb = null;
 							if (xAxis == null) xAxis = name;
 							else yAxis = name;
 						}
-						at.toString();
 					}
 				}
 				
 				if (xAxis != null && yAxis != null) break;
 				
+			}
+			
+			int xDim = 0;
+			int yDim = 1;
+			
+			try {
+				
+				DataNode dataNode = gn.getDataNode(xAxis);
+				Dataset x = DatasetUtils.sliceAndConvertLazyDataset(dataNode.getDataset());
+				Dataset m0 = Stats.median(x, 0);
+				Dataset m1 = Stats.median(x, 1);
+				
+				double p0 = m0.peakToPeak().doubleValue();
+				double p1 = m1.peakToPeak().doubleValue();
+				
+				if (p1 > p0) {
+					String tmp = yAxis;
+					yAxis = xAxis;
+					xAxis = tmp;
+					xDim = 1;
+					yDim = 0;
+				}
+				
+			} catch (Exception e) {
+				//cant read data?
 			}
 			
 			if (xAxis == null || yAxis == null) return null;
@@ -128,11 +154,9 @@ MappedDataFileBean fb = null;
 			ax[3] = I05ANALYSER + Node.SEPARATOR + I05ENERGIES;
 			bb.setAxes(ax);
 			bb.setRank(4);
-			bb.setxDim(1);
-			bb.setyDim(0);
+			bb.setxDim(xDim);
+			bb.setyDim(yDim);
 			fb.addBlock(bb);
-
-
 
 			MapBean mb = new MapBean();
 			mb.setName(I05CHECK);

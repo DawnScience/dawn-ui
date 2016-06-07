@@ -11,6 +11,11 @@ import javax.vecmath.Matrix3d;
 
 import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
 
+/**
+ * Handles transformations of the scene
+ * @author uij85458
+ *
+ */
 public class ArcBall {
 
 	final double MOUSE_MOVEMENT_MOD = 1.2;

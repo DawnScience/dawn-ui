@@ -352,7 +352,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	}
 
 	private void updateAxes(final IImageTrace image, final List<ILineTrace> traces, final List<Dataset> lines, final RectangularROI bounds){
-		DisplayUtils.runInDisplayThread(false, getControl(), new Runnable() {
+		DisplayUtils.syncExec(getControl(), new Runnable() {
 			@Override
 			public void run() {
 				List<IDataset> axes = image.getAxes();
@@ -455,8 +455,8 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 			av_trace.setTraceColor(ColorConstants.cyan);
 	}
 
-	private void hideTraces(){
-		DisplayUtils.runInDisplayThread(true, getControl(), new Runnable(){
+	private void hideTraces() {
+		DisplayUtils.asyncExec(getControl(), new Runnable() {
 			@Override
 			public void run() {
 				if(x_trace != null && y_trace != null){

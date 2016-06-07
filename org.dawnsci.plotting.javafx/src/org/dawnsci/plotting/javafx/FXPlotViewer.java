@@ -60,9 +60,6 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 	private SceneDisplayer scene;
 	// root node
 	private Group root;
-	// node to hold the isosurface data -> a pointer is declared within the scene (surfacedisplayer)
-	// this pointer is edited within the scene via listeners
-	private Group isoSurfaceGroup;
 	
 	// the canvas for drawing -> not sure if this is needed but will keep it for now
 	private FXCanvas canvas;
@@ -85,6 +82,7 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 	 */
 	public void createControl(final Composite parent)
 	{
+		// DO NOT REMOVE
 		Platform.setImplicitExit(false);
 		
 		// declare the canvas in memory
@@ -92,11 +90,9 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 		
 		// create the root node
 		this.root = new Group();
-		// create the group for the isosurfaces
-		this.isoSurfaceGroup = new Group();
 		
 		// create the scene -> most of the changes will be done within here
-		scene = new SceneDisplayer(root, isoSurfaceGroup);
+		scene = new SceneDisplayer(root);
 		
 		// set the scene to the canvas
 		this.canvas.setScene(scene);
@@ -156,16 +152,22 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 		dialog.setFilterPath(File.listRoots()[0].getAbsolutePath());
 		dialog.setFilterNames(new String[]{".png"});
 		dialog.setFilterExtensions (filterExtensions);
-		fileURL = dialog.open();
 		
+		// will = null if cancelled
+		fileURL = dialog.open();
+				
 		WritableImage wi = scene.snapshot(null);
 		BufferedImage rawImage;
 		rawImage = SwingFXUtils.fromFXImage(wi, null);
 		
-		try {
-			ImageIO.write(rawImage, "png", new File(fileURL));
-		} catch (IOException e) {
-			e.printStackTrace();
+		
+		if (fileURL != null)
+		{
+			try {
+				ImageIO.write(rawImage, "png", new File(fileURL));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -196,8 +198,8 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 			
 			// add the trace into the list of current traces
 			scene.addTrace(javafxTrace);
+			if (javafxTrace.getAxes() != null && javafxTrace.getAxes().size() == 3)
 			scene.setAxesData(javafxTrace.getAxes());
-//			scene.extendAxesBounds(javafxTrace.getBoundingBox());
 		}
 		
 		else

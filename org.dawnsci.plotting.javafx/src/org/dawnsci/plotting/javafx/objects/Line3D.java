@@ -24,6 +24,13 @@ public class Line3D extends MeshView
 	private double height;
 	private PhongMaterial mat;
 	
+	/**
+	 * creates a 3d line in the Y direction of a set height <br>
+	 * which is then transformed to the correct orientation and offset.
+	 * @param height
+	 * @param rotate
+	 * @param offset
+	 */
 	public Line3D(double height, Rotate rotate, Point3D offset)
 	{
 		super();
@@ -42,6 +49,11 @@ public class Line3D extends MeshView
 		this.getTransforms().addAll(this.rotate, this.offset);
 		
 	}
+	/**
+	 * Creates and 3d line with a start and end point
+	 * @param start
+	 * @param end
+	 */
 	public Line3D(Point3D start, Point3D end)
 	{
 		List<Point3D> pointList = new ArrayList<Point3D>();

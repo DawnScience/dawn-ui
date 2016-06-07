@@ -267,6 +267,19 @@ public class IsosurfaceTrace extends JavafxTrace implements IIsosurfaceTrace
 	public Node getNode() {
 		return this.isosurface; 
 	}
+
+	@Override
+	public boolean isLit() {
+		return true;
+	}
+
+	@Override
+	public void setOpacity(double opacity) {
+		this.opacity = opacity;
+		Color newColour = new Color(rgb[0], rgb[1], rgb[2], opacity);
+		this.isosurface.setMaterial(new PhongMaterial(newColour));
+		
+	}
 	
 }
 

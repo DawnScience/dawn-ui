@@ -61,5 +61,15 @@ public class LineTrace extends JavafxTrace implements ILine3DTrace
 	public Node getNode() {
 		return line;
 	}
+
+	@Override
+	public boolean isLit() {
+		return false;
+	}
+
+	@Override
+	public void setOpacity(double opacity) {
+		// it's a line, does nothing
+	}
 	
 }
