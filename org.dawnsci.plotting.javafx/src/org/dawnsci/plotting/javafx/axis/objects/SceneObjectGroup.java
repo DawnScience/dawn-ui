@@ -49,12 +49,25 @@ public class SceneObjectGroup extends Group
 			Point3D axisLength,
 			List<IDataset> axesData)
 	{
+		boolean xVis = true, yVis = true, zVis = true;
+		
 		if (xAxisGroup != null)
+		{
+			xVis = xAxisGroup.isVisible();
 			xAxisGroup.getChildren().clear();
+		}
+		
 		if (yAxisGroup != null)
+		{
+			yVis = yAxisGroup.isVisible();
 			yAxisGroup.getChildren().clear();
+		}
+		
 		if (zAxisGroup != null)
+		{
+			zVis = zAxisGroup.isVisible();
 			zAxisGroup.getChildren().clear();
+		}
 		
 		xAxisGroup = new TickLoop(
 							axesData.get(0), 
@@ -65,6 +78,8 @@ public class SceneObjectGroup extends Group
 							10, 
 							new Point3D(1, 0, 0),
 							new Point3D(0, 1, 0));
+		xAxisGroup.setVisible(xVis);
+		
 		yAxisGroup = new TickLoop(
 							axesData.get(1), 
 							new Point3D(
@@ -74,6 +89,8 @@ public class SceneObjectGroup extends Group
 							10, 
 							new Point3D(0, 1, 0),
 							new Point3D(0, 0, 1));
+		yAxisGroup.setVisible(yVis);
+		
 		zAxisGroup = new TickLoop(
 							axesData.get(2), 
 							new Point3D(
@@ -83,6 +100,7 @@ public class SceneObjectGroup extends Group
 							10, 
 							new Point3D(1, 0, 0),
 							new Point3D(0, 0, 1));
+		zAxisGroup.setVisible(zVis);
 		
 		this.getChildren().addAll(xAxisGroup, yAxisGroup, zAxisGroup);
 	}
@@ -95,8 +113,11 @@ public class SceneObjectGroup extends Group
 	 */
 	public void setBoundingBox(Point3D size)
 	{
+		boolean bbVis = true;
+		
 		if (boundingBox != null && this.getChildren().contains(boundingBox))
 		{
+			bbVis = boundingBox.isVisible();
 			this.getChildren().remove(boundingBox);
 		}
 		
@@ -106,6 +127,8 @@ public class SceneObjectGroup extends Group
 		ambientAxisLight.getScope().add(boundingBox);
 		boundingBox.getChildren().add(ambientAxisLight);
 		boundingBox.setColour(Color.BLACK);
+		
+		boundingBox.setVisible(bbVis);
 		
 		this.getChildren().add(boundingBox);
 	}
@@ -127,6 +150,7 @@ public class SceneObjectGroup extends Group
 		yAxisGroup.setVisible(visible);
 		zAxisGroup.setVisible(visible);
 	}
+	
 	public void setBoundingBoxVisibility(boolean visible)
 	{
 		this.boundingBox.setVisible(visible);

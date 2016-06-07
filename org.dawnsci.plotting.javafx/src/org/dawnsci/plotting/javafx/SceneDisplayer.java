@@ -10,6 +10,14 @@ package org.dawnsci.plotting.javafx;
 
 import java.util.List;
 
+import javax.vecmath.Matrix3d;
+
+import org.dawnsci.plotting.javafx.axis.objects.JavaFXProperties;
+import org.dawnsci.plotting.javafx.axis.objects.SceneObjectGroup;
+import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
+import org.dawnsci.plotting.javafx.trace.JavafxTrace;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.event.EventHandler;
@@ -27,13 +35,8 @@ import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
+import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
-
-import org.dawnsci.plotting.javafx.axis.objects.JavaFXProperties;
-import org.dawnsci.plotting.javafx.axis.objects.SceneObjectGroup;
-import org.dawnsci.plotting.javafx.trace.JavafxTrace;
-import org.dawnsci.plotting.javafx.trace.isosurface.IsosurfaceTrace;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 
 /**
  * 
@@ -392,7 +395,7 @@ public class SceneDisplayer extends Scene
 		if (axesData == null) {
 			throw new IllegalArgumentException("Must defined axes");
 		}
-		
+				
 		Point3D axisLength = new Point3D(
 				axesData.get(0).getSize(), 
 				axesData.get(1).getSize(),
@@ -400,7 +403,7 @@ public class SceneDisplayer extends Scene
 		
 		this.axisObjectGroup.setAxes(axisLength, axesData);
 		this.axisObjectGroup.setBoundingBox(axisLength);
-		
+				
 		centraliseObjectGroup();
 	}
 
@@ -417,6 +420,33 @@ public class SceneDisplayer extends Scene
 	public void setScaleAxesVisibility(boolean visibility)
 	{
 		// do nothing at the moment
+	}
+	
+	/**
+	 * set rotate with a javafx rotation object
+	 * @param rotate
+	 */
+	public void setRotate(Rotate rotate)
+	{
+		this.arcBall.setRotate(rotate);
+	}
+	
+	/**
+	 * set rotate with a matrix
+	 * @param rotate
+	 */
+	public void setRotate(Matrix3d rotate)
+	{
+		setRotate(Vector3DUtil.matrixToRotate(rotate));
+	}
+	
+	/**
+	 * set rotate with an axis angle
+	 * @param cameraType
+	 */
+	public void setRotate(double angle, double x, double y, double z)
+	{
+		setRotate(new Rotate(angle,new Point3D(x, y, z)));
 	}
 	
 	public void setCameraType(int cameraType)
