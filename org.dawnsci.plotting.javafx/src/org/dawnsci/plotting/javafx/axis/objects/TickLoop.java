@@ -79,6 +79,7 @@ public class TickLoop extends Group {
 			double yAngle = yVector.angle( new Point3D(0, 1, 0));
 			
 			double xCross = yVector.crossProduct(new Point3D(0, 0, 1)).getX();
+			double yCross = yVector.crossProduct(new Point3D(0, 0, 1)).getY();
 			
 			top.setVisible(false);
 			bottom.setVisible(false);
@@ -92,11 +93,12 @@ public class TickLoop extends Group {
 			
 //			top.setVisible(true);
 			
-//			System.out.println(TickLoop.this);
-//			System.out.println("xAngle: " + xAngle);
-//			System.out.println("yAngle: " + yAngle);
-//			System.out.println("xCross: " + xCross);
-//			System.out.println("___________________");
+			System.out.println(TickLoop.this);
+			System.out.println("xAngle: " + xAngle);
+			System.out.println("yAngle: " + yAngle);
+			System.out.println("xCross: " + xCross);
+			System.out.println("yCross: " + yCross);
+			System.out.println("___________________");
 //			
 			if (yAngle < 90)
 			{
@@ -140,34 +142,8 @@ public class TickLoop extends Group {
 				offsetLabel(right, new Point3D(0, 0, 0));
 			}
 			
-//			
-//			
-//			
-//			if (xAngle < 90)
-//			{
-//				offsetLabel(top, new Point3D(0, 0, 0));
-//				offsetLabel(bottom, new Point3D(0, size.getX(), 0));
-//			}
-//			else
-//			{
-//				offsetLabel(top, new Point3D(0, size.getX(), 0));
-//				offsetLabel(bottom, new Point3D(0, 0, 0));
-//			}
-//			if (yAngle < 90)
-//			{
-//				offsetLabel(right, new Point3D(0, 0, 0));
-//				offsetLabel(left, new Point3D(0, size.getY(), 0));
-//			}
-//			else
-//			{
-//				offsetLabel(right, new Point3D(0, size.getY(), 0));
-//				offsetLabel(right, new Point3D(0, 0, 0));
-//			}
 			
-			if (xAngle < 90 && xCross > 0)
-			{
-				
-			}
+			
 //			else if ()
 			{
 				
@@ -235,44 +211,46 @@ public class TickLoop extends Group {
 			double Zoffset = t.getPosition() * this.size.getZ();
 			
 			// add top
-			this.top.getChildren().add(
-					new TickGroup(
-							this.size.getX(),
-							new Point3D(1, 0, 0), 
-							new Point3D(0, 0, Zoffset), 
-							t.getText(),
-							this.textSize,
-							new Rotate()));
+			TickGroup topTick = new TickGroup(
+										this.size.getX(),
+										new Point3D(1, 0, 0), 
+										new Point3D(0, 0, Zoffset), 
+										t.getText(),
+										this.textSize,
+										new Rotate());
+			topTick.setTextVisibility(false);
+			this.top.getChildren().add(topTick);
 			
 			// add right
-			this.right.getChildren().add(
-					new TickGroup(
-							this.size.getY(),
-							new Point3D(0, 1, 0), 
-							new Point3D(this.size.getX(), 0, Zoffset), 
-							t.getText(),
-							this.textSize,
-							new Rotate()));
+			TickGroup rightTick = new TickGroup(
+										this.size.getY(),
+										new Point3D(0, 1, 0), 
+										new Point3D(this.size.getX(), 0, Zoffset), 
+										t.getText(),
+										this.textSize,
+										new Rotate());
+			this.right.getChildren().add(rightTick);
 			
 			// add bottom
-			this.bottom.getChildren().add(
-					new TickGroup(
-							this.size.getX(),
-							new Point3D(-1, 0, 0), 
-							new Point3D(this.size.getX(), this.size.getY(), Zoffset), 
-							t.getText(),
-							this.textSize,
-							new Rotate()));
+			TickGroup bottomTick = new TickGroup(
+										this.size.getX(),
+										new Point3D(-1, 0, 0), 
+										new Point3D(this.size.getX(), this.size.getY(), Zoffset), 
+										t.getText(),
+										this.textSize,
+										new Rotate());
+			bottomTick.setTextVisibility(false);
+			this.bottom.getChildren().add(bottomTick);
 			
 			// add left
-			this.left.getChildren().add(
-					new TickGroup(
-							this.size.getY(),
-							new Point3D(0, -1, 0), 
-							new Point3D(0, this.size.getY(), Zoffset), 
-							t.getText(),
-							this.textSize,
-							new Rotate()));
+			TickGroup leftTick = new TickGroup(
+										this.size.getY(),
+										new Point3D(0, -1, 0), 
+										new Point3D(0, this.size.getY(), Zoffset), 
+										t.getText(),
+										this.textSize,
+										new Rotate());
+			this.left.getChildren().add(leftTick);
 		}
 		
 		
