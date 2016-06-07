@@ -158,7 +158,7 @@ public class isoSurfaceShellTester {
         Group isoSurfaceGroup = new Group();
         
         
-        Scene scene = new SceneDisplayer(root, isoSurfaceGroup);
+        Scene scene = new SceneDisplayer(root);
         
         isoSurfaceGroup.getChildren().add(mesh);
         
