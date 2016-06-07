@@ -4,7 +4,7 @@
 <product name="DAWN Science" uid="uk.ac.diamond.dawn.base.product" id="org.dawnsci.product.plugin.DAWN" application="org.eclipse.ui.ide.workbench" version="2.2.0.qualifier" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
-      <image path="/org.dawnsci.product.plugin/icons/Temp-3Col-Splash.png"/>
+      <image path="/org.dawnsci.product.plugin/icons/Dawn-210x238-about.png"/>
    </aboutInfo>
 
    <configIni use="default">
@@ -30,7 +30,7 @@
       </vmArgsSol>
    </launcherArgs>
 
-   <windowImages i16="/org.dawnsci.product.plugin/icons/Temp-16x16-icon.png" i48="/org.dawnsci.product.plugin/icons/Temp-48x48-icon.png"/>
+   <windowImages i16="/org.dawnsci.product.plugin/icons/Temp-16x16-icon.png" i32="/org.dawnsci.product.plugin/icons/Temp-32x32-icon.png" i48="/org.dawnsci.product.plugin/icons/Temp-48x48-icon.png"/>
 
    <splash
       location="org.dawnsci.product.plugin"
@@ -56,7 +56,6 @@
 
    <vm>
    </vm>
-
 
    <plugins>
    </plugins>

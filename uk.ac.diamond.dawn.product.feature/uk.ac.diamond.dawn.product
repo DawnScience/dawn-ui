@@ -35,24 +35,24 @@ openFile
       </vmArgsMac>
    </launcherArgs>
 
-   <windowImages i16="/org.dawnsci.product.plugin/icons/Temp-16x16-icon.png" i48="/org.dawnsci.product.plugin/icons/Temp-48x48-icon.png"/>
+   <windowImages i16="/org.dawnsci.product.plugin/icons/Temp-16x16-icon.png" i32="/org.dawnsci.product.plugin/icons/Temp-32x32-icon.png" i48="/org.dawnsci.product.plugin/icons/Temp-48x48-icon.png"/>
 
    <splash
       location="org.dawnsci.product.plugin"
       startupProgressRect="5,240,590,15" />
    <launcher name="dawn">
-      <linux icon="/uk.ac.diamond.dawn.product.feature/icons/dawn-icon.xpm"/>
+      <linux icon="/org.dawnsci.product.plugin/icons/dawn-icon.xpm"/>
       <solaris/>
-      <win useIco="true">
+      <win useIco="false">
          <ico path="/org.dawnsci.product.plugin/icons/dawn-icon.ico"/>
          <bmp
-            winSmallHigh="/uk.ac.diamond.dawn.product.feature/icons/16x16_32.bmp"
-            winSmallLow="/uk.ac.diamond.dawn.product.feature/icons/16x16_8.bmp"
-            winMediumHigh="/uk.ac.diamond.dawn.product.feature/icons/32x32_32.bmp"
-            winMediumLow="/uk.ac.diamond.dawn.product.feature/icons/32x32_8.bmp"
-            winLargeHigh="/uk.ac.diamond.dawn.product.feature/icons/48x48_32.bmp"
-            winLargeLow="/uk.ac.diamond.dawn.product.feature/icons/48x48_8.bmp"
-            winExtraLargeHigh="/uk.ac.diamond.dawn.product.feature/icons/256x256_32.bmp"/>
+            winSmallHigh="/org.dawnsci.product.plugin/icons/16x16_32.bmp"
+            winSmallLow="/org.dawnsci.product.plugin/icons/16x16_8.bmp"
+            winMediumHigh="/org.dawnsci.product.plugin/icons/32x32_32.bmp"
+            winMediumLow="/org.dawnsci.product.plugin/icons/32x32_8.bmp"
+            winLargeHigh="/org.dawnsci.product.plugin/icons/48x48_32.bmp"
+            winLargeLow="/org.dawnsci.product.plugin/icons/48x48_8.bmp"
+            winExtraLargeHigh="/org.dawnsci.product.plugin/icons/256x256_32.bmp"/>
       </win>
    </launcher>
 
