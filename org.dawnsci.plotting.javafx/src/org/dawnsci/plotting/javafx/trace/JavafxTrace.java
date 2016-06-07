@@ -41,6 +41,8 @@ public abstract class JavafxTrace extends Image3DTrace
 	
 	public abstract boolean isLit();
 	
+	public abstract void setOpacity(double opacity);
+	
 	public void dispose() {
 		// remove node from scene
 		if (getNode() != null)
