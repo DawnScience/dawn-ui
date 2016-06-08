@@ -78,28 +78,12 @@ public class TickLoop extends Group {
 			double xAngle = yVector.angle( new Point3D(1, 0, 0));
 			double yAngle = yVector.angle( new Point3D(0, 1, 0));
 			
-			double xCross = yVector.crossProduct(new Point3D(0, 0, 1)).getX();
-			double yCross = yVector.crossProduct(new Point3D(0, 0, 1)).getY();
-			
 			top.setVisible(false);
 			bottom.setVisible(false);
 			left.setVisible(false);
 			right.setVisible(false);
 			
-//			top.setVisible(		true);
-//			bottom.setVisible(	true);
-//			left.setVisible(	true);
-//			right.setVisible(	true);
 			
-//			top.setVisible(true);
-			
-			System.out.println(TickLoop.this);
-			System.out.println("xAngle: " + xAngle);
-			System.out.println("yAngle: " + yAngle);
-			System.out.println("xCross: " + xCross);
-			System.out.println("yCross: " + yCross);
-			System.out.println("___________________");
-//			
 			if (yAngle < 90)
 			{
 				top.setVisible(true);
@@ -141,14 +125,7 @@ public class TickLoop extends Group {
 				offsetLabel(left, new Point3D(0, size.getY(), 0));
 				offsetLabel(right, new Point3D(0, 0, 0));
 			}
-			
-			
-			
-//			else if ()
-			{
-				
-			}
-			
+						
 		});
 		
 		
