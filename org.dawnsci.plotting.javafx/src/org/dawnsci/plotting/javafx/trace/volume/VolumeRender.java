@@ -114,37 +114,7 @@ public class VolumeRender extends Group
 		newPlane.setOpacity_Material(1);
 		
 		outputGroup.getChildren().add(newPlane);
-		
-		outputGroup.localToSceneTransformProperty().addListener((obs, oldT, newT) -> {
-			
-			Rotate worldRotate = Vector3DUtil.matrixToRotate(newT);
-			
-			Point3D zVector = new Point3D(0, 0, 1);
-			try 
-			{
-				zVector = worldRotate.createInverse().transform(zVector);
-			} 
-			catch (Exception e) 
-			{
-				e.printStackTrace();
-			}
-			
-			double zAngle = zVector.angle( new Point3D(0, 0, 1));
-						
-			double opacity = Math.abs(Math.cos(Math.toRadians(zAngle)));
-			
-			if (opacity < 0.3)
-			{
-				opacity *= (opacity*2);
-				if (opacity < 0.05)
-					opacity = 0;
-			}
 				
-			newPlane.setOpacity_Material(Math.abs(opacity));
-			newPlane.setColour(new Color(opacity, opacity, opacity, 1));
-			
-        });
-		
 		return outputGroup;
 	}
 		
