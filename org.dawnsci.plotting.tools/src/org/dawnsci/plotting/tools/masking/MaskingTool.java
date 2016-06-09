@@ -1478,9 +1478,12 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 	
 	private void setEnabled(boolean enabled) {
 		for (Control control : enableControls) {
-			if (control!=null) control.setEnabled(enabled);
+			if (control!=null && !control.isDisposed())
+				control.setEnabled(enabled);
 		}
-		if (autoApply.getSelection()) apply.setEnabled(false);
+		if (autoApply != null && !autoApply.isDisposed() && apply != null && !apply.isDisposed())
+			if (autoApply.getSelection())
+				apply.setEnabled(false);
 	}
 
 	@Override
