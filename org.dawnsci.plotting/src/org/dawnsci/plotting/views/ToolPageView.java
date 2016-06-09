@@ -1376,10 +1376,11 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			if (rec == null || tool.getControl()==null || rec.tool!=tool) {
 				rec = createPage(tool.getPart(), tool);
 			}
-		
-			showPageRec(rec);
-			updatePartInfo(rec.tool);
-			
+
+			if (rec != null) {
+				showPageRec(rec);
+				updatePartInfo(rec.tool);
+			}
 		} catch (Exception ne) {
 			logger.error("Unexpected and serious problem trying to switch tool to "+evt.getNewPage(), ne);
 		}
@@ -1429,7 +1430,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
             // leave the existing tool where it is. Likely it is an image tool
             // and sys is a 1D plot in a dedicated view.
             if (!newPartFound && sys instanceof IPlottingSystem && (tool instanceof EmptyTool || tool==null) ) {
-            	final Collection<ITrace> images = ((IPlottingSystem<Composite>)sys).getTraces(IImageTrace.class);   
+            	final Collection<ITrace> images = ((IPlottingSystem<?>)sys).getTraces(IImageTrace.class);   
                 
             	ToolPageRole role = (activeRec!=null && activeRec.tool!=null) 
             			          ? activeRec.tool.getToolPageRole()
