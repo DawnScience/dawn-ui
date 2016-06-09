@@ -63,7 +63,6 @@ public class TickLoop extends Group {
 			
 			Rotate worldRotate = Vector3DUtil.matrixToRotate(newT);
 			
-			
 			// with relation to the ticks not the camera
 			Point3D yVector = new Point3D(0, 0, -1);
 			try 
@@ -84,6 +83,13 @@ public class TickLoop extends Group {
 			right.setVisible(false);
 			
 			
+			labelVisibility(top, 	false);
+			labelVisibility(bottom, false);
+			labelVisibility(right, 	false);
+			labelVisibility(left, 	false);
+			
+			// tick visibility
+			
 			if (yAngle < 90)
 			{
 				top.setVisible(true);
@@ -101,6 +107,8 @@ public class TickLoop extends Group {
 			{
 				right.setVisible(true);
 			}
+			
+			//label offsets
 			
 			if (xAngle < 90)
 			{
@@ -125,7 +133,27 @@ public class TickLoop extends Group {
 				offsetLabel(left, new Point3D(0, size.getY(), 0));
 				offsetLabel(right, new Point3D(0, 0, 0));
 			}
-						
+			
+			// label visibility
+			
+			if (yAngle < 45)
+			{
+				labelVisibility(left, true);
+				labelVisibility(right, true);
+			}
+			
+			if (yAngle > 45 && yAngle < 135)
+			{
+				labelVisibility(top, true);
+				labelVisibility(bottom, true);
+			}
+			
+			if (yAngle > 135 )
+			{
+				labelVisibility(left, true);
+				labelVisibility(right, true);
+			}
+			
 		});
 		
 		
@@ -195,7 +223,6 @@ public class TickLoop extends Group {
 										t.getText(),
 										this.textSize,
 										new Rotate());
-			topTick.setTextVisibility(false);
 			this.top.getChildren().add(topTick);
 			
 			// add right
@@ -216,7 +243,6 @@ public class TickLoop extends Group {
 										t.getText(),
 										this.textSize,
 										new Rotate());
-			bottomTick.setTextVisibility(false);
 			this.bottom.getChildren().add(bottomTick);
 			
 			// add left
@@ -235,7 +261,6 @@ public class TickLoop extends Group {
 		this.getChildren().addAll(this.top, this.right, this.bottom, this.left);
 		
 	}
-	
 	
 }
 
