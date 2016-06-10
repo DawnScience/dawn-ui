@@ -1,6 +1,7 @@
 package org.dawnsci.mapping.ui.datamodel;
 
 import org.eclipse.dawnsci.analysis.api.dataset.DataEvent;
+import org.eclipse.dawnsci.analysis.api.dataset.DatasetException;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataListener;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
@@ -98,8 +99,15 @@ public class LiveMappedData extends MappedData implements ILiveData {
 		((IRemoteDataset)ly).refreshShape();
 		((IRemoteDataset)lx).refreshShape();
 		
-		IDataset y = ly.getSlice();
-		IDataset x = lx.getSlice();
+		IDataset x;
+		IDataset y;
+		try {
+			x = lx.getSlice();
+			y = ly.getSlice();
+		} catch (DatasetException e) {
+			e.printStackTrace();
+			return null;
+		}
 		
 		if (y.getRank() == 2) {
 			SliceND s = new SliceND(y.getShape());

@@ -1,6 +1,7 @@
 package org.dawnsci.mapping.ui.datamodel;
 
 
+import org.eclipse.dawnsci.analysis.api.dataset.DatasetException;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.IRemoteDataset;
@@ -8,7 +9,6 @@ import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
 import org.eclipse.dawnsci.analysis.api.metadata.MetadataType;
 import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromLiveSeriesMetadata;
-import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
 import org.slf4j.Logger;
@@ -41,12 +41,22 @@ public class LiveMappedDataBlock extends MappedDataBlock implements ILiveData {
 		slice.setSlice(yDim,y,y+1,1);
 		slice.setSlice(xDim,x,x+1,1);
 		
-		IDataset slice2 = dataset.getSlice(slice);
+		IDataset slice2;
+		try {
+			slice2 = dataset.getSlice(slice);
+		} catch (DatasetException e) {
+			logger.error("Could not get data from lazy dataset", e);
+			return null;
+		}
 		
 		AxesMetadataImpl ax = new AxesMetadataImpl(dataset.getRank());
 		for (int i = 0; i < dataset.getRank(); i++) {
 			if (i == xDim || i == yDim || axes.getAxes()[i] == null) continue;
-			ax.setAxis(i, axes.getAxes()[i].getSlice());
+			try {
+				ax.setAxis(i, axes.getAxes()[i].getSlice());
+			} catch (DatasetException e) {
+				logger.error("Could not get data from lazy dataset for axis " + i, e);
+			}
 		}
 		slice2.setMetadata(ax);
 		MetadataType sslsm = generateSliceMetadata(x,y);

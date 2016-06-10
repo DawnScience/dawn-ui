@@ -10,6 +10,7 @@ import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.dawnsci.plotting.javafx.SceneDisplayer;
 import org.dawnsci.plotting.javafx.ServiceLoader;
 import org.dawnsci.plotting.javafx.trace.JavafxTrace;
+import org.eclipse.dawnsci.analysis.api.dataset.DatasetException;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
@@ -44,7 +45,11 @@ public class PlaneTrace extends JavafxTrace implements IPlane3DTrace
 		if (lazyDataset == null) {
 			throw new IllegalArgumentException("lazyDataset was null");
 		}
-		return lazyDataset.getSlice();
+		try {
+			return lazyDataset.getSlice();
+		} catch (DatasetException e) {
+			throw new IllegalArgumentException("Could not get data from lazy dataset", e);
+		}
 	}
 
 	@Override

@@ -18,6 +18,7 @@ import javafx.scene.transform.Translate;
 
 import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
+import org.eclipse.dawnsci.analysis.api.dataset.DatasetException;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.plotting.api.histogram.functions.FunctionContainer;
@@ -114,7 +115,12 @@ public class ImagePlane extends MeshView
 
 	public static Image createImageFromDataset(ILazyDataset lazyDataset, PaletteService ps)
 	{
-		IDataset dataset = lazyDataset.getSlice();
+		IDataset dataset;
+		try {
+			dataset = lazyDataset.getSlice();
+		} catch (DatasetException e) {
+			throw new IllegalArgumentException("Could not get data from lazy dataset", e);
+		}
 		
 		double minValue = dataset.min(true, true).doubleValue();
 		double maxValue = dataset.max(true, true).doubleValue();

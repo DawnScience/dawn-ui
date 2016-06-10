@@ -1,14 +1,10 @@
 package org.dawnsci.mapping.ui.datamodel;
 
 import org.dawnsci.mapping.ui.MappingUtils;
+import org.eclipse.dawnsci.analysis.api.dataset.DatasetException;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
-import org.eclipse.dawnsci.analysis.api.metadata.MetadataType;
 import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
-import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
-import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
-import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 
 public class MappedData extends AbstractMapData{
@@ -63,7 +59,12 @@ public class MappedData extends AbstractMapData{
 		if (indices == null) return null;
 		ILazyDataset spectrum = parent.getSpectrum(indices[0], indices[1]);
 		if (spectrum == null) return null;
-		IDataset s = spectrum.getSlice();
+		IDataset s = null;
+		try {
+			s = spectrum.getSlice();
+		} catch (DatasetException e) {
+			e.printStackTrace();
+		}
 		return s;
 	}
 	

@@ -10,6 +10,7 @@ import javafx.scene.transform.Rotate;
 
 import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
+import org.eclipse.dawnsci.analysis.api.dataset.DatasetException;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.plotting.api.histogram.functions.FunctionContainer;
 
@@ -115,6 +116,36 @@ public class VolumeRender extends Group
 		
 		outputGroup.getChildren().add(newPlane);
 				
+		outputGroup.localToSceneTransformProperty().addListener((obs, oldT, newT) -> {
+			
+			Rotate worldRotate = Vector3DUtil.matrixToRotate(newT);
+			
+			Point3D zVector = new Point3D(0, 0, 1);
+			try 
+			{
+				zVector = worldRotate.createInverse().transform(zVector);
+			} 
+			catch (Exception e) 
+			{
+				e.printStackTrace();
+			}
+			
+			double zAngle = zVector.angle( new Point3D(0, 0, 1));
+						
+			double opacity = Math.abs(Math.cos(Math.toRadians(zAngle)));
+			
+			if (opacity < 0.3)
+			{
+				opacity *= (opacity*2);
+				if (opacity < 0.05)
+					opacity = 0;
+			}
+				
+			newPlane.setOpacity_Material(Math.abs(opacity));
+			newPlane.setColour(new Color(opacity, opacity, opacity, 1));
+			
+		});
+		
 		return outputGroup;
 	}
 		
@@ -180,8 +211,16 @@ public class VolumeRender extends Group
 				
 		// generate the planes
 		xygroup = createPlanesFromDataSlice(new int[]{size[0], size[1], size[2]}, paletteService, dataset);
-		zygroup = createPlanesFromDataSlice(new int[]{size[1], size[2], size[0]}, paletteService, dataset.getTransposedView(1,2,0).getSlice());
-		zxgroup = createPlanesFromDataSlice(new int[]{size[2], size[0], size[1]}, paletteService, dataset.getTransposedView(2,0,1).getSlice());
+		try {
+			zygroup = createPlanesFromDataSlice(new int[]{size[1], size[2], size[0]}, paletteService, dataset.getTransposedView(1,2,0).getSlice());
+		} catch (DatasetException e) {
+			e.printStackTrace();
+		}
+		try {
+			zxgroup = createPlanesFromDataSlice(new int[]{size[2], size[0], size[1]}, paletteService, dataset.getTransposedView(2,0,1).getSlice());
+		} catch (DatasetException e) {
+			e.printStackTrace();
+		}
 		
 		this.setTranslateX((size[0] / dataset.getShape()[0])/2);
 		this.setTranslateY((size[1] / dataset.getShape()[1])/2);
@@ -212,7 +251,4 @@ public class VolumeRender extends Group
 		setGroupOpacity(opacity, zygroup);
 		setGroupOpacity(opacity, zxgroup);
 	}
-	
 }
-
-

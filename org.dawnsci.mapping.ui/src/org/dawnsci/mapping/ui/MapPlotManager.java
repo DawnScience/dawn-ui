@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.analysis.api.dataset.DatasetException;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
@@ -45,7 +46,6 @@ import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -154,7 +154,13 @@ public class MapPlotManager {
 				public void run() {
 					if (firstHold) data.clear();
 					firstHold = false;
-					IDataset s = lz.getSlice().squeeze();
+					IDataset s = null;
+					try {
+						s = lz.getSlice().squeeze();
+					} catch (DatasetException e) {
+						logger.error("Could not get data from lazy dataset", e);
+						return;
+					}
 					if (s != null) {
 						Dataset mergedDataset = getMergedDataset(s);
 						int pos = atomicPosition.getAndIncrement() % 4;
@@ -198,7 +204,13 @@ public class MapPlotManager {
 				
 				@Override
 				public void run() {
-					IDataset s = lz.getSlice();
+					IDataset s = null;
+					try {
+						s = lz.getSlice();
+					} catch (DatasetException e) {
+						logger.error("Could not get data from lazy dataset", e);
+						return;
+					}
 					if (s != null) {
 						final ILineTrace l = MetadataPlotUtils.buildLineTrace(s, data);
 						
@@ -484,8 +496,20 @@ public class MapPlotManager {
 			if (oaxes[i] == null) return false;
 			if (axes[i] == null) return false;
 		
-			IDataset oa = oaxes[i].getSlice();
-			IDataset a = axes[i].getSlice();
+			IDataset oa;
+			try {
+				oa = oaxes[i].getSlice();
+			} catch (DatasetException e) {
+				logger.warn("Could not get data from lazy dataset", e);
+				return false;
+			}
+			IDataset a;
+			try {
+				a = axes[i].getSlice();
+			} catch (DatasetException e) {
+				logger.warn("Could not get data from lazy dataset", e);
+				return false;
+			}
 			if (!oa.equals(a)) return false;
 		}
 		

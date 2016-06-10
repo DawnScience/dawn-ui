@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.analysis.api.dataset.DatasetException;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.plotting.api.trace.IImageStackTrace;
@@ -60,11 +61,15 @@ public class ImageStackTrace extends ImageTrace implements IImageStackTrace {
 		if (isActive()) {
 		    stackJob.scheduleSlice(index);
 		} else {
-			IDataset set = stack.getSlice(new int[]{index,0,0}, 
-										  new int[]{index+1,stack.getShape()[1], stack.getShape()[2]},
-										  new int[]{1,1,1});
-			set = set.squeeze();
-			setData(set, getAxes(), false);
+			try {
+				IDataset set = stack.getSlice(new int[]{index,0,0}, 
+											  new int[]{index+1,stack.getShape()[1], stack.getShape()[2]},
+											  new int[]{1,1,1});
+				set = set.squeeze();
+				setData(set, getAxes(), false);
+			} catch (DatasetException e) {
+				e.printStackTrace();
+			}
 			
 		}
 	}

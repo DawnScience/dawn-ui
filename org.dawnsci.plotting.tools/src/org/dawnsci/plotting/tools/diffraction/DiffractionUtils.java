@@ -8,7 +8,8 @@
  */
 package org.dawnsci.plotting.tools.diffraction;
 
-import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.DatasetException;
+import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
@@ -94,8 +95,18 @@ public class DiffractionUtils {
 		
 		if (filePath != null) {
 			//see if we can read diffraction info from nexus files
-			IDiffractionMetadata difMet = NexusDiffractionCalibrationReader.getDiffractionMetadataFromNexus(filePath, null, image.getName());
-			if (difMet == null) difMet = NexusDiffractionCalibrationReader.getDiffractionMetadataFromNexus(filePath, null, null);
+			IDiffractionMetadata difMet = null;
+			try {
+				difMet = NexusDiffractionCalibrationReader.getDiffractionMetadataFromNexus(filePath, null, image.getName());
+			} catch (DatasetException e) {
+				logger.debug("Could not read diffraction metadata for " + image.getName(), e);
+			}
+			if (difMet == null)
+				try {
+					difMet = NexusDiffractionCalibrationReader.getDiffractionMetadataFromNexus(filePath, null, null);
+				} catch (DatasetException e) {
+					logger.debug("Could not read default diffraction metadata", e);
+				}
 			if (difMet !=null) {
 				//TODO comment out
 				//image.setMetadata(difMet);

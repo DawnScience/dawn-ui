@@ -11,6 +11,7 @@ package org.dawnsci.plotting.system;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.eclipse.dawnsci.analysis.api.dataset.DatasetException;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.IErrorDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
@@ -134,8 +135,18 @@ class LightWeightDataProvider implements IDataProvider {
 		this.y = DatasetUtils.convertToDataset(yData);
 		ILazyDataset xel = x.getError();
 		ILazyDataset yel = y.getError();
-		if (xel != null) this.xerr = DatasetUtils.convertToDataset(xel.getSlice());
-		if (yel != null) this.yerr = DatasetUtils.convertToDataset(yel.getSlice());
+		if (xel != null) {
+			try {
+				this.xerr = DatasetUtils.convertToDataset(xel.getSlice());
+			} catch (DatasetException e) {
+			}
+		}
+		if (yel != null) {
+			try {
+				this.yerr = DatasetUtils.convertToDataset(yel.getSlice());
+			} catch (DatasetException e) {
+			}
+		}
 		this.cachedXRange = null;
 		this.cachedYRange = null;
 	}

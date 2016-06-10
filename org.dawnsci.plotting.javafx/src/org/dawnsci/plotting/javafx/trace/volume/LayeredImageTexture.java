@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 
+import org.eclipse.dawnsci.analysis.api.dataset.DatasetException;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.plotting.api.histogram.functions.FunctionContainer;
@@ -51,30 +52,27 @@ public class LayeredImageTexture {
 	
 	private void createTextureImage(ILazyDataset lazyDataset)
 	{
-		
-		bi = new BufferedImage(
-				stampCountWidth * stampWidth,
-				stampCountHeight * stampHeight,
+		int[] shape = lazyDataset.getShape();
+		bi = new BufferedImage(stampCountWidth * stampWidth, stampCountHeight * stampHeight,
 				BufferedImage.TYPE_INT_ARGB);
 		
 		int z = 0;
+		int[] start = new int[3];
+		int[] stop = shape.clone();
+		int[] step = new int[] {1, 1, 1};
 		for (int y = 0; y < stampCountHeight && z < stampCount; y ++)
 		{
 			for (int x = 0; x < stampCountWidth && z < stampCount; x ++)
 			{
-				IDataset slice = lazyDataset.getSlice(
-						new int[]{0,0,z},
-						new int[]{
-								lazyDataset.getShape()[0],
-								lazyDataset.getShape()[1],
-								z+1},
-						new int[]{1,1,1});
-				
-				addSliceToBufferedImage(
-						x * stampWidth,
-						y * stampHeight,
-						slice,
-						z);
+				start[2] = z;
+				stop[2] = z + 1;
+				try {
+					IDataset slice = lazyDataset.getSlice(start, stop, step);
+					addSliceToBufferedImage(x * stampWidth, y * stampHeight, slice, z);
+				} catch (DatasetException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				z++;
 			}
 		}
