@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2012-2016 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -22,7 +22,6 @@ import javax.swing.ImageIcon;
 import javax.swing.filechooser.FileSystemView;
 
 import org.dawb.common.services.ServiceManager;
-import org.dawb.common.util.io.FileUtils;
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -71,6 +70,8 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.eclipse.ui.services.AbstractServiceFactory;
 import org.eclipse.ui.services.IDisposable;
 import org.eclipse.ui.services.IServiceLocator;
+
+import uk.ac.diamond.scisoft.analysis.utils.FileUtils;
 
 /**
  * A service to provide SWT Image objects for 2D data.
