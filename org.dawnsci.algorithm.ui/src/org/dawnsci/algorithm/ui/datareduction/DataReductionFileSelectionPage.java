@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2012-2016 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.dawb.common.ui.selection.SelectionUtils;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.algorithm.ui.Activator;
 import org.dawnsci.algorithm.ui.views.runner.AbstractAlgorithmProcessPage;
@@ -246,7 +247,7 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 								 boolean isLocked,
 								 final int index){
 		
-			final IDataset image = PlottingUtils.loadData(filePath, null);
+			final IDataset image = SelectionUtils.loadData(filePath, null);
 			if(index == 1){
 				// if data is locked
 				if(((SelectedData)viewer.getElementAt(0)).isLocked()){
@@ -374,12 +375,12 @@ public class DataReductionFileSelectionPage extends AbstractAlgorithmProcessPage
 		public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 			if (selection instanceof IStructuredSelection) {
 				IStructuredSelection structSelection = (IStructuredSelection)selection;
-				image = PlottingUtils.loadData(structSelection);
+				image = SelectionUtils.loadData(structSelection);
 				if(image == null) return;
 
 				for(int i = 0; i< keys.length; i++){
 					if (!((SelectedData)viewer.getElementAt(i)).isLocked()){
-						String path = PlottingUtils.getFullFilePath(structSelection);
+						String path = SelectionUtils.getFullFilePath(structSelection);
 						loadAndPlotData(plottingSystems.get(i), keys[i], path, titles[i], false, false, i);
 					}
 				}

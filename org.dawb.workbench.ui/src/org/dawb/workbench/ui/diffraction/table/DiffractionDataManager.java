@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2012-2016 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,9 +14,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.dawb.common.ui.selection.SelectionUtils;
 import org.dawb.workbench.ui.Activator;
 import org.dawnsci.plotting.tools.diffraction.DiffractionUtils;
-import org.dawnsci.plotting.util.PlottingUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -167,7 +167,7 @@ public class DiffractionDataManager {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			
-			IDataset image = PlottingUtils.loadData(path, fullName);
+			IDataset image = SelectionUtils.loadData(path, fullName);
 			
 			final String[] outName = new String[1];
 			
@@ -203,7 +203,7 @@ public class DiffractionDataManager {
 				}
 			}
 			
-			if (outName[0] != null) image = PlottingUtils.loadData(path, outName[0]);
+			if (outName[0] != null) image = SelectionUtils.loadData(path, outName[0]);
 			
 			if (image == null)
 				return Status.CANCEL_STATUS;
