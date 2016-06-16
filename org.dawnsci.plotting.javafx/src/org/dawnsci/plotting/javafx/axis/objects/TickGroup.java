@@ -71,8 +71,13 @@ public class TickGroup extends Group
 		this.getChildren().addAll(this.line, this.textPane);
 		this.getTransforms().addAll(this.offset, this.rotate);
 				
+		addUpdateListener();
+	}
+	
+	private void addUpdateListener()
+	{
 		this.localToSceneTransformProperty().addListener((obs, oldT, newT) -> {
-						
+			
 			Rotate axisAngleRotate = Vector3DUtil.matrixToRotate(newT);
 			
 			try {

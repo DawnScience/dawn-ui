@@ -58,7 +58,13 @@ public class TickLoop extends Group {
 		
 		align(xDirection, yDirection);
 		
+		addUpdateListener();
 		
+		
+	}
+	
+	private void addUpdateListener()
+	{
 		this.localToSceneTransformProperty().addListener((obs, oldT, newT) -> {
 			
 			Rotate worldRotate = Vector3DUtil.matrixToRotate(newT);
@@ -155,10 +161,6 @@ public class TickLoop extends Group {
 			}
 			
 		});
-		
-		
-		
-		
 	}
 	
 	private void offsetLabel(Group axis, Point3D newOffset)

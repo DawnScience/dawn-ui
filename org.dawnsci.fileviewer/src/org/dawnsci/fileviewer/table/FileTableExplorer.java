@@ -12,6 +12,7 @@
 package org.dawnsci.fileviewer.table;
 
 import java.io.File;
+import java.util.Arrays;
 
 import org.dawnsci.fileviewer.FileViewer;
 import org.dawnsci.fileviewer.FileViewerConstants;
@@ -98,7 +99,7 @@ public class FileTableExplorer {
 		tableContentsOfLabel = new Label(composite, SWT.BORDER);
 		tableContentsOfLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL));
 
-		tviewer = new TableViewer(composite, SWT.VIRTUAL | SWT.BORDER | SWT.V_SCROLL | SWT.FULL_SELECTION);
+		tviewer = new TableViewer(composite, SWT.VIRTUAL | SWT.BORDER | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
 		tviewer.setContentProvider(new FileTableContentProvider(tviewer));
 		tviewer.setUseHashlookup(true);
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -130,10 +131,7 @@ public class FileTableExplorer {
 	 */
 	public File[] getSelectedFiles() {
 		StructuredSelection selection = (StructuredSelection) tviewer.getSelection();
-		Object file = selection.getFirstElement();
-		final File[] files = new File[1];
-		files[0] = (File) file;
-		return files;
+		return Arrays.copyOf(selection.toArray(), selection.size(), File[].class);
 	}
 
 	private void createColumns() {
