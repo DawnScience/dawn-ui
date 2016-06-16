@@ -117,9 +117,6 @@ public class LegacyMapBeanBuilder {
 				
 			}
 			
-			int xDim = 0;
-			int yDim = 1;
-			
 			try {
 				
 				DataNode dataNode = gn.getDataNode(xAxis);
@@ -130,12 +127,10 @@ public class LegacyMapBeanBuilder {
 				double p0 = m0.peakToPeak().doubleValue();
 				double p1 = m1.peakToPeak().doubleValue();
 				
-				if (p1 > p0) {
+				if (p0 > p1) {
 					String tmp = yAxis;
 					yAxis = xAxis;
 					xAxis = tmp;
-					xDim = 1;
-					yDim = 0;
 				}
 				
 			} catch (Exception e) {
@@ -154,8 +149,8 @@ public class LegacyMapBeanBuilder {
 			ax[3] = I05ANALYSER + Node.SEPARATOR + I05ENERGIES;
 			bb.setAxes(ax);
 			bb.setRank(4);
-			bb.setxDim(xDim);
-			bb.setyDim(yDim);
+			bb.setxDim(1);
+			bb.setyDim(0);
 			fb.addBlock(bb);
 
 			MapBean mb = new MapBean();
