@@ -64,6 +64,7 @@ public class OperationTableUtils {
 		IOperationService os = (IOperationService)ServiceManager.getService(IOperationService.class);
 		IPersistentFile pf = service.getPersistentFile(filename);
 		IOperation<? extends IOperationModel, ? extends OperationData>[] operations = pf.getOperations();
+		pf.close();
 		if (operations == null) return;
 		List<OperationDescriptor> list = new ArrayList<OperationDescriptor>(operations.length);
 		for (IOperation<? extends IOperationModel, ? extends OperationData> op : operations) list.add(new OperationDescriptor(op, os));

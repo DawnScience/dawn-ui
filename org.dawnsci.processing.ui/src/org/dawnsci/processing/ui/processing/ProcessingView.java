@@ -173,6 +173,7 @@ public class ProcessingView extends ViewPart {
 			IPersistenceService service = (IPersistenceService)ServiceManager.getService(IPersistenceService.class);
 			IPersistentFile pf = service.getPersistentFile(filename);
 			pf.setOperations(op);
+			pf.close();
 		} catch (Exception e) {
 			logger.error("Could not write operations to file", e);
 			MessageDialog.openInformation(getSite().getShell(), "Exception while writing operations to file", "An exception occurred while writing the operations to a file.\n" + e.getMessage());
