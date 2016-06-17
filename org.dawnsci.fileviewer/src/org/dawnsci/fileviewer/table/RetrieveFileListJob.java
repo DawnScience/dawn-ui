@@ -22,17 +22,21 @@ public class RetrieveFileListJob extends Job {
 	private File workerStateDir;
 	private SortType sortType;
 	private int direction;
-
-	public RetrieveFileListJob(File workerStateDir, SortType sortType, int direction) {
+	private String filter;
+	private boolean useRegex;
+	
+	public RetrieveFileListJob(File workerStateDir, SortType sortType, int direction, String filter, boolean useRegex) {
 		super("Retrieving file list..");
 		this.workerStateDir = workerStateDir;
 		this.sortType = sortType;
 		this.direction = direction;
+		this.filter = filter;
+		this.useRegex = useRegex;
 	}
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		dirList = Utils.getDirectoryList(workerStateDir, sortType, direction);
+		dirList = Utils.getDirectoryList(workerStateDir, sortType, direction, filter, useRegex);
 		return Status.OK_STATUS;
 	}
 
