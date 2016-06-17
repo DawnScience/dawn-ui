@@ -17,6 +17,10 @@
       [Enter License Description here.]
    </license>
 
+   <includes
+         id="org.dawnsci.slicing.feature"
+         version="0.0.0"/>
+
    <plugin
          id="org.dawnsci.mapping.ui"
          download-size="0"
@@ -30,11 +34,5 @@
          install-size="0"
          version="0.0.0"
          fragment="true"/>
-
-   <plugin
-         id="org.dawnsci.slicing.tools"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
 
 </feature>
