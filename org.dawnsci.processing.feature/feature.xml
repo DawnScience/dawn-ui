@@ -31,4 +31,24 @@
          version="0.0.0"
          fragment="true"/>
 
+   <plugin
+         id="org.dawnsci.processing.python"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="uk.ac.diamond.scisoft.analysis.processing"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="uk.ac.diamond.scisoft.analysis.processing.actor"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
 </feature>
