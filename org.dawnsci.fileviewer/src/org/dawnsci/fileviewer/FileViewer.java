@@ -446,7 +446,7 @@ public class FileViewer {
 					@Override
 					public void done(IJobChangeEvent event) {
 						File[] dirList = retrieveDirJob.getDirList();
-						int numObjects = dirList.length;
+						int numObjects = dirList == null ? 0 : dirList.length;
 						Display.getDefault().syncExec(new Runnable() {
 							public void run() {
 								numObjectsLabel.setText(Utils.getResourceString("details.DirNumberOfObjects.text", new Object[] { new Integer(numObjects) }));
