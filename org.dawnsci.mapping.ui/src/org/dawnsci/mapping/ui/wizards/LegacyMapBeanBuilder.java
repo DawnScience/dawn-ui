@@ -124,10 +124,16 @@ public class LegacyMapBeanBuilder {
 				Dataset m0 = Stats.median(x, 0);
 				Dataset m1 = Stats.median(x, 1);
 				
-				double p0 = m0.peakToPeak().doubleValue();
-				double p1 = m1.peakToPeak().doubleValue();
+				double max0 = m0.max(true).doubleValue();
+				double min0 = m0.min(true).doubleValue();
 				
-				if (p0 > p1) {
+				double max1 = m1.max(true).doubleValue();
+				double min1 = m1.min(true).doubleValue();
+				
+				double p0 = max0-min0;
+				double p1 = max1-min1;
+				
+				if (p1 > p0) {
 					String tmp = yAxis;
 					yAxis = xAxis;
 					xAxis = tmp;
