@@ -42,15 +42,7 @@
          version="0.0.0"/>
 
    <includes
-         id="org.dawb.eclipse.feature"
-         version="0.0.0"/>
-
-   <includes
          id="org.dawb.visualization.feature"
-         version="0.0.0"/>
-
-   <includes
-         id="org.dawb.workflow.feature"
          version="0.0.0"/>
 
    <includes
@@ -90,10 +82,6 @@
          version="0.0.0"/>
 
    <includes
-         id="uk.ac.diamond.scisoft.analysis.processing.feature"
-         version="0.0.0"/>
-
-   <includes
          id="org.dawnsci.macro.feature"
          version="0.0.0"/>
 
@@ -119,6 +107,22 @@
 
    <includes
          id="org.dawnsci.marketplaceclient.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="org.dawnsci.conversion.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="org.dawnsci.mapping.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="org.dawnsci.processing.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="org.dawnsci.persistence.feature"
          version="0.0.0"/>
 
    <plugin
@@ -155,14 +159,6 @@
          version="0.0.0"/>
 
    <plugin
-         id="org.dawnsci.passerelle.actors.plot"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.apache.commons.math3"
          download-size="0"
          install-size="0"
@@ -180,20 +176,6 @@
          download-size="0"
          install-size="0"
          version="0.0.0"/>
-
-   <plugin
-         id="org.dawnsci.persistence"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.dawnsci.conversion"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
 
    <plugin
          id="org.eclipse.pde.runtime"
