@@ -34,16 +34,20 @@ import org.eclipse.swt.dnd.DropTargetAdapter;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,6 +91,10 @@ public class FileTableExplorer {
 
 	private TableViewer tviewer;
 
+	private String filter;
+	
+	private boolean useRegex = false;
+	
 	public FileTableExplorer(FileViewer viewer, Composite parent, int style) {
 		this.viewer = viewer;
 
@@ -99,6 +107,42 @@ public class FileTableExplorer {
 		tableContentsOfLabel = new Label(composite, SWT.BORDER);
 		tableContentsOfLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL));
 
+		Composite filter_composite = new Composite(composite, SWT.NONE);
+		gridLayout = new GridLayout(3, false);
+		gridLayout.marginHeight = gridLayout.marginWidth = 2;
+		gridLayout.horizontalSpacing = gridLayout.verticalSpacing = 2;
+		filter_composite.setLayout(gridLayout);
+		filter_composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		Label filter_label = new Label(filter_composite, SWT.BORDER);
+		filter_label.setText("File Filter");
+		filter_label.setLayoutData(new GridData(GridData.BEGINNING | GridData.VERTICAL_ALIGN_CENTER));
+		
+		Text filter_text = new Text(filter_composite, SWT.SINGLE | SWT.BORDER);
+		filter_text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		filter_text.addModifyListener(new ModifyListener() {
+			
+			@Override
+			public void modifyText(ModifyEvent e) {
+				filter = filter_text.getText();
+				//viewer.notifySelectedFiles(getSelectedFiles());
+				viewer.doRefresh();
+			}
+		});
+		
+		Button filter_regex_button = new Button(filter_composite, SWT.CHECK | SWT.BORDER);
+		filter_regex_button.setText("Regex?");
+		filter_regex_button.setSelection(useRegex);
+		filter_regex_button.setLayoutData(new GridData(GridData.END | GridData.VERTICAL_ALIGN_CENTER));
+		filter_regex_button.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				useRegex = filter_regex_button.getSelection();
+				viewer.doRefresh();
+			}
+		});
+		
 		tviewer = new TableViewer(composite, SWT.VIRTUAL | SWT.BORDER | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
 		tviewer.setContentProvider(new FileTableContentProvider(tviewer));
 		tviewer.setUseHashlookup(true);
@@ -313,7 +357,7 @@ public class FileTableExplorer {
 					workerCancelled = false;
 					workerStateDir = workerNextDir;
 				}
-				workerExecute(sortType, sortDirection);
+				workerExecute(sortType, sortDirection, filter, useRegex);
 				synchronized (workerLock) {
 					try {
 						if ((!workerCancelled) && (workerStateDir == workerNextDir))
@@ -333,7 +377,7 @@ public class FileTableExplorer {
 	/**
 	 * Updates the table's contents
 	 */
-	private void workerExecute(SortType sortType, int direction) {
+	private void workerExecute(SortType sortType, int direction, String filter, boolean useRegex) {
 		// Clear existing information
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
@@ -346,7 +390,7 @@ public class FileTableExplorer {
 				if (retrieveDirJob != null && retrieveDirJob.getState() == Job.RUNNING) {
 					retrieveDirJob.cancel();
 				}
-				retrieveDirJob = new RetrieveFileListJob(workerStateDir, sortType, direction);
+				retrieveDirJob = new RetrieveFileListJob(workerStateDir, sortType, direction, filter, useRegex);
 				retrieveDirJob.setThread(workerThread);
 				retrieveDirJob.addJobChangeListener(new JobChangeAdapter() {
 					@Override
@@ -387,4 +431,12 @@ public class FileTableExplorer {
 		return sortDirection;
 	}
 
+	public String getFilter() {
+		return filter;
+	}
+	
+	public boolean getUseRegex() {
+		return useRegex;
+	}
+	
 }

@@ -12,11 +12,16 @@
 package org.dawnsci.fileviewer;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
+import org.apache.commons.io.filefilter.RegexFileFilter;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.fileviewer.table.FileTableViewerComparator;
 import org.eclipse.core.runtime.CoreException;
@@ -153,8 +158,21 @@ public class Utils {
 	 * @return an array of files this directory contains, may be empty but not
 	 *         null
 	 */
-	public static File[] getDirectoryList(File file, SortType sortType, int direction) {
-		File[] list = file.listFiles();
+	public static File[] getDirectoryList(File file, SortType sortType, int direction, String filter, boolean useRegex) {
+		File[] list = null;
+		if (filter == null || filter.equals("*") || Pattern.matches("^\\s*$", filter)) {
+			list = file.listFiles();
+		}
+		else if (useRegex) {
+			try {
+				list = file.listFiles((FileFilter) new RegexFileFilter(filter));
+			} catch (PatternSyntaxException e) {
+				list = null;
+			}
+		}
+		else {
+			list = file.listFiles((FileFilter) new WildcardFileFilter(filter));
+		}
 		if (list == null)
 			return new File[0];
 		sortFiles(list, sortType, direction);

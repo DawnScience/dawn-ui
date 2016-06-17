@@ -440,13 +440,13 @@ public class FileViewer {
 				if (retrieveDirJob != null && retrieveDirJob.getState() == Job.RUNNING) {
 					retrieveDirJob.cancel();
 				}
-				retrieveDirJob = new RetrieveFileListJob(currentDirectory, tableExplo.getSortType(), tableExplo.getSortDirection());
+				retrieveDirJob = new RetrieveFileListJob(currentDirectory, tableExplo.getSortType(), tableExplo.getSortDirection(), tableExplo.getFilter(), tableExplo.getUseRegex());
 //				retrieveDirJob.setThread(workerThread);
 				retrieveDirJob.addJobChangeListener(new JobChangeAdapter() {
 					@Override
 					public void done(IJobChangeEvent event) {
 						File[] dirList = retrieveDirJob.getDirList();
-						int numObjects = dirList.length;
+						int numObjects = dirList == null ? 0 : dirList.length;
 						Display.getDefault().syncExec(new Runnable() {
 							public void run() {
 								numObjectsLabel.setText(Utils.getResourceString("details.DirNumberOfObjects.text", new Object[] { new Integer(numObjects) }));
