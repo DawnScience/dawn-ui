@@ -111,10 +111,6 @@ This Agreement is governed by the laws of the State of New York and the intellec
          version="0.0.0"/>
 
    <includes
-         id="org.dawb.eclipse.feature"
-         version="0.0.0"/>
-
-   <includes
          id="org.dawnsci.plotting.feature"
          version="0.0.0"/>
 
@@ -126,15 +122,12 @@ This Agreement is governed by the laws of the State of New York and the intellec
          id="org.dawnsci.isosurface.feature"
          version="0.0.0"/>
 
-   <plugin
-         id="org.dawb.workbench.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+   <includes
+         id="org.dawnsci.common.ui.feature"
+         version="0.0.0"/>
 
    <plugin
-         id="org.dawb.common.ui"
+         id="org.dawb.workbench.ui"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -180,13 +173,6 @@ This Agreement is governed by the laws of the State of New York and the intellec
          unpack="false"/>
 
    <plugin
-         id="com.thoughtworks.xstream"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.dom4j"
          download-size="0"
          install-size="0"
@@ -222,13 +208,6 @@ This Agreement is governed by the laws of the State of New York and the intellec
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.nebula.visualization.xygraph"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="uk.ac.diamond.org.jscience4"
          download-size="0"
          install-size="0"
@@ -250,12 +229,6 @@ This Agreement is governed by the laws of the State of New York and the intellec
          unpack="false"/>
 
    <plugin
-         id="org.dawnsci.conversion.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
          id="org.monte.media"
          download-size="0"
          install-size="0"
@@ -270,27 +243,6 @@ This Agreement is governed by the laws of the State of New York and the intellec
 
    <plugin
          id="org.dawnsci.io"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.dawnsci.algorithm.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.dawnsci.persistence"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.dawnsci.conversion"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -361,37 +313,9 @@ This Agreement is governed by the laws of the State of New York and the intellec
          version="0.0.0"/>
 
    <plugin
-         id="org.dawnsci.processing.ui.dawn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"/>
-
-   <plugin
-         id="org.dawnsci.processing.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.dawnsci.plotting.examples"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
-
-   <plugin
-         id="org.dawnsci.mapping.ui.dawn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"/>
-
-   <plugin
-         id="org.dawnsci.mapping.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
 
 </feature>
