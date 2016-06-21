@@ -22,10 +22,6 @@
          version="0.0.0"/>
 
    <includes
-         id="org.eclipse.jdt"
-         version="0.0.0"/>
-
-   <includes
          id="org.eclipse.platform"
          version="0.0.0"/>
 
@@ -87,10 +83,6 @@
 
    <includes
          id="org.eclipse.emf.common"
-         version="0.0.0"/>
-
-   <includes
-         id="org.dawnsci.dde.feature"
          version="0.0.0"/>
 
    <includes
