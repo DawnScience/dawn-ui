@@ -1961,7 +1961,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		for (String name : names) this.add(transferableService.createData(dataHolder, metaData, name));
 		
 		// Search names to see if they all have a common root, we do not show this.
-		this.rootName = DatasetTitleUtils.getRootName(names);
+		this.rootName = FileUtils.getRootName(names);
 		
 		if (dataFilter!=null) dataFilter.setMetaData(meta);
 

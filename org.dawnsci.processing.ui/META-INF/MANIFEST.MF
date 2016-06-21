@@ -25,17 +25,15 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.richbeans.widgets,
  org.eclipse.osgi.services;bundle-version="3.5.0",
  org.eclipse.scanning.api,
- org.eclipse.dawnsci.nexus
-Bundle-ActivationPolicy: lazy
-Import-Package: org.apache.commons.beanutils;version="1.9.1",
- org.apache.commons.io,
- org.dawb.common.services,
- org.dawnsci.plotting.services.util,
+ org.eclipse.dawnsci.nexus,
+ slf4j.api,
  org.eclipse.core.resources,
- org.eclipse.dawnsci.analysis.api.conversion,
- org.eclipse.emf.common.ui.dialogs,
- org.slf4j;version="[1.7.2,2.0.0)",
- uk.ac.diamond.scisoft.analysis.processing.visitor
+ org.apache.commons.beanutils,
+ org.apache.commons.io,
+ uk.ac.diamond.scisoft.analysis.processing,
+ org.dawb.common.services
+Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Service-Component: OSGI-INF/*.xml
-Export-Package: org.dawnsci.processing.ui.model
+Export-Package: org.dawnsci.processing.ui,
+ org.dawnsci.processing.ui.model

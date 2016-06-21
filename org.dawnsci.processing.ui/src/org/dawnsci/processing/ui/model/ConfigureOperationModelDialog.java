@@ -202,7 +202,7 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 		
 		for (final Entry<String,ROIStruct> entry : rois.entrySet()) {
 			try {
-				final IRegionService rservice = (IRegionService)ServiceManager.getService(IRegionService.class);
+				final IRegionService rservice = (IRegionService) ServiceManager.getService(IRegionService.class);
 				
 				if (entry.getValue().roi instanceof RingROI && d != null && sector) {
 					entry.getValue().roi.setPoint(d.getDetector2DProperties().getBeamCentreCoords());

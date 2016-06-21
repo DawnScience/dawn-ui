@@ -12,9 +12,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
@@ -87,30 +90,5 @@ public class DatasetTitleUtils {
 			return x.getName();
 		}
 	}
-
-	
-	private static final Pattern ROOT_PATTERN = Pattern.compile("(\\/[a-zA-Z0-9]+\\/).+");
-
-	public static String getRootName(Collection<String> names) {
-		
-		if (names==null) return null;
-		String rootName = null;
-		for (String name : names) {
-			final Matcher matcher = ROOT_PATTERN.matcher(name);
-			if (matcher.matches()) {
-				final String rName = matcher.group(1);
-				if (rootName!=null && !rootName.equals(rName)) {
-					rootName = null;
-					break;
-				}
-				rootName = rName;
-			} else {
-				rootName = null;
-				break;
-			}
-		}
-		return rootName;
-	}
-
 
 }

@@ -14,7 +14,7 @@ import java.util.Set;
 
 import org.dawb.common.ui.util.DatasetNameUtils;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
-import org.dawnsci.plotting.services.util.DatasetTitleUtils;
+import org.dawb.common.util.io.FileUtils;
 import org.dawnsci.processing.ui.ServiceHolder;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext;
@@ -351,7 +351,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 		final ConversionScheme scheme = context.getConversionScheme();
 		final Map<String, int[]>     names = DatasetNameUtils.getDatasetInfo(context.getFilePaths().get(0), scheme);
 
-        rootName = DatasetTitleUtils.getRootName(names.keySet());
+        rootName = FileUtils.getRootName(names.keySet());
         return names;
 	}
 	
