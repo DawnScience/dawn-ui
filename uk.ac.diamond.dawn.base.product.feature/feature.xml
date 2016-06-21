@@ -69,6 +69,10 @@
          id="uk.ac.diamond.optid.feature"
          version="0.0.0"/>
 
+   <includes
+         id="org.dawnsci.dde.feature"
+         version="0.0.0"/>
+
    <plugin
          id="uk.ac.diamond.scisoft.mx.rcp"
          os="linux"
