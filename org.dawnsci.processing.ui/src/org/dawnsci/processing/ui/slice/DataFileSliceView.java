@@ -24,8 +24,6 @@ import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.ServiceHolder;
-import org.dawnsci.processing.ui.model.OperationModelView;
-import org.dawnsci.processing.ui.preference.ProcessingConstants;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -55,7 +53,6 @@ import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
 import org.eclipse.dawnsci.analysis.dataset.slicer.Slicer;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
-import org.eclipse.dawnsci.hdf.object.operation.HierarchicalFileExecutionVisitor;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.image.IFileIconService;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
@@ -68,7 +65,6 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
@@ -357,27 +353,6 @@ public class DataFileSliceView extends ViewPart {
 				IOperation<? extends IOperationModel, ? extends OperationData>[] ops = getOperations();
 
 				if (ops != null) {
-					
-					ExecutionType et = ExecutionType.SERIES;
-					int pool = 1;
-					boolean tryParallel = false;
-					
-					try {
-						IPreferenceStore ps = Activator.getDefault().getPreferenceStore();
-						
-						pool = ps.getInt(ProcessingConstants.POOL_SIZE);
-						
-						String string = ps.getString(ProcessingConstants.EXECUTION_TYPE);
-						et = ExecutionType.valueOf(string);
-						tryParallel = ps.getBoolean(ProcessingConstants.USE_PARRALLEL);
-					} catch (Exception e) {
-						logger.error("Could not load execution type from preference!: "+ e.getMessage());
-					}
-					
-					final ExecutionType etype = et;
-					final int poolsize = pool;
-					final boolean par = tryParallel;
-
 					final IOperation<? extends IOperationModel, ? extends OperationData>[] fop = ops;
 
 					fileManager.setProcessingConversionInfo(new IProcessingConversionInfo() {
@@ -399,17 +374,17 @@ public class DataFileSliceView extends ViewPart {
 
 						@Override
 						public ExecutionType getExecutionType() {
-							return etype;
+							return ExecutionType.PARALLEL;
 						}
 
 						@Override
 						public int getPoolSize() {
-							return poolsize;
+							return -1;
 						}
 
 						@Override
 						public boolean isTryParallel() {
-							return par;
+							return true;
 						}
 
 					});
