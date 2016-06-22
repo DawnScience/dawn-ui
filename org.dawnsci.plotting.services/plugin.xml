@@ -6,12 +6,12 @@
       <serviceFactory
             factoryClass="org.dawnsci.plotting.services.PlotImageService">
          <service
-               serviceClass="org.dawb.common.services.IPlotImageService"></service>
+               serviceClass="org.eclipse.dawnsci.plotting.api.image.IPlotImageService"></service>
       </serviceFactory>
       <serviceFactory
             factoryClass="org.dawnsci.plotting.services.PlotImageService">
          <service
-               serviceClass="org.dawb.common.services.IFileIconService">
+               serviceClass="org.eclipse.dawnsci.plotting.api.image.IFileIconService">
          </service>
       </serviceFactory>
       <serviceFactory
