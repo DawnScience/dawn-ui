@@ -552,6 +552,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		b.setXmx("1024m");
 		b.setAxesNames(axes);
 		b.setOutputFilePath(path);
+		b.setDataDimensions(sslm.getDataDimensions());
 		b.setName("GDA_OPERATION_SUBMISSION");
 
 		b.setDataKey("/entry/solstice_scan");
@@ -600,18 +601,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 			
 			monitor.beginTask("Processing", DataFileSliceView.getWork(new SliceND(local.getShape()), meta.getDataDimensions()));
 			
-			boolean parallel = true;
-			IOperation[] operationSeries = getOperations();
-			for (IOperation op : operationSeries) {
-				Atomic atomic = op.getClass().getAnnotation(Atomic.class);
-				if (atomic == null) {
-					parallel = false;
-					break;
-				}
-			}
-
-			
-			if (parallel) cc.setExecutionType(ExecutionType.PARALLEL);
+			if (canRunParallel()) cc.setExecutionType(ExecutionType.PARALLEL);
 			else cc.setExecutionType(ExecutionType.SERIES);
 			
 			service.execute(cc);
@@ -619,6 +609,18 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private boolean canRunParallel() {
+		IOperation[] operationSeries = getOperations();
+		for (IOperation op : operationSeries) {
+			Atomic atomic = op.getClass().getAnnotation(Atomic.class);
+			if (atomic == null) {
+				return false;
+			}
+		}
+		
+		return true;
 	}
 
 	private String getPathNoExtension(String path) {
