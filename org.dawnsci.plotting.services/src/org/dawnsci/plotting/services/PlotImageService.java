@@ -21,7 +21,6 @@ import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.filechooser.FileSystemView;
 
-import org.dawb.common.services.ServiceManager;
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -135,7 +134,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 	}
 	
 	private Dataset getThumbnail(final File f, final int wdith, final int height) throws Throwable {
-		final ILoaderService loader = (ILoaderService)ServiceManager.getService(ILoaderService.class);
+		final ILoaderService loader = ServiceLoader.getLoaderService();
 		IDataHolder dh = loader.getData(f.getAbsolutePath(),null);
 		ILazyDataset lz = dh.getLazyDataset(0);
 		if (lz.getRank() == 2) {
@@ -177,13 +176,13 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 		
 		if (bean==null) {
 			bean = new ImageServiceBean();
-			final IPaletteService pservice = (IPaletteService)ServiceManager.getService(IPaletteService.class);
+			final IPaletteService pservice = ServiceLoader.getPaletteService();
 			bean.setPalette(pservice.getDirectPaletteData(store.getString(PlottingConstants.COLOUR_SCHEME)));	
 			bean.setOrigin(ImageOrigin.forLabel(store.getString(PlottingConstants.ORIGIN_PREF)));
 		}
 		bean.setImage(thumbnail);
 		
-		final IImageService service = (IImageService)ServiceManager.getService(IImageService.class);
+		final IImageService service = new ImageService();
 		return  service.getImage(bean);
 	}
 

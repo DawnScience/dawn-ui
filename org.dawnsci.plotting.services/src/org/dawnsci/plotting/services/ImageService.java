@@ -14,7 +14,6 @@ import java.awt.image.DirectColorModel;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
 
-import org.dawb.common.services.ServiceManager;
 import org.dawnsci.plotting.services.util.SWTImageUtils;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -79,7 +78,6 @@ import org.eclipse.ui.services.IServiceLocator;
  */
 public class ImageService extends AbstractServiceFactory implements IImageService {
 	
-
 	static {
 		System.out.println("Starting image service");
 	}
@@ -635,7 +633,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 			imageServiceBean.setHi(store.getDouble(BasePlottingConstants.HISTO_HI));		
 			
 			try {
-				IPaletteService pservice = (IPaletteService)ServiceManager.getService(IPaletteService.class);
+				IPaletteService pservice = ServiceLoader.getPaletteService();
 				if (pservice !=null) {
 					final String scheme = store.getString(BasePlottingConstants.COLOUR_SCHEME);
 						
