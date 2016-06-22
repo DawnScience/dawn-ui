@@ -11,12 +11,12 @@ package org.dawnsci.plotting.tools.reduction;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
-import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.util.io.FileUtils;
 import org.dawnsci.io.h5.H5Loader;
+import org.dawnsci.plotting.tools.ServiceLoader;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -56,7 +56,7 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 		
 		// It's an OSGI service, not required to use ServiceManager
 		try {
-			this.service = (IConversionService)ServiceManager.getService(IConversionService.class);
+			this.service = ServiceLoader.getConversionService();
 		} catch (Exception e) {
 			logger.error("Cannot get conversion service!", e);
 			return;

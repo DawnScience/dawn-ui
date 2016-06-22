@@ -1,14 +1,20 @@
 package org.dawnsci.plotting.tools;
 
+import org.eclipse.dawnsci.analysis.api.conversion.IConversionService;
+import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
 import org.eclipse.dawnsci.analysis.api.image.IImageFilterService;
 import org.eclipse.dawnsci.analysis.api.image.IImageTransform;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
+import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObjectService;
 
 public class ServiceLoader {
 
 	private static IImageFilterService filter;
 	private static IImageTransform transformer;
 	private static ILoaderService loaderservice;
+	private static IExpressionObjectService expressiononbjectservice;
+	private static IConversionService conversionservice;
+	private static IExpressionService expressionservice;
 
 	public ServiceLoader() {
 		
@@ -46,5 +52,29 @@ public class ServiceLoader {
 
 	public static ILoaderService getLoaderService() {
 		return loaderservice;
+	}
+
+	public static IExpressionObjectService getExpressionObjectService() {
+		return expressiononbjectservice;
+	}
+
+	public static void setExpressionObjectService(IExpressionObjectService eservice) {
+		expressiononbjectservice = eservice;
+	}
+
+	public static IConversionService getConversionService() {
+		return conversionservice;
+	}
+
+	public static void setConversionService(IConversionService cservice) {
+		conversionservice = cservice;
+	}
+
+	public static IExpressionService getExpressionService() {
+		return expressionservice;
+	}
+
+	public static void setExpressionService(IExpressionService expressionservice) {
+		ServiceLoader.expressionservice = expressionservice;
 	}
 }

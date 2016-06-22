@@ -16,7 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.dawb.common.services.ServiceManager;
+import org.dawnsci.plotting.tools.ServiceLoader;
 import org.eclipse.dawnsci.analysis.api.expressions.ExpressionEngineEvent;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionEngine;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionEngineListener;
@@ -42,7 +42,7 @@ public class ExpressionConsole {
     	listeners = new HashSet<IExpressionVariableListener>();
 
     	try {
-    		IExpressionService service = (IExpressionService)ServiceManager.getService(IExpressionService.class);
+    		IExpressionService service = ServiceLoader.getExpressionService();
     		engine = service.getExpressionEngine();
 
     		listener = new IExpressionEngineListener() {

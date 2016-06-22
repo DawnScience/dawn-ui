@@ -16,7 +16,6 @@ import java.util.List;
 import javax.measure.unit.NonSI;
 import javax.measure.unit.UnitFormat;
 
-import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.util.EclipseUtils;
