@@ -25,6 +25,14 @@
          id="org.eclipse.richbeans.feature"
          version="0.0.0"/>
 
+   <includes
+         id="org.dawnsci.common.ui.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="org.dawnsci.common.ui.feature"
+         version="0.0.0"/>
+
    <plugin
          id="org.dawnsci.isosurface"
          download-size="0"
@@ -34,13 +42,6 @@
 
    <plugin
          id="org.eclipse.dawnsci.slicing.api"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.dawb.common.ui"
          download-size="0"
          install-size="0"
          version="0.0.0"
