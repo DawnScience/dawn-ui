@@ -13,11 +13,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.dawb.common.gpu.Operator;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
 import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.history.operation.Operator;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;

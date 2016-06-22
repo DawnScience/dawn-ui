@@ -17,12 +17,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.dawb.common.gpu.IOperation;
-import org.dawb.common.gpu.OperationFactory;
-import org.dawb.common.gpu.Operator;
 import org.dawb.common.ui.components.cell.ScaleCellEditor;
 import org.dawb.common.ui.plot.tools.HistoryType;
 import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.history.operation.IOperation;
+import org.dawnsci.plotting.tools.history.operation.OperationFactory;
+import org.dawnsci.plotting.tools.history.operation.Operator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;

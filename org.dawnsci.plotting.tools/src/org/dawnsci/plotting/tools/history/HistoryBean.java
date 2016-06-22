@@ -13,8 +13,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.dawb.common.gpu.Operator;
 import org.dawb.common.services.ServiceManager;
+import org.dawnsci.plotting.tools.history.operation.Operator;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
