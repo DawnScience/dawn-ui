@@ -65,6 +65,10 @@
          id="org.dawnsci.dde.feature"
          version="0.0.0"/>
 
+   <includes
+         id="uk.ac.diamond.scisoft.ncd.feature"
+         version="0.0.0"/>
+
    <plugin
          id="uk.ac.diamond.scisoft.mx.rcp"
          os="linux"
