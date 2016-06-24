@@ -20,6 +20,7 @@ import org.dawnsci.processing.ui.EventServiceHolder;
 import org.dawnsci.processing.ui.ServiceHolder;
 import org.dawnsci.processing.ui.model.ConfigureOperationModelDialog;
 import org.dawnsci.processing.ui.model.OperationModelViewer;
+import org.dawnsci.processing.ui.preference.ProcessingConstants;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
 import org.dawnsci.processing.ui.processing.OperationTableUtils;
 import org.dawnsci.processing.ui.slice.DataFileSliceView;
@@ -66,6 +67,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -560,7 +562,9 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 
 		URI uri;
 		try {
-			uri = new URI("tcp://sci-serv5.diamond.ac.uk:61616");
+			IPreferenceStore pStore = Activator.getDefault().getPreferenceStore();
+			
+			uri = new URI(pStore.getString(ProcessingConstants.REMOTE_RUNNER_URI));
 		} catch (URISyntaxException e) {
 			logger.error("Could not create URI", e);
 			return;
