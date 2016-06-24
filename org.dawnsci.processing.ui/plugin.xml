@@ -155,5 +155,14 @@
             label="Processing XY">
       </plotting_tool_page>
    </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="org.dawnsci.preferences.root"
+            class="org.dawnsci.processing.ui.preference.ProcessingPreferencePage"
+            id="org.dawnsci.processing.ui.preference.ProcessingPreferencePage"
+            name="Processing Preferences">
+      </page>
+   </extension>
 
 </plugin>
