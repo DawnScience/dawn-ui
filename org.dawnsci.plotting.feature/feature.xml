@@ -29,6 +29,10 @@
          id="org.dawnsci.plotting.draw2d.feature"
          version="0.0.0"/>
 
+   <includes
+         id="org.dawnsci.thirdparty.xml.feature"
+         version="0.0.0"/>
+
    <plugin
          id="org.eclipse.nebula.visualization.xygraph"
          download-size="0"
