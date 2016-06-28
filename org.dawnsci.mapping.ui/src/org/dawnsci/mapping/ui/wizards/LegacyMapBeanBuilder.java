@@ -3,11 +3,13 @@ package org.dawnsci.mapping.ui.wizards;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.dawnsci.mapping.ui.LocalServiceManager;
 import org.dawnsci.mapping.ui.datamodel.MapBean;
 import org.dawnsci.mapping.ui.datamodel.MappedBlockBean;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.api.tree.Attribute;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
@@ -38,6 +40,19 @@ public class LegacyMapBeanBuilder {
 	private static final String I05ANGLES = "angles";
 	private static final String I05ENERGIES = "energies";
 	public static final String I05CHECK = "/entry1/instrument/analyser/cps";
+	
+	public static final String I22SAXCHECK = "/entry1/detector/data";
+	public static final String I22SAX = "/entry1/detector";
+	public static final String I22WAX = "/entry1/Pilatus2M_WAXS";
+	
+	public static final String I22XMAP = "/entry1/xmap";
+	public static final String I22MFX = "mfstage_x";
+	public static final String I22MFY = "mfstage_y";
+	public static final String I22BFX = "base_x";
+	public static final String I22BFY = "base_y";
+	public static final String I22I0PATH = "/entry1/I0";
+	public static final String I22ITPATH = "/entry1/It";
+	public static final String I22data = "data";
 	
 	
 	public static MappedDataFileBean buildBeani18in2015(Tree tree) {
@@ -170,4 +185,88 @@ public class LegacyMapBeanBuilder {
 		if (fb!= null && !fb.checkValid()) fb = null;
 		return fb;
 	}
+	
+	public static MappedDataFileBean buildBeani22in2016(Tree tree) {
+		
+		MappedDataFileBean fb = null;
+		
+		MappedBlockBean sax = buildI22Block(I22SAX, tree.findNodeLink(I22SAX));
+		MappedBlockBean wax = buildI22Block(I22SAX, tree.findNodeLink(I22SAX));
+		MappedBlockBean xrf = buildI22Block(I22XMAP, tree.findNodeLink(I22XMAP));
+		
+		if (sax == null && wax == null) return null;
+		
+		fb = new MappedDataFileBean();
+		
+		if (sax != null) fb.addBlock(sax);
+		if (wax != null) fb.addBlock(wax);
+		if (xrf != null) fb.addBlock(xrf);
+		
+		NodeLink nl = tree.findNodeLink(I22I0PATH);
+		
+		if (nl != null) {
+			Node destination = nl.getDestination();
+			if (destination instanceof GroupNode) {
+				if (((GroupNode)destination).containsDataNode(I22data)) {
+					MapBean b = new MapBean();
+					b.setName(I22I0PATH + Node.SEPARATOR + I22data);
+					b.setParent(sax == null ? I22WAX + Node.SEPARATOR + I22data : I22SAX + Node.SEPARATOR + I22data );
+					fb.addMap(b);
+				}
+			}
+		}
+		
+		NodeLink nl2 = tree.findNodeLink(I22ITPATH);
+		if (nl == null && nl2 == null) return null;
+		
+		if (nl2 != null) {
+			Node destination = nl2.getDestination();
+			if (destination instanceof GroupNode) {
+				if (((GroupNode)destination).containsDataNode(I22data)) {
+					MapBean b = new MapBean();
+					b.setName(I22ITPATH + Node.SEPARATOR + I22data);
+					b.setParent(sax == null ? I22WAX + Node.SEPARATOR + I22data : I22SAX + Node.SEPARATOR + I22data );
+					fb.addMap(b);
+				}
+			}
+		}	
+		
+		return fb.checkValid() ? fb : null;
+	}
+	
+	private static MappedBlockBean buildI22Block(String name, NodeLink link) {
+		if (link == null) return null;
+		Node n = link.getDestination();
+		if (n instanceof GroupNode) {
+			GroupNode gn = (GroupNode)n;
+			DataNode dataNode = gn.getDataNode(I22data);
+			int rank = dataNode.getDataset().getRank();
+			Collection<String> names = gn.getNames();
+			String x = null;
+			String y = null;
+			if (names.contains(I22MFX) && names.contains(I22MFY)) {
+				x = name + Node.SEPARATOR + I22MFX;
+				y = name + Node.SEPARATOR + I22MFY;	
+			} else if (names.contains(I22BFX) && names.contains(I22BFY)) {
+				x = name + Node.SEPARATOR + I22BFX;
+				y = name + Node.SEPARATOR + I22BFY;	
+			} else {
+				return null;
+			}
+			
+			MappedBlockBean mbb = new MappedBlockBean();
+			mbb.setName(name + Node.SEPARATOR + I22data);
+			mbb.setRank(rank);
+			mbb.setxDim(1);
+			mbb.setyDim(0);
+			String[] axes = new String[rank];
+			axes[0] = y;
+			axes[1] = x;
+			mbb.setAxes(axes);
+			return mbb;
+		}
+		
+		return null;
+	}
+	
 }
