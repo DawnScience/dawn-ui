@@ -963,7 +963,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				logger.debug("imageDataset contains invalid numbers");
 			}
 
-			logger.trace("Image Data is of type :" + imageDataset.getDtype());
+			logger.trace("Image Data is of type :" + imageDataset.getDType());
 			if (imageDataset.hasFloatingPointElements()) {
 				numBins = MAX_BINS;
 			} else {

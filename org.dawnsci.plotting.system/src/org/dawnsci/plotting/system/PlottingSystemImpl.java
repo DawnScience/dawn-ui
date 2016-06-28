@@ -838,9 +838,9 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	@SuppressWarnings("unused")
 	private boolean isAllInts(List<Dataset> ysIn) {
 		for (Dataset a : ysIn) {
-			if (a.getDtype()!=Dataset.INT16 &&
-				a.getDtype()!=Dataset.INT32 &&
-				a.getDtype()!=Dataset.INT64) {
+			if (a.getDType()!=Dataset.INT16 &&
+				a.getDType()!=Dataset.INT32 &&
+				a.getDType()!=Dataset.INT64) {
 				return false;
 			}
 		}

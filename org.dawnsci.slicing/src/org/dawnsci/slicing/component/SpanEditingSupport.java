@@ -78,7 +78,7 @@ public class SpanEditingSupport extends EditingSupport {
 	 */
 	public static int getMaxSliceLength(ILazyDataset lazySet, int dimension) {
 		// size in bytes of each item
-		final double size = AbstractDataset.getItemsize(AbstractDataset.getDTypeFromClass(lazySet.elementClass()), lazySet.getElementsPerItem());
+		final double size = AbstractDataset.getItemBytes(AbstractDataset.getDTypeFromClass(lazySet.getElementClass()), lazySet.getElementsPerItem());
 		
 		// Max in bytes takes into account our minimum requirement
 		final double max  = Math.max(Runtime.getRuntime().totalMemory(), Runtime.getRuntime().maxMemory());

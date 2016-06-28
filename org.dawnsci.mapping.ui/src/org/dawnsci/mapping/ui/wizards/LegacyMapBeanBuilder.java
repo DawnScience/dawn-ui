@@ -1,7 +1,6 @@
 package org.dawnsci.mapping.ui.wizards;
 
 import java.util.Collection;
-import java.util.Iterator;
 
 import org.dawnsci.mapping.ui.LocalServiceManager;
 import org.dawnsci.mapping.ui.datamodel.MapBean;
@@ -17,12 +16,9 @@ import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.api.tree.NodeLink;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
-import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.Stats;
-
-import uk.ac.diamond.scisoft.analysis.io.NexusTreeUtils;
 
 public class LegacyMapBeanBuilder {
 

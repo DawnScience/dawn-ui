@@ -776,7 +776,7 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 			}
 		} else {
 			int isize = data.getElementsPerItem();
-			switch(data.getDtype()) {
+			switch(data.getDType()) {
 			
 				case Dataset.ARRAYINT8:
 				{
