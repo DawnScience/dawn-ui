@@ -13,7 +13,6 @@ import java.util.HashSet;
 
 import org.eclipse.dawnsci.analysis.api.dataset.DatasetException;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.IErrorDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
@@ -200,9 +199,9 @@ class LightWeightDataProvider implements IDataProvider {
 	}
 
 	public boolean hasErrors() {
-		if (x instanceof IErrorDataset && ((IErrorDataset) x).hasErrors())
+		if (x.hasErrors())
 			return true;
-		if (y instanceof IErrorDataset && ((IErrorDataset) y).hasErrors())
+		if (y.hasErrors())
 			return true;
 		return false;
 	}

@@ -24,7 +24,6 @@ import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.IErrorDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
@@ -211,7 +210,7 @@ public class SWTXYTraceTest {
 		final List<ITrace>        traces = (List<ITrace>)oa[2];
 		
 		final ILineTrace lineTrace = (ILineTrace)traces.get(0);
-		if (((IErrorDataset)lineTrace.getData()).getError(50)!=5d) throw new Exception("Unexpected error!");
+		if (lineTrace.getData().getError(50)!=5d) throw new Exception("Unexpected error!");
 		
 		sys.repaint();
 		EclipseUtils.delay(2000);
@@ -455,7 +454,7 @@ public class SWTXYTraceTest {
 		final List<ITrace>        traces = (List<ITrace>)oa[2];
 		
 		final ILineTrace lineTrace = (ILineTrace)traces.get(0);
-		double errorAt50 = ((IErrorDataset)lineTrace.getData()).getError(49);
+		double errorAt50 = lineTrace.getData().getError(49);
 		if (Math.round(errorAt50)!=96) throw new Exception("Incorrect error, found "+errorAt50);
 		lineTrace.setErrorBarColor(ColorConstants.red);
 
@@ -478,7 +477,7 @@ public class SWTXYTraceTest {
 		final List<ITrace>        traces = (List<ITrace>)oa[2];
 		
 		final ILineTrace lineTrace = (ILineTrace)traces.get(0);
-		double errorAt50 = ((IErrorDataset)lineTrace.getData()).getError(49);
+		double errorAt50 = lineTrace.getData().getError(49);
 		if (Math.round(errorAt50)!=96) throw new Exception("Incorrect error, found "+errorAt50);
 		lineTrace.setErrorBarColor(ColorConstants.red);
 
@@ -497,9 +496,9 @@ public class SWTXYTraceTest {
 		final List<ITrace>        traces = (List<ITrace>)oa[2];
 		
 		final ILineTrace lineTrace = (ILineTrace)traces.get(0);
-		if (((IErrorDataset)lineTrace.getData()).getError(50)!=0d) throw new Exception("Unexpected error!");
+		if (lineTrace.getData().getError(50)!=0d) throw new Exception("Unexpected error!");
 		
-		IErrorDataset es = (IErrorDataset)lineTrace.getXData();
+		IDataset es = lineTrace.getXData();
 		es.setError(4d);
 		lineTrace.setData(es, lineTrace.getYData());
 		

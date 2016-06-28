@@ -57,7 +57,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.dataset.DataEvent;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataListener;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.IErrorDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
@@ -798,8 +797,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 								if (plotD!=null) {
 									ILazyDataset set = (ILazyDataset)getLazyValue(plotD.getVariable(), null);
 										
-									if (set instanceof IErrorDataset) { // Data was all read in already.
-										IErrorDataset errSet = (IErrorDataset)set;
+									if (set instanceof IDataset) { // Data was all read in already.
+										IDataset errSet = (IDataset)set;
 										// Read plotted data into memory, so can read error data too.
 										errSet.setError(getVariableValue(ob.getVariable(), null));
 										
@@ -813,7 +812,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 						});
 					}
 
-					final boolean isDatasetError = currentSelectedData instanceof IErrorDataset && ((IErrorDataset)currentSelectedData).hasErrors();
+					final boolean isDatasetError = currentSelectedData.hasErrors();
 					final boolean isLazyError    = currentSelectedData.getError() != null;
 					if (isDatasetError || isLazyError) {
 						menuManager.add(new Action("Clear error on '"+currentSelectedData.getName()+"'") {

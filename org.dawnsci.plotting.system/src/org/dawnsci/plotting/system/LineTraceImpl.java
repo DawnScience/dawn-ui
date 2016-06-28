@@ -14,7 +14,6 @@ import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.IErrorDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.macro.api.IMacroService;
@@ -414,15 +413,11 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 			prov.setData(xData,yData);
 			trace.setDataProvider(prov);
 			
-			if (xData instanceof IErrorDataset) {
-				if (((IErrorDataset)xData).hasErrors() && !errorBarExplicitySet) {
-					trace.setErrorBarEnabled(getPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS));
-				}
+			if (xData.hasErrors() && !errorBarExplicitySet) {
+				trace.setErrorBarEnabled(getPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS));
 			}
-			if (yData instanceof IErrorDataset) {
-				if (((IErrorDataset)yData).hasErrors() && !errorBarExplicitySet) {
-					trace.setErrorBarEnabled(getPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS));
-				}
+			if (yData.hasErrors() && !errorBarExplicitySet) {
+				trace.setErrorBarEnabled(getPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS));
 			}
 			
 			if (sys!=null) try {

@@ -31,7 +31,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.analysis.api.RMIServerProvider;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.IErrorDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
@@ -407,11 +406,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 				final ILineTrace lineTrace = (ILineTrace) trace;
 				updatedAndCreated.add(lineTrace);
 
-				if (!((IErrorDataset) y).hasErrors()) {
-					lineTrace.setErrorBarEnabled(false);
-				} else if (((IErrorDataset) y).hasErrors()) {
-					lineTrace.setErrorBarEnabled(true);
-				}
+				lineTrace.setErrorBarEnabled(y.hasErrors());
 
 				DisplayUtils.syncExec(new Runnable() {
 					@Override
@@ -757,8 +752,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			// No error dataset there then false again
 			boolean foundErrors = false;
 			for (IDataset ids : ysIn) {
-				if ((ids instanceof IErrorDataset && ((IErrorDataset) ids).hasErrors()) ||
-						ids.getError() != null) {
+				if (ids.hasErrors()) {
 					foundErrors = true;
 					break;
 				}
