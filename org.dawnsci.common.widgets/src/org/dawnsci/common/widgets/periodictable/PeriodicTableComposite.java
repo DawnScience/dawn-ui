@@ -57,9 +57,6 @@ public class PeriodicTableComposite extends Composite {
 		}
 	}
 	
-	private final List<PeriodicTableButton> periodicTableButtons = new ArrayList<>(MendelArray.length);
-	private final HashSet<IPeriodicTableButtonPressedListener> listeners = new HashSet<>();
-	
 	// shamelessly copied from xraylib as this allows us to use
 	// SymbolToAtomicNumber and AtomicNumberToSymbol without pulling
 	// in the entire jar
@@ -77,12 +74,12 @@ public class PeriodicTableComposite extends Composite {
 	    "Md", "No", "Lr", "Rf", "Db", "Sg", "Bh"
 	};
 	
+	private final PeriodicTableButton[] periodicTableButtons = new PeriodicTableButton[MendelArray.length];
+	private final HashSet<IPeriodicTableButtonPressedListener> listeners = new HashSet<>();
+	
 	public PeriodicTableComposite(Composite parent) {
 		super(parent, SWT.NONE);
 	
-		// add null so we can start counting 
-		periodicTableButtons.add(null);
-		
 		//start constructing the grid...
 		GridLayout gridLayout = new GridLayout(18, true);
 		this.setLayout(gridLayout);
@@ -109,7 +106,7 @@ public class PeriodicTableComposite extends Composite {
 		
 		for (int Z : allZ) {
 			final PeriodicTableButton button = new PeriodicTableButton(this, Z);
-			periodicTableButtons.add(button);
+			periodicTableButtons[Z] = button;
 			int horizontalAlignment = SWT.FILL;
 			int verticalAlignment = SWT.FILL;
 			boolean grabExcessHorizontalSpace = true;
@@ -155,14 +152,14 @@ public class PeriodicTableComposite extends Composite {
 	public Button getButton(int Z) {
 		if (Z < 1)
 			throw new ArrayIndexOutOfBoundsException();
-		return periodicTableButtons.get(Z).getButton();
+		return periodicTableButtons[Z].getButton();
 	}
 	
 	public Button getButton(String element) {
 		int Z = SymbolToAtomicNumber(element);
 		if (Z < 1)
 			throw new ArrayIndexOutOfBoundsException();
-		return periodicTableButtons.get(Z).getButton();
+		return periodicTableButtons[Z].getButton();
 	}
 	
 	public void addPeriodicTableButtonPressedListener(IPeriodicTableButtonPressedListener listener){
