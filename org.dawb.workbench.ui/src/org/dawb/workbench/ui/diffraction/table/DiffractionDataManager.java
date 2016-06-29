@@ -83,32 +83,26 @@ public class DiffractionDataManager {
 		}
 	}
 	
-	// Encapsulation is goooood.
 	public DiffractionTableData[] toArray() {
 		return model.toArray(new DiffractionTableData[model.size()]);
 	}
 
-	// Encapsulation is goooood.
 	public Iterable<DiffractionTableData> iterable() {
 		return model; // Cannot get at data unless they cast. Could provide protection against this in future.
 	}
 	
-	// Encapsulation is goooood.
 	public int getSize() {
 		return model.size();
 	}
 	
-	// Encapsulation is goooood.
 	public boolean remove(DiffractionTableData selectedData) {
 		return model.remove(selectedData);
 	}
 
-	// Encapsulation is goooood.
 	public boolean isValidModel() {
 		return model!=null && getSize()>0;
 	}
 	
-	// Encapsulation is goooood.
 	public DiffractionTableData getLast() {
 		return isValidModel() ? model.get(model.size()-1) : null;
 	}
