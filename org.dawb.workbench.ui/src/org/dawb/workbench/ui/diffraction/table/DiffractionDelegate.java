@@ -58,7 +58,6 @@ public class DiffractionDelegate implements IRefreshable {
 	//private List<DiffractionTableData> model = new ArrayList<DiffractionTableData>();
 	private DiffractionDataManager manager;
 	private Composite parent;
-	private List<String> pathsList;
 	private IDetectorPropertyListener detectorPropertyListener;
 	private DropTargetAdapter dropListener;
 	private Table table;
@@ -73,11 +72,10 @@ public class DiffractionDelegate implements IRefreshable {
 	 * @param service
 	 *           service loader, can be null
 	 */
-	public DiffractionDelegate(Composite parent, List<String> pathsList, DiffractionDataManager manager) {
+	public DiffractionDelegate(Composite parent, DiffractionDataManager manager) {
 		
 		viewer = new TableViewer(parent, SWT.FULL_SELECTION | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER );
 		this.parent = parent;
-		this.pathsList = pathsList;
 		this.table = viewer.getTable();
 		this.manager = manager;
 		
@@ -219,13 +217,10 @@ public class DiffractionDelegate implements IRefreshable {
 		tc = tvc.getColumn();
 		tc.setText("Distance");
 		tc.setToolTipText("in mm");
-		if (pathsList != null && pathsList.size() <= 1) {// if more than one image then we show the column
-			tc.setWidth(0);
-		    tc.setMoveable(false);
-		} else {
-			tc.setWidth(80);
-			tc.setMoveable(true);
-		}
+
+		tc.setWidth(80);
+		tc.setMoveable(true);
+
 		
 		tvc.setEditingSupport(new DiffCalEditingSupport(tv, 2));
 	}

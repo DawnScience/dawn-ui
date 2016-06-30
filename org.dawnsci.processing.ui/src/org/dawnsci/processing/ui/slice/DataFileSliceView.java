@@ -374,7 +374,7 @@ public class DataFileSliceView extends ViewPart {
 
 						@Override
 						public ExecutionType getExecutionType() {
-							return ExecutionType.PARALLEL;
+							return ExecutionType.SERIES;
 						}
 
 						@Override

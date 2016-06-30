@@ -375,7 +375,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		model.activate();
 		
 		resetExpansion();
-		getSite().setSelectionProvider(viewer);
+		if (getSite() != null) getSite().setSelectionProvider(viewer);
 
 	}
 	
@@ -909,6 +909,8 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	    	augmenter.addActions(dropdown);
 	    }
 
+	    if (getSite() == null) return;
+	    
 		IToolBarManager toolMan = getSite().getActionBars().getToolBarManager();
 		final MenuManager     menuMan = new MenuManager();
 

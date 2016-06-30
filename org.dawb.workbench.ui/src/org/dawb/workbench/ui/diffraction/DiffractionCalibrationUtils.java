@@ -35,6 +35,7 @@ import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.hdf5.nexus.NexusFileHDF5;
 import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -190,7 +191,7 @@ public class DiffractionCalibrationUtils {
 	public static IStatus drawFoundRing(final IProgressMonitor monitor, Display display, final IPlottingSystem<?> plotter, final IROI froi, final boolean circle) {
 		final boolean[] status = {true};
 		
-		display.syncExec(new Runnable() {
+		display.asyncExec(new Runnable() {
 
 			public void run() {
 				try {
@@ -319,15 +320,15 @@ public class DiffractionCalibrationUtils {
 				List<Double> odist = new ArrayList<Double>();
 				List<Double> ndist = new ArrayList<Double>();
 				for (DiffractionTableData data : model) {
-					if (data.getQ() == null || !data.isUse() || data.getNrois() <= 0 || data.getMetaData() == null) {
+					if (!data.isUse() || data.getNrois() <= 0 || data.getMetaData() == null) {
 						continue;
 					}
 
-					if (Double.isNaN(data.getOd())) {
+					if (Double.isNaN(data.getDistance())) {
 						continue;
 					}
-					odist.add(data.getOd());
-					ndist.add(data.getQ().getDetectorProperties().getDetectorDistance());
+					odist.add(data.getDistance());
+					ndist.add(data.getMetaData().getDetector2DProperties().getDetectorDistance());
 				}
 				if (odist.size() < 3) {
 					logger.warn("Need to use three or more images");
@@ -481,7 +482,7 @@ public class DiffractionCalibrationUtils {
 //		IPersistentFile file = service.createPersistentFile(filepath);
 		try {	
 			IPersistentNodeFactory pnf = service.getPersistentNodeFactory();
-			GroupNode n = pnf.writePowderCalibrationToFile(cd.getMetaData(),cd.getImage(), cd.getCalibrationInfo());
+			GroupNode n = pnf.writePowderCalibrationToFile(cd.getMetaData(),DatasetUtils.sliceAndConvertLazyDataset(cd.getImage()), cd.getCalibrationInfo());
 			nexusFile.addNode("/entry1", n);
 			
 		} catch(Exception e) {

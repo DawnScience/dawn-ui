@@ -45,7 +45,7 @@ public class DiffCalLabelProvider implements ITableLabelProvider {
 		if (columnIndex == 0) {
 			return data.getName();
 		} else if (columnIndex == 1) { // # of rings
-			if (data.getRois() == null)
+			if (data.getNonNullROISize() == 0)
 				return null;
 			return String.valueOf(data.getNrois());
 		} else if (columnIndex == 2) { // distance

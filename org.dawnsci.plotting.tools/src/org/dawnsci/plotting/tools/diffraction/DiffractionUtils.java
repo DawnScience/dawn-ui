@@ -11,6 +11,7 @@ package org.dawnsci.plotting.tools.diffraction;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
@@ -45,7 +46,7 @@ public class DiffractionUtils {
 	 * @param statusText returned message (can be null)
 	 * @return diffraction metadata
 	 */
-	public static IDiffractionMetadata getDiffractionMetadata(IDataset image, String altPath, ILoaderService service, String[] statusText) {
+	public static IDiffractionMetadata getDiffractionMetadata(ILazyDataset image, String altPath, ILoaderService service, String[] statusText) {
 		// Now always returns IDiffractionMetadata to prevent creation of a new
 		// metadata object after listeners have been added to the old metadata
 		//TODO improve this section- it's pretty horrible

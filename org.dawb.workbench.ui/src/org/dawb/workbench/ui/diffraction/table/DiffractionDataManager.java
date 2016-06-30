@@ -23,9 +23,11 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironment;
 import org.eclipse.dawnsci.analysis.api.diffraction.IDetectorPropertyListener;
+import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
@@ -44,8 +46,6 @@ public class DiffractionDataManager {
 	private List<DiffractionTableData> model;
 	private DiffractionTableData currentData;
 	private ILoaderService service;
-	
-	private final static ISchedulingRule mutex = new Mutex();
 	
 	// Logger
 	private final static Logger logger = LoggerFactory.getLogger(DiffractionDataManager.class);
@@ -88,7 +88,7 @@ public class DiffractionDataManager {
 	}
 
 	public Iterable<DiffractionTableData> iterable() {
-		return model; // Cannot get at data unless they cast. Could provide protection against this in future.
+		return model;
 	}
 	
 	public int getSize() {
@@ -128,9 +128,14 @@ public class DiffractionDataManager {
 				return;
 			}
 		}
-
-		PowderFileLoaderJob job = new PowderFileLoaderJob(filePath, dataFullName);
-		job.setRule(mutex);
+		
+		DiffractionTableData data = new DiffractionTableData();
+		data.setPath(filePath);
+		int j = filePath.lastIndexOf(File.separator);
+		String fileName = j > 0 ? filePath.substring(j + 1) : "file";
+		data.setName(fileName);
+		model.add(data);
+		PowderFileLoaderJob job = new PowderFileLoaderJob(filePath, dataFullName, data);
 		job.schedule();
 
 	}
@@ -151,17 +156,46 @@ public class DiffractionDataManager {
 
 		private final String path;
 		private final String fullName;
-
-		public PowderFileLoaderJob(String filePath, String dataFullName) {
+		private final DiffractionTableData data;
+		
+		public PowderFileLoaderJob(String filePath, String dataFullName, DiffractionTableData data) {
 			super("Load powder file");
 			this.path = filePath;
 			this.fullName = dataFullName;
+			this.data = data;
 		}
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			
-			IDataset image = SelectionUtils.loadData(path, fullName);
+			ILazyDataset image = null;
+			IDataHolder dh = null;
+			
+			
+			try {
+				dh = LoaderFactory.getData(path);
+
+			} catch (Exception e1) {
+				model.remove(data);
+				fireDiffractionDataListeners(null);
+				return Status.CANCEL_STATUS;
+			}
+			
+			if (dh.size() == 1) {
+				ILazyDataset ld = dh.getLazyDataset(0);
+				ld.squeezeEnds();
+				if (ld.getRank() == 2) {
+					image = ld;
+				}
+			}
+			
+			if (image == null && fullName != null) {
+				ILazyDataset ld = dh.getLazyDataset(fullName);
+				ld.squeezeEnds();
+				if (ld.getRank() == 2) {
+					image = ld;
+				}
+			}
 			
 			final String[] outName = new String[1];
 			
@@ -199,21 +233,19 @@ public class DiffractionDataManager {
 			
 			if (outName[0] != null) image = SelectionUtils.loadData(path, outName[0]);
 			
-			if (image == null)
+			if (image == null){
+				model.remove(data);
+				fireDiffractionDataListeners(null);
 				return Status.CANCEL_STATUS;
+			}
 			
 			int j = path.lastIndexOf(File.separator);
 			String fileName = j > 0 ? path.substring(j + 1) : null;
 			image.setName(fileName + ":" + image.getName());
-
-			DiffractionTableData data = new DiffractionTableData();
-			data.setPath(path);
-			data.setName(fileName);
 			data.setImage(image);
 			String[] statusString = new String[1];
 			data.setMetaData(DiffractionUtils.getDiffractionMetadata(image, path, service, statusString));
 			data.getImage().setMetadata(data.getMetaData());
-			model.add(data);
 			
 			fireDiffractionDataListeners(new DiffractionDataChanged(data));
 
@@ -222,17 +254,6 @@ public class DiffractionDataManager {
 
 	}
 
-	public static class Mutex implements ISchedulingRule {
-
-		public boolean contains(ISchedulingRule rule) {
-			return (rule == this);
-		}
-
-		public boolean isConflicting(ISchedulingRule rule) {
-			return (rule == this);
-		}
-
-	}
 
 	public void dispose() {
 		if (model!=null) model.clear(); // Helps garbage collector.
