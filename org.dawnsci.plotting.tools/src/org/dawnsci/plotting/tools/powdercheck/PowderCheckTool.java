@@ -29,6 +29,7 @@ import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.SimplexOptimizer;
 import org.dawb.common.ui.image.IconUtils;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
+import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.fitting.FittedFunction;
 import org.dawnsci.plotting.tools.fitting.FittedFunctions;
@@ -134,6 +135,7 @@ public class PowderCheckTool extends AbstractToolPage {
 	private MenuAction calibrantActions;
 	private CheckableActionGroup calibrantGroup;
 	private Action     calPref;
+	private boolean onDialog = false;
 
 
 	private ITraceListener            traceListener;
@@ -184,13 +186,23 @@ public class PowderCheckTool extends AbstractToolPage {
 	@Override
 	public void createControl(Composite parent) {
 		
-		sashForm = new SashForm(parent, SWT.VERTICAL);
-
-		createActions();
+		ActionBarWrapper actionBarWrapper = null;
 		
-		final IPageSite site = getSite();
-		IActionBars actionbars = site!=null?site.getActionBars():null;
+		if (getSite() == null) {
+			parent = new Composite(parent, SWT.NONE);
+			parent.setLayout(new GridLayout(1,true));
+			actionBarWrapper = ActionBarWrapper.createActionBars(parent, null);
+			onDialog = true;
+		}
+		
+		sashForm = new SashForm(parent, SWT.VERTICAL);
+		if (getSite() == null) sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
 
+		final IPageSite site = getSite();
+		IActionBars actionbars = site!=null?site.getActionBars():actionBarWrapper;
+		
+		createActions(actionbars);
+		
 		system.createPlotPart(sashForm, 
 				getTitle(), 
 				actionbars, 
@@ -206,7 +218,8 @@ public class PowderCheckTool extends AbstractToolPage {
 		viewer.getTable().setLinesVisible(true);
 		viewer.getTable().setHeaderVisible(true);
 		viewer.setContentProvider(createContentProvider());
-		sashForm.setWeights(new int[]{60,40});
+			sashForm.setWeights(new int[]{60,40});
+
 		sashForm.setMaximizedControl(system.getPlotComposite());
 		update();
 
@@ -215,10 +228,11 @@ public class PowderCheckTool extends AbstractToolPage {
 	
 	
 	private void update() {
-		
-		if (getViewPart()==null) return;
-		IWorkbenchPartSite site = getViewPart().getSite();
-		if (site == null || !site.getPage().isPartVisible(getViewPart())) return;
+		if (!onDialog) {
+			if (getViewPart()==null) return;
+			IWorkbenchPartSite site = getViewPart().getSite();
+			if (site == null || !site.getPage().isPartVisible(getViewPart())) return;
+		}
 		
 		IImageTrace im = getImageTrace();
 		logger.debug("Update");
@@ -274,7 +288,7 @@ public class PowderCheckTool extends AbstractToolPage {
 		
 	}
 	
-	private void createActions() {
+	private void createActions(IActionBars actionbars) {
 		
 		final MenuAction modeSelect = new MenuAction("Select Check Mode");
 		
@@ -400,11 +414,11 @@ public class PowderCheckTool extends AbstractToolPage {
 		axisSelect.add(tthAction);
 		axisSelect.setSelectedAction(qAction);
 		
-		getSite().getActionBars().getToolBarManager().add(modeSelect);
-		getSite().getActionBars().getToolBarManager().add(axisSelect);
-		getSite().getActionBars().getMenuManager().add(modeSelect);
-		getSite().getActionBars().getMenuManager().add(axisSelect);
-		getSite().getActionBars().getMenuManager().add(this.calibrantActions);
+		actionbars.getToolBarManager().add(modeSelect);
+		actionbars.getToolBarManager().add(axisSelect);
+		actionbars.getMenuManager().add(modeSelect);
+		actionbars.getMenuManager().add(axisSelect);
+		actionbars.getMenuManager().add(this.calibrantActions);
 		
 	}
 	
