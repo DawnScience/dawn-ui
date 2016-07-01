@@ -2,6 +2,7 @@ package org.dawnsci.mapping.ui.datamodel;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -122,6 +123,19 @@ public class MappedDataFile implements MapObject{
 	public LiveDataBean getLiveDataBean() {
 		return this.liveBean;
 	}
+	
+	public void addSuitableParentBlocks(AbstractMapData map, List<MappedDataBlock> list){
+		int[] shape = map.getData().getShape();
+		double[] r = map.getRange();
+		for (MappedDataBlock block : fullDataMap.values()) {
+			if (block.getxSize() == shape[1] && block.getySize() == shape[0]) {
+				if (Arrays.equals(r, range)) {
+					list.add(block);
+				}
+			}
+		}
+	}
+	
 
 	@Override
 	public String toString() {

@@ -51,6 +51,10 @@ public class MappedDataArea implements MapObject {
 		return false;
 	}
 	
+	public MappedDataFile getParentFile(MapObject object) {
+		return null;
+	}
+	
 	public void removeFile(MappedDataFile file) {
 		files.remove(file);
 		
@@ -120,6 +124,12 @@ public class MappedDataArea implements MapObject {
 			   newRange[1] > range[0] &&
 			   newRange[2] < range[3] &&
 			   newRange[3] > range[2];
+	}
+	
+	public List<MappedDataBlock> findSuitableParentBlocks(AbstractMapData map){
+		List<MappedDataBlock> list = new ArrayList<>();
+		for (MappedDataFile file : files) file.addSuitableParentBlocks(map, list);
+		return list;
 	}
 
 	@Override

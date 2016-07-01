@@ -1,9 +1,11 @@
 package org.dawnsci.mapping.ui.dialog;
 
+import java.util.List;
 import java.util.Map;
 
 import org.dawnsci.mapping.ui.MapPlotManager;
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
+import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.ReMappedData;
@@ -25,15 +27,15 @@ import org.eclipse.swt.widgets.Spinner;
 public class MapPropertiesDialog extends Dialog {
 	
 	private AbstractMapData map;
-	private MappedDataFile file;
+	private MappedDataArea area;
 	private MapPlotManager manager;
 
-	public MapPropertiesDialog(Shell parentShell, AbstractMapData map, MappedDataFile file, MapPlotManager manager) {
+	public MapPropertiesDialog(Shell parentShell, AbstractMapData map, MappedDataArea area, MapPlotManager manager) {
 		super(parentShell);
 //		setShellStyle(getShellStyle() | SWT.RESIZE);
 		
 		this.map = map;
-		this.file = file;
+		this.area = area;
 		this.manager = manager;
 	}
 	
@@ -69,8 +71,9 @@ public class MapPropertiesDialog extends Dialog {
 		parentLabel.setText("Root data");
 		
 		final Combo combo = new Combo(container,SWT.READ_ONLY);
-		final Map<String, MappedDataBlock> dataBlocks = file.getDataBlockMap();
-		String[] dataBlockNames = dataBlocks.keySet().toArray(new String[dataBlocks.size()]);
+		 List<MappedDataBlock> suitableParents = area.findSuitableParentBlocks(map);
+		String[] dataBlockNames = new String[suitableParents.size()];
+		for (int i = 0; i < dataBlockNames.length; i++) dataBlockNames[i] = suitableParents.get(i).toString();
 		combo.setItems(dataBlockNames);
 		for (int i = 0; i<dataBlockNames.length; i++) {
 			if(dataBlockNames[i].equals(map.getParent().toString())) {
@@ -82,7 +85,7 @@ public class MapPropertiesDialog extends Dialog {
 		combo.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				map.setParent(dataBlocks.get(combo.getText()));
+//				map.setParent(dataBlocks.get(combo.getText()));
 			}
 		});
 		

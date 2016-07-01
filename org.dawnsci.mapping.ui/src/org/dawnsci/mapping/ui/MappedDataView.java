@@ -145,7 +145,7 @@ public class MappedDataView extends ViewPart {
 					
 					if (!maps.isEmpty())manager.add(MapActionUtils.getComparisonDialog(maps));
 					if (maps.size() == 1) {
-						manager.add(MapActionUtils.getMapPropertiesAction(maps.get(0),plotManager, area.getDataFile(0)));
+						manager.add(MapActionUtils.getMapPropertiesAction(maps.get(0),plotManager, area));
 					}
 					
 					if (mdfs.size() > 1) manager.add(MapActionUtils.getFilesRemoveAction(FileManagerSingleton.getFileManager(),mdfs));

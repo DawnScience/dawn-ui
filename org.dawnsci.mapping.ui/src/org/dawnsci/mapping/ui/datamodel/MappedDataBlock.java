@@ -19,6 +19,14 @@ public class MappedDataBlock implements MapObject {
 	public int getxDim() {
 		return xDim;
 	}
+	
+	public int getySize() {
+		return dataset.getShape()[yDim];
+	}
+
+	public int getxSize() {
+		return dataset.getShape()[xDim];
+	}
 
 	private String name;
 	private String path;

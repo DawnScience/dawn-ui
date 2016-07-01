@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.MappedData;
+import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
@@ -79,14 +80,14 @@ public class MapActionUtils {
 		return action;
 	}
 	
-	public static IAction getMapPropertiesAction(final AbstractMapData map, final MapPlotManager manager, final MappedDataFile file) {
+	public static IAction getMapPropertiesAction(final AbstractMapData map, final MapPlotManager manager, final MappedDataArea area) {
 		IAction trans = new Action("Properties...") {
 			@Override
 			public void run() {
 				
 				MapPropertiesDialog dialog;
 				try {
-					dialog = new MapPropertiesDialog(Display.getDefault().getActiveShell(), map, file,manager);
+					dialog = new MapPropertiesDialog(Display.getDefault().getActiveShell(), map, area,manager);
 					dialog.open();
 				} catch (Exception e) {
 					MessageDialog.openError(Display.getDefault()
