@@ -2,9 +2,12 @@ package org.dawnsci.mapping.ui;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -51,7 +54,7 @@ public class MapPlotManager {
 	private IPlottingSystem<Composite> map;
 	private IPlottingSystem<Composite> data;
 	private MappedDataArea area;
-	private LinkedList<MapTrace> layers;
+	private ConcurrentLinkedDeque<MapTrace> layers;
 	private PlotJob job;
 	private RepeatingJob rJob;
 	private volatile Dataset merge;
@@ -65,7 +68,7 @@ public class MapPlotManager {
 		this.data = data;
 		this.area = area;
 		atomicPosition = new AtomicInteger(0);
-		layers = new LinkedList<MapTrace>();
+		layers = new ConcurrentLinkedDeque<MapTrace>();
 		job = new PlotJob();
 		job.setPriority(Job.INTERACTIVE);
 		rJob = new RepeatingJob(500, new Runnable() {
@@ -223,8 +226,7 @@ public class MapPlotManager {
 									re.setUserObject(MapPlotManager.this);
 									map.clearRegionTool();
 								} catch (Exception e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
+									logger.error("Error plotting line trace",e);
 								}
 								
 								
@@ -304,8 +306,10 @@ public class MapPlotManager {
 	
 	public AbstractMapData getTopMap(double x, double y){
 		
-		for (int i = 0; i < layers.size() ; i++) {
-			MapObject l = layers.get(i).getMap();
+		Iterator<MapTrace> iterator = layers.iterator();
+		
+		while (iterator.hasNext()) {
+			MapObject l = iterator.next().getMap();
 			if (l instanceof AbstractMapData && ((AbstractMapData)l).getSpectrum(x, y) != null) return (AbstractMapData)l;
 		}
 		
@@ -314,13 +318,16 @@ public class MapPlotManager {
 	
 	public MappedData getTopMap(){
 		
-		for (int i = 0; i < layers.size() ; i++) {
-			MapObject l = layers.get(i).getMap();
+		Iterator<MapTrace> iterator = layers.iterator();
+		
+		while (iterator.hasNext()) {
+			MapObject l = iterator.next().getMap();
 			if (l instanceof AbstractMapData) return (MappedData)l;
 		}
 		
 		return null;
 	}
+	
 	
 	public void clearAll(){
 		map.clear();
@@ -331,19 +338,21 @@ public class MapPlotManager {
 	
 	private void addMap(AbstractMapData map) {
 
-		int position = -1;
+		MapTrace sameMap = null;
 		
-		for (int i = 0; i < layers.size() ;i++) {
-			MapObject layer = layers.get(i).getMap();
-			if (layer instanceof AbstractMapData && isTheSameMap((AbstractMapData)layer, map)) {
-				position = i;
+		Iterator<MapTrace> iterator = layers.iterator();
+		
+		while (iterator.hasNext()) {
+			MapTrace l = iterator.next();
+			if (l.getMap() instanceof AbstractMapData && isTheSameMap((AbstractMapData)l.getMap(), map)) {
+				sameMap = l;
 				break;
 			}
 		}
 		
-		if (position >= 0) {
-			MapTrace mapTrace = layers.get(position);
-			mapTrace.switchMap(map);
+		
+		if (sameMap != null) {
+			sameMap.switchMap(map);
 			
 //			layers.set(position, map);
 		} else {
@@ -357,14 +366,17 @@ public class MapPlotManager {
 	
 	private void triggerForLive(){
 		boolean found = false;
-		
-		for (int i = 0; i < layers.size() ;i++) {
-			if (layers.get(i).getMap() instanceof ILiveData) {
+
+		Iterator<MapTrace> iterator = layers.iterator();
+
+		while (iterator.hasNext()) {
+			MapObject l = iterator.next().getMap();
+			if (l instanceof ILiveData) {
 				found = true;
 				break;
 			}
 		}
-		
+
 		if (found){
 			rJob.start();
 			rJob.schedule();
@@ -379,7 +391,6 @@ public class MapPlotManager {
 		
 		if (ob instanceof PlottableMapObject) {
 			PlottableMapObject amd = (PlottableMapObject)ob;
-//			longName = amd.getLongName();
 			map = amd.getData();
 		}
 		
@@ -387,17 +398,18 @@ public class MapPlotManager {
 		IImageTrace t = null;
 		try {
 			t = MetadataPlotUtils.buildTrace(longName, map, this.map);
+			//TODO something better here:
 			t.setGlobalRange(sanizeRange(area.getRange(), map.getShape()));
 			if (ob instanceof AbstractMapData)  t.setAlpha(((AbstractMapData)ob).getTransparency());
 		} catch (Exception e) {
-			//TODO
+			logger.error("Error creating image trace", e);
 		}
 		
 		
 		return t;
 	}
 	
-
+	
 	
 	private void plotLayers(){
 		
@@ -413,6 +425,9 @@ public class MapPlotManager {
 		}
 		
 		if (!map.is2D()) map.setPlotType(PlotType.IMAGE);
+		
+		updatePlottedRange();
+		
 //		map.clear();
 		try {
 			
@@ -433,26 +448,6 @@ public class MapPlotManager {
 				if (!traces.contains(m.getTrace())) {
 					map.addTrace(m.getTrace());
 				}
-//				MapObject o = it.next();
-//				IImageTrace trace = createImageTrace(o);
-//				if (trace != null)map.addTrace(trace);
-//				if (o instanceof AbstractMapData) {
-//					IImageTrace trace = createImageTrace((AbstractMapData)o);
-//					map.addTrace(trace);
-//					
-////					IDataset[] ax = MappingUtils.getAxesFromMetadata(m.getMap());
-////					ILineTrace lt = map.createLineTrace(m.getLongName()+ "line");
-////					lt.setData(ax[1], ax[0]);
-////					map.addTrace(lt);
-//				}
-//				
-//				if (o instanceof AssociatedImage) {
-////					comp.add(MappingUtils.buildTrace(((AssociatedImage)o).getImage(), this.map),count++);
-//					AssociatedImage im = (AssociatedImage)o;
-//					IImageTrace t = MappingUtils.buildTrace(im.getLongName(),im.getImage(), this.map);
-//					t.setGlobalRange(area.getRange());
-//					this.map.addTrace(t);
-//				}
 				
 			}
 			this.map.repaint();
@@ -492,36 +487,61 @@ public class MapPlotManager {
 		
 	}
 	
+	public void updatePlottedRange(){
+		
+		double[] range = null;
+		
+		Iterator<MapTrace> iterator = layers.iterator();
+		
+		while (iterator.hasNext()) {
+			PlottableMapObject object = iterator.next().getMap();
+			double[] r = object.getRange();
+			if (r == null) continue;
+			
+			if (range == null) {
+				range = r;
+				continue;
+			}
+			
+			range[0]  = r[0] < range[0] ? r[0] : range[0];
+			range[1]  = r[1] > range[1] ? r[1] : range[1];
+			range[2]  = r[2] < range[2] ? r[2] : range[2];
+			range[3]  = r[3] > range[3] ? r[3] : range[3];
+		}
+		
+		if (range == null) return;
+		
+		iterator = layers.iterator();
+		
+		while (iterator.hasNext()) iterator.next().getTrace().setGlobalRange(range);
+		
+	}
+	
+	public static void updateRange(MapObject object, double[] range) {
+		if (object == null) return;
+		double[] r = object.getRange();
+		if (r == null) return;
+		
+		range[0]  = r[0] < range[0] ? r[0] : range[0];
+		range[1]  = r[1] > range[1] ? r[1] : range[1];
+		range[2]  = r[2] < range[2] ? r[2] : range[2];
+		range[3]  = r[3] > range[3] ? r[3] : range[3];
+		
+	}
+	
+	
 	public void setTransparency(AbstractMapData m) {
 		
-		for (int i = 0; i < layers.size() ;i++) {
-			MapTrace layer = layers.get(i);
-			if (layer.getMap() == m) layer.getTrace().setAlpha(m.getTransparency());
+		
+		Iterator<MapTrace> iterator = layers.iterator();
+
+		while (iterator.hasNext()) {
+			MapTrace l = iterator.next();
+			if (l.getMap() == m) l.getTrace().setAlpha(m.getTransparency());
 		}
 		
 		map.repaint(false);
 	}
-	
-//	private void plotMapData(){
-//		map.clear();
-//		MappedDataFile dataFile = area.getDataFile(0);
-//		AssociatedImage image = dataFile.getAssociatedImage();
-//		if (mapdata == null) mapdata = dataFile.getMap();
-//		int count = 0;
-//		try {
-//			ICompositeTrace comp = this.map.createCompositeTrace("composite1");
-//			if (image != null) {
-//				layers.add(image);
-//				comp.add(MappingUtils.buildTrace(image.getImage(), this.map),count++);
-//			}
-//
-//			layers.add(mapdata);
-//			comp.add(MappingUtils.buildTrace(mapdata.getMap(), this.map,mapdata.getTransparency()),count++);
-//			this.map.addTrace(comp);
-//		} catch (Exception e) {
-//			logger.error("Error plotting mapped data", e);
-//		}
-//	}
 	
 	public boolean isPlotted(MapObject object) {
 		
@@ -551,31 +571,6 @@ public class MapPlotManager {
 		}
 		return m;
 	}
-	
-//	private class SingleTaskExecutor implements Executor {
-//	    private final AtomicReference<Runnable> lastTask =new AtomicReference<>();
-//	    private final Executor executor;
-//
-//	    public SingleTaskExecutor(Executor executor) {
-//	        super();
-//	        this.executor = executor;
-//	    }
-//
-//	    @Override
-//	    public void execute(Runnable command) {
-//	        lastTask.set(command);
-//	        executor.execute(new Runnable() {
-//	            @Override
-//	            public void run() {
-//	                Runnable task=lastTask.getAndSet(null);
-//	                if(task!=null){
-//	                    task.run();
-//	                }
-//	            }
-//	        });
-//
-//	    }
-//	}
 	
 	private class PlotJob extends Job {
 
@@ -670,32 +665,34 @@ public class MapPlotManager {
 		public void switchMap(final PlottableMapObject ob) {
 			try {
 				final IDataset d = ob.getData();
-				if (Display.getCurrent() == null) {
-					PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-						
-						@Override
-						public void run() {
-							
-							if (d.getRank() > 2) {
-								d.setShape(new int[]{d.getShape()[0],d.getShape()[1]});
-							}
-							
-							MetadataPlotUtils.switchData(ob.getLongName(),d, trace);
-						}
-					});
-				}
-				
-				trace.setGlobalRange(sanizeRange(area.getRange(),d.getShape()));
+				switchMap(ob.getLongName(),d);
 				map = ob;
 			} catch (Exception e) {
 				logger.error("Error updating live!",e);
 			}
-			
+
 		}
-		
+
 		public void rebuildTrace(){
 			trace = createImageTrace(map);
 		}
-		
+
+		private void switchMap(final String name, final IDataset d) {
+			if (Display.getCurrent() == null) {
+				PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+
+					@Override
+					public void run() {
+						switchMap(name, d);
+					}
+				});
+			}
+
+			if (d.getRank() > 2) {
+				d.setShape(new int[]{d.getShape()[0],d.getShape()[1]});
+			}
+
+			MetadataPlotUtils.switchData(name,d, trace);
+		}
 	}
 }
