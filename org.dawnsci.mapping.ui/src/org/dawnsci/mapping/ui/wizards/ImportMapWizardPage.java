@@ -109,6 +109,7 @@ public class ImportMapWizardPage extends WizardPage implements IDatasetWizard {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				Object element = ((StructuredSelection)event.getSelection()).getFirstElement();
+				if (element == null) return;
 				Entry<String,int[]> entry = (Entry<String,int[]>)element;
 				String key = entry.getKey();
 				if (!cviewer.getChecked(element)) {
