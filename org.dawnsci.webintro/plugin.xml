@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="org.dawnsc.introRegister" name="Intro Register" schema="schema/org.dawnsc.introRegister.exsd"/>
+
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            name="Sample Category"
+            id="org.dawnsci.webintro">
+      </category>
+      <view
+            name="Sample View"
+            icon="icons/sample.gif"
+            category="org.dawnsci.webintro"
+            class="org.dawnsci.webintro.views.SampleView"
+            id="org.dawnsci.webintro.views.SampleView">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.intro">
+      <intro
+            class="org.dawnsci.webintro.views.WelcomePart"
+            icon="icons/dawn-logo-icon.png"
+            id="org.dawnsci.webintro">
+      </intro>
+      <introProductBinding
+            introId="org.dawnsci.webintro"
+            productId="org.dawnsci.product.plugin.DAWN">
+      </introProductBinding>
+   </extension>
+
+</plugin>
