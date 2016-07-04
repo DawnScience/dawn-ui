@@ -18,7 +18,7 @@
          </property>
          <property
                name="windowImages"
-               value="icons/Temp-16x16-icon.png,icons/Temp-32x32-icon.png,icons/Temp-48x48-icon.png">
+               value="icons/Temp-16x16-icon.png,icons/Temp-48x48-icon.png">
          </property>
          <property
                name="aboutImage"
