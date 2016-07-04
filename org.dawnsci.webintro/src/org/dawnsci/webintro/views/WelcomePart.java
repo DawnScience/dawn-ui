@@ -34,6 +34,9 @@ import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
+import netscape.javascript.JSObject;
+
+import org.dawnsci.webintro.JSBridge;
 
 /**
  * Class to replace the welcome screen with a web browser 
@@ -81,30 +84,7 @@ public class WelcomePart extends IntroPart {
         setupToolbarButtons();
         setupURLBar(); //Useful for debug
         lockUrl();
-        
-        IExtension[] extensions = org.eclipse.core.runtime.Platform
-				.getExtensionRegistry()
-				.getExtensionPoint("org.eclipse.ui.intro.configExtension").getExtensions(); //$NON-NLS-1$
-		int numIntroExtensions = extensions.length;
-		System.out.println("There are "+numIntroExtensions+" extensions");
-		
-		for (IExtension thisExtension : extensions) {
-//			System.out.println(thisExtension.getLabel()+" - "+);
-			IConfigurationElement[] configElements = thisExtension.getConfigurationElements();
-			for (IConfigurationElement thisConfigElement : configElements){
-				System.out.println(thisConfigElement.getAttributeNames()[0]);
-				String test = thisConfigElement.getAttributeNames()[0];
-				thisConfigElement.
-			}
-			
-		}			
-		
-	}
-	
-	
-	private void onURLChange() {
-		urlTextBox.setText(webEngine.getLocation());
-		checkHistory();
+        addJSBridges();
 	}
 
 	private void setupToolbarButtons(){
@@ -147,8 +127,12 @@ public class WelcomePart extends IntroPart {
 		reloadButton.setText("Reload");
 		reloadButton.setImageDescriptor(Activator.getImageDescriptor("icons/reload-arrow.png"));
 		toolBar.add(reloadButton);
-
+		
 		checkHistory();
+		webEngine.getLoadWorker().stateProperty().addListener(
+				(ov, oldState, newState) -> {
+					if (newState == State.RUNNING | newState == State.SUCCEEDED) this.checkHistory();
+				});
 	}
 
 	private void setupURLBar(){
@@ -178,7 +162,7 @@ public class WelcomePart extends IntroPart {
 
 		webEngine.getLoadWorker().stateProperty().addListener(
 				(ov, oldState, newState) -> {
-					if (newState == State.RUNNING | newState == State.SUCCEEDED) this.onURLChange();
+					if (newState == State.RUNNING | newState == State.SUCCEEDED) urlTextBox.setText(webEngine.getLocation());
 				});
 	}
 	
@@ -206,6 +190,17 @@ public class WelcomePart extends IntroPart {
 		});
 	}
 	
+	private void addJSBridges(){
+		webEngine.getLoadWorker().stateProperty().addListener(
+				(ov, oldState, newState) -> {
+					if (newState == State.SUCCEEDED){
+						JSObject jsobj = (JSObject) webEngine.executeScript("window");
+						jsobj.setMember("java", new JSBridge());
+						webEngine.executeScript("javaReady();");
+					}
+				});
+	}
+	
 	@Override
 	public String getTitle() {
 		// TODO Auto-generated method stub
@@ -224,3 +219,4 @@ public class WelcomePart extends IntroPart {
 		
 	}
 }
+
