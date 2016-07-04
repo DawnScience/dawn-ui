@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
@@ -281,8 +282,8 @@ public class ImageRotateTool extends AbstractToolPage {
 
 						image = DatasetUtils.transpose(image);
 						ImageRotateTool.this.axes = new ArrayList<IDataset>();
-						ImageRotateTool.this.axes.add(DoubleDataset.createRange(xRange[0], xRange[1], newStep));//  meshAxes.get(0));
-						ImageRotateTool.this.axes.add(DoubleDataset.createRange(yRange[0], yRange[1], newStep));
+						ImageRotateTool.this.axes.add(DatasetFactory.createRange(DoubleDataset.class, xRange[0], xRange[1], newStep));//  meshAxes.get(0));
+						ImageRotateTool.this.axes.add(DatasetFactory.createRange(DoubleDataset.class, yRange[0], yRange[1], newStep));
 						image.setName(getImageTrace().getDataName());
 						// run the rotation job
 						Display.getDefault().syncExec(new Runnable() {

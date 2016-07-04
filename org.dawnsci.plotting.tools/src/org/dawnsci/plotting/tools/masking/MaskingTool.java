@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.dataset.impl.BooleanDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
@@ -1530,7 +1531,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 					// The mask must be maintained as a BooleanDataset so that there is the option
 					// of applying the same mask to many images.
 					final Dataset unmasked = DatasetUtils.convertToDataset(image.getData());
-					maskObject.setMaskDataset(new BooleanDataset(unmasked.getShape()), true);
+					maskObject.setMaskDataset(DatasetFactory.zeros(BooleanDataset.class, unmasked.getShape()), true);
 					maskObject.setImageDataset(unmasked);
 				}
 				

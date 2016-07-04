@@ -284,7 +284,7 @@ public class DataSet3DPlot1DStack extends DataSet3DPlot1D {
 		super.updateGraph(datasets);
 		if (zAxisValues != null) {
 			if (zAxisValues.size() < plots) {
-				DoubleDataset values = DoubleDataset.createRange(zOffset+1, zOffset + 1 + plots, 1);
+				DoubleDataset values = DatasetFactory.createRange(DoubleDataset.class, zOffset+1, zOffset + 1 + plots, 1);
 				zAxisValues.addValues(values.getData());
 			}
 		} else {

@@ -44,6 +44,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
@@ -1612,7 +1613,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		if (ysIn==null) {
 			ys = new ArrayList<IDataset>(1);
 			ys.add(xIn);
-			x = DoubleDataset.createRange(ys.get(0).getSize());
+			x = DatasetFactory.createRange(DoubleDataset.class, ys.get(0).getSize());
 			x.setName("Index of "+xIn.getName());
 		} else {
 			x  = xIn;

@@ -18,6 +18,7 @@ import org.dawnsci.spectrum.ui.utils.Contain1DDataImpl;
 import org.dawnsci.spectrum.ui.utils.SpectrumUtils;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 
@@ -58,7 +59,7 @@ public class AverageProcess extends AbstractProcess {
 			sb.append("\n");
 		}
 		List<IDataset> sets = new ArrayList<IDataset>();
-		DoubleDataset dd = new DoubleDataset(ms.getMean(), ms.getDimension());
+		Dataset dd = DatasetFactory.createFromObject(ms.getMean());
 		
 		dd.setName("Average");
 		sets.add(dd);

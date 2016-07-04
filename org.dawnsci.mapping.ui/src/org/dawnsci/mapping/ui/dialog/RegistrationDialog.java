@@ -10,6 +10,7 @@ import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.LinearAlgebra;
 import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.function.MapToRotatedCartesian;
@@ -237,7 +238,7 @@ public class RegistrationDialog extends Dialog {
 		if (image instanceof RGBDataset) {
 			
 			RGBDataset rgb = (RGBDataset)image;
-			im = new RGBDataset(mrc.value(rgb.getRedView()).get(0),
+			im = DatasetUtils.createCompoundDataset(Dataset.RGB, mrc.value(rgb.getRedView()).get(0),
 								mrc.value(rgb.getGreenView()).get(0),
 								mrc.value(rgb.getBlueView()).get(0));
 			

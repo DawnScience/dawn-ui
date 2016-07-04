@@ -29,6 +29,7 @@ import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
 import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.FloatDataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -592,7 +593,7 @@ public class MapPlotManager {
 				if (m == null) {
 					int[] newShape = AbstractDataset.squeezeShape(input.getShape(), false);
 					for (int i = 0; i<newShape.length;i++) newShape[i]*=2;
-					FloatDataset f = new FloatDataset(newShape);
+					FloatDataset f = DatasetFactory.zeros(FloatDataset.class, newShape);
 					Arrays.fill(f.getData(), Float.NaN);
 					m = merge = f;
 

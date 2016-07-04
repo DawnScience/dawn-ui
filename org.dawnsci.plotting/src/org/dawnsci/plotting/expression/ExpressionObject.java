@@ -26,6 +26,7 @@ import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
 import org.eclipse.dawnsci.analysis.api.io.ILazyLoader;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObject;
 import org.eclipse.dawnsci.plotting.api.expressions.IVariableManager;
@@ -255,7 +256,7 @@ class ExpressionObject implements IExpressionObject {
 		
 		if (dataSet!=null&&dataSet.get()!=null) return dataSet.get();
 		
-	    if (expressionString==null||provider==null) return new DoubleDataset();
+	    if (expressionString==null||provider==null) return DatasetFactory.zeros(DoubleDataset.class);
 	    
 		final Map<String,Object> refs = getVariables(mon);
 		

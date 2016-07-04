@@ -19,6 +19,7 @@ import org.dawnsci.spectrum.ui.file.SpectrumFileManager;
 import org.dawnsci.spectrum.ui.file.SpectrumInMemory;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
@@ -91,7 +92,7 @@ public class SpectrumUtils {
 			sb.append("\n");
 		}
 		List<IDataset> sets = new ArrayList<IDataset>();
-		DoubleDataset dd = new DoubleDataset(ms.getMean(), ms.getDimension());
+		Dataset dd = DatasetFactory.createFromObject(ms.getMean());
 		
 		dd.setName("Average");
 		sets.add(dd);

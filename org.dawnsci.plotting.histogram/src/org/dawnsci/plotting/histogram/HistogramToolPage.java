@@ -21,9 +21,11 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
+import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -1192,10 +1194,10 @@ public class HistogramToolPage extends AbstractToolPage {
 		PaletteData paletteData = image.getPaletteData();
 		final int numColours = paletteData.colors.length;
 		final int numPaletteColours = numColours - 3; // The -3 here is to avoid the min/max/NAN colours
-		final DoubleDataset R = new DoubleDataset(numPaletteColours);
-		final DoubleDataset G = new DoubleDataset(numPaletteColours);
-		final DoubleDataset B = new DoubleDataset(numPaletteColours);
-		final DoubleDataset RGBX = new DoubleDataset(numPaletteColours);
+		final Dataset R = DatasetFactory.zeros(DoubleDataset.class, numPaletteColours);
+		final Dataset G = DatasetFactory.zeros(DoubleDataset.class, numPaletteColours);
+		final Dataset B = DatasetFactory.zeros(DoubleDataset.class, numPaletteColours);
+		final Dataset RGBX = DatasetFactory.zeros(DoubleDataset.class, numPaletteColours);
 		R.setName("red");
 		G.setName("green");
 		B.setName("blue");

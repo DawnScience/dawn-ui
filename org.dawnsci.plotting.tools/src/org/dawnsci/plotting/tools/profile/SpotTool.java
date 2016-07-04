@@ -15,8 +15,8 @@ import org.dawb.common.ui.util.GridUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
-import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -127,13 +127,13 @@ public class SpotTool extends ZoomTool {
         xData.setName("Intensity");
 	
 		final RectangularROI bounds = (RectangularROI) (rbs==null ? region.getROI() : rbs);
- 		final Dataset y_indices   = AbstractDataset.arange(bounds.getPoint()[0], bounds.getPoint()[0]+bounds.getLength(0), 1, Dataset.FLOAT);
+ 		final Dataset y_indices   = DatasetFactory.createRange(bounds.getPoint()[0], bounds.getPoint()[0]+bounds.getLength(0), 1, Dataset.FLOAT);
 		y_indices.setName("X Location");
 		
 		topSystem.updatePlot1D(y_indices, Arrays.asList(new IDataset[]{yData}), monitor);
 		topSystem.repaint();
 
-		final Dataset x_indices   = AbstractDataset.arange(bounds.getPoint()[1]+bounds.getLength(1), bounds.getPoint()[1], -1, Dataset.FLOAT);
+		final Dataset x_indices   = DatasetFactory.createRange(bounds.getPoint()[1]+bounds.getLength(1), bounds.getPoint()[1], -1, Dataset.FLOAT);
 		x_indices.setName("Y Location");
 	
 		final Collection<ITrace> right = rightSystem.updatePlot1D(xData, Arrays.asList(new IDataset[]{x_indices}), monitor);

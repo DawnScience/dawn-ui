@@ -20,7 +20,7 @@ import org.dawnsci.isosurface.isogui.IsoBean;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.slicing.api.system.AxisChoiceListener;
 import org.eclipse.dawnsci.slicing.api.system.AxisType;
@@ -193,6 +193,6 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 
 	private IDataset generateIndexAxis(int max) {
 		double[] axis = IntStream.range(0, max).mapToDouble(i -> i).toArray();
-		return new DoubleDataset(axis, max);
+		return DatasetFactory.createFromObject(axis);
 	}
 }

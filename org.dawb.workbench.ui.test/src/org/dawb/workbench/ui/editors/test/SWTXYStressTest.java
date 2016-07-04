@@ -9,7 +9,6 @@
 package org.dawb.workbench.ui.editors.test;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -26,7 +25,6 @@ import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.LongDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Random;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
@@ -60,19 +58,19 @@ public class SWTXYStressTest {
 	@Test
 	public void testRandomNumbers() throws Throwable {
 		
-		createTest(createTestArraysRandom(10, 1000), 3000);
+		createTest(SWTXYTestUtils.createTestArraysRandom(10, 1000), 3000);
 	}
 	
 	@Test
 	public void testCoherantNumbers1() throws Throwable {
 		
-		createTest(createTestArraysCoherant(10, 1000), 3000);
+		createTest(SWTXYTestUtils.createTestArraysCoherent(10, 1000, null), 3000);
 	}
 	
 	@Test
 	public void testCoherantNumbers2() throws Throwable {
 		
-		createTest(createTestArraysCoherant(100, 10000), 3000);
+		createTest(SWTXYTestUtils.createTestArraysCoherent(100, 10000, null), 3000);
 	}
 
 	private void createTest(final List<IDataset> ys, long expectedTime) throws Throwable {
@@ -112,36 +110,6 @@ public class SWTXYStressTest {
 	}
 
 	
-	private List<IDataset> createTestArraysRandom(final int numberPlots, final int size) {
-		
-		final List<IDataset> ys = new ArrayList<IDataset>(numberPlots);
-		for (int i = 0; i < numberPlots; i++) {
-			final long[] buffer = new long[size];
-			for (int j = 0; j < size; j++) buffer[j] = Math.round(Math.random()*10000);
-			final LongDataset ls = new LongDataset(buffer,size);
-			ys.add(ls);
-		}
-		
-		return ys;
-	}
-	
-	private List<IDataset> createTestArraysCoherant(final int numberPlots, final int size) {
-		
-		final List<IDataset> ys = new ArrayList<IDataset>(numberPlots);
-		for (int i = 0; i < numberPlots; i++) {
-			
-			double rand = Math.random();
-			
-			final long[] buffer = new long[size];
-			for (int j = 0; j < size; j++) buffer[j] = (long)Math.pow(j+rand, 2d)*i;
-			final LongDataset ls = new LongDataset(buffer,size);
-			ys.add(ls);
-		}
-		
-		return ys;
-	}
-	
-	
 	@Test
 	public void testIfMemoryLeak1D() throws Throwable {
 		
@@ -168,7 +136,7 @@ public class SWTXYStressTest {
 		sys.addRegion(region);
 		
 		final ILineTrace trace = sys.createLineTrace("Test line plot");
-		trace.setData(IntegerDataset.createRange(2048), data);
+		trace.setData(DatasetFactory.createRange(IntegerDataset.class, 2048), data);
 		sys.addTrace(trace);
 
 		System.gc();
@@ -181,7 +149,7 @@ public class SWTXYStressTest {
         	Display.getDefault().syncExec(new Runnable() {
         		public void run() {
         			Dataset data = Random.rand(new int[]{2048});
-         			trace.setData(IntegerDataset.createRange(2048), data);
+         			trace.setData(DatasetFactory.createRange(IntegerDataset.class, 2048), data);
         			sys.repaint();
           		}
         	});
@@ -224,10 +192,7 @@ public class SWTXYStressTest {
 
         for (int i = 0; i < 1000; i++) {
 			
-        	final DoubleDataset data = new DoubleDataset(new int[]{2048, 2048});
-        	for (int j = 0; j < 2048*2048; j++) {
-        		data.getData()[j] =  Math.random();
-			}
+        	final Dataset data = Random.rand(new int[]{2048, 2048});
         	
         	Display.getDefault().syncExec(new Runnable() {
         		public void run() {
@@ -274,10 +239,7 @@ public class SWTXYStressTest {
 		// 10 random images
     	final DoubleDataset[] data = new DoubleDataset[10];
     	for (int i = 0; i < data.length; i++) {
-        	data[i] = new DoubleDataset(new int[]{2048, 2048});
-           	for (int j = 0; j < 2048*2048; j++) {
-           		data[i].getData()[j] =  Math.random();
-    		}
+    		data[i] = Random.rand(new int[]{2048, 2048});
 		}
  
     	// Plot something then fix histogram

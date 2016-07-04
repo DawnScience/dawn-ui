@@ -886,7 +886,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				// intensityScale
 				// TODO FIXME This will not work in log mode
 				if (reducedFullImage instanceof RGBDataset) return true;
-				final DoubleDataset dds = new DoubleDataset(INTENSITY_SCALE_ENTRIES,1);
+				final DoubleDataset dds = DatasetFactory.zeros(DoubleDataset.class, INTENSITY_SCALE_ENTRIES, 1);
 				double max = getMax().doubleValue();
 				double inc = (max - getMin().doubleValue())/INTENSITY_SCALE_ENTRIES;
 				for (int i = 0; i < INTENSITY_SCALE_ENTRIES; i++) {
@@ -1837,7 +1837,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				
 		if (mask!=null && image!=null && !image.isCompatibleWith(mask)) {
 			
-			BooleanDataset maskDataset = new BooleanDataset(image.getShape());
+			BooleanDataset maskDataset = DatasetFactory.zeros(BooleanDataset.class, image.getShape());
 			maskDataset.setName("mask");
 			maskDataset.fill(true);
 

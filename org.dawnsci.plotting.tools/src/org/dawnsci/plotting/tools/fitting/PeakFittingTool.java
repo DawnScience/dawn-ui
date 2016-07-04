@@ -31,7 +31,6 @@ import org.eclipse.dawnsci.analysis.api.fitting.functions.IPeak;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
-import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
@@ -355,7 +354,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 
 		Dataset x  = slice.getAxes()!=null && !slice.getAxes().isEmpty()
 				           ? DatasetUtils.convertToDataset(slice.getAxes().get(0))
-				           : IntegerDataset.createRange(slice.getData().getSize());
+				           : DatasetFactory.createRange(IntegerDataset.class, slice.getData().getSize());
 
 		Dataset[] a= Generic1DFitter.selectInRange(x,DatasetUtils.convertToDataset(slice.getData()),p1[0],p2[0]);
 		x = a[0]; Dataset y=a[1];
@@ -384,22 +383,22 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 			for (FittedFunction fp : bean.getFunctionList()) {
 				
 				final String peakName = "Peak"+index;
-				DoubleDataset sdd = new DoubleDataset(new double[]{fp.getPeakValue()}, new int[]{1});
+				Dataset sdd = DatasetFactory.createFromObject(fp.getPeakValue(), 1);
 				addValue(fit, index, fp.getPeakValue());
 				sdd.setName(peakName+"_fit");
 				slice.appendData(sdd);
 				
-				sdd = new DoubleDataset(new double[]{fp.getPosition()}, new int[]{1});
+				sdd = DatasetFactory.createFromObject(fp.getPosition(), 1);
 				addValue(xpos, index, fp.getPosition());
 				sdd.setName(peakName+"_xposition");
 				slice.appendData(sdd);
 				
-				sdd = new DoubleDataset(new double[]{fp.getFWHM()}, new int[]{1});
+				sdd = DatasetFactory.createFromObject(fp.getFWHM(), 1);
 				addValue(fwhm, index, fp.getFWHM());
 				sdd.setName(peakName+"_fwhm");
 				slice.appendData(sdd);
 				
-				sdd = new DoubleDataset(new double[]{fp.getArea()}, new int[]{1});
+				sdd = DatasetFactory.createFromObject(fp.getArea(), 1);
 				addValue(area, index, fp.getArea());
 				sdd.setName(peakName+"_area");
 				slice.appendData(sdd);

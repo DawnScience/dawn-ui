@@ -9,7 +9,8 @@
 package org.dawb.workbench.ui.editors.test;
 
 import org.dawb.common.ui.util.EclipseUtils;
-import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.Random;
 import org.eclipse.ui.IWorkbenchPage;
 import org.junit.Test;
 
@@ -39,10 +40,7 @@ public class SWTXYLiveUpdateTest {
 			
         	final Thread thread = new Thread(new Runnable() {
         		public void run() {
-                	final DoubleDataset data = new DoubleDataset(new int[]{2048});
-                	for (int j = 0; j < 2048; j++) {
-                		data.getData()[j] =  Math.random();
-        			}
+                	final Dataset data = Random.rand(2048);
                 	data.setName("Random xy");
                 	try {
 						SDAPlotter.plot("Plot 1", data);
@@ -84,10 +82,7 @@ public class SWTXYLiveUpdateTest {
 
 			final Thread thread = new Thread(new Runnable() {
 				public void run() {
-					final DoubleDataset data = new DoubleDataset(new int[] { 2048, 2048 });
-					for (int j = 0; j < 2048 * 2048; j++) {
-						data.getData()[j] = Math.random();
-					}
+                	final Dataset data = Random.rand(new int[] {2048, 2048});
 					data.setName("Random image");
 					try {
 						SDAPlotter.imagePlot(plotName, data);

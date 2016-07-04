@@ -24,7 +24,6 @@ import org.eclipse.dawnsci.analysis.api.fitting.functions.IPeak;
 import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
-import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
 import org.eclipse.dawnsci.analysis.dataset.impl.Stats;
 import org.eclipse.dawnsci.analysis.dataset.roi.ROISliceUtils;
@@ -389,7 +388,7 @@ public class PowderCheckJob extends Job {
 			}
 		}
 		
-		DoubleDataset dd = new DoubleDataset(minDif, new int[]{minDif.length});
+		Dataset dd = DatasetFactory.createFromObject(minDif);
 		
 		double med = (Double)Stats.median(dd);
 		double mad = (Double)Stats.median(Maths.abs(Maths.subtract(dd, med)));

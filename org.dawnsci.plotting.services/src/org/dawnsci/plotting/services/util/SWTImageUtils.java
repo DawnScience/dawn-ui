@@ -10,6 +10,7 @@
 package org.dawnsci.plotting.services.util;
 
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.IndexIterator;
 import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
@@ -204,7 +205,7 @@ public class SWTImageUtils {
 	 */
 	static public RGBDataset createRGBDataset(final ImageData image) {
 		final int[] data = new int[image.width];
-		final RGBDataset rgb = new RGBDataset(image.height, image.width);
+		final RGBDataset rgb = DatasetFactory.zeros(RGBDataset.class, image.height, image.width);
 		final short[] p = new short[3];
 		final PaletteData palette = image.palette;
 		if (palette.isDirect) {

@@ -170,12 +170,11 @@ public class MappedFileFactory {
 			
 			if (d.getRank() == 3) {
 				
-				RGBDataset ds = new RGBDataset(d.getSlice(new Slice(0,1,1),null,null).squeeze(), d.getSlice(new Slice(1,2,1),null,null).squeeze(), d.getSlice(new Slice(2,3,1),null,null).squeeze());
+				RGBDataset ds = (RGBDataset) DatasetUtils.createCompoundDataset(Dataset.RGB, d.getSlice(new Slice(0,1,1),null,null).squeeze(), d.getSlice(new Slice(1,2,1),null,null).squeeze(), d.getSlice(new Slice(2,3,1),null,null).squeeze());
 				ds.addMetadata(ax);
 				return new AssociatedImage(b.getName(), ds, path);
 			} else if (d.getRank() == 2) {
-				
-				RGBDataset ds = new RGBDataset(d, d, d);
+				RGBDataset ds = (RGBDataset) DatasetUtils.createCompoundDataset(Dataset.RGB, d);
 				ds.addMetadata(ax);
 				return new AssociatedImage(b.getName(), ds, path);
 				

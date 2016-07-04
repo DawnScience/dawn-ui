@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
@@ -104,8 +105,8 @@ public class ZoomTool extends ProfileTool {
 			if (yl!=null) yLabels = ZoomTool.getLabelsFromLabels(yl, bounds, 1);
 		}
 
-		if (yLabels==null) yLabels = IntegerDataset.createRange(bounds.getPoint()[1], bounds.getEndPoint()[1], yInc);
-		if (xLabels==null) xLabels = IntegerDataset.createRange(bounds.getPoint()[0], bounds.getEndPoint()[0], xInc);
+		if (yLabels==null) yLabels = DatasetFactory.createRange(IntegerDataset.class, bounds.getPoint()[1], bounds.getEndPoint()[1], yInc);
+		if (xLabels==null) xLabels = DatasetFactory.createRange(IntegerDataset.class, bounds.getPoint()[0], bounds.getEndPoint()[0], xInc);
 
 		final IImageTrace zoom_trace = (IImageTrace)profilePlottingSystem.updatePlot2D(slice, Arrays.asList(new IDataset[]{xLabels, yLabels}), monitor);
 		registerTraces(region, Arrays.asList(new ITrace[]{zoom_trace}));

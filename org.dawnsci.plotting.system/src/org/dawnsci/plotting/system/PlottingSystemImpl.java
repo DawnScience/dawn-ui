@@ -401,7 +401,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			final ITrace trace = getTrace(y.getName());
 			if (trace!=null && trace instanceof ILineTrace) {
 
-				if (x == null) x = IntegerDataset.createRange(y.getSize());
+				if (x == null) x = DatasetFactory.createRange(IntegerDataset.class, y.getSize());
 				final IDataset finalX = x;
 				final ILineTrace lineTrace = (ILineTrace) trace;
 				updatedAndCreated.add(lineTrace);
@@ -420,7 +420,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			unfoundNames.add(dataName);
 		}
 		if (!unfoundYs.isEmpty()) {
-			if (x==null) x = IntegerDataset.createRange(unfoundYs.get(0).getSize());
+			if (x==null) x = DatasetFactory.createRange(IntegerDataset.class, unfoundYs.get(0).getSize());
 			final Collection<ITrace> news = createPlot1D(x, unfoundYs, unfoundNames, plotTitle, monitor);
 			updatedAndCreated.addAll(news);
 		}

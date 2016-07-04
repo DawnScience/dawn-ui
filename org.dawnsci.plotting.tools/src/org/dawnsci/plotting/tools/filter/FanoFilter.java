@@ -6,7 +6,6 @@ import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.CompoundDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
-import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.SummedAreaTable;
 import org.eclipse.dawnsci.plotting.api.filter.AbstractDelayedFilter;
 import org.slf4j.Logger;
@@ -47,7 +46,7 @@ public class FanoFilter extends AbstractDelayedFilter {
 			Dataset gFano = gTable.getFanoImage(box);
 			SummedAreaTable bTable = new SummedAreaTable(bData, true);
 			Dataset bFano = bTable.getFanoImage(box);
-			RGBDataset fanoRgb = new RGBDataset(rFano, gFano, bFano);
+			Dataset fanoRgb = DatasetUtils.createCompoundDataset(Dataset.RGB, rFano, gFano, bFano);
 			return new Object[] { fanoRgb, axes };
 		} else {
 			SummedAreaTable table = new SummedAreaTable(DatasetUtils.convertToDataset(data), true);

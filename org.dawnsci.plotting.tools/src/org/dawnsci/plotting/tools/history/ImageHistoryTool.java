@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObject;
@@ -394,7 +395,7 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 			if (includeCurrentPlot) {
 			    return od;
 			} else {
-				return new IntegerDataset(1); // Clear
+				return DatasetFactory.zeros(IntegerDataset.class, 1); // Clear
 			}
 		}
 		

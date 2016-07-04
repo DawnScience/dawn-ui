@@ -15,6 +15,7 @@ import org.dawnsci.isosurface.alg.MarchingCubesModel;
 import org.dawnsci.isosurface.alg.Surface;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Random;
 import org.junit.Ignore;
@@ -40,7 +41,7 @@ public class BenchMark
 		Random.seed(123456789);
 
 		lz = Random.lazyRand(dataSetSizeXYZ);
-		IntegerDataset axis = IntegerDataset.createRange(dataSetSizeXYZ[0]);
+		IntegerDataset axis = DatasetFactory.createRange(IntegerDataset.class, dataSetSizeXYZ[0]);
 		List<IntegerDataset> axes = Arrays.asList(axis, axis, axis);
 		
 

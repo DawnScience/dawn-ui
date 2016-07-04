@@ -28,6 +28,7 @@ import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.BooleanDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Comparisons;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.IndexIterator;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
@@ -661,7 +662,7 @@ public class MaskObject {
 
 	private void createMaskIfNeeded() {
 		if (maskDataset == null || !maskDataset.isCompatibleWith(imageDataset)) {
-			maskDataset = BooleanDataset.ones(imageDataset.getShape());
+			maskDataset = DatasetFactory.ones(BooleanDataset.class, imageDataset.getShape());
 			maskDataset.setName("mask");
 		}	
 		if (operationManager ==null)  {

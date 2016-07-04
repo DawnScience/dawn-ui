@@ -475,7 +475,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
     
     static RGBDataset convertToRGBDataset(BufferedImage bufferedImage) {
     	
-        RGBDataset data = new RGBDataset(bufferedImage.getHeight(), bufferedImage.getWidth());
+        RGBDataset data = DatasetFactory.zeros(RGBDataset.class, bufferedImage.getHeight(), bufferedImage.getWidth());
        
         if (bufferedImage.getColorModel() instanceof DirectColorModel) {
             DirectColorModel colorModel = (DirectColorModel)bufferedImage.getColorModel();
