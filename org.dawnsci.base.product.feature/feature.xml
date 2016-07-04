@@ -70,10 +70,6 @@
          version="0.0.0"/>
 
    <includes
-         id="org.embl.cca.dviewer.feature"
-         version="0.0.0"/>
-
-   <includes
          id="org.dawnsci.macro.feature"
          version="0.0.0"/>
 
