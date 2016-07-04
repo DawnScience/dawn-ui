@@ -70,7 +70,6 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.SubActionBars;
 import org.eclipse.ui.cheatsheets.OpenCheatSheetAction;
-import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.part.IPage;
 import org.eclipse.ui.part.IPageBookViewPage;
 import org.eclipse.ui.part.IPageSite;
@@ -497,7 +496,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			page.init(new ToolPageSite(getViewSite()));
 			page.setViewPart(this);
 		} catch (PartInitException e) {
-			WorkbenchPlugin.log(getClass(), "initPage", e); //$NON-NLS-1$
+			logger.error("Error in initPage:", e);
 		}
 	}
 
