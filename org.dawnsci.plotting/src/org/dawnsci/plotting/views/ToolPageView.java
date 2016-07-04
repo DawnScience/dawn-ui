@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.dawb.common.util.object.AdapterUtils;
 import org.dawnsci.plotting.Activator;
 import org.eclipse.core.commands.common.EventManager;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -70,7 +71,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.SubActionBars;
 import org.eclipse.ui.cheatsheets.OpenCheatSheetAction;
 import org.eclipse.ui.internal.WorkbenchPlugin;
-import org.eclipse.ui.internal.util.Util;
 import org.eclipse.ui.part.IPage;
 import org.eclipse.ui.part.IPageBookViewPage;
 import org.eclipse.ui.part.IPageSite;
@@ -534,7 +534,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	public Object getAdapter(Class key) {
 		// delegate to the current page, if supported
 		IPage page = getCurrentPage();
-		Object adapter = Util.getAdapter(page, key);
+		Object adapter = AdapterUtils.getAdapter(page, key);
 		if (adapter != null) {
 			return adapter;
 		}
