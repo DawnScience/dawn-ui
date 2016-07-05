@@ -10,6 +10,12 @@ import org.eclipse.ui.intro.IIntroPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.StringWriter;
+
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonWriter;
 
 public class JSBridge {
 	private final static Logger logger = LoggerFactory.getLogger(JSBridge.class);
@@ -47,24 +53,32 @@ public class JSBridge {
 		return null;
 	}
 	
-    public String printRegisteredExtensions(){
-    	String result = "";
+	public String getActionsJSON(){
     	IConfigurationElement[] configs = getRegisteredConfigs();
+    
+    	JsonArrayBuilder configList = Json.createArrayBuilder();
 
     	for (IConfigurationElement thisConfigElement : configs){
     		String imageURL = getResourceURL(thisConfigElement.getContributor(),thisConfigElement.getAttribute("icon"));
-    		result += "<img style='float:left; height:70px; margin:10px;' src='"+ imageURL + "'></img>";
-    		result += thisConfigElement.getAttribute("id") + "<br>";
-    		result += thisConfigElement.getAttribute("name")+ "<br>";
-    		result += thisConfigElement.getAttribute("description")+ "<br>";
-    		result += "<a href='#' onclick=\"java.runAction('"+thisConfigElement.getAttribute("id")+"')\">"
-    				+ thisConfigElement.getAttribute("class")+ "</a><br>";
-    		result += "<hr>";
+    		configList.add(Json.createObjectBuilder()
+    				.add("id", thisConfigElement.getAttribute("id"))
+    				.add("name", thisConfigElement.getAttribute("name"))
+    				.add("description", thisConfigElement.getAttribute("description"))
+    				.add("image", imageURL)
+    				.build());
     	}
-
-		return result;
-    }
-    
+    	
+    	JsonObject rootObject = Json.createObjectBuilder()
+    			.add("actions", configList.build())
+    			.build();
+    	
+    	StringWriter stWriter = new StringWriter();
+    	try (JsonWriter jsonWriter = Json.createWriter(stWriter)) {
+    	   jsonWriter.writeObject(rootObject);
+    	}
+    	return stWriter.toString();
+	}
+	  
     public boolean runAction(String configId){
     	logger.debug("JSBridge runAction Called");
     	IConfigurationElement config = getConfigWithAttribute("id", configId);

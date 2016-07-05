@@ -34,7 +34,11 @@
    				$( this ).next( "#title span" ).show( "slow", showNext );
    		  	});
    			$("#data-here").hide(400);
-   			$("#data-here").html(java.printRegisteredExtensions());
+   			data = $.parseJSON(java.getActionsJSON());
+   			data['actions'].forEach(function(entry){
+	   			$("#data-here").append(entry["name"]+"<br>")	
+   			})
+   			//$("#data-here").html(java.getActionsJSON());
    			$("#data-here").slideDown(3000);
    		}
    	
