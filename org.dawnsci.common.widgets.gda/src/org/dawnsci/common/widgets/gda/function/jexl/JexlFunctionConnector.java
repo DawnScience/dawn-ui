@@ -11,18 +11,17 @@ package org.dawnsci.common.widgets.gda.function.jexl;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Gaussian;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.Lorentzian;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.PearsonVII;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.PseudoVoigt;
 
 /**
  * Reference implementation for a function to be accessible in jexl function expression
  */
 public class JexlFunctionConnector {
-
-	public static double Gaussian(double x, double p, double w, double a) {
-		return new Gaussian(p, w, a).val(x);
-	}
 	
 	/**
-	 * Dataset implementation for Tracy
+	 * Wrapper for standard peak functions
 	 * 
 	 * @param x
 	 * @param p
@@ -30,11 +29,24 @@ public class JexlFunctionConnector {
 	 * @param a
 	 * @return gaussian
 	 */
-	public static IDataset Gaussian2(IDataset x, double p, double w, double a) {
+	public static IDataset Gaussian(IDataset x, double p, double w, double a) {
 		Gaussian g = new Gaussian(p, w, a);
 		return g.calculateValues(x);
-		
-		
+	}
+	
+	public static IDataset Lorentzian(IDataset x, double p, double w, double a) {
+		Lorentzian l = new Lorentzian(p, w, a);
+		return l.calculateValues(x);
+	}
+	
+	public static IDataset PseudoVoigt(IDataset x, double p, double lw, double gw, double a, double mix) {
+		PseudoVoigt pv = new PseudoVoigt(p, lw, a, gw, mix);
+		return pv.calculateValues(x);
+	}
+	
+	public static IDataset PearsonVII(IDataset x, double p, double w, double a, double power) {
+		PearsonVII p7 = new PearsonVII(p,w,a,power);
+		return p7.calculateValues(x);
 	}
 
 }
