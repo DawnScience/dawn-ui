@@ -11,17 +11,19 @@ import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.LinearAlgebra;
+import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
 import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.function.MapToRotatedCartesian;
 import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
-import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.jface.dialogs.Dialog;
@@ -37,21 +39,18 @@ import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RegistrationDialog extends Dialog {
-
+public class RectangleRegistrationDialog extends Dialog {
 	private IDataset image;
 	private IDataset map;
 	private IDataset registered;
 	private IPlottingSystem<Composite> systemImage;
-	private IPlottingSystem<Composite> systemMap;
 	private IPlottingSystem<Composite> systemComposite;
-	private IRegion[] mapPoints = new IRegion[4];
-	private IRegion[] imagePoints = new IRegion[4];
+	private IRegion box;
 	int count = 0;
 	
 	private final static Logger logger = LoggerFactory.getLogger(RegistrationDialog.class);
 	
-	public RegistrationDialog(Shell parentShell, IDataset map, IDataset image) {
+	public RectangleRegistrationDialog(Shell parentShell, IDataset map, IDataset image) {
 		super(parentShell);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 		this.map = map;
@@ -59,7 +58,6 @@ public class RegistrationDialog extends Dialog {
 		this.image.clearMetadata(AxesMetadata.class);
 		
 		try {
-			systemMap = PlottingFactory.createPlottingSystem();
 			systemImage = PlottingFactory.createPlottingSystem();
 			systemComposite = PlottingFactory.createPlottingSystem();
 		} catch (Exception e) {
@@ -75,16 +73,9 @@ public class RegistrationDialog extends Dialog {
 		container.setLayoutData(new GridData(GridData.FILL_BOTH));
 		Composite main = new Composite(container, SWT.FILL);
 		main.setLayoutData(new GridData(GridData.FILL_BOTH));
-		main.setLayout(new GridLayout(3, true));
-		ActionBarWrapper actionBarMap = ActionBarWrapper.createActionBars(main, null);
+		main.setLayout(new GridLayout(2, true));
 		ActionBarWrapper actionBarImage = ActionBarWrapper.createActionBars(main, null);
 		ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(main, null);
-		systemMap.createPlotPart(main, "Map Plot", actionBarMap, PlotType.IMAGE, null);
-		systemMap.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		systemMap.setTitle("Map");
-		systemMap.setShowIntensity(false);
-		systemMap.getSelectedXAxis().setVisible(false);
-		systemMap.getSelectedYAxis().setVisible(false);
 
 		
 		systemImage.createPlotPart(main, "Image Plot", actionBarImage, PlotType.IMAGE, null);
@@ -99,8 +90,6 @@ public class RegistrationDialog extends Dialog {
 		systemComposite.createPlotPart(main, "Composite Plot", actionBarComposite, PlotType.IMAGE, null);
 		systemComposite.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-
-		MetadataPlotUtils.plotDataWithMetadata(map, systemMap);
 		image.setName("Image");
 		MetadataPlotUtils.plotDataWithMetadata(image, systemImage);
 		
@@ -124,65 +113,31 @@ public class RegistrationDialog extends Dialog {
 		double[] yValsMap = new double[]{mapY/3., mapY-mapY/3,mapY/3.,mapY/2};
 		double[] xValsImage = new double[]{imX/3., imX/2., imX-imX/3,imX/2};
 		double[] yValsImage = new double[]{imY/3., imY-imY/3,imY/3.,imY/2};
-		
+
 		try {
-			for (int i = 0; i < 4; i++) {
-
-				Color c = Display.getDefault().getSystemColor(SWT.COLOR_RED);
-				if (i == 1) c = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
-				if (i == 2) c = Display.getDefault().getSystemColor(SWT.COLOR_GREEN);
-				if (i == 3) c = Display.getDefault().getSystemColor(SWT.COLOR_CYAN);
-
-				final IRegion point1 = systemMap.createRegion("Point" +i, RegionType.POINT);
-				point1.setRegionColor(c);
-				mapPoints[i] = point1;
-				point1.setROI(new PointROI(xValsMap[i],yValsMap[i]));
-				point1.addROIListener(new IROIListener.Stub() {
+			box = systemImage.createRegion("Scan Region", RegionType.BOX);
+			box.setROI(new RectangularROI());
+			box.addROIListener(new IROIListener.Stub() {
 
 
-					@Override
-					public void roiChanged(ROIEvent evt) {
-						IROI roi = evt.getROI();
-						sanitizeROI(roi, map.getShape());
-						systemMap.repaint(false);
-
-						RegistrationDialog.this.update();
-					}
-				});
-				systemMap.addRegion(point1);
-			}
-
-			for (int i = 0; i < 4; i++) {
-				Color c = Display.getDefault().getSystemColor(SWT.COLOR_RED);
-				if (i == 1) c = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
-				if (i == 2) c = Display.getDefault().getSystemColor(SWT.COLOR_GREEN);
-				if (i == 3) c = Display.getDefault().getSystemColor(SWT.COLOR_CYAN);
-
-				final IRegion point1 = systemImage.createRegion("Point" +i, RegionType.POINT);
-				point1.setRegionColor(c);
-				imagePoints[i] = point1;
-				point1.setROI(new PointROI(xValsImage[i],yValsImage[i]));
-				point1.addROIListener(new IROIListener.Stub() {
+				@Override
+				public void roiChanged(ROIEvent evt) {
+					IROI roi = evt.getROI();
+					sanitizeROI(roi, image.getShape());
+					systemImage.repaint(false);
+					
+					RectangleRegistrationDialog.this.update();
+				}
+			});
+			systemImage.addRegion(box);
 
 
-					@Override
-					public void roiChanged(ROIEvent evt) {
-						IROI roi = evt.getROI();
-						sanitizeROI(roi, image.getShape());
-						systemImage.repaint(false);
-						
-						RegistrationDialog.this.update();
-					}
-				});
-				systemImage.addRegion(point1);
-			}
+			update();
 		} catch (Exception e) {
-			logger.error("Could not create Regions",e);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-
-
-
-		update();
+		
 		
 		
 	}
@@ -206,31 +161,64 @@ public class RegistrationDialog extends Dialog {
 	}
 	
 	private void update() {
-		Dataset v = buildDataset(mapPoints);
-		Dataset x = buildDataset(imagePoints);
-		if (x == null || v == null) return;
-		Dataset trans = LinearAlgebra.solveSVD(x, v);
-
-		double tX = trans.getDouble(2,0);
-		double tY = trans.getDouble(2,1);
 		
-		double sX = Math.hypot(trans.getDouble(0,0), trans.getDouble(0,1));
-		double sY = Math.hypot(trans.getDouble(1,0), trans.getDouble(1,1));
+		RectangularROI roi = (RectangularROI)box.getROI();
 		
-		double r = Math.toDegrees(Math.atan(trans.getDouble(0,1)/trans.getDouble(1,1)));
+		double r = roi.getAngle();
+		double tX = roi.getPointX();
+		double tY = roi.getPointY();
+		
+		AxesMetadata md = map.getFirstMetadata(AxesMetadata.class);
+		IDataset x = md.getAxes()[1].getSlice();
+		double xMax = x.max().doubleValue();
+		double xMin = x.min().doubleValue();
+		IDataset y = md.getAxes()[0].getSlice();
+		double yMax = y.max().doubleValue();
+		double yMin = y.min().doubleValue();
+		
+		
+//		Dataset v = buildDataset(mapPoints);
+//		Dataset x = buildDataset(imagePoints);
+//		if (x == null || v == null) return;
+//		Dataset trans = LinearAlgebra.solveSVD(x, v);
+//
+//		double tX = trans.getDouble(2,0);
+//		double tY = trans.getDouble(2,1);
+		
+		double cr = Math.cos(r);
+		
+		double xLen = roi.getLength(0);
+		double yLen = roi.getLength(1);
+		
+		double sX = (xMax-xMin)/xLen;
+		double sY = (yMax-yMin)/yLen;
+		
+//		double sX = Math.hypot(trans.getDouble(0,0), trans.getDouble(0,1));
+//		double sY = Math.hypot(trans.getDouble(1,0), trans.getDouble(1,1));
+		
+//		double r = Math.toDegrees(Math.atan(trans.getDouble(0,1)/trans.getDouble(1,1)));
 		
 		int[] shape = image.getShape();
 		
 		Dataset xR = DatasetFactory.createRange(shape[1], Dataset.FLOAT64);
 		Dataset yR = DatasetFactory.createRange(shape[0], Dataset.FLOAT64);
 		
+		double xVal = xMin + (sX*-tX);
+		double yVal = yMin+ (sY*-tY);
+		
+		double yrot = xVal * Math.cos(r) - yVal * Math.sin(r);
+	    double xrot = xVal * Math.sin(r) + yVal * Math.cos(r);
+		
+//		xR.iadd(tX);
 		xR.imultiply(sX);
-		xR.iadd(tX);
+		xR.iadd(xVal);
 		
+//		yR.iadd(tY);
 		yR.imultiply(sY);
-		yR.iadd(tY);
+		yR.iadd(yVal);
 		
-		MapToRotatedCartesian mrc = new MapToRotatedCartesian(0, 0, shape[1], shape[0], r*-1);
+		
+		MapToRotatedCartesian mrc = new MapToRotatedCartesian(0, 0, shape[1], shape[0], Math.toDegrees(r));
 		
 		IDataset im;
 		
@@ -260,7 +248,7 @@ public class RegistrationDialog extends Dialog {
 
 		IImageTrace image = MetadataPlotUtils.buildTrace("image",im, systemComposite);
 		image.setGlobalRange(range);
-		IImageTrace mapim = MetadataPlotUtils.buildTrace("map", map, systemComposite,120);
+		IImageTrace mapim = MetadataPlotUtils.buildTrace("map", map, systemComposite,180);
 		mapim.setGlobalRange(range);
 		systemComposite.addTrace(image);
 		systemComposite.addTrace(mapim);
@@ -312,3 +300,4 @@ public class RegistrationDialog extends Dialog {
 	  }
 
 }
+
