@@ -42,7 +42,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DTypeUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
@@ -998,7 +998,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			xyGraph.addImageTrace((ImageTrace)image);
 			removeAdditionalAxes(); // Do not have others with images.
 			
-			if (AbstractDataset.getDType(trace.getData()) == Dataset.RGB) {
+			if (DTypeUtils.getDType(trace.getData()) == Dataset.RGB) {
 				intensity.setVisible(false);
 			} else {
 			    intensity.setVisible(showIntensity);

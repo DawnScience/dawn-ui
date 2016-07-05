@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
-import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DTypeUtils;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
@@ -954,7 +954,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			// get the image data
 			imageDataset = getImageData(image);
 
-			if (AbstractDataset.getDType(imageDataset) == Dataset.RGB ) {
+			if (DTypeUtils.getDType(imageDataset) == Dataset.RGB ) {
 				hide();
 				return;
 			}

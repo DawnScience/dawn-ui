@@ -6,7 +6,6 @@ import static org.junit.Assert.assertEquals;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
@@ -24,7 +23,7 @@ public class ImageServiceTest {
 
 		// Test dataset of 10 doubles [0.0,..9.0]
 		ImageServiceBean imageServiceBean = new ImageServiceBean();
-		Dataset image = DatasetFactory.createRange(10, AbstractDataset.FLOAT64);
+		Dataset image = DatasetFactory.createRange(10, Dataset.FLOAT64);
 		imageServiceBean.setImage(image);
 		imageServiceBean.setLogColorScale(true);
 
@@ -40,7 +39,7 @@ public class ImageServiceTest {
 	public void testPlot() {
 
 		// Test dataset of 4 doubles [0.0,..3.0]
-		Dataset image = DatasetFactory.createRange(4, AbstractDataset.FLOAT64);
+		Dataset image = DatasetFactory.createRange(4, Dataset.FLOAT64);
 		ImageService imageService = new ImageService();
 
 		// The expected results, to check against
