@@ -12,9 +12,9 @@ package org.dawnsci.plotting.jreality.impl;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.jreality.core.AxisMode;
 import org.eclipse.dawnsci.plotting.api.jreality.data.ColourImageData;
+import org.eclipse.january.dataset.IDataset;
 
 import de.jreality.geometry.PointSetFactory;
 import de.jreality.scene.Appearance;

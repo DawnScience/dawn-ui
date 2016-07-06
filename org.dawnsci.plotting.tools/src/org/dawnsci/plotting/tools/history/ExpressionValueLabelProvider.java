@@ -8,8 +8,8 @@
  */
 package org.dawnsci.plotting.tools.history;
 
-import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObject;
+import org.eclipse.january.IMonitor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;

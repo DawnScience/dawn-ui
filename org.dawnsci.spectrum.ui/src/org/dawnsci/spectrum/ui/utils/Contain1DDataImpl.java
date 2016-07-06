@@ -11,7 +11,7 @@ package org.dawnsci.spectrum.ui.utils;
 import java.util.List;
 
 import org.dawnsci.spectrum.ui.file.IContain1DData;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.january.dataset.IDataset;
 
 public class Contain1DDataImpl implements IContain1DData {
 	

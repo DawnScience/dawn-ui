@@ -1,6 +1,6 @@
 package org.dawnsci.mapping.ui.datamodel;
 
-import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.january.dataset.ILazyDataset;
 
 public class LiveReMappedData extends ReMappedData implements ILiveData {
 

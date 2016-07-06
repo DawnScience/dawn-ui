@@ -8,8 +8,8 @@
  */
 package org.dawnsci.plotting.tools.history.operation;
 
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.Maths;
 
 /**
  * Operation which supports basic operators.

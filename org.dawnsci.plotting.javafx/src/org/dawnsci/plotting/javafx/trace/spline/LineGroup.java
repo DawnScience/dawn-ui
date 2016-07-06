@@ -7,7 +7,7 @@ import javafx.geometry.Point3D;
 import javafx.scene.Group;
 
 import org.dawnsci.plotting.javafx.objects.Line3D;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.january.dataset.IDataset;
 
 
 /**

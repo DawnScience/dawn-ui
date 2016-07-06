@@ -2,7 +2,7 @@ package org.dawnsci.plotting.javafx.axis.objects;
 
 import java.util.List;
 
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.january.dataset.IDataset;
 
 import javafx.geometry.Point3D;
 import javafx.scene.AmbientLight;

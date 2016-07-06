@@ -1,6 +1,6 @@
 package org.dawnsci.mapping.ui.datamodel;
 
-import org.eclipse.dawnsci.analysis.api.dataset.IRemoteDataset;
+import org.eclipse.january.dataset.IRemoteDataset;
 
 public class LiveRemoteAxes {
 

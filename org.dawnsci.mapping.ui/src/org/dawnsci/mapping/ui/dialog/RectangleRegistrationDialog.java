@@ -6,36 +6,34 @@ import java.util.List;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
-import org.eclipse.dawnsci.analysis.dataset.impl.LinearAlgebra;
-import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
-import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.function.MapToRotatedCartesian;
-import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
-import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
-import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
+import org.eclipse.january.DatasetException;
+import org.eclipse.january.MetadataException;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.LinearAlgebra;
+import org.eclipse.january.dataset.RGBDataset;
+import org.eclipse.january.metadata.AxesMetadata;
+import org.eclipse.january.metadata.MetadataFactory;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -234,10 +232,22 @@ public class RectangleRegistrationDialog extends Dialog {
 		double tY = roi.getPointY();
 		
 		AxesMetadata md = map.getFirstMetadata(AxesMetadata.class);
-		IDataset x = md.getAxes()[1].getSlice();
+		IDataset x;
+		try {
+			x = md.getAxes()[1].getSlice();
+		} catch (DatasetException e) {
+			logger.error("Could not get data from lazy dataset", e);
+			return;
+		}
 		double xMax = x.max().doubleValue();
 		double xMin = x.min().doubleValue();
-		IDataset y = md.getAxes()[0].getSlice();
+		IDataset y;
+		try {
+			y = md.getAxes()[0].getSlice();
+		} catch (DatasetException e) {
+			logger.error("Could not get data from lazy dataset", e);
+			return;
+		}
 		double yMax = y.max().doubleValue();
 		double yMin = y.min().doubleValue();
 		
@@ -365,10 +375,22 @@ public class RectangleRegistrationDialog extends Dialog {
 	private Dataset buildDataset(IDataset map) {
 
 		AxesMetadata md = map.getFirstMetadata(AxesMetadata.class);
-		IDataset x = md.getAxes()[1].getSlice();
+		IDataset x;
+		try {
+			x = md.getAxes()[1].getSlice();
+		} catch (DatasetException e) {
+			logger.error("Could not get data from lazy dataset", e);
+			return null;
+		}
 		double xMax = x.max().doubleValue();
 		double xMin = x.min().doubleValue();
-		IDataset y = md.getAxes()[0].getSlice();
+		IDataset y;
+		try {
+			y = md.getAxes()[0].getSlice();
+		} catch (DatasetException e) {
+			logger.error("Could not get data from lazy dataset", e);
+			return null;
+		}
 		double yMax = y.max().doubleValue();
 		double yMin = y.min().doubleValue();
 		double[] matb = new double[12];

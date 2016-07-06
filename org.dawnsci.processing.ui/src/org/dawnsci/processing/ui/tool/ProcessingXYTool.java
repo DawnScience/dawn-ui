@@ -2,10 +2,10 @@ package org.dawnsci.processing.ui.tool;
 
 import java.util.Iterator;
 
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.metadata.internal.AxesMetadataImpl;
 
 public class ProcessingXYTool extends AbstractProcessingTool {
 

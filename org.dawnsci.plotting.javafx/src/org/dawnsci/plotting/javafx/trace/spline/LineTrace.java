@@ -4,11 +4,11 @@ import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.dawnsci.plotting.javafx.SceneDisplayer;
 import org.dawnsci.plotting.javafx.ServiceLoader;
 import org.dawnsci.plotting.javafx.trace.JavafxTrace;
-import org.eclipse.dawnsci.analysis.api.dataset.DatasetException;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
 import org.eclipse.dawnsci.plotting.api.trace.ILine3DTrace;
+import org.eclipse.january.dataset.DatasetException;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.ILazyDataset;
 
 import javafx.scene.Node;
 

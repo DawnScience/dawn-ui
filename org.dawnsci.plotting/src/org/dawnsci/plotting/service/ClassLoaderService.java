@@ -14,7 +14,7 @@ import java.security.PrivilegedAction;
 import javax.vecmath.Vector3d;
 
 import org.eclipse.dawnsci.analysis.api.IClassLoaderService;
-import org.eclipse.dawnsci.analysis.api.dataset.Slice;
+import org.eclipse.january.dataset.Slice;
 import org.eclipse.ui.services.AbstractServiceFactory;
 import org.eclipse.ui.services.IServiceLocator;
 
@@ -65,7 +65,7 @@ public class ClassLoaderService extends AbstractServiceFactory implements IClass
 
 	private ClassLoader createClassLoader() {
 		final CompositeClassLoader loader = new CompositeClassLoader();
-	    loader.add(org.eclipse.dawnsci.analysis.dataset.impl.Activator.class.getClassLoader());
+	    loader.add(org.eclipse.dawnsci.analysis.dataset.Activator.class.getClassLoader());
 	    loader.add(uk.ac.diamond.scisoft.analysis.io.LoaderFactory.class.getClassLoader());
 		loader.add(Slice.class.getClassLoader());           // analysis.api
 		// Removed dependency on jmx

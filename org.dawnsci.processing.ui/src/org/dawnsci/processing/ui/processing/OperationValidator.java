@@ -12,10 +12,10 @@ import java.util.List;
 
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.slice.IOperationErrorInformer;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
+import org.eclipse.january.dataset.IDataset;
 import org.eclipse.richbeans.widgets.table.ISeriesItemDescriptor;
 import org.eclipse.richbeans.widgets.table.ISeriesValidator;
 

@@ -8,9 +8,9 @@
  */
 package org.dawnsci.slicing.component;
 
-import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DTypeUtils;
 import org.eclipse.dawnsci.slicing.api.system.DimsData;
+import org.eclipse.january.dataset.DTypeUtils;
+import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;

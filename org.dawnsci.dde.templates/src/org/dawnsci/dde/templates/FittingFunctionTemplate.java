@@ -47,6 +47,7 @@ public class FittingFunctionTemplate extends DAWNTemplateSection {
 	public IPluginReference[] getDependencies(String schemaVersion) {
 		// add _all_ required dependencies, no particular version 
 		return new IPluginReference[] {
+				new PluginReference("org.eclipse.january", null, 0),
 				new PluginReference("org.eclipse.dawnsci.analysis.api", null, 0),
 				new PluginReference("org.eclipse.dawnsci.analysis.dataset", null, 0),
 				new PluginReference("uk.ac.diamond.scisoft.analysis.processing", null, 0),

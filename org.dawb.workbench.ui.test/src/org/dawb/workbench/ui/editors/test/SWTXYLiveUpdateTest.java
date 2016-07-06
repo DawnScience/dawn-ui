@@ -9,8 +9,8 @@
 package org.dawb.workbench.ui.editors.test;
 
 import org.dawb.common.ui.util.EclipseUtils;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.Random;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.Random;
 import org.eclipse.ui.IWorkbenchPage;
 import org.junit.Test;
 

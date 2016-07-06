@@ -9,7 +9,7 @@
 
 package org.dawnsci.plotting.jreality.tool;
 
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.january.dataset.IDataset;
 
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 

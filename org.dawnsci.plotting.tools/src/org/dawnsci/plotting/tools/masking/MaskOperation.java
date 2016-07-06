@@ -27,7 +27,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.dawnsci.analysis.dataset.impl.BooleanDataset;
+import org.eclipse.january.dataset.BooleanDataset;
 
 public class MaskOperation extends AbstractOperation {
 	

@@ -10,8 +10,8 @@ package org.dawb.workbench.ui.data;
 
 import java.util.Arrays;
 
-import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
 import org.eclipse.dawnsci.slicing.api.data.ITransferableDataObject;
+import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 

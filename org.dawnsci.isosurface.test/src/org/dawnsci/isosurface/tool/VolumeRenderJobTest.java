@@ -11,7 +11,7 @@ import static org.mockito.Mockito.verify;
 import org.dawnsci.isosurface.alg.VolumeRenderer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
+import org.eclipse.january.IMonitor;
 import org.junit.Test;
 
 public class VolumeRenderJobTest{

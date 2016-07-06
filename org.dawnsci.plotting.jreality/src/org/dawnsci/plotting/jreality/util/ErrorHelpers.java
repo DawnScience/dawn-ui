@@ -11,9 +11,9 @@ package org.dawnsci.plotting.jreality.util;
 
 import java.awt.Color;
 
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.IDataset;
 
 import de.jreality.geometry.IndexedLineSetFactory;
 import de.jreality.scene.Appearance;

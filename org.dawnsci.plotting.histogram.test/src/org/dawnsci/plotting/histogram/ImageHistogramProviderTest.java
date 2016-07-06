@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import org.dawnsci.plotting.histogram.ImageHistogramProvider;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
+import org.eclipse.january.dataset.IDataset;
 import org.junit.Before;
 import org.junit.Test;
 import static org.mockito.Mockito.*;

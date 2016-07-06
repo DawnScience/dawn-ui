@@ -21,7 +21,6 @@ import org.dawnsci.plotting.roi.SurfacePlotROI;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.downsample.DownsampleMode;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.function.Downsample;
@@ -31,6 +30,7 @@ import org.eclipse.dawnsci.plotting.api.jreality.data.ColourImageData;
 import org.eclipse.dawnsci.plotting.api.jreality.impl.SurfPlotStyles;
 import org.eclipse.dawnsci.plotting.api.jreality.util.ArrayPoolUtility;
 import org.eclipse.dawnsci.plotting.api.jreality.util.ScalingUtility;
+import org.eclipse.january.dataset.IDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
