@@ -21,7 +21,7 @@
       </view>
       <view
             category="org.dawb.workbench.ui.beta.views.category"
-            class="uk.ac.diamond.scisoft.analysis.rcp.views.PlotView"
+            class="org.eclipse.dawnsci.plotting.api.VanillaPlottingSystemView"
             icon="icons/spectrumaxis.png"
             id="org.dawnsci.spectrum.ui.views.SpectrumPlot"
             name="Trace Plot"
