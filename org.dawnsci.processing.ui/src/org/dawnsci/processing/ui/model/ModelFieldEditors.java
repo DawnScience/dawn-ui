@@ -54,7 +54,6 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,7 +118,7 @@ public class ModelFieldEditors {
         	ed = new RegionCellEditor(parent);
         	
         } else if (Enum.class.isAssignableFrom(clazz)) {
-        	ed = getChoiceEditor((Class<? extends Enum>)clazz, parent);
+        	ed = getChoiceEditor((Class<? extends Enum<?>>)clazz, parent);
         	
         } else if (CComboWithEntryCellEditorData.class.isAssignableFrom(clazz)) {
         	ed = getChoiceWithEntryEditor((CComboWithEntryCellEditorData) value, parent);
@@ -177,7 +176,7 @@ public class ModelFieldEditors {
 		   		final Collection<ModelField> fields = ModelUtils.getModelFields(model);
 		   		for (ModelField field : fields) {
 		   			Object value = field.get();
-		   			if (value instanceof Enum) value = ((Enum)value).name();
+		   			if (value instanceof Enum) value = ((Enum<?>)value).name();
 		   			values.put(field.getName(), value);
 				}
 		   		engine.setLoadedVariables(values);
@@ -228,14 +227,14 @@ public class ModelFieldEditors {
                int[].class.isAssignableFrom(clazz)    || long[].class.isAssignableFrom(clazz);
 	}
 
-	private static CellEditor getChoiceEditor(final Class<? extends Enum> clazz, Composite parent) {
+	private static CellEditor getChoiceEditor(final Class<? extends Enum<?>> clazz, Composite parent) {
 		
-		final Enum[]   values = clazz.getEnumConstants();
+		final Enum<?>[]   values = clazz.getEnumConstants();
 	    final String[] items  = Arrays.toString(values).replaceAll("^.|.$", "").split(", ");
 		
 		CComboCellEditor cellEd = new CComboCellEditor(parent, items) {
     	    protected void doSetValue(Object value) {
-                if (value instanceof Enum) value = ((Enum) value).ordinal();
+                if (value instanceof Enum) value = ((Enum<?>) value).ordinal();
                 super.doSetValue(value);
     	    }
     		protected Object doGetValue() {
