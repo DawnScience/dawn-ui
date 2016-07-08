@@ -173,6 +173,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	private List<IROI> resROIs;
 	private boolean centreMoved = false;
 	private boolean forceRedraw = false;
+	private int maxRings = Integer.MAX_VALUE;
 
 	/**
 	 * @return list of ROIs representing resolution rings
@@ -215,6 +216,10 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 
 	public boolean isShowingBeamCenter() {
 		return beamCentre.isChecked();
+	}
+	
+	public void setMaxCalibrantRings(int maxRings){
+		this.maxRings = maxRings;
 	}
 
 	public void drawBeamCentre(boolean isChecked) {
@@ -260,16 +265,19 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 				calibrantRings.setChecked(true);
 			List<ResolutionRing> calibrantRingsList = new ArrayList<ResolutionRing>(7);
 	
+			int count = 0;
 			for (HKL hkl : spacing.getHKLs()) {
+//				if (count >= maxRings) break;
 				final double d = Double.valueOf(hkl.getD().doubleValue(NonSI.ANGSTROM));
 				try {
-					calibrantRingsList.add(new ResolutionRing(d, true, ColorConstants.red, true, false, false));
+					calibrantRingsList.add(new ResolutionRing(d, true, count >= maxRings ? ColorConstants.yellow :ColorConstants.red, true, false, false));
 				} catch (NumberFormatException e) {
 					logger.warn("Could not parse item {} in standard distances", d);
 				}
+				count++;
 			}
 			drawResolutionConics(calibrantRingsList, "calibrant", RING_TYPE.CALIBRANT);
-			drawResolutionBeamPosition();
+			if (isShowingBeamCenter()) drawResolutionBeamPosition();
 		} else {
 			hideConics(RING_TYPE.CALIBRANT);
 			hideConics(RING_TYPE.BEAM_POSITION_HANDLE);
@@ -664,49 +672,4 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		}
         
 	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (active ? 1231 : 1237);
-		result = prime * result + ((detprop == null) ? 0 : detprop.hashCode());
-		result = prime * result + ((diffenv == null) ? 0 : diffenv.hashCode());
-		result = prime * result + Arrays.hashCode(imageCentrePC);
-		result = prime * result
-				+ ((plottingSystem == null) ? 0 : plottingSystem.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		DiffractionImageAugmenter other = (DiffractionImageAugmenter) obj;
-		if (active != other.active)
-			return false;
-		if (detprop == null) {
-			if (other.detprop != null)
-				return false;
-		} else if (!detprop.equals(other.detprop))
-			return false;
-		if (diffenv == null) {
-			if (other.diffenv != null)
-				return false;
-		} else if (!diffenv.equals(other.diffenv))
-			return false;
-		if (!Arrays.equals(imageCentrePC, other.imageCentrePC))
-			return false;
-		if (plottingSystem == null) {
-			if (other.plottingSystem != null)
-				return false;
-		} else if (!plottingSystem.equals(other.plottingSystem))
-			return false;
-		return true;
-	}
-
 }
