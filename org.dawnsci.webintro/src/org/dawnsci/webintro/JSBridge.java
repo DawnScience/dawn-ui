@@ -20,7 +20,7 @@ import javax.json.JsonWriter;
 public class JSBridge {
 	private final static Logger logger = LoggerFactory.getLogger(JSBridge.class);
 
-	private String getResourceURL(IContributor contributer, String resourceLocation){
+	protected static String getResourceURL(IContributor contributer, String resourceLocation){
     	String url = "platform:/plugin/";
     	url += contributer.getName();
     	url += "/";
@@ -95,5 +95,10 @@ public class JSBridge {
     		e.printStackTrace();
     		return false;
     	}
+    }
+    
+    public void log(String text)
+    {
+        System.out.println(text);
     }
 }
