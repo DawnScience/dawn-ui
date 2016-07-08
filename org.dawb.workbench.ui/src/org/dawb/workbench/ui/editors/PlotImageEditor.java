@@ -222,7 +222,7 @@ public class PlotImageEditor extends EditorPart implements IEditorExtension, IRe
 						if (imageFilenames.size() > 1) {
 				 		    Collections.sort(imageFilenames, new SortNatural<String>(true));
 							ImageStackLoader loader = new ImageStackLoader(imageFilenames , new ProgressMonitorWrapper(monitor));
-							LazyDataset lazyDataset = new LazyDataset("Folder Stack", loader.getDtype(), loader.getShape(), loader);
+							LazyDataset lazyDataset = new LazyDataset("Folder Stack", loader.getDType(), loader.getShape(), loader);
 							
 							stack.setStack(lazyDataset);
 							
