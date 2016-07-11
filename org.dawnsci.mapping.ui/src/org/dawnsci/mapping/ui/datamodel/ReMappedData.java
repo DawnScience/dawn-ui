@@ -3,6 +3,7 @@ package org.dawnsci.mapping.ui.datamodel;
 import java.util.List;
 
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
+import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
@@ -10,7 +11,8 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.Maths;
 import org.eclipse.january.dataset.Stats;
-import org.eclipse.january.metadata.internal.AxesMetadataImpl;
+import org.eclipse.january.metadata.AxesMetadata;
+import org.eclipse.january.metadata.MetadataFactory;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelIntegration;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.XYImagePixelCache;
@@ -82,9 +84,14 @@ public class ReMappedData extends AbstractMapData {
 		
 		List<Dataset> data = PixelIntegration.integrate(map, null, cache);
 		
-		AxesMetadataImpl axm = new AxesMetadataImpl(2);
-		axm.addAxis(0, data.get(2));
-		axm.addAxis(1, data.get(0));
+		AxesMetadata axm = null;
+		try {
+			axm = MetadataFactory.createMetadata(AxesMetadata.class, 2);
+			axm.addAxis(0, data.get(2));
+			axm.addAxis(1, data.get(0));
+		} catch (MetadataException e) {
+			e.printStackTrace();
+		}
 		reMapped = data.get(1);
 		reMapped.addMetadata(axm);
 		lookup = data.get(3);

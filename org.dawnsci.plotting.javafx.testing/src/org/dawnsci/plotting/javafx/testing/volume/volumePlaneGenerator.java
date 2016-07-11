@@ -2,7 +2,7 @@ package org.dawnsci.plotting.javafx.testing.volume;
 
 import java.awt.image.BufferedImage;
 
-import org.eclipse.january.dataset.DatasetException;
+import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 

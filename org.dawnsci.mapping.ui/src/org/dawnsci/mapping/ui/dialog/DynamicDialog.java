@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.slicing.tools.hyper.HyperComponent;
+import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
-import org.eclipse.january.dataset.DatasetException;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;

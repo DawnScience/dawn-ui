@@ -17,6 +17,7 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
+import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
@@ -24,7 +25,7 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.LinearAlgebra;
 import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.january.metadata.AxesMetadata;
-import org.eclipse.january.metadata.internal.AxesMetadataImpl;
+import org.eclipse.january.metadata.MetadataFactory;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -251,9 +252,14 @@ public class RegistrationDialog extends Dialog {
 		logger.debug("XOffset: {}, YOffset: {}, XScale {}, YScale {},",tX,tY,sX,sY);
 		
 		registered = im;
-		AxesMetadataImpl ax = new AxesMetadataImpl(2);
-		ax.addAxis(0, yR);
-		ax.addAxis(1, xR);
+		AxesMetadata ax = null;
+		try {
+			ax = MetadataFactory.createMetadata(AxesMetadata.class, 2);
+			ax.addAxis(0, yR);
+			ax.addAxis(1, xR);
+		} catch (MetadataException e) {
+			logger.error("Could not create axes metadata", e);
+		}
 		im.addMetadata(ax);
 		registered.addMetadata(ax);
 		systemComposite.clear();

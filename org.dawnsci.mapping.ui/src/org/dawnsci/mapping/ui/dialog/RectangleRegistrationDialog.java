@@ -205,11 +205,16 @@ public class RectangleRegistrationDialog extends Dialog {
 		logger.debug("XOffset: {}, YOffset: {}, XScale {}, YScale {},",tX,tY,sX,sY);
 		
 		registered = im;
-		AxesMetadataImpl ax = new AxesMetadataImpl(2);
-		ax.addAxis(0, yR);
-		ax.addAxis(1, xR);
-		im.addMetadata(ax);
-		registered.addMetadata(ax);
+		try {
+			AxesMetadata ax;
+			ax = MetadataFactory.createMetadata(AxesMetadata.class, 2);
+			ax.addAxis(0, yR);
+			ax.addAxis(1, xR);
+			im.addMetadata(ax);
+			registered.addMetadata(ax);
+		} catch (MetadataException e) {
+			logger.error("Could not create axes metadata", e);
+		}
 		systemComposite.clear();
 		double[] range = MappingUtils.getGlobalRange(im,map);
 
@@ -313,11 +318,16 @@ public class RectangleRegistrationDialog extends Dialog {
 		logger.debug("XOffset: {}, YOffset: {}, XScale {}, YScale {},",tX,tY,sX,sY);
 		
 		registered = im;
-		AxesMetadataImpl ax = new AxesMetadataImpl(2);
-		ax.addAxis(0, yR);
-		ax.addAxis(1, xR);
-		im.addMetadata(ax);
-		registered.addMetadata(ax);
+		try {
+			AxesMetadata ax;
+			ax = MetadataFactory.createMetadata(AxesMetadata.class, 2);
+			ax.addAxis(0, yR);
+			ax.addAxis(1, xR);
+			im.addMetadata(ax);
+			registered.addMetadata(ax);
+		} catch (MetadataException e) {
+			logger.error("Could not create axes metadata", e);
+		}
 		systemComposite.clear();
 		double[] range = MappingUtils.getGlobalRange(im,map);
 

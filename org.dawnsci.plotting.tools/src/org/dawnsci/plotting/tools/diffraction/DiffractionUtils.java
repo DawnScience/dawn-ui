@@ -9,7 +9,7 @@
 package org.dawnsci.plotting.tools.diffraction;
 
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
-import org.eclipse.january.dataset.DatasetException;
+import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.metadata.IMetadata;

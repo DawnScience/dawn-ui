@@ -1,14 +1,16 @@
 package org.dawnsci.mapping.ui.datamodel;
 
+import org.eclipse.january.DatasetException;
+import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.DataEvent;
-import org.eclipse.january.dataset.DatasetException;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataListener;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.IRemoteDataset;
 import org.eclipse.january.dataset.SliceND;
-import org.eclipse.january.metadata.internal.AxesMetadataImpl;
+import org.eclipse.january.metadata.AxesMetadata;
+import org.eclipse.january.metadata.MetadataFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -133,19 +135,21 @@ public class LiveMappedData extends MappedData implements ILiveData {
 			
 		}
 		
-		AxesMetadataImpl axm = new AxesMetadataImpl(2);
-		axm.addAxis(0, y);
-		axm.addAxis(1, x);
+		AxesMetadata axm = null;
+		try {
+			axm = MetadataFactory.createMetadata(AxesMetadata.class, 2);
+			axm.addAxis(0, y);
+			axm.addAxis(1, x);
+		} catch (MetadataException e) {
+			logger.error("Could not create axes metdata", e);
+		}
+
 		int[] mapShape = ma.getShape();
 		SliceND s = new SliceND(mapShape);
 		if (mapShape[0] > y.getShape()[0]) s.setSlice(0, 0, y.getShape()[0], 1);
 		if (mapShape[1] > x.getShape()[0]) s.setSlice(1, 0, x.getShape()[0], 1);
-		
-		
-		
 		IDataset fm = ma.getSlice(s);
 		fm.setMetadata(axm);
-		
 		setRange(calculateRange(fm));
 		map = fm;
 		return fm;

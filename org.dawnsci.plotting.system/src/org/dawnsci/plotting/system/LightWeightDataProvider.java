@@ -11,8 +11,8 @@ package org.dawnsci.plotting.system;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
-import org.eclipse.january.dataset.DatasetException;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;

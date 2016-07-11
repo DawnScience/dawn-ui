@@ -16,7 +16,7 @@ import org.eclipse.january.dataset.IRemoteDataset;
 import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.metadata.AxesMetadata;
-import org.eclipse.january.metadata.internal.AxesMetadataImpl;
+import org.eclipse.january.metadata.MetadataFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,14 +138,14 @@ public class MappedFileFactory {
 			for (int i = 0; i < yAxis.length; i++) yView[i] = yAxis[i] == null ? null : yAxis[i].getSliceView().squeezeEnds();
 
 			if (block.isRemappingRequired() && d.getRank() == 1) {
-				AxesMetadataImpl ax = new AxesMetadataImpl(1);
+				AxesMetadata ax = MetadataFactory.createMetadata(AxesMetadata.class, 1);
 				ax.setAxis(0, xView);
 
 				d.setMetadata(ax);
 				return new ReMappedData(mapName, d, block, path);
 			}
 
-			AxesMetadataImpl ax = new AxesMetadataImpl(2);
+			AxesMetadata ax = MetadataFactory.createMetadata(AxesMetadata.class, 2);
 			ax.setAxis(0,yView);
 			ax.setAxis(1, xView);
 
@@ -164,7 +164,7 @@ public class MappedFileFactory {
 	private static AssociatedImage getAssociatedImage(String path, AssociatedImageBean b) {
 		try {
 			Dataset d = DatasetUtils.sliceAndConvertLazyDataset(getLazyDataset(path, b.getName()));
-			AxesMetadataImpl ax = new AxesMetadataImpl(2);
+			AxesMetadata ax = MetadataFactory.createMetadata(AxesMetadata.class, 2);
 			ax.addAxis(0,getLazyDataset(path, b.getAxes()[0]));
 			ax.addAxis(1,getLazyDataset(path, b.getAxes()[1]));
 			
@@ -215,10 +215,10 @@ public class MappedFileFactory {
 	
 	private static AxesMetadata checkAndBuildAxesMetadata(List<String> axes, String path, MappedBlockBean bean) {
 		
-		AxesMetadataImpl axm = null; 
+		AxesMetadata axm = null; 
 		
 		try {
-			axm = new AxesMetadataImpl(axes.size());
+			axm = MetadataFactory.createMetadata(AxesMetadata.class, axes.size());
 			for (int i = 0; i < axes.size(); i++) {
 				if (axes.get(i) == null) continue;
 				ILazyDataset lz = getLazyDataset(path, axes.get(i));

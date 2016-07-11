@@ -1,6 +1,6 @@
 package org.dawnsci.mapping.ui.datamodel;
 
-import org.eclipse.january.dataset.DatasetException;
+import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 

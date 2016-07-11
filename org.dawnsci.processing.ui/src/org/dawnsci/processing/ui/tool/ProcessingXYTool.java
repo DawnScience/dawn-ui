@@ -4,8 +4,10 @@ import java.util.Iterator;
 
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.metadata.internal.AxesMetadataImpl;
+import org.eclipse.january.metadata.AxesMetadata;
+import org.eclipse.january.metadata.MetadataFactory;
 
 public class ProcessingXYTool extends AbstractProcessingTool {
 
@@ -21,8 +23,13 @@ public class ProcessingXYTool extends AbstractProcessingTool {
 		ITrace next = it.next();
 		IDataset d = next.getData();
 		IDataset ax = ((ILineTrace)next).getXData();
-		AxesMetadataImpl am = new AxesMetadataImpl(1);
-		am.addAxis(0, ax);
+		AxesMetadata am = null;
+		try {
+			am = MetadataFactory.createMetadata(AxesMetadata.class, 1);
+			am.addAxis(0, ax);
+		} catch (MetadataException e) {
+			logger.error("Could not create axes metdata", e);
+		}
 		d.addMetadata(am);
 		return d;
 	}
