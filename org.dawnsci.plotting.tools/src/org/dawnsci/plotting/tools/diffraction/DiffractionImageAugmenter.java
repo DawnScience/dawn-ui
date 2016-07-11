@@ -11,7 +11,9 @@ package org.dawnsci.plotting.tools.diffraction;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.measure.unit.NonSI;
 import javax.vecmath.Vector3d;
@@ -174,6 +176,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	private boolean centreMoved = false;
 	private boolean forceRedraw = false;
 	private int maxRings = Integer.MAX_VALUE;
+	private Set<Integer> rings;
 
 	/**
 	 * @return list of ROIs representing resolution rings
@@ -221,6 +224,15 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	public void setMaxCalibrantRings(int maxRings){
 		this.maxRings = maxRings;
 	}
+	
+	public void setRingSet(Set<Integer> rings){
+		if (rings == null) {
+			this.rings = null;
+			return;
+		}
+		this.rings = new HashSet<>(rings);
+	}
+
 
 	public void drawBeamCentre(boolean isChecked) {
 		if (!active) return; // We are likely off screen.
@@ -267,10 +279,13 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	
 			int count = 0;
 			for (HKL hkl : spacing.getHKLs()) {
-//				if (count >= maxRings) break;
 				final double d = Double.valueOf(hkl.getD().doubleValue(NonSI.ANGSTROM));
+				
+				boolean highlight = count >= maxRings;
+				if (rings != null && !rings.isEmpty()) highlight = rings.contains(count);
+				
 				try {
-					calibrantRingsList.add(new ResolutionRing(d, true, count >= maxRings ? ColorConstants.yellow :ColorConstants.red, true, false, false));
+					calibrantRingsList.add(new ResolutionRing(d, true, highlight ? ColorConstants.yellow :ColorConstants.red, true, false, false));
 				} catch (NumberFormatException e) {
 					logger.warn("Could not parse item {} in standard distances", d);
 				}
