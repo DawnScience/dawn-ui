@@ -7,10 +7,32 @@ function updateData(){
 		$( this ).next( "#title span" ).show( "slow", showNext );
 	});
 	$("#data-here").hide(400);
-	data = $.parseJSON(java.getActionsJSON());
-	data.actions.forEach(function(entry){
-		$("#data-here").append(entry.name+"<br>");
+	data = $.parseJSON(java.getIntroJSON());
+		
+	data.pages.forEach(function(entry){
+		$("#tabList").append(
+		"<li role='presentation'><a href='#"+entry.page_id+"' aria-controls='"+entry.page_id+"' role='tab' data-toggle='tab'>"+entry.name+"</a></li>");
+		$("#tabContent").append(
+		"<div role='tabpanel' class='tab-pane' id='"+entry.page_id+"'>"+entry.content+"</div>");
+		
+		$('#tabList a:first').tab('show');
+		
+		$("#tabContent #"+entry.page_id).append('<ul></ul>');
+		entry.actions.forEach(function(action){
+			$( "<li/>", {
+				text: action.name,
+				data: {
+					action_id: action.id
+				},
+				click: function() {
+					java.runAction($(this).data('action_id'));
+				},
+				
+			})
+			.appendTo( "#tabContent #"+entry.page_id+" ul" );
+
+		});
 	});
-	//$("#data-here").html(java.getActionsJSON());
+//	$("#data-here").html(java.getIntroJSON());
 	$("#data-here").slideDown(3000);
 }

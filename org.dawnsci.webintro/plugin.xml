@@ -1,22 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="org.dawnsci.introRegister" name="Intro Register" schema="schema/org.dawnsc.introRegister.exsd"/>
+   <extension-point id="org.dawnsci.webintro.action" name="Web Intro Action Register" schema="schema/org.dawnsci.webintro.action.exsd"/>
+   <extension-point id="org.dawnsci.webintro.page" name="Web Intro Page Register" schema="schema/org.dawnsci.webintro.page.exsd"/>
 
-   <extension
-         point="org.eclipse.ui.views">
-      <category
-            name="Sample Category"
-            id="org.dawnsci.webintro">
-      </category>
-      <view
-            name="Sample View"
-            icon="icons/sample.gif"
-            category="org.dawnsci.webintro"
-            class="org.dawnsci.webintro.views.SampleView"
-            id="org.dawnsci.webintro.views.SampleView">
-      </view>
-   </extension>
    <extension
          point="org.eclipse.ui.intro">
       <intro
@@ -29,5 +16,21 @@
             productId="org.dawnsci.product.plugin.DAWN">
       </introProductBinding>
    </extension>
-
+<extension
+         point="org.dawnsci.webintro.page">
+      <introPage
+            content="This is the content for intro page 1. Eventually this could be formatted with markdown."
+            id="org.dawnsci.webintro.content.introPage1"
+            name="Intro Page 1"
+            ordering="10"
+            page_id="welcome">
+      </introPage>
+      <introPage
+            content="Some content for intro page 2. Hopefully this will appear first in the list since it has a lower ordering number"
+            id="org.dawnsci.webintro.content.introPage2"
+            name="Intro Page 2"
+            ordering="1"
+            page_id="welcome2">
+      </introPage>
+   </extension>
 </plugin>

@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.dawnsci.intro" xmlns="http://www.w3.org/2001/XMLSchema">
+<schema targetNamespace="org.dawnsci.webintro" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="org.dawnsci.intro" id="org.dawnsci.introRegister" name="IntroRegister"/>
+         <meta.schema plugin="org.dawnsci.webintro" id="org.dawnsci.webintro.action" name="Web Intro Register Action"/>
       </appinfo>
       <documentation>
-         This allows you to register Perspectives or Action that appear on the intro/welcome page and can be executed by the user on his first startup
+         [Enter description of this extension point.]
       </documentation>
    </annotation>
 
@@ -18,7 +18,7 @@
       </annotation>
       <complexType>
          <sequence minOccurs="0" maxOccurs="unbounded">
-            <element ref="introPageRegister"/>
+            <element ref="introAction" minOccurs="1" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -47,33 +47,38 @@
       </complexType>
    </element>
 
-   <element name="introPageRegister">
+   <element name="introAction">
+      <annotation>
+         <documentation>
+            Adds a link to the actions list on one of the intro pages
+         </documentation>
+      </annotation>
       <complexType>
          <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  A unique id for the action
                </documentation>
             </annotation>
          </attribute>
          <attribute name="name" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  The &apos;title&apos; of the action
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="description" type="string" use="required">
+         <attribute name="description" type="string">
             <annotation>
                <documentation>
-                  
+                  Short description of the action, can be formatted with markdown
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="icon" type="string" use="required">
+         <attribute name="icon" type="string">
             <annotation>
                <documentation>
-                  
+                  An icon for the action, in a web-friendly image format (e.g. JPG, PNG, GIF)
                </documentation>
                <appinfo>
                   <meta.attribute kind="resource"/>
@@ -83,11 +88,25 @@
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  The class of the action to be triggered when the link is clicked. Should implement org.eclipse.ui.IActionDelegate (or extend a class that does).
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java"/>
+                  <meta.attribute kind="java" basedOn=":org.eclipse.ui.IActionDelegate"/>
                </appinfo>
+            </annotation>
+         </attribute>
+         <attribute name="page_id" type="string" use="required">
+            <annotation>
+               <documentation>
+                  The intro page which this action should be added to. If this page has not been contributed to the org.dawnsci.webintro.page extension point, then a new page will be created with name=id
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="ordering" type="string">
+            <annotation>
+               <documentation>
+                  An integer describing the location in the list for this contributions. If two items are contributed with the same number, their position cannot be guarenteed. If no integer is provided, the contribution will be added to the end of the list in the order that the plugin is loaded.
+               </documentation>
             </annotation>
          </attribute>
       </complexType>
