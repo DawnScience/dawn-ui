@@ -58,6 +58,7 @@ import org.eclipse.nebula.visualization.xygraph.figures.Axis;
 import org.eclipse.nebula.visualization.xygraph.figures.PlotArea;
 import org.eclipse.nebula.visualization.xygraph.figures.Trace;
 import org.eclipse.nebula.visualization.xygraph.undo.ZoomType;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
@@ -149,13 +150,17 @@ public class RegionArea extends PlotArea {
 		
 		final double xVal   = getRegionGraph().getSelectedXAxis().getPositionValue(me.x);
 		final double yVal   = getRegionGraph().getSelectedYAxis().getPositionValue(me.y);
+		int state = me.getState();
+		boolean shiftDown = ((state & SWT.SHIFT) != 0);
+		boolean ctrlDown = ((state & SWT.CONTROL) != 0);
+		
 		final int keyCode   = keyEvent!=null ? keyEvent.keyCode   : -1;
 		final int stateMask = keyEvent!=null ? keyEvent.stateMask : -1;
 		final char character= keyEvent!=null ? keyEvent.character : '\0';
 		
 		return new ClickEvent(this, getRegionGraph().getSelectedXAxis(), getRegionGraph().getSelectedYAxis(),
-				             xVal, yVal, isShiftDown(), isControlDown(), 
-				             keyCode, stateMask, character);
+				             xVal, yVal, shiftDown, ctrlDown, 
+				             state, stateMask, character);
 				              
 	}
 
