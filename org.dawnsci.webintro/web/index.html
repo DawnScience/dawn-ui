@@ -85,7 +85,18 @@
 	<div class="content-section-a">
 
 		<div class="container">
-		<div id="data-here" class="row">
+
+			<script id="entry-template" type="text/x-handlebars-template">
+				<div class="entry">
+					
+					<h1>title:{{title}}</h1>
+					<div class="body">
+						{{body}}
+					</div>
+				</div>
+			</script>
+
+			<div id="data-here" class="row">
 			<div id="tabContainer">
 
 				<!-- Nav tabs -->
@@ -126,7 +137,7 @@
         </div>
         <!-- /.container -->
 
-	</div>
+	<!-- </div> -->
 	<!-- /.content-section-b -->
 	<!-- 
     <div class="content-section-a">
@@ -176,6 +187,7 @@
 	</footer>
 	
 	<script src="js/marked.js"></script>
+	<script src="js/handlebars-v4.0.5.js"></script>
 
 	<!-- jQuery -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
