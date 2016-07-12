@@ -19,14 +19,16 @@
 <extension
          point="org.dawnsci.webintro.page">
       <introPage
-            content="This is the content for intro page 1. Eventually this could be formatted with markdown."
+            content="content/page1content.md"
+            content_file="content/page1content.md"
             id="org.dawnsci.webintro.content.introPage1"
             name="Intro Page 1"
-            ordering="10"
+            ordering="1"
             page_id="welcome">
       </introPage>
       <introPage
-            content="Some content for intro page 2. Hopefully this will appear first in the list since it has a lower ordering number"
+            content="content/page2content.md"
+            content_file="content/page2content.md"
             id="org.dawnsci.webintro.content.introPage2"
             name="Intro Page 2"
             ordering="1"

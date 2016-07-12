@@ -68,11 +68,14 @@
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="content" type="string">
+         <attribute name="content_file" type="string">
             <annotation>
                <documentation>
                   The content of the page, displayed above the list of actions. Can be formatted with markdown
                </documentation>
+               <appinfo>
+                  <meta.attribute kind="resource"/>
+               </appinfo>
             </annotation>
          </attribute>
          <attribute name="icon" type="string">

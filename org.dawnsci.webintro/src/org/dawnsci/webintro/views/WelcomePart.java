@@ -46,11 +46,11 @@ import org.dawnsci.webintro.JSBridge;
  */
 public class WelcomePart extends IntroPart {
 
-	private static String homeLocation = "platform:/plugin/org.dawnsci.webintro/content/index.html";
+	private static String homeLocation = "platform:/plugin/org.dawnsci.webintro/web/index.html";
 	
 	//Any page urls loaded that do not start with this will be opened in the system browser
 	//(Note that this does not apply to JS, CSS, images etc.
-	private static String locationLock = "platform:/plugin/org.dawnsci.webintro/content";
+	private static String locationLock = "platform:/plugin/org.dawnsci.webintro/web";
 	
 	private WebEngine webEngine;
 	

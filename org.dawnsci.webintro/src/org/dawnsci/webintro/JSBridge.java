@@ -9,7 +9,12 @@ import org.eclipse.ui.intro.IIntroPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,6 +35,28 @@ public class JSBridge {
     	return url;
     }
 	
+	private String getTextResource(String resourceUrl){
+		URL url;
+		try {
+			url = new URL(resourceUrl);
+			InputStream inputStream = url.openConnection().getInputStream();
+			BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
+			String outputString = "";
+			String inputLine;
+
+			while ((inputLine = in.readLine()) != null) {
+				outputString += inputLine + "\n";
+			}
+
+			in.close();
+			
+			return outputString;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 	private IConfigurationElement[] getRegisteredConfigs(String point){
     	IConfigurationElement[] configs = org.eclipse.core.runtime.Platform
 				.getExtensionRegistry()
@@ -83,11 +110,12 @@ public class JSBridge {
         	}
 
     		String pageImageURL = getResourceURL(thisPage.getContributor(),thisPage.getAttribute("icon"));
+    		String pageContentURL = getResourceURL(thisPage.getContributor(), thisPage.getAttribute("content_file"));
     		pagesList.add(Json.createObjectBuilder()
     				.add("id", thisPage.getAttribute("id"))
     				.add("page_id", thisPage.getAttribute("page_id"))
     				.add("name", thisPage.getAttribute("name"))
-    				.add("content", thisPage.getAttribute("content"))
+    				.add("content", getTextResource(pageContentURL) )
     				.add("image", pageImageURL)
     				.add("actions", pageActions.build())
     				.build());
