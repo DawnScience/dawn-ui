@@ -28,8 +28,6 @@ import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.common.widgets.editor.ITitledEditor;
-import org.dawnsci.python.rpc.action.InjectPyDevConsole;
-import org.dawnsci.python.rpc.action.InjectPyDevConsoleAction;
 import org.dawnsci.slicing.Activator;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
@@ -325,7 +323,6 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 	
 	private Action                reverse;
 
-	private InjectPyDevConsoleAction inject;
 	/**
 	 * Creates the actions for 
 	 * @return
@@ -371,14 +368,6 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		updateAutomatically.setImageDescriptor(Activator.getImageDescriptor("icons/refresh.png"));
 		man.add(updateAutomatically);
 		
-		this.inject = new InjectPyDevConsoleAction("Open Scripting");
-		inject.setParameter(InjectPyDevConsole.CREATE_NEW_CONSOLE_PARAM, Boolean.TRUE.toString());
-		inject.setParameter(InjectPyDevConsole.SETUP_SCISOFTPY_PARAM, InjectPyDevConsole.SetupScisoftpy.ALWAYS.toString());
-		if (getPlottingSystem()!=null && getPlottingSystem().getPart()!=null) {
-			inject.setParameter(InjectPyDevConsole.VIEW_NAME_PARAM, getPlottingSystem().getPart().getTitle());
-		}
-		man.add(inject);
-
 		man.add(new Separator("group3"));
 		Action openGallery = new Action("Open data set in a gallery.\nFor instance a gallery of images.", Activator.getImageDescriptor("icons/imageStack.png")) {
 			public void run() {
@@ -430,18 +419,6 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		};
 		man.add(reverse);
 		return man;
-	}
-	
-	public void setSlice(IDataset slice) {
-		super.setSlice(slice);
-		if (inject!=null && slice != null) {
-			try {
-				inject.setData(InjectPyDevConsole.getLegalVarName(slice.getName()), slice);
-			} catch (Exception e) {
-				logger.error("Cannot set data to use with inject, using name 'x' instead", e);
-				inject.setData("x", slice);
-			}
-		}
 	}
 	
 	private Map<Enum, DimsDataList> sliceSettings;
@@ -783,9 +760,6 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 			setDataShape(lazySet.getShape());
 			explain.setText("Create a slice of "+sliceObject.getName()+".\nIt has the shape "+Arrays.toString(dataShape));
 		}
-		
-		if (inject!=null) inject.setText("Open slice of '"+source.getDataName()+"' in console");
-       //if (sliceEditingSupport!=null) sliceEditingSupport.setPlayButtonVisible(false);
 		
 		createDimsData(source.isExpression());
         if (axisEditingSupport!=null) axisEditingSupport.updateAxesChoices();

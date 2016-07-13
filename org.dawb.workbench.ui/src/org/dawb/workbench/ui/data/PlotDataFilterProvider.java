@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.dawnsci.python.rpc.AnalysisRpcPythonPyDevService;
+import org.dawb.workbench.ui.Activator;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
@@ -25,6 +25,7 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.dawnsci.analysis.api.rpc.IAnalysisRpcPythonService;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.filter.IFilterDecorator;
@@ -102,7 +103,7 @@ final class PlotDataFilterProvider implements IResourceChangeListener {
 
 		private IResource                     file;
 		private IPythonFilter                 pythonProxy;
-		private AnalysisRpcPythonPyDevService service;
+		private IAnalysisRpcPythonService service;
 		
 		public PythonPlottingFilter(String name, IResource file) throws Exception {	
 			super(name);			
@@ -116,9 +117,14 @@ final class PlotDataFilterProvider implements IResourceChangeListener {
 			if (service!=null) service.stop();
 			
 	        // TODO use constructor with true which offers to configure a python interpreter if none exists.
-			this.service = new AnalysisRpcPythonPyDevService(file.getProject());
-			service.addHandlers("execfile('''" + file.getLocation().toPortableString() + "''')", new String[]{"filter1D", "filter2D"});
-					
+			this.service = Activator.getService(IAnalysisRpcPythonService.class);
+			if (service == null)
+				throw new Exception(
+						"The Analysis RPC Python Service could not be loaded. Possible reasons "
+						+ "include the implementation plugin missing from the product.");
+			service.addHandlers("execfile('''" + file.getLocation().toPortableString() + "''')",
+					new String[] { "filter1D", "filter2D" });
+			
 			// TODO A constructor to allow debugging to connect.
 			this.pythonProxy = service.getClient().newProxyInstance(IPythonFilter.class);
 		}

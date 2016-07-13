@@ -9,8 +9,7 @@
 package org.dawb.workbench.ui.data;
 
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-
-import uk.ac.diamond.scisoft.analysis.rpc.AnalysisRpcException;
+import org.eclipse.dawnsci.analysis.api.rpc.AnalysisRpcException;
 
 public interface IPythonFilter {
 	/**
