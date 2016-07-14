@@ -1,5 +1,6 @@
 package org.dawnsci.mapping.ui.dialog;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
@@ -160,7 +161,71 @@ public class RectangleRegistrationDialog extends Dialog {
 		roi.setPoint(point);
 	}
 	
+	
 	private void update() {
+		Dataset v = buildDataset(map);//map
+		Dataset x = buildDataset((RectangularROI)box.getROI());//image
+		if (x == null || v == null) return;
+		Dataset trans = LinearAlgebra.solveSVD(x, v);
+
+		double tX = trans.getDouble(2,0);
+		double tY = trans.getDouble(2,1);
+		
+		double sX = Math.hypot(trans.getDouble(0,0), trans.getDouble(0,1));
+		double sY = Math.hypot(trans.getDouble(1,0), trans.getDouble(1,1));
+		
+		double r = Math.toDegrees(Math.atan(trans.getDouble(0,1)/trans.getDouble(1,1)));
+		
+		int[] shape = image.getShape();
+		
+		Dataset xR = DatasetFactory.createRange(shape[1], Dataset.FLOAT64);
+		Dataset yR = DatasetFactory.createRange(shape[0], Dataset.FLOAT64);
+		
+		xR.imultiply(sX);
+		xR.iadd(tX);
+		
+		yR.imultiply(sY);
+		yR.iadd(tY);
+		
+		MapToRotatedCartesian mrc = new MapToRotatedCartesian(0, 0, shape[1], shape[0], r*-1);
+		
+		IDataset im;
+		
+		if (image instanceof RGBDataset) {
+			
+			RGBDataset rgb = (RGBDataset)image;
+			im = new RGBDataset(mrc.value(rgb.getRedView()).get(0),
+								mrc.value(rgb.getGreenView()).get(0),
+								mrc.value(rgb.getBlueView()).get(0));
+			
+			
+		} else {
+			List<Dataset> value = mrc.value(image);
+			im = value.get(0);
+		}
+		
+		logger.debug("XOffset: {}, YOffset: {}, XScale {}, YScale {},",tX,tY,sX,sY);
+		
+		registered = im;
+		AxesMetadataImpl ax = new AxesMetadataImpl(2);
+		ax.addAxis(0, yR);
+		ax.addAxis(1, xR);
+		im.addMetadata(ax);
+		registered.addMetadata(ax);
+		systemComposite.clear();
+		double[] range = MappingUtils.getGlobalRange(im,map);
+
+		IImageTrace image = MetadataPlotUtils.buildTrace("image",im, systemComposite);
+		image.setGlobalRange(range);
+		IImageTrace mapim = MetadataPlotUtils.buildTrace("map", map, systemComposite,180);
+		mapim.setGlobalRange(range);
+		systemComposite.addTrace(image);
+		systemComposite.addTrace(mapim);
+		
+	}
+	
+	
+	private void update1() {
 		
 		RectangularROI roi = (RectangularROI)box.getROI();
 		
@@ -276,10 +341,50 @@ public class RectangleRegistrationDialog extends Dialog {
 			logger.error("Could not get axis location",e);
 		}
 
-
-
 		return null;
+	}
+	
+	private Dataset buildDataset(RectangularROI roi) {
 
+		double[] matb = new double[12];
+		Arrays.fill(matb, 1);
+		matb[0] = roi.getPoint(0, 0)[0];
+		matb[1] = roi.getPoint(0, 0)[1];
+		matb[3] = roi.getPoint(0, 1)[0];
+		matb[4] = roi.getPoint(0, 1)[1];
+		matb[6] = roi.getPoint(1, 0)[0];
+		matb[7] = roi.getPoint(1, 0)[1];
+		matb[9] = roi.getPoint(1, 1)[0];
+		matb[10] = roi.getPoint(1, 1)[1];
+		Dataset mat = DatasetFactory.createFromObject(matb);
+		mat.setShape(new int[]{4, 3});
+
+		return mat;
+	}
+	
+	private Dataset buildDataset(IDataset map) {
+
+		AxesMetadata md = map.getFirstMetadata(AxesMetadata.class);
+		IDataset x = md.getAxes()[1].getSlice();
+		double xMax = x.max().doubleValue();
+		double xMin = x.min().doubleValue();
+		IDataset y = md.getAxes()[0].getSlice();
+		double yMax = y.max().doubleValue();
+		double yMin = y.min().doubleValue();
+		double[] matb = new double[12];
+		Arrays.fill(matb, 1);
+		matb[0] = xMin;
+		matb[1] = yMin;
+		matb[3] = xMin;
+		matb[4] = yMax;
+		matb[6] = xMax;
+		matb[7] = yMin;
+		matb[9] = xMax;
+		matb[10] = yMax;
+		Dataset mat = DatasetFactory.createFromObject(matb);
+		mat.setShape(new int[]{4, 3});
+
+		return mat;
 	}
 	
 	
