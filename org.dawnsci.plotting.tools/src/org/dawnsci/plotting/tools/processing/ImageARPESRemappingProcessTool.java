@@ -506,20 +506,20 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 		remappedAxes.add(energyAxis);
 		remappedAxes.add(kParaAxis);
 		
-		userPlotBean.addList("remapped", remappedRegion.clone());
-		userPlotBean.addList("remapped_energy", remappedAxes.get(0).clone());
-		userPlotBean.addList("remapped_k_parallel", remappedAxes.get(1).clone());
-		
-		// items which need to be saved for the batch processing
-		userPlotBean.addRoi("mapping_roi", roi.getROI());
-		userPlotBean.addList("kParallel", kParallel.clone());
-		userPlotBean.addList("kParaAxis", kParaAxis.clone());
-		if (auxiliaryData != null) {
-			userPlotBean.addList("auxiliaryData", auxiliaryData.clone());
-		}
-		
-		userPlotBean.addScalar("photonEnergy", photonEnergy.toString());
-		userPlotBean.addScalar("workFunction", workFunction.toString());
+//		userPlotBean.addList("remapped", remappedRegion.clone());
+//		userPlotBean.addList("remapped_energy", remappedAxes.get(0).clone());
+//		userPlotBean.addList("remapped_k_parallel", remappedAxes.get(1).clone());
+//		
+//		// items which need to be saved for the batch processing
+//		userPlotBean.addRoi("mapping_roi", roi.getROI());
+//		userPlotBean.addList("kParallel", kParallel.clone());
+//		userPlotBean.addList("kParaAxis", kParaAxis.clone());
+//		if (auxiliaryData != null) {
+//			userPlotBean.addList("auxiliaryData", auxiliaryData.clone());
+//		}
+//		
+//		userPlotBean.addScalar("photonEnergy", photonEnergy.toString());
+//		userPlotBean.addScalar("workFunction", workFunction.toString());
 		
 		getPlottingSystem().createPlot2D(remappedRegion, remappedAxes , null);
 		

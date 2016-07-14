@@ -15,7 +15,6 @@ import java.util.List;
 
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
-import org.dawb.workbench.jmx.UserPlotBean;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -80,7 +79,6 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 	protected List<IDataset> originalAxes;
 	protected IDataset auxiliaryData;
 	
-	protected UserPlotBean userPlotBean = new UserPlotBean();
 	/**
 	 * flag set to true when update occurs through the tool
 	 */
@@ -390,7 +388,7 @@ public abstract class ImageProcessingTool extends AbstractToolPage  implements I
 	@Override
 	public Serializable getToolData() {
 		// TODO Auto-generated method stub
-		return userPlotBean;
+		return null;
 	}
 	
 	/**

@@ -344,9 +344,9 @@ public class ImageNormalisationProcessTool extends ImageProcessingTool {
 		Dataset correctionDataset = DatasetUtils.tile(tile, ds.getShapeRef()[1]);
 		ds.idivide(correctionDataset);
 
-		userPlotBean.addList("norm", ds.clone());
-		userPlotBean.addList("norm_profile", profile.clone());
-		userPlotBean.addList("norm_correction", correctionDataset.clone());
+//		userPlotBean.addList("norm", ds.clone());
+//		userPlotBean.addList("norm_profile", profile.clone());
+//		userPlotBean.addList("norm_correction", correctionDataset.clone());
 		
 		getPlottingSystem().updatePlot2D(ds, originalAxes, monitor);
 

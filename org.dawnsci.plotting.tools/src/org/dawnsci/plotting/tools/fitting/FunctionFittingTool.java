@@ -15,7 +15,6 @@ import java.util.Map;
 
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.dawb.common.ui.util.GridUtils;
-import org.dawb.workbench.jmx.UserPlotBean;
 import org.dawnsci.common.widgets.gda.function.FunctionFittingWidget;
 import org.dawnsci.common.widgets.gda.function.IFittedFunctionInvalidatedEvent;
 import org.dawnsci.common.widgets.gda.function.ModelModifiedAdapter;
@@ -778,9 +777,10 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		else {
 			enableFindPeaksButton = false;
 		}
-
-		final UserPlotBean bean = (UserPlotBean) toolData;
-		functions = bean.getFunctions();
+		
+//		final UserPlotBean bean = (UserPlotBean) toolData;
+		functions = new HashMap<String, Serializable>();
+		functions.put("Function", toolData);
 
 		compFunction = new Add();
 		for (String key : functions.keySet()) {
@@ -801,7 +801,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 	@Override
 	public Serializable getToolData() {
 
-		UserPlotBean bean = new UserPlotBean();
+//		UserPlotBean bean = new UserPlotBean();
 
 		int count = 0;
 		for (String key : functions.keySet()) {
@@ -814,10 +814,10 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		// Also add the composite function
 		functions.put("Comp", compFunction);
 		
-		bean.setFunctions(functions); // We only set functions because it does a
-										// replace merge.
+//		bean.setFunctions(functions); // We only set functions because it does a
+//										// replace merge.
 
-		return bean;
+		return compFunction;
 	}
 	
 	public void setShowFindPeaksWorkFlow(boolean buttonEnable) {
