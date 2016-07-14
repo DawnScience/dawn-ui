@@ -110,55 +110,12 @@ public class LegacyMapBeanBuilder {
 			if (!gn.containsDataNode(I05ANGLES)) return null;
 			if (!gn.containsDataNode(I05ENERGIES)) return null;
 			
-			String yAxis = null;
-			String xAxis = null;
+			String[] xyAxesNames = getXYAxesNames(gn);
 			
-			Collection<String> names = gn.getNames();
+			if (xyAxesNames == null) return null;
 			
-			for (String name : names) {
-				
-				if (gn.containsDataNode(name)) {
-					DataNode dataNode = gn.getDataNode(name);
-					if (dataNode.containsAttribute("axis")){
-						String at = dataNode.getAttribute("axis").getFirstElement();
-						if ("1,2".equals(at)) {
-							if (xAxis == null) xAxis = name;
-							else yAxis = name;
-						}
-					}
-				}
-				
-				if (xAxis != null && yAxis != null) break;
-				
-			}
-			
-			try {
-				
-				DataNode dataNode = gn.getDataNode(xAxis);
-				Dataset x = DatasetUtils.sliceAndConvertLazyDataset(dataNode.getDataset());
-				Dataset m0 = Stats.median(x, 0);
-				Dataset m1 = Stats.median(x, 1);
-				
-				double max0 = m0.max(true).doubleValue();
-				double min0 = m0.min(true).doubleValue();
-				
-				double max1 = m1.max(true).doubleValue();
-				double min1 = m1.min(true).doubleValue();
-				
-				double p0 = max0-min0;
-				double p1 = max1-min1;
-				
-				if (p1 > p0) {
-					String tmp = yAxis;
-					yAxis = xAxis;
-					xAxis = tmp;
-				}
-				
-			} catch (Exception e) {
-				//cant read data?
-			}
-			
-			if (xAxis == null || yAxis == null) return null;
+			String yAxis = xyAxesNames[1];
+			String xAxis = xyAxesNames[0];
 
 			fb = new MappedDataFileBean();
 			MappedBlockBean bb = new MappedBlockBean();
@@ -186,12 +143,67 @@ public class LegacyMapBeanBuilder {
 		return fb;
 	}
 	
+	private static String[] getXYAxesNames(GroupNode gn) {
+		
+		String yAxis = null;
+		String xAxis = null;
+		
+		Collection<String> names = gn.getNames();
+		
+		for (String name : names) {
+			
+			if (gn.containsDataNode(name)) {
+				DataNode dataNode = gn.getDataNode(name);
+				if (dataNode.containsAttribute("axis")){
+					String at = dataNode.getAttribute("axis").getFirstElement();
+					if ("1,2".equals(at)) {
+						if (xAxis == null) xAxis = name;
+						else yAxis = name;
+					}
+				}
+			}
+			
+			if (xAxis != null && yAxis != null) break;
+			
+		}
+		
+		try {
+			
+			DataNode dataNode = gn.getDataNode(xAxis);
+			Dataset x = DatasetUtils.sliceAndConvertLazyDataset(dataNode.getDataset());
+			Dataset m0 = Stats.median(x, 0);
+			Dataset m1 = Stats.median(x, 1);
+			
+			double max0 = m0.max(true).doubleValue();
+			double min0 = m0.min(true).doubleValue();
+			
+			double max1 = m1.max(true).doubleValue();
+			double min1 = m1.min(true).doubleValue();
+			
+			double p0 = max0-min0;
+			double p1 = max1-min1;
+			
+			if (p1 > p0) {
+				String tmp = yAxis;
+				yAxis = xAxis;
+				xAxis = tmp;
+			}
+			
+		} catch (Exception e) {
+			//cant read data?
+		}
+		
+		if (xAxis == null || yAxis == null) return null;
+		
+		return new String[]{xAxis,yAxis};
+	}
+	
 	public static MappedDataFileBean buildBeani22in2016(Tree tree) {
 		
 		MappedDataFileBean fb = null;
 		
 		MappedBlockBean sax = buildI22Block(I22SAX, tree.findNodeLink(I22SAX));
-		MappedBlockBean wax = buildI22Block(I22SAX, tree.findNodeLink(I22SAX));
+		MappedBlockBean wax = buildI22Block(I22SAX, tree.findNodeLink(I22WAX));
 		MappedBlockBean xrf = buildI22Block(I22XMAP, tree.findNodeLink(I22XMAP));
 		
 		if (sax == null && wax == null) return null;
@@ -241,18 +253,12 @@ public class LegacyMapBeanBuilder {
 			GroupNode gn = (GroupNode)n;
 			DataNode dataNode = gn.getDataNode(I22data);
 			int rank = dataNode.getDataset().getRank();
-			Collection<String> names = gn.getNames();
-			String x = null;
-			String y = null;
-			if (names.contains(I22MFX) && names.contains(I22MFY)) {
-				x = name + Node.SEPARATOR + I22MFX;
-				y = name + Node.SEPARATOR + I22MFY;	
-			} else if (names.contains(I22BFX) && names.contains(I22BFY)) {
-				x = name + Node.SEPARATOR + I22BFX;
-				y = name + Node.SEPARATOR + I22BFY;	
-			} else {
-				return null;
-			}
+			String[] xyAxesNames = getXYAxesNames(gn);
+			
+			if (xyAxesNames == null) return null;
+			
+			String yAxis = xyAxesNames[1];
+			String xAxis = xyAxesNames[0];
 			
 			MappedBlockBean mbb = new MappedBlockBean();
 			mbb.setName(name + Node.SEPARATOR + I22data);
@@ -260,8 +266,8 @@ public class LegacyMapBeanBuilder {
 			mbb.setxDim(1);
 			mbb.setyDim(0);
 			String[] axes = new String[rank];
-			axes[0] = y;
-			axes[1] = x;
+			axes[0] = name + Node.SEPARATOR + yAxis;
+			axes[1] = name + Node.SEPARATOR + xAxis;
 			mbb.setAxes(axes);
 			return mbb;
 		}
