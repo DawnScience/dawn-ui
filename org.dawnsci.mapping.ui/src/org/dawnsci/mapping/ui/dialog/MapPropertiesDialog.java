@@ -1,7 +1,9 @@
 package org.dawnsci.mapping.ui.dialog;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.dawnsci.mapping.ui.MapPlotManager;
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
@@ -10,6 +12,13 @@ import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.ReMappedData;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -71,21 +80,49 @@ public class MapPropertiesDialog extends Dialog {
 		parentLabel.setText("Root data");
 		
 		final Combo combo = new Combo(container,SWT.READ_ONLY);
+		final ComboViewer comboViewer = new ComboViewer(combo);
+		comboViewer.setContentProvider(new ArrayContentProvider());
+		comboViewer.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object obj) {
+				return obj.toString();
+			}
+			
+			@Override
+			public String getToolTipText(Object obj) {
+				if (obj instanceof MappedDataBlock) {
+					return ((MappedDataBlock)obj).getPath();
+				}
+				return "";
+			}
+		});
+		
+		
 		 List<MappedDataBlock> suitableParents = area.findSuitableParentBlocks(map);
 		String[] dataBlockNames = new String[suitableParents.size()];
 		for (int i = 0; i < dataBlockNames.length; i++) dataBlockNames[i] = suitableParents.get(i).toString();
-		combo.setItems(dataBlockNames);
-		for (int i = 0; i<dataBlockNames.length; i++) {
-			if(dataBlockNames[i].equals(map.getParent().toString())) {
-				combo.select(i);
+		comboViewer.setInput(suitableParents);
+		for (int i = 0; i<suitableParents.size(); i++) {
+			if(suitableParents.get(i).equals(map.getParent())) {
+				comboViewer.getCombo().select(i);
+				combo.setToolTipText(suitableParents.get(i).getPath());
 				break;
 			}
 		}
 		
-		combo.addSelectionListener(new SelectionAdapter() {
+		comboViewer.addSelectionChangedListener( new ISelectionChangedListener() {
+			
 			@Override
-			public void widgetSelected(SelectionEvent e) {
-//				map.setParent(dataBlocks.get(combo.getText()));
+			public void selectionChanged(SelectionChangedEvent event) {
+				ISelection s = event.getSelection();
+				if (s instanceof StructuredSelection) {
+					StructuredSelection ss = (StructuredSelection)s;
+					Object ob = ss.getFirstElement();
+					if (ob instanceof MappedDataBlock){
+						map.setParent((MappedDataBlock)ob);
+						combo.setToolTipText(((MappedDataBlock)ob).getPath());
+					}
+				}
 			}
 		});
 		
