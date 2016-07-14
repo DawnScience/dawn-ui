@@ -13,7 +13,6 @@ import java.security.PrivilegedAction;
 
 import javax.vecmath.Vector3d;
 
-import org.dawb.workbench.jmx.UserPlotBean;
 import org.eclipse.dawnsci.analysis.api.IClassLoaderService;
 import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.ui.services.AbstractServiceFactory;
@@ -69,7 +68,8 @@ public class ClassLoaderService extends AbstractServiceFactory implements IClass
 	    loader.add(org.eclipse.dawnsci.analysis.dataset.impl.Activator.class.getClassLoader());
 	    loader.add(uk.ac.diamond.scisoft.analysis.io.LoaderFactory.class.getClassLoader());
 		loader.add(Slice.class.getClassLoader());           // analysis.api
-		loader.add(UserPlotBean.class.getClassLoader());    // workbench.jmx
+		// Removed dependency on jmx
+//		loader.add(UserPlotBean.class.getClassLoader());    // workbench.jmx
 		loader.add(Vector3d.class.getClassLoader());        // vecmath
 		return loader;
 	}
