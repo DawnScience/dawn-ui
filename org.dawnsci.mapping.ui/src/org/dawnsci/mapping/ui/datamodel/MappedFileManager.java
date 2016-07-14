@@ -7,6 +7,7 @@ import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.util.DatasetNameUtils;
 import org.dawnsci.mapping.ui.LocalServiceManager;
 import org.dawnsci.mapping.ui.MapPlotManager;
+import org.dawnsci.mapping.ui.dialog.RectangleRegistrationDialog;
 import org.dawnsci.mapping.ui.dialog.RegistrationDialog;
 import org.dawnsci.mapping.ui.wizards.ImportMappedDataWizard;
 import org.dawnsci.mapping.ui.wizards.LegacyMapBeanBuilder;
@@ -317,7 +318,7 @@ public class MappedFileManager {
 		}
 
 
-		RegistrationDialog dialog = new RegistrationDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), plotManager.getTopMap().getData(),data);
+		RectangleRegistrationDialog dialog = new RectangleRegistrationDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), plotManager.getTopMap().getData(),data);
 		if (dialog.open() != IDialogConstants.OK_ID) return;
 		RGBDataset ds = (RGBDataset)dialog.getRegisteredImage();
 		ds.setName("Registered");
