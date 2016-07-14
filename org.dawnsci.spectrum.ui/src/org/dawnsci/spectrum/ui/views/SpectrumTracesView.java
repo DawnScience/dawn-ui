@@ -10,14 +10,10 @@ package org.dawnsci.spectrum.ui.views;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawnsci.python.rpc.action.InjectPyDevConsole;
-import org.dawnsci.python.rpc.action.InjectPyDevConsoleAction;
 import org.dawnsci.spectrum.ui.Activator;
 import org.dawnsci.spectrum.ui.file.IContain1DData;
 import org.dawnsci.spectrum.ui.file.ISpectrumFile;
@@ -441,52 +437,10 @@ public class SpectrumTracesView extends ViewPart {
 	
 	private void fillLocalToolBar(IToolBarManager manager) {
 		
-		
-		final InjectPyDevConsoleAction console = new InjectPyDevConsoleAction("Open plotted data in python console") {
-			public void run() {
-				setData(createData(system));
-				super.run();
-			}
-		};
-		console.setParameter(InjectPyDevConsole.CREATE_NEW_CONSOLE_PARAM, Boolean.TRUE.toString());
-		console.setParameter(InjectPyDevConsole.SETUP_SCISOFTPY_PARAM, InjectPyDevConsole.SetupScisoftpy.ALWAYS.toString());
-		console.setParameter(InjectPyDevConsole.VIEW_NAME_PARAM, system.getPlotName());
-		
-        manager.add(console);
-		
 		createXYFiltersActions(manager);
 		
 		manager.add(removeAction);
 	}
-
-	
-	protected Map<String, IDataset> createData(IPlottingSystem<Composite> system) {
-		
-		final Map<String, IDataset> data = new HashMap<String, IDataset>(3);
-		final Collection<ITrace>  traces = system.getTraces();
-		for (ITrace iTrace : traces) {
-			if (iTrace instanceof ILineTrace) {
-				ILineTrace line = (ILineTrace)iTrace;
-				final IDataset x = line.getXData();
-				
-			    // We only make x's unique if they are not identical
-				String xName = InjectPyDevConsole.getLegalVarName(x.getName())+"_"+InjectPyDevConsole.getLegalVarName(line.getName());
-				if (data.containsKey(xName) && data.get(xName)!=x) {
-					xName = InjectPyDevConsole.getLegalVarName(xName, data.keySet());
-				}
-				data.put(xName, x);
-				
-				final IDataset y = line.getYData();
-				data.put(InjectPyDevConsole.getLegalVarName(y.getName(), data.keySet()), y);
-				
-			} else {
-				data.put(InjectPyDevConsole.getLegalVarName(iTrace.getData().getName(), data.keySet()), iTrace.getData());
-			}
-		}
-		
-		return data;
-	}
-
 
 	private void setSelectionChecked(boolean checked) {
 		IStructuredSelection selection = (IStructuredSelection)viewer.getSelection();
