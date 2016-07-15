@@ -357,14 +357,6 @@
             visible="false">
       </plotting_tool_page>
       <plotting_tool_page
-            category="org.dawnsci.plotting.tools.plotting_tool_category.fitting"
-            class="org.dawnsci.plotting.tools.expressions.ExpressionTool"
-            icon="icons/add_expression.png"
-            id="org.dawb.workbench.plotting.tools.expressionConsoleTool"
-            label="Expression Console"
-            visible="true">
-      </plotting_tool_page>
-      <plotting_tool_page
             category="org.dawnsci.plotting.tools.category.Science"
             class="org.dawnsci.plotting.tools.powdercheck.PowderCheckTool"
             icon="icons/CalibrationCheck.png"
