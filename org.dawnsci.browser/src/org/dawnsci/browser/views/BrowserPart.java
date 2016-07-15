@@ -17,6 +17,8 @@ import org.dawnsci.browser.Activator;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.PersistState;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -28,8 +30,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IWorkbenchPage;
@@ -42,6 +46,7 @@ import javafx.concurrent.Worker.State;
 import javafx.embed.swt.FXCanvas;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.web.PromptData;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebHistory;
 import javafx.scene.web.WebView;
@@ -97,6 +102,7 @@ public class BrowserPart {
         toolbarComp.setLayout(new ToolbarLayout());
         
         createBrowser(parent);
+        addEventListeners();
         
         createNavigation(toolbarComp);
         createURLBar(toolbarComp);
@@ -134,6 +140,39 @@ public class BrowserPart {
         borderPane.setCenter(browser);
         
         return browser;
+	}
+	
+	private void addEventListeners(){
+		webEngine.setOnAlert(event -> showAlert(event.getData()));
+        webEngine.setConfirmHandler(message -> showConfirm(message));
+        webEngine.setPromptHandler(event -> showPrompt(event));
+}
+	
+	private void showAlert(String message) {
+		MessageBox dialog = 
+				new MessageBox(Display.getCurrent().getActiveShell(), SWT.ICON_INFORMATION | SWT.OK);
+		dialog.setText("Javascript Alert");
+		dialog.setMessage(message);
+		dialog.open();
+	}
+	
+	private String showPrompt(PromptData event) {
+		InputDialog dlg = new InputDialog(Display.getCurrent().getActiveShell(),
+				"Javascript Prompt", event.getMessage(), event.getDefaultValue(), null);
+		if (dlg.open() == Window.OK) {
+			return dlg.getValue();
+		}
+		return null;
+	}
+
+	private boolean showConfirm(String message) {
+		MessageBox dialog = 
+				new MessageBox(Display.getCurrent().getActiveShell()
+						, SWT.ICON_INFORMATION | SWT.OK | SWT.CANCEL);
+		dialog.setText("Javascript Confirm");
+		dialog.setMessage(message);
+		int result = dialog.open();
+		return result == SWT.OK;
 	}
 	
 	private void setURL(String url){
@@ -229,7 +268,6 @@ public class BrowserPart {
 					PlatformUI.getWorkbench().getActiveWorkbenchWindow().
 					getActivePage().showView("org.dawnsci.browser.views.BrowserPart",String.valueOf(new Date().getTime()),IWorkbenchPage.VIEW_ACTIVATE);
 				} catch (PartInitException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
             }
