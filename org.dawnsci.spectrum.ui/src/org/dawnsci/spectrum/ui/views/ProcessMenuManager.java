@@ -14,6 +14,7 @@ import org.dawb.common.ui.menu.MenuAction;
 import org.dawnsci.spectrum.ui.Activator;
 import org.dawnsci.spectrum.ui.dialogs.CombineDialog;
 import org.dawnsci.spectrum.ui.file.IContain1DData;
+import org.dawnsci.spectrum.ui.file.ISpectrumFile;
 import org.dawnsci.spectrum.ui.file.SpectrumFileManager;
 import org.dawnsci.spectrum.ui.file.SpectrumInMemory;
 import org.dawnsci.spectrum.ui.processing.AbstractProcess;
@@ -29,6 +30,7 @@ import org.dawnsci.spectrum.ui.processing.SubtractionProcess;
 import org.dawnsci.spectrum.ui.utils.Contain1DDataImpl;
 import org.dawnsci.spectrum.ui.utils.SpectrumUtils;
 import org.dawnsci.spectrum.ui.wizard.CropWizardPage;
+import org.dawnsci.spectrum.ui.wizard.ExampleDialog;
 import org.dawnsci.spectrum.ui.wizard.IntegerInputDialog;
 import org.dawnsci.spectrum.ui.wizard.SpectrumSubtractionWizardPage;
 import org.dawnsci.spectrum.ui.wizard.SpectrumWizard;
@@ -334,6 +336,19 @@ public class ProcessMenuManager {
 			}
 		};
 		
+		IAction example = new Action("Example Dialog...") {
+			public void run() {
+				ISelection selection = viewer.getSelection();
+				List<ISpectrumFile> list = SpectrumUtils.getSpectrumFilesList((IStructuredSelection)selection);
+				
+				String[] filenames = new String[list.size()];
+				for (int i = 0; i < list.size(); i++) filenames[i] = list.get(i).getLongName();
+				
+				ExampleDialog d = new ExampleDialog(Display.getDefault().getActiveShell(),filenames);
+				d.open();
+			}
+		};
+		
 		subtractionWizard.setEnabled(enabled);
 		rollingBaseline.setEnabled(((IStructuredSelection)viewer.getSelection()).size() >= 1);
 
@@ -341,6 +356,7 @@ public class ProcessMenuManager {
 		menu.add(rollingBaseline);
 		menu.add(cropWizard);
 		menu.add(combineWizard);
+		menu.add(example);
 		menuManager.add(menu);
 	}
 
