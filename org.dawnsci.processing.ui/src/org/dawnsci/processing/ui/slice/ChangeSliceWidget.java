@@ -13,7 +13,7 @@ import java.util.HashSet;
 
 import org.dawnsci.processing.ui.Activator;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
-import org.eclipse.january.dataset.AbstractDataset;
+import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.swt.SWT;
@@ -178,7 +178,7 @@ public class ChangeSliceWidget {
 		int[] shape = subsampling.getShape().clone();
 		int[] scanShape = shape.clone();
 		for (int i = 0; i< dataDims.length; i++) scanShape[dataDims[i]] = 1;
-		int[] start = AbstractDataset.getNDPositionFromShape(current, scanShape);
+		int[] start = ShapeUtils.getNDPositionFromShape(current, scanShape);
 		int[] stop = start.clone();
 		for (int i = 0; i< stop.length; i++) stop[i]++;
 		for (int i = 0; i< dataDims.length; i++) stop[dataDims[i]] = shape[dataDims[i]];

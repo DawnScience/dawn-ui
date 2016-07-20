@@ -2,12 +2,9 @@ package org.dawnsci.mapping.ui;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -36,12 +33,12 @@ import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
-import org.eclipse.january.dataset.AbstractDataset;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.FloatDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.swt.widgets.Composite;
@@ -146,7 +143,7 @@ public class MapPlotManager {
 		
 		Runnable r = null;
 		
-		if (AbstractDataset.squeezeShape(lz.getShape(),false).length > 1) {
+		if (ShapeUtils.squeezeShape(lz.getShape(),false).length > 1) {
 			job.cancel();
 			
 			r = new Runnable() {
@@ -591,7 +588,7 @@ public class MapPlotManager {
 			synchronized(this) {
 				m = merge;
 				if (m == null) {
-					int[] newShape = AbstractDataset.squeezeShape(input.getShape(), false);
+					int[] newShape = ShapeUtils.squeezeShape(input.getShape(), false);
 					for (int i = 0; i<newShape.length;i++) newShape[i]*=2;
 					FloatDataset f = DatasetFactory.zeros(FloatDataset.class, newShape);
 					Arrays.fill(f.getData(), Float.NaN);
