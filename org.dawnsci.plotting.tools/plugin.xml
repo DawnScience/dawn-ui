@@ -387,6 +387,12 @@
             tooltip="A tool used to rotate an Image Region of Interest"
             visible="true">
       </plotting_tool_page>
+      <plotting_tool_page
+            class="org.dawnsci.plotting.tools.MonitorTool"
+            icon="icons/monitor.png"
+            id="org.dawnsci.plotting.tools.monitorxytool"
+            label="Monitor tool">
+      </plotting_tool_page>
    </extension>
 
   <extension
