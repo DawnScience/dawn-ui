@@ -576,10 +576,15 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 	public void traceColorChanged(Trace trace, Color old, Color newColor) {
 		if (trace == this.trace && old!=null && old.equals(newColor)) return;
 		if (mservice!=null) {
-			String traceName = "trace_"+MacroUtils.getLegalName(getName());
-			ColorMacroEvent evt = new ColorMacroEvent(traceName, "setTraceColor", this, newColor);
-			evt.prepend(traceName+" = ps.getTrace(\""+getName()+"\")");
-			mservice.publish(evt);
+			try {
+				String traceName = "trace_"+MacroUtils.getLegalName(getName());
+				ColorMacroEvent evt = new ColorMacroEvent(traceName, "setTraceColor", this, newColor);
+				evt.prepend(traceName+" = ps.getTrace(\""+getName()+"\")");
+				mservice.publish(evt);
+			} catch (Exception e) {
+				//ignore
+			}
+			
 		}
 	}
 
