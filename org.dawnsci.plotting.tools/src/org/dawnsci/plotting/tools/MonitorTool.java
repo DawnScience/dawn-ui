@@ -26,6 +26,7 @@ import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
@@ -38,16 +39,20 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.PlatformUI;
 
 public class MonitorTool extends AbstractToolPage {
 
+	private static final int MAXIMUM_NUMBER = 255;
+	
 	private IPlottingSystem<Composite> system;
 	private ITraceListener listener;
 	private ComboViewer colorViewer;
 	private LinkedList<ILineTrace> queue;
-	private int maxLength = 255;
+	private int maxLength = 100;
 	private List<Color> colors;
 	private Composite control;
 
@@ -120,7 +125,7 @@ public class MonitorTool extends AbstractToolPage {
 		Composite comp = new Composite(control, SWT.NONE);
 		Composite plotComp = new Composite(control, SWT.NONE);
 		comp.setLayoutData(new GridData());
-		comp.setLayout(new GridLayout(3, false));
+		comp.setLayout(new GridLayout(5, false));
 		
 		final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
 		Collection<String> colorSchemes = pservice.getColorSchemes();
@@ -165,6 +170,28 @@ public class MonitorTool extends AbstractToolPage {
 				
 			}
 		});
+		
+		new Label(comp, SWT.NONE).setText("Max No.:");
+		
+		final Spinner spinner = new Spinner(comp, SWT.NONE);
+		spinner.setMaximum(MAXIMUM_NUMBER);
+		spinner.setSelection(maxLength);
+		spinner.setMinimum(1);
+		spinner.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (getPlottingSystem() == null) return;
+				getPlottingSystem().removeTraceListener(listener);
+				maxLength = spinner.getSelection();
+				queue = new LinkedList<ILineTrace>();
+				system.clear();
+				updateColor(colorViewer.getSelection());
+				getPlottingSystem().addTraceListener(listener);
+				
+			}
+		});
+		
 		
 		colorViewer = new ComboViewer(comp, SWT.READ_ONLY);
 		colorViewer.getCombo().setLayoutData(new GridData());
