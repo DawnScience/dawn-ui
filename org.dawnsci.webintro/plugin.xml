@@ -49,5 +49,12 @@
          name="A Link to a website"
          page_id="welcome">
    </introLink>
+   <introAction
+         class="org.dawnsci.webintro.actions.OpenCheatsheetAction:uk.ac.diamond.scisoft.analysis.rcp.contributions.NeXusScansCheatsheet"
+         description="This should hopefully open a cheat sheet"
+         id="org.dawnsci.webintro.introAction2"
+         name="Open Cheat Sheet"
+         page_id="welcome">
+   </introAction>
 </extension>
 </plugin>

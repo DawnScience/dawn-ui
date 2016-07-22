@@ -91,6 +91,9 @@
             <annotation>
                <documentation>
                   The class of the action to be triggered when the link is clicked. Should implement org.eclipse.ui.IActionDelegate (or extend a class that does).
+
+To open a cheat sheet, you can use the provided action org.dawnsci.webintro.actions.OpenCheatSheetAction, by passing an initialisation parameter containing the cheatsheet identifier separated by a colon. For example:
+org.dawnsci.webintro.actions.OpenCheatsheetAction:org.example.cheatsheets.MyDemoCheatsheet
                </documentation>
                <appinfo>
                   <meta.attribute kind="java" basedOn=":org.eclipse.ui.IActionDelegate"/>
