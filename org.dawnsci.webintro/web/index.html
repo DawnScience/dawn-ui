@@ -1,204 +1,154 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
+<meta charset="UTF-8">
+<link href="http://fonts.googleapis.com/icon?family=Material+Icons"
+	rel="stylesheet">
+<link type="text/css" rel="stylesheet" href="css/materialize.min.css"
+	media="screen,projection" />
+<link type="text/css" rel="stylesheet" href="css/style.css"
+	media="screen,projection" />
 
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="">
-<meta name="author" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<title>Landing Page - Start Bootstrap Theme</title>
+<script id="tpl-tab_headings" type="text/x-handlebars-template">
+	{{#each pages}}
+		<li class="tab"><a href="#{{page_id}}">{{name}}</a></li>
+	{{/each}}
+</script>
 
-<!-- Bootstrap Core CSS -->
-<link href="css/bootstrap.min.css" rel="stylesheet">
+<script id="tpl-tab_content" type="text/x-handlebars-template">
+	{{#each pages}}
+		<div id="{{page_id}}" class="col s12">
+			{{{content_rendered}}}
+			{{#each items}}
+				{{#if @first}}
+					<ul class="collection">
+				{{/if}}
+				{{#if isContent}}
+					<li class="collection-item avatar waves-effect content-trigger" href="#modal-{{losedots id}}">
+				{{else if isAction}}
+					<li class="collection-item avatar waves-effect action-trigger" href="#" data-action_id="{{id}}">
+				{{else if isLink}}
+					<li class="collection-item avatar waves-effect link-trigger" href="#" data-href="{{{href}}}">
+				{{/if}}
 
-<!-- Custom CSS -->
-<link href="css/landing-page.css" rel="stylesheet">
+					<img src="{{image}}" alt="" class="square">
+					<span class="title">{{name}}</span>
 
-<!-- Custom Fonts -->
-<link href="font-awesome/css/font-awesome.min.css" rel="stylesheet"
-	type="text/css">
-<link
-	href="http://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic"
-	rel="stylesheet" type="text/css">
+					{{{description_rendered}}}
+
+					<span class="secondary-content"><i class="material-icons">
+					{{#if isContent}} &#xE88F;
+					{{else if isAction}} &#xE8D8;
+					{{else if isLink}} &#xE89E;
+					{{/if}}
+					</i></span>
+
+				</li>
+				
+				{{#if content}}
+					 <div id="modal-{{losedots id}}" class="modal">
+   						 <div class="modal-content">
+  						    <h4>{{name}}</h4>
+   						   {{{content_rendered}}}
+  						  </div>
+  						  <div class="modal-footer">
+  						    <a href="#" class="modal-action modal-close waves-effect btn-flat">Close</a>
+ 						</div>
+ 					 </div>
+				{{/if}}
+
+				{{#if @last}}
+					</ul>
+				{{/if}}
+			{{/each}}		
+			</div>
+		</div>
+	{{/each}}
+</script>
 
 </head>
 
 <body>
-	<!-- Navigation -->
-	<nav class="navbar navbar-default navbar-fixed-top topnav"
-		role="navigation">
-		<div class="container topnav">
-			<!-- Brand and toggle get grouped for better mobile display -->
-			<div class="navbar-header">
-				<button type="button" class="navbar-toggle" data-toggle="collapse"
-					data-target="#bs-example-navbar-collapse-1">
-					<span class="sr-only">Toggle navigation</span> <span
-						class="icon-bar"></span> <span class="icon-bar"></span> <span
-						class="icon-bar"></span>
-				</button>
-				<a class="navbar-brand topnav" href="#">DAWN Welcome</a>
-			</div>
-			<!-- Collect the nav links, forms, and other content for toggling -->
-			<div class="collapse navbar-collapse"
-				id="bs-example-navbar-collapse-1">
-				<ul class="nav navbar-nav navbar-right">
-					<li><a href="#about">Perspectives</a></li>
-					<li><a href="#services">Data</a></li>
-					<li><a href="#contact">Tutorials</a></li>
-				</ul>
-			</div>
-			<!-- /.navbar-collapse -->
-		</div>
-		<!-- /.container -->
-	</nav>
 
+	<!-- <header>
+		<div class="navbar-fixed">
+			<nav>
+				<div class="nav-wrapper grey darken-4">
+					<div class="container">
+						<ul class="right hide-on-med-and-down">
+							<li><form>
+									<div class="input-field grey darken-3">
+										<input id="search" type="search" required> <label
+											for="search"><i class="material-icons">&#xE8B6;</i></label> <i
+											class="material-icons">&#xE5CD;</i>
+									</div>
+								</form></li>
+						</ul>
 
-	<!-- Header -->
-	<a name="about"></a>
-	<div class="intro-header">
-		<div class="container">
-
-			<div class="row">
-				<div class="col-lg-12">
-					<div class="intro-message">
-						<h1 id="title">
-							<span>D</span> <span>A</span> <span>W</span> <span>N</span>
-						</h1>
-						<hr class="intro-divider">
-						<h3>Welcome to DAWN</h3>
 					</div>
 				</div>
-			</div>
+			</nav>
 
 		</div>
-		<!-- /.container -->
+	</header> -->
+	<main>
 
-	</div>
-	<!-- /.intro-header -->
-
-	<!-- Page Content -->
-
-	<a name="services"></a>
-	<div class="content-section-a">
-
+	<div class="section" id="index-banner">
 		<div class="container">
 
-			<script id="entry-template" type="text/x-handlebars-template">
-				<div class="entry">
-					
-					<h1>title:{{title}}</h1>
-					<div class="body">
-						{{body}}
-					</div>
-				</div>
-			</script>
-
-			<div id="data-here" class="row">
-			<div id="tabContainer">
-
-				<!-- Nav tabs -->
-				<ul id="tabList" class="nav nav-tabs" role="tablist">
-					
-				</ul>
-
-				<!-- Tab panes -->
-				<div id="tabContent" class="tab-content">
-				</div>
-
-			</div>
-
-			</div>
+			<h1 class="center yellow-text">
+				<img id="dawn_logo" class="responsive-img" src="img/dawn_logo.png"></img>
+			</h1>
+			<!-- <div class="row center">
+				<a href="#"
+					id="download-button"
+					class="btn-large waves-effect waves-light blue">Get Started</a>
+			</div>  -->
 
 		</div>
-		<!-- /.container -->
-
 	</div>
-	<!-- /.content-section-a -->
-	<!-- 
-    <div class="content-section-b">
 
-        <div class="container">
-
-            <div class="row">
-                <div class="col-lg-5 col-lg-offset-1 col-sm-push-6  col-sm-6">
-                    <hr class="section-heading-spacer">
-                    <div class="clearfix"></div>
-                    <h2 class="section-heading">3D Device Mockups<br>by PSDCovers</h2>
-                    <p class="lead">Turn your 2D designs into high quality, 3D product shots in seconds using free Photoshop actions by <a target="_blank" href="http://www.psdcovers.com/">PSDCovers</a>! Visit their website to download some of their awesome, free photoshop actions!</p>
-                </div>
-                <div class="col-lg-5 col-sm-pull-6  col-sm-6">
-                    <img class="img-responsive" src="img/dog.png" alt="">
-                </div>
-            </div>
-
-        </div>
-        <!-- /.container -->
-
-	<!-- </div> -->
-	<!-- /.content-section-b -->
-	<!-- 
-    <div class="content-section-a">
-
-        <div class="container">
-
-            <div class="row">
-                <div class="col-lg-5 col-sm-6">
-                    <hr class="section-heading-spacer">
-                    <div class="clearfix"></div>
-                    <h2 class="section-heading">Google Web Fonts and<br>Font Awesome Icons</h2>
-                    <p class="lead">This template features the 'Lato' font, part of the <a target="_blank" href="http://www.google.com/fonts">Google Web Font library</a>, as well as <a target="_blank" href="http://fontawesome.io">icons from Font Awesome</a>.</p>
-                </div>
-                <div class="col-lg-5 col-lg-offset-2 col-sm-6">
-                    <img class="img-responsive" src="img/phones.png" alt="">
-                </div>
-            </div>
-
-        </div>
-        <!-- /.container -->
-
-	</div>
-	<!-- /.content-section-a -->
-
-	<a name="contact"></a>
-
-
-	<!-- Footer -->
-	<footer>
+	<div class="section">
 		<div class="container">
-			<div class="row">
-				<div class="col-lg-12">
-					<ul class="list-inline">
-						<li><a href="#">Home</a></li>
-						<li class="footer-menu-divider">&sdot;</li>
-						<li><a href="#about">About</a></li>
-						<li class="footer-menu-divider">&sdot;</li>
-						<li><a href="#services">Services</a></li>
-						<li class="footer-menu-divider">&sdot;</li>
-						<li><a href="#contact">Contact</a></li>
+			<div class="row ">
+				<div class="col s12">
+					<ul class="tabs">
+						<li class="tab" id="placeholder-tab_headings"><a href="#placeholder-tab_content">...</a></li>
 					</ul>
-					<p class="copyright text-muted small">Copyright &copy; Your
-						Company 2014. All Rights Reserved</p>
+				</div>
+				<div id="placeholder-tab_content" class="center-align">
+					<div class="preloader-wrapper big active">
+						<div class="spinner-layer spinner-blue-only">
+							<div class="circle-clipper left">
+								<div class="circle"></div>
+							</div>
+							<div class="gap-patch">
+								<div class="circle"></div>
+							</div>
+							<div class="circle-clipper right">
+								<div class="circle"></div>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
-	</footer>
-	
-	<script src="js/marked.js"></script>
-	<script src="js/handlebars-v4.0.5.js"></script>
+	</div>
+	</div>
 
-	<!-- jQuery -->
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+	</main>
 
-	<!-- Bootstrap Core JavaScript -->
-	<script src="js/bootstrap.min.js"></script>
-
-	<!-- App JavaScript -->
-	<script src="js/app.js"></script>
-
-
+	<!-- <div id="banner" class="section blue">
+		<div class="container">
+			<h1 class="title">DAWN Science</h1>
+		</div>
+	</div> -->
+	<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+	<script type="text/javascript" src="js/materialize.min.js"></script>
+	<script type="text/javascript" src="js/marked.js"></script>
+	<script type="text/javascript" src="js/handlebars-v4.0.5.js"></script>
+	<script type="text/javascript" src="js/init.js"></script>
 </body>
-
 </html>

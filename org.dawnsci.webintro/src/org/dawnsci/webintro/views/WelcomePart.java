@@ -181,8 +181,8 @@ public class WelcomePart extends IntroPart {
 				if (!loc.startsWith(locationLock)) {
 					Platform.runLater(new Runnable() { //Workaround for bug with calling engine.load within a ChangeListener event
 						@Override public void run() {
-							webEngine.load(oldLoc);
-							Program.launch(loc);
+//							webEngine.load(oldLoc);
+//							Program.launch(loc);
 						}
 					});
 				}
@@ -197,6 +197,7 @@ public class WelcomePart extends IntroPart {
 						JSObject jsobj = (JSObject) webEngine.executeScript("window");
 						jsobj.setMember("java", new JSBridge());
 						webEngine.executeScript("javaReady();");
+						System.out.println("Called java");
 					}
 				});
 	}

@@ -3,6 +3,7 @@ package org.dawnsci.webintro;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IContributor;
+import org.eclipse.swt.program.Program;
 import org.eclipse.ui.IActionDelegate;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.intro.IIntroPart;
@@ -14,21 +15,27 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.json.JsonWriter;
 
 public class JSBridge {
 	private final static Logger logger = LoggerFactory.getLogger(JSBridge.class);
 
 	protected static String getResourceURL(IContributor contributer, String resourceLocation){
-    	String url = "platform:/plugin/";
+		if(resourceLocation == null || resourceLocation.isEmpty()){
+			return "";
+		}
+		String url = "platform:/plugin/";
     	url += contributer.getName();
     	url += "/";
     	url += resourceLocation;
@@ -77,10 +84,11 @@ public class JSBridge {
 		return result.toArray(new IConfigurationElement[result.size()]);
 	}
 	
-	private IConfigurationElement[] getOrderedPageActions(String pageId){
-		IConfigurationElement[] pageActions	= getConfigsWithAttribute("org.dawnsci.webintro.action", "page_id", pageId);
-		Arrays.sort(pageActions, new ConfigElementComparator());
-		return pageActions;
+	private IConfigurationElement[] getOrderedPageItems(String pageId){
+		IConfigurationElement[] pageItems	= getConfigsWithAttribute("org.dawnsci.webintro.item", "page_id", pageId);
+
+		Arrays.sort(pageItems, new ConfigElementComparator());
+		return pageItems;
 	}
 	
 	private IConfigurationElement[] getOrderedPages(){
@@ -96,17 +104,33 @@ public class JSBridge {
 
     	for (IConfigurationElement thisPage : pages){
     		
-    		IConfigurationElement[] actions = getOrderedPageActions(thisPage.getAttribute("page_id"));
-    		JsonArrayBuilder pageActions = Json.createArrayBuilder();
+    		IConfigurationElement[] items = getOrderedPageItems(thisPage.getAttribute("page_id"));
+    		JsonArrayBuilder pageItems = Json.createArrayBuilder();
     		
-        	for (IConfigurationElement thisAction : actions){
-        		String actionImageURL = getResourceURL(thisAction.getContributor(),thisAction.getAttribute("icon"));
-        		pageActions.add(Json.createObjectBuilder()
-        				.add("id", thisAction.getAttribute("id"))
-        				.add("name", thisAction.getAttribute("name"))
-        				.add("description", thisAction.getAttribute("description"))
-        				.add("image", actionImageURL)
-        				.build());
+        	for (IConfigurationElement thisItem : items){
+        		String itemImageURL = getResourceURL(thisItem.getContributor(),thisItem.getAttribute("icon"));
+        		
+        		boolean isContent = thisItem.getName().equals("introContent");
+        		boolean isAction = thisItem.getName().equals("introAction");
+        		boolean isLink = thisItem.getName().equals("introLink");
+        		
+        		JsonObjectBuilder thisJSONItem = Json.createObjectBuilder()
+        				.add("id", thisItem.getAttribute("id"))
+        				.add("name", thisItem.getAttribute("name"))
+        				.add("image", itemImageURL)
+        				.add("description", thisItem.getAttribute("description"))
+        				.add("isContent", isContent)
+        				.add("isAction", isAction)
+        				.add("isLink", isLink);
+        		
+        		if(isContent){
+            		String itemContentURL = getResourceURL(thisPage.getContributor(), thisItem.getAttribute("content_file"));
+        			thisJSONItem.add("content", getTextResource(itemContentURL));
+        		}else if(isLink){
+        			thisJSONItem.add("href", thisItem.getAttribute("href"));
+        		}
+        				
+        		pageItems.add(thisJSONItem.build());
         	}
 
     		String pageImageURL = getResourceURL(thisPage.getContributor(),thisPage.getAttribute("icon"));
@@ -117,7 +141,7 @@ public class JSBridge {
     				.add("name", thisPage.getAttribute("name"))
     				.add("content", getTextResource(pageContentURL) )
     				.add("image", pageImageURL)
-    				.add("actions", pageActions.build())
+    				.add("items", pageItems.build())
     				.build());
     	}
     	
@@ -133,8 +157,8 @@ public class JSBridge {
 	}
 	  
     public boolean runAction(String configId){
-    	logger.debug("JSBridge runAction Called");
-    	IConfigurationElement config = getConfigsWithAttribute("org.dawnsci.webintro.action","id", configId)[0];
+    	logger.debug("JSBridge runAction Called for id "+configId);
+    	IConfigurationElement config = getConfigsWithAttribute("org.dawnsci.webintro.item","id", configId)[0];
     	
     	try {
     		IActionDelegate delegate = null;
@@ -148,6 +172,15 @@ public class JSBridge {
     		e.printStackTrace();
     		return false;
     	}
+    }
+    
+    public void openLink(String href) throws MalformedURLException{
+    	logger.debug("JSBridge openLink Called for url "+href);
+
+    	// Use URL class to validate the string (otherwise a website could open an executable on the local filesystem)
+    	URL urlObject = new URL(href); 
+    	
+    	Program.launch(urlObject.toString());
     }
     
     public void log(String text)

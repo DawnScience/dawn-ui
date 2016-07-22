@@ -1,0 +1,24 @@
+#index-banner{
+	background-image: url("../img/dawn_background.jpg");
+	background-size: cover;
+	background-position: center;
+}
+.collection .collection-item.avatar .square {
+	position:absolute;
+	width:42px;
+	height:42px;
+	overflow:hidden;
+	left:15px;
+	display:inline-block;
+	vertical-align:middle;
+}
+
+li.collection-item {
+	display:block;
+	opacity:0;
+	
+}
+
+li.collection-item:hover {
+	background-color:#eee;
+}

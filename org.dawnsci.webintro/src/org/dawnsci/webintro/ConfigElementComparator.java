@@ -20,12 +20,18 @@ public class ConfigElementComparator implements Comparator<IConfigurationElement
 		}catch (NumberFormatException e){
 			// Arg0 is not a valid number, so push it to the bottom of the list
 			return -1;
+		}catch (NullPointerException e){
+			// Arg0 hasn't specified an order, so push it to the bottom of the list
+			return -1;
 		}
 
 		try{
 			num1 = Double.valueOf(arg1.getAttribute("ordering"));
 		}catch (NumberFormatException e){
 			// Arg1 is not a valid number, so Arg0 should be above it
+			return 1;
+		}catch (NullPointerException e){
+			//  Arg1 hasn't specified the order, so Arg0 should be above it
 			return 1;
 		}
 
