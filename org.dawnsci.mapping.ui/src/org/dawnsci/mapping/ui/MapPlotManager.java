@@ -60,6 +60,7 @@ public class MapPlotManager {
 	private volatile Dataset merge;
 	private AtomicInteger atomicPosition;
 	private int layerCounter = 0;
+	private boolean firstHold = true;
 	
 	private final static Logger logger = LoggerFactory.getLogger(MapPlotManager.class);
 	
@@ -96,6 +97,7 @@ public class MapPlotManager {
 			return;
 		}
 		merge = null;
+		firstHold = true;
 		atomicPosition.set(0);
 		Runnable r = new Runnable() {
 			
@@ -150,6 +152,8 @@ public class MapPlotManager {
 				
 				@Override
 				public void run() {
+					if (firstHold) data.clear();
+					firstHold = false;
 					IDataset s = lz.getSlice().squeeze();
 					if (s != null) {
 						Dataset mergedDataset = getMergedDataset(s);
@@ -202,6 +206,8 @@ public class MapPlotManager {
 							
 							@Override
 							public void run() {
+								if (firstHold) data.clear();
+								firstHold = false;
 								data.addTrace(l);
 								try {
 									String uniqueName = RegionUtils.getUniqueName("Click", map);
