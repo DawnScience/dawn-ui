@@ -1,9 +1,12 @@
 package org.dawnsci.mapping.ui;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
+import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.dawnsci.mapping.ui.datamodel.MappedData;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
@@ -155,6 +158,30 @@ public class MapActionUtils {
 		};
 		
 		return trans;
+		
+	}
+	
+	public static IAction getSaveImageAction(final AssociatedImage image) {
+		IAction save = new Action("Save image...") {
+			@Override
+			public void run() {
+				
+				FileSelectionDialog dialog = new FileSelectionDialog(Display.getDefault().getActiveShell());
+				dialog.setNewFile(true);
+				dialog.setFolderSelector(false);
+
+				dialog.setPath(System.getProperty("user.home")+ File.separator + "image.nxs");
+				
+			
+				dialog.create();
+				
+				if (dialog.open() == Dialog.OK) {
+					MappingUtils.saveRegisteredImage(image, dialog.getPath());
+				}
+			}
+		};
+		
+		return save;
 		
 	}
 }

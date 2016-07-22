@@ -15,7 +15,9 @@ Require-Bundle: org.eclipse.ui,
  org.dawnsci.plotting.draw2d,
  uk.ac.diamond.scisoft.analysis;bundle-version="1.3.0",
  org.eclipse.osgi.services;bundle-version="3.5.0",
- org.dawnsci.slicing.tools;bundle-version="1.0.0"
+ org.dawnsci.slicing.tools;bundle-version="1.0.0",
+ org.eclipse.dawnsci.nexus,
+ org.dawnsci.common.widgets
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/localServiceManager.xml,

@@ -124,6 +124,12 @@ public class MappedDataView extends ViewPart {
 
 					}
 					
+					if (selection.size() == 1 && selection.getFirstElement() instanceof AssociatedImage) {
+
+						manager.add(MapActionUtils.getSaveImageAction((AssociatedImage)selection.getFirstElement()));
+
+					}
+					
 					List<MappedDataFile> mdfs = new ArrayList<MappedDataFile>();
 					while(it != null && it.hasNext()) {
 						Object obj = it.next();

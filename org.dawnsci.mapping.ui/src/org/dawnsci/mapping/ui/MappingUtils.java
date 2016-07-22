@@ -1,7 +1,17 @@
 package org.dawnsci.mapping.ui;
 
+import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
+import org.eclipse.dawnsci.analysis.api.tree.DataNode;
+import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
+import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
+import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
+import org.eclipse.dawnsci.analysis.tree.impl.AttributeImpl;
+import org.eclipse.dawnsci.nexus.NexusException;
+import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 
 public class MappingUtils {
@@ -38,5 +48,51 @@ public class MappingUtils {
 		range[2] -= dy;
 		range[3] += dy;
 		return range;
+	}
+	
+	public static void saveRegisteredImage(AssociatedImage image, String path) {
+		NexusFile nexus = LocalServiceManager.getNexusFactory().newNexusFile(path);
+		try {
+			nexus.openToWrite(true);
+			GroupNode group = nexus.getGroup("/entry", true);
+			nexus.addAttribute(group, new AttributeImpl("NX_class","NXentry"));
+			group = nexus.getGroup("/entry/registered_image", true);
+			nexus.addAttribute(group, new AttributeImpl("NX_class","NXdata"));
+			IDataset data = image.getData().getSliceView();
+			AxesMetadata axm = data.getFirstMetadata(AxesMetadata.class);
+			if (data instanceof RGBDataset) {
+				data = DatasetUtils.createDatasetFromCompoundDataset((RGBDataset)data, false);
+				if (data.getShape().length == 3 && data.getShape()[2] == 3) {
+					data = data.getTransposedView(new int[]{2,0,1}).getSlice();
+				}
+			}
+			data.setName("data");
+			DataNode dNode = nexus.createData(group, data);
+			nexus.addAttribute(dNode, new AttributeImpl("interpretation","rgba-image"));
+			
+			IDataset y = axm.getAxis(0)[0].getSlice().squeeze();
+			y.setName("y");
+			nexus.createData(group, y);
+			IDataset x = axm.getAxis(1)[0].getSlice().squeeze();
+			x.setName("x");
+			nexus.createData(group, x);
+			
+			nexus.addAttribute(group, new AttributeImpl("signal","data"));
+			nexus.addAttribute(group, new AttributeImpl("axes",new String[]{".","y","x"}));
+			
+		} catch (NexusException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if (nexus != null)
+				try {
+					nexus.close();
+				} catch (NexusException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		}
+		
+		
 	}
 }
