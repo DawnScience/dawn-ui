@@ -9,9 +9,11 @@ import org.dawnsci.isosurface.alg.MarchingCubes;
 import org.dawnsci.isosurface.alg.MarchingCubesModel;
 import org.dawnsci.isosurface.alg.Surface;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.Random;
+import org.eclipse.january.DatasetException;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.IntegerDataset;
+import org.eclipse.january.dataset.Random;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -41,13 +43,14 @@ public class Cancellation
 		/**
 		 * used to initialise the required information
 		 * might have to copy and paste to increase coupling
+		 * @throws Exception 
 		 */
-		public void start(int[] dataSetSizeXYZ, int[] boxSizeXYZ, IProgressMonitor monitor)
+		public void start(int[] dataSetSizeXYZ, int[] boxSizeXYZ, IProgressMonitor monitor) throws DatasetException
 		{
 			
 			lz = Random.lazyRand(dataSetSizeXYZ).getSlice();
 
-			IntegerDataset axis = IntegerDataset.createRange(dataSetSizeXYZ[0]);
+			IntegerDataset axis = DatasetFactory.createRange(IntegerDataset.class, dataSetSizeXYZ[0]);
 			List<IntegerDataset> axes = Arrays.asList(axis, axis, axis);
 			
 			Random.seed(SEED);
@@ -62,7 +65,7 @@ public class Cancellation
 
 		@Ignore
 		@Test
-		public void cancellation_Significance_Test()
+		public void cancellation_Significance_Test() throws DatasetException
 		{
 			IProgressMonitor monitor = new IProgressMonitor() {
 				

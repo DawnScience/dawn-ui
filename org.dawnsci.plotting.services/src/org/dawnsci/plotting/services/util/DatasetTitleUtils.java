@@ -9,18 +9,15 @@
 package org.dawnsci.plotting.services.util;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DoubleDataset;
+import org.eclipse.january.dataset.IDataset;
 
 public class DatasetTitleUtils {
 
@@ -41,7 +38,7 @@ public class DatasetTitleUtils {
 		if (ysIn==null) {
 			ys = new ArrayList<IDataset>(1);
 			ys.add(xIn);
-			x = DoubleDataset.createRange(ys.get(0).getSize());
+			x = DatasetFactory.createRange(DoubleDataset.class, ys.get(0).getSize());
 			x.setName("Index of "+xIn.getName());
 		} else {
 			x  = xIn;

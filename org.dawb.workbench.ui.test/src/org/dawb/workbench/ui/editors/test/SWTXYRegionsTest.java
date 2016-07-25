@@ -25,9 +25,6 @@ import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.LongDataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.SectorROI;
@@ -42,6 +39,9 @@ import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -112,7 +112,7 @@ public class SWTXYRegionsTest {
 	@Test
 	public void regionPositionTest() throws Throwable {
 		
-		final Object[] oa = createSomethingPlotted(createTestArraysCoherant(2, 1000, "Long set "), true);
+		final Object[] oa = createSomethingPlotted(SWTXYTestUtils.createTestArraysCoherent(2, 1000, "Long set "), true);
 		
 		final AbstractPlottingSystem sys = (AbstractPlottingSystem)oa[0];
 		final IEditorPart         editor = (IEditorPart)oa[1];
@@ -193,7 +193,7 @@ public class SWTXYRegionsTest {
 	@Test
 	public void regionListenerTest() throws Throwable {
 		
-		final Object[] oa = createSomethingPlotted(createTestArraysCoherant(2, 1000, "Long set "), true);
+		final Object[] oa = createSomethingPlotted(SWTXYTestUtils.createTestArraysCoherent(2, 1000, "Long set "), true);
 		
 		final AbstractPlottingSystem sys = (AbstractPlottingSystem)oa[0];
 		final IEditorPart         editor = (IEditorPart)oa[1];
@@ -263,7 +263,7 @@ public class SWTXYRegionsTest {
 	@Test
 	public void testRandom1() throws Throwable {
 		
-		final Object[] oa = createSomethingPlotted(createTestArraysRandom(2, 1000), true);
+		final Object[] oa = createSomethingPlotted(SWTXYTestUtils.createTestArraysRandom(2, 1000), true);
 		
 		final AbstractPlottingSystem sys = (AbstractPlottingSystem)oa[0];
 		final IEditorPart         editor = (IEditorPart)oa[1];
@@ -309,7 +309,7 @@ public class SWTXYRegionsTest {
 		return new Object[]{sys,editor,dir};
 	}
 	
-	private Object[] createSomethingPlotted(final List<Dataset> ys, boolean multipleAxes) throws Throwable {
+	private Object[] createSomethingPlotted(final List<IDataset> ys, boolean multipleAxes) throws Throwable {
 		
 		final Bundle bun  = Platform.getBundle("org.dawb.workbench.ui.test");
 
@@ -330,7 +330,7 @@ public class SWTXYRegionsTest {
 			
 		sys.clear();
 		
-		Dataset indices = ys.get(0).getIndices();
+		Dataset indices = DatasetUtils.convertToDataset(ys.get(0)).getIndices();
 
 		
 		final IAxis primaryY       = sys.getSelectedYAxis();
@@ -344,7 +344,7 @@ public class SWTXYRegionsTest {
 		List<ITrace> traces = new ArrayList<ITrace>();
 		for (int i = 0; i < ys.size(); i++) {
 
-			final Dataset y = ys.get(i);
+			final IDataset y = ys.get(i);
 			if (i%2==0) {
 				sys.setSelectedYAxis(primaryY);
 			} else {
@@ -360,38 +360,6 @@ public class SWTXYRegionsTest {
 	}
 
 	
-	private List<Dataset> createTestArraysRandom(final int numberPlots, final int size) {
-		
-		final List<Dataset> ys = new ArrayList<Dataset>(numberPlots);
-		for (int i = 0; i < numberPlots; i++) {
-			final long[] buffer = new long[size];
-			for (int j = 0; j < size; j++) buffer[j] = Math.round(Math.random()*10000);
-			final LongDataset ls = new LongDataset(buffer,size);
-			ls.setName("Test long set "+i);
-			ys.add(ls);
-		}
-		return ys;
-	}
-	
-	private List<Dataset> createTestArraysCoherant(final int numberPlots, final int size, final String name) {
-		
-		final List<Dataset> ys = new ArrayList<Dataset>(numberPlots);
-		for (int i = 0; i < numberPlots; i++) {
-			
-			double rand = Math.random();
-			
-			final long[] buffer = new long[size];
-			for (int j = 0; j < size; j++) buffer[j] = (long)Math.pow(j+rand, 2d)*i;
-
-			final LongDataset ls = (size>0) ? new LongDataset(buffer,size) : new LongDataset();
-			if (name!=null) ls.setName(name+i);
-			ys.add(ls);
-		}
-		
-		return ys;
-	}
-
-	
 	/**
 	 * TODO actually test some values...
 	 * @throws Throwable
@@ -399,7 +367,7 @@ public class SWTXYRegionsTest {
 	@Test
 	public void regionRingsTest() throws Throwable {
 		
-		final Object[] oa = createSomethingPlotted(createTestArraysCoherant(2, 1000, "Long set "), true);
+		final Object[] oa = createSomethingPlotted(SWTXYTestUtils.createTestArraysCoherent(2, 1000, "Long set "), true);
 		
 		final AbstractPlottingSystem sys = (AbstractPlottingSystem)oa[0];
 		final IEditorPart         editor = (IEditorPart)oa[1];

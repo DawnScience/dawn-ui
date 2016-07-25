@@ -14,13 +14,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
-import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.hdf.object.IHierarchicalDataFile;
 import org.eclipse.dawnsci.hdf.object.Nexus;
@@ -31,6 +25,12 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.IntegerDataset;
+import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.swt.SWT;
 
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
@@ -171,7 +171,7 @@ public class BoxProfileTool extends ProfileTool {
 		if (xi == null || !Arrays.equals(xi.getShape(), x_intensity.getShape())){
 			double xStart = bounds.getPointX();
 			double xEnd = bounds.getPointX() + bounds.getLength(0);
-			xi = IntegerDataset.createRange(xStart, xEnd, 1);
+			xi = DatasetFactory.createRange(IntegerDataset.class, xStart, xEnd, 1);
 			xi.setName("X Pixel");
 		}
 		final Dataset x_indices = xi; // Maths.add(xi, bounds.getX()); // Real position
@@ -181,7 +181,7 @@ public class BoxProfileTool extends ProfileTool {
 		if (yi == null || !Arrays.equals(yi.getShape(), y_intensity.getShape())) {
 			double yStart = bounds.getPointY();
 			double yEnd = bounds.getPointY() + bounds.getLength(1);
-			yi = IntegerDataset.createRange(yStart, yEnd, 1);
+			yi = DatasetFactory.createRange(IntegerDataset.class, yStart, yEnd, 1);
 			yi.setName("Y Pixel");
 		}
 		final Dataset y_indices = yi; // Maths.add(yi, bounds.getY()); // Real position

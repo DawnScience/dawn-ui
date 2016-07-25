@@ -4,7 +4,7 @@ package org.dawnsci.plotting.javafx.axis.objects;
 import java.util.List;
 
 import org.dawnsci.plotting.javafx.tools.Vector3DUtil;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.january.dataset.IDataset;
 import org.eclipse.nebula.visualization.xygraph.linearscale.Tick;
 import org.eclipse.nebula.visualization.xygraph.linearscale.TickFactory;
 import org.eclipse.nebula.visualization.xygraph.linearscale.TickFactory.TickFormatting;

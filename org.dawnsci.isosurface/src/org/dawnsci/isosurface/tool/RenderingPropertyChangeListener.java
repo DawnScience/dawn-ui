@@ -10,9 +10,9 @@ import org.dawnsci.isosurface.alg.VolumeRenderer;
 import org.dawnsci.isosurface.isogui.IIsoItem;
 import org.dawnsci.isosurface.isogui.IsoBean;
 import org.dawnsci.isosurface.isogui.Type;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.ILazyDataset;
 
 public class RenderingPropertyChangeListener implements PropertyChangeListener {
 	final private IsosurfaceJob surfaceJob;

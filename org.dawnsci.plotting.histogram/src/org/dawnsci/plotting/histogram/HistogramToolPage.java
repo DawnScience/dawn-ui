@@ -18,12 +18,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.dawnsci.analysis.api.dataset.Slice;
-import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
-import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -40,6 +34,14 @@ import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.TraceType;
+import org.eclipse.january.dataset.DTypeUtils;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.DoubleDataset;
+import org.eclipse.january.dataset.Maths;
+import org.eclipse.january.dataset.RGBDataset;
+import org.eclipse.january.dataset.Slice;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
@@ -952,7 +954,7 @@ public class HistogramToolPage extends AbstractToolPage {
 			// get the image data
 			imageDataset = getImageData(image);
 
-			if (AbstractDataset.getDType(imageDataset) == Dataset.RGB ) {
+			if (DTypeUtils.getDType(imageDataset) == Dataset.RGB ) {
 				hide();
 				return;
 			}
@@ -963,7 +965,7 @@ public class HistogramToolPage extends AbstractToolPage {
 				logger.debug("imageDataset contains invalid numbers");
 			}
 
-			logger.trace("Image Data is of type :" + imageDataset.getDtype());
+			logger.trace("Image Data is of type :" + imageDataset.getDType());
 			if (imageDataset.hasFloatingPointElements()) {
 				numBins = MAX_BINS;
 			} else {
@@ -1192,10 +1194,10 @@ public class HistogramToolPage extends AbstractToolPage {
 		PaletteData paletteData = image.getPaletteData();
 		final int numColours = paletteData.colors.length;
 		final int numPaletteColours = numColours - 3; // The -3 here is to avoid the min/max/NAN colours
-		final DoubleDataset R = new DoubleDataset(numPaletteColours);
-		final DoubleDataset G = new DoubleDataset(numPaletteColours);
-		final DoubleDataset B = new DoubleDataset(numPaletteColours);
-		final DoubleDataset RGBX = new DoubleDataset(numPaletteColours);
+		final Dataset R = DatasetFactory.zeros(DoubleDataset.class, numPaletteColours);
+		final Dataset G = DatasetFactory.zeros(DoubleDataset.class, numPaletteColours);
+		final Dataset B = DatasetFactory.zeros(DoubleDataset.class, numPaletteColours);
+		final Dataset RGBX = DatasetFactory.zeros(DoubleDataset.class, numPaletteColours);
 		R.setName("red");
 		G.setName("green");
 		B.setName("blue");

@@ -4,19 +4,19 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.dawnsci.mapping.ui.LocalServiceManager;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.IRemoteDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.io.IRemoteDatasetService;
-import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
-import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
-import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
-import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
+import org.eclipse.january.IMonitor;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.IRemoteDataset;
+import org.eclipse.january.dataset.RGBDataset;
+import org.eclipse.january.dataset.Slice;
+import org.eclipse.january.metadata.AxesMetadata;
+import org.eclipse.january.metadata.MetadataFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,14 +138,14 @@ public class MappedFileFactory {
 			for (int i = 0; i < yAxis.length; i++) yView[i] = yAxis[i] == null ? null : yAxis[i].getSliceView().squeezeEnds();
 
 			if (block.isRemappingRequired() && d.getRank() == 1) {
-				AxesMetadataImpl ax = new AxesMetadataImpl(1);
+				AxesMetadata ax = MetadataFactory.createMetadata(AxesMetadata.class, 1);
 				ax.setAxis(0, xView);
 
 				d.setMetadata(ax);
 				return new ReMappedData(mapName, d, block, path);
 			}
 
-			AxesMetadataImpl ax = new AxesMetadataImpl(2);
+			AxesMetadata ax = MetadataFactory.createMetadata(AxesMetadata.class, 2);
 			ax.setAxis(0,yView);
 			ax.setAxis(1, xView);
 
@@ -164,18 +164,17 @@ public class MappedFileFactory {
 	private static AssociatedImage getAssociatedImage(String path, AssociatedImageBean b) {
 		try {
 			Dataset d = DatasetUtils.sliceAndConvertLazyDataset(getLazyDataset(path, b.getName()));
-			AxesMetadataImpl ax = new AxesMetadataImpl(2);
+			AxesMetadata ax = MetadataFactory.createMetadata(AxesMetadata.class, 2);
 			ax.addAxis(0,getLazyDataset(path, b.getAxes()[0]));
 			ax.addAxis(1,getLazyDataset(path, b.getAxes()[1]));
 			
 			if (d.getRank() == 3) {
 				
-				RGBDataset ds = new RGBDataset(d.getSlice(new Slice(0,1,1),null,null).squeeze(), d.getSlice(new Slice(1,2,1),null,null).squeeze(), d.getSlice(new Slice(2,3,1),null,null).squeeze());
+				RGBDataset ds = (RGBDataset) DatasetUtils.createCompoundDataset(Dataset.RGB, d.getSlice(new Slice(0,1,1),null,null).squeeze(), d.getSlice(new Slice(1,2,1),null,null).squeeze(), d.getSlice(new Slice(2,3,1),null,null).squeeze());
 				ds.addMetadata(ax);
 				return new AssociatedImage(b.getName(), ds, path);
 			} else if (d.getRank() == 2) {
-				
-				RGBDataset ds = new RGBDataset(d, d, d);
+				RGBDataset ds = (RGBDataset) DatasetUtils.createCompoundDataset(Dataset.RGB, d);
 				ds.addMetadata(ax);
 				return new AssociatedImage(b.getName(), ds, path);
 				
@@ -216,10 +215,10 @@ public class MappedFileFactory {
 	
 	private static AxesMetadata checkAndBuildAxesMetadata(List<String> axes, String path, MappedBlockBean bean) {
 		
-		AxesMetadataImpl axm = null; 
+		AxesMetadata axm = null; 
 		
 		try {
-			axm = new AxesMetadataImpl(axes.size());
+			axm = MetadataFactory.createMetadata(AxesMetadata.class, axes.size());
 			for (int i = 0; i < axes.size(); i++) {
 				if (axes.get(i) == null) continue;
 				ILazyDataset lz = getLazyDataset(path, axes.get(i));

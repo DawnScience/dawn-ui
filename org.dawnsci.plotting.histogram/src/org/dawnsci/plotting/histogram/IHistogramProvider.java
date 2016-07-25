@@ -1,6 +1,6 @@
 package org.dawnsci.plotting.histogram;
 
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.viewers.IContentProvider;
 
 /**

@@ -1,7 +1,7 @@
 package org.dawnsci.processing.ui.slice;
 
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
+import org.eclipse.january.dataset.IDataset;
 
 /**
  * Interface to allow the processing view to know if the UI pipeline is in an error state,

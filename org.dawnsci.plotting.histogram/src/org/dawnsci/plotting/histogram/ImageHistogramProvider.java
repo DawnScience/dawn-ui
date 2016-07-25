@@ -3,17 +3,17 @@ package org.dawnsci.plotting.histogram;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.Slice;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
-import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.dawnsci.plotting.api.trace.PaletteEvent;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.DoubleDataset;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.Maths;
+import org.eclipse.january.dataset.Slice;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.PaletteData;
 
@@ -174,11 +174,10 @@ public class ImageHistogramProvider implements IHistogramProvider {
 		// now build the RGB Lines ( All the -3's here are to avoid the
 		// min/max/NAN colours)
 		PaletteData paletteData = image.getPaletteData();
-		final DoubleDataset R = new DoubleDataset(paletteData.colors.length - 3);
-		final DoubleDataset G = new DoubleDataset(paletteData.colors.length - 3);
-		final DoubleDataset B = new DoubleDataset(paletteData.colors.length - 3);
-		final DoubleDataset RGBX_orig_calc = new DoubleDataset(
-				paletteData.colors.length - 3);
+		final Dataset R = DatasetFactory.zeros(DoubleDataset.class, paletteData.colors.length - 3);
+		final Dataset G = DatasetFactory.zeros(DoubleDataset.class, paletteData.colors.length - 3);
+		final Dataset B = DatasetFactory.zeros(DoubleDataset.class, paletteData.colors.length - 3);
+		final Dataset RGBX_orig_calc = DatasetFactory.zeros(DoubleDataset.class, paletteData.colors.length - 3);
 		R.setName("red");
 		G.setName("green");
 		B.setName("blue");

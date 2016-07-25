@@ -2,8 +2,9 @@ package org.dawnsci.plotting.javafx.testing.volume;
 
 import java.awt.image.BufferedImage;
 
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.january.DatasetException;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.ILazyDataset;
 
 public class volumePlaneGenerator 
 {
@@ -17,7 +18,7 @@ public class volumePlaneGenerator
 	
 	private double resolution;
 	
-	public volumePlaneGenerator(double resolution, ILazyDataset dataset)
+	public volumePlaneGenerator(double resolution, ILazyDataset dataset) throws DatasetException
 	{
 		this.max = dataset.getSlice().max(true, true).doubleValue();
 		this.min = dataset.getSlice().min(true, true).doubleValue();
@@ -32,7 +33,7 @@ public class volumePlaneGenerator
 		lazySlice = dataset.getSliceView(new int []{0, 0, 0}, dataset.getShape(), step);
 	}
 	
-	private BufferedImage[] createPlaneArray(double transparency, ILazyDataset lazySlice)
+	private BufferedImage[] createPlaneArray(double transparency, ILazyDataset lazySlice) throws DatasetException
 	{
 		if (transparency > 1 || transparency < 0)
 		    throw new IllegalArgumentException("transparency must be between 0 and 1");
@@ -76,7 +77,7 @@ public class volumePlaneGenerator
 		return outputBIArray;
 	}
 	
-	public void createImagePlanes()
+	public void createImagePlanes() throws DatasetException
 	{
 		xyPlanes = createPlaneArray(resolution, lazySlice.getSlice());
 		zyPlanes = createPlaneArray(resolution, lazySlice.getTransposedView(1,2,0).getSlice());

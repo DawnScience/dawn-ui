@@ -14,17 +14,18 @@ import java.util.Collection;
 import org.dawnsci.plotting.tools.utils.ToolUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
-import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.IntegerDataset;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,8 +105,8 @@ public class ZoomTool extends ProfileTool {
 			if (yl!=null) yLabels = ZoomTool.getLabelsFromLabels(yl, bounds, 1);
 		}
 
-		if (yLabels==null) yLabels = IntegerDataset.createRange(bounds.getPoint()[1], bounds.getEndPoint()[1], yInc);
-		if (xLabels==null) xLabels = IntegerDataset.createRange(bounds.getPoint()[0], bounds.getEndPoint()[0], xInc);
+		if (yLabels==null) yLabels = DatasetFactory.createRange(IntegerDataset.class, bounds.getPoint()[1], bounds.getEndPoint()[1], yInc);
+		if (xLabels==null) xLabels = DatasetFactory.createRange(IntegerDataset.class, bounds.getPoint()[0], bounds.getEndPoint()[0], xInc);
 
 		final IImageTrace zoom_trace = (IImageTrace)profilePlottingSystem.updatePlot2D(slice, Arrays.asList(new IDataset[]{xLabels, yLabels}), monitor);
 		registerTraces(region, Arrays.asList(new ITrace[]{zoom_trace}));

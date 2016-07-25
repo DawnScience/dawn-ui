@@ -17,7 +17,7 @@ import org.dawnsci.mapping.ui.dialog.DynamicDialog;
 import org.dawnsci.mapping.ui.dialog.ImageGridDialog;
 import org.dawnsci.mapping.ui.dialog.MapPropertiesDialog;
 import org.dawnsci.mapping.ui.dialog.RGBMixerDialog;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.Dialog;

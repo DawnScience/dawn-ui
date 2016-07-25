@@ -9,8 +9,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.january.DatasetException;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.ILazyDataset;
 
 public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 {	
@@ -54,7 +55,7 @@ public class MarchingCubesSliceProcessor implements Callable<Set<Triangle>>
 		return triangleSet;
 	}
 	
-	private void run(ILazyDataset lazyData, int[] offset, int[] boxSize, double isovalue)
+	private void run(ILazyDataset lazyData, int[] offset, int[] boxSize, double isovalue) throws DatasetException
 	{
 		int[] xyzLimit = lazyData.getShape();
 		int[] sliceStart = new int[3];

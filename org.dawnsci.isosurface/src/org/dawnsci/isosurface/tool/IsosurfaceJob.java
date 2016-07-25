@@ -21,14 +21,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.FloatDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.trace.IImage3DTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IIsosurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
@@ -117,9 +116,9 @@ public class IsosurfaceJob extends Job {
 			if (monitor.isCanceled())
 				return Status.CANCEL_STATUS;
 			
-			IDataset points     = new FloatDataset(surface.getPoints(), surface.getPoints().length);         
-			IDataset textCoords = new FloatDataset(surface.getTexCoords(), surface.getTexCoords().length);   
-			IDataset faces      = new IntegerDataset(surface.getFaces(), surface.getFaces().length);         
+			IDataset points     = DatasetFactory.createFromObject(surface.getPoints());
+			IDataset textCoords = DatasetFactory.createFromObject(surface.getTexCoords());
+			IDataset faces      = DatasetFactory.createFromObject(surface.getFaces());
 									
 			final int[] traceColour =	model.getColour();
 			final double traceOpacity = model.getOpacity();

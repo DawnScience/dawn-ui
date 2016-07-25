@@ -1,7 +1,7 @@
 package org.dawnsci.plotting.imagej;
 
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
+import org.eclipse.january.dataset.IDataset;
 
 import ij.IJ;
 import ij.ImagePlus;

@@ -19,13 +19,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.Slice;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
-import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
@@ -36,6 +30,13 @@ import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.DoubleDataset;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.IntegerDataset;
+import org.eclipse.january.dataset.Slice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -195,17 +196,17 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 
 		Dataset line1 = boxLine[0];
 		line1.setName(traceName1);
-		Dataset xi = IntegerDataset.createRange(line1.getSize());
+		Dataset xi = DatasetFactory.createRange(IntegerDataset.class, line1.getSize());
 		final Dataset x_indices = xi;
 
 		Dataset line2 = boxLine[1];
 		line2.setName(traceName2);
-		Dataset yi = IntegerDataset.createRange(line2.getSize());
+		Dataset yi = DatasetFactory.createRange(IntegerDataset.class, line2.getSize());
 		final Dataset y_indices = yi;
 
 		// Average profile
 		line3.setName(traceName3);
-		Dataset av_indices = IntegerDataset.createRange(line3.getSize());
+		Dataset av_indices = DatasetFactory.createRange(IntegerDataset.class, line3.getSize());
 
 		final List<Dataset> lines = new ArrayList<Dataset>(3);
 		lines.add(line1);
@@ -258,12 +259,12 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 
 		Dataset line1 = boxLine[0];
 		line1.setName(traceName1);
-		Dataset xi = IntegerDataset.createRange(line1.getSize());
+		Dataset xi = DatasetFactory.createRange(IntegerDataset.class, line1.getSize());
 		final Dataset x_indices = xi;
 
 		Dataset line2 = boxLine[1];
 		line2.setName(traceName2);
-		Dataset yi = IntegerDataset.createRange(line2.getSize());
+		Dataset yi = DatasetFactory.createRange(IntegerDataset.class, line2.getSize());
 		final Dataset y_indices = yi;
 
 		final List<Dataset> lines = new ArrayList<Dataset>(3);
@@ -315,7 +316,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 
 		// Average profile
 		line3.setName(traceName3);
-		Dataset av_indices = IntegerDataset.createRange(line3.getSize());
+		Dataset av_indices = DatasetFactory.createRange(IntegerDataset.class, line3.getSize());
 
 		final List<Dataset> lines = new ArrayList<Dataset>(1);
 		lines.add(line3);
@@ -370,14 +371,14 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 						for (int i = 0; i < verticalAxis.length; i++) {
 							verticalAxis[i] = i;
 						}
-						Dataset vertical = new IntegerDataset(verticalAxis, shapes[1]);
+						Dataset vertical = DatasetFactory.createFromObject(verticalAxis);
 						updateAxes(traces, lines, vertical, bounds.getPointY());
 					} else {
 						int[] horizontalAxis = new int[shapes[0]];
 						for (int i = 0; i < horizontalAxis.length; i++) {
 							horizontalAxis[i] = i;
 						}
-						Dataset horizontal = new IntegerDataset(horizontalAxis, shapes[0]);
+						Dataset horizontal = DatasetFactory.createFromObject(horizontalAxis);
 						updateAxes(traces, lines, horizontal, bounds.getPointX());
 					}
 				}
@@ -402,7 +403,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 			double xStart = axis.getDouble((int)Math.round(startPoint));
 			double min = axis.getDouble(0);
 
-			axis = new DoubleDataset(axis);
+			axis = DatasetUtils.cast(DoubleDataset.class, axis);
 			xStart = axis.getDouble((int)Math.round(startPoint));
 			min = axis.getDouble(0);
 			axis.iadd(xStart-min);

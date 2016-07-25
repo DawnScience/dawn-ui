@@ -1,7 +1,7 @@
 package org.dawnsci.plotting.tools.fitting;
 
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.january.dataset.Dataset;
 
 /**
  * A runnable job with associated x & y data. The job is designed for function

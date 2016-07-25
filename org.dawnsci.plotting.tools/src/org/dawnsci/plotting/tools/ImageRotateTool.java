@@ -19,10 +19,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
-import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -34,6 +30,11 @@ import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.DoubleDataset;
+import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -281,8 +282,8 @@ public class ImageRotateTool extends AbstractToolPage {
 
 						image = DatasetUtils.transpose(image);
 						ImageRotateTool.this.axes = new ArrayList<IDataset>();
-						ImageRotateTool.this.axes.add(DoubleDataset.createRange(xRange[0], xRange[1], newStep));//  meshAxes.get(0));
-						ImageRotateTool.this.axes.add(DoubleDataset.createRange(yRange[0], yRange[1], newStep));
+						ImageRotateTool.this.axes.add(DatasetFactory.createRange(DoubleDataset.class, xRange[0], xRange[1], newStep));//  meshAxes.get(0));
+						ImageRotateTool.this.axes.add(DatasetFactory.createRange(DoubleDataset.class, yRange[0], yRange[1], newStep));
 						image.setName(getImageTrace().getDataName());
 						// run the rotation job
 						Display.getDefault().syncExec(new Runnable() {

@@ -11,12 +11,12 @@ package org.dawnsci.plotting.system;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.IErrorDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
-import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
+import org.eclipse.january.DatasetException;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.nebula.visualization.xygraph.dataprovider.IDataProvider;
 import org.eclipse.nebula.visualization.xygraph.dataprovider.IDataProviderListener;
 import org.eclipse.nebula.visualization.xygraph.dataprovider.ISample;
@@ -134,8 +134,18 @@ class LightWeightDataProvider implements IDataProvider {
 		this.y = DatasetUtils.convertToDataset(yData);
 		ILazyDataset xel = x.getError();
 		ILazyDataset yel = y.getError();
-		if (xel != null) this.xerr = DatasetUtils.convertToDataset(xel.getSlice());
-		if (yel != null) this.yerr = DatasetUtils.convertToDataset(yel.getSlice());
+		if (xel != null) {
+			try {
+				this.xerr = DatasetUtils.convertToDataset(xel.getSlice());
+			} catch (DatasetException e) {
+			}
+		}
+		if (yel != null) {
+			try {
+				this.yerr = DatasetUtils.convertToDataset(yel.getSlice());
+			} catch (DatasetException e) {
+			}
+		}
 		this.cachedXRange = null;
 		this.cachedYRange = null;
 	}
@@ -175,12 +185,12 @@ class LightWeightDataProvider implements IDataProvider {
 	    final double[] xa = new double[xArray.length+1];
 	    System.arraycopy(xArray, 0, xa, 0, xArray.length);
 	    xa[xa.length-1] = xValue.doubleValue();
-	    this.x = new DoubleDataset(xa, xa.length);
+	    this.x = DatasetFactory.createFromObject(xa);
 	    
 	    final double[] ya = new double[yArray.length+1];
 	    System.arraycopy(yArray, 0, ya, 0, yArray.length);
 	    ya[ya.length-1] = yValue.doubleValue();
-	    this.y = new DoubleDataset(ya, ya.length);
+	    this.y = DatasetFactory.createFromObject(ya);
 	    
 		this.cachedXRange = null;
 		this.cachedYRange = null;
@@ -189,9 +199,9 @@ class LightWeightDataProvider implements IDataProvider {
 	}
 
 	public boolean hasErrors() {
-		if (x instanceof IErrorDataset && ((IErrorDataset) x).hasErrors())
+		if (x.hasErrors())
 			return true;
-		if (y instanceof IErrorDataset && ((IErrorDataset) y).hasErrors())
+		if (y.hasErrors())
 			return true;
 		return false;
 	}

@@ -8,7 +8,7 @@
  */
 package org.dawnsci.spectrum.ui.processing;
 
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.january.dataset.Dataset;
 
 import uk.ac.diamond.scisoft.analysis.optimize.ApachePolynomial;
 

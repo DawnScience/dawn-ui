@@ -8,7 +8,7 @@
  */
 package org.dawnsci.plotting.tools.history.operation;
 
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
+import org.eclipse.january.dataset.Dataset;
 /**
  * 
  * @author Baha El Kassaby - duplicated code from org.dawb.common.gpu (this code

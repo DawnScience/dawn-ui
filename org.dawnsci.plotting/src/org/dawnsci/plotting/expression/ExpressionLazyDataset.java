@@ -8,8 +8,8 @@
  */
 package org.dawnsci.plotting.expression;
 
-import org.eclipse.dawnsci.analysis.api.io.ILazyLoader;
-import org.eclipse.dawnsci.analysis.dataset.impl.LazyDataset;
+import org.eclipse.january.dataset.LazyDataset;
+import org.eclipse.january.io.ILazyLoader;
 
 class ExpressionLazyDataset extends LazyDataset {
 

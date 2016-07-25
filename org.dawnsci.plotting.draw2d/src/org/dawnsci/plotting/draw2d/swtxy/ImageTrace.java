@@ -20,22 +20,10 @@ import java.util.Map;
 import org.dawb.common.ui.macro.TraceMacroEvent;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.dawnsci.analysis.api.dataset.DataEvent;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataListener;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.IDynamicDataset;
 import org.eclipse.dawnsci.analysis.api.downsample.DownsampleMode;
 import org.eclipse.dawnsci.analysis.api.roi.IPolylineROI;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.function.Downsample;
-import org.eclipse.dawnsci.analysis.dataset.impl.BooleanDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
-import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.IndexIterator;
-import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
-import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.PolygonalROI;
@@ -64,6 +52,18 @@ import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.january.dataset.BooleanDataset;
+import org.eclipse.january.dataset.DataEvent;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.DoubleDataset;
+import org.eclipse.january.dataset.IDataListener;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.IDynamicDataset;
+import org.eclipse.january.dataset.IndexIterator;
+import org.eclipse.january.dataset.Maths;
+import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.nebula.visualization.widgets.figureparts.ColorMapRamp;
 import org.eclipse.nebula.visualization.xygraph.figures.Axis;
@@ -886,7 +886,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				// intensityScale
 				// TODO FIXME This will not work in log mode
 				if (reducedFullImage instanceof RGBDataset) return true;
-				final DoubleDataset dds = new DoubleDataset(INTENSITY_SCALE_ENTRIES,1);
+				final DoubleDataset dds = DatasetFactory.zeros(DoubleDataset.class, INTENSITY_SCALE_ENTRIES, 1);
 				double max = getMax().doubleValue();
 				double inc = (max - getMin().doubleValue())/INTENSITY_SCALE_ENTRIES;
 				for (int i = 0; i < INTENSITY_SCALE_ENTRIES; i++) {
@@ -943,7 +943,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				return image; // nothing to downsample
 			}
 			
-			if (image.getDtype()!=Dataset.BOOL) {
+			if (image.getDType()!=Dataset.BOOL) {
 				if (mipMap!=null && mipMap.containsKey(bin) && mipMap.get(bin).get()!=null) {
 			        logger.trace("Downsample bin used, "+bin);
 					return mipMap.get(bin).get();
@@ -959,7 +959,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			List<? extends IDataset>   sets = downSampler.value(image);
 			final Dataset set = DatasetUtils.convertToDataset(sets.get(0));
 			
-			if (image.getDtype()!=Dataset.BOOL) {
+			if (image.getDType()!=Dataset.BOOL) {
 				if (mipMap==null) mipMap = new HashMap<Integer,Reference<Dataset>>(3);
 				mipMap.put(bin, new SoftReference<Dataset>(set));
 		        logger.trace("Downsample bin created, "+bin);
@@ -1837,7 +1837,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				
 		if (mask!=null && image!=null && !image.isCompatibleWith(mask)) {
 			
-			BooleanDataset maskDataset = new BooleanDataset(image.getShape());
+			BooleanDataset maskDataset = DatasetFactory.zeros(BooleanDataset.class, image.getShape());
 			maskDataset.setName("mask");
 			maskDataset.fill(true);
 

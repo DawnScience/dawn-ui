@@ -16,18 +16,19 @@ import org.dawb.common.util.io.IOUtils;
 import org.dawnsci.common.widgets.radio.RadioGroupWidget;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
-import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
 import org.eclipse.dawnsci.analysis.dataset.impl.function.MapToRotatedCartesian;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.DoubleDataset;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.Maths;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
@@ -344,7 +345,7 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 			
 			Dataset differenceInts = Maths.floor(Maths.divide(differences, meanSteps));
 			int[] shape = originalData.getShape();
-			correctedData = new DoubleDataset(shape);
+			correctedData = DatasetFactory.zeros(DoubleDataset.class, shape);
 			for(int y = 0; y < shape[0]; y++) {
 				int min = Math.max(differenceInts.getInt(y), 0);
 				int max = Math.min(shape[1]+differenceInts.getInt(y), shape[1]);
@@ -461,10 +462,10 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 		
 		// No calculate the energies
 		// TODO could be optimised
-		DoubleDataset photonEnergyDS = DoubleDataset.ones(dataRegion.getShapeRef()).imultiply(photonEnergy);
-		DoubleDataset workFunctionDS = DoubleDataset.ones(dataRegion.getShapeRef()).imultiply(workFunction);
+		DoubleDataset photonEnergyDS = DatasetFactory.ones(DoubleDataset.class, dataRegion.getShapeRef()).imultiply(photonEnergy);
+		DoubleDataset workFunctionDS = DatasetFactory.ones(DoubleDataset.class, dataRegion.getShapeRef()).imultiply(workFunction);
 				
-		DoubleDataset bindingEnergy = DoubleDataset.ones(energyRegion.getShapeRef()).imultiply(0);
+		DoubleDataset bindingEnergy = DatasetFactory.ones(DoubleDataset.class, energyRegion.getShapeRef()).imultiply(0);
 		
 		bindingEnergy.iadd(photonEnergyDS);
 		bindingEnergy.isubtract(workFunctionDS);
@@ -493,7 +494,7 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 
 		// make axis correction to regrid here
 		//double KPStep = kParallel.peakToPeak().doubleValue()/(dataRegion.getShape()[0]-1);
-		//Dataset kParaAxis = Dataset.arange(kParallel.min().doubleValue()+(KPStep), kParallel.max().doubleValue()-(KPStep), KPStep, Dataset.FLOAT64);
+		//Dataset kParaAxis = DatasetFactory.createRange(kParallel.min().doubleValue()+(KPStep), kParallel.max().doubleValue()-(KPStep), KPStep, Dataset.FLOAT64);
 				
 		// prepare the results
 		// Dataset remappedRegion = InterpolatorUtils.remapAxis(dataRegion, 0, kParallel, kParaAxis);

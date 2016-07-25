@@ -9,7 +9,6 @@
 package org.dawb.workbench.ui.editors.test;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -23,15 +22,6 @@ import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.IErrorDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
-import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.LongDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
-import org.eclipse.dawnsci.analysis.dataset.impl.Random;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.filter.AbstractPlottingFilter;
@@ -47,6 +37,13 @@ import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace.ArrowConfiguration;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace.ArrowHistogram;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.DoubleDataset;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.Maths;
+import org.eclipse.january.dataset.Random;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -68,7 +65,7 @@ public class SWTXYTraceTest {
 	@Test
     public void testVectorSimple1D() throws Throwable {
 		
-		final Dataset da1 = DoubleDataset.createRange(0, 100, 1);    
+		final Dataset da1 = DatasetFactory.createRange(DoubleDataset.class, 0, 100, 1);    
 		
 		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{da1}));
 
@@ -201,7 +198,7 @@ public class SWTXYTraceTest {
 	@Test
     public void testErrorBarsSimple() throws Throwable {
 		
-		final DoubleDataset da1 = DoubleDataset.createRange(0, 100, 1);
+		final DoubleDataset da1 = DatasetFactory.createRange(DoubleDataset.class, 0, 100, 1);
         da1.setError(5d);
         
       
@@ -211,7 +208,7 @@ public class SWTXYTraceTest {
 		final List<ITrace>        traces = (List<ITrace>)oa[2];
 		
 		final ILineTrace lineTrace = (ILineTrace)traces.get(0);
-		if (((IErrorDataset)lineTrace.getData()).getError(50)!=5d) throw new Exception("Unexpected error!");
+		if (lineTrace.getData().getError(50)!=5d) throw new Exception("Unexpected error!");
 		
 		sys.repaint();
 		EclipseUtils.delay(2000);
@@ -221,7 +218,7 @@ public class SWTXYTraceTest {
 	@Test
     public void testFilterDectorator() throws Throwable {
 		
-		final IDataset y = DoubleDataset.createRange(0, 100, 1);
+		final Dataset y = DatasetFactory.createRange(DoubleDataset.class, 0, 100, 1);
 		final IDataset x = DatasetFactory.createRange(0, y.getSize(), 1, Dataset.INT32);
      
       
@@ -257,7 +254,7 @@ public class SWTXYTraceTest {
 	@Test
     public void testFilterDectoratorMultiple() throws Throwable {
 		
-		final IDataset y = DoubleDataset.createRange(0, 100, 1);
+		final Dataset y = DatasetFactory.createRange(DoubleDataset.class, 0, 100, 1);
 		y.setName("Test Data");
 		final IDataset x = DatasetFactory.createRange(0, y.getSize(), 1, Dataset.INT32);
      
@@ -357,7 +354,7 @@ public class SWTXYTraceTest {
 		final PlotDataEditor plotter   = (PlotDataEditor)editor.getActiveEditor();
 		final IPlottingSystem<Composite> sys = plotter.getPlottingSystem();
 
-		final IDataset y = DoubleDataset.createRange(0, 100, 1);
+		final IDataset y = DatasetFactory.createRange(DoubleDataset.class, 0, 100, 1);
 		final IDataset x = DatasetFactory.createRange(0, y.getSize(), 1, Dataset.INT32);
   	
 		// Add a decorator that squares the data.
@@ -445,8 +442,8 @@ public class SWTXYTraceTest {
 	@Test
     public void testErrorBarsExponential() throws Throwable {
 		
-		final Dataset da1 = Maths.square(DoubleDataset.createRange(0, 100, 1));    
-		final Dataset err = Maths.square(DoubleDataset.createRange(0, 100, 1).imultiply(0.2d));
+		final Dataset da1 = Maths.square(DatasetFactory.createRange(DoubleDataset.class, 0, 100, 1));    
+		final Dataset err = Maths.square(DatasetFactory.createRange(DoubleDataset.class, 0, 100, 1).imultiply(0.2d));
 		da1.setError(err);
 		
 		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{da1}));
@@ -455,7 +452,7 @@ public class SWTXYTraceTest {
 		final List<ITrace>        traces = (List<ITrace>)oa[2];
 		
 		final ILineTrace lineTrace = (ILineTrace)traces.get(0);
-		double errorAt50 = ((IErrorDataset)lineTrace.getData()).getError(49);
+		double errorAt50 = lineTrace.getData().getError(49);
 		if (Math.round(errorAt50)!=96) throw new Exception("Incorrect error, found "+errorAt50);
 		lineTrace.setErrorBarColor(ColorConstants.red);
 
@@ -467,8 +464,8 @@ public class SWTXYTraceTest {
 	@Test
     public void testErrorBarsExponentialLogAxes() throws Throwable {
 		
-		final Dataset da1 = Maths.square(DoubleDataset.createRange(0, 100, 1));    
-		final Dataset err = Maths.square(DoubleDataset.createRange(0, 100, 1).imultiply(0.2d));
+		final Dataset da1 = Maths.square(DatasetFactory.createRange(DoubleDataset.class, 0, 100, 1));    
+		final Dataset err = Maths.square(DatasetFactory.createRange(DoubleDataset.class, 0, 100, 1).imultiply(0.2d));
 		da1.setError(err);
 		
 		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{da1}));
@@ -478,7 +475,7 @@ public class SWTXYTraceTest {
 		final List<ITrace>        traces = (List<ITrace>)oa[2];
 		
 		final ILineTrace lineTrace = (ILineTrace)traces.get(0);
-		double errorAt50 = ((IErrorDataset)lineTrace.getData()).getError(49);
+		double errorAt50 = lineTrace.getData().getError(49);
 		if (Math.round(errorAt50)!=96) throw new Exception("Incorrect error, found "+errorAt50);
 		lineTrace.setErrorBarColor(ColorConstants.red);
 
@@ -490,16 +487,16 @@ public class SWTXYTraceTest {
 	@Test
     public void testXErrorBars() throws Throwable {
 		
-		final DoubleDataset da1 = DoubleDataset.createRange(0, 100, 1);     
+		final DoubleDataset da1 = DatasetFactory.createRange(DoubleDataset.class, 0, 100, 1);     
 		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{da1}));
 
 		final IPlottingSystem<Composite>     sys    = (IPlottingSystem<Composite>)oa[0];
 		final List<ITrace>        traces = (List<ITrace>)oa[2];
 		
 		final ILineTrace lineTrace = (ILineTrace)traces.get(0);
-		if (((IErrorDataset)lineTrace.getData()).getError(50)!=0d) throw new Exception("Unexpected error!");
+		if (lineTrace.getData().getError(50)!=0d) throw new Exception("Unexpected error!");
 		
-		IErrorDataset es = (IErrorDataset)lineTrace.getXData();
+		IDataset es = lineTrace.getXData();
 		es.setError(4d);
 		lineTrace.setData(es, lineTrace.getYData());
 		
@@ -525,7 +522,7 @@ public class SWTXYTraceTest {
 	
 	
 	private void funnyNumberTest(double funny, String name) throws Throwable {
-		final DoubleDataset da1 = DoubleDataset.createRange(0, 100, 1);
+		final DoubleDataset da1 = DatasetFactory.createRange(DoubleDataset.class, 0, 100, 1);
 		da1.set(funny, 0);
 		
 		da1.set(funny, 50);
@@ -548,7 +545,7 @@ public class SWTXYTraceTest {
 	@Test
 	public void traceTypesTest() throws Throwable {
 		
-		final Object[] oa = createSomethingPlotted(createTestArraysCoherant(1, 40, "Long set "));
+		final Object[] oa = createSomethingPlotted(SWTXYTestUtils.createTestArraysCoherent(1, 40, "Long set "));
 
 		final AbstractPlottingSystem sys = (AbstractPlottingSystem)oa[0];
 		final IEditorPart         editor = (IEditorPart)oa[1];
@@ -573,7 +570,7 @@ public class SWTXYTraceTest {
 	@Test
 	public void pointStyleTest() throws Throwable {
 		
-		final Object[] oa = createSomethingPlotted(createTestArraysCoherant(1, 40, "Long set "));
+		final Object[] oa = createSomethingPlotted(SWTXYTestUtils.createTestArraysCoherent(1, 40, "Long set "));
 
 		final AbstractPlottingSystem sys = (AbstractPlottingSystem)oa[0];
 		final IEditorPart         editor = (IEditorPart)oa[1];
@@ -596,7 +593,7 @@ public class SWTXYTraceTest {
 	@Test
 	public void errorBarsTest() throws Throwable {
 		
-		final Object[] oa = createSomethingPlotted(createTestArraysCoherant(1, 40, "Long set "));
+		final Object[] oa = createSomethingPlotted(SWTXYTestUtils.createTestArraysCoherent(1, 40, "Long set "));
 
 		final AbstractPlottingSystem sys = (AbstractPlottingSystem)oa[0];
 		final IEditorPart         editor = (IEditorPart)oa[1];
@@ -650,26 +647,4 @@ public class SWTXYTraceTest {
 		return new Object[]{sys,editor,traces};
 	}
 
-	
-	private List<IDataset> createTestArraysCoherant(final int numberPlots, final int size, final String name) {
-		
-		final List<IDataset> ys = new ArrayList<IDataset>(numberPlots);
-		for (int i = 0; i < numberPlots; i++) {
-			
-			double rand = Math.random();
-			
-			final long[] buffer = new long[size];
-			for (int j = 0; j < size; j++) buffer[j] = (long)Math.pow(j+rand, 2d)*(i+1);
-
-			final LongDataset ls = (size>0) ? new LongDataset(buffer,size) : new LongDataset();
-			if (name!=null) ls.setName(name+i);
-			ys.add(ls);
-		}
-		
-		return ys;
-	}
-
-	
-
-	
 }

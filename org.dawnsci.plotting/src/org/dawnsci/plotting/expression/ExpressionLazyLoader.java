@@ -8,20 +8,20 @@
  */
 package org.dawnsci.plotting.expression;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.dawb.common.services.ServiceManager;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionEngine;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
-import org.eclipse.dawnsci.analysis.api.io.ILazyLoader;
-import org.eclipse.dawnsci.analysis.api.io.ScanFileHolderException;
-import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.plotting.api.expressions.IVariableManager;
+import org.eclipse.january.IMonitor;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.SliceND;
+import org.eclipse.january.io.ILazyLoader;
 
 class ExpressionLazyLoader implements ILazyLoader {
 
@@ -59,7 +59,7 @@ class ExpressionLazyLoader implements ILazyLoader {
 	}
 
 	@Override
-	public IDataset getDataset(IMonitor mon, SliceND slice) throws ScanFileHolderException {
+	public IDataset getDataset(IMonitor mon, SliceND slice) throws IOException {
 		
 		try {
 			engine.createExpression(expressionString);

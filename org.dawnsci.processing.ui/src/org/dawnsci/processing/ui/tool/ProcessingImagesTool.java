@@ -1,7 +1,7 @@
 package org.dawnsci.processing.ui.tool;
 
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.january.dataset.IDataset;
 
 
 public class ProcessingImagesTool extends AbstractProcessingTool {

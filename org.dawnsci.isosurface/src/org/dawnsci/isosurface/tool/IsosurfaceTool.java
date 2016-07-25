@@ -18,9 +18,6 @@ import java.util.stream.Stream;
 import org.dawnsci.isosurface.Activator;
 import org.dawnsci.isosurface.isogui.IsoBean;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.slicing.api.system.AxisChoiceListener;
 import org.eclipse.dawnsci.slicing.api.system.AxisType;
@@ -30,6 +27,9 @@ import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.dawnsci.slicing.api.system.ISliceSystem;
 import org.eclipse.dawnsci.slicing.api.tool.AbstractSlicingTool;
 import org.eclipse.dawnsci.slicing.api.util.SliceUtils;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.richbeans.api.generator.IGuiGeneratorService;
 import org.eclipse.richbeans.api.generator.IListenableProxyFactory;
 import org.eclipse.swt.SWT;
@@ -193,6 +193,6 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 
 	private IDataset generateIndexAxis(int max) {
 		double[] axis = IntStream.range(0, max).mapToDouble(i -> i).toArray();
-		return new DoubleDataset(axis, max);
+		return DatasetFactory.createFromObject(axis);
 	}
 }

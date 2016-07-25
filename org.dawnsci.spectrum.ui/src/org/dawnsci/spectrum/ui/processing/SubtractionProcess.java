@@ -9,9 +9,9 @@
 package org.dawnsci.spectrum.ui.processing;
 
 import org.dawnsci.spectrum.ui.file.IContain1DData;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
-import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.Maths;
 
 public class SubtractionProcess extends AbstractCacheProcess{
 	

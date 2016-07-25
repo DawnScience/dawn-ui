@@ -1,18 +1,18 @@
 package org.dawnsci.mapping.ui;
 
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
-import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.analysis.tree.impl.AttributeImpl;
 import org.eclipse.dawnsci.nexus.NexusException;
 import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
+import org.eclipse.january.DatasetException;
+import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.RGBDataset;
+import org.eclipse.january.metadata.AxesMetadata;
 
 public class MappingUtils {
 
@@ -79,7 +79,8 @@ public class MappingUtils {
 			
 			nexus.addAttribute(group, new AttributeImpl("signal","data"));
 			nexus.addAttribute(group, new AttributeImpl("axes",new String[]{".","y","x"}));
-			
+		} catch (DatasetException de) {
+			de.printStackTrace();
 		} catch (NexusException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

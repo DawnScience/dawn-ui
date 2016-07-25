@@ -7,17 +7,18 @@ import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.spectrum.ui.Activator;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
-import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
-import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
+import org.eclipse.january.MetadataException;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.metadata.AxesMetadata;
+import org.eclipse.january.metadata.MetadataFactory;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -53,18 +54,22 @@ public class CombineDialog extends Dialog implements IAdaptable{
 	public CombineDialog(Shell shell, IDataset x, IDataset data){
 		super(shell);
 		this.data = data;
-		AxesMetadataImpl ax = new AxesMetadataImpl(2);
-		ax.setAxis(1, x);
-		Dataset range = DatasetFactory.createRange(data.getShape()[0], Dataset.INT32);
-		range.setName("Range");
-		
-		globalRange = new double[]{x.min().doubleValue(),x.max().doubleValue(),range.min().doubleValue(),range.max().doubleValue(), 
-				};
-		
-		ax.setAxis(0, range);
-		
-		data.setMetadata(ax);
-		
+		try {
+			AxesMetadata ax = MetadataFactory.createMetadata(AxesMetadata.class, 2);
+			ax.setAxis(1, x);
+			Dataset range = DatasetFactory.createRange(data.getShape()[0], Dataset.INT32);
+			range.setName("Range");
+			
+			globalRange = new double[]{x.min().doubleValue(),x.max().doubleValue(),range.min().doubleValue(),range.max().doubleValue(), 
+					};
+			
+			ax.setAxis(0, range);
+			
+			data.setMetadata(ax);
+		} catch (MetadataException e) {
+			logger.error("Could not create axes metadata", e);
+		}
+
 		try {
 			system = PlottingFactory.createPlottingSystem();
 		} catch (Exception e) {

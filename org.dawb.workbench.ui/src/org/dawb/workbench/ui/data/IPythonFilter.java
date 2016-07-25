@@ -8,8 +8,8 @@
  */
 package org.dawb.workbench.ui.data;
 
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.rpc.AnalysisRpcException;
+import org.eclipse.january.dataset.IDataset;
 
 public interface IPythonFilter {
 	/**

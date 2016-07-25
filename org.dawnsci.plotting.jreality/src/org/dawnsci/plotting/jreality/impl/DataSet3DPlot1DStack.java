@@ -16,13 +16,13 @@ import java.util.List;
 
 import org.dawnsci.plotting.jreality.tick.Tick;
 import org.dawnsci.plotting.jreality.tick.TickFormatting;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
-import org.eclipse.dawnsci.analysis.dataset.impl.DoubleDataset;
 import org.eclipse.dawnsci.plotting.api.jreality.core.AxisMode;
 import org.eclipse.dawnsci.plotting.api.jreality.impl.Plot1DGraphTable;
 import org.eclipse.dawnsci.plotting.api.jreality.util.ArrayPoolUtility;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DoubleDataset;
+import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.widgets.Composite;
 
@@ -284,7 +284,7 @@ public class DataSet3DPlot1DStack extends DataSet3DPlot1D {
 		super.updateGraph(datasets);
 		if (zAxisValues != null) {
 			if (zAxisValues.size() < plots) {
-				DoubleDataset values = DoubleDataset.createRange(zOffset+1, zOffset + 1 + plots, 1);
+				DoubleDataset values = DatasetFactory.createRange(DoubleDataset.class, zOffset+1, zOffset + 1 + plots, 1);
 				zAxisValues.addValues(values.getData());
 			}
 		} else {

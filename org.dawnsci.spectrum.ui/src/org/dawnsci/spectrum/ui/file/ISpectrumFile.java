@@ -11,7 +11,7 @@ package org.dawnsci.spectrum.ui.file;
 import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
+import org.eclipse.january.dataset.IDataset;
 
 public interface ISpectrumFile extends IContain1DData {
 

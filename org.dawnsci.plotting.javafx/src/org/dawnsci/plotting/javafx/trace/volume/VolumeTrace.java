@@ -17,10 +17,11 @@ import org.dawnsci.plotting.javafx.ServiceLoader;
 import org.dawnsci.plotting.javafx.SceneDisplayer;
 import org.dawnsci.plotting.javafx.trace.Image3DTrace;
 import org.dawnsci.plotting.javafx.trace.JavafxTrace;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
 import org.eclipse.dawnsci.plotting.api.trace.IVolumeRenderTrace;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.IntegerDataset;
 import org.eclipse.swt.widgets.Display;
 
 /**
@@ -44,7 +45,7 @@ public class VolumeTrace  extends JavafxTrace implements IVolumeRenderTrace
 	
 	@Override
 	public IDataset getData() {
-		return new IntegerDataset(1, 1);
+		return DatasetFactory.zeros(IntegerDataset.class, 1, 1);
 	}
 
 	@Override

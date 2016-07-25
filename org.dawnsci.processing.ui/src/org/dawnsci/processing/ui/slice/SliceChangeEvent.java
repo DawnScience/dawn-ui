@@ -10,7 +10,7 @@ package org.dawnsci.processing.ui.slice;
 
 import java.util.EventObject;
 
-import org.eclipse.dawnsci.analysis.api.dataset.Slice;
+import org.eclipse.january.dataset.Slice;
 
 public class SliceChangeEvent extends EventObject {
 

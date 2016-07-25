@@ -110,7 +110,7 @@ public class MappedDataFile implements MapObject{
 //		try {
 //			ILazyDataset lz = LocalServiceManager.getLoaderService().getData(path, null).getLazyDataset(imageName);
 //			IDataset test = lz.getSlice(new Slice(0,1),null,null).squeeze();
-//			RGBDataset microrgb = new RGBDataset((Dataset)lz.getSlice(new Slice(0,1),null,null).squeeze(),
+//			RGBDataset microrgb = DatasetUtils.createCompoundDataset(RGBDataset.class, (Dataset)lz.getSlice(new Slice(0,1),null,null).squeeze(),
 //					 (Dataset)lz.getSlice(new Slice(1,2),null,null).squeeze(),
 //					 (Dataset)lz.getSlice(new Slice(2,3),null,null).squeeze());
 //			microrgb.setMetadata(test.getMetadata(AxesMetadata.class).get(0));

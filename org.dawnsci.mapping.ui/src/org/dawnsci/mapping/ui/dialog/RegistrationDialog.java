@@ -5,15 +5,8 @@ import java.util.List;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
-import org.eclipse.dawnsci.analysis.dataset.impl.LinearAlgebra;
-import org.eclipse.dawnsci.analysis.dataset.impl.RGBDataset;
 import org.eclipse.dawnsci.analysis.dataset.impl.function.MapToRotatedCartesian;
-import org.eclipse.dawnsci.analysis.dataset.metadata.AxesMetadataImpl;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -24,6 +17,15 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
+import org.eclipse.january.MetadataException;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.LinearAlgebra;
+import org.eclipse.january.dataset.RGBDataset;
+import org.eclipse.january.metadata.AxesMetadata;
+import org.eclipse.january.metadata.MetadataFactory;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -237,7 +239,7 @@ public class RegistrationDialog extends Dialog {
 		if (image instanceof RGBDataset) {
 			
 			RGBDataset rgb = (RGBDataset)image;
-			im = new RGBDataset(mrc.value(rgb.getRedView()).get(0),
+			im = DatasetUtils.createCompoundDataset(Dataset.RGB, mrc.value(rgb.getRedView()).get(0),
 								mrc.value(rgb.getGreenView()).get(0),
 								mrc.value(rgb.getBlueView()).get(0));
 			
@@ -250,9 +252,14 @@ public class RegistrationDialog extends Dialog {
 		logger.debug("XOffset: {}, YOffset: {}, XScale {}, YScale {},",tX,tY,sX,sY);
 		
 		registered = im;
-		AxesMetadataImpl ax = new AxesMetadataImpl(2);
-		ax.addAxis(0, yR);
-		ax.addAxis(1, xR);
+		AxesMetadata ax = null;
+		try {
+			ax = MetadataFactory.createMetadata(AxesMetadata.class, 2);
+			ax.addAxis(0, yR);
+			ax.addAxis(1, xR);
+		} catch (MetadataException e) {
+			logger.error("Could not create axes metadata", e);
+		}
 		im.addMetadata(ax);
 		registered.addMetadata(ax);
 		systemComposite.clear();

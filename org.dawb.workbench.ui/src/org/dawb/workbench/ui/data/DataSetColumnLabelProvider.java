@@ -12,10 +12,10 @@ import java.util.Arrays;
 
 import org.dawb.workbench.ui.Activator;
 import org.dawnsci.plotting.AbstractPlottingSystem;
-import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObject;
 import org.eclipse.dawnsci.slicing.api.data.ITransferableDataObject;
+import org.eclipse.january.IMonitor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;

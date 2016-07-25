@@ -5,12 +5,13 @@ import java.util.List;
 
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.slicing.tools.hyper.HyperComponent;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.Slice;
-import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
+import org.eclipse.january.DatasetException;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.Slice;
+import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -38,9 +39,10 @@ public class DynamicDialog extends Dialog {
 		ILazyDataset lazy = block.getLazy();
 		AxesMetadata metadata = lazy.getFirstMetadata(AxesMetadata.class);
 		ILazyDataset[] axes = metadata.getAxes();
+		int[] shape = lazy.getShape();
 		
-		Slice[] slices = new Slice[lazy.getRank()];
-		for (int i = 0; i< lazy.getRank(); i++) slices[i] = new Slice(0, lazy.getShape()[i]);
+		Slice[] slices = new Slice[shape.length];
+		for (int i = 0; i< shape.length; i++) slices[i] = new Slice(0, shape[i]);
 		
 		int[] order = new int[3];
 		order[2] = block.getDataDimensions()[0];
@@ -48,9 +50,13 @@ public class DynamicDialog extends Dialog {
 		order[0] = block.getxDim();
 
 		List<IDataset> dsl = new ArrayList<>();
-		dsl.add(axes[order[0]] == null ? DatasetFactory.createRange(lazy.getShape()[order[0]], Dataset.INT32) : axes[order[0]].getSlice().squeeze());
-		dsl.add(axes[order[1]] == null ? DatasetFactory.createRange(lazy.getShape()[order[1]], Dataset.INT32) : axes[order[1]].getSlice().squeeze());
-		dsl.add(axes[order[2]] == null ? DatasetFactory.createRange(lazy.getShape()[order[2]], Dataset.INT32) : axes[order[2]].getSlice().squeeze());
+		try {
+			dsl.add(axes[order[0]] == null ? DatasetFactory.createRange(shape[order[0]], Dataset.INT32) : axes[order[0]].getSlice().squeeze());
+			dsl.add(axes[order[1]] == null ? DatasetFactory.createRange(shape[order[1]], Dataset.INT32) : axes[order[1]].getSlice().squeeze());
+			dsl.add(axes[order[2]] == null ? DatasetFactory.createRange(shape[order[2]], Dataset.INT32) : axes[order[2]].getSlice().squeeze());
+		} catch (DatasetException e) {
+			e.printStackTrace();
+		}
 
 		component.setData(lazy, dsl, slices, order);
 		

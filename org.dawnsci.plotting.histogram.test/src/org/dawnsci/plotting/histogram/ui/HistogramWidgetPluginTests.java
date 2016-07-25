@@ -3,10 +3,10 @@ package org.dawnsci.plotting.histogram.ui;
 import static org.mockito.Mockito.*;
 
 import org.dawnsci.plotting.histogram.ImageHistogramProvider;
-import org.eclipse.dawnsci.analysis.dataset.impl.Random;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
+import org.eclipse.january.dataset.Random;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;

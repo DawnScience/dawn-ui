@@ -1,7 +1,8 @@
 package org.dawnsci.mapping.ui.datamodel;
 
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
+import org.eclipse.january.DatasetException;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.ILazyDataset;
 
 public abstract class AbstractMapData implements PlottableMapObject{
 
@@ -39,7 +40,12 @@ public abstract class AbstractMapData implements PlottableMapObject{
 	public IDataset getData(){
 		
 		if (baseMap != null) {
-			return baseMap.getSlice();
+			try {
+				return baseMap.getSlice();
+			} catch (DatasetException e) {
+				e.printStackTrace();
+				return null;
+			}
 		}
 		
 		return map;

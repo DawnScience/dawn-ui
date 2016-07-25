@@ -8,14 +8,14 @@ import java.util.Collection;
 import java.util.List;
 
 import org.dawnsci.plotting.histogram.ui.PluginTestBase;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.Maths;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.Maths;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Composite;
 import org.junit.Before;
@@ -47,25 +47,25 @@ public class ProviderLogDataPluginTest extends PluginTestBase {
 		Dataset input, expected;
 
 		// normal data
-		input = AbstractDataset.arange(100, Dataset.FLOAT64);
+		input = DatasetFactory.createRange(100, Dataset.FLOAT64);
 		input.setShape(10, 10);
 		expected = null;
 		params.add(new Object[] {input, expected});
 
 		// normal data with some negative values
-		input = AbstractDataset.arange(-100, 100, 2, Dataset.FLOAT64);
+		input = DatasetFactory.createRange(-100, 100, 2, Dataset.FLOAT64);
 		input.setShape(10, 10);
 		expected = null;
 		params.add(new Object[] {input, expected});
 
 		// complex data
-		input = AbstractDataset.arange(100, Dataset.COMPLEX128);
+		input = DatasetFactory.createRange(100, Dataset.COMPLEX128);
 		input.setShape(10, 10);
 		expected = Maths.abs(input);
 		params.add(new Object[] {input, expected});
 
 		// complex data with some negative values
-		input = AbstractDataset.arange(-100, 100, 2, Dataset.COMPLEX128);
+		input = DatasetFactory.createRange(-100, 100, 2, Dataset.COMPLEX128);
 		input.setShape(10, 10);
 		expected = Maths.abs(input);
 		params.add(new Object[] {input, expected});

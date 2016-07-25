@@ -54,15 +54,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.dawnsci.analysis.api.dataset.DataEvent;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataListener;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.IErrorDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
-import org.eclipse.dawnsci.analysis.api.metadata.IMetadata;
-import org.eclipse.dawnsci.analysis.api.monitor.IMonitor;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemSelection;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -83,6 +76,12 @@ import org.eclipse.dawnsci.slicing.api.system.DimsData;
 import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.dawnsci.slicing.api.system.ISliceSystem;
 import org.eclipse.dawnsci.slicing.api.util.SliceUtils;
+import org.eclipse.january.IMonitor;
+import org.eclipse.january.dataset.DataEvent;
+import org.eclipse.january.dataset.IDataListener;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
@@ -798,8 +797,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 								if (plotD!=null) {
 									ILazyDataset set = (ILazyDataset)getLazyValue(plotD.getVariable(), null);
 										
-									if (set instanceof IErrorDataset) { // Data was all read in already.
-										IErrorDataset errSet = (IErrorDataset)set;
+									if (set instanceof IDataset) { // Data was all read in already.
+										IDataset errSet = (IDataset)set;
 										// Read plotted data into memory, so can read error data too.
 										errSet.setError(getVariableValue(ob.getVariable(), null));
 										
@@ -813,7 +812,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 						});
 					}
 
-					final boolean isDatasetError = currentSelectedData instanceof IErrorDataset && ((IErrorDataset)currentSelectedData).hasErrors();
+					final boolean isDatasetError = currentSelectedData.hasErrors();
 					final boolean isLazyError    = currentSelectedData.getError() != null;
 					if (isDatasetError || isLazyError) {
 						menuManager.add(new Action("Clear error on '"+currentSelectedData.getName()+"'") {

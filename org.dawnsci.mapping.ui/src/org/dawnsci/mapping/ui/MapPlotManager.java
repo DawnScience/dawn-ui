@@ -2,12 +2,9 @@ package org.dawnsci.mapping.ui;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -22,13 +19,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.ILazyDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.SliceND;
-import org.eclipse.dawnsci.analysis.api.metadata.AxesMetadata;
-import org.eclipse.dawnsci.analysis.dataset.impl.AbstractDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.FloatDataset;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -42,10 +32,18 @@ import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
+import org.eclipse.january.DatasetException;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.FloatDataset;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.ShapeUtils;
+import org.eclipse.january.dataset.SliceND;
+import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -145,7 +143,7 @@ public class MapPlotManager {
 		
 		Runnable r = null;
 		
-		if (AbstractDataset.squeezeShape(lz.getShape(),false).length > 1) {
+		if (ShapeUtils.squeezeShape(lz.getShape(),false).length > 1) {
 			job.cancel();
 			
 			r = new Runnable() {
@@ -154,7 +152,13 @@ public class MapPlotManager {
 				public void run() {
 					if (firstHold) data.clear();
 					firstHold = false;
-					IDataset s = lz.getSlice().squeeze();
+					IDataset s = null;
+					try {
+						s = lz.getSlice().squeeze();
+					} catch (DatasetException e) {
+						logger.error("Could not get data from lazy dataset", e);
+						return;
+					}
 					if (s != null) {
 						Dataset mergedDataset = getMergedDataset(s);
 						int pos = atomicPosition.getAndIncrement() % 4;
@@ -198,7 +202,13 @@ public class MapPlotManager {
 				
 				@Override
 				public void run() {
-					IDataset s = lz.getSlice();
+					IDataset s = null;
+					try {
+						s = lz.getSlice();
+					} catch (DatasetException e) {
+						logger.error("Could not get data from lazy dataset", e);
+						return;
+					}
 					if (s != null) {
 						final ILineTrace l = MetadataPlotUtils.buildLineTrace(s, data);
 						
@@ -484,8 +494,20 @@ public class MapPlotManager {
 			if (oaxes[i] == null) return false;
 			if (axes[i] == null) return false;
 		
-			IDataset oa = oaxes[i].getSlice();
-			IDataset a = axes[i].getSlice();
+			IDataset oa;
+			try {
+				oa = oaxes[i].getSlice();
+			} catch (DatasetException e) {
+				logger.warn("Could not get data from lazy dataset", e);
+				return false;
+			}
+			IDataset a;
+			try {
+				a = axes[i].getSlice();
+			} catch (DatasetException e) {
+				logger.warn("Could not get data from lazy dataset", e);
+				return false;
+			}
 			if (!oa.equals(a)) return false;
 		}
 		
@@ -566,9 +588,9 @@ public class MapPlotManager {
 			synchronized(this) {
 				m = merge;
 				if (m == null) {
-					int[] newShape = AbstractDataset.squeezeShape(input.getShape(), false);
+					int[] newShape = ShapeUtils.squeezeShape(input.getShape(), false);
 					for (int i = 0; i<newShape.length;i++) newShape[i]*=2;
-					FloatDataset f = new FloatDataset(newShape);
+					FloatDataset f = DatasetFactory.zeros(FloatDataset.class, newShape);
 					Arrays.fill(f.getData(), Float.NaN);
 					m = merge = f;
 

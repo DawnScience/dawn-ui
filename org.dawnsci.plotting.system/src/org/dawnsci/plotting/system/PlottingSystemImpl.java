@@ -30,12 +30,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.analysis.api.RMIServerProvider;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.dataset.IErrorDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetUtils;
-import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
 import org.eclipse.dawnsci.macro.api.IMacroService;
 import org.eclipse.dawnsci.macro.api.MacroEventObject;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -73,6 +67,11 @@ import org.eclipse.dawnsci.plotting.api.trace.IVolumeRenderTrace;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.IntegerDataset;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
@@ -402,16 +401,12 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			final ITrace trace = getTrace(y.getName());
 			if (trace!=null && trace instanceof ILineTrace) {
 
-				if (x == null) x = IntegerDataset.createRange(y.getSize());
+				if (x == null) x = DatasetFactory.createRange(IntegerDataset.class, y.getSize());
 				final IDataset finalX = x;
 				final ILineTrace lineTrace = (ILineTrace) trace;
 				updatedAndCreated.add(lineTrace);
 
-				if (!((IErrorDataset) y).hasErrors()) {
-					lineTrace.setErrorBarEnabled(false);
-				} else if (((IErrorDataset) y).hasErrors()) {
-					lineTrace.setErrorBarEnabled(true);
-				}
+				lineTrace.setErrorBarEnabled(y.hasErrors());
 
 				DisplayUtils.syncExec(new Runnable() {
 					@Override
@@ -425,7 +420,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			unfoundNames.add(dataName);
 		}
 		if (!unfoundYs.isEmpty()) {
-			if (x==null) x = IntegerDataset.createRange(unfoundYs.get(0).getSize());
+			if (x==null) x = DatasetFactory.createRange(IntegerDataset.class, unfoundYs.get(0).getSize());
 			final Collection<ITrace> news = createPlot1D(x, unfoundYs, unfoundNames, plotTitle, monitor);
 			updatedAndCreated.addAll(news);
 		}
@@ -757,8 +752,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			// No error dataset there then false again
 			boolean foundErrors = false;
 			for (IDataset ids : ysIn) {
-				if ((ids instanceof IErrorDataset && ((IErrorDataset) ids).hasErrors()) ||
-						ids.getError() != null) {
+				if (ids.hasErrors()) {
 					foundErrors = true;
 					break;
 				}
@@ -844,9 +838,9 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	@SuppressWarnings("unused")
 	private boolean isAllInts(List<Dataset> ysIn) {
 		for (Dataset a : ysIn) {
-			if (a.getDtype()!=Dataset.INT16 &&
-				a.getDtype()!=Dataset.INT32 &&
-				a.getDtype()!=Dataset.INT64) {
+			if (a.getDType()!=Dataset.INT16 &&
+				a.getDType()!=Dataset.INT32 &&
+				a.getDType()!=Dataset.INT64) {
 				return false;
 			}
 		}

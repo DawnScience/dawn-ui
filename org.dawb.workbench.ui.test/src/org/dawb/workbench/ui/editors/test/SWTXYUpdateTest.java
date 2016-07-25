@@ -9,7 +9,6 @@
 package org.dawb.workbench.ui.editors.test;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.dawb.common.ui.util.EclipseUtils;
@@ -18,12 +17,11 @@ import org.dawb.workbench.ui.editors.PlotDataEditor;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.dawnsci.analysis.api.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.Dataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.DatasetFactory;
-import org.eclipse.dawnsci.analysis.dataset.impl.IntegerDataset;
-import org.eclipse.dawnsci.analysis.dataset.impl.LongDataset;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.LongDataset;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -60,7 +58,7 @@ public class SWTXYUpdateTest {
 	public void testUpdateUnnamed() throws Throwable {
 		
 		try {
-		    createUpdateTest(createTestArraysCoherant(2, 1000, null), false, 10);
+		    createUpdateTest(SWTXYTestUtils.createTestArraysCoherent(2, 1000, null), false, 10);
 		} catch (IllegalArgumentException ne) {
 			return; // Everything ok
 		}
@@ -71,26 +69,26 @@ public class SWTXYUpdateTest {
 	@Test
 	public void testUpdateChoerant() throws Throwable {
 		
-		createUpdateTest(createTestArraysCoherant(10, 1000, "Long set "), false, 1000);
+		createUpdateTest(SWTXYTestUtils.createTestArraysCoherent(10, 1000, "Long set "), false, 1000);
 	}
 
 	@Test
 	public void testUpdateChoerantStartSmall() throws Throwable {
 		
-		createUpdateTest(createTestArraysCoherant(10, 1, "Long set "), false, 100);
+		createUpdateTest(SWTXYTestUtils.createTestArraysCoherent(10, 1, "Long set "), false, 100);
 	}
 
 	@Test
 	public void testUpdateChoerantStartZero() throws Throwable {
 		
-		createUpdateTest(createTestArraysCoherant(10, 0, "Long set "), false, 100);
+		createUpdateTest(SWTXYTestUtils.createTestArraysCoherent(10, 0, "Long set "), false, 100);
 	}
 
 	
 	@Test
 	public void testUpdateRandom() throws Throwable {
 		
-		createUpdateTest(createTestArraysRandom(25, 10), true, 200);
+		createUpdateTest(SWTXYTestUtils.createTestArraysRandom(25, 10), true, 200);
 	}
 
 
@@ -114,7 +112,7 @@ public class SWTXYUpdateTest {
 		page.setPartState(EclipseUtils.getPage().getActivePartReference(), IWorkbenchPage.STATE_MAXIMIZED);
 				
 		if (ys.get(0)==null || ys.get(0).getSize()<1) {
-		    sys.createPlot1D(new IntegerDataset(), ys, null);
+		    sys.createPlot1D(DatasetFactory.zeros(new int[0], Dataset.INT32), ys, null);
 		} else {
 		    sys.createPlot1D(DatasetFactory.createRange(0, ys.get(0).getSize(), 1, Dataset.INT32), ys, null);
 		}
@@ -150,7 +148,7 @@ public class SWTXYUpdateTest {
 					System.arraycopy(la, 0, la2, 0, la.length);
 					la2[la.length] = Math.round(yValue);
 					
-					final LongDataset ls2 = new LongDataset(la2, la2.length);
+					final Dataset ls2 = DatasetFactory.createFromObject(la2);
 					ls2.setName(ls.getName());
 				    ys.set(i, ls2);
 				}
@@ -183,37 +181,4 @@ public class SWTXYUpdateTest {
 		System.out.println("Closed: "+path);
 	}
 
-	
-	private List<IDataset> createTestArraysRandom(final int numberPlots, final int size) {
-		
-		final List<IDataset> ys = new ArrayList<IDataset>(numberPlots);
-		for (int i = 0; i < numberPlots; i++) {
-			final long[] buffer = new long[size];
-			for (int j = 0; j < size; j++) buffer[j] = Math.round(Math.random()*10000);
-			final LongDataset ls = new LongDataset(buffer,size);
-			ls.setName("Test long set "+i);
-			ys.add(ls);
-		}
-		return ys;
-	}
-	
-	private List<IDataset> createTestArraysCoherant(final int numberPlots, final int size, final String name) {
-		
-		final List<IDataset> ys = new ArrayList<IDataset>(numberPlots);
-		for (int i = 0; i < numberPlots; i++) {
-			
-			double rand = Math.random();
-			
-			final long[] buffer = new long[size];
-			for (int j = 0; j < size; j++) buffer[j] = (long)Math.pow(j+rand, 2d)*i;
-
-			final LongDataset ls = (size>0) ? new LongDataset(buffer,size) : new LongDataset();
-			if (name!=null) ls.setName(name+i);
-			ys.add(ls);
-		}
-		
-		return ys;
-	}
-
-	
 }
