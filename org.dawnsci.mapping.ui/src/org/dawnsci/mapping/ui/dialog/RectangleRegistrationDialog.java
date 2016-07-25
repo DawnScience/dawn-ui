@@ -22,6 +22,7 @@ import org.eclipse.january.DatasetException;
 import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.LinearAlgebra;
 import org.eclipse.january.dataset.RGBDataset;
@@ -192,7 +193,7 @@ public class RectangleRegistrationDialog extends Dialog {
 		if (image instanceof RGBDataset) {
 			
 			RGBDataset rgb = (RGBDataset)image;
-			im = new RGBDataset(mrc.value(rgb.getRedView()).get(0),
+			im = DatasetUtils.createCompoundDataset(RGBDataset.class, mrc.value(rgb.getRedView()).get(0),
 								mrc.value(rgb.getGreenView()).get(0),
 								mrc.value(rgb.getBlueView()).get(0));
 			
@@ -305,7 +306,7 @@ public class RectangleRegistrationDialog extends Dialog {
 		if (image instanceof RGBDataset) {
 			
 			RGBDataset rgb = (RGBDataset)image;
-			im = new RGBDataset(mrc.value(rgb.getRedView()).get(0),
+			im = DatasetUtils.createCompoundDataset(RGBDataset.class, mrc.value(rgb.getRedView()).get(0),
 								mrc.value(rgb.getGreenView()).get(0),
 								mrc.value(rgb.getBlueView()).get(0));
 			
