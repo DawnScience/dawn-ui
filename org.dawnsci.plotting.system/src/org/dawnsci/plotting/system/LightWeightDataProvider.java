@@ -199,9 +199,9 @@ class LightWeightDataProvider implements IDataProvider {
 	}
 
 	public boolean hasErrors() {
-		if (x.hasErrors())
+		if (x != null && x.hasErrors())
 			return true;
-		if (y.hasErrors())
+		if (y != null && y.hasErrors())
 			return true;
 		return false;
 	}
