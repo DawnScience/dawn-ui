@@ -21,16 +21,16 @@
       <introPage
             content_file="content/page1content.md"
             id="org.dawnsci.webintro.content.introPage1"
-            name="Intro Page 1"
+            name="Demo"
             ordering="1"
             page_id="welcome">
       </introPage>
       <introPage
-            content_file="content/page2content.md"
-            id="org.dawnsci.webintro.content.introPage2"
-            name="Intro Page 2"
-            ordering="1"
-            page_id="welcome2">
+            content_file="pages/overview.md"
+            id="org.dawnsci.webintro.pages.overview"
+            name="Overview"
+            ordering="2"
+            page_id="overview">
       </introPage>
    </extension>
 <extension
@@ -40,21 +40,43 @@
          description="A description here"
          id="org.dawnsci.webintro.introContent1"
          name="This is a content contribution"
-         page_id="welcome">
+         parent_id="welcome">
    </introContent>
    <introLink
          description="This is an introLink contribution, it should take you to the **dawn** website"
          href="http://dawnsci.org"
          id="org.dawnsci.webintro.introLink1"
          name="A Link to a website"
-         page_id="welcome">
+         parent_id="welcome">
    </introLink>
    <introAction
          class="org.dawnsci.webintro.actions.OpenCheatsheetAction:uk.ac.diamond.scisoft.analysis.rcp.contributions.NeXusScansCheatsheet"
          description="This should hopefully open a cheat sheet"
          id="org.dawnsci.webintro.introAction2"
          name="Open Cheat Sheet"
-         page_id="welcome">
+         parent_id="cat1">
    </introAction>
+   <introContent
+         content_file="content/about-dawn.md"
+         id="org.dawnsci.webintro.content.about-dawn"
+         name="About DAWN"
+         ordering="1"
+         parent_id="cat1">
+   </introContent>
+   <introLink
+         description="Link to the description of the EPL license used in DAWN"
+         href="http://www.eclipse.org/legal/epl-v10.html"
+         id="org.dawnsci.webintro.content.licence"
+         name="License"
+         ordering="2"
+         parent_id="overview">
+   </introLink>
+   <introCategory
+         category_id="cat1"
+         description="Test category, hopefully this will animate nicely"
+         id="org.dawnsci.webintro.introCategory1"
+         name="Test Category"
+         parent_id="welcome">
+   </introCategory>
 </extension>
 </plugin>

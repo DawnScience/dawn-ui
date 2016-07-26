@@ -21,6 +21,7 @@
             <element ref="introAction" minOccurs="0" maxOccurs="unbounded"/>
             <element ref="introContent" minOccurs="0" maxOccurs="unbounded"/>
             <element ref="introLink" minOccurs="0" maxOccurs="unbounded"/>
+            <element ref="introCategory" minOccurs="0" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -87,6 +88,20 @@
                </appinfo>
             </annotation>
          </attribute>
+         <attribute name="parent_id" type="string" use="required">
+            <annotation>
+               <documentation>
+                  The parent which this action should be added to. This can be an introPage or an introCategory. If the page/category does not exist, this contribution will be added to an &quot;other&quot; page.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="ordering" type="string">
+            <annotation>
+               <documentation>
+                  An integer describing the location in the list for this contributions. If two items are contributed with the same number, their position cannot be guarenteed. If no integer is provided, the contribution will be added to the end of the list in the order that the plugin is loaded.
+               </documentation>
+            </annotation>
+         </attribute>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
@@ -98,20 +113,6 @@ org.dawnsci.webintro.actions.OpenCheatsheetAction:org.example.cheatsheets.MyDemo
                <appinfo>
                   <meta.attribute kind="java" basedOn=":org.eclipse.ui.IActionDelegate"/>
                </appinfo>
-            </annotation>
-         </attribute>
-         <attribute name="page_id" type="string" use="required">
-            <annotation>
-               <documentation>
-                  The intro page which this action should be added to. If this page has not been contributed to the org.dawnsci.webintro.page extension point, then a new page will be created with name=id
-               </documentation>
-            </annotation>
-         </attribute>
-         <attribute name="ordering" type="string">
-            <annotation>
-               <documentation>
-                  An integer describing the location in the list for this contributions. If two items are contributed with the same number, their position cannot be guarenteed. If no integer is provided, the contribution will be added to the end of the list in the order that the plugin is loaded.
-               </documentation>
             </annotation>
          </attribute>
       </complexType>
@@ -138,14 +139,11 @@ org.dawnsci.webintro.actions.OpenCheatsheetAction:org.example.cheatsheets.MyDemo
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="content_file" type="string">
+         <attribute name="description" type="string">
             <annotation>
                <documentation>
-                  The content of the page, displayed above the list of actions. Can be formatted with markdown
+                  Short description of the content, can be formatted with markdown
                </documentation>
-               <appinfo>
-                  <meta.attribute kind="resource"/>
-               </appinfo>
             </annotation>
          </attribute>
          <attribute name="icon" type="string">
@@ -158,10 +156,10 @@ org.dawnsci.webintro.actions.OpenCheatsheetAction:org.example.cheatsheets.MyDemo
                </appinfo>
             </annotation>
          </attribute>
-         <attribute name="page_id" type="string" use="required">
+         <attribute name="parent_id" type="string" use="required">
             <annotation>
                <documentation>
-                  The intro page which this action should be added to. If this page has not been contributed to the org.dawnsci.webintro.page extension point, then a new page will be created with name=id
+                  The parent which this action should be added to. This can be an introPage or an introCategory. If the page/category does not exist, this contribution will be added to an &quot;other&quot; page.
                </documentation>
             </annotation>
          </attribute>
@@ -172,11 +170,14 @@ org.dawnsci.webintro.actions.OpenCheatsheetAction:org.example.cheatsheets.MyDemo
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="description" type="string">
+         <attribute name="content_file" type="string">
             <annotation>
                <documentation>
-                  Some description for the link here
+                  The content to be displayed in the popup. Can be formatted with markdown, and contain images.
                </documentation>
+               <appinfo>
+                  <meta.attribute kind="resource"/>
+               </appinfo>
             </annotation>
          </attribute>
       </complexType>
@@ -203,10 +204,10 @@ org.dawnsci.webintro.actions.OpenCheatsheetAction:org.example.cheatsheets.MyDemo
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="href" type="string">
+         <attribute name="description" type="string">
             <annotation>
                <documentation>
-                  The content of the page, displayed above the list of actions. Can be formatted with markdown
+                  Short description of the link, can be formatted with markdown
                </documentation>
             </annotation>
          </attribute>
@@ -220,7 +221,69 @@ org.dawnsci.webintro.actions.OpenCheatsheetAction:org.example.cheatsheets.MyDemo
                </appinfo>
             </annotation>
          </attribute>
-         <attribute name="page_id" type="string" use="required">
+         <attribute name="parent_id" type="string" use="required">
+            <annotation>
+               <documentation>
+                  The parent which this action should be added to. This can be an introPage or an introCategory. If the page/category does not exist, this contribution will be added to an &quot;other&quot; page.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="ordering" type="string">
+            <annotation>
+               <documentation>
+                  An integer describing the location in the list for this contributions. If two items are contributed with the same number, their position cannot be guarenteed. If no integer is provided, the contribution will be added to the end of the list in the order that the plugin is loaded.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="href" type="string">
+            <annotation>
+               <documentation>
+                  This link which will be opened in the user&apos;s browser. Should include the protocol (e.g. http://dawnsci.org)
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="introCategory">
+      <annotation>
+         <documentation>
+            Adds a link to the list on one of the intro pages, opens a web browser
+         </documentation>
+      </annotation>
+      <complexType>
+         <attribute name="id" type="string" use="required">
+            <annotation>
+               <documentation>
+                  A unique id for the action
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="name" type="string" use="required">
+            <annotation>
+               <documentation>
+                  The &apos;title&apos; of the content
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="description" type="string">
+            <annotation>
+               <documentation>
+                  Some description for the link here
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="icon" type="string">
+            <annotation>
+               <documentation>
+                  An icon for the action, in a web-friendly image format (e.g. JPG, PNG, GIF)
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="resource"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+         <attribute name="parent_id" type="string" use="required">
             <annotation>
                <documentation>
                   The intro page which this action should be added to. If this page has not been contributed to the org.dawnsci.webintro.page extension point, then a new page will be created with name=id
@@ -234,10 +297,10 @@ org.dawnsci.webintro.actions.OpenCheatsheetAction:org.example.cheatsheets.MyDemo
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="description" type="string">
+         <attribute name="category_id" type="string">
             <annotation>
                <documentation>
-                  Some description for the link here
+                  The parent which this action should be added to. This must be an introPage, not an introCategory. If the page/category does not exist, this contribution will be added to an &quot;other&quot; page.
                </documentation>
             </annotation>
          </attribute>

@@ -1,0 +1,168 @@
+@charset "UTF-8";
+
+@import "materialize";
+@import "compass/css3";
+
+html{
+	background-image: url("../img/dawn_background.jpg");
+	background-size: cover;
+	background-position: center;
+	background-attachment: fixed;
+}
+
+#index-banner h1{
+	margin:0;
+}
+
+#main-content{
+	background:white;
+	padding:0rem 2rem 2rem 2rem ;
+	@include border-radius(4px, 4px);
+}
+
+#main-content, ul.tabs, li.collection-item
+{
+	//background: lighten(#4964f3, 25%) !important;
+	//background: lighten(#605db4, 25%) !important;
+}
+
+.collection {
+	overflow:visible;
+	border:0;
+}
+
+.collection li{
+	border-left: 1px solid $collection-border-color;
+	border-right: 1px solid $collection-border-color;
+	
+	&:first-child{
+		border-top:1px solid $collection-border-color;		
+	}
+	
+	&:last-child{
+		border-bottom:1px solid $collection-border-color !important;		
+	}
+	
+	&.active + li{
+		border-top:1px solid $collection-border-color;
+	}
+}
+
+
+
+.collection .collection-item .square {
+	position:absolute;
+	width:42px;
+	height:42px;
+	overflow:hidden;
+	left:15px;
+	display:inline-block;
+	vertical-align:middle;
+	background-color:#eee;
+}
+
+li.collection-item {
+	display:block;
+	@include transition( margin 0.8s);
+}
+
+ul.main-list>li {
+	opacity:0;
+}
+
+li.collection-item:hover {
+	background-color:#eee;
+}
+
+.modal img{
+	max-width:100%;
+	height:auto;
+	margin-left:auto;
+	margin-right:auto;
+	display:block;
+}
+
+.popout-item {
+	cursor:pointer;
+}
+.popout-item div.main{
+	padding-left:52px;	
+	width:100%;
+}
+
+.popout-item div.popout{
+	overflow:hidden;
+	display:none;
+	position:absolute;
+	right:0;
+  	top: 50%;
+ 	@include transform( translate(0,-50%));
+
+	margin:auto;
+		
+	ul.collection{
+		border: 4px solid $collection-active-bg-color !important;
+	}
+}
+
+.popout-item.active{
+	overflow:visible;
+	z-index:99!important;
+	margin:1rem 0!important;
+	position:relative;
+	margin-left:1rem!important;
+	margin-right:-1rem!important;
+
+	border:none !important;
+	
+	&:after {
+			@extend .z-depth-2;
+		    content: '';
+		    position: absolute;
+		    top: 0;
+		    left: 0;
+		    width: 100%;
+		    height: 100%;
+		    
+		}
+	
+	div.popout{
+		display:inline-block;
+		z-index:999;
+		
+		height:auto;
+		
+		width:50%;
+		
+		ul.collection{
+			@extend .collection;
+			margin:0;
+			
+			li{
+			color:$off-black;
+			}
+			
+			.secondary-content{
+				color:$secondary-color;
+			}
+			
+		}
+		
+		&:after {
+			@extend .z-depth-2;
+		    content: '';
+		    position: absolute;
+		    top: 0;
+		    left: 0;
+		    width: 100%;
+		    height: 100%;
+		}
+	}
+	
+	div.main{
+		width:50%;
+		display:inline-block;
+		z-index:999;
+		padding-right:20px;
+	}
+}

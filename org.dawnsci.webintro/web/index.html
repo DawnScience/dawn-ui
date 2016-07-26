@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <link href="http://fonts.googleapis.com/icon?family=Material+Icons"
 	rel="stylesheet">
-<link type="text/css" rel="stylesheet" href="css/materialize.min.css"
-	media="screen,projection" />
 <link type="text/css" rel="stylesheet" href="css/style.css"
 	media="screen,projection" />
 
@@ -13,18 +11,13 @@
 
 <script id="tpl-tab_headings" type="text/x-handlebars-template">
 	{{#each pages}}
-		<li class="tab"><a href="#{{page_id}}">{{name}}</a></li>
+		<li class="tab"><a href="#{{losedots page_id}}">{{name}}</a></li>
 	{{/each}}
 </script>
 
-<script id="tpl-tab_content" type="text/x-handlebars-template">
-	{{#each pages}}
-		<div id="{{page_id}}" class="col s12">
-			{{{content_rendered}}}
-			{{#each items}}
-				{{#if @first}}
-					<ul class="collection">
-				{{/if}}
+<script id="tpl-item" type="text/x-handlebars-template">
+			{{#with item}}
+
 				{{#if isContent}}
 					<li class="collection-item avatar waves-effect content-trigger" href="#modal-{{losedots id}}">
 				{{else if isAction}}
@@ -32,12 +25,6 @@
 				{{else if isLink}}
 					<li class="collection-item avatar waves-effect link-trigger" href="#" data-href="{{{href}}}">
 				{{/if}}
-
-					<img src="{{image}}" alt="" class="square">
-					<span class="title">{{name}}</span>
-
-					{{{description_rendered}}}
-
 					<span class="secondary-content"><i class="material-icons">
 					{{#if isContent}} &#xE88F;
 					{{else if isAction}} &#xE8D8;
@@ -45,10 +32,65 @@
 					{{/if}}
 					</i></span>
 
+					<img src="{{image}}" alt="" class="square">
+					<span class="title">{{name}}</span>
+
+					{{{description_rendered}}}
 				</li>
-				
-				{{#if content}}
-					 <div id="modal-{{losedots id}}" class="modal">
+{{/with}}
+</script>
+
+<script id="tpl-tab_content" type="text/x-handlebars-template">
+	{{#each pages}}
+		<div id="{{losedots page_id}}" class="col s12">
+			{{{content_rendered}}}
+			{{#each items as |item |}}
+				{{#if @first}}
+					<ul class="collection main-list">
+				{{/if}}
+
+				{{#if item.isCategory}}
+					{{#with item}}
+					<li class="popout-item collection-item " href="#">
+					<div class="main">
+					<span class="secondary-content"><i class="material-icons">&#xe8ef;</i></span>
+
+					<img src="{{image}}" alt="" class="square">
+					<span class="title">{{name}}</span>
+
+					{{{description_rendered}}}
+
+					
+					</div>
+					<div class="popout">
+						<ul class="collection">
+							{{#each items as |catItem|}}
+								{{> itemRender item=catItem }}
+							{{/each}}
+						</ul>
+					</div>
+					{{/with}}
+				{{else}}
+					{{> itemRender item=item }}
+				{{/if}}
+
+				{{#if @last}}
+					</ul>
+				{{/if}}
+			
+			{{/each}}		
+			
+</div>
+		</div>
+		
+	{{/each}}
+</script>
+
+<script id="tpl-modal_data" type="text/x-handlebars-template">
+	{{#each pages}}
+			{{#each items}}
+				{{#if isContent}}
+					 <div id="modal-{{losedots id}}" class="modal modal-fixed-footer">
    						 <div class="modal-content">
   						    <h4>{{name}}</h4>
    						   {{{content_rendered}}}
@@ -57,68 +99,44 @@
   						    <a href="#" class="modal-action modal-close waves-effect btn-flat">Close</a>
  						</div>
  					 </div>
-				{{/if}}
+				{{else if isCategory}}
+					 {{#each items}}
+<div id="modal-{{losedots id}}" class="modal modal-fixed-footer">
+   						 <div class="modal-content">
+  						    <h4>{{name}}</h4>
+   						   {{{content_rendered}}}
+  						  </div>
+  						  <div class="modal-footer">
+  						    <a href="#" class="modal-action modal-close waves-effect btn-flat">Close</a>
+ 						</div>
+ 					 </div>
 
-				{{#if @last}}
-					</ul>
+					{{/each}}
 				{{/if}}
-			{{/each}}		
-			</div>
-		</div>
+			{{/each}}
 	{{/each}}
 </script>
 
 </head>
 
 <body>
-
-	<!-- <header>
-		<div class="navbar-fixed">
-			<nav>
-				<div class="nav-wrapper grey darken-4">
-					<div class="container">
-						<ul class="right hide-on-med-and-down">
-							<li><form>
-									<div class="input-field grey darken-3">
-										<input id="search" type="search" required> <label
-											for="search"><i class="material-icons">&#xE8B6;</i></label> <i
-											class="material-icons">&#xE5CD;</i>
-									</div>
-								</form></li>
-						</ul>
-
-					</div>
-				</div>
-			</nav>
-
-		</div>
-	</header> -->
-	<main>
-
 	<div class="section" id="index-banner">
 		<div class="container">
-
-			<h1 class="center yellow-text">
+			<h1 class="center">
 				<img id="dawn_logo" class="responsive-img" src="img/dawn_logo.png"></img>
 			</h1>
-			<!-- <div class="row center">
-				<a href="#"
-					id="download-button"
-					class="btn-large waves-effect waves-light blue">Get Started</a>
-			</div>  -->
-
 		</div>
 	</div>
 
 	<div class="section">
-		<div class="container">
+		<div id="main-content" class="container">
 			<div class="row ">
 				<div class="col s12">
 					<ul class="tabs">
 						<li class="tab" id="placeholder-tab_headings"><a href="#placeholder-tab_content">...</a></li>
 					</ul>
 				</div>
-				<div id="placeholder-tab_content" class="center-align">
+				<div id="placeholder-tab_content" class="center-align col s12">
 					<div class="preloader-wrapper big active">
 						<div class="spinner-layer spinner-blue-only">
 							<div class="circle-clipper left">
@@ -136,19 +154,14 @@
 			</div>
 		</div>
 	</div>
-	</div>
 
-	</main>
+	<div id="placeholder-modal_data" ></div>
 
-	<!-- <div id="banner" class="section blue">
-		<div class="container">
-			<h1 class="title">DAWN Science</h1>
-		</div>
-	</div> -->
 	<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
 	<script type="text/javascript" src="js/materialize.min.js"></script>
 	<script type="text/javascript" src="js/marked.js"></script>
 	<script type="text/javascript" src="js/handlebars-v4.0.5.js"></script>
 	<script type="text/javascript" src="js/init.js"></script>
+	<!-- <a href="javascript:(function(F,i,r,e,b,u,g,L,I,T,E){if(F.getElementById(b))return;E=F[i+'NS']&&F.documentElement.namespaceURI;E=E?F[i+'NS'](E,'script'):F[i]('script');E[r]('id',b);E[r]('src',I+g+T);E[r](b,u);(F[e]('head')[0]||F[e]('body')[0]).appendChild(E);E=new%20Image;E[r]('src',I+L);})(document,'createElement','setAttribute','getElementsByTagName','FirebugLite','4','firebug-lite.js','releases/lite/latest/skin/xp/sprite.png','https://getfirebug.com/','#startOpened');">Do thing</a> -->
 </body>
 </html>
