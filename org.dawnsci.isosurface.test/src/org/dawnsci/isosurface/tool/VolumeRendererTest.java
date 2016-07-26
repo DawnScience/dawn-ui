@@ -21,7 +21,7 @@ public class VolumeRendererTest {
 	private final double intensity = .2;
 	private final double opacity = .3;
 	private final IDataset data = DatasetFactory.createRange(DoubleDataset.class, 10, 8010, 1).reshape(20, 20, 20);
-	private final IDataset afterSlicing = DoubleDataset
+	private final IDataset afterSlicing = DatasetFactory
 			.createFromObject(new double[]{10, 20, 210, 220, 4010, 4020, 4210, 4220})
 			.reshape(2,2,2);
 	private final double min = 0.2;
