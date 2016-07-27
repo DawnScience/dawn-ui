@@ -12,7 +12,7 @@ import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
-import org.eclipse.january.dataset.IRemoteDataset;
+import org.eclipse.january.dataset.IDatasetConnector;
 import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.metadata.AxesMetadata;
@@ -79,7 +79,7 @@ public class MappedFileFactory {
 		
 		List<String> axesNames = Arrays.asList(bean.getAxes());
 		if (live != null) {
-			IRemoteDataset lz = getRemoteDataset(path,blockName,live);
+			IDatasetConnector lz = getRemoteDataset(path,blockName,live);
 			LiveRemoteAxes remoteAxes = getRemoteAxes(axesNames, path, bean, live);
 			block = new LiveMappedDataBlock(blockName, lz, bean.getxDim(), bean.getyDim(), path, remoteAxes, live.getHost(),live.getPort());
 			return block;
@@ -188,7 +188,7 @@ public class MappedFileFactory {
 	}
 	
 	private static LiveRemoteAxes getRemoteAxes(List<String> axes, String path, MappedBlockBean bean, LiveDataBean live) {
-		IRemoteDataset[] r = new IRemoteDataset[axes.size()];
+		IDatasetConnector[] r = new IDatasetConnector[axes.size()];
 		String[] axesNames = new String[axes.size()];
 		
 		for (int i = 0; i < axes.size(); i++) {
@@ -268,18 +268,18 @@ public class MappedFileFactory {
 			return lazyDataset;
 		} 
 		
-		return getRemoteDataset(path, name, lb);
+		return getRemoteDataset(path, name, lb).getDataset();
 	}
 	
 	private static ILazyDataset getLazyDataset(String path, String name) throws Exception {
 		return getLazyDataset(path, name, null);
 	}
 	
-	private static IRemoteDataset getRemoteDataset(String path, String name, LiveDataBean lb) {
+	private static IDatasetConnector getRemoteDataset(String path, String name, LiveDataBean lb) {
 		IRemoteDatasetService rds = LocalServiceManager.getRemoteDatasetService();
-		IRemoteDataset remote = rds.createRemoteDataset(lb.getHost(), lb.getPort());
+		IDatasetConnector remote = rds.createRemoteDataset(lb.getHost(), lb.getPort());
 		remote.setPath(path);
-		remote.setDataset(name);
+		remote.setDatasetName(name);
 		
 		return remote;
 	}

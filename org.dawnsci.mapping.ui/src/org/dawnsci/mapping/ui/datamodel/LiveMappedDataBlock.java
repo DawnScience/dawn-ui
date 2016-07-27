@@ -8,7 +8,7 @@ import org.eclipse.january.DatasetException;
 import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
-import org.eclipse.january.dataset.IRemoteDataset;
+import org.eclipse.january.dataset.IDatasetConnector;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.january.metadata.MetadataFactory;
@@ -24,8 +24,8 @@ public class LiveMappedDataBlock extends MappedDataBlock implements ILiveData {
 	private String host;
 	private static final Logger logger = LoggerFactory.getLogger(LiveMappedDataBlock.class);
 	
-	public LiveMappedDataBlock(String name, IRemoteDataset dataset, int xDim, int yDim, String path, LiveRemoteAxes axes, String host, int port) {
-		super(name, dataset, xDim, yDim, path);
+	public LiveMappedDataBlock(String name, IDatasetConnector dataset, int xDim, int yDim, String path, LiveRemoteAxes axes, String host, int port) {
+		super(name, dataset.getDataset(), xDim, yDim, path);
 		this.axes = axes;
 		this.port = port;
 		this.host = host;
@@ -33,9 +33,9 @@ public class LiveMappedDataBlock extends MappedDataBlock implements ILiveData {
 	
 	public ILazyDataset getSpectrum(int x, int y) {
 		
-		((IRemoteDataset)dataset).refreshShape();
+		((IDatasetConnector)dataset).refreshShape();
 		
-		for (IRemoteDataset a : axes.getAxes()) {
+		for (IDatasetConnector a : axes.getAxes()) {
 			if (a != null) a.refreshShape();
 		}
 		
@@ -57,7 +57,7 @@ public class LiveMappedDataBlock extends MappedDataBlock implements ILiveData {
 			for (int i = 0; i < dataset.getRank(); i++) {
 				if (i == xDim || i == yDim || axes.getAxes()[i] == null) continue;
 				try {
-					ax.setAxis(i, axes.getAxes()[i].getSlice());
+					ax.setAxis(i, axes.getAxes()[i].getDataset().getSlice());
 				} catch (DatasetException e) {
 					logger.error("Could not get data from lazy dataset for axis " + i, e);
 				}
@@ -78,7 +78,7 @@ public class LiveMappedDataBlock extends MappedDataBlock implements ILiveData {
 		connected = true;
 		
 		try {
-			((IRemoteDataset)dataset).connect();
+			((IDatasetConnector)dataset).connect();
 		} catch (Exception e) {
 			connected = false;
 			logger.error("Could not connect to " + toString());
@@ -97,7 +97,7 @@ public class LiveMappedDataBlock extends MappedDataBlock implements ILiveData {
 	public boolean disconnect(){
 		
 		try {
-			((IRemoteDataset)dataset).disconnect();
+			((IDatasetConnector)dataset).disconnect();
 		} catch (Exception e) {
 			logger.error("Could not disconnect from " + toString());
 			return false;
@@ -116,15 +116,15 @@ public class LiveMappedDataBlock extends MappedDataBlock implements ILiveData {
 		
 		boolean success = true;
 		
-		for (IRemoteDataset a : axes.getAxes()) {
-			if (a instanceof IRemoteDataset) {
+		for (IDatasetConnector a : axes.getAxes()) {
+			if (a instanceof IDatasetConnector) {
 				
 				try {
 					if (connect) a.connect();
 					else a.disconnect();
 				}
 				catch (Exception e) {
-					logger.error("Error communicating with " + a.getName());
+					logger.error("Error communicating with " + a.getDataset().getName());
 					success = false;
 				} 
 			}
@@ -136,7 +136,7 @@ public class LiveMappedDataBlock extends MappedDataBlock implements ILiveData {
 				else axes.getxAxisForRemapping().disconnect();
 			}
 			catch (Exception e) {
-				logger.error("Error communicating with " + axes.getxAxisForRemapping().getName());
+				logger.error("Error communicating with " + axes.getxAxisForRemapping().getDataset().getName());
 				success = false;
 			} 
 		}
@@ -152,8 +152,8 @@ public class LiveMappedDataBlock extends MappedDataBlock implements ILiveData {
 		
 		if (!connected) return null;
 		
-		if (axes.getxAxisForRemapping() != null) return new ILazyDataset[]{axes.getxAxisForRemapping()};
-		return new ILazyDataset[]{axes.getAxes()[xDim]};
+		if (axes.getxAxisForRemapping() != null) return new ILazyDataset[]{axes.getxAxisForRemapping().getDataset()};
+		return new ILazyDataset[]{axes.getAxes()[xDim].getDataset()};
 	}
 	
 	public ILazyDataset[] getYAxis() {
@@ -163,7 +163,7 @@ public class LiveMappedDataBlock extends MappedDataBlock implements ILiveData {
 		
 		if (!connected) return null;
 		
-		return new ILazyDataset[]{axes.getAxes()[yDim]};
+		return new ILazyDataset[]{axes.getAxes()[yDim].getDataset()};
 	}
 
 	protected double[] calculateRange(ILazyDataset block){

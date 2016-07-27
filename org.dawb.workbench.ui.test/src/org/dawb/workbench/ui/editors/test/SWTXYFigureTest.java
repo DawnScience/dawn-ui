@@ -16,8 +16,7 @@ import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.LightweightSystem;
-import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.IRemoteDataset;
+import org.eclipse.january.dataset.IDatasetConnector;
 import org.eclipse.richbeans.widgets.util.SWTUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
@@ -71,7 +70,7 @@ public class SWTXYFigureTest {
 		path = path.substring(1);
 		// load data stream
 		IRemoteDatasetService remote = (IRemoteDatasetService) ServiceManager.getService(IRemoteDatasetService.class);
-		IRemoteDataset data = remote.createGrayScaleMJPGDataset(new URL("http://bl11i-di-serv-01:8082/ALCAM2.MJPG.mjpg"), 100, 10);
+		IDatasetConnector data = remote.createGrayScaleMJPGDataset(new URL("http://bl11i-di-serv-01:8082/ALCAM2.MJPG.mjpg"), 100, 10);
 		data.connect();
 
 		// set plot auto scale off
@@ -79,7 +78,7 @@ public class SWTXYFigureTest {
 
 		// plot an image
 		try {
-			system.updatePlot2D((IDataset) data, null, null);
+			system.updatePlot2D(data.getSlice(), null, null);
 			// set palette
 			IImageTrace image = (IImageTrace)system.getTraces().iterator().next();
 			image.setPalette("Nipy Spectral");

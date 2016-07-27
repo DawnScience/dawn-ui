@@ -1,20 +1,20 @@
 package org.dawnsci.mapping.ui.datamodel;
 
-import org.eclipse.january.dataset.IRemoteDataset;
+import org.eclipse.january.dataset.IDatasetConnector;
 
 public class LiveRemoteAxes {
 
-	private IRemoteDataset[] axes;
+	private IDatasetConnector[] axes;
 	private String[] axesNames;
-	private IRemoteDataset xAxisForRemapping;
+	private IDatasetConnector xAxisForRemapping;
 	private String xAxisForRemappingName;
 
-	public LiveRemoteAxes(IRemoteDataset[] axes, String[] axesNames) {
+	public LiveRemoteAxes(IDatasetConnector[] axes, String[] axesNames) {
 		this.axes = axes;
 		this.axesNames = axesNames;
 	}
 	
-	public IRemoteDataset getxAxisForRemapping() {
+	public IDatasetConnector getxAxisForRemapping() {
 		return xAxisForRemapping;
 	}
 	
@@ -30,11 +30,11 @@ public class LiveRemoteAxes {
 		return axesNames;
 	}
 
-	public void setxAxisForRemapping(IRemoteDataset ds){
+	public void setxAxisForRemapping(IDatasetConnector ds){
 		this.xAxisForRemapping = ds;
 	}
 	
-	public IRemoteDataset[] getAxes() {
+	public IDatasetConnector[] getAxes() {
 		return axes;
 	}
 	

@@ -7,7 +7,7 @@ import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataListener;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
-import org.eclipse.january.dataset.IRemoteDataset;
+import org.eclipse.january.dataset.IDatasetConnector;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.january.metadata.MetadataFactory;
@@ -19,16 +19,16 @@ public class LiveMappedData extends MappedData implements ILiveData {
 	private boolean connected = false;
 	private static final Logger logger = LoggerFactory.getLogger(LiveMappedData.class);
 	
-	public LiveMappedData(String name, IRemoteDataset map, LiveMappedDataBlock parent, String path) {
-		super(name, map, parent, path);
+	public LiveMappedData(String name, IDatasetConnector map, LiveMappedDataBlock parent, String path) {
+		super(name, map.getDataset(), parent, path);
 	}
 
 	@Override
 	public boolean connect() {
 		
 		try {
-			((IRemoteDataset)baseMap).connect();
-			((IRemoteDataset)baseMap).addDataListener(new IDataListener() {
+			((IDatasetConnector)baseMap).connect();
+			((IDatasetConnector)baseMap).addDataListener(new IDataListener() {
 				
 				@Override
 				public void dataChangePerformed(DataEvent evt) {
@@ -52,7 +52,7 @@ public class LiveMappedData extends MappedData implements ILiveData {
 	@Override
 	public boolean disconnect() {
 		try {
-			((IRemoteDataset)baseMap).disconnect();
+			((IDatasetConnector)baseMap).disconnect();
 		} catch (Exception e) {
 			logger.error("Could not disconnect from " + toString());
 			return false;
@@ -80,7 +80,7 @@ public class LiveMappedData extends MappedData implements ILiveData {
 		IDataset ma = null;
 		
 		try{
-			((IRemoteDataset)baseMap).refreshShape();
+			((IDatasetConnector)baseMap).refreshShape();
 			ma = baseMap.getSlice();
 		} catch (Exception e) {
 			//TODO log?
@@ -98,8 +98,8 @@ public class LiveMappedData extends MappedData implements ILiveData {
 		ILazyDataset ly = parent.getYAxis()[0];
 		ILazyDataset lx = parent.getXAxis()[0];
 		
-		((IRemoteDataset)ly).refreshShape();
-		((IRemoteDataset)lx).refreshShape();
+		((IDatasetConnector)ly).refreshShape();
+		((IDatasetConnector)lx).refreshShape();
 		
 		IDataset x;
 		IDataset y;
