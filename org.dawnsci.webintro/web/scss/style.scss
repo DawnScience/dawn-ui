@@ -20,12 +20,6 @@ html{
 	@include border-radius(4px, 4px);
 }
 
-#main-content, ul.tabs, li.collection-item
-{
-	//background: lighten(#4964f3, 25%) !important;
-	//background: lighten(#605db4, 25%) !important;
-}
-
 .collection {
 	overflow:visible;
 	border:0;
@@ -99,10 +93,8 @@ li.collection-item:hover {
  	@include transform( translate(0,-50%));
 
 	margin:auto;
-		
-	ul.collection{
-		border: 4px solid $collection-active-bg-color !important;
-	}
+	border: 4px solid $collection-active-bg-color !important;
+
 }
 
 .popout-item.active{
@@ -139,7 +131,7 @@ li.collection-item:hover {
 			margin:0;
 			
 			li{
-			color:$off-black;
+				color:$off-black;
 			}
 			
 			.secondary-content{
@@ -165,4 +157,9 @@ li.collection-item:hover {
 		z-index:999;
 		padding-right:20px;
 	}
+}
+
+/* Fix an issue with materialize not using transform webkit prefixes */
+.input-field label.active{
+	@include transform( translateY(-140%));
 }

@@ -78,5 +78,11 @@
          name="Test Category"
          parent_id="welcome">
    </introCategory>
+   <introContent
+         description="Open a feedback form"
+         id="uk.ac.diamond.scisoft.feedback"
+         name="Leave Feedback"
+         parent_id="org.dawnsci.webintro.introContent1">
+   </introContent>
 </extension>
 </plugin>

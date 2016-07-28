@@ -9,14 +9,12 @@
 package org.dawnsci.webintro.views;
 
 import org.dawnsci.webintro.Activator;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtension;
+import org.dawnsci.webintro.FeedbackUtil;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ControlContribution;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
@@ -196,6 +194,7 @@ public class WelcomePart extends IntroPart {
 					if (newState == State.SUCCEEDED){
 						JSObject jsobj = (JSObject) webEngine.executeScript("window");
 						jsobj.setMember("java", new JSBridge());
+						jsobj.setMember("feedbackUtil", new FeedbackUtil());
 						webEngine.executeScript("javaReady();");
 						System.out.println("Called java");
 					}

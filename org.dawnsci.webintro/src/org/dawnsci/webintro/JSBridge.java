@@ -59,9 +59,9 @@ public class JSBridge {
 
 			return outputString;
 		} catch (IOException e) {
-			e.printStackTrace();
+			return "";
 		}
-		return null;
+		
 	}
 
 	private IConfigurationElement[] getRegisteredConfigs(String point){

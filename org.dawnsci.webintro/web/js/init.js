@@ -1,10 +1,10 @@
 console.log("Loaded init js");
 
-demoData = {"pages":[{"id":"org.dawnsci.webintro.content.introPage1","page_id":"welcome","name":"Demo","content":"**Hello, this is some test content**\n~~Now with some new lines~~\n","items":[{"id":"org.dawnsci.webintro.introCategory1","name":"Test Category","image":"","description":"Test category, hopefully this will animate nicely","isContent":false,"isAction":false,"isLink":false,"isCategory":true,"items":[{"id":"org.dawnsci.webintro.introAction2","name":"Open Cheat Sheet","image":"","description":"This should hopefully open a cheat sheet","isContent":false,"isAction":true,"isLink":false,"isCategory":false},{"id":"org.dawnsci.webintro.content.about-dawn","name":"About DAWN","image":"","description":"","isContent":true,"isAction":false,"isLink":false,"isCategory":false,"content":"![alt text](platform:/plugin/org.dawnsci.webintro/content/img/about_dawn_image.png \"DAWN Logo\")\n\nDAWN is an open source software built on the Eclipse/RCP platform in order to scale to address a wide range of applications and to benefit from the workbench and advanced plugin system implemented in Eclipse. The main scientific domains which DAWN targets are powder diffraction, macromolecular crystallography, and tomography. Any scientific domain which needs visualisation, python and workflows can profit from DAWN.\n\nDAWN is a Java-based open source project based on the Eclipse Rich Client Platform with its advanced plugin architecture. This gives DAWN the possibility to be extended with functionality in virtually any direction.\n\nThe main institutes developing DAWN are the [Diamond Light Source](http://www.diamond.ac.uk/), and the [European Synchrotron Radiation Facility](http://www.esrf.eu/).\n"}]},{"id":"org.dawnsci.webintro.introLink1","name":"A Link to a website","image":"","description":"This is an introLink contribution, it should take you to the **dawn** website","isContent":false,"isAction":false,"isLink":true,"isCategory":false,"href":"http://dawnsci.org"},{"id":"org.dawnsci.webintro.introContent1","name":"This is a content contribution","image":"","description":"A description here","isContent":true,"isAction":false,"isLink":false,"isCategory":false,"content":"This is some content for the new page\n\n~~Some strikethrough~~\n\n##A title##\n"},{"id":"org.dawnsci.spectrum.ui.introAction1","name":"Spectrum Perspective Launch","image":"platform:/plugin/org.dawnsci.spectrum.ui/icons/Trace400.png","description":"This is an action contribution Designed for viewing line graphs Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est labor","isContent":false,"isAction":true,"isLink":false,"isCategory":false}]},{"id":"org.dawnsci.webintro.pages.overview","page_id":"overview","name":"Overview","content":"Welcome to **DAWN**, the **D**ata **A**nalysis **W**orkbe**N**ch, you may find the links below useful\n","items":[{"id":"org.dawnsci.webintro.content.licence","name":"License","image":"","description":"Link to the description of the EPL license used in DAWN","isContent":false,"isAction":false,"isLink":true,"isCategory":false,"href":"http://www.eclipse.org/legal/epl-v10.html"}]},{"id":"org.dawnsci.webintro.content.other","page_id":"org.dawnsci.webintro.content.other","name":"Other","content":"These items were not assigned to a page:","items":[{"id":"uk.ac.diamond.scisoft.beamlineexplorer.rcp.introAction2","name":"Beamline Data","image":"","description":"Test wizard action","isContent":false,"isAction":true,"isLink":false,"isCategory":false}]}]};
+demoData = {"pages":[{"id":"org.dawnsci.webintro.content.introPage1","page_id":"welcome","name":"Demo","content":"**Hello, this is some test content**\n~~Now with some new lines~~\n","items":[{"id":"org.dawnsci.webintro.introCategory1","name":"Test Category","image":"","description":"Test category, hopefully this will animate nicely","isContent":false,"isAction":false,"isLink":false,"isCategory":true,"items":[{"id":"org.dawnsci.webintro.introAction2","name":"Open Cheat Sheet","image":"","description":"This should hopefully open a cheat sheet","isContent":false,"isAction":true,"isLink":false,"isCategory":false},{"id":"org.dawnsci.webintro.content.about-dawn","name":"About DAWN","image":"","description":"","isContent":true,"isAction":false,"isLink":false,"isCategory":false,"content":"![alt text](platform:/plugin/org.dawnsci.webintro/content/img/about_dawn_image.png \"DAWN Logo\")\n\nDAWN is an open source software built on the Eclipse/RCP platform in order to scale to address a wide range of applications and to benefit from the workbench and advanced plugin system implemented in Eclipse. The main scientific domains which DAWN targets are powder diffraction, macromolecular crystallography, and tomography. Any scientific domain which needs visualisation, python and workflows can profit from DAWN.\n\nDAWN is a Java-based open source project based on the Eclipse Rich Client Platform with its advanced plugin architecture. This gives DAWN the possibility to be extended with functionality in virtually any direction.\n\nThe main institutes developing DAWN are the [Diamond Light Source](http://www.diamond.ac.uk/), and the [European Synchrotron Radiation Facility](http://www.esrf.eu/).\n"}]},{"id":"org.dawnsci.webintro.introLink1","name":"A Link to a website","image":"","description":"This is an introLink contribution, it should take you to the **dawn** website","isContent":false,"isAction":false,"isLink":true,"isCategory":false,"href":"http://dawnsci.org"},{"id":"org.dawnsci.webintro.introContent1","name":"This is a content contribution","image":"","description":"A description here","isContent":true,"isAction":false,"isLink":false,"isCategory":false,"content":"This is some content for the new page\n\n~~Some strikethrough~~\n\n##A title##\n"}]},{"id":"org.dawnsci.webintro.pages.overview","page_id":"overview","name":"Overview","content":"Welcome to **DAWN**, the **D**ata **A**nalysis **W**orkbe**N**ch, you may find the links below useful\n","items":[{"id":"org.dawnsci.webintro.content.licence","name":"License","image":"","description":"Link to the description of the EPL license used in DAWN","isContent":false,"isAction":false,"isLink":true,"isCategory":false,"href":"http://www.eclipse.org/legal/epl-v10.html"}]},{"id":"org.dawnsci.webintro.content.other","page_id":"org.dawnsci.webintro.content.other","name":"Other","content":"These items were not assigned to a page:","items":[{"id":"uk.ac.diamond.scisoft.feedback","name":"Leave Feedback","image":"","description":"Open a feedback form","isContent":true,"isAction":false,"isLink":false,"isCategory":false,"content":""}]}]};
 timer = setTimeout(function(){ console.log("Manually starting since no java"); updateData(demoData);  }, 1000);
 
 function javaReady(){
-	//$('html').html(java.getIntroJSON());
+//	$('html').html(java.getIntroJSON());
 
 	updateData($.parseJSON(java.getIntroJSON()));
 	clearTimeout(timer);
@@ -71,6 +71,10 @@ function updateData(data){
 	var template3 = Handlebars.compile(source3);
 	$("#placeholder-modal_data").replaceWith(template3(data));
 
+	var source4   = $("#tpl-feedback-form").html();
+	var template4 = Handlebars.compile(source4);
+	$("#modal-uk_ac_diamond_scisoft_feedback div.modal-content").append(template4());
+	
 	// Setup Category Items
 	$('.popout-item').click(function(){
 		$(this).toggleClass("active"); // Open and close the category on click
@@ -98,6 +102,32 @@ function updateData(data){
         java.openLink(this.href);
 	});
 
+//  Doesn't work due to CORS security (cross domain requests)
+//	$("#send_internal").click(function(e){
+//		subject = $('#feedback-form').find('input[name="subject"]').val();
+//		$(this).find('input[name="subject"]').val("[DAWN Feedback] "+subject);
+//		console.log("sending");
+//		$.ajax({
+//			method: "POST",
+//			url: 'http://requestb.in/1nqhyum1',
+//			data: $(this).serialize(),
+//			success: function(data)
+//			{
+//				console.log("sent");
+//				$("#feedback-form").html("Message sent successfully");
+//			}
+//		});
+//		$("#feedback-form").html("sending message");
+//	});
+	
+	$("#send_external").click(function(e){
+		email = $('#feedback-form').find('input[name="email"]').val();
+		subject = $('#feedback-form').find('input[name="subject"]').val();
+		message = $('#feedback-form').find('textarea[name="message"]').val();
+
+		feedbackUtil.openFeedback(email, subject, message);
+	});
+	
 	// Do some animations
 	animateList('.collection.main-list');
 	Materialize.fadeInImage('#dawn_logo');
