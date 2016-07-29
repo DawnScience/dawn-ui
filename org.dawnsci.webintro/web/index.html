@@ -101,7 +101,8 @@
  					 </div>
 				{{else if isCategory}}
 					 {{#each items}}
-<div id="modal-{{losedots id}}" class="modal modal-fixed-footer">
+						{{#if isContent}}
+						<div id="modal-{{losedots id}}" class="modal modal-fixed-footer">
    						 <div class="modal-content">
   						    <h4>{{name}}</h4>
    						   {{{content_rendered}}}
@@ -110,7 +111,7 @@
   						    <a href="#" class="modal-action modal-close waves-effect btn-flat">Close</a>
  						</div>
  					 </div>
-
+					{{/if}}
 					{{/each}}
 				{{/if}}
 			{{/each}}
