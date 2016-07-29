@@ -9402,15 +9402,24 @@ li.collection-item:hover {
 /* line 79, ../scss/style.scss */
 .popout-item {
   cursor: pointer;
+  min-height: 84px;
 }
 
-/* line 82, ../scss/style.scss */
+/* line 83, ../scss/style.scss */
 .popout-item div.main {
   padding-left: 52px;
   width: 100%;
 }
-
 /* line 87, ../scss/style.scss */
+.popout-item div.main .title {
+  font-size: 16px;
+}
+/* line 90, ../scss/style.scss */
+.popout-item div.main p {
+  margin: 0;
+}
+
+/* line 96, ../scss/style.scss */
 .popout-item div.popout {
   overflow: hidden;
   display: none;
@@ -9425,7 +9434,7 @@ li.collection-item:hover {
   border: 4px solid #0098DB !important;
 }
 
-/* line 100, ../scss/style.scss */
+/* line 109, ../scss/style.scss */
 .popout-item.active {
   overflow: visible;
   z-index: 99 !important;
@@ -9435,7 +9444,7 @@ li.collection-item:hover {
   margin-right: -1rem !important;
   border: none !important;
 }
-/* line 110, ../scss/style.scss */
+/* line 119, ../scss/style.scss */
 .popout-item.active:after {
   content: '';
   position: absolute;
@@ -9444,26 +9453,26 @@ li.collection-item:hover {
   width: 100%;
   height: 100%;
 }
-/* line 121, ../scss/style.scss */
+/* line 130, ../scss/style.scss */
 .popout-item.active div.popout {
   display: inline-block;
   z-index: 999;
   height: auto;
   width: 50%;
 }
-/* line 129, ../scss/style.scss */
+/* line 138, ../scss/style.scss */
 .popout-item.active div.popout ul.collection {
   margin: 0;
 }
-/* line 133, ../scss/style.scss */
+/* line 142, ../scss/style.scss */
 .popout-item.active div.popout ul.collection li {
   color: rgba(0, 0, 0, 0.87);
 }
-/* line 137, ../scss/style.scss */
+/* line 146, ../scss/style.scss */
 .popout-item.active div.popout ul.collection .secondary-content {
   color: #0098DB;
 }
-/* line 143, ../scss/style.scss */
+/* line 152, ../scss/style.scss */
 .popout-item.active div.popout:after {
   content: '';
   position: absolute;
@@ -9472,7 +9481,7 @@ li.collection-item:hover {
   width: 100%;
   height: 100%;
 }
-/* line 154, ../scss/style.scss */
+/* line 163, ../scss/style.scss */
 .popout-item.active div.main {
   width: 50%;
   display: inline-block;
@@ -9481,7 +9490,7 @@ li.collection-item:hover {
 }
 
 /* Fix an issue with materialize not using transform webkit prefixes */
-/* line 163, ../scss/style.scss */
+/* line 172, ../scss/style.scss */
 .input-field label.active {
   -moz-transform: translateY(-140%);
   -ms-transform: translateY(-140%);

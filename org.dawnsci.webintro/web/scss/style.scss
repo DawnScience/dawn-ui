@@ -78,10 +78,19 @@ li.collection-item:hover {
 
 .popout-item {
 	cursor:pointer;
+	min-height: 84px;
 }
 .popout-item div.main{
 	padding-left:52px;	
 	width:100%;
+	
+	.title{
+		font-size:16px;
+	}
+	p{
+		margin:0;
+	}
+	
 }
 
 .popout-item div.popout{

@@ -19,70 +19,126 @@
 <extension
          point="org.dawnsci.webintro.page">
       <introPage
-            content_file="content/page1content.md"
-            id="org.dawnsci.webintro.content.introPage1"
-            name="Demo"
-            ordering="1"
-            page_id="welcome">
+            content_file="content/pages/science.md"
+            id="org.dawnsci.webintro.content.pages.science"
+            name="Science"
+            ordering="10"
+            page_id="science">
       </introPage>
       <introPage
-            content_file="pages/overview.md"
-            id="org.dawnsci.webintro.pages.overview"
-            name="Overview"
-            ordering="2"
-            page_id="overview">
+            content_file="content/pages/dawn.md"
+            id="org.dawnsci.webintro.content.pages.dawn"
+            name="DAWN"
+            ordering="20"
+            page_id="dawn">
+      </introPage>
+      <introPage
+            content_file="content/pages/help.md"
+            id="org.dawnsci.webintro.content.pages.help"
+            name="Help"
+            ordering="30"
+            page_id="help">
       </introPage>
    </extension>
 <extension
       point="org.dawnsci.webintro.item">
-   <introContent
-         content_file="content/testcontent.md"
-         description="A description here"
-         id="org.dawnsci.webintro.introContent1"
-         name="This is a content contribution"
-         parent_id="welcome">
-   </introContent>
    <introLink
-         description="This is an introLink contribution, it should take you to the **dawn** website"
          href="http://dawnsci.org"
-         id="org.dawnsci.webintro.introLink1"
-         name="A Link to a website"
-         parent_id="welcome">
+         id="org.dawnsci.webintro.link.dawnwebsite"
+         name="DAWN Website"
+         ordering="10"
+         parent_id="help">
    </introLink>
-   <introAction
-         class="org.dawnsci.webintro.actions.OpenCheatsheetAction:uk.ac.diamond.scisoft.analysis.rcp.contributions.NeXusScansCheatsheet"
-         description="This should hopefully open a cheat sheet"
-         id="org.dawnsci.webintro.introAction2"
-         name="Open Cheat Sheet"
-         parent_id="cat1">
-   </introAction>
    <introContent
-         content_file="content/about-dawn.md"
-         id="org.dawnsci.webintro.content.about-dawn"
-         name="About DAWN"
-         ordering="1"
-         parent_id="cat1">
+         content_file="content/what-is-dawn.md"
+         id="org.dawnsci.webintro.content.what-is-dawn"
+         name="What Is DAWN"
+         ordering="10"
+         parent_id="help">
    </introContent>
    <introLink
          description="Link to the description of the EPL license used in DAWN"
          href="http://www.eclipse.org/legal/epl-v10.html"
-         id="org.dawnsci.webintro.content.licence"
+         id="org.dawnsci.webintro.link.licence"
          name="License"
-         ordering="2"
-         parent_id="overview">
+         ordering="30"
+         parent_id="help">
    </introLink>
-   <introCategory
-         category_id="cat1"
-         description="Test category, hopefully this will animate nicely"
-         id="org.dawnsci.webintro.introCategory1"
-         name="Test Category"
-         parent_id="welcome">
-   </introCategory>
    <introContent
          description="Open a feedback form"
          id="uk.ac.diamond.scisoft.feedback"
          name="Leave Feedback"
-         parent_id="org.dawnsci.webintro.introContent1">
+         ordering="40"
+         parent_id="help">
    </introContent>
+   <introCategory
+         category_id="powderdiffraction"
+         id="org.dawnsci.webintro.category.powderdiffraction"
+         name="Powder Diffraction"
+         ordering="2"
+         parent_id="science">
+   </introCategory>
+   <introCategory
+         category_id="tomography"
+         id="org.dawnsci.webintro.category.tomography"
+         name="Tomography"
+         ordering="1"
+         parent_id="science">
+   </introCategory>
+   <introCategory
+         category_id="ncd"
+         id="org.dawnsci.webintro.category.NCD"
+         name="NCD (Non-Crystalline Diffraction)"
+         ordering="3"
+         parent_id="science">
+   </introCategory>
+   <introCategory
+         category_id="arpes"
+         description="(angle-resolved photoemission spectroscopy)"
+         id="org.dawnsci.webintro.category.ARPES"
+         name="ARPES"
+         ordering="4"
+         parent_id="science">
+   </introCategory>
+   <introLink
+         href="http://example.org"
+         id="org.dawnsci.webintro.introLink1"
+         name="Test Link 1"
+         parent_id="powderdiffraction">
+   </introLink>
+   <introLink
+         href="http://"
+         id="org.dawnsci.webintro.introLink2"
+         name="Test Link 2"
+         parent_id="powderdiffraction">
+   </introLink>
+   <introCategory
+         category_id="scripting"
+         id="org.dawnsci.webintro.category.scripting"
+         name="Scripting"
+         ordering="1"
+         parent_id="dawn">
+   </introCategory>
+   <introCategory
+         category_id="dawndev"
+         id="org.dawnsci.webintro.category.dawnindawn"
+         name="DAWN Development Environment"
+         ordering="2"
+         parent_id="dawn">
+   </introCategory>
+   <introCategory
+         category_id="processes"
+         id="org.dawnsci.webintro.category.processes"
+         name="Processes"
+         ordering="3"
+         parent_id="dawn">
+   </introCategory>
+   <introLink
+         description="Contains tutorial videos"
+         href="http://youtube.com/DAWNScience"
+         id="org.dawnsci.webintro.link.youtube"
+         name="DAWN YouTube Channel"
+         parent_id="help">
+   </introLink>
 </extension>
 </plugin>

@@ -20,8 +20,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
-
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
@@ -164,8 +162,10 @@ public class JSBridge {
 			for (IConfigurationElement thisItem : orphanedItems){
 				if(thisItem.getName().equals("introCategory")){
 					orphanedCategories.add(thisItem);
-					orphanedItems.remove(thisItem);
 				}
+			}
+			for (IConfigurationElement thisItem : orphanedCategories){
+				orphanedItems.remove(thisItem);
 			}
 			
 			JsonArrayBuilder pageItems = Json.createArrayBuilder();
