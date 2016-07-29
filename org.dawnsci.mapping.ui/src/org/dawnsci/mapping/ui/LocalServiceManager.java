@@ -4,6 +4,7 @@ import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.io.IRemoteDatasetService;
 import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
 import org.eclipse.dawnsci.nexus.INexusFileFactory;
+import org.osgi.service.event.EventAdmin;
 
 public class LocalServiceManager {
 
@@ -11,6 +12,7 @@ public class LocalServiceManager {
 	private static IPersistenceService pservice;
 	private static IRemoteDatasetService dservice;
 	private static INexusFileFactory nexusFactory;
+	private static EventAdmin eventAdmin;
 	
 	public static void setLoaderService(ILoaderService s) {
 		lservice = s;
@@ -43,6 +45,13 @@ public class LocalServiceManager {
 	public static void setNexusFactory(INexusFileFactory nexusFactory) {
 		LocalServiceManager.nexusFactory = nexusFactory;
 	}
+	
+	public static EventAdmin getEventAdmin() {
+		return eventAdmin;
+	}
 
+	public static void setEventAdmin(EventAdmin eventAdmin) {
+		LocalServiceManager.eventAdmin = eventAdmin;
+	}
 	
 }

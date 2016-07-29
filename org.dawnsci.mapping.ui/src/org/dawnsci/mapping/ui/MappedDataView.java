@@ -1,8 +1,10 @@
 package org.dawnsci.mapping.ui;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
@@ -11,12 +13,19 @@ import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.dawnsci.plotting.api.ActionType;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.ManagerType;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -25,6 +34,7 @@ import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.osgi.container.SystemModule;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetAdapter;
@@ -32,6 +42,7 @@ import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.HelpListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
@@ -39,6 +50,7 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
+import org.osgi.service.event.Event;
 
 public class MappedDataView extends ViewPart {
 
@@ -58,6 +70,57 @@ public class MappedDataView extends ViewPart {
 		IPlottingSystem<Composite> spectrum = (IPlottingSystem<Composite>)view.getAdapter(IPlottingSystem.class);
 		
 		plotManager = new MapPlotManager(map, spectrum, area);
+		
+		map.addClickListener(new IClickListener() {
+			
+			@Override
+			public void doubleClickPerformed(final ClickEvent evt) {
+				Map<String,Object> props = new HashMap<>();
+				props.put("event", new IMapClickEvent() {
+					
+					@Override
+					public boolean isDoubleClick() {
+						return true;
+					}
+					
+					@Override
+					public String getFilePath() {
+						return null;
+					}
+					
+					@Override
+					public ClickEvent getClickEvent() {
+						return evt;
+					}
+				});
+				
+				LocalServiceManager.getEventAdmin().postEvent(new Event("org.dawnsci.mapping.ui.mapview.click", props));
+				
+			}
+			
+			@Override
+			public void clickPerformed(final ClickEvent evt) {
+				Map<String,Object> props = new HashMap<>();
+				props.put("event", new IMapClickEvent() {
+					
+					@Override
+					public boolean isDoubleClick() {
+						return false;
+					}
+					
+					@Override
+					public String getFilePath() {
+						return null;
+					}
+					
+					@Override
+					public ClickEvent getClickEvent() {
+						return evt;
+					}
+				});
+				LocalServiceManager.getEventAdmin().postEvent(new Event("org.dawnsci.mapping.ui.mapview.click", props));
+			}
+		});
 		
 		map.addClickListener(new IClickListener() {
 			
