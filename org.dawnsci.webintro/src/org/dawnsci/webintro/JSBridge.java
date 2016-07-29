@@ -52,7 +52,8 @@ public class JSBridge {
 			while ((inputLine = in.readLine()) != null) {
 				outputString += inputLine + "\n";
 			}
-
+			outputString = outputString.substring(0, outputString.length() - 1); //Don't want the last \n
+			
 			in.close();
 
 			return outputString;
@@ -107,7 +108,7 @@ public class JSBridge {
 
 	private JsonObjectBuilder getJsonForItem(IConfigurationElement thisItem){
 		String itemImageURL = getResourceURL(thisItem.getContributor(),thisItem.getAttribute("icon"));
-
+		
 		boolean isContent = thisItem.getName().equals("introContent");
 		boolean isAction = thisItem.getName().equals("introAction");
 		boolean isLink = thisItem.getName().equals("introLink");

@@ -1,9 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Webintro Test
-Bundle-SymbolicName: org.dawnsci.webintro.test
+Bundle-SymbolicName: org.dawnsci.webintro.test;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Fragment-Host: org.dawnsci.webintro;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.junit
 Bundle-Vendor: Diamond Light Source
+Bundle-ClassPath: jars/javax.json-1.0.4.jar,
+ .
