@@ -1,10 +1,10 @@
 console.log("Loaded init js");
 
-demoData = {"pages":[{"id":"org.dawnsci.webintro.content.introPage1","page_id":"welcome","name":"Demo","content":"**Hello, this is some test content**\n~~Now with some new lines~~\n","items":[{"id":"org.dawnsci.webintro.introCategory1","name":"Test Category","image":"","description":"Test category, hopefully this will animate nicely","isContent":false,"isAction":false,"isLink":false,"isCategory":true,"items":[{"id":"org.dawnsci.webintro.introAction2","name":"Open Cheat Sheet","image":"","description":"This should hopefully open a cheat sheet","isContent":false,"isAction":true,"isLink":false,"isCategory":false},{"id":"org.dawnsci.webintro.content.about-dawn","name":"About DAWN","image":"","description":"","isContent":true,"isAction":false,"isLink":false,"isCategory":false,"content":"![alt text](platform:/plugin/org.dawnsci.webintro/content/img/about_dawn_image.png \"DAWN Logo\")\n\nDAWN is an open source software built on the Eclipse/RCP platform in order to scale to address a wide range of applications and to benefit from the workbench and advanced plugin system implemented in Eclipse. The main scientific domains which DAWN targets are powder diffraction, macromolecular crystallography, and tomography. Any scientific domain which needs visualisation, python and workflows can profit from DAWN.\n\nDAWN is a Java-based open source project based on the Eclipse Rich Client Platform with its advanced plugin architecture. This gives DAWN the possibility to be extended with functionality in virtually any direction.\n\nThe main institutes developing DAWN are the [Diamond Light Source](http://www.diamond.ac.uk/), and the [European Synchrotron Radiation Facility](http://www.esrf.eu/).\n"}]},{"id":"org.dawnsci.webintro.introLink1","name":"A Link to a website","image":"","description":"This is an introLink contribution, it should take you to the **dawn** website","isContent":false,"isAction":false,"isLink":true,"isCategory":false,"href":"http://dawnsci.org"},{"id":"org.dawnsci.webintro.introContent1","name":"This is a content contribution","image":"","description":"A description here","isContent":true,"isAction":false,"isLink":false,"isCategory":false,"content":"This is some content for the new page\n\n~~Some strikethrough~~\n\n##A title##\n"}]},{"id":"org.dawnsci.webintro.pages.overview","page_id":"overview","name":"Overview","content":"Welcome to **DAWN**, the **D**ata **A**nalysis **W**orkbe**N**ch, you may find the links below useful\n","items":[{"id":"org.dawnsci.webintro.content.licence","name":"License","image":"","description":"Link to the description of the EPL license used in DAWN","isContent":false,"isAction":false,"isLink":true,"isCategory":false,"href":"http://www.eclipse.org/legal/epl-v10.html"}]},{"id":"org.dawnsci.webintro.content.other","page_id":"org.dawnsci.webintro.content.other","name":"Other","content":"These items were not assigned to a page:","items":[{"id":"uk.ac.diamond.scisoft.feedback","name":"Leave Feedback","image":"","description":"Open a feedback form","isContent":true,"isAction":false,"isLink":false,"isCategory":false,"content":""}]}]};
+demoData = {"pages":[{"id":"org.dawnsci.webintro.content.pages.science","page_id":"science","name":"Science","content":"Welcome to **DAWN**, the **D**ata **A**nalysis **W**orkbe**N**ch, you may find the links below useful\n","items":[{"id":"org.dawnsci.webintro.category.tomography","name":"Tomography","image":"","description":"","isContent":false,"isAction":false,"isLink":false,"isCategory":true,"items":[]},{"id":"org.dawnsci.webintro.category.powderdiffraction","name":"Powder Diffraction","image":"","description":"","isContent":false,"isAction":false,"isLink":false,"isCategory":true,"items":[{"id":"org.dawnsci.webintro.introLink2","name":"Test Link 2","image":"","description":"","isContent":false,"isAction":false,"isLink":true,"isCategory":false,"href":"http://"},{"id":"org.dawnsci.webintro.introLink1","name":"Test Link 1","image":"","description":"","isContent":false,"isAction":false,"isLink":true,"isCategory":false,"href":"http://example.org"}]},{"id":"org.dawnsci.webintro.category.NCD","name":"NCD (Non-Crystalline Diffraction)","image":"","description":"","isContent":false,"isAction":false,"isLink":false,"isCategory":true,"items":[]},{"id":"org.dawnsci.webintro.category.ARPES","name":"ARPES","image":"","description":"(angle-resolved photoemission spectroscopy)","isContent":false,"isAction":false,"isLink":false,"isCategory":true,"items":[]}]},{"id":"org.dawnsci.webintro.content.pages.dawn","page_id":"dawn","name":"DAWN","content":"Welcome to **DAWN**, the **D**ata **A**nalysis **W**orkbe**N**ch, you may find the links below useful\n","items":[]},{"id":"org.dawnsci.webintro.content.pages.help","page_id":"help","name":"Help","content":"Welcome to **DAWN**, the **D**ata **A**nalysis **W**orkbe**N**ch, you may find the links below useful\n","items":[{"id":"org.dawnsci.webintro.link.dawnwebsite","name":"DAWN Website","image":"","description":"","isContent":false,"isAction":false,"isLink":true,"isCategory":false,"href":"http://dawnsci.org"},{"id":"org.dawnsci.webintro.content.what-is-dawn","name":"What Is DAWN","image":"","description":"","isContent":true,"isAction":false,"isLink":false,"isCategory":false,"content":"![alt text](platform:/plugin/org.dawnsci.webintro/content/img/about_dawn_image.png \"DAWN Logo\")\n\nDAWN is an open source software built on the Eclipse/RCP platform in order to scale to address a wide range of applications and to benefit from the workbench and advanced plugin system implemented in Eclipse. The main scientific domains which DAWN targets are powder diffraction, macromolecular crystallography, and tomography. Any scientific domain which needs visualisation, python and workflows can profit from DAWN.\n\nDAWN is a Java-based open source project based on the Eclipse Rich Client Platform with its advanced plugin architecture. This gives DAWN the possibility to be extended with functionality in virtually any direction.\n\nThe main institutes developing DAWN are the [Diamond Light Source](http://www.diamond.ac.uk/), and the [European Synchrotron Radiation Facility](http://www.esrf.eu/).\n"},{"id":"org.dawnsci.webintro.link.licence","name":"License","image":"","description":"Link to the description of the EPL license used in DAWN","isContent":false,"isAction":false,"isLink":true,"isCategory":false,"href":"http://www.eclipse.org/legal/epl-v10.html"},{"id":"uk.ac.diamond.scisoft.feedback","name":"Leave Feedback","image":"","description":"Open a feedback form","isContent":true,"isAction":false,"isLink":false,"isCategory":false,"content":""}]}]};
 timer = setTimeout(function(){ console.log("Manually starting since no java"); updateData(demoData);  }, 1000);
 
 function javaReady(){
-//	$('html').html(java.getIntroJSON());
+	//$('html').html(java.getIntroJSON());
 
 	updateData($.parseJSON(java.getIntroJSON()));
 	clearTimeout(timer);
@@ -88,9 +88,11 @@ function updateData(data){
 	$('ul.tabs li.tab').width(tabWidth+"%");
 	
 	$('.content-trigger').leanModal(); // Setup modal boxes for content items
+	
 	$('.action-trigger').click(function(){
 		java.runAction($(this).data('action_id')); // Run an action
 	});
+	
 	$('.link-trigger').click(function(){
 		java.openLink($(this).data('href')); // Open a link in the system browser
 	});
@@ -101,25 +103,8 @@ function updateData(data){
         event.stopPropagation();
         java.openLink(this.href);
 	});
-
-//  Doesn't work due to CORS security (cross domain requests)
-//	$("#send_internal").click(function(e){
-//		subject = $('#feedback-form').find('input[name="subject"]').val();
-//		$(this).find('input[name="subject"]').val("[DAWN Feedback] "+subject);
-//		console.log("sending");
-//		$.ajax({
-//			method: "POST",
-//			url: 'http://requestb.in/1nqhyum1',
-//			data: $(this).serialize(),
-//			success: function(data)
-//			{
-//				console.log("sent");
-//				$("#feedback-form").html("Message sent successfully");
-//			}
-//		});
-//		$("#feedback-form").html("sending message");
-//	});
 	
+	// Allow the feedback form to send data to the eclipse feedback plugin
 	$("#send_external").click(function(e){
 		email = $('#feedback-form').find('input[name="email"]').val();
 		subject = $('#feedback-form').find('input[name="subject"]').val();
