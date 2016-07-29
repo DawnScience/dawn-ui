@@ -13,19 +13,12 @@ import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.dawnsci.plotting.api.ActionType;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.plotting.api.ManagerType;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -34,7 +27,6 @@ import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.osgi.container.SystemModule;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetAdapter;
@@ -42,7 +34,6 @@ import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.events.HelpListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
@@ -53,7 +44,40 @@ import org.eclipse.ui.part.ViewPart;
 import org.osgi.service.event.Event;
 
 public class MappedDataView extends ViewPart {
+	
+	private static class MapClickEvent implements IMapClickEvent {
+		
+		private final ClickEvent clickEvent;
+		private final boolean isDoubleClick;
+		private final String filePath;
+		
+		public MapClickEvent(ClickEvent clickEvent, boolean isDoubleClick,
+				String filePath) {
+			this.clickEvent = clickEvent;
+			this.isDoubleClick = isDoubleClick;
+			this.filePath = filePath;
+		}
 
+		@Override
+		public ClickEvent getClickEvent() {
+			return clickEvent;
+		}
+
+		@Override
+		public boolean isDoubleClick() {
+			return isDoubleClick;
+		}
+
+		@Override
+		public String getFilePath() {
+			// TODO: calculate lazily
+			return filePath;
+		}
+		
+	}
+
+	public static final String EVENT_TOPIC_MAPVIEW_CLICK = "org/dawnsci/mapping/ui/mapview/click";
+	
 	private TreeViewer viewer;
 	private MappedDataArea area;
 	private MapPlotManager plotManager; 
@@ -76,49 +100,15 @@ public class MappedDataView extends ViewPart {
 			@Override
 			public void doubleClickPerformed(final ClickEvent evt) {
 				Map<String,Object> props = new HashMap<>();
-				props.put("event", new IMapClickEvent() {
-					
-					@Override
-					public boolean isDoubleClick() {
-						return true;
-					}
-					
-					@Override
-					public String getFilePath() {
-						return null;
-					}
-					
-					@Override
-					public ClickEvent getClickEvent() {
-						return evt;
-					}
-				});
-				
-				LocalServiceManager.getEventAdmin().postEvent(new Event("org.dawnsci.mapping.ui.mapview.click", props));
-				
+				props.put("event", new MapClickEvent(evt, true, null));
+				LocalServiceManager.getEventAdmin().postEvent(new Event(EVENT_TOPIC_MAPVIEW_CLICK, props));
 			}
 			
 			@Override
 			public void clickPerformed(final ClickEvent evt) {
 				Map<String,Object> props = new HashMap<>();
-				props.put("event", new IMapClickEvent() {
-					
-					@Override
-					public boolean isDoubleClick() {
-						return false;
-					}
-					
-					@Override
-					public String getFilePath() {
-						return null;
-					}
-					
-					@Override
-					public ClickEvent getClickEvent() {
-						return evt;
-					}
-				});
-				LocalServiceManager.getEventAdmin().postEvent(new Event("org.dawnsci.mapping.ui.mapview.click", props));
+				props.put("event", new MapClickEvent(evt, false, null));
+				LocalServiceManager.getEventAdmin().postEvent(new Event(EVENT_TOPIC_MAPVIEW_CLICK, props));
 			}
 		});
 		
