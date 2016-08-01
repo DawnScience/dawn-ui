@@ -34,6 +34,7 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 	// in number and we just leave the VM to tidy them up...
 	private static Map<String, Image>   icons;
 	private static Map<String, Boolean> visible;
+	private static final String DEFAULT_ICON = "icons/unchanged.png";
 	
 
 	private IOperation<? extends IOperationModel, ? extends OperationData>              operation;
@@ -182,14 +183,13 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 			boolean isVisible = vis==null ? true : Boolean.parseBoolean(vis);
 			visible.put(identity, isVisible);
 
-			final String icon = e.getAttribute("icon");
-			if (icon !=null) {
-				final String   cont  = e.getContributor().getName();
-				final Bundle   bundle= Platform.getBundle(cont);
-				final URL      entry = bundle.getEntry(icon);
-				final ImageDescriptor des = ImageDescriptor.createFromURL(entry);
-				icons.put(identity, des.createImage());		
-			}
+			String icon = e.getAttribute("icon");
+			icon = icon != null ? icon : DEFAULT_ICON;
+			final String   cont  = e.getContributor().getName();
+			final Bundle   bundle= Platform.getBundle(cont);
+			final URL      entry = bundle.getEntry(icon);
+			final ImageDescriptor des = ImageDescriptor.createFromURL(entry);
+			icons.put(identity, des.createImage());		
 			
 		}
 		
