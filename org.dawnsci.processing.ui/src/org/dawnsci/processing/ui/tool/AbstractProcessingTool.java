@@ -543,12 +543,11 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 			axes[j] = Arrays.asList(new String[]{sslm.getAxesNames()[j]});
 		}
 		
-		
 		IOperationService service = ServiceHolder.getOperationService();
 		IOperationBean b = service.createBean();
 		b.setRunDirectory(runDirectory);
-		b.setDeletePersistenceFile(false);
-		b.setPersistencePath(chainPath);
+		b.setDeleteProcessingFile(false);
+		b.setProcessingPath(chainPath);
 		b.setFilePath(sslm.getFilePath());
 		b.setDatasetPath(sslm.getDatasetName());
 		b.setXmx("1024m");
