@@ -419,7 +419,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 			
 			ds.setMetadata(sliceMeta);
 			
-			EscapableSliceVisitor vis = new EscapableSliceVisitor(null, sliceMeta.getDataDimensions(),operations,null,null,system);
+			EscapableSliceVisitor vis = new EscapableSliceVisitor(null, sliceMeta.getDataDimensions(),operations,getOperations(),null,null,system);
 			vis.setEndOperation(selection);
 			
 			try {

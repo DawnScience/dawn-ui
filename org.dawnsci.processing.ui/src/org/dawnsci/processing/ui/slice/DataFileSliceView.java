@@ -811,7 +811,7 @@ public class DataFileSliceView extends ViewPart {
 	
 	private EscapableSliceVisitor getSliceVisitor(IOperation<? extends IOperationModel, ? extends OperationData>[] series,ILazyDataset lz,  
             int[] dataDims) {
-		return new EscapableSliceVisitor(lz,dataDims,series,null,fileManager.getContext(),output);
+		return new EscapableSliceVisitor(lz,dataDims,series,getOperations(),null,fileManager.getContext(),output);
 	}
 	
 	@Override

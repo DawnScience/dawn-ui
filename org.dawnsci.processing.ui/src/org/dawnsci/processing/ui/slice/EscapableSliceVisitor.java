@@ -21,14 +21,18 @@ import org.eclipse.january.dataset.Slice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.processing.metadata.OperationMetadataImpl;
+
+@SuppressWarnings("rawtypes")
 public class EscapableSliceVisitor implements SliceVisitor {
 
 
 	private ILazyDataset lz;
 	private UIExecutionVisitor visitor;
 	private int[] dataDims;
-	private IOperation<? extends IOperationModel, ? extends OperationData>[] series;
-	private IOperation<? extends IOperationModel, ? extends OperationData> endOperation;
+	private IOperation[] fullSeries;
+	private IOperation[] series;
+	private IOperation endOperation;
 	private IProgressMonitor monitor;
 	private IConversionContext context;
 	private IPlottingSystem<?> output;
@@ -36,12 +40,13 @@ public class EscapableSliceVisitor implements SliceVisitor {
 	
 	private final static Logger logger = LoggerFactory.getLogger(EscapableSliceVisitor.class);
 
-	public EscapableSliceVisitor(ILazyDataset lz, int[] dataDims, IOperation<? extends IOperationModel, ? extends OperationData>[] series, 
+	public EscapableSliceVisitor(ILazyDataset lz, int[] dataDims, IOperation[] series, IOperation[] fullSeries,
 			IProgressMonitor monitor, IConversionContext context, IPlottingSystem<?> system) {
 		this.lz = lz;
 		this.visitor = new UIExecutionVisitor();
 		this.dataDims = dataDims;
 		this.series = series;
+		this.fullSeries = fullSeries;
 		this.monitor= monitor;
 		this.context= context;
 		this.output = system;
@@ -63,7 +68,8 @@ public class EscapableSliceVisitor implements SliceVisitor {
 		for (IOperation op : series) op.init();
 		
 		for (IOperation<? extends IOperationModel, ? extends OperationData> i : series) {
-
+			OperationMetadataImpl operationMeta = new OperationMetadataImpl(null, fullSeries, i);
+			data.getData().setMetadata(operationMeta);
 			if (i instanceof IExportOperation) {
 				visitor.notify(i, data);
 			} else if (i.isPassUnmodifiedData() && i != endOperation) {
