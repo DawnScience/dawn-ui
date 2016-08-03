@@ -235,7 +235,7 @@ org.dawnsci.webintro.actions.OpenCheatsheetAction:org.example.cheatsheets.MyDemo
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="href" type="string">
+         <attribute name="href" type="string" use="required">
             <annotation>
                <documentation>
                   This link which will be opened in the user&apos;s browser. Should include the protocol (e.g. http://dawnsci.org)
@@ -297,7 +297,7 @@ org.dawnsci.webintro.actions.OpenCheatsheetAction:org.example.cheatsheets.MyDemo
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="category_id" type="string">
+         <attribute name="category_id" type="string" use="required">
             <annotation>
                <documentation>
                   The parent which this action should be added to. This must be an introPage, not an introCategory. If the page/category does not exist, this contribution will be added to an &quot;other&quot; page.
