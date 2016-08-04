@@ -53,14 +53,14 @@ public class JSBridge {
 				outputString += inputLine + "\n";
 			}
 			outputString = outputString.substring(0, outputString.length() - 1); //Don't want the last \n
-			
+
 			in.close();
 
 			return outputString;
 		} catch (IOException e) {
 			return "";
 		}
-		
+
 	}
 
 	private IConfigurationElement[] getRegisteredConfigs(String point){
@@ -108,7 +108,7 @@ public class JSBridge {
 
 	private JsonObjectBuilder getJsonForItem(IConfigurationElement thisItem){
 		String itemImageURL = getResourceURL(thisItem.getContributor(),thisItem.getAttribute("icon"));
-		
+
 		boolean isContent = thisItem.getName().equals("introContent");
 		boolean isAction = thisItem.getName().equals("introAction");
 		boolean isLink = thisItem.getName().equals("introLink");
@@ -156,7 +156,7 @@ public class JSBridge {
 					.add("items", pageItems.build())
 					.build());
 		}
-		
+
 		if (orphanedItems.size()>0){ // If there are orphaned items, we should make an "other" page
 			// separate the categories
 			ArrayList<IConfigurationElement> orphanedCategories = new ArrayList<IConfigurationElement>();
@@ -168,7 +168,7 @@ public class JSBridge {
 			for (IConfigurationElement thisItem : orphanedCategories){
 				orphanedItems.remove(thisItem);
 			}
-			
+
 			JsonArrayBuilder pageItems = Json.createArrayBuilder();
 			if(orphanedCategories.size()>0){
 				getJsonForItems(orphanedCategories.toArray(new IConfigurationElement[0]), orphanedItems, true, pageItems);
@@ -176,7 +176,7 @@ public class JSBridge {
 			if(orphanedItems.size()>0){
 				getJsonForItems(orphanedItems.toArray(new IConfigurationElement[0]), orphanedItems, true, pageItems);
 			}
-			
+
 			pagesList.add(Json.createObjectBuilder()
 					.add("id", "org.dawnsci.webintro.content.other")
 					.add("page_id", "org.dawnsci.webintro.content.other")
@@ -200,7 +200,7 @@ public class JSBridge {
 	private JsonArrayBuilder getJsonForItems(IConfigurationElement[] items, ArrayList<IConfigurationElement> orphanedItems, boolean allowCategories) {
 		return getJsonForItems(items, orphanedItems, allowCategories, Json.createArrayBuilder());
 	}
-	
+
 	private JsonArrayBuilder getJsonForItems(IConfigurationElement[] items, ArrayList<IConfigurationElement> orphanedItems, boolean allowCategories, JsonArrayBuilder startItems) {
 		JsonArrayBuilder allItems = startItems;
 		for (IConfigurationElement thisItem : items){
@@ -212,16 +212,16 @@ public class JSBridge {
 					logger.error("Tried to add a category to a category, ignoring contribution.");
 				}else{
 					IConfigurationElement[] catItems = getOrderedParentItems(thisItem.getAttribute("category_id"));
-					
+
 					JsonArrayBuilder categoryItemsJson = getJsonForItems(catItems, orphanedItems, false);
-					
+
 					thisItemJson.add("items", categoryItemsJson.build());
 					allItems.add(thisItemJson.build());
 				}
 			}else{
 				allItems.add(thisItemJson.build());
 			}
-			
+
 		}
 		return allItems;
 	}

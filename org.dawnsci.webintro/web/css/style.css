@@ -9472,7 +9472,11 @@ li.collection-item:hover {
 .popout-item.active div.popout ul.collection .secondary-content {
   color: #0098DB;
 }
-/* line 152, ../scss/style.scss */
+/* line 150, ../scss/style.scss */
+.popout-item.active div.popout ul.collection li.collection-item:hover {
+  background-color: #eee;
+}
+/* line 155, ../scss/style.scss */
 .popout-item.active div.popout:after {
   content: '';
   position: absolute;
@@ -9481,7 +9485,7 @@ li.collection-item:hover {
   width: 100%;
   height: 100%;
 }
-/* line 163, ../scss/style.scss */
+/* line 166, ../scss/style.scss */
 .popout-item.active div.main {
   width: 50%;
   display: inline-block;
@@ -9490,7 +9494,7 @@ li.collection-item:hover {
 }
 
 /* Fix an issue with materialize not using transform webkit prefixes */
-/* line 172, ../scss/style.scss */
+/* line 175, ../scss/style.scss */
 .input-field label.active {
   -moz-transform: translateY(-140%);
   -ms-transform: translateY(-140%);

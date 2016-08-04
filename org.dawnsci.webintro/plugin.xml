@@ -122,7 +122,7 @@
    <introCategory
          category_id="dawndev"
          id="org.dawnsci.webintro.category.dawnindawn"
-         name="DAWN Development Environment"
+         name="DAWN Development Environments"
          ordering="2"
          parent_id="dawn">
    </introCategory>
@@ -140,5 +140,11 @@
          name="DAWN YouTube Channel"
          parent_id="help">
    </introLink>
+   <introCategory
+         category_id="dawn_general"
+         id="org.dawnsci.webintro.category.general"
+         name="General"
+         parent_id="dawn">
+   </introCategory>
 </extension>
 </plugin>

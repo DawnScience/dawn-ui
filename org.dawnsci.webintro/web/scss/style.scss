@@ -147,6 +147,9 @@ li.collection-item:hover {
 				color:$secondary-color;
 			}
 			
+			li.collection-item:hover {
+				background-color:#eee;
+			}
 		}
 		
 		&:after {
