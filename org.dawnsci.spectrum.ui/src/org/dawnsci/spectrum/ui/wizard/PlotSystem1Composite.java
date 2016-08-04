@@ -32,7 +32,7 @@ public class PlotSystem1Composite  extends Composite {
     
     
     public PlotSystem1Composite(Composite parent, int style
-    		, AggregateDataset aggDat, Slider slider, String test0, String test1, ExampleModel model) {
+    		, AggregateDataset aggDat, String test0, String test1, ExampleModel model) {
     	
         super(parent, style);
         //composite = new Composite(parent, SWT.NONE);

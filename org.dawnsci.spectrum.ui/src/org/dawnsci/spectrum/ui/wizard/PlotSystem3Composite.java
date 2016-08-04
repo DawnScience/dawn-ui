@@ -1,5 +1,8 @@
 package org.dawnsci.spectrum.ui.wizard;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -22,8 +25,7 @@ public class PlotSystem3Composite extends Composite {
     private IDataset image1;
     
     public PlotSystem3Composite(Composite parent, int style
-    		, AggregateDataset aggDat, PlotSystemComposite plotSystemComposite
-    		, PlotSystem2Composite plotSystem2Composite) throws Exception {
+    		, AggregateDataset aggDat, ExampleModel model) throws Exception {
         super(parent, style);
         //composite = new Composite(parent, SWT.NONE);
 
@@ -37,11 +39,12 @@ public class PlotSystem3Composite extends Composite {
 			e2.printStackTrace();
 		}
         
-        this.createContents(aggDat, plotSystemComposite, plotSystem2Composite); 
+        this.createContents(aggDat, model); 
         
     }
      
-    public void createContents(AggregateDataset aggDat, PlotSystemComposite plotSystemComposite, PlotSystem2Composite plotSystem2Composite) throws Exception {
+    public void createContents(AggregateDataset aggDat,
+    		ExampleModel model) throws Exception {
 
     	
     	final GridLayout gridLayout = new GridLayout();
@@ -52,58 +55,62 @@ public class PlotSystem3Composite extends Composite {
         
         plotSystem3.createPlotPart(PlotSystem3Composite.this, "ExamplePlot2", actionBarComposite, PlotType.IMAGE, null);
 		
-		plotSystemComposite.returnSlider().addSelectionListener(new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				IDataset j = plotSystem2Composite.getImage();
-				image1= j;
-
-				plotSystem3.setPlotType(PlotType.SURFACE);
-				plotSystem3.createPlot2D(j, null, null);
-			
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
-		
-		plotSystem2Composite.returnRegion().addROIListener(new IROIListener() {
-
-			@Override
-			public void roiDragged(ROIEvent evt) {
-				IDataset j = plotSystem2Composite.getImage();
-				image1= j;
-				
-				plotSystem3.setPlotType(PlotType.SURFACE);
-				plotSystem3.createPlot2D(j, null, null);
-			}
-
-			@Override
-			public void roiChanged(ROIEvent evt) {
-				// TODO Auto-generated method stub
-				IDataset j = plotSystem2Composite.getImage();
-				image1= j;
-				
-				plotSystem3.setPlotType(PlotType.SURFACE);
-				plotSystem3.createPlot2D(j, null, null);
+//		plotSystemComposite.returnSlider().addSelectionListener(new SelectionListener() {
+//			
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				// TODO Auto-generated method stub
+//				IDataset j = plotSystem2Composite.getImage();
+//				image1= j;
+//
+//				plotSystem3.setPlotType(PlotType.SURFACE);
+//				plotSystem3.createPlot2D(j, null, null);
+//			
+//			}
+//			
+//			@Override
+//			public void widgetDefaultSelected(SelectionEvent e) {
+//				// TODO Auto-generated method stub
 //				
-			}
+//			}
+//		});
+		
+		model.addPropertyChangeListener(new PropertyChangeListener() {
 
 			@Override
-			public void roiSelected(ROIEvent evt) {
-				// TODO Auto-generated method stub
-				IDataset j = plotSystem2Composite.getImage();
+			public void propertyChange(PropertyChangeEvent evt) {
+				IDataset j = model.getCurrentImage();
 				image1= j;
 				
 				plotSystem3.setPlotType(PlotType.SURFACE);
 				plotSystem3.createPlot2D(j, null, null);
-				
 			}
+//
+//			@Override
+//			public void roiChanged(ROIEvent evt) {
+//				// TODO Auto-generated method stub
+//				IDataset j = plotSystem2Composite.getImage();
+//				image1= j;
+//				
+//				plotSystem3.setPlotType(PlotType.SURFACE);
+//				plotSystem3.createPlot2D(j, null, null);
+////				
+//			}
+//
+//			@Override
+//			public void roiSelected(ROIEvent evt) {
+//				// TODO Auto-generated method stub
+//				IDataset j = plotSystem2Composite.getImage();
+//				image1= j;
+//				
+//				plotSystem3.setPlotType(PlotType.SURFACE);
+//				plotSystem3.createPlot2D(j, null, null);
+//				
+//			}
+//
+//				// TODO Auto-generated method stub
+//				
+//			}
 		});
         
         

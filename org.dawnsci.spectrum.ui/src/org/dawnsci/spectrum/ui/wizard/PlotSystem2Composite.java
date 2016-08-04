@@ -1,5 +1,8 @@
 package org.dawnsci.spectrum.ui.wizard;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -25,13 +28,13 @@ public class PlotSystem2Composite extends Composite {
 
     private IPlottingSystem<Composite> plotSystem2;
     private IDataset image1;
-    private IRegion region;
+
 
 
     
     
     public PlotSystem2Composite(Composite parent, int style
-    		, AggregateDataset aggDat, PlotSystemComposite plotSystemComposite) throws Exception {
+    		, AggregateDataset aggDat, ExampleModel model) throws Exception {
         super(parent, style);
         //composite = new Composite(parent, SWT.NONE);
 
@@ -46,14 +49,12 @@ public class PlotSystem2Composite extends Composite {
 		}
         
 
-        
-        
-        this.createContents(aggDat, plotSystemComposite); 
+        this.createContents(aggDat, model); 
 //        System.out.println("Test line");
         
     }
      
-    public void createContents(AggregateDataset aggDat, PlotSystemComposite plotSystemComposite) throws Exception {
+    public void createContents(AggregateDataset aggDat, ExampleModel model) throws Exception {
 
     	
     	final GridLayout gridLayout = new GridLayout();
@@ -72,31 +73,27 @@ public class PlotSystem2Composite extends Composite {
 //        SliceND slice = new SliceND(aggDat.getShape());
 //		
         
-		region =plotSystemComposite.getPlotSystem().createRegion("myRegion", RegionType.BOX);
-		plotSystemComposite.getPlotSystem().addRegion(region);
-		
-		RectangularROI startROI = new RectangularROI(10,10,100,100,0);
-		region.setROI(startROI);
+//		region =plotSystemComposite.getPlotSystem().createRegion("myRegion", RegionType.BOX);
+//		plotSystemComposite.getPlotSystem().addRegion(region);
+//		
+//		RectangularROI startROI = new RectangularROI(10,10,100,100,0);
+//		region.setROI(startROI);
  
         
-		plotSystemComposite.returnSlider().addSelectionListener(new SelectionListener() {
-			
-			
-			
+		model.addPropertyChangeListener(new PropertyChangeListener() {
+		
+		
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void propertyChange(PropertyChangeEvent evt) {
 				// TODO Auto-generated method stub
-				IDataset j = ImageSlicerUtils.ImageSliceUpdate(plotSystemComposite.returnSlider(), aggDat, region);
+			
+				// TODO Auto-generated method stub
+				IDataset j = ImageSlicerUtils.ImageSliceUpdate(model.getImageNumber(), aggDat, model.getLenPt());
 				image1= j;
 				plotSystem2.createPlot2D(j, null, null);
+				model.setCurrentImage(j);
 //				plotSystem3.setPlotType(PlotType.SURFACE);
 //				plotSystem3.createPlot2D(j, null, null);
-			
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
 				
 			}
 		});
@@ -104,40 +101,40 @@ public class PlotSystem2Composite extends Composite {
 		
 		
 
-		region.addROIListener(new IROIListener() {
-
-			@Override
-			public void roiDragged(ROIEvent evt) {
-				IDataset j = ImageSlicerUtils.ImageSliceUpdate(plotSystemComposite.returnSlider(), aggDat, region);
-				image1= j;
-				plotSystem2.createPlot2D(j, null, null);
-//				plotSystem3.setPlotType(PlotType.SURFACE);
-//				plotSystem3.createPlot2D(j, null, null);
-//				
-			}
-
-			@Override
-			public void roiChanged(ROIEvent evt) {
-				// TODO Auto-generated method stub
-				IDataset j = ImageSlicerUtils.ImageSliceUpdate(plotSystemComposite.returnSlider(), aggDat, region);
-				image1= j;
-				plotSystem2.createPlot2D(j, null, null);
-//				plotSystem3.setPlotType(PlotType.SURFACE);
-//				plotSystem3.createPlot2D(j, null, null);
-//				
-			}
-
-			@Override
-			public void roiSelected(ROIEvent evt) {
-				// TODO Auto-generated method stub
-				IDataset j = ImageSlicerUtils.ImageSliceUpdate(plotSystemComposite.returnSlider(), aggDat, region);
-				image1= j;
-				plotSystem2.createPlot2D(j, null, null);
-//				plotSystem3.setPlotType(PlotType.SURFACE);
-//				plotSystem3.createPlot2D(j, null, null);
-//				
-			}
-		});
+//		model.addPropertyChangeListener(new PropertyChangeListener() {
+//
+//			@Override
+//			public void propertyChange(PropertyChangeEvent evt) {
+//				IDataset j = ImageSlicerUtils.ImageSliceUpdate(model.getImageNumber(), aggDat, model.getLenPt());
+//				image1= j;
+//				plotSystem2.createPlot2D(j, null, null);
+////				plotSystem3.setPlotType(PlotType.SURFACE);
+////				plotSystem3.createPlot2D(j, null, null);
+////				
+//			}
+////
+////			@Override
+////			public void roiChanged(ROIEvent evt) {
+////				// TODO Auto-generated method stub
+////				IDataset j = ImageSlicerUtils.ImageSliceUpdate(model.getImageNumber(), aggDat, model.getLenPt());
+////				image1= j;
+////				plotSystem2.createPlot2D(j, null, null);
+//////				plotSystem3.setPlotType(PlotType.SURFACE);
+//////				plotSystem3.createPlot2D(j, null, null);
+//////				
+////			}
+////
+////			@Override
+////			public void roiSelected(ROIEvent evt) {
+////				// TODO Auto-generated method stub
+////				IDataset j = ImageSlicerUtils.ImageSliceUpdate(model.getImageNumber(), aggDat, model.getLenPt());
+////				image1= j;
+////				plotSystem2.createPlot2D(j, null, null);
+//////				plotSystem3.setPlotType(PlotType.SURFACE);
+//////				plotSystem3.createPlot2D(j, null, null);
+//////				
+////			}
+//		});
         
         
         final GridData gd_secondField = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -166,10 +163,9 @@ public class PlotSystem2Composite extends Composite {
 	   return image1;
    }
    
-   public IRegion returnRegion(){
-	   
-	   return region;
-   }
+//   public IRegion returnRegion(){
+//	   return region;
+//   }
    
    
    

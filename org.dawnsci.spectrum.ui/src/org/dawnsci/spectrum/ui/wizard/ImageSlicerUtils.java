@@ -47,5 +47,38 @@ public class ImageSlicerUtils {
 			return j;
 			
 		}
+		
+		public static IDataset ImageSliceUpdate(int selection, ILazyDataset aggDat, int[][] LenPt){
+			
+			SliceND slice1 = new SliceND(aggDat.getShape());
+			slice1.setSlice(0, selection, selection+1, 1);
+			
+			
+			//int[] len 
+			int[] len = LenPt[0];
+			int[] pt = LenPt[1];
+			
+
+			//slice1.setSlice(2, (int) Math.round(pt[0]-(0.5*len[0])), (int) Math.round(pt[0] + (0.5*len[0])), 1);
+			//slice1.setSlice(1, (int) Math.round(pt[1]-(0.5*len[1])), (int) Math.round(pt[1] + (0.5*len[1])), 1);
+			
+			slice1.setSlice(2, (int) Math.round(pt[0]), (int) Math.round(pt[0] + (len[0])), 1);
+			slice1.setSlice(1, (int) Math.round(pt[1]), (int) Math.round(pt[1] + (len[1])), 1);
+
+
+			
+			//IDataset image2 = image.getSlice(slice1);
+			
+			IDataset j = null;
+			try {
+				j = aggDat.getSlice(slice1);
+			} catch (DatasetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			j.squeeze();
+			return j;
+			
+		}
 }
 //TEST

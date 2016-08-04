@@ -88,7 +88,7 @@ public class ExampleDialog extends Dialog {
 	    customComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	    
 	    PlotSystem1Composite customComposite1 = new PlotSystem1Composite(container, 
-	    		SWT.NONE, aggDat, customComposite.returnSlider(), test0, test1);
+	    		SWT.NONE, aggDat, test0, test1, model);
 	    customComposite1.setLayout(new GridLayout());
 	    customComposite1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	    		
@@ -105,11 +105,11 @@ public class ExampleDialog extends Dialog {
 	    
 	    try {
 			PlotSystem2Composite customComposite2 = new PlotSystem2Composite(container, SWT.NONE, 
-					aggDat, customComposite);
+					aggDat, model);
 		    customComposite2.setLayout(new GridLayout());
 		    customComposite2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		    PlotSystem3Composite customComposite3 = new PlotSystem3Composite(container, SWT.NONE, 
-		    		aggDat, customComposite, customComposite2);
+		    		aggDat, model);
 		    customComposite3.setLayout(new GridLayout());
 		    customComposite3.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		    

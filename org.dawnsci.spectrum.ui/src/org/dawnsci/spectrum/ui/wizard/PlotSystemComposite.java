@@ -1,8 +1,13 @@
 package org.dawnsci.spectrum.ui.wizard;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
+import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
+import org.eclipse.dawnsci.plotting.api.region.IROIListener;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.AggregateDataset;
 import org.eclipse.january.dataset.IDataset;
@@ -19,6 +24,7 @@ public class PlotSystemComposite extends Composite {
     final private Slider slider;
     private IPlottingSystem<Composite> plotSystem;
     private IDataset image;
+    private IRegion region;
     
      
     public PlotSystemComposite(Composite parent, int style
@@ -123,19 +129,45 @@ public class PlotSystemComposite extends Composite {
         plotSystem.createPlot2D(i, null, null);
         
 
-
+        try {
+			region =plotSystem.createRegion("myRegion", RegionType.BOX);
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
+		plotSystem.addRegion(region);
+		
+		RectangularROI startROI = new RectangularROI(10,10,100,100,0);
+		region.setROI(startROI);
+ 
+        model.setROI(startROI);
+		region.addROIListener(new IROIListener() {
+
+			@Override
+			public void roiDragged(ROIEvent evt) {
+				model.setROI(region.getROI());
+			}
+
+			@Override
+			public void roiChanged(ROIEvent evt) {
+				// TODO Auto-generated method stub
+				model.setROI(region.getROI());			}
+
+			@Override
+			public void roiSelected(ROIEvent evt) {
+				model.setROI(region.getROI());			}
+
+		});
+        
+    }
+		
    
    public int getSliderPos(){
 	   int sliderPos = slider.getSelection();
 	   return sliderPos;
    }
    
-   public Slider returnSlider(){
-	   
-	   return slider;
-	   
-   }
+
    
    public Composite getComposite(){
    	
@@ -151,6 +183,7 @@ public class PlotSystemComposite extends Composite {
    }
    
 }
+    
 
 
 
