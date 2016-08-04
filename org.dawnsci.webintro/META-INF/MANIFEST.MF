@@ -5,19 +5,13 @@ Bundle-SymbolicName: org.dawnsci.webintro;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.dawnsci.webintro.Activator
 Bundle-Vendor: Diamond Light Source
-Require-Bundle: org.eclipse.ui,
+Require-Bundle: org.eclipse.ui.cheatsheets,
+ org.eclipse.ui,
  org.eclipse.core.runtime,
- org.eclipse.ui.cheatsheets;bundle-version="3.4.200",
- org.eclipse.ui;bundle-version="3.107.0",
- org.eclipse.core.runtime;bundle-version="3.11.1",
- org.eclipse.e4.ui.di,
- org.eclipse.e4.core.di.annotations;bundle-version="1.4.0",
- org.eclipse.e4.ui.model.workbench,
- org.eclipse.ui.workbench
+ uk.ac.diamond.scisoft.feedback,
+ org.eclipse.osgi
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Import-Package: org.slf4j;version="1.7.2",
- uk.ac.diamond.scisoft.feedback
 Bundle-ClassPath: jars/jfxrt.jar,
  jars/jfxswt.jar,
  .,
@@ -27,3 +21,4 @@ Export-Package: org.dawnsci.webintro.actions;
    org.eclipse.core.runtime,
    org.eclipse.jface.action,
    org.eclipse.jface.viewers"
+Import-Package: org.slf4j
