@@ -714,6 +714,7 @@ public class MapPlotManager {
 						switchMap(name, d);
 					}
 				});
+				return;
 			}
 
 			if (d.getRank() > 2) {
