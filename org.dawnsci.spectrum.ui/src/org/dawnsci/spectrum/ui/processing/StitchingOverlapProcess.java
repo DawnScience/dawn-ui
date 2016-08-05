@@ -192,7 +192,7 @@ public class StitchingOverlapProcess extends AbstractProcess {
 				xArrayCorrTrunc[k] = xtemp;
 				yArrayCorrTrunc[k] = ytemp;
 
-			
+		
 			}
 		}
 
