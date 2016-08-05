@@ -56,7 +56,7 @@ public class StitchingOverlapProcess extends AbstractProcess {
 		
 		
 		
-		
+		double attenuationFactor =1;
 		
 		double[] correctionRatioArray = new double[list.size()];
 		correctionRatioArray[0]=1;
@@ -123,11 +123,11 @@ public class StitchingOverlapProcess extends AbstractProcess {
 							yHigherDataset.sum());
 					
 					
-					double correctionRatio = ((double) correctionsRatioDataset.sum())/((double) correctionsRatioDataset.getSize());
+					double correctionRatio = ((double) correctionsRatioDataset.sum())/((double) correctionsRatioDataset.getSize())*attenuationFactor;
 					
-					correctionRatioArray[k+1] = correctionRatio;
+					attenuationFactor = correctionRatio;
 					
-					yArrayCorrected[k+1] = Maths.multiply((Maths.multiply(yArray[k+1],correctionRatio)), correctionRatioArray[k]);
+					yArrayCorrected[k+1] = Maths.multiply(yArray[k+1],attenuationFactor);
 					
 					
 				//	}
