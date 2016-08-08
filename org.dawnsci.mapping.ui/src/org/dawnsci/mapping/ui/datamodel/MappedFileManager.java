@@ -8,7 +8,6 @@ import org.dawb.common.ui.util.DatasetNameUtils;
 import org.dawnsci.mapping.ui.LocalServiceManager;
 import org.dawnsci.mapping.ui.MapPlotManager;
 import org.dawnsci.mapping.ui.dialog.RectangleRegistrationDialog;
-import org.dawnsci.mapping.ui.dialog.RegistrationDialog;
 import org.dawnsci.mapping.ui.wizards.ImportMappedDataWizard;
 import org.dawnsci.mapping.ui.wizards.LegacyMapBeanBuilder;
 import org.dawnsci.mapping.ui.wizards.MapBeanBuilder;
