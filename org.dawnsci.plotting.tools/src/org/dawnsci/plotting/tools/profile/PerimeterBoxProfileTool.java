@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2012-2016 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.dawb.common.ui.util.GridUtils;
+import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.plotting.roi.ROIWidget;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.RegionSumTool;
@@ -20,11 +21,11 @@ import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
-import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IProfileToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
@@ -32,8 +33,8 @@ import org.eclipse.dawnsci.plotting.api.tool.ToolPageFactory;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
@@ -52,6 +53,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
@@ -91,6 +93,8 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 	private IProfileToolPage sideProfile2;
 	private ProfileTool zoomProfile;
 	private RegionSumTool roiSumProfile;
+
+	private Action plotAverage;
 
 	public PerimeterBoxProfileTool() {
 		
@@ -134,7 +138,20 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 	@Override
 	public void createControl(Composite parent) {
 		// Create extra toolbar buttons
-		createActions(getSite());
+		ActionBarWrapper actionBarWrapper = null;
+		if (getSite() == null) {
+			parent = new Composite(parent, SWT.NONE);
+			parent.setLayout(new GridLayout(1,true));
+			parent.setLayoutData(new GridData(GridData.FILL_BOTH));
+			actionBarWrapper = ActionBarWrapper.createActionBars(parent, null);
+		}
+		
+//		sashForm = new SashForm(parent, SWT.VERTICAL);
+//		if (getSite() == null) sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
+
+		final IPageSite site = getSite();
+		IActionBars actionbars = site != null ? site.getActionBars() : actionBarWrapper;
+		createActions(actionbars);
 
 		profileContentComposite = new Composite(parent, SWT.NONE);
 		profileContentComposite.setLayout(new GridLayout(1, true));
@@ -362,16 +379,29 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 		super.createControl(parent);
 	}
 
-	private void createActions(IPageSite site) {
+	/**
+	 * if True, displays plot average
+	 * 
+	 * @param plotAveraging
+	 */
+	public void setPlotAveraging(boolean plotAveraging) {
+		if (sideProfile1 != null && sideProfile2 != null && plotAverage != null) {
+			sideProfile1.setPlotAverageProfile(plotAveraging);
+			sideProfile2.setPlotAverageProfile(plotAveraging);
+			plotAverage.setChecked(true);
+		}
+	}
+
+	private void createActions(IActionBars actionbars) {
 
 		
-		final Action add = new Action("Create new perimeter box profile.", getImageDescriptor()) {
+		final Action add = new Action("Create new perimeter box profile", getImageDescriptor()) {
 			public void run() {
 				createNewRegion(true);
 			}
 		};
 
-		final Action plotAverage = new Action("Plot Average Box Profiles", IAction.AS_CHECK_BOX) {
+		plotAverage = new Action("Plot Average Box Profiles", IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
 				if(isChecked()){
@@ -387,7 +417,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 			}
 		};
 		plotAverage.setToolTipText("Toggle On/Off Average Profiles");
-		plotAverage.setText("Average");
+		plotAverage.setText("Plot Average Box Profiles");
 		plotAverage.setImageDescriptor(Activator.getImageDescriptor("icons/average.png"));
 
 		final Action plotEdge = new Action("Plot Edge Box Profiles", IAction.AS_CHECK_BOX) {
@@ -406,21 +436,18 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 			}
 		};
 		plotEdge.setToolTipText("Toggle On/Off Perimeter Profiles");
-		plotEdge.setText("Edge");
+		plotEdge.setText("Plot Edge Box Profiles");
 		plotEdge.setChecked(true);
 		plotEdge.setImageDescriptor(Activator.getImageDescriptor("icons/edge-color-box.png"));
 
-		// if site is null, the tool has been called programmatically
-		if(site != null){
-			IToolBarManager toolMan = getSite().getActionBars().getToolBarManager();
-			MenuManager menuMan = new MenuManager();
-			toolMan.add(add);
-			menuMan.add(add);
-			toolMan.add(plotEdge);
-			menuMan.add(plotEdge);
-			toolMan.add(plotAverage);
-			menuMan.add(plotAverage);
-		} 
+		IToolBarManager toolMan = actionbars.getToolBarManager();
+		IMenuManager menuMan = actionbars.getMenuManager();
+		toolMan.add(add);
+		menuMan.add(add);
+		toolMan.add(plotEdge);
+		menuMan.add(plotEdge);
+		toolMan.add(plotAverage);
+		menuMan.add(plotAverage);
 	}
 
 	@Override

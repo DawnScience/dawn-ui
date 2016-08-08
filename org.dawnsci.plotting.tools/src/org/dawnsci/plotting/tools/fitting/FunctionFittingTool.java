@@ -15,6 +15,7 @@ import java.util.Map;
 
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.dawb.common.ui.util.GridUtils;
+import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.common.widgets.gda.function.FunctionFittingWidget;
 import org.dawnsci.common.widgets.gda.function.IFittedFunctionInvalidatedEvent;
 import org.dawnsci.common.widgets.gda.function.ModelModifiedAdapter;
@@ -55,6 +56,7 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -66,6 +68,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.part.IPageSite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -238,9 +241,25 @@ public class FunctionFittingTool extends AbstractToolPage implements
 			}
 		});
 
-		getSite().setSelectionProvider(functionWidget.getFunctionViewer());
-		fillActionBar(getSite().getActionBars());
+		ActionBarWrapper actionBarWrapper = null;
+		if (getSite() == null) {
+			parent = new Composite(parent, SWT.NONE);
+			parent.setLayout(new GridLayout(1,true));
+			actionBarWrapper = ActionBarWrapper.createActionBars(parent, null);
+		}
+		
+//		sashForm = new SashForm(parent, SWT.VERTICAL);
+//		if (getSite() == null) sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
 
+		final IPageSite site = getSite();
+		IActionBars actionbars = site!=null?site.getActionBars():actionBarWrapper;
+
+		if (getSite() != null) {
+			getSite().setSelectionProvider(functionWidget.getFunctionViewer());
+		} else {
+			
+		}
+		fillActionBar(actionbars);
 		if (connectLater) {
 			connectPlotSystemListeners();
 			compFunctionModified();
@@ -602,7 +621,13 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		}
 
 	}
-	
+
+	public void addFunctionUpdatedListener(SelectionListener listener) {
+		if (updateAllButton != null) {
+			updateAllButton.addSelectionListener(listener);
+		}
+	}
+
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Object getAdapter(Class key) {
