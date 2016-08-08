@@ -39,16 +39,19 @@ import org.dawnsci.webintro.JSBridge;
  */
 public class WelcomePart extends IntroPart {
 
+	/**
+	 * The location which is opened when the part is opened
+	 */
 	private static String homeLocation = "platform:/plugin/org.dawnsci.webintro/web/index.html";
 	
-	//Any page urls loaded that do not start with this will be opened in the system browser
-	//(Note that this does not apply to JS, CSS, images etc.
+	/**
+	 * Any page urls loaded that do not start with this will be opened in the system browser
+	 * (Note that this does not apply to JS, CSS, images etc.)
+	 */
 	private static String locationLock = "platform:/plugin/org.dawnsci.webintro/web";
 	
 	private WebEngine webEngine;
-	
-	private IToolBarManager toolBar;
-	
+		
 	@Override
 	public void createPartControl(Composite container) {
 
@@ -68,15 +71,18 @@ public class WelcomePart extends IntroPart {
         canvas.setScene(scene);
         
         IActionBars actionBars = getIntroSite().getActionBars();
-
-		toolBar = actionBars.getToolBarManager();
+		IToolBarManager toolBar = actionBars.getToolBarManager();
 		
-        setupToolbarButtons();
+        setupToolbarButtons(toolBar);
         lockUrl();
         addJSBridges();
 	}
 
-	private void setupToolbarButtons(){
+	/**
+	 * Adds a home button to the toolbar
+	 * @param toolBar
+	 */
+	private void setupToolbarButtons(IToolBarManager toolBar){
 		Action homeButton = new Action() {
 			@Override
 			public void run() {
@@ -88,6 +94,11 @@ public class WelcomePart extends IntroPart {
 		toolBar.add(homeButton);
 	}
 
+	/**
+	 * Adds a listener for any change of URL. 
+	 * If the page changes outside of the locationLock, the user will be sent back to the old page, 
+	 * and the page they were trying to access will be opened in their system browser.
+	 */
 	private void lockUrl(){
 		webEngine.locationProperty().addListener(new ChangeListener<String>() {
 			@Override 
@@ -104,6 +115,9 @@ public class WelcomePart extends IntroPart {
 		});
 	}
 	
+	/**
+	 * Register instances of the bridge classes as javascript objects
+	 */
 	private void addJSBridges(){
 		webEngine.getLoadWorker().stateProperty().addListener(
 				(ov, oldState, newState) -> {

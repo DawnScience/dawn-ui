@@ -14,7 +14,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 
 public class ConfigElementComparator implements Comparator<IConfigurationElement> {
 	/**
-	 * Compares two elements.
+	 * Compares two IConfigurationElements which have an "ordering" attribute.
 	 * 
 	 * @param  f1  The first element you want to compare.
 	 * @param  f2  The second element you want to compare.

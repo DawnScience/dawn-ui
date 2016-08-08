@@ -17,7 +17,17 @@ import org.eclipse.ui.IActionDelegate;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.intro.IIntroPart;
 
-
+/**
+ * An exported class which extensions can contribute back as an introAction to the org.dawnsci.webintro.item extension point
+ * This allows a specific help URL to be launched from the welcome page. 
+ * <p>
+ * The help URL can be specified when adding to the extension point by specifying an initialisation parameter: 
+ * {@code org.dawnsci.webintro.actions.OpenHelpAction:/org.dawnsci.documentation.user/html/contents.html}
+ * 
+ * 
+ * @author David Taylor
+ *
+ */
 public class OpenHelpAction implements IActionDelegate, IExecutableExtension {
 
 	private String id;

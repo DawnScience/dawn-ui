@@ -33,10 +33,23 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonWriter;
-
+/**
+ * 
+ * Class which provides extension point information to the JavaScript running inside the JavaFX WebView.
+ * Any public methods can be called by JavaScript, and the result returned to JavaScript
+ * @author David Taylor
+ *
+ */
 public class JSBridge {
 	private final static Logger logger = LoggerFactory.getLogger(JSBridge.class);
 
+	/**
+	 * A method to construct the Platform URL of a resource contributed through an extension point
+	 * 
+	 * @param contributer The IContributer representation of the contributing plugin
+	 * @param resourceLocation The location relative to the plugin root of the required resource
+	 * @return The Eclipse "Platform URL" of the resource
+	 */
 	protected static String getResourceURL(IContributor contributer, String resourceLocation){
 		if(resourceLocation == null || resourceLocation.isEmpty()){
 			return "";
@@ -48,6 +61,12 @@ public class JSBridge {
 		return url;
 	}
 
+	/**
+	 * Loads text from a file specified with an Eclipse Platform URL
+	 * 
+	 * @param resourceUrl The full URL of the resource to load
+	 * @return A String with the contents of the file. Returns empty string if file does not exist
+	 */
 	private String getTextResource(String resourceUrl){
 		URL url;
 		try {
@@ -71,6 +90,12 @@ public class JSBridge {
 
 	}
 
+	/**
+	 * Get an array of all contributions to a specific extension point
+	 * 
+	 * @param point The extension point to load
+	 * @return Array of extension point contributions
+	 */
 	private IConfigurationElement[] getRegisteredConfigs(String point){
 		IConfigurationElement[] configs = org.eclipse.core.runtime.Platform
 				.getExtensionRegistry()
@@ -78,6 +103,14 @@ public class JSBridge {
 		return configs;
 	}
 
+	/**
+	 * Gets an array of all contributions to a specific extension point with att = val
+	 * 
+	 * @param point The extension point to load
+	 * @param att The attribute to filter by
+	 * @param val The value of att
+	 * @return
+	 */
 	private IConfigurationElement[] getConfigsWithAttribute(String point, String att, String val){
 		IConfigurationElement[] configs = getRegisteredConfigs(point);
 
@@ -92,19 +125,38 @@ public class JSBridge {
 		return result.toArray(new IConfigurationElement[result.size()]);
 	}
 
-	private IConfigurationElement[] getOrderedParentItems(String parentId){
+	/**
+	 * Gets an array of items with the a specific parent, and sorts them by the "ordering" field
+	 * 
+	 * @param parentId The category_id or page_id of the parent item/page
+	 * @return An array of item contributions
+	 */
+	private IConfigurationElement[] getOrderedChildren(String parentId){
 		IConfigurationElement[] parentItems	= getConfigsWithAttribute("org.dawnsci.webintro.item", "parent_id", parentId);
 
 		Arrays.sort(parentItems, new ConfigElementComparator());
 		return parentItems;
 	}
 
+	/**
+	 * Gets an array of all pages contributed to the org.dawnsci.webintro.page extension point
+	 * and sorts them by the "ordering" field
+	 * @return An array of page contributions
+	 */
 	private IConfigurationElement[] getOrderedPages(){
 		IConfigurationElement[] pages = getRegisteredConfigs("org.dawnsci.webintro.page");
 		Arrays.sort(pages, new ConfigElementComparator());
 		return pages;
 	}
 
+	/**
+	 * Gets the specified attribute from the IConfigurationElement. 
+	 * If it has not been specified, returns an empty string. 
+	 * 
+	 * @param configElement
+	 * @param attributeName
+	 * @return The attribute value, or an empty string if not specified
+	 */
 	private String getOptionalString(IConfigurationElement configElement, String attributeName){
 		String val = configElement.getAttribute(attributeName);
 		if(val == null){
@@ -114,6 +166,11 @@ public class JSBridge {
 		}
 	}
 
+	/**
+	 * Builds a JSONObject for the item described by the provided IConfigurationElement
+	 * @param thisItem The configuration element
+	 * @return A JsonObjectBuilder instance with the item information
+	 */
 	private JsonObjectBuilder getJsonForItem(IConfigurationElement thisItem){
 		String itemImageURL = getResourceURL(thisItem.getContributor(),thisItem.getAttribute("icon"));
 
@@ -142,6 +199,60 @@ public class JSBridge {
 		return thisJSONItem;
 	}
 
+	/**
+	 * Creates a JsonArrayBuilder instance with the information for the items provided and their children.
+	 * 
+	 * @param items the items to get the JSON for
+	 * @param orphanedItems an ArrayList containing all the items. As the item is processed, its entry in this ArrayList will be removed
+	 * @param allowCategories a boolean specifying whether to allow categories. 
+	 * 		  Should be true for processing pages, and false for processing categories (no nested categories) 
+	 * @return A JsonArrayBuilder containing all information relating to the items & their children
+	 */
+	private JsonArrayBuilder getJsonForItems(IConfigurationElement[] items, ArrayList<IConfigurationElement> orphanedItems, boolean allowCategories) {
+		return getJsonForItems(items, orphanedItems, allowCategories, Json.createArrayBuilder());
+	}
+
+	/**
+	 * Creates a JsonArrayBuilder instance with the information for the items provided and their children. 
+	 * Allows a starting JsonArrayBuilder to be passed in. The new items will be appended to this array.
+	 * 
+	 * @param items the items to get the JSON for
+	 * @param orphanedItems an ArrayList containing all the items. As the item is processed, its entry in this ArrayList will be removed
+	 * @param allowCategories a boolean specifying whether to allow categories. 
+	 * 		  Should be true for processing pages, and false for processing categories (no nested categories)
+	 * @param startItems a JsonArrayBuilder instance to append new items to 
+	 * @return A JsonArrayBuilder containing all information relating to the items & their children
+	 */
+	private JsonArrayBuilder getJsonForItems(IConfigurationElement[] items, ArrayList<IConfigurationElement> orphanedItems, boolean allowCategories, JsonArrayBuilder startItems) {
+		JsonArrayBuilder allItems = startItems;
+		for (IConfigurationElement thisItem : items){
+			orphanedItems.remove(thisItem); // Remove this item from the main list
+			JsonObjectBuilder thisItemJson = getJsonForItem(thisItem);
+
+			if(thisItem.getName().equals("introCategory")){
+				if(!allowCategories){
+					logger.error("Tried to add a category to a category, ignoring contribution.");
+				}else{
+					IConfigurationElement[] catItems = getOrderedChildren(thisItem.getAttribute("category_id"));
+
+					JsonArrayBuilder categoryItemsJson = getJsonForItems(catItems, orphanedItems, false);
+
+					thisItemJson.add("items", categoryItemsJson.build());
+					allItems.add(thisItemJson.build());
+				}
+			}else{
+				allItems.add(thisItemJson.build());
+			}
+
+		}
+		return allItems;
+	}
+
+	/**
+	 * The primary method which is called by the JavaScript. 
+	 * Serialises all extension point information into JSON and returns this as a String
+	 * @return String with extension point information serialised as JSON
+	 */
 	public String getIntroJSON(){
 		IConfigurationElement[] pages = getOrderedPages();
 
@@ -152,7 +263,7 @@ public class JSBridge {
 
 		for (IConfigurationElement thisPage : pages){
 
-			IConfigurationElement[] items = getOrderedParentItems(thisPage.getAttribute("page_id"));
+			IConfigurationElement[] items = getOrderedChildren(thisPage.getAttribute("page_id"));
 			JsonArrayBuilder pageItems = getJsonForItems(items, orphanedItems, true);
 
 			String pageContentURL = getResourceURL(thisPage.getContributor(), thisPage.getAttribute("content_file"));
@@ -204,36 +315,13 @@ public class JSBridge {
 		}
 		return stWriter.toString();
 	}
-
-	private JsonArrayBuilder getJsonForItems(IConfigurationElement[] items, ArrayList<IConfigurationElement> orphanedItems, boolean allowCategories) {
-		return getJsonForItems(items, orphanedItems, allowCategories, Json.createArrayBuilder());
-	}
-
-	private JsonArrayBuilder getJsonForItems(IConfigurationElement[] items, ArrayList<IConfigurationElement> orphanedItems, boolean allowCategories, JsonArrayBuilder startItems) {
-		JsonArrayBuilder allItems = startItems;
-		for (IConfigurationElement thisItem : items){
-			orphanedItems.remove(thisItem); // Remove this item from the main list
-			JsonObjectBuilder thisItemJson = getJsonForItem(thisItem);
-
-			if(thisItem.getName().equals("introCategory")){
-				if(!allowCategories){
-					logger.error("Tried to add a category to a category, ignoring contribution.");
-				}else{
-					IConfigurationElement[] catItems = getOrderedParentItems(thisItem.getAttribute("category_id"));
-
-					JsonArrayBuilder categoryItemsJson = getJsonForItems(catItems, orphanedItems, false);
-
-					thisItemJson.add("items", categoryItemsJson.build());
-					allItems.add(thisItemJson.build());
-				}
-			}else{
-				allItems.add(thisItemJson.build());
-			}
-
-		}
-		return allItems;
-	}
-
+	
+	/**
+	 * Public method called by JavaScript to invoke a specific action. 
+	 * 
+	 * @param configId The config ID for which the action is associated
+	 * @return boolean indicating whether the action was successful
+	 */
 	public boolean runAction(String configId){
 		logger.debug("JSBridge runAction Called for id "+configId);
 		IConfigurationElement config = getConfigsWithAttribute("org.dawnsci.webintro.item","id", configId)[0];
@@ -251,18 +339,32 @@ public class JSBridge {
 			return false;
 		}
 	}
-
-	public void openLink(String href) throws MalformedURLException{
+	/**
+	 * Public method called by JavaScript to launch the system browser at a specific page. 
+	 * URL will be validated by java.net.URL and checked for http or https protocol
+	 * @param href The web address to open
+	 * @throws MalformedURLException
+	 */
+	public boolean openLink(String href) throws MalformedURLException{
 		logger.debug("JSBridge openLink Called for url "+href);
 
 		// Use URL class to validate the string (otherwise a website could open an executable on the local filesystem)
 		URL urlObject = new URL(href); 
-
-		Program.launch(urlObject.toString());
+		String protocol = urlObject.getProtocol();
+		if( protocol.equals("http") || protocol.equals("https") ){
+			Program.launch(urlObject.toString());
+			return true;
+		}else{
+			return false;
+		}
 	}
 
+	/**
+	 * Utility method which allows JavaScript to log to the Java console
+	 * @param text The text to log
+	 */
 	public void log(String text)
 	{
-		System.out.println(text);
+		System.out.println("JavaScript logged: "+text);
 	}
 }

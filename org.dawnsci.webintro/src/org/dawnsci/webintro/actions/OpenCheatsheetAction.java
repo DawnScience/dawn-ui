@@ -20,7 +20,17 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.cheatsheets.OpenCheatSheetAction;
 import org.eclipse.ui.intro.IIntroPart;
 
-
+/**
+ * An exported class which extensions can contribute back as an introAction to the org.dawnsci.webintro.item extension point
+ * This allows a specific cheatsheet to be launched from the welcome page. 
+ * <p>
+ * The cheatsheet can be specified when adding to the extension point by specifying an initialisation parameter: 
+ * {@code org.dawnsci.webintro.actions.OpenCheatsheetAction:org.example.cheatsheets.MyDemoCheatsheet}
+ * 
+ * 
+ * @author David Taylor
+ *
+ */
 public class OpenCheatsheetAction implements IActionDelegate, IExecutableExtension {
 
 	private String id;
