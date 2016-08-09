@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2012-2016 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,12 +9,11 @@
 
 package org.dawnsci.plotting.tools.profile;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.dawb.common.ui.util.DisplayUtils;
+import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -33,10 +32,13 @@ import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
-import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IntegerDataset;
-import org.eclipse.january.dataset.Slice;
+import org.eclipse.january.dataset.RGBDataset;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +47,7 @@ import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 /**
  * BoxLine profile tool
  */
-public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
+public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(BoxLineProfileTool.class);
 	private IAxis xPixelAxis;
@@ -54,67 +56,126 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 
 	private boolean isAveragePlotted;
 	private boolean isEdgePlotted;
-	private boolean isXAxisROIVisible = true;
-	private String traceName1;
-	private String traceName2;
-	private String traceName3;
-	private ILineTrace x_trace;
-	private ILineTrace y_trace;
-	private ILineTrace av_trace;
+	private boolean isXAxisROIVisible = false;
 
 	private ProfileJob profileJob;
 	private IRegion xAxisROI;
+	private IRegion region;
 
 	public BoxLineProfileTool() {
-		this(false);
+		this(false, true, false);
 		this.profileJob = new ProfileJob();
 	}
+
 	/**
 	 * Constructor to this profile tool
+	 * 
 	 * @param isVertical
 	 */
-	public BoxLineProfileTool(boolean isVertical){
+	public BoxLineProfileTool(boolean isVertical) {
 		this.isVertical = isVertical;
+	}
+
+	/**
+	 * Constructor to this profile tool
+	 * 
+	 * @param isVertical
+	 * @param isEdgePlotted
+	 * @param isAveragePlotted
+	 */
+	public BoxLineProfileTool(boolean isVertical, boolean isEdgePlotted, boolean isAveragePlotted) {
+		this.isVertical = isVertical;
+		this.isEdgePlotted = isEdgePlotted;
+		this.isAveragePlotted = isAveragePlotted;
 	}
 
 	@Override
 	protected void configurePlottingSystem(IPlottingSystem<?> plottingSystem) {
 		if (xPixelAxis == null) {
 			this.xPixelAxis = plottingSystem.getSelectedXAxis();
+			xPixelAxis.setTitle("X Pixel");
 		}
 		if (yPixelAxis == null) {
-			plottingSystem.getSelectedYAxis().setTitle("Intensity");
 			this.yPixelAxis = plottingSystem.getSelectedYAxis();
+			plottingSystem.getSelectedYAxis().setTitle("Intensity");
 		}
 
 		profilePlottingSystem.setShowLegend(false);
 		profilePlottingSystem.setTitle("");
+
+		Action plotAverage = new Action("Plot Average Box Profiles", IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				setPlotAverageProfile(isChecked());
+				ILineTrace average_trace = (ILineTrace) profilePlottingSystem.getTrace("Average");
+				if (average_trace != null) {
+					average_trace.setVisible(isChecked());
+				}
+				if (region != null)
+					update(region, (RectangularROI) region.getROI(), false);
+			}
+		};
+		plotAverage.setToolTipText("Toggle On/Off Average Profiles");
+		plotAverage.setText("Plot Average Box Profiles");
+		plotAverage.setImageDescriptor(Activator.getImageDescriptor("icons/average.png"));
+
+		final Action plotEdge = new Action("Plot Edge Box Profiles", IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				setPlotEdgeProfile(isChecked());
+				ILineTrace trace1 = (ILineTrace) profilePlottingSystem.getTrace("Edge 1");
+				ILineTrace trace2 = (ILineTrace) profilePlottingSystem.getTrace("Edge 2");
+				if (trace1 != null && trace2 != null) {
+					trace1.setVisible(isChecked());
+					trace2.setVisible(isChecked());
+				}
+				if (region != null)
+					update(region, (RectangularROI) region.getROI(), false);
+			}
+		};
+		plotEdge.setToolTipText("Toggle On/Off Perimeter Profiles");
+		plotEdge.setText("Plot Edge Box Profiles");
+		plotEdge.setChecked(true);
+		plotEdge.setImageDescriptor(Activator.getImageDescriptor("icons/edge-color-box.png"));
+		if (getSite() != null) {
+			getSite().getActionBars().getToolBarManager().add(new Separator("average"));
+			getSite().getActionBars().getToolBarManager().add(plotAverage);
+			getSite().getActionBars().getToolBarManager().add(plotEdge);
+			getSite().getActionBars().getToolBarManager().add(new Separator("edge"));
+		}
+
 		logger.debug("profilePlottingSystem configured");
 	}
 
 	@Override
 	protected boolean isRegionTypeSupported(RegionType type) {
-		return (type==RegionType.BOX)||(type==RegionType.PERIMETERBOX)||(type==RegionType.XAXIS)||(type==RegionType.YAXIS);
+		return (type == RegionType.BOX) || (type == RegionType.PERIMETERBOX) || (type == RegionType.XAXIS)
+				|| (type == RegionType.YAXIS);
 	}
 
 	@Override
 	protected RegionType getCreateRegionType() {
 		return RegionType.PERIMETERBOX;
 	}
+
 	public boolean isAveragePlotted() {
 		return isAveragePlotted;
 	}
+
 	@Override
 	public void setPlotAverageProfile(boolean isAveragePlotted) {
 		this.isAveragePlotted = isAveragePlotted;
 	}
+
 	public boolean isEdgePlotted() {
 		return isEdgePlotted;
 	}
+
 	@Override
 	public void setPlotEdgeProfile(boolean isEdgePlotted) {
 		this.isEdgePlotted = isEdgePlotted;
 	}
+
 	@Override
 	public void setXAxisROIVisible(boolean isXAxisROIVisible) {
 		this.isXAxisROIVisible = isXAxisROIVisible;
@@ -135,353 +196,239 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 	}
 
 	@Override
-	protected Collection<? extends ITrace> createProfile(IImageTrace image, IRegion region,
-														IROI rbs, boolean tryUpdate, boolean isDrag,
-														IProgressMonitor monitor) {
-		if (monitor.isCanceled()) return null;
-		if (image==null) return null;
-		
-		if (!isRegionTypeSupported(region.getRegionType())) return null;
+	protected Collection<? extends ITrace> createProfile(IImageTrace image, IRegion region, IROI rbs, boolean tryUpdate,
+			boolean isDrag, IProgressMonitor monitor) {
+		this.region = region;
+		if (image == null)
+			return null;
 
-		RectangularROI bounds = (RectangularROI) (rbs==null ? region.getROI() : rbs);
-		if (bounds==null) return null;
-		if (!region.isVisible()) return null;
+		Dataset[] profile = getProfiles(image, region, rbs, tryUpdate, isDrag, monitor);
+		if (profile == null)
+			return null;
 
-		if (monitor.isCanceled()) return null;
-		bounds = getPositiveBounds(bounds);
-		// vertical and horizontal profiles
+		final Dataset indices = profile[0];
+		final Dataset edge1 = profile[1];
+		final Dataset edge2 = profile[2];
+		Dataset average = profile[3];
+
+		if (!isRegionTypeSupported(region.getRegionType()))
+			return null;
+
+		final ILineTrace trace1 = (ILineTrace) profilePlottingSystem.getTrace("Edge 1");
+		final ILineTrace trace2 = (ILineTrace) profilePlottingSystem.getTrace("Edge 2");
+		ILineTrace average_trace = (ILineTrace) profilePlottingSystem.getTrace("Average");
+		profilePlottingSystem.setSelectedXAxis(xPixelAxis);
 		if (isEdgePlotted && !isAveragePlotted) {
-			return updatePerimeterProfile(image, bounds, region, tryUpdate, monitor);
-		} else if (!isEdgePlotted && isAveragePlotted) {
-			return updateAverageProfile(image, bounds, region, tryUpdate, monitor);
+			if (tryUpdate && trace1 != null && trace2 != null) {
+				trace1.setData(indices, edge1);
+				trace2.setData(indices, edge2);
+			} else {
+				Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(indices,
+						Arrays.asList(new IDataset[] { edge1 }), monitor);
+				registerTraces(region, plotted);
+				plotted = profilePlottingSystem.updatePlot1D(indices, Arrays.asList(new IDataset[] { edge2 }), monitor);
+				registerTraces(region, plotted);
+			}
+			setTracesColor();
+			return Arrays.asList(trace2, trace1);
 		} else if (isEdgePlotted && isAveragePlotted) {
-			return updatePerimeterAndAverageProfile(image, bounds, region, tryUpdate, monitor);
-		} else if (!isEdgePlotted && !isAveragePlotted) {
-			hideTraces();
+			if (tryUpdate && trace1 != null && trace2 != null && average_trace != null) {
+				trace1.setData(indices, edge1);
+				trace2.setData(indices, edge2);
+				average_trace.setData(indices, average);
+			} else {
+				Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(indices,
+						Arrays.asList(new IDataset[] { edge1 }), monitor);
+				registerTraces(region, plotted);
+				plotted = profilePlottingSystem.updatePlot1D(indices, Arrays.asList(new IDataset[] { edge2 }), monitor);
+				registerTraces(region, plotted);
+				plotted = profilePlottingSystem.updatePlot1D(indices, Arrays.asList(new IDataset[] { average }), monitor);
+				registerTraces(region, plotted);
+			}
+			setTracesColor();
+			return Arrays.asList(trace2, trace1, average_trace);
+		} else if (!isEdgePlotted && isAveragePlotted) {
+			if (tryUpdate && average_trace != null) {
+				average_trace.setData(indices, average);
+			} else {
+				Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(indices,
+						Arrays.asList(new IDataset[] { average }), monitor);
+				registerTraces(region, plotted);
+			}
+			setTracesColor();
+			return Arrays.asList(average_trace);
 		}
-		return null; // TODO more than one trace so for now, do not return.
+		return null;
 	}
 
-	private RectangularROI getPositiveBounds(RectangularROI bounds){
+	@SuppressWarnings("unused")
+	private RectangularROI getPositiveBounds(RectangularROI bounds) {
 		double[] startpt = bounds.getPoint();
-		if(startpt[0] < 0) startpt[0] = 0;
-		if(startpt[1] < 0) startpt[1] = 0;
+		if (startpt[0] < 0)
+			startpt[0] = 0;
+		if (startpt[1] < 0)
+			startpt[1] = 0;
 		bounds.setPoint(startpt);
 		bounds.setEndPoint(bounds.getEndPoint());
 		return bounds;
 	}
 
 	/**
-	 * Update the perimeter profiles and the average profile
-	 * TODO Make a single generic method called updateProfile in order to lower number of lines of code
+	 * 
 	 * @param image
-	 * @param bounds
 	 * @param region
+	 * @param rbs
 	 * @param tryUpdate
+	 * @param isDrag
 	 * @param monitor
+	 * @return indices, intensity1, intensity2, average OR null
 	 */
-	private  Collection<ILineTrace> updatePerimeterAndAverageProfile( final IImageTrace image, final RectangularROI bounds,
-													IRegion region, boolean tryUpdate,
-													IProgressMonitor monitor) {
-		Dataset id = DatasetUtils.convertToDataset(image.getData());
-		Dataset md = DatasetUtils.convertToDataset(image.getMask());
-		Dataset[] boxLine = ROIProfile.boxLine(id, md, bounds, true, isVertical);
-		Dataset[] boxMean = ROIProfile.boxMean(id, md, bounds, true);
-
-		if (boxLine == null) return null;
-		if (boxMean == null) return null;
-
-		setTraceNames();
-		Dataset line3 = boxMean[isVertical ? 1 : 0];
-
-		Dataset line1 = boxLine[0];
-		line1.setName(traceName1);
-		Dataset xi = DatasetFactory.createRange(IntegerDataset.class, line1.getSize());
-		final Dataset x_indices = xi;
-
-		Dataset line2 = boxLine[1];
-		line2.setName(traceName2);
-		Dataset yi = DatasetFactory.createRange(IntegerDataset.class, line2.getSize());
-		final Dataset y_indices = yi;
-
-		// Average profile
-		line3.setName(traceName3);
-		Dataset av_indices = DatasetFactory.createRange(IntegerDataset.class, line3.getSize());
-
-		final List<Dataset> lines = new ArrayList<Dataset>(3);
-		lines.add(line1);
-		lines.add(line2);
-		lines.add(line3);
-
-		x_trace = (ILineTrace) profilePlottingSystem.getTrace(traceName1);
-		y_trace = (ILineTrace) profilePlottingSystem.getTrace(traceName2);
-		av_trace = (ILineTrace) profilePlottingSystem.getTrace(traceName3);
-
-		final List<ILineTrace> traces = new ArrayList<ILineTrace>(3);
-		traces.add(x_trace);
-		traces.add(y_trace);
-		traces.add(av_trace);
-
-		if (tryUpdate && x_trace != null && y_trace != null && av_trace != null) {
-			updateAxes(image, traces, lines, bounds);
-		} else {
-			profilePlottingSystem.setSelectedXAxis(xPixelAxis);
-			profilePlottingSystem.setSelectedYAxis(yPixelAxis);
-			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(x_indices, Arrays.asList(new IDataset[] { line1 }), monitor);
-			registerTraces(region, plotted);
-			plotted = profilePlottingSystem.updatePlot1D(y_indices, Arrays.asList(new IDataset[] { line2 }), monitor);
-			registerTraces(region, plotted);
-			plotted = profilePlottingSystem.updatePlot1D(av_indices, Arrays.asList(new IDataset[] { line3 }), monitor);
-			registerTraces(region, plotted);
-			hideTraces();
-		}
-		
-		return traces;
-	}
-
-	/**
-	 * Update the perimeter profiles if no average profile
-	 * @param image
-	 * @param bounds
-	 * @param region
-	 * @param tryUpdate
-	 * @param monitor
-	 */
-	private Collection<ILineTrace> updatePerimeterProfile(  final IImageTrace image, final RectangularROI bounds,
-														IRegion region, boolean tryUpdate,
-														IProgressMonitor monitor) {
-		Dataset id = DatasetUtils.convertToDataset(image.getData());
-		Dataset md = DatasetUtils.convertToDataset(image.getMask());
-		Dataset[] boxLine = ROIProfile.boxLine(id, md, bounds, true, isVertical);
-		if (boxLine == null) return null;
-
-		setTraceNames();
-
-		Dataset line1 = boxLine[0];
-		line1.setName(traceName1);
-		Dataset xi = DatasetFactory.createRange(IntegerDataset.class, line1.getSize());
-		final Dataset x_indices = xi;
-
-		Dataset line2 = boxLine[1];
-		line2.setName(traceName2);
-		Dataset yi = DatasetFactory.createRange(IntegerDataset.class, line2.getSize());
-		final Dataset y_indices = yi;
-
-		final List<Dataset> lines = new ArrayList<Dataset>(3);
-		lines.add(line1);
-		lines.add(line2);
-
-		x_trace = (ILineTrace) profilePlottingSystem.getTrace(traceName1);
-		y_trace = (ILineTrace) profilePlottingSystem.getTrace(traceName2);
-
-		final List<ILineTrace> traces = new ArrayList<ILineTrace>(3);
-		traces.add(x_trace);
-		traces.add(y_trace);
-
-		if (tryUpdate && x_trace != null && y_trace != null) {
-			updateAxes(image, traces, lines, bounds);
-		} else {
-			profilePlottingSystem.setSelectedXAxis(xPixelAxis);
-			profilePlottingSystem.setSelectedYAxis(yPixelAxis);
-			Collection<ITrace> plotted = null;
-			plotted = profilePlottingSystem.updatePlot1D(x_indices, Arrays.asList(new IDataset[] { line1 }), monitor);
-			registerTraces(region, plotted);
-			plotted = profilePlottingSystem.updatePlot1D(y_indices, Arrays.asList(new IDataset[] { line2 }), monitor);
-			registerTraces(region, plotted);
-		}
-		
-		return traces;
-	}
-
-	/**
-	 * Update the average profile without the perimeter profiles
-	 * @param image
-	 * @param bounds
-	 * @param region
-	 * @param tryUpdate
-	 * @param monitor
-	 */
-	private  Collection<ILineTrace> updateAverageProfile(
-			final IImageTrace image, final RectangularROI bounds,
-			IRegion region, boolean tryUpdate,
+	protected Dataset[] getProfiles(IImageTrace image, IRegion region, IROI rbs, boolean tryUpdate, boolean isDrag,
 			IProgressMonitor monitor) {
+
+		if (monitor.isCanceled())
+			return null;
+		if (image == null)
+			return null;
+
+		if (!isRegionTypeSupported(region.getRegionType()))
+			return null;
+
+		final RectangularROI bounds = (RectangularROI) (rbs == null ? region.getROI() : rbs);
+		if (bounds == null)
+			return null;
+		if (!region.isVisible())
+			return null;
+
+		if (monitor.isCanceled())
+			return null;
+
+		Dataset data = DatasetUtils.convertToDataset(image.getData());
+		if (data instanceof RGBDataset)
+			data = ((RGBDataset) data).getRedView();
+
 		Dataset id = DatasetUtils.convertToDataset(image.getData());
 		Dataset md = DatasetUtils.convertToDataset(image.getMask());
-		Dataset[] boxMean = ROIProfile.boxMean(id, md, bounds, true);
 
-		if (boxMean==null) return null;
+		Dataset[] boxLine = ROIProfile.boxLine(id, md, bounds, true, isVertical);
+		if (boxLine == null)
+			return null;
 
-		setTraceNames();
-		Dataset line3 = boxMean[isVertical ? 1 : 0];
-
-		// Average profile
-		line3.setName(traceName3);
-		Dataset av_indices = DatasetFactory.createRange(IntegerDataset.class, line3.getSize());
-
-		final List<Dataset> lines = new ArrayList<Dataset>(1);
-		lines.add(line3);
-
-		av_trace = (ILineTrace) profilePlottingSystem.getTrace(traceName3);
-
-		final List<ILineTrace> traces = new ArrayList<ILineTrace>(1);
-		traces.add(av_trace);
-
-		if (tryUpdate && av_trace != null) {
-			updateAxes(image, traces, lines, bounds);
-		} else {
-			profilePlottingSystem.setSelectedXAxis(xPixelAxis);
-			profilePlottingSystem.setSelectedYAxis(yPixelAxis);
-			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(av_indices, Arrays.asList(new IDataset[] { line3 }), monitor);
-			registerTraces(region, plotted);
+		Dataset average = null;
+		if (isAveragePlotted) {
+			Dataset[] boxMean = ROIProfile.boxMean(id, md, bounds, true);
+			if (isVertical)
+				average = boxMean[1];
+			else
+				average = boxMean[0];
+			average.setName("Average");
 		}
-		return traces;
-	}
 
-	/**
-	 * Set the trace names given the type of profile
-	 */
-	private void setTraceNames(){
-		if (isVertical) {
-			traceName1 = "Left Profile";
-			traceName2 = "Right Profile";
-			traceName3 = "Vertical Average Profile";
-		} else {
-			traceName1 = "Top Profile";
-			traceName2 = "Bottom Profile";
-			traceName3 = "Horizontal Average Profile";
-		}
-	}
+		Dataset xi = null;
 
-	private void updateAxes(final IImageTrace image, final List<ILineTrace> traces, final List<Dataset> lines, final RectangularROI bounds){
-		DisplayUtils.syncExec(getControl(), new Runnable() {
-			@Override
-			public void run() {
-				List<IDataset> axes = image.getAxes();
-				if (axes != null && axes.size() > 0) {
-					if (isVertical) {
-						updateAxes(traces, lines, DatasetUtils.convertToDataset(axes.get(1)), bounds.getPointY());
-					} else {
-						updateAxes(traces, lines, DatasetUtils.convertToDataset(axes.get(0)), bounds.getPointX());
-					}
-				} else { // if no axes we set them manually according to
-							// the data shape
-					int[] shapes = image.getData().getShape();
-					if (isVertical) {
-						int[] verticalAxis = new int[shapes[1]];
-						for (int i = 0; i < verticalAxis.length; i++) {
-							verticalAxis[i] = i;
-						}
-						Dataset vertical = DatasetFactory.createFromObject(verticalAxis);
-						updateAxes(traces, lines, vertical, bounds.getPointY());
-					} else {
-						int[] horizontalAxis = new int[shapes[0]];
-						for (int i = 0; i < horizontalAxis.length; i++) {
-							horizontalAxis[i] = i;
-						}
-						Dataset horizontal = DatasetFactory.createFromObject(horizontalAxis);
-						updateAxes(traces, lines, horizontal, bounds.getPointX());
-					}
+		double ang = bounds.getAngle();
+		if (image.getAxes() != null && ang == 0) {
+			List<IDataset> axes = image.getAxes();
+
+			int[] spt = bounds.getIntPoint();
+			int[] len = bounds.getIntLengths();
+
+			int xstart = 0;
+			int xend = 0;
+			if (isVertical) {
+				xstart = Math.max(0, spt[1]);
+				xend = Math.min(spt[1] + len[1], image.getData().getShape()[1]);
+			} else {
+				xstart = Math.max(0, spt[0]);
+				xend = Math.min(spt[0] + len[0], image.getData().getShape()[0]); // ,
+			}
+			if (isVertical) {
+				try {
+					IDataset xFull = axes.get(1);
+					xi = DatasetUtils.convertToDataset(
+							xFull.getSlice(new int[] { xstart }, new int[] { xend + 1 }, new int[] { 1 }));
+					xi.setName(xFull.getName());
+				} catch (Exception ne) {
+					// ignore
 				}
-				setTracesColor();
-				hideTraces();
+			} else {
+				try {
+					IDataset xFull = axes.get(0);
+					xi = DatasetUtils.convertToDataset(
+							xFull.getSlice(new int[] { xstart }, new int[] { xend + 1 }, new int[] { 1 }));
+					xi.setName(xFull.getName());
+				} catch (Exception ne) {
+					// ignore
+				}
 			}
-		});
-	}
-
-	/**
-	 * Updates the profile axes according to the ROI start point
-	 * @param profiles
-	 * @param boxLines
-	 * @param originalAxis
-	 * @param axis
-	 * @param startPoint
-	 */
-	private void updateAxes(List<ILineTrace> profiles, List<Dataset> lines, 
-			Dataset axis, double startPoint){
-		// shift the xaxis by yStart
-		try {
-			double xStart = axis.getDouble((int)Math.round(startPoint));
-			double min = axis.getDouble(0);
-
-			axis = DatasetUtils.cast(DoubleDataset.class, axis);
-			xStart = axis.getDouble((int)Math.round(startPoint));
-			min = axis.getDouble(0);
-			axis.iadd(xStart-min);
-
-			if(profiles == null) return;
-			if(isEdgePlotted && !isAveragePlotted){
-				profiles.get(0).setData(axis.getSlice(new Slice(0, lines.get(0).getShape()[0], 1)), lines.get(0));
-				profiles.get(1).setData(axis.getSlice(new Slice(0, lines.get(1).getShape()[0], 1)), lines.get(1));
-			}
-			else if(!isEdgePlotted && isAveragePlotted)
-				profiles.get(0).setData(axis.getSlice(new Slice(0, lines.get(0).getShape()[0], 1)), lines.get(0));
-			else if(isEdgePlotted && isAveragePlotted){
-				profiles.get(0).setData(axis.getSlice(new Slice(0, lines.get(0).getShape()[0], 1)), lines.get(0));
-				profiles.get(1).setData(axis.getSlice(new Slice(0, lines.get(1).getShape()[0], 1)), lines.get(1));
-				profiles.get(2).setData(axis.getSlice(new Slice(0, lines.get(2).getShape()[0], 1)), lines.get(2));
-			}
-
-			double max = axis.getElementDoubleAbs(axis.argMax());
-			xPixelAxis.setTitle(axis.getName());
-			xAxisROI = createXAxisBoxRegion(profilePlottingSystem, new RectangularROI(min, 0, (max-min)/2, 100, 0), "X_Axis_box");
-		
-		} catch (ArrayIndexOutOfBoundsException ae) {
-			//do nothing
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.debug("An exception has occured:"+e);
 		}
+
+		Dataset intensity1 = boxLine[0];
+		intensity1.setName("Edge 1");
+		if (xi == null || !Arrays.equals(xi.getShape(), intensity1.getShape())) {
+			double xStart = bounds.getPointX();
+			double xEnd = bounds.getPointX() + bounds.getLength(0);
+			xi = DatasetFactory.createRange(IntegerDataset.class, xStart, xEnd, 1);
+			xi.setName("X Pixel");
+		}
+		final Dataset indices = xi; // Maths.add(xi, bounds.getX()); // Real
+									// position
+
+		Dataset intensity2 = boxLine[1];
+		intensity2.setName("Edge 2");
+
+		return new Dataset[] { indices, intensity1, intensity2, average};
 	}
 
 	/**
 	 * Set the traces colour given the type of profile
 	 */
-	private void setTracesColor(){
-		setTraceNames();
-		x_trace = (ILineTrace)profilePlottingSystem.getTrace(traceName1);
-		y_trace = (ILineTrace)profilePlottingSystem.getTrace(traceName2);
-		if (isVertical) {
-			if(x_trace != null && y_trace != null){
-				x_trace.setTraceColor(ColorConstants.red);
-				y_trace.setTraceColor(ColorConstants.darkGreen);
-			}
-		} else {
-			if(x_trace != null && y_trace != null){
-				x_trace.setTraceColor(ColorConstants.blue);
-				y_trace.setTraceColor(ColorConstants.orange);
-			}
-		}
-		av_trace = (ILineTrace)profilePlottingSystem.getTrace(traceName3);
-		if(av_trace != null)
-			av_trace.setTraceColor(ColorConstants.cyan);
-	}
-
-	private void hideTraces() {
-		DisplayUtils.asyncExec(getControl(), new Runnable() {
+	private void setTracesColor() {
+		Display.getDefault().asyncExec(new Runnable() {
+			
 			@Override
 			public void run() {
-				if(x_trace != null && y_trace != null){
-					x_trace.setVisible(isEdgePlotted);
-					y_trace.setVisible(isEdgePlotted);
-				} 
-				if(av_trace != null)
-					av_trace.setVisible(isAveragePlotted);
+				ILineTrace edge1_trace = (ILineTrace) profilePlottingSystem.getTrace("Edge 1");
+				ILineTrace edge2_trace = (ILineTrace) profilePlottingSystem.getTrace("Edge 2");
+				if (isVertical) {
+					if (edge1_trace != null && edge2_trace != null) {
+						edge1_trace.setTraceColor(ColorConstants.red);
+						edge2_trace.setTraceColor(ColorConstants.darkGreen);
+					}
+				} else {
+					if (edge1_trace != null && edge2_trace != null) {
+						edge1_trace.setTraceColor(ColorConstants.blue);
+						edge2_trace.setTraceColor(ColorConstants.orange);
+					}
+				}
+				ILineTrace av_trace = (ILineTrace) profilePlottingSystem.getTrace("Average");
+				if (av_trace != null)
+					av_trace.setTraceColor(ColorConstants.cyan);
 			}
 		});
 	}
 
-	private IRegion createXAxisBoxRegion(final IPlottingSystem<?> plottingSystem, 
-			final IROI roi, final String roiName){
+	/**
+	 * TODO add xaxis region (used in perimeter tool)
+	 * @param plottingSystem
+	 * @param roi
+	 * @param roiName
+	 * @return
+	 */
+	@SuppressWarnings("unused")
+	private IRegion createXAxisBoxRegion(final IPlottingSystem<?> plottingSystem, final IROI roi,
+			final String roiName) {
 		try {
-			if(roi instanceof RectangularROI){
-				RectangularROI rroi = (RectangularROI)roi;
+			if (roi instanceof RectangularROI) {
+				RectangularROI rroi = (RectangularROI) roi;
 				IRegion region = plottingSystem.getRegion(roiName);
-				//Test if the region is already there and update the currentRegion
-				if(region!=null){
+				// Test if the region is already there and update the
+				// currentRegion
+				if (region != null) {
 					region.setROI(region.getROI());
 					region.setVisible(isXAxisROIVisible);
 					return region;
-				}else {
+				} else {
 					IRegion newRegion = plottingSystem.createRegion(roiName, RegionType.XAXIS);
 					newRegion.setRegionColor(ColorConstants.blue);
 					newRegion.setROI(rroi);
@@ -499,30 +446,37 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 
 	@Override
 	public void update(IRegion region) {
-		if(region == null) return;
-		if(region.getROI() == null) return;
-		if(region.getROI() instanceof RectangularROI)
-			update(region, (RectangularROI)region.getROI(), false);
+		this.region = region;
+		if (region == null)
+			return;
+		if (region.getROI() == null)
+			return;
+		if (region.getROI() instanceof RectangularROI)
+			update(region, (RectangularROI) region.getROI(), false);
 	}
 
 	protected synchronized void update(IRegion r, RectangularROI rb, boolean isDrag) {
-		if (!isActive()) return;
-		if (r!=null) {
-			if(!isRegionTypeSupported(r.getRegionType())) return; // Nothing to do.
-			if (!r.isUserRegion()) return; // Likewise
+		if (!isActive())
+			return;
+		if (r != null) {
+			if (!isRegionTypeSupported(r.getRegionType()))
+				return; // Nothing to do.
+			if (!r.isUserRegion())
+				return; // Likewise
 		}
-		if(rb == null) return;
+		if (rb == null)
+			return;
 		profileJob.profile(r, rb, isDrag);
 	}
 
 	private final class ProfileJob extends Job {
 
-		private   IRegion                currentRegion;
-		private   RectangularROI currentROI;
-		private   boolean                isDrag;
+		private IRegion currentRegion;
+		private RectangularROI currentROI;
+		private boolean isDrag;
 
 		ProfileJob() {
-			super(getRegionName()+" update");
+			super(getRegionName() + " update");
 			setSystem(true);
 			setUser(false);
 			setPriority(Job.INTERACTIVE);
@@ -530,8 +484,8 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage{
 
 		public void profile(IRegion r, RectangularROI rb, boolean isDrag) {
 			this.currentRegion = r;
-			this.currentROI    = rb;
-			this.isDrag        = isDrag;
+			this.currentROI = rb;
+			this.isDrag = isDrag;
 			schedule();
 		}
 
