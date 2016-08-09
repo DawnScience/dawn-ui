@@ -62,6 +62,10 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 	private IRegion xAxisROI;
 	private IRegion region;
 
+	private static final String EDGE1 = "Edge 1";
+	private static final String EDGE2 = "Edge 2";
+	private static final String AVERAGE = "Average";
+
 	public BoxLineProfileTool() {
 		this(false, true, false);
 		this.profileJob = new ProfileJob();
@@ -123,8 +127,8 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 			@Override
 			public void run() {
 				setPlotEdgeProfile(isChecked());
-				ILineTrace trace1 = (ILineTrace) profilePlottingSystem.getTrace("Edge 1");
-				ILineTrace trace2 = (ILineTrace) profilePlottingSystem.getTrace("Edge 2");
+				ILineTrace trace1 = (ILineTrace) profilePlottingSystem.getTrace(EDGE1);
+				ILineTrace trace2 = (ILineTrace) profilePlottingSystem.getTrace(EDGE2);
 				if (trace1 != null && trace2 != null) {
 					trace1.setVisible(isChecked());
 					trace2.setVisible(isChecked());
@@ -202,6 +206,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 		if (image == null)
 			return null;
 
+		// get the profiles and x indices (edge 1, edge 2, and average)
 		Dataset[] profile = getProfiles(image, region, rbs, tryUpdate, isDrag, monitor);
 		if (profile == null)
 			return null;
@@ -214,9 +219,9 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 		if (!isRegionTypeSupported(region.getRegionType()))
 			return null;
 
-		final ILineTrace trace1 = (ILineTrace) profilePlottingSystem.getTrace("Edge 1");
-		final ILineTrace trace2 = (ILineTrace) profilePlottingSystem.getTrace("Edge 2");
-		ILineTrace average_trace = (ILineTrace) profilePlottingSystem.getTrace("Average");
+		final ILineTrace trace1 = (ILineTrace) profilePlottingSystem.getTrace(EDGE1);
+		final ILineTrace trace2 = (ILineTrace) profilePlottingSystem.getTrace(EDGE2);
+		ILineTrace average_trace = (ILineTrace) profilePlottingSystem.getTrace(AVERAGE);
 		profilePlottingSystem.setSelectedXAxis(xPixelAxis);
 		if (isEdgePlotted && !isAveragePlotted) {
 			if (tryUpdate && trace1 != null && trace2 != null) {
@@ -274,6 +279,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 	}
 
 	/**
+	 * Create the Profiles as well as the x indices if custom axes.
 	 * 
 	 * @param image
 	 * @param region
@@ -321,7 +327,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 				average = boxMean[1];
 			else
 				average = boxMean[0];
-			average.setName("Average");
+			average.setName(AVERAGE);
 		}
 
 		Dataset xi = null;
@@ -364,7 +370,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 		}
 
 		Dataset intensity1 = boxLine[0];
-		intensity1.setName("Edge 1");
+		intensity1.setName(EDGE1);
 		if (xi == null || !Arrays.equals(xi.getShape(), intensity1.getShape())) {
 			double xStart = bounds.getPointX();
 			double xEnd = bounds.getPointX() + bounds.getLength(0);
@@ -375,7 +381,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 									// position
 
 		Dataset intensity2 = boxLine[1];
-		intensity2.setName("Edge 2");
+		intensity2.setName(EDGE2);
 
 		return new Dataset[] { indices, intensity1, intensity2, average};
 	}
@@ -388,8 +394,8 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 			
 			@Override
 			public void run() {
-				ILineTrace edge1_trace = (ILineTrace) profilePlottingSystem.getTrace("Edge 1");
-				ILineTrace edge2_trace = (ILineTrace) profilePlottingSystem.getTrace("Edge 2");
+				ILineTrace edge1_trace = (ILineTrace) profilePlottingSystem.getTrace(EDGE1);
+				ILineTrace edge2_trace = (ILineTrace) profilePlottingSystem.getTrace(EDGE2);
 				if (isVertical) {
 					if (edge1_trace != null && edge2_trace != null) {
 						edge1_trace.setTraceColor(ColorConstants.red);
@@ -401,7 +407,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 						edge2_trace.setTraceColor(ColorConstants.orange);
 					}
 				}
-				ILineTrace av_trace = (ILineTrace) profilePlottingSystem.getTrace("Average");
+				ILineTrace av_trace = (ILineTrace) profilePlottingSystem.getTrace(AVERAGE);
 				if (av_trace != null)
 					av_trace.setTraceColor(ColorConstants.cyan);
 			}
