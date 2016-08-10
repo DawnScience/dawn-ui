@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.XAxisBoxROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -169,6 +170,8 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 	@Override
 	public void setPlotAverageProfile(boolean isAveragePlotted) {
 		this.isAveragePlotted = isAveragePlotted;
+		if (region != null)
+			update(region, (RectangularROI) region.getROI(), false);
 	}
 
 	public boolean isEdgePlotted() {
@@ -178,14 +181,21 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 	@Override
 	public void setPlotEdgeProfile(boolean isEdgePlotted) {
 		this.isEdgePlotted = isEdgePlotted;
+		if (region != null)
+			update(region, (RectangularROI) region.getROI(), false);
 	}
 
 	@Override
 	public void setXAxisROIVisible(boolean isXAxisROIVisible) {
 		this.isXAxisROIVisible = isXAxisROIVisible;
-		if (xAxisROI == null)
-			return;
-		xAxisROI.setVisible(isXAxisROIVisible);
+		if (xAxisROI != null) {
+			xAxisROI.setVisible(isXAxisROIVisible);
+		} else {
+			double ptx = xPixelAxis.getLower();
+			double width = xPixelAxis.getUpper() - ptx;
+			IROI roi = new XAxisBoxROI(ptx, 0, width, 0, 0);
+			xAxisROI = createXAxisBoxRegion(roi);
+		}
 	}
 
 	@Override
@@ -219,10 +229,14 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 		if (!isRegionTypeSupported(region.getRegionType()))
 			return null;
 
-		final ILineTrace trace1 = (ILineTrace) profilePlottingSystem.getTrace(EDGE1);
-		final ILineTrace trace2 = (ILineTrace) profilePlottingSystem.getTrace(EDGE2);
+		ILineTrace trace1 = (ILineTrace) profilePlottingSystem.getTrace(EDGE1);
+		ILineTrace trace2 = (ILineTrace) profilePlottingSystem.getTrace(EDGE2);
 		ILineTrace average_trace = (ILineTrace) profilePlottingSystem.getTrace(AVERAGE);
+		// hide traces accordingly
+		setTracesVisible(trace1, trace2, average_trace);
+		
 		profilePlottingSystem.setSelectedXAxis(xPixelAxis);
+		
 		if (isEdgePlotted && !isAveragePlotted) {
 			if (tryUpdate && trace1 != null && trace2 != null) {
 				trace1.setData(indices, edge1);
@@ -264,6 +278,21 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 			return Arrays.asList(average_trace);
 		}
 		return null;
+	}
+
+	private void setTracesVisible(final ITrace edge1, final ITrace edge2, final ITrace average) {
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				if (average != null) {
+					average.setVisible(isAveragePlotted);
+				}
+				if (edge1 != null && edge2 != null) {
+					edge1.setVisible(isEdgePlotted);
+					edge2.setVisible(isEdgePlotted);
+				}
+			}
+		});
 	}
 
 	@SuppressWarnings("unused")
@@ -415,19 +444,18 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 	}
 
 	/**
-	 * TODO add xaxis region (used in perimeter tool)
+	 * Adds xaxis region
+	 * 
 	 * @param plottingSystem
 	 * @param roi
 	 * @param roiName
 	 * @return
 	 */
-	@SuppressWarnings("unused")
-	private IRegion createXAxisBoxRegion(final IPlottingSystem<?> plottingSystem, final IROI roi,
-			final String roiName) {
+	private IRegion createXAxisBoxRegion(IROI roi) {
 		try {
 			if (roi instanceof RectangularROI) {
 				RectangularROI rroi = (RectangularROI) roi;
-				IRegion region = plottingSystem.getRegion(roiName);
+				IRegion region = profilePlottingSystem.getRegion("XAxis Region");
 				// Test if the region is already there and update the
 				// currentRegion
 				if (region != null) {
@@ -435,11 +463,11 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 					region.setVisible(isXAxisROIVisible);
 					return region;
 				} else {
-					IRegion newRegion = plottingSystem.createRegion(roiName, RegionType.XAXIS);
+					IRegion newRegion = profilePlottingSystem.createRegion("XAxis Region", RegionType.XAXIS);
 					newRegion.setRegionColor(ColorConstants.blue);
 					newRegion.setROI(rroi);
 					newRegion.setVisible(isXAxisROIVisible);
-					plottingSystem.addRegion(newRegion);
+					profilePlottingSystem.addRegion(newRegion);
 					return newRegion;
 				}
 			}
