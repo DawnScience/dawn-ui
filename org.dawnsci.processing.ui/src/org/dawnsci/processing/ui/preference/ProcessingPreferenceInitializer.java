@@ -12,6 +12,7 @@ public class ProcessingPreferenceInitializer extends
 	public void initializeDefaultPreferences() {
 		IPreferenceStore ps = Activator.getDefault().getPreferenceStore();
 		ps.setDefault(ProcessingConstants.REMOTE_RUNNER_URI, "tcp://sci-serv5.diamond.ac.uk:61616");
+		ps.setDefault(ProcessingConstants.FORCE_SERIES, false);
 	}
 
 }

@@ -24,6 +24,7 @@ import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.ServiceHolder;
+import org.dawnsci.processing.ui.preference.ProcessingConstants;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -65,6 +66,7 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
@@ -354,6 +356,18 @@ public class DataFileSliceView extends ViewPart {
 
 				if (ops != null) {
 					final IOperation<? extends IOperationModel, ? extends OperationData>[] fop = ops;
+					
+					ExecutionType type = ExecutionType.PARALLEL;
+					
+					try {
+						IPreferenceStore ps = Activator.getDefault().getPreferenceStore();
+						
+						if (ps.getBoolean(ProcessingConstants.FORCE_SERIES)) type = ExecutionType.SERIES;
+					} catch (Exception e) {
+						logger.error("Could not read preferences");
+					}
+					
+					final ExecutionType finalType = type;
 
 					fileManager.setProcessingConversionInfo(new IProcessingConversionInfo() {
 
@@ -374,7 +388,7 @@ public class DataFileSliceView extends ViewPart {
 
 						@Override
 						public ExecutionType getExecutionType() {
-							return ExecutionType.SERIES;
+							return finalType;
 						}
 
 						@Override
