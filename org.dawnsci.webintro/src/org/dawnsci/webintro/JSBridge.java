@@ -23,6 +23,8 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,6 +34,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -48,6 +51,42 @@ import javax.json.JsonWriter;
 public class JSBridge {
 	private final static Logger logger = LoggerFactory.getLogger(JSBridge.class);
 
+	/** 
+	 * Internal class used to build json
+	 */
+	@SuppressWarnings("unused")	
+	private class Item{
+		public String id;
+		public String name;
+		public String image;
+		public String description;
+		public boolean isContent;
+		public boolean isAction;
+		public boolean isLink;
+		public boolean isCategory;
+		public String content;
+		public String href;
+		public ArrayList<Item> items;
+	}
+	/** 
+	 * Internal class used to build json
+	 */
+	@SuppressWarnings("unused")
+	private class Page{
+		public String id;
+		public String name;
+		public String page_id;
+		public String content;
+		public ArrayList<Item> items;
+	}
+	/** 
+	 * Internal class used to build json
+	 */
+	@SuppressWarnings("unused")
+	private class Root{
+		public ArrayList<Page> pages;
+	}
+	
 	/**
 	 * A method to construct the Platform URL of a resource contributed through an extension point
 	 * 
@@ -178,13 +217,13 @@ public class JSBridge {
 			return val;
 		}
 	}
-
+	
 	/**
-	 * Builds a JSONObject for the item described by the provided IConfigurationElement
+	 * Builds an Item object for the item described by the provided IConfigurationElement
 	 * @param thisItem The configuration element
-	 * @return A JsonObjectBuilder instance with the item information
+	 * @return An Item instance with the item information
 	 */
-	private JsonObjectBuilder getJsonForItem(IConfigurationElement thisItem){
+	private Item getJsonForItem(IConfigurationElement thisItem){
 		String itemImageURL = getResourceURL(thisItem.getContributor(),thisItem.getAttribute("icon"));
 
 		boolean isContent = thisItem.getName().equals("introContent");
@@ -192,55 +231,55 @@ public class JSBridge {
 		boolean isLink = thisItem.getName().equals("introLink");
 		boolean isCategory = thisItem.getName().equals("introCategory");
 
-		JsonObjectBuilder thisJSONItem = Json.createObjectBuilder()
-				.add("id", thisItem.getAttribute("id"))
-				.add("name", thisItem.getAttribute("name"))
-				.add("image", itemImageURL)
-				.add("description", getOptionalString(thisItem,"description"))
-				.add("isContent", isContent)
-				.add("isAction", isAction)
-				.add("isLink", isLink)
-				.add("isCategory", isCategory);
+		Item i = new Item();
+		i.id = thisItem.getAttribute("id");
+		i.name = thisItem.getAttribute("name");
+		i.image = itemImageURL;
+		i.description = getOptionalString(thisItem,"description");
+		i.isContent = isContent;
+		i.isAction = isAction;
+		i.isLink = isLink;
+		i.isCategory = isCategory;
 
 		if(isContent){
 			String itemContentURL = getResourceURL(thisItem.getContributor(), thisItem.getAttribute("content_file"));
-			thisJSONItem.add("content", getTextResource(itemContentURL));
+			i.content = getTextResource(itemContentURL);
 		}else if(isLink){
-			thisJSONItem.add("href", thisItem.getAttribute("href"));
+			i.href = thisItem.getAttribute("href");
 		}
 
-		return thisJSONItem;
+		return i;
 	}
 
 	/**
-	 * Creates a JsonArrayBuilder instance with the information for the items provided and their children.
+	 * Creates an Item ArrayList instance with the information for the items provided and their children.
 	 * 
 	 * @param items the items to get the JSON for
 	 * @param orphanedItems an ArrayList containing all the items. As the item is processed, its entry in this ArrayList will be removed
 	 * @param allowCategories a boolean specifying whether to allow categories. 
 	 * 		  Should be true for processing pages, and false for processing categories (no nested categories) 
-	 * @return A JsonArrayBuilder containing all information relating to the items & their children
+	 * @return An ArrayList containing Items with all information relating to the items & their children
 	 */
-	private JsonArrayBuilder getJsonForItems(IConfigurationElement[] items, ArrayList<IConfigurationElement> orphanedItems, boolean allowCategories) {
-		return getJsonForItems(items, orphanedItems, allowCategories, Json.createArrayBuilder());
+	private ArrayList<Item> getJsonForItems(IConfigurationElement[] items, ArrayList<IConfigurationElement> orphanedItems, boolean allowCategories) {
+		return getJsonForItems(items, orphanedItems, allowCategories, new ArrayList<Item>());
 	}
 
 	/**
-	 * Creates a JsonArrayBuilder instance with the information for the items provided and their children. 
-	 * Allows a starting JsonArrayBuilder to be passed in. The new items will be appended to this array.
+	 * Creates an ArrayList instance containing Items with the information for the items provided and their children. 
+	 * Allows a starting ArrayList to be passed in. The new items will be appended to this array.
 	 * 
 	 * @param items the items to get the JSON for
 	 * @param orphanedItems an ArrayList containing all the items. As the item is processed, its entry in this ArrayList will be removed
 	 * @param allowCategories a boolean specifying whether to allow categories. 
 	 * 		  Should be true for processing pages, and false for processing categories (no nested categories)
 	 * @param startItems a JsonArrayBuilder instance to append new items to 
-	 * @return A JsonArrayBuilder containing all information relating to the items & their children
+	 * @return An Item ArrayList containing all information relating to the items & their children
 	 */
-	private JsonArrayBuilder getJsonForItems(IConfigurationElement[] items, ArrayList<IConfigurationElement> orphanedItems, boolean allowCategories, JsonArrayBuilder startItems) {
-		JsonArrayBuilder allItems = startItems;
+	private ArrayList<Item> getJsonForItems(IConfigurationElement[] items, ArrayList<IConfigurationElement> orphanedItems, boolean allowCategories, ArrayList<Item> startItems) {
+		ArrayList<Item> allItems = startItems;
 		for (IConfigurationElement thisItem : items){
 			orphanedItems.remove(thisItem); // Remove this item from the main list
-			JsonObjectBuilder thisItemJson = getJsonForItem(thisItem);
+			Item thisItemJson = getJsonForItem(thisItem);
 
 			if(thisItem.getName().equals("introCategory")){
 				if(!allowCategories){
@@ -248,13 +287,13 @@ public class JSBridge {
 				}else{
 					IConfigurationElement[] catItems = getOrderedChildren(thisItem.getAttribute("category_id"));
 
-					JsonArrayBuilder categoryItemsJson = getJsonForItems(catItems, orphanedItems, false);
+					ArrayList<Item> categoryItemsJson = getJsonForItems(catItems, orphanedItems, false);
 
-					thisItemJson.add("items", categoryItemsJson.build());
-					allItems.add(thisItemJson.build());
+					thisItemJson.items = categoryItemsJson;
+					allItems.add(thisItemJson);
 				}
 			}else{
-				allItems.add(thisItemJson.build());
+				allItems.add(thisItemJson);
 			}
 
 		}
@@ -273,21 +312,23 @@ public class JSBridge {
 		// Setup a list with all of the items in it. We will remove them from the list when they're added to the JSON
 		ArrayList<IConfigurationElement> orphanedItems = new ArrayList<IConfigurationElement>(Arrays.asList(getRegisteredConfigs("org.dawnsci.webintro.item")));
 
-		JsonArrayBuilder pagesList = Json.createArrayBuilder();
+		ArrayList<Page> pagesList = new ArrayList<Page>();
 
 		for (IConfigurationElement thisPage : pages){
 
 			IConfigurationElement[] items = getOrderedChildren(thisPage.getAttribute("page_id"));
-			JsonArrayBuilder pageItems = getJsonForItems(items, orphanedItems, true);
+			ArrayList<Item> pageItems = getJsonForItems(items, orphanedItems, true);
 
 			String pageContentURL = getResourceURL(thisPage.getContributor(), thisPage.getAttribute("content_file"));
-			pagesList.add(Json.createObjectBuilder()
-					.add("id", thisPage.getAttribute("id"))
-					.add("page_id", thisPage.getAttribute("page_id"))
-					.add("name", thisPage.getAttribute("name"))
-					.add("content", getTextResource(pageContentURL) )
-					.add("items", pageItems.build())
-					.build());
+			
+			Page thisPageJson = new Page();
+			thisPageJson.id = thisPage.getAttribute("id");
+			thisPageJson.page_id = thisPage.getAttribute("page_id");
+			thisPageJson.name = thisPage.getAttribute("name");
+			thisPageJson.content = getTextResource(pageContentURL);
+			thisPageJson.items = pageItems;
+			
+			pagesList.add(thisPageJson);
 		}
 
 		if (orphanedItems.size()>0){ // If there are orphaned items, we should make an "other" page
@@ -302,32 +343,33 @@ public class JSBridge {
 				orphanedItems.remove(thisItem);
 			}
 
-			JsonArrayBuilder pageItems = Json.createArrayBuilder();
+			ArrayList<Item> pageItems = new ArrayList<Item>();
 			if(orphanedCategories.size()>0){
-				getJsonForItems(orphanedCategories.toArray(new IConfigurationElement[0]), orphanedItems, true, pageItems);
+				pageItems = getJsonForItems(orphanedCategories.toArray(new IConfigurationElement[0]), orphanedItems, true, pageItems);
 			}
 			if(orphanedItems.size()>0){
-				getJsonForItems(orphanedItems.toArray(new IConfigurationElement[0]), orphanedItems, true, pageItems);
+				pageItems = getJsonForItems(orphanedItems.toArray(new IConfigurationElement[0]), orphanedItems, true, pageItems);
 			}
 
-			pagesList.add(Json.createObjectBuilder()
-					.add("id", "org.dawnsci.webintro.content.other")
-					.add("page_id", "org.dawnsci.webintro.content.other")
-					.add("name", "Other")
-					.add("content", "These items were not assigned to a page:")
-					.add("items", pageItems.build())
-					.build());
+			Page thisPageJson = new Page();
+			
+			thisPageJson.id = "org.dawnsci.webintro.content.other";
+			thisPageJson.page_id = "org.dawnsci.webintro.content.other";
+			thisPageJson.name = "Other";
+			thisPageJson.content = "These items were not assigned to a page:";
+			thisPageJson.items = pageItems;
+
+			pagesList.add(thisPageJson);
+
 		}
 
-		JsonObject rootObject = Json.createObjectBuilder()
-				.add("pages", pagesList.build())
-				.build();
-
-		StringWriter stWriter = new StringWriter();
-		try (JsonWriter jsonWriter = Json.createWriter(stWriter)) {
-			jsonWriter.writeObject(rootObject);
-		}
-		return stWriter.toString();
+		Root rootObject = new Root();
+		rootObject.pages = pagesList;
+		
+		Gson gson = new Gson();
+		
+		return gson.toJson(rootObject);
+		
 	}
 	
 	/**

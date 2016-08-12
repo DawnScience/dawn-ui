@@ -9,13 +9,13 @@ Require-Bundle: org.eclipse.ui.cheatsheets,
  org.eclipse.ui,
  org.eclipse.core.runtime,
  uk.ac.diamond.scisoft.feedback,
- org.eclipse.osgi
+ org.eclipse.osgi,
+ com.google.gson;bundle-version="2.2.4"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: jars/jfxrt.jar,
  jars/jfxswt.jar,
- .,
- jars/javax.json-1.0.4.jar
+ .
 Export-Package: org.dawnsci.webintro.actions;
   uses:="org.eclipse.ui,
    org.eclipse.core.runtime,

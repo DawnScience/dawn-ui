@@ -5,6 +5,5 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="lib" path="jars/jfxrt.jar"/>
 	<classpathentry exported="true" kind="lib" path="jars/jfxswt.jar"/>
-	<classpathentry exported="true" kind="lib" path="jars/javax.json-1.0.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
