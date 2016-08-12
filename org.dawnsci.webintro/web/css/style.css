@@ -3243,7 +3243,7 @@ a {
 }
 
 /* line 70, ../scss/components/_global.scss */
-.z-depth-2, .popout-item.active:after, .popout-item.active div.popout:after {
+.z-depth-2, .popout-item:hover:after, .popout-item:hover div.popout:after {
   box-shadow: 0 8px 17px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
@@ -3706,7 +3706,7 @@ td, th {
   }
 }
 /* line 492, ../scss/components/_global.scss */
-.collection, .popout-item.active div.popout ul.collection {
+.collection, .popout-item:hover div.popout ul.collection {
   margin: 0.5rem 0 1rem 0;
   border: 1px solid #e0e0e0;
   border-radius: 2px;
@@ -3714,7 +3714,7 @@ td, th {
   position: relative;
 }
 /* line 499, ../scss/components/_global.scss */
-.collection .collection-item, .popout-item.active div.popout ul.collection .collection-item {
+.collection .collection-item, .popout-item:hover div.popout ul.collection .collection-item {
   background-color: #fff;
   line-height: 1.5rem;
   padding: 10px 20px;
@@ -3722,13 +3722,13 @@ td, th {
   border-bottom: 1px solid #e0e0e0;
 }
 /* line 507, ../scss/components/_global.scss */
-.collection .collection-item.avatar, .popout-item.active div.popout ul.collection .collection-item.avatar {
+.collection .collection-item.avatar, .popout-item:hover div.popout ul.collection .collection-item.avatar {
   min-height: 84px;
   padding-left: 72px;
   position: relative;
 }
 /* line 512, ../scss/components/_global.scss */
-.collection .collection-item.avatar .circle, .popout-item.active div.popout ul.collection .collection-item.avatar .circle {
+.collection .collection-item.avatar .circle, .popout-item:hover div.popout ul.collection .collection-item.avatar .circle {
   position: absolute;
   width: 42px;
   height: 42px;
@@ -3738,7 +3738,7 @@ td, th {
   vertical-align: middle;
 }
 /* line 521, ../scss/components/_global.scss */
-.collection .collection-item.avatar i.circle, .popout-item.active div.popout ul.collection .collection-item.avatar i.circle {
+.collection .collection-item.avatar i.circle, .popout-item:hover div.popout ul.collection .collection-item.avatar i.circle {
   font-size: 18px;
   line-height: 42px;
   color: #fff;
@@ -3746,54 +3746,54 @@ td, th {
   text-align: center;
 }
 /* line 530, ../scss/components/_global.scss */
-.collection .collection-item.avatar .title, .popout-item.active div.popout ul.collection .collection-item.avatar .title {
+.collection .collection-item.avatar .title, .popout-item:hover div.popout ul.collection .collection-item.avatar .title {
   font-size: 16px;
 }
 /* line 534, ../scss/components/_global.scss */
-.collection .collection-item.avatar p, .popout-item.active div.popout ul.collection .collection-item.avatar p {
+.collection .collection-item.avatar p, .popout-item:hover div.popout ul.collection .collection-item.avatar p {
   margin: 0;
 }
 /* line 538, ../scss/components/_global.scss */
-.collection .collection-item.avatar .secondary-content, .popout-item.active div.popout ul.collection .collection-item.avatar .secondary-content {
+.collection .collection-item.avatar .secondary-content, .popout-item:hover div.popout ul.collection .collection-item.avatar .secondary-content {
   position: absolute;
   top: 16px;
   right: 16px;
 }
 /* line 547, ../scss/components/_global.scss */
-.collection .collection-item:last-child, .popout-item.active div.popout ul.collection .collection-item:last-child {
+.collection .collection-item:last-child, .popout-item:hover div.popout ul.collection .collection-item:last-child {
   border-bottom: none;
 }
 /* line 551, ../scss/components/_global.scss */
-.collection .collection-item.active, .popout-item.active div.popout ul.collection .collection-item.active {
+.collection .collection-item.active, .popout-item:hover div.popout ul.collection .collection-item.active {
   background-color: #0098DB;
   color: #f5fcff;
 }
 /* line 555, ../scss/components/_global.scss */
-.collection .collection-item.active .secondary-content, .popout-item.active div.popout ul.collection .collection-item.active .secondary-content {
+.collection .collection-item.active .secondary-content, .popout-item:hover div.popout ul.collection .collection-item.active .secondary-content {
   color: #fff;
 }
 /* line 560, ../scss/components/_global.scss */
-.collection a.collection-item, .popout-item.active div.popout ul.collection a.collection-item {
+.collection a.collection-item, .popout-item:hover div.popout ul.collection a.collection-item {
   display: block;
   transition: .25s;
   color: #0098DB;
 }
 /* line 565, ../scss/components/_global.scss */
-.collection a.collection-item:not(.active):hover, .popout-item.active div.popout ul.collection a.collection-item:not(.active):hover {
+.collection a.collection-item:not(.active):hover, .popout-item:hover div.popout ul.collection a.collection-item:not(.active):hover {
   background-color: #ddd;
 }
 /* line 572, ../scss/components/_global.scss */
-.collection.with-header .collection-header, .popout-item.active div.popout ul.with-header.collection .collection-header {
+.collection.with-header .collection-header, .popout-item:hover div.popout ul.with-header.collection .collection-header {
   background-color: #fff;
   border-bottom: 1px solid #e0e0e0;
   padding: 10px 20px;
 }
 /* line 577, ../scss/components/_global.scss */
-.collection.with-header .collection-item, .popout-item.active div.popout ul.with-header.collection .collection-item {
+.collection.with-header .collection-item, .popout-item:hover div.popout ul.with-header.collection .collection-item {
   padding-left: 30px;
 }
 /* line 580, ../scss/components/_global.scss */
-.collection.with-header .collection-item.avatar, .popout-item.active div.popout ul.with-header.collection .collection-item.avatar {
+.collection.with-header .collection-item.avatar, .popout-item:hover div.popout ul.with-header.collection .collection-item.avatar {
   padding-left: 72px;
 }
 
@@ -3804,7 +3804,7 @@ td, th {
 }
 
 /* line 591, ../scss/components/_global.scss */
-.collapsible .collection, .collapsible .popout-item.active div.popout ul.collection, .popout-item.active div.popout .collapsible ul.collection {
+.collapsible .collection, .collapsible .popout-item:hover div.popout ul.collection, .popout-item:hover div.popout .collapsible ul.collection {
   margin: 0;
   border: none;
 }
@@ -9336,31 +9336,27 @@ html {
 }
 
 /* line 23, ../scss/style.scss */
-.collection, .popout-item.active div.popout ul.collection {
+.collection, .popout-item:hover div.popout ul.collection {
   overflow: visible;
   border: 0;
 }
 
 /* line 28, ../scss/style.scss */
-.collection li, .popout-item.active div.popout ul.collection li {
+.collection li, .popout-item:hover div.popout ul.collection li {
   border-left: 1px solid #e0e0e0;
   border-right: 1px solid #e0e0e0;
 }
 /* line 32, ../scss/style.scss */
-.collection li:first-child, .popout-item.active div.popout ul.collection li:first-child {
+.collection li:first-child, .popout-item:hover div.popout ul.collection li:first-child {
   border-top: 1px solid #e0e0e0;
 }
 /* line 36, ../scss/style.scss */
-.collection li:last-child, .popout-item.active div.popout ul.collection li:last-child {
+.collection li:last-child, .popout-item:hover div.popout ul.collection li:last-child {
   border-bottom: 1px solid #e0e0e0 !important;
 }
-/* line 40, ../scss/style.scss */
-.collection li.active + li, .popout-item.active div.popout ul.collection li.active + li {
-  border-top: 1px solid #e0e0e0;
-}
 
-/* line 47, ../scss/style.scss */
-.collection .collection-item .square, .popout-item.active div.popout ul.collection .collection-item .square {
+/* line 44, ../scss/style.scss */
+.collection .collection-item .square, .popout-item:hover div.popout ul.collection .collection-item .square {
   position: absolute;
   width: 42px;
   height: 42px;
@@ -9371,26 +9367,26 @@ html {
   background-color: #eee;
 }
 
-/* line 58, ../scss/style.scss */
+/* line 55, ../scss/style.scss */
 li.collection-item {
   display: block;
-  -moz-transition: margin 0.8s;
-  -o-transition: margin 0.8s;
-  -webkit-transition: margin 0.8s;
-  transition: margin 0.8s;
+  -moz-transition: margin 0.2s;
+  -o-transition: margin 0.2s;
+  -webkit-transition: margin 0.2s;
+  transition: margin 0.2s;
 }
 
-/* line 63, ../scss/style.scss */
+/* line 60, ../scss/style.scss */
 ul.main-list > li {
   opacity: 0;
 }
 
-/* line 67, ../scss/style.scss */
+/* line 64, ../scss/style.scss */
 li.collection-item:hover {
   background-color: #eee;
 }
 
-/* line 71, ../scss/style.scss */
+/* line 68, ../scss/style.scss */
 .modal img {
   max-width: 100%;
   height: auto;
@@ -9399,27 +9395,27 @@ li.collection-item:hover {
   display: block;
 }
 
-/* line 79, ../scss/style.scss */
+/* line 76, ../scss/style.scss */
 .popout-item {
   cursor: pointer;
   min-height: 84px;
 }
 
-/* line 83, ../scss/style.scss */
+/* line 80, ../scss/style.scss */
 .popout-item div.main {
   padding-left: 52px;
   width: 100%;
 }
-/* line 87, ../scss/style.scss */
+/* line 84, ../scss/style.scss */
 .popout-item div.main .title {
   font-size: 16px;
 }
-/* line 90, ../scss/style.scss */
+/* line 87, ../scss/style.scss */
 .popout-item div.main p {
   margin: 0;
 }
 
-/* line 96, ../scss/style.scss */
+/* line 93, ../scss/style.scss */
 .popout-item div.popout {
   overflow: hidden;
   display: none;
@@ -9434,18 +9430,30 @@ li.collection-item:hover {
   border: 4px solid #0098DB !important;
 }
 
-/* line 109, ../scss/style.scss */
+/* line 106, ../scss/style.scss */
 .popout-item.active {
+  background-color: white !important;
+  color: black !important;
+}
+
+/* line 110, ../scss/style.scss */
+.popout-item:hover {
   overflow: visible;
   z-index: 99 !important;
-  margin: 1rem 0 !important;
+  margin: 0rem 0 !important;
   position: relative;
   margin-left: 1rem !important;
   margin-right: -1rem !important;
+  background-color: #0098DB !important;
+  color: white;
   border: none !important;
 }
-/* line 119, ../scss/style.scss */
-.popout-item.active:after {
+/* line 122, ../scss/style.scss */
+.popout-item:hover + li {
+  border-top: 1px solid #e0e0e0;
+}
+/* line 126, ../scss/style.scss */
+.popout-item:hover:after {
   content: '';
   position: absolute;
   top: 0;
@@ -9453,31 +9461,31 @@ li.collection-item:hover {
   width: 100%;
   height: 100%;
 }
-/* line 130, ../scss/style.scss */
-.popout-item.active div.popout {
+/* line 137, ../scss/style.scss */
+.popout-item:hover div.popout {
   display: inline-block;
   z-index: 999;
   height: auto;
   width: 50%;
 }
-/* line 138, ../scss/style.scss */
-.popout-item.active div.popout ul.collection {
+/* line 145, ../scss/style.scss */
+.popout-item:hover div.popout ul.collection {
   margin: 0;
 }
-/* line 142, ../scss/style.scss */
-.popout-item.active div.popout ul.collection li {
+/* line 149, ../scss/style.scss */
+.popout-item:hover div.popout ul.collection li {
   color: rgba(0, 0, 0, 0.87);
 }
-/* line 146, ../scss/style.scss */
-.popout-item.active div.popout ul.collection .secondary-content {
+/* line 153, ../scss/style.scss */
+.popout-item:hover div.popout ul.collection .secondary-content {
   color: #0098DB;
 }
-/* line 150, ../scss/style.scss */
-.popout-item.active div.popout ul.collection li.collection-item:hover {
+/* line 157, ../scss/style.scss */
+.popout-item:hover div.popout ul.collection li.collection-item:hover {
   background-color: #eee;
 }
-/* line 155, ../scss/style.scss */
-.popout-item.active div.popout:after {
+/* line 162, ../scss/style.scss */
+.popout-item:hover div.popout:after {
   content: '';
   position: absolute;
   top: 0;
@@ -9485,16 +9493,20 @@ li.collection-item:hover {
   width: 100%;
   height: 100%;
 }
-/* line 166, ../scss/style.scss */
-.popout-item.active div.main {
+/* line 173, ../scss/style.scss */
+.popout-item:hover div.main {
   width: 50%;
   display: inline-block;
   z-index: 999;
   padding-right: 20px;
 }
+/* line 179, ../scss/style.scss */
+.popout-item:hover div.main > .secondary-content {
+  color: white;
+}
 
 /* Fix an issue with materialize not using transform webkit prefixes */
-/* line 175, ../scss/style.scss */
+/* line 186, ../scss/style.scss */
 .input-field label.active {
   -moz-transform: translateY(-140%);
   -ms-transform: translateY(-140%);

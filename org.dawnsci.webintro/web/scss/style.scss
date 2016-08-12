@@ -37,9 +37,6 @@ html{
 		border-bottom:1px solid $collection-border-color !important;		
 	}
 	
-	&.active + li{
-		border-top:1px solid $collection-border-color;
-	}
 }
 
 
@@ -57,7 +54,7 @@ html{
 
 li.collection-item {
 	display:block;
-	@include transition( margin 0.8s);
+	@include transition( margin 0.2s);
 }
 
 ul.main-list>li {
@@ -107,14 +104,24 @@ li.collection-item:hover {
 }
 
 .popout-item.active{
+	background-color:white !important;
+	color: black !important;
+}
+.popout-item:hover{
 	overflow:visible;
 	z-index:99!important;
-	margin:1rem 0!important;
+	margin:0rem 0!important;
 	position:relative;
 	margin-left:1rem!important;
 	margin-right:-1rem!important;
-
+	background-color:$primary-color !important;
+	color:white;
+	
 	border:none !important;
+	
+	& + li{
+		border-top:1px solid $collection-border-color;
+	}
 	
 	&:after {
 			@extend .z-depth-2;
@@ -168,6 +175,10 @@ li.collection-item:hover {
 		display:inline-block;
 		z-index:999;
 		padding-right:20px;
+		
+		&>.secondary-content{
+			color:white;
+		}
 	}
 }
 
