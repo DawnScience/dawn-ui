@@ -9505,8 +9505,26 @@ li.collection-item:hover {
   color: white;
 }
 
+/* line 185, ../scss/style.scss */
+.dawn_logo_container {
+  padding: 20px;
+  display: inline-block;
+}
+
+/* line 190, ../scss/style.scss */
+.version-number {
+  color: #fac70c;
+  text-align: right;
+  width: 100%;
+  font-weight: bold;
+  font-size: 1em;
+  position: relative;
+  right: 20%;
+  top: -20%;
+}
+
 /* Fix an issue with materialize not using transform webkit prefixes */
-/* line 186, ../scss/style.scss */
+/* line 202, ../scss/style.scss */
 .input-field label.active {
   -moz-transform: translateY(-140%);
   -ms-transform: translateY(-140%);

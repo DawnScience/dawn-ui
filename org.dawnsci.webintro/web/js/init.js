@@ -48,6 +48,8 @@ function animateList(selectorOrEl){
 
 function updateData(data){
 
+	$('.version-number').html(java.getVersion());
+	
 	// Render all of the markdown to HTML
 	data.pages.forEach(function(entry){
 		entry["content_rendered"] = marked(entry.content, {gfm:true,breaks:true});

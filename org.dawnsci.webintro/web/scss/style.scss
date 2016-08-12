@@ -182,6 +182,22 @@ li.collection-item:hover {
 	}
 }
 
+.dawn_logo_container{
+	padding: 20px;
+	display:inline-block;
+}
+
+.version-number{
+	color:$dawn-yellow;
+	text-align:right;
+	width:100%;
+	font-weight:bold;
+	font-size:1em;
+	position:relative;
+	right:20%;
+	top:-20%;
+}
+
 /* Fix an issue with materialize not using transform webkit prefixes */
 .input-field label.active{
 	@include transform( translateY(-140%));

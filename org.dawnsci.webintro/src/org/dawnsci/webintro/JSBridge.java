@@ -8,13 +8,18 @@
  */
 package org.dawnsci.webintro;
 
+import org.dawb.common.util.eclipse.BundleUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IContributor;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.equinox.app.IApplicationContext;
 import org.eclipse.swt.program.Program;
 import org.eclipse.ui.IActionDelegate;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.intro.IIntroPart;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +64,14 @@ public class JSBridge {
 		url += "/";
 		url += resourceLocation;
 		return url;
+	}
+	
+	public String getVersion(){
+		String version = BundleUtils.getDawnVersion();
+		if(version == null){
+			return "(unknown version)";
+		}
+		return BundleUtils.getDawnVersion();
 	}
 
 	/**
@@ -254,6 +267,7 @@ public class JSBridge {
 	 * @return String with extension point information serialised as JSON
 	 */
 	public String getIntroJSON(){
+		getVersion();
 		IConfigurationElement[] pages = getOrderedPages();
 
 		// Setup a list with all of the items in it. We will remove them from the list when they're added to the JSON
