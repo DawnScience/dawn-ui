@@ -21,4 +21,5 @@ Export-Package: org.dawnsci.webintro.actions;
    org.eclipse.core.runtime,
    org.eclipse.jface.action,
    org.eclipse.jface.viewers"
-Import-Package: org.slf4j
+Import-Package: org.dawb.common.util.eclipse,
+ org.slf4j

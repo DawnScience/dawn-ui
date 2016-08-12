@@ -8,6 +8,8 @@ This folder contains compiled CSS files, it should never need to be edited (see 
 ## Fonts ## 
 This folder contains the fonts and icons used in the webintro pages. They are included locally so that DAWN can run without an internet connection.
 
+The icon library being used is the google material design icon font: https://design.google.com/icons/
+
 ## img ##
 Images which are used by the web page - e.g. background, logo
 
