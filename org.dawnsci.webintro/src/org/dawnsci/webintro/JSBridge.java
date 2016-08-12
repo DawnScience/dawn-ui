@@ -12,14 +12,10 @@ import org.dawb.common.util.eclipse.BundleUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IContributor;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.equinox.app.IApplicationContext;
 import org.eclipse.swt.program.Program;
 import org.eclipse.ui.IActionDelegate;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.intro.IIntroPart;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
