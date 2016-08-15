@@ -9,13 +9,9 @@ import org.eclipse.nebula.visualization.xygraph.linearscale.Tick;
 import org.eclipse.nebula.visualization.xygraph.linearscale.TickFactory;
 import org.eclipse.nebula.visualization.xygraph.linearscale.TickFactory.TickFormatting;
 
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
-
-import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.shape.Box;
 import javafx.scene.transform.Rotate;
 
 /**

@@ -13,7 +13,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.dawnsci.analysis.dataset;bundle-version="1.0.0",
  org.dawnsci.plotting.histogram,
  javax.vecmath,
- org.eclipse.nebula.visualization.xygraph
+ org.eclipse.nebula.visualization.xygraph,
+ org.dawnsci.javafx;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Import-Package: org.slf4j;version="[1.7.2,2.0.0)"
