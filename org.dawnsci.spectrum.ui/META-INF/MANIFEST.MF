@@ -18,9 +18,11 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.ide,
  uk.ac.diamond.org.mihalis.opal,
  org.dawnsci.common.widgets,
- org.eclipse.ui.navigator
+ org.eclipse.ui.navigator,
+ org.eclipse.swt
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: org.apache.commons.io.filefilter;version="1.4.0",
+Import-Package: com.ibm.icu.util;version="54.1.1",
+ org.apache.commons.io.filefilter;version="1.4.0",
  org.slf4j;version="[1.7.2,2.0.0)"
 Bundle-Vendor: Diamond Light Source

@@ -358,13 +358,19 @@ public class ProcessMenuManager {
 		IAction reflectivity = new Action("Reflectivity Dialog...") {
 			public void run() {
 				ISelection selection = viewer.getSelection();
-				List<ISpectrumFile> list = SpectrumUtils.getSpectrumFilesList((IStructuredSelection)selection);
-				
-				String[] filenames = new String[list.size()];
+				List<ISpectrumFile> list1 = SpectrumUtils.getSpectrumFilesList((IStructuredSelection)selection);
+				List<IContain1DData> list = SpectrumUtils.get1DDataList((IStructuredSelection)selection);
+				String[] filenames = new String[list1.size()];
 				for (int i = 0; i < list.size(); i++) filenames[i] = list.get(i).getLongName();
 				
-				ReflectivityDialog d = new ReflectivityDialog(Display.getDefault().getActiveShell(),filenames);
+				ReflectivityDialog d = new ReflectivityDialog(Display.getDefault().getActiveShell(),filenames,list);
 				d.open();
+				
+				List<IContain1DData> out = d.getResult();
+				for(IContain1DData data : out) {
+					SpectrumInMemory mem = new SpectrumInMemory(data.getLongName(), data.getName(), data.getxDataset(), data.getyDatasets(), system);
+					ProcessMenuManager.this.manager.addFile(mem);
+				}
 			}
 		};
 		
@@ -377,7 +383,7 @@ public class ProcessMenuManager {
 		menu.add(cropWizard);
 		menu.add(combineWizard);
 		menu.add(reflectivity);
-		menu.add(example);
+//		menu.add(example);
 		
 		menuManager.add(menu);
 	}

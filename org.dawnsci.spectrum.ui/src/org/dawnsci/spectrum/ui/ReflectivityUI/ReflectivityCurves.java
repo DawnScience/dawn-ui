@@ -26,7 +26,7 @@ import org.eclipse.swt.widgets.Label;
 public class ReflectivityCurves extends Composite {
 
     private IPlottingSystem<Composite> plotSystem;
-    private IRegion region;
+    private IRegion[] regionArray;
     
      
     public ReflectivityCurves(Composite parent, int style
@@ -35,6 +35,9 @@ public class ReflectivityCurves extends Composite {
         super(parent, style);
         
         new Label(this, SWT.NONE).setText(title);
+        
+        
+        regionArray = new IRegion[arrayILDy.size()-1];
         
         try {
 			plotSystem = PlottingFactory.createPlottingSystem();
@@ -110,43 +113,55 @@ public class ReflectivityCurves extends Composite {
         String root = "RegionNo:";
         int k=0;
         
+        double[][] overlap = OverlapFinder.overlapFinderOperation(arrayILDx);
+        
         for (k=0;k<(filepaths.length-1);k++){
         	
-        	roiList.add(new RectangularROI(10,10,90+10*k,100,0));
+        	roiList.add(new RectangularROI(overlap[k][1],0.1,overlap[k][0]-overlap[k][1],0.1,0));
         	
         	String regionName = root +  Integer.toString(k);
         	
 	        try {
-				region =plotSystem.createRegion(regionName, RegionType.BOX);
-			}
+				regionArray[k] =plotSystem.createRegion(regionName, RegionType.XAXIS);
+			
+	        
+	        }
 	        catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			plotSystem.addRegion(region);
+	        
+	        
+			plotSystem.addRegion(regionArray[k]);
 			
 			//RectangularROI startROI = new RectangularROI(10,10,100,100,0);
-			region.setROI(roiList.get(k));
+			regionArray[k].setROI(roiList.get(k));
 	 
 	        model.setROIListElement(roiList.get(k), k);
 	        
 	        int ktemp =k;
-			region.addROIListener(new IROIListener() {
+	        regionArray[k].addROIListener(new IROIListener() {
 	
 				@Override
 				public void roiDragged(ROIEvent evt) {
-					model.setROIListElement(roiList.get(ktemp), ktemp);
+//					model.setROIListElementEst(regionArray[ktemp].getROI(), ktemp);
+//					//model.setROI(region.getROI());
+//					System.out.println("roiDragged, ktemp:  " + ktemp);
 				}
 	
 				@Override
 				public void roiChanged(ROIEvent evt) {
 					// TODO Auto-generated method stub
-					model.setROIListElement(roiList.get(ktemp), ktemp);
+					model.setROIListElementEst(regionArray[ktemp].getROI(), ktemp);
+					//model.setROI(roiList.get(ktemp));
+					System.out.println("roiChanged, ktemp:  " + ktemp);
 				}
 	
 				@Override
 				public void roiSelected(ROIEvent evt) {
-					model.setROIListElement(roiList.get(ktemp), ktemp);
+					model.setROIListElementEst(regionArray[ktemp].getROI(), ktemp);
+					//model.setROI(roiList.get(ktemp));
+					System.out.println("roiSelected, ktemp:  " + ktemp);
 				}
 			
 			});
