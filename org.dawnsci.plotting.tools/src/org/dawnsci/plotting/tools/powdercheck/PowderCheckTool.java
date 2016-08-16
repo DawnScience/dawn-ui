@@ -245,9 +245,9 @@ public class PowderCheckTool extends AbstractToolPage {
 		final Dataset ds = DatasetUtils.convertToDataset(im.getData());
 		if (ds==null) return;
 			
-		final IMetadata       m  = ds.getMetadata();
+		IDiffractionMetadata m = ds.getFirstMetadata(IDiffractionMetadata.class);
 
-		if (m == null || !(m instanceof IDiffractionMetadata)) {
+		if (m == null) {
 			//TODO nicer error
 			logger.error("No Diffraction Metadata");
 			return;

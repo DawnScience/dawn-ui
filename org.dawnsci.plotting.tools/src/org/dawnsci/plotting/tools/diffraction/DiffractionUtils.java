@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionMetadataUtils;
+import uk.ac.diamond.scisoft.analysis.io.DiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.NexusDiffractionCalibrationReader;
 
 public class DiffractionUtils {
@@ -42,14 +43,11 @@ public class DiffractionUtils {
 			return lockedMeta;
 
 		int[] shape = image.getShape();
-		IMetadata mdImage = null;
-		try {
-			mdImage = image.getMetadata();
-		} catch (Exception e1) {
-			// do nothing
-		}
+
+		IDiffractionMetadata mdImage = image.getFirstMetadata(IDiffractionMetadata.class);
+
 		if (lockedMeta != null) {
-			if (mdImage instanceof IDiffractionMetadata) {
+			if (mdImage != null) {
 				IDiffractionMetadata dmd = (IDiffractionMetadata) mdImage;
 				if (!dmd.getDiffractionCrystalEnvironment().equals(lockedMeta.getDiffractionCrystalEnvironment()) ||
 						!dmd.getDetector2DProperties().equals(lockedMeta.getDetector2DProperties())) {
