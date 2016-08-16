@@ -74,7 +74,7 @@ public class DatasetSplicer {
 		}
 			
 		if (usedPoints.size() != probe){
-			System.out.println("Didn't add up..");
+//			System.out.println("Didn't add up..");
 		}
 		output[0]=xOutput;
 		output[1]=yOutput;

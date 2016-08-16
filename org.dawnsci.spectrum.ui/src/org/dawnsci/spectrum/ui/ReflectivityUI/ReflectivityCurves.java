@@ -154,14 +154,14 @@ public class ReflectivityCurves extends Composite {
 					// TODO Auto-generated method stub
 					model.setROIListElementEst(regionArray[ktemp].getROI(), ktemp);
 					//model.setROI(roiList.get(ktemp));
-					System.out.println("roiChanged, ktemp:  " + ktemp);
+//					System.out.println("roiChanged, ktemp:  " + ktemp);
 				}
 	
 				@Override
 				public void roiSelected(ROIEvent evt) {
 					model.setROIListElementEst(regionArray[ktemp].getROI(), ktemp);
 					//model.setROI(roiList.get(ktemp));
-					System.out.println("roiSelected, ktemp:  " + ktemp);
+//					System.out.println("roiSelected, ktemp:  " + ktemp);
 				}
 			
 			});

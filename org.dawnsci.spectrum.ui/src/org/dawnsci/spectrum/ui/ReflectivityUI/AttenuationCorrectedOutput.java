@@ -54,7 +54,7 @@ public class AttenuationCorrectedOutput {
 		for (k=0; k<(arrayILDx.size()-1);k++){
 			
 			IRectangularROI box = new RectangularROI();
-			System.out.println("k:  "+ k);
+//			System.out.println("k:  "+ k);
 			
 			box = model.getROIListElement(k).getBounds();
 			
@@ -121,7 +121,7 @@ public class AttenuationCorrectedOutput {
 					
 					yArrayCorrected[k+1] = Maths.multiply(yArray[k+1],attenuationFactor);
 					
-					System.out.println("attenuation factor:  " + attenuationFactor + "   k:   " +k);
+//					System.out.println("attenuation factor:  " + attenuationFactor + "   k:   " +k);
 				//	}
 				}
 		output[0] = yArrayCorrected;

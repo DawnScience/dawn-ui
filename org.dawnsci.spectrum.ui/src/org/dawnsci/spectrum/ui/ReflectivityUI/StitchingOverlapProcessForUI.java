@@ -36,7 +36,7 @@ public class StitchingOverlapProcessForUI{
 		for (int k=0; k<(xArrayCorrected.length-1);k++){
 				
 			IRectangularROI box = new RectangularROI();
-			System.out.println("k:  "+ k);				
+//			System.out.println("k:  "+ k);				
 			box = model.getROIListElement(k).getBounds();
 					
 					
@@ -55,7 +55,7 @@ public class StitchingOverlapProcessForUI{
 			ArrayList<Integer> overlapHigherCorr = new ArrayList<Integer>();
 			
 			if (k==2){
-				System.out.println("k is two!!!!");
+//				System.out.println("k is two!!!!");
 			}
 			
 			
