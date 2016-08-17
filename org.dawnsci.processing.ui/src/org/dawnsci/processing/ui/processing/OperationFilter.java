@@ -60,6 +60,7 @@ final class OperationFilter implements ISeriesItemFilter {
 			for (String catName : ops.keySet()) {
 				
 				final Collection<IOperation<? extends IOperationModel, ? extends OperationData>> col = ops.get(catName);
+				if(col == null) continue;
 				for (IOperation<? extends IOperationModel, ? extends OperationData> op : col) {
 					
 					final OperationDescriptor des = new OperationDescriptor(op.getId(), service);

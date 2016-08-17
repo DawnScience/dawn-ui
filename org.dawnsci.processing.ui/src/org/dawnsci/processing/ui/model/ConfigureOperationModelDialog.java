@@ -434,7 +434,7 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 							@Override
 							public void run() {
 								if (!errorLabel.isDisposed()) {
-									errorLabel.setText(e.getMessage());
+									errorLabel.setText(e.getMessage() == null ? "Unknowb error" : e.getMessage());
 									errorLabel.pack();
 								}
 								
