@@ -314,7 +314,7 @@ public class MapPlotManager {
 		}	
 
 		layers.addLast(new MapTrace(image, null));
-		map.clear();
+		map.clearTraces();
 		for (MapTrace l : layers) l.rebuildTrace();
 		
 		plotLayers();
@@ -346,8 +346,7 @@ public class MapPlotManager {
 	
 	
 	public void clearAll(){
-		map.clear();
-		map.reset();
+		map.clearTraces();
 		data.clear();
 		layers.clear();
 	}
@@ -444,11 +443,10 @@ public class MapPlotManager {
 		
 		updatePlottedRange();
 		
-//		map.clear();
 		try {
 			
 			if (layers.isEmpty()) {
-				map.clear();
+				map.clearTraces();
 				layerCounter = 0;
 				return;
 			} else {
