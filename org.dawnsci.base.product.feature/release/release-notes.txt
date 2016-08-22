@@ -13,20 +13,10 @@ RELEASE NOTES FOR DAWN 2.3.0
 
 New features:
 ---------------
-- Migrated to Eclipse JANUARY (https://projects.eclipse.org/proposals/january)
-- New ARPES Gold calibration wizard (replacing the old workflow-based calibration process)
-- New processing operations: Transpose, FilterData (removes columns and/or rows from 2D data), Savitzky-Golay filtering, XAFS Bragg Peak Correction, XAFS Shift energy axis, XAFS Rebinning (Athena-like functionality)
-- PeriodicTableComposite widget added
-- New grating calibration dialog for SAXS
-- New conversion tools: Average Conversion Tool (given a group of B18 XAFS ascii files, averages the data when encountering repetitions, optionally taking into account an experimental parameter as criterion for grouping), Reprocess Conversion Tool (removes redundant columns from B18 XAFS ascii files) 
-- New tool features: XafsTool (support added for user-provided edge energy, overriding the estimated value), Xraylib tool (query the elements of the periodic table for physical data such as XRF line energies, absorption edges, cross sections etc.)
-
+-
 
 Bug fixes:
 ---------------
-- FileViewer: filter added using wildcards or regex, and multiple file selection allowed
-- Improved XPDF processing times
-- DAWN dependency tree refactoring (to enable more modular versions of DAWN)
-
+-
 
 
