@@ -34,7 +34,7 @@ public class ReleaseNotesPage extends InstallationPage {
 	public void createControl(Composite parent) {
 
 		text = new Text(parent, SWT.MULTI | SWT.BORDER | SWT.READ_ONLY
-				| SWT.V_SCROLL | SWT.NO_FOCUS | SWT.H_SCROLL);
+				| SWT.V_SCROLL | SWT.NO_FOCUS | SWT.WRAP);
 		text.setBackground(parent.getDisplay().getSystemColor(
 				SWT.COLOR_LIST_BACKGROUND));
 		GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_FILL
