@@ -302,21 +302,6 @@
       </category>
    </extension>
    <extension
-         point="org.eclipse.ui.intro.configExtension">
-      <configExtension
-            configId="org.dawnsci.intro.universalConfig"
-            content="intro/introContribution.xml">
-      </configExtension>
-      <configExtension
-            configId="org.dawnsci.intro.universalConfig"
-            content="intro/data.xml">
-      </configExtension>
-      <configExtension
-            configId="org.dawnsci.intro.universalConfig"
-            content="intro/tutorials.xml">
-      </configExtension>
-   </extension>
-   <extension
          point="org.eclipse.ui.services">
       <serviceFactory
             factoryClass="org.dawb.workbench.ui.transferable.TransferableDataService">
@@ -342,5 +327,17 @@
                id="org.eclipse.search.menu">
          </hiddenMenuItem>
       </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.dawnsci.webintro.item">
+      <introAction
+            class="org.dawb.workbench.ui.perspective.DataBrowsingPerspectiveLaunch"
+            description="The starting place for basic viewing of data. The Data Browsing perspective is suitable for viewing line traces, images and multidimensional data. Also contains more advanced features like applying a tool to a stack of images and mathematically processing data with expressions."
+            icon="intro/graphics/data_browsing_intro52.png"
+            id="org.dawb.workbench.ui.perspective.DataBrowsingPerspectiveLaunch"
+            name="Data Browsing (Default)"
+            ordering="1"
+            parent_id="dawn_general">
+      </introAction>
    </extension>
 </plugin>

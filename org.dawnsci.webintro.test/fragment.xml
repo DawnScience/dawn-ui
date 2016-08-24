@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<fragment>
+   <extension
+         point="org.dawnsci.webintro.page">
+      <introPage
+            content_file="intro-content/page-content.md"
+            id="org.dawnsci.webintro.test.test"
+            name="Test Page"
+            ordering="2"
+            page_id="plugin_test_page">
+      </introPage>
+      <introPage
+            id="org.dawnsci.webintro.test.test2"
+            name="Test Page 2"
+            ordering="1"
+            page_id="plugin_test_page_2">
+      </introPage>
+   </extension>
+   <extension
+         point="org.dawnsci.webintro.item">
+      <introContent
+            content_file="intro-content/content-contribution.md"
+            description="A description for the content contribution"
+            icon="icons/test-dawn-logo-icon.png"
+            id="org.dawnsci.webintro.test.contenttest"
+            name="Test Content Contribution"
+            ordering="1"
+            parent_id="plugin_test_page">
+      </introContent>
+      <introLink
+            description="A description for the link contribution"
+            href="http://dawnsci.org"
+            icon="icons/test-dawn-logo-icon.png"
+            id="org.dawnsci.webintro.test.linktest"
+            name="Test Link Contribution"
+            ordering="2"
+            parent_id="plugin_test_page">
+      </introLink>
+      <introAction
+            class="org.dawnsci.webintro.SampleAction"
+            description="A description for the action contribution"
+            icon="icons/test-dawn-logo-icon.png"
+            id="org.dawnsci.webintro.test.actiontest"
+            name="Test Action Contribution"
+            ordering="3"
+            parent_id="plugin_test_page">
+      </introAction>
+      <introCategory
+            category_id="test_category"
+            description="A description for the category contribution"
+            icon="icons/test-dawn-logo-icon.png"
+            id="org.dawnsci.webintro.test.categorytest"
+            name="Test Category Contribution"
+            ordering="4"
+            parent_id="plugin_test_page">
+      </introCategory>
+      <introLink
+            description="A description for the first category item"
+            href="http://dawnsci.org"
+            icon="icons/test-dawn-logo-icon.png"
+            id="org.dawnsci.webintro.test.categorytest.item1"
+            name="Category Item 1"
+            ordering="2"
+            parent_id="test_category">
+      </introLink>
+      <introLink
+            description="A description for the second category item"
+            href="http://dawnsci.org"
+            icon="icons/test-dawn-logo-icon.png"
+            id="org.dawnsci.webintro.test.categorytest.item2"
+            name="Category Item 2"
+            ordering="1"
+            parent_id="test_category">
+      </introLink>
+      <introLink
+            href="http://dawnsci.org"
+            id="org.dawnsci.webintro.test.orphan1"
+            name="Orphaned Item"
+            parent_id="non_existant_page">
+      </introLink>
+      <introCategory
+            category_id="orphaned_category"
+            id="org.dawnsci.webintro.test.orphancategory"
+            name="Orphaned Category"
+            parent_id="non_existant_page">
+      </introCategory>
+      <introLink
+            href="http://dawnsci.org"
+            id="org.dawnsci.webintro.test.orphan2"
+            name="Orphaned Category Item"
+            parent_id="orphaned_category">
+      </introLink>
+   </extension>
+
+</fragment>

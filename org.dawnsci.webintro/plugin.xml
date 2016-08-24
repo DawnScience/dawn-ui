@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="org.dawnsci.webintro.item" name="Web Intro Page Item Register" schema="schema/org.dawnsci.webintro.item.exsd"/>
+   <extension-point id="org.dawnsci.webintro.page" name="Web Intro Page Register" schema="schema/org.dawnsci.webintro.page.exsd"/>
+
+   <extension
+         point="org.eclipse.ui.intro">
+      <intro
+            class="org.dawnsci.webintro.views.WelcomePart"
+            icon="icons/dawn-logo-icon.png"
+            id="org.dawnsci.webintro">
+      </intro>
+      <introProductBinding
+            introId="org.dawnsci.webintro"
+            productId="org.dawnsci.product.plugin.DAWN">
+      </introProductBinding>
+   </extension>
+<extension
+         point="org.dawnsci.webintro.page">
+      <introPage
+            content_file="content/pages/science.md"
+            id="org.dawnsci.webintro.content.pages.science"
+            name="Science"
+            ordering="10"
+            page_id="science">
+      </introPage>
+      <introPage
+            content_file="content/pages/dawn.md"
+            id="org.dawnsci.webintro.content.pages.dawn"
+            name="DAWN"
+            ordering="20"
+            page_id="dawn">
+      </introPage>
+      <introPage
+            content_file="content/pages/help.md"
+            id="org.dawnsci.webintro.content.pages.help"
+            name="Help"
+            ordering="30"
+            page_id="help">
+      </introPage>
+   </extension>
+<extension
+      point="org.dawnsci.webintro.item">
+   <introLink
+         href="http://dawnsci.org"
+         icon="content/icons/applications-internet52.png"
+         id="org.dawnsci.webintro.link.dawnwebsite"
+         name="DAWN Website"
+         ordering="3"
+         parent_id="help">
+   </introLink>
+   <introContent
+         content_file="content/what-is-dawn.md"
+         icon="content/icons/dawn_64.png"
+         id="org.dawnsci.webintro.content.what-is-dawn"
+         name="What Is DAWN"
+         ordering="1"
+         parent_id="help">
+   </introContent>
+   <introContent
+         description="Open a feedback form"
+         icon="content/icons/feedback_icon.png"
+         id="uk.ac.diamond.scisoft.feedback"
+         name="Leave Feedback"
+         ordering="8"
+         parent_id="help">
+   </introContent>
+   <introCategory
+         category_id="science_powderdiffraction"
+         icon="content/icons/PowderCalibrationWelcome52.png"
+         id="org.dawnsci.webintro.category.powderdiffraction"
+         name="Powder Diffraction"
+         ordering="2"
+         parent_id="science">
+   </introCategory>
+   <introCategory
+         category_id="science_tomography"
+         icon="content/icons/tomo_intro.jpg"
+         id="org.dawnsci.webintro.category.tomography"
+         name="Tomography"
+         ordering="1"
+         parent_id="science">
+   </introCategory>
+   <introCategory
+         category_id="science_ncd"
+         description="(Non-Crystalline Diffraction)"
+         icon="content/icons/ncd_intro.png"
+         id="org.dawnsci.webintro.category.NCD"
+         name="NCD"
+         ordering="3"
+         parent_id="science">
+   </introCategory>
+   <introCategory
+         category_id="science_mx"
+         description="(Macromolecular Crystallography)"
+         icon="content/icons/mx_icon.png"
+         id="org.dawnsci.webintro.category.mx"
+         name="MX"
+         ordering="6"
+         parent_id="science">
+   </introCategory>
+   <introCategory
+         category_id="dawn_dev"
+         icon="content/icons/script-icon.png"
+         id="org.dawnsci.webintro.category.dawnindawn"
+         name="DAWN Development Environments"
+         ordering="2"
+         parent_id="dawn">
+   </introCategory>
+   <introCategory
+         category_id="dawn_processes"
+         icon="content/icons/Processing52.png"
+         id="org.dawnsci.webintro.category.processes"
+         name="Data Processing"
+         ordering="3"
+         parent_id="dawn">
+   </introCategory>
+   <introLink
+         description="Contains tutorial videos"
+         href="http://youtube.com/DAWNScience"
+         icon="content/icons/youtube52.png"
+         id="org.dawnsci.webintro.link.youtube"
+         name="DAWN YouTube Channel"
+         ordering="4"
+         parent_id="help">
+   </introLink>
+   <introCategory
+         category_id="dawn_general"
+         icon="content/icons/dawn_64.png"
+         id="org.dawnsci.webintro.category.general"
+         name="General"
+         parent_id="dawn">
+   </introCategory>
+   <introAction
+         class="org.dawnsci.webintro.actions.OpenHelpAction:/org.dawnsci.documentation.user/html/contents.html"
+         description="The DAWN help system is the main resource for documentation of DAWN. Here you find a searchable collection of documents, tutorialsm and reference documentation for the various installed features. The DAWN help system is accessible from inside the DAWN Workbench via the menu Help &gt; Help Contents."
+         icon="content/icons/book52.png"
+         id="org.dawnsci.webintro.action.help"
+         name="DAWN Help System"
+         ordering="6"
+         parent_id="help">
+   </introAction>
+   <introContent
+         content_file="content/license.md"
+         description="The description of the EPL license used in DAWN"
+         icon="content/icons/licenses-copyright52.png"
+         id="org.dawnsci.webintro.content.licence"
+         name="License"
+         ordering="5"
+         parent_id="help">
+   </introContent>
+   <introLink
+         description="If the DAWN help system is missing the information you are looking for, you can submit a feedback and/or question using the DAWN mailing list."
+         href="http://jiscmail.ac.uk/DAWN"
+         icon="content/icons/help_forum52.png"
+         id="org.dawnsci.webintro.link.mailing"
+         name="DAWN Mailing List"
+         ordering="7"
+         parent_id="help">
+   </introLink>
+</extension>
+</plugin>
