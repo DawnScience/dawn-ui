@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 import org.osgi.service.event.Event;
@@ -87,11 +88,22 @@ public class MappedDataView extends ViewPart {
 		
 		area = new MappedDataArea();
 		
-		IWorkbenchPage page = getSite().getPage();
-		IViewPart view = page.findView("org.dawnsci.mapping.ui.mapview");
-		IPlottingSystem<Composite> map = (IPlottingSystem<Composite>)view.getAdapter(IPlottingSystem.class);
-		view = page.findView("org.dawnsci.mapping.ui.spectrumview");
-		IPlottingSystem<Composite> spectrum = (IPlottingSystem<Composite>)view.getAdapter(IPlottingSystem.class);
+		final IWorkbenchPage page = getSite().getPage();
+		final IPlottingSystem<Composite> map;
+		try {
+			final IViewPart view = page.showView("org.dawnsci.mapping.ui.mapview");
+			map = (IPlottingSystem<Composite>)view.getAdapter(IPlottingSystem.class);
+		} catch (PartInitException e) {
+			throw new RuntimeException("Could not create the map view", e);
+		}
+		
+		final IPlottingSystem<Composite> spectrum;
+		try {
+			final IViewPart view = page.showView("org.dawnsci.mapping.ui.spectrumview");
+			spectrum = (IPlottingSystem<Composite>)view.getAdapter(IPlottingSystem.class);
+		} catch (PartInitException e) {
+			throw new RuntimeException("Could not create the spectrum view", e);
+		}
 		
 		plotManager = new MapPlotManager(map, spectrum, area);
 		
