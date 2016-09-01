@@ -5,5 +5,4 @@ Bundle-SymbolicName: org.dawnsci.processing.ui.dawn;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Fragment-Host: org.dawnsci.processing.ui;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: org.dawnsci.intro;bundle-version="1.2.0",
- org.eclipse.ui.intro;bundle-version="3.4.200"
+Require-Bundle: org.eclipse.ui.intro;bundle-version="3.4.200"
