@@ -101,6 +101,10 @@
          id="org.dawnsci.persistence.feature"
          version="0.0.0"/>
 
+   <includes
+         id="org.dawnsci.webintro.feature"
+         version="0.0.0"/>
+
    <plugin
          id="uk.ac.diamond.scisoft.analysis.rcp.contributions"
          download-size="0"
@@ -116,24 +120,11 @@
          version="0.0.0"/>
 
    <plugin
-         id="org.dawnsci.intro"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.apache.commons.math3"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-
-   <plugin
-         id="org.dawnsci.intro.universal"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
 
    <plugin
          id="com.fasterxml.jackson.core.jackson-core"
