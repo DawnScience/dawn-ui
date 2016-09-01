@@ -11,12 +11,12 @@ Require-Bundle: org.eclipse.ui.cheatsheets,
  uk.ac.diamond.scisoft.feedback,
  org.eclipse.osgi,
  com.google.gson,
- org.dawb.common.util;bundle-version="1.2.0"
+ org.dawb.common.util;bundle-version="1.2.0",
+ org.eclipse.fx.javafx
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Bundle-ClassPath: jars/jfxrt.jar,
- jars/jfxswt.jar,
- .
+Bundle-ClassPath: .,
+ lib/jfxswt.jar
 Export-Package: org.dawnsci.webintro.actions;
   uses:="org.eclipse.ui,
    org.eclipse.core.runtime,
