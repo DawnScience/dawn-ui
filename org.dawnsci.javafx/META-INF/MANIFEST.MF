@@ -1,8 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: Javafx
-Bundle-SymbolicName: org.dawnsci.javafx;singleton:=true
-Bundle-Version: 1.0.0.qualifier
-Bundle-Vendor: Diamond Light Source
-Bundle-ActivationPolicy: lazy
-Bundle-ClassPath: .
