@@ -160,4 +160,21 @@
          parent_id="help">
    </introLink>
 </extension>
+<extension
+      point="org.eclipse.ui.menus">
+   <menuContribution
+         locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+      <toolbar
+            id="org.dawnsci.intro.show.welcome"
+            label="Show Welcome Screen">
+         <command
+               commandId="org.eclipse.ui.help.quickStartAction"
+               icon="icons/home.png"
+               label="Home"
+               mnemonic="W"
+               tooltip="Show Welcome Screen">
+         </command>
+      </toolbar>
+   </menuContribution>
+</extension>
 </plugin>
