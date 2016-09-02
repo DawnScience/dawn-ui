@@ -8,9 +8,9 @@
             description="Process data by linking together independent calculations. Contains both general mathematical routines and operations specific for powder diffraction, SAXS, ARPES and XAFS."
             icon="intro/graphics/Processing52.png"
             id="org.dawnsci.processing.ui.ProcessingPerspectiveLaunch"
-            name="Processing Perspective"
+            name="Processing"
             ordering="1"
-            parent_id="dawn_processes">
+            parent_id="science">
       </introAction>
    </extension>
 </fragment>

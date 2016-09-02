@@ -75,23 +75,6 @@
          parent_id="science">
    </introCategory>
    <introCategory
-         category_id="science_tomography"
-         icon="content/icons/tomo_intro.jpg"
-         id="org.dawnsci.webintro.category.tomography"
-         name="Tomography"
-         ordering="1"
-         parent_id="science">
-   </introCategory>
-   <introCategory
-         category_id="science_ncd"
-         description="(Non-Crystalline Diffraction)"
-         icon="content/icons/ncd_intro.png"
-         id="org.dawnsci.webintro.category.NCD"
-         name="NCD"
-         ordering="3"
-         parent_id="science">
-   </introCategory>
-   <introCategory
          category_id="science_mx"
          description="(Macromolecular Crystallography)"
          icon="content/icons/mx_icon.png"
@@ -108,14 +91,6 @@
          ordering="2"
          parent_id="dawn">
    </introCategory>
-   <introCategory
-         category_id="dawn_processes"
-         icon="content/icons/Processing52.png"
-         id="org.dawnsci.webintro.category.processes"
-         name="Data Processing"
-         ordering="3"
-         parent_id="dawn">
-   </introCategory>
    <introLink
          description="Contains tutorial videos"
          href="http://youtube.com/DAWNScience"
@@ -129,7 +104,7 @@
          category_id="dawn_general"
          icon="content/icons/dawn_64.png"
          id="org.dawnsci.webintro.category.general"
-         name="General"
+         name="Visualization"
          parent_id="dawn">
    </introCategory>
    <introAction
