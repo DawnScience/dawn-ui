@@ -30,6 +30,7 @@ openFile
 -Dosgi.locking=non
 -Dorg.dawnsci.passerelle.do.not.break.osgi=true
 -Dpydev.funding.hide=true
+-Dosgi.framework.extensions=org.eclipse.fx.osgi
       </vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
       </vmArgsMac>
