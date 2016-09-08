@@ -118,10 +118,10 @@
    </introAction>
    <introContent
          content_file="content/license.md"
-         description="The description of the EPL license used in DAWN"
+         description="The description of the EPL licence used in DAWN"
          icon="content/icons/licenses-copyright52.png"
          id="org.dawnsci.webintro.content.licence"
-         name="License"
+         name="Licence"
          ordering="5"
          parent_id="help">
    </introContent>
