@@ -81,7 +81,7 @@ public class MappedFileFactory {
 		if (live != null) {
 			IDatasetConnector lz = getRemoteDataset(path,blockName,live);
 			LiveRemoteAxes remoteAxes = getRemoteAxes(axesNames, path, bean, live);
-			block = new LiveMappedDataBlock(blockName, lz, bean.getxDim(), bean.getyDim(), path, remoteAxes, live.getHost(),live.getPort());
+			block = new MappedDataBlock(blockName, lz, bean.getxDim(), bean.getyDim(), path, remoteAxes, live.getHost(),live.getPort());
 			return block;
 		}
 		
@@ -102,8 +102,8 @@ public class MappedFileFactory {
 		
 	private static AbstractMapData setUpMap(String path, String mapName, MappedDataBlock block, LiveDataBean live) {
 		
-		if (live != null && block instanceof LiveMappedDataBlock) {
-			return new LiveMappedData(mapName, getRemoteDataset(path,mapName,live), (LiveMappedDataBlock)block, path);
+		if (live != null && block.isLive()) {
+			return new LiveMappedData(mapName, getRemoteDataset(path,mapName,live),block, path);
 		}
 		
 		
@@ -202,7 +202,7 @@ public class MappedFileFactory {
 		
 		
 		
-		LiveRemoteAxes lra = new LiveRemoteAxes(r, axesNames);
+		LiveRemoteAxes lra = new LiveRemoteAxes(r, axesNames,live.getHost(),live.getPort());
 		
 		String s = bean.getxAxisForRemapping();
 		if (s != null){

@@ -19,7 +19,7 @@ public class LiveMappedData extends MappedData implements ILiveData {
 	private boolean connected = false;
 	private static final Logger logger = LoggerFactory.getLogger(LiveMappedData.class);
 	
-	public LiveMappedData(String name, IDatasetConnector map, LiveMappedDataBlock parent, String path) {
+	public LiveMappedData(String name, IDatasetConnector map, MappedDataBlock parent, String path) {
 		super(name, map.getDataset(), parent, path);
 	}
 
@@ -41,7 +41,7 @@ public class LiveMappedData extends MappedData implements ILiveData {
 			return false;
 		}
 		
-		if (((LiveMappedDataBlock)parent).connect()) {
+		if (parent.connect()) {
 			connected = true;
 			return true;
 		}
@@ -58,7 +58,7 @@ public class LiveMappedData extends MappedData implements ILiveData {
 			return false;
 		}
 		
-		if (((LiveMappedDataBlock)parent).disconnect()) {
+		if (parent.disconnect()) {
 			connected = false;
 			return true;
 		}
