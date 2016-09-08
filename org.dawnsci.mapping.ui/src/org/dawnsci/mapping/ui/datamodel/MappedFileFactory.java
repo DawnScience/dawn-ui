@@ -103,7 +103,7 @@ public class MappedFileFactory {
 	private static AbstractMapData setUpMap(String path, String mapName, MappedDataBlock block, LiveDataBean live) {
 		
 		if (live != null && block.isLive()) {
-			return new LiveMappedData(mapName, getRemoteDataset(path,mapName,live),block, path);
+			return new MappedData(mapName, getRemoteDataset(path,mapName,live),block, path);
 		}
 		
 		

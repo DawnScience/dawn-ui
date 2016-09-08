@@ -60,9 +60,9 @@ public class MappedDataArea implements MapObject {
 		
 		Object[] children = file.getChildren();
 		for (Object child : children) {
-			if (child instanceof ILiveData) {
+			if (child instanceof MapObject) {
 				try {
-					((ILiveData)child).disconnect();
+					((MapObject)child).disconnect();
 				} catch (Exception e) {
 					logger.error("Could not disconnect remote dataset",e);
 				}
@@ -102,9 +102,9 @@ public class MappedDataArea implements MapObject {
 			
 			Object[] children = file.getChildren();
 			for (Object child : children) {
-				if (child instanceof ILiveData) {
+				if (child instanceof MapObject) {
 					try {
-						((ILiveData)child).disconnect();
+						((MapObject)child).disconnect();
 					} catch (Exception e) {
 						logger.error("Could not disconnect remote dataset",e);
 					}
@@ -148,6 +148,11 @@ public class MappedDataArea implements MapObject {
 		}
 		
 		return r;
+	}
+
+	@Override
+	public boolean disconnect() {
+		return true;
 	}
 	
 }

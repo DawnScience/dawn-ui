@@ -155,5 +155,11 @@ public class MappedDataFile implements MapObject{
 		mo.addAll(microscopeDataMap.values());
 		return mo.toArray();
 	}
+
+	@Override
+	public boolean disconnect() {
+		// TODO Auto-generated method stub
+		return true;
+	}
 	
 }
