@@ -4,8 +4,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class MappedDataFile implements MapObject{
 
@@ -14,20 +16,61 @@ public class MappedDataFile implements MapObject{
 	private Map<String,AbstractMapData> mapDataMap;
 	private Map<String,AssociatedImage> microscopeDataMap;
 	private double[] range;
-	private LiveDataBean liveBean;
+	private MappedDataFileBean liveBean;
 	
 //	private final static Logger logger = LoggerFactory.getLogger(MappedDataFile.class);
 	
-	public MappedDataFile(String path, LiveDataBean liveBean) {
+	public MappedDataFile(String path, MappedDataFileBean liveBean) {
+		this(path);
+		this.liveBean = liveBean;
+	}
+	
+	public MappedDataFile(String path) {
 		this.path = path;
 		fullDataMap = new HashMap<String,MappedDataBlock>();
 		mapDataMap = new HashMap<String,AbstractMapData>();
 		microscopeDataMap = new HashMap<String,AssociatedImage>();
-		this.liveBean = liveBean;
 	}
 	
 	public String getPath() {
 		return path;
+	}
+	
+	public void locallyReloadLiveFile(){
+		if (liveBean == null) return;
+		liveBean.setLiveBean(null);
+		MappedDataFile tmp = MappedFileFactory.getMappedDataFile(path, liveBean, null);
+		
+		Iterator<Entry<String, MappedDataBlock>> it = fullDataMap.entrySet().iterator();
+		
+		while (it.hasNext()) {
+			Entry<String, MappedDataBlock> next = it.next();
+			MappedDataBlock live = next.getValue();
+			String key = next.getKey();
+			if (tmp.fullDataMap.containsKey(key)) {
+				MappedDataBlock local = tmp.fullDataMap.get(key);
+				live.replaceLiveDataset(local.getLazy());
+			} else {
+				live.disconnect();
+				it.remove();
+			}
+		}
+		
+		Iterator<Entry<String, AbstractMapData>> mapIt = mapDataMap.entrySet().iterator();
+		
+		while (mapIt.hasNext()) {
+			Entry<String, AbstractMapData> next = mapIt.next();
+			AbstractMapData live = next.getValue();
+			String key = next.getKey();
+			if (tmp.mapDataMap.containsKey(key)) {
+				AbstractMapData local = tmp.mapDataMap.get(key);
+				live.replaceLiveDataset(local.getData());
+			} else {
+				live.disconnect();
+				it.remove();
+			}
+		}
+		
 	}
 	
 //	public MappedDataBlock addFullDataBlock(String datasetName, int xdim, int ydim) {
@@ -121,7 +164,8 @@ public class MappedDataFile implements MapObject{
 //	}
 	
 	public LiveDataBean getLiveDataBean() {
-		return this.liveBean;
+		if (liveBean == null) return null;
+		return this.liveBean.getLiveBean();
 	}
 	
 	public void addSuitableParentBlocks(AbstractMapData map, List<MappedDataBlock> list){
@@ -154,6 +198,12 @@ public class MappedDataFile implements MapObject{
 		mo.addAll(mapDataMap.values());
 		mo.addAll(microscopeDataMap.values());
 		return mo.toArray();
+	}
+
+	@Override
+	public boolean disconnect() {
+		// TODO Auto-generated method stub
+		return true;
 	}
 	
 }

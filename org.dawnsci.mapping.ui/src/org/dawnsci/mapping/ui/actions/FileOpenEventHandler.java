@@ -36,6 +36,12 @@ public class FileOpenEventHandler implements EventHandler {
 			return;
 		}
 		
+		if (event.getTopic().endsWith("LOCALRELOAD")) {
+			fm.locallyReloadLiveFile(path);
+			return;
+		}
+		
+		
 		if (event.containsProperty("map_bean")) {
 			Object p = event.getProperty("map_bean");
 			if (p instanceof MappedDataFileBean) fm.importFile(path, (MappedDataFileBean)p);

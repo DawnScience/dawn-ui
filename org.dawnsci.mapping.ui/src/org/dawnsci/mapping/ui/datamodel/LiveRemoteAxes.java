@@ -7,9 +7,21 @@ public class LiveRemoteAxes {
 	private IDatasetConnector[] axes;
 	private String[] axesNames;
 	private IDatasetConnector xAxisForRemapping;
-	private String xAxisForRemappingName;
+	
+	public int getPort() {
+		return port;
+	}
 
-	public LiveRemoteAxes(IDatasetConnector[] axes, String[] axesNames) {
+	public String getHost() {
+		return host;
+	}
+
+	private String xAxisForRemappingName;
+	
+	private int port;
+	private String host;
+
+	public LiveRemoteAxes(IDatasetConnector[] axes, String[] axesNames, String host, int port) {
 		this.axes = axes;
 		this.axesNames = axesNames;
 	}

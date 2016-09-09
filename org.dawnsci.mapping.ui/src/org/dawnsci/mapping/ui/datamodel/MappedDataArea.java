@@ -55,14 +55,26 @@ public class MappedDataArea implements MapObject {
 		return null;
 	}
 	
+	public void locallyReloadLiveFile(String path) {
+		
+		for (MappedDataFile file : files) {
+			if (path.equals(file.getPath())) {
+				file.locallyReloadLiveFile();
+				return;
+			}
+		}
+		
+	}
+	
+	
 	public void removeFile(MappedDataFile file) {
 		files.remove(file);
 		
 		Object[] children = file.getChildren();
 		for (Object child : children) {
-			if (child instanceof ILiveData) {
+			if (child instanceof MapObject) {
 				try {
-					((ILiveData)child).disconnect();
+					((MapObject)child).disconnect();
 				} catch (Exception e) {
 					logger.error("Could not disconnect remote dataset",e);
 				}
@@ -102,9 +114,9 @@ public class MappedDataArea implements MapObject {
 			
 			Object[] children = file.getChildren();
 			for (Object child : children) {
-				if (child instanceof ILiveData) {
+				if (child instanceof MapObject) {
 					try {
-						((ILiveData)child).disconnect();
+						((MapObject)child).disconnect();
 					} catch (Exception e) {
 						logger.error("Could not disconnect remote dataset",e);
 					}
@@ -128,6 +140,7 @@ public class MappedDataArea implements MapObject {
 	
 	public List<MappedDataBlock> findSuitableParentBlocks(AbstractMapData map){
 		List<MappedDataBlock> list = new ArrayList<>();
+		list.add(map.getParent());
 		for (MappedDataFile file : files) file.addSuitableParentBlocks(map, list);
 		return list;
 	}
@@ -148,6 +161,11 @@ public class MappedDataArea implements MapObject {
 		}
 		
 		return r;
+	}
+
+	@Override
+	public boolean disconnect() {
+		return true;
 	}
 	
 }

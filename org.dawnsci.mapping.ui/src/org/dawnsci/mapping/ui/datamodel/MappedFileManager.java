@@ -73,6 +73,38 @@ public class MappedFileManager {
 		return mappedDataArea.contains(path);
 	}
 	
+	public void locallyReloadLiveFile(final String path) {
+		
+		IProgressService service = (IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class);
+		try {
+			service.busyCursorWhile(new IRunnableWithProgress() {
+
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException,
+				InterruptedException {
+					mappedDataArea.locallyReloadLiveFile(path);
+					plotManager.plotLayers();
+					PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+
+						@Override
+						public void run() {
+							viewer.refresh();
+
+						}
+					});
+				}
+			});
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+	}
+	
 	public void importFile(final String path, final MappedDataFileBean bean) {
 		if (contains(path)) return;
 		
@@ -177,7 +209,7 @@ public class MappedFileManager {
 		}
 		
 		logger.error("Could not build map bean from " + path);
-		mappedDataArea.addMappedDataFile(new MappedDataFile(path,bean));
+		mappedDataArea.addMappedDataFile(new MappedDataFile(path));
 		viewer.refresh();
 		
 	}

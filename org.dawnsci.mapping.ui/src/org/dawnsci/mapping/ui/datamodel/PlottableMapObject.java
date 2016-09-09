@@ -8,4 +8,6 @@ public interface PlottableMapObject extends MapObject {
 	
 	public IDataset getData();
 	
+	public boolean isLive();
+	
 }

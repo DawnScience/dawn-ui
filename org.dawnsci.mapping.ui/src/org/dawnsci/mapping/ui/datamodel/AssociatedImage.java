@@ -52,5 +52,17 @@ public class AssociatedImage implements PlottableMapObject {
 	public String getLongName() {
 		return path + " : " + name;
 	}
+
+	@Override
+	public boolean disconnect() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isLive() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 	
 }

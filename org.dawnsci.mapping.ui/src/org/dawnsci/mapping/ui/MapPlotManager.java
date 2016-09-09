@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
-import org.dawnsci.mapping.ui.datamodel.ILiveData;
 import org.dawnsci.mapping.ui.datamodel.MapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedData;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
@@ -75,7 +74,10 @@ public class MapPlotManager {
 			@Override
 			public void run() {
 				for (MapTrace t : layers) {
-					if (t.getMap() instanceof ILiveData) {
+					if (t.getMap().isLive()) {
+						if (t.getMap() instanceof MappedData) {
+							((MappedData)t.getMap()).update();
+						}
 						t.switchMap(t.getMap());
 					}
 				}
@@ -284,7 +286,10 @@ public class MapPlotManager {
 				}
 				
 				map = area.getDataFile(i).getMap();
-				if (map == null) continue;
+				if (map == null) {
+					logger.debug("Map is null");
+					continue;
+				}
 				addMap(map);
 			}
  			
@@ -372,8 +377,8 @@ public class MapPlotManager {
 //			layers.set(position, map);
 		} else {
 			IImageTrace t = createImageTrace(map);
-			if (t == null) return;
-			layers.push(new MapTrace(map, t));
+			layers.push(new MapTrace(map, t));;
+			
 		}
 	
 		triggerForLive();
@@ -386,12 +391,12 @@ public class MapPlotManager {
 
 		while (iterator.hasNext()) {
 			MapObject l = iterator.next().getMap();
-			if (l instanceof ILiveData) {
+			if (l instanceof PlottableMapObject &&  ((PlottableMapObject)l).isLive()) {
 				found = true;
 				break;
 			}
 		}
-
+		
 		if (found){
 			rJob.start();
 			rJob.schedule();
@@ -426,7 +431,7 @@ public class MapPlotManager {
 	
 	
 	
-	private void plotLayers(){
+	public void plotLayers(){
 		
 		if (Display.getCurrent() == null) {
 			PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -539,7 +544,10 @@ public class MapPlotManager {
 		
 		iterator = layers.iterator();
 		
-		while (iterator.hasNext()) iterator.next().getTrace().setGlobalRange(range);
+		while (iterator.hasNext()) {
+			IImageTrace trace = iterator.next().getTrace();
+			if (trace != null) trace.setGlobalRange(range);
+		}
 		
 	}
 	
@@ -714,12 +722,18 @@ public class MapPlotManager {
 				});
 				return;
 			}
+			
+			if (d == null) return;
 
 			if (d.getRank() > 2) {
 				d.setShape(new int[]{d.getShape()[0],d.getShape()[1]});
 			}
 
-			MetadataPlotUtils.switchData(name,d, trace);
+			if (trace == null) {
+				trace = createImageTrace(map);
+			} else {
+				MetadataPlotUtils.switchData(name,d, trace);
+			}
 		}
 	}
 }
