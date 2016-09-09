@@ -46,6 +46,13 @@ public class MappedDataBlock implements MapObject {
 
 	}
 	
+	public void replaceLiveDataset(ILazyDataset lz) {
+		disconnect();
+		this.dataset = lz;
+		axes = null;
+		calculateRange(lz);
+	}
+	
 	@Override
 	public String toString() {
 		return name;

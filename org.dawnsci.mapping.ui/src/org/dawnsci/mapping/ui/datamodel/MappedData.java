@@ -38,6 +38,13 @@ public class MappedData extends AbstractMapData{
 		live = true;
 	}
 	
+	public void replaceLiveDataset(IDataset dataset) {
+		live = false;
+		disconnect();
+		this.map = dataset;
+		setRange(calculateRange(map));
+	}
+	
 	protected double[] calculateRange(ILazyDataset map){
 		
 		if (map instanceof IDatasetConnector) return null;
@@ -139,16 +146,14 @@ public class MappedData extends AbstractMapData{
 		return live;
 	}
 	
-	@Override
-	public IDataset getData(){
-		
-		if (!live) return super.getData();
-		
+	public void update() {
+		if (!live) return;
 		if (!connected) {			
 			try {
 				connect();
 			} catch (Exception e) {
-				return null;
+				logger.debug("Could not connect",e);
+
 			}
 		}
 
@@ -161,14 +166,14 @@ public class MappedData extends AbstractMapData{
 			//TODO log?
 		}
 		
-		if (ma == null) return null;
+		if (ma == null) return;
 		
 		ma.setName(this.toString());
 		
 		if (parent.isTransposed()) ma = DatasetUtils.convertToDataset(ma).transpose();
 		
 		// TODO This check is probably not required
-		if (baseMap.getSize() == 1) return null;
+		if (baseMap.getSize() == 1) return;
 		
 		ILazyDataset ly = parent.getYAxis()[0];
 		ILazyDataset lx = parent.getXAxis()[0];
@@ -182,8 +187,8 @@ public class MappedData extends AbstractMapData{
 			x = lx.getSlice();
 			y = ly.getSlice();
 		} catch (DatasetException e) {
-			e.printStackTrace();
-			return null;
+			logger.debug("Could not slice",e);
+			return;
 		}
 		
 		if (y.getRank() == 2) {
@@ -227,6 +232,5 @@ public class MappedData extends AbstractMapData{
 		fm.setMetadata(axm);
 		setRange(calculateRange(fm));
 		map = fm;
-		return fm;
 	}
 }

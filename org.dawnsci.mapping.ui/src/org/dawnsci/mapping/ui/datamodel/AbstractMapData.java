@@ -2,6 +2,7 @@ package org.dawnsci.mapping.ui.datamodel;
 
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.IDatasetConnector;
 import org.eclipse.january.dataset.ILazyDataset;
 
 public abstract class AbstractMapData implements PlottableMapObject{
@@ -38,6 +39,8 @@ public abstract class AbstractMapData implements PlottableMapObject{
 	}
 	
 	public IDataset getData(){
+		
+		if (baseMap instanceof IDatasetConnector) return map;
 		
 		if (baseMap != null) {
 			try {
@@ -100,5 +103,7 @@ public abstract class AbstractMapData implements PlottableMapObject{
 	public String getLongName() {
 		return path + " : " + name;
 	}
+	
+	public abstract void replaceLiveDataset(IDataset map);
 	
 }

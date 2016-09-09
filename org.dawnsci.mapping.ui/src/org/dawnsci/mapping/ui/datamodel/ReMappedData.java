@@ -143,4 +143,7 @@ public class ReMappedData extends AbstractMapData {
 		return false;
 	}
 
+	public void replaceLiveDataset(IDataset map) {
+		
+	}
 }

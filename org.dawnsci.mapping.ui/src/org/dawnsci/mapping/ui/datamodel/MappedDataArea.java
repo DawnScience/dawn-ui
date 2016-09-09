@@ -55,6 +55,18 @@ public class MappedDataArea implements MapObject {
 		return null;
 	}
 	
+	public void locallyReloadLiveFile(String path) {
+		
+		for (MappedDataFile file : files) {
+			if (path.equals(file.getPath())) {
+				file.locallyReloadLiveFile();
+				return;
+			}
+		}
+		
+	}
+	
+	
 	public void removeFile(MappedDataFile file) {
 		files.remove(file);
 		
@@ -128,6 +140,7 @@ public class MappedDataArea implements MapObject {
 	
 	public List<MappedDataBlock> findSuitableParentBlocks(AbstractMapData map){
 		List<MappedDataBlock> list = new ArrayList<>();
+		list.add(map.getParent());
 		for (MappedDataFile file : files) file.addSuitableParentBlocks(map, list);
 		return list;
 	}

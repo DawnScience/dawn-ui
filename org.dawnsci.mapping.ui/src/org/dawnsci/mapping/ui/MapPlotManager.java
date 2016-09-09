@@ -75,6 +75,9 @@ public class MapPlotManager {
 			public void run() {
 				for (MapTrace t : layers) {
 					if (t.getMap().isLive()) {
+						if (t.getMap() instanceof MappedData) {
+							((MappedData)t.getMap()).update();
+						}
 						t.switchMap(t.getMap());
 					}
 				}
@@ -428,7 +431,7 @@ public class MapPlotManager {
 	
 	
 	
-	private void plotLayers(){
+	public void plotLayers(){
 		
 		if (Display.getCurrent() == null) {
 			PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -541,7 +544,10 @@ public class MapPlotManager {
 		
 		iterator = layers.iterator();
 		
-		while (iterator.hasNext()) iterator.next().getTrace().setGlobalRange(range);
+		while (iterator.hasNext()) {
+			IImageTrace trace = iterator.next().getTrace();
+			if (trace != null) trace.setGlobalRange(range);
+		}
 		
 	}
 	

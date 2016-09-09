@@ -35,7 +35,7 @@ public class MappedFileFactory {
 	
 	public static MappedDataFile getMappedDataFile(String path, MappedDataFileBean bean, IMonitor monitor) {
 		
-		MappedDataFile file = new MappedDataFile(path, bean.getLiveBean());
+		MappedDataFile file = new MappedDataFile(path, bean);
 		
 		for (MappedBlockBean b : bean.getBlocks()) {
 			String name = b.getName();
