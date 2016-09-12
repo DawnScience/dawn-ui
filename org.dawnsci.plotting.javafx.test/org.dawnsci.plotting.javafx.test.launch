@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.junit.launchconfig">
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/org.dawnsci.plotting.javafx.test/src/org/dawnsci/plotting/javafx/test/AllSuite.java"/>
+<listEntry value="/org.dawnsci.plotting.javafx.test/src/org/dawnsci/plotting/javafx/test/shell"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
-<listEntry value="1"/>
+<listEntry value="2"/>
 </listAttribute>
 <mapAttribute key="org.eclipse.debug.core.environmentVariables">
 <mapEntry key="LD_LIBRARY_PATH" value="${project_loc:uk.ac.diamond.CBFlib}/lib/${target.os}-${target.arch}:${project_loc:hdf.hdf5lib}/lib/${target.os}-${target.arch}"/>
 </mapAttribute>
-<stringAttribute key="org.eclipse.jdt.junit.CONTAINER" value=""/>
+<stringAttribute key="org.eclipse.jdt.junit.CONTAINER" value="=org.dawnsci.plotting.javafx.test/src&lt;org.dawnsci.plotting.javafx.test.shell"/>
 <booleanAttribute key="org.eclipse.jdt.junit.KEEPRUNNING_ATTR" value="false"/>
 <stringAttribute key="org.eclipse.jdt.junit.TESTNAME" value=""/>
 <stringAttribute key="org.eclipse.jdt.junit.TEST_KIND" value="org.eclipse.jdt.junit.loader.junit4"/>
-<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.dawnsci.plotting.javafx.test.AllSuite"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value=""/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="org.dawnsci.plotting.javafx.test"/>
 </launchConfiguration>

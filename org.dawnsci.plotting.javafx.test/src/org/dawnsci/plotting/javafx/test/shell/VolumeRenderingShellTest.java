@@ -60,23 +60,24 @@ public class VolumeRenderingShellTest {
 	public void shellButtonTest() throws Exception {
 		loadDataset();
 		// Group group = generateNode(dataset);
-		Display display = new Display();
-		Shell shell = new Shell(display);
-		shell.setLayout(new FillLayout());
+		//TODO
+//		Display display = new Display();
+//		Shell shell = new Shell(display);
+//		shell.setLayout(new FillLayout());
 
-		FXCanvas canvas = new FXCanvas(shell, SWT.NONE);
-		Group root = new Group();
-
-		SceneDisplayer scene = new SceneDisplayer(root);
-
-//		 scene.addVolume/Trace(group);
-
-		canvas.setScene(scene);
-		shell.open();
-		
-		TimeUnit.SECONDS.sleep(5);
-		shell.close();
-		display.dispose();
+//		FXCanvas canvas = new FXCanvas(shell, SWT.NONE);
+//		Group root = new Group();
+//
+//		SceneDisplayer scene = new SceneDisplayer(root);
+//
+////		 scene.addVolume/Trace(group);
+//
+//		canvas.setScene(scene);
+//		shell.open();
+//		
+//		TimeUnit.SECONDS.sleep(5);
+//		shell.close();
+//		display.dispose();
 
 	}
 }

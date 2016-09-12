@@ -1,20 +1,5 @@
 package org.dawnsci.plotting.javafx.test.shell;
 
-import javafx.embed.swt.FXCanvas;
-import javafx.scene.DepthTest;
-import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.PhongMaterial;
-import javafx.scene.shape.Mesh;
-import javafx.scene.shape.MeshView;
-import javafx.scene.shape.TriangleMesh;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import org.dawnsci.isosurface.alg.MarchingCubes;
@@ -26,11 +11,19 @@ import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.junit.Test;
 
+import javafx.embed.swt.FXCanvas;
+import javafx.scene.DepthTest;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.Mesh;
+import javafx.scene.shape.MeshView;
+import javafx.scene.shape.TriangleMesh;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class IsoSurfaceShellTest {
