@@ -1,8 +1,5 @@
 package org.dawnsci.plotting.javafx.test.rotation;
 
-public class rotationtests {
-	
-	
-	
+public class RotationTest {
 
 }
