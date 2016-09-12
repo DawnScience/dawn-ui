@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Testing
-Bundle-SymbolicName: org.dawnsci.plotting.javafx.testing;singleton:=true
+Bundle-SymbolicName: org.dawnsci.plotting.javafx.test;singleton:=true
 Fragment-Host: org.dawnsci.plotting.javafx;bundle-version="1.0.0"
 Bundle-Version: 1.0.0.qualifier
 Require-Bundle: org.junit;bundle-version="[4.10.0,5.0.0)",
