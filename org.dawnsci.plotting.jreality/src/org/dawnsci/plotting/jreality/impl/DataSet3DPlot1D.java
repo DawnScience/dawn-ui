@@ -3162,6 +3162,11 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 	}
 
 	@Override
+	public boolean setCustomLineStyle(int primID, float[] dash) {
+		throw new UnsupportedOperationException("Unsupported for DataSet3DPlot1D; please implement if needed");
+	}
+
+	@Override
 	public boolean setOutlineTransparency(int primID, double transparency) {
 		boolean returnValue = false;
 		if (overlayInOperation) {
