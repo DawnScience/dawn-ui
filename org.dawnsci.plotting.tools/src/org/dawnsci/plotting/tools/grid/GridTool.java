@@ -114,6 +114,8 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 	private IRegionListener       regionListener;
 	private IROIListener          roiListener;
 	private ITraceListener        traceListener;
+
+	private Label label;
 	public static final String    GDA_GRID_METADATA ="GDA_GRID_METADATA";  
 
 	public GridTool() {
@@ -210,7 +212,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		viewer.getTree().setLinesVisible(true);
 		viewer.getTree().setHeaderVisible(true);
 
-		final Label label = new Label(control, SWT.NONE);
+		label = new Label(control, SWT.NONE);
 		label.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 		ColorRegistry colorRegistry = JFaceResources.getColorRegistry();
 		RGB defaultRGB = colorRegistry.getRGB(JFacePreferences.QUALIFIER_COLOR);
@@ -627,6 +629,11 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 
 	@Override
 	public void dispose() {
+		if (label != null && !label.isDisposed()) {
+			Color color = label.getForeground();
+			if (color != null)
+				color.dispose();
+		}
 		super.dispose();
 		model.dispose();
 		model = null;

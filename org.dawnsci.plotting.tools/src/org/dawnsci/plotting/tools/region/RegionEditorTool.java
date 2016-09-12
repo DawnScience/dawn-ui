@@ -142,6 +142,8 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 	private Action activeToggleAction;
 	private Action mobileToggleAction;
 
+	private Label label;
+
 	public RegionEditorTool() {
 		super();
 		dragBounds = new HashMap<String,IROI>(7);
@@ -194,7 +196,7 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 		GridUtils.removeMargins(status);
 
 		ColorRegistry colorRegistry = JFaceResources.getColorRegistry();
-		final Label label = new Label(status, SWT.RIGHT);
+		label = new Label(status, SWT.RIGHT);
 		label.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 		RGB rgb = colorRegistry.getRGB(JFacePreferences.QUALIFIER_COLOR);
 		if (rgb == null)
@@ -933,6 +935,11 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 	}
 
 	public void dispose() {
+		if (label != null && !label.isDisposed()) {
+			Color color = label.getForeground();
+			if (color != null)
+				color.dispose();
+		}
 		resetRegionsColour();
 		super.dispose();
 	}

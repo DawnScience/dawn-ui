@@ -155,6 +155,8 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	 */
 	private boolean hide = false;
 
+	private Label label;
+
 	@Override
 	public ToolPageRole getToolPageRole() {
 		return ToolPageRole.ROLE_2D;
@@ -217,7 +219,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		if (statusString != null && statusString[0] != null)
 			statusMessage.setText(statusString[0]);
 
-		final Label label = new Label(status, SWT.RIGHT);
+		label = new Label(status, SWT.RIGHT);
 		label.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 		label.setForeground(new Color(label.getDisplay(), rgb));
 		label.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
@@ -297,6 +299,16 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		super.dispose();
 		if (model!=null) model.dispose();
 		if (augmenter != null) augmenter.dispose();
+		if (statusMessage != null && !statusMessage.isDisposed()) {
+			Color color = statusMessage.getForeground();
+			if (color != null)
+				color.dispose();
+		}
+		if (label != null && !label.isDisposed()) {
+			Color color = label.getForeground();
+			if (color != null)
+				color.dispose();
+		}
 	}
 
 	private void createDiffractionModel(boolean force) {

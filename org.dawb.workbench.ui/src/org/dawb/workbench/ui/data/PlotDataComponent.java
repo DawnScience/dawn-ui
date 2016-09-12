@@ -192,6 +192,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	
 	private IDataListener            dataListener;
 
+	private Label label;
+
 	
 	public PlotDataComponent(final IWorkbenchPart editor) throws Exception {
 				
@@ -320,14 +322,14 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		dataViewer.getTable().setHeaderVisible(true);
 		
 		ColorRegistry colorRegistry = JFaceResources.getColorRegistry();
-		Label label = new Label(container, SWT.RIGHT);
+		label = new Label(container, SWT.RIGHT);
 		label.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 		label.setForeground(new Color(label.getDisplay(), colorRegistry.getRGB(JFacePreferences.QUALIFIER_COLOR)));
 		label.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		label.setText("* Click to change value  ");
 
-		label = new Label(container, SWT.HORIZONTAL|SWT.SEPARATOR);
-		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		Label label2 = new Label(container, SWT.HORIZONTAL|SWT.SEPARATOR);
+		label2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		createColumns();
         dataViewer.setColumnProperties(new String[]{"Data","Length"});
@@ -1819,6 +1821,11 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		this.dataHolder = null;
 		this.filePath   = null;
 		
+		if (label != null && !label.isDisposed()) {
+			Color color = label.getForeground();
+			if (color != null)
+				color.dispose();
+		}
 		if (listeners!=null) listeners.clear();
 		if (data != null){
 			for (ITransferableDataObject ob : data) {

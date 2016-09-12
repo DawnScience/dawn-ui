@@ -38,8 +38,6 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TypedEvent;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -175,10 +173,10 @@ public abstract class SelectorWidget {
 				File tmp = new File(inputLocation.getText());
 				if ((SelectorWidget.this.isFolderSelector && tmp.isDirectory())
 						|| (!SelectorWidget.this.isFolderSelector && tmp.isFile())) {
-					inputLocation.setForeground(new Color(Display.getDefault(), new RGB(0, 0, 0)));
+					inputLocation.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_BLACK));
 					path = tmp.getAbsolutePath();
 				} else {
-					inputLocation.setForeground(new Color(Display.getDefault(), new RGB(255, 80, 80)));
+					inputLocation.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_GRAY));
 				}
 				pathChanged(inputLocation.getText(), e);
 			}
