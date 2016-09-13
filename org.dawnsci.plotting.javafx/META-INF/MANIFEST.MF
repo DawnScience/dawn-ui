@@ -14,7 +14,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.dawnsci.plotting.histogram,
  javax.vecmath,
  org.eclipse.nebula.visualization.xygraph,
- org.eclipse.fx.javafx;bundle-version="2.2.0"
+ org.eclipse.fx.javafx;bundle-version="2.2.0",
+ org.dawnsci.javafx.starter;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  lib/jfxswt.jar
