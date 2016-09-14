@@ -72,11 +72,12 @@ public class MapPlotManager {
 		rJob = new RepeatingJob(500, new Runnable() {
 			
 			@Override
-			public void run() {
+			public void run(){
+				if (layers.isEmpty()) rJob.stop();
 				for (MapTrace t : layers) {
 					if (t.getMap().isLive()) {
-						if (t.getMap() instanceof MappedData) {
-							((MappedData)t.getMap()).update();
+						if (t.getMap() instanceof AbstractMapData) {
+							((AbstractMapData)t.getMap()).update();
 						}
 						t.switchMap(t.getMap());
 					}

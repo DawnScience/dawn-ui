@@ -103,6 +103,11 @@ public class MappedFileFactory {
 	private static AbstractMapData setUpMap(String path, String mapName, MappedDataBlock block, LiveDataBean live) {
 		
 		if (live != null && block.isLive()) {
+			
+			if (block.isRemappingRequired()) {
+				return new ReMappedData(mapName, getRemoteDataset(path,mapName,live), block, path);
+			}
+			
 			return new MappedData(mapName, getRemoteDataset(path,mapName,live),block, path);
 		}
 		
@@ -225,11 +230,11 @@ public class MappedFileFactory {
 				int[] ss = lz.getShape();
 				
 				if (ss.length == 1) {
-					axm.addAxis(i, lz.getSlice());
+					axm.addAxis(i, lz);
 					
 					String second = null;
 					if (bean.getxDim() == i && bean.getxAxisForRemapping() != null) second = bean.getxAxisForRemapping();
-					if (second != null) axm.addAxis(i, getLazyDataset(path, second).getSlice());
+					if (second != null) axm.addAxis(i, getLazyDataset(path, second));
 					
 				} else {
 					//approximate 2D with 1D, should be done int the map/mapobjects

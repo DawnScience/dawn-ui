@@ -1,20 +1,29 @@
 package org.dawnsci.mapping.ui.datamodel;
 
 import org.eclipse.january.DatasetException;
+import org.eclipse.january.dataset.DataEvent;
+import org.eclipse.january.dataset.IDataListener;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDatasetConnector;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractMapData implements PlottableMapObject{
 
 	private String name;
 	protected String path;
-	protected ILazyDataset baseMap;
+	protected IDatasetConnector baseMap;
 	protected IDataset map;
 	protected MappedDataBlock oParent;
 	protected MappedDataBlock parent;
 	private int transparency = -1;
 	private double[] range;
+	
+	protected boolean connected = false;
+	protected boolean live;
+	
+	private static final Logger logger = LoggerFactory.getLogger(AbstractMapData.class);
 	
 	public AbstractMapData(String name, IDataset map, MappedDataBlock parent, String path) {
 		this.name = name;
@@ -24,12 +33,12 @@ public abstract class AbstractMapData implements PlottableMapObject{
 		range = calculateRange(map);
 	}
 	
-	public AbstractMapData(String name, ILazyDataset map, MappedDataBlock parent, String path) {
+	public AbstractMapData(String name, IDatasetConnector map, MappedDataBlock parent, String path) {
 		this.name = name;
 		this.baseMap = map;
 		this.path = path;
 		this.oParent = this.parent = parent;
-		range = calculateRange(map);
+		live = true;
 	}
 	
 	public abstract IDataset getSpectrum(double x, double y);
@@ -39,18 +48,6 @@ public abstract class AbstractMapData implements PlottableMapObject{
 	}
 	
 	public IDataset getData(){
-		
-		if (baseMap instanceof IDatasetConnector) return map;
-		
-		if (baseMap != null) {
-			try {
-				return baseMap.getSlice();
-			} catch (DatasetException e) {
-				e.printStackTrace();
-				return null;
-			}
-		}
-		
 		return map;
 	}
 	
@@ -103,7 +100,50 @@ public abstract class AbstractMapData implements PlottableMapObject{
 	public String getLongName() {
 		return path + " : " + name;
 	}
-	
+
 	public abstract void replaceLiveDataset(IDataset map);
 	
+	public abstract void update();
+	
+	
+public boolean connect() {
+		
+		try {
+			((IDatasetConnector)baseMap).connect();
+			((IDatasetConnector)baseMap).addDataListener(new IDataListener() {
+				
+				@Override
+				public void dataChangePerformed(DataEvent evt) {
+					// TODO Auto-generated method stub
+					
+				}
+			});
+		} catch (Exception e) {
+			logger.error("Could not connect to " + toString());
+			return false;
+		}
+		
+		if (parent.connect()) {
+			connected = true;
+			return true;
+		}
+		
+		return false;
+	}
+
+	public boolean disconnect() {
+		try {
+			((IDatasetConnector)baseMap).disconnect();
+		} catch (Exception e) {
+			logger.error("Could not disconnect from " + toString());
+			return false;
+		}
+		
+		if (parent.disconnect()) {
+			connected = false;
+			return true;
+		}
+		
+		return false;
+	}
 }

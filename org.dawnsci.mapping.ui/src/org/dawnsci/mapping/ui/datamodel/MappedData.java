@@ -19,9 +19,6 @@ import org.slf4j.LoggerFactory;
 
 public class MappedData extends AbstractMapData{
 
-	
-	private boolean connected = false;
-	private boolean live = false;
 	private static final Logger logger = LoggerFactory.getLogger(MappedData.class);
 	
 	
@@ -29,13 +26,8 @@ public class MappedData extends AbstractMapData{
 		super(name, map, parent, path);
 	}
 	
-	public MappedData(String name, ILazyDataset map, MappedDataBlock parent, String path) {
-		super(name,map, parent, path);
-	}
-	
 	public MappedData(String name, IDatasetConnector map, MappedDataBlock parent, String path) {
-		this(name, map.getDataset(), parent, path);
-		live = true;
+		super(name, map, parent, path);
 	}
 	
 	public void replaceLiveDataset(IDataset dataset) {
@@ -100,47 +92,7 @@ public class MappedData extends AbstractMapData{
 	public MappedData makeNewMapWithParent(String name, IDataset ds) {
 		return new MappedData(name, ds, parent, path);
 	}
-	
-	public boolean connect() {
-		
-		try {
-			((IDatasetConnector)baseMap).connect();
-			((IDatasetConnector)baseMap).addDataListener(new IDataListener() {
-				
-				@Override
-				public void dataChangePerformed(DataEvent evt) {
-					// TODO Auto-generated method stub
-					
-				}
-			});
-		} catch (Exception e) {
-			logger.error("Could not connect to " + toString());
-			return false;
-		}
-		
-		if (parent.connect()) {
-			connected = true;
-			return true;
-		}
-		
-		return false;
-	}
 
-	public boolean disconnect() {
-		try {
-			((IDatasetConnector)baseMap).disconnect();
-		} catch (Exception e) {
-			logger.error("Could not disconnect from " + toString());
-			return false;
-		}
-		
-		if (parent.disconnect()) {
-			connected = false;
-			return true;
-		}
-		
-		return false;
-	}
 	
 	public boolean isLive() {
 		return live;
@@ -160,7 +112,7 @@ public class MappedData extends AbstractMapData{
 		IDataset ma = null;
 		
 		try{
-			((IDatasetConnector)baseMap).refreshShape();
+			baseMap.refreshShape();
 			ma = baseMap.getSlice();
 		} catch (Exception e) {
 			//TODO log?
@@ -173,7 +125,7 @@ public class MappedData extends AbstractMapData{
 		if (parent.isTransposed()) ma = DatasetUtils.convertToDataset(ma).transpose();
 		
 		// TODO This check is probably not required
-		if (baseMap.getSize() == 1) return;
+		if ( baseMap instanceof ILazyDataset && ((ILazyDataset)baseMap).getSize() == 1) return;
 		
 		ILazyDataset ly = parent.getYAxis()[0];
 		ILazyDataset lx = parent.getXAxis()[0];

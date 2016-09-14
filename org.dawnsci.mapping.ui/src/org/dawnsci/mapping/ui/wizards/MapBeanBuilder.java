@@ -20,6 +20,7 @@ import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.StringDataset;
 
 import uk.ac.diamond.scisoft.analysis.io.NexusTreeUtils;
 
@@ -102,6 +103,44 @@ public class MapBeanBuilder {
 		
 		if (datasets.isEmpty() && !bean.getImages().isEmpty()) return bean;
 		
+		List<String> remappingAxesList = null;
+		
+		for (DataInfo d : datasets) {
+		
+			if (d.rank == 1) {
+				//spiral case
+				d.toString();
+				NodeLink nl = nodes.get(d.parent.substring(1));
+				remappingAxesList = new ArrayList<String>();
+				Node n = nl.getDestination();
+				Iterator<? extends Attribute> it = n.getAttributeIterator();
+				while (it.hasNext()) {
+					Attribute next = it.next();
+					IDataset value = next.getValue();
+					
+					if (next.getName().endsWith("_demand_indices")) {
+						String name = next.getName();
+						name = name.substring(0, name.length()-8);
+						remappingAxesList.add(name);
+					}
+				}
+			};
+			
+		}
+		
+		if (remappingAxesList != null && remappingAxesList.size() >=2) {
+			remappingAxesList.toString();
+			for (DataInfo d : datasets) {
+				NodeLink nl = nodes.get(d.parent.substring(1));
+				Node n = nl.getDestination();
+				Attribute attribute = n.getAttribute(remappingAxesList.get(0)+ "_indices");
+				if (attribute != null){
+					d.axes[0] = remappingAxesList.get(1);
+					d.xAxisForRemapping = remappingAxesList.get(0);
+				}
+			}
+		}
+		
 		populateData(bean, datasets);
 		
 		if (bean.checkValid()) return bean;
@@ -142,7 +181,12 @@ public class MapBeanBuilder {
 		
 		if (maxRank > 4) return;
 		
-		if (minRank < 2) return;
+		if (minRank < 1) return;
+		
+		if (minRank == 1) {
+			bean.toString();
+			//do remapping
+		}
 		
 		if (max == null || min == null) return;
 		
@@ -162,6 +206,11 @@ public class MapBeanBuilder {
 			b.setxDim(slow ? 1 : d.axes.length -2);
 			b.setyDim(slow ? 0 : d.axes.length -1);
 			b.setRank(d.rank);
+			b.setxAxisForRemapping(d.xAxisForRemapping == null ? null : d.parent + Node.SEPARATOR + d.xAxisForRemapping);
+			if (d.xAxisForRemapping != null) {
+				b.setxDim(0);
+				b.setyDim(0);
+			}
 			it.remove();
 			bean.addBlock(b);
 		}
@@ -221,6 +270,7 @@ public class MapBeanBuilder {
 		String name;
 		String[] axes;
 		int rank;
+		String xAxisForRemapping;
 		
 		public DataInfo(String parent, String name, String[] axes, int rank) {
 			this.name = name;
