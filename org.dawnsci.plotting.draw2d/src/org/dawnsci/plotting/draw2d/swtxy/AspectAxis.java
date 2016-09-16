@@ -229,75 +229,42 @@ public class AspectAxis extends Axis implements IAxis {
 		    
 		    final Range  cur  = getRange();
     		final double ran  = Math.max(cur.getUpper(), cur.getLower()) - Math.min(cur.getUpper(), cur.getLower());
-    		  			
-    		int yIndex = trace.getImageOrigin()==ImageOrigin.TOP_LEFT ||
-    				     trace.getImageOrigin()==ImageOrigin.BOTTOM_RIGHT
-    				   ? 0 : 1;
-    		
-    		int xIndex = trace.getImageOrigin()==ImageOrigin.TOP_LEFT ||
-				         trace.getImageOrigin()==ImageOrigin.BOTTOM_RIGHT
-				        ? 1 : 0;
-    		
-    		
-    		if (isYAxis()) {
-    			
-    			double lower = trace.getImageOrigin()==ImageOrigin.TOP_LEFT ||
-			                   trace.getImageOrigin()==ImageOrigin.TOP_RIGHT
-			                 ? temp.getUpper() : temp.getLower();
-			             
-			   double upper = trace.getImageOrigin()==ImageOrigin.TOP_LEFT ||
-		                      trace.getImageOrigin()==ImageOrigin.TOP_RIGHT
-		                     ? temp.getLower() : temp.getUpper();
 
-    			if ((lower-d2)<=0) {
-    				if (trace.getImageOrigin()==ImageOrigin.TOP_LEFT || trace.getImageOrigin()==ImageOrigin.TOP_RIGHT) {
-        				setRange(ran, 0);
-    				} else {
-        				setRange(0, ran);
-    				}
-    				return;
+			boolean isAxisFlipped = isYAxis() ? trace.getImageOrigin().isOnTop() : !trace.getImageOrigin().isOnLeft();
+    		int yIndex = trace.getImageOrigin().isOnLeadingDiagonal() ? 0 : 1;
+			int index = isYAxis() ? yIndex : 1 - yIndex;
+			double lower, upper;
+			if (isAxisFlipped) {
+				lower = temp.getUpper();
+				upper = temp.getLower();
+			} else {
+				lower = temp.getLower();
+				upper = temp.getUpper();
+			}
 
-    			} else if ((upper+d1)>trace.getData().getShape()[yIndex]) {
-    				if (trace.getImageOrigin()==ImageOrigin.TOP_LEFT || trace.getImageOrigin()==ImageOrigin.TOP_RIGHT) {
-   				        setRange(trace.getData().getShape()[yIndex], trace.getData().getShape()[yIndex]-ran);	    
-    				} else {
-    					setRange(trace.getData().getShape()[yIndex]-ran, trace.getData().getShape()[yIndex]);	   
-    				}
-    				return;
-    			}
+			if ((lower-d2)<=0) {
+				if (isAxisFlipped) {
+    				setRange(ran, 0);
+				} else {
+    				setRange(0, ran);
+				}
+				return;
 
-    		} else {
-    			double lower = trace.getImageOrigin()==ImageOrigin.TOP_LEFT ||
-   				               trace.getImageOrigin()==ImageOrigin.BOTTOM_LEFT
-   				             ? temp.getLower() : temp.getUpper();
-   				             
-        		double upper = trace.getImageOrigin()==ImageOrigin.TOP_LEFT ||
-			                   trace.getImageOrigin()==ImageOrigin.BOTTOM_LEFT
-			                  ? temp.getUpper() : temp.getLower();
+			} else if ((upper+d1)>trace.getData().getShape()[index]) {
+				if (isAxisFlipped) {
+			        setRange(trace.getData().getShape()[index], trace.getData().getShape()[index]-ran);	    
+				} else {
+					setRange(trace.getData().getShape()[index]-ran, trace.getData().getShape()[index]);	   
+				}
+				return;
+			}
 
-    			if ((lower-d2)<=0) {
-    				if (trace.getImageOrigin()==ImageOrigin.TOP_LEFT || trace.getImageOrigin()==ImageOrigin.BOTTOM_LEFT) {
-        				setRange(0, ran);   					
-    				} else {
-    					setRange(ran, 0);   	
-    				}
-    				return;
-
-    			} else if ((upper+d1)>trace.getData().getShape()[xIndex]) {
-    				if (trace.getImageOrigin()==ImageOrigin.TOP_LEFT || trace.getImageOrigin()==ImageOrigin.BOTTOM_LEFT) {
-   				        setRange(trace.getData().getShape()[xIndex]-ran, trace.getData().getShape()[xIndex]);
-    				} else {
-    					setRange(trace.getData().getShape()[xIndex], trace.getData().getShape()[xIndex]-ran);
-    				}
-    				return;
-
-    			}
-    		}
  		}
 		// End code to stop pan outside image bounds.
 		
 		super.pan(temp, t1, t2);
 	}
+
 	/**
 	 * true if with is longer in its direction in pixels than this axis. 
 	 * @param aspectAxis

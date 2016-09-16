@@ -794,12 +794,12 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		final Iterator<ITrace> it = traces.iterator();
 		if (it.hasNext()) {
 			final IImageTrace trace = (IImageTrace) it.next();
-			return trace.getImageOrigin()==ImageOrigin.TOP_LEFT || trace.getImageOrigin()==ImageOrigin.BOTTOM_RIGHT;
+			return trace.getImageOrigin().isOnLeadingDiagonal();
 		} else {
 			try {
 				final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
 				ImageOrigin origin = ImageOrigin.forLabel(store.getString(PlottingConstants.ORIGIN_PREF));
-				return origin==ImageOrigin.TOP_LEFT || origin==ImageOrigin.BOTTOM_RIGHT;
+				return origin.isOnLeadingDiagonal();
 			} catch (Throwable e) {
 				return true;
 			}

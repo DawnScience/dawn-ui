@@ -38,7 +38,6 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.eclipse.ui.services.AbstractServiceFactory;
 import org.eclipse.ui.services.IServiceLocator;
@@ -93,14 +92,6 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		return new Image(Display.getCurrent(), data);
 	}
 	
-	private static final int MIN_PIX_INDEX = 253;
-	private static final int NAN_PIX_INDEX = 254;
-	private static final int MAX_PIX_INDEX = 255;
-	
-	private static final byte MIN_PIX_BYTE = (byte)(MIN_PIX_INDEX & 0xFF);
-	private static final byte NAN_PIX_BYTE = (byte)(NAN_PIX_INDEX & 0xFF);
-	private static final byte MAX_PIX_BYTE = (byte)(MAX_PIX_INDEX & 0xFF);
-	
 	/**
 	 * getImageData(...) provides an image in a given palette data and origin.
 	 * Faster than getting a resolved image
@@ -112,30 +103,13 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		Dataset image    = oImage;
 		ImageOrigin     origin   = bean.getOrigin();
 		if (origin==null) origin = ImageOrigin.TOP_LEFT;
-		PaletteData     palette  = bean.getPalette();
 
+		// orientate the image
+		image = DatasetUtils.rotate90(image, origin.ordinal());
 		if (image instanceof RGBDataset) {
-			switch (origin) {
-			case TOP_LEFT:
-				break;
-			case TOP_RIGHT:
-				image = DatasetUtils.transpose(image);
-				image = image.getSlice(null, null, new int[] {1,-1});
-				break;
-			case BOTTOM_LEFT:
-				image = DatasetUtils.transpose(image);
-				image = image.getSlice(null, null, new int[] {-1,1});
-				break;
-			case BOTTOM_RIGHT:
-				image = image.getSlice(null, null, new int[] {-1,-1});
-				break;
-			}
-			RGBDataset rgbImage = (RGBDataset) image;
-			return SWTImageUtils.createImageData(rgbImage, 0, 255, null, null, null, false, false, false);
+			return SWTImageUtils.createImageData((RGBDataset) image, 0, 255, null, null, null, false, false, false);
 		}
 
-		int depth = bean.getDepth();
-		final int size  = (int)Math.round(Math.pow(2, depth));
 
 		createMaxMin(bean);
 		double max = getMax(bean);
@@ -180,120 +154,9 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 																  fc.isInverseBlue());
 		}
 
-		if (depth>8) { // Depth > 8 will not work properly at the moment.
-			throw new RuntimeException(getClass().getSimpleName()+" only supports 8-bit images unless a FunctionContainer has been set!");
-			//if (depth == 16) palette = new PaletteData(0x7C00, 0x3E0, 0x1F);
-			//if (depth == 24) palette = new PaletteData(0xFF, 0xFF00, 0xFF0000);
-			//if (depth == 32) palette = new PaletteData(0xFF00, 0xFF0000, 0xFF000000);
-		}
-		
-		final int[]   shape = image.getShape();
-		if (bean.isCancelled()) return null;	
-				
-		int len = image.getSize();
-		if (len == 0) return null;
-
-		// The last three indices of the palette are always taken up with bound colours
-		createCutColours(bean); // Modifies the palette data and sets the withheld indices
-		
-		double scale;
-		double maxPixel;
-		if (max > min) {
-			// 4 because 1 less than size and then 1 for each bound colour is lost.
-			scale = (size - 4) / (max - min);
-			maxPixel = max - min;
-		} else {
-			scale = 1;
-			maxPixel = 0xFF;
-		}
-		if (bean.isCancelled()) return null;
-		
-		BooleanDataset mask = bean.getMask()!=null
-							? (BooleanDataset)DatasetUtils.cast(bean.getMask(), Dataset.BOOL)
-							: null;
-
-		ImageData imageData = null;
-
-		// We use a byte array directly as this is faster than using setPixel(...)
-		// on image data. Set pixel does extra floating point operations. The downside
-		// is that by doing this we certainly have to have 8 bit as getPixelColorIndex(...)
-		// forces the use of on byte.
-		final byte[] scaledImageAsByte = new byte[len];
-
-		if (origin==ImageOrigin.TOP_LEFT) { 
-			
-			int index = 0;
-			// This loop is usually the same as the image is read in but not always depending on loader.
-			for (int i = 0; i<shape[0]; ++i) {
-				if (bean.isCancelled()) return null;				
-				for (int j = 0; j<shape[1]; ++j) {
-					
-					// This saves a value lookup when the pixel is certainly masked.
-					scaledImageAsByte[index] = mask==null || mask.getBoolean(i,j)
-									? getPixelColorIndex(image.getDouble(i,j), min, max, scale, maxPixel, minCut, maxCut)
-									: NAN_PIX_BYTE;
-					++index;
-				}
-			}
-			imageData = new ImageData(shape[1], shape[0], 8, palette, 1, scaledImageAsByte);
-	
-		} else if (origin==ImageOrigin.BOTTOM_LEFT) {
-
-			int index = 0;
-			// This loop is slower than looping over all data and using image.getElementDoubleAbs(...)
-			// However it reorders data for the axes
-			for (int i = shape[1]-1; i>=0; --i) {
-				if (bean.isCancelled()) return null;
-				for (int j = 0; j<shape[0]; ++j) {
-					
-					// This saves a value lookup when the pixel is certainly masked.
-					scaledImageAsByte[index]  = mask==null || mask.getBoolean(j,i)
-									? getPixelColorIndex(image.getDouble(j,i), min, max, scale, maxPixel, minCut, maxCut)
-									: NAN_PIX_BYTE;
-					index++;
-				}
-			}
-			imageData = new ImageData(shape[0], shape[1], 8, palette, 1, scaledImageAsByte);
-			
-		} else if (origin==ImageOrigin.BOTTOM_RIGHT) {
-
-			int index = 0;
-			// This loop is slower than looping over all data and using image.getElementDoubleAbs(...)
-			// However it reorders data for the axes
-			for (int i = shape[0]-1; i>=0; --i) {
-				if (bean.isCancelled()) return null;
-				for (int j = shape[1]-1; j>=0; --j) {
-
-					// This saves a value lookup when the pixel is certainly masked.
-					scaledImageAsByte[index] = mask==null || mask.getBoolean(i,j)
-									? getPixelColorIndex(image.getDouble(i,j), min, max, scale, maxPixel, minCut, maxCut)
-									: NAN_PIX_BYTE;
-						index++;
-				}
-			}
-			imageData = new ImageData(shape[1], shape[0], 8, palette, 1, scaledImageAsByte);
-			
-		} else if (origin==ImageOrigin.TOP_RIGHT) {
-
-			int index = 0;
-			// This loop is slower than looping over all data and using image.getElementDoubleAbs(...)
-			// However it reorders data for the axes
-			for (int i = 0; i<shape[1]; ++i) {
-				if (bean.isCancelled()) return null;
-				for (int j = shape[0]-1; j>=0; --j) {
-					scaledImageAsByte[index]  = mask==null || mask.getBoolean(j,i)
-									? getPixelColorIndex(image.getDouble(j, i), min, max, scale, maxPixel, minCut, maxCut)
-									: NAN_PIX_BYTE;
-					index++;
-				}
-			}
-			imageData = new ImageData(shape[0], shape[1], 8, palette, 1, scaledImageAsByte);
-		}
-
-		imageData.alpha = bean.getAlpha();
-		return imageData;
+		return SWTImageUtils.createImageData(min, max, minCut, maxCut, image, bean);
 	}
-
+	
 	private double getMax(ImageServiceBean bean) {
 		if (bean.getMaximumCutBound()==null || bean.getMaximumCutBound().getBound()==null) {
 			return bean.getMax().doubleValue();
@@ -322,44 +185,6 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		return bean.getMinimumCutBound().getBound().doubleValue();
 	}
 
-	/**
-	 * Calling this wipes out the last three RGBs. Even if you set max
-	 * @param bean
-	 */
-	private void createCutColours(ImageServiceBean bean) {
-		
-		// We *DO NOT* copy the palette here so up to 3 of the original
-		// colours can be changed. Instead whenever a palette is given to an
-		// ImageService bean it should be original.
-		if (bean.getPalette()==null) {
-			try {
-				final IPaletteService service = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
-				bean.setPalette(service.getDirectPaletteData("Gray Scale"));
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-		}
-		
-		// We have three special values, those which are greater than the max cut,
-		// less than the min cut and the NaN number. For these we use special pixel
-		// values in the palette as defined by the cut bound if it is set.
-		if (bean.getMinimumCutBound()!=null && bean.getMinimumCutBound().getColor()!=null) {
-			int[] ia = bean.getMinimumCutBound().getColor();
-			bean.getPalette().colors[MIN_PIX_INDEX] = new RGB(ia[0], ia[1], ia[2]);
-		}
-		
-		if (bean.getNanBound()!=null && bean.getNanBound().getColor()!=null) {
-			int[] ia = bean.getNanBound().getColor();
-			bean.getPalette().colors[NAN_PIX_INDEX] = new RGB(ia[0], ia[1], ia[2]);
-		}
-		
-		if (bean.getMaximumCutBound()!=null && bean.getMaximumCutBound().getColor()!=null) {
-			int[] ia = bean.getMaximumCutBound().getColor();
-			bean.getPalette().colors[MAX_PIX_INDEX] = new RGB(ia[0], ia[1], ia[2]);
-		}
-		
-	}
-
 	private void createMaxMin(ImageServiceBean bean) {
 		
 		double[] stats  = null;
@@ -372,43 +197,6 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 			if (stats==null) stats = getFastStatistics(bean); // do not get unless have to
 		    bean.setMax(stats[1]);
 		}		
-	}
-
-	/**
-	 * private finals inline well by the compiler.
-	 * @param val
-	 * @param min
-	 * @param max
-	 * @param scale
-	 * @param maxPixel
-	 * @param scaledImageAsByte
-	 */
-	private final static byte getPixelColorIndex(final double  val, 
-												 final double  min, 
-												 final double  max, 
-												 final double  scale, 
-												 final double  maxPixel,
-												 final double  minCut,
-												 final double  maxCut) {
-
-		// Deal with bounds
-		if (Double.isNaN(val)) return NAN_PIX_BYTE;
-
-		if (val<=minCut) return MIN_PIX_BYTE;
-		if (val>=maxCut) return MAX_PIX_BYTE;
-
-		// If the pixel is within the bounds
-		double scaled_pixel;
-		if (val < min) {
-			scaled_pixel = 0;
-		} else if (val >= max) {
-			scaled_pixel = maxPixel;
-		} else {
-			scaled_pixel = val - min;
-		}
-		scaled_pixel = scaled_pixel * scale;
-
-		return (byte) (0x000000FF & ((int) scaled_pixel));
 	}
 
 	/**

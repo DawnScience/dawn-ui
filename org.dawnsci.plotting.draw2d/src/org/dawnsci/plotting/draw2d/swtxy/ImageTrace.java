@@ -1332,7 +1332,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		}
 		
 		final int[] shape = image.getShape();
-		if (getImageOrigin()==ImageOrigin.TOP_LEFT || getImageOrigin()==ImageOrigin.BOTTOM_RIGHT) {
+		if (getImageOrigin().isOnLeadingDiagonal()) {
 			setupAxis(getXAxis(), new Range(0,shape[1]), axes!=null&&axes.size()>0 ? axes.get(0) : null);
 			setupAxis(getYAxis(), new Range(0,shape[0]), axes!=null&&axes.size()>1 ? axes.get(1) : null);
 		} else {
@@ -1673,7 +1673,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		imageServiceBean.setMax(null);
 		imageServiceBean.setMin(null);
 		createScaledImage(ImageScaleType.REHISTOGRAM, null);
-		// Max and min changed in all likely-hood
+		// Max and min changed in all likelihood
 		fireMaxDataListeners();
 		fireMinDataListeners();
 		repaint();
