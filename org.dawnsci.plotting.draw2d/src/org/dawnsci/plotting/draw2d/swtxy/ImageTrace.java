@@ -422,27 +422,15 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				double xOffset = (minX - Math.floor(minX))*xScale;
 				double yOffset = (minY - Math.floor(minY))*yScale;
 				// Deal with the origin orientations correctly.
-				switch (origin) {
-				case TOP_LEFT:
-					break;
-				case TOP_RIGHT:
+				if (!origin.isOnLeft()) {
 					xPixD = xSize-maxX;
 					xPix = (int) Math.floor(xPixD);
 					xOffset = (xPixD - xPix)*xScale;
-					break;
-				case BOTTOM_RIGHT:
-					xPixD = xSize-maxX;
-					xPix = (int) Math.floor(xPixD);
-					xOffset = (xPixD - xPix)*xScale;
+				}
+				if (!origin.isOnTop()) {
 					yPixD = ySize-maxY;
 					yPix = (int) Math.floor(yPixD);
 					yOffset = (yPixD - yPix)*yScale;
-					break;
-				case BOTTOM_LEFT:
-					yPixD = ySize-maxY;
-					yPix = (int) Math.floor(yPixD);
-					yOffset = (yPixD - yPix)*yScale;
-					break;
 				}
 				if (xPix < 0 || yPix < 0 || xPix+fullWidth > xSize || yPix+fullHeight > ySize) {
 					return false; // prevent IAE in calling getPixel
