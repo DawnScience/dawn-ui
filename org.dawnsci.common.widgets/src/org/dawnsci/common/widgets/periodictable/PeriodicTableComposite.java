@@ -24,7 +24,7 @@ public class PeriodicTableComposite extends Composite {
 		private final Button button;
 		
 		public PeriodicTableButton(Composite parent, int Z) {
-			button = new Button(parent, SWT.PUSH | SWT.CENTER);
+			button = new Button(parent, SWT.FLAT | SWT.CENTER);
 			this.Z = Z;
 			element = MendelArray[Z];
 			button.addSelectionListener(new SelectionAdapter() {

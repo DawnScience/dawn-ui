@@ -1,7 +1,6 @@
 package org.dawnsci.processing.ui.model;
 
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -11,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
@@ -22,7 +20,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.PlotAdditionalData;
-import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.ModelUtils;
 import org.eclipse.dawnsci.analysis.api.processing.model.OperationModelField;
@@ -46,12 +43,9 @@ import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.Maths;
 import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -60,22 +54,18 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConfigureOperationModelDialog extends Dialog implements PropertyChangeListener{
+public class ConfigureOperationModelDialog extends AbstractOperationModelDialog {
 	
 	private IPlottingSystem<Composite> input;
 	private IPlottingSystem<Composite> output;
-	private OperationModelViewer modelViewer;
-	IOperationInputData data;
 	private Job update;
-	private IOperationModel omodel;
-	private IOperationModel model;
 	private Label errorLabel;
 	private IDataset[] axes;
 	private double[] minMax = new double[4];
+	private OperationModelViewer modelViewer;
 	
 	private final static Logger logger = LoggerFactory.getLogger(ConfigureOperationModelDialog.class);
 
@@ -127,22 +117,11 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 		
 		return system;
 	}
-	
+	@Override
 	public void setOperationInputData(final IOperationInputData data) {
+		super.setOperationInputData(data);
 		
-		this.data = data;
 		modelViewer.setOperation(data.getCurrentOperation());
-		model = data.getCurrentOperation().getModel();
-		
-		try {
-			omodel = (IOperationModel)BeanUtils.cloneBean(model);
-		} catch (Exception e) {
-			logger.warn("Could not clone model: " + e.getMessage());
-		} 
-		
-		if (model instanceof AbstractOperationModel) {
-			((AbstractOperationModel)model).addPropertyChangeListener(this);
-		}
 		
 		try {
 			MetadataPlotUtils.plotDataWithMetadata(data.getInputData(),input);
@@ -451,21 +430,6 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 		update.schedule();
 	}
 
-	@Override
-	protected void buttonPressed(int buttonId) {
-		super.buttonPressed(buttonId);
-		if (model instanceof AbstractOperationModel) {
-			((AbstractOperationModel)model).removePropertyChangeListener(this);
-		}
-		
-		if (buttonId == Dialog.CANCEL) {
-			try {
-				BeanUtils.copyProperties(model, omodel);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
 	
 	private RegionType getRegionType(RangeType type) {
 		switch (type) {
@@ -530,17 +494,6 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 		
 		update();
 	}
-	
-	@Override
-	protected Point getInitialSize() {
-		Rectangle bounds = PlatformUI.getWorkbench().getWorkbenchWindows()[0].getShell().getBounds();
-		return new Point((int)(bounds.width*0.8),(int)(bounds.height*0.8));
-	}
-	
-	@Override
-	  protected boolean isResizable() {
-	    return true;
-	  }
 	
 	private boolean valuesChanged(IRegion region, RectangularROI roi) {
 		
