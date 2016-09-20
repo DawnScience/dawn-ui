@@ -91,7 +91,13 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 					AbstractOperationModelDialog dialog = (AbstractOperationModelDialog) ctor.newInstance(getSite().getShell());
 					dialog.create();
 					dialog.setOperationInputData(inputData);
-					dialog.open();
+					if (dialog.open() == Dialog.OK) {
+						logger.debug("OperationModelView: OK button clicked on close");
+						EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
+						Map<String,IOperationInputData> props = new HashMap<>();
+						eventAdmin.postEvent(new Event("org/dawnsci/events/processing/PROCESSUPDATE", props));
+						modelEditor.refresh();
+					}
 				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException e1) {
 					logger.error("Could not open " + operationdialogId + " dialog!", e1);

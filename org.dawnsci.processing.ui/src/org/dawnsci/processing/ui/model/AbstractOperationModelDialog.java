@@ -20,7 +20,7 @@ public abstract class AbstractOperationModelDialog extends Dialog implements Pro
 	protected IOperationModel omodel;
 	protected IOperationModel model;
 
-	private final Logger logger = LoggerFactory.getLogger(AbstractOperationModelDialog.class);
+	private static final Logger logger = LoggerFactory.getLogger(AbstractOperationModelDialog.class);
 	
 	protected AbstractOperationModelDialog(Shell parentShell) {
 		super(parentShell);
@@ -53,20 +53,44 @@ public abstract class AbstractOperationModelDialog extends Dialog implements Pro
 		}
 	}
 	
-
+	@Override
+	protected void handleShellCloseEvent() {
+		logger.debug("Entering AbstractOperationModelDialog handleShellCloseEvent");
+		super.handleShellCloseEvent();
+		if (model instanceof AbstractOperationModel) {
+			((AbstractOperationModel)model).removePropertyChangeListener(this);
+		}
+		
+		try {
+			BeanUtils.copyProperties(model, omodel);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.debug("Leaving AbstractOperationModelDialog handleShellCloseEvent");
+	}
+	
 	@Override
 	protected void buttonPressed(int buttonId) {
+		logger.debug("Entering AbstractOperationModelDialog buttonPressed");
 		super.buttonPressed(buttonId);
 		if (model instanceof AbstractOperationModel) {
 			((AbstractOperationModel)model).removePropertyChangeListener(this);
 		}
 		
 		if (buttonId == Dialog.CANCEL) {
+			logger.debug("AbstractOperationModelDialog buttonPressed: CANCEL mode");
 			try {
 				BeanUtils.copyProperties(model, omodel);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+		logger.debug("Leaving AbstractOperationModelDialog buttonPressed");
 	}
+	
+	// get rid of that annoying close button
+	/*@Override
+	protected boolean canHandleShellCloseEvent() {
+	    return false;
+	}*/
 }
