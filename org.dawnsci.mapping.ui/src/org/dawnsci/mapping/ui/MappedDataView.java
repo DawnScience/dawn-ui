@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
@@ -44,7 +45,24 @@ import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 import org.osgi.service.event.Event;
 
+/**
+ * 
+ * This view by default links to plotting systems on 
+ * "org.dawnsci.mapping.ui.mapview" and "org.dawnsci.mapping.ui.spectrumview"
+ * however a secondary id may be used when the view is opened. From a perspective
+ * this id is specified colon separated from the view id. So to show a 
+ * mapped data view with different linked views use:
+ * <pre>
+ * showView(MappedDataView.ID+":mapview=myViewForMappingID;spectrumview=myViewForSpectrumID")
+ * </pre>
+ * 
+ * @author Jacob Filik
+ * @author Matthew Gerring
+ *
+ */
 public class MappedDataView extends ViewPart {
+	
+	public final static String ID = "org.dawnsci.mapping.ui.mappeddataview";
 	
 	private static class MapClickEvent implements IMapClickEvent {
 		
@@ -91,7 +109,7 @@ public class MappedDataView extends ViewPart {
 		final IWorkbenchPage page = getSite().getPage();
 		final IPlottingSystem<Composite> map;
 		try {
-			final IViewPart view = page.showView("org.dawnsci.mapping.ui.mapview");
+			final IViewPart view = page.showView(getSecondaryIdAttribute("mapview", "org.dawnsci.mapping.ui.mapview"));
 			map = (IPlottingSystem<Composite>)view.getAdapter(IPlottingSystem.class);
 		} catch (PartInitException e) {
 			throw new RuntimeException("Could not create the map view", e);
@@ -99,7 +117,7 @@ public class MappedDataView extends ViewPart {
 		
 		final IPlottingSystem<Composite> spectrum;
 		try {
-			final IViewPart view = page.showView("org.dawnsci.mapping.ui.spectrumview");
+			final IViewPart view = page.showView(getSecondaryIdAttribute("spectrumview", "org.dawnsci.mapping.ui.spectrumview"));
 			spectrum = (IPlottingSystem<Composite>)view.getAdapter(IPlottingSystem.class);
 		} catch (PartInitException e) {
 			throw new RuntimeException("Could not create the spectrum view", e);
@@ -271,4 +289,42 @@ public class MappedDataView extends ViewPart {
 		return super.getAdapter(adapter);
 	}
 	
+	protected Properties                        idProperties;
+	
+	protected String getSecondaryIdAttribute(String key, String defaultValue) {
+		String attr = getSecondaryIdAttribute(key);
+		if (attr == null) return defaultValue;
+		return attr;
+	}
+
+	protected String getSecondaryIdAttribute(String key) {
+		if (idProperties!=null) return idProperties.getProperty(key);
+		if (getViewSite()==null) return null;
+		final String secondId = getViewSite().getSecondaryId();
+		if (secondId == null) return null;
+		idProperties = parseString(secondId);
+		return idProperties.getProperty(key);
+	}
+	/**
+	 * String to be parsed to properties. In the form of key=value pairs
+	 * separated by semi colons. You may not use semi-colons in the 
+	 * keys or values. Keys and values are trimmed so extra spaces will be
+	 * ignored.
+	 * 
+	 * @param secondId
+	 * @return map of values extracted from the 
+	 */
+	protected static Properties parseString(String properties) {
+		
+		if (properties==null) return new Properties();
+		Properties props = new Properties();
+		final String[] split = properties.split(";");
+		for (String line : split) {
+			final String[] kv = line.split("=", 2);
+			props.setProperty(kv[0].trim(), kv[1].trim());
+		}
+		return props;
+	}
+
+
 }

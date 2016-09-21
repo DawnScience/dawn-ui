@@ -18,6 +18,7 @@
             restorable="true">
       </view>
       <view
+            allowMultiple="true"
             class="org.dawnsci.mapping.ui.MappedDataView"
             icon="icons/mapfolder.png"
             id="org.dawnsci.mapping.ui.mappeddataview"
