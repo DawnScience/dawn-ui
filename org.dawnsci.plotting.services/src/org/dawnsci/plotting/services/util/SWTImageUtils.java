@@ -9,11 +9,15 @@
 
 package org.dawnsci.plotting.services.util;
 
+import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
 import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
+import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.histogram.ITransferFunction;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
+import org.eclipse.january.dataset.BooleanDataset;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IndexIterator;
 import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.swt.graphics.ImageData;
@@ -237,6 +241,153 @@ public class SWTImageUtils {
 		}
 
 		return rgb;
+	}
+
+	private static final int MIN_PIX_INDEX = 253;
+	private static final int NAN_PIX_INDEX = 254;
+	private static final int MAX_PIX_INDEX = 255;
+	
+	private static final byte MIN_PIX_BYTE = (byte)(MIN_PIX_INDEX & 0xFF);
+	private static final byte NAN_PIX_BYTE = (byte)(NAN_PIX_INDEX & 0xFF);
+	private static final byte MAX_PIX_BYTE = (byte)(MAX_PIX_INDEX & 0xFF);
+	
+
+	public static ImageData createImageData(double min, double max, double minCut, double maxCut, Dataset image, ImageServiceBean bean) {
+		int depth = bean.getDepth();
+		if (depth>8) { // Depth > 8 will not work properly at the moment.
+			throw new RuntimeException(SWTImageUtils.class.getSimpleName() + " only supports 8-bit images unless a FunctionContainer has been set!");
+			//if (depth == 16) palette = new PaletteData(0x7C00, 0x3E0, 0x1F);
+			//if (depth == 24) palette = new PaletteData(0xFF, 0xFF00, 0xFF0000);
+			//if (depth == 32) palette = new PaletteData(0xFF00, 0xFF0000, 0xFF000000);
+		}
+		final int size  = (int)Math.round(Math.pow(2, depth));
+	
+		final int[]   shape = image.getShape();
+		if (bean.isCancelled()) return null;	
+				
+		int len = image.getSize();
+		if (len == 0) return null;
+	
+		// The last three indices of the palette are always taken up with bound colours
+		createCutColours(bean); // Modifies the palette data and sets the withheld indices
+		
+		double scale;
+		double maxPixel;
+		if (max > min) {
+			// 4 because 1 less than size and then 1 for each bound colour is lost.
+			scale = (size - 4) / (max - min);
+			maxPixel = max - min;
+		} else {
+			scale = 1;
+			maxPixel = 0xFF;
+		}
+		if (bean.isCancelled()) return null;
+		
+		BooleanDataset mask = bean.getMask()!=null
+							? (BooleanDataset)DatasetUtils.cast(bean.getMask(), Dataset.BOOL)
+							: null;
+	
+		ImageData imageData = null;
+	
+		// We use a byte array directly as this is faster than using setPixel(...)
+		// on image data. Set pixel does extra floating point operations. The downside
+		// is that by doing this we certainly have to have 8 bit as getPixelColorIndex(...)
+		// forces the use of on byte.
+		final byte[] scaledImageAsByte = new byte[len];
+	
+		int index = 0;
+	
+		for (int i = 0; i<shape[0]; ++i) {
+			if (bean.isCancelled()) return null;				
+			for (int j = 0; j<shape[1]; ++j) {
+				
+				// This saves a value lookup when the pixel is certainly masked.
+				scaledImageAsByte[index] = mask==null || mask.getBoolean(i,j)
+								? getPixelColorIndex(image.getDouble(i,j), min, max, scale, maxPixel, minCut, maxCut)
+								: NAN_PIX_BYTE;
+				++index;
+			}
+		}
+		imageData = new ImageData(shape[1], shape[0], 8, bean.getPalette(), 1, scaledImageAsByte);
+	
+		imageData.alpha = bean.getAlpha();
+		return imageData;
+	}
+
+	/**
+	 * Calling this wipes out the last three RGBs. Even if you set max
+	 * @param bean
+	 */
+	private static void createCutColours(ImageServiceBean bean) {
+		
+		// We *DO NOT* copy the palette here so up to 3 of the original
+		// colours can be changed. Instead whenever a palette is given to an
+		// ImageService bean it should be original.
+		PaletteData palette = bean.getPalette();
+		if (palette == null) {
+			try {
+				final IPaletteService service = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
+				palette = service.getDirectPaletteData("Gray Scale");
+				bean.setPalette(palette);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+		// We have three special values, those which are greater than the max cut,
+		// less than the min cut and the NaN number. For these we use special pixel
+		// values in the palette as defined by the cut bound if it is set.
+		assignColour(bean.getMinimumCutBound(), palette, MIN_PIX_INDEX);
+		assignColour(bean.getMaximumCutBound(), palette, MAX_PIX_INDEX);
+		assignColour(bean.getNanBound(), palette, NAN_PIX_INDEX);
+	}
+
+	private static void assignColour(HistogramBound bound, PaletteData palette, int index) {
+		if (bound == null) {
+			return;
+		}
+	
+		int[] colour = bound.getColor();
+		if (colour != null) {
+			palette.colors[index] = new RGB(colour[0], colour[1], colour[2]);
+		}
+	}
+
+	/**
+	 * private finals inline well by the compiler.
+	 * @param val
+	 * @param min
+	 * @param max
+	 * @param scale
+	 * @param maxPixel
+	 * @param scaledImageAsByte
+	 */
+	private final static byte getPixelColorIndex(final double  val, 
+												 final double  min, 
+												 final double  max, 
+												 final double  scale, 
+												 final double  maxPixel,
+												 final double  minCut,
+												 final double  maxCut) {
+	
+		// Deal with bounds
+		if (Double.isNaN(val)) return NAN_PIX_BYTE;
+	
+		if (val<=minCut) return MIN_PIX_BYTE;
+		if (val>=maxCut) return MAX_PIX_BYTE;
+	
+		// If the pixel is within the bounds
+		double scaled_pixel;
+		if (val < min) {
+			scaled_pixel = 0;
+		} else if (val >= max) {
+			scaled_pixel = maxPixel;
+		} else {
+			scaled_pixel = val - min;
+		}
+		scaled_pixel = scaled_pixel * scale;
+	
+		return (byte) (0x000000FF & ((int) scaled_pixel));
 	}
 
 }

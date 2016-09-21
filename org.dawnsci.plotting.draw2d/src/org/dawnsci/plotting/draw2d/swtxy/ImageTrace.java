@@ -52,6 +52,7 @@ import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.BooleanDataset;
 import org.eclipse.january.dataset.DataEvent;
 import org.eclipse.january.dataset.Dataset;
@@ -61,6 +62,7 @@ import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataListener;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDynamicDataset;
+import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.IndexIterator;
 import org.eclipse.january.dataset.Maths;
 import org.eclipse.january.dataset.RGBDataset;
@@ -98,6 +100,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private Axis             yAxis;
 	private ColorMapRamp     intensityScale;
 	private Dataset          image;
+	private IDynamicDataset  dynamic;
 	private DownsampleType   downsampleType=DownsampleType.MAXIMUM;
 	private int              currentDownSampleBin=-1;
 	private int              alpha = -1;
@@ -422,27 +425,15 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				double xOffset = (minX - Math.floor(minX))*xScale;
 				double yOffset = (minY - Math.floor(minY))*yScale;
 				// Deal with the origin orientations correctly.
-				switch (origin) {
-				case TOP_LEFT:
-					break;
-				case TOP_RIGHT:
+				if (!origin.isOnLeft()) {
 					xPixD = xSize-maxX;
 					xPix = (int) Math.floor(xPixD);
 					xOffset = (xPixD - xPix)*xScale;
-					break;
-				case BOTTOM_RIGHT:
-					xPixD = xSize-maxX;
-					xPix = (int) Math.floor(xPixD);
-					xOffset = (xPixD - xPix)*xScale;
+				}
+				if (!origin.isOnTop()) {
 					yPixD = ySize-maxY;
 					yPix = (int) Math.floor(yPixD);
 					yOffset = (yPixD - yPix)*yScale;
-					break;
-				case BOTTOM_LEFT:
-					yPixD = ySize-maxY;
-					yPix = (int) Math.floor(yPixD);
-					yOffset = (yPixD - yPix)*yScale;
-					break;
 				}
 				if (xPix < 0 || yPix < 0 || xPix+fullWidth > xSize || yPix+fullHeight > ySize) {
 					return false; // prevent IAE in calling getPixel
@@ -1142,9 +1133,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		this.service          = null;
 		this.intensityScale   = null;
 		
-		if (image instanceof IDynamicDataset) {
-			IDynamicDataset dset = (IDynamicDataset)image;
-			dset.removeDataListener(this);
+		if (dynamic != null) {
+			dynamic.removeDataListener(this);
+			dynamic = null;
 		}
 		
 		if (scaledData!=null) scaledData.disposeImage();
@@ -1332,7 +1323,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		}
 		
 		final int[] shape = image.getShape();
-		if (getImageOrigin()==ImageOrigin.TOP_LEFT || getImageOrigin()==ImageOrigin.BOTTOM_RIGHT) {
+		if (getImageOrigin().isOnLeadingDiagonal()) {
 			setupAxis(getXAxis(), new Range(0,shape[1]), axes!=null&&axes.size()>0 ? axes.get(0) : null);
 			setupAxis(getYAxis(), new Range(0,shape[0]), axes!=null&&axes.size()>1 ? axes.get(1) : null);
 		} else {
@@ -1368,12 +1359,15 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private RGBDataset rgbDataset;
 	
 	@Override
-	public boolean setData(IDataset im, List<? extends IDataset> axes, boolean performAuto) {
+	public boolean setData(ILazyDataset im, List<? extends IDataset> axes, boolean performAuto) {
 		
 		if (im instanceof IDynamicDataset) {
-			IDynamicDataset dset = (IDynamicDataset)im;
-			dset.addDataListener(this);
+			dynamic = (IDynamicDataset) im;
+			dynamic.addDataListener(this);
+		} else {
+			dynamic = null;
 		}
+
 		return setDataInternal(im, axes, performAuto);
 	}
 	
@@ -1381,15 +1375,18 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * Called when the internal data of image has changed.
 	 */
 	public void dataChangePerformed(final DataEvent evt) {
-		
+		if (dynamic == null) {
+			return;
+		}
+
 		if (Display.getDefault().getThread()==Thread.currentThread()) {
-		    setDataInternal(image, axes, plottingSystem.isRescale());
+		    setDataInternal(dynamic, axes, plottingSystem.isRescale());
 		    updateImageDirty(ImageScaleType.FORCE_REIMAGE);
 		    repaint();
 		} else {
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
-					setDataInternal(image, axes, plottingSystem.isRescale());
+					setDataInternal(dynamic, axes, plottingSystem.isRescale());
 					updateImageDirty(ImageScaleType.FORCE_REIMAGE);
 					repaint();
 				}
@@ -1398,11 +1395,20 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 	
 	@SuppressWarnings("unchecked")
-	private boolean setDataInternal(IDataset im, List<? extends IDataset> axes, boolean performAuto) {
+	private boolean setDataInternal(ILazyDataset lazy, List<? extends IDataset> axes, boolean performAuto) {
+
+		Dataset im = null;
+		try {
+			im = DatasetUtils.sliceAndConvertLazyDataset(lazy);
+		} catch (DatasetException e) {
+		}
+		if (im == null) {
+			return false;
+		}
 
 		// We are just assigning the data before the image is live.
 		if (getParent()==null && !performAuto) {
-			this.image = DatasetUtils.convertToDataset(im);
+			this.image = im;
 			this.axes  = (List<IDataset>)axes;
 			// is this enough?
 			if (imageServiceBean==null) imageServiceBean = new ImageServiceBean();
@@ -1411,7 +1417,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		}
 
 		if (getPreferenceStore().getBoolean(PlottingConstants.IGNORE_RGB) && im instanceof RGBDataset) {
-			RGBDataset rgb = (RGBDataset)im;
+			RGBDataset rgb = (RGBDataset) im;
 			im = rgb.createGreyDataset(Dataset.FLOAT64);
 			rgbDataset = rgb;
 		} else {
@@ -1424,7 +1430,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			plottingSystem.fireWillPlot(evt);
 			if (!evt.doit) return false;
 			if (evt.isNewImageDataSet()) {
-				im = evt.getImage();
+				im = DatasetUtils.convertToDataset(evt.getImage());
 				axes  = evt.getAxes();
 			}
 		} catch (Throwable ignored) {
@@ -1436,7 +1442,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		// method, we allow for the fact that the dataset is in a different orientation to 
 		// what is plotted.
 		if (image==null) return false;
-		this.image = DatasetUtils.convertToDataset(im);
+		this.image = im;
 		if (this.mipMap!=null)  mipMap.clear();
 		if (scaledData!=null) scaledData.disposeImage();
 		
@@ -1463,12 +1469,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		try {
 			final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting.system");
 			if (store.getBoolean(PlottingConstants.SHOW_INTENSITY)) {
-				boolean isRGB = im instanceof RGBDataset;
-				if (isRGB && getPlottingSystem().isShowIntensity()) {
-					getPlottingSystem().setShowIntensity(false);
-				} else if (!isRGB && !getPlottingSystem().isShowIntensity()) {
-					getPlottingSystem().setShowIntensity(true);
-				}
+				getPlottingSystem().setShowIntensity(!(im instanceof RGBDataset));
 			}
 		} catch (Exception ne) { // Not the end of the world if this fails!
 			logger.error("Could not get scoped preference store org.dawnsci.plotting.system!", ne);
@@ -1673,7 +1674,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		imageServiceBean.setMax(null);
 		imageServiceBean.setMin(null);
 		createScaledImage(ImageScaleType.REHISTOGRAM, null);
-		// Max and min changed in all likely-hood
+		// Max and min changed in all likelihood
 		fireMaxDataListeners();
 		fireMinDataListeners();
 		repaint();

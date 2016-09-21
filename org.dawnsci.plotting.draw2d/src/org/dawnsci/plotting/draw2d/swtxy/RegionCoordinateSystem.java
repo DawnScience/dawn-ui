@@ -163,12 +163,7 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 	
 	private boolean isTransposed() {
 		if (imageTrace==null) return false;
-		if (imageTrace.getImageOrigin()==ImageOrigin.TOP_LEFT || 
-			imageTrace.getImageOrigin()==ImageOrigin.BOTTOM_RIGHT) {
-			return false;
-		} else {
-			return true;
-		}
+		return !imageTrace.getImageOrigin().isOnLeadingDiagonal();
 	}
 
 	@Override
@@ -185,15 +180,15 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 	@Override
 	public boolean isXReversed() {
 		if (imageTrace==null) return false;
-		return imageTrace.getImageOrigin()!=ImageOrigin.TOP_LEFT &&
-			   imageTrace.getImageOrigin()!=ImageOrigin.BOTTOM_LEFT;
+		return imageTrace.getImageOrigin() == ImageOrigin.TOP_RIGHT ||
+			   imageTrace.getImageOrigin() == ImageOrigin.BOTTOM_RIGHT;
 	}
 
 	@Override
 	public boolean isYReversed() {
 		if (imageTrace==null) return false;
-		return imageTrace.getImageOrigin()!=ImageOrigin.TOP_LEFT &&
-			   imageTrace.getImageOrigin()!=ImageOrigin.TOP_RIGHT;
+		return imageTrace.getImageOrigin() == ImageOrigin.BOTTOM_LEFT ||
+			   imageTrace.getImageOrigin() == ImageOrigin.BOTTOM_RIGHT;
 	}
 
 	@Override
@@ -201,20 +196,7 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 		double angle = 0;
 
 		if (imageTrace != null) {
-			switch (imageTrace.getImageOrigin()) {
-			case TOP_RIGHT:
-				angle = 90;
-				break;
-			case BOTTOM_RIGHT:
-				angle = 180;
-				break;
-			case BOTTOM_LEFT:
-				angle = 270;
-				break;
-			case TOP_LEFT:
-			default:
-				break;
-			}
+			angle = 90 * imageTrace.getImageOrigin().ordinal();
 		}
 		return angle;
 	}
