@@ -51,7 +51,7 @@ public class WelcomePart extends IntroPart {
 	private static String locationLock = "platform:/plugin/org.dawnsci.webintro/web";
 	
 	private WebEngine webEngine;
-		
+
 	@Override
 	public void createPartControl(Composite container) {
 
@@ -119,12 +119,15 @@ public class WelcomePart extends IntroPart {
 	 * Register instances of the bridge classes as javascript objects
 	 */
 	private void addJSBridges(){
+		// create the Java object in a scope where they won't be collected by the GC
+		JSBridge jsobjBridge = new JSBridge();
+		FeedbackUtil jsobjFeedbackUtil = new FeedbackUtil();
 		webEngine.getLoadWorker().stateProperty().addListener(
 				(ov, oldState, newState) -> {
 					if (newState == State.SUCCEEDED){
 						JSObject jsobj = (JSObject) webEngine.executeScript("window");
-						jsobj.setMember("java", new JSBridge());
-						jsobj.setMember("feedbackUtil", new FeedbackUtil());
+						jsobj.setMember("java", jsobjBridge);
+						jsobj.setMember("feedbackUtil", jsobjFeedbackUtil);
 						webEngine.executeScript("javaReady();");
 					}
 				});
