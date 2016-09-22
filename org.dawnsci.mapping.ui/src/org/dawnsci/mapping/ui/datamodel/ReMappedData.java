@@ -1,13 +1,11 @@
 package org.dawnsci.mapping.ui.datamodel;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.Dataset;
-import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDatasetConnector;
@@ -15,7 +13,6 @@ import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.IndexIterator;
 import org.eclipse.january.dataset.Maths;
 import org.eclipse.january.dataset.SliceND;
-import org.eclipse.january.dataset.Stats;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.january.metadata.MetadataFactory;
 import org.slf4j.Logger;
@@ -231,7 +228,7 @@ public class ReMappedData extends AbstractMapData {
 		
 		try{
 			baseMap.refreshShape();
-			ma = baseMap.getSlice();
+			ma = baseMap.getDataset().getSlice();
 		} catch (Exception e) {
 			//TODO log?
 		}

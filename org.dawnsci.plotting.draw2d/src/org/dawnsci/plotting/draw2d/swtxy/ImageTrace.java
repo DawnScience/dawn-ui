@@ -61,7 +61,7 @@ import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataListener;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.IDynamicDataset;
+import org.eclipse.january.dataset.IDynamicShape;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.IndexIterator;
 import org.eclipse.january.dataset.Maths;
@@ -100,7 +100,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private Axis             yAxis;
 	private ColorMapRamp     intensityScale;
 	private Dataset          image;
-	private IDynamicDataset  dynamic;
+	private IDynamicShape    dynamic;
 	private DownsampleType   downsampleType=DownsampleType.MAXIMUM;
 	private int              currentDownSampleBin=-1;
 	private int              alpha = -1;
@@ -1357,20 +1357,28 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	private RGBDataset rgbDataset;
-	
+
 	@Override
 	public boolean setData(ILazyDataset im, List<? extends IDataset> axes, boolean performAuto) {
-		
-		if (im instanceof IDynamicDataset) {
-			dynamic = (IDynamicDataset) im;
-			dynamic.addDataListener(this);
-		} else {
-			dynamic = null;
+		if (im instanceof IDynamicShape) {
+			return internalSetDynamicData((IDynamicShape) im);
 		}
-
 		return setDataInternal(im, axes, performAuto);
 	}
-	
+
+	@Override
+	public void setDynamicData(IDynamicShape dynamic) {
+		internalSetDynamicData(dynamic);
+	}
+
+	private boolean internalSetDynamicData(IDynamicShape dynamic) {
+		this.dynamic = dynamic;
+		ILazyDataset lazy = dynamic instanceof ILazyDataset ? (ILazyDataset) dynamic : dynamic.getDataset(); 
+		boolean flag = setDataInternal(lazy, null, false);
+		dynamic.addDataListener(this);
+		return flag;
+	}
+
 	/**
 	 * Called when the internal data of image has changed.
 	 */
@@ -1379,18 +1387,24 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			return;
 		}
 
-		if (Display.getDefault().getThread()==Thread.currentThread()) {
-		    setDataInternal(dynamic, axes, plottingSystem.isRescale());
-		    updateImageDirty(ImageScaleType.FORCE_REIMAGE);
-		    repaint();
-		} else {
-			Display.getDefault().syncExec(new Runnable() {
-				public void run() {
-					setDataInternal(dynamic, axes, plottingSystem.isRescale());
-					updateImageDirty(ImageScaleType.FORCE_REIMAGE);
-					repaint();
-				}
-			});
+		try {
+			final IDataset slice = DatasetUtils.sliceAndConvertLazyDataset(dynamic.getDataset());
+			if (Display.getDefault().getThread()==Thread.currentThread()) {
+			    setDataInternal(slice, axes, plottingSystem.isRescale());
+			    updateImageDirty(ImageScaleType.FORCE_REIMAGE);
+			    repaint();
+			} else {
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						setDataInternal(slice, axes, plottingSystem.isRescale());
+						updateImageDirty(ImageScaleType.FORCE_REIMAGE);
+						repaint();
+					}
+				});
+			}
+		} catch (DatasetException e) {
+			// TODO Auto-generated catch block
+//			e.printStackTrace();
 		}
 	}
 	
@@ -1431,7 +1445,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			if (!evt.doit) return false;
 			if (evt.isNewImageDataSet()) {
 				im = DatasetUtils.convertToDataset(evt.getImage());
-				axes  = evt.getAxes();
+				axes = evt.getAxes();
 			}
 		} catch (Throwable ignored) {
 			// We allow things to proceed without a warning.

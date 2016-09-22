@@ -4,9 +4,7 @@ import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.MetadataException;
-import org.eclipse.january.dataset.DataEvent;
 import org.eclipse.january.dataset.DatasetUtils;
-import org.eclipse.january.dataset.IDataListener;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDatasetConnector;
 import org.eclipse.january.dataset.ILazyDataset;
@@ -113,7 +111,7 @@ public class MappedData extends AbstractMapData{
 		
 		try{
 			baseMap.refreshShape();
-			ma = baseMap.getSlice();
+			ma = baseMap.getDataset().getSlice();
 		} catch (Exception e) {
 			//TODO log?
 		}
