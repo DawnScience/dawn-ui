@@ -20,8 +20,9 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
 import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
-import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
+import org.eclipse.dawnsci.plotting.api.region.ColorConstants;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
+import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace.DownsampleType;
 import org.eclipse.january.dataset.DTypeUtils;
@@ -62,6 +63,10 @@ public class ImageTraceComposite extends Composite {
 	private BoundsDecorator maximum, minimum, minCut, maxCut, lo, hi;
 	private CCombo          downsampleChoice, histoChoice;
     private ColorSelector   minCutColor, maxCutColor, nanColor;
+
+	private static final HistogramBound TRANSPARENT_NAN = new HistogramBound(Double.NaN, null);
+	private HistogramBound currentNan;
+
 	/**
 	 * 
 	 * @param dialog
@@ -311,7 +316,7 @@ public class ImageTraceComposite extends Composite {
 		
 		minCutColor = new ColorSelector(cuts);
 		minCutColor.getButton().setLayoutData(new GridData());		
-		if (imageTrace.getMinCut()!=null) minCutColor.setColorValue(ColorUtility.getRGB(imageTrace.getMinCut().getColor()));
+		if (imageTrace.getMinCut()!=null && imageTrace.getMinCut().hasColor()) minCutColor.setColorValue(ColorUtility.getRGB(imageTrace.getMinCut().getColor()));
 
 		label = new Label(cuts, SWT.NONE);
 		label.setText("Upper cut");
@@ -327,16 +332,42 @@ public class ImageTraceComposite extends Composite {
 		
 		maxCutColor = new ColorSelector(cuts);
 		maxCutColor.getButton().setLayoutData(new GridData());		
-		if (imageTrace.getMaxCut()!=null) maxCutColor.setColorValue(ColorUtility.getRGB(imageTrace.getMaxCut().getColor()));
+		if (imageTrace.getMaxCut()!=null && imageTrace.getMaxCut().hasColor()) maxCutColor.setColorValue(ColorUtility.getRGB(imageTrace.getMaxCut().getColor()));
 	
 		label = new Label(cuts, SWT.NONE);
 		label.setText("Invalid number color");
 		label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
 
-		nanColor = new ColorSelector(cuts);
-		nanColor.getButton().setLayoutData(new GridData());		
-		if (imageTrace.getNanBound()!=null) nanColor.setColorValue(ColorUtility.getRGB(imageTrace.getNanBound().getColor()));
+		final Button transparent = new Button(cuts, SWT.TOGGLE);
 		
+		transparent.setText("Transparent");
+		transparent.setToolTipText("Make NaN valued pixels transparent");
+		transparent.setLayoutData(new GridData());
+		HistogramBound colouredNan = imageTrace.getNanBound();
+		nanColor = new ColorSelector(cuts);
+		nanColor.getButton().setLayoutData(new GridData());
+		if (colouredNan != null && colouredNan.hasColor()) {
+			nanColor.setColorValue(ColorUtility.getRGB(colouredNan.getColor()));
+			currentNan = null;
+			transparent.setSelection(false);
+		} else if (colouredNan == null || !colouredNan.hasColor()) {
+			// already transparent
+			currentNan = TRANSPARENT_NAN;
+			nanColor.setColorValue(ColorConstants.black.getRGB());
+			imageTrace.setNanBound(TRANSPARENT_NAN);
+			transparent.setSelection(true);
+		}
+		transparent.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				currentNan = transparent.getSelection() ? TRANSPARENT_NAN : null;
+			}
+		});
+
+		label = new Label(cuts, SWT.NONE);
+		label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
+		label = new Label(cuts, SWT.NONE);
+		label.setLayoutData(new GridData());
+
 		final Button reset = new Button(cuts, SWT.NONE);
 		reset.setLayoutData(new GridData());		
 		reset.setImage(PlottingSystemActivator.getImage("icons/reset.gif"));
@@ -353,6 +384,8 @@ public class ImageTraceComposite extends Composite {
 				maxCutColor.setColorValue(ColorUtility.getRGB(HistogramBound.DEFAULT_MAXIMUM.getColor()));
 				maxCutBox.setText(String.valueOf(Double.POSITIVE_INFINITY));
 				nanColor.setColorValue(ColorUtility.getRGB(HistogramBound.DEFAULT_NAN.getColor()));
+				currentNan = null;
+				transparent.setSelection(false);
 			}
 		});
 		
@@ -414,8 +447,11 @@ public class ImageTraceComposite extends Composite {
 			
 			final double max = !Double.isNaN(maxCut.getValue().doubleValue()) ? maxCut.getValue().doubleValue() : imageTrace.getMaxCut().getBound().doubleValue();
 			imageTrace.setMaxCut(new HistogramBound(max, ColorUtility.getIntArray(maxCutColor.getColorValue())));
-			
-			imageTrace.setNanBound(new HistogramBound(Double.NaN, ColorUtility.getIntArray(nanColor.getColorValue())));
+
+			if (currentNan == null) {
+				currentNan = new HistogramBound(Double.NaN, ColorUtility.getIntArray(nanColor.getColorValue()));
+			}
+			imageTrace.setNanBound(currentNan);
 			imageTrace.setDownsampleType(DownsampleType.values()[downsampleChoice.getSelectionIndex()]);
 		} finally {
 			imageTrace.setImageUpdateActive(true);
