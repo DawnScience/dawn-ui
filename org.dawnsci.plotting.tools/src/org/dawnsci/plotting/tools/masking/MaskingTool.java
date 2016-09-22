@@ -454,7 +454,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		this.colorSelector = new ColorSelector(minMaxComp);
 		enableControls.add(colorSelector.getButton());
 		colorSelector.getButton().setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1,1));
-		if (image!=null) colorSelector.setColorValue(ColorUtility.getRGB(image.getNanBound().getColor()));
+		if (image!=null && image.getNanBound().hasColor()) colorSelector.setColorValue(ColorUtility.getRGB(image.getNanBound().getColor()));
 		colorSelector.addListener(new IPropertyChangeListener() {			
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {

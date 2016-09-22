@@ -440,25 +440,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				}
 				// Slice the data.
 				// Pixel slice on downsampled data = fast!
-				if (imageData.depth <= 8) {
-					// NOTE Assumes 8-bit images
-					final int size   = fullWidth*fullHeight;
-					final byte[] pixels = new byte[size];
-					for (int y = 0; y < fullHeight; y++) {
-						imageData.getPixels(xPix, yPix+y, fullWidth, pixels, fullWidth*y);
-					}
-					data = new ImageData(fullWidth, fullHeight, data.depth, getPaletteData(), 1, pixels);
-				} else {
-					// NOTE Assumes 24 Bit Images
-					final int[] pixels = new int[fullWidth];
-					
-					data = new ImageData(fullWidth, fullHeight, 24, new PaletteData(0xff0000, 0x00ff00, 0x0000ff));
-					for (int y = 0; y < fullHeight; y++) {					
-						imageData.getPixels(xPix, yPix+y, fullWidth, pixels, 0);
-						data.setPixels(0, y, fullWidth, pixels, 0);
-					}
-				}
-//				data.alpha = imageServiceBean.getAlpha();
+				data = sliceImageData(imageData, fullWidth, fullHeight, xPix, yPix, ySize);
 				
 				// create the scaled image
 				// We are suspicious if the algorithm wants to create an image
@@ -632,24 +614,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		try {
 			// Slice the data.
 			// Pixel slice on downsampled data = fast!
-			if (imageData.depth <= 8) {
-				// NOTE Assumes 8-bit images
-				final int size   = width*height;
-				final byte[] pixels = new byte[size];
-				for (int y = 0; y < height && (yPix+y)<ySize ; y++) {
-					imageData.getPixels(xPix, yPix+y, width, pixels, width*y);
-				}
-				data = new ImageData(width, height, data.depth, getPaletteData(), 1, pixels);
-			} else {
-				// NOTE Assumes 24 Bit Images
-				final int[] pixels = new int[width];
-				data = new ImageData(width, height, imageData.depth, new PaletteData(0xff0000, 0x00ff00, 0x0000ff));
-				for (int y = 0; y < height; y++) {					
-					imageData.getPixels(xPix, y+yPix, width, pixels, 0);
-					data.setPixels(0, y, width, pixels, 0);
-				}
-			}
-			data.alpha = imageServiceBean.getAlpha();
+			data = sliceImageData(data, width, height, xPix, yPix, ySize);
 
 			// create the scaled image
 			// We are suspicious if the algorithm wants to create an image
@@ -707,6 +672,43 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		
 	}
 	
+	private ImageData sliceImageData(ImageData imageData, int width, int height, int xPix, int yPix, int ySize) {
+		ImageData data;
+		if (imageData.depth <= 8) {
+			// NOTE Assumes 8-bit images
+			final int size   = width*height;
+			final byte[] pixels = new byte[size];
+			for (int y = 0; y < height && (yPix+y)<ySize ; y++) {
+				imageData.getPixels(xPix, yPix+y, width, pixels, width*y);
+			}
+			data = new ImageData(width, height, imageData.depth, getPaletteData(), 1, pixels);
+			if (imageData.alphaData != null) {
+				final byte[] alphas = new byte[size];
+				for (int y = 0; y < height && (yPix+y)<ySize ; y++) {
+					imageData.getAlphas(xPix, yPix+y, width, alphas, width*y);
+				}
+				data.alphaData = alphas;
+			}
+		} else {
+			// NOTE Assumes 24 Bit Images
+			final int[] pixels = new int[width];
+			data = new ImageData(width, height, imageData.depth, new PaletteData(0xff0000, 0x00ff00, 0x0000ff));
+			for (int y = 0; y < height; y++) {					
+				imageData.getPixels(xPix, y+yPix, width, pixels, 0);
+				data.setPixels(0, y, width, pixels, 0);
+			}
+			if (imageData.alphaData != null) {
+				final byte[] alphas = new byte[width];
+				for (int y = 0; y < height; y++) {					
+					imageData.getAlphas(xPix, y+yPix, width, alphas, 0);
+					data.setAlphas(0, y, width, alphas, 0);
+				}
+			}
+		}
+		data.alpha = imageData.alpha;
+		return data;
+	}
+
 	public void setGlobalRange(double[] globalRange) {
 		this.globalRange = globalRange;
 		yAxis.setTicksIndexBased(false);
@@ -1449,6 +1451,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			}
 		} catch (Throwable ignored) {
 			// We allow things to proceed without a warning.
+//			ignored.printStackTrace();
 		}
 
 		// The image is drawn low y to the top left but the axes are low y to the bottom right
@@ -1780,9 +1783,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		fireMinCutListeners();
 		
 		if (!bound.equals(orig) && ServiceHolder.getMacroService()!=null) {
-			
+			int[] color = bound.getColor();
 			MacroEventObject evt = new MacroEventObject(this);
-			evt.setPythonCommand("bound = dnp.plot.createHistogramBound("+bound.getStringBound()+", "+bound.getColor()[0]+", "+bound.getColor()[1]+", "+bound.getColor()[2]+")");
+			if (color == null) {
+				evt.setPythonCommand("bound = dnp.plot.createHistogramBound("+bound.getStringBound()+", None)");
+			} else {
+				evt.setPythonCommand("bound = dnp.plot.createHistogramBound("+bound.getStringBound()+", "+color[0]+", "+color[1]+", "+color[2]+")");
+			}
 			evt.append(TraceMacroEvent.getTraceCommand(this));
 			evt.append(TraceMacroEvent.getVarName(this)+".setMinCut(bound)\n");
 			ServiceHolder.getMacroService().publish(evt);
@@ -1812,9 +1819,14 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		fireMaxCutListeners();
 		
 		if (!bound.equals(orig) && ServiceHolder.getMacroService()!=null) {
-			
+
+			int[] color = bound.getColor();
 			MacroEventObject evt = new MacroEventObject(this);
-			evt.setPythonCommand("bound = dnp.plot.createHistogramBound("+bound.getStringBound()+", "+bound.getColor()[0]+", "+bound.getColor()[1]+", "+bound.getColor()[2]+")");
+			if (color == null) {
+				evt.setPythonCommand("bound = dnp.plot.createHistogramBound("+bound.getStringBound()+", None)");
+			} else {
+				evt.setPythonCommand("bound = dnp.plot.createHistogramBound("+bound.getStringBound()+", "+color[0]+", "+color[1]+", "+color[2]+")");
+			}
 			evt.append(TraceMacroEvent.getTraceCommand(this));
 			evt.append(TraceMacroEvent.getVarName(this)+".setMaxCut(bound)\n");
 			ServiceHolder.getMacroService().publish(evt);
