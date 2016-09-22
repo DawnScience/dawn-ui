@@ -57,4 +57,18 @@ public class Activator extends AbstractUIPlugin {
         return getImageDescriptor(path).createImage();
     }
 
+
+    public static final String getJmsUri() {
+    	String uri = null;
+	    if (uri == null) uri = System.getProperty("org.eclipse.scanning.broker.uri");
+	    if (uri == null) uri = System.getProperty("GDA/gda.activemq.broker.uri"); // GDA specific but not a compilation dependency.
+	    if (uri == null) uri = System.getProperty("gda.activemq.broker.uri"); // GDA specific but not a compilation dependency.
+		if (uri == null) {
+			throw new RuntimeException("URI not set for JMS. Please set system property org.eclipse.scanning.broker.uri or gda.activemq.broker.uri");
+		}
+		
+		return uri;
+	}
+
+
 }
