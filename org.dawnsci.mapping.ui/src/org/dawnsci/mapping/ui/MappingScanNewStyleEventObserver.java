@@ -13,6 +13,7 @@ import org.eclipse.scanning.api.event.core.ISubscriber;
 import org.eclipse.scanning.api.event.scan.IScanListener;
 import org.eclipse.scanning.api.event.scan.ScanBean;
 import org.eclipse.scanning.api.event.scan.ScanEvent;
+import org.eclipse.scanning.api.ui.CommandConstants;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
@@ -58,7 +59,7 @@ public class MappingScanNewStyleEventObserver implements IScanListener {
 
 	public void start() {
 		
-		final String suri = Activator.getAcquisitionJmsUri();
+		final String suri = CommandConstants.getScanningBrokerUri();
 		if (suri==null) return; // Nothing to start, standard DAWN.
 
 		logger.info("Starting the Mapping Scan Event Observer");
@@ -97,8 +98,8 @@ public class MappingScanNewStyleEventObserver implements IScanListener {
 			
 			// Recent change to GDA means that its configuration may be read without
 			// making a dependency on it.
-			String dataServerHost = System.getProperty("GDA/gda.dataserver.host");
-			int dataServerPort = Integer.getInteger("GDA/gda.dataserver.port", -1);
+			String dataServerHost = getDataServerHost();
+			int dataServerPort    = getDataServerPort();
 
 			// Configure the liveDataBean with a host and port to reach a dataserver
 			liveDataBean.setHost(dataServerHost);
@@ -130,5 +131,22 @@ public class MappingScanNewStyleEventObserver implements IScanListener {
 			// Reopen the file
 			eventAdmin.postEvent(new Event(DAWNSCI_MAPPING_FILE_OPEN, eventMap));
 		}
+	}
+
+
+	// TODO put this in global place?
+	private String getDataServerHost() {
+		String name = System.getProperty("org.eclipse.dawnsci.data.server.host");
+		if (name==null) name = System.getProperty("GDA/gda.dataserver.host");
+		if (name==null) name = System.getProperty("gda.dataserver.host");
+		return null;
+	}
+
+	// TODO put this in global place?
+	private int getDataServerPort() {
+		int port = Integer.getInteger("org.eclipse.dawnsci.data.server.port", -1);
+		if (port<=0) port = Integer.getInteger("GDA/gda.dataserver.port", -1);
+		if (port<=0) port = Integer.getInteger("gda.dataserver.port", -1);
+		return port;
 	}
 }
