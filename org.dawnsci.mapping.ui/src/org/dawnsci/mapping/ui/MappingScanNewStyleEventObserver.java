@@ -57,6 +57,10 @@ public class MappingScanNewStyleEventObserver implements IScanListener {
 	}
 
 	public void start() {
+		
+		final String suri = Activator.getAcquisitionJmsUri();
+		if (suri==null) return; // Nothing to start, standard DAWN.
+
 		logger.info("Starting the Mapping Scan Event Observer");
 
 		// Check the service is available this should always be true!
@@ -66,13 +70,13 @@ public class MappingScanNewStyleEventObserver implements IScanListener {
 		}
 
 		try {
-			final URI uri = new URI(Activator.getJmsUri());
+			final URI uri = new URI(suri);
 			subscriber = eventService.createSubscriber(uri, EventConstants.STATUS_TOPIC);
 			subscriber.addListener(this);
+			logger.info("Created subscriber");
 		} catch (URISyntaxException | EventException e) {
 			logger.error("Could not subscribe to the event service", e);
 		}
-		logger.info("Created subscriber");
 	}
 
 	@Override
