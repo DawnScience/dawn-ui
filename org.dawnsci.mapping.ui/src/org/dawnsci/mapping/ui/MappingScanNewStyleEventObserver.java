@@ -9,6 +9,7 @@ import org.dawnsci.mapping.ui.datamodel.LiveDataBean;
 import org.eclipse.scanning.api.event.EventConstants;
 import org.eclipse.scanning.api.event.EventException;
 import org.eclipse.scanning.api.event.IEventService;
+import org.eclipse.scanning.api.event.core.IPropertyFilter.FilterAction;
 import org.eclipse.scanning.api.event.core.ISubscriber;
 import org.eclipse.scanning.api.event.scan.IScanListener;
 import org.eclipse.scanning.api.event.scan.ScanBean;
@@ -73,8 +74,16 @@ public class MappingScanNewStyleEventObserver implements IScanListener {
 		try {
 			final URI uri = new URI(suri);
 			subscriber = eventService.createSubscriber(uri, EventConstants.STATUS_TOPIC);
+			
+			// We don't care about the scan request, removing it means that
+			// all the points models and detector models to not have to resolve in
+			// order to get the event.
+			subscriber.addProperty("scanRequest", FilterAction.DELETE); 
+			subscriber.addProperty("position", FilterAction.DELETE); 		            
 			subscriber.addListener(this);
+			
 			logger.info("Created subscriber");
+			
 		} catch (URISyntaxException | EventException e) {
 			logger.error("Could not subscribe to the event service", e);
 		}
@@ -87,10 +96,10 @@ public class MappingScanNewStyleEventObserver implements IScanListener {
 
 	@Override
 	public void scanStateChanged(ScanEvent event) {
-		ScanBean scanBean = event.getBean();
-		final String filePath = scanBean.getFilePath();
+		ScanBean beanNoScanReq = event.getBean();
+		final String filePath = beanNoScanReq.getFilePath();
 		// Scan started
-		if (scanBean.scanStart() == true) {
+		if (beanNoScanReq.scanStart() == true) {
 			logger.info("Pushing data to live visualisation from SWMR file: {}", filePath);
 
 			// Create the LiveDataBean
@@ -122,7 +131,7 @@ public class MappingScanNewStyleEventObserver implements IScanListener {
 			eventAdmin.postEvent(new Event(DAWNSCI_MAPPING_FILE_OPEN, eventMap));
 		}
 		// Scan ended swap out remote SWMR file access for direct file access
-		if (scanBean.scanEnd() == true) {
+		if (beanNoScanReq.scanEnd() == true) {
 			logger.info("Switching from remote SWMR file to direct access: {}", filePath);
 			Map<String, Object> eventMap = new HashMap<String, Object>();
 			eventMap.put("path", filePath);
