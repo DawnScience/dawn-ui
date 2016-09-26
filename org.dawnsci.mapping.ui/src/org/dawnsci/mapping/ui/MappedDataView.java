@@ -1,6 +1,9 @@
 package org.dawnsci.mapping.ui;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -14,6 +17,7 @@ import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationBean;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
@@ -28,6 +32,16 @@ import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.scanning.api.event.EventConstants;
+import org.eclipse.scanning.api.event.EventException;
+import org.eclipse.scanning.api.event.bean.BeanEvent;
+import org.eclipse.scanning.api.event.bean.IBeanListener;
+import org.eclipse.scanning.api.event.core.ISubscriber;
+import org.eclipse.scanning.api.event.scan.IScanListener;
+import org.eclipse.scanning.api.event.scan.ScanBean;
+import org.eclipse.scanning.api.event.scan.ScanEvent;
+import org.eclipse.scanning.api.event.status.StatusBean;
+import org.eclipse.scanning.api.ui.CommandConstants;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetAdapter;
@@ -269,6 +283,45 @@ public class MappedDataView extends ViewPart {
 				
 			}
 		});
+		
+		subscribeToOperationStatusTopic();
+	}
+	
+	
+	private void subscribeToOperationStatusTopic(){
+		
+		final String suri = CommandConstants.getScanningBrokerUri();
+		if (suri==null) return; // Nothing to start, standard DAWN.
+
+
+		// Check the service is available this should always be true!
+		if (LocalServiceManager.getEventService() == null) {
+			return;
+		}
+
+		try {
+			final URI uri = new URI(suri);
+			ISubscriber<EventListener> subscriber = LocalServiceManager.getEventService().createSubscriber(uri, "scisoft.operation.STATUS_TOPIC");
+			subscriber.addListener(new IBeanListener<StatusBean>() {
+
+				@Override
+				public void beanChangePerformed(BeanEvent<StatusBean> evt) {
+					if (!evt.getBean().getStatus().isFinal()) return;
+					if (evt.getBean() instanceof IOperationBean) {
+						IOperationBean bean = (IOperationBean)evt.getBean();
+						FileManagerSingleton.getFileManager().locallyReloadLiveFile(bean.getOutputFilePath());
+					}
+					
+				}
+
+
+			});
+			
+			
+		} catch (URISyntaxException | EventException e) {
+			
+		}
+		
 	}
 	
 	private void openImportWizard(String path) {
