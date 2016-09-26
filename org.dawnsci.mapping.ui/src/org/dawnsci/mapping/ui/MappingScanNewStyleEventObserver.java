@@ -28,6 +28,7 @@ public class MappingScanNewStyleEventObserver implements IScanListener {
 	// TODO These constants would ideally be defined somewhere in the Dawn mapping UI code
 	private static final String DAWNSCI_MAPPING_FILE_OPEN = "org/dawnsci/events/file/OPEN";
 	private static final String DAWNSCI_MAPPING_FILE_CLOSE = "org/dawnsci/events/file/CLOSE";
+	private static final String DAWNSCI_MAPPING_FILE_RELOAD = "org/dawnsci/events/file/LOCALRELOAD";
 
 	private IEventService eventService;
 	private ISubscriber<IScanListener> subscriber;
@@ -126,10 +127,8 @@ public class MappingScanNewStyleEventObserver implements IScanListener {
 			logger.info("Switching from remote SWMR file to direct access: {}", filePath);
 			Map<String, Object> eventMap = new HashMap<String, Object>();
 			eventMap.put("path", filePath);
-			// Close the old remote file
-			eventAdmin.postEvent(new Event(DAWNSCI_MAPPING_FILE_CLOSE, eventMap));
-			// Reopen the file
-			eventAdmin.postEvent(new Event(DAWNSCI_MAPPING_FILE_OPEN, eventMap));
+			// Reload the old remote file
+			eventAdmin.postEvent(new Event(DAWNSCI_MAPPING_FILE_RELOAD, eventMap));
 		}
 	}
 
@@ -139,7 +138,7 @@ public class MappingScanNewStyleEventObserver implements IScanListener {
 		String name = System.getProperty("org.eclipse.dawnsci.data.server.host");
 		if (name==null) name = System.getProperty("GDA/gda.dataserver.host");
 		if (name==null) name = System.getProperty("gda.dataserver.host");
-		return null;
+		return name;
 	}
 
 	// TODO put this in global place?
