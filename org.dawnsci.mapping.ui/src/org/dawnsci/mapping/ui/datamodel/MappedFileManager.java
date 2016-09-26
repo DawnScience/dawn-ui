@@ -75,6 +75,8 @@ public class MappedFileManager {
 	
 	public void locallyReloadLiveFile(final String path) {
 		
+		if (!mappedDataArea.contains(path)) return;
+		
 		IProgressService service = (IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class);
 		try {
 			service.busyCursorWhile(new IRunnableWithProgress() {
