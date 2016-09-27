@@ -15,6 +15,7 @@ import org.eclipse.scanning.api.event.scan.IScanListener;
 import org.eclipse.scanning.api.event.scan.ScanBean;
 import org.eclipse.scanning.api.event.scan.ScanEvent;
 import org.eclipse.scanning.api.ui.CommandConstants;
+import org.eclipse.ui.IStartup;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
@@ -22,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 
 //FIXME This needs to be renamed once things settle down
-public class MappingScanNewStyleEventObserver implements IScanListener {
+public class MappingScanNewStyleEventObserver implements IScanListener, IStartup {
 
 	private static final Logger logger = LoggerFactory.getLogger(MappingScanNewStyleEventObserver.class);
 
@@ -31,9 +32,9 @@ public class MappingScanNewStyleEventObserver implements IScanListener {
 	private static final String DAWNSCI_MAPPING_FILE_CLOSE = "org/dawnsci/events/file/CLOSE";
 	private static final String DAWNSCI_MAPPING_FILE_RELOAD = "org/dawnsci/events/file/LOCALRELOAD";
 
-	private IEventService eventService;
-	private ISubscriber<IScanListener> subscriber;
-	private EventAdmin eventAdmin;
+	private static IEventService eventService;
+	private static ISubscriber<IScanListener> subscriber;
+	private static EventAdmin eventAdmin;
 
 	public void bindIEventService(IEventService eventService) {
 		logger.debug("bindIEventService called with {}", eventService.toString());
@@ -44,6 +45,11 @@ public class MappingScanNewStyleEventObserver implements IScanListener {
 		logger.debug("unbindIEventService called with {}", eventService.toString());
 		if (eventService == this.eventService) {
 			this.eventService = null;
+			try {
+				subscriber.disconnect();
+			} catch (Exception ne) {
+				logger.warn("Cannot disconnect subscriber!", ne);
+			}
 		}
 	}
 
@@ -61,33 +67,6 @@ public class MappingScanNewStyleEventObserver implements IScanListener {
 
 	public void start() {
 		
-		final String suri = CommandConstants.getScanningBrokerUri();
-		if (suri==null) return; // Nothing to start, standard DAWN.
-
-		logger.info("Starting the Mapping Scan Event Observer");
-
-		// Check the service is available this should always be true!
-		if (eventService == null) {
-			logger.error("Tried to start Mapping Scan Event Observer but required services are not available");
-			return;
-		}
-
-		try {
-			final URI uri = new URI(suri);
-			subscriber = eventService.createSubscriber(uri, EventConstants.STATUS_TOPIC);
-			
-			// We don't care about the scan request, removing it means that
-			// all the points models and detector models to not have to resolve in
-			// order to get the event.
-			subscriber.addProperty("scanRequest", FilterAction.DELETE); 
-			subscriber.addProperty("position", FilterAction.DELETE); 		            
-			subscriber.addListener(this);
-			
-			logger.info("Created subscriber");
-			
-		} catch (URISyntaxException | EventException e) {
-			logger.error("Could not subscribe to the event service", e);
-		}
 	}
 
 	@Override
@@ -156,5 +135,36 @@ public class MappingScanNewStyleEventObserver implements IScanListener {
 		if (port<=0) port = Integer.getInteger("GDA/gda.dataserver.port", -1);
 		if (port<=0) port = Integer.getInteger("gda.dataserver.port", -1);
 		return port;
+	}
+
+	@Override
+	public void earlyStartup() {
+		final String suri = CommandConstants.getScanningBrokerUri();
+		if (suri==null) return; // Nothing to start, standard DAWN.
+
+		logger.info("Starting the Mapping Scan Event Observer");
+
+		// Check the service is available this should always be true!
+		if (eventService == null) {
+			logger.error("Tried to start Mapping Scan Event Observer but required services are not available");
+			return;
+		}
+
+		try {
+			final URI uri = new URI(suri);
+			subscriber = eventService.createSubscriber(uri, EventConstants.STATUS_TOPIC);
+			
+			// We don't care about the scan request, removing it means that
+			// all the points models and detector models to not have to resolve in
+			// order to get the event.
+			subscriber.addProperty("scanRequest", FilterAction.DELETE); 
+			subscriber.addProperty("position", FilterAction.DELETE); 		            
+			subscriber.addListener(MappingScanNewStyleEventObserver.this);
+			
+			logger.info("Created subscriber");
+			
+		} catch (URISyntaxException | EventException e) {
+			logger.error("Could not subscribe to the event service", e);
+		}
 	}
 }
