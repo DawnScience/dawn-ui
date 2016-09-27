@@ -51,6 +51,7 @@ import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -308,8 +309,15 @@ public class MappedDataView extends ViewPart {
 				public void beanChangePerformed(BeanEvent<StatusBean> evt) {
 					if (!evt.getBean().getStatus().isFinal()) return;
 					if (evt.getBean() instanceof IOperationBean) {
-						IOperationBean bean = (IOperationBean)evt.getBean();
-						FileManagerSingleton.getFileManager().locallyReloadLiveFile(bean.getOutputFilePath());
+						final IOperationBean bean = (IOperationBean)evt.getBean();
+						Display.getCurrent().asyncExec(new Runnable() {
+							
+							@Override
+							public void run() {
+								FileManagerSingleton.getFileManager().locallyReloadLiveFile(bean.getOutputFilePath());
+							}
+						});
+						
 					}
 					
 				}

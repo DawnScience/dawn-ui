@@ -196,6 +196,9 @@ public class ReMappedData extends AbstractMapData {
 		int[] indices = getIndices(x, y);
 		int index = lookup.getInt(indices);
 		if (index == -1) return null;
+		if (parent.getLazy() instanceof IDatasetConnector) {
+			((IDatasetConnector)parent.getLazy()).refreshShape();
+		}
 		return parent.getSpectrum(index);
 	}
 

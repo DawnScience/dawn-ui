@@ -16,13 +16,13 @@ public class MappedDataFile implements MapObject{
 	private Map<String,AbstractMapData> mapDataMap;
 	private Map<String,AssociatedImage> microscopeDataMap;
 	private double[] range;
-	private MappedDataFileBean liveBean;
+	private MappedDataFileBean descriptionBean;
 	
 //	private final static Logger logger = LoggerFactory.getLogger(MappedDataFile.class);
 	
 	public MappedDataFile(String path, MappedDataFileBean liveBean) {
 		this(path);
-		this.liveBean = liveBean;
+		this.descriptionBean = liveBean;
 	}
 	
 	public MappedDataFile(String path) {
@@ -32,14 +32,22 @@ public class MappedDataFile implements MapObject{
 		microscopeDataMap = new HashMap<String,AssociatedImage>();
 	}
 	
+	public MappedDataFile(String path, LiveDataBean bean) {
+		this(path);
+		if (bean != null) {
+			descriptionBean = new MappedDataFileBean();
+			descriptionBean.setLiveBean(bean);
+		}
+	}
+	
 	public String getPath() {
 		return path;
 	}
 	
 	public void locallyReloadLiveFile(){
-		if (liveBean == null) return;
-		liveBean.setLiveBean(null);
-		MappedDataFile tmp = MappedFileFactory.getMappedDataFile(path, liveBean, null);
+		if (descriptionBean == null) return;
+		descriptionBean.setLiveBean(null);
+		MappedDataFile tmp = MappedFileFactory.getMappedDataFile(path, descriptionBean, null);
 		
 		Iterator<Entry<String, MappedDataBlock>> it = fullDataMap.entrySet().iterator();
 		
@@ -164,8 +172,8 @@ public class MappedDataFile implements MapObject{
 //	}
 	
 	public LiveDataBean getLiveDataBean() {
-		if (liveBean == null) return null;
-		return this.liveBean.getLiveBean();
+		if (descriptionBean == null) return null;
+		return this.descriptionBean.getLiveBean();
 	}
 	
 	public void addSuitableParentBlocks(AbstractMapData map, List<MappedDataBlock> list){
