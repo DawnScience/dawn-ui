@@ -271,7 +271,7 @@ public class MapPlotManager {
 			MapTrace m = it.next();
 			if (m.getMap() == map) {
 				it.remove();
-				this.map.removeTrace(m.getTrace());
+				if (m.getTrace() != null) this.map.removeTrace(m.getTrace());
 				triggerForLive();
 				plotLayers();
 				return;

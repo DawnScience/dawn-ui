@@ -211,7 +211,7 @@ public class MappedFileManager {
 		}
 		
 		logger.error("Could not build map bean from " + path);
-		mappedDataArea.addMappedDataFile(new MappedDataFile(path));
+		mappedDataArea.addMappedDataFile(new MappedDataFile(path,bean));
 		viewer.refresh();
 		
 	}

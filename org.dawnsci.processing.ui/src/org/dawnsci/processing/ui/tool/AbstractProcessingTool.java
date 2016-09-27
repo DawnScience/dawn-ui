@@ -78,6 +78,7 @@ import org.eclipse.richbeans.widgets.table.SeriesTable;
 import org.eclipse.scanning.api.event.EventException;
 import org.eclipse.scanning.api.event.core.ISubmitter;
 import org.eclipse.scanning.api.event.status.StatusBean;
+import org.eclipse.scanning.api.ui.CommandConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
@@ -563,7 +564,8 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		try {
 			IPreferenceStore pStore = Activator.getDefault().getPreferenceStore();
 			
-			uri = new URI(pStore.getString(ProcessingConstants.REMOTE_RUNNER_URI));
+			uri = new URI(CommandConstants.getScanningBrokerUri());
+			
 		} catch (URISyntaxException e) {
 			logger.error("Could not create URI", e);
 			return;
