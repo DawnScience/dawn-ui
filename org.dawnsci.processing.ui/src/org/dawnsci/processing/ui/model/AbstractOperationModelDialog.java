@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractOperationModelDialog extends Dialog implements PropertyChangeListener {
 
-	IOperationInputData data;
+	protected IOperationInputData data;
 	protected IOperationModel omodel;
 	protected IOperationModel model;
 
