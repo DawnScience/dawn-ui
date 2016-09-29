@@ -3509,6 +3509,12 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 		// TODO Auto-generated method stub	
 		// not yet implemented in most plots.
 	}
+
+	@Override
+	public boolean setCustomLineStyle(int primID, float[] dash) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 	
 	
 }
