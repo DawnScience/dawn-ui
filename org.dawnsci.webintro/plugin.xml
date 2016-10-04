@@ -88,7 +88,7 @@
          icon="content/icons/script-icon.png"
          id="org.dawnsci.webintro.category.dawnindawn"
          name="DAWN Development Environments"
-         ordering="2"
+         ordering="3"
          parent_id="dawn">
    </introCategory>
    <introLink
@@ -105,6 +105,7 @@
          icon="content/icons/dawn_64.png"
          id="org.dawnsci.webintro.category.general"
          name="Visualization"
+         ordering="1"
          parent_id="dawn">
    </introCategory>
    <introAction
@@ -134,6 +135,23 @@
          ordering="7"
          parent_id="help">
    </introLink>
+   <introCategory
+         category_id="science_ncd"
+         description="(Non-Crystalline Diffraction)"
+         icon="content/icons/ncd_intro.png"
+         id="org.dawnsci.webintro.category.NCD"
+         name="NCD"
+         ordering="3"
+         parent_id="science">
+   </introCategory>
+   <introCategory
+         category_id="science_tomography"
+         icon="content/icons/tomo_intro.jpg"
+         id="org.dawnsci.webintro.category.tomography"
+         name="Tomography"
+         ordering="1"
+         parent_id="science">
+   </introCategory>
 </extension>
 <extension
       point="org.eclipse.ui.menus">
