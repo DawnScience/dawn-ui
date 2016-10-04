@@ -9,8 +9,26 @@
             icon="intro/graphics/Processing52.png"
             id="org.dawnsci.processing.ui.ProcessingPerspectiveLaunch"
             name="Processing"
+            ordering="2"
+            parent_id="dawn">
+      </introAction>
+      <introAction
+            class="org.dawnsci.processing.ui.ProcessingPerspectiveLaunch"
+            description="Process data by linking together independent calculations. Contains both general mathematical routines and operations specific for powder diffraction, SAXS, ARPES and XAFS."
+            icon="intro/graphics/Processing52.png"
+            id="org.dawnsci.processing.ui.ProcessingPerspectiveLaunch"
+            name="Processing"
             ordering="1"
-            parent_id="science">
+            parent_id="science_powderdiffraction">
+      </introAction>
+      <introAction
+            class="org.dawnsci.processing.ui.ProcessingPerspectiveLaunch"
+            description="Process data by linking together independent calculations. Contains both general mathematical routines and operations specific for powder diffraction, SAXS, ARPES and XAFS."
+            icon="intro/graphics/Processing52.png"
+            id="org.dawnsci.processing.ui.ProcessingPerspectiveLaunch"
+            name="Processing"
+            ordering="1"
+            parent_id="science_ncd">
       </introAction>
    </extension>
 </fragment>
