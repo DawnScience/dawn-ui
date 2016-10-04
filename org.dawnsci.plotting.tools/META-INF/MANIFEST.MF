@@ -175,8 +175,7 @@ Export-Package: org.dawnsci.plotting.tools;
    org.eclipse.dawnsci.plotting.api,
    org.eclipse.swt.widgets,
    org.eclipse.dawnsci.plotting.api.tool,
-   org.eclipse.dawnsci.plotting.api.trace,
-   org.dawb.workbench.jmx",
+   org.eclipse.dawnsci.plotting.api.trace",
  org.dawnsci.plotting.tools.profile;
   uses:="org.eclipse.core.runtime,
    uk.ac.diamond.scisoft.analysis.dataset,
