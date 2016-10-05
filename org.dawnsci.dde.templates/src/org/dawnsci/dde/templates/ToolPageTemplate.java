@@ -47,7 +47,8 @@ public class ToolPageTemplate extends DAWNTemplateSection {
 
 	public IPluginReference[] getDependencies(String schemaVersion) {
 		// add _all_ required dependencies, no particular version
-		return new IPluginReference[] { 
+		return new IPluginReference[] {
+				new PluginReference("org.eclipse.january", null, 0),
 				new PluginReference("org.eclipse.dawnsci.plotting.api", null, 0),
 				new PluginReference("org.eclipse.ui", null, 0),
 				new PluginReference("org.eclipse.core.runtime", null, 0),
