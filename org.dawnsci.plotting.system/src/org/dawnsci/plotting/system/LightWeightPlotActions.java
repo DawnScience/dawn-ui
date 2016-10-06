@@ -209,6 +209,8 @@ class LightWeightPlotActions {
 	 * Reads any extended actions
 	 */
 	private void createActionsByExtensionPoint(ICommandService cmdService) {
+		
+		if (!actionBarManager.isShowCustomPlotActions()) return;
 		final IConfigurationElement[] eles = Platform.getExtensionRegistry().getConfigurationElementsFor("org.eclipse.dawnsci.plotting.api.plottingAction");
 	    if (eles==null) return;
 	    

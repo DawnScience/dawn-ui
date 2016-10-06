@@ -83,6 +83,8 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 	protected MenuAction                imageMenu;
 	protected MenuAction                xyMenu;
 	protected ITraceActionProvider      traceActionProvider;
+
+	private boolean showCustomPlotActions = true;
 	
 	public PlottingActionBarManager(AbstractPlottingSystem<?> system) {
 		this.system = system;
@@ -858,6 +860,14 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 		if (windows==null) return null;
 		
 		return windows[0].getActivePage();
+	}
+
+	
+	public boolean isShowCustomPlotActions() {
+		return showCustomPlotActions;
+	}
+	public void setShowCustomPlotActions(boolean showCustomPlotActions) {
+		this.showCustomPlotActions = showCustomPlotActions;
 	}
 
 }
