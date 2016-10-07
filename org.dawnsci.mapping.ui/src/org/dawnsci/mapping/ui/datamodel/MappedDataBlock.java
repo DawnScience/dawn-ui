@@ -379,7 +379,7 @@ public class MappedDataBlock implements MapObject {
 		SourceInformation si = new SourceInformation(getPath(), toString(), dataset);
 		SliceND slice = getMatchingDataSlice(x, y);
 		SliceInformation sl = new SliceInformation(slice, slice, new SliceND(dataset.getShape()), getDataDimensions(), 1, 1);
-		return new SliceFromLiveSeriesMetadata(si,sl,axes.getHost(),axes.getPort(),axes.getAxesNames(), axes.getxAxisForRemappingName());
+		return new SliceFromLiveSeriesMetadata(si,sl,axes.getHost(),axes.getPort(),axes.getAxesNames());
 	}
 }
 	
