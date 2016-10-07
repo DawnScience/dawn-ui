@@ -6,7 +6,7 @@ import org.dawnsci.common.widgets.Activator;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
-public class FileDatasetFileLabelProvider extends LabelProvider {
+public class FileDatasetTreeLabelProvider extends LabelProvider {
 	private static final Image folderImage = Activator.getImage("icons/vogella_folder.gif");
 	private static final Image driveImage = Activator.getImage("icons/vogella_filenav_nav.gif");
 	private static final Image fileImage = Activator.getImage("icons/vogella_file_obj.gif");

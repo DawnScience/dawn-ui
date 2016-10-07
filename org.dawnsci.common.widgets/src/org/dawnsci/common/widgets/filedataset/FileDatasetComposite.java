@@ -4,10 +4,13 @@ import java.io.File;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
+import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -25,8 +28,9 @@ import org.slf4j.LoggerFactory;
 public class FileDatasetComposite extends Composite {
 	private final TreeViewer treeViewer;
 	private final TableViewer tableViewer;
-	private final FileDatasetFileContentProvider contentProvider = new FileDatasetFileContentProvider();
+	private final FileDatasetTreeContentProvider contentProvider = new FileDatasetTreeContentProvider();
 	private final static Logger logger = LoggerFactory.getLogger(FileDatasetComposite.class);
+	private volatile File currentSelection = null;
 	
 	public FileDatasetComposite(Composite parent, int style) {
 		super(parent, style);
@@ -41,28 +45,55 @@ public class FileDatasetComposite extends Composite {
 		SashForm sashForm = new SashForm(this, SWT.HORIZONTAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		treeViewer = new TreeViewer(sashForm, SWT.H_SCROLL | SWT.V_SCROLL);
+		treeViewer = new TreeViewer(sashForm, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 		treeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		treeViewer.setContentProvider(contentProvider);
-		treeViewer.setLabelProvider(new FileDatasetFileLabelProvider());
+		treeViewer.setLabelProvider(new FileDatasetTreeLabelProvider());
 		treeViewer.setInput(File.listRoots());
 		treeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				File selectedFile = (File) treeViewer.getStructuredSelection().getFirstElement();
-				if (selectedFile != null)
+				if (selectedFile != null) {
 					logger.debug("new selection: {}", selectedFile.toString());
-				
+					currentSelection = selectedFile;
+					tableViewer.setInput(selectedFile);
+				}
 			}
 		});
-		select(new File(System.getProperty("user.home")));
-		tableViewer = new TableViewer(sashForm, SWT.H_SCROLL | SWT.V_SCROLL);
+		// start at home directory
+		setSelectedFile(new File(System.getProperty("user.home")));
+		
+		tableViewer = new TableViewer(sashForm, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
 		tableViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		tableViewer.getTable().setHeaderVisible(true);
+		tableViewer.getTable().setLinesVisible(true);
+		tableViewer.setContentProvider(new FileDatasetTableContentProvider());
+		
+		TableViewerColumn datasetNameColumn = new TableViewerColumn(tableViewer, SWT.NONE);
+		datasetNameColumn.getColumn().setText("Name");
+		datasetNameColumn.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				ILazyDataset dataset = (ILazyDataset) element;
+				return dataset.getName();
+			}
+		});
+		TableViewerColumn datasetShapeColumn = new TableViewerColumn(tableViewer, SWT.NONE);
+		datasetShapeColumn.getColumn().setText("Shape");
+		datasetShapeColumn.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				ILazyDataset dataset = (ILazyDataset) element;
+				return dataset.toString();
+			}
+		});
+		
 		sashForm.setWeights(new int[]{50, 50});
 	}
 	
-	public void select(File file) {
+	public void setSelectedFile(File file) {
 		logger.debug("selecting file: {}", file.getAbsolutePath());
 		//treeViewer.expandToLevel(file, AbstractTreeViewer.ALL_LEVELS);
 		// file could also be a directory...
@@ -86,6 +117,10 @@ public class FileDatasetComposite extends Composite {
 		for (int i = path.size() - 1; i >= 0; --i) {
 			final File pathElement = path.get(i);
 		}*/
+	}
+	
+	public File getSelectedFile() {
+		return currentSelection;
 	}
 
 	private boolean checkItems(TreeItem[] items, Deque<File> path, File lastFile) {
@@ -111,6 +146,7 @@ public class FileDatasetComposite extends Composite {
 					return true;
 				} else {
 					treeViewer.expandToLevel(last, 1);
+					// recursive call...
 					return checkItems(item.getItems(), path, last);
 				} 
 			}

@@ -8,7 +8,7 @@ import java.util.Comparator;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
-public class FileDatasetFileContentProvider implements ITreeContentProvider {
+public class FileDatasetTreeContentProvider implements ITreeContentProvider {
 
 	@Override
 	public void dispose() {
