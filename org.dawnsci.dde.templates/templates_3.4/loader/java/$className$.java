@@ -21,9 +21,17 @@ import uk.ac.diamond.scisoft.analysis.io.Utils;
 
 public class $className$ extends AbstractFileLoader {
 
+	/**
+	 * Delimeter for the custom csv
+	 */
 	private static final String DELIMETER = "\\s*";
+	/**
+	 * Identifier so that other loaders don't try to load this type of file
+	 */
 	private static final String FILE_IDENTIFIER = "&dawnscience";
-	// Map to hold values
+	/**
+	 * Map to hold values to be read and then added to the dataholder
+	 */
 	protected Map<String, List<Double>> vals = new LinkedHashMap<String, List<Double>>();;
 
 	@Override
@@ -46,7 +54,7 @@ public class $className$ extends AbstractFileLoader {
 	 */
 	@Override
 	public DataHolder loadFile(final IMonitor mon) throws ScanFileHolderException {
-		// first instantiate the return object.
+		// first instantiate the return object
 		final DataHolder result = new DataHolder();
 
 		// then try to read the file given
