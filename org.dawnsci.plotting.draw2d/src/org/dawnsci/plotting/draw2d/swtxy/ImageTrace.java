@@ -722,6 +722,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 //		performAutoscale();
 	}
 	
+	public double[] getGlobalRange() {
+		return globalRange;
+	}
+	
 	private final int getNumberOfDataPoints(double min, double max, IDataset axes, boolean increasing) {
 		
 		int minp = getPositionInAxis(min,axes,true);
