@@ -18,6 +18,7 @@ import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.pde.launching.IPDELauncherConstants;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -85,7 +86,9 @@ public class DAWNDDEPlugin extends AbstractUIPlugin {
 			ILaunchConfigurationWorkingCopy newInstance = type.newInstance(null, LAUNCH_CONFIG_NAME);
 			newInstance.setAttribute(IPDELauncherConstants.USE_PRODUCT, true);
 			newInstance.setAttribute(IPDELauncherConstants.PRODUCT, DAWN_PRODUCT_ID);
-			newInstance.doSave();			
+			// Set this argument so that javafx classes are found at runtime
+			newInstance.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, "-Dosgi.framework.extensions=org.eclipse.fx.osgi");
+			newInstance.doSave();
 		}
 	}
 }
