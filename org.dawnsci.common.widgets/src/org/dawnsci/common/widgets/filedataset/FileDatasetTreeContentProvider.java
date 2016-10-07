@@ -38,6 +38,11 @@ public class FileDatasetTreeContentProvider implements ITreeContentProvider {
 		});
 		if (ls == null)
 			return null;
+		// comparator chaining can be achieved with org.apache.commons.collections4.ComparatorUtils,
+		// but seems like an unnecessary heavy dependency here...
+		// alphabetic sort
+		Arrays.sort(ls, new FileNameComparator());
+		// directories go before files sort
 		Arrays.sort(ls, new FileTypeComparator());
 		return ls;
 	}
@@ -52,6 +57,13 @@ public class FileDatasetTreeContentProvider implements ITreeContentProvider {
 	public boolean hasChildren(Object element) {
 		File file = (File) element;
 		return file.isDirectory();
+	}
+
+	class FileNameComparator implements Comparator<File> {
+		@Override
+		public int compare(File o1, File o2) {
+			return o1.getName().compareToIgnoreCase(o2.getName());
+		}
 	}
 	
 	class FileTypeComparator implements Comparator<File> {

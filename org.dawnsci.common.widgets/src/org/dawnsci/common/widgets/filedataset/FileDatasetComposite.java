@@ -3,10 +3,17 @@ package org.dawnsci.common.widgets.filedataset;
 import java.io.File;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.HashSet;
+import java.util.StringJoiner;
 
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
@@ -26,21 +33,37 @@ import org.slf4j.LoggerFactory;
  */
 
 public class FileDatasetComposite extends Composite {
+
 	private final TreeViewer treeViewer;
 	private final TableViewer tableViewer;
 	private final FileDatasetTreeContentProvider contentProvider = new FileDatasetTreeContentProvider();
 	private final static Logger logger = LoggerFactory.getLogger(FileDatasetComposite.class);
 	private volatile File currentSelection = null;
+	private volatile ILazyDataset currentDataset = null;
+	private final HashSet<IFileDatasetCompositeStatusChangedListener> listeners = new HashSet<>();
 	
-	public FileDatasetComposite(Composite parent, int style) {
+	
+	public FileDatasetComposite(Composite parent, IFileDatasetFilter filter, int style) {
 		super(parent, style);
+		
+		if (filter == null) {
+			// default filter allows for everything to get through
+			filter = new IFileDatasetFilter() {
+				@Override
+				public boolean accept(ILazyDataset dataset) {
+					return true;
+				}
+			};
+		}
+		
 		this.setLayout(new GridLayout(1, true));
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gridData.minimumWidth = 500;
-		gridData.minimumHeight = 400;
-		gridData.heightHint = 400;
-		gridData.widthHint = 500;
+		gridData.minimumWidth = 800;
+		gridData.widthHint = 800;
+		gridData.minimumHeight = 600;
+		gridData.heightHint = 600;
 		this.setLayoutData(gridData);
+		
 		// add a sash with a treeviewer and a tableviewer
 		SashForm sashForm = new SashForm(this, SWT.HORIZONTAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -51,7 +74,6 @@ public class FileDatasetComposite extends Composite {
 		treeViewer.setLabelProvider(new FileDatasetTreeLabelProvider());
 		treeViewer.setInput(File.listRoots());
 		treeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				File selectedFile = (File) treeViewer.getStructuredSelection().getFirstElement();
@@ -60,19 +82,39 @@ public class FileDatasetComposite extends Composite {
 					currentSelection = selectedFile;
 					tableViewer.setInput(selectedFile);
 				}
+				// changes in the treeViewer always set the status to false
+				fireListeners(false);
 			}
 		});
-		// start at home directory
-		setSelectedFile(new File(System.getProperty("user.home")));
+		// taken from http://stackoverflow.com/a/22453339
+		treeViewer.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				final IStructuredSelection selection = (IStructuredSelection)event.getSelection();
+			    if (selection == null || selection.isEmpty())
+			      return;
+
+			    final Object sel = selection.getFirstElement();
+
+			    if (!contentProvider.hasChildren(sel))
+			      return;
+
+			    if (treeViewer.getExpandedState(sel))
+			      treeViewer.collapseToLevel(sel, AbstractTreeViewer.ALL_LEVELS);
+			    else
+			      treeViewer.expandToLevel(sel, 1);
+			}
+		});
 		
 		tableViewer = new TableViewer(sashForm, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
 		tableViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tableViewer.getTable().setHeaderVisible(true);
 		tableViewer.getTable().setLinesVisible(true);
-		tableViewer.setContentProvider(new FileDatasetTableContentProvider());
+		tableViewer.setContentProvider(new FileDatasetTableContentProvider(filter));
 		
 		TableViewerColumn datasetNameColumn = new TableViewerColumn(tableViewer, SWT.NONE);
 		datasetNameColumn.getColumn().setText("Name");
+		datasetNameColumn.getColumn().setWidth(200);
 		datasetNameColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
@@ -82,15 +124,38 @@ public class FileDatasetComposite extends Composite {
 		});
 		TableViewerColumn datasetShapeColumn = new TableViewerColumn(tableViewer, SWT.NONE);
 		datasetShapeColumn.getColumn().setText("Shape");
+		datasetShapeColumn.getColumn().setWidth(200);
 		datasetShapeColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
 				ILazyDataset dataset = (ILazyDataset) element;
-				return dataset.toString();
+				int[] shape = dataset.getShape();
+				StringJoiner joiner = new StringJoiner(", ", "[", "]");
+				for (int s : shape)
+					joiner.add(Integer.toString(s));
+				return joiner.toString();
+			}
+		});
+		
+		tableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				ILazyDataset selectedDataset = (ILazyDataset) tableViewer.getStructuredSelection().getFirstElement();
+				if (selectedDataset != null) {
+					logger.debug("new dataset: {}", selectedDataset.toString());
+					currentDataset = selectedDataset;
+					fireListeners(true);
+				} else {
+					fireListeners(false);
+				}
 			}
 		});
 		
 		sashForm.setWeights(new int[]{50, 50});
+
+		// start at home directory
+		setSelectedFile(new File(System.getProperty("user.home")));
 	}
 	
 	public void setSelectedFile(File file) {
@@ -121,6 +186,10 @@ public class FileDatasetComposite extends Composite {
 	
 	public File getSelectedFile() {
 		return currentSelection;
+	}
+	
+	public ILazyDataset getSelectedDataset() {
+		return currentDataset;
 	}
 
 	private boolean checkItems(TreeItem[] items, Deque<File> path, File lastFile) {
@@ -153,5 +222,19 @@ public class FileDatasetComposite extends Composite {
 		}
 		logger.error("checkItems: no match found! {}", fileName);
 		return false;
+	}
+	
+	public void addFileDatasetCompositeStatusChangedListener(IFileDatasetCompositeStatusChangedListener listener) {
+		listeners.add(listener);
+	}
+	
+	public void removeFileDatasetCompositeStatusChangedListener(IFileDatasetCompositeStatusChangedListener listener) {
+		listeners.remove(listener);
+	}
+	
+	private void fireListeners(boolean status) {
+		FileDatasetCompositeStatusChangedEvent event = new FileDatasetCompositeStatusChangedEvent(this, status);
+		for (IFileDatasetCompositeStatusChangedListener listener : listeners) 
+			listener.compositeStatusChanged(event);
 	}
 }

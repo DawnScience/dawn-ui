@@ -2,14 +2,19 @@ package org.dawnsci.common.widgets.filedataset;
 
 import java.io.File;
 
+import org.dawnsci.common.widgets.LocalServiceManager;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
-import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-
 public class FileDatasetTableContentProvider implements IStructuredContentProvider {
 
+	IFileDatasetFilter filter;
+	
+	public FileDatasetTableContentProvider(IFileDatasetFilter filter) {
+		this.filter = filter;
+	}
+	
 	@Override
 	public void dispose() {
 
@@ -28,11 +33,11 @@ public class FileDatasetTableContentProvider implements IStructuredContentProvid
 		
 		// try opening the file
 		try {
-			IDataHolder dh = LoaderFactory.getData(file.getAbsolutePath());
-			return dh.getList().toArray();
+			IDataHolder dh = LocalServiceManager.getLoaderService().getData(file.getAbsolutePath(), null);
+			// return only those elements that are accepted by the filter
+			return dh.getList().stream().filter(ds -> filter.accept(ds)).toArray();
 		} catch (Exception e) {
 			return new Object[0];
 		}
 	}
-
 }
