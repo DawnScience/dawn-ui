@@ -128,9 +128,6 @@ public class MappedData extends AbstractMapData{
 		ILazyDataset ly = parent.getYAxis()[0];
 		ILazyDataset lx = parent.getXAxis()[0];
 		
-		((IDatasetConnector)ly).refreshShape();
-		((IDatasetConnector)lx).refreshShape();
-		
 		IDataset x;
 		IDataset y;
 		try {

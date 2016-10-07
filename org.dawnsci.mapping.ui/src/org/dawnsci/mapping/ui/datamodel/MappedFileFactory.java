@@ -201,6 +201,7 @@ public class MappedFileFactory {
 			axesNames[i] = s;
 			if (s != null) {
 					r[i] = getRemoteDataset(path, s, live);
+					if (r[i] != null) r[i].setDatasetName(s);
 			}
 
 		}
@@ -211,7 +212,9 @@ public class MappedFileFactory {
 		
 		String s = bean.getxAxisForRemapping();
 		if (s != null){
-				lra.setxAxisForRemapping(getRemoteDataset(path, s, live));
+			IDatasetConnector rd = getRemoteDataset(path, s, live);
+			rd.setDatasetName(s);
+				lra.setxAxisForRemapping(rd);
 				lra.setxAxisForRemappingName(s);
 		}
 		
@@ -227,6 +230,7 @@ public class MappedFileFactory {
 			for (int i = 0; i < axes.size(); i++) {
 				if (axes.get(i) == null) continue;
 				ILazyDataset lz = getLazyDataset(path, axes.get(i));
+				lz.setName(axes.get(i));
 				int[] ss = lz.getShape();
 				
 				if (ss.length == 1) {

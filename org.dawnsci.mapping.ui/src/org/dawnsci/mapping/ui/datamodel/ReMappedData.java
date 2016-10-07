@@ -91,6 +91,8 @@ public class ReMappedData extends AbstractMapData {
 		XYImagePixelCache cache = new XYImagePixelCache(x,y,new double[]{xMin,xMax},new double[]{yMin,yMax},shape[0],shape[1]);
 		
 		List<Dataset> data = PixelIntegration.integrate(flatMap, null, cache);
+		data.get(0).setName(x.getName());
+		data.get(2).setName(y.getName());
 		
 		AxesMetadata axm = null;
 		try {
@@ -247,9 +249,7 @@ public class ReMappedData extends AbstractMapData {
 		
 		ILazyDataset ly = parent.getYAxis()[0];
 		ILazyDataset lx = parent.getXAxis()[0];
-		
-		((IDatasetConnector)ly).refreshShape();
-		((IDatasetConnector)lx).refreshShape();
+	
 		
 		IDataset x;
 		IDataset y;
