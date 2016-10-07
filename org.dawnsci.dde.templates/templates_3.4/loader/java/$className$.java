@@ -21,6 +21,8 @@ import uk.ac.diamond.scisoft.analysis.io.Utils;
 
 public class $className$ extends AbstractFileLoader {
 
+	private static final String DELIMETER = "\\s*";
+	private static final String FILE_IDENTIFIER = "&dawnscience";
 	// Map to hold values
 	protected Map<String, List<Double>> vals = new LinkedHashMap<String, List<Double>>();;
 
@@ -44,7 +46,6 @@ public class $className$ extends AbstractFileLoader {
 	 */
 	@Override
 	public DataHolder loadFile(final IMonitor mon) throws ScanFileHolderException {
-
 		// first instantiate the return object.
 		final DataHolder result = new DataHolder();
 
@@ -53,14 +54,29 @@ public class $className$ extends AbstractFileLoader {
 		try {
 			in = new BufferedReader(new InputStreamReader(new FileInputStream(fileName), "UTF-8"));
 
-			parseHeaders(in, mon);
-			String line = null;
+			// Parse headers
+			String line = in.readLine();
+			if (line == null)
+				new ScanFileHolderException("Read line is null!");
+			if (!line.trim().startsWith(FILE_IDENTIFIER))
+				throw new ScanFileHolderException("Not a custom diamond csv file");
+			if (!monitorIncrement(mon))
+				throw new ScanFileHolderException("Loader cancelled during reading!");
+			vals.clear();
+			// read next line (columns headers)
+			line = in.readLine();
+			String[] headers = line.split(DELIMETER);
+			// populate Map with headers found
+			for (int i = 0; i < headers.length; i++) {
+				vals.put(headers[i], new ArrayList<Double>());
+			}
+
 			// Read data
 			while ((line = in.readLine()) != null) {
 				if (!monitorIncrement(mon)) {
 					throw new ScanFileHolderException("Loader cancelled during reading!");
 				}
-				final String[] values = line.split(getDelimiter());
+				final String[] values = line.split(DELIMETER);
 				final Iterator<String> it = vals.keySet().iterator();
 				for (String value : values) {
 					// add read value to Map
@@ -75,7 +91,6 @@ public class $className$ extends AbstractFileLoader {
 				result.addDataset(n, data);
 			}
 			return result;
-
 		} catch (Exception e) {
 			throw new ScanFileHolderException("DawnTestLoader.loadFile exception loading " + fileName, e);
 		} finally {
@@ -88,44 +103,8 @@ public class $className$ extends AbstractFileLoader {
 		}
 	}
 
-	/**
-	 * May override to support different file formats.
-	 * 
-	 * @return the delimiter
-	 */
-	private String getDelimiter() {
-		return "\\s*";
-	}
-
 	@Override
 	public void loadMetadata(final IMonitor mon) throws IOException {
 		// TODO
-	}
-
-	/**
-	 * Reads the first line
-	 * 
-	 * @param in
-	 * @param mon
-	 * @return last line
-	 * @throws Exception
-	 */
-	private void parseHeaders(final BufferedReader in, IMonitor mon) throws Exception {
-		String line = in.readLine();
-		if (line == null)
-			new ScanFileHolderException("Read line is null!");
-		if (!line.trim().startsWith("&dawnscience"))
-			throw new ScanFileHolderException("Not a custom diamond csv file");
-		if (!monitorIncrement(mon))
-			throw new ScanFileHolderException("Loader cancelled during reading!");
-		vals.clear();
-
-		// read next line (columns headers)
-		line = in.readLine();
-		String[] headers = line.split(getDelimiter());
-		// populate Map with headers found
-		for (int i = 0; i < headers.length; i++) {
-			vals.put(headers[i], new ArrayList<Double>());
-		}
 	}
 }
