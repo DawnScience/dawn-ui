@@ -3,8 +3,6 @@ package $packageName$;
 import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.OperationModelField;
 
-import org.eclipse.dawnsci.analysis.api.processing.model.EmptyModel;
-
 public class $className$Model extends AbstractOperationModel {
 
 	@OperationModelField(hint="Enter value for operation", label = "Value")
