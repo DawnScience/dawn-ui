@@ -4,8 +4,10 @@ import org.eclipse.january.dataset.ILazyDataset;
 
 @FunctionalInterface
 public interface IFileDatasetFilter {
-	public static class FileDatasetFilterRank implements IFileDatasetFilter {
+	static class FileDatasetFilterRank implements IFileDatasetFilter {
+		
 		private final int rank;
+		
 		public FileDatasetFilterRank(int rank) {
 			this.rank = rank;
 		}

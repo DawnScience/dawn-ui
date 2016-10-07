@@ -38,13 +38,20 @@ public class FileDatasetComposite extends Composite {
 	private final TableViewer tableViewer;
 	private final FileDatasetTreeContentProvider contentProvider = new FileDatasetTreeContentProvider();
 	private final static Logger logger = LoggerFactory.getLogger(FileDatasetComposite.class);
-	private volatile File currentSelection = null;
-	private volatile ILazyDataset currentDataset = null;
+	private volatile File currentSelectedFile = null;
+	private volatile ILazyDataset currentSelectedDataset = null;
 	private final HashSet<IFileDatasetCompositeStatusChangedListener> listeners = new HashSet<>();
 	
 	
 	public FileDatasetComposite(Composite parent, IFileDatasetFilter filter, int style) {
+		this(parent, null, filter, style);
+	}
+	
+	public FileDatasetComposite(Composite parent, File initialFile, IFileDatasetFilter filter, int style) {
 		super(parent, style);
+		
+		if (initialFile == null)
+			initialFile = new File(System.getProperty("user.home"));
 		
 		if (filter == null) {
 			// default filter allows for everything to get through
@@ -79,7 +86,7 @@ public class FileDatasetComposite extends Composite {
 				File selectedFile = (File) treeViewer.getStructuredSelection().getFirstElement();
 				if (selectedFile != null) {
 					logger.debug("new selection: {}", selectedFile.toString());
-					currentSelection = selectedFile;
+					currentSelectedFile = selectedFile;
 					tableViewer.setInput(selectedFile);
 				}
 				// changes in the treeViewer always set the status to false
@@ -144,7 +151,7 @@ public class FileDatasetComposite extends Composite {
 				ILazyDataset selectedDataset = (ILazyDataset) tableViewer.getStructuredSelection().getFirstElement();
 				if (selectedDataset != null) {
 					logger.debug("new dataset: {}", selectedDataset.toString());
-					currentDataset = selectedDataset;
+					currentSelectedDataset = selectedDataset;
 					fireListeners(true);
 				} else {
 					fireListeners(false);
@@ -155,7 +162,7 @@ public class FileDatasetComposite extends Composite {
 		sashForm.setWeights(new int[]{50, 50});
 
 		// start at home directory
-		setSelectedFile(new File(System.getProperty("user.home")));
+		setSelectedFile(initialFile);
 	}
 	
 	public void setSelectedFile(File file) {
@@ -185,11 +192,11 @@ public class FileDatasetComposite extends Composite {
 	}
 	
 	public File getSelectedFile() {
-		return currentSelection;
+		return currentSelectedFile;
 	}
 	
 	public ILazyDataset getSelectedDataset() {
-		return currentDataset;
+		return currentSelectedDataset;
 	}
 
 	private boolean checkItems(TreeItem[] items, Deque<File> path, File lastFile) {

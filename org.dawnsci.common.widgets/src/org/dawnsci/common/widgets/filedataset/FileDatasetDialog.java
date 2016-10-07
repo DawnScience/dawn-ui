@@ -1,5 +1,8 @@
 package org.dawnsci.common.widgets.filedataset;
 
+import java.io.File;
+
+import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
@@ -10,17 +13,23 @@ import org.eclipse.swt.widgets.Shell;
 public class FileDatasetDialog extends Dialog {
 
 	private final IFileDatasetFilter filter;
+	private final File initialFile;
+	private FileDatasetComposite composite;
 	
 	public FileDatasetDialog(Shell parentShell, IFileDatasetFilter filter) {
+		this(parentShell, null, filter);
+	}
+	public FileDatasetDialog(Shell parentShell, File initialFile, IFileDatasetFilter filter) {
 		super(parentShell);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 		this.filter = filter;
+		this.initialFile = initialFile;
 	}
 
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite container = (Composite) super.createDialogArea(parent);
-		FileDatasetComposite composite = new FileDatasetComposite(container, filter, SWT.NONE);
+		composite = new FileDatasetComposite(container, initialFile, filter, SWT.NONE);
 		composite.addFileDatasetCompositeStatusChangedListener(new IFileDatasetCompositeStatusChangedListener() {
 			@Override
 			public void compositeStatusChanged(FileDatasetCompositeStatusChangedEvent event) {
@@ -29,6 +38,14 @@ public class FileDatasetDialog extends Dialog {
 			}
 		});
 		return container;
+	}
+
+	public File getSelectedFile() {
+		return composite.getSelectedFile();
+	}
+	
+	public ILazyDataset getSelectedDataset() {
+		return composite.getSelectedDataset();
 	}
 	
 	@Override
