@@ -47,7 +47,7 @@ public class $className$ extends AbstractFileLoader {
 	}
 
 	/**
-	 * Function that loads a custom csv file
+	 * Function that loads a custom csv file available in the resource folder
 	 * 
 	 * @return The package which contains the data that has been loaded
 	 * @throws ScanFileHolderException
