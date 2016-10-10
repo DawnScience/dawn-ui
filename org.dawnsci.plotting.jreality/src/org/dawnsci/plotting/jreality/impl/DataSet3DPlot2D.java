@@ -2955,10 +2955,4 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 		return false;
 	}
 
-	@Override
-	public boolean setCustomLineStyle(int primID, float[] dash) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
 }
