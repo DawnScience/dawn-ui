@@ -13,7 +13,6 @@ import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
@@ -166,29 +165,17 @@ public class FileDatasetComposite extends Composite {
 	}
 	
 	public void setSelectedFile(File file) {
-		logger.debug("selecting file: {}", file.getAbsolutePath());
-		//treeViewer.expandToLevel(file, AbstractTreeViewer.ALL_LEVELS);
 		// file could also be a directory...
 		File origFile = file;
 		Deque<File> path = new ArrayDeque<>();
 		while (file != null) {
-			logger.debug("builder: {}", file.getName());
 			path.add(file);
 			file = file.getParentFile();
 		}
 	
 		if (checkItems(treeViewer.getTree().getItems(), path, null)) {
-			treeViewer.setSelection(new StructuredSelection(origFile));
+			treeViewer.setSelection(new StructuredSelection(origFile), true);
 		}
-		/*
-		treeViewer.expandToLevel(elementOrTreePath, level);
-		
-		((ITreeContentProvider) treeViewer.getContentProvider()).getChildren(parentElement)
-		
-		TreeItem[] items = treeViewer.getTree().getItems();
-		for (int i = path.size() - 1; i >= 0; --i) {
-			final File pathElement = path.get(i);
-		}*/
 	}
 	
 	public File getSelectedFile() {
@@ -207,12 +194,10 @@ public class FileDatasetComposite extends Composite {
 		if (fileName.length() ==  0) {
 			fileName = last.getAbsolutePath();
 		}
-		logger.debug("filename {}", fileName);
 		for (TreeItem item : items) {
 			if (item.getText().equals(fileName)) {
 				// we have a match
 				// if the path is now empty, we should stop here
-				logger.debug("match for {}", fileName);
 				if (path.isEmpty()) {
 					if (last.isDirectory()) {
 						treeViewer.expandToLevel(last, 1);
@@ -227,7 +212,6 @@ public class FileDatasetComposite extends Composite {
 				} 
 			}
 		}
-		logger.error("checkItems: no match found! {}", fileName);
 		return false;
 	}
 	
