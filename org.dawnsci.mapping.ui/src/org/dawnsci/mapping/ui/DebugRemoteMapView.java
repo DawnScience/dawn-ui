@@ -76,7 +76,7 @@ public class DebugRemoteMapView extends ViewPart {
 
 						final MappedFileManager manager = (MappedFileManager)view.getAdapter(MappedFileManager.class);
 						if (manager != null) {
-							manager.importLiveFile(filename.getText(), l);
+							manager.importLiveFile(filename.getText(), l,null);
 						}
 					}
 					

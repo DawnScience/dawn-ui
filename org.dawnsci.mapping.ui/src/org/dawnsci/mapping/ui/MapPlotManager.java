@@ -74,14 +74,17 @@ public class MapPlotManager {
 			@Override
 			public void run(){
 				if (layers.isEmpty()) rJob.stop();
+				boolean noneLive = true;
 				for (MapTrace t : layers) {
 					if (t.getMap().isLive()) {
+						noneLive = false;
 						if (t.getMap() instanceof AbstractMapData) {
 							((AbstractMapData)t.getMap()).update();
 						}
 						t.switchMap(t.getMap());
 					}
 				}
+				if (noneLive) rJob.stop();
 				plotLayers();
 			}
 		});
@@ -137,6 +140,12 @@ public class MapPlotManager {
 		job.setRunnable(r);
 		
 		job.schedule();
+	}
+	
+	public void stopRepeatPlot(){
+		if (rJob != null) {
+			rJob.stop();
+		}
 	}
 	
 	public void plotDataWithHold(final double x, final double y) {

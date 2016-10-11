@@ -122,7 +122,7 @@ public class MappingScanNewStyleEventObserver implements IScanListener, IStartup
 
 
 	// TODO put this in global place?
-	private String getDataServerHost() {
+	public static String getDataServerHost() {
 		String name = System.getProperty("org.eclipse.dawnsci.data.server.host");
 		if (name==null) name = System.getProperty("GDA/gda.dataserver.host");
 		if (name==null) name = System.getProperty("gda.dataserver.host");
@@ -130,7 +130,7 @@ public class MappingScanNewStyleEventObserver implements IScanListener, IStartup
 	}
 
 	// TODO put this in global place?
-	private int getDataServerPort() {
+	public static int getDataServerPort() {
 		int port = Integer.getInteger("org.eclipse.dawnsci.data.server.port", -1);
 		if (port<=0) port = Integer.getInteger("GDA/gda.dataserver.port", -1);
 		if (port<=0) port = Integer.getInteger("gda.dataserver.port", -1);

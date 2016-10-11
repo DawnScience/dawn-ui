@@ -177,15 +177,18 @@ public class MappedDataFile implements MapObject{
 	}
 	
 	public void addSuitableParentBlocks(AbstractMapData map, List<MappedDataBlock> list){
-		int[] shape = map.getData().getShape();
-		double[] r = map.getRange();
-		for (MappedDataBlock block : fullDataMap.values()) {
-			if (block.getxSize() == shape[1] && block.getySize() == shape[0]) {
-				if (Arrays.equals(r, range)) {
-					list.add(block);
-				}
-			}
+		if (mapDataMap.containsValue(map)) {
+			list.addAll(fullDataMap.values());
 		}
+//		int[] shape = map.getData().getShape();
+//		double[] r = map.getRange();
+//		for (MappedDataBlock block : fullDataMap.values()) {
+//			if (block.getxSize() == shape[1] && block.getySize() == shape[0]) {
+//				if (Arrays.equals(r, range)) {
+//					list.add(block);
+//				}
+//			}
+//		}
 	}
 	
 

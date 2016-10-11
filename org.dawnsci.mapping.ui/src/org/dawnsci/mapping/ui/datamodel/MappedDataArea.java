@@ -140,7 +140,6 @@ public class MappedDataArea implements MapObject {
 	
 	public List<MappedDataBlock> findSuitableParentBlocks(AbstractMapData map){
 		List<MappedDataBlock> list = new ArrayList<>();
-		list.add(map.getParent());
 		for (MappedDataFile file : files) file.addSuitableParentBlocks(map, list);
 		return list;
 	}

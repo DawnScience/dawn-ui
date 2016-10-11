@@ -12,6 +12,7 @@ import java.util.Properties;
 
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
+import org.dawnsci.mapping.ui.datamodel.LiveDataBean;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
@@ -19,6 +20,7 @@ import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationBean;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
 import org.eclipse.jface.action.IMenuListener;
@@ -126,6 +128,7 @@ public class MappedDataView extends ViewPart {
 		try {
 			final IViewPart view = page.showView(getSecondaryIdAttribute("mapview", "org.dawnsci.mapping.ui.mapview"));
 			map = (IPlottingSystem<Composite>)view.getAdapter(IPlottingSystem.class);
+			map.setPlotType(PlotType.IMAGE);
 		} catch (PartInitException e) {
 			throw new RuntimeException("Could not create the map view", e);
 		}
@@ -189,7 +192,7 @@ public class MappedDataView extends ViewPart {
 				if (e instanceof AssociatedImage) plotManager.addImage((AssociatedImage)e);
 				if (e instanceof MappedDataFile) {
 					MappedDataFile mdf = (MappedDataFile)e;
-					if (mdf.getLiveDataBean() !=null) FileManagerSingleton.getFileManager().importLiveFile(mdf.getPath(), mdf.getLiveDataBean());
+					if (mdf.getLiveDataBean() !=null) FileManagerSingleton.getFileManager().importLiveFile(mdf.getPath(), mdf.getLiveDataBean(),null);
 				}
 				viewer.refresh();
 			}
@@ -307,22 +310,31 @@ public class MappedDataView extends ViewPart {
 
 				@Override
 				public void beanChangePerformed(BeanEvent<StatusBean> evt) {
-					if (!evt.getBean().getStatus().isFinal()) return;
-					if (evt.getBean() instanceof IOperationBean) {
+					System.out.println("bean update " + evt.getBean().toString());
+					
+					if (evt.getBean() instanceof IOperationBean && evt.getBean().getStatus().isRunning()) {
+						String host = MappingScanNewStyleEventObserver.getDataServerHost();
+						int port = MappingScanNewStyleEventObserver.getDataServerPort();
 						final IOperationBean bean = (IOperationBean)evt.getBean();
-						Display.getCurrent().asyncExec(new Runnable() {
-							
-							@Override
-							public void run() {
-								FileManagerSingleton.getFileManager().locallyReloadLiveFile(bean.getOutputFilePath());
-							}
-						});
+						final LiveDataBean lb = new LiveDataBean();
+						lb.setHost(host);
+						lb.setPort(port);
+
+						FileManagerSingleton.getFileManager().importLiveFile(bean.getOutputFilePath(), lb, bean.getFilePath());
+
+						
 						
 					}
 					
+					if (!evt.getBean().getStatus().isFinal()) return;
+					if (evt.getBean() instanceof IOperationBean) {
+						final IOperationBean bean = (IOperationBean)evt.getBean();
+
+						FileManagerSingleton.getFileManager().locallyReloadLiveFile(bean.getOutputFilePath());
+
+
+					}
 				}
-
-
 			});
 			
 			
@@ -342,6 +354,12 @@ public class MappedDataView extends ViewPart {
 	public void setFocus() {
 		if (viewer != null && !viewer.getTree().isDisposed()) viewer.getTree().setFocus(); 
 
+	}
+	
+	@Override
+	public void dispose() {
+		super.dispose();
+		plotManager.stopRepeatPlot();
 	}
 	
 	@Override

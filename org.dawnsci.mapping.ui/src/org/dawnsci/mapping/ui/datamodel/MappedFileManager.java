@@ -77,6 +77,16 @@ public class MappedFileManager {
 		
 		if (!mappedDataArea.contains(path)) return;
 		
+		if (Display.getCurrent() == null) {
+			PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+				
+				@Override
+				public void run() {
+					locallyReloadLiveFile(path);
+				}
+			});
+		}
+		
 		IProgressService service = (IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class);
 		try {
 			service.busyCursorWhile(new IRunnableWithProgress() {
@@ -87,7 +97,7 @@ public class MappedFileManager {
 					mappedDataArea.locallyReloadLiveFile(path);
 					plotManager.plotLayers();
 					PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-
+ 
 						@Override
 						public void run() {
 							viewer.refresh();
@@ -180,7 +190,8 @@ public class MappedFileManager {
 	}
 
 	
-	public void importLiveFile(final String path, LiveDataBean bean) {
+	public void importLiveFile(final String path, LiveDataBean bean, String parentFile) {
+		if (parentFile != null && !mappedDataArea.contains(parentFile)) return;
 		IRemoteDatasetService rds = LocalServiceManager.getRemoteDatasetService();
 		if (rds == null) {
 			logger.error("Could not acquire remote dataset service");
@@ -212,7 +223,14 @@ public class MappedFileManager {
 		
 		logger.error("Could not build map bean from " + path);
 		mappedDataArea.addMappedDataFile(new MappedDataFile(path,bean));
-		viewer.refresh();
+		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				viewer.refresh();
+
+			}
+		});
 		
 	}
 	

@@ -543,6 +543,11 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		for (int j = 0; j < axes.length; j++) {
 			axes[j] = Arrays.asList(new String[]{sslm.getAxesNames()[j]});
 		}
+		if (sslm.getxAxisForRemapping() != null) {
+			List<String> ax = new ArrayList<String>(axes[0]);
+			ax.add(sslm.getxAxisForRemapping());
+			axes[0] = ax;
+		}
 		
 		IOperationService service = ServiceHolder.getOperationService();
 		IOperationBean b = service.createBean();
@@ -579,13 +584,12 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 			logger.error("TODO put description of error here", e);
 		}
 		
-		Map<String,String> props = new HashMap<>();
-		props.put("path", path);
-		props.put("host", sslm.getHost());
-		props.put("port", Integer.toString(sslm.getPort()));
-		EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
-		eventAdmin.postEvent(new Event("org/dawnsci/events/file/OPEN", props));
-		parentMeta.toString();
+//		Map<String,String> props = new HashMap<>();
+//		props.put("path", path);
+//		props.put("host", sslm.getHost());
+//		props.put("port", Integer.toString(sslm.getPort()));
+//		EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
+//		eventAdmin.postEvent(new Event("org/dawnsci/events/file/OPEN", props));
 		
 	}
 	
