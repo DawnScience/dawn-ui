@@ -1,7 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Ui
-Bundle-SymbolicName: org.dawnsci.surfacescatter.ui
+Bundle-SymbolicName: org.dawnsci.surfacescatter.ui;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: org.eclipse.jface;bundle-version="3.11.1"
+Require-Bundle: org.eclipse.jface;bundle-version="3.11.1",
+ org.eclipse.ui;bundle-version="3.107.0",
+ org.dawnsci.spectrum.ui;bundle-version="1.0.0"
