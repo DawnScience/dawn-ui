@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.dawnsci.processing.ui">
+   <implementation class="org.dawnsci.processing.ui.service.OperationUIServiceImpl"/>
+   <service>
+      <provide interface="org.dawnsci.processing.ui.api.IOperationUIService"/>
+   </service>
+</scr:component>
