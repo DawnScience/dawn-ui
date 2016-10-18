@@ -1,5 +1,6 @@
 package org.dawnsci.processing.ui;
 
+import org.dawnsci.processing.ui.api.IOperationUIService;
 import org.eclipse.dawnsci.analysis.api.EventTracker;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionService;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
@@ -19,6 +20,7 @@ public class ServiceHolder {
 	private static IOperationExporterService exporterService;
 	private static EventAdmin eventAdmin;
 	private static IPersistenceService persistenceService;
+	private static IOperationUIService operationUIService;
 
 	public static IExpressionService getExpressionService() {
 		return expressionService;
@@ -82,5 +84,13 @@ public class ServiceHolder {
 
 	public static void setPersistenceService(IPersistenceService persistenceService) {
 		ServiceHolder.persistenceService = persistenceService;
+	}
+	
+	public static IOperationUIService getOperationUIService() {
+		return operationUIService;
+	}
+	
+	public static void setOperationUIService(IOperationUIService operationUIService) {
+		ServiceHolder.operationUIService = operationUIService;
 	}
 }
