@@ -1,7 +1,6 @@
-package org.dawnsci.processing.ui.service;
+package org.dawnsci.processing.ui.model;
 
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -15,8 +14,6 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
-import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
-import org.dawnsci.processing.ui.model.OperationModelViewer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -50,7 +47,6 @@ import org.eclipse.january.dataset.Maths;
 import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.FillLayout;
@@ -63,23 +59,20 @@ import org.eclipse.swt.widgets.Label;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConfigureOperationModelWizardPage extends WizardPage implements PropertyChangeListener, IOperationSetupWizardPage{
+public class ConfigureOperationModelWizardPage extends AbstractOperationModelWizardPage {
 	
 	private IPlottingSystem<Composite> input;
 	private IPlottingSystem<Composite> output;
 	private OperationModelViewer modelViewer;
-	IOperationInputData data;
 	private Job update;
-	private IOperationModel omodel;
-	private IOperationModel model;
 	private Label errorLabel;
 	private IDataset[] axes;
 	private double[] minMax = new double[4];
 	
 	private final static Logger logger = LoggerFactory.getLogger(ConfigureOperationModelWizardPage.class);
 
-	public ConfigureOperationModelWizardPage() {
-		super("ConfigureOperationModelWizardPage", "Configure the operation model", null);
+	public ConfigureOperationModelWizardPage(String name, String description) {
+		super(name, description, null);
 	}
 
 	public Control createDialogArea(Composite parent) {
@@ -130,21 +123,10 @@ public class ConfigureOperationModelWizardPage extends WizardPage implements Pro
 	
 	@Override
 	public void setOperationInputData(final IOperationInputData data) {
+		super.setOperationInputData(data);
 		
-		this.data = data;
 		modelViewer.setOperation(data.getCurrentOperation());
-		model = data.getCurrentOperation().getModel();
-		
-		try {
-			omodel = (IOperationModel)BeanUtils.cloneBean(model);
-		} catch (Exception e) {
-			logger.warn("Could not clone model: " + e.getMessage());
-		} 
-		
-		if (model instanceof AbstractOperationModel) {
-			((AbstractOperationModel)model).addPropertyChangeListener(this);
-		}
-		
+
 		try {
 			MetadataPlotUtils.plotDataWithMetadata(data.getInputData(),input);
 		} catch (Exception e) {

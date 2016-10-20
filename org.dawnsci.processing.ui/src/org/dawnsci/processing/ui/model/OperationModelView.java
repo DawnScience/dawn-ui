@@ -12,7 +12,6 @@ import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.ServiceHolder;
 import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
-import org.dawnsci.processing.ui.service.ConfigureOperationModelWizardPage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
@@ -117,7 +116,7 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 				if (!inputData.getCurrentOperation().getModel().equals(model)) return;
 				
 				//ConfigureOperationModelDialog dialog = new ConfigureOperationModelDialog(getSite().getShell());
-				IOperationSetupWizardPage wizardPage = new ConfigureOperationModelWizardPage();
+				IOperationSetupWizardPage wizardPage = new ConfigureOperationModelWizardPage(inputData.getCurrentOperation().getName(), inputData.getCurrentOperation().getDescription());
 				OperationModelWizard wizard = new OperationModelWizard(wizardPage);
 				wizard.setWindowTitle("Operation Model Configuration");
 				OperationModelWizardDialog dialog = new OperationModelWizardDialog(getSite().getShell(), wizard);
