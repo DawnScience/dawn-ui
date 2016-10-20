@@ -3,7 +3,7 @@ package org.dawnsci.processing.ui.model;
 import java.beans.PropertyChangeListener;
 
 import org.apache.commons.beanutils.BeanUtils;
-import org.dawnsci.processing.ui.slice.IOperationInputData;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationInputData;
 import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.jface.dialogs.Dialog;

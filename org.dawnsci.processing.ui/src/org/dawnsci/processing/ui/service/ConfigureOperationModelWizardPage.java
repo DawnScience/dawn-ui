@@ -17,12 +17,11 @@ import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
 import org.dawnsci.processing.ui.model.OperationModelViewer;
-import org.dawnsci.processing.ui.slice.IOperationInputData;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.dawnsci.analysis.api.processing.IOperation;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationInputData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.PlotAdditionalData;
 import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
@@ -54,8 +53,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -63,17 +60,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ConfigureOperationModelWizardPage extends WizardPage implements PropertyChangeListener, IOperationSetupWizardPage{
 	
-	public ConfigureOperationModelWizardPage(String name) {
-		super(name);
-	}
-
 	private IPlottingSystem<Composite> input;
 	private IPlottingSystem<Composite> output;
 	private OperationModelViewer modelViewer;
@@ -87,10 +78,10 @@ public class ConfigureOperationModelWizardPage extends WizardPage implements Pro
 	
 	private final static Logger logger = LoggerFactory.getLogger(ConfigureOperationModelWizardPage.class);
 
-//	public ConfigureOperationModelDialog(Shell parentShell) {
-//		super(parentShell);
-//	}
-//	
+	public ConfigureOperationModelWizardPage() {
+		super("ConfigureOperationModelWizardPage", "Configure the operation model", null);
+	}
+
 	public Control createDialogArea(Composite parent) {
 		
 		SashForm sashForm= new SashForm(parent, SWT.HORIZONTAL);
@@ -137,6 +128,7 @@ public class ConfigureOperationModelWizardPage extends WizardPage implements Pro
 		return system;
 	}
 	
+	@Override
 	public void setOperationInputData(final IOperationInputData data) {
 		
 		this.data = data;
@@ -305,13 +297,6 @@ public class ConfigureOperationModelWizardPage extends WizardPage implements Pro
 		return rois;
 	}
 
-
-//	@Override
-//	protected void configureShell(Shell newShell) {
-//		super.configureShell(newShell);
-//		newShell.setText("Configure processing parameters");
-//	}
-
 	private double[] getStartAndEndXYFromRectangularROI(RectangularROI roi, IDataset[] axes) {
 		
 		double[] out = new double[]{roi.getPointX(), roi.getLength(0)+ roi.getPointX(),
@@ -460,22 +445,6 @@ public class ConfigureOperationModelWizardPage extends WizardPage implements Pro
 		update.schedule();
 	}
 
-//	@Override
-//	protected void buttonPressed(int buttonId) {
-//		super.buttonPressed(buttonId);
-//		if (model instanceof AbstractOperationModel) {
-//			((AbstractOperationModel)model).removePropertyChangeListener(this);
-//		}
-//		
-//		if (buttonId == Dialog.CANCEL) {
-//			try {
-//				BeanUtils.copyProperties(model, omodel);
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-//		}
-//	}
-	
 	private RegionType getRegionType(RangeType type) {
 		switch (type) {
 		case NONE:
@@ -539,17 +508,6 @@ public class ConfigureOperationModelWizardPage extends WizardPage implements Pro
 		
 		update();
 	}
-	
-//	@Override
-//	protected Point getInitialSize() {
-//		Rectangle bounds = PlatformUI.getWorkbench().getWorkbenchWindows()[0].getShell().getBounds();
-//		return new Point((int)(bounds.width*0.8),(int)(bounds.height*0.8));
-//	}
-//	
-//	@Override
-//	  protected boolean isResizable() {
-//	    return true;
-//	  }
 	
 	private boolean valuesChanged(IRegion region, RectangularROI roi) {
 		
@@ -638,10 +596,19 @@ public class ConfigureOperationModelWizardPage extends WizardPage implements Pro
 		createDialogArea(parent);
 	}
 
-	@Override
-	public void setOperation(IOperationSetupWizardPage operation) {
-		// TODO Auto-generated method stub
+	public void wizardButtonPressed(int buttonId) {
+		if (model instanceof AbstractOperationModel) {
+			((AbstractOperationModel)model).removePropertyChangeListener(this);
+		}
 		
+		if (buttonId == Dialog.CANCEL) {
+			//logger.debug("AbstractOperationModelDialog buttonPressed: CANCEL mode");
+			try {
+				BeanUtils.copyProperties(model, omodel);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 }

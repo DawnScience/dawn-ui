@@ -2,6 +2,7 @@ package org.dawnsci.processing.ui.slice;
 
 import java.util.EventListener;
 
+import org.eclipse.dawnsci.analysis.api.processing.IOperationInputData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.january.dataset.IDataset;
 

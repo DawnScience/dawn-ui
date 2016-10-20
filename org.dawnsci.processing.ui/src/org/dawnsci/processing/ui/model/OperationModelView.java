@@ -10,11 +10,13 @@ import java.util.Map;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.ServiceHolder;
+import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
-import org.dawnsci.processing.ui.slice.IOperationInputData;
+import org.dawnsci.processing.ui.service.ConfigureOperationModelWizardPage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationInputData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -114,9 +116,13 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 				if (inputData == null) return;
 				if (!inputData.getCurrentOperation().getModel().equals(model)) return;
 				
-				ConfigureOperationModelDialog dialog = new ConfigureOperationModelDialog(getSite().getShell());
+				//ConfigureOperationModelDialog dialog = new ConfigureOperationModelDialog(getSite().getShell());
+				IOperationSetupWizardPage wizardPage = new ConfigureOperationModelWizardPage();
+				OperationModelWizard wizard = new OperationModelWizard(wizardPage);
+				wizard.setWindowTitle("Operation Model Configuration");
+				OperationModelWizardDialog dialog = new OperationModelWizardDialog(getSite().getShell(), wizard);
 				dialog.create();
-				dialog.setOperationInputData(inputData);
+				wizardPage.setOperationInputData(inputData);
 				if (dialog.open() == Dialog.OK) {
 					EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
 					Map<String,IOperationInputData> props = new HashMap<>();
