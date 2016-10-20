@@ -12,15 +12,18 @@ import org.slf4j.LoggerFactory;
 public class OperationModelWizard extends Wizard {
 
 	final List<IOperationSetupWizardPage> wizardPages;
+	@SuppressWarnings("unused")
 	final static private Logger logger = LoggerFactory.getLogger(OperationModelWizard.class);
 	
 	public OperationModelWizard(final List<IOperationSetupWizardPage> wizardPages) {
 		this.wizardPages = wizardPages;
+		setHelpAvailable(false);
 	}
 	
 	public OperationModelWizard(final IOperationSetupWizardPage wizardPage) {
 		wizardPages = new ArrayList<>();
 		wizardPages.add(wizardPage);
+		setHelpAvailable(false);
 	}
 	
 	@Override
@@ -30,7 +33,6 @@ public class OperationModelWizard extends Wizard {
 
 	@Override
 	public boolean performFinish() {
-		logger.debug("OperationModelWizard performFinish clicked");
 		wizardPages.stream().forEachOrdered(page -> {
 			page.wizardButtonPressed(Dialog.OK);
 		});
@@ -39,7 +41,6 @@ public class OperationModelWizard extends Wizard {
 
 	@Override
 	public boolean performCancel() {
-		logger.debug("OperationModelWizard performCancel clicked");
 		wizardPages.stream().forEachOrdered(page -> {
 			page.wizardButtonPressed(Dialog.CANCEL);
 		});

@@ -2,7 +2,9 @@ package org.dawnsci.processing.ui.service;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.dawnsci.processing.ui.ServiceHolder;
@@ -35,16 +37,27 @@ public class OperationUIServiceImpl implements IOperationUIService {
 		
 		// The hash only contains the Class wizardPage belongs to.
 		// We need to construct it here.
-		// Try the 3 arg constructor first, followed by the 1 arg constructor.
 		Class <? extends IOperationSetupWizardPage> klazz = operationSetupWizardPages.get(operation_id);
-		if (klazz == null)
+		if (klazz == null) {
+			logger.info("No OperationSetupWizardPage found for {}", operation_id);
 			return null;
-	
+		}
+			
 		Constructor<?> constructor = null;
+	
+		List<Class<?>> ctorClassArgs = new ArrayList<Class<?>>();
+		ctorClassArgs.add(String.class);
+		ctorClassArgs.add(String.class);
+		ctorClassArgs.add(ImageDescriptor.class);
 		
-		try {
-			constructor = klazz.getConstructor(String.class, String.class, ImageDescriptor.class);
-			//
+		for (int i = 3 ; i >= 1 ; i--) {
+			try {
+				constructor = klazz.getConstructor(ctorClassArgs.toArray(new Class<?>[ctorClassArgs.size()]));
+			} catch (NoSuchMethodException | SecurityException e) {
+				// if failure -> go to next
+				ctorClassArgs.remove(ctorClassArgs.size()-1);
+				continue;
+			}
 			String name = operation_id, description = null;
 			ImageDescriptor image = null;
 			try {
@@ -57,36 +70,34 @@ public class OperationUIServiceImpl implements IOperationUIService {
 			} catch (Exception e) {
 				// do nothing
 			}
+			// no images for now...
+			List<Object> ctorArgs = new ArrayList<>();
+			switch (i) {
+			case 3:
+				ctorArgs.add(0, image);
+			case 2:
+				ctorArgs.add(0, description);
+			case 1:
+				ctorArgs.add(0, name);
+				break;
+			default:
+				logger.error("Unexpected case {} in constructor loop", i);
+				return null;
+			}
+			
 			try {
-				return (IOperationSetupWizardPage) constructor.newInstance(name, description, image);
+				IOperationSetupWizardPage rv = (IOperationSetupWizardPage) constructor.newInstance(ctorArgs.toArray(new Object[ctorArgs.size()]));
+				logger.info("{}-arg constructor instance generated for {}", operation_id);
+				return rv;
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException e) {
-				logger.error("Could not instantiate IOperationSetupWizardPage for {}", klazz.getName());
-				logger.error("Stacktrace: ", e);
-				return null;
-			}
-		} catch (NoSuchMethodException | SecurityException e) {
-			try {
-				constructor = klazz.getConstructor(String.class);
-				String name = operation_id;
-				try {
-					name = ServiceHolder.getOperationService().getName(operation_id);
-				} catch (Exception e2) {
-					// do nothing
-				}
-				try {
-					return (IOperationSetupWizardPage) constructor.newInstance(name);
-				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-						| InvocationTargetException e2) {
-					logger.error("Could not instantiate IOperationSetupWizardPage for {}", klazz.getName());
-					logger.error("Stacktrace: ", e2);
-					return null;
-				}
-			} catch (NoSuchMethodException | SecurityException e1) {
-				logger.error("Could not find a suitable constructor for {}!", klazz.getName());
-				return null;
+				logger.warn("Cannot construct instance of {}. Trying another constructor...", operation_id);
+				continue;
 			}
 		}
+		
+		logger.error("Cannot construct instance of {}. No more constructors left to try...", operation_id);
+		return null;
 	}
 
 	private synchronized void checkOperationSetupWizardPages() {
