@@ -24,7 +24,7 @@ public class $className$ extends AbstractFileLoader {
 	/**
 	 * Delimeter for the custom csv
 	 */
-	private static final String DELIMETER = "\\s*";
+	private static final String DELIMETER = "\\s+";
 	/**
 	 * Identifier so that other loaders don't try to load this type of file
 	 */
