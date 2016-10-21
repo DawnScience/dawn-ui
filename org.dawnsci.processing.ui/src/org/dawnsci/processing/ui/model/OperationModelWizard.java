@@ -34,7 +34,7 @@ public class OperationModelWizard extends Wizard {
 	@Override
 	public boolean performFinish() {
 		wizardPages.stream().forEachOrdered(page -> {
-			page.wizardButtonPressed(Dialog.OK);
+			page.wizardTerminatingButtonPressed(Dialog.OK);
 		});
 		return true;
 	}
@@ -42,7 +42,7 @@ public class OperationModelWizard extends Wizard {
 	@Override
 	public boolean performCancel() {
 		wizardPages.stream().forEachOrdered(page -> {
-			page.wizardButtonPressed(Dialog.CANCEL);
+			page.wizardTerminatingButtonPressed(Dialog.CANCEL);
 		});
 		return true;
 	}

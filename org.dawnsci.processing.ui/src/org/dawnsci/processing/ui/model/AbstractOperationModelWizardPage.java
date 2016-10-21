@@ -7,6 +7,7 @@ import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationInputData;
 import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardPage;
 import org.slf4j.Logger;
@@ -32,6 +33,7 @@ public abstract class AbstractOperationModelWizardPage extends WizardPage implem
 		super(name, description, image);
 	}
 	
+	@Override
 	public void setOperationInputData(final IOperationInputData data) {
 		
 		this.data = data;
@@ -48,4 +50,18 @@ public abstract class AbstractOperationModelWizardPage extends WizardPage implem
 		}
 	}
 	
+	@Override
+	public void wizardTerminatingButtonPressed(int buttonId) {
+		if (model instanceof AbstractOperationModel) {
+			((AbstractOperationModel)model).removePropertyChangeListener(this);
+		}
+		
+		if (buttonId == Dialog.CANCEL) {
+			try {
+				BeanUtils.copyProperties(model, omodel);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
 }

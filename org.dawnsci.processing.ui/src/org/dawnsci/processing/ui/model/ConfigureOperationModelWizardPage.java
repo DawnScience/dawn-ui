@@ -578,19 +578,6 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 		createDialogArea(parent);
 	}
 
-	public void wizardButtonPressed(int buttonId) {
-		if (model instanceof AbstractOperationModel) {
-			((AbstractOperationModel)model).removePropertyChangeListener(this);
-		}
-		
-		if (buttonId == Dialog.CANCEL) {
-			//logger.debug("AbstractOperationModelDialog buttonPressed: CANCEL mode");
-			try {
-				BeanUtils.copyProperties(model, omodel);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
+	
 
 }
