@@ -1,10 +1,16 @@
 package org.dawnsci.processing.ui.model;
 
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-
 import org.apache.commons.beanutils.BeanUtils;
+import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationInputData;
+import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.jface.dialogs.Dialog;
@@ -18,6 +24,8 @@ public abstract class AbstractOperationModelWizardPage extends WizardPage implem
 	protected IOperationInputData data;
 	protected IOperationModel omodel;
 	protected IOperationModel model;
+	protected OperationData od = null;
+	private Job update;
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractOperationModelWizardPage.class);
 	
@@ -48,6 +56,7 @@ public abstract class AbstractOperationModelWizardPage extends WizardPage implem
 		if (model instanceof AbstractOperationModel) {
 			((AbstractOperationModel)model).addPropertyChangeListener(this);
 		}
+		update();
 	}
 	
 	@Override
@@ -64,4 +73,44 @@ public abstract class AbstractOperationModelWizardPage extends WizardPage implem
 			}
 		}
 	}
+	
+	@Override
+	public void update() {
+
+		if (update == null) {
+			update = new Job("calculate...") {
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					try {
+						od = data.getCurrentOperation().execute(data.getInputData(),new ProgressMonitorWrapper(monitor));
+					} catch (final Exception e) {
+						logger.error("Exception caught: ", e);
+					}
+					return Status.OK_STATUS;
+				}
+			};
+		}
+
+		update.cancel();
+		update.schedule();
+	}
+	
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		update();
+	}
+	
+	@Override
+	public OperationData getOperationData() {
+		return od;
+	}
+
+	@Override
+	public void setPageComplete(boolean complete) {
+		if (complete)
+			update();
+		super.setPageComplete(complete);
+	}
+	
 }

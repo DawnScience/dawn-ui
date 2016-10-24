@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
@@ -21,7 +20,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationInputData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.PlotAdditionalData;
-import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.ModelUtils;
 import org.eclipse.dawnsci.analysis.api.processing.model.OperationModelField;
@@ -45,7 +43,6 @@ import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.Maths;
 import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -350,7 +347,7 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 	
 
 	
-	private void update() {
+	public void update() {
 
 		if (update == null) {
 			update = new Job("calculate...") {
@@ -410,7 +407,7 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 							@Override
 							public void run() {
 								if (!errorLabel.isDisposed()) {
-									errorLabel.setText(e.getMessage() == null ? "Unknowb error" : e.getMessage());
+									errorLabel.setText(e.getMessage() == null ? "Unknown error" : e.getMessage());
 									errorLabel.pack();
 								}
 								
