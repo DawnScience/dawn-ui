@@ -15,6 +15,7 @@ import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,7 @@ public abstract class AbstractOperationModelWizardPage extends WizardPage implem
 	protected IOperationModel omodel;
 	protected IOperationModel model;
 	protected OperationData od = null;
+	protected OperationData id = null;
 	private Job update;
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractOperationModelWizardPage.class);
@@ -58,6 +60,11 @@ public abstract class AbstractOperationModelWizardPage extends WizardPage implem
 		}
 		update();
 	}
+
+	@Override
+	public IOperationInputData getOperationInputData() {
+		return data;
+	}
 	
 	@Override
 	public void wizardTerminatingButtonPressed(int buttonId) {
@@ -83,7 +90,7 @@ public abstract class AbstractOperationModelWizardPage extends WizardPage implem
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
-						od = data.getCurrentOperation().execute(data.getInputData(),new ProgressMonitorWrapper(monitor));
+						od = data.getCurrentOperation().execute(id.getData() ,new ProgressMonitorWrapper(monitor));
 					} catch (final Exception e) {
 						logger.error("Exception caught: ", e);
 					}
@@ -105,12 +112,21 @@ public abstract class AbstractOperationModelWizardPage extends WizardPage implem
 	public OperationData getOperationData() {
 		return od;
 	}
-
+	
 	@Override
-	public void setPageComplete(boolean complete) {
-		if (complete)
-			update();
-		super.setPageComplete(complete);
+	public void setOperationData(OperationData id) {
+		this.id = id;
 	}
 	
+	/*@Override
+	public IWizardPage getNextPage() {
+		IWizardPage page = super.getNextPage();
+		if (page != null) {
+			page.setVisible(true);
+			page.getControl().redraw();
+			page.getControl().pack(true);;
+			page.getControl().setFocus();
+		}
+		return page;
+	}*/
 }

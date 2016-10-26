@@ -13,8 +13,12 @@ public interface IOperationSetupWizardPage extends IWizardPage {
 	public void wizardTerminatingButtonPressed(int buttonId);
 	
 	public void setOperationInputData(final IOperationInputData data);
+	
+	public IOperationInputData getOperationInputData();
 
 	public void update();
 	
 	public OperationData getOperationData();
+	
+	public void setOperationData(OperationData od);
 }

@@ -10,8 +10,12 @@ import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.ServiceHolder;
 import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
+import org.dawnsci.processing.ui.slice.EscapableSliceVisitor;
+import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationInputData;
+import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
+import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.Dialog;
@@ -35,6 +39,7 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 	private OperationModelViewer modelEditor;
 	private IOperationInputData inputData;
 	private IAction configure;
+	@SuppressWarnings("unused")
 	private final static Logger logger = LoggerFactory.getLogger(OperationModelView.class);
 	
 	@Override
@@ -53,9 +58,7 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 				if (inputData == null) return;
 				if (!inputData.getCurrentOperation().getModel().equals(model)) return;
 			
-				
-				
-
+				/*
 				// check if this operation has a wizardpage 
 				IOperationSetupWizardPage wizardPage = ServiceHolder.getOperationUIService().getWizardPage(inputData.getCurrentOperation().getId());
 				
@@ -63,7 +66,7 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 					wizardPage = new ConfigureOperationModelWizardPage(inputData.getCurrentOperation().getName(), inputData.getCurrentOperation().getDescription());
 				OperationModelWizard wizard = new OperationModelWizard(wizardPage);
 				wizard.setWindowTitle("Operation Model Configuration");
-				OperationModelWizardDialog dialog = new OperationModelWizardDialog(getSite().getShell(), wizard);
+				OperationModelWizardDialog dialog = new OperationModelWizardDialog(getSite().getShell(), wizard, new OperationData(inputData.getInputData()));
 				dialog.create();
 				wizardPage.setOperationInputData(inputData);
 				if (dialog.open() == Dialog.OK) {
@@ -72,6 +75,42 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 					eventAdmin.postEvent(new Event("org/dawnsci/events/processing/PROCESSUPDATE", props));
 					modelEditor.refresh();
 				}
+				*/
+				
+				try {
+					IOperation<? extends IOperationModel, ? extends OperationData> operation1 = ServiceHolder.getOperationService().create("uk.ac.diamond.scisoft.spectroscopy.operations.XRFGenerateEnergyAxisOperation");
+					IOperation<? extends IOperationModel, ? extends OperationData> operation2 = ServiceHolder.getOperationService().create("uk.ac.diamond.scisoft.spectroscopy.operations.XAFSShiftEnergyAxisOperation");
+					IOperation<? extends IOperationModel, ? extends OperationData> operationXRF = ServiceHolder.getOperationService().create("uk.ac.diamond.scisoft.spectroscopy.operations.XRFElementalMappingROIOperation");
+					IOperation<? extends IOperationModel, ? extends OperationData> operation3 = ServiceHolder.getOperationService().create("uk.ac.diamond.scisoft.analysis.processing.operations.oned.Crop1DOperation");
+					IOperationInputData inputData1 = new OperationInputDataImpl(inputData.getInputData(), operation1);
+					OperationData operationResults1 = operation1.execute(inputData.getInputData(), null);
+					IOperationInputData inputData2 = new OperationInputDataImpl(operationResults1.getData(), operation2);
+					OperationData operationResults2 = operation2.execute(operationResults1.getData(), null);
+					IOperationInputData inputDataXRF = new OperationInputDataImpl(operationResults2.getData(), operationXRF);
+					OperationData operationResultsXRF = operationXRF.execute(operationResults2.getData(), null);
+					IOperationInputData inputData3 = new OperationInputDataImpl(operationResultsXRF.getData(), operation3);
+					IOperationSetupWizardPage page1 = new ConfigureOperationModelWizardPage(operation1.getName(), operation1.getDescription());
+					IOperationSetupWizardPage page2 = new ConfigureOperationModelWizardPage(operation2.getName(), operation2.getDescription());
+					IOperationSetupWizardPage pageXRF = ServiceHolder.getOperationUIService().getWizardPage(inputDataXRF.getCurrentOperation().getId());
+					IOperationSetupWizardPage page3 = new ConfigureOperationModelWizardPage(operation3.getName(), operation3.getDescription());
+					OperationModelWizard wizard = new OperationModelWizard(page1, page2, pageXRF, page3);
+					wizard.setWindowTitle("Testttttttt");
+					OperationModelWizardDialog dialog = new OperationModelWizardDialog(getSite().getShell(), wizard, new OperationData(inputData1.getInputData()));
+					dialog.create();
+					page1.setOperationInputData(inputData1);
+					page2.setOperationInputData(inputData2);
+					pageXRF.setOperationInputData(inputDataXRF);
+					page3.setOperationInputData(inputData3);
+					if (dialog.open() == Dialog.OK) {
+						logger.debug("OK clicked");
+					} else {
+						logger.debug("Cancel clicked");
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 				
 			}
 		};
@@ -132,5 +171,31 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 		}		
 	}
 
+	private class OperationInputDataImpl implements IOperationInputData {
+
+		private IDataset ds;
+		private IOperation<? extends IOperationModel, ? extends OperationData> op;
+		
+		public OperationInputDataImpl(IDataset ds, IOperation<? extends IOperationModel, ? extends OperationData> op) {
+			this.ds = ds;
+			this.op = op;
+		}
+		
+		@Override
+		public void setInputData(IDataset ds) {
+			this.ds = ds;
+		}	
+		
+		@Override
+		public IDataset getInputData() {
+			return ds;
+		}
+
+		@Override
+		public IOperation<? extends IOperationModel, ? extends OperationData> getCurrentOperation() {
+			return op;
+		}
+		
+	}
 
 }

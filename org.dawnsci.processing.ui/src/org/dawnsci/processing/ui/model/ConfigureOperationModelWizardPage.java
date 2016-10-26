@@ -72,10 +72,12 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 		super(name, description, null);
 	}
 
-	public Control createDialogArea(Composite parent) {
-		
-		SashForm sashForm= new SashForm(parent, SWT.HORIZONTAL);
-		setControl(sashForm);
+	public void createDialogArea(Composite parent) {
+		logger.debug("Entering ConfigureOperationModelWizardPage createDialogArea");
+		logger.debug("parent {}", parent);
+		Composite container = new Composite(parent, SWT.NONE);
+		container.setLayout(new GridLayout(2, true));
+		SashForm sashForm= new SashForm(container, SWT.HORIZONTAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,2,1));
 		
 		final SashForm left = new SashForm(sashForm, SWT.VERTICAL);
@@ -92,8 +94,9 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 		
 		output = createPlottingSystem(right,"DialogOutput");
 		left.setWeights(new int[]{70,30});
-		errorLabel = new Label(parent, SWT.WRAP);
-		return parent;
+		errorLabel = new Label(container, SWT.WRAP);
+		setControl(container);
+		logger.debug("Leaving ConfigureOperationModelWizardPage createDialogArea");
 	}
 	
 	private IPlottingSystem<Composite> createPlottingSystem(Composite right, String name){
@@ -125,9 +128,10 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 		modelViewer.setOperation(data.getCurrentOperation());
 
 		try {
-			MetadataPlotUtils.plotDataWithMetadata(data.getInputData(),input);
+			MetadataPlotUtils.plotDataWithMetadata(data.getInputData() ,input);
 		} catch (Exception e) {
 			logger.warn("Could not plot data: " + e.getMessage());
+			return;
 		}
 		
 		update();
@@ -164,7 +168,7 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 			}
 		}
 		
-		Map<String,ROIStruct> rois = getROIs(data.getCurrentOperation().getModel(),data.getInputData());
+		Map<String,ROIStruct> rois = getROIs(data.getCurrentOperation().getModel(), data.getInputData());
 		boolean sector = false;
 		
 		IDiffractionMetadata d = AbstractOperation.getFirstDiffractionMetadata(data.getInputData());
@@ -348,14 +352,14 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 
 	
 	public void update() {
-
+		logger.debug("calling Update for {}", data.getCurrentOperation().getName());
 		if (update == null) {
 			update = new Job("calculate...") {
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
-						OperationData od = data.getCurrentOperation().execute(data.getInputData(),new ProgressMonitorWrapper(monitor));
+						od = data.getCurrentOperation().execute(id.getData(),new ProgressMonitorWrapper(monitor));
 						final IDataset out = od.getData();
 						PlotAdditionalData an = data.getCurrentOperation().getClass().getAnnotation(PlotAdditionalData.class);
 						IDataset aux = null;
@@ -386,7 +390,7 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 									if (additional!=null) {
 										if (onInput) {
 											input.clear();
-											MetadataPlotUtils.plotDataWithMetadata(data.getInputData(),input);
+											MetadataPlotUtils.plotDataWithMetadata(id.getData(),input);
 											MetadataPlotUtils.plotDataWithMetadata(additional, input, false);
 										} else {
 											MetadataPlotUtils.plotDataWithMetadata(additional, output, false);
@@ -573,6 +577,7 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 	@Override
 	public void createControl(Composite parent) {
 		createDialogArea(parent);
+		//setVisible(true);
 	}
 
 	

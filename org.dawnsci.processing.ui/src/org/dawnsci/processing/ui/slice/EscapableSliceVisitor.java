@@ -187,6 +187,11 @@ public class EscapableSliceVisitor implements SliceVisitor {
 		public IDataset getInputData() {
 			return ds;
 		}
+		
+		@Override
+		public void setInputData(IDataset ds) {
+			this.ds = ds;
+		}
 
 		@Override
 		public IOperation<? extends IOperationModel, ? extends OperationData> getCurrentOperation() {
