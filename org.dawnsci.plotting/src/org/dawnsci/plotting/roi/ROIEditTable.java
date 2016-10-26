@@ -531,9 +531,9 @@ public class ROIEditTable  {
 			RingROI orig = (RingROI) roi;
 			final double[] cent  = getPoint(coords, (RegionRow)rows.get(0));
 			final double[] radii = ((RegionRow)rows.get(1)).getPoint();
-			final String symmetryName = ((SymmetryRow)rows.get(3)).getSymmetryName();
 
 			if (orig instanceof SectorROI) {
+				final String symmetryName = ((SymmetryRow)rows.get(3)).getSymmetryName();
 				SectorROI so = (SectorROI) orig;
 				SectorROI sr = new SectorROI(cent[0],
 						 cent[1],
