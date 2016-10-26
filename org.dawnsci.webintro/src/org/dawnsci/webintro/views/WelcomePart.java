@@ -135,7 +135,7 @@ public class WelcomePart extends IntroPart {
 	
 	@Override
 	public String getTitle() {
-		return "DAWN Welcome";
+		return "Welcome";
 	}
 
 	@Override
