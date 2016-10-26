@@ -20,7 +20,6 @@ import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.StringDataset;
 
 import uk.ac.diamond.scisoft.analysis.io.NexusTreeUtils;
 
@@ -79,7 +78,7 @@ public class MapBeanBuilder {
 			
 			if (ad.getSize() != rank) {
 				if (ad.getSize() == 1) {
-					String string = ad.getString(0);
+					String string = ad.getString(new int[ad.getRank()]);
 					String[] split = string.split(",");
 					if (split.length == rank) {
 						ad = DatasetFactory.createFromObject(split);
