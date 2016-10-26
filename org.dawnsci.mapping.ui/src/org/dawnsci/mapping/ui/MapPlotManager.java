@@ -347,13 +347,13 @@ public class MapPlotManager {
 		return null;
 	}
 	
-	public MappedData getTopMap(){
+	public AbstractMapData getTopMap(){
 		
 		Iterator<MapTrace> iterator = layers.iterator();
 		
 		while (iterator.hasNext()) {
 			MapObject l = iterator.next().getMap();
-			if (l instanceof AbstractMapData) return (MappedData)l;
+			if (l instanceof AbstractMapData) return (AbstractMapData)l;
 		}
 		
 		return null;
