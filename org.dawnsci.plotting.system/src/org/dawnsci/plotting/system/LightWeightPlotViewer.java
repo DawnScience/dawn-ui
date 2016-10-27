@@ -169,7 +169,9 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	private LightWeightPlotActions plotActionsCreator;
 	private Figure                 plotContents;
 	private ColorMapRamp           intensity;
-    private ScaledSliderFigure     folderScale;
+	private ScaledSliderFigure     folderScale;
+	public static final String XAXIS_DEFAULT_NAME = "X-Axis";
+	public static final String YAXIS_DEFAULT_NAME = "Y-Axis";
 
 	private LayeredPane content;
 
@@ -613,7 +615,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	}
 
 	private void fillAxisConfigure(IMenuManager manager, final Axis axis) {
-		final Action configure = new Action("Configure '" + (axis.isHorizontal() ? "X-Axis": "Y-Axis") + "'",
+		final Action configure = new Action("Configure '" + (axis.isHorizontal() ? XAXIS_DEFAULT_NAME : YAXIS_DEFAULT_NAME) + "'",
 				PlottingSystemActivator.getImageDescriptor("icons/Configure.png")) {
 			public void run() {
 				final XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getDefault().getActiveShell(), xyGraph, getSystem().isRescale());
@@ -908,8 +910,8 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			setTitle(title);
 		}
 		String n = getName(x,rootName);
-		if (n != null && n.trim().length() > 0) // only override if axis dataset has name
-			xAxis.setTitle(n);
+		// only override if axis dataset has name
+		xAxis.setTitle((n != null && n.trim().length() > 0)? n : XAXIS_DEFAULT_NAME);
 
 		//create a trace data provider, which will provide the data to the trace.
 		int iplot = 0;
@@ -920,7 +922,8 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			IDataset y = ys.get(i);
 			if (y==null) continue;
 			final String   dataName = dataNames!=null ? dataNames.get(i) : null;
-			
+			// set yaxis name
+			yAxis.setTitle(dataName != null ? y.getName() : YAXIS_DEFAULT_NAME);
 			final LineTrace trace = new LineTrace(getName(y,rootName));
 			LineTraceImpl wrapper = new LineTraceImpl(system, trace);
 			wrapper.setDataName(dataName);
@@ -934,7 +937,6 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			
 			//create the trace
 			trace.init(xAxis, yAxis, traceDataProvider);	
-			
 			
 			if (y.getName()!=null && !"".equals(y.getName())) {
 				if (traceMap!=null) traceMap.put(y.getName(), wrapper);
@@ -1642,7 +1644,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			i++;
 		}
 		buf.append(" against ");
-		buf.append(x.getName());
+		buf.append((x != null && x.getName() != null && !x.getName().isEmpty()) ? x.getName() : XAXIS_DEFAULT_NAME);
 		return buf.toString();
 	}
 

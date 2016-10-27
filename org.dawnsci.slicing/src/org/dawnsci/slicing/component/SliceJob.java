@@ -158,21 +158,17 @@ class SliceJob extends Job {
 						ILineTrace lt = (ILineTrace)line;
 						lt.setData(x, s);
 						lt.setName(sliceSource.getDataName());
-						plottingSystem.setTitle(s.getName());
+						// set axes name
+						String xaxisname = (x != null && x.getName() != null && !x.getName().isEmpty()) ? x.getName() : "X-Axis";
+						plottingSystem.getSelectedXAxis().setTitle(xaxisname);
+						plottingSystem.getSelectedYAxis().setTitle(s.getName());
+						plottingSystem.setTitle(s.getName() + " against " + xaxisname);
 					}
 				});
 			} else {
 				plottingSystem.clearTraces();
 				plottingSystem.createPlot1D(x, Arrays.asList(slice), Arrays.asList(sliceSource.getDataName()), slice.getName(), monitor);
 			}
-			
-			Display.getDefault().syncExec(new Runnable() {
-				public void run() {
-					if (plottingSystem.getSelectedXAxis()!=null) plottingSystem.getSelectedXAxis().setTitle(x.getName());
-					if (plottingSystem.getSelectedYAxis()!=null) plottingSystem.getSelectedYAxis().setTitle("");
-				}
-			});
-			
 		} else if (type==PlotType.XY_STACKED || type==PlotType.XY_STACKED_3D || type == PlotType.XY_SCATTER_3D) {
 			
 			plottingSystem.clearTraces();
