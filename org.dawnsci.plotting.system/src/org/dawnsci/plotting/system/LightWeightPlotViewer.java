@@ -921,9 +921,10 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 
 			IDataset y = ys.get(i);
 			if (y==null) continue;
-			final String   dataName = dataNames!=null ? dataNames.get(i) : null;
 			// set yaxis name
-			yAxis.setTitle(dataName != null ? y.getName() : YAXIS_DEFAULT_NAME);
+			String dataName = dataNames!=null ? dataNames.get(i) : null;
+			dataName = dataName == null ? ((y.getName() != null && !y.getName().isEmpty()) ? y.getName() : YAXIS_DEFAULT_NAME) : dataName;
+			yAxis.setTitle(dataName);
 			final LineTrace trace = new LineTrace(getName(y,rootName));
 			LineTraceImpl wrapper = new LineTraceImpl(system, trace);
 			wrapper.setDataName(dataName);
