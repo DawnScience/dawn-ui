@@ -154,7 +154,7 @@ public class EscapableSliceVisitor implements SliceVisitor {
 				SliceFromSeriesMetadata ssm = out.getMetadata(SliceFromSeriesMetadata.class).get(0);
 				Slice[] s = ssm.getSliceFromInput();
 				String n = ssm.getFilePath();
-				if (n != null && !n.isEmpty()) {
+				if (n != null && !n.isEmpty() && (out.getName() == null || out.getName().isEmpty())) {
 					File f = new File(n);
 					String b = FilenameUtils.getBaseName(f.getAbsolutePath());
 					String name = b + "_" + Slice.createString(s);
