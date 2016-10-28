@@ -40,7 +40,7 @@ public class MappedDataTest {
 		ILazyDataset lazyDataset = data.getLazyDataset(MapNexusFileBuilderUtils.DETECTOR_PATH);
 		
 		gridScanBlock = new MappedDataBlock(MapNexusFileBuilderUtils.DETECTOR_PATH,
-				lazyDataset, 1, 0, file.getAbsolutePath());
+				lazyDataset, 1, 0, file.getAbsolutePath(),2);
 		
 		ILazyDataset sum = data.getLazyDataset(MapNexusFileBuilderUtils.SUM_PATH);
 		

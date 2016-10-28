@@ -3,21 +3,27 @@ package org.dawnsci.mapping.ui.test;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.util.Map.Entry;
 
 import org.dawnsci.mapping.ui.LocalServiceManager;
+import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
+import org.dawnsci.mapping.ui.datamodel.MappedData;
+import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
+import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
+import org.dawnsci.mapping.ui.datamodel.MappedFileFactory;
 import org.dawnsci.mapping.ui.wizards.MapBeanBuilder;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.january.dataset.ILazyDataset;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.io.LoaderServiceImpl;
 
-public class MapBeanBuilderTest {
+public class MappedFileFactoryTest {
 
 	@ClassRule
 	public static TemporaryFolder folder= new TemporaryFolder();
@@ -34,31 +40,33 @@ public class MapBeanBuilderTest {
 		LocalServiceManager.setLoaderService(new LoaderServiceImpl());
 	}
 	
-	
 	@Test
-	public void testBuildBean() throws Exception {
-
-		IDataHolder data = LoaderFactory.getData(file.getAbsolutePath());
-		MappedDataFileBean buildBean = MapBeanBuilder.buildBean(data.getTree());
-		assertTrue(buildBean.checkValid());
-	}
-	
-	@Test
-	public void testBuildBeanAxesNamesGridScan() throws Exception {
+	public void loadGridScan() throws Exception{
 
 		IDataHolder data = LoaderFactory.getData(file.getAbsolutePath());
 		MappedDataFileBean buildBean = MapBeanBuilder.buildBean(data.getTree(), MapNexusFileBuilderUtils.STAGE_X,
 				MapNexusFileBuilderUtils.STAGE_Y);
-		assertTrue(buildBean.checkValid());
+		
+		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(file.getAbsolutePath(), buildBean, null);
+		assertNotNull(mdf);
 	}
 	
 	@Test
-	public void testBuildBeanAxesNamesGridScanWithZ() throws Exception {
+	public void loadGridWithZScan() throws Exception{
 
 		IDataHolder data = LoaderFactory.getData(file1.getAbsolutePath());
 		MappedDataFileBean buildBean = MapBeanBuilder.buildBean(data.getTree(), MapNexusFileBuilderUtils.STAGE_X,
 				MapNexusFileBuilderUtils.STAGE_Y);
-		assertNotNull(buildBean);
-		assertTrue(buildBean.checkValid());
+		
+		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(file1.getAbsolutePath(), buildBean, null);
+		assertNotNull(mdf);
+		
+		Entry<String, MappedDataBlock> next = mdf.getDataBlockMap().entrySet().iterator().next();
+		MappedDataBlock value = next.getValue();
+		assertEquals(5, value.getLazy().getRank());
+		
+		 AbstractMapData map = mdf.getMap();
+		assertEquals(3, map.getData().getRank());
 	}
+
 }

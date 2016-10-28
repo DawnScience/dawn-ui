@@ -24,24 +24,40 @@ public class MappedDataBlock implements MapObject {
 	ILazyDataset dataset;
 	int yDim = 0;
 	int xDim = 1;
+	int scanRank = 0;
 	private double[] range;
 	private boolean connected = false;
+	private SliceND currentSlice;
 	
 	private LiveRemoteAxes axes;
 	
 	private static final Logger logger = LoggerFactory.getLogger(MappedDataBlock.class);
 	
-	public MappedDataBlock(String name, ILazyDataset dataset, int xDim, int yDim, String path) {
+	public MappedDataBlock(String name, ILazyDataset dataset, int xDim, int yDim, String path, int scanRank) {
 		this.name = name;
 		this.dataset = dataset;
 		this.xDim = xDim;
 		this.yDim = yDim;
 		this.range = calculateRange(dataset);
 		this.path = path;
+		this.scanRank = scanRank;
+		buildCurrentSlice();
 	}
 	
-	public MappedDataBlock(String name, IDatasetConnector dataset, int xDim, int yDim, String path, LiveRemoteAxes axes, String host, int port) {
-		this(name, dataset.getDataset(), xDim, yDim, path);
+	public int getScanRank() {
+		return scanRank;
+	}
+
+	private void buildCurrentSlice() {
+		currentSlice = new SliceND(dataset.getShape());
+		for (int i = 0; i < scanRank ; i++) {
+			if (!(i == xDim || i == yDim)) currentSlice.setSlice(i, 0, 1, 1);
+		}
+		
+	}
+
+	public MappedDataBlock(String name, IDatasetConnector dataset, int xDim, int yDim, String path,int scanRank, LiveRemoteAxes axes, String host, int port) {
+		this(name, dataset.getDataset(), xDim, yDim, path,scanRank);
 		this.axes = axes;
 
 	}
@@ -81,7 +97,7 @@ public class MappedDataBlock implements MapObject {
 	}
 	
 	protected SliceND getMatchingDataSlice(int x, int y) {
-		SliceND slice = new SliceND(dataset.getShape());
+		SliceND slice = currentSlice.clone();
 		slice.setSlice(yDim,y,y+1,1);
 		slice.setSlice(xDim,x,x+1,1);
 		
@@ -155,7 +171,7 @@ public class MappedDataBlock implements MapObject {
 		
 		if (block instanceof IDatasetConnector) return null;
 		
-		IDataset[] ax = MetadataPlotUtils.getAxesFromMetadata(block);
+		IDataset[] ax = MetadataPlotUtils.getAxesAsIDatasetArray(block);
 		
 		double[] range = new double[4];
 		int xs = ax[xDim].getSize();

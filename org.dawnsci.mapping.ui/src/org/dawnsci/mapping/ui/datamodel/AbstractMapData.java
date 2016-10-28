@@ -5,6 +5,7 @@ import org.eclipse.january.dataset.IDataListener;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDatasetConnector;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.SliceND;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +19,9 @@ public abstract class AbstractMapData implements PlottableMapObject{
 	protected MappedDataBlock parent;
 	private int transparency = -1;
 	private double[] range;
+	private SliceND currentSlice;
+	private int xDim = 1;
+	private int yDim = 2;
 	
 	protected boolean connected = false;
 	protected boolean live;
@@ -30,6 +34,7 @@ public abstract class AbstractMapData implements PlottableMapObject{
 		this.path = path;
 		this.oParent = this.parent = parent;
 		range = calculateRange(map);
+		buildCurrentSlice();
 	}
 	
 	public AbstractMapData(String name, IDatasetConnector map, MappedDataBlock parent, String path) {
@@ -38,6 +43,16 @@ public abstract class AbstractMapData implements PlottableMapObject{
 		this.path = path;
 		this.oParent = this.parent = parent;
 		live = true;
+		buildCurrentSlice();
+	}
+	
+	private void buildCurrentSlice() {
+		xDim = parent.getxDim();
+		yDim = parent.getyDim();
+		currentSlice = new SliceND(map.getShape());
+		for (int i = 0; i < map.getRank() ; i++) {
+			if (!(i == xDim || i == yDim)) currentSlice.setSlice(i, 0, 1, 1);
+		}
 	}
 	
 	public abstract IDataset getSpectrum(double x, double y);

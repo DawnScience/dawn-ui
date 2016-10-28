@@ -43,7 +43,7 @@ public class MappedFileFactory {
 				if (monitor.isCancelled()) return null;
 				monitor.subTask(name);
 			}
-			MappedDataBlock block = setUpBlock(path, name, b, bean.getLiveBean());
+			MappedDataBlock block = setUpBlock(path, name, b, bean.getLiveBean(),bean.getScanRank());
 			file.addMapObject(name, block);
 
 			if (monitor != null) monitor.worked(1);
@@ -74,14 +74,14 @@ public class MappedFileFactory {
 	}
 	
 	
-	private static MappedDataBlock setUpBlock(String path, String blockName, MappedBlockBean bean, LiveDataBean live) {
+	private static MappedDataBlock setUpBlock(String path, String blockName, MappedBlockBean bean, LiveDataBean live, int scanRank) {
 		MappedDataBlock block = null;
 		
 		List<String> axesNames = Arrays.asList(bean.getAxes());
 		if (live != null) {
 			IDatasetConnector lz = getRemoteDataset(path,blockName,live);
 			LiveRemoteAxes remoteAxes = getRemoteAxes(axesNames, path, bean, live);
-			block = new MappedDataBlock(blockName, lz, bean.getxDim(), bean.getyDim(), path, remoteAxes, live.getHost(),live.getPort());
+			block = new MappedDataBlock(blockName, lz, bean.getxDim(), bean.getyDim(), path,scanRank, remoteAxes, live.getHost(),live.getPort());
 			return block;
 		}
 		
@@ -91,7 +91,7 @@ public class MappedFileFactory {
 			lz.clearMetadata(AxesMetadata.class);
 			AxesMetadata axm = checkAndBuildAxesMetadata(axesNames, path, bean);
 			lz.setMetadata(axm);
-			block = new MappedDataBlock(blockName, lz, bean.getxDim(), bean.getyDim(), path);
+			block = new MappedDataBlock(blockName, lz, bean.getxDim(), bean.getyDim(), path,scanRank);
 		} catch (Exception e) {
 			
 		}
@@ -119,11 +119,6 @@ public class MappedFileFactory {
 			if (live == null) {
 				lz.clearMetadata(AxesMetadata.class);
 				d = DatasetUtils.sliceAndConvertLazyDataset(lz);
-				
-				while (d.getRank() > 2) {
-					d = d.sum(d.getRank()-1);
-					logger.warn("Summing " + mapName);
-				}
 
 			}
 			

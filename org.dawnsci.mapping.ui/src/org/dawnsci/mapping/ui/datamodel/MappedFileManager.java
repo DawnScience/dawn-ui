@@ -42,11 +42,18 @@ public class MappedFileManager {
 	private MapPlotManager plotManager;
 	private MappedDataArea mappedDataArea;
 	private Viewer viewer;
+	private String xAxisName;
+	private String yAxisName;
 
 	public void init(MapPlotManager plotManager, MappedDataArea mappedDataArea, Viewer viewer){
 		this.plotManager = plotManager;
 		this.mappedDataArea = mappedDataArea;
 		this.viewer = viewer;
+	}
+	
+	public void setXandYAxesName(String xAxisName, String yAxisName){
+		this.xAxisName = xAxisName;
+		this.yAxisName = yAxisName;
 	}
 	
 	public void removeFile(MappedDataFile file) {

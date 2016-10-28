@@ -12,6 +12,14 @@ public class MappedDataArea implements MapObject {
 	private List<MappedDataFile> files = new ArrayList<MappedDataFile>();
 	private static final Logger logger = LoggerFactory.getLogger(MappedDataArea.class);
 	
+	private String xAxisName;
+	private String yAxisName;
+	
+	public void setXandYAxesName(String xAxisName, String yAxisName){
+		this.xAxisName = xAxisName;
+		this.yAxisName = yAxisName;
+	}
+	
 	public void addMappedDataFile(MappedDataFile file) {
 //		files.clear();
 		if (file.getLiveDataBean() != null) {

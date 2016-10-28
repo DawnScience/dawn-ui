@@ -9,7 +9,16 @@ public class MappedDataFileBean {
 	private List<MapBean> maps = new ArrayList<MapBean>();
 	private List<AssociatedImageBean> images = new ArrayList<AssociatedImageBean>();
 	private LiveDataBean liveBean = null;
+	private int scanRank;
 	
+	public int getScanRank() {
+		return scanRank;
+	}
+
+	public void setScanRank(int scanRank) {
+		this.scanRank = scanRank;
+	}
+
 	public void addBlock(MappedBlockBean bean) {
 		blocks.add(bean);
 	}

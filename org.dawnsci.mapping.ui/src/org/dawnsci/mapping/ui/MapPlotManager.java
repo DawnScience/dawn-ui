@@ -89,8 +89,10 @@ public class MapPlotManager {
 			}
 		});
 		
-		List<IAxis> axes = data.getAxes();
-		for (IAxis axis : axes) axis.setAxisAutoscaleTight(true);
+		if (data.getAxes() != null) {
+			List<IAxis> axes = data.getAxes();
+			for (IAxis axis : axes) axis.setAxisAutoscaleTight(true);
+		}
 		
 	}
 	

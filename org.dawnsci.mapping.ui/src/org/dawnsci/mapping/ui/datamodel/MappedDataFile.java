@@ -44,6 +44,10 @@ public class MappedDataFile implements MapObject{
 		return path;
 	}
 	
+	public void updateXandYDimensions(String xName, String yName) {
+		
+	}
+	
 	public void locallyReloadLiveFile(){
 		if (descriptionBean == null) return;
 		descriptionBean.setLiveBean(null);
