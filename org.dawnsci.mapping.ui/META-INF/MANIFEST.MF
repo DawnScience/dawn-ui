@@ -31,4 +31,5 @@ Import-Package: org.eclipse.core.resources,
  uk.ac.diamond.sda.navigator.actions,
  uk.ac.diamond.sda.navigator.views
 Export-Package: org.dawnsci.mapping.ui,
- org.dawnsci.mapping.ui.datamodel
+ org.dawnsci.mapping.ui.datamodel,
+ org.dawnsci.mapping.ui.wizards
