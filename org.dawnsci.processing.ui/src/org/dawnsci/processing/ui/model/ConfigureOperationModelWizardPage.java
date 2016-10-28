@@ -17,7 +17,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.dawnsci.analysis.api.processing.IOperationInputData;
+import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.PlotAdditionalData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
@@ -50,7 +50,6 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.slf4j.Logger;
@@ -68,13 +67,11 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 	
 	private final static Logger logger = LoggerFactory.getLogger(ConfigureOperationModelWizardPage.class);
 
-	public ConfigureOperationModelWizardPage(String name, String description) {
-		super(name, description, null);
+	public ConfigureOperationModelWizardPage(IOperation<? extends IOperationModel, ? extends OperationData> operation) {
+		super(operation, null);
 	}
 
 	public void createDialogArea(Composite parent) {
-		logger.debug("Entering ConfigureOperationModelWizardPage createDialogArea");
-		logger.debug("parent {}", parent);
 		Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(2, true));
 		SashForm sashForm= new SashForm(container, SWT.HORIZONTAL);
@@ -95,8 +92,10 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 		output = createPlottingSystem(right,"DialogOutput");
 		left.setWeights(new int[]{70,30});
 		errorLabel = new Label(container, SWT.WRAP);
+		
+		modelViewer.setOperation(operation);
+		
 		setControl(container);
-		logger.debug("Leaving ConfigureOperationModelWizardPage createDialogArea");
 	}
 	
 	private IPlottingSystem<Composite> createPlottingSystem(Composite right, String name){
@@ -120,15 +119,14 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 		
 		return system;
 	}
-	
-	@Override
-	public void setOperationInputData(final IOperationInputData data) {
-		super.setOperationInputData(data);
-		
-		modelViewer.setOperation(data.getCurrentOperation());
 
+	@Override
+	public void setVisible(boolean visible) {
+		super.setVisible(visible);
+		if (visible) {
+		
 		try {
-			MetadataPlotUtils.plotDataWithMetadata(data.getInputData() ,input);
+			MetadataPlotUtils.plotDataWithMetadata(id.getData() ,input);
 		} catch (Exception e) {
 			logger.warn("Could not plot data: " + e.getMessage());
 			return;
@@ -136,18 +134,18 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 		
 		update();
 		
-		axes = MetadataPlotUtils.getAxesFromMetadata(data.getInputData());
+		axes = MetadataPlotUtils.getAxesFromMetadata(id.getData());
 		
 		if (input.is2D()) {
 			minMax[0] = 0;
-			minMax[1] = data.getInputData().getShape()[1];
+			minMax[1] = id.getData().getShape()[1];
 			minMax[2] = 0;
-			minMax[3] = data.getInputData().getShape()[0];
+			minMax[3] = id.getData().getShape()[0];
 		} else {
 			minMax[0] = 0;
-			minMax[1] = data.getInputData().getShape()[0];
-			minMax[2] = data.getInputData().min().doubleValue();
-			minMax[3] = data.getInputData().max().doubleValue();
+			minMax[1] = id.getData().getShape()[0];
+			minMax[2] = id.getData().min().doubleValue();
+			minMax[3] = id.getData().max().doubleValue();
 		}
 		
 		if (axes != null) {
@@ -168,10 +166,10 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 			}
 		}
 		
-		Map<String,ROIStruct> rois = getROIs(data.getCurrentOperation().getModel(), data.getInputData());
+		Map<String,ROIStruct> rois = getROIs(model, id.getData());
 		boolean sector = false;
 		
-		IDiffractionMetadata d = AbstractOperation.getFirstDiffractionMetadata(data.getInputData());
+		IDiffractionMetadata d = AbstractOperation.getFirstDiffractionMetadata(id.getData());
 		
 		if (d != null) for (ROIStruct r :rois.values()) if (r.roi instanceof RingROI) {
 			sector = true;
@@ -211,7 +209,6 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 						IROI roi = evt.getROI();
 						double[] range = null;
 						if (roi instanceof RectangularROI) range = getStartAndEndXYFromRectangularROI((RectangularROI)roi,axes);
-						IOperationModel model= data.getCurrentOperation().getModel();
 						try {
 							switch (entry.getValue().type) {
 							case NONE:
@@ -248,7 +245,7 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 				logger.warn("Could not create region: " + e.getMessage());
 			}
 		}
-		
+		}
 	}
 	
 	private Map<String, ROIStruct> getROIs(IOperationModel model, IDataset data) {
@@ -352,16 +349,16 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 
 	
 	public void update() {
-		logger.debug("calling Update for {}", data.getCurrentOperation().getName());
+		logger.debug("calling Update for {}", operation.getName());
 		if (update == null) {
 			update = new Job("calculate...") {
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
-						od = data.getCurrentOperation().execute(id.getData(),new ProgressMonitorWrapper(monitor));
+						od = operation.execute(id.getData(),new ProgressMonitorWrapper(monitor));
 						final IDataset out = od.getData();
-						PlotAdditionalData an = data.getCurrentOperation().getClass().getAnnotation(PlotAdditionalData.class);
+						PlotAdditionalData an = operation.getClass().getAnnotation(PlotAdditionalData.class);
 						IDataset aux = null;
 						boolean onIn = false;
 						if (an != null) {
@@ -452,7 +449,7 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 		try {
 			IRegion region = input.getRegion(evt.getPropertyName());
 
-			Object object = data.getCurrentOperation().getModel().get(evt.getPropertyName());
+			Object object = model.get(evt.getPropertyName());
 			
 			
 			
@@ -580,6 +577,5 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 		//setVisible(true);
 	}
 
-	
 
 }

@@ -121,7 +121,7 @@ public class ConfigureOperationModelDialog extends AbstractOperationModelDialog 
 	public void setOperationInputData(final IOperationInputData data) {
 		super.setOperationInputData(data);
 		
-		modelViewer.setOperation(data.getCurrentOperation());
+		modelViewer.setOperation(data.getCurrentOperations().get(0));
 		
 		try {
 			MetadataPlotUtils.plotDataWithMetadata(data.getInputData(),input);
@@ -163,7 +163,7 @@ public class ConfigureOperationModelDialog extends AbstractOperationModelDialog 
 			}
 		}
 		
-		Map<String,ROIStruct> rois = getROIs(data.getCurrentOperation().getModel(),data.getInputData());
+		Map<String,ROIStruct> rois = getROIs(data.getCurrentOperations().get(0).getModel(),data.getInputData());
 		boolean sector = false;
 		
 		IDiffractionMetadata d = AbstractOperation.getFirstDiffractionMetadata(data.getInputData());
@@ -206,7 +206,7 @@ public class ConfigureOperationModelDialog extends AbstractOperationModelDialog 
 						IROI roi = evt.getROI();
 						double[] range = null;
 						if (roi instanceof RectangularROI) range = getStartAndEndXYFromRectangularROI((RectangularROI)roi,axes);
-						IOperationModel model= data.getCurrentOperation().getModel();
+						IOperationModel model= data.getCurrentOperations().get(0).getModel();
 						try {
 							switch (entry.getValue().type) {
 							case NONE:
@@ -361,9 +361,9 @@ public class ConfigureOperationModelDialog extends AbstractOperationModelDialog 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
-						OperationData od = data.getCurrentOperation().execute(data.getInputData(),new ProgressMonitorWrapper(monitor));
+						OperationData od = data.getCurrentOperations().get(0).execute(data.getInputData(),new ProgressMonitorWrapper(monitor));
 						final IDataset out = od.getData();
-						PlotAdditionalData an = data.getCurrentOperation().getClass().getAnnotation(PlotAdditionalData.class);
+						PlotAdditionalData an = data.getCurrentOperations().get(0).getClass().getAnnotation(PlotAdditionalData.class);
 						IDataset aux = null;
 						boolean onIn = false;
 						if (an != null) {
@@ -455,7 +455,7 @@ public class ConfigureOperationModelDialog extends AbstractOperationModelDialog 
 		try {
 			IRegion region = input.getRegion(evt.getPropertyName());
 
-			Object object = data.getCurrentOperation().getModel().get(evt.getPropertyName());
+			Object object = data.getCurrentOperations().get(0).getModel().get(evt.getPropertyName());
 			
 			
 			

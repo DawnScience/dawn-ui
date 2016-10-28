@@ -183,7 +183,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 			public void run() {
 				IOperationModel model = modelEditor.getModel();
 				if (inputData == null) return;
-				if (!inputData.getCurrentOperation().getModel().equals(model)) return;
+				if (!inputData.getCurrentOperations().get(0).getModel().equals(model)) return;
 				
 				ConfigureOperationModelDialog dialog = new ConfigureOperationModelDialog(getSite().getShell());
 				dialog.create();

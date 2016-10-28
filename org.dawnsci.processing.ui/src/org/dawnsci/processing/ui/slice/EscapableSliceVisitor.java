@@ -1,6 +1,8 @@
 package org.dawnsci.processing.ui.slice;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -175,12 +177,13 @@ public class EscapableSliceVisitor implements SliceVisitor {
 	
 	private class OperationInputDataImpl implements IOperationInputData {
 
-		private IDataset ds;
-		private IOperation<? extends IOperationModel, ? extends OperationData> op;
+		final private IDataset ds;
+		final private List<IOperation<? extends IOperationModel, ? extends OperationData>> ops;
 		
 		public OperationInputDataImpl(IDataset ds, IOperation<? extends IOperationModel, ? extends OperationData> op) {
 			this.ds = ds;
-			this.op = op;
+			this.ops = new ArrayList<>();
+			this.ops.add(op);
 		}
 		
 		@Override
@@ -189,13 +192,8 @@ public class EscapableSliceVisitor implements SliceVisitor {
 		}
 		
 		@Override
-		public void setInputData(IDataset ds) {
-			this.ds = ds;
-		}
-
-		@Override
-		public IOperation<? extends IOperationModel, ? extends OperationData> getCurrentOperation() {
-			return op;
+		public List<IOperation<? extends IOperationModel, ? extends OperationData>> getCurrentOperations() {
+			return ops;
 		}
 		
 	}

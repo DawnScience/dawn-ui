@@ -56,7 +56,7 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 			public void run() {
 				IOperationModel model = modelEditor.getModel();
 				if (inputData == null) return;
-				if (!inputData.getCurrentOperation().getModel().equals(model)) return;
+				if (!inputData.getCurrentOperations().get(0).getModel().equals(model)) return;
 			
 				/*
 				// check if this operation has a wizardpage 
@@ -70,6 +70,7 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 				dialog.create();
 				wizardPage.setOperationInputData(inputData);
 				if (dialog.open() == Dialog.OK) {
+					inputData.getCurrentOperation().setModel(wizardPage.getModel());
 					EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
 					Map<String,IOperationInputData> props = new HashMap<>();
 					eventAdmin.postEvent(new Event("org/dawnsci/events/processing/PROCESSUPDATE", props));
@@ -80,32 +81,25 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 				try {
 					IOperation<? extends IOperationModel, ? extends OperationData> operation1 = ServiceHolder.getOperationService().create("uk.ac.diamond.scisoft.spectroscopy.operations.XRFGenerateEnergyAxisOperation");
 					IOperation<? extends IOperationModel, ? extends OperationData> operation2 = ServiceHolder.getOperationService().create("uk.ac.diamond.scisoft.spectroscopy.operations.XAFSShiftEnergyAxisOperation");
-					IOperation<? extends IOperationModel, ? extends OperationData> operationXRF = ServiceHolder.getOperationService().create("uk.ac.diamond.scisoft.spectroscopy.operations.XRFElementalMappingROIOperation");
+					//IOperation<? extends IOperationModel, ? extends OperationData> operationXRF = ServiceHolder.getOperationService().create("uk.ac.diamond.scisoft.spectroscopy.operations.XRFElementalMappingROIOperation");
 					IOperation<? extends IOperationModel, ? extends OperationData> operation3 = ServiceHolder.getOperationService().create("uk.ac.diamond.scisoft.analysis.processing.operations.oned.Crop1DOperation");
-					IOperationInputData inputData1 = new OperationInputDataImpl(inputData.getInputData(), operation1);
-					OperationData operationResults1 = operation1.execute(inputData.getInputData(), null);
-					IOperationInputData inputData2 = new OperationInputDataImpl(operationResults1.getData(), operation2);
-					OperationData operationResults2 = operation2.execute(operationResults1.getData(), null);
-					IOperationInputData inputDataXRF = new OperationInputDataImpl(operationResults2.getData(), operationXRF);
-					OperationData operationResultsXRF = operationXRF.execute(operationResults2.getData(), null);
-					IOperationInputData inputData3 = new OperationInputDataImpl(operationResultsXRF.getData(), operation3);
-					IOperationSetupWizardPage page1 = new ConfigureOperationModelWizardPage(operation1.getName(), operation1.getDescription());
-					IOperationSetupWizardPage page2 = new ConfigureOperationModelWizardPage(operation2.getName(), operation2.getDescription());
-					IOperationSetupWizardPage pageXRF = ServiceHolder.getOperationUIService().getWizardPage(inputDataXRF.getCurrentOperation().getId());
-					IOperationSetupWizardPage page3 = new ConfigureOperationModelWizardPage(operation3.getName(), operation3.getDescription());
-					OperationModelWizard wizard = new OperationModelWizard(page1, page2, pageXRF, page3);
+					IOperationSetupWizardPage page1 = new ConfigureOperationModelWizardPage(operation1);
+					IOperationSetupWizardPage page2 = new ConfigureOperationModelWizardPage(operation2);
+					//IOperationSetupWizardPage pageXRF = ServiceHolder.getOperationUIService().getWizardPage(inputDataXRF.getCurrentOperation().getId());
+					IOperationSetupWizardPage page3 = new ConfigureOperationModelWizardPage(operation3);
+					OperationModelWizard wizard = new OperationModelWizard(inputData.getInputData(), page1, page2, page3);
 					wizard.setWindowTitle("Testttttttt");
-					OperationModelWizardDialog dialog = new OperationModelWizardDialog(getSite().getShell(), wizard, new OperationData(inputData1.getInputData()));
+					OperationModelWizardDialog dialog = new OperationModelWizardDialog(getSite().getShell(), wizard);
 					dialog.create();
-					page1.setOperationInputData(inputData1);
-					page2.setOperationInputData(inputData2);
-					pageXRF.setOperationInputData(inputDataXRF);
-					page3.setOperationInputData(inputData3);
 					if (dialog.open() == Dialog.OK) {
 						logger.debug("OK clicked");
 					} else {
 						logger.debug("Cancel clicked");
 					}
+					logger.debug("Old zero: {}", (double) operation1.getModel().get("zero"));
+					logger.debug("Old gain: {}", (double) operation1.getModel().get("gain"));
+					logger.debug("New zero: {}", (double) page1.getModel().get("zero"));
+					logger.debug("New gain: {}", (double) page1.getModel().get("gain"));
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -125,14 +119,14 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 			public void handleEvent(Event event) {
 				IOperationInputData data = (IOperationInputData)event.getProperty("data");
 				
-				if (data == null || data.getCurrentOperation().getModel() != modelEditor.getModel()) {
+				if (data == null || data.getCurrentOperations().get(0).getModel() != modelEditor.getModel()) {
 					inputData = null;
 					configure.setEnabled(false);
 					return;
 				}
 				inputData = data;
 				configure.setEnabled(true);
-				String id = data.getCurrentOperation().getId();
+				String id = data.getCurrentOperations().get(0).getId();
 				try {
 					ServiceHolder.getOperationService().getOperationDialogId(id);
 				} catch (Exception e) {
@@ -170,32 +164,4 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 			}
 		}		
 	}
-
-	private class OperationInputDataImpl implements IOperationInputData {
-
-		private IDataset ds;
-		private IOperation<? extends IOperationModel, ? extends OperationData> op;
-		
-		public OperationInputDataImpl(IDataset ds, IOperation<? extends IOperationModel, ? extends OperationData> op) {
-			this.ds = ds;
-			this.op = op;
-		}
-		
-		@Override
-		public void setInputData(IDataset ds) {
-			this.ds = ds;
-		}	
-		
-		@Override
-		public IDataset getInputData() {
-			return ds;
-		}
-
-		@Override
-		public IOperation<? extends IOperationModel, ? extends OperationData> getCurrentOperation() {
-			return op;
-		}
-		
-	}
-
 }

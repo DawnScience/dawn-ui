@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
+import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.wizard.Wizard;
 import org.slf4j.Logger;
@@ -14,32 +15,33 @@ import org.slf4j.LoggerFactory;
 public class OperationModelWizard extends Wizard {
 
 	final List<IOperationSetupWizardPage> wizardPages;
-	@SuppressWarnings("unused")
-	private OperationData initialData;
 	
 	@SuppressWarnings("unused")
 	final static private Logger logger = LoggerFactory.getLogger(OperationModelWizard.class);
 	
-	public OperationModelWizard(final List<IOperationSetupWizardPage> wizardPages) {
+	public OperationModelWizard(final IDataset initialData, final List<IOperationSetupWizardPage> wizardPages) {
 		if (wizardPages == null || wizardPages.size()== 0)
 			throw new IllegalArgumentException("Constructor must be passed at least one IOperationSetupWizardPage");
 		this.wizardPages = wizardPages;
+		this.wizardPages.get(0).setInputData(new OperationData(initialData));
 		setHelpAvailable(false);
 	}
 	
-	public OperationModelWizard(final IOperationSetupWizardPage wizardPage) {
+	public OperationModelWizard(final IDataset initialData, final IOperationSetupWizardPage wizardPage) {
 		if (wizardPage == null)
 			throw new IllegalArgumentException("Constructor must be passed at least one IOperationSetupWizardPage");
-		wizardPages = new ArrayList<>();
-		wizardPages.add(wizardPage);
+		this.wizardPages = new ArrayList<>();
+		this.wizardPages.add(wizardPage);
+		this.wizardPages.get(0).setInputData(new OperationData(initialData));
 		setHelpAvailable(false);
 	}
 	
-	public OperationModelWizard(final IOperationSetupWizardPage... wizardPages) {
+	public OperationModelWizard(final IDataset initialData, final IOperationSetupWizardPage... wizardPages) {
 		if (wizardPages == null || wizardPages.length == 0)
 			throw new IllegalArgumentException("Constructor must be passed at least one IOperationSetupWizardPage");
 		this.wizardPages = new ArrayList<>();
 		Arrays.stream(wizardPages).forEachOrdered(wizardPage -> this.wizardPages.add(wizardPage));
+		this.wizardPages.get(0).setInputData(new OperationData(initialData));
 		setHelpAvailable(false);
 	}
 	
@@ -64,8 +66,4 @@ public class OperationModelWizard extends Wizard {
 		return true;
 	}
 
-	public void setInitialData(OperationData initialData) {
-		this.initialData = initialData;
-		wizardPages.get(0).setOperationData(initialData);
-	}
 }

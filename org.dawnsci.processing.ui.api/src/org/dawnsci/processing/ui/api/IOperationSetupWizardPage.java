@@ -1,7 +1,7 @@
 package org.dawnsci.processing.ui.api;
 
-import org.eclipse.dawnsci.analysis.api.processing.IOperationInputData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
+import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.jface.wizard.IWizardPage;
 
 public interface IOperationSetupWizardPage extends IWizardPage {
@@ -12,13 +12,13 @@ public interface IOperationSetupWizardPage extends IWizardPage {
 	 */
 	public void wizardTerminatingButtonPressed(int buttonId);
 	
-	public void setOperationInputData(final IOperationInputData data);
-	
-	public IOperationInputData getOperationInputData();
-
 	public void update();
 	
-	public OperationData getOperationData();
+	public OperationData getOutputData();
 	
-	public void setOperationData(OperationData od);
+	public void setInputData(OperationData od);
+	
+	public void setModel(IOperationModel model);
+	
+	public IOperationModel getModel();
 }

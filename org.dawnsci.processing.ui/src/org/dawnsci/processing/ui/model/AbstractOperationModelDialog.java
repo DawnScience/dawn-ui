@@ -40,7 +40,7 @@ public abstract class AbstractOperationModelDialog extends Dialog implements Pro
 	public void setOperationInputData(final IOperationInputData data) {
 		
 		this.data = data;
-		model = data.getCurrentOperation().getModel();
+		model = data.getCurrentOperations().get(0).getModel();
 		
 		try {
 			omodel = (IOperationModel)BeanUtils.cloneBean(model);

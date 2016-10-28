@@ -296,8 +296,8 @@ public class ModelFieldEditors {
 
 			if (!field.getModel().isModelField(fileField) && 
 					recentData != null && 
-					recentData.getCurrentOperation() != null && 
-					recentData.getCurrentOperation().getModel() == field.getModel()) {
+					recentData.getCurrentOperations().get(0) != null && 
+					recentData.getCurrentOperations().get(0).getModel() == field.getModel()) {
 				path = recentData.getInputData().getFirstMetadata(SliceFromSeriesMetadata.class).getFilePath();
 
 			}
@@ -375,7 +375,7 @@ public class ModelFieldEditors {
 		public void handleEvent(Event event) {
 			IOperationInputData data = (IOperationInputData)event.getProperty("data");
 			recentData = data;
-			if (data != null && data.getCurrentOperation().getModel() == model) {
+			if (data != null && data.getCurrentOperations().get(0).getModel() == model) {
 				SliceFromSeriesMetadata md = data.getInputData().getFirstMetadata(SliceFromSeriesMetadata.class);
 				if (md != null && md.getFilePath() != null) {
 					triggerDatasetNameJob(ed, md.getFilePath());

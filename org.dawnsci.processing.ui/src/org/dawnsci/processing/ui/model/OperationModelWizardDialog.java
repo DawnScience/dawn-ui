@@ -1,10 +1,6 @@
 package org.dawnsci.processing.ui.model;
 
-import java.io.File;
-
 import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
-import org.eclipse.dawnsci.analysis.api.processing.IOperationInputData;
-import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.jface.dialogs.IPageChangedListener;
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.PageChangedEvent;
@@ -21,13 +17,10 @@ import org.slf4j.LoggerFactory;
 
 public class OperationModelWizardDialog extends WizardDialog {
 
-	private final OperationData initialData;
 	private final static Logger logger = LoggerFactory.getLogger(OperationModelWizardDialog.class);
 	
-	public OperationModelWizardDialog(final Shell parentShell, final OperationModelWizard newWizard, final OperationData initialData) {
+	public OperationModelWizardDialog(final Shell parentShell, final OperationModelWizard newWizard) {
 		super(parentShell, newWizard);
-		this.initialData = initialData;
-		newWizard.setInitialData(initialData);
 		addPageChangingListener(new IPageChangingListener() {
 			
 			@Override
@@ -41,13 +34,8 @@ public class OperationModelWizardDialog extends WizardDialog {
 					logger.debug("Going to the previous page...");
 					return; // nothing to do when going back...
 				}
-				IOperationInputData nextInputData = nextPage.getOperationInputData();
-				nextInputData.setInputData(currentPage.getOperationData().getData());
-				nextPage.setOperationInputData(nextInputData);
-				nextPage.setOperationData(currentPage.getOperationData());
+				nextPage.setInputData(currentPage.getOutputData());
 				nextPage.update();
-				//nextPage.setVisible(true);
-				//nextPage.getControl().redraw();
 				update();
 				logger.debug("Going to the next page...");
 			}
@@ -67,11 +55,6 @@ public class OperationModelWizardDialog extends WizardDialog {
 		});
 	}
 
-	public OperationModelWizardDialog(final Shell parentShell, final OperationModelWizard newWizard, final File inputFile, final String datasetName) {
-		this(parentShell, newWizard, null);
-		// TODO: read dataset from file
-	}
-	
 	@Override
 	protected Point getInitialSize() {
 		Rectangle bounds = PlatformUI.getWorkbench().getWorkbenchWindows()[0].getShell().getBounds();
@@ -87,10 +70,6 @@ public class OperationModelWizardDialog extends WizardDialog {
 	protected void handleShellCloseEvent() {
 		getWizard().performCancel();
 		super.handleShellCloseEvent();
-	}
-	
-	public OperationData getInitialData() {
-		return initialData;
 	}
 	
 }
