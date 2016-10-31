@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Ui
+Bundle-Name: Mapping UI
 Bundle-SymbolicName: org.dawnsci.mapping.ui;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.dawnsci.mapping.ui.Activator
@@ -33,3 +33,4 @@ Import-Package: org.eclipse.core.resources,
 Export-Package: org.dawnsci.mapping.ui,
  org.dawnsci.mapping.ui.datamodel,
  org.dawnsci.mapping.ui.wizards
+Bundle-Vendor: Diamond Light Source
