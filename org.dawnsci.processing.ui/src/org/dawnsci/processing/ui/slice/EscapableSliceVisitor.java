@@ -26,8 +26,6 @@ import uk.ac.diamond.scisoft.analysis.processing.metadata.OperationMetadataImpl;
 @SuppressWarnings("rawtypes")
 public class EscapableSliceVisitor implements SliceVisitor {
 
-
-	private ILazyDataset lz;
 	private UIExecutionVisitor visitor;
 	private int[] dataDims;
 	private IOperation[] fullSeries;
@@ -42,7 +40,6 @@ public class EscapableSliceVisitor implements SliceVisitor {
 
 	public EscapableSliceVisitor(ILazyDataset lz, int[] dataDims, IOperation[] series, IOperation[] fullSeries,
 			IProgressMonitor monitor, IConversionContext context, IPlottingSystem<?> system) {
-		this.lz = lz;
 		this.visitor = new UIExecutionVisitor();
 		this.dataDims = dataDims;
 		this.series = series;
@@ -60,42 +57,45 @@ public class EscapableSliceVisitor implements SliceVisitor {
 	@Override
 	public void visit(IDataset slice) throws Exception {
 
-		OperationData  data = new OperationData(slice);
+		OperationData data = new OperationData(slice);
 		SliceFromSeriesMetadata ssm = slice.getMetadata(SliceFromSeriesMetadata.class).get(0);
-		
+
 		try {
-			
-		for (IOperation op : series) op.init();
-		
-		for (IOperation<? extends IOperationModel, ? extends OperationData> i : series) {
-			OperationMetadataImpl operationMeta = new OperationMetadataImpl(null, fullSeries, i);
-			data.getData().setMetadata(operationMeta);
-			if (i instanceof IExportOperation) {
-				visitor.notify(i, data);
-			} else if (i.isPassUnmodifiedData() && i != endOperation) {
-				//do nothing
-			} else {
-				
-				if (i == endOperation) inputData = new OperationInputDataImpl(data.getData(),i); 
-				
-				OperationData tmp = i.execute(data.getData(), null);
-				if (tmp != null) tmp.getData().setMetadata(ssm);
-				visitor.notify(i, tmp); // Optionally send intermediate result
-				data = i.isPassUnmodifiedData() ? data : tmp;
+			if (series == null)
+				return;
+			for (IOperation op : series)
+				op.init();
+
+			for (IOperation<? extends IOperationModel, ? extends OperationData> i : series) {
+				OperationMetadataImpl operationMeta = new OperationMetadataImpl(null, fullSeries, i);
+				data.getData().setMetadata(operationMeta);
+				if (i instanceof IExportOperation) {
+					visitor.notify(i, data);
+				} else if (i.isPassUnmodifiedData() && i != endOperation) {
+					// do nothing
+				} else {
+
+					if (i == endOperation)
+						inputData = new OperationInputDataImpl(data.getData(), i);
+
+					OperationData tmp = i.execute(data.getData(), null);
+					if (tmp != null)
+						tmp.getData().setMetadata(ssm);
+					visitor.notify(i, tmp); // Optionally send intermediate
+											// result
+					data = i.isPassUnmodifiedData() ? data : tmp;
+				}
+				if (i == endOperation)
+					break;
 			}
-
-			if (i == endOperation) break;
-		}
-
-
-		visitor.executed(data, null); // Send result.
+			visitor.executed(data, null); // Send result.
 		} catch (Exception e) {
-			logger.error("Error running processing",e);
+			logger.error("Error running processing", e);
 			throw e;
-		}finally {
-			for (IOperation op : series) op.dispose();
+		} finally {
+			for (IOperation op : series)
+				op.dispose();
 		}
-
 	}
 	
 	public IOperationInputData getOperationInputData() {
