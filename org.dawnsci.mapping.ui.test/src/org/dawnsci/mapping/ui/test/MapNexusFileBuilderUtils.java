@@ -86,6 +86,23 @@ public class MapNexusFileBuilderUtils {
 
 	}
 	
+	public static void makeDiagLineScanWithSum(String path) throws NexusException {
+		ServiceHolder.setNexusFileFactory(new NexusFileFactoryHDF5());
+		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
+		NXroot nXroot = fileBuilder.getNXroot();
+		NXentry entry = NexusNodeFactory.createNXentry();
+		nXroot.addGroupNode(ENTRY1, entry);
+
+		NXdata makeNXData = makeNonGridNXData(3, 2, false);
+		entry.addGroupNode(DETECTOR, makeNXData);
+		NXdata sum = makeNonGridNXData(1, 0, false);
+		entry.addGroupNode(SUM, sum);
+		
+		
+		try (NexusScanFile file = fileBuilder.createFile(false)) {
+		}
+	}
+	
 	private static NXdata makeNXData(int rank, int detectorRank, boolean isEnergy) {
 		
 		int scanRank = rank - detectorRank;
@@ -124,6 +141,66 @@ public class MapNexusFileBuilderUtils {
 				axes[i] = axis;
 				nxData.setDataset(axis, ax);
 				nxData.setAttribute(null, axis + "_indices", new int[]{i});
+			}
+		}
+		
+		nxData.setAttribute(null, "axes", axes);
+		
+		return nxData;
+		
+	}
+	
+	private static NXdata makeNonGridNXData(int rank, int detectorRank, boolean isEnergy) {
+		
+		int scanRank = rank - detectorRank;
+		
+		if (scanRank > 3) throw new IllegalArgumentException("Max scan rank is 3");
+		
+		NXdata nxData = NexusNodeFactory.createNXdata();
+		
+		int[] shape = new int[rank];
+		Arrays.fill(shape, 100);
+		
+		for (int i = 0 ; i < rank - detectorRank; i++) {
+			shape[i] = SMALLEST+i;
+		}
+		int size = 1;
+		for (int i = 0 ; i < shape.length; i++) {
+			size *= shape[i];
+		}
+		
+		DoubleDataset data = DatasetFactory.createRange(size);
+		data.setName(DATA);
+		data.setShape(shape);
+		nxData.setDataset(DATA, data);
+		nxData.setAttributeSignal(DATA);
+		
+		String[] axes = new String[shape.length];
+		for (int i = 0 ; i < rank; i++) {
+			if (i >= scanRank) {
+				axes[i] = ".";
+			} else {
+				if (i == scanRank-1) {
+					axes[i] = ".";
+					DoubleDataset ax = DatasetFactory.createRange(shape[i]);
+					String axis = FASTEST_AXES[scanRank];
+					nxData.setDataset(axis, ax);
+					nxData.setAttribute(null, axis + "_indices", new int[]{i});
+					axis = FASTEST_AXES[scanRank-1];
+					nxData.setDataset(axis, ax);
+					nxData.setAttribute(null, axis + "_indices", new int[]{i});
+				} else {
+					String axis = FASTEST_AXES[scanRank-3-i];
+					if (isEnergy) {
+						 axis = i == 0 ? ENERGY : FASTEST_AXES[scanRank-3-i];
+					}
+					DoubleDataset ax = DatasetFactory.createRange(shape[i]);
+					axes[i] = axis;
+					nxData.setDataset(axis, ax);
+					nxData.setAttribute(null, axis + "_indices", new int[]{i});
+				}
+				
+				
 			}
 		}
 		

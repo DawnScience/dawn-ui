@@ -31,6 +31,7 @@ public class MappedDataTest {
 	private static MappedDataBlock gridScanBlock = null;
 	private static MappedData gridScanMap = null;
 	private static File file = null;
+	private static File fileRemap = null;
 	
 	@BeforeClass
 	public static void buildData() throws Exception {
@@ -45,6 +46,11 @@ public class MappedDataTest {
 		ILazyDataset sum = data.getLazyDataset(MapNexusFileBuilderUtils.SUM_PATH);
 		
 		gridScanMap = new MappedData(MapNexusFileBuilderUtils.SUM_PATH, sum.getSlice(), gridScanBlock,file.getAbsolutePath());
+		
+		fileRemap = folder.newFile("file2.nxs");
+		MapNexusFileBuilderUtils.makeDiagLineScanWithSum(fileRemap.getAbsolutePath());
+		fileRemap.toPath();
+		
 	}
 	
 	
