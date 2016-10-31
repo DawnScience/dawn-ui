@@ -180,7 +180,8 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 			public Object[] getElements(Object inputElement) {
 				
 				final Collection<IRegion> regions = getPlottingSystem().getRegions();
-				if (regions==null || regions.isEmpty()) return new Object[]{"-"};
+				if (regions==null || regions.isEmpty())
+					return new Object[]{};
 				
 				final List<IRegion> okRegions = new ArrayList<IRegion>();
 				for (IRegion iRegion : regions) {
