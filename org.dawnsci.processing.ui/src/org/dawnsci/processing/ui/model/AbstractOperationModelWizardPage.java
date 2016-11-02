@@ -3,6 +3,7 @@ package org.dawnsci.processing.ui.model;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -29,6 +30,11 @@ public abstract class AbstractOperationModelWizardPage extends WizardPage implem
 	private Job update;
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractOperationModelWizardPage.class);
+
+	protected AbstractOperationModelWizardPage() {
+		super("");
+		operation = null;
+	}
 	
 	protected AbstractOperationModelWizardPage(IOperation<? extends IOperationModel, ? extends OperationData> operation) {
 		this(operation, null);
@@ -40,11 +46,11 @@ public abstract class AbstractOperationModelWizardPage extends WizardPage implem
 		initAbstractOperationModelWizardPage();
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void initAbstractOperationModelWizardPage() {
 		try {
-			this.model = operation.getModel().getClass().newInstance(); // model with default parameters
+			this.model = operation.getModel().getClass().newInstance(); // instantiate a new model
 			this.omodel = operation.getModel(); // get the old model
+			BeanUtils.copyProperties(this.model, this.omodel); // copy the properties from the old model back to the new one
 			operation.setModel(model);
 		} catch (Exception e) {
 			logger.error("Could not instantiate default model!", e);
@@ -112,20 +118,23 @@ public abstract class AbstractOperationModelWizardPage extends WizardPage implem
 	public OperationData getOutputData() {
 		return od;
 	}
-	
+
 	public void setInputData(OperationData id) {
 		this.id = id;
 	}
 	
-	public void setModel(IOperationModel model) {
+	/*public void setModel(IOperationModel model) {
+		logger.debug("Calling setModel");
 		if (this.model != null && this.model instanceof AbstractOperationModel) {
 			((AbstractOperationModel)this.model).removePropertyChangeListener(this);
 		}
+		this.omodel = this.model;
 		this.model = model;
+		operation.setModel(model);
 		if (model != null && model instanceof AbstractOperationModel) {
 			((AbstractOperationModel)model).addPropertyChangeListener(this);
 		}
-	}
+	}*/
 	
 	public IOperationModel getModel() {
 		return model;

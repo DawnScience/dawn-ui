@@ -68,7 +68,7 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 	private final static Logger logger = LoggerFactory.getLogger(ConfigureOperationModelWizardPage.class);
 
 	public ConfigureOperationModelWizardPage(IOperation<? extends IOperationModel, ? extends OperationData> operation) {
-		super(operation, null);
+		super(operation);
 	}
 
 	public void createDialogArea(Composite parent) {
@@ -123,8 +123,10 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
-		if (visible) {
 		
+		if (!visible)
+			return;
+			
 		try {
 			MetadataPlotUtils.plotDataWithMetadata(id.getData() ,input);
 		} catch (Exception e) {
@@ -245,7 +247,6 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 				logger.warn("Could not create region: " + e.getMessage());
 			}
 		}
-		}
 	}
 	
 	private Map<String, ROIStruct> getROIs(IOperationModel model, IDataset data) {
@@ -348,8 +349,8 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 	
 
 	
+	@Override
 	public void update() {
-		logger.debug("calling Update for {}", operation.getName());
 		if (update == null) {
 			update = new Job("calculate...") {
 

@@ -178,7 +178,7 @@ public class EscapableSliceVisitor implements SliceVisitor {
 	private class OperationInputDataImpl implements IOperationInputData {
 
 		final private IDataset ds;
-		final private List<IOperation<? extends IOperationModel, ? extends OperationData>> ops;
+		final private List<IOperation> ops;
 		
 		public OperationInputDataImpl(IDataset ds, IOperation<? extends IOperationModel, ? extends OperationData> op) {
 			this.ds = ds;
@@ -192,7 +192,7 @@ public class EscapableSliceVisitor implements SliceVisitor {
 		}
 		
 		@Override
-		public List<IOperation<? extends IOperationModel, ? extends OperationData>> getCurrentOperations() {
+		public List<IOperation> getCurrentOperations() {
 			return ops;
 		}
 		

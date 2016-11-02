@@ -53,32 +53,44 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 		
 		
 		configure = new Action("Live setup", Activator.getImageDescriptor("icons/application-dialog.png")) {
+			@SuppressWarnings("unchecked")
 			public void run() {
 				IOperationModel model = modelEditor.getModel();
 				if (inputData == null) return;
 				if (!inputData.getCurrentOperations().get(0).getModel().equals(model)) return;
 			
-				/*
+				
 				// check if this operation has a wizardpage 
-				IOperationSetupWizardPage wizardPage = ServiceHolder.getOperationUIService().getWizardPage(inputData.getCurrentOperation().getId());
+				IOperationSetupWizardPage wizardPage = ServiceHolder.getOperationUIService().getWizardPage(inputData.getCurrentOperations().get(0).getId());
 				
 				if (wizardPage == null)
-					wizardPage = new ConfigureOperationModelWizardPage(inputData.getCurrentOperation().getName(), inputData.getCurrentOperation().getDescription());
-				OperationModelWizard wizard = new OperationModelWizard(wizardPage);
+					wizardPage = new ConfigureOperationModelWizardPage(inputData.getCurrentOperations().get(0));
+				try {
+					logger.debug("gain before {}", wizardPage.getModel().get("gain"));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				OperationModelWizard wizard = new OperationModelWizard(inputData.getInputData(), wizardPage);
 				wizard.setWindowTitle("Operation Model Configuration");
-				OperationModelWizardDialog dialog = new OperationModelWizardDialog(getSite().getShell(), wizard, new OperationData(inputData.getInputData()));
+				OperationModelWizardDialog dialog = new OperationModelWizardDialog(getSite().getShell(), wizard);
 				dialog.create();
-				wizardPage.setOperationInputData(inputData);
 				if (dialog.open() == Dialog.OK) {
-					inputData.getCurrentOperation().setModel(wizardPage.getModel());
+					try {
+						logger.debug("gain after {}", wizardPage.getModel().get("gain"));
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					inputData.getCurrentOperations().get(0).setModel(wizardPage.getModel());
 					EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
 					Map<String,IOperationInputData> props = new HashMap<>();
 					eventAdmin.postEvent(new Event("org/dawnsci/events/processing/PROCESSUPDATE", props));
 					modelEditor.refresh();
 				}
-				*/
 				
-				try {
+				
+				/*try {
 					IOperation<? extends IOperationModel, ? extends OperationData> operation1 = ServiceHolder.getOperationService().create("uk.ac.diamond.scisoft.spectroscopy.operations.XRFGenerateEnergyAxisOperation");
 					IOperation<? extends IOperationModel, ? extends OperationData> operation2 = ServiceHolder.getOperationService().create("uk.ac.diamond.scisoft.spectroscopy.operations.XAFSShiftEnergyAxisOperation");
 					//IOperation<? extends IOperationModel, ? extends OperationData> operationXRF = ServiceHolder.getOperationService().create("uk.ac.diamond.scisoft.spectroscopy.operations.XRFElementalMappingROIOperation");
@@ -103,7 +115,7 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}
+				}*/
 				
 				
 			}

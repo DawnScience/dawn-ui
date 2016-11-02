@@ -18,7 +18,5 @@ public interface IOperationSetupWizardPage extends IWizardPage {
 	
 	public void setInputData(OperationData od);
 	
-	public void setModel(IOperationModel model);
-	
 	public IOperationModel getModel();
 }
