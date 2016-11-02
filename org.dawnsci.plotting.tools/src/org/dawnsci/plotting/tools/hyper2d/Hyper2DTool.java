@@ -26,6 +26,7 @@ import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
+import org.eclipse.dawnsci.plotting.api.region.IRegionSystem;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
@@ -67,7 +68,6 @@ public class Hyper2DTool extends AbstractToolPage {
 			}
 		};
 	}
-	
 	
 	@Override
 	public ToolPageRole getToolPageRole() {
@@ -179,35 +179,53 @@ public class Hyper2DTool extends AbstractToolPage {
 		}
 	}
 	
-	private void updateROI(IROI roi, double x, boolean right,IRegion region) {
+	private void updateROI(IROI roi, double x, boolean right,IRegion region, boolean isMainPlotUpdate) {
 		roi = roi.copy();
 		try {
-			IImageTrace next = (IImageTrace)getPlottingSystem().getTraces().iterator().next();
-			if (right) {
-				double[] im = next.getPointInImageCoordinates(new double[]{x,Double.NaN});
-				roi.setPoint(im[0], 0);
+			if (!isMainPlotUpdate) { // if update happens on the tool plotting systems
+				IImageTrace next = (IImageTrace)getPlottingSystem().getTraces().iterator().next();
+				if (right) {
+					double[] im = ((IImageTrace)next).getPointInImageCoordinates(new double[]{x,Double.NaN});
+					roi.setPoint(im[0], 0);
+					region.setROI(roi);
+					return;
+				}
+				double[] im = ((IImageTrace)next).getPointInImageCoordinates(new double[] { Double.NaN, x });
+				roi.setPoint(0, im[1]);
 				region.setROI(roi);
-				return;
+			} else { // if update happens on the main plotting system
+				roi.setPoint(x, 0);
+				region.setROI(roi);
 			}
-			
-			double[] im = next.getPointInImageCoordinates(new double[]{Double.NaN,x});
-			roi.setPoint(0, im[1]);
-			region.setROI(roi);
-			return;
 		} catch (Exception e) {
 			logger.error("Could not update roi!",e);
 		}
 	}
 	
-	private void updateRoiEvent(ROIEvent evt, boolean right){
+	private void updateRoiEvent(ROIEvent evt, boolean right, boolean isMainPlotUpdate){
 		IRegion r = (IRegion) evt.getSource();
 		if (r == null) return;
-		Collection<IRegion> regions = getPlottingSystem().getRegions();
+		Collection<IRegion> regions = null;
+		if (isMainPlotUpdate) { // if update is on the main plotting system
+			if (right) { 
+				regions = component.getSideSystem().getRegions();
+			} else {
+				regions = ((IRegionSystem) component.getAdapter(IPlottingSystem.class)).getRegions();
+			}
+		} else { // if update is on the tool plotting systems
+			regions = getPlottingSystem().getRegions();
+		}
+		
 		for (IRegion re : regions) {
 			if (re.getName().equals(r.getName())) {
-				double x = evt.getROI().getPointX();
+				double value = 0;
+				if (isMainPlotUpdate && !right){
+					value = evt.getROI().getPointY();
+				} else {
+					value = evt.getROI().getPointX();
+				}
 				IROI roi = re.getROI();
-				updateROI(roi, x, right,re);
+				updateROI(roi, value, right,re, isMainPlotUpdate);
 				return;
 			}
 		}
@@ -218,12 +236,12 @@ public class Hyper2DTool extends AbstractToolPage {
 			
 			@Override
 			public void roiDragged(ROIEvent evt) {
-				updateRoiEvent(evt, false);
+				updateRoiEvent(evt, false, false);
 			}
 			
 			@Override
 			public void roiChanged(ROIEvent evt) {
-				updateRoiEvent(evt, false);
+				updateRoiEvent(evt, false, false);
 			}
 		};
 	}
@@ -233,19 +251,26 @@ public class Hyper2DTool extends AbstractToolPage {
 			
 			@Override
 			public void roiDragged(ROIEvent evt) {
-				updateRoiEvent(evt, true);
+				updateRoiEvent(evt, true, false);
 			}
 			
 			@Override
 			public void roiChanged(ROIEvent evt) {
-				updateRoiEvent(evt, true);
+				updateRoiEvent(evt, true, false);
 			}
 		};
 	}
 	
+	private IROIListener mainPlotLeftRegionListener = new IROIListener.Stub() {
+		@Override
+		public void roiDragged(ROIEvent evt) {
+			updateRoiEvent(evt, false, true);
+		}
+	};
+
 	private IRegionListener getLeftRegionListener() {
 		return new IRegionListener.Stub() {
-			
+
 			@Override
 			public void regionsRemoved(RegionEvent evt) {
 				removeAllRegions(HyperComponent.RIGHT_REGION_NAME);
@@ -253,6 +278,10 @@ public class Hyper2DTool extends AbstractToolPage {
 			
 			@Override
 			public void regionRemoved(RegionEvent evt) {
+				IRegion source = getRegion(evt);
+				IRegion r = getPlottingSystem().getRegion(source.getName());
+				if (r != null)
+					r.removeROIListener(mainPlotLeftRegionListener);
 				removeRegion(evt);
 			}
 			
@@ -267,13 +296,11 @@ public class Hyper2DTool extends AbstractToolPage {
 					YAxisBoxROI roi = new YAxisBoxROI();
 					double x = source.getROI().getPointX();
 					
-					updateROI(roi,x,false,r);
+					updateROI(roi,x,false,r, false);
 					r.setRegionColor(ColorConstants.blue);
 					r.setName(source.getName());
-					r.setMobile(false);
+					r.addROIListener(mainPlotLeftRegionListener);
 					getPlottingSystem().addRegion(r);
-					r.setMobile(false);
-
 				} catch (Exception e) {
 					logger.error("Could not create region",e);
 				}
@@ -285,7 +312,14 @@ public class Hyper2DTool extends AbstractToolPage {
 			}
 		};
 	}
-	
+
+	private IROIListener mainPlotRightRegionListener = new IROIListener.Stub() {
+		@Override
+		public void roiDragged(ROIEvent evt) {
+			updateRoiEvent(evt, true, true);
+		}
+	};
+
 	private IRegionListener getRightRegionListener() {
 		return new IRegionListener.Stub() {
 			
@@ -296,6 +330,10 @@ public class Hyper2DTool extends AbstractToolPage {
 			
 			@Override
 			public void regionRemoved(RegionEvent evt) {
+				IRegion source = getRegion(evt);
+				IRegion r = getPlottingSystem().getRegion(source.getName());
+				if (r != null)
+					r.removeROIListener(mainPlotRightRegionListener);
 				removeRegion(evt);
 			}
 			
@@ -311,12 +349,11 @@ public class Hyper2DTool extends AbstractToolPage {
 					XAxisBoxROI roi = new XAxisBoxROI();
 					double x = source.getROI().getPointX();
 					
-					updateROI(roi,x,true,r);
+					updateROI(roi,x,true,r, false);
 					r.setRegionColor(ColorConstants.blue);
 					r.setName(source.getName());
+					r.addROIListener(mainPlotRightRegionListener);
 					getPlottingSystem().addRegion(r);
-					r.setMobile(false);
-
 				} catch (Exception e) {
 					logger.error("Could not create region",e);
 				}
