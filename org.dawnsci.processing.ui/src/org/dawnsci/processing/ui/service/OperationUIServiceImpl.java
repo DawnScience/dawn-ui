@@ -2,18 +2,17 @@ package org.dawnsci.processing.ui.service;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.dawnsci.processing.ui.ServiceHolder;
 import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
 import org.dawnsci.processing.ui.api.IOperationUIService;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.dawnsci.analysis.api.processing.IOperation;
+import org.eclipse.dawnsci.analysis.api.processing.OperationData;
+import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,20 +31,28 @@ public class OperationUIServiceImpl implements IOperationUIService {
 	}
 
 	@Override
-	public IOperationSetupWizardPage getWizardPage(String operation_id) {
+	public IOperationSetupWizardPage getWizardPage(IOperation<? extends IOperationModel, ? extends OperationData> operation) {
 		checkOperationSetupWizardPages();
 		
 		// The hash only contains the Class wizardPage belongs to.
 		// We need to construct it here.
-		Class <? extends IOperationSetupWizardPage> klazz = operationSetupWizardPages.get(operation_id);
+		Class <? extends IOperationSetupWizardPage> klazz = operationSetupWizardPages.get(operation.getId());
 		if (klazz == null) {
-			logger.info("No OperationSetupWizardPage found for {}", operation_id);
+			logger.info("No OperationSetupWizardPage found for {}", operation.getId());
 			return null;
 		}
 			
-		Constructor<?> constructor = null;
+		try {
+			Constructor<?> constructor = klazz.getConstructor(IOperation.class);
+			IOperationSetupWizardPage rv = (IOperationSetupWizardPage) constructor.newInstance(operation);
+			logger.info("{}-arg constructor instance generated for {}", 1, klazz.getName());
+			return rv;
+		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			logger.error("Cannot construct instance of {}. ", klazz.getName());
+			e.printStackTrace();
+		}
 	
-		List<Class<?>> ctorClassArgs = new ArrayList<Class<?>>();
+		/*List<Class<?>> ctorClassArgs = new ArrayList<Class<?>>();
 		ctorClassArgs.add(String.class);
 		ctorClassArgs.add(String.class);
 		ctorClassArgs.add(ImageDescriptor.class);
@@ -95,8 +102,7 @@ public class OperationUIServiceImpl implements IOperationUIService {
 				continue;
 			}
 		}
-		
-		logger.error("Cannot construct instance of {}. No more constructors left to try...", operation_id);
+		*/
 		return null;
 	}
 

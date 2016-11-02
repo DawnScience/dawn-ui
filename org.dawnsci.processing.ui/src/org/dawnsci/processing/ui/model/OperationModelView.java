@@ -10,12 +10,8 @@ import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.ServiceHolder;
 import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
-import org.dawnsci.processing.ui.slice.EscapableSliceVisitor;
-import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationInputData;
-import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
-import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.Dialog;
@@ -39,7 +35,6 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 	private OperationModelViewer modelEditor;
 	private IOperationInputData inputData;
 	private IAction configure;
-	@SuppressWarnings("unused")
 	private final static Logger logger = LoggerFactory.getLogger(OperationModelView.class);
 	
 	@Override
@@ -61,7 +56,7 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 			
 				
 				// check if this operation has a wizardpage 
-				IOperationSetupWizardPage wizardPage = ServiceHolder.getOperationUIService().getWizardPage(inputData.getCurrentOperations().get(0).getId());
+				IOperationSetupWizardPage wizardPage = ServiceHolder.getOperationUIService().getWizardPage(inputData.getCurrentOperations().get(0));
 				
 				if (wizardPage == null)
 					wizardPage = new ConfigureOperationModelWizardPage(inputData.getCurrentOperations().get(0));
