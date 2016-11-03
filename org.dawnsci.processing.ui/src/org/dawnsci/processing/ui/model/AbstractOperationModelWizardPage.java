@@ -2,6 +2,7 @@ package org.dawnsci.processing.ui.model;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.lang.reflect.InvocationTargetException;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
@@ -14,6 +15,7 @@ import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardPage;
 import org.slf4j.Logger;
@@ -83,11 +85,17 @@ public abstract class AbstractOperationModelWizardPage extends WizardPage implem
 		if (model != null && model instanceof AbstractOperationModel) {
 			((AbstractOperationModel)model).removePropertyChangeListener(this);
 		}
-		operation.setModel(omodel); // when the dialog closes, the operation gets the old model back!
+		if (buttonId == Dialog.OK) {
+			try {
+				BeanUtils.copyProperties(omodel, model);
+			} catch (IllegalAccessException | InvocationTargetException e) {
+				logger.error(e.getMessage());
+			}
+		}
+		operation.setModel(omodel); // when the dialog closes, the operation gets the old model back, but possibly with new values!
 	}
 	
-	@Override
-	public void update() {
+	protected void update() {
 
 		if (update == null) {
 			update = new Job("calculate...") {
@@ -121,6 +129,7 @@ public abstract class AbstractOperationModelWizardPage extends WizardPage implem
 
 	public void setInputData(OperationData id) {
 		this.id = id;
+		update();
 	}
 	
 	/*public void setModel(IOperationModel model) {

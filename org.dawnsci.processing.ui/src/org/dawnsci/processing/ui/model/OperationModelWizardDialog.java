@@ -35,7 +35,6 @@ public class OperationModelWizardDialog extends WizardDialog {
 					return; // nothing to do when going back...
 				}
 				nextPage.setInputData(currentPage.getOutputData());
-				nextPage.update();
 				update();
 				logger.debug("Going to the next page...");
 			}
