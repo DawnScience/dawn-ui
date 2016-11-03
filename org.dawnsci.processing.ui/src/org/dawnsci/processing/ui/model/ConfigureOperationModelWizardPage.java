@@ -350,7 +350,7 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 
 	
 	@Override
-	public void update() {
+	protected void update() {
 		if (update == null) {
 			update = new Job("calculate...") {
 

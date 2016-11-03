@@ -62,24 +62,6 @@ public abstract class AbstractOperationModelWizardPage extends WizardPage implem
 		}
 	}
 	
-	/*@Override
-	public void setOperationInputData(final IOperationInputData data) {
-		
-		this.data = data;
-		model = data.getCurrentOperation().getModel();
-		
-		try {
-			omodel = (IOperationModel)BeanUtils.cloneBean(model);
-		} catch (Exception e) {
-			logger.warn("Could not clone model: " + e.getMessage());
-		} 
-		
-		if (model instanceof AbstractOperationModel) {
-			((AbstractOperationModel)model).addPropertyChangeListener(this);
-		}
-		update();
-	}*/
-
 	@Override
 	public void wizardTerminatingButtonPressed(int buttonId) {
 		if (model != null && model instanceof AbstractOperationModel) {
@@ -131,19 +113,6 @@ public abstract class AbstractOperationModelWizardPage extends WizardPage implem
 		this.id = id;
 		update();
 	}
-	
-	/*public void setModel(IOperationModel model) {
-		logger.debug("Calling setModel");
-		if (this.model != null && this.model instanceof AbstractOperationModel) {
-			((AbstractOperationModel)this.model).removePropertyChangeListener(this);
-		}
-		this.omodel = this.model;
-		this.model = model;
-		operation.setModel(model);
-		if (model != null && model instanceof AbstractOperationModel) {
-			((AbstractOperationModel)model).addPropertyChangeListener(this);
-		}
-	}*/
 	
 	public IOperationModel getModel() {
 		return model;
