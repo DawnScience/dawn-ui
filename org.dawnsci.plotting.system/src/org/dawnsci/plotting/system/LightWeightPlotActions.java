@@ -468,13 +468,14 @@ class LightWeightPlotActions {
 		
 		actionBarManager.registerToolBarGroup(ToolbarConfigurationConstants.CONFIG.getId());	
 		
-		final Action configButton = new Action(BasePlottingConstants.CONFIG_SETTINGS, PlottingSystemActivator.getImageDescriptor("icons/Configure.png")) {
+		final Action configButton = new Action("Configure", PlottingSystemActivator.getImageDescriptor("icons/Configure.png")) {
 			public void run() {
 				XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getCurrent().getActiveShell(), xyGraph, viewer.getSystem().isRescale());
 				dialog.setPlottingSystem(viewer.getSystem());
 				dialog.open();
 			}
 		};
+		configButton.setId(BasePlottingConstants.CONFIG_SETTINGS);
 		configButton.setToolTipText("Configure Settings...");
 		actionBarManager.registerAction(ToolbarConfigurationConstants.CONFIG.getId(), configButton, ActionType.XYANDIMAGE);		
 		
