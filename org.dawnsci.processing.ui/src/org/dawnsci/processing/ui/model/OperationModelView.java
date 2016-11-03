@@ -90,11 +90,6 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 				}
 				inputData = data;
 				configure.setEnabled(true);
-				String id = data.getCurrentOperations().get(0).getId();
-				try {
-					ServiceHolder.getOperationService().getOperationDialogId(id);
-				} catch (Exception e) {
-				}
 			}
 		};
 		
