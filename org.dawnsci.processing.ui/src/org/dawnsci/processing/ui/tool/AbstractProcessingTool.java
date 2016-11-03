@@ -18,8 +18,11 @@ import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.EventServiceHolder;
 import org.dawnsci.processing.ui.ServiceHolder;
-import org.dawnsci.processing.ui.model.ConfigureOperationModelDialog;
+import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
+import org.dawnsci.processing.ui.model.ConfigureOperationModelWizardPage;
 import org.dawnsci.processing.ui.model.OperationModelViewer;
+import org.dawnsci.processing.ui.model.OperationModelWizard;
+import org.dawnsci.processing.ui.model.OperationModelWizardDialog;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
 import org.dawnsci.processing.ui.processing.OperationTableUtils;
 import org.dawnsci.processing.ui.slice.DataFileSliceView;
@@ -180,14 +183,29 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		};
 		
 		configure = new Action("Live setup", Activator.getImageDescriptor("icons/application-dialog.png")) {
+			@SuppressWarnings("unchecked")
 			public void run() {
 				IOperationModel model = modelEditor.getModel();
 				if (inputData == null) return;
 				if (!inputData.getCurrentOperations().get(0).getModel().equals(model)) return;
 				
-				ConfigureOperationModelDialog dialog = new ConfigureOperationModelDialog(getSite().getShell());
+				/*ConfigureOperationModelDialog dialog = new ConfigureOperationModelDialog(getSite().getShell());
 				dialog.create();
 				dialog.setOperationInputData(inputData);
+				if (dialog.open() == Dialog.OK) {
+					modelEditor.refresh();
+					updateData();
+				}*/
+			
+				// check if this operation has a wizardpage 
+				IOperationSetupWizardPage wizardPage = ServiceHolder.getOperationUIService().getWizardPage(inputData.getCurrentOperations().get(0));
+				
+				if (wizardPage == null)
+					wizardPage = new ConfigureOperationModelWizardPage(inputData.getCurrentOperations().get(0));
+				OperationModelWizard wizard = new OperationModelWizard(inputData.getInputData(), wizardPage);
+				wizard.setWindowTitle("Operation Model Configuration");
+				OperationModelWizardDialog dialog = new OperationModelWizardDialog(getSite().getShell(), wizard);
+				dialog.create();
 				if (dialog.open() == Dialog.OK) {
 					modelEditor.refresh();
 					updateData();
