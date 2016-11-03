@@ -318,6 +318,17 @@ public class MappedFileManager {
 							}
 						}
 						
+						if (b == null && dh.getLazyDataset(LegacyMapBeanBuilder.I08CHECK) != null) {
+							try {
+							b = LegacyMapBeanBuilder.buildBeani08Energyin2016(dh.getTree());
+							} catch (Exception e) {
+								//ignore
+							}
+						}
+						
+						
+						
+						
 						if (b != null) {
 							IMonitor m = new ProgressMonitorWrapper(monitor);
 							monitor.beginTask("Loading data...", -1);

@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 
+import org.dawnsci.mapping.ui.datamodel.MapScanDimensions;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
 import org.dawnsci.mapping.ui.wizards.MapBeanBuilder;
@@ -27,27 +28,39 @@ public class MappedDataBlockTest {
 	
 	private static MappedDataBlock gridScanBlock = null;
 	private static MappedDataBlock gridScanBlock3D = null;
+	private static MappedDataBlock gridScanBlockEnergy = null;
 	private static File file = null;
 	private static File file1 = null;
+	private static File file2 = null;
 	
 	@BeforeClass
 	public static void buildData() throws Exception {
 		file = folder.newFile("file1.nxs");
 		file1 = folder.newFile("file2.nxs");
+		file2 = folder.newFile("file3.nxs");
 		MapNexusFileBuilderUtils.makeGridScanWithSum(file.getAbsolutePath());
 		IDataHolder data = LoaderFactory.getData(file.getAbsolutePath());
 		ILazyDataset lazyDataset = data.getLazyDataset(MapNexusFileBuilderUtils.DETECTOR_PATH);
-		
+		MapScanDimensions msd = new MapScanDimensions(1, 0, 2);
 		gridScanBlock = new MappedDataBlock(MapNexusFileBuilderUtils.DETECTOR_PATH,
-				lazyDataset, 1, 0, file.getAbsolutePath(),2);
+				lazyDataset, file.getAbsolutePath(),msd);
 		
 		MapNexusFileBuilderUtils.makeGridScanWithZandSum(file1.getAbsolutePath());
 		
 		data = LoaderFactory.getData(file1.getAbsolutePath());
 		lazyDataset = data.getLazyDataset(MapNexusFileBuilderUtils.DETECTOR_PATH);
-		
+		msd = new MapScanDimensions(2, 1, 3);
 		gridScanBlock3D = new MappedDataBlock(MapNexusFileBuilderUtils.DETECTOR_PATH,
-				lazyDataset, 2, 1, file.getAbsolutePath(),3);
+				lazyDataset, file1.getAbsolutePath(), msd);
+		
+		MapNexusFileBuilderUtils.makeGridScanWithEnergyZ(file2.getAbsolutePath());
+		
+		data = LoaderFactory.getData(file2.getAbsolutePath());
+		lazyDataset = data.getLazyDataset(MapNexusFileBuilderUtils.DETECTOR_PATH);
+		msd = new MapScanDimensions(2, 1, 3);
+		gridScanBlockEnergy = new MappedDataBlock(MapNexusFileBuilderUtils.DETECTOR_PATH,
+				lazyDataset,file2.getAbsolutePath(),msd);
+		
 	}
 
 	@Test
@@ -94,6 +107,17 @@ public class MappedDataBlockTest {
 		Dataset d = DatasetUtils.convertToDataset(slice);
 		assertEquals(d.getElementDoubleAbs(0), 0,0);
 		assertEquals(d.getElementDoubleAbs(d.getSize()-1), d.getSize()-1,0);
+	}
+	
+	@Test
+	public void testGetSpectrumIntIntEnergyZ() throws Exception {
+		ILazyDataset spectrum = gridScanBlockEnergy.getSpectrum(0, 0);
+		IDataset slice = spectrum.getSlice();
+		slice.squeeze();
+		assertEquals(1, slice.getRank());
+		Dataset d = DatasetUtils.convertToDataset(slice);
+		assertEquals(d.getElementDoubleAbs(0), 0,0);
+		assertEquals(11*12*9, d.getElementDoubleAbs(d.getSize()-1),0);
 	}
 
 }

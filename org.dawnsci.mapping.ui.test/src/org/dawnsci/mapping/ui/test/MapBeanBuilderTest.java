@@ -6,6 +6,7 @@ import java.io.File;
 
 import org.dawnsci.mapping.ui.LocalServiceManager;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
+import org.dawnsci.mapping.ui.test.MapNexusFileBuilderUtils;
 import org.dawnsci.mapping.ui.wizards.MapBeanBuilder;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.junit.BeforeClass;

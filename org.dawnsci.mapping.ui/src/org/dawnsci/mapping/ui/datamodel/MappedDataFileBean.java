@@ -46,7 +46,7 @@ public class MappedDataFileBean {
 	public boolean checkValid() {
 		
 		if (blocks.isEmpty()) return false;
-		if (maps.isEmpty()) return false;
+//		if (maps.isEmpty()) return false;
 		
 		for (MappedBlockBean b : blocks) {
 			if (!b.checkValid()) return false;

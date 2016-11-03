@@ -17,47 +17,40 @@ import org.eclipse.january.metadata.MetadataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MappedDataBlock implements MapObject {
+public class MappedDataBlock implements MapObject, PlottableMapObject {
 
 	private String name;
 	private String path;
 	ILazyDataset dataset;
-	int yDim = 0;
-	int xDim = 1;
-	int scanRank = 0;
+	private MapScanDimensions mapDims;
+
+	public MapScanDimensions getMapDims() {
+		return mapDims;
+	}
+
 	private double[] range;
 	private boolean connected = false;
-	private SliceND currentSlice;
-	
+
 	private LiveRemoteAxes axes;
 	
 	private static final Logger logger = LoggerFactory.getLogger(MappedDataBlock.class);
 	
-	public MappedDataBlock(String name, ILazyDataset dataset, int xDim, int yDim, String path, int scanRank) {
+	public MappedDataBlock(String name, ILazyDataset dataset, String path, MapScanDimensions dims) {
 		this.name = name;
 		this.dataset = dataset;
-		this.xDim = xDim;
-		this.yDim = yDim;
+		this.mapDims = dims;
 		this.range = calculateRange(dataset);
 		this.path = path;
-		this.scanRank = scanRank;
-		buildCurrentSlice();
+		
 	}
 	
 	public int getScanRank() {
-		return scanRank;
+		return mapDims.getScanRank();
 	}
 
-	private void buildCurrentSlice() {
-		currentSlice = new SliceND(dataset.getShape());
-		for (int i = 0; i < scanRank ; i++) {
-			if (!(i == xDim || i == yDim)) currentSlice.setSlice(i, 0, 1, 1);
-		}
-		
-	}
 
-	public MappedDataBlock(String name, IDatasetConnector dataset, int xDim, int yDim, String path,int scanRank, LiveRemoteAxes axes, String host, int port) {
-		this(name, dataset.getDataset(), xDim, yDim, path,scanRank);
+	public MappedDataBlock(String name, IDatasetConnector dataset,MapScanDimensions dims, String path, LiveRemoteAxes axes, String host, int port) {
+		this(name, dataset.getDataset(), path,dims);
 		this.axes = axes;
 
 	}
@@ -97,11 +90,7 @@ public class MappedDataBlock implements MapObject {
 	}
 	
 	protected SliceND getMatchingDataSlice(int x, int y) {
-		SliceND slice = currentSlice.clone();
-		slice.setSlice(yDim,y,y+1,1);
-		slice.setSlice(xDim,x,x+1,1);
-		
-	return slice;
+		return mapDims.getSlice(x, y, dataset.getShape());
 	}
 	
 	public IDataset getSpectrum(int index) {
@@ -125,41 +114,25 @@ public class MappedDataBlock implements MapObject {
 	}
 	
 	public int[] getDataDimensions() {
-		int nDims = 0;
-		
-		int[] shape = dataset.getShape();
-		for (int i = 0; i < shape.length; i++) {
-			if (i!= xDim && i != yDim && shape[i] != 1) nDims++;
-		}
-		
-		int[] dd = new int[nDims];
-		int count = 0;
-		for (int i = 0; i < shape.length; i++) {
-			if (i!= xDim && i != yDim && shape[i] != 1) {
-				dd[count] = i;
-				count++;
-			}
-		}
-		
-		return dd;
+		return mapDims.getDataDimensions(dataset.getRank());
 	}
 	
 	public ILazyDataset[] getXAxis() {
 		if (axes != null) return getLiveXAxis();
 		AxesMetadata md = dataset.getFirstMetadata(AxesMetadata.class);
 		if (md == null) return null;
-		return md.getAxis(xDim);
+		return md.getAxis(mapDims.getxDim());
 	}
 	
 	public ILazyDataset[] getYAxis() {
 		if (axes != null) return getLiveYAxis();
 		AxesMetadata md = dataset.getFirstMetadata(AxesMetadata.class);
 		if (md == null) return null;
-		return md.getAxis(yDim);
+		return md.getAxis(mapDims.getyDim());
 	}
 	
 	public boolean isRemappingRequired(){
-		return xDim == yDim;
+		return mapDims.isRemappingRequired();
 	}
 
 	@Override
@@ -172,6 +145,9 @@ public class MappedDataBlock implements MapObject {
 		if (block instanceof IDatasetConnector) return null;
 		
 		IDataset[] ax = MetadataPlotUtils.getAxesAsIDatasetArray(block);
+		
+		int yDim = mapDims.getyDim();
+		int xDim = mapDims.getxDim();
 		
 		double[] range = new double[4];
 		int xs = ax[xDim].getSize();
@@ -205,23 +181,23 @@ public class MappedDataBlock implements MapObject {
 	}
 	
 	public boolean isTransposed(){
-		return yDim > xDim;
+		return mapDims.isTransposed();
 	}
 	
 	public int getyDim() {
-		return yDim;
+		return mapDims.getyDim();
 	}
 
 	public int getxDim() {
-		return xDim;
+		return mapDims.getxDim();
 	}
 	
 	public int getySize() {
-		return dataset.getShape()[yDim];
+		return dataset.getShape()[mapDims.getyDim()];
 	}
 
 	public int getxSize() {
-		return dataset.getShape()[xDim];
+		return dataset.getShape()[mapDims.getxDim()];
 	}
 
 	private MetadataType generateSliceMetadata(int x, int y){
@@ -236,6 +212,9 @@ public class MappedDataBlock implements MapObject {
 		((IDatasetConnector)dataset).refreshShape();
 		
 		axes.update();
+		
+		int yDim = mapDims.getyDim();
+		int xDim = mapDims.getxDim();
 		
 		SliceND slice = new SliceND(dataset.getShape());
 		slice.setSlice(yDim,y,y+1,1);
@@ -276,6 +255,9 @@ public class MappedDataBlock implements MapObject {
 		((IDatasetConnector)dataset).refreshShape();
 		
 		axes.update();
+		
+		int yDim = mapDims.getyDim();
+		int xDim = mapDims.getxDim();
 		
 		SliceND slice = new SliceND(dataset.getShape());
 		slice.setSlice(xDim,x,x+1,1);
@@ -377,7 +359,7 @@ public class MappedDataBlock implements MapObject {
 		axes.update();
 		
 		if (axes.getxAxisForRemapping() != null) return new ILazyDataset[]{axes.getxAxisForRemapping()};
-		return new ILazyDataset[]{axes.getAxes()[xDim]};
+		return new ILazyDataset[]{axes.getAxes()[mapDims.getxDim()]};
 	}
 	
 	private ILazyDataset[] getLiveYAxis() {
@@ -387,7 +369,7 @@ public class MappedDataBlock implements MapObject {
 		
 		if (!connected) return null;
 		axes.update();
-		return new ILazyDataset[]{axes.getAxes()[yDim]};
+		return new ILazyDataset[]{axes.getAxes()[mapDims.getyDim()]};
 	}
 
 	
@@ -396,6 +378,43 @@ public class MappedDataBlock implements MapObject {
 		SliceND slice = getMatchingDataSlice(x, y);
 		SliceInformation sl = new SliceInformation(slice, slice, new SliceND(dataset.getShape()), getDataDimensions(), 1, 1);
 		return new SliceFromLiveSeriesMetadata(si,sl,axes.getHost(),axes.getPort(),axes.getAxesNames(),axes.getxAxisForRemappingName());
+	}
+
+	@Override
+	public IDataset getData() {
+		SliceND nd = new SliceND(dataset.getShape());
+		
+		for (int i = 0; i < dataset.getRank() ; i++) {
+			if (!mapDims.isMapDimension(i)) nd.setSlice(i, 0, 1, 1);
+		}
+		
+		try {
+			IDataset slice = dataset.getSlice(nd);
+			
+			return slice.squeeze();
+		} catch (DatasetException e) {
+			logger.error("Could not slice data", e);
+		}
+		
+		return null;
+	}
+
+	@Override
+	public void update() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public int getTransparency() {
+		// TODO Auto-generated method stub
+		return -1;
+	}
+
+	@Override
+	public IDataset getSpectrum(double x, double y) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
 	

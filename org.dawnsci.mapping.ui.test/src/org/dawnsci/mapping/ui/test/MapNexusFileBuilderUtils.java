@@ -135,7 +135,7 @@ public class MapNexusFileBuilderUtils {
 			} else {
 				String axis = FASTEST_AXES[scanRank-1-i];
 				if (isEnergy) {
-					 axis = i == 0 ? ENERGY : FASTEST_AXES[scanRank-2-i];
+					 axis = i == 0 ? ENERGY : FASTEST_AXES[scanRank-1-i];
 				}
 				DoubleDataset ax = DatasetFactory.createRange(shape[i]);
 				axes[i] = axis;

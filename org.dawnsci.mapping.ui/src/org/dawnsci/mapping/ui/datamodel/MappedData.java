@@ -171,13 +171,40 @@ public class MappedData extends AbstractMapData{
 			logger.error("Could not create axes metdata", e);
 		}
 
+		IDataset fm = null;
 		int[] mapShape = ma.getShape();
-		SliceND s = new SliceND(mapShape);
-		if (mapShape[0] > y.getShape()[0]) s.setSlice(0, 0, y.getShape()[0], 1);
-		if (mapShape[1] > x.getShape()[0]) s.setSlice(1, 0, x.getShape()[0], 1);
-		IDataset fm = ma.getSlice(s);
+		if (mapShape.length == 2) {
+			SliceND s = new SliceND(mapShape);
+			if (mapShape[0] > y.getShape()[0]) s.setSlice(0, 0, y.getShape()[0], 1);
+			if (mapShape[1] > x.getShape()[0]) s.setSlice(1, 0, x.getShape()[0], 1);
+			fm = ma.getSlice(s);
+		} else {
+			SliceND s = new SliceND(mapShape);
+			int xDim = parent.getxDim();
+			int yDim = parent.getyDim();
+			int[] xyScanDims = parent.getMapDims().getNonXYScanDimensions();
+			
+			
+			for (int i = 0; i < mapShape.length; i++) {
+				if (i == yDim){
+					if (mapShape[0] > y.getShape()[0]) s.setSlice(0, 0, y.getShape()[0], 1);
+				} else if (i == xDim){
+					if (mapShape[1] > x.getShape()[0]) s.setSlice(1, 0, x.getShape()[0], 1);
+				} else {
+					s.setSlice(i,mapShape[i]-1, mapShape[i], 1);
+				}
+			}
+			
+			fm = ma.getSlice(s).squeeze();
+			
+		}
+		
 		fm.setMetadata(axm);
 		setRange(calculateRange(fm));
-		map = fm;
+//		if (currentSlice == null) {
+//		SliceND snd = build(fm);
+//		}
+		//TODO do something with the current slice
+		map  =fm;
 	}
 }

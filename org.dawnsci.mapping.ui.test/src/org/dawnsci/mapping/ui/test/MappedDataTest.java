@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 
+import org.dawnsci.mapping.ui.datamodel.MapScanDimensions;
 import org.dawnsci.mapping.ui.datamodel.MappedData;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
@@ -40,8 +41,9 @@ public class MappedDataTest {
 		IDataHolder data = LoaderFactory.getData(file.getAbsolutePath());
 		ILazyDataset lazyDataset = data.getLazyDataset(MapNexusFileBuilderUtils.DETECTOR_PATH);
 		
+		MapScanDimensions msd = new MapScanDimensions(1, 0, 2);
 		gridScanBlock = new MappedDataBlock(MapNexusFileBuilderUtils.DETECTOR_PATH,
-				lazyDataset, 1, 0, file.getAbsolutePath(),2);
+				lazyDataset, file.getAbsolutePath(),msd);
 		
 		ILazyDataset sum = data.getLazyDataset(MapNexusFileBuilderUtils.SUM_PATH);
 		
@@ -49,7 +51,6 @@ public class MappedDataTest {
 		
 		fileRemap = folder.newFile("file2.nxs");
 		MapNexusFileBuilderUtils.makeDiagLineScanWithSum(fileRemap.getAbsolutePath());
-		fileRemap.toPath();
 		
 	}
 	

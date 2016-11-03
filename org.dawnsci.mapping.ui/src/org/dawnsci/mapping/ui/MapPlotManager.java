@@ -8,10 +8,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.dawnsci.mapping.ui.datamodel.MapObject;
-import org.dawnsci.mapping.ui.datamodel.MappedData;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
 import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -78,9 +76,7 @@ public class MapPlotManager {
 				for (MapTrace t : layers) {
 					if (t.getMap().isLive()) {
 						noneLive = false;
-						if (t.getMap() instanceof AbstractMapData) {
-							((AbstractMapData)t.getMap()).update();
-						}
+						t.getMap().update();
 						t.switchMap(t.getMap());
 					}
 				}
@@ -97,7 +93,7 @@ public class MapPlotManager {
 	}
 	
 	public void plotData(final double x, final double y) {
-		final AbstractMapData topMap = getTopMap(x,y);
+		final PlottableMapObject topMap = getTopMap(x,y);
 		if (topMap == null)  {
 			data.clear();
 			return;
@@ -151,7 +147,7 @@ public class MapPlotManager {
 	}
 	
 	public void plotDataWithHold(final double x, final double y) {
-		final AbstractMapData topMap = getTopMap(x,y);
+		final PlottableMapObject topMap = getTopMap(x,y);
 		if (topMap == null) return;
 		final ILazyDataset lz = topMap.getSpectrum(x,y);
 		
@@ -274,7 +270,7 @@ public class MapPlotManager {
 	}
 	
 	
-	public void updateLayers(AbstractMapData map) {
+	public void updateLayers(PlottableMapObject map) {
 		
 		Iterator<MapTrace> it = layers.iterator();
 		
@@ -312,7 +308,7 @@ public class MapPlotManager {
 		plotLayers();
 	}
 	
-	public void plotMap(AbstractMapData map) {
+	public void plotMap(PlottableMapObject map) {
 		addMap(map);
 		plotLayers();
 	}
@@ -337,25 +333,25 @@ public class MapPlotManager {
 		plotLayers();
 	}
 	
-	public AbstractMapData getTopMap(double x, double y){
+	public PlottableMapObject getTopMap(double x, double y){
 		
 		Iterator<MapTrace> iterator = layers.iterator();
 		
 		while (iterator.hasNext()) {
 			MapObject l = iterator.next().getMap();
-			if (l instanceof AbstractMapData && ((AbstractMapData)l).getSpectrum(x, y) != null) return (AbstractMapData)l;
+			if (l instanceof PlottableMapObject && ((PlottableMapObject)l).getSpectrum(x, y) != null) return (PlottableMapObject)l;
 		}
 		
 		return null;
 	}
 	
-	public AbstractMapData getTopMap(){
+	public PlottableMapObject getTopMap(){
 		
 		Iterator<MapTrace> iterator = layers.iterator();
 		
 		while (iterator.hasNext()) {
 			MapObject l = iterator.next().getMap();
-			if (l instanceof AbstractMapData) return (AbstractMapData)l;
+			if (l instanceof PlottableMapObject) return (PlottableMapObject)l;
 		}
 		
 		return null;
@@ -368,7 +364,7 @@ public class MapPlotManager {
 		layers.clear();
 	}
 	
-	private void addMap(AbstractMapData map) {
+	private void addMap(PlottableMapObject map) {
 
 		MapTrace sameMap = null;
 		
@@ -376,7 +372,7 @@ public class MapPlotManager {
 		
 		while (iterator.hasNext()) {
 			MapTrace l = iterator.next();
-			if (l.getMap() instanceof AbstractMapData && isTheSameMap((AbstractMapData)l.getMap(), map)) {
+			if (l.getMap() instanceof PlottableMapObject && isTheSameMap((PlottableMapObject)l.getMap(), map)) {
 				sameMap = l;
 				break;
 			}
@@ -432,7 +428,7 @@ public class MapPlotManager {
 			t = MetadataPlotUtils.buildTrace(longName, map, this.map);
 			//TODO something better here:
 			t.setGlobalRange(sanizeRange(area.getRange(), map.getShape()));
-			if (ob instanceof AbstractMapData)  t.setAlpha(((AbstractMapData)ob).getTransparency());
+			if (ob instanceof PlottableMapObject)  t.setAlpha(((PlottableMapObject)ob).getTransparency());
 		} catch (Exception e) {
 			logger.error("Error creating image trace", e);
 		}
@@ -487,7 +483,7 @@ public class MapPlotManager {
 		}
 	}
 	
-	private boolean isTheSameMap(AbstractMapData omap, AbstractMapData map) {
+	private boolean isTheSameMap(PlottableMapObject omap, PlottableMapObject map) {
 		
 		if (omap.getLongName().equals(map.getLongName())) return true;
 		
@@ -576,7 +572,7 @@ public class MapPlotManager {
 	}
 	
 	
-	public void setTransparency(AbstractMapData m) {
+	public void setTransparency(PlottableMapObject m) {
 		
 		
 		Iterator<MapTrace> iterator = layers.iterator();

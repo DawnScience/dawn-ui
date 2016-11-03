@@ -77,11 +77,13 @@ public class MappedFileFactory {
 	private static MappedDataBlock setUpBlock(String path, String blockName, MappedBlockBean bean, LiveDataBean live, int scanRank) {
 		MappedDataBlock block = null;
 		
+		MapScanDimensions msd = new MapScanDimensions(bean.getxDim(), bean.getyDim(), scanRank);
+		
 		List<String> axesNames = Arrays.asList(bean.getAxes());
 		if (live != null) {
 			IDatasetConnector lz = getRemoteDataset(path,blockName,live);
 			LiveRemoteAxes remoteAxes = getRemoteAxes(axesNames, path, bean, live);
-			block = new MappedDataBlock(blockName, lz, bean.getxDim(), bean.getyDim(), path,scanRank, remoteAxes, live.getHost(),live.getPort());
+			block = new MappedDataBlock(blockName, lz, msd,path, remoteAxes, live.getHost(),live.getPort());
 			return block;
 		}
 		
@@ -91,7 +93,7 @@ public class MappedFileFactory {
 			lz.clearMetadata(AxesMetadata.class);
 			AxesMetadata axm = checkAndBuildAxesMetadata(axesNames, path, bean);
 			lz.setMetadata(axm);
-			block = new MappedDataBlock(blockName, lz, bean.getxDim(), bean.getyDim(), path,scanRank);
+			block = new MappedDataBlock(blockName, lz,path,msd);
 		} catch (Exception e) {
 			
 		}

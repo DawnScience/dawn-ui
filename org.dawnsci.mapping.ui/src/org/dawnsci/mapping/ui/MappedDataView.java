@@ -18,6 +18,7 @@ import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
 import org.dawnsci.plotting.views.ToolPageView;
+import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationBean;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -221,7 +222,7 @@ public class MappedDataView extends ViewPart {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				Object e = ((StructuredSelection)event.getSelection()).getFirstElement();
-				if (e instanceof AbstractMapData) plotManager.updateLayers((AbstractMapData)e);
+				if (e instanceof AbstractMapData || e instanceof MappedDataBlock) plotManager.updateLayers((PlottableMapObject)e);
 				if (e instanceof AssociatedImage) plotManager.addImage((AssociatedImage)e);
 				if (e instanceof MappedDataFile) {
 					MappedDataFile mdf = (MappedDataFile)e;

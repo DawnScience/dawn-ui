@@ -44,6 +44,47 @@ public class LegacyMapBeanBuilder {
 	public static final String I22ITPATH = "/entry1/It";
 	public static final String I22data = "data";
 	
+	private static final String I08COUNTER = "/entry1/Counter1";
+	private static final String I08Y = "sample_y";
+	private static final String I08X = "sample_x";
+	private static final String I08PHOTON_ENERGY = "photon_energy";
+	private static final String I08DATA = "data";
+	public static final String I08CHECK = "/entry1/Counter1/data";
+	
+	
+public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
+		
+		MappedDataFileBean fb = null;
+		
+		NodeLink nl = tree.findNodeLink(I08COUNTER);
+		Node n = nl.getDestination();
+		if (n instanceof GroupNode) {
+			GroupNode gn = (GroupNode)n;
+			if (!gn.containsDataNode(I08DATA)) return null;
+			if (!gn.containsDataNode(I08PHOTON_ENERGY)) return null;
+			if (!gn.containsDataNode(I08X)) return null;
+			if (!gn.containsDataNode(I08Y)) return null;
+			
+			fb = new MappedDataFileBean();
+			MappedBlockBean bb = new MappedBlockBean();
+			bb.setName(I08COUNTER + Node.SEPARATOR + I08DATA);
+			String[] ax = new String[3];
+			ax[0] = I08COUNTER + Node.SEPARATOR + I08PHOTON_ENERGY;
+			ax[1] = I08COUNTER + Node.SEPARATOR + I08Y;
+			ax[2] = I08COUNTER + Node.SEPARATOR + I08X;
+			
+			bb.setAxes(ax);
+			bb.setRank(3);
+			bb.setxDim(2);
+			bb.setyDim(1);
+			fb.addBlock(bb);
+		}
+		
+		if (fb!= null && !fb.checkValid()) fb = null;
+		return fb;
+	}
+	
+	
 	
 	public static MappedDataFileBean buildBeani18in2015(Tree tree) {
 		

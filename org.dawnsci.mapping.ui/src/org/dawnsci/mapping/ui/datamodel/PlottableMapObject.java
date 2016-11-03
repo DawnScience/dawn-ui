@@ -10,4 +10,9 @@ public interface PlottableMapObject extends MapObject {
 	
 	public boolean isLive();
 	
+	public void update();
+	
+	public int getTransparency();
+	
+	public IDataset getSpectrum(double x, double y);
 }

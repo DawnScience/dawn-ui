@@ -18,6 +18,8 @@ public class MappedDataFile implements MapObject{
 	private double[] range;
 	private MappedDataFileBean descriptionBean;
 	
+	private int[] nonXYScanDimensions;
+	
 //	private final static Logger logger = LoggerFactory.getLogger(MappedDataFile.class);
 	
 	public MappedDataFile(String path, MappedDataFileBean liveBean) {

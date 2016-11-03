@@ -32,7 +32,7 @@ public class MapBeanBuilder {
 	
 	public static MappedDataFileBean buildBean(Tree tree) {
 		IFindInTree finder = new NXDataFinder();
-		return buildBean(tree, finder, null);
+		return buildBean(tree, finder, new String[]{"stage_x","stage_y"});
 	}
 	
 	public static MappedDataFileBean buildBean(Tree tree, IFindInTree finder, String[] names) {

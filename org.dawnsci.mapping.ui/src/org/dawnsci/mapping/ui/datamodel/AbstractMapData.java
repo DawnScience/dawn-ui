@@ -19,9 +19,6 @@ public abstract class AbstractMapData implements PlottableMapObject{
 	protected MappedDataBlock parent;
 	private int transparency = -1;
 	private double[] range;
-	private SliceND currentSlice;
-	private int xDim = 1;
-	private int yDim = 2;
 	
 	protected boolean connected = false;
 	protected boolean live;
@@ -34,7 +31,6 @@ public abstract class AbstractMapData implements PlottableMapObject{
 		this.path = path;
 		this.oParent = this.parent = parent;
 		range = calculateRange(map);
-		buildCurrentSlice();
 	}
 	
 	public AbstractMapData(String name, IDatasetConnector map, MappedDataBlock parent, String path) {
@@ -43,17 +39,37 @@ public abstract class AbstractMapData implements PlottableMapObject{
 		this.path = path;
 		this.oParent = this.parent = parent;
 		live = true;
-		buildCurrentSlice();
 	}
 	
-	private void buildCurrentSlice() {
-		xDim = parent.getxDim();
-		yDim = parent.getyDim();
-		currentSlice = new SliceND(map.getShape());
-		for (int i = 0; i < map.getRank() ; i++) {
-			if (!(i == xDim || i == yDim)) currentSlice.setSlice(i, 0, 1, 1);
-		}
-	}
+//	protected void buildCurrentSlice() {
+//		xDim = parent.getxDim();
+//		yDim = parent.getyDim();
+//		if (map == null && baseMap == null) return;
+//		
+//		ILazyDataset m = map;
+//		
+//		if (baseMap != null) {
+//			m = baseMap.getDataset();
+//		}
+//		
+//		currentSlice = new SliceND(m.getShape());
+//		for (int i = 0; i < m.getRank() ; i++) {
+//			if (!(i == xDim || i == yDim)) currentSlice.setSlice(i, 0, 1, 1);
+//		}
+//	}
+	
+//	protected SliceND build(IDataset m) {
+//		xDim = parent.getxDim();
+//		yDim = parent.getyDim();
+//		if (m == null) return null;
+//		
+//		SliceND s = new SliceND(m.getShape());
+//		for (int i = 0; i < m.getRank() ; i++) {
+//			if (!(i == xDim || i == yDim)) s.setSlice(i, 0, 1, 1);
+//		}
+//		
+//		return s;
+//	}
 	
 	public abstract IDataset getSpectrum(double x, double y);
 	
@@ -120,7 +136,7 @@ public abstract class AbstractMapData implements PlottableMapObject{
 	public abstract void update();
 	
 	
-public boolean connect() {
+	public boolean connect() {
 		
 		try {
 			((IDatasetConnector)baseMap).connect();
