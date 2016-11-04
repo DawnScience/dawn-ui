@@ -655,17 +655,6 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			}
 		};
 		
-		final Action showSignal = new Action("Show only data with a 'signal' attribute", IAction.AS_CHECK_BOX) {
-			public void run() {
-				Activator.getDefault().getPreferenceStore().setValue(EditorConstants.SHOW_SIGNAL_ONLY, isChecked());
-				refresh();
-			}
-		};
-		showSignal.setImageDescriptor(Activator.getImageDescriptor("icons/signal.png"));
-		bars.getToolBarManager().add(showSignal);
-		bars.getToolBarManager().add(new Separator("signal.group"));
-		showSignal.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_SIGNAL_ONLY));
-		
 		final Action copy = new Action("Copy selected data (it can then be pasted to another data list.)", Activator.getImageDescriptor("icons/copy.gif")) {
 			public void run() {
 				final ITransferableDataObject sel = (ITransferableDataObject)((IStructuredSelection)dataViewer.getSelection()).getFirstElement();
