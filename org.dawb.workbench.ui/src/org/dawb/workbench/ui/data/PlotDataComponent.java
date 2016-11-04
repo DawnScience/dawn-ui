@@ -347,11 +347,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			}
 			@Override
 			public Object[] getElements(Object inputElement) {
-				
 				List<ITransferableDataObject> visible = new ArrayList<ITransferableDataObject>(data);
-				if (Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_SIGNAL_ONLY)) {
-					filterNonSignalData(visible);
-				}
 				return visible.toArray(new Object[visible.size()]);
 			}
 		});	
@@ -501,31 +497,6 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 
 	}
 	
-
-	/**
-	 * Actually filters passed in list to remove data without a signal attribute.
-	 * @param visible
-	 */
-	protected void filterNonSignalData(List<ITransferableDataObject> visible) {
-		
-		for (Iterator<ITransferableDataObject> it = visible.iterator(); it.hasNext();) {
-			ITransferableDataObject dataObject = it.next();
-			if (metaData!=null && !dataObject.isExpression()) {
-				try {
-					final Object signalAttrib = metaData.getMetaValue(dataObject+"@signal");
-					if (signalAttrib != null && !"".equals(signalAttrib)) {
-						continue;
-					}
-					it.remove();
-				} catch (Exception e) {
-					logger.error("Cannot determine signal from "+dataObject);
-				}
-			}
-		}
-	}
-
-
-
 	private static final String LOG_PREF   = "org.dawb.workbench.ui.editors.log.axis-";
 	private static final String TIME_PREF  = "org.dawb.workbench.ui.editors.time.axis-";
 	private static final String FORMAT_PREF= "org.dawb.workbench.ui.editors.format.axis-";
