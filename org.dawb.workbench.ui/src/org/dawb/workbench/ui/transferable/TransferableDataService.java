@@ -38,6 +38,7 @@ public class TransferableDataService extends AbstractServiceFactory implements I
 		return new TransferableDataObject(holder, meta, expression);
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public Object create(Class serviceInterface, IServiceLocator parentLocator, IServiceLocator locator) {
 		if (serviceInterface==ITransferableDataService.class) {

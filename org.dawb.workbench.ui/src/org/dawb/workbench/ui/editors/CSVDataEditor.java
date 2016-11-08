@@ -22,7 +22,6 @@ import org.dawb.workbench.ui.editors.preference.EditorConstants;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.slicing.api.editor.ISelectedPlotting;
 import org.eclipse.dawnsci.slicing.api.editor.ISlicablePlottingPart;
-import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ContributionManager;
@@ -309,6 +308,7 @@ public class CSVDataEditor extends EditorPart implements IReusableEditor, IPageC
 		RowObject(int row) {
 			this.row = row;
 		}
+		@SuppressWarnings("unused")
 		public void add(float value) {
 			rowValues.add(value);
 		}
@@ -318,6 +318,7 @@ public class CSVDataEditor extends EditorPart implements IReusableEditor, IPageC
 		public Float get(int col) {
 			return rowValues.get(col);
 		}
+		@SuppressWarnings("unused")
 		public int getRow(){
 			return row;
 		}

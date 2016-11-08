@@ -220,7 +220,8 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
 		return dataSetEditor;
 	}
 
-    public Object getAdapter(@SuppressWarnings("rawtypes") final Class clazz) {
+    @SuppressWarnings("unchecked")
+	public Object getAdapter(@SuppressWarnings("rawtypes") final Class clazz) {
 		
 		if (clazz == Page.class) {
 			final PlotDataEditor      ed  = getDataSetEditor();

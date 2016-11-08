@@ -174,7 +174,7 @@ public class PythonFilterPage extends ResourceChoosePage {
 			return;
 		}
 		
-		this.staticPath = getPath();
+		staticPath = getPath();
 		setErrorMessage(null);
 		setPageComplete(true);
 		

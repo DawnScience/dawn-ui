@@ -222,6 +222,7 @@ public class PlotDataPage extends Page implements IAdaptable {
 		return sliceComponent;
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public Object getAdapter(Class type) {
 	

@@ -9,8 +9,8 @@
 package org.dawb.workbench.ui.data;
 
 
-import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
+import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.transferable.TransferableDataObject;
 import org.dawnsci.common.widgets.celleditor.ExpresionCellEditor;
 import org.dawnsci.common.widgets.celleditor.ExpressionFunctionProposalProvider;
@@ -47,7 +47,7 @@ class ExpressionEditingSupport extends EditingSupport {
 		super(viewer);
 		
 		this.manager  = manager;
-		IExpressionObjectService service  = (IExpressionObjectService)ServiceManager.getService(IExpressionObjectService.class);
+		IExpressionObjectService service  = (IExpressionObjectService)Activator.getService(IExpressionObjectService.class);
 		IExpressionObject exObj = service.createExpressionObject(null,null,"");
 		
 		KeyStroke keystroke = null;

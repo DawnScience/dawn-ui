@@ -669,7 +669,8 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 		return this.plottingSystem;
 	}
 	
-    public Object getAdapter(@SuppressWarnings("rawtypes") final Class clazz) {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public Object getAdapter(final Class clazz) {
 		
     	
 		if (clazz == Page.class) {

@@ -23,7 +23,6 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.DawbUtils;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
@@ -200,8 +199,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		this.data = new ArrayList<ITransferableDataObject>(7);
 		this.editor   = editor;
 		
-		this.expressionService  = (IExpressionObjectService)ServiceManager.getService(IExpressionObjectService.class);
-		this.transferableService= (ITransferableDataService)ServiceManager.getService(ITransferableDataService.class);
+		this.expressionService  = (IExpressionObjectService)Activator.getService(IExpressionObjectService.class);
+		this.transferableService= (ITransferableDataService)Activator.getService(ITransferableDataService.class);
 		
 		this.dataListener = new IDataListener() {		
 			@Override
