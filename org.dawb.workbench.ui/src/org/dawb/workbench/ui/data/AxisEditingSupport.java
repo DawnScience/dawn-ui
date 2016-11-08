@@ -14,6 +14,7 @@ import org.dawb.workbench.ui.transferable.TransferableDataObject;
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.slicing.api.data.ITransferableDataObject;
+import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ComboBoxCellEditor;
@@ -55,12 +56,12 @@ class AxisEditingSupport extends EditingSupport {
 	protected boolean canEdit(Object element) {
 		ITransferableDataObject co = (ITransferableDataObject)element;
 		final int[] shape  = co.getShape(false);
-		return shape==null ? co.isChecked() : co.isChecked() && shape.length==1;
+		return shape==null ? co.isChecked() : co.isChecked() && (shape.length==1 || ShapeUtils.squeezeShape(shape, false).length == 1);
 	}
 
 	@Override
 	protected Object getValue(Object element) {
-		AbstractPlottingSystem asys = (AbstractPlottingSystem)plotComponent.getAdapter(IPlottingSystem.class);
+		AbstractPlottingSystem<?> asys = (AbstractPlottingSystem<?>)plotComponent.getAdapter(IPlottingSystem.class);
 		List<ITransferableDataObject> selections = plotComponent.getSelections();
 		return ((ITransferableDataObject)element).getAxisIndex(selections, asys.isXFirst());
 	}
@@ -76,7 +77,7 @@ class AxisEditingSupport extends EditingSupport {
 			} else {
 				
 				List<ITransferableDataObject> selections = plotComponent.getSelections();
-				AbstractPlottingSystem asys = (AbstractPlottingSystem)plotComponent.getAdapter(IPlottingSystem.class);
+				AbstractPlottingSystem<?> asys = (AbstractPlottingSystem<?>)plotComponent.getAdapter(IPlottingSystem.class);
 				if (asys.isXFirst() && "X".equals(co.getAxis(selections, asys.is2D(), true))) {
 					// We lost an x
 					asys.setXFirst(false);
