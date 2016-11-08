@@ -4,7 +4,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.dawnsci.processing.ui.ServiceHolder;
+import org.dawnsci.processing.ui.api.IOperationModelWizard;
 import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
+import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
+import org.eclipse.dawnsci.analysis.api.persistence.IPersistentFile;
+import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.dialogs.Dialog;
@@ -12,9 +17,9 @@ import org.eclipse.jface.wizard.Wizard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OperationModelWizard extends Wizard {
+public class OperationModelWizard extends Wizard implements IOperationModelWizard {
 
-	final List<IOperationSetupWizardPage> wizardPages;
+	private final List<IOperationSetupWizardPage> wizardPages;
 	
 	@SuppressWarnings("unused")
 	final static private Logger logger = LoggerFactory.getLogger(OperationModelWizard.class);
@@ -64,6 +69,23 @@ public class OperationModelWizard extends Wizard {
 			page.wizardTerminatingButtonPressed(Dialog.CANCEL);
 		});
 		return true;
+	}
+
+	@Override
+	public void saveOutputFile(String filename) throws Exception {
+		IPersistenceService service = ServiceHolder.getPersistenceService();
+		IPersistentFile pf = service.getPersistentFile(filename);
+		
+		List<IOperation> operationsList = new ArrayList<>();
+		
+		// get all operations, for those pages that are instances of AbstractOperationModelWizardPage
+		for (IOperationSetupWizardPage page : wizardPages) {
+			if (page instanceof AbstractOperationModelWizardPage)
+				operationsList.add(((AbstractOperationModelWizardPage) page).getOperation());
+		}
+		
+		pf.setOperations(operationsList.toArray(new IOperation[operationsList.size()]));
+		pf.close();
 	}
 
 }
