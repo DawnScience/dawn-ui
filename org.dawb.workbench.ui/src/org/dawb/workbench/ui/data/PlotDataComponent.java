@@ -842,6 +842,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	 * 
 	 * @param ob
 	 */
+	@SuppressWarnings("unused")
 	private void chooseFilterFile(ITransferableDataObject ob) {
 
         if (ob==null) return;
@@ -2067,17 +2068,17 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	}
 
 
-	public IPlottingSystem<Composite> getPlottingSystem() {
+	public IPlottingSystem<?> getPlottingSystem() {
 		if (editor==null) return null;
-		return (IPlottingSystem<Composite>)editor.getAdapter(IPlottingSystem.class);
+		return (IPlottingSystem<?>)editor.getAdapter(IPlottingSystem.class);
 	}
 
 	/**
 	 * May return null! Editor does not have to be a plotting editor.
 	 * @return
 	 */
-	private AbstractPlottingSystem getAbstractPlottingSystem() {
-		return (AbstractPlottingSystem)getPlottingSystem();
+	private AbstractPlottingSystem<?> getAbstractPlottingSystem() {
+		return (AbstractPlottingSystem<?>)getPlottingSystem();
 	}
 
 	public boolean isStaggerSupported() {
@@ -2101,8 +2102,9 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	
 	
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
+	public Object getAdapter(Class adapter) {
 		if (adapter==IPlottingSystem.class) {
 			return getPlottingSystem();
 		}
