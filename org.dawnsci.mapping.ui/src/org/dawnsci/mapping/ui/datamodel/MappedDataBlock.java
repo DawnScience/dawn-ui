@@ -1,5 +1,7 @@
 package org.dawnsci.mapping.ui.datamodel;
 
+import org.dawnsci.mapping.ui.LivePlottingUtils;
+import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromLiveSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
@@ -10,6 +12,7 @@ import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDatasetConnector;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.Maths;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.january.metadata.MetadataFactory;
@@ -216,9 +219,7 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 		int yDim = mapDims.getyDim();
 		int xDim = mapDims.getxDim();
 		
-		SliceND slice = new SliceND(dataset.getShape());
-		slice.setSlice(yDim,y,y+1,1);
-		slice.setSlice(xDim,x,x+1,1);
+		SliceND slice = mapDims.getSlice(x, y, dataset.getShape());
 		
 		IDataset slice2;
 		try {
@@ -382,6 +383,16 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 
 	@Override
 	public IDataset getData() {
+		
+		if (isLive()) {
+			update();
+			IDataset d = LivePlottingUtils.getUpdatedMap((IDatasetConnector)dataset, this, this.toString());
+			if (d == null) return null;
+			double[] range = MappingUtils.getGlobalRange(d);
+			this.range = range;
+			return d;
+		}
+		
 		SliceND nd = new SliceND(dataset.getShape());
 		
 		for (int i = 0; i < dataset.getRank() ; i++) {
@@ -401,7 +412,15 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 
 	@Override
 	public void update() {
-		// TODO Auto-generated method stub
+		if (!isLive()) return;
+		if (!connected) {			
+			try {
+				connect();
+			} catch (Exception e) {
+				logger.debug("Could not connect",e);
+
+			}
+		}
 		
 	}
 
@@ -413,7 +432,16 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 
 	@Override
 	public IDataset getSpectrum(double x, double y) {
-		// TODO Auto-generated method stub
+		int[] idx = MappingUtils.getIndicesFromCoOrds(getData(), x, y);
+		
+		if (idx == null) return null;
+		
+		try {
+			return getSpectrum(idx[0], idx[1]).getSlice();
+		} catch (DatasetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return null;
 	}
 }

@@ -113,6 +113,8 @@ public class MapPlotManager {
 				
 //				IDataset s = l.getSlice();
 				
+				if (s.getSize() == 1) return;
+				
 				if (s != null) MetadataPlotUtils.plotDataWithMetadata(s, data);
 				
 				Display.getDefault().asyncExec(new Runnable() {

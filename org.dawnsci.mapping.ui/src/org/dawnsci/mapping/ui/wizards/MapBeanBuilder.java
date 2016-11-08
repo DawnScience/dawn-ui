@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.crypto.CipherInputStream;
+
 import org.dawnsci.mapping.ui.datamodel.AssociatedImageBean;
 import org.dawnsci.mapping.ui.datamodel.MapBean;
 import org.dawnsci.mapping.ui.datamodel.MappedBlockBean;
@@ -32,7 +34,7 @@ public class MapBeanBuilder {
 	
 	public static MappedDataFileBean buildBean(Tree tree) {
 		IFindInTree finder = new NXDataFinder();
-		return buildBean(tree, finder, new String[]{"stage_x","stage_y"});
+		return buildBean(tree, finder, null);
 	}
 	
 	public static MappedDataFileBean buildBean(Tree tree, IFindInTree finder, String[] names) {
@@ -87,12 +89,40 @@ public class MapBeanBuilder {
 			}
 			
 			for (int i = 0; i < rank; i++) {
-				String s = ad.getString(i);
+				String s = null;
+				if (ad.getRank() == 0) {
+					 s = ad.getString();
+				} else {
+					 s = ad.getString(i);
+				}
+				
+				
 				if (s.equals(".") || s.isEmpty()) continue;
 				axNames[i] = s;
 			}
 			
-			datasets.add(new DataInfo(Node.SEPARATOR+entry.getKey(), att , axNames, squeezedRank));
+			String remap = null;
+			if (finder instanceof NXDataFinderWithAxes && ((NXDataFinderWithAxes)finder).isRemappingRequired() && names != null) {
+				Iterator<? extends Attribute> it = n.getAttributeIterator();
+				while (it.hasNext()) {
+					Attribute next = it.next();
+					String name = next.getName();
+					if(name.startsWith(names[0]) && name.endsWith(NexusTreeUtils.NX_AXES_SET+NexusTreeUtils.NX_INDICES_SUFFIX)) {
+						IDataset v = next.getValue();
+						String string = v.getString();
+						int index = Integer.parseInt(v.getString());
+						axNames[index] = names[1] + name.substring(names[0].length(), name.length()-8);
+						remap = names[0] + name.substring(names[0].length(), name.length()-8);
+						break;
+						
+					}
+				}
+			}
+
+			DataInfo dataInfo = new DataInfo(Node.SEPARATOR+entry.getKey(), att , axNames, squeezedRank);
+			if (remap != null) dataInfo.xAxisForRemapping = remap;
+
+			datasets.add(dataInfo);
 		}
 
 		for (String name : images) populateImage(bean, name, nodes.get(name));
@@ -103,7 +133,7 @@ public class MapBeanBuilder {
 		
 		for (DataInfo d : datasets) {
 		
-			if (d.rank == 1) {
+			if (d.xAxisForRemapping == null) {
 				//spiral case
 				d.toString();
 				NodeLink nl = nodes.get(d.parent.substring(1));
@@ -154,6 +184,8 @@ public class MapBeanBuilder {
 
 
 	private static void populateData(MappedDataFileBean bean, List<DataInfo> infoList, String[] xyNames) {
+		
+		int startCount = infoList.size();
 		//TODO 1D scans
 		int maxRank = 0;
 		DataInfo max = null;
@@ -202,7 +234,12 @@ public class MapBeanBuilder {
 				yDim = slow ? 0 : d.axes.length -1;
 			}
 			
-			if (d.rank == minRank) continue;
+			if (d.rank == minRank && startCount != 1) continue;
+			
+			if (d.rank == 1 && startCount == 1) {
+				xDim = 0;
+				yDim = 0;
+			}
 			
 			MappedBlockBean b = new MappedBlockBean();
 			b.setName(d.getFullName());
@@ -211,10 +248,7 @@ public class MapBeanBuilder {
 			b.setyDim(yDim);
 			b.setRank(d.rank);
 			b.setxAxisForRemapping(d.xAxisForRemapping == null ? null : d.parent + Node.SEPARATOR + d.xAxisForRemapping);
-			if (d.xAxisForRemapping != null) {
-				b.setxDim(0);
-				b.setyDim(0);
-			}
+
 			it.remove();
 			bean.addBlock(b);
 		}
@@ -317,6 +351,8 @@ public class MapBeanBuilder {
 		private String xName;
 		private String yName;
 		
+		boolean needsRemapping = false;
+		
 		public NXDataFinderWithAxes(String x, String y) {
 			this.xName = x;
 			this.yName = y;
@@ -326,40 +362,105 @@ public class MapBeanBuilder {
 		public boolean found(NodeLink node) {
 			Node n = node.getDestination();
 			if (n.containsAttribute("signal") && n.containsAttribute("NX_class") && n.getAttribute("NX_class").getFirstElement().equals(NexusTreeUtils.NX_DATA)) {
-				Attribute at = n.getAttribute("axes");
-				if (at == null) return false;
-				IDataset ad = at.getValue();
-				if (!(ad instanceof StringDataset)) return false;
-				String[] axes = ((StringDataset)ad).getData();
-				
-				boolean containsX = false;
-				
-				for (String x : axes) {
-					if (x.startsWith(xName)) {
-						containsX = true;
-						break;
-					}
+				if (containedInAxes(n,xName,yName)) {
+					return true;
 				}
 				
-				if (!containsX) return false;
-				
-				boolean containsY = false;
-				
-				for (String y : axes) {
-					if (y.startsWith(yName)) {
-						containsY = true;
-						break;
-					}
+				if (containedInNode(n,xName,yName)) {
+					return true;
 				}
-				
-				if (!containsY) return false;
-				
-				return true;
 				
 			}
 
 			return false;
 		}
+		
+		public boolean isRemappingRequired() {
+			return needsRemapping;
+			
+		}
+		
+		private boolean containedInNode(Node n, String xName, String yName){
+			
+			Iterator<? extends Attribute> it = n.getAttributeIterator();
+		
+			
+			boolean foundx = false;
+			boolean foundy = false;
+			Integer index = null;
+			
+			while (it.hasNext()) {
+				Attribute next = it.next();
+				String name = next.getName();
+				if(name.startsWith(xName) && name.endsWith(NexusTreeUtils.NX_AXES_SET+NexusTreeUtils.NX_INDICES_SUFFIX)) {
+					foundx = true;
+					IDataset value = next.getValue();
+					if (index == null) {
+						String string = value.getString();
+						index = Integer.parseInt(value.getString());
+					} else {
+						int i = Integer.parseInt(value.getString());
+						if (i != index) {
+							return false;
+						}
+					}
+				}
+				
+				if(name.startsWith(yName) && name.endsWith(NexusTreeUtils.NX_AXES_SET+NexusTreeUtils.NX_INDICES_SUFFIX)) {
+					foundy = true;
+					IDataset value = next.getValue();
+					if (index == null) {
+						index = Integer.parseInt(value.getString());
+					} else {
+						int i = Integer.parseInt(value.getString());
+						if (i != index) {
+							return false;
+						}
+					}
+				}
+			}
+			
+			needsRemapping = foundx && foundy && index != null;
+			
+			return foundx && foundy && index != null;
+			
+		}
+		
+		private boolean containedInAxes(Node n, String xName, String yName){
+			Attribute at = n.getAttribute(NexusTreeUtils.NX_AXES);
+			if (at == null) return false;
+			IDataset ad = at.getValue();
+			if (!(ad instanceof StringDataset)) return false;
+			String[] axes = ((StringDataset)ad).getData();
+			
+			boolean containsX = false;
+			
+			for (String x : axes) {
+				if (x.startsWith(xName)) {
+					containsX = true;
+					break;
+				}
+			}
+			
+			if (!containsX) return false;
+			
+			boolean containsY = false;
+			
+			for (String y : axes) {
+				if (y.startsWith(yName)) {
+					containsY = true;
+					break;
+				}
+			}
+			
+			if (!containsY) return false;
+			
+			return true;
+		}
 	}
+	
+	
+	
+	
 	
 }

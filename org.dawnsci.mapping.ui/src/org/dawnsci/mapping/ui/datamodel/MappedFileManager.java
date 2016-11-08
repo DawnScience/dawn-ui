@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.util.DatasetNameUtils;
+import org.dawnsci.mapping.ui.AcquisitionServiceManager;
 import org.dawnsci.mapping.ui.LocalServiceManager;
 import org.dawnsci.mapping.ui.MapPlotManager;
 import org.dawnsci.mapping.ui.dialog.RectangleRegistrationDialog;
@@ -217,10 +218,21 @@ public class MappedFileManager {
 			Map<String, Object> map = rd.getTree();
 			map.toString();
 			Tree tree = TreeToMapUtils.mapToTree(map, path);
-			MappedDataFileBean buildBean = MapBeanBuilder.buildBean(tree);
-			buildBean.setLiveBean(bean);
 			
-			if (buildBean != null) importFile(path, buildBean, null);
+			MappedDataFileBean buildBean = null; 
+			if (AcquisitionServiceManager.getStageConfiguration()==null){
+				buildBean = MapBeanBuilder.buildBean(tree);
+			} else {
+				String x = AcquisitionServiceManager.getStageConfiguration().getActiveFastScanAxis();
+				String y = AcquisitionServiceManager.getStageConfiguration().getActiveSlowScanAxis();
+				buildBean = MapBeanBuilder.buildBean(tree,x,y);
+			}
+			
+			
+			if (buildBean != null) {
+				buildBean.setLiveBean(bean);
+				importFile(path, buildBean, null);
+			}
 			
 			return;
 			

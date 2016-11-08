@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.swing.text.html.BlockView;
+
 public class MappedDataFile implements MapObject{
 
 	private String path;
@@ -157,6 +159,12 @@ public class MappedDataFile implements MapObject{
 //		if (range == null) {
 			for (AbstractMapData map : mapDataMap.values()) {
 				updateRange(map);
+			}
+			
+			if (mapDataMap.isEmpty()) {
+				for (PlottableMapObject o: fullDataMap.values()) {
+					updateRange(o);
+				}
 			}
 //		}
 		

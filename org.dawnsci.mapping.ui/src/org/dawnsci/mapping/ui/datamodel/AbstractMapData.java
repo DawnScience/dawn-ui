@@ -41,36 +41,6 @@ public abstract class AbstractMapData implements PlottableMapObject{
 		live = true;
 	}
 	
-//	protected void buildCurrentSlice() {
-//		xDim = parent.getxDim();
-//		yDim = parent.getyDim();
-//		if (map == null && baseMap == null) return;
-//		
-//		ILazyDataset m = map;
-//		
-//		if (baseMap != null) {
-//			m = baseMap.getDataset();
-//		}
-//		
-//		currentSlice = new SliceND(m.getShape());
-//		for (int i = 0; i < m.getRank() ; i++) {
-//			if (!(i == xDim || i == yDim)) currentSlice.setSlice(i, 0, 1, 1);
-//		}
-//	}
-	
-//	protected SliceND build(IDataset m) {
-//		xDim = parent.getxDim();
-//		yDim = parent.getyDim();
-//		if (m == null) return null;
-//		
-//		SliceND s = new SliceND(m.getShape());
-//		for (int i = 0; i < m.getRank() ; i++) {
-//			if (!(i == xDim || i == yDim)) s.setSlice(i, 0, 1, 1);
-//		}
-//		
-//		return s;
-//	}
-	
 	public abstract IDataset getSpectrum(double x, double y);
 	
 	public MappedData makeNewMapWithParent(String name, IDataset ds) {
