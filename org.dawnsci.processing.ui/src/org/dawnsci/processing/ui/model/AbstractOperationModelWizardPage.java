@@ -6,7 +6,6 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
-import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -17,16 +16,13 @@ import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.wizard.WizardPage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractOperationModelWizardPage extends WizardPage implements IOperationSetupWizardPage, PropertyChangeListener {
+public abstract class AbstractOperationModelWizardPage extends AbstractOperationSetupWizardPage implements PropertyChangeListener {
 
 	protected IOperationModel model;
 	protected IOperationModel omodel;
-	protected OperationData od = null;
-	protected OperationData id = null;
 	@SuppressWarnings("rawtypes")
 	final protected IOperation operation;
 	private Job update;
@@ -77,6 +73,7 @@ public abstract class AbstractOperationModelWizardPage extends WizardPage implem
 		operation.setModel(omodel); // when the dialog closes, the operation gets the old model back, but possibly with new values!
 	}
 	
+	@Override
 	protected void update() {
 
 		if (update == null) {
@@ -104,17 +101,11 @@ public abstract class AbstractOperationModelWizardPage extends WizardPage implem
 		update();
 	}
 	
-	@Override
-	public OperationData getOutputData() {
-		return od;
-	}
-
-	public void setInputData(OperationData id) {
-		this.id = id;
-		update();
-	}
-	
 	public IOperationModel getModel() {
 		return model;
+	}
+	
+	IOperation getOperation() {
+		return operation;
 	}
 }

@@ -1,5 +1,8 @@
 package org.dawnsci.processing.ui.model;
 
+import java.util.Arrays;
+
+import org.dawnsci.processing.ui.api.IOperationModelWizard;
 import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.PageChangingEvent;
@@ -16,16 +19,16 @@ public class OperationModelWizardDialog extends WizardDialog {
 	@SuppressWarnings("unused")
 	private final static Logger logger = LoggerFactory.getLogger(OperationModelWizardDialog.class);
 	
-	public OperationModelWizardDialog(final Shell parentShell, final OperationModelWizard newWizard) {
-		super(parentShell, newWizard);
+	public OperationModelWizardDialog(final Shell parentShell, final IOperationModelWizard wizard) {
+		super(parentShell, wizard);
 		addPageChangingListener(new IPageChangingListener() {
 			
 			@Override
 			public void handlePageChanging(PageChangingEvent event) {
 				IOperationSetupWizardPage currentPage = (IOperationSetupWizardPage) event.getCurrentPage();
-				int currentIndex = newWizard.wizardPages.indexOf(currentPage);
+				int currentIndex = Arrays.asList(wizard.getPages()).indexOf(currentPage);
 				IOperationSetupWizardPage nextPage = (IOperationSetupWizardPage) event.getTargetPage();
-				int nextIndex = newWizard.wizardPages.indexOf(nextPage);
+				int nextIndex = Arrays.asList(wizard.getPages()).indexOf(nextPage);
 				if (nextIndex <= currentIndex) {
 					return; // nothing to do when going backwards...
 				}
