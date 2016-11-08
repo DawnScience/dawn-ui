@@ -189,19 +189,8 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 				if (inputData == null) return;
 				if (!inputData.getCurrentOperations().get(0).getModel().equals(model)) return;
 				
-				/*ConfigureOperationModelDialog dialog = new ConfigureOperationModelDialog(getSite().getShell());
-				dialog.create();
-				dialog.setOperationInputData(inputData);
-				if (dialog.open() == Dialog.OK) {
-					modelEditor.refresh();
-					updateData();
-				}*/
-			
-				// check if this operation has a wizardpage 
 				IOperationSetupWizardPage wizardPage = ServiceHolder.getOperationUIService().getWizardPage(inputData.getCurrentOperations().get(0));
 				
-				if (wizardPage == null)
-					wizardPage = new ConfigureOperationModelWizardPage(inputData.getCurrentOperations().get(0));
 				OperationModelWizard wizard = new OperationModelWizard(inputData.getInputData(), wizardPage);
 				wizard.setWindowTitle("Operation Model Configuration");
 				OperationModelWizardDialog dialog = new OperationModelWizardDialog(getSite().getShell(), wizard);
