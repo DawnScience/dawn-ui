@@ -2,7 +2,9 @@ package org.dawnsci.mapping.ui.datamodel;
 
 import java.util.Arrays;
 
+import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
+import org.eclipse.january.metadata.AxesMetadata;
 
 public class MapScanDimensions {
 
@@ -121,6 +123,57 @@ public class MapScanDimensions {
 		}
 			
 		return slice;	
+	}
+	
+	public SliceND getMapSlice(ILazyDataset map){
+		
+		if (nonXYScanDimensions == null) {
+			if (map.getRank() != 2) {
+				
+				SliceND s = new SliceND(map.getShape());
+				
+				for (int i = 0; i < map.getRank(); i++){ 
+					if (!isMapDimension(i)) s.setSlice(i, 0, 1, 1);
+				}
+				
+				return s;
+			}
+			
+			return new SliceND(map.getShape());
+		}
+			
+		SliceND s = new SliceND(map.getShape());
+
+		int n = nonXYScanDimensions.length;
+
+		for (int i = 0; i < n ; i++) {
+			s.setSlice(nonXYScanDimensions[i], nonXYDimensionValues[i], nonXYDimensionValues[i]+1, 1);
+		}
+
+		return s;
+		
+	}
+	
+	public void setMapAxes(ILazyDataset block, ILazyDataset map) {
+		
+		try {
+			SliceND slice = new SliceND(block.getShape());
+			
+			for (int i = 0; i < block.getRank(); i++) {
+				if (!(isMapDimension(i) || isNonMapScanDimension(i))) slice.setSlice(i, 0, 1, 1);
+			}
+			
+			ILazyDataset sv = block.getSliceView(slice);
+			sv.setShape(map.getShape());
+			AxesMetadata svAx = sv.getFirstMetadata(AxesMetadata.class);
+			
+			map.setMetadata(svAx);
+			
+		} catch (Exception e) {
+			//FIXME log
+			e.printStackTrace();
+		}
+		
 	}
 	
 	public int[] getDataDimensions(int dataRank) {

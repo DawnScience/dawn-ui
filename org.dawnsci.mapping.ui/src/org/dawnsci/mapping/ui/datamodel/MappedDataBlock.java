@@ -12,7 +12,6 @@ import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDatasetConnector;
 import org.eclipse.january.dataset.ILazyDataset;
-import org.eclipse.january.dataset.Maths;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.january.metadata.MetadataFactory;
@@ -27,10 +26,8 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	ILazyDataset dataset;
 	private MapScanDimensions mapDims;
 
-	public MapScanDimensions getMapDims() {
-		return mapDims;
-	}
-
+	private AbstractMapData mapRepresentation;
+	
 	private double[] range;
 	private boolean connected = false;
 
@@ -47,15 +44,18 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 		
 	}
 	
-	public int getScanRank() {
-		return mapDims.getScanRank();
-	}
-
-
 	public MappedDataBlock(String name, IDatasetConnector dataset,MapScanDimensions dims, String path, LiveRemoteAxes axes, String host, int port) {
 		this(name, dataset.getDataset(), path,dims);
 		this.axes = axes;
 
+	}
+	
+	public int getScanRank() {
+		return mapDims.getScanRank();
+	}
+	
+	public MapScanDimensions getMapDims() {
+		return mapDims;
 	}
 	
 	public void replaceLiveDataset(ILazyDataset lz) {
@@ -98,8 +98,8 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	
 	public IDataset getSpectrum(int index) {
 		if (axes != null) return getLiveSpectrum(index);
-		SliceND slice = new SliceND(dataset.getShape());
-		slice.setSlice(0,index,index+1,1);
+		
+		SliceND slice = mapDims.getSlice(index, index, dataset.getShape());
 		
 		try {
 			
@@ -152,23 +152,7 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 		int yDim = mapDims.getyDim();
 		int xDim = mapDims.getxDim();
 		
-		double[] range = new double[4];
-		int xs = ax[xDim].getSize();
-		int ys = ax[yDim].getSize();
-		range[0] = ax[xDim].min().doubleValue();
-		range[1] = ax[xDim].max().doubleValue();
-		double dx = ((range[1]-range[0])/xs)/2;
-		range[0] -= dx;
-		range[1] += dx;
-		
-		
-		range[2] = ax[yDim].min().doubleValue();
-		range[3] = ax[yDim].max().doubleValue();
-		double dy = ((range[3]-range[2])/ys)/2;
-		range[2] -= dy;
-		range[3] += dy;
-		
-		return range;
+		return MappingUtils.calculateRangeFromAxes(new IDataset[]{ax[xDim],ax[yDim]});
 	}
 
 	public String getPath(){
@@ -382,32 +366,44 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	}
 
 	@Override
-	public IDataset getData() {
+	public IDataset getMap() {
 		
 		if (isLive()) {
 			update();
-			IDataset d = LivePlottingUtils.getUpdatedMap((IDatasetConnector)dataset, this, this.toString());
+			
+			IDataset d = null;
+			
+			if (mapDims.isRemappingRequired()) {
+				d = LivePlottingUtils.getUpdatedLinearMap((IDatasetConnector)dataset, this, this.toString());
+				d = MappingUtils.remapData(d, null, 0)[0];
+			} else {
+				d = LivePlottingUtils.getUpdatedMap((IDatasetConnector)dataset, this, this.toString());
+			}
+
 			if (d == null) return null;
 			double[] range = MappingUtils.getGlobalRange(d);
 			this.range = range;
 			return d;
 		}
 		
-		SliceND nd = new SliceND(dataset.getShape());
-		
-		for (int i = 0; i < dataset.getRank() ; i++) {
-			if (!mapDims.isMapDimension(i)) nd.setSlice(i, 0, 1, 1);
+		if (mapRepresentation == null) {
+			if (mapDims.isRemappingRequired()) {
+				
+			} else {
+				
+				try {
+					mapRepresentation = new MappedData(this.toString(), dataset.getSlice(mapDims.getMapSlice(dataset)).squeeze(),this, path);
+					return mapRepresentation.getMap();
+				} catch (DatasetException e) {
+					logger.error("Could not create map representation");
+				}
+			}
 		}
 		
-		try {
-			IDataset slice = dataset.getSlice(nd);
-			
-			return slice.squeeze();
-		} catch (DatasetException e) {
-			logger.error("Could not slice data", e);
-		}
 		
-		return null;
+		
+		
+		return mapRepresentation.getMap();
 	}
 
 	@Override
@@ -432,7 +428,7 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 
 	@Override
 	public IDataset getSpectrum(double x, double y) {
-		int[] idx = MappingUtils.getIndicesFromCoOrds(getData(), x, y);
+		int[] idx = MappingUtils.getIndicesFromCoOrds(getMap(), x, y);
 		
 		if (idx == null) return null;
 		

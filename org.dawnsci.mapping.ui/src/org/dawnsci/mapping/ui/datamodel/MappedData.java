@@ -86,4 +86,9 @@ public class MappedData extends AbstractMapData{
 
 		map  = ma;
 	}
+
+	@Override
+	public IDataset getData() {
+		return map;
+	}
 }

@@ -241,6 +241,10 @@ public class MapBeanBuilder {
 				yDim = 0;
 			}
 			
+			if (d.xAxisForRemapping != null) {
+				xDim = yDim = bean.getScanRank()-1;
+			}
+			
 			MappedBlockBean b = new MappedBlockBean();
 			b.setName(d.getFullName());
 			b.setAxes(d.getFullAxesNames());

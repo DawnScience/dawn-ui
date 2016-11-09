@@ -64,12 +64,6 @@ public class MappedFileFactory {
 			file.addMapObject(im.getLongName(), im);
 		}
 		
-//		for (String map : maps){
-//			
-//			MappedData m = setUpMap(path, map,block, description);
-//			file.addMapObject(map, m);
-//		}
-		
 		return file;
 	}
 	
@@ -117,47 +111,22 @@ public class MappedFileFactory {
 		try {
 			ILazyDataset lz = getLazyDataset(path,mapName);
 			
-			Dataset d = null;
-			if (live == null) {
-				lz.clearMetadata(AxesMetadata.class);
-				d = DatasetUtils.sliceAndConvertLazyDataset(lz);
+			lz.clearMetadata(AxesMetadata.class);
 
-			}
+			block.getMapDims().setMapAxes(block.getLazy(), lz);
+			
+			IDataset d = DatasetUtils.sliceAndConvertLazyDataset(lz);
 			
 			if (block.isTransposed()) {
 				Dataset ds = DatasetUtils.convertToDataset(d);
 				d = ds.transpose();
 				
 			}
-			
-			ILazyDataset[] xAxis = block.getXAxis();
-			ILazyDataset[] yAxis = block.getYAxis();
-			
-			ILazyDataset[] yView = new ILazyDataset[yAxis.length];
-			ILazyDataset[] xView = new ILazyDataset[xAxis.length];
-			
-			for (int i = 0; i < xAxis.length; i++) xView[i] = xAxis[i] == null ? null : xAxis[i].getSliceView().squeezeEnds();
-			for (int i = 0; i < yAxis.length; i++) yView[i] = yAxis[i] == null ? null : yAxis[i].getSliceView().squeezeEnds();
-
-			if (block.isRemappingRequired() && d.getRank() == 1) {
-				AxesMetadata ax = MetadataFactory.createMetadata(AxesMetadata.class, 1);
-				ax.setAxis(0, xView);
-
-				d.setMetadata(ax);
-				return new ReMappedData(mapName, d, block, path);
-			}
-
-			AxesMetadata ax = MetadataFactory.createMetadata(AxesMetadata.class, 2);
-			ax.setAxis(0,yView);
-			ax.setAxis(1, xView);
-
-
-			d.setMetadata(ax);
 
 			return new MappedData(mapName,d,block,path);
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Could not build map", e);
 		}
 		return null;
 

@@ -42,7 +42,7 @@ public class MappingUtils {
 		return range;
 	}
 	
-	private static double[] calculateRangeFromAxes(IDataset[] axes) {
+	public static double[] calculateRangeFromAxes(IDataset[] axes) {
 		double[] range = new double[4];
 		int xs = axes[1].getSize();
 		int ys = axes[0].getSize();
@@ -155,34 +155,16 @@ public class MappingUtils {
 		
 		double ratio = xrange/yrange;
 		
-		
-		
 		int yOut = (int)Math.ceil(Math.sqrt(nPoints/ratio));
 		if (yOut < 1) yOut = 1;
 		int xOut = (int)Math.ceil(nPoints/yOut);
 		
 		if (xOut < 1) xOut = 1;
 
-		
 		if (xOut > 1000) xOut = 1000;
 		if (yOut > 1000) yOut = 1000;
  		
-//		System.out.println(Arrays.toString(new int[]{xOut,yOut}));
-		
 		return new int[]{xOut,yOut};
-//		double yStepMed = (double)Stats.median(Maths.abs(Maths.derivative(DatasetFactory.createRange(y.getSize(),Dataset.INT32),y,1)));
-//		double xStepMed = (double)Stats.median(Maths.abs(Maths.derivative(DatasetFactory.createRange(x.getSize(),Dataset.INT32),x,1)));
-//		
-//		yStepMed = yStepMed == 0 ? 1 : yStepMed;
-//		xStepMed = xStepMed == 0 ? 1 : xStepMed;
-//		
-//		int nBinsY = (int)(((yMax-yMin)/yStepMed));
-//		int nBinsX = (int)(((xMax-xMin)/xStepMed));
-//		
-//		nBinsX = 10;
-//		nBinsY = 10;
-//		
-//		return new int[]{nBinsX, nBinsY};
 	}
 	
 	public static void saveRegisteredImage(AssociatedImage image, String path) {
@@ -193,7 +175,7 @@ public class MappingUtils {
 			nexus.addAttribute(group, new AttributeImpl("NX_class","NXentry"));
 			group = nexus.getGroup("/entry/registered_image", true);
 			nexus.addAttribute(group, new AttributeImpl("NX_class","NXdata"));
-			IDataset data = image.getData().getSliceView();
+			IDataset data = image.getMap().getSliceView();
 			AxesMetadata axm = data.getFirstMetadata(AxesMetadata.class);
 			if (data instanceof RGBDataset) {
 				data = DatasetUtils.createDatasetFromCompoundDataset((RGBDataset)data, false);

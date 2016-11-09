@@ -421,7 +421,7 @@ public class MapPlotManager {
 		
 		if (ob instanceof PlottableMapObject) {
 			PlottableMapObject amd = (PlottableMapObject)ob;
-			map = amd.getData();
+			map = amd.getMap();
 		}
 		
 		if (map == null) return null;
@@ -489,12 +489,12 @@ public class MapPlotManager {
 		
 		if (omap.getLongName().equals(map.getLongName())) return true;
 		
-		if (omap.getData() == null ||  map.getData() == null) return false;
+		if (omap.getMap() == null ||  map.getMap() == null) return false;
 		
-		if (!Arrays.equals(omap.getData().getShape(), map.getData().getShape())) return false;
+		if (!Arrays.equals(omap.getMap().getShape(), map.getMap().getShape())) return false;
 		
-		AxesMetadata oax = omap.getData().getFirstMetadata(AxesMetadata.class);
-		AxesMetadata ax = map.getData().getFirstMetadata(AxesMetadata.class);
+		AxesMetadata oax = omap.getMap().getFirstMetadata(AxesMetadata.class);
+		AxesMetadata ax = map.getMap().getFirstMetadata(AxesMetadata.class);
 		
 		if (oax == null || ax == null) return false; // should never be the case
 		
@@ -708,7 +708,7 @@ public class MapPlotManager {
 		
 		public void switchMap(final PlottableMapObject ob) {
 			try {
-				final IDataset d = ob.getData();
+				final IDataset d = ob.getMap();
 				switchMap(ob.getLongName(),d);
 				map = ob;
 			} catch (Exception e) {

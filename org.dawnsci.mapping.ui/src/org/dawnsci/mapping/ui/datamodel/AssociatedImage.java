@@ -21,7 +21,7 @@ public class AssociatedImage implements PlottableMapObject {
 		this.path = path;
 	}
 	
-	public IDataset getData() {
+	public IDataset getMap() {
 		return image;
 	}
 	

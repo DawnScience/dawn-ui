@@ -1,21 +1,11 @@
 package org.dawnsci.mapping.ui.datamodel;
 
-import java.util.List;
-
 import org.dawnsci.mapping.ui.LivePlottingUtils;
 import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
-import org.eclipse.january.DatasetException;
-import org.eclipse.january.MetadataException;
-import org.eclipse.january.dataset.Dataset;
-import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDatasetConnector;
 import org.eclipse.january.dataset.ILazyDataset;
-import org.eclipse.january.dataset.Maths;
-import org.eclipse.january.dataset.SliceND;
-import org.eclipse.january.metadata.AxesMetadata;
-import org.eclipse.january.metadata.MetadataFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +28,7 @@ public class ReMappedData extends AbstractMapData {
 	
 	@Override
 	protected double[] calculateRange(ILazyDataset map){
+		//FIXME for nd
 		IDataset[] ax = MetadataPlotUtils.getAxesForDimension(map,0);
 		double[] r = new double[4];
 		r[0] = ax[1].min().doubleValue();
@@ -48,7 +39,7 @@ public class ReMappedData extends AbstractMapData {
 	}
 	
 	@Override
-	public IDataset getData(){
+	public IDataset getMap(){
 		if (map == null) updateRemappedData(shape);
 		
 		return map;
@@ -79,25 +70,10 @@ public class ReMappedData extends AbstractMapData {
 		updateRemappedData(shape);
 	}
 	
-	private int[] getIndices(double x, double y) {
-
-		IDataset[] ax = MetadataPlotUtils.getAxesFromMetadata(map);
-
-		IDataset yy = ax[0];
-		IDataset xx = ax[1];
-
-		Dataset xd = Maths.subtract(xx, x);
-		Dataset yd = Maths.subtract(yy, y);
-		
-		int xi = Maths.abs(xd).argMin();
-		int yi = Maths.abs(yd).argMin();
-
-		return new int[]{yi,xi};
-	}
 	
 	@Override
 	public IDataset getSpectrum(double x, double y) {
-		int[] indices = getIndices(x, y);
+		int[] indices = MappingUtils.getIndicesFromCoOrds(map, x, y);
 		int index = lookup.getInt(indices);
 		if (index == -1) return null;
 		if (parent.getLazy() instanceof IDatasetConnector) {
@@ -133,80 +109,14 @@ public class ReMappedData extends AbstractMapData {
 
 		IDataset ma = LivePlottingUtils.getUpdatedLinearMap(baseMap, this.getParent(), this.toString());
 		
-//		try{
-//			baseMap.refreshShape();
-//			ma = baseMap.getDataset().getSlice();
-//		} catch (Exception e) {
-//			//TODO log?
-//		}
-//		
-//		if (ma == null) return;
-//		
-//		ma.setName(this.toString());
-//		
-//		if (parent.isTransposed()) ma = DatasetUtils.convertToDataset(ma).transpose();
-//		
-//		// TODO This check is probably not required
-//		if ( baseMap instanceof ILazyDataset && ((ILazyDataset)baseMap).getSize() == 1) return;
-//		
-//		ILazyDataset ly = parent.getYAxis()[0];
-//		ILazyDataset lx = parent.getXAxis()[0];
-//	
-//		
-//		IDataset x;
-//		IDataset y;
-//		try {
-//			x = lx.getSlice();
-//			y = ly.getSlice();
-//		} catch (DatasetException e) {
-//			logger.debug("Could not slice",e);
-//			return;
-//		}
-//		
-//		if (y.getRank() == 2) {
-//			SliceND s = new SliceND(y.getShape());
-//			s.setSlice(1, 0, 1, 1);
-//			y = y.getSlice(s);
-//			if (y.getSize() == 1) {
-//				y.setShape(new int[]{1});
-//			} else {
-//				y.squeeze();
-//			}
-//			
-//		}
-//		
-//		if (x.getRank() == 2) {
-//			SliceND s = new SliceND(x.getShape());
-//			s.setSlice(0, 0, 1, 1);
-//			x = x.getSlice(s);
-//			if (x.getSize() == 1) {
-//				x.setShape(new int[]{1});
-//			} else {
-//				x.squeeze();
-//			}
-//			
-//		}
-//
-//		int[] mapShape = ma.getShape();
-//		SliceND s = new SliceND(mapShape);
-//		int maxShape = Math.min(y.getShape()[0], y.getShape()[0]);
-//		maxShape = Math.min(maxShape, mapShape[0]);
-//		
-//		AxesMetadata axm = null;
-//		try {
-//			axm = MetadataFactory.createMetadata(AxesMetadata.class, 1);
-//			axm.addAxis(0, y.getSlice(s));
-//			axm.addAxis(0, x.getSlice(s));
-//		} catch (MetadataException e) {
-//			logger.error("Could not create axes metdata", e);
-//		}
-//		
-//		s.setSlice(0, 0, y.getShape()[0], 1);
-//		IDataset fm = ma.getSlice(s);
-//		fm.setMetadata(axm);
 		setRange(calculateRange(ma));
 		flatMap = ma;
 		updateRemappedData(null);
 		
+	}
+
+	@Override
+	public IDataset getData() {
+		return flatMap;
 	}
 }

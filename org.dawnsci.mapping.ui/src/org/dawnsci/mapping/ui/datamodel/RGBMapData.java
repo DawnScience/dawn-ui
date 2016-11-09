@@ -27,12 +27,12 @@ public class RGBMapData extends MappedData {
 		super(name, parent.map, parent.parent, parent.path);
 		this.rgb = new AbstractMapData[3];
 		data = DatasetFactory.zeros(RGBDataset.class, parent.map.getShape());
-		AxesMetadata ax = parent.getData().getFirstMetadata(AxesMetadata.class);
+		AxesMetadata ax = parent.getMap().getFirstMetadata(AxesMetadata.class);
 		data.setMetadata(ax);
 	}
 	
 	@Override
-	public IDataset getData() {
+	public IDataset getMap() {
 		return data;
 	}
 	
@@ -51,8 +51,8 @@ public class RGBMapData extends MappedData {
 	
 	private void updatePercentRange(int channel, int[] range, boolean log) { 
 		AbstractMapData m = rgb[channel];
-		if (m != null && m.getData() != null) {
-			Dataset update = update(DatasetUtils.convertToDataset(m.getData()), range[0], range[1], log);
+		if (m != null && m.getMap() != null) {
+			Dataset update = update(DatasetUtils.convertToDataset(m.getMap()), range[0], range[1], log);
 			data.setElements(update, channel);
 		}
 	}

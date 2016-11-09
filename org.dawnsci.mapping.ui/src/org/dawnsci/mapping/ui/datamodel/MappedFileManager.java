@@ -399,7 +399,7 @@ public class MappedFileManager {
 		}
 
 
-		RectangleRegistrationDialog dialog = new RectangleRegistrationDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), plotManager.getTopMap().getData(),data);
+		RectangleRegistrationDialog dialog = new RectangleRegistrationDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), plotManager.getTopMap().getMap(),data);
 		if (dialog.open() != IDialogConstants.OK_ID) return;
 		RGBDataset ds = (RGBDataset)dialog.getRegisteredImage();
 		ds.setName("Registered");

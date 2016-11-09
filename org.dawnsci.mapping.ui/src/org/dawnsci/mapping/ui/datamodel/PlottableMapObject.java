@@ -6,7 +6,7 @@ public interface PlottableMapObject extends MapObject {
 
 	public String getLongName();
 	
-	public IDataset getData();
+	public IDataset getMap();
 	
 	public boolean isLive();
 	

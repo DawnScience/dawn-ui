@@ -47,9 +47,19 @@ public abstract class AbstractMapData implements PlottableMapObject{
 		return new MappedData(name, ds, parent, path);
 	}
 	
-	public IDataset getData(){
+	public IDataset getMap(){
+		if (map != null && map.getRank() != 2) {
+			MapScanDimensions mapDims = parent.getMapDims();
+			SliceND s = mapDims.getMapSlice(map);
+			IDataset slice = map.getSlice(s);
+			slice.squeeze();
+			return slice;
+		}
 		return map;
 	}
+	
+	public abstract IDataset getData();
+	
 	
 	protected abstract double[] calculateRange(ILazyDataset map);
 	

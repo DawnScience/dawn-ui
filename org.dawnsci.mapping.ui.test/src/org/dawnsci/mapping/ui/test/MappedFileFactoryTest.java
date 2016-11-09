@@ -66,7 +66,7 @@ public class MappedFileFactoryTest {
 		assertEquals(5, value.getLazy().getRank());
 		
 		 AbstractMapData map = mdf.getMap();
-		assertEquals(3, map.getData().getRank());
+		assertEquals(3, map.getMap().getRank());
 	}
 
 }

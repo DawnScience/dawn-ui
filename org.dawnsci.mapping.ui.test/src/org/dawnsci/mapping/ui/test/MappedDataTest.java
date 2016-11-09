@@ -67,11 +67,11 @@ public class MappedDataTest {
 	@Ignore
 	@Test
 	public void testMakeNewMapWithParent() {
-		DoubleDataset rand = Random.rand(gridScanMap.getData().getShape());
-		AxesMetadata ax = gridScanMap.getData().getFirstMetadata(AxesMetadata.class);
+		DoubleDataset rand = Random.rand(gridScanMap.getMap().getShape());
+		AxesMetadata ax = gridScanMap.getMap().getFirstMetadata(AxesMetadata.class);
 		MetadataType clone = ax.clone();
 		rand.setMetadata(clone);
-		MappedData map = gridScanMap.makeNewMapWithParent("random", Random.rand(gridScanMap.getData().getShape()));
+		MappedData map = gridScanMap.makeNewMapWithParent("random", Random.rand(gridScanMap.getMap().getShape()));
 		assertEquals(gridScanBlock, map.getParent());
 	}
 
@@ -82,7 +82,7 @@ public class MappedDataTest {
 
 	@Test
 	public void testGetData() {
-		IDataset d = gridScanMap.getData();
+		IDataset d = gridScanMap.getMap();
 		assertNotNull(d);
 	}
 
