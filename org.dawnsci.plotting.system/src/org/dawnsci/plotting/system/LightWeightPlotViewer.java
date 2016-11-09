@@ -1657,13 +1657,14 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	 */
 	public static String getName(IDataset x, String rootName) {
 		if (x==null) return null;
-		try {
-			return rootName!=null
-					? x.getName().substring(rootName.length())
-							: x.getName();
-		} catch (StringIndexOutOfBoundsException ne) {
-			return x.getName();
+		String name = x.getName();
+		if (rootName != null && name != null) {
+			int l = rootName.length();
+			if (name.length() > l) {
+				name = name.substring(l);
+			}
 		}
+		return name;
 	}
 
 	@Override
