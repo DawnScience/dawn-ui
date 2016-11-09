@@ -923,7 +923,12 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			if (y==null) continue;
 			// set yaxis name
 			String dataName = dataNames!=null ? dataNames.get(i) : null;
-			dataName = dataName == null ? ((y.getName() != null && !y.getName().isEmpty()) ? y.getName() : YAXIS_DEFAULT_NAME) : dataName;
+			if (dataName == null) {
+				dataName = y.getName();
+			}
+			if (dataName == null || dataName.isEmpty()) {
+				dataName = YAXIS_DEFAULT_NAME;
+			}
 			yAxis.setTitle(dataName);
 			final LineTrace trace = new LineTrace(getName(y,rootName));
 			LineTraceImpl wrapper = new LineTraceImpl(system, trace);
@@ -1084,12 +1089,11 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		xyGraph.setSelectedYAxis((IAxis) xyGraph.primaryYAxis);
 		for (Axis axis : xyGraph.getAxisList()) {
 			if (axis!=xyGraph.primaryXAxis && axis!=xyGraph.primaryYAxis) {
-				axis.setVisible(false);
-				//removeAxis((IAxis) axis);
+				axis.setVisible(false); 
+				removeAxis((IAxis) axis);
 			}
 		}
 	}
-
 
 	@Override
 	public IAnnotation createAnnotation(final String name) throws Exception {
