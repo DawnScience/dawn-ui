@@ -46,7 +46,9 @@ public class MappingScanNewStyleEventObserver implements IScanListener, IStartup
 		if (eventService == this.eventService) {
 			this.eventService = null;
 			try {
-				subscriber.disconnect();
+				if (subscriber != null) {
+					subscriber.disconnect();
+				}
 			} catch (Exception ne) {
 				logger.warn("Cannot disconnect subscriber!", ne);
 			}
