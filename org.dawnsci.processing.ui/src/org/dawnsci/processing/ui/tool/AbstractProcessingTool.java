@@ -18,15 +18,16 @@ import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.EventServiceHolder;
 import org.dawnsci.processing.ui.ServiceHolder;
-import org.dawnsci.processing.ui.model.ConfigureOperationModelDialog;
+import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
+import org.dawnsci.processing.ui.model.ConfigureOperationModelWizardPage;
 import org.dawnsci.processing.ui.model.OperationModelViewer;
-import org.dawnsci.processing.ui.preference.ProcessingConstants;
+import org.dawnsci.processing.ui.model.OperationModelWizard;
+import org.dawnsci.processing.ui.model.OperationModelWizardDialog;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
 import org.dawnsci.processing.ui.processing.OperationTableUtils;
 import org.dawnsci.processing.ui.slice.DataFileSliceView;
 import org.dawnsci.processing.ui.slice.EscapableSliceVisitor;
 import org.dawnsci.processing.ui.slice.IOperationErrorInformer;
-import org.dawnsci.processing.ui.slice.IOperationInputData;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -37,6 +38,7 @@ import org.eclipse.dawnsci.analysis.api.processing.ExecutionType;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationBean;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationContext;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationInputData;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
@@ -46,9 +48,7 @@ import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromLiveSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
-import org.eclipse.dawnsci.hdf5.nexus.NexusFileFactoryHDF5;
 import org.eclipse.dawnsci.hdf5.nexus.NexusFileHDF5;
-import org.eclipse.dawnsci.nexus.NexusException;
 import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -71,7 +71,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.richbeans.widgets.internal.GridUtils;
 import org.eclipse.richbeans.widgets.table.ISeriesItemDescriptor;
 import org.eclipse.richbeans.widgets.table.ISeriesValidator;
 import org.eclipse.richbeans.widgets.table.SeriesTable;
@@ -184,14 +183,18 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		};
 		
 		configure = new Action("Live setup", Activator.getImageDescriptor("icons/application-dialog.png")) {
+			@SuppressWarnings("unchecked")
 			public void run() {
 				IOperationModel model = modelEditor.getModel();
 				if (inputData == null) return;
-				if (!inputData.getCurrentOperation().getModel().equals(model)) return;
+				if (!inputData.getCurrentOperations().get(0).getModel().equals(model)) return;
 				
-				ConfigureOperationModelDialog dialog = new ConfigureOperationModelDialog(getSite().getShell());
+				IOperationSetupWizardPage wizardPage = ServiceHolder.getOperationUIService().getWizardPage(inputData.getCurrentOperations().get(0));
+				
+				OperationModelWizard wizard = new OperationModelWizard(inputData.getInputData(), wizardPage);
+				wizard.setWindowTitle("Operation Model Configuration");
+				OperationModelWizardDialog dialog = new OperationModelWizardDialog(getSite().getShell(), wizard);
 				dialog.create();
-				dialog.setOperationInputData(inputData);
 				if (dialog.open() == Dialog.OK) {
 					modelEditor.refresh();
 					updateData();

@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Activator extends AbstractUIPlugin {
 
+	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(Activator.class);
 
 	// The plug-in ID

@@ -8,7 +8,7 @@
  */
 package org.dawb.workbench.ui.data;
 
-import org.dawb.common.services.ServiceManager;
+import org.dawb.workbench.ui.Activator;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObjectService;
 import org.eclipse.dawnsci.plotting.api.expressions.IVariableManager;
@@ -30,7 +30,7 @@ class VariableNameEditingSupport extends EditingSupport {
 
 	public VariableNameEditingSupport(ColumnViewer viewer, IVariableManager manager) throws Exception {
 		super(viewer);
-		this.service  = (IExpressionObjectService)ServiceManager.getService(IExpressionObjectService.class);
+		this.service  = (IExpressionObjectService)Activator.getService(IExpressionObjectService.class);
 		this.manager  = manager;
 	}
 

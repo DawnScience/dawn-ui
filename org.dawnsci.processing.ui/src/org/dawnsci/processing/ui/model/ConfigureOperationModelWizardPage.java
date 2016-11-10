@@ -1,7 +1,6 @@
 package org.dawnsci.processing.ui.model;
 
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -11,18 +10,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
-import org.dawnsci.processing.ui.slice.IOperationInputData;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.PlotAdditionalData;
-import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.ModelUtils;
 import org.eclipse.dawnsci.analysis.api.processing.model.OperationModelField;
@@ -46,46 +43,38 @@ import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.Maths;
 import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConfigureOperationModelDialog extends Dialog implements PropertyChangeListener{
+public class ConfigureOperationModelWizardPage extends AbstractOperationModelWizardPage {
 	
 	private IPlottingSystem<Composite> input;
 	private IPlottingSystem<Composite> output;
 	private OperationModelViewer modelViewer;
-	IOperationInputData data;
 	private Job update;
-	private IOperationModel omodel;
-	private IOperationModel model;
 	private Label errorLabel;
 	private IDataset[] axes;
 	private double[] minMax = new double[4];
 	
-	private final static Logger logger = LoggerFactory.getLogger(ConfigureOperationModelDialog.class);
+	private final static Logger logger = LoggerFactory.getLogger(ConfigureOperationModelWizardPage.class);
 
-	public ConfigureOperationModelDialog(Shell parentShell) {
-		super(parentShell);
+	public ConfigureOperationModelWizardPage(IOperation<? extends IOperationModel, ? extends OperationData> operation) {
+		super(operation);
 	}
-	
-	public Control createDialogArea(Composite parent) {
-		
-		SashForm sashForm= new SashForm(parent, SWT.HORIZONTAL);
+
+	public void createDialogArea(Composite parent) {
+		Composite container = new Composite(parent, SWT.NONE);
+		container.setLayout(new GridLayout(2, true));
+		SashForm sashForm= new SashForm(container, SWT.HORIZONTAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,2,1));
 		
 		final SashForm left = new SashForm(sashForm, SWT.VERTICAL);
@@ -102,8 +91,11 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 		
 		output = createPlottingSystem(right,"DialogOutput");
 		left.setWeights(new int[]{70,30});
-		errorLabel = new Label(parent, SWT.WRAP);
-		return parent;
+		errorLabel = new Label(container, SWT.WRAP);
+		
+		modelViewer.setOperation(operation);
+		
+		setControl(container);
 	}
 	
 	private IPlottingSystem<Composite> createPlottingSystem(Composite right, String name){
@@ -127,43 +119,35 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 		
 		return system;
 	}
-	
-	public void setOperationInputData(final IOperationInputData data) {
+
+	@Override
+	public void setVisible(boolean visible) {
+		super.setVisible(visible);
 		
-		this.data = data;
-		modelViewer.setOperation(data.getCurrentOperation());
-		model = data.getCurrentOperation().getModel();
-		
+		if (!visible)
+			return;
+			
 		try {
-			omodel = (IOperationModel)BeanUtils.cloneBean(model);
-		} catch (Exception e) {
-			logger.warn("Could not clone model: " + e.getMessage());
-		} 
-		
-		if (model instanceof AbstractOperationModel) {
-			((AbstractOperationModel)model).addPropertyChangeListener(this);
-		}
-		
-		try {
-			MetadataPlotUtils.plotDataWithMetadata(data.getInputData(),input);
+			MetadataPlotUtils.plotDataWithMetadata(id.getData() ,input);
 		} catch (Exception e) {
 			logger.warn("Could not plot data: " + e.getMessage());
+			return;
 		}
 		
 		update();
 		
-		axes = MetadataPlotUtils.getAxesFromMetadata(data.getInputData());
+		axes = MetadataPlotUtils.getAxesFromMetadata(id.getData());
 		
 		if (input.is2D()) {
 			minMax[0] = 0;
-			minMax[1] = data.getInputData().getShape()[1];
+			minMax[1] = id.getData().getShape()[1];
 			minMax[2] = 0;
-			minMax[3] = data.getInputData().getShape()[0];
+			minMax[3] = id.getData().getShape()[0];
 		} else {
 			minMax[0] = 0;
-			minMax[1] = data.getInputData().getShape()[0];
-			minMax[2] = data.getInputData().min().doubleValue();
-			minMax[3] = data.getInputData().max().doubleValue();
+			minMax[1] = id.getData().getShape()[0];
+			minMax[2] = id.getData().min().doubleValue();
+			minMax[3] = id.getData().max().doubleValue();
 		}
 		
 		if (axes != null) {
@@ -184,10 +168,10 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 			}
 		}
 		
-		Map<String,ROIStruct> rois = getROIs(data.getCurrentOperation().getModel(),data.getInputData());
+		Map<String,ROIStruct> rois = getROIs(model, id.getData());
 		boolean sector = false;
 		
-		IDiffractionMetadata d = AbstractOperation.getFirstDiffractionMetadata(data.getInputData());
+		IDiffractionMetadata d = AbstractOperation.getFirstDiffractionMetadata(id.getData());
 		
 		if (d != null) for (ROIStruct r :rois.values()) if (r.roi instanceof RingROI) {
 			sector = true;
@@ -227,7 +211,6 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 						IROI roi = evt.getROI();
 						double[] range = null;
 						if (roi instanceof RectangularROI) range = getStartAndEndXYFromRectangularROI((RectangularROI)roi,axes);
-						IOperationModel model= data.getCurrentOperation().getModel();
 						try {
 							switch (entry.getValue().type) {
 							case NONE:
@@ -264,7 +247,6 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 				logger.warn("Could not create region: " + e.getMessage());
 			}
 		}
-		
 	}
 	
 	private Map<String, ROIStruct> getROIs(IOperationModel model, IDataset data) {
@@ -294,13 +276,6 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 		}
 
 		return rois;
-	}
-
-
-	@Override
-	protected void configureShell(Shell newShell) {
-		super.configureShell(newShell);
-		newShell.setText("Configure processing parameters");
 	}
 
 	private double[] getStartAndEndXYFromRectangularROI(RectangularROI roi, IDataset[] axes) {
@@ -374,17 +349,17 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 	
 
 	
-	private void update() {
-
+	@Override
+	protected void update() {
 		if (update == null) {
 			update = new Job("calculate...") {
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
-						OperationData od = data.getCurrentOperation().execute(data.getInputData(),new ProgressMonitorWrapper(monitor));
+						od = operation.execute(id.getData(),new ProgressMonitorWrapper(monitor));
 						final IDataset out = od.getData();
-						PlotAdditionalData an = data.getCurrentOperation().getClass().getAnnotation(PlotAdditionalData.class);
+						PlotAdditionalData an = operation.getClass().getAnnotation(PlotAdditionalData.class);
 						IDataset aux = null;
 						boolean onIn = false;
 						if (an != null) {
@@ -413,7 +388,7 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 									if (additional!=null) {
 										if (onInput) {
 											input.clear();
-											MetadataPlotUtils.plotDataWithMetadata(data.getInputData(),input);
+											MetadataPlotUtils.plotDataWithMetadata(id.getData(),input);
 											MetadataPlotUtils.plotDataWithMetadata(additional, input, false);
 										} else {
 											MetadataPlotUtils.plotDataWithMetadata(additional, output, false);
@@ -434,7 +409,7 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 							@Override
 							public void run() {
 								if (!errorLabel.isDisposed()) {
-									errorLabel.setText(e.getMessage() == null ? "Unknowb error" : e.getMessage());
+									errorLabel.setText(e.getMessage() == null ? "Unknown error" : e.getMessage());
 									errorLabel.pack();
 								}
 								
@@ -451,22 +426,6 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 		update.schedule();
 	}
 
-	@Override
-	protected void buttonPressed(int buttonId) {
-		super.buttonPressed(buttonId);
-		if (model instanceof AbstractOperationModel) {
-			((AbstractOperationModel)model).removePropertyChangeListener(this);
-		}
-		
-		if (buttonId == Dialog.CANCEL) {
-			try {
-				BeanUtils.copyProperties(model, omodel);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
-	
 	private RegionType getRegionType(RangeType type) {
 		switch (type) {
 		case NONE:
@@ -491,7 +450,7 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 		try {
 			IRegion region = input.getRegion(evt.getPropertyName());
 
-			Object object = data.getCurrentOperation().getModel().get(evt.getPropertyName());
+			Object object = model.get(evt.getPropertyName());
 			
 			
 			
@@ -530,17 +489,6 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 		
 		update();
 	}
-	
-	@Override
-	protected Point getInitialSize() {
-		Rectangle bounds = PlatformUI.getWorkbench().getWorkbenchWindows()[0].getShell().getBounds();
-		return new Point((int)(bounds.width*0.8),(int)(bounds.height*0.8));
-	}
-	
-	@Override
-	  protected boolean isResizable() {
-	    return true;
-	  }
 	
 	private boolean valuesChanged(IRegion region, RectangularROI roi) {
 		
@@ -623,5 +571,12 @@ public class ConfigureOperationModelDialog extends Dialog implements PropertyCha
 			this.type = type;
 		}
 	}
+
+	@Override
+	public void createControl(Composite parent) {
+		createDialogArea(parent);
+		//setVisible(true);
+	}
+
 
 }

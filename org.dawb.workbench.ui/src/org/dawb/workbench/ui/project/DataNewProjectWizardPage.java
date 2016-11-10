@@ -33,7 +33,7 @@ public class DataNewProjectWizardPage extends WizardPage {
 
 	private Text   projectName;
 	private Button examples;
-	private ISelection selection;
+
 	/**
 	 * Constructor for SampleNewWizardPage.
 	 * 
@@ -43,7 +43,6 @@ public class DataNewProjectWizardPage extends WizardPage {
 		super("wizardPage");
 		setTitle("Create new data project");
 		setDescription("A project marked as a data project.");
-		this.selection = selection;
 	}
 
 	/**

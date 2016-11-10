@@ -146,7 +146,8 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor,
 		return false;
 	}
 
-    public Object getAdapter(final Class clazz) {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public Object getAdapter(final Class clazz) {
 		
     	// TODO FIXME for IContentProvider return a Page which shows the value
     	// of plotted data. Basically the same as the CSVPage.

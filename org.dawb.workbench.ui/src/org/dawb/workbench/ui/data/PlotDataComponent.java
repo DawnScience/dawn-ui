@@ -23,7 +23,6 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.DawbUtils;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
@@ -200,8 +199,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		this.data = new ArrayList<ITransferableDataObject>(7);
 		this.editor   = editor;
 		
-		this.expressionService  = (IExpressionObjectService)ServiceManager.getService(IExpressionObjectService.class);
-		this.transferableService= (ITransferableDataService)ServiceManager.getService(ITransferableDataService.class);
+		this.expressionService  = (IExpressionObjectService)Activator.getService(IExpressionObjectService.class);
+		this.transferableService= (ITransferableDataService)Activator.getService(ITransferableDataService.class);
 		
 		this.dataListener = new IDataListener() {		
 			@Override
@@ -347,11 +346,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			}
 			@Override
 			public Object[] getElements(Object inputElement) {
-				
 				List<ITransferableDataObject> visible = new ArrayList<ITransferableDataObject>(data);
-				if (Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_SIGNAL_ONLY)) {
-					filterNonSignalData(visible);
-				}
 				return visible.toArray(new Object[visible.size()]);
 			}
 		});	
@@ -501,31 +496,6 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 
 	}
 	
-
-	/**
-	 * Actually filters passed in list to remove data without a signal attribute.
-	 * @param visible
-	 */
-	protected void filterNonSignalData(List<ITransferableDataObject> visible) {
-		
-		for (Iterator<ITransferableDataObject> it = visible.iterator(); it.hasNext();) {
-			ITransferableDataObject dataObject = it.next();
-			if (metaData!=null && !dataObject.isExpression()) {
-				try {
-					final Object signalAttrib = metaData.getMetaValue(dataObject+"@signal");
-					if (signalAttrib != null && !"".equals(signalAttrib)) {
-						continue;
-					}
-					it.remove();
-				} catch (Exception e) {
-					logger.error("Cannot determine signal from "+dataObject);
-				}
-			}
-		}
-	}
-
-
-
 	private static final String LOG_PREF   = "org.dawb.workbench.ui.editors.log.axis-";
 	private static final String TIME_PREF  = "org.dawb.workbench.ui.editors.time.axis-";
 	private static final String FORMAT_PREF= "org.dawb.workbench.ui.editors.format.axis-";
@@ -654,17 +624,6 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				wd.open();
 			}
 		};
-		
-		final Action showSignal = new Action("Show only data with a 'signal' attribute", IAction.AS_CHECK_BOX) {
-			public void run() {
-				Activator.getDefault().getPreferenceStore().setValue(EditorConstants.SHOW_SIGNAL_ONLY, isChecked());
-				refresh();
-			}
-		};
-		showSignal.setImageDescriptor(Activator.getImageDescriptor("icons/signal.png"));
-		bars.getToolBarManager().add(showSignal);
-		bars.getToolBarManager().add(new Separator("signal.group"));
-		showSignal.setChecked(Activator.getDefault().getPreferenceStore().getBoolean(EditorConstants.SHOW_SIGNAL_ONLY));
 		
 		final Action copy = new Action("Copy selected data (it can then be pasted to another data list.)", Activator.getImageDescriptor("icons/copy.gif")) {
 			public void run() {
@@ -882,6 +841,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	 * 
 	 * @param ob
 	 */
+	@SuppressWarnings("unused")
 	private void chooseFilterFile(ITransferableDataObject ob) {
 
         if (ob==null) return;
@@ -2107,17 +2067,17 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	}
 
 
-	public IPlottingSystem<Composite> getPlottingSystem() {
+	public IPlottingSystem<?> getPlottingSystem() {
 		if (editor==null) return null;
-		return (IPlottingSystem<Composite>)editor.getAdapter(IPlottingSystem.class);
+		return (IPlottingSystem<?>)editor.getAdapter(IPlottingSystem.class);
 	}
 
 	/**
 	 * May return null! Editor does not have to be a plotting editor.
 	 * @return
 	 */
-	private AbstractPlottingSystem getAbstractPlottingSystem() {
-		return (AbstractPlottingSystem)getPlottingSystem();
+	private AbstractPlottingSystem<?> getAbstractPlottingSystem() {
+		return (AbstractPlottingSystem<?>)getPlottingSystem();
 	}
 
 	public boolean isStaggerSupported() {
@@ -2141,8 +2101,9 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	
 	
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
+	public Object getAdapter(Class adapter) {
 		if (adapter==IPlottingSystem.class) {
 			return getPlottingSystem();
 		}

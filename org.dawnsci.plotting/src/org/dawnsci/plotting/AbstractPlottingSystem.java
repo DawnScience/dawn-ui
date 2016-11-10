@@ -175,7 +175,11 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 		if (propertyListeners==null) return;
 		final PropertyChangeEvent evt = new PropertyChangeEvent(this, rescaleId, oldValue, newValue);
 		for (IPropertyChangeListener l : propertyListeners) {
-			l.propertyChange(evt);
+			try {
+				l.propertyChange(evt);
+			} catch (RuntimeException ne) {
+				logger.error("Unexpected exception thrown", ne);
+			}
 		}
 	}
 
@@ -284,19 +288,31 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 	public void fireTracesAltered(final TraceEvent evt) {
 		if (traceListeners==null) return;
 		for (Object l : traceListeners.getListeners()) {
-			((ITraceListener)l).tracesUpdated(evt);
+			try {
+				((ITraceListener)l).tracesUpdated(evt);
+			} catch (RuntimeException ne) {
+				logger.error("Unexpected exception thrown", ne);
+			}
 		}
 	}
 	protected void fireTraceCreated(final TraceEvent evt) {
 		if (traceListeners==null) return;
 		for (Object l : traceListeners.getListeners()) {
-			((ITraceListener)l).traceCreated(evt);
+			try {
+				((ITraceListener)l).traceCreated(evt);
+			} catch (RuntimeException ne) {
+				logger.error("Unexpected exception thrown", ne);
+			}
 		}
 	}
 	public void fireTraceUpdated(final TraceEvent evt) {
 		if (traceListeners==null) return;
 		for (Object l : traceListeners.getListeners()) {
-			((ITraceListener)l).traceUpdated(evt);
+			try {
+				((ITraceListener)l).traceUpdated(evt);
+			} catch (RuntimeException ne) {
+				logger.error("Unexpected exception thrown", ne);
+			}
 		}
 	}
 	public void fireWillPlot(final TraceWillPlotEvent evt) {
@@ -313,27 +329,43 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 	public void fireTraceAdded(final TraceEvent evt) {
 		if (traceListeners==null) return;
 		for (Object l : traceListeners.getListeners()) {
-			((ITraceListener)l).traceAdded(evt);
+			try {
+			    ((ITraceListener)l).traceAdded(evt);
+			} catch (RuntimeException ne) {
+				logger.error("Unexpected exception thrown", ne);
+			}
 		}
 	}
 	protected void fireTraceRemoved(final TraceEvent evt) {
 		if (traceListeners==null) return;
 		for (Object l : traceListeners.getListeners()) {
-			((ITraceListener)l).traceRemoved(evt);
+			try {
+				((ITraceListener)l).traceRemoved(evt);
+			} catch (RuntimeException ne) {
+				logger.error("Unexpected exception thrown", ne);
+			}
 		}
 	}
 
 	protected void fireTracesCleared(final TraceEvent evt) {
 		if (traceListeners==null) return;
 		for (Object l : traceListeners.getListeners()) {
-			((ITraceListener)l).tracesRemoved(evt);
+			try {
+				((ITraceListener)l).tracesRemoved(evt);
+			} catch (RuntimeException ne) {
+				logger.error("Unexpected exception thrown", ne);
+			}
 		}
 	}
 	
 	public void fireTracesPlotted(final TraceEvent evt) {
 		if (traceListeners==null) return;
 		for (Object l : traceListeners.getListeners()) {
-			((ITraceListener)l).tracesAdded(evt);
+			try {
+				((ITraceListener)l).tracesAdded(evt);
+			} catch (RuntimeException ne) {
+				logger.error("Unexpected exception thrown", ne);
+			}
 		}
 	}
 	
@@ -475,23 +507,47 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 
 	protected void fireRegionCreated(RegionEvent evt) {
 		if (regionListeners==null) return;
-		for (IRegionListener l : regionListeners) l.regionCreated(evt);
+		for (IRegionListener l : regionListeners) {
+			try {
+				l.regionCreated(evt);
+			} catch (RuntimeException ne) {
+				logger.error("Unexpected exception thrown", ne);
+			}
+		}
 	}
 
 	protected void fireRegionNameChanged(RegionEvent evt, String oldName) {
 		if (regionListeners==null) return;
-		for (IRegionListener l : regionListeners) l.regionNameChanged(evt, oldName);
+		for (IRegionListener l : regionListeners) {
+			try {
+				l.regionNameChanged(evt, oldName);
+			} catch (RuntimeException ne) {
+				logger.error("Unexpected exception thrown", ne);
+			}
+		}
 	}
 
 	protected void fireRegionAdded(RegionEvent evt) {
 		if (regionListeners==null) return;
-		for (IRegionListener l : regionListeners) l.regionAdded(evt);
+		for (IRegionListener l : regionListeners) {
+			try {
+				l.regionAdded(evt);
+			} catch (RuntimeException ne) {
+				logger.error("Unexpected exception thrown", ne);
+			}
+		}
 	}
 
 
 	protected void fireRegionRemoved(RegionEvent evt) {
 		if (regionListeners==null) return;
-		for (IRegionListener l : regionListeners) l.regionRemoved(evt);
+		for (IRegionListener l : regionListeners) {
+			try {
+				l.regionRemoved(evt);
+			} catch (RuntimeException ne) {
+				logger.error("Unexpected exception thrown", ne);
+			}
+		}
 	}
 
 	@Override
@@ -667,7 +723,11 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 		}
 
 		for (IToolChangeListener l : toolChangeListeners) {
-			l.toolChanged(evt);
+			try {
+				l.toolChanged(evt);
+			} catch (RuntimeException ne) {
+				logger.error("Unexpected exception thrown", ne);
+			}
 		}
 	}
 

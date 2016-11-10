@@ -17,14 +17,21 @@ import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
+import org.dawnsci.plotting.views.ToolPageView;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationBean;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
+import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
+import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
+import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -34,14 +41,10 @@ import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.scanning.api.event.EventConstants;
 import org.eclipse.scanning.api.event.EventException;
 import org.eclipse.scanning.api.event.bean.BeanEvent;
 import org.eclipse.scanning.api.event.bean.IBeanListener;
 import org.eclipse.scanning.api.event.core.ISubscriber;
-import org.eclipse.scanning.api.event.scan.IScanListener;
-import org.eclipse.scanning.api.event.scan.ScanBean;
-import org.eclipse.scanning.api.event.scan.ScanEvent;
 import org.eclipse.scanning.api.event.status.StatusBean;
 import org.eclipse.scanning.api.ui.CommandConstants;
 import org.eclipse.swt.dnd.DND;
@@ -53,14 +56,16 @@ import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 import org.osgi.service.event.Event;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -78,7 +83,8 @@ import org.osgi.service.event.Event;
  *
  */
 public class MappedDataView extends ViewPart {
-	
+
+	private static Logger logger = LoggerFactory.getLogger(MappedDataView.class);
 	public final static String ID = "org.dawnsci.mapping.ui.mappeddataview";
 	
 	private static class MapClickEvent implements IMapClickEvent {
@@ -118,6 +124,7 @@ public class MappedDataView extends ViewPart {
 	private MappedDataArea area;
 	private MapPlotManager plotManager; 
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void createPartControl(Composite parent) {
 		
@@ -129,6 +136,32 @@ public class MappedDataView extends ViewPart {
 			final IViewPart view = page.showView(getSecondaryIdAttribute("mapview", "org.dawnsci.mapping.ui.mapview"));
 			map = (IPlottingSystem<Composite>)view.getAdapter(IPlottingSystem.class);
 			map.setPlotType(PlotType.IMAGE);
+			// remove unwanted tool & menu contribution
+			IActionBars bar = map.getActionBars();
+			IToolBarManager tbm = bar.getToolBarManager();
+			tbm.remove(ToolPageRole.ROLE_2D.getId());
+			tbm.remove(BasePlottingConstants.SNAP_TO_GRID);
+			IMenuManager mm = bar.getMenuManager();
+			mm.remove(BasePlottingConstants.XY_PLOT_MENU_ID);
+			mm.remove(BasePlottingConstants.IMAGE_PLOT_MENU_ID);
+			mm.remove(BasePlottingConstants.IMAGE_ORIGIN_MENU_ID);
+			// add histogram action
+			IAction histogramAction = new Action() {
+				@Override
+				public void run() {
+					try {
+						if (map.getTraces().iterator().hasNext()) {
+							final IToolPageSystem system = (IToolPageSystem) map.getAdapter(IToolPageSystem.class);
+							system.setToolVisible(BasePlottingConstants.HISTO_TOOL_ID,
+									ToolPageRole.ROLE_2D, ToolPageView.TOOLPAGE_2D_VIEW_ID);
+						}
+					} catch (Exception e1) {
+						logger.error("Cannot show histogram tool programatically!", e1);
+					}
+				}
+			};
+			histogramAction.setImageDescriptor(Activator.getImageDescriptor("icons/color_wheel.png"));
+			tbm.insertBefore(BasePlottingConstants.CONFIG_SETTINGS, histogramAction);
 		} catch (PartInitException e) {
 			throw new RuntimeException("Could not create the map view", e);
 		}
@@ -359,11 +392,13 @@ public class MappedDataView extends ViewPart {
 	@Override
 	public void dispose() {
 		super.dispose();
-		plotManager.stopRepeatPlot();
+		if (plotManager != null)
+			plotManager.stopRepeatPlot();
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
+	public Object getAdapter(Class adapter) {
 		if (MappedFileManager.class == adapter) return FileManagerSingleton.getFileManager();
 		return super.getAdapter(adapter);
 	}

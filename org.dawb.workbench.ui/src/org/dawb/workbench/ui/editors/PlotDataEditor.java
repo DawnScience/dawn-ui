@@ -92,7 +92,6 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 	// This view is a composite of two other views.
 	private IPlottingSystem<Composite>  plottingSystem;	
 	private PlotType                    defaultPlotType;
-	private Map<Integer, IAxis>         axisMap;
 	private PlotJob                     plotJob;
 	private InitJob                     initJob;
 	private ActionBarWrapper            wrapper;
@@ -107,7 +106,6 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 	
 	public PlotDataEditor(final PlotType defaultPlotType, ITitledEditor parent) {
 		
-	    this.axisMap = new HashMap<Integer, IAxis>(4);
 	    this.plotJob = new PlotJob();
 	    this.initJob = new InitJob();
 	    this.lock    = new ReentrantLock();
@@ -191,15 +189,6 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 		getAxisSettings(EditorConstants.XAXIS_PROP_STUB, plottingSystem.getSelectedXAxis());
 		getAxisSettings(EditorConstants.YAXIS_PROP_STUB, plottingSystem.getSelectedYAxis());
        
-        axisMap.put(1, plottingSystem.getSelectedYAxis());
-		// FIX to http://jira.diamond.ac.uk/browse/DAWNSCI-380 remove axes until they work
-        for (int i = 2; i <=2; i++) { //(Y4)
-        	final IAxis yAxis = plottingSystem.createAxis("Y"+i, true, i==3||i==4?SWT.RIGHT:SWT.LEFT);
-        	yAxis.setVisible(false);
-        	yAxis.setTitle("Y"+i);
-            axisMap.put(i, yAxis);
-		}        		
-		
 		// Finally
 		if (wrapper!=null)  wrapper.update(true);
         initJob.schedule(getEditorInput());	
@@ -385,11 +374,12 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 				x = null;
 			}
 			
-			if (sels.isEmpty() || (!plottingSystem.isXFirst() && sels.size()==1)) {
+			if (sels.isEmpty() || (!plottingSystem.isXFirst() && sels.size()==1)) { // why is this a special case???
 				
 				// TODO Data Name
+				
 				final List<ITrace> traces = plottingSystem.updatePlot1D(x, Arrays.asList(data), Arrays.asList(first.getName()), monitor);
-				removeOldTraces(traces);
+				removeOldTraces(traces, null);
 		        sync(sels,traces);
 		        if (plottingSystem.isRescale()) plottingSystem.repaint();
 				return;
@@ -438,6 +428,19 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 		
 	}
 
+	/**
+	 * @return current y axes
+	 */
+	private List<IAxis> getYAxes() {
+		final List<IAxis> yAxes = new ArrayList<>();
+		for (IAxis a : plottingSystem.getAxes()) {
+			if (a.isYAxis()) {
+				yAxes.add(a);
+			}
+		}
+		return yAxes;
+	}
+
 	protected List<ITrace> createPlotSeparateAxes(final IDataset                    x,
 										          final Map<Integer,List<IDataset>> ysMap,
 										          final Map<Integer,List<String>>   dNameMap,
@@ -446,19 +449,29 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 		final List<ITrace> traces = new ArrayList<ITrace>();
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
-				try {
+				List<IAxis> yAxes = getYAxes();
+				try { // TODO magic constant!!!
 					for (int i = 1; i <= 4; i++) {
-						final IAxis axis = axisMap.get(i);
-						if (axis==null) continue;
-						if (ysMap.get(i)==null) {
-							axis.setVisible(false);
+						final List<IDataset> ys = ysMap.get(i);
+						int n = yAxes.size();
+						IAxis a = i <= n ? yAxes.get(i-1) : null;
+
+						if (ys == null) {
+							if (a != null) {
+								a.setVisible(false);
+							}
 							continue;
 						}
-						axis.setVisible(true);
-						plottingSystem.setSelectedYAxis(axis);	
 
-						final List<IDataset>    ys = ysMap.get(i);
-						final List<String>      dn = dNameMap.get(i);
+						if (a == null) {
+							String an = "Y" + i;
+							a = plottingSystem.createAxis(an, true, i==3||i==4?SWT.RIGHT:SWT.LEFT);
+							a.setTitle(an);
+						}
+
+						a.setVisible(true);
+						plottingSystem.setSelectedYAxis(a);
+						final List<String> dn = dNameMap.get(i);
 						
                         // Tell traces its data name.
 						final List<ITrace> plotted = plottingSystem.updatePlot1D(x, ys, dn, monitor);
@@ -467,10 +480,10 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 
 					// Remove traces in the plotting system that were not
 					// in this round of plotting.
-					removeOldTraces(traces);
+					removeOldTraces(traces, yAxes);
 
 				} finally {
-					plottingSystem.setSelectedYAxis(axisMap.get(1));
+					plottingSystem.setSelectedYAxis(yAxes.get(0));
 				}
 			}
 		});
@@ -480,13 +493,21 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 
 	}
 
-	private void removeOldTraces(final List<ITrace> traces) {
+	private void removeOldTraces(final List<ITrace> traces, final List<IAxis> yAxes) {
         Display.getDefault().syncExec(new Runnable() {
         	public void run() {
+        		List<IAxis> axes = yAxes != null ? yAxes : getYAxes();
 				final Collection<ITrace> existing = plottingSystem.getTraces();
 				existing.removeAll(traces);
 				for (ITrace iTrace : existing) {
+					String tn = iTrace.getName();
 					if (iTrace.getUserObject()==HistoryType.HISTORY_PLOT) continue;
+					for (IAxis a : axes) {
+						if (tn.equals(a.getTitle())) {
+							a.setVisible(false);
+							break;
+						}
+					}
 					plottingSystem.removeTrace(iTrace);
 				}
         	}
@@ -669,7 +690,8 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 		return this.plottingSystem;
 	}
 	
-    public Object getAdapter(@SuppressWarnings("rawtypes") final Class clazz) {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public Object getAdapter(final Class clazz) {
 		
     	
 		if (clazz == Page.class) {

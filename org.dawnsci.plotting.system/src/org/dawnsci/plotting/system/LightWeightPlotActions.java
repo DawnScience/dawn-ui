@@ -475,6 +475,7 @@ class LightWeightPlotActions {
 				dialog.open();
 			}
 		};
+		configButton.setId(BasePlottingConstants.CONFIG_SETTINGS);
 		configButton.setToolTipText("Configure Settings...");
 		actionBarManager.registerAction(ToolbarConfigurationConstants.CONFIG.getId(), configButton, ActionType.XYANDIMAGE);		
 		
@@ -986,8 +987,7 @@ class LightWeightPlotActions {
 	public void createOriginActions(final XYRegionGraph xyGraph) {
 
 		final MenuAction origins = new MenuAction("Image Origin");
-		origins.setId(getClass().getName()+".imageOrigin");
-		
+		origins.setId(BasePlottingConstants.IMAGE_ORIGIN_MENU_ID);
 		origins.setImageDescriptor(PlottingSystemActivator.getImageDescriptor("icons/origins.png"));
 		
 		CheckableActionGroup group      = new CheckableActionGroup();

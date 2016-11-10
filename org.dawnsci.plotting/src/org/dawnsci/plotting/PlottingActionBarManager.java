@@ -30,6 +30,7 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.ITraceActionProvider;
 import org.eclipse.dawnsci.plotting.api.ManagerType;
 import org.eclipse.dawnsci.plotting.api.PlotType;
+import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.tool.IToolChangeListener;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
@@ -102,12 +103,14 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 		system.getActionBars().getMenuManager().add(new Separator(system.getPlotName()+"/"+defaultGroupName));
 		
 		xyMenu =  new MenuAction("X/Y Plot");
+		xyMenu.setId(BasePlottingConstants.XY_PLOT_MENU_ID);
 		if (system.getActionBars()!=null) {
 			system.getActionBars().getMenuManager().add(xyMenu);
 			system.getActionBars().getMenuManager().add(new Separator());
 		}
 
 		imageMenu = new MenuAction("Image");
+		imageMenu.setId(BasePlottingConstants.IMAGE_PLOT_MENU_ID);
 		if (system.getActionBars()!=null) {
 			system.getActionBars().getMenuManager().add(imageMenu);
 			system.getActionBars().getMenuManager().add(new Separator());

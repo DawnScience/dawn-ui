@@ -24,7 +24,7 @@ public class PeriodicTableComposite extends Composite {
 		private final Button button;
 		
 		public PeriodicTableButton(Composite parent, int Z) {
-			button = new Button(parent, SWT.PUSH | SWT.CENTER);
+			button = new Button(parent, SWT.FLAT | SWT.CENTER);
 			this.Z = Z;
 			element = MendelArray[Z];
 			button.addSelectionListener(new SelectionAdapter() {
@@ -76,10 +76,21 @@ public class PeriodicTableComposite extends Composite {
 	
 	private final PeriodicTableButton[] periodicTableButtons = new PeriodicTableButton[MendelArray.length];
 	private final HashSet<IPeriodicTableButtonPressedListener> listeners = new HashSet<>();
+
+	private final int maxZ;
 	
-	public PeriodicTableComposite(Composite parent) {
+	public PeriodicTableComposite(Composite parent) throws Exception {
+		this(parent, 107);
+	}
+	
+	public PeriodicTableComposite(Composite parent, int maxZ) throws Exception {
 		super(parent, SWT.NONE);
 	
+		if (maxZ < 1 || maxZ > 107)
+			throw new Exception("Invalid maxZ provided");
+		
+		this.maxZ = maxZ;
+		
 		//start constructing the grid...
 		GridLayout gridLayout = new GridLayout(18, true);
 		this.setLayout(gridLayout);
@@ -146,18 +157,22 @@ public class PeriodicTableComposite extends Composite {
 				break;
 			}
 			
+			// the plan is to draw all buttons, but hide them if their Z is greater than maxZ
+			if (Z > maxZ)
+				button.getButton().setVisible(false);
+			
 		}
 	}
 	
 	public Button getButton(int Z) {
-		if (Z < 1)
+		if (Z < 1 || Z > maxZ)
 			throw new ArrayIndexOutOfBoundsException();
 		return periodicTableButtons[Z].getButton();
 	}
 	
 	public Button getButton(String element) {
 		int Z = SymbolToAtomicNumber(element);
-		if (Z < 1)
+		if (Z < 1 || Z > maxZ)
 			throw new ArrayIndexOutOfBoundsException();
 		return periodicTableButtons[Z].getButton();
 	}

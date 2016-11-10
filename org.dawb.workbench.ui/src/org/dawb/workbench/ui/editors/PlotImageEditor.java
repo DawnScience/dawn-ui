@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.editors.IEditorExtension;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.util.EclipseUtils;
@@ -184,7 +183,7 @@ public class PlotImageEditor extends EditorPart implements IEditorExtension, IRe
 				if (!isStackAllowed) {
 					IDataset set;
 					try {
-						final ILoaderService service = (ILoaderService)ServiceManager.getService(ILoaderService.class);
+						final ILoaderService service = (ILoaderService)Activator.getService(ILoaderService.class);
 						set = service.getDataset(filePath, null);
 					} catch (Throwable e) {
 						logger.error("Cannot load file "+filePath, e);
@@ -334,8 +333,9 @@ public class PlotImageEditor extends EditorPart implements IEditorExtension, IRe
      	super.dispose();
     }
 
-    @Override
-    public Object getAdapter(@SuppressWarnings("rawtypes") final Class clazz) {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+    public Object getAdapter(final Class clazz) {
 		if (clazz == Page.class) {
 			return new HeaderTablePage(EclipseUtils.getFilePath(getEditorInput()));
 		} else if (clazz == IToolPageSystem.class || clazz == IPlottingSystem.class) {

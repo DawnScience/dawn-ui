@@ -8,8 +8,9 @@ import java.util.Map;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.ServiceHolder;
+import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
-import org.dawnsci.processing.ui.slice.IOperationInputData;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationInputData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -26,12 +27,16 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OperationModelView extends ViewPart implements ISelectionListener {
 
 	private OperationModelViewer modelEditor;
 	private IOperationInputData inputData;
 	private IAction configure;
+	@SuppressWarnings("unused")
+	private final static Logger logger = LoggerFactory.getLogger(OperationModelView.class);
 	
 	@Override
 	public void createPartControl(Composite parent) {
@@ -42,22 +47,26 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 		
 		getSite().setSelectionProvider(modelEditor);
 		
+		
 		configure = new Action("Live setup", Activator.getImageDescriptor("icons/application-dialog.png")) {
+			@SuppressWarnings("unchecked")
 			public void run() {
 				IOperationModel model = modelEditor.getModel();
 				if (inputData == null) return;
-				if (!inputData.getCurrentOperation().getModel().equals(model)) return;
+				if (!inputData.getCurrentOperations().get(0).getModel().equals(model)) return;
+			
+				IOperationSetupWizardPage wizardPage = ServiceHolder.getOperationUIService().getWizardPage(inputData.getCurrentOperations().get(0));
 				
-				ConfigureOperationModelDialog dialog = new ConfigureOperationModelDialog(getSite().getShell());
+				OperationModelWizard wizard = new OperationModelWizard(inputData.getInputData(), wizardPage);
+				wizard.setWindowTitle("Operation Model Configuration");
+				OperationModelWizardDialog dialog = new OperationModelWizardDialog(getSite().getShell(), wizard);
 				dialog.create();
-				dialog.setOperationInputData(inputData);
 				if (dialog.open() == Dialog.OK) {
 					EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
 					Map<String,IOperationInputData> props = new HashMap<>();
 					eventAdmin.postEvent(new Event("org/dawnsci/events/processing/PROCESSUPDATE", props));
 					modelEditor.refresh();
 				}
-				
 			}
 		};
 		configure.setEnabled(false);
@@ -71,14 +80,13 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 			public void handleEvent(Event event) {
 				IOperationInputData data = (IOperationInputData)event.getProperty("data");
 				
-				if (data == null || data.getCurrentOperation().getModel() != modelEditor.getModel()) {
+				if (data == null || data.getCurrentOperations().get(0).getModel() != modelEditor.getModel()) {
 					inputData = null;
 					configure.setEnabled(false);
 					return;
 				}
 				inputData = data;
 				configure.setEnabled(true);
-				
 			}
 		};
 		
@@ -108,9 +116,8 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 				OperationDescriptor des = (OperationDescriptor)ob;
 				final String       name = des.getName();
 				setPartName("Model '"+name+"'");
+				
 			}
 		}		
 	}
-
-
 }

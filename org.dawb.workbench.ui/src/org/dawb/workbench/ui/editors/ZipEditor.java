@@ -209,7 +209,8 @@ public class ZipEditor extends MultiPageEditorPart implements  IPlottingSystemSe
 	public PlotDataEditor getDataSetEditor() {
 		return dataSetEditor;
 	}
-    public Object getAdapter(@SuppressWarnings("rawtypes") final Class clazz) {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public Object getAdapter(final Class clazz) {
 		
 		if (clazz == Page.class) {
 			if (dataSetEditor!=null)   return PlotDataPage.getPageFor(dataSetEditor);

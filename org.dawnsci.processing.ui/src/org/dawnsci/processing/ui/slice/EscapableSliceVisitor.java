@@ -1,6 +1,8 @@
 package org.dawnsci.processing.ui.slice;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -8,6 +10,7 @@ import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext;
 import org.eclipse.dawnsci.analysis.api.processing.IExecutionVisitor;
 import org.eclipse.dawnsci.analysis.api.processing.IExportOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationInputData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
@@ -174,22 +177,23 @@ public class EscapableSliceVisitor implements SliceVisitor {
 	
 	private class OperationInputDataImpl implements IOperationInputData {
 
-		private IDataset ds;
-		private IOperation<? extends IOperationModel, ? extends OperationData> op;
+		final private IDataset ds;
+		final private List<IOperation> ops;
 		
 		public OperationInputDataImpl(IDataset ds, IOperation<? extends IOperationModel, ? extends OperationData> op) {
 			this.ds = ds;
-			this.op = op;
+			this.ops = new ArrayList<>();
+			this.ops.add(op);
 		}
 		
 		@Override
 		public IDataset getInputData() {
 			return ds;
 		}
-
+		
 		@Override
-		public IOperation<? extends IOperationModel, ? extends OperationData> getCurrentOperation() {
-			return op;
+		public List<IOperation> getCurrentOperations() {
+			return ops;
 		}
 		
 	}

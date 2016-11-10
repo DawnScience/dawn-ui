@@ -153,6 +153,7 @@ public class AsciiEditor extends MultiPageEditorPart implements IPlottingSystemS
 		return dataSetEditor;
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Object getAdapter(final Class clazz) {
     	// TODO FIXME for IContentProvider return a Page which shows the value
     	// of plotted data. Basically the same as the CSVPage.

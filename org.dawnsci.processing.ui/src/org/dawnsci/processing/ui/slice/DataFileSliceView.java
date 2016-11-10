@@ -40,6 +40,7 @@ import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.processing.ExecutionType;
 import org.eclipse.dawnsci.analysis.api.processing.IExecutionVisitor;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationInputData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
@@ -742,11 +743,11 @@ public class DataFileSliceView extends ViewPart {
 				//Only run what is necessary
 				if (inputData != null) {
 					
-					if (inputData.getCurrentOperation() != end) {
+					if (inputData.getCurrentOperations().get(0) != end) {
 						int pos = 0;
 						for (int i = 0; i< ops.length; i++) {
 							if (ops[i] == end) break;
-							if (ops[i] == inputData.getCurrentOperation()) {
+							if (ops[i] == inputData.getCurrentOperations().get(0)) {
 								pos = i;
 								pos++;
 								break;
@@ -760,7 +761,7 @@ public class DataFileSliceView extends ViewPart {
 						
 					} else {
 						firstSlice = inputData.getInputData();
-						ops = new IOperation[]{inputData.getCurrentOperation()};
+						ops = new IOperation[]{inputData.getCurrentOperations().get(0)};
 					}
 					
 				}

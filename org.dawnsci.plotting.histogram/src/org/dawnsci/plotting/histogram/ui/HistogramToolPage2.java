@@ -63,6 +63,8 @@ import org.slf4j.LoggerFactory;
 
 public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
+	public static final String ID = "org.dawnsci.plotting.histogram.histogram_tool_page_2";
+
 	private static final Logger logger = LoggerFactory.getLogger(HistogramToolPage2.class);
 
 	private FormToolkit toolkit;
@@ -539,5 +541,10 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		if (pservice == null)
 			return pservice = (IPaletteService) PaletteService.getPaletteService();
 		return pservice;
+	}
+
+	@Override
+	public String getToolId() {
+		return ID;
 	}
 }

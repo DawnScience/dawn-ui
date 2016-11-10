@@ -15,6 +15,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
+import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
@@ -55,10 +56,10 @@ public class HistogramPluginTests extends PluginTestBase {
 
 		page.showView(
 				ToolPageView.FIXED_VIEW_ID,
-				"org.dawnsci.plotting.histogram.histogram_tool_page_2",
+				BasePlottingConstants.HISTO_TOOL_ID,
 				IWorkbenchPage.VIEW_ACTIVATE);
 		IToolPage tool = sys
-				.getToolPage("org.dawnsci.plotting.histogram.histogram_tool_page_2");
+				.getToolPage(BasePlottingConstants.HISTO_TOOL_ID);
 		histogramToolPage = (HistogramToolPage2) tool;
 		assertNotNull(histogramToolPage);
 

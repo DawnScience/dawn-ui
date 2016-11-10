@@ -14,13 +14,13 @@ import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.common.widgets.celleditor.TextCellEditorWithContentProposal;
 import org.dawnsci.plotting.roi.RegionCellEditor;
 import org.dawnsci.processing.ui.ServiceHolder;
-import org.dawnsci.processing.ui.slice.IOperationInputData;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionEngine;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationInputData;
 import org.eclipse.dawnsci.analysis.api.processing.model.FileType;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.ModelField;
@@ -296,8 +296,8 @@ public class ModelFieldEditors {
 
 			if (!field.getModel().isModelField(fileField) && 
 					recentData != null && 
-					recentData.getCurrentOperation() != null && 
-					recentData.getCurrentOperation().getModel() == field.getModel()) {
+					recentData.getCurrentOperations().get(0) != null && 
+					recentData.getCurrentOperations().get(0).getModel() == field.getModel()) {
 				path = recentData.getInputData().getFirstMetadata(SliceFromSeriesMetadata.class).getFilePath();
 
 			}
@@ -375,7 +375,7 @@ public class ModelFieldEditors {
 		public void handleEvent(Event event) {
 			IOperationInputData data = (IOperationInputData)event.getProperty("data");
 			recentData = data;
-			if (data != null && data.getCurrentOperation().getModel() == model) {
+			if (data != null && data.getCurrentOperations().get(0).getModel() == model) {
 				SliceFromSeriesMetadata md = data.getInputData().getFirstMetadata(SliceFromSeriesMetadata.class);
 				if (md != null && md.getFilePath() != null) {
 					triggerDatasetNameJob(ed, md.getFilePath());

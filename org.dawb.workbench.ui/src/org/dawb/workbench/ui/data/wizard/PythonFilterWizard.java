@@ -29,6 +29,7 @@ public class PythonFilterWizard extends Wizard implements INewWizard {
 	public final static String ID = "org.dawb.workbench.ui.data.pythonFilterWizard";
 	
 	private PythonFilterPage     page;
+	@SuppressWarnings("unused")
 	private IResource selection;
 
 	private String pythonPath;
