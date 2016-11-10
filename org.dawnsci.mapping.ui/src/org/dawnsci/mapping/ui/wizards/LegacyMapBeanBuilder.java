@@ -166,7 +166,7 @@ public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
 			}
 			
 		}
-		fb.setScanRank(3);
+		fb.setScanRank(2);
 		if (fb!= null && !fb.checkValid()) fb = null;
 		return fb;
 	}
@@ -207,7 +207,7 @@ public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
 			mb.setName(I05CHECK);
 			mb.setParent(I05ANALYSER + Node.SEPARATOR + I05DATA);
 			fb.addMap(mb);
-			fb.setScanRank(3);
+			fb.setScanRank(2);
 
 		}
 
@@ -315,7 +315,7 @@ public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
 				}
 			}
 		}	
-		fb.setScanRank(3);
+		fb.setScanRank(2);
 		return fb.checkValid() ? fb : null;
 	}
 	
