@@ -475,7 +475,7 @@ public class MapPlotManager {
 			while (it.hasNext()) {
 				MapTrace m = it.next();
 				if (!traces.contains(m.getTrace())) {
-					map.addTrace(m.getTrace());
+					if (m.getTrace() != null) map.addTrace(m.getTrace());
 				}
 				
 			}

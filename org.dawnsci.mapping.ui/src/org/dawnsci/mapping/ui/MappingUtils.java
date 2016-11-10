@@ -48,19 +48,19 @@ public class MappingUtils {
 		int ys = axes[0].getSize();
 		range[0] = axes[1].min().doubleValue();
 		range[1] = axes[1].max().doubleValue();
-		double dx = ((range[1]-range[0])/xs)/2;
+		double dx = ((range[1]-range[0])/(xs-1))/2;
 		range[0] -= dx;
 		range[1] += dx;
 		
 		range[2] = axes[0].min().doubleValue();
 		range[3] = axes[0].max().doubleValue();
-		double dy = ((range[3]-range[2])/ys)/2;
+		double dy = ((range[3]-range[2])/(ys-1))/2;
 		range[2] -= dy;
 		range[3] += dy;
 		return range;
 	}
 	
-	public static int[] getIndicesFromCoOrds(IDataset map, double x, double y){
+	public static int[] getIndicesFromCoOrds(ILazyDataset map, double x, double y){
 		IDataset[] ax = MetadataPlotUtils.getAxesFromMetadata(map, false);
 		
 		IDataset xx = ax[1];

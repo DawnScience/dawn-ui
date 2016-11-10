@@ -5,6 +5,7 @@ import java.util.Collection;
 import org.dawnsci.mapping.ui.datamodel.MapBean;
 import org.dawnsci.mapping.ui.datamodel.MappedBlockBean;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
+import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
@@ -52,6 +53,45 @@ public class LegacyMapBeanBuilder {
 	public static final String I08CHECK = "/entry1/Counter1/data";
 	
 	
+	
+	public static MappedDataFileBean tryLegacyLoaders(IDataHolder dh) {
+		MappedDataFileBean b = null;
+		
+		if (b == null && dh.getLazyDataset(LegacyMapBeanBuilder.I18CHECK) != null) {
+			try {
+			b = LegacyMapBeanBuilder.buildBeani18in2015(dh.getTree());
+			} catch (Exception e) {
+				//ignore
+			}
+		}
+		
+		if (b == null && dh.getLazyDataset(LegacyMapBeanBuilder.I05CHECK) != null) {
+			try {
+			b = LegacyMapBeanBuilder.buildBeani05in2015(dh.getTree());
+			} catch (Exception e) {
+				//ignore
+			}
+		}
+		
+		if (b == null && dh.getLazyDataset(LegacyMapBeanBuilder.I22SAXCHECK) != null) {
+			try {
+			b = LegacyMapBeanBuilder.buildBeani22in2016(dh.getTree());
+			} catch (Exception e) {
+				//ignore
+			}
+		}
+		
+		if (b == null && dh.getLazyDataset(LegacyMapBeanBuilder.I08CHECK) != null) {
+			try {
+			b = LegacyMapBeanBuilder.buildBeani08Energyin2016(dh.getTree());
+			} catch (Exception e) {
+				//ignore
+			}
+		}
+		
+		return b;
+	}
+	
 public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
 		
 		MappedDataFileBean fb = null;
@@ -78,6 +118,7 @@ public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
 			bb.setxDim(2);
 			bb.setyDim(1);
 			fb.addBlock(bb);
+			fb.setScanRank(3);
 		}
 		
 		if (fb!= null && !fb.checkValid()) fb = null;
@@ -125,7 +166,7 @@ public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
 			}
 			
 		}
-		
+		fb.setScanRank(3);
 		if (fb!= null && !fb.checkValid()) fb = null;
 		return fb;
 	}
@@ -166,6 +207,7 @@ public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
 			mb.setName(I05CHECK);
 			mb.setParent(I05ANALYSER + Node.SEPARATOR + I05DATA);
 			fb.addMap(mb);
+			fb.setScanRank(3);
 
 		}
 
@@ -273,7 +315,7 @@ public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
 				}
 			}
 		}	
-		
+		fb.setScanRank(3);
 		return fb.checkValid() ? fb : null;
 	}
 	

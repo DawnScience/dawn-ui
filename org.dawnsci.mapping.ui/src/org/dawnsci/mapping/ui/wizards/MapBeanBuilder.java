@@ -1,6 +1,7 @@
 package org.dawnsci.mapping.ui.wizards;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -124,48 +125,60 @@ public class MapBeanBuilder {
 
 			datasets.add(dataInfo);
 		}
+		
+		if (names == null) {
+			
+			int minRank = Integer.MAX_VALUE;
+			DataInfo min = null;
+			
+			for (DataInfo d : datasets) {
+				if (d.rank < minRank) {
+					minRank = d.rank;
+					min = d;
+				}
+			}
+			
+			boolean allFound = false;
+			
+			String fullName = min.getFullName();
+			NodeLink link = tree.findNodeLink(fullName);
+			Node d = link.getSource();
+			
+			Iterator<? extends Attribute> it = d.getAttributeIterator();
+		
+			boolean foundx = false;
+			boolean foundy = false;
+			Integer index = null;
+			
+			Map<Integer,String> nameDimMap = new HashMap<>();
+			String name = null;
+			Integer indexKey = null;
+			while (it.hasNext()) {
+				Attribute next = it.next();
+				name = next.getName();
+				if (name.endsWith(NexusTreeUtils.NX_INDICES_SUFFIX)) {
+					foundx = true;
+					IDataset value = next.getValue();
+					if (value.getSize() != 1) continue;
+					index = Integer.parseInt(value.getString());
+					if (nameDimMap.containsKey(index)) {
+						indexKey = index;
+						break;
+					}
+					nameDimMap.put(index, name.substring(0,name.length()-NexusTreeUtils.NX_INDICES_SUFFIX.length()));
+				}
+			}
+			if (indexKey != null && nameDimMap.containsKey(indexKey)) {
+				for (DataInfo di : datasets) {
+					di.axes[indexKey] = name.substring(0,name.length()-NexusTreeUtils.NX_INDICES_SUFFIX.length());
+					di.xAxisForRemapping = nameDimMap.get(indexKey);
+				}		
+			}
+		}
 
 		for (String name : images) populateImage(bean, name, nodes.get(name));
 		
 		if (datasets.isEmpty() && !bean.getImages().isEmpty()) return bean;
-		
-		List<String> remappingAxesList = null;
-		
-		for (DataInfo d : datasets) {
-		
-			if (d.xAxisForRemapping == null) {
-				//spiral case
-				d.toString();
-				NodeLink nl = nodes.get(d.parent.substring(1));
-				remappingAxesList = new ArrayList<String>();
-				Node n = nl.getDestination();
-				Iterator<? extends Attribute> it = n.getAttributeIterator();
-				while (it.hasNext()) {
-					Attribute next = it.next();
-					IDataset value = next.getValue();
-					
-					if (next.getName().endsWith("_demand_indices")) {
-						String name = next.getName();
-						name = name.substring(0, name.length()-8);
-						remappingAxesList.add(name);
-					}
-				}
-			};
-			
-		}
-		
-		if (remappingAxesList != null && remappingAxesList.size() >=2) {
-			remappingAxesList.toString();
-			for (DataInfo d : datasets) {
-				NodeLink nl = nodes.get(d.parent.substring(1));
-				Node n = nl.getDestination();
-				Attribute attribute = n.getAttribute(remappingAxesList.get(0)+ "_indices");
-				if (attribute != null){
-					d.axes[0] = remappingAxesList.get(1);
-					d.xAxisForRemapping = remappingAxesList.get(0);
-				}
-			}
-		}
 		
 		populateData(bean, datasets, names);
 		

@@ -21,7 +21,7 @@ public class MappedData extends AbstractMapData{
 	private static final Logger logger = LoggerFactory.getLogger(MappedData.class);
 	
 	
-	public MappedData(String name, IDataset map, MappedDataBlock parent, String path) {
+	public MappedData(String name, ILazyDataset map, MappedDataBlock parent, String path) {
 		super(name, map, parent, path);
 	}
 	
@@ -29,7 +29,7 @@ public class MappedData extends AbstractMapData{
 		super(name, map, parent, path);
 	}
 	
-	public void replaceLiveDataset(IDataset dataset) {
+	public void replaceLiveDataset(ILazyDataset dataset) {
 		live = false;
 		disconnect();
 		this.map = dataset;
@@ -88,7 +88,7 @@ public class MappedData extends AbstractMapData{
 	}
 
 	@Override
-	public IDataset getData() {
+	public ILazyDataset getData() {
 		return map;
 	}
 }

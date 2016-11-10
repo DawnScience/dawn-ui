@@ -22,9 +22,9 @@ import org.eclipse.january.dataset.DoubleDataset;
 public class MapNexusFileBuilderUtils {
 
 	public static final String DETECTOR = "detector";
-	public static final String STAGE_X = "stage_x";
-	public static final String STAGE_Y = "stage_y";
-	public static final String STAGE_Z = "stage_z";
+	public static final String STAGE_X = "stage_x_set";
+	public static final String STAGE_Y = "stage_y_set";
+	public static final String STAGE_Z = "stage_z_set";
 	public static final String TEMPERATURE = "temperature";
 	public static final String ENERGY = "energy";
 	public static final String SUM = "sum";
@@ -98,6 +98,77 @@ public class MapNexusFileBuilderUtils {
 		NXdata sum = makeNonGridNXData(1, 0, false);
 		entry.addGroupNode(SUM, sum);
 		
+		
+		try (NexusScanFile file = fileBuilder.createFile(false)) {
+		}
+	}
+	
+	public static void makeDiagLineScanWithSumZ(String path) throws NexusException {
+		ServiceHolder.setNexusFileFactory(new NexusFileFactoryHDF5());
+		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
+		NXroot nXroot = fileBuilder.getNXroot();
+		NXentry entry = NexusNodeFactory.createNXentry();
+		nXroot.addGroupNode(ENTRY1, entry);
+
+		NXdata makeNXData = makeNonGridNXData(4, 2, false);
+		entry.addGroupNode(DETECTOR, makeNXData);
+		NXdata sum = makeNonGridNXData(2, 0, false);
+		entry.addGroupNode(SUM, sum);
+		
+		
+		try (NexusScanFile file = fileBuilder.createFile(false)) {
+		}
+	}
+	
+	public static void makeDiodeGridScan(String path) throws NexusException {
+		ServiceHolder.setNexusFileFactory(new NexusFileFactoryHDF5());
+		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
+		NXroot nXroot = fileBuilder.getNXroot();
+		NXentry entry = NexusNodeFactory.createNXentry();
+		nXroot.addGroupNode(ENTRY1, entry);
+		NXdata sum = makeNXData(2, 0, false);
+		entry.addGroupNode(DETECTOR, sum);
+		
+		
+		try (NexusScanFile file = fileBuilder.createFile(false)) {
+		}
+	}
+	
+	public static void makeDiodeGridScanEnergy(String path) throws NexusException {
+		ServiceHolder.setNexusFileFactory(new NexusFileFactoryHDF5());
+		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
+		NXroot nXroot = fileBuilder.getNXroot();
+		NXentry entry = NexusNodeFactory.createNXentry();
+		nXroot.addGroupNode(ENTRY1, entry);
+		NXdata sum = makeNXData(3, 0, true);
+		entry.addGroupNode(DETECTOR, sum);
+		
+		
+		try (NexusScanFile file = fileBuilder.createFile(false)) {
+		}
+	}
+	
+	public static void makeDiodeLineScan(String path) throws NexusException {
+		ServiceHolder.setNexusFileFactory(new NexusFileFactoryHDF5());
+		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
+		NXroot nXroot = fileBuilder.getNXroot();
+		NXentry entry = NexusNodeFactory.createNXentry();
+		nXroot.addGroupNode(ENTRY1, entry);
+		NXdata sum = makeNonGridNXData(1, 0, false);
+		entry.addGroupNode(DETECTOR, sum);
+		
+		try (NexusScanFile file = fileBuilder.createFile(false)) {
+		}
+	}
+	
+	public static void makeDiodeLineScanEnergy(String path) throws NexusException {
+		ServiceHolder.setNexusFileFactory(new NexusFileFactoryHDF5());
+		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
+		NXroot nXroot = fileBuilder.getNXroot();
+		NXentry entry = NexusNodeFactory.createNXentry();
+		nXroot.addGroupNode(ENTRY1, entry);
+		NXdata sum = makeNonGridNXData(2, 0, true);
+		entry.addGroupNode(DETECTOR, sum);
 		
 		try (NexusScanFile file = fileBuilder.createFile(false)) {
 		}
@@ -183,16 +254,16 @@ public class MapNexusFileBuilderUtils {
 				if (i == scanRank-1) {
 					axes[i] = ".";
 					DoubleDataset ax = DatasetFactory.createRange(shape[i]);
-					String axis = FASTEST_AXES[scanRank];
+					String axis = FASTEST_AXES[1];
 					nxData.setDataset(axis, ax);
 					nxData.setAttribute(null, axis + "_indices", new int[]{i});
-					axis = FASTEST_AXES[scanRank-1];
+					axis = FASTEST_AXES[0];
 					nxData.setDataset(axis, ax);
 					nxData.setAttribute(null, axis + "_indices", new int[]{i});
 				} else {
-					String axis = FASTEST_AXES[scanRank-3-i];
+					String axis = FASTEST_AXES[scanRank-i];
 					if (isEnergy) {
-						 axis = i == 0 ? ENERGY : FASTEST_AXES[scanRank-3-i];
+						 axis = i == 0 ? ENERGY : FASTEST_AXES[scanRank-i];
 					}
 					DoubleDataset ax = DatasetFactory.createRange(shape[i]);
 					axes[i] = axis;

@@ -301,45 +301,19 @@ public class MappedFileManager {
 						
 						MappedDataFileBean b = null;
 						try {
-							b = MapBeanBuilder.buildBean(dh.getTree());
+							Tree tree = dh.getTree();
+							if (AcquisitionServiceManager.getStageConfiguration()==null){
+								b = MapBeanBuilder.buildBean(tree);
+							} else {
+								String x = AcquisitionServiceManager.getStageConfiguration().getActiveFastScanAxis();
+								String y = AcquisitionServiceManager.getStageConfiguration().getActiveSlowScanAxis();
+								b = MapBeanBuilder.buildBean(tree,x,y);
+							}
 						} catch (Exception e) {
 							//ignore
 						}
 
-						if (b == null && dh.getLazyDataset(LegacyMapBeanBuilder.I18CHECK) != null) {
-							try {
-							b = LegacyMapBeanBuilder.buildBeani18in2015(dh.getTree());
-							} catch (Exception e) {
-								//ignore
-							}
-						}
-						
-						if (b == null && dh.getLazyDataset(LegacyMapBeanBuilder.I05CHECK) != null) {
-							try {
-							b = LegacyMapBeanBuilder.buildBeani05in2015(dh.getTree());
-							} catch (Exception e) {
-								//ignore
-							}
-						}
-						
-						if (b == null && dh.getLazyDataset(LegacyMapBeanBuilder.I22SAXCHECK) != null) {
-							try {
-							b = LegacyMapBeanBuilder.buildBeani22in2016(dh.getTree());
-							} catch (Exception e) {
-								//ignore
-							}
-						}
-						
-						if (b == null && dh.getLazyDataset(LegacyMapBeanBuilder.I08CHECK) != null) {
-							try {
-							b = LegacyMapBeanBuilder.buildBeani08Energyin2016(dh.getTree());
-							} catch (Exception e) {
-								//ignore
-							}
-						}
-						
-						
-						
+						b = LegacyMapBeanBuilder.tryLegacyLoaders(dh);
 						
 						if (b != null) {
 							IMonitor m = new ProgressMonitorWrapper(monitor);

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.dawnsci.mapping.ui.LocalServiceManager;
+import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.io.IRemoteDatasetService;
 import org.eclipse.january.IMonitor;
@@ -81,7 +82,6 @@ public class MappedFileFactory {
 			return block;
 		}
 		
-		
 		try {
 			ILazyDataset lz = getLazyDataset(path,blockName);
 			lz.clearMetadata(AxesMetadata.class);
@@ -121,6 +121,10 @@ public class MappedFileFactory {
 				Dataset ds = DatasetUtils.convertToDataset(d);
 				d = ds.transpose();
 				
+			}
+			
+			if (block.isRemappingRequired()) {
+				return new ReMappedData(mapName,d,block,path);
 			}
 
 			return new MappedData(mapName,d,block,path);
@@ -204,7 +208,11 @@ public class MappedFileFactory {
 					
 					String second = null;
 					if (bean.getxDim() == i && bean.getxAxisForRemapping() != null) second = bean.getxAxisForRemapping();
-					if (second != null) axm.addAxis(i, getLazyDataset(path, second));
+					if (second != null) {
+						ILazyDataset l = getLazyDataset(path, second);
+						l.setName(second);
+						axm.addAxis(i, l);
+					}
 					
 				} else {
 					//approximate 2D with 1D, should be done int the map/mapobjects
@@ -238,6 +246,7 @@ public class MappedFileFactory {
 	private static ILazyDataset getLazyDataset(String path, String name, LiveDataBean lb) throws Exception {
 		if (lb == null) {
 			ILoaderService lService = LocalServiceManager.getLoaderService();
+			IDataHolder dh = lService.getData(path, null);
 			ILazyDataset lazyDataset = lService.getData(path, null).getLazyDataset(name);
 			lazyDataset.clearMetadata(null);
 			return lazyDataset;

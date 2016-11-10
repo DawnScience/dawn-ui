@@ -385,21 +385,21 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 			this.range = range;
 			return d;
 		}
-		
 		if (mapRepresentation == null) {
 			if (mapDims.isRemappingRequired()) {
-				
+
+				mapRepresentation = new ReMappedData(this.toString(), dataset ,this, path);
+				return mapRepresentation.getMap();
+
+
 			} else {
-				
-				try {
-					mapRepresentation = new MappedData(this.toString(), dataset.getSlice(mapDims.getMapSlice(dataset)).squeeze(),this, path);
-					return mapRepresentation.getMap();
-				} catch (DatasetException e) {
-					logger.error("Could not create map representation");
-				}
+
+				mapRepresentation = new MappedData(this.toString(),dataset,this, path);
+				return mapRepresentation.getMap();
+
 			}
 		}
-		
+
 		
 		
 		

@@ -1,8 +1,14 @@
 package org.dawnsci.mapping.ui.datamodel;
 
+import java.awt.font.NumericShaper.Range;
+
+import org.apache.commons.math3.ml.neuralnet.MapUtils;
 import org.dawnsci.mapping.ui.LivePlottingUtils;
 import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
+import org.eclipse.january.DatasetException;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDatasetConnector;
 import org.eclipse.january.dataset.ILazyDataset;
@@ -14,12 +20,14 @@ public class ReMappedData extends AbstractMapData {
 	private IDataset lookup;
 	private int[] shape;
 	
-	private IDataset flatMap;
+	private ILazyDataset flatMap;
 	
 	private static final Logger logger = LoggerFactory.getLogger(ReMappedData.class);
 	
-	public ReMappedData(String name, IDataset map, MappedDataBlock parent, String path) {
-		super(name, map, parent, path);
+	public ReMappedData(String name, ILazyDataset map, MappedDataBlock parent, String path) {
+		super(name, (ILazyDataset)null, parent, path);
+		flatMap = map;
+		this.setRange(calculateRange(flatMap));
 	}
 	
 	public ReMappedData(String name, IDatasetConnector map, MappedDataBlock parent, String path) {
@@ -28,8 +36,9 @@ public class ReMappedData extends AbstractMapData {
 	
 	@Override
 	protected double[] calculateRange(ILazyDataset map){
+		if (map == null) return null;
 		//FIXME for nd
-		IDataset[] ax = MetadataPlotUtils.getAxesForDimension(map,0);
+		IDataset[] ax = MetadataPlotUtils.getAxesForDimension(map,parent.getMapDims().getxDim());
 		double[] r = new double[4];
 		r[0] = ax[1].min().doubleValue();
 		r[1] = ax[1].max().doubleValue();
@@ -42,12 +51,32 @@ public class ReMappedData extends AbstractMapData {
 	public IDataset getMap(){
 		if (map == null) updateRemappedData(shape);
 		
-		return map;
+		Dataset d = null;
+		try {
+			d = DatasetUtils.sliceAndConvertLazyDataset(map);
+		} catch (DatasetException e) {
+			logger.error("Could not slice lazy dataset",e);
+		}
+		
+		return d;
 	}
 	
 	private void updateRemappedData(int[] shape) {
-		
-		IDataset[] remapData = MappingUtils.remapData(flatMap, shape, 0);
+		if (flatMap == null) return;
+		IDataset fm = null;
+		try {
+		if (flatMap.getRank() == 1) {
+			
+				fm = DatasetUtils.sliceAndConvertLazyDataset(flatMap);
+			
+		} else {
+			fm = flatMap.getSlice(parent.getMapDims().getMapSlice(flatMap));
+		}
+		} catch (DatasetException e) {
+			logger.error("Error sliceing lazy dataset", e);
+			return;
+		}
+		IDataset[] remapData = MappingUtils.remapData(fm, shape, 0);
 		
 		if (remapData == null) return;
 		
@@ -88,7 +117,7 @@ public class ReMappedData extends AbstractMapData {
 		return live;
 	}
 
-	public void replaceLiveDataset(IDataset map) {
+	public void replaceLiveDataset(ILazyDataset map) {
 		live = false;
 		disconnect();
 		this.flatMap = map;
@@ -116,7 +145,7 @@ public class ReMappedData extends AbstractMapData {
 	}
 
 	@Override
-	public IDataset getData() {
+	public ILazyDataset getData() {
 		return flatMap;
 	}
 }
