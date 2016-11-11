@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 
+import org.dawnsci.mapping.ui.datamodel.MapScanDimensions;
 import org.dawnsci.mapping.ui.datamodel.MappedData;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
@@ -31,6 +32,7 @@ public class MappedDataTest {
 	private static MappedDataBlock gridScanBlock = null;
 	private static MappedData gridScanMap = null;
 	private static File file = null;
+	private static File fileRemap = null;
 	
 	@BeforeClass
 	public static void buildData() throws Exception {
@@ -39,12 +41,17 @@ public class MappedDataTest {
 		IDataHolder data = LoaderFactory.getData(file.getAbsolutePath());
 		ILazyDataset lazyDataset = data.getLazyDataset(MapNexusFileBuilderUtils.DETECTOR_PATH);
 		
+		MapScanDimensions msd = new MapScanDimensions(1, 0, 2);
 		gridScanBlock = new MappedDataBlock(MapNexusFileBuilderUtils.DETECTOR_PATH,
-				lazyDataset, 1, 0, file.getAbsolutePath());
+				lazyDataset, file.getAbsolutePath(),msd);
 		
 		ILazyDataset sum = data.getLazyDataset(MapNexusFileBuilderUtils.SUM_PATH);
 		
 		gridScanMap = new MappedData(MapNexusFileBuilderUtils.SUM_PATH, sum.getSlice(), gridScanBlock,file.getAbsolutePath());
+		
+		fileRemap = folder.newFile("file2.nxs");
+		MapNexusFileBuilderUtils.makeDiagLineScanWithSum(fileRemap.getAbsolutePath());
+		
 	}
 	
 	
@@ -60,11 +67,11 @@ public class MappedDataTest {
 	@Ignore
 	@Test
 	public void testMakeNewMapWithParent() {
-		DoubleDataset rand = Random.rand(gridScanMap.getData().getShape());
-		AxesMetadata ax = gridScanMap.getData().getFirstMetadata(AxesMetadata.class);
+		DoubleDataset rand = Random.rand(gridScanMap.getMap().getShape());
+		AxesMetadata ax = gridScanMap.getMap().getFirstMetadata(AxesMetadata.class);
 		MetadataType clone = ax.clone();
 		rand.setMetadata(clone);
-		MappedData map = gridScanMap.makeNewMapWithParent("random", Random.rand(gridScanMap.getData().getShape()));
+		MappedData map = gridScanMap.makeNewMapWithParent("random", Random.rand(gridScanMap.getMap().getShape()));
 		assertEquals(gridScanBlock, map.getParent());
 	}
 
@@ -75,7 +82,7 @@ public class MappedDataTest {
 
 	@Test
 	public void testGetData() {
-		IDataset d = gridScanMap.getData();
+		IDataset d = gridScanMap.getMap();
 		assertNotNull(d);
 	}
 

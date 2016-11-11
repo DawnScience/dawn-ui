@@ -21,7 +21,7 @@ public class AssociatedImage implements PlottableMapObject {
 		this.path = path;
 	}
 	
-	public IDataset getData() {
+	public IDataset getMap() {
 		return image;
 	}
 	
@@ -55,14 +55,27 @@ public class AssociatedImage implements PlottableMapObject {
 
 	@Override
 	public boolean disconnect() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean isLive() {
-		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public void update() {
+		
+	}
+
+	@Override
+	public int getTransparency() {
+		return 0;
+	}
+
+	@Override
+	public IDataset getSpectrum(double x, double y) {
+		return null;
 	}
 	
 }

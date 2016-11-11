@@ -6,8 +6,13 @@ public interface PlottableMapObject extends MapObject {
 
 	public String getLongName();
 	
-	public IDataset getData();
+	public IDataset getMap();
 	
 	public boolean isLive();
 	
+	public void update();
+	
+	public int getTransparency();
+	
+	public IDataset getSpectrum(double x, double y);
 }

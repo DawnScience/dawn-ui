@@ -57,14 +57,14 @@ public class RGBMixerDialog extends Dialog  {
 		if (data.isEmpty())
 			throw new Exception("No data is available to visualize in the RGB Mixer dialog.");
 		this.data = new ArrayList<Dataset>();
-		int width = data.get(0).getData().getShape()[0];
-		int height = data.get(0).getData().getShape()[1];
+		int width = data.get(0).getMap().getShape()[0];
+		int height = data.get(0).getMap().getShape()[1];
 		for (AbstractMapData d : data) {
-			if (width != d.getData().getShape()[0] || height != d.getData().getShape()[1]) {
+			if (width != d.getMap().getShape()[0] || height != d.getMap().getShape()[1]) {
 				throw new Exception("Data has not the same size");
 			}
 			
-			Dataset da = DatasetUtils.convertToDataset(d.getData());
+			Dataset da = DatasetUtils.convertToDataset(d.getMap());
 			this.data.add(da);
 		}
 		this.maps = data;
@@ -293,7 +293,7 @@ public class RGBMixerDialog extends Dialog  {
 		if (idxR < 0 && idxG < 0 && idxB < 0) {
 			system.clear();
 		} else {
-			system.updatePlot2D(rgbMap.getData(), null, null);	
+			system.updatePlot2D(rgbMap.getMap(), null, null);	
 		}
 		
 

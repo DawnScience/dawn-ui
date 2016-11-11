@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.swing.text.html.BlockView;
+
 public class MappedDataFile implements MapObject{
 
 	private String path;
@@ -17,6 +19,8 @@ public class MappedDataFile implements MapObject{
 	private Map<String,AssociatedImage> microscopeDataMap;
 	private double[] range;
 	private MappedDataFileBean descriptionBean;
+	
+	private int[] nonXYScanDimensions;
 	
 //	private final static Logger logger = LoggerFactory.getLogger(MappedDataFile.class);
 	
@@ -42,6 +46,10 @@ public class MappedDataFile implements MapObject{
 	
 	public String getPath() {
 		return path;
+	}
+	
+	public void updateXandYDimensions(String xName, String yName) {
+		
 	}
 	
 	public void locallyReloadLiveFile(){
@@ -151,6 +159,12 @@ public class MappedDataFile implements MapObject{
 //		if (range == null) {
 			for (AbstractMapData map : mapDataMap.values()) {
 				updateRange(map);
+			}
+			
+			if (mapDataMap.isEmpty()) {
+				for (PlottableMapObject o: fullDataMap.values()) {
+					updateRange(o);
+				}
 			}
 //		}
 		
