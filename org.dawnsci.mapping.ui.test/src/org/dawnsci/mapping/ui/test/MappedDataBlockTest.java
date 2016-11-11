@@ -84,7 +84,7 @@ public class MappedDataBlockTest {
 	@Test
 	public void testGetRange() {
 		double[] range = gridScanBlock.getRange();
-		assertArrayEquals(new double[]{-0.5, 9.5, -0.5, 10.5}, range, 0.0001);
+		assertArrayEquals(new double[]{-0.5, 10.5, -0.5, 9.5}, range, 0.0001);
 	}
 	@Test
 	public void testGetLazy() {

@@ -152,7 +152,7 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 		int yDim = mapDims.getyDim();
 		int xDim = mapDims.getxDim();
 		
-		return MappingUtils.calculateRangeFromAxes(new IDataset[]{ax[xDim],ax[yDim]});
+		return MappingUtils.calculateRangeFromAxes(new IDataset[]{ax[yDim],ax[xDim]});
 	}
 
 	public String getPath(){
