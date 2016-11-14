@@ -372,7 +372,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 					dataViewer.refresh();
 				}
 			};
-			if (getPlottingSystem()!=null) getPlottingSystem().addTraceListener(traceListener);
+			if (getPlottingSystem()!=null)
+				getPlottingSystem().addTraceListener(traceListener);
 			
 			if (dataReduction!=null) {
 				this.toolListener = new IToolChangeListener() {
@@ -392,17 +393,19 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 					@Override
 					public void propertyChange(PropertyChangeEvent event) {
 						try {
-							saveAxisSettings(".xAxis", getPlottingSystem().getSelectedXAxis());
-							saveAxisSettings(".yAxis", getPlottingSystem().getSelectedYAxis());
+							if (getPlottingSystem() != null) {
+								saveAxisSettings(".xAxis", getPlottingSystem().getSelectedXAxis());
+								saveAxisSettings(".yAxis", getPlottingSystem().getSelectedYAxis());
+							}
 						} catch (Throwable ne) {
 							logger.error("Cannot save settings for plotting configuration!", ne);
 						}
 					}
 				});
-			
-			readAxisSettings(".xAxis", getPlottingSystem().getSelectedXAxis());
-			readAxisSettings(".yAxis", getPlottingSystem().getSelectedYAxis());
-			
+			if (getPlottingSystem() != null) {
+				readAxisSettings(".xAxis", getPlottingSystem().getSelectedXAxis());
+				readAxisSettings(".yAxis", getPlottingSystem().getSelectedYAxis());
+			}			
 			this.dataFilter = new DataTableFilter();
 			dataViewer.addFilter(dataFilter);
 			searchText.addModifyListener(new ModifyListener() {		
