@@ -313,7 +313,7 @@ public class MappedFileManager {
 							//ignore
 						}
 
-						b = LegacyMapBeanBuilder.tryLegacyLoaders(dh);
+						if (b == null) b = LegacyMapBeanBuilder.tryLegacyLoaders(dh);
 						
 						if (b != null) {
 							IMonitor m = new ProgressMonitorWrapper(monitor);

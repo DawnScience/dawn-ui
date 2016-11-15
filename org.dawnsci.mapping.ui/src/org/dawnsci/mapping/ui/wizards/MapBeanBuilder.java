@@ -82,9 +82,9 @@ public class MapBeanBuilder {
 					String[] split = string.split(",");
 					if (split.length == rank) {
 						ad = DatasetFactory.createFromObject(split);
+					}else {
+						continue;
 					}
-					
-					else continue;
 				}
 				
 			}
