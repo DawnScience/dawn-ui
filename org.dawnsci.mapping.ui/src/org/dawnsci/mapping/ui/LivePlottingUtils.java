@@ -81,7 +81,7 @@ public class LivePlottingUtils {
 			axm = MetadataFactory.createMetadata(AxesMetadata.class, 2);
 			axm.addAxis(0, y);
 			axm.addAxis(1, x);
-		} catch (MetadataException e) {
+		} catch (MetadataException | IllegalArgumentException e) {
 			logger.error("Could not create axes metdata", e);
 		}
 
