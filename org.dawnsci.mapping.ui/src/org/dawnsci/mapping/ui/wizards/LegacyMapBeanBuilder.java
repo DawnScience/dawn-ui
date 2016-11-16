@@ -15,6 +15,8 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.Stats;
 
+import uk.ac.diamond.scisoft.analysis.io.NexusTreeUtils;
+
 public class LegacyMapBeanBuilder {
 
 	public static final String I18CHECK = "/entry1/xspress3/AllElementSum";
@@ -133,6 +135,7 @@ public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
 		
 		NodeLink nl = tree.findNodeLink(XPRESS);
 		Node n = nl.getDestination();
+		if (n.containsAttribute(NexusTreeUtils.NX_AXES)) return null;
 		if (n instanceof GroupNode) {
 			GroupNode gn = (GroupNode)n;
 			if (!gn.containsDataNode(ALLELEMENT)) return null;
@@ -176,6 +179,7 @@ public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
 		
 		NodeLink nl = tree.findNodeLink(I05ANALYSER);
 		Node n = nl.getDestination();
+		if (n.containsAttribute(NexusTreeUtils.NX_AXES)) return null;
 		if (n instanceof GroupNode) {
 			GroupNode gn = (GroupNode)n;
 			if (!gn.containsDataNode(I05DATA)) return null;
@@ -322,6 +326,7 @@ public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
 	private static MappedBlockBean buildI22Block(String name, NodeLink link) {
 		if (link == null) return null;
 		Node n = link.getDestination();
+		if (n.containsAttribute(NexusTreeUtils.NX_AXES)) return null;
 		if (n instanceof GroupNode) {
 			GroupNode gn = (GroupNode)n;
 			DataNode dataNode = gn.getDataNode(I22data);
