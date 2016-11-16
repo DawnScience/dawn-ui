@@ -137,10 +137,10 @@
    </introLink>
    <introCategory
          category_id="science_ncd"
-         description="(Non-Crystalline Diffraction)"
+         description="(Small-Angle X-ray Scattering)"
          icon="content/icons/ncd_intro.png"
          id="org.dawnsci.webintro.category.NCD"
-         name="NCD"
+         name="SAXS"
          ordering="3"
          parent_id="science">
    </introCategory>
