@@ -792,11 +792,11 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 		} else if (plottingMode.isScatter3D()) {
 			traceMap.clear();
 			IScatter3DTrace trace = (IScatter3DTrace)viewer.createTrace(title, IScatter3DTrace.class);
-			final IDataset x = xIn;
+			final IDataset x = DatasetUtils.convertToDataset(ysIn.get(0));
 			final Dataset y = DatasetUtils.convertToDataset(ysIn.get(1));
 			final Dataset z = DatasetUtils.convertToDataset(ysIn.get(2));
 			if (dataNames!=null) trace.setDataName(dataNames.get(0));
-			trace.setData(x, Arrays.asList(x,y,z));
+			trace.setData(xIn, Arrays.asList(x,y,z));
 			viewer.addTrace(trace);
 			traceMap.put(trace.getName(), trace);
 			traces = Arrays.asList((ITrace)trace);
