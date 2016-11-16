@@ -924,6 +924,10 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	}
 
 	protected void switchPlottingType(PlotType type) {
+		if (plottingMode != null && plottingMode.equals(type)) {
+			return;
+		}
+
 		PlotType previous = plottingMode;
 		plottingMode = type;
 		actionBarManager.switchActions(plottingMode);
