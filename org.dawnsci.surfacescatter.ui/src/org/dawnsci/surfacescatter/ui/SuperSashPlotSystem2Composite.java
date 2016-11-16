@@ -141,9 +141,6 @@ public class SuperSashPlotSystem2Composite extends Composite{
 			
 			int[] ad = image2.getShape();
 			
-			
-	 
-			
 			horizontalSlice = plotSystem2.createRegion("Horizontal Slice", RegionType.YAXIS);
 			
 			RectangularROI horizROI = new RectangularROI(0,(int) Math.round(ad[1]/2),ad[0],(int) Math.round(ad[1]*0.1),0);

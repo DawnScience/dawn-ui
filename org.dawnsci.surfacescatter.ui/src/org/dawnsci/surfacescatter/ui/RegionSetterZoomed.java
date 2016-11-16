@@ -530,6 +530,9 @@ public class RegionSetterZoomed extends Dialog {
 			customComposite2.getRegions()[0].getROI().getBounds(),
 			customComposite2.getPlotSystem1(),
 			customComposite2.getImage());
+			
+			
+			
 			ILineTrace lt2 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
 					customComposite2.getRegions()[0].getROI().getBounds(),
 					customComposite2.getPlotSystem1()

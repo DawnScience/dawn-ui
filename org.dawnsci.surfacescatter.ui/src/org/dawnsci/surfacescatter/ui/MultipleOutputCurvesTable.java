@@ -15,6 +15,7 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -41,6 +42,7 @@ public class MultipleOutputCurvesTable extends Composite {
 	private Group overlapSelection;
 	private Table datTable;
 	private Button errors;
+	private Button overlapZoom;
 	
 	public MultipleOutputCurvesTable (Composite parent, int style, ArrayList<ExampleModel> models, ArrayList<DataModel> dms,
 			SuperModel sm) {
@@ -65,7 +67,11 @@ public class MultipleOutputCurvesTable extends Composite {
 
 	public void createContents(ExampleModel model, SuperModel sm, DataModel dm) {
 		
-		datTable = new Table(this, SWT.MULTI | SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
+		
+		SashForm sashForm= new SashForm(this, SWT.VERTICAL);
+		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		datTable = new Table(sashForm, SWT.MULTI | SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
 		GridData datTableData = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
 		datTableData.heightHint = 5;
 		datTable.setLayoutData(datTableData);
@@ -78,7 +84,7 @@ public class MultipleOutputCurvesTable extends Composite {
 			datSelector.add(it);
 		}
 		
-		overlapSelection = new Group(this, SWT.NULL);
+		overlapSelection = new Group(sashForm, SWT.NULL);
 		GridLayout overlapSelectionLayout = new GridLayout(4, true);
 		GridData overlapSelectionData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		overlapSelectionData.minimumWidth = 50;
@@ -102,14 +108,14 @@ public class MultipleOutputCurvesTable extends Composite {
 		gridLayout.numColumns = 1;
 		setLayout(gridLayout);
 		
-		ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(this, null);
+		ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(sashForm, null);
 		
 		final GridData gd_secondField = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd_secondField.grabExcessVerticalSpace = true;
 		gd_secondField.grabExcessVerticalSpace = true;
 		gd_secondField.heightHint = 100;
 
-		plotSystem4.createPlotPart(this, "ExamplePlot", actionBarComposite, PlotType.IMAGE, null);
+		plotSystem4.createPlotPart(sashForm, "ExamplePlot", actionBarComposite, PlotType.IMAGE, null);
 		
 		String[] t = CurveStateIdentifier.CurveStateIdentifier1(plotSystem4);
 		
@@ -139,6 +145,12 @@ public class MultipleOutputCurvesTable extends Composite {
 		}
 
 		plotSystem4.getPlotComposite().setLayoutData(gd_secondField);
+
+		overlapZoom = new Button(sashForm, SWT.PUSH);
+		overlapZoom.setText("Overlap Zoom");
+		
+		sashForm.setWeights(new int[]{15,12,5,60,5});
+		
 
 	}
 
@@ -226,6 +238,10 @@ public class MultipleOutputCurvesTable extends Composite {
 		return intensitySelect;
 	}
 	
+	public Button getOverlapZoom(){
+		return overlapZoom;
+	}
+	
 	public Button getSave(){
 		return save;
 	}
@@ -246,10 +262,8 @@ public class MultipleOutputCurvesTable extends Composite {
 	public ArrayList<TableItem> getDatSelector(){
 		return datSelector;
 	}
-	
-	
+		
 	public Button getErrors(){
 		return errors;
-	}
-	
+	}	
 }

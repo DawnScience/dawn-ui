@@ -47,8 +47,12 @@ public class OpenDialogHandler extends AbstractHandler {
 			
 			Shell s =PlatformUI.getWorkbench().getWorkbenchWindows()[0].getShell();
 			
-			ExampleDialog ed =new ExampleDialog(s, sf);
-			ed.open();
+//			ExampleDialog ed =new ExampleDialog(s, sf);
+//			ed.open();
+			
+			SurfaceScatterPresenter ssp = new SurfaceScatterPresenter(s, sf); 
+			
+			
 		}
 
 		return null;

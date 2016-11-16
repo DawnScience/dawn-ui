@@ -18,7 +18,7 @@ import org.dawnsci.surfacescatter.AnalaysisMethodologies.FitPower;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
 import org.dawnsci.surfacescatter.ClosestNoFinder;
 import org.dawnsci.surfacescatter.CurveStateIdentifier;
-import org.dawnsci.surfacescatter.DatDisplayer;
+import org.dawnsci.surfacescatter.ui.DatDisplayer;
 import org.dawnsci.surfacescatter.DataModel;
 import org.dawnsci.surfacescatter.DummyProcessingClass;
 import org.dawnsci.surfacescatter.ExampleModel;
@@ -78,6 +78,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.PlatformUI;
 
@@ -2060,6 +2061,9 @@ public class ExampleDialog extends Dialog {
 				customComposite1.setTrackerTypeDropDown(models.get(sm.getSelection()).getTrackerType());
 				customComposite1.setBoundaryBox(models.get(sm.getSelection()).getBoundaryBox());
 				
+				customComposite.setRegion(models.get(sm.getSelection()).getLenPt());
+				customComposite.redraw();
+				
 			}
 			
 			@Override
@@ -2072,6 +2076,87 @@ public class ExampleDialog extends Dialog {
 	    
 	    
 //////////////////////////////////////////////////////////////////////////////////////	    
+//////////////////////Overlap Zoom////////////////////////////////////////////////////
+///////////////////////keywords:   ///////////////////////////////////////////////////
+	    
+	    outputCurves.getOverlapZoom().addSelectionListener(new SelectionListener() {
+			
+//	    	getParentShell()
+//			, SWT.OPEN, sm, dms, filepaths, models, gms, paramField); 
+	    	
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				
+				String[] cs = CurveStateIdentifier.CurveStateIdentifier1(outputCurves.getPlotSystem());
+				
+				ArrayList<TableItem> items = new ArrayList<>();
+				
+				Table to = outputCurves.getDatTable();
+				
+				for (int ni = 0; ni<to.getItemCount(); ni++){
+					
+					TableItem no = to.getItem(ni);
+					
+					if (no.getChecked()){
+						items.add(no);
+					}
+				}
+				
+				ArrayList<IDataset> xArrayList = new ArrayList<>();
+				ArrayList<IDataset> yArrayList = new ArrayList<>();
+				ArrayList<IDataset> yArrayListFhkl = new ArrayList<>();
+				ArrayList<IDataset> yArrayListError = new ArrayList<>();
+				ArrayList<IDataset> yArrayListFhklError = new ArrayList<>();
+				
+				String[] files = new String[items.size()];
+				int f =0;
+				
+				for(int b = 0;b<items.size();b++){
+					
+					int p = (Arrays.asList(datDisplayer.getList().getItems())).indexOf(items.get(b).getText());
+					files[b] = items.get(b).getText();
+					
+					
+					
+					
+					if (dms.get(p).getyList() == null || dms.get(p).getxList() == null) {
+						
+					} else {
+							xArrayList.add(dms.get(p).xIDataset());
+							yArrayList.add(dms.get(p).yIDataset());
+							yArrayListFhkl.add(dms.get(p).yIDatasetFhkl());
+							yArrayListError.add(dms.get(p).yIDatasetError());
+							yArrayListFhklError.add(dms.get(p).yIDatasetFhklError());
+						}
+						
+			}
+				
+				GeneralOverlapHandler goh = new GeneralOverlapHandler(
+						getParentShell(), SWT.OPEN, sm,
+						xArrayList,
+						yArrayList,
+						yArrayListError,
+						yArrayListFhkl,
+						yArrayListFhklError,
+						datDisplayer, 
+						dms,
+						files);
+				goh.open();
+				
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+	    
+	    
+	   
+//////////////////////////////////////////////////////////////////////////////////////
 
 	    return container;
 //////////////////END OF DIALOG COMPOSITE.///////////////////////////////////////////
