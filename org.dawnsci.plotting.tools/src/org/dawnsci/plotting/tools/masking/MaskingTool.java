@@ -824,9 +824,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 			public void run() {
 				int pensize = Activator.getPlottingPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
 				ShapeType penShape = ShapeType.CIRCLE;
-				if (viewer != null) {
-					viewer.setSelectedCursor(CursorUtils.getPenCursor(pensize, penShape));
-				}
+				viewer.setSelectedCursor(CursorUtils.getPenCursor(pensize, penShape));
 				Activator.getPlottingPreferenceStore().setValue(PlottingConstants.MASK_PEN_SHAPE, penShape.name());
 			}
 		};
@@ -838,9 +836,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 			public void run() {
 				ShapeType penShape = ShapeType.NONE;
 				Activator.getPlottingPreferenceStore().setValue(PlottingConstants.MASK_PEN_SHAPE, penShape.name());
-				if (viewer != null) {
-					viewer.setSelectedCursor(null);
-				}
+				viewer.setSelectedCursor(null);
 			}
 		};
 		action.setId(ShapeType.NONE.getId());
