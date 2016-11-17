@@ -87,9 +87,14 @@ public class MappedData extends AbstractMapData{
 			}
 		}
 
+		//gets a slice
 		IDataset ma = LivePlottingUtils.getUpdatedMap(baseMap, oParent, this.toString());
 		if (ma == null) return;
-		setRange(calculateRange(ma));
+		
+		IDataset[] ax = MetadataPlotUtils.getAxesAsIDatasetArray(ma);
+		
+		
+		setRange(MappingUtils.calculateRangeFromAxes(new IDataset[]{ax[0],ax[1]}));
 
 		map  = ma;
 	}

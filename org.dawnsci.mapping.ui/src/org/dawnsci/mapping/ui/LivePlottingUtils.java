@@ -34,8 +34,6 @@ public class LivePlottingUtils {
 		
 		ma.setName(name);
 		
-		if (parent.isTransposed()) ma = DatasetUtils.convertToDataset(ma).transpose();
-		
 		// TODO This check is probably not required
 		if ( baseMap instanceof ILazyDataset && ((ILazyDataset)baseMap).getSize() == 1) return null;
 		
