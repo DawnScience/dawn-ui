@@ -91,6 +91,7 @@ public class MaskObject {
 	private DefaultOperationHistory operationManager;
 	private ForkJoinPool pool;
 	private PrecisionPoint brushThreshold;
+	private int[] imageShape;
     
 	MaskObject() {
 		this.operationManager = new DefaultOperationHistory();
@@ -184,12 +185,12 @@ public class MaskObject {
 	        		span.add(new int[]{(int)xAxis.getPositionValue(loc.x),      (int)yAxis.getPositionValue(loc.y)});
 	        	}
 	        });
+	        int[]  cen   = span.get(2);
+	        int radius   = span.get(1)[1]-cen[1]; // do not clip radius
 	        int[]  start = clip(span.get(0));
 	        int[]  end   = clip(span.get(1));
-	        int[]  cen   = span.get(2);
 	        int[]  b     = new int[]{cen[0], start[1]};
-	        int radius   = end[1]-cen[1];
-	
+
 	        boolean mv = maskOut ? Boolean.FALSE : Boolean.TRUE;
 	        
 	        for (int y = start[1]; y<=end[1]; ++y) {
@@ -320,14 +321,14 @@ public class MaskObject {
 	/**
 	 * Clip to span of image dataset (not 1)
 	 * @param is
-	 * @return
+	 * @return in-place clipped
 	 */
 	private int[] clip(int[] is) {
-		int maxX = imageDataset.getShape()[1]-1;
+		int maxX = imageShape[1]-1;
 		if (is[0]>maxX) is[0] = maxX;
 		if (is[0]<0)    is[0] = 0;
 		
-		int maxY = imageDataset.getShape()[0]-1;
+		int maxY = imageShape[0]-1;
 		if (is[1]>maxY) is[1] = maxY;
 		if (is[1]<0)    is[1] = 0;
         return is;
@@ -391,11 +392,10 @@ public class MaskObject {
 			if (validRegions.isEmpty()) return true;
 
 			final MaskOperation op  = new MaskOperation(maskDataset, getMaskDataset().getSize()/16);
-			final int[]      shape  = imageDataset.getShape();
 			
 			if (Boolean.getBoolean("org.dawnsci.plotting.tools.masking.no.thread.pool")) {
-				MAIN_LOOP: for (int y = 0; y<shape[0]; ++y) {
-					for (int x = 0; x<shape[1]; ++x) {
+				MAIN_LOOP: for (int y = 0; y<imageShape[0]; ++y) {
+					for (int x = 0; x<imageShape[1]; ++x) {
 						for (IRegion region : validRegions) {
 							monitor.worked(1);
 							try {
@@ -412,7 +412,7 @@ public class MaskObject {
 				}
 			} else {
 				// NORMALLY
-				pool.invoke(new MaskRegionsAction(op, shape, validRegions, monitor));
+				pool.invoke(new MaskRegionsAction(op, imageShape, validRegions, monitor));
 			}
 
 			try {
@@ -662,7 +662,7 @@ public class MaskObject {
 
 	private void createMaskIfNeeded() {
 		if (maskDataset == null || !maskDataset.isCompatibleWith(imageDataset)) {
-			maskDataset = DatasetFactory.ones(BooleanDataset.class, imageDataset.getShape());
+			maskDataset = DatasetFactory.ones(BooleanDataset.class, imageShape);
 			maskDataset.setName("mask");
 		}	
 		if (operationManager ==null)  {
@@ -725,6 +725,7 @@ public class MaskObject {
 
 	public void setImageDataset(Dataset imageDataset) {
 		this.imageDataset = imageDataset;
+		imageShape = imageDataset.getShapeRef();
 	}
 
 	public void reset() {
