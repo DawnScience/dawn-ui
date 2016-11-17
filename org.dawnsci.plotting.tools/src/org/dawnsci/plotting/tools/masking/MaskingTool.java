@@ -703,12 +703,6 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
         	if ("direct".equals(drawType)) {
         		directDraw.setSelection(true);
 				layout.topControl = directComp;
-				ShapeType penShape = ShapeType.NONE;
-				if (Activator.getPlottingPreferenceStore().contains(PlottingConstants.MASK_PEN_SHAPE)) {
-					penShape = ShapeType.valueOf(Activator.getPlottingPreferenceStore().getString(PlottingConstants.MASK_PEN_SHAPE));
-				}
-				ActionContributionItem item= ((ActionContributionItem)directToolbar.find(penShape.getId()));
-				if (item!=null) item.getAction().run();
      		
         	} else if ("region".equals(drawType)) {
         		regionDraw.setSelection(true);
@@ -830,7 +824,9 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 			public void run() {
 				int pensize = Activator.getPlottingPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
 				ShapeType penShape = ShapeType.CIRCLE;
-				viewer.setSelectedCursor(CursorUtils.getPenCursor(pensize, penShape));
+				if (viewer != null) {
+					viewer.setSelectedCursor(CursorUtils.getPenCursor(pensize, penShape));
+				}
 				Activator.getPlottingPreferenceStore().setValue(PlottingConstants.MASK_PEN_SHAPE, penShape.name());
 			}
 		};
@@ -842,8 +838,9 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 			public void run() {
 				ShapeType penShape = ShapeType.NONE;
 				Activator.getPlottingPreferenceStore().setValue(PlottingConstants.MASK_PEN_SHAPE, penShape.name());
-				if (viewer != null)
+				if (viewer != null) {
 					viewer.setSelectedCursor(null);
+				}
 			}
 		};
 		action.setId(ShapeType.NONE.getId());
@@ -1431,8 +1428,16 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		if (autoApplyMask!=null) {
 			autoApplyMask.setEnabled(!(getPlottingSystem().getPart() instanceof IViewPart));
 		}
+
+		// setup brush
+		ShapeType penShape = ShapeType.NONE;
+		if (Activator.getPlottingPreferenceStore().contains(PlottingConstants.MASK_PEN_SHAPE)) {
+			penShape = ShapeType.valueOf(Activator.getPlottingPreferenceStore().getString(PlottingConstants.MASK_PEN_SHAPE));
+		}
+		ActionContributionItem item= ((ActionContributionItem)directToolbar.find(penShape.getId()));
+		if (item!=null) item.getAction().run();
 	}
-	
+
 	@Override
 	public void deactivate() {
 		super.deactivate();
