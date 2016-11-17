@@ -13,10 +13,19 @@ RELEASE NOTES FOR DAWN 2.3.0
 
 New features:
 ---------------
+- DAWNSCI-6002: DAWN welcome page redesign
+- DAWNSCI-6012: Java FX web browser within DAWN available
+- New processing operations:
+--- Herman orientation factor calculation
+--- Export to TIFF & PNG
 -
 
 Bug fixes:
 ---------------
--
+- SCI-5729: 3D scatter plot supports different sizes again
+- SCI-5716: X and Y Axis profile tool fix
+- SCI-5712: Y-axis in plotting takes in correctly dataset name
+- DDPR-98: NCD Invariance plug-in now displays its model & subsequently functions properly
+- 
 
 
