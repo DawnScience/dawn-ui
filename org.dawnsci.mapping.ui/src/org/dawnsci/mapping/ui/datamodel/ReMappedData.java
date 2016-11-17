@@ -135,10 +135,17 @@ public class ReMappedData extends AbstractMapData {
 
 			}
 		}
-
+		//always returns sliced nd map
 		IDataset ma = LivePlottingUtils.getUpdatedLinearMap(baseMap, this.getParent(), this.toString());
 		
-		setRange(calculateRange(ma));
+		IDataset[] ax = MetadataPlotUtils.getAxesForDimension(ma,0);
+		double[] r = new double[4];
+		r[0] = ax[1].min().doubleValue();
+		r[1] = ax[1].max().doubleValue();
+		r[2] = ax[0].min().doubleValue();
+		r[3] = ax[0].max().doubleValue();
+		
+		setRange(r);
 		flatMap = ma;
 		updateRemappedData(null);
 		

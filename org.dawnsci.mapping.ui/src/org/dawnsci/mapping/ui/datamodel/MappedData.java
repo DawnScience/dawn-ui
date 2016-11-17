@@ -40,9 +40,16 @@ public class MappedData extends AbstractMapData{
 		
 		if (map instanceof IDatasetConnector) return null;
 		
-		double[] range = MappingUtils.getGlobalRange(map);
 		
-		return range;
+		IDataset[] ax = MetadataPlotUtils.getAxesAsIDatasetArray(map);
+		
+		MapScanDimensions mapDims = parent.getMapDims();
+		
+		int yDim = mapDims.getyDim();
+		int xDim = mapDims.getxDim();
+		
+		return MappingUtils.calculateRangeFromAxes(new IDataset[]{ax[yDim],ax[xDim]});
+
 	}
 	
 
