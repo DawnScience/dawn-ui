@@ -71,17 +71,23 @@ public class MapPlotManager {
 			
 			@Override
 			public void run(){
-				if (layers.isEmpty()) rJob.stop();
-				boolean noneLive = true;
-				for (MapTrace t : layers) {
-					if (t.getMap().isLive()) {
-						noneLive = false;
-						t.getMap().update();
-						t.switchMap(t.getMap());
+				try {
+					if (layers.isEmpty()) rJob.stop();
+					boolean noneLive = true;
+					for (MapTrace t : layers) {
+						if (t.getMap().isLive()) {
+							noneLive = false;
+							t.getMap().update();
+							t.switchMap(t.getMap());
+						}
 					}
+					if (noneLive) rJob.stop();
+					plotLayers();
+					
+				} catch (RuntimeException ne) { 
+					// Unchecked exceptions here show a dialog to the user
+					logger.error("Cannot update map!", ne);
 				}
-				if (noneLive) rJob.stop();
-				plotLayers();
 			}
 		});
 		
