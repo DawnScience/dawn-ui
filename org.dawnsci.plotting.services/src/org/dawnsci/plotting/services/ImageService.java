@@ -99,13 +99,13 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 	 * This method should be thread safe.
 	 */
 	public ImageData getImageData(ImageServiceBean bean) {
-		Dataset oImage    = DatasetUtils.convertToDataset(bean.getImage());
-		Dataset image    = oImage;
 		ImageOrigin     origin   = bean.getOrigin();
 		if (origin==null) origin = ImageOrigin.TOP_LEFT;
 
 		// orientate the image
-		image = DatasetUtils.rotate90(image, origin.ordinal());
+		Dataset oImage = DatasetUtils.rotate90(DatasetUtils.convertToDataset(bean.getImage()), origin.ordinal());
+		Dataset image  = oImage;
+
 		if (image instanceof RGBDataset) {
 			return SWTImageUtils.createImageData((RGBDataset) image, 0, 255, null, null, null, false, false, false);
 		}
@@ -120,7 +120,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 
 		// now deal with the log if needed
 		if (bean.isLogColorScale()) {
-			image = getImageLoggedData(bean);
+			image = DatasetUtils.rotate90(getImageLoggedData(bean), origin.ordinal());
 			max = Math.log10(max);
 			// note createMaxMin() -> getFastStatistics() -> getImageLogged() which ensures min >= 0 
 			min = Math.log10(min);
@@ -131,7 +131,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 
 		if (oImage.isComplex()) { // handle complex datasets by creating RGB dataset
 			Dataset hue = Maths.angle(oImage, true);
-			Dataset value = getImageLoggedData(bean);
+			Dataset value = DatasetUtils.rotate90(getImageLoggedData(bean), origin.ordinal());
 			double maxmax = Math.max(Math.abs(max), Math.abs(min));
 			if (max - min > Math.ulp(maxmax)) {
 				value.isubtract(min);

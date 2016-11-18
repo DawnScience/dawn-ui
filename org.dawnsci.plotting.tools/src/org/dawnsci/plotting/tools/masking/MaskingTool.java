@@ -167,8 +167,23 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 			public void nanBoundsChanged(PaletteEvent evt) {
 				updateIcons(evt.getTrace().getNanBound().getColor());
 			}
+
+			@Override
+			public void imageOriginChanged(PaletteEvent evt) {
+				if (maskObject != null) {
+					final IImageTrace trace = evt.getImageTrace();
+					maskObject.setImageOrigin(trace.getImageOrigin());
+					Display.getDefault().syncExec(new Runnable() {
+						public void run() {
+							// NOTE the mask will have a reference kept and
+							// will downsample with the data.
+							trace.setMask(maskObject.getMaskDataset()); 
+						}
+					});
+				}
+			}
 		};
-		
+
 		this.clickListener = new MaskMouseListener();
 		
 		this.regionListener = new IRegionListener.Stub() {
@@ -1390,7 +1405,8 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 	@Override
 	public void activate() {
 		super.activate();
-		setEnabled(getImageTrace()!=null);
+		IImageTrace trace = getImageTrace();
+		setEnabled(trace != null);
 		
 		currentMaskingTool = this;
 		if (getPlottingSystem()!=null) {
@@ -1405,8 +1421,11 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 				region.addROIListener(this.regionBoundsListener);
 			}
 			
-			if (getImageTrace()!=null) {
-				getImageTrace().addPaletteListener(paletteListener);
+			if (trace!=null) {
+				trace.addPaletteListener(paletteListener);
+				if (maskObject != null) {
+					maskObject.setImageOrigin(trace.getImageOrigin());
+				}
 			}
 			
 			this.viewer = (AbstractPlottingViewer)getPlottingSystem().getAdapter(AbstractPlottingViewer.class);
@@ -1523,7 +1542,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 				
 				if (region!=null && !isRegionsEnabled) return Status.CANCEL_STATUS;
-				
+
 				if (resetMask && !maskObject.isIgnoreAlreadyMasked())  {
 					maskObject.setMaskDataset(null, false);
 				}
@@ -1548,7 +1567,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 				
 				// Just process a changing region
 				if (location!=null) {
-					maskObject.process(location, getPlottingSystem(), monitor);
+					maskObject.process(location, image, getPlottingSystem(), monitor);
 					
 				} else if (region!=null) {
 					if (!maskObject.isSupportedRegion(region)) return Status.CANCEL_STATUS;
