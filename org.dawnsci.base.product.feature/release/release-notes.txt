@@ -1,4 +1,4 @@
-RELEASE NOTES FOR DAWN 2.3.0
+RELEASE NOTES FOR DAWN 2.4.0
 
 1. Use the '-data' switch to specify a different workspace if the disk access at your facility
    is slow or restricted in the default location. 
@@ -13,40 +13,9 @@ RELEASE NOTES FOR DAWN 2.3.0
 
 New features:
 ---------------
-- DAWNSCI-6002, DAWNSCI-5865: DAWN welcome page redesign
-- DAWNSCI-6012, SCI-5510: Java FX web browser available within DAWN
-- SCI-953: New Windows installer
-- SCI-5694: Transparent pixels for NaNs supported
-- Processing:
---- New operations:
------ SCI-1917: Herman orientation factor calculation
------ Export to TIFF & PNG
------ SCI-5434: RXESTransformation
------ XRFElementalMappingROI (with dedicated live setup wizardpage)
------ XRFGenerateEnergyAxis
---- New features:
------ Custom live setup pages
------ Support operations with rank ANY -> 1D
-- XasSampleCalculationComposite: 
---- add energy column
---- line markers via checkboxes
---- add support for arbitrary source-sample and sample-detector angles (within horizontal plane)
---- GUI rewritten for improved clarity
---- full control over detector description
-- Live setup is now implemented as a WizardDialog instead of a Dialog, in order to support multi-page operation configurations
-- FileDatasetDialog: shows file system browser tree and lists datasets available in selected file (custom filtering available)
+-
 
 Bug fixes:
 ---------------
-- SCI-5729: 3D scatter plot supports different point sizes again
-- SCI-5716: X and Y Axis profile tool fix
-- SCI-5712: Y-axis in plotting takes in correctly dataset name
-- DDPR-98: NCD Invariance plug-in now displays its model & subsequently functions properly
-- SCI-5598: Circle brush unusual behaviour in free-draw mode fixed for Masking tool 
-- Unstable signal button in Data Browsing perspective removed
-- OperationModelField: visible() option is now recognised and used
-- XMSOLoader: energy axis added to XRF spectra
-- XrfAnalysisComposite: refactored out of XrfAnalysisTool, add more L-lines for improved finger-printing and fix pile-up calculation for non-keV energy units
-- Fixes in operations: ConcatenatingTwoDatasetsOperation, XAFSShiftEnergyAxisOperation, XAFSRebinningOperation, AttenuationCorrection1DOperation
-
+-
 
