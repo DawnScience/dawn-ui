@@ -23,10 +23,6 @@ public class EditorConstants {
 	public static final String DATA_FORMAT            = "data.format.editor.view";
 	public static final String PLAY_SPEED             = "data.format.slice.play.speed";
 	
-	
-	public static final String PLOTTING_SYSTEM_CHOICE = "org.dawb.plotting.system.choice";
-	
-	
 	/**
 	 * Used to record the preference as to wether a workflow should be used with
 	 * highlighting to the actors or not.

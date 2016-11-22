@@ -56,14 +56,6 @@ public class EditorPreferencePage extends FieldEditorPreferencePage implements I
 	
 	@Override
 	protected void createFieldEditors() {
-		
-  
-     	// Choice between diamond and light weight plotting
-		final String[][] namesAndValues = getPlottingPreferenceChoices();
-		ComboFieldEditor plotChoice = new ComboFieldEditor(EditorConstants.PLOTTING_SYSTEM_CHOICE, "Plotting Technology*", namesAndValues, getFieldEditorParent());
-		addField(plotChoice);
-	   	new LabelFieldEditor("(* Please close and reopen the part after changing plotting preference.)\n\n", getFieldEditorParent());
-		
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor("uk.ac.diamond.scisoft.analysis.data.set.filter");
 				
 		if (config!=null && config.length>0) {
