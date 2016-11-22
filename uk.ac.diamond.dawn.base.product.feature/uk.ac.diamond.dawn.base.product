@@ -17,7 +17,6 @@
 -Xmx1024m
 -Dosgi.requiredJavaVersion=1.8.0
 -Dcom.isencia.require.file.source=true
--Dorg.dawb.editor.h5.use.default=true
 -Dosgi.locking=none
 -Dpydev.funding.hide=true
       </vmArgs>
