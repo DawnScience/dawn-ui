@@ -9,7 +9,7 @@
          Data Analysis WorkbeNch 
 Copyright, 2010 - 2016, Diamond Light Source
 
-Version 2.1.0
+Version 2.4.0
       </text>
    </aboutInfo>
 
@@ -57,6 +57,7 @@ openFile
             winExtraLargeHigh="/org.dawnsci.product.plugin/icons/256x256_32.bmp"/>
       </win>
    </launcher>
+
 
    <vm>
    </vm>
