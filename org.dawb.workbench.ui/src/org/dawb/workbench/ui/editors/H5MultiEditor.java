@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.IFileLoader;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
-import org.eclipse.dawnsci.hdf5.editor.H5Editor;
 import org.eclipse.dawnsci.hdf5.editor.H5ValuePage;
 import org.eclipse.dawnsci.hdf5.editor.IH5Editor;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -51,10 +50,6 @@ import uk.ac.diamond.scisoft.analysis.utils.FileUtils;
 
 
 public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEditor, IPlottingSystemSelection, IH5Editor, ITitledEditor {
-
-	// The property org.dawb.editor.h5.use.default is set by default in dawb / dawn vanilla
-	// The property org.dawb.editor.h5.use.default is not set in SDA.
-	private static final String ORG_DAWB_EDITOR_H5_USE_DEFAULT = "org.dawb.editor.h5.use.default";
 
 	private static final Logger logger = LoggerFactory.getLogger(H5MultiEditor.class);
 	private PlotDataEditor dataSetEditor;
@@ -123,10 +118,8 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
 			}
 
 			int index = 0;
-			String defaultEditorSetting = System.getProperty(ORG_DAWB_EDITOR_H5_USE_DEFAULT);
-			boolean useH5Editor = defaultEditorSetting == null || defaultEditorSetting.equals("true");
 			if (treeOnTop) {
-				this.treePage = useH5Editor ? new H5Editor() : new HDF5TreeEditor();
+				this.treePage = new HDF5TreeEditor();
 				addPage(index, treePage, input);
 				setPageText(index, "Tree");
 				index++;
@@ -159,15 +152,14 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
 				setPageText(index, "Plot");
 				index++;
 
-				this.treePage = useH5Editor ? new H5Editor() : new HDF5TreeEditor();
+				this.treePage = new HDF5TreeEditor();
 				addPage(index, treePage, input);
 				setPageText(index, "Tree");
 				index++;
 			}
 
-			if (!useH5Editor) {
-				((HDF5TreeEditor) treePage).startUpdateThread(holder, loader);
-			}
+			((HDF5TreeEditor) treePage).startUpdateThread(holder, loader);
+			
 		} catch (Exception e) {
 			logger.error("Cannot initiate "+getClass().getName()+"!", e);
 		}

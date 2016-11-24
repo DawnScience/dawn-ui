@@ -5,6 +5,7 @@ import java.util.Collection;
 import org.dawnsci.mapping.ui.datamodel.MapBean;
 import org.dawnsci.mapping.ui.datamodel.MappedBlockBean;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
+import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
@@ -13,6 +14,8 @@ import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.Stats;
+
+import uk.ac.diamond.scisoft.analysis.io.NexusTreeUtils;
 
 public class LegacyMapBeanBuilder {
 
@@ -44,6 +47,87 @@ public class LegacyMapBeanBuilder {
 	public static final String I22ITPATH = "/entry1/It";
 	public static final String I22data = "data";
 	
+	private static final String I08COUNTER = "/entry1/Counter1";
+	private static final String I08Y = "sample_y";
+	private static final String I08X = "sample_x";
+	private static final String I08PHOTON_ENERGY = "photon_energy";
+	private static final String I08DATA = "data";
+	public static final String I08CHECK = "/entry1/Counter1/data";
+	
+	
+	
+	public static MappedDataFileBean tryLegacyLoaders(IDataHolder dh) {
+		MappedDataFileBean b = null;
+		
+		if (b == null && dh.getLazyDataset(LegacyMapBeanBuilder.I18CHECK) != null) {
+			try {
+			b = LegacyMapBeanBuilder.buildBeani18in2015(dh.getTree());
+			} catch (Exception e) {
+				//ignore
+			}
+		}
+		
+		if (b == null && dh.getLazyDataset(LegacyMapBeanBuilder.I05CHECK) != null) {
+			try {
+			b = LegacyMapBeanBuilder.buildBeani05in2015(dh.getTree());
+			} catch (Exception e) {
+				//ignore
+			}
+		}
+		
+		if (b == null && dh.getLazyDataset(LegacyMapBeanBuilder.I22SAXCHECK) != null) {
+			try {
+			b = LegacyMapBeanBuilder.buildBeani22in2016(dh.getTree());
+			} catch (Exception e) {
+				//ignore
+			}
+		}
+		
+		if (b == null && dh.getLazyDataset(LegacyMapBeanBuilder.I08CHECK) != null) {
+			try {
+			b = LegacyMapBeanBuilder.buildBeani08Energyin2016(dh.getTree());
+			} catch (Exception e) {
+				//ignore
+			}
+		}
+		
+		return b;
+	}
+	
+public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
+		
+		MappedDataFileBean fb = null;
+		
+		NodeLink nl = tree.findNodeLink(I08COUNTER);
+		Node n = nl.getDestination();
+		if (n instanceof GroupNode) {
+			GroupNode gn = (GroupNode)n;
+			if (!gn.containsDataNode(I08DATA)) return null;
+			if (!gn.containsDataNode(I08PHOTON_ENERGY)) return null;
+			if (!gn.containsDataNode(I08X)) return null;
+			if (!gn.containsDataNode(I08Y)) return null;
+			
+			fb = new MappedDataFileBean();
+			MappedBlockBean bb = new MappedBlockBean();
+			bb.setName(I08COUNTER + Node.SEPARATOR + I08DATA);
+			String[] ax = new String[3];
+			ax[0] = I08COUNTER + Node.SEPARATOR + I08PHOTON_ENERGY;
+			ax[1] = I08COUNTER + Node.SEPARATOR + I08Y;
+			ax[2] = I08COUNTER + Node.SEPARATOR + I08X;
+			
+			bb.setAxes(ax);
+			bb.setRank(3);
+			bb.setxDim(2);
+			bb.setyDim(1);
+			fb.addBlock(bb);
+			fb.setScanRank(3);
+		}
+		
+		if (fb!= null && !fb.checkValid()) fb = null;
+		return fb;
+	}
+	
+	
 	
 	public static MappedDataFileBean buildBeani18in2015(Tree tree) {
 		
@@ -51,6 +135,7 @@ public class LegacyMapBeanBuilder {
 		
 		NodeLink nl = tree.findNodeLink(XPRESS);
 		Node n = nl.getDestination();
+		if (n.containsAttribute(NexusTreeUtils.NX_AXES)) return null;
 		if (n instanceof GroupNode) {
 			GroupNode gn = (GroupNode)n;
 			if (!gn.containsDataNode(ALLELEMENT)) return null;
@@ -84,7 +169,7 @@ public class LegacyMapBeanBuilder {
 			}
 			
 		}
-		
+		fb.setScanRank(2);
 		if (fb!= null && !fb.checkValid()) fb = null;
 		return fb;
 	}
@@ -94,6 +179,7 @@ public class LegacyMapBeanBuilder {
 		
 		NodeLink nl = tree.findNodeLink(I05ANALYSER);
 		Node n = nl.getDestination();
+		if (n.containsAttribute(NexusTreeUtils.NX_AXES)) return null;
 		if (n instanceof GroupNode) {
 			GroupNode gn = (GroupNode)n;
 			if (!gn.containsDataNode(I05DATA)) return null;
@@ -125,6 +211,7 @@ public class LegacyMapBeanBuilder {
 			mb.setName(I05CHECK);
 			mb.setParent(I05ANALYSER + Node.SEPARATOR + I05DATA);
 			fb.addMap(mb);
+			fb.setScanRank(2);
 
 		}
 
@@ -232,13 +319,14 @@ public class LegacyMapBeanBuilder {
 				}
 			}
 		}	
-		
+		fb.setScanRank(2);
 		return fb.checkValid() ? fb : null;
 	}
 	
 	private static MappedBlockBean buildI22Block(String name, NodeLink link) {
 		if (link == null) return null;
 		Node n = link.getDestination();
+		if (n.containsAttribute(NexusTreeUtils.NX_AXES)) return null;
 		if (n instanceof GroupNode) {
 			GroupNode gn = (GroupNode)n;
 			DataNode dataNode = gn.getDataNode(I22data);

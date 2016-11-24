@@ -9,7 +9,16 @@ public class MappedDataFileBean {
 	private List<MapBean> maps = new ArrayList<MapBean>();
 	private List<AssociatedImageBean> images = new ArrayList<AssociatedImageBean>();
 	private LiveDataBean liveBean = null;
+	private int scanRank;
 	
+	public int getScanRank() {
+		return scanRank;
+	}
+
+	public void setScanRank(int scanRank) {
+		this.scanRank = scanRank;
+	}
+
 	public void addBlock(MappedBlockBean bean) {
 		blocks.add(bean);
 	}
@@ -37,7 +46,7 @@ public class MappedDataFileBean {
 	public boolean checkValid() {
 		
 		if (blocks.isEmpty()) return false;
-		if (maps.isEmpty()) return false;
+//		if (maps.isEmpty()) return false;
 		
 		for (MappedBlockBean b : blocks) {
 			if (!b.checkValid()) return false;

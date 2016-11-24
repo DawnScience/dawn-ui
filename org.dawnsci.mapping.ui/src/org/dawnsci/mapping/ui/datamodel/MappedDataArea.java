@@ -12,6 +12,14 @@ public class MappedDataArea implements MapObject {
 	private List<MappedDataFile> files = new ArrayList<MappedDataFile>();
 	private static final Logger logger = LoggerFactory.getLogger(MappedDataArea.class);
 	
+	private String xAxisName;
+	private String yAxisName;
+	
+	public void setXandYAxesName(String xAxisName, String yAxisName){
+		this.xAxisName = xAxisName;
+		this.yAxisName = yAxisName;
+	}
+	
 	public void addMappedDataFile(MappedDataFile file) {
 //		files.clear();
 		if (file.getLiveDataBean() != null) {
@@ -153,6 +161,10 @@ public class MappedDataArea implements MapObject {
 		for (int i = 1; i < files.size(); i++) {
 			double[] range = files.get(i).getRange();
 			if (range == null) continue;
+			if (r == null) {
+				r = range;
+				continue;
+			}
 			r[0]  = r[0] < range[0] ? r[0] : range[0];
 			r[1]  = r[1] > range[1] ? r[1] : range[1];
 			r[2]  = r[2] < range[2] ? r[2] : range[2];

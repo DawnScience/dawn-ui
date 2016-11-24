@@ -8,10 +8,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.dawnsci.mapping.ui.datamodel.MapObject;
-import org.dawnsci.mapping.ui.datamodel.MappedData;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
 import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -73,29 +71,35 @@ public class MapPlotManager {
 			
 			@Override
 			public void run(){
-				if (layers.isEmpty()) rJob.stop();
-				boolean noneLive = true;
-				for (MapTrace t : layers) {
-					if (t.getMap().isLive()) {
-						noneLive = false;
-						if (t.getMap() instanceof AbstractMapData) {
-							((AbstractMapData)t.getMap()).update();
+				try {
+					if (layers.isEmpty()) rJob.stop();
+					boolean noneLive = true;
+					for (MapTrace t : layers) {
+						if (t.getMap().isLive()) {
+							noneLive = false;
+							t.getMap().update();
+							t.switchMap(t.getMap());
 						}
-						t.switchMap(t.getMap());
 					}
+					if (noneLive) rJob.stop();
+					plotLayers();
+					
+				} catch (RuntimeException ne) { 
+					// Unchecked exceptions here show a dialog to the user
+					logger.error("Cannot update map!", ne);
 				}
-				if (noneLive) rJob.stop();
-				plotLayers();
 			}
 		});
 		
-		List<IAxis> axes = data.getAxes();
-		for (IAxis axis : axes) axis.setAxisAutoscaleTight(true);
+		if (data.getAxes() != null) {
+			List<IAxis> axes = data.getAxes();
+			for (IAxis axis : axes) axis.setAxisAutoscaleTight(true);
+		}
 		
 	}
 	
 	public void plotData(final double x, final double y) {
-		final AbstractMapData topMap = getTopMap(x,y);
+		final PlottableMapObject topMap = getTopMap(x,y);
 		if (topMap == null)  {
 			data.clear();
 			return;
@@ -114,6 +118,8 @@ public class MapPlotManager {
 				}
 				
 //				IDataset s = l.getSlice();
+				
+				if (s.getSize() == 1) return;
 				
 				if (s != null) MetadataPlotUtils.plotDataWithMetadata(s, data);
 				
@@ -149,7 +155,7 @@ public class MapPlotManager {
 	}
 	
 	public void plotDataWithHold(final double x, final double y) {
-		final AbstractMapData topMap = getTopMap(x,y);
+		final PlottableMapObject topMap = getTopMap(x,y);
 		if (topMap == null) return;
 		final ILazyDataset lz = topMap.getSpectrum(x,y);
 		
@@ -272,7 +278,7 @@ public class MapPlotManager {
 	}
 	
 	
-	public void updateLayers(AbstractMapData map) {
+	public void updateLayers(PlottableMapObject map) {
 		
 		Iterator<MapTrace> it = layers.iterator();
 		
@@ -310,7 +316,7 @@ public class MapPlotManager {
 		plotLayers();
 	}
 	
-	public void plotMap(AbstractMapData map) {
+	public void plotMap(PlottableMapObject map) {
 		addMap(map);
 		plotLayers();
 	}
@@ -335,25 +341,25 @@ public class MapPlotManager {
 		plotLayers();
 	}
 	
-	public AbstractMapData getTopMap(double x, double y){
+	public PlottableMapObject getTopMap(double x, double y){
 		
 		Iterator<MapTrace> iterator = layers.iterator();
 		
 		while (iterator.hasNext()) {
 			MapObject l = iterator.next().getMap();
-			if (l instanceof AbstractMapData && ((AbstractMapData)l).getSpectrum(x, y) != null) return (AbstractMapData)l;
+			if (l instanceof PlottableMapObject && ((PlottableMapObject)l).getSpectrum(x, y) != null) return (PlottableMapObject)l;
 		}
 		
 		return null;
 	}
 	
-	public AbstractMapData getTopMap(){
+	public PlottableMapObject getTopMap(){
 		
 		Iterator<MapTrace> iterator = layers.iterator();
 		
 		while (iterator.hasNext()) {
 			MapObject l = iterator.next().getMap();
-			if (l instanceof AbstractMapData) return (AbstractMapData)l;
+			if (l instanceof PlottableMapObject) return (PlottableMapObject)l;
 		}
 		
 		return null;
@@ -366,7 +372,7 @@ public class MapPlotManager {
 		layers.clear();
 	}
 	
-	private void addMap(AbstractMapData map) {
+	private void addMap(PlottableMapObject map) {
 
 		MapTrace sameMap = null;
 		
@@ -374,7 +380,7 @@ public class MapPlotManager {
 		
 		while (iterator.hasNext()) {
 			MapTrace l = iterator.next();
-			if (l.getMap() instanceof AbstractMapData && isTheSameMap((AbstractMapData)l.getMap(), map)) {
+			if (l.getMap() instanceof PlottableMapObject && isTheSameMap((PlottableMapObject)l.getMap(), map)) {
 				sameMap = l;
 				break;
 			}
@@ -421,7 +427,7 @@ public class MapPlotManager {
 		
 		if (ob instanceof PlottableMapObject) {
 			PlottableMapObject amd = (PlottableMapObject)ob;
-			map = amd.getData();
+			map = amd.getMap();
 		}
 		
 		if (map == null) return null;
@@ -430,7 +436,7 @@ public class MapPlotManager {
 			t = MetadataPlotUtils.buildTrace(longName, map, this.map);
 			//TODO something better here:
 			t.setGlobalRange(sanizeRange(area.getRange(), map.getShape()));
-			if (ob instanceof AbstractMapData)  t.setAlpha(((AbstractMapData)ob).getTransparency());
+			if (ob instanceof PlottableMapObject)  t.setAlpha(((PlottableMapObject)ob).getTransparency());
 		} catch (Exception e) {
 			logger.error("Error creating image trace", e);
 		}
@@ -475,7 +481,7 @@ public class MapPlotManager {
 			while (it.hasNext()) {
 				MapTrace m = it.next();
 				if (!traces.contains(m.getTrace())) {
-					map.addTrace(m.getTrace());
+					if (m.getTrace() != null) map.addTrace(m.getTrace());
 				}
 				
 			}
@@ -485,16 +491,16 @@ public class MapPlotManager {
 		}
 	}
 	
-	private boolean isTheSameMap(AbstractMapData omap, AbstractMapData map) {
+	private boolean isTheSameMap(PlottableMapObject omap, PlottableMapObject map) {
 		
 		if (omap.getLongName().equals(map.getLongName())) return true;
 		
-		if (omap.getData() == null ||  map.getData() == null) return false;
+		if (omap.getMap() == null ||  map.getMap() == null) return false;
 		
-		if (!Arrays.equals(omap.getData().getShape(), map.getData().getShape())) return false;
+		if (!Arrays.equals(omap.getMap().getShape(), map.getMap().getShape())) return false;
 		
-		AxesMetadata oax = omap.getData().getFirstMetadata(AxesMetadata.class);
-		AxesMetadata ax = map.getData().getFirstMetadata(AxesMetadata.class);
+		AxesMetadata oax = omap.getMap().getFirstMetadata(AxesMetadata.class);
+		AxesMetadata ax = map.getMap().getFirstMetadata(AxesMetadata.class);
 		
 		if (oax == null || ax == null) return false; // should never be the case
 		
@@ -574,7 +580,7 @@ public class MapPlotManager {
 	}
 	
 	
-	public void setTransparency(AbstractMapData m) {
+	public void setTransparency(PlottableMapObject m) {
 		
 		
 		Iterator<MapTrace> iterator = layers.iterator();
@@ -708,7 +714,7 @@ public class MapPlotManager {
 		
 		public void switchMap(final PlottableMapObject ob) {
 			try {
-				final IDataset d = ob.getData();
+				final IDataset d = ob.getMap();
 				switchMap(ob.getLongName(),d);
 				map = ob;
 			} catch (Exception e) {

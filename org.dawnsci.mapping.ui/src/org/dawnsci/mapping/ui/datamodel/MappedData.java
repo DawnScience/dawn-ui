@@ -1,5 +1,6 @@
 package org.dawnsci.mapping.ui.datamodel;
 
+import org.dawnsci.mapping.ui.LivePlottingUtils;
 import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
@@ -20,7 +21,7 @@ public class MappedData extends AbstractMapData{
 	private static final Logger logger = LoggerFactory.getLogger(MappedData.class);
 	
 	
-	public MappedData(String name, IDataset map, MappedDataBlock parent, String path) {
+	public MappedData(String name, ILazyDataset map, MappedDataBlock parent, String path) {
 		super(name, map, parent, path);
 	}
 	
@@ -28,7 +29,7 @@ public class MappedData extends AbstractMapData{
 		super(name, map, parent, path);
 	}
 	
-	public void replaceLiveDataset(IDataset dataset) {
+	public void replaceLiveDataset(ILazyDataset dataset) {
 		live = false;
 		disconnect();
 		this.map = dataset;
@@ -39,42 +40,21 @@ public class MappedData extends AbstractMapData{
 		
 		if (map instanceof IDatasetConnector) return null;
 		
-		double[] range = MappingUtils.getGlobalRange(map);
 		
-		return range;
+		IDataset[] ax = MetadataPlotUtils.getAxesAsIDatasetArray(map);
+		
+		MapScanDimensions mapDims = parent.getMapDims();
+		
+		int yDim = mapDims.getyDim();
+		int xDim = mapDims.getxDim();
+		
+		return MappingUtils.calculateRangeFromAxes(new IDataset[]{ax[yDim],ax[xDim]});
+
 	}
 	
-	private int[] getIndices(double x, double y) {
-		
-		IDataset[] ax = MetadataPlotUtils.getAxesFromMetadata(map, false);
-		
-		IDataset xx = ax[1];
-		IDataset yy = ax[0];
-		
-		double xMin = xx.min().doubleValue();
-		double xMax = xx.max().doubleValue();
-		
-		double yMin = yy.min().doubleValue();
-		double yMax = yy.max().doubleValue();
-		
-		double xd = ((xMax-xMin)/xx.getSize())/2;
-		double yd = ((yMax-yMin)/yy.getSize())/2;
-		
-		if (xd == 0 && yd == 0) return null;
-		
-		yd = yd == 0 ? xd : yd;
-		xd = xd == 0 ? yd : xd;
-		
-		if (x > xMax+xd || x < xMin-xd || y > yMax+yd || y < yMin-yd) return null;
-		
-		int xi = Maths.abs(Maths.subtract(xx, x)).argMin();
-		int yi = Maths.abs(Maths.subtract(yy, y)).argMin();
-		
-		return new int[]{xi,yi};
-	}
-	
+
 	public IDataset getSpectrum(double x, double y) {
-		int[] indices = getIndices(x, y);
+		int[] indices = MappingUtils.getIndicesFromCoOrds(map, x, y);
 		if (indices == null) return null;
 		ILazyDataset spectrum = parent.getSpectrum(indices[0], indices[1]);
 		if (spectrum == null) return null;
@@ -107,77 +87,20 @@ public class MappedData extends AbstractMapData{
 			}
 		}
 
-		IDataset ma = null;
-		
-		try{
-			baseMap.refreshShape();
-			ma = baseMap.getDataset().getSlice();
-		} catch (Exception e) {
-			//TODO log?
-		}
-		
+		//gets a slice
+		IDataset ma = LivePlottingUtils.getUpdatedMap(baseMap, oParent, this.toString());
 		if (ma == null) return;
 		
-		ma.setName(this.toString());
+		IDataset[] ax = MetadataPlotUtils.getAxesAsIDatasetArray(ma);
 		
-		if (parent.isTransposed()) ma = DatasetUtils.convertToDataset(ma).transpose();
 		
-		// TODO This check is probably not required
-		if ( baseMap instanceof ILazyDataset && ((ILazyDataset)baseMap).getSize() == 1) return;
-		
-		ILazyDataset ly = parent.getYAxis()[0];
-		ILazyDataset lx = parent.getXAxis()[0];
-		
-		IDataset x;
-		IDataset y;
-		try {
-			x = lx.getSlice();
-			y = ly.getSlice();
-		} catch (DatasetException e) {
-			logger.debug("Could not slice",e);
-			return;
-		}
-		
-		if (y.getRank() == 2) {
-			SliceND s = new SliceND(y.getShape());
-			s.setSlice(1, 0, 1, 1);
-			y = y.getSlice(s);
-			if (y.getSize() == 1) {
-				y.setShape(new int[]{1});
-			} else {
-				y.squeeze();
-			}
-			
-		}
-		
-		if (x.getRank() == 2) {
-			SliceND s = new SliceND(x.getShape());
-			s.setSlice(0, 0, 1, 1);
-			x = x.getSlice(s);
-			if (x.getSize() == 1) {
-				x.setShape(new int[]{1});
-			} else {
-				x.squeeze();
-			}
-			
-		}
-		
-		AxesMetadata axm = null;
-		try {
-			axm = MetadataFactory.createMetadata(AxesMetadata.class, 2);
-			axm.addAxis(0, y);
-			axm.addAxis(1, x);
-		} catch (MetadataException e) {
-			logger.error("Could not create axes metdata", e);
-		}
+		setRange(MappingUtils.calculateRangeFromAxes(new IDataset[]{ax[0],ax[1]}));
 
-		int[] mapShape = ma.getShape();
-		SliceND s = new SliceND(mapShape);
-		if (mapShape[0] > y.getShape()[0]) s.setSlice(0, 0, y.getShape()[0], 1);
-		if (mapShape[1] > x.getShape()[0]) s.setSlice(1, 0, x.getShape()[0], 1);
-		IDataset fm = ma.getSlice(s);
-		fm.setMetadata(axm);
-		setRange(calculateRange(fm));
-		map = fm;
+		map  = ma;
+	}
+
+	@Override
+	public ILazyDataset getData() {
+		return map;
 	}
 }

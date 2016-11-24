@@ -14,6 +14,8 @@ import java.util.List;
 
 import org.eclipse.dawnsci.plotting.api.jreality.core.AxisMode;
 import org.eclipse.dawnsci.plotting.api.jreality.data.ColourImageData;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 
 import de.jreality.geometry.PointSetFactory;
@@ -46,7 +48,9 @@ public class DataSetScatterPlot3D extends DataSet3DPlot3D {
 	
 	@Override
 	protected void buildDisplayDataSet() {
-		displayData = currentData;
+		Dataset data = DatasetUtils.convertToDataset(currentData);
+		uniformSize = data.getRank() == 0;
+		displayData = uniformSize ? data.getBroadcastView(xAxisValues.size()) : data;
 	}
 
 	@Override
