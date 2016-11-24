@@ -13,9 +13,11 @@ import org.dawnsci.surfacescatter.PlotSystem2DataSetter;
 import org.dawnsci.surfacescatter.PlotSystemCompositeDataSetter;
 import org.dawnsci.surfacescatter.SuperModel;
 import org.dawnsci.surfacescatter.VerticalHorizontalSlices;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.AggregateDataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
@@ -38,7 +40,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
-public class GeneralOverlapHandler extends Dialog {
+public class GeneralOverlapHandlerView extends Dialog {
 	
 //	private String[] filepaths;
 	private SuperModel sm;
@@ -53,19 +55,25 @@ public class GeneralOverlapHandler extends Dialog {
     private DatDisplayer datDisplayer;
     private ArrayList<DataModel> dms;
     private Button export;
+    private SurfaceScatterPresenter ssp;
+    private IPlottingSystem<Composite> parentPs;
+    private StitchedOverlapCurves stitchedCurves;
 	
-	public GeneralOverlapHandler(Shell parentShell, int style, 
+	public GeneralOverlapHandlerView(Shell parentShell, int style, 
 			SuperModel sm, ArrayList<IDataset> xArrayList,
 			ArrayList<IDataset> yArrayList,
 			ArrayList<IDataset> yArrayListError,
 			ArrayList<IDataset> yArrayListFhkl,
 			ArrayList<IDataset> yArrayListFhklError,
 			DatDisplayer datDisplayer, 
-			ArrayList<DataModel> dms){
+			ArrayList<DataModel> dms,
+			IPlottingSystem<Composite> parentPs,
+			SurfaceScatterPresenter ssp){
 //			String[] filepaths) {
 		
 		super(parentShell);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
+		
 		this.parentShell = parentShell;
 		this.sm = sm;
 		this.xArrayList = xArrayList;
@@ -76,6 +84,8 @@ public class GeneralOverlapHandler extends Dialog {
 	    this.sm =sm;
 	    this.dms = dms;
 	    this.datDisplayer =datDisplayer;
+	    this.parentPs = parentPs;
+	    this.ssp = ssp;
 //	    this.filepaths = filepaths;
 	}
 
@@ -121,30 +131,52 @@ public class GeneralOverlapHandler extends Dialog {
 		///////////////////////////////////////////////////////////////////////////////
 		/////////////////Right sashform////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
-	
 		
-		StitchedOverlapCurves stitchedCurves
-		= new StitchedOverlapCurves(right, 
-									SWT.NONE, 
-									xArrayList,
-							    	yArrayList,
-							    	yArrayListError,
-							   		yArrayListFhkl,
-						 			yArrayListFhklError,
-						 			datDisplayer, 
-							    	dms, 
-							    	sm,
-							    	"Overlap Test", 
-							    	model);
+		
+		stitchedCurves = new StitchedOverlapCurves(right, 
+												   SWT.NONE, 
+												   xArrayList,
+												   yArrayList,
+												   yArrayListError,
+												   yArrayListFhkl,
+												   yArrayListFhklError,
+												   datDisplayer, 
+												   dms, 
+												   sm,
+												   "Overlap Test", 
+												   model);
 		
 		stitchedCurves.setLayout(new GridLayout());
 		stitchedCurves.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		export = new Button(right, SWT.PUSH);
 		export.setLayoutData (new GridData(GridData.FILL_HORIZONTAL));
+		export.setText("Export Curve");
+		export.setSize(export.computeSize(100, 20, true));
+		
+		right.setWeights(new int[] {90,10});
 		
 		//////////////////////////////////////////////////////////////////////////////////
 		
+		
+		export.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				IDataset xData = stitchedCurves.getLineTrace1().getXData();
+				IDataset yData = stitchedCurves.getLineTrace1().getYData();
+				
+				ssp.export(parentPs, xData, yData);
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
     
 			    
 	    return container;
@@ -175,6 +207,7 @@ public class GeneralOverlapHandler extends Dialog {
 		return export;
 	}
 }
+
 
 
 

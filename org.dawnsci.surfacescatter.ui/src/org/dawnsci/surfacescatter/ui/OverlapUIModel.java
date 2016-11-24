@@ -19,7 +19,7 @@ public class OverlapUIModel {
 	private IROI ROI;
 	private int[][] lenpt;
 	private IDataset currentImage;
-	private ArrayList<IROI> ROIList = new ArrayList<IROI>();
+	private ArrayList<IRectangularROI> ROIList = new ArrayList<IRectangularROI>();
 	private IROI ROIListElement;
 	private int ROIevent=0;
 	private Dataset[] output;
@@ -46,11 +46,11 @@ public class OverlapUIModel {
 		firePropertyChange("lenpt", this.lenpt, this.lenpt= lenpt);
 	}
 	
-	public void setROIList(ArrayList<IROI> ROIList) {
+	public void setROIList(ArrayList<IRectangularROI> ROIList) {
 		firePropertyChange("ROIList", this.ROIList, this.ROIList= ROIList);	
 	}
 	
-	public void setROIListElement(IROI ROI, int k) {
+	public void setROIListElement(IRectangularROI ROI, int k) {
 		
 		
 //		if (ROIList.size() == 0){
@@ -80,7 +80,7 @@ public class OverlapUIModel {
 		firePropertyChange("ROIevent", this.ROIevent, this.ROIevent= (ROIevent+1));
 	}
 
-	public void setROIListElementEst(IROI ROI, int k) {
+	public void setROIListElementEst(IRectangularROI ROI, int k) {
 	
 		ROIList.set(k, ROI);
 	
@@ -113,6 +113,11 @@ public class OverlapUIModel {
 	public IROI getROIListElement(int k){
 		return ROIList.get(k);
 	}
+	
+	public ArrayList<IRectangularROI> getROIList(){
+		return ROIList;
+	}
+	
 	
 	
 	

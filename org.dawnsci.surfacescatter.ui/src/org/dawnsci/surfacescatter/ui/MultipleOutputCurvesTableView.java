@@ -27,7 +27,7 @@ import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
-public class MultipleOutputCurvesTable extends Composite {
+public class MultipleOutputCurvesTableView extends Composite {
 
 	private IPlottingSystem<Composite> plotSystem4;
 	private IRegion imageNo;
@@ -43,15 +43,22 @@ public class MultipleOutputCurvesTable extends Composite {
 	private Table datTable;
 	private Button errors;
 	private Button overlapZoom;
+	private int extra = 0;
 	
-	public MultipleOutputCurvesTable (Composite parent, int style, ArrayList<ExampleModel> models, ArrayList<DataModel> dms,
-			SuperModel sm) {
+	public MultipleOutputCurvesTableView (Composite parent, 
+										  int style, 
+										  ArrayList<ExampleModel> models, 
+										  ArrayList<DataModel> dms,
+										  SuperModel sm,
+										  int extra) {
+
 		super(parent, style);
 
 		new Label(this, SWT.NONE).setText("Output Curves");
 
 		this.model = models.get(sm.getSelection());
 		this.dm = dms.get(sm.getSelection());
+		this.extra = extra;
 	
 		
 		try {
@@ -70,17 +77,21 @@ public class MultipleOutputCurvesTable extends Composite {
 		SashForm sashForm= new SashForm(this, SWT.VERTICAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		datTable = new Table(sashForm, SWT.MULTI | SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
-		GridData datTableData = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
-		datTableData.heightHint = 5;
-		datTable.setLayoutData(datTableData);
 		
-		datSelector = new ArrayList<>();
+		if (extra == 1){
+			
+			datTable = new Table(sashForm, SWT.MULTI | SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
+			GridData datTableData = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
+			datTableData.heightHint = 5;
+			datTable.setLayoutData(datTableData);
 		
-		for (int i = 0; i < sm.getFilepaths().length; i++) {
-			TableItem it = new  TableItem(datTable, SWT.NONE);
-			it.setText(StringUtils.substringAfterLast(sm.getFilepaths()[i], "/"));
-			datSelector.add(it);
+			datSelector = new ArrayList<>();
+		
+			for (int i = 0; i < sm.getFilepaths().length; i++) {
+				TableItem it = new  TableItem(datTable, SWT.NONE);
+				it.setText(StringUtils.substringAfterLast(sm.getFilepaths()[i], "/"));
+				datSelector.add(it);
+			}
 		}
 		
 		overlapSelection = new Group(sashForm, SWT.NULL);
@@ -148,7 +159,7 @@ public class MultipleOutputCurvesTable extends Composite {
 		overlapZoom = new Button(sashForm, SWT.PUSH);
 		overlapZoom.setText("Overlap Zoom");
 		
-		sashForm.setWeights(new int[]{15,12,5,60,5});
+		sashForm.setWeights(new int[]{10,5,80,5});
 		
 
 	}

@@ -39,6 +39,7 @@ public class StitchedOverlapCurves extends Composite {
     private DatDisplayer datDisplayer;
     private ArrayList<DataModel> dms;
     private SuperModel sm;
+    private ILineTrace lt1;
     
     public StitchedOverlapCurves(Composite parent, 
     		int style,
@@ -73,24 +74,21 @@ public class StitchedOverlapCurves extends Composite {
         this.dms = dms;
         this.datDisplayer =datDisplayer;
         
-        
-        
         this.createContents(xArrayList,
     			yArrayList,
     			yArrayListError,
     			yArrayListFhkl,
     			yArrayListFhklError,
         		title, model); 
-
-        
     }
      
     public void createContents(ArrayList<IDataset> xArrayList,
 			ArrayList<IDataset> yArrayList,
 			ArrayList<IDataset> yArrayListError,
 			ArrayList<IDataset> yArrayListFhkl,
-			ArrayList<IDataset> yArrayListFhklError, String filepaths
-    		, OverlapUIModel model) {
+			ArrayList<IDataset> yArrayListFhklError, 
+			String filepaths, 
+			OverlapUIModel model) {
     	
     	final GridLayout gridLayout = new GridLayout();
         gridLayout.numColumns = 1;
@@ -103,54 +101,29 @@ public class StitchedOverlapCurves extends Composite {
         gd_secondField.grabExcessVerticalSpace = true;
         
         plotSystem.createPlotPart(this, "ExamplePlot", actionBarComposite, PlotType.IMAGE, null);
-        
-
-
-        
-        
-
-		ILineTrace lt1 = plotSystem.createLineTrace("Concatenated Curve Test");
+    
+		lt1 = plotSystem.createLineTrace("Concatenated Curve Test");
 		
-		
-//		IDataset[][] attenuatedDatasets = AttenuationCorrectedOutput.StitchingOverlapProcessMethod(arrayILDy, arrayILDx, model);
-		
-		IDataset[] attenuatedDatasets = StitchedOutputWithErrors.curveStitch(plotSystem, 
-				xArrayList,
-				yArrayList,
-				yArrayListError,
-				yArrayListFhkl,
-				yArrayListFhklError, 
-				dms,
-				sm,
-				datDisplayer,
-				model);
+		IDataset[] attenuatedDatasets 
+		= StitchedOutputWithErrors.curveStitch4(dms, 
+												sm);
 		
 		Dataset[] sortedAttenuatedDatasets = new Dataset[2];
-		
-//		sortedAttenuatedDatasets[0]=DatasetUtils.convertToDataset(DatasetUtils.concatenate(attenuatedDatasets[0], 0));
-//		sortedAttenuatedDatasets[1]=DatasetUtils.convertToDataset(DatasetUtils.concatenate(attenuatedDatasets[1], 0));
-//		
-//		DatasetUtils.sort(attenuatedDatasets[1],
-//				attenuatedDatasets[0]);
-		
-		
+	
 		lt1.setData(attenuatedDatasets[1], attenuatedDatasets[0]);
+		
 		output = sortedAttenuatedDatasets;
 
 		plotSystem.addTrace(lt1);
 		plotSystem.repaint();
         
 		title = "Overlap Window";
-		
-		
+
 		model.addPropertyChangeListener(new PropertyChangeListener() {
 			
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
-				
-
-//				IDataset[][] attenuatedDatasets = AttenuationCorrectedOutput.StitchingOverlapProcessMethod(arrayILDy, arrayILDx, model);
-				
+						
 				IDataset[] attenuatedDatasets = StitchedOutputWithErrors.curveStitch(plotSystem, 
 						xArrayList,
 						yArrayList,
@@ -163,13 +136,7 @@ public class StitchedOverlapCurves extends Composite {
 						model);
 				
 				Dataset[] sortedAttenuatedDatasets = new Dataset[2];
-				
-//				sortedAttenuatedDatasets[0]=DatasetUtils.convertToDataset(DatasetUtils.concatenate(attenuatedDatasets[0], 0));
-//				sortedAttenuatedDatasets[1]=DatasetUtils.convertToDataset(DatasetUtils.concatenate(attenuatedDatasets[1], 0));
-//				
-//				DatasetUtils.sort(sortedAttenuatedDatasets[1],
-//						sortedAttenuatedDatasets[0]);
-								
+										
 				lt1.setData(attenuatedDatasets[1], attenuatedDatasets[0]);
 				
 				output = sortedAttenuatedDatasets;
@@ -177,15 +144,12 @@ public class StitchedOverlapCurves extends Composite {
 				plotSystem.clearTraces();
 				plotSystem.addTrace(lt1);
 				plotSystem.repaint();
+				
 			}
 		});
 		
 
         plotSystem.getPlotComposite().setLayoutData(gd_secondField);
-
-        
-    
-    
     } 
 		
     public Composite getComposite(){
@@ -208,5 +172,8 @@ public class StitchedOverlapCurves extends Composite {
 	return output1;
    }
    
+   public ILineTrace getLineTrace1(){
+	   return lt1;
+   }
+   
 }
-

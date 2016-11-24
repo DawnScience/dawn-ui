@@ -56,9 +56,16 @@ public class OverlapFinder{
 					}
 				}
 			
-			overlap[k][1]=(double) xArray[k].getDouble(Collections.min(overlapLower));
-			overlap[k][0]=(double) maxMinArray[k][0];		
+				if (overlapLower.size() > 0){
+					overlap[k][1]=(double) xArray[k].getDouble(Collections.min(overlapLower));
+					overlap[k][0]=(double) maxMinArray[k][0];	
 				}
+				else{
+					overlap[k][1]=1000000;
+					overlap[k][0]=1000001;
+				}
+				
+			}
 		
 		
 		

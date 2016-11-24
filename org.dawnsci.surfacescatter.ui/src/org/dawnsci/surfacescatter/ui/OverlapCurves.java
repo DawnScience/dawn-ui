@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -27,11 +28,17 @@ public class OverlapCurves extends Composite {
 
     private IPlottingSystem<Composite> plotSystem;
     private IRegion[] regionArray;
+    private int DEBUG =1;
     
      
-    public OverlapCurves(Composite parent, int style
-    		, ArrayList<IDataset> arrayILDy, ArrayList<IDataset> arrayILDx, String[] filepaths,
-    		String title, OverlapUIModel model) {
+    public OverlapCurves(Composite parent, 
+    					int style, 
+    					ArrayList<IDataset> arrayILDy, 
+    					ArrayList<IDataset> arrayILDx, 
+//    					String[] filepaths,
+    					String title, 
+    					OverlapUIModel model) {
+    	
         super(parent, style);
         
         new Label(this, SWT.NONE).setText(title);
@@ -42,17 +49,20 @@ public class OverlapCurves extends Composite {
         try {
 			plotSystem = PlottingFactory.createPlottingSystem();
 		} catch (Exception e2) {
-			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
         
-        this.createContents(arrayILDy, arrayILDx, filepaths, model); 
-//        System.out.println("Test line");
-        
+        this.createContents(arrayILDy, arrayILDx,  model);       
     }
      
-    public void createContents(ArrayList<IDataset> arrayILDy, ArrayList<IDataset> arrayILDx, String[] filepaths
-    		, OverlapUIModel model) {
+//    filepaths,
+    
+    public void createContents(ArrayList<IDataset> arrayILDy, 
+    						   ArrayList<IDataset> arrayILDx, 
+//    						   String[] filepaths,
+    						   OverlapUIModel model) {
+    	
+    	model.getROIList().clear();
     	
     	final GridLayout gridLayout = new GridLayout();
         gridLayout.numColumns = 1;
@@ -70,13 +80,10 @@ public class OverlapCurves extends Composite {
         
 		IDataset i = null;
 		IDataset j = null;
-//		String Name = "name";
-		
-		
-//		Iterator<ILazyDataset> itr =arrayILDy.iterator();
+
 		int r=0;
 		
-		for (r =0; r < filepaths.length; r++){
+		for (r =0; r < arrayILDy.size(); r++){
 			
 			ArrayList<IDataset> arrayIDy =new ArrayList<>();
 			ArrayList<IDataset> arrayIDx =new ArrayList<>();
@@ -96,7 +103,7 @@ public class OverlapCurves extends Composite {
 				e1.printStackTrace();
 			}
 			
-			ILineTrace lt = plotSystem.createLineTrace(filepaths[r]);
+			ILineTrace lt = plotSystem.createLineTrace(Double.toString(arrayIDx.get(0).getDouble(0)) +"-" +Double.toString(arrayIDx.get(0).getDouble(arrayIDx.size()-1)));
 			lt.setData(j, i);
 			
 			plotSystem.addTrace(lt);
@@ -107,64 +114,70 @@ public class OverlapCurves extends Composite {
 
         plotSystem.getPlotComposite().setLayoutData(gd_secondField);
 
-        ArrayList<IROI> roiList = new ArrayList<IROI>();
-//        ArrayList<IRegion> regionList = new ArrayList<IRegion>();
+       ArrayList<IRectangularROI> roiList = new ArrayList<IRectangularROI>();
+       IRectangularROI nullROI = null;
+        
+        
+        for(int yr =0; yr<regionArray.length;yr++){
+        	roiList.add(nullROI);
+        }
+
+        model.setROIList(roiList);
         
         String root = "RegionNo:";
         int k=0;
         
         double[][] overlap = OverlapFinder.overlapFinderOperation(arrayILDx);
         
-        for (k=0;k<(filepaths.length-1);k++){
+        for (k=0;k<(model.getROIList().size());k++){
         	
-        	roiList.add(new RectangularROI(overlap[k][1],0.1,overlap[k][0]-overlap[k][1],0.1,0));
-        	
-        	String regionName = root +  Integer.toString(k);
-        	
-	        try {
-				regionArray[k] =plotSystem.createRegion(regionName, RegionType.XAXIS);
-			
+        	if(overlap[k][1]<999999){
+        		
+        		if(DEBUG ==1 ){
+        			System.out.println("k in overlapCurves: " + k);
+        			System.out.println("overlap[k][1]: " + overlap[k][1]);
+        			System.out.println("overlap[k][0]: " + overlap[k][0]);
+        			System.out.println("roiList.size() : " + roiList.size());
+        		}
+        		
+        		
+        		roiList.set(k,  new RectangularROI(overlap[k][1],0.1,overlap[k][0]-overlap[k][1],0.1,0));
+
+	        	String regionName = root +  Integer.toString(k);
 	        
-	        }
-	        catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-	        
-	        
-			plotSystem.addRegion(regionArray[k]);
-			
-			//RectangularROI startROI = new RectangularROI(10,10,100,100,0);
-			regionArray[k].setROI(roiList.get(k));
-	 
-	        model.setROIListElement(roiList.get(k), k);
-	        
-	        int ktemp =k;
-	        regionArray[k].addROIListener(new IROIListener() {
-	
-				@Override
-				public void roiDragged(ROIEvent evt) {
-//					model.setROIListElementEst(regionArray[ktemp].getROI(), ktemp);
-//					//model.setROI(region.getROI());
-//					System.out.println("roiDragged, ktemp:  " + ktemp);
+		        try {
+					regionArray[k] =plotSystem.createRegion(regionName, RegionType.XAXIS);
+					regionArray[k].setROI(roiList.get(k));
+					plotSystem.addRegion(regionArray[k]);
+					
+		        }
+		        catch (Exception e1) {
+					e1.printStackTrace();
 				}
-	
-				@Override
-				public void roiChanged(ROIEvent evt) {
-					// TODO Auto-generated method stub
-					model.setROIListElementEst(regionArray[ktemp].getROI(), ktemp);
-					//model.setROI(roiList.get(ktemp));
-//					System.out.println("roiChanged, ktemp:  " + ktemp);
-				}
-	
-				@Override
-				public void roiSelected(ROIEvent evt) {
-					model.setROIListElementEst(regionArray[ktemp].getROI(), ktemp);
-					//model.setROI(roiList.get(ktemp));
-//					System.out.println("roiSelected, ktemp:  " + ktemp);
-				}
-			
-			});
+		       
+		        model.setROIList(roiList);
+		        
+		        int ktemp =k;
+		        ((IRegion) regionArray[k]).addROIListener(new IROIListener() {
+		
+					@Override
+					public void roiDragged(ROIEvent evt) {
+						model.setROIListElementEst(regionArray[ktemp].getROI().getBounds(), ktemp);
+					}
+		
+					@Override
+					public void roiChanged(ROIEvent evt) {
+						model.setROIListElementEst(regionArray[ktemp].getROI().getBounds(), ktemp);
+						
+					}
+		
+					@Override
+					public void roiSelected(ROIEvent evt) {
+						model.setROIListElementEst(regionArray[ktemp].getROI().getBounds(), ktemp);
+					}
+				
+				});
+        	}
         }
     }
 		

@@ -4,55 +4,43 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.TreeMap;
 
 import org.apache.commons.lang.StringUtils;
+import org.dawnsci.surfacescatter.AnalaysisMethodologies;
+import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
+import org.dawnsci.surfacescatter.ClosestNoFinder;//private ArrayList<double[]> locationList; 
+import org.dawnsci.surfacescatter.CountUpToArray;
 import org.dawnsci.surfacescatter.DataModel;
 import org.dawnsci.surfacescatter.DummyProcessingClass;
 import org.dawnsci.surfacescatter.ExampleModel;
 import org.dawnsci.surfacescatter.GeometricParametersModel;
 import org.dawnsci.surfacescatter.PlotSystem2DataSetter;
-import org.dawnsci.surfacescatter.PlotSystemCompositeDataSetter;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
+import org.dawnsci.surfacescatter.StitchedOutputWithErrors;
 import org.dawnsci.surfacescatter.SuperModel;
 import org.dawnsci.surfacescatter.TrackingMethodology;
-import org.dawnsci.surfacescatter.VerticalHorizontalSlices;
-import org.dawnsci.surfacescatter.AnalaysisMethodologies.FitPower;
-import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
-import org.dawnsci.surfacescatter.CountUpToArray;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
-import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
-import org.eclipse.january.dataset.Maths;
 import org.eclipse.january.dataset.SliceND;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.swt.widgets.Slider;
 
-import com.sun.javafx.collections.MappingChange.Map;
-
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 public class SurfaceScatterPresenter {
-	
+
 	private String[] filepaths;
 	private ArrayList<ExampleModel> models;
 	private ArrayList<DataModel> dms;
@@ -62,12 +50,12 @@ public class SurfaceScatterPresenter {
 	private Button button;
 	private int noImages;
 	private SurfaceScatterViewStart ssvs;
-	
-	
-	public SurfaceScatterPresenter(Shell parentShell, String[] filepaths){
-		
+	private int DEBUG = 1;
+
+	public SurfaceScatterPresenter(Shell parentShell, String[] filepaths) {
+
 		sm = new SuperModel();
-	    
+
 		gms = new ArrayList<GeometricParametersModel>();
 		dms = new ArrayList<DataModel>();
 		models = new ArrayList<ExampleModel>();
@@ -75,29 +63,28 @@ public class SurfaceScatterPresenter {
 		IDataset[] imageArray = new IDataset[filepaths.length];
 		IDataset[] xArray = new IDataset[filepaths.length];
 		TreeMap<Integer, Dataset> som = new TreeMap<Integer, Dataset>();
-		ArrayList<Integer> imageRefList = new  ArrayList<>();
-		int imageRef =0;
+		ArrayList<Integer> imageRefList = new ArrayList<>();
+		int imageRef = 0;
 		ArrayList<Integer> imagesToFilepathRef = new ArrayList<Integer>();
-		
-		
-		for (int id = 0; id<filepaths.length; id++){ 
+
+		for (int id = 0; id < filepaths.length; id++) {
 			try {
 				models.add(new ExampleModel());
 				dms.add(new DataModel());
 				gms.add(new GeometricParametersModel());
-				IDataHolder dh1 =LoaderFactory.getData(filepaths[id]);
-				ILazyDataset ild =dh1.getLazyDataset(gms.get(sm.getSelection()).getImageName());
+				IDataHolder dh1 = LoaderFactory.getData(filepaths[id]);
+				ILazyDataset ild = dh1.getLazyDataset(gms.get(sm.getSelection()).getImageName());
 				dms.get(id).setName(StringUtils.substringAfterLast(sm.getFilepaths()[id], File.separator));
 				models.get(id).setDatImages(ild);
 				models.get(id).setFilepath(filepaths[id]);
-				SliceND slice = new SliceND (ild.getShape());
+				SliceND slice = new SliceND(ild.getShape());
 				IDataset images = ild.getSlice(slice);
-				imageArray[id]=images;
-				
-				for (int f =0; f<(imageArray[id].getShape()[0]); f++){
-					
+				imageArray[id] = images;
+
+				for (int f = 0; f < (imageArray[id].getShape()[0]); f++) {
+
 					SliceND slice2 = new SliceND(images.getShape());
-					slice2.setSlice(0,f,f+1, 1);
+					slice2.setSlice(0, f, f + 1, 1);
 					IDataset nim = images.getSlice(slice2);
 					nim.squeeze();
 					som.put(imageRef, (Dataset) nim);
@@ -105,67 +92,60 @@ public class SurfaceScatterPresenter {
 					imagesToFilepathRef.add(id);
 					imageRef++;
 				}
-				
-				
-				
-				if (sm.getCorrectionSelection() == 0){
-					ILazyDataset ildx =dh1.getLazyDataset(gms.get(sm.getSelection()).getxName()); 
+
+				if (sm.getCorrectionSelection() == 0) {
+					ILazyDataset ildx = dh1.getLazyDataset(gms.get(sm.getSelection()).getxName());
 					models.get(id).setDatX(ildx);
-					SliceND slice1 = new SliceND (ildx.getShape());
+					SliceND slice1 = new SliceND(ildx.getShape());
 					IDataset xdat = ildx.getSlice(slice1);
-					xArray[id]=xdat;
-					
-				}
-				else if (sm.getCorrectionSelection() == 1){
-					ILazyDataset ildx =dh1.getLazyDataset(gms.get(sm.getSelection()).getxNameRef()); 
+					xArray[id] = xdat;
+
+				} else if (sm.getCorrectionSelection() == 1) {
+					ILazyDataset ildx = dh1.getLazyDataset(gms.get(sm.getSelection()).getxNameRef());
 					models.get(id).setDatX(ildx);
-					
-					SliceND slice1 = new SliceND (ildx.getShape());
+
+					SliceND slice1 = new SliceND(ildx.getShape());
 					IDataset xdat = ildx.getSlice(slice);
-					xArray[id]=xdat;
-					
-					ILazyDataset dcdtheta = dh1.getLazyDataset( ReflectivityMetadataTitlesForDialog.getdcdtheta());
+					xArray[id] = xdat;
+
+					ILazyDataset dcdtheta = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getdcdtheta());
 					models.get(id).setDcdtheta(dcdtheta);
-					
-					ILazyDataset qdcd = dh1.getLazyDataset( ReflectivityMetadataTitlesForDialog.getqdcd());
+
+					ILazyDataset qdcd = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getqdcd());
 					models.get(id).setQdcd(qdcd);
-						
-						
-					if (dcdtheta == null){
-						try{
-					    	dcdtheta = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getsdcdtheta());
-					    	models.get(id).setDcdtheta(dcdtheta);
-						} catch (Exception e2){
+
+					if (dcdtheta == null) {
+						try {
+							dcdtheta = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getsdcdtheta());
+							models.get(id).setDcdtheta(dcdtheta);
+						} catch (Exception e2) {
 							System.out.println("can't get dcdtheta");
 						}
+					} else {
 					}
-					else{
-					}
-					
-					
+
+				} else {
 				}
-				else{
-				}	
-			} 
-			
+			}
+
 			catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		}
-		
-		for (GeometricParametersModel gm : gms){
-		
-			gm.addPropertyChangeListener(new PropertyChangeListener(){
+
+		for (GeometricParametersModel gm : gms) {
+
+			gm.addPropertyChangeListener(new PropertyChangeListener() {
 
 				public void propertyChange(PropertyChangeEvent evt) {
-					for (int id = 0; id<filepaths.length; id++){ 
+					for (int id = 0; id < filepaths.length; id++) {
 						try {
-							IDataHolder dh1 =LoaderFactory.getData(filepaths[id]);
-							ILazyDataset ild =dh1.getLazyDataset(gms.get(sm.getSelection()).getImageName()); 
+							IDataHolder dh1 = LoaderFactory.getData(filepaths[id]);
+							ILazyDataset ild = dh1.getLazyDataset(gms.get(sm.getSelection()).getImageName());
 							models.get(id).setDatImages(ild);
-						} 
-						
+						}
+
 						catch (Exception e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
@@ -174,208 +154,227 @@ public class SurfaceScatterPresenter {
 				}
 			});
 		}
-		
-		
-		
+
 		Dataset xArrayCon = DatasetUtils.concatenate(xArray, 0);
 		Dataset imageCon = DatasetUtils.concatenate(imageArray, 0);
-		
+
 		int numberOfImages = xArrayCon.getSize();
-		
+
 		Dataset imageRefDat = DatasetFactory.ones(imageRefList.size());
 		Dataset imagesToFilepathRefDat = DatasetFactory.ones(imageRefList.size());
-		
-		
-		for(int sd = 0; sd<imageRefList.size(); sd++){
+
+		for (int sd = 0; sd < imageRefList.size(); sd++) {
 			imageRefDat.set(imageRefList.get(sd), sd);
 			imagesToFilepathRefDat.set(imagesToFilepathRef.get(sd), sd);
 		}
-		
-		Dataset xArrayConClone = xArrayCon.clone(); 
-		
+
+		Dataset xArrayConClone = xArrayCon.clone();
+
 		DatasetUtils.sort(xArrayCon, imageRefDat);
 		DatasetUtils.sort(xArrayConClone, imagesToFilepathRefDat);
-		
+
 		Dataset[] imageSortedDat = new Dataset[imageRefList.size()];
-		int[] filepathsSortedArray = new int[imageRefList.size()]; 
-		noImages = imageRefList.size(); 
-				
-		for (int y = 0; y< imageRefList.size();y++){
+		int[] filepathsSortedArray = new int[imageRefList.size()];
+		noImages = imageRefList.size();
+
+		for (int y = 0; y < imageRefList.size(); y++) {
 			filepathsSortedArray[y] = imagesToFilepathRefDat.getInt(y);
 		}
-        
+
 		sm.setFilepathsSortedArray(filepathsSortedArray);
-		
-		for(int rf = 0 ; rf < imageRefList.size(); rf++){
+
+		for (int rf = 0; rf < imageRefList.size(); rf++) {
 			int pos = imageRefDat.getInt(rf);
 			imageSortedDat[rf] = som.get(pos);
 		}
-		
+
 		sm.setImages(imageSortedDat);
 		sm.setImageStack(imageCon);
 		sm.setSortedX(xArrayCon);
-		
+
 		SliceND slice2 = new SliceND(imageCon.getShape());
 		slice2.setSlice(0, 0, 1, 1);
 		Dataset nullImage = imageCon.getSlice(slice2);
-		
+
 		sm.setNullImage(imageCon.getSlice(slice2));
-		
-		ssvs = new SurfaceScatterViewStart(parentShell, 
-										   filepaths,
-										   models,
-										   dms,
-										   gms,
-										   sm,
-										   numberOfImages,
-										   nullImage,
-										   this);
+
+		ssvs = new SurfaceScatterViewStart(parentShell, filepaths, models, dms, gms, sm, numberOfImages, nullImage,
+				this);
 		ssvs.open();
-	
-		
+
 	}
-	
-	
-	
-	public void sliderMovemementMainImage(int sliderPos, IPlottingSystem<Composite>... pS){
-		
+
+	public void sliderMovemementMainImage(int sliderPos, IPlottingSystem<Composite>... pS) {
+
 		sm.setSliderPos(sliderPos);
 		Dataset image = sm.getImages()[sliderPos];
-	
-		for (IPlottingSystem<Composite> x :pS){
+
+		for (IPlottingSystem<Composite> x : pS) {
 			x.updatePlot2D(image, null, null);
 		}
 	}
-	
-	public Dataset getImage(int k){
-		
+
+	public Dataset getImage(int k) {
+
 		Dataset image = sm.getImages()[k];
 		return image;
 	}
-	
-	public void regionOfInterestSetter(IROI green){
-		
-		
+
+	public void regionOfInterestSetter(IROI green) {
+
 		IRectangularROI greenRectangle = green.getBounds();
 		int[] Len = greenRectangle.getIntLengths();
 		int[] Pt = greenRectangle.getIntPoint();
-		int[][] LenPt = {Len,Pt};
-		
-		for (ExampleModel m: models){
+		int[][] LenPt = { Len, Pt };
+
+		for (ExampleModel m : models) {
 			m.setBox(greenRectangle);
 			m.setLenPt(LenPt);
 			m.setROI(green);
 		}
 	}
-	
+
 	public void sliderZoomedArea(int sliderPos, IROI box, IPlottingSystem<Composite>... pS) {
 
 		Dataset image = sm.getImages()[sliderPos];
 		Dataset subImage = (Dataset) PlotSystem2DataSetter.PlotSystem2DataSetter1(box, image);
-		
-		for (IPlottingSystem<Composite> x :pS){
+
+		for (IPlottingSystem<Composite> x : pS) {
 			x.updatePlot2D(subImage, null, null);
 		}
-
 	}
 	
-	public Dataset subImage (int sliderPos, IROI box) {
+	public double closestImageNo(double in){
+		int out = ClosestNoFinder.closestNoPos(in, sm.getSortedX());
+		return out;
+	}
+	
+
+	public Dataset subImage(int sliderPos, IROI box) {
 
 		Dataset image = sm.getImages()[sliderPos];
 		Dataset subImage = (Dataset) PlotSystem2DataSetter.PlotSystem2DataSetter1(box, image);
 		return subImage;
 	}
 
-	public IDataset presenterDummyProcess (int selection, 
-										   IDataset image,
-										   IPlottingSystem<Composite> pS,
-										   int trackingMarker){
-		
+	public IDataset presenterDummyProcess(int selection, IDataset image, IPlottingSystem<Composite> pS,
+			int trackingMarker) {
+
 		int j = sm.getFilepathsSortedArray()[selection];
+
+		int[] imagePosInOriginalDat = CountUpToArray.CountUpToArray1(sm.getFilepathsSortedArray());
 		
-		return DummyProcessingClass.DummyProcess(sm, 
-										  image, 
-										  models.get(j),
-										  dms.get(j), 
-										  gms.get(j), 
-										  pS, 
-										  sm.getCorrectionSelection(), 
-										  selection, 
-										  trackingMarker);
-		
+		return DummyProcessingClass.DummyProcess(sm,
+												 image, 
+												 models.get(j), 
+												 dms.get(j), 
+												 gms.get(j), 
+												 pS,
+												 sm.getCorrectionSelection(), 
+												 imagePosInOriginalDat[selection], 
+												 trackingMarker,
+												 selection);		
 	}
-	
-	
-	public void zoomAndSet(){
-		
+
+	public void zoomAndSet() {
+
 	}
-	
-	public void updateSliders(ArrayList<Slider> sl, int k){
-		
+
+	public void updateSliders(ArrayList<Slider> sl, int k) {
+
 		sm.setSliderPos(k);
-		
-		for(Slider x : sl){
-//			if( x.getSelection() != k){
-			try{	
-				x.setSelection(k);
+
+		for (Slider x : sl) {
+			if( x.isDisposed() == false){
+				try {
+					x.setSelection(k);
+				} catch (Error e) {
+	
+				}
 			}
-			catch(Error e){
-				
-			}
-//			}
 		}
 	}
-	
-	public SurfaceScatterViewStart getSsvs(){
+
+	public int xPositionFinder(double myNum) {
+
+		int xPos = ClosestNoFinder.closestNoPos(myNum, sm.getSortedX());
+
+		return xPos;
+	}
+
+	public SurfaceScatterViewStart getSsvs() {
 		return ssvs;
 	}
-	
-	public void updateGreenROIs(ArrayList<Slider> sl, int k){
-		
+
+	public void updateGreenROIs(ArrayList<Slider> sl, int k) {
+
 		sm.setSliderPos(k);
-		
-		for(Slider x : sl){
-			if( x.getSelection() != k){
+
+		for (Slider x : sl) {
+			if (x.getSelection() != k) {
 				x.setSelection(k);
 			}
 		}
 	}
-	
-	
-	public void updateAnalysisMethdodology(int methodlogySelection,
-										   int fitPowerSelection,
-										   int trackerSelection,
-										   String boundaryBox){
-	
-		for (ExampleModel model: models){
-			 model.setMethodology(Methodology.values()[methodlogySelection]);
-			 model.setFitPower(FitPower.values()[fitPowerSelection]);
-			 model.setTrackerType(TrackingMethodology.TrackerType1.values()[trackerSelection]);
-			 model.setBoundaryBox(Integer.parseInt(boundaryBox));
+
+	public void updateAnalysisMethdodology(int methodlogySelection, int fitPowerSelection, int trackerSelection,
+			String boundaryBox) {
+
+		for (ExampleModel model : models) {
+			model.setMethodology(Methodology.values()[methodlogySelection]);
+			model.setFitPower(AnalaysisMethodologies.toFitPower(fitPowerSelection));
+			model.setTrackerType(TrackingMethodology.intToTracker1(trackerSelection));
+			model.setBoundaryBox(Integer.parseInt(boundaryBox));
 		}
-		
 	}
-	
-	public int getNoImages(){
+
+	public int getNoImages() {
 		return noImages;
 	}
 	
-	public IROI getROI(){
+
+	public void export(IPlottingSystem<Composite> parentPs, 
+						IDataset xData,
+						IDataset yData){
 		
+		sm.setSplicedCurveX(xData);
+		sm.setSplicedCurveY(yData);
+	
+		parentPs.clear();
+
+		ILineTrace lt1 = parentPs.createLineTrace("Ajusted Spliced Curve");
+		lt1.setData(xData, yData);
+		lt1.isErrorBarEnabled();
+		
+		
+		parentPs.addTrace(lt1);
+		parentPs.repaint();
+	}
+
+	public IROI getROI() {
+
 		int jok = sm.getFilepathsSortedArray()[sm.getSliderPos()];
 		ExampleModel model = models.get(jok);
 		return model.getROI();
 	}
-	
-	public int getSliderPos(){
+
+	public int getSliderPos() {
 		return sm.getSliderPos();
 	}
-	
-	public void runTrackingJob(IPlottingSystem<Composite> ps,
-							   MultipleOutputCurvesTable outputCurves){
-		
-		outputCurves.resetCurve();
+
+	public void runTrackingJob(IPlottingSystem<Composite> ps, MultipleOutputCurvesTableView outputCurves) {
+
+		sm.resetAll();
+		sm.setLocationList(null);
+		for(DataModel md: dms){
+			md.resetAll();
+		}
+				
+				
+		debug("start of ssp tracking job");
+
 		trackingJob tj = new trackingJob();
+		debug("tj invoked");
 		tj.setCorrectionSelection(sm.getCorrectionSelection());
 		tj.setSuperModel(sm);
 		tj.setGms(gms);
@@ -383,232 +382,723 @@ public class SurfaceScatterPresenter {
 		tj.setModels(models);
 		tj.setPlotSystem(ps);
 		tj.setOutputCurves(outputCurves);
-		tj.schedule();
-		tj.setTimeStep(Math.round((2/noImages)));
+		tj.setTimeStep(Math.round((2 / noImages)));
 		tj.setSsp(this);
+		tj.run();
 
 		
+//		tj.schedule();
 		
+		
+		
+		
+		
+//		tj.run(null);
+		
+//		try {
+//			tj.join();
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		
+//		
+//		BusyIndicator.showWhile(Display.getCurrent(), new Runnable() {
+//
+//			@Override
+//			public void run() {
+//				tj.schedule();
+//				
+//				try {
+//					tj.join();
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
+//		});
+
+		
+
 	}
-}	
+
+	public ArrayList<DataModel> getDms() {
+		return dms;
+	}
+
+	public void stitchAndPresent(MultipleOutputCurvesTableView outputCurves) {
+
+		outputCurves.resetCurve();
+
+		IPlottingSystem<Composite> pS = outputCurves.getPlotSystem();
+
+		IDataset[] output = StitchedOutputWithErrors.curveStitch4(dms, sm);
+
+		ILineTrace lt = pS.createLineTrace("progress");
+
+		lt.setData(sm.getSplicedCurveX(), sm.getSplicedCurveY());
+		lt.isErrorBarEnabled();
+		
+		pS.clear();
+		pS.addTrace(lt);
+		
+		pS.repaint();
+		pS.autoscaleAxes();
+
+	}
 	
+
+
+
+
+	private void debug(String output) {
+		if (DEBUG == 1) {
+			System.out.println(output);
+		}
+	}
+
+}
+
 /////////////////////////////////////////////////////////////////////
-/////////////////////Tracking Job////////////////////////////////////
+///////////////////// Tracking Job////////////////////////////////////
 /////////////////////////////////////////////////////////////////////
 
-	class trackingJob extends Job {
+class trackingJob {
+//extends job
+	private ArrayList<DataModel> dms;
+	private ArrayList<ExampleModel> models;
+	private IPlottingSystem<Composite> plotSystem;
+	private MultipleOutputCurvesTableView outputCurves;
+	private ArrayList<GeometricParametersModel> gms;
+	private SuperModel sm;
+	private int correctionSelection;
+	private int noImages;
+	private int timeStep;
+	private SurfaceScatterPresenter ssp;
+	private int DEBUG = 1;
 
-		private ArrayList<DataModel> dms;
-		private ArrayList<ExampleModel> models;
-		private IPlottingSystem<Composite> plotSystem;
-		private MultipleOutputCurvesTable outputCurves;
-		private ArrayList<GeometricParametersModel> gms;
-		private SuperModel sm;
-		private int correctionSelection;
-		private int noImages;
-		private int timeStep;
-		private SurfaceScatterPresenter ssp;
+//	public trackingJob() {
+//		super("updating image...");
+//	}
+
+	public void setOutputCurves(MultipleOutputCurvesTableView outputCurves) {
+		this.outputCurves = outputCurves;
+	}
+
+	public void setCorrectionSelection(int cS) {
+		this.correctionSelection = cS;
+	}
+
+	public void setDms(ArrayList<DataModel> dms) {
+		this.dms = dms;
+	}
+
+	public void setModels(ArrayList<ExampleModel> models) {
+		this.models = models;
+	}
+
+	public void setSuperModel(SuperModel sm) {
+		this.sm = sm;
+	}
+
+	public void setGms(ArrayList<GeometricParametersModel> gms) {
+		this.gms = gms;
+	}
+
+	public void setPlotSystem(IPlottingSystem<Composite> plotSystem) {
+		this.plotSystem = plotSystem;
+	}
+
+	public void setTimeStep(int timeStep) {
+		this.timeStep = timeStep;
+	}
+
+	public void setSsp(SurfaceScatterPresenter ssp) {
+		this.ssp = ssp;
+	}
+
+	public void setps(IPlottingSystem<Composite> plotSystem) {
+		this.plotSystem = plotSystem;
+	}
+
+	@SuppressWarnings("unchecked")
+	
+	protected  void run(){
+//		ISTATUS
+//		(IProgressMonitor monitor)
 		
-		
-		public trackingJob() {
-			super("updating image...");
+		for(ExampleModel em: models){
+			em.setInput(null);
 		}
+
 		
-		public void setOutputCurves(MultipleOutputCurvesTable outputCurves) {
-			this.outputCurves = outputCurves;
-		}
 		
-		public void setCorrectionSelection(int cS) {
-			this.correctionSelection = cS;
-		}
 		
-		public void setDms(ArrayList<DataModel> dms) {
-			this.dms = dms;
-		}
-		
-		public void setModels(ArrayList<ExampleModel> models) {
-			this.models = models;
-		}
-		
-		public void setSuperModel(SuperModel sm) {
-			this.sm= sm;
-		}
-		
-		public void setGms(ArrayList<GeometricParametersModel> gms) {
-			this.gms = gms;
-		}	
-		
-		public void setPlotSystem(IPlottingSystem<Composite> plotSystem) {
-			this.plotSystem = plotSystem;
-		}
-		
-		public void setTimeStep (int timeStep){
-			this.timeStep = timeStep;
-		}
-		
-		public void setSsp(SurfaceScatterPresenter ssp){
-			this.ssp = ssp;
-		}
-		
-		@Override
-		protected IStatus run (IProgressMonitor monitor) {
-		
+		if (models.get(sm.getSelection()).getMethodology() != AnalaysisMethodologies.Methodology.TWOD_TRACKING) {
+
 			noImages = sm.getImages().length;
-			
-			int[] imagePosInOriginalDat= CountUpToArray.CountUpToArray1(sm.getFilepathsSortedArray());
 
-			for(DataModel dm:dms){
+			int[] imagePosInOriginalDat = CountUpToArray.CountUpToArray1(sm.getFilepathsSortedArray());
+
+			for (DataModel dm : dms) {
 				dm.resetAll();
 			}
 			outputCurves.resetCurve();
+
+			int k = 0;
+
+			if (sm.getSliderPos() == 0) {
+				for (k = 0; k < noImages; k++) {
 						
-			int k =0;
-			
-			if (sm.getSliderPos() == 0){ 
-				for ( k = 0; k<noImages; k++){
-		
-					//System.out.println("k value :   " + k);
-//					ssp.updateSliders(ssp.getSsvs().getSliderList(), k);
-					ssp.sliderMovemementMainImage(k, ssp.getSsvs().getPlotSystemCompositeView().getPlotSystem());
+					debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k));
 					
+					ssp.sliderMovemementMainImage(k, ssp.getSsvs().getPlotSystemCompositeView().getPlotSystem());
+
 					int trackingMarker = 0;
 					IDataset j = sm.getImages()[k];
 					int jok = sm.getFilepathsSortedArray()[k];
 					DataModel dm = dms.get(jok);
 					GeometricParametersModel gm = gms.get(jok);
 					ExampleModel model = models.get(jok);
-					
 
-				
-					IDataset output1 = DummyProcessingClass.DummyProcess(sm,
+					IDataset output1 = DummyProcessingClass.DummyProcess(sm, 
 																		 j,
-																		 model,
+																		 model, 
 																		 dm, 
 																		 gm, 
 																		 plotSystem,
 																		 correctionSelection, 
 																		 imagePosInOriginalDat[k], 
-																		 trackingMarker);
-					
+																		 trackingMarker, 
+																		 k);
+
 					dm.addxList(sm.getSortedX().getDouble(k));
+
+					 Display.getDefault().syncExec(new Runnable() {
 					
-					
-					
-					Display.getDefault().syncExec(new Runnable() {
-						
-						@Override
-						public void run() {
-							plotSystem.clear();
-							plotSystem.updatePlot2D(output1, null,monitor);
-							plotSystem.repaint(true);
-							outputCurves.updateCurve(dm, outputCurves.getIntensity().getSelection(), sm);
-						}
-					});
+					 @Override
+					 public void run() {
+					 plotSystem.clear();
+					 plotSystem.updatePlot2D(output1, null,null);
+					 plotSystem.repaint(true);
+					 outputCurves.updateCurve(dm,
+					 outputCurves.getIntensity().getSelection(), sm);
+					 }
+					 });
 				}
-		
-			} else if (sm.getSliderPos() != 0){
-		
-			
-			////////////////////////inside second loop scenario@@@@@@@@@@@@@@@@@@@@@@@@@@@@///////////
-			
-			
-				for (k = (sm.getSliderPos()); k >= 0; k-- ){
-				
-//					ssp.updateSliders(ssp.getSsvs().getSliderList(), k);
+
+			} else if (sm.getSliderPos() != 0) {
+
+				//////////////////////// inside second loop
+				//////////////////////// scenario@@@@@@@@@@@@@@@@@@@@@@@@@@@@///////////
+
+				for (k = (sm.getSliderPos()); k >= 0; k--) {
+
+					debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k));
+					
+					// ssp.updateSliders(ssp.getSsvs().getSliderList(), k);
 					ssp.sliderMovemementMainImage(k, ssp.getSsvs().getPlotSystemCompositeView().getPlotSystem());
 					int trackingMarker = 1;
-					
+
 					IDataset j = sm.getImages()[k];
 					int jok = sm.getFilepathsSortedArray()[k];
 					DataModel dm = dms.get(jok);
 					GeometricParametersModel gm = gms.get(jok);
 					ExampleModel model = models.get(jok);
-					
-					
-				
-			
-					
-				
-					IDataset output1 = DummyProcessingClass.DummyProcess(sm,
-																		 j, 
-																		 model,
-																		 dm, 
-																		 gm, 
-																		 plotSystem,
-																		 correctionSelection, 
-																		 imagePosInOriginalDat[k], 
-																		 trackingMarker);
-					
-					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k], sm.getSortedX().getDouble(k));
-					
-					
+
+					IDataset output1 = DummyProcessingClass.DummyProcess(sm, j, model, dm, gm, plotSystem,
+							correctionSelection, imagePosInOriginalDat[k], trackingMarker, k);
+
+					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
+							sm.getSortedX().getDouble(k));
+
 					Display.getDefault().syncExec(new Runnable() {
-				
-						@Override
-						public void run() {
-							plotSystem.clear();
-							plotSystem.updatePlot2D(output1, null,monitor);
-							plotSystem.repaint(true);
-							outputCurves.updateCurve(dm, outputCurves.getIntensity().getSelection(), sm);
-						}
-					});
-				}
-			
-				for ( k = sm.getSliderPos(); k<noImages; k++){
-//					ssp.updateSliders(ssp.getSsvs().getSliderList(), k);
-					ssp.sliderMovemementMainImage(k, ssp.getSsvs().getPlotSystemCompositeView().getPlotSystem());
-					int trackingMarker = 2;
 					
+					 @Override
+					 public void run() {
+					 plotSystem.clear();
+					 plotSystem.updatePlot2D(output1, null,null);
+					 plotSystem.repaint(true);
+					 outputCurves.updateCurve(dm,
+					 outputCurves.getIntensity().getSelection(), sm);
+					 }
+					 });
+				}
+
+				for (k = sm.getSliderPos(); k < noImages; k++) {
+					// ssp.updateSliders(ssp.getSsvs().getSliderList(), k);
+					
+					debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k));
+					
+//					ssp.sliderMovemementMainImage(k, ssp.getSsvs().getPlotSystemCompositeView().getPlotSystem());
+					int trackingMarker = 2;
+
 					IDataset j = sm.getImages()[k];
 					int jok = sm.getFilepathsSortedArray()[k];
 					DataModel dm = dms.get(jok);
 					GeometricParametersModel gm = gms.get(jok);
 					ExampleModel model = models.get(jok);
+
+					IDataset output1 = DummyProcessingClass.DummyProcess(sm, j, model, dm, gm, plotSystem,
+							correctionSelection, imagePosInOriginalDat[k], trackingMarker, k);
+
+					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
+							sm.getSortedX().getDouble(k));
+
+					 Display.getDefault().syncExec(new Runnable() {
+					
+					 @Override
+					 public void run() {
+					 plotSystem.clear();
+					 plotSystem.updatePlot2D(output1, null,null);
+					 plotSystem.repaint(true);
+					 outputCurves.updateCurve(dm,
+					 outputCurves.getIntensity().getSelection(), sm);
 					
 					
+					 }
+					 });
+				}
+
+			}
+		}
+
+		else {
+
+			trackingJob2 tj = new trackingJob2();
+			debug("tj2 invoked");
+			tj.setCorrectionSelection(sm.getCorrectionSelection());
+			tj.setSuperModel(sm);
+			tj.setGms(gms);
+			tj.setDms(dms);
+			tj.setModels(models);
+			tj.setPlotSystem(plotSystem);
+			tj.setOutputCurves(outputCurves);
+			tj.setTimeStep(Math.round(2 / sm.getImages().length));
+			tj.setSsp(ssp);
+			tj.run();
+//			tj.schedule();
+
+		}
+
+//		return Status.OK_STATUS;
+	}
+		private void debug(String output) {
+		if (DEBUG == 1) {
+			System.out.println(output);
+		}
+	}
+}
+
+/////////////////////////////////////////////////////////////////////
+///////////////////// Tracking Job2////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
+
+class trackingJob2 {
+//extends Job {
+
+	private ArrayList<DataModel> dms;
+	private ArrayList<ExampleModel> models;
+	private IPlottingSystem<Composite> plotSystem;
+	private MultipleOutputCurvesTableView outputCurves;
+	private ArrayList<GeometricParametersModel> gms;
+	private SuperModel sm;
+	private int correctionSelection;
+	private int noImages;
+	private int timeStep;
+	private SurfaceScatterPresenter ssp;
+	private int DEBUG = 1;
+
+//	public trackingJob2() {
+//		super("updating image...");
+//	}
+
+	public void setOutputCurves(MultipleOutputCurvesTableView outputCurves) {
+		this.outputCurves = outputCurves;
+	}
+
+	public void setCorrectionSelection(int cS) {
+		this.correctionSelection = cS;
+	}
+
+	public void setDms(ArrayList<DataModel> dms) {
+		this.dms = dms;
+	}
+
+	public void setModels(ArrayList<ExampleModel> models) {
+		this.models = models;
+	}
+
+	public void setSuperModel(SuperModel sm) {
+		this.sm = sm;
+	}
+
+	public void setGms(ArrayList<GeometricParametersModel> gms) {
+		this.gms = gms;
+	}
+
+	public void setPlotSystem(IPlottingSystem<Composite> plotSystem) {
+		this.plotSystem = plotSystem;
+	}
+
+	public void setTimeStep(int timeStep) {
+		this.timeStep = timeStep;
+	}
+
+	public void setSsp(SurfaceScatterPresenter ssp) {
+		this.ssp = ssp;
+	}
+
+	@SuppressWarnings("unchecked")
+//	@Override
+	protected void run() {
+//IStatus
+//		IProgressMonitor monitor
+		
+		debug("@@@@@@@@@@@~~~~~~~~~~~~~~~in the new tracker~~~~~~~~~~~~~~~~~~@@@@@@@@@@@@@@");
+
+		noImages = sm.getImages().length;
+
+		int[] imagePosInOriginalDat = CountUpToArray.CountUpToArray1(sm.getFilepathsSortedArray());
+
+		for (DataModel dm : dms) {
+			dm.resetAll();
+		}
+
+		outputCurves.resetCurve();
+
+		int jok = sm.getFilepathsSortedArray()[sm.getSliderPos()];
+
+		String[] doneArray = new String[sm.getFilepaths().length];
+
+		int k = 0;
+
+		if (sm.getSliderPos() == 0) {
+			for (k = 0; k < noImages; k++) {
+				if (sm.getFilepathsSortedArray()[k] == jok) {
+					
+					debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
+					+ " , " + "local jok:  " + Integer.toString(jok));
+					
+					debug("@@@@@@@@@@@~~~~~~~~~~~~~~~in the 0 loop~~~~~~~~~~~~~~~~~~@@@@@@@@@@@@@@");
+					ssp.sliderMovemementMainImage(k, ssp.getSsvs().getPlotSystemCompositeView().getPlotSystem());
+
+					int trackingMarker = 0;
+					IDataset j = sm.getImages()[k];
+					DataModel dm = dms.get(jok);
+					GeometricParametersModel gm = gms.get(jok);
+					ExampleModel model = models.get(jok);
+
 					IDataset output1 = DummyProcessingClass.DummyProcess(sm, 
 																		 j, 
-																		 model,
+																		 model, 
 																		 dm, 
 																		 gm, 
 																		 plotSystem,
 																		 correctionSelection, 
 																		 imagePosInOriginalDat[k], 
-																		 trackingMarker);
+																		 trackingMarker, 
+																		 k);
+
+					dm.addxList(sm.getSortedX().getDouble(k));
 					
-					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k], sm.getSortedX().getDouble(k));
-					
-				
 					Display.getDefault().syncExec(new Runnable() {
-				
-						@Override
-						public void run() {
-						plotSystem.clear();
-						plotSystem.updatePlot2D(output1, null,monitor);
-						plotSystem.repaint(true);
-						outputCurves.updateCurve(dm, outputCurves.getIntensity().getSelection(), sm);
-				
 						
-						}
-					});
-				}	
+						 @Override
+						 public void run() {
+						 plotSystem.clear();
+						 plotSystem.updatePlot2D(output1, null,null);
+						 plotSystem.repaint(true);
+						 outputCurves.updateCurve(dm,
+						 outputCurves.getIntensity().getSelection(), sm);
+						
+						
+						 }
+					 });
+					
+				}
+			}
+			doneArray[jok] = "done";
+
 		}
-		
-		
+
+		//////////////////////// inside second loop
+		//////////////////////// scenario@@@@@@@@@@@@@@@@@@@@@@@@@@@@///////////
+
+		else if (sm.getSliderPos() != 0) {
+
+			for (k = (sm.getSliderPos()); k >= 0; k--) {
+				// ssp.updateSliders(ssp.getSsvs().getSliderList(), k);
+				// ssp.sliderMovemementMainImage(k,
+				// ssp.getSsvs().getPlotSystemCompositeView().getPlotSystem());
+
+				if (sm.getFilepathsSortedArray()[k] == jok) {
+
+
+					debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
+					+ " , " + "local jok:  " + Integer.toString(jok));
+					
+					int trackingMarker = 1;
+					IDataset j = sm.getImages()[k];
+					DataModel dm = dms.get(jok);
+					GeometricParametersModel gm = gms.get(jok);
+					ExampleModel model = models.get(jok);
+
+					IDataset output1 = DummyProcessingClass.DummyProcess(sm, j, model, dm, gm, plotSystem,
+							correctionSelection, imagePosInOriginalDat[k], trackingMarker, k);
+
+					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
+							sm.getSortedX().getDouble(k));
+				}
+			}
+
+			for (k = sm.getSliderPos(); k < noImages; k++) {
+
+				// ssp.sliderMovemementMainImage(k,
+				// ssp.getSsvs().getPlotSystemCompositeView().getPlotSystem());
+				if (sm.getFilepathsSortedArray()[k] == jok) {
+
+					
+
+					debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
+					+ " , " + "local jok:  " + Integer.toString(jok));
+					
+					int trackingMarker = 2;
+					IDataset j = sm.getImages()[k];
+					DataModel dm = dms.get(jok);
+					GeometricParametersModel gm = gms.get(jok);
+					ExampleModel model = models.get(jok);
+
+					IDataset output1 = 
+							DummyProcessingClass.DummyProcess(sm, 
+															  j, 
+															  model, 
+															  dm,
+													   		  gm, 
+													   		  plotSystem,
+													   		  correctionSelection, 
+													   		  imagePosInOriginalDat[k], 
+													   		  trackingMarker, 
+													   		  k);
+
+					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
+							sm.getSortedX().getDouble(k));
+					
+					
+					Display.getDefault().syncExec(new Runnable() {
+						
+						 @Override
+						 public void run() {
+						 plotSystem.clear();
+						 plotSystem.updatePlot2D(output1, null,null);
+						 plotSystem.repaint(true);
+						 outputCurves.updateCurve(dm,
+						 outputCurves.getIntensity().getSelection(), sm);
+						
+						
+						 }
+					 });
+
+				}
+			}
+		}
+
+		doneArray[jok] = "done";
+
+		//////////////////////////// continuing to next
+		//////////////////////////// dat////////////////////////////////////////
+
+		while (ClosestNoFinder.full(doneArray, "done") == false) {
+
+			debug("in the while loop");
+
+			int nextk = ClosestNoFinder.closestNoWithoutDone(sm.getSortedX().getDouble(sm.getSliderPos()),
+					sm.getSortedX(), doneArray, sm.getFilepathsSortedArray());
+
+			int nextjok = sm.getFilepathsSortedArray()[nextk];
+
+			if (imagePosInOriginalDat[nextk] == 0) {
+
+				for (k = nextk; k < noImages; k++) {
+
+					if (sm.getFilepathsSortedArray()[k] == nextjok) {
+						ssp.sliderMovemementMainImage(k, ssp.getSsvs().getPlotSystemCompositeView().getPlotSystem());
+
+
+						debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
+						+ " , " + "local nextjok:  " + Integer.toString(nextjok));
+						
+						
+						int trackingMarker = 0;
+						IDataset j = sm.getImages()[k];
+						int jokLocal = sm.getFilepathsSortedArray()[k];
+						DataModel dm = dms.get(jokLocal);
+						GeometricParametersModel gm = gms.get(jokLocal);
+						ExampleModel model = models.get(jokLocal);
+						int seedIndex = 
+								ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
+																	  sm.getSortedX(), 
+																	  sm.getLocationList());
+
+						IDataset output1 = 
+								DummyProcessingClass.DummyProcess1(sm, 
+																   j, 
+																   model, 
+																   dm, 
+																   gm, 
+																   plotSystem,
+																   correctionSelection, 
+																   imagePosInOriginalDat[k], 
+																   trackingMarker, 
+																   k,
+																   sm.getLocationList().get(seedIndex));
+
+						dm.addxList(sm.getSortedX().getDouble(k));
+						
+						Display.getDefault().syncExec(new Runnable() {
+							
+							 @Override
+							 public void run() {
+							 plotSystem.clear();
+							 plotSystem.updatePlot2D(output1, null,null);
+							 plotSystem.repaint(true);
+							 outputCurves.updateCurve(dm,
+							 outputCurves.getIntensity().getSelection(), sm);
+							
+							
+							 }
+						 });
+
+					}
+				}
+			}
+
+			else if (imagePosInOriginalDat[nextk] != 0) {
+
+				for (k = (sm.getSliderPos()); k >= 0; k--) {
+
+					if (sm.getFilepathsSortedArray()[k] == nextjok) {
+
+						debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
+						+ " , " + "local nextjok:  " + Integer.toString(nextjok));
+						
+						
+						int trackingMarker = 1;
+						IDataset j = sm.getImages()[k];
+						DataModel dm = dms.get(nextjok);
+						GeometricParametersModel gm = gms.get(nextjok);
+						ExampleModel model = models.get(nextjok);
+						
+						int seedIndex = 
+								ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
+																	  sm.getSortedX(), 
+																	  sm.getLocationList());
+
+						IDataset output1 = 
+								DummyProcessingClass.DummyProcess1(sm, 
+																   j, 
+																   model, 
+																   dm, 
+																   gm, 
+																   plotSystem,
+																   correctionSelection, 
+																   imagePosInOriginalDat[k], 
+																   trackingMarker, 
+																   k,
+																   sm.getLocationList()
+																   	.get(seedIndex));
+
+						// sm.getLocationList().get(k));
+
+						dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
+								sm.getSortedX().getDouble(k));
+						
+						Display.getDefault().syncExec(new Runnable() {
+							
+							 @Override
+							 public void run() {
+							 plotSystem.clear();
+							 plotSystem.updatePlot2D(output1, null,null);
+							 plotSystem.repaint(true);
+							 outputCurves.updateCurve(dm,
+							 outputCurves.getIntensity().getSelection(), sm);
+							
+							
+							 }
+						 });
+					}
+				}
+
+				for (k = sm.getSliderPos(); k < noImages; k++) {
+
+					if (sm.getFilepathsSortedArray()[k] == nextjok) {
+
+						debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
+						+ " , " + "local nextjok:  " + Integer.toString(nextjok));
+						
+						
+						int trackingMarker = 2;
+						IDataset j = sm.getImages()[k];
+						DataModel dm = dms.get(nextjok);
+						GeometricParametersModel gm = gms.get(nextjok);
+						ExampleModel model = models.get(nextjok);
+
+						int seedIndex = 
+								ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
+																	  sm.getSortedX(), 
+																	  sm.getLocationList());
+
+						IDataset output1 = 
+								DummyProcessingClass.DummyProcess1(sm, 
+																   j, 
+																   model, 
+																   dm, 
+																   gm, 
+																   plotSystem,
+																   correctionSelection, 
+																   imagePosInOriginalDat[k], 
+																   trackingMarker, 
+																   k,
+																   sm.getLocationList().get(seedIndex));
+
+						dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
+								sm.getSortedX().getDouble(k));
+						
+						Display.getDefault().syncExec(new Runnable() {
+							
+							 @Override
+							 public void run() {
+							 plotSystem.clear();
+							 plotSystem.updatePlot2D(output1, null,null);
+							 plotSystem.repaint(true);
+							 outputCurves.updateCurve(dm,
+							 outputCurves.getIntensity().getSelection(), sm);
+							
+							
+							 }
+						 });
+
+					}
+				}
+			}
+
+			doneArray[nextjok] = "done";
+		}
+
 		try {
-			Thread.sleep(timeStep);
+			Thread.sleep(2000*timeStep);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
-		
-		return Status.OK_STATUS;
-	
-	
-	
-	}
-		
-}
 
+//		return Status.OK_STATUS;
+
+	}
+
+	private void debug(String output) {
+		if (DEBUG == 1) {
+			System.out.println(output);
+		}
+	}
+}

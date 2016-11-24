@@ -76,7 +76,7 @@ public class PlotSystem1CompositeView extends Composite {
     		SurfaceScatterPresenter ssp) {
     	
         super(parent, style);
-        new Label(this, SWT.NONE).setText("Operation Window");
+//        new Label(this, SWT.NONE).setText("Operation Window");
         
         this.sm =sm;
         this.model = models.get(sm.getSelection());
@@ -101,23 +101,28 @@ public class PlotSystem1CompositeView extends Composite {
     		int cS, int trackingMarker) {
         
         
-        Group methodSetting = new Group(this, SWT.NULL);
+        Group methodSetting = new Group(this, SWT.FILL);
         GridLayout methodSettingLayout = new GridLayout(2, true);
-	    GridData methodSettingData = new GridData(GridData.BEGINNING);
+	    GridData methodSettingData = new GridData();
 	    methodSettingData .minimumWidth = 50;
+//	    this.setLayout(methodSettingLayout);
+//	    this.setData(methodSettingData);
+//	
 	    methodSetting.setLayout(methodSettingLayout);
 	    methodSetting.setLayoutData(methodSettingData);
-	    
+//	    
 	    comboDropDown0 = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
 	    comboDropDown0.setText("Methodology"); 
 	   	comboDropDown1 = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.RIGHT);
 	   	comboDropDown1.setText("Fit Power");
-	   	comboDropDown2 = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.RIGHT);
+	   	comboDropDown2 = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
 	   	comboDropDown2.setText("Tracker");
 	    boundaryBoxText = new Text(methodSetting, SWT.SINGLE);
 	    boundaryBoxText.setText("Boundary Box");
-
-	    
+	    comboDropDown0.setData(new GridData(SWT.FILL));
+	    comboDropDown1.setData(new GridData(SWT.FILL));
+	    comboDropDown2.setData(new GridData(SWT.FILL));
+	    boundaryBoxText.setData(new GridData(SWT.FILL));
 	    //methodologies = new String[AnalaysisMethodologies.Methodology.values().length];
 	    
 	    for(Methodology  t: AnalaysisMethodologies.Methodology.values()){
@@ -176,29 +181,31 @@ public class PlotSystem1CompositeView extends Composite {
 			}
 	    	
 	    });
-	    
-        Group controlButtons = new Group(this, SWT.NULL);
-        controlButtons.setText("Control Buttons");
-        GridLayout gridLayoutButtons = new GridLayout();
-        gridLayoutButtons.numColumns =2;
-        controlButtons.setLayout(gridLayoutButtons);
-        GridData gridDataButtons = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-        gridDataButtons.horizontalSpan = 1;
-        controlButtons.setLayoutData(gridDataButtons);
-        
-        button = new Button (controlButtons, SWT.PUSH);
-        button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        button1 = new Button (controlButtons, SWT.PUSH);
-        button1.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        button2 = new Button (controlButtons, SWT.PUSH);
+//	    
+//        Group controlButtons = new Group(this, SWT.NULL);
+//        controlButtons.setText("Control Buttons");
+//        GridLayout gridLayoutButtons = new GridLayout();
+//        gridLayoutButtons.numColumns =2;
+//        controlButtons.setLayout(gridLayoutButtons);
+//        GridData gridDataButtons = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+//        gridDataButtons.horizontalSpan = 1;
+//        controlButtons.setLayoutData(gridDataButtons);
+//        
+//        button = new Button (controlButtons, SWT.PUSH);
+//        button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+//        button1 = new Button (controlButtons, SWT.PUSH);
+//        button1.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        button2 = new Button (methodSetting, SWT.PUSH);
         button2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        button3 = new Button (controlButtons, SWT.PUSH);
+        button3 = new Button (methodSetting, SWT.PUSH);
         button3.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
        
-        button.setText ("Proceed?");
-        button1.setText("Run");
+//        button.setText ("Proceed?");
+//        button1.setText("Run");
         button2.setText("Save Parameters");
         button3.setText("Load Parameters");
+        button2.setData(new GridData(SWT.FILL));
+        button3.setData(new GridData(SWT.FILL));
         
         if (extra == 1){
 	        

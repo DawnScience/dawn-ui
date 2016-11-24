@@ -84,7 +84,7 @@ public class RegionSetterZoomedView extends Dialog {
 		///////////////// Left
 		///////////////// SashForm///////////////////////////////////////////////////
 		Group topImage = new Group(left, SWT.NONE);
-		topImage.setText("Top Image");
+//		topImage.setText("Top Image");
 		GridLayout topImageLayout = new GridLayout();
 		topImage.setLayout(topImageLayout);
 		GridData topImageData = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -96,9 +96,7 @@ public class RegionSetterZoomedView extends Dialog {
 		////////////////////////// 2////////////////////////////////////////////////////
 
 		customComposite = new PlotSystemCompositeView(topImage, 
-				SWT.NONE, 
-				models, 
-				sm,
+				SWT.NONE,
 				PlotSystemCompositeDataSetter.imageSetter(models.get(sm.getSelection()), 0),
 				0,
 				ssp.getNoImages(),
@@ -111,8 +109,8 @@ public class RegionSetterZoomedView extends Dialog {
 
 		//////////////////////////////////////////////////////////
 
-		Group mainImage = new Group(left, SWT.NONE);
-		mainImage.setText("Main Image");
+		Group mainImage = new Group(left, SWT.FILL);
+//		mainImage.setText("Main Image");
 		GridLayout mainImageLayout = new GridLayout();
 		mainImage.setLayout(mainImageLayout);
 		GridData mainImageData = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -137,7 +135,7 @@ public class RegionSetterZoomedView extends Dialog {
 		customComposite1.setLayoutData(ld2);
 		//////////////////////////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////////////
-		left.setWeights(new int[] { 72, 28 });
+		left.setWeights(new int[] { 85, 15 });
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////// Right
 		/////////////////////////////////////////////////////////////////////////////// sashform////////////////////////////////////////////////

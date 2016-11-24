@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.dawnsci.surfacescatter.ClosestNoFinder;
 import org.dawnsci.surfacescatter.CurveStateIdentifier;
 import org.dawnsci.surfacescatter.DataModel;
 import org.dawnsci.surfacescatter.ExampleModel;
@@ -11,6 +12,10 @@ import org.dawnsci.surfacescatter.GeometricParametersModel;
 import org.dawnsci.surfacescatter.PlotSystemCompositeDataSetter;
 import org.dawnsci.surfacescatter.SuperModel;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.region.IROIListener;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.january.dataset.AggregateDataset;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.IDataset;
@@ -19,6 +24,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
@@ -40,7 +47,7 @@ public class SurfaceScatterViewStart extends Dialog {
 	
 	private String[] filepaths;
 	private PlotSystemCompositeView customComposite;
-	private MultipleOutputCurvesTable outputCurves;
+	private MultipleOutputCurvesTableView outputCurves;
 	private ArrayList<ExampleModel> models;
 	private ArrayList<DataModel> dms;
 	private ArrayList<GeometricParametersModel> gms;
@@ -60,6 +67,7 @@ public class SurfaceScatterViewStart extends Dialog {
 	private SurfaceScatterViewStart ssvs;
 	private ArrayList<Slider> sliderList;
 	private RegionSetterZoomedView rszv;
+	private int DEBUG =1;
 	
 	
 	public SurfaceScatterViewStart(Shell parentShell, 
@@ -218,9 +226,7 @@ public class SurfaceScatterViewStart extends Dialog {
 /////////////////anaLeft Window 3/////////////////////////////////		
 		IDataset im = PlotSystemCompositeDataSetter.imageSetter(models.get(sm.getSelection()), 0);
 	    customComposite = new PlotSystemCompositeView(anaLeft, 
-	    											SWT.FILL, 
-	    											models, 
-	    											sm,
+	    											SWT.FILL,
 	    											im,
 	    											1,
 	    											numberOfImages, 
@@ -273,7 +279,30 @@ public class SurfaceScatterViewStart extends Dialog {
 			public void widgetSelected(SelectionEvent e) {
 				 int sliderPos = customComposite.getSlider().getSelection();
 				 ssp.sliderMovemementMainImage(sliderPos, customComposite.getPlotSystem());
+				 ssp.sliderZoomedArea(sliderPos, 
+									  customComposite.getGreenRegion().getROI(), 
+									  customComposite.getSubImagePlotSystem());
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
 				
+			}
+		});
+	    
+	    customComposite.getImageNo().addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				customComposite.getImageNo().forceFocus();
+				int k = Integer.parseInt(customComposite.getImageNo().getText());
+				ssp.sliderMovemementMainImage(k, customComposite.getPlotSystem());
+				ssp.sliderZoomedArea(k, 
+						  			 customComposite.getGreenRegion().getROI(), 
+						  			 customComposite.getSubImagePlotSystem());
+				
+				customComposite.getXValue().setText(String.valueOf(sm.getSortedX().getDouble(k)));
 			}
 			
 			@Override
@@ -291,6 +320,10 @@ public class SurfaceScatterViewStart extends Dialog {
 				ssp.runTrackingJob(customComposite.getSubImagePlotSystem()
 									,outputCurves);
 				
+				
+				
+				
+				ssp.stitchAndPresent(outputCurves);
 			}
 			
 			@Override
@@ -304,7 +337,13 @@ public class SurfaceScatterViewStart extends Dialog {
 /////////////////anaRight Window 4/////////////////////////////////		
 		
 	    try {
-			outputCurves = new MultipleOutputCurvesTable(anaRight, SWT.FILL, models, dms, sm);
+			outputCurves = new MultipleOutputCurvesTableView(anaRight, 
+															SWT.FILL, 
+															models, 
+															dms, 
+															sm,
+															0);
+			
 			outputCurves.setLayout(new GridLayout());
 			outputCurves.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		} catch (Exception e) {
@@ -313,29 +352,12 @@ public class SurfaceScatterViewStart extends Dialog {
 		}
 	    
 	    
-outputCurves.getOverlapZoom().addSelectionListener(new SelectionListener() {
-			
-//	    	getParentShell()
-//			, SWT.OPEN, sm, dms, filepaths, models, gms, paramField); 
-	    	
+	    outputCurves.getOverlapZoom().addSelectionListener(new SelectionListener() {
+				    	
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
-				
 				String[] cs = CurveStateIdentifier.CurveStateIdentifier1(outputCurves.getPlotSystem());
-				
-				ArrayList<TableItem> items = new ArrayList<>();
-				
-				Table to = outputCurves.getDatTable();
-				
-				for (int ni = 0; ni<to.getItemCount(); ni++){
-					
-					TableItem no = to.getItem(ni);
-					
-					if (no.getChecked()){
-						items.add(no);
-					}
-				}
 				
 				ArrayList<IDataset> xArrayList = new ArrayList<>();
 				ArrayList<IDataset> yArrayList = new ArrayList<>();
@@ -343,17 +365,10 @@ outputCurves.getOverlapZoom().addSelectionListener(new SelectionListener() {
 				ArrayList<IDataset> yArrayListError = new ArrayList<>();
 				ArrayList<IDataset> yArrayListFhklError = new ArrayList<>();
 				
-				String[] files = new String[items.size()];
 				int f =0;
 				
-				for(int b = 0;b<items.size();b++){
-					
-					int p = (Arrays.asList(datDisplayer.getList().getItems())).indexOf(items.get(b).getText());
-					files[b] = items.get(b).getText();
-					
-					
-					
-					
+				for(int p = 0;p<dms.size();p++){
+										
 					if (dms.get(p).getyList() == null || dms.get(p).getxList() == null) {
 						
 					} else {
@@ -362,12 +377,13 @@ outputCurves.getOverlapZoom().addSelectionListener(new SelectionListener() {
 							yArrayListFhkl.add(dms.get(p).yIDatasetFhkl());
 							yArrayListError.add(dms.get(p).yIDatasetError());
 							yArrayListFhklError.add(dms.get(p).yIDatasetFhklError());
-						}
-						
-			}
+						}	
+				}
 				
-				GeneralOverlapHandler goh = new GeneralOverlapHandler(
-						getParentShell(), SWT.OPEN, sm,
+				GeneralOverlapHandlerView goh = new GeneralOverlapHandlerView(
+						getParentShell(), 
+						SWT.OPEN, 
+						sm,
 						xArrayList,
 						yArrayList,
 						yArrayListError,
@@ -375,7 +391,9 @@ outputCurves.getOverlapZoom().addSelectionListener(new SelectionListener() {
 						yArrayListFhklError,
 						datDisplayer, 
 						dms,
-						files);
+						outputCurves.getPlotSystem(),
+						ssp);
+				
 				goh.open();
 				
 				
@@ -387,6 +405,41 @@ outputCurves.getOverlapZoom().addSelectionListener(new SelectionListener() {
 				
 			}
 		});
+	    
+	    
+	    
+	    outputCurves.getRegionNo().addROIListener(new IROIListener() {
+			
+			@Override
+			public void roiSelected(ROIEvent evt) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void roiDragged(ROIEvent evt) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void roiChanged(ROIEvent evt) {
+
+				if(customComposite.getOutputControl().getSelection()){
+					
+					int xPos = ssp.xPositionFinder(outputCurves.getRegionNo().getROI().getPointX());
+					
+					ssp.updateSliders(ssvs.getSliderList(), xPos);
+					
+					ssp.sliderMovemementMainImage(xPos, 
+							                  	  customComposite.getPlotSystem(), 
+							                  	  customComposite.getSubImagePlotSystem());
+			
+				}
+			}
+			
+		});
+	    	    
 ////////////////////////////////////////////////////////////////////
 		return container;
 	}
@@ -417,10 +470,8 @@ outputCurves.getOverlapZoom().addSelectionListener(new SelectionListener() {
 	
 	public ArrayList<Slider> getSliderList(){
 		
-		if (sliderList != null){
-			sliderList.clear();
-		}
-		
+		sliderList = null;
+				
 		sliderList = new ArrayList<Slider>();
 		
 		sliderList.add(customComposite.getSlider());
@@ -433,5 +484,9 @@ outputCurves.getOverlapZoom().addSelectionListener(new SelectionListener() {
 		return sliderList;
 	}
 	
-	
+	private void debug(String output) {
+		if (DEBUG == 1) {
+			System.out.println(output);
+		}
+	}
 }
