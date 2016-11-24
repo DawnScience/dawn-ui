@@ -212,6 +212,9 @@ public class MapNexusFileBuilderUtils {
 				axes[i] = axis;
 				nxData.setDataset(axis, ax);
 				nxData.setAttribute(null, axis + "_indices", new int[]{i});
+				
+				nxData.setDataset(axis.substring(0,axis.length()-4), ax);
+				nxData.setAttribute(null, axis.substring(0,axis.length()-4) + "_indices", new int[]{i});
 			}
 		}
 		

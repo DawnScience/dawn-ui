@@ -156,7 +156,7 @@ public class MapBeanBuilder {
 			while (it.hasNext()) {
 				Attribute next = it.next();
 				name = next.getName();
-				if (name.endsWith(NexusTreeUtils.NX_INDICES_SUFFIX)) {
+				if (name.endsWith(NexusTreeUtils.NX_AXES_SET +NexusTreeUtils.NX_INDICES_SUFFIX)) {
 					foundx = true;
 					IDataset value = next.getValue();
 					if (value.getSize() != 1) continue;

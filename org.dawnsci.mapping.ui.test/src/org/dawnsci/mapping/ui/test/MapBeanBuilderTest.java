@@ -41,6 +41,7 @@ public class MapBeanBuilderTest {
 
 		IDataHolder data = LoaderFactory.getData(file.getAbsolutePath());
 		MappedDataFileBean buildBean = MapBeanBuilder.buildBean(data.getTree());
+		assertNull(buildBean.getBlocks().get(0).getxAxisForRemapping());
 		assertTrue(buildBean.checkValid());
 	}
 	
