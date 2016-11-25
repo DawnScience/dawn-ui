@@ -33,6 +33,10 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -198,12 +202,32 @@ public class FunctionFittingWidget extends Composite implements IFunctionViewer 
 		detailsPanelContainer = new Composite(sashForm, SWT.NONE);
 		detailsPanelContainer.setBackground(ColorConstants.white);
 		detailsPanelContainer.setLayout(new FillLayout());
-		functionDescription = new Label(sashForm, SWT.WRAP);
+		final ScrolledComposite scrolledComposite = new ScrolledComposite(sashForm, SWT.H_SCROLL | SWT.V_SCROLL);
+		scrolledComposite.setLayout(new FillLayout());
+		scrolledComposite.setBackground(ColorConstants.white);
+		final Composite descriptionComp = new Composite(scrolledComposite, SWT.NONE);
+		descriptionComp.setLayout(new FillLayout());
+		descriptionComp.setBackground(ColorConstants.white);
+
+		functionDescription = new Label(descriptionComp, SWT.WRAP);
 		functionDescription.setText("");
 		sashForm.setBackground(ColorConstants.white);
+		scrolledComposite.setContent(functionDescription);
 		
+		scrolledComposite.setContent(descriptionComp);
+		scrolledComposite.setExpandVertical(true);
+		scrolledComposite.setExpandHorizontal(true);
+		scrolledComposite.addControlListener(new ControlAdapter() {
+			@Override
+			public void controlResized(ControlEvent e) {
+				Rectangle r = scrolledComposite.getClientArea();
+				scrolledComposite.setMinHeight(descriptionComp.computeSize(r.width, SWT.DEFAULT).y);
+				scrolledComposite.setMinWidth(descriptionComp.computeSize(SWT.DEFAULT, r.height).x);
+			}
+		});
+
 		//XXX Formerly {6, 10}, but having more space for functions seemed more important
-		sashForm.setWeights(new int[] { 7, 3, 10});
+		sashForm.setWeights(new int[] { 7, 3, 4});
 
 		if (site != null) {
 			IHandlerService serv = (IHandlerService) site
