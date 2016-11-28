@@ -102,7 +102,10 @@ public class TreeUtils {
 		dirItem.setData(FileViewerConstants.TREEITEMDATA_STUB, viewer); // clear stub flag
 
 		/* Get directory listing */
-		File[] subFiles = (dir != null) ? Utils.getDirectoryList(dir, SortType.NAME, FileTableViewerComparator.ASC, null, true) : null;
+		File[] subFiles = null;
+		if (dir != null) {
+			subFiles = Utils.getDirectoryList(dir, SortType.NAME, FileTableViewerComparator.ASC, null, true);
+		}
 		if (subFiles == null || subFiles.length == 0) {
 			/* Error or no contents */
 			treeItemRemoveAll(dirItem);
