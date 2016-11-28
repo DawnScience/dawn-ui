@@ -62,7 +62,7 @@ public class MapActionUtils {
 	public static IAction getComparisonDialog(final List<AbstractMapData> maps) {
 		final List<IDataset> dataList = new ArrayList<IDataset>(maps.size());
 		for (AbstractMapData map : maps) {
-			dataList.add(map.getData());
+			dataList.add(map.getMap());
 		}
 		IAction action = new Action("Comparison Viewer...") {
 			@Override

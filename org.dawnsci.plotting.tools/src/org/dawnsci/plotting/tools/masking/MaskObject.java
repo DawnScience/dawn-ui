@@ -29,14 +29,17 @@ import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
+import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.january.dataset.BooleanDataset;
 import org.eclipse.january.dataset.Comparisons;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IndexIterator;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
@@ -91,7 +94,8 @@ public class MaskObject {
 	private DefaultOperationHistory operationManager;
 	private ForkJoinPool pool;
 	private PrecisionPoint brushThreshold;
-    
+	private ImageOrigin imageOrigin = ImageOrigin.TOP_LEFT;
+
 	MaskObject() {
 		this.operationManager = new DefaultOperationHistory();
 		operationManager.setLimit(MaskOperation.MASK_CONTEXT, 20);	
@@ -103,7 +107,7 @@ public class MaskObject {
 	 * @param maskObject
 	 */
 	public void sync(MaskObject maskObject) {
-		this.maskDataset = (BooleanDataset)maskObject.maskDataset.clone();
+		setMaskDataset((BooleanDataset)maskObject.maskDataset.clone(), false);
 	}
 
     /**
@@ -135,7 +139,14 @@ public class MaskObject {
 		}
 
 	}
-	
+
+	private static int[] getPoint(int x, int y, IAxis xAxis, IAxis yAxis, boolean transpose) {
+		int px = (int)xAxis.getPositionValue(x);
+		int py = (int)yAxis.getPositionValue(y);
+		int[] point = transpose ? new int[]{py, px} : new int[]{px, py};
+		return point;
+	}
+
 	/**
 	 * Attempts to process a pen shape at a given draw2d location.
 	 * 
@@ -144,7 +155,7 @@ public class MaskObject {
 	 * @param loc
 	 * @param system
 	 */
-	public void process(final Point finishLocation, final IPlottingSystem<?> system, IProgressMonitor monitor) {
+	public void process(final Point finishLocation, final IImageTrace image, final IPlottingSystem<?> system, IProgressMonitor monitor) {
 				
 		ShapeType penShape = ShapeType.valueOf(Activator.getPlottingPreferenceStore().getString(PlottingConstants.MASK_PEN_SHAPE));
         if (penShape==ShapeType.NONE) return;
@@ -171,7 +182,7 @@ public class MaskObject {
         }
         
         MaskOperation op = new MaskOperation(maskDataset, 300);
-        
+		final boolean transpose = !imageOrigin.isOnLeadingDiagonal();
         for (final Point loc : locations) {
         	
 	        monitor.worked(1);
@@ -179,19 +190,19 @@ public class MaskObject {
 	        final List<int[]> span = new ArrayList<int[]>(3);
 	        Display.getDefault().syncExec(new Runnable() {
 	        	public void run() {
-	        		span.add(new int[]{(int)xAxis.getPositionValue(loc.x-rad2), (int)yAxis.getPositionValue(loc.y-rad2)});
-	        		span.add(new int[]{(int)xAxis.getPositionValue(loc.x+rad1), (int)yAxis.getPositionValue(loc.y+rad1)});
-	        		span.add(new int[]{(int)xAxis.getPositionValue(loc.x),      (int)yAxis.getPositionValue(loc.y)});
+	        		span.add(getPoint(loc.x-rad2, loc.y-rad2, xAxis, yAxis, transpose));
+	        		span.add(getPoint(loc.x+rad1, loc.y+rad1, xAxis, yAxis, transpose));
+	        		span.add(getPoint(loc.x, loc.y, xAxis, yAxis, transpose));
 	        	}
 	        });
+	        int[]  cen   = span.get(2);
+	        int radius   = Math.abs(span.get(1)[1]-cen[1]); // do not clip radius
 	        int[]  start = clip(span.get(0));
 	        int[]  end   = clip(span.get(1));
-	        int[]  cen   = span.get(2);
-	        int[]  b     = new int[]{cen[0], start[1]};
-	        int radius   = end[1]-cen[1];
-	
+
 	        boolean mv = maskOut ? Boolean.FALSE : Boolean.TRUE;
-	        
+
+	        sortLimits(start, end);
 	        for (int y = start[1]; y<=end[1]; ++y) {
 	        	for (int x = start[0]; x<=end[0]; ++x) {
 	        		     
@@ -204,33 +215,43 @@ public class MaskObject {
 	        			}
 	        		}
 	        		
-	        		if (penShape==ShapeType.SQUARE) {
-	        			toggleMask(op, mv, y, x);
-	
-	        		} else if (penShape==ShapeType.CIRCLE || penSize<3) {
-	        			
-	        			double r = Math.hypot(x - cen[0], y - cen[1]);
-	                    if (r<=radius) {
-	                    	toggleMask(op, mv, y, x);
-	                    }
-	                    
-	        		} else if (penShape==ShapeType.TRIANGLE) {
-	
-	           			if (x <= b[0] ) { // px<=bx
-	           				double real = y-start[1];
-	           				double dash = 2*(x-start[0]);
-	        				if (real>dash) {
-	        					toggleMask(op, mv, y, 2*cen[0]-x-(cen[0]-start[0]));
-	        				}
-	        			} else { // px>bx
-	        				double real = y-start[1];
-	           				double dash = 2*(x-cen[0]);
-	        				if (real>dash) {
-	        					toggleMask(op, mv, y, x);
-	        				}
-	        			}
-	       			
-	        		}
+					if (penShape == ShapeType.SQUARE) {
+						toggleMask(op, mv, y, x);
+
+					} else if (penShape == ShapeType.CIRCLE || penSize < 3) {
+
+						double r = Math.hypot(x - cen[0], y - cen[1]);
+						if (r <= radius) {
+							toggleMask(op, mv, y, x);
+						}
+
+					} else if (penShape == ShapeType.TRIANGLE) {
+						double ydel;
+						double xdel;
+						switch (imageOrigin) {
+						case BOTTOM_LEFT:
+							xdel = cen[1] - y;
+							ydel = end[0] - x;
+							break;
+						case BOTTOM_RIGHT:
+							ydel = end[1] - y;
+							xdel = x - cen[0];
+							break;
+						case TOP_RIGHT:
+							xdel = cen[1] - y;
+							ydel = x - start[0];
+							break;
+						case TOP_LEFT:
+						default:
+							ydel = y - start[1];
+							xdel = x - cen[0];
+							break;
+						}
+						if (ydel > 2 * Math.abs(xdel)) {
+							toggleMask(op, mv, y, x);
+						}
+
+					}
 	        	}
 	        }
        }
@@ -241,7 +262,17 @@ public class MaskObject {
 			logger.error("Problem processing mask draw.", e);
 		}
 	}
-	
+
+	private void sortLimits(int[] start, int[] end) {
+		for (int i = 0; i < start.length; i++) {
+			int t = start[i];
+			if (t > end[i]) {
+				start[i] = end[i];
+				end[i] = t;
+			}
+		}
+	}
+
 	private final static Collection<Point> lineBresenham(Point from, Point to) {
 		
 		
@@ -320,14 +351,15 @@ public class MaskObject {
 	/**
 	 * Clip to span of image dataset (not 1)
 	 * @param is
-	 * @return
+	 * @return in-place clipped
 	 */
 	private int[] clip(int[] is) {
-		int maxX = imageDataset.getShape()[1]-1;
+		int[] imageShape = imageDataset.getShapeRef();
+		int maxX = imageShape[1]-1;
 		if (is[0]>maxX) is[0] = maxX;
 		if (is[0]<0)    is[0] = 0;
 		
-		int maxY = imageDataset.getShape()[0]-1;
+		int maxY = imageShape[0]-1;
 		if (is[1]>maxY) is[1] = maxY;
 		if (is[1]<0)    is[1] = 0;
         return is;
@@ -390,12 +422,12 @@ public class MaskObject {
 
 			if (validRegions.isEmpty()) return true;
 
-			final MaskOperation op  = new MaskOperation(maskDataset, getMaskDataset().getSize()/16);
-			final int[]      shape  = imageDataset.getShape();
+			final MaskOperation op  = new MaskOperation(maskDataset, maskDataset.getSize()/16);
 			
+			int[] imageShape = imageDataset.getShapeRef();
 			if (Boolean.getBoolean("org.dawnsci.plotting.tools.masking.no.thread.pool")) {
-				MAIN_LOOP: for (int y = 0; y<shape[0]; ++y) {
-					for (int x = 0; x<shape[1]; ++x) {
+				MAIN_LOOP: for (int y = 0; y<imageShape[0]; ++y) {
+					for (int x = 0; x<imageShape[1]; ++x) {
 						for (IRegion region : validRegions) {
 							monitor.worked(1);
 							try {
@@ -412,7 +444,7 @@ public class MaskObject {
 				}
 			} else {
 				// NORMALLY
-				pool.invoke(new MaskRegionsAction(op, shape, validRegions, monitor));
+				pool.invoke(new MaskRegionsAction(op, imageShape, validRegions, monitor));
 			}
 
 			try {
@@ -660,11 +692,11 @@ public class MaskObject {
 		}
 	}
 
-	private void createMaskIfNeeded() {
+	private void createMaskIfNeeded() { // FIXME shape...
 		if (maskDataset == null || !maskDataset.isCompatibleWith(imageDataset)) {
-			maskDataset = DatasetFactory.ones(BooleanDataset.class, imageDataset.getShape());
+			maskDataset = DatasetFactory.ones(BooleanDataset.class, imageDataset.getShapeRef());
 			maskDataset.setName("mask");
-		}	
+		}
 		if (operationManager ==null)  {
 			operationManager = new DefaultOperationHistory();
 			operationManager.setLimit(MaskOperation.MASK_CONTEXT, 20);
@@ -706,8 +738,12 @@ public class MaskObject {
 		this.squarePen = squarePen;
 	}
 
+	public void setImageOrigin(ImageOrigin origin) {
+		imageOrigin = origin;
+	}
+
 	public BooleanDataset getMaskDataset() {
-		return maskDataset;
+		return maskDataset == null ? null : DatasetUtils.rotate90(maskDataset, imageOrigin.ordinal());
 	}
 
 	/**
@@ -716,7 +752,9 @@ public class MaskObject {
 	 */
 	public void setMaskDataset(BooleanDataset maskDataset, boolean requireFill) {
 		this.maskDataset = maskDataset;
-		if (maskDataset!=null && requireFill) maskDataset.fill(true);
+		if (maskDataset != null && requireFill) {
+			maskDataset.fill(true);
+		}
 	}
 
 	public Dataset getImageDataset() {
@@ -728,7 +766,6 @@ public class MaskObject {
 	}
 
 	public void reset() {
-		this.maskDataset = null;
 		if (operationManager!=null) {
 			operationManager.dispose(MaskOperation.MASK_CONTEXT, true, true, true);
 		}

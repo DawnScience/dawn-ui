@@ -14,7 +14,6 @@ import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.histogram.ITransferFunction;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
-import org.eclipse.january.dataset.BooleanDataset;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
@@ -334,9 +333,10 @@ public class SWTImageUtils {
 		}
 		if (bean.isCancelled()) return null;
 		
-		final BooleanDataset mask = bean.getMask() == null ? null
-							: (BooleanDataset) DatasetUtils.cast(bean.getMask(), Dataset.BOOL);
-
+		Dataset mask = DatasetUtils.convertToDataset(bean.getMask());
+		if (mask != null) {
+			mask = DatasetUtils.rotate90(mask, bean.getOrigin().ordinal());
+		}
 		ImageData imageData = null;
 
 		int alpha = bean.getAlpha();

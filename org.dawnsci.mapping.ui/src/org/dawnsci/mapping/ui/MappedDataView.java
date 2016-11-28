@@ -18,6 +18,7 @@ import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
 import org.dawnsci.plotting.views.ToolPageView;
+import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationBean;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -34,6 +35,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.util.LocalSelectionTransfer;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -216,12 +218,13 @@ public class MappedDataView extends ViewPart {
 		viewer.setContentProvider(new MapFileTreeContentProvider());
 		viewer.setLabelProvider(new MapFileCellLabelProvider(plotManager));
 		viewer.setInput(area);
+		ColumnViewerToolTipSupport.enableFor(viewer);
 		viewer.addDoubleClickListener(new IDoubleClickListener() {
 			
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				Object e = ((StructuredSelection)event.getSelection()).getFirstElement();
-				if (e instanceof AbstractMapData) plotManager.updateLayers((AbstractMapData)e);
+				if (e instanceof AbstractMapData || e instanceof MappedDataBlock) plotManager.updateLayers((PlottableMapObject)e);
 				if (e instanceof AssociatedImage) plotManager.addImage((AssociatedImage)e);
 				if (e instanceof MappedDataFile) {
 					MappedDataFile mdf = (MappedDataFile)e;

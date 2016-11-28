@@ -66,6 +66,7 @@ import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.IndexIterator;
 import org.eclipse.january.dataset.Maths;
 import org.eclipse.january.dataset.RGBDataset;
+import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.nebula.visualization.widgets.figureparts.ColorMapRamp;
 import org.eclipse.nebula.visualization.xygraph.figures.Axis;
@@ -1419,7 +1420,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 		Dataset im = null;
 		try {
-			im = DatasetUtils.sliceAndConvertLazyDataset(lazy);
+			//don't take view of Dataset, could lose metadata listeners
+			im = (lazy instanceof Dataset) ? (Dataset)lazy : DatasetUtils.sliceAndConvertLazyDataset(lazy);
 		} catch (DatasetException e) {
 		}
 		if (im == null) {
@@ -1865,32 +1867,38 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * @param bd
 	 */
 	public void setMask(IDataset mask) {
-				
-		if (mask!=null && image!=null && !image.isCompatibleWith(mask)) {
-			
-			BooleanDataset maskDataset = DatasetFactory.zeros(BooleanDataset.class, image.getShape());
-			maskDataset.setName("mask");
-			maskDataset.fill(true);
+		Dataset dMask = DatasetUtils.convertToDataset(mask);
+		if (dMask != null) {
+			dMask = DatasetUtils.rotate90(dMask, -getImageOrigin().ordinal());
+		}
+		if (dMask != null && image != null) {
+			int[] iShape = image.getShapeRef();
+			int[] mShape = dMask.getShapeRef();
+			if (!ShapeUtils.areShapesCompatible(iShape, mShape)) {
+				BooleanDataset maskDataset = DatasetFactory.zeros(BooleanDataset.class, iShape);
+				maskDataset.setName("mask");
+				maskDataset.fill(true);
 
-			final int yMin = Math.min(maskDataset.getShape()[0], mask.getShape()[0]);
-			final int xMin = Math.min(maskDataset.getShape()[1], mask.getShape()[1]);
-			for (int y = 0; y<yMin; ++y) {
-				for (int x = 0; x<xMin; ++x) {
-			        try {
-			        	// We only add the falses 
-			        	if (!mask.getBoolean(y, x)) {
-			        		maskDataset.set(Boolean.FALSE, y, x);
-			        	}
-			        } catch (Throwable ignored) {
-			        	continue;
-			        }
+				final int yMin = Math.min(iShape[0], mShape[0]);
+				final int xMin = Math.min(iShape[1], mShape[1]);
+				for (int y = 0; y < yMin; ++y) {
+					for (int x = 0; x < xMin; ++x) {
+						try {
+							// We only add the falses
+							if (!dMask.getBoolean(y, x)) {
+								maskDataset.set(Boolean.FALSE, y, x);
+							}
+						} catch (Throwable ignored) {
+							continue;
+						}
+					}
 				}
-			}
 
-			mask = maskDataset;
+				dMask = maskDataset;
+			}
 		}
 		if (maskMap!=null) maskMap.clear();
-		fullMask = DatasetUtils.convertToDataset(mask);
+		fullMask = dMask;
 		remask();
 	}
 
@@ -1996,11 +2004,18 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (TraceUtils.isAxisCustom(yl, shape[0])) {
 			TraceUtils.transform(yl, 1, ret);
 		}
-        return ret;
+
+		return ret;
 	}
 
 	@Override
 	public double[] getPointInImageCoordinates(final double[] axisLocation) throws Exception {
+		if (!getImageOrigin().isOnLeadingDiagonal()) {
+			double t = axisLocation[0];
+			axisLocation[0] = axisLocation[1];
+			axisLocation[1] = t;
+		}
+
 		if (axes == null || axes.size() == 0 || image == null)
 			return axisLocation;
 

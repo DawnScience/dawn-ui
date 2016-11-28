@@ -167,8 +167,23 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 			public void nanBoundsChanged(PaletteEvent evt) {
 				updateIcons(evt.getTrace().getNanBound().getColor());
 			}
+
+			@Override
+			public void imageOriginChanged(PaletteEvent evt) {
+				if (maskObject != null) {
+					final IImageTrace trace = evt.getImageTrace();
+					maskObject.setImageOrigin(trace.getImageOrigin());
+					Display.getDefault().syncExec(new Runnable() {
+						public void run() {
+							// NOTE the mask will have a reference kept and
+							// will downsample with the data.
+							trace.setMask(maskObject.getMaskDataset()); 
+						}
+					});
+				}
+			}
 		};
-		
+
 		this.clickListener = new MaskMouseListener();
 		
 		this.regionListener = new IRegionListener.Stub() {
@@ -703,12 +718,6 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
         	if ("direct".equals(drawType)) {
         		directDraw.setSelection(true);
 				layout.topControl = directComp;
-				ShapeType penShape = ShapeType.NONE;
-				if (Activator.getPlottingPreferenceStore().contains(PlottingConstants.MASK_PEN_SHAPE)) {
-					penShape = ShapeType.valueOf(Activator.getPlottingPreferenceStore().getString(PlottingConstants.MASK_PEN_SHAPE));
-				}
-				ActionContributionItem item= ((ActionContributionItem)directToolbar.find(penShape.getId()));
-				if (item!=null) item.getAction().run();
      		
         	} else if ("region".equals(drawType)) {
         		regionDraw.setSelection(true);
@@ -842,8 +851,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 			public void run() {
 				ShapeType penShape = ShapeType.NONE;
 				Activator.getPlottingPreferenceStore().setValue(PlottingConstants.MASK_PEN_SHAPE, penShape.name());
-				if (viewer != null)
-					viewer.setSelectedCursor(null);
+				viewer.setSelectedCursor(null);
 			}
 		};
 		action.setId(ShapeType.NONE.getId());
@@ -1397,7 +1405,8 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 	@Override
 	public void activate() {
 		super.activate();
-		setEnabled(getImageTrace()!=null);
+		IImageTrace trace = getImageTrace();
+		setEnabled(trace != null);
 		
 		currentMaskingTool = this;
 		if (getPlottingSystem()!=null) {
@@ -1412,8 +1421,11 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 				region.addROIListener(this.regionBoundsListener);
 			}
 			
-			if (getImageTrace()!=null) {
-				getImageTrace().addPaletteListener(paletteListener);
+			if (trace!=null) {
+				trace.addPaletteListener(paletteListener);
+				if (maskObject != null) {
+					maskObject.setImageOrigin(trace.getImageOrigin());
+				}
 			}
 			
 			this.viewer = (AbstractPlottingViewer)getPlottingSystem().getAdapter(AbstractPlottingViewer.class);
@@ -1431,8 +1443,16 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		if (autoApplyMask!=null) {
 			autoApplyMask.setEnabled(!(getPlottingSystem().getPart() instanceof IViewPart));
 		}
+
+		// setup brush
+		ShapeType penShape = ShapeType.NONE;
+		if (Activator.getPlottingPreferenceStore().contains(PlottingConstants.MASK_PEN_SHAPE)) {
+			penShape = ShapeType.valueOf(Activator.getPlottingPreferenceStore().getString(PlottingConstants.MASK_PEN_SHAPE));
+		}
+		ActionContributionItem item= ((ActionContributionItem)directToolbar.find(penShape.getId()));
+		if (item!=null) item.getAction().run();
 	}
-	
+
 	@Override
 	public void deactivate() {
 		super.deactivate();
@@ -1522,7 +1542,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 				
 				if (region!=null && !isRegionsEnabled) return Status.CANCEL_STATUS;
-				
+
 				if (resetMask && !maskObject.isIgnoreAlreadyMasked())  {
 					maskObject.setMaskDataset(null, false);
 				}
@@ -1547,7 +1567,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 				
 				// Just process a changing region
 				if (location!=null) {
-					maskObject.process(location, getPlottingSystem(), monitor);
+					maskObject.process(location, image, getPlottingSystem(), monitor);
 					
 				} else if (region!=null) {
 					if (!maskObject.isSupportedRegion(region)) return Status.CANCEL_STATUS;

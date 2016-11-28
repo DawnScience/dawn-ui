@@ -268,12 +268,20 @@ public class SliceSystemImpl extends AbstractSliceSystem {
         
         Display.getDefault().syncExec(new Runnable() {
         	public void run() {
-               viewer.setSelection(viewer.getSelection()); 
-               
-               if (sliceMeta!=null && sliceMeta.getFilePath()!=null) {
+               viewer.setSelection(viewer.getSelection());
+				String path = null;
+				if (sliceMeta != null) {
+					path = sliceMeta.getFilePath();
+				}
+
+				if (path == null && sliceObject != null) {
+					path = sliceObject.getPath();
+				}
+
+				if (path != null) {
 	               final IWorkbenchPart part = getPlottingSystem() != null ? getPlottingSystem().getPart() : null;
 	               if (part!=null && part instanceof ITitledEditor) {
-	            	   final File file = new File(sliceMeta.getFilePath());
+	            	   final File file = new File(path);
 	            	   ((ITitledEditor)part).setPartTitle(file.getName());
 	               }
                }
