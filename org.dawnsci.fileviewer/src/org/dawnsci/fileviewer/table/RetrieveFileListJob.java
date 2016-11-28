@@ -36,7 +36,9 @@ public class RetrieveFileListJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		dirList = Utils.getDirectoryList(workerStateDir, sortType, direction, filter, useRegex);
+		dirList = Utils.getDirectoryList(workerStateDir, sortType, direction, filter, useRegex, monitor);
+		if (dirList == null)
+			return Status.CANCEL_STATUS;
 		return Status.OK_STATUS;
 	}
 
