@@ -111,14 +111,18 @@ public class PlotSystem1CompositeView extends Composite {
 	    methodSetting.setLayout(methodSettingLayout);
 	    methodSetting.setLayoutData(methodSettingData);
 //	    
+	    
+	    String[] setup = ssp.getAnalysisSetup(0);
+	    
+	    
 	    comboDropDown0 = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
-	    comboDropDown0.setText("Methodology"); 
+	    comboDropDown0.setText(setup[0]); 
 	   	comboDropDown1 = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.RIGHT);
-	   	comboDropDown1.setText("Fit Power");
+	   	comboDropDown1.setText(setup[1]);
 	   	comboDropDown2 = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
-	   	comboDropDown2.setText("Tracker");
+	   	comboDropDown2.setText(setup[2]);
 	    boundaryBoxText = new Text(methodSetting, SWT.SINGLE);
-	    boundaryBoxText.setText("Boundary Box");
+	    boundaryBoxText.setText("000" + setup[3]);
 	    comboDropDown0.setData(new GridData(SWT.FILL));
 	    comboDropDown1.setData(new GridData(SWT.FILL));
 	    comboDropDown2.setData(new GridData(SWT.FILL));
@@ -227,9 +231,16 @@ public class PlotSystem1CompositeView extends Composite {
 					}
 					
 					j.squeeze();
-					IDataset output = DummyProcessingClass.DummyProcess(sm, j, model,
-							dm, gm, customComposite.getPlotSystem(), 
-							cS, selection, trackingMarker);
+					IDataset output = DummyProcessingClass.DummyProcess(sm, 
+																		j, 
+																		model,
+																		dm, 
+																		gm, 
+																		customComposite.getPlotSystem(), 
+																		cS, 
+																		selection, 
+																		trackingMarker,
+																		ssp.getSliderPos());
 					plotSystem1.createPlot2D(output, null, null);
 					}
 				else {
@@ -249,9 +260,16 @@ public class PlotSystem1CompositeView extends Composite {
 				    		IDataset i = model.getDatImages().getSlice(slice);
 				    		i.squeeze();
 				    		IDataset image1 = i;
-							IDataset output = DummyProcessingClass.DummyProcess(sm ,i, model, 
-									dm,gm, customComposite.getPlotSystem(), 
-									cS, selection, trackingMarker);
+							IDataset output = DummyProcessingClass.DummyProcess(sm,
+																				i, 
+																				model, 
+																				dm,
+																				gm, 
+																				customComposite.getPlotSystem(), 
+																				cS, 
+																				selection, 
+																				trackingMarker, 
+																				ssp.getSliderPos());
 							plotSystem1.createPlot2D(output, null, null);
 				    	}
 					
@@ -271,16 +289,22 @@ public class PlotSystem1CompositeView extends Composite {
 				    		slice.setSlice(0, selection, selection+1, 1);
 				    		IDataset i = model.getDatImages().getSlice(slice);
 				    		i.squeeze();
-							IDataset output = DummyProcessingClass.DummyProcess(sm, i, 
-									model, dm, gm, customComposite.getPlotSystem()
-									, cS, selection, trackingMarker);
+							IDataset output = DummyProcessingClass.DummyProcess(sm, 
+																				i, 
+																				model, 
+																				dm, 
+																				gm, 
+																				customComposite.getPlotSystem(), 
+																				cS, 
+																				selection, 
+																				trackingMarker,
+																				ssp.getSliderPos());
 							plotSystem1.createPlot2D(output, null, null);
 							plotSystem1.repaint();
 				    	}
 					
 				    } 
 				    catch (Exception f) {
-						// TODO Auto-generated catch block
 						f.printStackTrace();
 					}
 				}
@@ -335,11 +359,16 @@ public class PlotSystem1CompositeView extends Composite {
    }
    
    public void generalUpdate(){
+	  
+	   
 	   int methodologySelection = comboDropDown0.getSelectionIndex();
-       int fitPowerSelection = comboDropDown1.getSelectionIndex();
-       int trackerSelection = comboDropDown2.getSelectionIndex();
-       String boundaryBox = boundaryBoxText.getText();
-       ssp.updateAnalysisMethdodology(methodologySelection, 
+	   int fitPowerSelection = comboDropDown1.getSelectionIndex();
+	   int trackerSelection = comboDropDown2.getSelectionIndex();
+       
+	   
+	   
+	   String boundaryBox = boundaryBoxText.getText();
+       ssp.updateAnalysisMethodology(methodologySelection, 
      		  						 fitPowerSelection, 
      		  						 trackerSelection, 
      		  						 boundaryBox);

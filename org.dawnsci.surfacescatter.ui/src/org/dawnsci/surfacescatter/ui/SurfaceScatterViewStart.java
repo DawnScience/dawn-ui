@@ -11,6 +11,9 @@ import org.dawnsci.surfacescatter.ExampleModel;
 import org.dawnsci.surfacescatter.GeometricParametersModel;
 import org.dawnsci.surfacescatter.PlotSystemCompositeDataSetter;
 import org.dawnsci.surfacescatter.SuperModel;
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -26,6 +29,10 @@ import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
@@ -37,6 +44,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+
+import uk.ac.diamond.scisoft.analysis.roi.XAxis;
+
 import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
@@ -68,6 +78,7 @@ public class SurfaceScatterViewStart extends Dialog {
 	private ArrayList<Slider> sliderList;
 	private RegionSetterZoomedView rszv;
 	private int DEBUG =1;
+	private boolean modify = true;
 	
 	
 	public SurfaceScatterViewStart(Shell parentShell, 
@@ -220,7 +231,6 @@ public class SurfaceScatterViewStart extends Dialog {
 		anaRight.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, true));
 		
 		analysisSash.setWeights(new int[]{50,50});
-	    		
 		
 //////////////////////Analysis Left//////////////////////////////
 /////////////////anaLeft Window 3/////////////////////////////////		
@@ -271,17 +281,17 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 		});
 	    
-	    
-	    
 	    customComposite.getSlider().addSelectionListener(new SelectionListener() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+			
 				 int sliderPos = customComposite.getSlider().getSelection();
 				 ssp.sliderMovemementMainImage(sliderPos, customComposite.getPlotSystem());
 				 ssp.sliderZoomedArea(sliderPos, 
-									  customComposite.getGreenRegion().getROI(), 
-									  customComposite.getSubImagePlotSystem());
+						 			  customComposite.getGreenRegion().getROI(), 
+						 			  customComposite.getSubImagePlotSystem());
+				ssvs.updateIndicators(sliderPos);
 			}
 			
 			@Override
@@ -291,27 +301,62 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 		});
 	    
-	    customComposite.getImageNo().addSelectionListener(new SelectionListener() {
+	    customComposite.getImageNo().addFocusListener(new FocusListener() {
 			
 			@Override
-			public void widgetSelected(SelectionEvent e) {
-				customComposite.getImageNo().forceFocus();
-				int k = Integer.parseInt(customComposite.getImageNo().getText());
-				ssp.sliderMovemementMainImage(k, customComposite.getPlotSystem());
-				ssp.sliderZoomedArea(k, 
-						  			 customComposite.getGreenRegion().getROI(), 
-						  			 customComposite.getSubImagePlotSystem());
-				
-				customComposite.getXValue().setText(String.valueOf(sm.getSortedX().getDouble(k)));
+			public void focusLost(FocusEvent e) {
+				if (modify == true){
+					modify = false;
+					int k = Integer.parseInt(customComposite.getImageNo().getText());
+					ssp.sliderMovemementMainImage(k, customComposite.getPlotSystem());
+					ssp.sliderZoomedArea(k, 
+							  			 customComposite.getGreenRegion().getROI(), 
+							  			 customComposite.getSubImagePlotSystem());
+					ssp.updateSliders(ssvs.getSliderList(), k);
+//					if(customComposite.getXValue().equals(ssp.getXValue(k)) == false){
+//						customComposite.getXValue().setText(String.valueOf(ssp.getXValue(k)));
+//					}
+//					if(customComposite.getImageNo().equals(String.valueOf(k)) == false){
+//						customComposite.getImageNo().setText(String.valueOf(k));
+//					}
+					ssvs.updateIndicators(k);
+					modify = true;
+				}				
 			}
 			
 			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
+			public void focusGained(FocusEvent e) {
 				// TODO Auto-generated method stub
 				
 			}
 		});
 	    
+	    customComposite.getXValue().addFocusListener(new FocusListener() {
+			
+			@Override
+			public void focusLost(FocusEvent e) {
+				if(modify == true){
+					modify = false;
+					double in = Double.parseDouble(customComposite.getXValue().getText());
+					int k = ssp.closestImageNo(in);
+//					double l = ssp.closestXValue(in);
+					
+					ssp.sliderMovemementMainImage(k, customComposite.getPlotSystem());
+					ssp.sliderZoomedArea(k, 
+							  			 customComposite.getGreenRegion().getROI(), 
+							  			 customComposite.getSubImagePlotSystem());
+					
+					ssp.updateSliders(ssvs.getSliderList(), k);
+					
+					ssvs.updateIndicators(k);
+					modify = true;
+				}		
+			}
+			
+			@Override
+			public void focusGained(FocusEvent e) {
+			}
+		});
 	    
 	    customComposite.getRun().addSelectionListener(new SelectionListener() {
 			
@@ -328,8 +373,6 @@ public class SurfaceScatterViewStart extends Dialog {
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
 			}
 		});
 	    
@@ -350,7 +393,6 @@ public class SurfaceScatterViewStart extends Dialog {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	    
 	    
 	    outputCurves.getOverlapZoom().addSelectionListener(new SelectionListener() {
 				    	
@@ -406,35 +448,32 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 		});
 	    
-	    
-	    
 	    outputCurves.getRegionNo().addROIListener(new IROIListener() {
 			
 			@Override
 			public void roiSelected(ROIEvent evt) {
-				// TODO Auto-generated method stub
-				
 			}
 			
 			@Override
 			public void roiDragged(ROIEvent evt) {
-				// TODO Auto-generated method stub
-				
 			}
 			
 			@Override
 			public void roiChanged(ROIEvent evt) {
 
-				if(customComposite.getOutputControl().getSelection()){
+				if(customComposite.getOutputControl().getSelection() && modify == true){
 					
 					int xPos = ssp.xPositionFinder(outputCurves.getRegionNo().getROI().getPointX());
 					
 					ssp.updateSliders(ssvs.getSliderList(), xPos);
 					
 					ssp.sliderMovemementMainImage(xPos, 
-							                  	  customComposite.getPlotSystem(), 
-							                  	  customComposite.getSubImagePlotSystem());
-			
+							                  	  customComposite.getPlotSystem());
+					ssp.sliderZoomedArea(xPos, 
+				 			  customComposite.getGreenRegion().getROI(), 
+				 			  customComposite.getSubImagePlotSystem());
+					
+					ssvs.updateIndicators(xPos);
 				}
 			}
 			
@@ -466,6 +505,24 @@ public class SurfaceScatterViewStart extends Dialog {
 	
 	public PlotSystemCompositeView getPlotSystemCompositeView(){
 		return customComposite;
+	}
+	
+	
+	public void updateIndicators(int k){
+		modify = false;
+		if(customComposite.getXValue().equals(ssp.getXValue(k)) == false){
+			customComposite.getXValue().setText(String.valueOf(ssp.getXValue(k)));
+		}
+		if(customComposite.getImageNo().equals(String.valueOf(k)) == false){
+			customComposite.getImageNo().setText(String.valueOf(k));
+		}	
+//		if(outputCurves.getRegionNo().getROI().isPlot()){
+			
+			RectangularROI r = new RectangularROI(ssp.getXValue(k),0.1,0,0.1,0);
+			outputCurves.getRegionNo().setROI(r);
+//		}
+		
+		modify = true;
 	}
 	
 	public ArrayList<Slider> getSliderList(){

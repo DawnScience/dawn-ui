@@ -34,16 +34,15 @@ public class MultipleOutputCurvesTableView extends Composite {
 	private ILineTrace lt;
 	private ExampleModel model;
 	private DataModel dm;
-	private ArrayList<TableItem> datSelector;
-	private Button overlap;
+//	private ArrayList<TableItem> datSelector;
 	private Button sc;
 	private Button save;
 	private Button intensitySelect;
 	private Group overlapSelection;
-	private Table datTable;
 	private Button errors;
 	private Button overlapZoom;
 	private int extra = 0;
+	private IRegion marker;
 	
 	public MultipleOutputCurvesTableView (Composite parent, 
 										  int style, 
@@ -73,40 +72,19 @@ public class MultipleOutputCurvesTableView extends Composite {
 
 	public void createContents(ExampleModel model, SuperModel sm, DataModel dm) {
 		
-		
 		SashForm sashForm= new SashForm(this, SWT.VERTICAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		
-		if (extra == 1){
-			
-			datTable = new Table(sashForm, SWT.MULTI | SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
-			GridData datTableData = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
-			datTableData.heightHint = 5;
-			datTable.setLayoutData(datTableData);
-		
-			datSelector = new ArrayList<>();
-		
-			for (int i = 0; i < sm.getFilepaths().length; i++) {
-				TableItem it = new  TableItem(datTable, SWT.NONE);
-				it.setText(StringUtils.substringAfterLast(sm.getFilepaths()[i], "/"));
-				datSelector.add(it);
-			}
-		}
-		
 		overlapSelection = new Group(sashForm, SWT.NULL);
-		GridLayout overlapSelectionLayout = new GridLayout(4, true);
+		GridLayout overlapSelectionLayout = new GridLayout(3, true);
 		GridData overlapSelectionData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		overlapSelectionData.minimumWidth = 50;
 		overlapSelection.setLayout(overlapSelectionLayout);
 		overlapSelection.setLayoutData(overlapSelectionData);
-		overlapSelection.setText("Overlap Controls");
+		overlapSelection.setText("Controls");
 		
 		errors = new Button(overlapSelection, SWT.PUSH);
 		errors.setText("Errors");
-		
-		overlap = new Button(overlapSelection, SWT.PUSH);
-		overlap.setText("Overlap");
 		
 		intensitySelect = new Button(overlapSelection, SWT.PUSH);
 		intensitySelect.setText("Intensity?");
@@ -150,6 +128,7 @@ public class MultipleOutputCurvesTableView extends Composite {
 		plotSystem4.addTrace(lt);
 		try {
 			imageNo = plotSystem4.createRegion("Image", RegionType.XAXIS_LINE);
+			imageNo.setShowPosition(true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -159,9 +138,19 @@ public class MultipleOutputCurvesTableView extends Composite {
 		overlapZoom = new Button(sashForm, SWT.PUSH);
 		overlapZoom.setText("Overlap Zoom");
 		
+//		 try {
+//				marker = plotSystem4.createRegion("Marker", RegionType.XAXIS);
+//				marker.setShowPosition(true);
+//			} catch (Exception e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			}
+//		
+		
 		sashForm.setWeights(new int[]{10,5,80,5});
 		
-
+		
+		
 	}
 
 	public Composite getComposite() {
@@ -214,15 +203,9 @@ public class MultipleOutputCurvesTableView extends Composite {
 		plotSystem4.clear();
 		plotSystem4.addTrace(lt);
 		plotSystem4.repaint();
-		
 
 	}
-	
-	public Button getOverlap(){
-		return overlap;
-	}
-	
-	
+		
 	public void addToDatSelector(){
 		if(this.getSc() == null){
 			sc = new Button(overlapSelection, SWT.CHECK);
@@ -239,7 +222,6 @@ public class MultipleOutputCurvesTableView extends Composite {
 		return sc;
 	}
 	
-	
 	public Group getOverlapSelectionGroup(){
 		return overlapSelection;
 	}
@@ -255,25 +237,12 @@ public class MultipleOutputCurvesTableView extends Composite {
 	public Button getSave(){
 		return save;
 	}
-	
-	public void setDatTable(SuperModel sm){
-		datTable.removeAll();;
-		for (int i = 0; i < sm.getFilepaths().length; i++) {
-			TableItem it = new  TableItem(datTable, SWT.NONE);
-			it.setText(StringUtils.substringAfterLast(sm.getFilepaths()[i], "/"));
-		}
-		this.layout();
-	}
-	
-	public Table getDatTable(){
-		return datTable;
-	}
-	
-	public ArrayList<TableItem> getDatSelector(){
-		return datSelector;
-	}
 		
 	public Button getErrors(){
 		return errors;
-	}	
+	}
+	
+	public IRegion getMarker(){
+		return marker;
+	}
 }

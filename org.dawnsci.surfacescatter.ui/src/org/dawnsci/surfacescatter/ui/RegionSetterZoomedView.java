@@ -19,6 +19,8 @@ import org.eclipse.january.dataset.Maths;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
@@ -45,6 +47,7 @@ public class RegionSetterZoomedView extends Dialog {
 	private PlotSystem1CompositeView customComposite1;
 	private SurfaceScatterPresenter ssp;
 	private SurfaceScatterViewStart ssvs;
+	private boolean modify = true;
 
 	public RegionSetterZoomedView(Shell parentShell, 
 			int style, 
@@ -182,7 +185,70 @@ public class RegionSetterZoomedView extends Dialog {
 		});
 
 		//////////////////////////////////////////////////////////////////////////////////
-
+		 customComposite.getImageNo().addFocusListener(new FocusListener() {
+				
+				@Override
+				public void focusLost(FocusEvent e) {
+					if (modify == true){
+						modify = false;
+						int k = Integer.parseInt(customComposite.getImageNo().getText());
+						ssp.sliderMovemementMainImage(k, customComposite.getPlotSystem());
+//						ssp.sliderZoomedArea(k, 
+//								  			 customComposite.getGreenRegion().getROI(), 
+//								  			 customComposite.getSubImagePlotSystem());
+						ssp.updateSliders(ssvs.getSliderList(), k);
+						if(customComposite.getXValue().equals(ssp.getXValue(k)) == false){
+							customComposite.getXValue().setText(String.valueOf(ssp.getXValue(k)));
+						}
+						if(customComposite.getImageNo().equals(String.valueOf(k)) == false){
+							customComposite.getImageNo().setText(String.valueOf(k));
+						}	
+						generalUpdate();
+						modify = true;
+					}				
+				}
+				
+				@Override
+				public void focusGained(FocusEvent e) {
+					// TODO Auto-generated method stub
+					
+				}
+			});
+		
+		  customComposite.getXValue().addFocusListener(new FocusListener() {
+				
+				@Override
+				public void focusLost(FocusEvent e) {
+					if(modify == true){
+						modify = false;
+						double in = Double.parseDouble(customComposite.getXValue().getText());
+						int k = ssp.closestImageNo(in);
+						double l = ssp.closestXValue(in);
+						
+						ssp.sliderMovemementMainImage(k, customComposite.getPlotSystem());
+//						ssp.sliderZoomedArea(k, 
+//								  			 customComposite.getGreenRegion().getROI(), 
+//								  			 customComposite.getSubImagePlotSystem());
+						
+						ssp.updateSliders(ssvs.getSliderList(), k);
+						if(customComposite.getXValue().equals(String.valueOf(l)) == false){
+							customComposite.getXValue().setText(String.valueOf(l));
+						}
+						if(customComposite.getImageNo().equals(String.valueOf(k)) == false){
+							customComposite.getImageNo().setText(String.valueOf(k));
+						}
+						
+						generalUpdate();
+						modify = true;
+					}		
+				}
+				
+				@Override
+				public void focusGained(FocusEvent e) {
+				}
+			});		
+		
+		
 		/////////////////////////////////////////////////////////////////////////////////
 		///////////////// Slider///////////////////////////
 		////////////////////////////////////////////////////
@@ -192,9 +258,23 @@ public class RegionSetterZoomedView extends Dialog {
 			public void widgetSelected(SelectionEvent e) {
 
 //				if (customComposite.getOutputControl().getSelection() == false) {
+				if(modify == true){
+					modify = false;
+					int sliderPos = customComposite.getSlider().getSelection();
+					
+					if(customComposite.getXValue().equals(ssp.getXValue(sliderPos)) == false){
+						customComposite.getXValue().setText(String.valueOf(ssp.getXValue(sliderPos)));
+					}
+					if(customComposite.getImageNo().equals(String.valueOf(sliderPos)) == false){
+						customComposite.getImageNo().setText(String.valueOf(sliderPos));
+					}	
+					
+					ssvs.updateIndicators(sliderPos);
+					
+					modify = true;
+				}
+				
 				generalUpdate();
-//				}
-
 			}
 
 			@Override
@@ -212,7 +292,6 @@ public class RegionSetterZoomedView extends Dialog {
 		/////////////////////////////////////////////////////////////////////////////////// examiner/////////////////////////////
 		////////////////////////////////////////////////////////////////////////
 		
-
 		customComposite2.getRegions()[0].addROIListener(new IROIListener() {
 
 			@Override
@@ -231,10 +310,8 @@ public class RegionSetterZoomedView extends Dialog {
 
 			}
 
-
 		});
-		
-		
+				
 		///////////////////////////////////////////////////////////////////////////////
 		customComposite2.getRegions()[1].addROIListener(new IROIListener() {
 
@@ -253,7 +330,6 @@ public class RegionSetterZoomedView extends Dialog {
 				generalUpdate();
 
 			}
-
 
 		});
 
@@ -388,8 +464,6 @@ public class RegionSetterZoomedView extends Dialog {
 		
 		customComposite2.getPlotSystem1().clearAnnotations();
 		customComposite2.getPlotSystem3().clearAnnotations();
-		
-		
 		
 		customComposite2.getPlotSystem1().autoscaleAxes();
 		customComposite2.getPlotSystem3().autoscaleAxes();

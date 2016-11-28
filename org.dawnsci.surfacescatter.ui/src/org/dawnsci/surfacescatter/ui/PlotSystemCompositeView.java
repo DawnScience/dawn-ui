@@ -62,7 +62,6 @@ public class PlotSystemCompositeView extends Composite {
         super(parent, style);
 
         this.slider=slider;
-      
         this.extra = extra;
         this.numberOfImages = numberOfImages;
         this.nullImage = nullImage;
@@ -105,27 +104,42 @@ public class PlotSystemCompositeView extends Composite {
         }
       
         Group indicators = new Group(this, SWT.NONE);
-		GridLayout indicatorsLayout = new GridLayout(3,true);
-		indicators.setLayout(indicatorsLayout);
+    	GridLayout indicatorsLayout = new GridLayout(3,true);
+    	
+        if(extra == 1){
+        	indicatorsLayout = new GridLayout(4,true);
+    	}
+        indicators.setLayout(indicatorsLayout);
 		GridData indicatorsData = new GridData(SWT.FILL, SWT.NULL, true, false);
 		indicators.setLayoutData(indicatorsData);
-        
-        outputControl = new Button (indicators, SWT.CHECK);
+		if(extra == 1){
+			Label outputControlLabel = new Label(indicators, SWT.NULL);
+			outputControlLabel.setText("Take Ouput Marker");
+		}
+		Label xValueLabel = new Label(indicators, SWT.NULL);
+		xValueLabel.setText("Variable");
+		
+		Label imageNumberLabel = new Label(indicators, SWT.NULL);
+		imageNumberLabel.setText("Image No.");
+		
+		Button go = new Button(indicators, SWT.PUSH | SWT.FILL);
+		go.setText("Go");
+		
+       
  
         if(extra == 1){
+        	 outputControl = new Button (indicators, SWT.CHECK);
         	 outputControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-	        outputControl.setText("Take Output Marker");
         }
         else{
-        	outputControl.setVisible(false);
         }
         
         xValue = new Text(indicators,SWT.SINGLE);
-        xValue.setText("Variable");
+        xValue.setText(String.valueOf(ssp.getXValue(slider.getSelection())));
         
         imageNumber = new Text(indicators,SWT.SINGLE);
-        imageNumber.setText("Image No.");
-
+        imageNumber.setText("   " + slider.getSelection());
+        
         
       
         ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(this, null);
@@ -159,7 +173,6 @@ public class PlotSystemCompositeView extends Composite {
         }
         
 		plotSystem.addRegion(region);
-		
 		
 		RectangularROI startROI = new RectangularROI(100,100,50,50,0);
 		

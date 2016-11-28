@@ -16,6 +16,7 @@ import org.dawnsci.surfacescatter.DummyProcessingClass;
 import org.dawnsci.surfacescatter.ExampleModel;
 import org.dawnsci.surfacescatter.GeometricParametersModel;
 import org.dawnsci.surfacescatter.PlotSystem2DataSetter;
+import org.dawnsci.surfacescatter.PolynomialOverlap;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
 import org.dawnsci.surfacescatter.StitchedOutputWithErrors;
 import org.dawnsci.surfacescatter.SuperModel;
@@ -155,6 +156,8 @@ public class SurfaceScatterPresenter {
 			});
 		}
 
+		updateAnalysisMethodology(0, 3, 0, "10");
+		
 		Dataset xArrayCon = DatasetUtils.concatenate(xArray, 0);
 		Dataset imageCon = DatasetUtils.concatenate(imageArray, 0);
 
@@ -232,6 +235,13 @@ public class SurfaceScatterPresenter {
 			m.setLenPt(LenPt);
 			m.setROI(green);
 		}
+		
+		for (DataModel dm :dms){
+			dm.setInitialLenPt(LenPt);
+		}
+		
+		
+		sm.setInitialLenPt(LenPt);
 	}
 
 	public void sliderZoomedArea(int sliderPos, IROI box, IPlottingSystem<Composite>... pS) {
@@ -244,11 +254,19 @@ public class SurfaceScatterPresenter {
 		}
 	}
 	
-	public double closestImageNo(double in){
+	public int closestImageNo(double in){
 		int out = ClosestNoFinder.closestNoPos(in, sm.getSortedX());
 		return out;
 	}
+
+	public double closestXValue(double in){
+		double out = ClosestNoFinder.closestNo(in, sm.getSortedX());
+		return out;
+	}
 	
+	public double getXValue(int k){
+		return sm.getSortedX().getDouble(k);
+	}
 
 	public Dataset subImage(int sliderPos, IROI box) {
 
@@ -317,17 +335,42 @@ public class SurfaceScatterPresenter {
 		}
 	}
 
-	public void updateAnalysisMethdodology(int methodlogySelection, int fitPowerSelection, int trackerSelection,
+	public void updateAnalysisMethodology(int methodologySelection, int fitPowerSelection, int trackerSelection,
 			String boundaryBox) {
 
 		for (ExampleModel model : models) {
-			model.setMethodology(Methodology.values()[methodlogySelection]);
-			model.setFitPower(AnalaysisMethodologies.toFitPower(fitPowerSelection));
-			model.setTrackerType(TrackingMethodology.intToTracker1(trackerSelection));
+			
+			if(methodologySelection !=-1){
+				model.setMethodology(Methodology.values()[methodologySelection]);
+		       }
+			if(fitPowerSelection !=-1){
+				model.setFitPower(AnalaysisMethodologies.toFitPower(fitPowerSelection));
+		       }
+			if(trackerSelection !=-1){
+				model.setTrackerType(TrackingMethodology.intToTracker1(trackerSelection));
+			}
+				
 			model.setBoundaryBox(Integer.parseInt(boundaryBox));
+		
 		}
 	}
 
+	public String[] getAnalysisSetup(int k){
+		
+		String[] setup = new String[4];
+		
+		int jok = sm.getFilepathsSortedArray()[k];
+		
+		setup[0] = AnalaysisMethodologies.toString(models.get(jok).getMethodology());
+		setup[1] = String.valueOf(AnalaysisMethodologies.toInt(models.get(jok).getFitPower()));
+		setup[2] = TrackingMethodology.toString(models.get(jok).getTrackerType());
+		setup[3] = String.valueOf(models.get(jok).getBoundaryBox());
+		
+		return setup;
+	}
+	
+	
+	
 	public int getNoImages() {
 		return noImages;
 	}
@@ -530,6 +573,11 @@ class trackingJob {
 		for(ExampleModel em: models){
 			em.setInput(null);
 		}
+		
+		for(DataModel dm :dms){
+			dm.resetAll();
+		}
+		sm.setLocationList(null);
 
 		
 		
@@ -828,9 +876,6 @@ class trackingJob2 {
 		else if (sm.getSliderPos() != 0) {
 
 			for (k = (sm.getSliderPos()); k >= 0; k--) {
-				// ssp.updateSliders(ssp.getSsvs().getSliderList(), k);
-				// ssp.sliderMovemementMainImage(k,
-				// ssp.getSsvs().getPlotSystemCompositeView().getPlotSystem());
 
 				if (sm.getFilepathsSortedArray()[k] == jok) {
 
@@ -854,8 +899,6 @@ class trackingJob2 {
 
 			for (k = sm.getSliderPos(); k < noImages; k++) {
 
-				// ssp.sliderMovemementMainImage(k,
-				// ssp.getSsvs().getPlotSystemCompositeView().getPlotSystem());
 				if (sm.getFilepathsSortedArray()[k] == jok) {
 
 					
@@ -917,8 +960,18 @@ class trackingJob2 {
 
 			int nextjok = sm.getFilepathsSortedArray()[nextk];
 
+			debug("nextk :" + nextk);
+			debug("nextjok :" + nextjok);
+			debug("doneArray[nextjok]: " + doneArray[nextjok]);
+			
+			
+			
 			if (imagePosInOriginalDat[nextk] == 0) {
 
+				
+				
+				debug("In the while loop for imagePosInOriginalDat[nextk] == 0");
+				
 				for (k = nextk; k < noImages; k++) {
 
 					if (sm.getFilepathsSortedArray()[k] == nextjok) {
@@ -935,11 +988,50 @@ class trackingJob2 {
 						DataModel dm = dms.get(jokLocal);
 						GeometricParametersModel gm = gms.get(jokLocal);
 						ExampleModel model = models.get(jokLocal);
-						int seedIndex = 
-								ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
-																	  sm.getSortedX(), 
-																	  sm.getLocationList());
-
+						
+						
+						if(dm.getLocationList() == null){
+							
+							int seedIndex = 
+									ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
+																		  sm.getSortedX(), 
+																		  sm.getLocationList());
+	
+							int nearestCompletedDatFileNo = sm.getFilepathsSortedArray()[seedIndex];
+							
+							
+							ArrayList<double[]> seedList = dms.get(nearestCompletedDatFileNo).getLocationList();
+							ArrayList<Double> lList = dms.get(nearestCompletedDatFileNo).getxList();
+							
+							Dataset yValues = DatasetFactory.zeros(seedList.size());
+							Dataset xValues = DatasetFactory.zeros(seedList.size());
+							Dataset lValues = DatasetFactory.zeros(seedList.size());
+							
+							for(int op = 0; op<seedList.size(); op++){
+								
+								double x = seedList.get(op)[1];
+								double y = seedList.get(op)[0];
+								double l = lList.get(op);
+								
+								xValues.set(x, op);
+								yValues.set(y, op);
+								lValues.set(l, op);
+		
+							}
+							
+							double[] seedLocation = PolynomialOverlap.extrapolatedLocation(sm.getSortedX().getDouble(k),
+																						   lValues, 
+																						   xValues, 
+																						   yValues, 
+																						   sm.getInitialLenPt()[0],
+																						   2);
+							dm.setSeedLocation(seedLocation);
+							
+							debug("!!!!!!!!!!!!!!!     }}}}}{{{{{{{{ seedlocation[0] : " + seedLocation[0] +" + " + "seedlocation[1] :" + seedLocation[1]);
+						
+						}	
+						
+						
 						IDataset output1 = 
 								DummyProcessingClass.DummyProcess1(sm, 
 																   j, 
@@ -951,7 +1043,7 @@ class trackingJob2 {
 																   imagePosInOriginalDat[k], 
 																   trackingMarker, 
 																   k,
-																   sm.getLocationList().get(seedIndex));
+																   dm.getSeedLocation());
 
 						dm.addxList(sm.getSortedX().getDouble(k));
 						
@@ -970,6 +1062,7 @@ class trackingJob2 {
 						 });
 
 					}
+					doneArray[nextjok] = "done";
 				}
 			}
 
@@ -989,11 +1082,49 @@ class trackingJob2 {
 						GeometricParametersModel gm = gms.get(nextjok);
 						ExampleModel model = models.get(nextjok);
 						
-						int seedIndex = 
-								ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
-																	  sm.getSortedX(), 
-																	  sm.getLocationList());
-
+						if(dm.getLocationList() == null){
+							
+							int seedIndex = 
+									ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
+																		  sm.getSortedX(), 
+																		  sm.getLocationList());
+	
+							int nearestCompletedDatFileNo = sm.getFilepathsSortedArray()[seedIndex];
+							
+							
+							ArrayList<double[]> seedList = dms.get(nearestCompletedDatFileNo).getLocationList();
+							ArrayList<Double> lList = dms.get(nearestCompletedDatFileNo).getxList();
+							
+							Dataset yValues = DatasetFactory.zeros(seedList.size());
+							Dataset xValues = DatasetFactory.zeros(seedList.size());
+							Dataset lValues = DatasetFactory.zeros(seedList.size());
+							
+							for(int op = 0; op<seedList.size(); op++){
+								
+								double x = seedList.get(op)[1];
+								double y = seedList.get(op)[0];
+								double l = lList.get(op);
+								
+								xValues.set(x, op);
+								yValues.set(y, op);
+								lValues.set(l, op);
+		
+							}
+							
+							double[] seedLocation = PolynomialOverlap.extrapolatedLocation(sm.getSortedX().getDouble(k),
+																						   lValues, 
+																						   xValues, 
+																						   yValues, 
+																						   sm.getInitialLenPt()[0],
+																						   2);
+							dm.setSeedLocation(seedLocation);
+							
+							debug("!!!!!!!!!!!!!!!     }}}}}{{{{{{{{ seedlocation[0] : " + seedLocation[0] +" + " + "seedlocation[1] :" + seedLocation[1]);
+							
+						
+						}	
+						
+						
 						IDataset output1 = 
 								DummyProcessingClass.DummyProcess1(sm, 
 																   j, 
@@ -1005,10 +1136,7 @@ class trackingJob2 {
 																   imagePosInOriginalDat[k], 
 																   trackingMarker, 
 																   k,
-																   sm.getLocationList()
-																   	.get(seedIndex));
-
-						// sm.getLocationList().get(k));
+																   dm.getSeedLocation());
 
 						dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
 								sm.getSortedX().getDouble(k));
@@ -1043,11 +1171,47 @@ class trackingJob2 {
 						GeometricParametersModel gm = gms.get(nextjok);
 						ExampleModel model = models.get(nextjok);
 
-						int seedIndex = 
-								ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
-																	  sm.getSortedX(), 
-																	  sm.getLocationList());
-
+						
+						if(dm.getLocationList() == null){
+							
+							int seedIndex = 
+									ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
+																		  sm.getSortedX(), 
+																		  sm.getLocationList());
+	
+							int nearestCompletedDatFileNo = sm.getFilepathsSortedArray()[seedIndex];
+							
+							
+							ArrayList<double[]> seedList = dms.get(nearestCompletedDatFileNo).getLocationList();
+							ArrayList<Double> lList = dms.get(nearestCompletedDatFileNo).getxList();
+							
+							Dataset yValues = DatasetFactory.zeros(seedList.size());
+							Dataset xValues = DatasetFactory.zeros(seedList.size());
+							Dataset lValues = DatasetFactory.zeros(seedList.size());
+							
+							for(int op = 0; op<seedList.size(); op++){
+								
+								double x = seedList.get(op)[1];
+								double y = seedList.get(op)[0];
+								double l = lList.get(op);
+								
+								xValues.set(x, op);
+								yValues.set(y, op);
+								lValues.set(l, op);
+		
+							}
+							
+							double[] seedLocation = PolynomialOverlap.extrapolatedLocation(sm.getSortedX().getDouble(k),
+																						   lValues, 
+																						   xValues, 
+																						   yValues, 
+																						   sm.getInitialLenPt()[0],
+																						   2);
+							dm.setSeedLocation(seedLocation);
+						
+						}	
+						
+						
 						IDataset output1 = 
 								DummyProcessingClass.DummyProcess1(sm, 
 																   j, 
@@ -1059,7 +1223,7 @@ class trackingJob2 {
 																   imagePosInOriginalDat[k], 
 																   trackingMarker, 
 																   k,
-																   sm.getLocationList().get(seedIndex));
+																   dm.getSeedLocation());
 
 						dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
 								sm.getSortedX().getDouble(k));
@@ -1077,22 +1241,18 @@ class trackingJob2 {
 							
 							 }
 						 });
-
 					}
 				}
+				doneArray[nextjok] = "done";
 			}
-
-			doneArray[nextjok] = "done";
 		}
 
 		try {
 			Thread.sleep(2000*timeStep);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-//		return Status.OK_STATUS;
 
 	}
 
