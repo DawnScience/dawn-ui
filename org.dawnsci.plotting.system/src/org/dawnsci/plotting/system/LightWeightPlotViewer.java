@@ -911,7 +911,9 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		}
 		String n = getName(x,rootName);
 		// only override if axis dataset has name
-		xAxis.setTitle((n != null && n.trim().length() > 0)? n : XAXIS_DEFAULT_NAME);
+		if (n != null && n.trim().length() > 0) {
+			xAxis.setTitle(n);
+		}
 
 		//create a trace data provider, which will provide the data to the trace.
 		int iplot = 0;
