@@ -28,6 +28,7 @@ public class ImportMappedDataWizard extends Wizard {
 	
 	public ImportMappedDataWizard(String filePath, Map<String,int[]> datasetNames, IMetadata meta) {
 		this.datasetNames = datasetNames;
+		mdfbean.setScanRank(2);
 		try {
 			populateNexusMaps(meta);
 		} catch (Exception e) {
@@ -56,6 +57,8 @@ public class ImportMappedDataWizard extends Wizard {
 				persistedList = p.unmarshal(jsonArray,MappedDataFileBean[].class);
 				for (MappedDataFileBean d : persistedList) {
 					if (d != null && datasetNames.containsKey(d.getBlocks().get(0).getName())){
+						int scanRank = d.getBlocks().get(0).getxAxisForRemapping() == null ? 2 :1;
+						d.setScanRank(scanRank);
 						mdfbean = d;
 						break;
 					}
