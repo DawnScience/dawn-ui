@@ -62,7 +62,7 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 		disconnect();
 		this.dataset = lz;
 		axes = null;
-		calculateRange(lz);
+		range = calculateRange(lz);
 	}
 	
 	@Override
