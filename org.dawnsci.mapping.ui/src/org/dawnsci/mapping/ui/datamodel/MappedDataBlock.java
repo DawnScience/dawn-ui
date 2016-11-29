@@ -196,6 +196,8 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	
 	public ILazyDataset getLiveSpectrum(int x, int y) {
 		
+		if (!connected) update();
+		
 		((IDatasetConnector)dataset).refreshShape();
 		
 		axes.update();
@@ -208,7 +210,7 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 		IDataset slice2;
 		try {
 			slice2 = dataset.getSlice(slice);
-		} catch (DatasetException e) {
+		} catch (Exception e) {
 			logger.error("Could not get data from lazy dataset", e);
 			return null;
 		}
