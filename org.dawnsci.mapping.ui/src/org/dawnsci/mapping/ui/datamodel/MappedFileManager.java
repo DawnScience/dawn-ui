@@ -310,6 +310,7 @@ public class MappedFileManager {
 								b = MapBeanBuilder.buildBean(tree,x,y);
 							}
 						} catch (Exception e) {
+							logger.debug("Can't automatically build bean from nexus tags",e.getMessage());
 							//ignore
 						}
 

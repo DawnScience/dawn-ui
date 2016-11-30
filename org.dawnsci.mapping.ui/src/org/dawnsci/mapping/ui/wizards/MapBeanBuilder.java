@@ -126,7 +126,7 @@ public class MapBeanBuilder {
 			datasets.add(dataInfo);
 		}
 		
-		if (names == null) {
+		if (names == null && !datasets.isEmpty()) {
 			
 			int minRank = Integer.MAX_VALUE;
 			DataInfo min = null;
@@ -137,6 +137,7 @@ public class MapBeanBuilder {
 					min = d;
 				}
 			}
+			
 			
 			boolean allFound = false;
 			
