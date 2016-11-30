@@ -16,6 +16,8 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -138,16 +140,10 @@ public class MultipleOutputCurvesTableView extends Composite {
 		overlapZoom = new Button(sashForm, SWT.PUSH);
 		overlapZoom.setText("Overlap Zoom");
 		
-//		 try {
-//				marker = plotSystem4.createRegion("Marker", RegionType.XAXIS);
-//				marker.setShowPosition(true);
-//			} catch (Exception e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			}
-//		
+
 		
 		sashForm.setWeights(new int[]{10,5,80,5});
+				
 		
 		
 		

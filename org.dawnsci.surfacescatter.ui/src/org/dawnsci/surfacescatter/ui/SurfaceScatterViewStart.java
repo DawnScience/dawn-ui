@@ -1,5 +1,6 @@
 package org.dawnsci.surfacescatter.ui;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,6 +44,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
@@ -398,7 +400,8 @@ public class SurfaceScatterViewStart extends Dialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				ssp.runTrackingJob(customComposite.getSubImagePlotSystem()
-									,outputCurves);
+									,outputCurves.getPlotSystem()
+									, customComposite.getPlotSystem());
 				
 				
 				
@@ -512,6 +515,38 @@ public class SurfaceScatterViewStart extends Dialog {
 				}
 			}
 			
+		});
+	    
+	    
+	    outputCurves.getSave().addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				FileDialog fd = new FileDialog(getParentShell(), SWT.OPEN); 
+				
+				String stitle = "r";
+				String path = "p";
+				
+				if (fd.open() != null) {
+					stitle = fd.getFileName();
+					path = fd.getFilterPath();
+				
+				}
+				
+				String title = path + File.separator + stitle;
+				
+				
+				String[] fr = CurveStateIdentifier.CurveStateIdentifier1(outputCurves.getPlotSystem());
+				
+				ssp.genXSave(title,fr);
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
 		});
 	    	    
 ////////////////////////////////////////////////////////////////////
