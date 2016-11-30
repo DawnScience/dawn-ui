@@ -8,6 +8,7 @@ import org.dawnsci.surfacescatter.DataModel;
 import org.dawnsci.surfacescatter.DummyProcessingClass;
 import org.dawnsci.surfacescatter.ExampleModel;
 import org.dawnsci.surfacescatter.GeometricParametersModel;
+import org.dawnsci.surfacescatter.OverlapUIModel;
 import org.dawnsci.surfacescatter.ui.GeometricParametersWindows;
 import org.dawnsci.surfacescatter.PlotSystem2DataSetter;
 import org.dawnsci.surfacescatter.PlotSystemCompositeDataSetter;
@@ -52,7 +53,7 @@ public class GeneralOverlapHandlerView extends Dialog {
     private ArrayList<IDataset> yArrayListError;
     private ArrayList<IDataset> yArrayListFhkl;
     private ArrayList<IDataset> yArrayListFhklError;
-    private DatDisplayer datDisplayer;
+  //  private DatDisplayer datDisplayer;
     private ArrayList<DataModel> dms;
     private Button export;
     private SurfaceScatterPresenter ssp;
@@ -83,7 +84,7 @@ public class GeneralOverlapHandlerView extends Dialog {
 	    this.yArrayListFhklError = yArrayListFhklError;
 	    this.sm =sm;
 	    this.dms = dms;
-	    this.datDisplayer =datDisplayer;
+	    //this.datDisplayer =datDisplayer;
 	    this.parentPs = parentPs;
 	    this.ssp = ssp;
 //	    this.filepaths = filepaths;
@@ -140,7 +141,7 @@ public class GeneralOverlapHandlerView extends Dialog {
 												   yArrayListError,
 												   yArrayListFhkl,
 												   yArrayListFhklError,
-												   datDisplayer, 
+												 // datDisplayer, 
 												   dms, 
 												   sm,
 												   "Overlap Test", 

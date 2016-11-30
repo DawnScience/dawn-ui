@@ -2,6 +2,7 @@ package org.dawnsci.surfacescatter.ui;
 
 import java.util.ArrayList;
 
+import org.dawnsci.surfacescatter.OverlapUIModel;
 import org.dawnsci.surfacescatter.PolynomialOverlap;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;

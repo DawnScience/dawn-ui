@@ -3,6 +3,7 @@ package org.dawnsci.surfacescatter.ui;
 import java.util.ArrayList;
 import java.util.Collections;import javax.xml.bind.attachment.AttachmentUnmarshaller;
 
+import org.dawnsci.surfacescatter.OverlapUIModel;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.january.DatasetException;

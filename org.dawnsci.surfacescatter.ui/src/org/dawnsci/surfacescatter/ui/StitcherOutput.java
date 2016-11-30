@@ -9,6 +9,7 @@ import java.util.List;
 import org.dawnsci.spectrum.ui.file.IContain1DData;
 import org.dawnsci.spectrum.ui.processing.AbstractProcess;
 import org.dawnsci.spectrum.ui.utils.Contain1DDataImpl;
+import org.dawnsci.surfacescatter.OverlapUIModel;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;

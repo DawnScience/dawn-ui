@@ -8,6 +8,7 @@ import org.dawnsci.surfacescatter.DataModel;
 import org.dawnsci.surfacescatter.DummyProcessingClass;
 import org.dawnsci.surfacescatter.ExampleModel;
 import org.dawnsci.surfacescatter.GeometricParametersModel;
+import org.dawnsci.surfacescatter.OverlapUIModel;
 import org.dawnsci.surfacescatter.ui.GeometricParametersWindows;
 import org.dawnsci.surfacescatter.PlotSystem2DataSetter;
 import org.dawnsci.surfacescatter.PlotSystemCompositeDataSetter;
@@ -131,7 +132,7 @@ public class GeneralOverlapHandler extends Dialog {
 							    	yArrayListError,
 							   		yArrayListFhkl,
 						 			yArrayListFhklError,
-						 			datDisplayer, 
+					//	 			datDisplayer, 
 							    	dms, 
 							    	sm,
 							    	"Overlap Test", 

@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
+import org.dawnsci.surfacescatter.OverlapUIModel;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;

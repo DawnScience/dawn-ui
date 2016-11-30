@@ -4,7 +4,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.TreeMap;
 
 import org.apache.commons.lang.StringUtils;
@@ -22,10 +21,6 @@ import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
 import org.dawnsci.surfacescatter.StitchedOutputWithErrors;
 import org.dawnsci.surfacescatter.SuperModel;
 import org.dawnsci.surfacescatter.TrackingMethodology;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
@@ -1447,7 +1442,7 @@ class MovieJob {
 						tempLoc = sm.getLocationList().get(k);
 					
 					
-						RectangularROI newROI = new RectangularROI(tempLoc[1],tempLoc[0],sm.getInitialLenPt()[0][0],sm.getInitialLenPt()[0][1],0);
+						RectangularROI newROI = new RectangularROI(tempLoc[0],tempLoc[1],sm.getInitialLenPt()[0][0],sm.getInitialLenPt()[0][1],0);
 						
 						
 						
@@ -1473,7 +1468,7 @@ class MovieJob {
 						debug("Repaint k ascending: "  + k);
 				 }
 				 
-				 for( int k = sm.getSliderPos() - 1; k<=0; k--){
+				 for( int k = sm.getSliderPos() - 1; k>=0; k--){
 							
 						tempImage = sm.getImages()[k];
 						subTempImage = sm.getBackgroundDatArray().get(k);

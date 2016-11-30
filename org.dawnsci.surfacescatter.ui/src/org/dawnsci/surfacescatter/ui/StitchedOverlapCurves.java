@@ -9,6 +9,7 @@ import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.spectrum.ui.file.IContain1DData;
 import org.dawnsci.spectrum.ui.utils.Contain1DDataImpl;
 import org.dawnsci.surfacescatter.DataModel;
+import org.dawnsci.surfacescatter.OverlapUIModel;
 import org.dawnsci.surfacescatter.StitchedOutputWithErrors;
 import org.dawnsci.surfacescatter.SuperModel;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -36,7 +37,7 @@ public class StitchedOverlapCurves extends Composite {
     private ArrayList<IDataset> yArrayListError;
     private ArrayList<IDataset> yArrayListFhkl;
     private ArrayList<IDataset> yArrayListFhklError;
-    private DatDisplayer datDisplayer;
+   // private DatDisplayer datDisplayer;
     private ArrayList<DataModel> dms;
     private SuperModel sm;
     private ILineTrace lt1;
@@ -48,7 +49,7 @@ public class StitchedOverlapCurves extends Composite {
 			ArrayList<IDataset> yArrayListError,
 			ArrayList<IDataset> yArrayListFhkl,
 			ArrayList<IDataset> yArrayListFhklError,
-			DatDisplayer datDisplayer,
+			//DatDisplayer datDisplayer,
 			ArrayList<DataModel> dms,
 			SuperModel sm,		
     		String title, 
@@ -72,7 +73,7 @@ public class StitchedOverlapCurves extends Composite {
         this.yArrayListFhklError = yArrayListFhklError;
         this.sm =sm;
         this.dms = dms;
-        this.datDisplayer =datDisplayer;
+        //this.datDisplayer =datDisplayer;
         
         this.createContents(xArrayList,
     			yArrayList,
@@ -132,7 +133,7 @@ public class StitchedOverlapCurves extends Composite {
 						yArrayListFhklError, 
 						dms,
 						sm,
-						datDisplayer,
+						//datDisplayer,
 						model);
 				
 				Dataset[] sortedAttenuatedDatasets = new Dataset[2];
