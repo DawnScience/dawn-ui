@@ -19,6 +19,8 @@
 -Dcom.isencia.require.file.source=true
 -Dosgi.locking=none
 -Dpydev.funding.hide=true
+-Dosgi.framework.extensions=org.eclipse.fx.osgi
+-Dorg.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService.url=http://dmarket.diamond.ac.uk:8080/mpc -Dorg.eclipse.epp.internal.mpc.core.service.DefaultCatalogService.url=http://dmarket.diamond.ac.uk:8080/mpc
       </vmArgs>
       <vmArgsLin>-Xmx2048m
       </vmArgsLin>
