@@ -4,6 +4,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeMap;
 
 import org.apache.commons.lang.StringUtils;
@@ -21,10 +22,17 @@ import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
 import org.dawnsci.surfacescatter.StitchedOutputWithErrors;
 import org.dawnsci.surfacescatter.SuperModel;
 import org.dawnsci.surfacescatter.TrackingMethodology;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
@@ -32,6 +40,8 @@ import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -52,6 +62,10 @@ public class SurfaceScatterPresenter {
 	private int noImages;
 	private SurfaceScatterViewStart ssvs;
 	private int DEBUG = 1;
+	private IRegion background;
+	private IDataset tempImage;
+	private IDataset subTempImage;
+	private double[] tempLoc;
 
 	public SurfaceScatterPresenter(Shell parentShell, String[] filepaths) {
 
@@ -405,6 +419,114 @@ public class SurfaceScatterPresenter {
 		return sm.getSliderPos();
 	}
 
+	public void runReplay(IPlottingSystem<Composite> pS,
+						  IPlottingSystem<Composite> subPS){
+		
+		MovieJob mJ = new MovieJob();
+		mJ.setSuperModel(sm);
+		mJ.setPS(pS);
+		mJ.setSubPS(subPS);
+		mJ.setTime(220);
+//		if(mJ.getState() == Job.RUNNING) {
+//			mJ.cancel();
+//		}
+//		mJ.schedule();
+		mJ.run();	
+		
+//		Display.getDefault().syncExec(new Runnable() {
+//			
+//			 @Override
+//			 public void run() {
+				 	
+//				for(int k = sm.getSliderPos(); k<sm.getImages().length; k++){
+//						
+//					tempImage = sm.getImages()[k];
+//					subTempImage = sm.getBackgroundDatArray().get(k);
+//					tempLoc = sm.getLocationList().get(k);
+//				
+//					
+//					debug("Repaint k ascending 1: "  + k);
+//					
+//					try {
+//						if (pS.getRegion("Background Region")!=null){
+//							pS.removeRegion(pS.getRegion("Background Region"));
+//						}
+//						background = pS.createRegion("Background Region", RegionType.BOX);
+//					} 
+//					catch (Exception e) {
+//						e.printStackTrace();
+//					}
+//					
+//					pS.addRegion(background);
+//					RectangularROI newROI = new RectangularROI(tempLoc[1],tempLoc[0],sm.getInitialLenPt()[0][0],sm.getInitialLenPt()[0][1],0);
+//					background.setROI(newROI);
+//					
+//					Display display = Display.getCurrent();
+//			        Color blue = display.getSystemColor(SWT.COLOR_BLUE);
+//					background.setRegionColor(blue);
+//				 
+//					try {
+//						Thread.sleep(220);
+//					} catch (InterruptedException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//					pS.repaint(true);
+//					
+//					subPS.repaint(true);
+//					
+//					
+//					debug("Repaint k ascending 2: "  + k);
+//			 }
+//			 
+//			 for(int k = (sm.getSliderPos() - 1); k>=0; k--){
+//						
+//					tempImage = sm.getImages()[k];
+//					subTempImage = sm.getBackgroundDatArray().get(k);
+//					tempLoc = sm.getLocationList().get(k);
+//						
+//					debug("Repaint k descending 1: "  + k);
+//					
+//				 	pS.updatePlot2D(tempImage, null, null);
+//					subPS.updatePlot2D(subTempImage, null, null);
+//					
+//					try {
+//						if (pS.getRegion("Background Region")!=null){
+//							pS.removeRegion(pS.getRegion("Background Region"));
+//						}
+//							
+//						background = pS.createRegion("Background Region", RegionType.BOX);
+//					} catch (Exception e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//					
+//					pS.addRegion(background);
+//					RectangularROI newROI = new RectangularROI(tempLoc[1],tempLoc[0],sm.getInitialLenPt()[0][0],sm.getInitialLenPt()[0][1],0);
+//					background.setROI(newROI);
+//					
+//					Display display = Display.getCurrent();
+//			        Color blue = display.getSystemColor(SWT.COLOR_BLUE);
+//					background.setRegionColor(blue);
+//				 
+//			 	
+//				 	try {
+//						Thread.sleep(220);
+//					} catch (InterruptedException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//					pS.repaint(true);
+//					
+//					subPS.repaint(true);
+//					
+//					debug("Repaint k descending 2: "  + k);
+//			 	}
+			 }
+//		});
+
+//	}
+
 	public void runTrackingJob(IPlottingSystem<Composite> ps, MultipleOutputCurvesTableView outputCurves) {
 
 		sm.resetAll();
@@ -427,41 +549,7 @@ public class SurfaceScatterPresenter {
 		tj.setOutputCurves(outputCurves);
 		tj.setTimeStep(Math.round((2 / noImages)));
 		tj.setSsp(this);
-		tj.run();
-
-		
-//		tj.schedule();
-		
-		
-		
-		
-		
-//		tj.run(null);
-		
-//		try {
-//			tj.join();
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-		
-//		
-//		BusyIndicator.showWhile(Display.getCurrent(), new Runnable() {
-//
-//			@Override
-//			public void run() {
-//				tj.schedule();
-//				
-//				try {
-//					tj.join();
-//				} catch (InterruptedException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}
-//		});
-
-		
+		tj.runTJ1();
 
 	}
 
@@ -490,9 +578,6 @@ public class SurfaceScatterPresenter {
 
 	}
 	
-
-
-
 
 	private void debug(String output) {
 		if (DEBUG == 1) {
@@ -566,7 +651,7 @@ class trackingJob {
 
 	@SuppressWarnings("unchecked")
 	
-	protected  void run(){
+	protected  void runTJ1(){
 //		ISTATUS
 //		(IProgressMonitor monitor)
 		
@@ -621,7 +706,9 @@ class trackingJob {
 																		 k);
 
 					dm.addxList(sm.getSortedX().getDouble(k));
-
+					sm.addBackgroundDatArray(sm.getImages().length, k, output1);
+					
+					
 					 Display.getDefault().syncExec(new Runnable() {
 					
 					 @Override
@@ -657,20 +744,21 @@ class trackingJob {
 					IDataset output1 = DummyProcessingClass.DummyProcess(sm, j, model, dm, gm, plotSystem,
 							correctionSelection, imagePosInOriginalDat[k], trackingMarker, k);
 
+					sm.addBackgroundDatArray(sm.getImages().length, k, output1);
+					
 					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
 							sm.getSortedX().getDouble(k));
 
-					Display.getDefault().syncExec(new Runnable() {
-					
-					 @Override
-					 public void run() {
-					 plotSystem.clear();
-					 plotSystem.updatePlot2D(output1, null,null);
-					 plotSystem.repaint(true);
-					 outputCurves.updateCurve(dm,
-					 outputCurves.getIntensity().getSelection(), sm);
-					 }
-					 });
+//					Display.getDefault().syncExec(new Runnable() {
+//					
+//					 public void run() {
+//					 plotSystem.clear();
+//					 plotSystem.updatePlot2D(output1, null,null);
+//					 plotSystem.repaint(true);
+//					 outputCurves.updateCurve(dm,
+//					 outputCurves.getIntensity().getSelection(), sm);
+//					 }
+//					 });
 				}
 
 				for (k = sm.getSliderPos(); k < noImages; k++) {
@@ -690,22 +778,24 @@ class trackingJob {
 					IDataset output1 = DummyProcessingClass.DummyProcess(sm, j, model, dm, gm, plotSystem,
 							correctionSelection, imagePosInOriginalDat[k], trackingMarker, k);
 
+					sm.addBackgroundDatArray(sm.getImages().length, k, output1);
+					
 					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
 							sm.getSortedX().getDouble(k));
 
-					 Display.getDefault().syncExec(new Runnable() {
-					
-					 @Override
-					 public void run() {
-					 plotSystem.clear();
-					 plotSystem.updatePlot2D(output1, null,null);
-					 plotSystem.repaint(true);
-					 outputCurves.updateCurve(dm,
-					 outputCurves.getIntensity().getSelection(), sm);
-					
-					
-					 }
-					 });
+//					 Display.getDefault().syncExec(new Runnable() {
+//					
+//					 @Override
+//					 public void run() {
+//					 plotSystem.clear();
+//					 plotSystem.updatePlot2D(output1, null,null);
+//					 plotSystem.repaint(true);
+//					 outputCurves.updateCurve(dm,
+//					 outputCurves.getIntensity().getSelection(), sm);
+//					
+//					
+//					 }
+//					 });
 				}
 
 			}
@@ -724,7 +814,7 @@ class trackingJob {
 			tj.setOutputCurves(outputCurves);
 			tj.setTimeStep(Math.round(2 / sm.getImages().length));
 			tj.setSsp(ssp);
-			tj.run();
+			tj.runTJ2();
 //			tj.schedule();
 
 		}
@@ -799,7 +889,7 @@ class trackingJob2 {
 
 	@SuppressWarnings("unchecked")
 //	@Override
-	protected void run() {
+	protected void runTJ2() {
 //IStatus
 //		IProgressMonitor monitor
 		
@@ -848,6 +938,7 @@ class trackingJob2 {
 																		 trackingMarker, 
 																		 k);
 
+					sm.addBackgroundDatArray(sm.getImages().length, k, output1);
 					dm.addxList(sm.getSortedX().getDouble(k));
 					
 					Display.getDefault().syncExec(new Runnable() {
@@ -892,6 +983,7 @@ class trackingJob2 {
 					IDataset output1 = DummyProcessingClass.DummyProcess(sm, j, model, dm, gm, plotSystem,
 							correctionSelection, imagePosInOriginalDat[k], trackingMarker, k);
 
+					sm.addBackgroundDatArray(sm.getImages().length, k, output1);
 					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
 							sm.getSortedX().getDouble(k));
 				}
@@ -924,24 +1016,23 @@ class trackingJob2 {
 													   		  trackingMarker, 
 													   		  k);
 
+					sm.addBackgroundDatArray(sm.getImages().length, k, output1);
 					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
 							sm.getSortedX().getDouble(k));
 					
 					
-					Display.getDefault().syncExec(new Runnable() {
-						
-						 @Override
-						 public void run() {
-						 plotSystem.clear();
-						 plotSystem.updatePlot2D(output1, null,null);
-						 plotSystem.repaint(true);
-						 outputCurves.updateCurve(dm,
-						 outputCurves.getIntensity().getSelection(), sm);
-						
-						
-						 }
-					 });
-
+//					Display.getDefault().syncExec(new Runnable() {
+//						
+//						 public void run() {
+//						 plotSystem.clear();
+//						 plotSystem.updatePlot2D(output1, null,null);
+//						 plotSystem.repaint(true);
+//						 outputCurves.updateCurve(dm,
+//						 outputCurves.getIntensity().getSelection(), sm);
+//						
+//						
+//						 }
+//					 });
 				}
 			}
 		}
@@ -964,12 +1055,8 @@ class trackingJob2 {
 			debug("nextjok :" + nextjok);
 			debug("doneArray[nextjok]: " + doneArray[nextjok]);
 			
-			
-			
 			if (imagePosInOriginalDat[nextk] == 0) {
-
-				
-				
+	
 				debug("In the while loop for imagePosInOriginalDat[nextk] == 0");
 				
 				for (k = nextk; k < noImages; k++) {
@@ -1045,21 +1132,22 @@ class trackingJob2 {
 																   k,
 																   dm.getSeedLocation());
 
+						sm.addBackgroundDatArray(sm.getImages().length, k, output1);
 						dm.addxList(sm.getSortedX().getDouble(k));
 						
-						Display.getDefault().syncExec(new Runnable() {
-							
-							 @Override
-							 public void run() {
-							 plotSystem.clear();
-							 plotSystem.updatePlot2D(output1, null,null);
-							 plotSystem.repaint(true);
-							 outputCurves.updateCurve(dm,
-							 outputCurves.getIntensity().getSelection(), sm);
-							
-							
-							 }
-						 });
+//						Display.getDefault().syncExec(new Runnable() {
+//							
+//							 @Override
+//							 public void run() {
+//							 plotSystem.clear();
+//							 plotSystem.updatePlot2D(output1, null,null);
+//							 plotSystem.repaint(true);
+//							 outputCurves.updateCurve(dm,
+//							 outputCurves.getIntensity().getSelection(), sm);
+//							
+//							
+//							 }
+//						 });
 
 					}
 					doneArray[nextjok] = "done";
@@ -1140,20 +1228,21 @@ class trackingJob2 {
 
 						dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
 								sm.getSortedX().getDouble(k));
+						sm.addBackgroundDatArray(sm.getImages().length, k, output1);
 						
-						Display.getDefault().syncExec(new Runnable() {
-							
-							 @Override
-							 public void run() {
-							 plotSystem.clear();
-							 plotSystem.updatePlot2D(output1, null,null);
-							 plotSystem.repaint(true);
-							 outputCurves.updateCurve(dm,
-							 outputCurves.getIntensity().getSelection(), sm);
-							
-							
-							 }
-						 });
+//						Display.getDefault().syncExec(new Runnable() {
+//							
+//							 @Override
+//							 public void run() {
+//							 plotSystem.clear();
+//							 plotSystem.updatePlot2D(output1, null,null);
+//							 plotSystem.repaint(true);
+//							 outputCurves.updateCurve(dm,
+//							 outputCurves.getIntensity().getSelection(), sm);
+//							
+//							
+//							 }
+//						 });
 					}
 				}
 
@@ -1225,22 +1314,23 @@ class trackingJob2 {
 																   k,
 																   dm.getSeedLocation());
 
+						sm.addBackgroundDatArray(sm.getImages().length, k, output1);
 						dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
 								sm.getSortedX().getDouble(k));
 						
-						Display.getDefault().syncExec(new Runnable() {
-							
-							 @Override
-							 public void run() {
-							 plotSystem.clear();
-							 plotSystem.updatePlot2D(output1, null,null);
-							 plotSystem.repaint(true);
-							 outputCurves.updateCurve(dm,
-							 outputCurves.getIntensity().getSelection(), sm);
-							
-							
-							 }
-						 });
+//						Display.getDefault().syncExec(new Runnable() {
+//							
+//							 @Override
+//							 public void run() {
+//							 plotSystem.clear();
+//							 plotSystem.updatePlot2D(output1, null,null);
+//							 plotSystem.repaint(true);
+//							 outputCurves.updateCurve(dm,
+//							 outputCurves.getIntensity().getSelection(), sm);
+//							
+//							
+//							 }
+//						 });
 					}
 				}
 				doneArray[nextjok] = "done";
@@ -1253,12 +1343,191 @@ class trackingJob2 {
 			e.printStackTrace();
 		}
 
-
 	}
+	
 
-	private void debug(String output) {
+	private void debug (String output) {
 		if (DEBUG == 1) {
 			System.out.println(output);
 		}
 	}
 }
+
+
+
+
+class MovieJob {
+//extends Job {
+
+	private int time = 220;
+	private IRegion background;
+	private IDataset tempImage;
+	private IDataset subTempImage;
+	private double[] tempLoc;
+	private IPlottingSystem<Composite> plotSystem;
+	private SuperModel sm;
+	private int correctionSelection;
+	private int noImages;
+	private int timeStep;
+	private int DEBUG = 1;
+	private IPlottingSystem<Composite> pS;
+	private IPlottingSystem<Composite> subPS;
+
+	
+	public MovieJob() {
+//		super("Playing movie...");
+	}
+		
+	public void setTime(int time) {
+		this.time = time;
+	}
+	
+	public void setSuperModel(SuperModel sm) {
+		this.sm = sm;
+	}
+	
+	public void setPS(IPlottingSystem<Composite> pS) {
+		this.pS = pS;
+	}
+	
+	public void setSubPS(IPlottingSystem<Composite> subPS) {
+		this.subPS = subPS;
+	}
+	
+//	@Override
+	protected void run() {
+	
+//		for( IDataset t: outputDatArray){
+//			java.util.Date date = new java.util.Date();
+//			System.out.println(date);
+//			System.out.println("start:" + date);
+//			System.out.println("sum: " + (Double) DatasetUtils.cast(DoubleDataset.class, t).sum());
+//			//outputMovie.clear();
+//			outputMovie.getPlotSystem().updatePlot2D(t, null, monitor);
+//			outputMovie.getPlotSystem().repaint(true);
+//			//outputMovie.repaint();
+//			try {
+//				TimeUnit.MILLISECONDS.sleep(time);
+//			} catch (InterruptedException e) {
+//			
+//				e.printStackTrace();
+//			}
+//			date = new java.util.Date();
+//			System.out.println("stop:" + date);
+//			}
+		
+
+		try {
+			if (pS.getRegion("Background Region")!=null){
+				pS.removeRegion(pS.getRegion("Background Region"));
+			}
+			background = pS.createRegion("Background Region", RegionType.BOX);
+		} 
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		final Display display = Display.getCurrent();
+        Color blue = display.getSystemColor(SWT.COLOR_BLUE);
+		
+		background.setRegionColor(blue);
+		pS.addRegion(background);
+			
+		
+		Thread t  = new Thread(){
+			@Override
+			public void run(){
+				
+				sm.setSliderPos(0);
+				
+					for( int k = sm.getSliderPos(); k<sm.getImages().length; k++){
+							
+						tempImage = sm.getImages()[k];
+						subTempImage = sm.getBackgroundDatArray().get(k);
+						tempLoc = sm.getLocationList().get(k);
+					
+					
+						RectangularROI newROI = new RectangularROI(tempLoc[1],tempLoc[0],sm.getInitialLenPt()[0][0],sm.getInitialLenPt()[0][1],0);
+						
+						
+						
+
+						display.syncExec(new Runnable() {
+							@Override
+							public void run() {
+								background.setROI(newROI);
+								pS.updatePlot2D(tempImage, null, null);
+								subPS.updatePlot2D(subTempImage, null, null);
+								pS.repaint(true);
+								subPS.repaint(true);
+							}
+						});					 
+						try {
+							sleep(220);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+						
+						debug("Repaint k ascending: "  + k);
+				 }
+				 
+				 for( int k = sm.getSliderPos() - 1; k<=0; k--){
+							
+						tempImage = sm.getImages()[k];
+						subTempImage = sm.getBackgroundDatArray().get(k);
+						tempLoc = sm.getLocationList().get(k);
+							
+			
+					 	pS.updatePlot2D(tempImage, null, null);
+						subPS.updatePlot2D(subTempImage, null, null);
+						
+						try {
+							if (pS.getRegion("Background Region")!=null){
+								pS.removeRegion(pS.getRegion("Background Region"));
+							}
+								
+							background = pS.createRegion("Background Region", RegionType.BOX);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+						pS.addRegion(background);
+						RectangularROI newROI = new RectangularROI(tempLoc[1],tempLoc[0],sm.getInitialLenPt()[0][0],sm.getInitialLenPt()[0][1],0);
+						background.setROI(newROI);
+						
+						Display display = Display.getCurrent();
+				        Color blue = display.getSystemColor(SWT.COLOR_BLUE);
+						background.setRegionColor(blue);
+					 
+				 	
+					 	try {
+							sleep(220);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						pS.repaint(true);
+						subPS.repaint(true);
+						debug("Repaint k descending: "  + k);
+				 	}
+				 }
+			};
+			t.start();
+
+				 }
+			
+				
+		
+//		return Status.OK_STATUS;
+	
+	private void debug (String output) {
+		if (DEBUG == 1) {
+			System.out.println(output);
+		}
+	}
+
+}
+

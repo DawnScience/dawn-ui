@@ -42,6 +42,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
@@ -274,12 +275,46 @@ public class SurfaceScatterViewStart extends Dialog {
 				
 			}
 			
+			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// TODO Auto-generated method stub
 				
 			}
 		});
+	    
+	    customComposite.getReplay().addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+//				Display.getDefault().syncExec(new Runnable() {
+//					
+//					 @Override
+//					 public void run() {
+//				
+						ssp.runReplay(customComposite.getPlotSystem(), 
+									  customComposite.getSubImagePlotSystem());
+//						
+//			
+//					 }
+//				});
+			
+				
+			
+			
+			
+			
+			
+			}
+			
+		
+			
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {	
+			}
+		});
+	    
 	    
 	    customComposite.getSlider().addSelectionListener(new SelectionListener() {
 			

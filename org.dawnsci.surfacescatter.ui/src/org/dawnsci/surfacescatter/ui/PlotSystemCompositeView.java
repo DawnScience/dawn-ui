@@ -47,7 +47,7 @@ public class PlotSystemCompositeView extends Composite {
     private SurfaceScatterViewStart ssvs;
     private Text xValue;
     private Text imageNumber;
-    
+    private Button replay;
      
     public PlotSystemCompositeView(Composite parent, 
     							   int style,
@@ -141,7 +141,10 @@ public class PlotSystemCompositeView extends Composite {
         imageNumber.setText("   " + slider.getSelection());
         
         
-      
+        replay = new Button(indicators, SWT.PUSH | SWT.FILL);
+		replay.setText("Replay");
+        
+        
         ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(this, null);
         
         final GridData gd_secondField = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -341,6 +344,10 @@ public class PlotSystemCompositeView extends Composite {
 	
 	public Button getRun(){
 		return run;
+	}
+	
+	public Button getReplay(){
+		return replay;
 	}
 	
 	public Text getXValue(){
