@@ -103,7 +103,12 @@ public class ReMappedData extends AbstractMapData {
 	@Override
 	public IDataset getSpectrum(double x, double y) {
 		int[] indices = MappingUtils.getIndicesFromCoOrds(map, x, y);
-		int index = lookup.getInt(indices);
+		int index = -1;
+		try {
+			index = lookup.getInt(new int[]{indices[1],indices[0]});
+		} catch (Exception e) {
+			logger.debug("click outside bounds");
+		}
 		if (index == -1) return null;
 		if (parent.getLazy() instanceof IDatasetConnector) {
 			((IDatasetConnector)parent.getLazy()).refreshShape();
