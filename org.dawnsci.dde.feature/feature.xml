@@ -21,6 +21,10 @@
          id="org.eclipse.jdt"
          version="0.0.0"/>
 
+   <includes
+         id="org.dawnsci.marketplace"
+         version="0.0.0"/>
+
    <plugin
          id="org.dawnsci.dde.core"
          download-size="0"
