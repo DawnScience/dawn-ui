@@ -19,6 +19,8 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.january.dataset.AggregateDataset;
 import org.eclipse.january.dataset.Dataset;
@@ -36,11 +38,13 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -62,9 +66,6 @@ public class SurfaceScatterViewStart extends Dialog {
 	private PlotSystemCompositeView customComposite;
 	private MultipleOutputCurvesTableView outputCurves;
 	private ArrayList<ExampleModel> models;
-	private ArrayList<DataModel> dms;
-	private ArrayList<GeometricParametersModel> gms;
-	private SuperModel sm;
 	private DatDisplayer datDisplayer;
 	private GeometricParametersWindows paramField;
 	private CTabFolder folder;
@@ -98,9 +99,9 @@ public class SurfaceScatterViewStart extends Dialog {
 		
 		this.filepaths = filepaths;
 		this.models = models;
-		this.dms = dms;
-		this.gms = gms;
-		this.sm = sm;
+//		this.dms = dms;
+//		this.gms = gms;
+//		this.sm = sm;
 		this.numberOfImages = numberOfImages;
 		this.nullImage = nullImage;
 		this.ssp = ssp;
@@ -162,7 +163,7 @@ public class SurfaceScatterViewStart extends Dialog {
 ///////////////////////////Window 1  LEFT  SETUP////////////////////////////////////////////////////
 		try {
 
-			datDisplayer = new DatDisplayer(left, SWT.FILL, sm, filepaths);
+			datDisplayer = new DatDisplayer(left, SWT.FILL, filepaths, ssp);
 			datDisplayer.setLayout(new GridLayout());
 			datDisplayer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 	
@@ -183,7 +184,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		
 
 	    try {
-			paramField = new GeometricParametersWindows(right, SWT.FILL, gms, sm);
+			paramField = new GeometricParametersWindows(right, SWT.FILL, ssp);
 			paramField.setLayout(new GridLayout());
 			paramField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		} catch (Exception e) {
@@ -195,7 +196,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				sm.setCorrectionSelection(paramField.getTabFolder().getSelectionIndex());
+				ssp.setCorrectionSelection(paramField.getTabFolder().getSelectionIndex());
 				
 			}
 			
@@ -237,10 +238,10 @@ public class SurfaceScatterViewStart extends Dialog {
 		
 //////////////////////Analysis Left//////////////////////////////
 /////////////////anaLeft Window 3/////////////////////////////////		
-		IDataset im = PlotSystemCompositeDataSetter.imageSetter(models.get(sm.getSelection()), 0);
+		
 	    customComposite = new PlotSystemCompositeView(anaLeft, 
 	    											SWT.FILL,
-	    											im,
+	    											ssp.returnNullImage(),
 	    											1,
 	    											numberOfImages, 
 	    											nullImage,
@@ -260,11 +261,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				rszv = new RegionSetterZoomedView(
 						getParentShell(), 
 						getShellStyle(), 
-						sm, 
-						dms, 
 						filepaths, 
-						models, 
-						gms, 
 						paramField, 
 						ssp, 
 						ssvs);
@@ -420,9 +417,6 @@ public class SurfaceScatterViewStart extends Dialog {
 	    try {
 			outputCurves = new MultipleOutputCurvesTableView(anaRight, 
 															SWT.FILL, 
-															models, 
-															dms, 
-															sm,
 															0);
 			
 			outputCurves.setLayout(new GridLayout());
@@ -437,40 +431,16 @@ public class SurfaceScatterViewStart extends Dialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
-				String[] cs = CurveStateIdentifier.CurveStateIdentifier1(outputCurves.getPlotSystem());
-				
-				ArrayList<IDataset> xArrayList = new ArrayList<>();
-				ArrayList<IDataset> yArrayList = new ArrayList<>();
-				ArrayList<IDataset> yArrayListFhkl = new ArrayList<>();
-				ArrayList<IDataset> yArrayListError = new ArrayList<>();
-				ArrayList<IDataset> yArrayListFhklError = new ArrayList<>();
-				
-				int f =0;
-				
-				for(int p = 0;p<dms.size();p++){
-										
-					if (dms.get(p).getyList() == null || dms.get(p).getxList() == null) {
-						
-					} else {
-							xArrayList.add(dms.get(p).xIDataset());
-							yArrayList.add(dms.get(p).yIDataset());
-							yArrayListFhkl.add(dms.get(p).yIDatasetFhkl());
-							yArrayListError.add(dms.get(p).yIDatasetError());
-							yArrayListFhklError.add(dms.get(p).yIDatasetFhklError());
-						}	
-				}
+				ArrayList<ArrayList<IDataset>> xyArrays = ssp.xyArrayPreparer();
 				
 				GeneralOverlapHandlerView goh = new GeneralOverlapHandlerView(
 						getParentShell(), 
 						SWT.OPEN, 
-						sm,
-						xArrayList,
-						yArrayList,
-						yArrayListError,
-						yArrayListFhkl,
-						yArrayListFhklError,
-						datDisplayer, 
-						dms,
+						xyArrays.get(0),
+						xyArrays.get(1),
+						xyArrays.get(2),
+						xyArrays.get(3),
+						xyArrays.get(4), 
 						outputCurves.getPlotSystem(),
 						ssp);
 				
@@ -517,13 +487,52 @@ public class SurfaceScatterViewStart extends Dialog {
 			
 		});
 	    
+	    outputCurves.getIntensity().addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+		
+				IPlottingSystem<Composite> pS = outputCurves.getPlotSystem();
+				Combo selector = outputCurves.getIntensity();
+				ssp.switchFhklIntensity(pS, selector);
+		
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+	    
+	    outputCurves.getErrorsButton().addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+				ssp.switchErrorDisplay();
+				
+				IPlottingSystem<Composite> pS = outputCurves.getPlotSystem();
+				Combo selector = outputCurves.getIntensity();
+				ssp.switchFhklIntensity(pS, selector);
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+	    
+	    
 	    
 	    outputCurves.getSave().addSelectionListener(new SelectionListener() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
-				FileDialog fd = new FileDialog(getParentShell(), SWT.OPEN); 
+				FileDialog fd = new FileDialog(getParentShell(), SWT.SAVE); 
 				
 				String stitle = "r";
 				String path = "p";
@@ -539,12 +548,18 @@ public class SurfaceScatterViewStart extends Dialog {
 				
 				String[] fr = CurveStateIdentifier.CurveStateIdentifier1(outputCurves.getPlotSystem());
 				
-				ssp.genXSave(title,fr);
+				if (outputCurves.getOutputFormatSelection().getSelectionIndex() == 0){
+					ssp.genXSave(title,fr);
+				}
+				if (outputCurves.getOutputFormatSelection().getSelectionIndex() == 1){
+					ssp.anarodSave(title,fr);
+				}
+				
 			}
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
+			
 				
 			}
 		});

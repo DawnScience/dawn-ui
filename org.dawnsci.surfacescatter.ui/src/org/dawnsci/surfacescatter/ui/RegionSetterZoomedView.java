@@ -39,9 +39,6 @@ public class RegionSetterZoomedView extends Dialog {
 	private PlotSystemCompositeView customComposite;
 	private SuperSashPlotSystem2Composite customComposite2;
 	private ArrayList<ExampleModel> models;
-	private ArrayList<GeometricParametersModel> gms;
-	private ArrayList<DataModel> dms;
-	private SuperModel sm;
 	private SashForm right;
 	private SashForm left;
 	private PlotSystem1CompositeView customComposite1;
@@ -51,21 +48,14 @@ public class RegionSetterZoomedView extends Dialog {
 
 	public RegionSetterZoomedView(Shell parentShell, 
 			int style, 
-			SuperModel sm, 
-			ArrayList<DataModel> dms,
 			String[] filepaths, 
-			ArrayList<ExampleModel> models, 
-			ArrayList<GeometricParametersModel> gms,
 			GeometricParametersWindows paramField, 
 			SurfaceScatterPresenter ssp,
 			SurfaceScatterViewStart ssvs) {
 		
 		super(parentShell);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
-		this.sm = sm;
-		this.dms = dms;
 		this.models = models;
-		this.gms = gms;
 		this.ssp = ssp;
 		this.ssvs = ssvs;
 	}
@@ -100,10 +90,10 @@ public class RegionSetterZoomedView extends Dialog {
 
 		customComposite = new PlotSystemCompositeView(topImage, 
 				SWT.NONE,
-				PlotSystemCompositeDataSetter.imageSetter(models.get(sm.getSelection()), 0),
+				ssp.returnNullImage(),
 				0,
 				ssp.getNoImages(),
-				(Dataset) PlotSystemCompositeDataSetter.imageSetter(models.get(sm.getSelection()), 0),
+				(Dataset) ssp.returnSubNullImage(),
 				ssp,
 				ssvs);
 
@@ -126,14 +116,12 @@ public class RegionSetterZoomedView extends Dialog {
 
 		customComposite1 = new PlotSystem1CompositeView(mainImage, 
 				SWT.NONE, 
-				models, 
-				dms, 
-				sm, 
-				gms.get(sm.getSelection()),
 				customComposite, 
 				0, 
 				0, 
-				ssp);
+				ssp,
+				ssvs);
+		
 		customComposite1.setLayout(new GridLayout());
 		customComposite1.setLayoutData(ld2);
 		//////////////////////////////////////////////////////////////////////////////
@@ -153,9 +141,9 @@ public class RegionSetterZoomedView extends Dialog {
 			e1.printStackTrace();
 		}
 
-		IDataset k = PlotSystem2DataSetter.PlotSystem2DataSetter1(models.get(sm.getSelection()));
+		IDataset k = ssp.returnSubNullImage();
 		customComposite2.setData(k);
-		models.get(sm.getSelection()).setCurrentImage(k);
+//		models.get(sm.getSelection()).setCurrentImage(k);
 		customComposite2.setLayout(new GridLayout());
 		customComposite2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		//////////////////////////////////////////////////////////////////////////////////
