@@ -116,7 +116,8 @@ public class LivePlottingUtils {
 		
 		fm.setMetadata(axm);
 		
-		return fm;
+		//take a slice to cut larger axes
+		return fm.getSlice();
 	}
 	
 	
