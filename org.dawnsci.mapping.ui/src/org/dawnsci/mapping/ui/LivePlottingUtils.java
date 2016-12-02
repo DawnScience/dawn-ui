@@ -8,6 +8,7 @@ import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDatasetConnector;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.january.metadata.MetadataFactory;
@@ -85,11 +86,15 @@ public class LivePlottingUtils {
 
 		IDataset fm = null;
 		int[] mapShape = ma.getShape();
-		if (mapShape.length == 2) {
+		//may need to only squeeze fastest
+		int[] squeezedShape = ShapeUtils.squeezeShape(mapShape, false);
+		
+		if (squeezedShape.length == 2) {
 			SliceND s = new SliceND(mapShape);
 			if (mapShape[0] > y.getShape()[0]) s.setSlice(0, 0, y.getShape()[0], 1);
 			if (mapShape[1] > x.getShape()[0]) s.setSlice(1, 0, x.getShape()[0], 1);
 			fm = ma.getSlice(s);
+			fm.squeeze();
 		} else {
 			
 			MapScanDimensions mapDims = parent.getMapDims();
@@ -116,7 +121,8 @@ public class LivePlottingUtils {
 		
 		fm.setMetadata(axm);
 		
-		return fm;
+		//take a slice to cut larger axes
+		return fm.getSlice();
 	}
 	
 	
