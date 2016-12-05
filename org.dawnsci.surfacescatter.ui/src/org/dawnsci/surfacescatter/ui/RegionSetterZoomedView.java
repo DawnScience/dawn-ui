@@ -120,7 +120,7 @@ public class RegionSetterZoomedView extends Dialog {
 				0, 
 				0, 
 				ssp,
-				ssvs);
+				this);
 		
 		customComposite1.setLayout(new GridLayout());
 		customComposite1.setLayoutData(ld2);
@@ -466,5 +466,15 @@ public class RegionSetterZoomedView extends Dialog {
 		return customComposite.getSlider();
 	}
 
+	public void dummyProcessTrigger(){
+		
+		int y = customComposite.getSliderPos();
+		
+		ssp.presenterDummyProcess(y, 
+								  ssp.getImage(y), 
+								  customComposite.getPlotSystem(),
+								  0);
+	}
+	
 }
 
