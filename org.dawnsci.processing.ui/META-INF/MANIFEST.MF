@@ -31,7 +31,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.apache.commons.io,
  uk.ac.diamond.scisoft.analysis.processing,
  org.dawb.common.services,
- org.dawnsci.processing.ui.api;bundle-version="1.0.0"
+ org.dawnsci.processing.ui.api;bundle-version="1.0.0",
+ org.eclipse.swt
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Service-Component: OSGI-INF/*.xml

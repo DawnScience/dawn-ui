@@ -4,7 +4,7 @@ package org.dawnsci.processing.ui.preference;
 
 import java.io.FileNotFoundException;
 
-import org.dawnsci.processing.python.ui.SavuWindow;
+import org.dawnsci.processing.python.ui.SavuWindow2;
 import org.dawnsci.processing.ui.Activator;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
@@ -46,7 +46,7 @@ public class ProcessingPreferencePage extends PreferencePage implements
 		
 
 		try {
-			Composite savu = new SavuWindow(parent, SWT.NONE);
+			Composite savu = new SavuWindow2(parent, SWT.NONE);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
