@@ -168,7 +168,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 		Label colourLabel = new Label(colourComposite, SWT.RIGHT);
 		colourLabel.setText("Colormap:");
-		colourMapViewer = new ComboViewer(colourComposite, SWT.NONE);
+		colourMapViewer = new ComboViewer(colourComposite, SWT.READ_ONLY);
 		colourMapViewer.getControl().setLayoutData(layoutData);
 		toolkit.adapt((Composite) colourMapViewer.getControl());
 		section.setClient(colourComposite);
