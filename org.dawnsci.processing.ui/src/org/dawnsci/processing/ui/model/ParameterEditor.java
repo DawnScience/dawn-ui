@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-
+import org.dawnsci.plotting.roi.AxisPixelROIEditTable;
 import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
 import org.eclipse.jface.viewers.AbstractTableViewer;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -39,6 +39,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Table;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ParameterEditor extends Composite {
 	public ParameterEditor(Composite parent, int style) {
@@ -53,6 +55,8 @@ public class ParameterEditor extends Composite {
 	 */
 
 	public static void main(String[] args) {
+
+
 		final Display display = new Display();
 		final Shell shell = new Shell(display);
 		shell.setText("Tester");
