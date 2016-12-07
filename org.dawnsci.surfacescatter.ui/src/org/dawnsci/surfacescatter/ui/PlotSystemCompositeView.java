@@ -1,11 +1,6 @@
 package org.dawnsci.surfacescatter.ui;
-import java.util.ArrayList;
-
 import org.dawb.common.ui.widgets.ActionBarWrapper;
-import org.dawnsci.surfacescatter.DataModel;
 import org.dawnsci.surfacescatter.ExampleModel;
-import org.dawnsci.surfacescatter.GeometricParametersModel;
-import org.dawnsci.surfacescatter.SuperModel;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -27,6 +22,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Slider;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
 public class PlotSystemCompositeView extends Composite {
@@ -35,6 +32,7 @@ public class PlotSystemCompositeView extends Composite {
 	private Slider slider;
     private IPlottingSystem<Composite> plotSystem;
     private IPlottingSystem<Composite> subImagePlotSystem;
+    private IPlottingSystem<Composite> subImageBgPlotSystem;
     private IDataset image;
     private IRegion region;
     private Button outputControl;
@@ -48,6 +46,7 @@ public class PlotSystemCompositeView extends Composite {
     private Text xValue;
     private Text imageNumber;
     private Button replay;
+	private TabFolder folder;
      
     public PlotSystemCompositeView(Composite parent, 
     							   int style,
@@ -73,6 +72,7 @@ public class PlotSystemCompositeView extends Composite {
         try {
 			plotSystem = PlottingFactory.createPlottingSystem();
 			subImagePlotSystem = PlottingFactory.createPlottingSystem();
+			subImageBgPlotSystem = PlottingFactory.createPlottingSystem();
 		} catch (Exception e2) {
 			e2.printStackTrace();
 		}
@@ -170,9 +170,49 @@ public class PlotSystemCompositeView extends Composite {
         ActionBarWrapper actionBarComposite1 = ActionBarWrapper.createActionBars(this, null);
         
         if(extra == 1){
-	        subImagePlotSystem.createPlotPart(this, "Region of interest", actionBarComposite1, PlotType.IMAGE, null);
-			subImagePlotSystem.getPlotComposite().setLayoutData(gd_secondField);
+        	
+        	folder = new TabFolder(this, SWT.BORDER | SWT.CLOSE);
+    		folder.setLayout(new GridLayout());
+    		folder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        	
+			////////////////////////////////////////////////////////
+			//		Tab 1 Setup
+			//////////////////////////////////////////////////////////
+        	
+    		TabItem subI = new TabItem(folder, SWT.NONE);
+    		subI.setText("Sub-Image");
+    		subI.setData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    		
+    		Composite subIComposite = new Composite(folder, SWT.NONE | SWT.FILL);
+    		subIComposite.setLayout(new GridLayout());
+    		subIComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    				
+    		subI.setControl(subIComposite);
+        	
+	        subImagePlotSystem.createPlotPart(subIComposite, "Region of interest", actionBarComposite1, PlotType.IMAGE, null);
+			subImagePlotSystem.getPlotComposite().setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, true));
 			subImagePlotSystem.createPlot2D(nullImage, null, null);
+			
+			
+			////////////////////////////////////////////////////////
+			//		Tab 2 Setup
+			//////////////////////////////////////////////////////////
+			
+			TabItem subBgI = new TabItem(folder, SWT.NONE);
+			subBgI.setText("Bg Subtracted Image");
+			subBgI.setData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+			Composite subBgIComposite = new Composite(folder, SWT.NONE | SWT.FILL);
+			subBgIComposite.setLayout(new GridLayout());
+			subBgIComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+			subBgI.setControl(subBgIComposite);
+			
+			subImageBgPlotSystem.createPlotPart(subBgIComposite, "Region of interest", actionBarComposite1, PlotType.IMAGE, null);
+			subImageBgPlotSystem.getPlotComposite().setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, true));
+			subImageBgPlotSystem.createPlot2D(nullImage, null, null);
+     
+        
         }
         
 		plotSystem.addRegion(region);
@@ -221,10 +261,16 @@ public class PlotSystemCompositeView extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
-				ssp.sliderMovemementMainImage(slider.getSelection(), plotSystem);
+				ssp.sliderMovemementMainImage(slider.getSelection(), 
+											  plotSystem);
 				
 				if(extra == 1){
-					ssp.sliderZoomedArea(slider.getSelection(), region.getROI(), subImagePlotSystem);			
+					ssp.sliderZoomedArea(slider.getSelection(),
+										 region.getROI(), 
+										 subImagePlotSystem);
+					
+					ssp.bgImageUpdate(subImageBgPlotSystem,
+									  slider.getSelection());
 				}	
 			}
 			
@@ -317,6 +363,10 @@ public class PlotSystemCompositeView extends Composite {
 		return subImagePlotSystem; 
 	}
 	
+	public IPlottingSystem<Composite> getSubImageBgPlotSystem(){
+		return subImageBgPlotSystem; 
+	}
+
 	public void updateImage(IDataset image){
 		plotSystem.updatePlot2D(image, null, null);
 	}
@@ -330,7 +380,11 @@ public class PlotSystemCompositeView extends Composite {
 	}
 	
 	public void setRegion(int[][] lenpt){
-		RectangularROI newROI = new RectangularROI(lenpt[1][0],lenpt[1][1],lenpt[0][0],lenpt[0][1],0);
+		RectangularROI newROI = new RectangularROI(lenpt[1][0],
+												   lenpt[1][1],
+												   lenpt[0][0],
+												   lenpt[0][1],
+												   0);
 		region.setROI(newROI);
 	}
 
@@ -357,7 +411,10 @@ public class PlotSystemCompositeView extends Composite {
 	public Text getImageNo(){
 		return imageNumber;
 	}
-
+	
+	public TabFolder getFolder(){
+		return folder;
+	}
 }
     
 

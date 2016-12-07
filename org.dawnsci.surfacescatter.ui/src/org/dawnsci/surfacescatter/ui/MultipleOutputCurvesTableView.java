@@ -131,13 +131,7 @@ public class MultipleOutputCurvesTableView extends Composite {
 		overlapZoom = new Button(sashForm, SWT.PUSH);
 		overlapZoom.setText("Overlap Zoom");
 		
-
-		
 		sashForm.setWeights(new int[]{10,5,80,5});
-				
-		
-		
-		
 	}
 
 	public Composite getComposite() {

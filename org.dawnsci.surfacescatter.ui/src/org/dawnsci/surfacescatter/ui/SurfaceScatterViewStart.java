@@ -65,7 +65,6 @@ public class SurfaceScatterViewStart extends Dialog {
 	private String[] filepaths;
 	private PlotSystemCompositeView customComposite;
 	private MultipleOutputCurvesTableView outputCurves;
-	private ArrayList<ExampleModel> models;
 	private DatDisplayer datDisplayer;
 	private GeometricParametersWindows paramField;
 	private CTabFolder folder;
@@ -87,10 +86,6 @@ public class SurfaceScatterViewStart extends Dialog {
 	
 	public SurfaceScatterViewStart(Shell parentShell, 
 			String[] filepaths,
-			ArrayList<ExampleModel> models,
-			ArrayList<DataModel> dms,
-			ArrayList<GeometricParametersModel> gms,
-			SuperModel sm,
 			int numberOfImages,
 			Dataset nullImage,
 			SurfaceScatterPresenter ssp) {
@@ -98,10 +93,6 @@ public class SurfaceScatterViewStart extends Dialog {
 		super(parentShell);
 		
 		this.filepaths = filepaths;
-		this.models = models;
-//		this.dms = dms;
-//		this.gms = gms;
-//		this.sm = sm;
 		this.numberOfImages = numberOfImages;
 		this.nullImage = nullImage;
 		this.ssp = ssp;
@@ -123,9 +114,6 @@ public class SurfaceScatterViewStart extends Dialog {
 		container.setLayout(new GridLayout());
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-
-
-
 		folder = new CTabFolder(container, SWT.BORDER | SWT.CLOSE);
 		folder.setLayout(new GridLayout());
 		folder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -286,23 +274,10 @@ public class SurfaceScatterViewStart extends Dialog {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-//				Display.getDefault().syncExec(new Runnable() {
-//					
-//					 @Override
-//					 public void run() {
-//				
+
 						ssp.runReplay(customComposite.getPlotSystem(), 
-									  customComposite.getSubImagePlotSystem());
-//						
-//			
-//					 }
-//				});
-			
-				
-			
-			
-			
-			
+									  customComposite.getFolder(),
+									  customComposite.getSubImageBgPlotSystem());
 			
 			}
 			
@@ -326,6 +301,8 @@ public class SurfaceScatterViewStart extends Dialog {
 						 			  customComposite.getGreenRegion().getROI(), 
 						 			  customComposite.getSubImagePlotSystem());
 				ssvs.updateIndicators(sliderPos);
+				ssp.bgImageUpdate(customComposite.getSubImageBgPlotSystem(),
+								  sliderPos);
 			}
 			
 			@Override
@@ -347,13 +324,12 @@ public class SurfaceScatterViewStart extends Dialog {
 							  			 customComposite.getGreenRegion().getROI(), 
 							  			 customComposite.getSubImagePlotSystem());
 					ssp.updateSliders(ssvs.getSliderList(), k);
-//					if(customComposite.getXValue().equals(ssp.getXValue(k)) == false){
-//						customComposite.getXValue().setText(String.valueOf(ssp.getXValue(k)));
-//					}
-//					if(customComposite.getImageNo().equals(String.valueOf(k)) == false){
-//						customComposite.getImageNo().setText(String.valueOf(k));
-//					}
+					ssp.bgImageUpdate(customComposite.getSubImageBgPlotSystem(),
+									  k);
+					
 					ssvs.updateIndicators(k);
+					
+					
 					modify = true;
 				}				
 			}
@@ -381,6 +357,8 @@ public class SurfaceScatterViewStart extends Dialog {
 							  			 customComposite.getSubImagePlotSystem());
 					
 					ssp.updateSliders(ssvs.getSliderList(), k);
+					ssp.bgImageUpdate(customComposite.getSubImageBgPlotSystem(),
+							  		  k);
 					
 					ssvs.updateIndicators(k);
 					modify = true;
@@ -396,9 +374,11 @@ public class SurfaceScatterViewStart extends Dialog {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ssp.runTrackingJob(customComposite.getSubImagePlotSystem()
-									,outputCurves.getPlotSystem()
-									, customComposite.getPlotSystem());
+				ssp.runTrackingJob(customComposite.getSubImagePlotSystem(),
+								   outputCurves.getPlotSystem(),
+								   customComposite.getPlotSystem(),
+								   customComposite.getFolder(),
+								   customComposite.getSubImageBgPlotSystem());
 				
 				
 				
@@ -482,6 +462,9 @@ public class SurfaceScatterViewStart extends Dialog {
 				 			  customComposite.getSubImagePlotSystem());
 					
 					ssvs.updateIndicators(xPos);
+					
+					ssp.bgImageUpdate(customComposite.getSubImageBgPlotSystem(),
+									  xPos);
 				}
 			}
 			
@@ -601,11 +584,11 @@ public class SurfaceScatterViewStart extends Dialog {
 		if(customComposite.getImageNo().equals(String.valueOf(k)) == false){
 			customComposite.getImageNo().setText(String.valueOf(k));
 		}	
-//		if(outputCurves.getRegionNo().getROI().isPlot()){
+
 			
-			RectangularROI r = new RectangularROI(ssp.getXValue(k),0.1,0,0.1,0);
-			outputCurves.getRegionNo().setROI(r);
-//		}
+		RectangularROI r = new RectangularROI(ssp.getXValue(k),0.1,0,0.1,0);
+		outputCurves.getRegionNo().setROI(r);
+
 		
 		modify = true;
 	}

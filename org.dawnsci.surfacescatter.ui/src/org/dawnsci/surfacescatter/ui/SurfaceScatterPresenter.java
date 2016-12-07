@@ -16,10 +16,12 @@ import org.dawnsci.surfacescatter.AnalaysisMethodologies;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
 import org.dawnsci.surfacescatter.ClosestNoFinder;//private ArrayList<double[]> locationList; 
 import org.dawnsci.surfacescatter.CountUpToArray;
-import org.dawnsci.surfacescatter.CurveStateIdentifier;
 import org.dawnsci.surfacescatter.DataModel;
 import org.dawnsci.surfacescatter.DummyProcessingClass;
 import org.dawnsci.surfacescatter.ExampleModel;
+import org.dawnsci.surfacescatter.FittingParameters;
+import org.dawnsci.surfacescatter.FittingParametersInputReader;
+import org.dawnsci.surfacescatter.FittingParametersOutput;
 import org.dawnsci.surfacescatter.GeometricParametersModel;
 import org.dawnsci.surfacescatter.OverlapUIModel;
 import org.dawnsci.surfacescatter.PlotSystem2DataSetter;
@@ -37,7 +39,6 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
-import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
@@ -52,6 +53,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
+import org.eclipse.swt.widgets.TabFolder;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
@@ -222,13 +224,17 @@ public class SurfaceScatterPresenter {
 
 		sm.setNullImage(imageCon.getSlice(slice2));
 
-		ssvs = new SurfaceScatterViewStart(parentShell, filepaths, models, dms, gms, sm, numberOfImages, nullImage,
-				this);
+		ssvs = new SurfaceScatterViewStart(parentShell, 
+										   filepaths, 
+										   numberOfImages, 
+										   nullImage,
+										   this);
 		ssvs.open();
 
 	}
 
-	public void sliderMovemementMainImage(int sliderPos, IPlottingSystem<Composite>... pS) {
+	public void sliderMovemementMainImage(int sliderPos, 
+										  IPlottingSystem<Composite>... pS) {
 
 		sm.setSliderPos(sliderPos);
 		Dataset image = sm.getImages()[sliderPos];
@@ -237,7 +243,103 @@ public class SurfaceScatterPresenter {
 			x.updatePlot2D(image, null, null);
 		}
 	}
-
+	
+	public void bgImageUpdate(IPlottingSystem<Composite> subImageBgPlotSystem,
+							  int selection){
+		
+		if(sm.getBackgroundDatArray()!=null){
+			
+			subImageBgPlotSystem.updatePlot2D(sm.getBackgroundDatArray().get(selection),
+											  null, 
+											  null);
+		}
+		else{
+			
+			IDataset nullImage = DatasetFactory.zeros(new int[] {2,2});
+			
+			subImageBgPlotSystem.updatePlot2D(nullImage, 
+											  null, 
+											  null);
+		}
+	}
+	
+	
+	public void saveParameters(String title){
+		
+		ExampleModel m = models.get(sm.getSelection());
+		System.out.println(title);
+		
+		FittingParametersOutput.FittingParametersOutputTest(title, 
+														    m.getLenPt()[1][0],
+														    m.getLenPt()[1][1],
+														    m.getLenPt()[0][0], 
+														    m.getLenPt()[0][1], 
+														    m.getMethodology(), 
+														    m.getTrackerType(), 
+														    m.getFitPower(), 
+														    m.getBoundaryBox(), 
+														    sm.getSliderPos(),
+														    ssp.getXValue(sm.getSliderPos()), 
+														    sm.getFilepaths()[sm.getFilepathsSortedArray()[sm.getSliderPos()]],
+														    sm.getFilepaths());
+		
+	}
+	
+	
+	public int loadParameters(String title,
+							   PlotSystemCompositeView pscv,
+							   PlotSystem1CompositeView ps1cv,
+							   SuperSashPlotSystem2Composite ps2cv){
+		
+		FittingParameters fp = FittingParametersInputReader.reader(title);
+		
+		for( ExampleModel m : models){
+		
+			m.setLenPt(fp.getLenpt());
+			m.setTrackerType(fp.getTracker());
+			m.setFitPower(fp.getFitPower());
+			m.setBoundaryBox(fp.getBoundaryBox());
+			m.setMethodology(fp.getBgMethod());
+		}
+		
+		int selection = ssp.closestImageNo(fp.getXValue());
+		
+		sm.setInitialLenPt(fp.getLenpt());
+		sm.setSliderPos(ssp.closestImageNo(fp.getXValue()));
+		
+		ps1cv.setMethodologyDropDown(fp.getBgMethod());
+		ps1cv.setFitPowerDropDown(fp.getFitPower());
+		ps1cv.setTrackerTypeDropDown(fp.getTracker());
+		ps1cv.setBoundaryBox(fp.getBoundaryBox());
+		
+		pscv.setRegion(fp.getLenpt());
+		pscv.redraw();
+		
+		RectangularROI loadedROI = new RectangularROI(fp.getLenpt()[1][0],
+													  fp.getLenpt()[1][1],
+													  fp.getLenpt()[0][0],
+													  fp.getLenpt()[0][1],
+													  0);
+		
+		ssp.updateSliders(ssvs.getSliderList(),selection);
+		
+		ssp.sliderMovemementMainImage(selection, 
+				  					  pscv.getPlotSystem());
+		
+		ssp.sliderZoomedArea(selection, 
+							 loadedROI, 
+							 ps2cv.getPlotSystem2(),
+							 ssvs.getPlotSystemCompositeView().getSubImagePlotSystem());
+		
+		ssp.regionOfInterestSetter(loadedROI);
+		
+		ssvs.updateIndicators(selection);
+		
+		
+		return ssp.closestImageNo(fp.getXValue());
+		
+	}
+	
 	public Dataset getImage(int k) {
 
 		Dataset image = sm.getImages()[k];
@@ -366,11 +468,7 @@ public class SurfaceScatterPresenter {
 			gm.setxName(xName);
 		}
 		
-		
-		
 	}
-	
-	
 	
 	public ArrayList<ArrayList<IDataset>> xyArrayPreparer(){
 		
@@ -404,7 +502,6 @@ public class SurfaceScatterPresenter {
 		return output;
 	}
 	
-
 	public void updateSliders(ArrayList<Slider> sl, int k) {
 
 		sm.setSliderPos(k);
@@ -476,8 +573,6 @@ public class SurfaceScatterPresenter {
 		return setup;
 	}
 	
-	
-	
 	public int getNoImages() {
 		return noImages;
 	}
@@ -487,7 +582,6 @@ public class SurfaceScatterPresenter {
 		IDataset outputDatY = DatasetFactory.ones(new int[] {1});
 		
 		String s = gms.get(sm.getSelection()).getSavePath();
-
 		
 		try {
 			File file = new File(title);
@@ -599,9 +693,6 @@ public class SurfaceScatterPresenter {
 		writer.close();
 	}	
 	
-	
-	
-	
 	public void export(IPlottingSystem<Composite> parentPs, 
 						IDataset xData,
 						IDataset yData){
@@ -712,16 +803,20 @@ public class SurfaceScatterPresenter {
 	
 	
 	public void runReplay(IPlottingSystem<Composite> pS,
-						  IPlottingSystem<Composite> subPS){
+//						  IPlottingSystem<Composite> subPS,
+						  TabFolder folder,
+						  IPlottingSystem<Composite> subIBgPS){
 		
 		MovieJob mJ = new MovieJob();
 		mJ.setSuperModel(sm);
 		mJ.setPS(pS);
-		mJ.setSubPS(subPS);
+//		mJ.setSubPS(subPS);
 		mJ.setTime(220);
 		mJ.setSsp(this);
 		mJ.setSsvs(ssvs);
 		mJ.setSliders(ssvs.getSliderList());
+		mJ.setFolder(folder);
+		mJ.setSubIBgPS(subIBgPS);
 		mJ.run();	
 		
 	}
@@ -746,7 +841,9 @@ public class SurfaceScatterPresenter {
 
 	public void runTrackingJob(IPlottingSystem<Composite> subPS, 
 							   IPlottingSystem<Composite> outputCurves,
-							   IPlottingSystem<Composite> pS) {
+							   IPlottingSystem<Composite> pS,
+							   TabFolder folder,
+							   IPlottingSystem<Composite> subIBgPS) {
 
 		sm.resetAll();
 		sm.setLocationList(null);
@@ -772,8 +869,8 @@ public class SurfaceScatterPresenter {
 		tj.runTJ1();
 		
 		runReplay(pS,
-				  subPS);
-		
+				  folder,
+				  subIBgPS);
 
 	}
 
@@ -816,7 +913,6 @@ public class SurfaceScatterPresenter {
 			System.out.println(output);
 		}
 	}
-
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -1597,19 +1693,7 @@ class trackingJob2 {
 						dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
 								sm.getSortedX().getDouble(k));
 						
-//						Display.getDefault().syncExec(new Runnable() {
-//							
-//							 @Override
-//							 public void run() {
-//							 plotSystem.clear();
-//							 plotSystem.updatePlot2D(output1, null,null);
-//							 plotSystem.repaint(true);
-//							 outputCurves.updateCurve(dm,
-//							 outputCurves.getIntensity().getSelection(), sm);
-//							
-//							
-//							 }
-//						 });
+
 					}
 				}
 				doneArray[nextjok] = "done";
@@ -1632,29 +1716,31 @@ class trackingJob2 {
 	}
 }
 
-
-
+///////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////Movie Job/////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
 
 class MovieJob {
-//extends Job {
 
 	private int time = 220;
 	private IRegion background;
 	private IDataset tempImage;
 	private IDataset subTempImage;
+	private IDataset subIBgTempImage;
 	private double[] tempLoc;
-	private IPlottingSystem<Composite> plotSystem;
 	private SuperModel sm;
-	private int correctionSelection;
 	private int noImages;
 	private int timeStep;
 	private int DEBUG = 1;
 	private IPlottingSystem<Composite> pS;
-	private IPlottingSystem<Composite> subPS;
+//	private IPlottingSystem<Composite> subPS;
+	private IPlottingSystem<Composite> subIBgPS;
 	private SurfaceScatterPresenter ssp;
 	private SurfaceScatterViewStart ssvs;
 	private int imageNumber;
 	private ArrayList<Slider> sliders;
+	private TabFolder folder;
+ 
 
 	
 	public MovieJob() {
@@ -1685,8 +1771,12 @@ class MovieJob {
 		this.pS = pS;
 	}
 	
-	public void setSubPS(IPlottingSystem<Composite> subPS) {
-		this.subPS = subPS;
+	public void setSubIBgPS(IPlottingSystem<Composite> subIBgPS) {
+		this.subIBgPS = subIBgPS;
+	}
+	
+	public void setFolder (TabFolder folder){
+		this.folder = folder;
 	}
 	
 //	@Override
@@ -1708,44 +1798,47 @@ class MovieJob {
 		
 		background.setRegionColor(blue);
 		pS.addRegion(background);
-			
+		
 		
 		Thread t  = new Thread(){
 			@Override
 			public void run(){
 				
 				sm.setSliderPos(0);
-//				ssp.updateSliders(sliders, 0);
 				
-				
-					for( int k = sm.getSliderPos(); k<sm.getImages().length; k++){
-							
-						tempImage = sm.getImages()[k];
-						subTempImage = sm.getBackgroundDatArray().get(k);
-						tempLoc = sm.getLocationList().get(k);
-						imageNumber =k;
-						double[] tl = tempLoc;
-						int[] sml =  sm.getInitialLenPt()[0];
 					
-						RectangularROI newROI = new RectangularROI(tempLoc[0],tempLoc[1],sm.getInitialLenPt()[0][0],sm.getInitialLenPt()[0][1],0);
+				for( int k = sm.getSliderPos(); k<sm.getImages().length; k++){
+							
+					tempImage = sm.getImages()[k];
+					subTempImage = sm.getBackgroundDatArray().get(k);
+					tempLoc = sm.getLocationList().get(k);
+					imageNumber =k;
+					double[] tl = tempLoc;
+					int[] sml =  sm.getInitialLenPt()[0];
+					
+					RectangularROI newROI = new RectangularROI(tempLoc[0],
+														       tempLoc[1],
+														       sm.getInitialLenPt()[0][0],
+														       sm.getInitialLenPt()[0][1],0);
 						
-						
-						
-
-						display.syncExec(new Runnable() {
+					display.syncExec(new Runnable() {
 							@Override
 							public void run() {
+								folder.setSelection(1);
 								ssp.updateSliders(ssvs.getSliderList(), imageNumber);
 								ssvs.updateIndicators(imageNumber);
 								background.setROI(newROI);
 								pS.updatePlot2D(tempImage, null, null);
-								subPS.updatePlot2D(subTempImage, null, null);
+//								subPS.updatePlot2D(subTempImage, null, null);
+								subIBgPS.updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
 								pS.repaint(true);
-								subPS.repaint(true);
+//								subPS.repaint(true);
+								subIBgPS.repaint(true);
 							}
 						});					 
-						try {
-							sleep(220);
+						
+					try {
+							sleep(time);
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -1758,12 +1851,15 @@ class MovieJob {
 				 for( int k = sm.getSliderPos() - 1; k>=0; k--){
 							
 						tempImage = sm.getImages()[k];
-						subTempImage = sm.getBackgroundDatArray().get(k);
+//						subTempImage = sm.getBackgroundDatArray().get(k);
+						subIBgTempImage = sm.getBackgroundDatArray().get(k);
 						tempLoc = sm.getLocationList().get(k);
 							
 			
 					 	pS.updatePlot2D(tempImage, null, null);
-						subPS.updatePlot2D(subTempImage, null, null);
+//						subPS.updatePlot2D(subTempImage, null, null);
+						subIBgPS.updatePlot2D(subIBgTempImage, null, null);
+						
 						
 						try {
 							if (pS.getRegion("Background Region")!=null){
@@ -1777,7 +1873,10 @@ class MovieJob {
 						}
 						
 						pS.addRegion(background);
-						RectangularROI newROI = new RectangularROI(tempLoc[1],tempLoc[0],sm.getInitialLenPt()[0][0],sm.getInitialLenPt()[0][1],0);
+						RectangularROI newROI = new RectangularROI(tempLoc[1],
+																   tempLoc[0],
+																   sm.getInitialLenPt()[0][0],
+																   sm.getInitialLenPt()[0][1],0);
 						background.setROI(newROI);
 						
 						Display display = Display.getCurrent();
@@ -1786,20 +1885,19 @@ class MovieJob {
 					 
 				 	
 					 	try {
-							sleep(220);
+							sleep(time);
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 						pS.repaint(true);
-						subPS.repaint(true);
+//						subPS.repaint(true);
 						debug("Repaint k descending: "  + k);
 				 	}
 				 }
 			};
-			t.start();
-
-				 }
+		t.start();
+	}
 			
 				
 		

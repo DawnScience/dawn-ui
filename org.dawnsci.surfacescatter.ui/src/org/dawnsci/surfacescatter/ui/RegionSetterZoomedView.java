@@ -1,5 +1,6 @@
 package org.dawnsci.surfacescatter.ui;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import org.dawnsci.surfacescatter.DataModel;
@@ -29,6 +30,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
@@ -38,13 +40,13 @@ public class RegionSetterZoomedView extends Dialog {
 
 	private PlotSystemCompositeView customComposite;
 	private SuperSashPlotSystem2Composite customComposite2;
-	private ArrayList<ExampleModel> models;
 	private SashForm right;
 	private SashForm left;
 	private PlotSystem1CompositeView customComposite1;
 	private SurfaceScatterPresenter ssp;
 	private SurfaceScatterViewStart ssvs;
 	private boolean modify = true;
+	private int DEBUG = 1;
 
 	public RegionSetterZoomedView(Shell parentShell, 
 			int style, 
@@ -55,7 +57,6 @@ public class RegionSetterZoomedView extends Dialog {
 		
 		super(parentShell);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
-		this.models = models;
 		this.ssp = ssp;
 		this.ssvs = ssvs;
 	}
@@ -76,8 +77,8 @@ public class RegionSetterZoomedView extends Dialog {
 
 		///////////////// Left
 		///////////////// SashForm///////////////////////////////////////////////////
+		
 		Group topImage = new Group(left, SWT.NONE);
-//		topImage.setText("Top Image");
 		GridLayout topImageLayout = new GridLayout();
 		topImage.setLayout(topImageLayout);
 		GridData topImageData = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -103,7 +104,6 @@ public class RegionSetterZoomedView extends Dialog {
 		//////////////////////////////////////////////////////////
 
 		Group mainImage = new Group(left, SWT.FILL);
-//		mainImage.setText("Main Image");
 		GridLayout mainImageLayout = new GridLayout();
 		mainImage.setLayout(mainImageLayout);
 		GridData mainImageData = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -124,6 +124,7 @@ public class RegionSetterZoomedView extends Dialog {
 		
 		customComposite1.setLayout(new GridLayout());
 		customComposite1.setLayoutData(ld2);
+		
 		//////////////////////////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////////////
 		left.setWeights(new int[] { 85, 15 });
@@ -143,7 +144,6 @@ public class RegionSetterZoomedView extends Dialog {
 
 		IDataset k = ssp.returnSubNullImage();
 		customComposite2.setData(k);
-//		models.get(sm.getSelection()).setCurrentImage(k);
 		customComposite2.setLayout(new GridLayout());
 		customComposite2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		//////////////////////////////////////////////////////////////////////////////////
@@ -181,9 +181,6 @@ public class RegionSetterZoomedView extends Dialog {
 						modify = false;
 						int k = Integer.parseInt(customComposite.getImageNo().getText());
 						ssp.sliderMovemementMainImage(k, customComposite.getPlotSystem());
-//						ssp.sliderZoomedArea(k, 
-//								  			 customComposite.getGreenRegion().getROI(), 
-//								  			 customComposite.getSubImagePlotSystem());
 						ssp.updateSliders(ssvs.getSliderList(), k);
 						if(customComposite.getXValue().equals(ssp.getXValue(k)) == false){
 							customComposite.getXValue().setText(String.valueOf(ssp.getXValue(k)));
@@ -198,7 +195,6 @@ public class RegionSetterZoomedView extends Dialog {
 				
 				@Override
 				public void focusGained(FocusEvent e) {
-					// TODO Auto-generated method stub
 					
 				}
 			});
@@ -272,6 +268,73 @@ public class RegionSetterZoomedView extends Dialog {
 			}
 		});
 
+		
+		
+//////////////////////////////////Save Fit Parameters////////////////////////////////////////
+		
+		customComposite1.getSaveButton().addSelectionListener(new SelectionListener() {
+		
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			
+				FileDialog fd = new FileDialog(getParentShell(), SWT.SAVE); 
+				
+				String stitle = "r";
+				String path = "p";
+				
+				if (fd.open() != null) {
+					stitle = fd.getFileName();
+					path = fd.getFilterPath();
+				}
+			
+				String title = path + File.separator + stitle + ".txt";
+				
+				debug(title);
+				
+				ssp.saveParameters(title);
+			
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+			// TODO Auto-generated method stub
+			
+			}
+		});	    
+		
+		customComposite1.getLoadButton().addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				FileDialog fd = new FileDialog(getParentShell(), SWT.OPEN); 
+				
+				String stitle = "r";
+				String path = "p";
+				
+				if (fd.open() != null) {
+					stitle = fd.getFileName();
+					path = fd.getFilterPath();
+				}
+				
+				String title = path + File.separator + stitle;
+				
+				int selection = (int) ssp.loadParameters(title, 
+												         customComposite,
+												         customComposite1,
+												         customComposite2);
+							
+				generalUpdate();
+				
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
 		///////////////////////////////////////////////////////////////////////////////////
 		////////////////////////////////////////////////////////////////////////////////////
 		/////////////////////// Background slice
@@ -373,7 +436,6 @@ public class RegionSetterZoomedView extends Dialog {
 		customComposite2.getPlotSystem1().clear();
 		customComposite2.getPlotSystem3().clear();
 		
-		
 		ssp.regionOfInterestSetter(customComposite.getGreenRegion().getROI());
 		
 		IRectangularROI greenRectangle = customComposite.getGreenRegion().getROI().getBounds();
@@ -474,6 +536,13 @@ public class RegionSetterZoomedView extends Dialog {
 								  ssp.getImage(y), 
 								  customComposite.getPlotSystem(),
 								  0);
+	}
+	
+
+	private void debug(String output) {
+		if (DEBUG == 1) {
+			System.out.println(output);
+		}
 	}
 	
 }
