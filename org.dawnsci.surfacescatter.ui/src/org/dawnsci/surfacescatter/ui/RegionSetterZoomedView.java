@@ -480,7 +480,7 @@ public class RegionSetterZoomedView extends Dialog {
 			IDataset background = ssp.presenterDummyProcess(selection,
 					ssp.getImage(selection),
 					customComposite.getPlotSystem(),
-					0);
+					3);
 	
 			ILineTrace lt3 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
 					customComposite2.getRegions()[0].getROI().getBounds(),

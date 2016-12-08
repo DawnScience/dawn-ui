@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.TreeMap;
 
@@ -75,6 +76,7 @@ public class SurfaceScatterPresenter {
 	private double[] tempLoc;
 	private SurfaceScatterPresenter ssp;
 	private PrintWriter writer;
+	private Shell parentShell;
 	
 	public SurfaceScatterPresenter(Shell parentShell, String[] filepaths) {
 
@@ -84,6 +86,7 @@ public class SurfaceScatterPresenter {
 		dms = new ArrayList<DataModel>();
 		models = new ArrayList<ExampleModel>();
 		sm.setFilepaths(filepaths);
+		this.parentShell= parentShell;
 		IDataset[] imageArray = new IDataset[filepaths.length];
 		IDataset[] xArray = new IDataset[filepaths.length];
 		TreeMap<Integer, Dataset> som = new TreeMap<Integer, Dataset>();
@@ -555,8 +558,11 @@ public class SurfaceScatterPresenter {
 			}
 				
 			model.setBoundaryBox(Integer.parseInt(boundaryBox));
-		
 		}
+		
+//		if (ssvs.getPlotSystemCompositeView().getPlotSystem().getRegion("Background Region")!=null){
+//			ssvs.getPlotSystemCompositeView().getPlotSystem().removeRegion(ssvs.getPlotSystemCompositeView().getPlotSystem().getRegion("Background Region"));
+//		}
 	}
 
 	public String[] getAnalysisSetup(int k){
@@ -719,6 +725,11 @@ public class SurfaceScatterPresenter {
 
 	public int getSliderPos() {
 		return sm.getSliderPos();
+	}
+	
+	public void boundariesWarning(){
+		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell);
+		roobw.open();
 	}
 	
 	
@@ -1000,7 +1011,7 @@ class trackingJob {
 		sm.setLocationList(null);
 
 		
-		
+		mainLoop1:
 		
 		if (models.get(sm.getSelection()).getMethodology() != AnalaysisMethodologies.Methodology.TWOD_TRACKING) {
 
@@ -1040,22 +1051,19 @@ class trackingJob {
 																		 imagePosInOriginalDat[k], 
 																		 trackingMarker, 
 																		 k);
-
+					
+					if(Arrays.equals(output1.getShape(),(new int[] {2,2}))){
+						ssp.boundariesWarning();
+						break;
+					}
+					
+					
+					
 					dm.addxList(sm.getSortedX().getDouble(k));
 					sm.addBackgroundDatArray(sm.getImages().length, k, output1);
 					
 					
-//					 Display.getDefault().syncExec(new Runnable() {
-//					
-//					 @Override
-//					 public void run() {
-//					 plotSystem.clear();
-//					 plotSystem.updatePlot2D(output1, null,null);
-//					 plotSystem.repaint(true);
-//					 outputCurves.updateCurve(dm,
-//					 outputCurves.getIntensity().getSelection(), sm);
-//					 }
-//					 });
+
 				}
 
 			} else if (sm.getSliderPos() != 0) {
@@ -1089,6 +1097,11 @@ class trackingJob {
 																		 trackingMarker, 
 																		 k);
 
+					if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
+						ssp.boundariesWarning();
+						break;
+					}
+					
 					sm.addBackgroundDatArray(sm.getImages().length, k, output1);
 					
 					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
@@ -1132,6 +1145,11 @@ class trackingJob {
 																		 trackingMarker, 
 																		 k);
 
+					if(output1.getShape().equals(new int[] {2,2}) && ((Dataset) output1).sum().equals(0)){
+						ssp.boundariesWarning();
+						break;
+					}
+					
 					sm.addBackgroundDatArray(sm.getImages().length, k, output1);
 					
 					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
@@ -1300,6 +1318,11 @@ class trackingJob2 {
 																		 trackingMarker, 
 																		 k);
 
+					if(output1.getShape().equals(new int[] {2,2}) && ((Dataset) output1).sum().equals(0)){
+						ssp.boundariesWarning();
+						break;
+					}
+					
 					sm.addBackgroundDatArray(sm.getImages().length, k, output1);
 					dm.addxList(sm.getSortedX().getDouble(k));
 					
@@ -1354,6 +1377,11 @@ class trackingJob2 {
 																		 trackingMarker, 
 																		 k);
 
+					if(Arrays.equals(output1.getShape(),(new int[] {2,2}) )){
+						ssp.boundariesWarning();
+						break;	
+					}
+					
 					sm.addBackgroundDatArray(sm.getImages().length, k, output1);
 					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
 							sm.getSortedX().getDouble(k));
@@ -1388,23 +1416,15 @@ class trackingJob2 {
 													   		  trackingMarker, 
 													   		  k);
 
+					if(output1.getShape().equals(new int[] {2,2}) && ((Dataset) output1).sum().equals(0)){
+						ssp.boundariesWarning();
+						break;
+					}
+					
 					sm.addBackgroundDatArray(sm.getImages().length, k, output1);
 					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
 							sm.getSortedX().getDouble(k));
 					
-					
-//					Display.getDefault().syncExec(new Runnable() {
-//						
-//						 public void run() {
-//						 plotSystem.clear();
-//						 plotSystem.updatePlot2D(output1, null,null);
-//						 plotSystem.repaint(true);
-//						 outputCurves.updateCurve(dm,
-//						 outputCurves.getIntensity().getSelection(), sm);
-//						
-//						
-//						 }
-//					 });
 				}
 			}
 		}
@@ -1505,22 +1525,14 @@ class trackingJob2 {
 																   k,
 																   dm.getSeedLocation());
 
+						if(output1.getShape().equals(new int[] {2,2}) && ((Dataset) output1).sum().equals(0)){
+							ssp.boundariesWarning();
+							break;
+						}
+						
 						sm.addBackgroundDatArray(sm.getImages().length, k, output1);
 						dm.addxList(sm.getSortedX().getDouble(k));
 						
-//						Display.getDefault().syncExec(new Runnable() {
-//							
-//							 @Override
-//							 public void run() {
-//							 plotSystem.clear();
-//							 plotSystem.updatePlot2D(output1, null,null);
-//							 plotSystem.repaint(true);
-//							 outputCurves.updateCurve(dm,
-//							 outputCurves.getIntensity().getSelection(), sm);
-//							
-//							
-//							 }
-//						 });
 
 					}
 					doneArray[nextjok] = "done";
@@ -1600,23 +1612,17 @@ class trackingJob2 {
 																   k,
 																   dm.getSeedLocation());
 
+						
+						if(output1.getShape().equals(new int[] {2,2}) && ((Dataset) output1).sum().equals(0)){
+							ssp.boundariesWarning();
+							break;
+						}
+						
 						dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
 								sm.getSortedX().getDouble(k));
 						sm.addBackgroundDatArray(sm.getImages().length, k, output1);
 						
-//						Display.getDefault().syncExec(new Runnable() {
-//							
-//							 @Override
-//							 public void run() {
-//							 plotSystem.clear();
-//							 plotSystem.updatePlot2D(output1, null,null);
-//							 plotSystem.repaint(true);
-//							 outputCurves.updateCurve(dm,
-//							 outputCurves.getIntensity().getSelection(), sm);
-//							
-//							
-//							 }
-//						 });
+
 					}
 				}
 
@@ -1689,6 +1695,12 @@ class trackingJob2 {
 																   k,
 																   dm.getSeedLocation());
 
+						if(output1.getShape().equals(new int[] {2,2}) && ((Dataset) output1).sum().equals(0)){
+							ssp.boundariesWarning();
+							break;
+						}
+						
+						
 						sm.addBackgroundDatArray(sm.getImages().length, k, output1);
 						dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
 								sm.getSortedX().getDouble(k));
@@ -1829,10 +1841,8 @@ class MovieJob {
 								ssvs.updateIndicators(imageNumber);
 								background.setROI(newROI);
 								pS.updatePlot2D(tempImage, null, null);
-//								subPS.updatePlot2D(subTempImage, null, null);
 								subIBgPS.updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
 								pS.repaint(true);
-//								subPS.repaint(true);
 								subIBgPS.repaint(true);
 							}
 						});					 
