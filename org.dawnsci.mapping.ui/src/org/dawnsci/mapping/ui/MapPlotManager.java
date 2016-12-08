@@ -438,7 +438,7 @@ public class MapPlotManager {
 		try {
 			t = MetadataPlotUtils.buildTrace(longName, map, this.map);
 			//TODO something better here:
-			t.setGlobalRange(sanizeRange(area.getRange(), map.getShape()));
+			t.setGlobalRange(sanizeRange(ob.getRange(), map.getShape()));
 			if (ob instanceof PlottableMapObject)  t.setAlpha(((PlottableMapObject)ob).getTransparency());
 		} catch (Exception e) {
 			logger.error("Error creating image trace", e);

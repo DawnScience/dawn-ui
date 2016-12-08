@@ -4,6 +4,7 @@ import org.dawnsci.mapping.ui.datamodel.MapScanDimensions;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.MetadataException;
+import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDatasetConnector;
@@ -75,6 +76,9 @@ public class LivePlottingUtils {
 			
 		}
 		
+		y = cropNanValues(y);
+		x = cropNanValues(x);
+		
 		AxesMetadata axm = null;
 		try {
 			axm = MetadataFactory.createMetadata(AxesMetadata.class, 2);
@@ -124,6 +128,28 @@ public class LivePlottingUtils {
 		//take a slice to cut larger axes
 		return fm.getSlice();
 	}
+	
+	private static IDataset cropNanValues(IDataset ax) {
+		Dataset x = DatasetUtils.convertToDataset(ax);
+		int i = 0;
+		boolean found = false;
+		for (; i < x.getSize(); i++) {
+			double val = x.getElementDoubleAbs(i);
+			if (Double.isNaN(val)) {
+				found = true;
+				break;
+			}
+		}
+		
+		if (!found) return ax;
+		
+		SliceND s = new SliceND(ax.getShape());
+		s.setSlice(0, 0, i, 1);
+		
+		return ax.getSlice(s);
+		
+	}
+	
 	
 	
 	public static IDataset getUpdatedLinearMap(IDatasetConnector baseMap, MappedDataBlock parent, String name) {
