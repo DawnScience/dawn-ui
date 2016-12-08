@@ -127,7 +127,7 @@ public class RegionSetterZoomedView extends Dialog {
 		
 		//////////////////////////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////////////
-		left.setWeights(new int[] { 85, 15 });
+		left.setWeights(new int[] { 77, 23 });
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////// Right
 		/////////////////////////////////////////////////////////////////////////////// sashform////////////////////////////////////////////////
@@ -179,7 +179,16 @@ public class RegionSetterZoomedView extends Dialog {
 				public void focusLost(FocusEvent e) {
 					if (modify == true){
 						modify = false;
-						int k = Integer.parseInt(customComposite.getImageNo().getText());
+						
+						double r = 0;
+						try{
+							r = Double.parseDouble(customComposite.getImageNo().getText());
+						}
+						catch (Exception e1){
+							ssp.numberFormatWarning();
+						}
+						
+						int k = ssp.closestImageIntegerInStack(r);
 						ssp.sliderMovemementMainImage(k, customComposite.getPlotSystem());
 						ssp.updateSliders(ssvs.getSliderList(), k);
 						if(customComposite.getXValue().equals(ssp.getXValue(k)) == false){
@@ -205,7 +214,17 @@ public class RegionSetterZoomedView extends Dialog {
 				public void focusLost(FocusEvent e) {
 					if(modify == true){
 						modify = false;
-						double in = Double.parseDouble(customComposite.getXValue().getText());
+						
+
+						double in = 0;
+						try{
+							in = Double.parseDouble(customComposite.getXValue().getText());
+						}
+						catch (Exception e1){
+							ssp.numberFormatWarning();
+						}
+						
+						
 						int k = ssp.closestImageNo(in);
 						double l = ssp.closestXValue(in);
 						

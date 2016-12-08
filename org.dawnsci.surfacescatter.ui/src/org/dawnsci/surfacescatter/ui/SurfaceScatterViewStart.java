@@ -318,7 +318,16 @@ public class SurfaceScatterViewStart extends Dialog {
 			public void focusLost(FocusEvent e) {
 				if (modify == true){
 					modify = false;
-					int k = Integer.parseInt(customComposite.getImageNo().getText());
+					
+					double r = 0;
+					try{
+						r = Double.parseDouble(customComposite.getImageNo().getText());
+					}
+					catch (Exception e1){
+						ssp.numberFormatWarning();
+					}
+					
+					int k = ssp.closestImageIntegerInStack(r);
 					ssp.sliderMovemementMainImage(k, customComposite.getPlotSystem());
 					ssp.sliderZoomedArea(k, 
 							  			 customComposite.getGreenRegion().getROI(), 
@@ -347,7 +356,15 @@ public class SurfaceScatterViewStart extends Dialog {
 			public void focusLost(FocusEvent e) {
 				if(modify == true){
 					modify = false;
-					double in = Double.parseDouble(customComposite.getXValue().getText());
+					
+					double in = 0;
+					try{
+						in = Double.parseDouble(customComposite.getXValue().getText());
+					}
+					catch (Exception e1){
+						ssp.numberFormatWarning();
+					}
+					
 					int k = ssp.closestImageNo(in);
 //					double l = ssp.closestXValue(in);
 					

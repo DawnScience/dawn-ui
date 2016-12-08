@@ -390,6 +390,11 @@ public class SurfaceScatterPresenter {
 		return out;
 	}
 	
+	public int closestImageIntegerInStack(double in){
+		int out = ClosestNoFinder.closestIntegerInStack(in, sm.getImages().length);
+		return out;
+	}
+	
 	public double getXValue(int k){
 		return sm.getSortedX().getDouble(k);
 	}
@@ -556,13 +561,19 @@ public class SurfaceScatterPresenter {
 			if(trackerSelection !=-1){
 				model.setTrackerType(TrackingMethodology.intToTracker1(trackerSelection));
 			}
-				
-			model.setBoundaryBox(Integer.parseInt(boundaryBox));
+			
+			double r = 0;
+			try{
+				r = Double.parseDouble(boundaryBox);
+			}
+			catch (Exception e1){
+				ssp.numberFormatWarning();
+			}
+			
+			model.setBoundaryBox((int) Math.round(r));
 		}
 		
-//		if (ssvs.getPlotSystemCompositeView().getPlotSystem().getRegion("Background Region")!=null){
-//			ssvs.getPlotSystemCompositeView().getPlotSystem().removeRegion(ssvs.getPlotSystemCompositeView().getPlotSystem().getRegion("Background Region"));
-//		}
+
 	}
 
 	public String[] getAnalysisSetup(int k){
@@ -728,7 +739,12 @@ public class SurfaceScatterPresenter {
 	}
 	
 	public void boundariesWarning(){
-		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell);
+		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,0);
+		roobw.open();
+	}
+	
+	public void numberFormatWarning(){
+		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,1);
 		roobw.open();
 	}
 	
@@ -814,14 +830,12 @@ public class SurfaceScatterPresenter {
 	
 	
 	public void runReplay(IPlottingSystem<Composite> pS,
-//						  IPlottingSystem<Composite> subPS,
 						  TabFolder folder,
 						  IPlottingSystem<Composite> subIBgPS){
 		
 		MovieJob mJ = new MovieJob();
 		mJ.setSuperModel(sm);
 		mJ.setPS(pS);
-//		mJ.setSubPS(subPS);
 		mJ.setTime(220);
 		mJ.setSsp(this);
 		mJ.setSsvs(ssvs);

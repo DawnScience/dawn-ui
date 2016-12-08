@@ -17,10 +17,13 @@ import org.eclipse.ui.PlatformUI;
 public class RegionOutOfBoundsWarning extends Dialog {
 	
 	
-	public RegionOutOfBoundsWarning(Shell parentShell) {
+	private int selector;
+	
+	
+	public RegionOutOfBoundsWarning(Shell parentShell, int selector) {
 		
 		super(parentShell);
-		
+		this.selector = selector;
 				
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 		
@@ -36,8 +39,12 @@ public class RegionOutOfBoundsWarning extends Dialog {
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label warning = new Label(container, SWT.FILL);
-		warning.setText("Bounday Box has over run image boundaries");	
-		
+		if(selector == 0 ){
+			warning.setText("Bounday Box has over run image boundaries");	
+		}
+		if (selector == 1){
+			warning.setText("Enter number as int or double");	
+		}
 		return container;
 	}
 

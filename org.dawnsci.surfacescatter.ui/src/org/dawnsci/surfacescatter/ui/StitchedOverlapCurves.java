@@ -33,6 +33,7 @@ public class StitchedOverlapCurves extends Composite {
     private ArrayList<IDataset> yArrayListFhklError;
     private ILineTrace lt1;
     private SurfaceScatterPresenter ssp;
+    private IDataset[] attenuatedDatasets;
     
     public StitchedOverlapCurves(Composite parent, 
     		int style,
@@ -93,7 +94,7 @@ public class StitchedOverlapCurves extends Composite {
     
 		lt1 = plotSystem.createLineTrace("Concatenated Curve Test");
 		
-		IDataset[] attenuatedDatasets = ssp.curveStitchingOutput();
+		attenuatedDatasets = ssp.curveStitchingOutput();
 		
 		Dataset[] sortedAttenuatedDatasets = new Dataset[2];
 	
@@ -111,13 +112,13 @@ public class StitchedOverlapCurves extends Composite {
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
 						
-				IDataset[] attenuatedDatasets = ssp.curveStitchingOutput(plotSystem, 
-																		 xArrayList,
-																		 yArrayList,
-																		 yArrayListError,
-																		 yArrayListFhkl,
-																		 yArrayListFhklError, 
-																		 model);
+				attenuatedDatasets = ssp.curveStitchingOutput(plotSystem, 
+															  xArrayList,
+															  yArrayList,
+															  yArrayListError,
+															  yArrayListFhkl,
+															  yArrayListFhklError, 
+															  model);
 				
 				Dataset[] sortedAttenuatedDatasets = new Dataset[2];
 										
@@ -158,6 +159,10 @@ public class StitchedOverlapCurves extends Composite {
    
    public ILineTrace getLineTrace1(){
 	   return lt1;
+   }
+   
+   public IDataset[] getAttenuatedDatasets(){
+	   return attenuatedDatasets;
    }
    
 }

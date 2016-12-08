@@ -104,11 +104,22 @@ public class PlotSystem1CompositeView extends Composite {
 	    
 	    String[] setup = ssp.getAnalysisSetup(0);
 	    
+	    Label bgMethod = new Label(methodSetting, SWT.FILL);
+	    bgMethod.setText("Background Method:");
+	    Label polynomialPower = new Label(methodSetting, SWT.FILL);
+	    polynomialPower.setText("Polynomial Power:");
 	    
 	    comboDropDown0 = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
 	    comboDropDown0.setText(setup[0]); 
+	    
 	   	comboDropDown1 = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.RIGHT);
 	   	comboDropDown1.setText(setup[1]);
+	   
+	    Label trMethod = new Label(methodSetting, SWT.FILL);
+	    trMethod.setText("Tracking Method:");
+	    Label bBox = new Label(methodSetting, SWT.FILL);
+	    bBox.setText("Boundary Box:");
+	   	
 	   	comboDropDown2 = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
 	   	comboDropDown2.setText(setup[2]);
 	    boundaryBoxText = new Text(methodSetting, SWT.SINGLE);
