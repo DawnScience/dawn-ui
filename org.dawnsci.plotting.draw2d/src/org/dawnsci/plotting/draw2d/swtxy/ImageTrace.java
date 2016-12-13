@@ -1420,7 +1420,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 		Dataset im = null;
 		try {
-			im = DatasetUtils.sliceAndConvertLazyDataset(lazy);
+			//don't take view of Dataset, could lose metadata listeners
+			im = (lazy instanceof Dataset) ? (Dataset)lazy : DatasetUtils.sliceAndConvertLazyDataset(lazy);
 		} catch (DatasetException e) {
 		}
 		if (im == null) {

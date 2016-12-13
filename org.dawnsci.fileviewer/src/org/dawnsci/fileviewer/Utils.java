@@ -26,6 +26,7 @@ import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.fileviewer.table.FileTableViewerComparator;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.program.Program;
 
@@ -78,10 +79,21 @@ public class Utils {
 	 */
 	public static void sortFiles(File[] files, SortType sortType, int direction) {
 		/* Very lazy merge sort algorithm */
-		sortBlock(files, 0, files.length - 1, new File[files.length], sortType, direction);
+		sortBlock(files, 0, files.length - 1, new File[files.length], sortType, direction, null);
 	}
 
-	private static void sortBlock(File[] files, int start, int end, File[] mergeTemp, SortType sortType, int direction) {
+	/**
+	 * Sorts files lexicographically by name.
+	 * 
+	 * @param files
+	 *            the array of Files to be sorted
+	 */
+	public static void sortFiles(File[] files, SortType sortType, int direction, IProgressMonitor monitor) {
+		/* Very lazy merge sort algorithm */
+		sortBlock(files, 0, files.length - 1, new File[files.length], sortType, direction, monitor);
+	}
+
+	private static void sortBlock(File[] files, int start, int end, File[] mergeTemp, SortType sortType, int direction, IProgressMonitor monitor) {
 		final int length = end - start + 1;
 		if (length < 8) {
 			for (int i = end; i > start; --i) {
@@ -90,14 +102,16 @@ public class Utils {
 						final File temp = files[j];
 						files[j] = files[j - 1];
 						files[j - 1] = temp;
+						if (monitor != null && monitor.isCanceled())
+							return;
 					}
 				}
 			}
 			return;
 		}
 		final int mid = (start + end) / 2;
-		sortBlock(files, start, mid, mergeTemp, sortType, direction);
-		sortBlock(files, mid + 1, end, mergeTemp, sortType, direction);
+		sortBlock(files, start, mid, mergeTemp, sortType, direction, monitor);
+		sortBlock(files, mid + 1, end, mergeTemp, sortType, direction, monitor);
 		int x = start;
 		int y = mid + 1;
 		for (int i = 0; i < length; ++i) {
@@ -106,6 +120,8 @@ public class Utils {
 			} else {
 				mergeTemp[i] = files[x++];
 			}
+			if (monitor != null && monitor.isCanceled())
+				return;
 		}
 		for (int i = 0; i < length; ++i)
 			files[i + start] = mergeTemp[i];
@@ -159,6 +175,20 @@ public class Utils {
 	 *         null
 	 */
 	public static File[] getDirectoryList(File file, SortType sortType, int direction, String filter, boolean useRegex) {
+		return getDirectoryList(file, sortType, direction, filter, useRegex, null);
+	}
+
+	/**
+	 * Gets a directory listing
+	 * 
+	 * @param file
+	 *            the directory to be listed
+	 * @param sort
+	 *            the sorting type
+	 * @return an array of files this directory contains, may be empty but not
+	 *         null
+	 */
+	public static File[] getDirectoryList(File file, SortType sortType, int direction, String filter, boolean useRegex, IProgressMonitor monitor) {
 		File[] list = null;
 		if (filter == null || filter.equals("*") || Pattern.matches("^\\s*$", filter)) {
 			list = file.listFiles();
@@ -175,7 +205,7 @@ public class Utils {
 		}
 		if (list == null)
 			return new File[0];
-		sortFiles(list, sortType, direction);
+		sortFiles(list, sortType, direction, monitor);
 		return list;
 	}
 

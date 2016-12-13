@@ -10,8 +10,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
 public class OpenDialogHandler extends AbstractHandler {
@@ -33,13 +32,27 @@ public class OpenDialogHandler extends AbstractHandler {
 				}
 			}
 			
-			if (!selectedFile.isEmpty()) {
-				String string = selectedFile.get(0);
-				MessageBox box = new MessageBox(Display.getCurrent().getActiveShell());
-				box.setMessage(string);
-				box.open();
+			String[] sf = new String[selectedFile.size()];
+			
+			for (int i = 0; i<selectedFile.size(); i++){
+				sf[i]=selectedFile.get(i);
 			}
-
+			
+//			if (!selectedFile.isEmpty()) {
+//				String string = selectedFile.get(0);
+//				MessageBox box = new MessageBox(Display.getCurrent().getActiveShell());
+//				box.setMessage(string);
+//				box.open();
+//			}
+			
+			Shell s =PlatformUI.getWorkbench().getWorkbenchWindows()[0].getShell();
+			
+//			ExampleDialog ed =new ExampleDialog(s, sf);
+//			ed.open();
+			
+			SurfaceScatterPresenter ssp = new SurfaceScatterPresenter(s, sf); 
+			
+			
 		}
 
 		return null;

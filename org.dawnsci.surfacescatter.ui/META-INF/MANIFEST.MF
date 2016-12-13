@@ -3,8 +3,23 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Surfacescatter UI
 Bundle-SymbolicName: org.dawnsci.surfacescatter.ui;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Activator: org.dawnsci.surfacescatter.ui.Activator
 Require-Bundle: org.eclipse.jface;bundle-version="3.11.1",
  org.eclipse.ui;bundle-version="3.107.0",
- org.dawnsci.spectrum.ui;bundle-version="1.0.0"
+ org.dawnsci.spectrum.ui;bundle-version="1.0.0",
+ uk.ac.diamond.scisoft.surfacescatter,
+ uk.ac.diamond.scisoft.analysis,
+ org.eclipse.january,
+ org.eclipse.dawnsci.analysis.api,
+ org.eclipse.dawnsci.plotting.api,
+ org.eclipse.core.runtime,
+ org.eclipse.dawnsci.analysis.dataset,
+ org.eclipse.osgi,
+ org.dawb.common.ui,
+ org.apache.commons.lang,
+ org.eclipse.swt
+Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Diamond Light Source
+Import-Package: uk.ac.diamond.scisoft.analysis.io
+Export-Package: org.dawnsci.surfacescatter.ui

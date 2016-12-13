@@ -347,7 +347,10 @@ public class MapPlotManager {
 		
 		while (iterator.hasNext()) {
 			MapObject l = iterator.next().getMap();
-			if (l instanceof PlottableMapObject && ((PlottableMapObject)l).getSpectrum(x, y) != null) return (PlottableMapObject)l;
+			double[] range = l.getRange();
+			
+			if (l instanceof PlottableMapObject && x >= range[0] && x <= range[1] && y >= range[2] && y <= range[3]) return (PlottableMapObject)l;
+			
 		}
 		
 		return null;
@@ -435,7 +438,7 @@ public class MapPlotManager {
 		try {
 			t = MetadataPlotUtils.buildTrace(longName, map, this.map);
 			//TODO something better here:
-			t.setGlobalRange(sanizeRange(area.getRange(), map.getShape()));
+			t.setGlobalRange(sanizeRange(ob.getRange(), map.getShape()));
 			if (ob instanceof PlottableMapObject)  t.setAlpha(((PlottableMapObject)ob).getTransparency());
 		} catch (Exception e) {
 			logger.error("Error creating image trace", e);

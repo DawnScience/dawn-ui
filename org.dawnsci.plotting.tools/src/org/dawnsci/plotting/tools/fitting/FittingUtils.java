@@ -89,7 +89,8 @@ public class FittingUtils {
 		//Fit the peaks we found
 		fittedPeaksAndBkgs = Generic1DFitter.fitPeakFunctions(foundPeaks, xDataSet, yDataSet, peakFunction, optimizer, smoothing, nrPeaks,  0.0, false, false, null, true);
 		
-		
+		if (fittedPeaksAndBkgs == null)
+			return null;
 		//Pick out the peak functions of the correct class & package into new composite function
 		for (IOperator peakAndBkg : fittedPeaksAndBkgs) {
 			for (IFunction partFunction : peakAndBkg.getFunctions()) {
