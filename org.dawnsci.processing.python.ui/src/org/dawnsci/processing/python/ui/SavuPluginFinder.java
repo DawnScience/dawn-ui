@@ -50,13 +50,6 @@ public class SavuPluginFinder {
 
 		try {
 			Map<String, Object> out = pythonRunSavuService.get_plugin_params(pluginName);
-			// now we need to add the java type so we can do stuff in the gui
-			// we don't use the python type, but instead record the java class for casting later.
-			for (Entry<String, Object> entry : out.entrySet()) {
-				Class<? extends Object> type = ((Map<String, Object>) entry.getValue()).get("value").getClass();
-				((Map<String, Object>) entry.getValue()).put("dtype", type);
-			}
-			System.out.println("I am here:"+out.toString());
 			return out;
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -1,4 +1,4 @@
-package org.dawnsci.processing.ui.model;
+package org.dawnsci.processing.ui.savu;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.dawnsci.processing.python.ui.SavuPluginFinder;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
 import org.eclipse.jface.viewers.AbstractTableViewer;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -31,6 +32,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -42,9 +44,42 @@ import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Table;
 
 public class SavuPluginChooser extends Composite {
-	public SavuPluginChooser(Composite parent, int style) {
-		super(parent, style);
+
+	public String pluginName;
+	public String pluginPath;
+	public Integer pluginRank;
+	private Combo c;
+	private int selectionIndex;
+
+	public String getPluginName() {
+		return pluginName;
 	}
+
+
+	public void setPluginName(String pluginName) {
+		this.pluginName = pluginName;
+	}
+
+
+	public String getPluginPath() {
+		return pluginPath;
+	}
+
+
+	public void setPluginPath(String pluginPath) {
+		this.pluginPath = pluginPath;
+	}
+
+
+	public Integer getPluginRank() {
+		return pluginRank;
+	}
+
+
+	public void setPluginRank(Integer pluginRank) {
+		this.pluginRank = pluginRank;
+	}
+
 
 	/**
 	 * Create the composite.
@@ -59,7 +94,7 @@ public class SavuPluginChooser extends Composite {
 		shell.setText("Tester");
 		shell.setLayout(new GridLayout());
 
-		SavuPluginChooser(shell);
+		new SavuPluginChooser(shell, SWT.NONE);
 		shell.pack();
 		shell.setSize(600, 300);
 		shell.open();
@@ -74,10 +109,15 @@ public class SavuPluginChooser extends Composite {
 	}
 
 	
-	public static void SavuPluginChooser(Composite parent) {
-		final Combo c = new Combo(parent, SWT.READ_ONLY);
+	public SavuPluginChooser(Composite parent, int style) {
+		super(parent, style);
+	}
+
+
+	public void initialiseCombo(Integer selectedItem) {
+		this.c = new Combo(this.getParent(), SWT.READ_ONLY);
 		Map<String, Object> pluginInfo = null;
-	    c.setBounds(50, 50, 150, 65);
+	    this.c.setBounds(50, 50, 150, 65);
 	    try {
 			pluginInfo = getMapFromFile();
 		} catch (IOException e) {
@@ -86,37 +126,46 @@ public class SavuPluginChooser extends Composite {
 		}
 		Set<String> myset = pluginInfo.keySet();			
 		String[] stuff = myset.toArray(new String[myset.size()]);
-	    c.setItems(stuff);
-	    c.addSelectionListener(getPluginPath(c, pluginInfo));
 		
-			
-		
+	    this.c.setItems(stuff);
+	    this.c.addSelectionListener(getPluginPath(c, pluginInfo));
+	    if (selectedItem!=null) {
+	    	this.c.select(selectedItem);
+	    }
 	}
 
-	private static SelectionAdapter getPluginPath(final Combo c, Map<String, Object> pluginInfo) {
+	public SelectionAdapter getPluginPath(final Combo c, Map<String, Object> pluginInfo) {
 		SelectionAdapter ac = new SelectionAdapter() {
+
 			public void widgetSelected(SelectionEvent e) {
-				Map <String, Object> pluginEntry = (Map<String, Object>) pluginInfo.get(c.getText()); 
-				System.out.println(c.getText());
-				System.out.println(pluginEntry.get("path2plugin"));
-				System.out.println(pluginEntry.get("input rank"));
-				
+				Map <String, Object> pluginEntry = (Map<String, Object>) pluginInfo.get(c.getText());
+				setSelectionIndex(c.getSelectionIndex());
+				setPluginName(c.getText());
+				setPluginPath((String) pluginEntry.get("path2plugin"));
+				setPluginRank((Integer) pluginEntry.get("input rank"));
 			}
-			
+
 	    };
 		return ac;
 	}
 	
+	public void setSelectionIndex(int selectionIndex) {
+		this.selectionIndex = selectionIndex;
+		
+	}
+	public Integer getSelectionIndex() {
+		return this.selectionIndex;
+		
+	}
+
 	private static Map<String, Object> getMapFromFile() throws IOException {
-		final String wspacePath = "/home/clb02321/Desktop/";// ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
+		final String wspacePath = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
 
 		Map<String, Object> pluginDict = null;
 		ObjectInputStream in;
 		FileInputStream fileIn;
 			try {
-			fileIn = new FileInputStream(wspacePath + "runtime-uk.ac.diamond.dawn.productsavu_plugin_info.ser");// just
-																												// for
-																												// testing
+			fileIn = new FileInputStream(wspacePath + "savu_plugin_info.ser");// just
 			in = new ObjectInputStream(fileIn);
 			pluginDict = (Map<String, Object>) in.readObject();
 			in.close();
@@ -127,5 +176,11 @@ public class SavuPluginChooser extends Composite {
 		}
 		return pluginDict;
 	
+	}
+
+
+	public void addSelectionListener(SelectionListener selectionListener) {
+		
+		this.c.addSelectionListener(selectionListener);
 	}
 }

@@ -1,4 +1,4 @@
-package org.dawnsci.processing.ui.model;
+package org.dawnsci.processing.ui.savu;
 
 import java.beans.PropertyChangeEvent;
 import java.io.Serializable;
@@ -13,6 +13,8 @@ import java.util.Map.Entry;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
+import org.dawnsci.processing.ui.model.AbstractOperationModelWizardPage;
+import org.dawnsci.processing.ui.model.OperationModelViewer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -55,7 +57,7 @@ import org.eclipse.swt.widgets.Label;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage {
+public class SavuPluginModelWizardPageOld extends AbstractOperationModelWizardPage {
 	
 	private IPlottingSystem<Composite> input;
 	private IPlottingSystem<Composite> output;
@@ -65,9 +67,9 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 	private IDataset[] axes;
 	private double[] minMax = new double[4];
 	
-	private final static Logger logger = LoggerFactory.getLogger(SavuPluginModelWizardPage.class);
+	private final static Logger logger = LoggerFactory.getLogger(SavuPluginModelWizardPageOld.class);
 
-	public SavuPluginModelWizardPage(IOperation<? extends IOperationModel, ? extends OperationData> operation) {
+	public SavuPluginModelWizardPageOld(IOperation<? extends IOperationModel, ? extends OperationData> operation) {
 		super(operation);
 	}
 
