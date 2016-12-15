@@ -14,11 +14,17 @@ import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
@@ -33,11 +39,10 @@ public class MultipleOutputCurvesTableView extends Composite {
 	private IRegion imageNo;
 	private ILineTrace lt;
 	private ExampleModel model;
-	private DataModel dm;
-//	private ArrayList<TableItem> datSelector;
 	private Button sc;
 	private Button save;
-	private Button intensitySelect;
+	private Combo intensitySelect;
+	private Combo outputFormatSelection;
 	private Group overlapSelection;
 	private Button errors;
 	private Button overlapZoom;
@@ -46,17 +51,12 @@ public class MultipleOutputCurvesTableView extends Composite {
 	
 	public MultipleOutputCurvesTableView (Composite parent, 
 										  int style, 
-										  ArrayList<ExampleModel> models, 
-										  ArrayList<DataModel> dms,
-										  SuperModel sm,
 										  int extra) {
 
 		super(parent, style);
 
 		new Label(this, SWT.NONE).setText("Output Curves");
-
-		this.model = models.get(sm.getSelection());
-		this.dm = dms.get(sm.getSelection());
+		
 		this.extra = extra;
 	
 		
@@ -66,17 +66,17 @@ public class MultipleOutputCurvesTableView extends Composite {
 			e2.printStackTrace();
 		}
 
-		this.createContents(model, sm, dm);
+		this.createContents(model);
 
 	}
 
-	public void createContents(ExampleModel model, SuperModel sm, DataModel dm) {
+	public void createContents(ExampleModel model) {
 		
 		SashForm sashForm= new SashForm(this, SWT.VERTICAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		overlapSelection = new Group(sashForm, SWT.NULL);
-		GridLayout overlapSelectionLayout = new GridLayout(3, true);
+		GridLayout overlapSelectionLayout = new GridLayout(4, true);
 		GridData overlapSelectionData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		overlapSelectionData.minimumWidth = 50;
 		overlapSelection.setLayout(overlapSelectionLayout);
@@ -86,8 +86,17 @@ public class MultipleOutputCurvesTableView extends Composite {
 		errors = new Button(overlapSelection, SWT.PUSH);
 		errors.setText("Errors");
 		
-		intensitySelect = new Button(overlapSelection, SWT.PUSH);
-		intensitySelect.setText("Intensity?");
+		
+		intensitySelect = new Combo(overlapSelection, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
+		intensitySelect.setText("Intensity");
+		intensitySelect.add("Intensity");
+		intensitySelect.add("Fhkl");
+		
+		outputFormatSelection = new Combo(overlapSelection, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
+		outputFormatSelection.setText("GenX");
+		outputFormatSelection.add("GenX");
+		outputFormatSelection.add("Anrod");
+		
 		
 		save = new Button(overlapSelection, SWT.PUSH);
 		save.setText("Save Spliced");
@@ -104,26 +113,10 @@ public class MultipleOutputCurvesTableView extends Composite {
 		gd_secondField.heightHint = 100;
 
 		plotSystem4.createPlotPart(sashForm, "ExamplePlot", actionBarComposite, PlotType.IMAGE, null);
-		
-		String[] t = CurveStateIdentifier.CurveStateIdentifier1(plotSystem4);
-		
-		if(t[0] == "f"){
-			lt = plotSystem4.createLineTrace(dm.getName() + "_Fhkl");
-		}
-		else{
-			lt = plotSystem4.createLineTrace(dm.getName() + "_Intensity");
-		}
-		
-		if (dm.getyList() == null || dm.getxList() == null) {
-			lt.setData(dm.backupDataset(), dm.backupDataset());
-		} else {
-			if (t[0] == "f"){
-				lt.setData(dm.yIDatasetFhkl(), dm.xIDataset());
-			}
-			else{
-				lt.setData(dm.yIDataset(), dm.xIDataset());
-			}
-		}
+			
+		lt = plotSystem4.createLineTrace("Blank Curve");
+		IDataset backup = DatasetFactory.createRange(0, 200, 1, Dataset.FLOAT64);
+		lt.setData(backup, backup);		
 
 		plotSystem4.addTrace(lt);
 		try {
@@ -138,19 +131,7 @@ public class MultipleOutputCurvesTableView extends Composite {
 		overlapZoom = new Button(sashForm, SWT.PUSH);
 		overlapZoom.setText("Overlap Zoom");
 		
-//		 try {
-//				marker = plotSystem4.createRegion("Marker", RegionType.XAXIS);
-//				marker.setShowPosition(true);
-//			} catch (Exception e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			}
-//		
-		
 		sashForm.setWeights(new int[]{10,5,80,5});
-		
-		
-		
 	}
 
 	public Composite getComposite() {
@@ -175,7 +156,8 @@ public class MultipleOutputCurvesTableView extends Composite {
 			public void run() {
 				plotSystem4.clear();
 				lt = plotSystem4.createLineTrace("Output Curve");
-				lt.setData(dm.backupDataset(), dm.backupDataset());
+				IDataset backup = DatasetFactory.createRange(0, 200, 1, Dataset.FLOAT64);
+				lt.setData(backup, backup);
 				plotSystem4.addTrace(lt);
 				plotSystem4.repaint();
 			}
@@ -226,8 +208,12 @@ public class MultipleOutputCurvesTableView extends Composite {
 		return overlapSelection;
 	}
 	
-	public Button getIntensity(){
+	public Combo getIntensity(){
 		return intensitySelect;
+	}
+	
+	public Combo getOutputFormatSelection(){
+		return outputFormatSelection;
 	}
 	
 	public Button getOverlapZoom(){
@@ -238,7 +224,7 @@ public class MultipleOutputCurvesTableView extends Composite {
 		return save;
 	}
 		
-	public Button getErrors(){
+	public Button getErrorsButton(){
 		return errors;
 	}
 	

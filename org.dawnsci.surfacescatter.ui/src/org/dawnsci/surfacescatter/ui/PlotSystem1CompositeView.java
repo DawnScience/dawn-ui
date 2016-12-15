@@ -56,35 +56,27 @@ public class PlotSystem1CompositeView extends Composite {
 	private Combo comboDropDown1;
 	private Combo comboDropDown2;
     private Text boundaryBoxText;
-    private SuperModel sm;
-    private DataModel dm;
     private String[] methodologies;
     private int extra;
     private SurfaceScatterPresenter ssp;
+    private RegionSetterZoomedView rszv;
 	
-    private ExampleModel model;
-    
+  
     public PlotSystem1CompositeView(Composite parent, 
     		int style,
-    		ArrayList<ExampleModel> models, 
-    		ArrayList<DataModel> dms,
-    		SuperModel sm, 
-    		GeometricParametersModel gm, 
     		PlotSystemCompositeView customComposite, 
     		int trackingMarker, 
     		int extra,
-    		SurfaceScatterPresenter ssp) {
+    		SurfaceScatterPresenter ssp,
+    		RegionSetterZoomedView rszv) {
     	
         super(parent, style);
-//        new Label(this, SWT.NONE).setText("Operation Window");
-        
-        this.sm =sm;
-        this.model = models.get(sm.getSelection());
-        this.dm =dms.get(sm.getSelection());
+
         this.extra= extra;
         this.ssp = ssp;
+        this.rszv = rszv;
         
-        int correctionSelection = sm.getCorrectionSelection();
+       
         try {
         	
 			plotSystem1 = PlottingFactory.createPlottingSystem();
@@ -92,21 +84,19 @@ public class PlotSystem1CompositeView extends Composite {
 			
 		}
 
-        this.createContents(model, gm, customComposite, correctionSelection, trackingMarker); 
+        this.createContents(customComposite, trackingMarker); 
         
     }
      
-    public void createContents(ExampleModel model
-    		, GeometricParametersModel gm, PlotSystemCompositeView customComposite,
-    		int cS, int trackingMarker) {
+    public void createContents(PlotSystemCompositeView customComposite,
+    						   int trackingMarker) {
         
         
         Group methodSetting = new Group(this, SWT.FILL);
         GridLayout methodSettingLayout = new GridLayout(2, true);
 	    GridData methodSettingData = new GridData();
 	    methodSettingData .minimumWidth = 50;
-//	    this.setLayout(methodSettingLayout);
-//	    this.setData(methodSettingData);
+
 //	
 	    methodSetting.setLayout(methodSettingLayout);
 	    methodSetting.setLayoutData(methodSettingData);
@@ -114,11 +104,22 @@ public class PlotSystem1CompositeView extends Composite {
 	    
 	    String[] setup = ssp.getAnalysisSetup(0);
 	    
+	    Label bgMethod = new Label(methodSetting, SWT.FILL);
+	    bgMethod.setText("Background Method:");
+	    Label polynomialPower = new Label(methodSetting, SWT.FILL);
+	    polynomialPower.setText("Polynomial Power:");
 	    
 	    comboDropDown0 = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
 	    comboDropDown0.setText(setup[0]); 
+	    
 	   	comboDropDown1 = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.RIGHT);
 	   	comboDropDown1.setText(setup[1]);
+	   
+	    Label trMethod = new Label(methodSetting, SWT.FILL);
+	    trMethod.setText("Tracking Method:");
+	    Label bBox = new Label(methodSetting, SWT.FILL);
+	    bBox.setText("Boundary Box:");
+	   	
 	   	comboDropDown2 = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
 	   	comboDropDown2.setText(setup[2]);
 	    boundaryBoxText = new Text(methodSetting, SWT.SINGLE);
@@ -163,7 +164,7 @@ public class PlotSystem1CompositeView extends Composite {
 	          
 	        }
 
-	      });
+	     });
 	    
 	    comboDropDown2.addSelectionListener(new SelectionListener() {
 	    	@Override
@@ -185,143 +186,16 @@ public class PlotSystem1CompositeView extends Composite {
 			}
 	    	
 	    });
-//	    
-//        Group controlButtons = new Group(this, SWT.NULL);
-//        controlButtons.setText("Control Buttons");
-//        GridLayout gridLayoutButtons = new GridLayout();
-//        gridLayoutButtons.numColumns =2;
-//        controlButtons.setLayout(gridLayoutButtons);
-//        GridData gridDataButtons = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-//        gridDataButtons.horizontalSpan = 1;
-//        controlButtons.setLayoutData(gridDataButtons);
-//        
-//        button = new Button (controlButtons, SWT.PUSH);
-//        button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-//        button1 = new Button (controlButtons, SWT.PUSH);
-//        button1.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
         button2 = new Button (methodSetting, SWT.PUSH);
         button2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         button3 = new Button (methodSetting, SWT.PUSH);
         button3.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
        
-//        button.setText ("Proceed?");
-//        button1.setText("Run");
         button2.setText("Save Parameters");
         button3.setText("Load Parameters");
         button2.setData(new GridData(SWT.FILL));
         button3.setData(new GridData(SWT.FILL));
-        
-        if (extra == 1){
-	        
-	        ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(this, null);
-	        plotSystem1.createPlotPart(this, "ExamplePlot1", actionBarComposite, PlotType.IMAGE, null);
-	        
-			
-			SliceND slice = new SliceND(model.getDatImages().getShape());
-				
-			button.addListener (SWT.Selection, e -> {
-				if (button.getSelection()) {
-					int selection = model.getImageNumber();
-					slice.setSlice(0, selection, selection+1, 1);
-					IDataset j = null;
-					try {
-						j = model.getDatImages().getSlice(slice);
-					} catch (Exception e1){
-						e1.printStackTrace();
-					}
-					
-					j.squeeze();
-					IDataset output = DummyProcessingClass.DummyProcess(sm, 
-																		j, 
-																		model,
-																		dm, 
-																		gm, 
-																		customComposite.getPlotSystem(), 
-																		cS, 
-																		selection, 
-																		trackingMarker,
-																		ssp.getSliderPos());
-					plotSystem1.createPlot2D(output, null, null);
-					}
-				else {
-				}
-			});
-		        
-			model.addPropertyChangeListener(new PropertyChangeListener() {
-				
-				@SuppressWarnings("unused")
-				public void widgetSelected(SelectionEvent e) {
-					
-					int selection = model.getImageNumber();
-					
-				    try {
-				    	if (button.getSelection()){
-				    		slice.setSlice(0, selection, selection+1, 1);
-				    		IDataset i = model.getDatImages().getSlice(slice);
-				    		i.squeeze();
-				    		IDataset image1 = i;
-							IDataset output = DummyProcessingClass.DummyProcess(sm,
-																				i, 
-																				model, 
-																				dm,
-																				gm, 
-																				customComposite.getPlotSystem(), 
-																				cS, 
-																				selection, 
-																				trackingMarker, 
-																				ssp.getSliderPos());
-							plotSystem1.createPlot2D(output, null, null);
-				    	}
-					
-				    } 
-				    catch (Exception f) {
-						
-						f.printStackTrace();
-					}
-				}
-				@Override
-				public void propertyChange(PropertyChangeEvent evt) {
-	
-					int selection = model.getImageNumber();
-					
-				    try {
-				    	if (button.getSelection()){
-				    		slice.setSlice(0, selection, selection+1, 1);
-				    		IDataset i = model.getDatImages().getSlice(slice);
-				    		i.squeeze();
-							IDataset output = DummyProcessingClass.DummyProcess(sm, 
-																				i, 
-																				model, 
-																				dm, 
-																				gm, 
-																				customComposite.getPlotSystem(), 
-																				cS, 
-																				selection, 
-																				trackingMarker,
-																				ssp.getSliderPos());
-							plotSystem1.createPlot2D(output, null, null);
-							plotSystem1.repaint();
-				    	}
-					
-				    } 
-				    catch (Exception f) {
-						f.printStackTrace();
-					}
-				}
-				
-			});
-			
-	        final GridData gd_firstField = new GridData(SWT.FILL, SWT.FILL, true, true);
-	        gd_firstField.grabExcessVerticalSpace = true;
-	        gd_firstField.grabExcessVerticalSpace = true;
-	
-	        gd_firstField.grabExcessVerticalSpace = true;
-	        gd_firstField.grabExcessVerticalSpace = true;
-	        gd_firstField.heightHint = 100;
-	        gd_firstField.horizontalSpan = 2;
-	
-	        plotSystem1.getPlotComposite().setLayoutData(gd_firstField);
-        }
         
 	}
     
@@ -372,6 +246,8 @@ public class PlotSystem1CompositeView extends Composite {
      		  						 fitPowerSelection, 
      		  						 trackerSelection, 
      		  						 boundaryBox);
+       
+       rszv.dummyProcessTrigger();
    }
    
    public Combo[] getCombos(){
@@ -391,12 +267,7 @@ public class PlotSystem1CompositeView extends Composite {
 		  }
 	   }
 	   
-	   
-	   
-   
-   
-   
-   
+
    public void setFitPowerDropDown(FitPower m){
 		  for (int i =0 ; i<AnalaysisMethodologies.FitPower.values().length; i++){
 			  if ( m == AnalaysisMethodologies.FitPower.values()[i]){
@@ -454,15 +325,10 @@ public class PlotSystem1CompositeView extends Composite {
    public Button getLoadButton(){
 	   return button3;
    }
-   
-//	public Button getButton2() {
-//		return button2;
-//	}
-	
-	
-	public Button getProceedButton(){
+
+   public Button getProceedButton(){
 		return button;
-	}
+   }
 	
    
 class operationJob extends Job {

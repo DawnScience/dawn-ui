@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Processing Python Savu bundle
+Bundle-SymbolicName: org.dawnsci.processing.python.ui
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.dawnsci.processing.python.ui.Activator
+Bundle-Vendor: Diamond Light Source
+Require-Bundle: org.eclipse.core.runtime,
+ org.dawnsci.python.rpc,
+ org.eclipse.swt,
+ org.eclipse.core.resources,
+ org.eclipse.dawnsci.analysis.api;bundle-version="1.1.0",
+ org.python.pydev.core;bundle-version="5.2.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy
+Export-Package: org.dawnsci.processing.python.ui

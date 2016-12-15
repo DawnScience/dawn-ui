@@ -164,5 +164,14 @@
             name="Processing Preferences">
       </page>
    </extension>
+   <extension
+         point="org.eclipse.dawnsci.analysis.api.operationsetupwizardpage">
+      <operationsetupwizardpage
+            class="org.dawnsci.processing.ui.savu.SavuPluginModelWizardPage"
+            id="org.dawnsci.processing.ui.SavuPluginModelWizardPage"
+            name="Savu Filter Operation Set-up Wizard Page"
+            operationid="uk.ac.diamond.scisoft.analysis.processing.python.PythonSavuOperation">
+      </operationsetupwizardpage>
+   </extension>
 
 </plugin>

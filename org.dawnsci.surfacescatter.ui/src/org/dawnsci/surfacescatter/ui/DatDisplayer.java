@@ -24,19 +24,23 @@ public class DatDisplayer extends Composite {
     private Button selectFiles;
     private List list;
     private Group datSelector;
+    private SurfaceScatterPresenter ssp;
         
-    public DatDisplayer (Composite parent, int style,
-    		SuperModel sm, String[] filepaths) {
+    public DatDisplayer (Composite parent, 
+    					 int style,
+//    					 SuperModel sm, 
+    					 String[] filepaths,
+    					 SurfaceScatterPresenter ssp){
         super(parent, style);
         
         new Label(this, SWT.NONE).setText("Source Data");
         
-        this.createContents(sm, filepaths); 
+        this.createContents(filepaths); 
 
         
     }
     
-    public void createContents(SuperModel sm, String[] filepaths) {
+    public void createContents(String[] filepaths) {
         
         datSelector = new Group(this, SWT.NULL);
         GridLayout datSelectorLayout = new GridLayout();
@@ -80,7 +84,8 @@ public class DatDisplayer extends Composite {
 	    	@Override
 	    	public void widgetSelected(SelectionEvent e) {
 	          int selection = list.getSelectionIndex();
-	          sm.setSelection(selection);
+	          ssp.setSelection(selection);
+//	          sm.setSelection(selection);
 //	          System.out.println("!!!!!!!!!!!!!!selection : " + selection +"  !!!!!!!!!!!!!!!!!!!!!!!!!!1");
 	        }
 	    	@Override

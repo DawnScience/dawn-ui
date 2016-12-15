@@ -1,5 +1,6 @@
 package org.dawnsci.surfacescatter.ui;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import org.dawnsci.surfacescatter.DataModel;
@@ -29,6 +30,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
@@ -38,34 +40,23 @@ public class RegionSetterZoomedView extends Dialog {
 
 	private PlotSystemCompositeView customComposite;
 	private SuperSashPlotSystem2Composite customComposite2;
-	private ArrayList<ExampleModel> models;
-	private ArrayList<GeometricParametersModel> gms;
-	private ArrayList<DataModel> dms;
-	private SuperModel sm;
 	private SashForm right;
 	private SashForm left;
 	private PlotSystem1CompositeView customComposite1;
 	private SurfaceScatterPresenter ssp;
 	private SurfaceScatterViewStart ssvs;
 	private boolean modify = true;
+	private int DEBUG = 1;
 
 	public RegionSetterZoomedView(Shell parentShell, 
 			int style, 
-			SuperModel sm, 
-			ArrayList<DataModel> dms,
 			String[] filepaths, 
-			ArrayList<ExampleModel> models, 
-			ArrayList<GeometricParametersModel> gms,
 			GeometricParametersWindows paramField, 
 			SurfaceScatterPresenter ssp,
 			SurfaceScatterViewStart ssvs) {
 		
 		super(parentShell);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
-		this.sm = sm;
-		this.dms = dms;
-		this.models = models;
-		this.gms = gms;
 		this.ssp = ssp;
 		this.ssvs = ssvs;
 	}
@@ -86,8 +77,8 @@ public class RegionSetterZoomedView extends Dialog {
 
 		///////////////// Left
 		///////////////// SashForm///////////////////////////////////////////////////
+		
 		Group topImage = new Group(left, SWT.NONE);
-//		topImage.setText("Top Image");
 		GridLayout topImageLayout = new GridLayout();
 		topImage.setLayout(topImageLayout);
 		GridData topImageData = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -100,10 +91,10 @@ public class RegionSetterZoomedView extends Dialog {
 
 		customComposite = new PlotSystemCompositeView(topImage, 
 				SWT.NONE,
-				PlotSystemCompositeDataSetter.imageSetter(models.get(sm.getSelection()), 0),
+				ssp.returnNullImage(),
 				0,
 				ssp.getNoImages(),
-				(Dataset) PlotSystemCompositeDataSetter.imageSetter(models.get(sm.getSelection()), 0),
+				(Dataset) ssp.returnSubNullImage(),
 				ssp,
 				ssvs);
 
@@ -113,7 +104,6 @@ public class RegionSetterZoomedView extends Dialog {
 		//////////////////////////////////////////////////////////
 
 		Group mainImage = new Group(left, SWT.FILL);
-//		mainImage.setText("Main Image");
 		GridLayout mainImageLayout = new GridLayout();
 		mainImage.setLayout(mainImageLayout);
 		GridData mainImageData = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -126,19 +116,18 @@ public class RegionSetterZoomedView extends Dialog {
 
 		customComposite1 = new PlotSystem1CompositeView(mainImage, 
 				SWT.NONE, 
-				models, 
-				dms, 
-				sm, 
-				gms.get(sm.getSelection()),
 				customComposite, 
 				0, 
 				0, 
-				ssp);
+				ssp,
+				this);
+		
 		customComposite1.setLayout(new GridLayout());
 		customComposite1.setLayoutData(ld2);
+		
 		//////////////////////////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////////////
-		left.setWeights(new int[] { 85, 15 });
+		left.setWeights(new int[] { 77, 23 });
 		///////////////////////////////////////////////////////////////////////////////
 		///////////////// Right
 		/////////////////////////////////////////////////////////////////////////////// sashform////////////////////////////////////////////////
@@ -153,9 +142,8 @@ public class RegionSetterZoomedView extends Dialog {
 			e1.printStackTrace();
 		}
 
-		IDataset k = PlotSystem2DataSetter.PlotSystem2DataSetter1(models.get(sm.getSelection()));
+		IDataset k = ssp.returnSubNullImage();
 		customComposite2.setData(k);
-		models.get(sm.getSelection()).setCurrentImage(k);
 		customComposite2.setLayout(new GridLayout());
 		customComposite2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		//////////////////////////////////////////////////////////////////////////////////
@@ -191,11 +179,17 @@ public class RegionSetterZoomedView extends Dialog {
 				public void focusLost(FocusEvent e) {
 					if (modify == true){
 						modify = false;
-						int k = Integer.parseInt(customComposite.getImageNo().getText());
+						
+						double r = 0;
+						try{
+							r = Double.parseDouble(customComposite.getImageNo().getText());
+						}
+						catch (Exception e1){
+							ssp.numberFormatWarning();
+						}
+						
+						int k = ssp.closestImageIntegerInStack(r);
 						ssp.sliderMovemementMainImage(k, customComposite.getPlotSystem());
-//						ssp.sliderZoomedArea(k, 
-//								  			 customComposite.getGreenRegion().getROI(), 
-//								  			 customComposite.getSubImagePlotSystem());
 						ssp.updateSliders(ssvs.getSliderList(), k);
 						if(customComposite.getXValue().equals(ssp.getXValue(k)) == false){
 							customComposite.getXValue().setText(String.valueOf(ssp.getXValue(k)));
@@ -210,7 +204,6 @@ public class RegionSetterZoomedView extends Dialog {
 				
 				@Override
 				public void focusGained(FocusEvent e) {
-					// TODO Auto-generated method stub
 					
 				}
 			});
@@ -221,7 +214,17 @@ public class RegionSetterZoomedView extends Dialog {
 				public void focusLost(FocusEvent e) {
 					if(modify == true){
 						modify = false;
-						double in = Double.parseDouble(customComposite.getXValue().getText());
+						
+
+						double in = 0;
+						try{
+							in = Double.parseDouble(customComposite.getXValue().getText());
+						}
+						catch (Exception e1){
+							ssp.numberFormatWarning();
+						}
+						
+						
 						int k = ssp.closestImageNo(in);
 						double l = ssp.closestXValue(in);
 						
@@ -284,6 +287,73 @@ public class RegionSetterZoomedView extends Dialog {
 			}
 		});
 
+		
+		
+//////////////////////////////////Save Fit Parameters////////////////////////////////////////
+		
+		customComposite1.getSaveButton().addSelectionListener(new SelectionListener() {
+		
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			
+				FileDialog fd = new FileDialog(getParentShell(), SWT.SAVE); 
+				
+				String stitle = "r";
+				String path = "p";
+				
+				if (fd.open() != null) {
+					stitle = fd.getFileName();
+					path = fd.getFilterPath();
+				}
+			
+				String title = path + File.separator + stitle + ".txt";
+				
+				debug(title);
+				
+				ssp.saveParameters(title);
+			
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+			// TODO Auto-generated method stub
+			
+			}
+		});	    
+		
+		customComposite1.getLoadButton().addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				FileDialog fd = new FileDialog(getParentShell(), SWT.OPEN); 
+				
+				String stitle = "r";
+				String path = "p";
+				
+				if (fd.open() != null) {
+					stitle = fd.getFileName();
+					path = fd.getFilterPath();
+				}
+				
+				String title = path + File.separator + stitle;
+				
+				int selection = (int) ssp.loadParameters(title, 
+												         customComposite,
+												         customComposite1,
+												         customComposite2);
+							
+				generalUpdate();
+				
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
 		///////////////////////////////////////////////////////////////////////////////////
 		////////////////////////////////////////////////////////////////////////////////////
 		/////////////////////// Background slice
@@ -385,7 +455,6 @@ public class RegionSetterZoomedView extends Dialog {
 		customComposite2.getPlotSystem1().clear();
 		customComposite2.getPlotSystem3().clear();
 		
-		
 		ssp.regionOfInterestSetter(customComposite.getGreenRegion().getROI());
 		
 		IRectangularROI greenRectangle = customComposite.getGreenRegion().getROI().getBounds();
@@ -430,7 +499,7 @@ public class RegionSetterZoomedView extends Dialog {
 			IDataset background = ssp.presenterDummyProcess(selection,
 					ssp.getImage(selection),
 					customComposite.getPlotSystem(),
-					0);
+					3);
 	
 			ILineTrace lt3 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
 					customComposite2.getRegions()[0].getROI().getBounds(),
@@ -478,5 +547,22 @@ public class RegionSetterZoomedView extends Dialog {
 		return customComposite.getSlider();
 	}
 
+	public void dummyProcessTrigger(){
+		
+		int y = customComposite.getSliderPos();
+		
+		ssp.presenterDummyProcess(y, 
+								  ssp.getImage(y), 
+								  customComposite.getPlotSystem(),
+								  0);
+	}
+	
+
+	private void debug(String output) {
+		if (DEBUG == 1) {
+			System.out.println(output);
+		}
+	}
+	
 }
 

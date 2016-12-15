@@ -37,7 +37,6 @@ public class GeometricParametersWindows extends Composite{
 	private Text imageName;
 	private Text xName;
 	private Text scalingFactor;
-	private GeometricParametersModel gm;
 	private Text beamHeight;
 	private Text footprint;
 	private Text angularFudgeFactor;
@@ -45,18 +44,25 @@ public class GeometricParametersWindows extends Composite{
 	private Text fluxPath;
 	private TabFolder folder;
 	private Text xNameRef;
+	private SurfaceScatterPresenter ssp;
+	private GeometricParametersWindows gpw;
 	
-	public GeometricParametersWindows(Composite parent, int style,ArrayList<GeometricParametersModel> gms, SuperModel sm){
+	public GeometricParametersWindows(Composite parent, 
+									  int style,
+									  SurfaceScatterPresenter ssp){
 		
 		super(parent, style);
-        //composite = new Composite(parent, SWT.NONE);
 		
         new Label(this, SWT.NONE).setText("Geometric Parameters Window");
         
-        this.createContents(gms, sm);
+        this.ssp = ssp;
+        this.gpw =this;
+        
+        this.createContents();
+        
 	}
 	
-	public void createContents(ArrayList<GeometricParametersModel> gms, SuperModel sm) {
+	public void createContents() {
 		
 		
 		folder = new TabFolder(this, SWT.NONE);
@@ -65,7 +71,6 @@ public class GeometricParametersWindows extends Composite{
 	    TabItem paramsSXRD = new TabItem(folder, SWT.NONE);
 	    paramsSXRD.setText("SXRD Parameters");
 	   
-		gm = gms.get(sm.getSelection());
 		Group geometricParametersSX = new Group(folder, SWT.NULL);
 		GridLayout geometricParametersSXLayout = new GridLayout(2,true);
 		GridData geometricParametersSXData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
@@ -114,7 +119,6 @@ public class GeometricParametersWindows extends Composite{
 	    TabItem paramsReflec = new TabItem(folder, SWT.NONE);
 	    paramsReflec.setText("Reflectivity Parameters");
 
-	    gm = gms.get(sm.getSelection());
 		Group geometricParametersReflec = new Group(folder, SWT.NULL);
 		GridLayout geometricParametersLayoutReflec = new GridLayout(2,true);
 		GridData geometricParametersDataReflec = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
@@ -140,7 +144,7 @@ public class GeometricParametersWindows extends Composite{
 
 			@Override
 			public void modifyText(ModifyEvent e) {
-				gm.setFluxPath(xNameRef.getText());
+				geometricParametersUpdate();
 			}
 	    	
 	    });
@@ -149,7 +153,7 @@ public class GeometricParametersWindows extends Composite{
 
 			@Override
 			public void modifyText(ModifyEvent e) {
-				gm.setFluxPath(fluxPath.getText());
+				geometricParametersUpdate();
 			}
 	    	
 	    });
@@ -158,7 +162,7 @@ public class GeometricParametersWindows extends Composite{
 
 			@Override
 			public void modifyText(ModifyEvent e) {
-				gm.setBeamHeight(Double.parseDouble(beamHeight.getText()));
+				geometricParametersUpdate();
 			}
 	    	
 	    });
@@ -167,7 +171,7 @@ public class GeometricParametersWindows extends Composite{
 
 			@Override
 			public void modifyText(ModifyEvent e) {
-				gm.setSavePath(savePath.getText());
+				geometricParametersUpdate();
 			}
 	    	
 	    });
@@ -176,7 +180,7 @@ public class GeometricParametersWindows extends Composite{
 
 			@Override
 			public void modifyText(ModifyEvent e) {
-				gm.setBeamHeight(Double.parseDouble(footprint.getText()));
+				geometricParametersUpdate();
 			}
 	    	
 	    });
@@ -185,7 +189,7 @@ public class GeometricParametersWindows extends Composite{
 
 			@Override
 			public void modifyText(ModifyEvent e) {
-				gm.setAngularFudgeFactor(Double.parseDouble(angularFudgeFactor.getText()));
+				geometricParametersUpdate();
 			}
 	    	
 	    });
@@ -194,13 +198,13 @@ public class GeometricParametersWindows extends Composite{
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				gm.setBeamCorrection(beamCorrection.getSelection());
+				geometricParametersUpdate();
 				
 			}
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				gm.setBeamCorrection(beamCorrection.getSelection());
+				geometricParametersUpdate();
 				
 			}
 		});
@@ -209,7 +213,7 @@ public class GeometricParametersWindows extends Composite{
 
 			@Override
 			public void modifyText(ModifyEvent e) {
-				gm.setBeamInPlane(Double.parseDouble(beamInPlane.getText()));
+				geometricParametersUpdate();
 			}
 	    	
 	    });
@@ -218,7 +222,7 @@ public class GeometricParametersWindows extends Composite{
 
 			@Override
 			public void modifyText(ModifyEvent e) {
-				gm.setBeamOutPlane(Double.parseDouble(beamOutPlane.getText()));
+				geometricParametersUpdate();
 			}
 	    	
 	    });
@@ -227,7 +231,7 @@ public class GeometricParametersWindows extends Composite{
 
 			@Override
 			public void modifyText(ModifyEvent e) {
-				gm.setCovar(Double.parseDouble(covar.getText()));
+				geometricParametersUpdate();
 			}
 	    	
 	    });
@@ -236,7 +240,7 @@ public class GeometricParametersWindows extends Composite{
 
 			@Override
 			public void modifyText(ModifyEvent e) {
-				gm.setDetectorSlits(Double.parseDouble(detectorSlits.getText()));
+				geometricParametersUpdate();
 			}
 	    	
 	    });
@@ -245,7 +249,7 @@ public class GeometricParametersWindows extends Composite{
 
 			@Override
 			public void modifyText(ModifyEvent e) {
-				gm.setInPlaneSlits(Double.parseDouble(inPlaneSlits.getText()));
+				geometricParametersUpdate();
 			}
 	    	
 	    });
@@ -254,7 +258,7 @@ public class GeometricParametersWindows extends Composite{
 
 			@Override
 			public void modifyText(ModifyEvent e) {
-				gm.setInplanePolarisation(Double.parseDouble(inplanePolarisation.getText()));
+				geometricParametersUpdate();
 			}
 	    	
 	    });
@@ -263,7 +267,7 @@ public class GeometricParametersWindows extends Composite{
 
 			@Override
 			public void modifyText(ModifyEvent e) {
-				gm.setOutPlaneSlits(Double.parseDouble(outPlaneSlits.getText()));
+				geometricParametersUpdate();
 			}
 	    	
 	    });
@@ -272,7 +276,7 @@ public class GeometricParametersWindows extends Composite{
 
 			@Override
 			public void modifyText(ModifyEvent e) {
-				gm.setOutplanePolarisation(Double.parseDouble(outplanePolarisation.getText()));
+				geometricParametersUpdate();
 			}
 	    	
 	    });
@@ -282,7 +286,7 @@ public class GeometricParametersWindows extends Composite{
 
 			@Override
 			public void modifyText(ModifyEvent e) {
-				gm.setScalingFactor(Double.parseDouble(scalingFactor.getText()));
+				geometricParametersUpdate();
 			}
 	    	
 	    });
@@ -291,7 +295,7 @@ public class GeometricParametersWindows extends Composite{
 
 			@Override
 			public void modifyText(ModifyEvent e) {
-				gm.setReflectivityA(Double.parseDouble(reflectivityA.getText()));
+				geometricParametersUpdate();
 			}
 	    	
 	    });
@@ -300,7 +304,7 @@ public class GeometricParametersWindows extends Composite{
 
 			@Override
 			public void modifyText(ModifyEvent e) {
-				gm.setSampleSize(Double.parseDouble(sampleSize.getText()));
+				geometricParametersUpdate();
 			}
 	    	
 	    });
@@ -309,7 +313,7 @@ public class GeometricParametersWindows extends Composite{
 
 			@Override
 			public void modifyText(ModifyEvent e) {
-				gm.setNormalisationFactor(Double.parseDouble(normalisationFactor.getText()));
+				geometricParametersUpdate();
 			}
 	    	
 	    });
@@ -318,13 +322,13 @@ public class GeometricParametersWindows extends Composite{
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				gm.setSpecular(specular.getSelection());
+				geometricParametersUpdate();
 				
 			}
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				gm.setSpecular(specular.getSelection());
+				geometricParametersUpdate();
 				
 			}
 		});
@@ -333,7 +337,7 @@ public class GeometricParametersWindows extends Composite{
 
 			@Override
 			public void modifyText(ModifyEvent e) {
-				gm.setImageName(imageName.getText());
+				geometricParametersUpdate();
 			}
 	    	
 	    });
@@ -342,15 +346,44 @@ public class GeometricParametersWindows extends Composite{
 
 			@Override
 			public void modifyText(ModifyEvent e) {
-				gm.setxName(xName.getText());
+				geometricParametersUpdate();
 			}
 	    	
 	    });
 		
 	}
 	
+	
 	public TabFolder getTabFolder(){
 		return folder;
+	}
+	
+	
+	public void geometricParametersUpdate() {
+			
+		ssp.geometricParametersUpdate(xNameRef.getText(),
+				  fluxPath.getText(),
+				  (Double.parseDouble(beamHeight.getText())),
+				  (savePath.getText()),
+				  (Double.parseDouble(footprint.getText())),
+				  (Double.parseDouble(angularFudgeFactor.getText())),
+				  beamCorrection.getSelection(),
+				  (Double.parseDouble(beamInPlane.getText())),
+				  (Double.parseDouble(beamOutPlane.getText())),
+				  (Double.parseDouble(covar.getText())),
+				  (Double.parseDouble(detectorSlits.getText())),
+				  Double.parseDouble(inPlaneSlits.getText()),
+				  (Double.parseDouble(inplanePolarisation.getText())),
+				  (Double.parseDouble(outPlaneSlits.getText())),
+				  (Double.parseDouble(outplanePolarisation.getText())),
+				  (Double.parseDouble(scalingFactor.getText())),
+				  (Double.parseDouble(reflectivityA.getText())),
+				  (Double.parseDouble(sampleSize.getText())),
+				  (Double.parseDouble(normalisationFactor.getText())),
+				  (specular.getSelection()),
+				  (imageName.getText()),
+				  (xName.getText()));
+		
 	}
 	
 }

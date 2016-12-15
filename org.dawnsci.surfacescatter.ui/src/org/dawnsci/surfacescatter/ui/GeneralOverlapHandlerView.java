@@ -43,8 +43,6 @@ import org.eclipse.ui.PlatformUI;
 
 public class GeneralOverlapHandlerView extends Dialog {
 	
-//	private String[] filepaths;
-	private SuperModel sm;
 	private Shell parentShell;
 	private SashForm right; 
 	private SashForm left;
@@ -53,41 +51,31 @@ public class GeneralOverlapHandlerView extends Dialog {
     private ArrayList<IDataset> yArrayListError;
     private ArrayList<IDataset> yArrayListFhkl;
     private ArrayList<IDataset> yArrayListFhklError;
-  //  private DatDisplayer datDisplayer;
-    private ArrayList<DataModel> dms;
     private Button export;
     private SurfaceScatterPresenter ssp;
     private IPlottingSystem<Composite> parentPs;
     private StitchedOverlapCurves stitchedCurves;
 	
 	public GeneralOverlapHandlerView(Shell parentShell, int style, 
-			SuperModel sm, ArrayList<IDataset> xArrayList,
+			ArrayList<IDataset> xArrayList,
 			ArrayList<IDataset> yArrayList,
 			ArrayList<IDataset> yArrayListError,
 			ArrayList<IDataset> yArrayListFhkl,
 			ArrayList<IDataset> yArrayListFhklError,
-			DatDisplayer datDisplayer, 
-			ArrayList<DataModel> dms,
 			IPlottingSystem<Composite> parentPs,
 			SurfaceScatterPresenter ssp){
-//			String[] filepaths) {
 		
 		super(parentShell);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 		
 		this.parentShell = parentShell;
-		this.sm = sm;
 		this.xArrayList = xArrayList;
 		this.yArrayList = yArrayList;
 	    this.yArrayListError = yArrayListError;
 	    this.yArrayListFhkl = yArrayListFhkl;
 	    this.yArrayListFhklError = yArrayListFhklError;
-	    this.sm =sm;
-	    this.dms = dms;
-	    //this.datDisplayer =datDisplayer;
 	    this.parentPs = parentPs;
 	    this.ssp = ssp;
-//	    this.filepaths = filepaths;
 	}
 
 	@Override
@@ -141,11 +129,9 @@ public class GeneralOverlapHandlerView extends Dialog {
 												   yArrayListError,
 												   yArrayListFhkl,
 												   yArrayListFhklError,
-												 // datDisplayer, 
-												   dms, 
-												   sm,
 												   "Overlap Test", 
-												   model);
+												   model,
+												   ssp);
 		
 		stitchedCurves.setLayout(new GridLayout());
 		stitchedCurves.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -174,7 +160,6 @@ public class GeneralOverlapHandlerView extends Dialog {
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
 				
 			}
 		});
@@ -208,7 +193,3 @@ public class GeneralOverlapHandlerView extends Dialog {
 		return export;
 	}
 }
-
-
-
-

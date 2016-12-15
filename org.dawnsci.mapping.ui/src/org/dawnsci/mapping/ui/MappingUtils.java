@@ -46,14 +46,14 @@ public class MappingUtils {
 		double[] range = new double[4];
 		int xs = axes[1].getSize();
 		int ys = axes[0].getSize();
-		range[0] = axes[1].min().doubleValue();
-		range[1] = axes[1].max().doubleValue();
+		range[0] = axes[1].min(true).doubleValue();
+		range[1] = axes[1].max(true).doubleValue();
 		double dx = ((range[1]-range[0])/(xs-1))/2;
 		range[0] -= dx;
 		range[1] += dx;
 		
-		range[2] = axes[0].min().doubleValue();
-		range[3] = axes[0].max().doubleValue();
+		range[2] = axes[0].min(true).doubleValue();
+		range[3] = axes[0].max(true).doubleValue();
 		double dy = ((range[3]-range[2])/(ys-1))/2;
 		range[2] -= dy;
 		range[3] += dy;
@@ -66,11 +66,11 @@ public class MappingUtils {
 		IDataset xx = ax[1];
 		IDataset yy = ax[0];
 		
-		double xMin = xx.min().doubleValue();
-		double xMax = xx.max().doubleValue();
+		double xMin = xx.min(true).doubleValue();
+		double xMax = xx.max(true).doubleValue();
 		
-		double yMin = yy.min().doubleValue();
-		double yMax = yy.max().doubleValue();
+		double yMin = yy.min(true).doubleValue();
+		double yMax = yy.max(true).doubleValue();
 		
 		double xd = ((xMax-xMin)/xx.getSize())/2;
 		double yd = ((yMax-yMin)/yy.getSize())/2;
@@ -95,11 +95,11 @@ public class MappingUtils {
 		Dataset y = DatasetUtils.convertToDataset(axes[0]);
 		Dataset x = DatasetUtils.convertToDataset(axes[1]);
 		
-		double yMax = y.max().doubleValue();
-		double yMin = y.min().doubleValue();
+		double yMax = y.max(true).doubleValue();
+		double yMin = y.min(true).doubleValue();
 		
-		double xMax = x.max().doubleValue();
-		double xMin = x.min().doubleValue();
+		double xMax = x.max(true).doubleValue();
+		double xMin = x.min(true).doubleValue();
 		
 		if (shape == null) {
 			shape = guessBestShapeShape(x,y);
