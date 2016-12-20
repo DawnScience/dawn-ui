@@ -78,6 +78,9 @@ public class MappingScanNewStyleEventObserver implements IScanListener, IStartup
 
 	@Override
 	public void scanStateChanged(ScanEvent event) {
+		
+		if (Boolean.getBoolean("org.dawnsci.mapping.ui.processing.off")) return;
+		
 		ScanBean beanNoScanReq = event.getBean();
 		final String filePath = beanNoScanReq.getFilePath();
 		// Scan started
