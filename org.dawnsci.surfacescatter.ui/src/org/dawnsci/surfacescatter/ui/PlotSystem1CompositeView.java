@@ -1,21 +1,9 @@
 
 package org.dawnsci.surfacescatter.ui;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
-import java.util.logging.Logger;
-
-import org.apache.log4j.spi.LoggerFactory;
-import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.FitPower;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
-import org.dawnsci.surfacescatter.DataModel;
-import org.dawnsci.surfacescatter.DummyProcessingClass;
-import org.dawnsci.surfacescatter.ExampleModel;
-import org.dawnsci.surfacescatter.GeometricParametersModel;
-import org.dawnsci.surfacescatter.SuperModel;
 import org.dawnsci.surfacescatter.TrackingMethodology;
 import org.dawnsci.surfacescatter.TrackingMethodology.TrackerType1;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -23,10 +11,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.SliceND;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;

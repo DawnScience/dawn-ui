@@ -50,8 +50,10 @@ public class OpenDialogHandler extends AbstractHandler {
 //			ExampleDialog ed =new ExampleDialog(s, sf);
 //			ed.open();
 			
-			SurfaceScatterPresenter ssp = new SurfaceScatterPresenter(s, sf); 
+//			SurfaceScatterPresenter ssp = new SurfaceScatterPresenter(s, sf); 
 			
+			PresenterInitialSetup pis = new PresenterInitialSetup(s, sf);
+			pis.open();
 			
 		}
 

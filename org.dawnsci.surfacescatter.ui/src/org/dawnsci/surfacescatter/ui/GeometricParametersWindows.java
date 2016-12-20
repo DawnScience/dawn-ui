@@ -372,7 +372,7 @@ public class GeometricParametersWindows extends Composite{
 				  (Double.parseDouble(beamOutPlane.getText())),
 				  (Double.parseDouble(covar.getText())),
 				  (Double.parseDouble(detectorSlits.getText())),
-				  Double.parseDouble(inPlaneSlits.getText()),
+				  (Double.parseDouble(inPlaneSlits.getText())),
 				  (Double.parseDouble(inplanePolarisation.getText())),
 				  (Double.parseDouble(outPlaneSlits.getText())),
 				  (Double.parseDouble(outplanePolarisation.getText())),

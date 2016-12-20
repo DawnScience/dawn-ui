@@ -1,28 +1,14 @@
 package org.dawnsci.surfacescatter.ui;
 
 import java.io.File;
-import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 
-import org.dawnsci.surfacescatter.ClosestNoFinder;
 import org.dawnsci.surfacescatter.CurveStateIdentifier;
-import org.dawnsci.surfacescatter.DataModel;
-import org.dawnsci.surfacescatter.ExampleModel;
-import org.dawnsci.surfacescatter.GeometricParametersModel;
-import org.dawnsci.surfacescatter.PlotSystemCompositeDataSetter;
-import org.dawnsci.surfacescatter.SuperModel;
-import org.eclipse.dawnsci.analysis.api.roi.IROI;
-import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
-import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
-import org.eclipse.dawnsci.plotting.api.trace.ITrace;
-import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
-import org.eclipse.january.dataset.AggregateDataset;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.dialogs.Dialog;
@@ -30,33 +16,21 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
-
-import uk.ac.diamond.scisoft.analysis.roi.XAxis;
-
 import org.eclipse.swt.widgets.Slider;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.ui.PlatformUI;
 
 
 
@@ -84,6 +58,14 @@ public class SurfaceScatterViewStart extends Dialog {
 	private boolean modify = true;
 	
 	
+	public boolean isModify() {
+		return modify;
+	}
+
+	public void setModify(boolean modify) {
+		this.modify = modify;
+	}
+
 	public SurfaceScatterViewStart(Shell parentShell, 
 			String[] filepaths,
 			int numberOfImages,
@@ -160,12 +142,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			e.printStackTrace();
 		}
 
-
-
-///////////////////////////////////////////////////		
-
-		
-		
+	
 /////////////////setupRight////////////////////////////////////////
 
 ///////////////////////////Window 2 RIGHT SETUP ////////////////////////////////////////////////////
@@ -311,6 +288,40 @@ public class SurfaceScatterViewStart extends Dialog {
 				
 			}
 		});
+	    
+	    customComposite.getGreenRegion().addROIListener(new IROIListener() {
+
+			@Override
+			public void roiDragged(ROIEvent evt) {
+				roiStandard(evt);
+			}
+
+			@Override
+			public void roiChanged(ROIEvent evt) {
+				roiStandard(evt);
+			}
+
+			@Override
+			public void roiSelected(ROIEvent evt) {
+				roiStandard(evt);
+			}
+			
+			@SuppressWarnings("unchecked")
+			public void roiStandard(ROIEvent evt) {
+				
+				IRegion region = customComposite.getIRegion();
+				
+				int[] Len = region.getROI().getBounds().getIntLengths();
+				int[] Pt = region.getROI().getBounds().getIntPoint();
+				int[][] LenPt = new int[][] {Len,Pt};
+				
+				customComposite.setROITexts(LenPt);
+				
+				
+			}
+		});
+	    	
+	    	
 	    
 	    customComposite.getImageNo().addFocusListener(new FocusListener() {
 			
@@ -482,6 +493,7 @@ public class SurfaceScatterViewStart extends Dialog {
 					
 					ssp.bgImageUpdate(customComposite.getSubImageBgPlotSystem(),
 									  xPos);
+					
 				}
 			}
 			
@@ -624,6 +636,10 @@ public class SurfaceScatterViewStart extends Dialog {
 		}
 		
 		return sliderList;
+	}
+	
+	public RegionSetterZoomedView getRszv(){
+		return rszv;
 	}
 	
 	private void debug(String output) {

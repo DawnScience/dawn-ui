@@ -78,11 +78,14 @@ public class SurfaceScatterPresenter {
 	private PrintWriter writer;
 	private Shell parentShell;
 	
-	public SurfaceScatterPresenter(Shell parentShell, String[] filepaths) {
+	public SurfaceScatterPresenter(Shell parentShell, 
+								   String[] filepaths,
+								   SuperModel sm,
+								   ArrayList<GeometricParametersModel> gms) {
 
-		sm = new SuperModel();
+		this.sm = sm;
 		ssp= this;
-		gms = new ArrayList<GeometricParametersModel>();
+		this.gms = gms;
 		dms = new ArrayList<DataModel>();
 		models = new ArrayList<ExampleModel>();
 		sm.setFilepaths(filepaths);
@@ -132,7 +135,7 @@ public class SurfaceScatterPresenter {
 					models.get(id).setDatX(ildx);
 
 					SliceND slice1 = new SliceND(ildx.getShape());
-					IDataset xdat = ildx.getSlice(slice);
+					IDataset xdat = ildx.getSlice(slice1);
 					xArray[id] = xdat;
 
 					ILazyDataset dcdtheta = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getdcdtheta());
@@ -147,6 +150,16 @@ public class SurfaceScatterPresenter {
 							models.get(id).setDcdtheta(dcdtheta);
 						} catch (Exception e2) {
 							System.out.println("can't get dcdtheta");
+						}
+					} else {
+					}
+					
+					if (qdcd == null) {
+						try {
+							qdcd = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getqsdcd());
+							models.get(id).setQdcd(qdcd);
+						} catch (Exception e2) {
+							System.out.println("can't get qdcd");
 						}
 					} else {
 					}
@@ -367,6 +380,37 @@ public class SurfaceScatterPresenter {
 		}
 		
 		
+		sm.setInitialLenPt(LenPt);
+	}
+	
+	public void regionOfInterestSetter(int[][] LenPt) {
+
+		
+		RectangularROI green = new RectangularROI(LenPt[1][0],
+												  LenPt[1][1],
+												  LenPt[0][0],
+												  LenPt[0][1],
+												  0);
+
+		for (ExampleModel m : models) {
+		
+			m.setLenPt(LenPt);
+			m.setROI(green);
+		}
+		
+		for (DataModel dm :dms){
+			dm.setInitialLenPt(LenPt);
+		}
+		
+		
+		sm.setInitialLenPt(LenPt);
+	}
+	
+	public int[][] getLenPt(){
+		return sm.getInitialLenPt();
+	}
+	
+	public void setLenPt(int[][] LenPt){
 		sm.setInitialLenPt(LenPt);
 	}
 
@@ -651,6 +695,15 @@ public class SurfaceScatterPresenter {
 		writer.close();
 	}	
 	
+	public SuperModel getSuperModel(){
+		return sm;
+	}
+	
+	public ArrayList<GeometricParametersModel> getGeometricParamtersModels(){
+		return gms;
+	}
+	
+	
 	public void anarodSave(String title, String[] fr){
 		
 		IDataset outputDatY = DatasetFactory.ones(new int[] {1});
@@ -930,6 +983,12 @@ public class SurfaceScatterPresenter {
 		}
 		else{
 			sm.setErrorDisplayFlag(true);
+		}
+	}
+	
+	public void setRszvRegionPosition(){
+		if(ssvs.getRszv()!=null){
+			ssvs.getRszv().roiReset(sm.getInitialLenPt());
 		}
 	}
 

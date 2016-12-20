@@ -15,6 +15,7 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Region;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -47,6 +48,13 @@ public class PlotSystemCompositeView extends Composite {
     private Text imageNumber;
     private Button replay;
 	private TabFolder folder;
+	private Text xCoord;
+	private Text xLen;
+	private Text yCoord;
+	private Text yLen;
+	
+	
+	
      
     public PlotSystemCompositeView(Composite parent, 
     							   int style,
@@ -114,13 +122,13 @@ public class PlotSystemCompositeView extends Composite {
 		indicators.setLayoutData(indicatorsData);
 		if(extra == 1){
 			Label outputControlLabel = new Label(indicators, SWT.NULL);
-			outputControlLabel.setText("Take Ouput Marker");
+			outputControlLabel.setText("Take Ouput Marker:");
 		}
 		Label xValueLabel = new Label(indicators, SWT.NULL);
-		xValueLabel.setText("Variable");
+		xValueLabel.setText("X Variable:");
 		
 		Label imageNumberLabel = new Label(indicators, SWT.NULL);
-		imageNumberLabel.setText("Image No.");
+		imageNumberLabel.setText("Image No.:");
 		
 		Button go = new Button(indicators, SWT.PUSH | SWT.FILL);
 		go.setText("Go");
@@ -134,16 +142,44 @@ public class PlotSystemCompositeView extends Composite {
         else{
         }
         
+      
         xValue = new Text(indicators,SWT.SINGLE);
         xValue.setText(String.valueOf(ssp.getXValue(slider.getSelection())));
         
         imageNumber = new Text(indicators,SWT.SINGLE);
         imageNumber.setText("   " + slider.getSelection());
         
-        
         replay = new Button(indicators, SWT.PUSH | SWT.FILL);
 		replay.setText("Replay");
         
+		Group rOIpositionIndicators = new Group(this, SWT.NONE);
+    	GridLayout rOIpositionIndicatorsLayout = new GridLayout(4,true);
+    	rOIpositionIndicators.setLayout(rOIpositionIndicatorsLayout);
+    	
+		
+		Label xPt = new Label(rOIpositionIndicators, SWT.NULL);
+		xPt.setText("ROI x coord:");
+		
+		xCoord = new Text(rOIpositionIndicators,SWT.SINGLE);
+	    xCoord.setText("  " + String.valueOf(ssp.getLenPt()[1][0]));
+	    
+	    Label xLenLabel = new Label(rOIpositionIndicators, SWT.NULL);
+	    xLenLabel.setText("x Len:");
+		
+		xLen = new Text(rOIpositionIndicators,SWT.SINGLE);
+	    xLen.setText("  " + String.valueOf(ssp.getLenPt()[0][0]));
+        
+	    Label yPt = new Label(rOIpositionIndicators, SWT.NULL);
+		yPt.setText("ROI y coord:");
+		
+		yCoord = new Text(rOIpositionIndicators,SWT.SINGLE);
+	    yCoord.setText("  " + String.valueOf(ssp.getLenPt()[1][1]));
+	    
+	    Label yLenLabel = new Label(rOIpositionIndicators, SWT.NULL);
+	    yLenLabel.setText("y Len:");
+		
+		yLen = new Text(rOIpositionIndicators,SWT.SINGLE);
+	    yLen.setText("  " + String.valueOf(ssp.getLenPt()[0][1]));
         
         ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(this, null);
         
@@ -250,9 +286,19 @@ public class PlotSystemCompositeView extends Composite {
 			@SuppressWarnings("unchecked")
 			public void roiStandard(ROIEvent evt) {
 				ssp.regionOfInterestSetter(region.getROI());
+				
 				if(extra == 1){
 					ssp.sliderZoomedArea(slider.getSelection(), region.getROI(), subImagePlotSystem);
+//					ssp.setRszvRegionPosition();
 				}
+				
+//				int[] Len = region.getROI().getBounds().getIntLengths();
+//				int[] Pt = region.getROI().getBounds().getIntPoint();
+//				int[][] LenPt = new int[][] {Len,Pt};
+//				
+//				
+//				setROITexts(LenPt);
+				
 			}
 		});
         
@@ -379,6 +425,10 @@ public class PlotSystemCompositeView extends Composite {
 	    slider.setThumb(1);
 	}
 	
+	public IRegion getIRegion(){
+		return region;
+	}
+	
 	public void setRegion(int[][] lenpt){
 		RectangularROI newROI = new RectangularROI(lenpt[1][0],
 												   lenpt[1][1],
@@ -414,6 +464,55 @@ public class PlotSystemCompositeView extends Composite {
 	
 	public TabFolder getFolder(){
 		return folder;
+	}
+	
+	public Text getXCoord(){
+		return xCoord;
+	}
+	
+	public Text getXLen(){
+		return xLen;
+	}
+	public Text getYCoord(){
+		return yCoord;
+	}
+	
+	public Text getYLen(){
+		return yLen;
+	}
+	
+	public Text[] getROITexts(){
+		Text[] texts = new Text [4];
+		
+		texts[0] = xCoord;
+		texts[1] = xLen;
+		texts[2] = yCoord;
+		texts[3] = yLen;
+		
+		return texts;
+	}
+	
+	public void setROITexts(String[] values){
+		
+		xCoord.setText(values[0]);
+		xLen.setText(values[1]);
+		yCoord.setText(values[2]);
+		yLen.setText(values[3]);
+		
+	}
+	
+	
+	public void setROITexts(int[][] LenPt){
+		
+		String[] values = new String[4];
+		
+		values[0] = String.valueOf(LenPt[1][0]);
+		values[1] = String.valueOf(LenPt[0][0]);
+		values[2] = String.valueOf(LenPt[1][1]);
+		values[3] = String.valueOf(LenPt[0][1]);
+		
+		setROITexts(values);
+				
 	}
 }
     

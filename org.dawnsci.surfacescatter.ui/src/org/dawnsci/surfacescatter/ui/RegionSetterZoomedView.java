@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
 public class RegionSetterZoomedView extends Dialog {
@@ -46,7 +47,17 @@ public class RegionSetterZoomedView extends Dialog {
 	private SurfaceScatterPresenter ssp;
 	private SurfaceScatterViewStart ssvs;
 	private boolean modify = true;
+	public boolean isModify() {
+		return modify;
+	}
+
+	public void setModify(boolean modify) {
+		this.modify = modify;
+	}
+
+
 	private int DEBUG = 1;
+
 
 	public RegionSetterZoomedView(Shell parentShell, 
 			int style, 
@@ -129,12 +140,10 @@ public class RegionSetterZoomedView extends Dialog {
 		//////////////////////////////////////////////////////////////////////////////
 		left.setWeights(new int[] { 77, 23 });
 		///////////////////////////////////////////////////////////////////////////////
-		///////////////// Right
-		/////////////////////////////////////////////////////////////////////////////// sashform////////////////////////////////////////////////
+		///////////////// Right sashform////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
 
-		/////////////////////////// Window
-		/////////////////////////// 6////////////////////////////////////////////////////
+		/////////////////////////// Window 6////////////////////////////////////////////////////
 		try {
 			customComposite2 = new SuperSashPlotSystem2Composite(right, SWT.NONE);
 		} catch (Exception e1) {
@@ -249,7 +258,7 @@ public class RegionSetterZoomedView extends Dialog {
 				@Override
 				public void focusGained(FocusEvent e) {
 				}
-			});		
+		});		
 		
 		
 		/////////////////////////////////////////////////////////////////////////////////
@@ -288,8 +297,27 @@ public class RegionSetterZoomedView extends Dialog {
 		});
 
 		
-		
-//////////////////////////////////Save Fit Parameters////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////ROI Indicators////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+		for(Text t : customComposite.getROITexts()){
+			
+			t.addFocusListener(new FocusListener() {
+	
+				@Override
+				public void focusLost(FocusEvent e) {
+					rOIUpdate();
+					
+				}
+				
+				@Override
+				public void focusGained(FocusEvent e) {
+					// TODO Auto-generated method stub		
+				}
+			});
+			
+		}
+////////////////////////////////Save Fit Parameters////////////////////////////////////////
 		
 		customComposite1.getSaveButton().addSelectionListener(new SelectionListener() {
 		
@@ -452,95 +480,186 @@ public class RegionSetterZoomedView extends Dialog {
 	@SuppressWarnings("unchecked")
 	public void generalUpdate(){
 		
-		customComposite2.getPlotSystem1().clear();
-		customComposite2.getPlotSystem3().clear();
+		if(modify){
+			customComposite2.getPlotSystem1().clear();
+			customComposite2.getPlotSystem3().clear();
+			
+			ssp.regionOfInterestSetter(customComposite.getGreenRegion().getROI());
+			
+			IRectangularROI greenRectangle = customComposite.getGreenRegion().getROI().getBounds();
+			int[] Len = greenRectangle.getIntLengths();
+			int[] Pt = greenRectangle.getIntPoint();
+			int[][] LenPt = {Len,Pt};
+			
+			ssvs.getPlotSystemCompositeView().setRegion(LenPt);
+			customComposite.setROITexts(LenPt);
+			int selection = customComposite.getSlider().getSelection();
+			
+			ssp.updateSliders(ssvs.getSliderList(), selection);
+			
+			ssp.sliderMovemementMainImage(selection, 
+					customComposite.getPlotSystem(), 
+					ssvs.getPlotSystemCompositeView().getPlotSystem());
+			
+			ssp.sliderZoomedArea(selection, 
+					customComposite.getGreenRegion().getROI(), 
+					customComposite2.getPlotSystem2());
+					
+			Dataset subImage =ssp.subImage(selection,customComposite.getGreenRegion().getROI());
+			
+			ILineTrace lt1 = VerticalHorizontalSlices.horizontalslice(
+							customComposite2.getRegions()[0].getROI().getBounds(),
+							customComposite2.getPlotSystem1(), 
+							subImage, 
+							customComposite.getGreenRegion().getROI());
+			
+			customComposite2.getPlotSystem1().addTrace(lt1);
+			
+			ILineTrace lt2 = VerticalHorizontalSlices.verticalslice(
+							customComposite2.getRegions()[1].getROI().getBounds(), 
+							subImage,
+							customComposite2.getPlotSystem3(), 
+							customComposite.getGreenRegion().getROI());
+			
+			customComposite2.getPlotSystem3().addTrace(lt2);	
+			
+			
+			
+			if (customComposite2.getBackgroundButton().getSelection()){
+				
+				IDataset background = ssp.presenterDummyProcess(selection,
+						ssp.getImage(selection),
+						customComposite.getPlotSystem(),
+						3);
 		
-		ssp.regionOfInterestSetter(customComposite.getGreenRegion().getROI());
+				ILineTrace lt3 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
+						customComposite2.getRegions()[0].getROI().getBounds(),
+						customComposite2.getPlotSystem1(), 
+						background,
+						customComposite.getGreenRegion().getROI());
+				
+				ILineTrace lt4 = VerticalHorizontalSlices.verticalsliceBackgroundSubtracted(
+						customComposite2.getRegions()[1].getROI().getBounds(),
+						customComposite2.getPlotSystem3(),
+						background,
+						customComposite.getGreenRegion().getROI());
+			
+				IDataset backSubTop = Maths.subtract(lt1.getYData(), lt3.getYData());
+				IDataset xTop = lt1.getXData();
+				ILineTrace lt13BackSub = customComposite2.getPlotSystem1().createLineTrace("background slice");
+				lt13BackSub.setData( xTop, backSubTop);
+				
+				customComposite2.getPlotSystem1().addTrace(lt3);
+				customComposite2.getPlotSystem1().addTrace(lt13BackSub);
+				
+				IDataset backSubSide = Maths.subtract(lt2.getXData(), lt4.getXData());
+				IDataset xSide = lt2.getYData();
+				ILineTrace lt24BackSub = customComposite2.getPlotSystem3().createLineTrace("background slice");
+				lt24BackSub.setData(backSubSide,xSide);
+				
+				customComposite2.getPlotSystem3().addTrace(lt4);
+				customComposite2.getPlotSystem3().addTrace(lt24BackSub);
+				
+			}
+			
+			customComposite2.getPlotSystem1().clearAnnotations();
+			customComposite2.getPlotSystem3().clearAnnotations();
+			
+			customComposite2.getPlotSystem1().autoscaleAxes();
+			customComposite2.getPlotSystem3().autoscaleAxes();
+	
+			customComposite2.getPlotSystem1().repaint();
+			customComposite2.getPlotSystem3().repaint();
+		}
+	}	
+	
+	public void rOIUpdate(){
 		
-		IRectangularROI greenRectangle = customComposite.getGreenRegion().getROI().getBounds();
-		int[] Len = greenRectangle.getIntLengths();
-		int[] Pt = greenRectangle.getIntPoint();
-		int[][] LenPt = {Len,Pt};
+		int[][] LenPt = new int[2][2];
+		
+		modify = false;
+		ssvs.setModify(false);
+		
+		double do0 = 0;
+		try{
+			do0 = Double.parseDouble(customComposite.getXCoord().getText());
+		}
+		catch (Exception e1){
+			ssp.numberFormatWarning();
+		}
+		
+		long f =  ((int) Math.round(do0));
+		
+		int w =  ((int) Math.round(do0));
+		
+		LenPt[1][0] = w;
+		
+		
+		double do1 = 0;
+		try{
+			do1 = Double.parseDouble(customComposite.getXLen().getText());
+		}
+		catch (Exception e1){
+			ssp.numberFormatWarning();
+		}
+		
+		LenPt[0][0] = (int) Math.round(do1);
+		
+		double do2 = 0;
+		try{
+			do2 = Double.parseDouble(customComposite.getYCoord().getText());
+		}
+		catch (Exception e1){
+			ssp.numberFormatWarning();
+		}
+		
+		LenPt[1][1] = (int) Math.round(do2);
+		
+		
+		double do3 = 0;
+		try{
+			do3 = Double.parseDouble(customComposite.getYLen().getText());
+		}
+		catch (Exception e1){
+			ssp.numberFormatWarning();
+		}
+		
+		LenPt[0][1] = (int) Math.round(do3);
+		
+		
+		
+		ssp.regionOfInterestSetter(LenPt);
 		
 		ssvs.getPlotSystemCompositeView().setRegion(LenPt);
 		
-		int selection = customComposite.getSlider().getSelection();
+		customComposite.setRegion(LenPt);
 		
-		ssp.updateSliders(ssvs.getSliderList(), selection);
+		modify = true;
+		ssvs.setModify(true);
 		
-		ssp.sliderMovemementMainImage(selection, 
-				customComposite.getPlotSystem(), 
-				ssvs.getPlotSystemCompositeView().getPlotSystem());
 		
-		ssp.sliderZoomedArea(selection, 
-				customComposite.getGreenRegion().getROI(), 
-				customComposite2.getPlotSystem2());
-				
-		Dataset subImage =ssp.subImage(selection,customComposite.getGreenRegion().getROI());
-		
-		ILineTrace lt1 = VerticalHorizontalSlices.horizontalslice(
-						customComposite2.getRegions()[0].getROI().getBounds(),
-						customComposite2.getPlotSystem1(), 
-						subImage, 
-						customComposite.getGreenRegion().getROI());
-		
-		customComposite2.getPlotSystem1().addTrace(lt1);
-		
-		ILineTrace lt2 = VerticalHorizontalSlices.verticalslice(
-						customComposite2.getRegions()[1].getROI().getBounds(), 
-						subImage,
-						customComposite2.getPlotSystem3(), 
-						customComposite.getGreenRegion().getROI());
-		
-		customComposite2.getPlotSystem3().addTrace(lt2);	
-		
-		if (customComposite2.getBackgroundButton().getSelection()){
-			
-			IDataset background = ssp.presenterDummyProcess(selection,
-					ssp.getImage(selection),
-					customComposite.getPlotSystem(),
-					3);
+	}
 	
-			ILineTrace lt3 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
-					customComposite2.getRegions()[0].getROI().getBounds(),
-					customComposite2.getPlotSystem1(), 
-					background,
-					customComposite.getGreenRegion().getROI());
-			
-			ILineTrace lt4 = VerticalHorizontalSlices.verticalsliceBackgroundSubtracted(
-					customComposite2.getRegions()[1].getROI().getBounds(),
-					customComposite2.getPlotSystem3(),
-					background,
-					customComposite.getGreenRegion().getROI());
+	public void roiReset(int[][] LenPt){
 		
-			IDataset backSubTop = Maths.subtract(lt1.getYData(), lt3.getYData());
-			IDataset xTop = lt1.getXData();
-			ILineTrace lt13BackSub = customComposite2.getPlotSystem1().createLineTrace("background slice");
-			lt13BackSub.setData( xTop, backSubTop);
-			
-			customComposite2.getPlotSystem1().addTrace(lt3);
-			customComposite2.getPlotSystem1().addTrace(lt13BackSub);
-			
-			IDataset backSubSide = Maths.subtract(lt2.getXData(), lt4.getXData());
-			IDataset xSide = lt2.getYData();
-			ILineTrace lt24BackSub = customComposite2.getPlotSystem3().createLineTrace("background slice");
-			lt24BackSub.setData(backSubSide,xSide);
-			
-			customComposite2.getPlotSystem3().addTrace(lt4);
-			customComposite2.getPlotSystem3().addTrace(lt24BackSub);
-			
-		}
+		modify = false;
+		customComposite.setRegion(LenPt);		
 		
-		customComposite2.getPlotSystem1().clearAnnotations();
-		customComposite2.getPlotSystem3().clearAnnotations();
+		String[] values = new String[4];
 		
-		customComposite2.getPlotSystem1().autoscaleAxes();
-		customComposite2.getPlotSystem3().autoscaleAxes();
+		values[0] = String.valueOf(LenPt[1][0]);
+		values[1] = String.valueOf(LenPt[0][0]);
+		values[2] = String.valueOf(LenPt[1][1]);
+		values[3] = String.valueOf(LenPt[0][1]);
+		
+		customComposite.setROITexts(values);
+		
+		modify = true;
 
-		customComposite2.getPlotSystem1().repaint();
-		customComposite2.getPlotSystem3().repaint();
 		
-	}	
+		
+	}
+	
 	
 	public Slider getSlider(){
 		

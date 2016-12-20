@@ -20,9 +20,13 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
 public class OverlapCurves extends Composite {
@@ -30,6 +34,9 @@ public class OverlapCurves extends Composite {
     private IPlottingSystem<Composite> plotSystem;
     private IRegion[] regionArray;
     private int DEBUG =1;
+    private Group controls;
+    private Button errors;
+    private ArrayList<ILineTrace> ltList;
     
      
     public OverlapCurves(Composite parent, 
@@ -69,6 +76,17 @@ public class OverlapCurves extends Composite {
         gridLayout.numColumns = 1;
         setLayout(gridLayout);
         
+        controls = new Group(this, SWT.NULL);
+        GridLayout controlsSelectionLayout = new GridLayout();
+		GridData controlsSelectionData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+        controls.setLayoutData(controlsSelectionData);
+        controls.setLayout(controlsSelectionLayout);
+
+		errors = new Button(controls, SWT.PUSH);
+		errors.setText("Errors");
+		
+		
+		
         ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(this, null);;
         
         final GridData gd_secondField = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -82,8 +100,11 @@ public class OverlapCurves extends Composite {
 		IDataset i = null;
 		IDataset j = null;
 
-		int r=0;
 		
+		ltList = new ArrayList<ILineTrace>();
+		
+		int r=0;
+	
 		for (r =0; r < arrayILDy.size(); r++){
 			
 			ArrayList<IDataset> arrayIDy =new ArrayList<>();
@@ -106,6 +127,8 @@ public class OverlapCurves extends Composite {
 			
 			ILineTrace lt = plotSystem.createLineTrace(Double.toString(arrayIDx.get(0).getDouble(0)) +"-" +Double.toString(arrayIDx.get(0).getDouble(arrayIDx.size()-1)));
 			lt.setData(j, i);
+			
+			ltList.add(lt);
 			
 			plotSystem.addTrace(lt);
 			plotSystem.repaint();
@@ -180,6 +203,10 @@ public class OverlapCurves extends Composite {
 				});
         	}
         }
+
+        
+    
+        
     }
 		
     public Composite getComposite(){
@@ -191,5 +218,12 @@ public class OverlapCurves extends Composite {
 	   return plotSystem;
    }
    
+	public Button getErrorsButton(){
+		return errors;
+	}
+   
+	public ArrayList<ILineTrace> getILineTraceList(){
+		return ltList;
+	}
 }
 

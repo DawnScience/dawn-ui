@@ -55,6 +55,7 @@ public class GeneralOverlapHandlerView extends Dialog {
     private SurfaceScatterPresenter ssp;
     private IPlottingSystem<Composite> parentPs;
     private StitchedOverlapCurves stitchedCurves;
+    private boolean errorFlag =true;
 	
 	public GeneralOverlapHandlerView(Shell parentShell, int style, 
 			ArrayList<IDataset> xArrayList,
@@ -164,6 +165,37 @@ public class GeneralOverlapHandlerView extends Dialog {
 			}
 		});
     
+		customComposite.getErrorsButton().addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				if (errorFlag == false){
+					errorFlag = true;
+				}
+				else{
+					errorFlag = false;
+				}
+				
+				for (ILineTrace lt : customComposite.getILineTraceList()){
+					lt.setErrorBarEnabled(errorFlag);
+				}
+						
+				
+				stitchedCurves.getLineTrace1().setErrorBarEnabled(errorFlag);
+				
+				customComposite.getPlotSystem().repaint();
+				stitchedCurves.getPlotSystem().repaint();
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
 			    
 	    return container;
 	}
@@ -192,4 +224,5 @@ public class GeneralOverlapHandlerView extends Dialog {
 	public Button getExport(){
 		return export;
 	}
+	
 }
