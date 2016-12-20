@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="org.dawnsci.processing.ui.preference.ProcessingPreferencePage"
+            class="org.dawnsci.processing.python.ui.preferences.SavuProcessingPreferencePage"
+            id="org.dawnsci.processing.python.ui.SavuPreferencePage"
+            name="Savu Processing Preferences">
+      </page>
+   </extension>
+
+</plugin>

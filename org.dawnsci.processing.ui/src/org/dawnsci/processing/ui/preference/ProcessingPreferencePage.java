@@ -2,9 +2,6 @@ package org.dawnsci.processing.ui.preference;
 
 
 
-import java.io.FileNotFoundException;
-
-import org.dawnsci.processing.python.ui.SavuWindow2;
 import org.dawnsci.processing.ui.Activator;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
@@ -13,9 +10,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -45,12 +40,12 @@ public class ProcessingPreferencePage extends PreferencePage implements
 		forceSeries.setText("Disable parallel processing");
 		
 
-		try {
-			Composite savu = new SavuWindow2(parent, SWT.NONE);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			Composite savu = new SavuWindow2(parent, SWT.NONE);
+//		} catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 
         
 		setUpFromPreferences();
