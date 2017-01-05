@@ -18,13 +18,14 @@ public class RegionOutOfBoundsWarning extends Dialog {
 	
 	
 	private int selector;
+	private String note;
 	
 	
-	public RegionOutOfBoundsWarning(Shell parentShell, int selector) {
+	public RegionOutOfBoundsWarning(Shell parentShell, int selector, String note) {
 		
 		super(parentShell);
 		this.selector = selector;
-				
+		this.note = note;		
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 		
 //		createDialogArea(parentShell.getParent());
@@ -45,6 +46,13 @@ public class RegionOutOfBoundsWarning extends Dialog {
 		if (selector == 1){
 			warning.setText("Enter number as int or double");	
 		}
+		
+		if(note != null){
+			Label noteLabel = new Label(container, SWT.FILL);
+			noteLabel.setText(note);
+		}
+		
+		
 		return container;
 	}
 

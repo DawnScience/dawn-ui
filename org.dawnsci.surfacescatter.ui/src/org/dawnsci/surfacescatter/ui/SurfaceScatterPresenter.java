@@ -31,6 +31,7 @@ import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
 import org.dawnsci.surfacescatter.SXRDGeometricCorrections;
 import org.dawnsci.surfacescatter.StitchedOutputWithErrors;
 import org.dawnsci.surfacescatter.SuperModel;
+import org.dawnsci.surfacescatter.TrackerLocationInterpolation;
 import org.dawnsci.surfacescatter.TrackingMethodology;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
@@ -45,6 +46,7 @@ import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.Maths;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -272,7 +274,7 @@ public class SurfaceScatterPresenter {
 		else{
 			
 			IDataset nullImage = DatasetFactory.zeros(new int[] {2,2});
-			
+			Maths.add(nullImage, 0.1);
 			subImageBgPlotSystem.updatePlot2D(nullImage, 
 											  null, 
 											  null);
@@ -302,6 +304,7 @@ public class SurfaceScatterPresenter {
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	public int loadParameters(String title,
 							   PlotSystemCompositeView pscv,
 							   PlotSystem1CompositeView ps1cv,
@@ -792,14 +795,25 @@ public class SurfaceScatterPresenter {
 	}
 	
 	public void boundariesWarning(){
-		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,0);
+		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,0, null);
+		roobw.open();
+	}
+	
+	public void numberFormatWarning(String note){
+		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,1,note);
+		roobw.open();
+	}
+	
+	public void boundariesWarning(String note){
+		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,0, note);
 		roobw.open();
 	}
 	
 	public void numberFormatWarning(){
-		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,1);
+		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,1,null);
 		roobw.open();
 	}
+	
 	
 	
 	public IDataset[] curveStitchingOutput (IPlottingSystem<Composite> plotSystem, 
@@ -906,6 +920,57 @@ public class SurfaceScatterPresenter {
 		return output;
 		
 	}
+	
+	public double[] trackerInterpolationInterpolator1(int k){
+		
+			
+			
+			int seedIndex = 
+			ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
+					  sm.getSortedX(), 
+					  sm.getLocationList());
+			
+			int nearestCompletedDatFileNo = sm.getFilepathsSortedArray()[seedIndex];
+			
+			
+			ArrayList<double[]> seedList = dms.get(nearestCompletedDatFileNo).getLocationList();
+			ArrayList<Double> lList = dms.get(nearestCompletedDatFileNo).getxList();
+			
+			Dataset yValues = DatasetFactory.zeros(seedList.size());
+			Dataset xValues = DatasetFactory.zeros(seedList.size());
+			Dataset lValues = DatasetFactory.zeros(seedList.size());
+			
+			for(int op = 0; op<seedList.size(); op++){
+			
+			double x = seedList.get(op)[1];
+			double y = seedList.get(op)[0];
+			double l = lList.get(op);
+			
+			xValues.set(x, op);
+			yValues.set(y, op);
+			lValues.set(l, op);
+			
+			}
+			
+			double[] seedLocation = PolynomialOverlap.extrapolatedLocation(sm.getSortedX().getDouble(k),
+									   lValues, 
+									   xValues, 
+									   yValues, 
+									   sm.getInitialLenPt()[0],
+									   1);
+			
+			
+			debug("!!!!!!!!!!!!!!!     }}}}}{{{{{{{{crude  seedlocation for Tracker[0] : " + seedLocation[0] +" + " + "seedlocation[1] :" + seedLocation[1]);
+			
+			
+		
+		return seedLocation;
+		}
+			
+	
+	
+	
+	
 	
 	public IDataset returnSubNullImage(){
 		
@@ -1113,6 +1178,8 @@ class trackingJob {
 					GeometricParametersModel gm = gms.get(jok);
 					ExampleModel model = models.get(jok);
 
+					dm.addxList(sm.getSortedX().getDouble(k));
+					
 					IDataset output1 = DummyProcessingClass.DummyProcess(sm, 
 																		 j,
 																		 model, 
@@ -1132,7 +1199,7 @@ class trackingJob {
 					
 					
 					
-					dm.addxList(sm.getSortedX().getDouble(k));
+				
 					sm.addBackgroundDatArray(sm.getImages().length, k, output1);
 					
 					
@@ -1158,6 +1225,9 @@ class trackingJob {
 					GeometricParametersModel gm = gms.get(jok);
 					ExampleModel model = models.get(jok);
 
+					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
+							sm.getSortedX().getDouble(k));
+					
 					IDataset output1 = DummyProcessingClass.DummyProcess(sm, 
 																		 j, 
 																		 model, 
@@ -1177,8 +1247,7 @@ class trackingJob {
 					
 					sm.addBackgroundDatArray(sm.getImages().length, k, output1);
 					
-					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
-							sm.getSortedX().getDouble(k));
+					
 
 //					Display.getDefault().syncExec(new Runnable() {
 //					
@@ -1206,6 +1275,9 @@ class trackingJob {
 					GeometricParametersModel gm = gms.get(jok);
 					ExampleModel model = models.get(jok);
 
+					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
+							sm.getSortedX().getDouble(k));
+					
 					IDataset output1 = DummyProcessingClass.DummyProcess(sm, 
 																		 j, 
 																		 model, 
@@ -1218,15 +1290,14 @@ class trackingJob {
 																		 trackingMarker, 
 																		 k);
 
-					if(output1.getShape().equals(new int[] {2,2}) && ((Dataset) output1).sum().equals(0)){
+					if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
 						ssp.boundariesWarning();
 						break;
 					}
 					
 					sm.addBackgroundDatArray(sm.getImages().length, k, output1);
 					
-					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
-							sm.getSortedX().getDouble(k));
+					
 
 //					 Display.getDefault().syncExec(new Runnable() {
 //					
@@ -1347,6 +1418,13 @@ class trackingJob2 {
 		
 		debug("@@@@@@@@@@@~~~~~~~~~~~~~~~in the new tracker~~~~~~~~~~~~~~~~~~@@@@@@@@@@@@@@");
 
+		sm.resetTrackers();
+		sm.resetAll();
+		
+		for(ExampleModel m : models){
+			m.setInput(null);
+		}
+		
 		noImages = sm.getImages().length;
 
 		int[] imagePosInOriginalDat = CountUpToArray.CountUpToArray1(sm.getFilepathsSortedArray());
@@ -1379,6 +1457,9 @@ class trackingJob2 {
 					GeometricParametersModel gm = gms.get(jok);
 					ExampleModel model = models.get(jok);
 
+					dm.addxList(sm.getSortedX().getDouble(k));
+					
+					
 					IDataset output1 = DummyProcessingClass.DummyProcess(sm, 
 																		 j, 
 																		 model, 
@@ -1391,13 +1472,12 @@ class trackingJob2 {
 																		 trackingMarker, 
 																		 k);
 
-					if(output1.getShape().equals(new int[] {2,2}) && ((Dataset) output1).sum().equals(0)){
-						ssp.boundariesWarning();
+					if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
+						ssp.boundariesWarning("position 1, line ~1410, k: " + Integer.toString(k));
 						break;
 					}
 					
 					sm.addBackgroundDatArray(sm.getImages().length, k, output1);
-					dm.addxList(sm.getSortedX().getDouble(k));
 					
 //					Display.getDefault().syncExec(new Runnable() {
 //						
@@ -1438,6 +1518,9 @@ class trackingJob2 {
 					GeometricParametersModel gm = gms.get(jok);
 					ExampleModel model = models.get(jok);
 
+					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
+							sm.getSortedX().getDouble(k));
+					
 					IDataset output1 = DummyProcessingClass.DummyProcess(sm, 
 																		 j, 
 																		 model, 
@@ -1451,13 +1534,12 @@ class trackingJob2 {
 																		 k);
 
 					if(Arrays.equals(output1.getShape(),(new int[] {2,2}) )){
-						ssp.boundariesWarning();
+						ssp.boundariesWarning("position 2, line ~1469, k: " + Integer.toString(k));
 						break;	
 					}
 					
 					sm.addBackgroundDatArray(sm.getImages().length, k, output1);
-					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
-							sm.getSortedX().getDouble(k));
+					
 				}
 			}
 
@@ -1476,8 +1558,11 @@ class trackingJob2 {
 					GeometricParametersModel gm = gms.get(jok);
 					ExampleModel model = models.get(jok);
 
+					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
+							sm.getSortedX().getDouble(k));
+					
 					IDataset output1 = 
-							DummyProcessingClass.DummyProcess(sm, 
+							DummyProcessingClass.DummyProcess0(sm, 
 															  j, 
 															  model, 
 															  dm,
@@ -1489,14 +1574,13 @@ class trackingJob2 {
 													   		  trackingMarker, 
 													   		  k);
 
-					if(output1.getShape().equals(new int[] {2,2}) && ((Dataset) output1).sum().equals(0)){
-						ssp.boundariesWarning();
-						break;
+					if(Arrays.equals(output1.getShape(),(new int[] {2,2}) )){
+						ssp.boundariesWarning("position 3, line ~1508, k: " + Integer.toString(k));
+						break;	
 					}
 					
 					sm.addBackgroundDatArray(sm.getImages().length, k, output1);
-					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
-							sm.getSortedX().getDouble(k));
+					
 					
 				}
 			}
@@ -1544,45 +1628,56 @@ class trackingJob2 {
 						
 						if(dm.getLocationList() == null){
 							
-							int seedIndex = 
-									ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
-																		  sm.getSortedX(), 
-																		  sm.getLocationList());
-	
-							int nearestCompletedDatFileNo = sm.getFilepathsSortedArray()[seedIndex];
-							
-							
-							ArrayList<double[]> seedList = dms.get(nearestCompletedDatFileNo).getLocationList();
-							ArrayList<Double> lList = dms.get(nearestCompletedDatFileNo).getxList();
-							
-							Dataset yValues = DatasetFactory.zeros(seedList.size());
-							Dataset xValues = DatasetFactory.zeros(seedList.size());
-							Dataset lValues = DatasetFactory.zeros(seedList.size());
-							
-							for(int op = 0; op<seedList.size(); op++){
-								
-								double x = seedList.get(op)[1];
-								double y = seedList.get(op)[0];
-								double l = lList.get(op);
-								
-								xValues.set(x, op);
-								yValues.set(y, op);
-								lValues.set(l, op);
+							if (sm.getTrackerLocationList() == null | sm.getTrackerLocationList().size() <= 10 ){
+								int seedIndex = 
+										ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
+																			  sm.getSortedX(), 
+																			  sm.getLocationList());
 		
-							}
-							
-							double[] seedLocation = PolynomialOverlap.extrapolatedLocation(sm.getSortedX().getDouble(k),
-																						   lValues, 
-																						   xValues, 
-																						   yValues, 
-																						   sm.getInitialLenPt()[0],
-																						   1);
-							dm.setSeedLocation(seedLocation);
-							
-							debug("!!!!!!!!!!!!!!!     }}}}}{{{{{{{{ seedlocation[0] : " + seedLocation[0] +" + " + "seedlocation[1] :" + seedLocation[1]);
+								int nearestCompletedDatFileNo = sm.getFilepathsSortedArray()[seedIndex];
+								
+								
+								ArrayList<double[]> seedList = dms.get(nearestCompletedDatFileNo).getLocationList();
+								ArrayList<Double> lList = dms.get(nearestCompletedDatFileNo).getxList();
+								
+								Dataset yValues = DatasetFactory.zeros(seedList.size());
+								Dataset xValues = DatasetFactory.zeros(seedList.size());
+								Dataset lValues = DatasetFactory.zeros(seedList.size());
+								
+								for(int op = 0; op<seedList.size(); op++){
+									
+									double x = seedList.get(op)[1];
+									double y = seedList.get(op)[0];
+									double l = lList.get(op);
+									
+									xValues.set(x, op);
+									yValues.set(y, op);
+									lValues.set(l, op);
+			
+								}
+								
+								
+								double[] seedLocation = PolynomialOverlap.extrapolatedLocation(sm.getSortedX().getDouble(k),
+																							   lValues, 
+																							   xValues, 
+																							   yValues, 
+																							   sm.getInitialLenPt()[0],
+																							   1);
+								dm.setSeedLocation(seedLocation);
+								
+								debug("!!!!!!!!!!!!!!!     }}}}}{{{{{{{{ seedlocation[0] : " + seedLocation[0] +" + " + "seedlocation[1] :" + seedLocation[1]);
 						
+							}
+							else{
+								double[] seedLocation = TrackerLocationInterpolation.trackerInterpolationInterpolator0(sm.getTrackerLocationList(), 
+																							   sm.getSortedX(), 
+																							   sm.getInitialLenPt()[0],
+																							   k);
+								dm.setSeedLocation(seedLocation);
+							}
 						}	
 						
+						dm.addxList(sm.getSortedX().getDouble(k));
 						
 						IDataset output1 = 
 								DummyProcessingClass.DummyProcess1(sm, 
@@ -1598,13 +1693,13 @@ class trackingJob2 {
 																   k,
 																   dm.getSeedLocation());
 
-						if(output1.getShape().equals(new int[] {2,2}) && ((Dataset) output1).sum().equals(0)){
-							ssp.boundariesWarning();
+						if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
+							ssp.boundariesWarning("position 4, line ~1617, k: " + Integer.toString(k));
 							break;
 						}
 						
 						sm.addBackgroundDatArray(sm.getImages().length, k, output1);
-						dm.addxList(sm.getSortedX().getDouble(k));
+						
 						
 
 					}
@@ -1670,6 +1765,8 @@ class trackingJob2 {
 						
 						}	
 						
+						dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
+								sm.getSortedX().getDouble(k));
 						
 						IDataset output1 = 
 								DummyProcessingClass.DummyProcess1(sm, 
@@ -1686,13 +1783,13 @@ class trackingJob2 {
 																   dm.getSeedLocation());
 
 						
-						if(output1.getShape().equals(new int[] {2,2}) && ((Dataset) output1).sum().equals(0)){
-							ssp.boundariesWarning();
+						if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
+							ssp.boundariesWarning("position 5, line ~1705, k: " + Integer.toString(k));
+							
 							break;
 						}
 						
-						dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
-								sm.getSortedX().getDouble(k));
+						
 						sm.addBackgroundDatArray(sm.getImages().length, k, output1);
 						
 
@@ -1753,6 +1850,8 @@ class trackingJob2 {
 						
 						}	
 						
+						dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
+								sm.getSortedX().getDouble(k));
 						
 						IDataset output1 = 
 								DummyProcessingClass.DummyProcess1(sm, 
@@ -1768,15 +1867,14 @@ class trackingJob2 {
 																   k,
 																   dm.getSeedLocation());
 
-						if(output1.getShape().equals(new int[] {2,2}) && ((Dataset) output1).sum().equals(0)){
-							ssp.boundariesWarning();
+						if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
+							ssp.boundariesWarning("position 6, line ~1788, k: " + Integer.toString(k));
 							break;
 						}
 						
 						
 						sm.addBackgroundDatArray(sm.getImages().length, k, output1);
-						dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
-								sm.getSortedX().getDouble(k));
+						
 						
 
 					}
@@ -1785,11 +1883,14 @@ class trackingJob2 {
 			}
 		}
 
-		try {
-			Thread.sleep(2000*timeStep);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			Thread.sleep(2000*timeStep);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+		
+//		sm.resetTrackers();
+		
 
 	}
 	
@@ -1818,7 +1919,6 @@ class MovieJob {
 	private int timeStep;
 	private int DEBUG = 1;
 	private IPlottingSystem<Composite> pS;
-//	private IPlottingSystem<Composite> subPS;
 	private IPlottingSystem<Composite> subIBgPS;
 	private SurfaceScatterPresenter ssp;
 	private SurfaceScatterViewStart ssvs;
@@ -1928,7 +2028,7 @@ class MovieJob {
 						}
 						
 						
-						debug("Repaint k ascending: "  + k);
+//						debug("Repaint k ascending: "  + k);
 				 }
 				 
 				 for( int k = sm.getSliderPos() - 1; k>=0; k--){
