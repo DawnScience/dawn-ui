@@ -235,7 +235,7 @@ public class MappedDataView extends ViewPart {
 				if (e instanceof AssociatedImage) plotManager.addImage((AssociatedImage)e);
 				if (e instanceof MappedDataFile) {
 					MappedDataFile mdf = (MappedDataFile)e;
-					if (mdf.getLiveDataBean() !=null) FileManagerSingleton.getFileManager().importLiveFile(mdf.getPath(), mdf.getLiveDataBean(),null);
+					if (mdf.getLiveDataBean() !=null) FileManagerSingleton.getFileManager().importLiveFile(mdf.getPath(), mdf.getLiveDataBean(),mdf.getParentPath());
 				}
 				viewer.refresh();
 			}
