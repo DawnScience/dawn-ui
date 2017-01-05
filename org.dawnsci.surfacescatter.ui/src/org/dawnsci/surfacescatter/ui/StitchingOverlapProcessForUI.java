@@ -1,19 +1,14 @@
 package org.dawnsci.surfacescatter.ui;
 
 import java.util.ArrayList;
-import java.util.Collections;import javax.xml.bind.attachment.AttachmentUnmarshaller;
+import java.util.Collections;
 
 import org.dawnsci.surfacescatter.OverlapUIModel;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
-import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
-import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.ILazyDataset;
-import org.eclipse.january.dataset.Maths;
-import org.eclipse.january.dataset.SliceND;
 
 public class StitchingOverlapProcessForUI{
 
@@ -36,7 +31,7 @@ public class StitchingOverlapProcessForUI{
 				
 		for (int k=0; k<(xArrayCorrected.length-1);k++){
 				
-			IRectangularROI box = new RectangularROI();
+			IRectangularROI box;
 //			System.out.println("k:  "+ k);				
 			box = model.getROIListElement(k).getBounds();
 					

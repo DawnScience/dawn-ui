@@ -3,7 +3,6 @@ package org.dawnsci.spectrum.ui.ReflectivityUI;
 import java.util.ArrayList;
 
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
-import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
@@ -53,7 +52,7 @@ public class AttenuationCorrectedOutput {
 		
 		for (k=0; k<(arrayILDx.size()-1);k++){
 			
-			IRectangularROI box = new RectangularROI();
+			IRectangularROI box;
 //			System.out.println("k:  "+ k);
 			
 			box = model.getROIListElement(k).getBounds();
