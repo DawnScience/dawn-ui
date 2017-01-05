@@ -1,6 +1,7 @@
 package org.dawnsci.mapping.ui.datamodel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -60,6 +61,14 @@ public class MappedDataArea implements MapObject {
 	}
 	
 	public MappedDataFile getParentFile(MapObject object) {
+		
+		Iterator<MappedDataFile> iterator = files.iterator();
+		 while (iterator.hasNext()) {
+			 MappedDataFile mdf = iterator.next();
+			 Object[] children = mdf.getChildren();
+			 if (Arrays.asList(children).contains(object)) return mdf;
+		 }
+		
 		return null;
 	}
 	

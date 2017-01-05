@@ -2,14 +2,12 @@ package org.dawnsci.mapping.ui.datamodel;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.swing.text.html.BlockView;
 
 public class MappedDataFile implements MapObject{
 
@@ -19,8 +17,7 @@ public class MappedDataFile implements MapObject{
 	private Map<String,AssociatedImage> microscopeDataMap;
 	private double[] range;
 	private MappedDataFileBean descriptionBean;
-	
-	private int[] nonXYScanDimensions;
+	private String parentPath;
 	
 //	private final static Logger logger = LoggerFactory.getLogger(MappedDataFile.class);
 	
@@ -233,6 +230,14 @@ public class MappedDataFile implements MapObject{
 	public boolean disconnect() {
 		// TODO Auto-generated method stub
 		return true;
+	}
+
+	public String getParentPath() {
+		return parentPath;
+	}
+
+	public void setParentPath(String parentPath) {
+		this.parentPath = parentPath;
 	}
 	
 }

@@ -165,7 +165,7 @@ public class MappedFileManager {
 				InterruptedException {
 					IMonitor m = new ProgressMonitorWrapper(monitor);
 					monitor.beginTask("Loading data...", -1);
-					importFile(path, bean, m);
+					importFile(path, bean, m, null);
 				}
 			});
 		} catch (InvocationTargetException e) {
@@ -178,9 +178,10 @@ public class MappedFileManager {
 	} 
 	
 	
-	private void importFile(final String path, final MappedDataFileBean bean, final IMonitor monitor) {
+	private void importFile(final String path, final MappedDataFileBean bean, final IMonitor monitor, String parentPath) {
 		final MappedDataFile mdf = MappedFileFactory.getMappedDataFile(path, bean, monitor);
 		if (monitor != null && monitor.isCancelled()) return;
+		if (mdf != null && parentPath != null) mdf.setParentPath(parentPath);
 		updateUI(mdf);
 	}
 	
@@ -239,7 +240,7 @@ public class MappedFileManager {
 			
 			if (buildBean != null) {
 				buildBean.setLiveBean(bean);
-				importFile(path, buildBean, null);
+				importFile(path, buildBean, null,parentFile);
 			}
 			
 			return;
@@ -321,7 +322,7 @@ public class MappedFileManager {
 						if (b != null) {
 							IMonitor m = new ProgressMonitorWrapper(monitor);
 							monitor.beginTask("Loading data...", -1);
-							importFile(path, b, m);
+							importFile(path, b, m, null);
 							return;
 						}
 						
