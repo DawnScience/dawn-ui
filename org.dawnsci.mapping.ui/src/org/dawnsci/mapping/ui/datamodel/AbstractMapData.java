@@ -167,4 +167,9 @@ public abstract class AbstractMapData implements PlottableMapObject{
 		
 		return false;
 	}
+	
+	@Override
+	public String getPath(){
+		return path;
+	}
 }

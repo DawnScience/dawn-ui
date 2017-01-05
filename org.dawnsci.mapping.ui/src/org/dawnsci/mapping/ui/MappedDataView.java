@@ -182,15 +182,19 @@ public class MappedDataView extends ViewPart {
 			
 			@Override
 			public void doubleClickPerformed(final ClickEvent evt) {
-				Map<String,Object> props = new HashMap<>();
-				props.put("event", new MapClickEvent(evt, true, null));
-				LocalServiceManager.getEventAdmin().postEvent(new Event(EVENT_TOPIC_MAPVIEW_CLICK, props));
+				sendEvent(evt,true);
 			}
 			
 			@Override
 			public void clickPerformed(final ClickEvent evt) {
+				sendEvent(evt,false);
+			}
+			
+			private void sendEvent(final ClickEvent evt, boolean isDoubleClick) {
 				Map<String,Object> props = new HashMap<>();
-				props.put("event", new MapClickEvent(evt, false, null));
+				PlottableMapObject topMap = plotManager.getTopMap();
+				String path = topMap == null ? null : topMap.getPath();
+				props.put("event", new MapClickEvent(evt, isDoubleClick, path));
 				LocalServiceManager.getEventAdmin().postEvent(new Event(EVENT_TOPIC_MAPVIEW_CLICK, props));
 			}
 		});

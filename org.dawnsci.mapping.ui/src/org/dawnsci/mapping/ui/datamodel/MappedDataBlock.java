@@ -155,6 +155,7 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 		return MappingUtils.calculateRangeFromAxes(new IDataset[]{ax[yDim],ax[xDim]});
 	}
 
+	@Override
 	public String getPath(){
 		return path;
 	}

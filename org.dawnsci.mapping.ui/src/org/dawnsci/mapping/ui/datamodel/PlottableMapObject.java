@@ -15,4 +15,6 @@ public interface PlottableMapObject extends MapObject {
 	public int getTransparency();
 	
 	public IDataset getSpectrum(double x, double y);
+	
+	public String getPath();
 }

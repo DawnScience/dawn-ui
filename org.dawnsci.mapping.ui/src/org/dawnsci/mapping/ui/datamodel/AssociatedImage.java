@@ -77,5 +77,10 @@ public class AssociatedImage implements PlottableMapObject {
 	public IDataset getSpectrum(double x, double y) {
 		return null;
 	}
+
+	@Override
+	public String getPath() {
+		return path;
+	}
 	
 }
