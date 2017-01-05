@@ -5,14 +5,10 @@ import java.util.ArrayList;
 import org.dawnsci.surfacescatter.OverlapUIModel;
 import org.dawnsci.surfacescatter.PolynomialOverlap;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
-import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
-import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.Maths;
-import org.eclipse.january.dataset.SliceND;
 
 public class AttenuationCorrectedOutput {
 
@@ -55,7 +51,7 @@ public class AttenuationCorrectedOutput {
 		
 		for (k=0; k<(arrayILDx.size()-1);k++){
 			
-			IRectangularROI box = new RectangularROI();
+			IRectangularROI box;
 //			System.out.println("k:  "+ k);
 			
 			box = model.getROIListElement(k).getBounds();
