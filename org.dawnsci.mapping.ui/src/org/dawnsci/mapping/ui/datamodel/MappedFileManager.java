@@ -205,7 +205,7 @@ public class MappedFileManager {
 
 		if (load)mappedDataArea.addMappedDataFile(mdf);
 //		plotManager.clearAll();
-		plotManager.updateLayers(null);
+		plotManager.updateLayers(mdf.getMap());
 		viewer.refresh();
 		if (viewer instanceof TreeViewer) {
 			((TreeViewer)viewer).expandToLevel(mdf, 1);
