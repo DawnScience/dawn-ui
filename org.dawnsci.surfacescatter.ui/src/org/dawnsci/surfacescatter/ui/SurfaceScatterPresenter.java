@@ -115,7 +115,7 @@ public class SurfaceScatterPresenter {
 				models.add(new ExampleModel());
 				dms.add(new DataModel());
 				gms.add(new GeometricParametersModel());
-				if(imageFolderPath.equals(null)){
+				if(imageFolderPath == null){
 					dh1 = LoaderFactory.getData(filepaths[id]);
 				}
 				else{

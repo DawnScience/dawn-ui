@@ -84,24 +84,18 @@ public class PresenterInitialSetup extends Dialog {
 		correctionsDropDown = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
 		correctionsDropDown.add("SXRD");
 		correctionsDropDown.add("Reflectivity");
-	
+		correctionsDropDown.select(0);
 		
 		optionsDropDown = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
-		optionsDropDown.setText(options[0]); 
-		
+	
 		for (int t=0; t<options.length; t++){
 			optionsDropDown.add(options[t]);
 		}
+		
+		optionsDropDown.select(0);
+		
 ///////////////////////////Folder selector///////////////////////////////////////////////////
-		
-//		Group folderSetting = new Group(container, SWT.FILL);
-//	    GridLayout folderSettingLayout = new GridLayout();
-//		GridData folderSettingData = new GridData();
-////		folderSettingData.minimumWidth = 50;
-//		folderSetting.setLayout(folderSettingLayout);
-//		folderSetting.setLayoutData(folderSettingData);
-		
-		
+				
 		imageFolderSelection = new Button(container, SWT.PUSH | SWT.FILL);
 		
 		imageFolderSelection.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
