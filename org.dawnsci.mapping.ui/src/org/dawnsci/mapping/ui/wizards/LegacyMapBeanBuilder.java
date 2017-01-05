@@ -283,13 +283,24 @@ public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
 		MappedBlockBean wax = buildI22Block(I22SAX, tree.findNodeLink(I22WAX));
 		MappedBlockBean xrf = buildI22Block(I22XMAP, tree.findNodeLink(I22XMAP));
 		
+		int scanRank = 2;
+		
 		if (sax == null && wax == null) return null;
 		
 		fb = new MappedDataFileBean();
 		
-		if (sax != null) fb.addBlock(sax);
-		if (wax != null) fb.addBlock(wax);
-		if (xrf != null) fb.addBlock(xrf);
+		if (sax != null) {
+			fb.addBlock(sax);
+			scanRank = sax.getRank()-2;
+		}
+		if (wax != null) {
+			fb.addBlock(wax);
+			scanRank = wax.getRank()-2;
+		}
+		if (xrf != null){
+			//dont pull the scan rank from the xrf, can be different from saxs/waxs.
+			fb.addBlock(xrf);
+		}
 		
 		NodeLink nl = tree.findNodeLink(I22I0PATH);
 		
@@ -318,8 +329,9 @@ public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
 					fb.addMap(b);
 				}
 			}
-		}	
-		fb.setScanRank(2);
+		}
+		
+		fb.setScanRank(scanRank);
 		return fb.checkValid() ? fb : null;
 	}
 	
