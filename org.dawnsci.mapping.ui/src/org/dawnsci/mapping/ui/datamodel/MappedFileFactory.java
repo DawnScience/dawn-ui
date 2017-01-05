@@ -27,7 +27,7 @@ public class MappedFileFactory {
 	
 	public static MappedDataFile getMappedDataFile(String path, AssociatedImage image) {
 		
-		MappedDataFile file = new MappedDataFile(path, (LiveDataBean)null);
+		MappedDataFile file = new MappedDataFile(path);
 		file.addMapObject(image.toString(), image);
 		
 		return file;

@@ -16,7 +16,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.IRemoteDatasetService;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
-import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
 import org.eclipse.dawnsci.analysis.tree.TreeToMapUtils;
 import org.eclipse.january.IMonitor;
 import org.eclipse.january.dataset.IDataset;
@@ -102,7 +101,24 @@ public class MappedFileManager {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 				InterruptedException {
-					mappedDataArea.locallyReloadLiveFile(path);
+					boolean reloaded = mappedDataArea.locallyReloadLiveFile(path);
+					
+					if (!reloaded) {
+						try {
+							IDataHolder dh = LocalServiceManager.getLoaderService().getData(path, null);
+							Tree tree = dh.getTree();
+							MappedDataFileBean b = buildBeanFromTree(tree);
+							
+							if (b != null) {
+								mappedDataArea.removeFile(path);
+								importFile(path, b);
+							}
+						} catch (Exception e) {
+							logger.debug("Can't automatically build bean from nexus tags",e.getMessage());
+							//ignore
+						}
+					}
+					
 					plotManager.plotLayers();
 					PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
  
@@ -219,15 +235,7 @@ public class MappedFileManager {
 			map.toString();
 			Tree tree = TreeToMapUtils.mapToTree(map, path);
 			
-			MappedDataFileBean buildBean = null; 
-			if (AcquisitionServiceManager.getStageConfiguration()==null){
-				buildBean = MapBeanBuilder.buildBean(tree);
-			} else {
-				String x = AcquisitionServiceManager.getStageConfiguration().getActiveFastScanAxis();
-				String y = AcquisitionServiceManager.getStageConfiguration().getActiveSlowScanAxis();
-				buildBean = MapBeanBuilder.buildBean(tree,x,y);
-			}
-			
+			MappedDataFileBean buildBean = buildBeanFromTree(tree);
 			
 			if (buildBean != null) {
 				buildBean.setLiveBean(bean);
@@ -302,13 +310,7 @@ public class MappedFileManager {
 						MappedDataFileBean b = null;
 						try {
 							Tree tree = dh.getTree();
-							if (AcquisitionServiceManager.getStageConfiguration()==null){
-								b = MapBeanBuilder.buildBean(tree);
-							} else {
-								String x = AcquisitionServiceManager.getStageConfiguration().getActiveFastScanAxis();
-								String y = AcquisitionServiceManager.getStageConfiguration().getActiveSlowScanAxis();
-								b = MapBeanBuilder.buildBean(tree,x,y);
-							}
+							b = buildBeanFromTree(tree);
 						} catch (Exception e) {
 							logger.debug("Can't automatically build bean from nexus tags",e.getMessage());
 							//ignore
@@ -333,6 +335,18 @@ public class MappedFileManager {
 				e.printStackTrace();
 			} 
 		
+	}
+	
+	private MappedDataFileBean buildBeanFromTree(Tree tree){
+		MappedDataFileBean b = null;
+		if (AcquisitionServiceManager.getStageConfiguration()==null){
+			b = MapBeanBuilder.buildBean(tree);
+		} else {
+			String x = AcquisitionServiceManager.getStageConfiguration().getActiveFastScanAxis();
+			String y = AcquisitionServiceManager.getStageConfiguration().getActiveSlowScanAxis();
+			b = MapBeanBuilder.buildBean(tree,x,y);
+		}
+		return b;
 	}
 		
 	private void showWizard(final String path, final Map<String, int[]> datasetNames, final IMetadata meta) {

@@ -63,14 +63,20 @@ public class MappedDataArea implements MapObject {
 		return null;
 	}
 	
-	public void locallyReloadLiveFile(String path) {
+	public boolean locallyReloadLiveFile(String path) {
 		
 		for (MappedDataFile file : files) {
 			if (path.equals(file.getPath())) {
-				file.locallyReloadLiveFile();
-				return;
+				if (file.isDescriptionSet()) {
+					file.locallyReloadLiveFile();
+					return true;
+				}
+				
+				return false;
 			}
 		}
+		
+		return false;
 		
 	}
 	

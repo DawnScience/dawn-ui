@@ -52,6 +52,10 @@ public class MappedDataFile implements MapObject{
 		
 	}
 	
+	public boolean isDescriptionSet() {
+		return descriptionBean != null && !descriptionBean.isEmpty();
+	}
+	
 	public void locallyReloadLiveFile(){
 		if (descriptionBean == null) return;
 		descriptionBean.setLiveBean(null);

@@ -43,6 +43,10 @@ public class MappedDataFileBean {
 		return images;
 	}
 	
+	public boolean isEmpty(){
+		return blocks.isEmpty() && maps.isEmpty() && images.isEmpty();
+	}
+	
 	public boolean checkValid() {
 		
 		if (blocks.isEmpty()) return false;
