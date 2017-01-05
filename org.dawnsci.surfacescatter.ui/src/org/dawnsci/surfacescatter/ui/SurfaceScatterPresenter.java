@@ -58,6 +58,15 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.TabFolder;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardCopyOption.*;
+
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class SurfaceScatterPresenter {
@@ -79,11 +88,13 @@ public class SurfaceScatterPresenter {
 	private SurfaceScatterPresenter ssp;
 	private PrintWriter writer;
 	private Shell parentShell;
+	private IDataHolder dh1;
 	
 	public SurfaceScatterPresenter(Shell parentShell, 
 								   String[] filepaths,
 								   SuperModel sm,
-								   ArrayList<GeometricParametersModel> gms) {
+								   ArrayList<GeometricParametersModel> gms,
+								   String imageFolderPath) {
 
 		this.sm = sm;
 		ssp= this;
@@ -104,7 +115,38 @@ public class SurfaceScatterPresenter {
 				models.add(new ExampleModel());
 				dms.add(new DataModel());
 				gms.add(new GeometricParametersModel());
-				IDataHolder dh1 = LoaderFactory.getData(filepaths[id]);
+				if(imageFolderPath.equals(null)){
+					dh1 = LoaderFactory.getData(filepaths[id]);
+				}
+				else{
+					String localFilepathCopy = StringUtils.substringBeforeLast(filepaths[id], ".dat") + "_copy";	
+					Path from = Paths.get(filepaths[id]);
+					Path to = Paths.get(localFilepathCopy + ".dat");
+					Files.copy(from, to, StandardCopyOption.REPLACE_EXISTING);
+					
+					
+					Charset charset = StandardCharsets.UTF_8;
+
+					String content = new String(Files.readAllBytes(to), charset);
+					
+					String firstTifName = StringUtils.substringBetween(content, File.separator, ".tif");
+					
+					if(firstTifName.contains(File.separator)){
+						firstTifName = StringUtils.substringAfterLast(firstTifName, File.separator);
+					}
+					
+					String pathNameToReplace = StringUtils.substringBetween(content, "\t", File.separator + firstTifName);
+					
+					if(pathNameToReplace.contains("\t")){
+						pathNameToReplace = StringUtils.substringAfterLast(pathNameToReplace,"\t");
+					}
+					content = content.replaceAll(pathNameToReplace, imageFolderPath);
+					
+					Files.write(to, content.getBytes(charset));
+					
+					dh1 = LoaderFactory.getData(to.toString());
+					
+				}
 				ILazyDataset ild = dh1.getLazyDataset(gms.get(sm.getSelection()).getImageName());
 				dms.get(id).setName(StringUtils.substringAfterLast(sm.getFilepaths()[id], File.separator));
 				models.get(id).setDatImages(ild);
