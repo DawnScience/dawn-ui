@@ -93,12 +93,12 @@ public class SurfaceScatterPresenter {
 	public SurfaceScatterPresenter(Shell parentShell, 
 								   String[] filepaths,
 								   SuperModel sm,
-								   ArrayList<GeometricParametersModel> gms,
+								   String xName,
 								   String imageFolderPath) {
 
 		this.sm = sm;
 		ssp= this;
-		this.gms = gms;
+		gms = new ArrayList<GeometricParametersModel>();
 		dms = new ArrayList<DataModel>();
 		models = new ArrayList<ExampleModel>();
 		sm.setFilepaths(filepaths);
@@ -115,6 +115,10 @@ public class SurfaceScatterPresenter {
 				models.add(new ExampleModel());
 				dms.add(new DataModel());
 				gms.add(new GeometricParametersModel());
+				
+				gms.get(id).setxName(xName);
+				gms.get(id).setxNameRef(xName);
+				
 				if(imageFolderPath == null){
 					dh1 = LoaderFactory.getData(filepaths[id]);
 				}

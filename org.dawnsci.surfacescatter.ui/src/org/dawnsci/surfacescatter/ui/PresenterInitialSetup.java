@@ -153,16 +153,11 @@ public class PresenterInitialSetup extends Dialog {
 				
 				sm.setCorrectionSelection(correctionSelection);
 				
-				for(GeometricParametersModel gm : gms){
-					gm.setxName(xName);
-					gm.setxNameRef(xName);
-				}
-				
 				@SuppressWarnings("unused")
 				SurfaceScatterPresenter ssp = new SurfaceScatterPresenter(parentShell,
 																		  filepaths,
 																		  sm,
-																		  gms,
+																		  xName,
 																		  imageFolderPath);
 			
 				
