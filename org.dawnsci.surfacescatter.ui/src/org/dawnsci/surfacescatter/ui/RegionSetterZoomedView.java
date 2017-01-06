@@ -527,7 +527,7 @@ public class RegionSetterZoomedView extends Dialog {
 			
 			if (customComposite2.getBackgroundButton().getSelection()){
 				
-				IDataset background = ssp.presenterDummyProcess(selection,
+				IDataset output = ssp.presenterDummyProcess(selection,
 						ssp.getImage(selection),
 						customComposite.getPlotSystem(),
 						3);
@@ -535,30 +535,35 @@ public class RegionSetterZoomedView extends Dialog {
 				ILineTrace lt3 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
 						customComposite2.getRegions()[0].getROI().getBounds(),
 						customComposite2.getPlotSystem1(), 
-						background,
+						ssp.getTemporaryBackground(),
 						customComposite.getGreenRegion().getROI());
 				
 				ILineTrace lt4 = VerticalHorizontalSlices.verticalsliceBackgroundSubtracted(
 						customComposite2.getRegions()[1].getROI().getBounds(),
 						customComposite2.getPlotSystem3(),
-						background,
+						ssp.getTemporaryBackground(),
 						customComposite.getGreenRegion().getROI());
-			
-				IDataset backSubTop = Maths.subtract(lt1.getYData(), lt3.getYData());
-				IDataset xTop = lt1.getXData();
-				ILineTrace lt13BackSub = customComposite2.getPlotSystem1().createLineTrace("background slice");
-				lt13BackSub.setData( xTop, backSubTop);
+				
+				
+				ILineTrace lt5 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
+						customComposite2.getRegions()[0].getROI().getBounds(),
+						customComposite2.getPlotSystem1(), 
+						output,
+						customComposite.getGreenRegion().getROI());
+				
+				ILineTrace lt6 = VerticalHorizontalSlices.verticalsliceBackgroundSubtracted(
+						customComposite2.getRegions()[1].getROI().getBounds(),
+						customComposite2.getPlotSystem3(),
+						output,
+						customComposite.getGreenRegion().getROI());
+					
+				lt3.setName("background Slice");
+				lt4.setName("background Slice");
 				
 				customComposite2.getPlotSystem1().addTrace(lt3);
-				customComposite2.getPlotSystem1().addTrace(lt13BackSub);
-				
-				IDataset backSubSide = Maths.subtract(lt2.getXData(), lt4.getXData());
-				IDataset xSide = lt2.getYData();
-				ILineTrace lt24BackSub = customComposite2.getPlotSystem3().createLineTrace("background slice");
-				lt24BackSub.setData(backSubSide,xSide);
-				
 				customComposite2.getPlotSystem3().addTrace(lt4);
-				customComposite2.getPlotSystem3().addTrace(lt24BackSub);
+				customComposite2.getPlotSystem1().addTrace(lt5);
+				customComposite2.getPlotSystem3().addTrace(lt6);
 				
 			}
 			

@@ -484,6 +484,10 @@ public class SurfaceScatterPresenter {
 		return out;
 	}
 	
+	public IDataset getTemporaryBackground(){
+		return sm.getTemporaryBackgroundHolder();
+	}
+	
 	public double getXValue(int k){
 		return sm.getSortedX().getDouble(k);
 	}
@@ -1097,6 +1101,10 @@ public class SurfaceScatterPresenter {
 		if(ssvs.getRszv()!=null){
 			ssvs.getRszv().roiReset(sm.getInitialLenPt());
 		}
+	}
+	
+	public void geometricParametersWindowPopulate(){
+		
 	}
 
 	private void debug(String output) {
