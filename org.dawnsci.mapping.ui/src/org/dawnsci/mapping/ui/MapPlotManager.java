@@ -57,6 +57,8 @@ public class MapPlotManager {
 	private int layerCounter = 0;
 	private boolean firstHold = true;
 	
+	private long pollTime = 1000;
+	
 	private final static Logger logger = LoggerFactory.getLogger(MapPlotManager.class);
 	
 	public MapPlotManager(IPlottingSystem<Composite> map, IPlottingSystem<Composite> data, MappedDataArea area) {
@@ -67,7 +69,7 @@ public class MapPlotManager {
 		layers = new ConcurrentLinkedDeque<MapTrace>();
 		job = new PlotJob();
 		job.setPriority(Job.INTERACTIVE);
-		rJob = new RepeatingJob(500, new Runnable() {
+		rJob = new RepeatingJob(pollTime, new Runnable() {
 			
 			@Override
 			public void run(){
