@@ -60,8 +60,11 @@ public class MappedDataArea implements MapObject {
 		return false;
 	}
 	
+	public boolean isEmpty() {
+		return files.isEmpty();
+	}
+	
 	public MappedDataFile getParentFile(MapObject object) {
-		
 		Iterator<MappedDataFile> iterator = files.iterator();
 		 while (iterator.hasNext()) {
 			 MappedDataFile mdf = iterator.next();
@@ -123,6 +126,14 @@ public class MappedDataArea implements MapObject {
 	
 	public MappedDataFile getDataFile(int index) {
 		return files.get(index);
+	}
+	
+	public MappedDataFile getDataFile(String path) {
+		for (MappedDataFile file : files) {
+			if (file.getPath().equals(path)) return file;
+		}
+		
+		return null;
 	}
 	
 	public int count() {
