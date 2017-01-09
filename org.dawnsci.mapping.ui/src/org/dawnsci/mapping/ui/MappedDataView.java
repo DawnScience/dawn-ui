@@ -192,7 +192,7 @@ public class MappedDataView extends ViewPart {
 			private void sendEvent(final ClickEvent evt, boolean isDoubleClick) {
 				Map<String,Object> props = new HashMap<>();
 				PlottableMapObject topMap = plotManager.getTopMap();
-				String path = topMap == null  || topMap.isLive() ? null : topMap.getPath();
+				String path = topMap == null ? null : topMap.getPath();
 				MappedDataFile p = area.getParentFile(topMap);
 				if (p != null && p.getParentPath() != null) {
 					path = p.getParentPath();
