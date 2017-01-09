@@ -38,14 +38,16 @@ public class PlotSystem1CompositeView extends Composite {
     private Button button1;
     private Button button2;
     private Button button3;
+    private Button trackerOnButton;
     private Combo comboDropDown0;
 	private Combo comboDropDown1;
 	private Combo comboDropDown2;
     private Text boundaryBoxText;
-    private String[] methodologies;
+//    private String[] methodologies;
     private int extra;
     private SurfaceScatterPresenter ssp;
     private RegionSetterZoomedView rszv;
+    private Boolean trackerOn = false;
 	
   
     public PlotSystem1CompositeView(Composite parent, 
@@ -77,16 +79,23 @@ public class PlotSystem1CompositeView extends Composite {
     public void createContents(PlotSystemCompositeView customComposite,
     						   int trackingMarker) {
         
-        
-        Group methodSetting = new Group(this, SWT.FILL);
+    
+    	trackerOnButton = new Button (this, SWT.PUSH);
+    	trackerOnButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+    	trackerOnButton.setText("Tracker Off");
+    	
+    	
+    	Group methodSetting = new Group(this, SWT.FILL | SWT.FILL);
         GridLayout methodSettingLayout = new GridLayout(2, true);
-	    GridData methodSettingData = new GridData();
+	    GridData methodSettingData = new GridData(GridData.FILL_HORIZONTAL);
 	    methodSettingData .minimumWidth = 50;
 
-//	
 	    methodSetting.setLayout(methodSettingLayout);
 	    methodSetting.setLayoutData(methodSettingData);
-//	    
+	    
+	    this.setLayout(methodSettingLayout);
+    	this.setLayoutData(methodSettingData);
+	    
 	    
 	    String[] setup = ssp.getAnalysisSetup(0);
 	    
@@ -114,7 +123,6 @@ public class PlotSystem1CompositeView extends Composite {
 	    comboDropDown1.setData(new GridData(SWT.FILL));
 	    comboDropDown2.setData(new GridData(SWT.FILL));
 	    boundaryBoxText.setData(new GridData(SWT.FILL));
-	    //methodologies = new String[AnalaysisMethodologies.Methodology.values().length];
 	    
 	    for(Methodology  t: AnalaysisMethodologies.Methodology.values()){
 	    	comboDropDown0.add(AnalaysisMethodologies.toString(t));
@@ -172,6 +180,32 @@ public class PlotSystem1CompositeView extends Composite {
 			}
 	    	
 	    });
+	    
+	    trackerOnButton.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if(trackerOn){
+					trackerOn = false;
+				}
+				
+				else{
+					trackerOn= true;
+				}
+				if(trackerOn){
+					trackerOnButton.setText("Tracker On");
+				}
+				else{
+					trackerOnButton.setText("Tracker Off");
+				}
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 
         button2 = new Button (methodSetting, SWT.PUSH);
         button2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -219,14 +253,11 @@ public class PlotSystem1CompositeView extends Composite {
    }
    
    public void generalUpdate(){
-	  
 	   
 	   int methodologySelection = comboDropDown0.getSelectionIndex();
 	   int fitPowerSelection = comboDropDown1.getSelectionIndex();
 	   int trackerSelection = comboDropDown2.getSelectionIndex();
        
-	   
-	   
 	   String boundaryBox = boundaryBoxText.getText();
        ssp.updateAnalysisMethodology(methodologySelection, 
      		  						 fitPowerSelection, 
@@ -316,6 +347,9 @@ public class PlotSystem1CompositeView extends Composite {
 		return button;
    }
 	
+   public Button getTrackerOnButton(){
+	   return trackerOnButton;
+   }
    
 class operationJob extends Job {
 

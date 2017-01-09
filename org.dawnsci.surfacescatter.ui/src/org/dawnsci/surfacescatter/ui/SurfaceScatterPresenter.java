@@ -178,7 +178,9 @@ public class SurfaceScatterPresenter {
 					IDataset xdat = ildx.getSlice(slice1);
 					xArray[id] = xdat;
 
-				} else if (sm.getCorrectionSelection() == 1) {
+				} else if (sm.getCorrectionSelection() == 1 || 
+						   sm.getCorrectionSelection() == 2 || 
+						   sm.getCorrectionSelection() == 3) {
 					ILazyDataset ildx = dh1.getLazyDataset(gms.get(sm.getSelection()).getxNameRef());
 					models.get(id).setDatX(ildx);
 
@@ -963,6 +965,12 @@ public class SurfaceScatterPresenter {
 		
 	}
 	
+	public void resetDataModels(){
+		for(DataModel dm:dms){
+			dm.resetAll();
+		}
+	}
+	
 	public IDataset returnNullImage(){
 		
 		IDataset output = sm.getImages()[0];
@@ -1043,10 +1051,7 @@ public class SurfaceScatterPresenter {
 		for(DataModel md: dms){
 			md.resetAll();
 		}
-				
-				
-		debug("start of ssp tracking job");
-
+		
 		trackingJob tj = new trackingJob();
 		debug("tj invoked");
 		tj.setCorrectionSelection(sm.getCorrectionSelection());
@@ -1937,6 +1942,17 @@ class trackingJob2 {
 			}
 		}
 
+		
+		if(correctionSelection == 1 ||
+		   correctionSelection == 2 ||	
+		   correctionSelection == 3){
+			
+			
+			
+		}
+		
+		
+		
 //		try {
 //			Thread.sleep(2000*timeStep);
 //		} catch (InterruptedException e) {

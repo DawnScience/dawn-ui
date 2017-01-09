@@ -83,7 +83,9 @@ public class PresenterInitialSetup extends Dialog {
 		
 		correctionsDropDown = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
 		correctionsDropDown.add("SXRD");
-		correctionsDropDown.add("Reflectivity");
+		correctionsDropDown.add("Reflectivity with Flux Correction");
+		correctionsDropDown.add("Reflectivity without Flux Correction");
+		correctionsDropDown.add("Reflectivity with NO Correction");
 		correctionsDropDown.select(0);
 		
 		optionsDropDown = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);

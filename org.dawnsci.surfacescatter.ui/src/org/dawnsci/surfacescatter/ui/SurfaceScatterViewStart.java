@@ -402,6 +402,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				ssp.resetDataModels();
 				ssp.runTrackingJob(customComposite.getSubImagePlotSystem(),
 								   outputCurves.getPlotSystem(),
 								   customComposite.getPlotSystem(),
