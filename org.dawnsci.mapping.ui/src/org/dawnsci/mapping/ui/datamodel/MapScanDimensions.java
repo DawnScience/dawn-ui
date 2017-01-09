@@ -76,6 +76,22 @@ public class MapScanDimensions {
 		
 	}
 	
+	public boolean isPointDetector(int[] shape){
+		if (shape.length == scanRank) return true;
+		
+		if (shape.length > scanRank) {
+			boolean allOnes = true;
+			for (int i = scanRank; i < shape.length; i++) {
+				if (shape[i] != 1) allOnes = false;
+				break;
+			}
+			
+			return allOnes;
+		}
+		
+		return false;
+	}
+	
 	public boolean isRemappingRequired(){
 		return xDim == yDim;
 	}

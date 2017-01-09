@@ -374,6 +374,8 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 		if (isLive()) {
 			update();
 			
+			if (!mapDims.isPointDetector(dataset.getShape())) return null;
+			
 			IDataset d = null;
 			
 			if (mapDims.isRemappingRequired()) {
@@ -388,6 +390,7 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 			this.range = range;
 			return d;
 		}
+		
 		if (mapRepresentation == null) {
 			if (mapDims.isRemappingRequired()) {
 
@@ -442,6 +445,15 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public boolean canPlot() {
+		if (isLive()) {
+			update();
+		}
+		
+		return mapDims.isPointDetector(dataset.getShape());
+		
 	}
 }
 	

@@ -43,6 +43,7 @@ import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.osgi.internal.messages.Msg;
 import org.eclipse.scanning.api.event.EventException;
 import org.eclipse.scanning.api.event.bean.BeanEvent;
 import org.eclipse.scanning.api.event.bean.IBeanListener;
@@ -231,7 +232,14 @@ public class MappedDataView extends ViewPart {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				Object e = ((StructuredSelection)event.getSelection()).getFirstElement();
-				if (e instanceof AbstractMapData || e instanceof MappedDataBlock) plotManager.updateLayers((PlottableMapObject)e);
+				if (e instanceof AbstractMapData || e instanceof MappedDataBlock) {
+					
+					if (e instanceof MappedDataBlock) {
+						if (!((MappedDataBlock)e).canPlot()) return;
+					}
+					
+					plotManager.updateLayers((PlottableMapObject)e);
+				}
 				if (e instanceof AssociatedImage) plotManager.addImage((AssociatedImage)e);
 				if (e instanceof MappedDataFile) {
 					MappedDataFile mdf = (MappedDataFile)e;
