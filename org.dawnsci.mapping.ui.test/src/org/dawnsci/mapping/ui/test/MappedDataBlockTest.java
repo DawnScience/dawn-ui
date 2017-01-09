@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 
+import org.dawnsci.mapping.ui.datamodel.LiveRemoteAxes;
 import org.dawnsci.mapping.ui.datamodel.MapScanDimensions;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
@@ -12,6 +13,7 @@ import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.IDatasetConnector;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -119,5 +121,47 @@ public class MappedDataBlockTest {
 		assertEquals(d.getElementDoubleAbs(0), 0,0);
 		assertEquals(11*12*9, d.getElementDoubleAbs(d.getSize()-1),0);
 	}
+	
+	public void testLiveVersion(){
+		
+		MapScanDimensions msd =new MapScanDimensions(1, 0, 2);
+		
+		MockDatasetConnector dataset = getLiveDataset();
+		LiveRemoteAxes axes = getLiveAxes();
+		
+		MappedDataBlock liveBlock = new MappedDataBlock("live", dataset, msd, "livePath", axes, "host", 8690);
+		
+	}
+	
+	public MockDatasetConnector getLiveDataset(){
+		
+		int[] maxShape = {-1,-1,99,100};
+		
+		int[] first = {1,5,99,100};
+		int[] second = {2,7,99,100};
+		int[] third = {7,7,99,100};
+		
+		MockDatasetConnector mock = new MockDatasetConnector(maxShape, new int[][]{first,second,third});
+		
+		return mock;
+		
+	}
 
+	public LiveRemoteAxes getLiveAxes() {
+		
+		int[] first = {4};
+		int[] second = {7};
+		int[] third = {7};
+		MockDatasetConnector x = new MockDatasetConnector(new int[]{7} , new int[][]{first,second,third});
+		
+		first = new int[]{1};
+		second = new int[]{3};
+		third = new int[]{7};
+		MockDatasetConnector y = new MockDatasetConnector(new int[]{7} , new int[][]{first,second,third});
+		IDatasetConnector[] ax = new IDatasetConnector[]{x,y,null,null};
+		String[] names = new String[]{"y","x",null,null};
+		LiveRemoteAxes axes= new LiveRemoteAxes(ax, names, "host", 8690);
+		
+		return axes;
+	}
 }

@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.dawnsci.mapping.ui.datamodel.MapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
+import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -279,6 +280,25 @@ public class MapPlotManager {
 		job.schedule();
 	}
 	
+	public void unplotFile(MappedDataFile file){
+		
+		Object[] c = file.getChildren();
+		List<Object> list = Arrays.asList(c);
+		
+		Iterator<MapTrace> it = layers.iterator();
+		
+		while (it.hasNext()) {
+			MapTrace m = it.next();
+			if (list.contains(m.getMap())) {
+				it.remove();
+				if (m.getTrace() != null) this.map.removeTrace(m.getTrace());
+			}
+		}
+		
+		triggerForLive();
+		plotLayers();
+		
+	}
 	
 	public void updateLayers(PlottableMapObject map) {
 		

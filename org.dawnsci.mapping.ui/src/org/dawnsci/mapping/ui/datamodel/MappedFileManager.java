@@ -57,17 +57,18 @@ public class MappedFileManager {
 	}
 	
 	public void removeFile(MappedDataFile file) {
+		if (file == null) return;
 		mappedDataArea.removeFile(file);
-		plotManager.clearAll();
-		plotManager.updateLayers(null);
+		plotManager.unplotFile(file);
+		if (mappedDataArea.isEmpty()) {
+			plotManager.clearAll();
+		}
 		viewer.refresh();
 	}
 	
 	public void removeFile(String path) {
-		mappedDataArea.removeFile(path);
-		plotManager.clearAll();
-		plotManager.updateLayers(null);
-		viewer.refresh();
+		MappedDataFile dataFile = mappedDataArea.getDataFile(path);
+		removeFile(dataFile);
 	}
 	
 	public void clearAll() {
