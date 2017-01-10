@@ -660,8 +660,6 @@ public class RegionSetterZoomedView extends Dialog {
 		customComposite.setROITexts(values);
 		
 		modify = true;
-
-		
 		
 	}
 	

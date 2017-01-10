@@ -47,7 +47,7 @@ public class PlotSystem1CompositeView extends Composite {
     private int extra;
     private SurfaceScatterPresenter ssp;
     private RegionSetterZoomedView rszv;
-    private Boolean trackerOn = false;
+    private Boolean trackerOn;
 	
   
     public PlotSystem1CompositeView(Composite parent, 
@@ -79,12 +79,19 @@ public class PlotSystem1CompositeView extends Composite {
     public void createContents(PlotSystemCompositeView customComposite,
     						   int trackingMarker) {
         
-    
+    	
+    	trackerOn = ssp.getTrackerOn();
+    	
     	trackerOnButton = new Button (this, SWT.PUSH);
     	trackerOnButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    	trackerOnButton.setText("Tracker Off");
     	
-    	
+    	if(ssp.getTrackerOn()){
+    		trackerOnButton.setText("Tracker On");
+    	}
+    	else{
+    		trackerOnButton.setText("Tracker Off");
+    	}
+    		
     	Group methodSetting = new Group(this, SWT.FILL | SWT.FILL);
         GridLayout methodSettingLayout = new GridLayout(2, true);
 	    GridData methodSettingData = new GridData(GridData.FILL_HORIZONTAL);
@@ -198,6 +205,8 @@ public class PlotSystem1CompositeView extends Composite {
 				else{
 					trackerOnButton.setText("Tracker Off");
 				}
+				
+				ssp.setTrackerOn(trackerOn);
 			}
 			
 			@Override
@@ -363,8 +372,6 @@ class operationJob extends Job {
 	public void setData(IDataset input) {
 		this.input = input;
 	}
-
-
 	
 	protected IStatus run(IProgressMonitor monitor) {
 		Display.getDefault().asyncExec(new Runnable() {

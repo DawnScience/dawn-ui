@@ -6,6 +6,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,15 +63,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.TabFolder;
-
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.CopyOption;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardCopyOption.*;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
@@ -750,8 +747,17 @@ public class SurfaceScatterPresenter {
 		writer.close();
 	}	
 	
-	public SuperModel getSuperModel(){
-		return sm;
+//	public SuperModel getSuperModel(){
+//		return sm;
+//	}
+	
+	
+	public void setTrackerOn(Boolean trackerOn){
+		sm.setTrackerOn(trackerOn);
+	}
+	
+	public Boolean getTrackerOn (){
+		return sm.getTrackerOn();
 	}
 	
 	public ArrayList<GeometricParametersModel> getGeometricParamtersModels(){
@@ -2126,8 +2132,8 @@ class MovieJob {
 						}
 						
 						pS.addRegion(background);
-						RectangularROI newROI = new RectangularROI(tempLoc[1],
-																   tempLoc[0],
+						RectangularROI newROI = new RectangularROI(tempLoc[0],
+																   tempLoc[1],
 																   sm.getInitialLenPt()[0][0],
 																   sm.getInitialLenPt()[0][1],0);
 						background.setROI(newROI);
