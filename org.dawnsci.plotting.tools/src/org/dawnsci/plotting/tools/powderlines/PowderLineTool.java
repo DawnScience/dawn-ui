@@ -1,12 +1,21 @@
 package org.dawnsci.plotting.tools.powderlines;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -15,7 +24,9 @@ public class PowderLineTool extends AbstractToolPage {
 	private Composite composite; // root Composite of the tool
 	private TableViewer lineTableViewer; // TableViewer holding the list of lines
 	private ITraceListener tracerListener; // The trace on which the tool listens
-	boolean isCoordinateAngle = false; // default to momentum for the independent coordinate
+	private PowderLineUnit dataCoordinate = PowderLineUnit.Q; // The coordinate of the input data 
+	private double energy; // Energy of the scattered radiation
+	private Double[] lineLocations; // Locations of the lines in the above units
 	
 	public PowderLineTool() {
 		try{
@@ -30,12 +41,15 @@ public class PowderLineTool extends AbstractToolPage {
 		} catch (Exception e) {
 			logger.error("Cannot get plotting system!", e);
 		}
+		
+		// Example data
+		lineLocations = ArrayUtils.toObject(new double []{3.0, 3.4, 4.85, 5.74, 10.18});
+		energy = 76.6;
 	}
 	
 	@Override
 	public ToolPageRole getToolPageRole() {
-		// TODO Auto-generated method stub
-		return null;
+		return ToolPageRole.ROLE_1D;
 	}
 
 	@Override
@@ -46,9 +60,37 @@ public class PowderLineTool extends AbstractToolPage {
 	@Override
 	public void createControl(Composite parent) {
 		this.composite = new Composite(parent, SWT.NONE);
+		composite.setLayout(new FillLayout());
 		
 		// Create the table of lines
+		lineTableViewer = new TableViewer(composite, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+		createColumns(lineTableViewer);
+		lineTableViewer.getTable().setLinesVisible(true);
+		lineTableViewer.getTable().setHeaderVisible(true);
 		// Create the Actions
+		
+		// define the content and the provider
+		lineTableViewer.setContentProvider(new IStructuredContentProvider() {
+			
+			@Override
+			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void dispose() {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public Object[] getElements(Object inputElement) {
+				return (Double[]) inputElement;
+			}
+		});
+		
+		lineTableViewer.setInput(lineLocations);
 		
 		activate();
 		
@@ -70,6 +112,9 @@ public class PowderLineTool extends AbstractToolPage {
 			getPlottingSystem().addTraceListener(tracerListener);
 		}
 		
+		// Activating the tool is the time to first draw the regions, I think
+		drawPowderLines();
+		
 		super.activate();
 	}
 	
@@ -83,5 +128,73 @@ public class PowderLineTool extends AbstractToolPage {
 		if (getPlottingSystem() != null) {
 			getPlottingSystem().removeTraceListener(tracerListener);
 		}
+	}
+	
+	// Create the table columns
+	private void createColumns(final TableViewer viewer) {
+		
+		// Set the tooltip to not created more than once in the same area
+		ColumnViewerToolTipSupport.enableFor(viewer, ToolTip.NO_RECREATE);
+		
+
+		
+		// Create the columns
+		TableViewerColumn colvarTheMagnificent;
+		colvarTheMagnificent = new TableViewerColumn(lineTableViewer, SWT.CENTER, 0);
+		colvarTheMagnificent.getColumn().setText("Q (Å⁻¹)");
+		colvarTheMagnificent.getColumn().setWidth(400); // a reasonable width
+		colvarTheMagnificent.setLabelProvider(new PowderLineLabelProvider(dataCoordinate, PowderLineUnit.Q, energy));
+		
+		colvarTheMagnificent = new TableViewerColumn(lineTableViewer, SWT.CENTER, 1);
+		colvarTheMagnificent.getColumn().setText("2θ (°)");
+		colvarTheMagnificent.getColumn().setWidth(400); // a reasonable width
+		colvarTheMagnificent.setLabelProvider(new PowderLineLabelProvider(dataCoordinate, PowderLineUnit.ANGLE, energy));
+		
+	}
+	
+	private enum PowderLineUnit {
+		Q, ANGLE
+	}
+	
+	private class PowderLineLabelProvider extends ColumnLabelProvider {
+		private PowderLineUnit dataCoordinate, columnCoordinate;
+		private double energy;
+		private static final double hckeVAA = 12.39841974;//(17)
+		private DecimalFormat format = new DecimalFormat("#.###");
+		
+		public PowderLineLabelProvider(PowderLineUnit dataCoordinate, PowderLineUnit columnCoordinate, double energy) {
+			this.dataCoordinate = dataCoordinate;
+			this.columnCoordinate = columnCoordinate;
+			this.energy = energy;
+			this.format = new DecimalFormat("#.###");
+		}
+		
+		@Override
+		public String getText(Object element) {
+			double value = (double) element;
+			
+			if (this.dataCoordinate == this.columnCoordinate)
+				return format.format(value);
+			else if (this.dataCoordinate == PowderLineUnit.Q)
+				// Column is 2θ, data is Q
+				return format.format(Math.toDegrees(2*Math.asin(value/this.energy * hckeVAA/(4*Math.PI))));
+			else if (this.dataCoordinate == PowderLineUnit.ANGLE)
+				// Column is Q, data is 2θ
+				return format.format(4*Math.PI*this.energy*Math.sin(Math.toRadians(value)/2)/hckeVAA);
+			else 
+				return "";
+		}
+	}
+	
+	private void drawPowderLines() {
+		System.err.println("(Re)drawing powder lines");
+		
+		// Correct the stored lines for the plot units
+		// FIXME: Currently assumed to be the same units
+		
+		// TODO: To draw the ROIs, create a region from the plotting system,
+		// then use Display.getDefault.asyncExec() to make the call to add the
+		// Region to the PlottingSystem in the UI thread.
+		
 	}
 }

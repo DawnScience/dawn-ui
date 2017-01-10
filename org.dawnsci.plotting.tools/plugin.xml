@@ -393,6 +393,13 @@
             id="org.dawnsci.plotting.tools.monitorxytool"
             label="Monitor tool">
       </plotting_tool_page>
+      <plotting_tool_page
+            class="org.dawnsci.plotting.tools.powderlines.PowderLineTool"
+            icon="icons/info.png"
+            id="org.dawnsci.plotting.tools.powderlines"
+            label="Powder Line Import"
+            tooltip="Import powder lines from a file into a plot">
+      	</plotting_tool_page>
    </extension>
 
   <extension
