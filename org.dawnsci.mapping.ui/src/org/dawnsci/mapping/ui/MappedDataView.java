@@ -298,6 +298,7 @@ public class MappedDataView extends ViewPart {
 						if (ob instanceof MappedDataFile) {
 							MappedDataFile df = (MappedDataFile)ob;
 							if (!maps.isEmpty())manager.add(MapActionUtils.getRGBDialog(maps, df,viewer));
+							//if (!maps.isEmpty())manager.add(MapActionUtils.getVectorDialog(maps, df,viewer));
 						}
 					}
 					

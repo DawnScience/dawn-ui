@@ -13,10 +13,12 @@ import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
 import org.dawnsci.mapping.ui.datamodel.RGBMapData;
+import org.dawnsci.mapping.ui.datamodel.VectorMapData;
 import org.dawnsci.mapping.ui.dialog.DynamicDialog;
 import org.dawnsci.mapping.ui.dialog.ImageGridDialog;
 import org.dawnsci.mapping.ui.dialog.MapPropertiesDialog;
 import org.dawnsci.mapping.ui.dialog.RGBMixerDialog;
+import org.dawnsci.mapping.ui.dialog.VectorMixerDialog;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -59,6 +61,37 @@ public class MapActionUtils {
 		return action;
 	}
 	
+	public static IAction getVectorDialog(final List<AbstractMapData> maps, final MappedDataFile mdf, final TreeViewer viewer) {
+		final List<AbstractMapData> dataList = new ArrayList<AbstractMapData>(maps.size());
+		for (AbstractMapData map : maps) {
+			dataList.add(map);
+		}
+		IAction action = new Action("Vector Plotter...") {
+			@Override
+			public void run() {
+				VectorMixerDialog dialog;
+				try {
+					dialog = new VectorMixerDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),dataList);
+					if (dialog.open() == Dialog.CANCEL)
+						return;
+
+					VectorMapData vectorMap = dialog.getVectorMap();
+					if (vectorMap == null) return;
+
+					mdf.addMapObject(vectorMap.toString(), vectorMap);
+					viewer.refresh();
+				} catch (Exception e) {
+					MessageDialog.openError(Display.getDefault()
+							.getActiveShell(), "Error opening Vector Mixer",
+							"The following error occured while opening the Vector Mixer dialog: " + e);
+				}
+				
+			}
+		};
+		action.setImageDescriptor(Activator.getImageDescriptor("icons/map.png"));
+		return action;
+	}
+
 	public static IAction getComparisonDialog(final List<AbstractMapData> maps) {
 		final List<IDataset> dataList = new ArrayList<IDataset>(maps.size());
 		for (AbstractMapData map : maps) {
