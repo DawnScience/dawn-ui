@@ -199,7 +199,7 @@ public class SWTXYTraceTest {
     public void testErrorBarsSimple() throws Throwable {
 		
 		final DoubleDataset da1 = DatasetFactory.createRange(DoubleDataset.class, 0, 100, 1);
-        da1.setError(5d);
+        da1.setErrors(5d);
         
       
 		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{da1}));
@@ -444,7 +444,7 @@ public class SWTXYTraceTest {
 		
 		final Dataset da1 = Maths.square(DatasetFactory.createRange(DoubleDataset.class, 0, 100, 1));    
 		final Dataset err = Maths.square(DatasetFactory.createRange(DoubleDataset.class, 0, 100, 1).imultiply(0.2d));
-		da1.setError(err);
+		da1.setErrors(err);
 		
 		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{da1}));
 
@@ -466,7 +466,7 @@ public class SWTXYTraceTest {
 		
 		final Dataset da1 = Maths.square(DatasetFactory.createRange(DoubleDataset.class, 0, 100, 1));    
 		final Dataset err = Maths.square(DatasetFactory.createRange(DoubleDataset.class, 0, 100, 1).imultiply(0.2d));
-		da1.setError(err);
+		da1.setErrors(err);
 		
 		final Object[] oa = createSomethingPlotted(Arrays.asList(new IDataset[]{da1}));
 
@@ -497,7 +497,7 @@ public class SWTXYTraceTest {
 		if (lineTrace.getData().getError(50)!=0d) throw new Exception("Unexpected error!");
 		
 		IDataset es = lineTrace.getXData();
-		es.setError(4d);
+		es.setErrors(4d);
 		lineTrace.setData(es, lineTrace.getYData());
 		
 		sys.repaint();

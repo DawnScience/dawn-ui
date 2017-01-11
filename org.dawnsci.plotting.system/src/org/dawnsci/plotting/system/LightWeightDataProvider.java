@@ -185,8 +185,8 @@ class LightWeightDataProvider implements IDataProvider {
 		Arrays.fill(positiveMins, 0); // reset
 		this.x = DatasetUtils.convertToDataset(xData);
 		this.y = DatasetUtils.convertToDataset(yData);
-		ILazyDataset xel = x.getError();
-		ILazyDataset yel = y.getError();
+		ILazyDataset xel = x.getErrors();
+		ILazyDataset yel = y.getErrors();
 		if (xel != null) {
 			try {
 				this.xerr = DatasetUtils.convertToDataset(xel.getSlice());
