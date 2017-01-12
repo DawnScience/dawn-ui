@@ -68,38 +68,65 @@ import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class SurfaceScatterPresenter {
 
-	private String[] filepaths;
+	
 	private ArrayList<ExampleModel> models;
 	private ArrayList<DataModel> dms;
 	private ArrayList<GeometricParametersModel> gms;
 	private SuperModel sm;
-	private Slider slider;
-	private Button button;
 	private int noImages;
 	private SurfaceScatterViewStart ssvs;
 	private int DEBUG = 1;
-	private IRegion background;
-	private IDataset tempImage;
-	private IDataset subTempImage;
-	private double[] tempLoc;
-	private SurfaceScatterPresenter ssp;
 	private PrintWriter writer;
 	private Shell parentShell;
+	
+	public Shell getParentShell() {
+		return parentShell;
+	}
+
+	public void setParentShell(Shell parentShell) {
+		this.parentShell = parentShell;
+	}
+
 	private IDataHolder dh1;
 	
-	public SurfaceScatterPresenter(Shell parentShell, 
-								   String[] filepaths,
-								   SuperModel sm,
-								   String xName,
-								   String imageFolderPath) {
+	public void setDms(ArrayList<DataModel> dms) {
+		this.dms = dms;
+	}
 
-		this.sm = sm;
-		ssp= this;
+	public ArrayList<DataModel> getDms() {
+		return  dms;
+	}
+	
+	public ArrayList<GeometricParametersModel> getGms() {
+		return gms;
+	}
+
+	public void setGms(ArrayList<GeometricParametersModel> gms) {
+		this.gms = gms;
+	}
+	
+	public SurfaceScatterPresenter(){
+		
+	}
+	
+	
+	public void surfaceScatterPresenterBuild(Shell parentShell, 
+								   String[] filepaths,
+								   String xName,
+								   String imageFolderPath,
+								   String datFolderPath,
+								   int correctionSelection) {
+
+		this.parentShell = parentShell;
+		
+		sm = new SuperModel();
 		gms = new ArrayList<GeometricParametersModel>();
 		dms = new ArrayList<DataModel>();
 		models = new ArrayList<ExampleModel>();
 		sm.setFilepaths(filepaths);
-		this.parentShell= parentShell;
+		sm.setCorrectionSelection(correctionSelection);
+		sm.setImageFolderPath(imageFolderPath);
+
 		IDataset[] imageArray = new IDataset[filepaths.length];
 		IDataset[] xArray = new IDataset[filepaths.length];
 		TreeMap<Integer, Dataset> som = new TreeMap<Integer, Dataset>();
@@ -287,14 +314,28 @@ public class SurfaceScatterPresenter {
 
 		sm.setNullImage(imageCon.getSlice(slice2));
 
-		ssvs = new SurfaceScatterViewStart(parentShell, 
-										   filepaths, 
-										   numberOfImages, 
-										   nullImage,
-										   this);
-		ssvs.open();
-
+		sm.setNumberOfImages(numberOfImages);
+		sm.setNullImage(nullImage);
+	
 	}
+	
+	public String getXName(){
+		return gms.get(0).getxName();
+	}
+	
+	public String getImageFolderPath(){
+		return sm.getImageFolderPath();
+		
+	}
+	
+	public int getCorrectionSelection(){
+		return sm.getCorrectionSelection();
+	}
+	
+//	String xName,
+//	   String imageFolderPath,
+//	   String datFolderPath,
+//	   int correctionSelection
 
 	public void sliderMovemementMainImage(int sliderPos, 
 										  IPlottingSystem<Composite>... pS) {
@@ -342,7 +383,7 @@ public class SurfaceScatterPresenter {
 														    m.getFitPower(), 
 														    m.getBoundaryBox(), 
 														    sm.getSliderPos(),
-														    ssp.getXValue(sm.getSliderPos()), 
+														    this.getXValue(sm.getSliderPos()), 
 														    sm.getFilepaths()[sm.getFilepathsSortedArray()[sm.getSliderPos()]],
 														    sm.getFilepaths());
 		
@@ -366,10 +407,10 @@ public class SurfaceScatterPresenter {
 			m.setMethodology(fp.getBgMethod());
 		}
 		
-		int selection = ssp.closestImageNo(fp.getXValue());
+		int selection = this.closestImageNo(fp.getXValue());
 		
 		sm.setInitialLenPt(fp.getLenpt());
-		sm.setSliderPos(ssp.closestImageNo(fp.getXValue()));
+		sm.setSliderPos(this.closestImageNo(fp.getXValue()));
 		
 		ps1cv.setMethodologyDropDown(fp.getBgMethod());
 		ps1cv.setFitPowerDropDown(fp.getFitPower());
@@ -385,22 +426,22 @@ public class SurfaceScatterPresenter {
 													  fp.getLenpt()[0][1],
 													  0);
 		
-		ssp.updateSliders(ssvs.getSliderList(),selection);
+		this.updateSliders(ssvs.getSliderList(),selection);
 		
-		ssp.sliderMovemementMainImage(selection, 
+		this.sliderMovemementMainImage(selection, 
 				  					  pscv.getPlotSystem());
 		
-		ssp.sliderZoomedArea(selection, 
+		this.sliderZoomedArea(selection, 
 							 loadedROI, 
 							 ps2cv.getPlotSystem2(),
 							 ssvs.getPlotSystemCompositeView().getSubImagePlotSystem());
 		
-		ssp.regionOfInterestSetter(loadedROI);
+		this.regionOfInterestSetter(loadedROI);
 		
 		ssvs.updateIndicators(selection);
 		
 		
-		return ssp.closestImageNo(fp.getXValue());
+		return this.closestImageNo(fp.getXValue());
 		
 	}
 	
@@ -663,7 +704,7 @@ public class SurfaceScatterPresenter {
 				r = Double.parseDouble(boundaryBox);
 			}
 			catch (Exception e1){
-				ssp.numberFormatWarning();
+				this.numberFormatWarning();
 			}
 			
 			model.setBoundaryBox((int) Math.round(r));
@@ -1040,7 +1081,7 @@ public class SurfaceScatterPresenter {
 		
 		RectangularROI startROI = new RectangularROI(100,100,50,50,0);
 		IROI box = startROI.getBounds().bounds(startROI);
-		IDataset subImage = PlotSystem2DataSetter.PlotSystem2DataSetter1(box, ssp.returnNullImage());
+		IDataset subImage = PlotSystem2DataSetter.PlotSystem2DataSetter1(box, this.returnNullImage());
 		
 		return subImage;
 	}
@@ -1078,10 +1119,7 @@ public class SurfaceScatterPresenter {
 
 	}
 
-	public ArrayList<DataModel> getDms() {
-		return dms;
-	}
-
+	
 	public void stitchAndPresent(MultipleOutputCurvesTableView outputCurves) {
 
 		outputCurves.resetCurve();

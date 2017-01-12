@@ -56,6 +56,7 @@ public class SurfaceScatterViewStart extends Dialog {
 	private RegionSetterZoomedView rszv;
 	private int DEBUG =1;
 	private boolean modify = true;
+	private  String datFolderPath;
 	
 	
 	public boolean isModify() {
@@ -70,7 +71,8 @@ public class SurfaceScatterViewStart extends Dialog {
 			String[] filepaths,
 			int numberOfImages,
 			Dataset nullImage,
-			SurfaceScatterPresenter ssp) {
+			SurfaceScatterPresenter ssp,
+			String datFolderPath) {
 		
 		super(parentShell);
 		
@@ -79,7 +81,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		this.nullImage = nullImage;
 		this.ssp = ssp;
 		this.ssvs = this;
-		
+		this.datFolderPath= datFolderPath;
 		
 		
 		setShellStyle(getShellStyle() | SWT.RESIZE);
@@ -125,7 +127,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		right.setLayout(new GridLayout());
 		right.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, true));
 		
-		setupSash.setWeights(new int[]{50,50});
+		setupSash.setWeights(new int[]{70,30});
 
 ////////////////setupLeft///////////////////////////////////////////////
 
@@ -133,7 +135,7 @@ public class SurfaceScatterViewStart extends Dialog {
 ///////////////////////////Window 1  LEFT  SETUP////////////////////////////////////////////////////
 		try {
 
-			datDisplayer = new DatDisplayer(left, SWT.FILL, filepaths, ssp);
+			datDisplayer = new DatDisplayer(left, SWT.FILL, filepaths, ssp, datFolderPath);
 			datDisplayer.setLayout(new GridLayout());
 			datDisplayer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 	
@@ -187,6 +189,7 @@ public class SurfaceScatterViewStart extends Dialog {
 					
 		analysis.setControl(analysisComposite);
 		
+		
 	    analysisSash = new SashForm(analysisComposite, SWT.FILL);
 	    analysisSash.setLayout(new GridLayout());
 		analysisSash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -204,9 +207,11 @@ public class SurfaceScatterViewStart extends Dialog {
 //////////////////////Analysis Left//////////////////////////////
 /////////////////anaLeft Window 3/////////////////////////////////		
 		
+		
+		
 	    customComposite = new PlotSystemCompositeView(anaLeft, 
 	    											SWT.FILL,
-	    											ssp.returnNullImage(),
+	    											ssp.getImage(0),
 	    											1,
 	    											numberOfImages, 
 	    											nullImage,
@@ -321,7 +326,20 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 		});
 	    	
-	    	
+	    folder.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				customComposite.getSlider().setMaximum(ssp.getNoImages());
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 	    
 	    customComposite.getImageNo().addFocusListener(new FocusListener() {
 			

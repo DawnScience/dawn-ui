@@ -31,12 +31,15 @@ public class PresenterInitialSetup extends Dialog {
 	private Combo correctionsDropDown;
 	private Button goButton;
 	private Button imageFolderSelection;
+	private Button datFolderSelection;
 	private Shell parentShell; 
     private String[] filepaths;
     private String[] options;
     private int correctionSelection;
     private String xName;
     private String imageFolderPath = null;
+    private String datFolderPath = null;
+    private SurfaceScatterPresenter ssp; 
 	
 	protected PresenterInitialSetup(Shell parentShell, 
 								    String[] filepaths) {
@@ -62,6 +65,9 @@ public class PresenterInitialSetup extends Dialog {
 	@Override
 	protected Control createDialogArea(Composite parent) {
 	
+		
+		SuperModel sm = new SuperModel();
+		
 		Composite container = (Composite) super.createDialogArea(parent);
 		container.setLayout(new GridLayout());
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -96,7 +102,45 @@ public class PresenterInitialSetup extends Dialog {
 		
 		optionsDropDown.select(0);
 		
-///////////////////////////Folder selector///////////////////////////////////////////////////
+		
+///////////////////////////.dat Folder selector///////////////////////////////////////////////////
+		
+		datFolderSelection = new Button(container, SWT.PUSH | SWT.FILL);
+		
+		datFolderSelection.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		datFolderSelection.setText("Select .dat File Folder");
+		
+		datFolderSelection.addSelectionListener(new SelectionListener() {
+		
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			
+				FileDialog fd = new FileDialog(getParentShell(), SWT.OPEN); 
+				
+				String path = "p";
+				
+				if (fd.open() != null) {
+					path = fd.getFilterPath();
+				}
+				
+				datFolderPath = path;
+				
+				}
+				
+				@Override
+				public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+			
+			}
+		});
+
+
+///////////////////////////////////////////////////////////////////////////////
+		
+		
+		
+///////////////////////////Image Folder selector///////////////////////////////////////////////////
 				
 		imageFolderSelection = new Button(container, SWT.PUSH | SWT.FILL);
 		
@@ -150,21 +194,29 @@ public class PresenterInitialSetup extends Dialog {
 					xName = options[0]; 
 				}
 				
-				SuperModel sm = new SuperModel();
-				ArrayList<GeometricParametersModel> gms = new ArrayList<GeometricParametersModel>();
 				
 				sm.setCorrectionSelection(correctionSelection);
+				ssp = new SurfaceScatterPresenter();
 				
-				@SuppressWarnings("unused")
-				SurfaceScatterPresenter ssp = new SurfaceScatterPresenter(parentShell,
-																		  filepaths,
-																		  sm,
-																		  xName,
-																		  imageFolderPath);
+				ssp.surfaceScatterPresenterBuild(parentShell,
+												 filepaths,
+//												 sm,
+												 xName,
+												 imageFolderPath,
+												 datFolderPath,
+												 correctionSelection);
 			
 				
+				SurfaceScatterViewStart ssvs = new SurfaceScatterViewStart(parentShell, 
+						   filepaths, 
+						   sm.getNumberOfImages(), 
+						   sm.getNullImage(),
+						   ssp,
+						   datFolderPath);
+				ssvs.open();
 				
-			}
+				
+		}
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
