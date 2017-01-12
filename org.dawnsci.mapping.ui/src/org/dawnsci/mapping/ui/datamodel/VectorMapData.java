@@ -270,10 +270,10 @@ public class VectorMapData extends MappedData {
 	}
 	
 	
-	@Override
-	public IDataset getSpectrum(double x, double y) {
-		return this.plotDataset;
-	}
+//	@Override
+//	public IDataset getSpectrum(double x, double y) {
+//		return this.plotDataset;
+//	}
 	
 	
 	@Override

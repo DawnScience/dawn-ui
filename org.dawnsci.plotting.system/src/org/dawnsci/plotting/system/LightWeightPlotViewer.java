@@ -1053,7 +1053,9 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		} else if (trace instanceof ImageTrace) {
 			((ImageTrace)trace).removePaletteListener(paletteListener);
 			xyGraph.removeImageTrace((ImageTrace)trace);
-		} 
+		}else if (trace instanceof VectorTrace) {
+			xyGraph.removeVectorTrace((VectorTrace)trace);
+		}
 		redraw();		
 	}
 
