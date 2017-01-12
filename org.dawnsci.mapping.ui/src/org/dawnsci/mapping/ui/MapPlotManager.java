@@ -13,6 +13,7 @@ import org.dawnsci.mapping.ui.datamodel.MapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
+import org.dawnsci.mapping.ui.datamodel.VectorMapData;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -29,10 +30,13 @@ import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
+import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace.ArrowConfiguration;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.FloatDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
@@ -413,13 +417,22 @@ public class MapPlotManager {
 		
 		
 		if (sameMap != null) {
-			sameMap.switchMap(map);
-			
-//			layers.set(position, map);
-		} else {
+			if (map instanceof VectorMapData) {
+				IVectorTrace vectorTrace = createVectorTrace(map);
+				layers.push(new MapTrace(map, vectorTrace));
+			}
+			else{
+				sameMap.switchMap(map); //test if switches images only
+			}
+		}
+		else if (map instanceof VectorMapData) {
+			// Initialise a vector trace
+			IVectorTrace vectorTrace = createVectorTrace(map);
+			layers.push(new MapTrace(map, vectorTrace));
+		} 
+		else {
 			IImageTrace t = createImageTrace(map);
-			layers.push(new MapTrace(map, t));;
-			
+			layers.push(new MapTrace(map, t));
 		}
 	
 		triggerForLive();
@@ -465,11 +478,46 @@ public class MapPlotManager {
 		} catch (Exception e) {
 			logger.error("Error creating image trace", e);
 		}
-		
-		
+	
 		return t;
 	}
 	
+	
+	private IVectorTrace createVectorTrace (MapObject ob) {
+
+		String longName = "Layer " + layerCounter++;
+		IDataset map = null;
+		
+		if (ob instanceof PlottableMapObject) {
+			PlottableMapObject amd = (PlottableMapObject)ob;
+			map = amd.getMap();
+		}
+		
+		if (map == null) return null;
+		
+		IVectorTrace vectorTrace = null;
+		
+		try {
+			// Create the vector trace, the long way round
+			vectorTrace = this.map.createVectorTrace(longName);
+			// Get the axes
+			AxesMetadata axesMetadata = map.getFirstMetadata(AxesMetadata.class);
+			IDataset yAxis = (IDataset) DatasetUtils.sliceAndConvertLazyDataset(axesMetadata.getAxis(0)[0]).squeeze();
+			IDataset xAxis = (IDataset) DatasetUtils.sliceAndConvertLazyDataset(axesMetadata.getAxis(1)[0]).squeeze();
+			// Set the map datapoints and axes
+			vectorTrace.setData(map, Arrays.asList(xAxis, yAxis));
+			// And whilst setting up the plot, also define some plot specific options
+			vectorTrace.setArrowColor(new int[] {200, 0, 0});
+			vectorTrace.setCircleColor(new int[] {0, 200, 0});
+			vectorTrace.setArrowConfiguration(ArrowConfiguration.THROUGH_CENTER);
+		}
+		catch (Exception e) {
+		logger.error("Error creating image trace", e);
+		}
+			
+		// Return the trace
+		return vectorTrace;
+	}
 	
 	
 	public void plotLayers(){
@@ -586,8 +634,11 @@ public class MapPlotManager {
 		iterator = layers.iterator();
 		
 		while (iterator.hasNext()) {
-			IImageTrace trace = iterator.next().getTrace();
-			if (trace != null) trace.setGlobalRange(range);
+			ITrace trace = iterator.next().getTrace();
+			if (trace instanceof IImageTrace) {
+				((IImageTrace)trace).setGlobalRange(range);
+			}
+
 		}
 		
 	}
@@ -612,7 +663,7 @@ public class MapPlotManager {
 
 		while (iterator.hasNext()) {
 			MapTrace l = iterator.next();
-			if (l.getMap() == m) l.getTrace().setAlpha(m.getTransparency());
+			if (l.getMap() == m && l.getTrace() instanceof IImageTrace) ((IImageTrace)l.getTrace()).setAlpha(m.getTransparency());
 		}
 		
 		map.repaint(false);
@@ -722,9 +773,9 @@ public class MapPlotManager {
 	private class MapTrace {
 		
 		private PlottableMapObject map;
-		private IImageTrace trace;
+		private ITrace trace;
 
-		public MapTrace(PlottableMapObject map, IImageTrace trace) {
+		public MapTrace(PlottableMapObject map, ITrace trace) {
 			this.map = map;
 			this.trace = trace;
 		}
@@ -733,7 +784,7 @@ public class MapPlotManager {
 			return map;
 		}
 
-		public IImageTrace getTrace() {
+		public ITrace getTrace() {
 			return trace;
 		}
 		
@@ -773,7 +824,12 @@ public class MapPlotManager {
 			if (trace == null) {
 				trace = createImageTrace(map);
 			} else {
-				MetadataPlotUtils.switchData(name,d, trace);
+				if (trace instanceof IVectorTrace) {
+					// TODO Passing this over for now, must sort
+				}
+				else {
+					MetadataPlotUtils.switchData(name,d, (IImageTrace) trace);
+				}
 			}
 		}
 	}
