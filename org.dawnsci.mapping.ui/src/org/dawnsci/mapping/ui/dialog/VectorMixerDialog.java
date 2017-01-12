@@ -365,7 +365,7 @@ public class VectorMixerDialog extends Dialog  {
 		this.vectorMap.updateVectorData(vectorDirectionData, vectorMagnitudeData);
 
 		// Set the vector data in the plot object
-		this.vectorPlot.setData(this.vectorMap.getVectorData(), vectorMap.getAxes());
+		this.vectorPlot.setData(this.vectorMap.getMap(), vectorMap.getAxes());
 
 		// Plot this trace on top of the 2D image, if present
 		plotSystem.addTrace(this.vectorPlot);

@@ -21,6 +21,7 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.january.dataset.DatasetFactory;
 
@@ -42,7 +43,7 @@ public class VectorMapData extends MappedData {
 		// Set everything up
 		super(name, parent.map, parent.parent, parent.path);
 		// Create a home for the vector and plot data
-		this.vectorMapData = new AbstractMapData[2];
+		this.vectorMapData = new AbstractMapData[3];
 		// Find out how big the mapped dataset is
 		int[] mapDatasetDimensions = parent.map.getShape();
 		// Initialise a dataset to stick the data in
@@ -89,8 +90,8 @@ public class VectorMapData extends MappedData {
 	
 
 	// If wanted, return the overall dataset
-	@Override
-	public IDataset getMap() {
+	//Override
+	public IDataset getWholeMap() {
 		// There's a few options here, so we must go through them all
 
 		if (this.plotDataset != null && this.vectorDataset != null) {
@@ -155,6 +156,13 @@ public class VectorMapData extends MappedData {
 	}
 	
 	
+	// Return the vector map
+	@Override
+	public IDataset getMap() {
+		return (IDataset) this.vectorDataset;
+	}
+
+	
 	// If wanted, return just the vector data
 	public IDataset getVectorData() {
 		return (IDataset) this.vectorDataset;
@@ -186,9 +194,9 @@ public class VectorMapData extends MappedData {
 			}
 
 			// If it's available populate the x and y axis datasets
-			xAxis = (IDataset) DatasetUtils.sliceAndConvertLazyDataset(allAxes.getAxis(0)[0]).squeeze();
 			yAxis = (IDataset) DatasetUtils.sliceAndConvertLazyDataset(allAxes.getAxis(0)[0]).squeeze();
-
+			xAxis = (IDataset) DatasetUtils.sliceAndConvertLazyDataset(allAxes.getAxis(1)[0]).squeeze();
+			
 			// And return these datasets as a list
 			return Arrays.asList(xAxis, yAxis);		
 			
@@ -235,8 +243,8 @@ public class VectorMapData extends MappedData {
 			}
 
 			// If it's available populate the x and y axis datasets
-			xAxis = (IDataset) DatasetUtils.sliceAndConvertLazyDataset(allAxes.getAxis(0)[0]).squeeze();
 			yAxis = (IDataset) DatasetUtils.sliceAndConvertLazyDataset(allAxes.getAxis(0)[0]).squeeze();
+			xAxis = (IDataset) DatasetUtils.sliceAndConvertLazyDataset(allAxes.getAxis(1)[0]).squeeze();
 		} 
 		catch (DatasetException lazySlicingError) {
 			// If there's no axis metadata
@@ -259,5 +267,23 @@ public class VectorMapData extends MappedData {
 		
 		// And return it!
 		return axisRange;
+	}
+	
+	
+	@Override
+	public IDataset getSpectrum(double x, double y) {
+		return this.plotDataset;
+	}
+	
+	
+	@Override
+	public ILazyDataset getData() {
+		return this.plotDataset;
+	}
+
+	@Override
+	public String toString() {
+				
+		return "Vector Map";
 	}
 }
