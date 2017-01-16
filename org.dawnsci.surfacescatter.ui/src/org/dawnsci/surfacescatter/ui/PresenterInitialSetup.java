@@ -1,12 +1,6 @@
 package org.dawnsci.surfacescatter.ui;
 
-import java.io.File;
-import java.util.ArrayList;
-
-import org.dawnsci.surfacescatter.CurveStateIdentifier;
-import org.dawnsci.surfacescatter.GeometricParametersModel;
 import org.dawnsci.surfacescatter.SuperModel;
-import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -16,27 +10,22 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.FileDialog;
-
-import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class PresenterInitialSetup extends Dialog {
 
-	private IDataHolder dh1;
-	private Combo optionsDropDown;
+
 	private Combo correctionsDropDown;
 	private Button goButton;
 	private Button imageFolderSelection;
 	private Button datFolderSelection;
 	private Shell parentShell; 
     private String[] filepaths;
-    private String[] options;
     private int correctionSelection;
-    private String xName;
     private String imageFolderPath = null;
     private String datFolderPath = null;
     private SurfaceScatterPresenter ssp; 
@@ -49,15 +38,7 @@ public class PresenterInitialSetup extends Dialog {
 		this.parentShell = parentShell;
 		this.filepaths = filepaths;
 		
-		try {
-			dh1 = LoaderFactory.getData(filepaths[0]);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		options = dh1.getNames();
-		
+
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 		
 	}
@@ -75,7 +56,7 @@ public class PresenterInitialSetup extends Dialog {
 //////////////////////////Group methodSetting//////////////////////////////
 		
 		Group methodSetting = new Group(container, SWT.FILL);
-	    GridLayout methodSettingLayout = new GridLayout(2, true);
+	    GridLayout methodSettingLayout = new GridLayout(1, true);
 		GridData methodSettingData = new GridData();
 		methodSettingData.minimumWidth = 50;
 		methodSetting.setLayout(methodSettingLayout);
@@ -84,8 +65,6 @@ public class PresenterInitialSetup extends Dialog {
 		Label correctionsLabel = new Label(methodSetting, SWT.FILL);
 		correctionsLabel.setText("SXRD / Reflectivity:");
 		
-		Label optionsLabel = new Label(methodSetting, SWT.FILL);
-		optionsLabel.setText("Scanned Parameter:");
 		
 		correctionsDropDown = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
 		correctionsDropDown.add("SXRD");
@@ -93,15 +72,7 @@ public class PresenterInitialSetup extends Dialog {
 		correctionsDropDown.add("Reflectivity without Flux Correction");
 		correctionsDropDown.add("Reflectivity with NO Correction");
 		correctionsDropDown.select(0);
-		
-		optionsDropDown = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
-	
-		for (int t=0; t<options.length; t++){
-			optionsDropDown.add(options[t]);
-		}
-		
-		optionsDropDown.select(0);
-		
+
 		
 ///////////////////////////.dat Folder selector///////////////////////////////////////////////////
 		
@@ -187,11 +158,11 @@ public class PresenterInitialSetup extends Dialog {
 			public void widgetSelected(SelectionEvent e) {
 				try{
 					correctionSelection = correctionsDropDown.getSelectionIndex();
-					xName = options[optionsDropDown.getSelectionIndex()]; 
+
 				}
 				catch(ArrayIndexOutOfBoundsException e1){
 					correctionSelection = 0;
-					xName = options[0]; 
+ 
 				}
 				
 				
@@ -200,8 +171,7 @@ public class PresenterInitialSetup extends Dialog {
 				
 				ssp.surfaceScatterPresenterBuild(parentShell,
 												 filepaths,
-//												 sm,
-												 xName,
+												 "test",
 												 imageFolderPath,
 												 datFolderPath,
 												 correctionSelection);
@@ -213,6 +183,8 @@ public class PresenterInitialSetup extends Dialog {
 						   sm.getNullImage(),
 						   ssp,
 						   datFolderPath);
+				
+				ssp.setSsvs(ssvs);
 				ssvs.open();
 				
 				

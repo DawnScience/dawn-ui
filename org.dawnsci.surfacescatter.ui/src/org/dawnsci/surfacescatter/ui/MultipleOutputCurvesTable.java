@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
+//import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
@@ -48,7 +48,7 @@ public class MultipleOutputCurvesTable extends Composite {
 			SuperModel sm) {
 		super(parent, style);
 
-		new Label(this, SWT.NONE).setText("Output Curves");
+		
 
 		this.model = models.get(sm.getSelection());
 		this.dm = dms.get(sm.getSelection());
@@ -89,7 +89,7 @@ public class MultipleOutputCurvesTable extends Composite {
 		overlapSelectionData.minimumWidth = 50;
 		overlapSelection.setLayout(overlapSelectionLayout);
 		overlapSelection.setLayoutData(overlapSelectionData);
-		overlapSelection.setText("Overlap Controls");
+		overlapSelection.setText("Output Controls");
 		
 		errors = new Button(overlapSelection, SWT.PUSH);
 		errors.setText("Errors");

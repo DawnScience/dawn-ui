@@ -70,13 +70,15 @@ public class DatDisplayer extends Composite {
     	right.setLayout(new GridLayout());
     	right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     	
+    	
+    	
     	Composite farRight = new Composite(selectionSash, SWT.NONE | SWT.FILL);
     	farRight.setLayout(new GridLayout());
     	farRight.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     	
     	
         datSelector = new Group(left, SWT.NULL);
-        GridLayout datSelectorLayout = new GridLayout(4,true);
+        GridLayout datSelectorLayout = new GridLayout(1,true);
         GridData datSelectorData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 	    datSelectorData .minimumWidth = 50;
 	    datSelectorData .minimumHeight = 100;
@@ -109,23 +111,47 @@ public class DatDisplayer extends Composite {
 	    
 	    Button transferToRod = new Button(middle, SWT.PUSH);
 	    transferToRod.setText("Transfer to Rod \r ->");
+	    transferToRod.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));	    
 	    
+	    Group rodComponents = new Group(right, SWT.NULL);
+        GridLayout rodComponentsLayout = new GridLayout(1,true);
+        GridData rodComponentsData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+        rodComponentsData .minimumWidth = 50;
+        rodComponentsData .minimumHeight = 100;
+        rodComponents.setLayout(rodComponentsLayout);
+        rodComponents.setLayoutData(rodComponentsData);
+        rodComponents.setText("Rod Components");
 	    
-	    Table rodDisplayTable = new Table(right, SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+	    Table rodDisplayTable = new Table(rodComponents, SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+	    GridData rodDisplayData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+        rodDisplayData .minimumWidth = 50;
+        rodDisplayData .minimumHeight = 250;
+	    rodDisplayTable.setLayoutData(rodDisplayData);
 	    
 	    Button selectAll = new Button(right, SWT.PUSH);
 	    selectAll.setText("Select All - not working well");
-
+	    selectAll.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+	    
 	    Button deleteSelected = new Button(right, SWT.PUSH);
 	    deleteSelected.setText("Delete Selected");
+	    deleteSelected.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 	    
 	    Button buildRod = new Button(right, SWT.PUSH);
 	    buildRod.setText("Build Rod From Selected");
+	    buildRod.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 	    
-	    optionsDropDown = new Combo(farRight, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
-		
-		
-		
+	    Group scannedVariableOptions = new Group(farRight, SWT.NULL);
+        GridLayout scannedVariableOptionsLayout = new GridLayout(1,true);
+        GridData scannedVariableOptionsData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+        scannedVariableOptionsData .minimumWidth = 50;
+        scannedVariableOptionsData .minimumHeight = 100;
+        scannedVariableOptions.setLayout(scannedVariableOptionsLayout);
+        scannedVariableOptions.setLayoutData(scannedVariableOptionsData);
+        scannedVariableOptions.setText("Scanned Variables");
+	    
+	    optionsDropDown = new Combo(scannedVariableOptions, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
+	    optionsDropDown .setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+	    
 		optionsDropDown.select(0);
 	    
 	    

@@ -38,6 +38,7 @@ public class SurfaceScatterViewStart extends Dialog {
 	
 	private String[] filepaths;
 	private PlotSystemCompositeView customComposite;
+	private SuperSashPlotSystem3Composite ssps3c;
 	private MultipleOutputCurvesTableView outputCurves;
 	private DatDisplayer datDisplayer;
 	private GeometricParametersWindows paramField;
@@ -53,11 +54,18 @@ public class SurfaceScatterViewStart extends Dialog {
 	private SurfaceScatterPresenter ssp;
 	private SurfaceScatterViewStart ssvs;
 	private ArrayList<Slider> sliderList;
-	private RegionSetterZoomedView rszv;
 	private int DEBUG =1;
 	private boolean modify = true;
 	private  String datFolderPath;
 	
+	
+	public SuperSashPlotSystem3Composite getSsps3c() {
+		return ssps3c;
+	}
+
+	public void setSsps3c(SuperSashPlotSystem3Composite ssps3c) {
+		this.ssps3c = ssps3c;
+	}
 	
 	public boolean isModify() {
 		return modify;
@@ -67,6 +75,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		this.modify = modify;
 	}
 
+		
 	public SurfaceScatterViewStart(Shell parentShell, 
 			String[] filepaths,
 			int numberOfImages,
@@ -127,7 +136,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		right.setLayout(new GridLayout());
 		right.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, true));
 		
-		setupSash.setWeights(new int[]{70,30});
+		setupSash.setWeights(new int[]{65,35});
 
 ////////////////setupLeft///////////////////////////////////////////////
 
@@ -202,7 +211,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		anaRight.setLayout(new GridLayout());
 		anaRight.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, true));
 		
-		analysisSash.setWeights(new int[]{50,50});
+		analysisSash.setWeights(new int[]{40,60});
 		
 //////////////////////Analysis Left//////////////////////////////
 /////////////////anaLeft Window 3/////////////////////////////////		
@@ -220,37 +229,6 @@ public class SurfaceScatterViewStart extends Dialog {
 					
 	    customComposite.setLayout(new GridLayout());
 	    customComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-	    
-	    
-	    
-	    customComposite.getZoom().addSelectionListener(new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				
-				rszv = new RegionSetterZoomedView(
-						getParentShell(), 
-						getShellStyle(), 
-						filepaths, 
-						paramField, 
-						ssp, 
-						ssvs);
-						
-				
-				
-				rszv.open();
-				
-				
-				
-			}
-			
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
 	    
 	    customComposite.getReplay().addSelectionListener(new SelectionListener() {
 			
@@ -274,14 +252,15 @@ public class SurfaceScatterViewStart extends Dialog {
 	    
 	    customComposite.getSlider().addSelectionListener(new SelectionListener() {
 			
+			@SuppressWarnings("unchecked")
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 			
 				 int sliderPos = customComposite.getSlider().getSelection();
 				 ssp.sliderMovemementMainImage(sliderPos, customComposite.getPlotSystem());
-				 ssp.sliderZoomedArea(sliderPos, 
-						 			  customComposite.getGreenRegion().getROI(), 
-						 			  customComposite.getSubImagePlotSystem());
+//				 ssp.sliderZoomedArea(sliderPos, 
+//						 			  customComposite.getGreenRegion().getROI(), 
+//						 			  customComposite.getSubImagePlotSystem());
 				ssvs.updateIndicators(sliderPos);
 				ssp.bgImageUpdate(customComposite.getSubImageBgPlotSystem(),
 								  sliderPos);
@@ -440,19 +419,20 @@ public class SurfaceScatterViewStart extends Dialog {
 	    
 ////////////////////////Analysis Right//////////////////////////////
 /////////////////anaRight Window 4/////////////////////////////////		
-		
-	    try {
-			outputCurves = new MultipleOutputCurvesTableView(anaRight, 
-															SWT.FILL, 
-															0);
+		try{
+			ssps3c = new SuperSashPlotSystem3Composite(anaRight, SWT.FILL, ssvs);
+
+			ssps3c.setLayout(new GridLayout());
+			ssps3c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
-			outputCurves.setLayout(new GridLayout());
-			outputCurves.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ssps3c.setSsp(ssp);
+			outputCurves = ssps3c.getOutputCurves(); 
+			
 		}
-	    
+	    catch(Exception d){
+	    	
+	    }
+		
 	    outputCurves.getOverlapZoom().addSelectionListener(new SelectionListener() {
 				    	
 			@Override
@@ -611,7 +591,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		int h = rect.height;
 		int w = rect.width;
 		
-		return new Point((int) Math.round(0.6*w), (int) Math.round(0.8*h));
+		return new Point((int) Math.round(0.8*w), (int) Math.round(0.9*h));
 	}
 	
 	@Override
@@ -649,16 +629,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		
 		sliderList.add(customComposite.getSlider());
 		
-		if (rszv != null) {
-			Slider pslider = (rszv.getSlider());		
-			sliderList.add(pslider);
-		}
-		
 		return sliderList;
-	}
-	
-	public RegionSetterZoomedView getRszv(){
-		return rszv;
 	}
 	
 	private void debug(String output) {
@@ -666,4 +637,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			System.out.println(output);
 		}
 	}
+	
+	
+	
 }

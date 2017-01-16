@@ -39,6 +39,7 @@ import org.dawnsci.surfacescatter.StitchedOutputWithErrors;
 import org.dawnsci.surfacescatter.SuperModel;
 import org.dawnsci.surfacescatter.TrackerLocationInterpolation;
 import org.dawnsci.surfacescatter.TrackingMethodology;
+import org.eclipse.dawnsci.analysis.api.image.IImageTracker.TrackerType;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
@@ -56,7 +57,6 @@ import org.eclipse.january.dataset.Maths;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -75,6 +75,12 @@ public class SurfaceScatterPresenter {
 	private SuperModel sm;
 	private int noImages;
 	private SurfaceScatterViewStart ssvs;
+	
+	
+	public void setSsvs(SurfaceScatterViewStart ssvs) {
+		this.ssvs = ssvs;
+	}
+
 	private int DEBUG = 1;
 	private PrintWriter writer;
 	private Shell parentShell;
@@ -133,120 +139,135 @@ public class SurfaceScatterPresenter {
 		ArrayList<Integer> imageRefList = new ArrayList<>();
 		int imageRef = 0;
 		ArrayList<Integer> imagesToFilepathRef = new ArrayList<Integer>();
-
-		for (int id = 0; id < filepaths.length; id++) {
-			try {
-				models.add(new ExampleModel());
-				dms.add(new DataModel());
-				gms.add(new GeometricParametersModel());
+		
+		try {
+		
+			for (int id = 0; id < filepaths.length; id++) {
 				
-				gms.get(id).setxName(xName);
-				gms.get(id).setxNameRef(xName);
+					models.add(new ExampleModel());
+					dms.add(new DataModel());
+					gms.add(new GeometricParametersModel());
+					
+					gms.get(id).setxName(xName);
+					gms.get(id).setxNameRef(xName);
+					
+					if(imageFolderPath == null){
+						dh1 = LoaderFactory.getData(filepaths[id]);
+					}
+					else{
+						String localFilepathCopy = StringUtils.substringBeforeLast(filepaths[id], ".dat") + "_copy";	
+						Path from = Paths.get(filepaths[id]);
+						Path to = Paths.get(localFilepathCopy + ".dat");
+						Files.copy(from, to, StandardCopyOption.REPLACE_EXISTING);
+						
+						
+						Charset charset = StandardCharsets.UTF_8;
+	
+						String content = new String(Files.readAllBytes(to), charset);
+						
+						String firstTifName = StringUtils.substringBetween(content, File.separator, ".tif");
+						
+						if(firstTifName.contains(File.separator)){
+							firstTifName = StringUtils.substringAfterLast(firstTifName, File.separator);
+						}
+						
+						String pathNameToReplace = StringUtils.substringBetween(content, "\t", File.separator + firstTifName);
+						
+						if(pathNameToReplace.contains("\t")){
+							pathNameToReplace = StringUtils.substringAfterLast(pathNameToReplace,"\t");
+						}
+						content = content.replaceAll(pathNameToReplace, imageFolderPath);
+						
+						Files.write(to, content.getBytes(charset));
+						
+						dh1 = LoaderFactory.getData(to.toString());
+						
+					}
+					ILazyDataset ild = dh1.getLazyDataset(gms.get(sm.getSelection()).getImageName());
+					dms.get(id).setName(StringUtils.substringAfterLast(sm.getFilepaths()[id], File.separator));
+					models.get(id).setDatImages(ild);
+					models.get(id).setFilepath(filepaths[id]);
+					SliceND slice = new SliceND(ild.getShape());
+					IDataset images = ild.getSlice(slice);
+					imageArray[id] = images;
+	
+					for (int f = 0; f < (imageArray[id].getShape()[0]); f++) {
+	
+						SliceND slice2 = new SliceND(images.getShape());
+						slice2.setSlice(0, f, f + 1, 1);
+						IDataset nim = images.getSlice(slice2);
+						nim.squeeze();
+						som.put(imageRef, (Dataset) nim);
+						imageRefList.add(imageRef);
+						imagesToFilepathRef.add(id);
+						imageRef++;
+					}
+					
+					
 				
-				if(imageFolderPath == null){
-					dh1 = LoaderFactory.getData(filepaths[id]);
-				}
-				else{
-					String localFilepathCopy = StringUtils.substringBeforeLast(filepaths[id], ".dat") + "_copy";	
-					Path from = Paths.get(filepaths[id]);
-					Path to = Paths.get(localFilepathCopy + ".dat");
-					Files.copy(from, to, StandardCopyOption.REPLACE_EXISTING);
 					
-					
-					Charset charset = StandardCharsets.UTF_8;
-
-					String content = new String(Files.readAllBytes(to), charset);
-					
-					String firstTifName = StringUtils.substringBetween(content, File.separator, ".tif");
-					
-					if(firstTifName.contains(File.separator)){
-						firstTifName = StringUtils.substringAfterLast(firstTifName, File.separator);
-					}
-					
-					String pathNameToReplace = StringUtils.substringBetween(content, "\t", File.separator + firstTifName);
-					
-					if(pathNameToReplace.contains("\t")){
-						pathNameToReplace = StringUtils.substringAfterLast(pathNameToReplace,"\t");
-					}
-					content = content.replaceAll(pathNameToReplace, imageFolderPath);
-					
-					Files.write(to, content.getBytes(charset));
-					
-					dh1 = LoaderFactory.getData(to.toString());
-					
-				}
-				ILazyDataset ild = dh1.getLazyDataset(gms.get(sm.getSelection()).getImageName());
-				dms.get(id).setName(StringUtils.substringAfterLast(sm.getFilepaths()[id], File.separator));
-				models.get(id).setDatImages(ild);
-				models.get(id).setFilepath(filepaths[id]);
-				SliceND slice = new SliceND(ild.getShape());
-				IDataset images = ild.getSlice(slice);
-				imageArray[id] = images;
-
-				for (int f = 0; f < (imageArray[id].getShape()[0]); f++) {
-
-					SliceND slice2 = new SliceND(images.getShape());
-					slice2.setSlice(0, f, f + 1, 1);
-					IDataset nim = images.getSlice(slice2);
-					nim.squeeze();
-					som.put(imageRef, (Dataset) nim);
-					imageRefList.add(imageRef);
-					imagesToFilepathRef.add(id);
-					imageRef++;
-				}
-
-				if (sm.getCorrectionSelection() == 0) {
-					ILazyDataset ildx = dh1.getLazyDataset(gms.get(sm.getSelection()).getxName());
-					models.get(id).setDatX(ildx);
-					SliceND slice1 = new SliceND(ildx.getShape());
-					IDataset xdat = ildx.getSlice(slice1);
-					xArray[id] = xdat;
-
-				} else if (sm.getCorrectionSelection() == 1 || 
-						   sm.getCorrectionSelection() == 2 || 
-						   sm.getCorrectionSelection() == 3) {
-					ILazyDataset ildx = dh1.getLazyDataset(gms.get(sm.getSelection()).getxNameRef());
-					models.get(id).setDatX(ildx);
-
-					SliceND slice1 = new SliceND(ildx.getShape());
-					IDataset xdat = ildx.getSlice(slice1);
-					xArray[id] = xdat;
-
-					ILazyDataset dcdtheta = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getdcdtheta());
-					models.get(id).setDcdtheta(dcdtheta);
-
-					ILazyDataset qdcd = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getqdcd());
-					models.get(id).setQdcd(qdcd);
-
-					if (dcdtheta == null) {
-						try {
-							dcdtheta = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getsdcdtheta());
-							models.get(id).setDcdtheta(dcdtheta);
-						} catch (Exception e2) {
-							System.out.println("can't get dcdtheta");
+					if (sm.getCorrectionSelection() == 0) {
+						try{
+						ILazyDataset ildx = dh1.getLazyDataset(gms.get(sm.getSelection()).getxName());
+						models.get(id).setDatX(ildx);
+						SliceND slice1 = new SliceND(ildx.getShape());
+						IDataset xdat = ildx.getSlice(slice1);
+						xArray[id] = xdat;
 						}
-					} else {
-					}
-					
-					if (qdcd == null) {
-						try {
-							qdcd = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getqsdcd());
-							models.get(id).setQdcd(qdcd);
-						} catch (Exception e2) {
-							System.out.println("can't get qdcd");
+						catch(NullPointerException r){
+							
 						}
-					} else {
+						
 					}
-
-				} else {
-				}
+					else if (sm.getCorrectionSelection() == 1 || 
+							   sm.getCorrectionSelection() == 2 || 
+							   sm.getCorrectionSelection() == 3) {
+						ILazyDataset ildx = dh1.getLazyDataset(gms.get(sm.getSelection()).getxNameRef());
+						models.get(id).setDatX(ildx);
+	
+						SliceND slice1 = new SliceND(ildx.getShape());
+						IDataset xdat = ildx.getSlice(slice1);
+						xArray[id] = xdat;
+	
+						ILazyDataset dcdtheta = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getdcdtheta());
+						models.get(id).setDcdtheta(dcdtheta);
+	
+						ILazyDataset qdcd = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getqdcd());
+						models.get(id).setQdcd(qdcd);
+	
+						if (dcdtheta == null) {
+							try {
+								dcdtheta = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getsdcdtheta());
+								models.get(id).setDcdtheta(dcdtheta);
+							} catch (Exception e2) {
+								System.out.println("can't get dcdtheta");
+							}
+						} 
+						else {
+						}
+						
+						if (qdcd == null) {
+							try {
+								qdcd = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getqsdcd());
+								models.get(id).setQdcd(qdcd);
+							} catch (Exception e2) {
+								System.out.println("can't get qdcd");
+							}
+						} 
+						
+						else {
+						}
+					}	
+					else {
+					}
 			}
+		}
 
 			catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-		}
+		
 
 		for (GeometricParametersModel gm : gms) {
 
@@ -271,11 +292,19 @@ public class SurfaceScatterPresenter {
 
 		updateAnalysisMethodology(0, 3, 0, "10");
 		
-		Dataset xArrayCon = DatasetUtils.concatenate(xArray, 0);
-		Dataset imageCon = DatasetUtils.concatenate(imageArray, 0);
-
-		int numberOfImages = xArrayCon.getSize();
-
+		Dataset xArrayCon = DatasetFactory.zeros(1);
+		Dataset imageCon = DatasetFactory.zeros(1);
+		int numberOfImages = 1; 
+		
+		try{
+			xArrayCon = DatasetUtils.concatenate(xArray, 0);
+			imageCon = DatasetUtils.concatenate(imageArray, 0);
+			numberOfImages = xArrayCon.getSize();
+		}
+		catch(NullPointerException e){
+			
+		}
+				
 		Dataset imageRefDat = DatasetFactory.ones(imageRefList.size());
 		Dataset imagesToFilepathRefDat = DatasetFactory.ones(imageRefList.size());
 
@@ -286,9 +315,14 @@ public class SurfaceScatterPresenter {
 
 		Dataset xArrayConClone = xArrayCon.clone();
 
-		DatasetUtils.sort(xArrayCon, imageRefDat);
-		DatasetUtils.sort(xArrayConClone, imagesToFilepathRefDat);
+		try{
+			DatasetUtils.sort(xArrayCon, imageRefDat);
+			DatasetUtils.sort(xArrayConClone, imagesToFilepathRefDat);
 
+		
+		
+			
+			
 		Dataset[] imageSortedDat = new Dataset[imageRefList.size()];
 		int[] filepathsSortedArray = new int[imageRefList.size()];
 		noImages = imageRefList.size();
@@ -316,6 +350,10 @@ public class SurfaceScatterPresenter {
 
 		sm.setNumberOfImages(numberOfImages);
 		sm.setNullImage(nullImage);
+		}
+		catch(Exception e){
+			
+		}
 	
 	}
 	
@@ -332,10 +370,6 @@ public class SurfaceScatterPresenter {
 		return sm.getCorrectionSelection();
 	}
 	
-//	String xName,
-//	   String imageFolderPath,
-//	   String datFolderPath,
-//	   int correctionSelection
 
 	public void sliderMovemementMainImage(int sliderPos, 
 										  IPlottingSystem<Composite>... pS) {
@@ -346,6 +380,14 @@ public class SurfaceScatterPresenter {
 		for (IPlottingSystem<Composite> x : pS) {
 			x.updatePlot2D(image, null, null);
 		}
+		
+		try{
+			ssvs.getSsps3c().generalUpdate();
+		}
+		catch(NullPointerException f){
+			
+		}
+		
 	}
 	
 	public void bgImageUpdate(IPlottingSystem<Composite> subImageBgPlotSystem,
@@ -446,9 +488,12 @@ public class SurfaceScatterPresenter {
 	}
 	
 	public Dataset getImage(int k) {
-
-		Dataset image = sm.getImages()[k];
-		return image;
+		if(sm.getImages() != null){
+				return sm.getImages()[k];
+		}
+		else{
+			return DatasetFactory.zeros(new int[] {2,2}, Dataset.ARRAYFLOAT64);
+		}
 	}
 
 	public void regionOfInterestSetter(IROI green) {
@@ -470,6 +515,13 @@ public class SurfaceScatterPresenter {
 		
 		
 		sm.setInitialLenPt(LenPt);
+		
+		try{
+			ssvs.getSsps3c().generalUpdate();
+		}
+		catch(NullPointerException f){
+			
+		}
 	}
 	
 	public void regionOfInterestSetter(int[][] LenPt) {
@@ -533,7 +585,12 @@ public class SurfaceScatterPresenter {
 	}
 	
 	public double getXValue(int k){
-		return sm.getSortedX().getDouble(k);
+		if(sm.getSortedX() != null){
+			return sm.getSortedX().getDouble(k);
+		}
+		else{
+			return 0;
+		}
 	}
 
 	public Dataset subImage(int sliderPos, IROI box) {
@@ -717,14 +774,27 @@ public class SurfaceScatterPresenter {
 		
 		String[] setup = new String[4];
 		
-		int jok = sm.getFilepathsSortedArray()[k];
+		try{
+				
+			int jok = sm.getFilepathsSortedArray()[k];
+			
+			setup[0] = AnalaysisMethodologies.toString(models.get(jok).getMethodology());
+			setup[1] = String.valueOf(AnalaysisMethodologies.toInt(models.get(jok).getFitPower()));
+			setup[2] = TrackingMethodology.toString(models.get(jok).getTrackerType());
+			setup[3] = String.valueOf(models.get(jok).getBoundaryBox());
+			
+		}
 		
-		setup[0] = AnalaysisMethodologies.toString(models.get(jok).getMethodology());
-		setup[1] = String.valueOf(AnalaysisMethodologies.toInt(models.get(jok).getFitPower()));
-		setup[2] = TrackingMethodology.toString(models.get(jok).getTrackerType());
-		setup[3] = String.valueOf(models.get(jok).getBoundaryBox());
+		catch(NullPointerException s){
+			
+			setup[0] = AnalaysisMethodologies.toString(Methodology.TWOD);
+			setup[1] = String.valueOf(1);
+			setup[2] = TrackingMethodology.toString(TrackingMethodology.TrackerType1.TLD);
+			setup[3] = String.valueOf(10);
+		}
 		
 		return setup;
+		
 	}
 	
 	public int getNoImages() {
@@ -787,11 +857,6 @@ public class SurfaceScatterPresenter {
 
 		writer.close();
 	}	
-	
-//	public SuperModel getSuperModel(){
-//		return sm;
-//	}
-	
 	
 	public void setTrackerOn(Boolean trackerOn){
 		sm.setTrackerOn(trackerOn);
@@ -1150,11 +1215,7 @@ public class SurfaceScatterPresenter {
 		}
 	}
 	
-	public void setRszvRegionPosition(){
-		if(ssvs.getRszv()!=null){
-			ssvs.getRszv().roiReset(sm.getInitialLenPt());
-		}
-	}
+
 	
 	public void geometricParametersWindowPopulate(){
 		
