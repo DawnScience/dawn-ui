@@ -95,15 +95,15 @@ public class VectorMixerDialog extends Dialog  {
 		}
 		
 		// Find out how big the data that's been passed is for the first frame
-		int width = passedData.get(0).getMap().getShape()[0];
-		int height = passedData.get(0).getMap().getShape()[1];
+		int width = passedData.get(0).getMap().getShape()[1];
+		int height = passedData.get(0).getMap().getShape()[0];
 		
 		this.data = new ArrayList<Dataset>();
 
 		// Looping through the subsequent datasets, or frames...
 		for (AbstractMapData loopFrame : passedData) {
 			// Check that the subsequent data is of the same size
-			if (width != loopFrame.getMap().getShape()[0] || height != loopFrame.getMap().getShape()[1]) {
+			if (width != loopFrame.getMap().getShape()[1] || height != loopFrame.getMap().getShape()[0]) {
 				throw new Exception("Data has not the same size");
 			}
 			

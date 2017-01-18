@@ -23,6 +23,7 @@ import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.metadata.AxesMetadata;
+import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.january.dataset.DatasetFactory;
 
 
@@ -31,7 +32,7 @@ import org.eclipse.january.dataset.DatasetFactory;
 
 // A class to hold Vector data to be plotted using the mapping perspective in DAWN
 public class VectorMapData extends MappedData {
-	// Create a few things that will be held by the class
+	// Create a few things that will be held by the class 
 	AbstractMapData[] vectorMapData;
 	Dataset plotDataset;
 	Dataset vectorDataset;
@@ -47,9 +48,9 @@ public class VectorMapData extends MappedData {
 		// Find out how big the mapped dataset is
 		int[] mapDatasetDimensions = parent.map.getShape();
 		// Initialise a dataset to stick the data in
-		this.plotDataset = DatasetFactory.zeros(new int[]{mapDatasetDimensions[0], mapDatasetDimensions[1]}, Dataset.FLOAT64);
-		this.vectorDataset = DatasetFactory.zeros(new int[]{mapDatasetDimensions[0], mapDatasetDimensions[1], 2}, Dataset.FLOAT64);
-		this.vectorPlotDataset = DatasetFactory.zeros(new int[]{mapDatasetDimensions[0], mapDatasetDimensions[1], 3}, Dataset.FLOAT64);
+		this.plotDataset = DatasetFactory.zeros(new int[]{mapDatasetDimensions[1], mapDatasetDimensions[0]}, Dataset.FLOAT64);
+		this.vectorDataset = DatasetFactory.zeros(new int[]{mapDatasetDimensions[1], mapDatasetDimensions[0], 2}, Dataset.FLOAT64);
+		this.vectorPlotDataset = DatasetFactory.zeros(new int[]{mapDatasetDimensions[1], mapDatasetDimensions[0], 3}, Dataset.FLOAT64);
 		// Extract out the axes
 		AxesMetadata axisData = parent.getMap().getFirstMetadata(AxesMetadata.class);
 		// Set these to the output dataset
@@ -72,11 +73,11 @@ public class VectorMapData extends MappedData {
 		Dataset vectorMagnitudeDataset = DatasetUtils.convertToDataset(vectorMagnitudeLocation.getMap());
 
 		int[] dataSize = vectorDirectionDataset.getShape();
-		
-		for (int xLoop = 0; xLoop < dataSize[0]; xLoop ++){
-			for (int yLoop = 0; yLoop < dataSize[1]; yLoop ++) {
-				this.vectorDataset.set(vectorMagnitudeDataset.getFloat(xLoop, yLoop), new int[]{xLoop, yLoop, 0});
-				this.vectorDataset.set(vectorDirectionDataset.getFloat(xLoop, yLoop), new int[]{xLoop, yLoop, 1});
+				
+		for (int yLoop = 0; yLoop < dataSize[0]; yLoop ++){
+			for (int xLoop = 0; xLoop < dataSize[1]; xLoop ++) {
+				this.vectorDataset.set(vectorMagnitudeDataset.getFloat(yLoop, xLoop), new int[]{xLoop, yLoop, 0});
+				this.vectorDataset.set(vectorDirectionDataset.getFloat(yLoop, xLoop), new int[]{xLoop, yLoop, 1});
 			}
 		}
 	}
@@ -102,11 +103,11 @@ public class VectorMapData extends MappedData {
 
 
 			// Then populate the return dataset with the plot and vector data
-			for (int xLoop = 0; xLoop < dataSize[0]; xLoop ++){
-				for (int yLoop = 0; yLoop < dataSize[1]; yLoop ++) {
-					this.vectorPlotDataset.set(this.plotDataset.getFloat(xLoop, yLoop), new int[]{xLoop, yLoop, 0});
-					this.vectorPlotDataset.set(this.vectorDataset.getFloat(xLoop, yLoop, 0), new int[]{xLoop, yLoop, 1});
-					this.vectorPlotDataset.set(this.vectorDataset.getFloat(xLoop, yLoop, 1), new int[]{xLoop, yLoop, 2});
+			for (int yLoop = 0; yLoop < dataSize[0]; yLoop ++){
+				for (int xLoop = 0; xLoop < dataSize[1]; xLoop ++) {
+					this.vectorPlotDataset.set(this.vectorDataset.getFloat(yLoop, xLoop, 0), new int[]{xLoop, yLoop, 0});
+					this.vectorPlotDataset.set(this.vectorDataset.getFloat(yLoop, xLoop, 1), new int[]{xLoop, yLoop, 1});
+					this.vectorPlotDataset.set(this.plotDataset.getFloat(yLoop, xLoop), new int[]{xLoop, yLoop, 2});
 				}
 			}
 		} 
@@ -117,9 +118,9 @@ public class VectorMapData extends MappedData {
 			int[] dataSize = this.plotDataset.getShape();
 
 			// Then populate the return dataset with the plot data and zeros for the vector data
-			for (int xLoop = 0; xLoop < dataSize[0]; xLoop ++){
-				for (int yLoop = 0; yLoop < dataSize[1]; yLoop ++) {
-					this.vectorPlotDataset.set(this.plotDataset.getFloat(xLoop, yLoop), new int[]{xLoop, yLoop, 0});
+			for (int yLoop = 0; yLoop < dataSize[0]; yLoop ++){
+				for (int xLoop = 0; xLoop < dataSize[1]; xLoop ++) {
+					this.vectorPlotDataset.set(this.plotDataset.getFloat(yLoop, xLoop), new int[]{xLoop, yLoop, 0});
 					this.vectorPlotDataset.set(0.00, new int[]{xLoop, yLoop, 1});
 					this.vectorPlotDataset.set(0.00, new int[]{xLoop, yLoop, 2});
 				}
@@ -132,11 +133,11 @@ public class VectorMapData extends MappedData {
 			int[] dataSize = this.vectorDataset.getShape();
 
 			// Then populate the return dataset with the vector data and zeros for the plot data
-			for (int xLoop = 0; xLoop < dataSize[0]; xLoop ++){
-				for (int yLoop = 0; yLoop < dataSize[1]; yLoop ++) {
-					this.vectorPlotDataset.set(0.00, new int[]{xLoop, yLoop, 0});
-					this.vectorPlotDataset.set(this.vectorDataset.getFloat(xLoop, yLoop, 0), new int[]{xLoop, yLoop, 1});
-					this.vectorPlotDataset.set(this.vectorDataset.getFloat(xLoop, yLoop, 1), new int[]{xLoop, yLoop, 2});
+			for (int yLoop = 0; yLoop < dataSize[0]; yLoop ++){
+				for (int xLoop = 0; xLoop < dataSize[1]; xLoop ++) {
+					this.vectorPlotDataset.set(this.vectorDataset.getFloat(yLoop, xLoop, 0), new int[]{xLoop, yLoop, 0});
+					this.vectorPlotDataset.set(this.vectorDataset.getFloat(yLoop, xLoop, 1), new int[]{xLoop, yLoop, 1});
+					this.vectorPlotDataset.set(0.00, new int[]{xLoop, yLoop, 2});
 				}
 			}			
 		} 
@@ -209,9 +210,9 @@ public class VectorMapData extends MappedData {
 			int[] dataSize = this.plotDataset.getShape();
 
 			// Create a linear space axis
+			yAxis = DatasetFactory.createLinearSpace(1, dataSize[0] + 1, dataSize[0], Dataset.INT);
 			xAxis = DatasetFactory.createLinearSpace(1, dataSize[1] + 1, dataSize[1], Dataset.INT);
-			yAxis = DatasetFactory.createLinearSpace(1, dataSize[1] + 1, dataSize[1], Dataset.INT);
-
+			
 			// And return that as a list of datasets
 			return Arrays.asList(xAxis, yAxis);		
 		}
@@ -254,8 +255,8 @@ public class VectorMapData extends MappedData {
 			int[] dataSize = this.plotDataset.getShape();
 
 			// Create a linear space axis
+			yAxis = DatasetFactory.createLinearSpace(1, dataSize[0] + 1, dataSize[0], Dataset.INT);
 			xAxis = DatasetFactory.createLinearSpace(1, dataSize[1] + 1, dataSize[1], Dataset.INT);
-			yAxis = DatasetFactory.createLinearSpace(1, dataSize[1] + 1, dataSize[1], Dataset.INT);
 		}
 		
 		// Now we have some axes, let's fill the return array
@@ -270,20 +271,12 @@ public class VectorMapData extends MappedData {
 	}
 	
 	
-//	@Override
-//	public IDataset getSpectrum(double x, double y) {
-//		return this.plotDataset;
-//	}
-	
-	
-	@Override
-	public ILazyDataset getData() {
-		return this.plotDataset;
-	}
-
 	@Override
 	public String toString() {
-				
+		String a = null;
+		//IMetadata b = this.vectorPlotDataset.getMet();
+		
+		
 		return "Vector Map";
 	}
 }
