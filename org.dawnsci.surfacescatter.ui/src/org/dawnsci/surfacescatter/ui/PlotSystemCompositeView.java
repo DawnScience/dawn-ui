@@ -35,7 +35,8 @@ public class PlotSystemCompositeView extends Composite {
     private IPlottingSystem<Composite> plotSystem;
     private IPlottingSystem<Composite> subImagePlotSystem;
     private IPlottingSystem<Composite> subImageBgPlotSystem;
-    private PlotSystem1CompositeView customComposite1;
+    private IPlottingSystem<Composite> subIBgPS;
+	private PlotSystem1CompositeView customComposite1;
     private IDataset image;
     private IRegion region;
     private Button outputControl;
@@ -219,6 +220,8 @@ public class PlotSystemCompositeView extends Composite {
     		Composite subIComposite = new Composite(folder, SWT.NONE | SWT.FILL);
     		subIComposite.setLayout(new GridLayout());
     		subIComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    		
+    		subI.setControl(subIComposite);
     		
     		GridData ld2 = new GridData(SWT.FILL, SWT.FILL, true, true);
 

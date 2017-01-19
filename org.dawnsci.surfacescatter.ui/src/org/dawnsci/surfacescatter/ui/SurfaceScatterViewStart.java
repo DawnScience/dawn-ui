@@ -27,6 +27,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
@@ -399,17 +400,36 @@ public class SurfaceScatterViewStart extends Dialog {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				
 				ssp.resetDataModels();
-				ssp.runTrackingJob(customComposite.getSubImagePlotSystem(),
-								   outputCurves.getPlotSystem(),
-								   customComposite.getPlotSystem(),
-								   customComposite.getFolder(),
-								   customComposite.getSubImageBgPlotSystem());
+//	
+//				Thread t = new Thread(new Runnable() {
+//					
+//					@Override
+//					public void run() {
+						synchronized (analysisComposite) {
+							ssp.runTrackingJob(customComposite.getSubImagePlotSystem(),
+									   outputCurves.getPlotSystem(),
+									   customComposite.getPlotSystem(),
+									   customComposite.getFolder(),
+									   customComposite.getSubImageBgPlotSystem());
+					
+							
+						}
+						
 				
-				
-				
-				
+//					}
+//				});
+//				t.start();
+	
 				ssp.stitchAndPresent(outputCurves);
+							
+////				ssp.runTrackingJob(customComposite.getSubImagePlotSystem(),
+//								   outputCurves.getPlotSystem(),
+//								   customComposite.getPlotSystem(),
+//								   customComposite.getFolder(),
+//								   customComposite.getSubImageBgPlotSystem());
+				
 			}
 			
 			@Override
