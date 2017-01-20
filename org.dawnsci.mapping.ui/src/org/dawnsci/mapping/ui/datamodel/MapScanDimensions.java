@@ -3,6 +3,7 @@ package org.dawnsci.mapping.ui.datamodel;
 import java.util.Arrays;
 
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
 
@@ -122,6 +123,13 @@ public class MapScanDimensions {
 		slice.setSlice(yDim, mapYindex, mapYindex+1, 1);
 		
 		if (shape.length == scanRank) return slice;
+		
+		int[] s = slice.getShape();
+		
+		if (ShapeUtils.squeezeShape(s, false).length == 1){
+			//no point in reducing from 1D
+			return slice;
+		}
 		
 		if (nonXYScanDimensions != null) {
 			
