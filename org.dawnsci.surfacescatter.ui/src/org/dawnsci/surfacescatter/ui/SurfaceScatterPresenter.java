@@ -64,6 +64,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.TabFolder;
 
+import com.sun.org.apache.bcel.internal.generic.NEWARRAY;
+
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class SurfaceScatterPresenter {
@@ -960,8 +962,8 @@ public class SurfaceScatterPresenter {
 	}
 	
 	public void boundariesWarning(){
-		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,0, null);
-		roobw.open();
+//		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,0, null);
+//		roobw.open();
 	}
 	
 	public void numberFormatWarning(String note){
@@ -969,9 +971,14 @@ public class SurfaceScatterPresenter {
 		roobw.open();
 	}
 	
-	public void boundariesWarning(String note){
-		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,0, note);
-		roobw.open();
+	public void boundariesWarning(String note, Display d){
+//		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,0, note);
+//		d.asyncExec(new Runnable() {
+//			@Override
+//			public void run() {	
+//				roobw.open();
+//			}
+//		});
 	}
 	
 	public void numberFormatWarning(){
@@ -1078,10 +1085,23 @@ public class SurfaceScatterPresenter {
 		
 	}
 	
+	public void setStartFrame(int f){
+		sm.setStartFrame(f);
+	}
+	
+	public int getStartFrame(){
+		return sm.getStartFrame();
+	}
+	
+	
 	public void resetDataModels(){
 		for(DataModel dm:dms){
 			dm.resetAll();
 		}
+	}
+	
+	public void resetTrackers(){
+		sm.resetTrackers();
 	}
 	
 	public IDataset returnNullImage(){
@@ -1329,7 +1349,7 @@ class trackingJob {
 
 			int k = 0;
 
-			if (sm.getSliderPos() == 0) {
+			if (sm.getStartFrame() == 0) {
 												
 					Thread t  = new Thread(){
 						@Override
@@ -1408,6 +1428,7 @@ class trackingJob {
 							});
 								
 						}
+								return;
 					};
 
 				}; ////Starts  the thread
@@ -1417,7 +1438,7 @@ class trackingJob {
 			
 		
 
-			else if (sm.getSliderPos() != 0) {
+			else if (sm.getStartFrame() != 0) {
 
 				//////////////////////// inside second loop
 				//////////////////////// scenario@@@@@@@@@@@@@@@@@@@@@@@@@@@@///////////
@@ -1428,7 +1449,7 @@ class trackingJob {
 				
 						int[] imagePosInOriginalDat = CountUpToArray.CountUpToArray1(sm.getFilepathsSortedArray());
 						
-						for (int k = (sm.getSliderPos()); k >= 0; k--) {
+						for (int k = (sm.getStartFrame()); k >= 0; k--) {
 	
 						debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k));
 						
@@ -1505,10 +1526,9 @@ class trackingJob {
 						
 					}
 	
-					for (int k = sm.getSliderPos(); k < noImages; k++) {
-						// ssp.updateSliders(ssp.getSsvs().getSliderList(), k);
+					for (int k = sm.getStartFrame(); k < noImages; k++) {
 						
-						debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k));
+						debug("wowowowow l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k));
 						
 	//					ssp.sliderMovemementMainImage(k, ssp.getSsvs().getPlotSystemCompositeView().getPlotSystem());
 						int trackingMarker = 2;
@@ -1540,14 +1560,14 @@ class trackingJob {
 						}
 						
 						sm.addBackgroundDatArray(sm.getImages().length, k, output1);
-	
+						
+						int imageNumber =k;
 						IDataset tempImage = sm.getImages()[imageNumber];
 						double[] tempLoc = sm.getLocationList().get(imageNumber);
 						RectangularROI newROI = new RectangularROI(tempLoc[0],
 							       tempLoc[1],
 							       sm.getInitialLenPt()[0][0],
 							       sm.getInitialLenPt()[0][1],0);
-						
 						
 						if (ssvs.getPlotSystemCompositeView().getPlotSystem().getRegion("Background Region")!=null){
 							ssvs.getPlotSystemCompositeView().getPlotSystem().removeRegion(
@@ -1577,11 +1597,13 @@ class trackingJob {
 								ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
 								}
 							});
+						}
+					return;
 					}
-				}
-			};
+					
+				};
 			t.start();
-		}	
+			}	
 		}
 		else {
 
@@ -1689,9 +1711,12 @@ class trackingJob2 {
 	protected void runTJ2() {
 //IStatus
 //		IProgressMonitor monitor
+		final Display display = Display.getCurrent();
+        Color blue = display.getSystemColor(SWT.COLOR_BLUE);
+		
 		
 		debug("@@@@@@@@@@@~~~~~~~~~~~~~~~in the new tracker~~~~~~~~~~~~~~~~~~@@@@@@@@@@@@@@");
-		final Display display = Display.getCurrent();
+//		final Display display = Display.getCurrent();
 		sm.resetTrackers();
 		sm.resetAll();
 		
@@ -1713,7 +1738,7 @@ class trackingJob2 {
 
 		String[] doneArray = new String[sm.getFilepaths().length];
 		
-		if (sm.getSliderPos() == 0) {
+		if (sm.getStartFrame() == 0) {
 			
 			
 			Thread t  = new Thread(){
@@ -1728,7 +1753,7 @@ class trackingJob2 {
 							+ " , " + "local jok:  " + Integer.toString(jok));
 							
 							debug("@@@@@@@@@@@~~~~~~~~~~~~~~~in the 0 loop~~~~~~~~~~~~~~~~~~@@@@@@@@@@@@@@");
-							ssp.sliderMovemementMainImage(k, ssp.getSsvs().getPlotSystemCompositeView().getPlotSystem());
+//							ssp.sliderMovemementMainImage(k, ssp.getSsvs().getPlotSystemCompositeView().getPlotSystem());
 		
 							int trackingMarker = 0;
 							IDataset j = sm.getImages()[k];
@@ -1738,6 +1763,8 @@ class trackingJob2 {
 		
 							dm.addxList(sm.getSortedX().getDouble(k));
 							
+							
+							debug("Tracker should fire once");
 							
 							IDataset output1 = DummyProcessingClass.DummyProcess(sm, 
 																				 j, 
@@ -1750,9 +1777,11 @@ class trackingJob2 {
 																				 imagePosInOriginalDat[k], 
 																				 trackingMarker, 
 																				 k);
-		
+							debug("Tracker should HAVE fired once");
+							
 							if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
-								ssp.boundariesWarning("position 1, line ~1410, k: " + Integer.toString(k));
+								Display d =Display.getCurrent();
+								ssp.boundariesWarning("position 1, line ~1410, k: " + Integer.toString(k),d);
 								break;
 							}
 							
@@ -1776,6 +1805,12 @@ class trackingJob2 {
 								@Override
 								public void run() {	
 										
+									double[] tempLoc = sm.getLocationList().get(imageNumber);
+									RectangularROI newROI = new RectangularROI(tempLoc[0],
+										       tempLoc[1],
+										       sm.getInitialLenPt()[0][0],
+										       sm.getInitialLenPt()[0][1],0);
+									
 									ssp.updateSliders(ssvs.getSliderList(), imageNumber);
 									IRegion background = null;
 									try {
@@ -1785,9 +1820,11 @@ class trackingJob2 {
 									}
 									ssvs.getPlotSystemCompositeView().getFolder().setSelection(1);
 									ssp.updateSliders(ssvs.getSliderList(), imageNumber);
-									ssvs.updateIndicators(imageNumber);
-									background.setROI(newROI);
+									ssvs.updateIndicators(imageNumber);	
+							        background.setROI(newROI);
+									ssvs.getPlotSystemCompositeView().getPlotSystem().addRegion(background);
 									ssvs.getPlotSystemCompositeView().getPlotSystem().updatePlot2D(tempImage, null, null);
+									background.setRegionColor(blue);
 									ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
 									ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
 									ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
@@ -1802,6 +1839,7 @@ class trackingJob2 {
 						}
 					}
 					doneArray[jok] = "done";
+					return;
 				}
 			};
 			t.start();
@@ -1829,10 +1867,11 @@ class trackingJob2 {
 			
 			
 			
-			for (int k = (sm.getSliderPos()); k >= 0; k--) {
+			for (int k = (sm.getStartFrame()); k >= 0; k--) {
 
 				if (sm.getFilepathsSortedArray()[k] == jok) {
-
+					
+					debug("switched to k--");
 
 					debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
 					+ " , " + "local jok:  " + Integer.toString(jok));
@@ -1859,7 +1898,9 @@ class trackingJob2 {
 																		 k);
 
 					if(Arrays.equals(output1.getShape(),(new int[] {2,2}) )){
-						ssp.boundariesWarning("position 2, line ~1469, k: " + Integer.toString(k));
+						
+//						Display d = Display.getCurrent();
+//						ssp.boundariesWarning("position 2, line ~1469, k: " + Integer.toString(k), d);
 						break;	
 					}
 					
@@ -1909,12 +1950,12 @@ class trackingJob2 {
 				}
 			}
 
-			for (int k = sm.getSliderPos(); k < noImages; k++) {
+			for (int k = sm.getStartFrame(); k < noImages; k++) {
 
 				if (sm.getFilepathsSortedArray()[k] == jok) {
 
 					
-
+					debug("switched to k++");
 					debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
 					+ " , " + "local jok:  " + Integer.toString(jok));
 					
@@ -1926,6 +1967,8 @@ class trackingJob2 {
 
 					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
 							sm.getSortedX().getDouble(k));
+					
+//					int tempLength = dm.getyList().size();
 					
 					IDataset output1 = 
 							DummyProcessingClass.DummyProcess0(sm, 
@@ -1939,9 +1982,15 @@ class trackingJob2 {
 													   		  imagePosInOriginalDat[k], 
 													   		  trackingMarker, 
 													   		  k);
+//					if(dm.getyList().size() != 1+tempLength){
+//						debug("didn't write a y");
+//					}
+					
 
 					if(Arrays.equals(output1.getShape(),(new int[] {2,2}) )){
-						ssp.boundariesWarning("position 3, line ~1508, k: " + Integer.toString(k));
+						Display d =Display.getCurrent();
+						ssp.boundariesWarning("position 1, line ~1955, k: " + Integer.toString(k),d);
+						
 						break;	
 					}
 					
@@ -2016,7 +2065,7 @@ class trackingJob2 {
 				for (int k = nextk; k < noImages; k++) {
 
 					if (sm.getFilepathsSortedArray()[k] == nextjok) {
-						ssp.sliderMovemementMainImage(k, ssp.getSsvs().getPlotSystemCompositeView().getPlotSystem());
+//						ssp.sliderMovemementMainImage(k, ssp.getSsvs().getPlotSystemCompositeView().getPlotSystem());
 
 
 						debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
@@ -2099,7 +2148,9 @@ class trackingJob2 {
 																   dm.getSeedLocation());
 
 						if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
-							ssp.boundariesWarning("position 4, line ~1617, k: " + Integer.toString(k));
+							Display d =Display.getCurrent();
+							ssp.boundariesWarning("position 1, line ~2115, k: " + Integer.toString(k),d);
+							
 							break;
 						}
 						
@@ -2152,7 +2203,7 @@ class trackingJob2 {
 
 			else if (imagePosInOriginalDat[nextk] != 0) {
 
-				for (int k = (sm.getSliderPos()); k >= 0; k--) {
+				for (int k = (sm.getStartFrame()); k >= 0; k--) {
 
 					if (sm.getFilepathsSortedArray()[k] == nextjok) {
 
@@ -2227,7 +2278,8 @@ class trackingJob2 {
 
 						
 						if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
-							ssp.boundariesWarning("position 5, line ~1705, k: " + Integer.toString(k));
+							Display d =Display.getCurrent();
+							ssp.boundariesWarning("position 1, line ~2245, k: " + Integer.toString(k),d);
 							
 							break;
 						}
@@ -2278,7 +2330,7 @@ class trackingJob2 {
 					}
 				}
 
-				for (int k = sm.getSliderPos(); k < noImages; k++) {
+				for (int k = sm.getStartFrame(); k < noImages; k++) {
 
 					if (sm.getFilepathsSortedArray()[k] == nextjok) {
 
@@ -2350,7 +2402,9 @@ class trackingJob2 {
 																   dm.getSeedLocation());
 
 						if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
-							ssp.boundariesWarning("position 6, line ~1788, k: " + Integer.toString(k));
+							Display d =Display.getCurrent();
+							ssp.boundariesWarning("position 1, line ~2369, k: " + Integer.toString(k),d);
+							
 							break;
 						}
 						
@@ -2400,25 +2454,12 @@ class trackingJob2 {
 				doneArray[nextjok] = "done";
 			}
 		}
-		}
+		return;
+				}
+				
 		};
 		t.start();
 		}
-
-		
-		
-		
-		
-		
-//		try {
-//			Thread.sleep(2000*timeStep);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
-		
-//		sm.resetTrackers();
-		
-
 	}
 	
 
@@ -2614,7 +2655,7 @@ class MovieJob {
 			
 			
 			
-				
+			return;	
 			}
 			
 		};
