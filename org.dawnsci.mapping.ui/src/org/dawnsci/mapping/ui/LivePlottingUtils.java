@@ -22,111 +22,108 @@ public class LivePlottingUtils {
 	
 	
 	public static IDataset getUpdatedMap(IDatasetConnector baseMap, MappedDataBlock parent, String name){
-		
-		IDataset ma = null;
-		
+
+
 		try{
 			baseMap.refreshShape();
-			ma = baseMap.getDataset().getSlice();
+
+			// TODO This check is probably not required
+			if ( baseMap instanceof ILazyDataset && ((ILazyDataset)baseMap).getSize() == 1) return null;
+
+			ILazyDataset ly = parent.getYAxis()[0];
+			ILazyDataset lx = parent.getXAxis()[0];
+
+			IDataset x;
+			IDataset y;
+			try {
+				x = lx.getSlice();
+				y = ly.getSlice();
+			} catch (DatasetException e) {
+				logger.debug("Could not slice",e);
+				return null;
+			}
+
+			if (y.getRank() == 2) {
+				SliceND s = new SliceND(y.getShape());
+				s.setSlice(1, 0, 1, 1);
+				y = y.getSlice(s);
+				if (y.getSize() == 1) {
+					y.setShape(new int[]{1});
+				} else {
+					y.squeeze();
+				}
+
+			}
+
+			if (x.getRank() == 2) {
+				SliceND s = new SliceND(x.getShape());
+				s.setSlice(0, 0, 1, 1);
+				x = x.getSlice(s);
+				if (x.getSize() == 1) {
+					x.setShape(new int[]{1});
+				} else {
+					x.squeeze();
+				}
+
+			}
+
+			y = cropNanValues(y);
+			x = cropNanValues(x);
+
+			AxesMetadata axm = null;
+			try {
+				axm = MetadataFactory.createMetadata(AxesMetadata.class, 2);
+				axm.addAxis(0, y);
+				axm.addAxis(1, x);
+			} catch (MetadataException | IllegalArgumentException e) {
+				logger.error("Could not create axes metdata", e);
+			}
+
+			IDataset fm = null;
+			int[] mapShape = baseMap.getDataset().getShape();
+			//may need to only squeeze fastest
+			int[] squeezedShape = ShapeUtils.squeezeShape(mapShape, false);
+
+			if (squeezedShape.length == 2) {
+				SliceND s = new SliceND(mapShape);
+				if (mapShape[0] > y.getShape()[0]) s.setSlice(0, 0, y.getShape()[0], 1);
+				if (mapShape[1] > x.getShape()[0]) s.setSlice(1, 0, x.getShape()[0], 1);
+				fm = baseMap.getDataset().getSlice(s);
+				fm.squeeze();
+			} else {
+
+				MapScanDimensions mapDims = parent.getMapDims();
+
+				SliceND s = new SliceND(mapShape);
+				int xDim = parent.getxDim();
+				int yDim = parent.getyDim();
+
+				for (int i = 0; i < mapShape.length; i++) {
+					if (i == yDim){
+						if (mapShape[i] > y.getShape()[0]) s.setSlice(i, 0, y.getShape()[0], 1);
+					} else if (i == xDim){
+						if (mapShape[i] > x.getShape()[0]) s.setSlice(i, 0, x.getShape()[0], 1);
+					} else {
+						s.setSlice(i,mapShape[i]-1, mapShape[i], 1);
+						mapDims.updateNonXYScanSlice(i, mapShape[i]-1);
+					}
+				}
+
+				fm = baseMap.getDataset().getSlice(s).squeeze();
+				if (fm.getRank() != 2) return null;
+
+			}
+
+			fm.setMetadata(axm);
+			fm.setName(name);
+			//take a slice to cut larger axes
+			return fm.getSlice();
 		} catch (Exception e) {
+			logger.info("could not slice map",e);
 			//TODO log?
 		}
-		
-		if (ma == null) return null;
-		
-		ma.setName(name);
-		
-		// TODO This check is probably not required
-		if ( baseMap instanceof ILazyDataset && ((ILazyDataset)baseMap).getSize() == 1) return null;
-		
-		ILazyDataset ly = parent.getYAxis()[0];
-		ILazyDataset lx = parent.getXAxis()[0];
-		
-		IDataset x;
-		IDataset y;
-		try {
-			x = lx.getSlice();
-			y = ly.getSlice();
-		} catch (DatasetException e) {
-			logger.debug("Could not slice",e);
-			return null;
-		}
-		
-		if (y.getRank() == 2) {
-			SliceND s = new SliceND(y.getShape());
-			s.setSlice(1, 0, 1, 1);
-			y = y.getSlice(s);
-			if (y.getSize() == 1) {
-				y.setShape(new int[]{1});
-			} else {
-				y.squeeze();
-			}
-			
-		}
-		
-		if (x.getRank() == 2) {
-			SliceND s = new SliceND(x.getShape());
-			s.setSlice(0, 0, 1, 1);
-			x = x.getSlice(s);
-			if (x.getSize() == 1) {
-				x.setShape(new int[]{1});
-			} else {
-				x.squeeze();
-			}
-			
-		}
-		
-		y = cropNanValues(y);
-		x = cropNanValues(x);
-		
-		AxesMetadata axm = null;
-		try {
-			axm = MetadataFactory.createMetadata(AxesMetadata.class, 2);
-			axm.addAxis(0, y);
-			axm.addAxis(1, x);
-		} catch (MetadataException | IllegalArgumentException e) {
-			logger.error("Could not create axes metdata", e);
-		}
 
-		IDataset fm = null;
-		int[] mapShape = ma.getShape();
-		//may need to only squeeze fastest
-		int[] squeezedShape = ShapeUtils.squeezeShape(mapShape, false);
-		
-		if (squeezedShape.length == 2) {
-			SliceND s = new SliceND(mapShape);
-			if (mapShape[0] > y.getShape()[0]) s.setSlice(0, 0, y.getShape()[0], 1);
-			if (mapShape[1] > x.getShape()[0]) s.setSlice(1, 0, x.getShape()[0], 1);
-			fm = ma.getSlice(s);
-			fm.squeeze();
-		} else {
-			
-			MapScanDimensions mapDims = parent.getMapDims();
-			
-			SliceND s = new SliceND(mapShape);
-			int xDim = parent.getxDim();
-			int yDim = parent.getyDim();
-			
-			for (int i = 0; i < mapShape.length; i++) {
-				if (i == yDim){
-					if (mapShape[0] > y.getShape()[0]) s.setSlice(0, 0, y.getShape()[0], 1);
-				} else if (i == xDim){
-					if (mapShape[1] > x.getShape()[0]) s.setSlice(1, 0, x.getShape()[0], 1);
-				} else {
-					s.setSlice(i,mapShape[i]-1, mapShape[i], 1);
-					mapDims.updateNonXYScanSlice(i, mapShape[i]-1);
-				}
-			}
-			
-			fm = ma.getSlice(s).squeeze();
-			if (fm.getRank() != 2) return null;
-			
-		}
-		
-		fm.setMetadata(axm);
-		
-		//take a slice to cut larger axes
-		return fm.getSlice();
+		return null;
 	}
 	
 	private static IDataset cropNanValues(IDataset ax) {

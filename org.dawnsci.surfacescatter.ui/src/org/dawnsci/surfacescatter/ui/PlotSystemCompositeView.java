@@ -13,6 +13,7 @@ import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Region;
@@ -34,12 +35,13 @@ public class PlotSystemCompositeView extends Composite {
     private IPlottingSystem<Composite> plotSystem;
     private IPlottingSystem<Composite> subImagePlotSystem;
     private IPlottingSystem<Composite> subImageBgPlotSystem;
+    private IPlottingSystem<Composite> subIBgPS;
+	private PlotSystem1CompositeView customComposite1;
     private IDataset image;
     private IRegion region;
     private Button outputControl;
-    private Button zoom;
     private Button run;
-    private int extra;
+//    private int extra;
     private int numberOfImages;
     private Dataset nullImage;
     private SurfaceScatterPresenter ssp;
@@ -52,7 +54,7 @@ public class PlotSystemCompositeView extends Composite {
 	private Text xLen;
 	private Text yCoord;
 	private Text yLen;
-	
+	private SashForm form;
 	
 	
      
@@ -68,14 +70,13 @@ public class PlotSystemCompositeView extends Composite {
     	
         super(parent, style);
 
-        this.slider=slider;
-        this.extra = extra;
+
         this.numberOfImages = numberOfImages;
         this.nullImage = nullImage;
         this.ssp = ssp;
         this.ssvs = ssvs;
         
-        new Label(this, SWT.NONE).setText("Raw Image");
+       
         
         try {
 			plotSystem = PlottingFactory.createPlottingSystem();
@@ -92,11 +93,23 @@ public class PlotSystemCompositeView extends Composite {
     public void createContents(IDataset image) {
 
     	
-    	final GridLayout gridLayout = new GridLayout();
-        gridLayout.numColumns = 1;
-        setLayout(gridLayout);
-        
-        slider = new Slider(this, SWT.HORIZONTAL);
+    	
+		form = new SashForm(this, SWT.VERTICAL);
+		form.setLayout(new GridLayout());
+		form.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, true));
+    	
+    	
+//    	GridLayout gridLayout = new GridLayout();
+//        gridLayout.numColumns = 1;
+//        setLayout(gridLayout);
+//        
+		Group mainImage = new Group(form, SWT.FILL);
+		GridLayout mainImageLayout = new GridLayout();
+		mainImage.setLayout(mainImageLayout);
+		GridData mainImageData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		mainImage.setLayoutData(mainImageData);
+		
+        slider = new Slider(mainImage, SWT.HORIZONTAL);
         
         slider.setMinimum(0);
 	    slider.setMaximum(numberOfImages);
@@ -105,25 +118,17 @@ public class PlotSystemCompositeView extends Composite {
         
         final GridData gd_firstField = new GridData(SWT.FILL, SWT.CENTER, true, false);
         slider.setLayoutData(gd_firstField);
-        
-        if(extra != 1){
-        	int pos = ssp.getSliderPos();
-        	slider.setSelection(pos);
-        }
       
-        Group indicators = new Group(this, SWT.NONE);
-    	GridLayout indicatorsLayout = new GridLayout(3,true);
+        Group indicators = new Group(mainImage, SWT.NONE);
+        GridLayout 	indicatorsLayout = new GridLayout(4,true);
     	
-        if(extra == 1){
-        	indicatorsLayout = new GridLayout(4,true);
-    	}
         indicators.setLayout(indicatorsLayout);
 		GridData indicatorsData = new GridData(SWT.FILL, SWT.NULL, true, false);
 		indicators.setLayoutData(indicatorsData);
-		if(extra == 1){
-			Label outputControlLabel = new Label(indicators, SWT.NULL);
-			outputControlLabel.setText("Take Ouput Marker:");
-		}
+		
+		Label outputControlLabel = new Label(indicators, SWT.NULL);
+		outputControlLabel.setText("Take Ouput Marker:");
+		
 		Label xValueLabel = new Label(indicators, SWT.NULL);
 		xValueLabel.setText("X Variable:");
 		
@@ -133,16 +138,9 @@ public class PlotSystemCompositeView extends Composite {
 		Button go = new Button(indicators, SWT.PUSH | SWT.FILL);
 		go.setText("Go");
 		
-       
- 
-        if(extra == 1){
-        	 outputControl = new Button (indicators, SWT.CHECK);
-        	 outputControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        }
-        else{
-        }
+        outputControl = new Button (indicators, SWT.CHECK);
+        outputControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         
-      
         xValue = new Text(indicators,SWT.SINGLE);
         xValue.setText(String.valueOf(ssp.getXValue(slider.getSelection())));
         
@@ -152,43 +150,44 @@ public class PlotSystemCompositeView extends Composite {
         replay = new Button(indicators, SWT.PUSH | SWT.FILL);
 		replay.setText("Replay");
         
-		Group rOIpositionIndicators = new Group(this, SWT.NONE);
-    	GridLayout rOIpositionIndicatorsLayout = new GridLayout(4,true);
-    	rOIpositionIndicators.setLayout(rOIpositionIndicatorsLayout);
+//		Group rOIpositionIndicators = new Group(indicators, SWT.NONE);
+//    	GridLayout rOIpositionIndicatorsLayout = new GridLayout(4,true);
+//    	rOIpositionIndicators.setLayout(rOIpositionIndicatorsLayout);
     	
-		
-		Label xPt = new Label(rOIpositionIndicators, SWT.NULL);
+		Label xPt = new Label(indicators, SWT.NULL);
 		xPt.setText("ROI x coord:");
 		
-		xCoord = new Text(rOIpositionIndicators,SWT.SINGLE);
+		xCoord = new Text(indicators,SWT.SINGLE);
 	    xCoord.setText("  " + String.valueOf(ssp.getLenPt()[1][0]));
 	    
-	    Label xLenLabel = new Label(rOIpositionIndicators, SWT.NULL);
+	    Label xLenLabel = new Label(indicators, SWT.NULL);
 	    xLenLabel.setText("x Len:");
 		
-		xLen = new Text(rOIpositionIndicators,SWT.SINGLE);
+		xLen = new Text(indicators,SWT.SINGLE);
 	    xLen.setText("  " + String.valueOf(ssp.getLenPt()[0][0]));
         
-	    Label yPt = new Label(rOIpositionIndicators, SWT.NULL);
+	    Label yPt = new Label(indicators, SWT.NULL);
 		yPt.setText("ROI y coord:");
 		
-		yCoord = new Text(rOIpositionIndicators,SWT.SINGLE);
+		yCoord = new Text(indicators,SWT.SINGLE);
 	    yCoord.setText("  " + String.valueOf(ssp.getLenPt()[1][1]));
 	    
-	    Label yLenLabel = new Label(rOIpositionIndicators, SWT.NULL);
+	    Label yLenLabel = new Label(indicators, SWT.NULL);
 	    yLenLabel.setText("y Len:");
 		
-		yLen = new Text(rOIpositionIndicators,SWT.SINGLE);
+		yLen = new Text(indicators,SWT.SINGLE);
 	    yLen.setText("  " + String.valueOf(ssp.getLenPt()[0][1]));
         
-        ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(this, null);
+        ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(form, null);
         
         final GridData gd_secondField = new GridData(SWT.FILL, SWT.FILL, true, true);
         gd_secondField.grabExcessVerticalSpace = true;
         gd_secondField.grabExcessVerticalSpace = true;
         
-        plotSystem.createPlotPart(this, 
-        						  "ExamplePlot", 
+       
+        
+        plotSystem.createPlotPart(form, 
+        						  "Raw Image", 
         						  actionBarComposite, 
         						  PlotType.IMAGE, 
         						  null);
@@ -203,32 +202,37 @@ public class PlotSystemCompositeView extends Composite {
 			e1.printStackTrace();
 		}
 		
-        ActionBarWrapper actionBarComposite1 = ActionBarWrapper.createActionBars(this, null);
-        
-        if(extra == 1){
-        	
-        	folder = new TabFolder(this, SWT.BORDER | SWT.CLOSE);
-    		folder.setLayout(new GridLayout());
-    		folder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+//        ActionBarWrapper actionBarComposite1 = ActionBarWrapper.createActionBars(this, null);
+//        
+        folder = new TabFolder(form, SWT.BORDER | SWT.CLOSE);
+    	folder.setLayout(new GridLayout());
+    		
+    	folder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         	
 			////////////////////////////////////////////////////////
 			//		Tab 1 Setup
 			//////////////////////////////////////////////////////////
         	
     		TabItem subI = new TabItem(folder, SWT.NONE);
-    		subI.setText("Sub-Image");
+    		subI.setText("Background Options");
     		subI.setData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    		
+//    		
     		Composite subIComposite = new Composite(folder, SWT.NONE | SWT.FILL);
     		subIComposite.setLayout(new GridLayout());
     		subIComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    				
+    		
     		subI.setControl(subIComposite);
-        	
-	        subImagePlotSystem.createPlotPart(subIComposite, "Region of interest", actionBarComposite1, PlotType.IMAGE, null);
-			subImagePlotSystem.getPlotComposite().setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, true));
-			subImagePlotSystem.createPlot2D(nullImage, null, null);
-			
+    		
+    		GridData ld2 = new GridData(SWT.FILL, SWT.FILL, true, true);
+
+    		customComposite1 = new PlotSystem1CompositeView(subIComposite,
+    				SWT.NONE,
+    				0, 
+    				0, 
+    				ssp);
+    		
+    		customComposite1.setLayout(new GridLayout());
+    		customComposite1.setLayoutData(ld2);
 			
 			////////////////////////////////////////////////////////
 			//		Tab 2 Setup
@@ -244,23 +248,18 @@ public class PlotSystemCompositeView extends Composite {
 			
 			subBgI.setControl(subBgIComposite);
 			
-			subImageBgPlotSystem.createPlotPart(subBgIComposite, "Region of interest", actionBarComposite1, PlotType.IMAGE, null);
+//			ActionBarWrapper actionBarComposite1 = ActionBarWrapper.createActionBars(subBgI, null);
+			subImageBgPlotSystem.createPlotPart(subBgIComposite, "Region of interest", null, PlotType.IMAGE, null);
 			subImageBgPlotSystem.getPlotComposite().setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, true));
 			subImageBgPlotSystem.createPlot2D(nullImage, null, null);
+//			subImageBgPlotSystem.
      
         
-        }
+        
         
 		plotSystem.addRegion(region);
 		
 		RectangularROI startROI = new RectangularROI(100,100,50,50,0);
-		
-		if (extra != 1){
-			IRectangularROI o = ssp.getROI().getBounds();
-			int[] len = o.getIntLengths();
-			int[] pt = o.getIntPoint();
-			startROI = new RectangularROI(pt[0],pt[1],len[0],len[1],0);
-		}
 		
 		region.setROI(startROI);
  
@@ -287,18 +286,6 @@ public class PlotSystemCompositeView extends Composite {
 			public void roiStandard(ROIEvent evt) {
 				ssp.regionOfInterestSetter(region.getROI());
 				
-				if(extra == 1){
-					ssp.sliderZoomedArea(slider.getSelection(), region.getROI(), subImagePlotSystem);
-//					ssp.setRszvRegionPosition();
-				}
-				
-//				int[] Len = region.getROI().getBounds().getIntLengths();
-//				int[] Pt = region.getROI().getBounds().getIntPoint();
-//				int[][] LenPt = new int[][] {Len,Pt};
-//				
-//				
-//				setROITexts(LenPt);
-				
 			}
 		});
         
@@ -310,14 +297,14 @@ public class PlotSystemCompositeView extends Composite {
 				ssp.sliderMovemementMainImage(slider.getSelection(), 
 											  plotSystem);
 				
-				if(extra == 1){
-					ssp.sliderZoomedArea(slider.getSelection(),
-										 region.getROI(), 
-										 subImagePlotSystem);
+				
+//				ssp.sliderZoomedArea(slider.getSelection(),
+//										 region.getROI(), 
+//										 subImagePlotSystem);
 					
-					ssp.bgImageUpdate(subImageBgPlotSystem,
+				ssp.bgImageUpdate(subImageBgPlotSystem,
 									  slider.getSelection());
-				}	
+					
 			}
 			
 			@Override
@@ -327,27 +314,10 @@ public class PlotSystemCompositeView extends Composite {
 			}
 		});
 		
-		if (extra == 1){
+		
 			
-			zoom = new Button (this, SWT.PUSH);
-	
-		    zoom.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		    zoom.setText("Zoom and set");
-			
-		    zoom.addSelectionListener(new SelectionListener() {
-				
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					
-				}
-				
-				@Override
-				public void widgetDefaultSelected(SelectionEvent e) {
-					
-				}
-			});
 		    
-		    run = new Button (this, SWT.PUSH);
+		    run = new Button (form, SWT.PUSH);
 			
 			
 		    run.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -366,11 +336,9 @@ public class PlotSystemCompositeView extends Composite {
 					
 				}
 			});
-		}    
+		    
 		
-		if (extra != 1){
-			ssp.sliderMovemementMainImage(slider.getSelection(), plotSystem);
-		}
+		    form.setWeights(new int[] { 20,5, 40, 30, 5 });
     }
 		
    
@@ -442,9 +410,6 @@ public class PlotSystemCompositeView extends Composite {
 		return region;
 	}
 	
-	public Button getZoom(){
-		return zoom;
-	}
 	
 	public Button getRun(){
 		return run;

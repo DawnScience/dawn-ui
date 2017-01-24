@@ -127,11 +127,11 @@ public class RegionSetterZoomedView extends Dialog {
 
 		customComposite1 = new PlotSystem1CompositeView(mainImage, 
 				SWT.NONE, 
-				customComposite, 
+//				customComposite, 
 				0, 
 				0, 
-				ssp,
-				this);
+				ssp);
+//				this);
 		
 		customComposite1.setLayout(new GridLayout());
 		customComposite1.setLayoutData(ld2);
@@ -177,8 +177,6 @@ public class RegionSetterZoomedView extends Dialog {
 			public void roiChanged(ROIEvent evt) {
 				generalUpdate();
 			}
-
-
 		});
 
 		//////////////////////////////////////////////////////////////////////////////////

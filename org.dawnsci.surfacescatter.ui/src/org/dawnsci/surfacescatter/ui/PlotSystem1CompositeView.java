@@ -46,23 +46,23 @@ public class PlotSystem1CompositeView extends Composite {
 //    private String[] methodologies;
     private int extra;
     private SurfaceScatterPresenter ssp;
-    private RegionSetterZoomedView rszv;
+//    private RegionSetterZoomedView rszv;
     private Boolean trackerOn;
 	
   
     public PlotSystem1CompositeView(Composite parent, 
     		int style,
-    		PlotSystemCompositeView customComposite, 
+//    		PlotSystemCompositeView customComposite, 
     		int trackingMarker, 
     		int extra,
-    		SurfaceScatterPresenter ssp,
-    		RegionSetterZoomedView rszv) {
+    		SurfaceScatterPresenter ssp){
+//    		RegionSetterZoomedView rszv) {
     	
         super(parent, style);
 
         this.extra= extra;
         this.ssp = ssp;
-        this.rszv = rszv;
+//        this.rszv = rszv;
         
        
         try {
@@ -72,11 +72,11 @@ public class PlotSystem1CompositeView extends Composite {
 			
 		}
 
-        this.createContents(customComposite, trackingMarker); 
+        this.createContents(trackingMarker); 
         
     }
      
-    public void createContents(PlotSystemCompositeView customComposite,
+    public void createContents(
     						   int trackingMarker) {
         
     	
@@ -273,7 +273,7 @@ public class PlotSystem1CompositeView extends Composite {
      		  						 trackerSelection, 
      		  						 boundaryBox);
        
-       rszv.dummyProcessTrigger();
+//       rszv.dummyProcessTrigger();
    }
    
    public Combo[] getCombos(){
