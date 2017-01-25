@@ -977,6 +977,7 @@ public class SurfaceScatterPresenter {
 //			@Override
 //			public void run() {	
 //				roobw.open();
+		return;
 //			}
 //		});
 	}
@@ -984,6 +985,7 @@ public class SurfaceScatterPresenter {
 	public void numberFormatWarning(){
 		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,1,null);
 		roobw.open();
+		return;
 	}
 	
 	
@@ -1197,6 +1199,8 @@ public class SurfaceScatterPresenter {
 		tj.setSsp(this);
 		tj.runTJ1();
 		
+		return;
+		
 	}
 
 	
@@ -1369,6 +1373,11 @@ class trackingJob {
 
 									dm.addxList(sm.getSortedX().getDouble(imageNumber));
 									
+									sm.addxList(sm.getImages().length, k,
+											sm.getSortedX().getDouble(k));
+									
+									debug("value added to xList:  "   + sm.getSortedX().getDouble(k)  + "  k:   " + k);
+									
 									IDataset output1 = DummyProcessingClass.DummyProcess(sm, 
 																						 j,
 																						 model, 
@@ -1424,6 +1433,7 @@ class trackingJob {
 								ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 								ssvs.getSsps3c().generalUpdate();
 								ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
+								return;
 								}
 							});
 								
@@ -1465,7 +1475,10 @@ class trackingJob {
 						dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
 								sm.getSortedX().getDouble(k));
 						
-						debug("value added to xList:  "   + sm.getSortedX().getDouble(k));
+						sm.addxList(sm.getImages().length, k,
+								sm.getSortedX().getDouble(k));
+						
+						debug("value added to xList:  "   + sm.getSortedX().getDouble(k)  + "  k:   " + k);
 						
 						IDataset output1 = DummyProcessingClass.DummyProcess(sm, 
 																			 j, 
@@ -1521,6 +1534,7 @@ class trackingJob {
 								ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 								ssvs.getSsps3c().generalUpdate();
 								ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
+								return;
 								}
 							});		
 						
@@ -1541,6 +1555,11 @@ class trackingJob {
 	
 						dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
 								sm.getSortedX().getDouble(k));
+						
+						sm.addxList(sm.getImages().length, k,
+								sm.getSortedX().getDouble(k));
+						
+						debug("value added to xList:  "   + sm.getSortedX().getDouble(k)  + "  k:   " + k);
 						
 						IDataset output1 = DummyProcessingClass.DummyProcess(sm, 
 																			 j, 
@@ -1595,6 +1614,7 @@ class trackingJob {
 								ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 								ssvs.getSsps3c().generalUpdate();
 								ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
+								return;
 								}
 							});
 						}
@@ -1763,6 +1783,10 @@ class trackingJob2 {
 		
 							dm.addxList(sm.getSortedX().getDouble(k));
 							
+							sm.addxList(sm.getImages().length, k,
+									sm.getSortedX().getDouble(k));
+							
+							debug("value added to xList:  "   + sm.getSortedX().getDouble(k)  + "  k:   " + k);
 							
 							debug("Tracker should fire once");
 							
@@ -1830,6 +1854,7 @@ class trackingJob2 {
 									ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 									ssvs.getSsps3c().generalUpdate();
 									ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
+									return;
 									}
 								});
 							
@@ -1846,14 +1871,7 @@ class trackingJob2 {
 		}
 		
 /////////////////////////
-		
-		
-		
-		
-		
-		
-		
-		
+
 		
 		//////////////////////// inside second loop
 		//////////////////////// scenario@@@@@@@@@@@@@@@@@@@@@@@@@@@@///////////
@@ -1885,6 +1903,12 @@ class trackingJob2 {
 					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
 							sm.getSortedX().getDouble(k));
 					
+					
+					sm.addxList(sm.getImages().length, k,
+							sm.getSortedX().getDouble(k));
+					
+					debug("value added to xList:  "   + sm.getSortedX().getDouble(k)  + "  k:   " + k);
+					
 					IDataset output1 = DummyProcessingClass.DummyProcess(sm, 
 																		 j, 
 																		 model, 
@@ -1899,8 +1923,7 @@ class trackingJob2 {
 
 					if(Arrays.equals(output1.getShape(),(new int[] {2,2}) )){
 						
-//						Display d = Display.getCurrent();
-//						ssp.boundariesWarning("position 2, line ~1469, k: " + Integer.toString(k), d);
+
 						break;	
 					}
 					
@@ -1941,6 +1964,7 @@ class trackingJob2 {
 							ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 							ssvs.getSsps3c().generalUpdate();
 							ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
+							return;
 							}
 						});
 					
@@ -1968,7 +1992,11 @@ class trackingJob2 {
 					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
 							sm.getSortedX().getDouble(k));
 					
-//					int tempLength = dm.getyList().size();
+					
+					sm.addxList(sm.getImages().length, k,
+							sm.getSortedX().getDouble(k));
+					
+					debug("value added to xList:  "   + sm.getSortedX().getDouble(k)  + "  k:   " + k);
 					
 					IDataset output1 = 
 							DummyProcessingClass.DummyProcess0(sm, 
@@ -1982,9 +2010,7 @@ class trackingJob2 {
 													   		  imagePosInOriginalDat[k], 
 													   		  trackingMarker, 
 													   		  k);
-//					if(dm.getyList().size() != 1+tempLength){
-//						debug("didn't write a y");
-//					}
+
 					
 
 					if(Arrays.equals(output1.getShape(),(new int[] {2,2}) )){
@@ -2032,7 +2058,8 @@ class trackingJob2 {
 							ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 							ssvs.getSsps3c().generalUpdate();
 							ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
-							}
+							return;
+						}
 						});
 					
 					
@@ -2133,6 +2160,11 @@ class trackingJob2 {
 						
 						dm.addxList(sm.getSortedX().getDouble(k));
 						
+						sm.addxList(sm.getImages().length, k,
+								sm.getSortedX().getDouble(k));
+						
+						debug("value added to xList:  "   + sm.getSortedX().getDouble(k)  + "  k:   " + k);
+						
 						IDataset output1 = 
 								DummyProcessingClass.DummyProcess1(sm, 
 																   j, 
@@ -2192,7 +2224,8 @@ class trackingJob2 {
 								ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 								ssvs.getSsps3c().generalUpdate();
 								ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
-								}
+								return;
+							}
 							});
 						
 
@@ -2262,6 +2295,12 @@ class trackingJob2 {
 						dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
 								sm.getSortedX().getDouble(k));
 						
+						
+						sm.addxList(sm.getImages().length, k,
+								sm.getSortedX().getDouble(k));
+						
+						debug("value added to xList:  "   + sm.getSortedX().getDouble(k)  + "  k:   " + k);
+						
 						IDataset output1 = 
 								DummyProcessingClass.DummyProcess1(sm, 
 																   j, 
@@ -2323,7 +2362,8 @@ class trackingJob2 {
 								ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 								ssvs.getSsps3c().generalUpdate();
 								ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
-								}
+								return;
+							}
 							});
 						
 
@@ -2387,6 +2427,11 @@ class trackingJob2 {
 						dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
 								sm.getSortedX().getDouble(k));
 						
+						sm.addxList(sm.getImages().length, k,
+								sm.getSortedX().getDouble(k));
+						
+						debug("value added to xList:  "   + sm.getSortedX().getDouble(k)  + "  k:   " + k);
+						
 						IDataset output1 = 
 								DummyProcessingClass.DummyProcess1(sm, 
 																   j, 
@@ -2446,7 +2491,8 @@ class trackingJob2 {
 								ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 								ssvs.getSsps3c().generalUpdate();
 								ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
-								}
+								return;
+							}
 							});
 
 					}
@@ -2586,6 +2632,7 @@ class MovieJob {
 								subIBgPS.repaint(true);
 								
 								ssvs.getSsps3c().generalUpdate();
+								return;
 							}
 						});					 
 						
