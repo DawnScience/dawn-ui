@@ -401,6 +401,8 @@ public class SurfaceScatterViewStart extends Dialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
+				ssp.regionOfInterestSetter();
+				
 				ssp.setStartFrame(ssvs.getSliderList().get(0).getSelection());
 				ssp.resetDataModels();
 				ssp.resetTrackers();

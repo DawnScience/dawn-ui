@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.TreeMap;
-
 import org.apache.commons.lang.StringUtils;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
@@ -39,7 +38,6 @@ import org.dawnsci.surfacescatter.StitchedOutputWithErrors;
 import org.dawnsci.surfacescatter.SuperModel;
 import org.dawnsci.surfacescatter.TrackerLocationInterpolation;
 import org.dawnsci.surfacescatter.TrackingMethodology;
-import org.eclipse.dawnsci.analysis.api.image.IImageTracker.TrackerType;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
@@ -63,8 +61,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.TabFolder;
-
-import com.sun.org.apache.bcel.internal.generic.NEWARRAY;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
@@ -525,6 +521,39 @@ public class SurfaceScatterPresenter {
 		catch(NullPointerException f){
 			
 		}
+	}
+	
+	public void regionOfInterestSetter() {
+
+		IROI green = ssvs.getPlotSystemCompositeView().getPlotSystem().
+				getRegion("myRegion").getROI();
+		
+		IRectangularROI greenRectangle = green.getBounds();
+		int[] Len = greenRectangle.getIntLengths();
+		int[] Pt = greenRectangle.getIntPoint();
+		int[][] LenPt = { Len, Pt };
+
+		for (ExampleModel m : models) {
+			m.setBox(greenRectangle);
+			m.setLenPt(LenPt);
+			m.setROI(green);
+		}
+//		 sort code 40-08-10, Account number: 71527487
+		for (DataModel dm :dms){
+			dm.setInitialLenPt(LenPt);
+		}
+		
+		
+		sm.setInitialLenPt(LenPt);
+		
+		try{
+			ssvs.getSsps3c().generalUpdate();
+		}
+		catch(NullPointerException f){
+			
+		}
+		
+		sm.setStartFrame(ssvs.getPlotSystemCompositeView().getSliderPos());
 	}
 	
 	public void regionOfInterestSetter(int[][] LenPt) {
@@ -1752,9 +1781,10 @@ class trackingJob2 {
 			dm.resetAll();
 		}
 
+		ssp.regionOfInterestSetter();
 		outputCurves.clear();
 
-		int jok = sm.getFilepathsSortedArray()[sm.getSliderPos()];
+		int jok = sm.getFilepathsSortedArray()[sm.getStartFrame()];
 
 		String[] doneArray = new String[sm.getFilepaths().length];
 		
@@ -1774,7 +1804,7 @@ class trackingJob2 {
 							
 							debug("@@@@@@@@@@@~~~~~~~~~~~~~~~in the 0 loop~~~~~~~~~~~~~~~~~~@@@@@@@@@@@@@@");
 //							ssp.sliderMovemementMainImage(k, ssp.getSsvs().getPlotSystemCompositeView().getPlotSystem());
-		
+							int jok = sm.getFilepathsSortedArray()[k];
 							int trackingMarker = 0;
 							IDataset j = sm.getImages()[k];
 							DataModel dm = dms.get(jok);
@@ -1829,11 +1859,11 @@ class trackingJob2 {
 								@Override
 								public void run() {	
 										
-									double[] tempLoc = sm.getLocationList().get(imageNumber);
-									RectangularROI newROI = new RectangularROI(tempLoc[0],
-										       tempLoc[1],
-										       sm.getInitialLenPt()[0][0],
-										       sm.getInitialLenPt()[0][1],0);
+//									double[] tempLoc = sm.getLocationList().get(imageNumber);
+//									RectangularROI newROI = new RectangularROI(tempLoc[0],
+//										       tempLoc[1],
+//										       sm.getInitialLenPt()[0][0],
+//										       sm.getInitialLenPt()[0][1],0);
 									
 									ssp.updateSliders(ssvs.getSliderList(), imageNumber);
 									IRegion background = null;
@@ -1864,6 +1894,440 @@ class trackingJob2 {
 						}
 					}
 					doneArray[jok] = "done";
+					
+					while (ClosestNoFinder.full(doneArray, "done") == false) {
+
+						debug("in the while loop");
+
+						int nextk = ClosestNoFinder.closestNoWithoutDone(sm.getSortedX().getDouble(sm.getSliderPos()),
+								sm.getSortedX(), doneArray, sm.getFilepathsSortedArray());
+
+						int nextjok = sm.getFilepathsSortedArray()[nextk];
+
+						debug("nextk :" + nextk);
+						debug("nextjok :" + nextjok);
+						debug("doneArray[nextjok]: " + doneArray[nextjok]);
+						
+						if (imagePosInOriginalDat[nextk] == 0) {
+				
+							debug("In the while loop for imagePosInOriginalDat[nextk] == 0");
+							
+							for (int k = nextk; k < noImages; k++) {
+
+								if (sm.getFilepathsSortedArray()[k] == nextjok) {
+//									ssp.sliderMovemementMainImage(k, ssp.getSsvs().getPlotSystemCompositeView().getPlotSystem());
+
+
+									debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
+									+ " , " + "local nextjok:  " + Integer.toString(nextjok));
+									
+									
+									int trackingMarker = 0;
+									IDataset j = sm.getImages()[k];
+									int jokLocal = sm.getFilepathsSortedArray()[k];
+									DataModel dm = dms.get(jokLocal);
+									GeometricParametersModel gm = gms.get(jokLocal);
+									ExampleModel model = models.get(jokLocal);
+									
+									
+									if(dm.getLocationList() == null){
+										
+										if (sm.getTrackerLocationList() == null | sm.getTrackerLocationList().size() <= 10 ){
+											int seedIndex = 
+													ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
+																						  sm.getSortedX(), 
+																						  sm.getLocationList());
+					
+											int nearestCompletedDatFileNo = sm.getFilepathsSortedArray()[seedIndex];
+											
+											
+											ArrayList<double[]> seedList = dms.get(nearestCompletedDatFileNo).getLocationList();
+											ArrayList<Double> lList = dms.get(nearestCompletedDatFileNo).getxList();
+											
+											Dataset yValues = DatasetFactory.zeros(seedList.size());
+											Dataset xValues = DatasetFactory.zeros(seedList.size());
+											Dataset lValues = DatasetFactory.zeros(seedList.size());
+											
+											for(int op = 0; op<seedList.size(); op++){
+												
+												double x = seedList.get(op)[1];
+												double y = seedList.get(op)[0];
+												double l = lList.get(op);
+												
+												xValues.set(x, op);
+												yValues.set(y, op);
+												lValues.set(l, op);
+						
+											}
+											
+											
+											double[] seedLocation = PolynomialOverlap.extrapolatedLocation(sm.getSortedX().getDouble(k),
+																										   lValues, 
+																										   xValues, 
+																										   yValues, 
+																										   sm.getInitialLenPt()[0],
+																										   1);
+											dm.setSeedLocation(seedLocation);
+											
+											debug("!!!!!!!!!!!!!!!     }}}}}{{{{{{{{ seedlocation[0] : " + seedLocation[0] +" + " + "seedlocation[1] :" + seedLocation[1]);
+									
+										}
+										else{
+											double[] seedLocation = TrackerLocationInterpolation.trackerInterpolationInterpolator0(sm.getTrackerLocationList(), 
+																										   sm.getSortedX(), 
+																										   sm.getInitialLenPt()[0],
+																										   k);
+											dm.setSeedLocation(seedLocation);
+										}
+									}	
+									
+									dm.addxList(sm.getSortedX().getDouble(k));
+									
+									sm.addxList(sm.getImages().length, k,
+											sm.getSortedX().getDouble(k));
+									
+									debug("value added to xList:  "   + sm.getSortedX().getDouble(k)  + "  k:   " + k);
+									
+									IDataset output1 = 
+											DummyProcessingClass.DummyProcess1(sm, 
+																			   j, 
+																			   model, 
+																			   dm, 
+																			   gm, 
+																			   plotSystem,
+																			   ssvsPS,
+																			   correctionSelection, 
+																			   imagePosInOriginalDat[k], 
+																			   trackingMarker, 
+																			   k,
+																			   dm.getSeedLocation());
+
+									if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
+										Display d =Display.getCurrent();
+										ssp.boundariesWarning("position 1, line ~2115, k: " + Integer.toString(k),d);
+										
+										break;
+									}
+									
+									sm.addBackgroundDatArray(sm.getImages().length, k, output1);
+									
+									
+									int imageNumber =k;
+									IDataset tempImage = sm.getImages()[imageNumber];
+									double[] tempLoc = sm.getLocationList().get(imageNumber);
+									RectangularROI newROI = new RectangularROI(tempLoc[0],
+										       tempLoc[1],
+										       sm.getInitialLenPt()[0][0],
+										       sm.getInitialLenPt()[0][1],0);
+									
+									
+									if (ssvs.getPlotSystemCompositeView().getPlotSystem().getRegion("Background Region")!=null){
+										ssvs.getPlotSystemCompositeView().getPlotSystem().removeRegion(
+												ssvs.getPlotSystemCompositeView().getPlotSystem().getRegion("Background Region"));
+									}
+									
+									display.syncExec(new Runnable() {
+										@Override
+										public void run() {	
+												
+											ssp.updateSliders(ssvs.getSliderList(), imageNumber);
+											IRegion background = null;
+											try {
+												background = ssvs.getPlotSystemCompositeView().getPlotSystem().createRegion("Background Region", RegionType.BOX);
+											} catch (Exception e) {
+												e.printStackTrace();
+											}
+											ssvs.getPlotSystemCompositeView().getFolder().setSelection(1);
+											ssp.updateSliders(ssvs.getSliderList(), imageNumber);
+											ssvs.updateIndicators(imageNumber);
+											background.setROI(newROI);
+											ssvs.getPlotSystemCompositeView().getPlotSystem().updatePlot2D(tempImage, null, null);
+											ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
+											ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
+											ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
+											ssvs.getSsps3c().generalUpdate();
+											ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
+											return;
+										}
+										});
+									
+
+								}
+								doneArray[nextjok] = "done";
+							}
+						}
+
+						else if (imagePosInOriginalDat[nextk] != 0) {
+
+							for (int k = (sm.getStartFrame()); k >= 0; k--) {
+
+								if (sm.getFilepathsSortedArray()[k] == nextjok) {
+
+									debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
+									+ " , " + "local nextjok:  " + Integer.toString(nextjok));
+									
+									
+									int trackingMarker = 1;
+									IDataset j = sm.getImages()[k];
+									DataModel dm = dms.get(nextjok);
+									GeometricParametersModel gm = gms.get(nextjok);
+									ExampleModel model = models.get(nextjok);
+									
+									if(dm.getLocationList() == null){
+										
+										int seedIndex = 
+												ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
+																					  sm.getSortedX(), 
+																					  sm.getLocationList());
+				
+										int nearestCompletedDatFileNo = sm.getFilepathsSortedArray()[seedIndex];
+										
+										
+										ArrayList<double[]> seedList = dms.get(nearestCompletedDatFileNo).getLocationList();
+										ArrayList<Double> lList = dms.get(nearestCompletedDatFileNo).getxList();
+										
+										Dataset yValues = DatasetFactory.zeros(seedList.size());
+										Dataset xValues = DatasetFactory.zeros(seedList.size());
+										Dataset lValues = DatasetFactory.zeros(seedList.size());
+										
+										for(int op = 0; op<seedList.size(); op++){
+											
+											double x = seedList.get(op)[1];
+											double y = seedList.get(op)[0];
+											double l = lList.get(op);
+											
+											xValues.set(x, op);
+											yValues.set(y, op);
+											lValues.set(l, op);
+					
+										}
+										
+										double[] seedLocation = PolynomialOverlap.extrapolatedLocation(sm.getSortedX().getDouble(k),
+																									   lValues, 
+																									   xValues, 
+																									   yValues, 
+																									   sm.getInitialLenPt()[0],
+																									   1);
+										dm.setSeedLocation(seedLocation);
+										
+										debug("!!!!!!!!!!!!!!!     }}}}}{{{{{{{{ seedlocation[0] : " + seedLocation[0] +" + " + "seedlocation[1] :" + seedLocation[1]);
+										
+									
+									}	
+									
+									dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
+											sm.getSortedX().getDouble(k));
+									
+									
+									sm.addxList(sm.getImages().length, k,
+											sm.getSortedX().getDouble(k));
+									
+									debug("value added to xList:  "   + sm.getSortedX().getDouble(k)  + "  k:   " + k);
+									
+									IDataset output1 = 
+											DummyProcessingClass.DummyProcess1(sm, 
+																			   j, 
+																			   model, 
+																			   dm, 
+																			   gm, 
+																			   plotSystem,
+																			   ssvsPS,
+																			   correctionSelection, 
+																			   imagePosInOriginalDat[k], 
+																			   trackingMarker, 
+																			   k,
+																			   dm.getSeedLocation());
+
+									
+									if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
+										Display d =Display.getCurrent();
+										ssp.boundariesWarning("position 1, line ~2245, k: " + Integer.toString(k),d);
+										
+										break;
+									}
+									
+									
+									sm.addBackgroundDatArray(sm.getImages().length, k, output1);
+									
+									
+									int imageNumber =k;
+									IDataset tempImage = sm.getImages()[imageNumber];
+									double[] tempLoc = sm.getLocationList().get(imageNumber);
+									RectangularROI newROI = new RectangularROI(tempLoc[0],
+										       tempLoc[1],
+										       sm.getInitialLenPt()[0][0],
+										       sm.getInitialLenPt()[0][1],0);
+									
+									
+									if (ssvs.getPlotSystemCompositeView().getPlotSystem().getRegion("Background Region")!=null){
+										ssvs.getPlotSystemCompositeView().getPlotSystem().removeRegion(
+												ssvs.getPlotSystemCompositeView().getPlotSystem().getRegion("Background Region"));
+									}
+									
+									display.syncExec(new Runnable() {
+										@Override
+										public void run() {	
+												
+											ssp.updateSliders(ssvs.getSliderList(), imageNumber);
+											IRegion background = null;
+											try {
+												background = ssvs.getPlotSystemCompositeView().getPlotSystem().createRegion("Background Region", RegionType.BOX);
+											} catch (Exception e) {
+												e.printStackTrace();
+											}
+											ssvs.getPlotSystemCompositeView().getFolder().setSelection(1);
+											ssp.updateSliders(ssvs.getSliderList(), imageNumber);
+											ssvs.updateIndicators(imageNumber);
+											background.setROI(newROI);
+											ssvs.getPlotSystemCompositeView().getPlotSystem().updatePlot2D(tempImage, null, null);
+											ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
+											ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
+											ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
+											ssvs.getSsps3c().generalUpdate();
+											ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
+											return;
+										}
+										});
+									
+
+								}
+							}
+
+							for (int k = sm.getStartFrame(); k < noImages; k++) {
+
+								if (sm.getFilepathsSortedArray()[k] == nextjok) {
+
+									debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
+									+ " , " + "local nextjok:  " + Integer.toString(nextjok));
+									
+									
+									int trackingMarker = 2;
+									IDataset j = sm.getImages()[k];
+									DataModel dm = dms.get(nextjok);
+									GeometricParametersModel gm = gms.get(nextjok);
+									ExampleModel model = models.get(nextjok);
+
+									
+									if(dm.getLocationList() == null){
+										
+										int seedIndex = 
+												ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
+																					  sm.getSortedX(), 
+																					  sm.getLocationList());
+				
+										int nearestCompletedDatFileNo = sm.getFilepathsSortedArray()[seedIndex];
+										
+										
+										ArrayList<double[]> seedList = dms.get(nearestCompletedDatFileNo).getLocationList();
+										ArrayList<Double> lList = dms.get(nearestCompletedDatFileNo).getxList();
+										
+										Dataset yValues = DatasetFactory.zeros(seedList.size());
+										Dataset xValues = DatasetFactory.zeros(seedList.size());
+										Dataset lValues = DatasetFactory.zeros(seedList.size());
+										
+										for(int op = 0; op<seedList.size(); op++){
+											
+											double x = seedList.get(op)[1];
+											double y = seedList.get(op)[0];
+											double l = lList.get(op);
+											
+											xValues.set(x, op);
+											yValues.set(y, op);
+											lValues.set(l, op);
+					
+										}
+										
+										double[] seedLocation = PolynomialOverlap.extrapolatedLocation(sm.getSortedX().getDouble(k),
+																									   lValues, 
+																									   xValues, 
+																									   yValues, 
+																									   sm.getInitialLenPt()[0],
+																									   1);
+										dm.setSeedLocation(seedLocation);
+									
+									}	
+									
+									dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
+											sm.getSortedX().getDouble(k));
+									
+									sm.addxList(sm.getImages().length, k,
+											sm.getSortedX().getDouble(k));
+									
+									debug("value added to xList:  "   + sm.getSortedX().getDouble(k)  + "  k:   " + k);
+									
+									IDataset output1 = 
+											DummyProcessingClass.DummyProcess1(sm, 
+																			   j, 
+																			   model, 
+																			   dm, 
+																			   gm, 
+																			   plotSystem,
+																			   ssvsPS,
+																			   correctionSelection, 
+																			   imagePosInOriginalDat[k], 
+																			   trackingMarker, 
+																			   k,
+																			   dm.getSeedLocation());
+
+									if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
+										Display d =Display.getCurrent();
+										ssp.boundariesWarning("position 1, line ~2369, k: " + Integer.toString(k),d);
+										
+										break;
+									}
+									
+									
+									sm.addBackgroundDatArray(sm.getImages().length, k, output1);
+									
+									int imageNumber =k;
+									IDataset tempImage = sm.getImages()[imageNumber];
+									double[] tempLoc = sm.getLocationList().get(imageNumber);
+									RectangularROI newROI = new RectangularROI(tempLoc[0],
+										       tempLoc[1],
+										       sm.getInitialLenPt()[0][0],
+										       sm.getInitialLenPt()[0][1],0);
+									
+									
+									if (ssvs.getPlotSystemCompositeView().getPlotSystem().getRegion("Background Region")!=null){
+										ssvs.getPlotSystemCompositeView().getPlotSystem().removeRegion(
+												ssvs.getPlotSystemCompositeView().getPlotSystem().getRegion("Background Region"));
+									}
+									
+									display.syncExec(new Runnable() {
+										@Override
+										public void run() {	
+												
+											ssp.updateSliders(ssvs.getSliderList(), imageNumber);
+											IRegion background = null;
+											try {
+												background = ssvs.getPlotSystemCompositeView().getPlotSystem().createRegion("Background Region", RegionType.BOX);
+											} catch (Exception e) {
+												e.printStackTrace();
+											}
+											ssvs.getPlotSystemCompositeView().getFolder().setSelection(1);
+											ssp.updateSliders(ssvs.getSliderList(), imageNumber);
+											ssvs.updateIndicators(imageNumber);
+											background.setROI(newROI);
+											ssvs.getPlotSystemCompositeView().getPlotSystem().updatePlot2D(tempImage, null, null);
+											ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
+											ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
+											ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
+											ssvs.getSsps3c().generalUpdate();
+											ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
+											return;
+										}
+										});
+
+								}
+							}
+							doneArray[nextjok] = "done";
+						}
+					}
+					
+					
+					
+					
+					
 					return;
 				}
 			};
