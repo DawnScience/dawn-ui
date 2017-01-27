@@ -35,6 +35,8 @@ public class DatDisplayer extends Composite {
     private Table rodDisplayTable;
 	private Combo optionsDropDown;
 	private String[] options;
+	private ArrayList<String> datList;
+	private Table folderDisplayTable;
         
     public DatDisplayer (Composite parent, 
     					 int style,
@@ -58,40 +60,36 @@ public class DatDisplayer extends Composite {
     	SashForm selectionSash = new SashForm(this, SWT.HORIZONTAL);
     	selectionSash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     	
-    	Composite left = new Composite(selectionSash, SWT.NONE | SWT.FILL);
+    	Composite left = new Composite(selectionSash, SWT.FILL);
     	left.setLayout(new GridLayout());
     	left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     	
-    	Composite middle= new Composite(selectionSash, SWT.NONE | SWT.FILL);
+    	Composite middle= new Composite(selectionSash,SWT.FILL);
     	middle.setLayout(new GridLayout());
     	middle.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     	
-    	Composite right = new Composite(selectionSash, SWT.NONE | SWT.FILL);
+    	Composite right = new Composite(selectionSash,SWT.FILL);
     	right.setLayout(new GridLayout());
     	right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     	
-    	
-    	
     	Composite farRight = new Composite(selectionSash, SWT.NONE | SWT.FILL);
     	farRight.setLayout(new GridLayout());
-    	farRight.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    	farRight.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));  	
     	
-    	
-        datSelector = new Group(left, SWT.NULL);
+        Group datSelector = new Group(left, SWT.NULL | SWT.V_SCROLL | SWT.FILL | SWT.CENTER);
         GridLayout datSelectorLayout = new GridLayout(1,true);
-        GridData datSelectorData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-	    datSelectorData .minimumWidth = 50;
-	    datSelectorData .minimumHeight = 100;
+        GridData datSelectorData = new GridData(GridData.GRAB_HORIZONTAL);
+	    datSelectorData .minimumWidth = 200;
+	    datSelectorData .minimumHeight = 1000;
 	    datSelector.setLayout(datSelectorLayout);
 	    datSelector.setLayoutData(datSelectorData);
-	    datSelector.setText("Select Data");
-
+	    datSelector.setText("Selected Dat Files");
 //	    selectFiles = new Button(datSelector, SWT.PUSH);
 //	    selectFiles.setText("Select Files");
 //	    
 	    File folder = new File(datFolderPath);
 	    File[] listOfFiles = folder.listFiles();
-	    ArrayList<String> datList = new ArrayList<>();
+	    datList = new ArrayList<>();
 
 	    CharSequence dat = ".dat";
 	    
@@ -100,43 +98,63 @@ public class DatDisplayer extends Composite {
 	    	   datList.add(listOfFiles[i].getName());
 	       }
 	    }
+	  
+	    folderDisplayTable = new Table(datSelector, SWT.CHECK |  SWT.V_SCROLL | SWT.H_SCROLL | SWT.FILL);
+	    GridData folderDisplayTableData = new GridData(SWT.CENTER, SWT.CENTER, true, true);
+	    folderDisplayTableData.minimumWidth = 200;
+        folderDisplayTableData.minimumHeight = 750;
 	    
-	    Table folderDisplayTable = new Table(datSelector, SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-	    folderDisplayTable.setLayoutData(new GridData());
+	    folderDisplayTable.setLayoutData(folderDisplayTableData);
+	    folderDisplayTable.setLayout(new GridLayout(1,true));
+	    folderDisplayTable.getVerticalBar().setEnabled(true);
 	    
-	    for(int j = 0; j<datList.size(); j++){
-	    	TableItem t = new TableItem(folderDisplayTable, SWT.NONE);
-	    	t.setText(datList.get(j));
-	    }
+	    Button placeHolder = new Button(datSelector, SWT.PUSH);
+	    placeHolder.setText("populate");
+	    
+	    java.util.Collections.sort(datList);
+	    
+//	    for(int j = 0; j<datList.size(); j++){
+//	    	TableItem t = new TableItem(folderDisplayTable, SWT.NONE);
+//	    	t.setText(datList.get(j));
+//	    }
+//	    
+	    
+//	    folderDisplayTable.getColumn(0).pack();
+	
+	    
+	    folderDisplayTable.getVerticalBar().setEnabled(true);
+	    folderDisplayTable.getVerticalBar().setIncrement(1);
+	    folderDisplayTable.getVerticalBar().setThumb(1);
+	    
 	    
 	    Button transferToRod = new Button(middle, SWT.PUSH);
 	    transferToRod.setText("Transfer to Rod \r ->");
 	    transferToRod.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));	    
 	    
-	    Group rodComponents = new Group(right, SWT.NULL);
+	    Group rodComponents = new Group(right, SWT.NULL | SWT.V_SCROLL | SWT.FILL | SWT.CENTER);
         GridLayout rodComponentsLayout = new GridLayout(1,true);
         GridData rodComponentsData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-        rodComponentsData .minimumWidth = 50;
-        rodComponentsData .minimumHeight = 100;
+        rodComponentsData.minimumWidth = 200;
+        rodComponentsData.minimumHeight = 10000;
         rodComponents.setLayout(rodComponentsLayout);
         rodComponents.setLayoutData(rodComponentsData);
         rodComponents.setText("Rod Components");
 	    
 	    Table rodDisplayTable = new Table(rodComponents, SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-	    GridData rodDisplayData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-        rodDisplayData .minimumWidth = 50;
-        rodDisplayData .minimumHeight = 250;
+	    GridData rodDisplayData = new GridData(SWT.CENTER, SWT.CENTER, true, true);
+        rodDisplayData.minimumWidth = 200;
+        rodDisplayData.minimumHeight = 750;
 	    rodDisplayTable.setLayoutData(rodDisplayData);
 	    
-	    Button selectAll = new Button(right, SWT.PUSH);
+	    Button selectAll = new Button(rodComponents, SWT.PUSH);
 	    selectAll.setText("Select All - not working well");
 	    selectAll.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 	    
-	    Button deleteSelected = new Button(right, SWT.PUSH);
+	    Button deleteSelected = new Button(rodComponents, SWT.PUSH);
 	    deleteSelected.setText("Delete Selected");
 	    deleteSelected.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 	    
-	    Button buildRod = new Button(right, SWT.PUSH);
+	    Button buildRod = new Button(rodComponents, SWT.PUSH);
 	    buildRod.setText("Build Rod From Selected");
 	    buildRod.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 	    
@@ -144,7 +162,7 @@ public class DatDisplayer extends Composite {
         GridLayout scannedVariableOptionsLayout = new GridLayout(1,true);
         GridData scannedVariableOptionsData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
         scannedVariableOptionsData .minimumWidth = 50;
-        scannedVariableOptionsData .minimumHeight = 100;
+        scannedVariableOptionsData .minimumHeight = 2000;
         scannedVariableOptions.setLayout(scannedVariableOptionsLayout);
         scannedVariableOptions.setLayoutData(scannedVariableOptionsData);
         scannedVariableOptions.setText("Scanned Variables");
@@ -223,6 +241,8 @@ public class DatDisplayer extends Composite {
 				
 				optionsDropDown.select(0);
 				
+				
+				folderDisplayTable.getVerticalBar().setEnabled(true);
 			}
 			
 			@Override
@@ -388,6 +408,23 @@ public class DatDisplayer extends Composite {
 //	        }
 //      });
     
+	 
+	    
+	   placeHolder.addSelectionListener(new SelectionListener() {
+		
+		@Override
+		public void widgetSelected(SelectionEvent e) {
+			fillTable();
+			
+		}
+		
+		@Override
+		public void widgetDefaultSelected(SelectionEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+	}); 
+	    
     }
     
    public Composite getComposite(){   	
@@ -418,6 +455,15 @@ public class DatDisplayer extends Composite {
    
    public Button getSelectFiles(){
 	   return selectFiles;
+   }
+   
+   public void fillTable(){
+	   for(int j = 0; j<datList.size(); j++){
+		   	TableItem t = new TableItem(folderDisplayTable, SWT.NONE);
+		   	t.setText(datList.get(j));
+	   }
+	   
+	   folderDisplayTable.getVerticalBar().setEnabled(true);
    }
 }
    
