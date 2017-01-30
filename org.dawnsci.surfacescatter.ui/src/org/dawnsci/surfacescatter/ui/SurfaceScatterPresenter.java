@@ -1522,8 +1522,9 @@ class trackingJob {
 																			 k);
 	
 						if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
+							debug("Dummy Proccessing failure");
 							ssp.boundariesWarning();
-	//						break;
+							break;
 						}
 						
 						sm.addBackgroundDatArray(sm.getImages().length, k, output1);
@@ -1603,7 +1604,8 @@ class trackingJob {
 																			 k);
 	
 						if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
-							ssp.boundariesWarning();
+//							ssp.boundariesWarning();
+							debug("Dummy Proccessing failure");
 							break;
 						}
 						
@@ -1803,7 +1805,7 @@ class trackingJob2 {
 							+ " , " + "local jok:  " + Integer.toString(jok));
 							
 							debug("@@@@@@@@@@@~~~~~~~~~~~~~~~in the 0 loop~~~~~~~~~~~~~~~~~~@@@@@@@@@@@@@@");
-//							ssp.sliderMovemementMainImage(k, ssp.getSsvs().getPlotSystemCompositeView().getPlotSystem());
+
 							int jok = sm.getFilepathsSortedArray()[k];
 							int trackingMarker = 0;
 							IDataset j = sm.getImages()[k];
@@ -1834,6 +1836,7 @@ class trackingJob2 {
 							debug("Tracker should HAVE fired once");
 							
 							if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
+								debug("Dummy Proccessing failure");
 								Display d =Display.getCurrent();
 								ssp.boundariesWarning("position 1, line ~1410, k: " + Integer.toString(k),d);
 								break;
@@ -2003,6 +2006,7 @@ class trackingJob2 {
 																			   dm.getSeedLocation());
 
 									if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
+										debug("Dummy Proccessing failure");
 										Display d =Display.getCurrent();
 										ssp.boundariesWarning("position 1, line ~2115, k: " + Integer.toString(k),d);
 										
@@ -2140,6 +2144,7 @@ class trackingJob2 {
 
 									
 									if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
+										debug("Dummy Proccessing failure");
 										Display d =Display.getCurrent();
 										ssp.boundariesWarning("position 1, line ~2245, k: " + Integer.toString(k),d);
 										
@@ -2270,6 +2275,7 @@ class trackingJob2 {
 																			   dm.getSeedLocation());
 
 									if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
+										debug("Dummy Proccessing failure");
 										Display d =Display.getCurrent();
 										ssp.boundariesWarning("position 1, line ~2369, k: " + Integer.toString(k),d);
 										
@@ -2386,7 +2392,7 @@ class trackingJob2 {
 																		 k);
 
 					if(Arrays.equals(output1.getShape(),(new int[] {2,2}) )){
-						
+						debug("Dummy Proccessing failure");
 
 						break;	
 					}
@@ -2479,8 +2485,9 @@ class trackingJob2 {
 
 					if(Arrays.equals(output1.getShape(),(new int[] {2,2}) )){
 						Display d =Display.getCurrent();
+						debug("Dummy Proccessing failure");
 						ssp.boundariesWarning("position 1, line ~1955, k: " + Integer.toString(k),d);
-						
+					
 						break;	
 					}
 					
@@ -2645,6 +2652,7 @@ class trackingJob2 {
 
 						if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
 							Display d =Display.getCurrent();
+							debug("Dummy Proccessing failure");
 							ssp.boundariesWarning("position 1, line ~2115, k: " + Integer.toString(k),d);
 							
 							break;
@@ -2782,7 +2790,8 @@ class trackingJob2 {
 						
 						if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
 							Display d =Display.getCurrent();
-							ssp.boundariesWarning("position 1, line ~2245, k: " + Integer.toString(k),d);
+							debug("Dummy Proccessing failure");
+//							ssp.boundariesWarning("position 1, line ~2245, k: " + Integer.toString(k),d);
 							
 							break;
 						}
@@ -2912,7 +2921,8 @@ class trackingJob2 {
 
 						if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
 							Display d =Display.getCurrent();
-							ssp.boundariesWarning("position 1, line ~2369, k: " + Integer.toString(k),d);
+							debug("Dummy Proccessing failure");
+//							ssp.boundariesWarning("position 1, line ~2369, k: " + Integer.toString(k),d);
 							
 							break;
 						}
