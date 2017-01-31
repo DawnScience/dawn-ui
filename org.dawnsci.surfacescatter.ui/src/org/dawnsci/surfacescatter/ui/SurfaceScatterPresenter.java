@@ -19,6 +19,8 @@ import java.util.Date;
 import java.util.TreeMap;
 import org.apache.commons.lang.StringUtils;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies;
+import org.dawnsci.surfacescatter.BoxSlicer;
+import org.dawnsci.surfacescatter.BoxSlicerRodScanUtilsForDialog;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
 import org.dawnsci.surfacescatter.ClosestNoFinder;//private ArrayList<double[]> locationList; 
 import org.dawnsci.surfacescatter.CountUpToArray;
@@ -73,8 +75,6 @@ public class SurfaceScatterPresenter {
 	private SuperModel sm;
 	private int noImages;
 	private SurfaceScatterViewStart ssvs;
-//	private int imageNumber;
-	
 	
 	public void setSsvs(SurfaceScatterViewStart ssvs) {
 		this.ssvs = ssvs;
@@ -500,6 +500,7 @@ public class SurfaceScatterPresenter {
 		IRectangularROI greenRectangle = green.getBounds();
 		int[] Len = greenRectangle.getIntLengths();
 		int[] Pt = greenRectangle.getIntPoint();
+
 		int[][] LenPt = { Len, Pt };
 
 		for (ExampleModel m : models) {
@@ -521,6 +522,19 @@ public class SurfaceScatterPresenter {
 		catch(NullPointerException f){
 			
 		}
+		
+		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDsiplay(LenPt, 
+															   models.get(0).getBoundaryBox(), 
+															   models.get(0).getMethodology());
+	
+		RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
+												  bgRegionROI[1],
+												  bgRegionROI[2],
+												  bgRegionROI[3],
+												  bgRegionROI[4]);
+		
+		ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgROI);
+	
 	}
 	
 	public void regionOfInterestSetter() {
@@ -538,7 +552,7 @@ public class SurfaceScatterPresenter {
 			m.setLenPt(LenPt);
 			m.setROI(green);
 		}
-//		 sort code 40-08-10, Account number: 71527487
+
 		for (DataModel dm :dms){
 			dm.setInitialLenPt(LenPt);
 		}
@@ -554,7 +568,73 @@ public class SurfaceScatterPresenter {
 		}
 		
 		sm.setStartFrame(ssvs.getPlotSystemCompositeView().getSliderPos());
+	
+		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDsiplay(LenPt, 
+				   models.get(0).getBoundaryBox(), 
+				   models.get(0).getMethodology());
+
+		RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
+												  bgRegionROI[1],
+												  bgRegionROI[2],
+												  bgRegionROI[3],
+												  bgRegionROI[4]);
+
+		ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgROI);
+
+	
+	
 	}
+	
+	
+	public void trackingRegionOfInterestSetter(int k){
+	
+		double[] loc= sm.getLocationList().get(k);
+		
+		trackingRegionOfInterestSetter(loc);
+		
+	}
+	
+	
+	public void trackingRegionOfInterestSetter(double[] location) {
+
+		int[] len = new int[] {(int) (location[2]-location[0]),(int) (location[5]-location[1])};
+		int[] pt = new int[] {(int) location[0],(int) location[1]};
+		int[][] lenPt = { len, pt };
+		
+		
+		try{
+			ssvs.getSsps3c().generalUpdate(lenPt);
+		}
+		catch(NullPointerException f){
+			
+		}
+		
+		sm.setStartFrame(ssvs.getPlotSystemCompositeView().getSliderPos());
+	
+		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDsiplay(lenPt, 
+				   models.get(0).getBoundaryBox(), 
+				   models.get(0).getMethodology());
+
+		RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
+												  bgRegionROI[1],
+												  bgRegionROI[2],
+												  bgRegionROI[3],
+												  bgRegionROI[4]);
+
+		ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgROI);
+
+
+		RectangularROI newGreenROI = new RectangularROI(pt[0],
+														pt[1],
+														len[0],
+														len[1],
+														0);
+
+		ssvs.getPlotSystemCompositeView().getIRegion().setROI(newGreenROI);		
+	}
+	
+	
+	
 	
 	public void regionOfInterestSetter(int[][] LenPt) {
 
@@ -577,6 +657,18 @@ public class SurfaceScatterPresenter {
 		
 		
 		sm.setInitialLenPt(LenPt);
+		
+		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDsiplay(LenPt, 
+				   models.get(0).getBoundaryBox(), 
+				   models.get(0).getMethodology());
+
+		RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
+											      bgRegionROI[1],
+											      bgRegionROI[2],
+											      bgRegionROI[3],
+											      bgRegionROI[4]);
+
+		ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgROI);
 	}
 	
 	public int[][] getLenPt(){
@@ -592,9 +684,11 @@ public class SurfaceScatterPresenter {
 		Dataset image = sm.getImages()[sliderPos];
 		Dataset subImage = (Dataset) PlotSystem2DataSetter.PlotSystem2DataSetter1(box, image);
 
-		for (IPlottingSystem<Composite> x : pS) {
-			x.updatePlot2D(subImage, null, null);
-		}
+//		for (IPlottingSystem<Composite> x : pS) {
+//			x.updatePlot2D(subImage, null, null);
+			ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(sliderPos), null, null);
+			
+//		}
 	}
 	
 	public int closestImageNo(double in){
@@ -1462,6 +1556,7 @@ class trackingJob {
 								ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 								ssvs.getSsps3c().generalUpdate();
 								ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
+								ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
 								return;
 								}
 							});
@@ -1564,6 +1659,7 @@ class trackingJob {
 								ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 								ssvs.getSsps3c().generalUpdate();
 								ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
+								ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
 								return;
 								}
 							});		
@@ -1645,6 +1741,7 @@ class trackingJob {
 								ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 								ssvs.getSsps3c().generalUpdate();
 								ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
+								ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
 								return;
 								}
 							});
@@ -1887,6 +1984,7 @@ class trackingJob2 {
 									ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 									ssvs.getSsps3c().generalUpdate();
 									ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
+									ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
 									return;
 									}
 								});
@@ -2051,6 +2149,7 @@ class trackingJob2 {
 											ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 											ssvs.getSsps3c().generalUpdate();
 											ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
+											ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
 											return;
 										}
 										});
@@ -2190,6 +2289,7 @@ class trackingJob2 {
 											ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 											ssvs.getSsps3c().generalUpdate();
 											ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
+											ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
 											return;
 										}
 										});
@@ -2320,6 +2420,7 @@ class trackingJob2 {
 											ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 											ssvs.getSsps3c().generalUpdate();
 											ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
+											ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
 											return;
 										}
 										});
@@ -2434,6 +2535,7 @@ class trackingJob2 {
 							ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 							ssvs.getSsps3c().generalUpdate();
 							ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
+							ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
 							return;
 							}
 						});
@@ -2529,6 +2631,7 @@ class trackingJob2 {
 							ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 							ssvs.getSsps3c().generalUpdate();
 							ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
+							ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
 							return;
 						}
 						});
@@ -2696,6 +2799,7 @@ class trackingJob2 {
 								ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 								ssvs.getSsps3c().generalUpdate();
 								ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
+								ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
 								return;
 							}
 							});
@@ -2835,6 +2939,7 @@ class trackingJob2 {
 								ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 								ssvs.getSsps3c().generalUpdate();
 								ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
+								ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
 								return;
 							}
 							});
@@ -2965,6 +3070,7 @@ class trackingJob2 {
 								ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 								ssvs.getSsps3c().generalUpdate();
 								ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
+								ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
 								return;
 							}
 							});
@@ -3106,6 +3212,7 @@ class MovieJob {
 								subIBgPS.repaint(true);
 								
 								ssvs.getSsps3c().generalUpdate();
+								ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
 								return;
 							}
 						});					 

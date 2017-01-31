@@ -14,16 +14,16 @@ import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
-import org.eclipse.january.DatasetException;
-import org.eclipse.january.dataset.AggregateDataset;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.SliceND;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Region;
-import org.eclipse.swt.layout.*;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Slider;
 
 public class PlotSystemComposite extends Composite {
 
@@ -32,6 +32,7 @@ public class PlotSystemComposite extends Composite {
     private IPlottingSystem<Composite> plotSystem;
     private IDataset image;
     private IRegion region;
+    private IRegion bgRegion;
     private Button outputControl;
     private ExampleModel model;
     private DataModel dm;
@@ -72,12 +73,12 @@ public class PlotSystemComposite extends Composite {
      
     public void createContents(ExampleModel model, IDataset image) {
 
-    	
     	final GridLayout gridLayout = new GridLayout();
         gridLayout.numColumns = 1;
         setLayout(gridLayout);
         
-//        slider = new Slider(this, SWT.HORIZONTAL);
+        Display display = Display.getCurrent();
+        Color gold = display.getSystemColor(SWT.COLOR_DARK_YELLOW);
         
         slider.setMinimum(0);
 	    slider.setMaximum(models.get(sm.getSelection()).getDatImages().getShape()[0]);
@@ -120,12 +121,19 @@ public class PlotSystemComposite extends Composite {
 			e1.printStackTrace();
 		}
 		plotSystem.addRegion(region);
+		plotSystem.addRegion(bgRegion);
 		
 		RectangularROI startROI = new RectangularROI(100,100,50,50,0);
 		region.setROI(startROI);
- 
+		
+		RectangularROI bgStartROI = new RectangularROI(90,90,70,70,0);
+		bgRegion.setROI(bgStartROI);
+		bgRegion.setRegionColor(gold);
+		
+		
         model.setROI(startROI);
-		region.addROIListener(new IROIListener() {
+		
+        region.addROIListener(new IROIListener() {
 
 			@Override
 			public void roiDragged(ROIEvent evt) {
@@ -225,6 +233,10 @@ public class PlotSystemComposite extends Composite {
 
 	public IRegion getGreenRegion(){
 		return region;
+	}
+	
+	public IRegion getGoldRegion(){
+		return bgRegion;
 	}
 	
 	public Button getZoom(){

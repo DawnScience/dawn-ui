@@ -494,6 +494,99 @@ public class SuperSashPlotSystem3Composite extends Composite{
 				
 				return;
 		}
+		
+		
+		public void generalUpdate(int[][] lenPt){
+			
+			
+			plotSystem1.clear();
+			plotSystem3.clear();
+			
+//			int[][] lenPt = ssp.getLenPt();
+//			
+			
+			IRectangularROI greenRectangle = new RectangularROI(lenPt[1][0], lenPt[1][1],
+																 lenPt[0][0], lenPt[0][1], 0);
+				
+			
+			int selection = ssp.getSliderPos();
+					
+			Dataset subImage =ssp.subImage(selection,greenRectangle);
+			
+			plotSystem2.updatePlot2D(subImage, null, null);
+//			plotSystem2.createPlot2D(subImage, null, null);
+			
+			ILineTrace lt1 = VerticalHorizontalSlices.horizontalslice(
+							horizontalSlice.getROI().getBounds(),
+							plotSystem1, 
+							subImage, 
+							greenRectangle);
+			
+			plotSystem1.addTrace(lt1);
+			
+			ILineTrace lt2 = VerticalHorizontalSlices.verticalslice(
+							verticalSlice.getROI().getBounds(), 
+							subImage,
+							plotSystem3, 
+							greenRectangle);
+			
+			plotSystem3.addTrace(lt2);	
+			
+			
+			
+			
+				@SuppressWarnings("unchecked")
+				IDataset output = ssp.presenterDummyProcess(selection,
+						ssp.getImage(selection),
+						ssvs.getPlotSystemCompositeView().getPlotSystem(),
+						3);
+		
+				ILineTrace lt3 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
+						horizontalSlice.getROI().getBounds(),
+						plotSystem1, 
+						ssp.getTemporaryBackground(),
+						greenRectangle);
+//				
+				ILineTrace lt4 = VerticalHorizontalSlices.verticalsliceBackgroundSubtracted(
+						verticalSlice.getROI().getBounds(),
+						getPlotSystem3(),
+						ssp.getTemporaryBackground(),
+						greenRectangle);
+//				
+//				
+				ILineTrace lt5 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
+						horizontalSlice.getROI().getBounds(),
+						plotSystem1, 
+						output,
+						greenRectangle);
+//				
+				ILineTrace lt6 = VerticalHorizontalSlices.verticalsliceBackgroundSubtracted(
+						verticalSlice.getROI().getBounds(),
+						plotSystem3,
+						output,
+						greenRectangle);
+//					
+				lt3.setName("background Slice");
+				lt4.setName("background Slice");
+//				
+				plotSystem1.addTrace(lt3);
+				plotSystem3.addTrace(lt4);
+				plotSystem1.addTrace(lt5);
+				plotSystem3.addTrace(lt6);
+//				
+			
+//			
+			plotSystem1.clearAnnotations();
+			plotSystem3.clearAnnotations();
+			
+			plotSystem1.autoscaleAxes();
+			plotSystem3.autoscaleAxes();
+//	
+			plotSystem1.repaint();
+			plotSystem3.repaint();
+			
+			return;
+	}
 }
 		
 		

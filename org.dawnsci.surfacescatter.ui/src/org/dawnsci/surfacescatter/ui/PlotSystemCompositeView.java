@@ -16,11 +16,13 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Region;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Slider;
@@ -39,9 +41,9 @@ public class PlotSystemCompositeView extends Composite {
 	private PlotSystem1CompositeView customComposite1;
     private IDataset image;
     private IRegion region;
+    private IRegion bgRegion;
     private Button outputControl;
     private Button run;
-//    private int extra;
     private int numberOfImages;
     private Dataset nullImage;
     private SurfaceScatterPresenter ssp;
@@ -92,12 +94,12 @@ public class PlotSystemCompositeView extends Composite {
      
     public void createContents(IDataset image) {
 
-    	
+    	Display display = Display.getCurrent();
+        Color gold = display.getSystemColor(SWT.COLOR_DARK_YELLOW);
     	
 		form = new SashForm(this, SWT.VERTICAL);
 		form.setLayout(new GridLayout());
 		form.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, true));
-    	
     	
 //    	GridLayout gridLayout = new GridLayout();
 //        gridLayout.numColumns = 1;
@@ -197,6 +199,7 @@ public class PlotSystemCompositeView extends Composite {
         
         try {
 			region =plotSystem.createRegion("myRegion", RegionType.BOX);
+			bgRegion =plotSystem.createRegion("bgRegion", RegionType.BOX);
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -258,12 +261,21 @@ public class PlotSystemCompositeView extends Composite {
         
         
 		plotSystem.addRegion(region);
-		
 		RectangularROI startROI = new RectangularROI(100,100,50,50,0);
-		
 		region.setROI(startROI);
+		
+
+		RectangularROI bgStartROI = new RectangularROI(90,90,70,70,0);
+		bgRegion.setROI(bgStartROI);
+		bgRegion.setRegionColor(gold);
+		bgRegion.setUserRegion(false);
+		bgRegion.setLineWidth(3);
+//		bgRegion.setOutlineOnly(true);
+		bgRegion.setMobile(false);
+		plotSystem.addRegion(bgRegion);
+		
  
-        ssp.regionOfInterestSetter(startROI);
+//        ssp.regionOfInterestSetter(startROI);
         
 		region.addROIListener(new IROIListener() {
 
@@ -284,7 +296,8 @@ public class PlotSystemCompositeView extends Composite {
 			
 			@SuppressWarnings("unchecked")
 			public void roiStandard(ROIEvent evt) {
-				ssp.regionOfInterestSetter(region.getROI());
+				ssp.regionOfInterestSetter();
+				
 				
 			}
 		});
@@ -361,6 +374,10 @@ public class PlotSystemCompositeView extends Composite {
    }
    
 
+   public PlotSystem1CompositeView getPlotSystem1CompositeView(){
+	   return customComposite1;
+   }
+   
 	public Button getOutputControl(){
 		return outputControl;
 	}
@@ -374,7 +391,7 @@ public class PlotSystemCompositeView extends Composite {
 	}
 	
 	public IPlottingSystem<Composite> getSubImagePlotSystem(){
-		return subImagePlotSystem; 
+		return customComposite1.getPlotSystem(); 
 	}
 	
 	public IPlottingSystem<Composite> getSubImageBgPlotSystem(){
@@ -395,6 +412,10 @@ public class PlotSystemCompositeView extends Composite {
 	
 	public IRegion getIRegion(){
 		return region;
+	}
+	
+	public IRegion getBgRegion(){
+		return bgRegion;
 	}
 	
 	public void setRegion(int[][] lenpt){

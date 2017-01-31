@@ -66,11 +66,8 @@ public class GeometricParametersWindows extends Composite{
 	
 	public void createContents() {
 		
-		
 		folder = new TabFolder(this, SWT.NONE);
-	    
-		
-		
+	   
 	    //Tab 1
 	    TabItem paramsSXRD = new TabItem(folder, SWT.NONE);
 	    paramsSXRD.setText("SXRD Parameters");
@@ -83,39 +80,54 @@ public class GeometricParametersWindows extends Composite{
 		
 		new Label(geometricParametersSX, SWT.LEFT).setText("beamCorrection");
 		beamCorrection = new Button(geometricParametersSX, SWT.CHECK);
+		beamCorrection.setSelection(false);
 		new Label(geometricParametersSX, SWT.LEFT).setText("beamInPlane");
 		beamInPlane = new Text(geometricParametersSX, SWT.SINGLE);
+		beamInPlane.setText("0.3");
 		new Label(geometricParametersSX, SWT.LEFT).setText("beamOutPlane");
 		beamOutPlane = new Text(geometricParametersSX, SWT.SINGLE);
+		beamOutPlane.setText("0.3");
 		new Label(geometricParametersSX, SWT.LEFT).setText("covar");
 		covar = new Text(geometricParametersSX, SWT.SINGLE);
+		covar.setText("1.0");
 		new Label(geometricParametersSX, SWT.LEFT).setText("detectorSlits");
 		detectorSlits = new Text(geometricParametersSX, SWT.SINGLE);
+		detectorSlits.setText("0.2");
 		new Label(geometricParametersSX, SWT.LEFT).setText("inPlaneSlits");
 		inPlaneSlits = new Text(geometricParametersSX, SWT.SINGLE);
+		inPlaneSlits.setText("0.5");
 		new Label(geometricParametersSX, SWT.LEFT).setText("inplanePolarisation");
 		inplanePolarisation = new Text(geometricParametersSX, SWT.SINGLE);
+		inplanePolarisation.setText("0.0");
 		new Label(geometricParametersSX, SWT.LEFT).setText("outPlaneSlits");
 		outPlaneSlits = new Text(geometricParametersSX, SWT.SINGLE);
+		outPlaneSlits.setText("0.5");
 		new Label(geometricParametersSX, SWT.LEFT).setText("outplanePolarisation");
 		outplanePolarisation = new Text(geometricParametersSX, SWT.SINGLE);
+		outplanePolarisation.setText("1.0");
 		new Label(geometricParametersSX, SWT.LEFT).setText("reflectivityA");
 		reflectivityA = new Text(geometricParametersSX, SWT.SINGLE);
+		reflectivityA.setText("1.0");
 		new Label(geometricParametersSX, SWT.LEFT).setText("sampleSize");
 		sampleSize = new Text(geometricParametersSX, SWT.SINGLE);
+		sampleSize.setText("10.0");
 		new Label(geometricParametersSX, SWT.LEFT).setText("normalisationFactor");
 		scalingFactor = new Text(geometricParametersSX, SWT.SINGLE);
+		scalingFactor.setText("10.0");
 		new Label(geometricParametersSX, SWT.LEFT).setText("scalingFactor");
-		normalisationFactor = new Text(geometricParametersSX, SWT.SINGLE);		
+		normalisationFactor = new Text(geometricParametersSX, SWT.SINGLE);
+		normalisationFactor.setText("10.0");
 		new Label(geometricParametersSX, SWT.LEFT).setText("specular");
 		specular = new Button (geometricParametersSX, SWT.CHECK);
+		specular.setSelection(false);
 		new Label(geometricParametersSX, SWT.LEFT).setText("imageName");
 		imageName = new Text(geometricParametersSX, SWT.SINGLE);
-		new Label(geometricParametersSX, SWT.LEFT).setText("xName");
-		xName = new Text (geometricParametersSX, SWT.CHECK);
-		new Label(geometricParametersSX, SWT.LEFT).setText("savePath");
-		savePath = new Text (geometricParametersSX, SWT.CHECK);
-		
+		imageName.setText("file_image");
+//		new Label(geometricParametersSX, SWT.LEFT).setText("xName");
+//		xName = new Text (geometricParametersSX, SWT.CHECK);
+//		xName.setText("l");
+//		new Label(geometricParametersSX, SWT.LEFT).setText("savePath");
+//		savePath = new Text (geometricParametersSX, SWT.CHECK);
 		
 		paramsSXRD.setControl(geometricParametersSX);
 	   	    
@@ -131,27 +143,30 @@ public class GeometricParametersWindows extends Composite{
 		
 		new Label(geometricParametersReflec, SWT.LEFT).setText("beamHeight");
 		beamHeight = new Text(geometricParametersReflec, SWT.SINGLE);
+		beamHeight.setText("0.06");
 		new Label(geometricParametersReflec, SWT.LEFT).setText("footprint");
 		footprint = new Text(geometricParametersReflec, SWT.SINGLE);
-		new Label(geometricParametersReflec, SWT.LEFT).setText("angularFudgeFactor");
+		footprint.setText("190");
+		new Label(geometricParametersReflec, SWT.LEFT).setText("Angular Adjustment");
 		angularFudgeFactor = new Text(geometricParametersReflec, SWT.SINGLE);
-		new Label(geometricParametersReflec, SWT.LEFT).setText("savePath");
-		savePath = new Text (geometricParametersReflec, SWT.CHECK);
+		angularFudgeFactor.setText("0");
+//		new Label(geometricParametersReflec, SWT.LEFT).setText("savePath");
+//		savePath = new Text (geometricParametersReflec, SWT.CHECK);
 		new Label(geometricParametersReflec, SWT.LEFT).setText("fluxPath");
 		fluxPath = new Text (geometricParametersReflec, SWT.CHECK);
-		new Label(geometricParametersReflec, SWT.LEFT).setText("xNameRef");
-		xNameRef = new Text (geometricParametersReflec, SWT.CHECK);
+//		new Label(geometricParametersReflec, SWT.LEFT).setText("xNameRef");
+//		xNameRef = new Text (geometricParametersReflec, SWT.CHECK);
 		
 	    paramsReflec.setControl(geometricParametersReflec);
 	    
-	    xNameRef.addModifyListener(new ModifyListener(){
-
-			@Override
-			public void modifyText(ModifyEvent e) {
-				geometricParametersUpdate();
-			}
-	    	
-	    });
+//	    xNameRef.addModifyListener(new ModifyListener(){
+//
+//			@Override
+//			public void modifyText(ModifyEvent e) {
+//				geometricParametersUpdate();
+//			}
+//	    	
+//	    });
 	    
 	    fluxPath.addModifyListener(new ModifyListener(){
 
@@ -171,14 +186,14 @@ public class GeometricParametersWindows extends Composite{
 	    	
 	    });
 		
-	    savePath.addModifyListener(new ModifyListener(){
-
-			@Override
-			public void modifyText(ModifyEvent e) {
-				geometricParametersUpdate();
-			}
-	    	
-	    });
+//	    savePath.addModifyListener(new ModifyListener(){
+//
+//			@Override
+//			public void modifyText(ModifyEvent e) {
+//				geometricParametersUpdate();
+//			}
+//	    	
+//	    });
 	 
 	    footprint.addModifyListener(new ModifyListener(){
 
@@ -346,14 +361,14 @@ public class GeometricParametersWindows extends Composite{
 	    	
 	    });
 		
-		xName.addModifyListener(new ModifyListener(){
-
-			@Override
-			public void modifyText(ModifyEvent e) {
-				geometricParametersUpdate();
-			}
-	    	
-	    });
+//		xName.addModifyListener(new ModifyListener(){
+//
+//			@Override
+//			public void modifyText(ModifyEvent e) {
+//				geometricParametersUpdate();
+//			}
+//	    	
+//	    });
 		
 	}
 	

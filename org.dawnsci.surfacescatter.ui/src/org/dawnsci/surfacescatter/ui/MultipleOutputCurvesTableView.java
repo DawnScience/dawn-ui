@@ -1,10 +1,6 @@
 package org.dawnsci.surfacescatter.ui;
 
-import java.util.ArrayList;
-
-import org.apache.commons.lang.StringUtils;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
-import org.dawnsci.surfacescatter.CurveStateIdentifier;
 import org.dawnsci.surfacescatter.DataModel;
 import org.dawnsci.surfacescatter.ExampleModel;
 import org.dawnsci.surfacescatter.SuperModel;
@@ -19,8 +15,6 @@ import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -28,10 +22,6 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.List;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableItem;
 
 public class MultipleOutputCurvesTableView extends Composite {
 
@@ -46,7 +36,7 @@ public class MultipleOutputCurvesTableView extends Composite {
 	private Group overlapSelection;
 	private Button errors;
 	private Button overlapZoom;
-	private int extra = 0;
+//	private int extra = 0;
 	private IRegion marker;
 	
 	public MultipleOutputCurvesTableView (Composite parent, 
@@ -57,7 +47,7 @@ public class MultipleOutputCurvesTableView extends Composite {
 
 //		new Label(this, SWT.NONE).setText("Output Curves");
 		
-		this.extra = extra;
+//		this.extra = extra;
 	
 		
 		try {

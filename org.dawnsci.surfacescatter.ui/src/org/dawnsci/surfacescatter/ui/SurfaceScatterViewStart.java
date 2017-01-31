@@ -311,6 +311,9 @@ public class SurfaceScatterViewStart extends Dialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				customComposite.getSlider().setMaximum(ssp.getNoImages());
+				customComposite.getPlotSystem1CompositeView().generalUpdate();
+				paramField.geometricParametersUpdate();
+				ssp.regionOfInterestSetter();
 				
 			}
 			
@@ -499,6 +502,8 @@ public class SurfaceScatterViewStart extends Dialog {
 					
 					ssp.bgImageUpdate(customComposite.getSubImageBgPlotSystem(),
 									  xPos);
+					
+					ssp.trackingRegionOfInterestSetter(xPos);
 					
 				}
 			}
