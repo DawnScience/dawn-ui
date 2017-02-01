@@ -11,7 +11,6 @@ package org.dawnsci.plotting.system;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +22,8 @@ import org.dawb.common.ui.printing.IPrintImageProvider;
 import org.dawb.common.ui.printing.PlotExportPrintUtil;
 import org.dawb.common.ui.printing.PlotPrintPreviewDialog;
 import org.dawb.common.ui.printing.PrintSettings;
+import org.dawb.common.ui.util.EclipseUtils;
+import org.dawb.common.ui.wizard.PlotDataConversionWizard;
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.dawnsci.plotting.AbstractPlottingViewer;
 import org.dawnsci.plotting.draw2d.swtxy.AspectAxis;
@@ -37,8 +38,6 @@ import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.dawnsci.plotting.draw2d.swtxy.selection.SelectionRegionFactory;
 import org.dawnsci.plotting.system.dialog.XYRegionConfigDialog;
 import org.dawnsci.plotting.util.ColorUtility;
-import org.eclipse.core.commands.Command;
-import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -109,6 +108,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.nebula.visualization.widgets.datadefinition.IManualValueChangeListener;
 import org.eclipse.nebula.visualization.widgets.figureparts.ColorMapRamp;
 import org.eclipse.nebula.visualization.widgets.figures.ScaledSliderFigure;
@@ -142,8 +142,6 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.commands.ICommandService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -175,6 +173,8 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 
 	private LayeredPane content;
 
+	private static String lastPath;
+	
 	public void init(IPlottingSystem<T> system) {
 		this.system = (PlottingSystemImpl<T>)system;
 	}
@@ -658,11 +658,13 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 				final Action export = new Action("Export '"+name+"' to ascii (dat file)", PlottingSystemActivator.getImageDescriptor("icons/mask-export-wiz.png")) {
 					public void run() {
 						try {
-							final ICommandService service = (ICommandService)PlatformUI.getWorkbench().getService(ICommandService.class);
-							final Command         export = service.getCommand("org.dawnsci.plotting.export.line.trace.command");
-							final ExecutionEvent  event = new ExecutionEvent(export, Collections.EMPTY_MAP, null, trace);
-							export.executeWithChecks(event);
-							
+							PlotDataConversionWizard wiz = (PlotDataConversionWizard)EclipseUtils.openWizard(PlotDataConversionWizard.ID, false);
+							wiz.setFilePath(lastPath);
+							WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
+							wd.setTitle(wiz.getWindowTitle());
+							if (wiz instanceof PlotDataConversionWizard) ((PlotDataConversionWizard)wiz).setPlottingSystem(system);
+							wd.open();
+							lastPath = wiz.getFilePath();
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
