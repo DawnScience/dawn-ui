@@ -91,6 +91,14 @@ public class SurfaceScatterViewStart extends Dialog {
 		this.numberOfImages = numberOfImages;
 		this.nullImage = nullImage;
 		this.ssp = ssp;
+		ssp.addStateListener(new  IPresenterStateChangeEventListener() {
+			
+			@Override
+			public void update() {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 		this.ssvs = this;
 		this.datFolderPath= datFolderPath;
 		

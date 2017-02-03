@@ -16,6 +16,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.TreeMap;
 import org.apache.commons.lang.StringUtils;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies;
@@ -40,6 +42,7 @@ import org.dawnsci.surfacescatter.StitchedOutputWithErrors;
 import org.dawnsci.surfacescatter.SuperModel;
 import org.dawnsci.surfacescatter.TrackerLocationInterpolation;
 import org.dawnsci.surfacescatter.TrackingMethodology;
+import org.eclipse.core.internal.preferences.ListenerRegistry;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
@@ -77,8 +80,9 @@ public class SurfaceScatterPresenter {
 	private SuperModel sm;
 	private int noImages;
 	private SurfaceScatterViewStart ssvs;
-	private SurfaceScatterPresenter ssp;
 	private IRegion backgroundRegion;
+	
+	private Set<IPresenterStateChangeEventListener> listeners = new HashSet<>();
 	
 	public void setSsvs(SurfaceScatterViewStart ssvs) {
 		this.ssvs = ssvs;
@@ -118,6 +122,14 @@ public class SurfaceScatterPresenter {
 		
 	}
 	
+	public void addStateListener(IPresenterStateChangeEventListener listener){
+		listeners.add(listener);
+	}
+	
+	private void fireStateListeners(){
+		for (IPresenterStateChangeEventListener l : listeners) l.update();
+	}
+	
 	
 	public void surfaceScatterPresenterBuild(Shell parentShell, 
 								   String[] filepaths,
@@ -127,7 +139,6 @@ public class SurfaceScatterPresenter {
 								   int correctionSelection) {
 
 		this.parentShell = parentShell;
-		this.ssp = this;
 		sm = new SuperModel();
 		gms = new ArrayList<GeometricParametersModel>();
 		dms = new ArrayList<DataModel>();
@@ -378,20 +389,23 @@ public class SurfaceScatterPresenter {
 										  IPlottingSystem<Composite>... pS) {
 
 		sm.setSliderPos(sliderPos);
-		Dataset image = sm.getImages()[sliderPos];
-
-		for (IPlottingSystem<Composite> x : pS) {
-			x.updatePlot2D(image, null, null);
-		}
 		
-		try{
-			ssvs.getSsps3c().generalUpdate();
-		}
-		catch(NullPointerException f){
-			
-		}
+		fireStateListeners();
+//		Dataset image = sm.getImages()[sliderPos];
+//
+//		for (IPlottingSystem<Composite> x : pS) {
+//			x.updatePlot2D(image, null, null);
+//		}
+//		
+//		try{
+//			ssvs.getSsps3c().generalUpdate();
+//		}
+//		catch(NullPointerException f){
+//			
+//		}
 		
 	}
+	
 	
 	public void bgImageUpdate(IPlottingSystem<Composite> subImageBgPlotSystem,
 							  int selection){
@@ -769,7 +783,7 @@ public class SurfaceScatterPresenter {
 							 
 							sm.setBoxOffsetLenPt(newOffsetLenPt);
 						}
-						ssp.regionOfInterestSetter();
+						regionOfInterestSetter();
 						
 					}
 				});				
