@@ -45,7 +45,9 @@ import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.january.dataset.Dataset;
@@ -75,6 +77,8 @@ public class SurfaceScatterPresenter {
 	private SuperModel sm;
 	private int noImages;
 	private SurfaceScatterViewStart ssvs;
+	private SurfaceScatterPresenter ssp;
+	private IRegion backgroundRegion;
 	
 	public void setSsvs(SurfaceScatterViewStart ssvs) {
 		this.ssvs = ssvs;
@@ -123,7 +127,7 @@ public class SurfaceScatterPresenter {
 								   int correctionSelection) {
 
 		this.parentShell = parentShell;
-		
+		this.ssp = this;
 		sm = new SuperModel();
 		gms = new ArrayList<GeometricParametersModel>();
 		dms = new ArrayList<DataModel>();
@@ -523,7 +527,7 @@ public class SurfaceScatterPresenter {
 			
 		}
 		
-		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDsiplay(LenPt, 
+		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDisplay(LenPt, 
 															   models.get(0).getBoundaryBox(), 
 															   models.get(0).getMethodology());
 	
@@ -533,7 +537,12 @@ public class SurfaceScatterPresenter {
 												  bgRegionROI[3],
 												  bgRegionROI[4]);
 		
-		ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgROI);
+		try{
+			ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgROI);
+		}
+		catch(Exception f){
+			
+		}
 	
 	}
 	
@@ -569,7 +578,7 @@ public class SurfaceScatterPresenter {
 		
 		sm.setStartFrame(ssvs.getPlotSystemCompositeView().getSliderPos());
 	
-		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDsiplay(LenPt, 
+		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDisplay(LenPt, 
 				   models.get(0).getBoundaryBox(), 
 				   models.get(0).getMethodology());
 
@@ -578,11 +587,12 @@ public class SurfaceScatterPresenter {
 												  bgRegionROI[2],
 												  bgRegionROI[3],
 												  bgRegionROI[4]);
-
-		ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgROI);
-
-	
-	
+		try{
+			ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgROI);
+		}
+		catch(Exception f){
+			
+		}
 	}
 	
 	
@@ -594,6 +604,222 @@ public class SurfaceScatterPresenter {
 		
 	}
 	
+	public void backgroundBoxesManager(){
+		
+		Display display = Display.getCurrent();
+        Color magenta = display.getSystemColor(SWT.COLOR_DARK_MAGENTA);
+        Color red = display.getSystemColor(SWT.COLOR_RED);
+//        Color gold = display.getSystemColor(SWT.COLOR_DARK_YELLOW);
+        
+		IPlottingSystem<Composite> pS = ssvs.getPlotSystemCompositeView().getPlotSystem();
+		
+		
+		
+		if (models.get(0).getMethodology() == Methodology.SECOND_BACKGROUND_BOX ||
+			models.get(0).getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
+
+
+			IRegion r1 = ssvs.getPlotSystemCompositeView().getBgRegion();
+//			r1.remove();
+			r1.setVisible(false);
+			
+			if (pS.getRegion("Background Region")!=null){
+				
+				
+					int[][] redLenPt = new int[][] {pS.getRegion("Background Region").getROI().getBounds().getIntLengths(),
+					pS.getRegion("Background Region").getROI().getBounds().getIntPoint()};
+				
+					sm.setBackgroundLenPt(redLenPt);
+					
+					
+					for(DataModel dm: dms){
+					
+						dm.setBackgroundLenPt(new int[][] {pS.getRegion("Background Region").getROI().getBounds().getIntPoint(),
+							pS.getRegion("Background Region").getROI().getBounds().getIntLengths()});
+						
+					}
+				
+				pS.getRegion("Background Region").setRegionColor(magenta);
+				
+				if(models.get(0).getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
+					
+					int[][] greenLenPt = sm.getInitialLenPt();
+					
+					int[][] newOffsetLenPt = new int[2][2];
+					
+					newOffsetLenPt[0][0]  =  -greenLenPt[0][0] + redLenPt[0][0];
+					newOffsetLenPt[0][1]  =  -greenLenPt[0][1] + redLenPt[0][1];
+					
+					
+					newOffsetLenPt[1][0]  =  -greenLenPt[1][0] + redLenPt[1][0];
+					newOffsetLenPt[1][1]  =  -greenLenPt[1][1] + redLenPt[1][1];
+					
+					sm.setBoxOffsetLenPt(newOffsetLenPt);
+					pS.getRegion("Background Region").setRegionColor(red);
+					
+				}
+				
+			}
+			else{
+
+				backgroundRegion = null;
+				
+				try {
+					backgroundRegion = pS.createRegion("Background Region", RegionType.BOX);
+					pS.addRegion(backgroundRegion);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				if (models.get(0).getMethodology() == Methodology.SECOND_BACKGROUND_BOX){
+					RectangularROI backgroundRegionROI = new RectangularROI(10,10,50,50,0);
+					backgroundRegion.setROI(backgroundRegionROI);
+					sm.setBackgroundLenPt(new int[][] {{50,50},{10,10}});
+					backgroundRegion.setRegionColor(magenta);
+				}
+				
+				else if (models.get(0).getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
+					if (sm.getBoxOffsetLenPt()!=null){
+						
+						int[][] newOffsetLenPt =sm.getBoxOffsetLenPt();
+						int[] len = sm.getInitialLenPt()[0]; 
+						int[] pt = sm.getInitialLenPt()[1];
+						
+						int[] offsetLen = newOffsetLenPt[0];
+						int[] offsetPt = newOffsetLenPt[1];
+						
+						int pt0 = pt[0] + offsetPt[0];
+						int pt1 = pt[1] + offsetPt[1];
+						
+						int len0 = len[0] + offsetLen[0];
+						int len1 = len[1] + offsetLen[1];
+					
+						IRectangularROI newROI = new RectangularROI(pt0,pt1,len0,len1,0);
+
+						backgroundRegion.setROI(newROI);
+						
+						sm.setBackgroundLenPt(new int[][] {{pt0,pt1},{len0,len1}});
+					}
+					
+					else{
+						
+						int[] len = sm.getInitialLenPt()[0]; 
+						int[] pt = sm.getInitialLenPt()[1];
+						
+						int pt0 = pt[0] + 25;
+						int pt1 = pt[1] + 25;
+						
+						int len0 = len[0] + 0;
+						int len1 = len[1] + 0;
+					
+						IRectangularROI newROI = new RectangularROI(pt0,pt1,len0,len1,0);
+					
+						backgroundRegion.setROI(newROI);
+						
+
+						sm.setBackgroundLenPt(new int[][] {{pt0,pt1},{len0,len1}});
+					}
+					
+					backgroundRegion.setRegionColor(red);
+					
+				}
+				
+				backgroundRegion.addROIListener(new IROIListener() {
+					
+					@Override
+					public void roiDragged(ROIEvent evt) {
+						roiStandard(evt);
+					}
+
+					@Override
+					public void roiChanged(ROIEvent evt) {
+						roiStandard(evt);
+					}
+
+					@Override
+					public void roiSelected(ROIEvent evt) {
+						roiStandard(evt);
+					}
+					
+					public void roiStandard(ROIEvent evt) {
+						
+						int[] len = sm.getInitialLenPt()[0]; 
+						int[] pt = sm.getInitialLenPt()[1];
+						int[][] lenpt = {len, pt};
+						
+						IRectangularROI bounds = backgroundRegion.getROI().getBounds();
+						int[] redLen = bounds.getIntLengths();
+						int[] redPt = bounds.getIntPoint();
+						int[][] redLenPt = {redLen, redPt};
+						
+						sm.setBackgroundLenPt(redLenPt);
+						
+						if (models.get(0).getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
+							
+							int [][] newOffsetLenPt = new int[2][2];
+							
+							newOffsetLenPt[0][0]  =  -len[0] + redLen[0];
+							newOffsetLenPt[0][1]  =  -len[1] + redLen[1];
+							
+							
+							newOffsetLenPt[1][0]  = -pt[0] + redPt[0];
+							newOffsetLenPt[1][1]  = -pt[1] + redPt[1];
+							
+							 
+							sm.setBoxOffsetLenPt(newOffsetLenPt);
+						}
+						ssp.regionOfInterestSetter();
+						
+					}
+				});				
+			}
+		}
+		
+		else{
+			
+			ssvs.getPlotSystemCompositeView().getBgRegion().setVisible(true);;
+			try {
+//				pS.getRegion("bgRegion").
+//				bgRegion = pS.createRegion("bgRegion", RegionType.BOX);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+//			RectangularROI bgStartROI = new RectangularROI(90,90,70,70,0);
+//			bgRegion.setROI(bgStartROI);
+//			bgRegion.setRegionColor(gold);
+//			bgRegion.setUserRegion(false);
+//			bgRegion.setLineWidth(3);
+//			bgRegion.setMobile(false);
+//			
+//			ssvs.getPlotSystemCompositeView().getPlotSystem().addRegion(bgRegion);
+//			
+			this.regionOfInterestSetter();
+			
+		}
+		
+		
+		
+		
+	}
+	
+	public AnalaysisMethodologies.Methodology getBackgroundSubtraction(){
+		return models.get(0).getMethodology();
+	}
+	
+	
+	public void triggerBoxOffsetTransfer(){
+		
+		if(models.get(0).getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
+			try{
+				sm.setPermanentBoxOffsetLenPt(sm.getBoxOffsetLenPt());
+			}
+			catch(Exception j){
+				
+			}
+		}
+	}
 	
 	public void trackingRegionOfInterestSetter(double[] location) {
 
@@ -611,7 +837,7 @@ public class SurfaceScatterPresenter {
 		
 		sm.setStartFrame(ssvs.getPlotSystemCompositeView().getSliderPos());
 	
-		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDsiplay(lenPt, 
+		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDisplay(lenPt, 
 				   models.get(0).getBoundaryBox(), 
 				   models.get(0).getMethodology());
 
@@ -621,8 +847,35 @@ public class SurfaceScatterPresenter {
 												  bgRegionROI[3],
 												  bgRegionROI[4]);
 
-		ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgROI);
-
+		try{
+			ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgROI);
+		}
+		catch(Exception f){
+			
+		}
+		
+		if(ssvs.getPlotSystemCompositeView().getPlotSystem().getRegion("Background Region") != null &&
+				models.get(0).getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
+			
+//			int[][] offsetLenPt = sm.getBoxOffsetLenPt();
+			int[] offsetLen = sm.getPermanentBoxOffsetLenPt()[0];
+			int[] offsetPt = sm.getPermanentBoxOffsetLenPt()[1];
+			
+			int pt0 = pt[0] + offsetPt[0];
+			int pt1 = pt[1] + offsetPt[1];
+			
+			
+			int len0 = len[0] + offsetLen[0];
+			int len1 = len[1] + offsetLen[1];
+			
+			RectangularROI offsetBgROI = new RectangularROI(pt0,
+					  pt1,
+					  len0,
+					  len1,
+					  0);
+			
+			ssvs.getPlotSystemCompositeView().getPlotSystem().getRegion("Background Region").setROI(offsetBgROI);
+		}
 
 		RectangularROI newGreenROI = new RectangularROI(pt[0],
 														pt[1],
@@ -658,7 +911,7 @@ public class SurfaceScatterPresenter {
 		
 		sm.setInitialLenPt(LenPt);
 		
-		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDsiplay(LenPt, 
+		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDisplay(LenPt, 
 				   models.get(0).getBoundaryBox(), 
 				   models.get(0).getMethodology());
 
@@ -667,8 +920,12 @@ public class SurfaceScatterPresenter {
 											      bgRegionROI[2],
 											      bgRegionROI[3],
 											      bgRegionROI[4]);
-
-		ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgROI);
+		try{
+			ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgROI);
+		}
+		catch(Exception f){
+			
+		}
 	}
 	
 	public int[][] getLenPt(){
@@ -1306,6 +1563,10 @@ public class SurfaceScatterPresenter {
 		for(DataModel md: dms){
 			md.resetAll();
 		}
+		this.backgroundBoxesManager();
+		
+		
+		sm.setPermanentBoxOffsetLenPt(sm.getBoxOffsetLenPt());
 		
 		trackingJob tj = new trackingJob();
 		debug("tj invoked");
@@ -1321,6 +1582,9 @@ public class SurfaceScatterPresenter {
 		tj.setTimeStep(Math.round((2 / noImages)));
 		tj.setSsp(this);
 		tj.runTJ1();
+		
+		
+//		sm.setPermanentBoxOffsetLenPt(null);
 		
 		return;
 		
@@ -1395,18 +1659,13 @@ class trackingJob {
 		return ssvs;
 	}
 
-
-
 	public void setSsvs(SurfaceScatterViewStart ssvs) {
 		this.ssvs = ssvs;
 	}
 	
-	
 	public void setOutputCurves(IPlottingSystem<Composite> outputCurves) {
 		this.outputCurves = outputCurves;
 	}
-
-
 
 	public void setCorrectionSelection(int cS) {
 		this.correctionSelection = cS;
@@ -1632,10 +1891,10 @@ class trackingJob {
 							       sm.getInitialLenPt()[0][1],0);
 						
 						
-						if (ssvs.getPlotSystemCompositeView().getPlotSystem().getRegion("Background Region")!=null){
-							ssvs.getPlotSystemCompositeView().getPlotSystem().removeRegion(
-									ssvs.getPlotSystemCompositeView().getPlotSystem().getRegion("Background Region"));
-						}
+//						if (ssvs.getPlotSystemCompositeView().getPlotSystem().getRegion("Background Region")!=null){
+////							ssvs.getPlotSystemCompositeView().getPlotSystem().removeRegion(
+////									ssvs.getPlotSystemCompositeView().getPlotSystem().getRegion("Background Region"));
+//						}
 						
 						
 						display.syncExec(new Runnable() {
@@ -1643,16 +1902,16 @@ class trackingJob {
 							public void run() {	
 									
 								ssp.updateSliders(ssvs.getSliderList(), imageNumber);
-								IRegion background = null;
-								try {
-									background = ssvs.getPlotSystemCompositeView().getPlotSystem().createRegion("Background Region", RegionType.BOX);
-								} catch (Exception e) {
-									e.printStackTrace();
-								}
+//								IRegion background = null;
+//								try {
+//									background = ssvs.getPlotSystemCompositeView().getPlotSystem().createRegion("Background Region", RegionType.BOX);
+//								} catch (Exception e) {
+//									e.printStackTrace();
+//								}
 								ssvs.getPlotSystemCompositeView().getFolder().setSelection(1);
 								ssp.updateSliders(ssvs.getSliderList(), imageNumber);
 								ssvs.updateIndicators(imageNumber);
-								background.setROI(newROI);
+//								background.setROI(newROI);
 								ssvs.getPlotSystemCompositeView().getPlotSystem().updatePlot2D(tempImage, null, null);
 								ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
 								ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
@@ -1714,27 +1973,27 @@ class trackingJob {
 							       tempLoc[1],
 							       sm.getInitialLenPt()[0][0],
 							       sm.getInitialLenPt()[0][1],0);
-						
-						if (ssvs.getPlotSystemCompositeView().getPlotSystem().getRegion("Background Region")!=null){
-							ssvs.getPlotSystemCompositeView().getPlotSystem().removeRegion(
-									ssvs.getPlotSystemCompositeView().getPlotSystem().getRegion("Background Region"));
-						}
+//						
+//						if (ssvs.getPlotSystemCompositeView().getPlotSystem().getRegion("Background Region")!=null){
+//							ssvs.getPlotSystemCompositeView().getPlotSystem().removeRegion(
+//									ssvs.getPlotSystemCompositeView().getPlotSystem().getRegion("Background Region"));
+//						}
 						
 						display.syncExec(new Runnable() {
 							@Override
 							public void run() {	
 									
 								ssp.updateSliders(ssvs.getSliderList(), imageNumber);
-								IRegion background = null;
-								try {
-									background = ssvs.getPlotSystemCompositeView().getPlotSystem().createRegion("Background Region", RegionType.BOX);
-								} catch (Exception e) {
-									e.printStackTrace();
-								}
+//								IRegion background = null;
+//								try {
+//									background = ssvs.getPlotSystemCompositeView().getPlotSystem().createRegion("Background Region", RegionType.BOX);
+//								} catch (Exception e) {
+//									e.printStackTrace();
+//								}
 								ssvs.getPlotSystemCompositeView().getFolder().setSelection(1);
 								ssp.updateSliders(ssvs.getSliderList(), imageNumber);
 								ssvs.updateIndicators(imageNumber);
-								background.setROI(newROI);
+//								background.setROI(newROI);
 								ssvs.getPlotSystemCompositeView().getPlotSystem().updatePlot2D(tempImage, null, null);
 								ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
 								ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);

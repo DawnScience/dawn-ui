@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 import org.dawnsci.surfacescatter.CurveStateIdentifier;
+import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
@@ -410,16 +411,14 @@ public class SurfaceScatterViewStart extends Dialog {
 				ssp.resetDataModels();
 				ssp.resetTrackers();
 				
+				ssp.triggerBoxOffsetTransfer();
+				
 				ssp.runTrackingJob(customComposite.getSubImagePlotSystem(),
 									   outputCurves.getPlotSystem(),
 									   customComposite.getPlotSystem(),
 									   customComposite.getFolder(),
 									   customComposite.getSubImageBgPlotSystem());
-					
-							
-				
-						
-							
+								
 			}
 			
 			@Override

@@ -100,11 +100,7 @@ public class PlotSystemCompositeView extends Composite {
 		form = new SashForm(this, SWT.VERTICAL);
 		form.setLayout(new GridLayout());
 		form.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, true));
-    	
-//    	GridLayout gridLayout = new GridLayout();
-//        gridLayout.numColumns = 1;
-//        setLayout(gridLayout);
-//        
+    	       
 		Group mainImage = new Group(form, SWT.FILL);
 		GridLayout mainImageLayout = new GridLayout();
 		mainImage.setLayout(mainImageLayout);
@@ -151,10 +147,7 @@ public class PlotSystemCompositeView extends Composite {
         
         replay = new Button(indicators, SWT.PUSH | SWT.FILL);
 		replay.setText("Replay");
-        
-//		Group rOIpositionIndicators = new Group(indicators, SWT.NONE);
-//    	GridLayout rOIpositionIndicatorsLayout = new GridLayout(4,true);
-//    	rOIpositionIndicators.setLayout(rOIpositionIndicatorsLayout);
+
     	
 		Label xPt = new Label(indicators, SWT.NULL);
 		xPt.setText("ROI x coord:");
@@ -255,10 +248,7 @@ public class PlotSystemCompositeView extends Composite {
 			subImageBgPlotSystem.createPlotPart(subBgIComposite, "Region of interest", null, PlotType.IMAGE, null);
 			subImageBgPlotSystem.getPlotComposite().setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, true));
 			subImageBgPlotSystem.createPlot2D(nullImage, null, null);
-//			subImageBgPlotSystem.
-     
-        
-        
+
         
 		plotSystem.addRegion(region);
 		RectangularROI startROI = new RectangularROI(100,100,50,50,0);
@@ -270,13 +260,9 @@ public class PlotSystemCompositeView extends Composite {
 		bgRegion.setRegionColor(gold);
 		bgRegion.setUserRegion(false);
 		bgRegion.setLineWidth(3);
-//		bgRegion.setOutlineOnly(true);
 		bgRegion.setMobile(false);
 		plotSystem.addRegion(bgRegion);
 		
- 
-//        ssp.regionOfInterestSetter(startROI);
-        
 		region.addROIListener(new IROIListener() {
 
 			@Override
@@ -336,20 +322,6 @@ public class PlotSystemCompositeView extends Composite {
 		    run.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		    run.setText("Run");
 			
-			
-		    run.addSelectionListener(new SelectionListener() {
-				
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					
-				}
-				
-				@Override
-				public void widgetDefaultSelected(SelectionEvent e) {
-					
-				}
-			});
-		    
 		
 		    form.setWeights(new int[] { 20,5, 40, 30, 5 });
     }

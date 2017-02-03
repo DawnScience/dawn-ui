@@ -273,6 +273,8 @@ public class PlotSystem1CompositeView extends Composite {
      		  						 trackerSelection, 
      		  						 boundaryBox);
        
+       ssp.backgroundBoxesManager();
+       
        ssp.regionOfInterestSetter();
       
       
