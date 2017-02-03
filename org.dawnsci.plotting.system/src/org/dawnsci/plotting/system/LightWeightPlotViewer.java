@@ -850,8 +850,10 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	}
 
 	protected ILineTrace createLineTrace(String traceName) {
-		final Axis xAxis = (Axis)getSelectedXAxis();
-		final Axis yAxis = (Axis)getSelectedYAxis();
+		final AspectAxis xAxis = (AspectAxis)getSelectedXAxis();
+		xAxis.setLabelDataAndTitle(null);
+		final AspectAxis yAxis = (AspectAxis)getSelectedYAxis();
+		yAxis.setLabelDataAndTitle(null);
 
 		LightWeightDataProvider traceDataProvider = new LightWeightDataProvider();
 		final LineTrace   trace    = new LineTrace(traceName);
