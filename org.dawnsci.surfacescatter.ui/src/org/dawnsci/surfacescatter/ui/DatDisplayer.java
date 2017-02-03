@@ -99,6 +99,9 @@ public class DatDisplayer extends Composite {
 	       }
 	    }
 	  
+	    Button placeHolder = new Button(datSelector, SWT.PUSH);
+	    placeHolder.setText("populate");
+	    
 	    folderDisplayTable = new Table(datSelector, SWT.CHECK |  SWT.V_SCROLL | SWT.H_SCROLL | SWT.FILL);
 	    GridData folderDisplayTableData = new GridData(SWT.CENTER, SWT.CENTER, true, true);
 	    folderDisplayTableData.minimumWidth = 200;
@@ -107,9 +110,6 @@ public class DatDisplayer extends Composite {
 	    folderDisplayTable.setLayoutData(folderDisplayTableData);
 	    folderDisplayTable.setLayout(new GridLayout(1,true));
 	    folderDisplayTable.getVerticalBar().setEnabled(true);
-	    
-	    Button placeHolder = new Button(datSelector, SWT.PUSH);
-	    placeHolder.setText("populate");
 	    
 	    java.util.Collections.sort(datList);
 	    
@@ -121,12 +121,10 @@ public class DatDisplayer extends Composite {
 	    
 //	    folderDisplayTable.getColumn(0).pack();
 	
-	    
 	    folderDisplayTable.getVerticalBar().setEnabled(true);
 	    folderDisplayTable.getVerticalBar().setIncrement(1);
 	    folderDisplayTable.getVerticalBar().setThumb(1);
-	    
-	    
+	     
 	    Button transferToRod = new Button(middle, SWT.PUSH);
 	    transferToRod.setText("Transfer to Rod \r ->");
 	    transferToRod.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));	    
@@ -140,13 +138,7 @@ public class DatDisplayer extends Composite {
         rodComponents.setLayoutData(rodComponentsData);
         rodComponents.setText("Rod Components");
 	    
-	    Table rodDisplayTable = new Table(rodComponents, SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-	    GridData rodDisplayData = new GridData(SWT.CENTER, SWT.CENTER, true, true);
-        rodDisplayData.minimumWidth = 200;
-        rodDisplayData.minimumHeight = 750;
-	    rodDisplayTable.setLayoutData(rodDisplayData);
-	    
-	    Button selectAll = new Button(rodComponents, SWT.PUSH);
+        Button selectAll = new Button(rodComponents, SWT.PUSH);
 	    selectAll.setText("Select All - not working well");
 	    selectAll.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 	    
@@ -157,6 +149,13 @@ public class DatDisplayer extends Composite {
 	    Button buildRod = new Button(rodComponents, SWT.PUSH);
 	    buildRod.setText("Build Rod From Selected");
 	    buildRod.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+	    
+	    Table rodDisplayTable = new Table(rodComponents, SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+	    GridData rodDisplayData = new GridData(SWT.CENTER, SWT.CENTER, true, true);
+        rodDisplayData.minimumWidth = 200;
+        rodDisplayData.minimumHeight = 750;
+	    rodDisplayTable.setLayoutData(rodDisplayData);
+	    
 	    
 	    Group scannedVariableOptions = new Group(farRight, SWT.NULL);
         GridLayout scannedVariableOptionsLayout = new GridLayout(1,true);
