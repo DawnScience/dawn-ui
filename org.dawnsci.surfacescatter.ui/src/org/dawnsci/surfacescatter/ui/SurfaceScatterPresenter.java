@@ -19,11 +19,11 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
+
 import org.apache.commons.lang.StringUtils;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies;
-import org.dawnsci.surfacescatter.BoxSlicer;
-import org.dawnsci.surfacescatter.BoxSlicerRodScanUtilsForDialog;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
+import org.dawnsci.surfacescatter.BoxSlicerRodScanUtilsForDialog;
 import org.dawnsci.surfacescatter.ClosestNoFinder;//private ArrayList<double[]> locationList; 
 import org.dawnsci.surfacescatter.CountUpToArray;
 import org.dawnsci.surfacescatter.DataModel;
@@ -42,7 +42,6 @@ import org.dawnsci.surfacescatter.StitchedOutputWithErrors;
 import org.dawnsci.surfacescatter.SuperModel;
 import org.dawnsci.surfacescatter.TrackerLocationInterpolation;
 import org.dawnsci.surfacescatter.TrackingMethodology;
-import org.eclipse.core.internal.preferences.ListenerRegistry;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
@@ -50,10 +49,10 @@ import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
-import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
-import org.eclipse.january.DatasetException;
+import org.eclipse.january.dataset.AggregateDataset;
 import org.eclipse.january.dataset.DTypeUtils;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
@@ -310,14 +309,15 @@ public class SurfaceScatterPresenter {
 		updateAnalysisMethodology(0, 1, 0, "10");
 		
 		Dataset xArrayCon = DatasetFactory.zeros(1);
-		ILazyDataset imageCon = DatasetFactory.zeros(1);
+		AggregateDataset imageCon = new AggregateDataset(false, imageArray);
 		int numberOfImages = 1; 
 		
 		
 		
 		try{
 			xArrayCon = DatasetUtils.concatenate(xArray, 0);
-			imageCon = SurfaceScatterPresenter.concatenate(imageArray, 0);
+//			((AggregateDataset) imageCon) = new AggregateDataset(false, imageArray);
+//			imageCon = SurfaceScatterPresenter.concatenate(imageArray, 0);
 			numberOfImages = xArrayCon.getSize();
 		}
 		catch(NullPointerException e){
@@ -600,7 +600,7 @@ public class SurfaceScatterPresenter {
 			
 		}
 		
-		sm.setStartFrame(ssvs.getPlotSystemCompositeView().getSliderPos());
+//		sm.setStartFrame(ssvs.getPlotSystemCompositeView().getSliderPos());
 	
 		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDisplay(LenPt, 
 				   models.get(0).getBoundaryBox(), 
@@ -615,7 +615,7 @@ public class SurfaceScatterPresenter {
 			ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgROI);
 		}
 		catch(Exception f){
-			
+			debug("couldn't get the gold background region");
 		}
 	}
 	
@@ -859,7 +859,7 @@ public class SurfaceScatterPresenter {
 			
 		}
 		
-		sm.setStartFrame(ssvs.getPlotSystemCompositeView().getSliderPos());
+//		sm.setStartFrame(ssvs.getPlotSystemCompositeView().getSliderPos());
 	
 		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDisplay(lenPt, 
 				   models.get(0).getBoundaryBox(), 
@@ -958,7 +958,7 @@ public class SurfaceScatterPresenter {
 			ashape[axis] += as[i].getShape()[axis];
 		}
 
-		Dataset result = DatasetFactory.zeros(isize, ashape, at);
+		ILazyDataset result = DatasetFactory.zeros(isize, ashape, at);
 
 		int[] start = new int[ashape.length];
 		int[] stop = ashape;
@@ -967,7 +967,10 @@ public class SurfaceScatterPresenter {
 			ILazyDataset b = as[i];
 			int[] bshape = b.getShape();
 			stop[axis] += bshape[axis];
-			result.setSlice(b, start, stop, null);
+//			result.
+			
+//			result.set;
+			((Dataset) result).setSlice(b, start, stop, null);
 			start[axis] += bshape[axis];
 		}
 
@@ -1673,6 +1676,8 @@ public class SurfaceScatterPresenter {
 		
 		sm.setPermanentBoxOffsetLenPt(sm.getBoxOffsetLenPt());
 		
+		sm.setStartFrame(sm.getSliderPos());
+		
 		trackingJob tj = new trackingJob();
 		debug("tj invoked");
 		tj.setSsvs(ssvs);
@@ -1949,7 +1954,7 @@ class trackingJob {
 						
 						for (int k = (sm.getStartFrame()); k >= 0; k--) {
 	
-						debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k));
+//						debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k));
 						
 	//					ssp.sliderMovemementMainImage(k, ssp.getSsvs().getPlotSystemCompositeView().getPlotSystem());
 						int trackingMarker = 1;
@@ -2032,7 +2037,7 @@ class trackingJob {
 	
 					for (int k = sm.getStartFrame(); k < noImages; k++) {
 						
-						debug("wowowowow l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k));
+//						debug("wowowowow l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k));
 						
 	//					ssp.sliderMovemementMainImage(k, ssp.getSsvs().getPlotSystemCompositeView().getPlotSystem());
 						int trackingMarker = 2;
@@ -2170,12 +2175,6 @@ class trackingJob2 {
 	public void setSsvs(SurfaceScatterViewStart ssvs) {
 		this.ssvs = ssvs;
 	}
-
-
-	
-//	public trackingJob2() {
-//		super("updating image...");
-//	}
 
 	public void setOutputCurves(IPlottingSystem<Composite> outputCurves) {
 		this.outputCurves = outputCurves;
@@ -2819,13 +2818,13 @@ class trackingJob2 {
 				public void run(){
 			
 			
-			
+		
 			for (int k = (sm.getStartFrame()); k >= 0; k--) {
 
 				if (sm.getFilepathsSortedArray()[k] == jok) {
 					
 					debug("switched to k--");
-
+					debug("%%%%%%%%%%%%%%%%% sm.getStartFrame:  "  +  sm.getStartFrame() + "??????????????????" );
 					debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
 					+ " , " + "local jok:  " + Integer.toString(jok));
 					
@@ -2910,10 +2909,15 @@ class trackingJob2 {
 				}
 			}
 
+			debug("%%%%%%%%%%%%%%%%% sm.getStartFrame:  "  +  sm.getStartFrame() + "??????????????????" );
+			
+			
 			for (int k = sm.getStartFrame(); k < noImages; k++) {
 
 				if (sm.getFilepathsSortedArray()[k] == jok) {
 
+					debug("%%%%%%%%%%%%%%%%% sm.getStartFrame:  "  +  sm.getStartFrame() + "??????????????????" );
+					
 					
 					debug("switched to k++");
 					debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
@@ -3176,12 +3180,19 @@ class trackingJob2 {
 
 			else if (imagePosInOriginalDat[nextk] != 0) {
 
+				debug("%%%%%%%%%%%%%%%%% switched the dat file");
+				debug("%%%%%%%%%%%%%%%%% sm.getStartFrame:  "  +  sm.getStartFrame() + "??????????????????" );
+				
 				for (int k = (sm.getStartFrame()); k >= 0; k--) {
 
 					if (sm.getFilepathsSortedArray()[k] == nextjok) {
 
 						debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
 						+ " , " + "local nextjok:  " + Integer.toString(nextjok));
+						
+						
+						debug("%%%%%%%%%%%%%%%%% switched the dat file");
+						debug("%%%%%%%%%%%%%%%%% sm.getStartFrame:  "  +  sm.getStartFrame() + "??????????????????" );
 						
 						
 						int trackingMarker = 1;
@@ -3313,7 +3324,7 @@ class trackingJob2 {
 				}
 
 				for (int k = sm.getStartFrame(); k < noImages; k++) {
-
+					debug("%%%%%%%%%%%%%%%%% sm.getStartFrame:  "  +  sm.getStartFrame() + "??????????????????" );
 					if (sm.getFilepathsSortedArray()[k] == nextjok) {
 
 						debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
