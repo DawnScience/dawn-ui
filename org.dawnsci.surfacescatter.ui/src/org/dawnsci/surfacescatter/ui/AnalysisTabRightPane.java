@@ -63,7 +63,7 @@ public class AnalysisTabRightPane extends Dialog {
 		final Composite container = (Composite) super.createDialogArea(parent);
 		
 		try {
-			customComposite2 = new SuperSashPlotSystem3Composite(container, SWT.NONE, ssvs);
+			customComposite2 = new SuperSashPlotSystem3Composite(container, SWT.NONE, ssvs, ssp);
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}

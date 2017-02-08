@@ -37,7 +37,7 @@ public class GeometricParametersWindows extends Composite{
 	private Text normalisationFactor;
 	private Button specular;
 	private Text imageName;
-	private Text xName;
+//	private Text xName;
 	private Text scalingFactor;
 	private Text beamHeight;
 	private Text footprint;
@@ -45,7 +45,7 @@ public class GeometricParametersWindows extends Composite{
 	private Text savePath;
 	private Text fluxPath;
 	private TabFolder folder;
-	private Text xNameRef;
+//	private Text xNameRef;
 	private SurfaceScatterPresenter ssp;
 	private GeometricParametersWindows gpw;
 	
@@ -485,13 +485,13 @@ public class GeometricParametersWindows extends Composite{
 		this.imageName = imageName;
 	}
 
-	public Text getxName() {
-		return xName;
-	}
-
-	public void setxName(Text xName) {
-		this.xName = xName;
-	}
+//	public Text getxName() {
+//		return xName;
+//	}
+//
+//	public void setxName(Text xName) {
+//		this.xName = xName;
+//	}
 
 	public Text getScalingFactor() {
 		return scalingFactor;
@@ -549,13 +549,13 @@ public class GeometricParametersWindows extends Composite{
 		this.folder = folder;
 	}
 
-	public Text getxNameRef() {
-		return xNameRef;
-	}
-
-	public void setxNameRef(Text xNameRef) {
-		this.xNameRef = xNameRef;
-	}
+//	public Text getxNameRef() {
+//		return xNameRef;
+//	}
+//
+//	public void setxNameRef(Text xNameRef) {
+//		this.xNameRef = xNameRef;
+//	}
 
 	public SurfaceScatterPresenter getSsp() {
 		return ssp;
@@ -580,10 +580,11 @@ public class GeometricParametersWindows extends Composite{
 	
 	public void geometricParametersUpdate() {
 			
-		ssp.geometricParametersUpdate(xNameRef.getText(),
+		ssp.geometricParametersUpdate(
+//			      xNameRef.getText(),
 				  fluxPath.getText(),
 				  (Double.parseDouble(beamHeight.getText())),
-				  (savePath.getText()),
+//				  (savePath.getText()),
 				  (Double.parseDouble(footprint.getText())),
 				  (Double.parseDouble(angularFudgeFactor.getText())),
 				  beamCorrection.getSelection(),
@@ -600,8 +601,9 @@ public class GeometricParametersWindows extends Composite{
 				  (Double.parseDouble(sampleSize.getText())),
 				  (Double.parseDouble(normalisationFactor.getText())),
 				  (specular.getSelection()),
-				  (imageName.getText()),
-				  (xName.getText()));
+				  (imageName.getText())
+//				  (xName.getText())
+				  );
 		
 	}
 	

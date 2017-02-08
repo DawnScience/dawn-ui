@@ -30,6 +30,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
 import org.eclipse.ui.PlatformUI;
@@ -59,6 +61,7 @@ public class SurfaceScatterViewStart extends Dialog {
 	private int DEBUG =1;
 	private boolean modify = true;
 	private  String datFolderPath;
+	private Combo correctionsDropDown;
 	
 	
 	public SuperSashPlotSystem3Composite getSsps3c() {
@@ -170,9 +173,30 @@ public class SurfaceScatterViewStart extends Dialog {
 		
 
 	    try {
+	    	
+	    	
+			Group methodSetting = new Group(right, SWT.FILL);
+		    GridLayout methodSettingLayout = new GridLayout(1, true);
+			GridData methodSettingData = new GridData();
+			methodSettingData.minimumWidth = 50;
+			methodSetting.setLayout(methodSettingLayout);
+			methodSetting.setLayoutData(methodSettingData);
+			
+			Label correctionsLabel = new Label(methodSetting, SWT.FILL);
+			correctionsLabel.setText("SXRD / Reflectivity:");
+			
+			
+			correctionsDropDown = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
+			correctionsDropDown.add("SXRD");
+			correctionsDropDown.add("Reflectivity with Flux Correction");
+			correctionsDropDown.add("Reflectivity without Flux Correction");
+			correctionsDropDown.add("Reflectivity with NO Correction");
+			correctionsDropDown.select(0);
+	    	
 			paramField = new GeometricParametersWindows(right, SWT.FILL, ssp);
 			paramField.setLayout(new GridLayout());
 			paramField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -182,7 +206,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ssp.setCorrectionSelection(paramField.getTabFolder().getSelectionIndex());
+//				ssp.setCorrectionSelection(paramField.getTabFolder().getSelectionIndex());
 				
 			}
 			
@@ -192,6 +216,8 @@ public class SurfaceScatterViewStart extends Dialog {
 				
 			}
 		});
+	    
+	    right.setWeights(new int[] {10,90});
 	    
 /////////////////////////////////////////////////////////////////////////		
 ///////////////////////////////////////////////////////
@@ -267,7 +293,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			public void widgetSelected(SelectionEvent e) {
 			
 				 int sliderPos = customComposite.getSlider().getSelection();
-				 ssp.sliderMovemementMainImage(sliderPos, customComposite.getPlotSystem());
+				 ssp.sliderMovemementMainImage(sliderPos);
 //				 ssp.sliderZoomedArea(sliderPos, 
 //						 			  customComposite.getGreenRegion().getROI(), 
 //						 			  customComposite.getSubImagePlotSystem());
@@ -349,7 +375,7 @@ public class SurfaceScatterViewStart extends Dialog {
 					}
 					
 					int k = ssp.closestImageIntegerInStack(r);
-					ssp.sliderMovemementMainImage(k, customComposite.getPlotSystem());
+					ssp.sliderMovemementMainImage(k);
 					ssp.sliderZoomedArea(k, 
 							  			 customComposite.getGreenRegion().getROI(), 
 							  			 customComposite.getSubImagePlotSystem());
@@ -389,7 +415,7 @@ public class SurfaceScatterViewStart extends Dialog {
 					int k = ssp.closestImageNo(in);
 //					double l = ssp.closestXValue(in);
 					
-					ssp.sliderMovemementMainImage(k, customComposite.getPlotSystem());
+					ssp.sliderMovemementMainImage(k);
 					ssp.sliderZoomedArea(k, 
 							  			 customComposite.getGreenRegion().getROI(), 
 							  			 customComposite.getSubImagePlotSystem());
@@ -437,7 +463,7 @@ public class SurfaceScatterViewStart extends Dialog {
 ////////////////////////Analysis Right//////////////////////////////
 /////////////////anaRight Window 4/////////////////////////////////		
 		try{
-			ssps3c = new SuperSashPlotSystem3Composite(anaRight, SWT.FILL, ssvs);
+			ssps3c = new SuperSashPlotSystem3Composite(anaRight, SWT.FILL, ssvs, ssp);
 
 			ssps3c.setLayout(new GridLayout());
 			ssps3c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -499,8 +525,7 @@ public class SurfaceScatterViewStart extends Dialog {
 					
 					ssp.updateSliders(ssvs.getSliderList(), xPos);
 					
-					ssp.sliderMovemementMainImage(xPos, 
-							                  	  customComposite.getPlotSystem());
+					ssp.sliderMovemementMainImage(xPos);
 					ssp.sliderZoomedArea(xPos, 
 				 			  customComposite.getGreenRegion().getROI(), 
 				 			  customComposite.getSubImagePlotSystem());
@@ -657,6 +682,8 @@ public class SurfaceScatterViewStart extends Dialog {
 		}
 	}
 	
-	
+	public Combo getCorrectionSelection (){
+		return correctionsDropDown;
+	}
 	
 }

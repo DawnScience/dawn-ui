@@ -53,12 +53,15 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.january.DatasetException;
+import org.eclipse.january.dataset.DTypeUtils;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.Maths;
+import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -147,9 +150,9 @@ public class SurfaceScatterPresenter {
 		sm.setCorrectionSelection(correctionSelection);
 		sm.setImageFolderPath(imageFolderPath);
 
-		IDataset[] imageArray = new IDataset[filepaths.length];
+		ILazyDataset[] imageArray = new ILazyDataset[filepaths.length];
 		IDataset[] xArray = new IDataset[filepaths.length];
-		TreeMap<Integer, Dataset> som = new TreeMap<Integer, Dataset>();
+		TreeMap<Integer, ILazyDataset> som = new TreeMap<Integer, ILazyDataset>();
 		ArrayList<Integer> imageRefList = new ArrayList<>();
 		int imageRef = 0;
 		ArrayList<Integer> imagesToFilepathRef = new ArrayList<Integer>();
@@ -202,15 +205,15 @@ public class SurfaceScatterPresenter {
 					models.get(id).setDatImages(ild);
 					models.get(id).setFilepath(filepaths[id]);
 					SliceND slice = new SliceND(ild.getShape());
-					IDataset images = ild.getSlice(slice);
-					imageArray[id] = images;
+//					ILazyDataset images = ild.getSlice(slice);
+					imageArray[id] = ild;
 	
 					for (int f = 0; f < (imageArray[id].getShape()[0]); f++) {
 	
-						SliceND slice2 = new SliceND(images.getShape());
+						SliceND slice2 = new SliceND(ild.getShape());
 						slice2.setSlice(0, f, f + 1, 1);
-						IDataset nim = images.getSlice(slice2);
-						nim.squeeze();
+						ILazyDataset nim = ild.getSlice(slice2);
+						nim.squeezeEnds();
 						som.put(imageRef, (Dataset) nim);
 						imageRefList.add(imageRef);
 						imagesToFilepathRef.add(id);
@@ -307,12 +310,14 @@ public class SurfaceScatterPresenter {
 		updateAnalysisMethodology(0, 1, 0, "10");
 		
 		Dataset xArrayCon = DatasetFactory.zeros(1);
-		Dataset imageCon = DatasetFactory.zeros(1);
+		ILazyDataset imageCon = DatasetFactory.zeros(1);
 		int numberOfImages = 1; 
+		
+		
 		
 		try{
 			xArrayCon = DatasetUtils.concatenate(xArray, 0);
-			imageCon = DatasetUtils.concatenate(imageArray, 0);
+			imageCon = SurfaceScatterPresenter.concatenate(imageArray, 0);
 			numberOfImages = xArrayCon.getSize();
 		}
 		catch(NullPointerException e){
@@ -333,11 +338,8 @@ public class SurfaceScatterPresenter {
 			DatasetUtils.sort(xArrayCon, imageRefDat);
 			DatasetUtils.sort(xArrayConClone, imagesToFilepathRefDat);
 
-		
-		
-			
-			
-		Dataset[] imageSortedDat = new Dataset[imageRefList.size()];
+				
+		ILazyDataset[] imageSortedDat = new Dataset[imageRefList.size()];
 		int[] filepathsSortedArray = new int[imageRefList.size()];
 		noImages = imageRefList.size();
 
@@ -358,9 +360,9 @@ public class SurfaceScatterPresenter {
 
 		SliceND slice2 = new SliceND(imageCon.getShape());
 		slice2.setSlice(0, 0, 1, 1);
-		Dataset nullImage = imageCon.getSlice(slice2);
+		Dataset nullImage = (Dataset) imageCon.getSlice(slice2);
 
-		sm.setNullImage(imageCon.getSlice(slice2));
+		sm.setNullImage((Dataset) imageCon.getSlice(slice2));
 
 		sm.setNumberOfImages(numberOfImages);
 		sm.setNullImage(nullImage);
@@ -385,8 +387,7 @@ public class SurfaceScatterPresenter {
 	}
 	
 
-	public void sliderMovemementMainImage(int sliderPos, 
-										  IPlottingSystem<Composite>... pS) {
+	public void sliderMovemementMainImage(int sliderPos) {
 
 		sm.setSliderPos(sliderPos);
 		
@@ -487,8 +488,7 @@ public class SurfaceScatterPresenter {
 		
 		this.updateSliders(ssvs.getSliderList(),selection);
 		
-		this.sliderMovemementMainImage(selection, 
-				  					  pscv.getPlotSystem());
+		this.sliderMovemementMainImage(selection);
 		
 		this.sliderZoomedArea(selection, 
 							 loadedROI, 
@@ -506,7 +506,17 @@ public class SurfaceScatterPresenter {
 	
 	public Dataset getImage(int k) {
 		if(sm.getImages() != null){
-				return sm.getImages()[k];
+			
+			ILazyDataset image = sm.getImages()[k];
+			SliceND slice = new SliceND(image.getShape());
+//			ILazyDataset images = ild.getSlice(slice);
+			
+				try {
+					return (Dataset) image.getSlice(slice);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					return DatasetFactory.zeros(new int[] {2,2}, Dataset.ARRAYFLOAT64);
+				}
 		}
 		else{
 			return DatasetFactory.zeros(new int[] {2,2}, Dataset.ARRAYFLOAT64);
@@ -535,7 +545,7 @@ public class SurfaceScatterPresenter {
 		sm.setInitialLenPt(LenPt);
 		
 		try{
-			ssvs.getSsps3c().generalUpdate();
+			fireStateListeners();;
 		}
 		catch(NullPointerException f){
 			
@@ -584,7 +594,7 @@ public class SurfaceScatterPresenter {
 		sm.setInitialLenPt(LenPt);
 		
 		try{
-			ssvs.getSsps3c().generalUpdate();
+			fireStateListeners();;
 		}
 		catch(NullPointerException f){
 			
@@ -901,7 +911,68 @@ public class SurfaceScatterPresenter {
 	}
 	
 	
-	
+	public static ILazyDataset concatenate(final ILazyDataset[] as, final int axis) {
+		if (as == null || as.length == 0) {
+//			utilsLogger.error("No datasets given");
+			throw new IllegalArgumentException("No datasets given");
+		}
+		ILazyDataset a = as[0];
+		if (as.length == 1) {
+			
+//			SliceND slice = new SliceND(a.getShape());
+//			ILazyDataset im = null;
+//			try {
+//				im = a.getSlice(slice);
+//			} catch (DatasetException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+			
+			return a.clone();
+		}
+		int[] ashape = a.getShape();
+		int at = DTypeUtils.getDType(a);
+		int anum = as.length;
+		int isize = a.getElementsPerItem();
+
+		int i = 1;
+		for (; i < anum; i++) {
+			if (at != DTypeUtils.getDType(as[i])) {
+//				utilsLogger.error("Datasets are not of same type");
+				break;
+			}
+			if (!ShapeUtils.areShapesCompatible(ashape, as[i].getShape(), axis)) {
+//				utilsLogger.error("Datasets' shapes are not equal");
+				break;
+			}
+			final int is = as[i].getElementsPerItem();
+			if (isize < is)
+				isize = is;
+		}
+		if (i < anum) {
+//			utilsLogger.error("Dataset are not compatible");
+			throw new IllegalArgumentException("Datasets are not compatible");
+		}
+
+		for (i = 1; i < anum; i++) {
+			ashape[axis] += as[i].getShape()[axis];
+		}
+
+		Dataset result = DatasetFactory.zeros(isize, ashape, at);
+
+		int[] start = new int[ashape.length];
+		int[] stop = ashape;
+		stop[axis] = 0;
+		for (i = 0; i < anum; i++) {
+			ILazyDataset b = as[i];
+			int[] bshape = b.getShape();
+			stop[axis] += bshape[axis];
+			result.setSlice(b, start, stop, null);
+			start[axis] += bshape[axis];
+		}
+
+		return result;
+	}
 	
 	public void regionOfInterestSetter(int[][] LenPt) {
 
@@ -952,7 +1023,7 @@ public class SurfaceScatterPresenter {
 
 	public void sliderZoomedArea(int sliderPos, IROI box, IPlottingSystem<Composite>... pS) {
 
-		Dataset image = sm.getImages()[sliderPos];
+		Dataset image = this.getImage(sliderPos);
 		Dataset subImage = (Dataset) PlotSystem2DataSetter.PlotSystem2DataSetter1(box, image);
 
 //		for (IPlottingSystem<Composite> x : pS) {
@@ -960,6 +1031,24 @@ public class SurfaceScatterPresenter {
 			ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(sliderPos), null, null);
 			
 //		}
+	}
+	
+	public void resetCorrectionsSelection(){
+		
+		int  correctionSelection =0;
+		
+		
+		try{
+			correctionSelection = ssvs.getCorrectionSelection().getSelectionIndex();
+
+		}
+		catch(ArrayIndexOutOfBoundsException e1){
+			correctionSelection = 0;
+
+		}
+		
+		
+		sm.setCorrectionSelection(correctionSelection);
 	}
 	
 	public int closestImageNo(double in){
@@ -992,7 +1081,7 @@ public class SurfaceScatterPresenter {
 
 	public Dataset subImage(int sliderPos, IROI box) {
 
-		Dataset image = sm.getImages()[sliderPos];
+		Dataset image = this.getImage(sliderPos);  // sm.getImages()[sliderPos];
 		Dataset subImage = (Dataset) PlotSystem2DataSetter.PlotSystem2DataSetter1(box, image);
 		return subImage;
 	}
@@ -1019,10 +1108,11 @@ public class SurfaceScatterPresenter {
 												 selection);		
 	}
 
-	public void geometricParametersUpdate(String xNameRef,
+	public void geometricParametersUpdate(
+//										  String xNameRef,
 										  String fluxPath,
 										  double beamHeight,
-										  String savePath,
+//										  String savePath,
 										  double footprint,
 										  double angularFudgeFactor,
 										  boolean beamCorrection,
@@ -1039,14 +1129,15 @@ public class SurfaceScatterPresenter {
 										  double sampleSize,
 										  double normalisationFactor,
 										  boolean specular,
-										  String imageName,
-										  String xName){
+										  String imageName
+//										  String xName
+										  ){
 											
 		for(GeometricParametersModel gm: gms){
-			gm.setxNameRef(xNameRef);
+//			gm.setxNameRef(xNameRef);
 			gm.setFluxPath(fluxPath);
 			gm.setBeamHeight(beamHeight);
-			gm.setSavePath(savePath);
+//			gm.setSavePath(savePath);
 			gm.setBeamHeight(footprint);
 			gm.setAngularFudgeFactor(angularFudgeFactor);
 			gm.setBeamCorrection(beamCorrection);
@@ -1064,7 +1155,7 @@ public class SurfaceScatterPresenter {
 			gm.setNormalisationFactor(normalisationFactor);
 			gm.setSpecular(specular);
 			gm.setImageName(imageName);
-			gm.setxName(xName);
+//			gm.setxName(xName);
 		}
 		
 	}
@@ -1502,7 +1593,7 @@ public class SurfaceScatterPresenter {
 	
 	public IDataset returnNullImage(){
 		
-		IDataset output = sm.getImages()[0];
+		IDataset output = this.getImage(0);
 		
 		return output;
 		
@@ -1761,7 +1852,7 @@ class trackingJob {
 							
 									int trackingMarker = 0;
 									int imageNumber =k;
-									IDataset j = sm.getImages()[imageNumber];
+									IDataset j = ssp.getImage(imageNumber);
 									int jok = sm.getFilepathsSortedArray()[imageNumber];
 									DataModel dm = dms.get(jok);
 									GeometricParametersModel gm = gms.get(jok);
@@ -1792,7 +1883,7 @@ class trackingJob {
 									}
 								
 									sm.addBackgroundDatArray(sm.getImages().length, imageNumber, output1);
-									IDataset tempImage = sm.getImages()[imageNumber];
+									IDataset tempImage = ssp.getImage(imageNumber);
 									double[] tempLoc = sm.getLocationList().get(imageNumber);
 									double[] tl = tempLoc;
 									int[] sml =  sm.getInitialLenPt()[0];
@@ -1863,7 +1954,7 @@ class trackingJob {
 	//					ssp.sliderMovemementMainImage(k, ssp.getSsvs().getPlotSystemCompositeView().getPlotSystem());
 						int trackingMarker = 1;
 						int imageNumber =k;
-						IDataset j = sm.getImages()[k];
+						IDataset j = ssp.getImage(k);
 						int jok = sm.getFilepathsSortedArray()[k];
 						DataModel dm = dms.get(jok);
 						GeometricParametersModel gm = gms.get(jok);
@@ -1897,7 +1988,7 @@ class trackingJob {
 						
 						sm.addBackgroundDatArray(sm.getImages().length, k, output1);
 						
-						IDataset tempImage = sm.getImages()[imageNumber];
+						IDataset tempImage = ssp.getImage(imageNumber);
 						double[] tempLoc = sm.getLocationList().get(imageNumber);
 						RectangularROI newROI = new RectangularROI(tempLoc[0],
 							       tempLoc[1],
@@ -1946,7 +2037,7 @@ class trackingJob {
 	//					ssp.sliderMovemementMainImage(k, ssp.getSsvs().getPlotSystemCompositeView().getPlotSystem());
 						int trackingMarker = 2;
 	
-						IDataset j = sm.getImages()[k];
+						IDataset j = ssp.getImage(k);
 						int jok = sm.getFilepathsSortedArray()[k];
 						DataModel dm = dms.get(jok);
 						GeometricParametersModel gm = gms.get(jok);
@@ -1981,7 +2072,7 @@ class trackingJob {
 						sm.addBackgroundDatArray(sm.getImages().length, k, output1);
 						
 						int imageNumber =k;
-						IDataset tempImage = sm.getImages()[imageNumber];
+						IDataset tempImage = ssp.getImage(imageNumber);
 						double[] tempLoc = sm.getLocationList().get(imageNumber);
 						RectangularROI newROI = new RectangularROI(tempLoc[0],
 							       tempLoc[1],
@@ -2178,7 +2269,7 @@ class trackingJob2 {
 
 							int jok = sm.getFilepathsSortedArray()[k];
 							int trackingMarker = 0;
-							IDataset j = sm.getImages()[k];
+							IDataset j = ssp.getImage(k);
 							DataModel dm = dms.get(jok);
 							GeometricParametersModel gm = gms.get(jok);
 							ExampleModel model = models.get(jok);
@@ -2215,7 +2306,7 @@ class trackingJob2 {
 							sm.addBackgroundDatArray(sm.getImages().length, k, output1);
 							
 							int imageNumber =k;
-							IDataset tempImage = sm.getImages()[imageNumber];
+							IDataset tempImage = ssp.getImage(imageNumber);
 							double[] tempLoc = sm.getLocationList().get(imageNumber);
 							RectangularROI newROI = new RectangularROI(tempLoc[0],
 								       tempLoc[1],
@@ -2297,7 +2388,7 @@ class trackingJob2 {
 									
 									
 									int trackingMarker = 0;
-									IDataset j = sm.getImages()[k];
+									IDataset j = ssp.getImage(k);
 									int jokLocal = sm.getFilepathsSortedArray()[k];
 									DataModel dm = dms.get(jokLocal);
 									GeometricParametersModel gm = gms.get(jokLocal);
@@ -2388,7 +2479,7 @@ class trackingJob2 {
 									
 									
 									int imageNumber =k;
-									IDataset tempImage = sm.getImages()[imageNumber];
+									IDataset tempImage = ssp.getImage(imageNumber);
 									double[] tempLoc = sm.getLocationList().get(imageNumber);
 									RectangularROI newROI = new RectangularROI(tempLoc[0],
 										       tempLoc[1],
@@ -2444,7 +2535,7 @@ class trackingJob2 {
 									
 									
 									int trackingMarker = 1;
-									IDataset j = sm.getImages()[k];
+									IDataset j = ssp.getImage(k);
 									DataModel dm = dms.get(nextjok);
 									GeometricParametersModel gm = gms.get(nextjok);
 									ExampleModel model = models.get(nextjok);
@@ -2528,7 +2619,7 @@ class trackingJob2 {
 									
 									
 									int imageNumber =k;
-									IDataset tempImage = sm.getImages()[imageNumber];
+									IDataset tempImage = ssp.getImage(imageNumber);
 									double[] tempLoc = sm.getLocationList().get(imageNumber);
 									RectangularROI newROI = new RectangularROI(tempLoc[0],
 										       tempLoc[1],
@@ -2580,7 +2671,7 @@ class trackingJob2 {
 									
 									
 									int trackingMarker = 2;
-									IDataset j = sm.getImages()[k];
+									IDataset j = ssp.getImage(k);
 									DataModel dm = dms.get(nextjok);
 									GeometricParametersModel gm = gms.get(nextjok);
 									ExampleModel model = models.get(nextjok);
@@ -2659,7 +2750,7 @@ class trackingJob2 {
 									sm.addBackgroundDatArray(sm.getImages().length, k, output1);
 									
 									int imageNumber =k;
-									IDataset tempImage = sm.getImages()[imageNumber];
+									IDataset tempImage = ssp.getImage(imageNumber);
 									double[] tempLoc = sm.getLocationList().get(imageNumber);
 									RectangularROI newROI = new RectangularROI(tempLoc[0],
 										       tempLoc[1],
@@ -2739,7 +2830,7 @@ class trackingJob2 {
 					+ " , " + "local jok:  " + Integer.toString(jok));
 					
 					int trackingMarker = 1;
-					IDataset j = sm.getImages()[k];
+					IDataset j = ssp.getImage(k);
 					DataModel dm = dms.get(jok);
 					GeometricParametersModel gm = gms.get(jok);
 					ExampleModel model = models.get(jok);
@@ -2774,7 +2865,7 @@ class trackingJob2 {
 					sm.addBackgroundDatArray(sm.getImages().length, k, output1);
 					
 					int imageNumber =k;
-					IDataset tempImage = sm.getImages()[imageNumber];
+					IDataset tempImage = ssp.getImage(imageNumber);
 					double[] tempLoc = sm.getLocationList().get(imageNumber);
 					RectangularROI newROI = new RectangularROI(tempLoc[0],
 						       tempLoc[1],
@@ -2829,7 +2920,7 @@ class trackingJob2 {
 					+ " , " + "local jok:  " + Integer.toString(jok));
 					
 					int trackingMarker = 2;
-					IDataset j = sm.getImages()[k];
+					IDataset j = ssp.getImage(k);
 					DataModel dm = dms.get(jok);
 					GeometricParametersModel gm = gms.get(jok);
 					ExampleModel model = models.get(jok);
@@ -2870,7 +2961,7 @@ class trackingJob2 {
 					
 					
 					int imageNumber =k;
-					IDataset tempImage = sm.getImages()[imageNumber];
+					IDataset tempImage = ssp.getImage(imageNumber);
 					double[] tempLoc = sm.getLocationList().get(imageNumber);
 					RectangularROI newROI = new RectangularROI(tempLoc[0],
 						       tempLoc[1],
@@ -2947,7 +3038,7 @@ class trackingJob2 {
 						
 						
 						int trackingMarker = 0;
-						IDataset j = sm.getImages()[k];
+						IDataset j = ssp.getImage(k);
 						int jokLocal = sm.getFilepathsSortedArray()[k];
 						DataModel dm = dms.get(jokLocal);
 						GeometricParametersModel gm = gms.get(jokLocal);
@@ -3038,7 +3129,7 @@ class trackingJob2 {
 						
 						
 						int imageNumber =k;
-						IDataset tempImage = sm.getImages()[imageNumber];
+						IDataset tempImage = ssp.getImage(imageNumber);
 						double[] tempLoc = sm.getLocationList().get(imageNumber);
 						RectangularROI newROI = new RectangularROI(tempLoc[0],
 							       tempLoc[1],
@@ -3094,7 +3185,7 @@ class trackingJob2 {
 						
 						
 						int trackingMarker = 1;
-						IDataset j = sm.getImages()[k];
+						IDataset j = ssp.getImage(k);
 						DataModel dm = dms.get(nextjok);
 						GeometricParametersModel gm = gms.get(nextjok);
 						ExampleModel model = models.get(nextjok);
@@ -3178,7 +3269,7 @@ class trackingJob2 {
 						
 						
 						int imageNumber =k;
-						IDataset tempImage = sm.getImages()[imageNumber];
+						IDataset tempImage = ssp.getImage(imageNumber);
 						double[] tempLoc = sm.getLocationList().get(imageNumber);
 						RectangularROI newROI = new RectangularROI(tempLoc[0],
 							       tempLoc[1],
@@ -3230,7 +3321,7 @@ class trackingJob2 {
 						
 						
 						int trackingMarker = 2;
-						IDataset j = sm.getImages()[k];
+						IDataset j = ssp.getImage(k);
 						DataModel dm = dms.get(nextjok);
 						GeometricParametersModel gm = gms.get(nextjok);
 						ExampleModel model = models.get(nextjok);
@@ -3309,7 +3400,7 @@ class trackingJob2 {
 						sm.addBackgroundDatArray(sm.getImages().length, k, output1);
 						
 						int imageNumber =k;
-						IDataset tempImage = sm.getImages()[imageNumber];
+						IDataset tempImage = ssp.getImage(imageNumber);
 						double[] tempLoc = sm.getLocationList().get(imageNumber);
 						RectangularROI newROI = new RectangularROI(tempLoc[0],
 							       tempLoc[1],
@@ -3462,7 +3553,7 @@ class MovieJob {
 				
 				for( k = 0; k<sm.getImages().length; k++){
 							
-					tempImage = sm.getImages()[k];
+					tempImage = ssp.getImage(k);
 					subTempImage = sm.getBackgroundDatArray().get(k);
 					tempLoc = sm.getLocationList().get(k);
 					imageNumber =k;

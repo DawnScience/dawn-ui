@@ -94,6 +94,17 @@ public class PlotSystemCompositeView extends Composite {
      
     public void createContents(IDataset image) {
 
+    	
+    	 ssp.addStateListener(new  IPresenterStateChangeEventListener() {
+				
+				@Override
+				public void update() {
+					generalUpdate();
+					
+				}
+			});
+    	
+    	
     	Display display = Display.getCurrent();
         Color gold = display.getSystemColor(SWT.COLOR_DARK_YELLOW);
     	
@@ -293,14 +304,8 @@ public class PlotSystemCompositeView extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
-				ssp.sliderMovemementMainImage(slider.getSelection(), 
-											  plotSystem);
+				ssp.sliderMovemementMainImage(slider.getSelection());
 				
-				
-//				ssp.sliderZoomedArea(slider.getSelection(),
-//										 region.getROI(), 
-//										 subImagePlotSystem);
-					
 				ssp.bgImageUpdate(subImageBgPlotSystem,
 									  slider.getSelection());
 					
@@ -471,6 +476,13 @@ public class PlotSystemCompositeView extends Composite {
 		
 		setROITexts(values);
 				
+	}
+	
+	public void generalUpdate(){
+		
+		plotSystem.updatePlot2D(ssp.getImage(ssp.getSliderPos()), null, null);
+		
+		
 	}
 }
     

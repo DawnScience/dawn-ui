@@ -66,9 +66,13 @@ public class SuperSashPlotSystem3Composite extends Composite{
 	}
 
 	public SuperSashPlotSystem3Composite(Composite parent, int style,
-			SurfaceScatterViewStart ssvs) throws Exception {
+			SurfaceScatterViewStart ssvs, SurfaceScatterPresenter ssp) throws Exception {
         super(parent, style);
         
+        
+        this.ssp = ssp;
+        
+       
         
         
 //        new Label(this, SWT.NONE).setText("Region of Interest");
@@ -96,7 +100,14 @@ public class SuperSashPlotSystem3Composite extends Composite{
 	 public void createContents() throws Exception {
 		 	
 		 
-		
+		 ssp.addStateListener(new  IPresenterStateChangeEventListener() {
+				
+				@Override
+				public void update() {
+					generalUpdate();
+					
+				}
+			});
 		 
 		SashForm sashForm= new SashForm(this, SWT.HORIZONTAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -260,7 +271,7 @@ public class SuperSashPlotSystem3Composite extends Composite{
 		}
 		
 		///////////////////////////////////////////////////////////////////////////////////
-		////////////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////////
 		/////////////////////// Background slice
 		/////////////////////////////////////////////////////////////////////////////////// viewer//////////////////////////////////////
 		///////////////// Keywords: cross hairs viewer, image

@@ -55,23 +55,23 @@ public class PresenterInitialSetup extends Dialog {
 		
 //////////////////////////Group methodSetting//////////////////////////////
 		
-		Group methodSetting = new Group(container, SWT.FILL);
-	    GridLayout methodSettingLayout = new GridLayout(1, true);
-		GridData methodSettingData = new GridData();
-		methodSettingData.minimumWidth = 50;
-		methodSetting.setLayout(methodSettingLayout);
-		methodSetting.setLayoutData(methodSettingData);
-		
-		Label correctionsLabel = new Label(methodSetting, SWT.FILL);
-		correctionsLabel.setText("SXRD / Reflectivity:");
-		
-		
-		correctionsDropDown = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
-		correctionsDropDown.add("SXRD");
-		correctionsDropDown.add("Reflectivity with Flux Correction");
-		correctionsDropDown.add("Reflectivity without Flux Correction");
-		correctionsDropDown.add("Reflectivity with NO Correction");
-		correctionsDropDown.select(0);
+//		Group methodSetting = new Group(container, SWT.FILL);
+//	    GridLayout methodSettingLayout = new GridLayout(1, true);
+//		GridData methodSettingData = new GridData();
+//		methodSettingData.minimumWidth = 50;
+//		methodSetting.setLayout(methodSettingLayout);
+//		methodSetting.setLayoutData(methodSettingData);
+//		
+//		Label correctionsLabel = new Label(methodSetting, SWT.FILL);
+//		correctionsLabel.setText("SXRD / Reflectivity:");
+//		
+//		
+//		correctionsDropDown = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
+//		correctionsDropDown.add("SXRD");
+//		correctionsDropDown.add("Reflectivity with Flux Correction");
+//		correctionsDropDown.add("Reflectivity without Flux Correction");
+//		correctionsDropDown.add("Reflectivity with NO Correction");
+//		correctionsDropDown.select(0);
 
 		
 ///////////////////////////.dat Folder selector///////////////////////////////////////////////////
@@ -156,17 +156,17 @@ public class PresenterInitialSetup extends Dialog {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				try{
-					correctionSelection = correctionsDropDown.getSelectionIndex();
-
-				}
-				catch(ArrayIndexOutOfBoundsException e1){
-					correctionSelection = 0;
- 
-				}
+//				try{
+//					correctionSelection = correctionsDropDown.getSelectionIndex();
+//
+//				}
+//				catch(ArrayIndexOutOfBoundsException e1){
+//					correctionSelection = 0;
+// 
+//				}
 				
 				
-				sm.setCorrectionSelection(correctionSelection);
+				sm.setCorrectionSelection(0);
 				ssp = new SurfaceScatterPresenter();
 				
 				ssp.surfaceScatterPresenterBuild(parentShell,

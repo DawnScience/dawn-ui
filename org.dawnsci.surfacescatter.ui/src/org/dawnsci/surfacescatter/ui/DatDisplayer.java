@@ -226,7 +226,11 @@ public class DatDisplayer extends Composite {
 				IDataHolder dh1 = null;
 				
 				try {
-					dh1 = LoaderFactory.getData(filepaths[0]);
+					
+					String filename = rodDisplayTable.getItem(0).getText();
+					String filep = datFolderPath + File.separator + filename;
+					dh1 = LoaderFactory.getData(filep );
+					
 				} catch (Exception e2) {
 					// TODO Auto-generated catch block
 					e2.printStackTrace();
@@ -337,6 +341,8 @@ public class DatDisplayer extends Composite {
 					String filename = rodComponentDats[f].getText();
 					filepaths[f] = datFolderPath + File.separator + filename;
 				}
+				
+				ssp.resetCorrectionsSelection();
 				
 				ssp.surfaceScatterPresenterBuild(ssp.getParentShell(), 
 												 filepaths, 
