@@ -15,6 +15,8 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabFolder2Adapter;
+import org.eclipse.swt.custom.CTabFolderEvent;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.FocusEvent;
@@ -350,6 +352,14 @@ public class SurfaceScatterViewStart extends Dialog {
 				paramField.geometricParametersUpdate();
 				ssp.regionOfInterestSetter();
 				
+				if(ssp.getTemporaryBackground()!=null){
+					try{
+						getPlotSystemCompositeView().removeBackgroundSubtractedSubImage();
+					}
+					catch(Exception n){
+						
+					}
+				}
 			}
 			
 			@Override
@@ -446,6 +456,10 @@ public class SurfaceScatterViewStart extends Dialog {
 				ssp.resetTrackers();
 				
 				ssp.triggerBoxOffsetTransfer();
+				
+				getPlotSystemCompositeView().appendBackgroundSubtractedSubImage();
+				
+//				getPlotSystemCompositeView().getFolder().getTabList()[1].setEnabled(true);
 				
 				ssp.runTrackingJob(customComposite.getSubImagePlotSystem(),
 									   outputCurves.getPlotSystem(),
@@ -618,6 +632,16 @@ public class SurfaceScatterViewStart extends Dialog {
 				
 			}
 		});
+	    
+	    
+	    folder.addCTabFolder2Listener(new CTabFolder2Adapter() {
+	        public void close(CTabFolderEvent event) {
+//	          if (event.item.equals(specialItem)) {
+	            event.doit = false;
+//	          }
+	        }
+	      });
+	    
 	    	    
 ////////////////////////////////////////////////////////////////////
 		return container;

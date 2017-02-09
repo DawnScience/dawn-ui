@@ -79,9 +79,12 @@ public class PlotSystem1CompositeView extends Composite {
     public void createContents(
     						   int trackingMarker) {
         
-    	
-    	trackerOn = ssp.getTrackerOn();
-    	
+    	try{
+    		trackerOn = ssp.getTrackerOn();
+    	}
+    	catch(NullPointerException r){
+    		trackerOn = false;
+    	}
     	trackerOnButton = new Button (this, SWT.PUSH);
     	trackerOnButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
     	

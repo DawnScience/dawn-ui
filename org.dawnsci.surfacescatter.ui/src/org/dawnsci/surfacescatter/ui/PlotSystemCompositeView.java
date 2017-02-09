@@ -22,6 +22,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
@@ -31,7 +32,6 @@ import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
 public class PlotSystemCompositeView extends Composite {
-
 
 	private Slider slider;
     private IPlottingSystem<Composite> plotSystem;
@@ -58,8 +58,6 @@ public class PlotSystemCompositeView extends Composite {
 	private Text yLen;
 	private SashForm form;
 	
-	
-     
     public PlotSystemCompositeView(Composite parent, 
     							   int style,
     							   IDataset image, 
@@ -71,19 +69,15 @@ public class PlotSystemCompositeView extends Composite {
     	
     	
         super(parent, style);
-
-
         this.numberOfImages = numberOfImages;
         this.nullImage = nullImage;
         this.ssp = ssp;
         this.ssvs = ssvs;
         
-       
-        
         try {
 			plotSystem = PlottingFactory.createPlottingSystem();
 			subImagePlotSystem = PlottingFactory.createPlottingSystem();
-			subImageBgPlotSystem = PlottingFactory.createPlottingSystem();
+//			subImageBgPlotSystem = PlottingFactory.createPlottingSystem();
 		} catch (Exception e2) {
 			e2.printStackTrace();
 		}
@@ -94,7 +88,6 @@ public class PlotSystemCompositeView extends Composite {
      
     public void createContents(IDataset image) {
 
-    	
     	 ssp.addStateListener(new  IPresenterStateChangeEventListener() {
 				
 				@Override
@@ -216,56 +209,54 @@ public class PlotSystemCompositeView extends Composite {
     		
     	folder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         	
-			////////////////////////////////////////////////////////
-			//		Tab 1 Setup
-			//////////////////////////////////////////////////////////
+		////////////////////////////////////////////////////////
+		//		Tab 1 Setup
+		//////////////////////////////////////////////////////////
         	
-    		TabItem subI = new TabItem(folder, SWT.NONE);
-    		subI.setText("Background Options");
-    		subI.setData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    	TabItem subI = new TabItem(folder, SWT.NONE);
+    	subI.setText("Background Options");
+    	subI.setData(new GridData(SWT.FILL, SWT.FILL, true, true));
 //    		
-    		Composite subIComposite = new Composite(folder, SWT.NONE | SWT.FILL);
-    		subIComposite.setLayout(new GridLayout());
-    		subIComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    	Composite subIComposite = new Composite(folder, SWT.NONE | SWT.FILL);
+    	subIComposite.setLayout(new GridLayout());
+    	subIComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     		
-    		subI.setControl(subIComposite);
+    	subI.setControl(subIComposite);
+    	
+    	GridData ld2 = new GridData(SWT.FILL, SWT.FILL, true, true);
+    	
+    	customComposite1 = new PlotSystem1CompositeView(subIComposite,
+    												    SWT.NONE,
+    												    0, 
+    												    0, 
+    												    ssp);
     		
-    		GridData ld2 = new GridData(SWT.FILL, SWT.FILL, true, true);
-
-    		customComposite1 = new PlotSystem1CompositeView(subIComposite,
-    				SWT.NONE,
-    				0, 
-    				0, 
-    				ssp);
-    		
-    		customComposite1.setLayout(new GridLayout());
-    		customComposite1.setLayoutData(ld2);
+    	customComposite1.setLayout(new GridLayout());
+    	customComposite1.setLayoutData(ld2);
 			
-			////////////////////////////////////////////////////////
-			//		Tab 2 Setup
-			//////////////////////////////////////////////////////////
+		////////////////////////////////////////////////////////
+		//		Tab 2 Setup
+		//////////////////////////////////////////////////////////
 			
-			TabItem subBgI = new TabItem(folder, SWT.NONE);
-			subBgI.setText("Bg Subtracted Image");
-			subBgI.setData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			
-			Composite subBgIComposite = new Composite(folder, SWT.NONE | SWT.FILL);
-			subBgIComposite.setLayout(new GridLayout());
-			subBgIComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			
-			subBgI.setControl(subBgIComposite);
-			
-//			ActionBarWrapper actionBarComposite1 = ActionBarWrapper.createActionBars(subBgI, null);
-			subImageBgPlotSystem.createPlotPart(subBgIComposite, "Region of interest", null, PlotType.IMAGE, null);
-			subImageBgPlotSystem.getPlotComposite().setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, true));
-			subImageBgPlotSystem.createPlot2D(nullImage, null, null);
-
-        
+//		TabItem subBgI = new TabItem(folder, SWT.NONE);
+//		subBgI.setText("Bg Subtracted Image");
+//		subBgI.setData(new GridData(SWT.FILL, SWT.FILL, true, true));
+//			
+//		Composite subBgIComposite = new Composite(folder, SWT.NONE | SWT.FILL);
+//		subBgIComposite.setLayout(new GridLayout());
+//		subBgIComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+//			
+//		subBgI.setControl(subBgIComposite);
+//			
+////		ActionBarWrapper actionBarComposite1 = ActionBarWrapper.createActionBars(subBgI, null);
+//		subImageBgPlotSystem.createPlotPart(subBgIComposite, "Region of interest", null, PlotType.IMAGE, null);
+//		subImageBgPlotSystem.getPlotComposite().setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, true));
+//		subImageBgPlotSystem.createPlot2D(nullImage, null, null);		
+		
 		plotSystem.addRegion(region);
 		RectangularROI startROI = new RectangularROI(100,100,50,50,0);
 		region.setROI(startROI);
 		
-
 		RectangularROI bgStartROI = new RectangularROI(90,90,70,70,0);
 		bgRegion.setROI(bgStartROI);
 		bgRegion.setRegionColor(gold);
@@ -321,14 +312,14 @@ public class PlotSystemCompositeView extends Composite {
 		
 			
 		    
-		    run = new Button (form, SWT.PUSH);
+		run = new Button (form, SWT.PUSH);
 			
 			
-		    run.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		    run.setText("Run");
+		run.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		run.setText("Run");
 			
 		
-		    form.setWeights(new int[] { 20,5, 40, 30, 5 });
+		form.setWeights(new int[] { 20,5, 40, 30, 5 });
     }
 		
    
@@ -342,7 +333,7 @@ public class PlotSystemCompositeView extends Composite {
    	return this;
    }
    
-   public IPlottingSystem getPlotSystem(){
+   public IPlottingSystem<Composite> getPlotSystem(){
 	   return plotSystem;
    }
 
@@ -484,6 +475,65 @@ public class PlotSystemCompositeView extends Composite {
 		
 		
 	}
+	
+	public void recursiveSetEnabled(Control ctrl, boolean enabled) {
+		   
+		if (ctrl instanceof Composite) {
+		      Composite comp = (Composite) ctrl;
+		      Control[] kids = comp.getChildren();
+		      for (Control c : kids)
+		         recursiveSetEnabled(c, enabled);
+		      if (kids == null || kids.length == 0) 
+		    	  ctrl.setEnabled(enabled);
+		 } else {
+		      ctrl.setEnabled(enabled);
+		 }
+	}
+	
+	public void appendBackgroundSubtractedSubImage(){
+		
+		try{
+			TabItem m = folder.getItem(1);
+			m.dispose();
+			folder.pack();
+		}
+		catch(Exception f){
+			
+		}
+		
+		TabItem subBgI = new TabItem(folder, SWT.NONE);
+		subBgI.setText("Bg Subtracted Image");
+		subBgI.setData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+		Composite subBgIComposite = new Composite(folder, SWT.NONE | SWT.FILL);
+		subBgIComposite.setLayout(new GridLayout());
+		subBgIComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+		subBgI.setControl(subBgIComposite);
+		
+		try {
+			subImageBgPlotSystem = PlottingFactory.createPlottingSystem();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		subImageBgPlotSystem.createPlotPart(subBgIComposite, "Region of interest", null, PlotType.IMAGE, null);
+		subImageBgPlotSystem.getPlotComposite().setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, true));
+		subImageBgPlotSystem.createPlot2D(nullImage, null, null);	
+		
+		folder.pack();		
+		
+	}
+	
+	public void removeBackgroundSubtractedSubImage(){
+		TabItem m = folder.getItem(1);
+		m.dispose();
+		folder.pack();
+		
+	}	
+	
+	
+	
 }
     
 

@@ -47,7 +47,7 @@ public class PresenterInitialSetup extends Dialog {
 	protected Control createDialogArea(Composite parent) {
 	
 		
-		SuperModel sm = new SuperModel();
+//		SuperModel sm = new SuperModel();
 		
 		Composite container = (Composite) super.createDialogArea(parent);
 		container.setLayout(new GridLayout());
@@ -166,11 +166,11 @@ public class PresenterInitialSetup extends Dialog {
 //				}
 				
 				
-				sm.setCorrectionSelection(0);
+//				sm.setCorrectionSelection(0);
 				ssp = new SurfaceScatterPresenter();
 				
 				ssp.surfaceScatterPresenterBuild(parentShell,
-												 filepaths,
+												 new String[] {null},
 												 "test",
 												 imageFolderPath,
 												 datFolderPath,
@@ -179,8 +179,8 @@ public class PresenterInitialSetup extends Dialog {
 				
 				SurfaceScatterViewStart ssvs = new SurfaceScatterViewStart(parentShell, 
 						   filepaths, 
-						   sm.getNumberOfImages(), 
-						   sm.getNullImage(),
+						   ssp.getNumberOfImages(), 
+						   ssp.getImage(0),
 						   ssp,
 						   datFolderPath);
 				

@@ -211,9 +211,9 @@ public class SurfaceScatterPresenter {
 	
 						SliceND slice2 = new SliceND(ild.getShape());
 						slice2.setSlice(0, f, f + 1, 1);
-						ILazyDataset nim = ild.getSlice(slice2);
-						nim.squeezeEnds();
-						som.put(imageRef, (Dataset) nim);
+						ILazyDataset nim = ild.getSliceView(slice2); //getSlice(slice2);
+//						nim.squeezeEnds();
+						som.put(imageRef, (ILazyDataset) nim);
 						imageRefList.add(imageRef);
 						imagesToFilepathRef.add(id);
 						imageRef++;
@@ -309,7 +309,16 @@ public class SurfaceScatterPresenter {
 		updateAnalysisMethodology(0, 1, 0, "10");
 		
 		Dataset xArrayCon = DatasetFactory.zeros(1);
-		AggregateDataset imageCon = new AggregateDataset(false, imageArray);
+		
+		AggregateDataset imageCon = null;
+		
+		try{
+			imageCon = new AggregateDataset(false, imageArray);
+		}
+		catch(Exception j){
+			imageCon = new AggregateDataset(false, DatasetFactory.zeros(new int[] {2, 2}, Dataset.ARRAYFLOAT64));
+		}
+		
 		int numberOfImages = 1; 
 		
 		
@@ -339,7 +348,7 @@ public class SurfaceScatterPresenter {
 			DatasetUtils.sort(xArrayConClone, imagesToFilepathRefDat);
 
 				
-		ILazyDataset[] imageSortedDat = new Dataset[imageRefList.size()];
+		ILazyDataset[] imageSortedDat = new ILazyDataset[imageRefList.size()];
 		int[] filepathsSortedArray = new int[imageRefList.size()];
 		noImages = imageRefList.size();
 
@@ -505,24 +514,31 @@ public class SurfaceScatterPresenter {
 	}
 	
 	public Dataset getImage(int k) {
-		if(sm.getImages() != null){
+		if(sm != null){
+			if(sm.getImages() != null){
+		
 			
-			ILazyDataset image = sm.getImages()[k];
-			SliceND slice = new SliceND(image.getShape());
-//			ILazyDataset images = ild.getSlice(slice);
-			
-				try {
-					return (Dataset) image.getSlice(slice);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					return DatasetFactory.zeros(new int[] {2,2}, Dataset.ARRAYFLOAT64);
-				}
+				ILazyDataset image = sm.getImages()[k];
+				SliceND slice = new SliceND(image.getShape());
+	//			ILazyDataset images = ild.getSlice(slice);
+				
+					try {
+						Dataset f = (Dataset) image.getSlice(slice);
+						f.squeeze();
+						return f;
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						return DatasetFactory.zeros(new int[] {2,2}, Dataset.ARRAYFLOAT64);
+					}
+			}
+			else{
+				return DatasetFactory.zeros(new int[] {2,2}, Dataset.ARRAYFLOAT64);
+			}
 		}
-		else{
-			return DatasetFactory.zeros(new int[] {2,2}, Dataset.ARRAYFLOAT64);
-		}
+		return DatasetFactory.zeros(new int[] {2,2}, Dataset.ARRAYFLOAT64);
 	}
-
+	
+	
 	public void regionOfInterestSetter(IROI green) {
 
 		IRectangularROI greenRectangle = green.getBounds();
@@ -1017,9 +1033,14 @@ public class SurfaceScatterPresenter {
 	}
 	
 	public int[][] getLenPt(){
-		return sm.getInitialLenPt();
+		if (sm != null){
+			return sm.getInitialLenPt();
+		}
+		else{
+			return new int[][] {{0,0},{0,0}};
+		}
+		
 	}
-	
 	public void setLenPt(int[][] LenPt){
 		sm.setInitialLenPt(LenPt);
 	}
@@ -1074,14 +1095,19 @@ public class SurfaceScatterPresenter {
 	}
 	
 	public double getXValue(int k){
-		if(sm.getSortedX() != null){
-			return sm.getSortedX().getDouble(k);
+		
+		if(sm != null){
+			if(sm.getSortedX() != null){
+				return sm.getSortedX().getDouble(k);
+			}
+			else{
+				return 0;
+			}
 		}
 		else{
 			return 0;
 		}
 	}
-
 	public Dataset subImage(int sliderPos, IROI box) {
 
 		Dataset image = this.getImage(sliderPos);  // sm.getImages()[sliderPos];
@@ -1193,6 +1219,11 @@ public class SurfaceScatterPresenter {
 		output.add(4, yArrayListFhklError);
 		
 		return output;
+	}
+	
+	
+	public int getNumberOfImages(){
+		return sm.getNumberOfImages();
 	}
 	
 	public void updateSliders(ArrayList<Slider> sl, int k) {
@@ -1354,7 +1385,12 @@ public class SurfaceScatterPresenter {
 	}
 	
 	public Boolean getTrackerOn (){
-		return sm.getTrackerOn();
+		try{
+			return sm.getTrackerOn();
+		}
+		catch(NullPointerException g){
+			return false;
+		}
 	}
 	
 	public ArrayList<GeometricParametersModel> getGeometricParamtersModels(){
@@ -1834,7 +1870,8 @@ class trackingJob {
 		final Display display = Display.getCurrent();
 		int[] imagePosInOriginalDat = CountUpToArray.CountUpToArray1(sm.getFilepathsSortedArray());
 		
-		if (models.get(sm.getSelection()).getMethodology() != AnalaysisMethodologies.Methodology.TWOD_TRACKING) {
+		if (models.get(sm.getSelection()).getMethodology() != AnalaysisMethodologies.Methodology.TWOD_TRACKING &&
+				sm.getTrackerOn() != true) {
 
 			noImages = sm.getImages().length;
 				
@@ -2034,7 +2071,9 @@ class trackingJob {
 							});		
 						
 					}
-	
+					
+					
+						
 					for (int k = sm.getStartFrame(); k < noImages; k++) {
 						
 //						debug("wowowowow l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k));
@@ -2165,7 +2204,7 @@ class trackingJob2 {
 	private SurfaceScatterPresenter ssp;
 	private IPlottingSystem<Composite> ssvsPS; 
 	private SurfaceScatterViewStart ssvs;
-	private int DEBUG = 1;
+	private int DEBUG = 0;
 
 	
 	public SurfaceScatterViewStart getSsvs() {
@@ -2215,6 +2254,8 @@ class trackingJob2 {
 	public void setSsvsPS (IPlottingSystem<Composite> ssvsPS) {
 		this.ssvsPS = ssvsPS;
 	}
+	
+	
 	
 	
 	@SuppressWarnings("unchecked")
@@ -2661,6 +2702,10 @@ class trackingJob2 {
 								}
 							}
 
+							
+							models.get(nextjok).setInput(null);
+							
+							
 							for (int k = sm.getStartFrame(); k < noImages; k++) {
 
 								if (sm.getFilepathsSortedArray()[k] == nextjok) {
@@ -2910,6 +2955,8 @@ class trackingJob2 {
 			}
 
 			debug("%%%%%%%%%%%%%%%%% sm.getStartFrame:  "  +  sm.getStartFrame() + "??????????????????" );
+			
+			models.get(jok).setInput(null);
 			
 			
 			for (int k = sm.getStartFrame(); k < noImages; k++) {
@@ -3322,7 +3369,8 @@ class trackingJob2 {
 
 					}
 				}
-
+				models.get(nextjok).setInput(null);
+				
 				for (int k = sm.getStartFrame(); k < noImages; k++) {
 					debug("%%%%%%%%%%%%%%%%% sm.getStartFrame:  "  +  sm.getStartFrame() + "??????????????????" );
 					if (sm.getFilepathsSortedArray()[k] == nextjok) {
