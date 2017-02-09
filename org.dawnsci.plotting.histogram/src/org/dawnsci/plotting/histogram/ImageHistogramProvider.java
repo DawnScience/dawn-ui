@@ -67,8 +67,7 @@ public class ImageHistogramProvider implements IHistogramProvider {
 			long numBins = imageDataset.max(true).longValue() - imageDataset.min(true).longValue();
 			if (numBins > MAX_BINS) {
 				numBins = MAX_BINS;
-			}
-			if (numBins < 1) {
+			} else if (numBins < 1) {
 				numBins = 1;
 			}
 			return (int) numBins;
