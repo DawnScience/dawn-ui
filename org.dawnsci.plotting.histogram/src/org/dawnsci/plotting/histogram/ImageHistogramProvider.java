@@ -64,11 +64,14 @@ public class ImageHistogramProvider implements IHistogramProvider {
 			return MAX_BINS;
 		} else {
 			// set the number of points to the range
-			int numBins = (Integer) imageDataset.max(true).intValue()
-					- imageDataset.min(true).intValue();
-			if (numBins > MAX_BINS)
+			long numBins = imageDataset.max(true).longValue() - imageDataset.min(true).longValue();
+			if (numBins > MAX_BINS) {
 				numBins = MAX_BINS;
-			return numBins;
+			}
+			if (numBins < 1) {
+				numBins = 1;
+			}
+			return (int) numBins;
 		}
 	}
 
@@ -95,11 +98,7 @@ public class ImageHistogramProvider implements IHistogramProvider {
 	public double getMax() {
 		double maxValue = doubleValue(bean.getMax());
 		double minValue = doubleValue(bean.getMin());
-		if (maxValue < minValue){
-			maxValue = minValue;
-		}
-
-		return maxValue;
+		return maxValue >= minValue ? maxValue : minValue;
 	}
 
 
@@ -113,11 +112,7 @@ public class ImageHistogramProvider implements IHistogramProvider {
 	public double getMin() {
 		double minValue = doubleValue(bean.getMin());
 		double maxValue = doubleValue(bean.getMax());
-		if (minValue > maxValue){
-			minValue = maxValue;
-		}
-
-		return minValue;
+		return minValue < maxValue ? minValue : maxValue;
 	}
 
 	/**
