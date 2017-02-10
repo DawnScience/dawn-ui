@@ -45,7 +45,7 @@ public class FloatSpinner extends Composite {
 	 */
 	private int    width;
 	private int    precision;
-	private int    maximumValue;
+	private double maximumValue;
 	private double factor;
 	
 	/**
@@ -113,17 +113,25 @@ public class FloatSpinner extends Composite {
 	 *            of value in decimal places
 	 */
 	public void setFormat(int width, int precision) {
-		this.precision = precision;
-		this.setWidth(width);
-		maximumValue = (int) Math.pow(10, width);
-		factor = Math.pow(10, precision);
+		setPrecision(precision);
 
-		spinner.setDigits(precision);
-		spinner.setMinimum(-maximumValue);
-		spinner.setMaximum(maximumValue);
+		setWidth(width);
 		spinner.setIncrement(1);
 		spinner.setPageIncrement(5);
 		spinner.setSelection(0);
+	}
+
+	/**
+	 * Set the precision
+	 * 
+	 * @param precision
+	 *            of value in decimal places
+	 */
+	public void setPrecision(int precision) {
+		this.precision = precision;
+		factor = Math.pow(10, precision);
+		spinner.setDigits(precision);
+		setWidth(width);
 	}
 
 	/**
@@ -135,10 +143,23 @@ public class FloatSpinner extends Composite {
 
 	/**
 	 * @param width
-	 *            The width to set.
+	 *            of displayed value as total number of digits
 	 */
 	public void setWidth(int width) {
+		if (width < 0) {
+			throw new IllegalArgumentException("Width must be non-negative");
+		}
+		if (width < precision) {
+			throw new IllegalArgumentException("Width must be greater than precision");
+		}
+		maximumValue = Math.pow(10, width - precision);
+		if (maximumValue > Integer.MAX_VALUE) {
+			width = (int) Math.ceil(Math.log10(Integer.MAX_VALUE)) - 1 + precision;
+			maximumValue = Math.pow(10, width - precision);
+		}
 		this.width = width;
+		spinner.setMinimum((int) -(maximumValue*factor));
+		spinner.setMaximum((int) (maximumValue*factor));
 	}
 
 	/**
@@ -153,12 +174,10 @@ public class FloatSpinner extends Composite {
 	 * @param value
 	 */
 	public void setDouble(double value) {
-		
-		// We round to the precision.
-		double factor = Math.pow(10d, precision);
+		// We round to the precision
 		value =	(long) (value * factor + 0.5) / factor;
 
-		if (Double.isInfinite(value)||Double.isNaN(value)) {
+		if (Double.isInfinite(value)||Double.isNaN(value)|| Math.abs(value) > maximumValue) {
 			((StackLayout)content.getLayout()).topControl = errorLabel;
 			errorLabel.setText(String.valueOf(value));
 			content.layout();
@@ -167,7 +186,9 @@ public class FloatSpinner extends Composite {
 		}
 		((StackLayout)content.getLayout()).topControl = spinner;
 
+		invalidValue = null;
 		spinner.setSelection((int) (value * factor));
+		content.layout();
 	}
 
 	/**
@@ -246,11 +267,11 @@ public class FloatSpinner extends Composite {
 	public void setIncrement(double inc) {
 		spinner.setIncrement((int) (inc * factor));
 	}
-	
+
 	public double getIncrement() {
 		return spinner.getIncrement() / factor;
 	}
-	
+
 	/**
 	 * Method creates a right-click menu for a FloatSpinner with options for resetting to original value, and for setting the increment.
 	 * @param increments an array of doubles representing the different increments allowed
@@ -258,10 +279,10 @@ public class FloatSpinner extends Composite {
 	 * @param resetMethod the method that gets the original value
 	 */
 	public void createMenu(final double[] increments, final Object resetObject, final Method resetMethod) {
- 		final MenuManager popupMenu = new MenuManager();
- 		popupMenu.setRemoveAllWhenShown(true);
- 		getControl().setMenu(popupMenu.createContextMenu(getControl()));
- 		popupMenu.addMenuListener(new IMenuListener() {
+		final MenuManager popupMenu = new MenuManager();
+		popupMenu.setRemoveAllWhenShown(true);
+		getControl().setMenu(popupMenu.createContextMenu(getControl()));
+		popupMenu.addMenuListener(new IMenuListener() {
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
 				Action cutAction = new Action("Cut") {
@@ -288,11 +309,11 @@ public class FloatSpinner extends Composite {
 				popupMenu.add(pasteAction);
 				popupMenu.add(new Separator());
 
-		 		popupMenu.add(new Action("Reset") {
-		 			@Override
-		 			public void run() {
-		 				Object[] params = new Object[0];
-		 				
+				popupMenu.add(new Action("Reset") {
+					@Override
+					public void run() {
+						Object[] params = new Object[0];
+						
 						try {
 							resetMethod.invoke(resetObject, params);
 						} catch (IllegalArgumentException e) {
@@ -302,16 +323,16 @@ public class FloatSpinner extends Composite {
 						} catch (InvocationTargetException e) {
 							logger.error("Can't invoke method (invokation target).", e);
 						}
-		 			}
-		 		});
+					}
+				});
 
-		 		manager.update();
+				manager.update();
 			}
 		});
 	}
-	
+
 	public void addKeyListener(KeyListener listener) {
 		super.addKeyListener(listener);
-        spinner.addKeyListener(listener);
+		spinner.addKeyListener(listener);
 	}
 }

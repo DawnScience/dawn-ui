@@ -183,8 +183,8 @@ public class HistogramViewer extends ContentViewer {
 		maxText.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false,
 				false));
 
-		minText.setFormat(12, 4);
-		maxText.setFormat(12, 4);
+		minText.setFormat(9, 4);
+		maxText.setFormat(9, 4);
 		minText.setIncrement(1.0);
 		maxText.setIncrement(1.0);
 
@@ -327,10 +327,15 @@ public class HistogramViewer extends ContentViewer {
 		// Set the increment to be the difference between two x pixels.
 		double val1 = histogramPlottingSystem.getSelectedXAxis().getPositionValue(1);
 		double val2 = histogramPlottingSystem.getSelectedXAxis().getPositionValue(2);
-		double increment = val2 - val1;
+		double increment = Math.abs(val2 - val1);
+		// update precision too
+		int logInc = (int) Math.floor(Math.log10(increment));
+		increment = Math.pow(10, logInc);
+		int precision = Math.max(0, -logInc);
+		minText.setPrecision(Math.min(minText.getPrecision(), precision));
 		minText.setIncrement(increment);
+		maxText.setPrecision(Math.min(maxText.getPrecision(), precision));
 		maxText.setIncrement(increment);
-
 	}
 
 	private void installMinMaxListeners() {
