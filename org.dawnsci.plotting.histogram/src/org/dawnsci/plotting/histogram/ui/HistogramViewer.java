@@ -338,8 +338,11 @@ public class HistogramViewer extends ContentViewer {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				double minValue = minText.getDouble();
-				if (validateMin(minValue)){
+				if (validateMin(minValue)) {
 					getHistogramProvider().setMin(minValue);
+					if (!updatingROI) {
+						updateRegion(minValue, getHistogramProvider().getMax());
+					}
 					maxText.setMinimum(minValue);
 				}
 			}
@@ -349,8 +352,11 @@ public class HistogramViewer extends ContentViewer {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				double maxValue = maxText.getDouble();
-				if (validateMax(maxValue)){
+				if (validateMax(maxValue)) {
 					getHistogramProvider().setMax(maxValue);
+					if (!updatingROI) {
+						updateRegion(getHistogramProvider().getMin(), maxValue);
+					}
 					minText.setMaximum(maxValue);
 				}
 			}
