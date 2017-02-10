@@ -75,16 +75,20 @@ public class ImageHistogramProvider implements IHistogramProvider {
 	}
 
 	public double getMaximumRange() {
-		double max = bean.getMaximumCutBound().getBound().doubleValue();
+		double max = doubleValue(bean.getMaximumCutBound().getBound());
 		if (Double.isInfinite(max))
-			max = imageDataset.max(true).doubleValue();
+			max = getMax();
+		if (Double.isInfinite(max))
+			max = doubleValue(imageDataset.max(true));
 		return max;
 	}
 
 	public double getMininumRange() {
-		double rMin = bean.getMinimumCutBound().getBound().doubleValue();
+		double rMin = doubleValue(bean.getMinimumCutBound().getBound());
 		if (Double.isInfinite(rMin))
-			rMin = imageDataset.min(true).doubleValue();
+			rMin = getMin();
+		if (Double.isInfinite(rMin))
+			rMin = doubleValue(imageDataset.min(true));
 		return rMin;
 	}
 
@@ -154,12 +158,6 @@ public class ImageHistogramProvider implements IHistogramProvider {
 	public IHistogramDatasets getDatasets() {
 		Assert.isNotNull(image, "This provider must have an image set when get datasets is called");
 
-		//getmin and max - validate values and swap
-		//validate these are good numbers
-		double histoMin = getMin();
-		double histoMax = getMax();
-
-
 		IDataset[] histogramData = generateHistogramData(imageDataset,
 				getNumberOfBins());
 		final IDataset histogramY = histogramData[0];
@@ -168,33 +166,31 @@ public class ImageHistogramProvider implements IHistogramProvider {
 		// now build the RGB Lines ( All the -3's here are to avoid the
 		// min/max/NAN colours)
 		PaletteData paletteData = image.getPaletteData();
-		final Dataset R = DatasetFactory.zeros(DoubleDataset.class, paletteData.colors.length - 3);
-		final Dataset G = DatasetFactory.zeros(DoubleDataset.class, paletteData.colors.length - 3);
-		final Dataset B = DatasetFactory.zeros(DoubleDataset.class, paletteData.colors.length - 3);
-		final Dataset RGBX_orig_calc = DatasetFactory.zeros(DoubleDataset.class, paletteData.colors.length - 3);
+		final int numPaletteColours = paletteData.colors.length - 3; // The -3 here is to avoid the min/max/NAN colours
+		final Dataset R = DatasetFactory.zeros(DoubleDataset.class, numPaletteColours);
+		final Dataset G = DatasetFactory.zeros(DoubleDataset.class, numPaletteColours);
+		final Dataset B = DatasetFactory.zeros(DoubleDataset.class, numPaletteColours);
 		R.setName("red");
 		G.setName("green");
 		B.setName("blue");
-		RGBX_orig_calc.setName("Axis (orig calc)");
 
-		double scale = ((histogramY.max(true).doubleValue()) / 256.0);
+		double scale = histogramY.max(true).doubleValue() / 255;
 		if (scale <= 0)
-			scale = 1.0 / 256.0;
+			scale = 1.0 / 255;
 
 		// palleteData.colors = new RGB[256];
-		for (int i = 0; i < paletteData.colors.length - 3; i++) {
+		for (int i = 0; i < numPaletteColours; i++) {
 			R.set(paletteData.colors[i].red * scale, i);
 			G.set(paletteData.colors[i].green * scale, i);
 			B.set(paletteData.colors[i].blue * scale, i);
-
-			// why not length -3???
-			RGBX_orig_calc
-					.set(histoMin
-							+ (i * ((histoMax - histoMin) / paletteData.colors.length)),
-							i);
 		}
 
-		final Dataset RGBX = DatasetFactory.createLinearSpace(histoMin, histoMax, paletteData.colors.length - 3, Dataset.FLOAT64);
+		//getmin and max - validate values and swap
+		//validate these are good numbers
+		double histoMin = histogramX.min(true).doubleValue();
+		double histoMax = histogramX.max(true).doubleValue();
+
+		final Dataset RGBX = DatasetFactory.createLinearSpace(histoMin, histoMax, numPaletteColours, Dataset.FLOAT64);
 		RGBX.setName("Axis");
 
 		return new IHistogramDatasets() {
