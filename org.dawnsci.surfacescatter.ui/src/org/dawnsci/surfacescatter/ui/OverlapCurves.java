@@ -85,8 +85,6 @@ public class OverlapCurves extends Composite {
 		errors = new Button(controls, SWT.PUSH);
 		errors.setText("Errors");
 		
-		
-		
         ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(this, null);;
         
         final GridData gd_secondField = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -113,7 +111,7 @@ public class OverlapCurves extends Composite {
 			slice = new SliceND(arrayILDy.get(r).getShape());
 			
 			try {
-				i = arrayILDy.get(r).getSlice(slice);
+				i = arrayILDy.get(r);
 				arrayIDy.add(i);
 				j = arrayILDx.get(r).getSlice(slice);
 				arrayIDx.add(j);

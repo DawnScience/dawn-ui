@@ -342,7 +342,7 @@ public class DatDisplayer extends Composite {
 					filepaths[f] = datFolderPath + File.separator + filename;
 				}
 				
-				ssp.resetCorrectionsSelection();
+				
 				
 				ssp.surfaceScatterPresenterBuild(ssp.getParentShell(), 
 												 filepaths, 
@@ -350,6 +350,7 @@ public class DatDisplayer extends Composite {
 												 ssp.getImageFolderPath(), 
 												 datFolderPath, 
 												 ssp.getCorrectionSelection());
+				ssp.resetCorrectionsSelection();
 				
 			}
 			

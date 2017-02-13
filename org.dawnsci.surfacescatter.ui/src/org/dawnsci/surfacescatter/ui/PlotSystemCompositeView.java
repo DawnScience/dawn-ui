@@ -47,16 +47,17 @@ public class PlotSystemCompositeView extends Composite {
     private int numberOfImages;
     private Dataset nullImage;
     private SurfaceScatterPresenter ssp;
-    private SurfaceScatterViewStart ssvs;
     private Text xValue;
     private Text imageNumber;
     private Button replay;
+    private Button go;
 	private TabFolder folder;
 	private Text xCoord;
 	private Text xLen;
 	private Text yCoord;
 	private Text yLen;
 	private SashForm form;
+	private TabItem subBgI;
 	
     public PlotSystemCompositeView(Composite parent, 
     							   int style,
@@ -64,20 +65,20 @@ public class PlotSystemCompositeView extends Composite {
     							   int extra,
     							   int numberOfImages,
     							   Dataset nullImage,
-    							   SurfaceScatterPresenter ssp,
-    							   SurfaceScatterViewStart ssvs) {
+    							   SurfaceScatterPresenter ssp
+    							   ) {
     	
     	
         super(parent, style);
         this.numberOfImages = numberOfImages;
         this.nullImage = nullImage;
         this.ssp = ssp;
-        this.ssvs = ssvs;
+//        this.ssvs = ssvs;
         
         try {
 			plotSystem = PlottingFactory.createPlottingSystem();
 			subImagePlotSystem = PlottingFactory.createPlottingSystem();
-//			subImageBgPlotSystem = PlottingFactory.createPlottingSystem();
+			
 		} catch (Exception e2) {
 			e2.printStackTrace();
 		}
@@ -106,9 +107,9 @@ public class PlotSystemCompositeView extends Composite {
 		form.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, true));
     	       
 		Group mainImage = new Group(form, SWT.FILL);
-		GridLayout mainImageLayout = new GridLayout();
+		GridLayout mainImageLayout = new GridLayout(1,true);
 		mainImage.setLayout(mainImageLayout);
-		GridData mainImageData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		GridData mainImageData = new GridData(SWT.FILL, SWT.FILL, true,false);
 		mainImage.setLayoutData(mainImageData);
 		
         slider = new Slider(mainImage, SWT.HORIZONTAL);
@@ -122,76 +123,66 @@ public class PlotSystemCompositeView extends Composite {
         slider.setLayoutData(gd_firstField);
       
         Group indicators = new Group(mainImage, SWT.NONE);
-        GridLayout 	indicatorsLayout = new GridLayout(4,true);
-    	
+        GridLayout 	indicatorsLayout = new GridLayout(3,true);
         indicators.setLayout(indicatorsLayout);
 		GridData indicatorsData = new GridData(SWT.FILL, SWT.NULL, true, false);
 		indicators.setLayoutData(indicatorsData);
 		
+		InputTileGenerator tile1 = new InputTileGenerator("X Variable:", String.valueOf(ssp.getXValue(slider.getSelection())), indicators);
+		xValue = tile1.getText();
+		InputTileGenerator tile2 = new InputTileGenerator("Image No.:", String.valueOf(slider.getSelection()), indicators);
+		imageNumber = tile2.getText();
+		InputTileGenerator tile3 = new InputTileGenerator("ROI x coord:", String.valueOf(ssp.getLenPt()[1][0]), indicators);
+		xCoord = tile3.getText();		
+		InputTileGenerator tile4 = new InputTileGenerator("x Len:", String.valueOf(ssp.getLenPt()[0][0]), indicators);
+		xLen = tile4.getText();
+		InputTileGenerator tile5 = new InputTileGenerator("ROI y coord:",  String.valueOf(ssp.getLenPt()[1][1]), indicators);
+		yCoord = tile5.getText();
+		InputTileGenerator tile6 = new InputTileGenerator("y len:",  String.valueOf(ssp.getLenPt()[0][1]), indicators);
+		yLen = tile6.getText();
+		
 		Label outputControlLabel = new Label(indicators, SWT.NULL);
 		outputControlLabel.setText("Take Ouput Marker:");
 		
-		Label xValueLabel = new Label(indicators, SWT.NULL);
-		xValueLabel.setText("X Variable:");
-		
-		Label imageNumberLabel = new Label(indicators, SWT.NULL);
-		imageNumberLabel.setText("Image No.:");
-		
-		Button go = new Button(indicators, SWT.PUSH | SWT.FILL);
-		go.setText("Go");
-		
-        outputControl = new Button (indicators, SWT.CHECK);
+		outputControl = new Button (indicators, SWT.CHECK);
         outputControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         
-        xValue = new Text(indicators,SWT.SINGLE);
-        xValue.setText(String.valueOf(ssp.getXValue(slider.getSelection())));
+        Group buttons = new Group (mainImage,SWT.NONE);  
+        GridLayout 	buttonsLayout = new GridLayout(2,true);
+        buttons.setLayout(buttonsLayout);
+		GridData buttonsData = new GridData(SWT.FILL, SWT.NULL, true, false);
+		buttons.setLayoutData(buttonsData);
         
-        imageNumber = new Text(indicators,SWT.SINGLE);
-        imageNumber.setText("   " + slider.getSelection());
+		go = new Button(buttons, SWT.PUSH | SWT.FILL);
+		go.setText("Go");
+		go.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         
-        replay = new Button(indicators, SWT.PUSH | SWT.FILL);
+        replay = new Button(buttons, SWT.PUSH | SWT.FILL);
 		replay.setText("Replay");
-
-    	
-		Label xPt = new Label(indicators, SWT.NULL);
-		xPt.setText("ROI x coord:");
+		replay.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        
+		Group images = new Group(form, SWT.NONE);
+        GridLayout imagesLayout = new GridLayout(1,true);
+        images.setLayout(imagesLayout);
+		GridData imagesData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		imagesData.grabExcessVerticalSpace = true;
+      
+		images.setLayoutData(imagesData);
 		
-		xCoord = new Text(indicators,SWT.SINGLE);
-	    xCoord.setText("  " + String.valueOf(ssp.getLenPt()[1][0]));
-	    
-	    Label xLenLabel = new Label(indicators, SWT.NULL);
-	    xLenLabel.setText("x Len:");
-		
-		xLen = new Text(indicators,SWT.SINGLE);
-	    xLen.setText("  " + String.valueOf(ssp.getLenPt()[0][0]));
+        ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(images, null);
         
-	    Label yPt = new Label(indicators, SWT.NULL);
-		yPt.setText("ROI y coord:");
-		
-		yCoord = new Text(indicators,SWT.SINGLE);
-	    yCoord.setText("  " + String.valueOf(ssp.getLenPt()[1][1]));
-	    
-	    Label yLenLabel = new Label(indicators, SWT.NULL);
-	    yLenLabel.setText("y Len:");
-		
-		yLen = new Text(indicators,SWT.SINGLE);
-	    yLen.setText("  " + String.valueOf(ssp.getLenPt()[0][1]));
-        
-        ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(form, null);
-        
-        final GridData gd_secondField = new GridData(SWT.FILL, SWT.FILL, true, true);
-        gd_secondField.grabExcessVerticalSpace = true;
-        gd_secondField.grabExcessVerticalSpace = true;
-        
-       
-        
-        plotSystem.createPlotPart(form, 
+//        GridData gd_secondField = new GridData(SWT.FILL, SWT.FILL, true, true);
+//        gd_secondField.grabExcessVerticalSpace = true;
+//        gd_secondField.grabExcessVerticalSpace = true;
+           
+        plotSystem.createPlotPart(images, 
         						  "Raw Image", 
         						  actionBarComposite, 
         						  PlotType.IMAGE, 
         						  null);
         
-        plotSystem.getPlotComposite().setLayoutData(gd_secondField);
+        plotSystem.getPlotComposite().setLayoutData(imagesData);
+        
         plotSystem.createPlot2D(nullImage, null, null);
         
         try {
@@ -233,26 +224,7 @@ public class PlotSystemCompositeView extends Composite {
     		
     	customComposite1.setLayout(new GridLayout());
     	customComposite1.setLayoutData(ld2);
-			
-		////////////////////////////////////////////////////////
-		//		Tab 2 Setup
-		//////////////////////////////////////////////////////////
-			
-//		TabItem subBgI = new TabItem(folder, SWT.NONE);
-//		subBgI.setText("Bg Subtracted Image");
-//		subBgI.setData(new GridData(SWT.FILL, SWT.FILL, true, true));
-//			
-//		Composite subBgIComposite = new Composite(folder, SWT.NONE | SWT.FILL);
-//		subBgIComposite.setLayout(new GridLayout());
-//		subBgIComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-//			
-//		subBgI.setControl(subBgIComposite);
-//			
-////		ActionBarWrapper actionBarComposite1 = ActionBarWrapper.createActionBars(subBgI, null);
-//		subImageBgPlotSystem.createPlotPart(subBgIComposite, "Region of interest", null, PlotType.IMAGE, null);
-//		subImageBgPlotSystem.getPlotComposite().setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, true));
-//		subImageBgPlotSystem.createPlot2D(nullImage, null, null);		
-		
+					
 		plotSystem.addRegion(region);
 		RectangularROI startROI = new RectangularROI(100,100,50,50,0);
 		region.setROI(startROI);
@@ -282,7 +254,6 @@ public class PlotSystemCompositeView extends Composite {
 				roiStandard(evt);
 			}
 			
-			@SuppressWarnings("unchecked")
 			public void roiStandard(ROIEvent evt) {
 				ssp.regionOfInterestSetter();
 				
@@ -308,10 +279,7 @@ public class PlotSystemCompositeView extends Composite {
 				
 			}
 		});
-		
-		
-			
-		    
+	    
 		run = new Button (form, SWT.PUSH);
 			
 			
@@ -319,7 +287,7 @@ public class PlotSystemCompositeView extends Composite {
 		run.setText("Run");
 			
 		
-		form.setWeights(new int[] { 20,5, 40, 30, 5 });
+		form.setWeights(new int[] {23, 45, 25, 7});
     }
 		
    
@@ -490,6 +458,12 @@ public class PlotSystemCompositeView extends Composite {
 		 }
 	}
 	
+	
+	public TabItem getBackgroundSubtractedSubImage(){
+		return subBgI;
+	}
+	
+	
 	public void appendBackgroundSubtractedSubImage(){
 		
 		try{
@@ -501,10 +475,10 @@ public class PlotSystemCompositeView extends Composite {
 			
 		}
 		
-		TabItem subBgI = new TabItem(folder, SWT.NONE);
+		subBgI = new TabItem(folder, SWT.NONE);
 		subBgI.setText("Bg Subtracted Image");
 		subBgI.setData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			
+		
 		Composite subBgIComposite = new Composite(folder, SWT.NONE | SWT.FILL);
 		subBgIComposite.setLayout(new GridLayout());
 		subBgIComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -529,10 +503,17 @@ public class PlotSystemCompositeView extends Composite {
 		TabItem m = folder.getItem(1);
 		m.dispose();
 		folder.pack();
-		
+		subBgI = null;
+		form.setWeights(new int[] {23, 45, 25, 7});
 	}	
 	
+	public Button getGo(){
+		return go;
+	}
 	
+	public SashForm getSash(){
+		return form;
+	}
 	
 }
     

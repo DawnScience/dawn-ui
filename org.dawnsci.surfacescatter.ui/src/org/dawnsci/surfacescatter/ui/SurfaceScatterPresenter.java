@@ -120,16 +120,16 @@ public class SurfaceScatterPresenter {
 		this.gms = gms;
 	}
 	
-	public SurfaceScatterPresenter(){
-		
-	}
-	
 	public void addStateListener(IPresenterStateChangeEventListener listener){
 		listeners.add(listener);
 	}
 	
 	private void fireStateListeners(){
 		for (IPresenterStateChangeEventListener l : listeners) l.update();
+	}
+	
+	public SurfaceScatterPresenter(){
+		sm = new SuperModel();
 	}
 	
 	
@@ -391,6 +391,10 @@ public class SurfaceScatterPresenter {
 		
 	}
 	
+	public void setImageFolderPath(String ifp){
+		sm.setImageFolderPath(ifp);	
+	}
+	
 	public int getCorrectionSelection(){
 		return sm.getCorrectionSelection();
 	}
@@ -430,9 +434,14 @@ public class SurfaceScatterPresenter {
 			
 			IDataset nullImage = DatasetFactory.zeros(new int[] {2,2});
 			Maths.add(nullImage, 0.1);
-			subImageBgPlotSystem.updatePlot2D(nullImage, 
-											  null, 
-											  null);
+			try{
+				subImageBgPlotSystem.updatePlot2D(nullImage, 
+												  null, 
+												  null);
+			}
+			catch(NullPointerException g){
+				
+			}
 		}
 	}
 	
@@ -1052,7 +1061,7 @@ public class SurfaceScatterPresenter {
 
 //		for (IPlottingSystem<Composite> x : pS) {
 //			x.updatePlot2D(subImage, null, null);
-			ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(sliderPos), null, null);
+//			ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(sliderPos), null, null);
 			
 //		}
 	}
@@ -1086,7 +1095,8 @@ public class SurfaceScatterPresenter {
 	}
 	
 	public int closestImageIntegerInStack(double in){
-		int out = ClosestNoFinder.closestIntegerInStack(in, sm.getImages().length);
+		int l = sm.getImages().length;
+		int out = ClosestNoFinder.closestIntegerInStack(in, l);
 		return out;
 	}
 	
@@ -1094,6 +1104,14 @@ public class SurfaceScatterPresenter {
 		return sm.getTemporaryBackgroundHolder();
 	}
 	
+	public ArrayList<IDataset> getBackgroundDatArray(){
+		try{
+			return dms.get(0).getBackgroundDatArray();
+		}
+		catch(Exception j){
+			return null;
+		}
+	}
 	public double getXValue(int k){
 		
 		if(sm != null){
@@ -1223,7 +1241,12 @@ public class SurfaceScatterPresenter {
 	
 	
 	public int getNumberOfImages(){
-		return sm.getNumberOfImages();
+		try{
+			return sm.getNumberOfImages();
+		}
+		catch (Exception h){
+			return 0;
+		}
 	}
 	
 	public void updateSliders(ArrayList<Slider> sl, int k) {
@@ -1960,7 +1983,10 @@ class trackingJob {
 								ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
 								ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
 								ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
+								
 								ssvs.getSsps3c().generalUpdate();
+//								ssvs.getSsps3c().pack();
+//								ssvs.getSsps3c().redraw();
 								ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
 								ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
 								return;
@@ -2063,7 +2089,10 @@ class trackingJob {
 								ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
 								ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
 								ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
+								
 								ssvs.getSsps3c().generalUpdate();
+//								ssvs.getSsps3c().pack();
+//								ssvs.getSsps3c().redraw();
 								ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
 								ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
 								return;
@@ -2147,7 +2176,10 @@ class trackingJob {
 								ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
 								ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
 								ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
+								
 								ssvs.getSsps3c().generalUpdate();
+//								ssvs.getSsps3c().pack();
+//								ssvs.getSsps3c().redraw();
 								ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
 								ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
 								return;
@@ -2386,7 +2418,10 @@ class trackingJob2 {
 									ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
 									ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
 									ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
+									
 									ssvs.getSsps3c().generalUpdate();
+									ssvs.getSsps3c().pack();
+									ssvs.getSsps3c().redraw();
 									ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
 									ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
 									return;
@@ -2551,7 +2586,10 @@ class trackingJob2 {
 											ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
 											ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
 											ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
+											
 											ssvs.getSsps3c().generalUpdate();
+											ssvs.getSsps3c().pack();
+											ssvs.getSsps3c().redraw();
 											ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
 											ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
 											return;
@@ -2691,7 +2729,10 @@ class trackingJob2 {
 											ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
 											ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
 											ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
+											
 											ssvs.getSsps3c().generalUpdate();
+											ssvs.getSsps3c().pack();
+											ssvs.getSsps3c().redraw();
 											ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
 											ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
 											return;
@@ -2826,7 +2867,10 @@ class trackingJob2 {
 											ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
 											ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
 											ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
+											
 											ssvs.getSsps3c().generalUpdate();
+											ssvs.getSsps3c().pack();
+											ssvs.getSsps3c().redraw();
 											ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
 											ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
 											return;
@@ -2941,7 +2985,10 @@ class trackingJob2 {
 							ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
 							ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
 							ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
+							
 							ssvs.getSsps3c().generalUpdate();
+							ssvs.getSsps3c().pack();
+							ssvs.getSsps3c().redraw();
 							ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
 							ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
 							return;
@@ -3044,7 +3091,10 @@ class trackingJob2 {
 							ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
 							ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
 							ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
+							
 							ssvs.getSsps3c().generalUpdate();
+							ssvs.getSsps3c().pack();
+							ssvs.getSsps3c().redraw();
 							ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
 							ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
 							return;
@@ -3212,7 +3262,10 @@ class trackingJob2 {
 								ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
 								ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
 								ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
+								
 								ssvs.getSsps3c().generalUpdate();
+//								ssvs.getSsps3c().pack();
+//								ssvs.getSsps3c().redraw();
 								ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
 								ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
 								return;
@@ -3359,7 +3412,10 @@ class trackingJob2 {
 								ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
 								ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
 								ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
+								
 								ssvs.getSsps3c().generalUpdate();
+//								ssvs.getSsps3c().pack();
+//								ssvs.getSsps3c().redraw();
 								ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
 								ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
 								return;
@@ -3491,7 +3547,10 @@ class trackingJob2 {
 								ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
 								ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
 								ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
+								
 								ssvs.getSsps3c().generalUpdate();
+//								ssvs.getSsps3c().pack();
+//								ssvs.getSsps3c().redraw();
 								ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
 								ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
 								return;
@@ -3635,6 +3694,9 @@ class MovieJob {
 								subIBgPS.repaint(true);
 								
 								ssvs.getSsps3c().generalUpdate();
+//								ssvs.getSsps3c().pack();
+//								ssvs.getSsps3c().redraw();
+//								ssvs.getSsps3c().
 								ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
 								return;
 							}

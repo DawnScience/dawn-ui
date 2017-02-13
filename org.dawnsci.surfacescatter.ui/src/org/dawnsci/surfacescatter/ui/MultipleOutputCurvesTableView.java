@@ -36,19 +36,13 @@ public class MultipleOutputCurvesTableView extends Composite {
 	private Group overlapSelection;
 	private Button errors;
 	private Button overlapZoom;
-//	private int extra = 0;
 	private IRegion marker;
 	
 	public MultipleOutputCurvesTableView (Composite parent, 
 										  int style, 
 										  int extra) {
 
-		super(parent, style);
-
-//		new Label(this, SWT.NONE).setText("Output Curves");
-		
-//		this.extra = extra;
-	
+		super(parent, style);	
 		
 		try {
 			plotSystem4 = PlottingFactory.createPlottingSystem();
@@ -71,7 +65,7 @@ public class MultipleOutputCurvesTableView extends Composite {
 		overlapSelectionData.minimumWidth = 50;
 		overlapSelection.setLayout(overlapSelectionLayout);
 		overlapSelection.setLayoutData(overlapSelectionData);
-		overlapSelection.setText("Output Controls");
+//		overlapSelection.setText("Output Controls");
 		
 		errors = new Button(overlapSelection, SWT.PUSH);
 		errors.setText("Errors");

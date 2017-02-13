@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.surfacescatter.VerticalHorizontalSlices;
-import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -12,24 +11,20 @@ import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
-import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 
 public class SuperSashPlotSystem3Composite extends Composite{
 
@@ -41,10 +36,10 @@ public class SuperSashPlotSystem3Composite extends Composite{
     private IDataset image2;
     private SashForm right; 
     private SashForm left;
-//    private Button backgroundButton;
 	private MultipleOutputCurvesTableView outputCurves;
 	private SurfaceScatterPresenter ssp;
-    private IRegion region;
+    private Group topRight;
+    private SashForm sashForm;
 	
 	public SurfaceScatterPresenter getSsp() {
 		return ssp;
@@ -72,10 +67,6 @@ public class SuperSashPlotSystem3Composite extends Composite{
         
         this.ssp = ssp;
         
-       
-        
-        
-//        new Label(this, SWT.NONE).setText("Region of Interest");
         this.ssvs = ssvs;
         
         
@@ -109,22 +100,20 @@ public class SuperSashPlotSystem3Composite extends Composite{
 				}
 			});
 		 
-		SashForm sashForm= new SashForm(this, SWT.HORIZONTAL);
+		 
+		outputCurves =null;
+		 
+		sashForm= new SashForm(this, SWT.HORIZONTAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
 		left = new SashForm(sashForm, SWT.VERTICAL);
 		
 		right = new SashForm(sashForm, SWT.VERTICAL);
 		
-		
 		sashForm.setWeights(new int[]{50,60});
 		
 
 	/////////////////Left SashForm///////////////////////////////////////////////////
-//		backgroundButton = new Button(left, SWT.CHECK);
-//		backgroundButton.setText("Background Display");
-//	    backgroundButton.setLayoutData(new GridData(GridData.CENTER, GridData.CENTER, true, false));
-		
 		
 		Group topImage = new Group(left, SWT.NONE);
         topImage.setText("Top Image");
@@ -137,7 +126,7 @@ public class SuperSashPlotSystem3Composite extends Composite{
 
 		ActionBarWrapper actionBarCompositeTop = ActionBarWrapper.createActionBars(topImage, null);;
         
-		plotSystem1.createPlotPart(topImage, "Top Image", actionBarCompositeTop, PlotType.IMAGE, null);
+		plotSystem1.createPlotPart(topImage, "Horizontal Slice", actionBarCompositeTop, PlotType.IMAGE, null);
 		plotSystem1.getPlotComposite().setLayoutData(ld1);
 		
 		plotSystem1.getAxis("X-Axis").setTitle("");
@@ -153,62 +142,25 @@ public class SuperSashPlotSystem3Composite extends Composite{
 
 		ActionBarWrapper actionBarCompositeMain = ActionBarWrapper.createActionBars(mainImage, null);;
         
-		plotSystem2.createPlotPart(mainImage, "Top Image", actionBarCompositeMain, PlotType.IMAGE, null);
+		plotSystem2.createPlotPart(mainImage, "Raw Data SubImage", actionBarCompositeMain, PlotType.IMAGE, null);
 		plotSystem2.getPlotComposite().setLayoutData(ld2);
 		plotSystem2.createPlot2D(image2, null, null);
-//		plotSystem2.getAxis("X-Axis").setTitle("");
-		
 		
 	////////////////////////////////////////////////////////////////////////////////////
 	/////////////////Right sashform//////////////////////////////////////////////////////////
-//	       
-//	        
-        
-        
-        try {
-			outputCurves = new MultipleOutputCurvesTableView(right, 
-															SWT.FILL, 
-															0);
-			
-			outputCurves.setLayout(new GridLayout());
-			outputCurves.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	    
-	    outputCurves.getOverlapZoom().addSelectionListener(new SelectionListener() {
-				    	
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				
-				ArrayList<ArrayList<IDataset>> xyArrays = ssp.xyArrayPreparer();
-				
-				GeneralOverlapHandlerView goh = new GeneralOverlapHandlerView(
-						ssp.getParentShell(), 
-						SWT.OPEN, 
-						xyArrays.get(0),
-						xyArrays.get(1),
-						xyArrays.get(2),
-						xyArrays.get(3),
-						xyArrays.get(4), 
-						outputCurves.getPlotSystem(),
-						ssp);
-				
-				goh.open();
-				
-				
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
-        
+ 		
+		topRight= new Group(right, SWT.NONE);
+        GridLayout topRightLayout = new GridLayout();
+        topRight.setLayout(topRightLayout);
+		GridData topRightData= new GridData(SWT.FILL, SWT.FILL, true, true);
+		topRight.setLayoutData(topRightData);
+		
+		addOutPutCurvesWindow();
+//		ssvs.appendListenersToOutputCurves();
+		isOutputCurvesVisible(false);
+		
         Group sideImage = new Group(right, SWT.NONE);
-        sideImage.setText("Side Image");
+        sideImage.setText("Vertical Slice");
         GridLayout sideImageLayout = new GridLayout();
         sideImage.setLayout(sideImageLayout);
 		GridData sideImageData= new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -228,22 +180,6 @@ public class SuperSashPlotSystem3Composite extends Composite{
 
         left.setWeights(new int[]{50,50});         
 		right.setWeights(new int[]{50,50});  
-        
-		
-//		left.addControlListener(new ControlListener() {
-//			
-//			@Override
-//			public void controlResized(ControlEvent e) {
-//				right.setWeights(left.getWeights());  
-//				
-//			}
-//			
-//			@Override
-//			public void controlMoved(ControlEvent e) {
-//				right.setWeights(left.getWeights());  
-//				
-//			}
-//		});
 		
 		try {
 			verticalSlice = plotSystem2.createRegion("Vertical Slice", RegionType.XAXIS);
@@ -254,7 +190,6 @@ public class SuperSashPlotSystem3Composite extends Composite{
 			horizontalSlice = plotSystem2.createRegion("Horizontal Slice", RegionType.YAXIS);
 			
 			RectangularROI horizROI = new RectangularROI(0,(int) Math.round(ad[1]/2),ad[0],(int) Math.round(ad[1]*0.5),0);
-//			RectangularROI horizROI = new RectangularROI(0,(int) Math.round(ad[1]/2),50,10,0);
 			horizontalSlice.setROI(horizROI);
 			horizontalSlice.setActive(true);
 			horizontalSlice.setMobile(true);
@@ -264,7 +199,7 @@ public class SuperSashPlotSystem3Composite extends Composite{
 			
 			plotSystem2.addRegion(horizontalSlice);
 			plotSystem2.addRegion(verticalSlice);
-			plotSystem2.addRegion(region);
+//			plotSystem2.addRegion(region);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -278,10 +213,6 @@ public class SuperSashPlotSystem3Composite extends Composite{
 		/////////////////////////////////////////////////////////////////////////////////// examiner/////////////////////////////
 		////////////////////////////////////////////////////////////////////////
 		
-//		IRegion[] regionArray = new IRegion[2];
-//		
-//		
-//		plotSystem2.getRegions().toArray(regionArray);
 		
 		horizontalSlice.addROIListener(new IROIListener() {
 
@@ -343,7 +274,8 @@ public class SuperSashPlotSystem3Composite extends Composite{
 //
 //			}
 //		});
-
+		
+		
 		///////////////////////////////////////////////////////////////////////////////////////
 		
 //		generalUpdate();
@@ -356,7 +288,6 @@ public class SuperSashPlotSystem3Composite extends Composite{
 	   public IPlottingSystem<Composite> getPlotSystem1(){
 		   return plotSystem1;
 	   }
-	   
 	   
 	   public IPlottingSystem<Composite> getPlotSystem2(){
 		   return plotSystem2;
@@ -373,7 +304,6 @@ public class SuperSashPlotSystem3Composite extends Composite{
 	   public void setData(IDataset input){
 		   this.image2 = input;
 	   }
-	   
 	   
 	   public void setImage(IDataset input){
 		   plotSystem2.updatePlot2D(input,  null, null);
@@ -396,27 +326,24 @@ public class SuperSashPlotSystem3Composite extends Composite{
 		}
 		
 		public SashForm getRight(){
-			return right;
-			
+			return right;	
 		}
 		
 		public SashForm getLeft(){
-			return left;
-			
+			return left;	
 		}
-		
-//		public Button getBackgroundButton(){
-//			return backgroundButton;
-//		}
 
 		public MultipleOutputCurvesTableView getOutputCurves(){
 			return outputCurves;
 		}
 		
 		
+		public void isOutputCurvesVisible(boolean visible){
+			outputCurves.setVisible(visible);
+		}
+		
 		public void generalUpdate(){
 		
-			
 				plotSystem1.clear();
 				plotSystem3.clear();
 				
@@ -424,7 +351,7 @@ public class SuperSashPlotSystem3Composite extends Composite{
 				
 				
 				IRectangularROI greenRectangle = new RectangularROI(lenPt[1][0], lenPt[1][1],
-																	 lenPt[0][0], lenPt[0][1], 0);
+																	lenPt[0][0], lenPt[0][1], 0);
 					
 				
 				int selection = ssp.getSliderPos();
@@ -432,7 +359,6 @@ public class SuperSashPlotSystem3Composite extends Composite{
 				Dataset subImage =ssp.subImage(selection,greenRectangle);
 				
 				plotSystem2.updatePlot2D(subImage, null, null);
-//				plotSystem2.createPlot2D(subImage, null, null);
 				
 				ILineTrace lt1 = VerticalHorizontalSlices.horizontalslice(
 								horizontalSlice.getROI().getBounds(),
@@ -464,44 +390,45 @@ public class SuperSashPlotSystem3Composite extends Composite{
 							plotSystem1, 
 							ssp.getTemporaryBackground(),
 							greenRectangle);
-//					
+					
 					ILineTrace lt4 = VerticalHorizontalSlices.verticalsliceBackgroundSubtracted(
 							verticalSlice.getROI().getBounds(),
 							getPlotSystem3(),
 							ssp.getTemporaryBackground(),
 							greenRectangle);
-//					
-//					
+				
 					ILineTrace lt5 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
 							horizontalSlice.getROI().getBounds(),
 							plotSystem1, 
 							output,
 							greenRectangle);
-//					
+					
 					ILineTrace lt6 = VerticalHorizontalSlices.verticalsliceBackgroundSubtracted(
 							verticalSlice.getROI().getBounds(),
 							plotSystem3,
 							output,
 							greenRectangle);
-//						
+					
 					lt3.setName("background Slice");
 					lt4.setName("background Slice");
-//					
+					
 					plotSystem1.addTrace(lt3);
 					plotSystem3.addTrace(lt4);
 					plotSystem1.addTrace(lt5);
 					plotSystem3.addTrace(lt6);
-//					
 				
-//				
 				plotSystem1.clearAnnotations();
 				plotSystem3.clearAnnotations();
 				
 				plotSystem1.autoscaleAxes();
 				plotSystem3.autoscaleAxes();
-//		
+		
 				plotSystem1.repaint();
 				plotSystem3.repaint();
+				
+//				sashForm.getParent().layout(true,true);
+//				sashForm.redraw();
+//				sashForm.update();
 				
 				return;
 		}
@@ -509,12 +436,8 @@ public class SuperSashPlotSystem3Composite extends Composite{
 		
 		public void generalUpdate(int[][] lenPt){
 			
-			
 			plotSystem1.clear();
 			plotSystem3.clear();
-			
-//			int[][] lenPt = ssp.getLenPt();
-//			
 			
 			IRectangularROI greenRectangle = new RectangularROI(lenPt[1][0], lenPt[1][1],
 																 lenPt[0][0], lenPt[0][1], 0);
@@ -525,7 +448,6 @@ public class SuperSashPlotSystem3Composite extends Composite{
 			Dataset subImage =ssp.subImage(selection,greenRectangle);
 			
 			plotSystem2.updatePlot2D(subImage, null, null);
-//			plotSystem2.createPlot2D(subImage, null, null);
 			
 			ILineTrace lt1 = VerticalHorizontalSlices.horizontalslice(
 							horizontalSlice.getROI().getBounds(),
@@ -542,61 +464,129 @@ public class SuperSashPlotSystem3Composite extends Composite{
 							greenRectangle);
 			
 			plotSystem3.addTrace(lt2);	
-			
-			
-			
-			
-				@SuppressWarnings("unchecked")
-				IDataset output = ssp.presenterDummyProcess(selection,
+	
+			@SuppressWarnings("unchecked")
+			IDataset output = ssp.presenterDummyProcess(selection,
 						ssp.getImage(selection),
 						ssvs.getPlotSystemCompositeView().getPlotSystem(),
 						3);
 		
-				ILineTrace lt3 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
+			ILineTrace lt3 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
 						horizontalSlice.getROI().getBounds(),
 						plotSystem1, 
 						ssp.getTemporaryBackground(),
 						greenRectangle);
-//				
-				ILineTrace lt4 = VerticalHorizontalSlices.verticalsliceBackgroundSubtracted(
+				
+			ILineTrace lt4 = VerticalHorizontalSlices.verticalsliceBackgroundSubtracted(
 						verticalSlice.getROI().getBounds(),
 						getPlotSystem3(),
 						ssp.getTemporaryBackground(),
 						greenRectangle);
-//				
-//				
-				ILineTrace lt5 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
+				
+			ILineTrace lt5 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
 						horizontalSlice.getROI().getBounds(),
 						plotSystem1, 
 						output,
 						greenRectangle);
-//				
-				ILineTrace lt6 = VerticalHorizontalSlices.verticalsliceBackgroundSubtracted(
+				
+			ILineTrace lt6 = VerticalHorizontalSlices.verticalsliceBackgroundSubtracted(
 						verticalSlice.getROI().getBounds(),
 						plotSystem3,
 						output,
 						greenRectangle);
-//					
-				lt3.setName("background Slice");
-				lt4.setName("background Slice");
-//				
-				plotSystem1.addTrace(lt3);
-				plotSystem3.addTrace(lt4);
-				plotSystem1.addTrace(lt5);
-				plotSystem3.addTrace(lt6);
-//				
+				
+			lt3.setName("background Slice");
+			lt4.setName("background Slice");
+				
+			plotSystem1.addTrace(lt3);
+			plotSystem3.addTrace(lt4);
+			plotSystem1.addTrace(lt5);
+			plotSystem3.addTrace(lt6);
 			
-//			
 			plotSystem1.clearAnnotations();
 			plotSystem3.clearAnnotations();
 			
 			plotSystem1.autoscaleAxes();
 			plotSystem3.autoscaleAxes();
-//	
+	
 			plotSystem1.repaint();
 			plotSystem3.repaint();
+//			sashForm.redraw();
+//			sashForm.pack();
 			
 			return;
+	}
+		
+		
+	public void addOutPutCurvesWindow(){
+ 
+		if(outputCurves != null){
+		
+	        try{
+	        	outputCurves.dispose();
+	        }
+	        catch(Exception g){
+	        	
+	        }
+	        
+		}
+		
+        try {
+			outputCurves = new MultipleOutputCurvesTableView(topRight, 
+															SWT.FILL, 
+															0);
+			
+			outputCurves.setLayout(new GridLayout());
+			outputCurves.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	    
+//	    outputCurves.getOverlapZoom().addSelectionListener(new SelectionListener() {
+//				    	
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				
+//				ArrayList<ArrayList<IDataset>> xyArrays = ssp.xyArrayPreparer();
+//				
+//				GeneralOverlapHandlerView goh = new GeneralOverlapHandlerView(
+//						ssp.getParentShell(), 
+//						SWT.OPEN, 
+//						xyArrays.get(0),
+//						xyArrays.get(1),
+//						xyArrays.get(2),
+//						xyArrays.get(3),
+//						xyArrays.get(4), 
+//						outputCurves.getPlotSystem(),
+//						ssp);
+//				
+//				goh.open();		
+//			}
+//			
+//			@Override
+//			public void widgetDefaultSelected(SelectionEvent e) {
+//				
+//			}
+//		});
+	           
+        topRight.setText("Output Curves");
+
+        
+	}
+		
+		
+	
+	
+	public void removeOutPutCurvesWindow(){
+ 
+        try{
+        	outputCurves.dispose();
+        }
+        catch(Exception g){
+        	
+        }
+        topRight.setText("");
+        topRight.redraw();
 	}
 }
 		

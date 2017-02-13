@@ -167,15 +167,18 @@ public class PresenterInitialSetup extends Dialog {
 				
 				
 //				sm.setCorrectionSelection(0);
-				ssp = new SurfaceScatterPresenter();
+
+//				ssp.surfaceScatterPresenterBuild(parentShell,
+//												 new String[] {null},
+//												 "test",
+//												 imageFolderPath,
+//												 datFolderPath,
+//												 correctionSelection);
 				
-				ssp.surfaceScatterPresenterBuild(parentShell,
-												 new String[] {null},
-												 "test",
-												 imageFolderPath,
-												 datFolderPath,
-												 correctionSelection);
-			
+				ssp = new SurfaceScatterPresenter();
+//				ssp.setFilepaths();
+				
+				ssp.setImageFolderPath(imageFolderPath);
 				
 				SurfaceScatterViewStart ssvs = new SurfaceScatterViewStart(parentShell, 
 						   filepaths, 
@@ -185,6 +188,35 @@ public class PresenterInitialSetup extends Dialog {
 						   datFolderPath);
 				
 				ssp.setSsvs(ssvs);
+				
+				
+//				ssvs.get
+				
+//				Control[]  ssps3cChildren = ssvs.getSsps3c().getChildren();
+//				Control[]  plotSystemViewChildren = ssvs.getPlotSystemCompositeView().getChildren();
+//				
+////				for (Control control : ssps3cChildren){
+////					try{
+////						GridData data = (GridData) control.getLayoutData ();
+////					}
+////					catch(Exception g){
+////						System.out.println("data error in ssps3c " + control.getParent().toString());
+////					}
+////					
+////				}
+////				
+//				
+//				for (Control control : plotSystemViewChildren){
+//					try{
+//						GridData data = (GridData) control.getLayoutData ();
+//					}
+//					catch(Exception g){
+//						System.out.println("plotSystemViewChildren " + control.getParent().toString());
+//					}
+//					
+//				}
+				
+				
 				ssvs.open();
 				
 				
