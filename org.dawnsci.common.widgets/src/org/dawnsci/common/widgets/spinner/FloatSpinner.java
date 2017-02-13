@@ -43,8 +43,8 @@ public class FloatSpinner extends Composite {
 	/**
 	 * prims
 	 */
-	private int    width;
-	private int    precision;
+	private int    width = 3;
+	private int    precision = 1;
 	private double maximumValue;
 	private double factor;
 	
@@ -113,9 +113,9 @@ public class FloatSpinner extends Composite {
 	 *            of value in decimal places
 	 */
 	public void setFormat(int width, int precision) {
-		setPrecision(precision);
+		this.width = width;
+		setPrecision(precision); // this implicitly sets width properly
 
-		setWidth(width);
 		spinner.setIncrement(1);
 		spinner.setPageIncrement(5);
 		spinner.setSelection(0);
