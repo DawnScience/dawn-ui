@@ -48,7 +48,7 @@ public class PlotSystem1CompositeView extends Composite {
     private int extra;
     private SurfaceScatterPresenter ssp;
 //    private RegionSetterZoomedView rszv;
-    private Boolean trackerOn;
+    private Boolean trackerOn =false;
 	
   
     public PlotSystem1CompositeView(Composite parent, 
@@ -88,6 +88,8 @@ public class PlotSystem1CompositeView extends Composite {
     	}
     	trackerOnButton = new Button (this, SWT.PUSH);
     	trackerOnButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+    	
+    	
     	
     	if(ssp.getTrackerOn()){
     		trackerOnButton.setText("Tracker On");
@@ -374,6 +376,17 @@ public class PlotSystem1CompositeView extends Composite {
 	
    public Button getTrackerOnButton(){
 	   return trackerOnButton;
+   }
+   
+   public void checkTrackerOnButton(){
+	 
+	   if(ssp.getTrackerOn() ==false){
+		   trackerOnButton.setText("Tracker Off");
+	   }
+	   else{
+		   trackerOnButton.setText("Tracker On");
+	    }
+	    
    }
    
 class operationJob extends Job {

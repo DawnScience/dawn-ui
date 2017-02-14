@@ -421,6 +421,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				}
 				
 				ssps3c.resetVerticalAndHorizontalSlices();
+				customComposite.getPlotSystem1CompositeView().checkTrackerOnButton();
 				
 			}
 			
