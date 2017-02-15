@@ -18,30 +18,34 @@
             locationURI="menu:org.eclipse.ui.main.menu">
          <menu
                id="org.dawnsci.datavis.file"
-               label="File">
+               label="File"
+               mnemonic="F">
             <command
                   commandId="org.dawnsci.datavis.model.fileopen"
                   label="Open File..."
                   style="push">
             </command>
             <command
-                  commandId="org.eclipse.ui.file.exit"
-                  label="Exit">
-            </command>
-            <command
-                  commandId="org.eclipse.ui.window.preferences"
-                  label="Preferences..."
+                  commandId="org.dawnsci.datavis.model.fileclose"
+                  label="Close"
                   style="push">
             </command>
-            <command
-                  commandId="org.eclipse.ui.perspectives.showPerspective"
-                  label="Switch Mode..."
-                  style="push">
-            </command>
+            <separator
+                  name="org.dawnsci.datavis.restartseparator"
+                  visible="true">
+            </separator>
             <command
                   commandId="org.eclipse.ui.file.restartWorkbench"
                   label="Restart"
                   style="push">
+            </command>
+            <separator
+                  name="org.dawnsci.datavis.exitseparator"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="org.eclipse.ui.file.exit"
+                  label="Exit">
             </command>
             <visibleWhen
                   checkEnabled="false">

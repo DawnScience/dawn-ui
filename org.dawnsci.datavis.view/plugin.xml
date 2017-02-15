@@ -34,5 +34,13 @@
             restorable="true">
       </view>
    </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="org.dawnsci.datavis.view.perspective.FileCloseHander"
+            id="org.dawnsci.datavis.model.fileclose"
+            name="File Close Command">
+      </command>
+   </extension>
 
 </plugin>

@@ -43,6 +43,7 @@ import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeSelection;
@@ -147,6 +148,8 @@ public class LoadedFilePart {
 			    	FileController.getInstance().setCurrentFile(selected, selected.isSelected());
 			    }
 			    
+			    selectionService.setSelection(new StructuredSelection(selection.toArray()));
+			    
 			  }
 			});
 		
@@ -160,7 +163,7 @@ public class LoadedFilePart {
 				if (viewer.getSelection() instanceof IStructuredSelection) {
 					IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
 					
-					manager.add(new Action("Check",AbstractUIPlugin.imageDescriptorFromPlugin("org.dawnsci.prototype.nano.model", "icons/ticked.png")) {
+					manager.add(new Action("Check",AbstractUIPlugin.imageDescriptorFromPlugin("org.dawnsci.datavis.view", "icons/ticked.png")) {
 						@Override
 						public void run() {
 							List<LoadedFile> collected = Arrays.stream(selection.toArray())
@@ -174,7 +177,7 @@ public class LoadedFilePart {
 						}
 					});
 					
-					manager.add(new Action("Uncheck",AbstractUIPlugin.imageDescriptorFromPlugin("org.dawnsci.prototype.nano.model", "icons/unticked.gif")) {
+					manager.add(new Action("Uncheck",AbstractUIPlugin.imageDescriptorFromPlugin("org.dawnsci.datavis.view", "icons/unticked.gif")) {
 						@Override
 						public void run() {
 							List<LoadedFile> collected = Arrays.stream(selection.toArray())
@@ -201,7 +204,7 @@ public class LoadedFilePart {
 						});
 					}
 					
-					manager.add(new Action("Unload") {
+					manager.add(new Action("Close") {
 						@Override
 						public void run() {
 							List<LoadedFile> collected = Arrays.stream(selection.toArray())
