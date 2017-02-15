@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+<extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="org.dawnsci.datavis.view.perspective.DataVisPerspective"
+            icon="icons/color-swatch.png"
+            id="org.dawnsci.datavis.DataVisPerspective"
+            name="DataVis">
+      </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <e4view
+            class="org.dawnsci.datavis.view.parts.LoadedFilePart"
+            icon="icons/ui-layered-pane.png"
+            id="org.dawnsci.datavis.view.parts.LoadedFilePart"
+            name="Data Files"
+            restorable="true">
+      </e4view>
+      <e4view
+            class="org.dawnsci.datavis.view.parts.DatasetPart"
+            icon="icons/ui-layered-pane.png"
+            id="org.dawnsci.datavis.view.parts.DatasetPart"
+            name="Datasets"
+            restorable="true">
+      </e4view>
+      <view
+            class="org.eclipse.dawnsci.plotting.api.VanillaPlottingSystemView"
+            icon="icons/color-swatch.png"
+            id="org.dawnsci.datavis.view.parts.Plot"
+            name="Plot"
+            restorable="true">
+      </view>
+   </extension>
+
+</plugin>

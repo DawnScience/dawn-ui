@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?pde version="3.5"?>
+
+<product name="DAWNano" uid="dawnano" id="org.dawnsci.datavis.product" application="org.dawnsci.datavis.application" useFeatures="false" includeLaunchers="true">
+
+   <configIni use="default">
+   </configIni>
+
+   <launcherArgs>
+      <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
+      </vmArgsMac>
+   </launcherArgs>
+
+   <windowImages/>
+
+   <splash
+      location="org.dawnsci.protoype.nano" />
+   <launcher>
+      <solaris/>
+      <win useIco="false">
+         <bmp/>
+      </win>
+   </launcher>
+
+   <vm>
+   </vm>
+
+   <plugins>
+      <plugin id="ch.qos.logback.classic"/>
+      <plugin id="ch.qos.logback.core"/>
+      <plugin id="com.fasterxml.jackson.core.jackson-annotations"/>
+      <plugin id="com.fasterxml.jackson.core.jackson-core"/>
+      <plugin id="com.fasterxml.jackson.core.jackson-databind"/>
+      <plugin id="com.google.gson"/>
+      <plugin id="com.googlecode.efficient-java-matrix-library.core"/>
+      <plugin id="com.ibm.icu"/>
+      <plugin id="com.springsource.javax.media.jai.codec"/>
+      <plugin id="com.springsource.javax.media.jai.core"/>
+      <plugin id="com.springsource.net.sf.cglib"/>
+      <plugin id="com.springsource.org.apache.commons.collections"/>
+      <plugin id="com.springsource.org.jdom"/>
+      <plugin id="com.thoughtworks.xstream"/>
+      <plugin id="hdf.hdf5lib"/>
+      <plugin id="hdf.object"/>
+      <plugin id="javax.annotation"/>
+      <plugin id="javax.inject"/>
+      <plugin id="javax.vecmath"/>
+      <plugin id="javax.xml"/>
+      <plugin id="net.sf.py4j"/>
+      <plugin id="org.apache.batik.css"/>
+      <plugin id="org.apache.batik.dom"/>
+      <plugin id="org.apache.batik.dom.svg"/>
+      <plugin id="org.apache.batik.ext.awt"/>
+      <plugin id="org.apache.batik.parser"/>
+      <plugin id="org.apache.batik.svggen"/>
+      <plugin id="org.apache.batik.util"/>
+      <plugin id="org.apache.batik.util.gui"/>
+      <plugin id="org.apache.batik.xml"/>
+      <plugin id="org.apache.commons.beanutils"/>
+      <plugin id="org.apache.commons.collections"/>
+      <plugin id="org.apache.commons.collections4"/>
+      <plugin id="org.apache.commons.io"/>
+      <plugin id="org.apache.commons.jexl"/>
+      <plugin id="org.apache.commons.jxpath"/>
+      <plugin id="org.apache.commons.lang"/>
+      <plugin id="org.apache.commons.logging"/>
+      <plugin id="org.apache.commons.math3"/>
+      <plugin id="org.dawb.common.services"/>
+      <plugin id="org.dawb.common.ui"/>
+      <plugin id="org.dawb.common.util"/>
+      <plugin id="org.dawnsci.boofcv"/>
+      <plugin id="org.dawnsci.common.widgets"/>
+      <plugin id="org.dawnsci.common.widgets.gda"/>
+      <plugin id="org.dawnsci.conversion"/>
+      <plugin id="org.dawnsci.datavis"/>
+      <plugin id="org.dawnsci.datavis.model"/>
+      <plugin id="org.dawnsci.datavis.view"/>
+      <plugin id="org.dawnsci.intro"/>
+      <plugin id="org.dawnsci.io"/>
+      <plugin id="org.dawnsci.isosurface"/>
+      <plugin id="org.dawnsci.jexl"/>
+      <plugin id="org.dawnsci.persistence"/>
+      <plugin id="org.dawnsci.plotting"/>
+      <plugin id="org.dawnsci.plotting.draw2d"/>
+      <plugin id="org.dawnsci.plotting.histogram"/>
+      <plugin id="org.dawnsci.plotting.jreality"/>
+      <plugin id="org.dawnsci.plotting.services"/>
+      <plugin id="org.dawnsci.plotting.system"/>
+      <plugin id="org.dawnsci.plotting.tools"/>
+      <plugin id="org.dawnsci.processing.ui"/>
+      <plugin id="org.dawnsci.processing.ui.api"/>
+      <plugin id="org.dawnsci.processing.ui.dawn" fragment="true"/>
+      <plugin id="org.dawnsci.product.logging" fragment="true"/>
+      <plugin id="org.dawnsci.slicing.tools"/>
+      <plugin id="org.ddogleg"/>
+      <plugin id="org.dom4j"/>
+      <plugin id="org.eclipse.compare.core"/>
+      <plugin id="org.eclipse.core.commands"/>
+      <plugin id="org.eclipse.core.contenttype"/>
+      <plugin id="org.eclipse.core.databinding"/>
+      <plugin id="org.eclipse.core.databinding.observable"/>
+      <plugin id="org.eclipse.core.databinding.property"/>
+      <plugin id="org.eclipse.core.expressions"/>
+      <plugin id="org.eclipse.core.filebuffers"/>
+      <plugin id="org.eclipse.core.filesystem"/>
+      <plugin id="org.eclipse.core.filesystem.aix.ppc" fragment="true"/>
+      <plugin id="org.eclipse.core.filesystem.aix.ppc64" fragment="true"/>
+      <plugin id="org.eclipse.core.filesystem.hpux.ia64" fragment="true"/>
+      <plugin id="org.eclipse.core.filesystem.java7" fragment="true"/>
+      <plugin id="org.eclipse.core.filesystem.linux.ppc" fragment="true"/>
+      <plugin id="org.eclipse.core.filesystem.linux.ppc64" fragment="true"/>
+      <plugin id="org.eclipse.core.filesystem.linux.ppc64le" fragment="true"/>
+      <plugin id="org.eclipse.core.filesystem.linux.x86" fragment="true"/>
+      <plugin id="org.eclipse.core.filesystem.linux.x86_64" fragment="true"/>
+      <plugin id="org.eclipse.core.filesystem.macosx" fragment="true"/>
+      <plugin id="org.eclipse.core.filesystem.solaris.sparc" fragment="true"/>
+      <plugin id="org.eclipse.core.filesystem.win32.x86" fragment="true"/>
+      <plugin id="org.eclipse.core.filesystem.win32.x86_64" fragment="true"/>
+      <plugin id="org.eclipse.core.jobs"/>
+      <plugin id="org.eclipse.core.resources"/>
+      <plugin id="org.eclipse.core.resources.win32.x86" fragment="true"/>
+      <plugin id="org.eclipse.core.resources.win32.x86_64" fragment="true"/>
+      <plugin id="org.eclipse.core.runtime"/>
+      <plugin id="org.eclipse.core.runtime.compatibility.registry" fragment="true"/>
+      <plugin id="org.eclipse.core.variables"/>
+      <plugin id="org.eclipse.dawnsci.analysis.api"/>
+      <plugin id="org.eclipse.dawnsci.analysis.dataset"/>
+      <plugin id="org.eclipse.dawnsci.analysis.tree"/>
+      <plugin id="org.eclipse.dawnsci.hdf5"/>
+      <plugin id="org.eclipse.dawnsci.json"/>
+      <plugin id="org.eclipse.dawnsci.macro.api"/>
+      <plugin id="org.eclipse.dawnsci.nexus"/>
+      <plugin id="org.eclipse.dawnsci.plotting.api"/>
+      <plugin id="org.eclipse.dawnsci.slicing.api"/>
+      <plugin id="org.eclipse.draw2d"/>
+      <plugin id="org.eclipse.e4.core.commands"/>
+      <plugin id="org.eclipse.e4.core.contexts"/>
+      <plugin id="org.eclipse.e4.core.di"/>
+      <plugin id="org.eclipse.e4.core.di.annotations"/>
+      <plugin id="org.eclipse.e4.core.di.extensions"/>
+      <plugin id="org.eclipse.e4.core.services"/>
+      <plugin id="org.eclipse.e4.emf.xpath"/>
+      <plugin id="org.eclipse.e4.ui.bindings"/>
+      <plugin id="org.eclipse.e4.ui.css.core"/>
+      <plugin id="org.eclipse.e4.ui.css.swt"/>
+      <plugin id="org.eclipse.e4.ui.css.swt.theme"/>
+      <plugin id="org.eclipse.e4.ui.di"/>
+      <plugin id="org.eclipse.e4.ui.model.workbench"/>
+      <plugin id="org.eclipse.e4.ui.services"/>
+      <plugin id="org.eclipse.e4.ui.swt.gtk" fragment="true"/>
+      <plugin id="org.eclipse.e4.ui.widgets"/>
+      <plugin id="org.eclipse.e4.ui.workbench"/>
+      <plugin id="org.eclipse.e4.ui.workbench.addons.swt"/>
+      <plugin id="org.eclipse.e4.ui.workbench.renderers.swt"/>
+      <plugin id="org.eclipse.e4.ui.workbench.renderers.swt.cocoa" fragment="true"/>
+      <plugin id="org.eclipse.e4.ui.workbench.swt"/>
+      <plugin id="org.eclipse.e4.ui.workbench3"/>
+      <plugin id="org.eclipse.emf.common"/>
+      <plugin id="org.eclipse.emf.common.ui"/>
+      <plugin id="org.eclipse.emf.ecore"/>
+      <plugin id="org.eclipse.emf.ecore.change"/>
+      <plugin id="org.eclipse.emf.ecore.xmi"/>
+      <plugin id="org.eclipse.equinox.app"/>
+      <plugin id="org.eclipse.equinox.bidi"/>
+      <plugin id="org.eclipse.equinox.common"/>
+      <plugin id="org.eclipse.equinox.ds"/>
+      <plugin id="org.eclipse.equinox.event"/>
+      <plugin id="org.eclipse.equinox.p2.core"/>
+      <plugin id="org.eclipse.equinox.p2.engine"/>
+      <plugin id="org.eclipse.equinox.p2.metadata"/>
+      <plugin id="org.eclipse.equinox.p2.metadata.repository"/>
+      <plugin id="org.eclipse.equinox.p2.repository"/>
+      <plugin id="org.eclipse.equinox.preferences"/>
+      <plugin id="org.eclipse.equinox.registry"/>
+      <plugin id="org.eclipse.equinox.security"/>
+      <plugin id="org.eclipse.equinox.security.macosx" fragment="true"/>
+      <plugin id="org.eclipse.equinox.security.win32.x86" fragment="true"/>
+      <plugin id="org.eclipse.equinox.security.win32.x86_64" fragment="true"/>
+      <plugin id="org.eclipse.equinox.util"/>
+      <plugin id="org.eclipse.fx.osgi" fragment="true"/>
+      <plugin id="org.eclipse.gef"/>
+      <plugin id="org.eclipse.help"/>
+      <plugin id="org.eclipse.january"/>
+      <plugin id="org.eclipse.jface"/>
+      <plugin id="org.eclipse.jface.databinding"/>
+      <plugin id="org.eclipse.jface.text"/>
+      <plugin id="org.eclipse.nebula.jface"/>
+      <plugin id="org.eclipse.nebula.visualization.widgets"/>
+      <plugin id="org.eclipse.nebula.visualization.xygraph"/>
+      <plugin id="org.eclipse.nebula.visualization.xygraph.preference"/>
+      <plugin id="org.eclipse.nebula.widgets"/>
+      <plugin id="org.eclipse.osgi"/>
+      <plugin id="org.eclipse.osgi.compatibility.state" fragment="true"/>
+      <plugin id="org.eclipse.osgi.services"/>
+      <plugin id="org.eclipse.richbeans.annot"/>
+      <plugin id="org.eclipse.richbeans.api"/>
+      <plugin id="org.eclipse.richbeans.binding"/>
+      <plugin id="org.eclipse.richbeans.widgets"/>
+      <plugin id="org.eclipse.richbeans.widgets.file"/>
+      <plugin id="org.eclipse.scanning.api"/>
+      <plugin id="org.eclipse.swt"/>
+      <plugin id="org.eclipse.swt.cocoa.macosx.x86_64" fragment="true"/>
+      <plugin id="org.eclipse.swt.gtk.aix.ppc" fragment="true"/>
+      <plugin id="org.eclipse.swt.gtk.aix.ppc64" fragment="true"/>
+      <plugin id="org.eclipse.swt.gtk.hpux.ia64" fragment="true"/>
+      <plugin id="org.eclipse.swt.gtk.linux.ppc" fragment="true"/>
+      <plugin id="org.eclipse.swt.gtk.linux.ppc64" fragment="true"/>
+      <plugin id="org.eclipse.swt.gtk.linux.ppc64le" fragment="true"/>
+      <plugin id="org.eclipse.swt.gtk.linux.s390" fragment="true"/>
+      <plugin id="org.eclipse.swt.gtk.linux.s390x" fragment="true"/>
+      <plugin id="org.eclipse.swt.gtk.linux.x86" fragment="true"/>
+      <plugin id="org.eclipse.swt.gtk.linux.x86_64" fragment="true"/>
+      <plugin id="org.eclipse.swt.gtk.solaris.sparc" fragment="true"/>
+      <plugin id="org.eclipse.swt.gtk.solaris.x86" fragment="true"/>
+      <plugin id="org.eclipse.swt.win32.win32.x86" fragment="true"/>
+      <plugin id="org.eclipse.swt.win32.win32.x86_64" fragment="true"/>
+      <plugin id="org.eclipse.text"/>
+      <plugin id="org.eclipse.ui"/>
+      <plugin id="org.eclipse.ui.cheatsheets"/>
+      <plugin id="org.eclipse.ui.cocoa" fragment="true"/>
+      <plugin id="org.eclipse.ui.console"/>
+      <plugin id="org.eclipse.ui.editors"/>
+      <plugin id="org.eclipse.ui.forms"/>
+      <plugin id="org.eclipse.ui.ide"/>
+      <plugin id="org.eclipse.ui.intro"/>
+      <plugin id="org.eclipse.ui.navigator"/>
+      <plugin id="org.eclipse.ui.win32" fragment="true"/>
+      <plugin id="org.eclipse.ui.workbench"/>
+      <plugin id="org.eclipse.ui.workbench.texteditor"/>
+      <plugin id="org.georegression"/>
+      <plugin id="org.jdom"/>
+      <plugin id="org.monte.media"/>
+      <plugin id="org.objenesis"/>
+      <plugin id="org.tukaani.xz"/>
+      <plugin id="org.uncommons.maths"/>
+      <plugin id="org.w3c.css.sac"/>
+      <plugin id="org.w3c.dom.events"/>
+      <plugin id="org.w3c.dom.smil"/>
+      <plugin id="org.w3c.dom.svg"/>
+      <plugin id="slf4j.api"/>
+      <plugin id="uk.ac.diamond.CBFlib"/>
+      <plugin id="uk.ac.diamond.jama"/>
+      <plugin id="uk.ac.diamond.org.jscience4"/>
+      <plugin id="uk.ac.diamond.org.mihalis.opal"/>
+      <plugin id="uk.ac.diamond.scisoft.analysis"/>
+      <plugin id="uk.ac.diamond.scisoft.analysis.osgi"/>
+      <plugin id="uk.ac.diamond.scisoft.analysis.processing"/>
+      <plugin id="uk.ac.diamond.scisoft.system.info"/>
+      <plugin id="uk.ac.diamond.sda.meta"/>
+      <plugin id="uk.ac.diamond.sda.navigator"/>
+   </plugins>
+
+
+   <preferencesInfo>
+      <targetfile overwrite="false"/>
+   </preferencesInfo>
+
+   <cssInfo>
+   </cssInfo>
+
+</product>
