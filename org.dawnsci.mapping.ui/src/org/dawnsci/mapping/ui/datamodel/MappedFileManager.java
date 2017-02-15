@@ -247,10 +247,11 @@ public class MappedFileManager {
 			return;
 			
 		} catch (Exception e) {
-			logger.error("Could not build map bean from " + path, e);
+			//It is possible that building the live bean will fail
+			logger.info("Could not build live map bean from " + path, e);
 		}
 		
-		logger.error("Could not build map bean from " + path);
+		
 		MappedDataFile mdf = new MappedDataFile(path,bean);
 		mdf.setParentPath(parentFile);
 		mappedDataArea.addMappedDataFile(mdf);
