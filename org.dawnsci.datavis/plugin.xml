@@ -17,6 +17,7 @@
             allPopups="false"
             locationURI="menu:org.eclipse.ui.main.menu">
          <menu
+               id="org.dawnsci.datavis.file"
                label="File">
             <command
                   commandId="org.dawnsci.datavis.model.fileopen"
@@ -53,6 +54,42 @@
             </visibleWhen>
          </menu>
       </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.dawnsci.datavis.DataVisPerspective">
+         <hiddenMenuItem
+               id="org.eclipse.ui.run">
+         </hiddenMenuItem>
+         <hiddenMenuItem
+               id="navigate">
+         </hiddenMenuItem>
+         <hiddenMenuItem
+               id="project">
+         </hiddenMenuItem>
+         <hiddenToolBarItem
+               id="org.eclipse.ui.workbench.navigate">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="org.eclipse.debug.ui.launchActionSet">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="org.dawb.tango.extensions.shared.memory">
+         </hiddenToolBarItem>
+         <actionSet
+               id="org.dawnsci.spectrum.ui.fileOpenActionSet">
+         </actionSet>
+         <hiddenMenuItem
+               id="org.eclipse.search.menu">
+         </hiddenMenuItem>
+         <hiddenMenuItem
+               id="file">
+         </hiddenMenuItem>
+         <hiddenMenuItem
+               id="edit">
+         </hiddenMenuItem>
+      </perspectiveExtension>
    </extension>
 
 </plugin>
