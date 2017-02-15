@@ -12,25 +12,6 @@
       </application>
    </extension>
    <extension
-         point="org.eclipse.core.runtime.products">
-      <product
-            application="org.dawnsci.datavis.application"
-            name="DAWNano">
-      </product>
-   </extension>
-   <extension
-         id="product"
-         point="org.eclipse.core.runtime.products">
-      <product
-            application="org.dawnsci.datavis.application"
-            name="DAWNano">
-         <property
-               name="appName"
-               value="DAWNano">
-         </property>
-      </product>
-   </extension>
-   <extension
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
