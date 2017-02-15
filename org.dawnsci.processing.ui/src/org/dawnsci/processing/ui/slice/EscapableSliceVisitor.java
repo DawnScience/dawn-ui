@@ -150,7 +150,10 @@ public class EscapableSliceVisitor implements SliceVisitor {
 		}
 		
 		private void displayData(OperationData result, int[] dataDims) throws Exception {
-			if (result == null) output.clear();
+			if (result == null) {
+				output.clear();
+				return;
+			}
 			IDataset out = result.getData();
 			//TODO change name
 			try {
