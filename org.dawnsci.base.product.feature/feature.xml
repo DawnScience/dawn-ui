@@ -109,6 +109,10 @@
          id="org.dawnsci.browser.feature"
          version="0.0.0"/>
 
+   <includes
+         id="org.dawnsci.datavis.feature"
+         version="0.0.0"/>
+
    <plugin
          id="uk.ac.diamond.scisoft.analysis.rcp.contributions"
          download-size="0"
