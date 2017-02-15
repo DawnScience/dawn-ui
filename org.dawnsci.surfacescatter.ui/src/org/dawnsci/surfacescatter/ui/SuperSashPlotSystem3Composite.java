@@ -110,7 +110,7 @@ public class SuperSashPlotSystem3Composite extends Composite{
 		
 		right = new SashForm(sashForm, SWT.VERTICAL);
 		
-		sashForm.setWeights(new int[]{50,60});
+		sashForm.setWeights(new int[]{50,50});
 		
 
 	/////////////////Left SashForm///////////////////////////////////////////////////
@@ -199,7 +199,7 @@ public class SuperSashPlotSystem3Composite extends Composite{
 			
 			plotSystem2.addRegion(horizontalSlice);
 			plotSystem2.addRegion(verticalSlice);
-//			plotSystem2.addRegion(region);
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -308,6 +308,7 @@ public class SuperSashPlotSystem3Composite extends Composite{
 	   public void setImage(IDataset input){
 		   plotSystem2.updatePlot2D(input,  null, null);
 		   setData(input);
+		   this.image2 = input;
 	   }
 	   
 	   public void plotSystem2Redraw(){
@@ -359,7 +360,7 @@ public class SuperSashPlotSystem3Composite extends Composite{
 				Dataset subImage =ssp.subImage(selection,greenRectangle);
 				
 				plotSystem2.updatePlot2D(subImage, null, null);
-				
+				updateImage(subImage);
 				ILineTrace lt1 = VerticalHorizontalSlices.horizontalslice(
 								horizontalSlice.getROI().getBounds(),
 								plotSystem1, 
@@ -426,9 +427,9 @@ public class SuperSashPlotSystem3Composite extends Composite{
 				plotSystem1.repaint();
 				plotSystem3.repaint();
 				
-//				sashForm.getParent().layout(true,true);
-//				sashForm.redraw();
-//				sashForm.update();
+				sashForm.setWeights(new int[] {50,50});
+				left.setWeights(new int[] {50,50});
+				right.setWeights(new int[] {50,50});
 				
 				return;
 		}
@@ -448,6 +449,7 @@ public class SuperSashPlotSystem3Composite extends Composite{
 			Dataset subImage =ssp.subImage(selection,greenRectangle);
 			
 			plotSystem2.updatePlot2D(subImage, null, null);
+			updateImage(subImage);
 			
 			ILineTrace lt1 = VerticalHorizontalSlices.horizontalslice(
 							horizontalSlice.getROI().getBounds(),
@@ -511,10 +513,37 @@ public class SuperSashPlotSystem3Composite extends Composite{
 	
 			plotSystem1.repaint();
 			plotSystem3.repaint();
-//			sashForm.redraw();
-//			sashForm.pack();
 			
+			sashForm.setWeights(new int[] {50,50});
+			left.setWeights(new int[] {50,50});
+			right.setWeights(new int[] {50,50});
+
 			return;
+	}
+		
+		
+	public void resetVerticalAndHorizontalSlices(){
+		
+		try {
+			
+			int[] ad = image2.getShape();
+			
+			RectangularROI horizROI = new RectangularROI(0,(int) Math.round(ad[1]/4),ad[0],(int) Math.round(ad[1]*0.5),0);
+			horizontalSlice.setROI(horizROI);
+			horizontalSlice.setActive(true);
+			horizontalSlice.setMobile(true);
+			
+			RectangularROI vertROI = new RectangularROI((int) Math.round(ad[0]/4),0,(int) Math.round(ad[0]*0.5),ad[1],0);
+			verticalSlice.setROI(vertROI);
+			
+			
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		
 	}
 		
 		
@@ -542,32 +571,6 @@ public class SuperSashPlotSystem3Composite extends Composite{
 			e.printStackTrace();
 		}
 	    
-//	    outputCurves.getOverlapZoom().addSelectionListener(new SelectionListener() {
-//				    	
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				
-//				ArrayList<ArrayList<IDataset>> xyArrays = ssp.xyArrayPreparer();
-//				
-//				GeneralOverlapHandlerView goh = new GeneralOverlapHandlerView(
-//						ssp.getParentShell(), 
-//						SWT.OPEN, 
-//						xyArrays.get(0),
-//						xyArrays.get(1),
-//						xyArrays.get(2),
-//						xyArrays.get(3),
-//						xyArrays.get(4), 
-//						outputCurves.getPlotSystem(),
-//						ssp);
-//				
-//				goh.open();		
-//			}
-//			
-//			@Override
-//			public void widgetDefaultSelected(SelectionEvent e) {
-//				
-//			}
-//		});
 	           
         topRight.setText("Output Curves");
 
@@ -575,7 +578,9 @@ public class SuperSashPlotSystem3Composite extends Composite{
 	}
 		
 		
-	
+	public SashForm getSashForm(){
+		return sashForm;
+	}
 	
 	public void removeOutPutCurvesWindow(){
  

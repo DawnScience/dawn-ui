@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.PlatformUI;
 
 
@@ -221,6 +222,62 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 		});
 	    
+	    
+	    datDisplayer.getBuildRod().addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				ArrayList<TableItem> checkedList = new ArrayList<>();
+				
+				for(TableItem d : datDisplayer.getRodDisplayTable().getItems()){
+					if(d.getChecked()){
+						checkedList.add(d);
+					}
+				}
+				
+				
+				TableItem[] rodComponentDats = new TableItem[checkedList.size()];
+				
+				for(int g = 0; g<checkedList.size(); g++){
+					rodComponentDats[g] = checkedList.get(g);
+				}
+				
+				
+				
+				String[] filepaths = new String[rodComponentDats.length];
+				
+				for(int f = 0 ; f<rodComponentDats.length; f++){
+					String filename = rodComponentDats[f].getText();
+					filepaths[f] = datFolderPath + File.separator + filename;
+				}
+				
+				
+				
+				ssp.surfaceScatterPresenterBuild(ssp.getParentShell(), 
+												 filepaths, 
+												 datDisplayer.getSelectedOption(), 
+												 ssp.getImageFolderPath(), 
+												 datFolderPath, 
+												 ssp.getCorrectionSelection());
+				
+				ssp.resetCorrectionsSelection();
+				
+				
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+	    
+	    
+	    
+	    
+	    
 	    right.setWeights(new int[] {10,90});
 	    
 /////////////////////////////////////////////////////////////////////////		
@@ -362,6 +419,10 @@ public class SurfaceScatterViewStart extends Dialog {
 						
 					}
 				}
+				
+				ssps3c.resetVerticalAndHorizontalSlices();
+				customComposite.getPlotSystem1CompositeView().checkTrackerOnButton();
+				
 			}
 			
 			@Override
@@ -466,18 +527,17 @@ public class SurfaceScatterViewStart extends Dialog {
 					getPlotSystemCompositeView().getSash().setWeights(new int[] {23, 45, 25, 7});
 					
 				}
-//				if(getSsps3c().getOutputCurves() == null ){
-//					getSsps3c().addOutPutCurvesWindow();
-//					appendListenersToOutputCurves();
-//					outputCurves = getSsps3c().getOutputCurves();
-////					getSsps3c().redraw();
-////					container.pack();
-//					
-//				}
+
+				if(getSsps3c().getOutputCurves().isVisible() != true){
+					getSsps3c().getOutputCurves().setVisible(true);
+					getSsps3c().getSashForm().setWeights(new int[] {50,50});
+					getSsps3c().getLeft().setWeights(new int[] {50,50});
+					getSsps3c().getRight().setWeights(new int[] {50,50});
+				}
+
 				
-				getSsps3c().getOutputCurves().setVisible(true);
-//				appendListenersToOutputCurves();
-				
+				analysisSash.setWeights(new int[]{40,60});
+				analysisSash.redraw();
 				
 				ssp.runTrackingJob(customComposite.getSubImagePlotSystem(),
 								   getSsps3c().getOutputCurves().getPlotSystem(),

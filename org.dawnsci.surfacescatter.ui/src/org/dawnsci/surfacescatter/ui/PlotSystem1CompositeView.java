@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 
 public class PlotSystem1CompositeView extends Composite {
@@ -42,12 +43,12 @@ public class PlotSystem1CompositeView extends Composite {
     private Combo comboDropDown0;
 	private Combo comboDropDown1;
 	private Combo comboDropDown2;
-    private Text boundaryBoxText;
+    private Spinner boundaryBoxText;
 //    private String[] methodologies;
     private int extra;
     private SurfaceScatterPresenter ssp;
 //    private RegionSetterZoomedView rszv;
-    private Boolean trackerOn;
+    private Boolean trackerOn =false;
 	
   
     public PlotSystem1CompositeView(Composite parent, 
@@ -88,6 +89,8 @@ public class PlotSystem1CompositeView extends Composite {
     	trackerOnButton = new Button (this, SWT.PUSH);
     	trackerOnButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
     	
+    	
+    	
     	if(ssp.getTrackerOn()){
     		trackerOnButton.setText("Tracker On");
     	}
@@ -127,12 +130,19 @@ public class PlotSystem1CompositeView extends Composite {
 	   	
 	   	comboDropDown2 = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
 	   	comboDropDown2.setText(setup[2]);
-	    boundaryBoxText = new Text(methodSetting, SWT.SINGLE);
-	    boundaryBoxText.setText("000" + setup[3]);
+	    boundaryBoxText = new Spinner(methodSetting, SWT.SINGLE |  SWT.BORDER);
+	    boundaryBoxText.setMinimum(0);
+	    boundaryBoxText.setMinimum(1000);
+	    boundaryBoxText.setIncrement(1);
+	    boundaryBoxText.setSelection(10);
+	    boundaryBoxText.setPageIncrement(10);
+	   
+//	    boundaryBoxText.setText("000" + setup[3]);
 	    comboDropDown0.setData(new GridData(SWT.FILL));
 	    comboDropDown1.setData(new GridData(SWT.FILL));
 	    comboDropDown2.setData(new GridData(SWT.FILL));
-	    boundaryBoxText.setData(new GridData(SWT.FILL));
+	    boundaryBoxText.setData(new GridData(SWT.FILL, SWT.FILL, true, false));
+	    
 	    
 	    for(Methodology  t: AnalaysisMethodologies.Methodology.values()){
 	    	comboDropDown0.add(AnalaysisMethodologies.toString(t));
@@ -270,7 +280,7 @@ public class PlotSystem1CompositeView extends Composite {
 	   int fitPowerSelection = comboDropDown1.getSelectionIndex();
 	   int trackerSelection = comboDropDown2.getSelectionIndex();
        
-	   String boundaryBox = boundaryBoxText.getText();
+	   String boundaryBox = String.valueOf(boundaryBoxText.getSelection());
        ssp.updateAnalysisMethodology(methodologySelection, 
      		  						 fitPowerSelection, 
      		  						 trackerSelection, 
@@ -340,12 +350,12 @@ public class PlotSystem1CompositeView extends Composite {
    }
    
    public void setBoundaryBox (int in){
-	   boundaryBoxText.setText(String.valueOf(in));
+	   boundaryBoxText.setSelection(in);
    }
    
 
    public void setBoundaryBox (String in){
-	   boundaryBoxText.setText(in);
+	   boundaryBoxText.setSelection(Integer.valueOf(in));
    }
    
    public Button getRunButton(){
@@ -366,6 +376,17 @@ public class PlotSystem1CompositeView extends Composite {
 	
    public Button getTrackerOnButton(){
 	   return trackerOnButton;
+   }
+   
+   public void checkTrackerOnButton(){
+	 
+	   if(ssp.getTrackerOn() ==false){
+		   trackerOnButton.setText("Tracker Off");
+	   }
+	   else{
+		   trackerOnButton.setText("Tracker On");
+	    }
+	    
    }
    
 class operationJob extends Job {

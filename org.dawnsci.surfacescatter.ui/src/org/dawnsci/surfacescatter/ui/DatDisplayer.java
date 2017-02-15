@@ -37,6 +37,7 @@ public class DatDisplayer extends Composite {
 	private String[] options;
 	private ArrayList<String> datList;
 	private Table folderDisplayTable;
+	private Button buildRod;
         
     public DatDisplayer (Composite parent, 
     					 int style,
@@ -146,11 +147,11 @@ public class DatDisplayer extends Composite {
 	    deleteSelected.setText("Delete Selected");
 	    deleteSelected.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 	    
-	    Button buildRod = new Button(rodComponents, SWT.PUSH);
+	    buildRod = new Button(rodComponents, SWT.PUSH);
 	    buildRod.setText("Build Rod From Selected");
 	    buildRod.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 	    
-	    Table rodDisplayTable = new Table(rodComponents, SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+	    rodDisplayTable = new Table(rodComponents, SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 	    GridData rodDisplayData = new GridData(SWT.CENTER, SWT.CENTER, true, true);
         rodDisplayData.minimumWidth = 200;
         rodDisplayData.minimumHeight = 750;
@@ -313,53 +314,53 @@ public class DatDisplayer extends Composite {
 		});
 	    
 	    
-	    buildRod.addSelectionListener(new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				
-				ArrayList<TableItem> checkedList = new ArrayList<>();
-				
-				for(TableItem d : rodDisplayTable.getItems()){
-					if(d.getChecked()){
-						checkedList.add(d);
-					}
-				}
-				
-				
-				TableItem[] rodComponentDats = new TableItem[checkedList.size()];
-				
-				for(int g = 0; g<checkedList.size(); g++){
-					rodComponentDats[g] = checkedList.get(g);
-				}
-				
-				
-				
-				String[] filepaths = new String[rodComponentDats.length];
-				
-				for(int f = 0 ; f<rodComponentDats.length; f++){
-					String filename = rodComponentDats[f].getText();
-					filepaths[f] = datFolderPath + File.separator + filename;
-				}
-				
-				
-				
-				ssp.surfaceScatterPresenterBuild(ssp.getParentShell(), 
-												 filepaths, 
-												 options[optionsDropDown.getSelectionIndex()], 
-												 ssp.getImageFolderPath(), 
-												 datFolderPath, 
-												 ssp.getCorrectionSelection());
-				ssp.resetCorrectionsSelection();
-				
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
+//	    buildRod.addSelectionListener(new SelectionListener() {
+//			
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				
+//				ArrayList<TableItem> checkedList = new ArrayList<>();
+//				
+//				for(TableItem d : rodDisplayTable.getItems()){
+//					if(d.getChecked()){
+//						checkedList.add(d);
+//					}
+//				}
+//				
+//				
+//				TableItem[] rodComponentDats = new TableItem[checkedList.size()];
+//				
+//				for(int g = 0; g<checkedList.size(); g++){
+//					rodComponentDats[g] = checkedList.get(g);
+//				}
+//				
+//				
+//				
+//				String[] filepaths = new String[rodComponentDats.length];
+//				
+//				for(int f = 0 ; f<rodComponentDats.length; f++){
+//					String filename = rodComponentDats[f].getText();
+//					filepaths[f] = datFolderPath + File.separator + filename;
+//				}
+//				
+//				
+//				
+//				ssp.surfaceScatterPresenterBuild(ssp.getParentShell(), 
+//												 filepaths, 
+//												 options[optionsDropDown.getSelectionIndex()], 
+//												 ssp.getImageFolderPath(), 
+//												 datFolderPath, 
+//												 ssp.getCorrectionSelection());
+//				ssp.resetCorrectionsSelection();
+//				
+//			}
+//			
+//			@Override
+//			public void widgetDefaultSelected(SelectionEvent e) {
+//				// TODO Auto-generated method stub
+//				
+//			}
+//		});
 	    
 	    
 	    
@@ -439,8 +440,11 @@ public class DatDisplayer extends Composite {
    
    public List getList() {
 		return list;
-	}
+   }
    
+   public Button getBuildRod(){
+	   return buildRod;
+   }
    
    public void setList(String[] in ) {
 	   list.removeAll();
@@ -471,5 +475,14 @@ public class DatDisplayer extends Composite {
 	   
 	   folderDisplayTable.getVerticalBar().setEnabled(true);
    }
+   
+   public Table getRodDisplayTable(){
+	   return rodDisplayTable;
+   }
+   
+   public String getSelectedOption(){
+	   return options[optionsDropDown.getSelectionIndex()] ;
+   }
+  
 }
    
