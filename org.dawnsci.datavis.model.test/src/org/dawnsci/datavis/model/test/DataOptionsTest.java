@@ -35,45 +35,45 @@ public class DataOptionsTest extends AbstractTestModel{
 		assertNull(children);
 	}
 
-	@Test
-	public void testGetName() {
-		assertEquals(NanoModelTestUtils.ROOT+Node.SEPARATOR+"dataset1",dataOptions.getName());
-	}
+//	@Test
+//	public void testGetName() {
+//		assertEquals(NanoModelTestUtils.ROOT+Node.SEPARATOR+"dataset1",dataOptions.getName());
+//	}
 
 	@Test
 	public void testGetFileName() {
 		assertEquals(file.getAbsolutePath(),dataOptions.getFileName());
 	}
 
-	@Test
-	public void testGetAllPossibleAxes() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetPrimaryAxes() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetData() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testSetAxes() {
-		fail("Not yet implemented");
-	}
+//	@Test
+//	public void testGetAllPossibleAxes() {
+//		fail("Not yet implemented");
+//	}
+//
+//	@Test
+//	public void testGetPrimaryAxes() {
+//		fail("Not yet implemented");
+//	}
+//
+//	@Test
+//	public void testGetData() {
+//		fail("Not yet implemented");
+//	}
+//
+//	@Test
+//	public void testSetAxes() {
+//		fail("Not yet implemented");
+//	}
 
 	@Test
 	public void testGetPlottableObject() {
 		assertNull(dataOptions.getPlottableObject());
 	}
 
-	@Test
-	public void testSetPlottableObject() {
-		fail("Not yet implemented");
-	}
+//	@Test
+//	public void testSetPlottableObject() {
+//		fail("Not yet implemented");
+//	}
 
 	@Test
 	public void testIsSelected() {

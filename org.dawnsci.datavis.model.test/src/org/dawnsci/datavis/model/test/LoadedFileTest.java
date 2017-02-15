@@ -42,7 +42,7 @@ public class LoadedFileTest  extends AbstractTestModel {
 	public void testGetDataOptions() {
 		List<DataOptions> dataOptions = loadedFile.getDataOptions();
 		//single element dataset not included
-		assertEquals(nameShapeMap.size()-1, dataOptions.size());
+		assertEquals(nameShapeMap.size()-2, dataOptions.size());
 	}
 
 	@Test
