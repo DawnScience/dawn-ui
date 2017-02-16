@@ -1,7 +1,5 @@
 package org.dawnsci.surfacescatter.ui;
 
-import java.util.ArrayList;
-
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.surfacescatter.VerticalHorizontalSlices;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
@@ -19,8 +17,6 @@ import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -424,6 +420,9 @@ public class SuperSashPlotSystem3Composite extends Composite{
 				plotSystem1.autoscaleAxes();
 				plotSystem3.autoscaleAxes();
 		
+				
+				
+				
 				plotSystem1.repaint();
 				plotSystem3.repaint();
 				

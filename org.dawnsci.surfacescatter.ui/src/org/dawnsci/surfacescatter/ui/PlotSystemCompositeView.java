@@ -1,7 +1,6 @@
 package org.dawnsci.surfacescatter.ui;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.surfacescatter.ExampleModel;
-import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -17,7 +16,6 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Region;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -35,13 +33,12 @@ public class PlotSystemCompositeView extends Composite {
 
 	private Slider slider;
     private IPlottingSystem<Composite> plotSystem;
-    private IPlottingSystem<Composite> subImagePlotSystem;
     private IPlottingSystem<Composite> subImageBgPlotSystem;
-    private IPlottingSystem<Composite> subIBgPS;
 	private PlotSystem1CompositeView customComposite1;
     private IDataset image;
     private IRegion region;
     private IRegion bgRegion;
+    private IRegion secondBgRegion;
     private Button outputControl;
     private Button run;
     private int numberOfImages;
@@ -73,11 +70,10 @@ public class PlotSystemCompositeView extends Composite {
         this.numberOfImages = numberOfImages;
         this.nullImage = nullImage;
         this.ssp = ssp;
-//        this.ssvs = ssvs;
         
         try {
 			plotSystem = PlottingFactory.createPlottingSystem();
-			subImagePlotSystem = PlottingFactory.createPlottingSystem();
+//			subImagePlotSystem = PlottingFactory.createPlottingSystem();
 			
 		} catch (Exception e2) {
 			e2.printStackTrace();
@@ -101,10 +97,12 @@ public class PlotSystemCompositeView extends Composite {
     	
     	Display display = Display.getCurrent();
         Color gold = display.getSystemColor(SWT.COLOR_DARK_YELLOW);
+        Color magenta = display.getSystemColor(SWT.COLOR_MAGENTA);
     	
 		form = new SashForm(this, SWT.VERTICAL);
 		form.setLayout(new GridLayout());
-		form.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, true));
+//		form.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, true));
+		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     	       
 		Group mainImage = new Group(form, SWT.FILL);
 		GridLayout mainImageLayout = new GridLayout(1,true);
@@ -160,6 +158,7 @@ public class PlotSystemCompositeView extends Composite {
         replay = new Button(buttons, SWT.PUSH | SWT.FILL);
 		replay.setText("Replay");
 		replay.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		replay.setEnabled(false);
         
 		Group images = new Group(form, SWT.NONE);
         GridLayout imagesLayout = new GridLayout(1,true);
@@ -188,6 +187,7 @@ public class PlotSystemCompositeView extends Composite {
         try {
 			region =plotSystem.createRegion("myRegion", RegionType.BOX);
 			bgRegion =plotSystem.createRegion("bgRegion", RegionType.BOX);
+			secondBgRegion =plotSystem.createRegion("Background Region", RegionType.BOX);
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -237,6 +237,16 @@ public class PlotSystemCompositeView extends Composite {
 		bgRegion.setMobile(false);
 		plotSystem.addRegion(bgRegion);
 		
+		RectangularROI secondBgStartROI = new RectangularROI(10,10,20,20,0);
+		secondBgRegion.setROI(secondBgStartROI);
+		secondBgRegion.setRegionColor(magenta);
+		secondBgRegion.setUserRegion(true);
+		secondBgRegion.setLineWidth(3);
+		secondBgRegion.setMobile(true);
+		secondBgRegion.setVisible(false);
+		plotSystem.addRegion(secondBgRegion);
+		
+		
 		region.addROIListener(new IROIListener() {
 
 			@Override
@@ -281,12 +291,10 @@ public class PlotSystemCompositeView extends Composite {
 		});
 	    
 		run = new Button (form, SWT.PUSH);
-			
-			
+				
 		run.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		run.setText("Run");
 			
-		
 		form.setWeights(new int[] {23, 45, 25, 7});
     }
 		
@@ -354,6 +362,10 @@ public class PlotSystemCompositeView extends Composite {
 		return bgRegion;
 	}
 	
+	public IRegion getSecondBgRegion(){
+		return secondBgRegion;
+	}
+	
 	public void setRegion(int[][] lenpt){
 		RectangularROI newROI = new RectangularROI(lenpt[1][0],
 												   lenpt[1][1],
@@ -404,8 +416,8 @@ public class PlotSystemCompositeView extends Composite {
 	}
 	
 	public Text[] getROITexts(){
-		Text[] texts = new Text [4];
 		
+		Text[] texts = new Text [4];
 		texts[0] = xCoord;
 		texts[1] = xLen;
 		texts[2] = yCoord;

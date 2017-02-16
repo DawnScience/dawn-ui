@@ -4,6 +4,7 @@ import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.surfacescatter.DataModel;
 import org.dawnsci.surfacescatter.ExampleModel;
 import org.dawnsci.surfacescatter.SuperModel;
+import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
@@ -60,30 +61,32 @@ public class MultipleOutputCurvesTableView extends Composite {
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		overlapSelection = new Group(sashForm, SWT.NULL);
-		GridLayout overlapSelectionLayout = new GridLayout(4, true);
-		GridData overlapSelectionData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		GridLayout overlapSelectionLayout = new GridLayout(4, false);
+		GridData overlapSelectionData = new GridData(SWT.FILL);
 		overlapSelectionData.minimumWidth = 50;
 		overlapSelection.setLayout(overlapSelectionLayout);
 		overlapSelection.setLayoutData(overlapSelectionData);
 //		overlapSelection.setText("Output Controls");
 		
-		errors = new Button(overlapSelection, SWT.PUSH);
+		errors = new Button(overlapSelection, SWT.PUSH |SWT.FILL);
 		errors.setText("Errors");
+//		errors.setLayoutData(new GridData(SWT.LEFT));
 		
-		
-		intensitySelect = new Combo(overlapSelection, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
+		intensitySelect = new Combo(overlapSelection, SWT.DROP_DOWN | SWT.BORDER |SWT.FILL);
 		intensitySelect.setText("Intensity");
 		intensitySelect.add("Intensity");
 		intensitySelect.add("Fhkl");
+//		intensitySelect.setLayoutData(new GridData(SWT.LEFT));
 		
-		outputFormatSelection = new Combo(overlapSelection, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
+		outputFormatSelection = new Combo(overlapSelection, SWT.DROP_DOWN | SWT.BORDER | SWT.FILL);
 		outputFormatSelection.setText("GenX");
 		outputFormatSelection.add("GenX");
 		outputFormatSelection.add("Anrod");
+//		outputFormatSelection.setLayoutData(new GridData(SWT.LEFT));
 		
-		
-		save = new Button(overlapSelection, SWT.PUSH);
+		save = new Button(overlapSelection, SWT.PUSH |SWT.FILL);
 		save.setText("Save Spliced");
+//		save.setLayoutData(new GridData(SWT.LEFT));
 		
 		final GridLayout gridLayout = new GridLayout();
 		gridLayout.numColumns = 1;
@@ -106,6 +109,7 @@ public class MultipleOutputCurvesTableView extends Composite {
 		try {
 			imageNo = plotSystem4.createRegion("Image", RegionType.XAXIS_LINE);
 			imageNo.setShowPosition(true);
+			plotSystem4.addRegion(imageNo);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -215,4 +219,37 @@ public class MultipleOutputCurvesTableView extends Composite {
 	public IRegion getMarker(){
 		return marker;
 	}
+	
+	public void addImageNoRegion(double j){
+
+		RectangularROI r = new RectangularROI(j ,0.1,0,0.1,0);
+
+		if(plotSystem4.getRegion("Image")== null){
+			
+		try{
+			imageNo = plotSystem4.createRegion("Image", RegionType.XAXIS_LINE);
+		}
+		catch(Exception x){
+			
+		}
+		
+		
+		imageNo.setShowPosition(true);
+		imageNo.setROI(r);
+		
+		plotSystem4.addRegion(imageNo);
+		imageNo.setShowPosition(true);
+		}
+		
+		else{
+			moveImageNoRegion(j);
+		}
+	}
+	
+	public void moveImageNoRegion(double j){
+		
+		RectangularROI r = new RectangularROI(j ,0.1,0,0.1,0);
+		imageNo.setROI(r);
+	}
+	
 }

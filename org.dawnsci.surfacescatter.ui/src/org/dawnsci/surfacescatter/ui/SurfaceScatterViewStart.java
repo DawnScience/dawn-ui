@@ -114,6 +114,12 @@ public class SurfaceScatterViewStart extends Dialog {
 		
 	}
 	
+	@Override
+	protected Control createButtonBar(Composite parent) {
+		Control c = super.createButtonBar(parent);
+		getShell().setDefaultButton(null);
+		return c;
+	}
 
 	@Override
 	protected Control createDialogArea(Composite parent) {
@@ -413,7 +419,8 @@ public class SurfaceScatterViewStart extends Dialog {
 				if(ssp.getBackgroundDatArray() == (null)){
 					try{
 						getPlotSystemCompositeView().removeBackgroundSubtractedSubImage();
-						getSsps3c().isOutputCurvesVisible(false);;
+						getSsps3c().isOutputCurvesVisible(false);
+						customComposite.getReplay().setEnabled(false);
 					}
 					catch(Exception n){
 						
@@ -431,6 +438,8 @@ public class SurfaceScatterViewStart extends Dialog {
 				
 			}
 		});
+	    
+	    ssp.addSecondBgRegionListeners();
 	    
 	    customComposite.getGo().addSelectionListener(new SelectionListener() {
 			
@@ -459,8 +468,19 @@ public class SurfaceScatterViewStart extends Dialog {
 					
 					ssvs.updateIndicators(k);
 					
-					
 					modify = true;
+					
+					int pt0 = (int) Math.round(Double.valueOf(customComposite.getXCoord().getText()));
+					int pt1 = (int) Math.round(Double.valueOf(customComposite.getYCoord().getText()));
+					
+					int len0 = (int) Math.round(Double.valueOf(customComposite.getXLen().getText()));
+					int len1 = (int) Math.round(Double.valueOf(customComposite.getYLen().getText()));
+					
+					int[][] newLenPt  = new int[][] {{len0, len1},{pt0, pt1}};
+					
+					ssp.regionOfInterestSetter(newLenPt);
+					ssp.backgroundBoxesManager();
+					
 				}				
 			}
 				
@@ -513,13 +533,9 @@ public class SurfaceScatterViewStart extends Dialog {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				
-				ssp.regionOfInterestSetter();
-				
+			
 				ssp.setStartFrame(ssvs.getSliderList().get(0).getSelection());
-				ssp.resetDataModels();
-				ssp.resetTrackers();
-				
+				ssp.resetDataModels();				
 				ssp.triggerBoxOffsetTransfer();
 			
 				if(getPlotSystemCompositeView().getBackgroundSubtractedSubImage() == null){
@@ -546,7 +562,7 @@ public class SurfaceScatterViewStart extends Dialog {
 								   customComposite.getSubImageBgPlotSystem());
 				
 				
-								
+				
 			}
 			
 			@Override
@@ -599,7 +615,7 @@ public class SurfaceScatterViewStart extends Dialog {
 //				
 //			}
 //		});
-//	    
+//	    ssp.a
 //	    outputCurves.getRegionNo().addROIListener(new IROIListener() {
 //			
 //			@Override
@@ -759,6 +775,13 @@ public class SurfaceScatterViewStart extends Dialog {
 		return customComposite;
 	}
 	
+	public PlotSystemCompositeView getCustomComposite(){
+		return customComposite;
+	}
+	
+	public MultipleOutputCurvesTableView getOutputCurves(){
+		return outputCurves;
+	}
 	
 	public void updateIndicators(int k){
 		modify = false;
