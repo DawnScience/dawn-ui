@@ -1,12 +1,21 @@
 package org.dawnsci.plotting.tools.powderlines;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.dawnsci.common.widgets.gda.Activator;
+import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.XAxisLineBoxROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.YAxisLineBoxROI;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -18,6 +27,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 
 public class PowderLineTool extends AbstractToolPage {
 
@@ -68,6 +78,7 @@ public class PowderLineTool extends AbstractToolPage {
 		lineTableViewer.getTable().setLinesVisible(true);
 		lineTableViewer.getTable().setHeaderVisible(true);
 		// Create the Actions
+		createActions();
 		
 		// define the content and the provider
 		lineTableViewer.setContentProvider(new IStructuredContentProvider() {
@@ -192,9 +203,37 @@ public class PowderLineTool extends AbstractToolPage {
 		// Correct the stored lines for the plot units
 		// FIXME: Currently assumed to be the same units
 		
-		// TODO: To draw the ROIs, create a region from the plotting system,
-		// then use Display.getDefault.asyncExec() to make the call to add the
-		// Region to the PlottingSystem in the UI thread.
-		
+		final XAxisLineBoxROI[] lines = makeROILines(this.lineLocations); 
+		Display.getDefault().asyncExec(new Runnable() {
+			public void run() {
+				try {
+					for (XAxisLineBoxROI line : lines) {
+						final IRegion rLine = getPlottingSystem().createRegion(RegionUtils.getUniqueName("Line", getPlottingSystem()), RegionType.XAXIS);
+						rLine.setROI(line);
+						getPlottingSystem().addRegion(rLine);
+					}
+				} catch (Exception e) {
+					logger.error("Cannot create line", e);
+				}
+			}
+		});
+	}
+	
+	private XAxisLineBoxROI[] makeROILines(Double locations[]) {
+		List<XAxisLineBoxROI> lines = new ArrayList<XAxisLineBoxROI>();
+		for(double location : locations)
+			lines.add(new XAxisLineBoxROI(location, 0, 0, 1, 0));
+
+		return lines.toArray(new XAxisLineBoxROI[]{});
+	}
+	
+	private void createActions() {
+		final Action loadAction = new Action("Load a list of lines from file", Activator.getImageDescriptor("icons/mask-export-wiz.png")) {
+			@Override
+			public void run() {
+				
+			}
+		};
+		getSite().getActionBars().getToolBarManager().add(loadAction);
 	}
 }
