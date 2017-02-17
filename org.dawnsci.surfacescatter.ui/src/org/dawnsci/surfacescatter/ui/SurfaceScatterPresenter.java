@@ -398,10 +398,11 @@ public class SurfaceScatterPresenter {
 	
 
 	public void sliderMovemementMainImage(int sliderPos) {
-
-		sm.setSliderPos(sliderPos);
+		if(sliderPos != sm.getSliderPos()){ 
+			sm.setSliderPos(sliderPos);
 		
-		fireStateListeners();
+			fireStateListeners();
+		}
 	}
 	
 	
@@ -595,16 +596,17 @@ public class SurfaceScatterPresenter {
 			dm.setInitialLenPt(LenPt);
 		}
 		
-		
-		sm.setInitialLenPt(LenPt);
-		
-		try{
-			fireStateListeners();;
-		}
-		catch(NullPointerException f){
+		if(LenPt.equals(sm.getInitialLenPt()) == false){
 			
-		};
-	
+			sm.setInitialLenPt(LenPt);
+		
+			try{
+				fireStateListeners();;
+			}
+			catch(NullPointerException f){
+				
+			};
+		}
 		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDisplay(LenPt, 
 				   models.get(0).getBoundaryBox(), 
 				   models.get(0).getMethodology());
@@ -1562,6 +1564,12 @@ public class SurfaceScatterPresenter {
 	public void setSelection (int selection){
 		sm.setSelection(selection);
 	}
+	
+	public void setSliderPos (int selection){
+		sm.setSliderPos(selection);
+	}
+	
+	
 	
 	public void addSecondBgRegionListeners(){
 		

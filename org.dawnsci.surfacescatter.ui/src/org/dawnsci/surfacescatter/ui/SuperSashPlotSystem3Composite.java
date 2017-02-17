@@ -17,8 +17,11 @@ import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
@@ -36,6 +39,7 @@ public class SuperSashPlotSystem3Composite extends Composite{
 	private SurfaceScatterPresenter ssp;
     private Group topRight;
     private SashForm sashForm;
+    private Button resetCrossHairs;
 	
 	public SurfaceScatterPresenter getSsp() {
 		return ssp;
@@ -142,6 +146,25 @@ public class SuperSashPlotSystem3Composite extends Composite{
 		plotSystem2.getPlotComposite().setLayoutData(ld2);
 		plotSystem2.createPlot2D(image2, null, null);
 		
+		resetCrossHairs = new Button(mainImage, SWT.None);
+		resetCrossHairs.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		resetCrossHairs.setText("Centre Cross Hairs");
+		
+		resetCrossHairs.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				resetCrossHairs();
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
 	////////////////////////////////////////////////////////////////////////////////////
 	/////////////////Right sashform//////////////////////////////////////////////////////////
  		
@@ -185,13 +208,18 @@ public class SuperSashPlotSystem3Composite extends Composite{
 			
 			horizontalSlice = plotSystem2.createRegion("Horizontal Slice", RegionType.YAXIS);
 			
-			RectangularROI horizROI = new RectangularROI(0,(int) Math.round(ad[1]/2),ad[0],(int) Math.round(ad[1]*0.5),0);
+			RectangularROI horizROI = new RectangularROI(0,(int) Math.round(ad[0]/4),ad[1],(int) Math.round(ad[0]*0.5),0);
 			horizontalSlice.setROI(horizROI);
-			horizontalSlice.setActive(true);
-			horizontalSlice.setMobile(true);
+
 			
-			RectangularROI vertROI = new RectangularROI((int) Math.round(ad[0]/2),0,(int) Math.round(ad[0]*0.5),ad[1],0);
+			RectangularROI vertROI = new RectangularROI((int) Math.round(ad[1]/4),0,(int) Math.round(ad[1]*0.5),ad[0],0);
 			verticalSlice.setROI(vertROI);
+//			
+//			horizontalSlice.setROI(horizROI);
+//			horizontalSlice.setActive(true);
+//			horizontalSlice.setMobile(true);
+			
+		
 			
 			plotSystem2.addRegion(horizontalSlice);
 			plotSystem2.addRegion(verticalSlice);
@@ -251,30 +279,7 @@ public class SuperSashPlotSystem3Composite extends Composite{
 
 		});
 
-		/////////////////////////////////////////////////////////////////////////////////////////
-		////////////////////////////////// Background Curves in cross sections
-		///////////////////////////////////////////////////////////////////////////////////////// Plotsystem2////////
-		/////////////////////////////////////////// keywords: background
-		///////////////////////////////////////////////////////////////////////////////////////// display//////////////////////////////////////////////
 
-//		backgroundButton.addSelectionListener(new SelectionListener() {
-//
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				generalUpdate();
-//			}
-//
-//			@Override
-//			public void widgetDefaultSelected(SelectionEvent e) {
-//				// TODO Auto-generated method stub
-//
-//			}
-//		});
-		
-		
-		///////////////////////////////////////////////////////////////////////////////////////
-		
-//		generalUpdate();
 	   }
 	   
 	   public Composite getComposite(){   	
@@ -527,13 +532,13 @@ public class SuperSashPlotSystem3Composite extends Composite{
 			
 			int[] ad = image2.getShape();
 			
-			RectangularROI horizROI = new RectangularROI(0,(int) Math.round(ad[1]/4),ad[0],(int) Math.round(ad[1]*0.5),0);
+			RectangularROI horizROI = new RectangularROI(0,(int) Math.round(ad[0]/4),ad[1],(int) Math.round(ad[0]*0.5),0);
 			horizontalSlice.setROI(horizROI);
-			horizontalSlice.setActive(true);
-			horizontalSlice.setMobile(true);
+
 			
-			RectangularROI vertROI = new RectangularROI((int) Math.round(ad[0]/4),0,(int) Math.round(ad[0]*0.5),ad[1],0);
-			verticalSlice.setROI(vertROI);
+			RectangularROI vertROI = new RectangularROI((int) Math.round(ad[1]/4),0,(int) Math.round(ad[1]*0.5),ad[0],0);
+			verticalSlice.setROI(vertROI);;
+			
 			
 			
 
@@ -576,6 +581,18 @@ public class SuperSashPlotSystem3Composite extends Composite{
         
 	}
 		
+	public void resetCrossHairs(){
+		
+		int[] ad = image2.getShape();
+		
+		RectangularROI horizROI = new RectangularROI(0,(int) Math.round(ad[0]/4),ad[1],(int) Math.round(ad[0]*0.5),0);
+		horizontalSlice.setROI(horizROI);
+
+		
+		RectangularROI vertROI = new RectangularROI((int) Math.round(ad[1]/4),0,(int) Math.round(ad[1]*0.5),ad[0],0);
+		verticalSlice.setROI(vertROI);
+		
+	}
 		
 	public SashForm getSashForm(){
 		return sashForm;
