@@ -675,6 +675,11 @@ public class FileViewer {
 		// Get dropped data (an array of filenames)
 		if (!dropTargetValidate(event, targetFile))
 			return;
+		
+		// no need to display a dialog with a fear inspiring message, though it's in fact harmless 
+		if (simulateOnly)
+			return;
+		
 		final String[] sourceNames = (String[]) event.data;
 		if (sourceNames == null)
 			event.detail = DND.DROP_NONE;
@@ -769,6 +774,10 @@ public class FileViewer {
 		if (event.detail != DND.DROP_MOVE)
 			return;
 
+		// no need to display a dialog with a fear inspiring message, though it's in fact harmless 
+		if (simulateOnly)
+			return;
+		
 		// Get array of files that were actually transferred
 		final File[] sourceFiles;
 		if (processedDropFiles != null) {
