@@ -55,7 +55,7 @@ public class GeometricParametersWindows extends Composite{
 		
 		super(parent, style);
 		
-        new Label(this, SWT.NONE).setText("Geometric Parameters Window");
+//        new Label(this, SWT.NONE).setText("Geometric Parameters Window");
         
         this.ssp = ssp;
         this.gpw =this;
@@ -67,14 +67,14 @@ public class GeometricParametersWindows extends Composite{
 	public void createContents() {
 		
 		folder = new TabFolder(this, SWT.NONE);
-	   
+		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
 	    //Tab 1
 	    TabItem paramsSXRD = new TabItem(folder, SWT.NONE);
 	    paramsSXRD.setText("SXRD Parameters");
 	   
 		Group geometricParametersSX = new Group(folder, SWT.NULL);
 		GridLayout geometricParametersSXLayout = new GridLayout(2,true);
-		GridData geometricParametersSXData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		GridData geometricParametersSXData = new GridData(GridData.FILL_BOTH);
 		geometricParametersSX.setLayout(geometricParametersSXLayout);
 		geometricParametersSX.setLayoutData(geometricParametersSXData);
 		

@@ -5,6 +5,8 @@ import java.util.ArrayList;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionEvent;
@@ -14,11 +16,13 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
@@ -30,7 +34,6 @@ public class DatDisplayer extends Composite {
     private List list;
     private Group datSelector;
     private SurfaceScatterPresenter ssp;
-    private String datFolderPath;
     private Boolean selectAllFlag = true;
     private Table rodDisplayTable;
 	private Combo optionsDropDown;
@@ -38,143 +41,274 @@ public class DatDisplayer extends Composite {
 	private ArrayList<String> datList;
 	private Table folderDisplayTable;
 	private Button buildRod;
+	private SashForm selectionSash;
+	private Button populateTable;
+	private Button imageFolderSelection;
+	private Button datFolderSelection;
+	private String imageFolderPath = null;
+	private SurfaceScatterViewStart ssvs;
+	private String datFolderPath = null;
+	private Button transferToRod;
+	private Group rodConstrucion;
+	private Button deleteSelected;
+	private Button clearTable;
+	private Group scannedVariableOptions;
+	private Group rodComponents;
+	private Text datFolderText;
+	private Text imageFolderText;
+	
         
-    public DatDisplayer (Composite parent, 
+    public Button getpopulateTable() {
+		return populateTable;
+	}
+
+	public void setpopulateTable(Button populateTable) {
+		this.populateTable = populateTable;
+	}
+
+	public DatDisplayer (Composite parent, 
     					 int style,
     					 String[] filepaths,
     					 SurfaceScatterPresenter ssp,
-    					 String datFolderPath){
+    					 String datFolderPath,
+    					 SurfaceScatterViewStart ssvs){
     	
         super(parent, style);
         
-        new Label(this, SWT.NONE).setText("Source Data");
+//        new Label(this, SWT.NONE).setText("Source Data");
         
-        this.createContents(filepaths, datFolderPath); 
-        this.datFolderPath= datFolderPath;
+        this.createContents(); 
+//        this.datFolderPath= datFolderPath;
         this.ssp = ssp;
+        this.ssvs = ssvs;
 
         
     }
     
-    public void createContents(String[] filepaths, String datFolderPath) {
+    public void createContents() {
         
-    	SashForm selectionSash = new SashForm(this, SWT.HORIZONTAL);
-    	selectionSash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    	
+    	selectionSash = new SashForm(this, SWT.FILL);
+    	selectionSash.setLayoutData(new GridData(GridData.FILL_BOTH));
     	Composite left = new Composite(selectionSash, SWT.FILL);
     	left.setLayout(new GridLayout());
-    	left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    	
-    	Composite middle= new Composite(selectionSash,SWT.FILL);
-    	middle.setLayout(new GridLayout());
-    	middle.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    	
+    	left.setLayoutData(new GridData(GridData.FILL));
+    	    	
     	Composite right = new Composite(selectionSash,SWT.FILL);
     	right.setLayout(new GridLayout());
-    	right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    	
-    	Composite farRight = new Composite(selectionSash, SWT.NONE | SWT.FILL);
-    	farRight.setLayout(new GridLayout());
-    	farRight.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));  	
-    	
-        Group datSelector = new Group(left, SWT.NULL | SWT.V_SCROLL | SWT.FILL | SWT.CENTER);
+    	right.setLayoutData(new GridData(GridData.FILL));
+
+        Group datSelector = new Group(left, SWT.V_SCROLL | SWT.FILL );
         GridLayout datSelectorLayout = new GridLayout(1,true);
-        GridData datSelectorData = new GridData(GridData.GRAB_HORIZONTAL);
+        GridData datSelectorData =new GridData((GridData.FILL_BOTH));
 	    datSelectorData .minimumWidth = 200;
-	    datSelectorData .minimumHeight = 1000;
+	    datSelectorData .minimumHeight = 850;
 	    datSelector.setLayout(datSelectorLayout);
 	    datSelector.setLayoutData(datSelectorData);
 	    datSelector.setText("Selected Dat Files");
-//	    selectFiles = new Button(datSelector, SWT.PUSH);
-//	    selectFiles.setText("Select Files");
-//	    
-	    File folder = new File(datFolderPath);
-	    File[] listOfFiles = folder.listFiles();
-	    datList = new ArrayList<>();
+    
+	    Group datFolders  =new Group(datSelector, SWT.NONE);
+	    GridLayout datFoldersLayout = new GridLayout(2,true);
+        GridData datFoldersData =new GridData((GridData.FILL_HORIZONTAL));
+        datFolders.setLayout(datFoldersLayout);
+        datFolders.setLayoutData(datFoldersData);
+	    
+	    
+	    
+	    datFolderPath =null;
+	    
+	    datFolderSelection = new Button(datFolders, SWT.PUSH | SWT.FILL);
+		
+		datFolderSelection.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		datFolderSelection.setText("Select .dat File Folder");
+		
+		datFolderSelection.addSelectionListener(new SelectionListener() {
+		
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			
+				FileDialog fd = new FileDialog(ssvs.getShell(), SWT.OPEN); 
+				
+				String path = "p";
+				
+				if (fd.open() != null) {
+					path = fd.getFilterPath();
+				}
+				
+				datFolderPath = path;
+				ssvs.setDatFolderPath(path);
+				
+				if(datFolderPath != null && imageFolderPath != null){
+					populateTable.setEnabled(true);
+					clearTable.setEnabled(true);
+				}
+				
+				datFolderText.setText(datFolderPath);
+				datFolderText.setEnabled(true);
+				}
+				
+				@Override
+				public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+			
+			}
+		});
+	    
+		datFolderText = new Text(datFolders,SWT.SINGLE | SWT.BORDER | SWT.FILL);
+		datFolderText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		datFolderText.setEnabled(false);
+		datFolderText.setEditable(false);
+		
+		Group imageFolders  =new Group(datSelector, SWT.NONE);
+		GridLayout imageFoldersLayout = new GridLayout(2,true);
+	    GridData imageFoldersData =new GridData((GridData.FILL_HORIZONTAL));
+	    imageFolders.setLayout(imageFoldersLayout);
+	    imageFolders.setLayoutData(imageFoldersData);
+		
+		imageFolderSelection = new Button(imageFolders, SWT.PUSH | SWT.FILL);
+		
+		imageFolderSelection.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		imageFolderSelection.setText("Select Images Folder");
+		
+		imageFolderSelection.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				FileDialog fd = new FileDialog(ssvs.getShell(), SWT.OPEN); 
+				
+				String path = "p";
+				
+				if (fd.open() != null) {
+					path = fd.getFilterPath();
+				}
+				
+				imageFolderPath = path;
+				
+				if(datFolderPath != null && imageFolderPath != null){
+					populateTable.setEnabled(true);
+					clearTable.setEnabled(true);
+				}
+				
+				imageFolderText.setText(imageFolderPath);
+				imageFolderText.setEnabled(true);
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
+		imageFolderText = new Text(imageFolders,SWT.SINGLE | SWT.BORDER | SWT.FILL);
+		imageFolderText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		imageFolderText.setEnabled(false);
+		imageFolderText.setEditable(false);
+		
+	    populateTable = new Button(datSelector, SWT.PUSH | SWT.FILL);
+	    populateTable.setText("Populate Table");	  
+	    populateTable.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+	    populateTable.setEnabled(false);
+	    
 
-	    CharSequence dat = ".dat";
+	    clearTable = new Button(datSelector, SWT.PUSH | SWT.FILL);
+	    clearTable.setText("Clear Table");	  
+	    clearTable.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+	    clearTable.setEnabled(false);
 	    
-	    for (int i = 0; i < listOfFiles.length; i++) {
-	       if (listOfFiles[i].isFile() && listOfFiles[i].getName().contains(dat)){
-	    	   datList.add(listOfFiles[i].getName());
-	       }
-	    }
-	  
-	    Button placeHolder = new Button(datSelector, SWT.PUSH);
-	    placeHolder.setText("populate");
+	    folderDisplayTable = new Table(datSelector, SWT.CHECK |  SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
+	    folderDisplayTable.setEnabled(false);
 	    
-	    folderDisplayTable = new Table(datSelector, SWT.CHECK |  SWT.V_SCROLL | SWT.H_SCROLL | SWT.FILL);
-	    GridData folderDisplayTableData = new GridData(SWT.CENTER, SWT.CENTER, true, true);
+	    selectionSash.getParent().layout(true,true);
+		selectionSash.redraw();
+		selectionSash.update();
+		
+	    GridData folderDisplayTableData = new GridData(GridData.FILL_BOTH);
 	    folderDisplayTableData.minimumWidth = 200;
-        folderDisplayTableData.minimumHeight = 750;
+        folderDisplayTableData.minimumHeight = 650;
 	    
 	    folderDisplayTable.setLayoutData(folderDisplayTableData);
-	    folderDisplayTable.setLayout(new GridLayout(1,true));
+	    folderDisplayTable.setLayout(new GridLayout());
 	    folderDisplayTable.getVerticalBar().setEnabled(true);
 	    
-	    java.util.Collections.sort(datList);
+	    try{
+	    	java.util.Collections.sort(datList);
+	    }
+	    catch(Exception g){	
+	    }
 	    
-//	    for(int j = 0; j<datList.size(); j++){
-//	    	TableItem t = new TableItem(folderDisplayTable, SWT.NONE);
-//	    	t.setText(datList.get(j));
-//	    }
-//	    
-	    
-//	    folderDisplayTable.getColumn(0).pack();
-	
 	    folderDisplayTable.getVerticalBar().setEnabled(true);
 	    folderDisplayTable.getVerticalBar().setIncrement(1);
 	    folderDisplayTable.getVerticalBar().setThumb(1);
 	     
-	    Button transferToRod = new Button(middle, SWT.PUSH);
+	    transferToRod = new Button(datSelector, SWT.PUSH);
 	    transferToRod.setText("Transfer to Rod \r ->");
-	    transferToRod.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));	    
+	    transferToRod.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));	
+	    transferToRod.setEnabled(false);
 	    
-	    Group rodComponents = new Group(right, SWT.NULL | SWT.V_SCROLL | SWT.FILL | SWT.CENTER);
+	    rodConstrucion = new Group(right, SWT.V_SCROLL | SWT.FILL | SWT.FILL);
+        GridLayout rodConstrucionLayout = new GridLayout(1,true);
+        GridData rodConstrucionData = new GridData(GridData.FILL_BOTH);
+        rodConstrucionData.minimumWidth = 200;
+        rodConstrucionData.minimumHeight = 600;
+        rodConstrucion.setLayout(rodConstrucionLayout);
+        rodConstrucion.setLayoutData(rodConstrucionData);
+        rodConstrucion.setText("Rod Construcion");
+        rodConstrucion.setEnabled(false);
+        
+        scannedVariableOptions = new Group(rodConstrucion, SWT.NULL);
+        GridLayout scannedVariableOptionsLayout = new GridLayout(1,true);
+        GridData scannedVariableOptionsData = new GridData(GridData.FILL_HORIZONTAL);
+        scannedVariableOptionsData .minimumWidth = 50;
+        scannedVariableOptionsData .minimumHeight = 500;
+        scannedVariableOptions.setLayout(scannedVariableOptionsLayout);
+        scannedVariableOptions.setLayoutData(scannedVariableOptionsData);
+        scannedVariableOptions.setText("Scanned Variables");
+        scannedVariableOptions.setEnabled(false);
+        
+	    optionsDropDown = new Combo(scannedVariableOptions, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
+	    optionsDropDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+	    optionsDropDown.setEnabled(false);
+	    
+		optionsDropDown.select(0);
+	    
+	    rodComponents = new Group(rodConstrucion, SWT.NULL | SWT.V_SCROLL | SWT.FILL );
         GridLayout rodComponentsLayout = new GridLayout(1,true);
-        GridData rodComponentsData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+        GridData rodComponentsData = new GridData(GridData.FILL_BOTH);
         rodComponentsData.minimumWidth = 200;
-        rodComponentsData.minimumHeight = 10000;
+        rodComponentsData.minimumHeight = 500;
         rodComponents.setLayout(rodComponentsLayout);
         rodComponents.setLayoutData(rodComponentsData);
         rodComponents.setText("Rod Components");
+        rodComponents.setEnabled(false);
 	    
-        Button selectAll = new Button(rodComponents, SWT.PUSH);
-	    selectAll.setText("Select All - not working well");
-	    selectAll.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+//      Button selectAll = new Button(rodComponents, SWT.PUSH);
+//	    selectAll.setText("Select All - not working well");
+//	    selectAll.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 	    
-	    Button deleteSelected = new Button(rodComponents, SWT.PUSH);
+	    deleteSelected = new Button(rodComponents, SWT.PUSH);
 	    deleteSelected.setText("Delete Selected");
 	    deleteSelected.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+	    deleteSelected.setEnabled(false);
 	    
 	    buildRod = new Button(rodComponents, SWT.PUSH);
 	    buildRod.setText("Build Rod From Selected");
 	    buildRod.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+	    buildRod.setEnabled(false);
 	    
 	    rodDisplayTable = new Table(rodComponents, SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-	    GridData rodDisplayData = new GridData(SWT.CENTER, SWT.CENTER, true, true);
+	    GridData rodDisplayData = new GridData(GridData.FILL_BOTH);
         rodDisplayData.minimumWidth = 200;
-        rodDisplayData.minimumHeight = 750;
+        rodDisplayData.minimumHeight = 600;
 	    rodDisplayTable.setLayoutData(rodDisplayData);
-	    
-	    
-	    Group scannedVariableOptions = new Group(farRight, SWT.NULL);
-        GridLayout scannedVariableOptionsLayout = new GridLayout(1,true);
-        GridData scannedVariableOptionsData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-        scannedVariableOptionsData .minimumWidth = 50;
-        scannedVariableOptionsData .minimumHeight = 2000;
-        scannedVariableOptions.setLayout(scannedVariableOptionsLayout);
-        scannedVariableOptions.setLayoutData(scannedVariableOptionsData);
-        scannedVariableOptions.setText("Scanned Variables");
-	    
-	    optionsDropDown = new Combo(scannedVariableOptions, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
-	    optionsDropDown .setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-	    
-		optionsDropDown.select(0);
-	    
+	    rodDisplayTable.setLayout(new GridLayout());
+	    rodDisplayTable.setEnabled(false);
 	    
 	    transferToRod.addSelectionListener(new SelectionListener() {
 			
+	    	
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
@@ -237,6 +371,8 @@ public class DatDisplayer extends Composite {
 					e2.printStackTrace();
 				}
 				
+				optionsDropDown.removeAll();
+				
 				options = dh1.getNames();
 				
 				for (int t=0; t<options.length; t++){
@@ -245,8 +381,15 @@ public class DatDisplayer extends Composite {
 				
 				optionsDropDown.select(0);
 				
-				
+				rodConstrucion.setEnabled(true);
+				deleteSelected.setEnabled(true);
+				buildRod.setEnabled(true);
+				optionsDropDown.setEnabled(true);
+				rodDisplayTable.setEnabled(true);
+				rodComponents.setEnabled(true);
+				scannedVariableOptions.setEnabled(true);
 				folderDisplayTable.getVerticalBar().setEnabled(true);
+				
 			}
 			
 			@Override
@@ -255,6 +398,22 @@ public class DatDisplayer extends Composite {
 				
 			}
 		});
+	    
+	    clearTable.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				clearTable();
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+	    
 	    
 	    deleteSelected.addSelectionListener(new SelectionListener() {
 			
@@ -279,6 +438,37 @@ public class DatDisplayer extends Composite {
 			    	t.setText(sr);
 				}
 				
+				
+				
+
+				IDataHolder dh1 = null;
+				
+				try {
+					
+					String filename = rodDisplayTable.getItem(0).getText();
+					String filep = datFolderPath + File.separator + filename;
+					dh1 = LoaderFactory.getData(filep );
+					
+					optionsDropDown.removeAll();
+					
+					options = dh1.getNames();
+					
+					for (int t=0; t<options.length; t++){
+						optionsDropDown.add(options[t]);
+					}
+					
+					optionsDropDown.select(0);
+					
+				} catch (Exception e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
+				}
+				
+				
+				if(rodDisplayTable.getItemCount() ==0){
+					enableRodConstruction(false);
+				}
+				
 			}
 			
 			@Override
@@ -288,71 +478,22 @@ public class DatDisplayer extends Composite {
 			}
 		});
 	    
-	    selectAll.addSelectionListener(new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if(selectAllFlag){
-					rodDisplayTable.selectAll();
-					
-					selectAllFlag = false;
-					selectAll.setText("Deselect All - not working well");
-					
-				}
-				else{
-					rodDisplayTable.deselectAll();;
-					selectAllFlag = true;
-					selectAll.setText("Select All - not working well");
-				}
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
-	    
-	    
-//	    buildRod.addSelectionListener(new SelectionListener() {
+//	    selectAll.addSelectionListener(new SelectionListener() {
 //			
 //			@Override
 //			public void widgetSelected(SelectionEvent e) {
-//				
-//				ArrayList<TableItem> checkedList = new ArrayList<>();
-//				
-//				for(TableItem d : rodDisplayTable.getItems()){
-//					if(d.getChecked()){
-//						checkedList.add(d);
-//					}
+//				if(selectAllFlag){
+//					rodDisplayTable.selectAll();
+//					
+//					selectAllFlag = false;
+//					selectAll.setText("Deselect All - not working well");
+//					
 //				}
-//				
-//				
-//				TableItem[] rodComponentDats = new TableItem[checkedList.size()];
-//				
-//				for(int g = 0; g<checkedList.size(); g++){
-//					rodComponentDats[g] = checkedList.get(g);
+//				else{
+//					rodDisplayTable.deselectAll();;
+//					selectAllFlag = true;
+//					selectAll.setText("Select All - not working well");
 //				}
-//				
-//				
-//				
-//				String[] filepaths = new String[rodComponentDats.length];
-//				
-//				for(int f = 0 ; f<rodComponentDats.length; f++){
-//					String filename = rodComponentDats[f].getText();
-//					filepaths[f] = datFolderPath + File.separator + filename;
-//				}
-//				
-//				
-//				
-//				ssp.surfaceScatterPresenterBuild(ssp.getParentShell(), 
-//												 filepaths, 
-//												 options[optionsDropDown.getSelectionIndex()], 
-//												 ssp.getImageFolderPath(), 
-//												 datFolderPath, 
-//												 ssp.getCorrectionSelection());
-//				ssp.resetCorrectionsSelection();
-//				
 //			}
 //			
 //			@Override
@@ -360,68 +501,15 @@ public class DatDisplayer extends Composite {
 //				// TODO Auto-generated method stub
 //				
 //			}
-//		});
+//		});	 
 	    
-	    
-	    
-//	    Button selectAll= new Button(parent, SWT.PUSH);
-//	    selectAll.setFont(FontUtils.getMsSansSerifFont());
-//	    selectAll.setLayoutData(gridData);
-//	    selectAll.addSelectionListener(new SelectionAdapter() {
-//	        public void widgetSelected(SelectionEvent e) {
-//	            table.selectAll();
-//	        }
-//	    });
-	    
-	    
-	    
-//	    list = new List(datSelector, SWT.V_SCROLL);
-//	    
-//	    for (String i :  datList) {
-//	    	list.add(new Button(datSelector, SWT.CHECK));
-//	    	list.add(StringUtils.substringAfterLast(i, File.separator));
-//	    }
-	    
-	    // Scroll to the bottom
-//	    list.select(list.getItemCount() - 1);
-//	    list.showSelection();
-	    
-
-//	    ScrollBar sb = list.getVerticalBar();
-//
-//	    // Add one more item that shows the selection value
-//	    //comboDropDown0 = new Combo(datSelector, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
-//	   	
-//	    massRunner = new Button(datSelector, SWT.NULL);
-//	    massRunner.setText("Run all");
-//	    
-//	    for(String t: sm.getFilepaths()){
-//	    	comboDropDown0.add(StringUtils.substringAfterLast(t, "/"));
-//	    	
-//	    }
-	    
-	    
-//	    list.addSelectionListener(new SelectionListener() {
-//	    	@Override
-//	    	public void widgetSelected(SelectionEvent e) {
-//	          int selection = list.getSelectionIndex();
-//	          ssp.setSelection(selection);
-////	          sm.setSelection(selection);
-////	          System.out.println("!!!!!!!!!!!!!!selection : " + selection +"  !!!!!!!!!!!!!!!!!!!!!!!!!!1");
-//	        }
-//	    	@Override
-//	        public void widgetDefaultSelected(SelectionEvent e) {
-//	          
-//	        }
-//      });
-    
-	 
-	    
-	   placeHolder.addSelectionListener(new SelectionListener() {
+	   populateTable.addSelectionListener(new SelectionListener() {
 		
 		@Override
 		public void widgetSelected(SelectionEvent e) {
 			fillTable();
+			folderDisplayTable.setEnabled(true);
+			transferToRod.setEnabled(true);
 			
 		}
 		
@@ -431,7 +519,9 @@ public class DatDisplayer extends Composite {
 			
 		}
 	}); 
-	    
+	   
+	   
+	   selectionSash.setWeights(new int[] {50,50});
     }
     
    public Composite getComposite(){   	
@@ -457,7 +547,15 @@ public class DatDisplayer extends Composite {
 	   this.redraw();
 	}
   
-   
+   public void enableRodConstruction(boolean enabled){
+	   rodConstrucion.setEnabled(enabled);
+	   scannedVariableOptions.setEnabled(enabled);
+	   rodComponents.setEnabled(enabled);
+	   rodDisplayTable.setEnabled(enabled);
+	   buildRod.setEnabled(enabled);
+	   deleteSelected.setEnabled(enabled);
+	   optionsDropDown.setEnabled(enabled);
+   }
    
    public Button getMassRunner(){
 	   return massRunner;
@@ -468,13 +566,51 @@ public class DatDisplayer extends Composite {
    }
    
    public void fillTable(){
-	   for(int j = 0; j<datList.size(); j++){
-		   	TableItem t = new TableItem(folderDisplayTable, SWT.NONE);
-		   	t.setText(datList.get(j));
-	   }
 	   
-	   folderDisplayTable.getVerticalBar().setEnabled(true);
+	   	File folder = new File(datFolderPath);
+	    File[] listOfFiles = folder.listFiles();
+	    datList = new ArrayList<>();
+
+	    CharSequence dat = ".dat";
+	    
+	    for (int i = 0; i < listOfFiles.length; i++) {
+	       if (listOfFiles[i].isFile() && listOfFiles[i].getName().contains(dat)){
+	    	   datList.add(listOfFiles[i].getName());
+	       }
+	    }
+	   
+	    
+	    try{
+		   java.util.Collections.sort(datList);
+		}
+		catch(Exception g){
+		    	
+		 }
+	    
+	   
+		 for(int j = 0; j<datList.size(); j++){
+			 TableItem t = new TableItem(folderDisplayTable, SWT.NONE);
+			 t.setText(datList.get(j));
+		  }
+		   
+		  folderDisplayTable.getVerticalBar().setEnabled(true);
+	 
    }
+   
+   public void clearTable(){
+	   
+	   TableItem[] itemsToRemove = folderDisplayTable.getItems();
+		
+//		for(TableItem ra : folderDisplayTable.getItems()){
+//			for(TableItem rb : itemsToRemove){
+//				if(ra.getText().equals(rb.getText())){
+//					ra.dispose();
+//				}
+//			}
+//		}
+//		
+		folderDisplayTable.removeAll();
+  }
    
    public Table getRodDisplayTable(){
 	   return rodDisplayTable;
@@ -483,6 +619,26 @@ public class DatDisplayer extends Composite {
    public String getSelectedOption(){
 	   return options[optionsDropDown.getSelectionIndex()] ;
    }
+
+	public SashForm getSelectionSash() {
+		return selectionSash;
+	}
+	
+	public void setSelectionSash(SashForm selectionSash) {
+		this.selectionSash = selectionSash;
+	}
   
+	
+	public void redrawDatDisplayerFolderView(){
+		
+		this.getParent().layout(true, true);
+		this.redraw();
+		this.update();
+		this.pack();
+		
+		selectionSash.getParent().layout(true,true);
+		selectionSash.redraw();
+		selectionSash.update();
+	}
 }
    

@@ -79,7 +79,7 @@ public class SurfaceScatterPresenter {
 	private ArrayList<DataModel> dms;
 	private ArrayList<GeometricParametersModel> gms;
 	private SuperModel sm;
-	private int noImages;
+	private int noImages = 0;
 	private SurfaceScatterViewStart ssvs;
 	private IRegion backgroundRegion;
 	
@@ -455,8 +455,9 @@ public class SurfaceScatterPresenter {
 	@SuppressWarnings("unchecked")
 	public int loadParameters(String title,
 							   PlotSystemCompositeView pscv,
-							   PlotSystem1CompositeView ps1cv,
-							   SuperSashPlotSystem2Composite ps2cv){
+							   PlotSystem1CompositeView ps1cv
+//							   SuperSashPlotSystem2Composite ps2cv
+							   ){
 		
 		FittingParameters fp = FittingParametersInputReader.reader(title);
 		
@@ -469,6 +470,7 @@ public class SurfaceScatterPresenter {
 			m.setMethodology(fp.getBgMethod());
 		}
 		
+		sm.setInitialLenPt(fp.getLenpt());
 		int selection = this.closestImageNo(fp.getXValue());
 		
 		sm.setInitialLenPt(fp.getLenpt());
@@ -478,6 +480,8 @@ public class SurfaceScatterPresenter {
 		ps1cv.setFitPowerDropDown(fp.getFitPower());
 		ps1cv.setTrackerTypeDropDown(fp.getTracker());
 		ps1cv.setBoundaryBox(fp.getBoundaryBox());
+		
+		
 		
 		pscv.setRegion(fp.getLenpt());
 		pscv.redraw();
@@ -492,10 +496,10 @@ public class SurfaceScatterPresenter {
 		
 		this.sliderMovemementMainImage(selection);
 		
-		this.sliderZoomedArea(selection, 
-							 loadedROI, 
-							 ps2cv.getPlotSystem2(),
-							 ssvs.getPlotSystemCompositeView().getSubImagePlotSystem());
+//		this.sliderZoomedArea(selection, 
+//							 loadedROI, 
+//							 ps2cv.getPlotSystem2(),
+//							 ssvs.getPlotSystemCompositeView().getSubImagePlotSystem());
 		
 		this.regionOfInterestSetter(loadedROI);
 		
@@ -648,6 +652,13 @@ public class SurfaceScatterPresenter {
 			
 			IRegion r2 = ssvs.getPlotSystemCompositeView().getSecondBgRegion();
 			r2.setVisible(true);
+			r2.setUserRegion(true);
+			r2.setLineWidth(1);
+			r2.setMobile(true);
+			r2.setFill(true);
+			r2.setLineWidth(3);
+			
+			
 			r2.setRegionColor(magenta);		
 				
 			if (models.get(0).getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
@@ -701,6 +712,15 @@ public class SurfaceScatterPresenter {
 				
 				ssvs.getPlotSystemCompositeView().getBgRegion().setVisible(true);
 				ssvs.getPlotSystemCompositeView().getSecondBgRegion().setVisible(false);
+				
+				ssvs.getPlotSystemCompositeView().getSecondBgRegion().setRegionColor(magenta);
+				ssvs.getPlotSystemCompositeView().getSecondBgRegion().setUserRegion(false);
+				ssvs.getPlotSystemCompositeView().getSecondBgRegion().setLineWidth(1);
+				ssvs.getPlotSystemCompositeView().getSecondBgRegion().setMobile(false);
+				ssvs.getPlotSystemCompositeView().getSecondBgRegion().setVisible(false);
+				ssvs.getPlotSystemCompositeView().getSecondBgRegion().setFill(false);
+				ssvs.getPlotSystemCompositeView().getSecondBgRegion().setLineWidth(0);
+				
 				
 				this.regionOfInterestSetter();
 				
@@ -757,10 +777,67 @@ public class SurfaceScatterPresenter {
 		}
 		
 		if(models.get(0).getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
-//			&&
-//		}
-//				k != sm.getStartFrame()){
-//			
+		
+			int[] offsetLen = sm.getPermanentBoxOffsetLenPt()[0];
+			int[] offsetPt = sm.getPermanentBoxOffsetLenPt()[1];
+			
+			int pt0 = pt[0] + offsetPt[0];
+			int pt1 = pt[1] + offsetPt[1];
+			
+			
+			int len0 = len[0] + offsetLen[0];
+			int len1 = len[1] + offsetLen[1];
+			
+			RectangularROI offsetBgROI = new RectangularROI(pt0,
+					  pt1,
+					  len0,
+					  len1,
+					  0);
+			
+			ssvs.getPlotSystemCompositeView().getSecondBgRegion().setROI(offsetBgROI);
+		}
+
+		try{
+			ssvs.getSsps3c().generalUpdate(lenPt);
+		}
+		catch(NullPointerException f){
+			
+		}
+			
+		
+	}
+	
+	public void trackingRegionOfInterestSetter(int[][] lenPt) {
+
+		int[] len = lenPt[0];
+		int[] pt = lenPt[1];
+		RectangularROI newGreenROI = new RectangularROI(pt[0],
+				pt[1],
+				len[0],
+				len[1],
+				0);
+
+		ssvs.getPlotSystemCompositeView().getIRegion().setROI(newGreenROI);	
+		
+		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDisplay(lenPt, 
+				   models.get(0).getBoundaryBox(), 
+				   models.get(0).getMethodology());
+
+		RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
+												  bgRegionROI[1],
+												  bgRegionROI[2],
+												  bgRegionROI[3],
+												  bgRegionROI[4]);
+
+		try{
+			ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgROI);
+		}
+		catch(Exception f){
+			
+		}
+		
+		if(models.get(0).getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
+		
 			int[] offsetLen = sm.getPermanentBoxOffsetLenPt()[0];
 			int[] offsetPt = sm.getPermanentBoxOffsetLenPt()[1];
 			

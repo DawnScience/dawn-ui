@@ -1,10 +1,5 @@
 package org.dawnsci.surfacescatter.ui;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import org.dawnsci.spectrum.ui.file.IContain1DData;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -19,25 +14,25 @@ public class OpenDialogHandler extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService().getSelection();
 		if (selection instanceof StructuredSelection) {
-			StructuredSelection ss = (StructuredSelection)selection;
+//			StructuredSelection ss = (StructuredSelection)selection;
+//			
+//			List<String> selectedFile = new ArrayList<String>();
 			
-			List<String> selectedFile = new ArrayList<String>();
-			
-			Iterator it = ss.iterator();
-			
-			while (it.hasNext()) {
-				Object ob = it.next();
-				if (ob instanceof IContain1DData) {
-					selectedFile.add(((IContain1DData)ob).getLongName());
-				}
-			}
-			
-			String[] sf = new String[selectedFile.size()];
-			
-			for (int i = 0; i<selectedFile.size(); i++){
-				sf[i]=selectedFile.get(i);
-			}
-			
+//			Iterator it = ss.iterator();
+//			
+//			while (it.hasNext()) {
+//				Object ob = it.next();
+//				if (ob instanceof IContain1DData) {
+//					selectedFile.add(((IContain1DData)ob).getLongName());
+//				}
+//			}
+//			
+//			String[] sf = new String[selectedFile.size()];
+//			
+//			for (int i = 0; i<selectedFile.size(); i++){
+//				sf[i]=selectedFile.get(i);
+//			}
+//			
 //			if (!selectedFile.isEmpty()) {
 //				String string = selectedFile.get(0);
 //				MessageBox box = new MessageBox(Display.getCurrent().getActiveShell());
@@ -52,8 +47,27 @@ public class OpenDialogHandler extends AbstractHandler {
 			
 //			SurfaceScatterPresenter ssp = new SurfaceScatterPresenter(s, sf); 
 			
-			PresenterInitialSetup pis = new PresenterInitialSetup(s, sf);
-			pis.open();
+//			PresenterInitialSetup pis = new PresenterInitialSetup(s, sf);
+//			pis.open();
+			
+			
+			SurfaceScatterPresenter ssp = new SurfaceScatterPresenter();
+
+			
+			ssp.setImageFolderPath(null);
+			
+			SurfaceScatterViewStart ssvs = new SurfaceScatterViewStart(s, 
+					   null, 
+					   ssp.getNumberOfImages(), 
+					   ssp.getImage(0),
+					   ssp,
+					   null);
+//					   datFolderPath);
+			
+			ssp.setSsvs(ssvs);
+			
+			ssvs.open();
+			
 			
 		}
 

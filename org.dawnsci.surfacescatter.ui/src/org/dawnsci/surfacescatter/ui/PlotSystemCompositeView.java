@@ -97,8 +97,9 @@ public class PlotSystemCompositeView extends Composite {
     	
     	Display display = Display.getCurrent();
         Color gold = display.getSystemColor(SWT.COLOR_DARK_YELLOW);
-        Color magenta = display.getSystemColor(SWT.COLOR_MAGENTA);
-    	
+//        Color magenta = display.getSystemColor(SWT.COLOR_MAGENTA);
+        Color transparent = display.getSystemColor(SWT.COLOR_TRANSPARENT);
+        
 		form = new SashForm(this, SWT.VERTICAL);
 		form.setLayout(new GridLayout());
 //		form.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, true));
@@ -169,10 +170,7 @@ public class PlotSystemCompositeView extends Composite {
 		images.setLayoutData(imagesData);
 		
         ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(images, null);
-        
-//        GridData gd_secondField = new GridData(SWT.FILL, SWT.FILL, true, true);
-//        gd_secondField.grabExcessVerticalSpace = true;
-//        gd_secondField.grabExcessVerticalSpace = true;
+
            
         plotSystem.createPlotPart(images, 
         						  "Raw Image", 
@@ -239,13 +237,15 @@ public class PlotSystemCompositeView extends Composite {
 		
 		RectangularROI secondBgStartROI = new RectangularROI(10,10,20,20,0);
 		secondBgRegion.setROI(secondBgStartROI);
-		secondBgRegion.setRegionColor(magenta);
+		secondBgRegion.setRegionColor(transparent);
 		secondBgRegion.setUserRegion(true);
 		secondBgRegion.setLineWidth(3);
 		secondBgRegion.setMobile(true);
-		secondBgRegion.setVisible(false);
-		plotSystem.addRegion(secondBgRegion);
 		
+		getSecondBgRegion().setVisible(false);
+		secondBgRegion.setFill(false);
+		plotSystem.addRegion(secondBgRegion);
+		secondBgRegion.setVisible(false);
 		
 		region.addROIListener(new IROIListener() {
 

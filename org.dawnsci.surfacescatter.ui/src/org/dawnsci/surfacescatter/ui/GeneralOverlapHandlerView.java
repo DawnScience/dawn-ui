@@ -79,6 +79,14 @@ public class GeneralOverlapHandlerView extends Dialog {
 	    this.ssp = ssp;
 	}
 
+	
+	@Override
+	protected Control createButtonBar(Composite parent) {
+		Control c = super.createButtonBar(parent);
+		getShell().setDefaultButton(null);
+		return c;
+	}
+
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		

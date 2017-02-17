@@ -28,6 +28,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -66,6 +67,19 @@ public class SurfaceScatterViewStart extends Dialog {
 	private  String datFolderPath;
 	private Combo correctionsDropDown;
 	private Composite container;
+	private Button imageFolderSelection;
+	private Button datFolderSelection;
+	private String imageFolderPath = null;
+	
+	
+	public String getDatFolderPath() {
+		return datFolderPath;
+	}
+
+	public void setDatFolderPath(String datFolderPath) {
+		this.datFolderPath = datFolderPath;
+	}
+
 	
 	
 	public SuperSashPlotSystem3Composite getSsps3c() {
@@ -143,22 +157,22 @@ public class SurfaceScatterViewStart extends Dialog {
 		setup.setText("Setup Parameters");
 		setup.setData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Composite setupComposite = new Composite(folder, SWT.NONE | SWT.FILL);
+		Composite setupComposite = new Composite(folder,  SWT.FILL);
 		setupComposite.setLayout(new GridLayout());
 		setupComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 				
 	    setup.setControl(setupComposite);
 		
-		setupSash= new SashForm(setupComposite, SWT.HORIZONTAL);
+		setupSash= new SashForm(setupComposite, SWT.FILL);
 		setupSash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
 		left = new SashForm(setupSash, SWT.VERTICAL);
 		left.setLayout(new GridLayout());
-		left.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, true));
+		left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		right = new SashForm(setupSash, SWT.VERTICAL);
 		right.setLayout(new GridLayout());
-		right.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, true));
+		right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		setupSash.setWeights(new int[]{65,35});
 
@@ -168,7 +182,7 @@ public class SurfaceScatterViewStart extends Dialog {
 ///////////////////////////Window 1  LEFT  SETUP////////////////////////////////////////////////////
 		try {
 
-			datDisplayer = new DatDisplayer(left, SWT.FILL, filepaths, ssp, datFolderPath);
+			datDisplayer = new DatDisplayer(left, SWT.FILL, filepaths, ssp, datFolderPath, this);
 			datDisplayer.setLayout(new GridLayout());
 			datDisplayer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 	
@@ -184,27 +198,41 @@ public class SurfaceScatterViewStart extends Dialog {
 		
 
 	    try {
+	    	Group experimentalSetup = new Group(right, SWT.FILL);
+	    	GridLayout experimentalSetupLayout = new GridLayout(1, true);
+			GridData experimentalSetupData = new GridData(GridData.FILL_BOTH);
+			experimentalSetupData.minimumWidth = 50;
+			experimentalSetup.setLayout(experimentalSetupLayout);
+			experimentalSetup.setLayoutData(experimentalSetupData);
+			experimentalSetup.setText("Experimental Setup");
+			
 	    	
 	    	
-			Group methodSetting = new Group(right, SWT.FILL);
+			Group methodSetting = new Group(experimentalSetup, SWT.FILL);
 		    GridLayout methodSettingLayout = new GridLayout(1, true);
-			GridData methodSettingData = new GridData();
+			GridData methodSettingData = new GridData(GridData.FILL_HORIZONTAL);
 			methodSettingData.minimumWidth = 50;
 			methodSetting.setLayout(methodSettingLayout);
 			methodSetting.setLayoutData(methodSettingData);
+			methodSetting.setText("SXRD / Reflectivity");
 			
-			Label correctionsLabel = new Label(methodSetting, SWT.FILL);
-			correctionsLabel.setText("SXRD / Reflectivity:");
-			
-			
-			correctionsDropDown = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
+			correctionsDropDown = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.FILL);
 			correctionsDropDown.add("SXRD");
 			correctionsDropDown.add("Reflectivity with Flux Correction");
 			correctionsDropDown.add("Reflectivity without Flux Correction");
 			correctionsDropDown.add("Reflectivity with NO Correction");
 			correctionsDropDown.select(0);
-	    	
-			paramField = new GeometricParametersWindows(right, SWT.FILL, ssp);
+			correctionsDropDown.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			
+			Group parametersSetting = new Group(experimentalSetup, SWT.FILL);
+		    GridLayout parametersSettingLayout = new GridLayout(1, true);
+			GridData parametersSettingData = new GridData(GridData.FILL_BOTH);
+			parametersSettingData.minimumWidth = 50;
+			parametersSetting.setLayout(parametersSettingLayout);
+			parametersSetting.setLayoutData(parametersSettingData);
+			parametersSetting.setText("Geometric Parameters");
+			
+			paramField = new GeometricParametersWindows(parametersSetting, SWT.FILL, ssp);
 			paramField.setLayout(new GridLayout());
 			paramField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
@@ -279,13 +307,9 @@ public class SurfaceScatterViewStart extends Dialog {
 				
 			}
 		});
-	    
-	    
-	    
-	    
-	    
-	    right.setWeights(new int[] {10,90});
-	    
+	       
+//	    right.setWeights(new int[] {10,90});
+//	    
 /////////////////////////////////////////////////////////////////////////		
 ///////////////////////////////////////////////////////
 //	    Tab 2	Analysis
@@ -300,7 +324,6 @@ public class SurfaceScatterViewStart extends Dialog {
 		analysisComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 					
 		analysis.setControl(analysisComposite);
-		
 		
 	    analysisSash = new SashForm(analysisComposite, SWT.FILL);
 	    analysisSash.setLayout(new GridLayout());
@@ -358,11 +381,8 @@ public class SurfaceScatterViewStart extends Dialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 			
-				 int sliderPos = customComposite.getSlider().getSelection();
-				 ssp.sliderMovemementMainImage(sliderPos);
-//				 ssp.sliderZoomedArea(sliderPos, 
-//						 			  customComposite.getGreenRegion().getROI(), 
-//						 			  customComposite.getSubImagePlotSystem());
+				int sliderPos = customComposite.getSlider().getSelection();
+				ssp.sliderMovemementMainImage(sliderPos);
 				ssvs.updateIndicators(sliderPos);
 				ssp.bgImageUpdate(customComposite.getSubImageBgPlotSystem(),
 								  sliderPos);
@@ -370,7 +390,6 @@ public class SurfaceScatterViewStart extends Dialog {
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
 				
 			}
 		});
@@ -411,25 +430,30 @@ public class SurfaceScatterViewStart extends Dialog {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				customComposite.getSlider().setMaximum(ssp.getNoImages());
-				customComposite.getPlotSystem1CompositeView().generalUpdate();
-				paramField.geometricParametersUpdate();
-				ssp.regionOfInterestSetter();
 				
-				if(ssp.getBackgroundDatArray() == (null)){
-					try{
-						getPlotSystemCompositeView().removeBackgroundSubtractedSubImage();
-						getSsps3c().isOutputCurvesVisible(false);
-						customComposite.getReplay().setEnabled(false);
+				if(ssp.getNoImages() != 0){
+					customComposite.getSlider().setMaximum(ssp.getNoImages());
+					customComposite.getPlotSystem1CompositeView().generalUpdate();
+					paramField.geometricParametersUpdate();
+					ssp.regionOfInterestSetter();
+					
+					if(ssp.getBackgroundDatArray() == (null)){
+						try{
+							getPlotSystemCompositeView().removeBackgroundSubtractedSubImage();
+							getSsps3c().isOutputCurvesVisible(false);
+							customComposite.getReplay().setEnabled(false);
+						}
+						catch(Exception n){
+							
+						}
 					}
-					catch(Exception n){
-						
-					}
+					
+					ssps3c.resetVerticalAndHorizontalSlices();
+					customComposite.getPlotSystem1CompositeView().checkTrackerOnButton();
 				}
-				
-				ssps3c.resetVerticalAndHorizontalSlices();
-				customComposite.getPlotSystem1CompositeView().checkTrackerOnButton();
-				
+				else{
+					folder.setSelection(0);
+				}
 			}
 			
 			@Override
@@ -586,149 +610,7 @@ public class SurfaceScatterViewStart extends Dialog {
 	    	
 	    }
 		
-//	    outputCurves.getOverlapZoom().addSelectionListener(new SelectionListener() {
-//				    	
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				
-//				ArrayList<ArrayList<IDataset>> xyArrays = ssp.xyArrayPreparer();
-//				
-//				GeneralOverlapHandlerView goh = new GeneralOverlapHandlerView(
-//						getParentShell(), 
-//						SWT.OPEN, 
-//						xyArrays.get(0),
-//						xyArrays.get(1),
-//						xyArrays.get(2),
-//						xyArrays.get(3),
-//						xyArrays.get(4), 
-//						outputCurves.getPlotSystem(),
-//						ssp);
-//				
-//				goh.open();
-//				
-//				
-//			}
-//			
-//			@Override
-//			public void widgetDefaultSelected(SelectionEvent e) {
-//				// TODO Auto-generated method stub
-//				
-//			}
-//		});
-//	    ssp.a
-//	    outputCurves.getRegionNo().addROIListener(new IROIListener() {
-//			
-//			@Override
-//			public void roiSelected(ROIEvent evt) {
-//			}
-//			
-//			@Override
-//			public void roiDragged(ROIEvent evt) {
-//			}
-//			
-//			@Override
-//			public void roiChanged(ROIEvent evt) {
-//
-//				if(customComposite.getOutputControl().getSelection() && modify == true){
-//					
-//					int xPos = ssp.xPositionFinder(outputCurves.getRegionNo().getROI().getPointX());
-//					
-//					ssp.updateSliders(ssvs.getSliderList(), xPos);
-//					
-//					ssp.sliderMovemementMainImage(xPos);
-//					ssp.sliderZoomedArea(xPos, 
-//				 			  customComposite.getGreenRegion().getROI(), 
-//				 			  customComposite.getSubImagePlotSystem());
-//					
-//					ssvs.updateIndicators(xPos);
-//					
-//					ssp.bgImageUpdate(customComposite.getSubImageBgPlotSystem(),
-//									  xPos);
-//					
-//					ssp.trackingRegionOfInterestSetter(xPos);
-//					
-//				}
-//			}
-//			
-//		});
-//	    
-//	    outputCurves.getIntensity().addSelectionListener(new SelectionListener() {
-//			
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//		
-//				IPlottingSystem<Composite> pS = outputCurves.getPlotSystem();
-//				Combo selector = outputCurves.getIntensity();
-//				ssp.switchFhklIntensity(pS, selector);
-//		
-//			}
-//			
-//			@Override
-//			public void widgetDefaultSelected(SelectionEvent e) {
-//				// TODO Auto-generated method stub
-//				
-//			}
-//		});
-//	    
-//	    outputCurves.getErrorsButton().addSelectionListener(new SelectionListener() {
-//			
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//
-//				ssp.switchErrorDisplay();
-//				
-//				IPlottingSystem<Composite> pS = outputCurves.getPlotSystem();
-//				Combo selector = outputCurves.getIntensity();
-//				ssp.switchFhklIntensity(pS, selector);
-//				
-//			}
-//			
-//			@Override
-//			public void widgetDefaultSelected(SelectionEvent e) {
-//				// TODO Auto-generated method stub
-//				
-//			}
-//		});
-//	    
-//	    
-//	    
-//	    outputCurves.getSave().addSelectionListener(new SelectionListener() {
-//			
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				
-//				FileDialog fd = new FileDialog(getParentShell(), SWT.SAVE); 
-//				
-//				String stitle = "r";
-//				String path = "p";
-//				
-//				if (fd.open() != null) {
-//					stitle = fd.getFileName();
-//					path = fd.getFilterPath();
-//				
-//				}
-//				
-//				String title = path + File.separator + stitle;
-//				
-//				
-//				String[] fr = CurveStateIdentifier.CurveStateIdentifier1(outputCurves.getPlotSystem());
-//				
-//				if (outputCurves.getOutputFormatSelection().getSelectionIndex() == 0){
-//					ssp.genXSave(title,fr);
-//				}
-//				if (outputCurves.getOutputFormatSelection().getSelectionIndex() == 1){
-//					ssp.anarodSave(title,fr);
-//				}
-//				
-//			}
-//			
-//			@Override
-//			public void widgetDefaultSelected(SelectionEvent e) {
-//			
-//				
-//			}
-//		});
-//	    
+	    
 	    
 	    folder.addCTabFolder2Listener(new CTabFolder2Adapter() {
 	        public void close(CTabFolderEvent event) {
@@ -740,11 +622,108 @@ public class SurfaceScatterViewStart extends Dialog {
 	    
 	    
 
+	    customComposite.getPlotSystem1CompositeView().getSaveButton().addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				FileDialog fd = new FileDialog(getParentShell(), SWT.SAVE); 
+				
+				String stitle = "r";
+				String path = "p";
+				
+				if (fd.open() != null) {
+					stitle = fd.getFileName();
+					path = fd.getFilterPath();
+				
+				}
+				
+				String title = path + File.separator + stitle;
+				
+				ssp.saveParameters(title);
+		
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+	    
+
+	    customComposite.getPlotSystem1CompositeView().getSaveButton().addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				FileDialog fd = new FileDialog(getParentShell(), SWT.SAVE); 
+				
+				String stitle = "r";
+				String path = "p";
+				
+				if (fd.open() != null) {
+					stitle = fd.getFileName();
+					path = fd.getFilterPath();
+				
+				}
+				
+				String title = path + File.separator + stitle;
+				
+				ssp.saveParameters(title);
+		
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+	    
+	    
+
+	    customComposite.getPlotSystem1CompositeView().getLoadButton().addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				FileDialog fd = new FileDialog(getParentShell(), SWT.OPEN); 
+				
+				String stitle = "r";
+				String path = "p";
+				
+				if (fd.open() != null) {
+					stitle = fd.getFileName();
+					path = fd.getFilterPath();
+				
+				}
+				
+				String title = path + File.separator + stitle;
+				
+				ssp.loadParameters(title, customComposite, customComposite.getPlotSystem1CompositeView());
+				ssps3c.generalUpdate();
+				customComposite.getPlotSystem1CompositeView().generalUpdate();
+				ssp.trackingRegionOfInterestSetter(ssp.getLenPt());
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 	    
 	    
 ////////////////////////////////////////////////////////////////////
-		
+		customComposite.getSecondBgRegion().setVisible(false);
+		customComposite.getSecondBgRegion().repaint();
 	    appendListenersToOutputCurves();
+	    
+	    
+	    datDisplayer.redrawDatDisplayerFolderView();
+	    
 	    return container;
 	}
 
@@ -825,6 +804,10 @@ public class SurfaceScatterViewStart extends Dialog {
 		return correctionsDropDown;
 	}
 	
+	
+	public DatDisplayer getDatDisplayer(){
+		return datDisplayer;
+	}
 	
 	public void appendListenersToOutputCurves(){
 		
