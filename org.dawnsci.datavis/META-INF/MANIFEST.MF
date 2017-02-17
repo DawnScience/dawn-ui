@@ -4,5 +4,10 @@ Bundle-Name: Datavis
 Bundle-SymbolicName: org.dawnsci.datavis;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Require-Bundle: org.eclipse.core.runtime,
- org.eclipse.ui
+ org.eclipse.ui,
+ org.dawnsci.datavis.model
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: org.eclipse.core.expressions,
+ org.osgi.service.event;version="1.3.1"
+Service-Component: OSGI-INF/*.xml
+Bundle-ActivationPolicy: lazy

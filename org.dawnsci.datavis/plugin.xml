@@ -58,6 +58,11 @@
             </visibleWhen>
          </menu>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            class="org.dawnsci.datavis.RecentFoldersContributionFactory"
+            locationURI="menu:org.dawnsci.datavis.file">
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.perspectiveExtensions">

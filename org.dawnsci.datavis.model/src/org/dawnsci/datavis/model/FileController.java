@@ -1,12 +1,14 @@
 package org.dawnsci.datavis.model;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.math3.ode.ODEIntegrator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -21,6 +23,8 @@ public class FileController {
 	private DataOptions currentData;
 	
 	private Set<FileControllerStateEventListener> listeners = new HashSet<FileControllerStateEventListener>();
+	
+	private LinkedList<String> lastFile = new LinkedList<String>(); 
 	
 	private FileController(){
 		loadedFiles = new LoadedFiles();
@@ -51,38 +55,7 @@ public class FileController {
 	
 	
 	public void loadFile(String path) {
-		
 		loadFiles(new String[]{path}, null);
-//		IProgressService service = (IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class);
-//		
-//			try {
-//				service.busyCursorWhile(new IRunnableWithProgress() {
-//
-//					@Override
-//					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-//						// TODO Auto-generated method stub
-//						
-//					}
-//					
-//				});
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			} 
-					
-					
-		
-//		
-//		LoadedFile f = null;
-//		try {
-//			f = new LoadedFile(ServiceManager.getLoaderService().getData(path, null));
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		
-//		if (f != null) {
-//			loadedFiles.addFile(f);
-//			fireStateChangeListeners(false,false);
-//		}
 	}
 	
 	public LoadedFiles getLoadedFiles() {
@@ -142,11 +115,6 @@ public class FileController {
 		if (option == null) return;
 		
 		setCurrentDataOnFileChange(option);
-
-		
-//		if (!set && file.getDataOptions().size() != 0) {
-//			setCurrentDataOnFileChange(file.getDataOptions().get(0));
-//		}
 		
 	}
 	
@@ -225,12 +193,6 @@ public class FileController {
 		int rank = shape.length;
 		return rank;
 	}
-	
-//	public NDimensions getNDimensions(){
-//		if (currentData == null) return null;
-//		return getNDimensions(currentData);
-//	}
-	
 
 	private void fireStateChangeListeners(boolean file, boolean dataset) {
 		FileControllerStateEvent e = new FileControllerStateEvent(this, file, dataset);
@@ -259,6 +221,7 @@ public class FileController {
 			List<LoadedFile> files = new ArrayList<>();
 			
 			for (String path : paths) {
+				//test path isnt already contained
 				LoadedFile f = null;
 				try {
 					f = new LoadedFile(ServiceManager.getLoaderService().getData(path, null));
@@ -270,8 +233,26 @@ public class FileController {
 				
 			}
 			
-			loadedFiles.addFiles(files);
+			if (!files.isEmpty()) {
+				String name = files.get(0).getLongName();
+				File f = new File(name);
+				File parentFile = f.getParentFile();
+				if (parentFile != null) {
+					String parentPath = parentFile.getAbsolutePath();
+					if (lastFile.size() > 5) lastFile.removeLast();
+					if (!lastFile.contains(parentPath)){
+						lastFile.addFirst(parentPath);
+					} else {
+						lastFile.remove(parentPath);
+						lastFile.addFirst(parentPath);
+					}
+				}
+				loadedFiles.addFiles(files);
+			}
+			
 
+//			
+			
 			fireStateChangeListeners(false,false);
 			
 		}
@@ -314,5 +295,9 @@ public class FileController {
 		
 		fireStateChangeListeners(false, true);
 		
+	}
+	
+	public Collection<String> getLastFolders(){
+		return lastFile;
 	}
 }
