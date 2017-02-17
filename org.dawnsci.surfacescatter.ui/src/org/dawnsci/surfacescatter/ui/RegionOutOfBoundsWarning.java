@@ -46,6 +46,10 @@ public class RegionOutOfBoundsWarning extends Dialog {
 		if (selector == 1){
 			warning.setText("Enter number as int or double");	
 		}
+		if (selector == 2){
+			warning.setText("Error in geometeric corrections. Check experimental setup");	
+		}
+		
 		
 		if(note != null){
 			Label noteLabel = new Label(container, SWT.FILL);

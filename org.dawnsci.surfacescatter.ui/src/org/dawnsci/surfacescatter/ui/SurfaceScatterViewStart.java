@@ -34,7 +34,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.TableItem;
@@ -70,6 +69,16 @@ public class SurfaceScatterViewStart extends Dialog {
 	private Button imageFolderSelection;
 	private Button datFolderSelection;
 	private String imageFolderPath = null;
+	
+	
+	public CTabFolder getFolder() {
+		return folder;
+	}
+
+	public void setFolder(CTabFolder folder) {
+		this.folder = folder;
+	}
+
 	
 	
 	public String getDatFolderPath() {
@@ -296,7 +305,7 @@ public class SurfaceScatterViewStart extends Dialog {
 												 ssp.getCorrectionSelection());
 				
 				ssp.resetCorrectionsSelection();
-				
+				folder.setSelection(1);
 				
 				
 			}

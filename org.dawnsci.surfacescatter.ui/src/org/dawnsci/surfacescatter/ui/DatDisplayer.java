@@ -188,7 +188,7 @@ public class DatDisplayer extends Composite {
 				
 				if(datFolderPath != null && imageFolderPath != null){
 					populateTable.setEnabled(true);
-					clearTable.setEnabled(true);
+					
 				}
 				
 				imageFolderText.setText(imageFolderPath);
@@ -284,10 +284,7 @@ public class DatDisplayer extends Composite {
         rodComponents.setText("Rod Components");
         rodComponents.setEnabled(false);
 	    
-//      Button selectAll = new Button(rodComponents, SWT.PUSH);
-//	    selectAll.setText("Select All - not working well");
-//	    selectAll.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-	    
+
 	    deleteSelected = new Button(rodComponents, SWT.PUSH);
 	    deleteSelected.setText("Delete Selected");
 	    deleteSelected.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
@@ -510,7 +507,7 @@ public class DatDisplayer extends Composite {
 			fillTable();
 			folderDisplayTable.setEnabled(true);
 			transferToRod.setEnabled(true);
-			
+			clearTable.setEnabled(true);
 		}
 		
 		@Override

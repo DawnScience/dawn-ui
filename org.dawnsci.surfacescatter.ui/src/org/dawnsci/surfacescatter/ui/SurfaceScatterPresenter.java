@@ -456,7 +456,6 @@ public class SurfaceScatterPresenter {
 	public int loadParameters(String title,
 							   PlotSystemCompositeView pscv,
 							   PlotSystem1CompositeView ps1cv
-//							   SuperSashPlotSystem2Composite ps2cv
 							   ){
 		
 		FittingParameters fp = FittingParametersInputReader.reader(title);
@@ -495,11 +494,6 @@ public class SurfaceScatterPresenter {
 		this.updateSliders(ssvs.getSliderList(),selection);
 		
 		this.sliderMovemementMainImage(selection);
-		
-//		this.sliderZoomedArea(selection, 
-//							 loadedROI, 
-//							 ps2cv.getPlotSystem2(),
-//							 ssvs.getPlotSystemCompositeView().getSubImagePlotSystem());
 		
 		this.regionOfInterestSetter(loadedROI);
 		
@@ -1077,18 +1071,27 @@ public class SurfaceScatterPresenter {
 		int j = sm.getFilepathsSortedArray()[selection];
 
 		int[] imagePosInOriginalDat = CountUpToArray.CountUpToArray1(sm.getFilepathsSortedArray());
-		
-		return DummyProcessingClass.DummyProcess(sm,
-												 image, 
-												 models.get(j), 
-												 dms.get(j), 
-												 gms.get(j), 
-												 pS,
-												 ssvs.getPlotSystemCompositeView().getPlotSystem(),
-												 sm.getCorrectionSelection(), 
-												 imagePosInOriginalDat[selection], 
-												 trackingMarker,
-												 selection);		
+		try{
+			IDataset output = DummyProcessingClass.DummyProcess(sm,
+													 image, 
+													 models.get(j), 
+													 dms.get(j), 
+													 gms.get(j), 
+													 pS,
+													 ssvs.getPlotSystemCompositeView().getPlotSystem(),
+													 sm.getCorrectionSelection(), 
+													 imagePosInOriginalDat[selection], 
+													 trackingMarker,
+													 selection);		
+			return output;
+			
+		}
+		catch(IllegalArgumentException s){
+			
+			 correctionMethodsWarning();
+			
+			return null;
+		}
 	}
 
 	public void geometricParametersUpdate(
@@ -1468,6 +1471,16 @@ public class SurfaceScatterPresenter {
 		roobw.open();
 		return;
 	}
+	
+	public void correctionMethodsWarning(){
+		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,2,null);
+		roobw.open();
+		
+		ssvs.getFolder().setSelection(0);
+		
+		return;
+	}
+	
 	
 	
 	
