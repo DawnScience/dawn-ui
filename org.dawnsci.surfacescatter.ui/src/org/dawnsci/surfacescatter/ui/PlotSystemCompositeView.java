@@ -55,6 +55,9 @@ public class PlotSystemCompositeView extends Composite {
 	private Text yLen;
 	private SashForm form;
 	private TabItem subBgI;
+	private Button centreRegion;
+	private Button centreSecondBgRegion;
+
 	
     public PlotSystemCompositeView(Composite parent, 
     							   int style,
@@ -85,6 +88,8 @@ public class PlotSystemCompositeView extends Composite {
      
     public void createContents(IDataset image) {
 
+    	this.image = image;
+    	
     	 ssp.addStateListener(new  IPresenterStateChangeEventListener() {
 				
 				@Override
@@ -97,12 +102,10 @@ public class PlotSystemCompositeView extends Composite {
     	
     	Display display = Display.getCurrent();
         Color gold = display.getSystemColor(SWT.COLOR_DARK_YELLOW);
-//        Color magenta = display.getSystemColor(SWT.COLOR_MAGENTA);
         Color transparent = display.getSystemColor(SWT.COLOR_TRANSPARENT);
         
 		form = new SashForm(this, SWT.VERTICAL);
 		form.setLayout(new GridLayout());
-//		form.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, true));
 		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     	       
 		Group mainImage = new Group(form, SWT.FILL);
@@ -190,9 +193,64 @@ public class PlotSystemCompositeView extends Composite {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		   
+        Group centringButtons = new Group (images,SWT.NONE);  
+        GridLayout 	centringButtonsLayout = new GridLayout(2,true);
+        centringButtons.setLayout(centringButtonsLayout);
+		GridData centringButtonsData = new GridData(SWT.FILL, SWT.NULL, true, false);
+		centringButtons.setLayoutData(centringButtonsData);
+        
+		centreRegion = new Button(centringButtons, SWT.PUSH | SWT.FILL);
+		centreRegion.setText("Centre Region");
+		centreRegion.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        
+		centreRegion.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				resetRegion(region);
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 		
-//        ActionBarWrapper actionBarComposite1 = ActionBarWrapper.createActionBars(this, null);
-//        
+
+		
+        centreSecondBgRegion = new Button(centringButtons, SWT.PUSH | SWT.FILL);
+        centreSecondBgRegion.setText("Centre Background Region");
+        centreSecondBgRegion.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        centreSecondBgRegion.setEnabled(false);
+		
+        centreSecondBgRegion.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				resetRegion(secondBgRegion);
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
+		go = new Button(buttons, SWT.PUSH | SWT.FILL);
+		go.setText("Go");
+		go.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        
+        replay = new Button(buttons, SWT.PUSH | SWT.FILL);
+		replay.setText("Replay");
+		replay.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		replay.setEnabled(false);
+        
+        
         folder = new TabFolder(form, SWT.BORDER | SWT.CLOSE);
     	folder.setLayout(new GridLayout());
     		
@@ -393,6 +451,15 @@ public class PlotSystemCompositeView extends Composite {
 		return region;
 	}
 	
+	public void resetRegion(IRegion re){
+		
+		int[] ad = ssp.getImage(ssp.getSliderPos()).getShape();
+		
+		RectangularROI newROI = new RectangularROI((int) Math.round(ad[1]*3/8),(int) Math.round(ad[0]*3/8),(int) Math.round(ad[1]*0.25),(int) Math.round(ad[0]*0.25),0);
+		re.setROI(newROI);
+	}
+	
+	
 	
 	public Button getRun(){
 		return run;
@@ -535,6 +602,10 @@ public class PlotSystemCompositeView extends Composite {
 	
 	public Button getGo(){
 		return go;
+	}
+	
+	public Button getCentreSecondBgRegion(){
+		return centreSecondBgRegion;
 	}
 	
 	public SashForm getSash(){

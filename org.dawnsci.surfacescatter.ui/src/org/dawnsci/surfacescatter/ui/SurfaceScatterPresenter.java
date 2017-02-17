@@ -655,8 +655,11 @@ public class SurfaceScatterPresenter {
 			r2.setLineWidth(3);
 			
 			
+			
 			r2.setRegionColor(magenta);		
-				
+			
+			ssvs.getPlotSystemCompositeView().getCentreSecondBgRegion().setEnabled(true);
+			
 			if (models.get(0).getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
 					
 				if (sm.getBoxOffsetLenPt()!=null){
@@ -716,6 +719,8 @@ public class SurfaceScatterPresenter {
 				ssvs.getPlotSystemCompositeView().getSecondBgRegion().setVisible(false);
 				ssvs.getPlotSystemCompositeView().getSecondBgRegion().setFill(false);
 				ssvs.getPlotSystemCompositeView().getSecondBgRegion().setLineWidth(0);
+				
+				ssvs.getPlotSystemCompositeView().getCentreSecondBgRegion().setEnabled(false);
 				
 				
 				this.regionOfInterestSetter();
