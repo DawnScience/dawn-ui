@@ -241,14 +241,7 @@ public class PlotSystemCompositeView extends Composite {
 			}
 		});
 		
-		go = new Button(buttons, SWT.PUSH | SWT.FILL);
-		go.setText("Go");
-		go.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        
-        replay = new Button(buttons, SWT.PUSH | SWT.FILL);
-		replay.setText("Replay");
-		replay.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		replay.setEnabled(false);
+	
         
         
         folder = new TabFolder(form, SWT.BORDER | SWT.CLOSE);
