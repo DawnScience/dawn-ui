@@ -36,7 +36,7 @@ public class PresenterInitialSetup extends Dialog {
 		super(parentShell);
 
 		this.parentShell = parentShell;
-		this.filepaths = filepaths;
+//		this.filepaths = filepaths;
 		
 
 		setShellStyle(getShellStyle() | SWT.RESIZE);
