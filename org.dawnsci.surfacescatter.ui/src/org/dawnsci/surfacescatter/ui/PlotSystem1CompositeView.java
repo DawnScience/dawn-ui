@@ -31,8 +31,6 @@ import org.eclipse.swt.widgets.Text;
 
 public class PlotSystem1CompositeView extends Composite {
 
-//	private final static Logger logger = LoggerFactory.getLogger(PlotSystem1Composite.class);
-
     private IPlottingSystem<Composite> plotSystem1;
     private IDataset image1;
     private Button button; 
@@ -44,30 +42,20 @@ public class PlotSystem1CompositeView extends Composite {
 	private Combo comboDropDown1;
 	private Combo comboDropDown2;
     private Spinner boundaryBoxText;
-//    private String[] methodologies;
-    private int extra;
     private SurfaceScatterPresenter ssp;
-//    private RegionSetterZoomedView rszv;
     private Boolean trackerOn =false;
 	
   
     public PlotSystem1CompositeView(Composite parent, 
-    		int style,
-//    		PlotSystemCompositeView customComposite, 
+    		int style, 
     		int trackingMarker, 
     		int extra,
     		SurfaceScatterPresenter ssp){
-//    		RegionSetterZoomedView rszv) {
     	
         super(parent, style);
-
-        this.extra= extra;
         this.ssp = ssp;
-//        this.rszv = rszv;
-        
-       
+
         try {
-        	
 			plotSystem1 = PlottingFactory.createPlottingSystem();
 		} catch (Exception e2) {
 			
@@ -102,46 +90,28 @@ public class PlotSystem1CompositeView extends Composite {
         GridLayout methodSettingLayout = new GridLayout(2, true);
 	    GridData methodSettingData = new GridData(GridData.FILL_HORIZONTAL);
 	    methodSettingData .minimumWidth = 50;
-
 	    methodSetting.setLayout(methodSettingLayout);
 	    methodSetting.setLayoutData(methodSettingData);
 	    
 	    this.setLayout(methodSettingLayout);
     	this.setLayoutData(methodSettingData);
-	    
-	    
+	   
 	    String[] setup = ssp.getAnalysisSetup(0);
-	    
-	    Label bgMethod = new Label(methodSetting, SWT.FILL);
-	    bgMethod.setText("Background Method:");
-	    Label polynomialPower = new Label(methodSetting, SWT.FILL);
-	    polynomialPower.setText("Polynomial Power:");
-	    
-	    comboDropDown0 = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
+	        
+	    InputTileGenerator tile0 = new InputTileGenerator("Background:", methodSetting);
+	    comboDropDown0 = tile0.getCombo();
 	    comboDropDown0.setText(setup[0]); 
 	    
-	   	comboDropDown1 = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.RIGHT);
+	    InputTileGenerator tile1 = new InputTileGenerator("Polynomial Power:", methodSetting);
+	    comboDropDown1 = tile1.getCombo();
 	   	comboDropDown1.setText(setup[1]);
-	   
-	    Label trMethod = new Label(methodSetting, SWT.FILL);
-	    trMethod.setText("Tracking Method:");
-	    Label bBox = new Label(methodSetting, SWT.FILL);
-	    bBox.setText("Boundary Box:");
 	   	
-	   	comboDropDown2 = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.LEFT);
+	    InputTileGenerator tile2 = new InputTileGenerator("Tracking Method:", methodSetting);
+	   	comboDropDown2 = tile2.getCombo();
 	   	comboDropDown2.setText(setup[2]);
-	    boundaryBoxText = new Spinner(methodSetting, SWT.SINGLE |  SWT.BORDER);
-	    boundaryBoxText.setMinimum(0);
-	    boundaryBoxText.setMinimum(1000);
-	    boundaryBoxText.setIncrement(1);
-	    boundaryBoxText.setSelection(10);
-	    boundaryBoxText.setPageIncrement(10);
-	   
-//	    boundaryBoxText.setText("000" + setup[3]);
-	    comboDropDown0.setData(new GridData(SWT.FILL));
-	    comboDropDown1.setData(new GridData(SWT.FILL));
-	    comboDropDown2.setData(new GridData(SWT.FILL));
-	    boundaryBoxText.setData(new GridData(SWT.FILL, SWT.FILL, true, false));
+	   	
+	   	InputTileGenerator tile3 = new InputTileGenerator("Boundary Box:", methodSetting, 0, 1000, 1);   
+	    boundaryBoxText = tile3.getSpinner();
 	    
 	    
 	    for(Methodology  t: AnalaysisMethodologies.Methodology.values()){
@@ -224,8 +194,7 @@ public class PlotSystem1CompositeView extends Composite {
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
+				// TODO Auto-generated method stub	
 			}
 		});
 
