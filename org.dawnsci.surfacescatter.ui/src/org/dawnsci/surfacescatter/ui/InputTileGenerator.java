@@ -94,8 +94,6 @@ public class InputTileGenerator {
 	    
 	}
 	
-	
-	
 	public Group getGroup(){
 		return tile;
 	}
@@ -103,7 +101,6 @@ public class InputTileGenerator {
 	public Spinner getSpinner(){
 		return spinner;
 	}
-	
 	
 	public Combo getCombo(){
 		return comboDropDown;

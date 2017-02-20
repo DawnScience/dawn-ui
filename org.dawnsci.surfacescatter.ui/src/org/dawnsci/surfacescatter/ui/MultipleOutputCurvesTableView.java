@@ -61,32 +61,32 @@ public class MultipleOutputCurvesTableView extends Composite {
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		overlapSelection = new Group(sashForm, SWT.NULL);
-		GridLayout overlapSelectionLayout = new GridLayout(4, false);
+		GridLayout overlapSelectionLayout = new GridLayout(4, true);
 		GridData overlapSelectionData = new GridData(SWT.FILL);
 		overlapSelectionData.minimumWidth = 50;
 		overlapSelection.setLayout(overlapSelectionLayout);
 		overlapSelection.setLayoutData(overlapSelectionData);
-//		overlapSelection.setText("Output Controls");
 		
 		errors = new Button(overlapSelection, SWT.PUSH |SWT.FILL);
 		errors.setText("Errors");
-//		errors.setLayoutData(new GridData(SWT.LEFT));
+		errors.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		intensitySelect = new Combo(overlapSelection, SWT.DROP_DOWN | SWT.BORDER |SWT.FILL);
 		intensitySelect.setText("Intensity");
 		intensitySelect.add("Intensity");
 		intensitySelect.add("Fhkl");
-//		intensitySelect.setLayoutData(new GridData(SWT.LEFT));
+		intensitySelect.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		outputFormatSelection = new Combo(overlapSelection, SWT.DROP_DOWN | SWT.BORDER | SWT.FILL);
 		outputFormatSelection.setText("GenX");
 		outputFormatSelection.add("GenX");
 		outputFormatSelection.add("Anrod");
-//		outputFormatSelection.setLayoutData(new GridData(SWT.LEFT));
+		outputFormatSelection.add(".int");
+		outputFormatSelection.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		save = new Button(overlapSelection, SWT.PUSH |SWT.FILL);
 		save.setText("Save Spliced");
-//		save.setLayoutData(new GridData(SWT.LEFT));
+		save.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		final GridLayout gridLayout = new GridLayout();
 		gridLayout.numColumns = 1;

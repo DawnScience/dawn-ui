@@ -422,15 +422,18 @@ public class PlotSystemCompositeView extends Composite {
 		boolean areLengthsEqual = false;
 		boolean arePtsEqual = false;
 		
-		if(region.getROI().getBounds().getIntLengths().equals(lenpt[0])){
+		int[] lengths =region.getROI().getBounds().getIntLengths();
+		int[] points =region.getROI().getBounds().getIntPoint();
+		
+		if(lengths[0] == (lenpt[0][0]) && lengths[1] == (lenpt[0][1])){
 			areLengthsEqual = true;
 		}
 		
-		if(region.getROI().getBounds().getIntPoint().equals(lenpt[1])){
+		if(points[0] == (lenpt[1][0]) && points[1] == (lenpt[1][1])){
 			arePtsEqual = true;
 		}
 		
-		if(areLengthsEqual == false && arePtsEqual ==false){
+		if(areLengthsEqual == false || arePtsEqual ==false){
 			RectangularROI newROI = new RectangularROI(lenpt[1][0],
 												   lenpt[1][1],
 												   lenpt[0][0],
@@ -526,7 +529,7 @@ public class PlotSystemCompositeView extends Composite {
 	public void generalUpdate(){
 		
 		plotSystem.updatePlot2D(ssp.getImage(ssp.getSliderPos()), null, null);
-//		setRegion(ssp.getLenPt());
+		setRegion(ssp.getLenPt());
 		
 	}
 	

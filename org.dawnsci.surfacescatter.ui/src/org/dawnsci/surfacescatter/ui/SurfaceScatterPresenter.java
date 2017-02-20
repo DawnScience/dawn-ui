@@ -596,7 +596,12 @@ public class SurfaceScatterPresenter {
 			dm.setInitialLenPt(LenPt);
 		}
 		
-		if(LenPt.equals(sm.getInitialLenPt()) == false){
+		int[][] ilpt = sm.getInitialLenPt();
+		
+		if(LenPt[0][0] != ilpt[0][0] ||
+		   LenPt[0][1] != ilpt[0][1] ||	
+		   LenPt[1][0] != ilpt[1][0] ||
+		   LenPt[1][1] != ilpt[1][1]){
 			
 			sm.setInitialLenPt(LenPt);
 		
@@ -1412,17 +1417,86 @@ public class SurfaceScatterPresenter {
 	    
 		writer.println("# Test file created: " + strDate);
 		writer.println("# Headers: ");
-		writer.println("#h	k	l	I	Ie");
+		writer.println("#h	k	l	F	Fe");
 	
 		IDataset outputDatX = sm.getSortedX();
 
 		for(int gh = 0 ; gh<sm.getImages().length; gh++){
 				writer.println(hArrayCon.getDouble(gh) +"	"+ kArrayCon.getDouble(gh) +"	"+lArrayCon.getDouble(gh) + 
-						"	"+ sm.getSplicedCurveY().getDouble(gh)+ "	"+ sm.getSplicedCurveY().getError(gh));
+						"	"+ sm.getSplicedCurveYFhkl().getDouble(gh)+ "	"+ sm.getSplicedCurveYFhkl().getError(gh));
 		}
 
 		writer.close();
 	}	
+	
+	public void intSave(String title, String[] fr){
+		
+		String s = gms.get(sm.getSelection()).getSavePath();
+		File file =null;
+		
+		try {
+			file = new File(title);
+			file.createNewFile();
+			writer = new PrintWriter(file);
+		} catch (FileNotFoundException e2) {
+			e2.printStackTrace();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		
+		int index  = title.lastIndexOf(".");
+		if(index != -1){
+			String ext = title.substring(0,index);
+			file.renameTo(new File(ext + ".int"));
+		}
+		else{
+			file.renameTo(new File(title + ".int"));
+		}
+			
+		
+		
+		SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//dd/MM/yyyy
+	    Date now = new Date();
+	    String strDate = sdfDate.format(now);
+	    
+	    IDataset[] hArray = new IDataset[sm.getFilepaths().length];
+	    IDataset[] kArray = new IDataset[sm.getFilepaths().length];
+	    IDataset[] lArray = new IDataset[sm.getFilepaths().length];
+	    
+	    for (int id = 0; id < sm.getFilepaths().length; id++) {
+	    
+	    	ILazyDataset h = SXRDGeometricCorrections.geth(models.get(id));
+			ILazyDataset k = SXRDGeometricCorrections.getk(models.get(id));
+			ILazyDataset l = SXRDGeometricCorrections.getl(models.get(id));
+			
+			hArray[id] = (IDataset) h;
+			kArray[id] = (IDataset) k;
+			lArray[id] = (IDataset) l;
+			
+	    }
+	    
+	    Dataset hArrayCon = DatasetUtils.concatenate(hArray, 0);
+	    Dataset kArrayCon = DatasetUtils.concatenate(kArray, 0);
+	    Dataset lArrayCon = DatasetUtils.concatenate(lArray, 0);	
+			
+	    hArrayCon.sort(0);
+	    kArrayCon.sort(0);
+	    lArrayCon.sort(0);
+	    
+		writer.println("# Test file created: " + strDate);
+		writer.println("# Headers: ");
+		writer.println("#h	k	l	F	Fe	lorentz	correction 	polarisation correction		area correction");
+
+		for(int gh = 0 ; gh<sm.getImages().length; gh++){
+				writer.println(hArrayCon.getDouble(gh) +"	"+ kArrayCon.getDouble(gh) +"	"+lArrayCon.getDouble(gh) + 
+						"	"+ sm.getSplicedCurveYFhkl().getDouble(gh)+ "	"+ sm.getSplicedCurveYFhkl().getError(gh) +"	"
+						+ sm.getLorentzCorrection().get(gh)+"	" + sm.getPolarisation().get(gh)+"	" + sm.getAreaCorrection().get(gh));
+		}
+
+		writer.close();
+	}	
+	
+	
 	
 	public void export(IPlottingSystem<Composite> parentPs, 
 						IDataset xData,
@@ -2254,8 +2328,7 @@ class trackingJob2 {
 	protected void runTJ2() {
 
 		final Display display = Display.getCurrent();
-        Color blue = display.getSystemColor(SWT.COLOR_BLUE);
-		
+	
 		debug("@@@@@@@@@@@~~~~~~~~~~~~~~~in the new tracker~~~~~~~~~~~~~~~~~~@@@@@@@@@@@@@@");
 		sm.resetTrackers();
 		sm.resetAll();
@@ -2346,18 +2419,6 @@ class trackingJob2 {
 							display.syncExec(new Runnable() {
 								@Override
 								public void run() {																			
-//									ssp.updateSliders(ssvs.getSliderList(), imageNumber);
-//									ssvs.getPlotSystemCompositeView().getFolder().setSelection(1);
-//									ssp.updateSliders(ssvs.getSliderList(), imageNumber);
-//									ssvs.updateIndicators(imageNumber);	
-//									ssvs.getPlotSystemCompositeView().getPlotSystem().updatePlot2D(tempImage, null, null);
-//									ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
-//									ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
-//									ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);								
-//									ssvs.getSsps3c().generalUpdate();
-//									ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
-//									ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber));
-									
 									updateTrackingDisplay(tempImage, imageNumber);
 									
 									return;

@@ -282,11 +282,12 @@ public class SurfaceScatterViewStart extends Dialog {
 				folder.setSelection(1);
 
 				ssp.setSelection(0);
-				//
-				 customComposite.generalUpdate();
-				 ssps3c.generalUpdate();
-				// ssp.backgroundBoxesManager();
-				// ssp.regionOfInterestSetter();
+				customComposite.getSlider().setMinimum(0);
+				customComposite.getSlider().setMaximum(ssp.getNoImages());
+				customComposite.getSlider().setThumb(1);
+				
+				customComposite.generalUpdate();
+				ssps3c.generalUpdate();
 
 			}
 
@@ -606,35 +607,6 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 		});
 
-		customComposite.getPlotSystem1CompositeView().getSaveButton().addSelectionListener(new SelectionListener() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-
-				FileDialog fd = new FileDialog(getParentShell(), SWT.SAVE);
-
-				String stitle = "r";
-				String path = "p";
-
-				if (fd.open() != null) {
-					stitle = fd.getFileName();
-					path = fd.getFilterPath();
-
-				}
-
-				String title = path + File.separator + stitle;
-
-				ssp.saveParameters(title);
-
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-
-			}
-		});
-
 		customComposite.getPlotSystem1CompositeView().getLoadButton().addSelectionListener(new SelectionListener() {
 
 			@Override
@@ -877,6 +849,9 @@ public class SurfaceScatterViewStart extends Dialog {
 				}
 				if (outputCurves.getOutputFormatSelection().getSelectionIndex() == 1) {
 					ssp.anarodSave(title, fr);
+				}
+				if (outputCurves.getOutputFormatSelection().getSelectionIndex() == 2) {
+					ssp.intSave(title, fr);
 				}
 
 			}
