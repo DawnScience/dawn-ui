@@ -3,6 +3,7 @@ package org.dawnsci.datavis.model;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 public class LoadedFiles implements SimpleTreeObject, Iterable<LoadedFile> {
 
@@ -18,6 +19,11 @@ public class LoadedFiles implements SimpleTreeObject, Iterable<LoadedFile> {
 	
 	public void addFiles(List<LoadedFile> f){
 		fileList.addAll(f);
+	}
+	
+	public boolean contains(String path) {
+		Optional<LoadedFile> findAny = fileList.stream().filter(f -> path.equals(f.getLongName())).findAny();
+		return findAny.isPresent();
 	}
 
 	@Override

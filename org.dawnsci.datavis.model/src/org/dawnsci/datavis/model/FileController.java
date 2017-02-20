@@ -220,14 +220,19 @@ public class FileController {
 			
 			List<LoadedFile> files = new ArrayList<>();
 			
+			monitor.beginTask("Loading files", paths.length);
+			
 			for (String path : paths) {
-				//test path isnt already contained
+				if (loadedFiles.contains(path)) continue;
+				monitor.subTask("Loading " + path + "...");
 				LoadedFile f = null;
 				try {
 					f = new LoadedFile(ServiceManager.getLoaderService().getData(path, null));
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+				
+				monitor.worked(1);
 				
 				if (f != null) files.add(f);
 				
