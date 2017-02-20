@@ -76,6 +76,7 @@ public class MultipleOutputCurvesTableView extends Composite {
 		intensitySelect.add("Intensity");
 		intensitySelect.add("Fhkl");
 		intensitySelect.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		intensitySelect.select(0);
 		
 		outputFormatSelection = new Combo(overlapSelection, SWT.DROP_DOWN | SWT.BORDER | SWT.FILL);
 		outputFormatSelection.setText("GenX");
@@ -83,6 +84,8 @@ public class MultipleOutputCurvesTableView extends Composite {
 		outputFormatSelection.add("Anrod");
 		outputFormatSelection.add(".int");
 		outputFormatSelection.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		outputFormatSelection.select(0);
+		
 		
 		save = new Button(overlapSelection, SWT.PUSH |SWT.FILL);
 		save.setText("Save Spliced");
