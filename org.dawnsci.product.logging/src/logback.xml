@@ -60,18 +60,44 @@
 			</layout>
 		</encoder>
 	</appender>
+	
+	<!-- This appender is using the GELF (http://docs.graylog.org/en/latest/pages/gelf.html) 
+		messaging format to send the messages to Graylog. The appender used here 
+		is from: https://github.com/Moocar/logback-gelf This definition was written 
+		for v0.3 -->
+	<!-- Use UDP protocol message delivery is NOT guaranteed -->
+	<appender name="GrayLog" class="me.moocar.logbackgelf.GelfUDPAppender">
+		<!-- Graylog server details -->
+		<remoteHost>${graylog.host}</remoteHost>
+		<port>12201</port>
+		<encoder class="me.moocar.logbackgelf.GZIPEncoder">
+			<layout class="me.moocar.logbackgelf.GelfLayout">
+				<shortMessageLayout class="ch.qos.logback.classic.PatternLayout">
+					<pattern>%level - %message</pattern>
+				</shortMessageLayout>
+				<fullMessageLayout class="ch.qos.logback.classic.PatternLayout">
+					<pattern>%message%n%rootException</pattern>
+				</fullMessageLayout>
+				<useLoggerName>true</useLoggerName>
+				<useThreadName>false</useThreadName> <!-- Disable - We are currently running in the log server where the thread 
+					name is always 'logback-1' -->
+				<staticField class="me.moocar.logbackgelf.Field">
+					<key>_application_name</key>
+					<value>dawn</value> <!-- Set to 'dawn' for all logging -->
+				</staticField>
+				<staticField class="me.moocar.logbackgelf.Field">
+					<key>_username</key>
+					<value>${user.name}</value>
+				</staticField>
+			</layout>
+		</encoder>
 
-	<appender name="EMAIL" class="ch.qos.logback.classic.net.SMTPAppender">
+
+		<!-- Filter out events below DEBUG level -->
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-			<level>ERROR</level>
+			<level>DEBUG</level>
 		</filter>
-		<smtpHost>localhost</smtpHost>
-		<to>mark.basham@diamond.ac.uk</to>
-		<from>${user.name}@diamond.ac.uk</from>
-		<subject>[SDA-ERRORS] %logger{20} - %m</subject>
-		<layout class="ch.qos.logback.classic.PatternLayout">
-			<pattern>%date %-5level %logger{35} - %message%n</pattern>
-		</layout>
+
 	</appender>
 
 	<logger name="org.apache.commons" level="ERROR"/>
@@ -83,5 +109,6 @@
 		<appender-ref ref="DebugFILE" />
 		<appender-ref ref="HTML" />
 		<appender-ref ref="STDOUT" />
+		<appender-ref ref="GrayLog" />
 	</root>
 </configuration>

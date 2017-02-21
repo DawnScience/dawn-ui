@@ -7,14 +7,14 @@
          point="org.eclipse.core.runtime.products">
       <product
             application="org.eclipse.ui.ide.workbench"
-            name="DAWN Science">
+            name="Dawn">
          <property
                name="appName"
-               value="DAWN Science">
+               value="Dawn">
          </property>
          <property
                name="startupProgressRect"
-               value="5,240,590,15">
+               value="0,245,600,15">
          </property>
          <property
                name="windowImages"
@@ -35,6 +35,14 @@
          <property
                name="aboutText"
                value="Data Analysis WorkbeNch &#x0A;Copyright, 2010 - 2016, Diamond Light Source&#x0A;&#x0A;Version 2.4.0">
+         </property>
+         <property
+               name="startupForegroundColor"
+               value="000000">
+         </property>
+         <property
+               name="startupMessageRect"
+               value="0,20,200,20">
          </property>
          <property
                name="preferenceCustomization"
