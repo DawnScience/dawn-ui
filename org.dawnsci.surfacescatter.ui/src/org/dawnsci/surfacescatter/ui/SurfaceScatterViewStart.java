@@ -285,6 +285,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				customComposite.getSlider().setMinimum(0);
 				customComposite.getSlider().setMaximum(ssp.getNoImages());
 				customComposite.getSlider().setThumb(1);
+				customComposite.getPlotSystem1CompositeView().checkTrackerOnButton();
 				
 				customComposite.generalUpdate();
 				ssps3c.generalUpdate();
@@ -852,6 +853,9 @@ public class SurfaceScatterViewStart extends Dialog {
 				}
 				if (outputCurves.getOutputFormatSelection().getSelectionIndex() == 2) {
 					ssp.intSave(title, fr);
+				}
+				if (outputCurves.getOutputFormatSelection().getSelectionIndex() == 3) {
+					ssp.simpleXYYeSave(title, fr);
 				}
 
 			}

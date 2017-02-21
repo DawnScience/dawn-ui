@@ -218,6 +218,11 @@ public class DatDisplayer extends Composite {
 	    clearTable.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	    clearTable.setEnabled(false);
 	    
+	    transferToRod = new Button(datSelector, SWT.PUSH);
+	    transferToRod.setText("Transfer to Rod ->");
+	    transferToRod.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));	
+	    transferToRod.setEnabled(false);
+	    
 	    folderDisplayTable = new Table(datSelector, SWT.CHECK |  SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 	    folderDisplayTable.setEnabled(false);
 	    
@@ -242,11 +247,6 @@ public class DatDisplayer extends Composite {
 	    folderDisplayTable.getVerticalBar().setEnabled(true);
 	    folderDisplayTable.getVerticalBar().setIncrement(1);
 	    folderDisplayTable.getVerticalBar().setThumb(1);
-	     
-	    transferToRod = new Button(datSelector, SWT.PUSH);
-	    transferToRod.setText("Transfer to Rod \r ->");
-	    transferToRod.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));	
-	    transferToRod.setEnabled(false);
 	    
 	    rodConstrucion = new Group(right, SWT.V_SCROLL | SWT.FILL | SWT.FILL);
         GridLayout rodConstrucionLayout = new GridLayout(1,true);

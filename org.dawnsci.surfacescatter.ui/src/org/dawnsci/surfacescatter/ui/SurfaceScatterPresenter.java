@@ -1431,7 +1431,6 @@ public class SurfaceScatterPresenter {
 	
 	public void intSave(String title, String[] fr){
 		
-		String s = gms.get(sm.getSelection()).getSavePath();
 		File file =null;
 		
 		try {
@@ -1495,6 +1494,84 @@ public class SurfaceScatterPresenter {
 
 		writer.close();
 	}	
+	
+	
+	public void simpleXYYeSave(String title, String[] fr){
+		
+		File file =null;
+		
+		try {
+			file = new File(title);
+			file.createNewFile();
+			writer = new PrintWriter(file);
+		} catch (FileNotFoundException e2) {
+			e2.printStackTrace();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		
+		int index  = title.lastIndexOf(".");
+		if(index != -1){
+			String ext = title.substring(0,index);
+			file.renameTo(new File(ext + ".int"));
+		}
+		else{
+			file.renameTo(new File(title + ".int"));
+		}
+			
+		
+		
+		SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//dd/MM/yyyy
+	    Date now = new Date();
+	    String strDate = sdfDate.format(now);
+	    
+	    IDataset[] hArray = new IDataset[sm.getFilepaths().length];
+	    IDataset[] kArray = new IDataset[sm.getFilepaths().length];
+	    IDataset[] lArray = new IDataset[sm.getFilepaths().length];
+	    
+	    for (int id = 0; id < sm.getFilepaths().length; id++) {
+	    
+	    	ILazyDataset h = SXRDGeometricCorrections.geth(models.get(id));
+			ILazyDataset k = SXRDGeometricCorrections.getk(models.get(id));
+			ILazyDataset l = SXRDGeometricCorrections.getl(models.get(id));
+			
+			hArray[id] = (IDataset) h;
+			kArray[id] = (IDataset) k;
+			lArray[id] = (IDataset) l;
+			
+	    }
+	    
+	    Dataset hArrayCon = DatasetUtils.concatenate(hArray, 0);
+	    Dataset kArrayCon = DatasetUtils.concatenate(kArray, 0);
+	    Dataset lArrayCon = DatasetUtils.concatenate(lArray, 0);	
+			
+	    hArrayCon.sort(0);
+	    kArrayCon.sort(0);
+	    lArrayCon.sort(0);
+	    
+		writer.println("# Test file created: " + strDate);
+		writer.println("# Headers: ");
+		writer.println("#X	Y	Ye");
+		
+		if(ssvs.getOutputCurves().getIntensity().getSelectionIndex() == 1){
+			for(int gh = 0 ; gh<sm.getImages().length; gh++){
+					writer.println(sm.getSplicedCurveX().getDouble(gh) + 
+							"	"+ sm.getSplicedCurveYFhkl().getDouble(gh)+ 
+							"	"+ sm.getSplicedCurveYFhkl().getError(gh));
+			}
+		}
+		
+		if(ssvs.getOutputCurves().getIntensity().getSelectionIndex() == 0){
+			for(int gh = 0 ; gh<sm.getImages().length; gh++){
+					writer.println(sm.getSplicedCurveX().getDouble(gh) + 
+							"	"+ sm.getSplicedCurveY().getDouble(gh)+ 
+							"	"+ sm.getSplicedCurveY().getError(gh));
+			}
+		}
+		
+		writer.close();
+	}	
+	
 	
 	
 	

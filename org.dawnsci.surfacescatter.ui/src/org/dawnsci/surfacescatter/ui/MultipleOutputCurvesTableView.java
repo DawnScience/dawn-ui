@@ -72,7 +72,7 @@ public class MultipleOutputCurvesTableView extends Composite {
 		errors.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		intensitySelect = new Combo(overlapSelection, SWT.DROP_DOWN | SWT.BORDER |SWT.FILL);
-		intensitySelect.setText("Intensity");
+//		intensitySelect.setText("Intensity");
 		intensitySelect.add("Intensity");
 		intensitySelect.add("Fhkl");
 		intensitySelect.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -83,6 +83,7 @@ public class MultipleOutputCurvesTableView extends Composite {
 		outputFormatSelection.add("GenX");
 		outputFormatSelection.add("Anrod");
 		outputFormatSelection.add(".int");
+		outputFormatSelection.add("X/Y/Ye .txt");
 		outputFormatSelection.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		outputFormatSelection.select(0);
 		
