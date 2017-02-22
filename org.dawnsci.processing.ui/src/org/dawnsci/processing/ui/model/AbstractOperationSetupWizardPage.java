@@ -47,4 +47,9 @@ public abstract class AbstractOperationSetupWizardPage extends WizardPage implem
 	}
 
 	protected abstract void update();
+	
+	@Override
+	public void finishPage() {
+		// default is to do nothing
+	}
 }

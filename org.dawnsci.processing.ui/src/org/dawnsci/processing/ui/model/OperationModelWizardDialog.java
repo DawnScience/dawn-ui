@@ -54,5 +54,11 @@ public class OperationModelWizardDialog extends WizardDialog {
 		getWizard().performCancel();
 		super.handleShellCloseEvent();
 	}
-	
+
+	@Override
+	protected void nextPressed() {
+		IOperationSetupWizardPage currentPage = (IOperationSetupWizardPage) getCurrentPage();
+		currentPage.finishPage();
+		super.nextPressed();
+	}
 }

@@ -14,4 +14,6 @@ public interface IOperationSetupWizardPage extends IWizardPage {
 	public OperationData getOutputData();
 	
 	public void setInputData(OperationData od);
+	
+	public void finishPage();
 }
