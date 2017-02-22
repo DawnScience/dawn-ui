@@ -118,7 +118,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 	@Override
 	protected List<TableViewerColumn> createColumns(final TableViewer viewer) {
 		
-		PeakColumnComparitor cc = new PeakColumnComparitor();
+		PeakColumnComparator cc = new PeakColumnComparator();
 		viewer.setComparator(cc);
 		
 		ColumnViewerToolTipSupport.enableFor(viewer,ToolTip.NO_RECREATE);
@@ -200,7 +200,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 
 	}
 
-	private SelectionAdapter getSelectionAdapter(final TableColumn column, final int index, final PeakColumnComparitor comparator) {
+	private SelectionAdapter getSelectionAdapter(final TableColumn column, final int index, final PeakColumnComparator comparator) {
 		SelectionAdapter selectionAdapter = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
