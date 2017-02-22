@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
 import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingService;
 import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
 
@@ -67,8 +68,7 @@ public class PeakSearchJob extends Job {
 			}
 	
 			/* Clean up last peak search */
-			controller.peaks.clear();
-
+			controller.clearPeaks();
 			
 			//TODO: clean control function
 			// Free up active peakfinder calls
@@ -145,12 +145,24 @@ public class PeakSearchJob extends Job {
 			controller.peaksY = DatasetFactory.createFromList(pPos);
 			controller.peaksX = xData.getBy1DIndex((IntegerDataset) DatasetFactory.createFromList(pHeight));
 
+			
+			
+			APeak peak;
+			
 			// Create peaks
 			for (int i = 0; i < controller.peaksY.getSize(); ++i) {
 				Peak p = new Peak(controller.peaksX.getDouble(i), controller.peaksY.getDouble(i));
 				p.setName("P" + i);
 				controller.peaks.add(p);
 			}
+			
+			
+			
+			
+			
+			
+			
+			
 
 			syncFormatPeakSearch();
 

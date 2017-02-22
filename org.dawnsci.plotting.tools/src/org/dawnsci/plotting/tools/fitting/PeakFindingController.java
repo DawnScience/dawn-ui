@@ -6,7 +6,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.dawnsci.plotting.tools.Activator;
@@ -14,7 +16,14 @@ import org.dawnsci.plotting.tools.preference.PeakFindingConstants;
 import org.eclipse.dawnsci.analysis.api.peakfinding.IPeakFinderParameter;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.Maths;
 import org.eclipse.jface.viewers.TableViewer;
+
+import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter.Compare;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingData;
 import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingService;
 import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
@@ -49,8 +58,109 @@ public class PeakFindingController {
 	//The table viewer should exist here
 	//TODO:Move these control values
 	
-	// Peak Details
-	List<Peak> peaks = new ArrayList<Peak>();
+	
+	
+	// Peak Details - could store as a series of functions however this will eventually be realised by the fitting
+	private Add peaksCompFunc;
+	
+	//Really need that intermedicate of a indentified peak. COuld the below be the answer
+	IdentifiedPeak peaksIdentified;
+	//List<Peak> peaks = new ArrayList<Peak>();
+	
+	public void clearPeaks(){
+		this.peaksCompFunc = null; //TODO: isnt there a proper way to clear?
+		//peaks.clear();
+	}
+	
+	
+	private IdentifiedPeak convertToPeak(Map<Integer, Double> peakpos, Dataset xData, Dataset yData){
+		
+		ArrayList<IdentifiedPeak> peaks = new ArrayList<IdentifiedPeak>();
+		// slightly less arbitrary scale for minimum height of peaks
+		//final double scale = Math.max(Math.abs(peaksY.min().doubleValue()), Math.abs(peaksY.max().doubleValue())) * EPSILON;
+		Dataset data = null;//Maths.derivative(xdata, ydata);
+		
+		int backPos, forwardPos;
+		double backTotal, forwardTotal;
+		double backValue, forwardValue;
+		
+		for (Map.Entry<Integer, Double> peak : peakpos.entrySet()) {
+
+			backPos = peak.getKey() - 1;
+			backValue = data.getElementDoubleAbs(backPos);
+			
+			
+			forwardPos = peak.getKey() + 1;
+			forwardValue = data.getElementDoubleAbs(forwardPos);
+			
+			
+			/*XXX: well if not nromalized to zero can not really assume that zero is the turning point...*/
+
+			// Found zero crossing from positive to negative (maximum)
+			// now, work out left and right height differences from local minima or edge
+			backTotal = 0;
+			// get the backwards points
+			while (backPos > 0) {
+				if (backValue >= 0) {
+					backTotal += backValue;
+					backPos -= 1;
+					backValue = data.getElementDoubleAbs(backPos);
+				} else {
+					break;
+				}
+			}
+
+			// get the forward points
+			forwardTotal = 0;
+			while (forwardPos < xData.getSize()) {
+				if (forwardValue <= 0) {
+					forwardTotal -= forwardValue;
+					forwardPos += 1;
+					forwardValue = data.getElementDoubleAbs(forwardPos);
+				} else {
+					break;
+				}
+			}
+			
+		
+			
+			
+			
+			
+			//Okay so below is some logic can grab to finding the peak info
+			int[] start = { backPos };
+			int[] stop = { forwardPos };
+			int[] step = { 1 };
+			
+			Dataset slicedXData = (Dataset) xData.getSlice(start, stop, step);
+			Dataset slicedYData = (Dataset) yData.getSlice(start, stop, step);
+			
+			List<Double> crossings = DatasetUtils.crossings(slicedXData, slicedYData, slicedYData.max()
+					.doubleValue() / 2);
+			
+			if (crossings.size() <= 1) {
+				crossings.clear();
+				crossings.add((double) backPos);
+				crossings.add((double) forwardPos);
+			}
+		
+			
+			
+			
+			
+			double position = yData.getElementDoubleAbs(i);
+			double minXValue = xData.getElementDoubleAbs(backPos) ;
+			double maxXValue = xData.getElementDoubleAbs(forwardPos); 
+			double area = Math.min(backTotal, forwardTotal); 
+			double height = slicedYData.peakToPeak().doubleValue();
+			int indexOfMinXVal = backPos; 
+			int indexofMaxXVal = forwardPos;
+			
+			List<Double> crossingsFnd = crossings;
+	
+		}
+	}
+	
 	
 	//TODO: decide on one of them
 	Dataset peaksY;
