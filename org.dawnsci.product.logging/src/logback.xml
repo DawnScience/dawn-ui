@@ -90,7 +90,7 @@
 					<value>${user.name}</value>
 				</staticField>
 				<staticField class="me.moocar.logbackgelf.Field">
-					<key>_version</key>
+					<key>_dawnversion</key>
 					<value>${dawn.version}</value>
 				</staticField>
 			</layout>
