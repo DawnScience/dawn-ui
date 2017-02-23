@@ -51,6 +51,20 @@ public class PeakFindingController {
 	private static IPeakFindingService peakFindServ = (IPeakFindingService) Activator
 			.getService(IPeakFindingService.class);
 	
+	//TODO: decide on if also storing the raw peaks values as well as the id peaks. There can only be one or else both are superfluous
+	Dataset peaksY;
+	Dataset peaksX;
+	
+	//Controls for user picking the peaks
+	public Boolean isRemoving = false; 
+	public Boolean isAdding = false;
+	
+	
+	//Bound limits for searching 
+	private Double upperBnd;
+	private Double lowerBnd;
+	
+	private Double searchScaleIntensity;
 	
 	private IPeakFindingData peakFindData; 
 	private String peakFinderID;
@@ -64,7 +78,7 @@ public class PeakFindingController {
 	private Add peaksCompFunc;
 	
 	//Really need that intermedicate of a indentified peak. COuld the below be the answer
-	IdentifiedPeak peaksIdentified;
+	 List<IdentifiedPeak> peaksIdentified = new ArrayList<IdentifiedPeak>();
 	//List<Peak> peaks = new ArrayList<Peak>();
 	
 	public void clearPeaks(){
@@ -72,14 +86,20 @@ public class PeakFindingController {
 		//peaks.clear();
 	}
 	
-	
-	private IdentifiedPeak convertToPeak(Map<Integer, Double> peakpos, Dataset xData, Dataset yData){
+	/**
+	 * 
+	 * Assumes peakpos are those repsented in yData passed into. 
+	 * 
+	 * xData and yData must be same size
+	 * 
+	 * @param peakpos
+	 * @param xData
+	 * @param yData
+	 * @return every peak pos inside @peakpos cast to identifed Peak
+	 */
+	private List<IdentifiedPeak> convertIntoPeaks(Map<Integer, Double> peakpos, Dataset xData, Dataset yData){
 		
 		ArrayList<IdentifiedPeak> peaks = new ArrayList<IdentifiedPeak>();
-		// slightly less arbitrary scale for minimum height of peaks
-		//final double scale = Math.max(Math.abs(peaksY.min().doubleValue()), Math.abs(peaksY.max().doubleValue())) * EPSILON;
-		Dataset data = null;//Maths.derivative(xdata, ydata);
-		
 		int backPos, forwardPos;
 		double backTotal, forwardTotal;
 		double backValue, forwardValue;
@@ -87,12 +107,11 @@ public class PeakFindingController {
 		for (Map.Entry<Integer, Double> peak : peakpos.entrySet()) {
 
 			backPos = peak.getKey() - 1;
-			backValue = data.getElementDoubleAbs(backPos);
+			backValue = yData.getElementDoubleAbs(backPos);
 			
 			
 			forwardPos = peak.getKey() + 1;
-			forwardValue = data.getElementDoubleAbs(forwardPos);
-			
+			forwardValue = yData.getElementDoubleAbs(forwardPos);
 			
 			/*XXX: well if not nromalized to zero can not really assume that zero is the turning point...*/
 
@@ -104,7 +123,7 @@ public class PeakFindingController {
 				if (backValue >= 0) {
 					backTotal += backValue;
 					backPos -= 1;
-					backValue = data.getElementDoubleAbs(backPos);
+					backValue = yData.getElementDoubleAbs(backPos);
 				} else {
 					break;
 				}
@@ -116,16 +135,11 @@ public class PeakFindingController {
 				if (forwardValue <= 0) {
 					forwardTotal -= forwardValue;
 					forwardPos += 1;
-					forwardValue = data.getElementDoubleAbs(forwardPos);
+					forwardValue = yData.getElementDoubleAbs(forwardPos);
 				} else {
 					break;
 				}
 			}
-			
-		
-			
-			
-			
 			
 			//Okay so below is some logic can grab to finding the peak info
 			int[] start = { backPos };
@@ -138,44 +152,29 @@ public class PeakFindingController {
 			List<Double> crossings = DatasetUtils.crossings(slicedXData, slicedYData, slicedYData.max()
 					.doubleValue() / 2);
 			
+			//No slice gathered as range too small. Must be current values
 			if (crossings.size() <= 1) {
 				crossings.clear();
 				crossings.add((double) backPos);
 				crossings.add((double) forwardPos);
 			}
-		
 			
-			
-			
-			
-			double position = yData.getElementDoubleAbs(i);
+			double position = peak.getKey();
 			double minXValue = xData.getElementDoubleAbs(backPos) ;
 			double maxXValue = xData.getElementDoubleAbs(forwardPos); 
 			double area = Math.min(backTotal, forwardTotal); 
 			double height = slicedYData.peakToPeak().doubleValue();
 			int indexOfMinXVal = backPos; 
 			int indexofMaxXVal = forwardPos;
-			
 			List<Double> crossingsFnd = crossings;
-	
+			
+			IdentifiedPeak newPeak = new IdentifiedPeak(position, minXValue,maxXValue,area,height,indexofMaxXVal,indexOfMinXVal,crossingsFnd);
+			peaks.add(newPeak);
 		}
+		
+		return peaks;
 	}
 	
-	
-	//TODO: decide on one of them
-	Dataset peaksY;
-	Dataset peaksX;
-
-	//Controls for user picking the peaks
-	public Boolean isRemoving = false; 
-	public Boolean isAdding = false;
-	
-	
-	//Bound limits for searching 
-	private Double upperBnd;
-	private Double lowerBnd;
-	
-	private Double searchScaleIntensity;
 	
 	public void refreshTable(){
 		table.viewer.refresh();
@@ -264,10 +263,15 @@ public class PeakFindingController {
 
 		final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
 		try {
+			
+			//TODO: fix the formatter. have iterate over identified peaks
 			for (Peak p : peaks) {
 				writer.write(p.getXYFormat());
 				writer.newLine();
 			}
+			
+			
+			
 		} finally {
 			writer.close();
 		}
