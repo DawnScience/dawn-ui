@@ -11,8 +11,10 @@ import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
 import org.eclipse.dawnsci.analysis.api.persistence.IPersistentFile;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
+import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +22,7 @@ import org.slf4j.LoggerFactory;
 public class OperationModelWizard extends Wizard implements IOperationModelWizard {
 
 	private final List<IOperationSetupWizardPage> wizardPages;
+	private final List<IOperationSetupWizardPage> templateWizardPages = new ArrayList<>();
 	
 	@SuppressWarnings("unused")
 	final static private Logger logger = LoggerFactory.getLogger(OperationModelWizard.class);
@@ -30,6 +33,7 @@ public class OperationModelWizard extends Wizard implements IOperationModelWizar
 		this.wizardPages = wizardPages;
 		this.wizardPages.get(0).setInputData(new OperationData(initialData));
 		setHelpAvailable(false);
+		
 	}
 	
 	public OperationModelWizard(final IDataset initialData, final IOperationSetupWizardPage wizardPage) {
@@ -53,11 +57,15 @@ public class OperationModelWizard extends Wizard implements IOperationModelWizar
 	@Override
 	public void addPages() {
 		wizardPages.stream().forEachOrdered(page -> addPage(page));
+		templateWizardPages.stream().forEachOrdered(page -> addPage(page));
 	}
 
 	@Override
 	public boolean performFinish() {
 		wizardPages.stream().forEachOrdered(page -> {
+			page.wizardTerminatingButtonPressed(Dialog.OK);
+		});
+		templateWizardPages.stream().forEachOrdered(page -> {
 			page.wizardTerminatingButtonPressed(Dialog.OK);
 		});
 		return true;
@@ -67,6 +75,9 @@ public class OperationModelWizard extends Wizard implements IOperationModelWizar
 	public boolean performCancel() {
 		wizardPages.stream().forEachOrdered(page -> {
 			page.wizardTerminatingButtonPressed(Dialog.CANCEL);
+		});
+		templateWizardPages.stream().forEachOrdered(page -> {
+				page.wizardTerminatingButtonPressed(Dialog.CANCEL);
 		});
 		return true;
 	}
@@ -83,9 +94,33 @@ public class OperationModelWizard extends Wizard implements IOperationModelWizar
 			if (page instanceof AbstractOperationModelWizardPage)
 				operationsList.add(((AbstractOperationModelWizardPage) page).getOperation());
 		}
+		for (IOperationSetupWizardPage page : templateWizardPages) {
+			if (page instanceof AbstractOperationModelWizardPage)
+				operationsList.add(((AbstractOperationModelWizardPage) page).getOperation());
+		}
 		
 		pf.setOperations(operationsList.toArray(new IOperation[operationsList.size()]));
 		pf.close();
 	}
 
+	@Override
+	public void setTemplateFile(String filename) throws Exception {
+		IPersistenceService service = ServiceHolder.getPersistenceService();
+		IPersistentFile pf = service.getPersistentFile(filename);
+		IOperation<? extends IOperationModel, ? extends OperationData>[] operations = pf.getOperations();
+		templateWizardPages.clear(); // remove any possible template wizardpages
+		Arrays.stream(operations).forEachOrdered(operation -> {
+			IOperationSetupWizardPage wizardPage = ServiceHolder.getOperationUIService().getWizardPage(operation);
+			templateWizardPages.add(wizardPage);
+			addPage(wizardPage);
+		});
+		getContainer().updateButtons();
+	}
+
+	@Override
+	public IWizardPage getNextPage(IWizardPage page) {
+		if (page == wizardPages.get(wizardPages.size()-1) && !templateWizardPages.isEmpty())
+			return templateWizardPages.get(0);
+		return super.getNextPage(page);
+	}
 }

@@ -6,6 +6,8 @@ import org.eclipse.jface.wizard.IWizardPage;
 
 public interface IOperationModelWizard extends IWizard {
 	public void saveOutputFile(String filename) throws Exception;
+
+	public void setTemplateFile(String filename) throws Exception;
 	
 	@Override
 	public IWizardPage[] getPages();

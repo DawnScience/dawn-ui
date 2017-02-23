@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.dawb.common.services.ServiceManager;
+import org.dawnsci.processing.ui.ServiceHolder;
 import org.dawnsci.processing.ui.api.IOperationModelWizard;
 import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
 import org.dawnsci.processing.ui.api.IOperationUIService;
@@ -137,7 +137,7 @@ public class OperationUIServiceImpl implements IOperationUIService {
 		IOperation<? extends IOperationModel, ? extends OperationData>[] operations = null;
 		
 		try {
-			IPersistenceService service = (IPersistenceService)ServiceManager.getService(IPersistenceService.class);
+			IPersistenceService service = ServiceHolder.getPersistenceService();
 			IPersistentFile pf = service.getPersistentFile(operationsFile);
 			operations = pf.getOperations();
 		} catch (Exception e) {
