@@ -2,20 +2,28 @@ package org.dawnsci.plotting.tools.powderlines;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.dawnsci.common.widgets.gda.Activator;
-import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
+import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.ServiceLoader;
+import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.dataset.roi.XAxisLineBoxROI;
-import org.eclipse.dawnsci.analysis.dataset.roi.YAxisLineBoxROI;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
-import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.DoubleDataset;
+import org.eclipse.january.dataset.IndexIterator;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -23,11 +31,19 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.ToolTip;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 public class PowderLineTool extends AbstractToolPage {
 
@@ -36,7 +52,8 @@ public class PowderLineTool extends AbstractToolPage {
 	private ITraceListener tracerListener; // The trace on which the tool listens
 	private PowderLineUnit dataCoordinate = PowderLineUnit.Q; // The coordinate of the input data 
 	private double energy; // Energy of the scattered radiation
-	private Double[] lineLocations; // Locations of the lines in the above units
+	private DoubleDataset lineLocations; // Locations of the lines in the above units
+	private List<IRegion> currentLineRegions;
 	
 	public PowderLineTool() {
 		try{
@@ -53,7 +70,7 @@ public class PowderLineTool extends AbstractToolPage {
 		}
 		
 		// Example data
-		lineLocations = ArrayUtils.toObject(new double []{3.0, 3.4, 4.85, 5.74, 10.18});
+		lineLocations = DatasetFactory.createFromList(DoubleDataset.class, Arrays.asList(ArrayUtils.toObject(new double []{3.0, 3.4, 4.85, 5.74, 10.18})));
 		energy = 76.6;
 	}
 	
@@ -86,7 +103,6 @@ public class PowderLineTool extends AbstractToolPage {
 			@Override
 			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 				// TODO Auto-generated method stub
-				
 			}
 			
 			@Override
@@ -97,7 +113,7 @@ public class PowderLineTool extends AbstractToolPage {
 			
 			@Override
 			public Object[] getElements(Object inputElement) {
-				return (Double[]) inputElement;
+				return ArrayUtils.toObject(((DoubleDataset) inputElement).getData());
 			}
 		});
 		
@@ -163,8 +179,8 @@ public class PowderLineTool extends AbstractToolPage {
 		
 	}
 	
-	private enum PowderLineUnit {
-		Q, ANGLE
+	public enum PowderLineUnit {
+		Q, ANGLE, D_SPACING
 	}
 	
 	private class PowderLineLabelProvider extends ColumnLabelProvider {
@@ -197,43 +213,206 @@ public class PowderLineTool extends AbstractToolPage {
 		}
 	}
 	
+	public void setEnergy(double energy) {
+		this.energy = energy;
+	}
+	
+	public double getEnergy( ) {
+		return this.energy;
+	}
+	
+	public void setUnit(PowderLineUnit unit) {
+		this.dataCoordinate = unit;
+	}
+	
+	public PowderLineUnit getUnit( ) {
+		return this.dataCoordinate;
+	}
+	
+	public void setLines(DoubleDataset novaLines) {
+		this.lineLocations = novaLines;
+		this.lineTableViewer.setInput(this.lineLocations);
+		this.drawPowderLines();
+	}
+	
 	private void drawPowderLines() {
-		System.err.println("(Re)drawing powder lines");
-		
 		// Correct the stored lines for the plot units
 		// FIXME: Currently assumed to be the same units
 		
-		final XAxisLineBoxROI[] lines = makeROILines(this.lineLocations); 
-		Display.getDefault().asyncExec(new Runnable() {
+		final XAxisLineBoxROI[] novalines = makeROILines(this.lineLocations);
+		final List<IRegion> viejoRegions = (currentLineRegions != null) ? new ArrayList<IRegion>(currentLineRegions) : null;
+		final List<IRegion> novaRegions = new ArrayList<IRegion>();
+		
+		// Keep track of our region names, since we are not adding them to the
+		// PlottingSystem until the async call
+		List<String> usedNames = new ArrayList<String>();
+		
+		for (XAxisLineBoxROI line : novalines) {
+			try {
+				IRegion rLine = getPlottingSystem().createRegion(RegionUtils.getUniqueName("PowderLine", getPlottingSystem(), usedNames.toArray(new String[]{})), RegionType.XAXIS_LINE);
+				usedNames.add(rLine.getName());
+				rLine.setROI(line);
+				rLine.setMobile(false);
+				novaRegions.add(rLine);
+			} catch (Exception e) {
+				System.err.println("Failed creating region for new powder line.");
+			}
+		}
+		currentLineRegions = novaRegions;
+		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
-				try {
-					for (XAxisLineBoxROI line : lines) {
-						final IRegion rLine = getPlottingSystem().createRegion(RegionUtils.getUniqueName("Line", getPlottingSystem()), RegionType.XAXIS);
-						rLine.setROI(line);
-						getPlottingSystem().addRegion(rLine);
+					for (IRegion lineRegion : novaRegions) {
+						try {
+							getPlottingSystem().addRegion(lineRegion);
+						} catch (Exception e) {
+							logger.error("PowderLineTool: Cannot create line region", e);
+						}
 					}
-				} catch (Exception e) {
-					logger.error("Cannot create line", e);
-				}
+					// Remove the ROIs that constitute the old lines
+					if (viejoRegions != null) {
+						for (IRegion lineRegion : viejoRegions) {
+							try {
+								getPlottingSystem().removeRegion(lineRegion);
+							} catch (Exception e) {
+								logger.error("PowderLineTool: Cannot remove line region", e);
+							}
+						}
+					}
 			}
 		});
 	}
 	
-	private XAxisLineBoxROI[] makeROILines(Double locations[]) {
-		List<XAxisLineBoxROI> lines = new ArrayList<XAxisLineBoxROI>();
-		for(double location : locations)
-			lines.add(new XAxisLineBoxROI(location, 0, 0, 1, 0));
-
-		return lines.toArray(new XAxisLineBoxROI[]{});
+	private XAxisLineBoxROI[] makeROILines(Dataset locations) {
+		
+		List<XAxisLineBoxROI> novalines = new ArrayList<XAxisLineBoxROI>();
+		
+		IndexIterator iter = locations.getIterator();
+		while(iter.hasNext())
+			novalines.add(new XAxisLineBoxROI(locations.getElementDoubleAbs(iter.index), 0, 0, 1, 0));
+		
+		return novalines.toArray(new XAxisLineBoxROI[]{});
 	}
 	
 	private void createActions() {
+		final Shell theShell = this.getSite().getShell();
+		final PowderLineTool theTool = this;
 		final Action loadAction = new Action("Load a list of lines from file", Activator.getImageDescriptor("icons/mask-export-wiz.png")) {
 			@Override
 			public void run() {
+				FileDialog chooser = new FileDialog(theShell, SWT.OPEN);
+				String chosenFile = chooser.open();
 				
+				ILoaderService loaderService = ServiceLoader.getLoaderService();
+				IDataHolder dataHolder = null;
+				// Get the data from the file
+				try {
+					dataHolder = loaderService.getData(chosenFile, null);
+				
+				} catch (Exception e) {
+					System.err.println("PowderLineTool: Could not read line data from " + chosenFile);
+				}
+				// Only one Dataset, get it, it is the first
+				DoubleDataset lines = (DoubleDataset) DatasetUtils.convertToDataset(dataHolder.getDataset(0));
+				System.err.println("Dataset name is "+dataHolder.getName(0));
+				theTool.setLines(lines);
 			}
 		};
 		getSite().getActionBars().getToolBarManager().add(loadAction);
+		
+		final Action coordinateAction = new Action("Set up the coordinates of the plot and lines", Activator.getImageDescriptor("icons/bullet_wrench.png")) {
+			@Override
+			public void run() {
+				PowderLineSettingsDialog dialog = new PowderLineSettingsDialog(theShell);
+				dialog.setCurrentValues(energy, dataCoordinate);
+				if (dialog.open() == Window.OK) {
+					theTool.setEnergy(dialog.getEnergy());
+					theTool.setUnit(dialog.getUnit());
+				}
+			}
+		};
+		getSite().getActionBars().getToolBarManager().add(coordinateAction);
+	}
+	
+	public class PowderLineSettingsDialog extends Dialog {
+
+		private double energy;
+		private PowderLineUnit unit;
+		
+		private Text energyText;
+		private Combo unitCombo;
+		
+		public PowderLineSettingsDialog(Shell parent) {
+			super(parent);
+		}
+
+		@Override
+		public void create() {
+			super.create();
+			setTitle("Powder Line Tool Settings");
+		}
+		
+		@Override
+		protected Control createDialogArea(Composite parent) {
+			Composite area = (Composite) super.createDialogArea(parent);
+			Composite container = new Composite(area, SWT.NONE);
+			container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			GridLayout layout  = new GridLayout(2, false);
+			container.setLayout(layout);
+			
+			createCoordinateDropdown(container);
+			createEnergyBox(container);
+			
+			return area;
+		}
+		
+		private void createCoordinateDropdown(Composite container) {
+			Label unitLabel = new Label(container, SWT.NONE);
+			unitLabel.setText("Plot units");
+			
+			unitCombo = new Combo(container, SWT.BORDER);
+			String[] unitItems = new String[]{
+					PowderLineUnit.Q.name(),
+					PowderLineUnit.ANGLE.name(),
+					PowderLineUnit.D_SPACING.name()
+			};
+			unitCombo.setItems(unitItems);
+			// Select the current unit
+			int currentIndex = Arrays.asList(unitItems).indexOf(unit.name()); 
+			unitCombo.select(currentIndex);
+			
+		}
+		
+		private void createEnergyBox(Composite container) {
+			Label energyLabel = new Label(container, SWT.NONE);
+			energyLabel.setText("Energy (keV)");
+			
+			energyText = new Text(container, SWT.BORDER);
+			energyText.setText(Double.toString(energy));
+			
+		}
+		
+		public void setCurrentValues(double energy, PowderLineUnit unit) {
+			this.energy = energy;
+			this.unit = unit;
+		}
+		
+		public double getEnergy() {
+			return this.energy;
+		}
+		
+		public PowderLineUnit getUnit() {
+			return this.unit;
+		}
+		
+		@Override
+		protected void okPressed() {
+			this.energy = Double.parseDouble(energyText.getText());
+//			this.unit = PowderLineUnit.valueOf(unitText.getText());
+			this.unit = PowderLineUnit.valueOf(unitCombo.getItems()[unitCombo.getSelectionIndex()]);
+			System.out.println("Energy = "+this.energy);
+			System.out.println("units = "+this.unit);
+			super.okPressed();
+		}
+		
 	}
 }
