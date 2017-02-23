@@ -91,6 +91,7 @@ public class HistogramViewer extends ContentViewer {
 					getHistogramProvider().setMin(rroi.getPoint()[0]);
 					double max = rroi.getEndPoint()[0];
 					getHistogramProvider().setMax(max);
+					rescaleAxis();
 				}
 			} catch (Exception e) {
 				logger.error(e.getMessage());
