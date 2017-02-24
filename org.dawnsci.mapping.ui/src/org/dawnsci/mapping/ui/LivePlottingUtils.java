@@ -6,8 +6,9 @@ import org.eclipse.january.DatasetException;
 import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.IDatasetConnector;
+import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.dataset.SliceND;
@@ -21,7 +22,7 @@ public class LivePlottingUtils {
 	private static final Logger logger = LoggerFactory.getLogger(LivePlottingUtils.class);
 	
 	
-	public static IDataset getUpdatedMap(IDatasetConnector baseMap, MappedDataBlock parent, String name){
+	public static IDataset getUpdatedMap(IDynamicDataset baseMap, MappedDataBlock parent, String name){
 
 
 		try{
@@ -144,12 +145,67 @@ public class LivePlottingUtils {
 		s.setSlice(0, 0, i, 1);
 		
 		return ax.getSlice(s);
+	}
+	
+	public static IDataset cropNanValuesFromAxes(IDataset map, boolean is2D) {
+		SliceND slice = new SliceND(map.getShape());
+		
+		AxesMetadata axes = map.getFirstMetadata(AxesMetadata.class);
+		
+		IDataset y = null;
+		IDataset x = null;
+		ILazyDataset[] laa = null;
+		
+		if (is2D) {
+			laa = axes.getAxes();
+		}else {
+			laa = axes.getAxis(0);
+		}
+			
+			
+		try {
+			y = laa[0].getSlice();
+			x = laa[1].getSlice();
+		} catch (DatasetException e) {
+			return null;
+		}
+		
+		
+		int firstNanY = findFirstNan(y);
+		int firstNanX = findFirstNan(x);
+		
+		if (is2D) {
+			slice.setSlice(0, 0, firstNanY, 1);
+			slice.setSlice(1, 0, firstNanX, 1);
+		} else {
+			slice.setSlice(0, 0, Math.min(firstNanY, firstNanX), 1);
+		}
+		
+		
+		if (slice.isAll()) return map;
+		
+		return map.getSlice(slice);
+
+	}
+	
+	private static int findFirstNan(IDataset ax) {
+		
+		DoubleDataset cast = DatasetUtils.cast(DoubleDataset.class, ax);
+		cast.squeeze();
+		for (int i = 0; i < cast.getSize(); i++){
+			if (Double.isNaN(cast.getAbs(i))) {
+				return i;
+			}
+		}
+		
+		return cast.getSize();
+		
 		
 	}
 	
 	
 	
-	public static IDataset getUpdatedLinearMap(IDatasetConnector baseMap, MappedDataBlock parent, String name) {
+	public static IDataset getUpdatedLinearMap(IDynamicDataset baseMap, MappedDataBlock parent, String name) {
 		
 		IDataset map = null;
 		

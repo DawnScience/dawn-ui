@@ -17,8 +17,8 @@ import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
-import org.dawnsci.plotting.views.ToolPageView;
 import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
+import org.dawnsci.plotting.views.ToolPageView;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationBean;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -26,8 +26,8 @@ import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
 import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
-import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
+import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
@@ -43,11 +43,14 @@ import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.osgi.internal.messages.Msg;
+import org.eclipse.scanning.api.event.EventConstants;
 import org.eclipse.scanning.api.event.EventException;
 import org.eclipse.scanning.api.event.bean.BeanEvent;
 import org.eclipse.scanning.api.event.bean.IBeanListener;
 import org.eclipse.scanning.api.event.core.ISubscriber;
+import org.eclipse.scanning.api.event.scan.IScanListener;
+import org.eclipse.scanning.api.event.scan.ScanEvent;
+import org.eclipse.scanning.api.event.core.IPropertyFilter.FilterAction;
 import org.eclipse.scanning.api.event.status.StatusBean;
 import org.eclipse.scanning.api.ui.CommandConstants;
 import org.eclipse.swt.dnd.DND;
@@ -341,6 +344,7 @@ public class MappedDataView extends ViewPart {
 		});
 		
 		subscribeToOperationStatusTopic();
+		subscribeToScanTopic();
 	}
 	
 	
@@ -358,12 +362,13 @@ public class MappedDataView extends ViewPart {
 		try {
 			final URI uri = new URI(suri);
 			ISubscriber<EventListener> subscriber = LocalServiceManager.getEventService().createSubscriber(uri, "scisoft.operation.STATUS_TOPIC");
+			
 			subscriber.addListener(new IBeanListener<StatusBean>() {
 
 				@Override
 				public void beanChangePerformed(BeanEvent<StatusBean> evt) {
 					System.out.println("bean update " + evt.getBean().toString());
-					
+					plotManager.updatePlot();
 					if (evt.getBean() instanceof IOperationBean && evt.getBean().getStatus().isRunning()) {
 						String host = MappingScanNewStyleEventObserver.getDataServerHost();
 						int port = MappingScanNewStyleEventObserver.getDataServerPort();
@@ -396,6 +401,35 @@ public class MappedDataView extends ViewPart {
 		
 	}
 	
+	private void subscribeToScanTopic(){
+		
+		final String suri = CommandConstants.getScanningBrokerUri();
+		if (suri==null) return; // Nothing to start, standard DAWN.
+
+
+		logger.info("Starting the Mapping Scan Event Observer");
+
+		try {
+			final URI uri = new URI(suri);
+			ISubscriber<EventListener> subscriber = LocalServiceManager.getEventService().createSubscriber(uri, EventConstants.STATUS_TOPIC);
+
+			subscriber.addProperty("scanRequest", FilterAction.DELETE); 
+			subscriber.addProperty("position", FilterAction.DELETE); 		            
+			subscriber.addListener(new IScanListener() {
+
+				public void scanEventPerformed(ScanEvent evt) {
+					plotManager.updatePlot();
+				}
+
+			});
+
+
+		} catch (URISyntaxException | EventException e) {
+
+		}
+
+	}
+	
 	private void openImportWizard(String path) {
 		
 		FileManagerSingleton.getFileManager().importFile(path);
@@ -411,8 +445,6 @@ public class MappedDataView extends ViewPart {
 	@Override
 	public void dispose() {
 		super.dispose();
-		if (plotManager != null)
-			plotManager.stopRepeatPlot();
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })

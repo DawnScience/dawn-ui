@@ -18,8 +18,7 @@ public class MockDatasetConnectorTest {
 		int[] second = {2,7,99,100};
 		int[] third = {7,7,99,100};
 		
-		MockDatasetConnector mock = new MockDatasetConnector(maxShape, new int[][]{first,second,third});
-		mock.connect();
+		DynamicRandomLazyDataset mock = new DynamicRandomLazyDataset(new int[][]{first,second,third}, maxShape);
 		IDynamicDataset dataset = (IDynamicDataset)mock.getDataset();
 		
 		assertArrayEquals(first, dataset.getShape());
@@ -28,6 +27,7 @@ public class MockDatasetConnectorTest {
 		
 		assertArrayEquals(first, slice.getShape());
 		
+		dataset.refreshShape();
 		dataset.refreshShape();
 		
 		assertArrayEquals(second, dataset.getShape());

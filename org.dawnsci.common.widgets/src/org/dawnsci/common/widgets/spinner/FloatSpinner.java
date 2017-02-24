@@ -160,6 +160,7 @@ public class FloatSpinner extends Composite {
 		this.width = width;
 		spinner.setMinimum((int) -(maximumValue*factor));
 		spinner.setMaximum((int) (maximumValue*factor));
+		spinner.setTextLimit(width + 1);
 	}
 
 	/**

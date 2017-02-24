@@ -1,6 +1,5 @@
 package org.dawnsci.mapping.ui.datamodel;
 
-import org.dawnsci.mapping.ui.LivePlottingUtils;
 import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromLiveSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
@@ -8,9 +7,8 @@ import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
-import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.IDatasetConnector;
+import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
@@ -29,7 +27,6 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	private AbstractMapData mapRepresentation;
 	
 	private double[] range;
-	private boolean connected = false;
 
 	private LiveRemoteAxes axes;
 	
@@ -44,9 +41,10 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 		
 	}
 	
-	public MappedDataBlock(String name, IDatasetConnector dataset,MapScanDimensions dims, String path, LiveRemoteAxes axes, String host, int port) {
-		this(name, dataset.getDataset(), path,dims);
+	public MappedDataBlock(String name, IDynamicDataset dataset,MapScanDimensions dims, String path, LiveRemoteAxes axes, String host, int port) {
+		this(name, null, path,dims);
 		this.axes = axes;
+		this.dataset = dataset;
 
 	}
 	
@@ -59,10 +57,10 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	}
 	
 	public void replaceLiveDataset(ILazyDataset lz) {
-		disconnect();
 		this.dataset = lz;
 		axes = null;
 		range = calculateRange(lz);
+		mapRepresentation = null;
 	}
 	
 	@Override
@@ -145,7 +143,7 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	
 	protected double[] calculateRange(ILazyDataset block){
 		
-		if (block instanceof IDatasetConnector) return null;
+		if (block == null) return null;
 		
 		IDataset[] ax = MetadataPlotUtils.getAxesAsIDatasetArray(block);
 		
@@ -195,43 +193,39 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 		return new SliceFromSeriesMetadata(si,sl);
 	}
 	
-	public ILazyDataset getLiveSpectrum(int x, int y) {
+	public IDataset getLiveSpectrum(int x, int y) {
 		
-		if (!connected) update();
+		if (dataset instanceof IDynamicDataset) {
+			
+			if (dataset.getFirstMetadata(AxesMetadata.class) == null) {
+				try {
+					((IDynamicDataset)dataset).refreshShape();
+					if (dataset.getSize() == 1) return null;
+					buildAxesMetadata();
+				} catch (Exception e) {
+					return null;
+				}
+			}
+			
+			((IDynamicDataset)dataset).refreshShape();
+			AxesMetadata ax = dataset.getFirstMetadata(AxesMetadata.class);
+			if (ax == null) return null;
+			int[] refresh = ax.refresh(dataset.getShape());
+			((IDynamicDataset) dataset).resize(refresh);
+		}
 		
-		((IDatasetConnector)dataset).refreshShape();
-		
-		axes.update();
-		
-		int yDim = mapDims.getyDim();
-		int xDim = mapDims.getxDim();
 		
 		SliceND slice = mapDims.getSlice(x, y, dataset.getShape());
 		
 		IDataset slice2;
 		try {
 			slice2 = dataset.getSlice(slice);
+			slice2.squeeze();
 		} catch (Exception e) {
 			logger.error("Could not get data from lazy dataset", e);
 			return null;
 		}
 		
-		AxesMetadata ax = null;
-		try {
-			ax = MetadataFactory.createMetadata(AxesMetadata.class, dataset.getRank());
-			ILazyDataset[] lax = axes.getAxes();
-			for (int i = 0; i < dataset.getRank(); i++) {
-				if (i == xDim || i == yDim || lax[i] == null) continue;
-				try {
-					ax.setAxis(i,lax[i].getSlice());
-				} catch (DatasetException e) {
-					logger.error("Could not get data from lazy dataset for axis " + i, e);
-				}
-			}
-		} catch (MetadataException e1) {
-			logger.error("Could not create axes metdata", e1);
-		}
-		slice2.setMetadata(ax);
 		MetadataType sslsm = generateLiveSliceMetadata(x,y);
 		slice2.setMetadata(sslsm);
 		
@@ -240,109 +234,33 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	
 	public IDataset getLiveSpectrum(int x) {
 		
-		((IDatasetConnector)dataset).refreshShape();
+		return getLiveSpectrum(x, x);
 		
-		axes.update();
-		
-		int yDim = mapDims.getyDim();
-		int xDim = mapDims.getxDim();
-		
-		SliceND slice = new SliceND(dataset.getShape());
-		slice.setSlice(xDim,x,x+1,1);
-		
-		IDataset slice2;
-		try {
-			slice2 = dataset.getSlice(slice);
-		} catch (DatasetException e) {
-			logger.error("Could not get data from lazy dataset", e);
-			return null;
-		}
-		
-		AxesMetadata ax = null;
-		try {
-			ax = MetadataFactory.createMetadata(AxesMetadata.class, dataset.getRank());
-			ILazyDataset[] lax = axes.getAxes();
-			for (int i = 0; i < dataset.getRank(); i++) {
-				if (i == xDim || i == yDim || lax[i] == null) continue;
-				try {
-					ax.setAxis(i, lax[i].getSlice());
-				} catch (DatasetException e) {
-					logger.error("Could not get data from lazy dataset for axis " + i, e);
-				}
-			}
-			
-		} catch (MetadataException e1) {
-			logger.error("Could not create axes metdata", e1);
-		}
-		slice2.setMetadata(ax);
-		MetadataType sslsm = generateLiveSliceMetadata(x,x);
-		slice2.setMetadata(sslsm);
-		
-		return slice2;
 	}
 
 	public boolean isLive() {
 		return axes != null;
 	}
 	
-	public boolean connect(){
+	private void buildAxesMetadata() throws Exception{
 		
-		if (axes == null) return true;
-		
-		connected = true;
-		
-		try {
-			((IDatasetConnector)dataset).connect();
-		} catch (Exception e) {
-			connected = false;
-			logger.error("Could not connect to " + toString());
-			return false;
+		AxesMetadata ax = MetadataFactory.createMetadata(AxesMetadata.class, dataset.getRank());
+		ILazyDataset[] lazyAx = axes.getAxes();
+		for (int i = 0; i < lazyAx.length; i++) {
+			ax.addAxis(i, lazyAx[i]);
 		}
 		
-		if (connectAxes(true)) {
-			connected = true;
-			return true;
+		if (axes.getxAxisForRemapping() != null) {
+			ax.addAxis(mapDims.getxDim(),axes.getxAxisForRemapping());
 		}
 		
-		return false;
-	}
-
-
-	public boolean disconnect(){
+		int[] refresh = ax.refresh(dataset.getShape());
+		((IDynamicDataset)dataset).resize(refresh);
+		dataset.addMetadata(ax);
 		
-		if (axes == null) return true;
-		
-		try {
-			((IDatasetConnector)dataset).disconnect();
-		} catch (Exception e) {
-			logger.error("Could not disconnect from " + toString());
-			return false;
-		}
-		
-		if (connectAxes(false)) {
-			connected = false;
-			return true;
-		}
-		
-		return false;
-		
-	}
-	
-	private boolean connectAxes(boolean connect){
-		
-		boolean success = true;
-		
-		success = axes.connect(connect);
-		
-		return success;
 	}
 	
 	private ILazyDataset[] getLiveXAxis() {
-		if (!connected) {			
-			connect();
-		}
-		
-		if (!connected) return null;
 		
 		axes.update();
 		
@@ -351,11 +269,6 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	}
 	
 	private ILazyDataset[] getLiveYAxis() {
-		if (!connected) {			
-			connect();
-		}
-		
-		if (!connected) return null;
 		axes.update();
 		return new ILazyDataset[]{axes.getAxes()[mapDims.getyDim()]};
 	}
@@ -371,64 +284,38 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	@Override
 	public IDataset getMap() {
 		
-		if (isLive()) {
-			update();
-			
-			if (!mapDims.isPointDetector(dataset.getShape())) return null;
-			
-			IDataset d = null;
-			
-			if (mapDims.isRemappingRequired()) {
-				d = LivePlottingUtils.getUpdatedLinearMap((IDatasetConnector)dataset, this, this.toString());
-				d = MappingUtils.remapData(d, null, 0)[0];
-			} else {
-				d = LivePlottingUtils.getUpdatedMap((IDatasetConnector)dataset, this, this.toString());
-			}
-
-			if (d == null) return null;
-			double[] range = MappingUtils.getGlobalRange(d);
-			this.range = range;
-			return d;
-		}
-		
 		if (mapRepresentation == null) {
 			if (mapDims.isRemappingRequired()) {
 
-				mapRepresentation = new ReMappedData(this.toString(), dataset ,this, path);
+				mapRepresentation = new ReMappedData(this.toString(), dataset.getSliceView() ,this, path, isLive());
+				if (isLive()) mapRepresentation.update();
+				range = mapRepresentation.getRange();
 				return mapRepresentation.getMap();
 
 
 			} else {
 
-				mapRepresentation = new MappedData(this.toString(),dataset,this, path);
+				mapRepresentation = new MappedData(this.toString(),dataset.getSliceView(),this, path, isLive());
+				if (isLive()) mapRepresentation.update();
+				range = mapRepresentation.getRange();
 				return mapRepresentation.getMap();
 
 			}
+			
 		}
-
 		
-		
-		
+		if (isLive()) mapRepresentation.update();
+		range = mapRepresentation.getRange();
 		return mapRepresentation.getMap();
 	}
 
 	@Override
 	public void update() {
-		if (!isLive()) return;
-		if (!connected) {			
-			try {
-				connect();
-			} catch (Exception e) {
-				logger.debug("Could not connect",e);
-
-			}
-		}
-		
+		((IDynamicDataset)dataset).refreshShape();
 	}
 
 	@Override
 	public int getTransparency() {
-		// TODO Auto-generated method stub
 		return -1;
 	}
 

@@ -1,13 +1,15 @@
 package org.dawnsci.mapping.ui.datamodel;
 
+import org.dawnsci.mapping.ui.LivePlottingUtils;
+import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.january.DatasetException;
-import org.eclipse.january.dataset.DataEvent;
-import org.eclipse.january.dataset.DatasetUtils;
-import org.eclipse.january.dataset.IDataListener;
+import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.IDatasetConnector;
+import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
+import org.eclipse.january.metadata.AxesMetadata;
+import org.eclipse.january.metadata.MetadataFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,58 +17,125 @@ public abstract class AbstractMapData implements PlottableMapObject{
 
 	private String name;
 	protected String path;
-	protected IDatasetConnector baseMap;
-	protected ILazyDataset map;
+	protected IDataset map;
+	protected ILazyDataset baseMap;
 	protected MappedDataBlock oParent;
 	protected MappedDataBlock parent;
 	private int transparency = -1;
 	private double[] range;
 	
-	protected boolean connected = false;
 	protected boolean live;
 	
 	private static final Logger logger = LoggerFactory.getLogger(AbstractMapData.class);
 	
-	public AbstractMapData(String name, ILazyDataset map, MappedDataBlock parent, String path) {
-		this.name = name;
-		this.map = map;
-		this.path = path;
-		this.oParent = this.parent = parent;
-		range = calculateRange(map);
-	}
-	
-	public AbstractMapData(String name, IDatasetConnector map, MappedDataBlock parent, String path) {
+	public AbstractMapData(String name, ILazyDataset map, MappedDataBlock parent, String path, boolean live) {
 		this.name = name;
 		this.baseMap = map;
 		this.path = path;
 		this.oParent = this.parent = parent;
-		live = true;
+		this.live = live;
+		if (!live) range = calculateRange(map);
 	}
 	
 	public abstract IDataset getSpectrum(double x, double y);
 	
 	public MappedData makeNewMapWithParent(String name, IDataset ds) {
-		return new MappedData(name, ds, parent, path);
+		return new MappedData(name, ds, parent, path, false);
 	}
 	
 	public IDataset getMap(){
 		try {
-		if (map != null && map.getRank() != 2) {
+
+			if (map != null) return map;
+
+			if (baseMap.getSize() == 1) return null;
+
 			MapScanDimensions mapDims = parent.getMapDims();
-			SliceND s = mapDims.getMapSlice(map);
+			SliceND s = mapDims.getMapSlice(baseMap);
 			IDataset slice;
-			
-				slice = map.getSlice(s);
-			
+
+			slice = baseMap.getSlice(s);
+
 			slice.squeeze();
-			return slice;
-		}
-		return DatasetUtils.sliceAndConvertLazyDataset(map);
+			map = slice;
+
+			return map;
 		} catch (DatasetException e) {
 			logger.error("Could not slice map");
 		}
+
+		return null;
+	}
+	
+	protected void buildAxesMetadata(){
+		AxesMetadata ax;
+		((IDynamicDataset)baseMap).refreshShape();
+		try {
+			ax = MetadataFactory.createMetadata(AxesMetadata.class, baseMap.getRank());
+			ILazyDataset ly = parent.getYAxis()[0];
+			ILazyDataset lx = parent.getXAxis()[0];
+			MapScanDimensions md = parent.getMapDims();
+			int xd = md.getxDim();
+			int yd = md.getyDim();
+			
+			//important to be this way around for when xd == yd
+			ax.setAxis(yd, ly);
+			ax.addAxis(xd, lx);
+			
+			int[] refresh = ax.refresh(baseMap.getShape());
+			((IDynamicDataset)baseMap).resize(refresh);
+			baseMap.setMetadata(ax);
+		} catch (MetadataException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+	
+	
+	protected IDataset updateMap() {
+		if (!live) return null;
+
+
+		if (baseMap.getFirstMetadata(AxesMetadata.class) == null) {
+			try {
+				((IDynamicDataset)baseMap).refreshShape();
+				if (baseMap.getSize() == 1) return null;
+				buildAxesMetadata();
+			} catch (Exception e) {
+				return null;
+			}
+		}
+
+		((IDynamicDataset)baseMap).refreshShape();
+		AxesMetadata ax = baseMap.getFirstMetadata(AxesMetadata.class);
+		if (ax == null) return null;
+		int[] refresh = ax.refresh(baseMap.getShape());
+		((IDynamicDataset) baseMap).resize(refresh);
+
+
+
+		try {
+			
+			MapScanDimensions mapDims = oParent.getMapDims();
+			mapDims.updateNonXYScanSlice(baseMap.getShape());
+			SliceND mapSlice = mapDims.getMapSlice(baseMap);
+			IDataset slice = baseMap.getSlice(mapSlice);
+			slice.squeeze();
+			slice = LivePlottingUtils.cropNanValuesFromAxes(slice,!mapDims.isRemappingRequired());
+			if (slice == null) return null;
+			setRange(MappingUtils.getRange(slice, !mapDims.isRemappingRequired()));
+			return slice;
+			
+//			updateRemappedData(null);
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		return null;
+
 	}
 	
 	public abstract ILazyDataset getData();
@@ -122,51 +191,15 @@ public abstract class AbstractMapData implements PlottableMapObject{
 		return path + " : " + name;
 	}
 
-	public abstract void replaceLiveDataset(ILazyDataset map);
+	public void replaceLiveDataset(ILazyDataset map) {
+		live = false;
+		this.map = null;
+		this.baseMap = map;
+		setRange(calculateRange(baseMap));
+	}
 	
 	public abstract void update();
 	
-	
-	public boolean connect() {
-		
-		try {
-			((IDatasetConnector)baseMap).connect();
-			((IDatasetConnector)baseMap).addDataListener(new IDataListener() {
-				
-				@Override
-				public void dataChangePerformed(DataEvent evt) {
-					// TODO Auto-generated method stub
-					
-				}
-			});
-		} catch (Exception e) {
-			logger.error("Could not connect to " + toString());
-			return false;
-		}
-		
-		if (parent.connect()) {
-			connected = true;
-			return true;
-		}
-		
-		return false;
-	}
-
-	public boolean disconnect() {
-		try {
-			if (baseMap != null) ((IDatasetConnector)baseMap).disconnect();
-		} catch (Exception e) {
-			logger.error("Could not disconnect from " + toString());
-			return false;
-		}
-		
-		if (parent.disconnect()) {
-			connected = false;
-			return true;
-		}
-		
-		return false;
-	}
 	
 	@Override
 	public String getPath(){

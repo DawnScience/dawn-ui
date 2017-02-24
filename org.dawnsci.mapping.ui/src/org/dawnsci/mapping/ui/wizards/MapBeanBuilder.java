@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.crypto.CipherInputStream;
-
 import org.dawnsci.mapping.ui.datamodel.AssociatedImageBean;
 import org.dawnsci.mapping.ui.datamodel.MapBean;
 import org.dawnsci.mapping.ui.datamodel.MappedBlockBean;
@@ -110,7 +108,6 @@ public class MapBeanBuilder {
 					String name = next.getName();
 					if(name.startsWith(names[0]) && name.endsWith(NexusTreeUtils.NX_AXES_SET+NexusTreeUtils.NX_INDICES_SUFFIX)) {
 						IDataset v = next.getValue();
-						String string = v.getString();
 						int index = Integer.parseInt(v.getString());
 						axNames[index] = names[1] + name.substring(names[0].length(), name.length()-8);
 						remap = names[0] + name.substring(names[0].length(), name.length()-8);
@@ -139,16 +136,12 @@ public class MapBeanBuilder {
 			}
 			
 			
-			boolean allFound = false;
-			
 			String fullName = min.getFullName();
 			NodeLink link = tree.findNodeLink(fullName);
 			Node d = link.getSource();
 			
 			Iterator<? extends Attribute> it = d.getAttributeIterator();
 		
-			boolean foundx = false;
-			boolean foundy = false;
 			Integer index = null;
 			
 			Map<Integer,String> nameDimMap = new HashMap<>();
@@ -158,7 +151,6 @@ public class MapBeanBuilder {
 				Attribute next = it.next();
 				name = next.getName();
 				if (name.endsWith(NexusTreeUtils.NX_AXES_SET +NexusTreeUtils.NX_INDICES_SUFFIX)) {
-					foundx = true;
 					IDataset value = next.getValue();
 					if (value.getSize() != 1) continue;
 					index = Integer.parseInt(value.getString());
@@ -414,7 +406,6 @@ public class MapBeanBuilder {
 					foundx = true;
 					IDataset value = next.getValue();
 					if (index == null) {
-						String string = value.getString();
 						index = Integer.parseInt(value.getString());
 					} else {
 						int i = Integer.parseInt(value.getString());

@@ -8,6 +8,4 @@ public interface MapObject {
 	
 	public double[] getRange();
 	
-	public boolean disconnect();
-	
 }

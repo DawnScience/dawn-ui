@@ -29,7 +29,7 @@ public class MappingScanNewStyleEventObserver implements IScanListener, IStartup
 
 	// TODO These constants would ideally be defined somewhere in the Dawn mapping UI code
 	private static final String DAWNSCI_MAPPING_FILE_OPEN = "org/dawnsci/events/file/OPEN";
-	private static final String DAWNSCI_MAPPING_FILE_CLOSE = "org/dawnsci/events/file/CLOSE";
+//	private static final String DAWNSCI_MAPPING_FILE_CLOSE = "org/dawnsci/events/file/CLOSE";
 	private static final String DAWNSCI_MAPPING_FILE_RELOAD = "org/dawnsci/events/file/LOCALRELOAD";
 
 	private static IEventService eventService;
@@ -38,13 +38,13 @@ public class MappingScanNewStyleEventObserver implements IScanListener, IStartup
 
 	public void bindIEventService(IEventService eventService) {
 		logger.debug("bindIEventService called with {}", eventService.toString());
-		this.eventService = eventService;
+		MappingScanNewStyleEventObserver.eventService = eventService;
 	}
 
 	public void unbindIEventService(IEventService eventService) {
 		logger.debug("unbindIEventService called with {}", eventService.toString());
-		if (eventService == this.eventService) {
-			this.eventService = null;
+		if (eventService == MappingScanNewStyleEventObserver.eventService) {
+			MappingScanNewStyleEventObserver.eventService = null;
 			try {
 				if (subscriber != null) {
 					subscriber.disconnect();
@@ -57,13 +57,13 @@ public class MappingScanNewStyleEventObserver implements IScanListener, IStartup
 
 	public void bindEventAdmin(EventAdmin eventAdmin) {
 		logger.debug("bindEventAdmin called with {}", eventAdmin.toString());
-		this.eventAdmin = eventAdmin;
+		MappingScanNewStyleEventObserver.eventAdmin = eventAdmin;
 	}
 
 	public void unbindEventAdmin(EventAdmin eventAdmin) {
 		logger.debug("unbindEventAdmin called with {}", eventAdmin.toString());
-		if (eventAdmin == this.eventAdmin) {
-			this.eventAdmin = null;
+		if (eventAdmin == MappingScanNewStyleEventObserver.eventAdmin) {
+			MappingScanNewStyleEventObserver.eventAdmin = null;
 		}
 	}
 

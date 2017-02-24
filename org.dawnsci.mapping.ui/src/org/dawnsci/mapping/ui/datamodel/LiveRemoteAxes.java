@@ -1,17 +1,14 @@
 package org.dawnsci.mapping.ui.datamodel;
 
-import org.eclipse.january.dataset.IDatasetConnector;
+import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LiveRemoteAxes {
 
-	private IDatasetConnector[] axes;
+	private IDynamicDataset[] axes;
 	private String[] axesNames;
-	private IDatasetConnector xAxisForRemapping;
+	private IDynamicDataset xAxisForRemapping;
 	
-	private static final Logger logger = LoggerFactory.getLogger(LiveRemoteAxes.class);
 	
 	public int getPort() {
 		return port;
@@ -26,7 +23,7 @@ public class LiveRemoteAxes {
 	private int port;
 	private String host;
 
-	public LiveRemoteAxes(IDatasetConnector[] axes, String[] axesNames, String host, int port) {
+	public LiveRemoteAxes(IDynamicDataset[] axes, String[] axesNames, String host, int port) {
 		this.axes = axes;
 		this.axesNames = axesNames;
 		this.host = host;
@@ -50,7 +47,7 @@ public class LiveRemoteAxes {
 		return axesNames;
 	}
 
-	public void setxAxisForRemapping(IDatasetConnector ds){
+	public void setxAxisForRemapping(IDynamicDataset ds){
 		this.xAxisForRemapping = ds;
 	}
 	
@@ -66,7 +63,7 @@ public class LiveRemoteAxes {
 	
 	public void update() {
 		for (int i = 0; i < axes.length; i++) {
-			IDatasetConnector ax = axes[i];
+			IDynamicDataset ax = axes[i];
 			if (ax != null) {
 				ax.refreshShape();
 				ax.getDataset().setName(axesNames[i]);
@@ -75,40 +72,10 @@ public class LiveRemoteAxes {
 		
 		if (xAxisForRemapping != null) {
 			xAxisForRemapping.refreshShape();
-			xAxisForRemapping.getDataset().setName(xAxisForRemappingName);
+			xAxisForRemapping.setName(xAxisForRemappingName);
 		}
 	}
 	
-	public boolean connect(boolean connect) {
-		
-		boolean success = true;
-		
-		for (IDatasetConnector a : axes) {
-			if (a instanceof IDatasetConnector) {
-				
-				try {
-					if (connect) a.connect();
-					else a.disconnect();
-				}
-				catch (Exception e) {
-					logger.error("Error communicating with " + a.getDataset().getName());
-					success = false;
-				} 
-			}
-		}
-		
-		if (xAxisForRemapping != null) {
-			try {
-				if (connect) xAxisForRemapping.connect();
-				else xAxisForRemapping.disconnect();
-			}
-			catch (Exception e) {
-				logger.error("Error communicating with " + xAxisForRemapping.getDataset().getName());
-				success = false;
-			} 
-		}
-		
-		return success;
-	}
+
 	
 }

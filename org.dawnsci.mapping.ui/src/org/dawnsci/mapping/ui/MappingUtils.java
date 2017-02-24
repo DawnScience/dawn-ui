@@ -42,6 +42,39 @@ public class MappingUtils {
 		return range;
 	}
 	
+	public static double[] getRange(IDataset map, boolean is2D) {
+		
+		ILazyDataset[] axis = null;
+		if (is2D) {
+			AxesMetadata m = map.getFirstMetadata(AxesMetadata.class);
+			axis = m.getAxes();
+		} else {
+			AxesMetadata md = map.getFirstMetadata(AxesMetadata.class);
+			axis = md.getAxis(0);
+		}
+		
+		IDataset[] ax = getDatasetsFromLazy(axis);
+		
+		return calculateRangeFromAxes(ax);
+		
+
+	}
+	
+	private static IDataset[] getDatasetsFromLazy(ILazyDataset[] lazys) {
+		IDataset[] out = new IDataset[lazys.length];
+		
+		for (int i = 0; i < lazys.length; i++) {
+			try {
+				out[i] = DatasetUtils.sliceAndConvertLazyDataset(lazys[i]);
+			} catch (DatasetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		return out;
+	}
+	
 	public static double[] calculateRangeFromAxes(IDataset[] axes) {
 		double[] range = new double[4];
 		int xs = axes[1].getSize();

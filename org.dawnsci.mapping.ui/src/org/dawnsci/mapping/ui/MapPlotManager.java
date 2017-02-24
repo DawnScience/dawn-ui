@@ -31,8 +31,8 @@ import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace;
-import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace.ArrowConfiguration;
+import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
@@ -56,13 +56,15 @@ public class MapPlotManager {
 	private MappedDataArea area;
 	private ConcurrentLinkedDeque<MapTrace> layers;
 	private PlotJob job;
-	private RepeatingJob rJob;
+	private PlotJob mapJob;
 	private volatile Dataset merge;
 	private AtomicInteger atomicPosition;
 	private int layerCounter = 0;
 	private boolean firstHold = true;
+	private Runnable mapRunnable;
+
 	
-	private long pollTime = 1000;
+	private static long MIN_REFRESH_TIME = 2000;
 	
 	private final static Logger logger = LoggerFactory.getLogger(MapPlotManager.class);
 	
@@ -72,23 +74,22 @@ public class MapPlotManager {
 		this.area = area;
 		atomicPosition = new AtomicInteger(0);
 		layers = new ConcurrentLinkedDeque<MapTrace>();
-		job = new PlotJob();
+		job = new PlotJob("Plot point...",false);
 		job.setPriority(Job.INTERACTIVE);
-		rJob = new RepeatingJob(pollTime, new Runnable() {
+		mapJob = new PlotJob("Map update...",true);
+		mapJob.setPriority(Job.INTERACTIVE);
+		mapRunnable = new Runnable() {
 			
 			@Override
 			public void run(){
 				try {
-					if (layers.isEmpty()) rJob.stop();
-					boolean noneLive = true;
+
 					for (MapTrace t : layers) {
 						if (t.getMap().isLive()) {
-							noneLive = false;
 							t.getMap().update();
 							t.switchMap(t.getMap());
 						}
 					}
-					if (noneLive) rJob.stop();
 					plotLayers();
 					
 				} catch (RuntimeException ne) { 
@@ -96,12 +97,19 @@ public class MapPlotManager {
 					logger.error("Cannot update map!", ne);
 				}
 			}
-		});
+		};
+		
 		
 		if (data.getAxes() != null) {
 			List<IAxis> axes = data.getAxes();
 			for (IAxis axis : axes) axis.setAxisAutoscaleTight(true);
 		}
+		
+	}
+	
+	public void updatePlot(){	
+		mapJob.setRunnable(mapRunnable);
+		mapJob.schedule();
 		
 	}
 	
@@ -123,8 +131,6 @@ public class MapPlotManager {
 					data.clear();
 					return;
 				}
-				
-//				IDataset s = l.getSlice();
 				
 				if (s.getSize() == 1) return;
 				
@@ -153,12 +159,6 @@ public class MapPlotManager {
 		job.setRunnable(r);
 		
 		job.schedule();
-	}
-	
-	public void stopRepeatPlot(){
-		if (rJob != null) {
-			rJob.stop();
-		}
 	}
 	
 	public void plotDataWithHold(final double x, final double y) {
@@ -298,8 +298,7 @@ public class MapPlotManager {
 				if (m.getTrace() != null) this.map.removeTrace(m.getTrace());
 			}
 		}
-		
-		triggerForLive();
+
 		plotLayers();
 		
 	}
@@ -313,7 +312,6 @@ public class MapPlotManager {
 			if (m.getMap() == map) {
 				it.remove();
 				if (m.getTrace() != null) this.map.removeTrace(m.getTrace());
-				triggerForLive();
 				plotLayers();
 				return;
 			}
@@ -434,29 +432,8 @@ public class MapPlotManager {
 			IImageTrace t = createImageTrace(map);
 			layers.push(new MapTrace(map, t));
 		}
-	
-		triggerForLive();
 	}
 	
-	private void triggerForLive(){
-		boolean found = false;
-
-		Iterator<MapTrace> iterator = layers.iterator();
-
-		while (iterator.hasNext()) {
-			MapObject l = iterator.next().getMap();
-			if (l instanceof PlottableMapObject &&  ((PlottableMapObject)l).isLive()) {
-				found = true;
-				break;
-			}
-		}
-		
-		if (found){
-			rJob.start();
-			rJob.schedule();
-		}
-		else rJob.stop();
-	}
 	
 	private IImageTrace createImageTrace(MapObject ob) {
 		
@@ -701,9 +678,11 @@ public class MapPlotManager {
 	private class PlotJob extends Job {
 
 		private final AtomicReference<Runnable> task =new AtomicReference<Runnable>();
+		private boolean delayed = false;
 		
-		public PlotJob() {
-			super("Plot point...");
+		public PlotJob(String name, boolean delayed) {
+			super(name);
+			this.delayed = delayed;
 		}
 		
 		public void setRunnable(Runnable runnable) {
@@ -712,17 +691,20 @@ public class MapPlotManager {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			Runnable local = task.get();
+			Runnable local = task.getAndSet(null);
+			if (local == null) return Status.OK_STATUS;
 			local.run();
+			
+			if (delayed) {
+				try {
+					Thread.sleep(MIN_REFRESH_TIME);
+				} catch (InterruptedException e) {
+					return Status.OK_STATUS;
+				}
+			}
+			
 			return Status.OK_STATUS;
 		}
-		
-	}
-	
-	public void test_method_remove(IDataset m) {
-		
-		map.updatePlot2D(m, null, null);
-		
 		
 	}
 	
@@ -741,33 +723,6 @@ public class MapPlotManager {
 		}
 		return r;
 		
-	}
-	
-	private class RepeatingJob extends Job{
-		private boolean running = true;
-		private long repeatDelay = 0;
-		private Runnable runnable;
-		public RepeatingJob(long repeatPeriod, Runnable runnable){ 
-			super("Repeat plot update");
-			repeatDelay = repeatPeriod;
-			this.runnable = runnable;
-		}
-		public IStatus run(IProgressMonitor monitor) {
-			runnable.run();
-			schedule(repeatDelay);
-			return Status.OK_STATUS;
-		}
-
-		public boolean shouldSchedule() {
-			return running;
-		}
-		public void stop() {
-			running = false;
-		}
-		public void start() {
-			running = true;
-		}
-
 	}
 	
 	private class MapTrace {

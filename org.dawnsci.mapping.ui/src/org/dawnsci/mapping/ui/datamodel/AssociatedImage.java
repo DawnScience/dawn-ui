@@ -54,11 +54,6 @@ public class AssociatedImage implements PlottableMapObject {
 	}
 
 	@Override
-	public boolean disconnect() {
-		return false;
-	}
-
-	@Override
 	public boolean isLive() {
 		return false;
 	}
