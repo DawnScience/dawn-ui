@@ -188,7 +188,6 @@ public class HistogramViewer extends ContentViewer {
 		maxText.setFormat(9, 4);
 		minText.setIncrement(1.0);
 		maxText.setIncrement(1.0);
-
 	}
 
 	/**
@@ -202,6 +201,20 @@ public class HistogramViewer extends ContentViewer {
 	}
 
 	/**
+	 * Check if values are close to each other
+	 * @param a
+	 * @param b
+	 * @return
+	 */
+	private static boolean isCloseTo(double a, double b) {
+		if (a == b) {
+			return true;
+		}
+		double max = Math.max(Math.abs(a), Math.abs(b));
+		return Math.abs(a-b) < 10*Math.ulp(max);
+	}
+
+	/**
 	 * Update Region
 	 *
 	 * @param histoMax
@@ -212,8 +225,8 @@ public class HistogramViewer extends ContentViewer {
 
 		if (oldRoi != null) {
 			// don't bother updating region if it is the same
-			if ((oldRoi.getPoint()[0] == histoMin)
-					&& (oldRoi.getEndPoint()[0]) == histoMax) {
+			if (isCloseTo(oldRoi.getPoint()[0], histoMin)
+					&& isCloseTo(oldRoi.getEndPoint()[0], histoMax)) {
 				return;
 			}
 		}
@@ -350,6 +363,7 @@ public class HistogramViewer extends ContentViewer {
 						updateRegion(minValue, getHistogramProvider().getMax());
 					}
 					maxText.setMinimum(minValue);
+					rescaleAxis();
 				}
 			}
 		});
@@ -364,6 +378,7 @@ public class HistogramViewer extends ContentViewer {
 						updateRegion(getHistogramProvider().getMin(), maxValue);
 					}
 					minText.setMaximum(maxValue);
+					rescaleAxis();
 				}
 			}
 		});
