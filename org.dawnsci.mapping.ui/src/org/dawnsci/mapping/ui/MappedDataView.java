@@ -43,10 +43,14 @@ import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.scanning.api.event.EventConstants;
 import org.eclipse.scanning.api.event.EventException;
 import org.eclipse.scanning.api.event.bean.BeanEvent;
 import org.eclipse.scanning.api.event.bean.IBeanListener;
 import org.eclipse.scanning.api.event.core.ISubscriber;
+import org.eclipse.scanning.api.event.scan.IScanListener;
+import org.eclipse.scanning.api.event.scan.ScanEvent;
+import org.eclipse.scanning.api.event.core.IPropertyFilter.FilterAction;
 import org.eclipse.scanning.api.event.status.StatusBean;
 import org.eclipse.scanning.api.ui.CommandConstants;
 import org.eclipse.swt.dnd.DND;
@@ -340,6 +344,7 @@ public class MappedDataView extends ViewPart {
 		});
 		
 		subscribeToOperationStatusTopic();
+		subscribeToScanTopic();
 	}
 	
 	
@@ -363,7 +368,7 @@ public class MappedDataView extends ViewPart {
 				@Override
 				public void beanChangePerformed(BeanEvent<StatusBean> evt) {
 					System.out.println("bean update " + evt.getBean().toString());
-					
+					plotManager.updatePlot();
 					if (evt.getBean() instanceof IOperationBean && evt.getBean().getStatus().isRunning()) {
 						String host = MappingScanNewStyleEventObserver.getDataServerHost();
 						int port = MappingScanNewStyleEventObserver.getDataServerPort();
@@ -396,6 +401,35 @@ public class MappedDataView extends ViewPart {
 		
 	}
 	
+	private void subscribeToScanTopic(){
+		
+		final String suri = CommandConstants.getScanningBrokerUri();
+		if (suri==null) return; // Nothing to start, standard DAWN.
+
+
+		logger.info("Starting the Mapping Scan Event Observer");
+
+		try {
+			final URI uri = new URI(suri);
+			ISubscriber<EventListener> subscriber = LocalServiceManager.getEventService().createSubscriber(uri, EventConstants.STATUS_TOPIC);
+
+			subscriber.addProperty("scanRequest", FilterAction.DELETE); 
+			subscriber.addProperty("position", FilterAction.DELETE); 		            
+			subscriber.addListener(new IScanListener() {
+
+				public void scanEventPerformed(ScanEvent evt) {
+					plotManager.updatePlot();
+				}
+
+			});
+
+
+		} catch (URISyntaxException | EventException e) {
+
+		}
+
+	}
+	
 	private void openImportWizard(String path) {
 		
 		FileManagerSingleton.getFileManager().importFile(path);
@@ -411,8 +445,6 @@ public class MappedDataView extends ViewPart {
 	@Override
 	public void dispose() {
 		super.dispose();
-		if (plotManager != null)
-			plotManager.stopRepeatPlot();
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })

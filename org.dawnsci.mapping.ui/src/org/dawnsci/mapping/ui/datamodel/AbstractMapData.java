@@ -193,6 +193,7 @@ public abstract class AbstractMapData implements PlottableMapObject{
 
 	public void replaceLiveDataset(ILazyDataset map) {
 		live = false;
+		this.map = null;
 		this.baseMap = map;
 		setRange(calculateRange(baseMap));
 	}
