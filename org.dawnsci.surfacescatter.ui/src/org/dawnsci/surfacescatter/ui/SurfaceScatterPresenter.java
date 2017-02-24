@@ -214,6 +214,10 @@ public class SurfaceScatterPresenter {
 						ild = dh1.getLazyDataset("file");
 					}
 					
+					if(ild == null){
+						imagesUnavailableWarning();
+					}
+					
 					
 					dms.get(id).setName(StringUtils.substringAfterLast(sm.getFilepaths()[id], File.separator));
 					models.get(id).setDatImages(ild);
@@ -1653,6 +1657,15 @@ public class SurfaceScatterPresenter {
 	
 	public void correctionMethodsWarning(){
 		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,2,null);
+		roobw.open();
+		
+		ssvs.getFolder().setSelection(0);
+		
+		return;
+	}
+	
+	public void imagesUnavailableWarning(){
+		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,3,null);
 		roobw.open();
 		
 		ssvs.getFolder().setSelection(0);

@@ -49,7 +49,9 @@ public class RegionOutOfBoundsWarning extends Dialog {
 		if (selector == 2){
 			warning.setText("Error in geometeric corrections. Check experimental setup");	
 		}
-		
+		if (selector == 3){
+			warning.setText("Unable to locate images. Check images file path, or image name in geometric paramters unavwindow.");	
+		}
 		
 		if(note != null){
 			Label noteLabel = new Label(container, SWT.FILL);
