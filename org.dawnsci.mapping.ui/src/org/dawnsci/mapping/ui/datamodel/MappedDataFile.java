@@ -68,7 +68,6 @@ public class MappedDataFile implements MapObject{
 				MappedDataBlock local = tmp.fullDataMap.get(key);
 				live.replaceLiveDataset(local.getLazy());
 			} else {
-				live.disconnect();
 				it.remove();
 			}
 		}
@@ -83,7 +82,6 @@ public class MappedDataFile implements MapObject{
 				AbstractMapData local = tmp.mapDataMap.get(key);
 				live.replaceLiveDataset(local.getData());
 			} else {
-				live.disconnect();
 				it.remove();
 			}
 		}
@@ -224,12 +222,6 @@ public class MappedDataFile implements MapObject{
 		mo.addAll(mapDataMap.values());
 		mo.addAll(microscopeDataMap.values());
 		return mo.toArray();
-	}
-
-	@Override
-	public boolean disconnect() {
-		// TODO Auto-generated method stub
-		return true;
 	}
 
 	public String getParentPath() {

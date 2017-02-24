@@ -24,7 +24,7 @@ public class RGBMapData extends MappedData {
 	RGBDataset data;
 	
 	public RGBMapData(String name, AbstractMapData parent, String path) {
-		super(name, parent.map, parent.parent, parent.path);
+		super(name, parent.map, parent.parent, parent.path, false);
 		this.rgb = new AbstractMapData[3];
 		data = DatasetFactory.zeros(RGBDataset.class, parent.map.getShape());
 		AxesMetadata ax = parent.getMap().getFirstMetadata(AxesMetadata.class);

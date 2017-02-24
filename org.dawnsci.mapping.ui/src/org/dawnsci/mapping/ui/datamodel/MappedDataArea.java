@@ -5,22 +5,10 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class MappedDataArea implements MapObject {
 
 	private List<MappedDataFile> files = new ArrayList<MappedDataFile>();
-	private static final Logger logger = LoggerFactory.getLogger(MappedDataArea.class);
-	
-	private String xAxisName;
-	private String yAxisName;
-	
-	public void setXandYAxesName(String xAxisName, String yAxisName){
-		this.xAxisName = xAxisName;
-		this.yAxisName = yAxisName;
-	}
-	
+
 	public void addMappedDataFile(MappedDataFile file) {
 //		files.clear();
 		if (file.getLiveDataBean() != null) {
@@ -95,17 +83,6 @@ public class MappedDataArea implements MapObject {
 	
 	public void removeFile(MappedDataFile file) {
 		files.remove(file);
-		
-		Object[] children = file.getChildren();
-		for (Object child : children) {
-			if (child instanceof MapObject) {
-				try {
-					((MapObject)child).disconnect();
-				} catch (Exception e) {
-					logger.error("Could not disconnect remote dataset",e);
-				}
-			}
-		}
 	}
 	
 	public void removeFile(String filename) {
@@ -144,18 +121,7 @@ public class MappedDataArea implements MapObject {
 		Iterator<MappedDataFile> iterator = files.iterator();
 		
 		while (iterator.hasNext()) {
-			MappedDataFile file = iterator.next();
-			
-			Object[] children = file.getChildren();
-			for (Object child : children) {
-				if (child instanceof MapObject) {
-					try {
-						((MapObject)child).disconnect();
-					} catch (Exception e) {
-						logger.error("Could not disconnect remote dataset",e);
-					}
-				}
-			}
+			iterator.next();
 			iterator.remove();
 		}
 	}
@@ -198,11 +164,6 @@ public class MappedDataArea implements MapObject {
 		}
 		
 		return r;
-	}
-
-	@Override
-	public boolean disconnect() {
-		return true;
 	}
 	
 }

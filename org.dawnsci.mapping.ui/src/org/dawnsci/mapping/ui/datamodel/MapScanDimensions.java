@@ -70,6 +70,18 @@ public class MapScanDimensions {
 		}
 	}
 	
+	public void updateNonXYScanSlice(int[] shape) {
+		
+		if (nonXYScanDimensions == null) return;
+		
+		for (int i = 0 ; i < shape.length; i++) {
+			if (i == xDim || i == yDim) continue;
+			updateNonXYScanSlice(i, shape[i]-1);
+		}
+		
+	}
+	
+	
 	public void changeXandYdims(int xDim, int yDim) {
 		this.xDim = xDim;
 		this.yDim = yDim;
@@ -80,11 +92,13 @@ public class MapScanDimensions {
 	public boolean isPointDetector(int[] shape){
 		if (shape.length == scanRank) return true;
 		
-		if (shape.length > scanRank) {
+		if (scanRank < shape.length ) {
 			boolean allOnes = true;
 			for (int i = scanRank; i < shape.length; i++) {
-				if (shape[i] != 1) allOnes = false;
-				break;
+				if (shape[i] != 1) {
+					allOnes = false;
+					break;
+				}
 			}
 			
 			return allOnes;

@@ -11,20 +11,17 @@
 package org.dawnsci.mapping.ui.datamodel;
 
 
+import java.util.Arrays;
 // Imports from java
 import java.util.List;
-import java.util.Arrays;
 
-
+import org.eclipse.january.DatasetException;
 // Imports from org.eclipse.january
 import org.eclipse.january.dataset.Dataset;
-import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.DatasetException;
-import org.eclipse.january.dataset.DatasetUtils;
-import org.eclipse.january.dataset.ILazyDataset;
-import org.eclipse.january.metadata.AxesMetadata;
-import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.metadata.AxesMetadata;
 
 
 // @author Tim Snow
@@ -42,7 +39,7 @@ public class VectorMapData extends MappedData {
 	// Class initiation
 	public VectorMapData(String name, AbstractMapData parent, String path) {
 		// Set everything up
-		super(name, parent.map, parent.parent, parent.path);
+		super(name, parent.map, parent.parent, parent.path, false);
 		// Create a home for the vector and plot data
 		this.vectorMapData = new AbstractMapData[3];
 		// Find out how big the mapped dataset is
@@ -273,7 +270,6 @@ public class VectorMapData extends MappedData {
 	
 	@Override
 	public String toString() {
-		String a = null;
 		//IMetadata b = this.vectorPlotDataset.getMet();
 		
 		

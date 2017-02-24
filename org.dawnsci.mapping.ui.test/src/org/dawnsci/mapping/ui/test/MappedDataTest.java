@@ -1,17 +1,25 @@
 package org.dawnsci.mapping.ui.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 
+import org.dawnsci.mapping.ui.datamodel.LiveRemoteAxes;
 import org.dawnsci.mapping.ui.datamodel.MapScanDimensions;
 import org.dawnsci.mapping.ui.datamodel.MappedData;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.january.dataset.Comparisons;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.Random;
 import org.eclipse.january.metadata.AxesMetadata;
@@ -47,7 +55,7 @@ public class MappedDataTest {
 		
 		ILazyDataset sum = data.getLazyDataset(MapNexusFileBuilderUtils.SUM_PATH);
 		
-		gridScanMap = new MappedData(MapNexusFileBuilderUtils.SUM_PATH, sum.getSlice(), gridScanBlock,file.getAbsolutePath());
+		gridScanMap = new MappedData(MapNexusFileBuilderUtils.SUM_PATH, sum.getSlice(), gridScanBlock,file.getAbsolutePath(),false);
 		
 		fileRemap = folder.newFile("file2.nxs");
 		MapNexusFileBuilderUtils.makeDiagLineScanWithSum(fileRemap.getAbsolutePath());
@@ -127,6 +135,39 @@ public class MappedDataTest {
 	@Test
 	public void testGetLongName() {
 		assertEquals(file.getAbsolutePath() +" : "+MapNexusFileBuilderUtils.SUM_PATH, gridScanMap.getLongName());
+	}
+	
+	@Test
+	public void testLiveVersion() throws Exception{
+		
+		MapScanDimensions msd =new MapScanDimensions(1, 0, 2);
+		
+		IDynamicDataset dataset = MappedDataBlockTest.getLiveDataset();
+		LiveRemoteAxes axes = MappedDataBlockTest.getLiveAxes();
+		
+		MappedDataBlock liveBlock = new MappedDataBlock("live", dataset, msd, "livePath", axes, "host", 8690);
+		
+		MappedData md = new MappedData("map", MappedDataBlockTest.getLiveMap(), liveBlock, "livePath", true);
+		
+		md.update();
+		
+		IDataset map = md.getMap();
+		
+		md.update();
+		
+		map = md.getMap();
+		
+		assertNotNull(map);
+		
+		AxesMetadata meta = map.getFirstMetadata(AxesMetadata.class);
+		ILazyDataset[] ax = meta.getAxes();
+		IDataset y = ax[0].getSlice();
+		IDataset x = ax[1].getSlice();
+		
+		assertEquals(map.getShape()[0],y.getShape()[0]);
+		assertEquals(map.getShape()[1],x.getShape()[1]);
+		
+		assertTrue(Comparisons.allTrue(Comparisons.isFinite(y)));
 	}
 
 

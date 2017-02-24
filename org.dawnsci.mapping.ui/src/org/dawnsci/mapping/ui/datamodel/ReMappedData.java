@@ -1,16 +1,12 @@
 package org.dawnsci.mapping.ui.datamodel;
 
-import java.awt.font.NumericShaper.Range;
-
-import org.apache.commons.math3.ml.neuralnet.MapUtils;
-import org.dawnsci.mapping.ui.LivePlottingUtils;
 import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.IDatasetConnector;
+import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,33 +14,22 @@ import org.slf4j.LoggerFactory;
 public class ReMappedData extends AbstractMapData {
 
 	private IDataset lookup;
+	private IDataset flatMap;
 	private int[] shape;
-	
-	private ILazyDataset flatMap;
 	
 	private static final Logger logger = LoggerFactory.getLogger(ReMappedData.class);
 	
-	public ReMappedData(String name, ILazyDataset map, MappedDataBlock parent, String path) {
-		super(name, (ILazyDataset)null, parent, path);
-		flatMap = map;
-		this.setRange(calculateRange(flatMap));
-	}
-	
-	public ReMappedData(String name, IDatasetConnector map, MappedDataBlock parent, String path) {
-		super(name, map, parent, path);
+	public ReMappedData(String name, ILazyDataset map, MappedDataBlock parent, String path, boolean live) {
+		super(name, map, parent, path, live);
+
 	}
 	
 	@Override
 	protected double[] calculateRange(ILazyDataset map){
-		if (map == null) return null;
+		if (baseMap.getSize() == 0) return null;
 		//FIXME for nd
 		IDataset[] ax = MetadataPlotUtils.getAxesForDimension(map,parent.getMapDims().getxDim());
-		double[] r = new double[4];
-		r[0] = ax[1].min().doubleValue();
-		r[1] = ax[1].max().doubleValue();
-		r[2] = ax[0].min().doubleValue();
-		r[3] = ax[0].max().doubleValue();
-		return r;
+		return MappingUtils.calculateRangeFromAxes(ax);
 	}
 	
 	@Override
@@ -62,19 +47,23 @@ public class ReMappedData extends AbstractMapData {
 	}
 	
 	private void updateRemappedData(int[] shape) {
-		if (flatMap == null) return;
-		IDataset fm = null;
-		try {
-		if (flatMap.getRank() == 1) {
+		IDataset fm = flatMap;
+		if (fm == null) {
 			
-				fm = DatasetUtils.sliceAndConvertLazyDataset(flatMap);
+			if (baseMap.getSize() == 1) return;
 			
-		} else {
-			fm = flatMap.getSlice(parent.getMapDims().getMapSlice(flatMap));
-		}
-		} catch (DatasetException e) {
-			logger.error("Error sliceing lazy dataset", e);
-			return;
+			try {
+				if (baseMap.getRank() == 1) {
+
+					fm = DatasetUtils.sliceAndConvertLazyDataset(baseMap);
+
+				} else {
+					fm = baseMap.getSlice(parent.getMapDims().getMapSlice(baseMap));
+				}
+			} catch (DatasetException e) {
+				logger.error("Error sliceing lazy dataset", e);
+				return;
+			}
 		}
 		IDataset[] remapData = MappingUtils.remapData(fm, shape, 0);
 		
@@ -110,54 +99,25 @@ public class ReMappedData extends AbstractMapData {
 			logger.debug("click outside bounds");
 		}
 		if (index == -1) return null;
-		if (parent.getLazy() instanceof IDatasetConnector) {
-			((IDatasetConnector)parent.getLazy()).refreshShape();
+		if (parent.getLazy() instanceof IDynamicDataset) {
+			((IDynamicDataset)parent.getLazy()).refreshShape();
 		}
 		return parent.getSpectrum(index);
 	}
-
 
 	@Override
 	public boolean isLive() {
 		return live;
 	}
 
-	public void replaceLiveDataset(ILazyDataset map) {
-		live = false;
-		disconnect();
-		this.flatMap = map;
-		setRange(calculateRange(flatMap));
-	}
 	
 	public void update() {
-		
-		if (!live) return;
-		if (!connected) {			
-			try {
-				connect();
-			} catch (Exception e) {
-				logger.debug("Could not connect",e);
-
-			}
-		}
-		//always returns sliced nd map
-		IDataset ma = LivePlottingUtils.getUpdatedLinearMap(baseMap, this.getParent(), this.toString());
-		
-		IDataset[] ax = MetadataPlotUtils.getAxesForDimension(ma,0);
-		double[] r = new double[4];
-		r[0] = ax[1].min().doubleValue();
-		r[1] = ax[1].max().doubleValue();
-		r[2] = ax[0].min().doubleValue();
-		r[3] = ax[0].max().doubleValue();
-		
-		setRange(r);
-		flatMap = ma;
+		flatMap = updateMap();
 		updateRemappedData(null);
-		
 	}
-
+	
 	@Override
 	public ILazyDataset getData() {
-		return flatMap;
+		return baseMap;
 	}
 }
