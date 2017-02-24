@@ -395,7 +395,7 @@
       </plotting_tool_page>
       <plotting_tool_page
             class="org.dawnsci.plotting.tools.powderlines.PowderLineTool"
-            icon="icons/info.png"
+            icon="icons/powderLines.png"
             id="org.dawnsci.plotting.tools.powderlines"
             label="Powder Line Import"
             tooltip="Import powder lines from a file into a plot">
