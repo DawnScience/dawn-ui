@@ -220,7 +220,7 @@ public class DatDisplayer extends Composite {
 	    
 	    transferToRod = new Button(datSelector, SWT.PUSH);
 	    transferToRod.setText("Transfer to Rod ->");
-	    transferToRod.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));	
+	    transferToRod.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));	
 	    transferToRod.setEnabled(false);
 	    
 	    folderDisplayTable = new Table(datSelector, SWT.CHECK |  SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
@@ -232,7 +232,7 @@ public class DatDisplayer extends Composite {
 		
 	    GridData folderDisplayTableData = new GridData(GridData.FILL_BOTH);
 	    folderDisplayTableData.minimumWidth = 200;
-        folderDisplayTableData.minimumHeight = 650;
+        folderDisplayTableData.minimumHeight = 550;
 	    
 	    folderDisplayTable.setLayoutData(folderDisplayTableData);
 	    folderDisplayTable.setLayout(new GridLayout());
