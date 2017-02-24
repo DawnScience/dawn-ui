@@ -657,14 +657,14 @@ public class SurfaceScatterViewStart extends Dialog {
 
 	}
 
-	@Override
-	protected Point getInitialSize() {
-		Rectangle rect = PlatformUI.getWorkbench().getWorkbenchWindows()[0].getShell().getBounds();
-		int h = rect.height;
-		int w = rect.width;
-
-		return new Point((int) Math.round(0.8 * w), (int) Math.round(0.9 * h));
-	}
+//	@Override
+//	protected Point getInitialSize() {
+//		Rectangle rect = PlatformUI.getWorkbench().getWorkbenchWindows()[0].getShell().getBounds();
+//		int h = rect.height;
+//		int w = rect.width;
+//
+//		return new Point((int) Math.round(0.8 * w), (int) Math.round(0.9 * h));
+//	}
 
 	@Override
 	protected boolean isResizable() {
