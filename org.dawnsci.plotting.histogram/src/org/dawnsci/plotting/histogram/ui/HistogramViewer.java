@@ -425,6 +425,7 @@ public class HistogramViewer extends ContentViewer {
 	@Override
 	protected void inputChanged(Object input, Object oldInput) {
 		try {
+			firstUpdateTraces = true;
 			refresh();
 		} catch (Exception e) {
 			logger.debug(e.getMessage());
