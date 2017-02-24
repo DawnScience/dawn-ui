@@ -1,4 +1,4 @@
-package org.dawnsci.plotting.tools.fitting;
+package org.dawnsci.plotting.tools.finding;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.common.widgets.spinner.FloatSpinner;
+import org.dawnsci.plotting.tools.fitting.PeakFittingTool;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;

@@ -36,6 +36,10 @@ import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionFactory;
 
+/**
+ * 
+ *
+ */
 public class PeakPrepopulateTool extends Dialog {
 	
 	private static final Logger logger = LoggerFactory.getLogger(FunctionFittingTool.class);
@@ -402,7 +406,6 @@ public class PeakPrepopulateTool extends Dialog {
 		public void setBkgFunction(IFunction bkgInFunction) {
 			fitBkgFunction = bkgInFunction;
 		}
-
 		
 		public void setPeakCompoundFunction(Add peakFn) {
 			peakCompFunction = peakFn;

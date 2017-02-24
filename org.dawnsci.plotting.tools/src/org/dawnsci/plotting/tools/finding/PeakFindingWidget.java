@@ -1,4 +1,4 @@
-package org.dawnsci.plotting.tools.fitting;
+package org.dawnsci.plotting.tools.finding;
 
 import java.util.Collection;
 
@@ -62,7 +62,7 @@ public class PeakFindingWidget {
 		lwrBndLab.setToolTipText("As shown by the second vertical line");
 
 	
-		lwrBndVal = new FloatSpinner(configureComposite, SWT.BORDER, 3, 4);
+		lwrBndVal = new FloatSpinner(configureComposite, SWT.BORDER, 4, 3);
 		lwrBndVal.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		lwrBndVal.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -75,7 +75,7 @@ public class PeakFindingWidget {
 		upperBndLab.setToolTipText("As shown by the vertical line");
 
 
-		uprBndVal = new FloatSpinner(configureComposite, SWT.BORDER, 3, 4);
+		uprBndVal = new FloatSpinner(configureComposite, SWT.BORDER, 4, 3);
 		uprBndVal.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		uprBndVal.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -97,7 +97,7 @@ public class PeakFindingWidget {
 		searchIntensityLab.setText("Search Intensity");
 		searchIntensityLab.setToolTipText("Higher values tend to lead to less peaks");
 
-		searchIntensity = new FloatSpinner(configureComposite, SWT.BORDER, 3, 4);
+		searchIntensity = new FloatSpinner(configureComposite, SWT.BORDER, 4, 3);
 		searchIntensity.setMaximum(300);
 		searchIntensity.setMinimum(1);
 		searchIntensity.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));

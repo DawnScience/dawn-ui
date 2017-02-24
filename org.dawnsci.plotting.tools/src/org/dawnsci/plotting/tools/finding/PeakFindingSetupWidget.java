@@ -1,4 +1,4 @@
-package org.dawnsci.plotting.tools.fitting;
+package org.dawnsci.plotting.tools.finding;
 
 import java.util.ArrayList;
 import java.util.List;

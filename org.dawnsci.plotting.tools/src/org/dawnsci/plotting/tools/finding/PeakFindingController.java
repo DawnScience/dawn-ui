@@ -1,4 +1,4 @@
-package org.dawnsci.plotting.tools.fitting;
+package org.dawnsci.plotting.tools.finding;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -21,7 +21,6 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.Maths;
 import org.eclipse.jface.viewers.TableViewer;
 
-import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter.Compare;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingData;
@@ -78,12 +77,12 @@ public class PeakFindingController {
 	private Add peaksCompFunc;
 	
 	//Really need that intermedicate of a indentified peak. COuld the below be the answer
-	 List<IdentifiedPeak> peaksIdentified = new ArrayList<IdentifiedPeak>();
-	//List<Peak> peaks = new ArrayList<Peak>();
+	List<IdentifiedPeak> peaksIdentified = new ArrayList<IdentifiedPeak>();
+	List<Peak> peaks = new ArrayList<Peak>();
 	
 	public void clearPeaks(){
 		this.peaksCompFunc = null; //TODO: isnt there a proper way to clear?
-		//peaks.clear();
+		peaks.clear();
 	}
 	
 	/**
