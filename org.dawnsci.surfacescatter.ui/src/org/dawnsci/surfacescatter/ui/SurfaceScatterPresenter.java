@@ -163,6 +163,8 @@ public class SurfaceScatterPresenter {
 					dms.add(new DataModel());
 					gms.add(new GeometricParametersModel());
 					
+					ssvs.getParamField().localGeometricParametersUpdate(gms.get(id));
+					
 					gms.get(id).setxName(xName);
 					gms.get(id).setxNameRef(xName);
 					
@@ -198,12 +200,25 @@ public class SurfaceScatterPresenter {
 						dh1 = LoaderFactory.getData(to.toString());
 						
 					}
-					ILazyDataset ild = dh1.getLazyDataset(gms.get(sm.getSelection()).getImageName());
+					
+					ILazyDataset ild = null;
+					
+					
+					ild = dh1.getLazyDataset(gms.get(sm.getSelection()).getImageName());
+					
+					if(ild == null){
+						ild = dh1.getLazyDataset("file_image");
+					}
+					
+					if(ild == null){
+						ild = dh1.getLazyDataset("file");
+					}
+					
+					
 					dms.get(id).setName(StringUtils.substringAfterLast(sm.getFilepaths()[id], File.separator));
 					models.get(id).setDatImages(ild);
 					models.get(id).setFilepath(filepaths[id]);
 					SliceND slice = new SliceND(ild.getShape());
-//					ILazyDataset images = ild.getSlice(slice);
 					imageArray[id] = ild;
 	
 					for (int f = 0; f < (imageArray[id].getShape()[0]); f++) {
@@ -1008,6 +1023,12 @@ public class SurfaceScatterPresenter {
 		sm.setCorrectionSelection(correctionSelection);
 	}
 	
+	public void resetCorrectionsSelection(int  correctionSelection){
+		
+		
+		sm.setCorrectionSelection(correctionSelection);
+	}
+	
 	public int closestImageNo(double in){
 		int out = ClosestNoFinder.closestNoPos(in, sm.getSortedX());
 		return out;
@@ -1136,7 +1157,7 @@ public class SurfaceScatterPresenter {
 			gm.setFluxPath(fluxPath);
 			gm.setBeamHeight(beamHeight);
 //			gm.setSavePath(savePath);
-			gm.setBeamHeight(footprint);
+			gm.setFootprint(footprint);
 			gm.setAngularFudgeFactor(angularFudgeFactor);
 			gm.setBeamCorrection(beamCorrection);
 			gm.setBeamInPlane(beamInPlane);

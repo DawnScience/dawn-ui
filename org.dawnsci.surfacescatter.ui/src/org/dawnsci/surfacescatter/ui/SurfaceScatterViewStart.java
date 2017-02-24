@@ -75,6 +75,10 @@ public class SurfaceScatterViewStart extends Dialog {
 	public void setFolder(CTabFolder folder) {
 		this.folder = folder;
 	}
+	
+	public GeometricParametersWindows getParamField(){
+		return paramField;
+	}
 
 	public String getDatFolderPath() {
 		return datFolderPath;
@@ -273,14 +277,19 @@ public class SurfaceScatterViewStart extends Dialog {
 					String filename = rodComponentDats[f].getText();
 					filepaths[f] = datFolderPath + File.separator + filename;
 				}
-
+				
+				customComposite.getOutputControl().setSelection(false);
+				customComposite.getOutputControl().redraw();
+				
+				
 				ssp.surfaceScatterPresenterBuild(ssp.getParentShell(), filepaths, datDisplayer.getSelectedOption(),
-						ssp.getImageFolderPath(), datFolderPath, ssp.getCorrectionSelection());
+						datDisplayer.getImageFolderPath(), datFolderPath, ssp.getCorrectionSelection());
 
+				
 				ssp.resetCorrectionsSelection();
 
 				folder.setSelection(1);
-
+		
 				ssp.setSelection(0);
 				customComposite.getSlider().setMinimum(0);
 				customComposite.getSlider().setMaximum(ssp.getNoImages());
@@ -775,6 +784,8 @@ public class SurfaceScatterViewStart extends Dialog {
 					ssp.sliderMovemementMainImage(xPos);
 					ssp.sliderZoomedArea(xPos, customComposite.getGreenRegion().getROI(),
 							customComposite.getSubImagePlotSystem());
+					
+					customComposite.getPlotSystem().updatePlot2D(ssp.getImage(xPos),null, null);
 
 					ssvs.updateIndicators(xPos);
 

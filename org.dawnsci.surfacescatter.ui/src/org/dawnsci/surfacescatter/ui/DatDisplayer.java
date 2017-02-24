@@ -57,6 +57,13 @@ public class DatDisplayer extends Composite {
 	private Text datFolderText;
 	private Text imageFolderText;
 	
+	public String getImageFolderPath() {
+		return imageFolderPath;
+	}
+
+	public void setImageFolderPath(String imageFolderPath) {
+		this.imageFolderPath = imageFolderPath;
+	}
         
     public Button getpopulateTable() {
 		return populateTable;
@@ -508,6 +515,8 @@ public class DatDisplayer extends Composite {
 			folderDisplayTable.setEnabled(true);
 			transferToRod.setEnabled(true);
 			clearTable.setEnabled(true);
+			ssp.setImageFolderPath(imageFolderPath);
+		
 		}
 		
 		@Override

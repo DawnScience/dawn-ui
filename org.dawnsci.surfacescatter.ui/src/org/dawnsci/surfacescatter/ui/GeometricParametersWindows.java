@@ -607,4 +607,30 @@ public class GeometricParametersWindows extends Composite{
 		
 	}
 	
+	
+	public void localGeometricParametersUpdate(GeometricParametersModel gm) {
+		
+		gm.setFluxPath(fluxPath.getText());
+		gm.setBeamHeight( (Double.parseDouble(beamHeight.getText())));
+		gm.setFootprint(Double.parseDouble(footprint.getText()));
+		gm.setAngularFudgeFactor (Double.parseDouble(angularFudgeFactor.getText()));
+		gm.setBeamCorrection(beamCorrection.getSelection());
+		gm.setBeamInPlane(Double.parseDouble(beamInPlane.getText()));
+		gm.setBeamOutPlane(Double.parseDouble(beamOutPlane.getText()));
+		gm.setCovar( (Double.parseDouble(covar.getText())));
+		gm.setDetectorSlits((Double.parseDouble(detectorSlits.getText())));
+		gm.setInPlaneSlits((Double.parseDouble(inPlaneSlits.getText())));
+		gm.setInplanePolarisation(Double.parseDouble(inplanePolarisation.getText()));
+		gm.setOutPlaneSlits (Double.parseDouble(outPlaneSlits.getText()));
+		gm.setOutplanePolarisation((Double.parseDouble(outplanePolarisation.getText())));
+		gm.setScalingFactor((Double.parseDouble(scalingFactor.getText())));
+		gm.setReflectivityA( (Double.parseDouble(reflectivityA.getText())));
+		gm.setSampleSize( (Double.parseDouble(sampleSize.getText())));
+		gm.setNormalisationFactor (Double.parseDouble(sampleSize.getText()));
+		gm.setSpecular(specular.getSelection());
+		gm.setImageName (imageName.getText());		
+		
+		
+	}
+	
 }

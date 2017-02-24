@@ -378,9 +378,6 @@ public class SuperSashPlotSystem3Composite extends Composite{
 				
 				plotSystem3.addTrace(lt2);	
 				
-				
-				
-				
 					@SuppressWarnings("unchecked")
 					IDataset output = ssp.presenterDummyProcess(selection,
 							ssp.getImage(selection),
