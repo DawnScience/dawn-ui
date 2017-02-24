@@ -14,7 +14,6 @@ public class LocalServiceManager {
 	private static IRemoteDatasetService dservice;
 	private static INexusFileFactory nexusFactory;
 	private static EventAdmin eventAdmin;
-	private static IEventService eventService;
 	
 	public static void setLoaderService(ILoaderService s) {
 		lservice = s;
@@ -54,14 +53,6 @@ public class LocalServiceManager {
 
 	public static void setEventAdmin(EventAdmin eventAdmin) {
 		LocalServiceManager.eventAdmin = eventAdmin;
-	}
-	
-	public static void setEventService(IEventService eService) {
-		eventService = eService;
-	}
-	
-	public static IEventService getEventService(){
-		return eventService;
 	}
 	
 }

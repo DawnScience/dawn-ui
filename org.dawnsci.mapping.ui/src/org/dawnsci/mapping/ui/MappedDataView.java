@@ -355,13 +355,13 @@ public class MappedDataView extends ViewPart {
 
 
 		// Check the service is available this should always be true!
-		if (LocalServiceManager.getEventService() == null) {
+		if (AcquisitionServiceManager.getEventService() == null) {
 			return;
 		}
 
 		try {
 			final URI uri = new URI(suri);
-			ISubscriber<EventListener> subscriber = LocalServiceManager.getEventService().createSubscriber(uri, "scisoft.operation.STATUS_TOPIC");
+			ISubscriber<EventListener> subscriber = AcquisitionServiceManager.getEventService().createSubscriber(uri, "scisoft.operation.STATUS_TOPIC");
 			
 			subscriber.addListener(new IBeanListener<StatusBean>() {
 
@@ -411,7 +411,7 @@ public class MappedDataView extends ViewPart {
 
 		try {
 			final URI uri = new URI(suri);
-			ISubscriber<EventListener> subscriber = LocalServiceManager.getEventService().createSubscriber(uri, EventConstants.STATUS_TOPIC);
+			ISubscriber<EventListener> subscriber = AcquisitionServiceManager.getEventService().createSubscriber(uri, EventConstants.STATUS_TOPIC);
 
 			subscriber.addProperty("scanRequest", FilterAction.DELETE); 
 			subscriber.addProperty("position", FilterAction.DELETE); 		            
