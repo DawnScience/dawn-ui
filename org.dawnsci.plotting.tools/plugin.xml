@@ -400,6 +400,12 @@
             label="Powder Line Import"
             tooltip="Import powder lines from a file into a plot">
       	</plotting_tool_page>
+      	<plotting_tool_page
+             class="org.dawnsci.plotting.tools.masking.FastMaskTool"
+             id="org.dawnsci.plotting.tools.masking.FastMaskTool"
+             label="Fast Mask"
+             visible="false">
+      </plotting_tool_page>
    </extension>
 
   <extension
