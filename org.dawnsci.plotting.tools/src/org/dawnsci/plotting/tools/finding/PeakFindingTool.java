@@ -114,13 +114,13 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		//TODO: can not really remove this...component of tool
 		configureTraces();
 		
-		controller.actions.createActions(getSite().getActionBars().getToolBarManager());
+		controller.getActions().createActions(getSite().getActionBars().getToolBarManager());
 		//createActions();
 
-		controller.table.createTableControl(composite);
+		controller.getTable().createTableControl(composite);
 		//createTableControl(composite);
 
-		controller.widget.createControl(composite);
+		controller.getWidget().createControl(composite);
 		//createPeakConfigurables(composite);
 
 		// Control Peak Removal + Addition
@@ -181,7 +181,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		p.setName("P" + pX.size());
 		controller.peaks.add(p);
 
-		controller.table.viewer.refresh();
+		controller.getTable().viewer.refresh();
 	}
 
 	private void removePeakValue(Double x, Double y) {
@@ -205,7 +205,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			// TODO: renive hot fix setup and functionalize
 			// remove peaks from table should be at same index?
 			controller.peaks.remove(toRemove);
-			controller.table.viewer.refresh();
+			controller.getTable().viewer.refresh();
 
 			peakx = DatasetFactory.createFromList(pX);
 			peaky = DatasetFactory.createFromList(pY);

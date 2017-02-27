@@ -6,19 +6,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.PeakFindingConstants;
-import org.eclipse.dawnsci.analysis.api.peakfinding.IPeakFinderParameter;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
-import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.Maths;
 import org.eclipse.jface.viewers.TableViewer;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
@@ -40,9 +34,11 @@ public class PeakFindingController {
 	
 	public IPlottingSystem plottingSystem;
 	
-	public PeakFindingActionsDelegate actions = new PeakFindingActionsDelegate(this);
-	public PeakFindingWidget widget = new PeakFindingWidget(this);
-	public PeakFindingTable table = new PeakFindingTable(this);
+	
+	//TODO: intialise in the cosntructor
+	private PeakFindingActionsDelegate actions = new PeakFindingActionsDelegate(this);
+	private PeakFindingWidget widget = new PeakFindingWidget(this);
+	private PeakFindingTable table = new PeakFindingTable(this);
 	
 	PeakSearchJob peakSearchJob;
 	
@@ -58,7 +54,6 @@ public class PeakFindingController {
 	public Boolean isRemoving = false; 
 	public Boolean isAdding = false;
 	
-	
 	//Bound limits for searching 
 	private Double upperBnd;
 	private Double lowerBnd;
@@ -71,30 +66,27 @@ public class PeakFindingController {
 	//The table viewer should exist here
 	//TODO:Move these control values
 	
-	
-	
 	// Peak Details - could store as a series of functions however this will eventually be realised by the fitting
 	private Add peaksCompFunc;
 	
-	//Really need that intermedicate of a indentified peak. COuld the below be the answer
+	//Really need that intermediate of a identified peak. COuld the below be the answer
 	List<IdentifiedPeak> peaksIdentified = new ArrayList<IdentifiedPeak>();
 	List<Peak> peaks = new ArrayList<Peak>();
 	
 	public void clearPeaks(){
-		this.peaksCompFunc = null; //TODO: isnt there a proper way to clear?
+		this.peaksCompFunc = null; //TODO: isn't there a proper way to clear?
 		peaks.clear();
 	}
 	
 	/**
-	 * 
-	 * Assumes peakpos are those repsented in yData passed into. 
+	 * Assumes peakpos are those represented in yData passed into. 
 	 * 
 	 * xData and yData must be same size
 	 * 
 	 * @param peakpos
 	 * @param xData
 	 * @param yData
-	 * @return every peak pos inside @peakpos cast to identifed Peak
+	 * @return every peak pos inside @peakpos cast to identified Peak
 	 */
 	private List<IdentifiedPeak> convertIntoPeaks(Map<Integer, Double> peakpos, Dataset xData, Dataset yData){
 		
@@ -176,45 +168,54 @@ public class PeakFindingController {
 	
 	
 	public void refreshTable(){
-		table.viewer.refresh();
+		getTable().viewer.refresh();
 	}
 	
 	public TableViewer getTableViewer(){
-		return table.viewer;
+		return getTable().viewer;
 	}
 		
 	public Double getLowerBnd() {
 		return lowerBnd;
 	}
+
 	public void setLowerBnd(Double lowerBnd) {
-		widget.setLwrBndVal(lowerBnd);
+		getWidget().setLwrBndVal(lowerBnd);
 		peakfindingtool.updateBoundsLower(lowerBnd);
 		this.lowerBnd = lowerBnd;
 	}
+	
 	public Double getUpperBnd() {
 		return upperBnd;
 	}
+	
 	public void setUpperBnd(Double upperBnd) {
-		widget.setUprBndVal(upperBnd);
+		getWidget().setUprBndVal(upperBnd);
 		peakfindingtool.updateBoundsUpper(upperBnd);
 		this.upperBnd = upperBnd;
 	}
+	
 	public String getPeakFinderID() {
 		return peakFinderID;
 	}
+	
 	public void setPeakFinderID(String peakFinderID) {
 		Activator.getPlottingPreferenceStore().setValue(PeakFindingConstants.PeakAlgorithm, peakFinderID);
 		this.peakFinderID = peakFinderID;
 	}
+	
 	public static IPeakFindingService getPeakFindServ() {
 		return peakFindServ;
 	}
+	
 	public static void setPeakFindServ(IPeakFindingService peakFindServ) {
 		PeakFindingController.peakFindServ = peakFindServ;
 	}
+	
 	public IPeakFindingData getPeakFindData() {
 		return peakFindData;
 	}
+	
 	public void setPeakFindData(IPeakFindingData peakFindData) {
 		this.peakFindData = peakFindData;
 	}
@@ -227,8 +228,8 @@ public class PeakFindingController {
 	public void formatPeakSearch(){
 		updatePeakTrace();
 
-		if (table.viewer != null)
-			table.viewer.refresh();
+		if (getTable().viewer != null)
+			getTable().viewer.refresh();
 
 		// TODO: CLEAN UP ON ACTIVATE PEAKFINDER
 		getPeakFindData().deactivatePeakFinder(getPeakFinderID());
@@ -236,14 +237,16 @@ public class PeakFindingController {
 		peakfindingtool.getPlottingSystem().repaint();
 
 		// Reset peak finder 
-		if (!widget.runPeakSearch.isEnabled())
-			widget.runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearch.png").createImage());
-		widget.runPeakSearch.setEnabled(true);
+		if (!getWidget().runPeakSearch.isEnabled())
+			getWidget().runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearch.png").createImage());
+		getWidget().runPeakSearch.setEnabled(true);
 	}
 	
+	public <T> void setPlottingSystem(IPlottingSystem<T> system) {
+		this.plottingSystem = system;
+	}
 	
 	/**
-	 *
 	 *TODO: move setup to export function
 	 * Exports found peaks in a .xy formated file
 	 *
@@ -270,7 +273,6 @@ public class PeakFindingController {
 			}
 			
 			
-			
 		} finally {
 			writer.close();
 		}
@@ -291,6 +293,30 @@ public class PeakFindingController {
 		}
 		
 		this.searchScaleIntensity = searchScaleIntensity;
+	}
+
+	public PeakFindingWidget getWidget() {
+		return widget;
+	}
+
+	public void setWidget(PeakFindingWidget widget) {
+		this.widget = widget;
+	}
+
+	public PeakFindingTable getTable() {
+		return table;
+	}
+
+	public void setTable(PeakFindingTable table) {
+		this.table = table;
+	}
+
+	public PeakFindingActionsDelegate getActions() {
+		return actions;
+	}
+
+	public void setActions(PeakFindingActionsDelegate actions) {
+		this.actions = actions;
 	}
 	
 	
