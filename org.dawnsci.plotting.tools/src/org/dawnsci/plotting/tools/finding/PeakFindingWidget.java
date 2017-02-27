@@ -22,6 +22,13 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingService;
 import uk.ac.diamond.scisoft.analysis.peakfinding.PeakFindingData;
 
+/**
+ * 
+ * Widget to handle all the components that would go into using a peak finder algorithm.
+ * 
+ * @author Dean P. Ottewell
+ *
+ */
 public class PeakFindingWidget {
 	
 	private static final Logger logger = LoggerFactory.getLogger(PeakFindingWidget.class);
@@ -55,13 +62,11 @@ public class PeakFindingWidget {
 
 		// GET SAMPLE CONFIGURATION TODO: refactor and extract earlier
 		//controller.get
-		
 	
 		Label lwrBndLab = new Label(configureComposite, SWT.NONE);
 		lwrBndLab.setText("Lower Bound");
 		lwrBndLab.setToolTipText("As shown by the second vertical line");
 
-	
 		lwrBndVal = new FloatSpinner(configureComposite, SWT.BORDER, 4, 3);
 		lwrBndVal.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		lwrBndVal.addSelectionListener(new SelectionAdapter() {
@@ -74,7 +79,6 @@ public class PeakFindingWidget {
 		upperBndLab.setText("Upper Bound");
 		upperBndLab.setToolTipText("As shown by the vertical line");
 
-
 		uprBndVal = new FloatSpinner(configureComposite, SWT.BORDER, 4, 3);
 		uprBndVal.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		uprBndVal.addSelectionListener(new SelectionAdapter() {
@@ -83,8 +87,7 @@ public class PeakFindingWidget {
 			}
 		});
 		
-		
-		//Intilaise values
+		//Initial values
 		uprBndVal.setMinimum(0.0);
 		uprBndVal.setMaximum(1000000.0);
 		
@@ -103,8 +106,7 @@ public class PeakFindingWidget {
 		searchIntensity.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		searchIntensity.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				// Adjust parameter to be passed to wavelet
-				//controoler.setsearchScalesearch(Intensity.getDouble());
+				// Adjust parameter to be passed to appropriate peak finder
 				searchScaleVal = searchIntensity.getDouble();
 				controller.setSearchScaleIntensity(searchScaleVal);
 			}
@@ -112,7 +114,7 @@ public class PeakFindingWidget {
 		
 		searchScale = new Scale(configure, SWT.HORIZONTAL);
 		searchScale.setBounds(0, 0, 40, 200);
-		searchScale.setOrientation(SWT.LEFT_TO_RIGHT); //TODO: switch around
+		searchScale.setOrientation(SWT.LEFT_TO_RIGHT);
 
 		searchScale.setMaximum(300);
 		searchScale.setMinimum(1);

@@ -8,9 +8,14 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import javax.swing.plaf.synth.Region;
+
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.PeakFindingConstants;
+import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.jface.viewers.TableViewer;
@@ -181,7 +186,15 @@ public class PeakFindingController {
 
 	public void setLowerBnd(Double lowerBnd) {
 		getWidget().setLwrBndVal(lowerBnd);
-		peakfindingtool.updateBoundsLower(lowerBnd);
+		
+		if(this.peakfindingtool != null)
+			this.peakfindingtool.updateBoundsLower(lowerBnd);
+		
+		if(this.selectedRegion != null){
+			double[] endPnt = this.selectedRegion.getPointRef();
+			this.selectedRegion.setEndPoint(new double[]{upperBnd,endPnt[1]});
+			
+		}
 		this.lowerBnd = lowerBnd;
 	}
 	
@@ -191,8 +204,29 @@ public class PeakFindingController {
 	
 	public void setUpperBnd(Double upperBnd) {
 		getWidget().setUprBndVal(upperBnd);
-		peakfindingtool.updateBoundsUpper(upperBnd);
+		
+		if(peakfindingtool != null)
+			peakfindingtool.updateBoundsUpper(upperBnd);
+		//TMP impl
+		if(selectedRegion != null){
+			double[] endPnt = this.selectedRegion.getEndPoint();
+			endPnt[0] = upperBnd;
+			this.selectedRegion.setEndPoint(endPnt);
+		}
+		
 		this.upperBnd = upperBnd;
+	}
+	
+	
+	
+	RectangularROI selectedRegion;
+	
+	public void setRegion(RectangularROI region){
+		this.selectedRegion = region;
+	}
+	
+	public RectangularROI getSelectedRegion(){
+		return this.selectedRegion;
 	}
 	
 	public String getPeakFinderID() {

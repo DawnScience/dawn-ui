@@ -1,29 +1,28 @@
 package org.dawnsci.plotting.tools.fitting;
 
-import java.util.Set;
+import java.util.Collection;
 
+import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.plotting.tools.finding.PeakFindingController;
-import org.dawnsci.plotting.tools.finding.PeakFindingWidget;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IPeak;
+import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.PlotType;
+import org.eclipse.dawnsci.plotting.api.PlottingFactory;
+import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +51,9 @@ public class PeakPrepopulateTool extends Dialog {
 	
 	private PeakFindingController controller;
 	
+	private IPlottingSystem<Composite> system;
+	
+	private Collection<ITrace> traces;
 	
 	public PeakPrepopulateTool(Shell parentShell, FunctionFittingTool parentFittingTool, Dataset[] roiLimits) {
 		//Setup the dialog and get the parent fitting tool as well as the ROI limits we're interested in.
@@ -59,6 +61,13 @@ public class PeakPrepopulateTool extends Dialog {
 	
 		//Configure controller for peak tool
 		this.controller = new PeakFindingController();
+		
+		//Need to set plotting system in controller
+		this.controller.setPlottingSystem(parentFittingTool.getPlottingSystem());
+		this.controller.setRegion((RectangularROI)parentFittingTool.getPlottingSystem().getRegion("fit_region").getROI());
+		
+		this.traces = parentFittingTool.getPlottingSystem().getTraces();
+	
 	}
 	
 	@Override
@@ -78,17 +87,43 @@ public class PeakPrepopulateTool extends Dialog {
 		dialogContainer.setLayout(new GridLayout(2, false));
 		
 		//Create a peak finding area on the left of the window
-		Group peakFindingSpace = new Group(dialogContainer,SWT.NONE);
-		peakFindingSpace.setText("Find Peaks");
-		peakFindingSpace.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true, true));
-		peakFindingSpace.setLayout(new GridLayout(2, false));
+//		Group peakFindingSpace = new Group(dialogContainer,SWT.NONE);
+//		peakFindingSpace.setText("Find Peaks");
+//		peakFindingSpace.setLayoutData(new GridData(SWT.FILL, SWT.FILL,false, true));
+//		peakFindingSpace.setLayout(new GridLayout(2, false));
 		
-		//TODO: replot the plot??
+		//TODO: create plot
+		//Composite right = new Composite(peakFindingSpace, SWT.RIGHT);
+		controller.getWidget().createControl(windowArea);
+		createPlottingSystem(windowArea);
+		
+		
 		
 		return windowArea;
 	}
 	
-	@Override
+	private void createPlottingSystem(Composite pos){
+		Composite plotComp = new Composite(pos, SWT.FILL);
+		plotComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		plotComp.setLayout(new GridLayout());
+		ActionBarWrapper actionBarWrapper = ActionBarWrapper.createActionBars(plotComp, null);
+		Composite displayPlotComp  = new Composite(plotComp, SWT.BORDER);
+		displayPlotComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		displayPlotComp.setLayout(new FillLayout());
+		
+		try {
+			system = PlottingFactory.createPlottingSystem();
+			system.createPlotPart(displayPlotComp, "Slice", actionBarWrapper, PlotType.IMAGE, null);
+		} catch (Exception e) {
+			logger.error("cannot create plotting system",e);
+		}
+		
+		
+		//Populate with last trace
+		for(ITrace trace : traces)
+			system.addTrace(trace);
+	}	
+	
 	protected void createButtonsForButtonBar(Composite parent) {
 		//Create Close & Find Peaks buttons.
 		createButton(parent, IDialogConstants.CLOSE_ID, IDialogConstants.CLOSE_LABEL, false);
