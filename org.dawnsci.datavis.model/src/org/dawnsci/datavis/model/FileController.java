@@ -177,15 +177,15 @@ public class FileController {
 		return currentFile;
 	}
 	
-	public List<DataOptions> getSelectedDataOptions(){
-		
-		List<DataOptions> checked = new ArrayList<>();
-		
-		for (DataOptions op : currentFile.getDataOptions()) {
-			if (op.isSelected()) checked.add(op);
-		}
-		return checked;
-	}
+//	public List<DataOptions> getSelectedDataOptions(){
+//		
+//		List<DataOptions> checked = new ArrayList<>();
+//		
+//		for (DataOptions op : currentFile.getDataOptions()) {
+//			if (op.isSelected()) checked.add(op);
+//		}
+//		return checked;
+//	}
 	
 	public List<LoadedFile> getSelectedFiles(){
 		

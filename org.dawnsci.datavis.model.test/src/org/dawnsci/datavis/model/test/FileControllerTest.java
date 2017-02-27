@@ -66,15 +66,15 @@ public class FileControllerTest extends AbstractTestModel{
 		assertNull(fileController.getCurrentFile());
 	}
 
-	@Test
-	public void testGetSelectedDataOptions() {
-		LoadedFile lf = fileController.getLoadedFiles().getLoadedFile(file.getAbsolutePath());
-		fileController.setCurrentFile(lf,false);
-		DataOptions dataOptions = fileController.getCurrentFile().getDataOptions().get(0);		
-		dataOptions.setSelected(true);
-		assertEquals(dataOptions, fileController.getSelectedDataOptions().get(0));
-		dataOptions.setSelected(false);
-		fileController.setCurrentFile(null,false);
-	}
+//	@Test
+//	public void testGetSelectedDataOptions() {
+//		LoadedFile lf = fileController.getLoadedFiles().getLoadedFile(file.getAbsolutePath());
+//		fileController.setCurrentFile(lf,false);
+//		DataOptions dataOptions = fileController.getCurrentFile().getDataOptions().get(0);		
+//		dataOptions.setSelected(true);
+//		assertEquals(dataOptions, fileController.getSelectedDataOptions().get(0));
+//		dataOptions.setSelected(false);
+//		fileController.setCurrentFile(null,false);
+//	}
 
 }
