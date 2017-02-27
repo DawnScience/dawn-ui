@@ -2,6 +2,8 @@ package org.dawnsci.plotting.tools.fitting;
 
 import java.util.Set;
 
+import org.dawnsci.plotting.tools.finding.PeakFindingController;
+import org.dawnsci.plotting.tools.finding.PeakFindingWidget;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -10,15 +12,9 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IPeak;
 import org.eclipse.january.dataset.Dataset;
-import org.eclipse.january.dataset.Maths;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.richbeans.widgets.decorator.IntegerDecorator;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -26,18 +22,17 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.fitting.Fitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionFactory;
 
 /**
  * TODO: adjust to spawn peak finder widget
+ * 
  * @edits Dean P. Ottewell
  *
  */
@@ -50,29 +45,20 @@ public class PeakPrepopulateTool extends Dialog {
 	
 	//Peak finding UI elements
 	private Combo peakTypeCombo;
-	private Text nrPeaksTxtBox;
-	private Button findPeaksButton;
-	
-	//Background finding UI elements
-	private Combo bkgTypeCombo;
-	private Button fitInitialBkgButton;
-	
-	private Integer nrPeaks = null;
-	private Dataset[] roiLimits;
-	
-	private FunctionFittingTool parentFittingTool;
-	
-	private FindInitialPeaksJob findStartingPeaksJob;
 	
 	private Add pkCompFunction = null;
 	private IFunction bkgFunction = null;
 	private Add compFunction = null;
 	
+	private PeakFindingController controller;
+	
+	
 	public PeakPrepopulateTool(Shell parentShell, FunctionFittingTool parentFittingTool, Dataset[] roiLimits) {
 		//Setup the dialog and get the parent fitting tool as well as the ROI limits we're interested in.
 		super(parentShell);
-		this.parentFittingTool = parentFittingTool;
-		this.roiLimits = roiLimits;
+	
+		//Configure controller for peak tool
+		this.controller = new PeakFindingController();
 	}
 	
 	@Override
@@ -84,10 +70,7 @@ public class PeakPrepopulateTool extends Dialog {
 	
 	@Override
 	protected Control createDialogArea(Composite parent) {
-		
-		
-		
-		
+	
 		//Create/get the base containers and set up the grid layout
 		Composite windowArea = (Composite) super.createDialogArea(parent);
 		dialogContainer = new Composite(windowArea, SWT.NONE);
@@ -100,21 +83,8 @@ public class PeakPrepopulateTool extends Dialog {
 		peakFindingSpace.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true, true));
 		peakFindingSpace.setLayout(new GridLayout(2, false));
 		
+		//TODO: replot the plot??
 		
-		
-		//Button to call initial peak finding
-//		findPeaksButton = new Button(peakFindingSpace, SWT.PUSH);
-//		GridData findPeaksButtonLayout = new GridData(SWT.CENTER, SWT.CENTER, true, true);
-//		findPeaksButtonLayout.horizontalSpan = 2;
-//		findPeaksButton.setLayoutData(findPeaksButtonLayout);
-//		findPeaksButton.setText("Find Peaks");
-//		findPeaksButton.addSelectionListener(new SelectionAdapter() {
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				findInitialPeaks();
-//			}
-//		});
-
 		return windowArea;
 	}
 	
@@ -147,13 +117,6 @@ public class PeakPrepopulateTool extends Dialog {
 		Class<? extends IPeak> selectedProfile = FunctionFactory.getPeakFunctionClass(selectedProfileName);
 		
 		return selectedProfile;
-	}
-
-	private static void populateCombo(Combo combo, Set<String> items) {
-		combo.removeAll();
-		for (String s : items) {
-			combo.add(s);
-		}
 	}
 	
 	/**
@@ -189,59 +152,30 @@ public class PeakPrepopulateTool extends Dialog {
 	 * to draw in located peaks.
 	 */
 	private void findInitialPeaks() {
-		if (findStartingPeaksJob == null) {
-			findStartingPeaksJob = new FindInitialPeaksJob("Find Initial Peaks");
-		}
-		
-		findStartingPeaksJob.setData(roiLimits);
-		findStartingPeaksJob.setNrPeaks(nrPeaks);
-		findStartingPeaksJob.setPeakFunction(getProfileFunction());
-		
-		findStartingPeaksJob.schedule();
-		
-		findStartingPeaksJob.addJobChangeListener(new JobChangeAdapter(){
-			@Override
-			public void done(IJobChangeEvent event) {
-				updateCompFunction(pkCompFunction, null);
-				// TODO this wants updating to use something more generic
-				parentFittingTool.setInitialPeaks(compFunction);
-			}
-		});
-	}
-	
-	
-	//**********************************
-	
-	/**
-	 * Job to find initial peaks. Uses getInitialPeaks method in FittingUtils 
-	 * to do the work
-	 */
-	private class FindInitialPeaksJob extends FittingJob {
 
-		public FindInitialPeaksJob(String name) {
-			super(name);
-		}
 		
-		Integer nrPeaks;
-		Class<? extends IPeak> peakFunction;
-		
-		public void setNrPeaks(Integer nrPeaks) {
-			this.nrPeaks = nrPeaks;
-		}
-		
-		public void setPeakFunction(Class<? extends IPeak> peakFunction) {
-			this.peakFunction = peakFunction;
-		}
-		
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			
-			//TODO FIXME Why does Generic1dFitter rely on reflection whereas Fitter et al. use concrete classes?
-			pkCompFunction = FittingUtils.getInitialPeaks(x, y, nrPeaks, peakFunction);
-			return Status.OK_STATUS;
-		}
-	}
+//		if (findStartingPeaksJob == null) {
+//			findStartingPeaksJob = new FindInitialPeaksJob("Find Initial Peaks");
+//		}
+//		
+//		findStartingPeaksJob.setData(roiLimits);
+//		findStartingPeaksJob.setNrPeaks(nrPeaks);
+//		findStartingPeaksJob.setPeakFunction(getProfileFunction());
+//		
+//		findStartingPeaksJob.schedule();
+//		
+//		findStartingPeaksJob.addJobChangeListener(new JobChangeAdapter(){
+//			@Override
+//			public void done(IJobChangeEvent event) {
+//				updateCompFunction(pkCompFunction, null);
+//				// TODO this wants updating to use something more generic
+//				parentFittingTool.setInitialPeaks(compFunction);
+//			}
+//		});
 	
+	
+	
+	}
 	
 	
 }
