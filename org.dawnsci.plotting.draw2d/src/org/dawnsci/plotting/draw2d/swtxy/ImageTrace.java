@@ -364,6 +364,18 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				Range xRange = xAxis.getRange();
 				Range yRange = yAxis.getRange();
 				
+				int reverseXScale = 1;
+				int reverseYScale = 1;
+				
+				if (xRange.getLower() > xRange.getUpper()) {
+					reverseXScale = -1;
+				}
+				
+				//origin top left for images
+				if (yRange.getLower() < yRange.getUpper()) {
+					reverseYScale = -1;
+				}
+				
 				double minX = xRange.getLower()/currentDownSampleBin;
 				double minY = yRange.getLower()/currentDownSampleBin;
 				double maxX = xRange.getUpper()/currentDownSampleBin;
@@ -466,7 +478,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				
 				Image scaledImage = null;
 				if (proceedWithScale) {
-					data = data!=null ? data.scaledTo(scaleWidth, scaleHeight) : null;
+					data = data!=null ? data.scaledTo(scaleWidth * reverseXScale, scaleHeight * reverseYScale) : null;
 					scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
 				} else if (scaledImage==null) {
 					scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
