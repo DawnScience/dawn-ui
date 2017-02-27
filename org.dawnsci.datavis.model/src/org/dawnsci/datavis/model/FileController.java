@@ -62,25 +62,42 @@ public class FileController {
 		return loadedFiles;
 	}
 	
-	public void deselectFile(LoadedFile file) {
-		file.setSelected(false);
-		fireStateChangeListeners(false,false);
-	}
-	
-	public void deselectOption(DataOptions option) {
-		option.setSelected(false);
-		fireStateChangeListeners(false,false);
-	}
-	
-	public void deselectAllOthers() {
-		List<DataOptions> dataOptions = currentFile.getDataOptions();
-		for (DataOptions dop : dataOptions) {
-			if (currentData != dop) dop.setSelected(false);
+	public void deselect(List<IDataObject> objects) {
+		
+		for (IDataObject o : objects) {
+			if (o instanceof DataOptions) {
+				((DataOptions)o).setSelected(false);
+			} else if (o instanceof LoadedFile) {
+				((LoadedFile)o).setSelected(false);
+			}
 		}
-		loadedFiles.deselectOthers(currentFile.getLongName());
 		
 		fireStateChangeListeners(false,false);
 	}
+	
+//	public void deselectFiles(List<LoadedFile> files) {
+//		for (LoadedFile file : files) {
+//			file.setSelected(false);	
+//		}
+//		fireStateChangeListeners(false,false);
+//	}
+//	
+//	public void deselectOptions(List<DataOptions> options) {
+//		 for (DataOptions option : options) {
+//			 option.setSelected(false);
+//		 }
+//		fireStateChangeListeners(false,false);
+//	}
+	
+//	public void deselectAllOthers() {
+//		List<DataOptions> dataOptions = currentFile.getDataOptions();
+//		for (DataOptions dop : dataOptions) {
+//			if (currentData != dop) dop.setSelected(false);
+//		}
+//		loadedFiles.deselectOthers(currentFile.getLongName());
+//		
+//		fireStateChangeListeners(false,false);
+//	}
 	
 	public void selectFiles(List<LoadedFile> files, boolean selected) {
 		for (LoadedFile file : files) file.setSelected(selected);
@@ -118,7 +135,7 @@ public class FileController {
 		
 	}
 	
-	public void setCurrentDataOnFileChange(DataOptions data) {
+	private void setCurrentDataOnFileChange(DataOptions data) {
 		currentData = data;
 		fireStateChangeListeners(true,true);
 	}
@@ -127,12 +144,6 @@ public class FileController {
 		if (currentData == data && data.isSelected() == selected) return;
 		currentData = data;
 		data.setSelected(selected);
-		fireStateChangeListeners(false,true);
-	}
-	
-	public void setCurrentData(DataOptions data) {
-		if (currentData == data) return;
-		currentData = data;
 		fireStateChangeListeners(false,true);
 	}
 	
@@ -220,11 +231,11 @@ public class FileController {
 			
 			List<LoadedFile> files = new ArrayList<>();
 			
-			monitor.beginTask("Loading files", paths.length);
+			if (monitor != null) monitor.beginTask("Loading files", paths.length);
 			
 			for (String path : paths) {
 				if (loadedFiles.contains(path)) continue;
-				monitor.subTask("Loading " + path + "...");
+				if (monitor != null) monitor.subTask("Loading " + path + "...");
 				LoadedFile f = null;
 				try {
 					f = new LoadedFile(ServiceManager.getLoaderService().getData(path, null));
@@ -232,7 +243,7 @@ public class FileController {
 					e.printStackTrace();
 				}
 				
-				monitor.worked(1);
+				if (monitor != null) monitor.worked(1);
 				
 				if (f != null) files.add(f);
 				

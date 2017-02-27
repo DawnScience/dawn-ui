@@ -7,25 +7,17 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
-import org.eclipse.dawnsci.analysis.api.processing.model.SleepModel;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
-import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
-import org.eclipse.dawnsci.analysis.api.tree.IFindInTree;
-import org.eclipse.dawnsci.analysis.api.tree.Node;
-import org.eclipse.dawnsci.analysis.api.tree.NodeLink;
-import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.LazyDatasetBase;
 
 
-public class LoadedFile implements SimpleTreeObject {
+public class LoadedFile implements IDataObject {
 
 	private IDataHolder dataHolder;
 	private Map<String,DataOptions> dataOptions;
@@ -78,16 +70,6 @@ public class LoadedFile implements SimpleTreeObject {
 		}
 	}
 
-	@Override
-	public boolean hasChildren() {
-		return true;
-	}
-
-	@Override
-	public Object[] getChildren() {
-		return dataOptions.values().toArray();
-	}
-
 	public List<DataOptions> getDataOptions() {
 		return new ArrayList<>(dataOptions.values());
 	}
@@ -119,7 +101,16 @@ public class LoadedFile implements SimpleTreeObject {
 	}
 	
 	public Map<String, int[]> getDataShapes(){
-		return dataHolder.getMetadata().getDataShapes();
+		
+		Map<String, int[]> ds = dataHolder.getMetadata().getDataShapes();
+		ds = new HashMap<>(ds);
+		for (String s : ds.keySet()) {
+			if (ds.get(s) == null) {
+				ds.put(s, dataHolder.getLazyDataset(s).getShape());
+			}
+		}
+		
+		return ds;
 	}
 	
 	public boolean isSelected() {

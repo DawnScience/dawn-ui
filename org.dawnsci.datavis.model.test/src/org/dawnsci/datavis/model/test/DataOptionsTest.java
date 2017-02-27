@@ -23,17 +23,17 @@ public class DataOptionsTest extends AbstractTestModel{
 		assertEquals("testName", op.getName());
 	}
 
-	@Test
-	public void testHasChildren() {
-		boolean children = dataOptions.hasChildren();
-		assertFalse(children);
-	}
-
-	@Test
-	public void testGetChildren() {
-		Object[] children = dataOptions.getChildren();
-		assertNull(children);
-	}
+//	@Test
+//	public void testHasChildren() {
+//		boolean children = dataOptions.hasChildren();
+//		assertFalse(children);
+//	}
+//
+//	@Test
+//	public void testGetChildren() {
+//		Object[] children = dataOptions.getChildren();
+//		assertNull(children);
+//	}
 
 //	@Test
 //	public void testGetName() {

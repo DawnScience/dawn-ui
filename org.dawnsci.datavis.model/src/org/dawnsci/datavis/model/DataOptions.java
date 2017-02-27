@@ -9,7 +9,7 @@ import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.january.metadata.MetadataFactory;
 
-public class DataOptions implements SimpleTreeObject {
+public class DataOptions implements IDataObject {
 
 	private String name;
 	private LoadedFile parent;
@@ -22,16 +22,6 @@ public class DataOptions implements SimpleTreeObject {
 	public DataOptions(String name, LoadedFile parent) {
 		this.name = name;
 		this.parent = parent;
-	}
-	
-	@Override
-	public boolean hasChildren() {
-		return false;
-	}
-
-	@Override
-	public Object[] getChildren() {
-		return null;
 	}
 
 	@Override

@@ -28,15 +28,15 @@ public class LoadedFileTest  extends AbstractTestModel {
 		assertEquals(file.getAbsolutePath(), loadedFile.getLongName());
 	}
 
-	@Test
-	public void testHasChildren() {
-		assertTrue(loadedFile.hasChildren());
-	}
-
-	@Test
-	public void testGetChildren() {
-		assertNotNull(loadedFile.getChildren());
-	}
+//	@Test
+//	public void testHasChildren() {
+//		assertTrue(loadedFile.hasChildren());
+//	}
+//
+//	@Test
+//	public void testGetChildren() {
+//		assertNotNull(loadedFile.getChildren());
+//	}
 
 	@Test
 	public void testGetDataOptions() {

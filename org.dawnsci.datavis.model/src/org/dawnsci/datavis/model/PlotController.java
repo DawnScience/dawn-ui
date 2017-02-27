@@ -385,6 +385,8 @@ public class PlotController {
 	
 	private void updateFileState(LoadedFile file, DataOptions option, IPlotMode mode) {
 		
+		List<IDataObject> objects = new ArrayList<>();
+		
 		for (LoadedFile f : fileController.getLoadedFiles()) {
 			if (!f.isSelected()) continue;
 			
@@ -396,13 +398,15 @@ public class PlotController {
 				if (o.getPlottableObject() == null) continue;
 				if (!mode.supportsMultiple() || o.getPlottableObject().getPlotMode() != mode) {
 					if (thisFile) {
-						fileController.deselectOption(o);
+						objects.add(o);
 					} else {
-						fileController.deselectFile(f);
+						objects.add(f);
 					}
 				}
 			}	
 		}
+		
+		if (!objects.isEmpty()) fileController.deselect(objects);
 	}
 
 	private Map<DataOptions, List<ITrace>> collectTracesFromPlot() {

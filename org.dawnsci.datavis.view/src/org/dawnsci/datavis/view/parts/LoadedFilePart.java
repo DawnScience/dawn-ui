@@ -40,13 +40,16 @@ import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeSelection;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
@@ -87,20 +90,38 @@ public class LoadedFilePart {
 		parent.setLayout(fillLayout);
 		
 		LoadedFiles loadedFiles = FileController.getInstance().getLoadedFiles();
-//		FileController.getInstance().loadFile("/home/jacobfilik/Work/data/exampleFPA.nxs");
 
 		Composite tableComposite = new Composite(parent, SWT.NONE);
 		
 		
 		viewer = new TableViewer(tableComposite, SWT.MULTI |SWT.FULL_SELECTION | SWT.BORDER);
-//		viewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
-		
 		viewer.getTable().setHeaderVisible(true);
 		
 		ticked = AbstractUIPlugin.imageDescriptorFromPlugin("org.dawnsci.datavis.view", "icons/ticked.png").createImage();
 		unticked = AbstractUIPlugin.imageDescriptorFromPlugin("org.dawnsci.datavis.view", "icons/unticked.gif").createImage();
 		
-		viewer.setContentProvider(new FileTreeContentProvider());
+		viewer.setContentProvider(new IStructuredContentProvider() {
+
+
+
+			@Override
+			public Object[] getElements(Object inputElement) {
+				return ((LoadedFiles)inputElement).getChildren();
+			}
+
+			@Override
+			public void dispose() {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
 		
 		TableViewerColumn check   = new TableViewerColumn(viewer, SWT.CENTER, 0);
 		check.setEditingSupport(new CheckBoxEditSupport(viewer));

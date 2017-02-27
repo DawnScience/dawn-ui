@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-public class LoadedFiles implements SimpleTreeObject, Iterable<LoadedFile> {
+public class LoadedFiles implements IDataObject, Iterable<LoadedFile> {
 
 	private List<LoadedFile> fileList; 
 	
@@ -25,14 +25,8 @@ public class LoadedFiles implements SimpleTreeObject, Iterable<LoadedFile> {
 		Optional<LoadedFile> findAny = fileList.stream().filter(f -> path.equals(f.getLongName())).findAny();
 		return findAny.isPresent();
 	}
-
-	@Override
-	public boolean hasChildren() {
-		return true;
-	}
-
-	@Override
-	public Object[] getChildren() {
+	
+	public Object[] getChildren(){
 		return fileList.toArray();
 	}
 
