@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.dawb.common.ui.util.GridUtils;
-import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.plotting.tools.fitting.PeakFittingTool;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -85,9 +85,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		// Setup up a new PeakSearch Instance
 		this.controller = new PeakFindingController();
 		controller.peakfindingtool = this;
-//TODO: nah i wont start with a peak search
-//		this.peakSearch = new PeakSearchJob();
-//
+
 		this.traceListener = new ITraceListener.Stub() {
 			@Override
 			public void tracesUpdated(TraceEvent evt) {
@@ -95,8 +93,15 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			}
 		};
 
-//		peakSearch.schedule();
 	}
+	
+	
+	public PeakFindingTool(IPlottingSystem system, PeakFindingController controller){
+		this.setPlottingSystem(system);
+		this.controller = controller;
+		controller.peakfindingtool = this;
+	}
+	
 
 	@Override
 	public ToolPageRole getToolPageRole() {
@@ -217,7 +222,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 	public void configureTraces() {
 		// Grab the current trace data
-		// TODO: this must have like a name? jsut feel concerned in just
+		// TODO: this must have like a name? just feel concerned in just
 		// assuming the trace i get is the plotting trace ...
 		// TODO: should check first if trace is loaded... because will fail if
 		// not. or better

@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.plotting.tools.finding.PeakFindingController;
+import org.dawnsci.plotting.tools.finding.PeakFindingTool;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IPeak;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
@@ -12,8 +13,11 @@ import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.Dataset;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
@@ -23,6 +27,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.ui.part.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +41,7 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionFactory;
  * @edits Dean P. Ottewell
  *
  */
-public class PeakPrepopulateTool extends Dialog {
+public class PeakPrepopulateTool extends WizardPage {
 	
 	private static final Logger logger = LoggerFactory.getLogger(FunctionFittingTool.class);
 	
@@ -83,21 +89,23 @@ public class PeakPrepopulateTool extends Dialog {
 		//Create/get the base containers and set up the grid layout
 		Composite windowArea = (Composite) super.createDialogArea(parent);
 		dialogContainer = new Composite(windowArea, SWT.NONE);
-		dialogContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		dialogContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 		dialogContainer.setLayout(new GridLayout(2, false));
 		
-		//Create a peak finding area on the left of the window
-//		Group peakFindingSpace = new Group(dialogContainer,SWT.NONE);
-//		peakFindingSpace.setText("Find Peaks");
-//		peakFindingSpace.setLayoutData(new GridData(SWT.FILL, SWT.FILL,false, true));
-//		peakFindingSpace.setLayout(new GridLayout(2, false));
+		//TODO: create tool segments..
+//		Composite tool = new Composite(dialogContainer, SWT.RIGHT);
+//		tool.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+//		tool.setLayout(new GridLayout(1, false));
+//		
+//		
+//		IToolBarManager toolBar = new ToolBarManager(new ToolBar(dialogContainer, SWT.FILL));
+//		controller.getActions().createActions(toolBar);
 		
-		//TODO: create plot
-		//Composite right = new Composite(peakFindingSpace, SWT.RIGHT);
-		controller.getWidget().createControl(windowArea);
-		createPlottingSystem(windowArea);
+		//controller.getWidget().createControl(dialogContainer);		
 		
-		
+		createPlottingSystem(dialogContainer);
+		PeakFindingTool tool = new PeakFindingTool(system,controller);
+		tool.createControl(dialogContainer);
 		
 		return windowArea;
 	}
@@ -210,6 +218,12 @@ public class PeakPrepopulateTool extends Dialog {
 	
 	
 	
+	}
+
+	@Override
+	public void createControl(Composite parent) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	
