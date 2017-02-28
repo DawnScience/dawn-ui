@@ -52,10 +52,6 @@ public class NDimensions {
 		update(true);
 	}
 	
-	public boolean areOptionsSet(){
-		return options != null;
-	}
-	
 	public String[] getDimensionOptions(){
 
 		int[] shape = Arrays.stream(dimensions).mapToInt(d -> d.getSize()).toArray();
@@ -109,13 +105,6 @@ public class NDimensions {
 		updateDescription(dimensions[i], description);
 //		dimensions[i].setDescription(description);
 		update(false);
-	}
-	
-	public void updateDimension(int i, String description, Slice slice) {
-		dimensions[i].setDescription(description);
-		dimensions[i].setSlice(slice);
-		update(false);
-		
 	}
 	
 	public String getDimensionWithSize(int i) {
