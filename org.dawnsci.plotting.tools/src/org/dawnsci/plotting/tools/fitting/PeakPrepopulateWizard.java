@@ -41,8 +41,12 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionFactory;
  * @edits Dean P. Ottewell
  *
  */
-public class PeakPrepopulateTool extends WizardPage {
+public class PeakPrepopulateWizard extends WizardPage {
 	
+	public PeakPrepopulateWizard() {
+		super("Intial peak searching tool");
+	}
+
 	private static final Logger logger = LoggerFactory.getLogger(FunctionFittingTool.class);
 	
 	//Tool common UI elements
@@ -57,38 +61,38 @@ public class PeakPrepopulateTool extends WizardPage {
 	
 	private PeakFindingController controller;
 	
-	private IPlottingSystem<Composite> system;
+	private IPlottingSystem<Composite> plotting;
 	
 	private Collection<ITrace> traces;
 	
-	public PeakPrepopulateTool(Shell parentShell, FunctionFittingTool parentFittingTool, Dataset[] roiLimits) {
+	private FunctionFittingTool parentFittingTool;
+	
+	public PeakPrepopulateWizard(FunctionFittingTool parentFittingTool, Dataset[] roiLimits) {
+		super("Intial peak searching tool");
+		this.setControl(parentFittingTool.getControl());
 		//Setup the dialog and get the parent fitting tool as well as the ROI limits we're interested in.
-		super(parentShell);
 	
 		//Configure controller for peak tool
 		this.controller = new PeakFindingController();
+		
+		this.parentFittingTool = parentFittingTool;
 		
 		//Need to set plotting system in controller
 		this.controller.setPlottingSystem(parentFittingTool.getPlottingSystem());
 		this.controller.setRegion((RectangularROI)parentFittingTool.getPlottingSystem().getRegion("fit_region").getROI());
 		
 		this.traces = parentFittingTool.getPlottingSystem().getTraces();
-	
+		
 	}
 	
-	@Override
-	protected void configureShell(Shell newShell) {
-		super.configureShell(newShell);
-		//Set window title
-		newShell.setText("Find Initial Peaks");
-	}
+	
 	
 	@Override
-	protected Control createDialogArea(Composite parent) {
-	
+	public void createControl(Composite parent) {
+		
+		
 		//Create/get the base containers and set up the grid layout
-		Composite windowArea = (Composite) super.createDialogArea(parent);
-		dialogContainer = new Composite(windowArea, SWT.NONE);
+		dialogContainer = new Composite(parent, SWT.NONE);
 		dialogContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 		dialogContainer.setLayout(new GridLayout(2, false));
 		
@@ -101,13 +105,18 @@ public class PeakPrepopulateTool extends WizardPage {
 //		IToolBarManager toolBar = new ToolBarManager(new ToolBar(dialogContainer, SWT.FILL));
 //		controller.getActions().createActions(toolBar);
 		
-		//controller.getWidget().createControl(dialogContainer);		
+		//controller.getWidget().createControl(dialogContainer);
+		Composite left = new Composite(dialogContainer, SWT.FILL);
+		left.setLayout(new GridLayout());
+
+		Composite right = new Composite(dialogContainer, SWT.FILL);
+		right.setLayout(new GridLayout());
 		
-		createPlottingSystem(dialogContainer);
-		PeakFindingTool tool = new PeakFindingTool(system,controller);
-		tool.createControl(dialogContainer);
+		createPlottingSystem(right);
 		
-		return windowArea;
+		PeakFindingTool tool = new PeakFindingTool(plotting,controller);
+		tool.init(parentFittingTool.getSite());
+		tool.createControl(left);
 	}
 	
 	private void createPlottingSystem(Composite pos){
@@ -120,33 +129,16 @@ public class PeakPrepopulateTool extends WizardPage {
 		displayPlotComp.setLayout(new FillLayout());
 		
 		try {
-			system = PlottingFactory.createPlottingSystem();
-			system.createPlotPart(displayPlotComp, "Slice", actionBarWrapper, PlotType.IMAGE, null);
+			plotting = PlottingFactory.createPlottingSystem();
+			plotting.createPlotPart(displayPlotComp, "Slice", actionBarWrapper, PlotType.IMAGE, null);
 		} catch (Exception e) {
 			logger.error("cannot create plotting system",e);
 		}
 		
-		
 		//Populate with last trace
 		for(ITrace trace : traces)
-			system.addTrace(trace);
+			plotting.addTrace(trace);
 	}	
-	
-	protected void createButtonsForButtonBar(Composite parent) {
-		//Create Close & Find Peaks buttons.
-		createButton(parent, IDialogConstants.CLOSE_ID, IDialogConstants.CLOSE_LABEL, false);
-	}
-	
-	@Override
-	protected void buttonPressed(int buttonId){
-		if (IDialogConstants.PROCEED_ID == buttonId) {
-			findInitialPeaks();
-		}
-		else if (IDialogConstants.CLOSE_ID == buttonId) {
-			setReturnCode(OK); //This is just returning 0 - might not be needed
-			close();
-		}
-	}
 	
 	
 	
@@ -220,11 +212,4 @@ public class PeakPrepopulateTool extends WizardPage {
 	
 	}
 
-	@Override
-	public void createControl(Composite parent) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	
 }
