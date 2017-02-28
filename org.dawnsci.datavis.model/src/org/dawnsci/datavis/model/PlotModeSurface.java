@@ -16,45 +16,15 @@ import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
 
-public class PlotModeSurface implements IPlotMode {
-
-	private static final String[] options =  new String[]{"X","Y"};
+public class PlotModeSurface extends PlotModeImage {
 
 	public String[] getOptions() {
 		return options;
-	}
-	
-	public static boolean transposeNeeded(Object[] options){
-		
-		boolean transpose = false;
-		for (int i = 0; i < options.length; i++) {
-			if (options[i] != null && !((String)options[i]).isEmpty()) {
-				if (options[i].equals("Y")) {
-					transpose = false;
-					break;
-				} else {
-					transpose = true;
-					break;
-				}
-			}
-		}
-		
-		return transpose;
 	}
 
 	@Override
 	public String getName() {
 		return "Surface";
-	}
-	
-	@Override
-	public boolean supportsMultiple(){
-		return false;
-	}
-
-	@Override
-	public int getMinimumRank() {
-		return 2;
 	}
 
 	@Override
@@ -62,13 +32,6 @@ public class PlotModeSurface implements IPlotMode {
 		return trace instanceof ISurfaceTrace;
 	}
 	
-	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice,Object[] options) throws Exception {
-		Dataset data = DatasetUtils.convertToDataset(lz.getSlice(slice));
-		data.squeeze();
-		if (data.getRank() != 2) return null;
-		if (transposeNeeded(options)) data = data.getTransposedView(null);
-		return new IDataset[]{data};
-	}
 	
 	public void displayData(IDataset[] data, ITrace[] update, IPlottingSystem system, Object userObject) throws Exception {
 		IDataset d = data[0];
@@ -117,17 +80,5 @@ public class PlotModeSurface implements IPlotMode {
 			system.addTrace(trace);
 		}
 		
-	}
-	
-	@Override
-	public int[] getDataDimensions(Object[] currentOptions) {
-		int[] dataDims = new int[2];
-		int count = 0;
-		for (int i = 0; i < currentOptions.length && count < 2; i++) {
-			if (currentOptions[i] != null && !currentOptions[i].toString().isEmpty() && (options[0].equals(currentOptions[i].toString()) || options[1].equals(currentOptions[i].toString()))) {
-				dataDims[count++] = i;
-			}
-		}
-		return dataDims;
 	}
 }

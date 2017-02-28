@@ -13,10 +13,14 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PlotModeImage implements IPlotMode {
 
-	private static final String[] options =  new String[]{"X","Y"};
+	private final static Logger logger = LoggerFactory.getLogger(PlotModeImage.class);
+	
+	protected static final String[] options =  new String[]{"X","Y"};
 
 	public String[] getOptions() {
 		return options;
@@ -41,7 +45,9 @@ public class PlotModeImage implements IPlotMode {
 	}
 	
 	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice, Object[] options) throws Exception {
+		long t = System.currentTimeMillis();
 		Dataset data = DatasetUtils.convertToDataset(lz.getSlice(slice));
+		logger.info("Slice time " + (System.currentTimeMillis()-t) + " ms");
 		data.squeeze();
 		if (data.getRank() != 2) return null;
 		if (transposeNeeded(options)) data = data.getTransposedView(null);
@@ -49,6 +55,7 @@ public class PlotModeImage implements IPlotMode {
 	}
 	
 	public void displayData(IDataset[] data, ITrace[] update, IPlottingSystem system, Object userObject) throws Exception {
+		long t = System.currentTimeMillis();
 		IDataset d = data[0];
 		AxesMetadata metadata = d.getFirstMetadata(AxesMetadata.class);
 		List<IDataset> ax = null;
@@ -92,6 +99,7 @@ public class PlotModeImage implements IPlotMode {
 		trace.setUserObject(userObject);
 		system.setTitle(d.getName());
 		if (!isUpdate)system.addTrace(trace);
+		logger.info("Display time " + (System.currentTimeMillis()-t) + " ms");
 		
 	}
 
