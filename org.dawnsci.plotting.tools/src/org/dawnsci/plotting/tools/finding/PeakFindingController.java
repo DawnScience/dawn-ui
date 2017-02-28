@@ -184,7 +184,7 @@ public class PeakFindingController {
 		return lowerBnd;
 	}
 
-	public void setLowerBnd(Double lowerBnd) {
+	public void setLowerBnd(double lowerBnd) {
 		getWidget().setLwrBndVal(lowerBnd);
 		
 		if(this.getPeakfindingtool() != null)
@@ -202,8 +202,8 @@ public class PeakFindingController {
 		return upperBnd;
 	}
 	
-	public void setUpperBnd(Double upperBnd) {
-		getWidget().setUprBndVal(upperBnd.shortValue());
+	public void setUpperBnd(double upperBnd) {
+		getWidget().setUprBndVal(upperBnd);
 		
 		if(getPeakfindingtool() != null)
 			getPeakfindingtool().updateBoundsUpper(upperBnd);

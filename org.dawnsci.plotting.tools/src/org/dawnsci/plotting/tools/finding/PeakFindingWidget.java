@@ -74,7 +74,7 @@ public class PeakFindingWidget {
 		lwrBndVal.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		lwrBndVal.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				controller.setLowerBnd(lwrBndVal.getDouble());
+				//controller.setLowerBnd(lwrBndVal.getDouble());
 			}
 		});
 	
@@ -82,13 +82,12 @@ public class PeakFindingWidget {
 		upperBndLab.setText("Upper Bound");
 		upperBndLab.setToolTipText("As shown by the vertical line");
 
-		
-		
+	
 		uprBndVal = new FloatSpinner(configureComposite, SWT.BORDER, sampleTrace.getXData().getSize(), 3);
 		uprBndVal.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		uprBndVal.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				controller.setUpperBnd(uprBndVal.getDouble());
+				//controller.setUpperBnd(uprBndVal.getDouble());
 			}
 		});
 

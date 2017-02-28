@@ -317,7 +317,8 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 	public void updateSearchBnds(RectangularROI rect) {
 		controller.setLowerBnd(rect.getPointRef()[0]);
-		controller.setUpperBnd(rect.getEndPoint()[0]);
+		double upper = rect.getPointRef()[0] + rect.getLengths()[0];
+		controller.setUpperBnd(upper);
 
 		double[] x = { controller.getLowerBnd(), controller.getUpperBnd() };
 		Dataset xdata = DatasetFactory.createFromObject(x);
