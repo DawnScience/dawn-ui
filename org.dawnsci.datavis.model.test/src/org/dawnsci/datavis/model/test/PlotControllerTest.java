@@ -35,9 +35,10 @@ public class PlotControllerTest extends AbstractTestModel {
 	public static void buildData() throws Exception {
 			AbstractTestModel.buildData();
 			plottingSystem = new MockPlottingSystem();
-			plotManager = new PlotController(plottingSystem);
 			ServiceManager.setLoaderService(new LoaderServiceImpl());
 			fileController = new FileController();
+			ServiceManager.setFileController(fileController);
+			plotManager = new PlotController(plottingSystem);
 	}
 
 	@Before
