@@ -38,8 +38,7 @@ public class RecentFoldersContributionFactory extends ExtensionContributionFacto
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
 				search.removeAll();
-//				Collection<String> lf = FileController.getInstance().getLastFolders();
-				Collection<String> lf = new ArrayList<>();
+				Collection<String> lf = ServiceManager.getRecentPlaces().getRecentPlaces();
 				if (lf.isEmpty()) {
 					search.add(new Action("No History"){
 						@Override

@@ -41,6 +41,4 @@ public interface IFileController {
 
 	public void applyToAll(LoadedFile f);
 
-	public Collection<String> getLastFolders();
-
 }

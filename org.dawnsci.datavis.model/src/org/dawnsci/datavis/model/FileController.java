@@ -22,7 +22,7 @@ public class FileController implements IFileController {
 	
 	private Set<FileControllerStateEventListener> listeners = new HashSet<FileControllerStateEventListener>();
 	
-	private LinkedList<String> lastFile = new LinkedList<String>(); 
+	
 	
 	public FileController(){
 		loadedFiles = new LoadedFiles();
@@ -324,23 +324,9 @@ public class FileController implements IFileController {
 			
 			if (!files.isEmpty()) {
 				String name = files.get(0).getLongName();
-				File f = new File(name);
-				File parentFile = f.getParentFile();
-				if (parentFile != null) {
-					String parentPath = parentFile.getAbsolutePath();
-					if (lastFile.size() > 5) lastFile.removeLast();
-					if (!lastFile.contains(parentPath)){
-						lastFile.addFirst(parentPath);
-					} else {
-						lastFile.remove(parentPath);
-						lastFile.addFirst(parentPath);
-					}
-				}
+				ServiceManager.getRecentPlaces().addPlace(name);
 				loadedFiles.addFiles(files);
 			}
-			
-
-//			
 			
 			fireStateChangeListeners(false,false);
 			
@@ -392,13 +378,5 @@ public class FileController implements IFileController {
 		
 		fireStateChangeListeners(false, true);
 		
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dawnsci.datavis.model.IFileController#getLastFolders()
-	 */
-	@Override
-	public Collection<String> getLastFolders(){
-		return lastFile;
 	}
 }
