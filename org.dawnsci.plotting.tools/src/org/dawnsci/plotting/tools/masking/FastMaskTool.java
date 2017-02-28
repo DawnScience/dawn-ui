@@ -1,18 +1,29 @@
 package org.dawnsci.plotting.tools.masking;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
+import org.dawb.common.ui.util.EclipseUtils;
+import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -21,9 +32,17 @@ public class FastMaskTool extends AbstractToolPage {
 
 	private Composite control;
 	private MaskCircularBuffer buffer;
+	private List<NamedRegionType> regionTypes;
 	
 	
 	public FastMaskTool() {
+		regionTypes = new ArrayList<>();
+		regionTypes.add(new NamedRegionType("Box", RegionType.BOX));
+		regionTypes.add(new NamedRegionType("Sector", RegionType.SECTOR));
+		regionTypes.add(new NamedRegionType("Polygon", RegionType.POLYGON));
+		regionTypes.add(new NamedRegionType("X-Axis", RegionType.XAXIS));
+		regionTypes.add(new NamedRegionType("Y-Axis", RegionType.YAXIS));
+		regionTypes.add(new NamedRegionType("Ring", RegionType.RING));
 	}
 
 	@Override
@@ -37,6 +56,30 @@ public class FastMaskTool extends AbstractToolPage {
 		control.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		control.setLayout(new GridLayout(1, false));
 		removeMargins(control);
+		
+		Combo combo = new Combo(control, SWT.READ_ONLY);
+		String[] array = regionTypes.stream().map(r -> r.name).toArray(String[]::new);
+		combo.setItems(array);
+		combo.select(0);
+		combo.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				String text = combo.getText();
+				Optional<NamedRegionType> findFirst = regionTypes.stream().filter(r -> text.equals(r.name)).findFirst();
+				if (findFirst.isPresent()) {
+					NamedRegionType nrt = findFirst.get();
+					IPlottingSystem system = getPlottingSystem();
+					try {
+						system.createRegion(RegionUtils.getUniqueName("MaskRegion", system, null), nrt.regionType);
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+			}
+			
+		});
 		
 		Button b = new Button(control, SWT.PUSH);
 		b.setText("Apply");
@@ -72,8 +115,27 @@ public class FastMaskTool extends AbstractToolPage {
 
 
 		});
+		
+		Button b3 = new Button(control, SWT.PUSH);
+		b3.setText("Save");
+		b3.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				try {
+					IWizard wiz = EclipseUtils.openWizard(PersistenceExportWizard.ID, false);
+					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
+					wd.setTitle(wiz.getWindowTitle());
+					wd.open();
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+			}
 
 
+		});
 	}
 
 	@Override
@@ -116,4 +178,14 @@ public class FastMaskTool extends AbstractToolPage {
 		layout.marginWidth      =0;
 	}
 
+	private class NamedRegionType {
+		public String name;
+		public RegionType regionType;
+		
+		public NamedRegionType(String name, RegionType regionType) {
+			this.name = name;
+			this.regionType = regionType;
+		}
+	}
+	
 }

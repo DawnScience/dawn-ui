@@ -402,9 +402,10 @@
       	</plotting_tool_page>
       	<plotting_tool_page
              class="org.dawnsci.plotting.tools.masking.FastMaskTool"
+             icon="icons/zoom_box.png"
              id="org.dawnsci.plotting.tools.masking.FastMaskTool"
              label="Fast Mask"
-             visible="false">
+             visible="true">
       </plotting_tool_page>
    </extension>
 
