@@ -29,7 +29,7 @@ public class PeakFindingActionsDelegate {
 	public void createActions(IToolBarManager toolbar) {
 		final Action createNewSelection = new Action("New Search Selection.", IAction.AS_PUSH_BUTTON) {
 			public void run() {
-				controller.peakfindingtool.createNewSearch();
+				controller.getPeakfindingtool().createNewSearch();
 			}
 		};
 		createNewSelection.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit.png"));

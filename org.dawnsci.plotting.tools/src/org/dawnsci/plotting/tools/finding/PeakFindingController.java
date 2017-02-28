@@ -35,7 +35,7 @@ import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
  */
 public class PeakFindingController {
 	
-	PeakFindingTool peakfindingtool;
+	private PeakFindingTool peakfindingtool;
 	
 	public IPlottingSystem plottingSystem;
 	
@@ -187,8 +187,8 @@ public class PeakFindingController {
 	public void setLowerBnd(Double lowerBnd) {
 		getWidget().setLwrBndVal(lowerBnd);
 		
-		if(this.peakfindingtool != null)
-			this.peakfindingtool.updateBoundsLower(lowerBnd);
+		if(this.getPeakfindingtool() != null)
+			this.getPeakfindingtool().updateBoundsLower(lowerBnd);
 		
 		if(this.selectedRegion != null){
 			double[] endPnt = this.selectedRegion.getPointRef();
@@ -203,10 +203,10 @@ public class PeakFindingController {
 	}
 	
 	public void setUpperBnd(Double upperBnd) {
-		getWidget().setUprBndVal(upperBnd);
+		getWidget().setUprBndVal(upperBnd.shortValue());
 		
-		if(peakfindingtool != null)
-			peakfindingtool.updateBoundsUpper(upperBnd);
+		if(getPeakfindingtool() != null)
+			getPeakfindingtool().updateBoundsUpper(upperBnd);
 		//TMP impl
 		if(selectedRegion != null){
 			double[] endPnt = this.selectedRegion.getEndPoint();
@@ -256,7 +256,7 @@ public class PeakFindingController {
 
 	public void updatePeakTrace(){
 		if(peaksX != null || peaksY != null)
-			peakfindingtool.updatePeakTrace(peaksX, peaksY);
+			getPeakfindingtool().updatePeakTrace(peaksX, peaksY);
 	}
 		
 	public void formatPeakSearch(){
@@ -268,7 +268,7 @@ public class PeakFindingController {
 		// TODO: CLEAN UP ON ACTIVATE PEAKFINDER
 		getPeakFindData().deactivatePeakFinder(getPeakFinderID());
 		// TODO: Update with the new peaks
-		peakfindingtool.getPlottingSystem().repaint();
+		getPeakfindingtool().getPlottingSystem().repaint();
 
 		// Reset peak finder 
 		if (!getWidget().runPeakSearch.isEnabled())
@@ -351,6 +351,14 @@ public class PeakFindingController {
 
 	public void setActions(PeakFindingActionsDelegate actions) {
 		this.actions = actions;
+	}
+
+	public PeakFindingTool getPeakfindingtool() {
+		return peakfindingtool;
+	}
+
+	public void setPeakfindingtool(PeakFindingTool peakfindingtool) {
+		this.peakfindingtool = peakfindingtool;
 	}
 	
 	

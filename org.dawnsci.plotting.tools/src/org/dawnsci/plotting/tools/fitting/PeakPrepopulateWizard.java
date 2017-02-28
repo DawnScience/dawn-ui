@@ -85,8 +85,6 @@ public class PeakPrepopulateWizard extends WizardPage {
 		
 	}
 	
-	
-	
 	@Override
 	public void createControl(Composite parent) {
 		
@@ -107,9 +105,11 @@ public class PeakPrepopulateWizard extends WizardPage {
 		
 		//controller.getWidget().createControl(dialogContainer);
 		Composite left = new Composite(dialogContainer, SWT.FILL);
+		left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		left.setLayout(new GridLayout());
 
 		Composite right = new Composite(dialogContainer, SWT.FILL);
+		right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		right.setLayout(new GridLayout());
 		
 		createPlottingSystem(right);

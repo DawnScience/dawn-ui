@@ -5,6 +5,7 @@ import java.util.Collection;
 import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.PeakFindingConstants;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -61,13 +62,15 @@ public class PeakFindingWidget {
 		configureComposite.setLayout(new GridLayout(2, false));
 
 		// GET SAMPLE CONFIGURATION TODO: refactor and extract earlier
-		//controller.get
+		//Set width to max value of plot
+		ILineTrace sampleTrace = controller.getPeakfindingtool().sampleTrace;
+		
 	
 		Label lwrBndLab = new Label(configureComposite, SWT.NONE);
 		lwrBndLab.setText("Lower Bound");
 		lwrBndLab.setToolTipText("As shown by the second vertical line");
-
-		lwrBndVal = new FloatSpinner(configureComposite, SWT.BORDER, 4, 3);
+		
+		lwrBndVal = new FloatSpinner(configureComposite, SWT.BORDER,  sampleTrace.getXData().getSize(), 3);
 		lwrBndVal.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		lwrBndVal.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -79,20 +82,16 @@ public class PeakFindingWidget {
 		upperBndLab.setText("Upper Bound");
 		upperBndLab.setToolTipText("As shown by the vertical line");
 
-		uprBndVal = new FloatSpinner(configureComposite, SWT.BORDER, 4, 3);
+		
+		
+		uprBndVal = new FloatSpinner(configureComposite, SWT.BORDER, sampleTrace.getXData().getSize(), 3);
 		uprBndVal.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		uprBndVal.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				controller.setUpperBnd(uprBndVal.getDouble());
 			}
 		});
-		
-		//Initial values
-		uprBndVal.setMinimum(0.0);
-		uprBndVal.setMaximum(1000000.0);
-		
-		lwrBndVal.setMinimum(0.0);
-		lwrBndVal.setMaximum(1000000.0);
+
 		
 		/* Adjust Peak Finding searchIntensity */
 		// TODO: quick tmp implementation

@@ -57,14 +57,14 @@ public class PeakSearchJob extends Job {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 	
-			if (controller.peakfindingtool.sampleTrace == null){
+			if (controller.getPeakfindingtool().sampleTrace == null){
 				syncFormatPeakSearch();
 				return Status.CANCEL_STATUS;
 			}
 			if (controller.getLowerBnd() == null || controller.getUpperBnd() == null) {
-				RectangularROI rectangle = (RectangularROI) controller.peakfindingtool.searchRegion.getROI();
+				RectangularROI rectangle = (RectangularROI) controller.getPeakfindingtool().searchRegion.getROI();
 				// // Set the region bounds
-				controller.peakfindingtool.updateSearchBnds(rectangle);
+				controller.getPeakfindingtool().updateSearchBnds(rectangle);
 			}
 	
 			/* Clean up last peak search */
@@ -107,8 +107,8 @@ public class PeakSearchJob extends Job {
 			
 
 			// Obtain Upper and Lower Bounds
-			Dataset xData = DatasetUtils.convertToDataset(controller.peakfindingtool.sampleTrace.getXData().squeeze());
-			Dataset yData = DatasetUtils.convertToDataset(controller.peakfindingtool.sampleTrace.getYData().squeeze());
+			Dataset xData = DatasetUtils.convertToDataset(controller.getPeakfindingtool().sampleTrace.getXData().squeeze());
+			Dataset yData = DatasetUtils.convertToDataset(controller.getPeakfindingtool().sampleTrace.getYData().squeeze());
 
 			BooleanDataset allowed = Comparisons.withinRange(xData, controller.getLowerBnd(), controller.getUpperBnd());
 			xData = xData.getByBoolean(allowed);
