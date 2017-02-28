@@ -20,6 +20,7 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Cursor;
@@ -104,7 +105,7 @@ public class PlotController {
 				if (event.isOptionsChanged()) return;
 				if (!fileController.getCurrentFile().isSelected()) return;
 				if (!fileController.getCurrentDataOption().isSelected()) return;
-				final List<DataStateObject> state = createImmutableFileState();
+				final List<DataStateObject> state =fileController.getImmutableFileState();
 				
 				updatePlotStateInJob(state, currentMode);	
 			};
@@ -140,7 +141,7 @@ public class PlotController {
 		if (selected) updateFileState(file, dOption, currentMode);
 		firePlotModeListeners(localMode, getCurrentPlotModes());
 		//make immutable state object
-		final List<DataStateObject> state = createImmutableFileState();
+		final List<DataStateObject> state = fileController.getImmutableFileState();
 		//update plot
 		updatePlotStateInJob(state, currentMode);
 		
@@ -290,36 +291,15 @@ public class PlotController {
 		
 	}
 	
-	private List<DataStateObject> createImmutableFileState() {
-		
-		List<DataStateObject> list = new ArrayList<DataStateObject>();
-		
-		for (LoadedFile f : fileController.getLoadedFiles()) {
-			for (DataOptions d : f.getDataOptions()) {
-				
-				PlottableObject plotObject = null; 
-				
-				if (d.getPlottableObject() != null) {
-					PlottableObject p = d.getPlottableObject();
-					plotObject = new PlottableObject(p.getPlotMode(), new NDimensions(p.getNDimensions()));
-				} 
-				if (f.isSelected() && d.isSelected()) {
-					DataStateObject dso = new DataStateObject(d, f.isSelected() && d.isSelected(), plotObject);
-					
-					list.add(dso);
-				}
-				
-			}
-		}
-		
-		return list;
-	}
-	
 	
 	public IPlotMode[] getCurrentPlotModes() {
 		if (fileController.getCurrentDataOption() == null) return null;
 		
-		return getPlotModes(fileController.getSelectedDataRank());
+		int[] shape = fileController.getCurrentDataOption().getData().getShape();
+		shape = ShapeUtils.squeezeShape(shape, false);
+		int rank = shape.length;
+
+		return getPlotModes(rank);
 	}
 	
 	private IPlotMode[] getPlotModes(int rank) {
@@ -354,7 +334,7 @@ public class PlotController {
 		dOption.setPlottableObject(new PlottableObject(currentMode, nd));
 		
 		updateFileState(fileController.getCurrentFile(), fileController.getCurrentDataOption(),currentMode);
-		final List<DataStateObject> state = createImmutableFileState();
+		final List<DataStateObject> state = fileController.getImmutableFileState();
 		//update plot
 		updatePlotStateInJob(state, currentMode);
 	}
@@ -484,33 +464,6 @@ public class PlotController {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} 
-		}
-		
-	}
-	
-	private class DataStateObject {
-		
-		private boolean checked;
-		private DataOptions option;
-		private PlottableObject plotObject;
-
-		public DataStateObject(DataOptions option, boolean checked, PlottableObject plotObject) {
-			
-			this.option = option;
-			this.checked = checked;
-			this.plotObject = plotObject;
-		}
-
-		public boolean isChecked() {
-			return checked;
-		}
-
-		public DataOptions getOption() {
-			return option;
-		}
-
-		public PlottableObject getPlotObject() {
-			return plotObject;
 		}
 		
 	}

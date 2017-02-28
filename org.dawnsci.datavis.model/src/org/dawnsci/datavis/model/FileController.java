@@ -58,6 +58,8 @@ public class FileController {
 		loadFiles(new String[]{path}, null);
 	}
 	
+	
+	//TODO stop leaking this object
 	public LoadedFiles getLoadedFiles() {
 		return loadedFiles;
 	}
@@ -197,17 +199,34 @@ public class FileController {
 		return checked;
 	}
 	
-	public int getSelectedDataRank() {
-		if (currentData == null) return -1;
-		int[] shape = currentData.getData().getShape();
-		shape = ShapeUtils.squeezeShape(shape, false);
-		int rank = shape.length;
-		return rank;
-	}
-
 	private void fireStateChangeListeners(boolean file, boolean dataset) {
 		FileControllerStateEvent e = new FileControllerStateEvent(this, file, dataset);
 		for (FileControllerStateEventListener l : listeners) l.stateChanged(e);
+	}
+	
+	public List<DataStateObject> getImmutableFileState() {
+		
+		List<DataStateObject> list = new ArrayList<DataStateObject>();
+		
+		for (LoadedFile f : getLoadedFiles()) {
+			for (DataOptions d : f.getDataOptions()) {
+				
+				PlottableObject plotObject = null; 
+				
+				if (d.getPlottableObject() != null) {
+					PlottableObject p = d.getPlottableObject();
+					plotObject = new PlottableObject(p.getPlotMode(), new NDimensions(p.getNDimensions()));
+				} 
+				if (f.isSelected() && d.isSelected()) {
+					DataStateObject dso = new DataStateObject(d, f.isSelected() && d.isSelected(), plotObject);
+					
+					list.add(dso);
+				}
+				
+			}
+		}
+		
+		return list;
 	}
 	
 	public void addStateListener(FileControllerStateEventListener l) {
