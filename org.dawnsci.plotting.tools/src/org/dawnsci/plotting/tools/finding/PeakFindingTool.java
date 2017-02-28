@@ -58,7 +58,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	// Page Components
 	private Composite composite;
 	
-	
 	// Traces
 	//TODO: just making public whilst poking
 	public ILineTrace sampleTrace;
@@ -84,7 +83,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	public PeakFindingTool() {
 		// Setup up a new PeakSearch Instance
 		this.controller = new PeakFindingController();
-		controller.peakfindingtool = this;
+		controller.setPeakfindingtool(this);
 
 		this.traceListener = new ITraceListener.Stub() {
 			@Override
@@ -99,7 +98,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	public PeakFindingTool(IPlottingSystem system, PeakFindingController controller){
 		this.setPlottingSystem(system);
 		this.controller = controller;
-		controller.peakfindingtool = this;
+		controller.setPeakfindingtool(this);
 	}
 	
 
