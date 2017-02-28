@@ -11,6 +11,7 @@ import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.FileController;
 import org.dawnsci.datavis.model.FileControllerStateEvent;
 import org.dawnsci.datavis.model.FileControllerStateEventListener;
+import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.IPlotMode;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.model.PlotController;
@@ -42,6 +43,8 @@ public class DatasetPart {
 	@Inject
 	ESelectionService selectionService;
 	
+	@Inject IFileController fileController;
+	
 	private DataConfigurationTable table;
 	private ComboViewer optionsViewer;
 	private PlotController plotManager;
@@ -57,6 +60,7 @@ public class DatasetPart {
 	public void createComposite(Composite parent, IPlottingService pService) {
 		
 		plotManager = new PlotController(pService);
+		fileController = ServiceManager.getFileController();
 
 		parent.setLayout(new FormLayout());
 		FormData checkForm = new FormData();
@@ -143,7 +147,7 @@ public class DatasetPart {
 			public void stateChanged(FileControllerStateEvent event) {
 			
 				if (event.isSelectedFileChanged()) {
-					LoadedFile currentFile = FileController.getInstance().getCurrentFile();
+					LoadedFile currentFile = fileController.getCurrentFile();
 					if (currentFile == null) {
 						viewer.setInput(null);
 						table.setInput(null);
@@ -154,8 +158,8 @@ public class DatasetPart {
 					viewer.setInput(dataOptions.toArray());
 //					viewer.setCheckedElements(currentFile.getChecked().toArray());
 //					
-					if (FileController.getInstance().getCurrentDataOption() != null) {
-						DataOptions op = FileController.getInstance().getCurrentDataOption();
+					if (fileController.getCurrentDataOption() != null) {
+						DataOptions op = fileController.getCurrentDataOption();
 						viewer.setSelection(new StructuredSelection(op),true);
 						table.setInput(plotManager.getPlottableObject().getNDimensions());
 						
@@ -168,7 +172,7 @@ public class DatasetPart {
 			}
 		};
 		
-		FileController.getInstance().addStateListener(fileStateListener);
+		fileController.addStateListener(fileStateListener);
 		
 		plotModeListener = new PlotModeChangeEventListener() {
 			
@@ -194,11 +198,11 @@ public class DatasetPart {
 	public void dispose(){
 		viewer.dispose();
 		plotManager.removePlotModeListener(plotModeListener);
-		FileController.getInstance().removeStateListener(fileStateListener);
+		fileController.removeStateListener(fileStateListener);
 	}
 	
 	private void updateOnSelectionChange(DataOptions op){
-		FileController.getInstance().setCurrentData(op,op.isSelected());
+		fileController.setCurrentData(op,op.isSelected());
 		table.setInput(plotManager.getPlottableObject().getNDimensions());
 	}
 	

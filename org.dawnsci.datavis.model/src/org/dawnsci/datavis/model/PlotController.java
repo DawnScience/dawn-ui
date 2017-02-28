@@ -57,7 +57,7 @@ public class PlotController {
 	private IPlotMode[] modes = new IPlotMode[]{new PlotModeXY(), new PlotModeImage(), new PlotModeSurface()};
 	private IPlotMode currentMode;
 	
-	private FileController fileController = FileController.getInstance();
+	private IFileController fileController = ServiceManager.getFileController();
 	
 	private ISliceChangeListener sliceListener;
 	

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.dawnsci.datavis.view">
+   <implementation class="org.dawnsci.datavis.view.parts.ServiceManager"/>
+   <reference bind="setFileController" cardinality="1..1" interface="org.dawnsci.datavis.model.IFileController" name="IFileController" policy="static"/>
+</scr:component>

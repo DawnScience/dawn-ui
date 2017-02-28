@@ -7,6 +7,7 @@ public class ServiceManager {
 
 	private static EventAdmin eventAdmin;
 	private static ILoaderService lService;
+	private static IFileController fController;
 	
 	public static ILoaderService getLoaderService() {
 		return lService;
@@ -22,6 +23,14 @@ public class ServiceManager {
 
 	public static void setEventAdmin(EventAdmin eventAdmin) {
 		ServiceManager.eventAdmin = eventAdmin;
+	}
+	
+	public static IFileController getFileController() {
+		return fController;
+	}
+
+	public static void setFileController(IFileController controller) {
+		ServiceManager.fController = controller;
 	}
 	
 }

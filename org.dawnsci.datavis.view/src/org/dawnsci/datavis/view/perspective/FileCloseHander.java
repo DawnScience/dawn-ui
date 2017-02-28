@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.dawnsci.datavis.model.FileController;
 import org.dawnsci.datavis.model.LoadedFile;
+import org.dawnsci.datavis.view.parts.ServiceManager;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -22,7 +22,7 @@ public class FileCloseHander extends AbstractHandler {
 		ISelection selection = HandlerUtil.getActiveSite(event).getWorkbenchWindow().getSelectionService().getSelection("org.dawnsci.datavis.view.parts.LoadedFilePart");
 		List<LoadedFile> list = getSelectedFiles(selection);
 
-		FileController.getInstance().unloadFiles(list);
+		ServiceManager.getFileController().unloadFiles(list);
 
 		return null;
 	}

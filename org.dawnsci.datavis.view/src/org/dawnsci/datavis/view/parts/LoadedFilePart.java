@@ -12,9 +12,9 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.dawnsci.datavis.model.DataOptions;
-import org.dawnsci.datavis.model.FileController;
 import org.dawnsci.datavis.model.FileControllerStateEvent;
 import org.dawnsci.datavis.model.FileControllerStateEventListener;
+import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.model.LoadedFiles;
 import org.eclipse.core.resources.IFile;
@@ -77,11 +77,12 @@ public class LoadedFilePart {
 	@Inject ILoaderService lService;
 	@Inject ESelectionService selectionService;
 	@Inject EventAdmin eventAdmin;
+	@Inject IFileController fileController;
 	
 	private Image ticked;
 	private Image unticked;
 	
-	FileControllerStateEventListener fileStateListener;
+	private FileControllerStateEventListener fileStateListener;
 
 	@PostConstruct
 	public void createComposite(Composite parent) {
@@ -89,8 +90,6 @@ public class LoadedFilePart {
 		fillLayout.type = SWT.VERTICAL;
 		parent.setLayout(fillLayout);
 		
-		LoadedFiles loadedFiles = FileController.getInstance().getLoadedFiles();
-
 		Composite tableComposite = new Composite(parent, SWT.NONE);
 		
 		
@@ -106,7 +105,7 @@ public class LoadedFilePart {
 
 			@Override
 			public Object[] getElements(Object inputElement) {
-				return ((LoadedFiles)inputElement).getChildren();
+				return ((IFileController)inputElement).getLoadedFiles().toArray();
 			}
 
 			@Override
@@ -158,7 +157,7 @@ public class LoadedFilePart {
 	    tableComposite.setLayout(columnLayout);
 		
 		ColumnViewerToolTipSupport.enableFor(viewer);
-		viewer.setInput(loadedFiles);
+		viewer.setInput(fileController);
 		
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			  @Override
@@ -166,7 +165,7 @@ public class LoadedFilePart {
 			    IStructuredSelection selection = viewer.getStructuredSelection();
 			    if (selection.getFirstElement() instanceof LoadedFile) {
 			    	LoadedFile selected = (LoadedFile)selection.getFirstElement();
-			    	FileController.getInstance().setCurrentFile(selected, selected.isSelected());
+			    	fileController.setCurrentFile(selected, selected.isSelected());
 			    }
 			    
 			    selectionService.setSelection(new StructuredSelection(selection.toArray()));
@@ -191,8 +190,8 @@ public class LoadedFilePart {
 									.filter(LoadedFile.class::isInstance)
 									.map(LoadedFile.class::cast)
 									.collect(Collectors.toList());
-							FileController.getInstance().selectFiles(collected, true);
-//							List<LoadedFile> fs = FileController.getInstance().getSelectedFiles();
+							fileController.selectFiles(collected, true);
+//							List<LoadedFile> fs = fileController().getSelectedFiles();
 //							viewer.setCheckedElements(fs.toArray());
 							viewer.refresh();
 						}
@@ -205,8 +204,8 @@ public class LoadedFilePart {
 									.filter(LoadedFile.class::isInstance)
 									.map(LoadedFile.class::cast)
 									.collect(Collectors.toList());
-							FileController.getInstance().selectFiles(collected, false);
-//							List<LoadedFile> fs = FileController.getInstance().getSelectedFiles();
+							fileController.selectFiles(collected, false);
+//							List<LoadedFile> fs = fileController().getSelectedFiles();
 //							viewer.setCheckedElements(fs.toArray());
 							viewer.refresh();
 						}
@@ -220,7 +219,7 @@ public class LoadedFilePart {
 						manager.add(new Action("Apply to all files") {
 							@Override
 							public void run() {
-								FileController.getInstance().applyToAll(f);
+								fileController.applyToAll(f);
 							}
 						});
 					}
@@ -232,7 +231,7 @@ public class LoadedFilePart {
 									.filter(LoadedFile.class::isInstance)
 									.map(LoadedFile.class::cast)
 									.collect(Collectors.toList());
-							FileController.getInstance().unloadFiles(collected);
+							fileController.unloadFiles(collected);
 							viewer.refresh();
 						}
 					});
@@ -257,7 +256,7 @@ public class LoadedFilePart {
 			}
 		};
 		
-		FileController.getInstance().addStateListener(fileStateListener);
+		fileController.addStateListener(fileStateListener);
 		
 		DropTargetAdapter dropListener = new DropTargetAdapter() {
 			@Override
@@ -275,11 +274,11 @@ public class LoadedFilePart {
 					}
 					
 					if (!paths.isEmpty()) {
-						FileController.getInstance().loadFiles(paths.toArray(new String[paths.size()]),(IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class));
+						fileController.loadFiles(paths.toArray(new String[paths.size()]),(IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class));
 					}
 					
 				} else if (dropData instanceof String[]) {
-					FileController.getInstance().loadFiles((String[])dropData,(IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class));
+					fileController.loadFiles((String[])dropData,(IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class));
 				}
 			}
 		};
@@ -305,17 +304,17 @@ public class LoadedFilePart {
 		}
 		
 //		if (!event.isSelectedDataChanged() && !event.isSelectedFileChanged()) {
-//			List<LoadedFile> fs = FileController.getInstance().getSelectedFiles();
+//			List<LoadedFile> fs = fileController().getSelectedFiles();
 //			viewer.setCheckedElements(fs.toArray());
 //
 //		}
-//		viewer.setCheckedElements(new Object[]{FileController.getInstance()});
+//		viewer.setCheckedElements(new Object[]{fileController()});
 		viewer.refresh();
 	}
 	
 	@PreDestroy
 	public void dispose(){
-		FileController.getInstance().removeStateListener(fileStateListener);
+		fileController.removeStateListener(fileStateListener);
 		ticked.dispose();
 		unticked.dispose();
 	}
@@ -325,37 +324,37 @@ public class LoadedFilePart {
 		if (viewer != null) viewer.getControl().setFocus();
 	}
 	
-	@Inject
-	@Optional
-	private void subscribeFileOpen(@UIEventTopic("orgdawnsciprototypee4nano") String path) {
-	  try {
-			LoadedFile f = new LoadedFile(lService.getData(path,null));
-			FileController.getInstance().getLoadedFiles().addFile(f);
-			viewer.refresh();
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-	}
+//	@Inject
+//	@Optional
+//	private void subscribeFileOpen(@UIEventTopic("orgdawnsciprototypee4nano") String path) {
+//	  try {
+//			LoadedFile f = new LoadedFile(lService.getData(path,null));
+//			fileController().getLoadedFiles().addFile(f);
+//			viewer.refresh();
+//		} catch (Exception e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//	}
 	
-	@Inject
-	@Optional
-	private void subscribeFileOpen(@UIEventTopic("orgdawnsciprototypeplotupdate")  Event data) {
-	  try {
-			if (data.containsProperty("path")){
-				String path = data.getProperty("path").toString();
-				System.out.println(FileController.getInstance().getCurrentFile().isSelected());
-				if (!FileController.getInstance().getCurrentFile().isSelected()) return;
-				FileController.getInstance().getLoadedFiles().deselectOthers(path);
-//				viewer.setCheckedElements(new Object[]{FileController.getInstance().getLoadedFiles().getLoadedFile(path)});
-				viewer.refresh();
-			}
-			
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-	}
+//	@Inject
+//	@Optional
+//	private void subscribeFileOpen(@UIEventTopic("orgdawnsciprototypeplotupdate")  Event data) {
+//	  try {
+//			if (data.containsProperty("path")){
+//				String path = data.getProperty("path").toString();
+//				System.out.println(fileController().getCurrentFile().isSelected());
+//				if (!fileController().getCurrentFile().isSelected()) return;
+//				fileController().getLoadedFiles().deselectOthers(path);
+////				viewer.setCheckedElements(new Object[]{fileController().getLoadedFiles().getLoadedFile(path)});
+//				viewer.refresh();
+//			}
+//			
+//		} catch (Exception e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//	}
 	
 	@Inject
 	@Optional
@@ -366,7 +365,7 @@ public class LoadedFilePart {
 			paths = new String[]{path};
 		}
 		IProgressService service = (IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class);
-		FileController.getInstance().loadFiles(paths,service);
+		fileController.loadFiles(paths,service);
 
 	} 
 	
@@ -397,9 +396,9 @@ public class LoadedFilePart {
 		@Override
 		protected void setValue(Object element, Object value) {
 			if (element instanceof LoadedFile && value instanceof Boolean){
-				FileController.getInstance().setCurrentFile((LoadedFile)element, (Boolean)value);
+				fileController.setCurrentFile((LoadedFile)element, (Boolean)value);
 			}
-//			FileController.getInstance().setCurrentData((DataOptions)element, (Boolean)value);
+//			fileController().setCurrentData((DataOptions)element, (Boolean)value);
 		}
 		
 	}

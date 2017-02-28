@@ -21,6 +21,10 @@ public class LoadedFiles implements IDataObject, Iterable<LoadedFile> {
 		fileList.addAll(f);
 	}
 	
+	public List<LoadedFile> getLoadedFiles() {
+		return new ArrayList<LoadedFile>(fileList);
+	}
+	
 	public boolean contains(String path) {
 		Optional<LoadedFile> findAny = fileList.stream().filter(f -> path.equals(f.getLongName())).findAny();
 		return findAny.isPresent();

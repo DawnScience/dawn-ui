@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.FileController;
+import org.dawnsci.datavis.view.parts.ServiceManager;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
@@ -158,7 +159,7 @@ public class DataOptionTableViewer {
 		@Override
 		protected void setValue(Object element, Object value) {
 			if (element instanceof DataOptions && value instanceof Boolean){
-				FileController.getInstance().setCurrentData((DataOptions)element, (Boolean)value);
+				ServiceManager.getFileController().setCurrentData((DataOptions)element, (Boolean)value);
 			}
 //			FileController.getInstance().setCurrentData((DataOptions)element, (Boolean)value);
 		}

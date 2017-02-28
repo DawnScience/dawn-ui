@@ -14,9 +14,7 @@ import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.progress.IProgressService;
 
-public class FileController {
-
-	private static final FileController instance = new FileController();
+public class FileController implements IFileController {
 	
 	private LoadedFiles loadedFiles;
 	private LoadedFile currentFile;
@@ -26,14 +24,14 @@ public class FileController {
 	
 	private LinkedList<String> lastFile = new LinkedList<String>(); 
 	
-	private FileController(){
+	public FileController(){
 		loadedFiles = new LoadedFiles();
 	};
 	
-	public static FileController getInstance() {
-		return instance;
-	}
-	
+	/* (non-Javadoc)
+	 * @see org.dawnsci.datavis.model.IFileController#loadFiles(java.lang.String[], org.eclipse.ui.progress.IProgressService)
+	 */
+	@Override
 	public void loadFiles(String[] paths, IProgressService progressService) {
 		
 		FileLoadingRunnable runnable = new FileLoadingRunnable(paths);
@@ -54,16 +52,28 @@ public class FileController {
 	}
 	
 	
+	/* (non-Javadoc)
+	 * @see org.dawnsci.datavis.model.IFileController#loadFile(java.lang.String)
+	 */
+	@Override
 	public void loadFile(String path) {
 		loadFiles(new String[]{path}, null);
 	}
 	
 	
 	//TODO stop leaking this object
-	public LoadedFiles getLoadedFiles() {
-		return loadedFiles;
+	/* (non-Javadoc)
+	 * @see org.dawnsci.datavis.model.IFileController#getLoadedFiles()
+	 */
+	@Override
+	public List<LoadedFile> getLoadedFiles() {
+		return loadedFiles.getLoadedFiles();
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dawnsci.datavis.model.IFileController#deselect(java.util.List)
+	 */
+	@Override
 	public void deselect(List<IDataObject> objects) {
 		
 		for (IDataObject o : objects) {
@@ -101,12 +111,20 @@ public class FileController {
 //		fireStateChangeListeners(false,false);
 //	}
 	
+	/* (non-Javadoc)
+	 * @see org.dawnsci.datavis.model.IFileController#selectFiles(java.util.List, boolean)
+	 */
+	@Override
 	public void selectFiles(List<LoadedFile> files, boolean selected) {
 		for (LoadedFile file : files) file.setSelected(selected);
 		fireStateChangeListeners(true,true);
 		
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dawnsci.datavis.model.IFileController#setCurrentFile(org.dawnsci.datavis.model.LoadedFile, boolean)
+	 */
+	@Override
 	public void setCurrentFile(LoadedFile file, boolean selected) {
 		if (file == currentFile && selected == currentFile.isSelected()) return;
 		currentFile = file;
@@ -142,6 +160,10 @@ public class FileController {
 		fireStateChangeListeners(true,true);
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dawnsci.datavis.model.IFileController#setCurrentData(org.dawnsci.datavis.model.DataOptions, boolean)
+	 */
+	@Override
 	public void setCurrentData(DataOptions data, boolean selected) {
 		if (currentData == data && data.isSelected() == selected) return;
 		currentData = data;
@@ -149,10 +171,18 @@ public class FileController {
 		fireStateChangeListeners(false,true);
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dawnsci.datavis.model.IFileController#getCurrentDataOption()
+	 */
+	@Override
 	public DataOptions getCurrentDataOption() {
 		return currentData;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dawnsci.datavis.model.IFileController#unloadFile(org.dawnsci.datavis.model.LoadedFile)
+	 */
+	@Override
 	public void unloadFile(LoadedFile file){
 		loadedFiles.unloadFile(file);
 		if (currentFile == file)  {
@@ -162,6 +192,10 @@ public class FileController {
 		fireStateChangeListeners(true, true);
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dawnsci.datavis.model.IFileController#unloadFiles(java.util.List)
+	 */
+	@Override
 	public void unloadFiles(List<LoadedFile> files){
 		
 		for (LoadedFile file : files){
@@ -175,6 +209,10 @@ public class FileController {
 		fireStateChangeListeners(true, true);
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dawnsci.datavis.model.IFileController#getCurrentFile()
+	 */
+	@Override
 	public LoadedFile getCurrentFile() {
 		return currentFile;
 	}
@@ -189,6 +227,10 @@ public class FileController {
 //		return checked;
 //	}
 	
+	/* (non-Javadoc)
+	 * @see org.dawnsci.datavis.model.IFileController#getSelectedFiles()
+	 */
+	@Override
 	public List<LoadedFile> getSelectedFiles(){
 		
 		List<LoadedFile> checked = new ArrayList<>();
@@ -204,6 +246,10 @@ public class FileController {
 		for (FileControllerStateEventListener l : listeners) l.stateChanged(e);
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dawnsci.datavis.model.IFileController#getImmutableFileState()
+	 */
+	@Override
 	public List<DataStateObject> getImmutableFileState() {
 		
 		List<DataStateObject> list = new ArrayList<DataStateObject>();
@@ -229,10 +275,18 @@ public class FileController {
 		return list;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dawnsci.datavis.model.IFileController#addStateListener(org.dawnsci.datavis.model.FileControllerStateEventListener)
+	 */
+	@Override
 	public void addStateListener(FileControllerStateEventListener l) {
 		listeners.add(l);
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dawnsci.datavis.model.IFileController#removeStateListener(org.dawnsci.datavis.model.FileControllerStateEventListener)
+	 */
+	@Override
 	public void removeStateListener(FileControllerStateEventListener l) {
 		listeners.remove(l);
 	}
@@ -294,6 +348,10 @@ public class FileController {
 		
 	}
 
+	/* (non-Javadoc)
+	 * @see org.dawnsci.datavis.model.IFileController#unloadAll()
+	 */
+	@Override
 	public void unloadAll() {
 		loadedFiles.unloadAllFiles();
 
@@ -303,6 +361,10 @@ public class FileController {
 		fireStateChangeListeners(true, true);
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dawnsci.datavis.model.IFileController#applyToAll(org.dawnsci.datavis.model.LoadedFile)
+	 */
+	@Override
 	public void applyToAll(LoadedFile f) {
 		
 		List<DataOptions> selected = f.getSelectedDataOptions();
@@ -332,6 +394,10 @@ public class FileController {
 		
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.dawnsci.datavis.model.IFileController#getLastFolders()
+	 */
+	@Override
 	public Collection<String> getLastFolders(){
 		return lastFile;
 	}

@@ -1,6 +1,7 @@
 package org.dawnsci.datavis;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,8 +38,8 @@ public class RecentFoldersContributionFactory extends ExtensionContributionFacto
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
 				search.removeAll();
-				Collection<String> lf = FileController.getInstance().getLastFolders();
-				
+//				Collection<String> lf = FileController.getInstance().getLastFolders();
+				Collection<String> lf = new ArrayList<>();
 				if (lf.isEmpty()) {
 					search.add(new Action("No History"){
 						@Override
