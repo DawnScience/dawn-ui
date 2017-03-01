@@ -172,6 +172,12 @@
             name="Savu Filter Operation Set-up Wizard Page"
             operationid="uk.ac.diamond.scisoft.analysis.processing.python.PythonSavuOperation">
       </operationsetupwizardpage>
+      <operationsetupwizardpage
+            class="org.dawnsci.processing.ui.saxs.TParameterWizardPage"
+            id="org.dawnsci.processing.ui.TParameterWizardPage"
+            name="T Parameter Operation Set-up Wizard Page"
+            operationid="uk.ac.diamond.scisoft.analysis.processing.operations.saxs.TParameterOperation">
+      </operationsetupwizardpage>
    </extension>
 
 </plugin>
