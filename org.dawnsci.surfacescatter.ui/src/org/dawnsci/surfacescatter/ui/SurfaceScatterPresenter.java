@@ -398,6 +398,10 @@ public class SurfaceScatterPresenter {
 	
 	}
 	
+	public ArrayList<Double> getYList(){
+		return sm.getyList();
+	}
+	
 	public String getXName(){
 		return gms.get(0).getxName();
 	}
@@ -1647,8 +1651,11 @@ public class SurfaceScatterPresenter {
 		
 		parentPs.addTrace(lt1);
 		parentPs.repaint();
+		ssvs.getSsps3c().getOutputCurves().getIntensity().select(0);;
 	}
 
+	
+	
 	public IROI getROI() {
 
 		int jok = sm.getFilepathsSortedArray()[sm.getSliderPos()];

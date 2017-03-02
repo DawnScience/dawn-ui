@@ -142,7 +142,6 @@ public class GeneralOverlapHandlerView extends Dialog {
 		
 		//////////////////////////////////////////////////////////////////////////////////
 		
-		
 		export.addSelectionListener(new SelectionListener() {
 			
 			@Override
@@ -152,6 +151,7 @@ public class GeneralOverlapHandlerView extends Dialog {
 				IDataset yData = stitchedCurves.getLineTrace1().getYData();
 				
 				ssp.export(parentPs, xData, yData);
+				
 				
 			}
 			

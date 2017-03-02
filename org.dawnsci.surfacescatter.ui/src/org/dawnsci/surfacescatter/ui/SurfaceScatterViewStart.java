@@ -425,7 +425,7 @@ public class SurfaceScatterViewStart extends Dialog {
 					paramField.geometricParametersUpdate();
 					ssp.regionOfInterestSetter();
 
-					if (ssp.getBackgroundDatArray() == (null)) {
+					if (ssp.getYList() == (null)) {
 						try {
 							getPlotSystemCompositeView().removeBackgroundSubtractedSubImage();
 							getSsps3c().isOutputCurvesVisible(false);
@@ -738,6 +738,10 @@ public class SurfaceScatterViewStart extends Dialog {
 	public DatDisplayer getDatDisplayer() {
 		return datDisplayer;
 	}
+	
+	public void resetIntensityCombo(){
+		ssvs.getSsps3c().getOutputCurves().getIntensity().select(0);
+	}
 
 	public void appendListenersToOutputCurves() {
 
@@ -750,7 +754,8 @@ public class SurfaceScatterViewStart extends Dialog {
 
 				ArrayList<ArrayList<IDataset>> xyArrays = ssp.xyArrayPreparer();
 
-				GeneralOverlapHandlerView goh = new GeneralOverlapHandlerView(getParentShell(), SWT.OPEN,
+				GeneralOverlapHandlerView goh = new GeneralOverlapHandlerView(
+						getParentShell(), SWT.OPEN,
 						xyArrays.get(0), xyArrays.get(1), 
 						xyArrays.get(2), xyArrays.get(3), 
 						xyArrays.get(4), xyArrays.get(5),
