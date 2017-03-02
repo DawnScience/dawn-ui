@@ -19,7 +19,7 @@ public class FileTreeLabelProvider extends StyledCellLabelProvider {
 	
 	@Override
 	public String getToolTipText(Object element) {
-		if (element instanceof LoadedFile) return ((LoadedFile)element).getLongName();
+		if (element instanceof LoadedFile) return ((LoadedFile)element).getFilePath();
 		return null;
 		
 	};

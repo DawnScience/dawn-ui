@@ -42,7 +42,7 @@ public class DataOptionsTest extends AbstractTestModel{
 
 	@Test
 	public void testGetFileName() {
-		assertEquals(file.getAbsolutePath(),dataOptions.getFileName());
+		assertEquals(file.getAbsolutePath(),dataOptions.getFilePath());
 	}
 
 //	@Test

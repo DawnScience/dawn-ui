@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.dawnsci.datavis.api.IRecentPlaces;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -323,12 +324,18 @@ public class FileController implements IFileController {
 			}
 			
 			if (!files.isEmpty()) {
-				String name = files.get(0).getLongName();
-				ServiceManager.getRecentPlaces().addPlace(name);
+				String name = files.get(0).getFilePath();
+				IRecentPlaces recentPlaces = ServiceManager.getRecentPlaces();
+				if (recentPlaces != null)recentPlaces.addPlace(name);
 				loadedFiles.addFiles(files);
 			}
 			
 			fireStateChangeListeners(false,false);
+			
+		}
+
+		private void addPlace(String name) {
+			// TODO Auto-generated method stub
 			
 		}
 		
@@ -361,7 +368,7 @@ public class FileController implements IFileController {
 			
 			for (DataOptions d : selected) {
 				DataOptions d2 = file.getDataOption(d.getName());
-				if (d2 != null && Arrays.equals(d2.getData().getShape(), d.getData().getShape())) {
+				if (d2 != null && Arrays.equals(d2.getLazyDataset().getShape(), d.getLazyDataset().getShape())) {
 					d2.setSelected(true);
 					
 					if (d.getPlottableObject() != null) {

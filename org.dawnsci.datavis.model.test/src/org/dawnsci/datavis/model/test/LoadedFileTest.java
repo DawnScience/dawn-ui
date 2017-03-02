@@ -25,7 +25,7 @@ public class LoadedFileTest  extends AbstractTestModel {
 	
 	@Test
 	public void testLoadedFile() throws Exception {
-		assertEquals(file.getAbsolutePath(), loadedFile.getLongName());
+		assertEquals(file.getAbsolutePath(), loadedFile.getFilePath());
 	}
 
 //	@Test
@@ -52,7 +52,7 @@ public class LoadedFileTest  extends AbstractTestModel {
 
 	@Test
 	public void testGetLongName() {
-		assertEquals(file.getAbsolutePath(), loadedFile.getLongName());
+		assertEquals(file.getAbsolutePath(), loadedFile.getFilePath());
 	}
 
 	@Test

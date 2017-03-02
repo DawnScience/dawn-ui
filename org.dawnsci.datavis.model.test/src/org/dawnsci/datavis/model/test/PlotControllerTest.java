@@ -1,9 +1,9 @@
 package org.dawnsci.datavis.model.test;
 
 import static org.junit.Assert.*;
-
 import java.util.Optional;
 
+import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.FileController;
 import org.dawnsci.datavis.model.IFileController;
@@ -49,7 +49,7 @@ public class PlotControllerTest extends AbstractTestModel {
 	
 	private void setUpAndSelectFirstFile1D(){
 		fileController.loadFile(file.getAbsolutePath());
-		LoadedFile lf = fileController.getLoadedFiles().stream().filter(f -> f.getLongName().equals(file.getAbsolutePath())).findFirst().get();
+		LoadedFile lf = fileController.getLoadedFiles().stream().filter(f -> f.getFilePath().equals(file.getAbsolutePath())).findFirst().get();
 		DataOptions dop = lf.getDataOption("/entry/dataset1");
 		fileController.setCurrentFile(lf,true);
 		fileController.setCurrentData(dop, true);
@@ -64,7 +64,7 @@ public class PlotControllerTest extends AbstractTestModel {
 	
 	private void setUpAndSelectFile2D(String path){
 		fileController.loadFile(path);
-		LoadedFile lf = fileController.getLoadedFiles().stream().filter(f -> f.getLongName().equals(path)).findFirst().get();
+		LoadedFile lf = fileController.getLoadedFiles().stream().filter(f -> f.getFilePath().equals(path)).findFirst().get();
 		DataOptions dop = lf.getDataOption("/entry/dataset2");
 		fileController.setCurrentFile(lf,true);
 		fileController.setCurrentData(dop, true);
@@ -148,9 +148,9 @@ public class PlotControllerTest extends AbstractTestModel {
 		fileController.loadFile(file1.getAbsolutePath());
 		fileController.loadFile(file2.getAbsolutePath());
 		fileController.loadFile(file3.getAbsolutePath());
-		LoadedFile lf1 = fileController.getLoadedFiles().stream().filter(f -> f.getLongName().equals(file1.getAbsolutePath())).findFirst().get();
-		LoadedFile lf2 = fileController.getLoadedFiles().stream().filter(f -> f.getLongName().equals(file2.getAbsolutePath())).findFirst().get();
-		LoadedFile lf3 = fileController.getLoadedFiles().stream().filter(f -> f.getLongName().equals(file3.getAbsolutePath())).findFirst().get();
+		LoadedFile lf1 = fileController.getLoadedFiles().stream().filter(f -> f.getFilePath().equals(file1.getAbsolutePath())).findFirst().get();
+		LoadedFile lf2 = fileController.getLoadedFiles().stream().filter(f -> f.getFilePath().equals(file2.getAbsolutePath())).findFirst().get();
+		LoadedFile lf3 = fileController.getLoadedFiles().stream().filter(f -> f.getFilePath().equals(file3.getAbsolutePath())).findFirst().get();
 		DataOptions dop1 = lf1.getDataOption("/entry/dataset1");
 		plotManager.waitOnJob();
 		assertEquals(0, plottingSystem.getTraces().size());
@@ -379,8 +379,8 @@ public class PlotControllerTest extends AbstractTestModel {
 		fileController.loadFile(file1.getAbsolutePath());
 		fileController.loadFile(file2.getAbsolutePath());
 		
-		LoadedFile lf1 = fileController.getLoadedFiles().stream().filter(f -> f.getLongName().equals(file1.getAbsolutePath())).findFirst().get();
-		LoadedFile lf2 = fileController.getLoadedFiles().stream().filter(f -> f.getLongName().equals(file2.getAbsolutePath())).findFirst().get();
+		LoadedFile lf1 = fileController.getLoadedFiles().stream().filter(f -> f.getFilePath().equals(file1.getAbsolutePath())).findFirst().get();
+		LoadedFile lf2 = fileController.getLoadedFiles().stream().filter(f -> f.getFilePath().equals(file2.getAbsolutePath())).findFirst().get();
 		
 		DataOptions dop1 = lf1.getDataOption("/entry/dataset2");
 		plotManager.waitOnJob();
@@ -412,8 +412,8 @@ public class PlotControllerTest extends AbstractTestModel {
 	public void testMultiFileXYAndImage() throws Exception{
 		fileController.loadFile(file.getAbsolutePath());
 		fileController.loadFile(file1.getAbsolutePath());
-		LoadedFile lf = fileController.getLoadedFiles().stream().filter(f -> f.getLongName().equals(file.getAbsolutePath())).findFirst().get();
-		LoadedFile lf1 = fileController.getLoadedFiles().stream().filter(f -> f.getLongName().equals(file1.getAbsolutePath())).findFirst().get();
+		LoadedFile lf = fileController.getLoadedFiles().stream().filter(f -> f.getFilePath().equals(file.getAbsolutePath())).findFirst().get();
+		LoadedFile lf1 = fileController.getLoadedFiles().stream().filter(f -> f.getFilePath().equals(file1.getAbsolutePath())).findFirst().get();
 
 		DataOptions dop = lf.getDataOption("/entry/dataset2");
 		plotManager.waitOnJob();

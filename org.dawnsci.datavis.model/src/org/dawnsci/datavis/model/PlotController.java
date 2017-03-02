@@ -242,8 +242,8 @@ public class PlotController {
 		
 		IDataset[] data = null;
 		try {
-			ILazyDataset view = dataOp.getData().getSliceView();
-			view.setName(dataOp.getFileName() + ":" + dataOp.getName());
+			ILazyDataset view = dataOp.getLazyDataset().getSliceView();
+			view.setName(dataOp.getFilePath() + ":" + dataOp.getName());
 
 			data = mode.sliceForPlot(view, slice,options);
 		} catch (Exception e) {
@@ -265,8 +265,8 @@ public class PlotController {
 		
 		if (data == null) return;	
 		
-		SourceInformation si = new SourceInformation(dataOp.getFileName(), dataOp.getName(), dataOp.getData());
-		SliceInformation s = new SliceInformation(slice, slice, new SliceND(dataOp.getData().getShape()), mode.getDataDimensions(options), 1, 0);
+		SourceInformation si = new SourceInformation(dataOp.getFilePath(), dataOp.getName(), dataOp.getLazyDataset());
+		SliceInformation s = new SliceInformation(slice, slice, new SliceND(dataOp.getLazyDataset().getShape()), mode.getDataDimensions(options), 1, 0);
 		SliceFromSeriesMetadata md = new SliceFromSeriesMetadata(si, s);
 		
 		for (IDataset d : data) d.setMetadata(md);
@@ -295,7 +295,7 @@ public class PlotController {
 	public IPlotMode[] getCurrentPlotModes() {
 		if (fileController.getCurrentDataOption() == null) return null;
 		
-		int[] shape = fileController.getCurrentDataOption().getData().getShape();
+		int[] shape = fileController.getCurrentDataOption().getLazyDataset().getShape();
 		shape = ShapeUtils.squeezeShape(shape, false);
 		int rank = shape.length;
 

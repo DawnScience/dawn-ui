@@ -36,7 +36,7 @@ public class FileControllerTest extends AbstractTestModel{
 	@Test
 	public void testSetCurrentFile() {
 		assertNull(fileController.getCurrentFile());
-		Optional<LoadedFile> lf = fileController.getLoadedFiles().stream().filter(f -> f.getLongName().equals(file.getAbsolutePath())).findFirst();
+		Optional<LoadedFile> lf = fileController.getLoadedFiles().stream().filter(f -> f.getFilePath().equals(file.getAbsolutePath())).findFirst();
 		fileController.setCurrentFile(lf.get(),false);
 		assertNotNull(fileController.getCurrentFile());
 		fileController.setCurrentFile(null,false);

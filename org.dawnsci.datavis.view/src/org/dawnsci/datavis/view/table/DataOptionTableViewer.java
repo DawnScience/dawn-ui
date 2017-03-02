@@ -117,7 +117,7 @@ public class DataOptionTableViewer {
 		shape.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				return Arrays.toString(((DataOptions)element).getData().getShape());
+				return Arrays.toString(((DataOptions)element).getLazyDataset().getShape());
 			}
 		});
 		

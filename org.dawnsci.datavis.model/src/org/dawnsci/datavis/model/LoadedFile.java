@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.dawnsci.datavis.api.IDataFilePackage;
+import org.dawnsci.datavis.api.IDataPackage;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
 import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
@@ -17,7 +19,7 @@ import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.LazyDatasetBase;
 
 
-public class LoadedFile implements IDataObject {
+public class LoadedFile implements IDataObject, IDataFilePackage {
 
 	private IDataHolder dataHolder;
 	private Map<String,DataOptions> dataOptions;
@@ -92,7 +94,7 @@ public class LoadedFile implements IDataObject {
 		return f.getName();
 	}
 	
-	public String getLongName() {
+	public String getFilePath() {
 		return dataHolder.getFilePath();
 	}
 	
@@ -132,6 +134,11 @@ public class LoadedFile implements IDataObject {
 		}
 		
 		return checked;
+	}
+
+	@Override
+	public IDataPackage[] getDataPackages() {
+		return dataOptions.values().stream().toArray(size ->new IDataPackage[size]);
 	}
 	
 }

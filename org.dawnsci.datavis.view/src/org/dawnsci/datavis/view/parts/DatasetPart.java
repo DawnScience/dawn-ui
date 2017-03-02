@@ -217,7 +217,7 @@ public class DatasetPart {
 	    public void update(ViewerCell cell) {
 	      Object element = cell.getElement();
 	      StyledString text = new StyledString();
-	      text.append(((DataOptions)element).getName() + " " + Arrays.toString(((DataOptions)element).getData().getShape()));
+	      text.append(((DataOptions)element).getName() + " " + Arrays.toString(((DataOptions)element).getLazyDataset().getShape()));
 	      cell.setText(text.toString());
 	      super.update(cell);
 		}

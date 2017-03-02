@@ -26,7 +26,7 @@ public class LoadedFiles implements IDataObject, Iterable<LoadedFile> {
 	}
 	
 	public boolean contains(String path) {
-		Optional<LoadedFile> findAny = fileList.stream().filter(f -> path.equals(f.getLongName())).findAny();
+		Optional<LoadedFile> findAny = fileList.stream().filter(f -> path.equals(f.getFilePath())).findAny();
 		return findAny.isPresent();
 	}
 	
@@ -40,11 +40,11 @@ public class LoadedFiles implements IDataObject, Iterable<LoadedFile> {
 	}
 	
 	public void deselectOthers(String path) {
-		for (LoadedFile file : fileList) if (!path.equals(file.getLongName())) file.setSelected(false);
+		for (LoadedFile file : fileList) if (!path.equals(file.getFilePath())) file.setSelected(false);
 	}
 	
 	public LoadedFile getLoadedFile(String path) {
-		for (LoadedFile file : fileList) if (path.equals(file.getLongName())) return file;
+		for (LoadedFile file : fileList) if (path.equals(file.getFilePath())) return file;
 		return null;
 	}
 	

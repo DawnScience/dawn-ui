@@ -195,27 +195,27 @@ public class NDimensions {
 		return -1;
 	}
 	
-	private boolean validOptions(Object[] opts){
-		
-		List<Object> list = Arrays.asList(opts);
-		
-		boolean valid = true;
-		
-		for (Object o : options) {
-			if (!list.contains(o)) {
-				valid = false;
-				break;
-			}
-			
-			if (Collections.frequency(list, o) != 1) {
-				valid = false;
-				break;
-			}
-		}
-		
-		
-		return valid;
-	}
+//	private boolean validOptions(Object[] opts){
+//		
+//		List<Object> list = Arrays.asList(opts);
+//		
+//		boolean valid = true;
+//		
+//		for (Object o : options) {
+//			if (!list.contains(o)) {
+//				valid = false;
+//				break;
+//			}
+//			
+//			if (Collections.frequency(list, o) != 1) {
+//				valid = false;
+//				break;
+//			}
+//		}
+//		
+//		
+//		return valid;
+//	}
 	
 	public void setUpAxes(String name, Map<String,int[]> axes, String[] primary) {
 		

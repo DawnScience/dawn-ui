@@ -3,13 +3,15 @@ package org.dawnsci.datavis.model;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.dawnsci.datavis.api.IDataPackage;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.january.metadata.MetadataFactory;
 
-public class DataOptions implements IDataObject {
+public class DataOptions implements IDataObject, IDataPackage {
 
 	private String name;
 	private LoadedFile parent;
@@ -29,8 +31,8 @@ public class DataOptions implements IDataObject {
 		return name;
 	}
 	
-	public String getFileName(){
-		return parent.getLongName();
+	public String getFilePath(){
+		return parent.getFilePath();
 	}
 	
 	public Map<String, int[]> getAllPossibleAxes() {
@@ -58,7 +60,7 @@ public class DataOptions implements IDataObject {
 		return ax;
 	}
 	
-	public ILazyDataset getData() {
+	public ILazyDataset getLazyDataset() {
 		if (data == null) {
 			ILazyDataset local = parent.getLazyDataset(name).getSliceView();
 			if (axes != null) {
@@ -153,8 +155,12 @@ public class DataOptions implements IDataObject {
 	}
 	
 	public NDimensions buildNDimensions() {
-		NDimensions ndims = new NDimensions(getData().getShape());
+		NDimensions ndims = new NDimensions(getLazyDataset().getShape());
 		ndims.setUpAxes((String)null, getAllPossibleAxes(), getPrimaryAxes());
 		return ndims;
+	}
+	
+	public SliceND getSlice() {
+		return plottableObject == null ? null : plottableObject.getNDimensions().buildSliceND();
 	}
 }
