@@ -81,7 +81,8 @@ public class PeakFindingActionsDelegate {
 		};
 		preferences.setImageDescriptor(Activator.getImageDescriptor("icons/Configure.png"));
 		toolbar.add(preferences);
-
+		
+		toolbar.update(true);
 	}
 	
 }

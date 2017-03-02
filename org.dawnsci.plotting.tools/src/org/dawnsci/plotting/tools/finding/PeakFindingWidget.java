@@ -51,7 +51,7 @@ public class PeakFindingWidget {
 	
 	public void createControl(final Composite parent){
 
-		Group configure = new Group(parent, SWT.FILL);
+		Group configure = new Group(parent, SWT.NONE);
 		configure.setText("Peakfinding Configuration ");
 		configure.setLayout(new GridLayout(1, false));
 		configure.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -74,7 +74,7 @@ public class PeakFindingWidget {
 		lwrBndVal.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		lwrBndVal.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				//controller.setLowerBnd(lwrBndVal.getDouble());
+				controller.setLowerBnd(lwrBndVal.getDouble());
 			}
 		});
 	
@@ -87,7 +87,7 @@ public class PeakFindingWidget {
 		uprBndVal.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		uprBndVal.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				//controller.setUpperBnd(uprBndVal.getDouble());
+				controller.setUpperBnd(uprBndVal.getDouble());
 			}
 		});
 
@@ -98,7 +98,7 @@ public class PeakFindingWidget {
 		searchIntensityLab.setText("Search Intensity");
 		searchIntensityLab.setToolTipText("Higher values tend to lead to less peaks");
 
-		searchIntensity = new FloatSpinner(configureComposite, SWT.BORDER, 4, 3);
+		searchIntensity = new FloatSpinner(configureComposite, SWT.BORDER, 1000, 3);
 		searchIntensity.setMaximum(300);
 		searchIntensity.setMinimum(1);
 		searchIntensity.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.dawb.common.ui.util.GridUtils;
+import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.plotting.tools.fitting.PeakFittingTool;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -40,10 +41,14 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Scale;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.part.IPageSite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
+
+//import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
 
 /**
  * @author Dean P. Ottewell
@@ -118,7 +123,19 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		//TODO: can not really remove this...component of tool
 		configureTraces();
 		
-		controller.getActions().createActions(getSite().getActionBars().getToolBarManager());
+		//Check site before create action bar 
+		ActionBarWrapper actionBarWrapper = null;
+		if (getSite() == null) {
+			parent = new Composite(composite, SWT.BORDER);
+			parent.setLayout(new GridLayout(1, false));
+			actionBarWrapper = ActionBarWrapper.createActionBars(parent, null);
+			actionBarWrapper.update(true);
+		}
+		
+		final IPageSite site = getSite();
+		IActionBars actionbars = site != null ? site.getActionBars() : actionBarWrapper;
+
+		controller.getActions().createActions(actionbars.getToolBarManager());
 		//createActions();
 
 		controller.getTable().createTableControl(composite);
@@ -325,9 +342,8 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 		Dataset ydata = genBoundsHeight();
 
-		updateTraceBounds(xdata, ydata); //TODOL this is already triggers
+		updateTraceBounds(xdata, ydata); //TODO: this is already triggers
 	}
-	
 
 	public void updateBoundsUpper(double upperVal){
 		Dataset xData = (Dataset) regionBndsTrace.getXData();

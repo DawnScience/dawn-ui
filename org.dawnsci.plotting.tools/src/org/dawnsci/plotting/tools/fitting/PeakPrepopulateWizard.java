@@ -7,16 +7,11 @@ import org.dawnsci.plotting.tools.finding.PeakFindingController;
 import org.dawnsci.plotting.tools.finding.PeakFindingTool;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IPeak;
-import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.Dataset;
-import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.action.ToolBarManager;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
@@ -24,10 +19,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.part.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,25 +60,27 @@ public class PeakPrepopulateWizard extends WizardPage {
 	
 	public PeakPrepopulateWizard(FunctionFittingTool parentFittingTool, Dataset[] roiLimits) {
 		super("Intial peak searching tool");
+		this.setDescription("Search for peaks to then pass onto function fitting");
+		this.setTitle("Peak Finding");
+		
 		this.setControl(parentFittingTool.getControl());
 		//Setup the dialog and get the parent fitting tool as well as the ROI limits we're interested in.
 	
 		//Configure controller for peak tool
-		this.controller = new PeakFindingController();
 		
 		this.parentFittingTool = parentFittingTool;
-		
-		//Need to set plotting system in controller
-		this.controller.setPlottingSystem(parentFittingTool.getPlottingSystem());
-		this.controller.setRegion((RectangularROI)parentFittingTool.getPlottingSystem().getRegion("fit_region").getROI());
-		
 		this.traces = parentFittingTool.getPlottingSystem().getTraces();
 		
+		this.controller = new PeakFindingController();
+		
+		//Need to set plotting system in controller
+		//this.controller = new PeakFindingController();
+		//this.controller.setPlottingSystem(parentFittingTool.getPlottingSystem());
+		//this.controller.setRegion((RectangularROI)parentFittingTool.getPlottingSystem().getRegion("fit_region").getROI());
 	}
 	
 	@Override
 	public void createControl(Composite parent) {
-		
 		
 		//Create/get the base containers and set up the grid layout
 		dialogContainer = new Composite(parent, SWT.NONE);
@@ -114,8 +107,10 @@ public class PeakPrepopulateWizard extends WizardPage {
 		
 		createPlottingSystem(right);
 		
+		this.controller.setPlottingSystem(plotting);
+		//TODO: pass onlt controller
 		PeakFindingTool tool = new PeakFindingTool(plotting,controller);
-		tool.init(parentFittingTool.getSite());
+		
 		tool.createControl(left);
 	}
 	
@@ -139,8 +134,6 @@ public class PeakPrepopulateWizard extends WizardPage {
 		for(ITrace trace : traces)
 			plotting.addTrace(trace);
 	}	
-	
-	
 	
 	/**
 	 * Gets the currently selected peak profile type in the combo box
