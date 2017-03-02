@@ -371,12 +371,7 @@ public class PowderLineTool extends AbstractToolPage {
 				}
 					
 				DoubleDataset lines = (DoubleDataset) DatasetUtils.convertToDataset(dataHolder.getDataset(0));
-				String[] dSpaceNames = new String[]{"d", "d spacing", "d space"};
-				if (Arrays.asList(dSpaceNames).contains(dataHolder.getName(0).toLowerCase())) {
-					theTool.setLines(lines);
-				} else {
-					logger.error("PowderLineTool: only files containing d-spacings are allowed. Found "+dataHolder.getName(0)+ ", expected "+Arrays.toString(dSpaceNames));
-				}
+				theTool.setLines(lines);
 			}
 		};
 		getSite().getActionBars().getToolBarManager().add(loadAction);
