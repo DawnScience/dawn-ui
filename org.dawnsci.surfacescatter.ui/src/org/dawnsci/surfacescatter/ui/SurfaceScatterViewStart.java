@@ -298,6 +298,8 @@ public class SurfaceScatterViewStart extends Dialog {
 				
 				customComposite.generalUpdate();
 				ssps3c.generalUpdate();
+				customComposite.generalCorrectionsUpdate();
+				
 
 			}
 
@@ -639,6 +641,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				ssps3c.generalUpdate();
 				customComposite.getPlotSystem1CompositeView().generalUpdate();
 				ssp.trackingRegionOfInterestSetter(ssp.getLenPt());
+				customComposite.generalCorrectionsUpdate();
 
 			}
 
@@ -748,8 +751,11 @@ public class SurfaceScatterViewStart extends Dialog {
 				ArrayList<ArrayList<IDataset>> xyArrays = ssp.xyArrayPreparer();
 
 				GeneralOverlapHandlerView goh = new GeneralOverlapHandlerView(getParentShell(), SWT.OPEN,
-						xyArrays.get(0), xyArrays.get(1), xyArrays.get(2), xyArrays.get(3), xyArrays.get(4),
-						outputCurves.getPlotSystem(), ssp);
+						xyArrays.get(0), xyArrays.get(1), 
+						xyArrays.get(2), xyArrays.get(3), 
+						xyArrays.get(4), xyArrays.get(5),
+						xyArrays.get(6), outputCurves.getPlotSystem(), 
+						ssp);
 
 				goh.open();
 
@@ -804,8 +810,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			public void widgetSelected(SelectionEvent e) {
 
 				IPlottingSystem<Composite> pS = outputCurves.getPlotSystem();
-				Combo selector = outputCurves.getIntensity();
-				ssp.switchFhklIntensity(pS, selector);
+				ssp.switchFhklIntensity(pS, outputCurves.getIntensity());
 
 			}
 

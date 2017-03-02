@@ -1,30 +1,11 @@
 package org.dawnsci.surfacescatter.ui;
 
-import java.io.PrintWriter;
 import java.util.ArrayList;
 
-import org.dawb.common.ui.widgets.ActionBarWrapper;
-import org.dawnsci.surfacescatter.DataModel;
-import org.dawnsci.surfacescatter.DummyProcessingClass;
-import org.dawnsci.surfacescatter.ExampleModel;
-import org.dawnsci.surfacescatter.GeometricParametersModel;
 import org.dawnsci.surfacescatter.OverlapUIModel;
-import org.dawnsci.surfacescatter.ui.GeometricParametersWindows;
-import org.dawnsci.surfacescatter.PlotSystem2DataSetter;
-import org.dawnsci.surfacescatter.PlotSystemCompositeDataSetter;
-import org.dawnsci.surfacescatter.SuperModel;
-import org.dawnsci.surfacescatter.VerticalHorizontalSlices;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.plotting.api.region.IROIListener;
-import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
-import org.eclipse.dawnsci.plotting.api.trace.ITrace;
-import org.eclipse.january.dataset.AggregateDataset;
-import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.ILazyDataset;
-import org.eclipse.january.dataset.Maths;
-import org.eclipse.january.dataset.SliceND;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -51,6 +32,8 @@ public class GeneralOverlapHandlerView extends Dialog {
     private ArrayList<IDataset> yArrayListError;
     private ArrayList<IDataset> yArrayListFhkl;
     private ArrayList<IDataset> yArrayListFhklError;
+    private ArrayList<IDataset> yArrayListRaw;
+    private ArrayList<IDataset> yArrayListRawError;
     private Button export;
     private SurfaceScatterPresenter ssp;
     private IPlottingSystem<Composite> parentPs;
@@ -63,6 +46,8 @@ public class GeneralOverlapHandlerView extends Dialog {
 			ArrayList<IDataset> yArrayListError,
 			ArrayList<IDataset> yArrayListFhkl,
 			ArrayList<IDataset> yArrayListFhklError,
+			ArrayList<IDataset> yArrayListRaw,
+			ArrayList<IDataset> yArrayListRawError,
 			IPlottingSystem<Composite> parentPs,
 			SurfaceScatterPresenter ssp){
 		
@@ -75,6 +60,8 @@ public class GeneralOverlapHandlerView extends Dialog {
 	    this.yArrayListError = yArrayListError;
 	    this.yArrayListFhkl = yArrayListFhkl;
 	    this.yArrayListFhklError = yArrayListFhklError;
+	    this.yArrayListRaw = yArrayListRaw;
+	    this.yArrayListRawError = yArrayListRawError;
 	    this.parentPs = parentPs;
 	    this.ssp = ssp;
 	}
@@ -112,13 +99,12 @@ public class GeneralOverlapHandlerView extends Dialog {
 		GridData topImageData= new GridData(SWT.FILL, SWT.FILL, true, true);
 		topImage.setLayoutData(topImageData);
 		
-		GridData ld1 = new GridData(SWT.FILL, SWT.FILL, true, true);
+//		GridData ld1 = new GridData(SWT.FILL, SWT.FILL, true, true);
 		
 		OverlapCurves customComposite = new OverlapCurves(topImage, 
 														  SWT.NONE, 
 														  yArrayList, 
 														  xArrayList,
-//														  filepaths,
 														  "Title", 
 														  model);
 		customComposite.setLayout(new GridLayout());
@@ -138,6 +124,8 @@ public class GeneralOverlapHandlerView extends Dialog {
 												   yArrayListError,
 												   yArrayListFhkl,
 												   yArrayListFhklError,
+												   yArrayListRaw,
+												   yArrayListRawError,
 												   "Overlap Test", 
 												   model,
 												   ssp);
@@ -199,19 +187,17 @@ public class GeneralOverlapHandlerView extends Dialog {
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
 				
 			}
 		});
-		
-			    
+		    
 	    return container;
 	}
 	
 	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		newShell.setText("ExampleDialog");
+		newShell.setText("Overlap Dialog");
 	}
 
 	@Override

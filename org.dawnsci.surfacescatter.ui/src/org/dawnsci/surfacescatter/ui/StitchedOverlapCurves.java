@@ -31,6 +31,8 @@ public class StitchedOverlapCurves extends Composite {
     private ArrayList<IDataset> yArrayListError;
     private ArrayList<IDataset> yArrayListFhkl;
     private ArrayList<IDataset> yArrayListFhklError;
+    private ArrayList<IDataset> yArrayListRaw;
+    private ArrayList<IDataset> yArrayListRawError;
     private ILineTrace lt1;
     private SurfaceScatterPresenter ssp;
     private IDataset[] attenuatedDatasets;
@@ -41,7 +43,9 @@ public class StitchedOverlapCurves extends Composite {
 			ArrayList<IDataset> yArrayList,
 			ArrayList<IDataset> yArrayListError,
 			ArrayList<IDataset> yArrayListFhkl,
-			ArrayList<IDataset> yArrayListFhklError,	
+			ArrayList<IDataset> yArrayListFhklError,
+			ArrayList<IDataset> yArrayListRaw,
+			ArrayList<IDataset> yArrayListRawError,
     		String title, 
     		OverlapUIModel model,
     		SurfaceScatterPresenter ssp) {
@@ -62,6 +66,8 @@ public class StitchedOverlapCurves extends Composite {
         this.yArrayListError = yArrayListError;
         this.yArrayListFhkl = yArrayListFhkl;
         this.yArrayListFhklError = yArrayListFhklError;
+        this.yArrayListRaw = yArrayListRaw;
+        this.yArrayListRawError = yArrayListRawError;
         this.ssp = ssp;
         
         this.createContents(xArrayList,
@@ -69,6 +75,8 @@ public class StitchedOverlapCurves extends Composite {
     			yArrayListError,
     			yArrayListFhkl,
     			yArrayListFhklError,
+    			yArrayListRaw,
+    			yArrayListRawError,
         		title, model); 
     }
      
@@ -77,6 +85,8 @@ public class StitchedOverlapCurves extends Composite {
 			ArrayList<IDataset> yArrayListError,
 			ArrayList<IDataset> yArrayListFhkl,
 			ArrayList<IDataset> yArrayListFhklError, 
+			ArrayList<IDataset> yArrayListRaw,
+			ArrayList<IDataset> yArrayListRawError,
 			String filepaths, 
 			OverlapUIModel model) {
     	
@@ -118,6 +128,8 @@ public class StitchedOverlapCurves extends Composite {
 															  yArrayListError,
 															  yArrayListFhkl,
 															  yArrayListFhklError, 
+															  yArrayListRaw,
+															  yArrayListRawError,
 															  model);
 				
 				Dataset[] sortedAttenuatedDatasets = new Dataset[2];
@@ -138,8 +150,7 @@ public class StitchedOverlapCurves extends Composite {
     } 
 		
     public Composite getComposite(){
-   	
-   	return this;
+    	return this;
    }
    
    public IPlottingSystem<Composite> getPlotSystem(){

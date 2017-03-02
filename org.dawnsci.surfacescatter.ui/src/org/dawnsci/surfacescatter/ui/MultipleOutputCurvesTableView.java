@@ -73,8 +73,9 @@ public class MultipleOutputCurvesTableView extends Composite {
 		
 		intensitySelect = new Combo(overlapSelection, SWT.DROP_DOWN | SWT.BORDER |SWT.FILL);
 //		intensitySelect.setText("Intensity");
-		intensitySelect.add("Intensity");
+		intensitySelect.add("Corrected Intensity");
 		intensitySelect.add("Fhkl");
+		intensitySelect.add("Raw Intensity");
 		intensitySelect.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		intensitySelect.select(0);
 		

@@ -47,14 +47,19 @@ public class PlotSystemCompositeView extends Composite {
     private Text xValue;
     private Text imageNumber;
     private Button replay;
-    private Button go;
+	private Button go;
 	private TabFolder folder;
 	private Text xCoord;
 	private Text xLen;
 	private Text yCoord;
 	private Text yLen;
+	private Text lorentz;
+	private Text polarisation;
+	private Text areaCorrection;
+	private Text rawIntensity;
 	private SashForm form;
 	private TabItem subBgI;
+	private TabItem correctionsTab;
 	private Button centreRegion;
 	private Button centreSecondBgRegion;
 
@@ -76,7 +81,6 @@ public class PlotSystemCompositeView extends Composite {
         
         try {
 			plotSystem = PlottingFactory.createPlottingSystem();
-//			subImagePlotSystem = PlottingFactory.createPlottingSystem();
 			
 		} catch (Exception e2) {
 			e2.printStackTrace();
@@ -214,12 +218,9 @@ public class PlotSystemCompositeView extends Composite {
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
 				
 			}
 		});
-		
-
 		
         centreSecondBgRegion = new Button(centringButtons, SWT.PUSH | SWT.FILL);
         centreSecondBgRegion.setText("Centre Background Region");
@@ -241,9 +242,6 @@ public class PlotSystemCompositeView extends Composite {
 			}
 		});
 		
-	
-        
-        
         folder = new TabFolder(form, SWT.BORDER | SWT.CLOSE);
     	folder.setLayout(new GridLayout());
     		
@@ -256,7 +254,7 @@ public class PlotSystemCompositeView extends Composite {
     	TabItem subI = new TabItem(folder, SWT.NONE);
     	subI.setText("Background Options");
     	subI.setData(new GridData(SWT.FILL, SWT.FILL, true, true));
-//    		
+    		
     	Composite subIComposite = new Composite(folder, SWT.NONE | SWT.FILL);
     	subIComposite.setLayout(new GridLayout());
     	subIComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -297,6 +295,42 @@ public class PlotSystemCompositeView extends Composite {
 		secondBgRegion.setFill(false);
 		plotSystem.addRegion(secondBgRegion);
 		secondBgRegion.setVisible(false);
+		
+		////////////////////////////////////////////////////////
+		//		Tab 2 Setup
+		//////////////////////////////////////////////////////////
+
+		correctionsTab = new TabItem(folder, SWT.NONE);
+		correctionsTab.setText("Raw Output and Corrections");
+		correctionsTab.setData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Composite correctionsTabComposite = new Composite(folder, SWT.NONE | SWT.FILL);
+		correctionsTabComposite.setLayout(new GridLayout());
+		correctionsTabComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+		correctionsTab.setControl(correctionsTabComposite);
+		
+		if (ssp.getCorrectionSelection() ==0 ){
+			
+			Group corrections = new Group(correctionsTabComposite, SWT.NONE);
+		    GridLayout 	correctionsLayout = new GridLayout(2,true);
+		    corrections.setLayout(correctionsLayout);
+			GridData correctionsData = new GridData(SWT.FILL, SWT.NULL, true, false);
+			corrections.setLayoutData(correctionsData);
+			
+			InputTileGenerator subTile0 = new InputTileGenerator("Raw Intensity:", String.valueOf(ssp.getCurrentRawIntensity()), corrections);
+			rawIntensity = subTile0.getText();
+			InputTileGenerator subTile1 = new InputTileGenerator("Lorentz Correction:", String.valueOf(ssp.getCurrentLorentzCorrection()), corrections);
+			lorentz = subTile1.getText();
+			InputTileGenerator subTile2 = new InputTileGenerator("Polarisation Correction:", String.valueOf(ssp.getCurrentPolarisationCorrection()), corrections);
+			polarisation = subTile2.getText();
+			InputTileGenerator subTile3 = new InputTileGenerator("Area Correction:", String.valueOf(ssp.getCurrentAreaCorrection()), corrections);
+			setAreaCorrection(subTile3.getText());
+			
+		}
+		
+		
+		folder.pack();
 		
 		region.addROIListener(new IROIListener() {
 
@@ -368,7 +402,6 @@ public class PlotSystemCompositeView extends Composite {
 	   return image;
    }
    
-
    public PlotSystem1CompositeView getPlotSystem1CompositeView(){
 	   return customComposite1;
    }
@@ -396,8 +429,7 @@ public class PlotSystemCompositeView extends Composite {
 	public void updateImage(IDataset image){
 		plotSystem.updatePlot2D(image, null, null);
 	}
-	
-   
+	 
 	public void sliderReset(ExampleModel model1){
 		slider.setMinimum(0);
 	    slider.setMaximum(model1.getDatImages().getShape()[0]);
@@ -454,8 +486,6 @@ public class PlotSystemCompositeView extends Composite {
 		RectangularROI newROI = new RectangularROI((int) Math.round(ad[1]*3/8),(int) Math.round(ad[0]*3/8),(int) Math.round(ad[1]*0.25),(int) Math.round(ad[0]*0.25),0);
 		re.setROI(newROI);
 	}
-	
-	
 	
 	public Button getRun(){
 		return run;
@@ -526,6 +556,31 @@ public class PlotSystemCompositeView extends Composite {
 				
 	}
 	
+	public void generalCorrectionsUpdate(){
+		
+		lorentz.setText(String.valueOf(ssp.getCurrentLorentzCorrection()));
+		polarisation.setText(String.valueOf(ssp.getCurrentPolarisationCorrection()));
+		rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
+		areaCorrection.setText(String.valueOf(ssp.getCurrentAreaCorrection()));
+		
+		this.update();
+		
+		
+	
+	}
+
+	public void generalCorrectionsSet(double lorentzCorrection,
+									  double polarisationCorrection,
+									  double rawIntensityValue,
+									  double areaCorrectionValue){
+		
+		lorentz.setText(String.valueOf(lorentzCorrection));
+		polarisation.setText(String.valueOf(polarisationCorrection));
+		rawIntensity.setText(String.valueOf(rawIntensityValue));
+		areaCorrection.setText(String.valueOf(areaCorrectionValue));
+	
+	}
+
 	public void generalUpdate(){
 		
 		plotSystem.updatePlot2D(ssp.getImage(ssp.getSliderPos()), null, null);
@@ -556,7 +611,7 @@ public class PlotSystemCompositeView extends Composite {
 	public void appendBackgroundSubtractedSubImage(){
 		
 		try{
-			TabItem m = folder.getItem(1);
+			TabItem m = folder.getItem(2);
 			m.dispose();
 			folder.pack();
 		}
@@ -581,7 +636,7 @@ public class PlotSystemCompositeView extends Composite {
 			e.printStackTrace();
 		}
 		subImageBgPlotSystem.createPlotPart(subBgIComposite, "Region of interest", null, PlotType.IMAGE, null);
-		subImageBgPlotSystem.getPlotComposite().setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, true));
+		subImageBgPlotSystem.getPlotComposite().setLayoutData( new GridData(GridData.FILL_BOTH));
 		subImageBgPlotSystem.createPlot2D(nullImage, null, null);	
 		
 		folder.pack();		
@@ -589,7 +644,7 @@ public class PlotSystemCompositeView extends Composite {
 	}
 	
 	public void removeBackgroundSubtractedSubImage(){
-		TabItem m = folder.getItem(1);
+		TabItem m = folder.getItem(2);
 		m.dispose();
 		folder.pack();
 		subBgI = null;
@@ -607,7 +662,39 @@ public class PlotSystemCompositeView extends Composite {
 	public SashForm getSash(){
 		return form;
 	}
+
+	public Text getAreaCorrection() {
+		return areaCorrection;
+	}
+
+	public void setAreaCorrection(Text areaCorrection) {
+		this.areaCorrection = areaCorrection;
+	}
 	
+	public Text getLorentz() {
+		return lorentz;
+	}
+
+	public void setLorentz(Text lorentz) {
+		this.lorentz = lorentz;
+	}
+
+	public Text getPolarisation() {
+		return polarisation;
+	}
+
+	public void setPolarisation(Text polarisation) {
+		this.polarisation = polarisation;
+	}
+
+	public Text getRawIntensity() {
+		return rawIntensity;
+	}
+
+	public void setRawIntensity(Text rawIntensity) {
+		this.rawIntensity = rawIntensity;
+	}
+
 }
     
 

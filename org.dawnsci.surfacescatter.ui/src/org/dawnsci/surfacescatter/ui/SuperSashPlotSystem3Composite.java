@@ -40,6 +40,8 @@ public class SuperSashPlotSystem3Composite extends Composite{
     private Group topRight;
     private SashForm sashForm;
     private Button resetCrossHairs;
+	private SurfaceScatterViewStart ssvs;
+	
 	
 	public SurfaceScatterPresenter getSsp() {
 		return ssp;
@@ -48,9 +50,6 @@ public class SuperSashPlotSystem3Composite extends Composite{
 	public void setSsp(SurfaceScatterPresenter ssp) {
 		this.ssp = ssp;
 	}
-
-
-	private SurfaceScatterViewStart ssvs;
 
 	public SurfaceScatterViewStart getSsvs() {
 		return ssvs;
@@ -89,8 +88,7 @@ public class SuperSashPlotSystem3Composite extends Composite{
     }
 	
 	 public void createContents() throws Exception {
-		 	
-		 
+
 		 ssp.addStateListener(new  IPresenterStateChangeEventListener() {
 				
 				@Override
@@ -421,16 +419,15 @@ public class SuperSashPlotSystem3Composite extends Composite{
 				
 				plotSystem1.autoscaleAxes();
 				plotSystem3.autoscaleAxes();
-		
-				
-				
-				
+			
 				plotSystem1.repaint();
 				plotSystem3.repaint();
 				
 				sashForm.setWeights(new int[] {50,50});
 				left.setWeights(new int[] {50,50});
 				right.setWeights(new int[] {50,50});
+				
+				ssp.correctionsDisplayUpdate();
 				
 				return;
 		}
@@ -519,6 +516,9 @@ public class SuperSashPlotSystem3Composite extends Composite{
 			left.setWeights(new int[] {50,50});
 			right.setWeights(new int[] {50,50});
 
+			ssp.correctionsDisplayUpdate();
+			
+			
 			return;
 	}
 		
@@ -534,10 +534,7 @@ public class SuperSashPlotSystem3Composite extends Composite{
 
 			
 			RectangularROI vertROI = new RectangularROI((int) Math.round(ad[1]/4),0,(int) Math.round(ad[1]*0.5),ad[0],0);
-			verticalSlice.setROI(vertROI);;
-			
-			
-			
+			verticalSlice.setROI(vertROI);;		
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
