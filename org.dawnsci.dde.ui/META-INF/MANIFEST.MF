@@ -19,6 +19,7 @@ Require-Bundle: org.eclipse.ui;bundle-version="3.8.2",
  org.eclipse.e4.ui.model.workbench;bundle-version="1.1.100",
  org.eclipse.launchbar.ui;bundle-version="1.0.1",
  org.dawb.common.ui,
- org.eclipse.jdt.launching
+ org.eclipse.jdt.launching,
+ org.eclipse.launchbar.ui.controls
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy

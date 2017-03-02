@@ -30,7 +30,7 @@ import org.eclipse.e4.ui.model.application.ui.menu.MToolControl;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.UIEvents.EventTags;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
-import org.eclipse.launchbar.ui.internal.controls.LaunchBarControl;
+import org.eclipse.launchbar.ui.controls.internal.LaunchBarControl;
 import org.eclipse.swt.widgets.Widget;
 import org.osgi.service.event.Event;
 
