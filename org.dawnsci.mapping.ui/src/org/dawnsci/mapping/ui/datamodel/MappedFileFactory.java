@@ -45,8 +45,14 @@ public class MappedFileFactory {
 				if (monitor.isCancelled()) return null;
 				monitor.subTask(name);
 			}
-			MappedDataBlock block = setUpBlock(path, name, b, bean.getLiveBean(),bean.getScanRank());
-			file.addMapObject(name, block);
+			
+			try {
+				MappedDataBlock block = setUpBlock(path, name, b, bean.getLiveBean(),bean.getScanRank());
+				file.addMapObject(name, block);
+			} catch (Exception e) {
+				logger.error("Could not build block named " + name, e);
+			}
+			
 
 			if (monitor != null) monitor.worked(1);
 		}
@@ -56,6 +62,11 @@ public class MappedFileFactory {
 				if (monitor != null && monitor.isCancelled()) return null;
 				if (monitor != null) monitor.subTask(b.getName());
 				MappedDataBlock block = file.getDataBlockMap().get(b.getParent());
+				
+				if (block == null && !file.getDataBlockMap().isEmpty()) {
+					block = file.getDataBlockMap().values().iterator().next();
+				}
+				
 				AbstractMapData m = setUpMap(path, b.getName(),block, bean.getLiveBean());
 				if (bean.getLiveBean() == null) m.getData().setName(m.toString());
  				file.addMapObject(b.getName(), m);
