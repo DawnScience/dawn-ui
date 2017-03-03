@@ -25,9 +25,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
-import org.eclipse.swt.widgets.Text;
 
 public class PlotSystem1CompositeView extends Composite {
 
@@ -89,7 +87,7 @@ public class PlotSystem1CompositeView extends Composite {
     	Group methodSetting = new Group(this, SWT.FILL | SWT.FILL);
         GridLayout methodSettingLayout = new GridLayout(2, true);
 	    GridData methodSettingData = new GridData(GridData.FILL_HORIZONTAL);
-	    methodSettingData .minimumWidth = 50;
+//	    methodSettingData .minimumWidth = 50;
 	    methodSetting.setLayout(methodSettingLayout);
 	    methodSetting.setLayoutData(methodSettingData);
 	    
@@ -259,8 +257,6 @@ public class PlotSystem1CompositeView extends Composite {
        
        ssp.regionOfInterestSetter();
       
-      
-//       rszv.dummyProcessTrigger();
    }
    
    public Combo[] getCombos(){

@@ -96,7 +96,7 @@ public class DatDisplayer extends Composite {
         
     	selectionSash = new SashForm(this, SWT.FILL);
     	selectionSash.setLayoutData(new GridData(GridData.FILL_BOTH));
-    	Composite left = new Composite(selectionSash, SWT.FILL);
+    	Composite left = new Composite(selectionSash, SWT.NONE);/////was SWT.FiLL
     	left.setLayout(new GridLayout());
     	left.setLayoutData(new GridData(GridData.FILL));
     	    	
@@ -107,8 +107,8 @@ public class DatDisplayer extends Composite {
         Group datSelector = new Group(left, SWT.V_SCROLL | SWT.FILL );
         GridLayout datSelectorLayout = new GridLayout(1,true);
         GridData datSelectorData =new GridData((GridData.FILL_BOTH));
-	    datSelectorData .minimumWidth = 200;
-	    datSelectorData .minimumHeight = 850;
+//	    datSelectorData .minimumWidth = 200;
+//	    datSelectorData .minimumHeight = 850;
 	    datSelector.setLayout(datSelectorLayout);
 	    datSelector.setLayoutData(datSelectorData);
 	    datSelector.setText("Selected Dat Files");
@@ -238,8 +238,8 @@ public class DatDisplayer extends Composite {
 		selectionSash.update();
 		
 	    GridData folderDisplayTableData = new GridData(GridData.FILL_BOTH);
-	    folderDisplayTableData.minimumWidth = 200;
-        folderDisplayTableData.minimumHeight = 550;
+//	    folderDisplayTableData.minimumWidth = 200;
+//        folderDisplayTableData.minimumHeight = 550;
 	    
 	    folderDisplayTable.setLayoutData(folderDisplayTableData);
 	    folderDisplayTable.setLayout(new GridLayout());
@@ -258,8 +258,8 @@ public class DatDisplayer extends Composite {
 	    rodConstrucion = new Group(right, SWT.V_SCROLL | SWT.FILL | SWT.FILL);
         GridLayout rodConstrucionLayout = new GridLayout(1,true);
         GridData rodConstrucionData = new GridData(GridData.FILL_BOTH);
-        rodConstrucionData.minimumWidth = 200;
-        rodConstrucionData.minimumHeight = 600;
+//        rodConstrucionData.minimumWidth = 200;
+//        rodConstrucionData.minimumHeight = 600;
         rodConstrucion.setLayout(rodConstrucionLayout);
         rodConstrucion.setLayoutData(rodConstrucionData);
         rodConstrucion.setText("Rod Construcion");
@@ -268,8 +268,8 @@ public class DatDisplayer extends Composite {
         scannedVariableOptions = new Group(rodConstrucion, SWT.NULL);
         GridLayout scannedVariableOptionsLayout = new GridLayout(1,true);
         GridData scannedVariableOptionsData = new GridData(GridData.FILL_HORIZONTAL);
-        scannedVariableOptionsData .minimumWidth = 50;
-        scannedVariableOptionsData .minimumHeight = 500;
+//        scannedVariableOptionsData .minimumWidth = 50;
+//        scannedVariableOptionsData .minimumHeight = 500;
         scannedVariableOptions.setLayout(scannedVariableOptionsLayout);
         scannedVariableOptions.setLayoutData(scannedVariableOptionsData);
         scannedVariableOptions.setText("Scanned Variables");
@@ -284,8 +284,8 @@ public class DatDisplayer extends Composite {
 	    rodComponents = new Group(rodConstrucion, SWT.NULL | SWT.V_SCROLL | SWT.FILL );
         GridLayout rodComponentsLayout = new GridLayout(1,true);
         GridData rodComponentsData = new GridData(GridData.FILL_BOTH);
-        rodComponentsData.minimumWidth = 200;
-        rodComponentsData.minimumHeight = 500;
+//        rodComponentsData.minimumWidth = 200;
+//        rodComponentsData.minimumHeight = 500;
         rodComponents.setLayout(rodComponentsLayout);
         rodComponents.setLayoutData(rodComponentsData);
         rodComponents.setText("Rod Components");
@@ -304,8 +304,8 @@ public class DatDisplayer extends Composite {
 	    
 	    rodDisplayTable = new Table(rodComponents, SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 	    GridData rodDisplayData = new GridData(GridData.FILL_BOTH);
-        rodDisplayData.minimumWidth = 200;
-        rodDisplayData.minimumHeight = 600;
+//        rodDisplayData.minimumWidth = 200;
+//        rodDisplayData.minimumHeight = 600;
 	    rodDisplayTable.setLayoutData(rodDisplayData);
 	    rodDisplayTable.setLayout(new GridLayout());
 	    rodDisplayTable.setEnabled(false);
