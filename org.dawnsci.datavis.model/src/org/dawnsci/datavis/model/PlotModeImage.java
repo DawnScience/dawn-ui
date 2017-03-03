@@ -7,6 +7,7 @@ import java.util.List;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
@@ -64,9 +65,45 @@ public class PlotModeImage implements IPlotMode {
 			ax = new ArrayList<IDataset>();
 			ILazyDataset[] axes = metadata.getAxes();
 			if (axes != null) {
-				for (ILazyDataset a : axes) {
-					ax.add(a == null ? null : a.getSlice().squeeze());
+				
+				if (axes[0] == null) {
+					ax.add(null);
+				} else {
+					IDataset axis = axes[0].getSlice().squeeze();
+					if (axis.getRank() != 1) {
+						SliceND s = new SliceND(axis.getShape());
+						s.setSlice(1, 0, 1, 1);
+						axis = axis.getSlice(s).squeeze();
+					}
+					axis.setName(MetadataPlotUtils.removeSquareBrackets(axis.getName()));
+					ax.add(axis);
+					
 				}
+				if (axes[1] == null) {
+					ax.add(null);
+				} else {
+					IDataset axis = axes[1].getSlice().squeeze();
+					if (axis.getRank() != 1) {
+						SliceND s = new SliceND(axis.getShape());
+						s.setSlice(0, 0, 1, 1);
+						axis = axis.getSlice(s).squeeze();
+					}
+					axis.setName(MetadataPlotUtils.removeSquareBrackets(axis.getName()));
+					ax.add(axis);
+					
+				}
+				
+				
+//				for (ILazyDataset a : axes) {
+//					
+//					IDataset axis = a.getSlice().squeeze();
+//					
+//					if (axis.getRank() == 2) {
+//						
+//					}
+//					
+//					ax.add(a == null ? null : a.getSlice().squeeze());
+//				}
 				Collections.reverse(ax);
 			}
 		}
