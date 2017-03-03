@@ -1270,7 +1270,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		this.axisRedrawActive = b;
 	}
 
-
 	public void performAutoscale() {
 		
 		if (globalRange != null) {
@@ -1282,23 +1281,47 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		final int[] shape = image.getShape();
 		switch(getImageOrigin()) {
 		case TOP_LEFT:
-			xAxis.setRange(0, shape[1]);
-			yAxis.setRange(shape[0], 0);	
+			if(!xAxis.isInverted())
+				xAxis.setRange(0, shape[1]);
+			else
+				xAxis.setRange(shape[1], 0);
+			if(!yAxis.isInverted())
+				yAxis.setRange(shape[0], 0);
+			else
+				yAxis.setRange(0, shape[0]);
 			break;
 			
 		case BOTTOM_LEFT:
-			xAxis.setRange(0, shape[0]);
-			yAxis.setRange(0, shape[1]);		
+			if(!xAxis.isInverted())
+				xAxis.setRange(0, shape[0]);
+			else
+				xAxis.setRange(shape[0], 0);
+			if(!yAxis.isInverted())
+				yAxis.setRange(0, shape[1]);
+			else
+				yAxis.setRange(shape[1], 0);
 			break;
 
 		case BOTTOM_RIGHT:
-			xAxis.setRange(shape[1], 0);
-			yAxis.setRange(0, shape[0]);		
+			if(!xAxis.isInverted())
+				xAxis.setRange(shape[1], 0);
+			else
+				xAxis.setRange(0, shape[1]);
+			if(!yAxis.isInverted())
+				yAxis.setRange(0, shape[0]);
+			else
+				yAxis.setRange(shape[0], 0);
 			break;
 
 		case TOP_RIGHT:
-			xAxis.setRange(shape[0], 0);
-			yAxis.setRange(shape[1], 0);		
+			if(!xAxis.isInverted())
+				xAxis.setRange(shape[0], 0);
+			else
+				xAxis.setRange(0, shape[0]);
+			if(!yAxis.isInverted())
+				yAxis.setRange(shape[1], 0);
+			else
+				yAxis.setRange(0, shape[1]);
 			break;
 		
 		}
