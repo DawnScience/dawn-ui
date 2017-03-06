@@ -27,6 +27,28 @@ public class FileController implements IFileController {
 	
 	public FileController(){
 		loadedFiles = new LoadedFiles();
+		if (LiveServiceManager.getILiveFileService() != null) {
+			LiveServiceManager.getILiveFileService().addLiveFileListener(new ILiveFileListener() {
+				
+				@Override
+				public void refreshRequest() {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void localReload(String path) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void fileLoaded(LoadedFile loadedFile) {
+					// TODO Auto-generated method stub
+					
+				}
+			});
+		}
 	};
 	
 	/* (non-Javadoc)
