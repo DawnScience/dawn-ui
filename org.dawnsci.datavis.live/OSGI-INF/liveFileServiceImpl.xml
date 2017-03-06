@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="Live File Service Implementation">
+   <implementation class="org.dawnsci.datavis.live.LiveFileServiceImpl"/>
+   <service>
+      <provide interface="org.dawnsci.datavis.model.ILiveFileService"/>
+   </service>
+</scr:component>
