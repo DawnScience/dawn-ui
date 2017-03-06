@@ -115,7 +115,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	@Override
 	public void createControl(Composite parent) {
 
-		this.composite = new Composite(parent, SWT.BORDER);
+		this.composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout(1, false));
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 		GridUtils.removeMargins(composite);
@@ -126,10 +126,11 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		//Check site before create action bar 
 		ActionBarWrapper actionBarWrapper = null;
 		if (getSite() == null) {
-			parent = new Composite(composite, SWT.BORDER);
+			parent = new Composite(composite, SWT.RIGHT);
 			parent.setLayout(new GridLayout(1, false));
 			actionBarWrapper = ActionBarWrapper.createActionBars(parent, null);
 			actionBarWrapper.update(true);
+			
 		}
 		
 		final IPageSite site = getSite();
