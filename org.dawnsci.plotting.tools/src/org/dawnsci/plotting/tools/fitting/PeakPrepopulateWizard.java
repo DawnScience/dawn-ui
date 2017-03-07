@@ -107,7 +107,9 @@ public class PeakPrepopulateWizard extends WizardPage {
 		
 		createPlottingSystem(right);
 		
-		this.controller.setPlottingSystem(plotting);
+		//TODO: NEED TO BE ABLE TO GET THE PLOT TO REDRAW FROM CONTROLLER SETUp 
+		//this.controller.setPlottingSystem(plotting);
+		
 		//TODO: pass onlt controller
 		PeakFindingTool tool = new PeakFindingTool(plotting,controller);
 		

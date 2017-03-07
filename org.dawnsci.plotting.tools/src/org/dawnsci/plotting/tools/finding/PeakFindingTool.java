@@ -26,12 +26,13 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.part.IPageSite;
 import org.slf4j.Logger;
@@ -82,13 +83,10 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	private Double upperBnd;
 	private Double lowerBnd;
 	
-	
-	
-	//TODO: should this defalt contructor generate controller...
+	//TODO: should this default constructor generate controller...
 	public PeakFindingTool() {
 		// Setup up a new PeakSearch Instance
 		this.controller = new PeakFindingController();
-
 		this.traceListener = new ITraceListener.Stub() {
 			@Override
 			public void tracesUpdated(TraceEvent evt) {
@@ -109,9 +107,17 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		return ToolPageRole.ROLE_1D;
 	}
 
+	private ActionBarWrapper generateActionBar(Composite parent){
+		ActionBarWrapper actionBarWrapper = null;
+		parent = new Composite(composite, SWT.RIGHT);
+		parent.setLayout(new GridLayout(1, false));
+		actionBarWrapper = ActionBarWrapper.createActionBars(parent, null);
+		actionBarWrapper.update(true);	
+		return actionBarWrapper;
+	}
+	
 	@Override
 	public void createControl(Composite parent) {
-
 		this.composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout(1, false));
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
@@ -120,23 +126,16 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		//TODO: can not really remove this...component of tool
 		configureTraces();
 		
-		//Check site before create action bar 
-		ActionBarWrapper actionBarWrapper = null;
-		if (getSite() == null) {
-			parent = new Composite(composite, SWT.RIGHT);
-			parent.setLayout(new GridLayout(1, false));
-			actionBarWrapper = ActionBarWrapper.createActionBars(parent, null);
-			actionBarWrapper.update(true);
-			
-		}
-		
 		final IPageSite site = getSite();
-		IActionBars actionbars = site != null ? site.getActionBars() : actionBarWrapper;
+		IActionBars actionbars = site != null ? site.getActionBars() : generateActionBar(parent);
 
+		actions = new PeakFindingActionsDelegate(controller);
 		actions.createActions(actionbars.getToolBarManager());
-
+		
+		table = new PeakFindingTable(controller);
 		table.createTableControl(composite);
-
+		
+		widget = new PeakFindingWidget(controller);
 		widget.createControl(composite);
 
 		// Control Peak Removal + Addition
@@ -157,9 +156,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 					} else if (isRemoving) {
 						removePeakValue(evt.getxValue(), evt.getyValue());
 					}
-					
 					//TODO: refresh table data...
-
 					getPlottingSystem().repaint(); // update plots
 				}
 			}
@@ -273,7 +270,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		peaksTrace.setTraceType(TraceType.HISTO);
 
 		getPlottingSystem().addTrace(peaksTrace);
-
 	}
 
 

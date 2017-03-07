@@ -27,6 +27,7 @@ public class PeakFindingActionsDelegate {
 	}
 	
 	public void createActions(IToolBarManager toolbar) {
+		
 		final Action createNewSelection = new Action("New Search Selection.", IAction.AS_PUSH_BUTTON) {
 			public void run() {
 				//TODO: how will trigger the peak finding tool
@@ -37,7 +38,6 @@ public class PeakFindingActionsDelegate {
 					@Override
 					public void peaksChanged(PeakOpportunityEvent evt) {
 						// TODO Auto-generated method stub
-						
 					}
 				});
 				
@@ -98,7 +98,7 @@ public class PeakFindingActionsDelegate {
 		preferences.setImageDescriptor(Activator.getImageDescriptor("icons/Configure.png"));
 		toolbar.add(preferences);
 		
-		toolbar.update(true);
+		//toolbar.update(true);
 	}
 	
 }

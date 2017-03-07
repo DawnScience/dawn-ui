@@ -189,7 +189,7 @@ public class PeakFindingWidget {
 				runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearching.png").createImage());			
 				
 				// Run peakSearch
-				controller.peakSearchJob= new PeakSearchJob(controller, null, null);
+				controller.peakSearchJob= new PeakSearchJob(controller, controller.peakDataOpp.xData, controller.peakDataOpp.yData);
 				
 				//TODO:Auto schedule in controller func
 				controller.peakSearchJob.schedule();

@@ -46,100 +46,11 @@ public class PeakFindingController {
 	
 	//Really need that intermediate of a identified peak. COuld the below be the answer
 	List<IdentifiedPeak> peaksIdentified = new ArrayList<IdentifiedPeak>();
-	private List<Peak> peaks = new ArrayList<Peak>();
-	
-	public void clearPeaks(){
-		getPeaks().clear();
+
+	public PeakFindingController(){
+		listeners = new HashSet<IPeakOpportunityListener>();
+		peakDataOpp = new PeakOppurtunity();
 	}
-	
-	/**
-	 * Assumes peakpos are those represented in yData passed into. 
-	 * 
-	 * xData and yData must be same size
-	 * 
-	 * @param peakpos
-	 * @param xData
-	 * @param yData
-	 * @return every peak pos inside @peakpos cast to identified Peak
-	 */
-	private List<IdentifiedPeak> convertIntoPeaks(Map<Integer, Double> peakpos, Dataset xData, Dataset yData){
-		
-		ArrayList<IdentifiedPeak> peaks = new ArrayList<IdentifiedPeak>();
-		int backPos, forwardPos;
-		double backTotal, forwardTotal;
-		double backValue, forwardValue;
-		
-		for (Map.Entry<Integer, Double> peak : peakpos.entrySet()) {
-
-			backPos = peak.getKey() - 1;
-			backValue = yData.getElementDoubleAbs(backPos);
-			
-			
-			forwardPos = peak.getKey() + 1;
-			forwardValue = yData.getElementDoubleAbs(forwardPos);
-			
-			/*XXX: well if not normalised to zero can not really assume that zero is the turning point...*/
-
-			// Found zero crossing from positive to negative (maximum)
-			// now, work out left and right height differences from local minima or edge
-			backTotal = 0;
-			// get the backwards points
-			while (backPos > 0) {
-				if (backValue >= 0) {
-					backTotal += backValue;
-					backPos -= 1;
-					backValue = yData.getElementDoubleAbs(backPos);
-				} else {
-					break;
-				}
-			}
-
-			// get the forward points
-			forwardTotal = 0;
-			while (forwardPos < xData.getSize()) {
-				if (forwardValue <= 0) {
-					forwardTotal -= forwardValue;
-					forwardPos += 1;
-					forwardValue = yData.getElementDoubleAbs(forwardPos);
-				} else {
-					break;
-				}
-			}
-			
-			//Okay so below is some logic can grab to finding the peak info
-			int[] start = { backPos };
-			int[] stop = { forwardPos };
-			int[] step = { 1 };
-			
-			Dataset slicedXData = (Dataset) xData.getSlice(start, stop, step);
-			Dataset slicedYData = (Dataset) yData.getSlice(start, stop, step);
-			
-			List<Double> crossings = DatasetUtils.crossings(slicedXData, slicedYData, slicedYData.max()
-					.doubleValue() / 2);
-			
-			//No slice gathered as range too small. Must be current values
-			if (crossings.size() <= 1) {
-				crossings.clear();
-				crossings.add((double) backPos);
-				crossings.add((double) forwardPos);
-			}
-			
-			double position = peak.getKey();
-			double minXValue = xData.getElementDoubleAbs(backPos) ;
-			double maxXValue = xData.getElementDoubleAbs(forwardPos); 
-			double area = Math.min(backTotal, forwardTotal); 
-			double height = slicedYData.peakToPeak().doubleValue();
-			int indexOfMinXVal = backPos; 
-			int indexofMaxXVal = forwardPos;
-			List<Double> crossingsFnd = crossings;
-			
-			IdentifiedPeak newPeak = new IdentifiedPeak(position, minXValue,maxXValue,area,height,indexofMaxXVal,indexOfMinXVal,crossingsFnd);
-			peaks.add(newPeak);
-		}
-		
-		return peaks;
-	}			
-	
 	
 	public String getPeakFinderID() {
 		return peakFinderID;
@@ -248,6 +159,95 @@ public class PeakFindingController {
 		//TODO: have peakOpputunity event use the actual peak opps. This is probs gonna  bite in the butt later by not doing that originally.
 		peaksChangedListeners(new PeakOpportunityEvent(this, peaksOpp.getPeaks()));
 	}
+	
+
+	/**
+	 * Assumes peakpos are those represented in yData passed into. 
+	 * xData and yData must be same size
+	 * 
+	 * @param peakpos
+	 * @param xData
+	 * @param yData
+	 * @return every peak pos inside @peakpos cast to identified Peak
+	 */
+	private List<IdentifiedPeak> convertIntoPeaks(Map<Integer, Double> peakpos, Dataset xData, Dataset yData){
+		
+		ArrayList<IdentifiedPeak> peaks = new ArrayList<IdentifiedPeak>();
+		int backPos, forwardPos;
+		double backTotal, forwardTotal;
+		double backValue, forwardValue;
+		
+		for (Map.Entry<Integer, Double> peak : peakpos.entrySet()) {
+
+			backPos = peak.getKey() - 1;
+			backValue = yData.getElementDoubleAbs(backPos);
+			
+			
+			forwardPos = peak.getKey() + 1;
+			forwardValue = yData.getElementDoubleAbs(forwardPos);
+			
+			/*XXX: well if not normalised to zero can not really assume that zero is the turning point...*/
+
+			// Found zero crossing from positive to negative (maximum)
+			// now, work out left and right height differences from local minima or edge
+			backTotal = 0;
+			// get the backwards points
+			while (backPos > 0) {
+				if (backValue >= 0) {
+					backTotal += backValue;
+					backPos -= 1;
+					backValue = yData.getElementDoubleAbs(backPos);
+				} else {
+					break;
+				}
+			}
+
+			// get the forward points
+			forwardTotal = 0;
+			while (forwardPos < xData.getSize()) {
+				if (forwardValue <= 0) {
+					forwardTotal -= forwardValue;
+					forwardPos += 1;
+					forwardValue = yData.getElementDoubleAbs(forwardPos);
+				} else {
+					break;
+				}
+			}
+			
+			//Okay so below is some logic can grab to finding the peak info
+			int[] start = { backPos };
+			int[] stop = { forwardPos };
+			int[] step = { 1 };
+			
+			Dataset slicedXData = (Dataset) xData.getSlice(start, stop, step);
+			Dataset slicedYData = (Dataset) yData.getSlice(start, stop, step);
+			
+			List<Double> crossings = DatasetUtils.crossings(slicedXData, slicedYData, slicedYData.max()
+					.doubleValue() / 2);
+			
+			//No slice gathered as range too small. Must be current values
+			if (crossings.size() <= 1) {
+				crossings.clear();
+				crossings.add((double) backPos);
+				crossings.add((double) forwardPos);
+			}
+			
+			double position = peak.getKey();
+			double minXValue = xData.getElementDoubleAbs(backPos) ;
+			double maxXValue = xData.getElementDoubleAbs(forwardPos); 
+			double area = Math.min(backTotal, forwardTotal); 
+			double height = slicedYData.peakToPeak().doubleValue();
+			int indexOfMinXVal = backPos; 
+			int indexofMaxXVal = forwardPos;
+			List<Double> crossingsFnd = crossings;
+			
+			IdentifiedPeak newPeak = new IdentifiedPeak(position, minXValue,maxXValue,area,height,indexofMaxXVal,indexOfMinXVal,crossingsFnd);
+			peaks.add(newPeak);
+		}
+		
+		return peaks;
+	}			
+
 	
 //	public void addFile(ISpectrumFile file) {
 //		if (spectrumFiles.containsKey(file.getLongName())) return;
