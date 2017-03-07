@@ -51,12 +51,11 @@ public class PeakFindingActionsDelegate {
 			 public void run() {
 			
 				//TODO: maybe controller shouldnt have this. Get tool values... 
-				controller.isRemoving = false;
-				controller.isAdding = true;
-				
-				if (removeMode.isChecked())
-					removeMode.setChecked(controller.isRemoving);
-			
+//				controller.isRemoving = false;
+//				controller.isAdding = true;
+//				
+//				if (removeMode.isChecked())
+//					removeMode.setChecked(controller.isRemoving);
 			 
 			 }
 		};
@@ -67,11 +66,11 @@ public class PeakFindingActionsDelegate {
 			public void run() {
 			
 				//TODO: maybe controller shouldnt have this
-				controller.isRemoving = true;
-				controller.isAdding = false;
-				if (addMode.isChecked())
-					addMode.setChecked(controller.isAdding);
-			
+//				controller.isRemoving = true;
+//				controller.isAdding = false;
+//				if (addMode.isChecked())
+//					addMode.setChecked(controller.isAdding);
+//			
 			
 			}
 		};

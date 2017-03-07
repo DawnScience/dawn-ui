@@ -34,15 +34,10 @@ public class PeakFindingController {
 	private static IPeakFindingService peakFindServ = (IPeakFindingService) Activator
 			.getService(IPeakFindingService.class);
 	
-	//TODO: decide on if also storing the raw peaks values as well as the id peaks. There can only be one or else both are superfluous
-	Dataset peaksY;
-	Dataset peaksX;
-	
 	private Double searchScaleIntensity;
 	
 	private IPeakFindingData peakFindData; 
 	private String peakFinderID;
-
 	
 	//TODO: check out HashSet. Do I really need a set. 
 	//Who listens -> Tool, Table, widget, actions
@@ -142,17 +137,8 @@ public class PeakFindingController {
 		}
 		
 		return peaks;
-	}
-			
-	RectangularROI selectedRegion;
+	}			
 	
-	public void setRegion(RectangularROI region){
-		this.selectedRegion = region;
-	}
-	
-	public RectangularROI getSelectedRegion(){
-		return this.selectedRegion;
-	}
 	
 	public String getPeakFinderID() {
 		return peakFinderID;
@@ -236,13 +222,13 @@ public class PeakFindingController {
 		this.peaks = peaks;
 	}
 	
-	
 	//Triggers People Listening
 	public void addPeakListener(IPeakOpportunityListener listener) {
 		listeners.add(listener);
 	}
 	
-	public void removeFileListener(IPeakOpportunityListener listener) {
+	//TODO: do I have to manage these listener removals?
+	public void removePeakListener(IPeakOpportunityListener listener) {
 		listeners.remove(listener);
 	}
 
@@ -257,19 +243,6 @@ public class PeakFindingController {
 	
 	}
 	
-//	private void fireFileLoadedListeners(SpectrumFileEvent event) {
-//		for (ISpectrumFileListener listener : listeners)
-//			listener.fileLoaded(event);
-//	}
-//
-//	private void fireFileRemovedListeners(SpectrumFileEvent event) {
-//		for (ISpectrumFileListener listener : listeners)
-//			listener.fileRemoved(event);
-//	
-	
-	
-	
-
 //Reference to what might need to listen on a peak change	
 
 //	public void updatePeakTrace(){

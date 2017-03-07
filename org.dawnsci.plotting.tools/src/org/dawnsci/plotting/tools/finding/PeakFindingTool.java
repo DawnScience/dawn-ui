@@ -165,26 +165,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			}
 		});
 
-		
-		//TODO: Controller Bean listeners
-//		manager.addFileListener(new ISpectrumFileListener() {
-//			@Override
-//			public void fileLoaded(final SpectrumFileEvent event) {
-//				Display.getDefault().syncExec(new Runnable() {
-//					@Override
-//					public void run() {
-//						ISpectrumFile file = updateSelection(event);
-//						file.setShowPlot(true);
-//					}
-//				});
-//			}
-//
-//			@Override
-//			public void fileRemoved(SpectrumFileEvent event) {
-//				updateSelection(event);
-//			}
-//		});
-
 		//controller.addPeakListener()
 		controller.addPeakListener(new IPeakOpportunityListener() {
 
@@ -195,17 +175,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			}
 			
 		});
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
 		
 		super.activate();
 		
@@ -232,14 +201,10 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		Dataset peakx = DatasetFactory.createFromList(pX);
 		Dataset peaky = DatasetFactory.createFromList(pY);
 
+		
+		
+		//TODO: UPDATE CONTROLLER
 		updatePeakTrace(peakx, peaky);
-
-		// Add peaks to table set TODO: move to a part inside updatePEakTrace
-		Peak p = new Peak(x, y);
-		p.setName("P" + pX.size());
-		controller.getPeaks().add(p);
-
-		table.viewer.refresh();
 	}
 
 	private void removePeakValue(Double x, Double y) {
@@ -271,6 +236,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 		}
 
+		//TODO: update controller
 		updatePeakTrace(peakx, peaky);
 	}
 

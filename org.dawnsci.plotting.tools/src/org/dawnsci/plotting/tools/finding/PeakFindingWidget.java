@@ -77,7 +77,7 @@ public class PeakFindingWidget {
 			public void widgetSelected(SelectionEvent e) {
 			
 					
-				controller.setLowerBnd(lwrBndVal.getDouble());
+				//controller.setLowerBnd(lwrBndVal.getDouble());
 			
 			
 			}
@@ -94,7 +94,7 @@ public class PeakFindingWidget {
 			public void widgetSelected(SelectionEvent e) {
 			
 				
-				controller.setUpperBnd(uprBndVal.getDouble());
+				//controller.setUpperBnd(uprBndVal.getDouble());
 			
 			
 			}
