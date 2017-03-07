@@ -21,8 +21,8 @@ import org.eclipse.january.dataset.LazyDatasetBase;
 
 public class LoadedFile implements IDataObject, IDataFilePackage {
 
-	private IDataHolder dataHolder;
-	private Map<String,DataOptions> dataOptions;
+	protected IDataHolder dataHolder;
+	protected Map<String,DataOptions> dataOptions;
 	private boolean selected = false;
 
 	public LoadedFile(IDataHolder dataHolder) {

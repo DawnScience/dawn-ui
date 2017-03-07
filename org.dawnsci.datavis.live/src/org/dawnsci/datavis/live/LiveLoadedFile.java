@@ -1,8 +1,14 @@
 package org.dawnsci.datavis.live;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import org.dawnsci.datavis.model.DataOptions;
+import org.dawnsci.datavis.model.IRefreshable;
 import org.dawnsci.datavis.model.LoadedFile;
+import org.dawnsci.datavis.model.NDimensions;
+import org.dawnsci.datavis.model.PlottableObject;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
 import org.eclipse.dawnsci.analysis.api.tree.IFindInTree;
@@ -11,13 +17,17 @@ import org.eclipse.dawnsci.analysis.api.tree.NodeLink;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
 import org.eclipse.dawnsci.analysis.tree.TreeToMapUtils;
+import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.IDatasetConnector;
+import org.eclipse.january.dataset.IDynamicDataset;
+import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.IRemoteData;
+import org.eclipse.january.dataset.LazyDatasetBase;
 import org.eclipse.january.metadata.Metadata;
 
 import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 
-public class LiveLoadedFile extends LoadedFile {
+public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 
 	public LiveLoadedFile(String path, String host, int port) {
 		this(createDataHolder(path,host,port));
@@ -26,11 +36,18 @@ public class LiveLoadedFile extends LoadedFile {
 	private LiveLoadedFile(IDataHolder dh) {
 		super(dh);
 	}
+	
+	public List<DataOptions> getDataOptions() {
+		
+		return new ArrayList<>(dataOptions.values());
+	}
 
 	private static IDataHolder createDataHolder(String path, String host, int port) {
 		DataHolder dh = new DataHolder();
+		dh.setFilePath(path);
 		
 		IRemoteData rd = ServiceManager.getRemoteDatasetService().createRemoteData(host, port);
+		rd.setPath(path);
 		Map<String, Object> map = null;
 		try {
 			map = rd.getTree();
@@ -55,20 +72,69 @@ public class LiveLoadedFile extends LoadedFile {
 		};
 		Map<String, NodeLink> result = TreeUtils.treeBreadthFirstSearch(tree.getGroupNode(), finder, false, null);
 		
+		Metadata md = new Metadata();
+		
 		for (String s : result.keySet()) {
 			IDatasetConnector r = ServiceManager.getRemoteDatasetService().createRemoteDataset(host, port);
 			r.setPath(path);
-			r.setDatasetName(s);
-			dh.addDataset(s, r.getDataset());
+			r.setDatasetName("/"+s);
+			IDynamicDataset dataset = (IDynamicDataset)r.getDataset();
+			dataset.refreshShape();
+			dataset.setName("/"+s);
+			dh.addDataset(s, dataset);
+			long[] maxShape = ((DataNode)result.get(s).getDestination()).getMaxShape();
+			int[] max = new int[maxShape.length];
+			for (int i = 0; i < maxShape.length; i++) max[i] = (int)maxShape[i];
+			md.addDataInfo(s, max);
+			
 		}
 		
-		Metadata md = new Metadata();
+		
 //		md.addDataInfo(name, shape);
 		
 		dh.setMetadata(md);
 		
 		
 		return dh;
+	}
+
+	@Override
+	public void refresh() {
+		if (dataOptions.isEmpty()) {
+			String[] names = dataHolder.getNames();
+			for (String n : names) {
+				ILazyDataset lazyDataset = dataHolder.getLazyDataset(n);
+				((IDynamicDataset)lazyDataset).refreshShape();
+				if (lazyDataset != null && ((LazyDatasetBase)lazyDataset).getDType() != Dataset.STRING) {
+					DataOptions d = new DataOptions(n, this);
+					dataOptions.put(d.getName(),d);
+				}
+			}
+			
+			return;
+		}
+		
+		String[] names = dataHolder.getNames();
+		for (String n : names) {
+			ILazyDataset lazyDataset = dataHolder.getLazyDataset(n);
+			((IDynamicDataset)lazyDataset).refreshShape();
+		}
+		
+//		dataOptions.values().stream().map(d -> d.getLazyDataset())
+//		.filter(IDynamicDataset.class::isInstance)
+//		.map(IDynamicDataset.class::cast)
+//		.forEach(d -> d.refreshShape());
+		
+		DataOptions[] array = dataOptions.values().stream()
+		.filter(d -> d.getPlottableObject() != null && d.getPlottableObject().getNDimensions() != null).toArray(size ->new DataOptions[size]);
+		
+		for (DataOptions o : array) {
+			NDimensions nDimensions = o.getPlottableObject().getNDimensions();
+			o.setAxes(null);
+			int[] shape = o.getLazyDataset().getShape();
+			nDimensions.updateShape(shape);
+		}
+		
 	}
 	
 }

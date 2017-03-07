@@ -195,6 +195,21 @@ public class NDimensions {
 		return -1;
 	}
 	
+	public void updateShape(int[] shape) {
+		for (int i = 0 ; i < shape.length; i++) {
+			boolean complete = false;
+			if (dimensions[i].getSlice() != null && dimensions[i].getSlice().isSliceComplete() && dimensions[i].getSize() != 1) {
+				complete = true;
+			}
+			dimensions[i].setSize(shape[i]);
+			if (complete) {
+				Slice slice = dimensions[i].getSlice();
+				slice.setStop(shape[i]);
+				
+			}
+		}
+	}
+	
 //	private boolean validOptions(Object[] opts){
 //		
 //		List<Object> list = Arrays.asList(opts);
