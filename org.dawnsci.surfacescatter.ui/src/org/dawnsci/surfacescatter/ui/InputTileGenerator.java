@@ -71,6 +71,29 @@ public class InputTileGenerator {
 	    
 	}
 	
+	
+	public InputTileGenerator(String l, String t, Composite parent, int n){
+		
+		tile = new Group(parent, SWT.NONE);
+        GridLayout 	tileLayout = new GridLayout(2,true);
+    	
+        tile.setLayout(tileLayout);
+		GridData tileData = new GridData(GridData.FILL_HORIZONTAL);
+		tile.setLayoutData(tileData);
+		
+		label = new Label(tile, SWT.NULL);
+		GridData labelData = new GridData(GridData.FILL_HORIZONTAL);
+		label.setLayoutData(labelData);
+		label.setText(l);
+		
+		text = new Text(tile,SWT.SINGLE);
+		GridData textData = new GridData(GridData.FILL_HORIZONTAL);
+		text.setLayoutData(textData);
+		text.setText(t);
+	    
+	}
+	
+	
 	public InputTileGenerator(String l, Group parent, int min, int max, int inc){
 		
 		tile = new Group(parent, SWT.NONE);

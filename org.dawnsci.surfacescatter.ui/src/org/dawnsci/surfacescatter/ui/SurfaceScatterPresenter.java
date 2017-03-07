@@ -19,7 +19,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
-
 import org.apache.commons.lang.StringUtils;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
@@ -33,6 +32,7 @@ import org.dawnsci.surfacescatter.FittingParameters;
 import org.dawnsci.surfacescatter.FittingParametersInputReader;
 import org.dawnsci.surfacescatter.FittingParametersOutput;
 import org.dawnsci.surfacescatter.GeometricParametersModel;
+import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.OverlapUIModel;
 import org.dawnsci.surfacescatter.PlotSystem2DataSetter;
 import org.dawnsci.surfacescatter.PolynomialOverlap;
@@ -82,7 +82,18 @@ public class SurfaceScatterPresenter {
 	private int noImages = 0;
 	private SurfaceScatterViewStart ssvs;
 	private IRegion backgroundRegion;
+	private String imageName = "file_image";
 	
+	
+	public String getImageName() {
+		return imageName;
+	}
+
+	public void setImageName(String imageName) {
+		this.imageName = imageName;
+		ssvs.getParamField().setImageName(imageName);
+	}
+
 	private Set<IPresenterStateChangeEventListener> listeners = new HashSet<>();
 	
 	public void setSsvs(SurfaceScatterViewStart ssvs) {
@@ -145,7 +156,7 @@ public class SurfaceScatterPresenter {
 		dms = new ArrayList<DataModel>();
 		models = new ArrayList<ExampleModel>();
 		sm.setFilepaths(filepaths);
-		sm.setCorrectionSelection(correctionSelection);
+		sm.setCorrectionSelection(MethodSetting.toMethod(correctionSelection));
 		sm.setImageFolderPath(imageFolderPath);
 
 		ILazyDataset[] imageArray = new ILazyDataset[filepaths.length];
@@ -171,12 +182,18 @@ public class SurfaceScatterPresenter {
 					if(imageFolderPath == null){
 						dh1 = LoaderFactory.getData(filepaths[id]);
 					}
+					
 					else{
-						String localFilepathCopy = StringUtils.substringBeforeLast(filepaths[id], ".dat") + "_copy";	
-						Path from = Paths.get(filepaths[id]);
-						Path to = Paths.get(localFilepathCopy + ".dat");
-						Files.copy(from, to, StandardCopyOption.REPLACE_EXISTING);
 						
+						String datName = StringUtils.substringAfterLast(filepaths[id], File.separator);
+						
+						String localFilepathCopy = StringUtils.substringBeforeLast(datName, ".dat") + "_copy";	
+						
+						Path from = Paths.get(filepaths[id]);
+						
+						Path to = Paths.get(sm.getSaveFolder() + localFilepathCopy + ".dat");
+						
+						Files.copy(from, to, StandardCopyOption.REPLACE_EXISTING);
 						
 						Charset charset = StandardCharsets.UTF_8;
 	
@@ -230,7 +247,6 @@ public class SurfaceScatterPresenter {
 						SliceND slice2 = new SliceND(ild.getShape());
 						slice2.setSlice(0, f, f + 1, 1);
 						ILazyDataset nim = ild.getSliceView(slice2); //getSlice(slice2);
-//						nim.squeezeEnds();
 						som.put(imageRef, (ILazyDataset) nim);
 						imageRefList.add(imageRef);
 						imagesToFilepathRef.add(id);
@@ -238,24 +254,25 @@ public class SurfaceScatterPresenter {
 					}
 					
 					
-				
-					
-					if (sm.getCorrectionSelection() == 0) {
+					if (MethodSetting.toInt(sm.getCorrectionSelection()) == 0) {
+						
 						try{
-						ILazyDataset ildx = dh1.getLazyDataset(gms.get(sm.getSelection()).getxName());
-						models.get(id).setDatX(ildx);
-						SliceND slice1 = new SliceND(ildx.getShape());
-						IDataset xdat = ildx.getSlice(slice1);
-						xArray[id] = xdat;
+							ILazyDataset ildx = dh1.getLazyDataset(gms.get(sm.getSelection()).getxName());
+							models.get(id).setDatX(ildx);
+							SliceND slice1 = new SliceND(ildx.getShape());
+							IDataset xdat = ildx.getSlice(slice1);
+							xArray[id] = xdat;
 						}
+						
 						catch(NullPointerException r){
 							
 						}
 						
 					}
-					else if (sm.getCorrectionSelection() == 1 || 
-							   sm.getCorrectionSelection() == 2 || 
-							   sm.getCorrectionSelection() == 3) {
+					else if(MethodSetting.toInt(sm.getCorrectionSelection()) == 1||
+							MethodSetting.toInt(sm.getCorrectionSelection()) == 2||	
+							MethodSetting.toInt(sm.getCorrectionSelection()) == 3){
+						
 						ILazyDataset ildx = dh1.getLazyDataset(gms.get(sm.getSelection()).getxNameRef());
 						models.get(id).setDatX(ildx);
 	
@@ -298,7 +315,6 @@ public class SurfaceScatterPresenter {
 		}
 
 			catch (Exception e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		
@@ -338,8 +354,6 @@ public class SurfaceScatterPresenter {
 		}
 		
 		int numberOfImages = 1; 
-		
-		
 		
 		try{
 			xArrayCon = DatasetUtils.concatenate(xArray, 0);
@@ -415,7 +429,15 @@ public class SurfaceScatterPresenter {
 		sm.setImageFolderPath(ifp);	
 	}
 	
-	public int getCorrectionSelection(){
+	public void setSaveFolder(String sfp){
+		sm.setSaveFolder(sfp);	
+	}
+	
+	public String getSaveFolder(){
+		return sm.getSaveFolder();	
+	}
+	
+	public MethodSetting getCorrectionSelection(){
 		return sm.getCorrectionSelection();
 	}
 	
@@ -442,6 +464,44 @@ public class SurfaceScatterPresenter {
 			fireStateListeners();
 		}
 	}
+	public IDataHolder copiedDatWithCorrectedTifs(String fp, String datFolderPath) {
+	
+		String localFilepathCopy = StringUtils.substringBeforeLast(fp, ".dat") + "_copy";	
+		
+		Path from = Paths.get(datFolderPath+  File.separator + fp);
+		
+		Path to = Paths.get(sm.getSaveFolder() +  File.separator+ localFilepathCopy + ".dat");
+		try{
+			Files.copy(from, to, StandardCopyOption.REPLACE_EXISTING);
+			
+			Charset charset = StandardCharsets.UTF_8;
+			String content = new String(Files.readAllBytes(to), charset);
+			
+			String firstTifName = StringUtils.substringBetween(content, File.separator, ".tif");
+			
+			if(firstTifName.contains(File.separator)){
+				firstTifName = StringUtils.substringAfterLast(firstTifName, File.separator);
+			}
+			
+			String pathNameToReplace = StringUtils.substringBetween(content, "\t", File.separator + firstTifName);
+			
+			if(pathNameToReplace.contains("\t")){
+				pathNameToReplace = StringUtils.substringAfterLast(pathNameToReplace,"\t");
+			}
+			content = content.replaceAll(pathNameToReplace, sm.getImageFolderPath());
+			
+			Files.write(to, content.getBytes(charset));
+			
+			return dh1 = LoaderFactory.getData(to.toString());
+		}
+		catch(Exception n1){
+			n1.printStackTrace();
+			return null;
+		}
+	
+	}
+	
+	
 	
 	public void correctionsDisplayUpdate(){
 		
@@ -915,7 +975,6 @@ public class SurfaceScatterPresenter {
 	
 	public static ILazyDataset concatenate(final ILazyDataset[] as, final int axis) {
 		if (as == null || as.length == 0) {
-//			utilsLogger.error("No datasets given");
 			throw new IllegalArgumentException("No datasets given");
 		}
 		ILazyDataset a = as[0];
@@ -1035,23 +1094,24 @@ public class SurfaceScatterPresenter {
 		
 		
 		try{
-			correctionSelection = ssvs.getCorrectionSelection().getSelectionIndex();
-
+			correctionSelection = ssvs.getCorrectionsDropDownArray()[ssvs.getCorrectionSelection().getSelectionIndex()];
+			
 		}
 		catch(ArrayIndexOutOfBoundsException e1){
 			correctionSelection = 0;
 
 		}
 		
-		
-		sm.setCorrectionSelection(correctionSelection);
+		sm.setCorrectionSelection(MethodSetting.toMethod(correctionSelection));
 	}
+	
 	
 	public void resetCorrectionsSelection(int  correctionSelection){
 		
-		
-		sm.setCorrectionSelection(correctionSelection);
+		sm.setCorrectionSelection(MethodSetting.toMethod(correctionSelection));
 	}
+	
+	
 	
 	public int closestImageNo(double in){
 		int out = ClosestNoFinder.closestNoPos(in, sm.getSortedX());
@@ -1136,7 +1196,7 @@ public class SurfaceScatterPresenter {
 													 gms.get(j), 
 													 pS,
 													 ssvs.getPlotSystemCompositeView().getPlotSystem(),
-													 sm.getCorrectionSelection(), 
+													 MethodSetting.toInt(sm.getCorrectionSelection()), 
 													 imagePosInOriginalDat[selection], 
 													 trackingMarker,
 													 selection);		
@@ -1713,6 +1773,31 @@ public class SurfaceScatterPresenter {
 	}
 	
 	
+	public void dialogToChangeImageName(){
+		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,3,null);
+		roobw.open();
+		
+		ssvs.getFolder().setSelection(0);
+		
+		return;
+	}
+	
+	public void dialogToChangeImageFolder(Boolean t, DatDisplayer dd){
+		
+		ImageFolderChangeDialog ifcd = new ImageFolderChangeDialog(parentShell,
+																   this, 
+																   t, 
+																   dd);
+		
+		
+		
+		ifcd.open();
+		
+		
+		
+		return;
+	}
+	
 	
 	
 	public IDataset[] curveStitchingOutput (IPlottingSystem<Composite> plotSystem, 
@@ -1802,7 +1887,7 @@ public class SurfaceScatterPresenter {
 	}
 	
 	public void setCorrectionSelection(int correctionSelection){
-		sm.setCorrectionSelection(correctionSelection);
+		sm.setCorrectionSelection(MethodSetting.toMethod(correctionSelection));
 	}
 	
 	public void setSelection (int selection){
@@ -1915,6 +2000,10 @@ public class SurfaceScatterPresenter {
 		
 	}
 	
+	public void resetSmOutputObjects(){
+		sm.resetAll();
+	}
+	
 	public double[] trackerInterpolationInterpolator1(int k){
 		
 			
@@ -1991,7 +2080,7 @@ public class SurfaceScatterPresenter {
 		trackingJob tj = new trackingJob();
 		debug("tj invoked");
 		tj.setSsvs(ssvs);
-		tj.setCorrectionSelection(sm.getCorrectionSelection());
+		tj.setCorrectionSelection(MethodSetting.toInt(sm.getCorrectionSelection()));
 		tj.setSuperModel(sm);
 		tj.setGms(gms);
 		tj.setDms(dms);
@@ -2237,7 +2326,7 @@ class trackingJob {
 				//////////////////////// scenario@@@@@@@@@@@@@@@@@@@@@@@@@@@@///////////
 
 				Thread t  = new Thread(){
-					@Override
+					
 					public void run(){
 				
 						int[] imagePosInOriginalDat = CountUpToArray.CountUpToArray1(sm.getFilepathsSortedArray());
@@ -2304,7 +2393,6 @@ class trackingJob {
 					if(sm.getStartFrame() != noImages-1){	
 						for (int k = sm.getStartFrame()+1; k < noImages; k++) {
 							
-	//						debug("wowowowow l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k));
 							
 							int trackingMarker = 2;
 		
@@ -2375,7 +2463,7 @@ class trackingJob {
 
 			trackingJob2 tj = new trackingJob2();
 			debug("tj2 invoked");
-			tj.setCorrectionSelection(sm.getCorrectionSelection());
+			tj.setCorrectionSelection(MethodSetting.toInt(sm.getCorrectionSelection()));
 			tj.setSuperModel(sm);
 			tj.setGms(gms);
 			tj.setDms(dms);

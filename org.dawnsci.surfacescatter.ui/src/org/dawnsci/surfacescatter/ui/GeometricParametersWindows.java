@@ -1,9 +1,6 @@
 package org.dawnsci.surfacescatter.ui;
 
-import java.util.ArrayList;
-
 import org.dawnsci.surfacescatter.GeometricParametersModel;
-import org.dawnsci.surfacescatter.SuperModel;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -13,6 +10,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabFolder;
@@ -23,7 +21,6 @@ public class GeometricParametersWindows extends Composite{
 
 	private Button beamCorrection;
 	
-
 	private Text beamInPlane;
 	private Text beamOutPlane;
 	private Text covar;
@@ -37,7 +34,6 @@ public class GeometricParametersWindows extends Composite{
 	private Text normalisationFactor;
 	private Button specular;
 	private Text imageName;
-//	private Text xName;
 	private Text scalingFactor;
 	private Text beamHeight;
 	private Text footprint;
@@ -45,17 +41,15 @@ public class GeometricParametersWindows extends Composite{
 	private Text savePath;
 	private Text fluxPath;
 	private TabFolder folder;
-//	private Text xNameRef;
 	private SurfaceScatterPresenter ssp;
 	private GeometricParametersWindows gpw;
+	private Group geometricParametersSX;
 	
 	public GeometricParametersWindows(Composite parent, 
 									  int style,
 									  SurfaceScatterPresenter ssp){
 		
 		super(parent, style);
-		
-//        new Label(this, SWT.NONE).setText("Geometric Parameters Window");
         
         this.ssp = ssp;
         this.gpw =this;
@@ -68,11 +62,15 @@ public class GeometricParametersWindows extends Composite{
 		
 		folder = new TabFolder(this, SWT.NONE);
 		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
+		
+		
+		
+		
 	    //Tab 1
 	    TabItem paramsSXRD = new TabItem(folder, SWT.NONE);
 	    paramsSXRD.setText("SXRD Parameters");
 	   
-		Group geometricParametersSX = new Group(folder, SWT.NULL);
+		geometricParametersSX = new Group(folder, SWT.NULL);
 		GridLayout geometricParametersSXLayout = new GridLayout(2,true);
 		GridData geometricParametersSXData = new GridData(GridData.FILL_BOTH);
 		geometricParametersSX.setLayout(geometricParametersSXLayout);
@@ -123,14 +121,11 @@ public class GeometricParametersWindows extends Composite{
 		new Label(geometricParametersSX, SWT.LEFT).setText("imageName");
 		imageName = new Text(geometricParametersSX, SWT.SINGLE);
 		imageName.setText("file_image");
-//		new Label(geometricParametersSX, SWT.LEFT).setText("xName");
-//		xName = new Text (geometricParametersSX, SWT.CHECK);
-//		xName.setText("l");
-//		new Label(geometricParametersSX, SWT.LEFT).setText("savePath");
-//		savePath = new Text (geometricParametersSX, SWT.CHECK);
-		
+
 		paramsSXRD.setControl(geometricParametersSX);
 	   	    
+		
+		
 	    //Tab 2
 	    TabItem paramsReflec = new TabItem(folder, SWT.NONE);
 	    paramsReflec.setText("Reflectivity Parameters");
@@ -150,23 +145,10 @@ public class GeometricParametersWindows extends Composite{
 		new Label(geometricParametersReflec, SWT.LEFT).setText("Angular Adjustment");
 		angularFudgeFactor = new Text(geometricParametersReflec, SWT.SINGLE);
 		angularFudgeFactor.setText("0");
-//		new Label(geometricParametersReflec, SWT.LEFT).setText("savePath");
-//		savePath = new Text (geometricParametersReflec, SWT.CHECK);
 		new Label(geometricParametersReflec, SWT.LEFT).setText("fluxPath");
 		fluxPath = new Text (geometricParametersReflec, SWT.CHECK);
-//		new Label(geometricParametersReflec, SWT.LEFT).setText("xNameRef");
-//		xNameRef = new Text (geometricParametersReflec, SWT.CHECK);
-		
+
 	    paramsReflec.setControl(geometricParametersReflec);
-	    
-//	    xNameRef.addModifyListener(new ModifyListener(){
-//
-//			@Override
-//			public void modifyText(ModifyEvent e) {
-//				geometricParametersUpdate();
-//			}
-//	    	
-//	    });
 	    
 	    fluxPath.addModifyListener(new ModifyListener(){
 
@@ -186,15 +168,6 @@ public class GeometricParametersWindows extends Composite{
 	    	
 	    });
 		
-//	    savePath.addModifyListener(new ModifyListener(){
-//
-//			@Override
-//			public void modifyText(ModifyEvent e) {
-//				geometricParametersUpdate();
-//			}
-//	    	
-//	    });
-	 
 	    footprint.addModifyListener(new ModifyListener(){
 
 			@Override
@@ -359,17 +332,7 @@ public class GeometricParametersWindows extends Composite{
 				geometricParametersUpdate();
 			}
 	    	
-	    });
-		
-//		xName.addModifyListener(new ModifyListener(){
-//
-//			@Override
-//			public void modifyText(ModifyEvent e) {
-//				geometricParametersUpdate();
-//			}
-//	    	
-//	    });
-		
+	    });		
 	}
 	
 	
@@ -484,14 +447,10 @@ public class GeometricParametersWindows extends Composite{
 	public void setImageName(Text imageName) {
 		this.imageName = imageName;
 	}
-
-//	public Text getxName() {
-//		return xName;
-//	}
-//
-//	public void setxName(Text xName) {
-//		this.xName = xName;
-//	}
+	
+	public void setImageName(String imageName) {
+		this.imageName.setText(imageName);
+	}
 
 	public Text getScalingFactor() {
 		return scalingFactor;
@@ -549,14 +508,6 @@ public class GeometricParametersWindows extends Composite{
 		this.folder = folder;
 	}
 
-//	public Text getxNameRef() {
-//		return xNameRef;
-//	}
-//
-//	public void setxNameRef(Text xNameRef) {
-//		this.xNameRef = xNameRef;
-//	}
-
 	public SurfaceScatterPresenter getSsp() {
 		return ssp;
 	}
@@ -577,14 +528,24 @@ public class GeometricParametersWindows extends Composite{
 		return folder;
 	}
 	
+	public void setEnabled(boolean enabled){
+		
+		for (Control o :geometricParametersSX.getChildren()){
+			o.setEnabled(enabled);
+		}
+
+		for(Control i :folder.getChildren()){
+			i.setEnabled(enabled);
+		}
+		
+		folder.setEnabled(enabled);
+	}
 	
 	public void geometricParametersUpdate() {
 			
 		ssp.geometricParametersUpdate(
-//			      xNameRef.getText(),
 				  fluxPath.getText(),
 				  (Double.parseDouble(beamHeight.getText())),
-//				  (savePath.getText()),
 				  (Double.parseDouble(footprint.getText())),
 				  (Double.parseDouble(angularFudgeFactor.getText())),
 				  beamCorrection.getSelection(),
@@ -602,7 +563,6 @@ public class GeometricParametersWindows extends Composite{
 				  (Double.parseDouble(normalisationFactor.getText())),
 				  (specular.getSelection()),
 				  (imageName.getText())
-//				  (xName.getText())
 				  );
 		
 	}

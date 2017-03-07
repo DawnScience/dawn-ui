@@ -2,8 +2,9 @@ package org.dawnsci.surfacescatter.ui;
 
 import java.io.File;
 import java.util.ArrayList;
-
 import org.dawnsci.surfacescatter.CurveStateIdentifier;
+import org.dawnsci.surfacescatter.MethodSettingEnum;
+import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
@@ -24,11 +25,8 @@ import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -37,7 +35,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.ui.PlatformUI;
 
 public class SurfaceScatterViewStart extends Dialog {
 
@@ -64,9 +61,11 @@ public class SurfaceScatterViewStart extends Dialog {
 	private String datFolderPath;
 	private Combo correctionsDropDown;
 	private Composite container;
-	private Button imageFolderSelection;
-	private Button datFolderSelection;
-	private String imageFolderPath = null;
+	private Group experimentalSetup;
+	private Group methodSetting;
+	private Group parametersSetting;
+	private int[] correctionsDropDownArray;
+
 
 	public CTabFolder getFolder() {
 		return folder;
@@ -117,8 +116,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 			@Override
 			public void update() {
-				// TODO Auto-generated method stub
-
+				
 			}
 		});
 		this.ssvs = this;
@@ -132,6 +130,8 @@ public class SurfaceScatterViewStart extends Dialog {
 	protected Control createButtonBar(Composite parent) {
 		Control c = super.createButtonBar(parent);
 		getShell().setDefaultButton(null);
+		
+		
 		return c;
 	}
 
@@ -196,15 +196,16 @@ public class SurfaceScatterViewStart extends Dialog {
 		/////////////////////////// ////////////////////////////////////////////////////
 
 		try {
-			Group experimentalSetup = new Group(right, SWT.FILL);
+			
+			experimentalSetup = new Group(right, SWT.FILL);
 			GridLayout experimentalSetupLayout = new GridLayout(1, true);
 			GridData experimentalSetupData = new GridData(GridData.FILL_BOTH);
 			experimentalSetupData.minimumWidth = 50;
 			experimentalSetup.setLayout(experimentalSetupLayout);
 			experimentalSetup.setLayoutData(experimentalSetupData);
 			experimentalSetup.setText("Experimental Setup");
-
-			Group methodSetting = new Group(experimentalSetup, SWT.FILL);
+			
+			methodSetting = new Group(experimentalSetup, SWT.FILL);
 			GridLayout methodSettingLayout = new GridLayout(1, true);
 			GridData methodSettingData = new GridData(GridData.FILL_HORIZONTAL);
 			methodSettingData.minimumWidth = 50;
@@ -213,44 +214,32 @@ public class SurfaceScatterViewStart extends Dialog {
 			methodSetting.setText("SXRD / Reflectivity");
 
 			correctionsDropDown = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.FILL);
-			correctionsDropDown.add("SXRD");
-			correctionsDropDown.add("Reflectivity with Flux Correction");
-			correctionsDropDown.add("Reflectivity without Flux Correction");
-			correctionsDropDown.add("Reflectivity with NO Correction");
+			
+			 for(org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting  t: MethodSettingEnum.MethodSetting.values()){
+				 correctionsDropDown.add(org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting.toString(t));
+			    }
+
 			correctionsDropDown.select(0);
 			correctionsDropDown.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-			Group parametersSetting = new Group(experimentalSetup, SWT.FILL);
+			parametersSetting = new Group(experimentalSetup, SWT.FILL);
 			GridLayout parametersSettingLayout = new GridLayout(1, true);
 			GridData parametersSettingData = new GridData(GridData.FILL_BOTH);
 			parametersSettingData.minimumWidth = 50;
 			parametersSetting.setLayout(parametersSettingLayout);
 			parametersSetting.setLayoutData(parametersSettingData);
 			parametersSetting.setText("Geometric Parameters");
-
+			
 			paramField = new GeometricParametersWindows(parametersSetting, SWT.FILL, ssp);
 			paramField.setLayout(new GridLayout());
 			paramField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
+			
+			this.setupRightEnabled(false);
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		paramField.getTabFolder().addSelectionListener(new SelectionListener() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				// ssp.setCorrectionSelection(paramField.getTabFolder().getSelectionIndex());
-
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-
-			}
-		});
 
 		datDisplayer.getBuildRod().addSelectionListener(new SelectionListener() {
 
@@ -280,13 +269,13 @@ public class SurfaceScatterViewStart extends Dialog {
 				
 				customComposite.getOutputControl().setSelection(false);
 				customComposite.getOutputControl().redraw();
-				
+				ssp.resetSmOutputObjects();
 				
 				ssp.surfaceScatterPresenterBuild(ssp.getParentShell(), filepaths, datDisplayer.getSelectedOption(),
-						datDisplayer.getImageFolderPath(), datFolderPath, ssp.getCorrectionSelection());
+						ssp.getImageFolderPath(), datFolderPath, MethodSetting.toInt(ssp.getCorrectionSelection()));
 
 				
-				ssp.resetCorrectionsSelection();
+				ssp.resetCorrectionsSelection(correctionsDropDownArray[correctionsDropDown.getSelectionIndex()]);	
 
 				folder.setSelection(1);
 		
@@ -299,8 +288,14 @@ public class SurfaceScatterViewStart extends Dialog {
 				customComposite.generalUpdate();
 				ssps3c.generalUpdate();
 				customComposite.generalCorrectionsUpdate();
-				
+				customComposite.getPlotSystem1CompositeView().generalUpdate();
 
+				getPlotSystemCompositeView().removeBackgroundSubtractedSubImage();
+				getSsps3c().isOutputCurvesVisible(false);
+				customComposite.getReplay().setEnabled(false);
+				
+				ssps3c.isOutputCurvesVisible(false);
+				
 			}
 
 			@Override
@@ -310,8 +305,6 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 		});
 
-		// right.setWeights(new int[] {10,90});
-		//
 		/////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////
 		// Tab 2 Analysis
@@ -410,7 +403,6 @@ public class SurfaceScatterViewStart extends Dialog {
 				int[][] LenPt = new int[][] { Len, Pt };
 
 				customComposite.setROITexts(LenPt);
-
 			}
 		});
 
@@ -456,7 +448,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			@SuppressWarnings("unchecked")
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-//				if (modify == true) {
+
 					modify = false;
 
 					double r = 0;
@@ -488,18 +480,17 @@ public class SurfaceScatterViewStart extends Dialog {
 					ssp.regionOfInterestSetter(newLenPt);
 					ssp.backgroundBoxesManager();
 
-//				}
 			}
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
 
 			}
 		});
 
 		customComposite.getXValue().addFocusListener(new FocusListener() {
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public void focusLost(FocusEvent e) {
 				if (modify == true) {
@@ -576,7 +567,6 @@ public class SurfaceScatterViewStart extends Dialog {
 			ssps3c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 			ssps3c.setSsp(ssp);
-			// outputCurves = ssps3c.getOutputCurves();
 
 		} catch (Exception d) {
 
@@ -584,9 +574,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		folder.addCTabFolder2Listener(new CTabFolder2Adapter() {
 			public void close(CTabFolderEvent event) {
-				// if (event.item.equals(specialItem)) {
 				event.doit = false;
-				// }
 			}
 		});
 
@@ -614,7 +602,6 @@ public class SurfaceScatterViewStart extends Dialog {
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
 
 			}
 		});
@@ -647,7 +634,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
+
 
 			}
 		});
@@ -668,15 +655,6 @@ public class SurfaceScatterViewStart extends Dialog {
 		newShell.setText("SurfaceScatterDialog");
 
 	}
-
-//	@Override
-//	protected Point getInitialSize() {
-//		Rectangle rect = PlatformUI.getWorkbench().getWorkbenchWindows()[0].getShell().getBounds();
-//		int h = rect.height;
-//		int w = rect.width;
-//
-//		return new Point((int) Math.round(0.8 * w), (int) Math.round(0.9 * h));
-//	}
 
 	@Override
 	protected boolean isResizable() {
@@ -730,6 +708,36 @@ public class SurfaceScatterViewStart extends Dialog {
 			System.out.println(output);
 		}
 	}
+	
+	public void resetSXRDReflectivityCombo(int[] input){
+		
+		correctionsDropDown.removeAll();
+		
+		for(int t = 0;t< input.length;t++){
+			 
+			correctionsDropDown.add(MethodSetting.toString(MethodSetting.toMethod(input[t])));
+		
+			 if(input[t] == 0){
+				 paramField.getFolder().setSelection(0);
+			 }
+			
+			 if(input[t] == 1){
+				 paramField.getFolder().setSelection(1);
+			 }
+			 
+			 if(input[t] == 2){
+				 paramField.getFolder().setSelection(2);
+			 }
+			 
+		}
+
+		correctionsDropDown.select(0);
+		
+		setCorrectionsDropDownArray(input);
+		
+		
+		
+	}	
 
 	public Combo getCorrectionSelection() {
 		return correctionsDropDown;
@@ -742,7 +750,24 @@ public class SurfaceScatterViewStart extends Dialog {
 	public void resetIntensityCombo(){
 		ssvs.getSsps3c().getOutputCurves().getIntensity().select(0);
 	}
-
+	
+	public void setupRightEnabled(boolean enabled){
+		
+		experimentalSetup.setEnabled(enabled);
+		
+		for (Control r: experimentalSetup.getChildren()){
+			r.setEnabled(enabled);
+		}
+		
+		for (Control r: methodSetting.getChildren()){
+			r.setEnabled(enabled);
+		}
+		
+		paramField.setEnabled(enabled);
+		parametersSetting.setEnabled(enabled);
+		
+	}
+	
 	public void appendListenersToOutputCurves() {
 
 		outputCurves = ssps3c.getOutputCurves();
@@ -783,6 +808,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			public void roiDragged(ROIEvent evt) {
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public void roiChanged(ROIEvent evt) {
 
@@ -886,5 +912,13 @@ public class SurfaceScatterViewStart extends Dialog {
 
 			}
 		});
+	}
+
+	public int[] getCorrectionsDropDownArray() {
+		return correctionsDropDownArray;
+	}
+
+	public void setCorrectionsDropDownArray(int[] correctionsDropDownArray) {
+		this.correctionsDropDownArray = correctionsDropDownArray;
 	}
 }

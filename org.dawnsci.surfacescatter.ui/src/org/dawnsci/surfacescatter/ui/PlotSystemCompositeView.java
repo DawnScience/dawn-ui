@@ -1,6 +1,7 @@
 package org.dawnsci.surfacescatter.ui;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.surfacescatter.ExampleModel;
+import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -72,8 +73,6 @@ public class PlotSystemCompositeView extends Composite {
     							   Dataset nullImage,
     							   SurfaceScatterPresenter ssp
     							   ) {
-    	
-    	
         super(parent, style);
         this.numberOfImages = numberOfImages;
         this.nullImage = nullImage;
@@ -87,7 +86,6 @@ public class PlotSystemCompositeView extends Composite {
 		}
         
         this.createContents(image); 
-   
     }
      
     public void createContents(IDataset image) {
@@ -177,8 +175,7 @@ public class PlotSystemCompositeView extends Composite {
 		images.setLayoutData(imagesData);
 		
         ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(images, null);
-
-           
+   
         plotSystem.createPlotPart(images, 
         						  "Raw Image", 
         						  actionBarComposite, 
@@ -310,7 +307,7 @@ public class PlotSystemCompositeView extends Composite {
 			
 		correctionsTab.setControl(correctionsTabComposite);
 		
-		if (ssp.getCorrectionSelection() ==0 ){
+		if (MethodSetting.toInt(ssp.getCorrectionSelection()) ==0 ){
 			
 			Group corrections = new Group(correctionsTabComposite, SWT.NONE);
 		    GridLayout 	correctionsLayout = new GridLayout(2,true);
@@ -649,6 +646,7 @@ public class PlotSystemCompositeView extends Composite {
 		folder.pack();
 		subBgI = null;
 		form.setWeights(new int[] {23, 45, 25, 7});
+		folder.setSelection(0);
 	}	
 	
 	public Button getGo(){
