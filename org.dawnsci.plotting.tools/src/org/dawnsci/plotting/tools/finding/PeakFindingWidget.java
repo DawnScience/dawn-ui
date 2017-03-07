@@ -61,8 +61,11 @@ public class PeakFindingWidget {
 		configureComposite.setLayout(new GridLayout(2, false));
 
 		// GET SAMPLE CONFIGURATION TODO: refactor and extract earlier
-		//Set width to max value of plot
+		//Where else am i going to get this?
 		ILineTrace sampleTrace = controller.getPeakfindingtool().sampleTrace;
+		
+		
+		
 		
 	
 		Label lwrBndLab = new Label(configureComposite, SWT.NONE);
@@ -73,7 +76,11 @@ public class PeakFindingWidget {
 		lwrBndVal.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		lwrBndVal.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
+			
+				
 				controller.setLowerBnd(lwrBndVal.getDouble());
+			
+			
 			}
 		});
 	
@@ -86,7 +93,11 @@ public class PeakFindingWidget {
 		uprBndVal.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		uprBndVal.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
+			
+				
 				controller.setUpperBnd(uprBndVal.getDouble());
+			
+			
 			}
 		});
 
@@ -173,6 +184,7 @@ public class PeakFindingWidget {
 		runPeakSearch.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				
 				runPeakSearch.setEnabled(false);
 				runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearching.png").createImage());			
 				// Run peakSearch

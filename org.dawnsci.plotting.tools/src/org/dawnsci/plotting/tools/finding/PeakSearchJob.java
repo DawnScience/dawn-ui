@@ -30,7 +30,6 @@ import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingService;
 import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
 
 /**
- * 
  * TODO: remove activator dependecy here and just get through controller
  * TODO: finally call formatPeakSearch
  * 
@@ -45,7 +44,6 @@ public class PeakSearchJob extends Job {
 
 		IPeakFindingService peakFindServ = (IPeakFindingService)Activator.getService(IPeakFindingService.class);
 		
-		
 		//TODO: job depends too much on controller.
 		public PeakSearchJob(PeakFindingController controller) {
 			super("Peak Search");
@@ -54,9 +52,17 @@ public class PeakSearchJob extends Job {
 		}
 		
 
+		//Some sort of data load into the job and then run. Do not want things to be changeing whilst running
+//		public void loadData(){
+//			
+//		}
+		
+		
+		
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 	
+			
 			if (controller.getPeakfindingtool().sampleTrace == null){
 				syncFormatPeakSearch();
 				return Status.CANCEL_STATUS;
@@ -67,8 +73,10 @@ public class PeakSearchJob extends Job {
 				controller.getPeakfindingtool().updateSearchBnds(rectangle);
 			}
 	
+			
 			/* Clean up last peak search */
-			controller.clearPeaks();
+			controller.clearPeaks(); //TODO: shouldnt have to do this... just get peaks from trace when would like them?
+			
 			
 			//TODO: clean control function
 			// Free up active peakfinder calls
@@ -79,14 +87,10 @@ public class PeakSearchJob extends Job {
 				}
 			}
 			
+			
 			String peakAlgorithm= Activator.getPlottingPreferenceStore().getString(PeakFindingConstants.PeakAlgorithm);
-			controller.getPeakFindData().activatePeakFinder(peakAlgorithm); //controller.getPeakFinderID());
-						
-			/*Configure peak finder on preference store
-			 *
-			 * go through all the params that match
-			 */
-	
+			controller.getPeakFindData().activatePeakFinder(peakAlgorithm);
+			//Configure peak finder on preference store go through all the params that match
 			Map<String, IPeakFinderParameter> peakParams = peakFindServ.getPeakFinderParameters(peakAlgorithm);
 			for (Entry<String, IPeakFinderParameter> peakParam : peakParams.entrySet()){
 				IPeakFinderParameter param = peakParam.getValue();
@@ -95,10 +99,9 @@ public class PeakSearchJob extends Job {
 				if (param.isInt())
 					val = (int) val.doubleValue();
 				param.setValue(val);
-				//TODO: allow signle param pass
+				//TODO: allow single param pass
 				controller.getPeakFindData().setPFParameterByName(peakAlgorithm, param.getName(), param.getValue());
 			}
-			
 			controller.getPeakFindData().setPFParametersByPeakFinder(peakAlgorithm, peakParams);
 			
 			
@@ -118,7 +121,15 @@ public class PeakSearchJob extends Job {
 			controller.getPeakFindData().setNPeaks(20);
 
 			
-			/*Do Peak Search*/
+			
+			
+			
+			
+			
+			
+			
+			
+			/*Perform Peak Search*/
 			
 			try {
 				controller.getPeakFindServ().findPeaks(controller.getPeakFindData());
@@ -129,8 +140,8 @@ public class PeakSearchJob extends Job {
 			}
 
 			
-			/*Extract Peak Data */
-			//Should just call a controller function for this
+			/*Extract Peak Search Data */
+			//Should just call a controller function for this?
 			TreeMap<Integer, Double> peaksPos = (TreeMap<Integer, Double>) controller.getPeakFindData().getPeaks(peakAlgorithm);
 
 			if(peaksPos.isEmpty()){
@@ -154,19 +165,11 @@ public class PeakSearchJob extends Job {
 				controller.getPeaks().add(p);
 			}
 
-			syncFormatPeakSearch();
-
+			
+			
+			
 			return Status.OK_STATUS;
 		}
-		
-		void syncFormatPeakSearch(){
-			Display.getDefault().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					controller.formatPeakSearch();
-				}
-			});
-		}
-		
+			
 }
 

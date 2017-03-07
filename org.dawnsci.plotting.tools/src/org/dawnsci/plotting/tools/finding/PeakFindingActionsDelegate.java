@@ -29,7 +29,9 @@ public class PeakFindingActionsDelegate {
 	public void createActions(IToolBarManager toolbar) {
 		final Action createNewSelection = new Action("New Search Selection.", IAction.AS_PUSH_BUTTON) {
 			public void run() {
+				
 				controller.getPeakfindingtool().createNewSearch();
+			
 			}
 		};
 		createNewSelection.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit.png"));
@@ -37,21 +39,28 @@ public class PeakFindingActionsDelegate {
 		
 		addMode = new Action("Add peaks to those already found", IAction.AS_CHECK_BOX) {
 			 public void run() {
+			
+				//TODO: maybe controller shouldnt have this 
 				controller.isRemoving = false;
 				controller.isAdding = true;
 				if (removeMode.isChecked())
 					removeMode.setChecked(controller.isRemoving);
-			}
+			
+			 }
 		};
 		addMode.setImageDescriptor(Activator.getImageDescriptor("icons/peakAdd.png"));
 		toolbar.add(addMode);
 
 		removeMode = new Action("Delete peaks to those already found", IAction.AS_CHECK_BOX) {
 			public void run() {
+			
+				//TODO: maybe controller shouldnt have this
 				controller.isRemoving = true;
 				controller.isAdding = false;
 				if (addMode.isChecked())
 					addMode.setChecked(controller.isAdding);
+			
+			
 			}
 		};
 		removeMode.setImageDescriptor(Activator.getImageDescriptor("icons/peakDelete.png"));
@@ -59,7 +68,7 @@ public class PeakFindingActionsDelegate {
 
 		final Action export = new Action("Export peak(s)", IAction.AS_PUSH_BUTTON) {
 			public void run() {
-				try {
+				try {	
 					EclipseUtils.openWizard(PeakFindingExportWizard.ID, true);
 				} catch (Exception e) {
 					logger.error("Cannot open export " + PeakFindingExportWizard.ID, e);

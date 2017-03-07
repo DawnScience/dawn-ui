@@ -75,14 +75,19 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	// Upper & Lower Selection Bounds
 	ILineTrace regionBndsTrace;
 
-	// Selected Region Interest For Searching
+	// Selected Region Interest For Searching - TODO: clean on
 	public IRegion searchRegion = null;
 
+	//Bound limits for searching 
+	private Double upperBnd;
+	private Double lowerBnd;
+	
+	
+	
 	//TODO: should this defalt contructor generate controller...
 	public PeakFindingTool() {
 		// Setup up a new PeakSearch Instance
 		this.controller = new PeakFindingController();
-		controller.setPeakfindingtool(this);
 
 		this.traceListener = new ITraceListener.Stub() {
 			@Override
@@ -96,7 +101,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	public PeakFindingTool(IPlottingSystem system, PeakFindingController controller){
 		this.setPlottingSystem(system);
 		this.controller = controller;
-		controller.setPeakfindingtool(this);
 	}
 	
 
@@ -129,14 +133,11 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		final IPageSite site = getSite();
 		IActionBars actionbars = site != null ? site.getActionBars() : actionBarWrapper;
 
-		controller.getActions().createActions(actionbars.getToolBarManager());
-		//createActions();
+		actions.createActions(actionbars.getToolBarManager());
 
-		controller.getTable().createTableControl(composite);
-		//createTableControl(composite);
+		table.createTableControl(composite);
 
-		controller.getWidget().createControl(composite);
-		//createPeakConfigurables(composite);
+		widget.createControl(composite);
 
 		// Control Peak Removal + Addition
 		getPlottingSystem().addClickListener(new IClickListener() {
@@ -156,8 +157,8 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 					} else if (isRemoving) {
 						removePeakValue(evt.getxValue(), evt.getyValue());
 					}
-
-					controller.refreshTable();
+					
+					//TODO: refresh table data...
 
 					getPlottingSystem().repaint(); // update plots
 				}
@@ -196,7 +197,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		p.setName("P" + pX.size());
 		controller.getPeaks().add(p);
 
-		controller.getTable().viewer.refresh();
+		table.viewer.refresh();
 	}
 
 	private void removePeakValue(Double x, Double y) {
@@ -220,7 +221,8 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			// TODO: renive hot fix setup and functionalize
 			// remove peaks from table should be at same index?
 			controller.getPeaks().remove(toRemove);
-			controller.getTable().viewer.refresh();
+			
+			table.viewer.refresh();
 
 			peakx = DatasetFactory.createFromList(pX);
 			peaky = DatasetFactory.createFromList(pY);
@@ -307,8 +309,8 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 			// TODO: need to now connect up this to have a resultant effect on
 			// the viewer
-			if (controller.getTableViewer() != null) {
-				controller.refreshTable();
+			if (table.viewer != null) {
+				table.viewer.refresh();
 			}
 
 		} catch (Exception e) {
@@ -317,10 +319,10 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	}
 
 	public void updateSearchBnds(RectangularROI rect) {
-		controller.setLowerBnd(rect.getPointRef()[0]);
-		double upper = rect.getPointRef()[0] + rect.getLengths()[0];
-		controller.setUpperBnd(upper);
+		lowerBnd = rect.getPointRef()[0];
+		upperBnd = rect.getPointRef()[0] + rect.getLengths()[0];
 
+		
 		double[] x = { controller.getLowerBnd(), controller.getUpperBnd() };
 		Dataset xdata = DatasetFactory.createFromObject(x);
 

@@ -31,15 +31,12 @@ import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
  */
 public class PeakFindingController {
 	
-	private PeakFindingTool peakfindingtool;
-	
-	public IPlottingSystem plottingSystem;
+	//private PeakFindingTool peakfindingtool;
 	
 	//TODO: initialise in the constructor
 //	private PeakFindingActionsDelegate actions = new PeakFindingActionsDelegate(this);
 //	private PeakFindingWidget widget = new PeakFindingWidget(this);
 //	private PeakFindingTable table = new PeakFindingTable(this);
-//	
 	PeakSearchJob peakSearchJob;
 	
 	// Peak Finders Load From Service Class
@@ -66,15 +63,11 @@ public class PeakFindingController {
 	//The table viewer should exist here
 	//TODO:Move these control values
 	
-	// Peak Details - could store as a series of functions however this will eventually be realised by the fitting
-	private Add peaksCompFunc;
-	
 	//Really need that intermediate of a identified peak. COuld the below be the answer
 	List<IdentifiedPeak> peaksIdentified = new ArrayList<IdentifiedPeak>();
 	private List<Peak> peaks = new ArrayList<Peak>();
 	
 	public void clearPeaks(){
-		this.peaksCompFunc = null; //TODO: isn't there a proper way to clear?
 		getPeaks().clear();
 	}
 	
@@ -238,17 +231,17 @@ public class PeakFindingController {
 		this.peakFindData = peakFindData;
 	}
 
-	public void updatePeakTrace(){
-		if(peaksX != null || peaksY != null)
-			getPeakfindingtool().updatePeakTrace(peaksX, peaksY);
-	}
+//	public void updatePeakTrace(){
+//		if(peaksX != null || peaksY != null)
+//			getPeakfindingtool().updatePeakTrace(peaksX, peaksY);
+//	}
 		
 //	public void formatPeakSearch(){
 //		updatePeakTrace();
 //		if (getTable().viewer != null)
 //			getTable().viewer.refresh();
 //
-//		// TODO: CLEAN UP ON ACTIVATE PEAKFINDER
+//		// TODO: CLEAN UP ON ACTIVE PEAKFINDER
 //		getPeakFindData().deactivatePeakFinder(getPeakFinderID());
 //		// TODO: Update with the new peaks
 //		getPeakfindingtool().getPlottingSystem().repaint();
@@ -259,9 +252,9 @@ public class PeakFindingController {
 //		getWidget().runPeakSearch.setEnabled(true);
 //	}
 //	
-	public <T> void setPlottingSystem(IPlottingSystem<T> system) {
-		this.plottingSystem = system;
-	}
+//	public <T> void setPlottingSystem(IPlottingSystem<T> system) {
+//		this.plottingSystem = system;
+//	}
 	
 	/**
 	 *TODO: move setup to export function
@@ -310,14 +303,6 @@ public class PeakFindingController {
 		}
 		
 		this.searchScaleIntensity = searchScaleIntensity;
-	}
-
-	public PeakFindingTool getPeakfindingtool() {
-		return peakfindingtool;
-	}
-
-	public void setPeakfindingtool(PeakFindingTool peakfindingtool) {
-		this.peakfindingtool = peakfindingtool;
 	}
 
 	public List<Peak> getPeaks() {
