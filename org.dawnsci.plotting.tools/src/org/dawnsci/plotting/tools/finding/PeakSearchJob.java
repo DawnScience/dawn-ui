@@ -31,6 +31,7 @@ import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
 
 /**
  * TODO: remove activator dependecy here and just get through controller
+ * TODO: have job update trace to look like things are going on
  * TODO: finally call formatPeakSearch
  * 
  * @author Dean P. Ottewell
@@ -53,7 +54,7 @@ public class PeakSearchJob extends Job {
 		
 
 		//Some sort of data load into the job and then run. Do not want things to be changeing whilst running
-//		public void loadData(){
+//		public void loadData(IPeakOppurtunity data){
 //			
 //		}
 		

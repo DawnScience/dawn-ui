@@ -30,8 +30,10 @@ public class PeakFindingActionsDelegate {
 		final Action createNewSelection = new Action("New Search Selection.", IAction.AS_PUSH_BUTTON) {
 			public void run() {
 				
+				//TODO: how will trigger the peak finding tool
 				controller.getPeakfindingtool().createNewSearch();
-			
+
+				
 			}
 		};
 		createNewSelection.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit.png"));
@@ -40,12 +42,14 @@ public class PeakFindingActionsDelegate {
 		addMode = new Action("Add peaks to those already found", IAction.AS_CHECK_BOX) {
 			 public void run() {
 			
-				//TODO: maybe controller shouldnt have this 
+				//TODO: maybe controller shouldnt have this. Get tool values... 
 				controller.isRemoving = false;
 				controller.isAdding = true;
+				
 				if (removeMode.isChecked())
 					removeMode.setChecked(controller.isRemoving);
 			
+			 
 			 }
 		};
 		addMode.setImageDescriptor(Activator.getImageDescriptor("icons/peakAdd.png"));

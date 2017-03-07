@@ -43,10 +43,18 @@ public class PeakFindingTable {
 		      public void keyPressed(KeyEvent e) {
 		          if (e.keyCode == SWT.DEL){
 		        	  //Delete the peak the refresh should fix itself
-		        	  //Thse indexs shoudl line up because of how they are populated...
+		        	  //TODO:These index should line up because of how they are populated... If a comparator is set we are doomed.
 		        	  int idx = viewer.getTable().getSelectionIndex();
+
+		        	  
+		        	  
+		        	  //TODO: controller.updatePeakTrace(controller.peaks); 
+		        	  //TODO: UPDATE PEAKS CONTROLLER FUNCTION CHANGE. EVERYONE IS LISTENING FOR THIS CHANGE
 		        	  controller.getPeaks().remove(idx);
-		        	  //TODO: controller.updatePeakTrace(controller.peaks);
+		        	  
+		        	  
+		        	  
+		        	  
 		        	  viewer.refresh();
 		          }
 		      }

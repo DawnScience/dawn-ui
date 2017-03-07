@@ -66,7 +66,6 @@ public class PeakFindingWidget {
 		
 		
 		
-		
 	
 		Label lwrBndLab = new Label(configureComposite, SWT.NONE);
 		lwrBndLab.setText("Lower Bound");
@@ -77,7 +76,7 @@ public class PeakFindingWidget {
 		lwrBndVal.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 			
-				
+					
 				controller.setLowerBnd(lwrBndVal.getDouble());
 			
 			

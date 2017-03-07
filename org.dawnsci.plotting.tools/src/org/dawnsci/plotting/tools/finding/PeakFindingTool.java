@@ -323,7 +323,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		upperBnd = rect.getPointRef()[0] + rect.getLengths()[0];
 
 		
-		double[] x = { controller.getLowerBnd(), controller.getUpperBnd() };
+		double[] x = { lowerBnd, upperBnd};
 		Dataset xdata = DatasetFactory.createFromObject(x);
 
 		Dataset ydata = genBoundsHeight();

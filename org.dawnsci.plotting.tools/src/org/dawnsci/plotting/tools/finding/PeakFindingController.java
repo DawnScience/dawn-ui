@@ -47,14 +47,6 @@ public class PeakFindingController {
 	Dataset peaksY;
 	Dataset peaksX;
 	
-	//Controls for user picking the peaks
-	public Boolean isRemoving = false; 
-	public Boolean isAdding = false;
-	
-	//Bound limits for searching 
-	private Double upperBnd;
-	private Double lowerBnd;
-	
 	private Double searchScaleIntensity;
 	
 	private IPeakFindingData peakFindData; 
@@ -159,9 +151,6 @@ public class PeakFindingController {
 		return peaks;
 	}
 		
-	public Double getLowerBnd() {
-		return lowerBnd;
-	}
 
 //	public void setLowerBnd(double lowerBnd) {
 //		getWidget().setLwrBndVal(lowerBnd);
@@ -177,9 +166,6 @@ public class PeakFindingController {
 //		this.lowerBnd = lowerBnd;
 //	}
 	
-	public Double getUpperBnd() {
-		return upperBnd;
-	}
 	
 //	public void setUpperBnd(double upperBnd) {
 //		getWidget().setUprBndVal(upperBnd);
