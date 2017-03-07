@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -135,17 +136,21 @@ public class OperationUIServiceImpl implements IOperationUIService {
 		
 		// the challenging part here is processing the operationsFile
 		IOperation<? extends IOperationModel, ? extends OperationData>[] operations = null;
-		
-		try {
-			IPersistenceService service = ServiceHolder.getPersistenceService();
-			IPersistentFile pf = service.getPersistentFile(operationsFile);
-			operations = pf.getOperations();
-		} catch (Exception e) {
-			logger.error("Could not get operations from " + operationsFile, e);
-			return null;
+		List <IOperation<? extends IOperationModel, ? extends OperationData>> operationsList;
+	
+		if (operationsFile != null) {
+			try {
+				IPersistenceService service = ServiceHolder.getPersistenceService();
+				IPersistentFile pf = service.getPersistentFile(operationsFile);
+				operations = pf.getOperations();
+				operationsList = Arrays.asList(operations);
+			} catch (Exception e) {
+				logger.error("Could not get operations from " + operationsFile, e);
+				return null;
+			}
+		} else {
+			operationsList = Collections.emptyList();
 		}
-		
-		List <IOperation<? extends IOperationModel, ? extends OperationData>> operationsList = Arrays.asList(operations);
 		
 		return getWizard(initialData, startPages, operationsList, endPages);
 	}
