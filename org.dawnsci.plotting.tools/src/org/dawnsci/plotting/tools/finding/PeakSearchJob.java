@@ -146,23 +146,13 @@ public class PeakSearchJob extends Job {
 			controller.peaksX = xData.getBy1DIndex((IntegerDataset) DatasetFactory.createFromList(pHeight));
 
 			
-			
 			APeak peak;
-			
 			// Create peaks
 			for (int i = 0; i < controller.peaksY.getSize(); ++i) {
 				Peak p = new Peak(controller.peaksX.getDouble(i), controller.peaksY.getDouble(i));
 				p.setName("P" + i);
-				controller.peaks.add(p);
+				controller.getPeaks().add(p);
 			}
-			
-			
-			
-			
-			
-			
-			
-			
 
 			syncFormatPeakSearch();
 

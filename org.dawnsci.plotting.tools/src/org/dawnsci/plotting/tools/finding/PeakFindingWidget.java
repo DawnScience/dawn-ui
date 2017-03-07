@@ -28,7 +28,6 @@ import uk.ac.diamond.scisoft.analysis.peakfinding.PeakFindingData;
  * Widget to handle all the components that would go into using a peak finder algorithm.
  * 
  * @author Dean P. Ottewell
- *
  */
 public class PeakFindingWidget {
 	
@@ -175,8 +174,7 @@ public class PeakFindingWidget {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				runPeakSearch.setEnabled(false);
-				runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearching.png").createImage());
-				
+				runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearching.png").createImage());			
 				// Run peakSearch
 				controller.peakSearchJob= new PeakSearchJob(controller);
 				//TODO:Auto schedule in controller func
@@ -184,7 +182,6 @@ public class PeakFindingWidget {
 				//controller.formatPeakSearch();
 			}
 		});
-		
 	}
 	
 	public void setLwrBndVal(double lowerVal) {

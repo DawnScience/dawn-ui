@@ -9,13 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.plaf.synth.Region;
-
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.PeakFindingConstants;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.jface.viewers.TableViewer;
@@ -29,7 +26,6 @@ import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
 /**
  * Manages the interactions of peakfinders to view
  * 
- * 
  * @author Dean P. Ottewell
  *
  */
@@ -39,12 +35,11 @@ public class PeakFindingController {
 	
 	public IPlottingSystem plottingSystem;
 	
-	
-	//TODO: intialise in the cosntructor
-	private PeakFindingActionsDelegate actions = new PeakFindingActionsDelegate(this);
-	private PeakFindingWidget widget = new PeakFindingWidget(this);
-	private PeakFindingTable table = new PeakFindingTable(this);
-	
+	//TODO: initialise in the constructor
+//	private PeakFindingActionsDelegate actions = new PeakFindingActionsDelegate(this);
+//	private PeakFindingWidget widget = new PeakFindingWidget(this);
+//	private PeakFindingTable table = new PeakFindingTable(this);
+//	
 	PeakSearchJob peakSearchJob;
 	
 	// Peak Finders Load From Service Class
@@ -76,11 +71,11 @@ public class PeakFindingController {
 	
 	//Really need that intermediate of a identified peak. COuld the below be the answer
 	List<IdentifiedPeak> peaksIdentified = new ArrayList<IdentifiedPeak>();
-	List<Peak> peaks = new ArrayList<Peak>();
+	private List<Peak> peaks = new ArrayList<Peak>();
 	
 	public void clearPeaks(){
 		this.peaksCompFunc = null; //TODO: isn't there a proper way to clear?
-		peaks.clear();
+		getPeaks().clear();
 	}
 	
 	/**
@@ -170,54 +165,43 @@ public class PeakFindingController {
 		
 		return peaks;
 	}
-	
-	
-	public void refreshTable(){
-		getTable().viewer.refresh();
-	}
-	
-	public TableViewer getTableViewer(){
-		return getTable().viewer;
-	}
 		
 	public Double getLowerBnd() {
 		return lowerBnd;
 	}
 
-	public void setLowerBnd(double lowerBnd) {
-		getWidget().setLwrBndVal(lowerBnd);
-		
-		if(this.getPeakfindingtool() != null)
-			this.getPeakfindingtool().updateBoundsLower(lowerBnd);
-		
-		if(this.selectedRegion != null){
-			double[] endPnt = this.selectedRegion.getPointRef();
-			this.selectedRegion.setEndPoint(new double[]{upperBnd,endPnt[1]});
-			
-		}
-		this.lowerBnd = lowerBnd;
-	}
+//	public void setLowerBnd(double lowerBnd) {
+//		getWidget().setLwrBndVal(lowerBnd);
+//		
+//		if(this.getPeakfindingtool() != null)
+//			this.getPeakfindingtool().updateBoundsLower(lowerBnd);
+//		
+//		if(this.selectedRegion != null){
+//			double[] endPnt = this.selectedRegion.getPointRef();
+//			this.selectedRegion.setEndPoint(new double[]{upperBnd,endPnt[1]});
+//			
+//		}
+//		this.lowerBnd = lowerBnd;
+//	}
 	
 	public Double getUpperBnd() {
 		return upperBnd;
 	}
 	
-	public void setUpperBnd(double upperBnd) {
-		getWidget().setUprBndVal(upperBnd);
-		
-		if(getPeakfindingtool() != null)
-			getPeakfindingtool().updateBoundsUpper(upperBnd);
-		//TMP impl
-		if(selectedRegion != null){
-			double[] endPnt = this.selectedRegion.getEndPoint();
-			endPnt[0] = upperBnd;
-			this.selectedRegion.setEndPoint(endPnt);
-		}
-		
-		this.upperBnd = upperBnd;
-	}
-	
-	
+//	public void setUpperBnd(double upperBnd) {
+//		getWidget().setUprBndVal(upperBnd);
+//		
+//		if(getPeakfindingtool() != null)
+//			getPeakfindingtool().updateBoundsUpper(upperBnd);
+//		//TMP impl
+//		if(selectedRegion != null){
+//			double[] endPnt = this.selectedRegion.getEndPoint();
+//			endPnt[0] = upperBnd;
+//			this.selectedRegion.setEndPoint(endPnt);
+//		}
+//		
+//		this.upperBnd = upperBnd;
+//	}
 	
 	RectangularROI selectedRegion;
 	
@@ -259,23 +243,22 @@ public class PeakFindingController {
 			getPeakfindingtool().updatePeakTrace(peaksX, peaksY);
 	}
 		
-	public void formatPeakSearch(){
-		updatePeakTrace();
-
-		if (getTable().viewer != null)
-			getTable().viewer.refresh();
-
-		// TODO: CLEAN UP ON ACTIVATE PEAKFINDER
-		getPeakFindData().deactivatePeakFinder(getPeakFinderID());
-		// TODO: Update with the new peaks
-		getPeakfindingtool().getPlottingSystem().repaint();
-
-		// Reset peak finder 
-		if (!getWidget().runPeakSearch.isEnabled())
-			getWidget().runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearch.png").createImage());
-		getWidget().runPeakSearch.setEnabled(true);
-	}
-	
+//	public void formatPeakSearch(){
+//		updatePeakTrace();
+//		if (getTable().viewer != null)
+//			getTable().viewer.refresh();
+//
+//		// TODO: CLEAN UP ON ACTIVATE PEAKFINDER
+//		getPeakFindData().deactivatePeakFinder(getPeakFinderID());
+//		// TODO: Update with the new peaks
+//		getPeakfindingtool().getPlottingSystem().repaint();
+//
+//		// Reset peak finder 
+//		if (!getWidget().runPeakSearch.isEnabled())
+//			getWidget().runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearch.png").createImage());
+//		getWidget().runPeakSearch.setEnabled(true);
+//	}
+//	
 	public <T> void setPlottingSystem(IPlottingSystem<T> system) {
 		this.plottingSystem = system;
 	}
@@ -301,7 +284,7 @@ public class PeakFindingController {
 		try {
 			
 			//TODO: fix the formatter. have iterate over identified peaks
-			for (Peak p : peaks) {
+			for (Peak p : getPeaks()) {
 				writer.write(p.getXYFormat());
 				writer.newLine();
 			}
@@ -329,30 +312,6 @@ public class PeakFindingController {
 		this.searchScaleIntensity = searchScaleIntensity;
 	}
 
-	public PeakFindingWidget getWidget() {
-		return widget;
-	}
-
-	public void setWidget(PeakFindingWidget widget) {
-		this.widget = widget;
-	}
-
-	public PeakFindingTable getTable() {
-		return table;
-	}
-
-	public void setTable(PeakFindingTable table) {
-		this.table = table;
-	}
-
-	public PeakFindingActionsDelegate getActions() {
-		return actions;
-	}
-
-	public void setActions(PeakFindingActionsDelegate actions) {
-		this.actions = actions;
-	}
-
 	public PeakFindingTool getPeakfindingtool() {
 		return peakfindingtool;
 	}
@@ -360,6 +319,13 @@ public class PeakFindingController {
 	public void setPeakfindingtool(PeakFindingTool peakfindingtool) {
 		this.peakfindingtool = peakfindingtool;
 	}
-	
+
+	public List<Peak> getPeaks() {
+		return peaks;
+	}
+
+	public void setPeaks(List<Peak> peaks) {
+		this.peaks = peaks;
+	}
 	
 }

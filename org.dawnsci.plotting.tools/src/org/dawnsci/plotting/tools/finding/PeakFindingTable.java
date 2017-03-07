@@ -36,16 +36,16 @@ public class PeakFindingTable {
 		viewer.getTable().setHeaderVisible(true);
 		viewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
 		viewer.setContentProvider(new ArrayContentProvider());
-		viewer.setInput(controller.peaks);
+		viewer.setInput(controller.getPeaks());
 		
 		/*Table Content Manipulation*/
 		viewer.getControl().addKeyListener( new org.eclipse.swt.events.KeyAdapter() {
 		      public void keyPressed(KeyEvent e) {
 		          if (e.keyCode == SWT.DEL){
-		        	  //Delete the peka the refresh should fix itself
+		        	  //Delete the peak the refresh should fix itself
 		        	  //Thse indexs shoudl line up because of how they are populated...
 		        	  int idx = viewer.getTable().getSelectionIndex();
-		        	  controller.peaks.remove(idx);
+		        	  controller.getPeaks().remove(idx);
 		        	  //TODO: controller.updatePeakTrace(controller.peaks);
 		        	  viewer.refresh();
 		          }
@@ -61,7 +61,7 @@ public class PeakFindingTable {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				final StructuredSelection sel = (StructuredSelection)event.getSelection();
-				if (controller.peaks!=null && sel!=null && sel.getFirstElement()!=null) {
+				if (controller.getPeaks()!=null && sel!=null && sel.getFirstElement()!=null) {
 					//peaksTrace.getTraceColor();
 					//((ILineTrace)peak.getTrace()).setTraceColor(ColorConstants.darkGreen);
 					viewer.refresh();

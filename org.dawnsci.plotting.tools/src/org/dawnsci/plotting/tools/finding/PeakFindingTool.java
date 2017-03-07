@@ -1,10 +1,5 @@
 package org.dawnsci.plotting.tools.finding;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -31,16 +26,11 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Scale;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.part.IPageSite;
 import org.slf4j.Logger;
@@ -48,11 +38,8 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
 
-//import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
-
 /**
  * @author Dean P. Ottewell
- *
  *
  */
 public class PeakFindingTool extends AbstractToolPage implements IRegionListener {
@@ -60,6 +47,13 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	private static final Logger logger = LoggerFactory.getLogger(PeakFittingTool.class);
 	
 	PeakFindingController controller;
+	
+	//View Compomnents
+	private PeakFindingActionsDelegate actions;
+	private PeakFindingWidget widget;
+	private PeakFindingTable table;
+	
+	
 	// Page Components
 	private Composite composite;
 	
@@ -84,6 +78,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	// Selected Region Interest For Searching
 	public IRegion searchRegion = null;
 
+	//TODO: should this defalt contructor generate controller...
 	public PeakFindingTool() {
 		// Setup up a new PeakSearch Instance
 		this.controller = new PeakFindingController();
@@ -96,6 +91,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			}
 		};
 	}
+	
 	
 	public PeakFindingTool(IPlottingSystem system, PeakFindingController controller){
 		this.setPlottingSystem(system);
@@ -179,10 +175,10 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		List<Double> pX = new ArrayList<Double>();
 		List<Double> pY = new ArrayList<Double>();
 
-		if (!controller.peaks.isEmpty()) {
-			for (int i = 0; i < controller.peaks.size(); ++i) {
-				pX.add(controller.peaks.get(i).getX());
-				pY.add(controller.peaks.get(i).getY());
+		if (!controller.getPeaks().isEmpty()) {
+			for (int i = 0; i < controller.getPeaks().size(); ++i) {
+				pX.add(controller.getPeaks().get(i).getX());
+				pY.add(controller.getPeaks().get(i).getY());
 			}
 		}
 
@@ -198,7 +194,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		// Add peaks to table set TODO: move to a part inside updatePEakTrace
 		Peak p = new Peak(x, y);
 		p.setName("P" + pX.size());
-		controller.peaks.add(p);
+		controller.getPeaks().add(p);
 
 		controller.getTable().viewer.refresh();
 	}
@@ -223,7 +219,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 			// TODO: renive hot fix setup and functionalize
 			// remove peaks from table should be at same index?
-			controller.peaks.remove(toRemove);
+			controller.getPeaks().remove(toRemove);
 			controller.getTable().viewer.refresh();
 
 			peakx = DatasetFactory.createFromList(pX);
@@ -280,8 +276,8 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				}
 
 				// Cleanup last peaks
-				if (!controller.peaks.isEmpty()) {
-					controller.peaks.clear();
+				if (!controller.getPeaks().isEmpty()) {
+					controller.getPeaks().clear();
 				}
 
 				peaksTrace.setVisible(false);
@@ -460,8 +456,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	public void regionsRemoved(RegionEvent evt) {
 		// TODO Auto-generated method stub
 	}
-
-
 
 	@Override
 	public void activate() {

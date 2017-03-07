@@ -34,8 +34,6 @@ public class PeakFindingActionsDelegate {
 		};
 		createNewSelection.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit.png"));
 		toolbar.add(createNewSelection);
-
-
 		
 		addMode = new Action("Add peaks to those already found", IAction.AS_CHECK_BOX) {
 			 public void run() {
