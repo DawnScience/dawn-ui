@@ -66,7 +66,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	// Traces
 	//TODO: just making public whilst poking
 	public ILineTrace sampleTrace;
-	private ILineTrace fitSignal;
 	private ILineTrace peaksTrace;
 
 	// Peak Running Process
@@ -96,9 +95,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				peakSearch.schedule();
 			}
 		};
-
 	}
-	
 	
 	public PeakFindingTool(IPlottingSystem system, PeakFindingController controller){
 		this.setPlottingSystem(system);
@@ -271,15 +268,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 		getPlottingSystem().addTrace(peaksTrace);
 
-		/*
-		 * TODO: not all peak finds have a signal trace
-		 */
-		// Setup Signal Trace
-		fitSignal = getPlottingSystem().createLineTrace("Fitted Signal");
-		fitSignal.setLineWidth(1);
-		fitSignal.setTraceType(TraceType.SOLID_LINE);
-		fitSignal.setTraceColor(ColorConstants.cyan);
-		getPlottingSystem().addTrace(fitSignal);
 	}
 
 
@@ -298,7 +286,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 				peaksTrace.setVisible(false);
 				regionBndsTrace.setVisible(false);
-				fitSignal.setVisible(false);
 
 				// hide region bounds whilst search
 				regionBndsTrace.setVisible(true);
