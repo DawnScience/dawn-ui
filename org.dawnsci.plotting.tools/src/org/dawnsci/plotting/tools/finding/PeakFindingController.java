@@ -12,15 +12,9 @@ import java.util.Map;
 
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.PeakFindingConstants;
-import org.dawnsci.spectrum.ui.file.ISpectrumFileListener;
-import org.dawnsci.spectrum.ui.file.SpectrumFileEvent;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
-import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
-import org.eclipse.jface.viewers.TableViewer;
-
-import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingData;
 import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingService;
@@ -255,7 +249,12 @@ public class PeakFindingController {
 	private void peaksChangedListeners(PeakOpportunityEvent evt) {
 		for(IPeakOpportunityListener listener : listeners)
 			listener.peaksChanged(evt);
-		
+	}
+	
+	public void addPeaks(List<Peak> peaks){
+		//TODO:this should then trigger all the updates... I hope, I hope, I hope
+		peaksChangedListeners(new PeakOpportunityEvent(this, peaks));
+	
 	}
 	
 //	private void fireFileLoadedListeners(SpectrumFileEvent event) {

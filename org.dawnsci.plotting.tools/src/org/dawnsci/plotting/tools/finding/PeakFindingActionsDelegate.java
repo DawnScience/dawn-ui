@@ -31,7 +31,16 @@ public class PeakFindingActionsDelegate {
 			public void run() {
 				
 				//TODO: how will trigger the peak finding tool
-				controller.getPeakfindingtool().createNewSearch();
+				//Need to grey of peak finding tool setup
+				//controller.getPeakfindingtool().createNewSearch();
+				
+				controller.addPeakListener(new IPeakOpportunityListener() {					
+					@Override
+					public void peaksChanged(PeakOpportunityEvent evt) {
+						// TODO Auto-generated method stub
+						
+					}
+				});
 				
 			}
 		};

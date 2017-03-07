@@ -15,11 +15,13 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.peakfinding.IPeakFinderParameter;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
+import org.eclipse.january.dataset.AbstractDataset;
 import org.eclipse.january.dataset.BooleanDataset;
 import org.eclipse.january.dataset.Comparisons;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IntegerDataset;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
@@ -44,41 +46,54 @@ public class PeakSearchJob extends Job {
 		PeakFindingController controller;
 
 		IPeakFindingService peakFindServ = (IPeakFindingService)Activator.getService(IPeakFindingService.class);
+
+		IDataset xData;
+		IDataset yData;
 		
-		//TODO: job depends too much on controller.
-		public PeakSearchJob(PeakFindingController controller) {
+		public PeakSearchJob(PeakFindingController controller,IDataset xData, IDataset yData) {
 			super("Peak Search");
 			this.controller = controller;
+			this.xData = xData;
+			this.yData = yData;
 			setPriority(Job.INTERACTIVE);
 		}
 		
 
 		//Some sort of data load into the job and then run. Do not want things to be changeing whilst running
-//		public void loadData(IPeakOppurtunity data){
-//			
+//		public void loadData(IPeakOppurtunity evt){
+//				//TODO: Do not realyl need to grab event peaks as we have them here but maybe better off here putting them in a event structure rather than passing this list object around...
+//		controller.addPeaks(peaks);
 //		}
 		
+	
+
+//TODO: should be done previously		
+//		if (controller.getPeakfindingtool().sampleTrace == null){
+//			return Status.CANCEL_STATUS;
+//		}
+//		if (controller.getLowerBnd() == null || controller.getUpperBnd() == null) {
+//			RectangularROI rectangle = (RectangularROI) controller.getPeakfindingtool().searchRegion.getROI();
+//			// // Set the region bounds
+//			controller.getPeakfindingtool().updateSearchBnds(rectangle);
+//		}
+//
+//		
+//		/* Clean up last peak search */
+//		controller.clearPeaks(); //TODO: shouldnt have to do this... just get peaks from trace when would like them?
+//		
+//		// Obtain Upper and Lower Bounds
+//		Dataset xData = DatasetUtils.convertToDataset(controller.getPeakfindingtool().sampleTrace.getXData().squeeze());
+//		Dataset yData = DatasetUtils.convertToDataset(controller.getPeakfindingtool().sampleTrace.getYData().squeeze());
+//
+//		BooleanDataset allowed = Comparisons.withinRange(xData, controller.getLowerBnd(), controller.getUpperBnd());
+//		xData = xData.getByBoolean(allowed);
+//		yData = yData.getByBoolean(allowed);
+
 		
 		
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 	
-			
-			if (controller.getPeakfindingtool().sampleTrace == null){
-				syncFormatPeakSearch();
-				return Status.CANCEL_STATUS;
-			}
-			if (controller.getLowerBnd() == null || controller.getUpperBnd() == null) {
-				RectangularROI rectangle = (RectangularROI) controller.getPeakfindingtool().searchRegion.getROI();
-				// // Set the region bounds
-				controller.getPeakfindingtool().updateSearchBnds(rectangle);
-			}
-	
-			
-			/* Clean up last peak search */
-			controller.clearPeaks(); //TODO: shouldnt have to do this... just get peaks from trace when would like them?
-			
-			
 			//TODO: clean control function
 			// Free up active peakfinder calls
 			if (controller.getPeakFindData().hasActivePeakFinders()) {
@@ -87,7 +102,6 @@ public class PeakSearchJob extends Job {
 					controller.getPeakFindData().deactivatePeakFinder(active);
 				}
 			}
-			
 			
 			String peakAlgorithm= Activator.getPlottingPreferenceStore().getString(PeakFindingConstants.PeakAlgorithm);
 			controller.getPeakFindData().activatePeakFinder(peakAlgorithm);
@@ -104,39 +118,15 @@ public class PeakSearchJob extends Job {
 				controller.getPeakFindData().setPFParameterByName(peakAlgorithm, param.getName(), param.getValue());
 			}
 			controller.getPeakFindData().setPFParametersByPeakFinder(peakAlgorithm, peakParams);
-			
-			
-			
-			
-			
-
-			// Obtain Upper and Lower Bounds
-			Dataset xData = DatasetUtils.convertToDataset(controller.getPeakfindingtool().sampleTrace.getXData().squeeze());
-			Dataset yData = DatasetUtils.convertToDataset(controller.getPeakfindingtool().sampleTrace.getYData().squeeze());
-
-			BooleanDataset allowed = Comparisons.withinRange(xData, controller.getLowerBnd(), controller.getUpperBnd());
-			xData = xData.getByBoolean(allowed);
-			yData = yData.getByBoolean(allowed);
-
+		
 			controller.getPeakFindData().setData(xData, yData);
 			controller.getPeakFindData().setNPeaks(20);
-
-			
-			
-			
-			
-			
-			
-			
-			
 			
 			/*Perform Peak Search*/
-			
 			try {
 				controller.getPeakFindServ().findPeaks(controller.getPeakFindData());
 			} catch (Exception e) {
 				logger.debug("Finding peaks data resulted in error in peak service");
-				syncFormatPeakSearch();
 				return Status.CANCEL_STATUS;
 			}
 
@@ -147,26 +137,27 @@ public class PeakSearchJob extends Job {
 
 			if(peaksPos.isEmpty()){
 				logger.debug("No peaks found with " + peakAlgorithm);
-				syncFormatPeakSearch();
 				return Status.CANCEL_STATUS;
 			}
+
 			
+			/*Format peaks*/
 			List<Double> pPos = new ArrayList<Double>(peaksPos.values());
 			List<Integer> pHeight = new ArrayList<Integer>(peaksPos.keySet());
-
-			controller.peaksY = DatasetFactory.createFromList(pPos);
-			controller.peaksX = xData.getBy1DIndex((IntegerDataset) DatasetFactory.createFromList(pHeight));
-
 			
-			APeak peak;
+			IDataset peaksY= DatasetFactory.createFromList(pPos);
+			IDataset peaksX = ((Dataset) xData).getBy1DIndex((IntegerDataset) DatasetFactory.createFromList(pHeight));
+			
+			List<Peak> peaks = new ArrayList<Peak>();
 			// Create peaks
-			for (int i = 0; i < controller.peaksY.getSize(); ++i) {
-				Peak p = new Peak(controller.peaksX.getDouble(i), controller.peaksY.getDouble(i));
+			for (int i = 0; i < peaksY.getSize(); ++i) {
+				Peak p = new Peak(peaksX.getDouble(i), peaksY.getDouble(i));
 				p.setName("P" + i);
-				controller.getPeaks().add(p);
+				peaks.add(p);
 			}
-
 			
+			/*Send peaks update*/
+			controller.addPeaks(peaks);
 			
 			
 			return Status.OK_STATUS;

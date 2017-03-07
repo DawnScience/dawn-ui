@@ -6,9 +6,6 @@ import java.util.List;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.plotting.tools.fitting.PeakFittingTool;
-import org.dawnsci.spectrum.ui.file.ISpectrumFile;
-import org.dawnsci.spectrum.ui.file.ISpectrumFileListener;
-import org.dawnsci.spectrum.ui.file.SpectrumFileEvent;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
@@ -189,7 +186,15 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 //		});
 
 		//controller.addPeakListener()
-		
+		controller.addPeakListener(new IPeakOpportunityListener() {
+
+			@Override
+			public void peaksChanged(PeakOpportunityEvent evt) {
+				//Update Peaks
+				updatePeakTrace(evt.getPeaks());
+			}
+			
+		});
 		
 		
 		
