@@ -62,16 +62,16 @@ public class PeakFindingWidget {
 
 		// GET SAMPLE CONFIGURATION TODO: refactor and extract earlier
 		//Where else am i going to get this?
-		ILineTrace sampleTrace = controller.getPeakfindingtool().sampleTrace;
+		//ILineTrace sampleTrace = controller.getPeakfindingtool().sampleTrace;
+//		int max = sampleTrace.getXData().getSize();
+		//TODO: tmp limit
+		int max = 100000;
 		
-		
-		
-	
 		Label lwrBndLab = new Label(configureComposite, SWT.NONE);
 		lwrBndLab.setText("Lower Bound");
 		lwrBndLab.setToolTipText("As shown by the second vertical line");
 		
-		lwrBndVal = new FloatSpinner(configureComposite, SWT.BORDER,  sampleTrace.getXData().getSize(), 3);
+		lwrBndVal = new FloatSpinner(configureComposite, SWT.BORDER,  max , 3);
 		lwrBndVal.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		lwrBndVal.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -88,7 +88,7 @@ public class PeakFindingWidget {
 		upperBndLab.setToolTipText("As shown by the vertical line");
 
 	
-		uprBndVal = new FloatSpinner(configureComposite, SWT.BORDER, sampleTrace.getXData().getSize(), 3);
+		uprBndVal = new FloatSpinner(configureComposite, SWT.BORDER, max , 3);
 		uprBndVal.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		uprBndVal.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -185,12 +185,18 @@ public class PeakFindingWidget {
 			public void widgetSelected(SelectionEvent e) {
 				
 				runPeakSearch.setEnabled(false);
+				
 				runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearching.png").createImage());			
+				
 				// Run peakSearch
-				controller.peakSearchJob= new PeakSearchJob(controller);
+				controller.peakSearchJob= new PeakSearchJob(controller, null, null);
+				
 				//TODO:Auto schedule in controller func
 				controller.peakSearchJob.schedule();
+				
 				//controller.formatPeakSearch();
+				
+				
 			}
 		});
 	}

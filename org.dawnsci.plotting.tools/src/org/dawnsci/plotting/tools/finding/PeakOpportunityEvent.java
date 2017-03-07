@@ -7,8 +7,8 @@ import java.util.List;
 import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
 
 /**
- * @author Dean P. Ottewell
  *
+ * @author Dean P. Ottewell
  */
 public class PeakOpportunityEvent extends EventObject {
 

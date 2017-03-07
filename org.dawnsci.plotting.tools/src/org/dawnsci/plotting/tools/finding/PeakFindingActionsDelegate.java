@@ -29,7 +29,6 @@ public class PeakFindingActionsDelegate {
 	public void createActions(IToolBarManager toolbar) {
 		final Action createNewSelection = new Action("New Search Selection.", IAction.AS_PUSH_BUTTON) {
 			public void run() {
-				
 				//TODO: how will trigger the peak finding tool
 				//Need to grey of peak finding tool setup
 				//controller.getPeakfindingtool().createNewSearch();
@@ -88,7 +87,6 @@ public class PeakFindingActionsDelegate {
 		};
 		export.setImageDescriptor(Activator.getImageDescriptor("icons/mask-export-wiz.png"));
 		toolbar.add(export);
-
 		
 		final Action preferences = new Action("Preferences...") {
 			public void run() {

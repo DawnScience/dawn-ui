@@ -12,7 +12,6 @@ import java.util.Map;
 
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.PeakFindingConstants;
-import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
@@ -24,7 +23,6 @@ import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
  * Manages the interactions of peakfinders to view
  * 
  * @author Dean P. Ottewell
- *
  */
 public class PeakFindingController {
 	
@@ -38,6 +36,9 @@ public class PeakFindingController {
 	
 	private IPeakFindingData peakFindData; 
 	private String peakFinderID;
+	
+	//TODO: wow, horrific name... come on
+	PeakOppurtunity peakDataOpp;
 	
 	//TODO: check out HashSet. Do I really need a set. 
 	//Who listens -> Tool, Table, widget, actions
@@ -215,11 +216,11 @@ public class PeakFindingController {
 	}
 
 	public List<Peak> getPeaks() {
-		return peaks;
+		return peakDataOpp.getPeaks();
 	}
 
 	public void setPeaks(List<Peak> peaks) {
-		this.peaks = peaks;
+		peakDataOpp.setPeaks(peaks);
 	}
 	
 	//Triggers People Listening
@@ -242,6 +243,20 @@ public class PeakFindingController {
 		peaksChangedListeners(new PeakOpportunityEvent(this, peaks));
 	
 	}
+	
+	public void loadPeakOppurtunities(IPeakOpportunity peaksOpp){
+		//TODO: have peakOpputunity event use the actual peak opps. This is probs gonna  bite in the butt later by not doing that originally.
+		peaksChangedListeners(new PeakOpportunityEvent(this, peaksOpp.getPeaks()));
+	}
+	
+//	public void addFile(ISpectrumFile file) {
+//		if (spectrumFiles.containsKey(file.getLongName())) return;
+//		
+//		spectrumFiles.put(file.getLongName(), file);
+//		
+//		file.plotAll();
+//		fireFileLoadedListeners(new SpectrumFileEvent(this, file));
+//	}
 	
 //Reference to what might need to listen on a peak change	
 

@@ -88,12 +88,9 @@ public class PeakSearchJob extends Job {
 //		BooleanDataset allowed = Comparisons.withinRange(xData, controller.getLowerBnd(), controller.getUpperBnd());
 //		xData = xData.getByBoolean(allowed);
 //		yData = yData.getByBoolean(allowed);
-
-		
 		
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-	
 			//TODO: clean control function
 			// Free up active peakfinder calls
 			if (controller.getPeakFindData().hasActivePeakFinders()) {
