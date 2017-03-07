@@ -32,7 +32,6 @@ public class PeakFindingActionsDelegate {
 				
 				//TODO: how will trigger the peak finding tool
 				controller.getPeakfindingtool().createNewSearch();
-
 				
 			}
 		};

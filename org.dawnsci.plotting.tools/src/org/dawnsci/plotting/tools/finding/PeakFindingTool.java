@@ -6,6 +6,9 @@ import java.util.List;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.plotting.tools.fitting.PeakFittingTool;
+import org.dawnsci.spectrum.ui.file.ISpectrumFile;
+import org.dawnsci.spectrum.ui.file.ISpectrumFileListener;
+import org.dawnsci.spectrum.ui.file.SpectrumFileEvent;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
@@ -31,6 +34,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.part.IPageSite;
 import org.slf4j.Logger;
@@ -52,7 +56,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	private PeakFindingActionsDelegate actions;
 	private PeakFindingWidget widget;
 	private PeakFindingTable table;
-	
 	
 	// Page Components
 	private Composite composite;
@@ -165,6 +168,40 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			}
 		});
 
+		
+		//TODO: Controller Bean listeners
+//		manager.addFileListener(new ISpectrumFileListener() {
+//			@Override
+//			public void fileLoaded(final SpectrumFileEvent event) {
+//				Display.getDefault().syncExec(new Runnable() {
+//					@Override
+//					public void run() {
+//						ISpectrumFile file = updateSelection(event);
+//						file.setShowPlot(true);
+//					}
+//				});
+//			}
+//
+//			@Override
+//			public void fileRemoved(SpectrumFileEvent event) {
+//				updateSelection(event);
+//			}
+//		});
+
+		//controller.addPeakListener()
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		super.activate();
 		
 		// Begin with the search tool ready to then run on

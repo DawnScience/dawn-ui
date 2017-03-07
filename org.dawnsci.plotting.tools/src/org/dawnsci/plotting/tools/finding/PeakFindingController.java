@@ -6,11 +6,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.PeakFindingConstants;
+import org.dawnsci.spectrum.ui.file.ISpectrumFileListener;
+import org.dawnsci.spectrum.ui.file.SpectrumFileEvent;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.january.dataset.Dataset;
@@ -31,12 +34,6 @@ import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
  */
 public class PeakFindingController {
 	
-	//private PeakFindingTool peakfindingtool;
-	
-	//TODO: initialise in the constructor
-//	private PeakFindingActionsDelegate actions = new PeakFindingActionsDelegate(this);
-//	private PeakFindingWidget widget = new PeakFindingWidget(this);
-//	private PeakFindingTable table = new PeakFindingTable(this);
 	PeakSearchJob peakSearchJob;
 	
 	// Peak Finders Load From Service Class
@@ -52,8 +49,10 @@ public class PeakFindingController {
 	private IPeakFindingData peakFindData; 
 	private String peakFinderID;
 
-	//The table viewer should exist here
-	//TODO:Move these control values
+	
+	//TODO: check out HashSet. Do I really need a set. 
+	//Who listens -> Tool, Table, widget, actions
+	private HashSet<IPeakOpportunityListener> listeners;
 	
 	//Really need that intermediate of a identified peak. COuld the below be the answer
 	List<IdentifiedPeak> peaksIdentified = new ArrayList<IdentifiedPeak>();
@@ -89,7 +88,7 @@ public class PeakFindingController {
 			forwardPos = peak.getKey() + 1;
 			forwardValue = yData.getElementDoubleAbs(forwardPos);
 			
-			/*XXX: well if not nromalized to zero can not really assume that zero is the turning point...*/
+			/*XXX: well if not normalised to zero can not really assume that zero is the turning point...*/
 
 			// Found zero crossing from positive to negative (maximum)
 			// now, work out left and right height differences from local minima or edge
@@ -150,38 +149,7 @@ public class PeakFindingController {
 		
 		return peaks;
 	}
-		
-
-//	public void setLowerBnd(double lowerBnd) {
-//		getWidget().setLwrBndVal(lowerBnd);
-//		
-//		if(this.getPeakfindingtool() != null)
-//			this.getPeakfindingtool().updateBoundsLower(lowerBnd);
-//		
-//		if(this.selectedRegion != null){
-//			double[] endPnt = this.selectedRegion.getPointRef();
-//			this.selectedRegion.setEndPoint(new double[]{upperBnd,endPnt[1]});
-//			
-//		}
-//		this.lowerBnd = lowerBnd;
-//	}
-	
-	
-//	public void setUpperBnd(double upperBnd) {
-//		getWidget().setUprBndVal(upperBnd);
-//		
-//		if(getPeakfindingtool() != null)
-//			getPeakfindingtool().updateBoundsUpper(upperBnd);
-//		//TMP impl
-//		if(selectedRegion != null){
-//			double[] endPnt = this.selectedRegion.getEndPoint();
-//			endPnt[0] = upperBnd;
-//			this.selectedRegion.setEndPoint(endPnt);
-//		}
-//		
-//		this.upperBnd = upperBnd;
-//	}
-	
+			
 	RectangularROI selectedRegion;
 	
 	public void setRegion(RectangularROI region){
@@ -216,31 +184,6 @@ public class PeakFindingController {
 	public void setPeakFindData(IPeakFindingData peakFindData) {
 		this.peakFindData = peakFindData;
 	}
-
-//	public void updatePeakTrace(){
-//		if(peaksX != null || peaksY != null)
-//			getPeakfindingtool().updatePeakTrace(peaksX, peaksY);
-//	}
-		
-//	public void formatPeakSearch(){
-//		updatePeakTrace();
-//		if (getTable().viewer != null)
-//			getTable().viewer.refresh();
-//
-//		// TODO: CLEAN UP ON ACTIVE PEAKFINDER
-//		getPeakFindData().deactivatePeakFinder(getPeakFinderID());
-//		// TODO: Update with the new peaks
-//		getPeakfindingtool().getPlottingSystem().repaint();
-//
-//		// Reset peak finder 
-//		if (!getWidget().runPeakSearch.isEnabled())
-//			getWidget().runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearch.png").createImage());
-//		getWidget().runPeakSearch.setEnabled(true);
-//	}
-//	
-//	public <T> void setPlottingSystem(IPlottingSystem<T> system) {
-//		this.plottingSystem = system;
-//	}
 	
 	/**
 	 *TODO: move setup to export function
@@ -298,5 +241,93 @@ public class PeakFindingController {
 	public void setPeaks(List<Peak> peaks) {
 		this.peaks = peaks;
 	}
+	
+	
+	//Triggers People Listening
+	public void addPeakListener(IPeakOpportunityListener listener) {
+		listeners.add(listener);
+	}
+	
+	public void removeFileListener(IPeakOpportunityListener listener) {
+		listeners.remove(listener);
+	}
+
+	private void peaksChangedListeners(PeakOpportunityEvent evt) {
+		for(IPeakOpportunityListener listener : listeners)
+			listener.peaksChanged(evt);
+		
+	}
+	
+//	private void fireFileLoadedListeners(SpectrumFileEvent event) {
+//		for (ISpectrumFileListener listener : listeners)
+//			listener.fileLoaded(event);
+//	}
+//
+//	private void fireFileRemovedListeners(SpectrumFileEvent event) {
+//		for (ISpectrumFileListener listener : listeners)
+//			listener.fileRemoved(event);
+//	
+	
+	
+	
+
+//Reference to what might need to listen on a peak change	
+
+//	public void updatePeakTrace(){
+//		if(peaksX != null || peaksY != null)
+//			getPeakfindingtool().updatePeakTrace(peaksX, peaksY);
+//	}
+		
+//	public void formatPeakSearch(){
+//		updatePeakTrace();
+//		if (getTable().viewer != null)
+//			getTable().viewer.refresh();
+//
+//		// TODO: CLEAN UP ON ACTIVE PEAKFINDER
+//		getPeakFindData().deactivatePeakFinder(getPeakFinderID());
+//		// TODO: Update with the new peaks
+//		getPeakfindingtool().getPlottingSystem().repaint();
+//
+//		// Reset peak finder 
+//		if (!getWidget().runPeakSearch.isEnabled())
+//			getWidget().runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearch.png").createImage());
+//		getWidget().runPeakSearch.setEnabled(true);
+//	}
+//	
+//	public <T> void setPlottingSystem(IPlottingSystem<T> system) {
+//		this.plottingSystem = system;
+//	}
+
+
+//	public void setLowerBnd(double lowerBnd) {
+//		getWidget().setLwrBndVal(lowerBnd);
+//		
+//		if(this.getPeakfindingtool() != null)
+//			this.getPeakfindingtool().updateBoundsLower(lowerBnd);
+//		
+//		if(this.selectedRegion != null){
+//			double[] endPnt = this.selectedRegion.getPointRef();
+//			this.selectedRegion.setEndPoint(new double[]{upperBnd,endPnt[1]});
+//			
+//		}
+//		this.lowerBnd = lowerBnd;
+//	}
+	
+	
+//	public void setUpperBnd(double upperBnd) {
+//		getWidget().setUprBndVal(upperBnd);
+//		
+//		if(getPeakfindingtool() != null)
+//			getPeakfindingtool().updateBoundsUpper(upperBnd);
+//		//TMP impl
+//		if(selectedRegion != null){
+//			double[] endPnt = this.selectedRegion.getEndPoint();
+//			endPnt[0] = upperBnd;
+//			this.selectedRegion.setEndPoint(endPnt);
+//		}
+//		
+//		this.upperBnd = upperBnd;
+//	}
+
 	
 }

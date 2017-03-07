@@ -3,25 +3,27 @@ package org.dawnsci.plotting.tools.finding;
 import java.util.EventObject;
 import java.util.List;
 
+
 import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
 
 /**
  * @author Dean P. Ottewell
  *
  */
-public class PeakOppurtunityEvent extends EventObject {
+public class PeakOpportunityEvent extends EventObject {
 
 	private static final long serialVersionUID = 1L;
 	
-	List<Peak> peaks;
+	private List<Peak> peaks;
 	
-	public PeakOppurtunityEvent(Object source) {
+	public PeakOpportunityEvent(Object source, List<Peak> result) {
 		super(source);
-		// TODO Auto-generated constructor stub
+		this.peaks = result;
 	}
 	
 	public List<Peak> getPeaks(){
 		return peaks;
 	}
 
+	
 }

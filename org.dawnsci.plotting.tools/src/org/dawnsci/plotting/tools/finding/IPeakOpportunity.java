@@ -6,7 +6,13 @@ import org.eclipse.january.dataset.IDataset;
 
 import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
 
-public interface IPeakOppurtunity {
+/**
+ * TODO: use instead of Peak
+ * 
+ * @author Dean P. Ottewell
+ *
+ */
+public interface IPeakOpportunity {
 
 	public List<Peak> getPeaks();
 	
@@ -14,7 +20,7 @@ public interface IPeakOppurtunity {
 	public IDataset getRawXData();
 	public IDataset getRawYData();
 
-//  Do below later
+//TODO:  Do below later
 //	public double getUpperBound();
 //	public void setUpperBound();
 //
