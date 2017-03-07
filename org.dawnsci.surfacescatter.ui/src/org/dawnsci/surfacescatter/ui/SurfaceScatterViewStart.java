@@ -5,13 +5,19 @@ import java.util.ArrayList;
 import org.dawnsci.surfacescatter.CurveStateIdentifier;
 import org.dawnsci.surfacescatter.MethodSettingEnum;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
+import org.dawnsci.surfacescatter.ReflectivityFluxCorrectionsForDialog;
+import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
+import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
+import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.SliceND;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.JFaceResources;
@@ -35,6 +41,8 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.TableItem;
+
+import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class SurfaceScatterViewStart extends Dialog {
 
@@ -65,7 +73,6 @@ public class SurfaceScatterViewStart extends Dialog {
 	private Group methodSetting;
 	private Group parametersSetting;
 	private int[] correctionsDropDownArray;
-
 
 	public CTabFolder getFolder() {
 		return folder;
@@ -179,6 +186,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		/////////////////////////// Window 1 LEFT
 		/////////////////////////// SETUP////////////////////////////////////////////////////
+		
 		try {
 
 			datDisplayer = new DatDisplayer(left, SWT.FILL, filepaths, ssp, datFolderPath, this);
@@ -920,5 +928,54 @@ public class SurfaceScatterViewStart extends Dialog {
 
 	public void setCorrectionsDropDownArray(int[] correctionsDropDownArray) {
 		this.correctionsDropDownArray = correctionsDropDownArray;
+	}
+	
+	public void checkForFlux(String filepath){ 
+		try{
+			IDataHolder dh1 =null;
+			
+			try {
+				dh1 = LoaderFactory.getData(filepath);
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+	
+			ILazyDataset qdcd = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getqdcd());
+			
+			if (qdcd == null) {
+				try {
+					qdcd = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getqsdcd());
+		
+				} catch (Exception e2) {
+	//				System.out.println("can't get qdcd");
+				}
+			} 
+			
+			else {
+			}
+			
+			SliceND sl = new SliceND(qdcd.getShape());
+			Dataset QdcdDat = null;
+			
+			try {
+				QdcdDat = (Dataset) qdcd.getSlice(sl);
+				
+			} catch (DatasetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				
+			}
+		
+			double ref = 
+					ReflectivityFluxCorrectionsForDialog.reflectivityFluxCorrectionsDouble(ssvs.getParamField().getFluxPath().getText(), 
+																				 	   	   QdcdDat.getDouble(0), 
+																				 	   	   filepath);
+			
+		}
+		catch(Exception h){
+			RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(getShell(),4,null);
+			roobw.open();
+		}
 	}
 }

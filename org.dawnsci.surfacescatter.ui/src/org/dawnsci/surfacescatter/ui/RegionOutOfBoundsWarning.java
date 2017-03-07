@@ -52,6 +52,9 @@ public class RegionOutOfBoundsWarning extends Dialog {
 		if (selector == 3){
 			warning.setText("Unable to locate images. Check images file path, or image name in geometric paramters unavwindow.");	
 		}
+		if (selector == 4){
+			warning.setText("Unable to locate flux data.");	
+		}
 		
 		if(note != null){
 			Label noteLabel = new Label(container, SWT.FILL);
@@ -65,7 +68,7 @@ public class RegionOutOfBoundsWarning extends Dialog {
 	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		newShell.setText("Boundaries Warning");
+		newShell.setText("Error Warning");
 	}
 
 	@Override

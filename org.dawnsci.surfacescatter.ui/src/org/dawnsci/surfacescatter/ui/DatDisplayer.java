@@ -399,7 +399,10 @@ public class DatDisplayer extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				clearTable();
-
+				ssvs.setupRightEnabled(false);
+				enableRodConstruction(false);
+				transferToRod.setEnabled(false);
+				clearTable.setEnabled(false);
 			}
 
 			@Override
@@ -652,11 +655,6 @@ public class DatDisplayer extends Composite {
 																					  Double.valueOf(ssvs.getParamField().getAngularFudgeFactor().getText()), 
 																					  Double.valueOf(ssvs.getParamField().getBeamHeight().getText()), 
 																					  Double.valueOf(ssvs.getParamField().getFootprint().getText()));
-			
-//			double ref = 
-//					ReflectivityFluxCorrectionsForDialog.reflectivityFluxCorrectionsDouble(ssvs.getParamField().getFluxPath().getText(), 
-//																					 	   QdcdDat.getDouble(0), 
-//																					 	   filepath);
 			
 			
 			output.add(MethodSetting.Reflectivity_with_Flux_Correction);
