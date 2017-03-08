@@ -12,7 +12,6 @@ import java.util.Map;
 
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.PeakFindingConstants;
-import org.eclipse.dawnsci.analysis.api.fitting.functions.IPeak;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
@@ -25,7 +24,7 @@ import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
  * 
  * @author Dean P. Ottewell
  */
-public class PeakFindingController {
+public class PeakFindingManager {
 	
 	PeakSearchJob peakSearchJob;
 	
@@ -44,7 +43,7 @@ public class PeakFindingController {
 	//Really need that intermediate of a identified peak. COuld the below be the answer
 	List<IdentifiedPeak> peaksIdentified = new ArrayList<IdentifiedPeak>();
 
-	public PeakFindingController(){
+	public PeakFindingManager(){
 		listeners = new HashSet<IPeakOpportunityListener>();
 	}
 	
@@ -62,7 +61,7 @@ public class PeakFindingController {
 	}
 	
 	public static void setPeakFindServ(IPeakFindingService peakFindServ) {
-		PeakFindingController.peakFindServ = peakFindServ;
+		PeakFindingManager.peakFindServ = peakFindServ;
 	}
 	
 	public IPeakFindingData getPeakFindData() {
@@ -144,13 +143,10 @@ public class PeakFindingController {
 			listener.peaksChanged(evt);
 	}
 	
-
-	
 	public void loadPeakOppurtunity(IPeakOpportunity peaksOpp){
 		//TODO: have peakOpputunity event use the actual peak opps. This is probs gonna  bite in the butt later by not doing that originally.
 		peaksChangedListeners(new PeakOpportunityEvent(this, peaksOpp));
 	}
-	
 
 	/**
 	 * Assumes peakpos are those represented in yData passed into. 

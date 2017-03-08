@@ -24,9 +24,9 @@ public class PeakFindingTable {
 	
 	public TableViewer viewer;
 	
-	private PeakFindingController controller;
+	private PeakFindingManager controller;
 
-	public PeakFindingTable(PeakFindingController controller){
+	public PeakFindingTable(PeakFindingManager controller){
 			this.controller = controller;
 	}
 	
@@ -47,7 +47,6 @@ public class PeakFindingTable {
 		        	  //Delete the peak the refresh should fix itself
 		        	  //TODO:These index should line up because of how they are populated... If a comparator is set we are doomed.
 		        	  int idx = viewer.getTable().getSelectionIndex();
-
 		        	  
 		        	  //TODO: controller.updatePeakTrace(controller.peaks); 
 		        	  //TODO: UPDATE PEAKS CONTROLLER FUNCTION CHANGE. EVERYONE IS LISTENING FOR THIS CHANGE
@@ -55,8 +54,6 @@ public class PeakFindingTable {
 		        	  peaks.remove(idx);
 		        	  controller.setPeaks(peaks);
 		        	  	
-		        	  
-		        	  
 		        	  viewer.refresh();
 		          }
 		      }
@@ -68,6 +65,16 @@ public class PeakFindingTable {
 			@Override
 			public void peaksChanged(PeakOpportunityEvent evt) {
 				viewer.setInput(evt.getPeaks());
+			}
+
+			@Override
+			public void boundsChanged(PeakOpportunityEvent evt) {
+				// TODO Auto-generated method stub
+			}
+
+			@Override
+			public void dataChanged(PeakOpportunityEvent evt) {
+				// TODO Auto-generated method stub
 			}
 		});
 	

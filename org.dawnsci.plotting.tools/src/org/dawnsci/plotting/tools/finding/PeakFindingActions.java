@@ -16,17 +16,21 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Dean P. Ottewell
  */
-public class PeakFindingActionsDelegate { 	
+public class PeakFindingActions { 	
 
-	private final static Logger logger = LoggerFactory.getLogger(PeakFindingActionsDelegate.class);
+	private final static Logger logger = LoggerFactory.getLogger(PeakFindingActions.class);
 	
-	PeakFindingController controller;
+	PeakFindingManager controller;
 	
 	Action addMode;
 	Action removeMode;
 	
-	public PeakFindingActionsDelegate(PeakFindingController controller){
+	//TODO: need to summon the peak finder connected too
+	PeakFindingTool tool;
+	
+	public PeakFindingActions(PeakFindingManager controller,PeakFindingTool peakTool){
 		this.controller = controller;
+		this.tool = peakTool;
 	}
 	
 	public void createActions(IToolBarManager toolbar) {
@@ -35,15 +39,7 @@ public class PeakFindingActionsDelegate {
 			public void run() {
 				//TODO: how will trigger the peak finding tool
 				//Need to grey of peak finding tool setup
-				//controller.getPeakfindingtool().createNewSearch();
-				
-				controller.addPeakListener(new IPeakOpportunityListener() {					
-					@Override
-					public void peaksChanged(PeakOpportunityEvent evt) {
-						// TODO Auto-generated method stub
-					}
-				});
-				
+				tool.createNewSearch();
 			}
 		};
 		createNewSelection.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit.png"));
@@ -51,14 +47,9 @@ public class PeakFindingActionsDelegate {
 		
 		addMode = new Action("Add peaks to those already found", IAction.AS_CHECK_BOX) {
 			 public void run() {
-			
-				//TODO: maybe controller shouldnt have this. Get tool values... 
-//				controller.isRemoving = false;
-//				controller.isAdding = true;
-//				
-//				if (removeMode.isChecked())
-//					removeMode.setChecked(controller.isRemoving);
-			 
+				 tool.setAddMode();
+				 if (removeMode.isChecked())
+					 removeMode.setChecked(false);
 			 }
 		};
 		addMode.setImageDescriptor(Activator.getImageDescriptor("icons/peakAdd.png"));
@@ -66,14 +57,9 @@ public class PeakFindingActionsDelegate {
 
 		removeMode = new Action("Delete peaks to those already found", IAction.AS_CHECK_BOX) {
 			public void run() {
-			
-				//TODO: maybe controller shouldnt have this
-//				controller.isRemoving = true;
-//				controller.isAdding = false;
-//				if (addMode.isChecked())
-//					addMode.setChecked(controller.isAdding);
-//			
-			
+				 tool.setRempveMode();
+				 if (addMode.isChecked())
+					 addMode.setChecked(false);
 			}
 		};
 		removeMode.setImageDescriptor(Activator.getImageDescriptor("icons/peakDelete.png"));

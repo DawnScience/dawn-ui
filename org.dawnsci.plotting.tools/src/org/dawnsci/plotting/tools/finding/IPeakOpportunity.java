@@ -22,11 +22,11 @@ public interface IPeakOpportunity {
 	public IDataset getYData();
 	public void setYData(IDataset yData);
 
-	//TODO:  Do below later
-	//	public double getUpperBound();
-	//	public void setUpperBound();
-	//
-	//	public double getLowerBound();
-	//	public void setLowerBound();
+	
+	//TODO: can bound changes exists without data set?
+	public double getUpperBound();
+	public double getLowerBound();
 
+	public void setUpperBound(double upper);
+	public void setLowerBound(double lower);
 }

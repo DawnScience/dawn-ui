@@ -36,7 +36,7 @@ public class PeakFindingWidget {
 	
 	private static final Logger logger = LoggerFactory.getLogger(PeakFindingWidget.class);
 
-	PeakFindingController controller;
+	PeakFindingManager controller;
 
 	private FloatSpinner uprBndVal;
 	private FloatSpinner lwrBndVal;	
@@ -51,7 +51,7 @@ public class PeakFindingWidget {
 	IDataset xData;
 	IDataset yData;
 	
-	public PeakFindingWidget(PeakFindingController controller){
+	public PeakFindingWidget(PeakFindingManager controller){
 		this.controller = controller;
 	}
 	
@@ -82,11 +82,10 @@ public class PeakFindingWidget {
 		lwrBndVal.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		lwrBndVal.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-			
-					
-				//controller.setLowerBnd(lwrBndVal.getDouble());
-			
-			
+				PeakOppurtunity peakOpp = new PeakOppurtunity();
+				peakOpp.setUpperBound(uprBndVal.getDouble());
+				peakOpp.setLowerBound(lwrBndVal.getDouble());
+				controller.loadPeakOppurtunity(peakOpp);
 			}
 		});
 	
@@ -99,11 +98,10 @@ public class PeakFindingWidget {
 		uprBndVal.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		uprBndVal.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-			
-				
-				//controller.setUpperBnd(uprBndVal.getDouble());
-			
-			
+				PeakOppurtunity peakOpp = new PeakOppurtunity();
+				peakOpp.setUpperBound(uprBndVal.getDouble());
+				peakOpp.setLowerBound(lwrBndVal.getDouble());
+				controller.loadPeakOppurtunity(peakOpp);
 			}
 		});
 
@@ -191,17 +189,14 @@ public class PeakFindingWidget {
 		runPeakSearch.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-//				runPeakSearch.setEnabled(false);
-//				runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearching.png").createImage());			
-				
 				// Run peakSearch
-				//TODO: should be loaded on something 
-				if(peaks.isEmpty() && xData != null && yData != null)
+				if(peaks.isEmpty() && xData != null && yData != null){
+//					runPeakSearch.setEnabled(false);
+//					runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearching.png").createImage());			
 					controller.peakSearchJob= new PeakSearchJob(controller, xData, yData);
-				
-				//TODO:Auto schedule in controller func
-				controller.peakSearchJob.schedule();
-				
+					//TODO:Auto schedule in controller func
+					controller.peakSearchJob.schedule();
+				}
 			}
 		});
 	
@@ -216,6 +211,18 @@ public class PeakFindingWidget {
 			//TODO: in running event
 			//runPeakSearch.setEnabled(true);
 			//runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearch.png").createImage());
+
+			@Override
+			public void boundsChanged(PeakOpportunityEvent evt) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void dataChanged(PeakOpportunityEvent evt) {
+				// TODO Auto-generated method stub
+				
+			}
 			
 		});
 	

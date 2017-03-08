@@ -28,8 +28,6 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -51,10 +49,10 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 	private static final Logger logger = LoggerFactory.getLogger(PeakFittingTool.class);
 	
-	PeakFindingController controller;
+	PeakFindingManager controller;
 	
 	//View Compomnents
-	private PeakFindingActionsDelegate actions;
+	private PeakFindingActions actions;
 	private PeakFindingWidget widget;
 	private PeakFindingTable table;
 	
@@ -93,7 +91,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	//TODO: should this default constructor generate controller...
 	public PeakFindingTool() {
 		// Setup up a new PeakSearch Instance
-		this.controller = new PeakFindingController();
+		this.controller = new PeakFindingManager();
 		this.traceListener = new ITraceListener.Stub() {
 			@Override
 			public void tracesUpdated(TraceEvent evt) {
@@ -102,11 +100,20 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		};
 	}
 	
-	public PeakFindingTool(IPlottingSystem system, PeakFindingController controller){
+	public void setAddMode(){
+		isRemoving = false;
+		isAdding = true;
+	}
+	
+	public void setRempveMode(){
+		isRemoving = true;
+		isAdding = false;
+	}
+	
+	public PeakFindingTool(IPlottingSystem system, PeakFindingManager controller){
 		this.setPlottingSystem(system);
 		this.controller = controller;
 	}
-	
 
 	@Override
 	public ToolPageRole getToolPageRole() {
@@ -135,7 +142,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		final IPageSite site = getSite();
 		IActionBars actionbars = site != null ? site.getActionBars() : generateActionBar(parent);
 
-		actions = new PeakFindingActionsDelegate(controller);
+		actions = new PeakFindingActions(controller, this);
 		actions.createActions(actionbars.getToolBarManager());
 		
 		table = new PeakFindingTable(controller);
@@ -157,10 +164,11 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 					// evt.getyValue());
 					// addPeakValue(evt.getxValue(), evt.getyValue());
 				} else {
-					if (isAdding) {
+					if (isAdding) {	
 						addPeakValue(evt.getxValue(), evt.getyValue());
 					} else if (isRemoving) {
-						removePeakValue(evt.getxValue(), evt.getyValue());
+						if(!peaks.isEmpty())
+							removePeakValue(evt.getxValue(), evt.getyValue());
 					}
 					//TODO: refresh table data...
 					getPlottingSystem().repaint(); // update plots
@@ -172,12 +180,31 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			@Override
 			public void peaksChanged(PeakOpportunityEvent evt) {
 				//Update Peaks
-				if(!evt.getPeaks().isEmpty())
-					updatePeakTrace(evt.getPeaks());
-				
-				xData = evt.getPeakOpp().getXData();
-				yData = evt.getPeakOpp().getYData();
+				if(!evt.getPeaks().isEmpty()){
+					peaks = evt.getPeaks();
+					updatePeakTrace(peaks);
+				}
 			}
+
+			@Override
+			public void boundsChanged(PeakOpportunityEvent evt) {
+				//if(evt.getPeakOpp().getLowerBound() != null && evt.getPeakOpp().getUpperBound() != null)
+				//if(evt.getPeakOpp().getLowerBound() != null)
+					
+				double lower = evt.getPeakOpp().getLowerBound();
+				double upper = evt.getPeakOpp().getUpperBound();
+			}
+
+			@Override
+			public void dataChanged(PeakOpportunityEvent evt) {
+				if (evt.getPeakOpp().getXData() != null)
+					xData = evt.getPeakOpp().getXData();
+				
+				if (evt.getPeakOpp().getYData() != null)
+					yData = evt.getPeakOpp().getYData();
+			}
+			
+			
 			
 		});
 		
@@ -201,13 +228,16 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		
 		pX.add(x);
 		pY.add(y);
-
+		Peak p = new Peak(x, y);
+		//XXX: Unfortunately now this will be on the end of the result. The order is important for the table view. Need comaprator there
+		peaks.add(p);
+		
 		// Update Trace
 		Dataset peakx = DatasetFactory.createFromList(pX);
 		Dataset peaky = DatasetFactory.createFromList(pY);
 
 		updatePeakTrace(peakx, peaky);
-		//TODO: UPDATE CONTROLLER
+
 		controller.setPeaks(peaks);
 	}
 
@@ -289,8 +319,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 					getPlottingSystem().removeRegion(i);
 				}
 
-				// Cleanup last peaks
-				//TODO: still need to clean up the view and just update peaks with a empty list i guess??
+//TODO: still need to clean up the view and just update peaks with a empty list i guess??
 //				if (!controller.getPeaks().isEmpty()) {
 //					controller.getPeaks().clear();
 //				}
@@ -300,7 +329,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 				// hide region bounds whilst search
 				regionBndsTrace.setVisible(true);
-			
 			}
 
 			getPlottingSystem().addRegionListener(this);
@@ -509,4 +537,5 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		composite.setFocus();
 	}
 
+	
 }

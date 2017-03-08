@@ -36,7 +36,7 @@ public class PeakSearchJob extends Job {
 
 		protected final Logger logger = LoggerFactory.getLogger(PeakSearchJob.class);
 
-		PeakFindingController controller;
+		PeakFindingManager controller;
 
 		IPeakFindingService peakFindServ = (IPeakFindingService)Activator.getService(IPeakFindingService.class);
 
@@ -46,7 +46,7 @@ public class PeakSearchJob extends Job {
 		String peakAlgorithm;
 		Map<String, IPeakFinderParameter> peakParams;
 
-		public PeakSearchJob(PeakFindingController controller,IDataset xData, IDataset yData) {
+		public PeakSearchJob(PeakFindingManager controller,IDataset xData, IDataset yData) {
 			super("Peak Search");
 			this.controller = controller;
 			this.xData = xData;

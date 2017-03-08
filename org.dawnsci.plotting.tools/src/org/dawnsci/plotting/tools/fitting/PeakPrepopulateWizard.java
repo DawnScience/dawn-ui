@@ -3,7 +3,7 @@ package org.dawnsci.plotting.tools.fitting;
 import java.util.Collection;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
-import org.dawnsci.plotting.tools.finding.PeakFindingController;
+import org.dawnsci.plotting.tools.finding.PeakFindingManager;
 import org.dawnsci.plotting.tools.finding.PeakFindingTool;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IPeak;
@@ -50,7 +50,7 @@ public class PeakPrepopulateWizard extends WizardPage {
 	private IFunction bkgFunction = null;
 	private Add compFunction = null;
 	
-	private PeakFindingController controller;
+	private PeakFindingManager controller;
 	
 	private IPlottingSystem<Composite> plotting;
 	
@@ -71,7 +71,7 @@ public class PeakPrepopulateWizard extends WizardPage {
 		this.parentFittingTool = parentFittingTool;
 		this.traces = parentFittingTool.getPlottingSystem().getTraces();
 		
-		this.controller = new PeakFindingController();
+		this.controller = new PeakFindingManager();
 		
 		//Need to set plotting system in controller
 		//this.controller = new PeakFindingController();
