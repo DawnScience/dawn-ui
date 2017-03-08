@@ -190,7 +190,7 @@ public class PeakFindingWidget {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				// Run peakSearch
-				if(peaks.isEmpty() && xData != null && yData != null){
+				if(xData != null && yData != null){
 //					runPeakSearch.setEnabled(false);
 //					runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearching.png").createImage());			
 					controller.peakSearchJob= new PeakSearchJob(controller, xData, yData);
@@ -205,8 +205,6 @@ public class PeakFindingWidget {
 			@Override
 			public void peaksChanged(PeakOpportunityEvent evt) {
 				peaks = evt.getPeaks();
-				xData = evt.getPeakOpp().getXData();
-				yData = evt.getPeakOpp().getYData();
 			}
 			//TODO: in running event
 			//runPeakSearch.setEnabled(true);

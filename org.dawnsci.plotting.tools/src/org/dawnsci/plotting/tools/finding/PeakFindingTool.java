@@ -100,14 +100,13 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		};
 	}
 	
-	public void setAddMode(){
-		isRemoving = false;
-		isAdding = true;
+	public void setAddMode(boolean status){
+		isAdding = status;
+
 	}
 	
-	public void setRempveMode(){
-		isRemoving = true;
-		isAdding = false;
+	public void setRemoveMode(boolean status){
+		isRemoving = status;
 	}
 	
 	public PeakFindingTool(IPlottingSystem system, PeakFindingManager controller){
@@ -244,34 +243,36 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	private void removePeakValue(Double x, Double y) {
 		Dataset peakx = DatasetUtils.convertToDataset(peaksTrace.getXData());
 		Dataset peaky = DatasetUtils.convertToDataset(peaksTrace.getYData());
+		
+		int toRemove = closestPoint(peakx, peaky, new Double[] { x, y });
 
-		if (peakx != null) {
-			int toRemove = closestPoint(peakx, peaky, new Double[] { x, y });
+		List<Double> pX = new ArrayList<Double>();
+		List<Double> pY = new ArrayList<Double>();
 
-			List<Double> pX = new ArrayList<Double>();
-			List<Double> pY = new ArrayList<Double>();
-
-			for (int i = 0; i < peakx.getSize(); ++i) {
-				pX.add((Double) peakx.getDouble(i));
-				pY.add((Double) peaky.getDouble(i));
-			}
-
-			pX.remove(toRemove);
-			pY.remove(toRemove);
-
-			// TODO: renive hot fix setup and functionalize
-			// remove peaks from table should be at same index?
-			peaks.remove(toRemove);
-			
-			table.viewer.refresh();
-
-			peakx = DatasetFactory.createFromList(pX);
-			peaky = DatasetFactory.createFromList(pY);
-
+		for (int i = 0; i < peakx.getSize(); ++i) {
+			pX.add((Double) peakx.getDouble(i));
+			pY.add((Double) peaky.getDouble(i));
 		}
 
-		//TODO: update controller
-		updatePeakTrace(peakx, peaky);
+		pX.remove(toRemove);
+		pY.remove(toRemove);
+
+		// TODO: renive hot fix setup and functionalize
+		// remove peaks from table should be at same index?
+		peaks.remove(toRemove);
+		
+		
+		if(!peaks.isEmpty()){
+			peakx = DatasetFactory.createFromList(pX);
+			peaky = DatasetFactory.createFromList(pY);
+			updatePeakTrace(peakx, peaky);
+		} else {
+			//Set as not visible as no peaks. Do not want to destroy, tis wasteful
+			peaksTrace.setVisible(false);
+			getPlottingSystem().repaint(); 
+		}
+
+
 		controller.setPeaks(peaks);
 	}
 

@@ -47,9 +47,12 @@ public class PeakFindingActions {
 		
 		addMode = new Action("Add peaks to those already found", IAction.AS_CHECK_BOX) {
 			 public void run() {
-				 tool.setAddMode();
-				 if (removeMode.isChecked())
+				 tool.setAddMode(this.isChecked());
+				 
+				 if (removeMode.isChecked()){
+					 tool.setRemoveMode(false);
 					 removeMode.setChecked(false);
+				 }
 			 }
 		};
 		addMode.setImageDescriptor(Activator.getImageDescriptor("icons/peakAdd.png"));
@@ -57,9 +60,11 @@ public class PeakFindingActions {
 
 		removeMode = new Action("Delete peaks to those already found", IAction.AS_CHECK_BOX) {
 			public void run() {
-				 tool.setRempveMode();
-				 if (addMode.isChecked())
+				 tool.setRemoveMode(this.isChecked());
+				 if (addMode.isChecked()){
+					 tool.setAddMode(false);
 					 addMode.setChecked(false);
+				 }
 			}
 		};
 		removeMode.setImageDescriptor(Activator.getImageDescriptor("icons/peakDelete.png"));
