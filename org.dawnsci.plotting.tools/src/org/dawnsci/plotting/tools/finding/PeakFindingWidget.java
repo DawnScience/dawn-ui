@@ -163,6 +163,7 @@ public class PeakFindingWidget {
 		controller.setPeakFindServ((IPeakFindingService) Activator.getService(IPeakFindingService.class));
 		//Load in peak finders
 		Collection<String> peakFinders = controller.getPeakFindServ().getRegisteredPeakFinders();
+
 		controller.setPeakFindData(new PeakFindingData(controller.getPeakFindServ()));
 
 		for (String pfID : peakFinders) {
@@ -183,9 +184,7 @@ public class PeakFindingWidget {
 		runPeakSearch.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				
-				runPeakSearch.setEnabled(false);
-				
+				//runPeakSearch.setEnabled(false);
 				runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearching.png").createImage());			
 				
 				// Run peakSearch
@@ -194,8 +193,13 @@ public class PeakFindingWidget {
 				//TODO:Auto schedule in controller func
 				controller.peakSearchJob.schedule();
 				
-				//controller.formatPeakSearch();
-				
+				controller.addPeakListener(new IPeakOpportunityListener() {
+					@Override
+					public void peaksChanged(PeakOpportunityEvent evt) {
+						runPeakSearch.setEnabled(true);
+					}
+					
+				});
 				
 			}
 		});

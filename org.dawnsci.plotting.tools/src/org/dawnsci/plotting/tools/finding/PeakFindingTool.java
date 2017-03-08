@@ -22,6 +22,8 @@ import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.PointStyle;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.TraceType;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.january.dataset.BooleanDataset;
+import org.eclipse.january.dataset.Comparisons;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
@@ -41,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
 
 /**
+ * 
  * @author Dean P. Ottewell
  *
  */
@@ -94,7 +97,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			}
 		};
 	}
-	
 	
 	public PeakFindingTool(IPlottingSystem system, PeakFindingController controller){
 		this.setPlottingSystem(system);
@@ -161,8 +163,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				}
 			}
 		});
-
-		//controller.addPeakListener()
 		controller.addPeakListener(new IPeakOpportunityListener() {
 
 			@Override
@@ -321,18 +321,34 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			logger.error("Cannot put the selection into searching region mode!", e);
 		}
 	}
+	
+	
+	
+	public void setSearchData(){
+		// Obtain Upper and Lower Bounds
+		Dataset xData = DatasetUtils.convertToDataset(sampleTrace.getXData().squeeze());
+		Dataset yData = DatasetUtils.convertToDataset(sampleTrace.getYData().squeeze());
+
+		BooleanDataset allowed = Comparisons.withinRange(xData, lowerBnd, upperBnd);
+		xData = xData.getByBoolean(allowed);
+		yData = yData.getByBoolean(allowed);
+		
+		controller.peakDataOpp.xData = xData;
+		controller.peakDataOpp.yData = yData;
+	}
+	
+	
 
 	public void updateSearchBnds(RectangularROI rect) {
 		lowerBnd = rect.getPointRef()[0];
 		upperBnd = rect.getPointRef()[0] + rect.getLengths()[0];
-
 		
 		double[] x = { lowerBnd, upperBnd};
 		Dataset xdata = DatasetFactory.createFromObject(x);
-
 		Dataset ydata = genBoundsHeight();
-
+		
 		updateTraceBounds(xdata, ydata); //TODO: this is already triggers
+		setSearchData();
 	}
 
 	public void updateBoundsUpper(double upperVal){

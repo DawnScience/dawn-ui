@@ -24,6 +24,5 @@ public class PeakOpportunityEvent extends EventObject {
 	public List<Peak> getPeaks(){
 		return peaks;
 	}
-
 	
 }

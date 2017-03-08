@@ -50,6 +50,9 @@ public class PeakSearchJob extends Job {
 		IDataset xData;
 		IDataset yData;
 		
+		String peakAlgorithm;
+		Map<String, IPeakFinderParameter> peakParams;
+
 		public PeakSearchJob(PeakFindingController controller,IDataset xData, IDataset yData) {
 			super("Peak Search");
 			this.controller = controller;
@@ -57,7 +60,6 @@ public class PeakSearchJob extends Job {
 			this.yData = yData;
 			setPriority(Job.INTERACTIVE);
 		}
-		
 
 		//Some sort of data load into the job and then run. Do not want things to be changeing whilst running
 //		public void loadData(IPeakOppurtunity evt){
@@ -81,16 +83,9 @@ public class PeakSearchJob extends Job {
 //		/* Clean up last peak search */
 //		controller.clearPeaks(); //TODO: shouldnt have to do this... just get peaks from trace when would like them?
 //		
-//		// Obtain Upper and Lower Bounds
-//		Dataset xData = DatasetUtils.convertToDataset(controller.getPeakfindingtool().sampleTrace.getXData().squeeze());
-//		Dataset yData = DatasetUtils.convertToDataset(controller.getPeakfindingtool().sampleTrace.getYData().squeeze());
-//
-//		BooleanDataset allowed = Comparisons.withinRange(xData, controller.getLowerBnd(), controller.getUpperBnd());
-//		xData = xData.getByBoolean(allowed);
-//		yData = yData.getByBoolean(allowed);
-		
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
+
+
+		private void loadPeakFinderParams(){
 			//TODO: clean control function
 			// Free up active peakfinder calls
 			if (controller.getPeakFindData().hasActivePeakFinders()) {
@@ -100,10 +95,10 @@ public class PeakSearchJob extends Job {
 				}
 			}
 			
-			String peakAlgorithm= Activator.getPlottingPreferenceStore().getString(PeakFindingConstants.PeakAlgorithm);
+			peakAlgorithm= Activator.getPlottingPreferenceStore().getString(PeakFindingConstants.PeakAlgorithm);
 			controller.getPeakFindData().activatePeakFinder(peakAlgorithm);
 			//Configure peak finder on preference store go through all the params that match
-			Map<String, IPeakFinderParameter> peakParams = peakFindServ.getPeakFinderParameters(peakAlgorithm);
+			peakParams = peakFindServ.getPeakFinderParameters(peakAlgorithm);
 			for (Entry<String, IPeakFinderParameter> peakParam : peakParams.entrySet()){
 				IPeakFinderParameter param = peakParam.getValue();
 				String curVal = Activator.getPlottingPreferenceStore().getString(peakParam.getKey());
@@ -116,6 +111,16 @@ public class PeakSearchJob extends Job {
 			}
 			controller.getPeakFindData().setPFParametersByPeakFinder(peakAlgorithm, peakParams);
 		
+		}
+		
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			//TODO: clean control function
+			// Free up active peakfinder calls
+			loadPeakFinderParams();
+			
+			controller.getPeakFindData().setPFParametersByPeakFinder(peakAlgorithm, peakParams);
+		
 			controller.getPeakFindData().setData(xData, yData);
 			controller.getPeakFindData().setNPeaks(20);
 			
@@ -126,8 +131,7 @@ public class PeakSearchJob extends Job {
 				logger.debug("Finding peaks data resulted in error in peak service");
 				return Status.CANCEL_STATUS;
 			}
-
-			
+	
 			/*Extract Peak Search Data */
 			//Should just call a controller function for this?
 			TreeMap<Integer, Double> peaksPos = (TreeMap<Integer, Double>) controller.getPeakFindData().getPeaks(peakAlgorithm);
@@ -145,7 +149,7 @@ public class PeakSearchJob extends Job {
 			IDataset peaksY= DatasetFactory.createFromList(pPos);
 			IDataset peaksX = ((Dataset) xData).getBy1DIndex((IntegerDataset) DatasetFactory.createFromList(pHeight));
 			
-			List<Peak> peaks = new ArrayList<Peak>();
+			final List<Peak> peaks = new ArrayList<Peak>();
 			// Create peaks
 			for (int i = 0; i < peaksY.getSize(); ++i) {
 				Peak p = new Peak(peaksX.getDouble(i), peaksY.getDouble(i));
@@ -154,7 +158,12 @@ public class PeakSearchJob extends Job {
 			}
 			
 			/*Send peaks update*/
-			controller.addPeaks(peaks);
+			Display.getDefault().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					controller.addPeaks(peaks);
+				}
+			});
 			
 			
 			return Status.OK_STATUS;
