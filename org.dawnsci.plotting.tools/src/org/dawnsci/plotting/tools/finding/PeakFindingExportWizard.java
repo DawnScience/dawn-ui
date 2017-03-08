@@ -1,29 +1,14 @@
 package org.dawnsci.plotting.tools.finding;
 
-import java.io.File;
-
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawb.common.ui.wizard.PlotDataConversionPage;
 import org.dawb.common.ui.wizard.ResourceChoosePage;
-import org.dawnsci.common.widgets.file.ResourceChoiceBox;
-import org.dawnsci.common.widgets.file.SelectorWidget;
 import org.dawnsci.plotting.views.ToolPageView;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dawnsci.plotting.api.tool.IToolContainer;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.TypedEvent;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IViewPart;
@@ -32,14 +17,9 @@ import org.eclipse.ui.IWorkbench;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-
-
-
 /**
  *
  * @author Dean P. Ottewell
- *
  */
 public class PeakFindingExportWizard extends Wizard implements IExportWizard {
 
@@ -63,7 +43,6 @@ public class PeakFindingExportWizard extends Wizard implements IExportWizard {
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 	}
-
 
 	@Override
 	public boolean performFinish() {
@@ -102,7 +81,8 @@ public class PeakFindingExportWizard extends Wizard implements IExportWizard {
 		staticFileName    = exportPage.getFileLabel();
 	
 		try {
-			((PeakFindingTool)container.getActiveTool()).controller.exportFoundPeaks(containerFullPath.toOSString());
+			//TODO: get peaks trigger here
+			//((PeakFindingTool)container.getActiveTool()).controller.exportFoundPeaks(containerFullPath.toOSString());
 		} catch (Exception e) {
 			logger.error("Cannot export peaks", e);
 		}

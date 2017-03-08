@@ -19,7 +19,6 @@ import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
 
 /**
  * @author Dean P. Ottewell
- *
  */
 public class PeakFindingSetupWidget {
 
@@ -48,10 +47,8 @@ public class PeakFindingSetupWidget {
 		viewer.setContentProvider(new ArrayContentProvider()); // TODO: could
 																// ignore for
 																// now
-		
 		//viewer.setInput(peaks); TODO: how pass need data contoller
 		viewer.refresh();
-
 	}
 
 	protected List<TableViewerColumn> createColumns(final TableViewer viewer) {

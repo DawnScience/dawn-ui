@@ -13,6 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+/**
+ * @author Dean P. Ottewell
+ */
 public class PeakFindingActionsDelegate { 	
 
 	private final static Logger logger = LoggerFactory.getLogger(PeakFindingActionsDelegate.class);
@@ -98,7 +101,7 @@ public class PeakFindingActionsDelegate {
 		preferences.setImageDescriptor(Activator.getImageDescriptor("icons/Configure.png"));
 		toolbar.add(preferences);
 		
-		//toolbar.update(true);
+		toolbar.update(true);
 	}
 	
 }

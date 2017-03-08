@@ -1,11 +1,13 @@
 package org.dawnsci.plotting.tools.finding;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.PeakFindingConstants;
-import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -21,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingService;
+import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
 import uk.ac.diamond.scisoft.analysis.peakfinding.PeakFindingData;
 
 /**
@@ -43,7 +46,11 @@ public class PeakFindingWidget {
 	private Scale searchScale;
 	
 	Button runPeakSearch;
-
+	
+	List<Peak> peaks = new ArrayList<Peak>();
+	IDataset xData;
+	IDataset yData;
+	
 	public PeakFindingWidget(PeakFindingController controller){
 		this.controller = controller;
 	}
@@ -184,25 +191,34 @@ public class PeakFindingWidget {
 		runPeakSearch.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				//runPeakSearch.setEnabled(false);
-				runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearching.png").createImage());			
+//				runPeakSearch.setEnabled(false);
+//				runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearching.png").createImage());			
 				
 				// Run peakSearch
-				controller.peakSearchJob= new PeakSearchJob(controller, controller.peakDataOpp.xData, controller.peakDataOpp.yData);
+				//TODO: should be loaded on something 
+				if(peaks.isEmpty() && xData != null && yData != null)
+					controller.peakSearchJob= new PeakSearchJob(controller, xData, yData);
 				
 				//TODO:Auto schedule in controller func
 				controller.peakSearchJob.schedule();
 				
-				controller.addPeakListener(new IPeakOpportunityListener() {
-					@Override
-					public void peaksChanged(PeakOpportunityEvent evt) {
-						runPeakSearch.setEnabled(true);
-					}
-					
-				});
-				
 			}
 		});
+	
+		//TODO: check is searching instead
+		controller.addPeakListener(new IPeakOpportunityListener() {
+			@Override
+			public void peaksChanged(PeakOpportunityEvent evt) {
+				peaks = evt.getPeaks();
+				xData = evt.getPeakOpp().getXData();
+				yData = evt.getPeakOpp().getYData();
+			}
+			//TODO: in running event
+			//runPeakSearch.setEnabled(true);
+			//runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearch.png").createImage());
+			
+		});
+	
 	}
 	
 	public void setLwrBndVal(double lowerVal) {

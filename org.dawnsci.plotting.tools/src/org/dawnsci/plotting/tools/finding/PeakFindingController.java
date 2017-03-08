@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.PeakFindingConstants;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IPeak;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
@@ -37,11 +38,7 @@ public class PeakFindingController {
 	private IPeakFindingData peakFindData; 
 	private String peakFinderID;
 	
-	//TODO: wow, horrific name... come on
-	PeakOppurtunity peakDataOpp;
-	
 	//TODO: check out HashSet. Do I really need a set. 
-	//Who listens -> Tool, Table, widget, actions
 	private HashSet<IPeakOpportunityListener> listeners;
 	
 	//Really need that intermediate of a identified peak. COuld the below be the answer
@@ -49,7 +46,6 @@ public class PeakFindingController {
 
 	public PeakFindingController(){
 		listeners = new HashSet<IPeakOpportunityListener>();
-		peakDataOpp = new PeakOppurtunity();
 	}
 	
 	public String getPeakFinderID() {
@@ -85,7 +81,7 @@ public class PeakFindingController {
 	 * @return
 	 * @throws IOException
 	 */
-	String exportFoundPeaks(final String path) throws IOException {
+	String exportFoundPeaks(final String path, List<Peak> peaks) throws IOException {
 		File file = new File(path);
 		if (!file.getName().toLowerCase().endsWith(".xy"))
 			file = new File(path + ".xy");
@@ -97,8 +93,8 @@ public class PeakFindingController {
 		final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
 		try {
 			
-			//TODO: fix the formatter. have iterate over identified peaks
-			for (Peak p : getPeaks()) {
+			//TODO: fix the formatter. have iterate over identified peaks 
+			for (Peak p : peaks) {
 				writer.write(p.getXYFormat());
 				writer.newLine();
 			}
@@ -125,13 +121,12 @@ public class PeakFindingController {
 		
 		this.searchScaleIntensity = searchScaleIntensity;
 	}
-
-	public List<Peak> getPeaks() {
-		return peakDataOpp.getPeaks();
-	}
-
-	public void setPeaks(List<Peak> peaks) {
-		peakDataOpp.setPeaks(peaks);
+	
+	public void setPeaks(List<Peak> peaks){
+		//TODO:this should then trigger all the updates... I hope, I hope, I hope
+		IPeakOpportunity peakOpp = new PeakOppurtunity();
+		peakOpp.setPeaks(peaks);
+		peaksChangedListeners(new PeakOpportunityEvent(this, peakOpp));
 	}
 	
 	//Triggers People Listening
@@ -149,15 +144,11 @@ public class PeakFindingController {
 			listener.peaksChanged(evt);
 	}
 	
-	public void addPeaks(List<Peak> peaks){
-		//TODO:this should then trigger all the updates... I hope, I hope, I hope
-		peaksChangedListeners(new PeakOpportunityEvent(this, peaks));
+
 	
-	}
-	
-	public void loadPeakOppurtunities(IPeakOpportunity peaksOpp){
+	public void loadPeakOppurtunity(IPeakOpportunity peaksOpp){
 		//TODO: have peakOpputunity event use the actual peak opps. This is probs gonna  bite in the butt later by not doing that originally.
-		peaksChangedListeners(new PeakOpportunityEvent(this, peaksOpp.getPeaks()));
+		peaksChangedListeners(new PeakOpportunityEvent(this, peaksOpp));
 	}
 	
 
@@ -246,7 +237,8 @@ public class PeakFindingController {
 		}
 		
 		return peaks;
-	}			
+	}
+
 
 	
 //	public void addFile(ISpectrumFile file) {

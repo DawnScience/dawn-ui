@@ -14,30 +14,23 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.peakfinding.IPeakFinderParameter;
-import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
-import org.eclipse.january.dataset.AbstractDataset;
-import org.eclipse.january.dataset.BooleanDataset;
-import org.eclipse.january.dataset.Comparisons;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
-import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IntegerDataset;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.fitting.functions.APeak;
 import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingService;
 import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
 
 /**
- * TODO: remove activator dependecy here and just get through controller
+ * TODO: remove activator dependency here and just get through controller
  * TODO: have job update trace to look like things are going on
  * TODO: finally call formatPeakSearch
  * 
  * @author Dean P. Ottewell
- *
  */
 public class PeakSearchJob extends Job {
 
@@ -161,10 +154,9 @@ public class PeakSearchJob extends Job {
 			Display.getDefault().syncExec(new Runnable() {
 				@Override
 				public void run() {
-					controller.addPeaks(peaks);
+					controller.setPeaks(peaks);
 				}
 			});
-			
 			
 			return Status.OK_STATUS;
 		}

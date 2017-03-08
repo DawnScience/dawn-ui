@@ -17,6 +17,9 @@ import org.eclipse.swt.widgets.Composite;
 
 import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
 
+/**
+ * @author Dean P. Ottewell
+ */
 public class PeakFindingTable {
 	
 	public TableViewer viewer;
@@ -36,7 +39,6 @@ public class PeakFindingTable {
 		viewer.getTable().setHeaderVisible(true);
 		viewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
 		viewer.setContentProvider(new ArrayContentProvider());
-		viewer.setInput(controller.getPeaks());
 		
 		/*Table Content Manipulation*/
 		viewer.getControl().addKeyListener( new org.eclipse.swt.events.KeyAdapter() {
@@ -47,12 +49,12 @@ public class PeakFindingTable {
 		        	  int idx = viewer.getTable().getSelectionIndex();
 
 		        	  
-		        	  
 		        	  //TODO: controller.updatePeakTrace(controller.peaks); 
 		        	  //TODO: UPDATE PEAKS CONTROLLER FUNCTION CHANGE. EVERYONE IS LISTENING FOR THIS CHANGE
-		        	  controller.getPeaks().remove(idx);
-		        	  
-		        	  
+		        	  List<Peak> peaks = (List<Peak>) viewer.getInput();
+		        	  peaks.remove(idx);
+		        	  controller.setPeaks(peaks);
+		        	  	
 		        	  
 		        	  
 		        	  viewer.refresh();
@@ -62,25 +64,13 @@ public class PeakFindingTable {
 			
 		viewer.refresh();
 		
-		//Add below to then have it swap between highlighted peaks
-		//viewer.addSelectionChangedListener(getPlotting.Hihgliht me peak);
-		
-		ISelectionChangedListener viewUpdateListener = new ISelectionChangedListener() {
+		controller.addPeakListener(new IPeakOpportunityListener() {
 			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				final StructuredSelection sel = (StructuredSelection)event.getSelection();
-				if (controller.getPeaks()!=null && sel!=null && sel.getFirstElement()!=null) {
-					//peaksTrace.getTraceColor();
-					//((ILineTrace)peak.getTrace()).setTraceColor(ColorConstants.darkGreen);
-					viewer.refresh();
-				}
+			public void peaksChanged(PeakOpportunityEvent evt) {
+				viewer.setInput(evt.getPeaks());
 			}
-		};
-		viewer.addSelectionChangedListener(viewUpdateListener);
-		
-		
-		
-		//getSite().setSelectionProvider(viewer);
+		});
+	
 	}
 	
 	private List<TableViewerColumn> createPeakDataColumns(final TableViewer viewer) {

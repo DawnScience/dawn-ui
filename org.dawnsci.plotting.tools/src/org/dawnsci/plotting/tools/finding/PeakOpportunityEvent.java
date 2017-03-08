@@ -14,15 +14,19 @@ public class PeakOpportunityEvent extends EventObject {
 
 	private static final long serialVersionUID = 1L;
 	
-	private List<Peak> peaks;
+	private IPeakOpportunity peakOpp;
 	
-	public PeakOpportunityEvent(Object source, List<Peak> result) {
+	public PeakOpportunityEvent(Object source, IPeakOpportunity result) {
 		super(source);
-		this.peaks = result;
+		this.peakOpp = result;
+	}
+	
+	public IPeakOpportunity getPeakOpp(){
+		return peakOpp;
 	}
 	
 	public List<Peak> getPeaks(){
-		return peaks;
+		return peakOpp.getPeaks();
 	}
 	
 }

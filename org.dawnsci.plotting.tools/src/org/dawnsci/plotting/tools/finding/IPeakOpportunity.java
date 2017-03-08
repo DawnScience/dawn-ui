@@ -16,11 +16,11 @@ public interface IPeakOpportunity {
 	public List<Peak> getPeaks();
 	public void setPeaks(List<Peak> peaks);
 		
-	public IDataset getRawXData();
-	public void  setRawXData(IDataset xData);
+	public IDataset getXData();
+	public void  setXData(IDataset xData);
 	
-	public IDataset getRawYData();
-	public void getRawYData(IDataset yData);
+	public IDataset getYData();
+	public void setYData(IDataset yData);
 
 	//TODO:  Do below later
 	//	public double getUpperBound();

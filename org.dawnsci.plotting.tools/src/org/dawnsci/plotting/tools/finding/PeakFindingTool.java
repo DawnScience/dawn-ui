@@ -71,9 +71,8 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 	private ITraceListener traceListener;
 
-	// Click Button Active
-	private Boolean isRemoving = false; // TODO: should set up
-												// differently
+	// Click Button Active TODO: set up differently
+	private Boolean isRemoving = false; 
 	private Boolean isAdding = false;
 
 	// Upper & Lower Selection Bounds
@@ -85,6 +84,11 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	//Bound limits for searching 
 	private Double upperBnd;
 	private Double lowerBnd;
+	
+	private IDataset xData;
+	private IDataset yData;
+	
+	private List<Peak> peaks = new ArrayList<Peak>();
 	
 	//TODO: should this default constructor generate controller...
 	public PeakFindingTool() {
@@ -168,7 +172,11 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			@Override
 			public void peaksChanged(PeakOpportunityEvent evt) {
 				//Update Peaks
-				updatePeakTrace(evt.getPeaks());
+				if(!evt.getPeaks().isEmpty())
+					updatePeakTrace(evt.getPeaks());
+				
+				xData = evt.getPeakOpp().getXData();
+				yData = evt.getPeakOpp().getYData();
 			}
 			
 		});
@@ -184,13 +192,13 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		List<Double> pX = new ArrayList<Double>();
 		List<Double> pY = new ArrayList<Double>();
 
-		if (!controller.getPeaks().isEmpty()) {
-			for (int i = 0; i < controller.getPeaks().size(); ++i) {
-				pX.add(controller.getPeaks().get(i).getX());
-				pY.add(controller.getPeaks().get(i).getY());
+		if (!peaks.isEmpty()) {
+			for (int i = 0; i < peaks.size(); ++i) {
+				pX.add(peaks.get(i).getX());
+				pY.add(peaks.get(i).getY());
 			}
 		}
-
+		
 		pX.add(x);
 		pY.add(y);
 
@@ -198,10 +206,9 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		Dataset peakx = DatasetFactory.createFromList(pX);
 		Dataset peaky = DatasetFactory.createFromList(pY);
 
-		
-		
-		//TODO: UPDATE CONTROLLER
 		updatePeakTrace(peakx, peaky);
+		//TODO: UPDATE CONTROLLER
+		controller.setPeaks(peaks);
 	}
 
 	private void removePeakValue(Double x, Double y) {
@@ -224,7 +231,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 			// TODO: renive hot fix setup and functionalize
 			// remove peaks from table should be at same index?
-			controller.getPeaks().remove(toRemove);
+			peaks.remove(toRemove);
 			
 			table.viewer.refresh();
 
@@ -235,6 +242,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 		//TODO: update controller
 		updatePeakTrace(peakx, peaky);
+		controller.setPeaks(peaks);
 	}
 
 	public void configureTraces() {
@@ -282,9 +290,10 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				}
 
 				// Cleanup last peaks
-				if (!controller.getPeaks().isEmpty()) {
-					controller.getPeaks().clear();
-				}
+				//TODO: still need to clean up the view and just update peaks with a empty list i guess??
+//				if (!controller.getPeaks().isEmpty()) {
+//					controller.getPeaks().clear();
+//				}
 
 				peaksTrace.setVisible(false);
 				regionBndsTrace.setVisible(false);
@@ -333,8 +342,14 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		xData = xData.getByBoolean(allowed);
 		yData = yData.getByBoolean(allowed);
 		
-		controller.peakDataOpp.xData = xData;
-		controller.peakDataOpp.yData = yData;
+		
+		
+		PeakOppurtunity peakOpp = new PeakOppurtunity();
+		peakOpp.setXData(xData);
+		peakOpp.setYData(yData);
+		
+		//TODO: might need to postpone whilst configure more on peakOpp..
+		controller.loadPeakOppurtunity(peakOpp);
 	}
 	
 	
