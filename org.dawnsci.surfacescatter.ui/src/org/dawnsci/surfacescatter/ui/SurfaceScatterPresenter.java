@@ -1297,8 +1297,8 @@ public class SurfaceScatterPresenter {
 		output.add(2, yArrayListFhkl);
 		output.add(3, yArrayListError);
 		output.add(4, yArrayListFhklError);
-		output.add(5, yArrayListRawError);
-		output.add(6, yArrayListRaw);
+		output.add(5, yArrayListRaw);
+		output.add(6, yArrayListRawError);
 		
 		return output;
 	}
@@ -2477,7 +2477,7 @@ class trackingJob {
 		}
 		
 		ssvs.getCustomComposite().getReplay().setEnabled(true);
-		ssvs.getOutputCurves().addImageNoRegion(ssp.getXValue((ssp.getNumberOfImages())/2));
+//		ssvs.getOutputCurves().addImageNoRegion(ssp.getXValue((ssp.getNumberOfImages())/2));
 	}
 		private void debug(String output) {
 		if (DEBUG == 1) {

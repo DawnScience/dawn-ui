@@ -86,7 +86,6 @@ public class GeneralOverlapHandlerView extends Dialog {
 			
 		left = new SashForm(sashForm, SWT.VERTICAL);
 		
-		
 		right = new SashForm(sashForm, SWT.VERTICAL);
 		
 		sashForm.setWeights(new int[]{50,50});
@@ -151,8 +150,6 @@ public class GeneralOverlapHandlerView extends Dialog {
 				IDataset yData = stitchedCurves.getLineTrace1().getYData();
 				
 				ssp.export(parentPs, xData, yData);
-				
-				
 			}
 			
 			@Override

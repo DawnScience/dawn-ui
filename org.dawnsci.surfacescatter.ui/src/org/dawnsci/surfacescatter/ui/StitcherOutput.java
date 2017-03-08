@@ -2,20 +2,14 @@ package org.dawnsci.surfacescatter.ui;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-
 import org.dawnsci.spectrum.ui.file.IContain1DData;
 import org.dawnsci.spectrum.ui.processing.AbstractProcess;
 import org.dawnsci.spectrum.ui.utils.Contain1DDataImpl;
 import org.dawnsci.surfacescatter.OverlapUIModel;
 import org.eclipse.january.dataset.Dataset;
-import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.ILazyDataset;
-import org.eclipse.january.dataset.Maths;
 
 public class StitcherOutput extends AbstractProcess {
 
@@ -25,15 +19,9 @@ public class StitcherOutput extends AbstractProcess {
 		
 		IDataset[][] output1= AttenuationCorrectedOutput.StitchingOverlapProcessMethod(arrayILDy, arrayILDx, model);
 			
-
 		IDataset[] xArrayCorrected = output1[1];
 		IDataset[] yArrayCorrected = output1[0];
-		
-		
-						
-		
-//////////////////////////////////////////////////////////////		
-		
+
 		
 		Dataset xCorrected = DatasetUtils.concatenate(xArrayCorrected, 0);
 		Dataset yCorrected = DatasetUtils.concatenate(yArrayCorrected, 0);
@@ -59,8 +47,3 @@ public class StitcherOutput extends AbstractProcess {
 		return null;
 	}
 }
-//	protected static String getAppendingName() {
-//		return "_stitched";
-//	}
-//
-//}
