@@ -5,26 +5,34 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.january.dataset.BooleanDataset;
 import org.eclipse.january.dataset.Comparisons;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IndexIterator;
+import org.eclipse.january.dataset.IntegerDataset;
 import org.eclipse.january.dataset.LongDataset;
 
 public class MaskCircularBuffer {
 
-	private LongDataset mask;
+	private IntegerDataset mask;
 	private int[] shape;
-	long bitMask = 1;
+	int bitMask = 1;
+	boolean looped = false;
 	
 	public MaskCircularBuffer(int[] shape) {
-		mask = DatasetFactory.zeros(LongDataset.class, shape);
+		mask = DatasetFactory.zeros(IntegerDataset.class, shape);
 		this.shape = shape;
 	}
 	
 	public void maskROI(IROI roi) {
-		for (int i = 0; i < shape[0]; i++) {
+		IRectangularROI bounds = roi.getBounds();
+		
+		int iStart = (int)Math.floor(bounds.getPointY());
+		int iStop = (int)Math.ceil(bounds.getPointY()+bounds.getLength(1));
+		
+		for (int i = iStart; i < iStop; i++) {
 			double[] hi = roi.findHorizontalIntersections(i);
 			if (hi != null) {
 				boolean cutsStart = roi.containsPoint(0, i);
@@ -46,7 +54,7 @@ public class MaskCircularBuffer {
 					if (inters.size() == 1) {
 						start[1] = inters.get(0);
 						stop[1] = start[1]+1;
-						LongDataset data = (LongDataset)mask.getSliceView(start, stop, step);
+						IntegerDataset data = (IntegerDataset)mask.getSliceView(start, stop, step);
 						updateArray(data);
 						inters.remove(0);
 					} else {
@@ -56,13 +64,13 @@ public class MaskCircularBuffer {
 						if (roi.containsPoint(s+(e-s)/2, i)) {
 							start[1] = s;
 							stop[1] = e;
-							LongDataset data = (LongDataset)mask.getSliceView(start, stop, step);
+							IntegerDataset data = (IntegerDataset)mask.getSliceView(start, stop, step);
 							updateArray(data);
 							inters.remove(0);
 						} else {
 							start[1] = inters.get(0);
 							stop[1] = start[1]+1;
-							LongDataset data = (LongDataset)mask.getSliceView(start, stop, step);
+							IntegerDataset data = (IntegerDataset)mask.getSliceView(start, stop, step);
 							updateArray(data);
 							inters.remove(0);
 						}
@@ -73,6 +81,13 @@ public class MaskCircularBuffer {
 		}
 		
 		bitMask = bitMask << 1;
+		
+		if (bitMask == 0) {
+			looped = true;
+			bitMask = 1;
+		}
+		
+		if (looped) freeNextSlot();
 		
 	}
 	
@@ -86,11 +101,32 @@ public class MaskCircularBuffer {
 		
 		while (iterator.hasNext()) {
 			long v = mask.getElementLongAbs(iterator.index);
-			mask.setAbs(iterator.index, v & ~bitMask);
-//			mask.setAbs(iterator.index, 0);
+			mask.setAbs(iterator.index, (int)(v & ~bitMask));
 		}
 		
 	}
+	
+	private void freeNextSlot(){
+		
+		IndexIterator iterator = mask.getIterator();
+		
+		int next = bitMask << 1;
+		
+		if (next == 0) {
+			next = 1;
+		}
+		
+		while (iterator.hasNext()) {
+			long v = mask.getElementLongAbs(iterator.index);
+			if (((v & bitMask) | (v & next)) != 0) {
+				v = (v | (next));
+			}
+			v = (v & ~bitMask);
+			mask.setAbs(iterator.index, (int)(v));
+		}
+		
+	}
+	
 	
 	public void maskThreshold(Number minNumber, Number maxNumber, Dataset data) {
 		if (!Arrays.equals(mask.getShape(), data.getShape())) throw new IllegalArgumentException("must have same shape");
@@ -107,17 +143,17 @@ public class MaskCircularBuffer {
 			if (element < min || element > max) {
 				long v = mask.getElementLongAbs(count);
 				v= v | bitMask;
-				mask.setAbs(count, v);
+				mask.setAbs(count, (int)v);
 			}
 			count++;
 		}
 	}
 	
-	private void updateArray(LongDataset section) {
+	private void updateArray(IntegerDataset section) {
 		IndexIterator iterator = section.getIterator();
 		while (iterator.hasNext()) {
 			long v = section.getElementLongAbs(iterator.index);
-			section.setAbs(iterator.index, v | bitMask);
+			section.setAbs(iterator.index, (int)(v | bitMask));
 		}
 	}
 	

@@ -8,9 +8,11 @@ import java.util.Optional;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
@@ -132,6 +134,51 @@ public class FastMaskTool extends AbstractToolPage {
 					e1.printStackTrace();
 				}
 				
+			}
+
+
+		});
+		
+		Button b4 = new Button(control, SWT.CHECK);
+		b4.setText("Draw");
+		b4.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (b4.getSelection() == true) {
+					Collection<IRegion> regions = getPlottingSystem().getRegions();
+					IRegion next = regions.iterator().next();
+					next.addROIListener(new IROIListener(){
+
+						@Override
+						public void roiDragged(ROIEvent evt) {
+							IImageTrace imageTrace = getImageTrace();
+							if (imageTrace != null) {
+								IDataset data = imageTrace.getData();
+
+								if (buffer == null) buffer = new MaskCircularBuffer(data.getShape());
+								Collection<IRegion> regions = getPlottingSystem().getRegions();
+								for (IRegion r : regions) buffer.maskROI(r.getROI());
+
+								imageTrace.setMask(buffer.getMask());
+							}
+
+						}
+
+						@Override
+						public void roiChanged(ROIEvent evt) {
+							// TODO Auto-generated method stub
+							
+						}
+
+						@Override
+						public void roiSelected(ROIEvent evt) {
+							// TODO Auto-generated method stub
+							
+						}
+						
+					});
+				}
 			}
 
 
