@@ -179,10 +179,8 @@ public class PeakFindingWidget {
 					searchIntensityLab.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_GRAY));
 					searchIntensity.setEnabled(false);
 					searchScale.setEnabled(false);
-					searchScale.setSelection(0);
 					searchScale.setVisible(false);
 				}
-				
 				
 				controller.setPeakFinderID(peakfinderCombo.getText());			
 			}

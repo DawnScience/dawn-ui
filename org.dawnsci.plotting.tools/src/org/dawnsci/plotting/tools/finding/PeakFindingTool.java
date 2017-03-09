@@ -13,8 +13,10 @@ import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
+import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
+import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -346,10 +348,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				for (IRegion i : regions) {
 					getPlottingSystem().removeRegion(i);
 				}
-				
-				regionBndsTrace.setVisible(false);
-				// hide region bounds whilst search
-				regionBndsTrace.setVisible(true);
 			}
 
 			if(!peaks.isEmpty()){
@@ -362,9 +360,33 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			this.searchRegion = getPlottingSystem().createRegion(
 					RegionUtils.getUniqueName("Search selection", getPlottingSystem()),
 					getPlottingSystem().is2D() ? IRegion.RegionType.BOX : IRegion.RegionType.XAXIS);
+			
 			searchRegion.setRegionColor(ColorConstants.red);
-			searchRegion.setMobile(false);
+			searchRegion.setMobile(true);
 
+			searchRegion.addROIListener(new IROIListener() {
+				
+				@Override
+				public void roiSelected(ROIEvent evt) {
+					// TODO Auto-generated method stub
+				}
+				
+				@Override
+				public void roiDragged(ROIEvent evt) {
+					// TODO Auto-generated method stub
+					//RectangularROI rectangle = (RectangularROI) searchRegion.getROI();
+					//updateSearchBnds(rectangle);
+				}
+				
+				@Override
+				public void roiChanged(ROIEvent evt) {
+					// TODO Auto-generated method stub
+					RectangularROI rectangle = (RectangularROI) searchRegion.getROI();
+					updateSearchBnds(rectangle);
+
+				}
+			});
+			
 			// SELECTING THOSE BOUNDS UPPER AND LOWER
 
 			// TODO: cant't yet do this here as rectangularROI doesnt exist yet
@@ -375,8 +397,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				updateSearchBnds(rectangle);
 			}
 
-
-			
 			// TODO: need to now connect up this to have a resultant effect on
 			// the viewer
 			if (table.viewer != null) {
@@ -542,7 +562,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			updateSearchBnds(rectangle);
 
 			// Make inactive so can touch around
-			evt.getRegion().setVisible(false);
+			//evt.getRegion().setVisible(false);
 		}
 	}
 
