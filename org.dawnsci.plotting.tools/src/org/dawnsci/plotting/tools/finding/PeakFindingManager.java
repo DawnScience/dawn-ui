@@ -149,14 +149,11 @@ public class PeakFindingManager {
 			Double lower = evt.getPeakOpp().getLowerBound();
 			Double upper = evt.getPeakOpp().getUpperBound();
 
-			if(lower < upper){
-			
+			if(lower != 0 && upper != 0)
 				listener.boundsChanged(evt.getPeakOpp().getUpperBound() , evt.getPeakOpp().getLowerBound());
-			
-			} else if(lower > upper){
+			//} else if(lower > upper){
 				//Well they want a bound setup. So give them it swapped 
-				listener.boundsChanged(evt.getPeakOpp().getLowerBound(), evt.getPeakOpp().getUpperBound());
-			} 	
+			//} 	
 			//else some equal value. Why do you hurt me with that search user?
 			
 			if (evt.getPeakOpp().getXData() != null && evt.getPeakOpp().getYData() != null)

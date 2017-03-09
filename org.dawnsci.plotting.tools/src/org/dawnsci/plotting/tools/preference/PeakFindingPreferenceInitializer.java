@@ -9,7 +9,6 @@ import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.dawnsci.analysis.api.peakfinding.IPeakFinderParameter;
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
 import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingService;
 
 import org.dawnsci.plotting.tools.preference.PeakFindingConstants;

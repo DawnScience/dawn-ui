@@ -1,5 +1,5 @@
 package org.dawnsci.plotting.tools.finding;
-
+	
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -81,6 +81,7 @@ public class PeakFindingWidget {
 		
 		lwrBndVal = new FloatSpinner(configureComposite, SWT.BORDER,  max , 3);
 		lwrBndVal.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
+
 		lwrBndVal.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				PeakOppurtunity peakOpp = new PeakOppurtunity();
@@ -211,9 +212,18 @@ public class PeakFindingWidget {
 		runPeakSearch.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				//Bounds check 
+				if(lwrBndVal.getDouble() > uprBndVal.getDouble()){
+					//Well they want a boudnd setup. So give them it swapped 
+					PeakOppurtunity peakOpp = new PeakOppurtunity();
+					peakOpp.setLowerBound(uprBndVal.getDouble());
+					peakOpp.setUpperBound(lwrBndVal.getDouble());
+					controller.loadPeakOppurtunity(peakOpp);
+				} 	
+				
 				// Run peakSearch
 	 			if(xData.getSize() > 0 && yData.getSize() > 0){
-					runPeakSearch.setEnabled(false);
+	 				runPeakSearch.setEnabled(false);
 					runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearching.png").createImage());			
 					controller.peakSearchJob= new PeakFindingSearchJob(controller, xData, yData);
 					//TODO:Auto schedule in controller func
