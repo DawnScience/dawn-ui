@@ -186,24 +186,24 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			}
 
 			@Override
-			public void boundsChanged(PeakOpportunityEvent evt) {
-				//if(evt.getPeakOpp().getLowerBound() != null && evt.getPeakOpp().getUpperBound() != null)
-				//if(evt.getPeakOpp().getLowerBound() != null)
-					
-				double lower = evt.getPeakOpp().getLowerBound();
-				double upper = evt.getPeakOpp().getUpperBound();
+			public void boundsChanged(double upper, double lower) {
+				//TODO: call functio nto update trace bounds and set new data areas
+				upperBnd = upper;
+				lowerBnd = lower;
+				double[] x = { lowerBnd, upperBnd};
+				
+				Dataset xdata = DatasetFactory.createFromObject(x);
+				Dataset ydata = genBoundsHeight();
+				
+				updateTraceBounds(xdata, ydata); //TODO: this is already triggers
+				setSearchDataOnBounds();
 			}
 
 			@Override
-			public void dataChanged(PeakOpportunityEvent evt) {
-				if (evt.getPeakOpp().getXData() != null)
-					xData = evt.getPeakOpp().getXData();
-				
-				if (evt.getPeakOpp().getYData() != null)
-					yData = evt.getPeakOpp().getYData();
+			public void dataChanged(IDataset nXData, IDataset nYData) {
+				xData = nXData;
+				yData = nYData;				
 			}
-			
-			
 			
 		});
 		
@@ -349,6 +349,8 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				updateSearchBnds(rectangle);
 			}
 
+
+			
 			// TODO: need to now connect up this to have a resultant effect on
 			// the viewer
 			if (table.viewer != null) {
@@ -362,7 +364,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	
 	
 	
-	public void setSearchData(){
+	public void setSearchDataOnBounds(){
 		// Obtain Upper and Lower Bounds
 		Dataset xData = DatasetUtils.convertToDataset(sampleTrace.getXData().squeeze());
 		Dataset yData = DatasetUtils.convertToDataset(sampleTrace.getYData().squeeze());
@@ -370,17 +372,8 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		BooleanDataset allowed = Comparisons.withinRange(xData, lowerBnd, upperBnd);
 		xData = xData.getByBoolean(allowed);
 		yData = yData.getByBoolean(allowed);
-		
-		
-		
-		PeakOppurtunity peakOpp = new PeakOppurtunity();
-		peakOpp.setXData(xData);
-		peakOpp.setYData(yData);
-		
-		//TODO: might need to postpone whilst configure more on peakOpp..
-		controller.loadPeakOppurtunity(peakOpp);
-	}
 	
+	}
 	
 
 	public void updateSearchBnds(RectangularROI rect) {
@@ -388,11 +381,29 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		upperBnd = rect.getPointRef()[0] + rect.getLengths()[0];
 		
 		double[] x = { lowerBnd, upperBnd};
+		
 		Dataset xdata = DatasetFactory.createFromObject(x);
 		Dataset ydata = genBoundsHeight();
 		
 		updateTraceBounds(xdata, ydata); //TODO: this is already triggers
-		setSearchData();
+		
+		//TODO: update manager search data 
+		setSearchDataOnBounds();
+		
+		
+		//Load in new search bounds to beacon
+		
+		PeakOppurtunity peakOpp = new PeakOppurtunity();
+		peakOpp.setXData(xData);
+		peakOpp.setYData(yData);
+		peakOpp.setLowerBound(lowerBnd);
+		peakOpp.setUpperBound(upperBnd);
+		
+		//TODO: might need to postpone whilst configure more on peakOpp..
+		controller.loadPeakOppurtunity(peakOpp);
+		
+		
+		
 	}
 
 	public void updateBoundsUpper(double upperVal){

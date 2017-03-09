@@ -3,6 +3,7 @@ package org.dawnsci.plotting.tools.finding;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -68,14 +69,17 @@ public class PeakFindingTable {
 			}
 
 			@Override
-			public void boundsChanged(PeakOpportunityEvent evt) {
+			public void boundsChanged(double upper, double lower) {
 				// TODO Auto-generated method stub
 			}
 
 			@Override
-			public void dataChanged(PeakOpportunityEvent evt) {
+			public void dataChanged(IDataset nXData, IDataset nYData) {
 				// TODO Auto-generated method stub
+				
 			}
+
+
 		});
 	
 	}

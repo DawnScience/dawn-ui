@@ -16,6 +16,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Scale;
@@ -191,8 +192,8 @@ public class PeakFindingWidget {
 			public void widgetSelected(SelectionEvent e) {
 				// Run peakSearch
 				if(xData != null && yData != null){
-//					runPeakSearch.setEnabled(false);
-//					runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearching.png").createImage());			
+					runPeakSearch.setEnabled(false);
+					runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearching.png").createImage());			
 					controller.peakSearchJob= new PeakSearchJob(controller, xData, yData);
 					//TODO:Auto schedule in controller func
 					controller.peakSearchJob.schedule();
@@ -205,33 +206,34 @@ public class PeakFindingWidget {
 			@Override
 			public void peaksChanged(PeakOpportunityEvent evt) {
 				peaks = evt.getPeaks();
-			}
-			//TODO: in running event
-			//runPeakSearch.setEnabled(true);
-			//runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearch.png").createImage());
-
-			@Override
-			public void boundsChanged(PeakOpportunityEvent evt) {
-				// TODO Auto-generated method stub
 				
+				//XXX: needs to be in own event checkign for peak chaning as not all searches lead to a change in peaks! what if empty huh! maybe that should update the peaks though...
+				runPeakSearch.setEnabled(true);
+				runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearch.png").createImage());
 			}
 
 			@Override
-			public void dataChanged(PeakOpportunityEvent evt) {
-				// TODO Auto-generated method stub
-				
+			public void boundsChanged(double upper, double lower) {
+				setLowerBound(lower);
+				setUpperBound(upper);
+			}
+
+			@Override
+			public void dataChanged(IDataset nXData, IDataset nYData) {
+				xData = nXData;
+				yData = nYData;
 			}
 			
 		});
 	
 	}
 	
-	public void setLwrBndVal(double lowerVal) {
+	public void setLowerBound(double lowerVal) {
 		lwrBndVal.setDouble(lowerVal);
 		lwrBndVal.update();
 	}
 	
-	public void setUprBndVal(double upperVal) {
+	public void setUpperBound(double upperVal) {
 		uprBndVal.setDouble(upperVal);
 		uprBndVal.update();
 	}

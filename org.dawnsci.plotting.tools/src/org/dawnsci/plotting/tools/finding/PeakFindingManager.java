@@ -125,7 +125,7 @@ public class PeakFindingManager {
 		//TODO:this should then trigger all the updates... I hope, I hope, I hope
 		IPeakOpportunity peakOpp = new PeakOppurtunity();
 		peakOpp.setPeaks(peaks);
-		peaksChangedListeners(new PeakOpportunityEvent(this, peakOpp));
+		everythingChangesListeners(new PeakOpportunityEvent(this, peakOpp));
 	}
 	
 	//Triggers People Listening
@@ -138,14 +138,28 @@ public class PeakFindingManager {
 		listeners.remove(listener);
 	}
 
-	private void peaksChangedListeners(PeakOpportunityEvent evt) {
-		for(IPeakOpportunityListener listener : listeners)
-			listener.peaksChanged(evt);
+	private void everythingChangesListeners(PeakOpportunityEvent evt) {
+		for(IPeakOpportunityListener listener : listeners){
+			
+			if(!evt.getPeaks().isEmpty())
+				listener.peaksChanged(evt);
+			
+			
+			//TODO: further sophisitication
+			Double lower = evt.getPeakOpp().getLowerBound();
+			Double upper = evt.getPeakOpp().getUpperBound();
+			if(lower != null && upper != null)
+				listener.boundsChanged(evt.getPeakOpp().getUpperBound() , evt.getPeakOpp().getLowerBound() );
+			
+			if (evt.getPeakOpp().getXData() != null && evt.getPeakOpp().getYData() != null)
+				listener.dataChanged(evt.getPeakOpp().getXData(),evt.getPeakOpp().getYData());
+			
+		}
 	}
-	
+
 	public void loadPeakOppurtunity(IPeakOpportunity peaksOpp){
 		//TODO: have peakOpputunity event use the actual peak opps. This is probs gonna  bite in the butt later by not doing that originally.
-		peaksChangedListeners(new PeakOpportunityEvent(this, peaksOpp));
+		everythingChangesListeners(new PeakOpportunityEvent(this, peaksOpp));
 	}
 
 	/**
