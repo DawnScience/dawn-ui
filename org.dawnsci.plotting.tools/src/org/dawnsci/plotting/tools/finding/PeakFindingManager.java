@@ -98,7 +98,6 @@ public class PeakFindingManager {
 				writer.newLine();
 			}
 			
-			
 		} finally {
 			writer.close();
 		}
@@ -148,7 +147,8 @@ public class PeakFindingManager {
 			//TODO: further sophisitication
 			Double lower = evt.getPeakOpp().getLowerBound();
 			Double upper = evt.getPeakOpp().getUpperBound();
-			if(!lower.equals(0.0) && !upper.equals(0.0))
+
+			if(lower < upper)
 				listener.boundsChanged(evt.getPeakOpp().getUpperBound() , evt.getPeakOpp().getLowerBound() );
 			
 			if (evt.getPeakOpp().getXData() != null && evt.getPeakOpp().getYData() != null)

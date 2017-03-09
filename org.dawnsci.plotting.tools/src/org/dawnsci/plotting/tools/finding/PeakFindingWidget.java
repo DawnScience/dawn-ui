@@ -191,7 +191,7 @@ public class PeakFindingWidget {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				// Run peakSearch
-	 			if(xData != null && yData != null){
+	 			if(xData.getSize() > 0 && yData.getSize() > 0){
 					runPeakSearch.setEnabled(false);
 					runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearching.png").createImage());			
 					controller.peakSearchJob= new PeakSearchJob(controller, xData, yData);
